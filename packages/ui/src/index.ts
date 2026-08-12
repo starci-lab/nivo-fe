@@ -50,8 +50,44 @@ export type {
     LeafProps,
 } from "./contracts/props"
 
+/*
+ * The tiers, named one at a time.
+ *
+ * `export *` is not used and must not be: every tier file also exports a `meta` marker, so a star
+ * re-export would collide on the first two tiers and then silently shadow as more arrive. Naming
+ * each symbol also keeps this file an honest inventory of what the package actually offers.
+ *
+ * This list grows as screens need it rather than all at once - an export nobody imports is a
+ * promise the package has not been asked to keep.
+ */
+
+export { Avatar } from "./leaves/Avatar"
+export type { AvatarData, AvatarProps } from "./leaves/Avatar"
+export { Badge } from "./leaves/Badge"
+export type { BadgeData, BadgeProps } from "./leaves/Badge"
+export { Button } from "./leaves/Button"
+export type { ButtonActions, ButtonData, ButtonProps } from "./leaves/Button"
+export { Checkbox } from "./leaves/Checkbox"
+export { Divider } from "./leaves/Divider"
+export type { DividerData, DividerProps } from "./leaves/Divider"
+export { Heading } from "./leaves/Heading"
+export type { HeadingData, HeadingProps } from "./leaves/Heading"
 export { Icon } from "./leaves/Icon"
 export type { IconData, IconName, IconProps, IconRole } from "./leaves/Icon"
+export { Input } from "./leaves/Input"
+export type { InputData, InputKind, InputProps } from "./leaves/Input"
+export { Label } from "./leaves/Label"
+export { Text } from "./leaves/Text"
+export type { TextData, TextProps } from "./leaves/Text"
+export { TextLink } from "./leaves/TextLink"
+export type { TextLinkData, TextLinkProps } from "./leaves/TextLink"
+
+export { Field } from "./composites/Field"
+export type { FieldActions, FieldData, FieldKind, FieldProps } from "./composites/Field"
 
 export { ContractContent, Tree } from "./branches/Tree"
 export type { TreeProps } from "./branches/Tree"
+export { SurfaceCard } from "./branches/SurfaceCard"
+export { SurfaceFormCard } from "./branches/SurfaceFormCard"
+export type { SurfaceFormCardProps } from "./branches/SurfaceFormCard"
+export { SurfaceListCard } from "./branches/SurfaceListCard"

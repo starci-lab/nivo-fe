@@ -454,7 +454,7 @@ export const CONTRACTS = buildContracts({
     "feed-stream": {
         classes: ["flex", "flex-col", "gap-3", "w-full"],
         children: {
-            filters: { contract: "dual-filter-tabs-card" },
+            filters: { contract: "stacked-choice-tabs" },
             feed: { contract: "activity-feed-result" },
             paginationError: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
             pagination: { leaf: "button", optional: true },
@@ -469,13 +469,13 @@ export const CONTRACTS = buildContracts({
         },
         why: "A feed settles into day-grouped joined lists or one explicit empty/error result; both occupy the same governed result region below its filters.",
     },
-    "dual-filter-tabs-card": {
+    "stacked-choice-tabs": {
         classes: ["overflow-hidden", "w-full", "rounded-2xl", "border", "border-separator", "bg-surface", "divide-y", "divide-separator", "[&>*]:p-2"],
         children: {
-            scope: { leaf: "choice-tabs" },
-            category: { leaf: "choice-tabs" },
+            primary: { leaf: "choice-tabs" },
+            secondary: { leaf: "choice-tabs" },
         },
-        why: "Scope and category filter the same result set, so one bordered card groups both controlled axes while a full-width divider keeps their independent meanings legible.",
+        why: "Two peer-choice axes govern the same result set, so one bordered surface stacks them while a full-width divider keeps their independent meanings legible.",
     },
     "changelog-list": {
         classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0", "[&>*]:px-4", "[&>*]:py-2", "[&>*:first-child]:pt-4", "[&>*:last-child]:pb-4"],
