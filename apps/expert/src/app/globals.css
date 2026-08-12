@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/*
+ * The shared canon lives outside this app's folder, so Tailwind cannot find its class names by
+ * scanning `src` alone. Without this line every class a leaf writes is dropped from the build and
+ * the components render unstyled - a failure that looks like a component bug and is not one.
+ */
+@source "../../../../packages/ui/src";

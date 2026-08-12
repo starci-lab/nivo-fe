@@ -1,0 +1,23 @@
+{
+  "name": "nivo-fe",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "npm@11.6.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "dev:landing": "npm run dev -w @nivo/landing",
+    "dev:expert": "npm run dev -w @nivo/expert",
+    "dev:app": "npm run dev -w @nivo/app"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "^5"
+  }
+}
