@@ -1,0 +1,166 @@
+{
+  "version": 1,
+  "task": "nivo expert academy public landing and student entry",
+  "planRecord": "nivo-fe/design-plans/academy-landing-student-entry/plan-record.json",
+  "deliveryMode": "batch",
+  "mode": "mixed",
+  "approvedCaseId": "case-la",
+  "approval": {
+    "source": "explicit user feedback",
+    "date": "2026-08-12",
+    "statement": "\"ok\" in reply to the preview lab, followed by a request to run apply; a later instruction added the English/translatable copy rule.",
+    "retainedTraits": [
+      "the ladder read in catalog order: offer, then proof, then entry",
+      "sections are peers in one column, toggleable and reorderable",
+      "one student entry panel that leads with registration",
+      "palette and custom CSS come from the mounted academy template"
+    ],
+    "rejectedTraits": [
+      "proof-before-offer opening (L-B)",
+      "one-question-at-a-time email-first entry (L-C)"
+    ]
+  },
+  "parityBaseline": "nivo/apps/expert/src/components/blocks/landing/LandingPage.tsx (landing only; the student entry page has no legacy render)",
+  "sharedDecisions": [
+    "AcademyChrome is the only reader of the mounted template and the only writer of the palette; no per-block theming hook.",
+    "No Vietnamese in source. Every product string is English and translatable through next-intl, which apps/expert does not yet have and apply must add.",
+    "Product copy translates; academy content does not. Field labels, button text, refusals, empty states and notices enter the catalogues. An academy's name, tagline and section text stay data.",
+    "Backend-fixed wording for refusal, reset, two-factor and oauth failure may not be softened.",
+    "No new leaf or composite: Input, Field, Button, Divider, Heading, Text and TextLink already carry every state.",
+    "apps/expert/src/app/page.tsx and .../dang-nhap/page.tsx were deleted at the user's instruction; the expert app has no root route, so apply rebuilds rather than edits."
+  ],
+  "workItems": [
+    {
+      "id": "layout-academy-chrome",
+      "target": "AcademyChrome",
+      "primaryScope": "layout",
+      "subordinateScopes": [],
+      "dependsOn": [],
+      "ownerBoundary": "Reads the mounted academy template, writes the palette and the academy's custom CSS, and frames every public academy surface.",
+      "fileBoundary": ["apps/expert/src/academy/AcademyChrome.tsx", "apps/expert/src/academy/template.ts"],
+      "approvedCaseId": "case-la",
+      "stateCoverage": [
+        { "ownerId": "layout-academy-chrome", "state": "provisioned palette", "coverage": "rendered", "scenarioId": "s01", "evidence": "the full ladder renders under a provisioned academy palette" },
+        { "ownerId": "layout-academy-chrome", "state": "default palette", "coverage": "rendered", "scenarioId": "s04", "evidence": "an academy on its first day, before provisioning" },
+        { "ownerId": "layout-academy-chrome", "state": "second palette", "coverage": "rendered", "scenarioId": "s03", "evidence": "a warm academy palette proves the palette is data, not a constant" },
+        { "ownerId": "layout-academy-chrome", "state": "custom CSS present", "coverage": "rendered", "scenarioId": "s08", "evidence": "the academy's own stylesheet is scoped and applied" },
+        { "ownerId": "layout-academy-chrome", "state": "custom CSS absent", "coverage": "rendered", "scenarioId": "s01", "evidence": "the default ladder carries no academy stylesheet" },
+        { "ownerId": "layout-academy-chrome", "state": "mobile", "coverage": "rendered", "scenarioId": "s02", "evidence": "narrow viewport render" },
+        { "ownerId": "layout-academy-chrome", "state": "desktop", "coverage": "rendered", "scenarioId": "s01", "evidence": "wide viewport render" },
+        { "ownerId": "layout-academy-chrome", "state": "dark theme", "coverage": "not-applicable", "scenarioId": null, "evidence": "the palette belongs to the academy, not the viewer, and no viewer-level toggle exists" },
+        { "ownerId": "layout-academy-chrome", "state": "loading", "coverage": "not-applicable", "scenarioId": null, "evidence": "the template is mounted at build time; the layout awaits no request" }
+      ]
+    },
+    {
+      "id": "page-academy-landing",
+      "target": "AcademyLanding",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": ["layout-academy-chrome"],
+      "ownerBoundary": "Orders the academy's sections as peers in one column and owns the lead form's pending, error and focus behavior.",
+      "fileBoundary": ["apps/expert/src/app/page.tsx", "apps/expert/src/academy/sections.tsx"],
+      "approvedCaseId": "case-la",
+      "stateCoverage": [
+        { "ownerId": "page-academy-landing", "state": "full ladder", "coverage": "rendered", "scenarioId": "s01", "evidence": "every catalog section present, in catalog order" },
+        { "ownerId": "page-academy-landing", "state": "unprovisioned default", "coverage": "rendered", "scenarioId": "s04", "evidence": "the shape an academy sees before it edits anything" },
+        { "ownerId": "page-academy-landing", "state": "sections off", "coverage": "rendered", "scenarioId": "s05", "evidence": "switching a section off removes a row rather than leaving a hole" },
+        { "ownerId": "page-academy-landing", "state": "sections reordered", "coverage": "rendered", "scenarioId": "s06", "evidence": "moving the lead section changes only its position" },
+        { "ownerId": "page-academy-landing", "state": "empty courses", "coverage": "rendered", "scenarioId": "s04", "evidence": "the courses rung with no course published yet" },
+        { "ownerId": "page-academy-landing", "state": "six custom shapes", "coverage": "rendered", "scenarioId": "s09,s10,s11,s12,s13,s14", "evidence": "stack, image-left, image-right, quote, columns and cta each render as their own scenario" },
+        { "ownerId": "page-academy-landing", "state": "image missing", "coverage": "rendered", "scenarioId": "s07", "evidence": "an absent image leaves no broken frame" },
+        { "ownerId": "page-academy-landing", "state": "image broken", "coverage": "rendered", "scenarioId": "s07", "evidence": "a failing external image degrades without collapsing the row" },
+        { "ownerId": "page-academy-landing", "state": "second palette", "coverage": "rendered", "scenarioId": "s03", "evidence": "the page holds under a different academy palette" },
+        { "ownerId": "page-academy-landing", "state": "mobile", "coverage": "rendered", "scenarioId": "s02", "evidence": "narrow viewport render" },
+        { "ownerId": "page-academy-landing", "state": "desktop", "coverage": "rendered", "scenarioId": "s01", "evidence": "wide viewport render" },
+        { "ownerId": "page-academy-landing", "state": "lead pending", "coverage": "rendered", "scenarioId": "s15", "evidence": "the submit control locks and keeps its accessible name" },
+        { "ownerId": "page-academy-landing", "state": "lead error", "coverage": "rendered", "scenarioId": "s16", "evidence": "a failed send states what did not happen" },
+        { "ownerId": "page-academy-landing", "state": "keyboard focus", "coverage": "rendered", "scenarioId": "s17", "evidence": "visible focus order through the lead form" },
+        { "ownerId": "page-academy-landing", "state": "loading", "coverage": "not-applicable", "scenarioId": null, "evidence": "the template is mounted at build time; there is no request to await" },
+        { "ownerId": "page-academy-landing", "state": "error", "coverage": "not-applicable", "scenarioId": null, "evidence": "same build-time mount; the page cannot fail to fetch what it never fetches" },
+        { "ownerId": "page-academy-landing", "state": "dark theme", "coverage": "not-applicable", "scenarioId": null, "evidence": "the palette belongs to the academy, not the viewer" }
+      ]
+    },
+    {
+      "id": "page-academy-auth",
+      "target": "AcademyAuth / StudentEntryPanel",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": ["layout-academy-chrome"],
+      "ownerBoundary": "Owns the student's entry: registration-first panel, provider buttons, credential fields and every refusal or notice the backend fixes the wording of.",
+      "fileBoundary": ["apps/expert/src/app/(auth)/**", "apps/expert/src/academy/StudentEntryPanel.tsx"],
+      "approvedCaseId": "case-la",
+      "stateCoverage": [
+        { "ownerId": "page-academy-auth", "state": "sign-up idle", "coverage": "rendered", "scenarioId": "s18", "evidence": "registration leads; it is the product's first sentence to a student" },
+        { "ownerId": "page-academy-auth", "state": "sign-in idle", "coverage": "rendered", "scenarioId": "s21", "evidence": "the returning student's panel" },
+        { "ownerId": "page-academy-auth", "state": "submitting with providers disabled", "coverage": "rendered", "scenarioId": "s22", "evidence": "one submission at a time; provider buttons lock with it" },
+        { "ownerId": "page-academy-auth", "state": "refused", "coverage": "rendered", "scenarioId": "s23", "evidence": "wording fixed by the password-reset e2e; never reveals whether an email has an account" },
+        { "ownerId": "page-academy-auth", "state": "reset link sent", "coverage": "rendered", "scenarioId": "s25", "evidence": "same non-disclosure rule, stated positively" },
+        { "ownerId": "page-academy-auth", "state": "two-factor unsupported", "coverage": "rendered", "scenarioId": "s26", "evidence": "the account neither failed nor succeeded, so it gets its own sentence" },
+        { "ownerId": "page-academy-auth", "state": "oauth leaving", "coverage": "rendered", "scenarioId": "s27", "evidence": "oauth leaves the page; it is not a spinner on a button" },
+        { "ownerId": "page-academy-auth", "state": "oauth failed", "coverage": "rendered", "scenarioId": "s28", "evidence": "e2e sign-up-and-sign-in: a bad code writes nothing, so the copy may not imply a half-created account" },
+        { "ownerId": "page-academy-auth", "state": "brand themed", "coverage": "rendered", "scenarioId": "s20", "evidence": "entry inherits the academy palette like every other public surface" },
+        { "ownerId": "page-academy-auth", "state": "already authenticated", "coverage": "rendered", "scenarioId": "s29", "evidence": "U-F fixed the redirect to the academy dashboard; the scenario renders the intent, not the destination" },
+        { "ownerId": "page-academy-auth", "state": "mobile", "coverage": "rendered", "scenarioId": "s19", "evidence": "narrow viewport render" },
+        { "ownerId": "page-academy-auth", "state": "desktop", "coverage": "rendered", "scenarioId": "s18", "evidence": "wide viewport render" },
+        { "ownerId": "page-academy-auth", "state": "keyboard focus", "coverage": "rendered", "scenarioId": "s24", "evidence": "visible focus order across providers and credential fields" },
+        { "ownerId": "page-academy-auth", "state": "dark theme", "coverage": "not-applicable", "scenarioId": null, "evidence": "the palette belongs to the academy, not the viewer" }
+      ]
+    }
+  ],
+  "evidence": [
+    { "id": "E-1", "claim": "Refusal and reset wording may not disclose account existence.", "source": "e2e password-reset" },
+    { "id": "E-2", "claim": "A rejected oauth code writes nothing, and two-factor accounts neither fail nor succeed.", "source": "e2e sign-up-and-sign-in" },
+    { "id": "E-3", "claim": "Landing parity baseline for section vocabulary and order.", "source": "nivo/apps/expert/src/components/blocks/landing/LandingPage.tsx" },
+    { "id": "E-4", "claim": "next-intl is absent from every app in nivo-fe; starci-academy-fe shows the wiring to copy.", "source": "nivo-fe package manifests; starci-academy-fe src/messages" },
+    { "id": "E-5", "claim": "The academy template is mounted at build time, which is why loading and error are not-applicable on the landing.", "source": "apps/expert/src/academy/template.ts" }
+  ],
+  "unknowns": [
+    { "id": "U-A", "unknown": "An external image is a request from a student's browser to a stranger's host. no-referrer is set; the address is still exposed.", "blocking": false },
+    { "id": "U-B", "unknown": "stats, testimonials and credentials are unverifiable claims served from nivo's infrastructure. Same family as BR-B07, different mechanism, no rule yet.", "blocking": false },
+    { "id": "U-C", "unknown": "Is instructor a system section or a custom one? BR-B06's two families do not cut cleanly.", "blocking": false },
+    { "id": "U-D", "unknown": "Own domain or nivo subdomain.", "blocking": false },
+    { "id": "U-E", "unknown": "guarantee, audience and schedule — three rungs the model predicts and no reference academy has.", "blocking": false },
+    { "id": "U-G", "unknown": "The student entry route segments. The record fixes the group as (auth) and the copy rule forbids Vietnamese, which retires dang-nhap, but no English segment was explicitly approved. Confirm at the start of apply.", "blocking": false }
+  ],
+  "decisions": [
+    { "id": "D-1", "decision": "The sections are peers in one column rather than nested.", "why": "Switching one off removes a row instead of leaving a hole, and moving one changes only its position." },
+    { "id": "D-2", "decision": "AcademyChrome owns palette and template reading.", "why": "A hook every block could call would spread one decision everywhere and leave nowhere to prove theming works." },
+    { "id": "D-3", "decision": "StudentEntryPanel is a new block, not a mode flag on the control plane's SignInPanel.", "why": "SignInPanel is weighted for someone who already has an account; a student's entry leads with registration, which is a different product sentence." },
+    { "id": "D-4", "decision": "Apply adds next-intl to apps/expert and moves product strings into catalogues.", "why": "The user's instruction is English throughout and multilingual the way starci is; the scaffold has no i18n layer at all." },
+    { "id": "D-5", "decision": "Academy-owned text stays out of the catalogues.", "why": "An academy's name and section text are one academy's data, not product copy; translating them would be a category error." }
+  ],
+  "rejectedDirections": [
+    { "id": "L-B", "title": "proof before offer", "why": "It leads with the rung both reference academies lean on hardest, but its three leading sections are all empty on an academy's first day, which is every academy's first day." },
+    { "id": "L-C", "title": "one question at a time", "why": "Shortest path to a lead, but its email-first entry needs the backend to answer whether an address has an account, and the password-reset e2e proves the product deliberately refuses to disclose exactly that." }
+  ],
+  "blockTrees": [
+    {
+      "caseId": "case-la",
+      "tree": "AcademyChrome\n├── AcademyLanding\n│   └── ordered-toggleable-section-stack\n│       ├── system sections (hero, outcomes, courses, instructor, faq, lead)\n│       └── custom sections (stack, image-left, image-right, quote, columns, cta)\n└── AcademyAuth\n    └── StudentEntryPanel\n        ├── provider buttons\n        ├── credential fields (Field, Input, Button)\n        └── notices (refused, reset sent, two-factor, oauth leaving, oauth failed, already authenticated)"
+    }
+  ],
+  "contracts": [
+    {
+      "key": "ordered-toggleable-section-stack",
+      "status": "approved, not yet in the registry",
+      "why": "The sections are peers in one column, so switching one off removes a row instead of leaving a hole, and moving one changes only its position.",
+      "applyRequirement": "Add the registry entry with its why before first use."
+    }
+  ],
+  "vocabularyProposals": [
+    { "decision": "new", "tier": "layout", "name": "AcademyChrome", "target": "apps/expert/src/academy/AcademyChrome.tsx", "why": "The only reader of the mounted template and the only writer of the palette." },
+    { "decision": "new", "tier": "block", "name": "StudentEntryPanel", "target": "apps/expert/src/academy/StudentEntryPanel.tsx", "why": "A student's entry leads with registration; the control plane's SignInPanel is weighted the other way." },
+    { "decision": "reuse", "tier": "leaf", "name": "Input, Field, Button, Divider, Heading, Text, TextLink", "target": "packages/ui", "why": "Every state in the approved case is already carried; no new leaf or composite is approved." }
+  ],
+  "backendEnablerProposals": [],
+  "preview": {
+    "path": "D:\\Repositories\\nivo-fe\\.artifacts\\preview-academy",
+    "url": "http://127.0.0.1:8080",
+    "manifestCaseIds": ["case-la"],
+    "scenarioIds": ["s01","s02","s03","s04","s05","s06","s07","s08","s09","s10","s11","s12","s13","s14","s15","s16","s17","s18","s19","s20","s21","s22","s23","s24","s25","s26","s27","s28","s29"]
+  },
+  "notes": [
+    "Both records were written to a session scratchpad on 2026-08-12 and moved here unchanged the same day; only the path fields and the relocation note were added.",
+    "The prose record's headline says 35 owner states. The enumeration above is 34 rendered plus 6 not-applicable across three owners. Every state named in the prose is present here; the headline count is one high and is not evidence of a missing state."
+  ]
+}

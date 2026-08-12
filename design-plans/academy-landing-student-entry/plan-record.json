@@ -1,0 +1,537 @@
+{
+  "version": 1,
+  "task": "nivo expert academy public landing and student auth",
+  "status": "direction-selected",
+  "deliveryMode": "batch",
+  "mode": "mixed",
+  "parityBaseline": "nivo/apps/expert/src/components/blocks/landing/LandingPage.tsx (landing only; the student auth page has no legacy render)",
+  "sharedDecisions": [
+    "Each academy runs as its own provisioned instance, so the template is MOUNTED AS A FILE at provision time rather than fetched per request. There is no tenant lookup, no per-request brand query, and no unstyled first paint.",
+    "Colour reaches the screen only through CSS variables written on the root by one owner. A component naming a shade looks right for the academy it was written beside and wrong for every other, so the brand read is confined to AcademyChrome.",
+    "The auth page serves STUDENTS. The expert administers from the nivo control plane where they are already signed in.",
+    "Section order is data: array position IS render order, and a section switched off leaves no hole.",
+    "An unrecognised system key is skipped silently so an older build survives a newer catalog; an expert-authored section carries its own content and therefore cannot be swallowed by that path.",
+    "Images are links the expert pastes. nivo stores no file, so 'no link yet' and 'link has died' are ordinary states, not edge cases.",
+    "An already-authenticated student is sent to the academy dashboard. The route is not built in this batch, so the auth page owns the redirect and nothing renders a destination that does not exist."
+  ],
+  "workItems": [
+    {
+      "id": "page-academy-landing",
+      "target": "nivo-fe/apps/expert/src/app/page.tsx",
+      "primaryScope": "page",
+      "subordinateScopes": [
+        "layout",
+        "block"
+      ],
+      "dependsOn": [
+        "layout-academy-chrome"
+      ],
+      "ownerBoundary": "the order in which a stranger meets the academy, and how the page still reads when sections are switched off or reordered",
+      "sourceBoundary": [
+        "apps/expert/src/app/page.tsx",
+        "apps/expert/src/academy/**"
+      ],
+      "stateInventory": [
+        {
+          "state": "unprovisioned-default",
+          "status": "required",
+          "evidence": "the mounted file has a committed default so the app runs before any academy exists"
+        },
+        {
+          "state": "all-sections-on",
+          "status": "required",
+          "evidence": "DEFAULT_LAYOUT_CONFIG makes every catalog section visible"
+        },
+        {
+          "state": "sections-off",
+          "status": "required",
+          "evidence": "updateLayoutConfig sets visible=false per key"
+        },
+        {
+          "state": "sections-reordered",
+          "status": "required",
+          "evidence": "layout-config.ts: array order IS render order"
+        },
+        {
+          "state": "empty-courses",
+          "status": "required",
+          "evidence": "a new academy has none on day one; the section must say so rather than draw an empty grid"
+        },
+        {
+          "state": "custom-section-each-shape",
+          "status": "required",
+          "evidence": "six closed shapes; each is a different arrangement and must be seen"
+        },
+        {
+          "state": "image-missing",
+          "status": "required",
+          "evidence": "no link pasted yet"
+        },
+        {
+          "state": "image-broken",
+          "status": "required",
+          "evidence": "an external link dies and the layout must hold"
+        },
+        {
+          "state": "second-palette",
+          "status": "required",
+          "evidence": "a hard-coded colour only fails visibly for the second academy, so one palette proves nothing"
+        },
+        {
+          "state": "loading",
+          "status": "not-applicable",
+          "evidence": "the template is mounted at build time; there is no fetch to wait on"
+        },
+        {
+          "state": "error",
+          "status": "not-applicable",
+          "evidence": "same reason; there is no request that can fail"
+        },
+        {
+          "state": "mobile",
+          "status": "required",
+          "evidence": "a public academy page is reached from social links on phones; no evidence supports desktop-only"
+        },
+        {
+          "state": "desktop",
+          "status": "required",
+          "evidence": "the section grids are authored two- and three-up"
+        },
+        {
+          "state": "dark-theme",
+          "status": "not-applicable",
+          "evidence": "the palette belongs to the academy, not the viewer. An expert may choose a dark palette, but there is no viewer toggle to render a second theme for"
+        },
+        {
+          "state": "lead-form-pending",
+          "status": "required",
+          "evidence": "the lead submission is a network call and must block a duplicate press"
+        },
+        {
+          "state": "lead-form-error",
+          "status": "required",
+          "evidence": "the submission can fail; the page must not claim a lead it did not record"
+        },
+        {
+          "state": "keyboard-focus",
+          "status": "required",
+          "evidence": "the lead form and every section button are interactive"
+        }
+      ]
+    },
+    {
+      "id": "page-academy-auth",
+      "target": "nivo-fe/apps/expert/src/app/dang-nhap/page.tsx",
+      "primaryScope": "page",
+      "subordinateScopes": [
+        "block"
+      ],
+      "dependsOn": [
+        "layout-academy-chrome"
+      ],
+      "ownerBoundary": "how a student enters: which journey leads, how much is asked at once, and the wording the backend fixes",
+      "sourceBoundary": [
+        "apps/expert/src/app/dang-nhap/**",
+        "apps/expert/src/academy/**"
+      ],
+      "stateInventory": [
+        {
+          "state": "sign-up-idle",
+          "status": "required",
+          "evidence": "most arrivals have no account; SignUpInput exists"
+        },
+        {
+          "state": "sign-in-idle",
+          "status": "required",
+          "evidence": "SignInInput takes email and password"
+        },
+        {
+          "state": "submitting",
+          "status": "required",
+          "evidence": "the mutation is a network call"
+        },
+        {
+          "state": "refused",
+          "status": "required",
+          "evidence": "e2e: bad credentials refused, no cookie set, and the message may not reveal whether the email exists"
+        },
+        {
+          "state": "reset-link-sent",
+          "status": "required",
+          "evidence": "e2e: the response must not disclose account existence"
+        },
+        {
+          "state": "two-factor-unsupported",
+          "status": "required",
+          "evidence": "e2e: an enrolled account receives a challenge, not a session; it has neither failed nor succeeded"
+        },
+        {
+          "state": "oauth-leaving",
+          "status": "required",
+          "evidence": "ExchangeOauthCodeInput proves a redirect, so the page is left"
+        },
+        {
+          "state": "oauth-failed",
+          "status": "required",
+          "evidence": "e2e: a refused exchange writes nothing, so nothing may imply a half-created account"
+        },
+        {
+          "state": "brand-themed",
+          "status": "required",
+          "evidence": "a student signing in to this academy must not suddenly be looking at nivo"
+        },
+        {
+          "state": "mobile",
+          "status": "required",
+          "evidence": "students arrive from phones; no evidence supports desktop-only"
+        },
+        {
+          "state": "desktop",
+          "status": "required",
+          "evidence": "the panel is authored at a fixed measure"
+        },
+        {
+          "state": "dark-theme",
+          "status": "not-applicable",
+          "evidence": "same as the landing page: the academy owns the palette, the viewer does not"
+        },
+        {
+          "state": "already-authenticated",
+          "status": "required",
+          "evidence": "U-F resolved: redirect to the academy dashboard. That route is later work, so this state proves the redirect happens and asserts nothing about where it lands."
+        },
+        {
+          "state": "keyboard-focus",
+          "status": "required",
+          "evidence": "the whole page is a form plus two provider buttons"
+        },
+        {
+          "state": "provider-disabled-while-submitting",
+          "status": "required",
+          "evidence": "two entry lanes must not run at once"
+        }
+      ]
+    },
+    {
+      "id": "layout-academy-chrome",
+      "target": "nivo-fe/apps/expert/src/academy/AcademyChrome.tsx",
+      "primaryScope": "layout",
+      "subordinateScopes": [],
+      "dependsOn": [],
+      "ownerBoundary": "the academy's palette and its own CSS, applied once for every route",
+      "sourceBoundary": [
+        "apps/expert/src/academy/AcademyChrome.tsx"
+      ],
+      "stateInventory": [
+        {
+          "state": "provisioned-palette",
+          "status": "required",
+          "evidence": "the mounted template supplies four named slots plus an accent"
+        },
+        {
+          "state": "default-palette",
+          "status": "required",
+          "evidence": "an unprovisioned instance renders the committed default"
+        },
+        {
+          "state": "second-palette",
+          "status": "required",
+          "evidence": "a hard-coded colour only fails visibly for the second academy, so one palette proves nothing"
+        },
+        {
+          "state": "custom-css-applied",
+          "status": "required",
+          "evidence": "the backend keeps real selectors, so an academy's own CSS can change any section"
+        },
+        {
+          "state": "custom-css-absent",
+          "status": "required",
+          "evidence": "most academies never write any"
+        },
+        {
+          "state": "mobile",
+          "status": "required",
+          "evidence": "a persistent layout owes responsive coverage"
+        },
+        {
+          "state": "desktop",
+          "status": "required",
+          "evidence": "same"
+        },
+        {
+          "state": "dark-theme",
+          "status": "not-applicable",
+          "evidence": "the academy owns the palette; there is no viewer-level toggle"
+        },
+        {
+          "state": "layout-loading",
+          "status": "not-applicable",
+          "evidence": "the template is mounted at build time, so this layout owns no data that can be pending"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "claim": "The academy is provisioned per instance, so the template is mounted as a file.",
+      "source": "explicit user instruction, 2026-08-12",
+      "sourceClass": "user",
+      "confidence": "proven",
+      "allowedUse": "removes runtime tenant lookup and its loading/error states",
+      "unknowns": []
+    },
+    {
+      "claim": "Images are links the expert pastes; nothing is uploaded.",
+      "source": "explicit user instruction",
+      "sourceClass": "user",
+      "confidence": "proven",
+      "allowedUse": "resolves where images live; introduces broken-link states",
+      "unknowns": [
+        "whether an external image leaking the student's IP is acceptable"
+      ]
+    },
+    {
+      "claim": "The section catalog is fixed and ordered; array position is render order.",
+      "source": "nivo-backend/src/modules/bussiness/theme/layout-config.ts",
+      "sourceClass": "backend",
+      "confidence": "proven",
+      "allowedUse": "fixes the vocabulary and makes reordering free",
+      "unknowns": []
+    },
+    {
+      "claim": "Colour arrives as named slots mapped to CSS variables.",
+      "source": "expert-branding.md BR-B02",
+      "sourceClass": "backend",
+      "confidence": "proven",
+      "allowedUse": "confines the brand read to one owner",
+      "unknowns": []
+    },
+    {
+      "claim": "The public site captures leads, visible to the owner alone.",
+      "source": "e2e expert-site-goes-live.e2e-spec.ts",
+      "sourceClass": "backend",
+      "confidence": "proven",
+      "allowedUse": "the lead section has a real business job and owns the only form",
+      "unknowns": []
+    },
+    {
+      "claim": "Password reset must not reveal whether an email has an account.",
+      "source": "e2e password-reset.e2e-spec.ts",
+      "sourceClass": "backend",
+      "confidence": "proven",
+      "allowedUse": "binds the refusal and reset wording",
+      "unknowns": []
+    },
+    {
+      "claim": "A 2FA-enrolled account receives a challenge rather than a session.",
+      "source": "e2e sign-up-and-sign-in.e2e-spec.ts",
+      "sourceClass": "backend",
+      "confidence": "proven",
+      "allowedUse": "requires a truthful state rather than a generic failure",
+      "unknowns": []
+    },
+    {
+      "claim": "OAuth is a Keycloak redirect with PKCE; providers are google and github.",
+      "source": "ExchangeOauthCodeInput plus the auth/{google,github}/callback routes",
+      "sourceClass": "backend",
+      "confidence": "proven",
+      "allowedUse": "fixes the provider set and the leaving state",
+      "unknowns": []
+    },
+    {
+      "claim": "Input, Field, Button, Divider, Heading, Text and TextLink already exist with the states this needs.",
+      "source": "nivo-fe/packages/ui",
+      "sourceClass": "component",
+      "confidence": "proven",
+      "allowedUse": "no new leaf or composite is required for either page",
+      "unknowns": []
+    },
+    {
+      "claim": "Three Vietnamese expert academies read hero, pain, outcomes, method, instructor, proof, testimonials, photos, courses, offer, questions, capture.",
+      "source": "ceovietnam.edu.vn/learn and taitue.academy, supplied by the user",
+      "sourceClass": "user",
+      "confidence": "proven",
+      "allowedUse": "confirms the catalog rather than inventing one",
+      "unknowns": []
+    },
+    {
+      "claim": "connecty.vn returned 403 and was never read.",
+      "source": "fetch attempt",
+      "sourceClass": "user",
+      "confidence": "unknown",
+      "allowedUse": "nothing may be concluded from it",
+      "unknowns": []
+    }
+  ],
+  "unknowns": [
+    "U-A: is an external image request from a student's browser to a third-party host acceptable? `no-referrer` is set but the student's address is still exposed.",
+    "U-B: `stats`, `testimonials` and instructor credentials are unverifiable claims served from nivo's infrastructure. Same family as BR-B07 but a different mechanism, and no rule covers it.",
+    "U-C: is `instructor` a system section or a custom one? Every academy needs it, but its content belongs to one person. It is the first case BR-B06's two families do not cut cleanly.",
+    "U-D: does an academy run on its own domain or a nivo subdomain? This decides how dangerous a deceptive section is.",
+    "U-E: three rungs the model predicts and no reference academy has - guarantee, audience, schedule. Not yet built.",
+    "U-F RESOLVED (user, 2026-08-12): an already-authenticated student is redirected to the academy dashboard. That route does not exist yet and is a separate later work item, so this batch renders the redirect intent and never a dashboard it cannot prove."
+  ],
+  "businessCapabilities": [
+    {
+      "capability": "render a mounted template",
+      "status": "proven"
+    },
+    {
+      "capability": "toggle and reorder sections",
+      "status": "proven"
+    },
+    {
+      "capability": "named colour slots to CSS variables",
+      "status": "proven"
+    },
+    {
+      "capability": "capture public leads",
+      "status": "proven"
+    },
+    {
+      "capability": "email/password and google/github sign-in",
+      "status": "proven"
+    },
+    {
+      "capability": "expert-authored sections with content",
+      "status": "out-of-scope-until-backend"
+    },
+    {
+      "capability": "appearance history and undo",
+      "status": "out-of-scope-until-backend"
+    }
+  ],
+  "preliminaryDirections": [
+    {
+      "id": "L-A",
+      "name": "Ladder, in catalog order",
+      "thesis": "A stranger climbs one rung at a time in the order the catalog already names, and every rung can be switched off without the page losing its footing.",
+      "primaryCta": "Landing: start the free trial. Auth: create an account.",
+      "readingOrder": [
+        "hero",
+        "problems",
+        "outcomes",
+        "roadmap",
+        "instructor",
+        "stats",
+        "testimonials",
+        "gallery",
+        "courses",
+        "community",
+        "offer",
+        "faq",
+        "magnet",
+        "lead"
+      ],
+      "tradeoffs": [
+        "Matches the catalog exactly, so nothing has to be explained to the backend.",
+        "Longest page; a reader who came to see the price scrolls furthest.",
+        "Least opinionated, which is also the weakest claim to being designed."
+      ],
+      "legacyDivergence": [
+        "Reordering is newly exposed; the legacy render treated order as fixed."
+      ]
+    },
+    {
+      "id": "L-B",
+      "name": "Proof before offer",
+      "thesis": "Nobody buys a course from a stranger, so who is teaching and who already finished come BEFORE what it costs, and the auth page puts the instructor beside the form so a student sees whose academy they are joining.",
+      "primaryCta": "Landing: start the free trial. Auth: create an account, with the instructor visible.",
+      "readingOrder": [
+        "hero",
+        "instructor",
+        "testimonials",
+        "stats",
+        "gallery",
+        "problems",
+        "outcomes",
+        "courses",
+        "offer",
+        "faq",
+        "lead"
+      ],
+      "tradeoffs": [
+        "Leads with the rung all three reference academies lean hardest on.",
+        "An academy with no instructor photo, no testimonials and no figures - every academy on day one - collapses to almost nothing.",
+        "Concentrates unverifiable claims at the top of the page, which is exactly where U-B bites hardest."
+      ],
+      "legacyDivergence": [
+        "Credibility promoted above the offer; the legacy render put courses first."
+      ]
+    },
+    {
+      "id": "L-C",
+      "name": "One question at a time",
+      "thesis": "The page asks for a decision as early as it honestly can: a short funnel of hero, outcomes, courses and capture, with every other rung folded behind one disclosure - and the auth page asks for an email before it asks for anything else.",
+      "primaryCta": "Landing: leave your contact. Auth: continue with your email.",
+      "readingOrder": [
+        "hero",
+        "outcomes",
+        "courses",
+        "lead",
+        "everything else behind one expand"
+      ],
+      "tradeoffs": [
+        "Shortest path to a lead, which is the site's proven business job.",
+        "Folding rungs away hides exactly the proof a cautious buyer needs; the fold becomes the whole design decision.",
+        "Splitting auth into email-then-password adds a step for returning students and needs a backend check that does not exist."
+      ],
+      "legacyDivergence": [
+        "Disclosure is new; the legacy render showed every enabled section inline."
+      ]
+    }
+  ],
+  "recommendedDirection": "L-A",
+  "recommendationEvidence": "The catalog and its order are already settled by the backend and confirmed by all three reference academies, so L-A is the only direction that needs no unproven claim. L-B collapses on a new academy, which is every academy on day one. L-C's email-first auth step needs a backend account-existence check, and that check is precisely what the password-reset e2e proves the product refuses to expose.",
+  "blockTrees": [
+    "Page - AcademyLanding\n└── Layout - AcademyChrome (mounted template to CSS variables; the only brand reader)\n    └── Block - one per visible key, in stored order",
+    "Page - AcademyAuth\n└── Layout - AcademyChrome\n    └── Block - StudentEntryPanel"
+  ],
+  "contracts": [
+    {
+      "key": "ordered-toggleable-section-stack",
+      "why": "The sections are peers in one column rather than nested, so switching one off removes a row instead of leaving a hole, and moving one changes only its position.",
+      "status": "proposed"
+    }
+  ],
+  "vocabularyProposals": [
+    {
+      "tier": "layout",
+      "name": "AcademyChrome",
+      "decision": "new",
+      "target": null,
+      "targetPath": null,
+      "reasonForDecision": "It is the single reader of the mounted template and the single writer of the palette. Any block reading the brand directly reproduces the failure BR-B02 forbids.",
+      "reasonAlternativesFail": "A hook every block could call spreads one decision across every block and leaves nowhere to prove theming works."
+    },
+    {
+      "tier": "block",
+      "name": "StudentEntryPanel",
+      "decision": "new",
+      "target": null,
+      "targetPath": null,
+      "reasonForDecision": "The control plane's SignInPanel is weighted for someone who already has an account. A student's entry leads with registration, which is a different product sentence rather than a variant.",
+      "reasonAlternativesFail": "Adding a mode flag to SignInPanel would make one block answer two different questions depending on a boolean."
+    }
+  ],
+  "backendEnablerProposals": [
+    {
+      "id": "BE-4",
+      "classification": "backend-design",
+      "uiNeed": "L-C only: decide whether to ask for a password after an email is entered.",
+      "operationKind": "query",
+      "currentEvidence": "The password-reset e2e proves the product deliberately refuses to disclose whether an email has an account.",
+      "apiDelta": "none proposed",
+      "applicationPath": "n/a",
+      "authorization": "n/a",
+      "compatibility": "n/a",
+      "tests": [],
+      "rejectedAlternatives": [
+        "Inferring existence from a sign-in attempt, which discloses the same fact more slowly."
+      ],
+      "escalationTrigger": "Already escalated: it contradicts an existing, tested privacy decision. This is the reason L-C's auth half cannot ship as described."
+    }
+  ],
+  "selectedDirection": "L-A",
+  "selectionEvidence": "User replied \"ok chốt làm đi\" directly to the L-A recommendation on 2026-08-12. Read as selecting L-A rather than as silence, and stated back to the user so a different intent could be corrected before preview."
+}
