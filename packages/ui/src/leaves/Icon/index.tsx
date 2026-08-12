@@ -1,125 +1,226 @@
 import {
-    ArrowPathIcon, ArrowLeftIcon, ArrowRightIcon, BellIcon, BookOpenIcon, ChevronDownIcon,
-    ArrowTrendingUpIcon, ChatBubbleOvalLeftIcon, CheckCircleIcon, CheckIcon, DocumentDuplicateIcon,
-    EyeIcon, EyeSlashIcon, InboxArrowDownIcon, Cog6ToothIcon, AcademicCapIcon,
-    HeartIcon, ClockIcon, InformationCircleIcon, KeyIcon, MinusIcon, PencilSquareIcon,
-    PaperAirplaneIcon, PlayCircleIcon, LinkIcon, PlusIcon, MapPinIcon, ReceiptPercentIcon,
-    ShieldCheckIcon, SparklesIcon, Squares2X2Icon, FlagIcon, TrashIcon, ShareIcon as TreeIcon,
-    TrophyIcon, ArrowUpTrayIcon, UserPlusIcon, UsersIcon, ExclamationTriangleIcon, XCircleIcon,
-    XMarkIcon, UserIcon, CircleStackIcon,
+    AcademicCapIcon,
+    ArrowPathIcon,
+    ArrowRightIcon,
+    ArrowRightOnRectangleIcon,
+    BellIcon,
+    BoltIcon,
+    BookmarkIcon,
+    BookOpenIcon,
+    BriefcaseIcon,
+    CheckCircleIcon,
+    ChevronRightIcon,
+    ClipboardDocumentCheckIcon,
+    CodeBracketIcon,
+    EnvelopeIcon,
+    EyeIcon,
+    EyeSlashIcon,
+    FireIcon,
+    GiftIcon,
+    GlobeAltIcon,
+    HomeIcon,
+    LanguageIcon,
+    LockClosedIcon,
+    MagnifyingGlassIcon,
+    MoonIcon,
+    NewspaperIcon,
+    PaperAirplaneIcon,
+    ShieldCheckIcon,
+    ShoppingCartIcon,
+    SparklesIcon,
+    SunIcon,
+    TrophyIcon,
+    UserCircleIcon,
+    UserGroupIcon,
+    UserPlusIcon,
+    XMarkIcon,
 } from "@heroicons/react/24/outline"
 import {
-    CheckCircleIcon as CheckCircleSolid, CheckIcon as CheckSolid, XMarkIcon as XSolid,
-    ExclamationTriangleIcon as WarningSolid, InformationCircleIcon as InfoSolid,
-    SparklesIcon as SparklesSolid, HeartIcon as HeartSolid, StarIcon as StarSolid,
+    AcademicCapIcon as AcademicCapSolidIcon,
+    ArrowPathIcon as ArrowPathSolidIcon,
+    ArrowRightIcon as ArrowRightSolidIcon,
+    ArrowRightEndOnRectangleIcon as ArrowRightOnRectangleSolidIcon,
+    BellIcon as BellSolidIcon,
+    BoltIcon as BoltSolidIcon,
+    BookmarkIcon as BookmarkSolidIcon,
+    BookOpenIcon as BookOpenSolidIcon,
+    BriefcaseIcon as BriefcaseSolidIcon,
+    CheckCircleIcon as CheckCircleSolidIcon,
+    ChevronRightIcon as ChevronRightSolidIcon,
+    ClipboardDocumentCheckIcon as ClipboardDocumentCheckSolidIcon,
+    CodeBracketIcon as CodeBracketSolidIcon,
+    EnvelopeIcon as EnvelopeSolidIcon,
+    EyeIcon as EyeSolidIcon,
+    EyeSlashIcon as EyeSlashSolidIcon,
+    FireIcon as FireSolidIcon,
+    GiftIcon as GiftSolidIcon,
+    GlobeAltIcon as GlobeAltSolidIcon,
+    HomeIcon as HomeSolidIcon,
+    LanguageIcon as LanguageSolidIcon,
+    LockClosedIcon as LockClosedSolidIcon,
+    MagnifyingGlassIcon as MagnifyingGlassSolidIcon,
+    MoonIcon as MoonSolidIcon,
+    NewspaperIcon as NewspaperSolidIcon,
+    PaperAirplaneIcon as PaperAirplaneSolidIcon,
+    ShieldCheckIcon as ShieldCheckSolidIcon,
+    ShoppingCartIcon as ShoppingCartSolidIcon,
+    SparklesIcon as SparklesSolidIcon,
+    SunIcon as SunSolidIcon,
+    TrophyIcon as TrophySolidIcon,
+    UserCircleIcon as UserCircleSolidIcon,
+    UserGroupIcon as UserGroupSolidIcon,
+    UserPlusIcon as UserPlusSolidIcon,
+    XMarkIcon as XMarkSolidIcon,
 } from "@heroicons/react/16/solid"
 import type { ComponentType, SVGProps } from "react"
+import { GithubMark, GoogleMark } from "./brands"
 import type { LeafProps } from "../../contracts/props"
 
 /**
- * LEAF - `Icon`: one glyph, named by MEANING.
+ * LEAF - `Icon`: the picture a word needs when the word alone is slower to find.
  *
- * CALLERS NAME MEANINGS; ONLY THIS FILE NAMES VENDOR GLYPHS. `refresh` survives a change of icon
- * package; `ArrowClockwiseIcon` survives nothing - it is one vendor's word for a picture, and the
- * day that vendor is replaced every caller has to be edited. That is why the glyph package is
- * imported here and nowhere else.
+ * WHY A NAME AND NOT A COMPONENT. A caller passing `<FireIcon />` decides three things at the call
+ * site - which library, which glyph, how big - and the first screen to answer them differently is
+ * the screen where the streak stops looking like the streak. Here the caller names the MEANING and
+ * this file owns the glyph.
  *
- * EACH ROLE KEEPS THE DIAMETER ITS DRAWING WAS AUTHORED FOR. A `chip` is not a `heading` scaled
- * down: shrinking a 24px outline drawing thins its stroke until it disappears beside text, so the
- * small role uses the 16px SOLID drawing that was drawn to be small. Two closed families, and no
- * third.
+ * WHY THE SET IS CLOSED. Heroicons ships a large glyph catalogue, and a product that can reach all
+ * of them has no iconography, it has a search box.
+ * `icon.md` is the canonical feature-to-glyph table: read it before adding a meaning or choosing a
+ * nearby glyph, and update it in the same change as this map.
+ *
+ * COLOUR IS NOT A PROP. The glyph draws in `currentColor`, so it inherits whatever `text-*` the
+ * node above carries and can never disagree with the label beside it.
  */
 
-/** Where the glyph sits, which decides both its diameter and which drawing is used. */
-export type IconRole = "heading" | "leading" | "chip"
-
-/** Every meaning this product can draw. A meaning not in this union is a compile error. */
+/** What an icon MEANS on these screens. The glyph that draws it is this file's business. */
 export type IconName =
-    | "refresh" | "back" | "forward" | "bell" | "course" | "expand"
-    | "trend" | "comment" | "done-circle" | "done" | "copy"
-    | "show" | "hide" | "save" | "send" | "settings" | "graduate"
-    | "favourite" | "waiting" | "info" | "key" | "remove" | "edit"
-    | "play" | "connected" | "add" | "pin" | "invoice"
-    | "verified" | "spark" | "grid" | "target" | "delete" | "workflow"
-    | "trophy" | "upload" | "invite" | "people" | "warning" | "error"
-    | "close" | "person" | "storage"
+    | "brand" | "streak" | "credit" | "reward" | "course"
+    | "email" | "password" | "revealPassword" | "hidePassword" | "code"
+    | "complete" | "pending" | "signIn" | "signUp" | "close" | "next" | "disclosure" | "retry" | "send"
+    | "home" | "explore" | "community" | "league" | "review"
+    | "light" | "dark" | "locale" | "google" | "github"
+    | "search" | "cart" | "notification" | "account" | "saved" | "blog" | "talents" | "jobs" | "practice"
 
-type Glyph = ComponentType<SVGProps<SVGSVGElement>>
-
-/** The 24px outline drawing, used by `heading` and `leading`. */
-const OUTLINE: Record<IconName, Glyph> = {
-    refresh: ArrowPathIcon, back: ArrowLeftIcon, forward: ArrowRightIcon, bell: BellIcon,
-    course: BookOpenIcon, expand: ChevronDownIcon, trend: ArrowTrendingUpIcon,
-    comment: ChatBubbleOvalLeftIcon, "done-circle": CheckCircleIcon, done: CheckIcon,
-    copy: DocumentDuplicateIcon, show: EyeIcon, hide: EyeSlashIcon, save: InboxArrowDownIcon,
-    send: PaperAirplaneIcon, settings: Cog6ToothIcon, graduate: AcademicCapIcon,
-    favourite: HeartIcon, waiting: ClockIcon, info: InformationCircleIcon, key: KeyIcon,
-    remove: MinusIcon, edit: PencilSquareIcon, play: PlayCircleIcon, connected: LinkIcon,
-    add: PlusIcon, pin: MapPinIcon, invoice: ReceiptPercentIcon, verified: ShieldCheckIcon,
-    spark: SparklesIcon, grid: Squares2X2Icon, target: FlagIcon, delete: TrashIcon,
-    workflow: TreeIcon, trophy: TrophyIcon, upload: ArrowUpTrayIcon, invite: UserPlusIcon,
-    people: UsersIcon, warning: ExclamationTriangleIcon, error: XCircleIcon, close: XMarkIcon,
-    person: UserIcon, storage: CircleStackIcon,
-}
-
-/**
- * The 16px solid drawing, used by `chip`.
- *
- * Only the meanings that actually appear at chip size are listed; anything else falls back to its
- * outline drawing rather than inventing a solid one that was never authored.
- */
-const SOLID: Partial<Record<IconName, Glyph>> = {
-    "done-circle": CheckCircleSolid, done: CheckSolid, close: XSolid,
-    warning: WarningSolid, info: InfoSolid, spark: SparklesSolid,
-    favourite: HeartSolid, trophy: StarSolid,
-}
-
-/** Each role keeps the diameter its drawing was authored for. */
-const ROLE_CLASSES: Record<IconRole, string> = {
-    heading: "size-6 shrink-0",
-    leading: "size-5 shrink-0",
-    chip: "size-4 shrink-0",
-}
+/** The two native Heroicon roles used by the product. */
+export type IconRole = "heading" | "leading" | "chip"
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type IconData = {
+    /** What this icon means. The glyph follows from it. */
     readonly name: IconName
+    /** `heading` is 24px outline; `leading` is 20px outline; `chip` is 16px micro. */
     readonly role?: IconRole
 }
 
-/** Props for {@link Icon}. */
+/** Props for {@link Icon}. Three fixed slots, no fourth - see {@link LeafProps}. */
 export type IconProps = LeafProps<IconData>
 
 /**
- * Draw one glyph.
+ * The meaning-to-glyph map. The only file in the repository that names a Heroicon.
  *
- * The colour is always `currentColor`: an icon does not decide its own colour, the place it sits
- * does. That is what lets tone stay a property of the text beside it rather than a class on the row.
+ * Two entries are NOT Heroicons: a provider mark has to be the provider own, in its own colours,
+ * because that is what a reader recognises before they read anything.
+ */
+type GlyphComponent = ComponentType<SVGProps<SVGSVGElement>>
+
+/**
+ * The unfinished twin of Heroicons' 24px outline CheckCircleIcon. Heroicons does not export an
+ * empty circle, so this keeps that glyph's outer path verbatim and removes only its inner check.
+ */
+const CircleIcon = (props: SVGProps<SVGSVGElement>) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        aria-hidden="true"
+        data-slot="icon"
+        {...props}
+    >
+        <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+        />
+    </svg>
+)
+
+/** Native Heroicon drawings for the two product roles. */
+type GlyphCuts = { readonly heading: GlyphComponent, readonly leading: GlyphComponent, readonly chip: GlyphComponent }
+
+/** Pair the normal and subject cuts without exposing either component to a caller. */
+const cuts = (outline: GlyphComponent, chip: GlyphComponent): GlyphCuts => ({
+    heading: outline,
+    leading: outline,
+    chip,
+})
+
+const GLYPHS: Record<IconName, GlyphCuts> = {
+    brand: cuts(AcademicCapIcon, AcademicCapSolidIcon),
+    streak: cuts(FireIcon, FireSolidIcon),
+    credit: cuts(BoltIcon, BoltSolidIcon),
+    reward: cuts(GiftIcon, GiftSolidIcon),
+    course: cuts(BookOpenIcon, BookOpenSolidIcon),
+    email: cuts(EnvelopeIcon, EnvelopeSolidIcon),
+    password: cuts(LockClosedIcon, LockClosedSolidIcon),
+    revealPassword: cuts(EyeIcon, EyeSolidIcon),
+    hidePassword: cuts(EyeSlashIcon, EyeSlashSolidIcon),
+    code: cuts(ShieldCheckIcon, ShieldCheckSolidIcon),
+    complete: cuts(CheckCircleIcon, CheckCircleSolidIcon),
+    pending: cuts(CircleIcon, CircleIcon),
+    signIn: cuts(ArrowRightOnRectangleIcon, ArrowRightOnRectangleSolidIcon),
+    signUp: cuts(UserPlusIcon, UserPlusSolidIcon),
+    close: cuts(XMarkIcon, XMarkSolidIcon),
+    next: cuts(ArrowRightIcon, ArrowRightSolidIcon),
+    disclosure: cuts(ChevronRightIcon, ChevronRightSolidIcon),
+    retry: cuts(ArrowPathIcon, ArrowPathSolidIcon),
+    send: cuts(PaperAirplaneIcon, PaperAirplaneSolidIcon),
+    home: cuts(HomeIcon, HomeSolidIcon),
+    explore: cuts(GlobeAltIcon, GlobeAltSolidIcon),
+    community: cuts(UserGroupIcon, UserGroupSolidIcon),
+    league: cuts(TrophyIcon, TrophySolidIcon),
+    review: cuts(ClipboardDocumentCheckIcon, ClipboardDocumentCheckSolidIcon),
+    light: cuts(SunIcon, SunSolidIcon),
+    dark: cuts(MoonIcon, MoonSolidIcon),
+    locale: cuts(LanguageIcon, LanguageSolidIcon),
+    search: cuts(MagnifyingGlassIcon, MagnifyingGlassSolidIcon),
+    cart: cuts(ShoppingCartIcon, ShoppingCartSolidIcon),
+    notification: cuts(BellIcon, BellSolidIcon),
+    account: cuts(UserCircleIcon, UserCircleSolidIcon),
+    saved: cuts(BookmarkIcon, BookmarkSolidIcon),
+    blog: cuts(NewspaperIcon, NewspaperSolidIcon),
+    talents: cuts(SparklesIcon, SparklesSolidIcon),
+    jobs: cuts(BriefcaseIcon, BriefcaseSolidIcon),
+    practice: cuts(CodeBracketIcon, CodeBracketSolidIcon),
+    google: cuts(GoogleMark, GoogleMark),
+    github: cuts(GithubMark, GithubMark),
+}
+
+/** Each role keeps the diameter its Heroicon drawing was authored for. */
+const ROLE_CLASSES = {
+    heading: "size-6 shrink-0",
+    leading: "size-5 shrink-0",
+    chip: "size-4 shrink-0",
+} as const
+
+/**
+ * Draw one meaning as a glyph.
  *
  * @param input - {@link IconProps}
  */
 export const Icon = ({ props, isLoading = false }: IconProps) => {
+    const glyph = GLYPHS[props.name]
     const role = props.role ?? "chip"
+    const Glyph = glyph[role]
     if (isLoading) {
-        return (
-            <span
-                aria-hidden="true"
-                data-tier="leaf"
-                data-component="Icon"
-                className={`${ROLE_CLASSES[role]} animate-pulse rounded-full bg-default`}
-            />
-        )
+        return <span aria-hidden="true" data-tier="leaf" data-component="Icon" className="size-5 shrink-0 animate-pulse rounded-full bg-default" />
     }
-    const Glyph = (role === "chip" ? SOLID[props.name] : undefined) ?? OUTLINE[props.name]
-    return (
-        <Glyph
-            aria-hidden="true"
-            data-tier="leaf"
-            data-component="Icon"
-            data-name={props.name}
-            className={ROLE_CLASSES[role]}
-        />
-    )
+    const className = props.name === "complete"
+        ? `${ROLE_CLASSES[role]} text-success-soft-foreground`
+        : ROLE_CLASSES[role]
+    return <Glyph aria-hidden className={className} />
 }
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */

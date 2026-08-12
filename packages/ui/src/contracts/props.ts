@@ -1,5 +1,5 @@
 import type { ComponentType, ReactNode } from "react"
-import type { ChildrenOf, ContractKey, ContractPropValue } from "./index"
+import type { ChildrenOf, ContractKey, ContractPropValue } from "./"
 
 /**
  * THE SLOT SHAPES, as types rather than as a convention.
@@ -79,7 +79,9 @@ export const defineLeafComponent = <
 /**
  * A COMPOSITE's props. The runtime lanes match a leaf, but the type is intentionally distinct:
  * a composite fixes an arrangement of independently meaningful leaves rather than one intrinsic
- * value or control.
+ * value or control. Closed does not mean freehand: its arrangement is still rendered through a
+ * typed Tree contract, never through raw structural markup. If a caller may supply the content,
+ * the component is a branch rather than a composite.
  */
 export type CompositeProps<D extends ComponentData, A extends ComponentActions = ComponentActions> = {
     readonly props: D

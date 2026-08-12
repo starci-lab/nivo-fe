@@ -23,12 +23,12 @@ export {
     contractSpec,
 } from "./contracts"
 export type {
-    AllowedClassName,
     ChildrenOf,
     ContractChildSpec,
     ContractKey,
     ContractPropValue,
     ContractSpec,
+    LayoutClassName,
 } from "./contracts"
 
 export {

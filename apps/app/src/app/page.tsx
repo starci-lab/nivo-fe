@@ -11,7 +11,7 @@ import { Icon } from "@nivo/ui"
  */
 const Page = () => (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-3">
-        <Icon props={{ name: "spark", role: "heading" }} />
+        <Icon props={{ name: "brand", role: "heading" }} />
         <h1 className="text-2xl font-semibold">nivo app</h1>
         <p className="text-sm text-neutral-500">Bảng điều khiển cấp phát và vận hành.</p>
     </main>
