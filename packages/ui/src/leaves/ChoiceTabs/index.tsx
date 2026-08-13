@@ -10,6 +10,7 @@ export type ChoiceTabsData = {
     readonly label: string
     readonly selectedKey: string
     readonly tabs: ReadonlyArray<ChoiceTabData>
+    readonly variant?: "primary" | "secondary"
 }
 /** Selection reported by the peer-choice control. */
 export type ChoiceTabsActions = { readonly select?: (key: string) => void }
@@ -18,7 +19,7 @@ export type ChoiceTabsProps = LeafProps<ChoiceTabsData, ChoiceTabsActions>
 
 /** Text-only peer choices. Business categories do not gain decorative glyphs. */
 export const ChoiceTabs = ({ props, on }: ChoiceTabsProps) => (
-    <Tabs selectedKey={props.selectedKey} onSelectionChange={(key) => on?.select?.(String(key))}>
+    <Tabs variant={props.variant ?? "secondary"} selectedKey={props.selectedKey} onSelectionChange={(key) => on?.select?.(String(key))}>
         <Tabs.ListContainer>
             <Tabs.List aria-label={props.label}>
                 {props.tabs.map((tab) => (

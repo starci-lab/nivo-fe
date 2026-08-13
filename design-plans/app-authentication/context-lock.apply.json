@@ -1,0 +1,183 @@
+{
+  "version": 1,
+  "task": "app-authentication",
+  "phase": "apply",
+  "status": "awaiting-confirmation",
+  "trustRoot": "D:/Repositories/starci-academy-backend/.claude",
+  "skill": {
+    "name": "starci-fe-design-apply"
+  },
+  "caseId": "case-auth",
+  "selectedDirectionId": "direction-b",
+  "approvedRevision": "1.0",
+  "designRecord": "D:/Repositories/nivo-fe/design-plans/app-authentication/design-record.json",
+  "seal": {
+    "manifestSha256": "028c341ba00ab08eab8f2076e55da06fb54036f0658fb970b7b79d2cb87add43",
+    "verified": true
+  },
+  "lintAdoption": {
+    "ok": true,
+    "missing": [],
+    "nonError": [],
+    "refusesInlineConfig": true,
+    "probe": "apps/app/src/components/blocks/auth/SignInPanel/index.tsx"
+  },
+  "targets": [
+    {
+      "role": "apply-target",
+      "repo": "nivo-fe",
+      "gitRoot": "D:/Repositories/nivo-fe",
+      "branch": "main",
+      "head": "415300f",
+      "worktree": "D:/Repositories/nivo-fe (single worktree, no detached copies)",
+      "remote": null,
+      "worktreeState": "dirty with this session's own uncommitted work; that is the state Plan and Preview both measured"
+    }
+  ],
+  "references": [
+    {
+      "role": "parity-baseline",
+      "repo": "starci-academy-fe",
+      "head": "8410a74",
+      "path": "src/components/blocks/auth/AuthenticationPanel + src/components/pages/AuthenticationPage"
+    },
+    {
+      "role": "business-truth",
+      "repo": "nivo-backend",
+      "head": "e822320"
+    }
+  ],
+  "writeBoundary": [
+    "D:/Repositories/nivo-fe/apps/app/src/components/blocks/auth/OtpStep/",
+    "D:/Repositories/nivo-fe/apps/app/src/components/blocks/auth/SignUpPanel/",
+    "D:/Repositories/nivo-fe/apps/app/src/components/blocks/auth/ForgotPasswordPanel/",
+    "D:/Repositories/nivo-fe/apps/app/src/components/pages/SignUpPage/",
+    "D:/Repositories/nivo-fe/apps/app/src/components/pages/ForgotPasswordPage/",
+    "D:/Repositories/nivo-fe/apps/app/src/app/[locale]/(auth)/sign-up/page.tsx",
+    "D:/Repositories/nivo-fe/apps/app/src/app/[locale]/(auth)/forgot-password/page.tsx",
+    "D:/Repositories/nivo-fe/apps/app/src/modules/api/auth.ts",
+    "D:/Repositories/nivo-fe/apps/app/src/messages/vi.json",
+    "D:/Repositories/nivo-fe/apps/app/src/messages/en.json",
+    "D:/Repositories/nivo-fe/packages/ui/src/contracts/index.ts",
+    "D:/Repositories/nivo-fe/packages/ui/src/leaves/TextLink/index.tsx",
+    "D:/Repositories/nivo-fe/packages/ui/src/index.ts",
+    "D:/Repositories/nivo-fe/design-plans/app-authentication/"
+  ],
+  "readOnlyBoundary": [
+    "apps/expert, apps/landing - not in this case",
+    "apps/app/src/components/blocks/auth/SignInPanel - the direction was selected to leave it alone",
+    "apps/app/src/components/pages/SignInPage - same",
+    "apps/app/src/modules/auth/session.tsx, apps/app/src/modules/api/graphql.ts",
+    "starci-academy-fe, nivo-backend, the trust tree"
+  ],
+  "plannedWrites": [
+    {
+      "path": "apps/app/src/components/blocks/auth/OtpStep/index.tsx",
+      "kind": "new file",
+      "authority": "candidate file, byte-identical port"
+    },
+    {
+      "path": "apps/app/src/components/blocks/auth/SignUpPanel/index.tsx",
+      "kind": "new file",
+      "authority": "candidate file, byte-identical port"
+    },
+    {
+      "path": "apps/app/src/components/blocks/auth/ForgotPasswordPanel/index.tsx",
+      "kind": "new file",
+      "authority": "candidate file, byte-identical port"
+    },
+    {
+      "path": "apps/app/src/components/pages/SignUpPage/component.tsx",
+      "kind": "new file",
+      "authority": "candidate file, ported; the `phase` prop becomes the pure half's discriminant"
+    },
+    {
+      "path": "apps/app/src/components/pages/SignUpPage/index.tsx",
+      "kind": "new file",
+      "authority": "integrationEdits - the connected half holding signUpInit/Resend/VerifyOtp"
+    },
+    {
+      "path": "apps/app/src/components/pages/ForgotPasswordPage/component.tsx",
+      "kind": "new file",
+      "authority": "candidate file, ported"
+    },
+    {
+      "path": "apps/app/src/components/pages/ForgotPasswordPage/index.tsx",
+      "kind": "new file",
+      "authority": "integrationEdits - the connected half"
+    },
+    {
+      "path": "apps/app/src/app/[locale]/(auth)/sign-up/page.tsx",
+      "kind": "new file",
+      "authority": "integrationEdits - route mount only, LAYOUT-6"
+    },
+    {
+      "path": "apps/app/src/app/[locale]/(auth)/forgot-password/page.tsx",
+      "kind": "new file",
+      "authority": "integrationEdits - route mount only, LAYOUT-6"
+    },
+    {
+      "path": "apps/app/src/modules/api/auth.ts",
+      "kind": "append only",
+      "authority": "integrationEdits - six OTP operations ADDED; nothing existing changes"
+    },
+    {
+      "path": "apps/app/src/messages/vi.json",
+      "kind": "merge",
+      "authority": "integrationEdits - the signUp and forgotPassword namespaces"
+    },
+    {
+      "path": "apps/app/src/messages/en.json",
+      "kind": "merge",
+      "authority": "integrationEdits - the English sibling; a locale added on one side only is drift"
+    },
+    {
+      "path": "packages/ui/src/contracts/index.ts",
+      "kind": "two one-line edits",
+      "authority": "open questions 1 and 2, waived at approval: an inset on authentication-panel-card, host:\"main\" on centred-authentication-page"
+    },
+    {
+      "path": "packages/ui/src/leaves/TextLink/index.tsx",
+      "kind": "additive prop",
+      "authority": "open question 4 - `disabled`. NOT approved for this revision; see below."
+    }
+  ],
+  "deferred": [
+    {
+      "id": "TextLink.disabled",
+      "why": "waived at its default, not approved as a change; materializing it would make the shipped screen differ from the sealed state",
+      "route": "a Preview minor revision if it is wanted"
+    }
+  ],
+  "parityStates": [
+    "sign-up",
+    "sign-up-refused",
+    "sign-up-code",
+    "sign-up-code-refused",
+    "sign-up-code-cooldown",
+    "sign-up-code-taken",
+    "sign-up-done",
+    "forgot-password",
+    "forgot-password-code",
+    "forgot-password-code-refused",
+    "forgot-password-done"
+  ],
+  "parityConditions": {
+    "viewport": "1280x900 @1",
+    "locale": "vi",
+    "theme": "light",
+    "authPersona": "anonymous",
+    "fixture": "preview-lab/candidate/src/messages/auth.vi.json"
+  },
+  "drift": {
+    "detected": false,
+    "checked": [
+      "nivo-fe HEAD 415300f",
+      "branch main",
+      "single worktree",
+      "record seal",
+      "lint adoption"
+    ]
+  },
+  "detectedAt": "2026-08-13"
+}

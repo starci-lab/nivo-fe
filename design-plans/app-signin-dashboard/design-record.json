@@ -1,0 +1,198 @@
+{
+  "version": 1,
+  "task": "nivo-app-signin-and-dashboard",
+  "planRecord": "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard\\plan-record.json",
+  "contextLock": "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard\\context-lock.preview.json",
+  "deliveryMode": "batch",
+  "mode": "mixed",
+  "approvedCaseId": "case-d1",
+  "approval": {
+    "source": "explicit user feedback",
+    "userWords": "ok chốt d (direction selection) then ok dứt /starci-fe-design-apply (approval of case-d1 and routing to apply)",
+    "retainedTraits": [
+      "Collapsible sidebar chrome adapted from starci-academy CollapsibleSidebar/SidebarNavItem/LearnSidebar: 16rem open, 4rem collapsed, collapse in place, persisted flag, clusters divided by a full-width rule, trailing badge in two tones, drawer below lg.",
+      "topSlot carries the provision action rather than a resume action.",
+      "Fleet leads the dashboard; work-needing-you and wallet share the second row; body stays one column.",
+      "Sign-in keeps the approved case-a3 order: shortcuts, divider, credential form kept mounted for password managers.",
+      "The second-factor challenge is completed on screen, replacing the committed twoFactorUnsupported notice.",
+      "The credential refusal discloses neither the address nor which half was wrong."
+    ],
+    "rejectedTraits": [
+      "direction-a top navbar chrome",
+      "direction-b obligations-first reading order and its myDueWork backend enabler",
+      "direction-c provisioning-first reading order"
+    ]
+  },
+  "parityBaseline": "starci-academy/src/components/blocks/navigation/CollapsibleSidebar, SidebarNavItem and blocks/learn/LearnSidebar at D:\\Repositories\\starci-academy (branch mtp, HEAD 9a1934231) - binding for sidebar geometry and collapse behaviour only. The dashboard body and sign-in are not parity work.",
+  "sharedDecisions": [
+    "apps/app/src/app/globals.css must import @heroui/styles/css and define the semantic token layer before any screen is judged; packages/ui writes text-muted (18), bg-default (12), text-foreground (6), bg-surface (5) and none resolve today.",
+    "PALETTE VALUES ARE NOT APPROVED. The review lab used a neutral placeholder. Apply may not port starci-academy-fe's 301-line globals.css wholesale as nivo's brand; it must stop and ask if a value is needed that the record does not carry.",
+    "The chrome is a layout mounted as a sibling of the routed body at apps/app/src/app/layout.tsx; the sign-in route mounts no chrome and keeps centred-authentication-page.",
+    "dashboard-main and dashboard-rail-then-main may not be reused: their why binds them to the academy's eight learner sections.",
+    "Each block owns its own request; there is no page-level loading flag.",
+    "Every figure rendered in the lab is a fixture; apply must bind real queries or render an honest empty state."
+  ],
+  "workItems": [
+    {
+      "id": "layout-app-chrome",
+      "target": "AppSidebarChrome + framework boundary",
+      "primaryScope": "layout",
+      "subordinateScopes": ["block"],
+      "dependsOn": [],
+      "ownerBoundary": "Wordmark, provision action slot, navigation clusters, active section, collapse state, drawer below lg, account row. Owns no page data.",
+      "fileBoundary": [
+        "apps/app/src/app/globals.css",
+        "apps/app/src/app/layout.tsx",
+        "apps/app/src/components/layouts/AppSidebarChrome/",
+        "packages/ui/src/contracts/index.ts"
+      ],
+      "approvedCaseId": "case-d1",
+      "stateCoverage": [
+        { "ownerId": "layout-app-chrome", "state": "desktop authenticated", "coverage": "rendered", "scenarioId": "chrome-open", "evidence": "me returns UserEntity with username and avatarUrl." },
+        { "ownerId": "layout-app-chrome", "state": "active navigation", "coverage": "rendered", "scenarioId": "chrome-open", "evidence": "Current section is the layout's own domain (LAYOUT-2)." },
+        { "ownerId": "layout-app-chrome", "state": "overflow / collapse", "coverage": "rendered", "scenarioId": "chrome-collapsed", "evidence": "16rem to 4rem in place; flag persisted." },
+        { "ownerId": "layout-app-chrome", "state": "mobile", "coverage": "rendered", "scenarioId": "chrome-mobile", "evidence": "Reference hides the sidebar below lg." },
+        { "ownerId": "layout-app-chrome", "state": "mobile drawer open / focus return", "coverage": "rendered", "scenarioId": "chrome-mobile-drawer", "evidence": "role=dialog aria-modal over a scrim." },
+        { "ownerId": "layout-app-chrome", "state": "light / dark", "coverage": "rendered", "scenarioId": "chrome-dark", "evidence": "next-themes and ThemeSwitch already ship." },
+        { "ownerId": "layout-app-chrome", "state": "persistent loading", "coverage": "not-applicable", "scenarioId": null, "evidence": "The chrome owns no fetched data beyond identity." }
+      ]
+    },
+    {
+      "id": "page-dashboard",
+      "target": "apps/app/src/app/page.tsx",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": ["layout-app-chrome"],
+      "ownerBoundary": "Session question and block reading order only.",
+      "fileBoundary": [
+        "apps/app/src/app/page.tsx",
+        "apps/app/src/components/pages/DashboardPage/",
+        "apps/app/src/components/blocks/dashboard/InstanceList/",
+        "apps/app/src/components/blocks/dashboard/WorkNeedingYou/",
+        "apps/app/src/components/blocks/dashboard/WalletSummary/",
+        "apps/app/src/modules/api/"
+      ],
+      "approvedCaseId": "case-d1",
+      "stateCoverage": [
+        { "ownerId": "page-dashboard", "state": "route entry / guest redirect", "coverage": "not-applicable", "scenarioId": null, "evidence": "The route redirects before any block mounts." },
+        { "ownerId": "page-dashboard", "state": "full content", "coverage": "rendered", "scenarioId": "chrome-open", "evidence": "All three blocks have live queries." },
+        { "ownerId": "page-dashboard", "state": "orchestration loading", "coverage": "rendered", "scenarioId": "dash-loading", "evidence": "Resting count of three rows preserved; static labels stay visible." },
+        { "ownerId": "page-dashboard", "state": "partial availability", "coverage": "rendered", "scenarioId": "dash-partial", "evidence": "One block landed, one failed, one loading." },
+        { "ownerId": "page-dashboard", "state": "page-level failure", "coverage": "not-applicable", "scenarioId": null, "evidence": "The page owns no request." },
+        { "ownerId": "block-instance-list", "state": "populated", "coverage": "rendered", "scenarioId": "chrome-open", "evidence": "MyInstance fields." },
+        { "ownerId": "block-instance-list", "state": "loading", "coverage": "rendered", "scenarioId": "dash-loading", "evidence": "Only name, qualifier and figure become skeleton." },
+        { "ownerId": "block-instance-list", "state": "empty", "coverage": "rendered", "scenarioId": "dash-empty", "evidence": "A new account owns no instance." },
+        { "ownerId": "block-work-needing-you", "state": "populated", "coverage": "rendered", "scenarioId": "chrome-open", "evidence": "InvoiceEntity dueAt/amountVnd and myTickets." },
+        { "ownerId": "block-work-needing-you", "state": "recoverable error", "coverage": "rendered", "scenarioId": "dash-partial", "evidence": "Either query can fail alone." },
+        { "ownerId": "block-work-needing-you", "state": "empty", "coverage": "rendered", "scenarioId": "dash-empty", "evidence": "Nothing due is the healthy case." },
+        { "ownerId": "block-wallet-summary", "state": "populated / loading", "coverage": "rendered", "scenarioId": "chrome-open + dash-loading", "evidence": "WalletEntity.balanceVnd." },
+        { "ownerId": "block-wallet-summary", "state": "empty", "coverage": "not-applicable", "scenarioId": null, "evidence": "A wallet always exists; zero is a value." }
+      ]
+    },
+    {
+      "id": "page-sign-in",
+      "target": "apps/app/src/app/(auth)/dang-nhap/page.tsx + SignInPanel",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": [],
+      "ownerBoundary": "Restore the approved case-a3 render under the token layer and replace the twoFactorUnsupported notice with a completed challenge.",
+      "fileBoundary": [
+        "apps/app/src/app/(auth)/dang-nhap/",
+        "apps/app/src/components/blocks/auth/SignInPanel/",
+        "apps/app/src/modules/api/"
+      ],
+      "approvedCaseId": "case-d1",
+      "stateCoverage": [
+        { "ownerId": "page-sign-in", "state": "route entry", "coverage": "rendered", "scenarioId": "signin-entry", "evidence": "Route already exists." },
+        { "ownerId": "page-sign-in", "state": "narrow", "coverage": "rendered", "scenarioId": "signin-entry", "evidence": "Second frame at 390px." },
+        { "ownerId": "page-sign-in", "state": "authenticated redirect", "coverage": "not-applicable", "scenarioId": null, "evidence": "A signed-in reader is redirected before the panel mounts." },
+        { "ownerId": "block-sign-in-panel", "state": "entry", "coverage": "rendered", "scenarioId": "signin-entry", "evidence": "Committed SignInState union." },
+        { "ownerId": "block-sign-in-panel", "state": "pending / disabled action", "coverage": "rendered", "scenarioId": "signin-pending", "evidence": "Spinner, disabled, accessible name preserved." },
+        { "ownerId": "block-sign-in-panel", "state": "recoverable error", "coverage": "rendered", "scenarioId": "signin-refused", "evidence": "Non-disclosing refusal." },
+        { "ownerId": "block-sign-in-panel", "state": "second factor", "coverage": "rendered", "scenarioId": "signin-2fa", "evidence": "AuthPayload.twoFactorToken + verifyTwoFactor." },
+        { "ownerId": "block-sign-in-panel", "state": "resetLinkSent", "coverage": "rendered", "scenarioId": "signin-reset-sent", "evidence": "requestPasswordReset; copy stays non-disclosing." },
+        { "ownerId": "block-sign-in-panel", "state": "handingOff / exchanging", "coverage": "rendered", "scenarioId": "signin-waiting", "evidence": "One waiting tree; only the sentence differs (BLOCK-2)." },
+        { "ownerId": "block-sign-in-panel", "state": "exchangeFailed", "coverage": "rendered", "scenarioId": "signin-exchange-failed", "evidence": "exchangeOauthCode can refuse a stale code." },
+        { "ownerId": "block-sign-in-panel", "state": "dark", "coverage": "covered-by", "scenarioId": "chrome-dark", "evidence": "Same surface, line and ink tokens." }
+      ]
+    }
+  ],
+  "evidence": [
+    { "claim": "nivo-backend exposes 59 queries, 102 mutations, 0 subscriptions.", "source": "GraphQL introspection at 127.0.0.1:3067 during the plan run", "confidence": "high", "note": "The service was not running at preview time; this evidence is as recorded, not re-verified." },
+    { "claim": "signIn returns AuthPayload { accessToken, requiresTwoFactor, twoFactorToken } and verifyTwoFactor(twoFactorToken, code) exists.", "source": "schema introspection", "confidence": "high" },
+    { "claim": "MyInstance carries name, product, plan, ram, status, renewsAt, creditBurnUsd.", "source": "schema introspection", "confidence": "high" },
+    { "claim": "CollapsibleSidebar is 16rem open and 4rem collapsed, collapses in place and persists its flag.", "source": "starci-academy/src/components/blocks/navigation/CollapsibleSidebar/index.tsx", "confidence": "high" },
+    { "claim": "apps/app/src/app/globals.css is nine lines with no HeroUI stylesheet and no tokens.", "source": "file read plus token counts across packages/ui/src", "confidence": "high" }
+  ],
+  "unknowns": [
+    "nivo's palette values are undecided; the approved case used a neutral placeholder and approval does not extend to colour.",
+    "MyInstance.status is a free String; running / provisioning are assumed vocabulary.",
+    "No subscription exists, so a provisioning row can only be polled.",
+    "creditBurnUsd is USD while wallet and invoices are VND; showing both on one screen is unresolved.",
+    "The eight destinations in three clusters are inferred from the my* queries, not from an approved information architecture.",
+    "apps/app has no GraphQL client and no i18n catalogue; both are apply work with no approved shape in this record."
+  ],
+  "decisions": [
+    { "id": "second-factor-completed", "decision": "The sign-in screen completes the second factor instead of refusing it.", "evidence": "AuthPayload.twoFactorToken and verifyTwoFactor exist, so the committed 'this build cannot complete' sentence is false.", "affects": "block-sign-in-panel", "approvedBy": "user, case-d1 approval" },
+    { "id": "topslot-provision", "decision": "The sidebar topSlot holds the provision action, where the reference holds ResumeRail.", "evidence": "A provisioning console's equivalent of resume is provision the next thing.", "affects": "layout-app-chrome", "approvedBy": "user, case-d1 approval" },
+    { "id": "one-column-body", "decision": "The body stays one column; no 288px rail beside the sidebar.", "evidence": "Sidebar plus rail is three columns and the middle one stops being readable at 1280px.", "affects": "page-dashboard", "approvedBy": "user, case-d1 approval" }
+  ],
+  "rejectedDirections": ["direction-a", "direction-b", "direction-c"],
+  "blockTrees": [
+    { "id": "case-d1", "tree": "app/layout.tsx > Tree contract=sidebar-then-body-app > [AppSidebarChrome (topSlot provision action, nav clusters, account row), routed body > DashboardPage > [InstanceList, WorkNeedingYou, WalletSummary] | SignInPage > SignInPanel]" }
+  ],
+  "contracts": [
+    { "key": "sidebar-then-body-app", "decision": "new", "why": "The chrome sits beside the routed body rather than above it and survives the body being replaced; nav-over-body-page cannot express that." },
+    { "key": "titled-body", "decision": "new", "why": "A console body announces which section it is before its first section label." },
+    { "key": "sidebar-nav-cluster", "decision": "new", "why": "Destinations belonging to one part of the product are peers of one cluster; a full-width rule separates clusters so a collapsed 4rem rail still reads as groups." },
+    { "key": "centred-authentication-page", "decision": "reuse", "why": "Authentication is the route's only task." },
+    { "key": "authentication-panel-card", "decision": "reuse", "why": "The form is one meaningful control group bounded by one card." },
+    { "key": "label-row-over-card", "decision": "reuse", "why": "The label is held outside the surface it names." },
+    { "key": "dashboard-main", "decision": "reject", "why": "Bound to the academy's eight learner sections." },
+    { "key": "dashboard-rail-then-main", "decision": "reject", "why": "The learner rail, not a nivo operations topology." }
+  ],
+  "vocabularyProposals": [
+    {
+      "target": "apps/app/src/app/globals.css",
+      "decision": "new",
+      "meaning": "The app's only stylesheet and the only place a colour is written down.",
+      "delta": "@import \"@heroui/styles/css\" plus semantic tokens: surface, muted, foreground, border, brand/accent, and success/warning/danger with their soft and foreground roles.",
+      "placement": "Imported once by apps/app/src/app/layout.tsx.",
+      "absenceDefault": "Without it every leaf in packages/ui resolves no colour and the app renders as raw HTML.",
+      "precedence": "Token values are NOT approved by this record; apply stops and asks rather than importing another product's palette.",
+      "affectedCallers": "every screen in apps/app",
+      "compatibility": "additive",
+      "tests": "a rendered screen computes a non-transparent surface background and the product ink"
+    },
+    {
+      "target": "apps/app/src/app/layout.tsx",
+      "decision": "extend",
+      "meaning": "The framework boundary brands the routed body and mounts vendor and theme providers.",
+      "delta": "Add the HeroUI provider and the next-themes provider; close children into the contract's page leaf beside the chrome.",
+      "placement": "root layout only",
+      "absenceDefault": "HeroUI components render without runtime context and ThemeSwitch has nothing to switch.",
+      "precedence": "The chrome must remain a sibling of the routed body (LAYOUT-1, LAYOUT-7).",
+      "affectedCallers": "every route",
+      "compatibility": "additive",
+      "tests": "theme toggle changes the computed background; chrome does not remount across navigation"
+    },
+    {
+      "target": "apps/app/src/components/layouts/AppSidebarChrome",
+      "decision": "new",
+      "meaning": "Route-stable collapsible chrome for the authenticated product.",
+      "delta": "New layout: topSlot provision action, three nav clusters, account row, collapse toggle with persisted flag, drawer below lg. No children prop; no page data.",
+      "placement": "sibling of the routed body inside sidebar-then-body-app",
+      "absenceDefault": "The dashboard has no navigation and nothing survives a route change.",
+      "precedence": "The sign-in route must not mount it.",
+      "affectedCallers": "apps/app/src/app/layout.tsx",
+      "compatibility": "additive",
+      "tests": "collapsed flag survives reload; drawer traps focus and returns it; chrome does not remount"
+    }
+  ],
+  "backendEnablerProposals": [],
+  "preview": {
+    "path": "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard\\preview-lab",
+    "url": "http://127.0.0.1:8086/",
+    "manifestCaseIds": ["case-d1"]
+  }
+}

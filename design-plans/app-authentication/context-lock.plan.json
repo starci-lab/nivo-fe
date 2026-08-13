@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "task": "app-authentication",
+  "phase": "plan",
+  "status": "superseded-by-preview",
+  "trustRoot": "D:/Repositories/starci-academy-backend/.claude",
+  "skill": {
+    "name": "starci-fe-design-plan"
+  },
+  "targets": [
+    {
+      "role": "design-target",
+      "repo": "nivo-fe",
+      "gitRoot": "D:/Repositories/nivo-fe",
+      "branch": "main",
+      "head": "415300f",
+      "remote": null,
+      "worktreeState": "dirty - this session's own uncommitted app/expert restructure and contract additions"
+    }
+  ],
+  "references": [
+    {
+      "role": "parity-baseline",
+      "repo": "starci-academy-fe",
+      "gitRoot": "D:/Repositories/starci-academy-fe",
+      "head": "8410a74",
+      "path": "src/components/blocks/auth/AuthenticationPanel",
+      "purpose": "the named render this screen is ported from; its SOURCE was read in this phase, not just its picture"
+    },
+    {
+      "role": "business-truth",
+      "repo": "nivo-backend",
+      "gitRoot": "D:/Repositories/nivo-backend",
+      "head": "e822320",
+      "purpose": "nine OTP mutations, proven by 25 e2e assertions"
+    }
+  ],
+  "artifactRoot": "D:/Repositories/nivo-fe/design-plans/app-authentication",
+  "writeBoundary": [
+    "D:/Repositories/nivo-fe/design-plans/app-authentication"
+  ],
+  "readOnlyBoundary": [
+    "all nivo-fe source",
+    "starci-academy-fe",
+    "nivo-backend",
+    "the trust tree"
+  ],
+  "drift": {
+    "detected": false
+  },
+  "repaired": {
+    "at": "preview",
+    "what": "every path field",
+    "why": "written with unescaped Windows separators, so the JSON parsed back with the separators eaten and one path split across a newline"
+  },
+  "detectedAt": "2026-08-13"
+}

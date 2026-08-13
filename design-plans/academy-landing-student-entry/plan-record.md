@@ -1,113 +1,107 @@
-# Plan record — nivo học viện: landing công khai + cửa vào của học viên
+# Plan record — `case-academy-entry`
 
-> **`status: awaiting-direction-selection`.** Chưa chọn hướng, chưa duyệt gì.
-> Không có `approvedCaseId`: plan không tự duyệt mình.
-> Đôi cùng nội dung với `plan-record.json`.
+nivo expert academy: the public landing, the academy chrome, and the route a member enters through.
+Version 2, written 2026-08-13. Lock: [`context-lock.plan.json`](context-lock.plan.json).
+Evidence ledger: [`evidence-ledger.md`](evidence-ledger.md).
+
+**This supersedes a version-1 record** that `verify_plan_record.mjs` refused on nine counts — no
+`caseId`, no `contextLock`, no `directionLab`, no `stateManifest`, and zero recorded directions. It
+was therefore never valid to route to Preview, which is why Preview never ran. Its selection is
+carried forward rather than discarded: L-A returns as **E-A**, the parity-first posture.
+
+## What the evidence settled before any direction was drawn
+
+**Two backends, and the old record read the wrong one.** The academy API exposes exactly `signIn`,
+`signOut`, `exchangeOauthCode` and `refreshSession`. `signUp`, password reset and all four
+two-factor resolvers exist **only** under `src/features/core/` — the control plane. Three states the
+version-1 record marked *required* are therefore reclassified `not-applicable` **with the schema
+evidence attached**, because a state that quietly disappears cannot be told apart from one nobody
+thought of.
+
+**No `signUp` is not a gap.** Both lanes create the member themselves: a brand-new identity through
+either OAuth or the password grant lands as `role=member, status=active`, and an email matching a
+seeded admin row migration-links onto it. A refusal writes nothing — no cookie, no member.
+
+**OAuth leads, and the registry already said so.** `auth.e2e-spec.ts:231` names
+`exchangeOauthCode` *"the login"*, and `auth-entry-stack` encodes the order in its own `why`:
+shortcuts closed by an OR divider above, credential form below. Nothing here was a layout preference.
+
+## Work items
+
+| id | scope | target | incumbent |
+|---|---|---|---|
+| `page-academy-landing` | page | `apps/expert/src/app/[locale]/page.tsx` | **live**, built outside this pipeline |
+| `page-academy-entry` | page | `apps/expert/src/app/[locale]/sign-in/page.tsx` | none — genuinely net-new |
+| `layout-academy-chrome` | layout | `apps/expert/src/academy/AcademyChrome.tsx` | **live**, built outside this pipeline |
+
+`page-academy-entry` was `page-academy-auth` at `app/dang-nhap/page.tsx`. The segment is `sign-in`,
+matching `apps/app/src/app/(auth)/sign-in` already in this monorepo, and the tree moved under
+`[locale]/`.
+
+## Directions
+
+| | posture | new owners | address | landing behind |
+|---|---|---:|---|---|
+| **E-A** | parity-first | 0 | `/sign-in` | no |
+| **E-B** | bold | **1 — `ModalShell`** | none | yes |
+| **E-C** | balanced | 0 | `/sign-in` | yes, muted |
+
+E-B is expensive for a structural reason, not an aesthetic one: `@nivo/ui` has **no `shells/` folder
+and no modal, dialog, drawer or overlay contract anywhere**. Canon permits a shell — it is the named
+exemption that may expose `children` — but it must be proposed, built and reviewed. And OAuth breaks
+its own premise: the browser really does leave, so returning must reopen the panel, which needs a
+flag in the URL — a route by another name.
+
+Lab: `direction-lab/`, served at `http://127.0.0.1:8095/`, every canvas labelled
+`DIRECTIONAL — NOT AN APPLY BASELINE`.
+
+## Selection — `E-AB`, explicit
+
+`selectedDirectionId: E-AB`, `selectionKind: **explicit**`.
+
+An earlier pass recorded `E-A` as `default-after-ambiguity`, because *"lam EA va EC"* did not resolve
+into one of the three offered directions and the binary re-ask came back about the destination
+instead. The user then said it plainly: *"ý là làm cả 2 hiểu k, E-A là trang riêng /vi/sign-in là
+router vào nếu chưa đăng nhập, còn modal vẫn có để quick access đăng nhập nhanh"*, and *"như starci
+ấy"*. That is a hybrid, so it becomes **one updated direction** with its traits named — and the
+default is gone, replaced by a real choice.
+
+**E-AB — one `AuthenticationPanel`, two hosts.**
 
 | | |
 |---|---|
-| Delivery | **batch** — 3 owner |
-| Mode | **mixed** — landing có render cũ ràng buộc parity; trang auth học viên chưa từng có |
-| Parity baseline | `nivo/apps/expert/src/components/blocks/landing/LandingPage.tsx` (chỉ landing) |
-| Khuyến nghị | **L-A**, xem lý lẽ ở cuối |
+| Retained from **E-A** | a real address at `/[locale]/sign-in`: the guard's redirect target, the link a mail can carry, the address OAuth returns to |
+| Retained from **E-B** | a quick-access overlay, so a reader on the landing enters without losing the page |
+| Rejected from **E-B** | the claim that entry needs no address — OAuth genuinely leaves the browser, so that lane hands off to the route instead of pretending to stay |
+| Rejected from **E-C** | muting the landing behind a route; the overlay covers that need without reopening whether `centred-authentication-page`'s “only task” still holds |
 
-## Điều phải đọc trước
+The two hosts cannot drift because there is only one panel. That is not a convention to remember —
+it is the composition.
 
-**Code em đã viết chính là L-A, và nó chưa được duyệt.** Em nhảy thẳng vào implement, trong khi luật
-của skill nói không có đường tắt từ một câu chỉ đạo tới apply. Hai file
-(`apps/expert/src/app/page.tsx`, `.../dang-nhap/page.tsx`) typecheck sạch nhưng phải coi là **bản
-nháp**. Chọn hướng khác thì chúng phải sửa hoặc bỏ.
+**This shape is not invented.** `starci-academy-fe`, the named reference, already ships all three
+pieces: `src/app/authentication`, `src/components/overlays/auth/SignInOverlay` and
+`src/components/shells/ModalShell` with `{ isOpen, size?, children?, onDismiss }` and
+`meta { shape: "shell", mechanics: true, world: "pure" }`. So `ModalShell` stops being a speculative
+new owner and becomes a **port** — and canon already names ModalShell one of the three shells allowed
+to expose `children`.
 
-## Ba owner
+Three ports, no invention: `ModalShell` → `packages/ui/src/shells/`, `AuthenticationPanel` →
+`apps/expert/src/components/blocks/auth/`, `SignInOverlay` →
+`apps/expert/src/components/overlays/auth/`.
 
-| id | Mục tiêu | Scope |
-|---|---|---|
-| `layout-academy-chrome` | `academy/AcademyChrome.tsx` | **layout** |
-| `page-academy-landing` | `app/page.tsx` | page |
-| `page-academy-auth` | `app/dang-nhap/page.tsx` | page |
+## Decisions the user did settle
 
-`AcademyChrome` là owner riêng chứ không phải chi tiết của trang, vì nó là **chỗ duy nhất đọc bảng
-màu**. Gộp nó vào trang là mở đường cho khối khác tự đọc màu, đúng thứ BR-B02 cấm.
+- The route segment is **`sign-in`**.
+- A successful entry goes to the **academy dashboard**.
+- A route needing auth sends an unauthenticated visitor **back to `/sign-in`**.
 
-## Quyết định dùng chung
+The last two name a destination that **does not exist yet** — `apps/expert` has no dashboard route
+and no guarded route. This case can prove a redirect happens and name where it points; it cannot
+render the far end.
 
-**Template được mount thành file lúc provision.** Mỗi học viện là một instance riêng, nên không có
-tra cứu tenant lúc chạy. Hệ quả đo được: landing **không còn trạng thái *đang tải* và *lỗi*** — không
-có request nào để chờ hay để hỏng. Hai trạng thái đó được đánh `not-applicable` kèm lý do, không bị
-bỏ lặng.
+## Still unknown
 
-**Màu chỉ tới màn hình qua biến CSS do một owner ghi.** Component gọi tên màu sẽ đúng với học viện
-nó được viết cạnh, và sai với mọi học viện khác.
-
-**Trang auth phục vụ HỌC VIÊN.** Chuyên gia quản trị từ control plane, nơi họ vốn đã đăng nhập.
-
-**Ảnh là link chuyên gia dán.** nivo không giữ tệp nào, nên *chưa dán link* và *link đã chết* là
-trạng thái thường ngày chứ không phải ca hiếm.
-
-## Kiểm kê trạng thái — phân theo owner, không phải theo trang
-
-`state-coverage.md` xếp theo **owner có thể đổi**, và đó là chỗ bản kiểm kê đầu của em hụt ba lỗ:
-`AcademyChrome` không có mục nào, khối tương tác thiếu *pending / disabled / focus*, và responsive bị
-bỏ trắng — mà luật cấm đánh N/A cho responsive nếu không có bằng chứng.
-
-**`layout-academy-chrome` (7 bắt buộc)** — bảng màu đã provision · bảng màu mặc định · **bảng màu thứ
-hai** · có CSS riêng · không có CSS riêng · mobile · desktop.
-
-**`page-academy-landing` (14)** — mặc định chưa provision · đủ khối · tắt khối · đổi thứ tự · chưa có
-khoá học · sáu hình thù khối tự tạo · thiếu ảnh · ảnh hỏng · bảng màu thứ hai · mobile · desktop ·
-form lead đang gửi · form lead lỗi · bàn phím/tiêu điểm.
-
-**`page-academy-auth` (14)** — đăng ký nghỉ · đăng nhập nghỉ · đang gửi · bị từ chối · đã gửi liên kết
-· 2FA chưa hỗ trợ · rời trang sang provider · callback thất bại · mang màu học viện · mobile ·
-desktop · **đã đăng nhập rồi** · bàn phím/tiêu điểm · nút provider bị khoá khi đang gửi.
-
-**Sáu N/A, tất cả có bằng chứng.** Đáng nói nhất là **giao diện tối**: bảng màu thuộc về **học viện**,
-không thuộc về người xem. Một chuyên gia có thể chọn bảng tối — lab đã có một cái — nhưng **không có
-công tắc của người xem** để render một chủ đề thứ hai.
-
-## Ba brief
-
-Xem bảng so sánh trong tin nhắn. Tóm tắt:
-
-**L-A · Thang bậc theo thứ tự catalog.** Không cần một tuyên bố chưa chứng minh nào. Trang dài nhất.
-
-**L-B · Bằng chứng trước giá.** Dẫn bằng bậc mà cả ba trang tham chiếu dựa vào nặng nhất — nhưng
-**sập vào ngày đầu**, khi học viện chưa có ảnh, chưa có cảm nhận, chưa có số liệu.
-
-**L-C · Mỗi lúc một câu hỏi.** Đường ngắn nhất tới lead, nhưng **nửa auth không ship được** (BE-4).
-
-## Đề xuất từ vựng
-
-| Tier | Tên | Quyết định | Vì sao hẹp nhất |
-|---|---|---|---|
-| layout | `AcademyChrome` | **owner mới** | Người đọc duy nhất của template và người ghi duy nhất của bảng màu. Một hook mọi khối gọi được thì rải một quyết định ra khắp nơi và không còn chỗ nào để chứng minh việc phối màu chạy đúng. |
-| block | `StudentEntryPanel` | **owner mới** | `SignInPanel` của control plane cân cho người **đã có** tài khoản. Cửa vào của học viên dẫn bằng đăng ký — một câu sản phẩm khác, không phải một biến thể. Thêm cờ chế độ vào `SignInPanel` là bắt một khối trả lời hai câu hỏi khác nhau tuỳ một boolean. |
-
-Không cần leaf hay composite mới nào: `Input`, `Field`, `Button`, `Divider`, `Heading`, `Text`,
-`TextLink` đã có đủ trạng thái cần.
-
-## Đề xuất backend
-
-**BE-4 · `backend-design`, và em nêu ra để bác bỏ chứ không phải để đề xuất.** L-C hỏi email trước
-rồi mới hỏi mật khẩu, tức cần backend trả lời *"email này có tài khoản chưa"* — đúng điều e2e
-`password-reset` chứng minh sản phẩm **cố ý từ chối tiết lộ**. Đây là lý do nửa auth của L-C gãy.
-
-## Ẩn số
-
-| id | Ẩn số | Chặn chọn hướng? |
-|---|---|---|
-| U-A | Ảnh ngoài lộ IP học viên cho bên thứ ba. Đã đặt `no-referrer`, nhưng nó không giấu được địa chỉ | không |
-| U-B | `stats`, `testimonials`, bằng cấp là **tuyên bố không kiểm được** chạy trên hạ tầng nivo. Cùng họ với BR-B07, khác cơ chế, chưa luật nào phủ | không — nhưng **L-B dồn hết chúng lên đầu trang** |
-| U-C | `instructor` là khối hệ thống hay tự tạo? Ca đầu tiên BR-B06 không cắt gọn | không |
-| U-D | Học viện chạy tên miền riêng hay subdomain nivo? | không |
-| U-E | Ba bậc mô hình dự đoán mà không trang tham chiếu nào có: `guarantee`, `audience`, `schedule` | không — chưa dựng |
-| U-F | **Học viên đã đăng nhập rồi thì đi đâu?** Chưa có route đích nào được chứng minh; học viện chưa có trang trong | **có, với mọi hướng** |
-
-U-F mới lộ ra khi em kiểm kê theo owner. Nó không đổi việc chọn hướng, nhưng phải giải trước khi
-preview đóng băng ma trận trạng thái.
-
-## Bước tiếp
-
-Thầy chọn một brief, hoặc nêu bản trộn kèm nét muốn giữ. Em cập nhật record thành
-`direction-selected` rồi mới sang preview. **Im lặng không phải là chọn**, và khuyến nghị của em
-cũng không.
+- Whether the incumbent landing already **is** the E-A shape or has drifted from it. No record
+  answers this, and it is part of why Plan was re-run.
+- Whether a course opens anything. No course-detail route exists, so the landing is not designed as
+  though one did.

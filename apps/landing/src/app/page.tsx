@@ -1,20 +1,10 @@
-import { Icon } from "@nivo/ui"
+import { LandingPage } from "@/components/pages/LandingPage"
 
 /**
- * The seed route.
+ * The `/` route. It mounts the page and nothing else.
  *
- * It draws one leaf from the shared package on purpose: it is the smallest thing that proves the
- * workspace link, the Next transpile step and the Tailwind `@source` line all work. When this page
- * renders a sized glyph, the scaffold is sound and screens can be built on it.
- *
- * @returns The page.
+ * @returns The route.
  */
-const Page = () => (
-    <main className="flex min-h-dvh flex-col items-center justify-center gap-3">
-        <Icon props={{ name: "brand", role: "heading" }} />
-        <h1 className="text-2xl font-semibold">nivo</h1>
-        <p className="text-sm text-neutral-500">Trang giới thiệu sản phẩm.</p>
-    </main>
-)
+const LandingRoute = () => <LandingPage />
 
-export default Page
+export default LandingRoute

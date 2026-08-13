@@ -1,0 +1,3372 @@
+{
+  "version": 3,
+  "task": "app-provisioning-dashboard",
+  "planRecord": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning-dashboard\\plan-record.json",
+  "contextLock": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning-dashboard\\context-lock.preview.json",
+  "caseId": "case-console",
+  "selectedDirectionId": "direction-a",
+  "approvedRevision": "1.2",
+  "revisionHistory": [
+    {
+      "revision": "1.0",
+      "summary": "First executable candidate for direction-a: a fixed sidebar, the shipped resource list absorbed as the console home, a resource detail page with an operator-only danger zone, and the domains and billing sections.",
+      "retainedTraits": [
+        "the sealed anatomy of the shipped /provisioning list, unchanged"
+      ],
+      "rejectedTraits": [
+        "a component layout taking the routed body - LAYOUT-8 refuses `children` on one, and renaming the slot to `content` would satisfy only the lint",
+        "a count beside each sidebar section - NavLink has no count slot and nivo-backend has no count query",
+        "an invented machine size and an invented $0.00 - both are shown as unreadable"
+      ],
+      "reason": "built from the plan record's selected direction; no feedback pass yet"
+    },
+    {
+      "revision": "1.1",
+      "summary": "Coverage completed and the danger zone given weight. Three states that 1.0 could not evidence are now rendered, and the destructive actions stopped looking like ordinary ones.",
+      "affectedElements": [
+        "DangerZone",
+        "ResourceDetailPage heading and body",
+        "the state matrix"
+      ],
+      "retainedTraits": [
+        "every owner, contract, prop and word from 1.0 in the light desktop states that already existed"
+      ],
+      "rejectedTraits": [
+        "the danger zone drawn as an ordinary label-row-over-card - two presses that destroy data looked exactly as harmless as a save, with the warning trailing the heading on a shared baseline",
+        "a loading detail page with no title row at all - the whole screen jumped downward when the name arrived",
+        "`not-applicable` as a stand-in for `not yet photographed` - 1.0 used it for mobile, dark and the detail's own loading state, which are all real and all now rendered"
+      ],
+      "reason": "The owner asked for 1.1 rather than approving 1.0 with three unevidenced states. The coverage pass then found two defects that only a capture could have found.",
+      "visibleDifference": "The danger zone now sits on its own bounded ground with the warning on a full line of its own. Everything else in the light desktop states is unchanged."
+    },
+    {
+      "revision": "1.2",
+      "summary": "The target map declares what Apply actually does to the shipped route, and what becomes of the owner it replaces. Nothing on screen changed.",
+      "affectedElements": [
+        "integrationEdits",
+        "removals"
+      ],
+      "retainedTraits": [
+        "every owner, contract, prop, state, tone and word from 1.1 - all 45 captures are unchanged"
+      ],
+      "rejectedTraits": [
+        "a sealed record that leaves `apps/app/src/app/provisioning/page.tsx` undeclared - the route exists and its import changes from ProvisioningPage to ResourcesPage, which the Apply gate correctly reported as an undeclared substitution",
+        "shipping ResourcesPage beside ProvisioningPage - two page owners drawing the identical screen, with nothing saying which one the route uses"
+      ],
+      "reason": "verify_apply_materialization.mjs run before any write reported one substituted target. The Apply law is explicit that an undeclared edit returns to Preview rather than being written and explained afterwards - the third time this case pattern appeared, and each time it was the target map rather than the design.",
+      "visibleDifference": "None. Only the record's declarations changed."
+    }
+  ],
+  "deliveryMode": "batch",
+  "mode": "mixed",
+  "parityBaseline": {
+    "id": "shipped-provisioning-page",
+    "revision": "1.4",
+    "retained": "The resource list keeps titled-summary-filter-over-body-page, FleetRow, the kind filter, the counter strip and all four states. The console adds a sidebar around it and a detail route below it."
+  },
+  "workItems": [
+    {
+      "id": "layout-console-chrome",
+      "scope": "layout",
+      "target": "nivo-fe/apps/app"
+    },
+    {
+      "id": "page-resources",
+      "scope": "page",
+      "target": "nivo-fe/apps/app"
+    },
+    {
+      "id": "page-resource-detail",
+      "scope": "page",
+      "target": "nivo-fe/apps/app"
+    },
+    {
+      "id": "page-domains",
+      "scope": "page",
+      "target": "nivo-fe/apps/app"
+    },
+    {
+      "id": "page-billing",
+      "scope": "page",
+      "target": "nivo-fe/apps/app"
+    }
+  ],
+  "evidence": [
+    {
+      "source": "candidate build",
+      "claim": "next build --webpack exited 0; 13 routes prerendered as a static export."
+    },
+    {
+      "source": "candidate lint",
+      "claim": "npx eslint on the candidate source exited 0 under the full canon rule set."
+    },
+    {
+      "source": "rendered DOM",
+      "claim": "the console frame draws one nav and one main; the sidebar marks the current section from the path."
+    },
+    {
+      "source": "rendered DOM",
+      "claim": "the operator state renders the danger zone; the customer state does not render it at all."
+    },
+    {
+      "source": "rendered DOM",
+      "claim": "the suspended workspace shows chart version and AI spend as unreadable rather than as zero."
+    },
+    {
+      "source": "nivo-backend @ e822320",
+      "claim": "rebuild/reprovision/wipe are operator-only HTTP endpoints; every core GraphQL query is scoped to the viewer."
+    }
+  ],
+  "unknowns": [
+    "Whether the console home stays /provisioning or becomes /resources. The candidate targets the shipped route so the address a customer may hold does not change.",
+    "Where creditBurnUsd belongs. It is on the resource detail page and deliberately absent from billing, because an account-level total would silently exclude every agent workspace.",
+    "Whether the sidebar earns per-section counts before counts-by-status exists.",
+    "An operator reading another account's resource is not possible today - there is no operator READ surface at all - so the operator state renders that reader's OWN resource."
+  ],
+  "findings": [
+    {
+      "id": "fleet-row-overflows-at-mobile-width",
+      "severity": "real defect, and it is in the PARITY BASELINE rather than in anything this case added",
+      "summary": "`identity-kind-status-action-row` is `flex-row` with no `flex-wrap` and no responsive variant. At 390px the name column shrinks to min-w-0 but two badges plus a button still need roughly 200px, so the row runs past the right edge and the primary action is cut off.",
+      "evidence": "resources-populated-mobile.png. The sidebar stacks correctly, so the console frame is not the cause.",
+      "whyItWasNeverSeen": "The shipped /provisioning page carries the same row and was sealed at 1280x900 only. Nobody photographed it at a phone width, including this session during the provisioning case.",
+      "whyItIsNotFixedHere": "How the row behaves at 390px is a product decision - wrap the badges under the name, drop the kind badge, or scroll the row - and Preview does not take product decisions. It returns to Plan, and it affects a screen that is already in production."
+    },
+    {
+      "id": "heading-declares-a-resting-shape-and-renders-nothing",
+      "severity": "leaf defect, worked around and named",
+      "summary": "`Heading` sets resting classes when `isLoading` is true but renders `props.content ?? \"\"`. An empty element collapses, so a loading page had no title row at all and the whole screen jumped downward when the name arrived. `Text` solved the identical problem by rendering a non-breaking space; `Heading` was never given it.",
+      "evidence": "detail-loading.png before the workaround: the heading row was entirely absent.",
+      "whyItIsNotFixedHere": "packages/ui/src/leaves/Heading is outside this phase's write boundary. The page passes a non-breaking space while loading and says so at the call site; the leaf fix is recorded as a vocabulary proposal."
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "Preview's write boundary was widened to packages/ui/src/contracts/index.ts",
+      "tradeoff": "deviates from CONTEXT-LOCK-6, which makes Preview artifact-only; taken because Tree imports contractSpec statically, so a candidate-local registry would have meant copying Tree and proving that a facsimile renders",
+      "approvedBy": "user"
+    },
+    {
+      "decision": "the main landmark is opened by the frame rather than by each page",
+      "tradeoff": "a page can no longer choose to be something other than main; taken because the shipped /provisioning page has zero main elements today and a per-page rule is one a page eventually forgets"
+    },
+    {
+      "decision": "`$content` was replaced in label-row-over-card's body slot",
+      "tradeoff": "widens a shared contract; taken because $content is not a ContractKey, so the slot resolved to `never` and no caller could ever have filled it"
+    },
+    {
+      "decision": "the destructive presses carry no danger tone",
+      "tradeoff": "the warning sentence carries all the weight; taken because the Button leaf has no danger variant and inventing a class in a block is refused"
+    }
+  ],
+  "candidate": {
+    "root": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning-dashboard\\preview-lab\\candidate",
+    "framework": "Next.js 16.1.6 (webpack), React 19, @nivo/ui source via transpilePackages",
+    "buildCommand": "next build --webpack",
+    "build": {
+      "command": "next build --webpack",
+      "exitCode": 0,
+      "log": {
+        "path": "preview-lab/candidate/build.log",
+        "sha256": "0d5c97e5afedcf47e482c78d1dbddd24ecfa6a4d2bbd005419919a0ce4f03862"
+      }
+    },
+    "lint": {
+      "command": "npx eslint \"design-plans/app-provisioning-dashboard/preview-lab/candidate/src\"",
+      "exitCode": 0,
+      "log": {
+        "path": "preview-lab/candidate/lint.log",
+        "sha256": "19eaf43821a7660ec323a87c8457bf74823beb296c39f5e01aa8a683aa50f061"
+      }
+    },
+    "files": [
+      {
+        "path": "preview-lab/candidate/src/app/layout.tsx",
+        "targetPath": "apps/app/src/app/layout.tsx",
+        "note": "the framework boundary AND the console frame. It receives children and closes them into the `page` leaf immediately (LAYOUT-1); ConsoleNav is its sibling, never its parent.",
+        "sha256": "1e9ce3491899683e265bb0aa78f06a9146fc183ee4ff971b660526c69beb81ea"
+      },
+      {
+        "path": "preview-lab/candidate/src/components/layouts/ConsoleNav/index.tsx",
+        "targetPath": "apps/app/src/components/layouts/ConsoleNav/index.tsx",
+        "note": "the layout. Resolves which section is current from the path itself and takes nothing from the body (LAYOUT-2/3/8).",
+        "sha256": "09da2db388eb799b41baaa8e8b25a959cbb9314b4393c48e686c5d627b45767f"
+      },
+      {
+        "path": "preview-lab/candidate/src/components/pages/ResourcesPage/index.tsx",
+        "targetPath": "apps/app/src/components/pages/ResourcesPage/index.tsx",
+        "note": "the console home; the shipped /provisioning page absorbed with its sealed anatomy intact.",
+        "sha256": "783a885afe5a233687c19a3621d3a4c76a0e6fcc0fe783abec9a6c05558c07c8"
+      },
+      {
+        "path": "preview-lab/candidate/src/components/pages/ResourceDetailPage/index.tsx",
+        "targetPath": "apps/app/src/components/pages/ResourceDetailPage/index.tsx",
+        "note": "one resource. Reading order is failure, then instruction, then facts, then danger.",
+        "sha256": "2b9578962e13971d53727f18f7e0249315a8cee8900f95fddd1d5c3831514988"
+      },
+      {
+        "path": "preview-lab/candidate/src/components/pages/DomainsPage/index.tsx",
+        "targetPath": "apps/app/src/components/pages/DomainsPage/index.tsx",
+        "note": "domains, ordered by expiry, with days-remaining computed rather than read from a column nothing writes.",
+        "sha256": "0ce998360bc98fc45bc3bcad3076c03ebad61235f4bf22f4dec825b7f07030c4"
+      },
+      {
+        "path": "preview-lab/candidate/src/components/pages/BillingPage/index.tsx",
+        "targetPath": "apps/app/src/components/pages/BillingPage/index.tsx",
+        "note": "wallet then invoices.",
+        "sha256": "94ada48100254b4bd238d5f0f3dbcaafeb53c3029cdca8b101899870e10fcfa9"
+      },
+      {
+        "path": "preview-lab/candidate/src/components/blocks/resource/DangerZone/index.tsx",
+        "targetPath": "apps/app/src/components/blocks/resource/DangerZone/index.tsx",
+        "note": "connected half: resolves the four words and renders only its twin.",
+        "sha256": "5ea32f5bc5e46b996ecb5b386d286f285eec115f70591ee6780ad7135ce96e01"
+      },
+      {
+        "path": "preview-lab/candidate/src/components/blocks/resource/DangerZone/component.tsx",
+        "targetPath": "apps/app/src/components/blocks/resource/DangerZone/component.tsx",
+        "note": "drawing half. Renderable from a fixture, which is what the split protects.",
+        "sha256": "07714a85c361e685b7c29cf8994be2b1746001bebd8021346eb25df10fb7c9fa"
+      },
+      {
+        "path": "preview-lab/candidate/src/messages/console.vi.json",
+        "targetPath": "apps/app/src/messages/vi.json",
+        "note": "MERGE, not overwrite: the console, resources, resourceDetail, domains and billing namespaces are added to the app's existing catalogue. Their English twins go to en.json.",
+        "sha256": "1208289a86e899bcaf72e0490ecf5c5151e6bf4fb8dbb9e5651748feeb0ed98c"
+      },
+      {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "targetPath": "apps/app/src/resources/resource-detail.fixture.json",
+        "note": "stand-in until myExpertSite/myExpertSiteDeployment are wired. null values are REAL absences.",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      {
+        "path": "preview-lab/candidate/src/resources/console.fixture.json",
+        "targetPath": "apps/app/src/resources/console.fixture.json",
+        "note": "stand-in for myDomains, myWallet and myInvoices.",
+        "sha256": "af5b4a6ce241cfc10dc33f351ed2162af0ce500ccf3e479d88fb0869be8483ca"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/page.tsx",
+        "targetPath": "apps/app/src/app/provisioning/page.tsx",
+        "note": "the console home route. It mounts the page and nothing else.",
+        "sha256": "ade5420ca79932d92f80b111b5694adc8f32b0b01f311ef24227a2ce46723cf4"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/domains/page.tsx",
+        "targetPath": "apps/app/src/app/domains/page.tsx",
+        "note": "route entry.",
+        "sha256": "06bd596445c6339466efc7c19a15ba46c8533833dcd8a11d32293154bd60e805"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/billing/page.tsx",
+        "targetPath": "apps/app/src/app/billing/page.tsx",
+        "note": "route entry.",
+        "sha256": "5f7e082f7d78292471a49f8c3a1b462014e755f28d5c84a6ba840b05e490306c"
+      }
+    ],
+    "notPorted": [
+      {
+        "path": "preview-lab/candidate/src/app/empty/page.tsx",
+        "reason": "REVIEW ROUTE. Isolates a state at a stable URL; the app reaches it from data.",
+        "sha256": "5df3e18a0902ec29c7c3281de05809f92085aff51b02f220d15578430cdbffb6"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/loading/page.tsx",
+        "reason": "REVIEW ROUTE.",
+        "sha256": "9a6392bdc872302c5717416152d5e5e87711780d7041609172acb2b3da1ee19e"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/error/page.tsx",
+        "reason": "REVIEW ROUTE.",
+        "sha256": "17497f64e21c24badaeaf3d146a5aa1a7b4e9e70be67673384af49317386a35f"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/resource-running/page.tsx",
+        "reason": "REVIEW ROUTE. The app reaches a resource from a routed id.",
+        "sha256": "b0ff0a01902859354b400245511bfd325e51bd5785a4cd944f2167e621dbad4d"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/resource-failed/page.tsx",
+        "reason": "REVIEW ROUTE.",
+        "sha256": "36376b53076dcf09df457de9c982147e129b7a24435eab241f99db8450da9327"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/resource-awaiting-dns/page.tsx",
+        "reason": "REVIEW ROUTE.",
+        "sha256": "453d1965dcc78d3bd89d7509a0e08f7c040fa57de6a53ae1c587866d6057f656"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/resource-suspended/page.tsx",
+        "reason": "REVIEW ROUTE.",
+        "sha256": "af50f42f37a4b04db082060f3d50ea320c9100bbc76e06ac1c98c11dd588a28c"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/resource-operator/page.tsx",
+        "reason": "REVIEW ROUTE. Renders the operator persona, which the app decides from PlatformRole.",
+        "sha256": "f06b3abc6d69a0e29397eaac1d8ea8a9ca26dbb0e654551cb29a3868e6ac696d"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/domains-empty/page.tsx",
+        "reason": "REVIEW ROUTE.",
+        "sha256": "79b34ee4b0cde66117a9727f7cef393f4663d1a6ca12f286fce8a1e50b6c55a6"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/billing-empty/page.tsx",
+        "reason": "REVIEW ROUTE.",
+        "sha256": "553fa63ee01a64a05aa0537cbf607bce3f898d24ddf40f6659ad41c3d83b4b05"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/resource-loading/page.tsx",
+        "reason": "REVIEW ROUTE. The app enters this state from a query in flight, not from a URL.",
+        "sha256": "1b17b7da0f697e2663cd977d91a22e2422c277020414e75f71a3ea2fae50852e"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/resource-not-found/page.tsx",
+        "reason": "REVIEW ROUTE. The app enters this state from a routed id that names no resource this viewer holds.",
+        "sha256": "e2eac9ee8da04630b78164da41f52cd1fe85ec745b02c6e93de4fe7234317c90"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/providers.tsx",
+        "reason": "The app already has its providers. The candidate passes the catalogue explicitly because a static export has no request scope.",
+        "sha256": "be654df3beed8fca65d01c710474f0e0b156977bb16dd95961d06e54d62eb6ef"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/globals.css",
+        "reason": "The app already has it; only the @source depth differs.",
+        "sha256": "4da66efbfd115abfa52ecb57106e5b1ccfb497bd4588b719d2d3c625408349cb"
+      },
+      {
+        "path": "preview-lab/candidate/next.config.ts",
+        "reason": "MUST NOT BE PORTED. It carries output: \"export\", which would turn the running app into a static site.",
+        "sha256": "c490ade2993bfa3c6d417de6f1e9c95f2959e30a71069b4fd59dc7a00d378cc8"
+      },
+      {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "reason": "ALREADY SHIPPED at apps/app/src/resources/fleet.fixture.json by the provisioning case. Carried here so the console renders the same rows the sealed list did.",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      }
+    ]
+  },
+  "states": [
+    {
+      "stateId": "resources-populated",
+      "ownerId": "page-resources",
+      "route": "/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "populated",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/resources-populated.png",
+        "sha256": "587abd474b8048f906d7a113de7038b5060004dc6bf75432182aebc86f8823d9"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourcesPage > Tree titled-summary-filter-over-body-page",
+        "          ├── title-with-end-action > Heading + Button",
+        "          ├── stacked-stat-rows > StatRow x4",
+        "          ├── choice-tab-strip > ChoiceTabs",
+        "          └── SurfaceListCard fleet-resource-list > FleetRow xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-summary-filter-over-body-page",
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "ResourcesPage: { phase: \"populated\" | \"empty\" | \"loading\" | \"error\" }",
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }",
+        "StatRow: { icon, label, value? } + isLoading",
+        "ChoiceTabs: { label, selectedKey, tabs } on { select }"
+      ],
+      "tokens": [
+        "status tones come from FleetRow's STATUS_TONE map and are unchanged from the sealed provisioning page",
+        "no brand palette is written: nivo has no approved colour, so every surface is HeroUI's default token layer"
+      ],
+      "coverage": "rendered",
+      "runtimeProof": {
+        "candidateDigest": "3dfd10976c249fe3befadb7b1d262126d56450b139c145e5590f7b7067ea6e13",
+        "stateId": "resources-populated",
+        "runtimeFingerprint": "909eab383d167fd0a8fed4dc0695a793f10b31245e2f4eb9923ab9c79da63c2b",
+        "next": "16.1.6",
+        "buildId": "cqcARYcdvBxlmGYH9PjCX"
+      }
+    },
+    {
+      "stateId": "resources-empty",
+      "ownerId": "page-resources",
+      "route": "/empty.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "empty",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/resources-empty.png",
+        "sha256": "fda772dfda276b7bfef9f5a5ad85f4d711ed93177ef1d68065a92a50a1c9a1c4"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourcesPage > Tree titled-summary-filter-over-body-page",
+        "          ├── title-with-end-action > Heading + Button",
+        "          ├── stacked-stat-rows > StatRow x4",
+        "          ├── choice-tab-strip > ChoiceTabs",
+        "          └── SurfaceListCard fleet-resource-list > FleetRow xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-summary-filter-over-body-page",
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "ResourcesPage: { phase: \"populated\" | \"empty\" | \"loading\" | \"error\" }",
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }",
+        "StatRow: { icon, label, value? } + isLoading",
+        "ChoiceTabs: { label, selectedKey, tabs } on { select }"
+      ],
+      "tokens": [
+        "status tones come from FleetRow's STATUS_TONE map and are unchanged from the sealed provisioning page",
+        "no brand palette is written: nivo has no approved colour, so every surface is HeroUI's default token layer"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "resources-loading",
+      "ownerId": "page-resources",
+      "route": "/loading.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "loading",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/resources-loading.png",
+        "sha256": "0945b9c2dca53f7e6628b653072f7f1275a30a39a8e9c86a5498b617c5e86a18"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourcesPage > Tree titled-summary-filter-over-body-page",
+        "          ├── title-with-end-action > Heading + Button",
+        "          ├── stacked-stat-rows > StatRow x4",
+        "          ├── choice-tab-strip > ChoiceTabs",
+        "          └── SurfaceListCard fleet-resource-list > FleetRow xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-summary-filter-over-body-page",
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "ResourcesPage: { phase: \"populated\" | \"empty\" | \"loading\" | \"error\" }",
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }",
+        "StatRow: { icon, label, value? } + isLoading",
+        "ChoiceTabs: { label, selectedKey, tabs } on { select }"
+      ],
+      "tokens": [
+        "status tones come from FleetRow's STATUS_TONE map and are unchanged from the sealed provisioning page",
+        "no brand palette is written: nivo has no approved colour, so every surface is HeroUI's default token layer"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "resources-error",
+      "ownerId": "page-resources",
+      "route": "/error.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "error",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/resources-error.png",
+        "sha256": "ca8e6d3c1521d44f2ffa24804ddbea0ca28e12c930229ad10942cdd4475b8db0"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourcesPage > Tree titled-summary-filter-over-body-page",
+        "          ├── title-with-end-action > Heading + Button",
+        "          ├── stacked-stat-rows > StatRow x4",
+        "          ├── choice-tab-strip > ChoiceTabs",
+        "          └── SurfaceListCard fleet-resource-list > FleetRow xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-summary-filter-over-body-page",
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "ResourcesPage: { phase: \"populated\" | \"empty\" | \"loading\" | \"error\" }",
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }",
+        "StatRow: { icon, label, value? } + isLoading",
+        "ChoiceTabs: { label, selectedKey, tabs } on { select }"
+      ],
+      "tokens": [
+        "status tones come from FleetRow's STATUS_TONE map and are unchanged from the sealed provisioning page",
+        "no brand palette is written: nivo has no approved colour, so every surface is HeroUI's default token layer"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-running",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-running.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "site running, viewer is customer",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-running.png",
+        "sha256": "7eda552b2ae3a44cc4166f9cafd3143a0d0aeb25d0e58461320770b9156097cf"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-failed",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-failed.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "site provisioning failed",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-failed.png",
+        "sha256": "1738a61496e45c270b2b7bda9c5d99bf3a59d8abe05e8f63199dd60966fbab5f"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-awaiting-dns",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-awaiting-dns.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "site awaiting DNS",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-awaiting-dns.png",
+        "sha256": "c2daf0dd466f327c4a8517d18b384dcff56beab05e0cfa685688f107fb1a3038"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-suspended",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-suspended.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "workspace suspended, AI spend unmeasured",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-suspended.png",
+        "sha256": "839de69e807777e53e9bef9c6cd893c24f46204b2debfea85ced49cdd5024e68"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-operator",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-operator.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "operator (platform role)",
+      "situation": "viewer is operator, danger zone present",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-operator.png",
+        "sha256": "d47a6e2a3b5366e4c87d4f55788acc350adaf060886572a64b55e6c98f95d907"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-loading",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-loading.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "resource in flight: labels known, values resting",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-loading.png",
+        "sha256": "7b90a010a631e230d8b0df453da9a8496063917e604850ab94a537ee64fb1071"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-not-found",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-not-found.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "routed id names no resource this viewer holds",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-not-found.png",
+        "sha256": "d7c3cc4ffe269f83bee6d37fe296f75a9984673059130390633d65c444eab3a7"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "domains-populated",
+      "ownerId": "page-domains",
+      "route": "/domains.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "populated with one expiring",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/console.fixture.json",
+        "sha256": "af5b4a6ce241cfc10dc33f351ed2162af0ce500ccf3e479d88fb0869be8483ca"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/domains-populated.png",
+        "sha256": "27684f846f8926d6448b75e6662b93268867c61ac482f9a1ee1f1c1cdfcc80d3"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── DomainsPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button",
+        "          └── label-row-over-card > labelled-fact-stack > label-value-row xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "title-with-baseline-fact",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row"
+      ],
+      "props": [
+        "DomainsPage: { phase: \"populated\" | \"empty\" }"
+      ],
+      "tokens": [
+        "expiry and renewal habit read as one muted fact, because either alone is misleading"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "domains-empty",
+      "ownerId": "page-domains",
+      "route": "/domains-empty.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "empty",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/console.fixture.json",
+        "sha256": "af5b4a6ce241cfc10dc33f351ed2162af0ce500ccf3e479d88fb0869be8483ca"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/domains-empty.png",
+        "sha256": "9f96b5608eeb052a8d5471ba12aee35de587a2dd5daa51c3d6094875beb760cf"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── DomainsPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button",
+        "          └── label-row-over-card > labelled-fact-stack > label-value-row xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "title-with-baseline-fact",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row"
+      ],
+      "props": [
+        "DomainsPage: { phase: \"populated\" | \"empty\" }"
+      ],
+      "tokens": [
+        "expiry and renewal habit read as one muted fact, because either alone is misleading"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "billing-populated",
+      "ownerId": "page-billing",
+      "route": "/billing.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "populated with one unpaid",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/console.fixture.json",
+        "sha256": "af5b4a6ce241cfc10dc33f351ed2162af0ce500ccf3e479d88fb0869be8483ca"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/billing-populated.png",
+        "sha256": "2c21d506fc858d6d052272e1623bd384d125316b48fda697174b50ec975304a7"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── BillingPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading",
+        "          └── stacked-sections > [wallet label-row-over-card, invoices label-row-over-card]"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "title-with-baseline-fact",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row"
+      ],
+      "props": [
+        "BillingPage: { phase: \"populated\" | \"empty\" }"
+      ],
+      "tokens": [
+        "the unpaid state is said in words: no badge exists in this shape and the Text leaf has no danger tone"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "billing-empty",
+      "ownerId": "page-billing",
+      "route": "/billing-empty.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "empty",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/console.fixture.json",
+        "sha256": "af5b4a6ce241cfc10dc33f351ed2162af0ce500ccf3e479d88fb0869be8483ca"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/billing-empty.png",
+        "sha256": "0d373bfefe00c271e6170698d3c5d0418452c2df63bd7a774268e05703993ffa"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── BillingPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading",
+        "          └── stacked-sections > [wallet label-row-over-card, invoices label-row-over-card]"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "title-with-baseline-fact",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row"
+      ],
+      "props": [
+        "BillingPage: { phase: \"populated\" | \"empty\" }"
+      ],
+      "tokens": [
+        "the unpaid state is said in words: no badge exists in this shape and the Text leaf has no danger tone"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "resources-populated-mobile",
+      "ownerId": "page-resources",
+      "route": "/",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "populated (mobile)",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/resources-populated-mobile.png",
+        "sha256": "06ffb2150324045c06817e8537354b0cb374476506645a30437661b364df112f"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourcesPage > Tree titled-summary-filter-over-body-page",
+        "          ├── title-with-end-action > Heading + Button",
+        "          ├── stacked-stat-rows > StatRow x4",
+        "          ├── choice-tab-strip > ChoiceTabs",
+        "          └── SurfaceListCard fleet-resource-list > FleetRow xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-summary-filter-over-body-page",
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "ResourcesPage: { phase: \"populated\" | \"empty\" | \"loading\" | \"error\" }",
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }",
+        "StatRow: { icon, label, value? } + isLoading",
+        "ChoiceTabs: { label, selectedKey, tabs } on { select }"
+      ],
+      "tokens": [
+        "status tones come from FleetRow's STATUS_TONE map and are unchanged from the sealed provisioning page",
+        "no brand palette is written: nivo has no approved colour, so every surface is HeroUI's default token layer"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "resources-empty-mobile",
+      "ownerId": "page-resources",
+      "route": "/empty.html",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "empty (mobile)",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/resources-empty-mobile.png",
+        "sha256": "f42625cdcbb88aea23794a5eb6230dac18f3e72dab6049a09c9283e72713996e"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourcesPage > Tree titled-summary-filter-over-body-page",
+        "          ├── title-with-end-action > Heading + Button",
+        "          ├── stacked-stat-rows > StatRow x4",
+        "          ├── choice-tab-strip > ChoiceTabs",
+        "          └── SurfaceListCard fleet-resource-list > FleetRow xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-summary-filter-over-body-page",
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "ResourcesPage: { phase: \"populated\" | \"empty\" | \"loading\" | \"error\" }",
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }",
+        "StatRow: { icon, label, value? } + isLoading",
+        "ChoiceTabs: { label, selectedKey, tabs } on { select }"
+      ],
+      "tokens": [
+        "status tones come from FleetRow's STATUS_TONE map and are unchanged from the sealed provisioning page",
+        "no brand palette is written: nivo has no approved colour, so every surface is HeroUI's default token layer"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "resources-loading-mobile",
+      "ownerId": "page-resources",
+      "route": "/loading.html",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "loading (mobile)",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/resources-loading-mobile.png",
+        "sha256": "70dbc8707efe7fcd623d157d62155031e99586ccc549d5b77cec036def52f7b5"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourcesPage > Tree titled-summary-filter-over-body-page",
+        "          ├── title-with-end-action > Heading + Button",
+        "          ├── stacked-stat-rows > StatRow x4",
+        "          ├── choice-tab-strip > ChoiceTabs",
+        "          └── SurfaceListCard fleet-resource-list > FleetRow xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-summary-filter-over-body-page",
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "ResourcesPage: { phase: \"populated\" | \"empty\" | \"loading\" | \"error\" }",
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }",
+        "StatRow: { icon, label, value? } + isLoading",
+        "ChoiceTabs: { label, selectedKey, tabs } on { select }"
+      ],
+      "tokens": [
+        "status tones come from FleetRow's STATUS_TONE map and are unchanged from the sealed provisioning page",
+        "no brand palette is written: nivo has no approved colour, so every surface is HeroUI's default token layer"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "resources-error-mobile",
+      "ownerId": "page-resources",
+      "route": "/error.html",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "error (mobile)",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/resources-error-mobile.png",
+        "sha256": "aacb9aca64d26fb3c4c058d9b1d948c2a465ce67542a8eb4f50bcdf60b2f3fd2"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourcesPage > Tree titled-summary-filter-over-body-page",
+        "          ├── title-with-end-action > Heading + Button",
+        "          ├── stacked-stat-rows > StatRow x4",
+        "          ├── choice-tab-strip > ChoiceTabs",
+        "          └── SurfaceListCard fleet-resource-list > FleetRow xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-summary-filter-over-body-page",
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "ResourcesPage: { phase: \"populated\" | \"empty\" | \"loading\" | \"error\" }",
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }",
+        "StatRow: { icon, label, value? } + isLoading",
+        "ChoiceTabs: { label, selectedKey, tabs } on { select }"
+      ],
+      "tokens": [
+        "status tones come from FleetRow's STATUS_TONE map and are unchanged from the sealed provisioning page",
+        "no brand palette is written: nivo has no approved colour, so every surface is HeroUI's default token layer"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-running-mobile",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-running.html",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "site running, viewer is customer (mobile)",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-running-mobile.png",
+        "sha256": "75484725c4d49252326c81ad132b5a229a3c5b25de2996ea8004245f513a8158"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-failed-mobile",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-failed.html",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "site provisioning failed (mobile)",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-failed-mobile.png",
+        "sha256": "dcca3604734c347f83894acdc5523f29ac0185d0b2c2a36863478ad720d117e6"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-awaiting-dns-mobile",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-awaiting-dns.html",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "site awaiting DNS (mobile)",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-awaiting-dns-mobile.png",
+        "sha256": "c69cc05e8eb790a0ec85d7dede4004718bef78de4bde200d7b30baf68bf4b16d"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-suspended-mobile",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-suspended.html",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "workspace suspended, AI spend unmeasured (mobile)",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-suspended-mobile.png",
+        "sha256": "7bff7c6a941eaaf241f2d3f09f33caf5b12912b3b02fb8294512ce7849f07d30"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-operator-mobile",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-operator.html",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "operator (platform role)",
+      "situation": "viewer is operator, danger zone present (mobile)",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-operator-mobile.png",
+        "sha256": "4cfe5aac3b2ff6119a97698895ccc50906403248420e5d43fb1e29467f40cd3d"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-loading-mobile",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-loading.html",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "resource in flight: labels known, values resting (mobile)",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-loading-mobile.png",
+        "sha256": "08d78d3ad41decfc86032323033842065cfbef7a173cb857587b0fa1a3877d1c"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-not-found-mobile",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-not-found.html",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "routed id names no resource this viewer holds (mobile)",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-not-found-mobile.png",
+        "sha256": "7d229c19a3ac73b2e0c527f87524b23e24c7a817a3d276d0149521cd7f1e2fc3"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "domains-populated-mobile",
+      "ownerId": "page-domains",
+      "route": "/domains.html",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "populated with one expiring (mobile)",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/console.fixture.json",
+        "sha256": "af5b4a6ce241cfc10dc33f351ed2162af0ce500ccf3e479d88fb0869be8483ca"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/domains-populated-mobile.png",
+        "sha256": "34ffc738f8cc4454a04532986734a1d4a9380733adb78c64a6d494343687a37f"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── DomainsPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button",
+        "          └── label-row-over-card > labelled-fact-stack > label-value-row xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "title-with-baseline-fact",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row"
+      ],
+      "props": [
+        "DomainsPage: { phase: \"populated\" | \"empty\" }"
+      ],
+      "tokens": [
+        "expiry and renewal habit read as one muted fact, because either alone is misleading"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "domains-empty-mobile",
+      "ownerId": "page-domains",
+      "route": "/domains-empty.html",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "empty (mobile)",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/console.fixture.json",
+        "sha256": "af5b4a6ce241cfc10dc33f351ed2162af0ce500ccf3e479d88fb0869be8483ca"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/domains-empty-mobile.png",
+        "sha256": "cb41820191bd5ff660151278ddc54b30ebfe1a18c413bf6151f22f9686293d86"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── DomainsPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button",
+        "          └── label-row-over-card > labelled-fact-stack > label-value-row xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "title-with-baseline-fact",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row"
+      ],
+      "props": [
+        "DomainsPage: { phase: \"populated\" | \"empty\" }"
+      ],
+      "tokens": [
+        "expiry and renewal habit read as one muted fact, because either alone is misleading"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "billing-populated-mobile",
+      "ownerId": "page-billing",
+      "route": "/billing.html",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "populated with one unpaid (mobile)",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/console.fixture.json",
+        "sha256": "af5b4a6ce241cfc10dc33f351ed2162af0ce500ccf3e479d88fb0869be8483ca"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/billing-populated-mobile.png",
+        "sha256": "616508c0a952b8590ca82003ebd4022a6f40204a33d816c86b6a40cbd2987f4d"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── BillingPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading",
+        "          └── stacked-sections > [wallet label-row-over-card, invoices label-row-over-card]"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "title-with-baseline-fact",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row"
+      ],
+      "props": [
+        "BillingPage: { phase: \"populated\" | \"empty\" }"
+      ],
+      "tokens": [
+        "the unpaid state is said in words: no badge exists in this shape and the Text leaf has no danger tone"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "billing-empty-mobile",
+      "ownerId": "page-billing",
+      "route": "/billing-empty.html",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "empty (mobile)",
+      "fromBuild": "cqcARYcdvBxlmGYH9PjCX",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/console.fixture.json",
+        "sha256": "af5b4a6ce241cfc10dc33f351ed2162af0ce500ccf3e479d88fb0869be8483ca"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/billing-empty-mobile.png",
+        "sha256": "0438002fade5d5013009c65e5ae45531b32ad6475a19e3dff9aacbbc8a18d1c4"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── BillingPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading",
+        "          └── stacked-sections > [wallet label-row-over-card, invoices label-row-over-card]"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "title-with-baseline-fact",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row"
+      ],
+      "props": [
+        "BillingPage: { phase: \"populated\" | \"empty\" }"
+      ],
+      "tokens": [
+        "the unpaid state is said in words: no badge exists in this shape and the Text leaf has no danger tone"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "resources-populated-dark",
+      "ownerId": "page-resources",
+      "route": "/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "populated (dark)",
+      "fromBuild": "c8duZ2_EbTdjXbbijdsqg",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/resources-populated-dark.png",
+        "sha256": "371d2e2292be2d2d3600f34c8b875f244351da4168fe56e96aaa6d98988e97a1"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourcesPage > Tree titled-summary-filter-over-body-page",
+        "          ├── title-with-end-action > Heading + Button",
+        "          ├── stacked-stat-rows > StatRow x4",
+        "          ├── choice-tab-strip > ChoiceTabs",
+        "          └── SurfaceListCard fleet-resource-list > FleetRow xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-summary-filter-over-body-page",
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "ResourcesPage: { phase: \"populated\" | \"empty\" | \"loading\" | \"error\" }",
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }",
+        "StatRow: { icon, label, value? } + isLoading",
+        "ChoiceTabs: { label, selectedKey, tabs } on { select }"
+      ],
+      "tokens": [
+        "status tones come from FleetRow's STATUS_TONE map and are unchanged from the sealed provisioning page",
+        "no brand palette is written: nivo has no approved colour, so every surface is HeroUI's default token layer"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "resources-empty-dark",
+      "ownerId": "page-resources",
+      "route": "/empty.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "empty (dark)",
+      "fromBuild": "c8duZ2_EbTdjXbbijdsqg",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/resources-empty-dark.png",
+        "sha256": "3d7935fb8c0498116ff59d5aa994a6b2735bd489e2a5f8bf8ecb341e6a129513"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourcesPage > Tree titled-summary-filter-over-body-page",
+        "          ├── title-with-end-action > Heading + Button",
+        "          ├── stacked-stat-rows > StatRow x4",
+        "          ├── choice-tab-strip > ChoiceTabs",
+        "          └── SurfaceListCard fleet-resource-list > FleetRow xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-summary-filter-over-body-page",
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "ResourcesPage: { phase: \"populated\" | \"empty\" | \"loading\" | \"error\" }",
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }",
+        "StatRow: { icon, label, value? } + isLoading",
+        "ChoiceTabs: { label, selectedKey, tabs } on { select }"
+      ],
+      "tokens": [
+        "status tones come from FleetRow's STATUS_TONE map and are unchanged from the sealed provisioning page",
+        "no brand palette is written: nivo has no approved colour, so every surface is HeroUI's default token layer"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "resources-loading-dark",
+      "ownerId": "page-resources",
+      "route": "/loading.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "loading (dark)",
+      "fromBuild": "c8duZ2_EbTdjXbbijdsqg",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/resources-loading-dark.png",
+        "sha256": "5a8f70b5e8b0c3b00e194f487511b9903a51ce015d6295d15a00baa14f4f53cd"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourcesPage > Tree titled-summary-filter-over-body-page",
+        "          ├── title-with-end-action > Heading + Button",
+        "          ├── stacked-stat-rows > StatRow x4",
+        "          ├── choice-tab-strip > ChoiceTabs",
+        "          └── SurfaceListCard fleet-resource-list > FleetRow xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-summary-filter-over-body-page",
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "ResourcesPage: { phase: \"populated\" | \"empty\" | \"loading\" | \"error\" }",
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }",
+        "StatRow: { icon, label, value? } + isLoading",
+        "ChoiceTabs: { label, selectedKey, tabs } on { select }"
+      ],
+      "tokens": [
+        "status tones come from FleetRow's STATUS_TONE map and are unchanged from the sealed provisioning page",
+        "no brand palette is written: nivo has no approved colour, so every surface is HeroUI's default token layer"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "resources-error-dark",
+      "ownerId": "page-resources",
+      "route": "/error.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "error (dark)",
+      "fromBuild": "c8duZ2_EbTdjXbbijdsqg",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/resources-error-dark.png",
+        "sha256": "97bf873661433fe82992d99d8058423f58c1e9cee516475c9ee530710ceeaad4"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourcesPage > Tree titled-summary-filter-over-body-page",
+        "          ├── title-with-end-action > Heading + Button",
+        "          ├── stacked-stat-rows > StatRow x4",
+        "          ├── choice-tab-strip > ChoiceTabs",
+        "          └── SurfaceListCard fleet-resource-list > FleetRow xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-summary-filter-over-body-page",
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "ResourcesPage: { phase: \"populated\" | \"empty\" | \"loading\" | \"error\" }",
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }",
+        "StatRow: { icon, label, value? } + isLoading",
+        "ChoiceTabs: { label, selectedKey, tabs } on { select }"
+      ],
+      "tokens": [
+        "status tones come from FleetRow's STATUS_TONE map and are unchanged from the sealed provisioning page",
+        "no brand palette is written: nivo has no approved colour, so every surface is HeroUI's default token layer"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-running-dark",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-running.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "site running, viewer is customer (dark)",
+      "fromBuild": "c8duZ2_EbTdjXbbijdsqg",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-running-dark.png",
+        "sha256": "97ab54c7fa5218f8423c94ce7223c05b852adbef490994432e186455ce2c1d0b"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-failed-dark",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-failed.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "site provisioning failed (dark)",
+      "fromBuild": "c8duZ2_EbTdjXbbijdsqg",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-failed-dark.png",
+        "sha256": "3432080cfd569c91075033dc7524d128b1e39d1d331dec685e8142790a2c595f"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-awaiting-dns-dark",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-awaiting-dns.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "site awaiting DNS (dark)",
+      "fromBuild": "c8duZ2_EbTdjXbbijdsqg",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-awaiting-dns-dark.png",
+        "sha256": "03584c03e8426e3b707169333b24c31689433e429a668d1d45e95dbac449dfe5"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-suspended-dark",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-suspended.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "workspace suspended, AI spend unmeasured (dark)",
+      "fromBuild": "c8duZ2_EbTdjXbbijdsqg",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-suspended-dark.png",
+        "sha256": "4ed1e8541754dbe3ffa077224e356ffac2f6408735ca799996e79919cbcbac26"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-operator-dark",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-operator.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "operator (platform role)",
+      "situation": "viewer is operator, danger zone present (dark)",
+      "fromBuild": "c8duZ2_EbTdjXbbijdsqg",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-operator-dark.png",
+        "sha256": "7dfd1cc0d7f9fb52d53b9308882c578bb11ca985ec45448e965cd67859d82b67"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-loading-dark",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-loading.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "resource in flight: labels known, values resting (dark)",
+      "fromBuild": "c8duZ2_EbTdjXbbijdsqg",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-loading-dark.png",
+        "sha256": "243e3df915baf6bb52660c243fd892d895fd6416885b64b4ed88ecbf61613dac"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "detail-not-found-dark",
+      "ownerId": "page-resource-detail",
+      "route": "/resource-not-found.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "routed id names no resource this viewer holds (dark)",
+      "fromBuild": "c8duZ2_EbTdjXbbijdsqg",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/resource-detail.fixture.json",
+        "sha256": "f78802629ba1a29fc164b033993f1dbc71adb986dd6609a0e1ec3866f47a780e"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/detail-not-found-dark.png",
+        "sha256": "dd7fb731858e1efc234da81829c5dbcb3abb96e06a5b7ba656e2702cd21f4d9e"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── ResourceDetailPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button (absent while loading)",
+        "          └── stacked-sections",
+        "               ├── label-row-over-card 'why it failed' (failed only)",
+        "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
+        "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
+        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row",
+        "warned-action-panel",
+        "title-with-baseline-fact",
+        "inline-action-run"
+      ],
+      "props": [
+        "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
+        "DangerZone: { isOperator: boolean }",
+        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
+      ],
+      "tokens": [
+        "the danger zone takes NO danger tone: the Button leaf has no such variant, so weight comes from warned-action-panel's own ground and a full-line warning",
+        "resting values use the Text leaf's own resting classes; labels stay at full opacity because they are known before the query answers"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "domains-populated-dark",
+      "ownerId": "page-domains",
+      "route": "/domains.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "populated with one expiring (dark)",
+      "fromBuild": "c8duZ2_EbTdjXbbijdsqg",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/console.fixture.json",
+        "sha256": "af5b4a6ce241cfc10dc33f351ed2162af0ce500ccf3e479d88fb0869be8483ca"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/domains-populated-dark.png",
+        "sha256": "26f0516bb2ff96cf7cdbd6b927af73628efa8aa679e03d2c6d946dd5afe84b07"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── DomainsPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button",
+        "          └── label-row-over-card > labelled-fact-stack > label-value-row xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "title-with-baseline-fact",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row"
+      ],
+      "props": [
+        "DomainsPage: { phase: \"populated\" | \"empty\" }"
+      ],
+      "tokens": [
+        "expiry and renewal habit read as one muted fact, because either alone is misleading"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "domains-empty-dark",
+      "ownerId": "page-domains",
+      "route": "/domains-empty.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "empty (dark)",
+      "fromBuild": "c8duZ2_EbTdjXbbijdsqg",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/console.fixture.json",
+        "sha256": "af5b4a6ce241cfc10dc33f351ed2162af0ce500ccf3e479d88fb0869be8483ca"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/domains-empty-dark.png",
+        "sha256": "d723182a5f8dd3032db13b724caf51d807ce8728becde48b5d93c90e10c367a2"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── DomainsPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading + Button",
+        "          └── label-row-over-card > labelled-fact-stack > label-value-row xN"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "title-with-baseline-fact",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row"
+      ],
+      "props": [
+        "DomainsPage: { phase: \"populated\" | \"empty\" }"
+      ],
+      "tokens": [
+        "expiry and renewal habit read as one muted fact, because either alone is misleading"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "billing-populated-dark",
+      "ownerId": "page-billing",
+      "route": "/billing.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "populated with one unpaid (dark)",
+      "fromBuild": "c8duZ2_EbTdjXbbijdsqg",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/console.fixture.json",
+        "sha256": "af5b4a6ce241cfc10dc33f351ed2162af0ce500ccf3e479d88fb0869be8483ca"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/billing-populated-dark.png",
+        "sha256": "d2dab0a948045806a38dfd983cc909018e105a801498192c3dc9a6ee2ba4d0ef"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── BillingPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading",
+        "          └── stacked-sections > [wallet label-row-over-card, invoices label-row-over-card]"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "title-with-baseline-fact",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row"
+      ],
+      "props": [
+        "BillingPage: { phase: \"populated\" | \"empty\" }"
+      ],
+      "tokens": [
+        "the unpaid state is said in words: no badge exists in this shape and the Text leaf has no danger tone"
+      ],
+      "coverage": "rendered"
+    },
+    {
+      "stateId": "billing-empty-dark",
+      "ownerId": "page-billing",
+      "route": "/billing-empty.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "dark",
+      "authPersona": "owner (expert, signed in)",
+      "situation": "empty (dark)",
+      "fromBuild": "c8duZ2_EbTdjXbbijdsqg",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/console.fixture.json",
+        "sha256": "af5b4a6ce241cfc10dc33f351ed2162af0ce500ccf3e479d88fb0869be8483ca"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/billing-empty-dark.png",
+        "sha256": "1cb247ad9f045a7177a448e50facf2cd0888c53eb23bfbe051055f94b23edfb6"
+      },
+      "componentTree": [
+        "layout.tsx > Tree sidebar-then-body-app",
+        "├── ConsoleNav > Tree sidebar-nav-cluster > Heading + NavLink x3",
+        "└── Tree console-body-main (host main) > page leaf",
+        "     └── BillingPage > Tree titled-body",
+        "          ├── title-with-end-action > Heading",
+        "          └── stacked-sections > [wallet label-row-over-card, invoices label-row-over-card]"
+      ],
+      "contracts": [
+        "sidebar-then-body-app",
+        "sidebar-nav-cluster",
+        "console-body-main",
+        "titled-body",
+        "title-with-end-action",
+        "title-with-baseline-fact",
+        "stacked-sections",
+        "label-row-over-card",
+        "labelled-fact-stack",
+        "label-value-row"
+      ],
+      "props": [
+        "BillingPage: { phase: \"populated\" | \"empty\" }"
+      ],
+      "tokens": [
+        "the unpaid state is said in words: no badge exists in this shape and the Text leaf has no danger tone"
+      ],
+      "coverage": "rendered"
+    }
+  ],
+  "integrationEdits": [
+    {
+      "targetPath": "apps/app/src/components/pages/ResourcesPage/index.tsx",
+      "reason": "the candidate reaches StatRow, FleetRow and its fixture by relative path because it sits outside the app; in the app they become @nivo/ui/composites/StatRow and @/ aliases."
+    },
+    {
+      "targetPath": "apps/app/src/components/pages/ResourceDetailPage/index.tsx",
+      "reason": "the fixture import becomes an @/ alias."
+    },
+    {
+      "targetPath": "apps/app/src/components/pages/DomainsPage/index.tsx",
+      "reason": "the fixture import becomes an @/ alias."
+    },
+    {
+      "targetPath": "apps/app/src/components/pages/BillingPage/index.tsx",
+      "reason": "the fixture import becomes an @/ alias."
+    },
+    {
+      "targetPath": "apps/app/src/app/layout.tsx",
+      "reason": "the catalogue import becomes the app's own; the app resolves locale, messages and timeZone through getLocale/getMessages/getTimeZone rather than passing a static export's explicit copy."
+    },
+    {
+      "targetPath": "apps/app/src/messages/vi.json",
+      "reason": "MERGE of five namespaces into the existing catalogue, not a replacement."
+    },
+    {
+      "targetPath": "apps/app/src/app/provisioning/page.tsx",
+      "reason": "the route already exists, shipped by the provisioning case. Its ONE import changes from ProvisioningPage to ResourcesPage, which is the rename this case makes; it still mounts one page and draws nothing."
+    }
+  ],
+  "removals": [
+    {
+      "path": "apps/app/src/components/pages/ProvisioningPage/index.tsx",
+      "reason": "RENAMED, not deleted work. ResourcesPage is this file with its owner name matched to the console section it now lives under, and its sealed anatomy is unchanged - the parity baseline is retained byte for byte in everything that renders. Leaving both would put two page owners in the tree drawing the identical screen, with only the route saying which one is real.",
+      "replacedBy": "apps/app/src/components/pages/ResourcesPage/index.tsx"
+    }
+  ],
+  "stateCoverage": [
+    {
+      "ownerId": "page-resources",
+      "state": "resources-populated",
+      "coverage": "rendered",
+      "scenarioId": "resources-populated"
+    },
+    {
+      "ownerId": "page-resources",
+      "state": "resources-populated (mobile)",
+      "coverage": "rendered",
+      "scenarioId": "resources-populated-mobile"
+    },
+    {
+      "ownerId": "page-resources",
+      "state": "resources-populated (dark)",
+      "coverage": "rendered",
+      "scenarioId": "resources-populated-dark"
+    },
+    {
+      "ownerId": "page-resources",
+      "state": "resources-empty",
+      "coverage": "rendered",
+      "scenarioId": "resources-empty"
+    },
+    {
+      "ownerId": "page-resources",
+      "state": "resources-empty (mobile)",
+      "coverage": "rendered",
+      "scenarioId": "resources-empty-mobile"
+    },
+    {
+      "ownerId": "page-resources",
+      "state": "resources-empty (dark)",
+      "coverage": "rendered",
+      "scenarioId": "resources-empty-dark"
+    },
+    {
+      "ownerId": "page-resources",
+      "state": "resources-loading",
+      "coverage": "rendered",
+      "scenarioId": "resources-loading"
+    },
+    {
+      "ownerId": "page-resources",
+      "state": "resources-loading (mobile)",
+      "coverage": "rendered",
+      "scenarioId": "resources-loading-mobile"
+    },
+    {
+      "ownerId": "page-resources",
+      "state": "resources-loading (dark)",
+      "coverage": "rendered",
+      "scenarioId": "resources-loading-dark"
+    },
+    {
+      "ownerId": "page-resources",
+      "state": "resources-error",
+      "coverage": "rendered",
+      "scenarioId": "resources-error"
+    },
+    {
+      "ownerId": "page-resources",
+      "state": "resources-error (mobile)",
+      "coverage": "rendered",
+      "scenarioId": "resources-error-mobile"
+    },
+    {
+      "ownerId": "page-resources",
+      "state": "resources-error (dark)",
+      "coverage": "rendered",
+      "scenarioId": "resources-error-dark"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-running",
+      "coverage": "rendered",
+      "scenarioId": "detail-running"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-running (mobile)",
+      "coverage": "rendered",
+      "scenarioId": "detail-running-mobile"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-running (dark)",
+      "coverage": "rendered",
+      "scenarioId": "detail-running-dark"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-failed",
+      "coverage": "rendered",
+      "scenarioId": "detail-failed"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-failed (mobile)",
+      "coverage": "rendered",
+      "scenarioId": "detail-failed-mobile"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-failed (dark)",
+      "coverage": "rendered",
+      "scenarioId": "detail-failed-dark"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-awaiting-dns",
+      "coverage": "rendered",
+      "scenarioId": "detail-awaiting-dns"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-awaiting-dns (mobile)",
+      "coverage": "rendered",
+      "scenarioId": "detail-awaiting-dns-mobile"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-awaiting-dns (dark)",
+      "coverage": "rendered",
+      "scenarioId": "detail-awaiting-dns-dark"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-suspended",
+      "coverage": "rendered",
+      "scenarioId": "detail-suspended"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-suspended (mobile)",
+      "coverage": "rendered",
+      "scenarioId": "detail-suspended-mobile"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-suspended (dark)",
+      "coverage": "rendered",
+      "scenarioId": "detail-suspended-dark"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-operator",
+      "coverage": "rendered",
+      "scenarioId": "detail-operator"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-operator (mobile)",
+      "coverage": "rendered",
+      "scenarioId": "detail-operator-mobile"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-operator (dark)",
+      "coverage": "rendered",
+      "scenarioId": "detail-operator-dark"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-loading",
+      "coverage": "rendered",
+      "scenarioId": "detail-loading"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-loading (mobile)",
+      "coverage": "rendered",
+      "scenarioId": "detail-loading-mobile"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-loading (dark)",
+      "coverage": "rendered",
+      "scenarioId": "detail-loading-dark"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-not-found",
+      "coverage": "rendered",
+      "scenarioId": "detail-not-found"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-not-found (mobile)",
+      "coverage": "rendered",
+      "scenarioId": "detail-not-found-mobile"
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "detail-not-found (dark)",
+      "coverage": "rendered",
+      "scenarioId": "detail-not-found-dark"
+    },
+    {
+      "ownerId": "page-domains",
+      "state": "domains-populated",
+      "coverage": "rendered",
+      "scenarioId": "domains-populated"
+    },
+    {
+      "ownerId": "page-domains",
+      "state": "domains-populated (mobile)",
+      "coverage": "rendered",
+      "scenarioId": "domains-populated-mobile"
+    },
+    {
+      "ownerId": "page-domains",
+      "state": "domains-populated (dark)",
+      "coverage": "rendered",
+      "scenarioId": "domains-populated-dark"
+    },
+    {
+      "ownerId": "page-domains",
+      "state": "domains-empty",
+      "coverage": "rendered",
+      "scenarioId": "domains-empty"
+    },
+    {
+      "ownerId": "page-domains",
+      "state": "domains-empty (mobile)",
+      "coverage": "rendered",
+      "scenarioId": "domains-empty-mobile"
+    },
+    {
+      "ownerId": "page-domains",
+      "state": "domains-empty (dark)",
+      "coverage": "rendered",
+      "scenarioId": "domains-empty-dark"
+    },
+    {
+      "ownerId": "page-billing",
+      "state": "billing-populated",
+      "coverage": "rendered",
+      "scenarioId": "billing-populated"
+    },
+    {
+      "ownerId": "page-billing",
+      "state": "billing-populated (mobile)",
+      "coverage": "rendered",
+      "scenarioId": "billing-populated-mobile"
+    },
+    {
+      "ownerId": "page-billing",
+      "state": "billing-populated (dark)",
+      "coverage": "rendered",
+      "scenarioId": "billing-populated-dark"
+    },
+    {
+      "ownerId": "page-billing",
+      "state": "billing-empty",
+      "coverage": "rendered",
+      "scenarioId": "billing-empty"
+    },
+    {
+      "ownerId": "page-billing",
+      "state": "billing-empty (mobile)",
+      "coverage": "rendered",
+      "scenarioId": "billing-empty-mobile"
+    },
+    {
+      "ownerId": "page-billing",
+      "state": "billing-empty (dark)",
+      "coverage": "rendered",
+      "scenarioId": "billing-empty-dark"
+    },
+    {
+      "ownerId": "layout-console-chrome",
+      "state": "desktop authenticated",
+      "coverage": "rendered",
+      "scenarioId": "resources-populated"
+    },
+    {
+      "ownerId": "layout-console-chrome",
+      "state": "active navigation",
+      "coverage": "rendered",
+      "scenarioId": "domains-populated",
+      "evidence": "the domains section carries the current mark while the resources section does not"
+    },
+    {
+      "ownerId": "layout-console-chrome",
+      "state": "mobile / stacked",
+      "coverage": "rendered",
+      "scenarioId": "resources-populated-mobile",
+      "evidence": "the sidebar stacks above the body below the md breakpoint, as sidebar-then-body-app declares"
+    },
+    {
+      "ownerId": "layout-console-chrome",
+      "state": "dark",
+      "coverage": "rendered",
+      "scenarioId": "resources-populated-dark"
+    },
+    {
+      "ownerId": "layout-console-chrome",
+      "state": "guest",
+      "coverage": "not-applicable",
+      "evidence": "the sign-in route uses centred-authentication-page and mounts no chrome at all - a guest never reaches this frame."
+    },
+    {
+      "ownerId": "layout-console-chrome",
+      "state": "section counts",
+      "coverage": "not-applicable",
+      "evidence": "NavLink has no count slot and nivo-backend has no count query; counts-by-status is a recorded enabler. This is an absent CAPABILITY, not an unphotographed state."
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "state": "viewer is customer",
+      "coverage": "rendered",
+      "scenarioId": "detail-running",
+      "evidence": "the danger zone is absent, which is the customer state"
+    }
+  ],
+  "blockTrees": [
+    {
+      "directionId": "direction-a",
+      "tree": "layout.tsx > Tree sidebar-then-body-app\n├── ConsoleNav (projection of sidebar-nav-cluster)\n└── console-body-main > page leaf\n     ├── ResourcesPage > titled-summary-filter-over-body-page > FleetRow xN\n     ├── ResourceDetailPage > titled-body > stacked-sections > [failure?, dns?, factSheet, DangerZone?]\n     ├── DomainsPage > titled-body > label-row-over-card > labelled-fact-stack\n     └── BillingPage > titled-body > stacked-sections > [wallet, invoices]"
+    }
+  ],
+  "contracts": [
+    {
+      "key": "sidebar-then-body-app",
+      "status": "new, implemented",
+      "why": "the console topology; every class already existed for rail-then-main"
+    },
+    {
+      "key": "console-body-main",
+      "status": "new, implemented",
+      "why": "the document's one main landmark, opened by the frame so no page has to remember"
+    },
+    {
+      "key": "sidebar-nav-cluster",
+      "status": "new, implemented",
+      "why": "a nav host for the console's one set of destinations, resting at four links"
+    },
+    {
+      "key": "titled-body",
+      "status": "new, implemented",
+      "why": "a console section's 56rem reading measure; opens no landmark of its own"
+    },
+    {
+      "key": "labelled-fact-stack",
+      "status": "new, implemented",
+      "why": "label-value-row had no holder in the table at all, so a fact sheet had nowhere legal to live"
+    },
+    {
+      "key": "warned-action-panel",
+      "status": "new in 1.1, implemented",
+      "why": "a press that destroys work needs weight the CONTROL cannot carry - the button vocabulary has no danger variant, so the panel supplies it structurally with its own ground and a full-width warning line"
+    },
+    {
+      "key": "label-row-over-card",
+      "status": "existing, corrected",
+      "why": "its body slot named $content, which is not a ContractKey and resolved to never"
+    },
+    {
+      "key": "titled-summary-filter-over-body-page",
+      "status": "existing, retained",
+      "why": "the parity baseline's frame, unchanged"
+    }
+  ],
+  "vocabularyProposals": [
+    {
+      "id": "ConsoleNav",
+      "status": "implemented in candidate",
+      "targetPath": "apps/app/src/components/layouts/ConsoleNav/index.tsx"
+    },
+    {
+      "id": "ResourceDetailPage",
+      "status": "implemented in candidate",
+      "targetPath": "apps/app/src/components/pages/ResourceDetailPage/index.tsx"
+    },
+    {
+      "id": "DangerZone",
+      "status": "implemented in candidate",
+      "targetPath": "apps/app/src/components/blocks/resource/DangerZone/"
+    },
+    {
+      "id": "Button danger variant",
+      "status": "not implemented",
+      "note": "the leaf offers primary, secondary, outline and ghost. A press that destroys data has no visual weight of its own, so the warning sentence carries all of it. Widening the leaf's variant union is a vocabulary decision this case does not get to take alone."
+    },
+    {
+      "id": "NavLink count slot",
+      "status": "not implemented",
+      "note": "needed before the sidebar can show per-section counts, and pointless before counts-by-status exists."
+    },
+    {
+      "id": "Heading rests with a non-breaking space",
+      "status": "not implemented",
+      "note": "the leaf declares resting classes but renders an empty string, so a resting heading has zero height. `Text` already renders a non-breaking space for exactly this. One character, in one leaf."
+    },
+    {
+      "id": "identity-kind-status-action-row wraps below md",
+      "status": "returns to Plan",
+      "note": "the row overflows at 390px. What it should do instead is a product decision and it affects the shipped /provisioning page, so it is not a Preview change."
+    }
+  ],
+  "backendEnablerProposals": [
+    {
+      "id": "instance-shape-is-readable",
+      "status": "not implemented",
+      "uiNeed": "a console states a machine's size",
+      "escalationTrigger": "MyInstance.ram and vcpu are hardcoded null though the columns exist; the detail page prints an unreadable marker instead"
+    },
+    {
+      "id": "counts-by-status",
+      "status": "not implemented",
+      "uiNeed": "sidebar counts and the list's counter strip",
+      "escalationTrigger": "no count query exists; a browser-side count goes wrong at pagination"
+    },
+    {
+      "id": "operator-read-surface",
+      "status": "escalated, not proposed",
+      "uiNeed": "an operator reaching another account's resource",
+      "escalationTrigger": "this is a NEW authorization boundary and belongs to backend design, not to this phase"
+    }
+  ],
+  "preview": {
+    "path": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning-dashboard\\preview-lab",
+    "url": null,
+    "caseId": "case-console",
+    "revision": "1.2"
+  },
+  "approval": {
+    "kind": "confirmed-restated",
+    "restatement": "duyệt revision 1.2 — khác 1.1 đúng ở chỗ khai báo: route /provisioning đổi import, và ProvisioningPage được đổi tên thành ResourcesPage. Không đổi một pixel nào.",
+    "source": "Duyệt 1.1, seal + Apply trước"
+  },
+  "seal": {
+    "algorithm": "sha256",
+    "manifestSha256": "618b67e1c4fd0049b16b7e6c16f624a5321cc937f272db302286ec36af82d64d"
+  }
+}

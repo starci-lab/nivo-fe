@@ -15,8 +15,14 @@ export type ReactionChoiceData = {
 /** Exact checked-in Fluent Emoji asset for one product reaction. */
 const reactionAsset = (type: ReactionType) => `/reactions/${type}.svg`
 
+/** Optical size for one reaction asset, owned by its placement. */
+type ReactionImageProps = {
+    readonly type: ReactionType
+    readonly size: "summary" | "picker"
+}
+
 /** Draw one reaction asset at the optical size owned by its placement. */
-const ReactionImage = ({ type, size }: { readonly type: ReactionType; readonly size: "summary" | "picker" }) => (
+const ReactionImage = ({ type, size }: ReactionImageProps) => (
     <img
         src={reactionAsset(type)}
         alt=""

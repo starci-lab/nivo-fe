@@ -2,7 +2,7 @@ import { Avatar } from "../../leaves/Avatar"
 import { Icon } from "../../leaves/Icon"
 import { Text } from "../../leaves/Text"
 import type { CompositeProps } from "../../contracts/props"
-import { PressableTree } from "../../branches/PressableTree"
+import { PressableSurface } from "../../branches/PressableSurface"
 import { defineContractComponent, defineLeafComponent } from "../../contracts/props"
 
 /** Resolved identity shown at the head of the dashboard rail. */
@@ -31,7 +31,7 @@ export const ProfileRow = ({ props, on, isLoading = false }: ProfileRowProps) =>
         identity,
         disclosure: defineLeafComponent("icon", {}, () => <Icon props={{ name: "disclosure", role: "chip" }} />),
     })
-    return <PressableTree contract="profile-avatar-name-handle-disclosure-row" render={content} label={props.displayName ?? "Profile"} press={on?.press} />
+    return <PressableSurface contract="profile-avatar-name-handle-disclosure-row" render={content} label={props.displayName ?? "Profile"} press={on?.press} />
 }
 
 /** Source-level tier marker for the fixed profile-row composition. */

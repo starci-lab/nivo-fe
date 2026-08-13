@@ -28,7 +28,7 @@ export const PressableInputLike = ({ props, on }: PressableInputLikeProps) => (
         variant="outline"
         aria-label={props.label}
         onPress={on?.press}
-        className="h-9 min-h-9 w-[260px] justify-between gap-2 rounded-field border-[var(--field-border)] bg-field px-3 font-normal text-field-foreground shadow-[var(--field-shadow)] hover:bg-field"
+        className="h-9 min-h-9 w-64 justify-between gap-2 rounded-field border-[var(--field-border)] bg-field px-3 font-normal text-field-foreground shadow-[var(--field-shadow)] hover:bg-field"
     >
         <span className="inline-flex min-w-0 items-center gap-2">
             <Icon props={{ name: "search", role: "leading" }} />

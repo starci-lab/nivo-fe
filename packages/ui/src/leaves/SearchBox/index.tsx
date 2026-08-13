@@ -37,10 +37,10 @@ export type SearchBoxActions = {
 export type SearchBoxProps = LeafProps<SearchBoxData, SearchBoxActions>
 
 /** The glyph leads, the box takes the slack, the hint trails inside the same well. */
-const BOX_CLASSES = "flex flex-row items-center gap-2 rounded-full bg-default px-3 py-1.5 w-full max-w-xs"
+const BOX_CLASSES = "flex flex-row items-center gap-2 rounded-full bg-default px-3 py-2 w-full max-w-xs"
 
 /** The hint is set as a key, not as a word. */
-const SHORTCUT_CLASSES = "shrink-0 rounded border px-1.5 py-0.5 text-xs text-muted"
+const SHORTCUT_CLASSES = "shrink-0 rounded border px-2 py-1 text-xs text-muted"
 
 /**
  * Draw the search field.

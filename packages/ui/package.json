@@ -8,6 +8,7 @@
     "./contracts": "./src/contracts/index.ts",
     "./contracts/props": "./src/contracts/props.ts",
     "./leaves/*": "./src/leaves/*/index.tsx",
+    "./composites/*": "./src/composites/*/index.tsx",
     "./branches/*": "./src/branches/*/index.tsx"
   },
   "scripts": {

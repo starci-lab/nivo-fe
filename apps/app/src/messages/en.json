@@ -1,0 +1,103 @@
+{
+  "app": {
+    "description": "Provisioning and operations console."
+  },
+  "provisioning": {
+    "title": "Provisioning",
+    "newResource": "Provision new",
+    "listLabel": "Fleet",
+    "listFact": "{count} resources",
+    "filterLabel": "Filter by resource kind",
+    "filterAll": "All",
+    "empty": "No sites or workspaces yet. Provision the first one to begin.",
+    "error": "Could not load the resource list. This is a failure asking the server, not a resource that failed.",
+    "kind": {
+      "site": "Site",
+      "workspace": "Workspace"
+    },
+    "status": {
+      "notProvisioned": "Not provisioned",
+      "provisioning": "Provisioning",
+      "awaitingDns": "Awaiting DNS",
+      "ready": "Running",
+      "failed": "Failed",
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "action": {
+      "open": "Open",
+      "suspend": "Suspend",
+      "resume": "Resume",
+      "retry": "Try again",
+      "viewDns": "View DNS record",
+      "provision": "Provision"
+    }
+  },
+  "authentication": {
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@company.com",
+    "emailHint": "The code goes to exactly the address you type here.",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Your password",
+    "newAccountPasswordPlaceholder": "At least 8 characters",
+    "passwordHint": "8 characters or more.",
+    "confirmPasswordLabel": "Repeat password",
+    "confirmPasswordPlaceholder": "Type that password again",
+    "confirmPasswordMismatch": "Those two passwords do not match.",
+    "revealLabel": "Show password",
+    "hideLabel": "Hide password",
+    "orLabel": "OR",
+    "googleLabel": "Continue with Google",
+    "forgotPasswordLabel": "Forgot your password?",
+    "codeLabel": "Verification code",
+    "codePlaceholder": "6 digits",
+    "codeHint": "The code is good for {minutes} minutes.",
+    "newPasswordLabel": "New password",
+    "newPasswordPlaceholder": "At least 8 characters",
+    "newPasswordHint": "8 characters or more.",
+    "resendLabel": "Send another code",
+    "cooldownLabel": "You can ask again in {seconds}s",
+    "resentLabel": "A new code is on its way.",
+    "backLabel": "Use a different email",
+    "providerUnavailable": "Taking you to {provider}…",
+    "signIn": {
+      "title": "Sign in",
+      "subtitle": "Manage the systems you run on nivo.",
+      "submitLabel": "Sign in",
+      "promptQuestion": "No account yet?",
+      "promptAction": "Create one",
+      "refused": "That email or password is not right.",
+      "twoFactorTitle": "Two-factor verification needed",
+      "twoFactorHint": "This account has two-factor verification on. nivo does not support that step in this build — turn it off for now, or use another account.",
+      "backLabel": "Back to sign in"
+    },
+    "signUp": {
+      "title": "Create a nivo account",
+      "subtitle": "One account for every system you run and manage.",
+      "submitLabel": "Send verification code",
+      "codeSubmitLabel": "Confirm and create account",
+      "codeSubtitle": "We have sent a 6-digit code to {email}.",
+      "promptQuestion": "Already have an account?",
+      "promptAction": "Sign in",
+      "codeRefused": "That code is not right. Check it and try again — the old code still works.",
+      "emailTaken": "That email already has an account. The code has been used, so sign in instead, or start again with another email.",
+      "doneTitle": "All set",
+      "doneHint": "Your account is created and you are signed in.",
+      "onwardLabel": "Go to the console"
+    },
+    "forgotPassword": {
+      "title": "Reset your password",
+      "subtitle": "Enter your email and we will send a verification code.",
+      "submitLabel": "Send verification code",
+      "codeSubmitLabel": "Set new password",
+      "codeSubtitle": "If {email} has an account, a 6-digit code has been sent to it.",
+      "promptQuestion": "Remembered it?",
+      "promptAction": "Sign in",
+      "codeRefused": "That code cannot be used. Check it, or start again from the beginning.",
+      "doneTitle": "Password changed",
+      "doneHint": "Your new password is saved. Sign in with it.",
+      "onwardLabel": "Sign in"
+    },
+    "rememberMeLabel": "Remember me"
+  }
+}

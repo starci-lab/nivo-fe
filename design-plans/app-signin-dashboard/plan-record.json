@@ -1,0 +1,218 @@
+{
+  "version": 1,
+  "task": "nivo-app-signin-and-dashboard",
+  "status": "direction-selected",
+  "deliveryMode": "batch",
+  "mode": "mixed",
+  "parityBaseline": "apps/app/src/app/(auth)/dang-nhap + apps/app/src/components/blocks/auth/SignInPanel/component.tsx (committed as feat(app): trang đăng nhập theo case-a3 đã duyệt, 5a78e89). Legacy repository D:\\Repositories\\nivo is explicitly out of scope by user instruction.",
+  "sharedDecisions": [
+    "apps/app/src/app/globals.css must import @heroui/styles/css and define the semantic token layer before any screen can be judged. packages/ui writes text-muted (18 uses), bg-default (12), text-foreground (6) and bg-surface (5); none resolve today, which is the single cause of every screen rendering as raw HTML.",
+    "The token VALUES are an open product decision. Porting starci-academy-fe/src/app/globals.css wholesale would dress nivo in StarCi Academy's brand; the direction lab therefore uses a neutral placeholder palette.",
+    "The dashboard needs route-stable chrome (AppChrome) mounted as a sibling of the routed body at apps/app/src/app/layout.tsx. The sign-in route keeps centred-authentication-page and gets no chrome.",
+    "dashboard-main and dashboard-rail-then-main are NOT reusable for nivo: their why binds them to the academy's eight learner sections in a fixed reading order.",
+    "Sign-in keeps the approved case-a3 reading order: shortcuts first, divider, then the credential form kept mounted for password managers.",
+    "Every figure in the lab is a labelled fixture; only the field names are real."
+  ],
+  "workItems": [
+    {
+      "id": "layout-app-chrome",
+      "target": "apps/app/src/app/layout.tsx + new AppChrome layout",
+      "primaryScope": "layout",
+      "subordinateScopes": ["block"],
+      "dependsOn": [],
+      "ownerBoundary": "Wordmark, section navigation, account trigger, and what survives navigation. Owns no page data.",
+      "sourceBoundary": ["apps/app/src/app/layout.tsx", "apps/app/src/components/layouts/"],
+      "stateInventory": [
+        { "state": "desktop authenticated", "status": "required", "evidence": "me query exists; UserEntity carries username and avatarUrl." },
+        { "state": "mobile / collapsed navigation", "status": "required", "evidence": "Deferred to Preview; not rendered in the direction lab." },
+        { "state": "guest", "status": "not-applicable", "evidence": "The sign-in route uses centred-authentication-page and mounts no chrome." },
+        { "state": "light / dark", "status": "required", "evidence": "next-themes and ThemeSwitch are already dependencies of apps/app and packages/ui." }
+      ]
+    },
+    {
+      "id": "page-dashboard",
+      "target": "apps/app/src/app/page.tsx (currently a 20-line seed route)",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": ["layout-app-chrome"],
+      "ownerBoundary": "Session question and block reading order only. Each block owns its own request.",
+      "sourceBoundary": ["apps/app/src/app/page.tsx", "apps/app/src/components/pages/", "apps/app/src/components/blocks/dashboard/"],
+      "stateInventory": [
+        { "state": "route entry / guest redirect", "status": "required", "evidence": "The only session evidence is signIn returning accessToken; no client exists yet." },
+        { "state": "full content", "status": "required", "evidence": "Rendered per direction in the lab." },
+        { "state": "partial availability", "status": "required", "evidence": "Blocks land independently (PAGE-3); deferred to Preview." },
+        { "state": "first run / empty account", "status": "required", "evidence": "Rendered per direction in the lab." },
+        { "state": "page-level failure", "status": "not-applicable", "evidence": "No page-owned request; failure belongs to each block." }
+      ]
+    },
+    {
+      "id": "page-sign-in",
+      "target": "apps/app/src/app/(auth)/dang-nhap/page.tsx + SignInPanel",
+      "primaryScope": "page",
+      "subordinateScopes": ["block"],
+      "dependsOn": [],
+      "ownerBoundary": "Restore the approved case-a3 render under the token layer; do not reopen its design.",
+      "sourceBoundary": ["apps/app/src/app/(auth)/dang-nhap/", "apps/app/src/components/blocks/auth/SignInPanel/"],
+      "stateInventory": [
+        { "state": "entry", "status": "required", "evidence": "Rendered in the lab, identical across all three directions." },
+        { "state": "resetLinkSent", "status": "required", "evidence": "requestPasswordReset mutation exists; state already in the committed union." },
+        { "state": "handingOff", "status": "required", "evidence": "Committed union; two OAuth callback routes are implied by SignInProvider." },
+        { "state": "exchanging", "status": "required", "evidence": "exchangeOauthCode(code, codeVerifier, redirectUri) exists." },
+        { "state": "exchangeFailed", "status": "required", "evidence": "Committed union." },
+        { "state": "twoFactorUnsupported", "status": "required", "evidence": "CONFLICT: the committed panel says this build cannot complete a second factor, but AuthPayload returns twoFactorToken and verifyTwoFactor(twoFactorToken, code) exists. Preview must decide whether the screen completes the challenge or keeps an honest refusal." },
+        { "state": "credential refusal", "status": "required", "evidence": "SignInResponse carries error and message; the refusal sentence must not disclose whether an address has an account." },
+        { "state": "submitting / pending action", "status": "required", "evidence": "Deferred to Preview." }
+      ]
+    }
+  ],
+  "evidence": [
+    { "claim": "The backend exposes 59 queries, 102 mutations and zero subscriptions.", "source": "GraphQL introspection against the running nivo-backend at 127.0.0.1:3067", "sourceClass": "business-truth", "confidence": "high", "allowedUse": "capability and data shape", "unknowns": "none" },
+    { "claim": "signIn(email, password) returns AuthPayload { accessToken, requiresTwoFactor, twoFactorToken }.", "source": "SignInInput / AuthPayload introspection", "sourceClass": "business-truth", "confidence": "high", "allowedUse": "sign-in states", "unknowns": "the refusal message wording is not proven by the schema" },
+    { "claim": "A dashboard can honestly show instances, wallet, invoices, catalog orders, expert sites, agent workspaces, domains and tickets.", "source": "myInstances, myWallet, myInvoices, myCatalogOrders, myExpertSites, myAgentWorkspace, myDomains, myTickets, myOpsTickets", "sourceClass": "business-truth", "confidence": "high", "allowedUse": "which blocks may exist", "unknowns": "MyInstance.status is a free String, not an enum" },
+    { "claim": "centred-authentication-page and authentication-panel-card already own the sign-in relationship.", "source": "packages/ui/src/contracts/index.ts lines 157-172", "sourceClass": "ui-grammar", "confidence": "high", "allowedUse": "reuse verdict", "unknowns": "none" },
+    { "claim": "dashboard-main is bound to the academy's eight learner sections and cannot be reused by nivo.", "source": "packages/ui/src/contracts/index.ts line 231 why", "sourceClass": "ui-grammar", "confidence": "high", "allowedUse": "reject verdict", "unknowns": "none" },
+    { "claim": "Every apps/app screen renders unstyled because no HeroUI stylesheet and no token layer exist.", "source": "apps/app/src/app/globals.css (9 lines) vs token usage counted in packages/ui/src", "sourceClass": "reuse", "confidence": "high", "allowedUse": "shared prerequisite", "unknowns": "whether nivo takes StarCi's palette or its own" },
+    { "claim": "The sign-in panel already covers six states and keeps the form mounted for password managers.", "source": "apps/app/src/components/blocks/auth/SignInPanel/component.tsx lines 16-57", "sourceClass": "reuse", "confidence": "high", "allowedUse": "parity baseline", "unknowns": "none" }
+  ],
+  "unknowns": [
+    "Which palette nivo wears. Neutral placeholder used in the lab; the user must decide before Preview freezes a visual case.",
+    "MyInstance.status vocabulary. The running/provisioning/failed chips shown in the lab are fixtures.",
+    "No subscription exists, so provisioning progress can only be polled; the 'bước 3/5' fixture in direction C has no backing field and must be dropped or earned.",
+    "creditBurnUsd is USD while wallet and invoices are VND; showing both currencies on one screen is an unresolved product decision.",
+    "apps/app has no GraphQL client and no i18n catalogue; the sign-in copy is currently inline Vietnamese constants.",
+    "Whether the dashboard reader may ever be someone other than the account owner."
+  ],
+  "businessCapabilities": [
+    { "capability": "email/password sign-in with optional second factor", "status": "proven", "source": "signIn, verifyTwoFactor, confirmTwoFactor, setupTwoFactor, disableTwoFactor" },
+    { "capability": "OAuth sign-in by authorization code with PKCE", "status": "proven", "source": "exchangeOauthCode(code, codeVerifier, redirectUri)" },
+    { "capability": "password reset", "status": "proven", "source": "requestPasswordReset, resetPassword" },
+    { "capability": "list the instances a user runs", "status": "proven", "source": "myInstances -> MyInstance" },
+    { "capability": "wallet balance and top-up", "status": "proven", "source": "myWallet, myWalletTransactions, createWalletTopUpPayLink" },
+    { "capability": "invoices and payment links", "status": "proven", "source": "myInvoices, payInvoice, createInvoicePayLink" },
+    { "capability": "catalog order lifecycle and renewal", "status": "proven", "source": "myCatalogOrders, orderCatalogItem, manageCatalogOrder, upgradeCatalogTier" },
+    { "capability": "expert site provisioning and publication", "status": "proven", "source": "myExpertSites, provisionExpertSite, deployExpertSite, publishExpertSite, ExpertSiteEntity.provisionStatus" },
+    { "capability": "support and ops tickets", "status": "proven", "source": "myTickets, myOpsTickets, createTicket, replyToTicket" },
+    { "capability": "live push of provisioning progress", "status": "unknown", "source": "subscriptionType is empty" }
+  ],
+  "preliminaryDirections": [
+    {
+      "id": "direction-a",
+      "thesis": "The fleet leads: a reader opens the dashboard to see whether what they run is alive.",
+      "primaryCta": "Open an instance",
+      "readingOrder": ["InstanceList", "WorkNeedingYou", "WalletSummary", "AccountFacts"],
+      "tradeoffs": ["Closest to the app's own sentence about itself", "A day-zero account sees an empty lead section", "The 288px rail repeats the academy geometry without its contract"],
+      "legacyDivergence": [],
+      "representativeStateIds": ["dash-populated", "dash-first-run", "signin-entry"],
+      "remainingPreviewStateIds": ["dashboard-loading", "dashboard-partial", "block-failed", "chrome-mobile", "chrome-dark", "signin-resetLinkSent", "signin-handingOff", "signin-exchanging", "signin-exchangeFailed", "signin-refusal", "signin-submitting", "signin-secondFactor"]
+    },
+    {
+      "id": "direction-b",
+      "thesis": "Obligations lead: the only thing that kills a running system is a missed payment.",
+      "primaryCta": "Pay the invoice / top up the wallet",
+      "readingOrder": ["DueWork", "InstanceGrid", "SupportInbox"],
+      "tradeoffs": ["Opens on what actually breaks the product", "Reads as a billing console rather than an operations console", "Its lead section is empty in the healthy case, which is most days"],
+      "legacyDivergence": [],
+      "representativeStateIds": ["dash-populated", "dash-first-run", "signin-entry"],
+      "remainingPreviewStateIds": ["dashboard-loading", "dashboard-partial", "block-failed", "chrome-mobile", "chrome-dark", "signin-resetLinkSent", "signin-handingOff", "signin-exchanging", "signin-exchangeFailed", "signin-refusal", "signin-submitting", "signin-secondFactor"]
+    },
+    {
+      "id": "direction-c",
+      "thesis": "Provisioning leads: nivo sells the act of building a system, so the page opens on what is being built and what could be built next.",
+      "primaryCta": "Provision a product",
+      "readingOrder": ["ProvisioningProgress", "ProductShelf", "DeliveredList", "WalletSummary"],
+      "tradeoffs": ["A new account has no empty state to explain", "Weakest for the returning operator with three running systems", "Its progress detail is not backed by any field today"],
+      "legacyDivergence": [],
+      "representativeStateIds": ["dash-populated", "dash-first-run", "signin-entry"],
+      "remainingPreviewStateIds": ["dashboard-loading", "dashboard-partial", "block-failed", "provisioning-failed", "chrome-mobile", "chrome-dark", "signin-resetLinkSent", "signin-handingOff", "signin-exchanging", "signin-exchangeFailed", "signin-refusal", "signin-submitting", "signin-secondFactor"]
+    },
+    {
+      "id": "direction-d",
+      "thesis": "Same thesis as A - the fleet leads - but navigation moves from a top bar into the collapsible left sidebar StarCi already uses in /courses/[courseId]/learn.",
+      "primaryCta": "Open an instance",
+      "readingOrder": ["SidebarNav (chrome)", "InstanceList", "WorkNeedingYou", "WalletSummary"],
+      "parityReference": "starci-academy/src/components/blocks/navigation/CollapsibleSidebar (EXPANDED_WIDTH 16rem, COLLAPSED_WIDTH 4rem, collapse in place with no overlay, collapsed flag persisted in localStorage), SidebarNavItem (min-h-9, gap-2, rounded-large, px-3 py-2; collapsed mx-auto w-fit justify-center gap-0 px-2) and LearnSidebar (GROUP_ORDER clusters divided by a full-width rule, trailing badge in two tones).",
+      "tradeoffs": ["Eight destinations stay permanently visible and reachable in one press, and collapse to a 4rem glyph rail when the body needs the width", "The sidebar is chrome, so it is a layout decision that binds every future route", "Below lg the reference hides the sidebar and uses a drawer plus a mobile tab bar; nivo has neither, so that work is real and unrendered", "A sidebar plus a 288px rail is three columns, so the body gives up the rail"],
+      "legacyDivergence": ["The reference is the course-learn sidebar, NOT the StarCi dashboard rail. The dashboard's 288px left column is a page-owned IdentityRail + QuickActions under a top ShellNav and is deliberately not what this direction copies."],
+      "representativeStateIds": ["dash-populated", "dash-collapsed", "dash-first-run", "signin-entry"],
+      "remainingPreviewStateIds": ["dashboard-loading", "dashboard-partial", "block-failed", "chrome-mobile-drawer", "chrome-dark", "signin-resetLinkSent", "signin-handingOff", "signin-exchanging", "signin-exchangeFailed", "signin-refusal", "signin-submitting", "signin-secondFactor"]
+    }
+  ],
+  "directionLab": {
+    "path": "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard\\direction-lab",
+    "url": "http://127.0.0.1:8082/",
+    "caseIds": ["direction-a", "direction-b", "direction-c", "direction-d"]
+  },
+  "recommendedPreviewDirections": ["direction-a"],
+  "selectedDirection": "direction-d",
+  "selectionEvidence": "User: \"bảng điều kiển kiểu dashboard có cái sidebar bên trái như starci được không?\" then \"cái trong course learn ấy\", then \"ok chốt d\". The named reference is the course-learn CollapsibleSidebar/LearnSidebar, not the StarCi dashboard rail. The recommendation was direction-a; the user chose direction-d, which carries the same fleet-leads thesis under sidebar chrome.",
+  "blockTrees": [
+    { "directionId": "direction-a", "tree": "AppChrome > DashboardPage > [InstanceList, WorkNeedingYou, WalletSummary, AccountFacts]" },
+    { "directionId": "direction-b", "tree": "AppChrome > DashboardPage > [DueWork, InstanceGrid, SupportInbox]" },
+    { "directionId": "direction-c", "tree": "AppChrome > DashboardPage > [ProvisioningProgress, ProductShelf, DeliveredList, WalletSummary]" },
+    { "directionId": "direction-d", "tree": "AppSidebarChrome > [SidebarNav, DashboardPage > [InstanceList, WorkNeedingYou, WalletSummary]]" }
+  ],
+  "contracts": [
+    { "key": "nav-over-body-page", "decision": "reuse", "why": "Navigation stays a sibling of the routed body so a route change repaints the body without tearing the nav down." },
+    { "key": "centred-authentication-page", "decision": "reuse", "why": "Authentication is the route's only task, so its one bounded form sits at the visual centre." },
+    { "key": "authentication-panel-card", "decision": "reuse", "why": "The authentication form is one meaningful control group bounded by one card." },
+    { "key": "label-row-over-card", "decision": "reuse", "why": "The label is held outside the surface it names." },
+    { "key": "stacked-sections", "decision": "reuse", "why": "Sections read as separate objects only while the space between them exceeds the space inside any of them." },
+    { "key": "dashboard-main", "decision": "reject", "why": "Its why binds it to the academy's eight learner sections in a fixed reading order." },
+    { "key": "dashboard-rail-then-main", "decision": "reject", "why": "Same: it is the learner rail, not a nivo operations topology." },
+    { "key": "operations-rail-then-main", "decision": "new", "directionId": "direction-a", "why": "The fleet owns the flexible column while wallet and account facts stay a fixed rail." },
+    { "key": "due-work-list", "decision": "new", "directionId": "direction-b", "why": "A due obligation is one row of deadline, amount and the single action that clears it." },
+    { "key": "progress-then-shelf", "decision": "new", "directionId": "direction-c", "why": "What is being built now sits above what could be built next." },
+    { "key": "sidebar-then-body-app", "decision": "new", "directionId": "direction-d", "why": "The chrome sits beside the routed body rather than above it and survives the body being replaced; nav-over-body-page cannot express that, because its children are a navigation stacked over a page leaf." },
+    { "key": "titled-body", "decision": "new", "directionId": "direction-d", "why": "A console body announces which section it is before its first section label, because the sidebar names the destination but not the state of it." }
+  ],
+  "vocabularyProposals": [
+    {
+      "target": "apps/app/src/app/globals.css",
+      "decision": "new",
+      "meaning": "The app's only stylesheet and the only place a colour is written down.",
+      "delta": "Add @import \"@heroui/styles/css\" and the semantic token block (surface, muted, foreground, border, brand, success/warning/danger with soft and foreground roles).",
+      "placement": "Imported once by apps/app/src/app/layout.tsx, which already imports ./globals.css.",
+      "absenceBehavior": "Without it every leaf in packages/ui resolves no colour and the app renders as raw HTML - the current state.",
+      "affectedCallers": "Every screen in apps/app.",
+      "compatibility": "Additive.",
+      "tests": "A rendered screen must compute a non-transparent surface background and the product's ink colour."
+    },
+    {
+      "target": "apps/app/src/app/layout.tsx",
+      "decision": "extend",
+      "meaning": "The framework boundary brands the routed body and mounts the vendor and theme providers.",
+      "delta": "Add the HeroUI provider and next-themes provider; close children into the contract's page leaf.",
+      "placement": "Root layout only.",
+      "absenceBehavior": "HeroUI components render without their runtime context and ThemeSwitch has nothing to switch.",
+      "affectedCallers": "Every route.",
+      "compatibility": "Additive.",
+      "tests": "Theme toggle changes the computed background."
+    },
+    {
+      "target": "apps/app/src/components/layouts/AppChrome",
+      "decision": "new",
+      "meaning": "Route-stable chrome for the authenticated product.",
+      "delta": "New layout composing wordmark, section navigation and an account block; owns no page data.",
+      "placement": "Sibling of the routed body inside nav-over-body-page.",
+      "absenceBehavior": "The dashboard has no navigation and nothing survives a route change.",
+      "affectedCallers": "apps/app/src/app/layout.tsx.",
+      "compatibility": "Additive.",
+      "tests": "Chrome does not remount across navigation."
+    }
+  ],
+  "backendEnablerProposals": [
+    {
+      "id": "myDueWork",
+      "directionId": "direction-b",
+      "classification": "additive-enabler",
+      "operationKind": "query",
+      "uiNeed": "Direction B's lead section merges invoices, renewing orders and a low wallet into one ordered list.",
+      "currentEvidence": "myInvoices, myCatalogOrders and myWallet already exist and are already authorized per user.",
+      "apiDelta": "One read projection returning the same authorized rows in one ordered payload.",
+      "authorization": "Unchanged: the same per-user guard the three existing queries use.",
+      "compatibility": "Additive; the three existing queries remain.",
+      "tests": "Projection returns exactly the union of what the three queries return for the same user.",
+      "escalation": "If ranking requires a new business rule about what counts as urgent, this stops being additive and becomes backend design."
+    }
+  ]
+}

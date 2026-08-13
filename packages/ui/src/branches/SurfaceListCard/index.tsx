@@ -73,7 +73,7 @@ export const SurfaceListCard = <
     )
 
     return (
-        <div data-component="SurfaceListCard" className="flex flex-col gap-2">
+        <div data-component="SurfaceListCard" className="flex flex-col gap-3">
             {surfaceProps.isLabelHidden === true ? null : label}
             <Card
                 className="p-0"

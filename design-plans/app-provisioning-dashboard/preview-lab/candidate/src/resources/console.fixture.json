@@ -1,0 +1,14 @@
+{
+  "_note": "Labelled fixture for the domains and billing sections. `status` values are what nivo-backend stores; every word on screen comes from the catalogue, so nothing here is a sentence. `daysLeft` is computed in the browser from expiresAt on purpose - nothing in the backend ever writes DomainStatus.Expiring, so a console that read that column would show every expiring domain as active.",
+  "domains": [
+    { "id": "d1", "name": "minhtue.com", "daysLeft": 12, "autoRenew": false },
+    { "id": "d2", "name": "hocvienmoc.vn", "daysLeft": 318, "autoRenew": true },
+    { "id": "d3", "name": "danglinh.dev", "daysLeft": 204, "autoRenew": true }
+  ],
+  "wallet": { "balance": "2.450.000₫" },
+  "invoices": [
+    { "id": "i1", "label": "Expert Academy · gia hạn", "amount": "1.200.000₫", "status": "unpaid" },
+    { "id": "i2", "label": "AgentOS · tháng 7", "amount": "800.000₫", "status": "paid" },
+    { "id": "i3", "label": "Expert Academy · tháng 7", "amount": "1.200.000₫", "status": "paid" }
+  ]
+}

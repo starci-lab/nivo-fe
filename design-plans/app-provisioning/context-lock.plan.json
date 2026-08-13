@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "task": "provisioning page for expert sites and agentos workspaces",
+  "phase": "plan",
+  "status": "locked",
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-plan",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-plan\\SKILL.md"
+  },
+  "targets": [
+    {
+      "role": "primary",
+      "repo": "nivo-fe",
+      "app": "apps/app",
+      "gitRoot": "D:\\Repositories\\nivo-fe",
+      "branch": "main",
+      "worktree": "D:\\Repositories\\nivo-fe",
+      "head": "415300f",
+      "remote": null
+    }
+  ],
+  "references": [
+    {
+      "role": "business-truth",
+      "repo": "nivo-backend",
+      "gitRoot": "D:\\Repositories\\nivo-backend",
+      "branch": "main",
+      "purpose": "ExpertProvisionStatus, AgentWorkspaceAction, my-expert-sites / my-agent-workspace queries"
+    },
+    {
+      "role": "canon-anchor",
+      "repo": "starci-academy-fe",
+      "gitRoot": "D:\\Repositories\\starci-academy-fe",
+      "branch": "main",
+      "head": "8af51ee",
+      "purpose": "component and contract source anchors"
+    },
+    {
+      "role": "prior-case",
+      "path": "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard",
+      "purpose": "admission evidence: case-d1 already approved for sign-in and dashboard"
+    }
+  ],
+  "artifactRoot": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning",
+  "writeBoundary": ["D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning"],
+  "readOnlyBoundary": [
+    "D:\\Repositories\\nivo-fe\\apps",
+    "D:\\Repositories\\nivo-fe\\packages",
+    "D:\\Repositories\\nivo-backend",
+    "D:\\Repositories\\starci-academy-fe",
+    "D:\\Repositories\\starci-academy-backend\\.claude"
+  ],
+  "runtime": {
+    "kind": "direction-lab",
+    "startPolicy": "first free port from 8080",
+    "processOwner": "this plan run"
+  },
+  "evidence": [
+    "git rev-parse / branch --show-current / remote in nivo-fe",
+    "apps/*/package.json for app roles",
+    "design-plans/app-signin-dashboard/apply-progress.md for admission",
+    "nivo-backend enums and GraphQL query folders for business truth"
+  ],
+  "inheritedFrom": null,
+  "detectedAt": "2026-08-13"
+}

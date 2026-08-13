@@ -1,0 +1,593 @@
+{
+  "version": 3,
+  "task": "provisioning page for expert sites and agentos workspaces",
+  "planRecord": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning\\plan-record.json",
+  "contextLock": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning\\context-lock.preview.json",
+  "caseId": "case-prov",
+  "selectedDirectionId": "dir-c-fleet",
+  "approvedRevision": "1.4",
+  "revisionHistory": [
+    {
+      "revision": "1.0",
+      "summary": "First executable candidate for dir-c-fleet: one fleet list, kind filter, status counter strip.",
+      "retainedTraits": [
+        "one normalized row for both resource kinds",
+        "status as a column rather than as reading order",
+        "action derived from status AND kind"
+      ],
+      "rejectedTraits": [
+        "a leading glyph on the row — the kind badge already answers what it is, and IconName has no honest meaning for site or workspace",
+        "DualTabsToolbar for the filter — it requires both a leading and a trailing axis and this page has one"
+      ],
+      "reason": "built from the plan record's selected direction; no feedback pass yet"
+    },
+    {
+      "revision": "1.1",
+      "summary": "The page host moved into the registry. No product decision changed.",
+      "retainedTraits": [
+        "every owner, contract, prop, fixture and state from 1.0"
+      ],
+      "rejectedTraits": [
+        "the raw <main> with literal structural classes — starci-fe/no-structural-host-outside-registry-frame and no-literal-structural-class refused it at the Apply gate",
+        "closing over the outer isLoading inside the list projection — the content now reads the flag the branch handed it"
+      ],
+      "reason": "Apply could not materialize 1.0: the target canon lint reported 6 errors, two of them structural. A new registry key was needed, which changes the approved artifact and therefore requires a new revision rather than an Apply-time repair.",
+      "visibleDifference": "The column is WIDER. max-w-4xl is not a member of LayoutClassName, so the admitted key carries max-w-6xl. Content, order, states and tones are unchanged."
+    },
+    {
+      "revision": "1.2",
+      "summary": "The route is named in English and the copy moved into the message catalogue. No layout, order, tone or state changed.",
+      "retainedTraits": [
+        "every owner, contract, prop, state and tone from 1.1"
+      ],
+      "rejectedTraits": [
+        "the route segment `cap-phat` - starci-fe/no-second-language-in-path refuses a romanised second language in a path, and a route is the address a customer quotes and an import repeats",
+        "sentences written at the call site - the same term ended up spelled differently on two screens and a second language would have meant editing every file that renders a word",
+        "a `listFactLoading` catalogue key - the surface draws a skeleton over that slot, so it was a string no reader could ever see and a translator would have maintained forever"
+      ],
+      "reason": "The owner asked for i18n, for the provisioning screen to carry no Vietnamese in its names, and for the naming rule to say so. NAMING-3 now says it and the trust tree tests it, so 1.1 no longer passes its own gate.",
+      "visibleDifference": "None on screen. The rendered Vietnamese is identical; it now arrives from apps/app/src/messages/vi.json instead of from constants in the page, and the same fixture renders in English from en.json."
+    },
+    {
+      "revision": "1.3",
+      "summary": "The page owner left the routing tree. Nothing on screen changed.",
+      "retainedTraits": [
+        "every owner, contract, prop, state, tone and word from 1.2 - the four screenshots are byte-identical"
+      ],
+      "rejectedTraits": [
+        "a page owner under `app/` - LAYOUT-6 says a file there names which page renders at which URL and nothing else, and the routing tree is addressed by URL rather than browsed by tier, so a component parked there is invisible to everyone looking for it beside its siblings",
+        "the name `fleet-page.tsx` - the folder is the component's name, so `components/pages/ProvisioningPage/index.tsx` makes the path predict the name"
+      ],
+      "reason": "The owner caught it at the Apply confirmation. It had reached that point with every gate green because LAYOUT-6 was prose that no rule read; `starci-fe/route-tree-holds-routes-only` now reads it, and the same sweep moved every other page in the workspace out of its routing tree.",
+      "visibleDifference": "None, and that is provable rather than asserted: the populated, empty and error screenshots hash identically to 1.2's."
+    },
+    {
+      "revision": "1.4",
+      "summary": "The fixture is declared as a target. Nothing on screen changed.",
+      "retainedTraits": [
+        "every owner, contract, prop, state, tone and word from 1.3 - the populated, empty and error screenshots are byte-identical"
+      ],
+      "rejectedTraits": [
+        "a candidate.files list that omitted the fixture the page imports - 1.3 named two targets and the page needed three, so Apply could not write it without inventing a path for the third, which is precisely the improvisation the seal exists to prevent",
+        "`src/fixtures/` as the fixture's home - a page folder may hold only its two halves and their twins, and `resources/` is where a config map already belongs in this tree"
+      ],
+      "reason": "Apply stopped before its first write. The page imports a fixture that the sealed record never gave a target, and the Apply law is explicit that an edit nobody declared before the seal returns to Preview rather than being written and explained afterwards.",
+      "visibleDifference": "None. Only the target map and the fixture's path changed; the populated, empty and error captures hash identically to 1.3's."
+    }
+  ],
+  "deliveryMode": "single",
+  "mode": "creative",
+  "parityBaseline": null,
+  "workItems": [
+    {
+      "id": "page-provisioning",
+      "scope": "page",
+      "target": "nivo-fe/apps/app"
+    }
+  ],
+  "evidence": [
+    {
+      "source": "candidate build",
+      "claim": "next build --webpack exited 0; static export produced."
+    },
+    {
+      "source": "typecheck",
+      "claim": "tsc --noEmit reported 0 errors in the candidate, packages/ui, apps/app and apps/expert."
+    },
+    {
+      "source": "measured DOM",
+      "claim": "body background oklch(0.9702 0 0), list surface oklch(1 0 0) — the HeroUI token layer resolved."
+    },
+    {
+      "source": "measured DOM",
+      "claim": "7 rows rendered; the provisioning row carries no action button."
+    },
+    {
+      "source": "nivo-backend ExpertProvisionStatus",
+      "claim": "awaiting_dns is 'not an error and not retryable by us'."
+    },
+    {
+      "source": "nivo-backend AgentWorkspaceAction",
+      "claim": "suspend from active, resume from suspended, retry_provision from failed."
+    },
+    {
+      "source": "candidate lint",
+      "claim": "npx eslint on the candidate source exited 0 under the canon rule set, including no-second-language-in-path."
+    },
+    {
+      "source": "trust tree",
+      "claim": "npm test in .claude reported 214 pass / 0 fail with NAMING-3 and the anchored inline-directive fix in place."
+    },
+    {
+      "source": "rendered DOM",
+      "claim": "all four states render Vietnamese resolved from apps/app/src/messages/vi.json; the fixture itself contains no sentence."
+    },
+    {
+      "source": "rendered DOM",
+      "claim": "the same fixture built against en.json renders Provisioning / Fleet / 7 resources / Awaiting DNS / View DNS record - the locale swap was executed, not asserted."
+    },
+    {
+      "source": "canon",
+      "claim": "starci-fe/route-tree-holds-routes-only was added for LAYOUT-6, which had no rule; the trust suite runs 216 tests at 0 failures with it and its twin cases in place."
+    },
+    {
+      "source": "workspace lint",
+      "claim": "npx eslint . in nivo-fe reports one remaining finding, in apps/expert AcademySections, unrelated to this case."
+    },
+    {
+      "source": "screenshot hashes",
+      "claim": "the 1.3 populated, empty and error captures are byte-identical to 1.2's, so the restructure moved no pixel."
+    }
+  ],
+  "unknowns": [
+    "The review chrome first served the candidate from a subpath, where Next's absolute asset paths 404 and the frame rendered unstyled. Fixed by giving the candidate its own origin; the sealed screenshots are from that origin.",
+    "Whether ContractChildSpec needs a fourth kind for blocks. fleet-resource-list declares composite: \"fleet-row\" while FleetRow's meta.shape is \"block\".",
+    "Whether one user may hold more than one agent workspace; the query name is singular and its response is an array.",
+    "Pointing the next-intl plugin at the app's request config was tried in the candidate and fails at prerender: getTranslations needs a request scope a static export never enters. The candidate therefore passes the catalogue to the client provider directly, over the same vi.json file."
+  ],
+  "decisions": [
+    {
+      "decision": "Preview's write boundary was widened to packages/ui/src/contracts/index.ts and packages/ui/src/blocks/",
+      "tradeoff": "deviates from CONTEXT-LOCK-6, which makes Preview artifact-only; taken because a closed ContractKey union makes a new row anatomy impossible to express inside the artifact",
+      "approvedBy": "user"
+    },
+    {
+      "decision": "kind and status are two badges, not one",
+      "tradeoff": "one more element per row; without it a suspended resource reads as a different kind of thing from a running one"
+    },
+    {
+      "decision": "the row action slot is optional rather than disabled",
+      "tradeoff": "the row's right edge is ragged across states; a disabled button would promise a control that does not exist"
+    },
+    {
+      "decision": "two unprefixed layout class names were admitted into LayoutClassName",
+      "tradeoff": "the union grew by two; the md: twins already existed and a row whose first child takes the slack at every width needs them unprefixed"
+    }
+  ],
+  "candidate": {
+    "root": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning\\preview-lab\\candidate",
+    "framework": "Next.js 16.1.6 (webpack), React 19, @nivo/ui source via transpilePackages",
+    "buildCommand": "next build --webpack",
+    "build": {
+      "command": "next build --webpack",
+      "exitCode": 0,
+      "log": {
+        "path": "preview-lab/candidate/build.log",
+        "sha256": "261111d8f45883b9c06bf1cfe13ad4e0add76473f798caeeac985c031a7e2b26"
+      }
+    },
+    "lint": {
+      "command": "npx eslint \"design-plans/app-provisioning/preview-lab/candidate/src\"",
+      "exitCode": 0,
+      "log": {
+        "path": "preview-lab/candidate/lint.log",
+        "sha256": "19eaf43821a7660ec323a87c8457bf74823beb296c39f5e01aa8a683aa50f061"
+      }
+    },
+    "files": [
+      {
+        "path": "preview-lab/candidate/src/components/pages/ProvisioningPage/index.tsx",
+        "targetPath": "apps/app/src/components/pages/ProvisioningPage/index.tsx",
+        "note": "the page owner; holds all four states and resolves every label through useTranslations(\"provisioning\"). One file rather than two per SPLIT-6: the split exists because a request exists, and this screen still reads a fixture.",
+        "sha256": "3c7fe46f62320aa1bbe9c0d9b1c7715f65e610d0c77f2a2cc58282e5c178cff5"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/page.tsx",
+        "targetPath": "apps/app/src/app/provisioning/page.tsx",
+        "note": "the route. It mounts the page and nothing else, which is the whole of what a file under app/ may do.",
+        "sha256": "a3ba5ffcfc1b3ae35624df3095ea2c965bd63e32fe49460c357bd39ded841ee8"
+      },
+      {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "targetPath": "apps/app/src/resources/fleet.fixture.json",
+        "note": "the stand-in for the query that does not exist yet. It carries KEYS, never words, so the same file renders in either locale. 1.3 imported it and never said where it lands, which is why Apply could not write the page without inventing a path.",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      }
+    ],
+    "notPorted": [
+      {
+        "path": "preview-lab/candidate/src/app/empty/page.tsx",
+        "reason": "REVIEW ROUTE. Isolates the empty state so it can be photographed at a stable URL. The app reaches the same state from data, not from a route.",
+        "sha256": "9b568664f90d53ff5580ca9a70ad6b64674ff53829ef36d7c87f469d2ed3709d"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/loading/page.tsx",
+        "reason": "REVIEW ROUTE. Same reason, for the pending state.",
+        "sha256": "43158be817ea209a1a3e4f1ec0a1755dc3aaa621b464030f58eeb60b23b46d40"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/error/page.tsx",
+        "reason": "REVIEW ROUTE. Same reason, for the query-failed state - which is not the same thing as a resource whose status is failed.",
+        "sha256": "32eb301c36af8e07db2e58d3930fbe09e8b3283621a01c9e493411799d4d089a"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/layout.tsx",
+        "reason": "The app already has a layout, and it is BETTER than this one: it resolves its title through getTranslations, which a static export cannot run. Porting this would replace a request-time shell with a build-time one.",
+        "sha256": "40e906a773e1641953c6bc98aa176c48a95c58c89ca935510847465c2c127a75"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/providers.tsx",
+        "reason": "The app already has its providers, and they read the catalogue through the next-intl plugin. The candidate passes messages explicitly because a static export has no request scope - a difference in mechanism only, over the same vi.json.",
+        "sha256": "d704a319116f7f43906c3a169deb93f4047d31ad4ad0a361e3e7f757de54e62b"
+      },
+      {
+        "path": "preview-lab/candidate/src/app/globals.css",
+        "reason": "The app already has it. The candidate's copy differs only in `@source` depth, because it sits six directories further down.",
+        "sha256": "4da66efbfd115abfa52ecb57106e5b1ccfb497bd4588b719d2d3c625408349cb"
+      },
+      {
+        "path": "preview-lab/candidate/next.config.ts",
+        "reason": "MUST NOT BE PORTED. It carries `output: \"export\"`, which is what makes the build hashable and what would turn the production app into a static site if it landed.",
+        "sha256": "c490ade2993bfa3c6d417de6f1e9c95f2959e30a71069b4fd59dc7a00d378cc8"
+      }
+    ],
+    "i18n": {
+      "catalogue": [
+        "apps/app/src/messages/vi.json",
+        "apps/app/src/messages/en.json"
+      ],
+      "namespace": "provisioning",
+      "note": "The fixture carries KEYS - `kind`, `status` and `action` are catalogue names, not words - so one fixture renders in either locale. The candidate imports the app's own catalogue rather than holding a copy."
+    }
+  },
+  "states": [
+    {
+      "stateId": "page-provisioning-populated",
+      "ownerId": "page-provisioning",
+      "route": "/",
+      "viewport": {
+        "width": 1280,
+        "height": 900,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/populated.png",
+        "sha256": "f9a18a7718c78e3b08e15d78f49d8c6a56768406dac0afea40b5c49b7fa918c0"
+      },
+      "coverage": "rendered",
+      "runtimeProof": {
+        "candidateDigest": "68706b54fefd041589ba6c4bb8d4f77889678809ebbe48eeba5eba0d349f7a45",
+        "stateId": "page-provisioning-populated",
+        "fixtureSha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96",
+        "runtimeFingerprint": "741506db2989f680aa83ba36cb41664b7677da0bcc0b4e8f0a1fa53416565c6d",
+        "next": "16.1.6",
+        "buildId": "07WdyyxFGXLINdSbmFuxB"
+      },
+      "componentTree": [
+        "Tree title-with-end-action → Heading + Button",
+        "Tree stacked-stat-rows → StatRow ×4 (absent when there is nothing to count)",
+        "Tree choice-tab-strip → ChoiceTabs",
+        "SurfaceListCard fleet-resource-list → FleetRow ×N → Tree identity-kind-status-action-row"
+      ],
+      "contracts": [
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }"
+      ],
+      "tokens": [
+        "ready/active → success, awaiting_dns → warning, failed → danger, provisioning → accent, not_provisioned/suspended → neutral"
+      ]
+    },
+    {
+      "stateId": "page-provisioning-empty",
+      "ownerId": "page-provisioning",
+      "route": "/empty.html",
+      "viewport": {
+        "width": 1280,
+        "height": 900,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/empty.png",
+        "sha256": "45fc2dac067ff236b5993124a67ae3505e3edd15eea6ebc1a9b0ba4d0057906b"
+      },
+      "coverage": "rendered",
+      "componentTree": [
+        "Tree title-with-end-action → Heading + Button",
+        "Tree stacked-stat-rows → StatRow ×4 (absent when there is nothing to count)",
+        "Tree choice-tab-strip → ChoiceTabs",
+        "SurfaceListCard fleet-resource-list → FleetRow ×N → Tree identity-kind-status-action-row"
+      ],
+      "contracts": [
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }"
+      ],
+      "tokens": [
+        "ready/active → success, awaiting_dns → warning, failed → danger, provisioning → accent, not_provisioned/suspended → neutral"
+      ]
+    },
+    {
+      "stateId": "page-provisioning-loading",
+      "ownerId": "page-provisioning",
+      "route": "/loading.html",
+      "viewport": {
+        "width": 1280,
+        "height": 900,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/loading.png",
+        "sha256": "72754a5b6761cc39fdfcec1b3037450f3e4de7c92e6468f56ff42c8fe1513198"
+      },
+      "coverage": "rendered",
+      "componentTree": [
+        "Tree title-with-end-action → Heading + Button",
+        "Tree stacked-stat-rows → StatRow ×4 (absent when there is nothing to count)",
+        "Tree choice-tab-strip → ChoiceTabs",
+        "SurfaceListCard fleet-resource-list → FleetRow ×N → Tree identity-kind-status-action-row"
+      ],
+      "contracts": [
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }"
+      ],
+      "tokens": [
+        "ready/active → success, awaiting_dns → warning, failed → danger, provisioning → accent, not_provisioned/suspended → neutral"
+      ]
+    },
+    {
+      "stateId": "page-provisioning-error",
+      "ownerId": "page-provisioning",
+      "route": "/error.html",
+      "viewport": {
+        "width": 1280,
+        "height": 900,
+        "dpr": 1
+      },
+      "locale": "vi",
+      "theme": "light",
+      "authPersona": "owner (expert, signed in)",
+      "fixture": {
+        "path": "preview-lab/candidate/src/resources/fleet.fixture.json",
+        "sha256": "eab34437c10896509ef0098e742cc8f3d1d5856345ec434ae8ffc8695a669b96"
+      },
+      "screenshot": {
+        "path": "preview-lab/screens/error.png",
+        "sha256": "83bab7bfa67a80cbada5ed2131b9e8750259c280eaf3f103c4749f00ce7a1806"
+      },
+      "coverage": "rendered",
+      "componentTree": [
+        "Tree title-with-end-action → Heading + Button",
+        "Tree stacked-stat-rows → StatRow ×4 (absent when there is nothing to count)",
+        "Tree choice-tab-strip → ChoiceTabs",
+        "SurfaceListCard fleet-resource-list → FleetRow ×N → Tree identity-kind-status-action-row"
+      ],
+      "contracts": [
+        "title-with-end-action",
+        "stacked-stat-rows",
+        "choice-tab-strip",
+        "fleet-resource-list",
+        "identity-kind-status-action-row",
+        "name-over-handle",
+        "label-with-muted-fact-row"
+      ],
+      "props": [
+        "FleetRow: { id, name?, detail?, kind, kindLabel, status, statusLabel?, actionLabel? }"
+      ],
+      "tokens": [
+        "ready/active → success, awaiting_dns → warning, failed → danger, provisioning → accent, not_provisioned/suspended → neutral"
+      ]
+    }
+  ],
+  "integrationEdits": [
+    {
+      "targetPath": "apps/app/src/components/pages/ProvisioningPage/index.tsx",
+      "reason": "three imports become the app's own specifiers on materialization, and nothing else in the file changes. StatRow is reached by relative path into packages/ui/src because @nivo/ui's exports map publishes only ., ./contracts, ./leaves/* and ./branches/*, so it becomes @nivo/ui/composites/StatRow once the map admits it. FleetRow and the fixture are reached by relative path because the candidate sits outside the app; both become @/ aliases."
+    },
+    {
+      "targetPath": "apps/app/src/app/provisioning/page.tsx",
+      "reason": "the candidate's route reaches the page by relative path because it sits inside the lab; in the app it becomes the @/ alias."
+    },
+    {
+      "targetPath": "packages/ui/package.json",
+      "reason": "the exports map must admit ./composites/* before the StatRow import above can be a specifier"
+    }
+  ],
+  "stateCoverage": [
+    {
+      "ownerId": "page-provisioning",
+      "state": "populated",
+      "coverage": "rendered",
+      "scenarioId": "page-provisioning-populated"
+    },
+    {
+      "ownerId": "page-provisioning",
+      "state": "filtered",
+      "coverage": "covered-by",
+      "scenarioId": "page-provisioning-populated",
+      "evidence": "the kind filter is live in the sealed state; selecting Site or Workspace re-renders the same owner from the same fixture"
+    },
+    {
+      "ownerId": "page-provisioning",
+      "state": "empty",
+      "coverage": "rendered",
+      "scenarioId": "page-provisioning-empty"
+    },
+    {
+      "ownerId": "page-provisioning",
+      "state": "loading",
+      "coverage": "rendered",
+      "scenarioId": "page-provisioning-loading"
+    },
+    {
+      "ownerId": "page-provisioning",
+      "state": "error",
+      "coverage": "rendered",
+      "scenarioId": "page-provisioning-error"
+    },
+    {
+      "ownerId": "fleet-row",
+      "state": "ready",
+      "coverage": "rendered",
+      "scenarioId": "page-provisioning-populated"
+    },
+    {
+      "ownerId": "fleet-row",
+      "state": "active",
+      "coverage": "rendered",
+      "scenarioId": "page-provisioning-populated"
+    },
+    {
+      "ownerId": "fleet-row",
+      "state": "awaiting_dns",
+      "coverage": "rendered",
+      "scenarioId": "page-provisioning-populated"
+    },
+    {
+      "ownerId": "fleet-row",
+      "state": "provisioning",
+      "coverage": "rendered",
+      "scenarioId": "page-provisioning-populated"
+    },
+    {
+      "ownerId": "fleet-row",
+      "state": "failed",
+      "coverage": "rendered",
+      "scenarioId": "page-provisioning-populated"
+    },
+    {
+      "ownerId": "fleet-row",
+      "state": "suspended",
+      "coverage": "rendered",
+      "scenarioId": "page-provisioning-populated"
+    },
+    {
+      "ownerId": "fleet-row",
+      "state": "not_provisioned",
+      "coverage": "rendered",
+      "scenarioId": "page-provisioning-populated"
+    }
+  ],
+  "blockTrees": [
+    {
+      "directionId": "dir-c-fleet",
+      "tree": "PageProvisioning\n├── title-with-end-action\n├── stacked-stat-rows\n├── choice-tab-strip\n└── fleet-resource-list\n    └── FleetRow ×N"
+    }
+  ],
+  "contracts": [
+    {
+      "key": "identity-kind-status-action-row",
+      "status": "new, implemented",
+      "why": "kind and status are two badges because a row must answer WHAT before WHAT STATE; no glyph, because kind already carries that answer"
+    },
+    {
+      "key": "fleet-resource-list",
+      "status": "new, implemented",
+      "why": "two kinds compared in one scan share one joined surface"
+    },
+    {
+      "key": "titled-summary-filter-over-body-page",
+      "status": "new in 1.1, implemented",
+      "why": "the filter sits after the totals and before the rows; summary is optional because totals vanish honestly when there is nothing to count, while the filter is not, because a filter that disappeared with its rows would take the way back with it"
+    },
+    {
+      "key": "choice-tab-strip",
+      "status": "new, implemented",
+      "why": "a single filter axis on the plain choice primitive; extended-tabs requires an icon per tab and no honest glyph exists for a resource kind"
+    }
+  ],
+  "vocabularyProposals": [
+    {
+      "id": "FleetRow",
+      "status": "implemented",
+      "path": "apps/app/src/components/blocks/provisioning/FleetRow/index.tsx",
+      "note": "a BLOCK, so it lives in the app: it knows what a site and a workspace are, and @nivo/ui must not."
+    },
+    {
+      "id": "FleetStatusStrip",
+      "status": "not implemented",
+      "note": "the counter strip is composed inline from stacked-stat-rows + StatRow; extracting an owner was not needed to render the state"
+    },
+    {
+      "id": "ProvisioningPage",
+      "status": "implemented in candidate",
+      "targetPath": "apps/app/src/components/pages/ProvisioningPage/index.tsx"
+    }
+  ],
+  "backendEnablerProposals": [
+    {
+      "id": "counts-by-status",
+      "status": "not implemented",
+      "uiNeed": "the status counter strip",
+      "escalationTrigger": "counts are fixture-fed today and go wrong as soon as the list paginates"
+    }
+  ],
+  "preview": {
+    "path": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning\\preview-lab",
+    "url": "http://127.0.0.1:8089/",
+    "caseId": "case-prov",
+    "revision": "1.4"
+  },
+  "approval": {
+    "kind": "confirmed-restated",
+    "restatement": "duyệt revision 1.4 - khác 1.3 đúng một chỗ: fixture được khai là target thứ ba, ảnh không đổi một pixel. Apply sẽ ghi 3 file cộng exports map.",
+    "source": "ok"
+  },
+  "seal": {
+    "algorithm": "sha256",
+    "manifestSha256": "ebdb3221626b22db018624cd0026dc670450040b37478af2814bdef16c89bcc9"
+  }
+}

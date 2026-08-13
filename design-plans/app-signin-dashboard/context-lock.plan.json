@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "task": "nivo-app-signin-and-dashboard",
+  "phase": "plan",
+  "status": "backfilled",
+  "backfillNote": "The Plan run executed before starci-fe-design-plan carried the Context Lock requirement; the SKILL.md loaded at that time had no such step. These values are re-detected read-only after the fact and are marked backfilled rather than presented as a lock shown before the run. The Plan run did honour the substance of CONTEXT-LOCK-5: it wrote only inside the artifact root.",
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-plan",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-plan\\SKILL.md"
+  },
+  "targets": [
+    {
+      "role": "primary",
+      "repo": "nivo-fe",
+      "gitRoot": "D:\\Repositories\\nivo-fe",
+      "branch": "main",
+      "worktree": "D:\\Repositories\\nivo-fe",
+      "head": "5a78e89 at plan time; 415300f at preview detection",
+      "remote": "none configured"
+    }
+  ],
+  "references": [
+    { "role": "reference", "repo": "starci-academy", "path": "D:\\Repositories\\starci-academy", "branch": "mtp", "head": "9a1934231", "purpose": "Named parity source for the course-learn CollapsibleSidebar, SidebarNavItem and LearnSidebar." },
+    { "role": "reference", "repo": "starci-academy-fe", "path": "D:\\Repositories\\starci-academy-fe", "purpose": "Token-layer comparison: src/app/globals.css, 301 lines." },
+    { "role": "reference", "repo": "nivo-backend", "path": "D:\\Repositories\\nivo-backend", "purpose": "Business truth via GraphQL introspection against the running service at 127.0.0.1:3067." }
+  ],
+  "artifactRoot": "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard",
+  "writeBoundary": ["D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard"],
+  "readOnlyBoundary": [
+    "D:\\Repositories\\nivo-fe\\apps",
+    "D:\\Repositories\\nivo-fe\\packages",
+    "D:\\Repositories\\starci-academy",
+    "D:\\Repositories\\starci-academy-fe",
+    "D:\\Repositories\\nivo-backend",
+    "D:\\Repositories\\starci-academy-backend\\.claude"
+  ],
+  "runtime": [
+    { "port": 8082, "role": "direction lab", "pid": 49408, "owner": "this plan run", "note": "8080 and 8081 were already held by two earlier StarCi labs." },
+    { "port": 3067, "role": "nivo-backend, read-only evidence source", "owner": "this session", "note": "was live during introspection; no longer listening at preview detection" },
+    { "port": 3014, "role": "nivo-fe app dev server", "owner": "pre-existing process", "note": "no longer listening at preview detection" }
+  ],
+  "evidence": [
+    "git -C D:\\Repositories\\nivo-fe rev-parse --show-toplevel / branch --show-current / rev-parse --short HEAD / remote -v",
+    "git -C D:\\Repositories\\starci-academy branch --show-current -> mtp, HEAD 9a1934231",
+    "netstat listener table for 8082, 3014 and 3067",
+    "CLAUDE.md router naming D:\\Repositories\\starci-academy-backend\\.claude as the single trust tree"
+  ],
+  "inheritedFrom": null,
+  "detectedAt": "2026-08-12 (session-local; re-detected at preview gate)"
+}

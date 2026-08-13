@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction lab — console quản lý nivo</title>
+<style>
+:root{
+  --bg:#f4f4f5; --surface:#fff; --surface-2:#fafafa; --nav:#18181b; --border:#e4e4e7;
+  --fg:#18181b; --muted:#71717a; --faint:#a1a1aa;
+  --accent:#0485f7; --success:#17a34a; --warn:#d97706; --danger:#dc2626;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:14px/1.55 ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+.banner{position:sticky;top:0;z-index:9;background:#18181b;color:#fafafa;
+  padding:10px 20px;font-weight:700;letter-spacing:.06em;font-size:11px;text-transform:uppercase}
+.banner span{color:#fbbf24}
+.wrap{max-width:1500px;margin:0 auto;padding:24px 20px 90px}
+h1{font-size:23px;margin:22px 0 6px}
+.lede{color:var(--muted);max-width:80ch;margin:0 0 8px}
+.dirs{display:flex;flex-direction:column;gap:26px;margin-top:26px}
+.col{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.col > header{padding:16px 18px;border-bottom:1px solid var(--border);background:var(--surface-2)}
+.tag{display:inline-block;font:600 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:5px 9px;background:#fff}
+.col h2{font-size:17px;margin:10px 0 4px}
+.thesis{color:var(--muted);font-size:13px;margin:0;max-width:95ch}
+.scene{padding:18px;background:#e9e9ec}
+
+/* --- fake app chrome --- */
+.app{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;min-height:430px}
+.side{width:198px;flex:none;background:var(--nav);color:#d4d4d8;padding:14px 10px;display:flex;flex-direction:column;gap:3px}
+.brand{color:#fff;font-weight:700;padding:6px 10px 14px;font-size:15px}
+.nav{padding:8px 10px;border-radius:8px;font-size:13px;display:flex;gap:9px;align-items:center}
+.nav.on{background:#27272a;color:#fff;font-weight:600}
+.nav .g{width:15px;text-align:center;opacity:.7;font-size:12px}
+.navsep{height:1px;background:#3f3f46;margin:8px 6px}
+.body{flex:1;padding:18px;background:var(--surface);display:flex;flex-direction:column;gap:16px;min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topnav{display:flex;gap:18px;font-size:13px;color:var(--muted)}
+.topnav b{color:var(--fg);border-bottom:2px solid var(--accent);padding-bottom:11px;margin-bottom:-13px}
+
+.row{display:flex;align-items:center;gap:10px}
+.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stack{display:flex;flex-direction:column}
+.gap4{gap:4px}.gap6{gap:6px}.gap10{gap:10px}.gap14{gap:14px}
+.muted{color:var(--muted)}.faint{color:var(--faint)}.xs{font-size:12px}.sm{font-size:13px}
+.btn{border:0;border-radius:99px;padding:7px 14px;font:600 13px/1 inherit;background:var(--accent);color:#fff;cursor:default}
+.btn.ghost{background:#f4f4f5;color:var(--fg)}
+.btn.line{background:#fff;border:1px solid var(--border);color:var(--fg)}
+.btn.sm{padding:5px 11px;font-size:12px}
+.btn.danger{background:#fff;border:1px solid #fecaca;color:var(--danger)}
+.chip{display:inline-block;border-radius:99px;padding:3px 9px;font-size:11px;font-weight:600;background:#f4f4f5;color:var(--muted)}
+.chip.ok{background:#dcfce7;color:#166534}.chip.warn{background:#fef3c7;color:#92400e}
+.chip.bad{background:#fee2e2;color:#991b1b}.chip.run{background:#dbeafe;color:#1e40af}
+.card{border:1px solid var(--border);border-radius:11px;background:var(--surface);overflow:hidden}
+.item{padding:11px 13px;border-bottom:1px solid var(--border)}
+.item:last-child{border-bottom:0}
+.dot{width:8px;height:8px;border-radius:99px;flex:none}
+.dot.ok{background:var(--success)}.dot.warn{background:var(--warn)}
+.dot.bad{background:var(--danger)}.dot.run{background:var(--accent)}
+.mono{font-family:var(--mono)}
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.stat{border:1px solid var(--border);border-radius:9px;padding:9px 11px;background:var(--surface)}
+.big{font:700 21px/1.1 var(--mono)}
+.tabs{display:flex;gap:16px;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted)}
+.tabs b{color:var(--fg);border-bottom:2px solid var(--accent);padding-bottom:8px;margin-bottom:-1px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:7px 14px;font-size:13px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font-family:var(--mono);font-size:12.5px}
+.notes{padding:16px 18px;border-top:1px solid var(--border);background:var(--surface-2)}
+.notes h4{margin:0 0 8px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.notes ul{margin:0 0 12px;padding-left:18px}
+.notes li{margin:4px 0;font-size:12.5px;color:#3f3f46}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:1100px){.two{grid-template-columns:1fr}}
+.v-ok{color:var(--success);font-weight:700}.v-part{color:var(--warn);font-weight:700}.v-no{color:var(--danger);font-weight:700}
+table.cmp{width:100%;border-collapse:collapse;margin-top:16px;background:var(--surface);
+  border:1px solid var(--border);border-radius:14px;overflow:hidden;font-size:13px}
+table.cmp th,table.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+table.cmp th{background:var(--surface-2);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+table.cmp tr:last-child td{border-bottom:0}
+code{font:12px var(--mono);background:#f4f4f5;padding:1px 5px;border-radius:5px}
+.foot{margin-top:34px;color:var(--muted);font-size:12.5px;max-width:92ch}
+.callout{background:#fff;border:1px solid var(--border);border-left:3px solid var(--accent);
+  border-radius:9px;padding:13px 15px;margin:16px 0 0;font-size:13px;max-width:92ch}
+</style>
+</head>
+<body>
+<div class="banner">DIRECTIONAL — NOT AN APPLY BASELINE <span>· hình dạng để chọn hướng, không phải bản dựng</span></div>
+<div class="wrap">
+
+<h1>Console quản lý nivo — ba topology</h1>
+<p class="lede">
+  <code>/provisioning</code> <strong>trở thành</strong> console, không phải một màn đứng cạnh dashboard. Đây là trang
+  quản lý chung cho mọi thứ một expert đang chạy — kiểu panel quản VPS.
+</p>
+<div class="callout">
+  <strong>Ba hướng khác nhau ở TOPOLOGY, không phải ở nội dung.</strong> Cả ba đều hiển thị đúng những tài nguyên đó,
+  đúng những hành động đó. Chúng khác nhau ở chỗ: điều hướng nằm đâu, một tài nguyên mở ra thế nào, và hành động
+  nguy hiểm sống ở tầng nào. Đó là quyết định khó đổi nhất về sau — đổi topology là viết lại route, đổi màu thì không.
+</div>
+
+<div class="dirs">
+
+  <!-- ============ A ============ -->
+  <section class="col">
+    <header>
+      <span class="tag">direction-a · sidebar console</span>
+      <h2>Sidebar cố định, danh sách là trang chủ, mỗi tài nguyên có trang riêng</h2>
+      <p class="thesis">Hình dạng DigitalOcean/Vultr. Cột trái là các LOẠI tài nguyên; giữa là danh sách; bấm một dòng mở trang chi tiết đầy đủ. Hành động nhẹ nằm trên dòng, hành động nặng nằm trong trang chi tiết.</p>
+    </header>
+    <div class="scene">
+      <div class="two">
+        <div class="app">
+          <aside class="side">
+            <div class="brand">nivo</div>
+            <div class="nav on"><span class="g">▤</span> Tài nguyên <span style="margin-left:auto;font-size:11px;opacity:.6">7</span></div>
+            <div class="nav"><span class="g">◈</span> Tên miền <span style="margin-left:auto;font-size:11px;opacity:.6">3</span></div>
+            <div class="nav"><span class="g">◐</span> Chi phí AI</div>
+            <div class="nav"><span class="g">₫</span> Thanh toán <span style="margin-left:auto;font-size:11px;color:#f87171">1</span></div>
+            <div class="navsep"></div>
+            <div class="nav"><span class="g">☰</span> Nhật ký</div>
+            <div class="nav"><span class="g">⚙</span> Cài đặt</div>
+          </aside>
+          <div class="body">
+            <div class="between">
+              <div class="stack gap4"><strong style="font-size:16px">Tài nguyên</strong><span class="xs muted">7 mục · 2 cần chú ý</span></div>
+              <button class="btn sm">Cấp phát mới</button>
+            </div>
+            <div class="row gap10 xs muted"><span class="chip" style="background:#e0e7ff;color:#3730a3">Tất cả 7</span><span class="chip">Site 4</span><span class="chip">Workspace 3</span></div>
+            <div class="card">
+              <div class="item row gap10"><i class="dot ok"></i>
+                <div class="stack" style="flex:1;min-width:0"><span class="sm">hocvien-minhtue.nivo.vn</span><span class="xs muted mono">site · Pro · 2vCPU 4GB</span></div>
+                <span class="chip ok">Đang chạy</span><button class="btn line sm">Mở</button></div>
+              <div class="item row gap10"><i class="dot ok"></i>
+                <div class="stack" style="flex:1;min-width:0"><span class="sm">Minh Tue workspace</span><span class="xs muted mono">workspace · 3 agent</span></div>
+                <span class="chip ok">Hoạt động</span><button class="btn line sm">Mở</button></div>
+              <div class="item row gap10"><i class="dot warn"></i>
+                <div class="stack" style="flex:1;min-width:0"><span class="sm">minhtue.com</span><span class="xs muted mono">site · tên miền riêng</span></div>
+                <span class="chip warn">Chờ DNS</span><button class="btn line sm">Mở</button></div>
+              <div class="item row gap10"><i class="dot bad"></i>
+                <div class="stack" style="flex:1;min-width:0"><span class="sm">danglinh.nivo.vn</span><span class="xs muted mono">site · Keycloak bootstrap failed</span></div>
+                <span class="chip bad">Thất bại</span><button class="btn line sm">Mở</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="app">
+          <aside class="side">
+            <div class="brand">nivo</div>
+            <div class="nav on"><span class="g">▤</span> Tài nguyên</div>
+            <div class="nav"><span class="g">◈</span> Tên miền</div>
+            <div class="nav"><span class="g">◐</span> Chi phí AI</div>
+            <div class="nav"><span class="g">₫</span> Thanh toán</div>
+          </aside>
+          <div class="body">
+            <div class="row gap10 xs muted"><span>Tài nguyên</span><span class="faint">/</span><span class="mono" style="color:var(--fg)">hocvien-minhtue.nivo.vn</span></div>
+            <div class="between">
+              <div class="stack gap4"><strong style="font-size:16px">hocvien-minhtue.nivo.vn</strong>
+                <div class="row gap6"><span class="chip ok">Đang chạy</span><span class="xs muted mono">expert_academy · Pro</span></div></div>
+              <div class="row gap6"><button class="btn line sm">Triển khai lại</button><button class="btn danger sm">Dừng</button></div>
+            </div>
+            <div class="tabs"><b>Tổng quan</b><span>Triển khai</span><span>Tên miền</span><span>Chi phí</span><span>Nhật ký</span></div>
+            <dl class="kv">
+              <dt>Host công khai</dt><dd>hocvien-minhtue.nivo.vn</dd>
+              <dt>Cổng web / api</dt><dd>3210 / 3211</dd>
+              <dt>Trạng thái build</dt><dd>running</dd>
+              <dt>Chart version</dt><dd>0.4.2</dd>
+              <dt>AI đã tiêu</dt><dd>$12.10</dd>
+              <dt>Gia hạn</dt><dd>06/09/2026 · tự động</dd>
+            </dl>
+            <div class="card" style="border-color:#fecaca">
+              <div class="item between"><div class="stack gap4"><strong class="sm" style="color:var(--danger)">Vùng nguy hiểm</strong>
+                <span class="xs muted">Dựng lại xoá container và tạo lại từ đầu. Cấp phát lại xoá cả dữ liệu.</span></div>
+                <div class="row gap6"><button class="btn line sm">Dựng lại</button><button class="btn danger sm">Cấp phát lại</button></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notes">
+      <h4>Dữ liệu &amp; feasibility — <span class="v-ok">dựng được ngay</span></h4>
+      <ul>
+        <li>Danh sách: <code>myInstances</code>. Chi tiết: <code>myExpertSite</code> + <code>myExpertSiteDeployment</code> (<code>publicHost</code>, <code>apiPort</code>, <code>webPort</code>, <code>status</code>, <code>lastError</code>) + <code>myPodOpenclawStatus</code> + <code>opsEvents</code>.</li>
+        <li>Hành động đã có mutation thật: <code>deployExpertSite</code>, <code>stopExpertSiteDeployment</code>, <code>publishExpertSite</code>, <code>provisionExpertSite</code>, <code>manageAgentWorkspace</code>.</li>
+        <li><strong>“Dựng lại” và “Cấp phát lại” CHỈ operator gọi được</strong> — <code>POST /api/ops/lifecycle/rebuild|reprovision|wipe</code> sau <code>PlatformOperatorHttpGuard</code>. Với expert thường, hai nút này <strong>không tồn tại</strong>, không phải bị disable.</li>
+        <li><code>vCPU/RAM</code> hiện <strong>hardcode null</strong> trong <code>myInstances</code> dù cột <code>instances.ram_mb</code>/<code>vcpu</code> có thật — sửa resolver là đọc được, đây là enabler nhỏ nhất trong ba hướng.</li>
+      </ul>
+      <h4>Rủi ro phản biện</h4>
+      <ul>
+        <li>Sidebar + trang chi tiết là <strong>nhiều route nhất</strong>. Với tài khoản 2 tài nguyên thì bốn mục điều hướng cho ba thứ trông rỗng.</li>
+        <li>Cần contract mới cho topology sidebar — đúng ba key đã chặn Apply lần trước: <code>sidebar-then-body-app</code>, <code>sidebar-nav-cluster</code>, <code>titled-body</code>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ B ============ -->
+  <section class="col">
+    <header>
+      <span class="tag">direction-b · một trang, mở tại chỗ</span>
+      <h2>Không sidebar, không route con — mọi thứ trên một trang, chi tiết bung ra tại dòng</h2>
+      <p class="thesis">Hình dạng Fly.io/Railway thời đầu. Một trang cuộn: hạm đội, tên miền, chi phí, sự kiện. Bấm một dòng thì nó nở ra ngay tại chỗ, không rời trang, không mất ngữ cảnh.</p>
+    </header>
+    <div class="scene">
+      <div class="app" style="min-height:auto">
+        <div class="body" style="padding:0">
+          <div class="topbar">
+            <div class="row gap10"><strong>nivo</strong><span class="xs muted">console</span></div>
+            <div class="row gap6"><button class="btn ghost sm">Nạp ví</button><button class="btn sm">Cấp phát mới</button></div>
+          </div>
+          <div class="body">
+            <div class="statgrid">
+              <div class="stat stack gap4"><span class="xs muted">Đang chạy</span><span class="big" style="color:var(--success)">3</span></div>
+              <div class="stat stack gap4"><span class="xs muted">Cần chú ý</span><span class="big" style="color:var(--danger)">2</span></div>
+              <div class="stat stack gap4"><span class="xs muted">Ví</span><span class="big">2.45<span class="xs muted">tr</span></span></div>
+              <div class="stat stack gap4"><span class="xs muted">AI đã tiêu</span><span class="big">$18.4</span></div>
+            </div>
+
+            <div class="stack gap6">
+              <div class="between"><strong class="sm">Tài nguyên</strong><span class="xs muted">7 mục</span></div>
+              <div class="card">
+                <div class="item row gap10"><i class="dot ok"></i>
+                  <div class="stack" style="flex:1;min-width:0"><span class="sm">Minh Tue workspace</span><span class="xs muted mono">workspace · 3 agent</span></div>
+                  <span class="chip ok">Hoạt động</span><button class="btn line sm">Tạm dừng</button></div>
+
+                <div class="item" style="background:var(--surface-2)">
+                  <div class="row gap10" style="margin-bottom:11px"><i class="dot bad"></i>
+                    <div class="stack" style="flex:1;min-width:0"><span class="sm">danglinh.nivo.vn</span><span class="xs muted mono">site · đang mở</span></div>
+                    <span class="chip bad">Thất bại</span><span class="xs faint">▲</span></div>
+                  <div class="stack gap10" style="padding-left:18px;border-left:2px solid var(--border)">
+                    <dl class="kv" style="grid-template-columns:130px 1fr">
+                      <dt>Lỗi</dt><dd style="color:var(--danger)">Keycloak bootstrap failed</dd>
+                      <dt>Dừng ở</dt><dd>bước 3/5 · 2 giờ trước</dd>
+                      <dt>Host</dt><dd>danglinh.nivo.vn</dd>
+                      <dt>AI đã tiêu</dt><dd>$0.00</dd>
+                    </dl>
+                    <div class="row gap6"><button class="btn sm">Thử lại</button><button class="btn line sm">Xem nhật ký</button><button class="btn danger sm">Xoá</button></div>
+                  </div>
+                </div>
+
+                <div class="item row gap10"><i class="dot warn"></i>
+                  <div class="stack" style="flex:1;min-width:0"><span class="sm">minhtue.com</span><span class="xs muted mono">site · chờ CNAME</span></div>
+                  <span class="chip warn">Chờ DNS</span><span class="xs faint">▼</span></div>
+              </div>
+            </div>
+
+            <div class="two" style="gap:14px">
+              <div class="stack gap6"><strong class="sm">Tên miền</strong>
+                <div class="card">
+                  <div class="item between"><span class="sm mono">minhtue.com</span><span class="chip warn">12 ngày</span></div>
+                  <div class="item between"><span class="sm mono">hocvienmoc.vn</span><span class="chip ok">318 ngày</span></div>
+                </div></div>
+              <div class="stack gap6"><strong class="sm">Sự kiện gần đây</strong>
+                <div class="card">
+                  <div class="item row gap10"><i class="dot bad"></i><span class="sm" style="flex:1">Cấp phát thất bại</span><span class="xs faint">2 giờ</span></div>
+                  <div class="item row gap10"><i class="dot run"></i><span class="sm" style="flex:1">Bắt đầu cấp phát</span><span class="xs faint">1 giờ</span></div>
+                </div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notes">
+      <h4>Dữ liệu &amp; feasibility — <span class="v-part">dựng được, nhưng bốn con số trên cùng phải tự đếm</span></h4>
+      <ul>
+        <li>Dải bốn ô là <strong>đếm ở trình duyệt</strong> từ <code>myInstances</code> — backend <strong>không có query count nào</strong>. Đúng ngay hôm nay, sai ngay khi danh sách phân trang.</li>
+        <li>Chi tiết bung tại chỗ chỉ cần <code>myExpertSiteDeployment</code> + <code>opsEvents</code>, tải theo yêu cầu khi mở dòng.</li>
+        <li>Không có route con nên <strong>không chia sẻ được link tới một tài nguyên</strong>, và refresh mất chỗ đang mở trừ khi đẩy vào query string.</li>
+      </ul>
+      <h4>Rủi ro phản biện</h4>
+      <ul>
+        <li>Tài khoản 20 tài nguyên thì trang này <strong>dài vô tận</strong> và mọi thứ tranh nhau chỗ. Đây là hình dạng tối ưu cho ít, không cho nhiều.</li>
+        <li>Hành động nguy hiểm nằm <strong>cùng tầng</strong> với hành động thường — không có trang riêng để tách “vùng nguy hiểm” ra.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ C ============ -->
+  <section class="col">
+    <header>
+      <span class="tag">direction-c · thanh tác vụ trên, chi tiết là sản phẩm</span>
+      <h2>Điều hướng ngang mảnh, danh sách chỉ là bộ chuyển — trang chi tiết mới là nơi làm việc</h2>
+      <p class="thesis">Hình dạng Hetzner/Render. Danh sách cố tình gọn: tên, trạng thái, hết. Toàn bộ chiều sâu nằm ở trang một tài nguyên, chia tab — vì thao tác thật (triển khai, DNS, chi phí, nhật ký) đều thuộc về MỘT tài nguyên chứ không phải cả hạm đội.</p>
+    </header>
+    <div class="scene">
+      <div class="two">
+        <div class="app" style="min-height:auto">
+          <div class="body" style="padding:0">
+            <div class="topbar">
+              <div class="row gap10"><strong>nivo</strong>
+                <div class="topnav"><b>Tài nguyên</b><span>Tên miền</span><span>Thanh toán</span></div></div>
+              <button class="btn sm">Cấp phát mới</button>
+            </div>
+            <div class="body">
+              <div class="row gap10 between">
+                <div class="row gap6"><span class="chip" style="background:#e0e7ff;color:#3730a3">Tất cả</span><span class="chip">Cần chú ý 2</span></div>
+                <span class="xs muted">7 mục</span>
+              </div>
+              <div class="card">
+                <div class="item row gap10"><i class="dot ok"></i><span class="sm" style="flex:1">hocvien-minhtue.nivo.vn</span><span class="chip ok">Đang chạy</span></div>
+                <div class="item row gap10"><i class="dot ok"></i><span class="sm" style="flex:1">Minh Tue workspace</span><span class="chip ok">Hoạt động</span></div>
+                <div class="item row gap10" style="background:#f0f9ff"><i class="dot warn"></i><span class="sm" style="flex:1">minhtue.com</span><span class="chip warn">Chờ DNS</span></div>
+                <div class="item row gap10"><i class="dot bad"></i><span class="sm" style="flex:1">danglinh.nivo.vn</span><span class="chip bad">Thất bại</span></div>
+                <div class="item row gap10"><i class="dot run"></i><span class="sm" style="flex:1">Thao workspace</span><span class="chip run">Đang cấp phát</span></div>
+              </div>
+              <span class="xs faint">Danh sách cố tình mảnh — không hạ tầng, không giá, không hành động. Nó là bộ chuyển.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="app" style="min-height:auto">
+          <div class="body" style="padding:0">
+            <div class="topbar">
+              <div class="row gap10"><strong>nivo</strong>
+                <div class="topnav"><b>Tài nguyên</b><span>Tên miền</span><span>Thanh toán</span></div></div>
+            </div>
+            <div class="body">
+              <div class="between">
+                <div class="stack gap4"><strong style="font-size:16px">minhtue.com</strong>
+                  <div class="row gap6"><span class="chip warn">Chờ DNS</span><span class="xs muted mono">site · tên miền riêng</span></div></div>
+                <button class="btn line sm">Kiểm tra lại DNS</button>
+              </div>
+              <div class="tabs"><span>Tổng quan</span><span>Triển khai</span><b>Tên miền</b><span>Chi phí</span><span>Nhật ký</span></div>
+              <div class="card">
+                <div class="item stack gap6">
+                  <span class="xs muted">Trỏ bản ghi CNAME này rồi bấm kiểm tra lại</span>
+                  <div class="row gap10" style="background:#fafafa;border:1px solid var(--border);border-radius:8px;padding:9px 11px">
+                    <span class="xs mono" style="flex:1">minhtue.com → hocvien-minhtue.nivo.vn</span>
+                    <button class="btn ghost sm">Sao chép</button>
+                  </div>
+                </div>
+                <div class="item row gap10"><i class="dot warn"></i>
+                  <div class="stack" style="flex:1"><span class="sm">Chưa thấy bản ghi</span>
+                    <span class="xs muted">Dò lúc 12:41 · CNAME chưa trỏ tới đích</span></div></div>
+                <div class="item between"><span class="sm">Tự động gia hạn</span><span class="chip ok">Bật</span></div>
+                <div class="item between"><span class="sm">Hết hạn</span><span class="sm mono">25/08/2026 · còn 12 ngày</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notes">
+      <h4>Dữ liệu &amp; feasibility — <span class="v-ok">hợp với backend nhất</span></h4>
+      <ul>
+        <li>Tab “Tên miền” dùng <code>myAcademySettings</code>, thứ <strong>đã dò CNAME thật ngay lúc query</strong> và trả <code>{ domain, target, dnsReady, delivery, detail }</code>. Không hướng nào khác dùng tới nó.</li>
+        <li>Danh sách mảnh nên <strong>không cần</strong> <code>vCPU/RAM</code> đang hardcode null, và <strong>không cần</strong> đếm ở FE — hai điểm yếu của A và B đều không chạm vào đây.</li>
+        <li>Mỗi tab tải riêng, nên tab “Chi phí” hiện <code>creditBurnUsd</code> có chỗ để nói thẳng “tổng luỹ kế” và “workspace chưa đo được” mà không làm bẩn trang chính.</li>
+      </ul>
+      <h4>Rủi ro phản biện</h4>
+      <ul>
+        <li>Danh sách mảnh nghĩa là <strong>phải bấm vào mới biết gì đang cháy</strong> — trạng thái “Thất bại” nói có chuyện, không nói chuyện gì.</li>
+        <li>Năm tab cho một site mới cấp phát thì <strong>bốn tab rỗng</strong>.</li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+<table class="cmp">
+  <tr><th style="width:14%"></th><th>A · sidebar console</th><th>B · một trang, mở tại chỗ</th><th>C · chi tiết là sản phẩm</th></tr>
+  <tr><td><strong>Điều hướng</strong></td><td>Sidebar cố định theo loại tài nguyên</td><td>Không có — một trang cuộn</td><td>Thanh ngang mảnh, 3 mục</td></tr>
+  <tr><td><strong>Mở một tài nguyên</strong></td><td>Route riêng, trang đầy đủ</td><td>Nở tại chỗ, không rời trang</td><td>Route riêng, chia 5 tab</td></tr>
+  <tr><td><strong>Hành động nguy hiểm</strong></td><td>Vùng riêng ở cuối trang chi tiết</td><td>Cùng hàng với hành động thường</td><td>Trong tab, tách khỏi lối đọc chính</td></tr>
+  <tr><td><strong>Link tới một tài nguyên</strong></td><td>có</td><td><strong>không</strong></td><td>có, tới tận từng tab</td></tr>
+  <tr><td><strong>Hợp với tài khoản</strong></td><td>nhiều tài nguyên</td><td>ít, dưới ~10</td><td>bất kỳ</td></tr>
+  <tr><td><strong>Contract mới</strong></td><td>3 (<code>sidebar-then-body-app</code>, <code>sidebar-nav-cluster</code>, <code>titled-body</code>)</td><td>1 (hàng nở được)</td><td>2 (<code>resource-detail-tabs</code>, <code>copyable-record-row</code>)</td></tr>
+  <tr><td><strong>Backend enabler</strong></td><td><span class="v-part">1 nhỏ — bỏ hardcode null cho vCPU/RAM</span></td><td><span class="v-part">1 — query đếm theo trạng thái</span></td><td><span class="v-ok">0</span></td></tr>
+  <tr><td><strong>Tái dùng việc đã xong</strong></td><td><code>FleetRow</code> giữ nguyên</td><td><code>FleetRow</code> phải học trạng thái “đang mở”</td><td><code>FleetRow</code> <strong>gọn lại</strong> — bỏ badge kind và nút hành động</td></tr>
+  <tr><td><strong>Điểm yếu lớn nhất</strong></td><td>Nhiều route nhất; sidebar rỗng với tài khoản nhỏ</td><td>Không chia sẻ được link; dài vô tận khi nhiều</td><td>Phải bấm mới biết chuyện gì; tab rỗng lúc mới tạo</td></tr>
+</table>
+
+<p class="foot">
+  Cả ba đều là console quản lý chung và đều hiển thị đúng những tài nguyên, tên miền, chi phí và hành động mà
+  nivo-backend <strong>thật sự có</strong>. Khác biệt nằm ở topology — thứ đắt nhất để đổi về sau. Trang này là
+  <strong>công cụ để chọn</strong>: Preview sẽ dựng lại hướng được chọn thành candidate chạy thật, không sao chép HTML này.
+</p>
+
+</div>
+</body>
+</html>

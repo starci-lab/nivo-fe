@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "task": "nivo-app-signin-and-dashboard",
+  "phase": "preview",
+  "status": "relocked",
+  "relockNote": "Four drift findings were reported to the user before any preview artifact was written; the user chose to relock and continue in this session. (1) No inherited plan lock existed; it is now backfilled. (2) nivo-fe HEAD moved 5a78e89 -> 415300f during the session, a commit named docs(academy): persist the approved landing and student-entry records which places StarCi Academy artifacts under nivo-fe/.artifacts/preview-academy and nivo-fe/design-plans/academy-landing-student-entry - another session writes to this repository. (3) Ports 3067 and 3014 stopped listening; the schema evidence in the plan record was captured while 3067 was live and is not re-verified. (4) nivo-fe has no git remote.",
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-preview",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-preview\\SKILL.md"
+  },
+  "targets": [
+    {
+      "role": "primary",
+      "repo": "nivo-fe",
+      "gitRoot": "D:\\Repositories\\nivo-fe",
+      "branch": "main",
+      "worktree": "D:\\Repositories\\nivo-fe",
+      "head": "415300f",
+      "remote": "none configured"
+    }
+  ],
+  "references": [
+    { "role": "reference", "repo": "starci-academy", "path": "D:\\Repositories\\starci-academy", "branch": "mtp", "head": "9a1934231", "purpose": "Named parity source for the collapsible course-learn sidebar." },
+    { "role": "reference", "repo": "starci-academy-fe", "path": "D:\\Repositories\\starci-academy-fe", "purpose": "Token-layer comparison." },
+    { "role": "reference", "repo": "nivo-backend", "path": "D:\\Repositories\\nivo-backend", "purpose": "Business truth recorded in plan-record.json; service not currently running." }
+  ],
+  "artifactRoot": "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard",
+  "writeBoundary": ["D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard\\preview-lab", "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard\\design-record.md", "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard\\design-record.json", "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard\\context-lock.preview.md", "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard\\context-lock.preview.json"],
+  "readOnlyBoundary": [
+    "D:\\Repositories\\nivo-fe\\apps",
+    "D:\\Repositories\\nivo-fe\\packages",
+    "D:\\Repositories\\nivo-fe\\.artifacts",
+    "D:\\Repositories\\starci-academy",
+    "D:\\Repositories\\starci-academy-fe",
+    "D:\\Repositories\\nivo-backend",
+    "D:\\Repositories\\starci-academy-backend\\.claude"
+  ],
+  "runtime": [
+    { "port": 8082, "role": "plan direction lab", "pid": 49408, "owner": "this session", "policy": "keep running for comparison" },
+    { "port": "first free from 8080", "role": "preview review lab", "owner": "this session", "policy": "started by this phase" }
+  ],
+  "evidence": [
+    "git -C D:\\Repositories\\nivo-fe rev-parse --short HEAD -> 415300f",
+    "git -C D:\\Repositories\\nivo-fe show --stat 415300f",
+    "curl 127.0.0.1:3014 and :3067 -> 000 (no listener); :8082 -> 200",
+    "User instruction: relock and continue in this session"
+  ],
+  "inheritedFrom": "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard\\context-lock.plan.json",
+  "detectedAt": "2026-08-12 (session-local)"
+}

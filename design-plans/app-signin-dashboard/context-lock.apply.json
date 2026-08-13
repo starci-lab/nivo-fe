@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "task": "nivo-app-signin-and-dashboard",
+  "phase": "apply",
+  "status": "confirmed",
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-apply",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-apply\\SKILL.md"
+  },
+  "approvedRecord": "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard\\design-record.json",
+  "approvedCaseId": "case-d1",
+  "targets": [
+    {
+      "role": "primary",
+      "repo": "nivo-fe",
+      "gitRoot": "D:\\Repositories\\nivo-fe",
+      "branch": "main",
+      "worktree": "D:\\Repositories\\nivo-fe",
+      "head": "415300f",
+      "remote": "none configured",
+      "workingTree": "15 modified or untracked entries, of which 1 is this task's artifact directory; the rest belong to apps/expert and packages/ui and are NOT this task's work"
+    }
+  ],
+  "references": [
+    { "role": "reference", "repo": "starci-academy", "path": "D:\\Repositories\\starci-academy", "branch": "mtp", "head": "9a1934231", "purpose": "Parity source for sidebar geometry and collapse behaviour." },
+    { "role": "reference", "repo": "starci-academy-fe", "path": "D:\\Repositories\\starci-academy-fe", "purpose": "Token-layer shape only; its palette values are NOT approved for nivo." },
+    { "role": "reference", "repo": "nivo-backend", "path": "D:\\Repositories\\nivo-backend", "purpose": "Schema truth; service currently stopped and must be restarted before queries are wired." }
+  ],
+  "artifactRoot": "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard",
+  "proposedWriteBoundary": [
+    "D:\\Repositories\\nivo-fe\\apps\\app\\src\\app\\globals.css",
+    "D:\\Repositories\\nivo-fe\\apps\\app\\src\\app\\layout.tsx",
+    "D:\\Repositories\\nivo-fe\\apps\\app\\src\\app\\page.tsx",
+    "D:\\Repositories\\nivo-fe\\apps\\app\\src\\app\\(auth)\\dang-nhap\\",
+    "D:\\Repositories\\nivo-fe\\apps\\app\\src\\components\\layouts\\AppSidebarChrome\\",
+    "D:\\Repositories\\nivo-fe\\apps\\app\\src\\components\\pages\\DashboardPage\\",
+    "D:\\Repositories\\nivo-fe\\apps\\app\\src\\components\\blocks\\dashboard\\InstanceList\\",
+    "D:\\Repositories\\nivo-fe\\apps\\app\\src\\components\\blocks\\dashboard\\WorkNeedingYou\\",
+    "D:\\Repositories\\nivo-fe\\apps\\app\\src\\components\\blocks\\dashboard\\WalletSummary\\",
+    "D:\\Repositories\\nivo-fe\\apps\\app\\src\\components\\blocks\\auth\\SignInPanel\\",
+    "D:\\Repositories\\nivo-fe\\apps\\app\\src\\modules\\api\\",
+    "D:\\Repositories\\nivo-fe\\apps\\app\\package.json",
+    "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard\\"
+  ],
+  "confirmedWriteBoundaryNote": "The user narrowed the boundary to apps/app only. packages/ui/src/contracts/index.ts is EXCLUDED, so the three approved contracts - sidebar-then-body-app, titled-body, sidebar-nav-cluster - cannot be added in this run. layout-app-chrome and page-dashboard therefore cannot be implemented in canon terms and are deferred; only work that reuses existing contracts may proceed.",
+  "readOnlyBoundary": [
+    "D:\\Repositories\\nivo-fe\\apps\\expert",
+    "D:\\Repositories\\nivo-fe\\apps\\landing",
+    "D:\\Repositories\\nivo-fe\\.artifacts",
+    "D:\\Repositories\\starci-academy",
+    "D:\\Repositories\\starci-academy-fe",
+    "D:\\Repositories\\nivo-backend",
+    "D:\\Repositories\\starci-academy-backend\\.claude"
+  ],
+  "runtime": [
+    { "port": 8082, "role": "plan direction lab", "pid": 49408, "state": "running" },
+    { "port": 8086, "role": "preview review lab", "pid": 32856, "state": "running" },
+    { "port": 3014, "role": "nivo-fe app dev server", "state": "stopped", "policy": "apply must restart it to verify the state matrix in the browser" },
+    { "port": 3067, "role": "nivo-backend", "state": "stopped", "policy": "apply must restart it before wiring any query" }
+  ],
+  "drift": [
+    { "field": "runtime 3014", "inherited": "was listening at plan time", "detected": "stopped", "consequence": "no browser verification is possible until restarted" },
+    { "field": "runtime 3067", "inherited": "was listening during schema introspection", "detected": "stopped", "consequence": "schema evidence in the record is unverified for this run" },
+    { "field": "target working tree", "inherited": "not recorded by the plan lock", "detected": "15 entries, 14 of them unrelated to this task (apps/expert, packages/ui)", "consequence": "an unrelated in-flight change shares the branch; apply must not sweep it into this work" },
+    { "field": "target remote", "inherited": "none", "detected": "none", "consequence": "nothing here is pushed anywhere" }
+  ],
+  "confirmationRequired": [
+    "target repository and branch: D:\\Repositories\\nivo-fe on main (no separate worktree)",
+    "the proposed write boundary above, in particular packages/ui/src/contracts/index.ts which is shared canon and already carries uncommitted changes from other work",
+    "whether apply may restart the dev server on 3014 and nivo-backend on 3067",
+    "the palette question: token VALUES are not approved by the design record"
+  ],
+  "confirmationEvidence": "User chose \"Chạy, nhưng chỉ trong apps/app\": repo D:\\Repositories\\nivo-fe on main confirmed, write boundary confirmed minus packages/ui/src/contracts/index.ts, and restarting 3014 / 3067 permitted.",
+  "inheritedFrom": "D:\\Repositories\\nivo-fe\\design-plans\\app-signin-dashboard\\context-lock.preview.json",
+  "detectedAt": "2026-08-12 (session-local)"
+}

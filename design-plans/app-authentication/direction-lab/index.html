@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction lab — màn xác thực nivo</title>
+<style>
+:root{
+  --bg:#f4f4f5; --surface:#fff; --border:#e4e4e7;
+  --fg:#18181b; --muted:#71717a; --faint:#a1a1aa;
+  --accent:#0485f7; --success:#17a34a; --warn:#d97706; --danger:#dc2626;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:14px/1.55 ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+.banner{position:sticky;top:0;z-index:9;background:#18181b;color:#fafafa;
+  padding:10px 20px;font-weight:700;letter-spacing:.06em;font-size:11px;text-transform:uppercase}
+.banner span{color:#fbbf24}
+.wrap{max-width:1500px;margin:0 auto;padding:24px 20px 90px}
+h1{font-size:23px;margin:22px 0 6px}
+.lede{color:var(--muted);max-width:82ch;margin:0 0 8px}
+.callout{background:#fff;border:1px solid var(--border);border-left:3px solid var(--danger);
+  border-radius:9px;padding:14px 16px;margin:18px 0 0;font-size:13px;max-width:95ch}
+.callout.info{border-left-color:var(--accent)}
+.callout b{color:var(--danger)}
+.callout.info b{color:var(--accent)}
+.grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));align-items:start;margin-top:26px}
+.col{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.col > header{padding:16px 18px;border-bottom:1px solid var(--border);background:#fafafa}
+.tag{display:inline-block;font:600 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:5px 9px;background:#fff}
+.col h2{font-size:16px;margin:10px 0 4px}
+.thesis{color:var(--muted);font-size:13px;margin:0}
+.scene{padding:22px 18px;background:#e9e9ec;display:flex;justify-content:center}
+.card{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:22px 20px}
+.center{text-align:center}
+.brand{font-weight:700;font-size:15px;margin-bottom:14px}
+h3{font-size:17px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 16px}
+.field{margin-bottom:11px}
+.lab{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.inp{width:100%;border:1px solid var(--border);border-radius:10px;padding:9px 11px;font-size:13px;
+  background:#fff;color:var(--faint)}
+.btn{display:block;width:100%;border:0;border-radius:99px;padding:10px;font:600 14px/1 inherit;
+  background:var(--accent);color:#fff;margin-top:6px;cursor:default}
+.btn.ghost{background:#f4f4f5;color:var(--fg)}
+.btn.line{background:#fff;border:1px solid var(--border);color:var(--fg)}
+.or{display:flex;align-items:center;gap:10px;color:var(--faint);font-size:12px;margin:14px 0}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--border)}
+.row{display:flex;align-items:center;gap:8px}
+.between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.xs{font-size:12px}.muted{color:var(--muted)}.faint{color:var(--faint)}
+.link{color:var(--accent)}
+.otp{display:flex;gap:7px;justify-content:center;margin:16px 0 12px}
+.cell{width:40px;height:46px;border:1px solid var(--border);border-radius:10px;background:#fafafa;
+  display:flex;align-items:center;justify-content:center;font:700 20px/1 var(--mono)}
+.tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:99px;padding:3px;margin-bottom:16px;background:#fafafa}
+.tabs span{flex:1;text-align:center;font-size:13px;padding:7px;border-radius:99px;color:var(--muted)}
+.tabs b{flex:1;text-align:center;font-size:13px;padding:7px;border-radius:99px;background:#fff;
+  border:1px solid var(--border);color:var(--fg)}
+.step{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--faint);margin-bottom:14px;
+  justify-content:center;font-family:var(--mono)}
+.step i{width:18px;height:18px;border-radius:99px;border:1px solid var(--border);display:inline-flex;
+  align-items:center;justify-content:center;font-style:normal;font-size:10px}
+.step i.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chk{width:15px;height:15px;border:1px solid var(--border);border-radius:4px;flex:none}
+.notes{padding:16px 18px;border-top:1px solid var(--border);background:#fafafa}
+.notes h4{margin:0 0 8px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.notes ul{margin:0 0 12px;padding-left:18px}
+.notes li{margin:4px 0;font-size:12.5px;color:#3f3f46}
+.v-ok{color:var(--success);font-weight:700}.v-part{color:var(--warn);font-weight:700}.v-no{color:var(--danger);font-weight:700}
+table.cmp{width:100%;border-collapse:collapse;margin-top:18px;background:var(--surface);
+  border:1px solid var(--border);border-radius:14px;overflow:hidden;font-size:13px}
+table.cmp th,table.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+table.cmp th{background:#fafafa;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+table.cmp tr:last-child td{border-bottom:0}
+code{font:12px var(--mono);background:#f4f4f5;padding:1px 5px;border-radius:5px}
+.foot{margin-top:32px;color:var(--muted);font-size:12.5px;max-width:92ch}
+</style>
+</head>
+<body>
+<div class="banner">DIRECTIONAL — NOT AN APPLY BASELINE <span>· hình dạng để chọn hướng, không phải bản dựng</span></div>
+<div class="wrap">
+
+<h1>Màn xác thực nivo — ba hướng</h1>
+<p class="lede">
+  Tham chiếu có tên là <code>starci-fe/AuthenticationPanel</code>: <strong>một panel, ba mode, hai bước mỗi mode</strong>.
+  Backend nivo giờ phục vụ đủ chín mutation OTP. Ba hướng dưới đây khác nhau ở chỗ <em>panel đó gặp thực tế nivo ra sao</em>.
+</p>
+
+<div class="callout">
+  <b>PHẢI ĐỌC TRƯỚC KHI CHỌN.</b> <code>signInVerifyOtp</code> hiện <strong>hardcode <code>requiresTwoFactor: false</code></strong>,
+  trong khi <code>signIn</code> trực tiếp <em>có</em> cổng TOTP (<code>user.twoFactorEnabled</code> → challenge).
+  Nghĩa là tài khoản đã bật TOTP đi qua đường OTP sẽ <strong>vào được mà không cần yếu tố thứ hai</strong>.
+  Đây là hạ cấp bảo mật, phát hiện khi đọc để làm Plan. Hướng nào được chọn cũng phải trả lời nó — và câu trả lời khác nhau ở từng hướng.
+</div>
+
+<div class="callout info">
+  <b>Ba thứ starci có mà nivo chưa có nền để đỡ.</b>
+  <strong>Điều khoản/bảo mật</strong>: panel starci có link, nhưng <code>src/app</code> của starci <em>không có trang nào</em> — link trỏ vào hư không ở cả hai repo.
+  <strong>Ghi nhớ đăng nhập</strong>: phiên nivo là token trong bộ nhớ + cookie refresh <code>maxAge</code> cố định 30 ngày — không có cơ chế nào để bật/tắt.
+  <strong><code>SignInPanel</code> đã ship</strong>: 6 state, đã duyệt, đã nối dây thật.
+</div>
+
+<div class="grid">
+
+  <!-- ============ A ============ -->
+  <section class="col">
+    <header>
+      <span class="tag">direction-a · parity-first</span>
+      <h2>Port nguyên panel starci, cắt cái nivo không đỡ được</h2>
+      <p class="thesis">Một panel, ba mode đổi tại chỗ, hai bước. Giữ y nguyên bố cục và thứ tự đọc của tham chiếu; bỏ đúng những phần nivo không có nền — và ghi rõ từng chỗ bỏ.</p>
+    </header>
+    <div class="scene">
+      <div class="card">
+        <div class="brand center">nivo</div>
+        <div class="tabs"><b>Đăng nhập</b><span>Đăng ký</span></div>
+        <div class="step"><i class="on">1</i> thông tin <i>2</i> mã</div>
+        <div class="field"><span class="lab">Email</span><div class="inp">ban@congty.vn</div></div>
+        <div class="field"><span class="lab">Mật khẩu</span><div class="inp">••••••••</div></div>
+        <div class="between xs" style="margin:10px 0 4px">
+          <span class="faint">— ghi nhớ: bỏ, không có cơ chế</span>
+          <span class="link">Quên mật khẩu?</span>
+        </div>
+        <button class="btn">Tiếp tục</button>
+        <div class="or">hoặc</div>
+        <button class="btn line">Tiếp tục với Google</button>
+        <button class="btn line" style="margin-top:8px">Tiếp tục với GitHub</button>
+        <p class="xs muted center" style="margin:14px 0 0">Chưa có tài khoản? <span class="link">Tạo tài khoản</span></p>
+      </div>
+    </div>
+    <div class="notes">
+      <h4>Trả lời câu TOTP thế nào</h4>
+      <ul>
+        <li><strong>Bước ba.</strong> Mật khẩu → mã email → mã TOTP, chỉ với tài khoản đã bật. Panel starci không có state này nên đây là <strong>chỗ divergence được ghi</strong>, không phải parity.</li>
+      </ul>
+      <h4>Bỏ gì, vì sao</h4>
+      <ul>
+        <li><strong>Ghi nhớ đăng nhập</strong> — cookie refresh có <code>maxAge</code> cố định; ô tick không đổi được gì thì là ô tick nói dối.</li>
+        <li><strong>Đồng ý điều khoản</strong> — không có trang để trỏ. Vẽ link chết còn tệ hơn không vẽ.</li>
+      </ul>
+      <h4>Feasibility — <span class="v-part">2 contract mới</span></h4>
+      <ul>
+        <li>Tái dùng: <code>centred-authentication-page</code>, <code>authentication-panel-card</code>, <code>centred-page-column</code>, <code>auth-shortcuts-over-divider</code>, <code>spread-choice-row</code>, <code>form-column</code>, <code>label-field-hint</code>.</li>
+        <li>MỚI: một dải ô nhập mã, và một chỉ báo bước — không key nào đang có diễn tả được hai quan hệ đó.</li>
+        <li><code>SignInPanel</code> đã ship <strong>bị thay thế</strong>. 6 state của nó gộp vào mode <code>signIn</code>.</li>
+      </ul>
+      <h4>Rủi ro phản biện</h4>
+      <ul>
+        <li>Bỏ một block đã duyệt và đã nối dây. Nếu sau này nivo có trang điều khoản và cơ chế ghi nhớ, hai thứ vừa cắt phải quay lại.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ B ============ -->
+  <section class="col">
+    <header>
+      <span class="tag">direction-b · giữ cái đã ship</span>
+      <h2>Giữ <code>SignInPanel</code>, chỉ thêm hai mode còn thiếu</h2>
+      <p class="thesis">Màn đăng nhập đã duyệt, đã nối dây, đã chạy — để yên. Đăng ký và quên mật khẩu là hai panel riêng cùng ngữ pháp, cùng khung thẻ, đi tới bằng route.</p>
+    </header>
+    <div class="scene">
+      <div class="card">
+        <div class="brand center">nivo</div>
+        <h3 class="center">Đăng nhập</h3>
+        <p class="sub center">Quản lý các hệ thống bạn đang chạy trên nivo.</p>
+        <button class="btn line">Tiếp tục với Google</button>
+        <button class="btn line" style="margin-top:8px">Tiếp tục với GitHub</button>
+        <div class="or">hoặc</div>
+        <div class="field"><span class="lab">Email</span><div class="inp">ban@congty.vn</div></div>
+        <div class="field"><span class="lab">Mật khẩu</span><div class="inp">••••••••</div></div>
+        <button class="btn">Đăng nhập</button>
+        <div class="between xs" style="margin-top:12px">
+          <span class="link">Quên mật khẩu?</span>
+          <span class="link">Tạo tài khoản</span>
+        </div>
+        <p class="xs faint center" style="margin:14px 0 0">— hai lối ra dẫn sang route riêng, không đổi mode tại chỗ</p>
+      </div>
+    </div>
+    <div class="notes">
+      <h4>Trả lời câu TOTP thế nào</h4>
+      <ul>
+        <li><strong>Đăng nhập không đi qua OTP.</strong> Giữ <code>signIn</code> trực tiếp, vốn <em>đã</em> có cổng TOTP và <code>SignInPanel</code> đã có state cho nó. Lỗ hổng biến mất vì đường sinh ra nó không được dùng.</li>
+        <li>Hệ quả: <code>signInInit</code>/<code>signInVerifyOtp</code> vừa dựng <strong>nằm không</strong> ở đường đăng nhập.</li>
+      </ul>
+      <h4>Feasibility — <span class="v-ok">rẻ nhất, ít rủi ro nhất</span></h4>
+      <ul>
+        <li><code>SignInPanel</code>, <code>SignInPage</code>, transport, phiên — <strong>không đụng gì</strong>. Tất cả đang chạy thật.</li>
+        <li>Thêm: <code>SignUpPanel</code>, <code>ForgotPasswordPanel</code>, hai route, một dải ô nhập mã dùng chung.</li>
+      </ul>
+      <h4>Rủi ro phản biện</h4>
+      <ul>
+        <li><strong>Không phải "y chang starci".</strong> starci đổi mode tại chỗ trong một thẻ; đây là ba màn. Người dùng bấm "Tạo tài khoản" sẽ thấy trang tải lại.</li>
+        <li>Ba panel cùng ngữ pháp là ba chỗ ngữ pháp đó có thể trôi.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ C ============ -->
+  <section class="col">
+    <header>
+      <span class="tag">direction-c · mã là bước duy nhất</span>
+      <h2>Bỏ mật khẩu khỏi đăng nhập — chỉ email và mã</h2>
+      <p class="thesis">Nếu mọi lần đăng nhập đều phải mở hộp thư, thì ô mật khẩu chỉ là bước thừa đứng trước bước thật. Đăng nhập nhập email, nhận mã, vào. Mật khẩu vẫn tồn tại cho đăng ký và cho đường không OTP.</p>
+    </header>
+    <div class="scene">
+      <div class="card">
+        <div class="brand center">nivo</div>
+        <div class="tabs"><b>Đăng nhập</b><span>Đăng ký</span></div>
+        <div class="step"><i>1</i> email <i class="on">2</i> mã</div>
+        <p class="sub center">Đã gửi mã tới <strong>ban@congty.vn</strong></p>
+        <div class="otp"><span class="cell">8</span><span class="cell">0</span><span class="cell">4</span><span class="cell">1</span><span class="cell">9</span><span class="cell">4</span></div>
+        <p class="xs muted center">Mã có hiệu lực trong 10 phút.</p>
+        <button class="btn">Xác nhận</button>
+        <div class="between xs" style="margin-top:12px">
+          <span class="faint">Gửi lại sau 0:47</span>
+          <span class="link">Dùng email khác</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes">
+      <h4>Trả lời câu TOTP thế nào</h4>
+      <ul>
+        <li><strong>Mã email THAY cho mật khẩu, nên TOTP thành yếu tố thứ hai thật</strong> — và cổng TOTP phải được nối lại vào <code>signInVerifyOtp</code>, không được để <code>false</code> như hiện tại.</li>
+      </ul>
+      <h4>Feasibility — <span class="v-no">cần backend đổi</span></h4>
+      <ul>
+        <li><code>signInInit</code> hiện <strong>bắt buộc</strong> mật khẩu, và grant nó <em>trước</em> khi gửi mail — đó là thứ chặn endpoint thành máy gửi thư rác. Bỏ mật khẩu là <strong>gỡ mất lá chắn đó</strong> và phải thay bằng thứ khác.</li>
+        <li>Không có thứ khác nào đang tồn tại. Đây là hướng duy nhất cần backend làm thêm việc.</li>
+      </ul>
+      <h4>Rủi ro phản biện</h4>
+      <ul>
+        <li>Không đăng nhập được khi mail trễ hoặc vào spam — và đó là <strong>mọi lần</strong>, không phải lần đầu.</li>
+        <li>Xa tham chiếu nhất.</li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+<table class="cmp">
+  <tr><th style="width:15%"></th><th>A · parity-first</th><th>B · giữ cái đã ship</th><th>C · mã thay mật khẩu</th></tr>
+  <tr><td><strong>Giống starci</strong></td><td>gần nhất</td><td>ngữ pháp giống, topology khác</td><td>xa nhất</td></tr>
+  <tr><td><strong>Đổi mode</strong></td><td>tại chỗ, một thẻ</td><td>ba route</td><td>tại chỗ, một thẻ</td></tr>
+  <tr><td><strong>Lỗ TOTP</strong></td><td>vá bằng bước ba</td><td><strong>biến mất</strong> — không dùng đường OTP để đăng nhập</td><td>vá, và TOTP thành yếu tố thứ hai thật</td></tr>
+  <tr><td><strong><code>SignInPanel</code> đã ship</strong></td><td>bị thay</td><td><strong>giữ nguyên</strong></td><td>bị thay</td></tr>
+  <tr><td><strong>Backend phải làm thêm</strong></td><td><span class="v-ok">không</span></td><td><span class="v-ok">không</span></td><td><span class="v-no">có — thay lá chắn chống gửi thư rác</span></td></tr>
+  <tr><td><strong>Contract mới</strong></td><td>2</td><td>2</td><td>2</td></tr>
+  <tr><td><strong>Điểm yếu lớn nhất</strong></td><td>bỏ một block đã duyệt và đã chạy</td><td>không phải "y chang"; ba chỗ ngữ pháp có thể trôi</td><td>mail trễ là không vào được, mọi lần</td></tr>
+</table>
+
+<p class="foot">
+  Ba hướng khác nhau ở <strong>quyết định sản phẩm</strong> — đăng nhập có bắt buộc mở hộp thư không, đổi mode tại chỗ hay đổi trang,
+  và số phận của màn đã ship. Không hướng nào chỉ khác màu. Trang này là <strong>công cụ để chọn</strong>: Preview sẽ dựng lại
+  hướng được chọn thành candidate chạy thật, không sao chép HTML này.
+</p>
+
+</div>
+</body>
+</html>

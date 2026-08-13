@@ -1,0 +1,114 @@
+{
+    "landing": {
+        "hero": {
+            "tryFree": "Học thử miễn phí",
+            "seeCourses": "Xem khoá học"
+        },
+        "problems": {
+            "title": "Những cái sai thường gặp"
+        },
+        "outcomes": {
+            "title": "Sau khoá học bạn làm được gì",
+            "first": "Làm được việc thật",
+            "second": "Có lộ trình rõ ràng",
+            "third": "Được sửa trực tiếp"
+        },
+        "roadmap": {
+            "title": "Lộ trình"
+        },
+        "testimonials": {
+            "title": "Học viên nói gì"
+        },
+        "gallery": {
+            "title": "Hình ảnh hoạt động"
+        },
+        "courses": {
+            "title": "Khoá học",
+            "emptyTitle": "Chưa có khoá học nào",
+            "emptyBody": "Khoá đầu tiên sẽ xuất hiện ở đây."
+        },
+        "community": {
+            "title": "Cộng đồng",
+            "body": "Hỏi đáp hằng tuần, và một nhóm cùng đi đường dài."
+        },
+        "offer": {
+            "title": "Quyền lợi thành viên",
+            "body": "Liên hệ để biết học phí và lịch khai giảng."
+        },
+        "faq": {
+            "title": "Câu hỏi thường gặp"
+        },
+        "lead": {
+            "title": "Học thử miễn phí",
+            "body": "Điền thông tin, học viện sẽ liên hệ lại.",
+            "name": "Họ tên",
+            "phone": "Số điện thoại",
+            "submit": "Gửi thông tin",
+            "sending": "Đang gửi…",
+            "error": "Chưa gửi được. Kiểm tra kết nối rồi thử lại.",
+            "sent": "Cảm ơn bạn — học viện sẽ liên hệ lại sớm."
+        }
+    },
+    "entry": {
+        "signUp": {
+            "title": "Tạo tài khoản",
+            "body": "Tài khoản học viên của riêng học viện này, không liên quan tài khoản nivo.",
+            "submit": "Tiếp tục",
+            "switchPrompt": "Đã có tài khoản?",
+            "switchAction": "Đăng nhập",
+            "doneTitle": "Tạo tài khoản thành công",
+            "doneHint": "Đang đưa bạn vào học viện..."
+        },
+        "signIn": {
+            "title": "Đăng nhập",
+            "body": "Nhập email và mật khẩu, chúng tôi sẽ gửi mã xác nhận về hộp thư của bạn.",
+            "submit": "Tiếp tục",
+            "switchPrompt": "Chưa có tài khoản?",
+            "switchAction": "Đăng ký",
+            "doneTitle": "Đã đăng nhập",
+            "doneHint": "Đang đưa bạn vào học viện..."
+        },
+        "google": "Tiếp tục với Google",
+        "github": "Tiếp tục với GitHub",
+        "or": "hoặc",
+        "email": "Email",
+        "password": "Mật khẩu",
+        "back": "Quay lại",
+        "twoFactor": "Tài khoản này bật xác minh hai lớp. Học viện chưa hỗ trợ bước đó trên bản này — hãy tạm tắt, hoặc dùng tài khoản khác.",
+        "oauthLeaving": "Đang chuyển tới {provider}… Bạn sẽ quay lại ngay sau khi đăng nhập xong.",
+        "oauthFailed": "Không hoàn tất được đăng nhập. Liên kết có thể đã hết hạn.",
+        "alreadySignedIn": "Đang đưa bạn về trang học…",
+        "emailPlaceholder": "ban@vidu.com",
+        "passwordPlaceholder": "Nhập mật khẩu của bạn",
+        "reveal": "Hiện mật khẩu",
+        "hide": "Ẩn mật khẩu",
+        "confirmPassword": "Nhập lại mật khẩu",
+        "confirmPasswordPlaceholder": "Nhập lại mật khẩu của bạn",
+        "passwordMismatch": "Hai mật khẩu chưa khớp.",
+        "passwordHint": "Ít nhất 8 ký tự.",
+        "newPassword": "Mật khẩu mới",
+        "newPasswordPlaceholder": "Nhập mật khẩu mới",
+        "rememberMe": "Ghi nhớ đăng nhập",
+        "forgotPasswordLink": "Quên mật khẩu?",
+        "agreeToTerms": "Tôi đồng ý với điều khoản",
+        "agreeToTermsPrefix": "Khi tiếp tục, bạn đồng ý với",
+        "terms": "Điều khoản sử dụng",
+        "and": "và",
+        "privacy": "Chính sách bảo mật",
+        "codeLabel": "Mã xác nhận",
+        "codePlaceholder": "6 chữ số",
+        "codeHint": "Mã có hiệu lực trong {minutes} phút. Kiểm tra cả hộp thư rác.",
+        "codeSubmit": "Xác nhận",
+        "resend": "Gửi lại mã",
+        "useAnotherEmail": "Dùng email khác",
+        "forgotPassword": {
+            "title": "Đặt lại mật khẩu",
+            "body": "Nhập email và mật khẩu mới. Nếu địa chỉ này có tài khoản, chúng tôi sẽ gửi mã xác nhận.",
+            "submit": "Gửi mã",
+            "switchPrompt": "Nhớ ra mật khẩu rồi?",
+            "switchAction": "Đăng nhập",
+            "doneTitle": "Đã đổi mật khẩu",
+            "doneHint": "Hãy đăng nhập bằng mật khẩu mới."
+        }
+    }
+}

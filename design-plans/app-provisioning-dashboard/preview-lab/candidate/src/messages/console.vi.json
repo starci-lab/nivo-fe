@@ -1,0 +1,90 @@
+{
+  "_note": "PROPOSED CATALOGUE ADDITIONS. Target: these namespaces merge into apps/app/src/messages/vi.json, and their English twins into en.json. They live here rather than there because the app's catalogue is production source and Preview's write boundary reaches only the contracts file. Nothing in this file is a sentence a component holds - the components read keys.",
+  "console": {
+    "title": "Bảng điều khiển",
+    "brand": "nivo",
+    "sectionResources": "Tài nguyên",
+    "sectionDomains": "Tên miền",
+    "sectionBilling": "Thanh toán",
+    "sectionSpend": "Chi phí AI"
+  },
+  "resources": {
+    "title": "Tài nguyên",
+    "newResource": "Cấp phát mới",
+    "listLabel": "Hạm đội",
+    "listFact": "{count} tài nguyên",
+    "filterLabel": "Lọc theo loại tài nguyên",
+    "filterAll": "Tất cả",
+    "empty": "Chưa có site hay workspace nào. Cấp phát cái đầu tiên để bắt đầu.",
+    "error": "Không tải được danh sách tài nguyên. Đây là lỗi khi hỏi máy chủ, không phải một tài nguyên bị lỗi.",
+    "kind": {
+      "site": "Site",
+      "workspace": "Workspace"
+    },
+    "status": {
+      "notProvisioned": "Chưa cấp phát",
+      "provisioning": "Đang cấp phát",
+      "awaitingDns": "Chờ DNS",
+      "ready": "Đang chạy",
+      "failed": "Thất bại",
+      "active": "Hoạt động",
+      "suspended": "Tạm dừng"
+    },
+    "action": {
+      "open": "Mở",
+      "suspend": "Tạm dừng",
+      "resume": "Tiếp tục",
+      "retry": "Thử lại",
+      "viewDns": "Xem bản ghi DNS",
+      "provision": "Cấp phát"
+    }
+  },
+  "resourceDetail": {
+    "factsLabel": "Thông tin",
+    "publicHost": "Host công khai",
+    "ports": "Cổng web / api",
+    "buildStatus": "Trạng thái build",
+    "chartVersion": "Phiên bản chart",
+    "aiSpend": "AI đã tiêu",
+    "aiSpendLifetime": "tổng luỹ kế",
+    "aiSpendUnmeasured": "chưa đo được",
+    "renewsAt": "Gia hạn",
+    "shapeUnknown": "chưa đọc được",
+    "redeploy": "Triển khai lại",
+    "stop": "Dừng",
+    "retryProvision": "Thử cấp phát lại",
+    "resume": "Tiếp tục",
+    "failureLabel": "Vì sao thất bại",
+    "dnsLabel": "Bản ghi cần trỏ",
+    "dnsPending": "Chưa thấy bản ghi. Trỏ CNAME rồi kiểm tra lại.",
+    "dangerLabel": "Vùng nguy hiểm",
+    "dangerBody": "Dựng lại xoá container và tạo lại từ đầu. Cấp phát lại xoá cả dữ liệu.",
+    "rebuild": "Dựng lại",
+    "reprovision": "Cấp phát lại",
+    "eventsLabel": "Sự kiện gần đây",
+    "eventsEmpty": "Chưa có sự kiện nào.",
+    "notFound": "Không tìm thấy tài nguyên này. Có thể nó đã bị xoá, hoặc nó không thuộc tài khoản đang đăng nhập.",
+    "loadingLabel": "Đang tải"
+  },
+  "domains": {
+    "title": "Tên miền",
+    "addDomain": "Thêm tên miền",
+    "listLabel": "Đang giữ",
+    "listFact": "{count} tên miền",
+    "expiresIn": "còn {days} ngày",
+    "autoRenewOn": "Tự động gia hạn",
+    "autoRenewOff": "Không tự gia hạn",
+    "empty": "Chưa giữ tên miền nào."
+  },
+  "billing": {
+    "title": "Thanh toán",
+    "topUp": "Nạp ví",
+    "walletLabel": "Số dư ví",
+    "invoicesLabel": "Hoá đơn",
+    "invoicesFact": "{count} hoá đơn",
+    "unpaid": "Chưa thanh toán",
+    "paid": "Đã thanh toán",
+    "pay": "Thanh toán",
+    "empty": "Chưa có hoá đơn nào."
+  }
+}

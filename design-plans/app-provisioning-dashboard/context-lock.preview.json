@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "task": "app-provisioning-dashboard",
+  "phase": "preview",
+  "status": "active",
+  "trustRoot": "D:Repositoriesstarci-academy-backend.claude",
+  "skill": {
+    "name": "starci-fe-design-preview",
+    "path": "D:Repositoriesstarci-academy-backend.claudeskillsstarci-fe-design-previewSKILL.md"
+  },
+  "targets": [
+    {
+      "role": "design-target",
+      "repo": "nivo-fe",
+      "gitRoot": "D:Repositories\nivo-fe",
+      "branch": "main",
+      "worktree": "D:Repositories\nivo-fe",
+      "head": "415300f5a37a6366941612eb75c80a8ae1fc002c",
+      "remote": null
+    }
+  ],
+  "references": [
+    {
+      "role": "business-truth",
+      "repo": "nivo-backend",
+      "gitRoot": "D:Repositories\nivo-backend",
+      "head": "e822320",
+      "purpose": "which operations, entities and aggregates actually exist"
+    },
+    {
+      "role": "prior-case",
+      "path": "D:Repositories\nivo-fedesign-plansapp-signin-dashboard",
+      "purpose": "direction-d was selected for a dashboard whose fleet list now lives on /provisioning; its page-dashboard item was blocked at Apply and never rendered"
+    },
+    {
+      "role": "sibling-case",
+      "path": "D:Repositories\nivo-fedesign-plansapp-provisioning",
+      "purpose": "the shipped /provisioning page this dashboard must not duplicate"
+    },
+    {
+      "role": "trust",
+      "gitRoot": "D:Repositoriesstarci-academy-backend.claude",
+      "purpose": "canon, contracts, FE rule set"
+    }
+  ],
+  "artifactRoot": "D:Repositories\nivo-fedesign-plansapp-provisioning-dashboard",
+  "writeBoundary": [
+    "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning-dashboard",
+    "D:\\Repositories\\nivo-fe\\packages\\ui\\src\\contracts\\index.ts"
+  ],
+  "readOnlyBoundary": [
+    "all nivo-fe source",
+    "D:Repositories\nivo-backend",
+    "D:Repositoriesstarci-academy-backend"
+  ],
+  "runtime": {
+    "candidate": "preview-lab/candidate, Next 16 webpack static export",
+    "lab": "preview-lab",
+    "startPolicy": "after the lock is shown"
+  },
+  "evidence": [
+    "git rev-parse in both repositories",
+    "a full read-only scan of nivo-backend for the four data areas",
+    "the prior plan-record and its apply-progress stop note"
+  ],
+  "inheritedFrom": "D:Repositories\nivo-fedesign-plansapp-provisioning-dashboardcontext-lock.plan.json",
+  "detectedAt": "2026-08-13",
+  "planRecord": "D:Repositories\nivo-fedesign-plansapp-provisioning-dashboardplan-record.json",
+  "caseId": "case-console",
+  "selectedDirectionId": "direction-a",
+  "drift": {
+    "detected": false,
+    "comparedFields": [
+      "trustRoot",
+      "skill lineage",
+      "target role",
+      "gitRoot",
+      "branch",
+      "worktree",
+      "head",
+      "remote",
+      "artifactRoot"
+    ],
+    "note": "HEAD 415300f unchanged from the Plan lock. Same repositories, same roles, same artifact root."
+  },
+  "blocked": false,
+  "blockingFinding": {
+    "id": "proposed-contracts-live-outside-the-preview-boundary",
+    "summary": "direction-a needs four registry entries. They belong in packages/ui/src/contracts/index.ts, which is production source and therefore read-only to Preview under CONTEXT-LOCK-6.",
+    "whyTheCandidateCannotWorkAroundIt": "Tree imports contractSpec statically from packages/ui/src/contracts. A candidate-local registry cannot be injected, so rendering these nodes artifact-locally would require copying Tree - and a copied frame makes the candidate prove that a facsimile renders, which is the one thing an executable Preview may not do.",
+    "precedent": "app-signin-dashboard hit this exactly: its apply-progress records layout-app-chrome and page-dashboard BLOCKED for the same reason. The provisioning case resolved it by the user widening the boundary, recorded as a named deviation with approvedBy: user.",
+    "exactSource": "preview-lab/proposed-contracts.ts",
+    "requestedBoundaryAddition": [
+      "packages/ui/src/contracts/index.ts"
+    ],
+    "productionWrites": "none",
+    "resolvedBy": "the user widened the boundary to that single contracts file"
+  },
+  "boundaryDeviation": {
+    "rule": "CONTEXT-LOCK-6 makes Preview artifact-only",
+    "granted": [
+      "packages/ui/src/contracts/index.ts"
+    ],
+    "approvedBy": "user",
+    "words": "Nới cho đúng file contracts (đề xuất)",
+    "reason": "A closed ContractKey union makes a new node anatomy impossible to express inside the artifact: Tree imports contractSpec statically, so a candidate-local registry would require copying Tree - and the candidate would then be proving that a facsimile renders.",
+    "narrowness": "Exactly one file. No leaf, branch, composite, block or app source is writable by this phase."
+  }
+}

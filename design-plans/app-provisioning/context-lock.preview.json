@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "task": "provisioning page for expert sites and agentos workspaces",
+  "phase": "preview",
+  "status": "confirmed-widened-boundary",
+  "boundaryWidening": {
+    "approvedBy": "user",
+    "evidence": "Mở ranh giới cho đúng hai đường dẫn này",
+    "deviatesFrom": "CONTEXT-LOCK-6 (Preview is artifact-only)",
+    "grantedPaths": [
+      "D:\\Repositories\\nivo-fe\\packages\\ui\\src\\contracts\\index.ts",
+      "D:\\Repositories\\nivo-fe\\packages\\ui\\src\\blocks"
+    ],
+    "stillForbidden": [
+      "D:\\Repositories\\nivo-fe\\apps",
+      "D:\\Repositories\\nivo-fe\\packages\\ui\\src\\leaves",
+      "D:\\Repositories\\nivo-fe\\packages\\ui\\src\\composites",
+      "D:\\Repositories\\nivo-fe\\packages\\ui\\src\\branches"
+    ]
+  },
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-preview",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-preview\\SKILL.md"
+  },
+  "inheritedFrom": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning\\context-lock.plan.json",
+  "caseId": "case-prov",
+  "selectedDirectionId": "dir-c-fleet",
+  "targets": [
+    {
+      "role": "primary",
+      "repo": "nivo-fe",
+      "app": "apps/app",
+      "gitRoot": "D:\\Repositories\\nivo-fe",
+      "branch": "main",
+      "worktree": "D:\\Repositories\\nivo-fe",
+      "head": "415300f",
+      "remote": null
+    }
+  ],
+  "drift": [],
+  "artifactRoot": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning",
+  "writeBoundary": ["D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning"],
+  "readOnlyBoundary": [
+    "D:\\Repositories\\nivo-fe\\apps",
+    "D:\\Repositories\\nivo-fe\\packages",
+    "D:\\Repositories\\nivo-backend",
+    "D:\\Repositories\\starci-academy-fe",
+    "D:\\Repositories\\starci-academy-backend\\.claude"
+  ],
+  "runtime": {
+    "kind": "executable-candidate",
+    "startPolicy": "first free port from 8080",
+    "started": false
+  },
+  "runtimeFeasibilityProven": {
+    "moduleResolution": "@nivo/ui resolves to D:\\Repositories\\nivo-fe\\packages\\ui\\src\\index.ts from the candidate location",
+    "method": "createRequire from the intended candidate next.config.ts path",
+    "consequence": "an artifact-local Next app can import the real StarCi components with transpilePackages"
+  },
+  "blocker": {
+    "kind": "write-boundary",
+    "needs": [
+      "packages/ui/src/contracts/index.ts — one new registry entry for the fleet row",
+      "packages/ui/src/blocks/ — the FleetRow and FleetStatusStrip owners"
+    ],
+    "reason": "ContractKey is keyof typeof CONTRACTS (contracts/index.ts:850), a closed union; Tree accepts no other key, so a new contract cannot exist inside the artifact root",
+    "anatomyChecked": [
+      { "key": "glyph-title-fact-row", "verdict": "three fixed icon/text slots; no badge, button or kind" },
+      { "key": "glyph-body-action-row", "verdict": "glyph + body + action; no badge, no kind" },
+      { "key": "avatar-identity-badge-action-row", "verdict": "closest; leading leaf is avatar, no kind slot, why is about a suggested identity" },
+      { "key": "label-with-muted-fact-row", "verdict": "two text slots only" }
+    ],
+    "priorOccurrence": "design-plans/app-signin-dashboard/apply-progress.md — layout-app-chrome and page-dashboard blocked on the same file"
+  },
+  "detectedAt": "2026-08-13"
+}

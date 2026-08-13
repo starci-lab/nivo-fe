@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "task": "nivo expert academy public landing and student entry",
+  "phase": "apply",
+  "status": "awaiting-confirmation",
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-apply",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-apply\\SKILL.md"
+  },
+  "targets": [
+    {
+      "role": "primary",
+      "repo": "nivo-fe",
+      "gitRoot": "D:\\Repositories\\nivo-fe",
+      "branch": "main",
+      "worktree": "D:\\Repositories\\nivo-fe",
+      "head": "415300f",
+      "remote": null
+    }
+  ],
+  "references": [
+    {
+      "role": "parity-baseline",
+      "repo": "nivo",
+      "gitRoot": "D:\\Repositories\\nivo",
+      "branch": "main",
+      "head": "cc9a41f",
+      "remote": "https://github.com/starci-lab/nivo.git",
+      "purpose": "apps/expert/src/components/blocks/landing/LandingPage.tsx binds landing parity"
+    },
+    {
+      "role": "convention-reference",
+      "repo": "starci-academy-fe",
+      "gitRoot": "D:\\Repositories\\starci-academy-fe",
+      "branch": "main",
+      "head": "8af51ee",
+      "remote": "https://github.com/starci-lab/starci-academy-fe.git",
+      "purpose": "the implementation standard the user asked the code to follow, and the next-intl wiring being copied"
+    }
+  ],
+  "artifactRoot": "D:\\Repositories\\nivo-fe\\.artifacts\\preview-academy",
+  "writeBoundary": [
+    "D:\\Repositories\\nivo-fe\\apps\\expert\\package.json",
+    "D:\\Repositories\\nivo-fe\\apps\\expert\\next.config.ts",
+    "D:\\Repositories\\nivo-fe\\apps\\expert\\src\\i18n",
+    "D:\\Repositories\\nivo-fe\\apps\\expert\\src\\messages",
+    "D:\\Repositories\\nivo-fe\\apps\\expert\\src\\app\\layout.tsx",
+    "D:\\Repositories\\nivo-fe\\apps\\expert\\src\\app\\page.tsx",
+    "D:\\Repositories\\nivo-fe\\apps\\expert\\src\\app\\(auth)\\sign-in",
+    "D:\\Repositories\\nivo-fe\\apps\\expert\\src\\academy"
+  ],
+  "readOnlyBoundary": [
+    "D:\\Repositories\\nivo",
+    "D:\\Repositories\\starci-academy-fe",
+    "D:\\Repositories\\starci-academy-backend",
+    "D:\\Repositories\\nivo-fe\\packages\\ui"
+  ],
+  "runtime": {
+    "reviewLab": { "url": "http://127.0.0.1:8080", "servedFrom": "D:\\Repositories\\nivo-fe\\.artifacts\\preview-academy", "pid": 52228, "owner": "this session", "startPolicy": "first free port from 8080" },
+    "appDevServer": { "port": 3013, "running": false }
+  },
+  "evidence": [
+    "git rev-parse / branch --show-current / remote -v per repository",
+    "design-record.json target and fileBoundary entries",
+    "user instruction 2026-08-12: \"chuẩn cho nivo đấy\"",
+    "user instruction 2026-08-12: \"chạy lại code theo chuẩn starci-academy-fe\"",
+    "user answer to U-G 2026-08-12: route segment /sign-in",
+    "netstat: 127.0.0.1:8080 owned by PID 52228; nothing listening on 3013"
+  ],
+  "inheritedFrom": null,
+  "drift": [
+    { "id": "D-1", "item": "inherited preview lock", "detected": "context-lock.preview.md/json absent; the approved record predates the Context Lock rule", "disposition": "user ruling required" },
+    { "id": "D-2", "item": "production edits already made this session", "detected": "package.json, next.config.ts, layout.tsx, src/i18n/*, src/messages/*, sections.tsx (partial)", "disposition": "user ruling required" },
+    { "id": "D-3", "item": "sections.tsx mid-conversion", "detected": "Hero and Problems translated; nine sections still hardcoded Vietnamese; file parses; untracked so no git baseline", "disposition": "finish forward or rewrite wholesale" },
+    { "id": "D-4", "item": "auth route segment U-G", "detected": "user chose /sign-in; plan record still names dang-nhap", "disposition": "resolved, recorded" },
+    { "id": "D-5", "item": "approved contract ordered-toggleable-section-stack", "detected": "registry requires child-fixing entries and a closed layout-class union; academy bands are app-level markup", "disposition": "user ruling required" },
+    { "id": "D-6", "item": "plan record status disagreement", "detected": "plan-record.json direction-selected vs plan-record.md awaiting-direction-selection", "disposition": "documentation drift, non-blocking" },
+    { "id": "D-7", "item": "target has no git remote", "detected": "nivo-fe remote list empty while nivo has origin", "disposition": "confirm the target is the local-only checkout" },
+    { "id": "D-8", "item": "no wired endpoint for lead or credential submission", "detected": "apps/expert has no lead mutation and no auth call", "disposition": "user ruling required before those four states can be claimed" }
+  ],
+  "detectedAt": "2026-08-12"
+}

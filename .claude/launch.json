@@ -2,21 +2,44 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "candidate-academy-entry",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "D:/Repositories/nivo-fe/design-plans/academy-landing-student-entry/preview-lab/candidate",
+        "run",
+        "dev"
+      ],
+      "port": 8099,
+      "autoPort": false
+    },
+    {
       "name": "app",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev:app"],
-      "port": 3014
+      "runtimeArgs": [
+        "run",
+        "dev:app"
+      ],
+      "port": 3066,
+      "autoPort": false
     },
     {
       "name": "expert",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev:expert"],
-      "port": 3013
+      "runtimeArgs": [
+        "run",
+        "dev:expert"
+      ],
+      "port": 3068,
+      "autoPort": false
     },
     {
       "name": "landing",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev:landing"],
+      "runtimeArgs": [
+        "run",
+        "dev:landing"
+      ],
       "port": 3012
     }
   ]

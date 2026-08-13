@@ -1,0 +1,341 @@
+{
+	"identity": {
+		"name": "Học viện Mộc",
+		"tagline": {
+			"vi": "Nghề mộc thủ công, dạy bởi người đã sống bằng nghề hai mươi năm.",
+			"en": "Hand joinery, taught by someone who has lived off the craft for twenty years."
+		}
+	},
+	"theme": {
+		"light": {
+			"--accent": "oklch(52% 0.12 55)",
+			"--accent-foreground": "oklch(99% 0.005 85)",
+			"--background": "oklch(97.5% 0.008 85)",
+			"--foreground": "oklch(24% 0.02 60)",
+			"--muted": "oklch(52% 0.025 62)",
+			"--border": "oklch(89% 0.012 80)",
+			"--separator": "oklch(92% 0.01 82)",
+			"--scrollbar": "oklch(87% 0.012 82)",
+			"--surface": "oklch(100% 0.002 85)",
+			"--surface-foreground": "oklch(24% 0.02 60)",
+			"--surface-secondary": "oklch(95% 0.012 85)",
+			"--surface-secondary-foreground": "oklch(24% 0.02 60)",
+			"--surface-tertiary": "oklch(93% 0.014 85)",
+			"--surface-tertiary-foreground": "oklch(24% 0.02 60)",
+			"--default": "oklch(94% 0.01 85)",
+			"--default-foreground": "oklch(24% 0.02 60)",
+			"--focus": "oklch(52% 0.12 55)",
+			"--field-background": "oklch(100% 0.002 85)",
+			"--field-border": "oklch(89% 0.012 80)",
+			"--field-foreground": "oklch(24% 0.02 60)",
+			"--field-placeholder": "oklch(58% 0.02 62)",
+			"--overlay": "oklch(100% 0.002 85)",
+			"--overlay-foreground": "oklch(24% 0.02 60)",
+			"--segment": "oklch(100% 0.002 85)",
+			"--segment-foreground": "oklch(24% 0.02 60)",
+			"--radius": "0.625rem",
+			"--field-radius": "0.5rem"
+		},
+		"dark": {
+			"--accent": "oklch(64% 0.13 58)",
+			"--accent-foreground": "oklch(15% 0.012 60)",
+			"--background": "oklch(16% 0.008 60)",
+			"--foreground": "oklch(96% 0.006 85)",
+			"--muted": "oklch(72% 0.016 70)",
+			"--border": "oklch(30% 0.012 60)",
+			"--separator": "oklch(27% 0.01 60)",
+			"--surface": "oklch(21% 0.01 60)",
+			"--surface-foreground": "oklch(96% 0.006 85)",
+			"--surface-secondary": "oklch(25% 0.012 60)",
+			"--surface-secondary-foreground": "oklch(96% 0.006 85)",
+			"--default": "oklch(27% 0.012 60)",
+			"--default-foreground": "oklch(96% 0.006 85)",
+			"--focus": "oklch(64% 0.13 58)",
+			"--field-background": "oklch(21% 0.01 60)",
+			"--field-foreground": "oklch(96% 0.006 85)",
+			"--field-placeholder": "oklch(66% 0.016 65)",
+			"--overlay": "oklch(21% 0.01 60)",
+			"--overlay-foreground": "oklch(96% 0.006 85)"
+		}
+	},
+	"layout": {
+		"sections": [
+			{
+				"key": "hero",
+				"visible": true
+			},
+			{
+				"key": "problems",
+				"visible": true
+			},
+			{
+				"key": "outcomes",
+				"visible": true
+			},
+			{
+				"key": "roadmap",
+				"visible": true
+			},
+			{
+				"key": "courses",
+				"visible": true
+			},
+			{
+				"key": "instructor",
+				"visible": true
+			},
+			{
+				"key": "stats",
+				"visible": true
+			},
+			{
+				"key": "testimonials",
+				"visible": true
+			},
+			{
+				"key": "gallery",
+				"visible": true
+			},
+			{
+				"key": "faq",
+				"visible": true
+			},
+			{
+				"key": "magnet",
+				"visible": true
+			},
+			{
+				"key": "lead",
+				"visible": true
+			},
+			{
+				"key": "community",
+				"visible": false
+			},
+			{
+				"key": "offer",
+				"visible": false
+			}
+		]
+	},
+	"content": {
+		"instructor": {
+			"vi": {
+				"name": "Trần Văn Mộc",
+				"title": "Thợ cả, xưởng mộc Trường Sơn",
+				"bio": "Tôi vào nghề năm mười tám tuổi, bắt đầu bằng việc bào gỗ thuê cho một xưởng nhỏ ở Hà Đông. Hai mươi năm sau, xưởng của tôi làm nội thất cho những căn nhà mà chủ nhà muốn đồ đạc sống lâu hơn họ. Tôi dạy vì phần lớn thứ tôi biết không nằm trong sách: nó nằm ở chỗ tay bạn biết khi nào lưỡi bào cần dừng.",
+				"credentials": [
+					"20 năm làm nghề, 11 năm điều hành xưởng riêng",
+					"Đào tạo 40 thợ, trong đó 9 người đã mở xưởng",
+					"Giải nhất Hội thi tay nghề mộc dân dụng Hà Nội 2019"
+				],
+				"quote": "Gỗ không tha thứ cho sự vội vàng. Nó cũng không quên một mối ghép làm tử tế."
+			},
+			"en": {
+				"name": "Tran Van Moc",
+				"title": "Master joiner, Truong Son workshop",
+				"bio": "I came into the trade at eighteen, planing timber for a small shop in Ha Dong. Twenty years on, my workshop makes furniture for people who want it to outlast them. I teach because most of what I know is not in books: it is in the moment your hand knows the plane should stop.",
+				"credentials": [
+					"20 years in the trade, 11 running my own workshop",
+					"40 joiners trained, 9 of them now running their own shop",
+					"First prize, Hanoi domestic joinery skills competition 2019"
+				],
+				"quote": "Timber does not forgive haste. It does not forget an honest joint either."
+			}
+		},
+		"problems": {
+			"vi": [
+				"Học trên video mãi mà cầm đục vẫn run tay",
+				"Mối ghép làm xong thì hở, không biết sai từ bước nào",
+				"Mua đồ nghề theo lời người bán, dùng được một nửa",
+				"Nhận được đơn nhưng không dám báo giá vì không tính nổi giá thành"
+			],
+			"en": [
+				"Years of videos and your hand still shakes on the chisel",
+				"The joint closes with a gap and you cannot tell which step went wrong",
+				"You bought tools on a salesman word and use half of them",
+				"Work comes in and you cannot quote it because you cannot cost it"
+			]
+		},
+		"roadmap": {
+			"vi": [
+				"Tuần 1-2 — Đọc gỗ: thớ, độ ẩm, co ngót. Chọn gỗ đúng việc thay vì đúng giá.",
+				"Tuần 3-5 — Tay nghề nền: bào, đục, cưa tay đến khi mặt phẳng không cần giấy nhám.",
+				"Tuần 6-8 — Mối ghép mộng: mộng âm dương, mộng đuôi én, và cách sửa khi lỡ tay.",
+				"Tuần 9-11 — Một sản phẩm hoàn chỉnh: từ bản vẽ, dự toán gỗ, đến hoàn thiện bề mặt.",
+				"Tuần 12 — Làm nghề: báo giá, nhận đơn, và nói chuyện với khách khó tính."
+			],
+			"en": [
+				"Weeks 1-2 — Reading timber: grain, moisture, movement. Choose wood for the job, not for the price.",
+				"Weeks 3-5 — Foundations: plane, chisel and handsaw until a face needs no sandpaper.",
+				"Weeks 6-8 — Mortice and tenon, dovetails, and how to recover when your hand slips.",
+				"Weeks 9-11 — One finished piece: drawing, timber take-off, and surface finishing.",
+				"Week 12 — The business: quoting, taking work, and talking to a difficult client."
+			]
+		},
+		"stats": {
+			"vi": [
+				{
+					"value": "20 năm",
+					"label": "Làm nghề"
+				},
+				{
+					"value": "40",
+					"label": "Thợ đã đào tạo"
+				},
+				{
+					"value": "12 tuần",
+					"label": "Một khoá đầy đủ"
+				},
+				{
+					"value": "8",
+					"label": "Học viên mỗi lớp"
+				}
+			],
+			"en": [
+				{
+					"value": "20 years",
+					"label": "In the trade"
+				},
+				{
+					"value": "40",
+					"label": "Joiners trained"
+				},
+				{
+					"value": "12 weeks",
+					"label": "A full course"
+				},
+				{
+					"value": "8",
+					"label": "Students per class"
+				}
+			]
+		},
+		"testimonials": {
+			"vi": [
+				{
+					"name": "Nguyễn Đức Hải",
+					"role": "Học viên khoá 3, nay mở xưởng riêng ở Bắc Ninh",
+					"stars": 5,
+					"quote": "Tôi học ba khoá online trước đó, không khoá nào bắt tôi làm lại một mối mộng bảy lần. Khoá này thì có, và đó là lý do bây giờ tay tôi biết việc.",
+					"result": "Mở xưởng sau 8 tháng, doanh thu tháng thứ sáu 62 triệu"
+				},
+				{
+					"name": "Phạm Thị Lan",
+					"role": "Kiến trúc sư nội thất",
+					"stars": 5,
+					"quote": "Tôi không định làm thợ. Tôi học để thôi vẽ ra những thứ mà xưởng không đóng được. Sau khoá này bản vẽ của tôi bớt hẳn phần viển vông.",
+					"result": "Giảm 70% số lần phải sửa bản vẽ theo góp ý của xưởng"
+				},
+				{
+					"name": "Lê Minh Tuấn",
+					"role": "Học viên khoá 5",
+					"stars": 4,
+					"quote": "Thầy nghiêm, và tuần đầu tôi hơi nản vì chỉ được bào gỗ. Đến tuần sáu thì hiểu vì sao."
+				}
+			],
+			"en": [
+				{
+					"name": "Nguyen Duc Hai",
+					"role": "Cohort 3, now running his own workshop in Bac Ninh",
+					"stars": 5,
+					"quote": "I took three online courses before this one. None of them made me cut the same joint seven times. This one did, and that is why my hands know the work now.",
+					"result": "Opened his workshop after 8 months"
+				},
+				{
+					"name": "Pham Thi Lan",
+					"role": "Interior architect",
+					"stars": 5,
+					"quote": "I never meant to become a joiner. I came so I would stop drawing things a workshop cannot build. My drawings are a good deal less fanciful now.",
+					"result": "70% fewer drawings sent back by the workshop"
+				},
+				{
+					"name": "Le Minh Tuan",
+					"role": "Cohort 5",
+					"stars": 4,
+					"quote": "He is strict, and the first week I nearly quit because all I did was plane timber. By week six I understood why."
+				}
+			]
+		},
+		"gallery": {
+			"vi": [
+				{
+					"caption": "Xưởng buổi sáng, trước khi lớp bắt đầu"
+				},
+				{
+					"caption": "Mộng đuôi én của học viên tuần 7 — lần thứ tư mới đạt"
+				},
+				{
+					"caption": "Bàn gỗ sồi, sản phẩm tốt nghiệp khoá 4"
+				},
+				{
+					"caption": "Bộ đục đã theo thầy mười chín năm"
+				}
+			],
+			"en": [
+				{
+					"caption": "The workshop in the morning, before class"
+				},
+				{
+					"caption": "A student dovetail in week 7 — the fourth attempt passed"
+				},
+				{
+					"caption": "Oak table, cohort 4 graduation piece"
+				},
+				{
+					"caption": "A chisel set nineteen years in his hand"
+				}
+			]
+		},
+		"faq": {
+			"vi": [
+				{
+					"q": "Tôi chưa cầm đục bao giờ, học được không?",
+					"a": "Được, và phần lớn học viên cũng vậy. Năm tuần đầu là dành cho người chưa biết gì; ai đã có nghề thì được phép bỏ qua sau khi làm bài kiểm tra tay nghề."
+				},
+				{
+					"q": "Học online thì làm sao sửa được tay tôi?",
+					"a": "Mỗi tuần bạn quay lại thao tác của mình và gửi lên. Tôi xem từng bài và trả lời bằng video chỉ đúng chỗ sai. Đó là lý do lớp chỉ nhận tám người."
+				},
+				{
+					"q": "Cần mua đồ nghề bao nhiêu tiền?",
+					"a": "Khoảng 3-4 triệu cho bộ tối thiểu, và có danh sách cụ thể gửi trước khi khai giảng. Đừng mua gì trước khi nhận danh sách đó."
+				},
+				{
+					"q": "Không theo kịp thì sao?",
+					"a": "Bạn giữ quyền vào lại lớp khoá sau, không mất thêm phí. Nghề này không đo bằng tốc độ."
+				}
+			],
+			"en": [
+				{
+					"q": "I have never held a chisel. Can I still learn?",
+					"a": "Yes, and most students are the same. The first five weeks assume you know nothing; anyone with a trade behind them may skip ahead after a bench test."
+				},
+				{
+					"q": "How can you correct my hands over the internet?",
+					"a": "Each week you film your own work and send it in. I watch every submission and answer with a video pointing at the exact fault. That is why a class is eight people."
+				},
+				{
+					"q": "What will the tools cost me?",
+					"a": "Three to four million dong for the minimum kit, and you get the list before term starts. Buy nothing before that list arrives."
+				},
+				{
+					"q": "What if I fall behind?",
+					"a": "You keep your seat in the next cohort at no further cost. This trade is not measured in speed."
+				}
+			]
+		},
+		"magnet": {
+			"vi": {
+				"title": "Bảng chọn gỗ cho mười món đồ thường làm",
+				"description": "Một trang A4 tôi in ra dán ở xưởng: món nào nên dùng gỗ gì, độ ẩm bao nhiêu, và cái giá phải trả khi chọn sai.",
+				"cta": "Nhận bảng chọn gỗ"
+			},
+			"en": {
+				"title": "A timber-choice sheet for ten common pieces",
+				"description": "One A4 page pinned up in my workshop: which timber suits which piece, at what moisture, and what choosing wrong costs you.",
+				"cta": "Get the timber sheet"
+			}
+		}
+	}
+}

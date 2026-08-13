@@ -1,0 +1,179 @@
+{
+  "version": 2,
+  "task": "provisioning page for expert sites and agentos workspaces",
+  "status": "direction-selected",
+  "contextLock": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning\\context-lock.plan.json",
+  "caseId": "case-prov",
+  "deliveryMode": "single",
+  "mode": "creative",
+  "renderStatus": "directional-not-apply-baseline",
+  "parityBaseline": null,
+  "workItems": [
+    {
+      "id": "page-provisioning",
+      "scope": "page",
+      "target": "nivo-fe/apps/app",
+      "note": "One page holding both resource kinds, confirmed by the user."
+    }
+  ],
+  "evidence": [
+    { "source": "nivo-backend ExpertProvisionStatus", "claim": "not_provisioned | provisioning | awaiting_dns | ready | failed; provisionError carries the failure sentence written by the worker." },
+    { "source": "nivo-backend ExpertProvisionStatus.AwaitingDns", "claim": "'Not an error and not retryable by us' - the customer must add the DNS record." },
+    { "source": "nivo-backend AgentWorkspaceAction", "claim": "suspend from active, resume from suspended, retry_provision from failed, mark_failed from provisioning|active." },
+    { "source": "nivo-backend graphql queries", "claim": "my-expert-sites and my-agent-workspace both return arrays scoped to the viewer." },
+    { "source": "nivo-fe packages/ui", "claim": "No blocks exist. Every domain-aware owner in this case is new." },
+    { "source": "nivo-fe packages/ui DualTabsToolbar", "claim": "Requires BOTH leading and trailing ChoiceTabsData; it is a closed two-axis toolbar and cannot express a single filter axis." },
+    { "source": "nivo-fe packages/ui contracts underlined-tab-strip", "claim": "Opens exactly one 'tabs' slot for the extended-tabs leaf - the correct owner for a single filter axis." }
+  ],
+  "unknowns": [
+    "Whether one user can hold more than one agent workspace. my-agent-workspace is named singular but returns [AgentWorkspaceEntity]; the contract was believed over the name.",
+    "What the DNS instruction surface shows. my-expert-site-deployment exists but its fields were not read in this run.",
+    "Whether mark_failed should be reachable from this page. Its enum comment calls it an interim owner-triggered producer of failed because no provisioning watcher exists yet.",
+    "Where 'dashboard expert' belongs. page-dashboard for apps/app is already owned by case-d1 and apps/expert has no pages; deliberately not planned here."
+  ],
+  "businessCapabilities": [
+    { "capability": "list own expert sites", "operation": "query myExpertSites", "exists": true },
+    { "capability": "list own agent workspaces", "operation": "query myAgentWorkspace", "exists": true },
+    { "capability": "read a site's deployment detail", "operation": "query myExpertSiteDeployment", "exists": true },
+    { "capability": "suspend / resume / retry a workspace", "operation": "AgentWorkspaceAction transitions", "exists": true },
+    { "capability": "counts of resources grouped by status", "operation": "none", "exists": false }
+  ],
+  "directions": [
+    {
+      "directionId": "dir-a-triage",
+      "posture": "bold",
+      "thesis": "The page opens with work that needs a person; running resources sit below. Awaiting-DNS and Failed share one queue but carry two different sentences: one names the customer's job, one names our failure.",
+      "primaryCta": "Resolve the blocking item",
+      "readingOrder": ["action queue", "running inventory", "provision new"],
+      "tradeoffs": ["A resource changes position when its status changes, so the list does not stay still."],
+      "legacyDivergence": [],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": ["SurfaceListCard", "EmptyNotice", "Badge"],
+        "existingContracts": ["title-with-end-action", "glyph-title-fact-row", "label-value-row", "stacked-sections", "empty-notice-card"],
+        "exactProposals": [
+          { "kind": "new-owner", "id": "ProvisioningActionQueue", "path": "packages/ui/src/blocks/ProvisioningActionQueue", "api": "props: { items: ReadonlyArray<QueueItem> }" },
+          { "kind": "new-owner", "id": "ResourceActionRow", "path": "packages/ui/src/blocks/ResourceActionRow", "api": "props: { name, detail, reason, status }, on: { act }" }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "default"
+    },
+    {
+      "directionId": "dir-b-shelves",
+      "posture": "conservative",
+      "thesis": "Expert sites and agent workspaces are two lifecycles, so they sit on two labelled shelves. Status is a fact on the row, not the page's headline.",
+      "primaryCta": "Provision new",
+      "readingOrder": ["expert sites", "agent workspaces", "per-row action"],
+      "tradeoffs": ["Awaiting-DNS is buried in a shelf; a user with several sites must hunt for the one thing blocking a launch."],
+      "legacyDivergence": [],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": ["SurfaceListCard", "EmptyNotice", "Badge"],
+        "existingContracts": ["title-with-end-action", "glyph-title-fact-row", "label-row-over-card", "stacked-sections", "empty-notice-card"],
+        "exactProposals": [
+          { "kind": "new-owner", "id": "ResourceRow", "path": "packages/ui/src/blocks/ResourceRow", "api": "props: { name, detail, status }, on: { act }" }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "default"
+    },
+    {
+      "directionId": "dir-c-fleet",
+      "posture": "balanced",
+      "thesis": "Both resource kinds normalize onto one row shape (name, kind, status, action) in a single list, with a status counter strip above and a kind filter between them.",
+      "primaryCta": "Provision new",
+      "readingOrder": ["status counters", "kind filter", "fleet list"],
+      "tradeoffs": [
+        "Normalizing erases real differences: suspend/resume exists only for workspaces, awaiting-DNS only for sites. A shared row can imply actions that do not exist for that kind.",
+        "The counter strip needs a backend enabler; without it the counts are computed client-side and become wrong the moment the list paginates."
+      ],
+      "legacyDivergence": [],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": ["SurfaceListCard", "StatRow", "ExtendedTabs", "EmptyNotice", "Badge"],
+        "existingContracts": ["underlined-tab-strip", "stacked-stat-rows", "label-row-over-card", "title-with-end-action", "empty-notice-card"],
+        "exactProposals": [
+          {
+            "kind": "new-owner",
+            "id": "FleetRow",
+            "path": "packages/ui/src/blocks/FleetRow",
+            "api": "props: { name, detail, kind: 'site' | 'workspace', status }, on: { act }",
+            "why": "glyph-title-fact-row has no slot for the resource kind, and renaming an existing slot to carry it would be a false generic."
+          },
+          {
+            "kind": "new-owner",
+            "id": "FleetStatusStrip",
+            "path": "packages/ui/src/blocks/FleetStatusStrip",
+            "api": "props: { counts: ReadonlyArray<{ status, total }> }",
+            "why": "projects StatRow through stacked-stat-rows; the domain meaning of a provisioning status count is not something a pure composite may own."
+          },
+          {
+            "kind": "new-owner",
+            "id": "PageProvisioning",
+            "path": "apps/app/src/app/cap-phat/page.tsx",
+            "api": "composes FleetStatusStrip, the filter strip and the fleet list",
+            "why": "a page owner is required; apps/app has no provisioning route today."
+          }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "default"
+    }
+  ],
+  "stateManifest": [
+    { "ownerId": "page-provisioning", "state": "empty", "coverage": "rendered", "scenarioId": "empty" },
+    { "ownerId": "page-provisioning", "state": "populated", "coverage": "rendered", "scenarioId": "default" },
+    { "ownerId": "page-provisioning", "state": "filtered", "coverage": "rendered", "scenarioId": "filtered" },
+    { "ownerId": "page-provisioning", "state": "loading", "coverage": "deferred-to-preview", "scenarioId": null },
+    { "ownerId": "page-provisioning", "state": "error", "coverage": "deferred-to-preview", "scenarioId": null },
+    { "ownerId": "fleet-row", "state": "not_provisioned", "coverage": "rendered", "scenarioId": "default" },
+    { "ownerId": "fleet-row", "state": "provisioning", "coverage": "rendered", "scenarioId": "default" },
+    { "ownerId": "fleet-row", "state": "awaiting_dns", "coverage": "rendered", "scenarioId": "default" },
+    { "ownerId": "fleet-row", "state": "ready", "coverage": "rendered", "scenarioId": "default" },
+    { "ownerId": "fleet-row", "state": "failed", "coverage": "rendered", "scenarioId": "default" },
+    { "ownerId": "fleet-row", "state": "active", "coverage": "rendered", "scenarioId": "default" },
+    { "ownerId": "fleet-row", "state": "suspended", "coverage": "rendered", "scenarioId": "default" }
+  ],
+  "directionLab": {
+    "path": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning\\direction-lab",
+    "url": "http://127.0.0.1:8087/",
+    "caseId": "case-prov",
+    "directionIds": ["dir-a-triage", "dir-b-shelves", "dir-c-fleet"]
+  },
+  "selectedDirectionId": "dir-c-fleet",
+  "selectionKind": "explicit",
+  "selectionEvidence": "C",
+  "defaultReason": null,
+  "blockTrees": [
+    {
+      "directionId": "dir-c-fleet",
+      "tree": "PageProvisioning\n├── FleetStatusStrip        (new block, projects StatRow via stacked-stat-rows)\n├── FleetKindFilter         (underlined-tab-strip -> ExtendedTabs leaf)\n└── FleetList               (SurfaceListCard via label-row-over-card)\n    └── FleetRow            (new block)"
+    }
+  ],
+  "contracts": [
+    { "key": "underlined-tab-strip", "why": "opens exactly one tabs slot for the extended-tabs leaf, which is what a single filter axis is" },
+    { "key": "stacked-stat-rows", "why": "a run of stat rows kept as one typed sequence" },
+    { "key": "label-row-over-card", "why": "the label is held OUTSIDE the surface it names, so a list of rows never draws a card inside a card" },
+    { "key": "title-with-end-action", "why": "a heading that owns one trailing action - the page header and its provision CTA" },
+    { "key": "empty-notice-card", "why": "an empty state that is a surface rather than a bare sentence" }
+  ],
+  "vocabularyProposals": [
+    { "id": "FleetRow", "reason": "the resource-kind slot has no existing owner" },
+    { "id": "FleetStatusStrip", "reason": "a provisioning status count is domain meaning, which a pure composite may not own" },
+    { "id": "PageProvisioning", "reason": "apps/app has no provisioning route today" }
+  ],
+  "backendEnablerProposals": [
+    {
+      "id": "counts-by-status",
+      "uiNeed": "the status counter strip above the fleet list",
+      "classification": "additive-read",
+      "operation": "extend myExpertSites / myAgentWorkspace responses with a grouped count, or add one counts query",
+      "evidence": "no existing query returns totals grouped by status",
+      "authorization": "same viewer scope as the two list queries",
+      "compatibility": "additive; existing callers unaffected",
+      "tests": "handler spec asserting counts match the rows the same viewer can read",
+      "escalationTrigger": "if counts must be computed client-side, the strip becomes wrong as soon as the list paginates"
+    }
+  ]
+}

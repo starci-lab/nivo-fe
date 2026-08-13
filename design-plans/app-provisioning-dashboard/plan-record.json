@@ -1,0 +1,754 @@
+{
+  "version": 2,
+  "task": "app-provisioning-dashboard",
+  "status": "direction-selected",
+  "contextLock": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning-dashboard\\context-lock.plan.json",
+  "caseId": "case-console",
+  "deliveryMode": "batch",
+  "mode": "mixed",
+  "renderStatus": "directional-not-apply-baseline",
+  "parityBaseline": {
+    "id": "shipped-provisioning-page",
+    "path": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning\\design-record.json",
+    "revision": "1.4",
+    "what": "The /provisioning screen already shipped: one fleet list over titled-summary-filter-over-body-page, FleetRow per resource, a kind filter and a status counter strip. This case ABSORBS it rather than replacing it, so its rendered anatomy is the parity baseline for the console's resource list."
+  },
+  "workItems": [
+    {
+      "id": "layout-console-chrome",
+      "target": "apps/app/src/components/layouts/ConsoleChrome/ + apps/app/src/app/layout.tsx",
+      "primaryScope": "layout",
+      "subordinateScopes": [
+        "block"
+      ],
+      "dependsOn": [],
+      "ownerBoundary": "The fixed sidebar, its section links with their counts, the account trigger, and what survives navigation. Owns no resource data of its own; a count shown beside a link arrives as a prop.",
+      "sourceBoundary": [
+        "apps/app/src/components/layouts/",
+        "apps/app/src/app/layout.tsx"
+      ],
+      "stateInventory": [
+        {
+          "state": "desktop authenticated",
+          "status": "required",
+          "evidence": "the only shape rendered in the direction lab"
+        },
+        {
+          "state": "mobile / collapsed sidebar",
+          "status": "required",
+          "evidence": "not rendered in the lab; Preview owns it"
+        },
+        {
+          "state": "guest",
+          "status": "not-applicable",
+          "evidence": "the sign-in route uses centred-authentication-page and mounts no chrome"
+        },
+        {
+          "state": "light / dark",
+          "status": "required",
+          "evidence": "next-themes and ThemeSwitch are already dependencies of apps/app and packages/ui"
+        },
+        {
+          "state": "section counts absent",
+          "status": "required",
+          "evidence": "counts must not block the chrome from rendering; myInstances can be in flight"
+        }
+      ]
+    },
+    {
+      "id": "page-resources",
+      "target": "apps/app/src/components/pages/ResourcesPage/ (absorbs the shipped ProvisioningPage)",
+      "primaryScope": "page",
+      "subordinateScopes": [
+        "block"
+      ],
+      "dependsOn": [
+        "layout-console-chrome"
+      ],
+      "ownerBoundary": "The resource list, its kind filter and the counter strip. It keeps the sealed anatomy of the shipped /provisioning page; what changes is that every row now leads somewhere.",
+      "sourceBoundary": [
+        "apps/app/src/components/pages/ProvisioningPage/",
+        "apps/app/src/components/blocks/provisioning/"
+      ],
+      "stateInventory": [
+        {
+          "state": "populated",
+          "status": "required",
+          "evidence": "sealed at revision 1.4 of the shipped page"
+        },
+        {
+          "state": "empty",
+          "status": "required",
+          "evidence": "sealed at revision 1.4"
+        },
+        {
+          "state": "loading",
+          "status": "required",
+          "evidence": "sealed at revision 1.4"
+        },
+        {
+          "state": "error",
+          "status": "required",
+          "evidence": "sealed at revision 1.4"
+        },
+        {
+          "state": "filtered by kind",
+          "status": "required",
+          "evidence": "covered by the populated state; the filter is live in the sealed capture"
+        }
+      ]
+    },
+    {
+      "id": "page-resource-detail",
+      "target": "apps/app/src/components/pages/ResourceDetailPage/ + apps/app/src/app/resources/[id]/",
+      "primaryScope": "page",
+      "subordinateScopes": [
+        "block"
+      ],
+      "dependsOn": [
+        "page-resources"
+      ],
+      "ownerBoundary": "One resource: its identity, its facts, its lifecycle actions and the operator-only danger zone. It decides which tab is showing; each tab's block owns its own request.",
+      "sourceBoundary": [
+        "apps/app/src/components/pages/ResourceDetailPage/",
+        "apps/app/src/components/blocks/resource/"
+      ],
+      "stateInventory": [
+        {
+          "state": "site, running",
+          "status": "required",
+          "evidence": "rendered in the lab; myExpertSiteDeployment returns status running"
+        },
+        {
+          "state": "site, provisioning failed",
+          "status": "required",
+          "evidence": "ExpertProvisionStatus.Failed carries provisionError"
+        },
+        {
+          "state": "site, awaiting DNS",
+          "status": "required",
+          "evidence": "ExpertProvisionStatus.AwaitingDns; myAcademySettings probes CNAME live"
+        },
+        {
+          "state": "workspace, active / suspended / failed",
+          "status": "required",
+          "evidence": "AgentWorkspaceAction transitions permit exactly these"
+        },
+        {
+          "state": "workspace, provisioning",
+          "status": "required",
+          "evidence": "retry_provision moves failed -> provisioning and nothing completes it back"
+        },
+        {
+          "state": "viewer is operator",
+          "status": "required",
+          "evidence": "PlatformRole.Operator; the danger zone exists only for this viewer"
+        },
+        {
+          "state": "viewer is customer",
+          "status": "required",
+          "evidence": "the danger zone is ABSENT, not disabled - the endpoints are behind PlatformOperatorHttpGuard"
+        },
+        {
+          "state": "detail loading / not found",
+          "status": "required",
+          "evidence": "a routed id can name a resource the viewer does not own"
+        }
+      ]
+    },
+    {
+      "id": "page-domains",
+      "target": "apps/app/src/components/pages/DomainsPage/ + apps/app/src/app/domains/",
+      "primaryScope": "page",
+      "subordinateScopes": [
+        "block"
+      ],
+      "dependsOn": [
+        "layout-console-chrome"
+      ],
+      "ownerBoundary": "The domains a user holds, their expiry and their auto-renew switch.",
+      "sourceBoundary": [
+        "apps/app/src/components/pages/DomainsPage/"
+      ],
+      "stateInventory": [
+        {
+          "state": "populated",
+          "status": "required",
+          "evidence": "myDomains ordered by expiresAt ASC"
+        },
+        {
+          "state": "empty",
+          "status": "required",
+          "evidence": "a new account holds none"
+        },
+        {
+          "state": "expiring soon",
+          "status": "required",
+          "evidence": "computed in the browser from expiresAt - nothing in the backend ever writes DomainStatus.Expiring"
+        },
+        {
+          "state": "loading / error",
+          "status": "required",
+          "evidence": "one page-owned query"
+        }
+      ]
+    },
+    {
+      "id": "page-billing",
+      "target": "apps/app/src/components/pages/BillingPage/ + apps/app/src/app/billing/",
+      "primaryScope": "page",
+      "subordinateScopes": [
+        "block"
+      ],
+      "dependsOn": [
+        "layout-console-chrome"
+      ],
+      "ownerBoundary": "Wallet balance, invoices and their pay links, catalog orders and their renewal dates. Also the one honest home for AI spend.",
+      "sourceBoundary": [
+        "apps/app/src/components/pages/BillingPage/"
+      ],
+      "stateInventory": [
+        {
+          "state": "populated",
+          "status": "required",
+          "evidence": "myWallet, myInvoices, myCatalogOrders all exist"
+        },
+        {
+          "state": "unpaid invoice present",
+          "status": "required",
+          "evidence": "InvoiceStatus.Unpaid; the sidebar count derives from this"
+        },
+        {
+          "state": "empty / first run",
+          "status": "required",
+          "evidence": "an account with no order yet"
+        },
+        {
+          "state": "loading / error",
+          "status": "required",
+          "evidence": "three independent block requests"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "source": "nivo-backend @ e822320",
+      "claim": "myInstances, myExpertSites, myExpertSite, myExpertSiteDeployment, myAgentWorkspace, myDomains, myWallet, myInvoices, myCatalogOrders, opsEvents and myPodOpenclawStatus all exist as per-user GraphQL queries."
+    },
+    {
+      "source": "nivo-backend @ e822320",
+      "claim": "Lifecycle mutations exist: provisionExpertSite, deployExpertSite, stopExpertSiteDeployment, publishExpertSite, manageAgentWorkspace, manageCatalogOrder, addDomain, renewDomain, setDomainAutoRenew, topUpInstance, payInvoice."
+    },
+    {
+      "source": "src/features/core/api/core/http/lifecycle/",
+      "claim": "rebuild, reprovision, wipe and fleet-upgrade are HTTP endpoints behind PlatformOperatorHttpGuard - operator only, and write-only. There is no operator READ surface at all."
+    },
+    {
+      "source": "src/modules/platform/auth/platform-operator-http.guard.ts",
+      "claim": "PlatformRole.Operator is checked in exactly one place and by no GraphQL resolver."
+    },
+    {
+      "source": "my-instances.service.ts",
+      "claim": "MyInstance.ram and vcpu are hardcoded null even though instances.ram_mb and instances.vcpu exist."
+    },
+    {
+      "source": "credit-ledger.service.ts",
+      "claim": "getBurnUsd is the ONLY aggregate in the codebase: SUM(amount_usd) GROUP BY instance WHERE kind='consumption', reconciled from OpenRouter every 10 minutes."
+    },
+    {
+      "source": "design-plans/app-provisioning/design-record.json",
+      "claim": "The /provisioning page shipped at revision 1.4 with a sealed four-state matrix and a same-state parity pass against production."
+    }
+  ],
+  "unknowns": [
+    "Whether the console's home route stays /provisioning or becomes /resources. The shipped route is /provisioning and renaming it is a customer-visible address change; Preview must decide and record it.",
+    "Whether an operator viewing a customer's resource is a real scenario. The danger zone is drawn for an operator, but no operator READ surface exists, so today an operator reaching a detail page would be reading their OWN resources.",
+    "Whether creditBurnUsd belongs on the resource detail page, on billing, or both. It is lifetime-to-date rather than per-cycle and is always null for agent workspaces.",
+    "Whether the sidebar's per-section counts are worth their cost: no count query exists, so each is either derived from a list the console already fetched or a second request."
+  ],
+  "businessCapabilities": [
+    {
+      "capability": "list every resource a user runs",
+      "status": "proven",
+      "source": "myInstances -> MyInstance"
+    },
+    {
+      "capability": "read one expert site and its deployment",
+      "status": "proven",
+      "source": "myExpertSite, myExpertSiteDeployment (publicHost, apiPort, webPort, projectDir, status, lastError)"
+    },
+    {
+      "capability": "provision, deploy, stop and publish an expert site",
+      "status": "proven",
+      "source": "provisionExpertSite, deployExpertSite, stopExpertSiteDeployment, publishExpertSite"
+    },
+    {
+      "capability": "suspend, resume and retry an agent workspace",
+      "status": "proven",
+      "source": "manageAgentWorkspace with AgentWorkspaceAction suspend | resume | retry_provision | mark_failed"
+    },
+    {
+      "capability": "read a workspace's recent ops events",
+      "status": "proven",
+      "source": "opsEvents - agent workspaces only; expert sites have no event feed"
+    },
+    {
+      "capability": "probe whether a pod is reachable right now",
+      "status": "proven",
+      "source": "myPodOpenclawStatus - point-in-time, never persisted, so no uptime history"
+    },
+    {
+      "capability": "hold, renew and auto-renew a domain",
+      "status": "proven",
+      "source": "myDomains, addDomain, renewDomain, setDomainAutoRenew"
+    },
+    {
+      "capability": "resolve a custom domain's CNAME live",
+      "status": "proven",
+      "source": "myAcademySettings -> AcademyCustomDomainService performs a real dns.promises lookup at query time"
+    },
+    {
+      "capability": "wallet, invoices and payment links",
+      "status": "proven",
+      "source": "myWallet, myWalletTransactions, myInvoices, payInvoice, createInvoicePayLink, createWalletTopUpPayLink"
+    },
+    {
+      "capability": "read AI spend per instance",
+      "status": "partial",
+      "source": "myInstances.creditBurnUsd - real SUM, but lifetime-to-date not per-cycle, and always null for agent workspaces"
+    },
+    {
+      "capability": "rebuild, reprovision or wipe an instance",
+      "status": "operator-only",
+      "source": "POST /api/ops/lifecycle/* behind PlatformOperatorHttpGuard"
+    },
+    {
+      "capability": "count resources by status",
+      "status": "absent",
+      "source": "no count or aggregate query exists anywhere in the core GraphQL API"
+    },
+    {
+      "capability": "buy a domain from a registrar",
+      "status": "simulated",
+      "source": "no registrar integration exists; addDomain writes a local row with a synthetic 365-day expiry and fixed nameservers"
+    },
+    {
+      "capability": "read token usage or per-model AI cost",
+      "status": "absent",
+      "source": "no table stores token counts; the ledger row has no model column"
+    },
+    {
+      "capability": "read uptime history or a heartbeat",
+      "status": "absent",
+      "source": "pod_registrations.last_seen_at exists as a column but is exposed by no query"
+    }
+  ],
+  "directions": [
+    {
+      "directionId": "direction-a",
+      "posture": "parity-first",
+      "thesis": "A fixed sidebar of resource KINDS, a list as the console's home, and a full page per resource. Light actions ride the row; heavy and destructive ones live on the detail page where there is room to say what they do.",
+      "primaryCta": "Cấp phát mới on the list; the per-resource lifecycle action on the detail page",
+      "readingOrder": [
+        "sidebar section",
+        "list heading with count and primary action",
+        "kind filter",
+        "resource rows",
+        "one resource: identity, facts, actions, danger zone"
+      ],
+      "tradeoffs": [
+        "The most routes of the three, and a sidebar with four sections looks empty on an account holding two resources.",
+        "Needs the three sidebar contracts that blocked the previous Apply run.",
+        "A row shows infrastructure facts, so it depends on vCPU/RAM which myInstances currently hardcodes to null."
+      ],
+      "legacyDivergence": [
+        "None within the baseline. The shipped /provisioning page is absorbed as the console's resource list with its sealed anatomy intact - same frame key, same FleetRow, same filter, same counter strip, same four states. What is added sits around it (a sidebar) and below it (a detail route); the approved render itself is unchanged."
+      ],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": [
+          "FleetRow",
+          "ProvisioningPage",
+          "SurfaceListCard",
+          "Tree",
+          "ChoiceTabs",
+          "StatRow",
+          "Badge",
+          "Button",
+          "Heading",
+          "Text",
+          "NavLink"
+        ],
+        "existingContracts": [
+          "titled-summary-filter-over-body-page",
+          "fleet-resource-list",
+          "identity-kind-status-action-row",
+          "choice-tab-strip",
+          "stacked-stat-rows",
+          "label-value-row",
+          "title-with-end-action",
+          "stacked-sections",
+          "empty-notice-card",
+          "activity-feed-list"
+        ],
+        "exactProposals": [
+          {
+            "id": "sidebar-then-body-app",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "children: { sidebar: contract 'sidebar-nav-cluster', body: contract }, host: 'div'",
+            "why": "the console's two-column topology; the layout must not write its own classes (LAYOUT-5)"
+          },
+          {
+            "id": "sidebar-nav-cluster",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "children: { brand: leaf, link: repeats leaf 'nav-link', tools: contract }",
+            "why": "the fixed section list with an optional count per link"
+          },
+          {
+            "id": "titled-body",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "children: { heading: contract 'title-with-end-action', body: contract }, host: 'main'",
+            "why": "the detail page's landmark; host main so the page owns the document's one main landmark"
+          },
+          {
+            "id": "ResourceDetailPage",
+            "kind": "new-owner",
+            "owner": "apps/app/src/components/pages/ResourceDetailPage/",
+            "api": "index.tsx resolves the resource and the viewer's role; component.tsx draws",
+            "why": "no existing owner describes one resource"
+          },
+          {
+            "id": "DangerZone",
+            "kind": "new-owner",
+            "owner": "apps/app/src/components/blocks/resource/DangerZone/",
+            "api": "props: { title, description, actions: ReadonlyArray<{ id, label, tone }> }, on: { act }",
+            "why": "rebuild/reprovision/wipe need a place that states consequence before offering the press"
+          },
+          {
+            "id": "ConsoleChrome",
+            "kind": "new-owner",
+            "owner": "apps/app/src/components/layouts/ConsoleChrome/",
+            "api": "props: { sections: ReadonlyArray<{ id, label, href, count? }>, activeId }, content: ReactNode",
+            "why": "route-stable chrome; takes the routed interior as a named prop, never children"
+          }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "direction-a-default"
+    },
+    {
+      "directionId": "direction-b",
+      "posture": "conservative",
+      "thesis": "No sidebar and no child routes. One scrolling page holds the fleet, the domains, the spend and the events, and a row expands in place so the reader never loses context.",
+      "primaryCta": "Cấp phát mới in the top bar; per-row action inside the expanded row",
+      "readingOrder": [
+        "four-figure summary",
+        "resource rows with one expanded",
+        "domains beside recent events"
+      ],
+      "tradeoffs": [
+        "No route per resource, so a resource cannot be linked to and a refresh loses the open row unless it is pushed into a query string.",
+        "The four summary figures must be counted in the browser; correct today, wrong the moment the list paginates.",
+        "Destructive actions sit at the same level as ordinary ones, with no page to separate them.",
+        "An account with twenty resources makes the page endless."
+      ],
+      "legacyDivergence": [
+        "The shipped /provisioning list is retained but FleetRow must learn an expanded state it does not have."
+      ],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": [
+          "FleetRow",
+          "SurfaceListCard",
+          "Tree",
+          "StatRow",
+          "Badge",
+          "Button"
+        ],
+        "existingContracts": [
+          "titled-summary-filter-over-body-page",
+          "fleet-resource-list",
+          "identity-kind-status-action-row",
+          "stacked-stat-rows",
+          "label-value-row",
+          "activity-feed-list"
+        ],
+        "exactProposals": [
+          {
+            "id": "expandable-row-with-detail",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "children: { summary: composite, detail: contract }, host: 'div'",
+            "why": "a row that holds a second reading level below itself"
+          },
+          {
+            "id": "FleetRow.isExpanded",
+            "kind": "api-extension",
+            "owner": "apps/app/src/components/blocks/provisioning/FleetRow/",
+            "api": "props gains isExpanded?: boolean; on gains toggle?: () => void; absent means collapsed, which is today's behaviour",
+            "why": "the row already owns identity, kind, status and action; expansion is a state of that same relationship"
+          },
+          {
+            "id": "count-resources-by-status",
+            "kind": "backend-enabler",
+            "owner": "nivo-backend",
+            "api": "extend myInstances with a countsByStatus field, or add a resourceCounts query",
+            "why": "the four figures are otherwise counted client-side over a list that will paginate"
+          }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "direction-b-default"
+    },
+    {
+      "directionId": "direction-c",
+      "posture": "bold",
+      "thesis": "A thin horizontal nav and a deliberately sparse list. All depth lives on one resource's page, split into tabs, because every real operation belongs to one resource rather than to the fleet.",
+      "primaryCta": "the per-tab action on the resource page",
+      "readingOrder": [
+        "horizontal nav",
+        "sparse list as a switcher",
+        "one resource: tab bar, then the tab's work"
+      ],
+      "tradeoffs": [
+        "A sparse list means a reader must click to learn what is wrong; the status says there is trouble, not what it is.",
+        "Five tabs for a freshly provisioned site leaves four of them empty.",
+        "It discards part of the shipped list's anatomy: FleetRow loses its kind badge and its action."
+      ],
+      "legacyDivergence": [
+        "The shipped list is deliberately thinned, which is a visible reduction from the sealed 1.4 render."
+      ],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": [
+          "FleetRow",
+          "SurfaceListCard",
+          "Tree",
+          "ExtendedTabs",
+          "ChoiceTabs",
+          "Badge"
+        ],
+        "existingContracts": [
+          "titled-summary-filter-over-body-page",
+          "fleet-resource-list",
+          "identity-kind-status-action-row",
+          "underlined-tab-strip",
+          "double-navbar",
+          "inline-route-links",
+          "label-value-row"
+        ],
+        "exactProposals": [
+          {
+            "id": "resource-detail-tabs",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "children: { heading: contract, tabs: leaf 'choice-tabs', body: contract }, host: 'main'",
+            "why": "the detail page's tab topology, with the landmark on the page rather than the route"
+          },
+          {
+            "id": "copyable-record-row",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "children: { value: leaf 'text', copy: leaf 'button' }, host: 'div'",
+            "why": "the DNS record a reader must paste into their registrar"
+          }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "direction-c-default"
+    }
+  ],
+  "stateManifest": [
+    {
+      "ownerId": "layout-console-chrome",
+      "states": [
+        "desktop authenticated",
+        "mobile collapsed",
+        "light",
+        "dark",
+        "counts absent"
+      ]
+    },
+    {
+      "ownerId": "page-resources",
+      "states": [
+        "populated",
+        "empty",
+        "loading",
+        "error",
+        "filtered by kind"
+      ]
+    },
+    {
+      "ownerId": "page-resource-detail",
+      "states": [
+        "site running",
+        "site failed",
+        "site awaiting dns",
+        "workspace active",
+        "workspace suspended",
+        "workspace failed",
+        "workspace provisioning",
+        "viewer operator",
+        "viewer customer",
+        "loading",
+        "not found"
+      ]
+    },
+    {
+      "ownerId": "page-domains",
+      "states": [
+        "populated",
+        "empty",
+        "expiring soon",
+        "loading",
+        "error"
+      ]
+    },
+    {
+      "ownerId": "page-billing",
+      "states": [
+        "populated",
+        "unpaid invoice present",
+        "empty",
+        "loading",
+        "error"
+      ]
+    }
+  ],
+  "directionLab": {
+    "path": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning-dashboard\\direction-lab",
+    "url": "http://127.0.0.1:8097/",
+    "caseId": "case-console",
+    "directionIds": [
+      "direction-a",
+      "direction-b",
+      "direction-c"
+    ]
+  },
+  "selectedDirectionId": "direction-a",
+  "selectionKind": "explicit",
+  "selectionEvidence": "A đi trò",
+  "defaultReason": null,
+  "blockTrees": [
+    {
+      "directionId": "direction-a",
+      "tree": "ConsoleChrome > [SidebarNav, ResourcesPage > [FleetRow xN]]\nConsoleChrome > [SidebarNav, ResourceDetailPage > [ResourceFacts, LifecycleActions, DangerZone(operator only)]]\nConsoleChrome > [SidebarNav, DomainsPage > [DomainRow xN]]\nConsoleChrome > [SidebarNav, BillingPage > [WalletSummary, InvoiceList, OrderList]]"
+    },
+    {
+      "directionId": "direction-b",
+      "tree": "TopBar > ConsolePage > [SummaryStrip, FleetRow xN (one expanded), DomainList, EventList]"
+    },
+    {
+      "directionId": "direction-c",
+      "tree": "TopNav > [ResourcesPage > [SparseRow xN]]\nTopNav > [ResourceDetailPage > TabStrip > [Overview | Deployment | Domain | Cost | Events]]"
+    }
+  ],
+  "contracts": [
+    {
+      "key": "sidebar-then-body-app",
+      "status": "proposed",
+      "why": "the console's two-column topology; a layout may not write its own structural classes"
+    },
+    {
+      "key": "sidebar-nav-cluster",
+      "status": "proposed",
+      "why": "the fixed section list, each link optionally carrying a count"
+    },
+    {
+      "key": "titled-body",
+      "status": "proposed",
+      "why": "the detail page's landmark host, so the page owns the document's one main"
+    },
+    {
+      "key": "titled-summary-filter-over-body-page",
+      "status": "existing, retained",
+      "why": "already sealed as the resource list's frame at revision 1.4"
+    },
+    {
+      "key": "fleet-resource-list",
+      "status": "existing, retained",
+      "why": "the joined surface both resource kinds are compared in"
+    },
+    {
+      "key": "identity-kind-status-action-row",
+      "status": "existing, retained",
+      "why": "a row must answer WHAT before WHAT STATE"
+    }
+  ],
+  "vocabularyProposals": [
+    {
+      "id": "ConsoleChrome",
+      "status": "proposed",
+      "path": "apps/app/src/components/layouts/ConsoleChrome/index.tsx",
+      "note": "route-stable chrome taking the routed interior as a named `content` prop, never `children`"
+    },
+    {
+      "id": "ResourceDetailPage",
+      "status": "proposed",
+      "path": "apps/app/src/components/pages/ResourceDetailPage/",
+      "note": "splits into index.tsx + component.tsx because it makes a request"
+    },
+    {
+      "id": "DangerZone",
+      "status": "proposed",
+      "path": "apps/app/src/components/blocks/resource/DangerZone/",
+      "note": "absent entirely for a customer viewer; the endpoints are operator-only"
+    },
+    {
+      "id": "DomainsPage",
+      "status": "proposed",
+      "path": "apps/app/src/components/pages/DomainsPage/"
+    },
+    {
+      "id": "BillingPage",
+      "status": "proposed",
+      "path": "apps/app/src/components/pages/BillingPage/"
+    },
+    {
+      "id": "ProvisioningPage",
+      "status": "shipped, to be absorbed",
+      "path": "apps/app/src/components/pages/ProvisioningPage/index.tsx",
+      "note": "becomes the console's resource list; its sealed anatomy is the parity baseline"
+    }
+  ],
+  "backendEnablerProposals": [
+    {
+      "id": "instance-shape-is-readable",
+      "uiNeed": "a resource row states its shape (vCPU, RAM) the way a VPS console does",
+      "classification": "read projection of existing authorized data",
+      "operation": "MyInstance.ram and MyInstance.vcpu stop being hardcoded null and read instances.ram_mb / instances.vcpu",
+      "evidence": "my-instances.service.ts returns null with the comment 'no ram/vcpu column exists on catalog_tiers yet', while instance.entity.ts declares both columns",
+      "authorization": "unchanged - the row is already scoped where user.id = viewer",
+      "compatibility": "additive; the field already exists in the schema as nullable",
+      "tests": "a user with one provisioned instance reads its ram and vcpu",
+      "escalationTrigger": "without it the console shows a machine with no size, which is the one fact a VPS panel is expected to state"
+    },
+    {
+      "id": "counts-by-status",
+      "uiNeed": "the sidebar's per-section counts and the list's counter strip",
+      "classification": "read projection of existing authorized data",
+      "operation": "a countsByStatus field on myInstances, or a resourceCounts query",
+      "evidence": "no COUNT or GROUP BY exists in the core GraphQL API; the shipped /provisioning counter strip is fixture-fed",
+      "authorization": "unchanged - per-viewer",
+      "compatibility": "additive",
+      "tests": "counts equal the length of the corresponding filtered list",
+      "escalationTrigger": "counted in the browser it is correct today and wrong the moment the list paginates"
+    },
+    {
+      "id": "operator-read-surface",
+      "uiNeed": "the danger zone is drawn for an operator, but an operator has no way to READ another account's resource",
+      "classification": "NEW authorization surface - requires backend design, not a Preview decision",
+      "operation": "none proposed",
+      "evidence": "PlatformRole.Operator is checked in exactly one guard, on write-only HTTP endpoints; every GraphQL query is scoped where user.id = viewer",
+      "authorization": "would be a new permission boundary",
+      "compatibility": "n/a",
+      "tests": "n/a",
+      "escalationTrigger": "until it exists, an operator on a detail page is reading their OWN resource, so the danger zone is real but reaches only their own fleet. Preview must render the customer state as the default and treat the operator state as the exception."
+    }
+  ]
+}

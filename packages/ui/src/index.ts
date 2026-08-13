@@ -64,7 +64,7 @@ export type {
 export { Avatar } from "./leaves/Avatar"
 export type { AvatarData, AvatarProps } from "./leaves/Avatar"
 export { Badge } from "./leaves/Badge"
-export type { BadgeData, BadgeProps } from "./leaves/Badge"
+export type { BadgeData, BadgeProps, BadgeTone } from "./leaves/Badge"
 export { Button } from "./leaves/Button"
 export type { ButtonActions, ButtonData, ButtonProps } from "./leaves/Button"
 export { Checkbox } from "./leaves/Checkbox"

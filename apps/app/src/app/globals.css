@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@heroui/styles/css";
 
 /*
  * The shared canon lives outside this app's folder, so Tailwind cannot find its class names by
@@ -6,3 +7,52 @@
  * the components render unstyled - a failure that looks like a component bug and is not one.
  */
 @source "../../../../packages/ui/src";
+
+/*
+ * WHY THE SECOND IMPORT IS THE WHOLE FIX.
+ *
+ * Every leaf in `@nivo/ui` wraps a HeroUI control and names a SEMANTIC token - `bg-surface`,
+ * `text-muted`, `bg-default`, `text-foreground` - rather than a colour. Those utilities are
+ * HeroUI's own: they arrive with `@heroui/styles/css`, together with the base variables they
+ * resolve against. Without that import the class names still compile and resolve to nothing, so
+ * every screen in this app rendered as unstyled HTML while looking, from the source, entirely
+ * correct.
+ *
+ * WHY NO BRAND TOKENS ARE WRITTEN HERE YET.
+ *
+ * nivo has no approved palette. The design record for case-d1 approved hierarchy, states and
+ * ownership against a NEUTRAL placeholder and explicitly withheld colour, so this file takes the
+ * vendor's default palette and stops there - a deliberate absence, not an oversight. Porting
+ * `starci-academy-fe/src/app/globals.css` would dress nivo in StarCi Academy's rose brand, which
+ * that record forbids.
+ *
+ * When the palette is decided, it belongs here and only here, as base-token overrides on
+ * `:root` / `.dark` in the manner HeroUI expects: write the BASE token and the vendor derives its
+ * soft, foreground and focus families from it with `color-mix`.
+ */
+
+/*
+ * The theme switch answers to a class, because the vendor's own stylesheet keys off `.dark`.
+ * Declared here so `dark:` utilities in this app follow the same hook the provider sets.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * A press label is ruled with the SAME mark the vendor link uses, because the two sit in one card
+ * and stand for one promise. The vendor bakes `--separator-tertiary` at 1.5px into `.link`; naming
+ * a token from the scale instead gives the title a 91% hairline beside a link ruled at 85%, and the
+ * pair reads as two different weights of underline.
+ */
+[data-press-label="true"] {
+    text-decoration-color: var(--separator-tertiary);
+    text-decoration-thickness: 1.5px;
+}
+
+/*
+ * Hovering a control INSIDE a press target is not hovering the press target. The label underlines
+ * to say "this whole surface opens something", and while the pointer is on a link that opens
+ * something else, that sentence is false: the reader is told two destinations answer one gesture.
+ */
+[data-component="PressableSurface"]:has([data-component="TextLink"]:hover) [data-press-label="true"] {
+    text-decoration-line: none;
+}

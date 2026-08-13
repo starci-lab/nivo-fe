@@ -1,10 +1,15 @@
 import { Card } from "@heroui/react"
-import { ContractContent, Tree } from "../Tree"
+import { Tree } from "../Tree"
 import { Heading } from "../../leaves/Heading"
 import { Text } from "../../leaves/Text"
 import { SeeMoreLink } from "../../leaves/SeeMoreLink"
-import { contractNodeProps, type ContractKey } from "../../contracts"
-import { defineContractComponent, defineLeafComponent, type ContractBranchProps } from "../../contracts/props"
+import { CONTRACTS } from "../../contracts"
+import {
+    defineContractComponent,
+    defineContractProjection,
+    defineLeafComponent,
+    type ContractBranchProps,
+} from "../../contracts/props"
 
 /**
  * BRANCH - `SurfaceCard`: a named section, and the surface its content sits on.
@@ -19,7 +24,10 @@ import { defineContractComponent, defineLeafComponent, type ContractBranchProps 
  *
  * WHAT IT MAY CONTAIN, AND NOTHING ELSE: `Tree`, leaves, other branches. No markup of its own, no
  * class of its own. Every class on screen comes from a registry entry. That single sentence is
- * what stops a branch quietly becoming a second registry.
+ * what stops a branch quietly becoming a second registry. The one class written here is `p-0`, and
+ * it ADDS nothing - it removes the vendor card's own inset so that the only inset on screen is the
+ * one the entry declares. A branch forbidden to write that would be forced to leave an undeclared
+ * inset standing around every entry it grounds.
  *
  * THE END OF THE LABEL LINE HOLDS ONE THING OR NOTHING, and an action outranks a fact when both are
  * passed. They compete for the same place on purpose: a fact and a control that look alike, sitting
@@ -31,8 +39,17 @@ import { defineContractComponent, defineLeafComponent, type ContractBranchProps 
 
 /** What this branch draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type SurfaceCardData = {
-    /** The already-resolved name of the section. Copy, so it never rests. */
-    readonly label: string
+    /**
+     * The already-resolved name of the section. Copy, so it never rests.
+     *
+     * ABSENT MEANS THE OBJECT SAYS WHAT IT IS. A claim panel, a course tile, an empty notice: their
+     * own contents name them, and a heading above each one in a grid of them is a title repeated
+     * until it stops being read. Without a label this draws the ground and nothing else - no label
+     * line, no section node - which is the whole of what a second, label-less surface branch would
+     * have been. One component with one optional name, rather than two components differing by a
+     * line each.
+     */
+    readonly label?: string
     /**
      * A supporting fact at the end of the label line - a count, a record, a unit. Never an action:
      * it reads as part of the label sentence, and a control there gets pressed by somebody who
@@ -58,8 +75,20 @@ export type SurfaceCardActions = {
 }
 
 /** Props for {@link SurfaceCard}. Fixed slots plus what it assembles - see {@link BranchProps}. */
-export type SurfaceCardProps<K extends ContractKey> = ContractBranchProps<K> & {
-    readonly props: SurfaceCardData
+/**
+ * The bodies a named section may hold, READ FROM THE ENTRY rather than restated here.
+ *
+ * A section holds what `label-row-over-card` says it holds. Typed as any key, this branch could be
+ * handed a body its own entry refuses - and the refusal would surface as a type error deep inside
+ * the projection, or not at all if somebody widened the projection to make the red go away. Derived,
+ * the list has one author: adding a body to the entry admits it here in the same edit.
+ */
+export type SectionBodyKey = (typeof CONTRACTS)["label-row-over-card"]["children"]["body"]["contract"][number]
+
+/** Props for {@link SurfaceCard}. Fixed slots plus what it assembles - see {@link ContractBranchProps}. */
+export type SurfaceCardProps<K extends SectionBodyKey> = ContractBranchProps<K> & {
+    /** Absent altogether when the object names itself: then this draws the ground and nothing else. */
+    readonly props?: SurfaceCardData
     readonly on?: SurfaceCardActions
 }
 
@@ -68,8 +97,8 @@ export type SurfaceCardProps<K extends ContractKey> = ContractBranchProps<K> & {
  *
  * @param input - {@link SurfaceCardProps}
  */
-export const SurfaceCard = <const K extends ContractKey>({
-    props,
+export const SurfaceCard = <const K extends SectionBodyKey>({
+    props = {},
     on,
     contract,
     render,
@@ -100,22 +129,52 @@ export const SurfaceCard = <const K extends ContractKey>({
                 end: defineLeafComponent("see-more-link", {}, () => end),
             } : {}),
         })
-    const cardNodeProps = contractNodeProps(contract)
-    const sectionNodeProps = contractNodeProps("label-row-over-card")
+
+    /*
+     * ONE NODE, DRAWN THE SAME WAY WHETHER OR NOT A CARD STANDS BEHIND IT. The framed and frameless
+     * arms now differ in exactly one thing - the ground - which is what `isFrameless` claims to be.
+     *
+     * IT USED TO DIFFER IN MORE THAN THAT, INVISIBLY. Framed, the entry's classes and markers were
+     * spread onto `Card.Content`, so the vendor kept the ELEMENT: an entry declaring `host: "ol"`
+     * came out as a `div` and the list left the accessibility tree with nothing able to report it -
+     * not the compiler, not the linter, not a screenshot. `Tree` is the only place that reads
+     * `spec.host`, so the entry survives only by going through it.
+     */
+    const content = <Tree contract={contract} render={render} />
+
+    /*
+     * `p-0` IS THE BRANCH'S ONLY CLASS AND IT IS THE ABSENCE OF ONE. The vendor card carries its own
+     * `p-4`; with the entry's node now INSIDE that card rather than painted onto it, the vendor inset
+     * would sit outside the entry and become a second one nobody declared. Zeroing it hands the whole
+     * interior to the entry - which is where an inset is readable, and where `SurfaceListCard`
+     * already puts it.
+     */
+    const surface = props.isFrameless === true ? content : (
+        <Card className="p-0">
+            <Card.Content className="p-0" data-component="SurfaceCardBody">
+                {content}
+            </Card.Content>
+        </Card>
+    )
+
+    // No name, no section: the column and the label line exist to hold a label, so an object that
+    // names itself gets the ground alone rather than an empty row above it.
+    if (props.label === undefined) return surface
 
     return (
-        <div data-component="SurfaceCard" {...sectionNodeProps}>
-            <Tree contract={labelContract} render={labelRow} />
-            {props.isFrameless === true ? (
-                <Tree contract={contract} render={render} />
-            ) : (
-                <Card>
-                    <Card.Content {...cardNodeProps} data-component="SurfaceCardBody">
-                        <ContractContent contract={contract} render={render} />
-                    </Card.Content>
-                </Card>
-            )}
-        </div>
+        <Tree
+            contract="label-row-over-card"
+            render={defineContractComponent("label-row-over-card", {
+                label: labelRow,
+                /*
+                 * The surface is ALREADY a whole node - the vendor card, its body, and the caller's
+                 * own contract rendered inside - so it enters the section as a projection. Handing
+                 * the caller's key back as slots would open a second node around a node already
+                 * drawn, which is the duplicate wrapper this branch was inset twice by.
+                 */
+                body: defineContractProjection(contract, () => surface),
+            })}
+        />
     )
 }
 

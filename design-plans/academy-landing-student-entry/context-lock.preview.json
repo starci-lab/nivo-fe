@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "task": "nivo expert academy public landing and academy entry",
+  "phase": "preview",
+  "status": "confirmed",
+  "caseId": "case-academy-entry",
+  "selectedDirectionId": "E-AB",
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-preview",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-preview\\SKILL.md"
+  },
+  "targets": [
+    {
+      "role": "primary",
+      "repo": "nivo-fe",
+      "app": "apps/expert",
+      "gitRoot": "D:\\Repositories\\nivo-fe",
+      "branch": "main",
+      "worktree": "D:\\Repositories\\nivo-fe",
+      "head": "415300f",
+      "remote": null
+    }
+  ],
+  "references": [
+    {
+      "path": "D:\\Repositories\\starci-academy-fe",
+      "role": "named-reference",
+      "purpose": "the shape E-AB was taken from: src/app/authentication, src/components/overlays/auth/SignInOverlay, src/components/shells/ModalShell. Read-only source anchors for three ports.",
+      "writable": false
+    },
+    {
+      "path": "D:\\Repositories\\nivo\\apps\\expert\\src\\components\\blocks\\landing\\LandingPage.tsx",
+      "role": "parity-baseline",
+      "purpose": "landing only; the entry page has no legacy render",
+      "writable": false
+    },
+    {
+      "path": "http://localhost:3069/graphql",
+      "role": "business-truth",
+      "purpose": "academy API — signIn, signOut, exchangeOauthCode, refreshSession, courses, submitLead",
+      "writable": false
+    },
+    {
+      "path": "D:\\Repositories\\nivo-fe\\apps\\expert\\src",
+      "role": "current-implementation",
+      "purpose": "the landing and chrome are live here, built outside the pipeline; Preview reconciles against them and does not write to them",
+      "writable": false
+    }
+  ],
+  "artifactRoot": "D:\\Repositories\\nivo-fe\\design-plans\\academy-landing-student-entry",
+  "writeBoundary": [
+    "D:\\Repositories\\nivo-fe\\design-plans\\academy-landing-student-entry"
+  ],
+  "readOnlyBoundary": [
+    "D:\\Repositories\\nivo-fe\\apps",
+    "D:\\Repositories\\nivo-fe\\packages",
+    "D:\\Repositories\\starci-academy-fe",
+    "D:\\Repositories\\starci-academy-backend\\.claude",
+    "D:\\Repositories\\nivo-backend"
+  ],
+  "runtime": {
+    "candidate": "hosted from the artifact root, first free port from 8080",
+    "directionLab": { "url": "http://127.0.0.1:8095/", "pid": 51440, "phase": "plan" },
+    "existingProcesses": [
+      { "port": 3068, "owner": "this session", "what": "apps/expert dev server" },
+      { "port": 3069, "owner": "this session", "what": "academy API" }
+    ]
+  },
+  "inheritedFrom": "D:\\Repositories\\nivo-fe\\design-plans\\academy-landing-student-entry\\context-lock.plan.json",
+  "drift": [
+    {
+      "what": "git identity",
+      "inherited": "main / 415300f / remote null",
+      "detected": "main / 415300f / remote null",
+      "verdict": "no drift"
+    },
+    {
+      "what": "target source layout",
+      "inherited": "components/pages/AcademyPage, components/layouts/AcademyChrome, components/blocks/academy/**",
+      "detected": "those plus modules/academy/template.ts and modules/api/{graphql,academy}.ts — a further refactor landed after the plan lock was written",
+      "verdict": "recorded, not blocking: Preview writes no production source, and the moved modules are read-only evidence. Apply inherits this note so the boundary it confirms is the one that exists."
+    }
+  ],
+  "proposalsCarried": [
+    {
+      "name": "ModalShell",
+      "futureTargetPath": "packages/ui/src/shells/ModalShell/index.tsx",
+      "sourceAnchor": "starci-academy-fe/src/components/shells/ModalShell/index.tsx",
+      "placedIn": "candidate, because Preview may not write packages/ui"
+    },
+    {
+      "name": "AuthenticationPanel",
+      "futureTargetPath": "apps/expert/src/components/blocks/auth/AuthenticationPanel/",
+      "sourceAnchor": "starci-academy-fe/src/components/blocks/auth/AuthenticationPanel",
+      "placedIn": "candidate"
+    },
+    {
+      "name": "SignInOverlay",
+      "futureTargetPath": "apps/expert/src/components/overlays/auth/SignInOverlay/",
+      "sourceAnchor": "starci-academy-fe/src/components/overlays/auth/SignInOverlay",
+      "placedIn": "candidate"
+    }
+  ],
+  "evidence": [
+    "git rev-parse / branch --show-current / remote -v in D:\\Repositories\\nivo-fe",
+    "node verify_plan_record.mjs design-plans/academy-landing-student-entry/plan-record.json -> ok: true, caseId case-academy-entry",
+    "plan-record.json: selectedDirectionId E-AB, selectionKind explicit, 4 directions, 38 state manifest entries",
+    "filesystem: apps/expert/src now carries components/{pages,layouts,blocks} and modules/{academy,api}"
+  ],
+  "detectedAt": "2026-08-13"
+}

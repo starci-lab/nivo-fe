@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction lab — academy entry · DIRECTIONAL, NOT AN APPLY BASELINE</title>
+<style>
+  :root{
+    /* the academy's own palette, read from the mounted template so the lab reads as this product */
+    --bg:oklch(97.5% 0.008 85); --surface:oklch(100% 0.002 85); --surface-2:oklch(95% 0.012 85);
+    --border:oklch(89% 0.012 80); --fg:oklch(24% 0.02 60); --muted:oklch(52% 0.025 62);
+    --accent:oklch(52% 0.12 55); --accent-fg:oklch(99% 0.005 85); --radius:.625rem;
+    --warn:oklch(52% 0.15 30);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:15px/1.55 ui-sans-serif,system-ui,"Segoe UI",sans-serif}
+  .banner{position:sticky;top:0;z-index:20;background:var(--warn);color:#fff;
+          padding:.5rem 1rem;font-weight:600;letter-spacing:.02em;font-size:13px}
+  .wrap{max-width:1180px;margin:0 auto;padding:1.5rem 1rem 4rem}
+  h1{font-size:1.3rem;margin:1.25rem 0 .25rem}
+  .lede{color:var(--muted);max-width:70ch;margin:0 0 1.5rem}
+  .axis{border:1px solid var(--border);background:var(--surface);border-radius:var(--radius);
+        padding:1rem 1.15rem;margin-bottom:2rem}
+  .axis h2{font-size:.95rem;margin:0 0 .5rem}
+  .axis p{margin:.35rem 0;color:var(--muted);font-size:14px}
+  .axis code{background:var(--surface-2);padding:.05rem .3rem;border-radius:4px;font-size:12.5px}
+  .grid{display:grid;gap:1.25rem;grid-template-columns:1fr}
+  @media(min-width:980px){.grid{grid-template-columns:repeat(3,1fr)}}
+  .dir{border:1px solid var(--border);background:var(--surface);border-radius:var(--radius);
+       display:flex;flex-direction:column;overflow:hidden}
+  .dir > header{padding:.85rem 1rem;border-bottom:1px solid var(--border)}
+  .id{font-weight:700;font-size:.8rem;letter-spacing:.06em;color:var(--accent)}
+  .thesis{margin:.3rem 0 0;font-size:14px}
+  .scene{background:var(--bg);border-bottom:1px solid var(--border);padding:1rem;min-height:330px}
+  /* --- the representative scene, drawn from the real contract anatomy --- */
+  .browser{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface)}
+  .url{background:var(--surface-2);border-bottom:1px solid var(--border);padding:.3rem .6rem;
+       font:11.5px ui-monospace,monospace;color:var(--muted)}
+  .stage{position:relative;padding:.9rem;min-height:248px}
+  .land{opacity:.5;filter:saturate(.6)}
+  .land.dim{opacity:.22}
+  .land h3{margin:0 0 .2rem;font-size:15px}
+  .land p{margin:0 0 .55rem;color:var(--muted);font-size:12px}
+  .strip{display:flex;gap:.35rem;margin-bottom:.55rem}
+  .chip{flex:1;height:26px;border:1px solid var(--border);border-radius:6px;background:var(--surface)}
+  .rowline{height:9px;border-radius:4px;background:var(--surface-2);margin:.28rem 0}
+  .rowline.s{width:62%}
+  .panel{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);
+         padding:.85rem;box-shadow:0 6px 22px oklch(24% .02 60/.10)}
+  .panel.float{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(88%,270px)}
+  .panel h4{margin:0 0 .1rem;font-size:14px}
+  .panel .sub{margin:0 0 .7rem;color:var(--muted);font-size:11.5px}
+  .oauth{display:flex;flex-direction:column;gap:.35rem}
+  .btn{border:1px solid var(--border);border-radius:6px;background:var(--surface);
+       padding:.4rem;text-align:center;font-size:12px}
+  .btn.primary{background:var(--accent);color:var(--accent-fg);border-color:transparent;font-weight:600}
+  .divider{display:flex;align-items:center;gap:.5rem;color:var(--muted);font-size:10.5px;margin:.6rem 0}
+  .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border)}
+  .fields{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.55rem}
+  .fld{border:1px solid var(--border);border-radius:6px;padding:.38rem .5rem;color:var(--muted);font-size:11.5px}
+  .centred{display:flex;align-items:center;justify-content:center;min-height:248px}
+  /* --- notes --- */
+  .body{padding:.9rem 1rem 1.15rem;display:flex;flex-direction:column;gap:.75rem;flex:1}
+  .body section h5{margin:0 0 .25rem;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  .body ul{margin:0;padding-left:1.05rem;font-size:13px}
+  .body li{margin:.12rem 0}
+  .tree{font:11.5px ui-monospace,monospace;background:var(--surface-2);border-radius:6px;
+        padding:.5rem .6rem;white-space:pre;overflow-x:auto;color:var(--fg)}
+  .tag{display:inline-block;font-size:11px;border-radius:999px;padding:.1rem .5rem;border:1px solid var(--border)}
+  .tag.ok{background:oklch(94% .05 150);border-color:oklch(80% .08 150)}
+  .tag.new{background:oklch(94% .06 60);border-color:oklch(82% .1 60)}
+  .tag.inc{background:var(--surface-2)}
+  footer{margin-top:2rem;color:var(--muted);font-size:12.5px;border-top:1px solid var(--border);padding-top:1rem}
+</style>
+</head>
+<body>
+<div class="banner">DIRECTIONAL — NOT AN APPLY BASELINE. These scenes exist to make one choice visible; they are not the implementation.</div>
+<div class="wrap">
+
+<h1>Academy entry — three directions</h1>
+<p class="lede">The landing already runs in production. The only page with no incumbent is the one a
+student enters through, so that is where the choice is. All three directions keep the same landing
+and the same academy chrome; they differ in <strong>where entry happens</strong>.</p>
+
+<div class="axis">
+  <h2>What the evidence fixes, and what it leaves open</h2>
+  <p><strong>Fixed.</strong> OAuth leads. <code>auth.e2e-spec.ts:231</code> calls
+  <code>exchangeOauthCode</code> “the login”, and the registry already encodes the order:
+  <code>auth-entry-stack</code> declares OAuth shortcuts closed by an OR divider <em>above</em>, the
+  credential form <em>below</em>. Both lanes create the member; a refusal writes nothing.</p>
+  <p><strong>Fixed.</strong> There is no <code>signUp</code>, no password reset and no 2FA on the
+  academy API. Any direction promising them is describing the control plane, not this product.</p>
+  <p><strong>Open.</strong> The backend built the password grant “so the FE can log a member in
+  <em>from a modal, with no browser redirect</em>”. But OAuth genuinely leaves the browser, and a
+  signed-in student has to be sent somewhere. Page or modal is therefore a real choice.</p>
+</div>
+
+<div class="grid">
+
+  <!-- ================= E-A ================= -->
+  <article class="dir">
+    <header>
+      <div class="id">E-A · INCUMBENT / PARITY-FIRST</div>
+      <p class="thesis">Entry is its own destination. A route the student can be sent to, linked to,
+      and returned to.</p>
+    </header>
+    <div class="scene">
+      <div class="browser">
+        <div class="url">/vi/dang-nhap</div>
+        <div class="stage centred">
+          <div class="panel" style="width:min(88%,270px)">
+            <h4>Học viện Mộc</h4>
+            <p class="sub">Đăng nhập để tiếp tục</p>
+            <div class="oauth">
+              <div class="btn">Tiếp tục với Google</div>
+              <div class="btn">Tiếp tục với GitHub</div>
+            </div>
+            <div class="divider">HOẶC</div>
+            <div class="fields">
+              <div class="fld">Email</div>
+              <div class="fld">Mật khẩu</div>
+            </div>
+            <div class="btn primary">Đăng nhập</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="body">
+      <section>
+        <h5>Owner tree — all of it exists today</h5>
+        <div class="tree">centred-authentication-page
+└ authentication-panel-card
+  └ centred-page-column
+    └ auth-entry-stack
+      ├ shortcuts: auth-shortcuts-over-divider
+      │   ├ shortcut ×2 (leaf button)
+      │   └ divider   (leaf divider)
+      └ credentials: leaf form</div>
+      </section>
+      <section>
+        <h5>Feasibility</h5>
+        <p style="margin:0"><span class="tag ok">0 new owners</span>
+        <span class="tag inc">carries L-A forward</span></p>
+      </section>
+      <section>
+        <h5>Strongest benefit</h5>
+        <ul>
+          <li>OAuth leaves the browser and comes back to a URL that exists.</li>
+          <li><code>already-authenticated</code> has somewhere to redirect from.</li>
+          <li>The vocabulary was written for exactly this shape.</li>
+        </ul>
+      </section>
+      <section>
+        <h5>Trade-off / rejection risk</h5>
+        <ul>
+          <li>The student leaves the academy's page to sign in, and the sales context goes with it.</li>
+          <li>It is the shape the backend's own note says it built the direct grant to avoid.</li>
+        </ul>
+      </section>
+    </div>
+  </article>
+
+  <!-- ================= E-B ================= -->
+  <article class="dir">
+    <header>
+      <div class="id">E-B · MODAL, NEVER LEAVE</div>
+      <p class="thesis">Entry happens over the landing. The student never loses the page that was
+      selling to them.</p>
+    </header>
+    <div class="scene">
+      <div class="browser">
+        <div class="url">/vi &nbsp;·&nbsp; no route change</div>
+        <div class="stage">
+          <div class="land dim">
+            <h3>Học viện Mộc</h3>
+            <p>Nghề mộc thủ công, dạy bởi người đã sống bằng nghề hai mươi năm.</p>
+            <div class="strip"><div class="chip"></div><div class="chip"></div><div class="chip"></div></div>
+            <div class="rowline"></div><div class="rowline s"></div>
+          </div>
+          <div class="panel float">
+            <h4>Đăng nhập</h4>
+            <p class="sub">Tiếp tục học tại Học viện Mộc</p>
+            <div class="oauth">
+              <div class="btn">Tiếp tục với Google</div>
+              <div class="btn">Tiếp tục với GitHub</div>
+            </div>
+            <div class="divider">HOẶC</div>
+            <div class="fields"><div class="fld">Email</div><div class="fld">Mật khẩu</div></div>
+            <div class="btn primary">Đăng nhập</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="body">
+      <section>
+        <h5>Owner tree — one piece does not exist</h5>
+        <div class="tree">ModalShell            ← NEW OWNER, none in @nivo/ui
+└ authentication-panel-card
+  └ centred-page-column
+    └ auth-entry-stack      (as E-A)</div>
+      </section>
+      <section>
+        <h5>Feasibility</h5>
+        <p style="margin:0"><span class="tag new">1 new owner: ModalShell</span></p>
+        <ul>
+          <li>No <code>shells/</code> folder and no modal, dialog, drawer or overlay contract exists
+          anywhere in <code>@nivo/ui</code>. Canon permits a shell — it is the named exemption that
+          may expose <code>children</code> — but it must be proposed, built and reviewed.</li>
+        </ul>
+      </section>
+      <section>
+        <h5>Strongest benefit</h5>
+        <ul>
+          <li>Exactly what the backend note describes: sign in without a redirect.</li>
+          <li>The landing keeps selling while the student authenticates.</li>
+        </ul>
+      </section>
+      <section>
+        <h5>Trade-off / rejection risk</h5>
+        <ul>
+          <li><strong>OAuth breaks the premise.</strong> The browser really does leave; on return the
+          modal must be reopened, which needs a flag in the URL — a route by another name.</li>
+          <li><code>already-authenticated</code> has no destination to redirect to.</li>
+          <li>An entry with no address cannot be linked from an email or a course page.</li>
+        </ul>
+      </section>
+    </div>
+  </article>
+
+  <!-- ================= E-C ================= -->
+  <article class="dir">
+    <header>
+      <div class="id">E-C · ROUTE THAT KEEPS THE LANDING</div>
+      <p class="thesis">A real address, rendered over the academy it belongs to. The modal's feeling
+      without the vocabulary that does not exist.</p>
+    </header>
+    <div class="scene">
+      <div class="browser">
+        <div class="url">/vi/dang-nhap</div>
+        <div class="stage">
+          <div class="land">
+            <h3>Học viện Mộc</h3>
+            <p>Nghề mộc thủ công, dạy bởi người đã sống bằng nghề hai mươi năm.</p>
+            <div class="strip"><div class="chip"></div><div class="chip"></div><div class="chip"></div></div>
+            <div class="rowline"></div><div class="rowline s"></div>
+          </div>
+          <div class="panel float">
+            <h4>Đăng nhập</h4>
+            <p class="sub">Học viện Mộc</p>
+            <div class="oauth">
+              <div class="btn">Tiếp tục với Google</div>
+              <div class="btn">Tiếp tục với GitHub</div>
+            </div>
+            <div class="divider">HOẶC</div>
+            <div class="fields"><div class="fld">Email</div><div class="fld">Mật khẩu</div></div>
+            <div class="btn primary">Đăng nhập</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="body">
+      <section>
+        <h5>Owner tree — existing keys, one class decision</h5>
+        <div class="tree">centred-authentication-page
+└ authentication-panel-card      (as E-A)
+  └ centred-page-column
+    └ auth-entry-stack
+
+the academy band run renders behind it,
+muted by the PAGE, not by a new owner</div>
+      </section>
+      <section>
+        <h5>Feasibility</h5>
+        <p style="margin:0"><span class="tag ok">0 new owners</span>
+        <span class="tag new">1 open question</span></p>
+        <ul>
+          <li>Whether <code>centred-authentication-page</code>'s <code>why</code> — “authentication is
+          the route's <em>only</em> task” — still holds when the landing is behind it. That is a canon
+          reading to settle in Preview, not a component to invent.</li>
+        </ul>
+      </section>
+      <section>
+        <h5>Strongest benefit</h5>
+        <ul>
+          <li>Keeps every property E-A has: a URL, an OAuth return, a redirect target.</li>
+          <li>Keeps the academy visible, which is the thing E-B was reaching for.</li>
+        </ul>
+      </section>
+      <section>
+        <h5>Trade-off / rejection risk</h5>
+        <ul>
+          <li>The landing renders twice in a session and must stay cheap; it is server-rendered, so
+          this is a measurement Preview owes, not an assumption.</li>
+          <li>Reads as a modal but is not one — the back button leaves the page, which a modal's
+          appearance does not promise.</li>
+        </ul>
+      </section>
+    </div>
+  </article>
+
+</div>
+
+<div class="axis" style="margin-top:2rem;border-color:var(--accent)">
+  <h2 style="color:var(--accent)">E-AB · SELECTED — one block, two hosts</h2>
+  <p>The chosen shape is not E-A or E-C but a hybrid of E-A and E-B, and it is the shape
+  <strong>starci-academy-fe already ships</strong>: <code>src/app/authentication</code>,
+  <code>src/components/overlays/auth/SignInOverlay</code> and
+  <code>src/components/shells/ModalShell</code>.</p>
+  <p><strong>Retained from E-A:</strong> a real address at <code>/[locale]/sign-in</code> — the
+  destination a guard redirects to, the page a link opens, and the address OAuth returns to.
+  <strong>Retained from E-B:</strong> a quick-access overlay so a reader on the landing can enter
+  without losing the page. <strong>Rejected from E-B:</strong> the claim that entry needs no address
+  — OAuth leaves the browser, so that lane hands off to the route rather than pretending to stay.
+  <strong>Rejected from E-C:</strong> muting the landing behind a route; the overlay covers that need
+  without asking whether <code>centred-authentication-page</code>'s “only task” still holds.</p>
+</div>
+
+<div class="grid" style="grid-template-columns:1fr">
+  <article class="dir" id="E-AB-default">
+    <header>
+      <div class="id">E-AB · SELECTED</div>
+      <p class="thesis">One <code>AuthenticationPanel</code>. Two hosts. They cannot drift, because
+      there is only one of them.</p>
+    </header>
+    <div class="scene">
+      <div style="display:grid;gap:1rem;grid-template-columns:1fr;">
+        <div style="display:grid;gap:1rem;grid-template-columns:1fr 1fr;">
+          <div>
+            <p style="margin:0 0 .4rem;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)">Host 1 — the route</p>
+            <div class="browser">
+              <div class="url">/vi/sign-in &nbsp;·&nbsp; guard sent them here</div>
+              <div class="stage centred" style="min-height:210px">
+                <div class="panel" style="width:min(90%,240px)">
+                  <h4>Học viện Mộc</h4>
+                  <p class="sub">Đăng nhập để tiếp tục</p>
+                  <div class="oauth"><div class="btn">Google</div><div class="btn">GitHub</div></div>
+                  <div class="divider">HOẶC</div>
+                  <div class="fields"><div class="fld">Email</div><div class="fld">Mật khẩu</div></div>
+                  <div class="btn primary">Đăng nhập</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p style="margin:0 0 .4rem;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)">Host 2 — the overlay</p>
+            <div class="browser">
+              <div class="url">/vi &nbsp;·&nbsp; quick access, no route change</div>
+              <div class="stage" style="min-height:210px">
+                <div class="land dim">
+                  <h3>Học viện Mộc</h3>
+                  <p>Nghề mộc thủ công…</p>
+                  <div class="strip"><div class="chip"></div><div class="chip"></div><div class="chip"></div></div>
+                </div>
+                <div class="panel float" style="width:min(90%,232px)">
+                  <h4>Đăng nhập</h4>
+                  <p class="sub">Học viện Mộc</p>
+                  <div class="oauth"><div class="btn">Google</div><div class="btn">GitHub</div></div>
+                  <div class="divider">HOẶC</div>
+                  <div class="fields"><div class="fld">Email</div><div class="fld">Mật khẩu</div></div>
+                  <div class="btn primary">Đăng nhập</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="body">
+      <section>
+        <h5>Owner tree — the panel is shared, the hosts are not</h5>
+        <div class="tree">AuthenticationPanel            (block — the thing being shown)
+└ auth-entry-stack
+  ├ shortcuts: auth-shortcuts-over-divider
+  └ credentials: leaf form
+
+mounted by TWO hosts:
+  /[locale]/sign-in  → centred-authentication-page > authentication-panel-card
+  SignInOverlay      → ModalShell size="xs"</div>
+      </section>
+      <section>
+        <h5>Feasibility — three ports, no invention</h5>
+        <ul>
+          <li><code>ModalShell</code> → <code>packages/ui/src/shells/ModalShell/</code>. Not a new
+          design: canon names it one of the three shells that may expose <code>children</code>, and
+          the reference ships it with
+          <code>{ isOpen, size?, children?, onDismiss }</code>.</li>
+          <li><code>AuthenticationPanel</code> → <code>apps/expert/src/components/blocks/auth/</code>.</li>
+          <li><code>SignInOverlay</code> → <code>apps/expert/src/components/overlays/auth/</code>.</li>
+        </ul>
+      </section>
+      <section>
+        <h5>The one thing Preview must settle</h5>
+        <ul>
+          <li>Whether the overlay's OAuth lane returns the member to the landing or leaves them on
+          <code>/sign-in</code> after the exchange. Both are buildable; it is a decision, not a
+          missing capability.</li>
+        </ul>
+      </section>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <p><strong>Not shown, deliberately.</strong> Sign-up, password reset and two-factor: the academy API
+  exposes none of them. The version-1 record listed all three as required states by reading the
+  control plane's schema instead of this one.</p>
+  <p><strong>Unknown carried into every direction.</strong> Where a signed-in student lands —
+  <code>apps/expert</code> has no dashboard route. Each direction can prove a redirect happens; none
+  of them can say where it goes until that route exists.</p>
+</footer>
+</div>
+</body>
+</html>

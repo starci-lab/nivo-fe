@@ -1,0 +1,602 @@
+{
+  "version": 2,
+  "task": "app-authentication",
+  "status": "direction-selected",
+  "contextLock": "D:\\Repositories\\nivo-fe\\design-plans\\app-authentication\\context-lock.plan.json",
+  "caseId": "case-auth",
+  "deliveryMode": "batch",
+  "mode": "mixed",
+  "renderStatus": "directional-not-apply-baseline",
+  "parityBaseline": {
+    "id": "starci-authentication-panel",
+    "repo": "starci-academy-fe",
+    "head": "8410a74",
+    "path": "src/components/blocks/auth/AuthenticationPanel",
+    "what": "One panel, three modes (signIn | signUp | forgotPassword), two steps each (details -> code), plus a done confirmation. The named render this case is ported from."
+  },
+  "workItems": [
+    {
+      "id": "page-sign-in",
+      "target": "apps/app/src/components/pages/SignInPage/ + apps/app/src/components/blocks/auth/SignInPanel/",
+      "primaryScope": "page",
+      "subordinateScopes": [
+        "block"
+      ],
+      "dependsOn": [],
+      "ownerBoundary": "UNCHANGED. It already owns the sign-in reading order and its six states, and it is already wired to the real signIn mutation. This item exists in the matrix so the case records that it is deliberately untouched rather than forgotten.",
+      "sourceBoundary": [
+        "apps/app/src/components/pages/SignInPage/",
+        "apps/app/src/components/blocks/auth/SignInPanel/"
+      ],
+      "stateInventory": [
+        {
+          "state": "entry",
+          "status": "shipped",
+          "evidence": "rendered and wired; signIn returns a session or a two-factor challenge"
+        },
+        {
+          "state": "twoFactorUnsupported",
+          "status": "shipped",
+          "evidence": "the panel's own state for an account that owes TOTP"
+        },
+        {
+          "state": "resetLinkSent",
+          "status": "to be replaced",
+          "evidence": "the link journey becomes the code journey; this state's successor lives in page-forgot-password"
+        },
+        {
+          "state": "handingOff / exchanging / exchangeFailed",
+          "status": "shipped",
+          "evidence": "the OAuth round trip; still not completable in this build"
+        }
+      ]
+    },
+    {
+      "id": "block-otp-step",
+      "target": "apps/app/src/components/blocks/auth/OtpStep/",
+      "primaryScope": "block",
+      "subordinateScopes": [],
+      "dependsOn": [],
+      "ownerBoundary": "The second step of BOTH new journeys: the code entry, the expiry sentence, the resend control and its cooldown, and the way back to the first step. It knows what a code MEANS; it does not know which journey it is finishing.",
+      "sourceBoundary": [
+        "apps/app/src/components/blocks/auth/OtpStep/"
+      ],
+      "stateInventory": [
+        {
+          "state": "waiting for the code",
+          "status": "required",
+          "evidence": "signUpInit and forgotPasswordInit both answer with a challenge and a TTL"
+        },
+        {
+          "state": "code refused",
+          "status": "required",
+          "evidence": "OTP_CODE_INVALID_EXCEPTION, proven in the e2e; the challenge survives so the reader retypes"
+        },
+        {
+          "state": "resend inside the cooldown",
+          "status": "required",
+          "evidence": "OTP_RESEND_TOO_SOON_EXCEPTION; the sixty seconds are real and the control must say so"
+        },
+        {
+          "state": "challenge expired or spent",
+          "status": "required",
+          "evidence": "OTP_CHALLENGE_NOT_FOUND_EXCEPTION; the only way forward is to start again"
+        },
+        {
+          "state": "submitting",
+          "status": "required",
+          "evidence": "one request in flight must refuse a second press"
+        }
+      ]
+    },
+    {
+      "id": "page-sign-up",
+      "target": "apps/app/src/components/pages/SignUpPage/ + apps/app/src/app/[locale]/(auth)/sign-up/",
+      "primaryScope": "page",
+      "subordinateScopes": [
+        "block"
+      ],
+      "dependsOn": [
+        "block-otp-step"
+      ],
+      "ownerBoundary": "The two-step account creation and which step is showing. The panel owns what is asked; the OTP block owns the second step.",
+      "sourceBoundary": [
+        "apps/app/src/components/pages/SignUpPage/",
+        "apps/app/src/components/blocks/auth/SignUpPanel/"
+      ],
+      "stateInventory": [
+        {
+          "state": "details",
+          "status": "required",
+          "evidence": "signUpInit takes email, password and an optional name"
+        },
+        {
+          "state": "details refused",
+          "status": "required",
+          "evidence": "@MinLength(8) on the input; a weak password never reaches the challenge"
+        },
+        {
+          "state": "code",
+          "status": "required",
+          "evidence": "covered by block-otp-step"
+        },
+        {
+          "state": "done",
+          "status": "required",
+          "evidence": "signUpVerifyOtp returns a session and sets the refresh cookie"
+        },
+        {
+          "state": "address already registered",
+          "status": "required",
+          "evidence": "createUser throws on a 409 - and it throws at VERIFY, after the code is spent, which is a journey the reader can reach"
+        }
+      ]
+    },
+    {
+      "id": "page-forgot-password",
+      "target": "apps/app/src/components/pages/ForgotPasswordPage/ + apps/app/src/app/[locale]/(auth)/forgot-password/",
+      "primaryScope": "page",
+      "subordinateScopes": [
+        "block"
+      ],
+      "dependsOn": [
+        "block-otp-step"
+      ],
+      "ownerBoundary": "The two-step reset and which step is showing. It must not, in any state, say whether an address is registered.",
+      "sourceBoundary": [
+        "apps/app/src/components/pages/ForgotPasswordPage/",
+        "apps/app/src/components/blocks/auth/ForgotPasswordPanel/"
+      ],
+      "stateInventory": [
+        {
+          "state": "details",
+          "status": "required",
+          "evidence": "forgotPasswordInit takes the email alone"
+        },
+        {
+          "state": "code plus new password",
+          "status": "required",
+          "evidence": "forgotPasswordVerifyOtp takes challengeId, otp and newPassword together"
+        },
+        {
+          "state": "done",
+          "status": "required",
+          "evidence": "the mutation answers a boolean, NOT a session - setting a password is not signing in"
+        },
+        {
+          "state": "unknown address",
+          "status": "not-applicable",
+          "evidence": "PROVEN INDISTINGUISHABLE rather than absent: the e2e asserts an unknown address returns the same flag, sentence, TTL and mail as a known one, and the refusal only arrives after the code is proved, wearing the same words an expired challenge wears. A state here would be the leak."
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "source": "nivo-backend live schema",
+      "claim": "signUpInit, signUpResend, signUpVerifyOtp, signInInit, signInResend, signInVerifyOtp, forgotPasswordInit, forgotPasswordResend, forgotPasswordVerifyOtp all resolve."
+    },
+    {
+      "source": "e2e sign-up-otp / sign-in-otp / forgot-password-otp",
+      "claim": "25 passing assertions across the three journeys, including the refusals: wrong code, replay, cooldown, unknown challenge, weak password."
+    },
+    {
+      "source": "e2e forgot-password-otp",
+      "claim": "an unknown address answers identically to a known one - same success flag, message, TTL and mailed code."
+    },
+    {
+      "source": "apps/app source",
+      "claim": "SignInPanel ships six states and SignInPage is wired to the real signIn mutation, with a session provider above it."
+    },
+    {
+      "source": "starci-academy-fe @ 8410a74",
+      "claim": "the reference panel carries rememberMe, agreeToTerms and openLegal - and starci's own src/app has no terms or privacy route, so those links resolve to nothing there either."
+    },
+    {
+      "source": "modules/shared/keycloak/refresh-cookie.ts",
+      "claim": "the refresh cookie's maxAge is a fixed 30 days with no per-request control, so a remember-me switch has nothing to switch."
+    }
+  ],
+  "unknowns": [
+    "Whether sign-up should collect a display name. signUpInit accepts an optional `name`; the reference form does not ask for one.",
+    "What the sign-up journey does when the address is already registered. createUser throws at VERIFY - after the code has been spent - so the reader has proved an inbox and still cannot proceed.",
+    "Whether the OAuth shortcuts belong on the sign-up panel as well as sign-in. exchangeOauthCode is one mutation for both, but this build completes neither.",
+    "Whether the shipped `resetLinkSent` state is removed once the code journey lands, or kept for accounts created before it."
+  ],
+  "businessCapabilities": [
+    {
+      "capability": "create an account behind a mailed code",
+      "status": "proven",
+      "source": "signUpInit -> signUpVerifyOtp, e2e 6/6"
+    },
+    {
+      "capability": "sign in with a password",
+      "status": "proven",
+      "source": "signIn, wired and rendered"
+    },
+    {
+      "capability": "sign in behind a mailed code",
+      "status": "proven but unused by this direction",
+      "source": "signInInit -> signInVerifyOtp, e2e 6/6"
+    },
+    {
+      "capability": "reset a password behind a mailed code",
+      "status": "proven",
+      "source": "forgotPasswordInit -> forgotPasswordVerifyOtp, e2e 6/6"
+    },
+    {
+      "capability": "resend a code",
+      "status": "partial",
+      "source": "resend exists and is refused inside a 60s cooldown; the successful resend is untested because the flow cannot move the clock"
+    },
+    {
+      "capability": "a second factor on sign-in",
+      "status": "proven on the direct path only",
+      "source": "signIn gates on user.twoFactorEnabled; signInVerifyOtp does not"
+    },
+    {
+      "capability": "remember me",
+      "status": "absent",
+      "source": "the refresh cookie's maxAge is fixed"
+    },
+    {
+      "capability": "terms and privacy pages",
+      "status": "absent",
+      "source": "no route in either repository"
+    }
+  ],
+  "directions": [
+    {
+      "directionId": "direction-a",
+      "posture": "parity-first",
+      "thesis": "Port the reference panel whole: one card, three modes switched in place, two steps each. Cut only what nivo has no mechanism to support, and name every cut.",
+      "primaryCta": "Tiếp tục - one button that means the next step, whichever mode is showing",
+      "readingOrder": [
+        "mode tabs",
+        "step indicator",
+        "credentials",
+        "the way out",
+        "primary press",
+        "OAuth shortcuts"
+      ],
+      "tradeoffs": [
+        "Replaces SignInPanel, a block that is already approved, already wired and already rendering.",
+        "The TOTP hole is patched with a third step the reference has no state for, so the closest-to-parity direction still diverges where it matters most.",
+        "Remember-me and the terms checkbox are cut, and would have to return if nivo ever grows the mechanisms behind them."
+      ],
+      "legacyDivergence": [
+        "No remember-me: the refresh cookie's lifetime is fixed.",
+        "No terms checkbox: there is no page to link to, in either repository.",
+        "A third step for TOTP, which the reference does not have."
+      ],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": [
+          "SignInPanel",
+          "Field",
+          "Button",
+          "TextLink",
+          "Divider",
+          "Heading",
+          "Text",
+          "Tree"
+        ],
+        "existingContracts": [
+          "centred-authentication-page",
+          "authentication-panel-card",
+          "centred-page-column",
+          "auth-shortcuts-over-divider",
+          "spread-choice-row",
+          "form-column",
+          "label-field-hint",
+          "centred-title-pair"
+        ],
+        "exactProposals": [
+          {
+            "id": "otp-digit-row",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "children: { digit: leaf 'input', repeats: true, restingCount: 6 }",
+            "why": "a run of single-character boxes read as one value; no existing key repeats a leaf at a fixed count on one line"
+          },
+          {
+            "id": "stepped-panel-header",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "children: { title: leaf 'heading', step: leaf 'text' }",
+            "why": "which of two steps is showing, above the title it belongs to"
+          }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "direction-a-default"
+    },
+    {
+      "directionId": "direction-b",
+      "posture": "conservative",
+      "thesis": "The sign-in screen is approved, wired and running - leave it alone. Sign-up and forgot-password arrive as two more panels in the same grammar and the same card, reached by route rather than by switching a tab.",
+      "primaryCta": "Đăng nhập on the existing panel; Tiếp tục on each new one",
+      "readingOrder": [
+        "shortcuts",
+        "divider",
+        "credentials",
+        "primary press",
+        "the two ways out"
+      ],
+      "tradeoffs": [
+        "Not the reference's topology: three routes rather than one card that switches. Pressing 'Tạo tài khoản' navigates rather than swapping in place.",
+        "Three panels sharing one grammar are three places that grammar can drift.",
+        "signInInit and signInVerifyOtp, just built and tested, go unused on the sign-in path."
+      ],
+      "legacyDivergence": [
+        "Mode switching is navigation rather than in-place state.",
+        "No remember-me and no terms checkbox, for the same absent mechanisms as direction-a."
+      ],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": [
+          "SignInPanel",
+          "SignInPage",
+          "Field",
+          "Button",
+          "TextLink",
+          "Divider",
+          "Heading",
+          "Text",
+          "Tree",
+          "SurfaceFormCard"
+        ],
+        "existingContracts": [
+          "centred-authentication-page",
+          "authentication-panel-card",
+          "centred-page-column",
+          "auth-shortcuts-over-divider",
+          "spread-choice-row",
+          "form-column",
+          "label-field-hint",
+          "centred-title-pair",
+          "inline-action-run"
+        ],
+        "exactProposals": [
+          {
+            "id": "otp-digit-row",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "children: { digit: leaf 'input', repeats: true, restingCount: 6 }",
+            "why": "REUSE was checked first: form-column arranges labelled fields and label-field-hint pairs one label to one control - neither expresses a run of single-character boxes that read as ONE value. NEW."
+          },
+          {
+            "id": "stepped-panel-header",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "children: { title: leaf 'heading', step: leaf 'text' }",
+            "why": "centred-title-pair holds a title over a description, which is prose about the screen; this holds a title beside a POSITION in a journey. Considered EXTEND of centred-title-pair and refused: a description and a step counter wrap and align differently. NEW."
+          },
+          {
+            "id": "OtpStep",
+            "kind": "new-owner",
+            "owner": "apps/app/src/components/blocks/auth/OtpStep/",
+            "api": "props: { challengeId, expiresInSeconds, title, lead, codeLabel, submitLabel, resendLabel, cooldownLabel, backLabel, statusMessage, isError, isPending }, on: { submit(code), resend, back }",
+            "why": "the second step of both journeys; it knows what a code means and not which journey it finishes"
+          },
+          {
+            "id": "SignUpPanel",
+            "kind": "new-owner",
+            "owner": "apps/app/src/components/blocks/auth/SignUpPanel/",
+            "api": "state: 'details' | 'code' | 'done', discriminated exactly as SignInPanel already is"
+          },
+          {
+            "id": "ForgotPasswordPanel",
+            "kind": "new-owner",
+            "owner": "apps/app/src/components/blocks/auth/ForgotPasswordPanel/",
+            "api": "state: 'details' | 'code' | 'done'"
+          }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "direction-b-default"
+    },
+    {
+      "directionId": "direction-c",
+      "posture": "bold",
+      "thesis": "If every sign-in has to open an inbox anyway, the password field is a step in front of the real step. Sign in with an email and a code; the password survives for sign-up and for the direct path.",
+      "primaryCta": "Xác nhận on the code step",
+      "readingOrder": [
+        "mode tabs",
+        "step indicator",
+        "the address it went to",
+        "the code",
+        "resend and the way back"
+      ],
+      "tradeoffs": [
+        "signInInit REQUIRES a password today and grants it before mailing - that grant is what stops the endpoint mailing strangers on demand. Removing the password removes the shield, and nothing existing replaces it.",
+        "A reader cannot sign in while mail is slow or filtered, and that is every time rather than once.",
+        "Furthest from the reference."
+      ],
+      "legacyDivergence": [
+        "The sign-in mode asks for no password at all, which the reference does not do."
+      ],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": [
+          "Field",
+          "Button",
+          "TextLink",
+          "Heading",
+          "Text",
+          "Tree"
+        ],
+        "existingContracts": [
+          "centred-authentication-page",
+          "authentication-panel-card",
+          "centred-page-column",
+          "form-column",
+          "centred-title-pair"
+        ],
+        "exactProposals": [
+          {
+            "id": "otp-digit-row",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "children: { digit: leaf 'input', repeats: true, restingCount: 6 }",
+            "why": "as direction-b"
+          },
+          {
+            "id": "stepped-panel-header",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "children: { title: leaf 'heading', step: leaf 'text' }",
+            "why": "as direction-b"
+          },
+          {
+            "id": "passwordless-sign-in-shield",
+            "kind": "backend-enabler",
+            "owner": "nivo-backend",
+            "api": "not proposed",
+            "why": "the password grant is the current shield; what replaces it is a backend design decision, not a Preview one"
+          }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "direction-c-default"
+    }
+  ],
+  "stateManifest": [
+    {
+      "ownerId": "page-sign-in",
+      "states": [
+        "entry",
+        "twoFactorUnsupported",
+        "resetLinkSent",
+        "handingOff",
+        "exchanging",
+        "exchangeFailed"
+      ]
+    },
+    {
+      "ownerId": "block-otp-step",
+      "states": [
+        "waiting",
+        "code refused",
+        "resend in cooldown",
+        "challenge gone",
+        "submitting"
+      ]
+    },
+    {
+      "ownerId": "page-sign-up",
+      "states": [
+        "details",
+        "details refused",
+        "code",
+        "done",
+        "address already registered"
+      ]
+    },
+    {
+      "ownerId": "page-forgot-password",
+      "states": [
+        "details",
+        "code plus new password",
+        "done"
+      ]
+    }
+  ],
+  "directionLab": {
+    "path": "D:\\Repositories\\nivo-fe\\design-plans\\app-authentication\\direction-lab",
+    "url": "http://127.0.0.1:8098/",
+    "caseId": "case-auth",
+    "directionIds": [
+      "direction-a",
+      "direction-b",
+      "direction-c"
+    ]
+  },
+  "selectedDirectionId": "direction-b",
+  "selectionKind": "explicit",
+  "selectionEvidence": "B",
+  "defaultReason": null,
+  "blockTrees": [
+    {
+      "directionId": "direction-a",
+      "tree": "AuthenticationPage > centred-authentication-page > authentication-panel-card > AuthenticationPanel(mode, step)"
+    },
+    {
+      "directionId": "direction-b",
+      "tree": "SignInPage > centred-authentication-page > authentication-panel-card > SignInPanel  [UNCHANGED]\nSignUpPage > centred-authentication-page > authentication-panel-card > SignUpPanel(details) | OtpStep(code) | done\nForgotPasswordPage > centred-authentication-page > authentication-panel-card > ForgotPasswordPanel(details) | OtpStep(code) | done"
+    },
+    {
+      "directionId": "direction-c",
+      "tree": "AuthenticationPage > authentication-panel-card > PasswordlessPanel(email | code)"
+    }
+  ],
+  "contracts": [
+    {
+      "key": "centred-authentication-page",
+      "status": "existing, retained",
+      "why": "the one centred surface every auth route already sits on"
+    },
+    {
+      "key": "authentication-panel-card",
+      "status": "existing, retained",
+      "why": "the reading column the shipped sign-in already uses"
+    },
+    {
+      "key": "auth-shortcuts-over-divider",
+      "status": "existing, retained",
+      "why": "the divider closes the shortcut choice rather than merely separating it"
+    },
+    {
+      "key": "otp-digit-row",
+      "status": "proposed",
+      "why": "a run of single-character boxes reading as one value; form-column and label-field-hint were checked first and pair one label to one control"
+    },
+    {
+      "key": "stepped-panel-header",
+      "status": "proposed",
+      "why": "a title beside a position in a journey; centred-title-pair holds a title over PROSE and wraps differently"
+    }
+  ],
+  "vocabularyProposals": [
+    {
+      "id": "OtpStep",
+      "status": "proposed",
+      "path": "apps/app/src/components/blocks/auth/OtpStep/",
+      "note": "shared by both new journeys; the cooldown is real and this block owns saying so"
+    },
+    {
+      "id": "SignUpPanel",
+      "status": "proposed",
+      "path": "apps/app/src/components/blocks/auth/SignUpPanel/"
+    },
+    {
+      "id": "ForgotPasswordPanel",
+      "status": "proposed",
+      "path": "apps/app/src/components/blocks/auth/ForgotPasswordPanel/"
+    },
+    {
+      "id": "SignInPanel",
+      "status": "shipped, untouched",
+      "path": "apps/app/src/components/blocks/auth/SignInPanel/",
+      "note": "the direction was selected partly to leave this alone"
+    }
+  ],
+  "backendEnablerProposals": [
+    {
+      "id": "sign-in-verify-otp-honours-totp",
+      "status": "REQUIRED, and it is a defect rather than a feature",
+      "uiNeed": "none - this direction does not use the OTP sign-in path at all",
+      "classification": "security regression in existing code",
+      "evidence": "signInVerifyOtp returns requiresTwoFactor: false unconditionally, while signIn gates on user.twoFactorEnabled and issues a challenge. An account with TOTP enabled can therefore sign in through the OTP path without its second factor.",
+      "escalationTrigger": "Selecting direction-b means nothing in this app calls that path today - which fixes the exposure by not using it, and does NOT fix the hole. The mutation is in the live schema and anything else that calls it inherits the bypass."
+    },
+    {
+      "id": "otp-challenge-takes-an-injectable-clock",
+      "status": "not implemented",
+      "uiNeed": "a test that proves a resend actually delivers a new code",
+      "classification": "testability of existing code",
+      "evidence": "OTP_RESEND_COOLDOWN_MS is 60s and OtpChallengeService reads the wall clock, so no flow can reach the successful resend without sleeping a minute.",
+      "escalationTrigger": "the resend control is drawn in the UI and its happy path has never been executed by a test"
+    }
+  ]
+}

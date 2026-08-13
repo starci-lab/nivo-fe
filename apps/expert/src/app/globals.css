@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@heroui/styles/css";
 
 /*
  * The shared canon lives outside this app's folder, so Tailwind cannot find its class names by
@@ -6,3 +7,60 @@
  * the components render unstyled - a failure that looks like a component bug and is not one.
  */
 @source "../../../../packages/ui/src";
+
+/*
+ * WHY THE SECOND IMPORT IS THE WHOLE FIX -- the same one `apps/app` already carries.
+ *
+ * Every leaf in `@nivo/ui`, and every band in `src/academy`, names a SEMANTIC token -
+ * `bg-surface`, `text-muted`, `border-border`, `bg-background`, `text-foreground` - rather than a
+ * colour. Those utilities are HeroUI's own and arrive with `@heroui/styles/css`, together with the
+ * base variables they resolve against. Without it the class names still compile and resolve to
+ * NOTHING: the markup is correct, the classes are on the elements, and the page renders as
+ * unstyled HTML. The compiled stylesheet carried Tailwind's own defaults and not one `--color-*`
+ * variable, which is what that failure looks like from the outside.
+ *
+ * `AcademyChrome` writes this academy's palette onto the root as `--background`, `--surface`,
+ * `--border`, `--foreground` and `--accent`. Those are the same base tokens HeroUI resolves
+ * against, so the mounted template repaints the vendor's palette without a single component
+ * naming a shade - but only once the vendor's stylesheet is here to be repainted.
+ */
+
+/*
+ * The theme switch answers to a class, because the vendor's own stylesheet keys off `.dark`.
+ * Declared here so `dark:` utilities in this app follow the same hook.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * NO THEME BLOCK HERE, AND THAT IS THE POINT.
+ *
+ * HeroUI's own theming contract is a `:root` / `.dark` block of ITS variable names, and this app
+ * is committed to HeroUI -- so the template overrides those names directly rather than through a
+ * vocabulary of our own. `AcademyChrome` emits that block from the mounted template, which is what
+ * gives an academy the vendor's full surface (`danger`, `success`, `focus`, `field-*`, `overlay`,
+ * `segment`, `separator`, the two radii, the font) instead of a hand-picked subset.
+ *
+ * Writing the defaults here as well would mean two files claiming the same variables, and the one
+ * that lost would be invisible. The vendor's stylesheet above already carries them; a template that
+ * sets nothing renders exactly as HeroUI intends.
+ */
+
+/*
+ * A press label is ruled with the SAME mark the vendor link uses, because the two sit in one card
+ * and stand for one promise. The vendor bakes `--separator-tertiary` at 1.5px into `.link`; naming
+ * a token from the scale instead gives the title a 91% hairline beside a link ruled at 85%, and the
+ * pair reads as two different weights of underline.
+ */
+[data-press-label="true"] {
+    text-decoration-color: var(--separator-tertiary);
+    text-decoration-thickness: 1.5px;
+}
+
+/*
+ * Hovering a control INSIDE a press target is not hovering the press target. The label underlines
+ * to say "this whole surface opens something", and while the pointer is on a link that opens
+ * something else, that sentence is false: the reader is told two destinations answer one gesture.
+ */
+[data-component="PressableSurface"]:has([data-component="TextLink"]:hover) [data-press-label="true"] {
+    text-decoration-line: none;
+}

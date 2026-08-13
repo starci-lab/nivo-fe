@@ -1,0 +1,81 @@
+{
+    "landing": {
+        "hero": {
+            "tryFree": "Học thử miễn phí",
+            "seeCourses": "Xem khoá học"
+        },
+        "problems": {
+            "title": "Những cái sai thường gặp"
+        },
+        "outcomes": {
+            "title": "Sau khoá học bạn làm được gì",
+            "first": "Làm được việc thật",
+            "second": "Có lộ trình rõ ràng",
+            "third": "Được sửa trực tiếp"
+        },
+        "roadmap": {
+            "title": "Lộ trình"
+        },
+        "testimonials": {
+            "title": "Học viên nói gì"
+        },
+        "gallery": {
+            "title": "Hình ảnh hoạt động"
+        },
+        "courses": {
+            "title": "Khoá học",
+            "emptyTitle": "Chưa có khoá học nào",
+            "emptyBody": "Khoá đầu tiên sẽ xuất hiện ở đây."
+        },
+        "community": {
+            "title": "Cộng đồng",
+            "body": "Hỏi đáp hằng tuần, và một nhóm cùng đi đường dài."
+        },
+        "offer": {
+            "title": "Quyền lợi thành viên",
+            "body": "Liên hệ để biết học phí và lịch khai giảng."
+        },
+        "faq": {
+            "title": "Câu hỏi thường gặp"
+        },
+        "lead": {
+            "title": "Học thử miễn phí",
+            "body": "Điền thông tin, học viện sẽ liên hệ lại.",
+            "name": "Họ tên",
+            "phone": "Số điện thoại",
+            "submit": "Gửi thông tin",
+            "sending": "Đang gửi…",
+            "error": "Chưa gửi được. Kiểm tra kết nối rồi thử lại.",
+            "sent": "Cảm ơn bạn — học viện sẽ liên hệ lại sớm."
+        }
+    },
+    "entry": {
+        "signUp": {
+            "title": "Đăng ký học thử",
+            "body": "Miễn phí, không cần thẻ.",
+            "submit": "Tạo tài khoản",
+            "switchPrompt": "Đã có tài khoản?",
+            "switchAction": "Đăng nhập"
+        },
+        "signIn": {
+            "title": "Đăng nhập",
+            "body": "Tiếp tục lộ trình của bạn.",
+            "submit": "Đăng nhập",
+            "switchPrompt": "Quên mật khẩu?",
+            "switchAction": "Tạo tài khoản"
+        },
+        "google": "Tiếp tục với Google",
+        "github": "Tiếp tục với GitHub",
+        "or": "hoặc",
+        "email": "Email",
+        "password": "Mật khẩu",
+        "checking": "Đang kiểm tra…",
+        "back": "Quay lại",
+        "refused": "Email hoặc mật khẩu không đúng.",
+        "resetSent": "Nếu có tài khoản dùng email này, chúng tôi đã gửi liên kết đặt lại mật khẩu.",
+        "twoFactor": "Tài khoản này bật xác minh hai lớp. Học viện chưa hỗ trợ bước đó trên bản này — hãy tạm tắt, hoặc dùng tài khoản khác.",
+        "oauthLeaving": "Đang chuyển tới {provider}… Bạn sẽ quay lại ngay sau khi đăng nhập xong.",
+        "oauthFailed": "Không hoàn tất được đăng nhập. Liên kết có thể đã hết hạn.",
+        "alreadySignedIn": "Đang đưa bạn về trang học…"
+    }
+}

@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "task": "nivo expert academy public landing and student auth",
+  "phase": "plan",
+  "status": "confirmed",
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-plan",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-plan\\SKILL.md"
+  },
+  "targets": [
+    {
+      "role": "primary",
+      "repo": "nivo-fe",
+      "app": "apps/expert",
+      "gitRoot": "D:\\Repositories\\nivo-fe",
+      "branch": "main",
+      "worktree": "D:\\Repositories\\nivo-fe",
+      "head": "415300f",
+      "remote": null
+    }
+  ],
+  "references": [
+    {
+      "path": "D:\\Repositories\\nivo\\apps\\expert\\src\\components\\blocks\\landing\\LandingPage.tsx",
+      "role": "parity-baseline",
+      "purpose": "the legacy landing render this case must reproduce before proposing change; the student auth page has no legacy render",
+      "writable": false
+    },
+    {
+      "path": "http://localhost:3069/graphql",
+      "role": "business-truth",
+      "purpose": "academy API: courses (public), submitLead (public), signIn / signUp / exchangeOauthCode / refreshSession / signOut",
+      "writable": false
+    },
+    {
+      "path": "http://localhost:3067/graphql",
+      "role": "business-truth",
+      "purpose": "control plane: myExpertSite, myAgentWorkspace and the provisioning surface an academy is created by",
+      "writable": false
+    },
+    {
+      "path": "D:\\Repositories\\nivo-fe\\apps\\expert\\src",
+      "role": "current-implementation",
+      "purpose": "the landing and the academy chrome were built here today OUTSIDE this pipeline; Plan reads them as the incumbent state, not as an approved baseline",
+      "writable": false
+    }
+  ],
+  "artifactRoot": "D:\\Repositories\\nivo-fe\\design-plans\\academy-landing-student-entry",
+  "writeBoundary": [
+    "D:\\Repositories\\nivo-fe\\design-plans\\academy-landing-student-entry"
+  ],
+  "readOnlyBoundary": [
+    "D:\\Repositories\\nivo-fe\\apps",
+    "D:\\Repositories\\nivo-fe\\packages",
+    "D:\\Repositories\\starci-academy-backend\\.claude",
+    "D:\\Repositories\\nivo-backend"
+  ],
+  "runtime": {
+    "directionLab": "hosted from the artifact root, first free port from 8080, started by this phase",
+    "existingProcesses": [
+      { "port": 3068, "owner": "this session", "what": "apps/expert dev server" },
+      { "port": 3069, "owner": "this session", "what": "academy API" },
+      { "port": 3067, "owner": "another chat", "what": "control plane API" }
+    ]
+  },
+  "inheritedFrom": null,
+  "inheritedFromNote": "No context-lock.plan.json existed for this case and plan-record.json carried no contextLock, so there is no lineage to inherit. Recorded as absent rather than reconstructed, because a lock invented after the fact would claim an authority nobody granted.",
+  "supersedes": {
+    "record": "D:\\Repositories\\nivo-fe\\design-plans\\academy-landing-student-entry\\plan-record.json",
+    "recordVersion": 1,
+    "reason": "verify_plan_record.mjs refuses it on nine counts, including no caseId, no contextLock, no directionLab and zero recorded directions. It was never valid to route to Preview.",
+    "carriedForward": {
+      "selectedDirection": "L-A",
+      "selectionEvidence": "User replied \"ok chốt làm đi\" directly to the L-A recommendation on 2026-08-12",
+      "howItIsUsed": "L-A enters the new run as the incumbent, parity-first direction with its selection evidence intact. It is not discarded and it is not auto-reselected."
+    }
+  },
+  "drift": [
+    {
+      "what": "recorded work-item targets",
+      "inherited": "apps/expert/src/app/page.tsx and apps/expert/src/app/dang-nhap/page.tsx",
+      "detected": "the route tree moved under apps/expert/src/app/[locale]/ today",
+      "handling": "the new record states the routed paths; the stale ones are not silently rewritten anywhere else"
+    },
+    {
+      "what": "implementation state of two work items",
+      "inherited": "not built",
+      "detected": "page-academy-landing and layout-academy-chrome are live in production, built today outside Plan/Preview/Apply",
+      "handling": "Plan treats the built page as the incumbent to compare against, never as an approved baseline"
+    },
+    {
+      "what": "page-academy-auth",
+      "inherited": "planned",
+      "detected": "does not exist in apps/expert at all; only apps/app has a dang-nhap page",
+      "handling": "genuinely net-new, and the only item of the three with no incumbent"
+    }
+  ],
+  "evidence": [
+    "git rev-parse / branch --show-current / remote -v in D:\\Repositories\\nivo-fe",
+    "node .claude/skills/starci-fe-design-plan/scripts/verify_plan_record.mjs design-plans/academy-landing-student-entry/plan-record.json",
+    "filesystem: design-plans/academy-landing-student-entry has no context-lock.plan.json and no design-record.json",
+    "filesystem: apps/expert/src/app contains only [locale]/layout.tsx, [locale]/page.tsx and globals.css",
+    "GraphQL introspection against :3069 and :3067"
+  ],
+  "detectedAt": "2026-08-13",
+  "confirmation": {
+    "kind": "explicit",
+    "restatement": "artifact root dùng lại thư mục academy-landing-student-entry (giữ lineage, ghi đè bản version-1) chứ không mở thư mục mới",
+    "words": "ok XÁC NHẬN"
+  }
+}

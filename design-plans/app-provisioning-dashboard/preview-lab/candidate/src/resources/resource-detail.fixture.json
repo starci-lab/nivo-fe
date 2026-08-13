@@ -1,0 +1,55 @@
+{
+  "_note": "Labelled fixture. Field values are what nivo-backend stores; `chartVersion: null` and `aiSpendUsd: null` are REAL absences rather than placeholders - myInstances hardcodes the machine's shape to null today, and creditBurnUsd is always null for an agent workspace. Nothing here is a sentence: the words arrive from the catalogue.",
+  "running": {
+    "id": "s1",
+    "name": "hocvien-minhtue.nivo.vn",
+    "kind": "site",
+    "status": "ready",
+    "publicHost": "hocvien-minhtue.nivo.vn",
+    "ports": "3210 / 3211",
+    "buildStatus": "running",
+    "chartVersion": "0.4.2",
+    "aiSpendUsd": "$12.10",
+    "failure": null,
+    "dnsTarget": null
+  },
+  "failed": {
+    "id": "s3",
+    "name": "danglinh.nivo.vn",
+    "kind": "site",
+    "status": "failed",
+    "publicHost": "danglinh.nivo.vn",
+    "ports": "3212 / 3213",
+    "buildStatus": "failed",
+    "chartVersion": null,
+    "aiSpendUsd": "$0.00",
+    "failure": "Keycloak bootstrap failed",
+    "dnsTarget": null
+  },
+  "awaitingDns": {
+    "id": "s2",
+    "name": "minhtue.com",
+    "kind": "site",
+    "status": "awaitingDns",
+    "publicHost": "minhtue.com",
+    "ports": "3214 / 3215",
+    "buildStatus": "running",
+    "chartVersion": "0.4.2",
+    "aiSpendUsd": "$6.30",
+    "failure": null,
+    "dnsTarget": "minhtue.com → hocvien-minhtue.nivo.vn"
+  },
+  "suspended": {
+    "id": "w3",
+    "name": "Sandbox workspace",
+    "kind": "workspace",
+    "status": "suspended",
+    "publicHost": "sandbox.pod.nivo.vn",
+    "ports": "8080 / 8081",
+    "buildStatus": "stopped",
+    "chartVersion": null,
+    "aiSpendUsd": null,
+    "failure": null,
+    "dnsTarget": null
+  }
+}

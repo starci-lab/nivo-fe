@@ -35,6 +35,18 @@ type TextCommonData = {
     readonly weight?: TextWeight
     /** The meaning drawn ahead of the words. It inherits this line's colour, never its own. */
     readonly icon?: IconName
+    /**
+     * Whether this line is the LABEL of the press target that contains it.
+     *
+     * A whole row that navigates has no visible edge saying so, and a cursor change alone is a
+     * promise only a mouse can read. Underlining the label while the row is hovered is what a link
+     * does, said by the one line that names the destination - the rest of the row is evidence about
+     * it rather than the thing being opened.
+     *
+     * It is an OPT-IN, not a default for every line inside a button: two underlines racing on one
+     * hover is how a row stops naming one destination.
+     */
+    readonly isPressLabel?: boolean
     /** Whether a change to this line is announced, and how urgently. */
     readonly live?: TextLive
 }
@@ -72,6 +84,10 @@ const TEXT_CLASSES = [
     "data-[tone=accent]:text-accent-soft-foreground",
     "data-[weight=medium]:font-medium data-[weight=semibold]:font-semibold",
     "data-[icon=true]:inline-flex data-[icon=true]:items-center data-[icon=true]:gap-2",
+    // The rule sits one step off the letters so a two-line title still reads as words rather than
+    // as struck-through text. Its colour and thickness are the vendor link's, set in the app stylesheet.
+    "data-[press-label=true]:underline-offset-4",
+    "data-[press-label=true]:group-hover:underline",
 ].join(" ")
 
 /** The resting shape - the same line box, wearing the vendor's skeleton, glyphs out. */
@@ -109,6 +125,7 @@ export const Text = ({ props, isLoading = false }: TextProps) => {
             data-size={size}
             data-weight={weight}
             data-icon={showsIcon ? "true" : "false"}
+            data-press-label={props.isPressLabel === true ? "true" : "false"}
             data-live={live}
             data-loading={isLoading ? "true" : "false"}
             role={LIVE_ROLES[live]}

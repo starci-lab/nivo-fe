@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "task": "app-provisioning-dashboard",
+  "phase": "plan",
+  "status": "active",
+  "trustRoot": "D:Repositoriesstarci-academy-backend.claude",
+  "skill": {
+    "name": "starci-fe-design-plan",
+    "path": "D:Repositoriesstarci-academy-backend.claudeskillsstarci-fe-design-planSKILL.md"
+  },
+  "targets": [
+    {
+      "role": "design-target",
+      "repo": "nivo-fe",
+      "gitRoot": "D:Repositories\nivo-fe",
+      "branch": "main",
+      "worktree": "D:Repositories\nivo-fe",
+      "head": "415300f5a37a6366941612eb75c80a8ae1fc002c",
+      "remote": null
+    }
+  ],
+  "references": [
+    {
+      "role": "business-truth",
+      "repo": "nivo-backend",
+      "gitRoot": "D:Repositories\nivo-backend",
+      "head": "e822320",
+      "purpose": "which operations, entities and aggregates actually exist"
+    },
+    {
+      "role": "prior-case",
+      "path": "D:Repositories\nivo-fedesign-plansapp-signin-dashboard",
+      "purpose": "direction-d was selected for a dashboard whose fleet list now lives on /provisioning; its page-dashboard item was blocked at Apply and never rendered"
+    },
+    {
+      "role": "sibling-case",
+      "path": "D:Repositories\nivo-fedesign-plansapp-provisioning",
+      "purpose": "the shipped /provisioning page this dashboard must not duplicate"
+    },
+    {
+      "role": "trust",
+      "gitRoot": "D:Repositoriesstarci-academy-backend.claude",
+      "purpose": "canon, contracts, FE rule set"
+    }
+  ],
+  "artifactRoot": "D:Repositories\nivo-fedesign-plansapp-provisioning-dashboard",
+  "writeBoundary": [
+    "D:Repositories\nivo-fedesign-plansapp-provisioning-dashboard"
+  ],
+  "readOnlyBoundary": [
+    "all nivo-fe source",
+    "D:Repositories\nivo-backend",
+    "D:Repositoriesstarci-academy-backend"
+  ],
+  "runtime": {
+    "lab": "D:Repositories\nivo-fedesign-plansapp-provisioning-dashboarddirection-lab",
+    "url": "http://127.0.0.1:8097/",
+    "port": 8097,
+    "startPolicy": "started after the lock was shown",
+    "stop": "stop the serve_preview.py process on port 8097"
+  },
+  "evidence": [
+    "git rev-parse in both repositories",
+    "a full read-only scan of nivo-backend for the four data areas",
+    "the prior plan-record and its apply-progress stop note"
+  ],
+  "inheritedFrom": null,
+  "detectedAt": "2026-08-13"
+}

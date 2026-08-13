@@ -68,13 +68,25 @@ export const ContractContent = <const K extends ContractKey>({ contract, render 
  */
 export const Tree = <const K extends ContractKey>({ contract, render }: TreeProps<K>) => {
     const nodeProps = contractNodeProps(contract)
+    /*
+     * THE ENTRY NAMES THE ELEMENT, NOT THE CALLER. A `<main>` is the document's one main landmark
+     * and a `<nav>` is a destination; both are MEANING, and meaning belongs beside the classes and
+     * the children that the key already fixes.
+     *
+     * The alternative was an `as` prop, and it is the wrong door: it hands the element back to the
+     * call site, which is the single decision `TreeProps` exists to refuse. It also scales badly in
+     * the way this repository already paid for once - `Main` was a whole second frame whose only
+     * job was to swap the tag, so every rule taught about `Tree` had to be taught about `Main` too,
+     * and the one that was not reported the landmark as a node with no key.
+     */
+    const Host = contractSpec(contract).host ?? "div"
     return (
-        <div
+        <Host
             data-component="Tree"
             {...nodeProps}
         >
             <ContractContent contract={contract} render={render} />
-        </div>
+        </Host>
     )
 }
 

@@ -1,0 +1,81 @@
+{
+    "landing": {
+        "hero": {
+            "tryFree": "Try a free class",
+            "seeCourses": "See the courses"
+        },
+        "problems": {
+            "title": "Common mistakes"
+        },
+        "outcomes": {
+            "title": "What you will be able to do",
+            "first": "Do the real work",
+            "second": "Follow a clear path",
+            "third": "Have your work corrected"
+        },
+        "roadmap": {
+            "title": "The path"
+        },
+        "testimonials": {
+            "title": "What students say"
+        },
+        "gallery": {
+            "title": "The academy at work"
+        },
+        "courses": {
+            "title": "Courses",
+            "emptyTitle": "No courses yet",
+            "emptyBody": "The first one will appear here."
+        },
+        "community": {
+            "title": "Community",
+            "body": "Weekly questions and answers, and a group that goes the distance."
+        },
+        "offer": {
+            "title": "What membership includes",
+            "body": "Ask about fees and start dates."
+        },
+        "faq": {
+            "title": "Frequently asked questions"
+        },
+        "lead": {
+            "title": "Try a free class",
+            "body": "Leave your details and the academy will get back to you.",
+            "name": "Full name",
+            "phone": "Phone number",
+            "submit": "Send",
+            "sending": "Sending…",
+            "error": "That did not send. Check your connection and try again.",
+            "sent": "Thank you — the academy will be in touch."
+        }
+    },
+    "entry": {
+        "signUp": {
+            "title": "Create your student account",
+            "body": "Free, and no card needed.",
+            "submit": "Create account",
+            "switchPrompt": "Already have an account?",
+            "switchAction": "Sign in"
+        },
+        "signIn": {
+            "title": "Sign in",
+            "body": "Pick up where you left off.",
+            "submit": "Sign in",
+            "switchPrompt": "Forgot your password?",
+            "switchAction": "Create account"
+        },
+        "google": "Continue with Google",
+        "github": "Continue with GitHub",
+        "or": "or",
+        "email": "Email",
+        "password": "Password",
+        "checking": "Checking…",
+        "back": "Back",
+        "refused": "That email or password is not right.",
+        "resetSent": "If an account uses this email, we have sent a link to reset the password.",
+        "twoFactor": "This account has two-step verification switched on. The academy does not support that step in this build — switch it off, or use another account.",
+        "oauthLeaving": "Taking you to {provider}… you will come back as soon as you have signed in.",
+        "oauthFailed": "We could not finish signing you in. The link may have expired.",
+        "alreadySignedIn": "Taking you to your courses…"
+    }
+}

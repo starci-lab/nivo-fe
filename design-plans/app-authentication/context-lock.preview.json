@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "task": "app-authentication",
+  "phase": "preview",
+  "status": "active",
+  "trustRoot": "D:/Repositories/starci-academy-backend/.claude",
+  "skill": {
+    "name": "starci-fe-design-preview"
+  },
+  "caseId": "case-auth",
+  "selectedDirectionId": "direction-b",
+  "targets": [
+    {
+      "role": "design-target",
+      "repo": "nivo-fe",
+      "gitRoot": "D:/Repositories/nivo-fe",
+      "branch": "main",
+      "head": "415300f",
+      "remote": null,
+      "worktreeState": "dirty - this session's own uncommitted app/expert restructure and contract additions"
+    }
+  ],
+  "references": [
+    {
+      "role": "parity-baseline",
+      "repo": "starci-academy-fe",
+      "gitRoot": "D:/Repositories/starci-academy-fe",
+      "head": "8410a74",
+      "path": "src/components/blocks/auth/AuthenticationPanel",
+      "purpose": "the named render this screen is ported from; its SOURCE was read in this phase, not just its picture"
+    },
+    {
+      "role": "business-truth",
+      "repo": "nivo-backend",
+      "gitRoot": "D:/Repositories/nivo-backend",
+      "head": "e822320",
+      "purpose": "nine OTP mutations, proven by 25 e2e assertions"
+    }
+  ],
+  "artifactRoot": "D:/Repositories/nivo-fe/design-plans/app-authentication",
+  "writeBoundary": [
+    "D:/Repositories/nivo-fe/design-plans/app-authentication/preview-lab",
+    "D:/Repositories/nivo-fe/design-plans/app-authentication/context-lock.preview.json",
+    "D:/Repositories/nivo-fe/design-plans/app-authentication/context-lock.preview.md",
+    "D:/Repositories/nivo-fe/design-plans/app-authentication/design-record.json",
+    "D:/Repositories/nivo-fe/design-plans/app-authentication/design-record.md",
+    "D:/Repositories/nivo-fe/design-plans/app-authentication/context-lock.plan.json"
+  ],
+  "readOnlyBoundary": [
+    "all nivo-fe source outside design-plans",
+    "starci-academy-fe",
+    "nivo-backend",
+    "the trust tree"
+  ],
+  "lintReachesCandidate": {
+    "reaches": true,
+    "glob": "**/candidate/src/**/*.{ts,tsx}",
+    "source": "starciFeConfig({ layout: 'monorepo' }) in .claude/sources/fe/lint-adoption.mjs",
+    "note": "nivo-fe/eslint.config.mjs ignores only *.log, *.html, *.css and cases*/review* under design-plans, so candidate TypeScript is governed by the full rule set."
+  },
+  "drift": {
+    "detected": false,
+    "checked": [
+      "nivo-fe HEAD",
+      "starci-academy-fe HEAD",
+      "nivo-backend HEAD",
+      "selected direction",
+      "case id"
+    ],
+    "note": "All three HEADs match the plan lock. The nivo-fe working tree is dirty with this session's own work, which is the state Plan measured too."
+  },
+  "detectedAt": "2026-08-13"
+}

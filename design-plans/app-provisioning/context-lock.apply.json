@@ -1,0 +1,191 @@
+{
+  "version": 4,
+  "task": "app-provisioning",
+  "phase": "apply",
+  "status": "confirmed",
+  "blocked": false,
+  "trustRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+  "skill": {
+    "name": "starci-fe-design-apply",
+    "path": "D:\\Repositories\\starci-academy-backend\\.claude\\skills\\starci-fe-design-apply\\SKILL.md"
+  },
+  "inheritedFrom": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning\\context-lock.preview.json",
+  "designRecord": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning\\design-record.json",
+  "caseId": "case-prov",
+  "approvedRevision": "1.4",
+  "sealVerified": true,
+  "manifestSha256": "ebdb3221626b22db018624cd0026dc670450040b37478af2814bdef16c89bcc9",
+  "supersedes": {
+    "locks": "version 2 (revision 1.1) and version 3 (revision 1.3)",
+    "blockingFindings": [
+      {
+        "id": "record-target-map-overreaches",
+        "at": "1.1",
+        "summary": "candidate.files named nine targets while only two were writable, so the Apply gate reported missing=5 substituted=4.",
+        "resolvedBy": "Preview 1.2: two targets, seven moved to notPorted with reasons."
+      },
+      {
+        "id": "page-owner-in-the-routing-tree",
+        "at": "1.2",
+        "summary": "the target was apps/app/src/app/provisioning/fleet-page.tsx. A file under app/ names which page renders at which URL and nothing else (LAYOUT-6); it reached an approval with every gate green because that law was prose no rule read.",
+        "resolvedBy": "Preview 1.3 moved it to components/pages/ProvisioningPage/, and starci-fe/route-tree-holds-routes-only now enforces the law."
+      },
+      {
+        "id": "undeclared-fixture-target",
+        "at": "1.3",
+        "summary": "the page imports a fixture the record gave no target, so Apply would have had to invent a path.",
+        "resolvedBy": "Preview 1.4 declared it as a third target at apps/app/src/resources/fleet.fixture.json."
+      }
+    ],
+    "howTheyWereResolved": "None of the three was patched during Apply. Each returned to Preview for a minor revision, was rebuilt, re-photographed, re-approved and re-sealed."
+  },
+  "targets": [
+    {
+      "role": "design-target",
+      "repo": "nivo-fe",
+      "gitRoot": "D:\\Repositories\\nivo-fe",
+      "branch": "main",
+      "worktree": "D:\\Repositories\\nivo-fe",
+      "head": "415300f5a37a6366941612eb75c80a8ae1fc002c",
+      "remote": null,
+      "remoteNote": "This repository has no git remote. Nothing can be pushed, and nothing will be."
+    }
+  ],
+  "references": [
+    {
+      "role": "trust",
+      "repo": "starci-trust",
+      "gitRoot": "D:\\Repositories\\starci-academy-backend\\.claude",
+      "purpose": "canon, skills and the generated FE rule set"
+    }
+  ],
+  "artifactRoot": "D:\\Repositories\\nivo-fe\\design-plans\\app-provisioning",
+  "proposedWriteBoundary": [
+    "apps/app/src/components/pages/ProvisioningPage/index.tsx",
+    "apps/app/src/app/provisioning/page.tsx",
+    "apps/app/src/resources/fleet.fixture.json",
+    "packages/ui/package.json"
+  ],
+  "writeBoundaryNotes": {
+    "apps/app/src/app/provisioning/": "New directory. Named in English because starci-fe/no-second-language-in-path refuses a romanised second language in a path; the prior lock proposed `cap-phat`, which 1.2 replaced.",
+    "packages/ui/package.json": "The single declared integration edit that touches a shared file. The exports map publishes only `.`, `./contracts`, `./contracts/props`, `./leaves/*` and `./branches/*`, so StatRow cannot be imported as a specifier. Adding `./composites/*` is additive: it publishes a path that did not resolve before and changes no existing entry.",
+    "notInBoundary": "FleetRow needs no exports change. It is a BLOCK and already lives at apps/app/src/components/blocks/provisioning/FleetRow, so it resolves through the app's own `@/*` alias."
+  },
+  "readOnlyBoundary": [
+    "everything else in nivo-fe, including apps/expert and apps/landing",
+    "D:\\Repositories\\starci-academy-backend",
+    "D:\\Repositories\\starci-academy-backend\\.claude",
+    "D:\\Repositories\\starci-academy-fe"
+  ],
+  "gates": {
+    "designRecord": {
+      "ok": true,
+      "manifestSha256": "ebdb3221626b22db018624cd0026dc670450040b37478af2814bdef16c89bcc9"
+    },
+    "lintAdoption": {
+      "ok": true,
+      "missing": 0,
+      "nonError": 0,
+      "refusesInlineConfig": true,
+      "probe": "apps/app/src/components/pages/HomePage/index.tsx"
+    },
+    "materialization": {
+      "ok": true,
+      "materialized": 1,
+      "integrated": 2,
+      "missing": 0,
+      "substituted": 0,
+      "outOfBounds": 0
+    },
+    "typecheck": {
+      "apps/app": 0,
+      "apps/expert": 0,
+      "apps/landing": 0,
+      "packages/ui": 0
+    },
+    "build": {
+      "apps/app": 0,
+      "apps/expert": 0,
+      "apps/landing": 0
+    },
+    "workspaceLint": {
+      "errors": 1,
+      "note": "apps/expert AcademySections needs its presentational twin; unrelated to this case and agreed as separate work."
+    }
+  },
+  "drift": {
+    "detected": false,
+    "comparedFields": [
+      "trustRoot",
+      "skill lineage",
+      "target role",
+      "gitRoot",
+      "branch",
+      "worktree",
+      "head",
+      "remote",
+      "artifactRoot"
+    ],
+    "note": "HEAD 415300f matches the prior apply lock exactly. The absent remote was already recorded and is not new. The approved revision moved 1.1 -> 1.2 -> 1.3 -> 1.4 through Preview, which is a record change rather than context drift."
+  },
+  "integrationEdits": [
+    {
+      "targetPath": "apps/app/src/components/pages/ProvisioningPage/index.tsx",
+      "reason": "three imports become the app own specifiers: StatRow to @nivo/ui/composites/StatRow, FleetRow and the fixture to @/ aliases. Nothing else in the file changed."
+    },
+    {
+      "targetPath": "apps/app/src/app/provisioning/page.tsx",
+      "reason": "the route reaches the page by @/ alias instead of the relative path it used inside the lab."
+    },
+    {
+      "targetPath": "packages/ui/package.json",
+      "reason": "the exports map must admit ./composites/* before the StatRow import above can be a specifier. Additive: it publishes a path that did not resolve before and changes no existing entry."
+    }
+  ],
+  "otherWorkInProgress": "The working tree carries uncommitted work from other sessions across apps/ and packages/, including an apps/expert locale-segment migration. None of the three proposed targets is among those files.",
+  "productionWrites": "4 files: 3 materialized targets plus the declared exports-map edit",
+  "detectedAt": "2026-08-13",
+  "confirmation": {
+    "words": "ok",
+    "restatedBoundary": [
+      "apps/app/src/components/pages/ProvisioningPage/index.tsx",
+      "apps/app/src/app/provisioning/page.tsx",
+      "apps/app/src/resources/fleet.fixture.json",
+      "packages/ui/package.json"
+    ],
+    "note": "Apply had already stopped once before its first write: revision 1.3 named two targets while the page imported three files, so materializing it would have meant inventing a path for the fixture. That returned to Preview as 1.4 rather than being written and explained afterwards."
+  },
+  "parity": {
+    "method": "same route, 1280x900 dpr 1, locale vi, theme light, owner persona, same fixture hash - captured through the same headless path the seal used",
+    "productionScreenshot": "preview-lab/screens/production-provisioning.png",
+    "approvedScreenshot": "preview-lab/screens/populated.png",
+    "componentCount": {
+      "sealed": 73,
+      "production": 73
+    },
+    "domSequence": "identical for the first 40 data-component nodes, in order",
+    "actionButtons": {
+      "sealed": 6,
+      "production": 6,
+      "note": "seven rows, and the provisioning row carries none - the optional action slot doing its job"
+    },
+    "badgeTones": "identical, including the two that are wrong in BOTH - see findings",
+    "result": "pass - no structural or visual drift"
+  },
+  "findings": [
+    {
+      "id": "fixture-status-keys-do-not-match-the-union",
+      "severity": "real defect, frozen by the seal",
+      "summary": "fleet.fixture.json spells two statuses in camelCase (awaitingDns, notProvisioned) while FleetStatus is snake_case (awaiting_dns, not_provisioned). STATUS_TONE[status] returns undefined for those two, so the Cho DNS badge renders neutral where the record own tokens line promises warning.",
+      "whyTypeScriptMissedIt": "the JSON is cast with an `as ReadonlyArray<Resource>` assertion, which silences exactly the check that would have caught it.",
+      "whyNotFixedHere": "an amber badge where a grey one was approved is visual drift, and Apply does not change an approved artifact. It returns to Preview as 1.5."
+    },
+    {
+      "id": "the-page-opens-no-main-landmark",
+      "severity": "accessibility defect, frozen by the seal",
+      "summary": "titled-summary-filter-over-body-page declares no host, so the screen outermost node is a div and the document has zero main landmarks. A reader cannot skip to content.",
+      "whyNoRuleCaughtIt": "routed-page-is-a-main-landmark fires only on a layout that composes chrome. Nothing yet reports a screen that opens no landmark at all.",
+      "whyNotFixedHere": "same reason: it changes the approved DOM. Returns to Preview as 1.5, and canon needs the missing rule."
+    }
+  ]
+}
