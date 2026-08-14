@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Lab hướng — bốn điểm đến còn lại của console nivo</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:#f4f4f5;
+    color:#18181b;
+    font:15px/1.6 ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .lab-wrap{max-width:1520px;margin:0 auto;padding:0 20px 80px}
+  code{font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#e9e9ec;padding:1px 5px;border-radius:5px;color:#27272a}
+
+  /* ── banner, printed once ─────────────────────────────────── */
+  .lab-banner{
+    position:sticky;top:0;z-index:40;
+    background:#18181b;color:#fafafa;
+    padding:11px 20px;
+    font:700 12px/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    letter-spacing:.13em;text-transform:uppercase;text-align:center;
+  }
+  .lab-banner span{display:block;font-weight:400;letter-spacing:.02em;text-transform:none;
+    font-family:inherit;font-size:11px;color:#a1a1aa;margin-top:3px}
+
+  /* ── head block ───────────────────────────────────────────── */
+  .lab-head{padding:34px 0 8px}
+  .lab-head h1{font-size:27px;letter-spacing:-.02em;margin:0 0 10px}
+  .lab-head .lab-sub{font-size:14.5px;color:#3f3f46;max-width:96ch;margin:0 0 18px}
+  .lab-head .lab-sub b{color:#18181b}
+
+  .lab-jump{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 26px;padding:0;list-style:none}
+  .lab-jump a{
+    display:inline-block;text-decoration:none;
+    border:1px solid #d4d4d8;background:#fff;border-radius:999px;
+    padding:6px 13px;font-size:12.5px;color:#3f3f46;
+  }
+  .lab-jump a b{color:#18181b}
+
+  .lab-panel{
+    background:#fff;border:1px solid #e4e4e7;border-radius:14px;
+    padding:22px 24px;margin:0 0 20px;
+  }
+  .lab-panel > h2{
+    margin:0 0 4px;font-size:11px;letter-spacing:.11em;text-transform:uppercase;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#71717a;font-weight:600;
+  }
+  .lab-panel > h2 + p.lab-h2sub{margin:0 0 16px;font-size:17px;font-weight:600;letter-spacing:-.01em;color:#18181b}
+  .lab-panel p{margin:0 0 11px;font-size:13.5px;color:#3f3f46;max-width:104ch}
+  .lab-panel p:last-child{margin-bottom:0}
+  .lab-panel p b{color:#18181b}
+  .lab-panel .lab-fact{
+    border-left:3px solid #52525b;background:#fafafa;
+    padding:11px 14px;border-radius:0 8px 8px 0;margin:0 0 14px;max-width:104ch;
+  }
+  .lab-panel .lab-fact p{margin:0 0 7px}
+  .lab-panel .lab-fact p:last-child{margin:0}
+
+  .lab-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin:14px 0 0}
+  .lab-col h3{margin:0 0 7px;font-size:13.5px;font-weight:600}
+  .lab-col ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+  .lab-col li{font-size:12.5px;line-height:1.55;color:#3f3f46;padding-left:12px;border-left:2px solid #e4e4e7}
+  .lab-col li b{color:#18181b}
+
+  table.lab-tbl{border-collapse:collapse;width:100%;font-size:12.5px;margin:6px 0 0}
+  table.lab-tbl th,table.lab-tbl td{
+    border-bottom:1px solid #e4e4e7;padding:9px 11px;text-align:left;vertical-align:top;color:#3f3f46;
+  }
+  table.lab-tbl th{
+    font:600 10.5px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    letter-spacing:.07em;text-transform:uppercase;color:#71717a;background:#fafafa;white-space:nowrap;
+  }
+  table.lab-tbl td:first-child{font-weight:600;color:#18181b;white-space:nowrap}
+  table.lab-tbl tr:last-child td{border-bottom:0}
+  .lab-scroll{overflow-x:auto;border:1px solid #e4e4e7;border-radius:10px}
+  .lab-agree{
+    display:inline-block;font:600 10px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    letter-spacing:.07em;text-transform:uppercase;border-radius:999px;padding:1px 8px;
+    background:#dcfce7;color:#166534;
+  }
+  .lab-agree.lab-split{background:#fef3c7;color:#92400e}
+
+  /* ── one direction ────────────────────────────────────────── */
+  .lab-dir{margin:44px 0 0;scroll-margin-top:64px}
+  .lab-dir > header{
+    background:#fff;border:1px solid #e4e4e7;border-radius:14px 14px 0 0;border-bottom:0;
+    padding:22px 24px 20px;
+  }
+  .lab-dir > header .lab-id{
+    display:inline-block;font:700 10px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    letter-spacing:.12em;text-transform:uppercase;color:#fafafa;background:#18181b;
+    border-radius:5px;padding:5px 8px;
+  }
+  .lab-dir > header h2{margin:11px 0 9px;font-size:21px;letter-spacing:-.015em}
+  .lab-dir > header .lab-thesis{margin:0 0 14px;font-size:13.5px;color:#3f3f46;max-width:104ch}
+  .lab-dir > header .lab-thesis b{color:#18181b}
+  .lab-nav{
+    border:1px solid #e4e4e7;border-left:3px solid #52525b;border-radius:0 9px 9px 0;
+    background:#fafafa;padding:12px 15px;margin:0 0 4px;max-width:104ch;
+  }
+  .lab-nav h3{
+    margin:0 0 6px;font:600 10px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    letter-spacing:.1em;text-transform:uppercase;color:#71717a;
+  }
+  .lab-nav p{margin:0;font-size:12.5px;color:#3f3f46;line-height:1.6}
+  .lab-nav p b{color:#18181b}
+
+  .lab-reason{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:0;
+    background:#fff;border:1px solid #e4e4e7;border-top:1px dashed #e4e4e7;
+  }
+  .lab-reason > section{padding:20px 24px;border-top:0}
+  .lab-reason > section + section{border-left:1px solid #f1f1f4}
+  @media(max-width:820px){.lab-reason > section + section{border-left:0;border-top:1px solid #f1f1f4}}
+  .lab-reason h3{
+    margin:0 0 10px;font:600 10.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    letter-spacing:.1em;text-transform:uppercase;color:#71717a;
+  }
+  .lab-reason ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;counter-reset:r}
+  .lab-reason li{
+    font-size:12.5px;line-height:1.6;color:#3f3f46;
+    padding-left:26px;position:relative;counter-increment:r;
+  }
+  .lab-reason li::before{
+    content:counter(r);position:absolute;left:0;top:1px;
+    width:18px;height:18px;border-radius:50%;background:#f1f1f4;color:#52525b;
+    font:700 9.5px/18px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;text-align:center;
+  }
+  .lab-reason li b{color:#18181b}
+  .lab-reason.lab-feas li::before{background:#e9e9ec}
+
+  .lab-scenes{
+    background:#fff;border:1px solid #e4e4e7;border-top:0;border-radius:0 0 14px 14px;
+    padding:22px 24px 26px;
+  }
+  .lab-scenes > h3{
+    margin:0 0 16px;font:600 10.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    letter-spacing:.1em;text-transform:uppercase;color:#71717a;
+  }
+  .lab-foot{margin:46px 0 0;padding:18px 0 0;border-top:1px solid #d4d4d8;font-size:12px;color:#71717a;max-width:104ch}
+</style>
+</head>
+<body>
+
+<div class="lab-banner">
+  DIRECTIONAL — NOT AN APPLY BASELINE
+  <span>Bản vẽ ở đây để chọn hướng. Preview mới dựng lại hướng thắng bằng component, hợp đồng và token thật — không ai port HTML này.</span>
+</div>
+
+<div class="lab-wrap">
+
+<header class="lab-head">
+  <h1>Bốn điểm đến còn lại của console nivo</h1>
+  <p class="lab-sub">
+    Console đã ship ba điểm đến — <b>Tổng quan</b>, <b>Ứng dụng</b>, <b>Ví</b>. Bốn cái tên còn lại trên thanh bên —
+    <b>AgentOS</b>, <b>Máy chủ</b>, <b>Tên miền</b>, <b>Hỗ trợ</b> — chưa có trang nào. Ba hướng dưới đây vẽ bốn màn đó,
+    mỗi hướng đủ tám cảnh: bốn dịch vụ × hai trạng thái (có dữ liệu và rỗng). Cả ba đều kiểm chứng từng trường trên
+    schema sống tại <code>localhost:3067/graphql</code>, đều giữ bốn trạng thái mạng cho mỗi khối
+    (<b>chưa hỏi · rỗng · có · bị từ chối</b>), đều không dùng fixture, và đều <b>không nêu một con số đếm nào</b> —
+    vì nivo không công bố truy vấn đếm nào cả.
+  </p>
+  <ul class="lab-jump">
+    <li><a href="#van-de-a"><b>Vấn đề A</b> · thanh bên</a></li>
+    <li><a href="#gioi-han"><b>Giới hạn</b> · backend không nói được gì</a></li>
+    <li><a href="#so-sanh"><b>Bảng so sánh</b></a></li>
+    <li><a href="#dir-a"><b>Hướng A</b> · một hình cho cả bốn</a></li>
+    <li><a href="#dir-b"><b>Hướng B</b> · mỗi dịch vụ một câu hỏi</a></li>
+    <li><a href="#dir-c"><b>Hướng C</b> · dịch vụ mỏng, một chỗ sâu</a></li>
+  </ul>
+</header>
+
+<!-- ═══════════════ VẤN ĐỀ A ═══════════════ -->
+<section class="lab-panel" id="van-de-a">
+  <h2>Vấn đề A — nằm ngoài phạm vi bản vẽ, nhưng cả ba hướng phải trả lời</h2>
+  <p class="lab-h2sub">Thanh bên không phải là liên kết thật, và không điểm đến nào là</p>
+
+  <div class="lab-fact">
+    <p><b>Sự thật đã kiểm chứng trong source.</b> <code>NavLinkData</code>
+    (<code>packages/ui/src/leaves/NavLink/index.tsx</code>) có đúng bốn trường —
+    <code>label</code>, <code>icon</code>, <code>isCurrent</code>, <code>kind</code> — và
+    <b>không có <code>href</code></b>. Lá này dựng <code>&lt;Link&gt;</code> của HeroUI với mỗi
+    <code>onPress</code>, nên DOM ra là <code>&lt;span role="link"&gt;</code>: không phải thẻ neo, không bấm chuột giữa
+    được, không mở tab mới được, không kéo vào dấu trang được, và không có địa chỉ hiện ở thanh trạng thái.</p>
+    <p><b>Nhưng lời than “bấm không ăn gì” có hai nửa, và ba hướng đều tách chúng ra giống nhau.</b>
+    <code>on.press</code> vẫn chạy tới <code>useLink</code> của react-aria qua <code>LinkRoot</code> của HeroUI và vẫn
+    gọi <code>router.push</code> thật — nên <b>ba điểm đến đã ship vẫn chuyển trang khi bấm</b>. Bốn mục trơ là bốn mục
+    mang <code>route: null</code> trong <code>ConsoleNav.DESTINATIONS</code>, tức là chúng chưa có trang, chứ không phải
+    lá bị hỏng. Cái mà một thẻ neo thật sự mua thêm — chuột giữa, ⌘/Ctrl-bấm sang tab mới, xem địa chỉ, kéo dấu trang —
+    là mất mát có thật với một bảng điều khiển vận hành, và nó <b>mất đều cho cả bảy mục</b>, kể cả ba mục đã ship.</p>
+  </div>
+
+  <p><b>Cả ba hướng đồng ý về việc sẽ làm trong Plan này, và đồng ý luôn về việc KHÔNG làm.</b>
+  Không hướng nào sửa <code>NavLink</code> bên trong hồ sơ vẽ trang này; cả ba điền các giá trị <code>route</code> đang
+  <code>null</code>, và cả ba <b>từ chối cách bọc <code>&lt;Link&gt;</code> của Next quanh lá trong <code>ConsoleNav</code></b>
+  với cùng một lý do kỹ thuật: lá vẫn dựng <code>&lt;span role="link" tabindex="0"&gt;</code> bên trong, nên DOM thành một
+  <code>&lt;a&gt;</code> ôm một <code>role="link"</code> lồng — <b>hai điểm dừng tab, hai lần đọc “liên kết”</b> cho một
+  điểm đến, cộng một handler đua với hành vi mặc định của thẻ neo. Đó là cùng một vi phạm VENDOR-14, chỉ lùi ra một tệp.</p>
+
+  <p><b>Một cảnh báo cả ba cùng nêu, và nó quan trọng khi ai đó viện dẫn cổng lint.</b> Nhánh “lá chỉ dùng nội bộ” của
+  <code>vendor-boundary.mjs</code> bị chặn bởi một biểu thức đường dẫn kiểu <i>một-app</i>, trả <code>false</code> cho
+  <code>packages/ui/src/leaves/NavLink/index.tsx</code>. Luật <b>không thể nổ</b> trong bố cục monorepo này, nên
+  <b>một lượt lint xanh không phải bằng chứng cho bất kỳ lối nào</b>. Bản thân lỗ hổng đường dẫn đó đáng một sửa chữa
+  riêng trong cây tin cậy.</p>
+
+  <div class="lab-scroll">
+    <table class="lab-tbl">
+      <thead>
+        <tr>
+          <th>Hướng</th>
+          <th>Làm trong Plan này</th>
+          <th><code>href</code> trên lá</th>
+          <th>Bọc <code>&lt;Link&gt;</code></th>
+          <th>Nếu bị buộc phải chọn</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Hướng A</td>
+          <td>Điền 4 route, không đụng lá</td>
+          <td>Là tu chính VENDOR-14, nộp riêng</td>
+          <td>Từ chối dứt khoát</td>
+          <td>Chọn <code>href</code> + tu chính canon + <code>RouterProvider navigate={router.push}</code> trong <code>providers.tsx</code></td>
+        </tr>
+        <tr>
+          <td>Hướng B</td>
+          <td>Điền 4 route, không đụng lá</td>
+          <td>Từ chối trong phạm vi này — không thu hẹp trung thực về một lá được</td>
+          <td>Từ chối, mạnh hơn</td>
+          <td>Không chọn: đây là câu hỏi quản trị, không hướng nào có quyền phân xử</td>
+        </tr>
+        <tr>
+          <td>Hướng C</td>
+          <td>Điền 3 route (Hỗ trợ là bảng bên, không có địa chỉ)</td>
+          <td><b>Ủng hộ</b>, kèm ba điều kiện, nhưng ở một hồ sơ khác</td>
+          <td>Từ chối dứt khoát</td>
+          <td>Đã chọn sẵn: ủng hộ tu chính, 3 tệp production nếu nó về</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin-top:14px"><span class="lab-agree">đồng thuận</span> &nbsp;<b>Cả ba hướng hội tụ về một câu trả lời,
+  và sự hội tụ đó tự nó là kết quả:</b> Vấn đề A không phải một lựa chọn thiết kế giữa các hướng, nó là một quyết định
+  về cây tin cậy — nộp riêng, đụng
+  <code>.claude/fe/canon/patterns/vendor-boundary.md</code>, <code>.claude/sources/fe/vendor-boundary.mjs</code>,
+  bài kiểm tra sinh đôi của luật, rồi đồng bộ lại qua <code>sync-fe-lint.mjs</code>. Nếu tu chính về, chi phí production
+  là <b>ba tệp</b>, không phải hai: lá, <code>ConsoleNav</code>, và <code>providers.tsx</code> phải gắn
+  <code>RouterProvider</code> — nếu không, mỗi lần bấm trên thanh bên thành một lần tải lại cả tài liệu, remount app,
+  quay lại trạng thái <code>restoring</code> của <code>SessionProvider</code> và bắn lại mọi truy vấn của console.</p>
+
+  <p><b>Một khoản lời miễn phí, đã kiểm chứng trong source.</b> <code>OverviewPage/component.tsx</code> hiện vẽ hai nhãn
+  “xem thêm” với <code>on={{ seeMore: undefined }}</code> (dòng 444 và 482) — nhãn có, bấm chết. Bốn route mới làm chúng
+  sống lại mà không sửa thêm gì. <b>Một cảnh báo kèm theo:</b> <code>isCurrentDestination</code> so khớp tiền tố
+  <b>chuỗi thô</b> chứ không phải tiền tố đoạn đường dẫn — bốn route mới không đụng nhau hôm nay, nhưng một route anh em
+  trong tương lai phải kiểm bằng tay.</p>
+</section>
+
+<!-- ═══════════════ GIỚI HẠN ═══════════════ -->
+<section class="lab-panel" id="gioi-han">
+  <h2>Giới hạn — điều backend KHÔNG nói được</h2>
+  <p class="lab-h2sub">Bản đồ sự thật mà cả ba hướng đều phải vẽ vòng quanh</p>
+  <p>Đọc từ schema sống và từ source, không lấy từ trí nhớ. Đây là lý do ba hướng khác nhau về hình, nhưng giống nhau
+  gần như từng chữ về nội dung: <b>khoảng trống là như nhau, chỉ có cách nói ra là khác</b>.</p>
+
+  <div class="lab-cols">
+    <div class="lab-col">
+      <h3>Xuyên suốt cả bốn màn</h3>
+      <ul>
+        <li><b>Không có truy vấn đếm nào, ở bất cứ đâu.</b> Không kiểu phản hồi nào khai báo <code>total</code>,
+        <code>cursor</code> hay <code>hasMore</code>; <code>metadata</code> bị <code>graphql.ts</code> bỏ trước khi tới
+        người gọi. Một con số đếm trên màn sẽ là con số trình duyệt tự tính trên một danh sách nó không sở hữu.</li>
+        <li><b>“Bị từ chối” là trạng thái thật, không phải đệm phòng thủ.</b> <code>myPodOpenclawStatus</code> và
+        <code>myAcademySettings</code> <i>ném</i> thay vì trả lời.</li>
+        <li><b>Từ chối đọc theo <code>code</code>, không bao giờ theo <code>reason</code></b> — <code>reason</code> là
+        câu tiếng Anh dành cho người vận hành. Và <code>t()</code> ném khi gặp khoá chưa khai, nên mọi mã mới phải được
+        ghi tay vào <code>NAMED_REFUSALS</code>.</li>
+        <li><b>Điều kiện thứ năm không thuộc về khối nào.</b> Chốt Keycloak chạy trước bộ chặn phong bì, nên một phiên
+        hết hạn trả <code>errors</code> ở cấp cao nhất với <code>data: null</code> — <b>trắng cả tài liệu</b>, xử lý ở
+        tầng trang.</li>
+        <li><b>Không <code>@ResolveField</code> nào trong toàn backend</b>, và các handler danh sách không nạp quan hệ —
+        nên mọi trường quan hệ là null trên mọi dòng danh sách.</li>
+      </ul>
+    </div>
+
+    <div class="lab-col">
+      <h3>AgentOS</h3>
+      <ul>
+        <li><b>Tự động hoá bị từ chối cho MỌI tài khoản hôm nay.</b> <code>myAutomations</code>,
+        <code>myAutomationRuns</code> và <code>myPodN8nWorkflows</code> đều đòi khoá n8n; bảng
+        <code>pod_credentials</code> không giữ dòng nào là khoá đó. Workspace có, pod có, khoá chưa từng được đúc.</li>
+        <li><b>Kho tri thức không rời khỏi “đang xử lý”.</b> Chưa có đường ống lập chỉ mục nào, và bản thân tài liệu chưa
+        gửi lên được — mới chỉ ghi lại cái tên. Một thanh tiến trình ở đây là bịa.</li>
+        <li><b>Công cụ không có trạng thái rỗng.</b> Lần đọc đầu tiên tự gieo ba dòng vào một workspace trống.</li>
+        <li><b>“Tạm dừng” là một lá cờ, không phải công tắc.</b> <code>toggleAgentStatus</code> ghi một cột; không tiến
+        trình nào dừng lại.</li>
+        <li><b><code>myModels</code> là danh mục chung của nivo</b>, không phải mô hình tài khoản sở hữu.</li>
+        <li><b>Không bao giờ chọn <code>ChannelConnectionEntity.instance</code></b> — <code>InstanceEntity!</code>
+        không-null mà quan hệ không được nạp; chọn nó xoá sạch cả phản hồi, không phải một ô.</li>
+      </ul>
+    </div>
+
+    <div class="lab-col">
+      <h3>Máy chủ</h3>
+      <ul>
+        <li><b>Cải chính hồ sơ cũ, hai hướng độc lập cùng kiểm và cùng kết luận:</b> <code>MyInstance.ram</code> và
+        <code>vcpu</code> <b>không</b> hardcoded null. Handler đọc <code>instance.ramMb</code> và
+        <code>instance.vcpu</code> thật. Null <b>chỉ</b> xuất hiện trên dòng mồ côi, và điều kiện phân biệt là
+        <code>instanceId === null</code> chứ không phải loại ứng dụng. Đây đúng là lời nói dối mà vụ này sinh ra để
+        chặn — chỉ có điều nó nằm ở hồ sơ, không nằm ở backend.</li>
+        <li><b>Không truy vấn nào dò một máy đang chạy.</b> Không hostname, IP, vùng, đĩa, băng thông, tải CPU, bộ nhớ
+        đang dùng, uptime, số lần khởi động lại — <code>MyInstance</code> là DTO phẳng không công bố chúng.</li>
+        <li><b><code>creditBurnUsd</code> null nghĩa là <i>chưa biết</i>, không phải bằng không.</b> Sổ tín dụng đang
+        trống. Viết “0 $” là bịa một con số đã chốt.</li>
+        <li><b>Không có mutation nào tạo một máy chủ.</b> Instance chỉ sinh ra như hệ quả của một đơn hàng hoàn tất, nên
+        một nút “Tạo máy chủ” hứa một điều khiển không tồn tại.</li>
+        <li><b><code>myInstances</code> từ chối cả danh sách</b>, không phải một dòng — bộ chặn bắt theo thao tác.</li>
+      </ul>
+    </div>
+
+    <div class="lab-col">
+      <h3>Tên miền</h3>
+      <ul>
+        <li><b>Đồng hồ là thật, việc đăng ký thì không.</b> Một lượt quét mỗi giờ ghi “sắp hết hạn” ở mốc 30 ngày và
+        “đã hết hạn” khi qua ngày — cột trạng thái có người viết thật.</li>
+        <li><b><code>addDomain</code> chỉ kiểm trùng trong bảng của chính nivo</b> rồi ghi 365 ngày và
+        <code>ns1/ns2.nivo.vn</code>. Không gọi nhà đăng ký, không kiểm tra còn trống ngoài đời, <b>không giá</b>,
+        không WHOIS, không mã chuyển nhượng, không bản ghi DNS.</li>
+        <li><b>Không khoá ngoại nào nối một tên miền với một ứng dụng hay một máy</b> — màn hình không nói được tên miền
+        đang trỏ vào đâu.</li>
+        <li><b><code>expiresAt</code> nullable trên dây</b>, nên không được định dạng mà chưa kiểm tra.</li>
+        <li><b>Định dạng ngày của console là ngày/tháng.</b> Một tên miền hết hạn năm 2027 in “12/06” đọc thành năm nay —
+        Tên miền <b>bắt buộc</b> phải thêm <code>year</code>. Không phải thay đổi contract, nhưng không phải tuỳ chọn.</li>
+      </ul>
+    </div>
+
+    <div class="lab-col">
+      <h3>Hỗ trợ</h3>
+      <ul>
+        <li><b><code>answered</code> không có nghĩa là ai đó đã trả lời.</b> Chính handler tạo phiếu đăng một tin nhắn
+        soạn sẵn của “nhân viên” rồi tự đặt trạng thái đó. <b>Không tồn tại mutation nào cho nhân viên trả lời</b> ở bất
+        cứ đâu trong backend; cơ sở dữ liệu giữ 10 tin nhắn nhân viên với <b>đúng một</b> nội dung. Nhãn phải đọc là
+        <b>“Đã tiếp nhận”</b>, không bao giờ là “Đã trả lời”.</li>
+        <li><b><code>myOpsTickets</code> hôm nay không thể đầy.</b> Danh mục gieo đúng hai món và <b>không món nào</b>
+        mang <code>FulfillmentKind.OpsService</code>; bộ gieo còn vô hiệu hoá mọi thứ ngoài danh sách đó. Một danh sách
+        rỗng vĩnh viễn cần một câu trả lời khác với “danh sách rỗng”.</li>
+        <li><b>Danh sách phiếu không mang nội dung.</b> <code>myTickets</code> không nạp quan hệ nào, nên
+        <code>messages</code> là null trên mọi dòng — không có dòng trích dẫn nào là khả thi ở tầng danh sách.</li>
+        <li><b><code>CreateTicketInput</code> có đúng hai trường.</b> Không phân loại, không ưu tiên, không SLA, không
+        người phụ trách, không đính kèm.</li>
+        <li><b>Trả lời một phiếu đã đóng bị từ chối</b> (<code>TICKET_ALREADY_CLOSED_EXCEPTION</code>), nên hàng đã đóng
+        không mang nút trả lời — một nút vẽ mờ vẫn là hứa một điều khiển không có.</li>
+      </ul>
+    </div>
+
+    <div class="lab-col">
+      <h3>Một bất đồng còn mở giữa các hướng</h3>
+      <ul>
+        <li><b>Hình của <code>myAgents</code>.</b> Hướng A đọc được rằng <code>AgentEntity</code> chỉ công bố
+        <code>channels</code> và <b>không có</b> <code>tools</code>/<code>knowledgeSources</code>. Hướng B đọc được rằng
+        <code>myAgents</code> trả <code>MyAgentsAgent</code>, với cả ba là mảng chuỗi hiển thị. Hai lần đọc mâu thuẫn
+        nhau về đúng một kiểu, nên <b>đây là mục phải xác minh lại ở Preview trước khi viết selection set</b> — không
+        phải một khác biệt về thẩm mỹ.</li>
+        <li><b>Hình của <code>myThreads</code>.</b> Cùng dạng: A ghi <code>ThreadEntity.channel</code> là một
+        <code>ChannelConnectionEntity</code>, B ghi <code>AgentThread.channel</code> là <code>String!</code>. Chỉ hướng
+        A và B mới chạm tới nó; hướng C không truy vấn <code>myThreads</code> ở đâu cả.</li>
+        <li><b>Điều này không đổi bản vẽ nào</b> — không cảnh nào trong ba hướng khẳng định công cụ của một agent như
+        một sự thật ở cấp dòng mà không có chú thích. Nhưng nó đổi selection set, nên nó được ghi ra chứ không được lờ
+        đi.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SO SÁNH ═══════════════ -->
+<section class="lab-panel" id="so-sanh">
+  <h2>Bảng so sánh</h2>
+  <p class="lab-h2sub">Cái giá về vốn từ, số màn, và chỗ đứng của Hỗ trợ</p>
+  <div class="lab-scroll">
+    <table class="lab-tbl">
+      <thead>
+        <tr>
+          <th>Hướng</th>
+          <th>Khoá hợp đồng MỚI</th>
+          <th>MỞ RỘNG</th>
+          <th>Địa chỉ mới</th>
+          <th>Cảnh</th>
+          <th>Hỗ trợ ở đâu</th>
+          <th>Backend cần làm gì</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>A · một hình cho cả bốn</td>
+          <td><b>0</b></td>
+          <td><b>2</b>, đều ngoài bảng hợp đồng: các union của khối <code>FleetRow</code>
+            (<code>FleetStatus</code>, <code>FleetKind</code>) và composite <code>EmptyNotice</code>
+            (icon lối ra đang bị ép cứng thành <code>retry</code>)</td>
+          <td><b>4</b> — <code>/agentos</code> <code>/servers</code> <code>/domains</code> <code>/support</code></td>
+          <td>8</td>
+          <td><b>Điểm đến</b> <code>/support</code>, cùng hình dòng như ba màn kia</td>
+          <td>Không</td>
+        </tr>
+        <tr>
+          <td>B · mỗi dịch vụ một câu hỏi</td>
+          <td><b>1</b> — <code>subject-status-action-row</code>, phục vụ cả Tên miền lẫn Hỗ trợ</td>
+          <td><b>1</b> — <code>fleet-resource-list.resource</code> nhận hàng thứ ba</td>
+          <td><b>4</b> — như trên</td>
+          <td>8</td>
+          <td><b>Điểm đến</b> <code>/support</code>, dẫn bằng “có ai đang chờ nivo không”</td>
+          <td>Không</td>
+        </tr>
+        <tr>
+          <td>C · dịch vụ mỏng, một chỗ sâu</td>
+          <td><b>0</b> khoá hợp đồng — nhưng <b>một owner mới</b>: <code>packages/ui/src/shells/DrawerShell</code>,
+            <b>tầng shell đầu tiên trong repo</b></td>
+          <td><b>3</b> — một slot <code>overlay</code> tuỳ chọn trên <code>sidebar-then-body-app</code>, cộng
+            <code>FleetKind</code> (+<code>domain</code>, +<code>agent</code>) và <code>FleetStatus</code>
+            (+<code>expiring</code>, +<code>expired</code>)</td>
+          <td><b>3</b> — <code>/agentos</code> <code>/servers</code> <code>/domains</code></td>
+          <td>8</td>
+          <td><b>Bảng bên</b> mở từ nhóm Tài khoản — <b>không có địa chỉ</b>, không dán link được, không bao giờ sáng
+            lên như nơi đang đứng</td>
+          <td>Không</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="margin-top:14px"><span class="lab-agree lab-split">khác nhau</span> &nbsp;<b>Ba câu hỏi mà bảng này đặt ra
+  cho người duyệt, và không hướng nào tự trả lời được:</b> (1) một hàng bốn ô dùng cho cả một VPS lẫn một phiếu hỗ trợ
+  thì phẳng tới mức nào là chấp nhận được — A trả giá ở đây, B mua đường thoát bằng một khoá mới; (2) một bảng bên có
+  đáng để Hỗ trợ mất địa chỉ vĩnh viễn không — nếu nivo sau này có người trực trả lời thật, C phải mở lại quyết định
+  chứ không đổi route được; (3) <code>restingCount: 2</code> của <code>titled-section-stack-page</code> đã sai với
+  trang AgentOS ở <b>cả ba hướng</b> (7–10 mục ở A, 9 ở B, 6 ở C) — đây là câu hỏi canon mà vụ trước đã mang vào
+  Preview và cả ba hướng đều mở lại chứ không hướng nào chốt.</p>
+</section>
+
+<!--DIR_A-->
+
+<!--DIR_B-->
+
+<!--DIR_C-->
+
+<p class="lab-foot">
+  Lab này là <b>ĐỊNH HƯỚNG — KHÔNG PHẢI NỀN ĐỂ ÁP DỤNG</b>. HTML ở đây được viết để so sánh hướng, không phải để port.
+  Preview dựng lại hướng thắng bằng component, hợp đồng, token và fixture thật, rồi mới niêm phong một bản.
+  Mọi giá trị trong cảnh là thể hiện hợp lệ của hình mà schema sống công bố — không phải dữ liệu thật của một tài khoản.
+</p>
+
+</div>
+</body>
+</html>

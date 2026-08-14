@@ -28,7 +28,7 @@ export type LayoutClassName =
     | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "overflow-hidden"
     | "items-center" | "items-baseline" | "items-start"
     | "justify-between" | "justify-center" | "[&>*]:w-full" | "[&>*]:max-w-sm"
-    | "gap-0" | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
+    | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
     | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "lg:grid-cols-3"
     | "md:flex" | "md:flex-row" | "md:items-start"
     | "mx-auto" | "min-h-screen" | "w-full" | "min-w-0" | "grow" | "flex-1" | "hidden" | "max-w-app-lg" | "max-w-6xl" | "max-w-sm"
@@ -310,7 +310,7 @@ export const CONTRACTS = buildContracts({
              *
              * Replaced with the bodies a section actually holds. A leaf is admitted beside them
              * because an empty or failed section says its one sentence in the same column its rows
-             * would have used, exactly as `titled-summary-filter-over-body-page` already allows.
+             * would have used.
              */
             body: {
                 contract: [
@@ -320,6 +320,10 @@ export const CONTRACTS = buildContracts({
                     // way at a real call site and this list did not say so, which is how the branch
                     // ended up wearing the section on a box of its own rather than rendering it.
                     "attributed-claim-panel",
+                    // A refusal is a THIRD answer beside a body and an emptiness. A section that
+                    // cannot draw one has to fall back on the empty notice, which tells the reader
+                    // nothing was there when the server in fact declined to say.
+                    "body-with-refusal-note",
                 ],
                 leaf: "text",
             },
@@ -389,7 +393,7 @@ export const CONTRACTS = buildContracts({
         why: "A row in a mixed fleet has to answer WHAT it is before WHAT STATE it is in, so kind and status are two badges rather than one sentence: kind never changes and is fixed to the neutral tone, status changes constantly and owns the tone. Collapsing them would let a merely suspended resource read as a different kind of thing from a running one. There is deliberately NO leading glyph: the kind badge already carries that answer, and a figure repeating it would be the second place a reader has to look to learn one fact. The action is optional because a resource mid-provision has nothing anybody may do to it, and an always-present button drawn disabled promises a control that does not exist rather than admitting there is none.",
     },
     "name-over-handle": {
-        classes: ["flex", "flex-col", "gap-0"],
+        classes: ["flex", "flex-col", "gap-1"],
         children: {
             name: { leaf: "text-link", props: { size: "sm" } },
             handle: { leaf: "text", props: { size: "xs", tone: "muted" } },
@@ -458,31 +462,20 @@ export const CONTRACTS = buildContracts({
     "fleet-resource-list": {
         classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0", "[&>*]:px-4", "[&>*]:py-3", "[&>*:first-child]:pt-4", "[&>*:last-child]:pb-4"],
         children: {
-            // KNOWN TIER MISMATCH, recorded rather than hidden: `fleet-row` is a BLOCK (it reads
-            // nivo's provisioning states), but a child slot may only name a leaf, a composite or a
-            // contract. Declaring it `composite` is what makes the slot expressible today; the tier
-            // that is true lives on the component's own `meta.shape`. Whether this spec needs a
-            // fourth kind is a canon decision, not one to settle by relabelling the component.
-            resource: { composite: "fleet-row", repeats: true, restingCount: 3 },
+            /*
+             * THE SLOT ADMITS A SECOND ROW IDENTITY, and that is what lets a catalogue of things on
+             * offer and a list of things already owned be the SAME surface rather than two shelves.
+             *
+             * KNOWN TIER MISMATCH, recorded rather than hidden: both named rows are BLOCKS (they
+             * read nivo's provisioning and catalogue states), but a child slot may only name a leaf,
+             * a composite or a contract. Declaring them `composite` is what makes the slot
+             * expressible today; the tier that is true lives on each component's own `meta.shape`.
+             * Whether this spec needs a fourth kind is a canon decision, not one to settle by
+             * relabelling the components.
+             */
+            resource: { composite: ["fleet-row", "template-offer-row"], repeats: true, restingCount: 3 },
         },
-        why: "Two kinds of provisioned thing are compared in one scan, so they share one joined surface and full-width rules rather than sitting in two shelves that would make their differing lifecycles look like differing importance.",
-    },
-    "titled-summary-filter-over-body-page": {
-        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-6", "px-6", "py-6"],
-        children: {
-            heading: { contract: "title-with-end-action" },
-            summary: { contract: "stacked-stat-rows", optional: true },
-            filter: { contract: "choice-tab-strip" },
-            body: { contract: "label-row-over-card", leaf: "text" },
-        },
-        why: "A page that filters a collection has to put the filter where a reader meets it AFTER the totals and BEFORE the rows, because a control placed under what it changes reads as belonging to the last row rather than to the list. The summary is optional and the filter is not: totals vanish honestly when there is nothing to count, while a filter that disappears with its rows would take the way back with it. The body admits a text leaf so an empty or failed page says its sentence in the same column the rows would have used, rather than in a shape of its own.",
-    },
-    "choice-tab-strip": {
-        classes: ["w-full"],
-        children: {
-            tabs: { leaf: "choice-tabs" },
-        },
-        why: "A single filter axis owns one strip. `underlined-tab-strip` already holds the compound `extended-tabs` primitive, which requires an icon per tab, and there is no honest glyph for a resource kind - so a strip that filters by NAME alone needs the plain choice primitive instead.",
+        why: "Rows are compared in one scan, so they share one joined surface and full-width rules rather than sitting in two shelves that would make a difference in what they are look like a difference in importance - which is why the same surface holds a thing already provisioned and a thing still on offer, and why the surface owns its own first and last inset instead of every row remembering it is the last one.",
     },
     "dual-tabs-toolbar": {
         classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3"],
@@ -588,7 +581,7 @@ export const CONTRACTS = buildContracts({
         why: "A joined list may qualify its own rows with a semibold label and a smaller muted fact on one baseline; without peer identities outside the list there is no reason to add a leading glyph.",
     },
     "claim-panel-grid": {
-        classes: ["grid", "grid-cols-1", "gap-3", "sm:grid-cols-2", "lg:grid-cols-3"],
+        classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-2", "lg:grid-cols-3"],
         children: {
             claim: { contract: "attributed-claim-panel", repeats: true, restingCount: 4 },
         },
@@ -646,7 +639,7 @@ export const CONTRACTS = buildContracts({
         why: "The hint belongs under the control it explains rather than beside the label, because a reader reaches the hint after failing at the control and not before trying it.",
     },
     "form-column": {
-        classes: ["flex", "w-full", "max-w-sm", "flex-col", "gap-3"],
+        classes: ["flex", "w-full", "max-w-sm", "flex-col", "gap-4"],
         children: {
             field: { contract: "label-field-hint", repeats: true, restingCount: 3 },
             submit: { leaf: "button" },
@@ -673,7 +666,7 @@ export const CONTRACTS = buildContracts({
             shortcuts: { contract: "auth-shortcuts-over-divider" },
             credentials: { leaf: "form" },
         },
-        why: "Authentication has exactly two entry blocks: OAuth closed by the OR divider above, and the credential form below. This node alone owns their gap-3 seam so the outer page rhythm cannot add a second gap.",
+        why: "Authentication has exactly two entry blocks: OAuth closed by the OR divider above, and the credential form below. This node alone owns the seam between them, and it stays at gap-3 because the divider has already closed the shortcut choice, so the outer page rhythm cannot add a second gap.",
     },
     "centred-title-pair": {
         classes: ["flex", "flex-col", "gap-3", "items-center", "text-center"],
@@ -714,7 +707,7 @@ export const CONTRACTS = buildContracts({
         why: "OAuth shortcuts and the OR divider are one alternative-entry cluster: the divider closes the shortcut choice before the credential form begins, so it keeps the cluster's gap rather than the larger seam between form groups.",
     },
     "stacked-peer-controls": {
-        classes: ["flex", "flex-col", "gap-3", "[&>*]:w-full"],
+        classes: ["flex", "flex-col", "gap-4", "[&>*]:w-full"],
         children: {
             control: {
                 contract: "spread-choice-row",
@@ -727,7 +720,7 @@ export const CONTRACTS = buildContracts({
         why: "Controls repeat down one column as independently readable field or action units, so the ordinary gap-3 keeps each decision legible while their shared width still makes the run read as one form.",
     },
     "stacked-stat-rows": {
-        classes: ["flex", "flex-col", "gap-0", "p-0", "[&>*]:w-full", "[&>*]:p-2"],
+        classes: ["flex", "flex-col", "p-0", "[&>*]:w-full", "[&>*]:p-2"],
         children: {
             stat: { composite: "stat-row", repeats: true, restingCount: 3 },
         },
@@ -743,7 +736,7 @@ export const CONTRACTS = buildContracts({
         why: "The avatar identifies the profile, the name stack owns the available width, and the trailing disclosure makes the whole row's destination explicit.",
     },
     "profile-name-over-handle": {
-        classes: ["flex", "min-w-0", "flex-col", "gap-0"],
+        classes: ["flex", "min-w-0", "flex-col", "gap-1"],
         children: {
             name: { leaf: "text", props: { size: "sm", weight: "semibold" } },
             handle: { leaf: "text", props: { size: "xs", tone: "muted" } },
@@ -772,6 +765,158 @@ export const CONTRACTS = buildContracts({
             notice: { composite: "empty-notice" },
         },
         why: "An empty region still has to offer a way out, so the recovery action is part of this node rather than something a caller remembers to add beside it.",
+    },
+
+    /*
+     * ── THE CONSOLE RAIL AND ITS ROUTED BODY ─────────────────────────────────────────────────────
+     *
+     * Three entries admitted together because they are one topology: a standing run of destinations
+     * beside a routed body, and the landmark that body opens. Splitting them would put a frame in
+     * the table that nothing can legally sit inside.
+     */
+    "sidebar-then-body-app": {
+        /*
+         * NO HOST, ON PURPOSE. A `nav` here would pull the routed body inside the navigation
+         * landmark, which is the opposite of what the sibling relationship is for. The `nav` belongs
+         * to the destination run alone.
+         *
+         * NO `gap`, ALSO ON PURPOSE. The union carries no bare vertical-rule token - only the
+         * positional `[&>*:nth-child(odd)]:border-r` - so the rail and the body meet at a seam and
+         * each owns its own inset. A gap written here would be a second inset on top of two that
+         * already exist.
+         */
+        classes: [
+            "flex", "min-h-screen", "w-full", "flex-col",
+            "md:flex-row", "md:items-start",
+            "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0",
+            "md:[&>*:last-child]:min-w-0", "md:[&>*:last-child]:grow",
+        ],
+        children: {
+            sidebar: { contract: "home-services-account-nav" },
+            body: { contract: "console-body-main" },
+        },
+        why: "The destinations are a SIBLING of the routed body rather than a wrapper around it, so replacing the body on every press cannot take the way back with it; the rail holds one fixed measure while the body takes every remaining pixel, because a rail that resized to its longest label would move every destination each time the route changed.",
+    },
+    "console-body-main": {
+        host: "main",
+        /*
+         * `min-w-0` IS WRITTEN UNPREFIXED AS WELL AS INHERITED, and the duplication is the point.
+         * The parent supplies it only through `md:[&>*:last-child]:min-w-0`, so below the breakpoint
+         * nothing stops a long resource handle from pushing this column wider than the viewport.
+         */
+        classes: ["flex", "min-w-0", "w-full", "flex-col"],
+        children: {
+            /*
+             * A LEAF, NOT A CONTRACT. Naming a page key here would read well and could never be
+             * satisfied: the framework hands the layout an opaque `ReactNode`, and no `ReactNode`
+             * narrows into a `ContractComponent`. LAYOUT-1 says the framework boundary closes
+             * `children` into the contract's `page` leaf immediately, so this entry constrains which
+             * ELEMENT the routed body opens rather than which page renders inside it.
+             */
+            page: { leaf: "page" },
+        },
+        why: "The routed body is the document's one main landmark, so it is marked once here for every destination instead of each page remembering to mark itself; it adds no measure, seam or inset of its own because the page inside already owns all three, and a second one written here would pad every route twice.",
+    },
+    "home-services-account-nav": {
+        host: "nav",
+        classes: ["flex", "w-full", "flex-col", "gap-2", "px-3", "py-6"],
+        children: {
+            brand: { leaf: "heading" },
+            /*
+             * `home` IS ITS OWN SLOT RATHER THAN THE FIRST `service`: the permanent overview stands
+             * ABOVE the services rather than being one of them, and a run that swallowed it would
+             * make the way back read as one more thing a reader could have bought.
+             */
+            home: { leaf: "nav-link" },
+            servicesCaption: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            service: { leaf: "nav-link", repeats: true, restingCount: 4 },
+            accountCaption: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            account: { leaf: "nav-link", repeats: true, restingCount: 2 },
+        },
+        why: "Two of these destinations talk ABOUT the other four rather than standing beside them - the wallet is one account's money across every service and support cuts through all of them - so each run is introduced by a caption a reader hears; a flat list can only say that with order, and order is silent to a screen reader.",
+    },
+
+    /*
+     * ── THE PAGE MEASURE, AND THE TWO BODIES ─────────────────────────────────────────────────────
+     */
+    "titled-section-stack-page": {
+        /*
+         * `max-w-4xl` RATHER THAN `max-w-6xl`, decided by the class union's own comment rather than
+         * by taste: it reserves 56rem for a single-column operations page and 72rem for a
+         * two-column one. Every destination this key serves is single-column.
+         */
+        classes: ["mx-auto", "flex", "w-full", "max-w-4xl", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            heading: { contract: ["title-with-end-action", "title-with-baseline-fact"] },
+            /*
+             * A SENTENCE, WHERE `title-with-baseline-fact` HOLDS ONLY A PHRASE. Its `fact` reads as
+             * part of the heading's own line, so a page whose subject needs a full explanatory line
+             * has nowhere legal to put one; this slot is that place, and it is optional because most
+             * pages do not need it.
+             */
+            lede: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            /*
+             * TWO, AND THE NUMBER IS READ THE WAY `auth-shortcuts-over-divider` reads its own: the
+             * resting count is what the SKELETON draws before anything is known, so it must be true
+             * on EVERY screen this key serves. Two rests short on the longest page and fills in,
+             * where three would promise a section the shortest page never has.
+             */
+            section: { contract: "label-row-over-card", repeats: true, restingCount: 2 },
+        },
+        why: "Each subject on this page asks its own query and answers at its own moment, so they are read straight down at one seam and none may be nested inside another - a section drawn inside its neighbour makes one refusal look like the whole page failing; the measure is capped because a single column of labelled sections run across a desktop loses the start of every next line.",
+    },
+    "body-with-refusal-note": {
+        /*
+         * `items-start` IS WHAT SEPARATES THIS FROM `empty-notice-stack`, which centres its column
+         * and its text. A refusal is prose the reader is meant to act on rather than a centred
+         * absence, and a sentence centred over a left-aligned answer reads as an apology for the
+         * page instead of a note about one section of it.
+         */
+        classes: ["flex", "flex-col", "items-start", "gap-3"],
+        children: {
+            /*
+             * OPTIONAL, AND IT IS THE SLOT THAT MAKES THE `label-row-over-card` BODY EXTEND
+             * SUFFICIENT. A section can be refused in one half and answered in the other - a pod
+             * status throws while the workspace it belongs to answers normally - so the refusal sits
+             * BESIDE what came back rather than replacing it. Without this slot the same drawing
+             * would need `label-row-over-card` to admit a RUN of bodies, which reopens
+             * `SurfaceCard`'s projection for a shape this slot already expresses.
+             */
+            answered: { contract: ["labelled-fact-stack", "fleet-resource-list"], optional: true },
+            note: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            recovery: { leaf: "button", optional: true },
+        },
+        why: "A subject that was REFUSED is not a subject that came back empty, so the server's own already-translated sentence sits left-aligned beside whatever part did answer instead of replacing it with a centred apology; the way forward is optional because the two refusals nivo actually throws are the ordinary result of a customer who bought more than once, not a fault to retry.",
+    },
+    "template-offer-row": {
+        /*
+         * THE ENTRY CLOSEST TO `identity-kind-status-action-row`, and it stays a separate key on two
+         * independent grounds rather than one. That row is this exact class list minus `flex-wrap`,
+         * with slots identity/kind/status/action. The classes differ, AND the slot identities differ
+         * where `status` is a badge and `price` is a text. The `props` literals and `restingCount`
+         * are read past when two entries are compared, so the neutral tone on `kind` is NOT what
+         * separates them; the class list and the slot names both are.
+         *
+         * `flex-wrap` also answers, for this new row only, the narrow-viewport overflow the older row
+         * carries - the price cell is what pushes the line past the edge. It does not repair the
+         * older row, which is a separate bounded fix.
+         */
+        classes: [
+            "flex", "flex-row", "flex-wrap", "items-center", "gap-3", "w-full",
+            "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow",
+        ],
+        children: {
+            identity: { contract: "name-over-handle" },
+            kind: { leaf: "badge", props: { tone: "neutral" } },
+            price: { leaf: "text", props: { size: "sm" } },
+            /*
+             * REQUIRED here, where the owned row's action is optional. A resource mid-provision has
+             * nothing anybody may do to it, but a catalogue entry with nothing to press is an
+             * advertisement rather than an offer.
+             */
+            action: { leaf: "button" },
+        },
+        why: "A thing that can be BOUGHT carries a price and exactly one press, which is a different relationship from a thing already owned carrying a lifecycle whose tone changes underneath it; putting the price in a status slot would make an amount of money read as a state a resource can be in, and the row wraps rather than clipping because the price cell is what pushes a phone past the edge.",
     },
 })
 

@@ -111,14 +111,30 @@ export interface VerifyTwoFactorInput {
     readonly code: string
 }
 
-/** What trading an OAuth authorization code asks for. */
+/**
+ * Which identity provider a shortcut hands off to.
+ *
+ * The value travels exactly as spelled here: it is the Keycloak identity-provider alias, and the
+ * backend puts it straight on the authorization URL as `kc_idp_hint`.
+ */
+export type OauthProvider = "google" | "github"
+
+/**
+ * What trading an OAuth authorization code asks for.
+ *
+ * NO VERIFIER, AND THAT IS THE WHOLE DESIGN. PKCE exists so that an intercepted authorization code
+ * is useless without the verifier that was hashed into the challenge - so a verifier this browser
+ * held and posted back would be a verifier anything able to read this page could hold too. The
+ * backend generates it, caches it against {@link state}, and never sends it here. What crosses the
+ * wire is an opaque handle that the backend spends once.
+ */
 export interface ExchangeOauthCodeInput {
-    /** The code the provider put on the callback URL. */
+    /** The code Keycloak put on the callback URL. */
     readonly code: string
-    /** The PKCE verifier this browser generated before leaving. */
-    readonly codeVerifier: string
-    /** The redirect the provider was given, which it will check against. */
-    readonly redirectUri: string
+    /** Which door the hand-off went through; the backend refuses a bundle cached for another one. */
+    readonly provider: OauthProvider
+    /** The opaque handle the redirect endpoint issued, and the only state this browser carries. */
+    readonly state: string
 }
 
 /** What asking for a reset link needs. */
@@ -133,6 +149,46 @@ export interface ResetPasswordInput {
     readonly token: string
     /** The password to set. */
     readonly newPassword: string
+}
+
+/**
+ * Where the core API answers, read the same way `graphql.ts` reads it.
+ *
+ * ONE VARIABLE, DELIBERATELY. The hand-off leaves for the API's own ORIGIN rather than for its
+ * GraphQL path, so it needs the host on its own - but a second variable naming that host would be a
+ * second thing that can be wrong, and what it buys is a build whose queries reach production while
+ * its sign-in reaches a laptop. So this reads the same variable with the same fallback.
+ *
+ * THE REPEATED LITERAL IS A COST, NOT A CHOICE. `graphql.ts` keeps its endpoint module-private, so
+ * there is nothing to import; the smaller shape is that file exporting the value and this one
+ * reading it, and that file is not this change's to edit.
+ */
+const CORE_API_URL = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3067/graphql"
+
+/**
+ * Where a provider hand-off starts.
+ *
+ * IT IS A NAVIGATION, NOT A REQUEST. The endpoint answers 302 towards Keycloak, and only a top-level
+ * navigation may follow that - fetched, the browser would chase the redirect itself as a
+ * cross-origin request and the reader would never leave this page.
+ *
+ * NOTHING SECRET IS BUILT HERE. The verifier and the state are the backend's; this browser hands
+ * over one thing, the address it wants the reader returned to.
+ *
+ * @param provider - Which identity provider to hand off to.
+ * @param redirectUri - The page Keycloak returns the reader to. Passed raw, because the backend both
+ * forwards it and replays it at the token exchange, and those two must be the same string.
+ * @returns The absolute URL to navigate to.
+ */
+export const oauthRedirectUrl = (provider: OauthProvider, redirectUri: string): string => {
+    /*
+     * An ABSOLUTE path against the endpoint, so the whole path is replaced rather than appended.
+     * `CORE_API_URL` ends in `/graphql`, and concatenating would aim the hand-off at
+     * `/graphql/api/v1/...` - a 404 that looks like a broken provider rather than a broken URL.
+     */
+    const url = new URL(`/api/v1/keycloak/${provider}/redirect`, CORE_API_URL)
+    url.searchParams.set("redirect_uri", redirectUri)
+    return url.toString()
 }
 
 /** The fields every payload-returning operation selects. */
@@ -270,7 +326,12 @@ export const verifyTwoFactor = (input: VerifyTwoFactorInput): Promise<Result<Aut
 /**
  * Trade an OAuth authorization code for a session.
  *
- * @param input - The code, the PKCE verifier and the redirect the provider was given.
+ * THE STATE IS SPENT ONCE. The backend deletes the cached bundle as it reads it, so a second call
+ * with the same handle is refused however soon it arrives - which is what stops a code lifted off
+ * the callback URL being exchanged a second time. A caller must therefore not retry this: a retry
+ * reports as a broken sign-in when the first attempt already decided the outcome.
+ *
+ * @param input - The code Keycloak returned, the provider it came from, and the handle to spend.
  * @returns The session, or a two-factor challenge, or why there is neither.
  */
 export const exchangeOauthCode = (input: ExchangeOauthCodeInput): Promise<Result<AuthPayload>> =>

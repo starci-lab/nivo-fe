@@ -1,0 +1,587 @@
+<section class="dir-c">
+<style>
+.dir-c{
+  --c-bg:#eef0f3;--c-sf:#fff;--c-sf2:#fafafa;--c-ln:#e4e4e7;--c-ln2:#f1f1f4;
+  --c-fg:#18181b;--c-ink:#3f3f46;--c-mut:#71717a;--c-fnt:#a1a1aa;
+  --c-ac:#3f4bd8;--c-acs:#ecedfb;
+  --c-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font:14px/1.5 ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+  color:var(--c-fg);display:block}
+.dir-c *{box-sizing:border-box}
+
+/* ── lab chrome ─────────────────────────────────────────────── */
+.dir-c .dc-head{max-width:96ch;margin:0 0 16px}
+.dir-c .dc-post{display:inline-block;font:600 10px/1 var(--c-mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--c-ac);background:var(--c-acs);border-radius:999px;padding:5px 10px;margin-bottom:9px}
+.dir-c .dc-head h3{margin:0 0 7px;font-size:18px;letter-spacing:-.01em}
+.dir-c .dc-lede{margin:0 0 8px;font-size:13px;color:var(--c-ink)}
+.dir-c .dc-lede b{color:var(--c-fg)}
+.dir-c .dc-rule{margin:0;font-size:12px;color:var(--c-mut);border-left:2px solid var(--c-ln);padding-left:11px}
+.dir-c code{font:11.5px var(--c-mono);background:#f4f4f5;padding:1px 5px;border-radius:5px;color:#27272a}
+
+.dir-c .dc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(455px,1fr));gap:18px}
+.dir-c .dc-scene{margin:0;border:1px solid var(--c-ln);border-radius:11px;overflow:hidden;background:var(--c-sf)}
+.dir-c .dc-cap{padding:9px 13px;border-bottom:1px solid var(--c-ln);background:var(--c-sf2)}
+.dir-c .dc-cap b{font-size:12.5px}
+.dir-c .dc-cap span{display:block;font-size:11.5px;color:var(--c-mut);margin-top:2px;line-height:1.45}
+
+/* ── the frame: rail beside body ────────────────────────────── */
+.dir-c .dc-app{display:flex;min-height:560px;position:relative;background:var(--c-bg)}
+.dir-c .dc-rail{width:170px;flex:none;background:var(--c-sf);border-right:1px solid var(--c-ln);
+  padding:16px 10px;display:flex;flex-direction:column;gap:2px}
+.dir-c .dc-brand{font-size:14px;font-weight:700;padding:0 10px 12px}
+.dir-c .dc-cap2{margin:12px 0 4px;padding:0 10px;font:500 10px/1 var(--c-mono);letter-spacing:.11em;
+  text-transform:uppercase;color:var(--c-mut)}
+.dir-c .dc-nl{display:flex;align-items:center;justify-content:space-between;gap:6px;
+  padding:7px 11px;border-radius:999px;font-size:12.5px;color:var(--c-mut)}
+.dir-c .dc-nl.dc-on{background:var(--c-acs);color:#2c35a8;font-weight:600}
+.dir-c .dc-nl i{font-style:normal;font:500 9px/1.5 var(--c-mono);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--c-fnt);border:1px solid var(--c-ln);border-radius:4px;padding:0 4px}
+.dir-c .dc-nl.dc-open i{color:var(--c-ac);border-color:#c7cbf2;background:var(--c-acs)}
+.dir-c .dc-railnote{margin:auto 0 0;padding:10px 10px 0;border-top:1px dashed var(--c-ln);
+  font-size:10.5px;line-height:1.45;color:var(--c-fnt)}
+
+.dir-c .dc-body{flex:1;min-width:0;background:var(--c-sf);padding:18px 18px 22px;
+  display:flex;flex-direction:column;gap:18px}
+.dir-c .dc-body.dc-dim{opacity:.38}
+.dir-c .dc-h1{margin:0;font-size:19px;letter-spacing:-.01em}
+.dir-c .dc-pagelede{margin:-10px 0 0;font-size:12px;color:var(--c-mut);max-width:64ch}
+.dir-c .dc-pagelede b{color:var(--c-ink);font-weight:600}
+
+/* ── section: label OUTSIDE the surface it names ────────────── */
+.dir-c .dc-sec{display:flex;flex-direction:column;gap:9px}
+.dir-c .dc-lab{display:flex;align-items:baseline;flex-wrap:wrap;gap:7px}
+.dir-c .dc-lab h4{margin:0;font-size:13.5px;font-weight:600}
+.dir-c .dc-lab em{font-style:normal;font-size:11.5px;color:var(--c-mut);max-width:52ch}
+.dir-c .dc-lab .dc-see{margin-left:auto;font-size:12px;color:var(--c-ac)}
+.dir-c .dc-st{font:600 9px/1.7 var(--c-mono);letter-spacing:.07em;text-transform:uppercase;
+  border-radius:999px;padding:1px 7px;border:1px dashed #cfd2d8;color:var(--c-fnt);background:#fbfbfc;white-space:nowrap}
+.dir-c .dc-st-data{color:#2c35a8;border-color:#c7cbf2;background:var(--c-acs)}
+.dir-c .dc-st-empty{color:#52525b}
+.dir-c .dc-st-wait{color:var(--c-fnt)}
+.dir-c .dc-st-ref{color:#92400e;border-color:#f0d9a8;background:#fffbeb}
+
+.dir-c .dc-card{border:1px solid var(--c-ln);border-radius:10px;background:var(--c-sf);overflow:hidden}
+.dir-c .dc-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--c-ln2)}
+.dir-c .dc-row:last-child{border-bottom:0}
+.dir-c .dc-idy{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.dir-c .dc-idy b{font-size:12.5px;font-weight:500;color:var(--c-ac)}
+.dir-c .dc-idy span{font:11px/1.4 var(--c-mono);color:var(--c-mut)}
+.dir-c .dc-idy span.dc-none{font-family:inherit;font-size:11.5px;font-style:italic;color:var(--c-fnt)}
+.dir-c .dc-bd{border-radius:999px;padding:3px 9px;font-size:10.5px;font-weight:600;white-space:nowrap;
+  background:#f4f4f5;color:#52525b}
+.dir-c .dc-bd.dc-ok{background:#dcfce7;color:#166534}
+.dir-c .dc-bd.dc-wn{background:#fef3c7;color:#92400e}
+.dir-c .dc-bd.dc-dg{background:#fee2e2;color:#991b1b}
+.dir-c .dc-btn{border:1px solid var(--c-ac);background:var(--c-ac);color:#fff;border-radius:999px;
+  padding:6px 13px;font:600 12px/1 inherit;white-space:nowrap;cursor:default}
+.dir-c .dc-btn.dc-line{background:var(--c-sf);border-color:var(--c-ln);color:var(--c-fg);font-weight:500}
+.dir-c .dc-btn.dc-sm{padding:5px 11px;font-size:11.5px}
+
+.dir-c .dc-facts{padding:6px 14px}
+.dir-c .dc-fact{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  padding:7px 0;border-bottom:1px solid var(--c-ln2);font-size:12.5px}
+.dir-c .dc-fact:last-child{border-bottom:0}
+.dir-c .dc-fact span{color:var(--c-mut)}
+.dir-c .dc-fact b{font-weight:500}
+.dir-c .dc-fact.dc-unk b{font-weight:400;font-style:italic;color:var(--c-fnt)}
+
+.dir-c .dc-say{margin:0;font-size:12.5px;color:var(--c-mut);max-width:62ch;line-height:1.55}
+.dir-c .dc-ref{padding:13px 14px}
+.dir-c .dc-ref p{margin:0;font-size:12.5px;color:var(--c-mut);max-width:62ch;line-height:1.55}
+.dir-c .dc-skel{padding:14px;display:flex;flex-direction:column;gap:11px}
+.dir-c .dc-skel i{display:block;height:10px;border-radius:5px;background:#f0f0f2}
+.dir-c .dc-skel i:nth-child(odd){width:38%}
+.dir-c .dc-skel i:nth-child(even){width:22%;margin-left:auto}
+.dir-c .dc-note{padding:22px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:7px}
+.dir-c .dc-note b{font-size:12.5px;font-weight:600;color:var(--c-ink)}
+.dir-c .dc-note span{font-size:11.5px;color:var(--c-mut);max-width:44ch}
+.dir-c .dc-acts{display:flex;flex-wrap:wrap;gap:8px}
+
+/* ── the support panel ──────────────────────────────────────── */
+.dir-c .dc-scrim{position:absolute;inset:0;background:rgba(24,24,27,.14)}
+.dir-c .dc-drawer{position:absolute;top:0;right:0;bottom:0;width:63%;min-width:280px;background:var(--c-sf);
+  border-left:1px solid var(--c-ln);box-shadow:-12px 0 28px rgba(24,24,27,.10);
+  padding:16px 16px 20px;display:flex;flex-direction:column;gap:15px;overflow:hidden}
+.dir-c .dc-drawer .dc-dhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.dir-c .dc-drawer .dc-dhead h4{margin:0;font-size:15px}
+.dir-c .dc-drawer .dc-dhead span{font-size:11.5px;color:var(--c-fnt)}
+.dir-c .dc-field{display:flex;flex-direction:column;gap:4px}
+.dir-c .dc-field label{font-size:11.5px;font-weight:600;color:var(--c-ink)}
+.dir-c .dc-field .dc-inp{border:1px solid var(--c-ln);border-radius:8px;background:var(--c-sf2);
+  padding:9px 11px;font-size:12px;color:var(--c-fnt);min-height:34px}
+.dir-c .dc-field .dc-inp.dc-tall{min-height:62px}
+.dir-c .dc-field .dc-hint{font-size:11px;color:var(--c-mut)}
+
+/* ── closing notes ──────────────────────────────────────────── */
+.dir-c .dc-keys{margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+.dir-c .dc-keys section{border:1px solid var(--c-ln);border-radius:10px;background:var(--c-sf2);padding:13px 15px}
+.dir-c .dc-keys h4{margin:0 0 8px;font:600 10.5px/1 var(--c-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--c-mut)}
+.dir-c .dc-keys ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.dir-c .dc-keys li{font-size:12px;line-height:1.55;color:var(--c-ink);padding-left:11px;border-left:2px solid var(--c-ln)}
+.dir-c .dc-keys li b{color:var(--c-fg)}
+.dir-c .dc-vd{display:inline-block;font:700 9px/1.5 var(--c-mono);letter-spacing:.07em;text-transform:uppercase;
+  border-radius:4px;padding:1px 6px;margin-right:5px;vertical-align:1px}
+.dir-c .dc-vd-r{background:#e6f2ec;color:#15803d}
+.dir-c .dc-vd-e{background:#fbf1dc;color:#b45309}
+.dir-c .dc-vd-n{background:var(--c-acs);color:var(--c-ac)}
+.dir-c .dc-vd-x{background:#f4f4f5;color:var(--c-mut)}
+@media(max-width:520px){.dir-c .dc-rail{display:none}}
+</style>
+
+<header class="dc-head">
+  <span class="dc-post">direction-c · dịch vụ mỏng, một chỗ sâu</span>
+  <h3>Bốn điểm đến còn thiếu, vẽ theo đúng độ sâu mà backend có</h3>
+  <p class="dc-lede">
+    <b>Máy chủ</b> và <b>Tên miền</b> là danh sách, và ở đây chúng vẫn là danh sách — một mục, một mặt phẳng, không có
+    tầng thứ hai, vì phía sau mỗi dòng không có gì để mở ra. <b>AgentOS</b> nhận toàn bộ độ sâu, vì nó là điểm đến duy
+    nhất có agent, kênh, kho tri thức và bộ máy tự động hoá nằm dưới. <b>Hỗ trợ</b> không còn là một điểm đến: nó là một
+    <i>hành động</i> trong nhóm Tài khoản, mở ra một bảng bên — vì danh sách của nó hôm nay không thể đầy, và một địa chỉ
+    riêng cho một danh sách vĩnh viễn rỗng là một lời hứa sai.
+  </p>
+  <p class="dc-rule">
+    Độ sâu ở đây đếm bằng <b>số chủ thể trên một trang</b>, không phải số route. Hướng này thêm <b>ba</b> địa chỉ mới
+    (<code>/agentos</code>, <code>/servers</code>, <code>/domains</code>) chứ không phải bốn — ít màn nhất trong ba hướng.
+    Màu: xám trung tính cộng đúng một màu nhấn, chính là token <code>accent</code> đang chạy; không có màu thương hiệu nào
+    được đặt ra ở đây. Nhãn <span class="dc-st">chưa hỏi</span> <span class="dc-st dc-st-empty">rỗng</span>
+    <span class="dc-st dc-st-data">có</span> <span class="dc-st dc-st-ref">bị từ chối</span> là chú thích của lab,
+    không phải phần tử của màn hình. Mọi con số trong lab là minh hoạ; số thật đến từ truy vấn được nêu tên ở cuối.
+  </p>
+</header>
+
+<div class="dc-grid">
+
+<!-- ══════════════ 1. AGENTOS · CÓ ══════════════ -->
+<figure class="dc-scene">
+  <figcaption class="dc-cap">
+    <b>AgentOS · có dữ liệu</b>
+    <span>Màn duy nhất có độ sâu. Bốn trạng thái mạng cùng xuất hiện ở đây, và đó là tình trạng thật hôm nay:
+    Tự động hoá bị từ chối cho <i>mọi</i> tài khoản vì chưa có khoá N8N nào được đúc.</span>
+  </figcaption>
+  <div class="dc-app">
+    <nav class="dc-rail">
+      <div class="dc-brand">nivo</div>
+      <span class="dc-nl">Tổng quan</span>
+      <p class="dc-cap2">Dịch vụ</p>
+      <span class="dc-nl">Ứng dụng</span>
+      <span class="dc-nl dc-on">AgentOS</span>
+      <span class="dc-nl">Máy chủ</span>
+      <span class="dc-nl">Tên miền</span>
+      <p class="dc-cap2">Tài khoản</p>
+      <span class="dc-nl">Ví</span>
+      <span class="dc-nl dc-open">Hỗ trợ <i>bảng</i></span>
+      <p class="dc-railnote">Sáu điểm đến có địa chỉ. Hỗ trợ mở bảng bên, nên nó không bao giờ sáng lên như một nơi
+      đang đứng.</p>
+    </nav>
+    <div class="dc-body">
+      <h1 class="dc-h1">AgentOS</h1>
+      <p class="dc-pagelede">Một workspace agent, và những thứ chạy bên trong nó.</p>
+
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Workspace</h4><span class="dc-st dc-st-data">có</span></div>
+        <div class="dc-card"><div class="dc-facts">
+          <div class="dc-fact"><span>Trạng thái</span><b>Đang chạy</b></div>
+          <div class="dc-fact"><span>Mã workspace</span><b>ws_7f3a91c4</b></div>
+          <div class="dc-fact"><span>Tạo lúc</span><b>02/08/2026</b></div>
+          <div class="dc-fact"><span>Đơn hàng</span><b>Đã kích hoạt · gia hạn 12/09</b></div>
+        </div></div>
+      </div>
+
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Agent</h4><em>gọi tên, không đếm</em><span class="dc-st dc-st-data">có</span></div>
+        <div class="dc-card">
+          <div class="dc-row">
+            <div class="dc-idy"><b>Trợ lý bán hàng</b><span>deepseek-v4-flash · Zalo · Web · Tra cứu đơn hàng</span></div>
+            <span class="dc-bd">Agent</span><span class="dc-bd dc-ok">Đang chạy</span>
+            <button class="dc-btn dc-line dc-sm">Tạm dừng</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Kênh</h4><span class="dc-st dc-st-empty">rỗng</span></div>
+        <p class="dc-say">Chưa nối kênh nào. Agent chỉ trả lời trên kênh đã nối, nên đến lúc này nó chưa gặp khách nào.</p>
+      </div>
+
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Kho tri thức</h4><em>nivo chưa có bước lập chỉ mục</em><span class="dc-st dc-st-data">có</span></div>
+        <div class="dc-card"><div class="dc-facts">
+          <div class="dc-fact"><span>Bảng giá 2026.pdf</span><b>Đang xử lý</b></div>
+          <div class="dc-fact"><span>Chính sách đổi trả</span><b>Đang xử lý</b></div>
+        </div></div>
+      </div>
+
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Tự động hoá</h4><span class="dc-st dc-st-ref">bị từ chối</span></div>
+        <div class="dc-card dc-ref"><p>Workspace và pod đều có. Chưa cấp khoá cho bộ máy tự động hoá của pod này, nên
+        phần này chưa đọc được. Các phần còn lại trên màn hình vẫn đúng.</p></div>
+      </div>
+
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Pod</h4><span class="dc-st dc-st-wait">chưa hỏi</span></div>
+        <div class="dc-card"><div class="dc-skel"><i></i><i></i><i></i><i></i></div></div>
+      </div>
+    </div>
+  </div>
+</figure>
+
+<!-- ══════════════ 2. AGENTOS · RỖNG ══════════════ -->
+<figure class="dc-scene">
+  <figcaption class="dc-cap">
+    <b>AgentOS · rỗng</b>
+    <span>Không có workspace thì không truy vấn nào bên dưới hỏi được câu nào. Màn này <i>không</i> vẽ một loạt danh sách
+    rỗng — nó nói rằng chưa đặt mua, và đưa đúng thứ có thể đặt.</span>
+  </figcaption>
+  <div class="dc-app">
+    <nav class="dc-rail">
+      <div class="dc-brand">nivo</div>
+      <span class="dc-nl">Tổng quan</span>
+      <p class="dc-cap2">Dịch vụ</p>
+      <span class="dc-nl">Ứng dụng</span>
+      <span class="dc-nl dc-on">AgentOS</span>
+      <span class="dc-nl">Máy chủ</span>
+      <span class="dc-nl">Tên miền</span>
+      <p class="dc-cap2">Tài khoản</p>
+      <span class="dc-nl">Ví</span>
+      <span class="dc-nl dc-open">Hỗ trợ <i>bảng</i></span>
+    </nav>
+    <div class="dc-body">
+      <h1 class="dc-h1">AgentOS</h1>
+      <p class="dc-pagelede">Tài khoản này chưa có workspace agent nào, nên các phần bên dưới của AgentOS chưa hỏi được
+      câu nào. Màn này không vẽ chúng ra dưới dạng danh sách rỗng.</p>
+
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Workspace</h4><span class="dc-st dc-st-empty">rỗng</span></div>
+        <div class="dc-card">
+          <div class="dc-row">
+            <div class="dc-idy"><b>nivo AI Agent</b><span class="dc-none">Một workspace agent riêng, trực Zalo/Telegram theo quy trình của bạn.</span></div>
+            <span class="dc-bd">Mẫu dịch vụ</span>
+            <span style="font-size:12.5px">Từ 590.000 ₫/tháng</span>
+            <button class="dc-btn dc-sm">Đặt mua</button>
+          </div>
+        </div>
+        <p class="dc-say">Workspace không tạo bằng một nút ở đây. Nó được dựng khi một đơn hàng đã thanh toán, nên lối
+        vào đúng là danh mục — cũng chính là chỗ bạn quay lại cho workspace thứ hai.</p>
+      </div>
+    </div>
+  </div>
+</figure>
+
+<!-- ══════════════ 3. MÁY CHỦ · CÓ ══════════════ -->
+<figure class="dc-scene">
+  <figcaption class="dc-cap">
+    <b>Máy chủ · có dữ liệu</b>
+    <span>Một danh sách, một mặt phẳng. Dòng đầu là một Học viện không có máy phía sau: kích thước của nó
+    <i>thật sự</i> không đọc được, nên chỗ đó nói ra điều đó chứ không bịa một con số.</span>
+  </figcaption>
+  <div class="dc-app">
+    <nav class="dc-rail">
+      <div class="dc-brand">nivo</div>
+      <span class="dc-nl">Tổng quan</span>
+      <p class="dc-cap2">Dịch vụ</p>
+      <span class="dc-nl">Ứng dụng</span>
+      <span class="dc-nl">AgentOS</span>
+      <span class="dc-nl dc-on">Máy chủ</span>
+      <span class="dc-nl">Tên miền</span>
+      <p class="dc-cap2">Tài khoản</p>
+      <span class="dc-nl">Ví</span>
+      <span class="dc-nl dc-open">Hỗ trợ <i>bảng</i></span>
+    </nav>
+    <div class="dc-body">
+      <h1 class="dc-h1">Máy chủ</h1>
+      <p class="dc-pagelede">Đây là góc nhìn hạ tầng của các ứng dụng và workspace ở trên — nivo không bán máy chủ rời.
+      <b>nivo chưa ghi nhận chi phí theo từng máy, nên màn này không nêu số tiền nào.</b></p>
+
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Máy đang chạy</h4><em>kích thước đọc từ bản ghi cấp phát</em><span class="dc-st dc-st-data">có</span></div>
+        <div class="dc-card">
+          <div class="dc-row">
+            <div class="dc-idy"><b>Học viện Cô Mai</b><span class="dc-none">chưa có pod riêng · Gói Học viện</span></div>
+            <span class="dc-bd">Ứng dụng</span><span class="dc-bd dc-ok">Đang chạy</span>
+            <button class="dc-btn dc-line dc-sm">Mở</button>
+          </div>
+          <div class="dc-row">
+            <div class="dc-idy"><b>Workspace bán hàng</b><span>4 GB · 2 vCPU · Gói pro · gia hạn 12/09</span></div>
+            <span class="dc-bd">Workspace</span><span class="dc-bd dc-ok">Đang chạy</span>
+            <button class="dc-btn dc-line dc-sm">Mở</button>
+          </div>
+          <div class="dc-row">
+            <div class="dc-idy"><b>Workspace thử nghiệm</b><span>1 GB · 1 vCPU · Gói start · gia hạn 03/10</span></div>
+            <span class="dc-bd">Workspace</span><span class="dc-bd">Tạm dừng</span>
+            <button class="dc-btn dc-line dc-sm">Mở</button>
+          </div>
+        </div>
+        <p class="dc-say">Một dòng chỉ nói ra kích thước khi nó thật sự có một máy phía sau. Học viện hiện đứng trên hạ
+        tầng dùng chung, nên không có RAM và vCPU để nêu — và “chưa có pod riêng” là câu trả lời đúng, không phải một ô trống.</p>
+      </div>
+    </div>
+  </div>
+</figure>
+
+<!-- ══════════════ 4. MÁY CHỦ · RỖNG ══════════════ -->
+<figure class="dc-scene">
+  <figcaption class="dc-cap">
+    <b>Máy chủ · rỗng</b>
+    <span>Một câu, không nền, không nút. Đây là sự vắng mặt <i>cố ý</i> — không ai mua máy chủ ở đây — nên nó không được
+    vẽ như một lời mời. Lối ra duy nhất dẫn tới một địa chỉ đã có thật.</span>
+  </figcaption>
+  <div class="dc-app">
+    <nav class="dc-rail">
+      <div class="dc-brand">nivo</div>
+      <span class="dc-nl">Tổng quan</span>
+      <p class="dc-cap2">Dịch vụ</p>
+      <span class="dc-nl">Ứng dụng</span>
+      <span class="dc-nl">AgentOS</span>
+      <span class="dc-nl dc-on">Máy chủ</span>
+      <span class="dc-nl">Tên miền</span>
+      <p class="dc-cap2">Tài khoản</p>
+      <span class="dc-nl">Ví</span>
+      <span class="dc-nl dc-open">Hỗ trợ <i>bảng</i></span>
+    </nav>
+    <div class="dc-body">
+      <h1 class="dc-h1">Máy chủ</h1>
+      <p class="dc-pagelede">Đây là góc nhìn hạ tầng của các ứng dụng và workspace ở trên — nivo không bán máy chủ rời.</p>
+
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Máy đang chạy</h4><span class="dc-st dc-st-empty">rỗng</span>
+          <span class="dc-see">Xem Ứng dụng →</span></div>
+        <p class="dc-say">Chưa có máy nào. Máy chủ không đặt mua riêng: nó xuất hiện khi một ứng dụng hoặc một workspace
+        được dựng, và biến mất cùng với thứ đó.</p>
+      </div>
+    </div>
+  </div>
+</figure>
+
+<!-- ══════════════ 5. TÊN MIỀN · CÓ ══════════════ -->
+<figure class="dc-scene">
+  <figcaption class="dc-cap">
+    <b>Tên miền · có dữ liệu</b>
+    <span>Đồng hồ hết hạn là thật — một lượt quét mỗi giờ ghi “Sắp hết hạn” ở mốc 30 ngày. Việc đăng ký thì không:
+    lede nói thẳng đây là tên giữ trong sổ của nivo, và không một chỗ nào trên màn có giá.</span>
+  </figcaption>
+  <div class="dc-app">
+    <nav class="dc-rail">
+      <div class="dc-brand">nivo</div>
+      <span class="dc-nl">Tổng quan</span>
+      <p class="dc-cap2">Dịch vụ</p>
+      <span class="dc-nl">Ứng dụng</span>
+      <span class="dc-nl">AgentOS</span>
+      <span class="dc-nl">Máy chủ</span>
+      <span class="dc-nl dc-on">Tên miền</span>
+      <p class="dc-cap2">Tài khoản</p>
+      <span class="dc-nl">Ví</span>
+      <span class="dc-nl dc-open">Hỗ trợ <i>bảng</i></span>
+    </nav>
+    <div class="dc-body">
+      <h1 class="dc-h1">Tên miền</h1>
+      <p class="dc-pagelede">Tên miền ở nivo là một cái tên được <b>giữ trong sổ của nivo</b>, trỏ về ns1/ns2.nivo.vn,
+      mỗi lần một năm, không mất phí. Đây không phải đăng ký tại nhà đăng ký tên miền, và nivo không tra được tình trạng
+      thật của cái tên ở bên ngoài.</p>
+
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Tên đang giữ</h4><em>sắp hết hạn xếp lên trên</em><span class="dc-st dc-st-data">có</span></div>
+        <div class="dc-card">
+          <div class="dc-row">
+            <div class="dc-idy"><b>old-project.com</b><span>hết hạn 02/09/2026 · không tự gia hạn · ns1/ns2.nivo.vn</span></div>
+            <span class="dc-bd">Giữ tại nivo</span><span class="dc-bd dc-wn">Sắp hết hạn</span>
+            <button class="dc-btn dc-sm">Gia hạn</button>
+          </div>
+          <div class="dc-row">
+            <div class="dc-idy"><b>cu-lam-thu.vn</b><span>hết hạn 11/06/2026 · không tự gia hạn · ns1/ns2.nivo.vn</span></div>
+            <span class="dc-bd">Giữ tại nivo</span><span class="dc-bd dc-dg">Đã hết hạn</span>
+            <button class="dc-btn dc-sm">Gia hạn</button>
+          </div>
+          <div class="dc-row">
+            <div class="dc-idy"><b>demo-shop.vn</b><span>hết hạn 04/03/2027 · tự động gia hạn · ns1/ns2.nivo.vn</span></div>
+            <span class="dc-bd">Giữ tại nivo</span><span class="dc-bd dc-ok">Đang giữ</span>
+            <button class="dc-btn dc-line dc-sm">Tắt tự gia hạn</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Thêm tên</h4><em>nivo chỉ kiểm tra trong sổ của mình</em><span class="dc-st dc-st-data">có</span></div>
+        <div class="dc-acts"><button class="dc-btn">Thêm tên miền</button></div>
+        <p class="dc-say">Khi thêm, nivo chỉ xét xem có ai trong nivo đang giữ cái tên đó chưa. Không kiểm tra tình trạng
+        thật ở nhà đăng ký, không có giá, và không có bản ghi DNS nào để sửa.</p>
+      </div>
+    </div>
+  </div>
+</figure>
+
+<!-- ══════════════ 6. TÊN MIỀN · RỖNG ══════════════ -->
+<figure class="dc-scene">
+  <figcaption class="dc-cap">
+    <b>Tên miền · rỗng</b>
+    <span>Chỗ duy nhất trong bốn màn được vẽ như một lời mời có nền và có nút — vì đây là điểm đến duy nhất mà hành động
+    chính chạy trọn vẹn từ đầu đến cuối.</span>
+  </figcaption>
+  <div class="dc-app">
+    <nav class="dc-rail">
+      <div class="dc-brand">nivo</div>
+      <span class="dc-nl">Tổng quan</span>
+      <p class="dc-cap2">Dịch vụ</p>
+      <span class="dc-nl">Ứng dụng</span>
+      <span class="dc-nl">AgentOS</span>
+      <span class="dc-nl">Máy chủ</span>
+      <span class="dc-nl dc-on">Tên miền</span>
+      <p class="dc-cap2">Tài khoản</p>
+      <span class="dc-nl">Ví</span>
+      <span class="dc-nl dc-open">Hỗ trợ <i>bảng</i></span>
+    </nav>
+    <div class="dc-body">
+      <h1 class="dc-h1">Tên miền</h1>
+      <p class="dc-pagelede">Tên miền ở nivo là một cái tên được <b>giữ trong sổ của nivo</b>, trỏ về ns1/ns2.nivo.vn,
+      mỗi lần một năm, không mất phí.</p>
+
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Tên đang giữ</h4><span class="dc-st dc-st-empty">rỗng</span></div>
+        <div class="dc-card"><div class="dc-note">
+          <b>Chưa giữ tên miền nào.</b>
+          <span>Giữ một cái tên trong sổ của nivo, một năm một lần, không mất phí. Tên riêng chỉ cần đến sau khi một
+          ứng dụng đã chạy.</span>
+          <button class="dc-btn">Thêm tên miền</button>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</figure>
+
+<!-- ══════════════ 7. HỖ TRỢ · CÓ ══════════════ -->
+<figure class="dc-scene">
+  <figcaption class="dc-cap">
+    <b>Hỗ trợ · có dữ liệu</b>
+    <span>Không phải một trang: một bảng bên, mở từ nhóm Tài khoản, phủ lên chỗ đang đứng. Trạng thái đọc là
+    <i>Đã tiếp nhận</i> — không phải “Đã trả lời”, vì cái đặt nó là câu tự động do chính máy chủ gửi ngay lúc nhận.</span>
+  </figcaption>
+  <div class="dc-app">
+    <nav class="dc-rail">
+      <div class="dc-brand">nivo</div>
+      <span class="dc-nl">Tổng quan</span>
+      <p class="dc-cap2">Dịch vụ</p>
+      <span class="dc-nl">Ứng dụng</span>
+      <span class="dc-nl">AgentOS</span>
+      <span class="dc-nl">Máy chủ</span>
+      <span class="dc-nl">Tên miền</span>
+      <p class="dc-cap2">Tài khoản</p>
+      <span class="dc-nl dc-on">Ví</span>
+      <span class="dc-nl dc-open">Hỗ trợ <i>đang mở</i></span>
+    </nav>
+    <div class="dc-body dc-dim">
+      <h1 class="dc-h1">Ví</h1>
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Số dư</h4></div>
+        <div class="dc-card"><div class="dc-facts">
+          <div class="dc-fact"><span>Số dư</span><b>1.250.000 ₫</b></div>
+          <div class="dc-fact"><span>Hoá đơn chưa thanh toán</span><b>Không có</b></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dc-scrim"></div>
+    <aside class="dc-drawer">
+      <div class="dc-dhead"><h4>Hỗ trợ</h4><span>Đóng</span></div>
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Yêu cầu của bạn</h4><em>nivo xác nhận tự động ngay khi nhận</em><span class="dc-st dc-st-data">có</span></div>
+        <div class="dc-card">
+          <div class="dc-row">
+            <div class="dc-idy"><b>Không đổi được tên miền cho học viện</b><span>gửi 12/08 · cập nhật 12/08</span></div>
+            <span class="dc-bd dc-wn">Đã tiếp nhận</span>
+            <button class="dc-btn dc-line dc-sm">Mở</button>
+          </div>
+          <div class="dc-row">
+            <div class="dc-idy"><b>Hỏi về gói pro</b><span>gửi 03/08 · đóng 05/08</span></div>
+            <span class="dc-bd">Đã đóng</span>
+            <button class="dc-btn dc-line dc-sm">Mở</button>
+          </div>
+        </div>
+        <p class="dc-say"><b>Đã tiếp nhận</b> nghĩa là yêu cầu đã vào hệ thống và đã có câu xác nhận tự động — chưa phải
+        đã có người trả lời. Hôm nay nivo chưa có đường nào để nhân viên trả lời trong hệ thống này.</p>
+      </div>
+      <div class="dc-acts"><button class="dc-btn">Gửi yêu cầu mới</button></div>
+    </aside>
+  </div>
+</figure>
+
+<!-- ══════════════ 8. HỖ TRỢ · RỖNG ══════════════ -->
+<figure class="dc-scene">
+  <figcaption class="dc-cap">
+    <b>Hỗ trợ · rỗng</b>
+    <span>Chưa có yêu cầu nào thì bảng này <i>là</i> cái biểu mẫu. Đúng hai ô, vì backend nhận đúng hai trường — và màn
+    nói ra điều đó thay vì vẽ những ô nó không có.</span>
+  </figcaption>
+  <div class="dc-app">
+    <nav class="dc-rail">
+      <div class="dc-brand">nivo</div>
+      <span class="dc-nl">Tổng quan</span>
+      <p class="dc-cap2">Dịch vụ</p>
+      <span class="dc-nl">Ứng dụng</span>
+      <span class="dc-nl">AgentOS</span>
+      <span class="dc-nl">Máy chủ</span>
+      <span class="dc-nl">Tên miền</span>
+      <p class="dc-cap2">Tài khoản</p>
+      <span class="dc-nl dc-on">Ví</span>
+      <span class="dc-nl dc-open">Hỗ trợ <i>đang mở</i></span>
+    </nav>
+    <div class="dc-body dc-dim">
+      <h1 class="dc-h1">Ví</h1>
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Số dư</h4></div>
+        <div class="dc-card"><div class="dc-facts">
+          <div class="dc-fact"><span>Số dư</span><b>0 ₫</b></div>
+          <div class="dc-fact"><span>Hoá đơn chưa thanh toán</span><b>Không có</b></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dc-scrim"></div>
+    <aside class="dc-drawer">
+      <div class="dc-dhead"><h4>Hỗ trợ</h4><span>Đóng</span></div>
+      <div class="dc-sec">
+        <div class="dc-lab"><h4>Yêu cầu của bạn</h4><span class="dc-st dc-st-empty">rỗng</span></div>
+        <p class="dc-say">Chưa có yêu cầu nào. Viết vào đây là cách nhanh nhất.</p>
+      </div>
+      <div class="dc-sec">
+        <div class="dc-field"><label>Tiêu đề</label><div class="dc-inp">Bạn cần giúp việc gì?</div></div>
+        <div class="dc-field"><label>Nội dung</label><div class="dc-inp dc-tall">Kể càng cụ thể càng nhanh — tên ứng dụng, việc bạn đang làm, và cái bạn thấy.</div>
+          <p class="dc-hint">Chỉ có hai ô. Không có mức độ ưu tiên, không có phân loại, không đính kèm được tệp, và nivo
+          không hứa một mốc thời gian trả lời nào.</p></div>
+      </div>
+      <div class="dc-acts"><button class="dc-btn">Gửi yêu cầu</button></div>
+    </aside>
+  </div>
+</figure>
+
+</div>
+
+<div class="dc-keys">
+  <section>
+    <h4>Hướng này cố tình KHÔNG vẽ</h4>
+    <ul>
+      <li><b>Danh sách ops ticket.</b> Không một mục nào trong danh mục hôm nay sinh ra được một cái, nên một danh sách
+      rỗng ở đây là đồ đạc vĩnh viễn rỗng. Nó không xuất hiện ở đâu cả — kể cả dưới dạng “chưa có”.</li>
+      <li><b>Mô hình, Quy trình, Hội thoại, Lịch sử chạy.</b> Mô hình là danh mục chung của nivo chứ không phải của tài
+      khoản; ba cái còn lại hôm nay trống hoặc nằm sau cùng một khoá đang thiếu. Dịch vụ mỏng nghĩa là nói ra cái nào có thật.</li>
+      <li><b>Mọi con số đếm.</b> Không truy vấn nào trả về tổng, và một con số đếm trong trình duyệt là một khẳng định
+      khác với vẻ ngoài của nó.</li>
+      <li><b>Chi phí theo máy.</b> <code>creditBurnUsd</code> rỗng nghĩa là <i>chưa biết</i>, không phải bằng không —
+      nên màn Máy chủ không có cột tiền, và lede nói ra vì sao.</li>
+      <li><b>Giá tên miền.</b> Thêm và gia hạn đều miễn phí và tức thì; một mức giá ở đây sẽ là đúng thứ vụ này sinh ra để chặn.</li>
+    </ul>
+  </section>
+  <section>
+    <h4>Cái hướng này phải trả giá</h4>
+    <ul>
+      <li><b>Hỗ trợ không có địa chỉ.</b> Một bảng bên không dán được vào tin nhắn, không mở tab mới được, và không bao
+      giờ sáng lên trên thanh bên. Nếu sau này có người trực trả lời thật, nó sẽ phải trở thành điểm đến — và lúc đó là
+      một quyết định mở lại, không phải một lần đổi route.</li>
+      <li><b>AgentOS không có tầng thứ hai.</b> Một agent không mở ra được thành trang riêng, nên hội thoại và lịch sử
+      chạy chưa có chỗ. Đó là cái giá của “ít màn nhất”.</li>
+      <li><b>Bảng bên là tầng đầu tiên thuộc loại đó trong nivo.</b> <code>packages/ui</code> hôm nay có leaf, composite
+      và branch — chưa có shell nào cả. HeroUI có sẵn <code>drawer</code>, nhưng dựng shell đầu tiên là một quyết định
+      về vốn từ chứ không phải một màn hình. Nếu người duyệt không nhận tầng mới, Hỗ trợ lùi về <code>/support</code>
+      với đúng hai cảnh này và hướng vẫn đứng — chỉ mất đúng một điểm cộng của thesis.</li>
+      <li><b>Thanh bên vẫn chưa mở được bằng chuột giữa.</b> Ba route mới làm cả thanh bên bấm được, nhưng mở tab mới
+      thì vẫn chưa — đó là một sửa đổi canon riêng, không phải một quyết định của bản vẽ này.</li>
+    </ul>
+  </section>
+</div>
+</section>

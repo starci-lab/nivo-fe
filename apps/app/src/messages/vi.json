@@ -99,5 +99,119 @@
       "onwardLabel": "Đăng nhập"
     },
     "rememberMeLabel": "Ghi nhớ đăng nhập"
+  },
+  "console": {
+    "brand": "nivo",
+    "title": "Bảng điều khiển",
+    "servicesCaption": "Dịch vụ",
+    "accountCaption": "Tài khoản",
+    "nav": {
+      "overview": "Tổng quan",
+      "apps": "Ứng dụng",
+      "agentos": "AgentOS",
+      "servers": "Máy chủ",
+      "domains": "Tên miền",
+      "wallet": "Ví",
+      "support": "Hỗ trợ"
+    },
+    "state": {
+      "loading": "Đang hỏi máy chủ"
+    },
+    "refusal": {
+      "EXPERT_SITE_NOT_FOUND_EXCEPTION": "Tài khoản này chưa có ứng dụng nào, nên chưa có cài đặt học viện để đọc.",
+      "EXPERT_SITE_AMBIGUOUS_FOR_VIEWER_EXCEPTION": "Tài khoản này có nhiều hơn một ứng dụng, nên phần này cần bạn chọn đúng một cái.",
+      "AGENT_WORKSPACE_NOT_FOUND_EXCEPTION": "Chưa có workspace agent nào, nên chưa đọc được trạng thái pod.",
+      "POD_REGISTRATION_MISSING_EXCEPTION": "Chưa đăng ký pod cho workspace này. Phần trên vẫn đúng.",
+      "unknown": "Chưa đọc được phần này. Phần còn lại trên màn hình vẫn đúng."
+    },
+    "overview": {
+      "title": "Tổng quan"
+    },
+    "apps": {
+      "title": "Ứng dụng",
+      "lede": "Mỗi ứng dụng dựng từ một mẫu và có vòng đời riêng.",
+      "listLabel": "Ứng dụng của bạn",
+      "openSet": "Mở Ứng dụng",
+      "namesNotCount": "Mục này gọi tên vài ứng dụng đầu tiên chứ không đếm. Một trang danh sách không phải là tổng số.",
+      "empty": "Chưa có ứng dụng nào.",
+      "emptyDescription": "Chọn một mẫu bên dưới để dựng cái đầu tiên.",
+      "catalogueLabel": "Dựng thêm ứng dụng",
+      "catalogueFact": "danh mục mẫu",
+      "kindTemplateApp": "Mẫu ứng dụng",
+      "build": "Dựng",
+      "open": "Mở",
+      "viewDns": "Xem bản ghi",
+      "orderInProgress": "đơn đã thanh toán · đang dựng",
+      "priceFrom": "Từ {price}/tháng",
+      "priceTier": "{tier} · {price}"
+    },
+    "agentos": {
+      "title": "AgentOS",
+      "openService": "Mở dịch vụ",
+      "kindWorkspace": "Workspace",
+      "empty": "Chưa có workspace nào.",
+      "emptyDescription": "Một workspace agent riêng, trực Zalo/Telegram theo quy trình của bạn.",
+      "viewPlans": "Xem gói",
+      "podReachable": "Pod đang trả lời",
+      "podUnreachable": "Pod chưa trả lời",
+      "checkedAt": "kiểm tra lúc {time}"
+    },
+    "servers": {
+      "title": "Máy chủ",
+      "lede": "Đây là góc nhìn hạ tầng của các ứng dụng và workspace ở trên.",
+      "empty": "nivo chưa bán máy chủ riêng. Mục này chỉ có nội dung sau khi một ứng dụng hoặc một workspace được dựng.",
+      "shape": "{ram} · {vcpu} vCPU",
+      "shapeUnknown": "chưa có pod riêng",
+      "plan": "Gói {plan}",
+      "renewsAt": "gia hạn {date}"
+    },
+    "domains": {
+      "title": "Tên miền",
+      "empty": "Chưa giữ tên miền nào. Tên miền riêng chỉ cần đến sau khi một ứng dụng đã chạy.",
+      "expiresAt": "hết hạn {date}",
+      "autoRenewOn": "Tự động gia hạn",
+      "autoRenewOff": "Không tự gia hạn",
+      "status": {
+        "active": "Đang giữ",
+        "expiring": "Sắp hết hạn",
+        "expired": "Đã hết hạn"
+      }
+    },
+    "wallet": {
+      "title": "Ví",
+      "balanceLabel": "Số dư",
+      "topUp": "Nạp ví",
+      "viewTransactions": "Xem giao dịch",
+      "unpaidLabel": "Hoá đơn chưa thanh toán",
+      "noUnpaid": "Không có",
+      "dueAt": "hạn {date}",
+      "transactionsLabel": "Giao dịch",
+      "invoicesLabel": "Hoá đơn",
+      "transactionsEmpty": "Chưa có giao dịch nào.",
+      "invoicesEmpty": "Chưa có hoá đơn nào.",
+      "pay": "Thanh toán",
+      "type": {
+        "deposit": "Nạp",
+        "spend": "Trừ"
+      },
+      "status": {
+        "unpaid": "Chưa thanh toán",
+        "paid": "Đã thanh toán",
+        "cancelled": "Đã huỷ"
+      }
+    },
+    "status": {
+      "notProvisioned": "Chưa cấp phát",
+      "provisioning": "Đang dựng",
+      "awaitingDns": "Chờ DNS",
+      "ready": "Đang chạy",
+      "failed": "Thất bại",
+      "active": "Đang chạy",
+      "suspended": "Tạm dừng",
+      "unknown": "Không rõ"
+    },
+    "kind": {
+      "unknown": "Ứng dụng"
+    }
   }
 }

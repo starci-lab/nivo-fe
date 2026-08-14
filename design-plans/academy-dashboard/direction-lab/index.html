@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>case-academy-dashboard · direction lab</title>
+<style>
+  :root{
+    --accent:oklch(84% 0.17 92); --accent-fg:oklch(28% 0.05 80);
+    --bg:oklch(97.5% 0.008 85); --fg:oklch(24% 0.02 60); --muted:oklch(52% 0.025 62);
+    --surface:oklch(100% 0.002 85); --surface-2:oklch(95% 0.012 85); --border:oklch(89% 0.012 80);
+    --radius:20px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+  .banner{position:sticky;top:0;z-index:9;background:var(--accent);color:var(--accent-fg);
+    padding:10px 20px;font-weight:700;letter-spacing:.02em;font-size:13px}
+  .wrap{padding:24px;max-width:1600px;margin:0 auto}
+  h1{font-size:22px;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 24px;max-width:74ch}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:20px;align-items:start}
+  .dir{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .dir > header{padding:16px 18px;border-bottom:1px solid var(--border)}
+  .tag{display:inline-block;background:var(--accent);color:var(--accent-fg);
+    border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
+  .dir h2{font-size:17px;margin:8px 0 6px}
+  .thesis{color:var(--muted);font-size:13.5px;margin:0}
+  .scene{padding:18px;background:var(--surface-2)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
+  .card:last-child{margin-bottom:0}
+  .k{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px}
+  .big{font-size:16px;font-weight:650;margin:0 0 4px}
+  .bar{height:8px;border-radius:999px;background:var(--border);overflow:hidden;margin:10px 0 6px}
+  .bar > i{display:block;height:100%;background:var(--accent)}
+  .btn{display:inline-block;background:var(--accent);color:var(--accent-fg);border:0;
+    border-radius:12px;padding:10px 16px;font-weight:700;font-size:14px}
+  .btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--border);font-weight:500}
+  .row{display:flex;gap:10px;align-items:center;justify-content:space-between}
+  .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .chip{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px;text-align:center}
+  .chip b{display:block;font-size:18px}
+  .chip span{font-size:11.5px;color:var(--muted)}
+  .tabs{display:flex;gap:6px;margin-bottom:12px}
+  .tab{padding:7px 12px;border-radius:999px;font-size:13px;border:1px solid var(--border);background:var(--surface)}
+  .tab.on{background:var(--accent);color:var(--accent-fg);border-color:transparent;font-weight:700}
+  .notes{padding:16px 18px;border-top:1px solid var(--border);font-size:13px}
+  .notes dt{font-weight:700;margin-top:10px}
+  .notes dt:first-child{margin-top:0}
+  .notes dd{margin:2px 0 0;color:var(--muted)}
+  .warn{color:oklch(45% 0.15 30)}
+  code{background:var(--surface-2);padding:1px 5px;border-radius:5px;font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="banner">DIRECTIONAL — NOT AN APPLY BASELINE · case-academy-dashboard · một cảnh đại diện cho mỗi hướng, không phải bản dựng</div>
+<div class="wrap">
+  <h1>Dashboard học viện — ba hướng để chọn</h1>
+  <p class="sub">
+    Cả ba đều dựng được bằng owner và contract hiện có, và đều chỉ đọc dữ liệu API đã trả.
+    Khác nhau ở một quyết định sản phẩm duy nhất: <b>màn hình đầu tiên tuyên bố sản phẩm này là gì</b>.
+    Membership tier và Mentor Hub không xuất hiện ở hướng nào — backend chưa có query nào cho chúng.
+  </p>
+
+  <div class="grid">
+
+    <!-- ============ D-A ============ -->
+    <section class="dir">
+      <header>
+        <span class="tag">D-A</span>
+        <h2>Học tiếp — một việc, làm ngay</h2>
+        <p class="thesis">Người đọc vào đây để học. Mọi thứ khác là phân tâm cho tới khi họ mở lại bài đang dở.</p>
+      </header>
+      <div class="scene">
+        <div class="card">
+          <p class="k">Đang học dở</p>
+          <p class="big">Bài 7 · Định giá sản phẩm đầu tiên</p>
+          <div class="bar"><i style="width:62%"></i></div>
+          <div class="row"><span style="font-size:13px;color:var(--muted)">62% · còn 4 bài</span>
+            <button class="btn">Học tiếp</button></div>
+        </div>
+        <div class="card">
+          <div class="three">
+            <div class="chip"><b>3</b><span>chứng chỉ</span></div>
+            <div class="chip"><b>1.240</b><span>XP</span></div>
+            <div class="chip"><b>2</b><span>thông báo</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="row"><span style="font-size:13.5px">Kỳ trả góp đến hạn 20/08</span>
+            <button class="btn ghost">Xem</button></div>
+        </div>
+      </div>
+      <dl class="notes">
+        <dt>CTA chính</dt><dd>“Học tiếp” — đúng một nút nổi trên màn.</dd>
+        <dt>Đọc theo thứ tự</dt><dd>bài dở → thành tích → nghĩa vụ tài chính.</dd>
+        <dt>Query dùng</dt><dd><code>courseProgress</code> <code>myCertificates</code> <code>myXp</code> <code>myNotifications</code> <code>myInstallmentPlans</code></dd>
+        <dt>Được gì</dt><dd>Khớp thẳng BRD dòng 226 “Dashboard tiến độ học”. Ít quyết định nhất, dựng nhanh nhất.</dd>
+        <dt class="warn">Mất gì</dt><dd>Bán membership kém: người vừa mua gói thấy đúng một khoá, không thấy hệ sinh thái mình vừa trả tiền. Affiliate bị đẩy xuống hạng hai dù BRD cho nó dashboard riêng.</dd>
+      </dl>
+    </section>
+
+    <!-- ============ D-B ============ -->
+    <section class="dir">
+      <header>
+        <span class="tag">D-B</span>
+        <h2>Tri thức · Danh · Lợi — ba dải ngang hàng</h2>
+        <p class="thesis">Mindmap của chủ sở hữu đặt ba thứ này ngang nhau, không phân cấp. Màn hình nói lại đúng như vậy.</p>
+      </header>
+      <div class="scene">
+        <div class="card">
+          <p class="k">Tri thức</p>
+          <p class="big">Bài 7 · Định giá sản phẩm đầu tiên</p>
+          <div class="bar"><i style="width:62%"></i></div>
+          <button class="btn" style="margin-top:6px">Học tiếp</button>
+        </div>
+        <div class="card">
+          <p class="k">Danh</p>
+          <div class="row"><span style="font-size:13.5px"><b>3 chứng chỉ</b> · 1.240 XP · hạng Bạc</span>
+            <button class="btn ghost">Bộ sưu tập</button></div>
+        </div>
+        <div class="card">
+          <p class="k">Lợi</p>
+          <div class="row"><span style="font-size:13.5px"><b>2.400.000đ</b> hoa hồng chờ duyệt · 6 lượt giới thiệu</span>
+            <button class="btn ghost">Link của tôi</button></div>
+        </div>
+      </div>
+      <dl class="notes">
+        <dt>CTA chính</dt><dd>“Học tiếp”, nhưng hai dải kia có CTA riêng ngang trọng lượng.</dd>
+        <dt>Đọc theo thứ tự</dt><dd>ba dải theo đúng thứ tự mindmap, không dải nào nuốt dải nào.</dd>
+        <dt>Query dùng</dt><dd>như D-A, cộng <code>commissions</code> <code>affiliates</code></dd>
+        <dt>Được gì</dt><dd>Là hướng duy nhất nói được “bạn mua hệ sinh thái” — đúng điều BRD đòi ở Membership. Đường từ học viên sang đối tác nhìn thấy ngay ngày đầu.</dd>
+        <dt class="warn">Mất gì</dt><dd>Người mới tinh chưa có chứng chỉ và chưa có hoa hồng sẽ thấy hai dải rỗng. Cần trạng thái rỗng thật sự tốt, nếu không màn hình đầu tiên trông như thất bại.</dd>
+      </dl>
+    </section>
+
+    <!-- ============ D-C ============ -->
+    <section class="dir">
+      <header>
+        <span class="tag">D-C</span>
+        <h2>Một vỏ, đổi vai</h2>
+        <p class="thesis">BRD nói hành trình “từ học viên → đối tác”. Route riêng biến nó thành cuộc di cư; một vỏ biến nó thành cái tab.</p>
+      </header>
+      <div class="scene">
+        <div class="tabs"><span class="tab on">Học viên</span><span class="tab">Đối tác</span><span class="tab">Chuyên gia</span></div>
+        <div class="card">
+          <p class="k">Đang học dở</p>
+          <p class="big">Bài 7 · Định giá sản phẩm đầu tiên</p>
+          <div class="bar"><i style="width:62%"></i></div>
+          <div class="row"><span style="font-size:13px;color:var(--muted)">62%</span><button class="btn">Học tiếp</button></div>
+        </div>
+        <div class="card">
+          <div class="three">
+            <div class="chip"><b>3</b><span>chứng chỉ</span></div>
+            <div class="chip"><b>1.240</b><span>XP</span></div>
+            <div class="chip"><b>2.4tr</b><span>hoa hồng</span></div>
+          </div>
+        </div>
+        <div class="card" style="border-style:dashed">
+          <p class="k">Tab “Chuyên gia”</p>
+          <p style="margin:0;font-size:13px;color:var(--muted)">Chỉ hiện với người có vai trò đó. Nội dung là <code>dashboardStats</code> <code>revenueSeries</code> <code>completionFunnel</code>.</p>
+        </div>
+      </div>
+      <dl class="notes">
+        <dt>CTA chính</dt><dd>“Học tiếp” ở tab mặc định; mỗi tab có CTA của nó.</dd>
+        <dt>Đọc theo thứ tự</dt><dd>chọn vai → việc của vai đó.</dd>
+        <dt>Query dùng</dt><dd>cả ba nhóm, tải theo tab đang mở.</dd>
+        <dt>Được gì</dt><dd>Một địa chỉ <code>/dashboard</code> duy nhất — vá luôn cú redirect đang treo. Chuyên gia kiêm học viên không phải nhớ hai URL.</dd>
+        <dt class="warn">Mất gì</dt><dd>Vai trò thành trạng thái chứ không phải địa chỉ, nên không gửi link thẳng tới bảng hoa hồng được. BRD cho affiliate một dashboard <i>riêng</i> — hướng này cãi lại điều đó.</dd>
+      </dl>
+    </section>
+
+  </div>
+
+  <div class="dir" style="margin-top:22px">
+    <div class="notes">
+      <dt>Chung cho cả ba — đề xuất enabler backend</dt>
+      <dd><b>membership-tier</b>: BRD bán gói Basic/Pro/VIP và hứa “đặc quyền”, nhưng 30 query không có cái nào về gói. Không hướng nào vẽ nó, vì vẽ là hứa thay backend.</dd>
+      <dd><b>mentor-hub</b>: phân hệ số 5 của BRD, cũng không có query nào. Tab “Chuyên gia” ở D-C là bảng số liệu kinh doanh, <i>không phải</i> Mentor Hub.</dd>
+      <dt>Chưa đọc</dt>
+      <dd class="warn">Bốn tài liệu còn lại (Cơ cấu tổ chức, STIGO HUB, BRIEF VINEN, Sơ bộ dự án) chưa bóc. Nếu trong đó có phân quyền theo vai trò thì D-C là hướng bị ảnh hưởng nhiều nhất.</dd>
+    </div>
+  </div>
+</div>
+</body>
+</html>

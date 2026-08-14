@@ -1,0 +1,48 @@
+{
+  "phase": "preview",
+  "caseId": "case-academy-dashboard",
+  "detectedAt": "2026-08-14",
+  "inheritedFrom": "design-plans/academy-dashboard/context-lock.plan.json",
+  "planRecord": "design-plans/academy-dashboard/plan-record.json",
+  "planStatus": "direction-selected",
+  "selectedDirectionId": "D-B",
+  "selectionKind": "explicit",
+  "target": {
+    "repository": "D:/Repositories/nivo-fe",
+    "app": "apps/expert",
+    "branch": "session/surface-branch-and-dead-vocabulary",
+    "head": "9fdf5c3",
+    "remote": null
+  },
+  "drift": [],
+  "driftNote": "Branch and HEAD match what the Plan lock recorded. Nothing moved between the two phases.",
+  "lintReach": {
+    "reachesCandidateSource": true,
+    "evidence": "Running eslint over design-plans/academy-landing-student-entry/preview-lab/candidate/src this session reported real canon findings (starci-fe/no-children-slot on AcademyChrome, starci-fe/no-second-language-in-source on a comment). A config that only covered src/** would have reported nothing.",
+    "ignoredGlobs": [
+      "design-plans/**/cases*.js",
+      "design-plans/**/review*.js",
+      "design-plans/**/*.{html,css,log}"
+    ],
+    "ignoredGlobsNote": "Those ignore lab chrome and generated artifacts, not candidate TS/TSX."
+  },
+  "writeBoundary": {
+    "mayWrite": [
+      "design-plans/academy-dashboard/**"
+    ],
+    "readOnly": [
+      "apps/**",
+      "packages/**",
+      "<trust-root>/**",
+      "D:/Repositories/starci-academy-fe/**"
+    ]
+  },
+  "revision": "1.0-not-yet-built",
+  "owedBeforeSeal": [
+    "relationship sheet",
+    "open questions",
+    "consolidation verdict per new owner",
+    "candidate.build log",
+    "candidate.lint log"
+  ]
+}

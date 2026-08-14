@@ -1,0 +1,31 @@
+{
+  "_source": "NOT A RESPONSE. This is the state matrix the other fixtures are read THROUGH, written beside them so a route does not have to rediscover which arms exist. Every claim below was checked against the live schema at http://localhost:3067/graphql and against the handler that backs each query.",
+  "_restingIsNotAFixture": "There is no 'notAsked' body in any file here, and its absence is deliberate rather than an omission. A resting screen is the absence of a response plus isLoading on the owner - every leaf, every branch and FleetRow already take it, and each contract entry's restingCount is what decides how many rows the skeleton draws. Writing a notAsked JSON body would be inventing a response shape the transport never produces, which is the exact failure this whole phase exists to prevent.",
+  "_forbiddenInEveryFixture": {
+    "aCountOfAnything": "No count query exists anywhere in the schema, and no my* query except myExpertSiteLeads takes an argument or returns a total, cursor or hasMore - so nothing may state how many apps, sites, domains or templates there are. This includes an unpaid-invoice count computed from a complete list: draw the unpaid AMOUNT and its due date, both of which are real fields, or the words for 'none'.",
+    "aResolvedAcademyHost": "No FE constant for the academy base domain exists in apps/ or packages/, and no schema field returns a resolved host. The fixtures carry slug and customDomain exactly as the wire sends them. If a row must show a host, the base domain is a declared candidate constant named in the design record as an open question - never a string baked into a fixture.",
+    "aTemplateAppFieldOnAnExpertSite": "ExpertSiteConfig.templateKey is the site's industry LAYOUT (minimal | creator | consultant), not the product template. The product template is myInstances.appKey joined to catalogItems[].templateKey, and both sides of that join are supplied by fixtures here."
+  },
+  "byQuery": {
+    "myExpertSites": { "file": "my-expert-sites.fixture.json", "arms": ["answered", "empty"], "canRefuse": false },
+    "myInstances": { "file": "my-instances.fixture.json", "arms": ["answered", "empty"], "canRefuse": false },
+    "catalogItems": { "file": "catalog-items.fixture.json", "arms": ["answered"], "canRefuse": false },
+    "myAgentWorkspace": { "file": "my-agent-workspace.fixture.json", "arms": ["answered", "empty"], "canRefuse": false },
+    "myPodOpenclawStatus": { "file": "my-pod-openclaw-status.fixture.json", "arms": ["answered", "unreachable", "refused", "refusedAgentWorkspaceNotFound"], "canRefuse": true },
+    "myAcademySettings": { "file": "my-academy-settings.fixture.json", "arms": ["refused", "refusedAmbiguous"], "canRefuse": true },
+    "myDomains": { "file": "my-domains.fixture.json", "arms": ["answered", "empty"], "canRefuse": false },
+    "myWallet": { "file": "my-wallet.fixture.json", "arms": ["answered", "new"], "canRefuse": false },
+    "myWalletTransactions": { "file": "my-wallet-transactions.fixture.json", "arms": ["answered", "empty"], "canRefuse": false },
+    "myInvoices": { "file": "my-invoices.fixture.json", "arms": ["answered", "empty"], "canRefuse": false },
+    "myCatalogOrders": { "file": "my-catalog-orders.fixture.json", "arms": ["answered", "empty"], "canRefuse": false }
+  },
+  "_openGapForTheReviewer": {
+    "id": "page-apps-has-a-required-refused-state-and-nothing-that-throws",
+    "claim": "page-apps lists 'refused' at status required, but the three queries that page reads - myExpertSites, catalogItems and myCatalogOrders - are plain finds and none of them throws. Nothing in the backend can produce that state on that page today.",
+    "options": [
+      "Draw it from the generic envelope failure with no named code, keyed to console.refusal.unknown, which is honest about being a transport failure rather than a business refusal.",
+      "Strike the state from page-apps' inventory and leave the refused state to page-overview, where myAcademySettings and myPodOpenclawStatus really do throw."
+    ],
+    "refused": "Inventing an exception code for the apps page. It would be the one string on the screen with no source, which is the class of thing this case exists to remove."
+  }
+}

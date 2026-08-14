@@ -1,0 +1,43 @@
+{
+  "_source": "myPodOpenclawStatus -> MyPodOpenclawStatusResponse { success, message, error, metadata, data: PodOpenclawStatus }. PodOpenclawStatus introspected live: checkedAt:DateTime!, httpStatus:Int, reachable:Boolean!, tokenConfigured:Boolean!, tokenHint:String. THIS FILE IS THE REFUSAL CARRIER, and the single most important fact about it is that A REFUSAL IS NOT A GraphQL ERROR - graphql-transform.interceptor.ts catches every throw and emits a SUCCESSFUL field carrying a failed envelope: success:false, message set to the exception's own text, error set to its CODE, metadata carried through minus originalError, and data absent. AbstractException assigns this.name = code, so `error` is the SCREAMING_SNAKE code rather than a class name. THE UI KEYS OFF `error` AND NEVER PRINTS `message`: the server's sentence is English, written for an operator. UNREACHABLE IS NOT REFUSED: a pod that does not answer is itself an ANSWER, per the service's own doc, which is why it sits beside `answered` rather than under `refused`. TWO REFUSALS, AND THE BARE ARM NAME IS THE ONE THE PAGE DRAWS: `refused` is the pod-registration case, which is the ordinary result of a workspace whose pod was never issued tokens; `refusedAgentWorkspaceNotFound` is the second code the same field can carry, kept so the refusal sentence can be proved against more than one code rather than one.",
+  "answered": {
+    "success": true,
+    "message": "Lấy trạng thái pod thành công",
+    "error": null,
+    "metadata": null,
+    "data": {
+      "reachable": true,
+      "httpStatus": 200,
+      "tokenConfigured": true,
+      "tokenHint": "ocw_…4f19",
+      "checkedAt": "2026-08-14T02:41:00.000Z"
+    }
+  },
+  "unreachable": {
+    "success": true,
+    "message": "Lấy trạng thái pod thành công",
+    "error": null,
+    "metadata": null,
+    "data": {
+      "reachable": false,
+      "httpStatus": null,
+      "tokenConfigured": true,
+      "tokenHint": null,
+      "checkedAt": "2026-08-14T02:41:00.000Z"
+    }
+  },
+  "refused": {
+    "success": false,
+    "message": "This pod has not been issued access tokens yet.",
+    "error": "POD_REGISTRATION_MISSING_EXCEPTION",
+    "metadata": {},
+    "data": null
+  },
+  "refusedAgentWorkspaceNotFound": {
+    "success": false,
+    "message": "Agent workspace not found",
+    "error": "AGENT_WORKSPACE_NOT_FOUND_EXCEPTION",
+    "metadata": {},
+    "data": null
+  }
+}

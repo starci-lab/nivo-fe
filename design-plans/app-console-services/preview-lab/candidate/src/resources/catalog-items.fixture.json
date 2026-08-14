@@ -1,0 +1,67 @@
+{
+  "_source": "catalogItems(category: site_from_template) -> CatalogItemsResponse { success, message, error, metadata, data: [CatalogItemEntity!] }. THIS FILE IS THE LIVE RESPONSE, COPIED VERBATIM from a real call to http://localhost:3067/graphql on 2026-08-14 - name, slug, tagline, templateKey, tier names and every price are the running server's own values from catalog-seeder.service.ts, not values a screen invented. The catalogue answers with exactly ONE item today, which is the fact the whole middle level exists to survive: an open set with one member. fulfillmentKind reads 'expert_site_provisioned', a DEPRECATED enum member that is nonetheless what the seeded row holds - the fixture uses what the wire says, not what the enum recommends. NO empty state: a catalogue that answers nothing is not a state this product has. NO refused state: catalogItems is a plain find and cannot throw.",
+  "answered": {
+    "success": true,
+    "message": "Catalog items fetched successfully",
+    "error": null,
+    "metadata": null,
+    "data": [
+      {
+        "id": "97eea7a7-e73a-4636-8a4b-5bd2ed5b4e78",
+        "name": "Học viện AI",
+        "slug": "nivo-ai-academy",
+        "tagline": "Sinh trang học viện + lớp học của riêng bạn từ template — có sẵn thu học phí và trợ giảng AI.",
+        "category": "site_from_template",
+        "fulfillmentKind": "expert_site_provisioned",
+        "templateKey": "ai_academy",
+        "isTiered": true,
+        "isActive": true,
+        "isOrderWired": true,
+        "billingModel": "recurring",
+        "basePriceMonthlyVnd": null,
+        "basePriceOneTimeVnd": null,
+        "tiers": [
+          {
+            "id": "9bbc1360-9972-44bb-bb48-41662b8be781",
+            "tierKey": "academy_start",
+            "name": "Khởi động",
+            "description": "Trang học viện <slug>.nivo.vn + 1 khóa + cộng đồng + thu lead cơ bản.",
+            "priceMonthlyVnd": 0,
+            "priceOneTimeVnd": null,
+            "orderIndex": 0,
+            "isRecommended": false,
+            "isResellerTier": false,
+            "isServiceComponent": false,
+            "scopeDepth": null
+          },
+          {
+            "id": "229df93d-7c80-4f29-8a4b-6dccb4e0206d",
+            "tierKey": "academy_pro",
+            "name": "Chuyên nghiệp",
+            "description": "Tên miền riêng + không giới hạn khóa + thu học phí (SePay/PayOS) + trợ giảng AI + chứng chỉ.",
+            "priceMonthlyVnd": 299000,
+            "priceOneTimeVnd": null,
+            "orderIndex": 1,
+            "isRecommended": true,
+            "isResellerTier": false,
+            "isServiceComponent": false,
+            "scopeDepth": null
+          },
+          {
+            "id": "30b8d8a8-921a-4655-b284-8128d18c49f9",
+            "tierKey": "academy_business",
+            "name": "Doanh nghiệp",
+            "description": "Nhiều chuyên gia + affiliate + xuất Docker/self-host + hỗ trợ ưu tiên (SLA).",
+            "priceMonthlyVnd": 899000,
+            "priceOneTimeVnd": null,
+            "orderIndex": 2,
+            "isRecommended": false,
+            "isResellerTier": true,
+            "isServiceComponent": true,
+            "scopeDepth": null
+          }
+        ]
+      }
+    ]
+  }
+}

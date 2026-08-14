@@ -1,0 +1,48 @@
+{
+  "_source": "myWalletTransactions -> MyWalletTransactionsResponse { success, message, error, metadata, data: [WalletTransactionEntity!] }. WalletTransactionEntity introspected live: amountVnd:Int!, createdAt!, id!, note, paymentId, type:WalletTransactionType!, updatedAt!, wallet. No relations loaded, so `wallet` is null on the wire. Rows are ordered createdAt DESC by the handler. WalletTransactionType has exactly two members, deposit and spend, so the sign of a line is a TYPE rather than a negative number - amountVnd is always the magnitude, and a screen that rendered a minus sign would be inventing one. `note` is operator text and may be absent; it is not a translated string and must not be treated as one.",
+  "answered": {
+    "success": true,
+    "message": "Lấy danh sách giao dịch thành công",
+    "error": null,
+    "metadata": null,
+    "data": [
+      {
+        "id": "7f3c1a68-9d25-4e07-b840-5a1e6c93d2f4",
+        "amountVnd": 299000,
+        "type": "spend",
+        "note": "academy_pro",
+        "paymentId": null,
+        "createdAt": "2026-08-02T03:16:00.000Z",
+        "updatedAt": "2026-08-02T03:16:00.000Z",
+        "wallet": null
+      },
+      {
+        "id": "1e04b7d3-6c89-4a51-93f2-0d7a5e28c916",
+        "amountVnd": 500000,
+        "type": "deposit",
+        "note": null,
+        "paymentId": "SEPAY-2026080100417",
+        "createdAt": "2026-08-01T09:07:00.000Z",
+        "updatedAt": "2026-08-01T09:07:00.000Z",
+        "wallet": null
+      },
+      {
+        "id": "a62d9f05-4b70-4c18-8e3a-7f1c0b6d54e2",
+        "amountVnd": 1039000,
+        "type": "deposit",
+        "note": null,
+        "paymentId": "PAYOS-2026070109194",
+        "createdAt": "2026-07-01T09:19:00.000Z",
+        "updatedAt": "2026-07-01T09:19:00.000Z",
+        "wallet": null
+      }
+    ]
+  },
+  "empty": {
+    "success": true,
+    "message": "Lấy danh sách giao dịch thành công",
+    "error": null,
+    "metadata": null,
+    "data": []
+  }
+}

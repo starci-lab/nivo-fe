@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "@heroui/styles/css";
+
+/*
+ * The same two imports `apps/expert` carries, and for the same reason: every leaf in `@nivo/ui`
+ * names a SEMANTIC token that arrives with the vendor stylesheet. Without the second line the class
+ * names still compile and resolve to nothing, and the candidate would review as a component bug.
+ */
+@source "../../../../../../packages/ui/src";
+
+@custom-variant dark (&:where(.dark, .dark *));

@@ -99,5 +99,119 @@
       "onwardLabel": "Sign in"
     },
     "rememberMeLabel": "Remember me"
+  },
+  "console": {
+    "brand": "nivo",
+    "title": "Console",
+    "servicesCaption": "Services",
+    "accountCaption": "Account",
+    "nav": {
+      "overview": "Overview",
+      "apps": "Apps",
+      "agentos": "AgentOS",
+      "servers": "Servers",
+      "domains": "Domains",
+      "wallet": "Wallet",
+      "support": "Support"
+    },
+    "state": {
+      "loading": "Asking the server"
+    },
+    "refusal": {
+      "EXPERT_SITE_NOT_FOUND_EXCEPTION": "This account has no app yet, so there are no academy settings to read.",
+      "EXPERT_SITE_AMBIGUOUS_FOR_VIEWER_EXCEPTION": "This account has more than one app, so this section needs you to pick exactly one.",
+      "AGENT_WORKSPACE_NOT_FOUND_EXCEPTION": "There is no agent workspace yet, so the pod status could not be read.",
+      "POD_REGISTRATION_MISSING_EXCEPTION": "This workspace has no pod registered yet. Everything above is still correct.",
+      "unknown": "This part could not be read. The rest of the screen is still correct."
+    },
+    "overview": {
+      "title": "Overview"
+    },
+    "apps": {
+      "title": "Apps",
+      "lede": "Each app is built from a template and has a lifecycle of its own.",
+      "listLabel": "Your apps",
+      "openSet": "Open Apps",
+      "namesNotCount": "This section names the first few apps rather than counting them. A list page is not a total.",
+      "empty": "No apps yet.",
+      "emptyDescription": "Pick a template below to build the first one.",
+      "catalogueLabel": "Build another app",
+      "catalogueFact": "template catalogue",
+      "kindTemplateApp": "Template app",
+      "build": "Build",
+      "open": "Open",
+      "viewDns": "View record",
+      "orderInProgress": "paid order · being built",
+      "priceFrom": "From {price}/month",
+      "priceTier": "{tier} · {price}"
+    },
+    "agentos": {
+      "title": "AgentOS",
+      "openService": "Open service",
+      "kindWorkspace": "Workspace",
+      "empty": "No workspace yet.",
+      "emptyDescription": "Your own agent workspace, on duty across Zalo and Telegram to your process.",
+      "viewPlans": "See plans",
+      "podReachable": "Pod is answering",
+      "podUnreachable": "Pod is not answering",
+      "checkedAt": "checked at {time}"
+    },
+    "servers": {
+      "title": "Servers",
+      "lede": "This is the infrastructure view of the apps and workspaces above.",
+      "empty": "nivo does not sell a standalone server. This section fills in only after an app or a workspace has been built.",
+      "shape": "{ram} · {vcpu} vCPU",
+      "shapeUnknown": "no dedicated pod",
+      "plan": "{plan} plan",
+      "renewsAt": "renews {date}"
+    },
+    "domains": {
+      "title": "Domains",
+      "empty": "No domains held. A custom domain is only needed once an app is running.",
+      "expiresAt": "expires {date}",
+      "autoRenewOn": "Auto-renews",
+      "autoRenewOff": "No auto-renew",
+      "status": {
+        "active": "Held",
+        "expiring": "Expiring soon",
+        "expired": "Expired"
+      }
+    },
+    "wallet": {
+      "title": "Wallet",
+      "balanceLabel": "Balance",
+      "topUp": "Top up",
+      "viewTransactions": "See transactions",
+      "unpaidLabel": "Unpaid invoice",
+      "noUnpaid": "None",
+      "dueAt": "due {date}",
+      "transactionsLabel": "Transactions",
+      "invoicesLabel": "Invoices",
+      "transactionsEmpty": "No transactions yet.",
+      "invoicesEmpty": "No invoices yet.",
+      "pay": "Pay",
+      "type": {
+        "deposit": "Top-up",
+        "spend": "Charge"
+      },
+      "status": {
+        "unpaid": "Unpaid",
+        "paid": "Paid",
+        "cancelled": "Cancelled"
+      }
+    },
+    "status": {
+      "notProvisioned": "Not provisioned",
+      "provisioning": "Building",
+      "awaitingDns": "Awaiting DNS",
+      "ready": "Running",
+      "failed": "Failed",
+      "active": "Running",
+      "suspended": "Suspended",
+      "unknown": "Unknown"
+    },
+    "kind": {
+      "unknown": "App"
+    }
   }
 }

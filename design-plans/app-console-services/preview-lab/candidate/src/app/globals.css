@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@import "@heroui/styles/css";
+
+/*
+ * Byte-for-byte the same two imports and the same source hint `apps/app/src/app/globals.css`
+ * carries, because the trap they exist to avoid is exactly the one a candidate would hit first.
+ *
+ * `@source` reaches the shared canon: Tailwind cannot find class names by scanning this folder
+ * alone, and without it every class a leaf writes is dropped from the build. `case-d1`'s
+ * apply-progress recorded that failure - every screen came out as bare HTML - and it looks like a
+ * component bug rather than a missing stylesheet.
+ *
+ * SIX LEVELS, COUNTED RATHER THAN COPIED, even though the answer came out the same as the
+ * authentication candidate's: `src/app` -> `src` -> `candidate` -> `preview-lab` ->
+ * `app-console-services` -> `design-plans` -> the repository root. The two candidates sit at
+ * identical depth, which is why the string is identical; if this lab ever moves, this line moves
+ * with it or every screen goes bare again.
+ *
+ * `@heroui/styles/css` carries the SEMANTIC tokens every leaf names (`bg-surface`, `text-muted`,
+ * `bg-background`). Without it those class names still compile and resolve to nothing.
+ *
+ * No brand palette is written here. nivo has no approved colour, `case-d1` withheld it
+ * deliberately, and a preview that invented one would be asking for approval of a decision nobody
+ * made.
+ */
+@source "../../../../../../packages/ui/src";
+
+@custom-variant dark (&:where(.dark, .dark *));

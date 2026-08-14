@@ -1,0 +1,214 @@
+<article class="lab-dir" id="dir-b">
+  <header>
+    <span class="lab-id">Hướng B</span>
+    <h2>Mỗi dịch vụ trả lời câu hỏi của riêng nó</h2>
+    <p class="lab-thesis">
+      <b>AgentOS</b> mở đầu bằng việc workspace còn sống hay không (hàng workspace, rồi pod có trả lời);
+      <b>Máy chủ</b> mở đầu bằng máy <i>là cái gì</i> (gói, RAM, vCPU, ngày gia hạn ngay hàng đầu);
+      <b>Tên miền</b> mở đầu bằng cái nào sắp hết hạn; <b>Hỗ trợ</b> mở đầu bằng có ai đang chờ nivo không.
+      Bốn sự thật dẫn dắt khác nhau, bốn hàng đầu tiên khác nhau — mang bởi
+      <code>title-with-baseline-fact</code>, khoá đã nằm sẵn trong <code>titled-section-stack-page.heading</code> mà
+      <b>chưa trang nào đã ship từng gọi</b>. Sự thật dẫn dắt <b>không bao giờ là một con số đếm</b>: nó gọi tên đúng
+      một thành viên mà phản hồi đã mang sẵn, theo tiền lệ <code>cheapestTier</code> và dòng hoá đơn chưa thanh toán.
+      Tên miền là trường hợp sạch nhất — <code>myDomains</code> đã được handler sắp xếp hết-hạn-sớm-nhất-trước, nên
+      sự thật dẫn dắt đúng bằng <code>data[0]</code> và trình duyệt không tính gì cả. Mọi thứ còn lại là ngữ pháp của
+      console đã ship, giữ nguyên.
+    </p>
+    <div class="lab-nav">
+      <h3>Vấn đề A — hướng này trả lời</h3>
+      <p><b>Không lấy lựa chọn nào</b> — điền bốn route, để <code>NavLink</code> nguyên vẹn. <b>Từ chối
+      <code>href</code> trên lá</b> vì VENDOR-14 gọi đích danh <code>NavLink</code> trong cả văn bản canon lẫn mã luật,
+      nên đó là <b>sửa cây tin cậy</b> (ba tệp dưới <code>.claude/</code>, cộng bài kiểm tra sinh đôi, cộng một lượt
+      đồng bộ vào mọi kho tiêu thụ) chứ không phải sửa component — và nó không thể thu hẹp trung thực về một lá, vì cùng
+      lập luận chuột-giữa áp cho <code>SeeMoreLink</code> và mọi <code>Link</code> nội bộ, nghĩa là người duyệt sẽ đang
+      mở lại toàn bộ lập trường “điều hướng nội bộ là một hành động”. <b>Từ chối cách bọc mạnh hơn:</b> cùng một vi
+      phạm lùi ra một tệp, cộng một lỗi tiếp cận thật — lá vẫn dựng <code>&lt;span role="link" tabIndex=0&gt;</code>, nên
+      DOM thành <code>&lt;a&gt;</code> ôm một <code>role="link"</code> lồng: hai điểm dừng tiêu điểm, hai lần đọc “liên
+      kết”, một mặc định của thẻ neo đua với một press handler; và nó thôi dùng lá theo cách
+      <code>home-services-account-nav</code> mô tả, tức là phá đúng thứ duy nhất mà lựa chọn đó định giữ.
+      <b>Phát hiện:</b> hướng này dự đoán cả ba hướng sẽ cùng đáp về đây — VENDOR-14, luật header của chính lá
+      <code>Link</code>, sự tồn tại của <code>TextLink</code> như một lá chỉ được biện minh bởi luật này, và chú thích
+      của <code>ConsoleNav</code> nói rằng đổi tên <code>href</code> thành <code>route</code> <i>chính là</i> điểm mấu
+      chốt — nên <b>sự đồng thuận tự nó là kết quả</b>: Vấn đề A không phải lựa chọn thiết kế, mà là câu hỏi quản trị
+      không hướng nào có quyền phân xử.</p>
+    </div>
+  </header>
+
+  <div class="lab-reason">
+    <section>
+      <h3>Cái phải trả giá</h3>
+      <ol>
+        <li><b>Giàu nhất, nên đắt nhất về vốn từ.</b> Đây là hướng duy nhất cần vốn từ hợp đồng mới: <b>1 MỚI</b>
+        (<code>subject-status-action-row</code>) + <b>1 MỞ RỘNG</b> (<code>fleet-resource-list.resource</code>), cộng
+        một nhóm nội dung <code>console.support.*</code> hoàn toàn mới ở <i>cả</i> vi và en. Một hướng vẽ tên miền và
+        phiếu thành các dòng sự kiện chỉ-đọc tốn <b>không</b> khoá nào — và mất mọi cú bấm. <b>Người duyệt đang mua
+        chính những cú bấm đó.</b></li>
+        <li><b>AgentOS chạy tới chín mục và phá một lời hứa lúc nghỉ.</b>
+        <code>titled-section-stack-page.section</code> khai <code>restingCount: 2</code>, mà chú thích của chính nó nói
+        con số phải đúng trên <i>mọi</i> màn khoá đó phục vụ, vì đó là thứ bộ xương vẽ ra trước khi biết gì. Hai mục
+        nghỉ phía trên một trang chín mục là một lời hứa sai nhìn thấy được ngay lần sơn đầu tiên.</li>
+        <li><b>Máy chủ nhét bốn dữ kiện vào một dòng chữ mờ.</b> <code>gói pro · 2 GB · 2 vCPU · gia hạn 12/09</code>
+        dùng lại <code>name-over-handle.handle</code> và tốn không khoá nào — nhưng một người vận hành đang so kích
+        thước giữa các hàng <b>không có cột nào để rà dọc</b>, chỉ có một câu phải đọc lại từng hàng. Một hàng có ô
+        riêng sẽ chữa được và <i>cố ý</i> không được đề xuất, vì nó sẽ là khoá mới thứ hai được biện minh bằng sự dễ rà
+        chứ không phải bằng một quan hệ không khoá nào diễn đạt được.</li>
+        <li><b>Thứ đầu tiên người duyệt thấy ở AgentOS là một lời từ chối, không phải một tính năng.</b>
+        <code>myAutomations</code>, <code>myAutomationRuns</code> và <code>myPodN8nWorkflows</code> đều từ chối với
+        <code>POD_CREDENTIAL_NOT_FOUND_EXCEPTION</code> cho mọi tài khoản hôm nay, vì
+        <code>pod_credentials</code> chỉ giữ các dòng <code>OPENCLAW_GATEWAY_TOKEN</code>. Vẽ điều đó ra là đúng, và
+        cũng là không gây ấn tượng — hướng này <b>trưng ra ít phần mềm chạy được nhất</b> trong ba hướng, đồng thời
+        chính xác nhất về lý do.</li>
+        <li><b>Bốn sự thật dẫn dắt là bốn luật phải nuôi, và không luật nào cho cái thứ năm.</b> Mỗi điểm đến tự nghĩ
+        ra một câu dẫn trung thực của riêng nó. Ba trong bốn cần một phép <code>find</code>/<code>min</code> trên danh
+        sách trả về; chỉ Tên miền là miễn phí (<code>data[0]</code>, do handler sắp). Một điểm đến thứ năm sẽ phải nghĩ
+        ra câu dẫn thứ năm hoặc lặng lẽ rơi về <code>title-with-end-action</code>, và hướng này <b>không nêu luật chọn
+        nào</b>.</li>
+        <li><b><code>myOpsTickets</code> được cho một câu thay vì không gì cả, và điều đó tranh cãi được.</b> Vẽ một
+        lời giải thích cho một danh sách <i>về cấu trúc</i> không thể đầy có nguy cơ khiến người duyệt hỏi vì sao lại có
+        một mục cho thứ không ai mua được. Cách còn lại — bỏ hẳn — để một khách hàng dịch vụ vận hành tương lai không
+        biết phiếu của mình hiện ra ở đâu. Hướng này chọn câu văn và <b>ghi lại lời phản đối</b> chứ không giấu nó.</li>
+        <li><b>Khối agent không quy được chủ cho các mảng khi có hai agent.</b> <code>MyAgentsAgent</code> mang
+        <code>channels</code>, <code>tools</code> và <code>knowledgeSources</code> thành mảng chuỗi phẳng theo từng
+        agent. Vẽ thành dòng sự kiện dưới <i>một</i> agent thì đọc đúng; với hai agent các dòng mất chủ. Hướng này có
+        một agent sống và <b>không có câu trả lời cho cái thứ hai</b> — một khoảng trống thật mang vào Preview, không
+        phải một vấn đề đã giải.</li>
+      </ol>
+    </section>
+
+    <section class="lab-feas">
+      <h3>Tính khả thi</h3>
+      <ol>
+        <li><b>Owner đã có, dùng nguyên vẹn.</b> <code>packages/ui/src/branches/{Tree,SurfaceCard}</code>;
+        <code>packages/ui/src/leaves/{Heading,Text,TextLink,Badge,Button,NavLink}</code>;
+        <code>packages/ui/src/composites/EmptyNotice</code>;
+        <code>apps/app/src/components/blocks/provisioning/FleetRow</code> (<code>FleetStatus</code>,
+        <code>FleetKind</code>, <code>STATUS_TONE</code>); <code>ConsoleNav</code> (<code>DESTINATIONS</code>,
+        <code>routeOf</code>, <code>hrefOf</code>, <code>isCurrentDestination</code>);
+        <code>apps/app/src/modules/api/{console.ts,graphql.ts}</code>;
+        <code>app/[locale]/(console)/layout.tsx</code> (thanh bên, landmark <code>main</code>, chuyển hướng khi chưa
+        đăng nhập); <code>messages/{vi,en}.json</code> namespace <code>console</code>; <code>i18n/config.ts</code>.</li>
+        <li><b>DÙNG LẠI — bộ khung.</b> <code>titled-section-stack-page</code> (gốc trang cả bốn màn),
+        <code>label-row-over-card</code> (mọi mục), <code>title-with-end-action</code> (nhãn mục),
+        <code>home-services-account-nav</code> / <code>sidebar-then-body-app</code> / <code>console-body-main</code>
+        (khung, không đụng — một trang mới là một tệp route chứ không phải một sửa đổi layout, vì thanh bên là
+        <i>anh em</i> của thân).</li>
+        <li><b>DÙNG LẠI — <code>title-with-baseline-fact</code> trong <code>titled-section-stack-page.heading</code>.</b>
+        Đã nằm trong union, không chỗ gọi nào đã ship. <b>Đây là toàn bộ cơ chế của luận đề và nó tốn không gì.</b>
+        Người gọi trung thực đầu tiên ở cấp trang.</li>
+        <li><b>DÙNG LẠI — <code>fleet-resource-list</code> + <code>fleet-row</code></b> (qua khối
+        <code>FleetRow</code>) cho hàng workspace của AgentOS và cả hai hàng Máy chủ. <b>Không cần mở rộng
+        <code>FleetKind</code>:</b> <code>kind</code> giữ nguyên <code>site</code>/<code>workspace</code> và
+        <code>kindLabel</code> là chuỗi tự do, nên “Học viện” là một nhãn chứ không phải thành viên union mới. Thừa
+        hưởng có ý thức khoảng trống nghỉ đã ghi của FleetRow (<code>isLoading</code> tới được handle và action, không
+        tới huy hiệu nào).</li>
+        <li><b>DÙNG LẠI — <code>labelled-fact-stack</code> + <code>label-value-row</code></b> cho trạng thái pod, dữ
+        kiện agent, nguồn kiến thức, công cụ, mô hình và chi phí tín dụng. <code>why</code> của chính khoá là “các dòng
+        nhãn-và-số về MỘT đối tượng”, và mỗi mục này đúng là thế.</li>
+        <li><b>DÙNG LẠI — <code>body-with-refusal-note</code></b> cho vùng tự động hoá của AgentOS. Ô
+        <code>answered</code> được bỏ ở đó (cả vùng bị từ chối) và vẫn sẵn cho cặp workspace/pod đúng như
+        <code>OverviewPage</code> dùng.</li>
+        <li><b>DÙNG LẠI — hai kiểu rỗng, theo đúng luật <code>OverviewPage</code> đã nêu nguyên văn</b> (“một sự vắng
+        mặt vẽ như một thông báo rỗng sẽ đọc thành một lời mời”): <code>centred-empty-notice</code> +
+        <code>EmptyNotice</code> cho rỗng-là-lời-mời (workspace AgentOS, kênh AgentOS, Tên miền, Hỗ trợ); lá
+        <code>text</code> trần trong <code>label-row-over-card.body</code> cho rỗng-là-vắng-mặt-cố-ý (máy của Máy chủ,
+        Nội dung trao đổi, Yêu cầu vận hành).</li>
+        <li><b>DÙNG LẠI — <code>inline-action-run</code></b> cho hành động chính của tên miền và phiếu: đã nằm trong
+        union của <code>label-row-over-card.body</code> với không chỗ gọi nào đã ship, đây là người gọi trung thực đầu
+        tiên. <b>DÙNG LẠI — <code>template-offer-row</code></b> cho cảnh Máy chủ rỗng, trả lời bằng danh mục; nó mang
+        theo sự trùng lặp đã ghi giữa <code>OverviewPage</code> và <code>AppsPage</code>, và bản sao inline thứ ba
+        <i>củng cố</i> luận cứ tách <code>components/blocks/console/TemplateOfferRow/</code> chứ không làm yếu đi.</li>
+        <li><b>MỚI — <code>subject-status-action-row</code></b> { identity: hợp đồng <code>name-over-handle</code>;
+        status: lá <code>badge</code>; action: lá <code>button</code>, tuỳ chọn }. <b>Quan hệ không khoá nào diễn đạt
+        được:</b> một thứ bạn <i>giữ</i> theo một cái đồng hồ, trạng thái là enum do đồng hồ đó hoặc do bạn viết, và
+        đúng một cú bấm kéo dài hoặc kết thúc nó — <b>không có “loại”</b>, vì mọi thành viên của danh sách cùng một loại.
+        Các lựa chọn đã bác, kèm lý do: <code>identity-kind-status-action-row</code> đòi <code>kind</code>, và
+        <code>why</code> của chính nó cấm có chỗ thứ hai để tìm một sự thật — một huy hiệu “Tên miền” trên mọi hàng tên
+        miền đúng là như thế; <code>label-value-row</code> là hai lá text và không hành động được;
+        <code>label-with-muted-fact-row</code> không có huy hiệu và không có cú bấm; <code>template-offer-row</code> đòi
+        cả loại lẫn giá, mà tên miền và phiếu đều không dính tiền; <code>changelog-entry-row</code> có đúng hình
+        meta/tiêu đề nhưng <b>không có ô hành động</b> và, đã kiểm, <b>không có holder nào trong registry</b> — hai danh
+        sách nối liền duy nhất là <code>fleet-resource-list</code> và <code>question-answer-list</code>;
+        <code>question-over-answer</code> không bấm được. <b>Một khoá phục vụ HAI điểm đến</b> (hàng Tên miền và hàng
+        phiếu Hỗ trợ), nên nó không phải một khoá dùng một lần.</li>
+        <li><b>MỞ RỘNG — <code>fleet-resource-list.resource</code></b> nhận <code>subject-status-action-row</code> làm
+        danh tính hàng thứ ba. Ô này đã nhận hai (<code>fleet-row</code>, <code>template-offer-row</code>) và chú thích
+        của chính nó nói cái thứ hai được thêm để một danh mục và một danh sách sở hữu dùng chung một mặt phẳng nối
+        liền; cái thứ ba là cùng lập luận. Kết xuất inline qua <code>defineCompositeComponent</code> bọc một
+        <code>Tree</code>, soi gương cách <code>offerRow</code> được viết trong cả hai trang đã ship — không cần tệp
+        khối mới.</li>
+        <li><b>MỚI — nội dung <code>console.support.*</code> ở CẢ <code>vi.json</code> và <code>en.json</code>.</b>
+        Hôm nay không có nhóm khoá phiếu ở ngôn ngữ nào. Tối thiểu cần: title, listLabel, empty, emptyDescription,
+        create, open, threadNote, opsNote, inputNote, và <code>status.{open,answered,closed}</code> — trong đó
+        <code>answered</code> <b>PHẢI</b> đọc là <b>“Đã tiếp nhận”</b>, không bao giờ “Đã trả lời”. Khoá từ chối mới:
+        <code>POD_CREDENTIAL_NOT_FOUND_EXCEPTION</code>, <code>PROVISIONABLE_APP_NOT_FOUND_EXCEPTION</code>,
+        <code>AGENT_WORKSPACE_INSTANCE_MISSING_EXCEPTION</code>, <code>DOMAIN_NAME_UNAVAILABLE_EXCEPTION</code>,
+        <code>TICKET_NOT_FOUND_EXCEPTION</code>, <code>TICKET_ALREADY_CLOSED_EXCEPTION</code> — mỗi mã phải vào cả
+        <code>NAMED_REFUSALS</code>, vì <code>t()</code> ném khi khoá chưa khai và một mã không có trong danh sách phải
+        rơi về <code>refusal.unknown</code>. <b>Nội dung đã viết mà chưa từng kết xuất, nay được dùng:</b>
+        <code>agentos.podReachable</code>, <code>agentos.podUnreachable</code>, <code>agentos.checkedAt</code>,
+        <code>agentos.empty</code>, <code>servers.shape</code>, <code>servers.shapeUnknown</code>,
+        <code>servers.plan</code>, <code>servers.renewsAt</code>, <code>domains.status.*</code>,
+        <code>apps.priceFrom</code>, <code>state.loading</code>, <code>console.title</code>. Hướng này chính là thứ
+        những khoá đó được viết cho.</li>
+        <li><b>Schema kiểm chứng sống</b> tại <code>localhost:3067/graphql</code> (introspection chạy lại trong phiên
+        này, không lấy từ brief). Đúng từng trường: <code>MyInstance</code> như trên;
+        <code>DomainEntity { id, name, status DomainStatus!, registeredAt DateTime!, expiresAt DateTime (NULLABLE),
+        autoRenew Boolean!, nameservers [String!]!, user (không bao giờ nạp) }</code>;
+        <code>SupportTicketEntity { id, subject String!, status TicketStatus!, createdAt, updatedAt,
+        messages [TicketMessageEntity!] }</code>;
+        <code>OpsTicketEntity { id, ticketStatus OpsTicketStatus!, scopeNotes, sourceUrl, assignedStaffUserId,
+        catalogOrder, createdAt }</code>. <b>Cải chính hồ sơ cũ:</b> <code>MyInstance.ram</code>/<code>vcpu</code>
+        <b>không</b> hardcoded null — <code>my-instances.handler.ts:mapInstance</code> đọc
+        <code>this.renderRam(instance.ramMb)</code> và <code>instance.vcpu</code>; null chỉ ở dòng mồ côi
+        (<code>mapOrphanSite</code>, <code>mapOrphanWorkspace</code>), và discriminator là
+        <code>instanceId === null</code> chứ không phải loại ứng dụng. <b>Cải chính với brief:</b>
+        <code>myThreads</code> trả <code>AgentThread</code> có <code>channel</code> là <code>String!</code>; và
+        <code>myAgents</code> trả <code>MyAgentsAgent</code> (channels/tools/knowledgeSources đều
+        <code>[String!]!</code>), không phải <code>AgentEntity</code> — chọn trường hình-AgentEntity trên
+        <code>myAgents</code> sẽ là lỗi tài liệu.</li>
+        <li><b>Kiểm chứng độc lập — bản lề trung thực của Hỗ trợ.</b>
+        <code>create-ticket.handler.ts</code> đăng <code>MessageAuthorRole.User</code> rồi
+        <code>MessageAuthorRole.Staff</code> với <code>AUTO_ACK_MESSAGE_BODY</code> và đặt
+        <code>TicketStatus.Answered</code>; <code>reply-to-ticket.handler.ts</code> làm Open → auto-ack → Answered. Một
+        lượt grep toàn repo cho <code>MessageAuthorRole.Staff</code> ngoài spec trả về <b>đúng hai</b> chỗ ghi, cả hai
+        ghi cùng một hằng số. <b>Không tồn tại mutation trả lời cho người vận hành ở đâu cả.</b></li>
+        <li><b>Kiểm chứng độc lập — <code>myOpsTickets</code> rỗng về cấu trúc.</b>
+        <code>catalog-seeder.service.ts</code> gieo đúng hai món: <code>nivo-ai-academy</code>
+        (ExpertSiteProvisioned) và <code>nivo-ai-agent</code> (AgentWorkspaceProvisioned). Không món nào là
+        <code>FulfillmentKind.OpsService</code>, và bộ gieo vô hiệu hoá mọi thứ ngoài danh sách slug đang hoạt động.
+        Danh sách không thể đầy nếu danh mục không đổi — nên nó là <b>một câu văn, không phải một danh sách rỗng</b>.</li>
+        <li><b>Mũi tên truy vấn mới theo đúng thủ tục của <code>console.ts</code></b> (type hàng có TSDoc từng trường,
+        hằng selection-set SCREAMING_SNAKE có ngoặc, mũi tên export trả
+        <code>Promise&lt;Result&lt;T&gt;&gt;</code>, <b>đúng một root field mỗi tài liệu</b>): <code>myAgents</code>,
+        <code>myTools</code>, <code>myKnowledgeSources</code>, <code>myModels</code>, <code>myWorkflows</code>,
+        <code>myThreads</code>, <code>myChannels</code>, <code>myAutomations</code>, <code>myTickets</code>,
+        <code>myOpsTickets</code>, <code>ticket</code>. Ràng buộc cứng: <code>graphql.ts:153</code> bóc
+        <code>Object.values(body.data)[0]</code> nên root field thứ hai bị vứt lặng lẽ; phong bì
+        <code>data … message success error</code> bắt buộc; trạng thái <code>String!</code> đánh kiểu
+        <code>string</code> và giải qua một bảng tra chứ không ép kiểu; và <b>không bao giờ chọn
+        <code>ChannelConnectionEntity.instance</code></b>.</li>
+        <li><b>Bốn tệp route, chín dòng mỗi tệp</b>, không <code>use client</code>, không quyết định vẽ nào (LAYOUT-6):
+        <code>app/[locale]/(console)/{agentos,servers,domains,support}/page.tsx</code>. Cộng một sửa đổi
+        <code>DESTINATIONS</code> trong <code>ConsoleNav</code> điền bốn mục <code>route: null</code>. <b>Đó là toàn bộ
+        thay đổi điều hướng</b> — <code>packages/ui</code> không bị đụng, nên không có sửa gói dùng chung và không có tu
+        chính canon nào trong Plan này.</li>
+        <li><b>Backend cần làm: KHÔNG.</b> Mọi trường được vẽ đều đã công bố và đã với tới được bằng chính chứng chỉ
+        console đang giữ. Hai phát hiện hình-backend được nêu và để ngoài ranh giới Plan này:
+        <code>assignOpsTicket</code> và <code>updateOpsTicketStatus</code> <b>không có kiểm tra
+        <code>PlatformRole.Operator</code></b>, và <code>myAutomationRuns</code> nhận một <code>limit</code> mà header
+        của <code>console.ts</code> không nhắc — không cái nào đổi một bản vẽ.</li>
+        <li><b>Mang vào Preview như những ẩn số:</b> (1) <code>restingCount</code> của
+        <code>titled-section-stack-page</code> khi nó phục vụ một trang AgentOS chín mục; (2) tầng mạch trao đổi của
+        phiếu (<code>ticket(ticketId)</code> với tin nhắn cũ-trước) hoãn đúng như tầng ứng dụng thứ ba đã hoãn, và cần
+        vốn từ hàng/tin nhắn riêng; (3) quy chủ cho các mảng channels/tools/knowledge của một agent khi có agent thứ
+        hai; (4) <code>subject-status-action-row</code> nên là một hợp đồng nhận vào ô composite hay hai khối soi gương
+        mẫu FleetRow.</li>
+      </ol>
+    </section>
+  </div>
+
+  <div class="lab-scenes">
+    <h3>Tám cảnh — bốn dịch vụ × hai trạng thái · bản vẽ nguyên bản của hướng, kèm quy ước riêng của nó</h3>
+<!--SCENES-->
+  </div>
+</article>

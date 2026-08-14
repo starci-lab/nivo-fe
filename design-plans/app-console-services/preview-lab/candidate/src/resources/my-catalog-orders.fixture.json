@@ -1,0 +1,66 @@
+{
+  "_source": "myCatalogOrders -> MyCatalogOrdersResponse { success, message, error, metadata, data: [CatalogOrderEntity!] }. CatalogOrderEntity introspected live: activatedAt, activityLogs, autoRenew!, catalogItem, catalogTier, createdAt!, fulfillmentKind!, id!, invoices, renewsAt, status:CatalogOrderStatus!, updatedAt!, user. The handler loads catalogItem and catalogTier; activityLogs, invoices and user are not loaded and are null on the wire. CatalogOrderStatus introspected live has six members: active | cancelled | completed | in_progress | pending_payment | suspended. THE in_progress ROW IS THE SOURCE OF THE 'ONE STANDING UP' STATE - an app that is paid for and not yet finished being built - and it is drawn with NO action, which needs no new row shape at all because identity-kind-status-action-row.action is already optional and its own why states the reason verbatim: a resource mid-provision has nothing anybody may do to it. activatedAt is null on that row and that is what makes it honest.",
+  "answered": {
+    "success": true,
+    "message": "Lấy danh sách đơn hàng thành công",
+    "error": null,
+    "metadata": null,
+    "data": [
+      {
+        "id": "8d4f0b27-1e63-49a5-b0c8-2f7a5d96e310",
+        "status": "in_progress",
+        "fulfillmentKind": "expert_site_provisioned",
+        "autoRenew": true,
+        "renewsAt": null,
+        "activatedAt": null,
+        "createdAt": "2026-08-09T04:39:00.000Z",
+        "updatedAt": "2026-08-09T04:41:00.000Z",
+        "catalogItem": {
+          "id": "97eea7a7-e73a-4636-8a4b-5bd2ed5b4e78",
+          "name": "Học viện AI",
+          "slug": "nivo-ai-academy",
+          "templateKey": "ai_academy"
+        },
+        "catalogTier": {
+          "id": "9bbc1360-9972-44bb-bb48-41662b8be781",
+          "name": "Khởi động",
+          "tierKey": "academy_start"
+        },
+        "activityLogs": null,
+        "invoices": null,
+        "user": null
+      },
+      {
+        "id": "5c1a7e63-0d48-4b92-8f37-6a2d9e0b14c5",
+        "status": "active",
+        "fulfillmentKind": "expert_site_provisioned",
+        "autoRenew": true,
+        "renewsAt": "2026-09-02T03:14:00.000Z",
+        "activatedAt": "2026-07-02T03:15:00.000Z",
+        "createdAt": "2026-07-02T03:12:00.000Z",
+        "updatedAt": "2026-08-02T03:16:00.000Z",
+        "catalogItem": {
+          "id": "97eea7a7-e73a-4636-8a4b-5bd2ed5b4e78",
+          "name": "Học viện AI",
+          "slug": "nivo-ai-academy",
+          "templateKey": "ai_academy"
+        },
+        "catalogTier": {
+          "id": "229df93d-7c80-4f29-8a4b-6dccb4e0206d",
+          "name": "Chuyên nghiệp",
+          "tierKey": "academy_pro"
+        },
+        "activityLogs": null,
+        "invoices": null,
+        "user": null
+      }
+    ]
+  },
+  "empty": {
+    "success": true,
+    "message": "Lấy danh sách đơn hàng thành công",
+    "error": null,
+    "metadata": null,
+    "data": []
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "_source": "myAgentWorkspace -> MyAgentWorkspaceResponse { success, message, error, metadata, data: [AgentWorkspaceEntity!] }. AgentWorkspaceEntity introspected live: catalogOrder, createdAt!, externalWorkspaceRef, id!, instance, name, status!, updatedAt!. THE RELATION FENCE, AND IT IS THE TRAP NEXT DOOR TO my-expert-sites: the service loads catalogOrder: true but NOT catalogTier or catalogItem beneath it, so the nested pair is null on the wire. Both nulls are written out explicitly, because the tier name the direction lab draws beside this workspace is NOT reachable from this query - it is reachable from myInstances.plan or from myCatalogOrders[].catalogTier.name, and a fixture that filled it here would be inventing a join the transport does not make. `status` is a plain String on the wire, and its written values are provisioning | active | suspended | failed - the second half of FleetRow's FleetStatus union.",
+  "answered": {
+    "success": true,
+    "message": "Lấy workspace thành công",
+    "error": null,
+    "metadata": null,
+    "data": [
+      {
+        "id": "c04a9b6e-3d71-42f8-95a0-8b1c7e5d2604",
+        "name": "Workspace của Minh Tuệ",
+        "externalWorkspaceRef": "ws_9f8e7d6c5b4a",
+        "status": "active",
+        "createdAt": "2026-07-02T08:30:00.000Z",
+        "updatedAt": "2026-08-12T11:47:00.000Z",
+        "instance": null,
+        "catalogOrder": {
+          "id": "2b6e9f41-8c07-4d35-a1b9-73e0d5c86124",
+          "status": "active",
+          "autoRenew": true,
+          "renewsAt": "2026-09-02T08:30:00.000Z",
+          "activatedAt": "2026-07-02T08:31:00.000Z",
+          "createdAt": "2026-07-02T08:29:00.000Z",
+          "updatedAt": "2026-07-02T08:31:00.000Z",
+          "fulfillmentKind": "agent_workspace_provisioned",
+          "catalogItem": null,
+          "catalogTier": null,
+          "user": null
+        }
+      }
+    ]
+  },
+  "empty": {
+    "success": true,
+    "message": "Lấy workspace thành công",
+    "error": null,
+    "metadata": null,
+    "data": []
+  }
+}

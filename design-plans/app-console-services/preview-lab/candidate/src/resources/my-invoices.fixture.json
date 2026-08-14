@@ -1,0 +1,96 @@
+{
+  "_source": "myInvoices -> MyInvoicesResponse { success, message, error, metadata, data: [InvoiceEntity!] }. InvoiceEntity introspected live: amountVnd:Int!, catalogOrder, chargedAmountVnd, createdAt!, dueAt:DateTime!, gatewayCheckoutFields, gatewayCheckoutUrl, gatewayReferenceId, id!, paidAt, paymentGateway:InvoicePaymentGateway, purpose:InvoicePurpose!, status:InvoiceStatus!, targetCatalogTier, updatedAt!, user. THE RELATION FENCE IS WIDER HERE THAN ANYWHERE ELSE, AND IT MATTERS: the handler loads catalogOrder.{catalogItem, catalogTier}, ordered createdAt DESC. This is therefore the ONE place a human-readable invoice label - a product name and a tier name - is legitimately derivable, which is why the wallet draws it here and nowhere else. targetCatalogTier and user are not loaded and are null on the wire. InvoicePaymentGateway has exactly two members, payos and sepay - not Stripe and not VNPay. THE UNPAID LINE DRAWS THE AMOUNT AND ITS DUE DATE, NEVER A COUNT: both are real fields, and counting the unpaid rows would be the one number on the screen the schema never states.",
+  "answered": {
+    "success": true,
+    "message": "Lấy danh sách hoá đơn thành công",
+    "error": null,
+    "metadata": null,
+    "data": [
+      {
+        "id": "0b8e4a17-5f92-43d6-a07c-1e5b39c86d24",
+        "amountVnd": 299000,
+        "chargedAmountVnd": null,
+        "status": "unpaid",
+        "purpose": "catalog_renewal",
+        "dueAt": "2026-09-02T03:14:00.000Z",
+        "paidAt": null,
+        "paymentGateway": "payos",
+        "gatewayCheckoutUrl": null,
+        "gatewayReferenceId": null,
+        "gatewayCheckoutFields": null,
+        "createdAt": "2026-08-26T03:14:00.000Z",
+        "updatedAt": "2026-08-26T03:14:00.000Z",
+        "catalogOrder": {
+          "id": "5c1a7e63-0d48-4b92-8f37-6a2d9e0b14c5",
+          "status": "active",
+          "fulfillmentKind": "expert_site_provisioned",
+          "autoRenew": true,
+          "renewsAt": "2026-09-02T03:14:00.000Z",
+          "activatedAt": "2026-07-02T03:15:00.000Z",
+          "createdAt": "2026-07-02T03:12:00.000Z",
+          "updatedAt": "2026-08-02T03:16:00.000Z",
+          "catalogItem": {
+            "id": "97eea7a7-e73a-4636-8a4b-5bd2ed5b4e78",
+            "name": "Học viện AI",
+            "slug": "nivo-ai-academy",
+            "templateKey": "ai_academy"
+          },
+          "catalogTier": {
+            "id": "229df93d-7c80-4f29-8a4b-6dccb4e0206d",
+            "name": "Chuyên nghiệp",
+            "tierKey": "academy_pro"
+          },
+          "user": null
+        },
+        "targetCatalogTier": null,
+        "user": null
+      },
+      {
+        "id": "cf2d6013-8a47-4e5b-90c1-7b3f5d82a6e0",
+        "amountVnd": 299000,
+        "chargedAmountVnd": 299000,
+        "status": "paid",
+        "purpose": "catalog_renewal",
+        "dueAt": "2026-08-02T03:14:00.000Z",
+        "paidAt": "2026-08-02T03:16:00.000Z",
+        "paymentGateway": "sepay",
+        "gatewayCheckoutUrl": null,
+        "gatewayReferenceId": "SEPAY-2026080200316",
+        "gatewayCheckoutFields": null,
+        "createdAt": "2026-07-26T03:14:00.000Z",
+        "updatedAt": "2026-08-02T03:16:00.000Z",
+        "catalogOrder": {
+          "id": "5c1a7e63-0d48-4b92-8f37-6a2d9e0b14c5",
+          "status": "active",
+          "fulfillmentKind": "expert_site_provisioned",
+          "autoRenew": true,
+          "renewsAt": "2026-09-02T03:14:00.000Z",
+          "activatedAt": "2026-07-02T03:15:00.000Z",
+          "createdAt": "2026-07-02T03:12:00.000Z",
+          "updatedAt": "2026-08-02T03:16:00.000Z",
+          "catalogItem": {
+            "id": "97eea7a7-e73a-4636-8a4b-5bd2ed5b4e78",
+            "name": "Học viện AI",
+            "slug": "nivo-ai-academy",
+            "templateKey": "ai_academy"
+          },
+          "catalogTier": {
+            "id": "229df93d-7c80-4f29-8a4b-6dccb4e0206d",
+            "name": "Chuyên nghiệp",
+            "tierKey": "academy_pro"
+          },
+          "user": null
+        },
+        "targetCatalogTier": null,
+        "user": null
+      }
+    ]
+  },
+  "empty": {
+    "success": true,
+    "message": "Lấy danh sách hoá đơn thành công",
+    "error": null,
+    "metadata": null,
+    "data": []
+  }
+}

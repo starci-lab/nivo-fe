@@ -5,8 +5,33 @@
   "contextLock": "D:/Repositories/nivo-fe/design-plans/app-authentication/context-lock.preview.json",
   "caseId": "case-auth",
   "selectedDirectionId": "direction-b",
-  "approvedRevision": "1.1",
+  "approvedRevision": "1.2",
   "revisionHistory": [
+    {
+      "revision": "1.2",
+      "summary": "The three panels became ONE. One route, one AuthenticationPanel with four states, one AuthenticationPage split into a drawing half and a connected half.",
+      "retained": [
+        "every tree 1.1 approved: the shortcut over the divider, the credential form, the code step with its cooldown and its way back, the confirmation, and the question-and-answer footer",
+        "the reference's own rule that a different tree is a state and the same tree with a different sentence is props",
+        "the uncontrolled ref, the browser-side password comparison, and the single refusal sentence covering both ways the reset's second step can fail",
+        "Google as the only provider, from 1.1"
+      ],
+      "rejected": [
+        "three routes - starci has exactly one authentication address, and the mode is panel state rather than a URL. Keeping three was what made this case not the reference it named.",
+        "OtpStep as a separate owner - it existed only because two panels each needed a code step and a sixty-second cooldown; with one panel there is exactly one of each, and a block extracted to be shared once is a block that should not have been extracted",
+        "a mode STATE - which journey is running changes which fields appear inside the same tree, which is props by the reference's own rule; making it a state would have given the union twelve members drawing four trees"
+      ],
+      "reason": "The named reference is one route whose panel switches mode in place. Revisions 1.0 and 1.1 shipped three panels across three routes and read as a family that merely resembled it. 1.2 is the consolidation verdict applied: MERGE, on the fact that `details`, `code` and `done` are the same three trees in all three journeys.",
+      "consequences": [
+        "SignInPanel, SignUpPanel, ForgotPasswordPanel and OtpStep are all gone; `apps/app/src/components/blocks/auth/SignInPanel/component.tsx` was deleted in the Apply commit",
+        "REMEMBER-ME IS BACK. 1.1 recorded its absence as a divergence from the parity baseline; the merged panel restores it on the sign-in mode only, and the refresh cookie still has a fixed thirty-day lifetime, so the control records intent and changes nothing server-side yet",
+        "THE PROVIDER SHORTCUT NOW APPEARS ON THE RESET JOURNEY. In one panel the shortcut block sits above the divider inside the single `details` tree, so it is drawn for every mode - which is what the reference does and the exact reverse of open question 3's answer in 1.0",
+        "the divider label is set in capitals (`HOẶC` / `OR`), matching the parity baseline",
+        "AuthenticationPage is split: `component.tsx` draws from a finished panel prop and `index.tsx` resolves the world - seven mutations, one challenge, one cooldown clock and the mode",
+        "`isCredentialsOpen` and the sign-in-closed state are gone: with one surface there is nothing to collapse, and the credential form is always mounted and always open",
+        "the scoped CSS stand-in for the card inset is gone from the candidate's `globals.css`, because the inset was really applied to `authentication-panel-card` in the registry"
+      ]
+    },
     {
       "revision": "1.1",
       "summary": "The shipped sign-in screen was reopened, and GitHub was dropped everywhere.",
@@ -51,20 +76,16 @@
     "path": "src/components/blocks/auth/AuthenticationPanel + src/components/pages/AuthenticationPage/component.tsx",
     "divergences": [
       {
-        "what": "three routes rather than one card that switches mode in place",
-        "why": "the shipped SignInPanel is approved and wired; direction-b was selected to leave it alone"
+        "what": "signing in does not pass through a mailed code",
+        "why": "THE ONE STRUCTURAL DIFFERENCE LEFT, and it is the backend's rather than a choice. nivo's `signIn` exchanges a password for a session in one request; the reference's backend mails a code for every journey. So signIn runs details -> done, and only signUp and forgotPassword reach the code step."
       },
       {
-        "what": "no remember-me checkbox",
-        "why": "the refresh cookie's maxAge is a fixed thirty days with no per-request control, so the switch would switch nothing"
+        "what": "an account owing TOTP lands on a twoFactorUnsupported notice instead of a second-factor step",
+        "why": "`signIn` answers `requiresTwoFactor` and nothing in this build can complete the challenge. Reusing the refusal sentence would tell those readers their password was wrong, which it was not."
       },
       {
         "what": "no terms/privacy checkbox",
         "why": "neither repository has a terms or privacy route - the reference's own links resolve to nothing"
-      },
-      {
-        "what": "no provider shortcuts on the reset route",
-        "why": "the reference draws them on all three modes because they sit outside its mode switch, which is an artefact of one panel holding three journeys. Split into its own route the question has to be answered: a provider button does not recover this account, it signs the reader into a different one. Open question 3."
       },
       {
         "what": "the resend control states a cooldown",
@@ -76,55 +97,50 @@
       },
       {
         "what": "one identity provider, not two",
-        "why": "requested in revision 1.1"
+        "why": "requested in revision 1.1; GitHub is gone from the panel, the catalogue and the registry's restingCount"
       },
       {
-        "what": "the forgot-password row holds one item instead of two",
-        "why": "the reference balances it with a remember-me checkbox and nivo has no mechanism behind one. Recorded as a divergence rather than balanced with an invented second link."
+        "what": "remember-me is drawn but changes nothing server-side",
+        "why": "restored in 1.2 to match the reference's row, while the refresh cookie's maxAge is a fixed thirty days with no per-request control. Recorded as a backend enabler rather than removed, because the control has to exist before the cookie change has anywhere to land."
       }
     ],
-    "adoptedInRevision11": [
-      "SurfaceFormCard at the page for the sign-in route too, which is where the reference's visible card comes from",
-      "centred-prompt-row as the sign-in footer: a question and its answer rather than two links of equal rank"
+    "closedInRevision12": [
+      "three routes rather than one panel that switches mode in place - CLOSED, there is one /authentication route",
+      "no remember-me checkbox - CLOSED, it is drawn on the sign-in mode",
+      "no provider shortcuts on the reset route - CLOSED, one details tree draws them for every mode, as the reference does"
     ],
     "adopted": [
-      "SurfaceFormCard wrapping the contract at the PAGE, which is where the visible card comes from - the entry's own classes are only `w-full max-w-sm` in both repositories",
+      "one route, one panel, the mode as panel state",
+      "SurfaceFormCard wrapping the contract at the PAGE, which is where the visible card comes from - the entry's own classes are a measure and an inset, not a surface",
       "one Field with kind:\"code\" for the code step",
       "the confirm-password box and its browser-side mismatch check",
-      "centred-prompt-row as the last line: a question and its answer, not two buttons of equal weight"
+      "centred-prompt-row as the last line: a question and its answer, not two buttons of equal weight",
+      "the divider label in capitals"
     ]
   },
   "workItems": [
     {
-      "id": "page-sign-in",
-      "primaryScope": "page",
-      "status": "REOPENED in revision 1.1",
-      "note": "It was UNCHANGED in 1.0. It now takes the card (SurfaceFormCard at the page), the question-and-answer footer, and the loss of GitHub. Both SignInPanel and SignInPage are written."
-    },
-    {
-      "id": "block-otp-step",
+      "id": "block-authentication-panel",
       "primaryScope": "block",
-      "status": "built",
+      "status": "built - MERGED from SignInPanel, SignUpPanel and ForgotPasswordPanel, retiring OtpStep",
+      "note": "One block, four states, three journeys. The candidate file and the shipped file at apps/app/src/components/blocks/auth/AuthenticationPanel/index.tsx are byte-identical.",
       "dependsOn": []
     },
     {
-      "id": "page-sign-up",
+      "id": "page-authentication",
       "primaryScope": "page",
-      "status": "built",
+      "status": "built - MERGED from SignInPage, SignUpPage and ForgotPasswordPage, then split into component.tsx and index.tsx",
+      "note": "The candidate is the drawing half driven by props so a static export can seal each state. On materialization it became component.tsx, and index.tsx beside it resolves the world.",
       "dependsOn": [
-        "block-otp-step"
-      ]
-    },
-    {
-      "id": "page-forgot-password",
-      "primaryScope": "page",
-      "status": "built",
-      "dependsOn": [
-        "block-otp-step"
+        "block-authentication-panel"
       ]
     }
   ],
   "evidence": [
+    {
+      "source": "apps/app/src/components/blocks/auth/AuthenticationPanel/index.tsx vs preview-lab/candidate/src/components/blocks/auth/AuthenticationPanel/index.tsx",
+      "claim": "byte-identical, 26292 bytes. Apply ported the candidate's tree rather than reinterpreting a screenshot, and the difference between the two files is zero rather than small."
+    },
     {
       "source": "nivo-backend e2e (sign-up-otp, sign-in-otp, forgot-password-otp)",
       "claim": "25 passing assertions, including every refusal this candidate draws: wrong code, replay, cooldown, unknown challenge, weak password."
@@ -135,7 +151,7 @@
     },
     {
       "source": "starci-academy-fe @ 8410a74 AuthenticationPanel/component.tsx",
-      "claim": "the code step is one Field with kind:\"code\"; there is no step indicator and no digit row."
+      "claim": "ONE panel on ONE route, whose mode switches in place; the code step is one Field with kind:\"code\"; there is no step indicator and no digit row. This is the fact revision 1.2 acted on."
     },
     {
       "source": "starci-academy-fe @ 8410a74 AuthenticationPage/component.tsx:34",
@@ -147,38 +163,59 @@
     },
     {
       "source": "packages/ui/src/branches/SurfaceFormCard/index.tsx:29",
-      "claim": "nivo zeroes the vendor card's padding on purpose and hands the interior to the entry, which is why the entry must declare an inset."
+      "claim": "nivo zeroes the vendor card's padding on purpose and hands the interior to the entry, which is why the entry declares the p-4 inset itself."
     },
     {
-      "source": "eslint --print-config on the candidate",
-      "claim": "55 starci-fe rules active and noInlineConfig true; 19 candidate files were read, so the clean run is real rather than an unmatched glob."
+      "source": "eslint --print-config on the candidate's panel",
+      "claim": "57 starci-fe rules present and all 57 at error, with noInlineConfig true; 19 candidate ts/tsx files are matched by the lint glob, so the clean run is real rather than an unmatched glob."
+    },
+    {
+      "source": "apps/app/src/components/pages/AuthenticationPage/index.tsx:153",
+      "claim": "`requiresTwoFactor` is read BEFORE `accessToken`, so a two-factor challenge cannot be mistaken for a session."
     }
   ],
   "unknowns": [
-    "Whether the shipped `resetLinkSent` state is removed once the code journey lands, or kept for accounts created before it.",
     "Whether `requestPasswordReset` and `resetPassword` stay in the transport after this, since nothing calls them any more.",
-    "Whether sign-up should collect a display name - signUpInit accepts an optional `name` and the reference does not ask for one."
+    "Whether sign-up should collect a display name - signUpInit accepts an optional `name` and the reference does not ask for one.",
+    "Whether the provider shortcut BELONGS on the reset journey. The merge put it there structurally rather than by decision, and 1.0's objection still stands on its own terms: a provider button does not recover this account, it signs the reader into a different one. Suppressing it again would mean a mode-conditional shortcut block, which is a product choice nobody has made.",
+    "Whether five of the fourteen sealed screenshots are re-rendered. See screenshotProvenance: they were exported before the last two copy edits of revision 1.2 and therefore show a lowercase divider label and, on the two sign-in states, no remember-me row."
   ],
   "decisions": [
     {
-      "decision": "OtpStep is a SIBLING of the panels, mounted by the page, not a child of them",
-      "tradeoff": "the page carries one more branch; in exchange no block renders another block and the cooldown exists once"
+      "decision": "ONE panel rather than three, and the step is the state while the mode is not",
+      "tradeoff": "one union of four members instead of three unions of two, and every state now has to say which mode it is in. In exchange the sixty-second cooldown, the uncontrolled ref, the mismatch check and the status slot exist exactly once."
     },
     {
-      "decision": "the reset journey's second step is a STATE of OtpStep rather than an optional slot",
-      "tradeoff": "a two-arm union instead of one shape; canon refuses children on a block, and code-only versus code-plus-password genuinely selects a different tree"
+      "decision": "OtpStep is retired rather than kept as a shared child",
+      "tradeoff": "the code step's tree now lives inside the same file as the details tree. It was extracted in 1.0 so two panels could share it; with one panel a shared child would be a block rendered by exactly one caller, which canon reads as a seam invented for its own sake."
+    },
+    {
+      "decision": "the page is split into component.tsx and index.tsx",
+      "tradeoff": "two files where 1.1 had one. The drawing half needs no locale, no session and no request to draw any state, which is what lets the state matrix be rendered without standing the world up first; the connected half owns the seven mutations, the challenge handle and the cooldown clock."
+    },
+    {
+      "decision": "the panel prop is passed WHOLE rather than unpacked into a dozen props",
+      "tradeoff": "component.tsx takes a type it cannot inspect. The panel's own union is what guarantees the copy of a state it is not drawing cannot be supplied; splitting it here would hand this file the job of reassembling it, and every reassembly is a chance to get it wrong."
     },
     {
       "decision": "one refusal sentence covers both ways the reset's second step can fail",
-      "tradeoff": "a legitimate reader with a typo is told less than the backend knows, which is the price of not letting an inbox holder enumerate accounts"
+      "tradeoff": "a legitimate reader with a typo is told less than the backend knows, which is the price of not letting an inbox holder enumerate accounts. `result.reason` is deliberately discarded at that one call site."
     },
     {
       "decision": "the password confirmation is checked in the browser and never sent",
       "tradeoff": "none - no request answers it, and sending a mismatched pair would spend a code to learn what a comparison already knew"
     },
     {
+      "decision": "the cooldown is counted in the page, not asked for",
+      "tradeoff": "a LOCAL clock that may drift from the server's. The refusal `OTP_RESEND_TOO_SOON_EXCEPTION` is still handled, because a countdown that disagrees is not a reason to stop reading the answer."
+    },
+    {
+      "decision": "switching mode clears the challenge",
+      "tradeoff": "a reader who switches away mid-challenge spends a code for nothing. A challenge belongs to one address on one journey, and carrying it across would offer a code that cannot finish where they now are."
+    },
+    {
       "decision": "the transport GAINS six OTP operations; nothing existing in it changes",
-      "tradeoff": "the plan record said \"transport untouched\", which was true of the sign-in path and not of the file. Corrected here rather than left to Apply."
+      "tradeoff": "the plan record said \"transport untouched\", which was true of the sign-in path and not of the file. Corrected in 1.0 rather than left to Apply."
     }
   ],
   "candidate": {
@@ -188,17 +225,20 @@
     "build": {
       "command": "npx next build --webpack",
       "exitCode": 0,
+      "note": "Re-run against the merged panel. The previous log recorded a FAILURE: a concurrent change gave `centred-title-pair` an optional `mark` slot, and omitting the key made every defineContractComponent in the panel fail to resolve its overload. The panel now names `mark: undefined` explicitly and the build passes, emitting all fifteen static routes.",
       "log": {
         "path": "preview-lab/candidate/build.log",
-        "sha256": "6d02a6fd32444ac9d7f05c9c28e377d7b3117da54b14078475aec6dfa85090d1"
+        "sha256": "dad6c72d6f70f715f0b6cf110eef0885a0632898fb54b830bff3fe7f914bb58b"
       }
     },
     "lint": {
       "command": "npx eslint \"design-plans/app-authentication/preview-lab/candidate/src/**/*.{ts,tsx}\"",
       "exitCode": 0,
-      "filesRead": 19,
-      "canonRulesActive": 55,
+      "filesMatched": 19,
+      "canonRulesActive": 57,
+      "canonRulesAtError": 57,
       "noInlineConfig": true,
+      "note": "An empty log is what a passing eslint run writes, so the rule count and the matched-file count are recorded beside it - a clean run from an unmatched glob looks exactly like a clean run.",
       "log": {
         "path": "preview-lab/candidate/lint.log",
         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -206,44 +246,45 @@
     },
     "declaredDifferences": [
       "output: \"export\" - the review chrome loads each state as a static URL in an iframe, and a static export is a build artifact that can be hashed",
-      "the catalogue is handed to NextIntlClientProvider directly rather than through the next-intl plugin, because a static export never enters a request scope. The base catalogue is IMPORTED from apps/app, so the words are the app's own.",
-      "one scoped CSS rule stands in for the inset that belongs on `authentication-panel-card`, because the registry is production source and outside this phase's write boundary. Apply deletes the rule and adds the class."
+      "the catalogue is handed to NextIntlClientProvider directly rather than through the next-intl plugin, because a static export never enters a request scope. The BASE catalogue is IMPORTED from apps/app, so the words are the app's own; `auth.vi.json` beside it replaces the `authentication` namespace with the one this case wrote.",
+      "one route per STATE rather than one route for the screen. The target is a single `/authentication`; each candidate URL exists only so a static export can seal one state, and every one of them mounts the same page with different props.",
+      "the candidate page is driven by `mode` and `phase` props; on materialization the same tree became `component.tsx` taking a finished panel, with `index.tsx` beside it resolving the world"
     ],
     "files": [
       {
         "path": "preview-lab/candidate/src/app/forgot-password-code-refused/page.tsx",
         "targetPath": "not ported - review harness (src/app/forgot-password-code-refused/page.tsx)",
-        "sha256": "c8e5a82961be0daba514a1addfedc403b988baece1099e336f7de2b38c47cea0"
+        "sha256": "203221c8b4921fe2e372188d2bc13dde296af4fdc41f887e44545807a91cab70"
       },
       {
         "path": "preview-lab/candidate/src/app/forgot-password-code/page.tsx",
         "targetPath": "not ported - review harness (src/app/forgot-password-code/page.tsx)",
-        "sha256": "2792102f9fbef36a41e649be5833d455ff841c55b221cfbcde5c90303da9b2f9"
+        "sha256": "6a84849dcd474e676d48aec2a628fac6f9b5832245f88e95a06b0aef61ecf5b0"
       },
       {
         "path": "preview-lab/candidate/src/app/forgot-password-done/page.tsx",
         "targetPath": "not ported - review harness (src/app/forgot-password-done/page.tsx)",
-        "sha256": "324d745892d16ce7536ab9bcf827321bd04e1ed6def11af8942767214fc327f3"
+        "sha256": "b8e96e31ef4f69225af1d4a9a7c962a8696a33a90b8ade5e31c158350c28bc52"
       },
       {
         "path": "preview-lab/candidate/src/app/forgot-password/page.tsx",
         "targetPath": "not ported - review harness (src/app/forgot-password/page.tsx)",
-        "sha256": "5ca50e29d3b4d287428c7166f3026c1476a5f5a69c0687d6da03827c7d03489e"
+        "sha256": "0a85d7bc56b8a26c715537a02c86ae5c7749710560d979babf3ad99beb4309f1"
       },
       {
         "path": "preview-lab/candidate/src/app/globals.css",
         "targetPath": "not ported - review harness (src/app/globals.css)",
-        "sha256": "d7d0ec3048c35ed61ed2b3c4e9fd17c0697699190a7e98961912a130e9ab2e3d"
+        "sha256": "4da66efbfd115abfa52ecb57106e5b1ccfb497bd4588b719d2d3c625408349cb"
       },
       {
         "path": "preview-lab/candidate/src/app/layout.tsx",
         "targetPath": "not ported - review harness (src/app/layout.tsx)",
-        "sha256": "570fdbe02150dc069840c7f58c79d5cf3fd7e274fb99321f3d1f7176b13b61a9"
+        "sha256": "035794e9e23870dac487e7287335b79ef43b3546f098b887da20448879589040"
       },
       {
         "path": "preview-lab/candidate/src/app/page.tsx",
         "targetPath": "not ported - review harness (src/app/page.tsx)",
-        "sha256": "4cedc0aa7473ab478f53f6b49044136af78b2e7774aaff002059e1fc056df2f5"
+        "sha256": "67a97b0d7b4c18a9000300863b9c671ee5f7092889a364ada29c60cc202cc809"
       },
       {
         "path": "preview-lab/candidate/src/app/providers.tsx",
@@ -253,105 +294,88 @@
       {
         "path": "preview-lab/candidate/src/app/sign-in-2fa/page.tsx",
         "targetPath": "not ported - review harness (src/app/sign-in-2fa/page.tsx)",
-        "sha256": "d10e6a2f9f6f513ebb8c62951ddb25693bdf83f6a35a80826a3bba7203777169"
-      },
-      {
-        "path": "preview-lab/candidate/src/app/sign-in-closed/page.tsx",
-        "targetPath": "not ported - review harness (src/app/sign-in-closed/page.tsx)",
-        "sha256": "32e200d946f44249f67c1838dade6f7b2e4080f94a59db8cc26602fbf27baaf9"
+        "sha256": "776757ca9d7c073c2f29a0621319a6638d63c0eea01ecadcc954a178c3035950"
       },
       {
         "path": "preview-lab/candidate/src/app/sign-in-refused/page.tsx",
         "targetPath": "not ported - review harness (src/app/sign-in-refused/page.tsx)",
-        "sha256": "e1c4be8d381521a136be2bb42bd6ecc87e580d3ea9657e364110e770fe052e41"
+        "sha256": "f7d55a629effdcda9a2b0f89c0262bc69cdf3f347c9996c9d11b376641df9444"
       },
       {
         "path": "preview-lab/candidate/src/app/sign-in/page.tsx",
         "targetPath": "not ported - review harness (src/app/sign-in/page.tsx)",
-        "sha256": "b4c9509b801114668c18976046351079a925d21f614988a627683fc4089cc1ac"
+        "sha256": "820a3506790c07d468630393179bfb35abe93f56b91be70b23fdc2512f73cad1"
       },
       {
         "path": "preview-lab/candidate/src/app/sign-up-code-cooldown/page.tsx",
         "targetPath": "not ported - review harness (src/app/sign-up-code-cooldown/page.tsx)",
-        "sha256": "dadc4222b0ae8b0b30375de8a59157ba7b255dcb628a49a0d9a43cf138617357"
+        "sha256": "760447b01b62f261a4d4b0d2c6bd20d7e124e97c34aee5db8fbc45ec015f1d8f"
       },
       {
         "path": "preview-lab/candidate/src/app/sign-up-code-refused/page.tsx",
         "targetPath": "not ported - review harness (src/app/sign-up-code-refused/page.tsx)",
-        "sha256": "071eef1a5031abb9ceb18d795a077758fc2e3167ba2311dd6d955b3d5f66c508"
+        "sha256": "db5a69f271b66368a99b739180251ded9c92dc5e4afb996b19accb358e5043ff"
       },
       {
         "path": "preview-lab/candidate/src/app/sign-up-code-taken/page.tsx",
         "targetPath": "not ported - review harness (src/app/sign-up-code-taken/page.tsx)",
-        "sha256": "b4e5580c9a1821dac1f900b16f2d94731c08fcb9fe93e0629e06bdfaf5a3b477"
+        "sha256": "89926b17441d5918f044254c2ad5ce0ed059f727ec9ee82c204c640029de81b6"
       },
       {
         "path": "preview-lab/candidate/src/app/sign-up-code/page.tsx",
         "targetPath": "not ported - review harness (src/app/sign-up-code/page.tsx)",
-        "sha256": "7f117ad95530f314bcf3cca361ee5d0d30f311a686c76295c7450e26eabafd9a"
+        "sha256": "809b1a7c17d6365b303d68579216ff200dfc83ca213ea7b167e12c4d43a7bd30"
       },
       {
         "path": "preview-lab/candidate/src/app/sign-up-done/page.tsx",
         "targetPath": "not ported - review harness (src/app/sign-up-done/page.tsx)",
-        "sha256": "79c34261392582af42f31b07c639346928e6b06e3e0de52931a3d0632a68adf0"
+        "sha256": "ad448b68bd51953de80b9b55e3710217cc796087612140a78be5fb65fb14e4f3"
       },
       {
         "path": "preview-lab/candidate/src/app/sign-up-refused/page.tsx",
         "targetPath": "not ported - review harness (src/app/sign-up-refused/page.tsx)",
-        "sha256": "a4e2b2e020035e11291832041fc05524f20ed47cabc942afd866bbcc503c184c"
+        "sha256": "33acb81d71ab3c866c6493b25093dbf82653cd2df9027aff5fbb49d72c6f892a"
       },
       {
         "path": "preview-lab/candidate/src/app/sign-up/page.tsx",
         "targetPath": "not ported - review harness (src/app/sign-up/page.tsx)",
-        "sha256": "2dff686c653cb395e5d53d800e97c5ca957d3473bc1110eec84a4a10ea7b77ac"
+        "sha256": "6ebbffda47ba708af5a65512b6a33ad32c5708c4c8d7ea926ae76a460452adb0"
       },
       {
-        "path": "preview-lab/candidate/src/components/blocks/auth/ForgotPasswordPanel/index.tsx",
-        "targetPath": "apps/app/src/components/blocks/auth/ForgotPasswordPanel/index.tsx",
-        "sha256": "3ecb0a90f6e63c7947bb567a6192019eaf660dd7f014a0914962bffee4fc54a2"
+        "path": "preview-lab/candidate/src/components/blocks/auth/AuthenticationPanel/index.tsx",
+        "targetPath": "apps/app/src/components/blocks/auth/AuthenticationPanel/index.tsx",
+        "sha256": "b4b169956c582fccfd4a1ee7378c8b1f1fa370bfaaa8cffac07bd3b3266f0eb3"
       },
       {
-        "path": "preview-lab/candidate/src/components/blocks/auth/OtpStep/index.tsx",
-        "targetPath": "apps/app/src/components/blocks/auth/OtpStep/index.tsx",
-        "sha256": "f51424dc8f268b61140848080d5de74d3939631daf8393d90b622bdf8d8323f5"
-      },
-      {
-        "path": "preview-lab/candidate/src/components/blocks/auth/SignInPanel/index.tsx",
-        "targetPath": "apps/app/src/components/blocks/auth/SignInPanel/index.tsx",
-        "sha256": "bbfa2a2ae9585d9e4754a2c16c927c8cca8ea426645019bf86d184f01e6363b2"
-      },
-      {
-        "path": "preview-lab/candidate/src/components/blocks/auth/SignUpPanel/index.tsx",
-        "targetPath": "apps/app/src/components/blocks/auth/SignUpPanel/index.tsx",
-        "sha256": "5fddcb6eb265455056da814686b4936c7a6b049d0383e3f48819ac9e35207fea"
-      },
-      {
-        "path": "preview-lab/candidate/src/components/pages/ForgotPasswordPage/index.tsx",
-        "targetPath": "apps/app/src/components/pages/ForgotPasswordPage/component.tsx",
-        "sha256": "2f2a67258cf204b2e5c4bf683b90398d8e168a44b12f0dc4cb760559976004b0"
-      },
-      {
-        "path": "preview-lab/candidate/src/components/pages/SignInPage/index.tsx",
-        "targetPath": "apps/app/src/components/pages/SignInPage/component.tsx",
-        "sha256": "9f040cf075c4c2cb8f1a862ad134116182096051d8ef3d8e20e26a038b39cbc6"
-      },
-      {
-        "path": "preview-lab/candidate/src/components/pages/SignUpPage/index.tsx",
-        "targetPath": "apps/app/src/components/pages/SignUpPage/component.tsx",
-        "sha256": "63bb312eecb0ea3b1dfd2d358c9ead239ec0915317a073441dd9367eb0e22788"
+        "path": "preview-lab/candidate/src/components/pages/AuthenticationPage/index.tsx",
+        "targetPath": "apps/app/src/components/pages/AuthenticationPage/component.tsx",
+        "sha256": "8e255724da412506fdacd2baaf561393437cb71d2a8e4ff6ff45a82bda9f231f"
       },
       {
         "path": "preview-lab/candidate/src/messages/auth.vi.json",
         "targetPath": "merged into apps/app/src/messages/vi.json, and translated into en.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
+        "sha256": "3195fe2c4a1fc07f25ed5d9576b6e358391a7351f90f32e4929f6fdda69341e2"
       }
     ]
+  },
+  "screenshotProvenance": {
+    "exportedAt": "the static export that produced every screen below already carried the MERGED panel: forgot-password.png draws the Google shortcut, which no 1.1 ForgotPasswordPanel ever did",
+    "staleIn": [
+      "sign-in",
+      "sign-in-refused",
+      "sign-up",
+      "sign-up-refused",
+      "forgot-password"
+    ],
+    "whatIsStale": "Two copy-level edits landed AFTER the export: `orLabel` was set in capitals, and the remember-me row was restored on the sign-in mode. So the five `details` screens show a lowercase divider label, and the two sign-in ones show no remember-me row. Every `code`, `done` and `twoFactorUnsupported` screen is unaffected - neither edit reaches those trees.",
+    "whereTheTruthIS": "preview-lab/screens/PRODUCTION-authentication.png, captured from the shipped /authentication route, shows both: the capitalised HOẶC and the checked remember-me row beside the forgot-password link.",
+    "why": "Recorded rather than repaired: re-rendering is a Preview action, and the session that brought this record up to 1.2 held a write boundary covering the record only. It is the one outstanding item on this case."
   },
   "states": [
     {
       "stateId": "sign-in",
-      "ownerId": "page-sign-in",
-      "route": "/sign-in",
+      "ownerId": "block-authentication-panel",
+      "route": "/sign-in  (target: /authentication, mode=signIn, phase=details)",
       "viewport": {
         "width": 1280,
         "height": 900,
@@ -359,26 +383,27 @@
       },
       "locale": "vi",
       "theme": "light",
-      "authPersona": "anonymous (no session; these routes are the way in)",
+      "authPersona": "anonymous (no session; this route is the way in)",
       "fixture": {
         "path": "preview-lab/candidate/src/messages/auth.vi.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
+        "sha256": "3195fe2c4a1fc07f25ed5d9576b6e358391a7351f90f32e4929f6fdda69341e2"
       },
       "screenshot": {
         "path": "preview-lab/screens/sign-in.png",
-        "sha256": "2bd7cb16fc34f06cb311476a4a267754b7b968e24d3e63e829836ed660dddd1d"
+        "sha256": "070a6363812baecd850bb99dd39764d2fe48ede944d2482e041971c5a946d0db"
       },
+      "screenshotNote": "Predates the capitalised divider label and the restored remember-me row. PRODUCTION-authentication.png is the same state with both.",
       "coverage": "rendered",
       "componentTree": [
-        "SignInPage > Tree centred-authentication-page",
+        "AuthenticationPage > Tree centred-authentication-page (host=main)",
         "└── projection authentication-panel-card > SurfaceFormCard(contract=authentication-panel-card)",
         "     └── Tree authentication-panel-card > projection centred-page-column",
-        "          └── SignInPanel(entry) > Tree centred-page-column",
-        "               ├── header: centred-title-pair > Heading(level 2) + Text(sm, muted)",
+        "          └── AuthenticationPanel(details, mode=signIn) > Tree centred-page-column",
+        "               ├── header: centred-title-pair > mark=undefined + Heading(level 2) + Text(sm, muted)",
         "               ├── body: auth-entry-stack",
         "               │    ├── shortcuts: auth-shortcuts-over-divider > Button x1 (outline, google) + Divider(label)",
         "               │    └── credentials: form > stacked-peer-controls",
-        "               │         └── Field(email) + Field(password) + spread-choice-row(forgot only) + Button(primary, submit)",
+        "               │         └── Field(email) + Field(password) + spread-choice-row(Checkbox remember-me + TextLink forgot) + Button(primary, submit)",
         "               └── footer: centred-prompt-row > Text(sm, muted) + TextLink(sm)"
       ],
       "contracts": [
@@ -394,77 +419,22 @@
         "centred-prompt-row"
       ],
       "props": [
-        "SignInPanel state=entry",
-        "isCredentialsOpen=true",
-        "one shortcut, not two",
-        "footer is centred-prompt-row, not a two-ended row"
+        "AuthenticationPanel state=details, mode=signIn",
+        "statusMessage=\"\", isError=false, isPending=false",
+        "isRememberMe=true - the switch defaults ON, which is what a reader signing into their own console expects",
+        "no confirm-password box: the third field belongs to signUp alone",
+        "the footer asks \"Chưa có tài khoản?\" and answers \"Đăng ký\" - the same tree the signUp mode inverts"
       ],
       "tokens": [
         "no brand palette written: nivo has no approved colour and case-d1 withheld one deliberately",
         "every colour is a HeroUI semantic token (bg-background, bg-surface, text-muted, border-separator)",
-        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard, not from a class written here"
-      ]
-    },
-    {
-      "stateId": "sign-in-closed",
-      "ownerId": "page-sign-in",
-      "route": "/sign-in-closed",
-      "viewport": {
-        "width": 1280,
-        "height": 900,
-        "dpr": 1
-      },
-      "locale": "vi",
-      "theme": "light",
-      "authPersona": "anonymous (no session; these routes are the way in)",
-      "fixture": {
-        "path": "preview-lab/candidate/src/messages/auth.vi.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
-      },
-      "screenshot": {
-        "path": "preview-lab/screens/sign-in-closed.png",
-        "sha256": "d856027bb1246328ff6f02bd34d252ff68e1282168c8e2d1e8b2df26a5f2845e"
-      },
-      "coverage": "rendered",
-      "componentTree": [
-        "SignInPage > Tree centred-authentication-page",
-        "└── projection authentication-panel-card > SurfaceFormCard(contract=authentication-panel-card)",
-        "     └── Tree authentication-panel-card > projection centred-page-column",
-        "          └── SignInPanel(entry) > Tree centred-page-column",
-        "               ├── header: centred-title-pair > Heading(level 2) + Text(sm, muted)",
-        "               ├── body: auth-entry-stack",
-        "               │    ├── shortcuts: auth-shortcuts-over-divider > Button x1 (outline, google) + Divider(label)",
-        "               │    └── credentials: form > stacked-peer-controls",
-        "               │         └── Field(email) + Field(password) + spread-choice-row(forgot only) + Button(primary, submit)",
-        "               └── footer: centred-prompt-row > Text(sm, muted) + TextLink(sm)"
-      ],
-      "contracts": [
-        "centred-authentication-page",
-        "authentication-panel-card",
-        "centred-page-column",
-        "auth-entry-stack",
-        "auth-shortcuts-over-divider",
-        "stacked-peer-controls",
-        "label-field-hint",
-        "centred-title-pair",
-        "spread-choice-row",
-        "centred-prompt-row"
-      ],
-      "props": [
-        "SignInPanel state=entry",
-        "isCredentialsOpen=false",
-        "the fields stay MOUNTED and hidden, so a password manager can still find them at load"
-      ],
-      "tokens": [
-        "no brand palette written: nivo has no approved colour and case-d1 withheld one deliberately",
-        "every colour is a HeroUI semantic token (bg-background, bg-surface, text-muted, border-separator)",
-        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard, not from a class written here"
+        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard; the p-4 inset comes from authentication-panel-card, and the max-w-sm measure is written onto the card from the page entry"
       ]
     },
     {
       "stateId": "sign-in-refused",
-      "ownerId": "page-sign-in",
-      "route": "/sign-in-refused",
+      "ownerId": "page-authentication",
+      "route": "/sign-in-refused  (target: /authentication, mode=signIn, phase=details with a refusal)",
       "viewport": {
         "width": 1280,
         "height": 900,
@@ -472,26 +442,27 @@
       },
       "locale": "vi",
       "theme": "light",
-      "authPersona": "anonymous (no session; these routes are the way in)",
+      "authPersona": "anonymous (no session; this route is the way in)",
       "fixture": {
         "path": "preview-lab/candidate/src/messages/auth.vi.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
+        "sha256": "3195fe2c4a1fc07f25ed5d9576b6e358391a7351f90f32e4929f6fdda69341e2"
       },
       "screenshot": {
         "path": "preview-lab/screens/sign-in-refused.png",
-        "sha256": "711184d8044675e5e4c56fca3b457458732b3cc376c92048d1916fa916061fcc"
+        "sha256": "7abeba965dd6384883cd5611297af50ea7f91dafdb6faabd517ceb791c0db155"
       },
+      "screenshotNote": "Predates the capitalised divider label and the restored remember-me row.",
       "coverage": "rendered",
       "componentTree": [
-        "SignInPage > Tree centred-authentication-page",
+        "AuthenticationPage > Tree centred-authentication-page (host=main)",
         "└── projection authentication-panel-card > SurfaceFormCard(contract=authentication-panel-card)",
         "     └── Tree authentication-panel-card > projection centred-page-column",
-        "          └── SignInPanel(entry) > Tree centred-page-column",
-        "               ├── header: centred-title-pair > Heading(level 2) + Text(sm, muted)",
+        "          └── AuthenticationPanel(details, mode=signIn) > Tree centred-page-column",
+        "               ├── header: centred-title-pair > mark=undefined + Heading(level 2) + Text(sm, muted)",
         "               ├── body: auth-entry-stack",
         "               │    ├── shortcuts: auth-shortcuts-over-divider > Button x1 (outline, google) + Divider(label)",
         "               │    └── credentials: form > stacked-peer-controls",
-        "               │         └── Field(email) + Field(password) + spread-choice-row(forgot only) + Button(primary, submit)",
+        "               │         └── Field(email, invalid) + Field(password, invalid) + spread-choice-row + Text(sm, live=assertive) + Button(primary, submit)",
         "               └── footer: centred-prompt-row > Text(sm, muted) + TextLink(sm)"
       ],
       "contracts": [
@@ -507,21 +478,21 @@
         "centred-prompt-row"
       ],
       "props": [
-        "SignInPanel state=entry",
-        "statusMessage=signIn.refused",
-        "isError=true",
-        "the sentence never says whether the address exists - the backend withholds it and the screen must not give it back"
+        "statusMessage=signIn.refused, isError=true",
+        "the sentence sits between the last control and the submit, announced assertive",
+        "it never says whether the address exists - the backend withholds that and the screen must not give it back",
+        "both fields are marked invalid together, because the refusal does not say which one was wrong"
       ],
       "tokens": [
         "no brand palette written: nivo has no approved colour and case-d1 withheld one deliberately",
         "every colour is a HeroUI semantic token (bg-background, bg-surface, text-muted, border-separator)",
-        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard, not from a class written here"
+        "the refusal keeps the muted tone: the invalid fields already carry the alarm, and a second red sentence would double it"
       ]
     },
     {
       "stateId": "sign-in-2fa",
-      "ownerId": "page-sign-in",
-      "route": "/sign-in-2fa",
+      "ownerId": "block-authentication-panel",
+      "route": "/sign-in-2fa  (target: /authentication, mode=signIn, phase=twoFactor)",
       "viewport": {
         "width": 1280,
         "height": 900,
@@ -529,23 +500,24 @@
       },
       "locale": "vi",
       "theme": "light",
-      "authPersona": "anonymous (no session; these routes are the way in)",
+      "authPersona": "anonymous, holding correct credentials for an account with TOTP enabled",
       "fixture": {
         "path": "preview-lab/candidate/src/messages/auth.vi.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
+        "sha256": "3195fe2c4a1fc07f25ed5d9576b6e358391a7351f90f32e4929f6fdda69341e2"
       },
       "screenshot": {
         "path": "preview-lab/screens/sign-in-2fa.png",
-        "sha256": "aac60b2fe665c9283ab8d0ad9ff0bffbdd7039bad133786d2e11708c25f66ab2"
+        "sha256": "70fd820e05e5399155898860ba6b7b0af3b6e570bb857e1a3fbd5deb9d6bb749"
       },
       "coverage": "rendered",
       "componentTree": [
-        "SignInPage > Tree centred-authentication-page",
+        "AuthenticationPage > Tree centred-authentication-page (host=main)",
         "└── projection authentication-panel-card > SurfaceFormCard(contract=authentication-panel-card)",
         "     └── Tree authentication-panel-card > projection centred-page-column",
-        "          └── SignInPanel(twoFactorUnsupported) > Tree centred-page-column",
-        "               ├── header: centred-title-pair > Heading(level 2) + Text(sm, muted)",
-        "               └── body: stacked-peer-controls > Text(sm, polite) + Button(outline)"
+        "          └── AuthenticationPanel(twoFactorUnsupported) > Tree centred-page-column",
+        "               ├── header: centred-title-pair > mark=undefined + Heading(level 2) + Text(sm, muted)",
+        "               ├── body[0]: centred-title-pair > mark=undefined + Heading(level 3) + Text(sm, muted)",
+        "               └── body[1]: stacked-peer-controls > Button(outline-weight primary)"
       ],
       "contracts": [
         "centred-authentication-page",
@@ -555,20 +527,22 @@
         "centred-title-pair"
       ],
       "props": [
-        "SignInPanel state=twoFactorUnsupported",
-        "isError=false ON PURPOSE - a challenge is not a refusal",
-        "one way onward"
+        "AuthenticationPanel state=twoFactorUnsupported",
+        "isError=false ON PURPOSE - a challenge is not a refusal; the password was right and the session is simply not owed yet",
+        "statusMessage=\"\" - the notice IS the message, and a second sentence beside it would be the same fact twice",
+        "one way onward, back to the first step",
+        "it shares the `done` tree because both say one thing and offer one way on; only the words differ, which is props"
       ],
       "tokens": [
         "no brand palette written: nivo has no approved colour and case-d1 withheld one deliberately",
         "every colour is a HeroUI semantic token (bg-background, bg-surface, text-muted, border-separator)",
-        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard, not from a class written here"
+        "no alarm colour anywhere: nothing here failed"
       ]
     },
     {
       "stateId": "sign-up",
-      "ownerId": "page-sign-up",
-      "route": "/sign-up",
+      "ownerId": "page-authentication",
+      "route": "/sign-up  (target: /authentication, mode=signUp, phase=details)",
       "viewport": {
         "width": 1280,
         "height": 900,
@@ -576,26 +550,27 @@
       },
       "locale": "vi",
       "theme": "light",
-      "authPersona": "anonymous (no session; these routes are the way in)",
+      "authPersona": "anonymous (no session; this route is the way in)",
       "fixture": {
         "path": "preview-lab/candidate/src/messages/auth.vi.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
+        "sha256": "3195fe2c4a1fc07f25ed5d9576b6e358391a7351f90f32e4929f6fdda69341e2"
       },
       "screenshot": {
         "path": "preview-lab/screens/sign-up.png",
-        "sha256": "428df7d04fdc20f7db81947bbb5a89940319e13392c12b6435972303ee8829cf"
+        "sha256": "4f2f68b92df27815771b23e4715631664c227817de24991be3ee951ef6528498"
       },
+      "screenshotNote": "Predates the capitalised divider label. The remember-me row never appears in this mode, so nothing else is stale.",
       "coverage": "rendered",
       "componentTree": [
-        "SignUpPage > Tree centred-authentication-page",
+        "AuthenticationPage > Tree centred-authentication-page (host=main)",
         "└── projection authentication-panel-card > SurfaceFormCard(contract=authentication-panel-card)",
         "     └── Tree authentication-panel-card > projection centred-page-column",
-        "          └── SignUpPanel(details) > Tree centred-page-column",
-        "               ├── header: centred-title-pair > Heading(level 2) + Text(sm, muted)",
+        "          └── AuthenticationPanel(details, mode=signUp) > Tree centred-page-column",
+        "               ├── header: centred-title-pair > mark=undefined + Heading(level 2) + Text(sm, muted)",
         "               ├── body: auth-entry-stack",
-        "               │    ├── shortcuts: auth-shortcuts-over-divider > Button x2 (outline) + Divider(label)",
+        "               │    ├── shortcuts: auth-shortcuts-over-divider > Button x1 (outline, google) + Divider(label)",
         "               │    └── credentials: form > stacked-peer-controls",
-        "               │         └── Field(email) + Field(newPassword) + Field(newPassword, confirm) + Button(primary, submit)",
+        "               │         └── Field(email) + Field(newPassword, hint) + Field(newPassword, confirm) + Button(primary, submit)",
         "               └── footer: centred-prompt-row > Text(sm, muted) + TextLink(sm)"
       ],
       "contracts": [
@@ -610,21 +585,22 @@
         "centred-prompt-row"
       ],
       "props": [
-        "SignUpPanel state=details",
-        "statusMessage=\"\"",
-        "isError=false",
-        "isPending=false"
+        "AuthenticationPanel state=details, mode=signUp",
+        "SAME TREE as sign-in, one mode over: a third box appears, the password gains its rule as a hint, and the remember-me row is gone",
+        "no spread-choice-row: neither remembering nor forgetting means anything before an account exists",
+        "the password hint states the backend's own eight-character rule BEFORE it is broken, rather than as a refusal after",
+        "the submit says \"Gửi mã xác minh\" - it opens a challenge rather than an account, and the label must not promise otherwise"
       ],
       "tokens": [
         "no brand palette written: nivo has no approved colour and case-d1 withheld one deliberately",
         "every colour is a HeroUI semantic token (bg-background, bg-surface, text-muted, border-separator)",
-        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard, not from a class written here"
+        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard; the p-4 inset comes from authentication-panel-card"
       ]
     },
     {
       "stateId": "sign-up-refused",
-      "ownerId": "page-sign-up",
-      "route": "/sign-up-refused",
+      "ownerId": "page-authentication",
+      "route": "/sign-up-refused  (target: /authentication, mode=signUp, phase=details with a refusal)",
       "viewport": {
         "width": 1280,
         "height": 900,
@@ -632,26 +608,27 @@
       },
       "locale": "vi",
       "theme": "light",
-      "authPersona": "anonymous (no session; these routes are the way in)",
+      "authPersona": "anonymous (no session; this route is the way in)",
       "fixture": {
         "path": "preview-lab/candidate/src/messages/auth.vi.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
+        "sha256": "3195fe2c4a1fc07f25ed5d9576b6e358391a7351f90f32e4929f6fdda69341e2"
       },
       "screenshot": {
         "path": "preview-lab/screens/sign-up-refused.png",
-        "sha256": "a42977e0f4520c0ec49ad1f787683b937a78061b7d2c1846a7efc95032c89c58"
+        "sha256": "6c6e1fe0e4b23b73150ce78eb574863e4fa5bfa2d2f3aba2b9488575ba436ec6"
       },
+      "screenshotNote": "Predates the capitalised divider label.",
       "coverage": "rendered",
       "componentTree": [
-        "SignUpPage > Tree centred-authentication-page",
+        "AuthenticationPage > Tree centred-authentication-page (host=main)",
         "└── projection authentication-panel-card > SurfaceFormCard(contract=authentication-panel-card)",
         "     └── Tree authentication-panel-card > projection centred-page-column",
-        "          └── SignUpPanel(details) > Tree centred-page-column",
-        "               ├── header: centred-title-pair > Heading(level 2) + Text(sm, muted)",
+        "          └── AuthenticationPanel(details, mode=signUp) > Tree centred-page-column",
+        "               ├── header: centred-title-pair > mark=undefined + Heading(level 2) + Text(sm, muted)",
         "               ├── body: auth-entry-stack",
-        "               │    ├── shortcuts: auth-shortcuts-over-divider > Button x2 (outline) + Divider(label)",
+        "               │    ├── shortcuts: auth-shortcuts-over-divider > Button x1 (outline, google) + Divider(label)",
         "               │    └── credentials: form > stacked-peer-controls",
-        "               │         └── Field(email) + Field(newPassword) + Field(newPassword, confirm) + Button(primary, submit)",
+        "               │         └── Field(email, invalid) + Field(newPassword, invalid) + Field(confirm) + Text(sm, live=assertive) + Button(primary, submit)",
         "               └── footer: centred-prompt-row > Text(sm, muted) + TextLink(sm)"
       ],
       "contracts": [
@@ -666,21 +643,20 @@
         "centred-prompt-row"
       ],
       "props": [
-        "SignUpPanel state=details",
-        "statusMessage=signUp.weakPassword",
-        "isError=true",
-        "the sentence sits between the last field and the submit, announced assertive"
+        "statusMessage carries the backend's refusal, isError=true",
+        "REFUSED BEFORE ANY CODE WAS SENT - this is the cheap failure, and the reader loses nothing but the retype",
+        "the confirm box is NOT marked invalid: its own check passed, and marking it would blame the wrong field"
       ],
       "tokens": [
         "no brand palette written: nivo has no approved colour and case-d1 withheld one deliberately",
         "every colour is a HeroUI semantic token (bg-background, bg-surface, text-muted, border-separator)",
-        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard, not from a class written here"
+        "the refusal keeps the muted tone; the invalid fields carry the alarm"
       ]
     },
     {
       "stateId": "sign-up-code",
-      "ownerId": "block-otp-step",
-      "route": "/sign-up-code",
+      "ownerId": "block-authentication-panel",
+      "route": "/sign-up-code  (target: /authentication, mode=signUp, phase=code)",
       "viewport": {
         "width": 1280,
         "height": 900,
@@ -688,25 +664,24 @@
       },
       "locale": "vi",
       "theme": "light",
-      "authPersona": "anonymous (no session; these routes are the way in)",
+      "authPersona": "anonymous, holding an open sign-up challenge",
       "fixture": {
         "path": "preview-lab/candidate/src/messages/auth.vi.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
+        "sha256": "3195fe2c4a1fc07f25ed5d9576b6e358391a7351f90f32e4929f6fdda69341e2"
       },
       "screenshot": {
         "path": "preview-lab/screens/sign-up-code.png",
-        "sha256": "a9aaabb7fdc3694847c0a370592de92cab361cddf2cc54a73ea15028938c76a4"
+        "sha256": "7c9e91c24112fd5d9fd36c658197da533f6fd09b81b648a7b0ce00f7d7f14827"
       },
       "coverage": "rendered",
       "componentTree": [
-        "SignUpPage > Tree centred-authentication-page",
+        "AuthenticationPage > Tree centred-authentication-page (host=main)",
         "└── projection authentication-panel-card > SurfaceFormCard(contract=authentication-panel-card)",
         "     └── Tree authentication-panel-card > projection centred-page-column",
-        "          └── OtpStep(code) > Tree centred-page-column",
-        "               ├── header: centred-title-pair > Heading(level 2) + Text(sm, muted, carries the ADDRESS)",
-        "               ├── body[0]: form > stacked-peer-controls",
-        "               │    └── Field(code) + Button(primary, submit)",
-        "               └── body[1]: spread-choice-row > TextLink(resend|cooldown) + TextLink(back)"
+        "          └── AuthenticationPanel(code, mode=signUp) > Tree centred-page-column",
+        "               ├── header: centred-title-pair > mark=undefined + Heading(level 2) + Text(sm, muted, carries the ADDRESS)",
+        "               ├── body[0]: form > stacked-peer-controls > Field(code) + Button(primary, submit)",
+        "               └── body[1]: spread-choice-row > TextLink(resend) + TextLink(back)"
       ],
       "contracts": [
         "centred-authentication-page",
@@ -718,21 +693,23 @@
         "spread-choice-row"
       ],
       "props": [
-        "OtpStep state=code",
-        "codeHint=\"Mã có hiệu lực trong 10 phút.\"",
+        "AuthenticationPanel state=code, mode=signUp",
+        "ONE box, because signUpVerifyOtp takes only the code - the password was already handed over at the first step",
+        "codeHint=\"Mã có hiệu lực trong 10 phút.\" - the lifetime the backend reported, not a constant written here",
         "cooldownLabel=\"\" so the resend is pressable",
-        "isError=false"
+        "the subtitle carries the address, which is why no step counter was ever minted",
+        "no shortcuts and no divider: a reader mid-challenge is not choosing an entry any more"
       ],
       "tokens": [
         "no brand palette written: nivo has no approved colour and case-d1 withheld one deliberately",
         "every colour is a HeroUI semantic token (bg-background, bg-surface, text-muted, border-separator)",
-        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard, not from a class written here"
+        "the two TextLinks are the same size and weight: they are peers a reader picks between"
       ]
     },
     {
       "stateId": "sign-up-code-refused",
-      "ownerId": "block-otp-step",
-      "route": "/sign-up-code-refused",
+      "ownerId": "page-authentication",
+      "route": "/sign-up-code-refused  (target: /authentication, mode=signUp, phase=code with a wrong code)",
       "viewport": {
         "width": 1280,
         "height": 900,
@@ -740,25 +717,24 @@
       },
       "locale": "vi",
       "theme": "light",
-      "authPersona": "anonymous (no session; these routes are the way in)",
+      "authPersona": "anonymous, holding an open sign-up challenge",
       "fixture": {
         "path": "preview-lab/candidate/src/messages/auth.vi.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
+        "sha256": "3195fe2c4a1fc07f25ed5d9576b6e358391a7351f90f32e4929f6fdda69341e2"
       },
       "screenshot": {
         "path": "preview-lab/screens/sign-up-code-refused.png",
-        "sha256": "7849f520c3fe9c31114be3126f8dff96c89a3cec3be7cbb0a7b4e1c3434959d5"
+        "sha256": "ba0925a3c30aa053eb8476be79d440c22c29e9d23513f3053ce2260581ef3428"
       },
       "coverage": "rendered",
       "componentTree": [
-        "SignUpPage > Tree centred-authentication-page",
+        "AuthenticationPage > Tree centred-authentication-page (host=main)",
         "└── projection authentication-panel-card > SurfaceFormCard(contract=authentication-panel-card)",
         "     └── Tree authentication-panel-card > projection centred-page-column",
-        "          └── OtpStep(code) > Tree centred-page-column",
-        "               ├── header: centred-title-pair > Heading(level 2) + Text(sm, muted, carries the ADDRESS)",
-        "               ├── body[0]: form > stacked-peer-controls",
-        "               │    └── Field(code) + Button(primary, submit)",
-        "               └── body[1]: spread-choice-row > TextLink(resend|cooldown) + TextLink(back)"
+        "          └── AuthenticationPanel(code, mode=signUp) > Tree centred-page-column",
+        "               ├── header: centred-title-pair > mark=undefined + Heading(level 2) + Text(sm, muted, carries the ADDRESS)",
+        "               ├── body[0]: form > stacked-peer-controls > Field(code, invalid) + Text(sm, live=assertive) + Button(primary, submit)",
+        "               └── body[1]: spread-choice-row > TextLink(resend) + TextLink(back)"
       ],
       "contracts": [
         "centred-authentication-page",
@@ -770,21 +746,20 @@
         "spread-choice-row"
       ],
       "props": [
-        "OtpStep state=code",
-        "statusMessage=signUp.codeRefused",
-        "isError=true",
-        "the lifetime hint is REPLACED by the refusal rather than shown beside it - one line under a box, not two"
+        "statusMessage=signUp.codeRefused, isError=true",
+        "the LIFETIME HINT IS REPLACED by the refusal rather than shown beside it - one line under a box, not two",
+        "the sentence says the old code is still valid, because it is: a wrong attempt does not spend the challenge"
       ],
       "tokens": [
         "no brand palette written: nivo has no approved colour and case-d1 withheld one deliberately",
         "every colour is a HeroUI semantic token (bg-background, bg-surface, text-muted, border-separator)",
-        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard, not from a class written here"
+        "the refusal keeps the muted tone; the invalid box carries the alarm"
       ]
     },
     {
       "stateId": "sign-up-code-cooldown",
-      "ownerId": "block-otp-step",
-      "route": "/sign-up-code-cooldown",
+      "ownerId": "page-authentication",
+      "route": "/sign-up-code-cooldown  (target: /authentication, mode=signUp, phase=code inside the cooldown)",
       "viewport": {
         "width": 1280,
         "height": 900,
@@ -792,25 +767,24 @@
       },
       "locale": "vi",
       "theme": "light",
-      "authPersona": "anonymous (no session; these routes are the way in)",
+      "authPersona": "anonymous, holding an open sign-up challenge sent less than sixty seconds ago",
       "fixture": {
         "path": "preview-lab/candidate/src/messages/auth.vi.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
+        "sha256": "3195fe2c4a1fc07f25ed5d9576b6e358391a7351f90f32e4929f6fdda69341e2"
       },
       "screenshot": {
         "path": "preview-lab/screens/sign-up-code-cooldown.png",
-        "sha256": "3b45d441f637ab88d85983620d012edfd7789c48cb6d0388e32a56ad0a0b14a0"
+        "sha256": "2de7bf30b5cfbcff8ca9540ef138076ea3a024cafd68858ab998d162df86391f"
       },
       "coverage": "rendered",
       "componentTree": [
-        "SignUpPage > Tree centred-authentication-page",
+        "AuthenticationPage > Tree centred-authentication-page (host=main)",
         "└── projection authentication-panel-card > SurfaceFormCard(contract=authentication-panel-card)",
         "     └── Tree authentication-panel-card > projection centred-page-column",
-        "          └── OtpStep(code) > Tree centred-page-column",
-        "               ├── header: centred-title-pair > Heading(level 2) + Text(sm, muted, carries the ADDRESS)",
-        "               ├── body[0]: form > stacked-peer-controls",
-        "               │    └── Field(code) + Button(primary, submit)",
-        "               └── body[1]: spread-choice-row > TextLink(resend|cooldown) + TextLink(back)"
+        "          └── AuthenticationPanel(code, mode=signUp) > Tree centred-page-column",
+        "               ├── header: centred-title-pair > mark=undefined + Heading(level 2) + Text(sm, muted, carries the ADDRESS)",
+        "               ├── body[0]: form > stacked-peer-controls > Field(code) + Button(primary, submit)",
+        "               └── body[1]: spread-choice-row > TextLink(label carries the countdown, press withheld) + TextLink(back)"
       ],
       "contracts": [
         "centred-authentication-page",
@@ -822,21 +796,21 @@
         "spread-choice-row"
       ],
       "props": [
-        "OtpStep state=code",
-        "cooldownLabel=\"Gửi lại sau 47 giây\"",
-        "press withheld",
-        "the words still look pressable - open question 4"
+        "cooldownLabel=\"Gửi lại sau 47 giây\", press withheld",
+        "the SAME TextLink stays in the slot: spread-choice-row.choice admits only checkbox or text-link, so a Text cannot stand there",
+        "the countdown is counted in the page's own clock and may drift from the server's; the backend's OTP_RESEND_TOO_SOON_EXCEPTION is still handled",
+        "the words still LOOK pressable - open question 4, still unanswered in 1.2"
       ],
       "tokens": [
         "no brand palette written: nivo has no approved colour and case-d1 withheld one deliberately",
         "every colour is a HeroUI semantic token (bg-background, bg-surface, text-muted, border-separator)",
-        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard, not from a class written here"
+        "nothing dims: TextLink has no disabled paint to reach for"
       ]
     },
     {
       "stateId": "sign-up-code-taken",
-      "ownerId": "page-sign-up",
-      "route": "/sign-up-code-taken",
+      "ownerId": "page-authentication",
+      "route": "/sign-up-code-taken  (target: /authentication, mode=signUp, phase=code refused at create)",
       "viewport": {
         "width": 1280,
         "height": 900,
@@ -844,25 +818,24 @@
       },
       "locale": "vi",
       "theme": "light",
-      "authPersona": "anonymous (no session; these routes are the way in)",
+      "authPersona": "anonymous, holding a proved code for an address that already has an account",
       "fixture": {
         "path": "preview-lab/candidate/src/messages/auth.vi.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
+        "sha256": "3195fe2c4a1fc07f25ed5d9576b6e358391a7351f90f32e4929f6fdda69341e2"
       },
       "screenshot": {
         "path": "preview-lab/screens/sign-up-code-taken.png",
-        "sha256": "5ec5bb5b96a968023cbb12af87e118bd98571ae27f42b35c4a4413625cd8e902"
+        "sha256": "01d04863c90612c47fad59e168f970b50e049d496448fece1b6bd3522a20d2c7"
       },
       "coverage": "rendered",
       "componentTree": [
-        "SignUpPage > Tree centred-authentication-page",
+        "AuthenticationPage > Tree centred-authentication-page (host=main)",
         "└── projection authentication-panel-card > SurfaceFormCard(contract=authentication-panel-card)",
         "     └── Tree authentication-panel-card > projection centred-page-column",
-        "          └── OtpStep(code) > Tree centred-page-column",
-        "               ├── header: centred-title-pair > Heading(level 2) + Text(sm, muted, carries the ADDRESS)",
-        "               ├── body[0]: form > stacked-peer-controls",
-        "               │    └── Field(code) + Button(primary, submit)",
-        "               └── body[1]: spread-choice-row > TextLink(resend|cooldown) + TextLink(back)"
+        "          └── AuthenticationPanel(code, mode=signUp) > Tree centred-page-column",
+        "               ├── header: centred-title-pair > mark=undefined + Heading(level 2) + Text(sm, muted, carries the ADDRESS)",
+        "               ├── body[0]: form > stacked-peer-controls > Field(code, invalid) + Text(sm, live=assertive) + Button(primary, submit)",
+        "               └── body[1]: spread-choice-row > TextLink(resend) + TextLink(back)"
       ],
       "contracts": [
         "centred-authentication-page",
@@ -874,21 +847,21 @@
         "spread-choice-row"
       ],
       "props": [
-        "OtpStep state=code",
-        "statusMessage=signUp.emailTaken",
-        "isError=true",
-        "the code has ALREADY been spent at this point and nothing here can give it back"
+        "statusMessage=signUp.emailTaken, isError=true",
+        "THE CODE HAS ALREADY BEEN SPENT and nothing on this screen can give it back: createUser throws at VERIFY, which is after the challenge is consumed",
+        "so the sentence offers the two real ways on - sign in, or start again with another address - rather than inviting a retype that cannot work",
+        "this is the only refusal in the case that arrives after a cost has been paid, which is why it says so"
       ],
       "tokens": [
         "no brand palette written: nivo has no approved colour and case-d1 withheld one deliberately",
         "every colour is a HeroUI semantic token (bg-background, bg-surface, text-muted, border-separator)",
-        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard, not from a class written here"
+        "the refusal keeps the muted tone; the invalid box carries the alarm"
       ]
     },
     {
       "stateId": "sign-up-done",
-      "ownerId": "page-sign-up",
-      "route": "/sign-up-done",
+      "ownerId": "block-authentication-panel",
+      "route": "/sign-up-done  (target: /authentication, mode=signUp, phase=done)",
       "viewport": {
         "width": 1280,
         "height": 900,
@@ -896,23 +869,23 @@
       },
       "locale": "vi",
       "theme": "light",
-      "authPersona": "anonymous (no session; these routes are the way in)",
+      "authPersona": "freshly signed in - the verify answered with a session and it was adopted",
       "fixture": {
         "path": "preview-lab/candidate/src/messages/auth.vi.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
+        "sha256": "3195fe2c4a1fc07f25ed5d9576b6e358391a7351f90f32e4929f6fdda69341e2"
       },
       "screenshot": {
         "path": "preview-lab/screens/sign-up-done.png",
-        "sha256": "6ad36269b6e50ff0f4f2b2eb65a505c8be2b5aa96b92d558dfb65ef648bc3f73"
+        "sha256": "138db66d396c47d66166b3fd04d81492babf9d0ac89cd622cfa2e166ddcc883c"
       },
       "coverage": "rendered",
       "componentTree": [
-        "SignUpPage > Tree centred-authentication-page",
+        "AuthenticationPage > Tree centred-authentication-page (host=main)",
         "└── projection authentication-panel-card > SurfaceFormCard(contract=authentication-panel-card)",
         "     └── Tree authentication-panel-card > projection centred-page-column",
-        "          └── SignUpPanel(done) > Tree centred-page-column",
-        "               ├── header: centred-title-pair > Heading(level 2) + Text(sm, muted)",
-        "               ├── body[0]: centred-title-pair > Heading(level 3) + Text(sm, muted)",
+        "          └── AuthenticationPanel(done, mode=signUp) > Tree centred-page-column",
+        "               ├── header: centred-title-pair > mark=undefined + Heading(level 2) + Text(sm, muted)",
+        "               ├── body[0]: centred-title-pair > mark=undefined + Heading(level 3) + Text(sm, muted)",
         "               └── body[1]: stacked-peer-controls > Button(primary)"
       ],
       "contracts": [
@@ -923,20 +896,21 @@
         "centred-title-pair"
       ],
       "props": [
-        "SignUpPanel state=done",
+        "AuthenticationPanel state=done, mode=signUp",
         "onwardLabel=\"Vào bảng điều khiển\"",
-        "the button is the fallback for a route push that did not happen"
+        "the button is the FALLBACK for a route push that did not happen: index.tsx adopts the session, sets done and pushes to /provisioning in the same breath",
+        "the done title is Heading level 3 - it names the OUTCOME inside a surface the level-2 title already named"
       ],
       "tokens": [
         "no brand palette written: nivo has no approved colour and case-d1 withheld one deliberately",
         "every colour is a HeroUI semantic token (bg-background, bg-surface, text-muted, border-separator)",
-        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard, not from a class written here"
+        "no alarm colour: nothing failed"
       ]
     },
     {
       "stateId": "forgot-password",
-      "ownerId": "page-forgot-password",
-      "route": "/forgot-password",
+      "ownerId": "page-authentication",
+      "route": "/forgot-password  (target: /authentication, mode=forgotPassword, phase=details)",
       "viewport": {
         "width": 1280,
         "height": 900,
@@ -944,49 +918,56 @@
       },
       "locale": "vi",
       "theme": "light",
-      "authPersona": "anonymous (no session; these routes are the way in)",
+      "authPersona": "anonymous (no session; this route is the way in)",
       "fixture": {
         "path": "preview-lab/candidate/src/messages/auth.vi.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
+        "sha256": "3195fe2c4a1fc07f25ed5d9576b6e358391a7351f90f32e4929f6fdda69341e2"
       },
       "screenshot": {
         "path": "preview-lab/screens/forgot-password.png",
-        "sha256": "1c5cce006d6eec2f97520f229501931c457f8c97e9c9bc1c3a00bdf978c47ed9"
+        "sha256": "f09e64774a46d1e761a8fbf5336bdbdd6652e88e2f85193780390437b98d2f5f"
       },
+      "screenshotNote": "Predates the capitalised divider label. It DOES already draw the Google shortcut, which is the proof this export carried the merged panel rather than 1.1's ForgotPasswordPanel.",
       "coverage": "rendered",
       "componentTree": [
-        "ForgotPasswordPage > Tree centred-authentication-page",
+        "AuthenticationPage > Tree centred-authentication-page (host=main)",
         "└── projection authentication-panel-card > SurfaceFormCard(contract=authentication-panel-card)",
         "     └── Tree authentication-panel-card > projection centred-page-column",
-        "          └── ForgotPasswordPanel(details) > Tree centred-page-column",
-        "               ├── header: centred-title-pair > Heading(level 2) + Text(sm, muted)",
-        "               ├── body: form > stacked-peer-controls > Field(email) + Button(primary, submit)",
+        "          └── AuthenticationPanel(details, mode=forgotPassword) > Tree centred-page-column",
+        "               ├── header: centred-title-pair > mark=undefined + Heading(level 2) + Text(sm, muted)",
+        "               ├── body: auth-entry-stack",
+        "               │    ├── shortcuts: auth-shortcuts-over-divider > Button x1 (outline, google) + Divider(label)",
+        "               │    └── credentials: form > stacked-peer-controls > Field(email, hint) + Button(primary, submit)",
         "               └── footer: centred-prompt-row > Text(sm, muted) + TextLink(sm)"
       ],
       "contracts": [
         "centred-authentication-page",
         "authentication-panel-card",
         "centred-page-column",
+        "auth-entry-stack",
+        "auth-shortcuts-over-divider",
         "stacked-peer-controls",
         "label-field-hint",
         "centred-title-pair",
         "centred-prompt-row"
       ],
       "props": [
-        "ForgotPasswordPanel state=details",
-        "NO auth-shortcuts-over-divider - the one place this family diverges from the reference, on purpose",
-        "emailHint says the code goes to the address AS TYPED"
+        "AuthenticationPanel state=details, mode=forgotPassword",
+        "ONE field and NO password: this journey proves the inbox first and sets a password at the second step",
+        "emailHint says the code goes to the address AS TYPED - the one hint this mode needs, because nothing later will tell the reader they mistyped it",
+        "no spread-choice-row: there is nothing to remember and nothing left to forget",
+        "THE SHORTCUT IS DRAWN HERE NOW, which reverses 1.0's answer to open question 3. In one panel the shortcut block sits inside the single details tree, so suppressing it for one mode would be a new conditional rather than a layout that already existed."
       ],
       "tokens": [
         "no brand palette written: nivo has no approved colour and case-d1 withheld one deliberately",
         "every colour is a HeroUI semantic token (bg-background, bg-surface, text-muted, border-separator)",
-        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard, not from a class written here"
+        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard; the p-4 inset comes from authentication-panel-card"
       ]
     },
     {
       "stateId": "forgot-password-code",
-      "ownerId": "page-forgot-password",
-      "route": "/forgot-password-code",
+      "ownerId": "page-authentication",
+      "route": "/forgot-password-code  (target: /authentication, mode=forgotPassword, phase=code)",
       "viewport": {
         "width": 1280,
         "height": 900,
@@ -994,25 +975,24 @@
       },
       "locale": "vi",
       "theme": "light",
-      "authPersona": "anonymous (no session; these routes are the way in)",
+      "authPersona": "anonymous, holding a reset challenge that may or may not belong to a real account",
       "fixture": {
         "path": "preview-lab/candidate/src/messages/auth.vi.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
+        "sha256": "3195fe2c4a1fc07f25ed5d9576b6e358391a7351f90f32e4929f6fdda69341e2"
       },
       "screenshot": {
         "path": "preview-lab/screens/forgot-password-code.png",
-        "sha256": "38fa663b3e955c0d4c6399934649f96e2d0e30640b22d1526112b82edd057ba7"
+        "sha256": "0a8acc6986a018365a6dd86ec8fc43a45e66d9ca117d3d21b916b6e3a89f7c38"
       },
       "coverage": "rendered",
       "componentTree": [
-        "ForgotPasswordPage > Tree centred-authentication-page",
+        "AuthenticationPage > Tree centred-authentication-page (host=main)",
         "└── projection authentication-panel-card > SurfaceFormCard(contract=authentication-panel-card)",
         "     └── Tree authentication-panel-card > projection centred-page-column",
-        "          └── OtpStep(codeWithNewPassword) > Tree centred-page-column",
-        "               ├── header: centred-title-pair > Heading(level 2) + Text(sm, muted, carries the ADDRESS)",
-        "               ├── body[0]: form > stacked-peer-controls",
-        "               │    └── Field(code) + Field(newPassword) + Button(primary, submit)",
-        "               └── body[1]: spread-choice-row > TextLink(resend|cooldown) + TextLink(back)"
+        "          └── AuthenticationPanel(code, mode=forgotPassword) > Tree centred-page-column",
+        "               ├── header: centred-title-pair > mark=undefined + Heading(level 2) + Text(sm, muted, carries the ADDRESS conditionally)",
+        "               ├── body[0]: form > stacked-peer-controls > Field(code) + Field(newPassword, hint) + Button(primary, submit)",
+        "               └── body[1]: spread-choice-row > TextLink(resend) + TextLink(back)"
       ],
       "contracts": [
         "centred-authentication-page",
@@ -1024,20 +1004,21 @@
         "spread-choice-row"
       ],
       "props": [
-        "OtpStep state=codeWithNewPassword",
-        "subtitle is CONDITIONAL: \"Nếu {email} có tài khoản…\"",
-        "two boxes because forgotPasswordVerifyOtp takes code and password in one request"
+        "AuthenticationPanel state=code, mode=forgotPassword - the ONE thing `mode` decides in this tree is whether the password box appears",
+        "TWO boxes, because forgotPasswordVerifyOtp takes the code and the new password in one request",
+        "the subtitle is CONDITIONAL: \"Nếu {email} có tài khoản, mã…\" - phrased that way for this mode alone, because forgotPasswordInit answers an unknown address exactly as it answers a known one",
+        "the same resend and the same way back as the sign-up code step, from the same lines of source"
       ],
       "tokens": [
         "no brand palette written: nivo has no approved colour and case-d1 withheld one deliberately",
         "every colour is a HeroUI semantic token (bg-background, bg-surface, text-muted, border-separator)",
-        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard, not from a class written here"
+        "the two TextLinks are the same size and weight: they are peers a reader picks between"
       ]
     },
     {
       "stateId": "forgot-password-code-refused",
-      "ownerId": "block-otp-step",
-      "route": "/forgot-password-code-refused",
+      "ownerId": "page-authentication",
+      "route": "/forgot-password-code-refused  (target: /authentication, mode=forgotPassword, phase=code refused)",
       "viewport": {
         "width": 1280,
         "height": 900,
@@ -1045,25 +1026,24 @@
       },
       "locale": "vi",
       "theme": "light",
-      "authPersona": "anonymous (no session; these routes are the way in)",
+      "authPersona": "anonymous, holding a reset challenge that may or may not belong to a real account",
       "fixture": {
         "path": "preview-lab/candidate/src/messages/auth.vi.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
+        "sha256": "3195fe2c4a1fc07f25ed5d9576b6e358391a7351f90f32e4929f6fdda69341e2"
       },
       "screenshot": {
         "path": "preview-lab/screens/forgot-password-code-refused.png",
-        "sha256": "b303e3f2975eaa23540a94274a84d414efd5dd4886fa25028094acc7da8ddfe4"
+        "sha256": "e4c208a73c4f3671778956ec07bd9fef91e5df464d73eb5ef3bc221e734896de"
       },
       "coverage": "rendered",
       "componentTree": [
-        "ForgotPasswordPage > Tree centred-authentication-page",
+        "AuthenticationPage > Tree centred-authentication-page (host=main)",
         "└── projection authentication-panel-card > SurfaceFormCard(contract=authentication-panel-card)",
         "     └── Tree authentication-panel-card > projection centred-page-column",
-        "          └── OtpStep(codeWithNewPassword) > Tree centred-page-column",
-        "               ├── header: centred-title-pair > Heading(level 2) + Text(sm, muted, carries the ADDRESS)",
-        "               ├── body[0]: form > stacked-peer-controls",
-        "               │    └── Field(code) + Field(newPassword) + Button(primary, submit)",
-        "               └── body[1]: spread-choice-row > TextLink(resend|cooldown) + TextLink(back)"
+        "          └── AuthenticationPanel(code, mode=forgotPassword) > Tree centred-page-column",
+        "               ├── header: centred-title-pair > mark=undefined + Heading(level 2) + Text(sm, muted, carries the ADDRESS conditionally)",
+        "               ├── body[0]: form > stacked-peer-controls > Field(code, invalid) + Field(newPassword) + Text(sm, live=assertive) + Button(primary, submit)",
+        "               └── body[1]: spread-choice-row > TextLink(resend) + TextLink(back)"
       ],
       "contracts": [
         "centred-authentication-page",
@@ -1075,20 +1055,20 @@
         "spread-choice-row"
       ],
       "props": [
-        "OtpStep state=codeWithNewPassword",
-        "statusMessage=forgotPassword.codeRefused",
-        "ONE sentence covers both OTP_CODE_INVALID and OTP_CHALLENGE_NOT_FOUND - two would let an inbox holder tell a wrong code from an address nobody has"
+        "statusMessage=forgotPassword.codeRefused, isError=true",
+        "ONE sentence covers both OTP_CODE_INVALID and OTP_CHALLENGE_NOT_FOUND. Two would let an inbox holder tell a wrong code from an address nobody has, which is the last place the question \"does this person have an account\" could leak.",
+        "index.tsx discards `result.reason` at this one call site ON PURPOSE - the backend's own words are more specific than this screen may be"
       ],
       "tokens": [
         "no brand palette written: nivo has no approved colour and case-d1 withheld one deliberately",
         "every colour is a HeroUI semantic token (bg-background, bg-surface, text-muted, border-separator)",
-        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard, not from a class written here"
+        "the refusal keeps the muted tone; the invalid box carries the alarm"
       ]
     },
     {
       "stateId": "forgot-password-done",
-      "ownerId": "page-forgot-password",
-      "route": "/forgot-password-done",
+      "ownerId": "page-authentication",
+      "route": "/forgot-password-done  (target: /authentication, mode=forgotPassword, phase=done)",
       "viewport": {
         "width": 1280,
         "height": 900,
@@ -1096,23 +1076,23 @@
       },
       "locale": "vi",
       "theme": "light",
-      "authPersona": "anonymous (no session; these routes are the way in)",
+      "authPersona": "anonymous STILL - the reset answered a boolean and opened no session",
       "fixture": {
         "path": "preview-lab/candidate/src/messages/auth.vi.json",
-        "sha256": "f2920cec2a97dcc3c276f848e6c658d0408a961cf54b7776437953efeafaa3cf"
+        "sha256": "3195fe2c4a1fc07f25ed5d9576b6e358391a7351f90f32e4929f6fdda69341e2"
       },
       "screenshot": {
         "path": "preview-lab/screens/forgot-password-done.png",
-        "sha256": "1784eaa47b0b3d32d403efb3e44426ae59f22aa2f2e38cd0a83c4331527b0e69"
+        "sha256": "91a87b7794ad4cc654485dff69238c2e3e3794c4fd5206e6284f6bc59c6354d8"
       },
       "coverage": "rendered",
       "componentTree": [
-        "ForgotPasswordPage > Tree centred-authentication-page",
+        "AuthenticationPage > Tree centred-authentication-page (host=main)",
         "└── projection authentication-panel-card > SurfaceFormCard(contract=authentication-panel-card)",
         "     └── Tree authentication-panel-card > projection centred-page-column",
-        "          └── ForgotPasswordPanel(done) > Tree centred-page-column",
-        "               ├── header: centred-title-pair > Heading(level 2) + Text(sm, muted)",
-        "               ├── body[0]: centred-title-pair > Heading(level 3) + Text(sm, muted)",
+        "          └── AuthenticationPanel(done, mode=forgotPassword) > Tree centred-page-column",
+        "               ├── header: centred-title-pair > mark=undefined + Heading(level 2) + Text(sm, muted)",
+        "               ├── body[0]: centred-title-pair > mark=undefined + Heading(level 3) + Text(sm, muted)",
         "               └── body[1]: stacked-peer-controls > Button(primary)"
       ],
       "contracts": [
@@ -1123,115 +1103,177 @@
         "centred-title-pair"
       ],
       "props": [
-        "ForgotPasswordPanel state=done",
-        "signInLabel=\"Đăng nhập\" and NOT the console",
-        "because the mutation answered a boolean rather than a session"
+        "AuthenticationPanel state=done, mode=forgotPassword",
+        "onwardLabel=\"Đăng nhập\" and NOT the console, because forgotPasswordVerifyOtp answered a BOOLEAN rather than a session",
+        "pressing it switches the panel back to mode=signIn on the same route - which is the merge's dividend: what used to be a route change is now a mode change",
+        "the same tree as sign-up-done, carrying different words, which is props by the reference's own rule"
       ],
       "tokens": [
         "no brand palette written: nivo has no approved colour and case-d1 withheld one deliberately",
         "every colour is a HeroUI semantic token (bg-background, bg-surface, text-muted, border-separator)",
-        "the card's ground, border and elevation come from the vendor Card inside SurfaceFormCard, not from a class written here"
+        "no alarm colour: nothing failed"
       ]
     }
   ],
   "integrationEdits": [
     {
-      "targetPath": "apps/app/src/components/blocks/auth/SignInPanel/index.tsx",
-      "reason": "revision 1.1 - the footer becomes centred-prompt-row, GitHub goes, resetLinkSent leaves the union, forgotPassword stops carrying an email"
+      "targetPath": "apps/app/src/components/blocks/auth/AuthenticationPanel/index.tsx",
+      "reason": "NEW, and the whole of revision 1.2. One block, four states, three journeys. Byte-identical to the candidate file."
     },
     {
-      "targetPath": "apps/app/src/components/pages/SignInPage/index.tsx",
-      "reason": "revision 1.1 - the panel is drawn through SurfaceFormCard; the mutation wiring is unchanged except that forgotPassword now navigates to /forgot-password"
+      "targetPath": "apps/app/src/components/blocks/auth/SignInPanel/component.tsx",
+      "reason": "DELETED. Its states, its uncontrolled ref and its footer live in AuthenticationPanel now, and a second panel drawing the same tree is what the merge existed to remove."
+    },
+    {
+      "targetPath": "apps/app/src/components/pages/AuthenticationPage/component.tsx",
+      "reason": "NEW - the drawing half. It takes the panel's complete situation as one prop, wraps it in SurfaceFormCard at the page, and needs no locale, session or request to draw any state."
+    },
+    {
+      "targetPath": "apps/app/src/components/pages/AuthenticationPage/index.tsx",
+      "reason": "NEW - the connected half. Seven mutations, the challenge handle in a ref, the sixty-second cooldown clock, the mode, and the rule that requiresTwoFactor is read before accessToken."
+    },
+    {
+      "targetPath": "apps/app/src/app/[locale]/(auth)/authentication/page.tsx",
+      "reason": "NEW route mount, and nothing else (LAYOUT-6). ONE address for all three journeys."
+    },
+    {
+      "targetPath": "apps/app/src/app/(auth)/dang-nhap/page.tsx",
+      "reason": "DELETED - the old un-localised sign-in route the merge replaced."
     },
     {
       "targetPath": "apps/app/src/modules/api/auth.ts",
-      "reason": "ADD signUpInit, signUpResend, signUpVerifyOtp, forgotPasswordInit, forgotPasswordResend, forgotPasswordVerifyOtp. Nothing existing in the file changes."
+      "reason": "ADD signUpInit, signUpResend, signUpVerifyOtp, forgotPasswordInit, forgotPasswordResend, forgotPasswordVerifyOtp. Nothing existing in the file changed; requestPasswordReset and resetPassword survive with no caller."
     },
     {
       "targetPath": "apps/app/src/messages/vi.json",
-      "reason": "merge the signUp and forgotPassword namespaces"
+      "reason": "the whole `authentication` namespace: one shared block of field copy plus `signIn`, `signUp` and `forgotPassword` sub-namespaces, read as `<mode>.<key>` so a fourth journey would be a catalogue change rather than a branch. 59 keys."
     },
     {
       "targetPath": "apps/app/src/messages/en.json",
-      "reason": "the English sibling of the same two namespaces - a locale added on one side only is the drift the sweep rule exists to catch"
+      "reason": "the English sibling of the same namespace, key-for-key - 59 keys on both sides, checked. A locale added on one side only is the drift the sweep rule exists to catch."
     },
     {
       "targetPath": "packages/ui/src/contracts/index.ts",
-      "reason": "authentication-panel-card gains an inset (open question 1), centred-authentication-page gains host:\"main\" (open question 2), and auth-shortcuts-over-divider drops restingCount to 1 now that one shortcut remains"
+      "reason": "the four registry deltas listed under contractDeltas below, plus `[&>*]:max-w-sm` joining LayoutClassName so the page entry can write the measure onto the card."
+    }
+  ],
+  "contractDeltas": [
+    {
+      "key": "centred-authentication-page",
+      "delta": "gains host: \"main\"",
+      "why": "An authentication route's whole content is this surface, so while it rendered as a plain div a screen reader had nothing to skip to. Open question 2, applied as proposed.",
+      "blastRadius": "no class changes, so no pixel changes"
     },
     {
-      "targetPath": "packages/ui/src/leaves/TextLink/index.tsx",
-      "reason": "gains `disabled` (open question 4), after which OtpStep stops swapping the label to express a cooldown"
+      "key": "centred-authentication-page",
+      "delta": "gains the classes [&>*]:w-full and [&>*]:max-w-sm",
+      "why": "NOT PROPOSED BY PREVIEW - found during Apply and worth recording as a correction. SurfaceFormCard renders a vendor Card and puts the entry's node INSIDE it, so authentication-panel-card's own max-w-sm constrains the card's contents and never the card. Left alone the card was a flex item with no width and shrank to its longest line: 263px instead of 384px, and narrower still in a language with shorter words.",
+      "blastRadius": "`[&>*]:max-w-sm` had to be added to the LayoutClassName union; written into an entry without being a member it collapsed the whole table's types and reported as errors in unrelated files"
     },
     {
-      "targetPath": "apps/app/src/components/pages/SignUpPage/index.tsx",
-      "reason": "the connected half: signUpInit / signUpResend / signUpVerifyOtp, session.adopt, router.push"
+      "key": "authentication-panel-card",
+      "delta": "classes go from [w-full, max-w-sm] to [w-full, max-w-sm, p-4]",
+      "why": "Open question 1, applied - but at p-4 rather than the p-6 the default named. The inset is written on the entry because nivo's surface branches zero the vendor card's own padding, and an inset borrowed from that ground would make the same key read one way inside a surface branch and another way on its own.",
+      "blastRadius": "the shipped authentication screen acquires a visible card with interior space, which is what the parity baseline draws"
     },
     {
-      "targetPath": "apps/app/src/components/pages/ForgotPasswordPage/index.tsx",
-      "reason": "the connected half: forgotPasswordInit / forgotPasswordResend / forgotPasswordVerifyOtp"
+      "key": "auth-shortcuts-over-divider",
+      "delta": "shortcut.restingCount goes from 2 to 1",
+      "why": "One provider ships. The resting count is what the skeleton draws before anything is known, so leaving it at two promised a second shortcut that never arrives - a loading state that lies about the screen it stands in for. This is the 1.1 consequence that Apply was left to settle, and it is settled.",
+      "blastRadius": "the loading skeleton stops over-drawing by one"
     },
     {
-      "targetPath": "apps/app/src/app/[locale]/(auth)/sign-up/page.tsx",
-      "reason": "route mount, nothing else (LAYOUT-6)"
-    },
-    {
-      "targetPath": "apps/app/src/app/[locale]/(auth)/forgot-password/page.tsx",
-      "reason": "route mount, nothing else (LAYOUT-6)"
+      "key": "centred-title-pair",
+      "delta": "NOT THIS CASE'S DELTA - a concurrent change gave it an optional `mark` glyph slot",
+      "why": "Recorded because it reached into this candidate. `ChildrenOf` marks the slot optional but the caller must still NAME it; omitting the key made every defineContractComponent in the panel fail to resolve its overload and reported as unrelated errors about `title`. The panel therefore says `mark: undefined` out loud, which also states the design decision: this surface has no glyph above its name.",
+      "blastRadius": "one build failure, already fixed and re-proved by the sealed build log"
     }
   ],
   "stateCoverage": [
     {
-      "ownerId": "page-sign-in",
-      "state": "entry",
-      "coverage": "not-applicable",
-      "evidence": "shipped and unchanged; this case alters nothing in that block"
+      "ownerId": "block-authentication-panel",
+      "state": "details",
+      "coverage": "rendered",
+      "scenarioId": "sign-in",
+      "evidence": "the same tree under all three modes; sign-up and forgot-password are the same state with different fields, which is props"
     },
     {
-      "ownerId": "page-sign-in",
-      "state": "twoFactorUnsupported",
-      "coverage": "not-applicable",
-      "evidence": "shipped and unchanged"
-    },
-    {
-      "ownerId": "page-sign-in",
-      "state": "handingOff / exchanging / exchangeFailed",
-      "coverage": "not-applicable",
-      "evidence": "shipped and unchanged; the OAuth round trip is still not completable in this build"
-    },
-    {
-      "ownerId": "page-sign-in",
-      "state": "resetLinkSent",
-      "coverage": "covered-by",
-      "scenarioId": "forgot-password-done",
-      "evidence": "the link journey's successor is the code journey's confirmation; whether the shipped state is removed is an open unknown"
-    },
-    {
-      "ownerId": "block-otp-step",
-      "state": "submitting",
-      "coverage": "covered-by",
+      "ownerId": "block-authentication-panel",
+      "state": "code",
+      "coverage": "rendered",
       "scenarioId": "sign-up-code",
-      "evidence": "isPending draws the SAME tree with the button disabled and spinning, so it is props rather than a state"
+      "evidence": "the reset journey's second box is the same state with mode=forgotPassword, rendered at forgot-password-code"
     },
     {
-      "ownerId": "page-sign-up",
-      "state": "submitting",
+      "ownerId": "block-authentication-panel",
+      "state": "done",
+      "coverage": "rendered",
+      "scenarioId": "sign-up-done"
+    },
+    {
+      "ownerId": "block-authentication-panel",
+      "state": "twoFactorUnsupported",
+      "coverage": "rendered",
+      "scenarioId": "sign-in-2fa"
+    },
+    {
+      "ownerId": "block-authentication-panel",
+      "state": "isPending",
       "coverage": "covered-by",
-      "scenarioId": "sign-up",
-      "evidence": "same reason"
+      "scenarioId": "sign-in",
+      "evidence": "it draws the SAME tree with every control disabled and the submit spinning, so it is props rather than a state"
     },
     {
-      "ownerId": "page-forgot-password",
-      "state": "unknown address",
+      "ownerId": "block-authentication-panel",
+      "state": "confirm-password mismatch",
+      "coverage": "covered-by",
+      "scenarioId": "sign-up-refused",
+      "evidence": "the third box takes the invalid mark and the mismatch hint through the same two props the backend refusal uses; the tree does not change, and the check never leaves the browser"
+    },
+    {
+      "ownerId": "page-authentication",
+      "state": "signIn done",
       "coverage": "not-applicable",
-      "evidence": "PROVEN INDISTINGUISHABLE rather than absent. The e2e asserts an unknown address returns the same success flag, message, TTL and mailed code as a known one, and the eventual refusal wears the same words an expired challenge wears. A state here would be the leak."
+      "evidence": "UNREACHABLE BY CONSTRUCTION. signIn answers with a session in one request, so index.tsx adopts it and pushes to /provisioning without ever setting phase=done. There is no confirmation to draw because the next screen is a different route."
     },
     {
-      "ownerId": "page-forgot-password",
-      "state": "resend in cooldown",
+      "ownerId": "page-authentication",
+      "state": "forgotPassword unknown address",
+      "coverage": "not-applicable",
+      "evidence": "PROVEN INDISTINGUISHABLE rather than absent. The e2e asserts an unknown address returns the same success flag, message, TTL and mailed code as a known one, and the eventual refusal wears the same words an expired challenge wears. A state here would BE the leak."
+    },
+    {
+      "ownerId": "page-authentication",
+      "state": "resend accepted",
       "coverage": "covered-by",
+      "scenarioId": "sign-up-code-refused",
+      "evidence": "the confirmation occupies the same status slot the refusal does, with isError false; no tree changes. It is also the one control in this case whose happy path no test has ever executed - see the open backend enabler."
+    },
+    {
+      "ownerId": "page-authentication",
+      "state": "provider shortcut pressed",
+      "coverage": "covered-by",
+      "scenarioId": "sign-in-refused",
+      "evidence": "chooseProvider writes `providerUnavailable` into the same status slot with isError false. The OAuth round trip has no client id, no PKCE verifier and no callback route in this build, so the screen REPORTS rather than pretends - a screen that looked connected and was not is the kind of thing that gets believed."
+    },
+    {
+      "ownerId": "page-authentication",
+      "state": "resend in cooldown",
+      "coverage": "rendered",
       "scenarioId": "sign-up-code-cooldown",
-      "evidence": "the same OtpStep block draws it; only the surrounding copy differs"
+      "evidence": "the reset journey's cooldown is the same tree from the same source; only the surrounding copy differs"
+    },
+    {
+      "ownerId": "page-authentication",
+      "state": "resetLinkSent",
+      "coverage": "not-applicable",
+      "evidence": "GONE. The link-based reset left the union in 1.1 when the journey became code-based, and 1.2 has no link journey at all - `requestPasswordReset` and `resetPassword` survive in the transport with no caller."
+    },
+    {
+      "ownerId": "page-authentication",
+      "state": "sign-in credentials collapsed",
+      "coverage": "not-applicable",
+      "evidence": "REMOVED BY THE MERGE. `isCredentialsOpen` existed so one panel could hide its form behind the shortcuts; with one surface per route there is nothing to collapse, and the credential form is always mounted and always open."
     }
   ],
   "relationships": [
@@ -1256,8 +1298,14 @@
     {
       "kind": "seam",
       "subject": "authentication-panel-card",
-      "decision": "one inset around the whole interior",
-      "reason": "the card's boundary is the surface; the inset belongs to the entry because nivo's branches zero the vendor's own"
+      "decision": "p-4 around the whole interior, written on the entry",
+      "reason": "the card's boundary is the surface, and nivo's surface branches zero the vendor's own padding; an inset borrowed from the branch would make the same key read one way inside a surface and another way on its own"
+    },
+    {
+      "kind": "seam",
+      "subject": "the measure of the card",
+      "decision": "max-w-sm is written onto the child FROM centred-authentication-page",
+      "reason": "SurfaceFormCard puts the entry's node inside the vendor Card, so the entry's own max-w-sm constrains the contents and never the card; the measure has to reach the element the reader sees a border around"
     },
     {
       "kind": "rank",
@@ -1281,7 +1329,7 @@
       "kind": "rank",
       "subject": "the address in the code step's subtitle",
       "decision": "carried in the subtitle rather than given its own row",
-      "reason": "it is the one fact a reader on that step checks, and it belongs to the sentence that explains why they are there"
+      "reason": "it is the one fact a reader on that step checks, and it belongs to the sentence that explains why they are there - which is also why no step counter was minted"
     },
     {
       "kind": "variant",
@@ -1292,8 +1340,20 @@
     {
       "kind": "variant",
       "subject": "provider shortcuts",
-      "decision": "Button variant=outline with an icon",
-      "reason": "alternatives to the primary path, not competitors with it"
+      "decision": "Button variant=outline with an icon, above the divider, in every mode",
+      "reason": "alternatives to the primary path rather than competitors with it - and in one panel they sit outside the mode's field list, so every mode draws them, exactly as the named reference does"
+    },
+    {
+      "kind": "variant",
+      "subject": "the divider label",
+      "decision": "set in capitals - HOẶC / OR",
+      "reason": "it names the choice BETWEEN two ways in rather than labelling the block below it; at sm and muted, lowercase reads as a caption of the form underneath. It also matches the parity baseline exactly."
+    },
+    {
+      "kind": "variant",
+      "subject": "remember-me and forgot-password",
+      "decision": "spread-choice-row - Checkbox at one end, TextLink at the other, sign-in mode only",
+      "reason": "a choice a reader makes about THIS sign-in and the way out of it are peers picked between, which is the contract's own reason for existing. Neither means anything before an account exists, so neither is drawn on the other two modes."
     },
     {
       "kind": "variant",
@@ -1311,190 +1371,220 @@
       "kind": "variant",
       "subject": "the refusal sentence",
       "decision": "Text sm muted with live=assertive",
-      "reason": "announced rather than merely shown; the tone stays muted because the invalid field is already marked"
+      "reason": "announced rather than merely shown; the tone stays muted because the invalid field is already marked, and a second alarm would be the same fact twice"
     }
   ],
   "openQuestions": [
     {
       "question": "authentication-panel-card gains an inset, so the card has interior space",
-      "default": "p-6 on the entry; a scoped CSS rule stands in for it in the candidate",
-      "cost": "touches an entry the shipped SignInPage renders, so that screen acquires a visible card",
-      "resolution": "waived",
-      "answeredBy": "duyệt - revision 1.0 approved as shown, with this stated"
+      "default": "p-6 on the entry; a scoped CSS rule stood in for it in the 1.0 candidate",
+      "cost": "touches an entry the shipped sign-in screen renders, so that screen acquires a visible card",
+      "resolution": "answered",
+      "answeredBy": "Applied in the registry at p-4, not the p-6 the default named, and the scoped CSS stand-in is gone from the candidate's globals.css. The narrower inset is recorded here rather than silently: it is what the shipped screen and every screenshot below actually show."
     },
     {
       "question": "centred-authentication-page gains host:\"main\"",
       "default": "yes",
-      "cost": "the shipped sign-in route's outer element becomes <main>; no class changes, so no pixel changes",
-      "resolution": "waived",
-      "answeredBy": "duyệt - revision 1.0 approved as shown, with this stated"
+      "cost": "the shipped route's outer element becomes <main>; no class changes, so no pixel changes",
+      "resolution": "answered",
+      "answeredBy": "applied as proposed"
     },
     {
       "question": "do the provider shortcuts appear on the reset route",
-      "default": "no on reset, yes on sign-up",
-      "cost": "a deliberate divergence from the named reference, which draws them on all three modes",
-      "resolution": "waived",
-      "answeredBy": "duyệt - revision 1.0 approved as shown, with this stated"
+      "default": "no on reset, yes on sign-up - 1.0's answer",
+      "cost": "1.0 paid a deliberate divergence from the named reference, which draws them on all three modes",
+      "resolution": "answered",
+      "answeredBy": "REVERSED BY THE MERGE, structurally rather than by decision: one details tree holds the shortcut block above the divider, so every mode draws it and the divergence closed itself. The reasoning behind 1.0's answer is not refuted - a provider button does not recover this account, it signs the reader into a different one - and it is carried into unknowns rather than treated as settled."
     },
     {
       "question": "TextLink gains disabled, so a cooling-down resend stops looking pressable",
       "default": "not in this candidate - the label carries the countdown and press is withheld",
       "cost": "the words still look pressable for sixty seconds",
       "resolution": "waived",
-      "answeredBy": "duyệt - revision 1.0 approved as shown, with this stated"
+      "answeredBy": "still waived at 1.2: TextLink has no `disabled` prop in packages/ui, and the exact delta is written out in preview-lab/proposed-contracts.ts rather than applied"
     },
     {
       "question": "is the shipped resetLinkSent state removed once the code journey lands",
       "default": "left in place in 1.0",
       "cost": "one state nothing reaches",
       "resolution": "answered",
-      "answeredBy": "revision 1.1 settled it structurally rather than by a decision: the forgot-password link navigates to its own route, so the panel cannot reach that state and it is gone from the union"
+      "answeredBy": "settled structurally in 1.1 and completed by the merge in 1.2: there is no link journey and no such member in the union"
+    },
+    {
+      "question": "remember-me is drawn again while the refresh cookie's lifetime is fixed",
+      "default": "draw it, hold its value in page state, default it ON",
+      "cost": "the control implies a choice the backend does not honour - the cookie's maxAge is a fixed thirty days with no per-request control, so the session lasts the same either way",
+      "resolution": "waived",
+      "answeredBy": "shipped in revision 1.2 as drawn. It is held rather than dropped because making it mean something is ONE backend change - the cookie taking its lifetime from this flag - and the control has to exist before that change has anywhere to land. Recorded as the backend enabler remember-me-sets-the-refresh-lifetime rather than faked here."
     }
   ],
   "newOwners": [
-    "OtpStep",
-    "SignUpPanel",
-    "ForgotPasswordPanel"
+    "AuthenticationPanel",
+    "AuthenticationPage"
   ],
   "consolidation": [
     {
-      "ownerId": "OtpStep",
+      "ownerId": "AuthenticationPanel",
       "kin": [
+        "SignInPanel",
         "SignUpPanel",
         "ForgotPasswordPanel",
-        "the reference's inline `code` step"
+        "OtpStep",
+        "the named reference's own AuthenticationPanel"
       ],
-      "verdict": "extract-composite",
-      "distinguishingFact": "The second step is identical in both journeys down to the cooldown, and the cooldown is the part with a security consequence. Written into each panel it would be two copies of one sixty-second rule. Extracted as a sibling the pages mount, no block renders another block and the page keeps the only thing it owns - which step is showing."
+      "verdict": "merge",
+      "distinguishingFact": "THE FACT THAT MADE THEM ONE: `details`, `code` and `done` are the SAME THREE TREES in all three journeys. What differs between the journeys is which fields appear inside those trees and which words label them - and by the reference's own rule, which this case adopted in 1.0, a different tree is a state while the same tree with a different sentence is props. Three panels were therefore three copies of one state machine, each re-deriving the same union, the same uncontrolled ref and the same status slot. Merging also retires OtpStep on its own terms: it was extracted in 1.0 because two panels each needed the code step and its sixty-second cooldown, and with one panel there is exactly one of each - a block shared by a single caller is a seam kept for its own sake.",
+      "whatMergingCostChecked": "The 1.0 verdicts that said keep-apart were re-read rather than overruled by convenience. SignUpPanel was kept apart on a DIFFERENT DOMAIN ENTITY (an account, not a session) and a third field existing only to be compared with the second; ForgotPasswordPanel on a constraint neither sibling has (it must never disclose whether an address is registered). Both facts are still true and both are now expressed as props inside one panel: `mode` selects the third field, and the reset journey's conditional subtitle and single refusal sentence carry the non-disclosure rule. A fact that can be expressed as a prop of one owner was never a reason for a second owner - it was a reason for a discriminator, which is what `mode` is."
     },
     {
-      "ownerId": "SignUpPanel",
+      "ownerId": "AuthenticationPage",
       "kin": [
-        "SignInPanel"
+        "SignInPage",
+        "SignUpPage",
+        "ForgotPasswordPage"
       ],
-      "verdict": "keep-apart",
-      "distinguishingFact": "A DIFFERENT DOMAIN ENTITY and a different slot identity: SignInPanel exchanges existing credentials for a session and holds two fields; this creates an account and holds three, the third existing only to be compared with the second. They also differ in what a submission MEANS - one opens a session, the other opens a challenge. They render similarly, which is the weakest signal on the list and never the verdict on its own."
+      "verdict": "merge",
+      "distinguishingFact": "Three pages differed only in which panel they mounted and which mutations they called. With one panel there is one thing to mount, and the three mutation sets are three branches of one submit - so the pages collapsed the same way the panels did. The named reference has exactly one authentication address, and a page per journey was the thing that made three URLs necessary in the first place."
     },
     {
-      "ownerId": "ForgotPasswordPanel",
+      "ownerId": "OtpStep",
       "kin": [
-        "SignUpPanel",
-        "SignInPanel"
+        "AuthenticationPanel"
       ],
-      "verdict": "keep-apart",
-      "distinguishingFact": "It carries a constraint neither sibling has: it must not disclose whether an address is registered, in any state, which is why it has no unknown-address state and no provider shortcuts. Its slot identity differs too - one field, no password at the first step. Merging it into a variant prop would put a security rule behind a boolean."
+      "verdict": "merge",
+      "distinguishingFact": "Retired into AuthenticationPanel's `code` state. It was a correct extraction while two panels shared it and became a block with one caller the moment they became one panel."
     }
   ],
   "blockTrees": [
-    "SignInPage > centred-authentication-page > SurfaceFormCard(authentication-panel-card) > SignInPanel(entry|twoFactorUnsupported|handingOff|exchanging|exchangeFailed)",
-    "SignUpPage > centred-authentication-page > SurfaceFormCard(authentication-panel-card) > SignUpPanel(details|done) | OtpStep(code)",
-    "ForgotPasswordPage > centred-authentication-page > SurfaceFormCard(authentication-panel-card) > ForgotPasswordPanel(details|done) | OtpStep(codeWithNewPassword)"
+    "AuthenticationPage(route /authentication) > component.tsx > centred-authentication-page(host=main) > SurfaceFormCard(authentication-panel-card) > AuthenticationPanel(details|code|done|twoFactorUnsupported)",
+    "AuthenticationPanel(details) > centred-page-column > [centred-title-pair] + [auth-entry-stack > auth-shortcuts-over-divider + form>stacked-peer-controls] + [centred-prompt-row]",
+    "AuthenticationPanel(code) > centred-page-column > [centred-title-pair] + [form>stacked-peer-controls] + [spread-choice-row]",
+    "AuthenticationPanel(done|twoFactorUnsupported) > centred-page-column > [centred-title-pair] + [centred-title-pair] + [stacked-peer-controls]",
+    "index.tsx (connected half) > owns mode, phase, challengeId ref, cooldown clock, seven mutations; renders component.tsx and nothing else"
   ],
   "contracts": [
     {
       "key": "centred-authentication-page",
-      "status": "existing, retained; gains host:\"main\"",
+      "status": "existing, retained; host:\"main\" and the two child-measure classes APPLIED",
       "why": "Authentication is the route's only task, so its one bounded form sits at the visual centre instead of inheriting the dashboard's rail-and-main reading order."
     },
     {
       "key": "authentication-panel-card",
-      "status": "existing, retained; gains an inset",
+      "status": "existing, retained; p-4 inset APPLIED",
       "why": "The authentication form is one meaningful control group, so one card bounds it while the panel inside retains ownership of its typed form rhythm."
     },
     {
       "key": "centred-page-column",
-      "status": "existing, retained",
+      "status": "existing, retained, unchanged",
       "why": "A surface read one control at a time is centred and narrow on purpose."
     },
     {
       "key": "auth-entry-stack",
-      "status": "existing, retained",
+      "status": "existing, retained, unchanged",
       "why": "Authentication has exactly two entry blocks: OAuth closed by the OR divider above, and the credential form below."
     },
     {
       "key": "auth-shortcuts-over-divider",
-      "status": "existing, retained",
+      "status": "existing, retained; restingCount 2 -> 1 APPLIED",
       "why": "The divider CLOSES the shortcut choice rather than merely separating it."
     },
     {
       "key": "stacked-peer-controls",
-      "status": "existing, retained",
-      "why": "Controls repeat down one column as independently readable field or action units."
+      "status": "existing, retained, unchanged",
+      "why": "Controls repeat down one column as independently readable field or action units - which is how the status sentence can sit between the last field and the submit without a wrapper."
     },
     {
       "key": "label-field-hint",
-      "status": "existing, retained",
+      "status": "existing, retained, unchanged",
       "why": "The hint belongs under the control it explains, because a reader reaches the hint after failing at the control."
     },
     {
       "key": "centred-title-pair",
-      "status": "existing, retained",
+      "status": "existing, retained; its optional `mark` slot arrived from a CONCURRENT case and is named explicitly as undefined",
       "why": "Used for the step header too: its description slot carries the ADDRESS, which is why no step counter was minted."
     },
     {
       "key": "spread-choice-row",
-      "status": "existing, retained",
+      "status": "existing, retained, unchanged - and now used for BOTH the remember-me row and the resend row",
       "why": "A choice and the way out of it are pushed to opposite ends of one line."
     },
     {
       "key": "centred-prompt-row",
-      "status": "existing, retained",
+      "status": "existing, retained, unchanged",
       "why": "A question and its answer read as one sentence."
     },
     {
       "key": "otp-digit-row",
-      "status": "REJECTED at Preview",
-      "why": "Proposed by Plan; withdrawn after reading the reference's source. One Field with kind:\"code\" already expresses it and carries autocomplete=one-time-code."
+      "status": "REJECTED at Preview, still rejected",
+      "why": "Proposed by Plan; withdrawn after reading the reference's source. One Field with kind:\"code\" already expresses it and carries autocomplete=one-time-code and inputmode=numeric."
     },
     {
       "key": "stepped-panel-header",
-      "status": "REJECTED at Preview",
+      "status": "REJECTED at Preview, still rejected",
       "why": "Proposed by Plan; withdrawn. centred-title-pair already holds the pair, and the reference puts the address there instead of a step count."
     }
   ],
   "vocabularyProposals": [
     {
-      "id": "OtpStep",
-      "status": "approved in revision 1.0",
-      "path": "apps/app/src/components/blocks/auth/OtpStep/index.tsx"
+      "id": "AuthenticationPanel",
+      "status": "approved in revision 1.2, shipped",
+      "path": "apps/app/src/components/blocks/auth/AuthenticationPanel/index.tsx"
     },
     {
-      "id": "SignUpPanel",
-      "status": "approved in revision 1.0",
-      "path": "apps/app/src/components/blocks/auth/SignUpPanel/index.tsx"
-    },
-    {
-      "id": "ForgotPasswordPanel",
-      "status": "approved in revision 1.0",
-      "path": "apps/app/src/components/blocks/auth/ForgotPasswordPanel/index.tsx"
+      "id": "AuthenticationPage",
+      "status": "approved in revision 1.2, shipped as component.tsx plus index.tsx",
+      "path": "apps/app/src/components/pages/AuthenticationPage/"
     },
     {
       "id": "SignInPanel",
-      "status": "shipped, untouched",
-      "path": "apps/app/src/components/blocks/auth/SignInPanel/index.tsx"
+      "status": "RETIRED in revision 1.2 - merged into AuthenticationPanel and deleted",
+      "path": "apps/app/src/components/blocks/auth/SignInPanel/ (gone)"
+    },
+    {
+      "id": "SignUpPanel",
+      "status": "RETIRED in revision 1.2 - never shipped as its own owner",
+      "path": "merged into AuthenticationPanel's details/done states"
+    },
+    {
+      "id": "ForgotPasswordPanel",
+      "status": "RETIRED in revision 1.2 - never shipped as its own owner",
+      "path": "merged into AuthenticationPanel's details/code/done states with mode=forgotPassword"
+    },
+    {
+      "id": "OtpStep",
+      "status": "RETIRED in revision 1.2 - never shipped as its own owner",
+      "path": "merged into AuthenticationPanel's code state"
     },
     {
       "id": "TextLink.disabled",
-      "status": "proposed, NOT approved",
+      "status": "proposed, NOT approved and NOT applied",
       "path": "packages/ui/src/leaves/TextLink/index.tsx",
-      "note": "exact delta in preview-lab/proposed-contracts.ts"
+      "note": "exact delta in preview-lab/proposed-contracts.ts; the cooling-down resend still swaps its label instead"
     }
   ],
   "backendEnablerProposals": [
     {
       "id": "sign-in-verify-otp-honours-totp",
       "classification": "SECURITY REGRESSION in existing code, not a feature request",
-      "uiNeed": "none - this direction does not use the OTP sign-in path",
+      "uiNeed": "none - no journey in this design calls that path",
       "evidence": "signInVerifyOtp returns requiresTwoFactor:false unconditionally, while signIn gates on user.twoFactorEnabled and issues a challenge.",
-      "escalationTrigger": "Approving this design removes the EXPOSURE by not calling that path, and does not remove the HOLE. The mutation is in the live schema and anything else that calls it inherits the bypass.",
-      "status": "open, and it survives this approval"
+      "escalationTrigger": "Approving this design removed the EXPOSURE by not calling that path, and did NOT remove the HOLE. The mutation is in the live schema and anything else that calls it inherits the bypass. Revision 1.2 changes nothing about this: the merge moved the sign-in path into one panel, it did not close a backend door.",
+      "status": "open, and it survives this approval too"
     },
     {
       "id": "otp-challenge-takes-an-injectable-clock",
       "classification": "testability of existing code",
       "uiNeed": "a test that proves the resend control actually delivers a new code",
       "evidence": "OTP_RESEND_COOLDOWN_MS is 60s and OtpChallengeService reads the wall clock, so no flow reaches the successful resend without sleeping a minute.",
-      "escalationTrigger": "the control is drawn in this candidate and its happy path has never been executed by a test",
+      "escalationTrigger": "the control is drawn in this candidate, its cooldown state is one of the fourteen sealed screens, and its happy path has never been executed by any test",
+      "status": "open"
+    },
+    {
+      "id": "remember-me-sets-the-refresh-lifetime",
+      "classification": "the control exists and the mechanism behind it does not",
+      "uiNeed": "the remember-me checkbox restored in revision 1.2 has to mean something",
+      "evidence": "the refresh cookie is written with a fixed thirty-day maxAge and no per-request control, so the switch records intent and the session lasts the same either way",
+      "escalationTrigger": "a control that implies a choice it does not make is a promise the screen cannot keep; it is drawn because the cookie change has to have somewhere to land, and that change has not happened",
       "status": "open"
     }
   ],
@@ -1502,13 +1592,19 @@
     "path": "D:/Repositories/nivo-fe/design-plans/app-authentication/preview-lab",
     "url": "http://127.0.0.1:8100/",
     "caseId": "case-auth",
-    "revision": "1.1"
+    "revision": "1.2"
   },
   "approval": {
     "kind": "confirmed-restated",
-    "restatement": "Duyệt 1.1 thì em niêm phong lại rồi chạy Apply với ranh giới đã nở.",
-    "source": "ok dứt apply",
+    "restatement": "Revision 1.2 - one /authentication route, one AuthenticationPanel with four states, one AuthenticationPage split into a drawing half and a connected half, GitHub gone, remember-me restored - is recorded RETROACTIVELY. It was built, approved in conversation and shipped before this record was brought up to it.",
+    "source": "commit 9fdf5c3 in nivo-fe, which shipped the merged panel, the single route, the six OTP operations and the four registry deltas; this record is the artifact debt that commit left behind",
+    "evidenceLimit": "NO VERBATIM APPROVAL SENTENCE FOR 1.2 was available to the session that wrote this entry, so the approval is attested by the shipped commit rather than quoted. The two prior revisions carry the user's own words and are kept below for exactly that contrast. A reader who needs the words for 1.2 has to go to the conversation that produced 9fdf5c3.",
     "priorRevisions": [
+      {
+        "revision": "1.1",
+        "restatement": "Duyệt 1.1 thì em niêm phong lại rồi chạy Apply với ranh giới đã nở.",
+        "source": "ok dứt apply"
+      },
       {
         "revision": "1.0",
         "restatement": "Thầy duyệt revision 1.0 như đang thấy, hay sửa gì trước?",
@@ -1518,6 +1614,6 @@
   },
   "seal": {
     "algorithm": "sha256",
-    "manifestSha256": "5dde424eb96a525f9cb3cff08c6a625b159590db379fddbd557d17495a2ebfc4"
+    "manifestSha256": "899eedf488aa7133bbbcc9ef04267cd595be8a13d7c9ec8a53df27fd221c1b3f"
   }
 }

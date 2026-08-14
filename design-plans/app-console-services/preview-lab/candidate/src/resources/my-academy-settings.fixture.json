@@ -1,0 +1,20 @@
+{
+  "_source": "myAcademySettings -> MyAcademySettingsResponse { success, message, error, metadata, data: MyAcademySettings }. MyAcademySettings introspected live carries exactly two fields: credentials:[AcademyCredentialStatusType!]! and customDomain:AcademyCustomDomainStateType!. THIS QUERY IS HERE FOR ITS REFUSALS, NOT ITS ANSWER, which is why the case lists a fourth network state at all: it throws for a viewer with NO site and again for a viewer with TWO, so both refusals are the ORDINARY result of an ordinary customer rather than a fault to retry - which is why body-with-refusal-note's recovery slot is optional. THE AMBIGUOUS REFUSAL IS THE ONE WHOSE METADATA IS WORTH DRAWING: it carries the site count that made the answer ambiguous. Note that this is a count the SERVER volunteered about a refusal, not a count of a list - the case's no-counts rule is about stating how many apps, sites, domains or templates exist, and no query answers that. THERE IS NO ANSWER ARM AT ALL, deliberately: this case draws the refusals and never renders the settings body, which belongs to the deferred third level. The bare arm name `refused` is the not-found case, which is what a viewer with no site gets; `refusedAmbiguous` is the two-site case, kept separate because it is the only refusal whose metadata is worth drawing.",
+  "refused": {
+    "success": false,
+    "message": "Expert site not found",
+    "error": "EXPERT_SITE_NOT_FOUND_EXCEPTION",
+    "metadata": {},
+    "data": null
+  },
+  "refusedAmbiguous": {
+    "success": false,
+    "message": "Expert site is ambiguous for this viewer",
+    "error": "EXPERT_SITE_AMBIGUOUS_FOR_VIEWER_EXCEPTION",
+    "metadata": {
+      "userId": "0a4d2f18-53b6-4c70-9e21-8f6b3d0a7c45",
+      "siteCount": 2
+    },
+    "data": null
+  }
+}

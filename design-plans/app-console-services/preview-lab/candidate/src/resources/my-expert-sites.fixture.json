@@ -1,0 +1,66 @@
+{
+  "_source": "myExpertSites -> MyExpertSitesResponse { success, message, error, metadata, data: [ExpertSiteEntity!] }. Introspected live at http://localhost:3067/graphql. THE RELATION FENCE: my-expert-sites.service.ts selects relations { offerings: true } and nothing else, and the resolver carries no @ResolveField, so catalogOrder, instance and user are NULL on the wire for every row. They are written out as explicit nulls rather than omitted, because that is what the transport actually says - a fixture that put catalogOrder.catalogItem.name on one of these rows would be inventing the very field this case refuses to assert. NO refused state: this service cannot throw. NO pagination: the query takes zero arguments and returns the complete set, so there is no total, cursor or hasMore a fixture may carry.",
+  "answered": {
+    "success": true,
+    "message": "Lấy danh sách site thành công",
+    "error": null,
+    "metadata": null,
+    "data": [
+      {
+        "id": "4f2b8c11-6a3d-4d8e-9c21-1a7f0e5b3d90",
+        "slug": "minhtue",
+        "customDomain": null,
+        "status": "live",
+        "provisionStatus": "ready",
+        "provisionError": null,
+        "publishedAt": "2026-07-02T03:14:00.000Z",
+        "createdAt": "2026-07-01T09:20:00.000Z",
+        "updatedAt": "2026-08-11T02:05:00.000Z",
+        "config": {
+          "displayName": "Minh Tuệ",
+          "headline": "Lớp văn học cho người đi làm",
+          "bio": null,
+          "avatarUrl": null,
+          "ctaLabel": "Đăng ký học",
+          "accentHue": 212,
+          "templateKey": "creator"
+        },
+        "offerings": [],
+        "catalogOrder": null,
+        "instance": null,
+        "user": null
+      },
+      {
+        "id": "b7d1e004-2f55-4a19-8f30-c6c9a4d21e7b",
+        "slug": "lopvanhoc",
+        "customDomain": "lopvanhoc.com",
+        "status": "draft",
+        "provisionStatus": "awaiting_dns",
+        "provisionError": null,
+        "publishedAt": null,
+        "createdAt": "2026-08-09T04:41:00.000Z",
+        "updatedAt": "2026-08-13T01:12:00.000Z",
+        "config": {
+          "displayName": "Lớp Văn học",
+          "headline": "Đọc kỹ, viết thật",
+          "bio": null,
+          "avatarUrl": null,
+          "ctaLabel": "Xem khóa học",
+          "accentHue": 28,
+          "templateKey": "minimal"
+        },
+        "offerings": [],
+        "catalogOrder": null,
+        "instance": null,
+        "user": null
+      }
+    ]
+  },
+  "empty": {
+    "success": true,
+    "message": "Lấy danh sách site thành công",
+    "error": null,
+    "metadata": null,
+    "data": []
+  }
+}

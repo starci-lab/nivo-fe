@@ -1,0 +1,1801 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction lab — console theo dịch vụ (nivo)</title>
+<style>
+:root{
+  --bg:#f4f4f5; --surface:#fff; --surface-2:#fafafa; --border:#e4e4e7;
+  --fg:#18181b; --muted:#71717a; --faint:#a1a1aa;
+  --accent:#3f4bd8; --ok:#15803d; --warn:#b45309; --bad:#b91c1c;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:14px/1.55 ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+.banner{position:sticky;top:0;z-index:20;background:#18181b;color:#fafafa;
+  padding:10px 20px;font-weight:700;letter-spacing:.06em;font-size:11px;text-transform:uppercase;
+  display:flex;flex-wrap:wrap;gap:10px;align-items:baseline}
+.banner span{color:#fbbf24;font-weight:600;letter-spacing:.02em;text-transform:none;font-size:11.5px}
+.wrap{max-width:1560px;margin:0 auto;padding:24px 20px 90px}
+h1{font-size:24px;margin:20px 0 8px;letter-spacing:-.01em}
+.lede{color:#3f3f46;max-width:96ch;margin:0 0 14px;font-size:13.5px}
+.quotes{border:1px solid var(--border);border-left:3px solid var(--accent);background:var(--surface);
+  border-radius:9px;padding:13px 16px;margin:0 0 16px;max-width:96ch}
+.quotes p{margin:0 0 6px;font-size:13px;color:#3f3f46}
+.quotes p:last-child{margin-bottom:0}
+.quotes b{color:var(--fg)}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 20px;max-width:120ch}
+@media(max-width:900px){.facts{grid-template-columns:1fr}}
+.fact{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 15px}
+.fact h3{margin:0 0 6px;font:600 11px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.fact p{margin:0;font-size:12.5px;color:#3f3f46}
+.jump{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px;padding:0;list-style:none}
+.jump a{display:inline-block;font-size:12px;font-weight:600;text-decoration:none;color:var(--fg);
+  background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:6px 13px}
+.jump a:hover{border-color:var(--accent);color:var(--accent)}
+.dirs{display:flex;flex-direction:column;gap:28px;margin-top:26px}
+.dir{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;scroll-margin-top:60px}
+.dir > header{padding:17px 19px;border-bottom:1px solid var(--border);background:var(--surface-2)}
+.dir-tag{display:inline-block;font:600 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:5px 9px;background:#fff}
+.dir h2{font-size:18px;margin:11px 0 6px;letter-spacing:-.01em}
+.dir-thesis{margin:0 0 8px;font-size:13px;color:#3f3f46;max-width:112ch}
+.dir-posture{margin:0;font-size:12.5px;color:var(--muted);max-width:112ch}
+.dir-posture b{color:var(--fg)}
+.dir-scene{padding:18px;background:#e9e9ec;border-bottom:1px solid var(--border)}
+.dir-notes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:22px;padding:18px 19px;background:var(--surface-2)}
+@media(max-width:1100px){.dir-notes{grid-template-columns:1fr}}
+.dir-notes h3{margin:0 0 4px;font:600 11px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.dir-notes .hint{margin:0 0 10px;font-size:11.5px;color:var(--faint);max-width:70ch}
+.dir-notes ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.dir-notes li{font-size:12.5px;color:#3f3f46;line-height:1.55;padding-left:12px;border-left:2px solid var(--border)}
+.dir-notes li b{color:var(--fg)}
+.dir-notes code{font:11.5px var(--mono);background:#f0f0f2;padding:1px 5px;border-radius:5px;color:#27272a}
+.vd{display:inline-block;font:700 9.5px/1.5 var(--mono);letter-spacing:.07em;text-transform:uppercase;
+  border-radius:4px;padding:1px 6px;margin-right:6px;vertical-align:1px;white-space:nowrap}
+.vd-reuse{background:#e6f2ec;color:var(--ok)}
+.vd-new{background:#ecedfb;color:var(--accent)}
+.vd-extend{background:#fbf1dc;color:var(--warn)}
+.vd-no{background:#f4f4f5;color:var(--muted)}
+.vd-gap{background:#faeaeb;color:var(--bad)}
+/* Each direction's source HTML carries its own header. The lab chrome above already states the
+   same tag, title, thesis and posture, so the duplicate is hidden here rather than deleted from
+   the direction markup — the markup is the record, this is only how the lab presents it.
+   Anything the chrome does NOT repeat (B's four-state legend, C's accent-colour rule) stays. */
+.dir-scene .da-head{display:none}
+.dir-scene .db-head{margin-bottom:14px}
+.dir-scene .db-head .db-kicker,.dir-scene .db-head .db-title,.dir-scene .db-head .db-thesis{display:none}
+.dir-scene .dc-head{display:none} /* C's accent-colour rule survives in its own dc-key block below the scenes */
+.dir-scene .direction-a .da-scenes{border-left:0;border-right:0;background:transparent;padding:0}
+.rev-log{padding:16px 19px;border-bottom:1px solid var(--border);background:#fbfbfc}
+.rev-log > h3{margin:0 0 12px;font:600 11px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.rev-log-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.rev-log-cols h4{margin:0 0 7px;font-size:13px;letter-spacing:-.01em}
+.rev-log-cols p{margin:0 0 8px;font-size:12.5px;color:#3f3f46;line-height:1.6}
+.rev-log-cols p:last-child{margin-bottom:0}
+.rev-log-cols b{color:var(--fg)}
+.rev-log-cols code{font:11.5px var(--mono);background:#f0f0f2;padding:1px 5px;border-radius:5px;color:#27272a}
+details.revold{border-bottom:1px solid var(--border);background:var(--surface-2)}
+details.revold > summary{cursor:pointer;list-style:none;padding:12px 19px;font:600 11px/1.4 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+details.revold > summary::-webkit-details-marker{display:none}
+details.revold > summary::before{content:"▸ ";color:var(--accent)}
+details.revold[open] > summary::before{content:"▾ "}
+details.revold > summary:hover{color:var(--accent)}
+.revold-lede{margin:0;padding:0 19px 12px;font-size:12.5px;color:var(--muted);max-width:104ch}
+.revold-scene{padding:18px;background:#e9e9ec;border-top:1px solid var(--border)}
+table.cmp{width:100%;border-collapse:collapse;margin-top:14px;background:var(--surface);
+  border:1px solid var(--border);border-radius:12px;overflow:hidden;font-size:12.5px}
+table.cmp th,table.cmp td{padding:11px 13px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+table.cmp th{background:var(--surface-2);font:600 10.5px/1.4 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+table.cmp tbody th{background:var(--surface-2);font-family:inherit;font-size:12.5px;letter-spacing:0;text-transform:none;color:var(--fg);width:190px}
+table.cmp tr:last-child td,table.cmp tr:last-child th{border-bottom:0}
+table.cmp code{font:11.5px var(--mono);background:#f0f0f2;padding:1px 5px;border-radius:5px}
+h2.section{font-size:19px;margin:36px 0 6px;letter-spacing:-.01em}
+.section-lede{margin:0;color:var(--muted);font-size:13px;max-width:96ch}
+.foot{margin-top:30px;color:var(--muted);font-size:12.5px;max-width:100ch}
+.foot b{color:var(--fg)}
+</style>
+</head>
+<body>
+
+<div class="banner">
+  DIRECTIONAL — NOT AN APPLY BASELINE
+  <span>· ba hướng để chọn, không phải bản dựng. Preview mới là đặc tả thực thi được.</span>
+</div>
+
+<main class="wrap">
+
+<h1>Console theo dịch vụ — ba hướng</h1>
+<p class="lede">
+  Console của nivo có đúng một màn: <code>/provisioning</code>. Cả ba hướng dưới đây đều nhận cùng một chỉ dẫn —
+  thanh bên chọn <b>dịch vụ</b> chứ không phải loại tài nguyên, bốn dịch vụ cộng ví, và không một dòng nào đến từ fixture.
+  Chúng khác nhau ở ba chỗ khó đổi về sau: <b>toàn cảnh sống ở đâu</b>, <b>màn chưa-cấp-phát-gì nói gì</b>,
+  và <b>phải đúc thêm bao nhiêu vốn từ contract</b>.
+</p>
+
+<div class="quotes">
+  <p><b>Chỉ dẫn, nguyên văn:</b></p>
+  <p>“kiểu 1 cái sidebar ấy rồi chọn service, hiện tại có 4 services học viện agentos vps và domain registar / và wallet management”</p>
+  <p>“còn data mock đừng render vào vì giờ làm thật”</p>
+  <p>“trang là dashboard, có sidebar bên cạnh và ở đây là thông tin chung, giờ chưa provision gì hết”</p>
+</div>
+
+<div class="facts">
+  <div class="fact">
+    <h3>Fact 1 — màn đang chạy là hư cấu</h3>
+    <p><code>ProvisioningPage/index.tsx:23</code> import <code>fleet.fixture.json</code>; mọi dòng và mọi con số trên
+    màn hình đang chạy đều là bịa. <code>apps/app/src/modules/api/</code> chỉ có <code>auth.ts</code> và
+    <code>graphql.ts</code> — chưa có module dữ liệu nào cho bất kỳ truy vấn console nào.</p>
+  </div>
+  <div class="fact">
+    <h3>Fact 2 — nối vào mạng thì trạng thái nhân lên</h3>
+    <p>Mỗi khối dịch vụ có thể ở bốn trạng thái: <b>chưa hỏi</b>, <b>hỏi rồi và rỗng</b>, <b>hỏi rồi và có</b>,
+    <b>hỏi rồi và bị từ chối</b>. Console chạy trên fixture có một trạng thái mỗi khối. Console chạy trên mạng có bốn.
+    Vì thế cả ba hướng đều phải vẽ được trạng thái nghỉ và trạng thái từ chối, không chỉ trạng thái đẹp.</p>
+  </div>
+</div>
+
+<ul class="jump">
+  <li><a href="#direction-a">A — sidebar chọn dịch vụ, thân trang LÀ dịch vụ</a></li>
+  <li><a href="#direction-b">B — bản sửa 2: tổng quan là nhà, và điểm đến là ỨNG DỤNG</a></li>
+  <li><a href="#direction-c">C — thanh bên chính là bảng tổng quan</a></li>
+  <li><a href="#compare">Bảng so sánh</a></li>
+</ul>
+
+<div class="dirs">
+
+<!-- ══════════════════════════════ DIRECTION A ══════════════════════════════ -->
+<section class="dir" id="direction-a">
+  <header>
+    <span class="dir-tag">direction-a · sidebar chọn dịch vụ</span>
+    <h2>Sidebar chọn dịch vụ, thân trang LÀ dịch vụ đó</h2>
+    <p class="dir-thesis">
+      Năm điểm đến cố định (Học viện, AgentOS, Máy chủ, Tên miền · Ví, Hỗ trợ) đứng yên trong khi thân trang thay theo
+      route; mỗi dịch vụ là một cột các khối, và MỖI KHỐI tự trả lời bốn trạng thái mạng của riêng nó (chưa hỏi · rỗng ·
+      có dữ liệu · bị từ chối) thay vì cả trang mang một <code>phase</code> chung. Sidebar cố tình không mang con số nào,
+      vì backend không có truy vấn đếm và <code>NavLink</code> không có chỗ chứa điều kiện — điều kiện của dịch vụ nằm
+      trên baseline của tiêu đề thân trang. Màn hình của tài khoản chưa cấp phát gì không phải bốn danh sách rỗng mà là
+      MỘT màn duy nhất gọi tên bốn dịch vụ theo đúng thứ tự phụ thuộc thật, kết lại bằng số dư ví 0 ₫ — con số có thật
+      duy nhất trên màn đó.
+    </p>
+    <p class="dir-posture"><b>Posture:</b> parity-first với khung đã niêm phong. Thừa hưởng <code>FleetRow</code>,
+      thừa hưởng cả lỗi tràn dòng 390px của nó; cái mới nằm ở TRỤC của sidebar và ở chỗ trạng thái mạng thuộc về từng khối.
+      Rủi ro thấp nhất trong ba hướng, và cũng ít quyết định mới nhất.</p>
+  </header>
+
+  <div class="dir-scene">
+<section class="direction-a">
+<style>
+.direction-a{--da-bg:#f4f4f5;--da-surface:#fff;--da-surface2:#fafafa;--da-nav:#18181b;--da-border:#e4e4e7;--da-fg:#18181b;--da-muted:#71717a;--da-faint:#a1a1aa;--da-accent:#2563eb;--da-ok:#15803d;--da-warn:#b45309;--da-mono:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--da-fg);font:14px/1.55 ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif;display:block}
+.direction-a *{box-sizing:border-box}
+.direction-a .da-head{padding:16px 18px;border:1px solid var(--da-border);border-radius:14px 14px 0 0;background:var(--da-surface2)}
+.direction-a .da-tag{display:inline-block;font:600 10px/1 var(--da-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--da-muted);border:1px solid var(--da-border);border-radius:99px;padding:5px 9px;background:#fff}
+.direction-a .da-h2{font-size:17px;margin:10px 0 4px}
+.direction-a .da-thesis{color:var(--da-muted);font-size:13px;margin:0 0 6px;max-width:100ch}
+.direction-a .da-posture{margin:0;font-size:12.5px;color:#3f3f46}
+.direction-a .da-scenes{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;background:#e9e9ec;border-left:1px solid var(--da-border);border-right:1px solid var(--da-border)}
+@media(max-width:1180px){.direction-a .da-scenes{grid-template-columns:1fr}}
+.direction-a .da-scene{margin:0}
+.direction-a .da-cap{display:block;margin:0 0 8px;font-size:12.5px;color:#3f3f46}
+.direction-a .da-cap b{display:block;font-size:13px;color:var(--da-fg)}
+.direction-a .da-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.direction-a .da-app{display:flex;background:var(--da-surface);border:1px solid var(--da-border);border-radius:12px;overflow:hidden;min-height:620px}
+.direction-a .da-side{width:172px;flex:none;background:var(--da-nav);color:#d4d4d8;padding:14px 9px;display:flex;flex-direction:column;gap:2px}
+.direction-a .da-brand{color:#fff;font-weight:700;padding:4px 10px 12px;font-size:15px}
+.direction-a .da-navgrp{font:600 9.5px/1 var(--da-mono);letter-spacing:.12em;text-transform:uppercase;color:#71717a;padding:12px 10px 6px}
+.direction-a .da-nav{padding:7px 10px;border-radius:8px;font-size:13px}
+.direction-a .da-nav.da-on{background:#27272a;color:#fff;font-weight:600}
+.direction-a .da-sidenote{margin:auto 0 0;padding:10px;font-size:10.5px;line-height:1.45;color:#8b8b93;border-top:1px solid #3f3f46}
+.direction-a .da-body{flex:1;min-width:0;padding:16px;display:flex;flex-direction:column;gap:16px;background:var(--da-surface)}
+.direction-a .da-titlerow{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.direction-a .da-h3{font-size:18px;margin:0}
+.direction-a .da-basefact{font-size:12.5px;font-weight:400;color:var(--da-muted)}
+.direction-a .da-lede{margin:-6px 0 0;font-size:12.5px;color:var(--da-muted);max-width:70ch}
+.direction-a .da-sec{display:flex;flex-direction:column;gap:8px}
+.direction-a .da-seclabel{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;font-size:13.5px}
+.direction-a .da-seclabel b{font-size:13.5px}
+.direction-a .da-state{font:600 9.5px/1.6 var(--da-mono);letter-spacing:.06em;text-transform:uppercase;border-radius:99px;padding:2px 8px;background:#f4f4f5;color:var(--da-muted);border:1px solid var(--da-border)}
+.direction-a .da-s-data{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+.direction-a .da-s-wait{background:#fafafa;color:var(--da-faint)}
+.direction-a .da-s-empty{background:#fff;color:var(--da-muted)}
+.direction-a .da-s-refuse{background:#fffbeb;color:var(--da-warn);border-color:#fde68a}
+.direction-a .da-s-free{background:#f0fdf4;color:var(--da-ok);border-color:#bbf7d0}
+.direction-a .da-card{border:1px solid var(--da-border);border-radius:11px;background:var(--da-surface);overflow:hidden}
+.direction-a .da-row{display:flex;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid var(--da-border)}
+.direction-a .da-row:last-child{border-bottom:0}
+.direction-a .da-id{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.direction-a .da-name{font-size:13px;color:var(--da-accent)}
+.direction-a .da-handle{font-size:11.5px;color:var(--da-muted);font-family:var(--da-mono)}
+.direction-a .da-badge{display:inline-block;border-radius:99px;padding:3px 9px;font-size:11px;font-weight:600;background:#f4f4f5;color:var(--da-muted);white-space:nowrap}
+.direction-a .da-badge.da-ok{background:#dcfce7;color:#166534}
+.direction-a .da-badge.da-warn{background:#fef3c7;color:#92400e}
+.direction-a .da-btn{border:0;border-radius:99px;padding:7px 14px;font:600 13px/1 inherit;background:var(--da-accent);color:#fff;cursor:default}
+.direction-a .da-btn.da-line{background:#fff;border:1px solid var(--da-border);color:var(--da-fg)}
+.direction-a .da-btn.da-sm{padding:5px 11px;font-size:12px}
+.direction-a .da-facts{padding:4px 13px}
+.direction-a .da-fact{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:7px 0;border-bottom:1px dashed #f0f0f1;font-size:13px}
+.direction-a .da-fact:last-child{border-bottom:0}
+.direction-a .da-fact span{color:var(--da-muted)}
+.direction-a .da-fact b{font-family:var(--da-mono);font-size:12.5px;font-weight:600}
+.direction-a .da-unknown b{font-weight:400;font-style:italic;color:var(--da-faint);font-family:inherit;font-size:12.5px}
+.direction-a .da-refuse{border:1px solid #fde68a;background:#fffbeb;border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.direction-a .da-refuse b{font-size:13px}
+.direction-a .da-refuse p{margin:0;font-size:12.5px;color:#713f12}
+.direction-a .da-skel{padding:12px 13px;display:flex;flex-direction:column;gap:10px}
+.direction-a .da-skel i{display:block;height:11px;border-radius:5px;background:linear-gradient(90deg,#f4f4f5,#e9e9ec,#f4f4f5)}
+.direction-a .da-skel i:nth-child(1){width:62%}
+.direction-a .da-skel i:nth-child(2){width:78%}
+.direction-a .da-skel i:nth-child(3){width:45%}
+.direction-a .da-empty{padding:20px 13px;text-align:center;display:flex;flex-direction:column;gap:5px}
+.direction-a .da-empty b{font-size:13px;font-weight:600;color:#3f3f46}
+.direction-a .da-empty span{font-size:12px;color:var(--da-muted)}
+.direction-a .da-src{margin:0;font:11px/1.5 var(--da-mono);color:var(--da-faint)}
+.direction-a .da-offer{border:1px solid var(--da-border);border-radius:11px;padding:13px;display:flex;flex-direction:column;gap:9px;background:var(--da-surface)}
+.direction-a .da-offer.da-first{border-color:#bfdbfe;background:#fbfdff}
+.direction-a .da-offer.da-noact{background:var(--da-surface2)}
+.direction-a .da-ord{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:99px;background:#18181b;color:#fff;font:700 11px/1 var(--da-mono);flex:none}
+.direction-a .da-off-lede{margin:0;font-size:12.5px;color:var(--da-muted)}
+.direction-a .da-steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.direction-a .da-steps li{display:flex;gap:10px;font-size:12.5px;align-items:baseline}
+.direction-a .da-steps li em{width:14px;flex:none;text-align:center;font:600 12px/1 var(--da-mono);font-style:normal;color:var(--da-muted)}
+.direction-a .da-prereq{margin:0;font-size:12px;color:var(--da-warn);background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:7px 9px}
+.direction-a .da-noaction{margin:0;font-size:12px;color:var(--da-muted);font-style:italic}
+.direction-a .da-wallet{border:1px solid var(--da-border);border-radius:11px;padding:13px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;background:var(--da-surface2)}
+.direction-a .da-wline{display:flex;align-items:baseline;justify-content:space-between;width:100%;gap:10px}
+.direction-a .da-wline span{font-size:13px;color:var(--da-muted)}
+.direction-a .da-wline b{font:700 22px/1.1 var(--da-mono)}
+.direction-a .da-wallet p{margin:0;font-size:12.5px;color:#3f3f46}
+.direction-a .da-foot{margin:0;font-size:12px;color:var(--da-muted);border-top:1px dashed var(--da-border);padding-top:10px}
+.direction-a .da-notes{border:1px solid var(--da-border);border-top:0;border-radius:0 0 14px 14px;background:var(--da-surface2);padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:1180px){.direction-a .da-notes{grid-template-columns:1fr}}
+.direction-a .da-notes h4{margin:0 0 8px;font:600 11px/1 var(--da-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--da-muted)}
+.direction-a .da-notes ul{margin:0;padding-left:17px}
+.direction-a .da-notes li{margin:5px 0;font-size:12.5px;color:#3f3f46}
+.direction-a .da-notes code{font:11.5px var(--da-mono);background:#f4f4f5;padding:1px 5px;border-radius:5px}
+</style>
+
+<header class="da-head">
+  <span class="da-tag">direction-a · sidebar chọn dịch vụ</span>
+  <h2 class="da-h2">Sidebar là danh sách DỊCH VỤ; thân trang chính LÀ dịch vụ đang chọn</h2>
+  <p class="da-thesis">Năm điểm đến đứng yên trong khi thân trang đổi theo route. Trong một dịch vụ, mỗi khối tự hỏi truy vấn của riêng nó và tự trả lời bốn trạng thái mạng — chưa hỏi, rỗng, có dữ liệu, bị từ chối — thay vì cả trang mang một trạng thái chung như màn đang chạy trên fixture. Màn của tài khoản chưa cấp phát gì là MỘT màn duy nhất gọi tên bốn dịch vụ theo thứ tự phụ thuộc thật, không phải bốn danh sách rỗng.</p>
+  <p class="da-posture"><b>Posture:</b> parity-first với khung đã niêm phong (sidebar + thân trang + <code>FleetRow</code> giữ nguyên). Cái mới nằm ở TRỤC của sidebar và ở chỗ trạng thái mạng thuộc về từng khối. Màu nhấn ở đây là màu tạm — nivo chưa duyệt màu thương hiệu nào.</p>
+</header>
+
+<div class="da-scenes">
+
+  <figure class="da-scene">
+    <figcaption class="da-cap">
+      <b>Cảnh 1 — tài khoản đã có dịch vụ</b>
+      Đang chọn “Học viện”. Bốn khối trong thân trang đang ở bốn trạng thái mạng KHÁC NHAU cùng lúc — đó là điều một màn chạy trên fixture không bao giờ phải xử lý.
+      <span class="da-legend">
+        <span class="da-state da-s-data">có dữ liệu</span>
+        <span class="da-state da-s-wait">đang hỏi</span>
+        <span class="da-state da-s-empty">trả lời rỗng</span>
+        <span class="da-state da-s-refuse">bị từ chối</span>
+      </span>
+    </figcaption>
+
+    <div class="da-app">
+      <aside class="da-side">
+        <div class="da-brand">nivo</div>
+        <div class="da-navgrp">Dịch vụ</div>
+        <div class="da-nav da-on">Học viện</div>
+        <div class="da-nav">AgentOS</div>
+        <div class="da-nav">Máy chủ</div>
+        <div class="da-nav">Tên miền</div>
+        <div class="da-navgrp">Tài khoản</div>
+        <div class="da-nav">Ví</div>
+        <div class="da-nav">Hỗ trợ</div>
+        <p class="da-sidenote">Không một con số nào ở cột này: backend không có truy vấn đếm, và NavLink không có chỗ chứa tình trạng. Điều kiện của dịch vụ nằm cạnh tên nó trong thân trang.</p>
+      </aside>
+
+      <div class="da-body">
+        <div class="da-titlerow">
+          <h3 class="da-h3">Học viện <span class="da-basefact">đang chạy · có site chờ DNS</span></h3>
+          <button class="da-btn">Tạo học viện</button>
+        </div>
+
+        <section class="da-sec">
+          <div class="da-seclabel"><b>Học viện của bạn</b><span class="da-state da-s-data">có dữ liệu</span></div>
+          <div class="da-card">
+            <div class="da-row">
+              <div class="da-id"><span class="da-name">hocvien-minhtue</span><span class="da-handle">hocvien-minhtue.nivo.vn</span></div>
+              <span class="da-badge">Site</span>
+              <span class="da-badge da-ok">đã sẵn sàng</span>
+              <button class="da-btn da-line da-sm">Mở</button>
+            </div>
+            <div class="da-row">
+              <div class="da-id"><span class="da-name">lophocmoi</span><span class="da-handle">lophocmoi.nivo.vn</span></div>
+              <span class="da-badge">Site</span>
+              <span class="da-badge da-warn">chờ DNS</span>
+              <button class="da-btn da-line da-sm">Xem bản ghi CNAME</button>
+            </div>
+            <div class="da-row">
+              <div class="da-id"><span class="da-name">thu-nghiem</span><span class="da-handle">thu-nghiem.nivo.vn</span></div>
+              <span class="da-badge">Site</span>
+              <span class="da-badge">chưa cấp phát</span>
+              <button class="da-btn da-line da-sm">Xuất bản</button>
+            </div>
+          </div>
+          <p class="da-src">myExpertSites → slug · customDomain · status · provisionStatus · offerings. “chờ DNS” giữ tông cảnh báo chứ không phải tông lỗi — đó là phán đoán đã có sẵn trong FleetRow. Việc duy nhất một site nháp cho phép làm là xuất bản, nên nút là “Xuất bản”: provisionExpertSite từ chối mọi site chưa Live.</p>
+        </section>
+
+        <section class="da-sec">
+          <div class="da-seclabel"><b>hocvien-minhtue · bản triển khai</b><span class="da-state da-s-data">có dữ liệu</span></div>
+          <div class="da-card da-facts">
+            <div class="da-fact"><span>Trạng thái xuất bản</span><b>live</b></div>
+            <div class="da-fact"><span>Trạng thái cấp phát</span><b>ready</b></div>
+            <div class="da-fact"><span>Bản triển khai</span><b>running</b></div>
+            <div class="da-fact"><span>Xuất bản lúc</span><b>12/08/2026</b></div>
+            <div class="da-fact"><span>Tên miền riêng</span><b>chưa đặt</b></div>
+            <div class="da-fact da-unknown"><span>Cấu hình máy (RAM · vCPU)</span><b>console chưa có đường hỏi</b></div>
+          </div>
+          <p class="da-src">myExpertSite + myExpertSiteDeployment. Dòng cuối viết thành CÂU chứ không phải dấu gạch ngang: cột ram_mb/vcpu có thật và có trong schema, nhưng không truy vấn nào nạp được — “không biết” khác “bằng không”, và một dấu gạch ngang thì không nói được sự khác nhau đó.</p>
+        </section>
+
+        <section class="da-sec">
+          <div class="da-seclabel"><b>Cài đặt học viện</b><span class="da-state da-s-refuse">bị từ chối</span></div>
+          <div class="da-refuse">
+            <b>Phần này chưa hỏi được.</b>
+            <p>“Tài khoản đang có nhiều hơn một học viện, nên phần cài đặt không biết hỏi học viện nào.” — câu do máy chủ trả về, đã dịch sẵn vi/en.</p>
+            <button class="da-btn da-line da-sm">Chọn một học viện</button>
+          </div>
+          <p class="da-src">myAcademySettings → ExpertSiteAmbiguousForViewer. Đây là kết quả BÌNH THƯỜNG của một khách hàng mua nhiều, không phải lỗi trang — nên nó không được đẩy cả màn hình vào trạng thái hỏng, và tên dịch vụ phía trên vẫn đúng.</p>
+        </section>
+
+        <section class="da-sec">
+          <div class="da-seclabel"><b>Khách hàng tiềm năng</b><span class="da-state da-s-wait">đang hỏi</span></div>
+          <div class="da-card da-skel"><i></i><i></i><i></i></div>
+          <p class="da-src">myExpertSiteLeads(limit, offset) — truy vấn duy nhất trong dịch vụ này có phân trang, nên khối này nghỉ ở đúng số dòng nó sẽ có, không phải một vòng xoay.</p>
+        </section>
+
+        <section class="da-sec">
+          <div class="da-seclabel"><b>Gói bán hiển thị trên trang</b><span class="da-state da-s-empty">trả lời rỗng</span></div>
+          <div class="da-card da-empty">
+            <b>Chưa có gói nào hiển thị trên trang học viện.</b>
+            <span>Rỗng ở đây là câu trả lời thật, không phải sự vắng mặt của câu trả lời.</span>
+          </div>
+          <p class="da-src">offerings — nạp kèm theo myExpertSites, nên trạng thái rỗng này không tốn thêm một lượt hỏi nào.</p>
+        </section>
+      </div>
+    </div>
+  </figure>
+
+  <figure class="da-scene">
+    <figcaption class="da-cap">
+      <b>Cảnh 2 — chưa cấp phát gì (trạng thái thật của mọi tài khoản hôm nay)</b>
+      Khung không đổi: vẫn năm điểm đến, không cái nào bị khoá. Thân trang không phải bốn danh sách rỗng mà là một màn duy nhất, xếp bốn dịch vụ theo thứ tự phụ thuộc thật.
+    </figcaption>
+
+    <div class="da-app">
+      <aside class="da-side">
+        <div class="da-brand">nivo</div>
+        <div class="da-navgrp">Dịch vụ</div>
+        <div class="da-nav da-on">Tổng quan</div>
+        <div class="da-nav">Học viện</div>
+        <div class="da-nav">AgentOS</div>
+        <div class="da-nav">Máy chủ</div>
+        <div class="da-nav">Tên miền</div>
+        <div class="da-navgrp">Tài khoản</div>
+        <div class="da-nav">Ví</div>
+        <div class="da-nav">Hỗ trợ</div>
+        <p class="da-sidenote">Chưa mua gì thì các mục vẫn hiện đủ và bấm được: một điểm đến bị làm mờ không nói được là bạn chưa mua hay hệ thống hỏng.</p>
+      </aside>
+
+      <div class="da-body">
+        <div class="da-titlerow">
+          <h3 class="da-h3">Tổng quan <span class="da-basefact">chưa cấp phát dịch vụ nào</span></h3>
+        </div>
+        <p class="da-lede">nivo bán bốn thứ, và chúng không ngang nhau. Đây là thứ tự đi thật: bắt đầu ở đâu, thứ gì phải có trước, thứ gì không phải nơi bắt đầu.</p>
+
+        <section class="da-offer da-first">
+          <div class="da-seclabel"><span class="da-ord">1</span><b>Học viện</b><span class="da-state da-s-free">có bậc miễn phí</span></div>
+          <p class="da-off-lede">Trang học viện của bạn: khoá học, gói bán, chạy trên tên miền phụ nivo.vn.</p>
+          <ol class="da-steps">
+            <li><em>1</em>Tạo học viện — miễn phí, chưa cần ví, chưa cần đơn hàng</li>
+            <li><em>2</em>Xuất bản (Live) — bắt buộc trước khi cấp phát</li>
+            <li><em>3</em>Chọn gói: Khởi động 0 ₫ · Chuyên nghiệp 299.000 ₫ · Doanh nghiệp 899.000 ₫ mỗi tháng</li>
+            <li><em>4</em>Cấp phát — gói 0 ₫ không chạm tới ví</li>
+          </ol>
+          <button class="da-btn">Tạo học viện</button>
+          <p class="da-src">catalogItems → nivo-ai-academy và ba bậc giá của nó. Giá đọc từ backend lúc dựng trang, không viết cứng trong FE.</p>
+        </section>
+
+        <section class="da-offer">
+          <div class="da-seclabel"><span class="da-ord">2</span><b>AgentOS</b></div>
+          <p class="da-off-lede">Workspace agent: agent, kênh, mô hình, tự động hoá. Không có gì để tạo trước và không có bậc miễn phí — mua gói chính là bước đầu tiên.</p>
+          <ol class="da-steps">
+            <li><em>1</em>Chọn gói: Cơ bản 490.000 ₫ · Pro 990.000 ₫ · Scale 2.400.000 ₫ mỗi tháng</li>
+            <li><em>2</em>Thanh toán — qua ví hoặc qua cổng</li>
+            <li><em>3</em>Hệ thống tạo workspace cho bạn</li>
+          </ol>
+          <button class="da-btn da-line">Xem gói AgentOS</button>
+          <p class="da-src">catalogItems → nivo-ai-agent. Không có mutation tạo workspace: workspace treo vào đơn hàng đã trả tiền.</p>
+        </section>
+
+        <section class="da-offer">
+          <div class="da-seclabel"><span class="da-ord">3</span><b>Tên miền</b></div>
+          <p class="da-off-lede">Thêm tên miền vào tài khoản: miễn phí, không hoá đơn, không trừ ví.</p>
+          <p class="da-prereq">Cần có trước: một học viện đang Live trên gói trả phí. Thêm tên miền lúc này thì nó chưa trỏ tới đâu cả.</p>
+          <button class="da-btn da-line">Thêm tên miền</button>
+          <p class="da-src">addDomain — nút vẫn có thật vì mutation chạy độc lập; câu điều kiện ở trên là để không ai mua kỳ vọng nhầm.</p>
+        </section>
+
+        <section class="da-offer da-noact">
+          <div class="da-seclabel"><span class="da-ord">4</span><b>Máy chủ</b></div>
+          <p class="da-off-lede">Đây là góc nhìn hạ tầng của hai dịch vụ trên, không phải một thứ mua riêng.</p>
+          <p class="da-noaction">Không có nút ở đây, và đó là chủ ý: chưa có gì để bắt đầu, nên một nút bị làm mờ sẽ hứa một thao tác không tồn tại. Cấu hình máy (RAM, vCPU) có thật trong hệ thống nhưng chưa có đường hỏi từ phía khách hàng.</p>
+          <p class="da-src">Không truy vấn nào của khách hàng liệt kê máy. Mục này gọi tên được, bán được, nhưng chưa liệt kê được.</p>
+        </section>
+
+        <div class="da-wallet">
+          <div class="da-wline"><span>Ví</span><b>0 ₫</b></div>
+          <p>Đây là số 0 CÓ THẬT — ví được tạo ngay lần đọc đầu tiên. Bốn mục trên là sự vắng mặt; mục này là một con số, và đó là thứ duy nhất trên màn này backend trả lời chắc chắn.</p>
+          <p>Ví không phải bước đầu tiên: gói 0 ₫ không dùng ví, và trả qua cổng cũng không đi qua ví.</p>
+          <button class="da-btn da-line da-sm">Nạp tiền</button>
+        </div>
+
+        <p class="da-foot">Bấm vào một dịch vụ chưa mua thì thân trang là chính lời mời của dịch vụ đó, không phải một danh sách rỗng. Cả màn này không nói “chưa có…” lần nào.</p>
+      </div>
+    </div>
+  </figure>
+</div>
+
+<div class="da-notes">
+  <div>
+    <h4>Quyết định nhìn thấy được</h4>
+    <ul>
+      <li><b>Trục của sidebar là dịch vụ</b>, và Ví/Hỗ trợ tách xuống nhóm “Tài khoản” — vì tiền và ticket nói VỀ bốn dịch vụ kia chứ không đứng ngang hàng với chúng. Một danh sách phẳng chỉ nói được điều đó bằng thứ tự, mà thứ tự thì trình đọc màn hình không nghe thấy.</li>
+      <li><b>Sidebar không mang con số và không mang tình trạng.</b> Không có truy vấn đếm nào; đếm ở trình duyệt là đúng hôm nay và sai vào ngày danh sách phân trang. Tình trạng dịch vụ nằm trên baseline của tiêu đề thân trang, dưới dạng câu chứ không phải số.</li>
+      <li><b>Trạng thái mạng thuộc về TỪNG KHỐI.</b> Một khối bị từ chối không làm bốn khối kia trông như hỏng; một khối đang hỏi không làm cả trang trông như chưa trả lời.</li>
+      <li><b>Bị từ chối ≠ rỗng.</b> Từ chối được vẽ riêng, mang đúng câu backend đã dịch sẵn, kèm một lối đi tiếp — vì hai trường hợp từ chối nặng nhất (có 2+ học viện; pod chưa đăng ký) là kết quả bình thường của khách hàng mua nhiều.</li>
+      <li><b>Không vẽ ở màn rỗng:</b> bộ đếm, dải lọc theo loại, danh sách fleet. Cả ba đều mô tả một đội tài nguyên, mà ở đây chưa có đội nào.</li>
+    </ul>
+  </div>
+  <div>
+    <h4>Giả định · rủi ro · việc backend</h4>
+    <ul>
+      <li><b>Cảnh báo dữ liệu giả đến qua mạng:</b> bộ seeder domain của backend ghi <code>demo-shop.vn</code> và <code>old-project.com</code> cho <code>tester@nivo.local</code> mỗi lần boot. Xoá <code>fleet.fixture.json</code> không xoá được hai dòng đó, và console không phân biệt được chúng với dữ liệu thật.</li>
+      <li>“Hỗ trợ” trong nhóm Tài khoản là đề xuất cần duyệt: <code>SupportTicketEntity</code> không có cột nào gắn ticket vào một dịch vụ, nên hỗ trợ theo từng dịch vụ sẽ là việc backend chứ không phải cách sắp xếp UI.</li>
+      <li>Enabler backend gợi ý, không bắt buộc để dựng hướng này: (a) <code>myAcademySettings(siteId)</code> để lời từ chối “nhiều học viện” không còn phải xảy ra; (b) đường đọc cấu hình máy để mục “Máy chủ” có cái để liệt kê. Hướng này không cần <code>counts-by-status</code> vì nó không vẽ con số nào.</li>
+      <li>Bốn dòng trong danh sách automations của AgentOS trả về rỗng cả khi khách chưa mua pod — khối AgentOS phải hỏi workspace trước rồi mới hỏi automations, nếu không “0 automation” sẽ là một câu nói dối lịch sự.</li>
+      <li>Lỗi 390px của <code>identity-kind-status-action-row</code> (không wrap, nút bị cắt) là nợ có sẵn của baseline, hướng này thừa hưởng nguyên vẹn.</li>
+    </ul>
+  </div>
+</div>
+</section>
+  </div>
+
+  <div class="dir-notes">
+    <div>
+      <h3>Đánh đổi</h3>
+      <p class="hint">Điều hướng chọn hướng cũng là chọn mức rủi ro — đây là những gì hướng A cố tình trả giá.</p>
+      <ul>
+        <li><b>Sidebar câm:</b> không đếm, không tình trạng. Người đọc phải mở từng dịch vụ mới biết cái nào đang có vấn đề. Đổi lại, không con số nào trên màn hình là do trình duyệt tự cộng, và <code>NavLink</code> không phải mọc thêm slot. Hướng B/C có thể chọn ngược lại và trả giá bằng một enabler đếm.</li>
+        <li><b>Mỗi khối tự hỏi truy vấn của mình</b>, nên một dịch vụ có thể phát ra 4–5 lượt hỏi khi mở. Không có truy vấn nào gộp, và hai trong số đó (<code>myAcademySettings</code>, <code>myPodOpenclawStatus</code>) ném lỗi thay vì trả lời — nghĩa là FE phải xử lý từ chối như một kết quả, không phải như một sự cố.</li>
+        <li><b>Màn rỗng là một màn CHÀO HÀNG có thứ hạng</b>, nên nó mang phán đoán sản phẩm: Học viện đứng số 1 vì có bậc 0 ₫, Máy chủ đứng cuối và không có nút. Nếu sau này nivo muốn đẩy AgentOS lên trước, phải sửa nội dung màn này chứ không chỉ sửa dữ liệu.</li>
+        <li><b>Bốn tên trong sidebar phủ lên hai sản phẩm thật cộng một ví.</b> “Máy chủ” là mục gọi tên được nhưng chưa liệt kê được, và “Tên miền” là một registrar mô phỏng (<code>addDomain</code> ghi thẳng 365 ngày, ns1/ns2.nivo.vn, không giá, không WHOIS). Hướng này nói thẳng điều đó ra màn hình thay vì giấu — sẽ có người đọc thấy nivo mỏng hơn họ tưởng.</li>
+        <li><b>Trang chủ console là “dịch vụ dùng gần nhất, hoặc dịch vụ đầu tiên có gì đó”</b>, nên hai lần mở console của cùng một người có thể ra hai màn khác nhau. Cần một trạng thái ghi nhớ ở FE, và cần quyết định điều gì xảy ra khi dịch vụ ghi nhớ đó vừa bị từ chối.</li>
+        <li><b>Giữ nguyên <code>FleetRow</code> và khung đã niêm phong</b> đồng nghĩa với việc thừa hưởng cả lỗi tràn dòng ở 390px; hướng này không sửa nó trong phạm vi Plan.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Kiểm kê trước khi phát minh · tính khả thi</h3>
+      <p class="hint">Mỗi hình dạng nhìn thấy được phải ánh xạ về một chủ sở hữu / contract đã có, hoặc về đúng một delta được nêu tên.</p>
+      <ul>
+        <li><span class="vd vd-reuse">Chủ sở hữu có sẵn</span> dùng lại nguyên vẹn: <code>apps/app/src/components/blocks/provisioning/FleetRow/index.tsx</code> (block, kèm <code>STATUS_TONE</code> với <code>awaiting_dns = warning</code>, <code>actionLabel</code> vắng mặt khi trạng thái không cho phép gì); <code>packages/ui/src/branches/SurfaceCard</code> (chọn giữa <code>title-with-end-action</code> và <code>title-with-baseline-fact</code>, và bỏ nền trong qua <code>isFrameless</code>); <code>packages/ui/src/branches/SurfaceListCard</code> (nhãn trên một danh sách nối liền, tự nắm <code>isLoading</code> trao xuống nội dung); <code>packages/ui/src/composites/EmptyNotice</code> (hiện chưa màn nào mount — hướng này mount nó, chấm dứt tình trạng chết); <code>packages/ui/src/leaves/NavLink</code> (<code>isCurrent</code> lái cả gạch chân lẫn <code>aria-current</code>); <code>Tree</code> + <code>defineContractComponent</code> / <code>defineContractProjection</code> / <code>defineLeafComponent</code>; cơ chế <code>repeats</code> + <code>restingCount</code> cho ô nghỉ.</li>
+        <li><span class="vd vd-no">Không dùng, có chủ ý</span> <code>packages/ui/src/composites/StatRow</code> và contract <code>stacked-stat-rows</code> (hướng này không vẽ con số nào vì không có truy vấn đếm); <code>choice-tab-strip</code> (trục lọc theo loại đã chuyển vào sidebar); <code>titled-summary-filter-over-body-page</code> làm khung trang console (slot <code>filter</code> của nó là BẮT BUỘC, mà ở đây không có gì để lọc — dùng nó sẽ phải dựng một bộ lọc giả).</li>
+        <li><span class="vd vd-reuse">Reuse</span> <code>label-row-over-card</code>: nhãn nằm NGOÀI mặt phẳng nó gọi tên, nên một khối dịch vụ có nội dung là các mặt phẳng sẽ không vẽ thẻ trong thẻ. Đây chính là quan hệ “một dịch vụ có tên và một thân”. Union body của nó đã nhận sẵn <code>centred-empty-notice</code>, <code>fleet-resource-list</code>, <code>labelled-fact-stack</code> và một leaf <code>text</code>.</li>
+        <li><span class="vd vd-reuse">Reuse</span> <code>fleet-resource-list</code> (một mặt phẳng nối liền, đường kẻ full-width, tự sở hữu inset đầu/cuối) làm thân khối “Học viện của bạn”; nó cũng là <code>JoinedListContractKey</code> duy nhất <code>SurfaceListCard</code> nhận cho miền này.</li>
+        <li><span class="vd vd-reuse">Reuse</span> <code>identity-kind-status-action-row</code> + <code>name-over-handle</code>: <code>kind</code> giữ tông trung tính (“Site”), <code>status</code> mang tông và mang <code>provisionStatus</code> (5 giá trị enum thật), <code>action</code> là thao tác DUY NHẤT trạng thái đó cho phép (“Xuất bản” với site nháp, vì <code>provisionExpertSite</code> từ chối mọi site chưa Live). Không cần badge thứ ba, không cần key thứ hai.</li>
+        <li><span class="vd vd-reuse">Reuse</span> <code>labelled-fact-stack</code> + <code>label-value-row</code> cho bảng sự kiện của bản triển khai. Hai key này hiện KHÔNG CÓ CALLER nào (đang vi phạm CONTRACT-13); hướng này nhận chúng thay vì đúc một key thứ hai cùng hình dạng. Trường hợp “không biết được” (RAM/vCPU) được viết thành câu trong slot <code>value</code> chứ không phải một dấu gạch ngang — một câu là một khẳng định, một dấu gạch ngang thì không.</li>
+        <li><span class="vd vd-reuse">Reuse</span> <code>centred-empty-notice</code> + <code>empty-notice-stack</code> cho khối “trả lời rỗng”; <code>title-with-end-action</code> (slot <code>end</code> là optional, nên mục “Máy chủ” không có nút là biểu đạt được, không phải một nút bị làm mờ); <code>title-with-baseline-fact</code>; <code>numbered-step-stack</code> + <code>step-number-then-instruction</code>; <code>inline-action-run</code> nếu một khối cần hai nút xếp theo thứ tự cân nhắc.</li>
+        <li><span class="vd vd-new">New</span> <code>sidebar-then-body-app</code> (host <code>div</code>): quan hệ “một tập điểm đến SỐNG SÓT qua việc thân trang bị thay” — không key nào trong registry biểu đạt điều hướng thường trực; hai key gần nhất (<code>choice-tab-strip</code>, <code>dual-tabs-toolbar</code>) là bộ lọc trên MỘT tập kết quả, đúng thứ mà việc đổi trục này bỏ đi. Toàn bộ 10 class nó cần đã có trong <code>LayoutClassName</code> union và hiện không entry nào nhận. Từng được đề xuất trong preview-lab của case đã niêm phong nhưng CHƯA BAO GIỜ land — nên là NEW, không phải REUSE.</li>
+        <li><span class="vd vd-new">New</span> <code>console-body-main</code> (host <code>main</code>): thân trang được thay theo route chính là landmark <code>main</code> duy nhất của tài liệu, đánh dấu MỘT LẦN cho mọi route. <code>apps/app/src/app/[locale]/layout.tsx</code> hiện chỉ dựng html/body/AppProviders, nên không route nào trong app có landmark main — LANDMARK-4/5 đòi, và LANDMARK-5 cho phép đúng dạng <code>host:'main'</code> này.</li>
+        <li><span class="vd vd-new">New</span> <code>sidebar-nav-cluster</code> (host <code>nav</code>): brand + một dãy NHÓM điểm đến, giữ nguyên bề rộng trong khi các khối đến để thân trang không nhảy ở lần vẽ đầu. Đã đề xuất trong case niêm phong, chưa land.</li>
+        <li><span class="vd vd-new">New</span> <code>sidebar-nav-group</code>: nhãn nhóm + dãy <code>NavLink</code>. Quan hệ không key nào nói được: trong một dãy điểm đến, có thành viên nói VỀ các thành viên khác (Ví là tiền của tài khoản trên cả bốn dịch vụ; Hỗ trợ cắt ngang tất cả). Một slot link lặp phẳng chỉ phân biệt được bằng thứ tự, mà thứ tự không nói gì với trình đọc màn hình.</li>
+        <li><span class="vd vd-new">New</span> <code>stacked-sections</code> (land lại đúng tên cũ): mấy chủ thể TRẢ LỜI ĐỘC LẬP đọc xuôi xuống một trang tại một mối nối, mỗi cái được quyền ở trạng thái khác hàng xóm. Key này từng tồn tại và bị quét đi ở <code>9fdf5c3</code> vì không ai render; case này là caller. Không đặt tên mới, vì một key cùng class và cùng danh tính con dưới cái tên thứ hai là cùng một khái niệm.</li>
+        <li><span class="vd vd-new">New</span> <code>refused-section-notice</code>: một khối BỊ TỪ CHỐI chứ không phải rỗng — tên dịch vụ phía trên vẫn đúng, còn bên dưới là câu từ chối do máy chủ trả về (đã dịch sẵn vi/en qua <code>GraphQLSuccessMessage</code>/<code>GraphQLTransformInterceptor</code>) kèm một lối đi tiếp. <code>empty-notice-stack</code> giải quyết MỘT sự vắng mặt bằng một câu và một lối ra; một leaf <code>text</code> ở tầng trang thì làm cả trang trông như hỏng.</li>
+        <li><span class="vd vd-extend">Extend</span> <code>label-row-over-card</code>: thêm <code>refused-section-notice</code> và <code>numbered-step-stack</code> vào union của slot <code>body</code>. Một dòng sửa, và vì <code>SurfaceCard</code> suy ra kiểu thân của nó TỪ chính union này (<code>SectionBodyKey = CONTRACTS['label-row-over-card']['children']['body']['contract'][number]</code>) nên cùng một sửa đổi mở luôn đường cho branch.</li>
+        <li><span class="vd vd-new">Chủ sở hữu mới</span> (thường, không phải delta vocabulary): <code>components/layouts/ConsoleLayout</code>, <code>components/pages/ConsoleOverviewPage</code>, <code>ConsoleAcademyPage</code> · <code>ConsoleAgentOsPage</code> · <code>ConsoleMachinesPage</code> · <code>ConsoleDomainsPage</code> · <code>ConsoleWalletPage</code>, và một block mỗi khối dịch vụ để mỗi khối tự nắm trạng thái truy vấn của nó.</li>
+        <li><span class="vd vd-gap">Còn thiếu</span> module dữ liệu: <code>apps/app/src/modules/api/</code> hiện chỉ có <code>auth.ts</code> và <code>graphql.ts</code>. Hướng này cần một module đọc cho mỗi dịch vụ (<code>myExpertSites</code>/<code>myExpertSiteDeployment</code>/<code>myExpertSiteLeads</code> · <code>myAgentWorkspace</code> + <code>myPodOpenclawStatus</code> · <code>myDomains</code> · <code>myWallet</code>/<code>myInvoices</code>/<code>myCatalogOrders</code> · <code>catalogItems</code>) và một cách biểu diễn kết quả có ĐÚNG bốn nhánh, trong đó nhánh “bị từ chối” mang theo câu message của envelope thay vì bị đổi thành một câu lỗi tự viết ở FE.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ DIRECTION B ══════════════════════════════ -->
+<section class="dir" id="direction-b">
+  <header>
+    <span class="dir-tag">direction-b · bản sửa 2 · ứng dụng là một tập</span>
+    <h2>Điểm đến là ỨNG DỤNG, không phải Học viện: tổng quan → tập ứng dụng → một ứng dụng</h2>
+    <p class="dir-thesis">
+      Tổng quan vẫn là điểm đến thường trực đứng trên các dịch vụ, mỗi mục mang đúng một sự thật mà truy vấn của chính
+      nó nói được. Cái đổi nằm ở MÔ HÌNH chứ không ở bức tranh: Học viện không phải một dịch vụ mà là MỘT ứng dụng dựng
+      từ mẫu — một thành viên của tập mở hôm nay có đúng một thành viên. Nên điểm đến mang tên <b>Ứng dụng</b>, Học viện
+      trở thành một dòng bên trong nó, và giữa tổng quan với một ứng dụng nay có một tầng thứ ba: chính cái tập.
+      AgentOS, Máy chủ và Tên miền vẫn là hạ tầng cố định; chỉ nhánh ứng dụng là mở.
+    </p>
+    <p class="dir-posture"><b>Posture:</b> vẫn một quyết định sản phẩm ở giữa, nhưng đắt hơn bản 1 đúng một phần và
+      phần đó được nói to: <b>sáu contract entry mới thay vì năm, hai extend thay vì một</b>, toàn bộ khoản chênh nằm ở
+      DANH MỤC MẪU. Tầng thứ ba tự nó không tốn gì. Vẫn <b>không một enabler backend nào</b> — lý do B được chọn bị
+      sứt chứ chưa bị tiêu.</p>
+  </header>
+
+  <div class="rev-log">
+    <h3>Bản sửa 2 — đổi gì, giữ gì, còn treo gì</h3>
+    <div class="rev-log-cols">
+      <div>
+        <h4>Đã đổi</h4>
+        <p><b>Điểm đến đổi tên và Học viện tụt một bậc.</b> Rail không còn mục “Học viện”; nó có mục “Ứng dụng”, và Học
+        viện là một dòng bên trong. Đây không phải chuyện chữ nghĩa: giữ mỗi mẫu một điểm đến thì mẫu thứ hai đẻ ra mục
+        thứ năm, mẫu thứ ba đẻ ra mục thứ sáu, và lúc đó <code>/hoc-vien</code> đã là địa chỉ công bố nên không dời được
+        nữa. Đổi tên chỉ miễn phí trong lúc nó chưa được xuất bản, tức là bây giờ.</p>
+        <p><b>Một tầng thứ ba xuất hiện.</b> Bản 1 có hai tầng — tổng quan, rồi một dịch vụ. Bản này có ba: tổng quan →
+        Ứng dụng (cái tập) → một ứng dụng. Cảnh 2 vẽ đúng tầng ở giữa, thứ bản 1 không hề có. Tầng thứ ba, tức trang của
+        một ứng dụng, cố tình chưa vẽ — đúng cách bản 1 hoãn bốn trang dịch vụ.</p>
+        <p><b>Sự thật của mục Ứng dụng đổi LOẠI, không chỉ đổi nội dung.</b> Bốn mục còn lại nói một điều về một chủ thể;
+        mục này tóm tắt một tập, nên nó gọi tên vài thành viên đầu và im lặng về tổng số. Một câu ngắn trong thẻ nói ra
+        điều đó, và đường ra đọc là “Mở Ứng dụng” chứ không phải một chữ nào hàm ý con số.</p>
+        <p><b>Badge kind bắt đầu mang thông tin.</b> Bản 1 vẽ “Site” dưới nhãn “Học viện” và đã phải ghi sự thừa ấy vào
+        sổ như một đánh đổi CHẤP NHẬN chứ không giải quyết, đối chiếu CONTRACT-9. Ở bản này badge đọc “Học viện AI” dưới
+        nhãn “Ứng dụng” — một sự thu hẹp thật, nên món nợ ấy được trả chứ không mang tiếp.</p>
+        <p><b>Màn rỗng mở danh mục, không mở một cái nút cứng.</b> Chỗ mà bản 1 đặt nút “Tạo site” nay là chính
+        <code>catalogItems</code> lọc theo <code>category = site_from_template</code>, vẽ bằng đúng hình dạng dòng mà tầng
+        Ứng dụng dùng. Người mới nhìn thấy ngay hôm đầu cái danh sách mà sau này họ quay lại để dựng ứng dụng thứ hai.
+        Câu rỗng cũng đổi chủ ngữ: “chưa có ứng dụng nào” thay cho “chưa có Học viện”, vì câu thứ nhất già đi đúng vào
+        ngày mẫu thứ hai lên còn câu thứ hai thì không.</p>
+        <p><b>Vài chỗ nhỏ hơn, cùng một lý do.</b> VPS đổi thành “Máy chủ” ở mọi nơi; nhóm “Tài khoản” nay giữ cả Ví lẫn
+        Hỗ trợ, nên slot <code>account</code> của <code>home-services-account-nav</code> đi từ restingCount 1 lên 2. Và
+        <code>titled-service-overview-page</code> đổi tên thành <code>titled-section-stack-page</code>, phục vụ CẢ trang
+        tổng quan lẫn tầng Ứng dụng — cái tên không thể tiếp tục nói “service” khi một điểm đến đã thôi là dịch vụ.
+        Cả hai lần đổi tên đều miễn phí vì chưa entry nào land.</p>
+      </div>
+      <div>
+        <h4>Giữ nguyên</h4>
+        <p>Những thứ khiến B được chọn không bị mở lại. Tổng quan vẫn là NHÀ — một điểm đến thường trực đứng trên các
+        dịch vụ, không phải phỏng đoán “dịch vụ dùng gần nhất”; cảnh 1 và cảnh 3 là cùng một trang ở hai trạng thái.
+        Không một dòng nào đến từ fixture, và mỗi khối vẫn tự trả lời đủ bốn trạng thái mạng: Tên miền còn đang nghỉ ở
+        cảnh 1, AgentOS mang một câu từ chối bên cạnh phần đã trả lời, cảnh 3 là cột rỗng, cảnh 1 và 2 là cột có.</p>
+        <p>Không con số đếm nào được vẽ, vì không truy vấn nào trả về số đếm — mục Ứng dụng gọi tên thành viên thay vì
+        đếm, và nói thẳng rằng một trang danh sách không phải một tổng. Ví và Hỗ trợ vẫn nằm dưới chú thích “Tài khoản”,
+        vì ví nói VỀ các dịch vụ chứ không đứng ngang hàng, và mỗi thứ tự thì không nói gì với trình đọc màn hình.</p>
+        <p><code>FleetRow</code> vẫn được dùng nguyên khối, kể cả bản đồ <code>STATUS_TONE</code> nơi
+        <code>awaiting_dns</code> là warning chứ không phải danger. Hai key không có caller —
+        <code>labelled-fact-stack</code> và <code>label-value-row</code> — vẫn được NHẬN thay vì nhân bản, và mục Ví vẫn
+        là caller đầu tiên của chúng. <code>EmptyNotice</code>, hiện đang chết, vẫn được mount, lần này ở thân mục
+        AgentOS rỗng trong cảnh 3.</p>
+        <p>Hai kiểu vắng mặt vẫn đọc khác nhau: Máy chủ và Tên miền chỉ nói một câu thuần — không căn giữa, không dấu
+        hiệu, không nút — nên không bao giờ đọc giống một lời mời. Ví vẫn hiện <code>0 đ</code> thật chứ không phải một
+        sự vắng mặt. Bảng màu vẫn là xám trung tính cộng một màu nhấn, và tông trạng thái vẫn lấy từ vốn
+        <code>BadgeTone</code> đã có. Và quan trọng nhất với hồ sơ chi phí của B: <b>vẫn không cần một enabler backend
+        nào</b> — mọi sự thật được vẽ đều nằm trên một truy vấn đã ship.</p>
+      </div>
+      <div>
+        <h4>Còn treo</h4>
+        <p>Một workstream khác đang thiết kế registry cho mẫu ứng dụng và hình dạng của nó chưa chốt, nên bản vẽ này chỉ
+        vẽ những gì đúng bất kể bảng đó ra sao: ứng dụng là một tập, mỗi cái có danh tính và vòng đời, và một cái có thể
+        được dựng từ danh mục. <b>Danh tính mẫu của một ứng dụng KHÔNG được vẽ như một field.</b>
+        <code>ExpertSiteEntity</code> có <code>config.templateKey</code> nhưng mô tả của chính nó nói đó là bố cục ngành
+        của site (minimal/creator/consultant) — một thứ khác với mẫu ỨNG DỤNG; mẫu sản phẩm hôm nay chỉ với tới được qua
+        quan hệ nullable <code>catalogOrder → catalogItem.name</code>. Bản vẽ vì thế chỉ khẳng định HÌNH DẠNG là một
+        badge kind trên dòng ứng dụng.</p>
+        <p><b>Tầng Ứng dụng sẽ ĐỌC gì khi mẫu thứ hai xuất hiện.</b> Hôm nay <code>myExpertSites</code> chính là danh sách
+        ứng dụng, nên tầng này không cần enabler nào. Mẫu thứ hai trả về qua chính truy vấn đó, qua truy vấn riêng của
+        nó, hay qua một <code>myApps</code> dựa trên registry — điều đó quyết định tầng ấy là một lượt hỏi hay là một
+        phép gộp phía client với N error boundary. Bản vẽ không giả định câu trả lời nào.</p>
+        <p><b>Một đơn đang dựng là một DÒNG trong danh sách ứng dụng hay chỉ là một đơn hàng.</b> Cảnh 2 vẽ nó thành một
+        dòng ứng dụng không có nút, nguồn là một <code>catalogOrder</code> ở <code>in_progress</code>; registry có thể
+        thay vào đó tạo bản ghi ứng dụng ngay từ đầu với một trạng thái provisioning. Hình dạng dòng sống sót cả hai
+        đường; cái nguồn thì không.</p>
+        <p><b>Không list response nào hôm nay khai “còn nữa”</b> — không cursor, không hasMore, không total. Vì thế tổng
+        quan hiện được vài dòng đầu và không khẳng định gì về phần còn lại, đúng như đang vẽ; nếu phân trang land kèm một
+        tổng, tổng quan có thêm một dòng tràn trung thực mà hôm nay nó không viết được.</p>
+        <p><b>restingCount cho page key dùng chung.</b> <code>titled-section-stack-page</code> nay phục vụ một tổng quan
+        năm mục và một tầng Ứng dụng hai mục. Luật của bản 1 là restingCount phải là con số thật — nhưng chính lập luận
+        đó là một nạn nhân của lần sửa mô hình này, vì một điểm đến đã thôi là một dịch vụ cố định. Nếu người duyệt giữ
+        luật cũ, page key tách đôi và số entry mới đi từ sáu lên bảy. Tương tự, restingCount của danh sách danh mục là
+        chỗ DUY NHẤT trong cả bản vẽ mà số lượng mẫu được viết ra; để nó bằng 1 là trung thực hôm nay và cũ đi vào ngày
+        mẫu thứ hai lên, và không có phương án thứ ba nào mà không phải đoán.</p>
+        <p><b>Chữ “template” đang bị quá tải trong chính codebase này:</b> <code>CatalogItem.templateKey = "ai_academy"</code>
+        là mẫu ỨNG DỤNG, còn <code>ExpertSiteConfig.templateKey = minimal|creator|consultant</code> là bố cục ngành của
+        site. UI ở đây nói “mẫu ứng dụng” để tách hai thứ, nhưng cách nói đó có sống sót khi gặp màn cài đặt site — nơi
+        cũng nói “template” — thì chưa ai trả lời. Còn treo tiếp từ bản 1: Hỗ trợ có thật sự thuộc nhóm Tài khoản không,
+        khi <code>myTickets</code> không có cột dịch vụ và <code>myOpsTickets</code> luôn rỗng hôm nay. Và một ứng dụng ở
+        trạng thái nháp hay bị treo thì có hành động nào không — mới chỉ dòng đang chạy và dòng chờ DNS được vẽ có nút.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="dir-scene">
+<section class="direction-b">
+<style>
+.direction-b{--db-bg:#fbfbfc;--db-surface:#ffffff;--db-ink:#14161a;--db-muted:#6a7280;--db-faint:#9aa2ae;--db-line:#e3e6ea;--db-soft:#eef0f3;--db-accent:#4550c8;--db-accent-soft:#ecedfb;--db-ok:#1f6f52;--db-ok-bg:#e6f2ec;--db-warn:#84520a;--db-warn-bg:#fbf1dc;--db-rest:#e9ebef;color:var(--db-ink);font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.45;-webkit-font-smoothing:antialiased;display:block;box-sizing:border-box}
+.direction-b *,.direction-b *::before,.direction-b *::after{box-sizing:border-box}
+@media (prefers-color-scheme: dark){.direction-b{--db-bg:#101216;--db-surface:#171a20;--db-ink:#e9ebef;--db-muted:#9aa2ae;--db-faint:#767e8b;--db-line:#2a2f38;--db-soft:#20242b;--db-accent:#9aa3f5;--db-accent-soft:#232741;--db-ok:#7fd3ad;--db-ok-bg:#16302a;--db-warn:#e0b76a;--db-warn-bg:#332811;--db-rest:#242932}}
+.direction-b .db-head{margin:0 0 20px}
+.direction-b .db-kicker{font-size:11px;letter-spacing:.10em;text-transform:uppercase;color:var(--db-accent);font-weight:700;margin:0 0 6px}
+.direction-b .db-title{font-size:20px;font-weight:700;margin:0 0 8px;letter-spacing:-.01em}
+.direction-b .db-thesis{font-size:13px;color:var(--db-muted);margin:0 0 8px;max-width:82ch}
+.direction-b .db-thesis b{color:var(--db-ink);font-weight:600}
+.direction-b .db-evidence{font-size:13px;color:var(--db-muted);margin:0;max-width:82ch}
+.direction-b .db-evidence b{color:var(--db-ink);font-weight:600}
+.direction-b .db-evidence code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;color:var(--db-ink)}
+.direction-b .db-legend{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0;padding:0;list-style:none}
+.direction-b .db-legend li{font-size:11px;color:var(--db-muted);border:1px solid var(--db-line);border-radius:999px;padding:3px 9px;background:var(--db-surface)}
+.direction-b .db-legend b{color:var(--db-ink);font-weight:600}
+.direction-b .db-scenes{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:22px;align-items:start}
+.direction-b .db-scene{min-width:0}
+.direction-b .db-cap{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin:0 0 8px}
+.direction-b .db-cap-k{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--db-accent);color:#fff;border-radius:4px;padding:2px 6px}
+@media (prefers-color-scheme: dark){.direction-b .db-cap-k{color:#101216}}
+.direction-b .db-cap-t{font-size:13px;font-weight:600}
+.direction-b .db-cap-s{font-size:12px;color:var(--db-muted);flex:1 1 100%}
+.direction-b .db-console{display:grid;grid-template-columns:132px minmax(0,1fr);border:1px solid var(--db-line);border-radius:12px;overflow:hidden;background:var(--db-bg)}
+@media (max-width:560px){.direction-b .db-console{grid-template-columns:1fr}}
+.direction-b .db-rail{display:flex;flex-direction:column;gap:4px;padding:14px 8px;background:var(--db-surface);border-right:1px solid var(--db-line);min-width:0}
+@media (max-width:560px){.direction-b .db-rail{border-right:0;border-bottom:1px solid var(--db-line)}}
+.direction-b .db-brand{font-size:13px;font-weight:700;letter-spacing:-.02em;padding:2px 9px 8px}
+.direction-b .db-nav{display:block;font-size:12px;color:var(--db-muted);padding:5px 9px;border-radius:999px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.direction-b .db-nav-current{background:var(--db-accent-soft);color:var(--db-accent);font-weight:700}
+.direction-b .db-group{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--db-faint);padding:10px 9px 2px;font-weight:700}
+.direction-b .db-page{padding:16px 15px 18px;display:flex;flex-direction:column;gap:15px;min-width:0}
+.direction-b .db-page-h{font-size:15px;font-weight:700;margin:0;letter-spacing:-.01em}
+.direction-b .db-page-lede{font-size:11.5px;color:var(--db-muted);margin:-9px 0 0;max-width:56ch}
+.direction-b .db-stack{display:flex;flex-direction:column;gap:15px;min-width:0}
+.direction-b .db-sec{display:flex;flex-direction:column;gap:8px;min-width:0}
+.direction-b .db-sec-label{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px}
+.direction-b .db-sec-name{font-size:13px;font-weight:700;margin:0}
+.direction-b .db-sec-fact{font-size:11.5px;color:var(--db-muted)}
+.direction-b .db-sec-link{font-size:11.5px;color:var(--db-accent);font-weight:600}
+.direction-b .db-card{background:var(--db-surface);border:1px solid var(--db-line);border-radius:10px;overflow:hidden}
+.direction-b .db-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 13px}
+.direction-b .db-row+.db-row{border-top:1px solid var(--db-soft)}
+.direction-b .db-idy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 120px}
+.direction-b .db-name{font-size:12.5px;font-weight:600;color:var(--db-accent);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.direction-b .db-handle{font-size:11px;color:var(--db-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.direction-b .db-handle-wrap{white-space:normal;overflow:visible}
+.direction-b .db-badge{font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 8px;white-space:nowrap;border:1px solid transparent}
+.direction-b .db-b-kind{background:var(--db-soft);color:var(--db-muted)}
+.direction-b .db-b-ok{background:var(--db-ok-bg);color:var(--db-ok)}
+.direction-b .db-b-warn{background:var(--db-warn-bg);color:var(--db-warn)}
+.direction-b .db-b-rest{background:var(--db-rest);color:var(--db-muted)}
+.direction-b .db-price{font-size:11.5px;font-weight:700;white-space:nowrap}
+.direction-b .db-btn{font-size:11px;font-weight:600;border:1px solid var(--db-line);background:var(--db-surface);color:var(--db-ink);border-radius:7px;padding:4px 9px;white-space:nowrap}
+.direction-b .db-btn-primary{background:var(--db-accent);border-color:var(--db-accent);color:#fff}
+@media (prefers-color-scheme: dark){.direction-b .db-btn-primary{color:#101216}}
+.direction-b .db-note{font-size:11px;color:var(--db-muted);padding:8px 13px;border-top:1px solid var(--db-soft);background:var(--db-bg)}
+.direction-b .db-note b{color:var(--db-ink);font-weight:600}
+.direction-b .db-say{font-size:11.5px;color:var(--db-muted);padding:11px 13px;margin:0}
+.direction-b .db-say b{color:var(--db-ink);font-weight:600}
+.direction-b .db-empty{display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;padding:16px 13px}
+.direction-b .db-empty-msg{font-size:12px;color:var(--db-ink);margin:0}
+.direction-b .db-empty-desc{font-size:11px;color:var(--db-muted);margin:0}
+.direction-b .db-facts{display:flex;flex-direction:column;gap:6px;padding:11px 13px}
+.direction-b .db-fact{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
+.direction-b .db-fact-l{font-size:11.5px;color:var(--db-muted)}
+.direction-b .db-fact-v{font-size:11.5px;font-weight:600}
+.direction-b .db-fact-v-zero{font-size:11.5px;font-weight:600;color:var(--db-muted)}
+.direction-b .db-skel{height:9px;border-radius:5px;background:var(--db-rest)}
+.direction-b .db-skel-row{display:flex;align-items:center;gap:9px;padding:11px 13px}
+.direction-b .db-skel-row+.db-skel-row{border-top:1px solid var(--db-soft)}
+.direction-b .db-pin{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--db-accent);color:#fff;font-size:9.5px;font-weight:700;font-style:normal;vertical-align:middle;margin-left:5px;flex:0 0 auto}
+@media (prefers-color-scheme: dark){.direction-b .db-pin{color:#101216}}
+.direction-b .db-notes{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.direction-b .db-notes li{font-size:11.5px;color:var(--db-muted);display:flex;gap:7px;align-items:flex-start}
+.direction-b .db-notes b{color:var(--db-ink);font-weight:600}
+.direction-b .db-n{flex:0 0 auto;width:15px;height:15px;border-radius:50%;background:var(--db-soft);color:var(--db-ink);font-size:9.5px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-top:1px}
+.direction-b .db-answer{margin:22px 0 0;border:1px solid var(--db-accent);border-radius:10px;background:var(--db-accent-soft);padding:13px 15px}
+.direction-b .db-answer h4{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--db-accent);margin:0 0 8px;font-weight:700}
+.direction-b .db-answer p{font-size:12px;color:var(--db-ink);margin:0 0 7px;max-width:92ch}
+.direction-b .db-answer p:last-child{margin-bottom:0}
+.direction-b .db-answer code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px}
+.direction-b .db-vocab{margin:16px 0 0;border:1px solid var(--db-line);border-radius:10px;background:var(--db-surface);padding:12px 14px}
+.direction-b .db-vocab h4{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--db-faint);margin:0 0 8px;font-weight:700}
+.direction-b .db-vocab ul{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:5px 18px}
+.direction-b .db-vocab li{font-size:11.5px;color:var(--db-muted)}
+.direction-b .db-vocab code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;color:var(--db-ink)}
+.direction-b .db-new{font-size:9.5px;font-weight:700;letter-spacing:.06em;background:var(--db-accent-soft);color:var(--db-accent);border-radius:4px;padding:1px 5px;margin-left:4px}
+.direction-b .db-open{font-size:9.5px;font-weight:700;letter-spacing:.06em;background:var(--db-warn-bg);color:var(--db-warn);border-radius:4px;padding:1px 5px;margin-left:4px}
+.direction-b .db-foot{font-size:11px;color:var(--db-faint);margin:10px 0 0}
+</style>
+
+<header class="db-head">
+  <p class="db-kicker">Direction B · bản sửa 2</p>
+  <h3 class="db-title">Học viện không phải một dịch vụ — nó là MỘT ứng dụng dựng từ mẫu</h3>
+  <p class="db-thesis">Bản 1 treo “Học viện” lên rail như điểm đến thứ nhất. Bản này hạ nó xuống làm một DÒNG bên trong điểm đến <b>Ứng dụng</b>, và dựng tầng ở giữa mà bản 1 không có: tổng quan → Ứng dụng (cái tập) → một ứng dụng. AgentOS, Máy chủ, Tên miền vẫn là hạ tầng cố định; chỉ nhánh ứng dụng là mở.</p>
+  <p class="db-evidence">Cái mở đó không phải phỏng đoán sản phẩm: enum <code>CatalogCategory.SiteFromTemplate</code> trong backend tự viết ra nó — “<i>AI academy now, MMO/ecommerce later; each template is its own SKU, provisioned as a per-site app instance</i>”. Danh mục mẫu ở đây là <code>catalogItems</code> lọc theo đúng category đó, không phải một nút cứng.</p>
+  <ul class="db-legend">
+    <li><b>Bốn trạng thái mỗi khối:</b> chưa hỏi · rỗng · có · bị từ chối</li>
+    <li><b>Không vẽ số đếm:</b> không truy vấn nào trả về số đếm</li>
+    <li><b>Ví luôn trả lời</b> — 0 đ là một con số thật</li>
+    <li><b>Không enabler backend</b></li>
+  </ul>
+</header>
+
+<div class="db-scenes">
+
+  <!-- ══════════ SCENE 1 — OVERVIEW, POPULATED ══════════ -->
+  <article class="db-scene">
+    <div class="db-cap">
+      <span class="db-cap-k">Cảnh 1</span>
+      <span class="db-cap-t">Tổng quan — tài khoản có dữ liệu</span>
+      <span class="db-cap-s">năm mục; mục đầu tiên là mục duy nhất tóm tắt MỘT TẬP</span>
+    </div>
+
+    <div class="db-console">
+      <nav class="db-rail">
+        <div class="db-brand">nivo</div>
+        <span class="db-nav db-nav-current">Tổng quan</span>
+        <div class="db-group">Dịch vụ</div>
+        <span class="db-nav">Ứng dụng<i class="db-pin">1</i></span>
+        <span class="db-nav">AgentOS</span>
+        <span class="db-nav">Máy chủ</span>
+        <span class="db-nav">Tên miền</span>
+        <div class="db-group">Tài khoản</div>
+        <span class="db-nav">Ví</span>
+        <span class="db-nav">Hỗ trợ</span>
+      </nav>
+
+      <div class="db-page">
+        <h4 class="db-page-h">Tổng quan</h4>
+
+        <div class="db-stack">
+
+          <!-- Ứng dụng — a SET, summarised by naming its first members -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Ứng dụng</h5>
+              <span class="db-sec-link">Mở Ứng dụng</span>
+            </div>
+            <div class="db-card">
+              <div class="db-row">
+                <span class="db-idy">
+                  <span class="db-name">minhtue</span>
+                  <span class="db-handle">minhtue.nivo.vn</span>
+                </span>
+                <span class="db-badge db-b-kind">Học viện AI<i class="db-pin">2</i></span>
+                <span class="db-badge db-b-ok">Đang chạy</span>
+                <span class="db-btn">Mở</span>
+              </div>
+              <div class="db-row">
+                <span class="db-idy">
+                  <span class="db-name">lopvanhoc</span>
+                  <span class="db-handle">lopvanhoc.com</span>
+                </span>
+                <span class="db-badge db-b-kind">Học viện AI</span>
+                <span class="db-badge db-b-warn">Chờ DNS</span>
+                <span class="db-btn">Xem bản ghi</span>
+              </div>
+              <p class="db-note"><b>Mục này tóm tắt nhiều chủ thể, và tóm tắt bằng cách gọi tên chứ không bằng một con số.</b> Không truy vấn nào của nivo trả về số đếm, và độ dài một trang danh sách không phải là tổng — nên “Mở Ứng dụng” không hứa gì về phần còn lại.<i class="db-pin">3</i></p>
+            </div>
+          </section>
+
+          <!-- AgentOS — one subject, answered, with one refused sub-read -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">AgentOS</h5>
+              <span class="db-sec-link">Mở dịch vụ</span>
+            </div>
+            <div class="db-card">
+              <div class="db-row">
+                <span class="db-idy">
+                  <span class="db-name">Workspace của Minh Tue</span>
+                  <span class="db-handle">Cơ bản · tạo 02/07</span>
+                </span>
+                <span class="db-badge db-b-kind">Workspace</span>
+                <span class="db-badge db-b-ok">Đang chạy</span>
+              </div>
+              <p class="db-note">Chưa đọc được trạng thái pod — chưa đăng ký pod cho workspace này. Phần trên vẫn đúng.<i class="db-pin">4</i></p>
+            </div>
+          </section>
+
+          <!-- Máy chủ — nothing to ask, permanently -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Máy chủ</h5>
+            </div>
+            <div class="db-card">
+              <p class="db-say"><b>Đây là góc nhìn hạ tầng của các ứng dụng và workspace ở trên.</b> API khách hàng chưa trả về cấu hình máy — RAM và vCPU có trong cơ sở dữ liệu nhưng không truy vấn nào lấy ra được. Màn hình này chưa liệt kê được, và đó không phải lỗi.</p>
+            </div>
+          </section>
+
+          <!-- Tên miền — still resting -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Tên miền</h5>
+            </div>
+            <div class="db-card">
+              <div class="db-skel-row"><span class="db-skel" style="flex:1 1 auto;max-width:140px"></span><span class="db-skel" style="width:48px"></span><span class="db-skel" style="width:58px"></span></div>
+              <div class="db-skel-row"><span class="db-skel" style="flex:1 1 auto;max-width:110px"></span><span class="db-skel" style="width:48px"></span><span class="db-skel" style="width:58px"></span></div>
+            </div>
+          </section>
+
+          <!-- Ví — always answers -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Ví</h5>
+              <span class="db-sec-link">Xem giao dịch</span>
+            </div>
+            <div class="db-card">
+              <div class="db-facts">
+                <div class="db-fact"><span class="db-fact-l">Số dư</span><span class="db-fact-v">1.240.000 đ</span></div>
+                <div class="db-fact"><span class="db-fact-l">Hoá đơn chưa thanh toán</span><span class="db-fact-v">299.000 đ · hạn 21/08</span></div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+
+    <ul class="db-notes">
+      <li><span class="db-n">1</span><span><b>Điểm đến là “Ứng dụng”, không phải “Học viện”.</b> Một điểm đến cho mỗi mẫu nghĩa là mẫu thứ hai đẻ ra mục thứ năm, mẫu thứ ba mục thứ sáu — và lúc đó <code>/hoc-vien</code> đã là địa chỉ công bố, không dời được nữa.</span></li>
+      <li><span class="db-n">2</span><span><b>Badge kind giờ MANG THÔNG TIN.</b> Bản 1 vẽ “Site” dưới nhãn “Học viện” — một sự lặp mà bản 1 đã phải CHẤP NHẬN chứ không giải quyết. Ở đây badge nói ứng dụng này dựng từ mẫu nào, tức nó thu hẹp thật, không lặp lại nhãn mục.</span></li>
+      <li><span class="db-n">3</span><span><b>Sự thật của mục Ứng dụng khác LOẠI với bốn mục kia.</b> Bốn mục kia nói về một chủ thể; mục này nói về một tập, nên nó liệt kê những thành viên đầu tiên và cố tình im lặng về tổng số.</span></li>
+      <li><span class="db-n">4</span><span><b>Từ chối nằm cạnh phần đã trả lời</b>, tông mờ, không phải panel lỗi — vẫn nguyên như bản 1.</span></li>
+    </ul>
+  </article>
+
+  <!-- ══════════ SCENE 2 — THE NEW MIDDLE LEVEL ══════════ -->
+  <article class="db-scene">
+    <div class="db-cap">
+      <span class="db-cap-k">Cảnh 2</span>
+      <span class="db-cap-t">Ứng dụng — tầng ở giữa</span>
+      <span class="db-cap-s">tầng chưa từng tồn tại ở bản 1; đây là cảnh cần được phán xét</span>
+    </div>
+
+    <div class="db-console">
+      <nav class="db-rail">
+        <div class="db-brand">nivo</div>
+        <span class="db-nav">Tổng quan</span>
+        <div class="db-group">Dịch vụ</div>
+        <span class="db-nav db-nav-current">Ứng dụng</span>
+        <span class="db-nav">AgentOS</span>
+        <span class="db-nav">Máy chủ</span>
+        <span class="db-nav">Tên miền</span>
+        <div class="db-group">Tài khoản</div>
+        <span class="db-nav">Ví</span>
+        <span class="db-nav">Hỗ trợ</span>
+      </nav>
+
+      <div class="db-page">
+        <h4 class="db-page-h">Ứng dụng</h4>
+        <p class="db-page-lede">Mỗi ứng dụng dựng từ một mẫu và có vòng đời riêng. Hôm nay danh mục có một mẫu — và tài khoản này đã có hai ứng dụng từ chính mẫu đó.<i class="db-pin">1</i></p>
+
+        <div class="db-stack">
+
+          <!-- Owned apps -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Ứng dụng của bạn</h5>
+            </div>
+            <div class="db-card">
+              <div class="db-row">
+                <span class="db-idy">
+                  <span class="db-name">minhtue</span>
+                  <span class="db-handle">minhtue.nivo.vn</span>
+                </span>
+                <span class="db-badge db-b-kind">Học viện AI</span>
+                <span class="db-badge db-b-ok">Đang chạy</span>
+                <span class="db-btn">Mở</span>
+              </div>
+              <div class="db-row">
+                <span class="db-idy">
+                  <span class="db-name">lopvanhoc</span>
+                  <span class="db-handle">lopvanhoc.com</span>
+                </span>
+                <span class="db-badge db-b-kind">Học viện AI</span>
+                <span class="db-badge db-b-warn">Chờ DNS</span>
+                <span class="db-btn">Xem bản ghi</span>
+              </div>
+              <div class="db-row">
+                <span class="db-idy">
+                  <span class="db-name">daotao-noibo</span>
+                  <span class="db-handle">đơn đã thanh toán · đang dựng</span>
+                </span>
+                <span class="db-badge db-b-kind">Học viện AI</span>
+                <span class="db-badge db-b-rest">Đang dựng</span>
+              </div>
+              <p class="db-note"><b>Dòng thứ ba không có nút</b> — một ứng dụng đang dựng thì chưa có gì để bấm, và <code>identity-kind-status-action-row</code> đã cho phép bỏ trống ô hành động đúng vì lý do đó. Nguồn của dòng này là một <code>catalogOrder</code> chưa thành ứng dụng.<i class="db-pin">2</i></p>
+            </div>
+          </section>
+
+          <!-- The catalogue: how a new app is started -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Dựng thêm ứng dụng</h5>
+              <span class="db-sec-fact">danh mục mẫu</span>
+            </div>
+            <div class="db-card">
+              <div class="db-row">
+                <span class="db-idy">
+                  <span class="db-name">Học viện AI</span>
+                  <span class="db-handle db-handle-wrap">Sinh trang học viện + lớp học của riêng bạn từ template — có sẵn thu học phí và trợ giảng AI.</span>
+                </span>
+                <span class="db-badge db-b-kind">Mẫu ứng dụng</span>
+                <span class="db-price">Từ 0 đ/tháng</span>
+                <span class="db-btn db-btn-primary">Dựng</span>
+              </div>
+              <p class="db-note"><b>Đây là một DANH SÁCH vì <code>catalogItems</code> trả về một danh sách</b>, lọc theo <code>category = site_from_template</code> — không phải vì có mẫu thứ hai đã được hứa. Hôm nay bộ lọc ra đúng một mẫu. Mẫu thứ hai xuất hiện ở đây mà không cần đổi màn hình, không cần thêm route, không cần đụng rail.<i class="db-pin">3</i></p>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+
+    <ul class="db-notes">
+      <li><span class="db-n">1</span><span><b>Một tập một-thành-viên là ca khó nhất — và ở đây nó không xảy ra.</b> Tập này đếm ỨNG DỤNG, không đếm MẪU. <code>myExpertSites</code> đã là số nhiều từ hôm nay, nên một khách hoàn toàn có thể có hai học viện. Bản 1 đã vẽ đúng hai dòng đó rồi; nó chỉ gọi cái tập ấy là “Học viện”.</span></li>
+      <li><span class="db-n">2</span><span><b>Tập này giữ cả những thứ chưa hoàn thành.</b> Đó là việc mà trang một-ứng-dụng không làm được và trang tổng quan không nên làm — tức tầng giữa có việc riêng ngay từ ngày đầu, không phải một thư mục rỗng nghĩa.</span></li>
+      <li><span class="db-n">3</span><span><b>Nếu “Học viện” là điểm đến, “dựng học viện thứ hai” biết đứng ở đâu?</b> Bên trong một trang mang tên chính nó, hoặc trên rail cạnh nó. Cả hai đều đọc như một mâu thuẫn. Câu hỏi đó tự biến mất khi điểm đến là cái tập.</span></li>
+      <li><span class="db-n">4</span><span><b>Tầng thứ ba (một ứng dụng) cố tình chưa vẽ</b>, đúng cách bản 1 hoãn bốn trang dịch vụ. Bản này chỉ quyết định tổng quan và tầng tập.</span></li>
+    </ul>
+  </article>
+
+  <!-- ══════════ SCENE 3 — EMPTY ACCOUNT ══════════ -->
+  <article class="db-scene">
+    <div class="db-cap">
+      <span class="db-cap-k">Cảnh 3</span>
+      <span class="db-cap-t">Tài khoản rỗng</span>
+      <span class="db-cap-s">chưa ứng dụng, chưa workspace, chưa máy chủ, chưa tên miền — trạng thái thật hôm nay</span>
+    </div>
+
+    <div class="db-console">
+      <nav class="db-rail">
+        <div class="db-brand">nivo</div>
+        <span class="db-nav db-nav-current">Tổng quan</span>
+        <div class="db-group">Dịch vụ</div>
+        <span class="db-nav">Ứng dụng</span>
+        <span class="db-nav">AgentOS</span>
+        <span class="db-nav">Máy chủ</span>
+        <span class="db-nav">Tên miền</span>
+        <div class="db-group">Tài khoản</div>
+        <span class="db-nav">Ví</span>
+        <span class="db-nav">Hỗ trợ</span>
+      </nav>
+
+      <div class="db-page">
+        <h4 class="db-page-h">Tổng quan</h4>
+
+        <div class="db-stack">
+
+          <!-- Ứng dụng — the catalogue IS the offer -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Ứng dụng</h5>
+              <span class="db-sec-fact">chưa có ứng dụng nào<i class="db-pin">1</i></span>
+            </div>
+            <div class="db-card">
+              <div class="db-row">
+                <span class="db-idy">
+                  <span class="db-name">Học viện AI</span>
+                  <span class="db-handle db-handle-wrap">Trang học viện <span style="font-family:ui-monospace,monospace">&lt;slug&gt;</span>.nivo.vn + 1 khoá + cộng đồng + thu lead cơ bản.</span>
+                </span>
+                <span class="db-badge db-b-kind">Mẫu ứng dụng</span>
+                <span class="db-price">Khởi động · 0 đ</span>
+                <span class="db-btn db-btn-primary">Dựng</span>
+              </div>
+              <p class="db-note"><b>Không phải một nút cứng “Tạo học viện”.</b> Cái được đưa ra là danh mục mẫu — cùng một truy vấn, cùng một hình dạng dòng như ở tầng Ứng dụng, chỉ khác là chưa có gì đứng trên nó.<i class="db-pin">2</i></p>
+            </div>
+          </section>
+
+          <!-- AgentOS — an offer, paid rung, one step -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">AgentOS</h5>
+              <span class="db-sec-fact">chưa có workspace nào</span>
+            </div>
+            <div class="db-card">
+              <div class="db-empty">
+                <p class="db-empty-msg">Một workspace agent riêng, trực Zalo/Telegram theo quy trình của bạn.</p>
+                <p class="db-empty-desc">Cơ bản từ 490.000 đ/tháng · mua gói là xong, không phải dựng gì trước.<i class="db-pin">3</i></p>
+                <span class="db-btn">Xem gói</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Máy chủ — deliberately not a starting point -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Máy chủ</h5>
+            </div>
+            <div class="db-card">
+              <p class="db-say"><b>Không phải nơi bắt đầu.</b> nivo chưa bán máy chủ riêng — đây là góc nhìn hạ tầng của ứng dụng và workspace, và nó chỉ có nội dung sau khi một trong hai được dựng.<i class="db-pin">4</i></p>
+            </div>
+          </section>
+
+          <!-- Tên miền — free, but not step one -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Tên miền</h5>
+            </div>
+            <div class="db-card">
+              <p class="db-say"><b>Chưa cần đến.</b> Tên miền riêng chỉ có tác dụng sau khi một ứng dụng đã chạy và ở gói có tên miền riêng. Gói Khởi động chạy trên tên miền phụ nivo.vn.</p>
+            </div>
+          </section>
+
+          <!-- Ví — a real zero -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Ví</h5>
+              <span class="db-sec-link">Nạp ví</span>
+            </div>
+            <div class="db-card">
+              <div class="db-facts">
+                <div class="db-fact"><span class="db-fact-l">Số dư</span><span class="db-fact-v-zero">0 đ<i class="db-pin">5</i></span></div>
+                <div class="db-fact"><span class="db-fact-l">Hoá đơn chưa thanh toán</span><span class="db-fact-v-zero">0</span></div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+
+    <ul class="db-notes">
+      <li><span class="db-n">1</span><span><b>Câu rỗng đổi chủ ngữ:</b> không còn “bạn chưa có Học viện” mà là “chưa có ứng dụng nào”. Câu thứ nhất già đi ngay khi mẫu thứ hai lên; câu thứ hai thì không.</span></li>
+      <li><span class="db-n">2</span><span><b>Cùng một hình dạng dòng ở cả hai nơi.</b> Người mới nhìn thấy đúng cái danh sách mà sau này họ sẽ quay lại để dựng ứng dụng thứ hai — nên tầng giữa không phải thứ họ phải học lần nữa.</span></li>
+      <li><span class="db-n">3</span><span><b>Chỉ hai mục có nút</b>, vì chỉ hai thứ bán được, và hai lời mời dài ngắn khác nhau: 0 đ dựng ngay, so với 490.000 đ mua gói.</span></li>
+      <li><span class="db-n">4</span><span><b>Vắng mặt có chủ ý khác vắng mặt vì chưa mua.</b> Máy chủ và Tên miền nói một câu — không nút, không căn giữa — nên không đọc giống một lời mời.</span></li>
+      <li><span class="db-n">5</span><span><b>0 đ là con số thật</b>, không phải sự vắng mặt: ví được tạo lười ngay lần đọc đầu, nên nó không bao giờ có trạng thái “chưa có”.</span></li>
+    </ul>
+  </article>
+
+</div>
+
+<div class="db-answer">
+  <h4>Câu hỏi đang được phán xét — trả lời thẳng</h4>
+  <p><b>“Một tập chỉ có một thành viên trông như một thư mục vô nghĩa.”</b> Đúng — nếu tập đó đếm MẪU. Tập này đếm ỨNG DỤNG. <code>myExpertSites</code> đã là số nhiều từ hôm nay, và cảnh 1 của chính bản 1 đã vẽ hai dòng site cho một khách. Tập ấy đã có hai thành viên; bản 1 chỉ gọi nó bằng tên của mẫu.</p>
+  <p><b>Tầng giữa kiếm được chỗ đứng ngay ngày đầu</b> bằng ba việc mà cả trang tổng quan lẫn trang một-ứng-dụng đều không làm được: liệt kê các ứng dụng cùng mẫu cạnh nhau, giữ ứng dụng đang dựng chưa hoàn thành, và mở danh mục mẫu. Nếu “Học viện” là điểm đến thì “dựng học viện thứ hai” không có chỗ nào đứng mà không mâu thuẫn với chính cái tên đó.</p>
+  <p><b>Và chi phí của việc đổi tên là bây giờ hoặc không bao giờ.</b> <code>/hoc-vien</code> chưa được xuất bản. Một mẫu thứ hai trong tương lai không dời được một địa chỉ đã công bố, cũng không gỡ được một mục rail mà khách đã thuộc.</p>
+</div>
+
+<div class="db-vocab">
+  <h4>Vốn từ · thay đổi so với bản 1</h4>
+  <ul>
+    <li>Khung sidebar + thân · <code>sidebar-then-body-app</code><span class="db-new">MỚI</span> — như bản 1</li>
+    <li>Landmark thân định tuyến · <code>console-body-main</code><span class="db-new">MỚI</span> — như bản 1</li>
+    <li>Rail Tổng quan / Dịch vụ / Tài khoản · <code>home-services-account-nav</code><span class="db-new">MỚI</span> — <code>account</code> restingCount 1 → 2 (Ví, Hỗ trợ)</li>
+    <li>Trang gồm các mục tự trả lời · <code>titled-section-stack-page</code><span class="db-new">MỚI</span> — đổi tên từ <code>titled-service-overview-page</code>; dùng cho CẢ tổng quan và tầng Ứng dụng<span class="db-open">restingCount mở</span></li>
+    <li>Câu từ chối cạnh phần đã trả lời · <code>body-with-refusal-note</code><span class="db-new">MỚI</span> — như bản 1</li>
+    <li>Dòng mẫu có giá · <code>template-offer-row</code><span class="db-new">MỚI</span> — quan hệ “thứ có thể MUA, có giá, một hành động”, khác hẳn “thứ đang SỞ HỮU, có vòng đời”</li>
+    <li>Danh sách dòng ghép · <code>fleet-resource-list</code> <span class="db-open">EXTEND</span> — nhận thêm block <code>TemplateOfferRow</code></li>
+    <li>Mục có nhãn ngoài thẻ · <code>label-row-over-card</code> <span class="db-open">EXTEND</span> — nhận thêm <code>body-with-refusal-note</code> (như bản 1)</li>
+    <li>Dòng ứng dụng · <code>identity-kind-status-action-row</code> + <code>name-over-handle</code> — block <code>FleetRow</code> dùng nguyên khối</li>
+    <li>Lời mời khi chưa có gì · <code>centred-empty-notice</code> + composite <code>EmptyNotice</code> (đang chết) — mount ở mục AgentOS rỗng</li>
+    <li>Bảng số liệu ví · <code>labelled-fact-stack</code> + <code>label-value-row</code> — nhận hai key callerless đúng như bản 1</li>
+    <li>Câu về giới hạn (Máy chủ, Tên miền) · leaf <code>text</code> trong thân mục</li>
+  </ul>
+  <p class="db-foot">Sáu entry mới thay vì năm của bản 1, và hai extend thay vì một — cái giá của tầng thứ ba và của danh mục. Vẫn KHÔNG có enabler backend nào: <code>catalogItems</code>, <code>myCatalogOrders</code>, <code>myExpertSites</code>, <code>myAgentWorkspace</code>, <code>myDomains</code>, <code>myWallet</code>, <code>myInvoices</code> đều đã ship. Mọi tên sản phẩm, tagline, tên gói và giá trong ba cảnh lấy nguyên từ <code>catalog-seeder.service.ts</code>, không phải fixture màn hình.</p>
+</div>
+</section>
+  </div>
+
+  <details class="revold">
+    <summary>B — bản 1 (trước khi sửa) · mở ra để đối chiếu</summary>
+    <p class="revold-lede">
+      Bản 1 nguyên vẹn, không sửa một chữ nào, để thấy được cái gì đã đổi chứ không phải nghe kể. Nó gọi Học viện là một
+      DỊCH VỤ và treo lên rail như điểm đến thứ nhất, chỉ có hai cảnh (có dữ liệu · rỗng), rail nói “VPS”, nhóm Tài khoản
+      chỉ có Ví, và màn rỗng đưa ra một nút cứng “Tạo site” thay cho danh mục mẫu.
+    </p>
+    <div class="revold-scene">
+<section class="direction-b-rev1">
+<style>
+.direction-b-rev1{--db-bg:#fbfbfc;--db-surface:#ffffff;--db-ink:#14161a;--db-muted:#6a7280;--db-faint:#9aa2ae;--db-line:#e3e6ea;--db-soft:#eef0f3;--db-accent:#4550c8;--db-accent-soft:#ecedfb;--db-ok:#1f6f52;--db-ok-bg:#e6f2ec;--db-warn:#84520a;--db-warn-bg:#fbf1dc;--db-bad:#98303a;--db-bad-bg:#faeaeb;--db-rest:#e9ebef;color:var(--db-ink);font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.45;-webkit-font-smoothing:antialiased;display:block;box-sizing:border-box}
+.direction-b-rev1 *,.direction-b-rev1 *::before,.direction-b-rev1 *::after{box-sizing:border-box}
+@media (prefers-color-scheme: dark){.direction-b-rev1{--db-bg:#101216;--db-surface:#171a20;--db-ink:#e9ebef;--db-muted:#9aa2ae;--db-faint:#767e8b;--db-line:#2a2f38;--db-soft:#20242b;--db-accent:#9aa3f5;--db-accent-soft:#232741;--db-ok:#7fd3ad;--db-ok-bg:#16302a;--db-warn:#e0b76a;--db-warn-bg:#332811;--db-bad:#f0a1a8;--db-bad-bg:#33191c;--db-rest:#242932}}
+.direction-b-rev1 .db-head{margin:0 0 20px}
+.direction-b-rev1 .db-kicker{font-size:11px;letter-spacing:.10em;text-transform:uppercase;color:var(--db-accent);font-weight:700;margin:0 0 6px}
+.direction-b-rev1 .db-title{font-size:20px;font-weight:700;margin:0 0 8px;letter-spacing:-.01em}
+.direction-b-rev1 .db-thesis{font-size:13px;color:var(--db-muted);margin:0;max-width:78ch}
+.direction-b-rev1 .db-legend{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 0;padding:0;list-style:none}
+.direction-b-rev1 .db-legend li{font-size:11px;color:var(--db-muted);border:1px solid var(--db-line);border-radius:999px;padding:3px 9px;background:var(--db-surface)}
+.direction-b-rev1 .db-legend b{color:var(--db-ink);font-weight:600}
+.direction-b-rev1 .db-scenes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;align-items:start}
+@media (max-width:980px){.direction-b-rev1 .db-scenes{grid-template-columns:1fr}}
+.direction-b-rev1 .db-scene{min-width:0}
+.direction-b-rev1 .db-cap{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin:0 0 8px}
+.direction-b-rev1 .db-cap-k{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--db-accent);color:#fff;border-radius:4px;padding:2px 6px}
+@media (prefers-color-scheme: dark){.direction-b-rev1 .db-cap-k{color:#101216}}
+.direction-b-rev1 .db-cap-t{font-size:13px;font-weight:600}
+.direction-b-rev1 .db-cap-s{font-size:12px;color:var(--db-muted)}
+.direction-b-rev1 .db-console{display:grid;grid-template-columns:150px minmax(0,1fr);border:1px solid var(--db-line);border-radius:12px;overflow:hidden;background:var(--db-bg)}
+@media (max-width:560px){.direction-b-rev1 .db-console{grid-template-columns:1fr}}
+.direction-b-rev1 .db-rail{display:flex;flex-direction:column;gap:6px;padding:14px 10px;background:var(--db-surface);border-right:1px solid var(--db-line);min-width:0}
+@media (max-width:560px){.direction-b-rev1 .db-rail{border-right:0;border-bottom:1px solid var(--db-line)}}
+.direction-b-rev1 .db-brand{font-size:13px;font-weight:700;letter-spacing:-.02em;padding:2px 10px 8px}
+.direction-b-rev1 .db-nav{display:block;font-size:12px;color:var(--db-muted);padding:6px 10px;border-radius:999px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.direction-b-rev1 .db-nav-current{background:var(--db-accent-soft);color:var(--db-accent);font-weight:700}
+.direction-b-rev1 .db-group{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--db-faint);padding:10px 10px 2px;font-weight:700}
+.direction-b-rev1 .db-page{padding:16px 16px 18px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.direction-b-rev1 .db-page-h{font-size:15px;font-weight:700;margin:0;letter-spacing:-.01em}
+.direction-b-rev1 .db-stack{display:flex;flex-direction:column;gap:16px;min-width:0}
+.direction-b-rev1 .db-sec{display:flex;flex-direction:column;gap:8px;min-width:0}
+.direction-b-rev1 .db-sec-label{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
+.direction-b-rev1 .db-sec-name{font-size:13px;font-weight:700;margin:0}
+.direction-b-rev1 .db-sec-fact{font-size:12px;color:var(--db-muted)}
+.direction-b-rev1 .db-sec-link{font-size:12px;color:var(--db-accent);font-weight:600}
+.direction-b-rev1 .db-card{background:var(--db-surface);border:1px solid var(--db-line);border-radius:10px;overflow:hidden}
+.direction-b-rev1 .db-card-pad{padding:12px 14px}
+.direction-b-rev1 .db-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:11px 14px}
+.direction-b-rev1 .db-row+.db-row{border-top:1px solid var(--db-soft)}
+.direction-b-rev1 .db-idy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 130px}
+.direction-b-rev1 .db-name{font-size:12.5px;font-weight:600;color:var(--db-accent);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.direction-b-rev1 .db-handle{font-size:11px;color:var(--db-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.direction-b-rev1 .db-badge{font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 8px;white-space:nowrap;border:1px solid transparent}
+.direction-b-rev1 .db-b-kind{background:var(--db-soft);color:var(--db-muted);font-weight:600}
+.direction-b-rev1 .db-b-ok{background:var(--db-ok-bg);color:var(--db-ok)}
+.direction-b-rev1 .db-b-warn{background:var(--db-warn-bg);color:var(--db-warn)}
+.direction-b-rev1 .db-b-bad{background:var(--db-bad-bg);color:var(--db-bad)}
+.direction-b-rev1 .db-b-acc{background:var(--db-accent-soft);color:var(--db-accent)}
+.direction-b-rev1 .db-b-neutral{background:var(--db-soft);color:var(--db-muted)}
+.direction-b-rev1 .db-btn{font-size:11px;font-weight:600;border:1px solid var(--db-line);background:var(--db-surface);color:var(--db-ink);border-radius:7px;padding:4px 10px;white-space:nowrap}
+.direction-b-rev1 .db-btn-primary{background:var(--db-accent);border-color:var(--db-accent);color:#fff}
+@media (prefers-color-scheme: dark){.direction-b-rev1 .db-btn-primary{color:#101216}}
+.direction-b-rev1 .db-note{font-size:11.5px;color:var(--db-muted);padding:9px 14px;border-top:1px solid var(--db-soft);background:var(--db-bg)}
+.direction-b-rev1 .db-say{font-size:12px;color:var(--db-muted);padding:12px 14px;margin:0}
+.direction-b-rev1 .db-say b{color:var(--db-ink);font-weight:600}
+.direction-b-rev1 .db-empty{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:18px 14px}
+.direction-b-rev1 .db-empty-msg{font-size:12.5px;color:var(--db-ink);margin:0}
+.direction-b-rev1 .db-empty-desc{font-size:11.5px;color:var(--db-muted);margin:0}
+.direction-b-rev1 .db-facts{display:flex;flex-direction:column;gap:7px;padding:12px 14px}
+.direction-b-rev1 .db-fact{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
+.direction-b-rev1 .db-fact-l{font-size:12px;color:var(--db-muted)}
+.direction-b-rev1 .db-fact-v{font-size:12px;font-weight:600}
+.direction-b-rev1 .db-fact-v-zero{font-size:12px;font-weight:600;color:var(--db-muted)}
+.direction-b-rev1 .db-skel{height:9px;border-radius:5px;background:var(--db-rest)}
+.direction-b-rev1 .db-skel-row{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.direction-b-rev1 .db-skel-row+.db-skel-row{border-top:1px solid var(--db-soft)}
+.direction-b-rev1 .db-pin{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--db-accent);color:#fff;font-size:9.5px;font-weight:700;font-style:normal;vertical-align:middle;margin-left:6px;flex:0 0 auto}
+@media (prefers-color-scheme: dark){.direction-b-rev1 .db-pin{color:#101216}}
+.direction-b-rev1 .db-notes{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.direction-b-rev1 .db-notes li{font-size:11.5px;color:var(--db-muted);display:flex;gap:7px;align-items:flex-start}
+.direction-b-rev1 .db-notes b{color:var(--db-ink);font-weight:600}
+.direction-b-rev1 .db-n{flex:0 0 auto;width:15px;height:15px;border-radius:50%;background:var(--db-soft);color:var(--db-ink);font-size:9.5px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-top:1px}
+.direction-b-rev1 .db-vocab{margin:22px 0 0;border:1px solid var(--db-line);border-radius:10px;background:var(--db-surface);padding:12px 14px}
+.direction-b-rev1 .db-vocab h4{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--db-faint);margin:0 0 8px;font-weight:700}
+.direction-b-rev1 .db-vocab ul{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:5px 18px}
+.direction-b-rev1 .db-vocab li{font-size:11.5px;color:var(--db-muted)}
+.direction-b-rev1 .db-vocab code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;color:var(--db-ink)}
+.direction-b-rev1 .db-new{font-size:9.5px;font-weight:700;letter-spacing:.06em;background:var(--db-accent-soft);color:var(--db-accent);border-radius:4px;padding:1px 5px;margin-left:4px}
+.direction-b-rev1 .db-foot{font-size:11px;color:var(--db-faint);margin:10px 0 0}
+</style>
+
+<header class="db-head">
+  <p class="db-kicker">Direction B</p>
+  <h3 class="db-title">Tổng quan là nhà — sidebar chỉ là đường đi</h3>
+  <p class="db-thesis">Điểm đến thứ sáu đứng trên bốn dịch vụ. Trang chủ giữ năm mục, mỗi mục một dịch vụ, mỗi mục mang đúng một sự thật mà truy vấn của chính nó trả về được — và mỗi mục tự trả lời theo nhịp riêng. Khách có ba dịch vụ nhìn thấy cả ba mà không phải bấm đi đâu. Tài khoản chưa provision gì không rơi vào một màn hình khác: vẫn trang đó, năm mục đó, ở trạng thái chưa-có.</p>
+  <ul class="db-legend">
+    <li><b>Bốn trạng thái mỗi mục:</b> chưa hỏi · trả lời rỗng · trả lời có · bị từ chối</li>
+    <li><b>+ một trạng thái vĩnh viễn:</b> không có gì để hỏi (VPS)</li>
+    <li><b>+ một số 0 thật:</b> ví luôn trả lời 0 đ, không bao giờ vắng mặt</li>
+  </ul>
+</header>
+
+<div class="db-scenes">
+
+  <!-- ══════════ SCENE 1 — POPULATED ══════════ -->
+  <article class="db-scene">
+    <div class="db-cap">
+      <span class="db-cap-k">Cảnh 1</span>
+      <span class="db-cap-t">Khách đã mua Học viện và AgentOS</span>
+      <span class="db-cap-s">năm mục, năm nhịp trả lời khác nhau</span>
+    </div>
+
+    <div class="db-console">
+      <nav class="db-rail">
+        <div class="db-brand">nivo</div>
+        <span class="db-nav db-nav-current">Tổng quan<i class="db-pin">1</i></span>
+        <div class="db-group">Dịch vụ</div>
+        <span class="db-nav">Học viện</span>
+        <span class="db-nav">AgentOS</span>
+        <span class="db-nav">VPS</span>
+        <span class="db-nav">Tên miền</span>
+        <div class="db-group">Tài khoản<i class="db-pin">2</i></div>
+        <span class="db-nav">Ví</span>
+      </nav>
+
+      <div class="db-page">
+        <h4 class="db-page-h">Tổng quan<i class="db-pin">3</i></h4>
+
+        <div class="db-stack">
+
+          <!-- Học viện — answered with rows -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Học viện</h5>
+              <span class="db-sec-link">Mở dịch vụ</span>
+            </div>
+            <div class="db-card">
+              <div class="db-row">
+                <span class="db-idy">
+                  <span class="db-name">minhtue</span>
+                  <span class="db-handle">minhtue.nivo.vn</span>
+                </span>
+                <span class="db-badge db-b-kind">Site</span>
+                <span class="db-badge db-b-ok">Đã sẵn sàng</span>
+                <span class="db-btn">Mở</span>
+              </div>
+              <div class="db-row">
+                <span class="db-idy">
+                  <span class="db-name">lopvanhoc</span>
+                  <span class="db-handle">lopvanhoc.com</span>
+                </span>
+                <span class="db-badge db-b-kind">Site</span>
+                <span class="db-badge db-b-warn">Chờ DNS<i class="db-pin">4</i></span>
+                <span class="db-btn">Xem bản ghi</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- AgentOS — answered, with one refused sub-read -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">AgentOS</h5>
+              <span class="db-sec-link">Mở dịch vụ</span>
+            </div>
+            <div class="db-card">
+              <div class="db-row">
+                <span class="db-idy">
+                  <span class="db-name">Workspace của Minh Tue</span>
+                  <span class="db-handle">Cơ bản · tạo 02/07</span>
+                </span>
+                <span class="db-badge db-b-kind">Workspace</span>
+                <span class="db-badge db-b-ok">Đang chạy</span>
+              </div>
+              <p class="db-note">Chưa đọc được trạng thái pod — chưa đăng ký pod cho workspace này. Phần còn lại ở trên vẫn đúng.<i class="db-pin">5</i></p>
+            </div>
+          </section>
+
+          <!-- VPS — nothing to ask, permanently -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">VPS</h5>
+            </div>
+            <div class="db-card">
+              <p class="db-say"><b>Đây là góc nhìn hạ tầng của hai dịch vụ ở trên.</b> API khách hàng chưa trả về cấu hình máy — RAM và vCPU có trong cơ sở dữ liệu nhưng không truy vấn nào lấy ra được. Màn hình này chưa liệt kê được, và đó không phải lỗi.<i class="db-pin">6</i></p>
+            </div>
+          </section>
+
+          <!-- Domains — still resting -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Tên miền</h5>
+            </div>
+            <div class="db-card">
+              <div class="db-skel-row"><span class="db-skel" style="flex:1 1 auto;max-width:150px"></span><span class="db-skel" style="width:52px"></span><span class="db-skel" style="width:64px"></span></div>
+              <div class="db-skel-row"><span class="db-skel" style="flex:1 1 auto;max-width:120px"></span><span class="db-skel" style="width:52px"></span><span class="db-skel" style="width:64px"></span></div>
+            </div>
+          </section>
+
+          <!-- Wallet — always answers -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Ví</h5>
+              <span class="db-sec-link">Xem giao dịch</span>
+            </div>
+            <div class="db-card">
+              <div class="db-facts">
+                <div class="db-fact"><span class="db-fact-l">Số dư</span><span class="db-fact-v">1.240.000 đ</span></div>
+                <div class="db-fact"><span class="db-fact-l">Hoá đơn chưa thanh toán</span><span class="db-fact-v">299.000 đ · hạn 21/08</span></div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+
+    <ul class="db-notes">
+      <li><span class="db-n">1</span><span><b>Tổng quan là điểm đến thứ sáu</b>, đứng trên bốn dịch vụ — không phải một tab lọc của chúng.</span></li>
+      <li><span class="db-n">2</span><span><b>Ví tách xuống nhóm “Tài khoản”.</b> Nó nói về bốn thứ ở trên, không phải thứ năm ngang hàng; thứ tự đơn thuần không nói được điều đó với trình đọc màn hình.</span></li>
+      <li><span class="db-n">3</span><span><b>Không có nút cấp trang.</b> Mỗi lời mời thuộc về dịch vụ đưa ra nó — một nút “Cấp phát mới” duy nhất sẽ phủ lên hai sản phẩm có giá khác nhau và điều kiện khác nhau.</span></li>
+      <li><span class="db-n">4</span><span><b>Chờ DNS là tông cảnh báo, không phải lỗi.</b> Khách phải tự thêm bản ghi; vẽ nó màu đỏ là mời bấm thử lại một việc không thể thử lại.</span></li>
+      <li><span class="db-n">5</span><span><b>Từ chối nằm cạnh phần đã trả lời</b>, tông mờ, không phải panel lỗi — đây là kết cục bình thường của một khách đang trả tiền.</span></li>
+      <li><span class="db-n">6</span><span><b>Mục Tên miền còn đang hỏi</b> trong khi bốn mục kia đã trả lời — và trang không vì thế mà trống. Đó là điều một màn hình đọc từ fixture không bao giờ phải làm.</span></li>
+    </ul>
+  </article>
+
+  <!-- ══════════ SCENE 2 — EMPTY ══════════ -->
+  <article class="db-scene">
+    <div class="db-cap">
+      <span class="db-cap-k">Cảnh 2</span>
+      <span class="db-cap-t">Tài khoản mới — chưa provision gì</span>
+      <span class="db-cap-s">trạng thái thật của mọi tài khoản hôm nay</span>
+    </div>
+
+    <div class="db-console">
+      <nav class="db-rail">
+        <div class="db-brand">nivo</div>
+        <span class="db-nav db-nav-current">Tổng quan</span>
+        <div class="db-group">Dịch vụ</div>
+        <span class="db-nav">Học viện</span>
+        <span class="db-nav">AgentOS</span>
+        <span class="db-nav">VPS</span>
+        <span class="db-nav">Tên miền</span>
+        <div class="db-group">Tài khoản</div>
+        <span class="db-nav">Ví</span>
+      </nav>
+
+      <div class="db-page">
+        <h4 class="db-page-h">Tổng quan<i class="db-pin">1</i></h4>
+
+        <div class="db-stack">
+
+          <!-- Học viện — an offer, free rung, three steps -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Học viện</h5>
+              <span class="db-sec-fact">chưa có site nào</span>
+            </div>
+            <div class="db-card">
+              <div class="db-empty">
+                <p class="db-empty-msg">Dựng một trang học viện và bán khoá của bạn trên đó.</p>
+                <p class="db-empty-desc">Gói Khởi động 0 đ · tạo site → xuất bản → chọn gói. Không cần nạp ví.<i class="db-pin">2</i></p>
+                <span class="db-btn db-btn-primary">Tạo site</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- AgentOS — an offer, paid rung, one step -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">AgentOS</h5>
+              <span class="db-sec-fact">chưa có workspace nào</span>
+            </div>
+            <div class="db-card">
+              <div class="db-empty">
+                <p class="db-empty-msg">Một workspace agent riêng, tự động hoá theo quy trình của bạn.</p>
+                <p class="db-empty-desc">Từ 490.000 đ/tháng · mua gói là xong, không phải tạo gì trước.<i class="db-pin">3</i></p>
+                <span class="db-btn">Xem gói</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- VPS — deliberately not a starting point -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">VPS</h5>
+            </div>
+            <div class="db-card">
+              <p class="db-say"><b>Không phải nơi bắt đầu.</b> nivo chưa bán VPS riêng — đây là góc nhìn hạ tầng của Học viện và AgentOS, và nó chỉ có nội dung sau khi một trong hai được provision.<i class="db-pin">4</i></p>
+            </div>
+          </section>
+
+          <!-- Domain — free, but not step one -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Tên miền</h5>
+            </div>
+            <div class="db-card">
+              <p class="db-say"><b>Chưa cần đến.</b> Tên miền riêng chỉ có tác dụng sau khi một Học viện đã Live và ở gói có tên miền riêng. Gói Khởi động chạy trên tên miền phụ nivo.vn.</p>
+            </div>
+          </section>
+
+          <!-- Wallet — a real zero, never an absence -->
+          <section class="db-sec">
+            <div class="db-sec-label">
+              <h5 class="db-sec-name">Ví</h5>
+              <span class="db-sec-link">Nạp ví</span>
+            </div>
+            <div class="db-card">
+              <div class="db-facts">
+                <div class="db-fact"><span class="db-fact-l">Số dư</span><span class="db-fact-v-zero">0 đ<i class="db-pin">5</i></span></div>
+                <div class="db-fact"><span class="db-fact-l">Hoá đơn chưa thanh toán</span><span class="db-fact-v-zero">0</span></div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+
+    <ul class="db-notes">
+      <li><span class="db-n">1</span><span><b>Cùng một trang, cùng năm mục.</b> Rỗng không phải một màn hình thứ hai — chỉ là phần thân của mỗi mục nói điều khác.</span></li>
+      <li><span class="db-n">2</span><span><b>Chỉ hai mục có nút</b>, vì chỉ hai thứ bán được. Và hai lời mời có độ dài khác nhau: ba bước và miễn phí, so với một bước và 490.000 đ.</span></li>
+      <li><span class="db-n">3</span><span><b>Không có “nạp ví trước”.</b> Gói Khởi động là 0 đ, và cổng thanh toán không đi qua ví — dựng ví thành cửa vào là dựng một rào chắn backend không có.</span></li>
+      <li><span class="db-n">4</span><span><b>Vắng mặt có chủ ý khác vắng mặt vì chưa mua.</b> VPS và Tên miền nói một câu, không nút, không căn giữa, không dấu hiệu rỗng — nên chúng không đọc giống một lời mời.</span></li>
+      <li><span class="db-n">5</span><span><b>0 đ là một con số thật</b>, không phải một sự vắng mặt: ví được tạo ngay khi đọc lần đầu, nên nó không bao giờ có trạng thái “chưa có”.</span></li>
+      <li><span class="db-n">6</span><span><b>Không đếm, không bộ lọc, không “chưa có…” lặp năm lần.</b> Không truy vấn nào của nivo trả về số đếm, và một bộ lọc trên tập rỗng chỉ làm tập rỗng nhỏ hơn.</span></li>
+    </ul>
+  </article>
+
+</div>
+
+<div class="db-vocab">
+  <h4>Vốn từ mỗi vùng đứng trên</h4>
+  <ul>
+    <li>Khung sidebar + thân · <code>sidebar-then-body-app</code><span class="db-new">MỚI</span></li>
+    <li>Landmark thân định tuyến · <code>console-body-main</code><span class="db-new">MỚI</span></li>
+    <li>Rail có nhóm Tổng quan / Dịch vụ / Tài khoản · <code>home-services-account-nav</code><span class="db-new">MỚI</span></li>
+    <li>Trang tổng quan (không bộ lọc) · <code>titled-service-overview-page</code><span class="db-new">MỚI</span></li>
+    <li>Một mục dịch vụ · <code>label-row-over-card</code> qua <code>SurfaceCard</code></li>
+    <li>Nhãn mục + đường ra / + số liệu · <code>title-with-end-action</code>, <code>title-with-baseline-fact</code></li>
+    <li>Danh sách site / workspace · <code>fleet-resource-list</code> qua <code>SurfaceListCard</code></li>
+    <li>Một dòng tài nguyên · <code>identity-kind-status-action-row</code> + <code>name-over-handle</code> (block <code>FleetRow</code>)</li>
+    <li>Lời mời khi chưa có gì · <code>centred-empty-notice</code> + <code>empty-notice-stack</code></li>
+    <li>Câu nói về giới hạn (VPS, Tên miền) · leaf <code>text</code> trong thân mục</li>
+    <li>Bảng số liệu ví · <code>labelled-fact-stack</code> + <code>label-value-row</code></li>
+    <li>Câu từ chối cạnh phần đã trả lời · <code>body-with-refusal-note</code><span class="db-new">MỚI</span></li>
+  </ul>
+  <p class="db-foot">Số liệu trong hai cảnh là hình dạng của trường thật (slug, provisionStatus, expiresAt, balanceVnd, amountVnd, dueAt), không phải fixture của màn hình đang chạy. Không vùng nào vẽ số đếm, RAM hay vCPU, vì không truy vấn khách hàng nào trả về chúng.</p>
+</div>
+</section>
+    </div>
+  </details>
+
+  <div class="dir-notes">
+    <div>
+      <h3>Đánh đổi</h3>
+      <p class="hint">Một cái nhìn trả lời tất cả — trả bằng một cú bấm nữa để xuống sâu, và từ bản sửa 2 là bằng một tầng nữa.</p>
+      <ul>
+        <li><b>Ba tầng thay vì hai.</b> Từ tổng quan tới một ứng dụng nay có một chặng ở giữa. Chặng ấy kiếm được chỗ đứng ngay ngày đầu — nó xếp các ứng dụng cùng mẫu cạnh nhau, giữ được cái đang dựng dở, và mở danh mục — nhưng người chỉ có đúng một ứng dụng vẫn phải đi qua nó mỗi lần. Đây là cái giá phải trả để tên đường không phải là tên của một mẫu.</li>
+        <li><b>Đắt hơn bản 1 đúng một entry mới và một extend, và cả khoản chênh nằm ở DANH MỤC.</b> Tầng thứ ba tự nó không tốn gì — page key được đổi tên chứ không nhân đôi. Cái tốn là <code>template-offer-row</code> cộng việc mở <code>fleet-resource-list</code> cho nó. B được chọn một phần vì rẻ nhất, nên điều này phải được nói to chứ không được lùa qua: <b>6 NEW + 2 EXTEND</b>, và <b>7 NEW</b> nếu người duyệt giữ luật “restingCount phải là số thật” và bắt tách page key.</li>
+        <li><b>Một chỗ có thể phản đối, và tôi từ chối chứ không lặng lẽ nhận.</b> Phương án rẻ hơn là nhét giá vào ô status của <code>identity-kind-status-action-row</code> và khỏi đúc <code>template-offer-row</code>. Nhưng ô đó mang một vòng đời mà tông của nó đổi theo trạng thái; một cái giá không phải một vòng đời, và làm thế là nói dối về đúng cái quan hệ mà <code>why</code> của key ấy đang bảo vệ.</li>
+        <li><b>Badge kind hết lặp, nhưng đổi lấy một cam kết mới.</b> “Học viện AI” dưới nhãn “Ứng dụng” là một sự thu hẹp thật — món nợ CONTRACT-9 của bản 1 được trả. Cái giá: bản vẽ phải giả định một ứng dụng NÓI ĐƯỢC nó dựng từ mẫu nào, mà hôm nay điều đó chỉ với tới được qua quan hệ nullable <code>catalogOrder → catalogItem.name</code>. Bản vẽ vì thế chỉ khẳng định hình dạng, không khẳng định field.</li>
+        <li><b>Năm mục vẫn mount năm truy vấn độc lập trên route chủ</b>, và ở tài khoản rỗng có thêm <code>catalogItems</code> cho mục Ứng dụng. Năm–sáu câu trả lời tới ở năm–sáu thời điểm, không truy vấn đếm nào tóm tắt được — đó vẫn là lý do trạng thái nghỉ phải được VẼ chứ không được giả định.</li>
+        <li><b>Hai kiểu vắng mặt vẫn đọc khác nhau nhờ hai kiểu thân khác nhau</b> — một danh mục có giá và có nút cho thứ dựng được, một câu thuần cho thứ không. Nó đúng vì là quy tắc lắp ráp block, không phải điều registry cưỡng chế; không gì ngăn tác giả sau đưa cho mục Máy chủ một empty notice kèm nút, và cái sai đó vẫn vô hình với mọi gate.</li>
+        <li><b>Thừa hưởng lỗi 390px chưa sửa của <code>identity-kind-status-action-row</code></b>: dòng là flex-row, không wrap, không biến thể responsive. Bản sửa 2 làm nó nặng thêm một chút, vì dòng danh mục có thêm một ô giá bên cạnh badge và nút. Là nợ baseline, thuộc một fidelity fix, nhưng bản này đặt nó ở nơi điện thoại gặp đầu tiên.</li>
+        <li><b>Cố tình hoãn sang Preview:</b> tầng thứ ba (trang của một ứng dụng), bốn trang dịch vụ, thang giá với bậc được khuyến nghị, lựa chọn thanh toán ví-hay-cổng, và support. Mỗi thứ là một khoảng trống thật đã được kiểm kê nêu tên, và không thứ nào là quan hệ của trang tổng quan hay của tầng tập.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Kiểm kê trước khi phát minh · tính khả thi</h3>
+      <p class="hint">Sáu entry mới, hai extend — và vẫn không một enabler backend nào.</p>
+      <ul>
+        <li><span class="vd vd-reuse">Chủ sở hữu có sẵn</span> dùng nguyên vẹn — branches: <code>Tree</code>, <code>SurfaceCard</code>, <code>SurfaceListCard</code>. Leaves: <code>NavLink</code>, <code>Heading</code>, <code>Text</code>, <code>TextLink</code>, <code>Badge</code>, <code>Button</code>, <code>SeeMoreLink</code>. Composites: <code>EmptyNotice</code> (chết cho tới bây giờ), <code>fleet-row</code>. Block: <code>blocks/provisioning/FleetRow</code> import nguyên khối, kể cả bản đồ <code>STATUS_TONE</code> — <code>awaiting_dns</code> vẫn là warning chứ không phải danger.</li>
+        <li><span class="vd vd-reuse">Reuse</span> không sửa gì, đã xác minh có mặt trong <code>packages/ui/src/contracts/index.ts</code>: <code>label-row-over-card</code>, <code>title-with-end-action</code>, <code>title-with-baseline-fact</code>, <code>fleet-resource-list</code>, <code>identity-kind-status-action-row</code>, <code>name-over-handle</code>, <code>centred-empty-notice</code>, <code>empty-notice-stack</code>, <code>labelled-fact-stack</code>, <code>label-value-row</code>, và leaf <code>text</code> mà <code>label-row-over-card.body</code> đã nhận sẵn.</li>
+        <li><span class="vd vd-reuse">Nhận thay vì nhân bản</span> <code>labelled-fact-stack</code> và <code>label-value-row</code> vẫn không có caller trong registry — một vi phạm CONTRACT-13 còn sống, đúc cho case console đã niêm phong mà Apply chưa bao giờ chạy. Mục Ví vẫn là caller trung thực đầu tiên: “Số dư / 1.240.000 đ” và “Hoá đơn chưa thanh toán / 299.000 đ · hạn 21/08” đúng là những dòng nhãn-và-số về một đối tượng.</li>
+        <li><span class="vd vd-reuse">Reuse</span> ô hành động của <code>identity-kind-status-action-row</code> vốn đã optional, và <code>why</code> của nó nói nguyên văn lý do: một tài nguyên đang giữa chừng cấp phát thì không có gì ai được làm với nó, còn một cái nút luôn hiện diện dưới dạng bị làm mờ là hứa một control không tồn tại. Dòng “đang dựng” ở cảnh 2 thực thi đúng mệnh đề đó thay vì đòi một hình dạng dòng mới — bản 1 chưa bao giờ chạm tới trạng thái này.</li>
+        <li><span class="vd vd-new">New</span> <code>sidebar-then-body-app</code> — mang nguyên từ bản 1, không đổi. Quan hệ không key nào biểu đạt: phần chrome sống sót qua thân trang bên cạnh nó, nên việc có những điểm đến nào không ngừng đúng khi route đổi.</li>
+        <li><span class="vd vd-new">New</span> <code>console-body-main</code> — mang nguyên từ bản 1, không đổi. Thân được định tuyến là landmark <code>main</code> duy nhất của tài liệu, hứa MỘT LẦN cho mọi route. <code>apps/app</code> hôm nay không có landmark main nào; LANDMARK-4/5 đòi.</li>
+        <li><span class="vd vd-new">New</span> <code>home-services-account-nav</code> — mang từ bản 1, ĐỔI một prop: slot <code>account</code> đi từ restingCount 1 lên 2 (Ví, Hỗ trợ). Miễn phí, vì entry chưa bao giờ land. Quan hệ không key nào biểu đạt: một tập điểm đến thường trực trong đó một thành viên TÓM TẮT các thành viên kia và hai thành viên nói VỀ tất cả chứ không đứng ngang hàng; <code>sidebar-nav-cluster</code> là một slot link lặp phẳng, chỉ nói được bằng thứ tự — thứ không nói gì với trình đọc màn hình.</li>
+        <li><span class="vd vd-new">New</span> <code>titled-section-stack-page</code> — ĐỔI TÊN từ <code>titled-service-overview-page</code> của bản 1, và nay phục vụ CẢ trang tổng quan lẫn tầng Ứng dụng. Quan hệ không key nào biểu đạt: nhiều chủ thể trả lời độc lập, đọc xuôi xuống một trang tại một mối nối, không bộ lọc. <code>titled-summary-filter-over-body-page</code> để <code>filter</code> BẮT BUỘC và <code>body</code> không lặp — đúng cho một collection bị lọc, sai ở đây. Đổi tên miễn phí vì chưa land, và bắt buộc vì cái tên không thể tiếp tục nói “service” khi một điểm đến đã thôi là một dịch vụ.</li>
+        <li><span class="vd vd-new">New</span> <code>body-with-refusal-note</code> — mang nguyên từ bản 1, không đổi. Quan hệ không key nào biểu đạt: một chủ thể BỊ TỪ CHỐI chứ không phải bị làm rỗng, đặt cạnh phần đã trả lời được. <code>myAcademySettings</code> ném lỗi cho người xem không có site VÀ cho người xem có hai; <code>myPodOpenclawStatus</code> ném theo thiết kế thay vì khai <code>reachable:false</code>. Một lời từ chối không phải một sự rỗng và cũng không phải một trang hỏng.</li>
+        <li><span class="vd vd-new">New — chỉ có ở bản sửa 2</span> <code>template-offer-row</code>. Quan hệ không key nào biểu đạt: một thứ bạn có thể MUA, mang một cái giá và đúng một cú bấm — đối lại với thứ bạn ĐANG SỞ HỮU của <code>identity-kind-status-action-row</code>, thứ mang một trạng thái vòng đời có tông đổi theo. Nhét giá vào ô status ấy là nói dối về chính quan hệ mà <code>why</code> của nó bảo vệ. <b>Đây là entry mới duy nhất thật sự có thể tranh cãi ở bản này, và phương án rẻ hơn bị TỪ CHỐI công khai chứ không được lặng lẽ nhận.</b></li>
+        <li><span class="vd vd-extend">Extend</span> <code>label-row-over-card</code>.<code>children.body.contract</code> phải nhận thêm <code>body-with-refusal-note</code> — mang từ bản 1. <code>SurfaceCard</code> suy <code>SectionBodyKey</code> ra từ đúng union đó (<code>packages/ui/src/branches/SurfaceCard/index.tsx:86</code>), nên thêm vào entry là nhận vào branch trong cùng một sửa đổi.</li>
+        <li><span class="vd vd-extend">Extend — chỉ có ở bản sửa 2</span> <code>fleet-resource-list</code>.<code>children.resource</code> hôm nay đọc <code>composite: "fleet-row"</code>, một ràng buộc cứng đúng một giá trị (kèm sẵn một ghi chú lệch tầng). Nó phải nhận thêm block <code>TemplateOfferRow</code>, và <code>why</code> của nó phải nới từ “hai loại thứ đã cấp phát được so sánh trong một lượt quét” thành các DÒNG được so sánh trong một lượt quét ghép. Chọn thế thay vì đúc một entry danh sách thứ hai có class y hệt.</li>
+        <li><span class="vd vd-new">Block mới</span> trong <code>apps/app</code> (biết miền, đúng chỗ ngoài <code>@nivo/ui</code>): <code>ServiceOverviewPage</code>, <code>AppsSection</code> (trước là <code>AcademySection</code>), <code>AgentOsSection</code>, <code>InfrastructureSection</code>, <code>DomainsSection</code>, <code>WalletSection</code>, cộng <code>AppSetPage</code>, <code>TemplateCatalogSection</code> và <code>TemplateOfferRow</code> cho tầng giữa mới. <code>FleetRow</code> import nguyên vẹn.</li>
+        <li><span class="vd vd-reuse">Enabler backend</span> KHÔNG CẦN — phần quan trọng nhất trong hồ sơ chi phí của B sống sót. Mọi sự thật được vẽ nằm trên một truy vấn đã ship: <code>catalogItems</code> (xác minh tại <code>src/features/core/api/core/graphql/queries/catalog/catalog-items/</code>), <code>myCatalogOrders</code>, <code>catalogItemDetail</code>, <code>catalogOrderDetail</code>, <code>myExpertSites</code>, <code>myAgentWorkspace</code>, <code>myDomains</code>, <code>myWallet</code>, <code>myInvoices</code>. Danh mục là một lượt đọc thật lọc theo <code>CatalogCategory.SiteFromTemplate</code>, và chú thích enum của chính backend viết “AI academy now, MMO/ecommerce later; each template is its own SKU, provisioned as a per-site app instance” — tập mở là mô hình của backend chứ không phải phát minh của bản vẽ này.</li>
+        <li><span class="vd vd-reuse">Bằng chứng cho chữ được vẽ</span> <code>catalog-seeder.service.ts</code> cấp tên “Học viện AI”, slug <code>nivo-ai-academy</code>, <code>templateKey ai_academy</code>, category <code>site_from_template</code>, tagline nguyên văn, và ba bậc Khởi động 0 ₫ / Chuyên nghiệp 299.000 ₫ / Doanh nghiệp 899.000 ₫; item AI Agent cấp bậc Cơ bản 490.000 ₫. Không một dòng nào trong ba cảnh là fixture màn hình.</li>
+        <li><span class="vd vd-gap">Còn thiếu</span> module dữ liệu, thứ duy nhất chưa tồn tại: <code>apps/app/src/modules/api/</code> chỉ có <code>auth.ts</code> và <code>graphql.ts</code>. Phải viết các module truy vấn trên transport đã có — code FE mới trong một lane đã có, và là chi phí BẰNG NHAU cho cả ba hướng vì màn đang chạy đọc từ fixture.</li>
+        <li><span class="vd vd-gap">Câu hỏi mở, KHÔNG được vẽ như đã chốt</span> một workstream khác đang thiết kế registry cho mẫu ứng dụng. Bản vẽ chỉ khẳng định những gì đúng bất kể bảng đó ra sao: ứng dụng là một tập, mỗi cái có danh tính và vòng đời, một cái dựng được từ danh mục. KHÔNG khẳng định: một field mang danh tính mẫu; tầng Ứng dụng đọc qua truy vấn nào khi mẫu thứ hai lên; một đơn đang dựng là một bản ghi ứng dụng hay chỉ là một đơn; có tồn tại cursor / hasMore / total hay không.</li>
+        <li><span class="vd vd-no">Cố tình không vẽ</span> nên không được kể là khả thi ở đây: tầng thứ ba (trang của một ứng dụng), bốn trang dịch vụ, thang giá có bậc khuyến nghị, lựa chọn thanh toán ví-hay-cổng, và support (<code>myTickets</code> không có cột dịch vụ; <code>myOpsTickets</code> treo vào một catalog order và luôn rỗng hôm nay).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════ DIRECTION C ══════════════════════════════ -->
+<section class="dir" id="direction-c">
+  <header>
+    <span class="dir-tag">direction-c · thanh bên chính là bảng tổng quan</span>
+    <h2>Không có trang chủ: mỗi mục trong thanh bên mang một sự thật sống của dịch vụ đó</h2>
+    <p class="dir-thesis">
+      Thanh bên chính là bảng tổng quan. Mỗi mục mang đúng một sự thật mà dịch vụ đó nói được, nên bản thân thanh bên đã
+      trả lời “tôi đang có gì” và thân trang luôn là đúng một dịch vụ. Điều kiện không đi bên trong đường dẫn — một điểm
+      đến trở thành một branch <code>NavSurface</code> bọc quanh một sắp xếp hai slot (tên, điều kiện), nên cả dòng là
+      đích bấm, <code>aria-current</code> sống sót, và điều kiện được đọc lên CÙNG với điểm đến chứ không phải sau nó.
+      Một sự thật mỗi dịch vụ, chọn theo cái người đọc hành động được chứ không theo cái rẻ nhất để đếm: Học viện báo
+      <code>provisionStatus</code> ít-ổn-định-nhất đọc thẳng từ <code>myExpertSites</code> (không bao giờ qua suy diễn
+      <code>myInstances</code>, thứ chôn <code>awaiting_dns</code> vào trong <code>provisioning</code>); AgentOS báo
+      <code>status</code> của workspace; Tên miền báo <code>myDomains[0].expiresAt</code>, thứ backend vốn đã trả về đầu
+      tiên vì nó sắp theo <code>expiresAt ASC</code> và không thể trễ như badge status quét theo giờ; Ví báo
+      <code>balanceVnd</code>, luôn là một con số thật vì ví được tạo lười ở 0. VPS báo một dấu gạch ngang, vĩnh viễn,
+      vì không truy vấn nào tồn tại — sự vắng mặt của nó được VẼ chứ không được lấp liếm.
+    </p>
+    <p class="dir-posture"><b>Posture:</b> đậm đặc, nhiều quyết định nhất, nhiều vốn từ mới nhất. Là hướng duy nhất đề
+      xuất một BRANCH mới (<code>NavSurface</code>) và là hướng duy nhất khiến chrome phải đọc năm truy vấn ngay khi tải.</p>
+  </header>
+
+  <div class="dir-scene">
+<section class="direction-c">
+<style>
+.direction-c{--dc-ink:#16181c;--dc-ink2:#3f444d;--dc-mut:#7a818c;--dc-ln:#e2e5ea;--dc-ln2:#eef0f4;--dc-rl:#f6f7f9;--dc-ac:#3f4bd8;--dc-acs:#ecedfb;font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif;color:var(--dc-ink);line-height:1.45}
+.direction-c *{box-sizing:border-box}
+.direction-c .dc-head{max-width:72ch;margin:0 0 18px}
+.direction-c .dc-post{display:inline-block;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--dc-ac);background:var(--dc-acs);border-radius:999px;padding:3px 9px;margin-bottom:8px}
+.direction-c h3{margin:0 0 6px;font-size:17px}
+.direction-c .dc-lede{margin:0;font-size:13px;color:var(--dc-ink2)}
+.direction-c .dc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(430px,1fr));gap:18px}
+.direction-c .dc-scene{border:1px solid var(--dc-ln);border-radius:10px;overflow:hidden;background:#fff}
+.direction-c .dc-cap{padding:9px 13px;border-bottom:1px solid var(--dc-ln);background:var(--dc-rl)}
+.direction-c .dc-cap b{font-size:12.5px}.direction-c .dc-cap span{display:block;font-size:11px;color:var(--dc-mut);margin-top:2px}
+.direction-c .dc-app{display:flex;min-height:420px}
+.direction-c .dc-rail{width:184px;flex:none;background:var(--dc-rl);border-right:1px solid var(--dc-ln);padding:12px 9px;display:flex;flex-direction:column;gap:15px}
+.direction-c .dc-brand{font-size:13px;font-weight:700;padding:0 8px}
+.direction-c .dc-grp{display:flex;flex-direction:column;gap:3px}
+.direction-c .dc-glab{font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--dc-mut);padding:0 8px 3px}
+.direction-c .dc-row{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;padding:6px 8px;border-radius:6px;font-size:12.5px;color:var(--dc-ink2);border:1px solid transparent}
+.direction-c .dc-row.cur{background:#fff;border-color:var(--dc-ln);color:var(--dc-ink);font-weight:600}
+.direction-c .dc-row.off{color:#a7adb6}
+.direction-c .dc-nm{min-width:0;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.direction-c .dc-c{flex:none;font-size:10.5px;white-space:nowrap}
+.direction-c .dc-c.act{background:var(--dc-acs);color:var(--dc-ac);border-radius:999px;padding:2px 7px;font-weight:600}
+.direction-c .dc-c.on{background:#e6e9ed;color:#414750;border-radius:999px;padding:2px 7px}
+.direction-c .dc-c.work{border:1px dashed #c5cad2;color:#6c727c;border-radius:999px;padding:1px 6px}
+.direction-c .dc-c.stop{background:#2a2d33;color:#fff;border-radius:999px;padding:2px 7px;font-weight:600}
+.direction-c .dc-c.none{color:var(--dc-mut)}
+.direction-c .dc-c.val{color:var(--dc-ink);font-variant-numeric:tabular-nums}
+.direction-c .dc-c.nil{color:#b9bec6}
+.direction-c .dc-body{flex:1 1 auto;min-width:0;padding:15px;display:flex;flex-direction:column;gap:15px;background:#fff}
+.direction-c .dc-ttl{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px}
+.direction-c .dc-ttl h4{margin:0;font-size:15.5px}
+.direction-c .dc-ttl em{font-style:normal;font-size:11.5px;color:var(--dc-mut)}
+.direction-c .dc-sec{display:flex;flex-direction:column;gap:8px}
+.direction-c .dc-slab{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.direction-c .dc-slab b{font-size:12.5px}
+.direction-c .dc-btn{font-size:11px;border:1px solid var(--dc-ln);border-radius:6px;padding:4px 9px;background:#fff;color:var(--dc-ink2)}
+.direction-c .dc-btn.p{background:var(--dc-ac);border-color:var(--dc-ac);color:#fff}
+.direction-c .dc-card{border:1px solid var(--dc-ln);border-radius:8px;overflow:hidden}
+.direction-c .dc-item{display:flex;align-items:center;gap:9px;padding:10px 12px;border-top:1px solid var(--dc-ln2)}
+.direction-c .dc-item:first-child{border-top:0}
+.direction-c .dc-id{min-width:0;flex:1 1 auto;display:flex;flex-direction:column;gap:2px}
+.direction-c .dc-id a{font-size:12.5px;color:var(--dc-ac);text-decoration:none}
+.direction-c .dc-id small{font-size:10.5px;color:var(--dc-mut)}
+.direction-c .dc-bdg{font-size:10.5px;border-radius:999px;padding:2px 7px;background:#eef0f4;color:#5a6069;white-space:nowrap}
+.direction-c .dc-ref{border:1px solid var(--dc-ln);border-left:3px solid #2a2d33;border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;align-items:flex-start;gap:7px}
+.direction-c .dc-ref p{margin:0;font-size:12px;color:var(--dc-ink2)}
+.direction-c .dc-rest{border:1px solid var(--dc-ln);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.direction-c .dc-bar{height:9px;border-radius:4px;background:#eceef2}
+.direction-c .dc-step{display:flex;gap:9px;font-size:12px;color:var(--dc-ink2)}
+.direction-c .dc-step i{font-style:normal;width:16px;flex:none;text-align:center;font-variant-numeric:tabular-nums;font-weight:600;color:var(--dc-mut)}
+.direction-c .dc-note{font-size:11.5px;color:var(--dc-mut);margin:0}
+.direction-c .dc-src{border-top:1px solid var(--dc-ln);background:var(--dc-rl);padding:8px 13px;font-size:10px;color:var(--dc-mut)}
+.direction-c .dc-src code{font-family:ui-monospace,Menlo,monospace;color:var(--dc-ink2)}
+.direction-c .dc-key{margin-top:18px;border-top:1px solid var(--dc-ln);padding-top:13px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;font-size:11px;color:var(--dc-mut)}
+.direction-c .dc-key b{display:block;color:var(--dc-ink);margin-bottom:4px;font-size:11px}
+</style>
+
+<div class="dc-head">
+<span class="dc-post">Đậm đặc · nhiều quyết định nhất</span>
+<h3>Direction C — Thanh bên chính là bảng tổng quan</h3>
+<p class="dc-lede">Không có trang chủ riêng. Mỗi mục trong thanh bên mang <b>một</b> sự thật sống của dịch vụ đó, nên bản thân thanh bên đã trả lời "tôi đang có gì"; thân trang luôn là một dịch vụ cụ thể. Điều kiện là <b>hàng xóm</b> của tên dịch vụ, không phải thuộc tính của đường dẫn. Chỉ dùng xám trung tính và một màu nhấn: màu nhấn chỉ dành cho việc <b>đang chờ bạn làm</b>.</p>
+</div>
+
+<div class="dc-grid">
+
+<div class="dc-scene">
+<div class="dc-cap"><b>Cảnh 1 — đã có dịch vụ</b><span>Thanh bên trả lời trước khi đọc thân trang. Một cảnh cho thấy đủ bốn trạng thái mạng: đã trả lời, bị từ chối, chưa hỏi xong, và một giá trị thật.</span></div>
+<div class="dc-app">
+<nav class="dc-rail">
+<div class="dc-brand">nivo</div>
+<div class="dc-grp">
+<div class="dc-glab">Dịch vụ</div>
+<div class="dc-row cur"><span class="dc-nm">Học viện</span><span class="dc-c act">chờ DNS</span></div>
+<div class="dc-row"><span class="dc-nm">AgentOS</span><span class="dc-c on">đang chạy</span></div>
+<div class="dc-row off"><span class="dc-nm">VPS</span><span class="dc-c nil">—</span></div>
+<div class="dc-row"><span class="dc-nm">Tên miền</span><span class="dc-c val">23/09</span></div>
+</div>
+<div class="dc-grp">
+<div class="dc-glab">Tài khoản</div>
+<div class="dc-row"><span class="dc-nm">Ví</span><span class="dc-c val">1.250.000 ₫</span></div>
+<div class="dc-row"><span class="dc-nm">Hỗ trợ</span><span class="dc-c val">2</span></div>
+</div>
+</nav>
+<div class="dc-body">
+<div class="dc-ttl"><h4>Học viện</h4><em>2 site</em></div>
+
+<div class="dc-sec">
+<div class="dc-slab"><b>Site</b><button class="dc-btn p">Tạo site</button></div>
+<div class="dc-card">
+<div class="dc-item">
+<span class="dc-id"><a href="#direction-c">hocvien-abc</a><small>abc.vn</small></span>
+<span class="dc-bdg">Site</span><span class="dc-c act">chờ DNS</span>
+<button class="dc-btn">Xem bản ghi</button>
+</div>
+<div class="dc-item">
+<span class="dc-id"><a href="#direction-c">hocvien-xyz</a><small>hocvien-xyz.nivo.vn</small></span>
+<span class="dc-bdg">Site</span><span class="dc-c on">đang chạy</span>
+<button class="dc-btn">Mở</button>
+</div>
+</div>
+</div>
+
+<div class="dc-sec">
+<div class="dc-slab"><b>Cấu hình học viện</b></div>
+<div class="dc-ref">
+<p>Bạn đang có 2 site nên không xác định được đâu là học viện chính.</p>
+<button class="dc-btn">Chọn site</button>
+</div>
+<p class="dc-note">Bị từ chối — không phải trống, và không phải cả trang hỏng. Ba site còn lại vẫn trả lời bình thường.</p>
+</div>
+
+<div class="dc-sec">
+<div class="dc-slab"><b>Lần triển khai gần nhất</b></div>
+<div class="dc-rest"><div class="dc-bar" style="width:62%"></div><div class="dc-bar" style="width:40%"></div></div>
+<p class="dc-note">Chưa hỏi xong — chỉ mục này còn nghỉ, phần trên đã trả lời.</p>
+</div>
+</div>
+</div>
+<div class="dc-src">Nguồn — thanh bên: <code>myExpertSites[].provisionStatus</code> · <code>myAgentWorkspace[].status</code> · VPS: không có truy vấn · <code>myDomains[0].expiresAt</code> · <code>myWallet.balanceVnd</code> · <code>myTickets.length</code>. Thân trang: <code>myExpertSites[]</code> (slug, customDomain, provisionStatus) · <code>myAcademySettings</code> từ chối · <code>myExpertSiteDeployment</code> chưa trả lời.</div>
+</div>
+
+<div class="dc-scene">
+<div class="dc-cap"><b>Cảnh 2 — chưa cấp phát gì (trạng thái thật hôm nay)</b><span>Thanh bên nói sự vắng mặt <b>một lần</b>, không lặp lại "chưa có" ở từng mục. Bốn khoảng trống ở trên, hai số 0 thật ở dưới.</span></div>
+<div class="dc-app">
+<nav class="dc-rail">
+<div class="dc-brand">nivo</div>
+<div class="dc-grp">
+<div class="dc-glab">Dịch vụ</div>
+<div class="dc-row cur"><span class="dc-nm">Học viện</span><span class="dc-c none">chưa mở</span></div>
+<div class="dc-row"><span class="dc-nm">AgentOS</span><span class="dc-c none">chưa mở</span></div>
+<div class="dc-row off"><span class="dc-nm">VPS</span><span class="dc-c nil">—</span></div>
+<div class="dc-row"><span class="dc-nm">Tên miền</span><span class="dc-c none">chưa mở</span></div>
+</div>
+<div class="dc-grp">
+<div class="dc-glab">Tài khoản</div>
+<div class="dc-row"><span class="dc-nm">Ví</span><span class="dc-c val">0 ₫</span></div>
+<div class="dc-row"><span class="dc-nm">Hỗ trợ</span><span class="dc-c val">0</span></div>
+</div>
+</nav>
+<div class="dc-body">
+<div class="dc-ttl"><h4>Học viện</h4><em>từ 0 ₫/tháng</em></div>
+
+<div class="dc-sec">
+<div class="dc-slab"><b>Bắt đầu</b><button class="dc-btn p">Tạo site</button></div>
+<div class="dc-card" style="padding:12px;display:flex;flex-direction:column;gap:9px">
+<div class="dc-step"><i>1</i><span>Tạo site — miễn phí, chưa cần ví, chưa cần đơn hàng.</span></div>
+<div class="dc-step"><i>2</i><span>Xuất bản site. Site còn ở bản nháp thì hệ thống <b>từ chối</b> cấp phát.</span></div>
+<div class="dc-step"><i>3</i><span>Chọn gói: 0 ₫ · 299.000 ₫ · 899.000 ₫ mỗi tháng.</span></div>
+<div class="dc-step"><i>4</i><span>Thanh toán bằng ví hoặc cổng. Gói 0 ₫ bỏ qua bước này.</span></div>
+</div>
+</div>
+
+<div class="dc-sec">
+<div class="dc-slab"><b>Tên miền riêng</b></div>
+<p class="dc-note">Chỉ có từ gói Chuyên nghiệp. Gói miễn phí chạy trên <code>&lt;slug&gt;.nivo.vn</code>. Mua tên miền trước khi có học viện đang chạy thì nó chưa trỏ tới đâu cả.</p>
+</div>
+
+<div class="dc-sec">
+<div class="dc-slab"><b>VPS</b></div>
+<p class="dc-note">Đây là góc nhìn hạ tầng của hai dịch vụ trên, không phải thứ để mua riêng — và hiện chưa có truy vấn nào liệt kê máy. Vì vậy mục này mang dấu "—" ở cả hai cảnh, chứ không mang chữ "chưa mở".</p>
+</div>
+</div>
+</div>
+<div class="dc-src">Nguồn — cùng bộ truy vấn, tất cả trả về <code>[]</code>; <code>myWallet</code> tự tạo ví <code>0 ₫</code> ngay lần đọc đầu. Thân trang: giá lấy từ <code>catalogItems[].tiers[].priceMonthlyVnd</code>; thứ tự bắt buộc từ <code>createExpertSite</code> → <code>publishExpertSite</code> → <code>orderCatalogItem</code> → <code>payInvoice</code>.</div>
+</div>
+
+</div>
+
+<div class="dc-key">
+<div><b>Không vẽ vì backend không có</b>Không dải đếm, không bộ lọc theo loại, không RAM/vCPU, không "3 agents · 12 automations". Không truy vấn đếm nào tồn tại và không danh sách nào mang tổng số.</div>
+<div><b>Đếm được thật</b><code>myExpertSites</code>, <code>myDomains</code>, <code>myTickets</code> không có tham số phân trang, nên độ dài mảng là số thật. <code>myAutomations</code> và <code>myAutomationRuns</code> thì không — nên không đếm.</div>
+<div><b>Ba loại "trống" khác nhau</b>Khoảng trống mời mua (chữ xám "chưa mở"), giá trị 0 thật (số đen), và không thể biết (dấu "—"). Ba cách vẽ khác nhau vì ba câu trả lời khác nhau.</div>
+<div><b>Màu nhấn dùng ở đâu</b>Chỉ cho trạng thái cần khách hàng ra tay (<code>awaiting_dns</code>) và cho một nút chính mỗi mục. Trạng thái lỗi dùng xám đậm đặc, không dùng đỏ, vì nivo chưa duyệt bảng màu nào.</div>
+</div>
+</section>
+  </div>
+
+  <div class="dir-notes">
+    <div>
+      <h3>Đánh đổi</h3>
+      <p class="hint">Đây là hướng trả giá nhiều nhất để lấy được “nhìn thanh bên là biết”.</p>
+      <ul>
+        <li><b>Một sự thật mỗi dịch vụ là quyết định gắt nhất ở đây:</b> thanh bên nói Học viện đang chờ DNS nhưng không nói có mấy site, và số site chỉ hiện khi mở vào dịch vụ đó. Đổi lại, thanh bên không bao giờ phải gọi hết mọi truy vấn chỉ để đếm.</li>
+        <li><b>Không có trang chủ</b> nghĩa là lần đầu vào console phải chọn sẵn một dịch vụ (Học viện). Người mới sẽ thấy lời mời của một dịch vụ chứ không thấy toàn cảnh bốn dịch vụ cùng lúc — thanh bên gánh phần đó.</li>
+        <li><b>Thanh bên phải đọc năm truy vấn ngay khi tải</b>, và mỗi dòng có trạng thái riêng, nên chrome có thể hiện xong lệch nhịp nhau. Bù lại không dòng nào chờ dòng nào, và một dịch vụ bị từ chối không làm bốn dịch vụ còn lại trông như hỏng.</li>
+        <li><b>Điều kiện trong thanh bên bị ép rất ngắn</b> (“chờ DNS”, “23/09”). Câu giải thích đầy đủ — kể cả câu từ chối đã dịch sẵn từ server — chỉ đọc được sau khi mở vào dịch vụ.</li>
+        <li><b>Bản HTML này cố tình không dùng bảng màu success/warning/danger;</b> ở Preview, tone sẵn có của leaf <code>Badge</code> sẽ cấp bốn tone đó, và bản đồ <code>STATUS_TONE</code> của <code>FleetRow</code> (<code>awaiting_dns = warning</code>) giữ nguyên không sửa.</li>
+        <li><b>VPS chiếm một dòng vĩnh viễn không bấm được.</b> Đó là chi phí của việc tôn trọng chỉ dẫn “có 4 services” mà không bịa dữ liệu — nếu sau này backend mở truy vấn máy chủ thì dòng đó sống lại mà không cần đổi hình dạng nào.</li>
+        <li><b>Hỗ trợ được xếp dưới “Tài khoản”</b> chứ không thành dịch vụ thứ năm. Đây là quyết định của Plan: <code>SupportTicketEntity</code> không có cột nào để gắn vé vào một dịch vụ, nên gắn theo dịch vụ sẽ là việc của backend chứ không phải sắp xếp UI.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Kiểm kê trước khi phát minh · tính khả thi</h3>
+      <p class="hint">Nhiều vốn từ mới nhất — và là hướng duy nhất đề xuất một branch mới.</p>
+      <ul>
+        <li><span class="vd vd-reuse">Chủ sở hữu có sẵn</span> không sửa: <code>branches/Tree</code> (khung duy nhất biến một key thành một element), <code>branches/SurfaceCard</code> (vẽ mỗi mục dịch vụ có tên, bỏ mặt phẳng trong qua <code>isFrameless</code> khi thân đã là một tập mặt phẳng), <code>branches/SurfaceListCard</code>, <code>leaves/Text</code>, <code>leaves/Heading</code>, <code>leaves/Badge</code> (vốn tone neutral/accent/success/warning/danger đã có), <code>leaves/Button</code>, <code>leaves/TextLink</code>, <code>composites/EmptyNotice</code> (hiện không gì mount — hướng này mount nó và giải quyết vi phạm CONTRACT-13 đó), và <code>blocks/provisioning/FleetRow</code> nguyên văn, kể cả <code>STATUS_TONE</code> nơi <code>awaiting_dns</code> là warning và một mình ở tông đó.</li>
+        <li><span class="vd vd-reuse">Reuse</span> không sửa: <code>label-row-over-card</code> (mỗi mục dịch vụ: nhãn giữ NGOÀI mặt phẳng nó gọi tên), <code>title-with-end-action</code>, <code>title-with-baseline-fact</code>, <code>fleet-resource-list</code>, <code>identity-kind-status-action-row</code> và <code>name-over-handle</code> (do <code>FleetRow</code> vẽ), <code>numbered-step-stack</code> và <code>step-number-then-instruction</code> (thang tạo→xuất bản→đặt→trả trong thân rỗng), <code>centred-empty-notice</code>, <code>inline-action-run</code>. <code>glyph-title-fact-row</code> CỐ TÌNH không dùng.</li>
+        <li><span class="vd vd-reuse">Nhận thay vì nhân bản</span> <code>labelled-fact-stack</code> và <code>label-value-row</code> hôm nay không có caller nào và đang vi phạm CONTRACT-13. Hướng này nhận chúng cho bảng sự kiện Tên miền (<code>registeredAt</code> / <code>expiresAt</code> / <code>autoRenew</code> / <code>nameservers</code> — đều là cột thật của <code>DomainEntity</code>) và bảng sự kiện Ví. Đúc một key thứ hai xếp các dòng nhãn-và-số trong khi hai key này nằm không chính là bản sao mà CONTRACT-9 và CONTRACT-13 sinh ra để ngăn.</li>
+        <li><span class="vd vd-no">Từ chối</span> <code>titled-summary-filter-over-body-page</code>: slot <code>filter</code> của nó BẮT BUỘC và <code>why</code> của nó bảo vệ đúng yêu cầu đó cho một trang lọc một collection. Một trang dịch vụ không lọc gì, vì trục đã dời vào rail. Dùng lại nó là ép ra một control mà chức năng duy nhất là làm một tập rỗng nhỏ hơn.</li>
+        <li><span class="vd vd-no">Từ chối</span> <code>choice-tab-strip</code> và <code>dual-tabs-toolbar</code>: cả hai biểu đạt một bộ lọc trên một tập kết quả, đúng quan hệ mà trục dịch vụ bỏ đi. <span class="vd vd-no">Từ chối</span> mở rộng leaf <code>NavLink</code> bằng một prop fact/condition: điều kiện thuộc về DỊCH VỤ còn đường dẫn thuộc về ROUTE, và một leaf mang cả hai sẽ nhét một tông lifecycle vào bên trong một primitive điều hướng đang dùng chung với top bar của trang landing.</li>
+        <li><span class="vd vd-new">New (branch)</span> <code>NavSurface</code> tại <code>packages/ui/src/branches/NavSurface</code> — dựng theo từng dòng của <code>PressableSurface</code> đã có, nhưng vẽ một anchor và mang <code>isCurrent → aria-current</code> thay vì một button. QUAN HỆ KHÔNG CHỦ SỞ HỮU NÀO BIỂU ĐẠT: một điểm đến mà tên khả truy cập của nó phải bao gồm một sự thật về thứ nó dẫn tới, với cả dòng là đích. <code>PressableSurface</code> vẽ <code>&lt;button&gt;</code>, thứ tước mất ngữ nghĩa route mà một rail phải có; <code>NavLink</code> là leaf và không giữ được một node đã sắp xếp bên trong, còn lồng <code>NavLink</code> trong <code>PressableSurface</code> là một anchor trong một button. Props: <code>contract, render, label, isCurrent, press, disabled</code> — cùng hình dạng với <code>PressableSurface</code>, hover cố định ở <code>'surface'</code>.</li>
+        <li><span class="vd vd-new">New</span> <code>service-destination-condition-row</code> — classes <code>flex, flex-row, items-center, justify-between, gap-2, w-full, [&gt;*:first-child]:min-w-0, [&gt;*:first-child]:grow</code>; host <code>div</code>; children <code>{name: text(sm), condition: leaf ['badge','text']}</code>. QUAN HỆ KHÔNG KEY NÀO BIỂU ĐẠT: một nơi người đọc đi tới VÌ điều kiện của nó, nơi điều kiện là badge khi dịch vụ báo một lifecycle và là chữ thuần khi sự thật là một giá trị chứ không phải một trạng thái — nên số 0 ₫ có thật của ví không thể bị vẽ thành một badge trạng thái khai một điều kiện mà ví không có. <code>label-value-row</code> là hình dạng gần nhất và bị từ chối: nó <code>items-baseline</code> cho một bảng sự kiện đọc theo cột, và slot <code>value</code> của nó chỉ nhận text — đúng thứ làm “không có”, “không biết được” và “bằng không” sập vào một khẳng định.</li>
+        <li><span class="vd vd-new">New</span> <code>labelled-destination-group</code> — classes <code>flex, flex-col, gap-2</code>; children <code>{label: text(xs,muted), destination: service-destination-condition-row repeats, restingCount 4}</code>. QUAN HỆ KHÔNG KEY NÀO BIỂU ĐẠT: một chú thích gọi tên điều mà một dãy điểm đến có chung — thứ duy nhất nói được với người đọc VÀ với trình đọc màn hình rằng Ví dưới “Tài khoản” là về bốn dịch vụ ở trên chứ không phải cái thứ năm. Thứ tự nói điều đó với mắt và với không gì khác, còn <code>sidebar-nav-cluster</code> đã niêm phong là một slot lặp phẳng duy nhất, không có cách nào nói.</li>
+        <li><span class="vd vd-new">New</span> <code>console-service-rail</code> — classes <code>flex, w-full, flex-col, gap-4, p-4</code>; host <code>nav</code>; children <code>{brand: heading, services: labelled-destination-group, account: labelled-destination-group}</code>. Thay thế <code>sidebar-nav-cluster</code> đã niêm phong nhưng chưa bao giờ land. QUAN HỆ: tập điểm đến duy nhất của console, xứng đáng được tìm bằng tên, giữ bề rộng của nó trong khi các điều kiện đang đến để thân trang không nhảy ở lần vẽ đầu — với hai nhóm cố định thành slot có tên chứ không phải một dãy phẳng.</li>
+        <li><span class="vd vd-new">New</span> <code>sidebar-then-body-app</code> — classes <code>flex, min-h-screen, w-full, flex-col, md:flex-row, md:items-start, md:[&gt;*:first-child]:w-72, :shrink-0, md:[&gt;*:last-child]:min-w-0, :grow</code>; children <code>{sidebar: console-service-rail, body: console-body-main}</code>. Đây là đề xuất của chính case đã niêm phong tại <code>design-plans/app-provisioning-dashboard/preview-lab/proposed-contracts.ts</code>, mang sang nguyên văn cả class lẫn <code>why</code>, chỉ trỏ lại slot sidebar. Verdict NEW vì nó chưa bao giờ land — <code>rail-then-main</code> và họ hàng bị quét ở commit <code>9fdf5c3</code> — nhưng KHÔNG một class member mới nào: cả mười đã nằm trong union <code>LayoutClassName</code> và hôm nay không entry nào nhận.</li>
+        <li><span class="vd vd-new">New</span> <code>console-body-main</code> — classes <code>flex, min-w-0, grow, flex-col</code>; host <code>main</code>; children <code>{page: titled-service-body}</code>. Nguyên văn đề xuất đã niêm phong trừ đứa con của nó, thứ gọi tên một leaf <code>'page'</code> không tồn tại trong <code>packages/ui/src/leaves</code>; gọi tên contract trang thay vào đó khiến slot kiểm tra được. LANDMARK-4/5 đòi: <code>apps/app/src/app/[locale]/layout.tsx</code> vẽ html/body/AppProviders và không gì khác, nên không route đã ship nào có landmark main.</li>
+        <li><span class="vd vd-new">New</span> <code>titled-service-body</code> — classes <code>mx-auto, flex, w-full, max-w-4xl, flex-col, gap-6, px-6, py-6</code>; children <code>{heading: [title-with-baseline-fact, title-with-end-action], section: [label-row-over-card, centred-empty-notice, numbered-step-stack] repeats, restingCount 2}</code>. QUAN HỆ KHÔNG KEY NÀO BIỂU ĐẠT: nhiều mục có tên trả lời độc lập đọc xuôi xuống một khổ vận hành 56rem, mỗi mục được quyền ở trạng thái khác hàng xóm, không bộ lọc. <code>stacked-sections</code> từng là key xếp chồng các mục và nó đã bị xoá; gấp phần lặp vào khung trang là thứ ngăn nó bị đúc lại. Khác <code>titled-summary-filter-over-body-page</code> ở bộ lọc bắt buộc, khác <code>titled-body</code> đã niêm phong ở slot section lặp.</li>
+        <li><span class="vd vd-new">New</span> <code>refused-section-notice</code> — classes <code>flex, flex-col, items-start, gap-2, p-4</code>; children <code>{message: text(sm), retry: button optional}</code>. QUAN HỆ KHÔNG KEY NÀO BIỂU ĐẠT: một mục BỊ TỪ CHỐI trong khi vẫn gọi đúng tên dịch vụ của nó — <code>myAcademySettings</code> ném lỗi cho người xem không có site và lại ném cho người xem có hai, còn <code>myPodOpenclawStatus</code> ném theo thiết kế thay vì khai <code>reachable:false</code>. <code>centred-empty-notice</code> bị từ chối cho việc này: một sự rỗng được căn giữa vì nó LÀ toàn bộ câu trả lời, còn một lời từ chối cắt ngang một câu trả lời đang tồn tại, và căn giữa nó sẽ khiến một dịch vụ đang chạy đọc như một dịch vụ vắng mặt.</li>
+        <li><span class="vd vd-extend">Extend</span> <code>label-row-over-card</code> — thêm <code>refused-section-notice</code> vào union body. Sửa một dòng tại <code>packages/ui/src/contracts/index.ts</code>. <code>SurfaceCard</code> suy <code>SectionBodyKey</code> ra từ union đó, nên branch nhận nó trong cùng một sửa đổi và không cần đổi branch.</li>
+        <li><span class="vd vd-reuse">Không class mới</span> KHÔNG một <code>LayoutClassName</code> member mới nào. Mọi class nêu trên đã nằm trong union tại <code>packages/ui/src/contracts/index.ts:27-78</code> — kể cả toàn bộ topology của rail (<code>md:[&gt;*:first-child]:w-72 / :shrink-0</code>, <code>md:[&gt;*:last-child]:min-w-0 / :grow</code>) bị bỏ lại khi <code>rail-then-main</code> bị quét, và <code>max-w-4xl</code>, được nhận vào cho đúng khổ vận hành một cột này.</li>
+        <li><span class="vd vd-new">Chủ sở hữu mới</span> trong <code>apps/app</code>: <code>components/layouts/ConsoleLayout</code>; <code>blocks/console/ServiceRail</code> (là block, vì nó đọc các trạng thái cấp phát của nivo để chọn chữ điều kiện và tông cho từng dòng); <code>pages/AcademyServicePage</code>, <code>AgentOsServicePage</code>, <code>InstancesServicePage</code>, <code>DomainsServicePage</code>, <code>WalletServicePage</code>, <code>SupportServicePage</code>. Mỗi trang tự nắm prop bốn trạng thái của nó (nghỉ / đã trả lời / rỗng / bị từ chối) theo từng mục thay vì một <code>phase</code> cấp trang — đó là hệ quả cấu trúc của năm truy vấn độc lập.</li>
+        <li><span class="vd vd-gap">Còn thiếu</span> dữ liệu: <code>apps/app/src/modules/api/console/*.ts</code> — một file mỗi dịch vụ trên transport <code>modules/api/graphql.ts</code> đã có. KHÔNG cần thay đổi backend nào, và đó là chủ ý: hướng này không vẽ truy vấn đếm, không tổng, không RAM/vCPU, không credit burn, nên không gì nó render phụ thuộc vào một enabler. Enabler TUỲ CHỌN, nêu tên nhưng không bắt buộc: (a) một <code>myInstances</code> đọc bảng instances cộng một <code>ResolveField</code> cho <code>ExpertSiteEntity.instance</code>, thứ sẽ biến dấu gạch ngang VPS thành một danh sách; (b) một cột service hoặc order trên <code>SupportTicketEntity</code>, thứ mà hỗ trợ theo dịch vụ cần. Cả hai là việc backend, không phải sắp xếp UI.</li>
+        <li><span class="vd vd-gap">Nợ thừa hưởng</span> không phải do hướng này gây ra: <code>identity-kind-status-action-row</code> là flex-row không <code>flex-wrap</code> và không biến thể responsive, nên ở 390px nút của <code>FleetRow</code> bị cắt. Đã ghi trong design record đã niêm phong và vẫn chưa sửa trong dòng đang chạy; nó đến cùng baseline parity và thuộc về một fidelity fix, không thuộc case này.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<h2 class="section" id="compare">Ba hướng khác nhau ở đâu</h2>
+<p class="section-lede">
+  Cả ba đồng ý về: không fixture, bốn trạng thái mạng mỗi khối, Ví/Hỗ trợ tách xuống nhóm “Tài khoản”,
+  <code>FleetRow</code> dùng lại nguyên khối, và không vẽ số đếm vì không truy vấn đếm nào tồn tại. Chúng chỉ khác nhau
+  ở những dòng dưới đây — và đó là những dòng khó đổi nhất về sau.
+  <b>Một điều từng là chung nay không còn:</b> A và C vẫn coi cả bốn điểm đến là DỊCH VỤ, còn bản sửa 2 của B nói Học viện
+  là một ỨNG DỤNG dựng từ mẫu chứ không phải một dịch vụ — nên ở B, ba điểm đến là hạ tầng cố định và điểm đến thứ tư là
+  một tập mở. Đây là sửa mô hình, không phải sửa bức tranh, nên nếu B được chọn thì câu hỏi ấy cũng đặt lại cho A và C.
+</p>
+
+<table class="cmp">
+  <thead>
+    <tr>
+      <th>Trục</th>
+      <th>A — thân trang LÀ dịch vụ</th>
+      <th>B — bản sửa 2 · tổng quan là nhà, điểm đến là ứng dụng</th>
+      <th>C — thanh bên là bảng tổng quan</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Toàn cảnh sống ở đâu</th>
+      <td>Không có route toàn cảnh thường trực. Thân trang luôn là một dịch vụ; “Tổng quan” chỉ xuất hiện cho tài khoản chưa có gì. Trang chủ = dịch vụ dùng gần nhất, nên hai lần mở có thể ra hai màn.</td>
+      <td><b>Bản sửa 2.</b> Vẫn một điểm đến thường trực đứng TRÊN các dịch vụ, năm mục, route chủ ổn định. Nhưng nay có BA tầng: tổng quan → Ứng dụng (cái tập) → một ứng dụng. Mục đầu tiên tóm tắt một TẬP chứ không một chủ thể, nên nó gọi tên vài thành viên và im lặng về tổng số.</td>
+      <td>Không có route toàn cảnh nào cả. THANH BÊN là toàn cảnh: mỗi mục mang một sự thật sống. Thân trang luôn đúng một dịch vụ; vào lần đầu chọn sẵn Học viện.</td>
+    </tr>
+    <tr>
+      <th>Sidebar mang gì</th>
+      <td>Chỉ tên. Không số, không tình trạng. <code>NavLink</code> không mọc thêm slot.</td>
+      <td>Chỉ tên (cộng mục Tổng quan). Điều kiện cố tình dồn hết về trang chủ. <b>Điểm đến là “Ứng dụng”, không phải “Học viện”</b> — Học viện là một DÒNG bên trong, nên mẫu thứ hai không đẻ ra mục thứ năm. “VPS” đổi thành “Máy chủ”; nhóm Tài khoản giữ cả Ví lẫn Hỗ trợ.</td>
+      <td>Tên + đúng MỘT điều kiện mỗi dịch vụ (badge khi là lifecycle, chữ khi là giá trị). Cả dòng là đích bấm.</td>
+    </tr>
+    <tr>
+      <th>Màn chưa cấp phát gì nói gì</th>
+      <td>Một màn CHÀO HÀNG có thứ hạng: bốn dịch vụ theo thứ tự phụ thuộc thật (Học viện 1 → AgentOS 2 → Tên miền 3 → Máy chủ 4), mỗi cái một thang bước đánh số, kết bằng ví <code>0 ₫</code>. Máy chủ cố tình KHÔNG có nút. Cả màn không nói “chưa có…” lần nào.</td>
+      <td>CÙNG một trang tổng quan, năm mục y nguyên, chỉ phần thân đổi lời. Câu rỗng nói <b>“chưa có ứng dụng nào”</b> chứ không “chưa có Học viện”, và cái được đưa ra là <b>DANH MỤC MẪU</b> (<code>catalogItems</code> lọc <code>site_from_template</code>, cùng hình dạng dòng với tầng Ứng dụng) chứ không phải một nút cứng “Tạo site”. AgentOS 490.000 ₫ một bước; Máy chủ và Tên miền là một CÂU thuần; ví là <code>0 đ</code> thật.</td>
+      <td>Thanh bên nói sự vắng mặt MỘT LẦN (“chưa mở” ×3, “—” cho VPS, <code>0 ₫</code>, <code>0</code>), rồi thân trang mở thẳng vào Học viện với thang bốn bước. Ba kiểu “trống” được vẽ khác nhau: chưa mở / 0 thật / không biết được.</td>
+    </tr>
+    <tr>
+      <th>Contract entry phải đúc mới</th>
+      <td><b>6 NEW</b> + 1 EXTEND: <code>sidebar-then-body-app</code>, <code>console-body-main</code>, <code>sidebar-nav-cluster</code>, <code>sidebar-nav-group</code>, <code>stacked-sections</code> (land lại tên cũ), <code>refused-section-notice</code>; extend <code>label-row-over-card</code> (+2 giá trị body). Không branch mới.</td>
+      <td><b>6 NEW</b> + <b>2 EXTEND</b> — bản 1 là 5 + 1, và khoản chênh được nói to vì B từng được chọn một phần vì rẻ nhất. NEW: <code>sidebar-then-body-app</code>, <code>console-body-main</code>, <code>home-services-account-nav</code> (account restingCount 1→2), <code>titled-section-stack-page</code> (đổi tên từ <code>titled-service-overview-page</code>, dùng cho cả hai tầng), <code>body-with-refusal-note</code>, <code>template-offer-row</code>. EXTEND: <code>label-row-over-card</code> (+1) và <code>fleet-resource-list</code> (nhận <code>TemplateOfferRow</code>). Không branch mới. <b>Thành 7 NEW</b> nếu người duyệt bắt tách page key theo luật restingCount phải là số thật. Toàn bộ khoản chênh là DANH MỤC; tầng thứ ba tự nó không tốn gì.</td>
+      <td><b>7 NEW</b> + 1 EXTEND + <b>1 BRANCH mới</b>: <code>service-destination-condition-row</code>, <code>labelled-destination-group</code>, <code>console-service-rail</code>, <code>sidebar-then-body-app</code>, <code>console-body-main</code>, <code>titled-service-body</code>, <code>refused-section-notice</code>; extend <code>label-row-over-card</code>; branch <code>NavSurface</code>. Nhiều nhất.</td>
+    </tr>
+    <tr>
+      <th>Key chết được nhận lại</th>
+      <td><code>labelled-fact-stack</code> + <code>label-value-row</code> (bảng triển khai), <code>EmptyNotice</code>.</td>
+      <td><code>labelled-fact-stack</code> + <code>label-value-row</code> (mục Ví), <code>EmptyNotice</code>.</td>
+      <td><code>labelled-fact-stack</code> + <code>label-value-row</code> (bảng Tên miền và Ví), <code>EmptyNotice</code>.</td>
+    </tr>
+    <tr>
+      <th>Truy vấn phát ra khi mở</th>
+      <td>Theo dịch vụ đang mở: 4–5 lượt cho Học viện. Chrome không hỏi gì.</td>
+      <td>5 lượt trên route chủ (6 với tài khoản rỗng, vì mục Ứng dụng đọc thêm <code>catalogItems</code>), mỗi lượt một nhịp trả lời — cộng lượt của tầng Ứng dụng và của trang dịch vụ khi bấm vào.</td>
+      <td>5 lượt cho CHROME ngay khi tải, mỗi lần đổi route lại cộng lượt của dịch vụ đó.</td>
+    </tr>
+    <tr>
+      <th>Enabler backend</th>
+      <td>Không bắt buộc. Gợi ý: <code>myAcademySettings(siteId)</code>, đường đọc cấu hình máy.</td>
+      <td>Vẫn không bắt buộc và không gợi ý cái nào — kể cả danh mục, vốn là <code>catalogItems</code> đã ship lọc theo <code>CatalogCategory.SiteFromTemplate</code>. Đây là phần hồ sơ chi phí của B sống sót nguyên vẹn.</td>
+      <td>Không bắt buộc. Tuỳ chọn: <code>myInstances</code> thật + <code>ExpertSiteEntity.instance</code>; cột service/order trên <code>SupportTicketEntity</code>.</td>
+    </tr>
+    <tr>
+      <th>Rủi ro riêng</th>
+      <td>Console không có nơi trả lời “bốn dịch vụ của tôi đang thế nào” trong một cái nhìn; trang chủ phụ thuộc trí nhớ FE.</td>
+      <td>Nay là HAI chặng phụ để tới một ứng dụng. Badge kind hết lặp (“Học viện AI” dưới “Ứng dụng”), nhưng đổi lại bản vẽ phải giả định một ứng dụng nói được nó dựng từ mẫu nào — hôm nay chỉ với tới qua quan hệ nullable <code>catalogOrder → catalogItem</code>, và registry mẫu ứng dụng thì chưa chốt.</td>
+      <td>Điều kiện bị ép rất ngắn; chrome hiện lệch nhịp; nhiều vốn từ mới nhất phải qua review.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="foot">
+  <b>Trạng thái được vẽ ở cả ba:</b> có dữ liệu · đang hỏi (nghỉ) · trả lời rỗng · bị từ chối, và tài khoản chưa cấp phát gì.
+  <b>Hoãn sang Preview một cách công khai:</b> ma trận lỗi mạng (mất kết nối, hết phiên), trạng thái 390px của
+  <code>identity-kind-status-action-row</code> (nợ baseline, thuộc fidelity fix), thang giá đầy đủ, luồng thanh toán
+  ví-hay-cổng, và ở hướng B cả bốn trang dịch vụ lẫn tầng thứ ba (trang của một ứng dụng).
+  <b>Ghi chú kỹ thuật:</b> hai cảnh của hướng C dựng thân trang bằng <code>div</code> thay cho <code>main</code> để trang lab
+  này giữ đúng một landmark <code>main</code>; contract <code>console-body-main</code> mà hướng C đề xuất vẫn là <code>host: 'main'</code>.
+  Số liệu trong mọi cảnh là HÌNH DẠNG của trường thật (slug, provisionStatus, expiresAt, balanceVnd, amountVnd, dueAt),
+  không phải bản ghi thật và không phải <code>fleet.fixture.json</code>.
+</p>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,313 @@
+{
+  "version": 2,
+  "task": "Plan the academy dashboard: what a member sees on /dashboard, which the sign-up flow already redirects to and which does not exist.",
+  "status": "direction-selected",
+  "contextLock": "design-plans/academy-dashboard/context-lock.plan.json",
+  "caseId": "case-academy-dashboard",
+  "deliveryMode": "batch",
+  "mode": "creative",
+  "renderStatus": "directional-not-apply-baseline",
+  "parityBaseline": null,
+  "workItems": [
+    {
+      "id": "page-member-dashboard",
+      "primaryScope": "page",
+      "subordinateScopes": [],
+      "target": "apps/expert/src/app/[locale]/dashboard/page.tsx",
+      "dependsOn": [],
+      "ownerBoundary": "Owns the three bands and nothing about how a band's data is fetched.",
+      "sourceBoundary": "apps/expert only. packages/ui and the trust tree stay read-only.",
+      "incumbent": null
+    },
+    {
+      "id": "block-knowledge-band",
+      "primaryScope": "block",
+      "subordinateScopes": [],
+      "target": "apps/expert/src/components/blocks/dashboard/KnowledgeBand",
+      "dependsOn": [
+        "page-member-dashboard"
+      ],
+      "ownerBoundary": "The resume-learning surface. Owns progress and the continue action.",
+      "sourceBoundary": "apps/expert",
+      "incumbent": null
+    },
+    {
+      "id": "block-standing-band",
+      "primaryScope": "block",
+      "subordinateScopes": [],
+      "target": "apps/expert/src/components/blocks/dashboard/StandingBand",
+      "dependsOn": [
+        "page-member-dashboard"
+      ],
+      "ownerBoundary": "Certificates and XP. Owns what the reader has earned, not what they owe.",
+      "sourceBoundary": "apps/expert",
+      "incumbent": null
+    },
+    {
+      "id": "block-earnings-band",
+      "primaryScope": "block",
+      "subordinateScopes": [],
+      "target": "apps/expert/src/components/blocks/dashboard/EarningsBand",
+      "dependsOn": [
+        "page-member-dashboard"
+      ],
+      "ownerBoundary": "Commission and referral link. BRD line 98 asks for transparency and easy sharing.",
+      "sourceBoundary": "apps/expert",
+      "incumbent": null
+    }
+  ],
+  "evidence": [
+    "BRD 'V2_2025_11_08_LMS BRD! (2).docx', 316 lines, read this session. Line 226 names 'Dashboard tien do hoc'. Line 98 names an affiliate dashboard: simple, transparent commission, easy to share the link.",
+    "BRD section B lists six subsystems: LMS, Membership, Marketing, Affiliate, He chuyen gia (Mentor Hub), Portal Admin.",
+    "Owner mindmap splits the member journey into Tri thuc / Danh / Loi as three COORDINATE branches, not a hierarchy. D-B is the only direction that renders that relationship as the owner drew it.",
+    "Live academy API at localhost:3069, 30 queries dumped UNFILTERED. Member-scoped: me, courseProgress, courses, course, myCertificates, myXp, myNotifications, myInstallmentPlans, askTutor. Affiliate: commissions, affiliates.",
+    "AuthenticationPage already calls router.replace('/dashboard'); no such route exists in apps/expert, so this case closes a live dangling redirect.",
+    "No route under apps/expert/src/app matches 'dashboard' - confirmed net-new, so there is no parity baseline and nothing to reproduce."
+  ],
+  "unknowns": [
+    "READ AND RULED OUT: Co cau to chuc.docx is nivo internal org structure (CEO/CTO/CCO, tech/sales/service divisions). It contains NO product role model, so it does not decide whether a non-affiliate sees the Loi band. That unknown stays open and this artifact will not close it.",
+    "RAISED BY THAT READ: Ban Co van Trien khai mentors the EXPERT one-to-one for 90 days - nivo staff to expert, not expert to student. If Mentor Hub is that relationship, it does not belong on the member dashboard at all. BRD subsystem 5 does not state the direction. Not resolved, not assumed.",
+    "Still unread: STIGO HUB 2025.11.29.pptx, BRIEF VINEN x SGJ.xlsx, So bo du an thay Tue.pdf.",
+    "Whether a member who is not an affiliate should see the Loi band at all, or see it as an invitation. The empty state is the direction's own biggest risk and Preview must render it.",
+    "Whether XP has a visible tier ladder (the scene showed 'hang Bac'); myXp returns a number and nothing was found that names tiers."
+  ],
+  "businessCapabilities": [
+    "A member resumes the lesson they left, from the first screen.",
+    "A member sees what they have earned: certificates and XP.",
+    "A member sees commission owed and can copy their referral link.",
+    "A member sees an installment coming due before it locks their account."
+  ],
+  "directions": [
+    {
+      "directionId": "D-A",
+      "posture": "conservative",
+      "thesis": "The reader came to learn. Everything else is a distraction until they have resumed the lesson they left.",
+      "primaryCta": "Hoc tiep",
+      "readingOrder": [
+        "unfinished lesson -> earned standing -> money owed"
+      ],
+      "tradeoffs": [
+        "Fewest decisions and fastest to build, but sells membership poorly: somebody who just bought the ecosystem sees one course. Affiliate is demoted despite the BRD giving it its own dashboard."
+      ],
+      "legacyDivergence": [],
+      "implementationFeasibility": {
+        "existingOwners": [
+          "Tree",
+          "SurfaceCard",
+          "Heading",
+          "Text",
+          "Button",
+          "TextLink",
+          "Divider"
+        ],
+        "existingContracts": [
+          "centred-page-column",
+          "centred-title-pair"
+        ],
+        "exactProposals": [],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "scene-D-A"
+    },
+    {
+      "directionId": "D-B",
+      "posture": "balanced",
+      "thesis": "The owner's own mindmap makes Tri thuc, Danh and Loi coordinate rather than hierarchical. The first screen says the same thing, so a member who bought the ecosystem sees the ecosystem.",
+      "primaryCta": "Hoc tiep, with the standing and earnings bands carrying their own equal-weight actions",
+      "readingOrder": [
+        "Tri thuc -> Danh -> Loi, in the order the mindmap draws them, no band swallowing another"
+      ],
+      "tradeoffs": [
+        "The only direction that expresses what the BRD promises Membership buyers. Its cost is the empty state: a brand-new member has no certificate and no commission, so two of three bands start empty and the first screen can read as failure unless those states are designed rather than defaulted."
+      ],
+      "legacyDivergence": [],
+      "implementationFeasibility": {
+        "existingOwners": [
+          "Tree",
+          "SurfaceCard",
+          "Heading",
+          "Text",
+          "Button",
+          "TextLink",
+          "Divider"
+        ],
+        "existingContracts": [
+          "centred-page-column",
+          "centred-title-pair"
+        ],
+        "exactProposals": [
+          "Three band blocks under one page contract; each band is a card surface already expressed by existing owners."
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "scene-D-B"
+    },
+    {
+      "directionId": "D-C",
+      "posture": "bold",
+      "thesis": "The BRD describes a journey from learner to partner. Separate routes make that a migration; one shell with a role switch makes it a tab.",
+      "primaryCta": "Hoc tiep on the default tab; each tab carries its own",
+      "readingOrder": [
+        "pick a role -> that role's work"
+      ],
+      "tradeoffs": [
+        "One address fixes the dangling redirect outright, but role becomes state rather than address, so nobody can link straight to the commission table - and the BRD gives affiliate its OWN dashboard, which this contradicts."
+      ],
+      "legacyDivergence": [],
+      "implementationFeasibility": {
+        "existingOwners": [
+          "Tree",
+          "SurfaceCard",
+          "Heading",
+          "Text",
+          "Button",
+          "TextLink",
+          "Divider"
+        ],
+        "existingContracts": [
+          "centred-page-column",
+          "centred-title-pair"
+        ],
+        "exactProposals": [],
+        "unmappedAnatomy": [
+          "The role switch has no existing owner; a tab strip would be a NEW composite and its verdict is not recorded."
+        ]
+      },
+      "representativeSceneId": "scene-D-C"
+    }
+  ],
+  "stateManifest": [
+    {
+      "workItem": "page-member-dashboard",
+      "state": "loading",
+      "status": "required",
+      "evidence": "Three bands fetch independently; the page must not block on the slowest."
+    },
+    {
+      "workItem": "page-member-dashboard",
+      "state": "loaded",
+      "status": "required",
+      "evidence": "The scene shown in the lab."
+    },
+    {
+      "workItem": "block-knowledge-band",
+      "state": "in-progress",
+      "status": "required",
+      "evidence": "courseProgress returns a partially completed course."
+    },
+    {
+      "workItem": "block-knowledge-band",
+      "state": "not-started",
+      "status": "required",
+      "evidence": "A member who has enrolled and opened nothing. The CTA is 'Bat dau', not 'Hoc tiep'."
+    },
+    {
+      "workItem": "block-knowledge-band",
+      "state": "no-enrollment",
+      "status": "required",
+      "evidence": "Sign-up with verification off lands here immediately, owning no course at all. This is the FIRST screen a new member sees."
+    },
+    {
+      "workItem": "block-knowledge-band",
+      "state": "all-complete",
+      "status": "required",
+      "evidence": "Every enrolled course finished; the band must not show a stale 'continue'."
+    },
+    {
+      "workItem": "block-standing-band",
+      "state": "empty",
+      "status": "required",
+      "evidence": "myCertificates empty and myXp zero - the default for every new member."
+    },
+    {
+      "workItem": "block-standing-band",
+      "state": "populated",
+      "status": "required",
+      "evidence": "myCertificates and myXp both return values."
+    },
+    {
+      "workItem": "block-earnings-band",
+      "state": "not-an-affiliate",
+      "status": "required",
+      "evidence": "affiliates returns nothing for this member. Named unknown: whether this band appears at all."
+    },
+    {
+      "workItem": "block-earnings-band",
+      "state": "affiliate-no-commission",
+      "status": "required",
+      "evidence": "Enrolled as an affiliate, nothing earned yet."
+    },
+    {
+      "workItem": "block-earnings-band",
+      "state": "commission-pending",
+      "status": "required",
+      "evidence": "commissions returns PENDING rows - the state BRD line 98 calls 'minh bach hoa hong'."
+    },
+    {
+      "workItem": "page-member-dashboard",
+      "state": "installment-due",
+      "status": "required",
+      "evidence": "myInstallmentPlans returns a plan with a due date; it must surface here rather than inside a payment page."
+    },
+    {
+      "workItem": "page-member-dashboard",
+      "state": "error",
+      "status": "required",
+      "evidence": "A band's query fails; the other two must still render."
+    }
+  ],
+  "directionLab": {
+    "path": "D:/Repositories/nivo-fe/design-plans/academy-dashboard/direction-lab",
+    "url": "http://127.0.0.1:8086",
+    "port": 8086,
+    "portNote": "8080-8085 were already held by other sessions' labs; 8086 was the first free port. Verified by the served <title>, not by an HTTP 200 - a 200 only proves somebody answered.",
+    "banner": "DIRECTIONAL - NOT AN APPLY BASELINE",
+    "caseId": "case-academy-dashboard",
+    "directionIds": [
+      "D-A",
+      "D-B",
+      "D-C"
+    ]
+  },
+  "selectedDirectionId": "D-B",
+  "selectionKind": "explicit",
+  "selectionEvidence": "The owner replied 'D-B' on 2026-08-14, directly to the three-direction comparison table and the hosted lab at http://127.0.0.1:8086.",
+  "defaultReason": null,
+  "sharedDecisions": [
+    "The three bands are coordinate. No band may be styled or sized so that it reads as a subheading of another - that IS the direction.",
+    "Membership tiers and Mentor Hub are drawn nowhere. The BRD names both; the API has no query for either. Drawing them would be promising on the backend's behalf.",
+    "The installment notice is part of the page, not of a band: it is an obligation rather than knowledge, standing or earnings, and it outranks all three when due.",
+    "Every band fetches independently, so one failure cannot blank the page."
+  ],
+  "blockTrees": [
+    {
+      "workItem": "page-member-dashboard",
+      "tree": "page(dashboard) > [ KnowledgeBand, StandingBand, EarningsBand ] with an installment notice owned by the page",
+      "note": "Contract inventory is owed before Preview names a key: the existing centred-page-column and card contracts must each get a REUSE / EXTEND / NEW verdict, because an entry repeating an existing class list and child identity is the same concept under a second name and no-duplicate-entry-shape refuses it."
+    }
+  ],
+  "contracts": [],
+  "vocabularyProposals": [],
+  "backendEnablerProposals": [
+    {
+      "id": "membership-tier",
+      "uiNeed": "The BRD sells Basic/Pro/VIP and promises the buyer feels they have 'dac quyen'. The dashboard cannot say which tier a member holds or what it entitles them to.",
+      "classification": "additive-and-REQUIRED-for-the-membership-thesis",
+      "evidence": [
+        "30 academy queries dumped unfiltered: orders, coupons, validateCoupon, myInstallmentPlans - and nothing naming a tier, plan or subscription.",
+        "BRD section B row 2 makes tiers the product being sold, not a detail."
+      ],
+      "escalationTrigger": "The moment the dashboard is asked to show a tier badge or an entitlement list."
+    },
+    {
+      "id": "mentor-hub",
+      "uiNeed": "BRD subsystem 5. A member should be able to see experts and reach one.",
+      "classification": "additive",
+      "evidence": [
+        "No query for mentors, expert profiles, reviews or booking exists among the 30.",
+        "D-C's 'Chuyen gia' tab is dashboardStats/revenueSeries/completionFunnel - a business panel, NOT the Mentor Hub. The lab says so on the canvas so the two are not confused."
+      ],
+      "escalationTrigger": "Any screen that offers to contact or browse an expert."
+    }
+  ]
+}

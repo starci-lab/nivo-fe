@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "task": "app-console-services",
+  "phase": "plan",
+  "status": "active",
+  "trustRoot": "D:/Repositories/starci-academy-backend/.claude",
+  "skill": {
+    "name": "starci-fe-design-plan"
+  },
+  "caseId": "case-console-services",
+  "targets": [
+    {
+      "role": "design-target",
+      "repo": "nivo-fe",
+      "gitRoot": "D:/Repositories/nivo-fe",
+      "branch": "main",
+      "head": "9fdf5c3",
+      "remote": null,
+      "worktreeState": "dirty - this session's own auth work plus a concurrent session's UI work"
+    }
+  ],
+  "references": [
+    {
+      "role": "business-truth",
+      "repo": "nivo-backend",
+      "gitRoot": "D:/Repositories/nivo-backend",
+      "head": "e822320",
+      "purpose": "26 my* queries, read unfiltered from the live schema at localhost:3067"
+    },
+    {
+      "role": "prior-design",
+      "repo": "nivo-fe",
+      "head": "9fdf5c3",
+      "path": "design-plans/app-provisioning-dashboard/",
+      "purpose": "case-console, sealed at 1.2 and never applied. Not a parity baseline - a design on a different axis, mined for vocabulary."
+    }
+  ],
+  "artifactRoot": "D:/Repositories/nivo-fe/design-plans/app-console-services",
+  "writeBoundary": [
+    "D:/Repositories/nivo-fe/design-plans/app-console-services"
+  ],
+  "readOnlyBoundary": [
+    "all nivo-fe source outside design-plans",
+    "nivo-backend",
+    "the trust tree"
+  ],
+  "drift": {
+    "detected": false
+  },
+  "detectedAt": "2026-08-14"
+}

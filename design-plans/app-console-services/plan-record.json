@@ -1,0 +1,572 @@
+{
+  "version": 2,
+  "task": "app-console-services",
+  "status": "direction-selected",
+  "contextLock": "D:/Repositories/nivo-fe/design-plans/app-console-services/context-lock.plan.json",
+  "caseId": "case-console-services",
+  "deliveryMode": "batch",
+  "mode": "creative",
+  "renderStatus": "directional-not-apply-baseline",
+  "parityBaseline": null,
+  "workItems": [
+    {
+      "id": "layout-console-chrome",
+      "target": "apps/app/src/components/layouts/ConsoleNav/",
+      "primaryScope": "layout",
+      "subordinateScopes": [],
+      "dependsOn": [],
+      "ownerBoundary": "The standing rail and which destination is current. It resolves nothing about any destination's contents, and it carries NO counts - no count query exists anywhere in the schema, so a number here would be one the browser computed.",
+      "sourceBoundary": [
+        "apps/app/src/components/layouts/ConsoleNav/",
+        "apps/app/src/app/[locale]/layout.tsx"
+      ],
+      "stateInventory": [
+        {
+          "state": "a destination is current",
+          "status": "required",
+          "evidence": "NavLink.isCurrent drives both the underline and aria-current"
+        },
+        {
+          "state": "resting",
+          "status": "required",
+          "evidence": "the rail must hold its width while the body's blocks arrive, or the first paint jumps"
+        }
+      ]
+    },
+    {
+      "id": "page-overview",
+      "target": "apps/app/src/components/pages/OverviewPage/",
+      "primaryScope": "page",
+      "subordinateScopes": [
+        "block"
+      ],
+      "dependsOn": [
+        "layout-console-chrome"
+      ],
+      "ownerBoundary": "The console's home: five sections, one per service, each owning its own four network states. It orders the sections and nothing else; each section's body is its own owner.",
+      "sourceBoundary": [
+        "apps/app/src/components/pages/OverviewPage/"
+      ],
+      "stateInventory": [
+        {
+          "state": "not yet asked",
+          "status": "required",
+          "evidence": "every section fires its own query, so they arrive at five different times"
+        },
+        {
+          "state": "answered with nothing",
+          "status": "required",
+          "evidence": "the state a real account is in today"
+        },
+        {
+          "state": "answered with something",
+          "status": "required",
+          "evidence": "myExpertSites, myAgentWorkspace, myInstances, myDomains, myWallet"
+        },
+        {
+          "state": "refused",
+          "status": "required",
+          "evidence": "myAcademySettings and myPodOpenclawStatus THROW rather than answer, so a refusal is a result the page must draw, not an incident"
+        }
+      ]
+    },
+    {
+      "id": "page-apps",
+      "target": "apps/app/src/components/pages/AppsPage/",
+      "primaryScope": "page",
+      "subordinateScopes": [
+        "block"
+      ],
+      "dependsOn": [
+        "layout-console-chrome"
+      ],
+      "ownerBoundary": "The middle level revision 2 introduced: the set of template apps this account owns, and how a new one is started from the catalogue. It is the level that makes template apps an open set rather than a fixed destination.",
+      "sourceBoundary": [
+        "apps/app/src/components/pages/AppsPage/"
+      ],
+      "stateInventory": [
+        {
+          "state": "apps listed",
+          "status": "required",
+          "evidence": "myExpertSites is the app list today"
+        },
+        {
+          "state": "one standing up",
+          "status": "required",
+          "evidence": "identity-kind-status-action-row's action is optional, and its why already says a resource mid-provision has nothing anybody may do to it"
+        },
+        {
+          "state": "none yet, catalogue offered",
+          "status": "required",
+          "evidence": "the catalog query family plus myCatalogOrders"
+        },
+        {
+          "state": "refused",
+          "status": "required",
+          "evidence": "same as the overview: a refusal is an answer"
+        }
+      ]
+    },
+    {
+      "id": "page-wallet",
+      "target": "apps/app/src/components/pages/WalletPage/",
+      "primaryScope": "page",
+      "subordinateScopes": [],
+      "dependsOn": [
+        "layout-console-chrome"
+      ],
+      "ownerBoundary": "The account's money across all four services. It is under an account caption rather than beside the services because it talks ABOUT them.",
+      "sourceBoundary": [
+        "apps/app/src/components/pages/WalletPage/"
+      ],
+      "stateInventory": [
+        {
+          "state": "a balance",
+          "status": "required",
+          "evidence": "myWallet is lazily created on first read, so a new account reads a real 0 d rather than an absence"
+        },
+        {
+          "state": "transactions and invoices",
+          "status": "required",
+          "evidence": "myWalletTransactions, myInvoices, myCatalogOrders"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "source": "live schema at localhost:3067, dumped unfiltered",
+      "claim": "26 my* queries partition cleanly across four services plus a wallet - the backend already thinks in services, which is why service is the right axis."
+    },
+    {
+      "source": "apps/app/src/components/pages/ProvisioningPage/index.tsx:23,85-86",
+      "claim": "the shipped console renders fleet.fixture.json. Every row and every count on the running screen is invented."
+    },
+    {
+      "source": "apps/app/src/modules/api/",
+      "claim": "holds auth.ts and graphql.ts only - no data module exists for any console query yet."
+    },
+    {
+      "source": "the schema, searched for a count",
+      "claim": "NO count query exists anywhere, so every number the sealed design drew was computed in the browser."
+    },
+    {
+      "source": "ExpertSiteEntity + CatalogItem",
+      "claim": "an app's TEMPLATE identity is not a field. config.templateKey is the site's industry LAYOUT (minimal|creator|consultant); the product template is reachable only through the nullable catalogOrder -> catalogItem relation, whose FK is ON DELETE SET NULL."
+    },
+    {
+      "source": "myAcademySettings, myPodOpenclawStatus",
+      "claim": "both throw rather than answer, so refusal is a fourth network state the design must draw."
+    }
+  ],
+  "unknowns": [
+    "What the app list reads once template app #2 exists: myExpertSites, a per-template query, or a registry-backed myApps. It decides whether the Apps level is one query or a client-side merge with N error boundaries.",
+    "Whether an app standing up appears as a row in the app list or only as an order. The row shape survives either answer; its source does not.",
+    "Whether any list response exposes a total or a cursor. Without one the overview can name first members and make no claim about the rest, which is what is drawn.",
+    "The word template is overloaded: CatalogItem.templateKey = ai_academy is the template APP; ExpertSiteConfig.templateKey = minimal|creator|consultant is the site's layout. The UI says 'mau ung dung' to separate them; whether that survives the site settings screen is unresolved.",
+    "Whether Ho tro belongs under the account caption. myTickets has no service column and myOpsTickets is always empty today.",
+    "restingCount for titled-section-stack-page, now that it serves a five-section overview and a two-section app level. Holding the old rule splits it into two entries and the new-entry count goes 6 -> 7."
+  ],
+  "businessCapabilities": [
+    {
+      "capability": "list the apps this account owns",
+      "status": "proven",
+      "source": "myExpertSites"
+    },
+    {
+      "capability": "offer a catalogue of templates to stand up",
+      "status": "proven",
+      "source": "the catalog query family"
+    },
+    {
+      "capability": "report an agent workspace",
+      "status": "proven with a refusal path",
+      "source": "myAgentWorkspace; myPodOpenclawStatus throws"
+    },
+    {
+      "capability": "list VPS instances",
+      "status": "partial",
+      "source": "myInstances - ram and vcpu are hardcoded null though the columns exist"
+    },
+    {
+      "capability": "list domains",
+      "status": "proven, but the registrar is simulated",
+      "source": "addDomain writes 365 days and ns1/ns2.nivo.vn with no price and no WHOIS"
+    },
+    {
+      "capability": "report a wallet balance",
+      "status": "proven",
+      "source": "myWallet, lazily created on first read"
+    },
+    {
+      "capability": "count anything",
+      "status": "ABSENT",
+      "source": "no count query exists anywhere in the schema"
+    },
+    {
+      "capability": "name an app's template app",
+      "status": "absent as a first-class field",
+      "source": "only via the nullable catalogOrder -> catalogItem relation"
+    }
+  ],
+  "directions": [
+    {
+      "directionId": "direction-a",
+      "posture": "conservative",
+      "thesis": "The sidebar picks a service and the body IS that service. No standing overview; the console home is the last-used service.",
+      "primaryCta": "whatever the open service offers",
+      "readingOrder": [
+        "rail",
+        "service title",
+        "its blocks"
+      ],
+      "tradeoffs": [
+        "The rail is mute - no counts, no condition - so a reader opens each service to find the one with a problem.",
+        "Home is a guess, so two visits can land differently.",
+        "Its empty screen is a ranked offer screen, which encodes a product judgement that must be edited rather than re-fed with data."
+      ],
+      "legacyDivergence": [],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": [
+          "FleetRow",
+          "SurfaceCard",
+          "SurfaceListCard",
+          "EmptyNotice",
+          "NavLink",
+          "Tree"
+        ],
+        "existingContracts": [
+          "label-row-over-card",
+          "fleet-resource-list",
+          "identity-kind-status-action-row",
+          "centred-empty-notice",
+          "labelled-fact-stack"
+        ],
+        "exactProposals": [
+          {
+            "id": "sidebar-then-body-app",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "sidebar + body",
+            "why": "a set of destinations that SURVIVES the body being replaced; the nearest keys are filters over one result set"
+          }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "direction-a-default"
+    },
+    {
+      "directionId": "direction-b",
+      "posture": "conservative",
+      "thesis": "A permanent overview above the services is the console's home, and template apps are an OPEN SET reached through one destination rather than a destination each. Three levels: overview, the app set, one app.",
+      "primaryCta": "Mo Ung dung from the overview's app card",
+      "readingOrder": [
+        "rail",
+        "overview sections",
+        "the app set",
+        "one app"
+      ],
+      "tradeoffs": [
+        "It stopped being the cheapest. Revision 1 needed 5 new entries and was chosen partly for that; revision 2 needs 6 plus 2 EXTEND, and 7 if the old restingCount rule is held. The whole delta is the catalogue - the third level itself costs nothing.",
+        "A set with one member can read as a pointless folder, and today there is exactly one app. The drawing has to earn the folder before template #2 arrives.",
+        "It breaks the agreement the other two directions share: B now has a destination that is not a service, so if B wins the axis question reopens for A and C."
+      ],
+      "legacyDivergence": [],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": [
+          "FleetRow (whole, including STATUS_TONE where awaiting_dns stays warning)",
+          "SurfaceCard",
+          "SurfaceListCard",
+          "EmptyNotice (dead until now)",
+          "NavLink",
+          "Badge",
+          "SeeMoreLink",
+          "Tree"
+        ],
+        "existingContracts": [
+          "label-row-over-card",
+          "title-with-end-action",
+          "title-with-baseline-fact",
+          "fleet-resource-list",
+          "identity-kind-status-action-row",
+          "name-over-handle",
+          "centred-empty-notice",
+          "empty-notice-stack",
+          "labelled-fact-stack",
+          "label-value-row"
+        ],
+        "exactProposals": [
+          {
+            "id": "sidebar-then-body-app",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "sidebar + body",
+            "why": "NEW - a standing set of destinations that survives the body being replaced. choice-tab-strip and dual-tabs-toolbar are filters over ONE result set, which is exactly what this axis discards."
+          },
+          {
+            "id": "console-body-main",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "host main, page slot",
+            "why": "NEW - the routed body is the document's one main landmark, marked once for every route. No route in the app has a main today."
+          },
+          {
+            "id": "sidebar-nav-cluster",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "brand + groups",
+            "why": "NEW"
+          },
+          {
+            "id": "home-services-account-nav",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "home + services + account, account restingCount 2",
+            "why": "NEW - a run of destinations where some members talk ABOUT the others. Order alone says nothing to a screen reader."
+          },
+          {
+            "id": "titled-section-stack-page",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "title + repeated sections",
+            "why": "NEW - serves BOTH the overview and the app level. Renamed from titled-service-overview-page because one destination stopped being a service."
+          },
+          {
+            "id": "template-offer-row",
+            "kind": "contract",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "identity + price + action",
+            "why": "NEW - the catalogue's row. A cheaper alternative was considered and refused; the refusal is recorded in the lab."
+          },
+          {
+            "id": "label-row-over-card",
+            "kind": "contract EXTEND",
+            "owner": "packages/ui/src/contracts/index.ts",
+            "api": "body union gains the new bodies",
+            "why": "SurfaceCard infers its body type FROM this union, so one edit opens the branch too"
+          }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "direction-b-revision-2"
+    },
+    {
+      "directionId": "direction-c",
+      "posture": "bold",
+      "thesis": "The sidebar IS the overview: each entry carries the service's one live fact, so the rail answers 'what do I have' and the body is always exactly one service.",
+      "primaryCta": "the open service's own action",
+      "readingOrder": [
+        "rail as summary",
+        "one service"
+      ],
+      "tradeoffs": [
+        "Five queries fire for the CHROME on every load, plus the service's own on every route change.",
+        "Most new entries of the three, and the only one needing a new branch.",
+        "It is the most opinionated about what one fact per service is, and that opinion is hardest to change later."
+      ],
+      "legacyDivergence": [],
+      "implementationFeasibility": {
+        "status": "mapped",
+        "existingOwners": [
+          "FleetRow",
+          "NavLink",
+          "Badge",
+          "Tree"
+        ],
+        "existingContracts": [
+          "label-row-over-card",
+          "fleet-resource-list",
+          "labelled-fact-stack"
+        ],
+        "exactProposals": [
+          {
+            "id": "NavSurface",
+            "kind": "new-owner",
+            "owner": "packages/ui/src/branches/NavSurface/",
+            "api": "a rail that carries facts",
+            "why": "no branch draws a navigation surface that holds data"
+          }
+        ],
+        "unmappedAnatomy": []
+      },
+      "representativeSceneId": "direction-c-default"
+    }
+  ],
+  "stateManifest": [
+    {
+      "ownerId": "layout-console-chrome",
+      "states": [
+        "current destination",
+        "resting"
+      ]
+    },
+    {
+      "ownerId": "page-overview",
+      "states": [
+        "not asked",
+        "empty",
+        "answered",
+        "refused"
+      ]
+    },
+    {
+      "ownerId": "page-apps",
+      "states": [
+        "listed",
+        "one standing up",
+        "none yet with catalogue",
+        "refused"
+      ]
+    },
+    {
+      "ownerId": "page-wallet",
+      "states": [
+        "balance",
+        "transactions and invoices"
+      ]
+    }
+  ],
+  "directionLab": {
+    "path": "D:/Repositories/nivo-fe/design-plans/app-console-services/direction-lab",
+    "url": "http://127.0.0.1:8110/",
+    "caseId": "case-console-services",
+    "directionIds": [
+      "direction-a",
+      "direction-b",
+      "direction-c"
+    ]
+  },
+  "selectedDirectionId": "direction-b",
+  "selectionKind": "explicit",
+  "selectionEvidence": "duyet b rev 2",
+  "defaultReason": null,
+  "blockTrees": [
+    {
+      "directionId": "direction-a",
+      "tree": "sidebar-then-body-app > sidebar-nav-cluster | console-body-main > one service"
+    },
+    {
+      "directionId": "direction-b",
+      "tree": "sidebar-then-body-app\n├── sidebar-nav-cluster > home-services-account-nav\n└── console-body-main\n     ├── OverviewPage > titled-section-stack-page > label-row-over-card x5\n     ├── AppsPage    > titled-section-stack-page > fleet-resource-list | template-offer-row\n     └── WalletPage  > titled-section-stack-page > labelled-fact-stack"
+    },
+    {
+      "directionId": "direction-c",
+      "tree": "sidebar-then-body-app > NavSurface (facts in the rail) | console-body-main > one service"
+    }
+  ],
+  "contracts": [
+    {
+      "key": "label-row-over-card",
+      "status": "existing, retained and EXTENDED",
+      "why": "the label sits OUTSIDE the surface it names, so a section whose body is itself cards never draws a card inside a card"
+    },
+    {
+      "key": "fleet-resource-list",
+      "status": "existing, retained",
+      "why": "one joined surface with full-width rules, so two kinds of provisioned thing are compared in a single scan"
+    },
+    {
+      "key": "identity-kind-status-action-row",
+      "status": "existing, retained",
+      "why": "the action is optional, which is how a resource mid-provision expresses that nothing may be done to it"
+    },
+    {
+      "key": "labelled-fact-stack",
+      "status": "existing, CLAIMED",
+      "why": "currently callerless and in violation of CONTRACT-13; the wallet section is its first caller"
+    },
+    {
+      "key": "label-value-row",
+      "status": "existing, CLAIMED",
+      "why": "same"
+    },
+    {
+      "key": "centred-empty-notice",
+      "status": "existing, retained",
+      "why": "EmptyNotice is mounted for the first time by this case"
+    },
+    {
+      "key": "sidebar-then-body-app",
+      "status": "proposed NEW",
+      "why": "destinations that survive the body being replaced"
+    },
+    {
+      "key": "console-body-main",
+      "status": "proposed NEW",
+      "why": "the routed body is the document's one main landmark; no route in the app has one today"
+    },
+    {
+      "key": "sidebar-nav-cluster",
+      "status": "proposed NEW",
+      "why": "brand over a run of destination groups"
+    },
+    {
+      "key": "home-services-account-nav",
+      "status": "proposed NEW",
+      "why": "a run where some members talk ABOUT the others"
+    },
+    {
+      "key": "titled-section-stack-page",
+      "status": "proposed NEW",
+      "why": "subjects that answer independently, read down one page at one seam"
+    },
+    {
+      "key": "template-offer-row",
+      "status": "proposed NEW",
+      "why": "a template that can be stood up, with its price and its one action"
+    }
+  ],
+  "vocabularyProposals": [
+    {
+      "id": "ConsoleNav",
+      "status": "proposed",
+      "path": "apps/app/src/components/layouts/ConsoleNav/"
+    },
+    {
+      "id": "OverviewPage",
+      "status": "proposed",
+      "path": "apps/app/src/components/pages/OverviewPage/"
+    },
+    {
+      "id": "AppsPage",
+      "status": "proposed",
+      "path": "apps/app/src/components/pages/AppsPage/"
+    },
+    {
+      "id": "WalletPage",
+      "status": "proposed",
+      "path": "apps/app/src/components/pages/WalletPage/"
+    },
+    {
+      "id": "FleetRow",
+      "status": "shipped, reused whole",
+      "path": "apps/app/src/components/blocks/provisioning/FleetRow/"
+    },
+    {
+      "id": "ProvisioningPage",
+      "status": "to be retired",
+      "path": "apps/app/src/components/pages/ProvisioningPage/",
+      "note": "it renders a fixture; nothing it draws is real"
+    }
+  ],
+  "backendEnablerProposals": [
+    {
+      "id": "an-app-carries-its-template-identity",
+      "classification": "read projection of data that is already authorized, and a schema question",
+      "uiNeed": "the app row shows which template app it is",
+      "evidence": "ExpertSiteEntity has no template-app field. config.templateKey is the site's industry layout; the product template is reachable only through the nullable catalogOrder -> catalogItem relation with ON DELETE SET NULL, so a site created without an order has none.",
+      "escalationTrigger": "The drawing asserts the SHAPE - a kind badge on the row - and deliberately refuses to assert a field. A separate workstream is designing the template-app registry; this proposal is that design's frontend consequence, not a request beside it.",
+      "status": "open, and blocking nothing in Preview"
+    },
+    {
+      "id": "instance-shape-is-readable",
+      "classification": "read projection of existing authorized data",
+      "uiNeed": "a VPS row that states the machine's size",
+      "evidence": "MyInstance.ram and vcpu are hardcoded null although instances.ram_mb and instances.vcpu exist.",
+      "escalationTrigger": "carried forward from the sealed console case, still true",
+      "status": "open, not required by this design"
+    }
+  ]
+}

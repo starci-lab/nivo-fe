@@ -1,0 +1,42 @@
+{
+  "_source": "myDomains -> MyDomainsResponse { success, message, error, metadata, data: [DomainEntity!] }. DomainEntity introspected live: autoRenew!, createdAt!, expiresAt, id!, name!, nameservers:[String!]!, registeredAt!, status:DomainStatus!, updatedAt!, user. No relations are loaded, so `user` is null on the wire. Rows are ordered expiresAt ASC by the handler, so soonest-expiry first is the transport's own order and not a sort the screen applied. ONE CORRECTION TO A STALE NOTE CARRIED FROM THE SEALED CONSOLE CASE: DomainStatus.expiring IS written - domain-expiry.service.ts runs hourly and sets expiring/expired - so the row reads `status` directly and needs no browser-computed condition. THE REGISTRAR IS SIMULATED, which is why every row here shows ns1/ns2.nivo.vn and a 365-day term: addDomain writes exactly that, with no price and no WHOIS, and a fixture carrying a registrar price would be inventing a field.",
+  "answered": {
+    "success": true,
+    "message": "Lấy danh sách tên miền thành công",
+    "error": null,
+    "metadata": null,
+    "data": [
+      {
+        "id": "6c8f0a35-b214-4e79-91d0-3a5e7c2b48f6",
+        "name": "lopvanhoc.com",
+        "status": "expiring",
+        "registeredAt": "2025-09-10T06:00:00.000Z",
+        "expiresAt": "2026-09-10T06:00:00.000Z",
+        "autoRenew": false,
+        "nameservers": ["ns1.nivo.vn", "ns2.nivo.vn"],
+        "createdAt": "2025-09-10T06:00:00.000Z",
+        "updatedAt": "2026-08-14T01:00:00.000Z",
+        "user": null
+      },
+      {
+        "id": "9a17d5e8-4c63-402b-8f5a-b0d92e63147c",
+        "name": "minhtue.com",
+        "status": "active",
+        "registeredAt": "2026-07-01T09:25:00.000Z",
+        "expiresAt": "2027-07-01T09:25:00.000Z",
+        "autoRenew": true,
+        "nameservers": ["ns1.nivo.vn", "ns2.nivo.vn"],
+        "createdAt": "2026-07-01T09:25:00.000Z",
+        "updatedAt": "2026-07-01T09:25:00.000Z",
+        "user": null
+      }
+    ]
+  },
+  "empty": {
+    "success": true,
+    "message": "Lấy danh sách tên miền thành công",
+    "error": null,
+    "metadata": null,
+    "data": []
+  }
+}

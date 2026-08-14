@@ -1,0 +1,29 @@
+{
+  "_source": "myWallet -> MyWalletResponse { success, message, error, metadata, data: WalletEntity }. WalletEntity introspected live: balanceVnd:Int!, createdAt!, id!, updatedAt!, user. No relations loaded, so `user` is null on the wire. THERE IS NO EMPTY STATE HERE AND THAT IS THE POINT: the handler CREATES the wallet on first read, so a brand-new account reads a real balanceVnd of 0 rather than an absence. The wallet section therefore has a balance in every situation the product can be in, which is why page-wallet's state inventory names two states and not three. balanceVnd is an Int in the smallest unit of the currency and is formatted by next-intl at the drawing edge; no formatted money string enters this file.",
+  "answered": {
+    "success": true,
+    "message": "Lấy ví thành công",
+    "error": null,
+    "metadata": null,
+    "data": {
+      "id": "e5b71c94-3a08-4d62-b7f1-2c60d9a4e837",
+      "balanceVnd": 1240000,
+      "createdAt": "2026-07-01T09:19:00.000Z",
+      "updatedAt": "2026-08-13T10:02:00.000Z",
+      "user": null
+    }
+  },
+  "new": {
+    "success": true,
+    "message": "Lấy ví thành công",
+    "error": null,
+    "metadata": null,
+    "data": {
+      "id": "3d90a6f2-7e14-45cb-8a03-9f2b5c1e64d0",
+      "balanceVnd": 0,
+      "createdAt": "2026-08-14T02:55:00.000Z",
+      "updatedAt": "2026-08-14T02:55:00.000Z",
+      "user": null
+    }
+  }
+}

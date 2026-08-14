@@ -1,0 +1,114 @@
+{
+  "phase": "plan",
+  "caseId": "case-academy-dashboard",
+  "detectedAt": "2026-08-14",
+  "trustRoot": "D:/Repositories/starci-academy-backend/.claude",
+  "inheritedFrom": null,
+  "inheritedFromNote": "No prior lock for this case. The academy-landing-student-entry case is a different scope and is not a parent.",
+  "target": {
+    "repository": "D:/Repositories/nivo-fe",
+    "app": "apps/expert",
+    "worktreeIsGitRoot": true,
+    "branch": "session/surface-branch-and-dead-vocabulary",
+    "head": "9fdf5c3",
+    "remote": null
+  },
+  "drift": [
+    {
+      "field": "branch",
+      "previouslyRecorded": "main",
+      "nowDetected": "session/surface-branch-and-dead-vocabulary",
+      "why": "another session branched this worktree while it was shared"
+    },
+    {
+      "field": "head",
+      "previouslyRecorded": "415300f",
+      "nowDetected": "9fdf5c3",
+      "why": "same"
+    },
+    {
+      "field": "remote",
+      "previouslyRecorded": "none",
+      "nowDetected": "none",
+      "why": "unchanged - nothing here can be pushed"
+    }
+  ],
+  "backendTruth": {
+    "endpoint": "http://localhost:3069/graphql",
+    "queriesDumpedUnfiltered": 30,
+    "studentScoped": [
+      "me",
+      "courseProgress",
+      "courses",
+      "course",
+      "myCertificates",
+      "myXp",
+      "myNotifications",
+      "myInstallmentPlans",
+      "askTutor"
+    ],
+    "expertScoped": [
+      "dashboardStats",
+      "revenueSeries",
+      "completionFunnel",
+      "members",
+      "studentDetail",
+      "orders",
+      "commissions",
+      "affiliates",
+      "coupons",
+      "myLeads",
+      "systemStatus",
+      "sentEmails",
+      "academyMailSettings"
+    ],
+    "subsystemsWithNoQueryAtAll": [
+      "membership tiers (Basic/Pro/VIP)",
+      "mentor hub"
+    ]
+  },
+  "productEvidence": {
+    "brd": "V2_2025_11_08_LMS BRD! (2).docx, 316 lines, read this session",
+    "brdNamesTwoStudentDashboards": [
+      {
+        "line": 226,
+        "text": "Dashboard tien do hoc"
+      },
+      {
+        "line": 98,
+        "text": "Dashboard don gian, minh bach hoa hong, de chia se link"
+      }
+    ],
+    "brdSubsystems": [
+      "LMS",
+      "Membership",
+      "Marketing",
+      "Affiliate",
+      "He chuyen gia (Mentor Hub)",
+      "Portal Admin"
+    ],
+    "ownerMindmapTriad": [
+      "Tri thuc",
+      "Danh",
+      "Loi"
+    ],
+    "unreadArtifacts": [
+      "Co cau to chuc.docx",
+      "STIGO HUB 2025.11.29.pptx",
+      "BRIEF VINEN x SGJ.xlsx",
+      "So bo du an thay Tue.pdf"
+    ]
+  },
+  "writeBoundary": {
+    "mayWrite": [
+      "design-plans/academy-dashboard/**"
+    ],
+    "readOnly": [
+      "apps/**",
+      "packages/**",
+      "<trust-root>/**",
+      "D:/Repositories/starci-academy-fe/**"
+    ]
+  },
+  "openAtLockTime": "AuthenticationPage redirects to /dashboard and no such route exists, so this case also closes a live dangling redirect."
+}

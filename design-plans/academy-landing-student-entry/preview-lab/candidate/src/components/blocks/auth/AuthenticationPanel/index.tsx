@@ -97,7 +97,6 @@ export const AuthenticationPanel = ({ initialMode = "signIn", onSignedIn }: Auth
                 submitLabel: t(`${panel.mode}.submit`),
                 orLabel: t("or"),
                 oauthGoogle: t("google"),
-                oauthGithub: t("github"),
                 rememberMeLabel: t("rememberMe"),
                 forgotPassword: t("forgotPasswordLink"),
                 agreeToTerms: t("agreeToTerms"),

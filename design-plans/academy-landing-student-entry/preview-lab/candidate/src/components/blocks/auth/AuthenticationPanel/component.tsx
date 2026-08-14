@@ -86,8 +86,15 @@ export type AuthDetailsCopy = {
     readonly confirmPasswordMismatch: string
     readonly submitLabel: string
     readonly orLabel: string
+    /**
+     * The one provider this academy offers.
+     *
+     * GitHub was here and is gone: it is a developer's account, and the reader
+     * this panel is written for is a student buying a craft course. An entry
+     * screen offering a lane almost nobody in the audience holds does not add a
+     * choice, it adds a thing to skip past.
+     */
     readonly oauthGoogle: string
-    readonly oauthGithub: string
     readonly rememberMeLabel: string
     readonly forgotPassword: string
     readonly agreeToTerms: string
@@ -306,12 +313,6 @@ export const _AuthenticationPanel = (input: AuthenticationPanelInput) => {
                                     <Button
                                         props={{ label: input.props.oauthGoogle, variant: "outline", icon: "google", disabled: input.props.isPending }}
                                         on={{ press: () => input.on?.oauthPress?.(KeycloakIdentityProvider.Google) }}
-                                    />
-                                )),
-                                defineLeafComponent("button", {}, () => (
-                                    <Button
-                                        props={{ label: input.props.oauthGithub, variant: "outline", icon: "github", disabled: input.props.isPending }}
-                                        on={{ press: () => input.on?.oauthPress?.(KeycloakIdentityProvider.Github) }}
                                     />
                                 )),
                             ],

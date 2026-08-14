@@ -1,0 +1,170 @@
+<article class="lab-dir" id="dir-a">
+  <header>
+    <span class="lab-id">Hướng A</span>
+    <h2>Mọi dịch vụ đều cùng một hình</h2>
+    <p class="lab-thesis">
+      Cả bốn điểm đến còn thiếu là <b>một</b> <code>titled-section-stack-page</code> giữ các mục
+      <code>label-row-over-card</code> mà thân là một <code>fleet-resource-list</code> nối liền — đúng thứ ngữ pháp
+      <code>AppsPage</code> đã ship. <b>Không khoá hợp đồng mới, không ngôn ngữ thị giác mới, một hình dòng học một lần
+      dùng bốn lần.</b> Cái giá là có thật và được vẽ ra chứ không giấu: một VPS và một phiếu hỗ trợ không phải cùng một
+      loại vật, và cái dòng bốn ô — tên · loại · trạng thái · một nút — làm phẳng cả hai. <b>Máy chủ lộ ra rõ nhất</b>,
+      vì nó có bốn dữ kiện mà dòng chỉ có một ô chữ tự do; <b>AgentOS lộ ra thứ nhì</b>, vì cùng một hình lặp lại mười
+      lần đọc thành một trang cài đặt chứ không phải một dịch vụ.
+    </p>
+    <div class="lab-nav">
+      <h3>Vấn đề A — hướng này trả lời</h3>
+      <p><b>Không lấy lựa chọn nào trong hai lựa chọn được đưa ra:</b> nó điền bốn giá trị <code>route</code> đang
+      <code>null</code> trong <code>ConsoleNav.DESTINATIONS</code> và không đụng vào <code>NavLink</code>. Đó là toàn bộ
+      phần sửa nằm trong ranh giới của Plan này, và nó chạy được vì <b>tiền đề của lời than sai về ba điểm đến đã ship</b>:
+      <code>on.press</code> đi tới <code>LinkRoot</code> của HeroUI rồi <code>useLink</code> của react-aria, nên
+      <code>&lt;span role="link"&gt;</code> <i>vẫn</i> bấm được và <i>vẫn</i> gọi <code>router.push</code>. Hướng này xác
+      nhận điều đó trong kết xuất preview: <code>overview-answered.html</code> phát ra
+      <code>&lt;span data-component="NavLink" role="link" tabindex="0" data-react-aria-pressable="true" aria-current="page"&gt;</code>.
+      Chỉ bốn mục không có route là trơ, và ngay khi trang của chúng tồn tại thì cả bảy đều chuyển trang được.
+      <b>Nếu người duyệt buộc phải chọn một trong hai</b>, hướng này chọn phương án <code>href</code> trên lá, kèm tu chính
+      canon và <code>RouterProvider navigate={router.push}</code> trong <code>apps/app/src/app/providers.tsx</code>; và từ
+      chối dứt khoát cách bọc trong <code>ConsoleNav</code> — cùng một vi phạm VENDOR-14 lùi ra một tệp, cộng một lỗi tiếp
+      cận thật: một <code>&lt;a&gt;</code> ôm một <code>role="link"</code> lồng có handler riêng, thành hai điểm dừng tab và
+      hai lần đọc “liên kết” cho một điểm đến.</p>
+    </div>
+  </header>
+
+  <div class="lab-reason">
+    <section>
+      <h3>Cái phải trả giá</h3>
+      <ol>
+        <li><b>Máy chủ là chỗ luận đề gãy đầu tiên.</b> <code>identity-kind-status-action-row</code> cho đúng một ô chữ
+        tự do (<code>name-over-handle.handle</code>), mà một instance có bốn dữ kiện muốn vào đó: gói, kích thước, ngày
+        gia hạn, và <i>sự vắng mặt</i> của kích thước. Bản vẽ nhét chúng thành một chuỗi phẩy — “Gói Học viện Start ·
+        chưa có pod riêng · chưa có ngày gia hạn” — ở khổ hẹp sẽ ngắt ba dòng và thôi đọc như một hàng.
+        <code>labelled-fact-stack</code> giữ chúng đúng cách, nhưng một fact stack cho mỗi máy là một thẻ cho mỗi máy,
+        và đó là một hướng khác.</li>
+        <li><b>Bản đồ sắc thái thành bãi rác.</b> <code>FleetStatus</code> có 7 thành viên và tồn tại để <i>một</i>
+        quyết định được ra cho đúng (<code>awaiting_dns</code> là cảnh báo chứ không phải nguy hiểm — chú thích của
+        chính nó nói vậy). Bốn dịch vụ thêm khoảng mười một thành viên nữa từ bốn vốn từ không liên quan. Một bản đồ 18
+        mục trải trên bốn miền không còn là chỗ nhìn thấy được một quyết định cẩn thận; cái
+        <code>awaiting_dns</code> tiếp theo sẽ chôn trong đó.</li>
+        <li><b>AgentOS ở mười mục giống hệt nhau đọc thành trang cài đặt, không phải một dịch vụ.</b> Cảnh 1 vẽ bảy và
+        ghi ba cái còn lại vào một dòng chân trang. Không gì trên trang nói nên nhìn cái nào trước, vì trong ngữ pháp
+        này mọi mục có cùng trọng lượng. Sự thật khẩn cấp duy nhất trên màn đó — bộ máy tự động hoá bị từ chối cho mọi
+        tài khoản hôm nay — nằm thứ sáu, kẹp giữa hai danh sách không ai đang chờ.</li>
+        <li><b>Huy hiệu “loại” là đồ đạc trên ba trong bốn màn.</b> Nó xứng chỗ trong một đội hình <i>trộn</i> — chính
+        <code>why</code> của <code>identity-kind-status-action-row</code> nói vậy: một hàng phải trả lời NÓ LÀ GÌ trước
+        khi trả lời NÓ ĐANG THẾ NÀO. Máy chủ trộn nên xứng. Tên miền và Hỗ trợ đồng nhất — mọi hàng đọc “Tên miền”, mọi
+        hàng đọc “Yêu cầu” — nên huy hiệu thành một cột lặp một chữ, và bỏ nó đi thì phá đúng cái hình mà hướng này
+        mang tên.</li>
+        <li><b>Không khoá mới là rẻ nhất để dựng Preview và ít khác biệt nhất để đọc.</b> Đó là toàn bộ món mặc cả. Nếu
+        người duyệt muốn Hỗ trợ có cảm giác của một cuộc thư từ — một mạch trao đổi, tin nhắn cuối, đang chờ ai — hướng
+        này <b>không thể tới đó bằng một vòng sửa</b>; nó thành một hướng khác. Máy chủ muốn thành một phiếu thông số
+        cũng vậy.</li>
+        <li><b><code>titled-section-stack-page</code> nghỉ ở <code>restingCount: 2</code>.</b> Con số đó chọn khi trang
+        dài nhất có năm mục; AgentOS có bảy tới mười. Bộ xương sẽ nghỉ thiếu hai mục trên đúng trang chờ lâu nhất, và đó
+        là một cú nhảy nhìn thấy được. Hướng này mở lại câu hỏi chứ không chốt nó.</li>
+        <li><b>Thanh bên vẫn là <code>&lt;span role="link"&gt;</code>.</b> Điền bốn route làm mọi mục chạy được, nhưng
+        không ai có chuột giữa, tab mới hay địa chỉ ở thanh trạng thái trên <i>bất kỳ</i> mục nào trong bảy — kể cả ba
+        mục đã ship. Hướng này nhận điều đó và nộp nó thành tu chính VENDOR-14 riêng, nghĩa là lời than “tôi muốn mở Máy
+        chủ ở tab mới” <b>vẫn còn mở</b> sau khi Plan này ship.</li>
+      </ol>
+    </section>
+
+    <section class="lab-feas">
+      <h3>Tính khả thi</h3>
+      <ol>
+        <li><b>Khoá hợp đồng — TOÀN BỘ DÙNG LẠI, 0 MỚI, 0 MỞ RỘNG.</b> Dùng đúng như các trang đã ship dùng:
+        <code>titled-section-stack-page</code> (gốc trang, kể cả lá <code>lede</code> tuỳ chọn — Tên miền và Hỗ trợ cần
+        câu mà một <code>title-with-baseline-fact</code> không giữ nổi), <code>label-row-over-card</code>,
+        <code>title-with-end-action</code> (ô <code>end</code> là chỗ đứng của “Thêm tên miền”, “Gửi yêu cầu”, “Mở Ứng
+        dụng”), <code>title-with-baseline-fact</code>, <code>fleet-resource-list</code> +
+        <code>identity-kind-status-action-row</code> + <code>name-over-handle</code>,
+        <code>labelled-fact-stack</code> + <code>label-value-row</code> (chỉ khối Pod),
+        <code>body-with-refusal-note</code>, <code>centred-empty-notice</code> + <code>empty-notice-stack</code>, và
+        khung <code>sidebar-then-body-app</code> / <code>home-services-account-nav</code> /
+        <code>console-body-main</code> giữ nguyên.</li>
+        <li><b>Kiểm kê trước khi phát minh — khoá duy nhất đã cân nhắc đúc và đã không đúc.</b> Một khoá “hàng phiếu hỗ
+        trợ”: <b>TỪ CHỐI, dùng lại <code>identity-kind-status-action-row</code></b>. Bốn ô của nó đúng là tiêu đề / loại
+        / trạng thái / một nút, và ô <code>action</code> tuỳ chọn đã lo được hàng phiếu đã đóng. Quan hệ mà một khoá mới
+        sẽ diễn đạt — một dòng trích nội dung dưới tiêu đề — là quan hệ <b>backend không cấp được</b>:
+        <code>myTickets</code> không nạp quan hệ nào và repo không có <code>@ResolveField</code> nào, nên
+        <code>messages</code> null trên mọi hàng. Một khoá đúc cho một ô không bao giờ điền được chính là khoá thứ bảy
+        lặp lại khoá thứ sáu.</li>
+        <li><b>MỞ RỘNG 1 — <code>apps/app/src/components/blocks/provisioning/FleetRow</code></b>, các union
+        <code>FleetStatus</code> và <code>FleetKind</code>. Quan hệ không thành viên nào diễn đạt được: đồng hồ của một
+        tên miền (<code>expiring</code>, <code>expired</code>) và tình trạng hội thoại của một phiếu
+        (<code>open</code>, <code>acknowledged</code>, <code>closed</code>) không phải trạng thái cấp phát, và mượn
+        <code>failed</code> để lấy sắc thái nguy hiểm cho một tên miền hết hạn là <b>đẩy lời nói dối lên một tầng</b> —
+        đúng cái mẫu mà header của chính tệp đó cảnh báo. <b>Phát hiện gửi người duyệt:</b> <code>props.kind</code>
+        <i>được khai báo và không bao giờ được đọc</i> trong render của FleetRow (chỉ <code>kindLabel</code> tới được
+        huy hiệu), nên <code>FleetKind</code> hôm nay là một discriminator chết. Mở rộng nó thì miễn phí; xoá nó là câu
+        trả lời trung thực còn lại. Bán kính: 3 chỗ gọi, không story, không test.</li>
+        <li><b>MỞ RỘNG 2 — <code>packages/ui/src/composites/EmptyNotice</code>.</b>
+        <code>EmptyNoticeData.icon</code> đã tuỳ chọn, nhưng <i>hành động</i> bị ép cứng
+        <code>variant:"secondary", icon:"retry"</code>. Quan hệ không prop nào diễn đạt được: lối ra khỏi một vùng rỗng
+        là một hành động <b>đầu tiên</b>, không phải một lần thử lại thứ đã hỏng. “Thêm tên miền” và “Gửi yêu cầu” dưới
+        một mũi tên thử-lại là một khẳng định sai về việc đã xảy ra. Bản vẽ <b>kết xuất khuyết tật đúng như nó đang là</b>
+        (cảnh 2, 6, 8 và phần chú giải) thay vì giấu nó sau một khung rỗng tự vẽ. Đây là sửa gói dùng chung, nên cần
+        vòng duyệt riêng; 4+ chỗ gọi hiện có thừa hưởng theo kiểu cộng thêm.</li>
+        <li><b>Tệp mới.</b> Tầng route: bốn tệp chín dòng,
+        <code>apps/app/src/app/[locale]/(console)/{agentos,servers,domains,support}/page.tsx</code>, mỗi tệp gắn một
+        trang và không ra quyết định vẽ nào (LAYOUT-6). Tầng trang: bốn cặp <code>component.tsx</code> /
+        <code>index.tsx</code> dưới <code>apps/app/src/components/pages/{AgentOsPage,ServersPage,DomainsPage,SupportPage}/</code>,
+        nửa pure kết thúc bằng <code>meta = { shape: "page", world: "pure" }</code>, nửa connected mang
+        <code>"use client"</code> và sở hữu mọi lần gọi <code>useTranslations</code> / <code>useFormatter</code>.</li>
+        <li><b>Bổ sung vào <code>console.ts</code>.</b> 8 mũi tên truy vấn (<code>myAgentWorkspace</code>,
+        <code>myAgents</code>, <code>myChannels</code>, <code>myKnowledgeSources</code>, <code>myTools</code>,
+        <code>myPodOpenclawStatus</code>, <code>myAutomations</code>, <code>myInstances</code> mở rộng,
+        <code>myDomains</code>, <code>myTickets</code>) cộng 4 mũi tên mutation (<code>addDomain</code>,
+        <code>renewDomain</code>, <code>setDomainAutoRenew</code>, <code>createTicket</code>) —
+        <b>đúng một root field mỗi tài liệu</b> (<code>graphql.ts:153</code> bóc
+        <code>Object.values(body.data)[0]</code> và lặng lẽ vứt cái thứ hai), phong bì
+        <code>data … message success error</code> là bắt buộc, trạng thái kiểu <code>string</code> chứ không thu hẹp.
+        AgentOS cần <b>lấy hai chặng</b>: <code>myAgentWorkspace</code> trước, rồi chín lời gọi phạm vi workspace với id
+        của nó, <code>Promise.all</code>.</li>
+        <li><b>Nội dung ngôn ngữ.</b> Đã viết sẵn và hiện chưa kết xuất, nay được dùng:
+        <code>agentos.podReachable/podUnreachable/checkedAt/empty</code>,
+        <code>servers.shape/shapeUnknown/plan/renewsAt</code>, <code>domains.status.*</code>,
+        <code>domains.expiresAt/autoRenewOn/autoRenewOff/empty</code>, <code>servers.empty</code>,
+        <code>state.loading</code>, <code>console.title</code>. <b>Nhóm mới bắt buộc:</b> <code>console.support.*</code> —
+        không có nhóm khoá phiếu ở cả hai ngôn ngữ. <b>Mã từ chối mới</b> phải ghi tay vào <code>NAMED_REFUSALS</code>:
+        <code>POD_CREDENTIAL_NOT_FOUND_EXCEPTION</code>, <code>PROVISIONABLE_APP_NOT_FOUND_EXCEPTION</code>,
+        <code>AGENT_WORKSPACE_INSTANCE_MISSING_EXCEPTION</code>, <code>DOMAIN_NAME_UNAVAILABLE_EXCEPTION</code>,
+        <code>TICKET_NOT_FOUND_EXCEPTION</code>, <code>TICKET_ALREADY_CLOSED_EXCEPTION</code>.</li>
+        <li><b>Một quyết định của nửa connected, bắt buộc chứ không tuỳ chọn.</b> Console đang định dạng ngày
+        <code>{ day: "2-digit", month: "2-digit" }</code>. Một tên miền hết hạn năm 2027 in “hết hạn 12/06” đọc thành
+        năm nay. Tên miền cần <code>year</code> trong lời gọi định dạng của nó — không phải thay đổi contract, nó nằm
+        trong <code>DomainsPage/index.tsx</code>.</li>
+        <li><b>Kiểm chứng schema sống, và hai cải chính với chính hồ sơ bằng chứng của brief.</b> Dump từ
+        <code>localhost:3067/graphql</code>: <code>MyInstance</code> công bố
+        <code>appKey String!, creditBurnUsd Float, detailId ID, id ID!, instanceId ID, name String, plan String,
+        ram String, renewsAt DateTime, status String!, vcpu Int</code> — <code>ram</code> và <code>vcpu</code> nullable
+        trên dây nhưng <b>là cột thật do handler đọc</b>; chỉ dòng mồ côi (<code>instanceId</code> null) mới thật sự
+        không có kích thước. <b>Cải chính 1:</b> <code>AgentEntity</code> <b>không có</b> <code>tools</code> và
+        <b>không có</b> <code>knowledgeSources</code> — nó công bố <code>channels:[String!]!, createdAt, id, model,
+        name, status, systemPrompt, updatedAt, workspace</code>; brief ghi cả ba mảng, chỉ <code>channels</code> tồn
+        tại, nên hàng agent không được khẳng định công cụ của nó. <b>Cải chính 2:</b> <code>ThreadEntity.channel</code>
+        là <code>ChannelConnectionEntity</code> (một <i>đối tượng</i> nullable), không phải chuỗi loại; entity còn mang
+        <code>sessionKey</code>. Enum xác nhận sống: <code>DomainStatus{active,expiring,expired}</code>,
+        <code>TicketStatus{open,answered,closed}</code>, <code>OpsTicketStatus{open,in_progress,completed}</code>,
+        <code>MessageAuthorRole{staff,user}</code>,
+        <code>AutomationRunOutcome{cancelled,failed,running,succeeded,unknown,waiting}</code>.
+        <code>ChannelConnectionEntity.instance</code> là <code>InstanceEntity!</code> KHÔNG-NULL và không được nạp —
+        không chọn ở bất cứ đâu trong hướng này.</li>
+        <li><b>Không đếm, đã kiểm.</b> Không truy vấn <code>my*</code> nào trên schema sống nhận limit hay offset trừ
+        <code>myExpertSiteLeads</code> và <code>myAutomationRuns</code>; không kiểu phản hồi nào khai
+        <code>total</code>, <code>cursor</code> hay <code>hasMore</code>; <code>metadata</code> bị
+        <code>graphql.ts</code> bỏ trước khi tới người gọi. Không cảnh nào trong tám cảnh nêu một số lượng — kể cả
+        những chỗ trông vô hại: màn Hỗ trợ không bao giờ nói có bao nhiêu phiếu đang mở, và <code>myOpsTickets</code>
+        <b>không được vẽ</b> chứ không phải vẽ thành một danh sách rỗng vĩnh viễn.</li>
+        <li><b>Không fixture.</b> Mọi hàng trong mọi cảnh là một hình schema sống công bố; giá trị là thể hiện hợp lý
+        của hình đó, không phải <code>fleet.fixture.json</code>. Số lượng thật đọc từ cơ sở dữ liệu <code>nivo</code>
+        khi kiểm chứng — agents 1, knowledge_sources 2, agent_tools_catalog 3, channel_connections 0, workflows 0,
+        threads 0, agent_models 0, instances 11, domains 18, support tickets 5, ops_tickets 0, credit_ledger 0 — là cái
+        các cảnh được soạn dựa vào.</li>
+      </ol>
+    </section>
+  </div>
+
+  <div class="lab-scenes">
+    <h3>Tám cảnh — bốn dịch vụ × hai trạng thái · bản vẽ nguyên bản của hướng, kèm quy ước riêng của nó</h3>
+<!--SCENES-->
+  </div>
+</article>

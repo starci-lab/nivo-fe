@@ -1,0 +1,679 @@
+<section class="dir-a">
+<style>
+.dir-a{
+  --a-bg:#e9e9ec; --a-surface:#fff; --a-surface2:#fafafa; --a-border:#e4e4e7; --a-sep:#f0f0f1;
+  --a-fg:#18181b; --a-fg2:#3f3f46; --a-muted:#71717a; --a-faint:#a1a1aa;
+  --a-accent:#2563eb; --a-accent-soft:#eff6ff; --a-accent-fg:#1d4ed8;
+  --a-ok:#166534; --a-ok-bg:#dcfce7; --a-warn:#92400e; --a-warn-bg:#fef3c7;
+  --a-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  display:block;color:var(--a-fg);
+  font:14px/1.55 ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+}
+.dir-a *{box-sizing:border-box}
+
+/* ── direction header ─────────────────────────────────────────────────────── */
+.dir-a .a-head{background:var(--a-surface2);border:1px solid var(--a-border);border-radius:14px;padding:18px 20px;margin:0 0 16px}
+.dir-a .a-kicker{display:inline-block;font:600 10px/1 var(--a-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--a-muted);border:1px solid var(--a-border);border-radius:99px;padding:5px 9px;background:#fff}
+.dir-a .a-title{font-size:18px;margin:11px 0 6px;letter-spacing:-.01em}
+.dir-a .a-thesis{margin:0 0 10px;font-size:13px;color:var(--a-fg2);max-width:104ch}
+.dir-a .a-thesis b{color:var(--a-fg)}
+.dir-a .a-navans{margin:0;padding:11px 13px;border-left:3px solid var(--a-accent);background:#fff;border:1px solid var(--a-border);border-radius:9px;font-size:12.5px;color:var(--a-fg2);max-width:104ch}
+.dir-a .a-navans b{color:var(--a-fg)}
+.dir-a code{font:11.5px var(--a-mono);background:#f0f0f2;padding:1px 5px;border-radius:5px;color:#27272a}
+
+/* ── the four-state legend, drawn once ────────────────────────────────────── */
+.dir-a .a-legend{background:var(--a-surface2);border:1px solid var(--a-border);border-radius:14px;padding:16px 18px;margin:0 0 20px}
+.dir-a .a-legend > h3{margin:0 0 4px;font:600 11px/1 var(--a-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--a-muted)}
+.dir-a .a-legend > p{margin:0 0 13px;font-size:12.5px;color:var(--a-fg2);max-width:104ch}
+.dir-a .a-legend-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.dir-a .a-legend-cell > span{display:block;margin:0 0 7px;font-size:12px;color:var(--a-muted)}
+
+/* ── scene grid ───────────────────────────────────────────────────────────── */
+.dir-a .a-scenes{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:1180px){.dir-a .a-scenes{grid-template-columns:1fr}}
+.dir-a .a-scene{margin:0;display:flex;flex-direction:column}
+.dir-a .a-cap{margin:0 0 8px;font-size:12.5px;color:var(--a-fg2)}
+.dir-a .a-cap > b:first-child{display:block;font-size:13.5px;color:var(--a-fg);margin-bottom:2px}
+.dir-a .a-cap b{color:var(--a-fg)}
+.dir-a .a-note{margin:9px 0 0;font:11.5px/1.55 var(--a-mono);color:var(--a-faint)}
+.dir-a .a-note b{color:var(--a-muted);font-weight:600}
+
+/* ── the app frame: rail beside body, siblings, never nested ──────────────── */
+.dir-a .a-app{display:flex;background:var(--a-surface);border:1px solid var(--a-border);border-radius:12px;overflow:hidden;min-height:600px}
+.dir-a .a-rail{width:186px;flex:none;display:flex;flex-direction:column;gap:8px;padding:24px 12px;border-right:1px solid var(--a-border);background:var(--a-surface)}
+.dir-a .a-brand{font-size:16px;font-weight:600;padding:0 12px 4px;margin:0}
+.dir-a .a-railcap{font-size:11px;color:var(--a-muted);padding:8px 12px 0}
+.dir-a .a-link{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;border-radius:99px;padding:8px 12px;font-size:13px;color:var(--a-muted)}
+.dir-a .a-link.is-on{background:var(--a-accent-soft);color:var(--a-accent-fg);font-weight:600}
+
+/* ── page body ────────────────────────────────────────────────────────────── */
+.dir-a .a-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:24px;padding:24px}
+.dir-a .a-h1{font-size:20px;margin:0;letter-spacing:-.01em}
+.dir-a .a-lede{margin:-16px 0 0;font-size:12.5px;color:var(--a-muted);max-width:64ch}
+.dir-a .a-foot{margin:0;font-size:12px;color:var(--a-faint);max-width:64ch}
+
+/* ── a section: label OUTSIDE the surface it names ────────────────────────── */
+.dir-a .a-sec{display:flex;flex-direction:column;gap:12px}
+.dir-a .a-seclabel{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.dir-a .a-secname{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;min-width:0}
+.dir-a .a-sech3{font-size:15px;margin:0;font-weight:600}
+.dir-a .a-secfact{font-size:12.5px;color:var(--a-muted)}
+.dir-a .a-state{font:600 9.5px/1.6 var(--a-mono);letter-spacing:.06em;text-transform:uppercase;border-radius:99px;padding:2px 8px;border:1px solid var(--a-border);background:#f4f4f5;color:var(--a-muted);white-space:nowrap}
+.dir-a .s-wait{background:#fafafa;color:var(--a-faint)}
+.dir-a .s-empty{background:#fff;color:var(--a-muted)}
+.dir-a .s-data{background:var(--a-accent-soft);color:var(--a-accent-fg);border-color:#bfdbfe}
+.dir-a .s-refuse{background:#fff;color:var(--a-warn);border-color:#fde68a}
+.dir-a .a-seemore{font-size:13px;color:var(--a-accent);text-decoration:underline;text-underline-offset:3px}
+
+/* ── the ground a section owns ────────────────────────────────────────────── */
+.dir-a .a-card{border:1px solid var(--a-border);border-radius:12px;background:var(--a-surface);overflow:hidden}
+.dir-a .a-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--a-sep)}
+.dir-a .a-row:first-child{padding-top:16px}
+.dir-a .a-row:last-child{border-bottom:0;padding-bottom:16px}
+.dir-a .a-idy{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.dir-a .a-name{font-size:13px;color:var(--a-accent);text-decoration:underline;text-underline-offset:3px}
+.dir-a .a-handle{font-size:11.5px;color:var(--a-muted)}
+.dir-a .a-badge{display:inline-block;border-radius:99px;padding:3px 9px;font-size:11px;font-weight:600;white-space:nowrap;background:#f4f4f5;color:var(--a-muted)}
+.dir-a .a-badge.b-ok{background:var(--a-ok-bg);color:var(--a-ok)}
+.dir-a .a-badge.b-warn{background:var(--a-warn-bg);color:var(--a-warn)}
+.dir-a .a-badge.b-acc{background:var(--a-accent-soft);color:var(--a-accent-fg)}
+.dir-a .a-btn{border:1px solid var(--a-border);border-radius:99px;padding:6px 13px;font:600 12.5px/1 inherit;background:#fff;color:var(--a-fg);cursor:default}
+.dir-a .a-btn.b-primary{background:var(--a-accent);border-color:var(--a-accent);color:#fff}
+
+/* label-and-figure lines about ONE object */
+.dir-a .a-facts{display:flex;flex-direction:column;gap:8px;padding:16px}
+.dir-a .a-fact{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;font-size:13px}
+.dir-a .a-fact span{color:var(--a-muted)}
+.dir-a .a-fact b{font-weight:400}
+.dir-a .a-fact.f-absent b{color:var(--a-faint);font-style:italic}
+
+/* an absence that is NOT an invitation: one sentence, no ground, no press */
+.dir-a .a-sentence{font-size:13px;color:var(--a-muted);max-width:64ch}
+
+/* an absence that IS an invitation */
+.dir-a .a-emptyn{display:flex;flex-direction:column;align-items:center;gap:12px;padding:24px 16px;text-align:center}
+.dir-a .a-emptyn .e-msg{font-size:13px;color:var(--a-muted)}
+.dir-a .a-emptyn .e-desc{font-size:11.5px;color:var(--a-muted);max-width:44ch}
+/* KHUYẾT TẬT ĐƯỢC VẼ ĐÚNG NHƯ NÓ ĐANG LÀ: EmptyNotice ép nút lối ra thành `secondary` và ép
+   icon `retry`. “Thêm tên miền” không phải là thử lại. Bản vẽ giữ nguyên để lỗi nhìn thấy được. */
+.dir-a .a-emptyn .a-btn{background:#fff;border-color:var(--a-border);color:var(--a-fg)}
+.dir-a .a-emptyn .a-btn::before{content:"\21BB";margin-right:6px;color:var(--a-faint)}
+
+/* a refusal: left-aligned prose on the section's own ground, never centred */
+.dir-a .a-refuse{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:16px}
+.dir-a .a-refuse p{margin:0;font-size:13px;color:var(--a-muted);max-width:60ch}
+
+/* the resting body is the REAL body asked to rest as itself */
+.dir-a .a-skelrow{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--a-sep)}
+.dir-a .a-skelrow:first-child{padding-top:16px}
+.dir-a .a-skelrow:last-child{border-bottom:0;padding-bottom:16px}
+.dir-a .a-skelidy{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.dir-a .a-skelrow i,.dir-a .a-skelidy i{display:block;height:10px;border-radius:5px;background:#f0f0f1}
+.dir-a .a-skelidy i:nth-child(1){width:46%}
+.dir-a .a-skelidy i:nth-child(2){width:64%;height:8px}
+.dir-a .a-skelchip{width:62px;height:20px;border-radius:99px;background:#f4f4f5;flex:none}
+
+/* the row's inline caveat, under the surface it qualifies */
+.dir-a .a-caveat{margin:0;font-size:11.5px;color:var(--a-muted);max-width:64ch}
+.dir-a .a-caveat + .a-caveat{margin-top:-6px}
+</style>
+
+<div class="a-head">
+  <span class="a-kicker">direction-a · một hình cho cả bốn</span>
+  <h2 class="a-title">Mọi dịch vụ đều cùng một hình</h2>
+  <p class="a-thesis">
+    Bốn điểm đến còn thiếu đều là <b>một trang danh sách</b>, đúng như trang Ứng dụng đã ship: một hàng tiêu đề,
+    một mặt phẳng nối liền các dòng, và một lời nhắn khi không có gì. Không khoá contract nào mới, không hình
+    nào mới, không ngôn ngữ thị giác thứ hai. <b>Cái giá của nó:</b> một VPS và một yêu cầu hỗ trợ không cùng
+    một loại vật, và ép chúng vào một dòng bốn ô — tên · loại · trạng thái · một nút — làm phẳng cả hai.
+    Trang Máy chủ thấy rõ điều đó nhất: nó có nhiều dữ kiện hơn số ô mà dòng có.
+  </p>
+  <p class="a-navans">
+    <b>Vấn đề A — hướng này không đụng vào <code>NavLink</code> và cũng không bọc <code>&lt;Link&gt;</code> quanh nó.</b>
+    Nó điền bốn giá trị <code>route</code> đang là <code>null</code> trong <code>ConsoleNav</code>. Bảy mục trên
+    thanh bên đều bấm được ngay sau đó, vì <code>on.press</code> đã chạy tới <code>router.push</code> từ trước —
+    ba điểm đến đã ship <em>không</em> hề chết như lời than ban đầu; bốn mục chết là bốn mục không có route.
+    Điều một thẻ <code>&lt;a&gt;</code> thật sự mua thêm — bấm chuột giữa, mở tab mới, xem địa chỉ ở thanh trạng thái —
+    là mất mát có thật, nhưng nó mất đều cho cả bảy mục và phải sửa bằng một <b>bản tu chính VENDOR-14</b> trong
+    cây tin cậy, không phải bằng một Plan vẽ trang. Nếu buộc phải chọn một trong hai lựa chọn đã nêu, hướng này
+    chọn <code>href</code> trên leaf kèm tu chính canon, và từ chối cách bọc trong <code>ConsoleNav</code>:
+    cách bọc là cùng một vi phạm lùi ra một file, cộng thêm một <code>&lt;a&gt;</code> ôm một
+    <code>role="link"</code> — hai điểm dừng tab và hai lần đọc “liên kết” cho một mục.
+  </p>
+  <p class="a-caveat" style="margin-top:12px;max-width:104ch">
+    <b>Hai quy ước của bản vẽ.</b> Chip <code>có · rỗng · bị từ chối</code> ở đầu mỗi mục là <b>chú thích của lab</b>,
+    không phải phần tử của màn hình — không khoá contract nào có chỗ cho nó và Preview không được dựng nó.
+    Màu nhấn là xanh mặc định của vendor HeroUI, dùng làm chỗ giữ chỗ: nivo chưa có màu thương hiệu được duyệt,
+    và bịa ra một màu ở đây là xin duyệt một quyết định chưa ai ra.
+  </p>
+</div>
+
+<div class="a-legend">
+  <h3>Bốn trạng thái mạng — vẽ một lần, vì cả bốn trang dùng chung</h3>
+  <p>
+    Trạng thái <b>chưa hỏi</b> không có cảnh riêng, và đó là một quyết định chứ không phải thiếu sót: theo luật của
+    console đã ship, thân nghỉ <em>chính là thân thật</em> mang <code>isLoading</code>, nên bốn cảnh nghỉ sẽ là bốn
+    bộ xương giống hệt nhau. Nó được vẽ một lần ở đây, kèm ba trạng thái còn lại, để tám cảnh phía dưới dành cho
+    điều thật sự khác nhau giữa bốn dịch vụ.
+  </p>
+  <div class="a-legend-grid">
+    <div class="a-legend-cell">
+      <span><b>chưa hỏi</b> — thân thật, đang nghỉ</span>
+      <div class="a-card">
+        <div class="a-skelrow"><div class="a-skelidy"><i></i><i></i></div><div class="a-skelchip"></div></div>
+        <div class="a-skelrow"><div class="a-skelidy"><i></i><i></i></div><div class="a-skelchip"></div></div>
+        <div class="a-skelrow"><div class="a-skelidy"><i></i><i></i></div><div class="a-skelchip"></div></div>
+      </div>
+    </div>
+    <div class="a-legend-cell">
+      <span><b>rỗng</b> — vắng mặt có chủ ý: một câu, không nền</span>
+      <p class="a-sentence">nivo chưa bán máy chủ riêng. Mục này chỉ có nội dung sau khi một ứng dụng hoặc một workspace được dựng.</p>
+    </div>
+    <div class="a-legend-cell">
+      <span><b>rỗng</b> — vắng mặt là một lời mời: có nền, có lối ra</span>
+      <div class="a-card">
+        <div class="a-emptyn">
+          <span class="e-msg">Chưa giữ tên miền nào.</span>
+          <span class="e-desc">Nhập một tên, nivo giữ tên đó một năm, không mất phí.</span>
+          <button class="a-btn b-primary" type="button">Thêm tên miền</button>
+        </div>
+      </div>
+    </div>
+    <div class="a-legend-cell">
+      <span><b>bị từ chối</b> — văn xuôi canh trái, không phải lời xin lỗi canh giữa</span>
+      <div class="a-card">
+        <div class="a-refuse">
+          <p>Chưa đọc được phần này. Phần còn lại trên màn hình vẫn đúng.</p>
+        </div>
+      </div>
+    </div>
+    <div class="a-legend-cell" style="grid-column:1/-1">
+      <span><b>Một khuyết tật vẽ đúng như nó đang là.</b> Nút lối ra ở trên mang mũi tên thử-lại vì
+      <code>EmptyNotice</code> ép cứng <code>icon:"retry"</code> và <code>variant:"secondary"</code> cho mọi lối ra.
+      “Thêm tên miền” không phải là thử lại một việc đã hỏng. Hướng này <b>không</b> sửa bằng cách tự vẽ một khung rỗng
+      riêng — nó đề xuất EXTEND đúng một composite dùng chung, để icon do người gọi chọn.</span>
+    </div>
+  </div>
+</div>
+
+<div class="a-scenes">
+
+<!-- ══════════ 1 · AGENTOS — CÓ ══════════ -->
+<figure class="a-scene">
+  <figcaption class="a-cap">
+    <b>1 · AgentOS — có dữ liệu</b>
+    Bảy mục cùng một hình, và ba trạng thái đứng cạnh nhau trên một trang: có · rỗng · bị từ chối.
+  </figcaption>
+  <div class="a-app">
+    <nav class="a-rail">
+      <h2 class="a-brand">nivo</h2>
+      <span class="a-link">Tổng quan</span>
+      <span class="a-railcap">Dịch vụ</span>
+      <span class="a-link">Ứng dụng</span>
+      <span class="a-link is-on">AgentOS</span>
+      <span class="a-link">Máy chủ</span>
+      <span class="a-link">Tên miền</span>
+      <span class="a-railcap">Tài khoản</span>
+      <span class="a-link">Ví</span>
+      <span class="a-link">Hỗ trợ</span>
+    </nav>
+    <div class="a-body">
+      <h1 class="a-h1">AgentOS</h1>
+      <p class="a-lede">Một workspace agent, những agent bên trong nó, và những thứ workspace đó đang nối vào.</p>
+
+      <div class="a-sec">
+        <div class="a-seclabel"><div class="a-secname"><h3 class="a-sech3">Workspace</h3></div><span class="a-state s-data">có</span></div>
+        <div class="a-card">
+          <div class="a-row">
+            <div class="a-idy"><span class="a-name">Workspace của Minh</span><span class="a-handle">wsp_3f9c1a · tạo 02/07</span></div>
+            <span class="a-badge">Workspace</span>
+            <span class="a-badge b-ok">Đang chạy</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="a-sec">
+        <div class="a-seclabel"><div class="a-secname"><h3 class="a-sech3">Agent</h3></div><span class="a-state s-data">có</span></div>
+        <div class="a-card">
+          <div class="a-row">
+            <div class="a-idy"><span class="a-name">Trực Zalo bán hàng</span><span class="a-handle">deepseek/deepseek-v4-flash</span></div>
+            <span class="a-badge">Agent</span>
+            <span class="a-badge b-ok">Đang bật</span>
+            <button class="a-btn" type="button">Tạm dừng</button>
+          </div>
+        </div>
+        <p class="a-caveat">“Tạm dừng” đổi một cờ trong sổ. Nó không dừng tiến trình nào đang chạy.</p>
+      </div>
+
+      <div class="a-sec">
+        <div class="a-seclabel"><div class="a-secname"><h3 class="a-sech3">Kênh kết nối</h3></div><span class="a-state s-empty">rỗng</span></div>
+        <p class="a-sentence">Chưa nối kênh nào. Agent chỉ trả lời khách sau khi có ít nhất một kênh.</p>
+      </div>
+
+      <div class="a-sec">
+        <div class="a-seclabel"><div class="a-secname"><h3 class="a-sech3">Nguồn kiến thức</h3></div><span class="a-state s-data">có</span></div>
+        <div class="a-card">
+          <div class="a-row">
+            <div class="a-idy"><span class="a-name">Bảng giá 2026.pdf</span><span class="a-handle">Tệp tài liệu · thêm 05/08</span></div>
+            <span class="a-badge">Nguồn</span>
+            <span class="a-badge b-acc">Đang xử lý</span>
+          </div>
+          <div class="a-row">
+            <div class="a-idy"><span class="a-name">Chính sách đổi trả</span><span class="a-handle">Tệp tài liệu · thêm 05/08</span></div>
+            <span class="a-badge">Nguồn</span>
+            <span class="a-badge b-acc">Đang xử lý</span>
+          </div>
+        </div>
+        <p class="a-caveat">Chưa có bước lập chỉ mục nào chạy, nên mọi nguồn dừng ở “đang xử lý” và agent chưa đọc được nội dung. Đây mới là tên tài liệu được ghi lại, chưa phải tài liệu đã gửi đi.</p>
+      </div>
+
+      <div class="a-sec">
+        <div class="a-seclabel"><div class="a-secname"><h3 class="a-sech3">Công cụ</h3></div><span class="a-state s-data">có</span></div>
+        <div class="a-card">
+          <div class="a-row">
+            <div class="a-idy"><span class="a-name">Tra đơn hàng</span><span class="a-handle">Đọc trạng thái một đơn theo mã</span></div>
+            <span class="a-badge">Công cụ</span>
+            <span class="a-badge b-ok">Đang bật</span>
+          </div>
+          <div class="a-row">
+            <div class="a-idy"><span class="a-name">Đặt lịch hẹn</span><span class="a-handle">Ghi một lịch hẹn vào sổ</span></div>
+            <span class="a-badge">Công cụ</span>
+            <span class="a-badge b-ok">Đang bật</span>
+          </div>
+          <div class="a-row">
+            <div class="a-idy"><span class="a-name">Chuyển người thật</span><span class="a-handle">Chuyển hội thoại cho nhân viên</span></div>
+            <span class="a-badge">Công cụ</span>
+            <span class="a-badge">Đã tắt</span>
+          </div>
+        </div>
+        <p class="a-caveat">Ba công cụ này do lần đọc đầu tiên tạo ra chứ không phải bạn thêm — mục này không bao giờ rỗng.</p>
+      </div>
+
+      <div class="a-sec">
+        <div class="a-seclabel"><div class="a-secname"><h3 class="a-sech3">Tự động hoá</h3></div><span class="a-state s-refuse">bị từ chối</span></div>
+        <div class="a-card">
+          <div class="a-refuse">
+            <p>Chưa có khoá cho bộ máy tự động hoá của workspace này, nên chưa đọc được kịch bản nào và lịch sử chạy nào. Phần còn lại trên màn hình vẫn đúng.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="a-sec">
+        <div class="a-seclabel"><div class="a-secname"><h3 class="a-sech3">Pod</h3></div><span class="a-state s-data">có</span></div>
+        <div class="a-card">
+          <div class="a-facts">
+            <div class="a-fact"><span>Pod trả lời</span><b>Chưa</b></div>
+            <div class="a-fact"><span>Mã HTTP</span><b>502</b></div>
+            <div class="a-fact"><span>Khoá đã cấu hình</span><b>Rồi · …4f2a</b></div>
+            <div class="a-fact"><span>Kiểm tra lúc</span><b>14/08 18:32</b></div>
+          </div>
+        </div>
+        <p class="a-caveat">“Chưa trả lời” là một câu trả lời, không phải một lời từ chối: máy chủ đã hỏi được pod và pod nói không. Mục Tự động hoá phía trên thì khác — ở đó máy chủ chưa hỏi được.</p>
+      </div>
+
+      <p class="a-foot">Còn ba mục nữa cùng đúng một hình: Mô hình, Luồng công việc, Hội thoại.</p>
+    </div>
+  </div>
+  <p class="a-note">
+    <b>nguồn</b> myAgentWorkspace · myAgents · myChannels · myKnowledgeSources · myTools · myAutomations · myPodOpenclawStatus<br>
+    <b>từ chối</b> POD_CREDENTIAL_NOT_FOUND_EXCEPTION — hôm nay đúng cho <b>mọi</b> tài khoản: không pod nào có khoá n8n.<br>
+    <b>không vẽ</b> ChannelConnection.instance — trường NON-NULL mà truy vấn không nạp; chọn nó là xoá sạch cả câu trả lời.
+  </p>
+</figure>
+
+<!-- ══════════ 2 · AGENTOS — RỖNG ══════════ -->
+<figure class="a-scene">
+  <figcaption class="a-cap">
+    <b>2 · AgentOS — rỗng</b>
+    Chưa mua AI Agent. Một mục duy nhất, không phải chín danh sách rỗng — chín truy vấn kia cần mã workspace nên chưa từng hỏi được.
+  </figcaption>
+  <div class="a-app">
+    <nav class="a-rail">
+      <h2 class="a-brand">nivo</h2>
+      <span class="a-link">Tổng quan</span>
+      <span class="a-railcap">Dịch vụ</span>
+      <span class="a-link">Ứng dụng</span>
+      <span class="a-link is-on">AgentOS</span>
+      <span class="a-link">Máy chủ</span>
+      <span class="a-link">Tên miền</span>
+      <span class="a-railcap">Tài khoản</span>
+      <span class="a-link">Ví</span>
+      <span class="a-link">Hỗ trợ</span>
+    </nav>
+    <div class="a-body">
+      <h1 class="a-h1">AgentOS</h1>
+      <p class="a-lede">Một workspace agent, những agent bên trong nó, và những thứ workspace đó đang nối vào.</p>
+
+      <div class="a-sec">
+        <div class="a-seclabel"><div class="a-secname"><h3 class="a-sech3">Workspace</h3></div><span class="a-state s-empty">rỗng</span></div>
+        <div class="a-card">
+          <div class="a-emptyn">
+            <span class="e-msg">Chưa có workspace agent nào.</span>
+            <span class="e-desc">Workspace được tạo khi một đơn AI Agent được thanh toán — không phải bằng một nút ở màn này.</span>
+            <button class="a-btn b-primary" type="button">Xem gói</button>
+          </div>
+        </div>
+      </div>
+
+      <p class="a-foot">
+        Chín mục còn lại của AgentOS đều cần mã workspace, nên chúng chưa từng được hỏi. Chúng không được vẽ.
+      </p>
+    </div>
+  </div>
+  <p class="a-note">
+    <b>nguồn</b> myAgentWorkspace → <code>[]</code> (rỗng thật, không phải từ chối)<br>
+    <b>lời mời</b> có nền, có mô tả, có lối ra — vì nivo có bán đúng một sản phẩm AI Agent và lối ra là danh mục.<br>
+    <b>không vẽ</b> chín danh sách rỗng: “rỗng” và “chưa hỏi được” không phải một câu.
+  </p>
+</figure>
+
+<!-- ══════════ 3 · MÁY CHỦ — CÓ ══════════ -->
+<figure class="a-scene">
+  <figcaption class="a-cap">
+    <b>3 · Máy chủ — có dữ liệu</b>
+    Chỗ hướng này căng nhất: dòng có một ô chữ tự do, mà máy chủ có bốn dữ kiện muốn vào đó.
+  </figcaption>
+  <div class="a-app">
+    <nav class="a-rail">
+      <h2 class="a-brand">nivo</h2>
+      <span class="a-link">Tổng quan</span>
+      <span class="a-railcap">Dịch vụ</span>
+      <span class="a-link">Ứng dụng</span>
+      <span class="a-link">AgentOS</span>
+      <span class="a-link is-on">Máy chủ</span>
+      <span class="a-link">Tên miền</span>
+      <span class="a-railcap">Tài khoản</span>
+      <span class="a-link">Ví</span>
+      <span class="a-link">Hỗ trợ</span>
+    </nav>
+    <div class="a-body">
+      <h1 class="a-h1">Máy chủ</h1>
+      <p class="a-lede">Máy chủ không mua ở đây. Nó xuất hiện khi một ứng dụng hoặc một workspace được dựng, và biến mất cùng thứ đó.</p>
+
+      <div class="a-sec">
+        <div class="a-seclabel">
+          <div class="a-secname"><h3 class="a-sech3">Máy chủ</h3><span class="a-secfact">gia hạn theo đơn hàng</span></div>
+          <span class="a-state s-data">có</span>
+        </div>
+        <div class="a-card">
+          <div class="a-row">
+            <div class="a-idy"><span class="a-name">Workspace của Minh</span><span class="a-handle">Gói pro · 4 GB · 2 vCPU · gia hạn 02/09</span></div>
+            <span class="a-badge">Workspace</span>
+            <span class="a-badge b-ok">Đang chạy</span>
+          </div>
+          <div class="a-row">
+            <div class="a-idy"><span class="a-name">Học viện của Minh</span><span class="a-handle">Gói Học viện Pro · chưa có pod riêng · gia hạn 18/08</span></div>
+            <span class="a-badge">Học viện</span>
+            <span class="a-badge b-ok">Đang chạy</span>
+          </div>
+          <div class="a-row">
+            <div class="a-idy"><span class="a-name">Học viện thử nghiệm</span><span class="a-handle">Gói Học viện Start · chưa có pod riêng · chưa có ngày gia hạn</span></div>
+            <span class="a-badge">Học viện</span>
+            <span class="a-badge b-acc">Đang dựng</span>
+          </div>
+        </div>
+        <p class="a-caveat">Dòng nào chưa có bản ghi máy thì thật sự không có kích thước, và ở đây ghi đúng là chưa có — không điền một con số thay vào.</p>
+        <p class="a-caveat">Chưa đọc được mức tiêu thụ tín dụng của máy nào, nên màn này không nói gì về nó. Chưa đọc được không phải là bằng không.</p>
+      </div>
+    </div>
+  </div>
+  <p class="a-note">
+    <b>nguồn</b> myInstances — id · instanceId · appKey · name · plan · ram · vcpu · status · renewsAt · creditBurnUsd<br>
+    <b>đã kiểm chứng</b> ram và vcpu <b>là cột thật và được đọc thật</b>; plan-record của case trước ghi sai là hardcoded null. Chúng chỉ null trên dòng mồ côi (<code>instanceId === null</code>), và cả hai học viện đang sống đều mồ côi.<br>
+    <b>một cột hai bộ từ vựng</b> “Gói pro” là mã gói thuê bao; “Gói Học viện Pro” là tên bậc trong đơn hàng. Bản vẽ để nguyên như máy chủ trả về.<br>
+    <b>không vẽ</b> hostname · IP · vùng · đĩa · băng thông · tải CPU · uptime — không trường nào tồn tại trên DTO này, và không có gì trong API đo được máy đang chạy.
+  </p>
+</figure>
+
+<!-- ══════════ 4 · MÁY CHỦ — RỖNG ══════════ -->
+<figure class="a-scene">
+  <figcaption class="a-cap">
+    <b>4 · Máy chủ — rỗng</b>
+    Vắng mặt có chủ ý, không phải lời mời: một câu, không nền, không nút. Đối lập trực tiếp với cảnh 6.
+  </figcaption>
+  <div class="a-app">
+    <nav class="a-rail">
+      <h2 class="a-brand">nivo</h2>
+      <span class="a-link">Tổng quan</span>
+      <span class="a-railcap">Dịch vụ</span>
+      <span class="a-link">Ứng dụng</span>
+      <span class="a-link">AgentOS</span>
+      <span class="a-link is-on">Máy chủ</span>
+      <span class="a-link">Tên miền</span>
+      <span class="a-railcap">Tài khoản</span>
+      <span class="a-link">Ví</span>
+      <span class="a-link">Hỗ trợ</span>
+    </nav>
+    <div class="a-body">
+      <h1 class="a-h1">Máy chủ</h1>
+      <p class="a-lede">Máy chủ không mua ở đây. Nó xuất hiện khi một ứng dụng hoặc một workspace được dựng, và biến mất cùng thứ đó.</p>
+
+      <div class="a-sec">
+        <div class="a-seclabel">
+          <div class="a-secname"><h3 class="a-sech3">Máy chủ</h3></div>
+          <div class="a-secname"><span class="a-state s-empty">rỗng</span><a class="a-seemore" href="#">Mở Ứng dụng</a></div>
+        </div>
+        <p class="a-sentence">nivo chưa bán máy chủ riêng. Mục này chỉ có nội dung sau khi một ứng dụng hoặc một workspace được dựng.</p>
+      </div>
+    </div>
+  </div>
+  <p class="a-note">
+    <b>nguồn</b> myInstances → <code>[]</code><br>
+    <b>không có nút “Tạo máy chủ”</b> vì không có mutation nào tạo được máy chủ. Lối ra duy nhất thật sự tồn tại là danh mục ứng dụng, và nó nằm trên hàng nhãn chứ không phải giữa một khung rỗng.<br>
+    <b>myInstances có thể từ chối</b> PROVISIONABLE_APP_NOT_FOUND_EXCEPTION — và nó từ chối <b>cả danh sách</b>, không phải một dòng. Trạng thái đó dùng lại đúng khung bị-từ-chối ở phần chú giải.
+  </p>
+</figure>
+
+<!-- ══════════ 5 · TÊN MIỀN — CÓ ══════════ -->
+<figure class="a-scene">
+  <figcaption class="a-cap">
+    <b>5 · Tên miền — có dữ liệu</b>
+    Sổ ghi tên của nivo, nói thẳng ra là sổ ghi tên. Đồng hồ hết hạn là thật; việc “đăng ký” thì không.
+  </figcaption>
+  <div class="a-app">
+    <nav class="a-rail">
+      <h2 class="a-brand">nivo</h2>
+      <span class="a-link">Tổng quan</span>
+      <span class="a-railcap">Dịch vụ</span>
+      <span class="a-link">Ứng dụng</span>
+      <span class="a-link">AgentOS</span>
+      <span class="a-link">Máy chủ</span>
+      <span class="a-link is-on">Tên miền</span>
+      <span class="a-railcap">Tài khoản</span>
+      <span class="a-link">Ví</span>
+      <span class="a-link">Hỗ trợ</span>
+    </nav>
+    <div class="a-body">
+      <h1 class="a-h1">Tên miền</h1>
+      <p class="a-lede">Tên miền ở nivo là một cái tên được giữ trong sổ của nivo, trỏ về nameserver của nivo, mỗi lần một năm và không mất phí. Đây không phải một đăng ký tại nhà đăng ký: không có giá, không có WHOIS, không có mã chuyển nhượng.</p>
+
+      <div class="a-sec">
+        <div class="a-seclabel">
+          <div class="a-secname"><h3 class="a-sech3">Tên miền</h3><span class="a-secfact">sắp hết hạn trước</span></div>
+          <div class="a-secname"><span class="a-state s-data">có</span><button class="a-btn b-primary" type="button">Thêm tên miền</button></div>
+        </div>
+        <div class="a-card">
+          <div class="a-row">
+            <div class="a-idy"><span class="a-name">old-project.com</span><span class="a-handle">hết hạn 03/09 · không tự gia hạn</span></div>
+            <span class="a-badge">Tên miền</span>
+            <span class="a-badge b-warn">Sắp hết hạn</span>
+            <button class="a-btn" type="button">Gia hạn</button>
+          </div>
+          <div class="a-row">
+            <div class="a-idy"><span class="a-name">demo-shop.vn</span><span class="a-handle">hết hạn 12/06/2027 · tự động gia hạn</span></div>
+            <span class="a-badge">Tên miền</span>
+            <span class="a-badge b-ok">Đang giữ</span>
+            <button class="a-btn" type="button">Gia hạn</button>
+          </div>
+        </div>
+        <p class="a-caveat">Mọi tên miền đều dùng ns1.nivo.vn và ns2.nivo.vn. Danh sách đó cố định và không sửa được, nên nó nói một lần ở đây thay vì lặp lại trên từng dòng.</p>
+        <p class="a-caveat">Gia hạn cộng thêm một năm và không tính tiền. Không có chỗ nào ghi tên miền này đang trỏ vào ứng dụng nào — quan hệ đó chưa được lưu.</p>
+      </div>
+    </div>
+  </div>
+  <p class="a-note">
+    <b>nguồn</b> myDomains — id · name · status · registeredAt · expiresAt · autoRenew · nameservers<br>
+    <b>thật</b> DomainStatus là enum Postgres <code>active | expiring | expired</code>, và một lần quét mỗi giờ ghi “sắp hết hạn” ở mốc 30 ngày rồi “đã hết hạn” khi qua ngày. Đồng hồ là thật.<br>
+    <b>giả</b> việc đăng ký. addDomain chỉ kiểm tra trùng trong bảng của chính nivo rồi ghi 365 ngày. Không gọi nhà đăng ký, không kiểm tra còn trống, không giá.<br>
+    <b>expiresAt có thể null</b> nên ô ngày không được định dạng mà không kiểm tra trước.<br>
+    <b>định dạng ngày phải đổi ở đây</b> console đang định dạng ngày là ngày/tháng. Một tên miền hết hạn năm 2027
+    ghi “hết hạn 12/06” là đọc thành năm nay. Đây là quyết định của nửa connected (thêm <code>year</code>), không phải
+    thay đổi contract — nhưng nó là bắt buộc, không phải tuỳ chọn.
+  </p>
+</figure>
+
+<!-- ══════════ 6 · TÊN MIỀN — RỖNG ══════════ -->
+<figure class="a-scene">
+  <figcaption class="a-cap">
+    <b>6 · Tên miền — rỗng</b>
+    Điểm đến duy nhất mà hành động chính chạy được từ đầu đến cuối, nên đây là lời mời thật — và lời mời nói rõ nó mời cái gì.
+  </figcaption>
+  <div class="a-app">
+    <nav class="a-rail">
+      <h2 class="a-brand">nivo</h2>
+      <span class="a-link">Tổng quan</span>
+      <span class="a-railcap">Dịch vụ</span>
+      <span class="a-link">Ứng dụng</span>
+      <span class="a-link">AgentOS</span>
+      <span class="a-link">Máy chủ</span>
+      <span class="a-link is-on">Tên miền</span>
+      <span class="a-railcap">Tài khoản</span>
+      <span class="a-link">Ví</span>
+      <span class="a-link">Hỗ trợ</span>
+    </nav>
+    <div class="a-body">
+      <h1 class="a-h1">Tên miền</h1>
+      <p class="a-lede">Tên miền ở nivo là một cái tên được giữ trong sổ của nivo, trỏ về nameserver của nivo, mỗi lần một năm và không mất phí. Đây không phải một đăng ký tại nhà đăng ký: không có giá, không có WHOIS, không có mã chuyển nhượng.</p>
+
+      <div class="a-sec">
+        <div class="a-seclabel">
+          <div class="a-secname"><h3 class="a-sech3">Tên miền</h3></div>
+          <span class="a-state s-empty">rỗng</span>
+        </div>
+        <div class="a-card">
+          <div class="a-emptyn">
+            <span class="e-msg">Chưa giữ tên miền nào.</span>
+            <span class="e-desc">Nhập một tên, nivo giữ tên đó một năm và trỏ về nameserver của mình. Không mất phí.</span>
+            <button class="a-btn b-primary" type="button">Thêm tên miền</button>
+          </div>
+        </div>
+        <p class="a-caveat">Nếu tên đó đã có người khác giữ trong sổ của nivo, màn hình sẽ nói vậy. Nó không kiểm tra được tên đó còn trống ở ngoài đời.</p>
+      </div>
+    </div>
+  </div>
+  <p class="a-note">
+    <b>nguồn</b> myDomains → <code>[]</code> · hành động addDomain(name)<br>
+    <b>lời mời hợp lệ ở đây và không hợp lệ ở cảnh 4</b> vì hành động chính chạy thật: bấm là có tên trong sổ ngay.<br>
+    <b>từ chối duy nhất</b> DOMAIN_NAME_UNAVAILABLE_EXCEPTION — trùng trong sổ nivo, không phải trùng ngoài đời.
+  </p>
+</figure>
+
+<!-- ══════════ 7 · HỖ TRỢ — CÓ ══════════ -->
+<figure class="a-scene">
+  <figcaption class="a-cap">
+    <b>7 · Hỗ trợ — có dữ liệu</b>
+    Cả màn xoay quanh một chữ: trạng thái <code>answered</code> do máy tự đặt, nên trên màn nó <b>không</b> được đọc là “Đã trả lời”.
+  </figcaption>
+  <div class="a-app">
+    <nav class="a-rail">
+      <h2 class="a-brand">nivo</h2>
+      <span class="a-link">Tổng quan</span>
+      <span class="a-railcap">Dịch vụ</span>
+      <span class="a-link">Ứng dụng</span>
+      <span class="a-link">AgentOS</span>
+      <span class="a-link">Máy chủ</span>
+      <span class="a-link">Tên miền</span>
+      <span class="a-railcap">Tài khoản</span>
+      <span class="a-link">Ví</span>
+      <span class="a-link is-on">Hỗ trợ</span>
+    </nav>
+    <div class="a-body">
+      <h1 class="a-h1">Hỗ trợ</h1>
+      <p class="a-lede">Gửi một yêu cầu, nivo ghi nhận ngay lập tức. Người thật trả lời sau, và màn hình này chưa đọc được lúc đó là khi nào.</p>
+
+      <div class="a-sec">
+        <div class="a-seclabel">
+          <div class="a-secname"><h3 class="a-sech3">Yêu cầu của bạn</h3></div>
+          <div class="a-secname"><span class="a-state s-data">có</span><button class="a-btn b-primary" type="button">Gửi yêu cầu</button></div>
+        </div>
+        <div class="a-card">
+          <div class="a-row">
+            <div class="a-idy"><span class="a-name">Không đăng nhập được vào học viện</span><span class="a-handle">gửi 12/08 · cập nhật 12/08</span></div>
+            <span class="a-badge">Yêu cầu</span>
+            <span class="a-badge">Đã tiếp nhận</span>
+            <button class="a-btn" type="button">Xem trao đổi</button>
+          </div>
+          <div class="a-row">
+            <div class="a-idy"><span class="a-name">Xin đổi tên miền cho ứng dụng</span><span class="a-handle">gửi 09/08 · cập nhật 10/08</span></div>
+            <span class="a-badge">Yêu cầu</span>
+            <span class="a-badge">Đang mở</span>
+            <button class="a-btn" type="button">Xem trao đổi</button>
+          </div>
+          <div class="a-row">
+            <div class="a-idy"><span class="a-name">Hoá đơn tháng 7 ghi sai số</span><span class="a-handle">gửi 02/08 · đóng 04/08</span></div>
+            <span class="a-badge">Yêu cầu</span>
+            <span class="a-badge">Đã đóng</span>
+            <button class="a-btn" type="button">Xem trao đổi</button>
+          </div>
+        </div>
+        <p class="a-caveat"><b>“Đã tiếp nhận”</b> nghĩa là hệ thống đã ghi nhận và đã gửi lại một lời báo nhận tự động. Nó không có nghĩa là đã có người trả lời.</p>
+        <p class="a-caveat">Nội dung trao đổi không nằm trong danh sách này; phải mở từng yêu cầu mới đọc được.</p>
+      </div>
+    </div>
+  </div>
+  <p class="a-note">
+    <b>nguồn</b> myTickets — id · subject · status · createdAt · updatedAt. <code>messages</code> là null trên mọi dòng danh sách, nên không có dòng trích dẫn nào.<br>
+    <b>chữ bị đổi</b> TicketStatus.answered → “Đã tiếp nhận”, tone trung tính. Handler đăng câu trả lời tự động rồi tự đặt trạng thái đó; toàn backend không có mutation nào cho nhân viên trả lời, và cơ sở dữ liệu đang có 10 tin nhắn nhân viên với đúng <b>một</b> nội dung.<br>
+    <b>myOpsTickets không được vẽ</b> — không phải vẽ thành danh sách rỗng thứ hai. Không món nào trong danh mục mang loại <code>ops_service</code>, nên danh sách đó không thể đầy. Một khung rỗng vĩnh viễn là đồ đạc, không phải thông tin.<br>
+    <b>không vẽ</b> phân loại · mức ưu tiên · SLA · người phụ trách · tệp đính kèm · thời gian phản hồi dự kiến — CreateTicketInput đúng hai trường.
+  </p>
+</figure>
+
+<!-- ══════════ 8 · HỖ TRỢ — RỖNG ══════════ -->
+<figure class="a-scene">
+  <figcaption class="a-cap">
+    <b>8 · Hỗ trợ — rỗng</b>
+    Lời mời, và nó nói trước điều sẽ xảy ra ngay sau khi bấm — để câu trả lời tự động không bị nhầm là người thật.
+  </figcaption>
+  <div class="a-app">
+    <nav class="a-rail">
+      <h2 class="a-brand">nivo</h2>
+      <span class="a-link">Tổng quan</span>
+      <span class="a-railcap">Dịch vụ</span>
+      <span class="a-link">Ứng dụng</span>
+      <span class="a-link">AgentOS</span>
+      <span class="a-link">Máy chủ</span>
+      <span class="a-link">Tên miền</span>
+      <span class="a-railcap">Tài khoản</span>
+      <span class="a-link">Ví</span>
+      <span class="a-link is-on">Hỗ trợ</span>
+    </nav>
+    <div class="a-body">
+      <h1 class="a-h1">Hỗ trợ</h1>
+      <p class="a-lede">Gửi một yêu cầu, nivo ghi nhận ngay lập tức. Người thật trả lời sau, và màn hình này chưa đọc được lúc đó là khi nào.</p>
+
+      <div class="a-sec">
+        <div class="a-seclabel">
+          <div class="a-secname"><h3 class="a-sech3">Yêu cầu của bạn</h3></div>
+          <span class="a-state s-empty">rỗng</span>
+        </div>
+        <div class="a-card">
+          <div class="a-emptyn">
+            <span class="e-msg">Chưa gửi yêu cầu nào.</span>
+            <span class="e-desc">Một yêu cầu cần đúng hai thứ: một tiêu đề và một nội dung.</span>
+            <button class="a-btn b-primary" type="button">Gửi yêu cầu</button>
+          </div>
+        </div>
+        <p class="a-caveat">Ngay sau khi gửi, bạn sẽ nhận được một lời báo nhận tự động. Đó là máy trả lời để bạn biết yêu cầu đã tới, chưa phải người.</p>
+      </div>
+    </div>
+  </div>
+  <p class="a-note">
+    <b>nguồn</b> myTickets → <code>[]</code> · hành động createTicket(subject, body)<br>
+    <b>lời mời hợp lệ</b> vì hành động chính chạy thật và không cần mua gì trước.<br>
+    <b>câu cảnh báo đứng ở đây chứ không phải sau khi gửi</b> — người đang chờ đọc nó lúc còn có thể chỉnh kỳ vọng, chứ không phải lúc đã hiểu nhầm.
+  </p>
+</figure>
+
+</div>
+</section>

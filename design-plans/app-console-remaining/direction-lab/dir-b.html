@@ -1,0 +1,786 @@
+<section class="dir-b">
+<style>
+.dir-b{--b-bg:#fbfbfc;--b-surface:#ffffff;--b-ink:#14161a;--b-muted:#6a7280;--b-faint:#9aa2ae;--b-line:#e3e6ea;--b-soft:#eef0f3;--b-accent:#4550c8;--b-accent-soft:#ecedfb;--b-ok:#1f6f52;--b-ok-bg:#e6f2ec;--b-warn:#84520a;--b-warn-bg:#fbf1dc;--b-rest:#e9ebef;color:var(--b-ink);font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.45;-webkit-font-smoothing:antialiased;display:block;box-sizing:border-box}
+.dir-b *,.dir-b *::before,.dir-b *::after{box-sizing:border-box}
+@media (prefers-color-scheme: dark){.dir-b{--b-bg:#101216;--b-surface:#171a20;--b-ink:#e9ebef;--b-muted:#9aa2ae;--b-faint:#767e8b;--b-line:#2a2f38;--b-soft:#20242b;--b-accent:#9aa3f5;--b-accent-soft:#232741;--b-ok:#7fd3ad;--b-ok-bg:#16302a;--b-warn:#e0b76a;--b-warn-bg:#332811;--b-rest:#242932}}
+
+.dir-b .b-head{margin:0 0 20px}
+.dir-b .b-kicker{font-size:11px;letter-spacing:.10em;text-transform:uppercase;color:var(--b-accent);font-weight:700;margin:0 0 6px}
+.dir-b .b-title{font-size:20px;font-weight:700;margin:0 0 8px;letter-spacing:-.01em}
+.dir-b .b-thesis{font-size:13px;color:var(--b-muted);margin:0 0 8px;max-width:88ch}
+.dir-b .b-thesis b{color:var(--b-ink);font-weight:600}
+.dir-b .b-evidence{font-size:13px;color:var(--b-muted);margin:0;max-width:88ch}
+.dir-b .b-evidence b{color:var(--b-ink);font-weight:600}
+.dir-b .b-evidence code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;color:var(--b-ink)}
+.dir-b .b-legend{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0;padding:0;list-style:none}
+.dir-b .b-legend li{font-size:11px;color:var(--b-muted);border:1px solid var(--b-line);border-radius:999px;padding:3px 9px;background:var(--b-surface)}
+.dir-b .b-legend b{color:var(--b-ink);font-weight:600}
+
+.dir-b .b-scenes{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:22px;align-items:start}
+.dir-b .b-scene{min-width:0}
+.dir-b .b-cap{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin:0 0 8px}
+.dir-b .b-cap-k{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--b-accent);color:#fff;border-radius:4px;padding:2px 6px}
+@media (prefers-color-scheme: dark){.dir-b .b-cap-k{color:#101216}}
+.dir-b .b-cap-t{font-size:13px;font-weight:600}
+.dir-b .b-cap-s{font-size:12px;color:var(--b-muted);flex:1 1 100%}
+
+.dir-b .b-console{display:grid;grid-template-columns:132px minmax(0,1fr);border:1px solid var(--b-line);border-radius:12px;overflow:hidden;background:var(--b-bg)}
+@media (max-width:560px){.dir-b .b-console{grid-template-columns:1fr}}
+.dir-b .b-rail{display:flex;flex-direction:column;gap:4px;padding:14px 8px;background:var(--b-surface);border-right:1px solid var(--b-line);min-width:0}
+@media (max-width:560px){.dir-b .b-rail{border-right:0;border-bottom:1px solid var(--b-line)}}
+.dir-b .b-brand{font-size:13px;font-weight:700;letter-spacing:-.02em;padding:2px 9px 8px}
+.dir-b .b-nav{display:block;font-size:12px;color:var(--b-muted);padding:5px 9px;border-radius:999px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dir-b .b-nav-current{background:var(--b-accent-soft);color:var(--b-accent);font-weight:700}
+.dir-b .b-group{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--b-faint);padding:10px 9px 2px;font-weight:700}
+
+.dir-b .b-page{padding:16px 15px 18px;display:flex;flex-direction:column;gap:15px;min-width:0}
+.dir-b .b-page-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:7px}
+.dir-b .b-page-h{font-size:15px;font-weight:700;margin:0;letter-spacing:-.01em}
+.dir-b .b-page-fact{font-size:11.5px;color:var(--b-muted)}
+.dir-b .b-page-lede{font-size:11.5px;color:var(--b-muted);margin:-9px 0 0;max-width:62ch}
+.dir-b .b-stack{display:flex;flex-direction:column;gap:15px;min-width:0}
+.dir-b .b-sec{display:flex;flex-direction:column;gap:8px;min-width:0}
+.dir-b .b-sec-label{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px}
+.dir-b .b-sec-name{font-size:13px;font-weight:700;margin:0}
+.dir-b .b-sec-fact{font-size:11.5px;color:var(--b-muted)}
+.dir-b .b-sec-link{font-size:11.5px;color:var(--b-accent);font-weight:600}
+
+.dir-b .b-card{background:var(--b-surface);border:1px solid var(--b-line);border-radius:10px;overflow:hidden}
+.dir-b .b-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 13px}
+.dir-b .b-row+.b-row{border-top:1px solid var(--b-soft)}
+.dir-b .b-idy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 130px}
+.dir-b .b-name{font-size:12.5px;font-weight:600;color:var(--b-accent);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dir-b .b-handle{font-size:11px;color:var(--b-muted)}
+.dir-b .b-handle i{font-style:normal;color:var(--b-faint)}
+.dir-b .b-handle-wrap{white-space:normal}
+.dir-b .b-badge{font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 8px;white-space:nowrap;border:1px solid transparent}
+.dir-b .b-b-kind{background:var(--b-soft);color:var(--b-muted)}
+.dir-b .b-b-ok{background:var(--b-ok-bg);color:var(--b-ok)}
+.dir-b .b-b-warn{background:var(--b-warn-bg);color:var(--b-warn)}
+.dir-b .b-b-rest{background:var(--b-rest);color:var(--b-muted)}
+.dir-b .b-price{font-size:11.5px;font-weight:700;white-space:nowrap}
+.dir-b .b-btn{font-size:11px;font-weight:600;border:1px solid var(--b-line);background:var(--b-surface);color:var(--b-ink);border-radius:7px;padding:4px 9px;white-space:nowrap;display:inline-block}
+.dir-b .b-btn-primary{background:var(--b-accent);border-color:var(--b-accent);color:#fff}
+@media (prefers-color-scheme: dark){.dir-b .b-btn-primary{color:#101216}}
+.dir-b .b-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 13px}
+
+.dir-b .b-note{font-size:11px;color:var(--b-muted);padding:8px 13px;border-top:1px solid var(--b-soft);background:var(--b-bg);margin:0}
+.dir-b .b-note b{color:var(--b-ink);font-weight:600}
+.dir-b .b-say{font-size:11.5px;color:var(--b-muted);padding:11px 13px;margin:0}
+.dir-b .b-say b{color:var(--b-ink);font-weight:600}
+.dir-b .b-refuse{font-size:11.5px;color:var(--b-muted);padding:11px 13px;margin:0;display:flex;flex-direction:column;align-items:flex-start;gap:7px}
+.dir-b .b-refuse b{color:var(--b-ink);font-weight:600}
+.dir-b .b-empty{display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;padding:16px 13px}
+.dir-b .b-empty-msg{font-size:12px;color:var(--b-ink);margin:0}
+.dir-b .b-empty-desc{font-size:11px;color:var(--b-muted);margin:0;max-width:46ch}
+.dir-b .b-facts{display:flex;flex-direction:column;gap:6px;padding:11px 13px}
+.dir-b .b-fact{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
+.dir-b .b-fact-l{font-size:11.5px;color:var(--b-muted);min-width:0}
+.dir-b .b-fact-v{font-size:11.5px;font-weight:600;text-align:right}
+.dir-b .b-fact-v-unknown{font-size:11.5px;font-weight:600;color:var(--b-faint);font-style:italic;text-align:right}
+.dir-b .b-skel{height:9px;border-radius:5px;background:var(--b-rest)}
+.dir-b .b-skel-row{display:flex;align-items:center;gap:9px;padding:11px 13px}
+.dir-b .b-skel-row+.b-skel-row{border-top:1px solid var(--b-soft)}
+.dir-b .b-pin{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--b-accent);color:#fff;font-size:9.5px;font-weight:700;font-style:normal;vertical-align:middle;margin-left:5px;flex:0 0 auto}
+@media (prefers-color-scheme: dark){.dir-b .b-pin{color:#101216}}
+.dir-b .b-notes{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.dir-b .b-notes li{font-size:11.5px;color:var(--b-muted);display:flex;gap:7px;align-items:flex-start}
+.dir-b .b-notes b{color:var(--b-ink);font-weight:600}
+.dir-b .b-notes code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;color:var(--b-ink)}
+.dir-b .b-n{flex:0 0 auto;width:15px;height:15px;border-radius:50%;background:var(--b-soft);color:var(--b-ink);font-size:9.5px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-top:1px}
+
+.dir-b .b-answer{margin:24px 0 0;border:1px solid var(--b-accent);border-radius:10px;background:var(--b-accent-soft);padding:13px 15px}
+.dir-b .b-answer h4{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--b-accent);margin:0 0 8px;font-weight:700}
+.dir-b .b-answer p{font-size:12px;color:var(--b-ink);margin:0 0 7px;max-width:96ch}
+.dir-b .b-answer p:last-child{margin-bottom:0}
+.dir-b .b-answer code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px}
+.dir-b .b-vocab{margin:16px 0 0;border:1px solid var(--b-line);border-radius:10px;background:var(--b-surface);padding:12px 14px}
+.dir-b .b-vocab h4{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--b-faint);margin:0 0 8px;font-weight:700}
+.dir-b .b-vocab ul{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:5px 18px}
+.dir-b .b-vocab li{font-size:11.5px;color:var(--b-muted)}
+.dir-b .b-vocab code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;color:var(--b-ink)}
+.dir-b .b-tag{font-size:9.5px;font-weight:700;letter-spacing:.06em;border-radius:4px;padding:1px 5px;margin-right:5px}
+.dir-b .b-tag-reuse{background:var(--b-ok-bg);color:var(--b-ok)}
+.dir-b .b-tag-extend{background:var(--b-warn-bg);color:var(--b-warn)}
+.dir-b .b-tag-new{background:var(--b-accent-soft);color:var(--b-accent)}
+.dir-b .b-foot{font-size:11px;color:var(--b-faint);margin:10px 0 0}
+</style>
+
+<header class="b-head">
+  <p class="b-kicker">Hướng B — bốn đích còn lại</p>
+  <h3 class="b-title">Mỗi dịch vụ trả lời câu hỏi của riêng nó</h3>
+  <p class="b-thesis"><b>AgentOS</b> mở đầu bằng việc workspace còn sống hay không. <b>Máy chủ</b> mở đầu bằng máy là cái gì — gói, RAM, vCPU. <b>Tên miền</b> mở đầu bằng cái nào sắp hết hạn. <b>Hỗ trợ</b> mở đầu bằng việc có ai đang chờ nivo hay không. Bốn sự thật dẫn dắt khác nhau, bốn hàng đầu tiên khác nhau — nhưng vẫn là một khung: cùng thanh điều hướng, cùng cách đóng khung mục, cùng bốn trạng thái mạng của ba màn hình đã ship.</p>
+  <p class="b-evidence">Sự thật dẫn dắt nằm ở <code>title-with-baseline-fact</code> — khoá đã có trong <code>titled-section-stack-page.heading</code> mà chưa màn hình nào gọi. Nó <b>không bao giờ là một con số đếm</b>: nó gọi tên đúng một thành viên mà câu trả lời đã mang sẵn, theo đúng tiền lệ <code>cheapestTier</code> và dòng hoá đơn chưa thanh toán của <code>WalletPage</code>. Tên miền là trường hợp mạnh nhất — <code>myDomains</code> đã được handler sắp xếp hết-hạn-sớm-nhất-trước, nên sự thật dẫn dắt đúng bằng <code>data[0]</code>, trình duyệt không tính gì cả.</p>
+  <ul class="b-legend">
+    <li><b>chưa hỏi</b> — chính thân mục nghỉ, kèm isLoading</li>
+    <li><b>rỗng</b> — một câu, hoặc một lời mời</li>
+    <li><b>có</b> — hàng hoặc dòng nhãn–số</li>
+    <li><b>bị từ chối</b> — câu của máy chủ, cạnh phần đã trả lời</li>
+  </ul>
+</header>
+
+<div class="b-scenes">
+
+  <!-- ══════════ CẢNH 1 — AGENTOS, CÓ DỮ LIỆU ══════════ -->
+  <article class="b-scene">
+    <div class="b-cap">
+      <span class="b-cap-k">Cảnh 1</span>
+      <span class="b-cap-t">AgentOS — workspace còn sống</span>
+      <span class="b-cap-s">mục đầu là tính sống: workspace trả lời, pod trả lời. Tự động hoá bị từ chối cho MỌI tài khoản hôm nay.</span>
+    </div>
+
+    <div class="b-console">
+      <nav class="b-rail">
+        <div class="b-brand">nivo</div>
+        <span class="b-nav">Tổng quan</span>
+        <div class="b-group">Dịch vụ</div>
+        <span class="b-nav">Ứng dụng</span>
+        <span class="b-nav b-nav-current">AgentOS</span>
+        <span class="b-nav">Máy chủ</span>
+        <span class="b-nav">Tên miền</span>
+        <div class="b-group">Tài khoản</div>
+        <span class="b-nav">Ví</span>
+        <span class="b-nav">Hỗ trợ</span>
+      </nav>
+
+      <div class="b-page">
+        <div class="b-page-head">
+          <h4 class="b-page-h">AgentOS</h4>
+          <span class="b-page-fact">workspace-mt · đang chạy<i class="b-pin">1</i></span>
+        </div>
+
+        <div class="b-stack">
+
+          <!-- 1. WORKSPACE — liveness, the lead -->
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Workspace</h5></div>
+            <div class="b-card">
+              <div class="b-row">
+                <span class="b-idy">
+                  <span class="b-name">workspace-mt</span>
+                  <span class="b-handle">tạo 02/07 · đơn đang hoạt động · gia hạn 12/09</span>
+                </span>
+                <span class="b-badge b-b-kind">Workspace</span>
+                <span class="b-badge b-b-ok">Đang chạy</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. POD -->
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Pod</h5></div>
+            <div class="b-card">
+              <div class="b-facts">
+                <div class="b-fact"><span class="b-fact-l">Pod</span><span class="b-fact-v">Đang trả lời · HTTP 200</span></div>
+                <div class="b-fact"><span class="b-fact-l">Token</span><span class="b-fact-v">đã cấu hình · …a4f2</span></div>
+                <div class="b-fact"><span class="b-fact-l">Kiểm tra lúc</span><span class="b-fact-v">14:32</span></div>
+              </div>
+              <p class="b-note">Không có gì ở đây được lưu lại. <code>myPodOpenclawStatus</code> dò lại từ đầu mỗi lần hỏi, nên đây là <b>lúc này</b>, không phải lịch sử.<i class="b-pin">2</i></p>
+            </div>
+          </section>
+
+          <!-- 3. AGENT -->
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Agent</h5></div>
+            <div class="b-card">
+              <div class="b-facts">
+                <div class="b-fact"><span class="b-fact-l">Trực Zalo</span><span class="b-fact-v">deepseek-v4-flash · đang chạy</span></div>
+                <div class="b-fact"><span class="b-fact-l">Kênh</span><span class="b-fact-v">Zalo</span></div>
+                <div class="b-fact"><span class="b-fact-l">Công cụ</span><span class="b-fact-v">Tra đơn, Đặt lịch, Chuyển người thật</span></div>
+              </div>
+              <p class="b-note"><b>“Tạm dừng” là một lá cờ, không phải công tắc tắt.</b> <code>toggleAgentStatus</code> chỉ ghi <code>active</code>/<code>paused</code> vào một cột; service của nó tự cảnh báo rằng màn hình nào trình bày nó như một nút dừng khẩn là đang hứa sai.</p>
+            </div>
+          </section>
+
+          <!-- 4. AUTOMATIONS — REFUSED for everyone today -->
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Tự động hoá</h5></div>
+            <div class="b-card">
+              <p class="b-refuse">
+                <span>Chưa có khoá cho bộ máy tự động hoá của pod này, nên chưa đọc được danh sách. Workspace và pod ở trên vẫn đúng.</span>
+              </p>
+              <p class="b-note"><b>Đây là “bị từ chối”, không phải “rỗng”, và câu của nó phải khác câu “chưa có workspace”.</b> <code>myAutomations</code>, <code>myAutomationRuns</code> và <code>myPodN8nWorkflows</code> đều đòi <code>N8N_API_KEY</code>; bảng <code>pod_credentials</code> hiện giữ 11 dòng và <b>không dòng nào</b> là khoá đó. Workspace có, pod có, khoá chưa từng được cấp.<i class="b-pin">3</i></p>
+            </div>
+          </section>
+
+          <!-- 5. KNOWLEDGE -->
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Kiến thức</h5></div>
+            <div class="b-card">
+              <div class="b-facts">
+                <div class="b-fact"><span class="b-fact-l">Bảng giá 2026</span><span class="b-fact-v-unknown">đang xử lý</span></div>
+                <div class="b-fact"><span class="b-fact-l">Quy trình đổi trả</span><span class="b-fact-v-unknown">đang xử lý</span></div>
+              </div>
+              <p class="b-note"><b>Không có gì ở đây sẽ chuyển sang “sẵn sàng”.</b> Chưa có đường ống lập chỉ mục, nên <code>status</code> không rời khỏi <code>processing</code>, và bản thân tài liệu chưa gửi lên được — mới chỉ ghi cái tên. Một thanh tiến trình ở đây là bịa.<i class="b-pin">4</i></p>
+            </div>
+          </section>
+
+          <!-- 6. TOOLS -->
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Công cụ</h5></div>
+            <div class="b-card">
+              <div class="b-facts">
+                <div class="b-fact"><span class="b-fact-l">Tra đơn hàng</span><span class="b-fact-v">đang bật</span></div>
+                <div class="b-fact"><span class="b-fact-l">Đặt lịch</span><span class="b-fact-v">đang bật</span></div>
+                <div class="b-fact"><span class="b-fact-l">Chuyển người thật</span><span class="b-fact-v">đang bật</span></div>
+              </div>
+              <p class="b-note">Mục này <b>không có trạng thái rỗng</b>: lần đọc đầu tiên tự gieo đúng ba dòng này vào một workspace trống. Vẽ một “chưa có công cụ nào” ở đây là vẽ một trạng thái không tồn tại.</p>
+            </div>
+          </section>
+
+          <!-- 7. MODELS -->
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Mô hình</h5></div>
+            <div class="b-card">
+              <div class="b-facts">
+                <div class="b-fact"><span class="b-fact-l">deepseek/deepseek-v4-flash</span><span class="b-fact-v">mặc định</span></div>
+              </div>
+              <p class="b-note">Đây là <b>danh mục chung của nivo</b> chứ không phải mô hình workspace này sở hữu — <code>myModels</code> dựng dòng từ bảng mô hình toàn hệ thống. Nói “mô hình của bạn” là nói sai chủ sở hữu.</p>
+            </div>
+          </section>
+
+          <!-- 8. CHANNELS — empty as invitation -->
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Kênh</h5></div>
+            <div class="b-card">
+              <div class="b-empty">
+                <p class="b-empty-msg">Chưa nối kênh nào.</p>
+                <p class="b-empty-desc">Agent chỉ trả lời khách khi có một kênh đứng trước nó — nên chưa có hội thoại nào để đọc.</p>
+                <span class="b-btn b-btn-primary">Nối kênh</span>
+              </div>
+              <p class="b-note">Rỗng ở đây là <b>lời mời</b>, nên nó lấy hình thức thông báo trống có nút. Rỗng ở Máy chủ là <b>vắng mặt có chủ ý</b>, nên nó chỉ có một câu. Hai kiểu rỗng khác nhau là một quyết định, không phải cách viết.</p>
+            </div>
+          </section>
+
+          <!-- 9. WORKFLOWS — resting -->
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Quy trình</h5></div>
+            <div class="b-card">
+              <div class="b-skel-row"><span class="b-skel" style="flex:1 1 auto;max-width:150px"></span><span class="b-skel" style="width:52px"></span></div>
+              <div class="b-skel-row"><span class="b-skel" style="flex:1 1 auto;max-width:118px"></span><span class="b-skel" style="width:52px"></span></div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+
+    <ul class="b-notes">
+      <li><span class="b-n">1</span><span><b>Sự thật dẫn dắt gọi tên, không đếm.</b> “workspace-mt · đang chạy” là <code>data[0].name</code> và <code>data[0].status</code>. Nếu tài khoản giữ hai workspace, câu này vẫn gọi tên đúng một cái và mục Workspace bên dưới liệt kê đủ — nó không bao giờ nói “2 workspace”.</span></li>
+      <li><span class="b-n">2</span><span>Chín truy vấn chi tiết đều đòi <code>agentWorkspaceId</code>, nên đây là <b>chưa hỏi hai tầng</b>: chưa có <code>myAgentWorkspace</code> thì chín mục kia chưa hỏi được, chứ không phải đang chờ.</span></li>
+      <li><span class="b-n">3</span><span>Câu từ chối lấy theo <code>code</code> (<code>POD_CREDENTIAL_NOT_FOUND_EXCEPTION</code>), không bao giờ theo <code>reason</code> — <code>reason</code> là câu tiếng Anh cho người vận hành.</span></li>
+      <li><span class="b-n">4</span><span><b>Không chọn <code>ChannelConnectionEntity.instance</code> ở bất cứ đâu.</b> Nó là <code>InstanceEntity!</code> không-null và <code>myChannels</code> không nạp quan hệ đó, nên chọn nó sẽ làm hỏng toàn bộ phản hồi chứ không phải một ô.</span></li>
+    </ul>
+  </article>
+
+  <!-- ══════════ CẢNH 2 — AGENTOS, RỖNG ══════════ -->
+  <article class="b-scene">
+    <div class="b-cap">
+      <span class="b-cap-k">Cảnh 2</span>
+      <span class="b-cap-t">AgentOS — chưa có workspace</span>
+      <span class="b-cap-s">một lời mời và một câu. Không phải chín danh sách trống.</span>
+    </div>
+
+    <div class="b-console">
+      <nav class="b-rail">
+        <div class="b-brand">nivo</div>
+        <span class="b-nav">Tổng quan</span>
+        <div class="b-group">Dịch vụ</div>
+        <span class="b-nav">Ứng dụng</span>
+        <span class="b-nav b-nav-current">AgentOS</span>
+        <span class="b-nav">Máy chủ</span>
+        <span class="b-nav">Tên miền</span>
+        <div class="b-group">Tài khoản</div>
+        <span class="b-nav">Ví</span>
+        <span class="b-nav">Hỗ trợ</span>
+      </nav>
+
+      <div class="b-page">
+        <div class="b-page-head">
+          <h4 class="b-page-h">AgentOS</h4>
+          <span class="b-page-fact">chưa có workspace</span>
+        </div>
+
+        <div class="b-stack">
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Workspace</h5></div>
+            <div class="b-card">
+              <div class="b-empty">
+                <p class="b-empty-msg">Chưa có workspace nào.</p>
+                <p class="b-empty-desc">Một workspace agent riêng, trực Zalo/Telegram theo quy trình của bạn. Workspace được tạo khi một đơn hàng được thanh toán — không phải bằng một nút ở màn hình này.</p>
+                <span class="b-btn b-btn-primary">Xem gói</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Bên trong workspace</h5></div>
+            <div class="b-card">
+              <p class="b-say">Agent, kênh, kiến thức, công cụ, quy trình và tự động hoá đều thuộc về một workspace cụ thể, nên <b>chưa hỏi được cái nào</b> — không phải chúng rỗng.<i class="b-pin">5</i></p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <ul class="b-notes">
+      <li><span class="b-n">5</span><span><b>Đây là điểm đắt nhất của cảnh này.</b> <code>myAgentWorkspace</code> trả <code>[]</code> chứ không từ chối, nên đây là “rỗng”. Nếu vẽ chín mục con thành chín danh sách trống, màn hình sẽ nói rằng chín thứ đó đã được hỏi và không có gì — trong khi chúng chưa từng được hỏi. Một câu thay chín cái khung.</span></li>
+      <li><span class="b-n">·</span><span>Mọi truy vấn phạm vi workspace ném <b>cùng một</b> <code>AGENT_WORKSPACE_NOT_FOUND_EXCEPTION</code> cho “không tồn tại” và “không phải của bạn”. Cố ý như vậy, nên lời văn <b>không được</b> phân biệt hai trường hợp.</span></li>
+    </ul>
+  </article>
+
+  <!-- ══════════ CẢNH 3 — MÁY CHỦ, CÓ DỮ LIỆU ══════════ -->
+  <article class="b-scene">
+    <div class="b-cap">
+      <span class="b-cap-k">Cảnh 3</span>
+      <span class="b-cap-t">Máy chủ — máy là cái gì</span>
+      <span class="b-cap-s">hàng đầu tiên là hàng hình dạng: gói, RAM, vCPU, ngày gia hạn. Một máy biết kích thước của mình, một máy thật sự không biết.</span>
+    </div>
+
+    <div class="b-console">
+      <nav class="b-rail">
+        <div class="b-brand">nivo</div>
+        <span class="b-nav">Tổng quan</span>
+        <div class="b-group">Dịch vụ</div>
+        <span class="b-nav">Ứng dụng</span>
+        <span class="b-nav">AgentOS</span>
+        <span class="b-nav b-nav-current">Máy chủ</span>
+        <span class="b-nav">Tên miền</span>
+        <div class="b-group">Tài khoản</div>
+        <span class="b-nav">Ví</span>
+        <span class="b-nav">Hỗ trợ</span>
+      </nav>
+
+      <div class="b-page">
+        <div class="b-page-head">
+          <h4 class="b-page-h">Máy chủ</h4>
+          <span class="b-page-fact">gia hạn gần nhất 12/09</span>
+        </div>
+        <p class="b-page-lede">Máy chủ không mua riêng. Nó xuất hiện khi một ứng dụng hoặc một workspace được dựng xong, và biến mất cùng thứ đó.</p>
+
+        <div class="b-stack">
+
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Máy đang chạy</h5></div>
+            <div class="b-card">
+              <div class="b-row">
+                <span class="b-idy">
+                  <span class="b-name">workspace-mt</span>
+                  <span class="b-handle">gói pro · 2 GB · 2 vCPU · gia hạn 12/09</span>
+                </span>
+                <span class="b-badge b-b-kind">Workspace</span>
+                <span class="b-badge b-b-ok">Đang chạy</span>
+              </div>
+              <div class="b-row">
+                <span class="b-idy">
+                  <span class="b-name">minhtue</span>
+                  <span class="b-handle">gói Chuyên nghiệp · <i>chưa có pod riêng</i> · gia hạn 30/09</span>
+                </span>
+                <span class="b-badge b-b-kind">Học viện</span>
+                <span class="b-badge b-b-ok">Đang chạy</span>
+              </div>
+              <p class="b-note"><b>Hàng thứ hai không giấu kích thước — nó thật sự không có.</b> Học viện này chưa có dòng máy nào đứng sau, nên RAM và vCPU là null đúng nghĩa “không có gì để nói”. Điều kiện phân biệt là <code>instanceId === null</code>, không phải loại ứng dụng.<i class="b-pin">6</i></p>
+              <p class="b-note"><b>Chữ “gói” ở hai hàng là hai từ vựng khác nhau.</b> Hàng có máy đọc mã gói cước (<code>start</code>/<code>pro</code>/<code>max</code>); hàng không có máy đọc tên gói thương mại từ đơn hàng. Cùng một cột, hai ngôn ngữ — nên màn hình không so sánh chúng với nhau.</p>
+            </div>
+          </section>
+
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Chi phí tín dụng</h5></div>
+            <div class="b-card">
+              <div class="b-facts">
+                <div class="b-fact"><span class="b-fact-l">workspace-mt</span><span class="b-fact-v-unknown">chưa ghi nhận</span></div>
+                <div class="b-fact"><span class="b-fact-l">minhtue</span><span class="b-fact-v-unknown">chưa ghi nhận</span></div>
+              </div>
+              <p class="b-note"><b>“Chưa ghi nhận” không phải “0 $”.</b> Sổ tín dụng hiện trống, nên <code>creditBurnUsd</code> về null — và hợp đồng của chính handler nói null nghĩa là <b>chưa biết</b>. Viết “0 $” là bịa ra một con số đã chốt.<i class="b-pin">7</i></p>
+            </div>
+          </section>
+
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Màn hình này chưa nói được</h5></div>
+            <div class="b-card">
+              <p class="b-say">Tên máy trên hạ tầng, địa chỉ IP, vùng đặt máy, dung lượng đĩa, băng thông, tải CPU, bộ nhớ đang dùng, thời gian chạy liên tục, số lần khởi động lại. <b>Không truy vấn nào của nivo dò một máy đang chạy</b>, và <code>MyInstance</code> là một DTO phẳng không công bố các trường đó — dù chúng có trong bảng.</p>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+
+    <ul class="b-notes">
+      <li><span class="b-n">6</span><span><b>Một cải chính với hồ sơ hướng cũ.</b> Hồ sơ <code>app-console-services</code> ghi <code>ram</code>/<code>vcpu</code> là “hardcoded null”. Sai. Handler đọc <code>instance.ramMb</code> và <code>instance.vcpu</code> thật, cả hai <code>INTEGER NOT NULL</code>. Null chỉ xuất hiện ở dòng mồ côi. <code>console.ts</code> đã ghi chú điều này rồi.</span></li>
+      <li><span class="b-n">7</span><span><code>status</code> ở đây <b>không phải</b> <code>instances.status</code>. Handler chuẩn hoá từ bảng sản phẩm, vì cột thô cả đời chỉ nhận <code>provisioning</code> và <code>active</code> — đọc thẳng nó sẽ báo mọi workspace bị tạm dừng và mọi lần dựng thất bại là “đang chạy”.</span></li>
+      <li><span class="b-n">·</span><span><b>Bị từ chối ở đây từ chối cả danh sách.</b> <code>myInstances</code> ném <code>PROVISIONABLE_APP_NOT_FOUND_EXCEPTION</code> khi một dòng không gọi tên được ứng dụng, và bộ chặn bắt theo <b>thao tác</b> — nên mất cả trang máy, không phải một hàng. Lời văn phải nói “chưa đọc được danh sách máy”, không phải “một máy có vấn đề”.</span></li>
+    </ul>
+  </article>
+
+  <!-- ══════════ CẢNH 4 — MÁY CHỦ, RỖNG ══════════ -->
+  <article class="b-scene">
+    <div class="b-cap">
+      <span class="b-cap-k">Cảnh 4</span>
+      <span class="b-cap-t">Máy chủ — chưa có máy nào</span>
+      <span class="b-cap-s">câu trả lời là danh mục, không phải nút “tạo máy chủ” — không có mutation nào như thế.</span>
+    </div>
+
+    <div class="b-console">
+      <nav class="b-rail">
+        <div class="b-brand">nivo</div>
+        <span class="b-nav">Tổng quan</span>
+        <div class="b-group">Dịch vụ</div>
+        <span class="b-nav">Ứng dụng</span>
+        <span class="b-nav">AgentOS</span>
+        <span class="b-nav b-nav-current">Máy chủ</span>
+        <span class="b-nav">Tên miền</span>
+        <div class="b-group">Tài khoản</div>
+        <span class="b-nav">Ví</span>
+        <span class="b-nav">Hỗ trợ</span>
+      </nav>
+
+      <div class="b-page">
+        <div class="b-page-head">
+          <h4 class="b-page-h">Máy chủ</h4>
+        </div>
+        <p class="b-page-lede">Máy chủ không mua riêng. Nó xuất hiện khi một ứng dụng hoặc một workspace được dựng xong.</p>
+
+        <div class="b-stack">
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Máy đang chạy</h5></div>
+            <div class="b-card">
+              <p class="b-say">Chưa có máy nào, vì chưa có ứng dụng hay workspace nào được dựng.</p>
+            </div>
+          </section>
+
+          <section class="b-sec">
+            <div class="b-sec-label">
+              <h5 class="b-sec-name">Dựng thứ đầu tiên</h5>
+              <span class="b-sec-fact">danh mục</span>
+            </div>
+            <div class="b-card">
+              <div class="b-row">
+                <span class="b-idy">
+                  <span class="b-name">Học viện AI</span>
+                  <span class="b-handle b-handle-wrap">Trang học viện dựng sẵn, tên miền riêng, thanh toán khoá học.</span>
+                </span>
+                <span class="b-badge b-b-kind">Mẫu ứng dụng</span>
+                <span class="b-price">Khởi đầu · 490.000 ₫</span>
+                <span class="b-btn b-btn-primary">Dựng</span>
+              </div>
+              <div class="b-row">
+                <span class="b-idy">
+                  <span class="b-name">Agent AI</span>
+                  <span class="b-handle b-handle-wrap">Workspace agent riêng, trực Zalo/Telegram theo quy trình của bạn.</span>
+                </span>
+                <span class="b-badge b-b-kind">Workspace agent</span>
+                <span class="b-price">Cơ bản · 690.000 ₫</span>
+                <span class="b-btn b-btn-primary">Dựng</span>
+              </div>
+              <p class="b-note"><b>Đây là mẫu đã ship, dùng lại nguyên vẹn.</b> <code>OverviewPage</code> đã trả lời “chưa có ứng dụng nào” bằng chính danh mục thay vì một cái nút — người mới gặp đúng danh sách họ sẽ quay lại lần thứ hai. Máy chủ mượn nguyên lý đó, và không tốn khoá nào.<i class="b-pin">8</i></p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <ul class="b-notes">
+      <li><span class="b-n">8</span><span>Một nút “Tạo máy chủ” ở đây sẽ hứa một điều khiển <b>không tồn tại</b>: không có mutation nào tạo một instance. Instance chỉ sinh ra như hệ quả của một đơn hàng được hoàn tất.</span></li>
+    </ul>
+  </article>
+
+  <!-- ══════════ CẢNH 5 — TÊN MIỀN, CÓ DỮ LIỆU ══════════ -->
+  <article class="b-scene">
+    <div class="b-cap">
+      <span class="b-cap-k">Cảnh 5</span>
+      <span class="b-cap-t">Tên miền — cái nào sắp hết hạn</span>
+      <span class="b-cap-s">sự thật dẫn dắt đúng bằng data[0]: handler đã sắp xếp hết-hạn-sớm-nhất-trước, trình duyệt không tính gì.</span>
+    </div>
+
+    <div class="b-console">
+      <nav class="b-rail">
+        <div class="b-brand">nivo</div>
+        <span class="b-nav">Tổng quan</span>
+        <div class="b-group">Dịch vụ</div>
+        <span class="b-nav">Ứng dụng</span>
+        <span class="b-nav">AgentOS</span>
+        <span class="b-nav">Máy chủ</span>
+        <span class="b-nav b-nav-current">Tên miền</span>
+        <div class="b-group">Tài khoản</div>
+        <span class="b-nav">Ví</span>
+        <span class="b-nav">Hỗ trợ</span>
+      </nav>
+
+      <div class="b-page">
+        <div class="b-page-head">
+          <h4 class="b-page-h">Tên miền</h4>
+          <span class="b-page-fact">old-project.com hết hạn 08/09<i class="b-pin">9</i></span>
+        </div>
+        <p class="b-page-lede">Tên miền ở nivo là một cái tên <b>nivo giữ trong sổ của mình</b>, trỏ về ns1/ns2.nivo.vn, mỗi lần một năm, không mất phí. Đây chưa phải đăng ký tại nhà đăng ký tên miền.</p>
+
+        <div class="b-stack">
+
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Tên miền đang giữ</h5></div>
+            <div class="b-card">
+              <div class="b-row">
+                <span class="b-idy">
+                  <span class="b-name">old-project.com</span>
+                  <span class="b-handle">hết hạn 08/09 · không tự gia hạn · ns1/ns2.nivo.vn</span>
+                </span>
+                <span class="b-badge b-b-warn">Sắp hết hạn</span>
+                <span class="b-btn">Gia hạn</span>
+              </div>
+              <div class="b-row">
+                <span class="b-idy">
+                  <span class="b-name">demo-shop.vn</span>
+                  <span class="b-handle">hết hạn 14/03 · tự gia hạn · ns1/ns2.nivo.vn</span>
+                </span>
+                <span class="b-badge b-b-ok">Đang giữ</span>
+                <span class="b-btn">Tắt tự gia hạn</span>
+              </div>
+              <div class="b-actions"><span class="b-btn b-btn-primary">Thêm tên miền</span></div>
+              <p class="b-note"><b>Cái đồng hồ ở đây là thật.</b> Một lượt quét mỗi giờ ghi “Sắp hết hạn” khi còn 30 ngày và “Đã hết hạn” khi quá ngày; <code>renewDomain</code> đưa về “Đang giữ”. Cột trạng thái có người viết thật — chỉ có <b>việc đăng ký</b> là mô phỏng.<i class="b-pin">10</i></p>
+            </div>
+          </section>
+
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Màn hình này chưa nói được</h5></div>
+            <div class="b-card">
+              <p class="b-say">Giá, phí gia hạn, nhà đăng ký, thông tin WHOIS, tình trạng còn trống ở nhà đăng ký thật, mã chuyển nhượng, bản ghi DNS. <b>Không thứ nào được mô hình hoá.</b> Kiểm tra trùng chỉ chạy trên bảng của nivo, và cặp nameserver là hằng số hai phần tử — không có bảng bản ghi, không có mutation nào chạm vào một bản ghi.</p>
+              <p class="b-note">Cũng không có khoá ngoại nào nối một tên miền với một ứng dụng hay một máy. Màn hình này <b>không nói được</b> tên miền đang trỏ về đâu.</p>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+
+    <ul class="b-notes">
+      <li><span class="b-n">9</span><span>“Gọi tên thành viên đầu tiên” ở đây rẻ nhất trong bốn màn hình: handler đã sắp xếp theo <code>expiresAt</code> tăng dần, nên sự thật dẫn dắt là <code>data[0]</code> chứ không phải một phép <code>min</code> chạy trong trình duyệt.</span></li>
+      <li><span class="b-n">10</span><span><code>expiresAt</code> <b>nullable</b> trên dây. Không được định dạng nếu chưa kiểm tra, nếu không hàng sẽ in “Invalid Date” — <code>OverviewPage</code> đã rơi vào đúng chỗ này và xử lý bằng cách quay về nói tự-gia-hạn hay không.</span></li>
+      <li><span class="b-n">·</span><span><b>Hàng này là khoá MỚI duy nhất của hướng B</b> — xem hộp từ vựng cuối trang. Một cái tên được giữ theo đồng hồ, trạng thái là enum do đồng hồ viết, và đúng một nút kéo dài cái đồng hồ đó. Không huy hiệu “loại”, vì mọi thành viên cùng một loại.</span></li>
+    </ul>
+  </article>
+
+  <!-- ══════════ CẢNH 6 — TÊN MIỀN, RỖNG ══════════ -->
+  <article class="b-scene">
+    <div class="b-cap">
+      <span class="b-cap-k">Cảnh 6</span>
+      <span class="b-cap-t">Tên miền — chưa giữ tên nào</span>
+      <span class="b-cap-s">đích duy nhất mà hành động chính chạy trọn vẹn — nên câu giải thích phải đứng TRƯỚC cái nút.</span>
+    </div>
+
+    <div class="b-console">
+      <nav class="b-rail">
+        <div class="b-brand">nivo</div>
+        <span class="b-nav">Tổng quan</span>
+        <div class="b-group">Dịch vụ</div>
+        <span class="b-nav">Ứng dụng</span>
+        <span class="b-nav">AgentOS</span>
+        <span class="b-nav">Máy chủ</span>
+        <span class="b-nav b-nav-current">Tên miền</span>
+        <div class="b-group">Tài khoản</div>
+        <span class="b-nav">Ví</span>
+        <span class="b-nav">Hỗ trợ</span>
+      </nav>
+
+      <div class="b-page">
+        <div class="b-page-head">
+          <h4 class="b-page-h">Tên miền</h4>
+        </div>
+        <p class="b-page-lede">Tên miền ở nivo là một cái tên <b>nivo giữ trong sổ của mình</b>, trỏ về ns1/ns2.nivo.vn, mỗi lần một năm, không mất phí. Đây chưa phải đăng ký tại nhà đăng ký tên miền.</p>
+
+        <div class="b-stack">
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Tên miền đang giữ</h5></div>
+            <div class="b-card">
+              <div class="b-empty">
+                <p class="b-empty-msg">Chưa giữ tên miền nào.</p>
+                <p class="b-empty-desc">Tên riêng chỉ cần đến sau khi một ứng dụng đã chạy. Giữ một cái tên ở đây không mất phí và có hiệu lực ngay.</p>
+                <span class="b-btn b-btn-primary">Thêm tên miền</span>
+              </div>
+              <p class="b-note">Nút này <b>chạy thật</b>: <code>addDomain(name)</code> ghi ngay 365 ngày và cặp nameserver của nivo. Nó từ chối với <code>DOMAIN_NAME_UNAVAILABLE_EXCEPTION</code> khi một người dùng khác của nivo đã giữ cái tên đó — <b>không phải</b> khi tên đã có chủ ngoài đời.<i class="b-pin">11</i></p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <ul class="b-notes">
+      <li><span class="b-n">11</span><span><b>Thứ tự ở đây là quyết định, không phải bố cục.</b> Câu giải thích nằm ở lede, phía trên nút, vì một màn hình rỗng có nút “Thêm tên miền” mà không nói trước nó là gì sẽ được đọc là “mua tên miền” — đúng lời nói dối mà cả hồ sơ này tồn tại để chặn.</span></li>
+    </ul>
+  </article>
+
+  <!-- ══════════ CẢNH 7 — HỖ TRỢ, CÓ DỮ LIỆU ══════════ -->
+  <article class="b-scene">
+    <div class="b-cap">
+      <span class="b-cap-k">Cảnh 7</span>
+      <span class="b-cap-t">Hỗ trợ — có ai đang chờ nivo không</span>
+      <span class="b-cap-s">“Đã tiếp nhận”, không phải “Đã trả lời”. Đây là ràng buộc trung thực nặng nhất của cả bốn màn hình.</span>
+    </div>
+
+    <div class="b-console">
+      <nav class="b-rail">
+        <div class="b-brand">nivo</div>
+        <span class="b-nav">Tổng quan</span>
+        <div class="b-group">Dịch vụ</div>
+        <span class="b-nav">Ứng dụng</span>
+        <span class="b-nav">AgentOS</span>
+        <span class="b-nav">Máy chủ</span>
+        <span class="b-nav">Tên miền</span>
+        <div class="b-group">Tài khoản</div>
+        <span class="b-nav">Ví</span>
+        <span class="b-nav b-nav-current">Hỗ trợ</span>
+      </nav>
+
+      <div class="b-page">
+        <div class="b-page-head">
+          <h4 class="b-page-h">Hỗ trợ</h4>
+          <span class="b-page-fact">Không dựng được học viện · chưa ai trả lời<i class="b-pin">12</i></span>
+        </div>
+
+        <div class="b-stack">
+
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Yêu cầu của bạn</h5></div>
+            <div class="b-card">
+              <div class="b-row">
+                <span class="b-idy">
+                  <span class="b-name">Không dựng được học viện</span>
+                  <span class="b-handle">gửi 11/09 · hệ thống đã tự xác nhận</span>
+                </span>
+                <span class="b-badge b-b-warn">Đã tiếp nhận</span>
+                <span class="b-btn">Mở</span>
+              </div>
+              <div class="b-row">
+                <span class="b-idy">
+                  <span class="b-name">Hỏi về hoá đơn tháng 8</span>
+                  <span class="b-handle">gửi 02/09 · bạn đã đóng</span>
+                </span>
+                <span class="b-badge b-b-kind">Đã đóng</span>
+                <span class="b-btn">Mở</span>
+              </div>
+              <div class="b-actions"><span class="b-btn b-btn-primary">Gửi yêu cầu mới</span></div>
+              <p class="b-note"><b>“Đã tiếp nhận” là trạng thái <code>answered</code>, và không có người nào trả lời.</b> Chính handler tạo phiếu đăng luôn một tin nhắn soạn sẵn của bộ phận hỗ trợ rồi đặt trạng thái đó. <b>Không tồn tại mutation nào để nhân viên trả lời</b> ở bất cứ đâu trong backend: 10 tin nhắn “staff” trong cơ sở dữ liệu chỉ có <b>đúng một</b> nội dung. Một huy hiệu “Đã trả lời” là nói dối một khách hàng đang chờ.<i class="b-pin">13</i></p>
+            </div>
+          </section>
+
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Nội dung trao đổi</h5></div>
+            <div class="b-card">
+              <p class="b-say">Danh sách trên <b>không kèm nội dung</b>. <code>myTickets</code> không nạp quan hệ nào và backend không có <code>@ResolveField</code> nào, nên <code>messages</code> là null ở mọi hàng. Một dòng trích dẫn ở đây phải là một lần gọi thứ hai cho từng phiếu — nên nội dung nằm sau nút “Mở”, ở tầng phiếu, chứ không phải ở danh sách.</p>
+            </div>
+          </section>
+
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Yêu cầu vận hành</h5></div>
+            <div class="b-card">
+              <p class="b-say">Phiếu vận hành gắn vào một đơn hàng <b>dịch vụ vận hành</b>. Danh mục hiện bán đúng hai sản phẩm và <b>không sản phẩm nào</b> thuộc loại đó, nên mục này chưa thể có nội dung — và sẽ không có, cho tới khi danh mục đổi.<i class="b-pin">14</i></p>
+            </div>
+          </section>
+
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Một yêu cầu gồm những gì</h5></div>
+            <div class="b-card">
+              <p class="b-say">Tiêu đề và nội dung. <b>Chỉ hai ô.</b> Không phân loại, không mức ưu tiên, không đính kèm, không cam kết thời gian phản hồi, không tên người phụ trách — không thứ nào tồn tại trong <code>CreateTicketInput</code>, nên không thứ nào được vẽ ra.</p>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+
+    <ul class="b-notes">
+      <li><span class="b-n">12</span><span>Sự thật dẫn dắt gọi tên <b>phiếu chưa đóng cũ nhất</b> — cùng lối “tìm một thành viên” mà <code>WalletPage</code> dùng cho hoá đơn chưa thanh toán. Không đếm phiếu.</span></li>
+      <li><span class="b-n">13</span><span>Hai nhãn tự nhiên khác — “Đang chờ nivo” và “Đã trả lời” — đều sai theo hai hướng ngược nhau. Nội dung Việt cho nhóm phiếu <b>chưa tồn tại ở cả hai ngôn ngữ</b>; đây là mục từ điển mới hướng này phải mở.</span></li>
+      <li><span class="b-n">14</span><span><b>Không vẽ nó thành một danh sách rỗng.</b> Một danh sách rỗng nói “đã hỏi và chưa có gì”, ngụ ý ngày mai có thể có. Danh sách này <b>không thể</b> đầy. Một câu nói đúng điều đó; một cái khung trống thì không.</span></li>
+      <li><span class="b-n">·</span><span>Trả lời một phiếu đã đóng bị từ chối bằng <code>TICKET_ALREADY_CLOSED_EXCEPTION</code>, nên hàng “Đã đóng” không mang nút trả lời — đúng nguyên tắc “một nút vẽ mờ vẫn là hứa một điều khiển không có”.</span></li>
+    </ul>
+  </article>
+
+  <!-- ══════════ CẢNH 8 — HỖ TRỢ, RỖNG ══════════ -->
+  <article class="b-scene">
+    <div class="b-cap">
+      <span class="b-cap-k">Cảnh 8</span>
+      <span class="b-cap-t">Hỗ trợ — chưa gửi yêu cầu nào</span>
+      <span class="b-cap-s">rỗng thật, hành động chính chạy thật — nhưng lời hứa về hồi đáp phải đúng ngay từ đây.</span>
+    </div>
+
+    <div class="b-console">
+      <nav class="b-rail">
+        <div class="b-brand">nivo</div>
+        <span class="b-nav">Tổng quan</span>
+        <div class="b-group">Dịch vụ</div>
+        <span class="b-nav">Ứng dụng</span>
+        <span class="b-nav">AgentOS</span>
+        <span class="b-nav">Máy chủ</span>
+        <span class="b-nav">Tên miền</span>
+        <div class="b-group">Tài khoản</div>
+        <span class="b-nav">Ví</span>
+        <span class="b-nav b-nav-current">Hỗ trợ</span>
+      </nav>
+
+      <div class="b-page">
+        <div class="b-page-head">
+          <h4 class="b-page-h">Hỗ trợ</h4>
+          <span class="b-page-fact">chưa có yêu cầu nào</span>
+        </div>
+
+        <div class="b-stack">
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Yêu cầu của bạn</h5></div>
+            <div class="b-card">
+              <div class="b-empty">
+                <p class="b-empty-msg">Chưa gửi yêu cầu nào.</p>
+                <p class="b-empty-desc">Gửi một tiêu đề và nội dung. Hệ thống sẽ tự xác nhận đã nhận ngay lập tức; người thật sẽ đọc sau đó.</p>
+                <span class="b-btn b-btn-primary">Gửi yêu cầu mới</span>
+              </div>
+              <p class="b-note"><b>Câu mô tả nói trước điều sẽ xảy ra, vì nó sắp xảy ra ngay.</b> Ngay khi phiếu được tạo, phiếu đổi sang “Đã tiếp nhận” và một tin nhắn soạn sẵn xuất hiện. Một khách hàng không được cảnh báo trước sẽ đọc tin đó là một người đã trả lời.<i class="b-pin">15</i></p>
+            </div>
+          </section>
+
+          <section class="b-sec">
+            <div class="b-sec-label"><h5 class="b-sec-name">Yêu cầu vận hành</h5></div>
+            <div class="b-card">
+              <p class="b-say">Phiếu vận hành gắn vào một đơn hàng <b>dịch vụ vận hành</b>, và danh mục hiện chưa bán loại đó.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <ul class="b-notes">
+      <li><span class="b-n">15</span><span><b>Trạng thái thứ năm, thuộc về trang chứ không thuộc về mục.</b> Chốt Keycloak chạy trước bộ chặn phong bì, nên một phiên hết hạn trả về mảng <code>errors</code> ở cấp cao nhất với <code>data: null</code> — <b>cả tài liệu trắng</b>, không phải một mục bị từ chối. Bốn màn hình này giữ nguyên bốn trạng thái mỗi mục; điều kiện thứ năm được xử lý ở tầng trang, đúng như ba màn hình đã ship.</span></li>
+    </ul>
+  </article>
+
+</div>
+
+<div class="b-answer">
+  <h4>Vấn đề A — thanh điều hướng: hướng này chọn gì</h4>
+  <p><b>Không lấy <code>href</code>, và cũng không bọc <code>&lt;Link&gt;</code>. Hướng này điền bốn tuyến còn trống.</b> <code>ConsoleNav.DESTINATIONS</code> hiện giữ <code>route: null</code> cho <code>agentos</code>, <code>servers</code>, <code>domains</code> và <code>support</code>; điền <code>/agentos</code>, <code>/servers</code>, <code>/domains</code>, <code>/support</code> làm cả bảy đích bấm được, <b>không sửa một dòng nào trong <code>NavLink</code></b>. Ba đích đã ship vốn <b>vẫn</b> chuyển trang khi bấm — <code>on.press</code> đi tới <code>useLink</code> của react-aria và gọi <code>router.push</code> thật; chỉ bốn mục không có tuyến mới trơ.</p>
+  <p><b>Vì sao không lấy <code>href</code>.</b> VENDOR-14 gọi đích danh <code>NavLink</code> trong cả văn bản canon lẫn mã luật, nên thêm <code>href</code> là <b>sửa cây tin cậy</b> — ba tệp trong <code>.claude/</code> cộng bài kiểm tra sinh đôi và một lượt đồng bộ sang mọi kho tiêu thụ — chứ không phải sửa một component. Và nó không thể thu hẹp trung thực về mình <code>NavLink</code>: cùng lập luận (bấm giữa chuột, mở tab mới) áp cho <code>SeeMoreLink</code> và mọi <code>Link</code> nội bộ, nên người duyệt sẽ đang mở lại toàn bộ lập trường “điều hướng nội bộ là một hành động”.</p>
+  <p><b>Vì sao càng không bọc <code>&lt;Link&gt;</code>.</b> Đó là <b>cùng một vi phạm, lùi ra một tệp</b>, cộng thêm một lỗi tiếp cận thật: lá vẫn dựng <code>&lt;span role="link" tabindex=0&gt;</code>, nên DOM thành một <code>&lt;a&gt;</code> bọc một <code>role="link"</code> lồng bên trong — hai điểm dừng tiêu điểm, hai lần đọc “liên kết”, và một handler cạnh tranh với hành vi mặc định của thẻ neo.</p>
+  <p><b>Cổng lint không phân xử được, nên đừng lấy nó làm bằng chứng.</b> Nhánh “lá nội bộ” của VENDOR-14 bị chặn bởi một biểu thức đường dẫn kiểu một-app, trả <code>false</code> cho <code>packages/ui/src/leaves/NavLink/index.tsx</code>. <b>Cả hai lối đều xanh lint và đỏ canon.</b> Bản thân lỗ hổng đường dẫn đó đáng một sửa chữa riêng trong cây tin cậy.</p>
+  <p><b>Cái mà thẻ neo thật sự mua được</b> không phải là điều hướng: đó là bấm-giữa-chuột, ⌘/Ctrl-bấm mở tab mới, xem địa chỉ ở thanh trạng thái, kéo vào dấu trang. Đó là mất mát thật với một bảng điều khiển vận hành — và nó <b>mất y hệt</b> ở ba đích đã ship. Vì thế nó thuộc về một tu chính VENDOR-14 nộp riêng, chứ không phải một quyết định giấu trong hồ sơ vẽ trang. Lập luận “để máy tìm kiếm đọc được” không mua gì ở đây: các tuyến này chặn theo phiên, dựng ở trình duyệt, và cấu hình i18n đã ghi bảng điều khiển là <b>cố ý không lập chỉ mục</b>.</p>
+  <p><b>Một khoản lời miễn phí.</b> <code>OverviewPage</code> hiện vẽ “Mở dịch vụ” và “Xem gói” với <code>on.seeMore: undefined</code> — nhãn có, bấm chết. Bốn tuyến này làm chúng sống lại mà không sửa gì thêm. <b>Một cảnh báo:</b> <code>isCurrentDestination</code> so khớp tiền tố <b>chuỗi thô</b>, không phải tiền tố đoạn — bốn tuyến mới không đụng nhau và không đụng ba tuyến cũ, nhưng một tuyến anh em tương lai phải kiểm tra bằng tay.</p>
+</div>
+
+<div class="b-vocab">
+  <h4>Từ vựng — kiểm kê trước khi phát minh</h4>
+  <ul>
+    <li><span class="b-tag b-tag-reuse">DÙNG LẠI</span><code>title-with-baseline-fact</code> ở <code>heading</code> — mang cả luận đề, chưa trang nào gọi</li>
+    <li><span class="b-tag b-tag-reuse">DÙNG LẠI</span><code>titled-section-stack-page</code>, <code>label-row-over-card</code>, <code>SurfaceCard</code></li>
+    <li><span class="b-tag b-tag-reuse">DÙNG LẠI</span><code>fleet-resource-list</code> + <code>fleet-row</code> — AgentOS workspace, Máy chủ</li>
+    <li><span class="b-tag b-tag-reuse">DÙNG LẠI</span><code>labelled-fact-stack</code> / <code>label-value-row</code> — pod, agent, kiến thức, công cụ, mô hình, chi phí</li>
+    <li><span class="b-tag b-tag-reuse">DÙNG LẠI</span><code>body-with-refusal-note</code> (+ ô <code>answered</code>) — tự động hoá bị từ chối</li>
+    <li><span class="b-tag b-tag-reuse">DÙNG LẠI</span><code>centred-empty-notice</code> + <code>EmptyNotice</code> — rỗng-là-lời-mời</li>
+    <li><span class="b-tag b-tag-reuse">DÙNG LẠI</span>lá <code>text</code> trong <code>label-row-over-card.body</code> — rỗng-là-vắng-mặt</li>
+    <li><span class="b-tag b-tag-reuse">DÙNG LẠI</span><code>inline-action-run</code> — “Thêm tên miền”, “Gửi yêu cầu mới”</li>
+    <li><span class="b-tag b-tag-reuse">DÙNG LẠI</span><code>template-offer-row</code> — Máy chủ rỗng trả lời bằng danh mục</li>
+    <li><span class="b-tag b-tag-new">MỚI</span><code>subject-status-action-row</code> — tên miền <b>và</b> phiếu hỗ trợ</li>
+    <li><span class="b-tag b-tag-extend">MỞ RỘNG</span><code>fleet-resource-list.resource</code> — nhận hàng thứ ba</li>
+    <li><span class="b-tag b-tag-new">MỚI</span>nhóm nội dung <code>console.support.*</code> ở cả <code>vi</code> và <code>en</code></li>
+  </ul>
+  <p class="b-foot">Toàn bộ giá của hướng B: <b>1 MỚI + 1 MỞ RỘNG</b> cho khoá hợp đồng, cộng một nhóm nội dung mới. Không cần backend làm gì thêm.</p>
+</div>
+
+<p class="b-foot">HTML của hồ sơ là <b>ĐỊNH HƯỚNG — KHÔNG PHẢI NỀN ĐỂ ÁP DỤNG</b>. Preview dựng lại hướng thắng bằng component, hợp đồng và token thật.</p>
+</section>

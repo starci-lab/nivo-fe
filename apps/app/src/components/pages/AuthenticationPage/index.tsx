@@ -12,13 +12,16 @@ import type {
     AuthenticationPanelProps,
 } from "@/components/blocks/auth/AuthenticationPanel"
 import {
+    exchangeOauthCode,
     forgotPasswordInit,
     forgotPasswordResend,
     forgotPasswordVerifyOtp,
+    oauthRedirectUrl,
     signIn,
     signUpInit,
     signUpResend,
     signUpVerifyOtp,
+    type OauthProvider,
     type OtpChallenge,
 } from "@/modules/api/auth"
 import { useSession } from "@/modules/auth/session"
@@ -51,6 +54,17 @@ import { useSession } from "@/modules/auth/session"
  *
  * SWITCHING MODE CLEARS EVERYTHING. A challenge belongs to one address on one journey, and carrying
  * it across would offer a reader a code that cannot finish where they now are.
+ *
+ * THE PROVIDER JOURNEY LEAVES AND COMES BACK TO THIS SAME ADDRESS, which is why it is a fourth
+ * journey handled here rather than a route of its own. Pressing the shortcut navigates to the
+ * backend's redirect endpoint naming this page as the return address; the backend mints the PKCE
+ * pair, keeps the verifier and sends the reader to Keycloak; Keycloak returns them here with `code`
+ * and `state` on the query, and the effect below spends that pair for a session. A separate
+ * `/callback` screen would be a second surface that could only ever say "please wait" and then
+ * repeat this page's own refusal and two-factor endings in its own words.
+ *
+ * THE VERIFIER IS NEVER HERE. It is generated and held by the backend for the whole round trip, so
+ * the worst a script that can read this page can steal is an authorization code it cannot spend.
  */
 
 /**
@@ -67,6 +81,51 @@ const RESEND_COOLDOWN_SECONDS = 60
 
 /** Seconds per minute, so the code hint states a lifetime rather than a raw count. */
 const SECONDS_PER_MINUTE = 60
+
+/** Where the door a hand-off left through is kept while the reader is away at the provider. */
+const PROVIDER_KEY = "nivo.oauth.provider"
+
+/** The door this build offers, and what an unreadable memory falls back to. */
+const DEFAULT_PROVIDER: OauthProvider = "google"
+
+/**
+ * Note which door a hand-off is leaving through.
+ *
+ * SESSION STORAGE RATHER THAN THE URL, because the return address is replayed verbatim at the token
+ * exchange and anything appended to it would have to match on both legs exactly. This survives the
+ * round trip and dies with the tab, which is the same lifetime the sign-in has.
+ *
+ * IN A TRY/CATCH, BECAUSE STORAGE THROWS. Some private modes and some cookie settings refuse it
+ * outright. What is being remembered is only which of two names to send, and the backend refuses a
+ * name that disagrees with the bundle it cached - so a sign-in that crashed over this would be
+ * failing over something it can do without.
+ *
+ * @param provider - The door being left through.
+ */
+const rememberProvider = (provider: OauthProvider) => {
+    try {
+        window.sessionStorage.setItem(PROVIDER_KEY, provider)
+    } catch {
+        // Unreadable storage is handled where it is read, by naming the door this build offers.
+    }
+}
+
+/**
+ * Recall the door a hand-off left through, and forget it.
+ *
+ * SPENT ON READING, so a later reload cannot resurrect a journey that already ended.
+ *
+ * @returns The remembered door, or the one this build offers when nothing could be read.
+ */
+const takeProvider = (): OauthProvider => {
+    try {
+        const remembered = window.sessionStorage.getItem(PROVIDER_KEY)
+        window.sessionStorage.removeItem(PROVIDER_KEY)
+        return remembered === "github" ? "github" : DEFAULT_PROVIDER
+    } catch {
+        return DEFAULT_PROVIDER
+    }
+}
 
 /**
  * The authentication screen.
@@ -96,6 +155,13 @@ export const AuthenticationPage = () => {
     // Held in a ref rather than state: nothing on screen shows it, and re-rendering to store it would
     // cost the uncontrolled fields their contents.
     const challengeId = useRef("")
+    /*
+     * ONE HAND-OFF PER ARRIVAL, held in a ref because the guard has to outlive a re-render and must
+     * not cause one. `state` is spent by the first exchange, so a second attempt is refused by
+     * design - and development's deliberate double-mounting would otherwise turn a working sign-in
+     * into a refusal that appears only on a developer's machine.
+     */
+    const hasExchanged = useRef(false)
 
     useEffect(() => {
         if (cooldownSeconds === 0) return undefined
@@ -133,6 +199,68 @@ export const AuthenticationPage = () => {
         setStatusMessage(reason)
     }
 
+    /*
+     * THE RETURN LEG OF A PROVIDER SIGN-IN.
+     *
+     * THE QUERY IS READ FROM THE ADDRESS RATHER THAN FROM `useSearchParams`. That hook makes the
+     * whole route client-rendered unless it is wrapped in a boundary, and what is wanted here is one
+     * read at mount rather than a subscription to a query string that never changes under this page.
+     *
+     * THE QUERY IS CLEARED BEFORE THE EXCHANGE, NOT AFTER. `state` is single-use, so a reader who
+     * reloads mid-flight would otherwise replay a handle the backend has already spent and be told
+     * their sign-in failed when it did not - and the code would sit in the address bar, in history,
+     * and in whatever the reader pastes into a support ticket.
+     *
+     * A CHALLENGE IS READ BEFORE A TOKEN, exactly as the password journey does. `session.adopt`
+     * ignores a payload that still owes a second factor, so a page that adopted first and routed on
+     * would send that reader to a console they are not signed in to, silently.
+     */
+    useEffect(() => {
+        const query = new URLSearchParams(window.location.search)
+        const code = query.get("code")
+        const state = query.get("state")
+        const wasRefused = query.has("error")
+        if ((code === null || state === null) && !wasRefused) {
+            return
+        }
+        if (hasExchanged.current) {
+            return
+        }
+        hasExchanged.current = true
+        const provider = takeProvider()
+        window.history.replaceState(null, "", window.location.pathname)
+
+        if (code === null || state === null) {
+            /*
+             * A REFUSAL AT THE PROVIDER IS NOT AN ERROR TO REPORT. Keycloak writes `error` on the
+             * return address for the case that dominates it - the reader pressing cancel at the
+             * provider - and telling somebody their deliberate choice failed is worse than saying
+             * nothing. Clearing the query is the whole handling: they are back at a clean form, which
+             * is where cancelling meant to leave them. Keycloak's own `error_description` is not
+             * shown, because it is protocol prose in a language nobody chose.
+             */
+            return
+        }
+        setIsPending(true)
+
+        const finish = async () => {
+            const result = await exchangeOauthCode({ code, provider, state })
+            setIsPending(false)
+            if (!result.ok) {
+                refuse(result.reason)
+                return
+            }
+            if (result.data.requiresTwoFactor) {
+                setStatusMessage("")
+                setPhase("twoFactor")
+                return
+            }
+            session.adopt(result.data)
+            router.push("/overview")
+        }
+        void finish()
+    }, [router, session])
+
     /**
      * Submit the first step of whichever journey is running.
      *
@@ -156,7 +284,7 @@ export const AuthenticationPage = () => {
                 return
             }
             session.adopt(result.data)
-            router.push("/provisioning")
+            router.push("/overview")
             return
         }
 
@@ -193,7 +321,7 @@ export const AuthenticationPage = () => {
             // A brand new account has no second factor, so there is no challenge to read for here.
             session.adopt(result.data)
             setPhase("done")
-            router.push("/provisioning")
+            router.push("/overview")
             return
         }
 
@@ -247,12 +375,29 @@ export const AuthenticationPage = () => {
         },
         chooseProvider: (provider) => {
             /*
-             * The OAuth round trip has no client id, no PKCE verifier and no callback route in this
-             * build, so it reports rather than pretends. A screen that looked connected and was not
-             * is the kind of thing that gets believed.
+             * A FULL-PAGE NAVIGATION RATHER THAN `router.push`. The destination is the backend, which
+             * answers 302 towards Keycloak. Next's router moves between this app's own routes and has
+             * nowhere to send this; and the reader genuinely leaves - the whole point of the trip is
+             * that it happens outside this document.
+             *
+             * THE RETURN ADDRESS IS THIS PAGE WITH ITS QUERY AND HASH DROPPED. Dropped, because the
+             * backend replays that string verbatim at the token exchange and Keycloak compares the
+             * two - so anything that could differ between the leg out and the leg back has to go.
+             * This page, because the reader came from here and should land back in the language they
+             * left from; `pathname` already carries the locale prefix when there is one.
+             *
+             * THE CONTROLS ARE DELIBERATELY NOT LOCKED. Locking them reads as the careful choice and
+             * is the trap: a reader who presses Back from the provider can be restored from the
+             * browser's cache with this component's state exactly as it was left, and a form frozen
+             * pending a request that will never answer is a dead end only a reload escapes. A second
+             * press costs nothing instead - each hand-off mints its own state on the backend and the
+             * one that is completed is the one that counts.
              */
+            rememberProvider(provider)
             setIsError(false)
             setStatusMessage(t("providerUnavailable", { provider: provider === "google" ? "Google" : provider }))
+            const returnTo = `${window.location.origin}${window.location.pathname}`
+            window.location.assign(oauthRedirectUrl(provider, returnTo))
         },
         onward: () => {
             if (mode === "forgotPassword") {
@@ -264,7 +409,7 @@ export const AuthenticationPage = () => {
                 clear()
                 return
             }
-            router.push("/provisioning")
+            router.push("/overview")
         },
     }
 

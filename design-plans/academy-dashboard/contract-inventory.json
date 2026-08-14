@@ -1,0 +1,63 @@
+{
+  "caseId": "case-academy-dashboard",
+  "direction": "D-B",
+  "phase": "preview",
+  "revision": "1.0-corrected-by-typecheck",
+  "candidateStatus": "NOT BUILT. A first attempt was written against the wrong anatomy, refused by the candidate typecheck, and REMOVED rather than left on disk.",
+  "rule": "Inventory before invention. An entry repeating an existing class list and child identity is the same concept under a second name, and starci-fe/no-duplicate-entry-shape refuses it.",
+
+  "correction": {
+    "what": "The first inventory named stacked-band-parts as the page column holding three coordinate bands. It is not, and the candidate typecheck refused it.",
+    "truth": "banded-measure-column-on-surface has ONE child: column -> stacked-band-parts. stacked-band-parts has ONE child: part, whose contract comes from a closed list, with repeats: true and restingCount: 3.",
+    "consequence": "D-B is not three bands needing a container. It is ONE banded column whose parts already rest at three siblings, so the contract table already names the coordinate relationship the owner selected, at the exact cardinality they selected it. The three separate band blocks were each re-opening a band the table does not admit them to open.",
+    "alsoCorrected": "The empty-state key is centred-empty-notice, whose single child is the empty-notice composite. empty-notice-stack is NOT admitted as a part of stacked-band-parts, so the first inventory named a key the anatomy could not use.",
+    "lesson": "Reading class lists is not reading a contract. The children and their cardinality ARE the contract; the classes only say how it looks. The first inventory was built by grepping class strings and it got the roles backwards."
+  },
+
+  "contractInventory": [
+    {
+      "need": "the band that carries the three coordinate parts",
+      "candidate": "banded-measure-column-on-surface",
+      "children": "column -> stacked-band-parts",
+      "verdict": "REUSE",
+      "why": "It owns the surface, the padding and the separator, and admits exactly one column. The page writes no layout class of its own."
+    },
+    {
+      "need": "three coordinate siblings inside that band",
+      "candidate": "stacked-band-parts",
+      "children": "part -> closed contract list, repeats: true, restingCount: 3",
+      "verdict": "REUSE",
+      "roleCorrected": true,
+      "why": "restingCount 3 IS D-B: three parts at rest, none of them a heading over the others. The direction the owner picked was already named by the table before this case existed."
+    },
+    {
+      "need": "a part that shows a fact with one action (Tri thuc, Danh, Loi when populated)",
+      "candidate": "title-with-end-action",
+      "children": "title -> leaf heading; end -> leaf button or see-more-link, optional",
+      "verdict": "REUSE",
+      "why": "Admitted as a part. Title at the start, one action at the end - exactly what each populated band needs."
+    },
+    {
+      "need": "a part that shows nothing yet (the state a new member actually sees)",
+      "candidate": "centred-empty-notice",
+      "children": "notice -> composite empty-notice",
+      "verdict": "REUSE",
+      "why": "Admitted as a part, and it delegates to the empty-notice COMPOSITE rather than re-assembling a message and a button inline. Rebuilding that row from a text leaf plus a button is the exact failure the inventory rule names."
+    }
+  ],
+
+  "newContractEntries": 0,
+  "finding": "D-B still needs NO new contract entry, and the corrected reading makes that stronger rather than weaker: one banded column, one parts stack resting at three, and per-part keys for the populated and empty cases. What the first attempt got wrong was not WHETHER to reuse but WHICH key plays which role.",
+
+  "nextCandidateShape": "MemberDashboardPage owns banded-measure-column-on-surface > column: stacked-band-parts > part x 3. Each part is title-with-end-action when the band has a fact to state, or centred-empty-notice when it does not. There are no per-band block components; a block per band was the mistake.",
+
+  "stillOwedBeforeSeal": [
+    "candidate built to the corrected shape and running",
+    "candidate.build log with command and exit code",
+    "candidate.lint log with command and exit code",
+    "relationship sheet",
+    "open questions",
+    "consolidation verdict per new owner",
+    "explicit approval of a named revision"
+  ]
+}
