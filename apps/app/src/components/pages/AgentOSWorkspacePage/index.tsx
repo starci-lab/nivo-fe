@@ -1,12 +1,18 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { useFormatter, useLocale, useTranslations } from "next-intl"
-import { myAgentWorkspaceControlCenter, type AgentWorkspaceControlCenter } from "@/modules/api/console"
+import { useFormatter, useTranslations } from "next-intl"
+import {
+    issueAgentWorkspaceAppLaunch,
+    myAgentWorkspaceControlCenter,
+    renewAgentWorkspaceAppLaunch,
+    revokeAgentWorkspaceAppLaunch,
+    type AgentWorkspaceControlCenter,
+} from "@/modules/api/console"
 import type { Result } from "@/modules/api/graphql"
 import { useSession } from "@/modules/auth/session"
 import useProvisioningRealtime from "@/modules/realtime/provisioning"
-import { openAgentConsolePopup, useAgentConsoleHostBridge } from "@/modules/window/agent-console"
+import { navigateWorkspaceAppPopup, openWorkspaceAppPopup } from "@/modules/window/workspace-app-launch"
 import { _AgentOSWorkspacePage, type AgentOSWorkspacePageLabels, type AgentOSWorkspaceSection } from "./component"
 
 /** Exact workspace identity supplied by the detail route. */
@@ -15,7 +21,6 @@ export type AgentOSWorkspacePageProps = { readonly workspaceId: string }
 /** Own the aggregate snapshot and refetch it on an exact workspace runtime invalidation. */
 export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps) => {
     const t = useTranslations("console.agentos.workspace")
-    const locale = useLocale()
     const format = useFormatter()
     const session = useSession()
     const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
@@ -28,7 +33,9 @@ export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps)
         setAnswer(result)
     }, [workspaceId])
     const realtime = useProvisioningRealtime({ accessToken, target: accessToken === null ? null : { kind: "workspace", id: workspaceId } })
-    useAgentConsoleHostBridge(workspaceId, accessToken !== null)
+    const launchId = useRef<string | null>(null)
+    const popup = useRef<Window | null>(null)
+    const [launchState, setLaunchState] = useState<"idle" | "opening" | "connected" | "blocked" | "expired" | "disconnected">("idle")
 
     useEffect(() => {
         if (accessToken === null) return
@@ -41,6 +48,49 @@ export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps)
         if (realtime.event.kind !== "workspace-runtime" && realtime.event.kind !== "workspace") return
         void load()
     }, [load, realtime])
+
+    useEffect(() => {
+        const timer = window.setInterval(() => {
+            if (popup.current?.closed && launchId.current !== null) {
+                const current = launchId.current
+                launchId.current = null
+                popup.current = null
+                setLaunchState("disconnected")
+                void revokeAgentWorkspaceAppLaunch(current)
+                return
+            }
+            if (launchId.current !== null) {
+                void renewAgentWorkspaceAppLaunch(launchId.current).then((renewed) => {
+                    if (!renewed.ok) setLaunchState("expired")
+                })
+            }
+        }, 20_000)
+        return () => {
+            window.clearInterval(timer)
+            if (launchId.current !== null) void revokeAgentWorkspaceAppLaunch(launchId.current)
+        }
+    }, [])
+
+    const openOpenClaw = useCallback(async () => {
+        const openedPopup = openWorkspaceAppPopup(workspaceId)
+        if (openedPopup === null) {
+            setLaunchState("blocked")
+            return
+        }
+        popup.current = openedPopup
+        setLaunchState("opening")
+        const issued = await issueAgentWorkspaceAppLaunch(workspaceId)
+        if (!issued.ok) {
+            openedPopup.close()
+            popup.current = null
+            setLaunchState("blocked")
+            return
+        }
+        if (launchId.current !== null) void revokeAgentWorkspaceAppLaunch(launchId.current)
+        launchId.current = issued.data.launchId
+        const navigated = navigateWorkspaceAppPopup(openedPopup, issued.data.redirectUrl)
+        setLaunchState(navigated ? "connected" : "blocked")
+    }, [workspaceId])
 
     const labels: AgentOSWorkspacePageLabels = {
         titleFallback: t("titleFallback"),
@@ -58,6 +108,8 @@ export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps)
             unavailableAction: t("applications.unavailableAction"),
             securityUpgradeRequired: t("applications.securityUpgradeRequired"),
             unavailableDetail: t("applications.unavailableDetail"),
+            opening: t("applications.opening"), blocked: t("applications.blocked"),
+            expired: t("applications.expired"), disconnected: t("applications.disconnected"),
         },
         runtime: {
             section: t("runtime.section"), cpu: t("runtime.cpu"), memory: t("runtime.memory"), requests: t("runtime.requests"),
@@ -80,8 +132,9 @@ export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps)
             data={answer?.ok === true ? answer.data : undefined}
             section={section}
             labels={labels}
+            launchState={launchState}
             onSelectSection={setSection}
-            onOpenAgentConsole={() => openAgentConsolePopup(`/${locale}/agentos/workspaces/${workspaceId}/console`, workspaceId)}
+            onOpenAgentConsole={() => void openOpenClaw()}
             formatDate={(value) => format.dateTime(new Date(value), { dateStyle: "medium", timeStyle: "short" })}
         />
     )

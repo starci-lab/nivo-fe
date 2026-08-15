@@ -181,33 +181,18 @@
           "section": "Workspace applications",
           "openclaw": "OpenClaw",
           "n8n": "n8n",
-          "openclawDescription": "The Nivo-managed agent console for this workspace.",
+          "openclawDescription": "Open the real OpenClaw Control UI in a secure separate window.",
           "n8nDescription": "The automation studio opens after its secure sign-in adapter is complete.",
           "available": "Available",
           "unavailable": "Unavailable",
-          "manage": "Manage in Nivo",
+          "manage": "Open OpenClaw",
           "unavailableAction": "Cannot open yet",
           "securityUpgradeRequired": "Nivo is upgrading n8n before enabling secure one-click access. Your workspace stays protected while the editor remains closed.",
-          "unavailableDetail": "This application is not ready to open yet."
-        },
-        "console": {
-          "title": "OpenClaw console",
-          "lede": "Live customer conversations managed through Nivo. OpenClaw credentials never enter the browser.",
-          "section": "Conversations",
-          "loading": "Loading conversations.",
-          "empty": "No customer conversation has arrived yet.",
-          "refused": "These conversations could not be opened or are not owned by the current account.",
-          "unread": "Unread",
-          "read": "Read",
-          "messages": "{count, plural, one {# message} other {# messages}}",
-          "connection": {
-            "section": "Connection",
-            "mainSession": "Main Nivo window",
-            "realtime": "AgentOS realtime",
-            "connected": "Connected",
-            "connecting": "Connecting",
-            "disconnected": "Disconnected"
-          }
+          "unavailableDetail": "This application is not ready to open yet.",
+          "opening": "Opening OpenClaw…",
+          "blocked": "The popup was blocked or the secure launch could not be issued. Allow popups and try again.",
+          "expired": "The secure OpenClaw session expired. Open it again to reconnect.",
+          "disconnected": "The OpenClaw window disconnected from this Nivo session."
         },
         "runtime": {
           "section": "CPU and memory",

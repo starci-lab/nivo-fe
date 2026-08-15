@@ -181,33 +181,18 @@
           "section": "Ứng dụng trong workspace",
           "openclaw": "OpenClaw",
           "n8n": "n8n",
-          "openclawDescription": "Agent console do Nivo quản lý trong workspace này.",
+          "openclawDescription": "Mở giao diện OpenClaw Control UI thật trong một cửa sổ riêng an toàn.",
           "n8nDescription": "Automation studio sẽ mở sau khi lớp đăng nhập an toàn được hoàn tất.",
           "available": "Sẵn sàng",
           "unavailable": "Chưa sẵn sàng",
-          "manage": "Quản lý trong Nivo",
+          "manage": "Mở OpenClaw",
           "unavailableAction": "Chưa thể mở",
           "securityUpgradeRequired": "Nivo đang nâng cấp n8n trước khi bật đăng nhập một chạm an toàn. Workspace vẫn được bảo vệ trong lúc editor tạm khóa.",
-          "unavailableDetail": "Ứng dụng này chưa sẵn sàng để mở."
-        },
-        "console": {
-          "title": "Console OpenClaw",
-          "lede": "Các hội thoại khách hàng trực tiếp được quản lý qua Nivo. Credential OpenClaw không bao giờ đi vào trình duyệt.",
-          "section": "Hội thoại",
-          "loading": "Đang tải hội thoại.",
-          "empty": "Chưa có hội thoại khách hàng nào.",
-          "refused": "Không thể mở các hội thoại này hoặc tài khoản hiện tại không sở hữu chúng.",
-          "unread": "Chưa đọc",
-          "read": "Đã đọc",
-          "messages": "{count} tin nhắn",
-          "connection": {
-            "section": "Kết nối",
-            "mainSession": "Cửa sổ Nivo chính",
-            "realtime": "AgentOS realtime",
-            "connected": "Đã kết nối",
-            "connecting": "Đang kết nối",
-            "disconnected": "Đã ngắt kết nối"
-          }
+          "unavailableDetail": "Ứng dụng này chưa sẵn sàng để mở.",
+          "opening": "Đang mở OpenClaw…",
+          "blocked": "Cửa sổ bật lên bị chặn hoặc chưa cấp được phiên an toàn. Hãy cho phép popup rồi thử lại.",
+          "expired": "Phiên OpenClaw an toàn đã hết hạn. Mở lại để kết nối.",
+          "disconnected": "Cửa sổ OpenClaw đã ngắt khỏi phiên Nivo này."
         },
         "runtime": {
           "section": "CPU và bộ nhớ",

@@ -794,7 +794,7 @@ export const CONTRACTS = buildContracts({
             "md:[&>*:last-child]:min-w-0", "md:[&>*:last-child]:grow",
         ],
         children: {
-            sidebar: { contract: "home-services-account-nav" },
+            sidebar: { contract: "sidebar-nav-cluster" },
             body: { contract: "console-body-main" },
         },
         why: "The destinations are a SIBLING of the routed body rather than a wrapper around it, so replacing the body on every press cannot take the way back with it; the rail holds one fixed measure while the body takes every remaining pixel, because a rail that resized to its longest label would move every destination each time the route changed.",
@@ -837,6 +837,15 @@ export const CONTRACTS = buildContracts({
         },
         why: "Two of these destinations talk ABOUT the other four rather than standing beside them - the wallet is one account's money across every service and support cuts through all of them - so each run is introduced by a caption a reader hears; a flat list can only say that with order, and order is silent to a screen reader.",
     },
+    "sidebar-nav-cluster": {
+        host: "nav",
+        classes: ["flex", "w-full", "flex-col", "gap-2", "p-4"],
+        children: {
+            brand: { leaf: "heading" },
+            link: { leaf: "nav-link", repeats: true, restingCount: 4 },
+        },
+        why: "The dashboard has one fixed heading and four routes in one compact list, so the cluster owns the rail shape and passes each destination as a repeated leaf without inventing extra structure.",
+    },
 
     /*
      * ── THE PAGE MEASURE, AND THE TWO BODIES ─────────────────────────────────────────────────────
@@ -867,6 +876,17 @@ export const CONTRACTS = buildContracts({
         },
         why: "Each subject on this page asks its own query and answers at its own moment, so they are read straight down at one seam and none may be nested inside another - a section drawn inside its neighbour makes one refusal look like the whole page failing; the measure is capped because a single column of labelled sections run across a desktop loses the start of every next line.",
     },
+    "titled-body": {
+        classes: ["mx-auto", "flex", "w-full", "max-w-4xl", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            heading: { contract: "title-with-end-action" },
+            body: { contract: [
+                "stacked-sections",
+                "body-with-refusal-note",
+            ] },
+        },
+        why: "A console page needs one stable title row and one flexible body row, so the heading and the content are siblings at the seam that reads as the screen's flow rather than an extra nested wrapper.",
+    },
     "body-with-refusal-note": {
         /*
          * `items-start` IS WHAT SEPARATES THIS FROM `empty-notice-stack`, which centres its column
@@ -889,6 +909,15 @@ export const CONTRACTS = buildContracts({
             recovery: { leaf: "button", optional: true },
         },
         why: "A subject that was REFUSED is not a subject that came back empty, so the server's own already-translated sentence sits left-aligned beside whatever part did answer instead of replacing it with a centred apology; the way forward is optional because the two refusals nivo actually throws are the ordinary result of a customer who bought more than once, not a fault to retry.",
+    },
+    "warned-action-panel": {
+        classes: ["flex", "w-full", "flex-col", "gap-3", "p-4"],
+        children: {
+            title: { leaf: "heading" },
+            warning: { leaf: "text", props: { size: "sm", tone: "warning" } },
+            action: { contract: "inline-action-run" },
+        },
+        why: "Danger actions need a bounded heading and warning before the destructive presses, so the warning owns its own vertical slot and the action row stays separated from regular fact sections.",
     },
     "horizontal-lifecycle-run": {
         classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-start", "gap-3"],

@@ -314,21 +314,17 @@ export type AgentWorkspaceControlCenter = {
     readonly runtime: AgentWorkspaceRuntime | null
 }
 
-/** One persisted message in an AgentOS customer conversation. */
-export type AgentThreadMessage = {
-    readonly id: string
-    readonly author: "customer" | "agent"
-    readonly body: string
-    readonly createdAt: string
+/** One credential-free callback grant for opening a workspace application. */
+export type AgentWorkspaceAppLaunch = {
+    readonly launchId: string
+    readonly redirectUrl: string
+    readonly expiresAt: string
 }
 
-/** One exact workspace conversation returned by the existing owner-scoped query. */
-export type AgentThread = {
-    readonly id: string
-    readonly customerName: string
-    readonly channel: string
-    readonly hasUnread: boolean
-    readonly messages: ReadonlyArray<AgentThreadMessage>
+/** Updated expiry returned after the main Nivo window renews a launch lease. */
+export type RenewedAgentWorkspaceAppLaunch = {
+    readonly launchId: string
+    readonly expiresAt: string
 }
 
 /** Which slice of the catalogue a caller wants. */
@@ -522,16 +518,37 @@ export const myAgentWorkspaceControlCenter = (workspaceId: string): Promise<Resu
         { workspaceId },
     )
 
-/** Fetch persisted conversations for one exact owned AgentOS workspace. */
-export const myAgentThreads = (workspaceId: string): Promise<Result<ReadonlyArray<AgentThread>>> =>
+/** Issue one owner-scoped OpenClaw launch without exposing a gateway credential. */
+export const issueAgentWorkspaceAppLaunch = (workspaceId: string): Promise<Result<AgentWorkspaceAppLaunch>> =>
     graphql(
-        `query MyAgentThreads($workspaceId: ID!) {
-            myThreads(agentWorkspaceId: $workspaceId) {
-                data { id customerName channel hasUnread messages { id author body createdAt } }
-                message success error
+        `mutation IssueAgentWorkspaceAppLaunch($input: IssueAgentWorkspaceAppLaunchInput!) {
+            issueAgentWorkspaceAppLaunch(input: $input) {
+                data { launchId redirectUrl expiresAt } message success error
             }
         }`,
-        { workspaceId },
+        { input: { workspaceId, app: "OPENCLAW" } },
+    )
+
+/** Keep one redeemed workspace launch alive while the Nivo owner remains present. */
+export const renewAgentWorkspaceAppLaunch = (launchId: string): Promise<Result<RenewedAgentWorkspaceAppLaunch>> =>
+    graphql(
+        `mutation RenewAgentWorkspaceAppLaunch($input: RenewAgentWorkspaceAppLaunchInput!) {
+            renewAgentWorkspaceAppLaunch(input: $input) {
+                data { launchId expiresAt } message success error
+            }
+        }`,
+        { input: { launchId } },
+    )
+
+/** Revoke a workspace launch when its owner closes the popup or leaves Nivo. */
+export const revokeAgentWorkspaceAppLaunch = (launchId: string): Promise<Result<{ readonly launchId: string, readonly revoked: boolean }>> =>
+    graphql(
+        `mutation RevokeAgentWorkspaceAppLaunch($input: RevokeAgentWorkspaceAppLaunchInput!) {
+            revokeAgentWorkspaceAppLaunch(input: $input) {
+                data { launchId revoked } message success error
+            }
+        }`,
+        { input: { launchId } },
     )
 
 /** The draft site returned by the expert academy create mutation. */

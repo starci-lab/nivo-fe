@@ -16,12 +16,17 @@ export type AgentOSWorkspaceApplicationsProps = {
         readonly unavailableAction: string
         readonly securityUpgradeRequired: string
         readonly unavailableDetail: string
+        readonly opening: string
+        readonly blocked: string
+        readonly expired: string
+        readonly disconnected: string
     }
+    readonly launchState: "idle" | "opening" | "connected" | "blocked" | "expired" | "disconnected"
     readonly onManageOpenClaw: () => void
 }
 
 /** Render application capability only; no credential or one-time code enters this boundary. */
-export const AgentOSWorkspaceApplications = ({ apps, labels, onManageOpenClaw }: AgentOSWorkspaceApplicationsProps) => (
+export const AgentOSWorkspaceApplications = ({ apps, labels, launchState, onManageOpenClaw }: AgentOSWorkspaceApplicationsProps) => (
     <SurfaceCard
         props={{ label: labels.section }}
         contract="application-launch-grid"
@@ -37,10 +42,16 @@ export const AgentOSWorkspaceApplications = ({ apps, labels, onManageOpenClaw }:
                             description: openClaw ? labels.openclawDescription : labels.n8nDescription,
                             statusLabel: app.available ? labels.available : labels.unavailable,
                             statusTone: app.available ? "success" : "warning",
-                            actionLabel: openClaw ? labels.manage : labels.unavailableAction,
-                            disabled: !openClaw || !app.available,
+                            actionLabel: openClaw && launchState === "opening" ? labels.opening : openClaw ? labels.manage : labels.unavailableAction,
+                            disabled: !openClaw || !app.available || launchState === "opening",
                             detail: app.reason === "SECURITY_UPGRADE_REQUIRED"
                                 ? labels.securityUpgradeRequired
+                                : openClaw && launchState === "blocked"
+                                    ? labels.blocked
+                                    : openClaw && launchState === "expired"
+                                        ? labels.expired
+                                        : openClaw && launchState === "disconnected"
+                                            ? labels.disconnected
                                 : app.available
                                     ? app.observedVersion ?? undefined
                                     : labels.unavailableDetail,

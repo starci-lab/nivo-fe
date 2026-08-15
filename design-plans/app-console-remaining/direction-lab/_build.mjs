@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
+import { Buffer } from "node:buffer"
 
 const here = "D:/Repositories/nivo-fe/design-plans/app-console-remaining/direction-lab"
 const parent = "D:/Repositories/nivo-fe/design-plans/app-console-remaining"
