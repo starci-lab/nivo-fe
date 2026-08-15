@@ -186,7 +186,28 @@
           "available": "Sẵn sàng",
           "unavailable": "Chưa sẵn sàng",
           "manage": "Quản lý trong Nivo",
-          "unavailableAction": "Chưa thể mở"
+          "unavailableAction": "Chưa thể mở",
+          "securityUpgradeRequired": "Nivo đang nâng cấp n8n trước khi bật đăng nhập một chạm an toàn. Workspace vẫn được bảo vệ trong lúc editor tạm khóa.",
+          "unavailableDetail": "Ứng dụng này chưa sẵn sàng để mở."
+        },
+        "console": {
+          "title": "Console OpenClaw",
+          "lede": "Các hội thoại khách hàng trực tiếp được quản lý qua Nivo. Credential OpenClaw không bao giờ đi vào trình duyệt.",
+          "section": "Hội thoại",
+          "loading": "Đang tải hội thoại.",
+          "empty": "Chưa có hội thoại khách hàng nào.",
+          "refused": "Không thể mở các hội thoại này hoặc tài khoản hiện tại không sở hữu chúng.",
+          "unread": "Chưa đọc",
+          "read": "Đã đọc",
+          "messages": "{count} tin nhắn",
+          "connection": {
+            "section": "Kết nối",
+            "mainSession": "Cửa sổ Nivo chính",
+            "realtime": "AgentOS realtime",
+            "connected": "Đã kết nối",
+            "connecting": "Đang kết nối",
+            "disconnected": "Đã ngắt kết nối"
+          }
         },
         "runtime": {
           "section": "CPU và bộ nhớ",

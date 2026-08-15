@@ -14,6 +14,8 @@ export type AgentOSWorkspaceApplicationsProps = {
         readonly unavailable: string
         readonly manage: string
         readonly unavailableAction: string
+        readonly securityUpgradeRequired: string
+        readonly unavailableDetail: string
     }
     readonly onManageOpenClaw: () => void
 }
@@ -37,7 +39,11 @@ export const AgentOSWorkspaceApplications = ({ apps, labels, onManageOpenClaw }:
                             statusTone: app.available ? "success" : "warning",
                             actionLabel: openClaw ? labels.manage : labels.unavailableAction,
                             disabled: !openClaw || !app.available,
-                            detail: app.reason ?? app.observedVersion ?? undefined,
+                            detail: app.reason === "SECURITY_UPGRADE_REQUIRED"
+                                ? labels.securityUpgradeRequired
+                                : app.available
+                                    ? app.observedVersion ?? undefined
+                                    : labels.unavailableDetail,
                         }}
                         on={{ press: openClaw ? onManageOpenClaw : undefined }}
                     />

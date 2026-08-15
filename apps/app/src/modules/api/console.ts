@@ -314,6 +314,23 @@ export type AgentWorkspaceControlCenter = {
     readonly runtime: AgentWorkspaceRuntime | null
 }
 
+/** One persisted message in an AgentOS customer conversation. */
+export type AgentThreadMessage = {
+    readonly id: string
+    readonly author: "customer" | "agent"
+    readonly body: string
+    readonly createdAt: string
+}
+
+/** One exact workspace conversation returned by the existing owner-scoped query. */
+export type AgentThread = {
+    readonly id: string
+    readonly customerName: string
+    readonly channel: string
+    readonly hasUnread: boolean
+    readonly messages: ReadonlyArray<AgentThreadMessage>
+}
+
 /** Which slice of the catalogue a caller wants. */
 export type CatalogCategory =
     | "ai_agent" | "digital_identity" | "launch_ai" | "migration"
@@ -499,6 +516,18 @@ export const myAgentWorkspaceControlCenter = (workspaceId: string): Promise<Resu
                         }
                     }
                 }
+                message success error
+            }
+        }`,
+        { workspaceId },
+    )
+
+/** Fetch persisted conversations for one exact owned AgentOS workspace. */
+export const myAgentThreads = (workspaceId: string): Promise<Result<ReadonlyArray<AgentThread>>> =>
+    graphql(
+        `query MyAgentThreads($workspaceId: ID!) {
+            myThreads(agentWorkspaceId: $workspaceId) {
+                data { id customerName channel hasUnread messages { id author body createdAt } }
                 message success error
             }
         }`,

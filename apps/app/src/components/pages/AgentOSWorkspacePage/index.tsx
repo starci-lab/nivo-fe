@@ -1,11 +1,12 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { useFormatter, useTranslations } from "next-intl"
+import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { myAgentWorkspaceControlCenter, type AgentWorkspaceControlCenter } from "@/modules/api/console"
 import type { Result } from "@/modules/api/graphql"
 import { useSession } from "@/modules/auth/session"
 import useProvisioningRealtime from "@/modules/realtime/provisioning"
+import { openAgentConsolePopup, useAgentConsoleHostBridge } from "@/modules/window/agent-console"
 import { _AgentOSWorkspacePage, type AgentOSWorkspacePageLabels, type AgentOSWorkspaceSection } from "./component"
 
 /** Exact workspace identity supplied by the detail route. */
@@ -14,6 +15,7 @@ export type AgentOSWorkspacePageProps = { readonly workspaceId: string }
 /** Own the aggregate snapshot and refetch it on an exact workspace runtime invalidation. */
 export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps) => {
     const t = useTranslations("console.agentos.workspace")
+    const locale = useLocale()
     const format = useFormatter()
     const session = useSession()
     const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
@@ -26,6 +28,7 @@ export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps)
         setAnswer(result)
     }, [workspaceId])
     const realtime = useProvisioningRealtime({ accessToken, target: accessToken === null ? null : { kind: "workspace", id: workspaceId } })
+    useAgentConsoleHostBridge(workspaceId, accessToken !== null)
 
     useEffect(() => {
         if (accessToken === null) return
@@ -53,6 +56,8 @@ export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps)
             openclawDescription: t("applications.openclawDescription"), n8nDescription: t("applications.n8nDescription"),
             available: t("applications.available"), unavailable: t("applications.unavailable"), manage: t("applications.manage"),
             unavailableAction: t("applications.unavailableAction"),
+            securityUpgradeRequired: t("applications.securityUpgradeRequired"),
+            unavailableDetail: t("applications.unavailableDetail"),
         },
         runtime: {
             section: t("runtime.section"), cpu: t("runtime.cpu"), memory: t("runtime.memory"), requests: t("runtime.requests"),
@@ -76,6 +81,7 @@ export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps)
             section={section}
             labels={labels}
             onSelectSection={setSection}
+            onOpenAgentConsole={() => openAgentConsolePopup(`/${locale}/agentos/workspaces/${workspaceId}/console`, workspaceId)}
             formatDate={(value) => format.dateTime(new Date(value), { dateStyle: "medium", timeStyle: "short" })}
         />
     )
