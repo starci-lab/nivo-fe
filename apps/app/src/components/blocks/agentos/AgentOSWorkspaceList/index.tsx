@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
+import { useLocale } from "next-intl"
+import { useRouter } from "next/navigation"
+import { DEFAULT_LOCALE } from "@/i18n/config"
 import { useSession } from "@/modules/auth/session"
 import { myAgentWorkspace, type AgentWorkspaceRow } from "@/modules/api/console"
 import type { Result } from "@/modules/api/graphql"
@@ -19,6 +22,8 @@ const STATUS: Readonly<Record<string, FleetStatus | undefined>> = {
 /** Own the AgentOS workspace query and settle its management-list states. */
 export const AgentOSWorkspaceList = () => {
     const t = useTranslations("console")
+    const locale = useLocale()
+    const router = useRouter()
     const session = useSession()
     const signedIn = session.state.status === "signed-in"
     const [answer, setAnswer] = useState<Result<ReadonlyArray<AgentWorkspaceRow>> | null>(null)
@@ -41,6 +46,7 @@ export const AgentOSWorkspaceList = () => {
         if (answer.data.length === 0) return { state: "empty", props: { label, message: t("agentos.empty") } }
         return {
             state: "answered",
+            on: { openWorkspace: (id) => router.push(`${locale === DEFAULT_LOCALE ? "" : `/${locale}`}/agentos/workspaces/${id}`) },
             props: {
                 label,
                 rows: answer.data.map((workspace) => {

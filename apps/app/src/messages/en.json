@@ -156,7 +156,67 @@
       "workspacesLabel": "Your workspaces",
       "podReachable": "Pod is answering",
       "podUnreachable": "Pod is not answering",
-      "checkedAt": "checked at {time}"
+      "checkedAt": "checked at {time}",
+      "workspace": {
+        "titleFallback": "AgentOS workspace",
+        "loading": "Reading the latest workspace and runtime snapshot.",
+        "refused": "This workspace could not be opened or is not owned by the current account.",
+        "tabsLabel": "Workspace management area",
+        "tabs": {
+          "overview": "Overview",
+          "applications": "Applications",
+          "infrastructure": "Infrastructure",
+          "operations": "Operations",
+          "access": "Access"
+        },
+        "summary": {
+          "section": "Workspace details",
+          "status": "Status",
+          "plan": "Plan",
+          "allocation": "Namespace allocation",
+          "host": "Hostname",
+          "chart": "Chart version"
+        },
+        "applications": {
+          "section": "Workspace applications",
+          "openclaw": "OpenClaw",
+          "n8n": "n8n",
+          "openclawDescription": "The Nivo-managed agent console for this workspace.",
+          "n8nDescription": "The automation studio opens after its secure sign-in adapter is complete.",
+          "available": "Available",
+          "unavailable": "Unavailable",
+          "manage": "Manage in Nivo",
+          "unavailableAction": "Cannot open yet"
+        },
+        "runtime": {
+          "section": "CPU and memory",
+          "cpu": "Current CPU",
+          "memory": "Current memory",
+          "requests": "Requests",
+          "limits": "Limits",
+          "restarts": "Restart count",
+          "health": "Probe",
+          "fresh": "Fresh snapshot",
+          "stale": "Stale snapshot",
+          "unavailable": "Kubernetes metrics unavailable"
+        },
+        "stack": {
+          "section": "Helm stack",
+          "unavailable": "No Helm snapshot is available for this workspace yet.",
+          "release": "Release",
+          "chart": "Chart",
+          "storage": "Storage"
+        },
+        "operations": {
+          "section": "Workspace lifecycle",
+          "note": "Nivo can read runtime state, but instance-operation mutations are not public on Core GraphQL yet, so the UI does not fake runnable controls.",
+          "update": "Update pod",
+          "plan": "Change plan",
+          "backup": "Backup",
+          "reset": "Reset VPS",
+          "rebuild": "Rebuild"
+        }
+      }
     },
     "provisioningFlows": {
       "loadingTitle": "Loading product",

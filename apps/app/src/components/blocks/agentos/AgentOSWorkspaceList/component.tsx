@@ -21,10 +21,11 @@ export type AgentOSWorkspaceListViewProps =
     | { readonly state: "resting"; readonly props: { readonly label: string } }
     | { readonly state: "empty"; readonly props: { readonly label: string; readonly message: string } }
     | { readonly state: "refused"; readonly props: { readonly label: string; readonly message: string } }
-    | { readonly state: "answered"; readonly props: { readonly label: string; readonly rows: ReadonlyArray<AgentOSWorkspaceView> } }
+    | { readonly state: "answered"; readonly props: { readonly label: string; readonly rows: ReadonlyArray<AgentOSWorkspaceView> }; readonly on: { readonly openWorkspace: (id: string) => void } }
 
 /** Draw the workspace list independently from the creation flow below it. */
-export const _AgentOSWorkspaceList = ({ state, props }: AgentOSWorkspaceListViewProps) => {
+export const _AgentOSWorkspaceList = (view: AgentOSWorkspaceListViewProps) => {
+    const { state, props } = view
     if (state === "empty" || state === "refused") {
         return (
             <SurfaceCard
@@ -49,7 +50,7 @@ export const _AgentOSWorkspaceList = ({ state, props }: AgentOSWorkspaceListView
                         <FleetRow props={{ id: "agentos-resting", kind: "workspace", kindLabel: "", status: "provisioning" }} isLoading />
                     ))]
                     : rows.map((row) => defineCompositeComponent("fleet-row", {}, () => (
-                        <FleetRow props={{ ...row, kind: "workspace" }} />
+                        <FleetRow props={{ ...row, kind: "workspace" }} on={{ open: () => view.on.openWorkspace(row.id) }} />
                     ))),
             })}
             isLoading={state === "resting"}

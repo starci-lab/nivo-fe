@@ -219,6 +219,101 @@ export type PodStatusRow = {
     readonly checkedAt: string
 }
 
+/** One customer-safe application capability inside an AgentOS workspace. */
+export type AgentWorkspaceAppCapability = {
+    readonly app: "OPENCLAW" | "N8N"
+    readonly accessMode: "NIVO_CONSOLE" | "EXTERNAL_LAUNCH" | "UNAVAILABLE"
+    readonly available: boolean
+    readonly reason: string | null
+    readonly observedVersion: string | null
+}
+
+/** Resource values and health reported for one Helm component. */
+export type AgentWorkspaceRuntimeComponent = {
+    readonly key: string
+    readonly kind: string
+    readonly status: string
+    readonly desiredReplicas: number | null
+    readonly readyReplicas: number | null
+    readonly image: string | null
+    readonly pvcSize: string | null
+    readonly storagePolicy: string | null
+    readonly cpuUsageMillicores: number | null
+    readonly cpuRequestMillicores: number | null
+    readonly cpuLimitMillicores: number | null
+    readonly memoryUsageBytes: number | null
+    readonly memoryRequestBytes: number | null
+    readonly memoryLimitBytes: number | null
+    readonly restartCount: number
+    readonly lastTerminationReason: string | null
+    readonly oomKilled: boolean
+    readonly throttled: boolean | null
+}
+
+/** Persistent volume projected from the workspace Helm release. */
+export type AgentWorkspaceRuntimeStorage = {
+    readonly key: string
+    readonly kind: string
+    readonly size: string | null
+    readonly policy: string | null
+    readonly status: string
+}
+
+/** Aggregate usage, requests and limits across the workspace. */
+export type AgentWorkspaceRuntimeTotals = {
+    readonly cpuUsageMillicores: number | null
+    readonly cpuRequestMillicores: number
+    readonly cpuLimitMillicores: number
+    readonly memoryUsageBytes: number | null
+    readonly memoryRequestBytes: number
+    readonly memoryLimitBytes: number
+    readonly restartCount: number
+    readonly oomKilled: boolean
+    readonly throttled: boolean | null
+}
+
+/** Latest persisted probe of one AgentOS Helm release. */
+export type AgentWorkspaceRuntime = {
+    readonly instanceId: string
+    readonly appKey: string
+    readonly status: string
+    readonly releaseName: string | null
+    readonly chartName: string | null
+    readonly chartVersion: string | null
+    readonly components: ReadonlyArray<AgentWorkspaceRuntimeComponent>
+    readonly storage: ReadonlyArray<AgentWorkspaceRuntimeStorage>
+    readonly totals: AgentWorkspaceRuntimeTotals
+    readonly probeStatus: "available" | "partial" | "unavailable"
+    readonly fingerprint: string
+    readonly lastError: string | null
+    readonly observedAt: string
+    readonly stale: boolean
+}
+
+/** Owner-scoped aggregate used by the AgentOS workspace control center. */
+export type AgentWorkspaceControlCenter = {
+    readonly workspace: {
+        readonly id: string
+        readonly name: string | null
+        readonly status: string
+        readonly externalWorkspaceRef: string | null
+    }
+    readonly instance: {
+        readonly id: string
+        readonly name: string
+        readonly hostname: string
+        readonly status: string
+        readonly chartVersion: string
+        readonly ramMb: number
+        readonly vcpu: number
+        readonly planCode: string | null
+        readonly planRamGb: number | null
+        readonly planVcpu: number | null
+    }
+    readonly apps: ReadonlyArray<AgentWorkspaceAppCapability>
+    readonly runtime: AgentWorkspaceRuntime | null
+}
+
 /** Which slice of the catalogue a caller wants. */
 export type CatalogCategory =
     | "ai_agent" | "digital_identity" | "launch_ai" | "migration"
@@ -378,6 +473,37 @@ export const catalogItems = (category: CatalogCategory): Promise<Result<Readonly
  */
 export const myPodOpenclawStatus = (): Promise<Result<PodStatusRow>> =>
     graphql(`query MyPodOpenclawStatus { myPodOpenclawStatus { data ${POD_STATUS} message success error } }`)
+
+/** Fetch one exact workspace control center; the backend enforces viewer ownership. */
+export const myAgentWorkspaceControlCenter = (workspaceId: string): Promise<Result<AgentWorkspaceControlCenter>> =>
+    graphql(
+        `query MyAgentWorkspaceControlCenter($workspaceId: ID!) {
+            myAgentWorkspaceControlCenter(workspaceId: $workspaceId) {
+                data {
+                    workspace { id name status externalWorkspaceRef }
+                    instance { id name hostname status chartVersion ramMb vcpu planCode planRamGb planVcpu }
+                    apps { app accessMode available reason observedVersion }
+                    runtime {
+                        instanceId appKey status releaseName chartName chartVersion probeStatus fingerprint lastError observedAt stale
+                        components {
+                            key kind status desiredReplicas readyReplicas image pvcSize storagePolicy
+                            cpuUsageMillicores cpuRequestMillicores cpuLimitMillicores
+                            memoryUsageBytes memoryRequestBytes memoryLimitBytes
+                            restartCount lastTerminationReason oomKilled throttled
+                        }
+                        storage { key kind size policy status }
+                        totals {
+                            cpuUsageMillicores cpuRequestMillicores cpuLimitMillicores
+                            memoryUsageBytes memoryRequestBytes memoryLimitBytes
+                            restartCount oomKilled throttled
+                        }
+                    }
+                }
+                message success error
+            }
+        }`,
+        { workspaceId },
+    )
 
 /** The draft site returned by the expert academy create mutation. */
 export interface CreatedExpertSite {

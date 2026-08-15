@@ -325,6 +325,7 @@ export const CONTRACTS = buildContracts({
                     // cannot draw one has to fall back on the empty notice, which tells the reader
                     // nothing was there when the server in fact declined to say.
                     "body-with-refusal-note",
+                    "application-launch-grid", "workspace-runtime-stack", "helm-component-status-table",
                 ],
                 leaf: "text",
             },
@@ -883,7 +884,7 @@ export const CONTRACTS = buildContracts({
              * would need `label-row-over-card` to admit a RUN of bodies, which reopens
              * `SurfaceCard`'s projection for a shape this slot already expresses.
              */
-            answered: { contract: ["labelled-fact-stack", "fleet-resource-list"], optional: true },
+            answered: { contract: ["labelled-fact-stack", "fleet-resource-list", "inline-action-run"], optional: true },
             note: { leaf: "text", props: { size: "sm", tone: "muted" } },
             recovery: { leaf: "button", optional: true },
         },
@@ -951,6 +952,58 @@ export const CONTRACTS = buildContracts({
             action: { leaf: "button" },
         },
         why: "A thing that can be BOUGHT carries a price and exactly one press, which is a different relationship from a thing already owned carrying a lifecycle whose tone changes underneath it; putting the price in a status slot would make an amount of money read as a state a resource can be in, and the row wraps rather than clipping because the price cell is what pushes a phone past the edge.",
+    },
+    "agentos-workspace-control-center": {
+        classes: ["mx-auto", "flex", "w-full", "max-w-4xl", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            heading: { contract: "title-with-end-action" },
+            tabs: { leaf: "choice-tabs" },
+            section: { contract: "label-row-over-card", repeats: true, restingCount: 2 },
+        },
+        why: "A workspace is one customer destination: identity and peer sections stay in the main content column, while applications precede infrastructure and no part of that journey becomes sidebar navigation.",
+    },
+    "application-launch-grid": {
+        classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-2"],
+        children: {
+            application: { composite: "application-launch-card", repeats: true, restingCount: 2 },
+        },
+        why: "Bundled applications are independent destinations compared side by side when width permits and stacked intact on a phone.",
+    },
+    "application-launch-card": {
+        classes: ["flex", "flex-col", "items-start", "gap-3", "p-4"],
+        children: {
+            identity: { contract: "subject-over-muted-caption" },
+            state: { leaf: "badge" },
+            detail: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            action: { leaf: "button" },
+        },
+        why: "One application states what it is, whether it can be entered and one safe action; refusal detail stays quiet and no credential-shaped value enters the card.",
+    },
+    "workspace-runtime-stack": {
+        classes: ["flex", "flex-col", "gap-6"],
+        children: {
+            metric: { composite: "labelled-progress-row", repeats: true, restingCount: 2 },
+            facts: { contract: "labelled-fact-stack" },
+            note: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "Usage bars are read first, then exact request, limit and health facts; the timestamp qualifies the whole snapshot rather than masquerading as live telemetry.",
+    },
+    "helm-component-status-table": {
+        classes: ["flex", "flex-col", "gap-1"],
+        children: {
+            component: { composite: "helm-component-status-row", repeats: true, restingCount: 3 },
+        },
+        why: "Every Helm component shares one joined vertical scan so replica, image and health differences can be compared without nested cards.",
+    },
+    "helm-component-status-row": {
+        classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "gap-3", "border-b", "border-separator", "py-3"],
+        children: {
+            identity: { contract: "subject-over-muted-caption" },
+            kind: { leaf: "badge", props: { tone: "neutral" } },
+            state: { leaf: "badge" },
+            resources: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "The component identity grows while kind, state and resources remain short comparable facts; wrapping preserves all four on narrow screens.",
     },
 })
 

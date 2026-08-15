@@ -156,7 +156,67 @@
       "workspacesLabel": "Workspace của bạn",
       "podReachable": "Pod đang trả lời",
       "podUnreachable": "Pod chưa trả lời",
-      "checkedAt": "kiểm tra lúc {time}"
+      "checkedAt": "kiểm tra lúc {time}",
+      "workspace": {
+        "titleFallback": "Workspace AgentOS",
+        "loading": "Đang đọc workspace và runtime mới nhất.",
+        "refused": "Không thể mở workspace này hoặc tài khoản hiện tại không sở hữu nó.",
+        "tabsLabel": "Khu vực quản lý workspace",
+        "tabs": {
+          "overview": "Tổng quan",
+          "applications": "Ứng dụng",
+          "infrastructure": "Hạ tầng",
+          "operations": "Thao tác",
+          "access": "Truy cập"
+        },
+        "summary": {
+          "section": "Thông tin workspace",
+          "status": "Trạng thái",
+          "plan": "Gói",
+          "allocation": "Namespace allocation",
+          "host": "Hostname",
+          "chart": "Phiên bản chart"
+        },
+        "applications": {
+          "section": "Ứng dụng trong workspace",
+          "openclaw": "OpenClaw",
+          "n8n": "n8n",
+          "openclawDescription": "Agent console do Nivo quản lý trong workspace này.",
+          "n8nDescription": "Automation studio sẽ mở sau khi lớp đăng nhập an toàn được hoàn tất.",
+          "available": "Sẵn sàng",
+          "unavailable": "Chưa sẵn sàng",
+          "manage": "Quản lý trong Nivo",
+          "unavailableAction": "Chưa thể mở"
+        },
+        "runtime": {
+          "section": "CPU và bộ nhớ",
+          "cpu": "CPU hiện tại",
+          "memory": "Bộ nhớ hiện tại",
+          "requests": "Requests",
+          "limits": "Limits",
+          "restarts": "Số lần restart",
+          "health": "Probe",
+          "fresh": "Snapshot mới",
+          "stale": "Snapshot đã cũ",
+          "unavailable": "Chưa có số liệu K8s"
+        },
+        "stack": {
+          "section": "Helm stack",
+          "unavailable": "Chưa có snapshot Helm cho workspace này.",
+          "release": "Release",
+          "chart": "Chart",
+          "storage": "Lưu trữ"
+        },
+        "operations": {
+          "section": "Vòng đời workspace",
+          "note": "Nivo đã đọc được runtime nhưng các mutation thao tác instance chưa được public trên Core GraphQL, nên không giả lập nút chạy.",
+          "update": "Update pod",
+          "plan": "Đổi gói",
+          "backup": "Backup",
+          "reset": "Reset VPS",
+          "rebuild": "Rebuild"
+        }
+      }
     },
     "provisioningFlows": {
       "loadingTitle": "Đang tải sản phẩm",

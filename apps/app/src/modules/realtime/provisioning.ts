@@ -15,6 +15,7 @@ export type ProvisioningTarget =
 /** One event after the hook has rejected unrelated owner-room traffic. */
 export type ProvisioningEvent =
     | { readonly kind: "workspace"; readonly id: string; readonly status: string; readonly reason: string | null; readonly updatedAt: string }
+    | { readonly kind: "workspace-runtime"; readonly id: string; readonly instanceId: string; readonly fingerprint: string; readonly probeStatus: string; readonly updatedAt: string }
     | { readonly kind: "deployment"; readonly id: string; readonly status: string; readonly reason: string | null; readonly updatedAt: string }
     | { readonly kind: "order"; readonly id: string; readonly status: string }
 
@@ -26,6 +27,7 @@ export type ProvisioningRealtimeState =
     | { readonly status: "event"; readonly reason: null; readonly event: ProvisioningEvent }
 
 type WorkspaceMessage = { readonly eventId?: string; readonly sequence?: number; readonly workspaceId: string; readonly status: string; readonly reason: string | null; readonly updatedAt: string }
+type WorkspaceRuntimeMessage = { readonly sequence: number; readonly workspaceId: string; readonly instanceId: string; readonly fingerprint: string; readonly probeStatus: string; readonly observedAt: string }
 type DeploymentMessage = { readonly eventId?: string; readonly sequence?: number; readonly deploymentId: string; readonly status: string; readonly reason: string | null; readonly updatedAt: string }
 type OrderMessage = { readonly orderId: string; readonly status: string }
 type SocketEnvelope<T> =
@@ -120,6 +122,19 @@ const useProvisioningRealtime = ({
                 status: message.status,
                 reason: message.reason,
                 updatedAt: message.updatedAt,
+            }, message.sequence)
+        })
+        socket.on("workspace.runtime", (payload: WorkspaceRuntimeMessage | SocketEnvelope<WorkspaceRuntimeMessage>) => {
+            const message = unwrapMessage(payload)
+            if (message === null) return
+            if (targetKind !== "workspace" || message.workspaceId !== targetId) return
+            acceptOrdered(message.observedAt, {
+                kind: "workspace-runtime",
+                id: message.workspaceId,
+                instanceId: message.instanceId,
+                fingerprint: message.fingerprint,
+                probeStatus: message.probeStatus,
+                updatedAt: message.observedAt,
             }, message.sequence)
         })
         socket.on("deployment.status", (payload: DeploymentMessage | SocketEnvelope<DeploymentMessage>) => {
