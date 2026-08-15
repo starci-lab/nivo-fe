@@ -139,6 +139,7 @@
       "catalogueFact": "template catalogue",
       "kindTemplateApp": "Template app",
       "build": "Build",
+      "unavailable": "Not available yet",
       "open": "Open",
       "viewDns": "View record",
       "orderInProgress": "paid order · being built",
@@ -152,9 +153,66 @@
       "empty": "No workspace yet.",
       "emptyDescription": "Your own agent workspace, on duty across Zalo and Telegram to your process.",
       "viewPlans": "See plans",
+      "workspacesLabel": "Your workspaces",
       "podReachable": "Pod is answering",
       "podUnreachable": "Pod is not answering",
       "checkedAt": "checked at {time}"
+    },
+    "provisioningFlows": {
+      "loadingTitle": "Loading product",
+      "loadingText": "Reading the latest request and provisioning snapshot.",
+      "connecting": "Reconnecting live progress. The saved snapshot remains authoritative.",
+      "preparingTitle": "Kubernetes is building",
+      "readyTitle": "Ready to manage",
+      "failedTitle": "Provisioning needs attention",
+      "failedLoad": "The latest provisioning state could not be loaded.",
+      "failedProvision": "Provisioning failed before the resource became ready.",
+      "unsupportedTitle": "Template not available yet",
+      "unsupportedText": "This Template App is listed in the catalogue but is not wired for provisioning yet.",
+      "backToApps": "Back to Apps",
+      "manageApps": "Manage apps",
+      "steps": {
+        "request": "Request",
+        "payment": "Payment",
+        "createApp": "Create app",
+        "createWorkspace": "Create workspace",
+        "infrastructure": "Build infrastructure",
+        "manage": "Manage"
+      },
+      "stepState": {
+        "done": "Done",
+        "current": "Current",
+        "upcoming": "Upcoming"
+      },
+      "template": {
+        "detail": "Template App request",
+        "slugLabel": "App slug",
+        "slugPlaceholder": "my-academy",
+        "slugHint": "This becomes the app's stable address identity.",
+        "submit": "Create app",
+        "requestTitle": "Create from this template",
+        "acceptedTitle": "App accepted",
+        "acceptedText": "The app is live and nivo is creating its deployment identity.",
+        "requestText": "Submit the app identity, then nivo will create and provision its isolated stack.",
+        "preparingText": "The Kubernetes watcher is reporting deployment.status for this deployment only.",
+        "readyText": "The app stack is ready. Return to Apps to manage it."
+      },
+      "agentos": {
+        "requestTitle": "Request an AgentOS workspace",
+        "requestText": "The request creates an invoice first. Provisioning begins after payment.",
+        "submit": "Request AgentOS",
+        "paymentTitle": "Waiting for payment",
+        "paymentText": "Open Wallet and settle this order's invoice to start fulfillment.",
+        "openWallet": "Open Wallet",
+        "acceptedTitle": "Order accepted",
+        "acceptedText": "Payment is settled and nivo is creating the workspace identity.",
+        "preparingText": "The workspace event stream is following this workspace only.",
+        "readyText": "The workspace is ready and now appears in your AgentOS management list.",
+        "manage": "Manage AgentOS",
+        "orderMissing": "This AgentOS order was not found for the signed-in account.",
+        "orderCancelled": "This AgentOS order was cancelled.",
+        "startAgain": "Start again"
+      }
     },
     "servers": {
       "title": "Servers",
@@ -190,6 +248,7 @@
       "transactionsEmpty": "No transactions yet.",
       "invoicesEmpty": "No invoices yet.",
       "pay": "Pay",
+      "paying": "Paying...",
       "type": {
         "deposit": "Top-up",
         "spend": "Charge"

@@ -76,6 +76,7 @@ export type LayoutClassName =
     // the rail layouts, which only take the flexible-first shape above the md breakpoint; a row
     // whose FIRST child takes the slack at every width needs the same two names without the prefix.
     | "[&>*:first-child]:min-w-0" | "[&>*:first-child]:grow"
+    | "sm:[&>*:first-child]:col-span-2"
 
 /** Literal values a contract may require from a child component's data props. */
 export type ContractPropValue = string | number | boolean | null
@@ -887,6 +888,39 @@ export const CONTRACTS = buildContracts({
             recovery: { leaf: "button", optional: true },
         },
         why: "A subject that was REFUSED is not a subject that came back empty, so the server's own already-translated sentence sits left-aligned beside whatever part did answer instead of replacing it with a centred apology; the way forward is optional because the two refusals nivo actually throws are the ordinary result of a customer who bought more than once, not a fault to retry.",
+    },
+    "horizontal-lifecycle-run": {
+        classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-start", "gap-3"],
+        children: {
+            step: { composite: "lifecycle-step", repeats: true, restingCount: 4 },
+        },
+        why: "The lifecycle is one journey read from left to right, but it wraps as complete steps on a narrow screen instead of becoming a second navigation rail or clipping the management destination.",
+    },
+    "ordinal-over-label-and-state": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-1"],
+        children: {
+            ordinal: { leaf: "text" },
+            label: { leaf: "text" },
+            state: { leaf: "badge" },
+        },
+        why: "The ordinal establishes sequence before the label names the work, while the state sits underneath so completion never replaces the step's identity.",
+    },
+    "subject-over-muted-caption-with-action": {
+        classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3"],
+        children: {
+            identity: { contract: "subject-over-muted-caption" },
+            action: { leaf: "button", optional: true },
+        },
+        why: "The subject and its quiet identifying detail stay one unit while the only permitted action remains at the far edge and wraps below rather than narrowing that identity.",
+    },
+    "request-beside-live-status": {
+        classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-2", "sm:[&>*:first-child]:col-span-2"],
+        children: {
+            journey: { contract: "horizontal-lifecycle-run" },
+            request: { contract: ["form-column", "subject-over-muted-caption-with-action"] },
+            status: { contract: ["heading-body-action-stack", "body-with-refusal-note"] },
+        },
+        why: "The journey spans the top because it explains both halves; beneath it the immutable request identity stays beside the changing live status so a push update never looks like a different product was requested.",
     },
     "template-offer-row": {
         /*

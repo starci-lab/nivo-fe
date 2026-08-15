@@ -70,6 +70,8 @@ export type AgentWorkspaceRow = {
     readonly name: string | null
     /** Free-form on the wire: `String!`, not an enum. */
     readonly status: string
+    /** Catalog order this workspace fulfills; the stable bridge from order events to workspace events. */
+    readonly catalogOrder: { readonly id: string } | null
 }
 
 /** One running instance, which is the infrastructure view of an app or a workspace. */
@@ -226,7 +228,7 @@ export type CatalogCategory =
 const EXPERT_SITE = "{ id slug customDomain provisionStatus status }"
 
 /** The fields a workspace row needs. */
-const AGENT_WORKSPACE = "{ id name status }"
+const AGENT_WORKSPACE = "{ id name status catalogOrder { id } }"
 
 /** The fields an instance row needs, including the shape the plan record wrongly called absent. */
 const INSTANCE = "{ id appKey detailId name plan ram vcpu status }"
@@ -330,6 +332,18 @@ export const myInvoices = (): Promise<Result<ReadonlyArray<InvoiceRow>>> =>
     graphql(`query MyInvoices { myInvoices { data ${INVOICE} message success error } }`)
 
 /**
+ * Settle one invoice owned by the current account.
+ *
+ * @param invoiceId - The unpaid invoice to settle from wallet balance.
+ * @returns The canonical paid invoice, or why settlement was refused.
+ */
+export const payInvoice = (invoiceId: string): Promise<Result<InvoiceRow>> =>
+    graphql(
+        `mutation PayInvoice($input: PayInvoiceInput!) { payInvoice(input: $input) { data ${INVOICE} message success error } }`,
+        { input: { invoiceId } },
+    )
+
+/**
  * Every order, including the ones paid for and not yet built.
  *
  * @returns The orders, or why there are none.
@@ -364,3 +378,78 @@ export const catalogItems = (category: CatalogCategory): Promise<Result<Readonly
  */
 export const myPodOpenclawStatus = (): Promise<Result<PodStatusRow>> =>
     graphql(`query MyPodOpenclawStatus { myPodOpenclawStatus { data ${POD_STATUS} message success error } }`)
+
+/** The draft site returned by the expert academy create mutation. */
+export interface CreatedExpertSite {
+    readonly id: string
+    readonly slug: string
+}
+
+/** The academy site after its single publication/deployment door has accepted it. */
+export interface PublishedExpertSite extends CreatedExpertSite {
+    readonly status: ExpertSiteStatus
+}
+
+/** Handles returned when expert academy provisioning is queued. */
+export interface ProvisionedExpertSite {
+    readonly jobId: string
+    readonly expertDeploymentId: string
+    readonly publicHost: string
+}
+
+/** Create a draft expert academy site owned by the signed-in viewer. */
+export const createExpertSite = (slug: string): Promise<Result<CreatedExpertSite>> =>
+    graphql(
+        `mutation CreateExpertSite($input: CreateExpertSiteInput!) {
+            createExpertSite(input: $input) { data { id slug } message success error }
+        }`,
+        { input: { slug } },
+    )
+
+/** Publish the academy and dispatch its deployment through the live academy owner. */
+export const publishExpertSite = (siteId: string): Promise<Result<PublishedExpertSite>> =>
+    graphql(
+        `mutation PublishExpertSite($input: PublishExpertSiteInput!) {
+            publishExpertSite(input: $input) { data { id slug status } message success error }
+        }`,
+        { input: { siteId, published: true } },
+    )
+
+/** Queue expert academy provisioning; readiness arrives through the deployment stream/read model. */
+export const provisionExpertSite = (siteId: string): Promise<Result<ProvisionedExpertSite>> =>
+    graphql(
+        `mutation ProvisionExpertSite($input: ProvisionExpertSiteInput!) {
+            provisionExpertSite(input: $input) { data { jobId expertDeploymentId publicHost } message success error }
+        }`,
+        { input: { siteId } },
+    )
+
+/** Request a new AgentOS order; fulfillment/provisioning is asynchronous. */
+export const orderAgentOs = (catalogItemSlug: string, catalogTierId?: string): Promise<Result<CatalogOrderRow>> =>
+    graphql(
+        `mutation OrderAgentOs($input: OrderCatalogItemInput!) {
+            orderCatalogItem(input: $input) { data { id status ${ORDER_PRODUCT} } message success error }
+        }`,
+        {
+            input: {
+                catalogItemSlug,
+                ...(catalogTierId === undefined ? {} : { catalogTierId }),
+            },
+        },
+    )
+
+/** Read the latest expert deployment for re-entry/readiness reconciliation. */
+export interface ExpertDeploymentSnapshot {
+    readonly id: string
+    readonly status: string
+    readonly publicHost: string | null
+}
+
+/** Read the latest deployment snapshot for one owned expert site so a resumed flow starts from persisted truth. */
+export const myExpertSiteDeployment = (siteId: string): Promise<Result<ExpertDeploymentSnapshot | null>> =>
+    graphql(
+        `query MyExpertSiteDeployment($siteId: ID!) {
+            myExpertSiteDeployment(siteId: $siteId) { data { id status publicHost } message success error }
+        }`,
+        { siteId },
+    )

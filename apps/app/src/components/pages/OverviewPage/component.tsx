@@ -205,6 +205,8 @@ export type WalletSectionView =
 export type OverviewPageActions = {
     /** Called when the reader follows the way out of the apps section. */
     readonly openApps?: () => void
+    /** Called when the reader enters the independent AgentOS product surface. */
+    readonly openAgentOs?: () => void
     /** Called when the reader follows the way out of the wallet section. */
     readonly openWallet?: () => void
 }
@@ -441,7 +443,7 @@ export const _OverviewPage = ({ title, apps, agentOs, servers, domains, wallet, 
             return defineContractProjection("label-row-over-card", () => (
                 <SurfaceCard
                     props={{ label: agentOs.label, seeMoreLabel: agentOs.plansLabel }}
-                    on={{ seeMore: undefined }}
+                    on={{ seeMore: on?.openAgentOs }}
                     contract="centred-empty-notice"
                     render={defineContractComponent("centred-empty-notice", {
                         notice: defineCompositeComponent("empty-notice", {}, () => (
@@ -479,7 +481,7 @@ export const _OverviewPage = ({ title, apps, agentOs, servers, domains, wallet, 
         return defineContractProjection("label-row-over-card", () => (
             <SurfaceCard
                 props={{ label: agentOs.label, seeMoreLabel: agentOs.openLabel }}
-                on={{ seeMore: undefined }}
+                on={{ seeMore: on?.openAgentOs }}
                 contract="fleet-resource-list"
                 render={defineContractComponent("fleet-resource-list", {
                     resource: agentOs.phase === "answered"

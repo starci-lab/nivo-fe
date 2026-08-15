@@ -61,6 +61,8 @@ export type OwnedAppRow = {
 export type TemplateOfferRowView = {
     /** The row's identity, and its React key. */
     readonly id: string
+    /** Stable provisionable-app key carried by this catalogue item. */
+    readonly templateKey: string
     /** What the seller calls the template. */
     readonly name: string
     /** The seller's own sentence about it. */
@@ -71,6 +73,8 @@ export type TemplateOfferRowView = {
     readonly priceLabel: string
     /** The words on the one press an offer carries. */
     readonly actionLabel: string
+    /** True when the catalogue can name the template but the backend cannot provision it yet. */
+    readonly actionDisabled: boolean
 }
 
 /** The section holding the apps this account owns, in every situation the set can be in. */
@@ -106,6 +110,8 @@ export interface AppsPageViewProps {
     readonly owned: OwnedSectionView
     /** The catalogue section's settled situation. */
     readonly catalogue: CatalogueSectionView
+    /** Start a new app from the selected template catalogue row. */
+    readonly onBuildTemplate: (templateKey: string) => void
 }
 
 /**
@@ -155,7 +161,7 @@ const ownedRow = (row: OwnedAppRow) => defineCompositeComponent("fleet-row", {},
  * @param row - The already-worded offer.
  * @returns The row, bound to the slot's composite identity.
  */
-const offerRow = (row: TemplateOfferRowView) => defineCompositeComponent("template-offer-row", {}, () => (
+const offerRow = (row: TemplateOfferRowView, onBuildTemplate: (templateKey: string) => void) => defineCompositeComponent("template-offer-row", {}, () => (
     <Tree
         contract="template-offer-row"
         render={defineContractComponent("template-offer-row", {
@@ -174,7 +180,7 @@ const offerRow = (row: TemplateOfferRowView) => defineCompositeComponent("templa
                 <Text props={{ content: row.priceLabel, size: "sm" }} />
             )),
             action: defineLeafComponent("button", {}, () => (
-                <Button props={{ label: row.actionLabel, size: "sm", variant: "primary" }} />
+                <Button props={{ label: row.actionLabel, size: "sm", variant: "primary", disabled: row.actionDisabled }} on={{ press: () => onBuildTemplate(row.templateKey) }} />
             )),
         })}
     />
@@ -225,7 +231,7 @@ const refusedSection = (label: string, note: string) => defineContractProjection
  * @param input - {@link AppsPageViewProps}
  * @returns The page node.
  */
-export const _AppsPage = ({ title, lede, owned, catalogue }: AppsPageViewProps) => {
+export const _AppsPage = ({ title, lede, owned, catalogue, onBuildTemplate }: AppsPageViewProps) => {
     /*
      * SECTION 1 - the apps this account owns, in every situation the set can be in.
      */
@@ -271,7 +277,7 @@ export const _AppsPage = ({ title, lede, owned, catalogue }: AppsPageViewProps) 
                 contract="fleet-resource-list"
                 render={defineContractComponent("fleet-resource-list", {
                     resource: catalogue.phase === "answered"
-                        ? catalogue.offers.map(offerRow)
+                        ? catalogue.offers.map((offer) => offerRow(offer, onBuildTemplate))
                         : [restingRow(4)],
                 })}
                 isLoading={isResting}

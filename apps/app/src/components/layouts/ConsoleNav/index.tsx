@@ -70,7 +70,7 @@ export interface ConsoleDestination {
 const DESTINATIONS: ReadonlyArray<ConsoleDestination> = [
     { key: "overview", route: "/overview" },
     { key: "apps", route: "/apps" },
-    { key: "agentos", route: null },
+    { key: "agentos", route: "/agentos" },
     { key: "servers", route: null },
     { key: "domains", route: null },
     { key: "wallet", route: "/wallet" },

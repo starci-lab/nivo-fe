@@ -84,6 +84,10 @@ export type { TextLinkData, TextLinkProps } from "./leaves/TextLink"
 
 export { Field } from "./composites/Field"
 export type { FieldActions, FieldData, FieldKind, FieldProps } from "./composites/Field"
+export { LifecycleStep } from "./composites/LifecycleStep"
+export type { LifecycleStepData, LifecycleStepProps, LifecycleStepState } from "./composites/LifecycleStep"
+export { RequestSummary } from "./composites/RequestSummary"
+export type { RequestSummaryActions, RequestSummaryData, RequestSummaryProps } from "./composites/RequestSummary"
 
 export { ContractContent, Tree } from "./branches/Tree"
 export type { TreeProps } from "./branches/Tree"

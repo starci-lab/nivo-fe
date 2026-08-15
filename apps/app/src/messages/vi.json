@@ -139,6 +139,7 @@
       "catalogueFact": "danh mục mẫu",
       "kindTemplateApp": "Mẫu ứng dụng",
       "build": "Dựng",
+      "unavailable": "Chưa sẵn sàng",
       "open": "Mở",
       "viewDns": "Xem bản ghi",
       "orderInProgress": "đơn đã thanh toán · đang dựng",
@@ -152,9 +153,66 @@
       "empty": "Chưa có workspace nào.",
       "emptyDescription": "Một workspace agent riêng, trực Zalo/Telegram theo quy trình của bạn.",
       "viewPlans": "Xem gói",
+      "workspacesLabel": "Workspace của bạn",
       "podReachable": "Pod đang trả lời",
       "podUnreachable": "Pod chưa trả lời",
       "checkedAt": "kiểm tra lúc {time}"
+    },
+    "provisioningFlows": {
+      "loadingTitle": "Đang tải sản phẩm",
+      "loadingText": "Đang đọc request và snapshot cấp phát mới nhất.",
+      "connecting": "Đang nối lại tiến trình trực tiếp. Snapshot đã lưu vẫn là nguồn sự thật.",
+      "preparingTitle": "Kubernetes đang dựng",
+      "readyTitle": "Sẵn sàng quản lý",
+      "failedTitle": "Tiến trình cần xử lý",
+      "failedLoad": "Không đọc được trạng thái cấp phát mới nhất.",
+      "failedProvision": "Cấp phát thất bại trước khi tài nguyên sẵn sàng.",
+      "unsupportedTitle": "Template chưa sẵn sàng",
+      "unsupportedText": "Template App này có trong catalog nhưng backend chưa nối luồng cấp phát.",
+      "backToApps": "Về Ứng dụng",
+      "manageApps": "Quản lý ứng dụng",
+      "steps": {
+        "request": "Yêu cầu",
+        "payment": "Thanh toán",
+        "createApp": "Tạo ứng dụng",
+        "createWorkspace": "Tạo workspace",
+        "infrastructure": "Dựng hạ tầng",
+        "manage": "Quản lý"
+      },
+      "stepState": {
+        "done": "Đã xong",
+        "current": "Đang thực hiện",
+        "upcoming": "Sắp tới"
+      },
+      "template": {
+        "detail": "Request Template App",
+        "slugLabel": "Slug ứng dụng",
+        "slugPlaceholder": "hoc-vien-cua-toi",
+        "slugHint": "Slug trở thành định danh địa chỉ ổn định của ứng dụng.",
+        "submit": "Tạo ứng dụng",
+        "requestTitle": "Tạo từ template này",
+        "acceptedTitle": "Đã nhận ứng dụng",
+        "acceptedText": "Ứng dụng đã được xuất bản và nivo đang tạo định danh deployment.",
+        "requestText": "Gửi định danh ứng dụng, sau đó nivo tạo và cấp phát stack độc lập.",
+        "preparingText": "Kubernetes watcher đang gửi deployment.status đúng cho deployment này.",
+        "readyText": "Stack ứng dụng đã sẵn sàng. Quay về Ứng dụng để quản lý."
+      },
+      "agentos": {
+        "requestTitle": "Yêu cầu workspace AgentOS",
+        "requestText": "Request tạo hóa đơn trước. Cấp phát chỉ bắt đầu sau khi thanh toán.",
+        "submit": "Yêu cầu AgentOS",
+        "paymentTitle": "Đang chờ thanh toán",
+        "paymentText": "Mở Ví và thanh toán hóa đơn của order này để bắt đầu fulfillment.",
+        "openWallet": "Mở Ví",
+        "acceptedTitle": "Order đã được nhận",
+        "acceptedText": "Thanh toán đã hoàn tất và nivo đang tạo định danh workspace.",
+        "preparingText": "Luồng sự kiện workspace chỉ đang theo dõi workspace này.",
+        "readyText": "Workspace đã sẵn sàng và xuất hiện trong trang quản lý AgentOS.",
+        "manage": "Quản lý AgentOS",
+        "orderMissing": "Không tìm thấy order AgentOS này trong tài khoản đang đăng nhập.",
+        "orderCancelled": "Order AgentOS này đã bị hủy.",
+        "startAgain": "Bắt đầu lại"
+      }
     },
     "servers": {
       "title": "Máy chủ",
@@ -190,6 +248,7 @@
       "transactionsEmpty": "Chưa có giao dịch nào.",
       "invoicesEmpty": "Chưa có hoá đơn nào.",
       "pay": "Thanh toán",
+      "paying": "Đang thanh toán...",
       "type": {
         "deposit": "Nạp",
         "spend": "Trừ"

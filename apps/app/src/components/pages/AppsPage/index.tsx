@@ -1,8 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useFormatter, useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
+import { useFormatter, useLocale, useTranslations } from "next-intl"
 import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow"
+import { DEFAULT_LOCALE } from "@/i18n/config"
 import { useSession } from "@/modules/auth/session"
 import {
     catalogItems,
@@ -107,6 +109,8 @@ const cheapestTier = (item: CatalogItemRow) => {
 export const AppsPage = () => {
     const t = useTranslations("console")
     const format = useFormatter()
+    const locale = useLocale()
+    const router = useRouter()
     const session = useSession()
     const isSignedIn = session.state.status === "signed-in"
     const [answer, setAnswer] = useState<AppsAnswer | null>(null)
@@ -212,20 +216,30 @@ export const AppsPage = () => {
             phase: "answered",
             label,
             fact,
-            offers: answer.catalogue.data.map((item) => {
+            offers: answer.catalogue.data.flatMap((item) => {
+                if (item.templateKey === null) {
+                    return []
+                }
                 const tier = cheapestTier(item)
-                return {
+                return [{
                     id: item.id,
+                    templateKey: item.templateKey,
                     name: item.name,
                     tagline: item.tagline ?? "",
                     kindLabel: t("apps.kindTemplateApp"),
                     priceLabel: tier === undefined
                         ? ""
                         : t("apps.priceTier", { tier: tier.name, price: money(tier.priceMonthlyVnd) }),
-                    actionLabel: t("apps.build"),
-                }
+                    actionLabel: item.templateKey === "ai_academy" ? t("apps.build") : t("apps.unavailable"),
+                    actionDisabled: item.templateKey !== "ai_academy",
+                }]
             }),
         }
+    }
+
+    const buildTemplate = (templateKey: string) => {
+        const route = `/apps/new/${encodeURIComponent(templateKey)}`
+        router.push(locale === DEFAULT_LOCALE ? route : `/${locale}${route}`)
     }
 
     return (
@@ -234,6 +248,7 @@ export const AppsPage = () => {
             lede={t("apps.lede")}
             owned={ownedView()}
             catalogue={catalogueView()}
+            onBuildTemplate={buildTemplate}
         />
     )
 }

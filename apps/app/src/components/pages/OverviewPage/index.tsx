@@ -436,7 +436,7 @@ export const OverviewPage = () => {
             servers={serversView}
             domains={domainsView()}
             wallet={walletView()}
-            on={{ openApps: open("/apps"), openWallet: open("/wallet") }}
+            on={{ openApps: open("/apps"), openAgentOs: open("/agentos"), openWallet: open("/wallet") }}
         />
     )
 }

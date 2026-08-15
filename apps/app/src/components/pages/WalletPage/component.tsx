@@ -74,6 +74,8 @@ export type LedgerSectionView =
         readonly phase: "answered"
         readonly label: string
         readonly facts: ReadonlyArray<WalletFactRow>
+        /** The one available ledger action, when this ledger owns one. */
+        readonly actionLabel?: string
     }
     | { readonly phase: "refused", readonly label: string, readonly note: string }
 
@@ -81,6 +83,8 @@ export type LedgerSectionView =
 export type WalletPageActions = {
     /** Called when the reader takes the way out of the balance section. */
     readonly topUp?: () => void
+    /** Settles the newest unpaid invoice shown by the invoice ledger. */
+    readonly payInvoice?: () => void
 }
 
 /** Props for {@link _WalletPage}. */
@@ -185,7 +189,7 @@ export const _WalletPage = ({ title, balance, transactions, invoices, on }: Wall
      * bought and whether it is settled. Both are label-and-figure lines about one object, so both take
      * the same ledger shape rather than two that would differ by accident.
      */
-    const ledgerSection = (ledger: LedgerSectionView) => {
+    const ledgerSection = (ledger: LedgerSectionView, action?: () => void) => {
         if (ledger.phase === "empty" || ledger.phase === "refused") {
             return ledger.phase === "empty"
                 ? sentenceSection(ledger.label, ledger.note)
@@ -195,7 +199,11 @@ export const _WalletPage = ({ title, balance, transactions, invoices, on }: Wall
         const facts = ledger.phase === "resting" ? RESTING_FACTS : ledger.facts
         return defineContractProjection("label-row-over-card", () => (
             <SurfaceCard
-                props={{ label: ledger.label }}
+                props={{
+                    label: ledger.label,
+                    seeMoreLabel: ledger.phase === "answered" ? ledger.actionLabel : undefined,
+                }}
+                on={{ seeMore: action }}
                 contract="labelled-fact-stack"
                 render={defineContractComponent("labelled-fact-stack", {
                     fact: facts.map((row) => factRow(row, isResting)),
@@ -212,7 +220,7 @@ export const _WalletPage = ({ title, balance, transactions, invoices, on }: Wall
                 heading: defineContractComponent("title-with-end-action", {
                     title: defineLeafComponent("heading", {}, () => <Heading props={{ content: title, level: 1 }} />),
                 }),
-                section: [balanceSection(), ledgerSection(transactions), ledgerSection(invoices)],
+                section: [balanceSection(), ledgerSection(transactions), ledgerSection(invoices, on?.payInvoice)],
             })}
         />
     )

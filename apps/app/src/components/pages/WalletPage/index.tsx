@@ -7,6 +7,7 @@ import {
     myInvoices,
     myWallet,
     myWalletTransactions,
+    payInvoice as payInvoiceMutation,
     type InvoiceRow,
     type WalletRow,
     type WalletTransactionRow,
@@ -54,6 +55,8 @@ export const WalletPage = () => {
     const isSignedIn = session.state.status === "signed-in"
     const [money, setMoney] = useState<MoneyAnswer | null>(null)
     const [movements, setMovements] = useState<Result<ReadonlyArray<WalletTransactionRow>> | null>(null)
+    const [payingInvoice, setPayingInvoice] = useState(false)
+    const [paymentError, setPaymentError] = useState<string | null>(null)
 
     useEffect(() => {
         if (!isSignedIn) {
@@ -167,6 +170,9 @@ export const WalletPage = () => {
         return {
             phase: "answered",
             label,
+            actionLabel: money.invoices.data.some((invoice) => invoice.status === "unpaid")
+                ? payingInvoice ? t("wallet.paying") : t("wallet.pay")
+                : undefined,
             /*
              * AN INVOICE IS THE ONE PLACE A HUMAN-READABLE PRODUCT LABEL IS LEGITIMATELY DERIVABLE.
              * `myInvoices` is the only handler that loads `catalogOrder.catalogItem` AND
@@ -182,10 +188,36 @@ export const WalletPage = () => {
                     label: item === undefined
                         ? t("wallet.invoicesLabel")
                         : tier === undefined ? item : `${item} · ${tier}`,
-                    value: `${amount(invoice.amountVnd)} · ${t(`wallet.status.${invoice.status}`)}`,
+                    value: `${amount(invoice.amountVnd)} · ${t(`wallet.status.${invoice.status}`)}${invoice.status === "unpaid" && paymentError !== null ? ` · ${paymentError}` : ""}`,
                 }
             }),
         }
+    }
+
+    const payInvoice = async () => {
+        if (payingInvoice || money === null || !money.invoices.ok) {
+            return
+        }
+        const invoice = money.invoices.data.find((row) => row.status === "unpaid")
+        if (invoice === undefined) {
+            return
+        }
+        setPayingInvoice(true)
+        setPaymentError(null)
+        const paid = await payInvoiceMutation(invoice.id)
+        if (!paid.ok) {
+            setPaymentError(paid.reason)
+            setPayingInvoice(false)
+            return
+        }
+        const [wallet, invoices, transactions] = await Promise.all([
+            myWallet(),
+            myInvoices(),
+            myWalletTransactions(),
+        ])
+        setMoney({ wallet, invoices })
+        setMovements(transactions)
+        setPayingInvoice(false)
     }
 
     return (
@@ -194,6 +226,7 @@ export const WalletPage = () => {
             balance={balanceView()}
             transactions={transactionsView()}
             invoices={invoicesView()}
+            on={{ payInvoice: () => void payInvoice() }}
         />
     )
 }
