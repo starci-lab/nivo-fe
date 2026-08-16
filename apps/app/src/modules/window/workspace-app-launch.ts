@@ -1,25 +1,25 @@
-/** Open a reusable blank popup synchronously so the browser does not block the later navigation. */
-export const openWorkspaceAppPopup = (workspaceId: string): Window | null => {
-    const width = Math.min(1280, window.screen.availWidth)
-    const height = Math.min(900, window.screen.availHeight)
-    const left = Math.max(0, Math.round(window.screenX + (window.outerWidth - width) / 2))
-    const top = Math.max(0, Math.round(window.screenY + (window.outerHeight - height) / 2))
-    const popup = window.open(
-        "about:blank",
-        `nivo-openclaw-${workspaceId}`,
-        `popup=yes,width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`,
-    )
-    popup?.focus()
-    return popup
+/** Message sent by the short-lived same-origin launch bridge to the owning Nivo page. */
+export type WorkspaceAppLaunchMessage =
+    | { readonly status: "issued"; readonly workspaceId: string; readonly launchId: string }
+    | { readonly status: "failed"; readonly workspaceId: string }
+
+/** One collision-free same-origin channel per workspace launch surface. */
+export const workspaceAppLaunchChannelName = (workspaceId: string): string => `nivo-workspace-app-launch:${workspaceId}`
+
+/** Accept only an HTTPS callback, with localhost allowed for a future local gateway fixture. */
+export const safeWorkspaceAppRedirect = (redirectUrl: string): string | null => {
+    const destination = new URL(redirectUrl)
+    if (destination.protocol !== "https:" && destination.hostname !== "localhost") return null
+    return destination.href
 }
 
-/** Navigate only to the exact callback URL returned by backend. */
-export const navigateWorkspaceAppPopup = (popup: Window, redirectUrl: string): boolean => {
-    const destination = new URL(redirectUrl)
-    if (destination.protocol !== "https:" && destination.hostname !== "localhost") {
-        popup.close()
-        return false
-    }
-    popup.location.replace(destination.href)
-    return true
+/** Navigate with a native anchor so embedded browsers do not need Location.replace support. */
+export const followWorkspaceAppRedirect = (redirectUrl: string): void => {
+    const anchor = document.createElement("a")
+    anchor.href = redirectUrl
+    anchor.target = "_self"
+    anchor.rel = "noopener"
+    anchor.hidden = true
+    document.body.append(anchor)
+    window.requestAnimationFrame(() => anchor.click())
 }

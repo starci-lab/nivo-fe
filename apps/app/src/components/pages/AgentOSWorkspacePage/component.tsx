@@ -39,12 +39,13 @@ export type AgentOSWorkspacePageViewProps = {
     readonly labels: AgentOSWorkspacePageLabels
     readonly onSelectSection: (section: AgentOSWorkspaceSection) => void
     readonly onOpenAgentConsole: () => void
+    readonly openClawLaunchHref: string
     readonly launchState: Parameters<typeof AgentOSWorkspaceApplications>[0]["launchState"]
     readonly formatDate: (value: string) => string
 }
 
 /** Compose one AgentOS workspace from domain blocks; the page owns no API or operational JSX. */
-export const _AgentOSWorkspacePage = ({ state, message, data, section, labels, launchState, onSelectSection, onOpenAgentConsole, formatDate }: AgentOSWorkspacePageViewProps) => {
+export const _AgentOSWorkspacePage = ({ state, message, data, section, labels, launchState, openClawLaunchHref, onSelectSection, onOpenAgentConsole, formatDate }: AgentOSWorkspacePageViewProps) => {
     const title = data?.workspace.name ?? labels.titleFallback
     const sections = state !== "ready" || data === undefined
         ? [defineContractProjection("label-row-over-card", () => <EmptyNotice props={{ message: message ?? labels.loading }} />)]
@@ -55,7 +56,13 @@ export const _AgentOSWorkspacePage = ({ state, message, data, section, labels, l
             ]
             : section === "applications" || section === "access"
                 ? [defineContractProjection("label-row-over-card", () => (
-                    <AgentOSWorkspaceApplications apps={data.apps} labels={labels.applications} launchState={launchState} onManageOpenClaw={onOpenAgentConsole} />
+                    <AgentOSWorkspaceApplications
+                        apps={data.apps}
+                        labels={labels.applications}
+                        launchState={launchState}
+                        openClawLaunchHref={openClawLaunchHref}
+                        onManageOpenClaw={onOpenAgentConsole}
+                    />
                 ))]
                 : section === "infrastructure"
                     ? [

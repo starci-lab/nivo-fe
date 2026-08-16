@@ -63,6 +63,8 @@ export type {
 
 export { Avatar } from "./leaves/Avatar"
 export type { AvatarData, AvatarProps } from "./leaves/Avatar"
+export { ActionLink } from "./leaves/ActionLink"
+export type { ActionLinkActions, ActionLinkData, ActionLinkProps } from "./leaves/ActionLink"
 export { Badge } from "./leaves/Badge"
 export type { BadgeData, BadgeProps, BadgeTone } from "./leaves/Badge"
 export { Button } from "./leaves/Button"

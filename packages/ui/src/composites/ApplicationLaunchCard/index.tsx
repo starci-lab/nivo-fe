@@ -1,3 +1,4 @@
+import { ActionLink } from "../../leaves/ActionLink"
 import { Badge } from "../../leaves/Badge"
 import { Button } from "../../leaves/Button"
 import { Text } from "../../leaves/Text"
@@ -17,6 +18,8 @@ export type ApplicationLaunchCardData = {
     readonly disabled?: boolean
     readonly isPending?: boolean
     readonly detail?: string
+    readonly actionHref?: string
+    readonly actionTarget?: "_blank" | "_self"
 }
 
 /** The one safe destination an application card may open. */
@@ -37,9 +40,13 @@ export const ApplicationLaunchCard = ({ props, on, isLoading = false }: Applicat
             ...(props.detail === undefined ? {} : {
                 detail: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: props.detail, size: "sm", tone: "muted" }} />),
             }),
-            action: defineLeafComponent("button", {}, () => (
-                <Button props={{ label: props.actionLabel, disabled: props.disabled, isPending: props.isPending }} on={{ press: on?.press }} isLoading={isLoading} />
-            )),
+            action: props.actionHref !== undefined && props.disabled !== true
+                ? defineLeafComponent("action-link", {}, () => (
+                    <ActionLink props={{ label: props.actionLabel, href: props.actionHref!, target: props.actionTarget }} on={{ press: on?.press }} />
+                ))
+                : defineLeafComponent("button", {}, () => (
+                    <Button props={{ label: props.actionLabel, disabled: props.disabled, isPending: props.isPending }} on={{ press: on?.press }} isLoading={isLoading} />
+                )),
         })}
     />
 )

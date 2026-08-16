@@ -22,11 +22,12 @@ export type AgentOSWorkspaceApplicationsProps = {
         readonly disconnected: string
     }
     readonly launchState: "idle" | "opening" | "connected" | "blocked" | "expired" | "disconnected"
+    readonly openClawLaunchHref: string
     readonly onManageOpenClaw: () => void
 }
 
 /** Render application capability only; no credential or one-time code enters this boundary. */
-export const AgentOSWorkspaceApplications = ({ apps, labels, launchState, onManageOpenClaw }: AgentOSWorkspaceApplicationsProps) => (
+export const AgentOSWorkspaceApplications = ({ apps, labels, launchState, openClawLaunchHref, onManageOpenClaw }: AgentOSWorkspaceApplicationsProps) => (
     <SurfaceCard
         props={{ label: labels.section }}
         contract="application-launch-grid"
@@ -44,6 +45,8 @@ export const AgentOSWorkspaceApplications = ({ apps, labels, launchState, onMana
                             statusTone: app.available ? "success" : "warning",
                             actionLabel: openClaw && launchState === "opening" ? labels.opening : openClaw ? labels.manage : labels.unavailableAction,
                             disabled: !openClaw || !app.available || launchState === "opening",
+                            actionHref: openClaw ? openClawLaunchHref : undefined,
+                            actionTarget: openClaw ? "_blank" : undefined,
                             detail: app.reason === "SECURITY_UPGRADE_REQUIRED"
                                 ? labels.securityUpgradeRequired
                                 : openClaw && launchState === "blocked"

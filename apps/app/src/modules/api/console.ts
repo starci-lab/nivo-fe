@@ -526,7 +526,7 @@ export const issueAgentWorkspaceAppLaunch = (workspaceId: string): Promise<Resul
                 data { launchId redirectUrl expiresAt } message success error
             }
         }`,
-        { input: { workspaceId, app: "OPENCLAW" } },
+        { input: { workspaceId, app: "Openclaw" } },
     )
 
 /** Keep one redeemed workspace launch alive while the Nivo owner remains present. */

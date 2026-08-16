@@ -1004,7 +1004,7 @@ export const CONTRACTS = buildContracts({
             identity: { contract: "subject-over-muted-caption" },
             state: { leaf: "badge" },
             detail: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
-            action: { leaf: "button" },
+            action: { leaf: ["button", "action-link"] },
         },
         why: "One application states what it is, whether it can be entered and one safe action; refusal detail stays quiet and no credential-shaped value enters the card.",
     },
