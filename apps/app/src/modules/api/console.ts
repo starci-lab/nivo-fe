@@ -625,3 +625,354 @@ export const myExpertSiteDeployment = (siteId: string): Promise<Result<ExpertDep
         }`,
         { siteId },
     )
+
+/** Aggregate growth facts projected from one Academy owned by the viewer. */
+export type AcademyGrowthSnapshot = {
+    readonly revenueVnd: number
+    readonly paidOrders: number
+    readonly totalMembers: number
+    readonly activeMembers: number
+    readonly totalCompletions: number
+}
+
+/** One student row in the Academy control center. */
+export type AcademyStudent = {
+    readonly id: string
+    readonly name: string
+    readonly email: string
+    readonly role: string
+    readonly status: string
+    readonly xp: number
+}
+
+/** A bounded student page returned by the owner-scoped bridge. */
+export type AcademyStudentsPage = { readonly items: ReadonlyArray<AcademyStudent>, readonly total: number }
+
+/** Purchase history carried by a student detail. */
+export type AcademyStudentOrder = {
+    readonly id: string
+    readonly courseSlug: string
+    readonly status: string
+    readonly amountVnd: number
+}
+
+/** Progress through one course. */
+export type AcademyStudentCourseProgress = {
+    readonly slug: string
+    readonly title: string
+    readonly completed: number
+    readonly total: number
+}
+
+/** Owner-only student detail. */
+export type AcademyStudentDetail = {
+    readonly member: Omit<AcademyStudent, "xp">
+    readonly orders: ReadonlyArray<AcademyStudentOrder>
+    readonly courses: ReadonlyArray<AcademyStudentCourseProgress>
+}
+
+/** Safe status of one write-only Academy credential. */
+export type AcademyCredentialStatus = {
+    readonly key: string
+    readonly configured: boolean
+    readonly hint: string | null
+    readonly syncedAt: string | null
+    readonly verification: string
+    readonly verificationReason: string | null
+    readonly verifiedAt: string | null
+}
+
+/** Custom domain state, including the DNS target the customer must publish. */
+export type AcademyCustomDomainState = {
+    readonly domain: string | null
+    readonly target: string
+    readonly dnsReady: boolean
+    readonly delivery: string
+    readonly detail: string
+}
+
+/** Safe provider status. Secret values are deliberately absent. */
+export type AcademyProviderStatus = {
+    readonly provider: string
+    readonly status: string
+    readonly clientId: string | null
+    readonly identifier: string | null
+    readonly consentMode: string | null
+    readonly reason: string | null
+    readonly deliveredAt: string | null
+    readonly verifiedAt: string | null
+}
+
+/** Safe webhook status. */
+export type AcademyWebhookStatus = {
+    readonly id: string
+    readonly endpoint: string
+    readonly events: ReadonlyArray<string>
+    readonly enabled: boolean
+    readonly version: number
+    readonly lastDeliveryStatus: string | null
+    readonly lastDeliveredAt: string | null
+}
+
+/** Complete Integration Center read model with no credential material. */
+export type AcademyIntegrations = {
+    readonly credentials: ReadonlyArray<AcademyCredentialStatus>
+    readonly customDomain: AcademyCustomDomainState | null
+    readonly google: AcademyProviderStatus
+    readonly zalo: AcademyProviderStatus
+    readonly analytics: ReadonlyArray<AcademyProviderStatus>
+    readonly webhooks: ReadonlyArray<AcademyWebhookStatus>
+}
+
+/** One lead submitted through an Academy public site. */
+export type ExpertSiteLead = {
+    readonly id: string
+    readonly name: string
+    readonly contact: string
+    readonly message: string | null
+    readonly status: string
+    readonly note: string | null
+}
+
+/** Filters and pagination accepted by the Academy student list. */
+export type MyAcademyStudentsInput = { readonly siteId: string, readonly offset?: number, readonly limit?: number, readonly search?: string, readonly status?: string }
+/** Identity and optional bootstrap credentials for a new student. */
+export type CreateAcademyStudentInput = { readonly siteId: string, readonly name: string, readonly email: string, readonly password?: string, readonly role?: string }
+/** Editable identity fields of one existing student. */
+export type UpdateAcademyStudentInput = { readonly siteId: string, readonly memberId: string, readonly name?: string, readonly email?: string }
+/** Targeted active/banned transition for one student. */
+export type SetAcademyStudentStatusInput = { readonly siteId: string, readonly memberId: string, readonly status: "active" | "banned", readonly reason?: string }
+/** Student and course identity used to grant access. */
+export type AcademyCourseAccessInput = { readonly siteId: string, readonly email: string, readonly courseSlug: string, readonly note?: string }
+/** Student and course identity used to revoke gifted access. */
+export type RevokeAcademyCourseAccessInput = { readonly siteId: string, readonly email: string, readonly courseSlug: string }
+/** Resulting course-access row. */
+export type AcademyCourseAccess = { readonly id: string, readonly email: string, readonly courseSlug: string, readonly status: string }
+/** Safe result of revoking gifted access. */
+export type RevokedAcademyCourseAccess = { readonly revoked: number, readonly keptPaidPurchase: boolean }
+/** Follow-up fields editable on an Academy lead. */
+export type UpdateExpertSiteLeadInput = { readonly leadId: string, readonly status?: string, readonly note?: string }
+/** Lead and locale used to ask for an unsent draft. */
+export type DraftLeadReplyInput = { readonly leadId: string, readonly locale?: "vi" | "en" }
+/** AI-authored reply that remains unsent. */
+export type DraftedLeadReply = { readonly reply: string }
+/** Write-only Academy credential submission. */
+export type SaveAcademyCredentialInput = { readonly siteId: string, readonly key: string, readonly value: string }
+/** Safe status returned after storing and delivering a credential. */
+export type AcademyCredentialSaveResult = { readonly credential: AcademyCredentialStatus, readonly delivery: string, readonly detail: string }
+/** Domain replacement or explicit clear for one Academy. */
+export type SetAcademyCustomDomainInput = { readonly siteId: string, readonly domain: string | null }
+/** Write-only Google OAuth client configuration. */
+export type SaveAcademyGoogleOAuthInput = { readonly siteId: string, readonly clientId: string, readonly clientSecret: string }
+/** Analytics identifier and consent policy for one provider. */
+export type SaveAcademyAnalyticsInput = { readonly siteId: string, readonly provider: "ga4" | "meta_pixel", readonly identifier: string | null, readonly consentMode: "required" | "granted" | "denied" }
+/** Signed webhook destination and subscribed Academy events. */
+export type CreateAcademyWebhookInput = { readonly siteId: string, readonly endpoint: string, readonly events: ReadonlyArray<string> }
+/** Optimistically fenced webhook-secret rotation. */
+export type RotateAcademyWebhookSecretInput = { readonly siteId: string, readonly webhookId: string, readonly expectedVersion: number }
+/** One-time webhook secret returned only by create or rotate. */
+export type AcademyWebhookSecretResult = AcademyWebhookStatus & { readonly signingSecret: string }
+/** Short-lived Zalo authorization destination. */
+export type AcademyZaloAuthorization = { readonly authorizationUrl: string, readonly expiresAt: string }
+
+/** Read Academy growth through the owner-scoped Nivo bridge. */
+export const myAcademyGrowthSnapshot = (siteId: string): Promise<Result<AcademyGrowthSnapshot>> =>
+    graphql(
+        `query MyAcademyGrowthSnapshot($siteId: String!) {
+            myAcademyGrowthSnapshot(siteId: $siteId) { data { revenueVnd paidOrders totalMembers activeMembers totalCompletions } message success error }
+        }`,
+        { siteId },
+    )
+
+/** Read one bounded student page through the owner-scoped Nivo bridge. */
+export const myAcademyStudents = (input: MyAcademyStudentsInput): Promise<Result<AcademyStudentsPage>> =>
+    graphql(
+        `query MyAcademyStudents($input: MyAcademyStudentsInput!) {
+            myAcademyStudents(input: $input) { data { items { id name email role status xp } total } message success error }
+        }`,
+        { input },
+    )
+
+/** Read one student detail after ownership is checked by Core. */
+export const myAcademyStudentDetail = (siteId: string, memberId: string): Promise<Result<AcademyStudentDetail>> =>
+    graphql(
+        `query MyAcademyStudentDetail($siteId: String!, $memberId: String!) {
+            myAcademyStudentDetail(siteId: $siteId, memberId: $memberId) {
+                data { member { id name email role status } orders { id courseSlug status amountVnd } courses { slug title completed total } }
+                message success error
+            }
+        }`,
+        { siteId, memberId },
+    )
+
+/** Read all safe provider states for one owned Academy. */
+export const myAcademyIntegrations = (siteId: string): Promise<Result<AcademyIntegrations>> =>
+    graphql(
+        `query MyAcademyIntegrations($siteId: String!) {
+            myAcademyIntegrations(siteId: $siteId) {
+                data {
+                    credentials { key configured hint syncedAt verification verificationReason verifiedAt }
+                    customDomain { domain target dnsReady delivery detail }
+                    google { provider status clientId identifier consentMode reason deliveredAt verifiedAt }
+                    zalo { provider status clientId identifier consentMode reason deliveredAt verifiedAt }
+                    analytics { provider status clientId identifier consentMode reason deliveredAt verifiedAt }
+                    webhooks { id endpoint events enabled version lastDeliveryStatus lastDeliveredAt }
+                }
+                message success error
+            }
+        }`,
+        { siteId },
+    )
+
+/** Read leads received by one owned Academy. */
+export const myExpertSiteLeads = (siteId: string, limit = 20, offset = 0): Promise<Result<ReadonlyArray<ExpertSiteLead>>> =>
+    graphql(
+        `query MyExpertSiteLeads($siteId: ID!, $limit: Int, $offset: Int) {
+            myExpertSiteLeads(siteId: $siteId, limit: $limit, offset: $offset) { data { id name contact message status note } message success error }
+        }`,
+        { siteId, limit, offset },
+    )
+
+/** Create a student in one owned Academy. */
+export const createAcademyStudent = (input: CreateAcademyStudentInput): Promise<Result<AcademyStudent>> =>
+    graphql(
+        `mutation CreateAcademyStudent($input: CreateAcademyStudentInput!) {
+            createAcademyStudent(input: $input) { data { id name email role status xp } message success error }
+        }`,
+        { input },
+    )
+
+/** Update one student's identity fields. */
+export const updateAcademyStudent = (input: UpdateAcademyStudentInput): Promise<Result<AcademyStudent>> =>
+    graphql(
+        `mutation UpdateAcademyStudent($input: UpdateAcademyStudentInput!) {
+            updateAcademyStudent(input: $input) { data { id name email role status xp } message success error }
+        }`,
+        { input },
+    )
+
+/** Change one student's active/banned state. */
+export const setAcademyStudentStatus = (input: SetAcademyStudentStatusInput): Promise<Result<AcademyStudent>> =>
+    graphql(
+        `mutation SetAcademyStudentStatus($input: SetAcademyStudentStatusInput!) {
+            setAcademyStudentStatus(input: $input) { data { id name email role status xp } message success error }
+        }`,
+        { input },
+    )
+
+/** Grant one course to a student. */
+export const grantAcademyCourseAccess = (input: AcademyCourseAccessInput): Promise<Result<AcademyCourseAccess>> =>
+    graphql(
+        `mutation GrantAcademyCourseAccess($input: GrantAcademyCourseAccessInput!) {
+            grantAcademyCourseAccess(input: $input) { data { id email courseSlug status } message success error }
+        }`,
+        { input },
+    )
+
+/** Revoke gifted course access from a student. */
+export const revokeAcademyCourseAccess = (input: RevokeAcademyCourseAccessInput): Promise<Result<RevokedAcademyCourseAccess>> =>
+    graphql(
+        `mutation RevokeAcademyCourseAccess($input: RevokeAcademyCourseAccessInput!) {
+            revokeAcademyCourseAccess(input: $input) { data { revoked keptPaidPurchase } message success error }
+        }`,
+        { input },
+    )
+
+/** Update the follow-up state of one Academy lead. */
+export const updateExpertSiteLead = (input: UpdateExpertSiteLeadInput): Promise<Result<ExpertSiteLead>> =>
+    graphql(
+        `mutation UpdateExpertSiteLead($input: UpdateExpertSiteLeadInput!) {
+            updateExpertSiteLead(input: $input) { data { id name contact message status note } message success error }
+        }`,
+        { input },
+    )
+
+/** Draft a reply for one Academy lead without sending it. */
+export const draftLeadReply = (input: DraftLeadReplyInput): Promise<Result<DraftedLeadReply>> =>
+    graphql(
+        `mutation DraftLeadReply($input: DraftLeadReplyInput!) {
+            draftLeadReply(input: $input) { data { reply } message success error }
+        }`,
+        { input },
+    )
+
+/** Store one Academy credential and return delivery status, never its value. */
+export const saveAcademyCredential = (input: SaveAcademyCredentialInput): Promise<Result<AcademyCredentialSaveResult>> =>
+    graphql(
+        `mutation SaveAcademyCredential($input: SaveAcademyCredentialInput!) {
+            saveAcademyCredential(input: $input) { data { credential { key configured hint syncedAt verification verificationReason verifiedAt } delivery detail } message success error }
+        }`,
+        { input },
+    )
+
+/** Store or clear one Academy custom domain. */
+export const setAcademyCustomDomain = (input: SetAcademyCustomDomainInput): Promise<Result<AcademyCustomDomainState>> =>
+    graphql(
+        `mutation SetAcademyCustomDomain($input: SetAcademyCustomDomainInput!) {
+            setAcademyCustomDomain(input: $input) { data { domain target dnsReady delivery detail } message success error }
+        }`,
+        { input },
+    )
+
+/** Save write-only Google OAuth credentials. */
+export const saveAcademyGoogleOAuth = (input: SaveAcademyGoogleOAuthInput): Promise<Result<AcademyProviderStatus>> =>
+    graphql(
+        `mutation SaveAcademyGoogleOAuth($input: SaveAcademyGoogleOAuthInput!) {
+            saveAcademyGoogleOAuth(input: $input) { data { provider status clientId identifier consentMode reason deliveredAt verifiedAt } message success error }
+        }`,
+        { input },
+    )
+
+/** Disconnect the Academy Google login provider. */
+export const disconnectAcademyGoogleOAuth = (siteId: string): Promise<Result<AcademyProviderStatus>> =>
+    graphql(
+        `mutation DisconnectAcademyGoogleOAuth($input: DisconnectAcademyGoogleOAuthInput!) {
+            disconnectAcademyGoogleOAuth(input: $input) { data { provider status clientId identifier consentMode reason deliveredAt verifiedAt } message success error }
+        }`,
+        { input: { siteId } },
+    )
+
+/** Begin a short-lived Zalo OA authorization flow. */
+export const beginAcademyZaloAuthorization = (siteId: string): Promise<Result<AcademyZaloAuthorization>> =>
+    graphql(
+        `mutation BeginAcademyZaloAuthorization($input: BeginAcademyZaloAuthorizationInput!) {
+            beginAcademyZaloAuthorization(input: $input) { data { authorizationUrl expiresAt } message success error }
+        }`,
+        { input: { siteId } },
+    )
+
+/** Save one analytics identifier and consent mode. */
+export const saveAcademyAnalytics = (input: SaveAcademyAnalyticsInput): Promise<Result<AcademyProviderStatus>> =>
+    graphql(
+        `mutation SaveAcademyAnalytics($input: SaveAcademyAnalyticsInput!) {
+            saveAcademyAnalytics(input: $input) { data { provider status clientId identifier consentMode reason deliveredAt verifiedAt } message success error }
+        }`,
+        { input },
+    )
+
+/** Create a signed Academy webhook and reveal its signing secret once. */
+export const createAcademyWebhook = (input: CreateAcademyWebhookInput): Promise<Result<AcademyWebhookSecretResult>> =>
+    graphql(
+        `mutation CreateAcademyWebhook($input: CreateAcademyWebhookInput!) {
+            createAcademyWebhook(input: $input) { data { id endpoint events enabled version lastDeliveryStatus lastDeliveredAt signingSecret } message success error }
+        }`,
+        { input },
+    )
+
+/** Rotate a webhook secret with optimistic version fencing. */
+export const rotateAcademyWebhookSecret = (input: RotateAcademyWebhookSecretInput): Promise<Result<AcademyWebhookSecretResult>> =>
+    graphql(
+        `mutation RotateAcademyWebhookSecret($input: RotateAcademyWebhookSecretInput!) {
+            rotateAcademyWebhookSecret(input: $input) { data { id endpoint events enabled version lastDeliveryStatus lastDeliveredAt signingSecret } message success error }
+        }`,
+        { input },
+    )
+
+/** Disable one Academy webhook. */
+export const disableAcademyWebhook = (siteId: string, webhookId: string): Promise<Result<AcademyWebhookStatus>> =>
+    graphql(
+        `mutation DisableAcademyWebhook($input: DisableAcademyWebhookInput!) {
+            disableAcademyWebhook(input: $input) { data { id endpoint events enabled version lastDeliveryStatus lastDeliveredAt } message success error }
+        }`,
+        { input: { siteId, webhookId } },
+    )

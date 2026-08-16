@@ -224,6 +224,109 @@
         }
       }
     },
+    "academyControlCenter": {
+      "title": "Học viện chuyên gia",
+      "loading": "Đang xác minh học viện và quyền quản lý.",
+      "refused": "Không tìm thấy học viện này hoặc tài khoản hiện tại không có quyền quản lý.",
+      "openSite": "Mở trang học viện",
+      "tabsLabel": "Chế độ quản lý học viện",
+      "tabs": {
+        "growth": "Tăng trưởng",
+        "system": "Hệ thống"
+      },
+      "growth": {
+        "section": "Tổng quan tăng trưởng",
+        "health": "Mức độ hoạt động",
+        "loading": "Đang đọc số liệu học viện.",
+        "refused": "Chưa đọc được số liệu tăng trưởng của học viện này.",
+        "revenue": "Doanh thu",
+        "orders": "Đơn đã thanh toán",
+        "members": "Học viên",
+        "completions": "Lượt hoàn thành",
+        "activeRate": "Học viên đang hoạt động"
+      },
+      "students": {
+        "section": "Học viên",
+        "empty": "Chưa có học viên nào.",
+        "refused": "Chưa đọc được danh sách học viên.",
+        "open": "Xem",
+        "active": "Đang hoạt động",
+        "banned": "Đã khóa",
+        "detail": "Tiến độ học viên",
+        "create": "Thêm học viên",
+        "name": "Tên học viên",
+        "email": "Email",
+        "password": "Mật khẩu ban đầu",
+        "saveStudent": "Tạo học viên",
+        "courseSlug": "Slug khóa học",
+        "grant": "Cấp quyền khóa học",
+        "revoke": "Thu hồi quyền được tặng",
+        "ban": "Khóa học viên",
+        "activate": "Mở lại học viên",
+        "loadingDetail": "Đang đọc tiến độ học viên.",
+        "saved": "Đã cập nhật học viên.",
+        "actionFailed": "Không thể thực hiện thao tác học viên này."
+      },
+      "leads": {
+        "section": "CRM khách hàng tiềm năng",
+        "empty": "Chưa có khách hàng tiềm năng nào gửi thông tin.",
+        "refused": "Chưa đọc được CRM của học viện.",
+        "open": "Mở",
+        "detail": "Theo dõi liên hệ",
+        "advance": "Lưu và chuyển bước",
+        "draft": "Soạn phản hồi bằng AI",
+        "saved": "Đã cập nhật khách hàng tiềm năng.",
+        "actionFailed": "Không thể cập nhật khách hàng tiềm năng này."
+      },
+      "integrations": {
+        "section": "Trung tâm tích hợp",
+        "refused": "Chưa đọc được trạng thái tích hợp của học viện.",
+        "configure": "Thiết lập",
+        "save": "Lưu cấu hình",
+        "authorize": "Kết nối Zalo",
+        "saved": "Đã lưu. Giá trị bí mật sẽ không được hiển thị lại.",
+        "saveFailed": "Không thể lưu cấu hình này.",
+        "notConfigured": "Chưa cấu hình",
+        "credentialCount": "Đã lưu {count} trường",
+        "webhookCount": "{count} webhook",
+        "webhookSecretCopied": "Webhook đã tạo; signing secret một lần đã được gửi vào clipboard.",
+        "dnsTarget": "Trỏ CNAME hoặc A record phù hợp về {target}.",
+        "status": {
+          "absent": "Chưa cấu hình",
+          "pending": "Đang chờ",
+          "live": "Đang phục vụ",
+          "connected": "Đã kết nối",
+          "configured": "Đã cấu hình",
+          "verified": "Đã xác minh",
+          "rejected": "Bị từ chối",
+          "failed": "Có lỗi",
+          "expired": "Đã hết hạn",
+          "unreachable": "Chưa kết nối được",
+          "authorizing": "Đang cấp quyền"
+        },
+        "fields": {
+          "domain": "Tên miền riêng",
+          "clientId": "Google Client ID",
+          "clientSecret": "Google Client Secret",
+          "credentialKey": "Tên biến cấu hình",
+          "credentialValue": "Giá trị bí mật",
+          "identifier": "Measurement ID / Pixel ID",
+          "consentMode": "Chế độ đồng ý",
+          "endpoint": "HTTPS webhook endpoint",
+          "events": "Các sự kiện, cách nhau bằng dấu phẩy"
+        },
+        "providers": {
+          "domain": { "title": "Tên miền", "description": "Gắn hostname riêng và kiểm tra DNS cho cả FE lẫn API.", "formLabel": "Cấu hình tên miền" },
+          "google": { "title": "Google Login", "description": "Cho học viên đăng nhập Google qua Keycloak riêng của học viện.", "formLabel": "Google OAuth" },
+          "smtp": { "title": "Email SMTP", "description": "Gửi email giao dịch bằng sender của học viện.", "formLabel": "Thông tin SMTP", "keys": "SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD hoặc SMTP_FROM" },
+          "payment": { "title": "Thanh toán", "description": "Nhận PayOS hoặc SePay vào đúng tài khoản của học viện.", "formLabel": "Thông tin thanh toán", "keys": "PAYOS_CLIENT_ID, PAYOS_API_KEY, PAYOS_CHECKSUM_KEY hoặc các khóa SEPAY_*" },
+          "zalo": { "title": "Zalo OA", "description": "Kết nối OA bằng phiên OAuth ngắn hạn do Nivo cấp.", "formLabel": "Kết nối Zalo OA" },
+          "ga4": { "title": "Google Analytics", "description": "Theo dõi hành trình học viên bằng GA4.", "formLabel": "Google Analytics 4" },
+          "meta_pixel": { "title": "Meta Pixel", "description": "Đo hiệu quả chuyển đổi cho chiến dịch Meta.", "formLabel": "Meta Pixel" },
+          "webhook": { "title": "Webhook", "description": "Đẩy sự kiện CRM đã ký sang hệ thống tự động hóa.", "formLabel": "Tạo webhook" }
+        }
+      }
+    },
     "provisioningFlows": {
       "loadingTitle": "Đang tải sản phẩm",
       "loadingText": "Đang đọc request và snapshot cấp phát mới nhất.",

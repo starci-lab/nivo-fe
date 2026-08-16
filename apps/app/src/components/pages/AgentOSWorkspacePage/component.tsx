@@ -72,8 +72,8 @@ export const _AgentOSWorkspacePage = ({ state, message, data, section, labels, l
                     : [defineContractProjection("label-row-over-card", () => <AgentOSWorkspaceOperations labels={labels.operations} />)]
     return (
         <Tree
-            contract="agentos-workspace-control-center"
-            render={defineContractComponent("agentos-workspace-control-center", {
+            contract="tabbed-control-center-page"
+            render={defineContractComponent("tabbed-control-center-page", {
                 heading: defineContractComponent("title-with-end-action", {
                     title: defineLeafComponent("heading", {}, () => <Heading props={{ content: title, level: 1 }} />),
                 }),

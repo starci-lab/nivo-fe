@@ -7,8 +7,8 @@ import type { BadgeTone } from "../../leaves/Badge"
 import type { CompositeProps } from "../../contracts/props"
 import { defineContractComponent, defineLeafComponent } from "../../contracts/props"
 
-/** Resolved customer-safe application capability. */
-export type ApplicationLaunchCardData = {
+/** Resolved customer-safe capability with one action. */
+export type StatusActionCardData = {
     readonly id: string
     readonly title: string
     readonly description: string
@@ -22,16 +22,16 @@ export type ApplicationLaunchCardData = {
     readonly actionTarget?: "_blank" | "_self"
 }
 
-/** The one safe destination an application card may open. */
-export type ApplicationLaunchCardActions = { readonly press?: () => void }
-/** Closed data and action surface for one application card. */
-export type ApplicationLaunchCardProps = CompositeProps<ApplicationLaunchCardData, ApplicationLaunchCardActions>
+/** The one safe action exposed by a capability card. */
+export type StatusActionCardActions = { readonly press?: () => void }
+/** Closed data and action surface for one capability. */
+export type StatusActionCardProps = CompositeProps<StatusActionCardData, StatusActionCardActions>
 
-/** Draw one bundled application without accepting credentials or launch codes as props. */
-export const ApplicationLaunchCard = ({ props, on, isLoading = false }: ApplicationLaunchCardProps) => (
+/** Draw one capability without accepting credentials or transient authorization codes as props. */
+export const StatusActionCard = ({ props, on, isLoading = false }: StatusActionCardProps) => (
     <Tree
-        contract="application-launch-card"
-        render={defineContractComponent("application-launch-card", {
+        contract="status-action-card"
+        render={defineContractComponent("status-action-card", {
             identity: defineContractComponent("subject-over-muted-caption", {
                 subject: defineLeafComponent("text", { weight: "semibold" }, () => <Text props={{ content: props.title, weight: "semibold" }} isLoading={isLoading} />),
                 caption: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: props.description, size: "xs", tone: "muted" }} isLoading={isLoading} />),
@@ -51,5 +51,5 @@ export const ApplicationLaunchCard = ({ props, on, isLoading = false }: Applicat
     />
 )
 
-/** Source-level tier marker for the application capability card. */
+/** Source-level tier marker for a generic status/action capability card. */
 export const meta = { shape: "composite", world: "pure" } as const

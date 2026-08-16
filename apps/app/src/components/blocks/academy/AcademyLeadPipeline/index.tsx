@@ -1,0 +1,64 @@
+"use client"
+
+import { useCallback, useEffect, useState } from "react"
+import { useLocale, useTranslations } from "next-intl"
+import { draftLeadReply, myExpertSiteLeads, updateExpertSiteLead, type ExpertSiteLead } from "@/modules/api/console"
+import { useSession } from "@/modules/auth/session"
+import { _AcademyLeadPipeline } from "./component"
+
+/** Owner-scoped identity consumed by the lead pipeline. */
+export type AcademyLeadPipelineProps = { readonly siteId: string }
+
+/** Load leads and own targeted update/draft state. */
+export const AcademyLeadPipeline = ({ siteId }: AcademyLeadPipelineProps) => {
+    const t = useTranslations("console.academyControlCenter.leads")
+    const locale = useLocale()
+    const session = useSession()
+    const [leads, setLeads] = useState<ReadonlyArray<ExpertSiteLead> | null | undefined>(undefined)
+    const [selectedId, setSelectedId] = useState<string>()
+    const [draft, setDraft] = useState<string>()
+    const [pendingAction, setPendingAction] = useState<"advance" | "draft">()
+    const [message, setMessage] = useState<string>()
+    const load = useCallback(async () => {
+        const result = await myExpertSiteLeads(siteId)
+        setLeads(result.ok ? result.data : null)
+    }, [siteId])
+    useEffect(() => {
+        if (session.state.status === "signed-in") void load()
+    }, [load, session.state.status])
+    const selected = leads?.find((lead) => lead.id === selectedId)
+    const draftReply = async () => {
+        if (selected === undefined) return
+        setPendingAction("draft")
+        const result = await draftLeadReply({ leadId: selected.id, locale: locale === "en" ? "en" : "vi" })
+        if (result.ok) setDraft(result.data.reply)
+        else setMessage(t("actionFailed"))
+        setPendingAction(undefined)
+    }
+    const advance = async () => {
+        if (selected === undefined) return
+        setPendingAction("advance")
+        const status = selected.status === "new" ? "contacted" : selected.status === "contacted" ? "qualified" : "converted"
+        const result = await updateExpertSiteLead({ leadId: selected.id, status, ...(draft === undefined ? {} : { note: draft }) })
+        setMessage(result.ok ? t("saved") : t("actionFailed"))
+        setPendingAction(undefined)
+        if (result.ok) await load()
+    }
+    return (
+        <_AcademyLeadPipeline
+            state={leads === undefined ? "resting" : leads === null ? "refused" : leads.length === 0 ? "empty" : "answered"}
+            leads={leads ?? []}
+            selected={selected}
+            draft={draft}
+            pendingAction={pendingAction}
+            message={message}
+            labels={{ section: t("section"), empty: t("empty"), refused: t("refused"), open: t("open"), detail: t("detail"), advance: t("advance"), draft: t("draft"), saved: t("saved"), actionFailed: t("actionFailed") }}
+            onOpenLead={(leadId) => { setSelectedId(leadId); setDraft(undefined); setMessage(undefined) }}
+            onAdvance={() => void advance()}
+            onDraftReply={() => void draftReply()}
+        />
+    )
+}
+
+/** Source-level tier marker for the connected Academy lead block. */
+export const meta = { shape: "block", world: "connected" } as const

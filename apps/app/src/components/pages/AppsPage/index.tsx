@@ -242,6 +242,11 @@ export const AppsPage = () => {
         router.push(locale === DEFAULT_LOCALE ? route : `/${locale}${route}`)
     }
 
+    const openOwnedApp = (siteId: string) => {
+        const route = `/apps/${encodeURIComponent(siteId)}`
+        router.push(locale === DEFAULT_LOCALE ? route : `/${locale}${route}`)
+    }
+
     return (
         <_AppsPage
             title={t("apps.title")}
@@ -249,6 +254,7 @@ export const AppsPage = () => {
             owned={ownedView()}
             catalogue={catalogueView()}
             onBuildTemplate={buildTemplate}
+            onOpenOwnedApp={openOwnedApp}
         />
     )
 }

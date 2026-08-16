@@ -1,4 +1,4 @@
-import { ApplicationLaunchCard, SurfaceCard, defineCompositeComponent, defineContractComponent } from "@nivo/ui"
+import { StatusActionCard, SurfaceCard, defineCompositeComponent, defineContractComponent } from "@nivo/ui"
 import type { AgentWorkspaceAppCapability } from "@/modules/api/console"
 
 /** Workspace capabilities and resolved copy consumed by the application block. */
@@ -30,12 +30,12 @@ export type AgentOSWorkspaceApplicationsProps = {
 export const AgentOSWorkspaceApplications = ({ apps, labels, launchState, openClawLaunchHref, onManageOpenClaw }: AgentOSWorkspaceApplicationsProps) => (
     <SurfaceCard
         props={{ label: labels.section }}
-        contract="application-launch-grid"
-        render={defineContractComponent("application-launch-grid", {
-            application: apps.map((app) => defineCompositeComponent("application-launch-card", {}, () => {
+        contract="status-action-card-grid"
+        render={defineContractComponent("status-action-card-grid", {
+            item: apps.map((app) => defineCompositeComponent("status-action-card", {}, () => {
                 const openClaw = app.app === "OPENCLAW"
                 return (
-                    <ApplicationLaunchCard
+                    <StatusActionCard
                         key={app.app}
                         props={{
                             id: app.app,

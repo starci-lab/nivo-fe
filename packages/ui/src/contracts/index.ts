@@ -316,7 +316,7 @@ export const CONTRACTS = buildContracts({
             body: {
                 contract: [
                     "labelled-fact-stack", "inline-action-run", "fleet-resource-list",
-                    "stacked-stat-rows", "claim-panel-grid", "progress-row-stack", "centred-empty-notice",
+                    "stacked-stat-rows", "claim-panel-grid", "captioned-cell-grid", "progress-row-stack", "centred-empty-notice",
                     // A named section drawn around one attributed claim. It was already drawn that
                     // way at a real call site and this list did not say so, which is how the branch
                     // ended up wearing the section on a box of its own rather than rendering it.
@@ -324,8 +324,8 @@ export const CONTRACTS = buildContracts({
                     // A refusal is a THIRD answer beside a body and an emptiness. A section that
                     // cannot draw one has to fall back on the empty notice, which tells the reader
                     // nothing was there when the server in fact declined to say.
-                    "body-with-refusal-note",
-                    "application-launch-grid", "workspace-runtime-stack", "helm-component-status-table",
+                    "body-with-refusal-note", "heading-body-action-stack", "form-column", "identity-action-list",
+                    "status-action-card-grid", "workspace-runtime-stack", "helm-component-status-table",
                 ],
                 leaf: "text",
             },
@@ -794,7 +794,7 @@ export const CONTRACTS = buildContracts({
             "md:[&>*:last-child]:min-w-0", "md:[&>*:last-child]:grow",
         ],
         children: {
-            sidebar: { contract: "sidebar-nav-cluster" },
+            sidebar: { contract: ["sidebar-nav-cluster", "home-services-account-nav"] },
             body: { contract: "console-body-main" },
         },
         why: "The destinations are a SIBLING of the routed body rather than a wrapper around it, so replacing the body on every press cannot take the way back with it; the rail holds one fixed measure while the body takes every remaining pixel, because a rail that resized to its longest label would move every destination each time the route changed.",
@@ -876,17 +876,6 @@ export const CONTRACTS = buildContracts({
         },
         why: "Each subject on this page asks its own query and answers at its own moment, so they are read straight down at one seam and none may be nested inside another - a section drawn inside its neighbour makes one refusal look like the whole page failing; the measure is capped because a single column of labelled sections run across a desktop loses the start of every next line.",
     },
-    "titled-body": {
-        classes: ["mx-auto", "flex", "w-full", "max-w-4xl", "flex-col", "gap-6", "px-6", "py-6"],
-        children: {
-            heading: { contract: "title-with-end-action" },
-            body: { contract: [
-                "stacked-sections",
-                "body-with-refusal-note",
-            ] },
-        },
-        why: "A console page needs one stable title row and one flexible body row, so the heading and the content are siblings at the seam that reads as the screen's flow rather than an extra nested wrapper.",
-    },
     "body-with-refusal-note": {
         /*
          * `items-start` IS WHAT SEPARATES THIS FROM `empty-notice-stack`, which centres its column
@@ -909,15 +898,6 @@ export const CONTRACTS = buildContracts({
             recovery: { leaf: "button", optional: true },
         },
         why: "A subject that was REFUSED is not a subject that came back empty, so the server's own already-translated sentence sits left-aligned beside whatever part did answer instead of replacing it with a centred apology; the way forward is optional because the two refusals nivo actually throws are the ordinary result of a customer who bought more than once, not a fault to retry.",
-    },
-    "warned-action-panel": {
-        classes: ["flex", "w-full", "flex-col", "gap-3", "p-4"],
-        children: {
-            title: { leaf: "heading" },
-            warning: { leaf: "text", props: { size: "sm", tone: "warning" } },
-            action: { contract: "inline-action-run" },
-        },
-        why: "Danger actions need a bounded heading and warning before the destructive presses, so the warning owns its own vertical slot and the action row stays separated from regular fact sections.",
     },
     "horizontal-lifecycle-run": {
         classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-start", "gap-3"],
@@ -982,23 +962,23 @@ export const CONTRACTS = buildContracts({
         },
         why: "A thing that can be BOUGHT carries a price and exactly one press, which is a different relationship from a thing already owned carrying a lifecycle whose tone changes underneath it; putting the price in a status slot would make an amount of money read as a state a resource can be in, and the row wraps rather than clipping because the price cell is what pushes a phone past the edge.",
     },
-    "agentos-workspace-control-center": {
+    "tabbed-control-center-page": {
         classes: ["mx-auto", "flex", "w-full", "max-w-4xl", "flex-col", "gap-6", "px-6", "py-6"],
         children: {
             heading: { contract: "title-with-end-action" },
             tabs: { leaf: "choice-tabs" },
             section: { contract: "label-row-over-card", repeats: true, restingCount: 2 },
         },
-        why: "A workspace is one customer destination: identity and peer sections stay in the main content column, while applications precede infrastructure and no part of that journey becomes sidebar navigation.",
+        why: "A managed resource is one customer destination: identity and peer sections stay in the main content column, while no part of that journey becomes sidebar navigation.",
     },
-    "application-launch-grid": {
+    "status-action-card-grid": {
         classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-2"],
         children: {
-            application: { composite: "application-launch-card", repeats: true, restingCount: 2 },
+            item: { composite: "status-action-card", repeats: true, restingCount: 2 },
         },
-        why: "Bundled applications are independent destinations compared side by side when width permits and stacked intact on a phone.",
+        why: "Independent capabilities are compared side by side when width permits and stacked intact on a phone.",
     },
-    "application-launch-card": {
+    "status-action-card": {
         classes: ["flex", "flex-col", "items-start", "gap-3", "p-4"],
         children: {
             identity: { contract: "subject-over-muted-caption" },
@@ -1006,7 +986,14 @@ export const CONTRACTS = buildContracts({
             detail: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
             action: { leaf: ["button", "action-link"] },
         },
-        why: "One application states what it is, whether it can be entered and one safe action; refusal detail stays quiet and no credential-shaped value enters the card.",
+        why: "One capability states what it is, its current status and one safe action; refusal detail stays quiet and no credential-shaped value enters the card.",
+    },
+    "identity-action-list": {
+        classes: ["flex", "flex-col", "divide-y", "divide-separator"],
+        children: {
+            item: { contract: "avatar-identity-badge-action-row", repeats: true, restingCount: 3 },
+        },
+        why: "People or leads form one joined scan; each identity owns one status and one available action without becoming a separate card.",
     },
     "workspace-runtime-stack": {
         classes: ["flex", "flex-col", "gap-6"],

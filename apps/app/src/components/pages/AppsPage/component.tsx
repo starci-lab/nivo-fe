@@ -112,6 +112,8 @@ export interface AppsPageViewProps {
     readonly catalogue: CatalogueSectionView
     /** Start a new app from the selected template catalogue row. */
     readonly onBuildTemplate: (templateKey: string) => void
+    /** Open one already provisioned Academy resource. */
+    readonly onOpenOwnedApp: (siteId: string) => void
 }
 
 /**
@@ -130,7 +132,7 @@ const restingRow = (index: number) => defineCompositeComponent("fleet-row", {}, 
  * @param row - The already-worded row.
  * @returns The row, bound to the slot's composite identity.
  */
-const ownedRow = (row: OwnedAppRow) => defineCompositeComponent("fleet-row", {}, () => (
+const ownedRow = (row: OwnedAppRow, onOpenOwnedApp: (siteId: string) => void) => defineCompositeComponent("fleet-row", {}, () => (
     <FleetRow
         props={{
             id: row.id,
@@ -142,6 +144,7 @@ const ownedRow = (row: OwnedAppRow) => defineCompositeComponent("fleet-row", {},
             statusLabel: row.statusLabel,
             actionLabel: row.actionLabel,
         }}
+        on={{ open: () => onOpenOwnedApp(row.id), act: () => onOpenOwnedApp(row.id) }}
     />
 ))
 
@@ -231,7 +234,7 @@ const refusedSection = (label: string, note: string) => defineContractProjection
  * @param input - {@link AppsPageViewProps}
  * @returns The page node.
  */
-export const _AppsPage = ({ title, lede, owned, catalogue, onBuildTemplate }: AppsPageViewProps) => {
+export const _AppsPage = ({ title, lede, owned, catalogue, onBuildTemplate, onOpenOwnedApp }: AppsPageViewProps) => {
     /*
      * SECTION 1 - the apps this account owns, in every situation the set can be in.
      */
@@ -249,7 +252,7 @@ export const _AppsPage = ({ title, lede, owned, catalogue, onBuildTemplate }: Ap
                 contract="fleet-resource-list"
                 render={defineContractComponent("fleet-resource-list", {
                     resource: owned.phase === "answered"
-                        ? owned.rows.map(ownedRow)
+                        ? owned.rows.map((row) => ownedRow(row, onOpenOwnedApp))
                         : [restingRow(1), restingRow(2), restingRow(3)],
                 })}
                 isLoading={isResting}

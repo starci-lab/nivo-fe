@@ -224,6 +224,57 @@
         }
       }
     },
+    "academyControlCenter": {
+      "title": "Expert academy",
+      "loading": "Checking the academy and management access.",
+      "refused": "This academy was not found or the current account cannot manage it.",
+      "openSite": "Open academy site",
+      "tabsLabel": "Academy management mode",
+      "tabs": { "growth": "Growth", "system": "System" },
+      "growth": {
+        "section": "Growth overview", "health": "Activity", "loading": "Reading academy metrics.",
+        "refused": "Growth metrics are unavailable for this academy.", "revenue": "Revenue", "orders": "Paid orders",
+        "members": "Students", "completions": "Completions", "activeRate": "Active students"
+      },
+      "students": {
+        "section": "Students", "empty": "No students yet.", "refused": "The student list is unavailable.", "open": "View",
+        "active": "Active", "banned": "Blocked", "detail": "Student progress", "create": "Add student", "name": "Student name",
+        "email": "Email", "password": "Initial password", "saveStudent": "Create student", "courseSlug": "Course slug",
+        "grant": "Grant course access", "revoke": "Revoke gifted access", "ban": "Block student", "activate": "Reactivate student",
+        "loadingDetail": "Reading student progress.", "saved": "Student updated.", "actionFailed": "This student action could not be completed."
+      },
+      "leads": {
+        "section": "Lead CRM", "empty": "No leads have submitted their details yet.", "refused": "The academy CRM is unavailable.",
+        "open": "Open", "detail": "Lead follow-up", "advance": "Save and advance", "draft": "Draft reply with AI",
+        "saved": "Lead updated.", "actionFailed": "This lead could not be updated."
+      },
+      "integrations": {
+        "section": "Integration center", "refused": "Academy integration status is unavailable.", "configure": "Configure",
+        "save": "Save configuration", "authorize": "Connect Zalo", "saved": "Saved. Secret values will not be shown again.",
+        "saveFailed": "This configuration could not be saved.", "notConfigured": "Not configured", "credentialCount": "{count} fields saved",
+        "webhookCount": "{count} webhooks", "webhookSecretCopied": "Webhook created; the one-time signing secret was sent to the clipboard.",
+        "dnsTarget": "Point the matching CNAME or A record to {target}.",
+        "status": {
+          "absent": "Not configured", "pending": "Pending", "live": "Serving", "connected": "Connected", "configured": "Configured",
+          "verified": "Verified", "rejected": "Rejected", "failed": "Failed", "expired": "Expired", "unreachable": "Unreachable", "authorizing": "Authorizing"
+        },
+        "fields": {
+          "domain": "Custom domain", "clientId": "Google Client ID", "clientSecret": "Google Client Secret",
+          "credentialKey": "Configuration key", "credentialValue": "Secret value", "identifier": "Measurement ID / Pixel ID",
+          "consentMode": "Consent mode", "endpoint": "HTTPS webhook endpoint", "events": "Comma-separated events"
+        },
+        "providers": {
+          "domain": { "title": "Domain", "description": "Attach a custom host and verify DNS for both FE and API.", "formLabel": "Domain configuration" },
+          "google": { "title": "Google Login", "description": "Let students sign in through the academy's Keycloak Google provider.", "formLabel": "Google OAuth" },
+          "smtp": { "title": "SMTP email", "description": "Send transactional mail through the academy's sender.", "formLabel": "SMTP credentials", "keys": "SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD or SMTP_FROM" },
+          "payment": { "title": "Payments", "description": "Receive PayOS or SePay payments into the academy's account.", "formLabel": "Payment credentials", "keys": "PAYOS_CLIENT_ID, PAYOS_API_KEY, PAYOS_CHECKSUM_KEY or SEPAY_* keys" },
+          "zalo": { "title": "Zalo OA", "description": "Connect an OA through a short-lived Nivo OAuth session.", "formLabel": "Connect Zalo OA" },
+          "ga4": { "title": "Google Analytics", "description": "Measure the student journey with GA4.", "formLabel": "Google Analytics 4" },
+          "meta_pixel": { "title": "Meta Pixel", "description": "Measure conversion performance for Meta campaigns.", "formLabel": "Meta Pixel" },
+          "webhook": { "title": "Webhook", "description": "Send signed CRM events to an automation system.", "formLabel": "Create webhook" }
+        }
+      }
+    },
     "provisioningFlows": {
       "loadingTitle": "Loading product",
       "loadingText": "Reading the latest request and provisioning snapshot.",
