@@ -11,12 +11,14 @@ export type ProvisioningTarget =
     | { readonly kind: "order"; readonly id: string }
     | { readonly kind: "deployment"; readonly id: string }
     | { readonly kind: "workspace"; readonly id: string }
+    | { readonly kind: "module-installation"; readonly id: string }
 
 /** One event after the hook has rejected unrelated owner-room traffic. */
 export type ProvisioningEvent =
     | { readonly kind: "workspace"; readonly id: string; readonly status: string; readonly reason: string | null; readonly updatedAt: string }
     | { readonly kind: "workspace-runtime"; readonly id: string; readonly instanceId: string; readonly fingerprint: string; readonly probeStatus: string; readonly updatedAt: string }
     | { readonly kind: "deployment"; readonly id: string; readonly status: string; readonly reason: string | null; readonly updatedAt: string }
+    | { readonly kind: "module-installation"; readonly id: string; readonly status: string; readonly stepKey: string | null; readonly reason: string | null; readonly updatedAt: string }
     | { readonly kind: "order"; readonly id: string; readonly status: string }
 
 /** Connection and event states visible to a provisioning block. */
@@ -64,7 +66,7 @@ export type UseProvisioningRealtimeInput = {
 }
 
 /**
- * Follow one order, deployment or workspace in the authenticated owner's room.
+ * Follow one order, deployment, workspace or module installation in the authenticated owner's room.
  *
  * A null target deliberately keeps the socket closed: before a request has an identity there is no
  * event this screen can safely claim. Re-entry snapshots choose the target before the connection is
@@ -156,7 +158,20 @@ const useProvisioningRealtime = ({
                 && message.resourceKind === "agent_workspace"
             const isDeployment = targetKind === "deployment"
                 && message.resourceKind === "expert_deployment"
-            if ((!isWorkspace && !isDeployment) || message.resourceId !== targetId) return
+            const isModuleInstallation = targetKind === "module-installation"
+                && message.resourceKind === "agentos_module_installation"
+            if ((!isWorkspace && !isDeployment && !isModuleInstallation) || message.resourceId !== targetId) return
+            if (isModuleInstallation) {
+                acceptOrdered(message.updatedAt, {
+                    kind: "module-installation",
+                    id: targetId,
+                    status: terminalSagaStatus(message.status, "ready"),
+                    stepKey: message.stepKey,
+                    reason: message.reason,
+                    updatedAt: message.updatedAt,
+                }, message.sequence)
+                return
+            }
             const kind = isWorkspace ? "workspace" as const : "deployment" as const
             acceptOrdered(message.updatedAt, {
                 kind,

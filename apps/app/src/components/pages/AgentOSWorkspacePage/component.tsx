@@ -8,6 +8,7 @@ import {
 } from "@nivo/ui"
 import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice"
 import { AgentOSWorkspaceApplications } from "@/components/blocks/agentos/AgentOSWorkspaceApplications"
+import { AgentOSSolutionModuleCenter } from "@/components/blocks/agentos/AgentOSSolutionModuleCenter"
 import { AgentOSWorkspaceRuntime } from "@/components/blocks/agentos/AgentOSWorkspaceRuntime"
 import { AgentOSWorkspaceSummary } from "@/components/blocks/agentos/AgentOSWorkspaceSummary"
 import { AgentOSWorkspaceOperations } from "@/components/blocks/operations/AgentOSWorkspaceOperations"
@@ -15,7 +16,7 @@ import { HelmStackSnapshot } from "@/components/blocks/operations/HelmStackSnaps
 import type { AgentWorkspaceControlCenter } from "@/modules/api/console"
 
 /** Peer sections available inside one workspace control center. */
-export type AgentOSWorkspaceSection = "overview" | "applications" | "infrastructure" | "operations" | "access"
+export type AgentOSWorkspaceSection = "overview" | "solutions" | "applications" | "infrastructure" | "operations" | "access"
 
 /** Fully resolved bilingual copy passed into the pure workspace page. */
 export type AgentOSWorkspacePageLabels = {
@@ -64,6 +65,8 @@ export const _AgentOSWorkspacePage = ({ state, message, data, section, labels, l
                         onManageOpenClaw={onOpenAgentConsole}
                     />
                 ))]
+                : section === "solutions"
+                    ? [defineContractProjection("label-row-over-card", () => <AgentOSSolutionModuleCenter workspaceId={data.workspace.id} />)]
                 : section === "infrastructure"
                     ? [
                         defineContractProjection("label-row-over-card", () => <AgentOSWorkspaceRuntime data={data} labels={labels.runtime} formatDate={formatDate} />),
@@ -78,7 +81,7 @@ export const _AgentOSWorkspacePage = ({ state, message, data, section, labels, l
                     title: defineLeafComponent("heading", {}, () => <Heading props={{ content: title, level: 1 }} />),
                 }),
                 tabs: defineLeafComponent("choice-tabs", {}, () => (
-                    <ChoiceTabs props={{ label: labels.tabsLabel, selectedKey: section, tabs: labels.tabs }} on={{ select: (key) => onSelectSection(key as AgentOSWorkspaceSection) }} />
+                    <ChoiceTabs props={{ label: labels.tabsLabel, selectedKey: section, tabs: labels.tabs, variant: "primary" }} on={{ select: (key) => onSelectSection(key as AgentOSWorkspaceSection) }} />
                 )),
                 section: sections,
             })}

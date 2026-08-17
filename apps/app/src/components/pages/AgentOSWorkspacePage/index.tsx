@@ -26,6 +26,7 @@ export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps)
     const session = useSession()
     const adoptSession = session.adopt
     const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
+    const [mounted, setMounted] = useState(false)
     const [answer, setAnswer] = useState<Result<AgentWorkspaceControlCenter> | null>(null)
     const [section, setSection] = useState<AgentOSWorkspaceSection>("overview")
     const lastFingerprint = useRef<string | null>(null)
@@ -38,6 +39,10 @@ export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps)
     const launchId = useRef<string | null>(null)
     const renewingLaunch = useRef(false)
     const [launchState, setLaunchState] = useState<"idle" | "opening" | "connected" | "blocked" | "expired" | "disconnected">("idle")
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     useEffect(() => {
         if (accessToken === null) return
@@ -97,11 +102,13 @@ export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps)
         setLaunchState("opening")
     }, [])
 
+    if (!mounted) return null
+
     const labels: AgentOSWorkspacePageLabels = {
         titleFallback: t("titleFallback"),
         loading: t("loading"),
         tabsLabel: t("tabsLabel"),
-        tabs: (["overview", "applications", "infrastructure", "operations", "access"] as const).map((id) => ({ id, label: t(`tabs.${id}`) })),
+        tabs: (["overview", "solutions", "applications", "infrastructure", "operations", "access"] as const).map((id) => ({ id, label: t(`tabs.${id}`) })),
         summary: {
             section: t("summary.section"), status: t("summary.status"), plan: t("summary.plan"),
             allocation: t("summary.allocation"), host: t("summary.host"), chart: t("summary.chart"),

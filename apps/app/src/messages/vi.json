@@ -163,13 +163,62 @@
         "refused": "Không thể mở workspace này hoặc tài khoản hiện tại không sở hữu nó.",
         "tabsLabel": "Khu vực quản lý workspace",
         "tabs": {
-          "overview": "Tổng quan",
-          "applications": "Ứng dụng",
+        "overview": "Tổng quan",
+        "solutions": "Giải pháp",
+        "applications": "Ứng dụng",
           "infrastructure": "Hạ tầng",
           "operations": "Thao tác",
           "access": "Truy cập"
+      },
+      "solutions": {
+        "modesLabel": "Chế độ xem solution module",
+        "modes": {
+          "catalog": "Khám phá",
+          "installed": "Đã cài"
         },
-        "summary": {
+        "catalogSection": "Giải pháp từ Nivo",
+        "installedSection": "Giải pháp đã cài",
+        "install": "Cài giải pháp",
+        "installed": "Đã cài",
+        "viewDetails": "Xem chi tiết",
+        "browse": "Khám phá giải pháp",
+        "empty": "Workspace này chưa cài solution module nào.",
+        "refused": "Nivo chưa đọc được catalog giải pháp hoặc danh sách module của workspace này.",
+        "installAccepted": "Nivo đã nhận yêu cầu và bắt đầu provision giải pháp.",
+        "installFailed": "Nivo chưa thể bắt đầu cài giải pháp này.",
+        "installedDescription": "Một giải pháp Nivo bất biến đã được cài vào workspace này.",
+        "catalogDetail": "{agents} vai trò agent · {channels} vai trò channel · {safety}",
+        "version": "Phiên bản {version}",
+        "status": {
+          "available": "Sẵn sàng cài",
+          "requested": "Đã tiếp nhận",
+          "provisioning": "Đang provision",
+          "ready": "Sẵn sàng",
+          "degraded": "Cần kiểm tra",
+          "failed": "Thất bại"
+        },
+        "detail": {
+          "title": "Solution module",
+          "loading": "Đang đọc snapshot cài đặt mới nhất.",
+          "refused": "Không thể mở module này hoặc module không thuộc workspace hiện tại.",
+          "empty": "Chưa có",
+          "summary": {
+            "section": "Gói và vòng đời",
+            "module": "Module",
+            "version": "Phiên bản",
+            "status": "Trạng thái",
+            "failure": "Mã lỗi"
+          },
+          "bindings": {
+            "section": "Agent và tri thức",
+            "agents": "Agent đã tạo",
+            "channels": "Tài khoản channel",
+            "sharedKnowledge": "Nguồn tri thức dùng chung",
+            "knowledgeVersions": "Tri thức chung · riêng"
+          }
+        }
+      },
+      "summary": {
           "section": "Thông tin workspace",
           "status": "Trạng thái",
           "plan": "Gói",

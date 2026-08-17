@@ -163,13 +163,62 @@
         "refused": "This workspace could not be opened or is not owned by the current account.",
         "tabsLabel": "Workspace management area",
         "tabs": {
-          "overview": "Overview",
-          "applications": "Applications",
+        "overview": "Overview",
+        "solutions": "Solutions",
+        "applications": "Applications",
           "infrastructure": "Infrastructure",
           "operations": "Operations",
           "access": "Access"
+      },
+      "solutions": {
+        "modesLabel": "Solution module view",
+        "modes": {
+          "catalog": "Discover",
+          "installed": "Installed"
         },
-        "summary": {
+        "catalogSection": "Nivo solutions",
+        "installedSection": "Installed solutions",
+        "install": "Install solution",
+        "installed": "Installed",
+        "viewDetails": "View details",
+        "browse": "Browse solutions",
+        "empty": "No solution module has been installed in this workspace yet.",
+        "refused": "Nivo could not read the solution catalog or this workspace's installations.",
+        "installAccepted": "The solution was accepted and provisioning has started.",
+        "installFailed": "Nivo could not start this solution installation.",
+        "installedDescription": "An immutable Nivo solution installed into this workspace.",
+        "catalogDetail": "{agents} agent roles · {channels} channel roles · {safety}",
+        "version": "Version {version}",
+        "status": {
+          "available": "Available",
+          "requested": "Requested",
+          "provisioning": "Provisioning",
+          "ready": "Ready",
+          "degraded": "Needs attention",
+          "failed": "Failed"
+        },
+        "detail": {
+          "title": "Solution module",
+          "loading": "Reading the latest installation snapshot.",
+          "refused": "This module installation could not be opened or does not belong to this workspace.",
+          "empty": "None",
+          "summary": {
+            "section": "Package and lifecycle",
+            "module": "Module",
+            "version": "Version",
+            "status": "Status",
+            "failure": "Failure code"
+          },
+          "bindings": {
+            "section": "Agents and knowledge",
+            "agents": "Generated agents",
+            "channels": "Channel accounts",
+            "sharedKnowledge": "Shared knowledge sources",
+            "knowledgeVersions": "Common · private knowledge"
+          }
+        }
+      },
+      "summary": {
           "section": "Workspace details",
           "status": "Status",
           "plan": "Plan",

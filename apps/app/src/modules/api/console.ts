@@ -314,6 +314,52 @@ export type AgentWorkspaceControlCenter = {
     readonly runtime: AgentWorkspaceRuntime | null
 }
 
+/** Immutable AgentOS solution package offered by the Nivo catalog. */
+export type AgentosSolutionModule = {
+    readonly key: "multichannel-chatbot" | "sales-copilot"
+    readonly version: string
+    readonly name: string
+    readonly summary: string
+    readonly agentRoles: ReadonlyArray<string>
+    readonly channelRoles: ReadonlyArray<string>
+    readonly safetyMode: string
+}
+
+/** Owner-scoped lifecycle row for one installed solution package. */
+export type AgentosModuleInstallation = {
+    readonly id: string
+    readonly agentWorkspaceId: string
+    readonly moduleKey: string
+    readonly moduleVersion: string
+    readonly status: string
+    readonly failureCode: string | null
+    readonly createdAt: string
+    readonly updatedAt: string
+}
+
+/** Canonical detail snapshot for one installed AgentOS solution package. */
+export type AgentosModuleInstallationDetail = {
+    readonly id: string
+    readonly agentWorkspaceId: string
+    readonly moduleKey: string
+    readonly moduleVersion: string
+    readonly status: string
+    readonly sagaId: string | null
+    readonly generatedAgentIds: ReadonlyArray<string>
+    readonly sharedKnowledgeSourceIds: ReadonlyArray<string>
+    readonly channelAccountRefs: ReadonlyArray<string>
+    readonly commonKnowledgeVersion: string
+    readonly privateKnowledgeVersion: string
+    readonly failureCode: string | null
+}
+
+/** Customer choice required to start one immutable solution-module installation. */
+export type InstallAgentosSolutionModuleInput = {
+    readonly agentWorkspaceId: string
+    readonly moduleKey: AgentosSolutionModule["key"]
+    readonly idempotencyKey: string
+}
+
 /** One credential-free callback grant for opening a workspace application. */
 export type AgentWorkspaceAppLaunch = {
     readonly launchId: string
@@ -516,6 +562,55 @@ export const myAgentWorkspaceControlCenter = (workspaceId: string): Promise<Resu
             }
         }`,
         { workspaceId },
+    )
+
+/** Read the immutable AgentOS solution-module catalog. */
+export const myAgentosSolutionModules = (): Promise<Result<ReadonlyArray<AgentosSolutionModule>>> =>
+    graphql(`query MyAgentosSolutionModules {
+        myAgentosSolutionModules {
+            data { key version name summary agentRoles channelRoles safetyMode }
+            message success error
+        }
+    }`)
+
+/** Read installations belonging to one exact owner-scoped AgentOS workspace. */
+export const myAgentosModuleInstallations = (agentWorkspaceId: string): Promise<Result<ReadonlyArray<AgentosModuleInstallation>>> =>
+    graphql(
+        `query MyAgentosModuleInstallations($agentWorkspaceId: ID!) {
+            myAgentosModuleInstallations(agentWorkspaceId: $agentWorkspaceId) {
+                data { id agentWorkspaceId moduleKey moduleVersion status failureCode createdAt updatedAt }
+                message success error
+            }
+        }`,
+        { agentWorkspaceId },
+    )
+
+/** Read the canonical owner-scoped snapshot for one module installation. */
+export const myAgentosModuleInstallation = (installationId: string): Promise<Result<AgentosModuleInstallationDetail>> =>
+    graphql(
+        `query MyAgentosModuleInstallation($installationId: ID!) {
+            myAgentosModuleInstallation(installationId: $installationId) {
+                data {
+                    id agentWorkspaceId moduleKey moduleVersion status sagaId failureCode
+                    generatedAgentIds sharedKnowledgeSourceIds channelAccountRefs
+                    commonKnowledgeVersion privateKnowledgeVersion
+                }
+                message success error
+            }
+        }`,
+        { installationId },
+    )
+
+/** Install one immutable solution package using one browser-generated idempotency identity. */
+export const installAgentosSolutionModule = (input: InstallAgentosSolutionModuleInput): Promise<Result<AgentosModuleInstallation>> =>
+    graphql(
+        `mutation InstallAgentosSolutionModule($input: InstallAgentosSolutionModuleInput!) {
+            installAgentosSolutionModule(input: $input) {
+                data { id agentWorkspaceId moduleKey moduleVersion status failureCode createdAt updatedAt }
+                message success error
+            }
+        }`,
+        { input: { ...input, modelProfileRef: "nivo-default", channelAccountRefs: [], sharedKnowledgeSourceIds: [] } },
     )
 
 /** Issue one owner-scoped OpenClaw launch without exposing a gateway credential. */
