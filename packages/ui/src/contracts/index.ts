@@ -208,7 +208,7 @@ export const CONTRACTS = buildContracts({
         children: {
             surface: { contract: "authentication-panel-card" },
         },
-        why: "Authentication is the route's only task, so its one bounded form sits at the visual centre instead of inheriting the dashboard's rail-and-main reading order.",
+        why: "when authentication is the route's only task and its one bounded form must sit at the visual centre rather than inherit the dashboard's rail-and-main reading order.",
     },
     "centred-viewport-main": {
         // The document's one main landmark. The key's name has said so all along; now the entry
