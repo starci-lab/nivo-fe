@@ -5,7 +5,7 @@
  * from `metadata.json`'s offset registry and a second literal here is a second
  * place to be wrong.
  */
-const ENDPOINT = process.env.NEXT_PUBLIC_ACADEMY_API_URL ?? "http://localhost:3069/graphql"
+const ENDPOINT = process.env.NEXT_PUBLIC_ACADEMY_API_URL ?? "http://localhost:4067/graphql"
 
 /**
  * The envelope every academy mutation answers with.

@@ -13,7 +13,7 @@ export enum KeycloakIdentityProvider {
  */
 
 /** Where the academy API answers. */
-const ENDPOINT = process.env.NEXT_PUBLIC_ACADEMY_API_URL ?? "http://localhost:3069/graphql"
+const ENDPOINT = process.env.NEXT_PUBLIC_ACADEMY_API_URL ?? "http://localhost:4067/graphql"
 
 /** What a caller gets back: nothing useful on success, or the reason there is none. */
 export type EntryResult =

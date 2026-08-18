@@ -9,13 +9,13 @@
  * functions here are small enough to throw away then.
  *
  * WHERE THE PORT COMES FROM. `NEXT_PUBLIC_ACADEMY_API_URL`, defaulting to the port
- * `metadata.json` in nivo-backend reserves for this app (`ports.expertApi`, 3000 + offset 67 = 3069).
+ * `metadata.json` in nivo-backend projects for this app (`ports.expertApi`, academy slot = 4067).
  * The default is written out rather than derived because this repository has no copy of that
  * registry, and a wrong guess should be visible in one place instead of implied.
  */
 
 /** Where the academy API answers. */
-const ENDPOINT = process.env.NEXT_PUBLIC_ACADEMY_API_URL ?? "http://localhost:3069/graphql"
+const ENDPOINT = process.env.NEXT_PUBLIC_ACADEMY_API_URL ?? "http://localhost:4067/graphql"
 
 /**
  * Every response this API sends, whatever the operation.

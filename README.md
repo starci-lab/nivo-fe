@@ -3,9 +3,9 @@
 Monorepo giao diện của nivo: ba ứng dụng dựng trên **một** bản canon dùng chung.
 
 ```
-apps/landing    @nivo/landing   :3012   trang giới thiệu
-apps/expert     @nivo/expert    :3013   học viện của một chuyên gia
-apps/app        @nivo/app       :3014   bảng điều khiển cấp phát và vận hành
+apps/app        @nivo/app       :3066   bảng điều khiển cấp phát và vận hành (core slot)
+apps/expert     @nivo/expert    :4066   học viện của một chuyên gia (academy slot +1000)
+apps/landing    @nivo/landing   :5066   trang giới thiệu (landing slot +2000)
 packages/ui     @nivo/ui                canon dùng chung
 ```
 
