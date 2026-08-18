@@ -1,8 +1,7 @@
-// >>> sync-fe-lint.mjs -- canon rule wiring, do not edit by hand >>>
 /*
- * The rules are authored in the trust tree and MIRRORED here by sync-fe-lint.mjs. Do not edit
- * anything under plugins/eslint-canon/ and do not add a rule to it: the next run overwrites the
- * folder, and a rule that exists only here is a second answer to a question canon already answers.
+ * The rules are authored in the trust tree and published as @starci/eslint-canon-fe. Do not add a
+ * rule here: a rule with no law in the tree is unaccountable, and a copy that lives in this
+ * repository enforces whatever the law was on the day it was copied.
  *
  * What this repository does own is the config below - which globs the rules apply to.
  */
@@ -10,8 +9,7 @@ import starciFe, {
     recommended as starciRecommended,
     linterOptions as starciLinterOptions,
     starciFeConfig,
-} from "./plugins/eslint-canon/index.mjs"
-// <<< sync-fe-lint.mjs -- canon rule wiring <<<
+} from "@starci/eslint-canon-fe"
 import js from "@eslint/js"
 import globals from "globals"
 import tseslint from "typescript-eslint"
@@ -111,21 +109,6 @@ export default defineConfig([
             "**/candidate/src/**/blocks/**/{index,component}.tsx",
         ],
         linterOptions: { noInlineConfig: true },
-    },
-    {
-        /*
-         * The enforcement layer is source too, and it is NODE source: rule modules and their twin
-         * tests read `process` and run under the test runner, never in a browser. Without this the
-         * repository-wide `globals.browser` is all they get and every one of those reads is an
-         * undefined variable.
-         *
-         * THE PATH IS `eslint-canon`, NOT `eslint`, and the difference cost a red gate: the mirror
-         * folder was renamed when it became generated output and this glob was left behind, so it
-         * matched nothing and said so in the only way a non-matching glob can - silently.
-         */
-        files: ["plugins/eslint-canon/**/*.{js,mjs,cjs}"],
-        languageOptions: { globals: globals.node },
-        rules: { indent: "off" },
     },
     {
         files: ["scripts/**/*.{js,mjs,cjs}"],

@@ -10,16 +10,16 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "lint": "npm run gate:canon && turbo run lint",
+    "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "dev:landing": "npm run dev -w @nivo/landing",
     "dev:expert": "npm run dev -w @nivo/expert",
     "dev:app": "npm run dev -w @nivo/app",
     "academy:inject": "node scripts/inject-academy-template.mjs",
-    "sync:ports": "node scripts/sync-ports.mjs",
-    "gate:canon": "node ../starci-academy-backend/.claude/scripts/sync-fe-lint.mjs --target ."
+    "sync:ports": "node scripts/sync-ports.mjs"
   },
   "devDependencies": {
+    "@starci/eslint-canon-fe": "^1.2.0",
     "turbo": "^2.5.0",
     "typescript": "^5",
     "typescript-eslint": "^8.67.0"
