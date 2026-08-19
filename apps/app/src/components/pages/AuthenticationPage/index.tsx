@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
-import { _AuthenticationPage } from "./component"
+import { _AuthenticationPage as AuthenticationPageView } from "./component"
 import type {
     AuthActions,
     AuthCode,
@@ -419,24 +419,32 @@ export const AuthenticationPage = () => {
      * THE PANEL'S SITUATION, RESOLVED HERE AND HANDED OVER WHOLE. Every string is read as
      * `<mode>.<key>` out of one namespace, so a fourth journey would be a catalogue change rather
      * than a branch - and the drawing half never learns which language it is in.
+     *
+     * FOUR SITUATIONS, SETTLED ONE AT A TIME. Each phase answers with the whole panel and leaves, so
+     * a reader confirms the situation in front of them without holding the other three open while
+     * they read it. The order still matters and is the journey's own: a challenge outranks a
+     * finished journey, a finished journey outranks a code, and the details are where every journey
+     * starts.
      */
-    const panel: AuthenticationPanelProps = phase === "twoFactor"
-        ? {
-            state: "twoFactorUnsupported",
-            props: {
-                ...frame,
-                statusMessage: "",
-                // A challenge is not a refusal: the password was right and the session is simply not
-                // owed yet.
-                isError: false,
-                doneTitle: t("signIn.twoFactorTitle"),
-                doneHint: t("signIn.twoFactorHint"),
-                onwardLabel: t("signIn.backLabel"),
-            },
-            on: actions,
+    const panelFor = (): AuthenticationPanelProps => {
+        if (phase === "twoFactor") {
+            return {
+                state: "twoFactorUnsupported",
+                props: {
+                    ...frame,
+                    statusMessage: "",
+                    // A challenge is not a refusal: the password was right and the session is simply
+                    // not owed yet.
+                    isError: false,
+                    doneTitle: t("signIn.twoFactorTitle"),
+                    doneHint: t("signIn.twoFactorHint"),
+                    onwardLabel: t("signIn.backLabel"),
+                },
+                on: actions,
+            }
         }
-        : phase === "done"
-            ? {
+        if (phase === "done") {
+            return {
                 state: "done",
                 props: {
                     ...frame,
@@ -448,59 +456,64 @@ export const AuthenticationPage = () => {
                 },
                 on: actions,
             }
-            : phase === "code"
-                ? {
-                    state: "code",
-                    props: {
-                        ...frame,
-                        mode,
-                        subtitle: t(`${mode}.codeSubtitle`, { email }),
-                        statusMessage,
-                        isError,
-                        codeLabel: t("codeLabel"),
-                        codePlaceholder: t("codePlaceholder"),
-                        codeHint: t("codeHint", { minutes: ttlMinutes }),
-                        newPasswordLabel: t("newPasswordLabel"),
-                        newPasswordPlaceholder: t("newPasswordPlaceholder"),
-                        newPasswordHint: t("newPasswordHint"),
-                        revealLabel: t("revealLabel"),
-                        hideLabel: t("hideLabel"),
-                        submitLabel: t(`${mode}.codeSubmitLabel`),
-                        resendLabel: t("resendLabel"),
-                        cooldownLabel: cooldownSeconds === 0 ? "" : t("cooldownLabel", { seconds: cooldownSeconds }),
-                        backLabel: t("backLabel"),
-                    },
-                    on: actions,
-                }
-                : {
-                    state: "details",
-                    props: {
-                        ...frame,
-                        mode,
-                        statusMessage,
-                        isError,
-                        emailLabel: t("emailLabel"),
-                        emailPlaceholder: t("emailPlaceholder"),
-                        emailHint: t("emailHint"),
-                        passwordLabel: t("passwordLabel"),
-                        passwordPlaceholder: mode === "signUp" ? t("newAccountPasswordPlaceholder") : t("passwordPlaceholder"),
-                        passwordHint: t("passwordHint"),
-                        confirmPasswordLabel: t("confirmPasswordLabel"),
-                        confirmPasswordPlaceholder: t("confirmPasswordPlaceholder"),
-                        confirmPasswordMismatch: t("confirmPasswordMismatch"),
-                        revealLabel: t("revealLabel"),
-                        hideLabel: t("hideLabel"),
-                        submitLabel: t(`${mode}.submitLabel`),
-                        orLabel: t("orLabel"),
-                        googleLabel: t("googleLabel"),
-                        forgotPasswordLabel: t("forgotPasswordLabel"),
-                        rememberMeLabel: t("rememberMeLabel"),
-                        isRememberMe,
-                        promptQuestion: t(`${mode}.promptQuestion`),
-                        promptAction: t(`${mode}.promptAction`),
-                    },
-                    on: actions,
-                }
+        }
+        if (phase === "code") {
+            return {
+                state: "code",
+                props: {
+                    ...frame,
+                    mode,
+                    subtitle: t(`${mode}.codeSubtitle`, { email }),
+                    statusMessage,
+                    isError,
+                    codeLabel: t("codeLabel"),
+                    codePlaceholder: t("codePlaceholder"),
+                    codeHint: t("codeHint", { minutes: ttlMinutes }),
+                    newPasswordLabel: t("newPasswordLabel"),
+                    newPasswordPlaceholder: t("newPasswordPlaceholder"),
+                    newPasswordHint: t("newPasswordHint"),
+                    revealLabel: t("revealLabel"),
+                    hideLabel: t("hideLabel"),
+                    submitLabel: t(`${mode}.codeSubmitLabel`),
+                    resendLabel: t("resendLabel"),
+                    cooldownLabel: cooldownSeconds === 0 ? "" : t("cooldownLabel", { seconds: cooldownSeconds }),
+                    backLabel: t("backLabel"),
+                },
+                on: actions,
+            }
+        }
+        return {
+            state: "details",
+            props: {
+                ...frame,
+                mode,
+                statusMessage,
+                isError,
+                emailLabel: t("emailLabel"),
+                emailPlaceholder: t("emailPlaceholder"),
+                emailHint: t("emailHint"),
+                passwordLabel: t("passwordLabel"),
+                passwordPlaceholder: mode === "signUp" ? t("newAccountPasswordPlaceholder") : t("passwordPlaceholder"),
+                passwordHint: t("passwordHint"),
+                confirmPasswordLabel: t("confirmPasswordLabel"),
+                confirmPasswordPlaceholder: t("confirmPasswordPlaceholder"),
+                confirmPasswordMismatch: t("confirmPasswordMismatch"),
+                revealLabel: t("revealLabel"),
+                hideLabel: t("hideLabel"),
+                submitLabel: t(`${mode}.submitLabel`),
+                orLabel: t("orLabel"),
+                googleLabel: t("googleLabel"),
+                forgotPasswordLabel: t("forgotPasswordLabel"),
+                rememberMeLabel: t("rememberMeLabel"),
+                isRememberMe,
+                promptQuestion: t(`${mode}.promptQuestion`),
+                promptAction: t(`${mode}.promptAction`),
+            },
+            on: actions,
+        }
+    }
 
-    return <_AuthenticationPage panel={panel} />
+    const panel = panelFor()
+
+    return <AuthenticationPageView panel={panel} />
 }

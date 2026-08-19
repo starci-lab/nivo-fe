@@ -39,7 +39,7 @@ icon leaf selects the outline or micro drawing from the role.
 | `code` | Verification/security code | `ShieldCheckIcon` | The checked shield distinguishes verification from programming |
 | `complete` | Completed/successful state | `CheckCircleIcon` | A checked circle names completion across authentication, quests and progress without tying the glyph to one feature |
 | `pending` | Incomplete/pending progress | `CircleIcon` | The unfinished state is the exact empty twin of completion: keep Heroicons' outer `CheckCircleIcon` path and remove only its inner check |
-| `signIn` | Enter account/session | `ArrowRightOnRectangleIcon` | The arrow entering a boundary names session entry |
+| `signIn` | Enter account/session | `ArrowRightStartOnRectangleIcon` (outline), `ArrowRightEndOnRectangleIcon` (chip) | The arrow crossing a boundary names session entry. Heroicons 2.1 split the old `ArrowRightOnRectangleIcon` in two and deprecated that name; the outline cut here is its byte-identical successor `ArrowRightStartOnRectangleIcon`, so the drawing is unchanged |
 | `signUp` | Create an account | `UserPlusIcon` | A person with a plus names account creation |
 | `close` | Dismiss/close | `XMarkIcon` | The conventional close mark has one unambiguous action |
 | `next` | Continue/go forward | `ArrowRightIcon` | A forward arrow names progression without implying login |

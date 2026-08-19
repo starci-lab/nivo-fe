@@ -39,15 +39,16 @@ export type AcademyControlCenterPageViewProps = {
 
 /** Compose one Academy destination without taking ownership of block requests. */
 export const _AcademyControlCenterPage = ({ state, title, siteId, publicHost, mode, labels, onSelectMode, onOpenPublicSite }: AcademyControlCenterPageViewProps) => {
+    const settledSections = mode === "growth"
+        ? [
+            defineContractProjection("label-row-over-card", () => <AcademyGrowthSummary siteId={siteId} />),
+            defineContractProjection("label-row-over-card", () => <AcademyStudentCrm siteId={siteId} />),
+            defineContractProjection("label-row-over-card", () => <AcademyLeadPipeline siteId={siteId} />),
+        ]
+        : [defineContractProjection("label-row-over-card", () => <AcademyIntegrationCenter siteId={siteId} />)]
     const sections = state !== "ready"
         ? [defineContractProjection("label-row-over-card", () => <EmptyNotice props={{ message: state === "restoring" ? labels.loading : labels.refused }} />)]
-        : mode === "growth"
-            ? [
-                defineContractProjection("label-row-over-card", () => <AcademyGrowthSummary siteId={siteId} />),
-                defineContractProjection("label-row-over-card", () => <AcademyStudentCrm siteId={siteId} />),
-                defineContractProjection("label-row-over-card", () => <AcademyLeadPipeline siteId={siteId} />),
-            ]
-            : [defineContractProjection("label-row-over-card", () => <AcademyIntegrationCenter siteId={siteId} />)]
+        : settledSections
     return (
         <Tree
             contract="tabbed-control-center-page"

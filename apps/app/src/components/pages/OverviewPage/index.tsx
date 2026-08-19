@@ -26,7 +26,7 @@ import {
 } from "@/modules/api/console"
 import type { Result } from "@/modules/api/graphql"
 import {
-    _OverviewPage,
+    _OverviewPage as OverviewPageView,
     type AgentOsSectionView,
     type AppsSectionView,
     type ConsoleFactRow,
@@ -68,12 +68,12 @@ const ACADEMY_HOST_SUFFIX = process.env.NEXT_PUBLIC_ACADEMY_HOST_SUFFIX ?? ".niv
  * `refusal.unknown`, which says the rest of the screen is still correct. Minting a catalogue key per
  * transport code would promise a business explanation for something that is not one.
  */
-const NAMED_REFUSALS: ReadonlyArray<string> = [
+const NAMED_REFUSALS: ReadonlySet<string> = new Set([
     "EXPERT_SITE_NOT_FOUND_EXCEPTION",
     "EXPERT_SITE_AMBIGUOUS_FOR_VIEWER_EXCEPTION",
     "AGENT_WORKSPACE_NOT_FOUND_EXCEPTION",
     "POD_REGISTRATION_MISSING_EXCEPTION",
-]
+])
 
 /**
  * The statuses the fleet vocabulary actually holds, read off the wire's own words.
@@ -238,7 +238,7 @@ export const OverviewPage = () => {
     }, [isSignedIn])
 
     const refusalNote = (code: string | undefined) =>
-        code !== undefined && NAMED_REFUSALS.includes(code) ? t(`refusal.${code}`) : t("refusal.unknown")
+        code !== undefined && NAMED_REFUSALS.has(code) ? t(`refusal.${code}`) : t("refusal.unknown")
 
     const money = (amountVnd: number) =>
         format.number(amountVnd, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
@@ -367,17 +367,20 @@ export const OverviewPage = () => {
         return {
             phase: "answered",
             label,
-            facts: domains.data.map((domain) => ({
-                id: domain.id,
-                label: domain.name,
+            facts: domains.data.map((domain) => {
                 /*
                  * `expiresAt` IS NULLABLE ON THE WIRE, so the line falls back to what the account did
                  * settle about the domain rather than formatting a null into `Invalid Date`.
                  */
-                value: domain.expiresAt === null
-                    ? (domain.autoRenew ? t("domains.autoRenewOn") : t("domains.autoRenewOff"))
-                    : t("domains.expiresAt", { date: day(domain.expiresAt) }),
-            })),
+                const renewalNote = domain.autoRenew ? t("domains.autoRenewOn") : t("domains.autoRenewOff")
+                return {
+                    id: domain.id,
+                    label: domain.name,
+                    value: domain.expiresAt === null
+                        ? renewalNote
+                        : t("domains.expiresAt", { date: day(domain.expiresAt) }),
+                }
+            }),
         }
     }
 
@@ -429,7 +432,7 @@ export const OverviewPage = () => {
     }
 
     return (
-        <_OverviewPage
+        <OverviewPageView
             title={t("overview.title")}
             apps={appsView()}
             agentOs={agentOsView()}

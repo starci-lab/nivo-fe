@@ -65,8 +65,14 @@ export const AcademyIntegrationCenter = ({ siteId }: AcademyIntegrationCenterPro
         const count = answer?.credentials.filter((item) => item.key.startsWith("PAYOS_") || item.key.startsWith("SEPAY_")).length ?? 0
         return count === 0 ? t("notConfigured") : t("credentialCount", { count })
     }
+    /** A custom domain is live once DNS answers, absent until one is claimed, and pending in between. */
+    const domainStatus = (): "live" | "absent" | "pending" => {
+        if (answer?.customDomain?.dnsReady === true) return "live"
+        if (answer?.customDomain?.domain === null || answer?.customDomain === undefined) return "absent"
+        return "pending"
+    }
     const cards: ReadonlyArray<AcademyIntegrationCard> = ([
-        { id: "domain", status: answer?.customDomain?.dnsReady === true ? "live" : answer?.customDomain?.domain === null || answer?.customDomain === undefined ? "absent" : "pending", detail: answer?.customDomain?.domain === null || answer?.customDomain?.domain === undefined ? undefined : `${answer.customDomain.domain} → ${answer.customDomain.target}` },
+        { id: "domain", status: domainStatus(), detail: answer?.customDomain?.domain === null || answer?.customDomain?.domain === undefined ? undefined : `${answer.customDomain.domain} → ${answer.customDomain.target}` },
         { id: "google", status: provider("google")?.status ?? "absent", detail: provider("google")?.reason ?? provider("google")?.clientId },
         { id: "smtp", status: answer?.credentials.some((item) => item.key.startsWith("SMTP_") && item.verification === "verified") === true ? "verified" : "absent", detail: credentialDetail("SMTP_") },
         { id: "payment", status: answer?.credentials.some((item) => (item.key.startsWith("PAYOS_") || item.key.startsWith("SEPAY_")) && item.verification === "verified") === true ? "verified" : "absent", detail: paymentCredentialDetail() },
@@ -105,33 +111,43 @@ export const AcademyIntegrationCenter = ({ siteId }: AcademyIntegrationCenterPro
         ]
     }
 
+    /** Consent mode is a closed vocabulary; anything else the field holds means the default. */
+    const consentModeOf = (value: string | undefined) => value === "granted" || value === "denied" ? value : "required"
+
+    /** Each provider writes through its own mutation; the caller owns the shared pending state. */
+    const saveProvider = async (id: ProviderId) => {
+        if (id === "domain") return setAcademyCustomDomain({ siteId, domain: values.domain?.trim() || null })
+        if (id === "google") return saveAcademyGoogleOAuth({ siteId, clientId: values.clientId ?? "", clientSecret: values.clientSecret ?? "" })
+        if (id === "smtp" || id === "payment") return saveAcademyCredential({ siteId, key: values.credentialKey ?? "", value: values.credentialValue ?? "" })
+        if (id === "zalo") return beginAcademyZaloAuthorization(siteId)
+        if (id === "ga4" || id === "meta_pixel") return saveAcademyAnalytics({ siteId, provider: id, identifier: values.identifier?.trim() || null, consentMode: consentModeOf(values.consentMode) })
+        return createAcademyWebhook({ siteId, endpoint: values.endpoint ?? "", events: (values.events ?? "").split(",").map((event) => event.trim()).filter(Boolean) })
+    }
+
+    /** A webhook reports the copied signing secret; every other provider reports a plain save. */
+    const outcomeOf = (id: ProviderId, ok: boolean) => {
+        if (!ok) return t("saveFailed")
+        return id === "webhook" ? t("webhookSecretCopied") : t("saved")
+    }
+
     const submit = async () => {
         if (selectedId === undefined) return
         setPendingId(selectedId)
         setOutcome(undefined)
-        const result = selectedId === "domain"
-            ? await setAcademyCustomDomain({ siteId, domain: values.domain?.trim() || null })
-            : selectedId === "google"
-                ? await saveAcademyGoogleOAuth({ siteId, clientId: values.clientId ?? "", clientSecret: values.clientSecret ?? "" })
-                : selectedId === "smtp" || selectedId === "payment"
-                    ? await saveAcademyCredential({ siteId, key: values.credentialKey ?? "", value: values.credentialValue ?? "" })
-                    : selectedId === "zalo"
-                        ? await beginAcademyZaloAuthorization(siteId)
-                        : selectedId === "ga4" || selectedId === "meta_pixel"
-                            ? await saveAcademyAnalytics({ siteId, provider: selectedId, identifier: values.identifier?.trim() || null, consentMode: values.consentMode === "granted" || values.consentMode === "denied" ? values.consentMode : "required" })
-                            : await createAcademyWebhook({ siteId, endpoint: values.endpoint ?? "", events: (values.events ?? "").split(",").map((event) => event.trim()).filter(Boolean) })
+        const result = await saveProvider(selectedId)
         if (result.ok && selectedId === "zalo" && "authorizationUrl" in result.data) window.open(result.data.authorizationUrl, "academy-zalo-oauth", "popup,width=520,height=720")
         if (result.ok && selectedId === "webhook" && "signingSecret" in result.data) {
             try { await navigator.clipboard.writeText(result.data.signingSecret) } catch { /* Browser permission may refuse clipboard; never echo the secret into the DOM. */ }
         }
-        setOutcome(result.ok ? selectedId === "webhook" ? t("webhookSecretCopied") : t("saved") : t("saveFailed"))
+        setOutcome(outcomeOf(selectedId, result.ok))
         setPendingId(undefined)
         if (result.ok) await load()
     }
 
+    const settledState = answer === null ? "refused" : "answered"
     return (
         <_AcademyIntegrationCenter
-            state={answer === undefined ? "resting" : answer === null ? "refused" : "answered"}
+            state={answer === undefined ? "resting" : settledState}
             sectionLabel={t("section")}
             refusedLabel={t("refused")}
             cards={cards}

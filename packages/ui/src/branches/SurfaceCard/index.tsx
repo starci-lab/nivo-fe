@@ -106,11 +106,12 @@ export const SurfaceCard = <const K extends SectionBodyKey>({
 }: SurfaceCardProps<K>) => {
     // One place at the end of the line: the way out wins it, the fact takes it only if free.
     const hasSeeMore = props.seeMoreLabel !== undefined && on?.seeMore !== undefined
+    const fact = props.fact === undefined
+        ? null
+        : <Text props={{ content: props.fact, size: "sm", tone: "muted" }} isLoading={isLoading} />
     const end = hasSeeMore
         ? <SeeMoreLink props={{ label: props.seeMoreLabel }} on={{ press: on.seeMore }} />
-        : props.fact === undefined
-            ? null
-            : <Text props={{ content: props.fact, size: "sm", tone: "muted" }} isLoading={isLoading} />
+        : fact
 
     const labelContract = !hasSeeMore && props.fact !== undefined
         ? "title-with-baseline-fact"

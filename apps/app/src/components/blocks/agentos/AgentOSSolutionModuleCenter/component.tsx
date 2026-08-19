@@ -45,20 +45,25 @@ const loadingCards: ReadonlyArray<AgentOSSolutionModuleCard> = ["module-loading-
 }))
 
 /** Render the selected solution mode from already-resolved card projections. */
-export const _AgentOSSolutionModuleCenter = ({ state, mode, sectionLabel, modesLabel, modes, refusedLabel, emptyLabel, emptyActionLabel, cards, pendingId, outcome, onSelectMode, onPressCard }: AgentOSSolutionModuleCenterViewProps) => (
-    <>
-        <ChoiceTabs props={{ label: modesLabel, selectedKey: mode, tabs: modes }} on={{ select: (key) => onSelectMode(key as "catalog" | "installed") }} />
-        {state === "refused" ? (
-            <SurfaceCard
-                props={{ label: sectionLabel }}
-                contract="body-with-refusal-note"
-                render={defineContractComponent("body-with-refusal-note", {
-                    note: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: refusedLabel, size: "sm", tone: "muted" }} />),
-                })}
-            />
-        ) : state === "answered" && cards.length === 0 ? (
-            <EmptyNotice props={{ message: emptyLabel, actionLabel: emptyActionLabel }} on={{ act: () => onSelectMode("catalog") }} />
-        ) : (
+export const _AgentOSSolutionModuleCenter = ({ state, mode, sectionLabel, modesLabel, modes, refusedLabel, emptyLabel, emptyActionLabel, cards, pendingId, outcome, onSelectMode, onPressCard }: AgentOSSolutionModuleCenterViewProps) => {
+    // The three situations under the tabs, read in order: a refusal, an answer with nothing in it,
+    // and otherwise the grid - which draws the resting placeholders when the answer has not landed.
+    const body = () => {
+        if (state === "refused") {
+            return (
+                <SurfaceCard
+                    props={{ label: sectionLabel }}
+                    contract="body-with-refusal-note"
+                    render={defineContractComponent("body-with-refusal-note", {
+                        note: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: refusedLabel, size: "sm", tone: "muted" }} />),
+                    })}
+                />
+            )
+        }
+        if (state === "answered" && cards.length === 0) {
+            return <EmptyNotice props={{ message: emptyLabel, actionLabel: emptyActionLabel }} on={{ act: () => onSelectMode("catalog") }} />
+        }
+        return (
             <SurfaceCard
                 props={{ label: sectionLabel, isFrameless: true }}
                 contract="status-action-card-grid"
@@ -73,10 +78,16 @@ export const _AgentOSSolutionModuleCenter = ({ state, mode, sectionLabel, modesL
                     ))),
                 })}
             />
-        )}
-        {outcome === undefined ? null : <Text props={{ content: outcome, size: "sm", tone: "muted", live: "polite" }} />}
-    </>
-)
+        )
+    }
+    return (
+        <>
+            <ChoiceTabs props={{ label: modesLabel, selectedKey: mode, tabs: modes }} on={{ select: (key) => onSelectMode(key as "catalog" | "installed") }} />
+            {body()}
+            {outcome === undefined ? null : <Text props={{ content: outcome, size: "sm", tone: "muted", live: "polite" }} />}
+        </>
+    )
+}
 
 /** Source-level tier marker for the pure solution-module center. */
 export const meta = { shape: "block", world: "pure" } as const

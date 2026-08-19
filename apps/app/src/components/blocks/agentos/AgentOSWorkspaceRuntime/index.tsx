@@ -47,9 +47,10 @@ export const AgentOSWorkspaceRuntime = ({ data, labels, formatDate }: AgentOSWor
     const memoryText = totals?.memoryUsageBytes === null || totals === undefined
         ? labels.unavailable
         : `${mib(totals.memoryUsageBytes)} / ${mib(totals.memoryLimitBytes)}`
+    const freshness = runtime?.stale === true ? labels.stale : labels.fresh
     const note = runtime === null
         ? labels.unavailable
-        : `${runtime.stale ? labels.stale : labels.fresh} · ${formatDate(runtime.observedAt)}`
+        : `${freshness} · ${formatDate(runtime.observedAt)}`
     return (
         <SurfaceCard
             props={{ label: labels.section }}

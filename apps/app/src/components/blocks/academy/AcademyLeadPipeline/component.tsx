@@ -58,7 +58,8 @@ export const _AcademyLeadPipeline = ({ state, leads, selected, draft, pendingAct
             badge: defineLeafComponent("badge", {}, () => <Badge props={{ content: lead.status, tone: lead.status === "converted" ? "success" : "neutral" }} />),
             action: defineLeafComponent("button", {}, () => <Button props={{ label: labels.open, size: "sm" }} on={{ press: () => onOpenLead(lead.id) }} />),
         }))
-    const note = state === "empty" ? labels.empty : state === "refused" ? labels.refused : undefined
+    const refusalNote = state === "refused" ? labels.refused : undefined
+    const note = state === "empty" ? labels.empty : refusalNote
     return (
         <>
             {note === undefined ? (

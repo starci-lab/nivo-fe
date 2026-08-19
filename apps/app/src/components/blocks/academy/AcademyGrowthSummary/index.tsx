@@ -23,9 +23,10 @@ export const AcademyGrowthSummary = ({ siteId }: AcademyGrowthSummaryProps) => {
         return () => { cancelled = true }
     }, [session.state.status, siteId])
     const data = answer?.ok === true ? answer.data : undefined
+    const settledState = answer?.ok === true ? "answered" : "refused"
     return (
         <_AcademyGrowthSummary
-            state={answer === null ? "resting" : answer.ok ? "answered" : "refused"}
+            state={answer === null ? "resting" : settledState}
             data={data}
             revenue={format.number(data?.revenueVnd ?? 0, { style: "currency", currency: "VND", maximumFractionDigits: 0 })}
             labels={{

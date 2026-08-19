@@ -14,7 +14,7 @@ import {
 } from "@/modules/api/console"
 import type { Result } from "@/modules/api/graphql"
 import {
-    _WalletPage,
+    _WalletPage as WalletPageView,
     type BalanceSectionView,
     type LedgerSectionView,
     type WalletFactRow,
@@ -97,6 +97,25 @@ export const WalletPage = () => {
 
     const day = (iso: string) => format.dateTime(new Date(iso), { day: "2-digit", month: "2-digit" })
 
+    /**
+     * What an invoice row is called.
+     *
+     * Written as three answers rather than one nested question: the relation is gone, the rung is
+     * gone, or both are there. See the note in {@link invoicesView} for why either can be absent.
+     *
+     * @param item - The product name, when the order still points at a catalog item.
+     * @param tier - The rung's name, when the order still points at a tier.
+     */
+    const invoiceLabel = (item?: string, tier?: string) => {
+        if (item === undefined) {
+            return t("wallet.invoicesLabel")
+        }
+        if (tier === undefined) {
+            return item
+        }
+        return `${item} · ${tier}`
+    }
+
     const balanceView = (): BalanceSectionView => {
         const label = t("wallet.balanceLabel")
         if (money === null) {
@@ -148,11 +167,14 @@ export const WalletPage = () => {
              * deposit or spend - so nothing here decides what a row means, and a minus in front of an
              * amount would read as an error state on a screen where a real one exists next door.
              */
-            facts: movements.data.map((movement) => ({
-                id: movement.id,
-                label: `${day(movement.createdAt)} · ${t(`wallet.type.${movement.type}`)}`,
-                value: amount(movement.amountVnd),
-            })),
+            facts: movements.data.map((movement) => {
+                const typeWord = t(`wallet.type.${movement.type}`)
+                return {
+                    id: movement.id,
+                    label: `${day(movement.createdAt)} · ${typeWord}`,
+                    value: amount(movement.amountVnd),
+                }
+            }),
         }
     }
 
@@ -167,11 +189,12 @@ export const WalletPage = () => {
         if (money.invoices.data.length === 0) {
             return { phase: "empty", label, note: t("wallet.invoicesEmpty") }
         }
+        const payLabel = payingInvoice ? t("wallet.paying") : t("wallet.pay")
         return {
             phase: "answered",
             label,
             actionLabel: money.invoices.data.some((invoice) => invoice.status === "unpaid")
-                ? payingInvoice ? t("wallet.paying") : t("wallet.pay")
+                ? payLabel
                 : undefined,
             /*
              * AN INVOICE IS THE ONE PLACE A HUMAN-READABLE PRODUCT LABEL IS LEGITIMATELY DERIVABLE.
@@ -183,19 +206,22 @@ export const WalletPage = () => {
             facts: money.invoices.data.map((invoice) => {
                 const item = invoice.catalogOrder?.catalogItem?.name
                 const tier = invoice.catalogOrder?.catalogTier?.name
+                const statusWord = t(`wallet.status.${invoice.status}`)
+                // A payment that was refused says so on the row it was refused for, and nowhere else.
+                const refusal = invoice.status === "unpaid" && paymentError !== null
+                    ? ` · ${paymentError}`
+                    : ""
                 return {
                     id: invoice.id,
-                    label: item === undefined
-                        ? t("wallet.invoicesLabel")
-                        : tier === undefined ? item : `${item} · ${tier}`,
-                    value: `${amount(invoice.amountVnd)} · ${t(`wallet.status.${invoice.status}`)}${invoice.status === "unpaid" && paymentError !== null ? ` · ${paymentError}` : ""}`,
+                    label: invoiceLabel(item, tier),
+                    value: `${amount(invoice.amountVnd)} · ${statusWord}${refusal}`,
                 }
             }),
         }
     }
 
     const payInvoice = async () => {
-        if (payingInvoice || money === null || !money.invoices.ok) {
+        if (payingInvoice || money?.invoices.ok !== true) {
             return
         }
         const invoice = money.invoices.data.find((row) => row.status === "unpaid")
@@ -221,7 +247,7 @@ export const WalletPage = () => {
     }
 
     return (
-        <_WalletPage
+        <WalletPageView
             title={t("wallet.title")}
             balance={balanceView()}
             transactions={transactionsView()}

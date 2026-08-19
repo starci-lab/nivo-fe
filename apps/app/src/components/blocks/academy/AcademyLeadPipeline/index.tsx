@@ -9,6 +9,25 @@ import { _AcademyLeadPipeline } from "./component"
 /** Owner-scoped identity consumed by the lead pipeline. */
 export type AcademyLeadPipelineProps = { readonly siteId: string }
 
+/**
+ * Where a lead moves next when the operator advances it.
+ *
+ * A TABLE RATHER THAN A CHAIN: the pipeline order is a fact about the vocabulary, and any status
+ * the wire holds that is not a step before the end - including `converted` itself - stays at
+ * `converted`, which is what the chain it replaces did.
+ */
+const NEXT_STATUS: Readonly<Record<string, string | undefined>> = {
+    new: "contacted",
+    contacted: "qualified",
+}
+
+/** Settle which state the pipeline surface is in from what the load returned. */
+const pipelineState = (leads: ReadonlyArray<ExpertSiteLead> | null | undefined) => {
+    if (leads === undefined) return "resting" as const
+    if (leads === null) return "refused" as const
+    return leads.length === 0 ? "empty" as const : "answered" as const
+}
+
 /** Load leads and own targeted update/draft state. */
 export const AcademyLeadPipeline = ({ siteId }: AcademyLeadPipelineProps) => {
     const t = useTranslations("console.academyControlCenter.leads")
@@ -38,7 +57,7 @@ export const AcademyLeadPipeline = ({ siteId }: AcademyLeadPipelineProps) => {
     const advance = async () => {
         if (selected === undefined) return
         setPendingAction("advance")
-        const status = selected.status === "new" ? "contacted" : selected.status === "contacted" ? "qualified" : "converted"
+        const status = NEXT_STATUS[selected.status] ?? "converted"
         const result = await updateExpertSiteLead({ leadId: selected.id, status, ...(draft === undefined ? {} : { note: draft }) })
         setMessage(result.ok ? t("saved") : t("actionFailed"))
         setPendingAction(undefined)
@@ -46,7 +65,7 @@ export const AcademyLeadPipeline = ({ siteId }: AcademyLeadPipelineProps) => {
     }
     return (
         <_AcademyLeadPipeline
-            state={leads === undefined ? "resting" : leads === null ? "refused" : leads.length === 0 ? "empty" : "answered"}
+            state={pipelineState(leads)}
             leads={leads ?? []}
             selected={selected}
             draft={draft}

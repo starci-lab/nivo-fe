@@ -18,6 +18,45 @@ import { _AcademyStudentCrm } from "./component"
 /** Owner-scoped identity consumed by the student CRM. */
 export type AcademyStudentCrmProps = { readonly siteId: string }
 
+/**
+ * Which situation the student list is in.
+ *
+ * `undefined` is "not asked yet" and `null` is "asked and refused" -- two different sentences on
+ * screen, which is why the request state is not collapsed into an empty array.
+ *
+ * @param students - The loaded students, `null` when the request refused, `undefined` before it ran.
+ * @returns The state the list surface draws.
+ */
+const listStateOf = (students: ReadonlyArray<AcademyStudent> | null | undefined) => {
+    if (students === undefined) {
+        return "resting" as const
+    }
+    if (students === null) {
+        return "refused" as const
+    }
+    return students.length === 0 ? "empty" as const : "answered" as const
+}
+
+/**
+ * Which situation the student detail panel is in.
+ *
+ * An in-flight request outranks whatever the panel last held, so reopening a student does not show
+ * the previous one's detail while the new one loads.
+ *
+ * @param detailLoading - Whether a detail request is in flight.
+ * @param detail - The loaded detail, `null` when refused, `undefined` before any student was opened.
+ * @returns The state the detail surface draws.
+ */
+const detailStateOf = (detailLoading: boolean, detail: AcademyStudentDetail | null | undefined) => {
+    if (detailLoading) {
+        return "resting" as const
+    }
+    if (detail === undefined) {
+        return "idle" as const
+    }
+    return detail === null ? "refused" as const : "answered" as const
+}
+
 /** Own student requests and targeted action state. */
 export const AcademyStudentCrm = ({ siteId }: AcademyStudentCrmProps) => {
     const t = useTranslations("console.academyControlCenter.students")
@@ -56,9 +95,9 @@ export const AcademyStudentCrm = ({ siteId }: AcademyStudentCrmProps) => {
     }
     return (
         <_AcademyStudentCrm
-            state={students === undefined ? "resting" : students === null ? "refused" : students.length === 0 ? "empty" : "answered"}
+            state={listStateOf(students)}
             students={students ?? []}
-            detailState={detailLoading ? "resting" : detail === undefined ? "idle" : detail === null ? "refused" : "answered"}
+            detailState={detailStateOf(detailLoading, detail)}
             detail={detail ?? undefined}
             pendingAction={pendingAction}
             actionMessage={actionMessage}

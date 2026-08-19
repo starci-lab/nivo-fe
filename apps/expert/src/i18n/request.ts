@@ -1,5 +1,4 @@
 import { getRequestConfig } from "next-intl/server"
-import { routing } from "./routing"
 import { toLocale } from "./config"
 
 /**
@@ -43,4 +42,4 @@ export default getRequestConfig(async ({ requestLocale }) => {
     }
 })
 
-export { routing }
+export { routing } from "./routing"

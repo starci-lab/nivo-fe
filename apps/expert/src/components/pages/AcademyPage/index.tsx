@@ -1,5 +1,5 @@
 import { fetchCourses } from "@/modules/api/academy"
-import { _AcademyPage } from "./component"
+import { _AcademyPage as AcademyPageView } from "./component"
 
 /**
  * PAGE - the academy's landing screen, connected half.
@@ -25,5 +25,5 @@ import { _AcademyPage } from "./component"
  */
 export const AcademyPage = async () => {
     const { courses } = await fetchCourses()
-    return <_AcademyPage courses={courses} />
+    return <AcademyPageView courses={courses} />
 }

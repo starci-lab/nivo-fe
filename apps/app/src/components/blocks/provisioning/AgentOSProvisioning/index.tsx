@@ -11,8 +11,11 @@ import {
     myCatalogOrders,
     myInvoices,
     orderAgentOs,
+    type AgentWorkspaceRow,
     type CatalogItemRow,
+    type CatalogOrderRow,
     type CatalogTierRow,
+    type InvoiceRow,
 } from "@/modules/api/console"
 import useProvisioningRealtime, { type ProvisioningTarget } from "@/modules/realtime/provisioning"
 import { _AgentOSProvisioning, type AgentOSProvisioningViewProps } from "./component"
@@ -40,6 +43,71 @@ const workspacePhase = (status: string): "preparing" | "ready" | "failed" => {
     return "preparing"
 }
 
+/** The namespaced copy reader, so the settlement below can read the same strings off the surface. */
+type ProvisioningCopy = ReturnType<typeof useTranslations>
+
+/** The three owner-scoped snapshots one order is settled against. */
+type ProvisioningSnapshot = {
+    readonly orders: ReadonlyArray<CatalogOrderRow>
+    readonly invoices: ReadonlyArray<InvoiceRow>
+    readonly workspaces: ReadonlyArray<AgentWorkspaceRow>
+}
+
+/**
+ * Read one order out of a settled snapshot and say which phase it leaves the flow in.
+ *
+ * The workspace answers first because it is the later fact: once one exists, the order and the
+ * invoice behind it have already been spent and no longer decide anything.
+ */
+const settleOrder = (orderId: string, snapshot: ProvisioningSnapshot, t: ProvisioningCopy): AgentOSFlow => {
+    const order = snapshot.orders.find((candidate) => candidate.id === orderId)
+    if (order === undefined) {
+        return { phase: "failed", orderId, subject: "AgentOS", detail: orderId, reason: t("agentos.orderMissing"), atStep: 0 }
+    }
+    const subject = order.catalogItem?.name ?? "AgentOS"
+    const detail = order.catalogTier?.name ?? orderId
+    const workspace = snapshot.workspaces.find((candidate) => candidate.catalogOrder?.id === orderId)
+    if (workspace !== undefined) {
+        const phase = workspacePhase(workspace.status)
+        if (phase === "failed") {
+            return { phase: "failed", orderId, subject, detail: workspace.id, reason: t("failedProvision"), atStep: 3 }
+        }
+        return { phase, orderId, workspaceId: workspace.id, subject, detail: workspace.name ?? workspace.id }
+    }
+    const invoice = snapshot.invoices.find((candidate) => candidate.catalogOrder?.id === orderId)
+    if (order.status === "pending_payment" || invoice?.status === "unpaid") {
+        return { phase: "awaiting_payment", orderId, subject, detail }
+    }
+    if (order.status === "cancelled") {
+        return { phase: "failed", orderId, subject, detail, reason: t("agentos.orderCancelled"), atStep: 1 }
+    }
+    return { phase: "accepted", orderId, subject, detail }
+}
+
+/** The one realtime subject a phase is waiting on, or nothing when it waits on no one. */
+const realtimeTarget = (flow: AgentOSFlow): ProvisioningTarget | null => {
+    if (flow.phase === "preparing" || flow.phase === "ready") return { kind: "workspace", id: flow.workspaceId }
+    if (flow.phase === "awaiting_payment" || flow.phase === "accepted") return { kind: "order", id: flow.orderId }
+    return null
+}
+
+/** Which of the five ordered steps the flow is standing on. A failure keeps the step it failed at. */
+const phaseIndexOf = (flow: AgentOSFlow): number => {
+    if (flow.phase === "catalog_loading" || flow.phase === "request" || flow.phase === "submitting") return 0
+    if (flow.phase === "awaiting_payment") return 1
+    if (flow.phase === "accepted") return 2
+    if (flow.phase === "preparing") return 3
+    if (flow.phase === "failed") return flow.atStep
+    return 4
+}
+
+/** Where one step sits relative to the step the flow is on. */
+const stepState = (index: number, phaseIndex: number): "done" | "current" | "upcoming" => {
+    if (index < phaseIndex) return "done"
+    if (index === phaseIndex) return "current"
+    return "upcoming"
+}
+
 /** Own the real order → payment → workspace lifecycle and its matching Socket.IO target. */
 export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
     const t = useTranslations("console.provisioningFlows")
@@ -61,33 +129,7 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
             setFlow({ phase: "failed", orderId, subject: "AgentOS", detail: orderId, reason: t("failedLoad"), atStep: 0 })
             return
         }
-        const order = orders.data.find((candidate) => candidate.id === orderId)
-        if (order === undefined) {
-            setFlow({ phase: "failed", orderId, subject: "AgentOS", detail: orderId, reason: t("agentos.orderMissing"), atStep: 0 })
-            return
-        }
-        const subject = order.catalogItem?.name ?? "AgentOS"
-        const detail = order.catalogTier?.name ?? orderId
-        const workspace = workspaces.data.find((candidate) => candidate.catalogOrder?.id === orderId)
-        if (workspace !== undefined) {
-            const phase = workspacePhase(workspace.status)
-            if (phase === "failed") {
-                setFlow({ phase: "failed", orderId, subject, detail: workspace.id, reason: t("failedProvision"), atStep: 3 })
-                return
-            }
-            setFlow({ phase, orderId, workspaceId: workspace.id, subject, detail: workspace.name ?? workspace.id })
-            return
-        }
-        const invoice = invoices.data.find((candidate) => candidate.catalogOrder?.id === orderId)
-        if (order.status === "pending_payment" || invoice?.status === "unpaid") {
-            setFlow({ phase: "awaiting_payment", orderId, subject, detail })
-            return
-        }
-        if (order.status === "cancelled") {
-            setFlow({ phase: "failed", orderId, subject, detail, reason: t("agentos.orderCancelled"), atStep: 1 })
-            return
-        }
-        setFlow({ phase: "accepted", orderId, subject, detail })
+        setFlow(settleOrder(orderId, { orders: orders.data, invoices: invoices.data, workspaces: workspaces.data }, t))
     }, [t])
 
     useEffect(() => {
@@ -114,11 +156,7 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
         }
     }, [accessToken, context, reconcile, t])
 
-    const target: ProvisioningTarget | null = flow.phase === "preparing" || flow.phase === "ready"
-        ? { kind: "workspace", id: flow.workspaceId }
-        : flow.phase === "awaiting_payment" || flow.phase === "accepted"
-            ? { kind: "order", id: flow.orderId }
-            : null
+    const target = realtimeTarget(flow)
     const realtime = useProvisioningRealtime({ accessToken, target })
 
     useEffect(() => {
@@ -178,15 +216,13 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
         router.replace(route(`/agentos/orders/${order.data.id}`))
     }
 
-    const phaseIndex = flow.phase === "catalog_loading" || flow.phase === "request" || flow.phase === "submitting"
-        ? 0 : flow.phase === "awaiting_payment" ? 1 : flow.phase === "accepted" ? 2 : flow.phase === "preparing" ? 3 : flow.phase === "failed" ? flow.atStep : 4
+    const phaseIndex = phaseIndexOf(flow)
     const stepLabels = [t("steps.request"), t("steps.payment"), t("steps.createWorkspace"), t("steps.infrastructure"), t("steps.manage")]
-    const steps = stepLabels.map((label, index) => ({
-        ordinal: String(index + 1),
-        label,
-        state: index < phaseIndex ? "done" as const : index === phaseIndex ? "current" as const : "upcoming" as const,
-        stateLabel: index < phaseIndex ? t("stepState.done") : index === phaseIndex ? t("stepState.current") : t("stepState.upcoming"),
-    }))
+    const stateLabels = { done: t("stepState.done"), current: t("stepState.current"), upcoming: t("stepState.upcoming") } as const
+    const steps = stepLabels.map((label, index) => {
+        const state = stepState(index, phaseIndex)
+        return { ordinal: String(index + 1), label, state, stateLabel: stateLabels[state] }
+    })
     const view = (): AgentOSProvisioningViewProps => {
         if (flow.phase === "catalog_loading") return { state: flow.phase, props: { steps, subject: "AgentOS", detail: t("loadingText"), statusTitle: t("loadingTitle"), statusText: t("loadingText") } }
         if (flow.phase === "request" || flow.phase === "submitting") {
@@ -197,7 +233,10 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
         if (flow.phase === "failed") return { state: "failed", props: { steps, subject: flow.subject, detail: flow.detail, statusTitle: t("failedTitle"), statusText: flow.reason, statusActionLabel: t("agentos.startAgain") }, on: { statusAction: () => router.push(route("/agentos")) } }
         if (flow.phase === "awaiting_payment") return { state: flow.phase, props: { steps, subject: flow.subject, detail: flow.detail, statusTitle: t("agentos.paymentTitle"), statusText: t("agentos.paymentText"), statusActionLabel: t("agentos.openWallet") }, on: { statusAction: () => router.push(route("/wallet")) } }
         if (flow.phase === "ready") return { state: flow.phase, props: { steps, subject: flow.subject, detail: flow.detail, statusTitle: t("readyTitle"), statusText: t("agentos.readyText"), statusActionLabel: t("agentos.manage") }, on: { statusAction: () => router.push(route("/agentos")) } }
-        return { state: flow.phase, props: { steps, subject: flow.subject, detail: flow.detail, statusTitle: flow.phase === "accepted" ? t("agentos.acceptedTitle") : t("preparingTitle"), statusText: realtime.status === "connecting" ? t("connecting") : flow.phase === "accepted" ? t("agentos.acceptedText") : t("agentos.preparingText") } }
+        const isAccepted = flow.phase === "accepted"
+        const settledText = isAccepted ? t("agentos.acceptedText") : t("agentos.preparingText")
+        const statusText = realtime.status === "connecting" ? t("connecting") : settledText
+        return { state: flow.phase, props: { steps, subject: flow.subject, detail: flow.detail, statusTitle: isAccepted ? t("agentos.acceptedTitle") : t("preparingTitle"), statusText } }
     }
 
     return <_AgentOSProvisioning {...view()} />

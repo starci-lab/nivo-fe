@@ -137,9 +137,10 @@ export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps)
             backup: t("operations.backup"), reset: t("operations.reset"), rebuild: t("operations.rebuild"),
         },
     }
+    const answeredState = answer?.ok === true ? "ready" : "refused"
     return (
         <_AgentOSWorkspacePage
-            state={answer === null ? "loading" : answer.ok ? "ready" : "refused"}
+            state={answer === null ? "loading" : answeredState}
             message={answer !== null && !answer.ok ? t("refused") : undefined}
             data={answer?.ok === true ? answer.data : undefined}
             section={section}
@@ -147,7 +148,7 @@ export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps)
             launchState={launchState}
             openClawLaunchHref={`/${locale}/launch/agentos/${workspaceId}/openclaw`}
             onSelectSection={setSection}
-            onOpenAgentConsole={() => void openOpenClaw()}
+            onOpenAgentConsole={openOpenClaw}
             formatDate={(value) => format.dateTime(new Date(value), { dateStyle: "medium", timeStyle: "short" })}
         />
     )

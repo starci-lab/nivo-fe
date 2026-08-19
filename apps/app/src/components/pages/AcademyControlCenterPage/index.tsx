@@ -33,9 +33,10 @@ export const AcademyControlCenterPage = ({ siteId }: AcademyControlCenterPagePro
         ? undefined
         : site.customDomain ?? `${site.slug}${process.env.NEXT_PUBLIC_ACADEMY_HOST_SUFFIX ?? ".nivo.vn"}`
     if (!mounted) return null
+    const settledState = site === null ? "refused" : "ready"
     return (
         <_AcademyControlCenterPage
-            state={site === undefined ? "restoring" : site === null ? "refused" : "ready"}
+            state={site === undefined ? "restoring" : settledState}
             title={site?.slug ?? t("title")}
             siteId={siteId}
             publicHost={publicHost}

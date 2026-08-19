@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from "react"
+import { useRef, useState, type SubmitEvent } from "react"
 import {
     Button,
     Checkbox,
@@ -276,7 +276,7 @@ export const AuthenticationPanel = (input: AuthenticationPanelProps) => {
 
     if (input.state === "code") {
         const copy = input.props
-        const submitCode = (event: FormEvent<HTMLFormElement>) => {
+        const submitCode = (event: SubmitEvent<HTMLFormElement>) => {
             event.preventDefault()
             input.on?.submitCode?.({ otp: values.current.otp, newPassword: values.current.newPassword })
         }
@@ -378,7 +378,7 @@ export const AuthenticationPanel = (input: AuthenticationPanelProps) => {
     const copy = input.props
     const isSignUp = copy.mode === "signUp"
     const isReset = copy.mode === "forgotPassword"
-    const submitDetails = (event: FormEvent<HTMLFormElement>) => {
+    const submitDetails = (event: SubmitEvent<HTMLFormElement>) => {
         event.preventDefault()
         // Whether two boxes hold the same characters is intrinsic to this form. No request answers
         // it, and sending a mismatched pair would spend a code to learn what a comparison knew.

@@ -72,6 +72,12 @@ export const SurfaceListCard = <
         />
     )
 
+    // A whole-list action outranks the supporting sentence: only one of the two closes the surface.
+    const showsAction = surfaceProps.actionLabel !== undefined && (isLoading || on?.act !== undefined)
+    const description = surfaceProps.description === undefined ? null : (
+        <Text props={{ content: surfaceProps.description, size: "xs", tone: "muted" }} isLoading={isLoading} />
+    )
+
     return (
         <div data-component="SurfaceListCard" className="flex flex-col gap-3">
             {surfaceProps.isLabelHidden === true ? null : label}
@@ -84,11 +90,9 @@ export const SurfaceListCard = <
                     <Content props={props} on={on} isLoading={isLoading} />
                 </Card.Content>
             </Card>
-            {surfaceProps.actionLabel !== undefined && (isLoading || on?.act !== undefined) ? (
+            {showsAction ? (
                 <Button props={{ label: surfaceProps.actionLabel, size: "sm", variant: "primary" }} on={{ press: on?.act }} isLoading={isLoading} />
-            ) : surfaceProps.description === undefined ? null : (
-                <Text props={{ content: surfaceProps.description, size: "xs", tone: "muted" }} isLoading={isLoading} />
-            )}
+            ) : description}
         </div>
     )
 }

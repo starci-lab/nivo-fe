@@ -1,6 +1,5 @@
 import { getRequestConfig } from "next-intl/server"
 import { TIME_ZONE, toLocale } from "./config"
-import { routing } from "./routing"
 
 /**
  * WHERE PRODUCT COPY COMES FROM, resolved once per request on the server.
@@ -33,4 +32,4 @@ export default getRequestConfig(async ({ requestLocale }) => {
     }
 })
 
-export { routing }
+export { routing } from "./routing"

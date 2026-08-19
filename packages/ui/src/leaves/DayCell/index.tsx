@@ -30,6 +30,9 @@ export type DayCellProps = LeafProps<DayCellData>
 /** Stacks the plain circle over its letter. */
 const BASE_CLASSES = "flex flex-col items-center gap-1"
 
+/** The circle itself, before the fill that says whether the day was worked. */
+const DOT_CLASSES = "size-6 shrink-0 rounded-full"
+
 /** The resting shape - same chip, glyphs out. */
 const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
     className: "select-none text-transparent",
@@ -40,29 +43,28 @@ const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
  *
  * @param input - {@link DayCellProps}
  */
-export const DayCell = ({ props, isLoading = false }: DayCellProps) => (
-    <li
-        data-tier="leaf"
-        data-component="DayCell"
-        data-part="day"
-        data-active={props.active === true ? "true" : "false"}
-        data-loading={isLoading ? "true" : "false"}
-        className={BASE_CLASSES}
-    >
-        <span
-            aria-hidden="true"
-            className={isLoading
-                ? `size-6 shrink-0 rounded-full ${RESTING_CLASSES}`
-                : `size-6 shrink-0 rounded-full ${props.active === true ? "bg-accent/80" : "bg-muted/20"}`}
-        />
-        <span data-part="weekday" className="text-xs text-muted">
-            {props.weekday ?? ""}
-        </span>
-        <span data-part="date" className="sr-only">
-            {props.title ?? ""}
-        </span>
-    </li>
-)
+export const DayCell = ({ props, isLoading = false }: DayCellProps) => {
+    const dotFill = props.active === true ? "bg-accent/80" : "bg-muted/20"
+    const dotClasses = `${DOT_CLASSES} ${isLoading ? RESTING_CLASSES : dotFill}`
+    return (
+        <li
+            data-tier="leaf"
+            data-component="DayCell"
+            data-part="day"
+            data-active={props.active === true ? "true" : "false"}
+            data-loading={isLoading ? "true" : "false"}
+            className={BASE_CLASSES}
+        >
+            <span aria-hidden="true" className={dotClasses} />
+            <span data-part="weekday" className="text-xs text-muted">
+                {props.weekday ?? ""}
+            </span>
+            <span data-part="date" className="sr-only">
+                {props.title ?? ""}
+            </span>
+        </li>
+    )
+}
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
 export const meta = { shape: "leaf", world: "pure" } as const

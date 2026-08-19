@@ -48,31 +48,40 @@ export type AgentOSWorkspacePageViewProps = {
 /** Compose one AgentOS workspace from domain blocks; the page owns no API or operational JSX. */
 export const _AgentOSWorkspacePage = ({ state, message, data, section, labels, launchState, openClawLaunchHref, onSelectSection, onOpenAgentConsole, formatDate }: AgentOSWorkspacePageViewProps) => {
     const title = data?.workspace.name ?? labels.titleFallback
-    const sections = state !== "ready" || data === undefined
-        ? [defineContractProjection("label-row-over-card", () => <EmptyNotice props={{ message: message ?? labels.loading }} />)]
-        : section === "overview"
-            ? [
+    /** One tab decides one list of projections; an unsettled page shows the notice instead. */
+    const sectionsOf = () => {
+        if (state !== "ready" || data === undefined) {
+            return [defineContractProjection("label-row-over-card", () => <EmptyNotice props={{ message: message ?? labels.loading }} />)]
+        }
+        if (section === "overview") {
+            return [
                 defineContractProjection("label-row-over-card", () => <AgentOSWorkspaceSummary data={data} labels={labels.summary} />),
                 defineContractProjection("label-row-over-card", () => <AgentOSWorkspaceRuntime data={data} labels={labels.runtime} formatDate={formatDate} />),
             ]
-            : section === "applications" || section === "access"
-                ? [defineContractProjection("label-row-over-card", () => (
-                    <AgentOSWorkspaceApplications
-                        apps={data.apps}
-                        labels={labels.applications}
-                        launchState={launchState}
-                        openClawLaunchHref={openClawLaunchHref}
-                        onManageOpenClaw={onOpenAgentConsole}
-                    />
-                ))]
-                : section === "solutions"
-                    ? [defineContractProjection("label-row-over-card", () => <AgentOSSolutionModuleCenter workspaceId={data.workspace.id} />)]
-                : section === "infrastructure"
-                    ? [
-                        defineContractProjection("label-row-over-card", () => <AgentOSWorkspaceRuntime data={data} labels={labels.runtime} formatDate={formatDate} />),
-                        defineContractProjection("label-row-over-card", () => <HelmStackSnapshot runtime={data.runtime} labels={labels.stack} />),
-                    ]
-                    : [defineContractProjection("label-row-over-card", () => <AgentOSWorkspaceOperations labels={labels.operations} />)]
+        }
+        if (section === "applications" || section === "access") {
+            return [defineContractProjection("label-row-over-card", () => (
+                <AgentOSWorkspaceApplications
+                    apps={data.apps}
+                    labels={labels.applications}
+                    launchState={launchState}
+                    openClawLaunchHref={openClawLaunchHref}
+                    onManageOpenClaw={onOpenAgentConsole}
+                />
+            ))]
+        }
+        if (section === "solutions") {
+            return [defineContractProjection("label-row-over-card", () => <AgentOSSolutionModuleCenter workspaceId={data.workspace.id} />)]
+        }
+        if (section === "infrastructure") {
+            return [
+                defineContractProjection("label-row-over-card", () => <AgentOSWorkspaceRuntime data={data} labels={labels.runtime} formatDate={formatDate} />),
+                defineContractProjection("label-row-over-card", () => <HelmStackSnapshot runtime={data.runtime} labels={labels.stack} />),
+            ]
+        }
+        return [defineContractProjection("label-row-over-card", () => <AgentOSWorkspaceOperations labels={labels.operations} />)]
+    }
+    const sections = sectionsOf()
     return (
         <Tree
             contract="tabbed-control-center-page"

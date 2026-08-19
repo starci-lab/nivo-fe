@@ -106,9 +106,10 @@ export const AgentOSSolutionModuleCenter = ({ workspaceId }: AgentOSSolutionModu
         }
     })
     const refused = catalog === null || installations === null
+    const settledState = refused ? "refused" : "answered"
     return (
         <_AgentOSSolutionModuleCenter
-            state={catalog === undefined || installations === undefined ? "resting" : refused ? "refused" : "answered"}
+            state={catalog === undefined || installations === undefined ? "resting" : settledState}
             mode={mode}
             sectionLabel={mode === "catalog" ? t("catalogSection") : t("installedSection")}
             modesLabel={t("modesLabel")}

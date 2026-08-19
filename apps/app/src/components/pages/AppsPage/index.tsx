@@ -18,7 +18,7 @@ import {
 } from "@/modules/api/console"
 import type { Result } from "@/modules/api/graphql"
 import {
-    _AppsPage,
+    _AppsPage as AppsPageView,
     type CatalogueSectionView,
     type OwnedAppRow,
     type OwnedSectionView,
@@ -248,7 +248,7 @@ export const AppsPage = () => {
     }
 
     return (
-        <_AppsPage
+        <AppsPageView
             title={t("apps.title")}
             lede={t("apps.lede")}
             owned={ownedView()}

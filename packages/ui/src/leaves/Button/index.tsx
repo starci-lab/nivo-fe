@@ -76,6 +76,13 @@ export const Button = ({ props, on, isLoading = false }: ButtonProps) => {
     const variant = props.variant ?? "secondary"
     const size = props.size ?? "md"
     const isPending = props.isPending === true
+    /*
+     * WHAT SITS BEFORE THE LABEL, decided once. A running action shows its progress there and the
+     * meaning glyph stands down for as long as it runs - the two never occupy the slot together, so
+     * the choice is one named value rather than a condition read inside another condition.
+     */
+    const glyph = props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "chip" }} />
+    const ornament = isPending ? <Spinner size="sm" className="absolute" aria-hidden="true" /> : glyph
     return (
         <HeroButton
             data-tier="leaf"
@@ -91,9 +98,7 @@ export const Button = ({ props, on, isLoading = false }: ButtonProps) => {
             onPress={on?.press}
             className={isLoading ? LOADING_CLASSES : "relative"}
         >
-            {isLoading ? null : isPending ? <Spinner size="sm" className="absolute" aria-hidden="true" /> : (
-                props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "chip" }} />
-            )}
+            {isLoading ? null : ornament}
             <span className={isPending ? "invisible" : undefined}>{props.label}</span>
         </HeroButton>
     )

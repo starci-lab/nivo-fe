@@ -228,6 +228,98 @@ const claimPanel = (slots: ChildrenOf<"attributed-claim-panel">) =>
  */
 const STAR_SCALE = 5
 
+/** One control the lead form draws: its identity, its label, and the keyboard it asks for. */
+type LeadField = readonly [id: string, label: string, kind: "text" | "tel"]
+
+/** Where a reader's details have got to. */
+type LeadStatus = "idle" | "sending" | "sent" | "failed"
+
+/**
+ * One value the reader typed, read as a string.
+ *
+ * `FormData` answers with a file for a file control, and a file stringified is `[object File]`. This
+ * form has no file control and never will (BR-B07), so anything that is not text is read as nothing
+ * rather than printed into somebody's name.
+ *
+ * @param form - The submitted values.
+ * @param field - Which control to read.
+ */
+const leadField = (form: FormData, field: string) => {
+    const value = form.get(field)
+    return typeof value === "string" ? value : ""
+}
+
+/** What {@link leadForm} needs to draw the controls and to say where the submission has got to. */
+type LeadFormInput = {
+    /** The controls, in reading order. */
+    readonly fields: ReadonlyArray<LeadField>
+    /** Where the submission has got to. */
+    readonly status: LeadStatus
+    /** The press label at rest. */
+    readonly submitLabel: string
+    /** The press label while the request is in flight. */
+    readonly sendingLabel: string
+    /** What submitting does. */
+    readonly onSubmit: (event: React.SubmitEvent<HTMLFormElement>) => void
+}
+
+/**
+ * The lead form, as the projection `form-column` admits.
+ *
+ * IT IS BUILT HERE, beside the other part builders, rather than inside the band. A projection's
+ * render draws a whole subtree, and one declared inside the component that uses it is a second
+ * component defined per render - the shape that costs a remount, and a remount here costs a
+ * half-typed phone number.
+ *
+ * THE `<form>` IS THE PROJECTION'S OWN HOST. `form-column` arranges the controls; the element that
+ * submits them is host mechanics no contract can express, so it is declared as a projection of that
+ * key and the node inside it is still drawn by `Tree`.
+ *
+ * THE BOX IS STILL THE PLATFORM'S. The `Input` leaf's `kind` union has no `tel` member, and a phone
+ * number typed into a `text` box offers a phone the wrong keyboard. Rather than change that
+ * silently, the box keeps its own type here - a finding for whoever owns the leaf's vocabulary.
+ *
+ * @param input - {@link LeadFormInput}
+ */
+const leadForm = ({ fields, status, submitLabel, sendingLabel, onSubmit }: LeadFormInput) => {
+    const locked = status === "sending" || status === "sent"
+    return defineContractProjection("form-column", () => (
+        <form onSubmit={onSubmit}>
+            <Tree
+                contract="form-column"
+                render={defineContractComponent("form-column", {
+                    field: fields.map(([id, label, kind]) => defineContractComponent("label-field-hint", {
+                        label: defineLeafComponent("label", {}, () => (
+                            <Label props={{ htmlFor: id, content: label }} />
+                        )),
+                        field: defineLeafComponent("input", {}, () => (
+                            <input
+                                id={id}
+                                name={id}
+                                type={kind}
+                                placeholder={label}
+                                required
+                                disabled={locked}
+                                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm"
+                            />
+                        )),
+                    })),
+                    submit: defineLeafComponent("button", {}, () => (
+                        <Button
+                            props={{
+                                label: status === "sending" ? sendingLabel : submitLabel,
+                                variant: "primary",
+                                type: "submit",
+                                disabled: locked,
+                            }}
+                        />
+                    )),
+                })}
+            />
+        </form>
+    ))
+}
+
 /** Props for {@link LeadBand}. */
 type LeadBandProps = {
     /** The settled words for this section. */
@@ -247,22 +339,17 @@ type LeadBandProps = {
  * what the reader sees while it is in flight. Whether the details reach a server is not a drawing
  * decision, and a fixture render of this band must not post anything anywhere.
  *
- * THE `<form>` IS PROJECTED RATHER THAN OPENED. `form-column` is the registry node that arranges
- * the controls; the form element around it is host mechanics no contract can express, so it is
- * declared as a projection of that key and the node inside it is still drawn by `Tree`.
- *
- * THE BOX IS STILL THE PLATFORM'S. The `Input` leaf's `kind` union has no `tel` member, and a phone
- * number typed into a `text` box offers a phone the wrong keyboard. Rather than change that
- * silently, the box keeps its own type here - a finding for whoever owns the leaf's vocabulary.
+ * THE `<form>` IS PROJECTED RATHER THAN OPENED, by {@link leadForm}, which also records why that
+ * builder lives at module level and why the phone box keeps the platform's own type.
  *
  * @param input - {@link LeadBandProps}
  */
 const LeadBand = ({ section, onSubmit }: LeadBandProps) => {
-    const [status, setStatus] = useState<"idle" | "sending" | "sent" | "failed">("idle")
-    const fields = [
+    const [status, setStatus] = useState<LeadStatus>("idle")
+    const fields: ReadonlyArray<LeadField> = [
         ["lead-name", section.nameLabel, "text"],
         ["lead-phone", section.phoneLabel, "tel"],
-    ] as const
+    ]
 
     /**
      * Sends the reader's details.
@@ -272,7 +359,7 @@ const LeadBand = ({ section, onSubmit }: LeadBandProps) => {
      *
      * @param event - The submit that started it.
      */
-    const send = async (event: React.FormEvent<HTMLFormElement>) => {
+    const send = async (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault()
         if (status === "sending") {
             return
@@ -280,8 +367,8 @@ const LeadBand = ({ section, onSubmit }: LeadBandProps) => {
         const form = new FormData(event.currentTarget)
         setStatus("sending")
         const ok = await onSubmit({
-            name: String(form.get("lead-name") ?? ""),
-            contact: String(form.get("lead-phone") ?? ""),
+            name: leadField(form, "lead-name"),
+            contact: leadField(form, "lead-phone"),
         })
         setStatus(ok ? "sent" : "failed")
     }
@@ -292,41 +379,13 @@ const LeadBand = ({ section, onSubmit }: LeadBandProps) => {
             parts={[
                 headingPart(section.title),
                 textPart(section.body),
-                defineContractProjection("form-column", () => (
-                    <form onSubmit={send}>
-                        <Tree
-                            contract="form-column"
-                            render={defineContractComponent("form-column", {
-                                field: fields.map(([id, label, kind]) => defineContractComponent("label-field-hint", {
-                                    label: defineLeafComponent("label", {}, () => (
-                                        <Label props={{ htmlFor: id, content: label }} />
-                                    )),
-                                    field: defineLeafComponent("input", {}, () => (
-                                        <input
-                                            id={id}
-                                            name={id}
-                                            type={kind}
-                                            placeholder={label}
-                                            required
-                                            disabled={status === "sending" || status === "sent"}
-                                            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm"
-                                        />
-                                    )),
-                                })),
-                                submit: defineLeafComponent("button", {}, () => (
-                                    <Button
-                                        props={{
-                                            label: status === "sending" ? section.sendingLabel : section.submitLabel,
-                                            variant: "primary",
-                                            type: "submit",
-                                            disabled: status === "sending" || status === "sent",
-                                        }}
-                                    />
-                                )),
-                            })}
-                        />
-                    </form>
-                )),
+                leadForm({
+                    fields,
+                    status,
+                    submitLabel: section.submitLabel,
+                    sendingLabel: section.sendingLabel,
+                    onSubmit: send,
+                }),
                 /*
                  * The outcome sits in the BAND rather than in the form, because `form-column`
                  * declares exactly two slots -- the fields and the submit -- and adding a third to
@@ -342,35 +401,24 @@ const LeadBand = ({ section, onSubmit }: LeadBandProps) => {
     )
 }
 
+/** Everything an expert authored for one section, whatever shape the template chose for it. */
+type CustomContent = Extract<AcademySection, { kind: "custom" }>["content"]
+
 /**
- * An expert-authored section, drawn in whatever shape the template chose.
+ * The leaves every custom shape draws from, prepared once.
  *
- * ONE RENDERER FOR EVERY CUSTOM SECTION, which is why one can never vanish: it needs no component
- * registered in advance. An unrecognised SYSTEM key is dropped - how an older build survives a newer
- * catalog - but that drop path cannot reach the expert's own work.
+ * WHY THEY ARE PREPARED BEFORE THE SHAPE IS KNOWN. Five shapes reach for the same six pieces and
+ * each piece is optional in the same way, so asking "did the expert write one?" once per piece
+ * leaves each shape to answer only the question it is actually about - where the pieces go.
  *
- * An unrecognised shape falls back to `stack` rather than blanking the section: losing the styling
- * still leaves something readable, losing the words does not.
- *
- * `image-left` AND `image-right` DRAW THE SAME WAY for now. `figure-beside-prose` is one key whose
- * `why` says the order is the assembling branch's business, but `Tree` walks the entry's declared
- * slot order, so the picture always comes first. Mirroring the pair needs either a second key or a
- * `Tree` that honours the order of the record it is handed - a registry decision, not one to fake
- * here with a class.
- *
- * There is no input field here, and there never will be (BR-B07).
- *
- * @param section - The expert's own content for one section.
- * @returns The band.
+ * @param content - The expert's own content for one section.
  */
-const customBand = (section: Extract<AcademySection, { kind: "custom" }>) => {
-    const content = section.content
-    const shape = content.variant ?? "stack"
+const customPieces = (content: CustomContent) => {
     const headingText = content.heading
     const bodyText = content.body
     const actionSpec = content.action
-    const attribution = content.attribution
     const imageUrl = content.imageUrl
+    const imageAlt = headingText ?? ""
 
     const heading = headingText === undefined
         ? undefined
@@ -385,97 +433,183 @@ const customBand = (section: Extract<AcademySection, { kind: "custom" }>) => {
         ? undefined
         : defineContractComponent("inline-action-run", { action: [actionLeaf] })
     const figure = defineLeafComponent("image-frame", {}, () => (
-        <Figure src={imageUrl} alt={headingText ?? ""} />
+        <Figure src={imageUrl} alt={imageAlt} />
     ))
 
-    if (shape === "quote") {
-        const attributed: Array<BandPart> = attribution === undefined
-            ? []
-            : [defineLeafComponent("text", {}, () => (
-                <Text props={{ content: `— ${attribution}`, size: "sm", tone: "muted" }} />
-            ))]
-        return (
-            <Band
-                parts={[
-                    defineLeafComponent("pull-quote", {}, () => (
-                        <blockquote className="border-l-4 border-accent pl-4 text-xl font-medium leading-snug">
-                            {bodyText ?? headingText}
-                        </blockquote>
-                    )),
-                    ...attributed,
-                ]}
-            />
-        )
+    return {
+        shape: content.variant ?? "stack",
+        attribution: content.attribution,
+        columns: content.columns ?? [],
+        headingText,
+        bodyText,
+        imageUrl,
+        heading,
+        body,
+        actionLeaf,
+        actionRun,
+        figure,
     }
+}
 
-    if (shape === "columns") {
-        return (
-            <Band
-                parts={[
-                    ...(heading === undefined ? [] : [heading]),
-                    defineContractComponent("claim-panel-grid", {
-                        claim: (content.columns ?? []).map((column) => {
-                            const note = column.text
-                            return claimPanel({
-                                claim: defineLeafComponent("text", {}, () => (
-                                    <Text props={{ content: column.title, weight: "medium" }} />
-                                )),
-                                note: note === undefined
-                                    ? undefined
-                                    : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                                        <Text props={{ content: note, size: "sm", tone: "muted" }} />
-                                    )),
-                            })
-                        }),
-                    }),
-                    ...(actionRun === undefined ? [] : [actionRun]),
-                ]}
-            />
-        )
-    }
+/** The prepared pieces one custom shape arranges. */
+type CustomPieces = ReturnType<typeof customPieces>
 
-    if (shape === "cta") {
-        return (
-            <Band
-                alt
-                parts={[
-                    defineContractComponent("centred-heading-body-action", {
-                        heading,
-                        body,
-                        action: actionLeaf,
-                    }),
-                ]}
-            />
-        )
-    }
-
-    if (shape === "image-left" || shape === "image-right") {
-        return (
-            <Band
-                parts={[
-                    defineContractComponent("figure-beside-prose", {
-                        figure,
-                        prose: defineContractComponent("heading-body-action-stack", {
-                            heading,
-                            body,
-                            action: actionLeaf,
-                        }),
-                    }),
-                ]}
-            />
-        )
-    }
-
+/**
+ * `quote` - the expert's words, said by somebody.
+ *
+ * The quoted words fall back to the heading: a pull quote with nothing in it is a bordered blank,
+ * and the heading is the only other sentence this shape was given.
+ *
+ * @param pieces - {@link CustomPieces}
+ * @returns The band.
+ */
+const quoteBand = ({ bodyText, headingText, attribution }: CustomPieces) => {
+    const quoted = bodyText ?? headingText
+    const attributed: Array<BandPart> = attribution === undefined
+        ? []
+        : [defineLeafComponent("text", {}, () => (
+            <Text props={{ content: `— ${attribution}`, size: "sm", tone: "muted" }} />
+        ))]
     return (
         <Band
             parts={[
-                ...(heading === undefined ? [] : [heading]),
-                ...(imageUrl === undefined ? [] : [figure]),
-                ...(body === undefined ? [] : [body]),
-                ...(actionRun === undefined ? [] : [actionRun]),
+                defineLeafComponent("pull-quote", {}, () => (
+                    <blockquote className="border-l-4 border-accent pl-4 text-xl font-medium leading-snug">
+                        {quoted}
+                    </blockquote>
+                )),
+                ...attributed,
             ]}
         />
     )
+}
+
+/**
+ * `columns` - a grid of claims, each with an optional note under it.
+ *
+ * @param pieces - {@link CustomPieces}
+ * @returns The band.
+ */
+const columnsBand = ({ heading, columns, actionRun }: CustomPieces) => (
+    <Band
+        parts={[
+            ...(heading === undefined ? [] : [heading]),
+            defineContractComponent("claim-panel-grid", {
+                claim: columns.map((column) => {
+                    const note = column.text
+                    return claimPanel({
+                        claim: defineLeafComponent("text", {}, () => (
+                            <Text props={{ content: column.title, weight: "medium" }} />
+                        )),
+                        note: note === undefined
+                            ? undefined
+                            : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+                                <Text props={{ content: note, size: "sm", tone: "muted" }} />
+                            )),
+                    })
+                }),
+            }),
+            ...(actionRun === undefined ? [] : [actionRun]),
+        ]}
+    />
+)
+
+/**
+ * `cta` - one centred ask.
+ *
+ * @param pieces - {@link CustomPieces}
+ * @returns The band.
+ */
+const ctaBand = ({ heading, body, actionLeaf }: CustomPieces) => (
+    <Band
+        alt
+        parts={[
+            defineContractComponent("centred-heading-body-action", {
+                heading,
+                body,
+                action: actionLeaf,
+            }),
+        ]}
+    />
+)
+
+/**
+ * `image-left` and `image-right` - a picture beside the prose.
+ *
+ * BOTH DRAW THE SAME WAY for now. `figure-beside-prose` is one key whose `why` says the order is the
+ * assembling branch's business, but `Tree` walks the entry's declared slot order, so the picture
+ * always comes first. Mirroring the pair needs either a second key or a `Tree` that honours the
+ * order of the record it is handed - a registry decision, not one to fake here with a class.
+ *
+ * @param pieces - {@link CustomPieces}
+ * @returns The band.
+ */
+const figureBand = ({ figure, heading, body, actionLeaf }: CustomPieces) => (
+    <Band
+        parts={[
+            defineContractComponent("figure-beside-prose", {
+                figure,
+                prose: defineContractComponent("heading-body-action-stack", {
+                    heading,
+                    body,
+                    action: actionLeaf,
+                }),
+            }),
+        ]}
+    />
+)
+
+/**
+ * `stack` - whatever the expert wrote, in reading order.
+ *
+ * This is also where an unrecognised shape lands: losing the styling still leaves something
+ * readable, losing the words does not.
+ *
+ * @param pieces - {@link CustomPieces}
+ * @returns The band.
+ */
+const stackBand = ({ heading, imageUrl, figure, body, actionRun }: CustomPieces) => (
+    <Band
+        parts={[
+            ...(heading === undefined ? [] : [heading]),
+            ...(imageUrl === undefined ? [] : [figure]),
+            ...(body === undefined ? [] : [body]),
+            ...(actionRun === undefined ? [] : [actionRun]),
+        ]}
+    />
+)
+
+/**
+ * An expert-authored section, drawn in whatever shape the template chose.
+ *
+ * ONE RENDERER FOR EVERY CUSTOM SECTION, which is why one can never vanish: it needs no component
+ * registered in advance. An unrecognised SYSTEM key is dropped - how an older build survives a newer
+ * catalog - but that drop path cannot reach the expert's own work.
+ *
+ * WHAT THIS FUNCTION DECIDES IS THE SHAPE AND NOTHING ELSE. Each shape owns its own arrangement one
+ * function away, so a reader who wants to know what `cta` looks like reads `cta` rather than the
+ * four shapes it is not.
+ *
+ * There is no input field here, and there never will be (BR-B07).
+ *
+ * @param section - The expert's own content for one section.
+ * @returns The band.
+ */
+const customBand = (section: Extract<AcademySection, { kind: "custom" }>) => {
+    const pieces = customPieces(section.content)
+    if (pieces.shape === "quote") {
+        return quoteBand(pieces)
+    }
+    if (pieces.shape === "columns") {
+        return columnsBand(pieces)
+    }
+    if (pieces.shape === "cta") {
+        return ctaBand(pieces)
+    }
+    if (pieces.shape === "image-left" || pieces.shape === "image-right") {
+        return figureBand(pieces)
+    }
+    return stackBand(pieces)
 }
 
 /**

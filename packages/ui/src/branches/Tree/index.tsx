@@ -40,9 +40,10 @@ export const ContractContent = <const K extends ContractKey>({ contract, render 
     const slots = render.slots
     return Object.keys(spec.children).flatMap((slot) => {
         const value = slots[slot as keyof typeof slots]
-        const values: ReadonlyArray<unknown> = Array.isArray(value)
-            ? value
-            : value === undefined ? [] : [value]
+        // A slot holds nothing, one thing, or a run of things. The single-value case is named so the
+        // two questions - "is it a run?" and "is it there at all?" - are read one at a time.
+        const single: ReadonlyArray<unknown> = value === undefined ? [] : [value]
+        const values: ReadonlyArray<unknown> = Array.isArray(value) ? value : single
         return values.map((component: unknown, index: number) => {
             const child = component as ContractComponent<ContractKey> | LeafComponent<string, Readonly<Record<never, never>>>
             if (child.meta.shape === "contract") {

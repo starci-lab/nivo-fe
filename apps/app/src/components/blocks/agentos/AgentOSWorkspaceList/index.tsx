@@ -1,8 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useTranslations } from "next-intl"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { DEFAULT_LOCALE } from "@/i18n/config"
 import { useSession } from "@/modules/auth/session"
@@ -39,6 +38,9 @@ export const AgentOSWorkspaceList = () => {
         }
     }, [signedIn])
 
+    // The default locale is served off the bare path, so it contributes no segment of its own.
+    const localeSegment = locale === DEFAULT_LOCALE ? "" : `/${locale}`
+
     const view = (): AgentOSWorkspaceListViewProps => {
         const label = t("agentos.workspacesLabel")
         if (answer === null) return { state: "resting", props: { label } }
@@ -46,7 +48,7 @@ export const AgentOSWorkspaceList = () => {
         if (answer.data.length === 0) return { state: "empty", props: { label, message: t("agentos.empty") } }
         return {
             state: "answered",
-            on: { openWorkspace: (id) => router.push(`${locale === DEFAULT_LOCALE ? "" : `/${locale}`}/agentos/workspaces/${id}`) },
+            on: { openWorkspace: (id) => router.push(`${localeSegment}/agentos/workspaces/${id}`) },
             props: {
                 label,
                 rows: answer.data.map((workspace) => {

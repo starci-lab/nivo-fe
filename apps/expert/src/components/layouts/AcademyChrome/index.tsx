@@ -58,6 +58,20 @@ const declarationsFor = (variables: ThemeVariables | undefined): string => {
 }
 
 /**
+ * The two characters that end a quoted CSS string early, and what they become inside one.
+ *
+ * They are named rather than written inline because a backslash reads as noise at the call site --
+ * `"\\\\"` is one escaped backslash standing for one literal backslash, and a reader counting them
+ * in the middle of a chained expression is the reader who miscounts. `String.raw` is used wherever
+ * the sequence can be written literally; a lone backslash cannot be, because a template literal
+ * ending in one escapes its own closing backtick.
+ */
+const BACKSLASH = "\\"
+const ESCAPED_BACKSLASH = String.raw`\\`
+const QUOTATION_MARK = '"'
+const ESCAPED_QUOTATION_MARK = String.raw`\"`
+
+/**
  * Names the mounted academy on the root, beside the palette that belongs to it.
  *
  * This replaces a `data-academy` attribute, which existed only because there was a wrapper element
@@ -84,7 +98,10 @@ const identityDeclarationFor = (name: string | undefined): string => {
     if (name === undefined || !isSafeThemeValue(name)) {
         return ""
     }
-    return `  --academy: "${name.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}";`
+    const quoted = name
+        .replaceAll(BACKSLASH, ESCAPED_BACKSLASH)
+        .replaceAll(QUOTATION_MARK, ESCAPED_QUOTATION_MARK)
+    return `  --academy: "${quoted}";`
 }
 
 /**

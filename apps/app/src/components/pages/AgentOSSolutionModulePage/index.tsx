@@ -5,10 +5,16 @@ import { useTranslations } from "next-intl"
 import { myAgentosModuleInstallation, type AgentosModuleInstallationDetail } from "@/modules/api/console"
 import { useSession } from "@/modules/auth/session"
 import useProvisioningRealtime from "@/modules/realtime/provisioning"
-import { _AgentOSSolutionModulePage, type AgentOSSolutionModulePageLabels } from "./component"
+import { _AgentOSSolutionModulePage as AgentOSSolutionModulePageView, type AgentOSSolutionModulePageLabels } from "./component"
 
 /** Exact route identities required to read one owner-scoped installation. */
 export type AgentOSSolutionModulePageProps = { readonly workspaceId: string; readonly installationId: string }
+
+/** Settle which state the detail surface is in from what the snapshot returned. */
+const detailState = (installation: AgentosModuleInstallationDetail | null | undefined) => {
+    if (installation === undefined) return "loading" as const
+    return installation === null ? "refused" as const : "ready" as const
+}
 
 /** Own the canonical detail snapshot and refresh it on exact Saga updates or reconnect. */
 export const AgentOSSolutionModulePage = ({ workspaceId, installationId }: AgentOSSolutionModulePageProps) => {
@@ -44,7 +50,7 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId }: Agent
             sharedKnowledge: t("bindings.sharedKnowledge"), knowledgeVersions: t("bindings.knowledgeVersions"), empty: t("empty"),
         },
     }
-    return <_AgentOSSolutionModulePage state={installation === undefined ? "loading" : installation === null ? "refused" : "ready"} installation={installation ?? undefined} labels={labels} />
+    return <AgentOSSolutionModulePageView state={detailState(installation)} installation={installation ?? undefined} labels={labels} />
 }
 
 /** Source-level tier marker for the connected module detail page. */

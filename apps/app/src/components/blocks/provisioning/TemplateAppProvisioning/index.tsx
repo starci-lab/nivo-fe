@@ -38,6 +38,34 @@ const deploymentPhase = (status: string): "preparing" | "ready" | "failed" => {
     return "preparing"
 }
 
+/**
+ * Which of the four visible steps each flow phase is standing on.
+ *
+ * A TABLE RATHER THAN A CHAIN, because the mapping is a fact about the vocabulary and not a
+ * decision: a reader checking "where does `failed` sit" reads one line instead of unpicking two
+ * conditions.
+ */
+const PHASE_INDEX: Readonly<Record<TemplateFlow["phase"], number>> = {
+    catalog_loading: 0,
+    unsupported: 0,
+    request: 0,
+    submitting: 0,
+    accepted: 2,
+    preparing: 2,
+    failed: 2,
+    ready: 3,
+}
+
+/** How one step reads against the step the flow is standing on. */
+type StepState = "done" | "current" | "upcoming"
+
+/** Settle one step against the current position. */
+const stepState = (index: number, phaseIndex: number): StepState => {
+    if (index < phaseIndex) return "done"
+    if (index === phaseIndex) return "current"
+    return "upcoming"
+}
+
 /** Own academy creation, K8s deployment snapshots and the matching deployment stream. */
 export const TemplateAppProvisioning = ({ context }: TemplateAppProvisioningProps) => {
     const t = useTranslations("console.provisioningFlows")
@@ -165,27 +193,48 @@ export const TemplateAppProvisioning = ({ context }: TemplateAppProvisioningProp
         router.replace(route(`/apps/${created.data.id}/provisioning`))
     }
 
-    const phaseIndex = flow.phase === "request" || flow.phase === "submitting" || flow.phase === "catalog_loading" || flow.phase === "unsupported"
-        ? 0
-        : flow.phase === "accepted" || flow.phase === "preparing" || flow.phase === "failed" ? 2 : 3
+    const phaseIndex = PHASE_INDEX[flow.phase]
     const stepLabels = [t("steps.request"), t("steps.createApp"), t("steps.infrastructure"), t("steps.manage")]
-    const steps = stepLabels.map((label, index) => ({
-        ordinal: String(index + 1),
-        label,
-        state: index < phaseIndex ? "done" as const : index === phaseIndex ? "current" as const : "upcoming" as const,
-        stateLabel: index < phaseIndex ? t("stepState.done") : index === phaseIndex ? t("stepState.current") : t("stepState.upcoming"),
-    }))
+    const stepStateLabels: Readonly<Record<StepState, string>> = {
+        done: t("stepState.done"),
+        current: t("stepState.current"),
+        upcoming: t("stepState.upcoming"),
+    }
+    const steps = stepLabels.map((label, index) => {
+        const state = stepState(index, phaseIndex)
+        return {
+            ordinal: String(index + 1),
+            label,
+            state,
+            stateLabel: stepStateLabels[state],
+        }
+    })
+    const subject = (): string => {
+        switch (flow.phase) {
+            case "request":
+            case "submitting":
+            case "unsupported":
+                return flow.name
+            case "failed":
+            case "accepted":
+                return flow.subject
+            case "preparing":
+            case "ready":
+                return flow.publicHost ?? flow.siteId
+            default:
+                return "Template App"
+        }
+    }
+    const detail = (): string => {
+        if (flow.phase === "preparing" || flow.phase === "ready") return flow.deploymentId
+        if (flow.phase === "accepted") return flow.siteId
+        return t("template.detail")
+    }
     const view = (): TemplateAppProvisioningViewProps => {
-        const subject = flow.phase === "request" || flow.phase === "submitting" || flow.phase === "unsupported"
-            ? flow.name
-            : flow.phase === "failed" || flow.phase === "accepted" ? flow.subject
-                : flow.phase === "preparing" || flow.phase === "ready" ? flow.publicHost ?? flow.siteId
-                    : "Template App"
         const common = {
             steps,
-            subject,
-            detail: flow.phase === "preparing" || flow.phase === "ready" ? flow.deploymentId
-                : flow.phase === "accepted" ? flow.siteId : t("template.detail"),
+            subject: subject(),
+            detail: detail(),
             slugLabel: t("template.slugLabel"),
             slugPlaceholder: t("template.slugPlaceholder"),
             slugHint: t("template.slugHint"),
@@ -196,7 +245,9 @@ export const TemplateAppProvisioning = ({ context }: TemplateAppProvisioningProp
         if (flow.phase === "request" || flow.phase === "submitting") return { state: flow.phase, props: { ...common, statusTitle: t("template.requestTitle"), statusText: t("template.requestText") }, on: { changeSlug: setSlug, submit: () => void submit() } }
         if (flow.phase === "ready") return { state: "ready", props: { ...common, statusTitle: t("readyTitle"), statusText: t("template.readyText"), actionLabel: t("manageApps") }, on: { act: () => router.push(route("/apps")) } }
         if (flow.phase === "accepted") return { state: "accepted", props: { ...common, statusTitle: t("template.acceptedTitle"), statusText: t("template.acceptedText") } }
-        return { state: flow.phase, props: { ...common, statusTitle: flow.phase === "catalog_loading" ? t("loadingTitle") : t("preparingTitle"), statusText: flow.phase === "catalog_loading" ? t("loadingText") : realtime.status === "connecting" ? t("connecting") : t("template.preparingText") } }
+        const isCatalogLoading = flow.phase === "catalog_loading"
+        const waitingText = realtime.status === "connecting" ? t("connecting") : t("template.preparingText")
+        return { state: flow.phase, props: { ...common, statusTitle: isCatalogLoading ? t("loadingTitle") : t("preparingTitle"), statusText: isCatalogLoading ? t("loadingText") : waitingText } }
     }
 
     return <_TemplateAppProvisioning {...view()} />

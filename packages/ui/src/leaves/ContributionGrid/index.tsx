@@ -33,7 +33,45 @@ const CELL_CLASSES = [
     "size-3 shrink-0 rounded-sm bg-accent",
 ] as const
 
-const levelOf = (count: number) => count <= 0 ? 0 : count <= 2 ? 1 : count <= 5 ? 2 : count <= 9 ? 3 : 4
+/** A day outside the plotted year keeps the cell's footprint and paints nothing. */
+const EMPTY_CELL_CLASSES = "size-3 shrink-0"
+
+/** While the year is still arriving, every cell inside it pulses rather than claiming a count. */
+const LOADING_CELL_CLASSES = "size-3 shrink-0 animate-pulse rounded-sm bg-default"
+
+/**
+ * The upper bound of each shade below the darkest one, in order.
+ *
+ * There is one fewer threshold than there are shades: anything past the last bound is the darkest
+ * cell, which is what makes the top shade open-ended rather than a fifth bucket somebody has to
+ * keep in step with the busiest day of the year.
+ */
+const LEVEL_UPPER_BOUNDS = [0, 2, 5, 9] as const
+
+/**
+ * Which shade a day's count draws in.
+ *
+ * @param count - The day's contribution count.
+ * @returns An index into {@link CELL_CLASSES}.
+ */
+const levelOf = (count: number): number => {
+    const level = LEVEL_UPPER_BOUNDS.findIndex((bound) => count <= bound)
+    return level === -1 ? CELL_CLASSES.length - 1 : level
+}
+
+/**
+ * Which classes one calendar cell wears.
+ *
+ * @param cell - The day, and whether it falls inside the plotted year.
+ * @param isLoading - Whether the year is still arriving.
+ * @returns The cell's classes.
+ */
+const cellClassesFor = (cell: CalendarCell, isLoading: boolean): string => {
+    if (!cell.inYear) {
+        return EMPTY_CELL_CLASSES
+    }
+    return isLoading ? LOADING_CELL_CLASSES : CELL_CLASSES[levelOf(cell.count)]
+}
 
 const makeWeeks = (
     year: number,
@@ -98,9 +136,7 @@ export const ContributionGrid = ({ props, isLoading = false }: ContributionGridP
                                 data-count={cell.count}
                                 aria-label={cell.inYear ? cell.label : undefined}
                                 aria-hidden={cell.inYear ? undefined : true}
-                                className={cell.inYear
-                                    ? isLoading ? "size-3 shrink-0 animate-pulse rounded-sm bg-default" : CELL_CLASSES[levelOf(cell.count)]
-                                    : "size-3 shrink-0"}
+                                className={cellClassesFor(cell, isLoading)}
                             />
                         ))}
                     </span>

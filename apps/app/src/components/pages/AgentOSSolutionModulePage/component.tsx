@@ -44,17 +44,20 @@ const loadingSection = (label: string) => (
 
 /** Compose one exact installation snapshot without owning API or realtime mechanics. */
 export const _AgentOSSolutionModulePage = ({ state, installation, labels }: AgentOSSolutionModulePageViewProps) => {
+    // A refusal and a missing installation are the same page: there is nothing to lay out, so the
+    // stack carries the one notice rather than two empty cards.
+    const settledSections = state === "refused" || installation === undefined
+        ? [defineContractProjection("label-row-over-card", () => <EmptyNotice props={{ message: labels.refused }} />)]
+        : [
+            defineContractProjection("label-row-over-card", () => <AgentOSSolutionModuleSummary installation={installation} labels={labels.summary} />),
+            defineContractProjection("label-row-over-card", () => <AgentOSSolutionModuleBindings installation={installation} labels={labels.bindings} />),
+        ]
     const sections = state === "loading"
         ? [
             defineContractProjection("label-row-over-card", () => loadingSection(labels.summary.section)),
             defineContractProjection("label-row-over-card", () => loadingSection(labels.bindings.section)),
         ]
-        : state === "refused" || installation === undefined
-            ? [defineContractProjection("label-row-over-card", () => <EmptyNotice props={{ message: labels.refused }} />)]
-            : [
-                defineContractProjection("label-row-over-card", () => <AgentOSSolutionModuleSummary installation={installation} labels={labels.summary} />),
-                defineContractProjection("label-row-over-card", () => <AgentOSSolutionModuleBindings installation={installation} labels={labels.bindings} />),
-            ]
+        : settledSections
     return (
         <Tree
             contract="titled-section-stack-page"

@@ -21,6 +21,18 @@ export type LifecycleStepData = {
 /** Props for the closed lifecycle-step shape. */
 export type LifecycleStepProps = CompositeProps<LifecycleStepData>
 
+/**
+ * How each step state reads as a badge tone.
+ *
+ * A TABLE RATHER THAN A CHAIN, so adding a fourth state is one line and a reader checking one
+ * state reads one line.
+ */
+const STATE_TONES: Readonly<Record<LifecycleStepState, "success" | "accent" | "neutral">> = {
+    done: "success",
+    current: "accent",
+    upcoming: "neutral",
+}
+
 /** Draw one ordered step without knowing which product is progressing. */
 export const LifecycleStep = ({ props, isLoading = false }: LifecycleStepProps) => (
     <Tree
@@ -36,7 +48,7 @@ export const LifecycleStep = ({ props, isLoading = false }: LifecycleStepProps) 
                 <Badge
                     props={{
                         content: props.stateLabel,
-                        tone: props.state === "done" ? "success" : props.state === "current" ? "accent" : "neutral",
+                        tone: STATE_TONES[props.state],
                     }}
                     isLoading={isLoading}
                 />

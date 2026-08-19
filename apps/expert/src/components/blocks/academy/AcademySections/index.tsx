@@ -75,6 +75,30 @@ export type AcademySection =
     }
     | { readonly kind: "custom"; readonly id: string; readonly content: CustomContent }
 
+/**
+ * Keep a list-backed section only when the expert authored something for it.
+ *
+ * WHY IT IS A HELPER AND NOT AN `if` PER CASE. Eight of the fourteen sections answer the same
+ * question - "did the expert write anything here?" - and asking it inline turned one readable
+ * switch into a branch thicket. The section is built lazily so an empty one costs nothing.
+ *
+ * @param items - The authored content the section draws.
+ * @param build - How to settle the section when there is content.
+ * @returns The settled section, or null to drop it.
+ */
+const whenAuthored = <T,>(items: ReadonlyArray<T>, build: () => AcademySection): AcademySection | null =>
+    items.length === 0 ? null : build()
+
+/**
+ * Keep a single-value section only when the expert authored the one thing it draws.
+ *
+ * @param value - The authored value, or undefined when the expert wrote none.
+ * @param build - How to settle the section around that value.
+ * @returns The settled section, or null to drop it.
+ */
+const whenPresent = <T,>(value: T | undefined, build: (value: T) => AcademySection): AcademySection | null =>
+    value === undefined ? null : build(value)
+
 /** Hand a reader's details to whoever owns the request; answers whether it landed. */
 export type LeadSubmit = (input: { readonly name: string; readonly contact: string }) => Promise<boolean>
 
@@ -155,9 +179,7 @@ export const AcademySections = ({ courses }: AcademySectionsProps) => {
                     seeCoursesLabel: hero("seeCourses"),
                 }
             case "problems":
-                return academy.problems.length === 0
-                    ? null
-                    : { kind: "problems", id: key, title: problems("title"), problems: academy.problems }
+                return whenAuthored(academy.problems, () => ({ kind: "problems", id: key, title: problems("title"), problems: academy.problems }))
             case "outcomes":
                 return {
                     kind: "outcomes",
@@ -166,23 +188,15 @@ export const AcademySections = ({ courses }: AcademySectionsProps) => {
                     outcomes: [outcomes("first"), outcomes("second"), outcomes("third")],
                 }
             case "roadmap":
-                return academy.roadmap.length === 0
-                    ? null
-                    : { kind: "roadmap", id: key, title: roadmap("title"), steps: academy.roadmap }
+                return whenAuthored(academy.roadmap, () => ({ kind: "roadmap", id: key, title: roadmap("title"), steps: academy.roadmap }))
             case "instructor":
-                return academy.instructor === undefined
-                    ? null
-                    : { kind: "instructor", id: key, person: academy.instructor }
+                return whenPresent(academy.instructor, (person) => ({ kind: "instructor", id: key, person }))
             case "stats":
-                return academy.stats.length === 0 ? null : { kind: "stats", id: key, stats: academy.stats }
+                return whenAuthored(academy.stats, () => ({ kind: "stats", id: key, stats: academy.stats }))
             case "testimonials":
-                return academy.testimonials.length === 0
-                    ? null
-                    : { kind: "testimonials", id: key, title: testimonials("title"), testimonials: academy.testimonials }
+                return whenAuthored(academy.testimonials, () => ({ kind: "testimonials", id: key, title: testimonials("title"), testimonials: academy.testimonials }))
             case "gallery":
-                return academy.gallery.length === 0
-                    ? null
-                    : { kind: "gallery", id: key, title: gallery("title"), gallery: academy.gallery }
+                return whenAuthored(academy.gallery, () => ({ kind: "gallery", id: key, title: gallery("title"), gallery: academy.gallery }))
             case "courses":
                 return {
                     kind: "courses",
@@ -197,9 +211,9 @@ export const AcademySections = ({ courses }: AcademySectionsProps) => {
             case "offer":
                 return { kind: "offer", id: key, title: offer("title"), body: offer("body") }
             case "faq":
-                return academy.faq.length === 0 ? null : { kind: "faq", id: key, title: faq("title"), faq: academy.faq }
+                return whenAuthored(academy.faq, () => ({ kind: "faq", id: key, title: faq("title"), faq: academy.faq }))
             case "magnet":
-                return academy.magnet === undefined ? null : { kind: "magnet", id: key, magnet: academy.magnet }
+                return whenPresent(academy.magnet, (magnet) => ({ kind: "magnet", id: key, magnet }))
             case "lead":
                 return {
                     kind: "lead",
