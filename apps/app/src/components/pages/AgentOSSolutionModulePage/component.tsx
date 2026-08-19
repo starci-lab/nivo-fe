@@ -43,7 +43,7 @@ const loadingSection = (label: string) => (
 )
 
 /** Compose one exact installation snapshot without owning API or realtime mechanics. */
-export const _AgentOSSolutionModulePage = ({ state, installation, labels }: AgentOSSolutionModulePageViewProps) => {
+export const AgentOSSolutionModulePageBase = ({ state, installation, labels }: AgentOSSolutionModulePageViewProps) => {
     // A refusal and a missing installation are the same page: there is nothing to lay out, so the
     // stack carries the one notice rather than two empty cards.
     const settledSections = state === "refused" || installation === undefined

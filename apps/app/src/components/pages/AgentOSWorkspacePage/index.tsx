@@ -13,7 +13,7 @@ import { refreshSession } from "@/modules/api/auth"
 import { useSession } from "@/modules/auth/session"
 import useProvisioningRealtime from "@/modules/realtime/provisioning"
 import { workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@/modules/window/workspace-app-launch"
-import { _AgentOSWorkspacePage, type AgentOSWorkspacePageLabels, type AgentOSWorkspaceSection } from "./component"
+import { AgentOSWorkspacePageBase, type AgentOSWorkspacePageLabels, type AgentOSWorkspaceSection } from "./component"
 
 /** Exact workspace identity supplied by the detail route. */
 export type AgentOSWorkspacePageProps = { readonly workspaceId: string }
@@ -139,7 +139,7 @@ export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps)
     }
     const answeredState = answer?.ok === true ? "ready" : "refused"
     return (
-        <_AgentOSWorkspacePage
+        <AgentOSWorkspacePageBase
             state={answer === null ? "loading" : answeredState}
             message={answer !== null && !answer.ok ? t("refused") : undefined}
             data={answer?.ok === true ? answer.data : undefined}

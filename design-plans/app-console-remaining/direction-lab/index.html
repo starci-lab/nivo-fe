@@ -2470,7 +2470,7 @@
         <code>state.loading</code>, <code>console.title</code>, <code>nav.*</code>.</li>
         <li><b>Owner mới — ba cặp trang và ba tệp route:</b>
         <code>components/pages/{AgentOsPage,ServersPage,DomainsPage}/{component.tsx,index.tsx}</code> (nửa pure export
-        <code>_XPage</code> và <code>meta = { shape: "page", world: "pure" }</code>, không giải và không định dạng gì;
+        <code>XPageBase</code> và <code>meta = { shape: "page", world: "pure" }</code>, không giải và không định dạng gì;
         nửa connected là <code>"use client"</code>, sở hữu <code>useTranslations("console")</code>,
         <code>useFormatter</code>, một <code>useState</code>/<code>useEffect</code> cho mỗi chủ thể và chặn mọi effect
         theo <code>session.state.status === "signed-in"</code>), cộng

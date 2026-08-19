@@ -25,7 +25,7 @@ export type AuthenticationPageActions = {
     readonly signedIn?: () => void
 }
 
-/** Props for {@link _AuthenticationPage}. */
+/** Props for {@link AuthenticationPageBase}. */
 export type AuthenticationPageProps = {
     /** Which lane to open on. The route opens on sign-in. */
     readonly initialMode?: AuthMode
@@ -37,7 +37,7 @@ export type AuthenticationPageProps = {
  *
  * @param input - {@link AuthenticationPageProps}
  */
-export const _AuthenticationPage = ({ initialMode = "signIn", on }: AuthenticationPageProps) => {
+export const AuthenticationPageBase = ({ initialMode = "signIn", on }: AuthenticationPageProps) => {
     const cardContent = defineContractComponent("authentication-panel-card", {
         panel: defineContractProjection("centred-page-column", () => (
             <AuthenticationPanel initialMode={initialMode} onSignedIn={() => on?.signedIn?.()} />

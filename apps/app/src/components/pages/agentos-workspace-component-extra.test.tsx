@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { _AgentOSWorkspacePage, type AgentOSWorkspacePageLabels, type AgentOSWorkspaceSection } from "./AgentOSWorkspacePage/component"
+import { AgentOSWorkspacePageBase, type AgentOSWorkspacePageLabels, type AgentOSWorkspaceSection } from "./AgentOSWorkspacePage/component"
 
 vi.mock("@/components/blocks/agentos/AgentOSWorkspaceApplications", () => ({ AgentOSWorkspaceApplications: () => <div>applications</div> }))
 vi.mock("@/components/blocks/agentos/AgentOSSolutionModuleCenter", () => ({ AgentOSSolutionModuleCenter: () => <div>solutions</div> }))
@@ -24,13 +24,13 @@ describe("AgentOSWorkspacePage pure sections", () => {
     it("draws every ready section and the refused fallback", () => {
         const sections: ReadonlyArray<AgentOSWorkspaceSection> = ["overview", "solutions", "applications", "access", "infrastructure", "operations"]
         for (const section of sections) {
-            const html = renderToStaticMarkup(<_AgentOSWorkspacePage
+            const html = renderToStaticMarkup(<AgentOSWorkspacePageBase
                 state="ready" data={data} section={section} labels={labels} launchState="idle" openClawLaunchHref="#"
                 onSelectSection={vi.fn()} onOpenAgentConsole={vi.fn()} formatDate={(value) => value}
             />)
             expect(html).toContain("Agent workspace")
         }
-        const refused = renderToStaticMarkup(<_AgentOSWorkspacePage
+        const refused = renderToStaticMarkup(<AgentOSWorkspacePageBase
             state="refused" message="Unavailable" section="overview" labels={labels} launchState="idle" openClawLaunchHref="#"
             onSelectSection={vi.fn()} onOpenAgentConsole={vi.fn()} formatDate={(value) => value}
         />)

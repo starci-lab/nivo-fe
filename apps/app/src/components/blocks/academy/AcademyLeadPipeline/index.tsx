@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { draftLeadReply, myExpertSiteLeads, updateExpertSiteLead, type ExpertSiteLead } from "@/modules/api/console"
 import { useSession } from "@/modules/auth/session"
-import { _AcademyLeadPipeline } from "./component"
+import { AcademyLeadPipelineBase } from "./component"
 
 /** Owner-scoped identity consumed by the lead pipeline. */
 export type AcademyLeadPipelineProps = { readonly siteId: string }
@@ -64,7 +64,7 @@ export const AcademyLeadPipeline = ({ siteId }: AcademyLeadPipelineProps) => {
         if (result.ok) await load()
     }
     return (
-        <_AcademyLeadPipeline
+        <AcademyLeadPipelineBase
             state={pipelineState(leads)}
             leads={leads ?? []}
             selected={selected}

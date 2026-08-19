@@ -13,7 +13,7 @@ import {
     type AcademyIntegrations,
 } from "@/modules/api/console"
 import { useSession } from "@/modules/auth/session"
-import { _AcademyIntegrationCenter, type AcademyIntegrationCard, type AcademyIntegrationFormField } from "./component"
+import { AcademyIntegrationCenterBase, type AcademyIntegrationCard, type AcademyIntegrationFormField } from "./component"
 
 /** Owner-scoped identity consumed by Integration Center. */
 export type AcademyIntegrationCenterProps = { readonly siteId: string }
@@ -146,7 +146,7 @@ export const AcademyIntegrationCenter = ({ siteId }: AcademyIntegrationCenterPro
 
     const settledState = answer === null ? "refused" : "answered"
     return (
-        <_AcademyIntegrationCenter
+        <AcademyIntegrationCenterBase
             state={answer === undefined ? "resting" : settledState}
             sectionLabel={t("section")}
             refusedLabel={t("refused")}

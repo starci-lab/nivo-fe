@@ -24,7 +24,7 @@ export type AgentOSWorkspaceListViewProps =
     | { readonly state: "answered"; readonly props: { readonly label: string; readonly rows: ReadonlyArray<AgentOSWorkspaceView> }; readonly on: { readonly openWorkspace: (id: string) => void } }
 
 /** Draw the workspace list independently from the creation flow below it. */
-export const _AgentOSWorkspaceList = (view: AgentOSWorkspaceListViewProps) => {
+export const AgentOSWorkspaceListBase = (view: AgentOSWorkspaceListViewProps) => {
     const { state, props } = view
     if (state === "empty" || state === "refused") {
         return (

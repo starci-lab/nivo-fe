@@ -253,7 +253,7 @@ const statusCard = (
 }
 
 /** Render student CRM state without owning requests or secrets. */
-export const _AcademyStudentCrm = ({ state, students, detailState, detail, pendingAction, actionMessage, labels, on }: AcademyStudentCrmViewProps) => {
+export const AcademyStudentCrmBase = ({ state, students, detailState, detail, pendingAction, actionMessage, labels, on }: AcademyStudentCrmViewProps) => {
     const rows = state === "resting" ? restingRows(labels) : studentRows(students, labels, on)
     const note = noteFor(state, labels)
     return (

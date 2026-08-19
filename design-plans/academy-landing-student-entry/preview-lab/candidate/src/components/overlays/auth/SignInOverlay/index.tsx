@@ -3,7 +3,7 @@
 import { useCallback, useRef } from "react"
 import { defineContractProjection } from "@nivo/ui"
 import { AuthenticationPanel } from "@/components/blocks/auth/AuthenticationPanel"
-import { _SignInOverlay } from "./component"
+import { SignInOverlayBase } from "./component"
 
 /**
  * OVERLAY - `SignInOverlay`, connected half.
@@ -41,7 +41,7 @@ export const SignInOverlay = ({ isOpen, onDismiss }: SignInOverlayConnectedProps
     }, [])
 
     return (
-        <_SignInOverlay
+        <SignInOverlayBase
             isOpen={isOpen}
             onDismiss={onDismiss}
             render={defineContractProjection("centred-page-column", () => (

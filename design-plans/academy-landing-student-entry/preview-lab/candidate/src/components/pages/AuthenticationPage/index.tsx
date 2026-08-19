@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "@/i18n/navigation"
-import { _AuthenticationPage } from "./component"
+import { AuthenticationPageBase } from "./component"
 
 /**
  * Resolve authentication-route navigation and draw its pure page twin.
@@ -16,7 +16,7 @@ import { _AuthenticationPage } from "./component"
  */
 export const AuthenticationPage = () => {
     const router = useRouter()
-    return <_AuthenticationPage on={{ signedIn: () => router.replace("/dashboard") }} />
+    return <AuthenticationPageBase on={{ signedIn: () => router.replace("/dashboard") }} />
 }
 
 /** Source-level tier marker for the connected authentication page. */

@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { _AcademySections, type AcademySectionsViewProps } from "./component"
+import { AcademySectionsBase, type AcademySectionsViewProps } from "./component"
 import type { AcademySection } from "./index"
 
 const sections: ReadonlyArray<AcademySection> = [
@@ -21,7 +21,7 @@ const sections: ReadonlyArray<AcademySection> = [
 describe("AcademySections authored variants", () => {
     it("draws the authored section switch cases in order", () => {
         const props: AcademySectionsViewProps = { sections, onSubmitLead: vi.fn() }
-        const html = renderToStaticMarkup(<_AcademySections {...props} />)
+        const html = renderToStaticMarkup(<AcademySectionsBase {...props} />)
         expect(html).toContain("Academy")
         expect(html).toContain("Busy")
         expect(html).toContain("When?")

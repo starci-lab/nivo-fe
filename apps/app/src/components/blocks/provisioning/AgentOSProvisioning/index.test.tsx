@@ -35,7 +35,7 @@ vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => mocks.api)
 vi.mock("@/modules/realtime/provisioning", () => ({ default: () => mocks.realtime }))
 vi.mock("./component", () => ({
-    _AgentOSProvisioning: (props: AgentProbeProps) => (
+    AgentOSProvisioningBase: (props: AgentProbeProps) => (
         <div>
             <output data-testid="agent-flow">{JSON.stringify({ state: props.state, subject: props.props.subject, detail: props.props.detail, text: props.props.statusText })}</output>
             <button data-testid="request" onClick={props.on?.request}>request</button>

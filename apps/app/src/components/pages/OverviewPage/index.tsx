@@ -26,7 +26,7 @@ import {
 } from "@/modules/api/console"
 import type { Result } from "@/modules/api/graphql"
 import {
-    _OverviewPage as OverviewPageView,
+    OverviewPageBase as OverviewPageView,
     type AgentOsSectionView,
     type AppsSectionView,
     type ConsoleFactRow,

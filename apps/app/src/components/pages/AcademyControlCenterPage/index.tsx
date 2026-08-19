@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import { myExpertSites, type ExpertSiteRow } from "@/modules/api/console"
 import { useSession } from "@/modules/auth/session"
-import { _AcademyControlCenterPage, type AcademyControlCenterMode } from "./component"
+import { AcademyControlCenterPageBase, type AcademyControlCenterMode } from "./component"
 
 /** Exact Academy identity supplied by the resource route. */
 export type AcademyControlCenterPageProps = { readonly siteId: string }
@@ -35,7 +35,7 @@ export const AcademyControlCenterPage = ({ siteId }: AcademyControlCenterPagePro
     if (!mounted) return null
     const settledState = site === null ? "refused" : "ready"
     return (
-        <_AcademyControlCenterPage
+        <AcademyControlCenterPageBase
             state={site === undefined ? "restoring" : settledState}
             title={site?.slug ?? t("title")}
             siteId={siteId}

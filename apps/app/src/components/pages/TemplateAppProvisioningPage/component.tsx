@@ -13,7 +13,7 @@ export type TemplateAppProvisioningPageProps =
     | { readonly mode: "resume"; readonly siteId: string }
 
 /** Compose the template-app domain block on its own route-level screen. */
-export const _TemplateAppProvisioningPage = (props: TemplateAppProvisioningPageProps) => (
+export const TemplateAppProvisioningPageBase = (props: TemplateAppProvisioningPageProps) => (
     <Tree
         contract="titled-section-stack-page"
         render={defineContractComponent("titled-section-stack-page", {

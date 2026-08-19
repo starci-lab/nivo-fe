@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { _OverviewPage, type AppsSectionView, type AgentOsSectionView, type DomainsSectionView, type WalletSectionView } from "./component"
+import { OverviewPageBase, type AppsSectionView, type AgentOsSectionView, type DomainsSectionView, type WalletSectionView } from "./component"
 
 const servers = { label: "Servers", note: "No servers" }
 const apps: AppsSectionView = { phase: "answered", label: "Apps", openSetLabel: "Open apps", rows: [{ id: "site", name: "Alpha", detail: "alpha.vn", kindLabel: "Academy", status: "ready", statusLabel: "Ready", actionLabel: "Open" }] }
@@ -9,7 +9,7 @@ const domains: DomainsSectionView = { phase: "answered", label: "Domains", facts
 const wallet: WalletSectionView = { phase: "answered", label: "Wallet", actionLabel: "Transactions", facts: [{ id: "balance", label: "Balance", value: "1,250 ₫" }] }
 
 const renderPage = (overrides: Partial<{ apps: AppsSectionView, agentOs: AgentOsSectionView, domains: DomainsSectionView, wallet: WalletSectionView }> = {}) =>
-    renderToStaticMarkup(<_OverviewPage title="Overview" apps={overrides.apps ?? apps} agentOs={overrides.agentOs ?? agentOs} servers={servers} domains={overrides.domains ?? domains} wallet={overrides.wallet ?? wallet} on={{ openApps: vi.fn(), openAgentOs: vi.fn(), openWallet: vi.fn() }} />)
+    renderToStaticMarkup(<OverviewPageBase title="Overview" apps={overrides.apps ?? apps} agentOs={overrides.agentOs ?? agentOs} servers={servers} domains={overrides.domains ?? domains} wallet={overrides.wallet ?? wallet} on={{ openApps: vi.fn(), openAgentOs: vi.fn(), openWallet: vi.fn() }} />)
 
 describe("OverviewPage drawing states", () => {
     it("draws answered resource rows and facts", () => {

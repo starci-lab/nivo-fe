@@ -36,7 +36,7 @@ import fixture from "../../../resources/fleet.fixture.json"
  *
  * ONE FILE, NOT TWO, per SPLIT-6: the split exists because a request exists, and this screen still
  * reads a fixture. When the GraphQL client lands, the query becomes `index.tsx` and this shape moves
- * to `component.tsx` behind an exact `_ProvisioningPage`.
+ * to `component.tsx` behind an exact `ProvisioningPageBase`.
  *
  * REVISION 1.2 TOOK THE WORDS OUT. Revision 1.1 held Vietnamese sentences as constants and its route
  * was named `cap-phat`. Both are now refused by canon and both were worth refusing: a path is the

@@ -14,7 +14,7 @@ export type AgentOSPageProps =
     | { readonly mode: "resume"; readonly orderId: string }
 
 /** Compose management before creation because owned workspaces are the stable AgentOS surface. */
-export const _AgentOSPage = (props: AgentOSPageProps) => (
+export const AgentOSPageBase = (props: AgentOSPageProps) => (
     <Tree
         contract="titled-section-stack-page"
         render={defineContractComponent("titled-section-stack-page", {

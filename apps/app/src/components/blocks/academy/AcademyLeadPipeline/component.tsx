@@ -39,7 +39,7 @@ export type AcademyLeadPipelineViewProps = {
 }
 
 /** Render leads as a joined identity scan with one selected follow-up. */
-export const _AcademyLeadPipeline = ({ state, leads, selected, draft, pendingAction, message, labels, onOpenLead, onAdvance, onDraftReply }: AcademyLeadPipelineViewProps) => {
+export const AcademyLeadPipelineBase = ({ state, leads, selected, draft, pendingAction, message, labels, onOpenLead, onAdvance, onDraftReply }: AcademyLeadPipelineViewProps) => {
     const rows = state === "resting"
         ? [0, 1, 2].map(() => defineContractComponent("avatar-identity-badge-action-row", {
             avatar: defineLeafComponent("avatar", {}, () => <Avatar props={{ size: "md" }} isLoading />),

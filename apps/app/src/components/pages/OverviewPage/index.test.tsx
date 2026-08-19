@@ -41,7 +41,7 @@ vi.mock("next-intl", () => ({
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => mocks.api)
 vi.mock("./component", () => ({
-    _OverviewPage: (props: OverviewProbeProps) => (
+    OverviewPageBase: (props: OverviewProbeProps) => (
         <div>
             <output data-testid="overview">{JSON.stringify({ title: props.title, apps: props.apps, agentOs: props.agentOs, servers: props.servers, domains: props.domains, wallet: props.wallet })}</output>
             <button data-testid="apps" onClick={props.on?.openApps}>apps</button>

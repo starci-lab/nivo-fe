@@ -45,7 +45,7 @@ export type DangerZoneActions = {
     readonly reprovision?: () => void
 }
 
-/** Props for {@link _DangerZone}. */
+/** Props for {@link DangerZoneBase}. */
 export interface DangerZoneViewProps {
     /** The settled words. */
     readonly props: DangerZoneData
@@ -59,7 +59,7 @@ export interface DangerZoneViewProps {
  * @param input - {@link DangerZoneViewProps}
  * @returns The block node.
  */
-export const _DangerZone = ({ props, on }: DangerZoneViewProps) => (
+export const DangerZoneBase = ({ props, on }: DangerZoneViewProps) => (
     <Tree
         contract="warned-action-panel"
         render={defineContractComponent("warned-action-panel", {

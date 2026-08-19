@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { myAgentosModuleInstallation, type AgentosModuleInstallationDetail } from "@/modules/api/console"
 import { useSession } from "@/modules/auth/session"
 import useProvisioningRealtime from "@/modules/realtime/provisioning"
-import { _AgentOSSolutionModulePage as AgentOSSolutionModulePageView, type AgentOSSolutionModulePageLabels } from "./component"
+import { AgentOSSolutionModulePageBase as AgentOSSolutionModulePageView, type AgentOSSolutionModulePageLabels } from "./component"
 
 /** Exact route identities required to read one owner-scoped installation. */
 export type AgentOSSolutionModulePageProps = { readonly workspaceId: string; readonly installationId: string }

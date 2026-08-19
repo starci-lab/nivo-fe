@@ -18,7 +18,7 @@ import {
 } from "@/modules/api/console"
 import type { Result } from "@/modules/api/graphql"
 import {
-    _AppsPage as AppsPageView,
+    AppsPageBase as AppsPageView,
     type CatalogueSectionView,
     type OwnedAppRow,
     type OwnedSectionView,

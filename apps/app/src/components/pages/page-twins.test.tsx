@@ -1,10 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { _WalletPage } from "./WalletPage/component"
-import { _AppsPage } from "./AppsPage/component"
-import { _OverviewPage, type OverviewPageViewProps } from "./OverviewPage/component"
-import { _AgentOSWorkspacePage, type AgentOSWorkspacePageLabels } from "./AgentOSWorkspacePage/component"
-import { _AgentOSSolutionModulePage, type AgentOSSolutionModulePageLabels } from "./AgentOSSolutionModulePage/component"
+import { WalletPageBase } from "./WalletPage/component"
+import { AppsPageBase } from "./AppsPage/component"
+import { OverviewPageBase, type OverviewPageViewProps } from "./OverviewPage/component"
+import { AgentOSWorkspacePageBase, type AgentOSWorkspacePageLabels } from "./AgentOSWorkspacePage/component"
+import { AgentOSSolutionModulePageBase, type AgentOSSolutionModulePageLabels } from "./AgentOSSolutionModulePage/component"
 
 const actions = { openApps: vi.fn(), openAgentOs: vi.fn(), openWallet: vi.fn() }
 
@@ -20,7 +20,7 @@ const overviewProps: OverviewPageViewProps = {
 
 describe("pure page twins", () => {
     it("renders overview answered, refused, and empty sections", () => {
-        const html = renderToStaticMarkup(<_OverviewPage {...overviewProps} />)
+        const html = renderToStaticMarkup(<OverviewPageBase {...overviewProps} />)
         expect(html).toContain("Overview")
         expect(html).toContain("Academy")
         expect(html).toContain("Unavailable")
@@ -28,7 +28,7 @@ describe("pure page twins", () => {
     })
 
     it("renders wallet resting, empty, and refused ledger branches", () => {
-        const html = renderToStaticMarkup(<_WalletPage
+        const html = renderToStaticMarkup(<WalletPageBase
             title="Wallet"
             balance={{ phase: "answered", label: "Balance", actionLabel: "Top up", facts: [{ id: "b", label: "Balance", value: "100 VND" }] }}
             transactions={{ phase: "empty", label: "Transactions", note: "No transactions" }}
@@ -42,7 +42,7 @@ describe("pure page twins", () => {
     })
 
     it("renders AppsPage owned apps and buyable catalogue offers", () => {
-        const html = renderToStaticMarkup(<_AppsPage
+        const html = renderToStaticMarkup(<AppsPageBase
             title="Apps"
             lede="Your applications"
             owned={{ phase: "answered", label: "Owned", rows: [{ id: "site-1", name: "Academy", detail: "academy.test", kindLabel: "Academy", status: "ready", statusLabel: "Ready", actionLabel: "Open" }] }}
@@ -67,7 +67,7 @@ describe("pure page twins", () => {
             stack: {} as AgentOSWorkspacePageLabels["stack"],
             operations: {} as AgentOSWorkspacePageLabels["operations"],
         } satisfies AgentOSWorkspacePageLabels
-        const html = renderToStaticMarkup(<_AgentOSWorkspacePage
+        const html = renderToStaticMarkup(<AgentOSWorkspacePageBase
             state="loading"
             section="overview"
             labels={labels}
@@ -88,8 +88,8 @@ describe("pure page twins", () => {
             summary: { section: "Summary" } as AgentOSSolutionModulePageLabels["summary"],
             bindings: { section: "Bindings" } as AgentOSSolutionModulePageLabels["bindings"],
         } satisfies AgentOSSolutionModulePageLabels
-        const loading = renderToStaticMarkup(<_AgentOSSolutionModulePage state="loading" labels={labels} />)
-        const refused = renderToStaticMarkup(<_AgentOSSolutionModulePage state="refused" labels={labels} />)
+        const loading = renderToStaticMarkup(<AgentOSSolutionModulePageBase state="loading" labels={labels} />)
+        const refused = renderToStaticMarkup(<AgentOSSolutionModulePageBase state="refused" labels={labels} />)
         expect(loading).toContain("Loading module")
         expect(refused).toContain("Module unavailable")
     })

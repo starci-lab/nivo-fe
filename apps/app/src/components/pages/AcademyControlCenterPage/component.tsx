@@ -38,7 +38,7 @@ export type AcademyControlCenterPageViewProps = {
 }
 
 /** Compose one Academy destination without taking ownership of block requests. */
-export const _AcademyControlCenterPage = ({ state, title, siteId, publicHost, mode, labels, onSelectMode, onOpenPublicSite }: AcademyControlCenterPageViewProps) => {
+export const AcademyControlCenterPageBase = ({ state, title, siteId, publicHost, mode, labels, onSelectMode, onOpenPublicSite }: AcademyControlCenterPageViewProps) => {
     const settledSections = mode === "growth"
         ? [
             defineContractProjection("label-row-over-card", () => <AcademyGrowthSummary siteId={siteId} />),

@@ -13,7 +13,7 @@ import {
     type AcademyStudentDetail,
 } from "@/modules/api/console"
 import { useSession } from "@/modules/auth/session"
-import { _AcademyStudentCrm } from "./component"
+import { AcademyStudentCrmBase } from "./component"
 
 /** Owner-scoped identity consumed by the student CRM. */
 export type AcademyStudentCrmProps = { readonly siteId: string }
@@ -94,7 +94,7 @@ export const AcademyStudentCrm = ({ siteId }: AcademyStudentCrmProps) => {
         setDetailLoading(false)
     }
     return (
-        <_AcademyStudentCrm
+        <AcademyStudentCrmBase
             state={listStateOf(students)}
             students={students ?? []}
             detailState={detailStateOf(detailLoading, detail)}

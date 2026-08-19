@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { useAuthPanel } from "@/hooks/auth/useAuthPanel"
 import { KeycloakIdentityProvider } from "@/modules/api/auth"
 import {
-    _AuthenticationPanel,
+    AuthenticationPanelBase,
     type AuthMode,
     type AuthenticationPanelProps as PanelProps,
 } from "./component"
@@ -132,7 +132,7 @@ export const AuthenticationPanel = ({ initialMode = "signIn", onSignedIn }: Auth
             }
 
     return (
-        <_AuthenticationPanel
+        <AuthenticationPanelBase
             {...props}
             on={{
                 submitDetails: panel.submitDetails,

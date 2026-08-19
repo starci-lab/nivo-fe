@@ -5,7 +5,7 @@ import { useFormatter, useTranslations } from "next-intl"
 import { myAcademyGrowthSnapshot, type AcademyGrowthSnapshot } from "@/modules/api/console"
 import type { Result } from "@/modules/api/graphql"
 import { useSession } from "@/modules/auth/session"
-import { _AcademyGrowthSummary } from "./component"
+import { AcademyGrowthSummaryBase } from "./component"
 
 /** Owner-scoped identity consumed by the connected growth block. */
 export type AcademyGrowthSummaryProps = { readonly siteId: string }
@@ -25,7 +25,7 @@ export const AcademyGrowthSummary = ({ siteId }: AcademyGrowthSummaryProps) => {
     const data = answer?.ok === true ? answer.data : undefined
     const settledState = answer?.ok === true ? "answered" : "refused"
     return (
-        <_AcademyGrowthSummary
+        <AcademyGrowthSummaryBase
             state={answer === null ? "resting" : settledState}
             data={data}
             revenue={format.number(data?.revenueVnd ?? 0, { style: "currency", currency: "VND", maximumFractionDigits: 0 })}

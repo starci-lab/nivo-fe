@@ -100,7 +100,7 @@ export type CatalogueSectionView =
     }
     | { readonly phase: "refused", readonly label: string, readonly note: string }
 
-/** Props for {@link _AppsPage}. */
+/** Props for {@link AppsPageBase}. */
 export interface AppsPageViewProps {
     /** The page's own name. */
     readonly title: string
@@ -234,7 +234,7 @@ const refusedSection = (label: string, note: string) => defineContractProjection
  * @param input - {@link AppsPageViewProps}
  * @returns The page node.
  */
-export const _AppsPage = ({ title, lede, owned, catalogue, onBuildTemplate, onOpenOwnedApp }: AppsPageViewProps) => {
+export const AppsPageBase = ({ title, lede, owned, catalogue, onBuildTemplate, onOpenOwnedApp }: AppsPageViewProps) => {
     /*
      * SECTION 1 - the apps this account owns, in every situation the set can be in.
      */

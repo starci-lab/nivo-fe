@@ -911,7 +911,7 @@ const band = (section: AcademySection, onSubmitLead: LeadSubmit) => {
     }
 }
 
-/** Props for {@link _AcademySections}. */
+/** Props for {@link AcademySectionsBase}. */
 export interface AcademySectionsViewProps {
     /** Every visible section, already resolved, in the expert's own order. */
     readonly sections: ReadonlyArray<AcademySection>
@@ -929,7 +929,7 @@ export interface AcademySectionsViewProps {
  * @param input - {@link AcademySectionsViewProps}
  * @returns Every visible section, in the expert's order.
  */
-export const _AcademySections = ({ sections, onSubmitLead }: AcademySectionsViewProps) => (
+export const AcademySectionsBase = ({ sections, onSubmitLead }: AcademySectionsViewProps) => (
     <>
         {/*
           * A keyed `Fragment` rather than a wrapper element. React needs a key per item and the band

@@ -39,7 +39,7 @@ vi.mock("next-intl", () => ({ useTranslations: () => mocks.t }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/auth", () => mocks.api)
 vi.mock("./component", () => ({
-    _AuthenticationPage: (input: AuthPageProbeInput) => (
+    AuthenticationPageBase: (input: AuthPageProbeInput) => (
         <div>
             <output data-testid="auth-panel">{JSON.stringify({ state: input.panel.state, props: input.panel.props })}</output>
             <button data-testid="submit-details" onClick={() => input.panel.on?.submitDetails?.(details)}>details</button>

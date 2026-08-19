@@ -45,7 +45,7 @@ const loadingCards: ReadonlyArray<AgentOSSolutionModuleCard> = ["module-loading-
 }))
 
 /** Render the selected solution mode from already-resolved card projections. */
-export const _AgentOSSolutionModuleCenter = ({ state, mode, sectionLabel, modesLabel, modes, refusedLabel, emptyLabel, emptyActionLabel, cards, pendingId, outcome, onSelectMode, onPressCard }: AgentOSSolutionModuleCenterViewProps) => {
+export const AgentOSSolutionModuleCenterBase = ({ state, mode, sectionLabel, modesLabel, modes, refusedLabel, emptyLabel, emptyActionLabel, cards, pendingId, outcome, onSelectMode, onPressCard }: AgentOSSolutionModuleCenterViewProps) => {
     // The three situations under the tabs, read in order: a refusal, an answer with nothing in it,
     // and otherwise the grid - which draws the resting placeholders when the answer has not landed.
     const body = () => {

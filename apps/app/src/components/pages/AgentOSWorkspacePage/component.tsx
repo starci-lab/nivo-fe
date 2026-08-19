@@ -46,7 +46,7 @@ export type AgentOSWorkspacePageViewProps = {
 }
 
 /** Compose one AgentOS workspace from domain blocks; the page owns no API or operational JSX. */
-export const _AgentOSWorkspacePage = ({ state, message, data, section, labels, launchState, openClawLaunchHref, onSelectSection, onOpenAgentConsole, formatDate }: AgentOSWorkspacePageViewProps) => {
+export const AgentOSWorkspacePageBase = ({ state, message, data, section, labels, launchState, openClawLaunchHref, onSelectSection, onOpenAgentConsole, formatDate }: AgentOSWorkspacePageViewProps) => {
     const title = data?.workspace.name ?? labels.titleFallback
     /** One tab decides one list of projections; an unsettled page shows the notice instead. */
     const sectionsOf = () => {

@@ -12,7 +12,7 @@ import {
     publishExpertSite,
 } from "@/modules/api/console"
 import useProvisioningRealtime, { type ProvisioningTarget } from "@/modules/realtime/provisioning"
-import { _TemplateAppProvisioning, type TemplateAppProvisioningViewProps } from "./component"
+import { TemplateAppProvisioningBase, type TemplateAppProvisioningViewProps } from "./component"
 
 /** Route identity owned by the template-app provisioning block. */
 export type TemplateAppProvisioningProps = {
@@ -250,7 +250,7 @@ export const TemplateAppProvisioning = ({ context }: TemplateAppProvisioningProp
         return { state: flow.phase, props: { ...common, statusTitle: isCatalogLoading ? t("loadingTitle") : t("preparingTitle"), statusText: isCatalogLoading ? t("loadingText") : waitingText } }
     }
 
-    return <_TemplateAppProvisioning {...view()} />
+    return <TemplateAppProvisioningBase {...view()} />
 }
 
 /** Source-level tier marker for the connected block half. */

@@ -211,7 +211,7 @@ export type OverviewPageActions = {
     readonly openWallet?: () => void
 }
 
-/** Props for {@link _OverviewPage}. */
+/** Props for {@link OverviewPageBase}. */
 export interface OverviewPageViewProps {
     /** The page's own name. */
     readonly title: string
@@ -391,7 +391,7 @@ const refusedSection = (label: string, note: string) => defineContractProjection
  * @param input - {@link OverviewPageViewProps}
  * @returns The page node.
  */
-export const _OverviewPage = ({ title, apps, agentOs, servers, domains, wallet, on }: OverviewPageViewProps) => {
+export const OverviewPageBase = ({ title, apps, agentOs, servers, domains, wallet, on }: OverviewPageViewProps) => {
     /*
      * SECTION 1 - the apps. The only section that summarises a SET rather than one subject, which is
      * why its way out is a destination and not a detail.

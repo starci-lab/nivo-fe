@@ -19,7 +19,7 @@ import { AuthenticationPanel, type AuthenticationPanelProps } from "@/components
  * state matrix testable without standing the world up first.
  */
 
-/** Props for {@link _AuthenticationPage}. */
+/** Props for {@link AuthenticationPageBase}. */
 export type AuthenticationPageProps = {
     /**
      * The panel's complete situation, already discriminated and already in words.
@@ -38,7 +38,7 @@ export type AuthenticationPageProps = {
  * @param props - {@link AuthenticationPageProps}
  * @returns The page node.
  */
-export const _AuthenticationPage = ({ panel }: AuthenticationPageProps) => {
+export const AuthenticationPageBase = ({ panel }: AuthenticationPageProps) => {
     const cardContent = defineContractComponent("authentication-panel-card", {
         panel: defineContractProjection("centred-page-column", () => <AuthenticationPanel {...panel} />),
     })

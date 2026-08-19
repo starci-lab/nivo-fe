@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
-import { _AuthenticationPage as AuthenticationPageView } from "./component"
+import { AuthenticationPageBase as AuthenticationPageView } from "./component"
 import type {
     AuthActions,
     AuthCode,
@@ -30,7 +30,7 @@ import { useSession } from "@/modules/auth/session"
  * PAGE - `/authentication`, connected half.
  *
  * IT RESOLVES THE WORLD AND RENDERS ONLY ITS TWIN. Seven mutations, one challenge, one cooldown
- * clock and the mode live here; `_AuthenticationPage` receives finished values and draws them.
+ * clock and the mode live here; `AuthenticationPageBase` receives finished values and draws them.
  *
  * THREE JOURNEYS, THREE SHAPES, AND THEY ARE NOT INTERCHANGEABLE:
  *

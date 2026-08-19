@@ -39,7 +39,7 @@ export type TemplateAppProvisioningViewProps = {
 }
 
 /** Draw one Template App request and its deployment journey. */
-export const _TemplateAppProvisioning = ({ state, props, on }: TemplateAppProvisioningViewProps) => {
+export const TemplateAppProvisioningBase = ({ state, props, on }: TemplateAppProvisioningViewProps) => {
     const isRequest = state === "request" || state === "submitting"
     const journey = defineContractComponent("horizontal-lifecycle-run", {
         step: props.steps.map((step) => defineCompositeComponent("lifecycle-step", {}, () => (

@@ -7,7 +7,7 @@ vi.mock("next-intl", () => ({ useLocale: () => m.locale, useTranslations: () => 
 vi.mock("@/modules/auth/session", () => ({ useSession: () => m.session }))
 vi.mock("@/modules/api/console", () => ({ myExpertSiteLeads: m.calls.list, updateExpertSiteLead: m.calls.update, draftLeadReply: m.calls.draft }))
 type LeadView = { state: string; onOpenLead: (id: string) => void; onAdvance: () => void; onDraftReply: () => void }
-vi.mock("./component", () => ({ _AcademyLeadPipeline: (input: LeadView) => <><output data-testid="state">{input.state}</output><button onClick={() => input.onOpenLead("lead-1")}>open</button><button onClick={input.onDraftReply}>draft</button><button onClick={input.onAdvance}>advance</button></> }))
+vi.mock("./component", () => ({ AcademyLeadPipelineBase: (input: LeadView) => <><output data-testid="state">{input.state}</output><button onClick={() => input.onOpenLead("lead-1")}>open</button><button onClick={input.onDraftReply}>draft</button><button onClick={input.onAdvance}>advance</button></> }))
 
 beforeEach(() => { vi.clearAllMocks(); m.leads = { ok: true, data: [{ id: "lead-1", name: "Reader", contact: "reader@example.test", message: "Interested", status: "new", note: null }] }; m.calls.list.mockResolvedValue(m.leads); m.calls.update.mockResolvedValue({ ok: true }); m.calls.draft.mockResolvedValue({ ok: true, data: { reply: "Draft reply" } }) })
 

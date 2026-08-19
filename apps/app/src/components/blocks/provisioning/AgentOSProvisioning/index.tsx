@@ -18,7 +18,7 @@ import {
     type InvoiceRow,
 } from "@/modules/api/console"
 import useProvisioningRealtime, { type ProvisioningTarget } from "@/modules/realtime/provisioning"
-import { _AgentOSProvisioning, type AgentOSProvisioningViewProps } from "./component"
+import { AgentOSProvisioningBase, type AgentOSProvisioningViewProps } from "./component"
 
 /** Route identity owned by the AgentOS provisioning block. */
 export type AgentOSProvisioningProps = {
@@ -239,7 +239,7 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
         return { state: flow.phase, props: { steps, subject: flow.subject, detail: flow.detail, statusTitle: isAccepted ? t("agentos.acceptedTitle") : t("preparingTitle"), statusText } }
     }
 
-    return <_AgentOSProvisioning {...view()} />
+    return <AgentOSProvisioningBase {...view()} />
 }
 
 /** Source-level tier marker for the connected block half. */

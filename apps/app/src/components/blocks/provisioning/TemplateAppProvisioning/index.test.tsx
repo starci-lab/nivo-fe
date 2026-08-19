@@ -30,7 +30,7 @@ vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => mocks.api)
 vi.mock("@/modules/realtime/provisioning", () => ({ default: () => mocks.realtime }))
 vi.mock("./component", () => ({
-    _TemplateAppProvisioning: (props: TemplateProbeProps) => (
+    TemplateAppProvisioningBase: (props: TemplateProbeProps) => (
         <div>
             <output data-testid="template-flow">{JSON.stringify({ state: props.state, subject: props.props.subject, detail: props.props.detail, text: props.props.statusText })}</output>
             <input data-testid="slug" onChange={(event) => props.on?.changeSlug?.(event.target.value)} />

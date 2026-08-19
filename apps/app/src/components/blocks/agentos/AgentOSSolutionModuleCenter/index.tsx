@@ -11,7 +11,7 @@ import {
 } from "@/modules/api/console"
 import { useSession } from "@/modules/auth/session"
 import useProvisioningRealtime from "@/modules/realtime/provisioning"
-import { _AgentOSSolutionModuleCenter, type AgentOSSolutionModuleCard } from "./component"
+import { AgentOSSolutionModuleCenterBase, type AgentOSSolutionModuleCard } from "./component"
 
 /** Exact owner workspace scope consumed by the connected module center. */
 export type AgentOSSolutionModuleCenterProps = { readonly workspaceId: string }
@@ -108,7 +108,7 @@ export const AgentOSSolutionModuleCenter = ({ workspaceId }: AgentOSSolutionModu
     const refused = catalog === null || installations === null
     const settledState = refused ? "refused" : "answered"
     return (
-        <_AgentOSSolutionModuleCenter
+        <AgentOSSolutionModuleCenterBase
             state={catalog === undefined || installations === undefined ? "resting" : settledState}
             mode={mode}
             sectionLabel={mode === "catalog" ? t("catalogSection") : t("installedSection")}

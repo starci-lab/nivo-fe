@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { _DangerZone } from "./component"
+import { DangerZoneBase } from "./component"
 
 /**
  * BLOCK - the lifecycle actions that destroy work, connected half.
@@ -44,7 +44,7 @@ export const DangerZone = ({ isOperator }: DangerZoneProps) => {
         return null
     }
     return (
-        <_DangerZone
+        <DangerZoneBase
             props={{
                 title: t("dangerLabel"),
                 description: t("dangerBody"),

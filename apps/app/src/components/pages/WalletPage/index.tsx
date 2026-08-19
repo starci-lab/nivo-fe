@@ -14,7 +14,7 @@ import {
 } from "@/modules/api/console"
 import type { Result } from "@/modules/api/graphql"
 import {
-    _WalletPage as WalletPageView,
+    WalletPageBase as WalletPageView,
     type BalanceSectionView,
     type LedgerSectionView,
     type WalletFactRow,

@@ -16,7 +16,7 @@ import type { Course } from "@/modules/api/academy"
  * connected half never has to describe a failure this file would then have to interpret.
  */
 
-/** Props for {@link _AcademyPage}. */
+/** Props for {@link AcademyPageBase}. */
 export interface AcademyPageProps {
     /** The catalog this academy sells, already resolved. */
     readonly courses: ReadonlyArray<Course>
@@ -28,7 +28,7 @@ export interface AcademyPageProps {
  * @param props - {@link AcademyPageProps}
  * @returns The page.
  */
-export const _AcademyPage = ({ courses }: AcademyPageProps) => (
+export const AcademyPageBase = ({ courses }: AcademyPageProps) => (
     <AcademyChrome
         /*
          * `content`, not `children`: the layout names the one routed interior it takes, so nothing

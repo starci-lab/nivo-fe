@@ -1,10 +1,10 @@
 "use client"
 
-import { _TemplateAppProvisioningPage, type TemplateAppProvisioningPageProps } from "./component"
+import { TemplateAppProvisioningPageBase, type TemplateAppProvisioningPageProps } from "./component"
 
 /** Settle the route identity and hand drawing to the pure page twin. */
 export const TemplateAppProvisioningPage = (props: TemplateAppProvisioningPageProps) => (
-    <_TemplateAppProvisioningPage {...props} />
+    <TemplateAppProvisioningPageBase {...props} />
 )
 
 /** Source-level tier marker for the connected page half. */

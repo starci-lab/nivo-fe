@@ -30,7 +30,7 @@ export type AcademyGrowthSummaryViewProps = {
 }
 
 /** Render aggregate facts without fetching or formatting. */
-export const _AcademyGrowthSummary = ({ state, data, labels, revenue }: AcademyGrowthSummaryViewProps) => {
+export const AcademyGrowthSummaryBase = ({ state, data, labels, revenue }: AcademyGrowthSummaryViewProps) => {
     const facts = [
         { id: "revenue", subject: revenue, caption: labels.revenue },
         { id: "orders", subject: String(data?.paidOrders ?? 0), caption: labels.orders },

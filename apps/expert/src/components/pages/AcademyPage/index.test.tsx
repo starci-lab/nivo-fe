@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 vi.mock("@/modules/api/academy", () => ({ fetchCourses: vi.fn() }))
 type PageProps = { readonly courses: ReadonlyArray<{ readonly title: string }> }
-vi.mock("./component", () => ({ _AcademyPage: ({ courses }: PageProps) => <output>{courses.map((course) => course.title).join(",")}</output> }))
+vi.mock("./component", () => ({ AcademyPageBase: ({ courses }: PageProps) => <output>{courses.map((course) => course.title).join(",")}</output> }))
 import { fetchCourses } from "@/modules/api/academy"
 import { AcademyPage } from "./index"
 describe("academy page server orchestration", () => {

@@ -87,7 +87,7 @@ export type WalletPageActions = {
     readonly payInvoice?: () => void
 }
 
-/** Props for {@link _WalletPage}. */
+/** Props for {@link WalletPageBase}. */
 export interface WalletPageViewProps {
     /** The page's own name. */
     readonly title: string
@@ -164,7 +164,7 @@ const refusedSection = (label: string, note: string) => defineContractProjection
  * @param input - {@link WalletPageViewProps}
  * @returns The page node.
  */
-export const _WalletPage = ({ title, balance, transactions, invoices, on }: WalletPageViewProps) => {
+export const WalletPageBase = ({ title, balance, transactions, invoices, on }: WalletPageViewProps) => {
     const balanceSection = () => {
         if (balance.phase === "refused") {
             return refusedSection(balance.label, balance.note)

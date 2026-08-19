@@ -15,7 +15,7 @@ import {
     type Stat,
     type Testimonial,
 } from "@/modules/academy/template"
-import { _AcademySections } from "./component"
+import { AcademySectionsBase } from "./component"
 
 /**
  * BLOCK - `AcademySections`, connected half.
@@ -258,5 +258,5 @@ export const AcademySections = ({ courses }: AcademySectionsProps) => {
      */
     const onSubmitLead: LeadSubmit = async (input) => (await submitLead(input)).ok
 
-    return <_AcademySections sections={sections} onSubmitLead={onSubmitLead} />
+    return <AcademySectionsBase sections={sections} onSubmitLead={onSubmitLead} />
 }

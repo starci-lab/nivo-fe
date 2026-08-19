@@ -21,7 +21,7 @@ import { ModalShell } from "@/components/shells/ModalShell"
  * about how a modal behaves.
  */
 
-/** Props for {@link _SignInOverlay}. */
+/** Props for {@link SignInOverlayBase}. */
 export type SignInOverlayProps<K extends ContractKey> = {
     /** Whether the surface is on screen. Owned by whoever mounts it, never by the surface. */
     readonly isOpen: boolean
@@ -37,7 +37,7 @@ export type SignInOverlayProps<K extends ContractKey> = {
  * @param input - {@link SignInOverlayProps}
  * @returns The modal shell with the typed branch inside it.
  */
-export const _SignInOverlay = <const K extends ContractKey>(input: SignInOverlayProps<K>) => (
+export const SignInOverlayBase = <const K extends ContractKey>(input: SignInOverlayProps<K>) => (
     <ModalShell isOpen={input.isOpen} size="xs" onDismiss={input.onDismiss}>
         <ContractContent contract={input.render.meta.contract} render={input.render} />
     </ModalShell>

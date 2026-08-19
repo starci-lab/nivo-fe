@@ -616,7 +616,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -635,7 +635,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -676,7 +676,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -695,7 +695,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -736,7 +736,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -755,7 +755,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -796,7 +796,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -815,7 +815,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -856,7 +856,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -875,7 +875,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -916,7 +916,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -935,7 +935,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -976,7 +976,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -995,7 +995,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -1462,7 +1462,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -1481,7 +1481,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -1522,7 +1522,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -1541,7 +1541,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -1582,7 +1582,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -1601,7 +1601,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -1642,7 +1642,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -1661,7 +1661,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -1702,7 +1702,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -1721,7 +1721,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -1762,7 +1762,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -1781,7 +1781,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -1822,7 +1822,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -1841,7 +1841,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -2308,7 +2308,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -2327,7 +2327,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -2368,7 +2368,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -2387,7 +2387,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -2428,7 +2428,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -2447,7 +2447,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -2488,7 +2488,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -2507,7 +2507,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -2548,7 +2548,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -2567,7 +2567,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -2608,7 +2608,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -2627,7 +2627,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [
@@ -2668,7 +2668,7 @@
         "               ├── label-row-over-card 'why it failed' (failed only)",
         "               ├── label-row-over-card 'the record to point' (awaiting DNS only)",
         "               ├── label-row-over-card > labelled-fact-stack > label-value-row x5",
-        "               └── DangerZone > _DangerZone > Tree warned-action-panel (operator only)"
+        "               └── DangerZone > DangerZoneBase > Tree warned-action-panel (operator only)"
       ],
       "contracts": [
         "sidebar-then-body-app",
@@ -2687,7 +2687,7 @@
       "props": [
         "ResourceDetailPage: { phase: \"running\" | \"failed\" | \"awaitingDns\" | \"suspended\" | \"loading\" | \"notFound\", isOperator?: boolean }",
         "DangerZone: { isOperator: boolean }",
-        "_DangerZone: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
+        "DangerZoneBase: props { title, description, rebuildLabel, reprovisionLabel } on { rebuild?, reprovision? }",
         "Heading: { content, level: 1 } + isLoading; content is a non-breaking space while loading, which compensates for the leaf rendering an empty string when resting"
       ],
       "tokens": [

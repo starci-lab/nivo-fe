@@ -52,7 +52,7 @@ export type AcademyIntegrationCenterViewProps = {
 }
 
 /** Render provider status and one selected write-only setup form. */
-export const _AcademyIntegrationCenter = ({ state, sectionLabel, refusedLabel, cards, selected, pendingId, outcome, onSelect, onChangeField, onSubmit }: AcademyIntegrationCenterViewProps) => (
+export const AcademyIntegrationCenterBase = ({ state, sectionLabel, refusedLabel, cards, selected, pendingId, outcome, onSelect, onChangeField, onSubmit }: AcademyIntegrationCenterViewProps) => (
     <>
         {state === "refused" ? (
             <SurfaceCard

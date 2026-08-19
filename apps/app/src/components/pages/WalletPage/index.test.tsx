@@ -19,7 +19,7 @@ vi.mock("next-intl", () => ({ useTranslations: () => mocks.t, useFormatter: () =
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => mocks.api)
 vi.mock("./component", () => ({
-    _WalletPage: (props: WalletProbeProps) => (
+    WalletPageBase: (props: WalletProbeProps) => (
         <div>
             <output data-testid="wallet">{JSON.stringify({ balance: props.balance, transactions: props.transactions, invoices: props.invoices })}</output>
             <button data-testid="pay" onClick={props.on?.payInvoice}>pay</button>

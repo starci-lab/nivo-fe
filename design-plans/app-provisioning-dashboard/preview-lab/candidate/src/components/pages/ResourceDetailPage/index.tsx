@@ -32,7 +32,7 @@ import detail from "../../../resources/resource-detail.fixture.json"
  * region with nothing to draw. Everything else is one resource in one of its real states.
  *
  * ONE FILE, per SPLIT-6: the candidate reads a fixture. When the query lands, `index.tsx` resolves
- * the resource and this shape moves to `component.tsx` behind an exact `_ResourceDetailPage`.
+ * the resource and this shape moves to `component.tsx` behind an exact `ResourceDetailPageBase`.
  */
 
 /** Which resource situation is being drawn. Each renders a different tree, so each is a state. */

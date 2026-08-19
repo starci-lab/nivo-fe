@@ -8,7 +8,7 @@ import { useSession } from "@/modules/auth/session"
 import { myAgentWorkspace, type AgentWorkspaceRow } from "@/modules/api/console"
 import type { Result } from "@/modules/api/graphql"
 import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow"
-import { _AgentOSWorkspaceList, type AgentOSWorkspaceListViewProps } from "./component"
+import { AgentOSWorkspaceListBase, type AgentOSWorkspaceListViewProps } from "./component"
 
 const STATUS: Readonly<Record<string, FleetStatus | undefined>> = {
     active: "active",
@@ -66,7 +66,7 @@ export const AgentOSWorkspaceList = () => {
         }
     }
 
-    return <_AgentOSWorkspaceList {...view()} />
+    return <AgentOSWorkspaceListBase {...view()} />
 }
 
 /** Source-level tier marker for the connected block half. */
