@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
     transpilePackages: ["@nivo/ui"],
     experimental: {
         optimizePackageImports: ["@heroui/react"],
+        rootParams: true,
     },
 }
 

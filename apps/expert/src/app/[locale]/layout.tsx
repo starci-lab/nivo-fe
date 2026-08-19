@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { notFound } from "next/navigation"
 import { NextIntlClientProvider, hasLocale } from "next-intl"
-import { getMessages, setRequestLocale } from "next-intl/server"
+import { getMessages } from "next-intl/server"
 import { ACADEMY, inLocale } from "@/modules/academy/template"
 import { routing } from "@/i18n/routing"
 import type { Locale } from "@/i18n/config"
@@ -83,9 +83,6 @@ const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
     if (!hasLocale(routing.locales, locale)) {
         notFound()
     }
-    // Opts this route into static rendering: without it every page using a translation is forced
-    // dynamic, which for a marketing page means rendering the same HTML on every single request.
-    setRequestLocale(locale)
     const messages = await getMessages()
     return (
         <html lang={locale} suppressHydrationWarning>

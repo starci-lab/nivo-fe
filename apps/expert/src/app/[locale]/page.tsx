@@ -1,25 +1,16 @@
-import { setRequestLocale } from "next-intl/server"
 import { AcademyPage } from "@/components/pages/AcademyPage"
 
-/** The routed locale segment this route reads. */
-interface LocaleSegment {
-    /** Next hands the dynamic segment over as a promise. */
-    readonly params: Promise<{ readonly locale: string }>
-}
-
 /**
- * The `/[locale]` route. It opts the route into static rendering, then mounts the page.
+ * The `/[locale]` route.
  *
- * READING THE SEGMENT HERE rather than trusting the layout to have done it is what keeps the route
- * renderable on its own, which is how Next treats it. That call is route wiring, not drawing: it
- * tells the framework which locale this render is for and returns nothing to the screen.
+ * IT NO LONGER READS THE SEGMENT. It used to call `setRequestLocale` with the awaited param, which
+ * was route wiring rather than drawing: it told next-intl which locale the render was for, because
+ * nothing else could. `src/i18n/request.ts` now reads the segment directly through
+ * `next/root-params`, so the locale reaches the message loader without a route having to hand it
+ * over - and the route goes back to doing the one thing a route is for.
  *
- * @param input - The locale segment.
  * @returns The route.
  */
-const AcademyRoute = async ({ params }: LocaleSegment) => {
-    setRequestLocale((await params).locale)
-    return <AcademyPage />
-}
+const AcademyRoute = () => <AcademyPage />
 
 export default AcademyRoute

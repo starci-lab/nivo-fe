@@ -1,4 +1,5 @@
 import { getRequestConfig } from "next-intl/server"
+import { locale as rootLocale } from "next/root-params"
 import { toLocale } from "./config"
 
 /**
@@ -19,9 +20,19 @@ import { toLocale } from "./config"
  * `generateMetadata` can see it. A cookie cannot be read early enough for the description tag, so a
  * Vietnamese page was describing itself in English to every search engine.
  *
- * `requestLocale` IS VALIDATED, NOT TRUSTED. It is whatever sat in the path segment, so an
- * unrecognised value resolves to the default instead of reaching the message loader and throwing on
- * a file that is not there.
+ * IT IS READ THROUGH `next/root-params`, WHICH IS WHAT RETIRED `setRequestLocale`. next-intl's
+ * `requestLocale` fell back to a header written by the middleware, and reading a header is what
+ * forced a render dynamic - so every route had to call `setRequestLocale` first to get its prerender
+ * back. next-intl deprecated both in favour of the root param, which is known before the render
+ * begins. `[locale]/layout.tsx` and `[locale]/page.tsx` no longer announce the locale to anybody,
+ * and `/en` and `/vi` are still prerendered.
+ *
+ * THE VALUE IS VALIDATED, NOT TRUSTED. It is whatever sat in the path segment, so an unrecognised
+ * value resolves to the default instead of reaching the message loader and throwing on a file that
+ * is not there. `next/root-params` is also untyped in Next 16.1.6 - the module ships as a bare
+ * `declare module` until the compiler generates its types, so what it returns is `any` and neither
+ * `tsc` nor eslint has anything to say about it. `toLocale` is the boundary that makes it a `Locale`
+ * again, so an `any` never travels past this line.
  */
 
 /**
@@ -33,8 +44,8 @@ import { toLocale } from "./config"
  */
 const TIME_ZONE = "Asia/Ho_Chi_Minh"
 
-export default getRequestConfig(async ({ requestLocale }) => {
-    const locale = toLocale(await requestLocale)
+export default getRequestConfig(async () => {
+    const locale = toLocale(await rootLocale())
     return {
         locale,
         timeZone: TIME_ZONE,
