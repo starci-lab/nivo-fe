@@ -8,9 +8,13 @@ export const workspaceAppLaunchChannelName = (workspaceId: string): string => `n
 
 /** Accept only an HTTPS callback, with localhost allowed for a future local gateway fixture. */
 export const safeWorkspaceAppRedirect = (redirectUrl: string): string | null => {
-    const destination = new URL(redirectUrl)
-    if (destination.protocol !== "https:" && destination.hostname !== "localhost") return null
-    return destination.href
+    try {
+        const destination = new URL(redirectUrl)
+        if (destination.protocol !== "https:" && destination.hostname !== "localhost") return null
+        return destination.href
+    } catch {
+        return null
+    }
 }
 
 /** Navigate with a native anchor so embedded browsers do not need Location.replace support. */
