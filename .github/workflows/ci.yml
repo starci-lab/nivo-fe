@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -45,7 +47,12 @@ jobs:
 
       # ONE run, ONE `coverage/lcov.info`, read by both providers below.
       - name: Unit tests with coverage
+        env:
+          COVERAGE_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
         run: npm run test:ci
+
+      - name: Built application HTTP E2E
+        run: npm run test:e2e
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
