@@ -163,7 +163,7 @@ export interface ResetPasswordInput {
  * there is nothing to import; the smaller shape is that file exporting the value and this one
  * reading it, and that file is not this change's to edit.
  */
-const CORE_API_URL = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3067/graphql"
+const CORE_API_URL = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql"
 
 /**
  * Where a provider hand-off starts.

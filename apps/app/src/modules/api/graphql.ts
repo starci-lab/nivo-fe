@@ -16,15 +16,15 @@
  * cannot read it, which is the point, and it is why every call sets `credentials: "include"`: without
  * that the cookie is simply not sent and a refresh silently behaves like a signed-out user.
  *
- * SAME-SITE HOLDS ACROSS THE PORT SPLIT. `localhost:3066` and `localhost:3067` are different ORIGINS
+ * SAME-SITE HOLDS ACROSS THE PORT SPLIT. `localhost:3067` and `localhost:3068` are different ORIGINS
  * but the same SITE, and `SameSite=Lax` is decided by site rather than by port - so the cookie does
  * travel in development. In production `app.nivo.vn` and the API share `nivo.vn`, so it holds there
  * too. What the port split does require is CORS, and the backend already allows this origin with
- * credentials: `CORS_ORIGIN=http://localhost:3066` in `.env.override`.
+ * credentials: `CORS_ORIGIN=http://localhost:3067` in `.env.override`.
  */
 
 /** Where the core API answers. Overridable so a deployed build can point at its own host. */
-const ENDPOINT = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3067/graphql"
+const ENDPOINT = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql"
 
 /**
  * Every response this API sends, whatever the operation.

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { io, type Socket } from "socket.io-client"
 
-const API_ENDPOINT = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3067/graphql"
+const API_ENDPOINT = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql"
 const SOCKET_ENDPOINT = API_ENDPOINT.replace(/\/graphql\/?$/, "")
 
 /** Exact resource identity one provisioning listener is allowed to advance. */

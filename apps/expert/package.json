@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 4066",
+    "dev": "next dev -p 4067",
     "build": "next build --webpack",
-    "start": "next start -p 4066",
+    "start": "next start -p 4067",
     "lint": "eslint",
     "typecheck": "tsc --noEmit"
   },

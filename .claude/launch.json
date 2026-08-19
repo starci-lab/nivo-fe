@@ -20,7 +20,7 @@
         "run",
         "dev:app"
       ],
-      "port": 3066,
+      "port": 3067,
       "autoPort": false
     },
     {
