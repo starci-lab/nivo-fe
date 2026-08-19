@@ -6,6 +6,7 @@ import {fileURLToPath} from "node:url"
 const normalize = (file, cwd) => relative(cwd, file).replaceAll("\\", "/")
 const production = (file) => /^(?:apps|packages)\/.+\.(?:ts|tsx|js|jsx)$/.test(file)
     && !/\.(?:test|spec|e2e-spec)\.[cm]?[jt]sx?$/.test(file)
+    && !/(?:^|\/)(?:vitest|vite|jest|eslint|next|playwright)\.config\.[cm]?[jt]s$/.test(file)
 export const resolveBase = (env, args) => env.COVERAGE_BASE_SHA ?? (args.includes("--base") ? args[args.indexOf("--base") + 1] : undefined)
 
 export const lineCounts = (data) => {
@@ -38,6 +39,13 @@ export const buildPatchSummary = (report, changedFiles, cwd = process.cwd()) => 
     }}
 }
 
+export const assertPatchThresholds = (summary, threshold = 90) => {
+    if (summary.notApplicable) return summary
+    const failures = Object.entries(summary.total).filter(([, value]) => value.pct === null || value.pct < threshold)
+    if (failures.length) throw new Error(`Patch coverage below ${threshold}%: ${JSON.stringify(Object.fromEntries(failures))}`)
+    return summary
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
     const reportPath = "coverage/coverage-final.json"
     if (!existsSync(reportPath)) throw new Error(`Coverage report is missing: ${reportPath}`)
@@ -47,4 +55,5 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
     const tracked = execFileSync("git", ["diff", "--name-only", base, "HEAD"], {encoding: "utf8"}).split(/\r?\n/)
     const summary = buildPatchSummary(report, tracked)
     writeFileSync("coverage/patch-summary.json", JSON.stringify(summary, null, 2) + "\n")
+    assertPatchThresholds(summary)
 }

@@ -5,7 +5,7 @@ import {tmpdir} from "node:os"
 import {dirname, join} from "node:path"
 import test from "node:test"
 import {fileURLToPath} from "node:url"
-import {buildPatchSummary, lineCounts, resolveBase} from "./write-patch-coverage.mjs"
+import {assertPatchThresholds, buildPatchSummary, lineCounts, resolveBase} from "./write-patch-coverage.mjs"
 
 const file = (name, statementMap, statements) => ({[name]: {statementMap, s: statements, f: {0: statements[0]}, b: {0: statements}}})
 
@@ -21,7 +21,7 @@ test("normalizes monorepo paths and measures every metric", () => {
 
 test("fails missing changed production and ignores tests", () => {
     assert.throws(() => buildPatchSummary({}, ["packages/ui/src/missing.tsx"], "C:/repo"), /missing from coverage-final/)
-    assert.equal(buildPatchSummary({}, ["apps/app/src/example.test.tsx"], "C:/repo").notApplicable, true)
+    assert.equal(buildPatchSummary({}, ["apps/app/src/example.test.tsx", "apps/app/vitest.config.ts"], "C:/repo").notApplicable, true)
 })
 
 test("requires an explicit base and executes on this platform", () => {
@@ -33,4 +33,13 @@ test("requires an explicit base and executes on this platform", () => {
     const result = spawnSync(process.execPath, [script], {cwd, encoding: "utf8", env: {}})
     assert.notEqual(result.status, 0)
     assert.match(result.stderr, /COVERAGE_BASE_SHA/)
+})
+
+test("blocks every patch metric below ninety percent", () => {
+    assert.throws(() => assertPatchThresholds({total: {
+        statements: {pct: 100}, lines: {pct: 100}, functions: {pct: 89.99}, branches: {pct: 100},
+    }}), /functions/)
+    assert.doesNotThrow(() => assertPatchThresholds({total: {
+        statements: {pct: 90}, lines: {pct: 90}, functions: {pct: 90}, branches: {pct: 90},
+    }}))
 })
