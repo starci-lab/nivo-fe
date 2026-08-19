@@ -25,7 +25,7 @@ describe("ActivityRow", () => {
         render(<ActivityRow props={{ id: "a", actor: "Ada", action: "joined", time: "today", isMine: true }} />)
         expect(screen.getByRole("link", { name: "Ada" })).toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "React" })).not.toBeInTheDocument()
-        expect(screen.queryByText("joined")).toBeInTheDocument()
+        expect(screen.getByText("joined")).toBeInTheDocument()
     })
 })
 

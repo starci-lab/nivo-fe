@@ -18,5 +18,5 @@ export default createMiddleware(routing)
 
 /** Which paths the locale middleware runs on: everything except API, build output and real files. */
 export const config = {
-    matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
+    matcher: ["/((?!api|_next|_vercel|.*[.].*).*)"],
 }

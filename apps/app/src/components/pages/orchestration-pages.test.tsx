@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const push = vi.fn()
@@ -45,22 +45,22 @@ describe("connected console pages", () => {
     })
 
     it("settles AppsPage into its empty catalogue state", async () => {
-        await act(async () => { render(<AppsPage />) })
+        render(<AppsPage />)
         expect(screen.getByText("apps.title")).toBeInTheDocument()
     })
 
     it("settles WalletPage into empty ledgers", async () => {
-        await act(async () => { render(<WalletPage />) })
+        render(<WalletPage />)
         expect(screen.getByText("wallet.title")).toBeInTheDocument()
     })
 
     it("renders the workspace route while its snapshot is loading", async () => {
-        await act(async () => { render(<AgentOSWorkspacePage workspaceId="workspace-1" />) })
+        render(<AgentOSWorkspacePage workspaceId="workspace-1" />)
         expect(screen.getByText("titleFallback")).toBeInTheDocument()
     })
 
     it("renders the solution module route while its detail is loading", async () => {
-        await act(async () => { render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />) })
+        render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
         expect(screen.getByRole("heading", { name: "title" })).toBeInTheDocument()
     })
 })

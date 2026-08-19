@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { DualTabsToolbar } from "./DualTabsToolbar"
 import { EmptyNotice } from "./EmptyNotice"
@@ -37,10 +37,8 @@ describe("StreakWeekRun", () => {
 })
 
 describe("DualTabsToolbar", () => {
-    it("renders both controlled axes", async () => {
-        await act(async () => {
-            render(<DualTabsToolbar props={{ leading: { label: "Period", selectedKey: "week", tabs: [{ id: "week", label: "Week" }] }, trailing: { label: "Scope", selectedKey: "all", tabs: [{ id: "all", label: "All" }] } }} />)
-        })
+    it("renders both controlled axes", () => {
+        render(<DualTabsToolbar props={{ leading: { label: "Period", selectedKey: "week", tabs: [{ id: "week", label: "Week" }] }, trailing: { label: "Scope", selectedKey: "all", tabs: [{ id: "all", label: "All" }] } }} />)
         expect(screen.getByRole("tablist", { name: "Period" })).toBeInTheDocument()
         expect(screen.getByRole("tablist", { name: "Scope" })).toBeInTheDocument()
     })

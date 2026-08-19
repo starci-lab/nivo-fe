@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
 const push = vi.fn()
@@ -19,7 +19,7 @@ describe("AuthenticationPage interactions", () => {
         if (!(password instanceof HTMLInputElement)) throw new Error("expected password input")
         fireEvent.change(password, { target: { value: "wrong-password" } })
         fireEvent.click(screen.getByRole("button", { name: "signIn.submitLabel" }))
-        await waitFor(() => expect(screen.getByText("Invalid credentials")).toBeTruthy())
-        expect(push.mock.calls.length).toBe(0)
+        expect(await screen.findByText("Invalid credentials")).toBeInTheDocument()
+        expect(push).not.toHaveBeenCalled()
     })
 })
