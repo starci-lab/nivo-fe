@@ -3,6 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "packageManager": "npm@11.6.2",
+  "starci": {
+    "deliveryAssurance": {
+      "required": true,
+      "unitCoverage": {
+        "statements": 80,
+        "lines": 80,
+        "functions": 80,
+        "branches": 75,
+        "patch": 90
+      }
+    }
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -15,11 +27,12 @@
     "dev:expert": "npm run dev -w @nivo/expert",
     "dev:landing": "npm run dev -w @nivo/landing",
     "lint": "turbo run lint",
-    "lint:check": "turbo run lint",
+    "lint:check": "turbo run lint -- --max-warnings=0",
     "prepare": "husky",
     "sonar:check": "sonar-scanner-npm -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=600",
     "sync:ports": "node scripts/sync-ports.mjs",
     "test": "vitest run",
+    "test:unit": "npm test",
     "test:ci": "vitest run --coverage && node scripts/write-patch-coverage.mjs",
     "coverage:patch": "node scripts/write-patch-coverage.mjs",
     "test:e2e": "npm run build && node e2e/built-app-http.e2e-spec.mjs",

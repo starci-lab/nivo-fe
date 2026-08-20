@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -60,7 +61,7 @@ jobs:
           files: coverage/lcov.info
           disable_search: true
           fail_ci_if_error: true
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
 
       - name: Scan with SonarQube
         uses: SonarSource/sonarqube-scan-action@v7
@@ -69,7 +70,7 @@ jobs:
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
 
       # A scan proves the server received a report. Only the gate proves the report passed.
-      - name: Wait for SonarQube quality gate
+      - name: Strict sonar-quality-gate proof
         uses: SonarSource/sonarqube-quality-gate-action@v1
         timeout-minutes: 10
         env:
