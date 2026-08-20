@@ -146,9 +146,10 @@
       "priceFrom": "From {price}/month",
       "priceTier": "{tier} · {price}"
     },
-    "agentos": {
+  "agentos": {
       "title": "AgentOS",
-      "openService": "Open service",
+    "openService": "Open service",
+    "workspaceDescription": "Your agent workspace and its current runtime reachability.",
       "kindWorkspace": "Workspace",
       "empty": "No workspace yet.",
       "emptyDescription": "Your own agent workspace, on duty across Zalo and Telegram to your process.",
@@ -380,7 +381,7 @@
         "startAgain": "Start again"
       }
     },
-    "servers": {
+  "servers": {
       "title": "Servers",
       "lede": "This is the infrastructure view of the apps and workspaces above.",
       "empty": "nivo does not sell a standalone server. This section fills in only after an app or a workspace has been built.",
@@ -388,7 +389,12 @@
       "shapeUnknown": "no dedicated pod",
       "plan": "{plan} plan",
       "renewsAt": "renews {date}"
-    },
+  },
+  "infrastructure": {
+    "title": "Infrastructure",
+    "context": "Built services and held domains share this infrastructure context.",
+    "empty": "No app or workspace infrastructure has been built yet."
+  },
     "domains": {
       "title": "Domains",
       "empty": "No domains held. A custom domain is only needed once an app is running.",

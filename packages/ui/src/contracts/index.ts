@@ -27,11 +27,11 @@
 export type LayoutClassName =
     | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "overflow-hidden"
     | "items-center" | "items-baseline" | "items-start"
-    | "justify-between" | "justify-center" | "[&>*]:w-full" | "[&>*]:max-w-sm"
+    | "justify-between" | "justify-center" | "justify-around" | "[&>*]:w-full" | "[&>*]:max-w-sm"
     | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
     | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "lg:grid-cols-3"
     | "md:flex" | "md:flex-row" | "md:items-start"
-    | "mx-auto" | "min-h-screen" | "w-full" | "min-w-0" | "grow" | "flex-1" | "hidden" | "max-w-app-lg" | "max-w-6xl" | "max-w-sm"
+    | "mx-auto" | "min-h-screen" | "w-full" | "w-64" | "min-w-0" | "grow" | "flex-1" | "hidden" | "fixed" | "inset-x-0" | "bottom-0" | "max-w-app-lg" | "max-w-6xl" | "max-w-sm"
     // The two reading measures between the form width and the dashboard width. `max-w-sm` is a
     // control column and `max-w-6xl` is a two-column page at 72rem; a band of prose read straight
     // down needs 48rem, and a single-column operations page needs 56rem. Neither is expressible by
@@ -41,7 +41,7 @@ export type LayoutClassName =
     // nothing at all.
     | "max-w-3xl" | "max-w-4xl"
     | "h-16" | "min-h-16" | "sticky" | "top-0" | "top-16" | "z-40" | "z-50"
-    | "border" | "border-b" | "border-separator" | "divide-y" | "divide-separator" | "bg-background"
+    | "border" | "border-b" | "border-t" | "border-separator" | "divide-y" | "divide-separator" | "bg-background"
     | "px-3" | "px-4" | "px-6" | "py-2" | "py-3" | "py-6" | "py-8" | "p-0" | "p-2" | "p-4" | "p-6"
     | "px-2"
     // THE INTERACTION AND PAINT TOKENS LEFT WHEN THE PRESS TARGET BECAME A BRANCH. A cursor, a
@@ -65,8 +65,10 @@ export type LayoutClassName =
     | "md:[&>*:first-child]:w-72" | "md:[&>*:first-child]:shrink-0"
     | "md:[&>*:last-child]:min-w-0" | "md:[&>*:last-child]:grow"
     | "md:[&>*:first-child]:sticky" | "md:[&>*:first-child]:top-6"
-    | "md:[&>*:first-child]:self-start" | "md:[&>*:first-child]:max-h-rail"
+    | "md:[&>*:first-child]:top-0" | "md:[&>*:first-child]:self-start" | "md:[&>*:first-child]:max-h-rail"
+    | "md:[&>*:first-child]:max-h-screen" | "md:[&>*:first-child]:w-64"
     | "md:[&>*:first-child]:overflow-y-auto"
+    | "md:[&>*:nth-child(2)]:min-w-0" | "md:[&>*:nth-child(2)]:grow" | "md:hidden"
     | "[&>*]:px-4" | "[&>*]:py-3" | "[&>*]:p-2" | "[&>*]:p-3" | "[&>*]:border-separator"
     | "[&>*:nth-child(odd)]:border-r" | "[&>*:nth-child(-n+4)]:border-b"
     | "[&>*:first-child]:w-5" | "[&>*:first-child]:shrink-0"
@@ -326,6 +328,7 @@ export const CONTRACTS = buildContracts({
                     // nothing was there when the server in fact declined to say.
                     "body-with-refusal-note", "heading-body-action-stack", "form-column", "identity-action-list",
                     "status-action-card-grid", "workspace-runtime-stack", "helm-component-status-table",
+                    "infrastructure-summary", "wallet-summary",
                 ],
                 leaf: "text",
             },
@@ -790,12 +793,15 @@ export const CONTRACTS = buildContracts({
         classes: [
             "flex", "min-h-screen", "w-full", "flex-col",
             "md:flex-row", "md:items-start",
-            "md:[&>*:first-child]:w-72", "md:[&>*:first-child]:shrink-0",
-            "md:[&>*:last-child]:min-w-0", "md:[&>*:last-child]:grow",
+            "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-0",
+            "md:[&>*:first-child]:max-h-screen", "md:[&>*:first-child]:w-64",
+            "md:[&>*:first-child]:shrink-0", "md:[&>*:first-child]:overflow-y-auto",
+            "md:[&>*:nth-child(2)]:min-w-0", "md:[&>*:nth-child(2)]:grow",
         ],
         children: {
             sidebar: { contract: ["sidebar-nav-cluster", "home-services-account-nav"] },
             body: { contract: "console-body-main" },
+            mobileNav: { contract: "console-mobile-tab-bar", optional: true },
         },
         why: "if you need the console's outer frame — a fixed-width destination rail standing as a sibling of the routed body, never its wrapper, so swapping the body on every navigation cannot take the way back with it",
     },
@@ -837,6 +843,18 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need a console nav rail whose fixed overview link sits above two captioned runs of destinations, one for services and one for the account, so a screen reader hears which group a link belongs to",
     },
+    "console-mobile-tab-bar": {
+        host: "nav",
+        classes: [
+            "fixed", "inset-x-0", "bottom-0", "z-40", "flex", "w-full",
+            "items-center", "justify-around", "gap-1", "border-t", "border-separator",
+            "bg-surface", "px-2", "py-2", "md:hidden",
+        ],
+        children: {
+            destination: { leaf: "nav-link", repeats: true, restingCount: 4 },
+        },
+        why: "if you need the four real console destinations to remain reachable at the bottom edge on narrow screens while the standing desktop rail is absent.",
+    },
     "sidebar-nav-cluster": {
         host: "nav",
         classes: ["flex", "w-full", "flex-col", "gap-2", "p-4"],
@@ -872,9 +890,32 @@ export const CONTRACTS = buildContracts({
              * on EVERY screen this key serves. Two rests short on the longest page and fills in,
              * where three would promise a section the shortest page never has.
              */
-            section: { contract: "label-row-over-card", repeats: true, restingCount: 2 },
+            section: {
+                contract: ["label-row-over-card", "infrastructure-summary", "wallet-summary"],
+                repeats: true,
+                restingCount: 2,
+            },
         },
         why: "if you need a single-column operations page with a heading and independently-loading labelled sections stacked one after another so one section refusing never nests inside, or reads as, another",
+    },
+    "infrastructure-summary": {
+        classes: ["flex", "flex-col", "gap-4"],
+        children: {
+            heading: { contract: "title-with-end-action" },
+            context: { leaf: "text" },
+            domains: { contract: "labelled-fact-stack", optional: true },
+            note: { contract: "body-with-refusal-note", optional: true },
+        },
+        why: "if the overview needs one independently settled infrastructure context derived from built services and domain expiry without inventing a standalone server total.",
+    },
+    "wallet-summary": {
+        classes: ["flex", "flex-col", "gap-4"],
+        children: {
+            heading: { contract: "title-with-end-action" },
+            facts: { contract: "labelled-fact-stack" },
+            note: { contract: "body-with-refusal-note", optional: true },
+        },
+        why: "if the overview needs one independently settled balance and unpaid-invoice summary whose wallet actions remain attached to the facts they affect.",
     },
     "body-with-refusal-note": {
         /*

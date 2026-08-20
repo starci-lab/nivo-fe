@@ -60,6 +60,15 @@ export interface ConsoleDestination {
     readonly route: string | null
 }
 
+/** The responsive navigation surface being drawn. */
+export type ConsoleNavMode = "desktop" | "mobile"
+
+/** Props for {@link ConsoleNav}. */
+export interface ConsoleNavProps {
+    /** The persistent rail or its narrow-screen replacement. */
+    readonly mode?: ConsoleNavMode
+}
+
 /**
  * The rail, in the order the revision fixed it.
  *
@@ -82,6 +91,9 @@ const SERVICE_KEYS: ReadonlyArray<ConsoleDestinationKey> = ["apps", "agentos", "
 
 /** The two destinations that talk about the other four. */
 const ACCOUNT_KEYS: ReadonlyArray<ConsoleDestinationKey> = ["wallet", "support"]
+
+/** The real destinations that remain reachable from the narrow-screen tab bar. */
+const MOBILE_KEYS: ReadonlyArray<ConsoleDestinationKey> = ["overview", "apps", "agentos", "wallet"]
 
 /**
  * The path with its locale segment removed.
@@ -133,7 +145,7 @@ const isCurrentDestination = (destination: ConsoleDestination, route: string): b
  *
  * @returns The navigation node.
  */
-export const ConsoleNav = () => {
+export const ConsoleNav = ({ mode = "desktop" }: ConsoleNavProps) => {
     const t = useTranslations("console")
     const locale = useLocale()
     const router = useRouter()
@@ -166,6 +178,17 @@ export const ConsoleNav = () => {
         defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
             <Text props={{ content, size: "xs", tone: "muted" }} />
         ))
+
+    if (mode === "mobile") {
+        return (
+            <Tree
+                contract="console-mobile-tab-bar"
+                render={defineContractComponent("console-mobile-tab-bar", {
+                    destination: MOBILE_KEYS.map(link),
+                })}
+            />
+        )
+    }
 
     return (
         <Tree

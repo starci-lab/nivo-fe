@@ -88,6 +88,9 @@ const ConsoleLayout = ({ children }: ConsoleLayoutProps) => {
                         })}
                     />
                 )),
+                mobileNav: defineContractProjection("console-mobile-tab-bar", () => (
+                    <ConsoleNav mode="mobile" />
+                )),
             })}
         />
     )

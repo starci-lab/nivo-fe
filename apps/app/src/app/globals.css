@@ -37,6 +37,14 @@
  */
 @custom-variant dark (&:where(.dark, .dark *));
 
+:root {
+    --nivo-font-interface: ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+    font-family: var(--nivo-font-interface);
+}
+
 /*
  * A press label is ruled with the SAME mark the vendor link uses, because the two sit in one card
  * and stand for one promise. The vendor bakes `--separator-tertiary` at 1.5px into `.link`; naming

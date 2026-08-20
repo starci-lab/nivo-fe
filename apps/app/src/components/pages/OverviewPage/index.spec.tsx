@@ -1,33 +1,14 @@
-import { act, render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-const mocks = vi.hoisted(() => {
-    const api = {
-        catalogItems: vi.fn(),
-        myAgentWorkspace: vi.fn(),
-        myDomains: vi.fn(),
-        myExpertSites: vi.fn(),
-        myInstances: vi.fn(),
-        myInvoices: vi.fn(),
-        myPodOpenclawStatus: vi.fn(),
-        myWallet: vi.fn(),
-    }
-    return {
-        api,
-        push: vi.fn(),
-        session: { state: { status: "signed-in", accessToken: "token" } },
-    }
-})
-
-type OverviewProbeProps = {
-    title: string
-    apps: unknown
-    agentOs: unknown
-    servers: unknown
-    domains: unknown
-    wallet: unknown
-    on?: { openApps?: () => void, openAgentOs?: () => void, openWallet?: () => void }
-}
+const mocks = vi.hoisted(() => ({
+    api: {
+        myAgentWorkspace: vi.fn(), myDomains: vi.fn(), myExpertSites: vi.fn(), myInvoices: vi.fn(),
+        myPodOpenclawStatus: vi.fn(), myWallet: vi.fn(),
+    },
+    push: vi.fn(),
+    session: { state: { status: "signed-in", accessToken: "token" } },
+}))
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("next-intl", () => ({
@@ -41,24 +22,15 @@ vi.mock("next-intl", () => ({
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => mocks.api)
 vi.mock("./component", () => ({
-    OverviewPageBase: (props: OverviewProbeProps) => (
-        <div>
-            <output data-testid="overview">{JSON.stringify({ title: props.title, apps: props.apps, agentOs: props.agentOs, servers: props.servers, domains: props.domains, wallet: props.wallet })}</output>
-            <button data-testid="apps" onClick={props.on?.openApps}>apps</button>
-            <button data-testid="agentos" onClick={props.on?.openAgentOs}>agentos</button>
-            <button data-testid="wallet" onClick={props.on?.openWallet}>wallet</button>
-        </div>
-    ),
+    OverviewPageBase: (props: unknown) => <output data-testid="overview">{JSON.stringify(props)}</output>,
 }))
 
 import { OverviewPage } from "./"
 
-const settled = () => {
+const settleEmpty = () => {
     mocks.api.myExpertSites.mockResolvedValue({ ok: true, data: [] })
-    mocks.api.myInstances.mockResolvedValue({ ok: true, data: [] })
-    mocks.api.catalogItems.mockResolvedValue({ ok: true, data: [] })
     mocks.api.myAgentWorkspace.mockResolvedValue({ ok: true, data: [] })
-    mocks.api.myPodOpenclawStatus.mockResolvedValue({ ok: true, data: { id: "pod-1" } })
+    mocks.api.myPodOpenclawStatus.mockResolvedValue({ ok: true, data: { id: "pod" } })
     mocks.api.myDomains.mockResolvedValue({ ok: true, data: [] })
     mocks.api.myWallet.mockResolvedValue({ ok: true, data: { balanceVnd: 0 } })
     mocks.api.myInvoices.mockResolvedValue({ ok: true, data: [] })
@@ -70,61 +42,38 @@ describe("OverviewPage connected orchestration", () => {
     beforeEach(() => {
         vi.clearAllMocks()
         mocks.session.state = { status: "signed-in", accessToken: "token" }
-        settled()
+        settleEmpty()
     })
 
-    it("keeps every section resting while session restoration has not signed in", () => {
+    it("keeps all four summaries pending until a signed-in session can ask", () => {
         mocks.session.state = { status: "restoring", accessToken: "" }
         render(<OverviewPage />)
-        expect(overview()).toContain('"phase":"resting"')
+        expect(overview().match(/"phase":"pending"/g)).toHaveLength(4)
         expect(mocks.api.myExpertSites).not.toHaveBeenCalled()
     })
 
-    it("maps answered data, joins app templates, formats money and routes with locale", async () => {
-        mocks.api.myExpertSites.mockResolvedValue({ ok: true, data: [{ id: "site-1", slug: "alpha", customDomain: null, provisionStatus: "awaiting_dns" }] })
-        mocks.api.myInstances.mockResolvedValue({ ok: true, data: [{ detailId: "site-1", appKey: "academy" }] })
-        mocks.api.catalogItems.mockResolvedValue({ ok: true, data: [{ id: "item-1", name: "Academy", tagline: null, templateKey: "academy", tiers: [{ name: "Pro", priceMonthlyVnd: 900 }, { name: "Free", priceMonthlyVnd: null }] }] })
-        mocks.api.myAgentWorkspace.mockResolvedValue({ ok: true, data: [{ id: "ws-1", name: null, status: "active" }] })
+    it("settles apps, AgentOS, infrastructure domains, and wallet independently", async () => {
+        mocks.api.myExpertSites.mockResolvedValue({ ok: true, data: [{ id: "site", slug: "alpha", customDomain: null, provisionStatus: "ready" }] })
+        mocks.api.myAgentWorkspace.mockResolvedValue({ ok: true, data: [{ id: "workspace", name: "Ops", status: "active" }] })
         mocks.api.myPodOpenclawStatus.mockResolvedValue({ ok: false, code: "POD_REGISTRATION_MISSING_EXCEPTION" })
-        mocks.api.myDomains.mockResolvedValue({ ok: true, data: [{ id: "domain-1", name: "alpha.vn", autoRenew: true, expiresAt: "2026-08-20T00:00:00.000Z" }, { id: "domain-2", name: "beta.vn", autoRenew: false, expiresAt: null }] })
+        mocks.api.myDomains.mockResolvedValue({ ok: true, data: [{ id: "domain", name: "alpha.vn", autoRenew: true, expiresAt: null }] })
         mocks.api.myWallet.mockResolvedValue({ ok: true, data: { balanceVnd: 1250 } })
-        mocks.api.myInvoices.mockResolvedValue({ ok: true, data: [{ status: "unpaid", amountVnd: 500, dueAt: "2026-09-01T00:00:00.000Z" }] })
-
+        mocks.api.myInvoices.mockResolvedValue({ ok: false, code: "TRANSPORT" })
         render(<OverviewPage />)
-        await waitFor(() => expect(overview()).toContain('"phase":"answered"'))
+        await waitFor(() => expect(overview()).toContain("money-1250"))
+        expect(overview()).toContain("alpha.nivo.vn")
+        expect(overview()).not.toContain("podReachable")
+        expect(overview()).toContain('"phase":"partial"')
         expect(overview()).toContain("alpha.vn")
-        expect(overview()).toContain("money-1250")
-        expect(overview()).toContain("POD_REGISTRATION_MISSING_EXCEPTION")
-        await act(async () => {
-            screen.getByTestId("apps").click()
-            screen.getByTestId("agentos").click()
-            screen.getByTestId("wallet").click()
-        })
-        expect(mocks.push).toHaveBeenCalledWith("/en/apps")
-        expect(mocks.push).toHaveBeenCalledWith("/en/agentos")
-        expect(mocks.push).toHaveBeenCalledWith("/en/wallet")
+        expect(overview()).toContain("infrastructure.context")
     })
 
-    it("maps empty catalogue, workspace, domains and zero wallet states", async () => {
-        mocks.api.catalogItems.mockResolvedValue({ ok: true, data: [{ id: "offer", name: "Starter", tagline: undefined, tiers: [{ name: "Monthly", priceMonthlyVnd: 1000 }, { name: "One-off", priceMonthlyVnd: null }] }] })
-        render(<OverviewPage />)
-        await waitFor(() => expect(overview()).toContain('"phase":"empty"'))
-        expect(overview()).toContain("apps.priceTier")
-        expect(overview()).toContain("servers.empty")
-        expect(overview()).toContain("wallet.topUp")
-    })
-
-    it("keeps named and unknown refusals separate from answered data", async () => {
+    it("does not invent totals for empty or refused answers", async () => {
         mocks.api.myExpertSites.mockResolvedValue({ ok: false, code: "EXPERT_SITE_NOT_FOUND_EXCEPTION" })
-        mocks.api.myInstances.mockResolvedValue({ ok: false, code: "TRANSPORT" })
-        mocks.api.catalogItems.mockResolvedValue({ ok: false, code: "TRANSPORT" })
-        mocks.api.myAgentWorkspace.mockResolvedValue({ ok: false, code: "AGENT_WORKSPACE_NOT_FOUND_EXCEPTION" })
-        mocks.api.myPodOpenclawStatus.mockResolvedValue({ ok: true, data: { id: "pod" } })
-        mocks.api.myDomains.mockResolvedValue({ ok: false, code: "UNKNOWN" })
-        mocks.api.myWallet.mockResolvedValue({ ok: false, code: "UNKNOWN" })
-        mocks.api.myInvoices.mockResolvedValue({ ok: false, code: "UNKNOWN" })
+        mocks.api.myDomains.mockResolvedValue({ ok: false, code: "TRANSPORT" })
         render(<OverviewPage />)
         await waitFor(() => expect(overview()).toContain("refusal.EXPERT_SITE_NOT_FOUND_EXCEPTION"))
         expect(overview()).toContain("refusal.unknown")
+        expect(overview()).not.toMatch(/count|total/i)
     })
 })

@@ -146,9 +146,10 @@
       "priceFrom": "Từ {price}/tháng",
       "priceTier": "{tier} · {price}"
     },
-    "agentos": {
+  "agentos": {
       "title": "AgentOS",
-      "openService": "Mở dịch vụ",
+    "openService": "Mở dịch vụ",
+    "workspaceDescription": "Workspace agent của bạn và khả năng phản hồi runtime hiện tại.",
       "kindWorkspace": "Workspace",
       "empty": "Chưa có workspace nào.",
       "emptyDescription": "Một workspace agent riêng, trực Zalo/Telegram theo quy trình của bạn.",
@@ -432,7 +433,7 @@
         "startAgain": "Bắt đầu lại"
       }
     },
-    "servers": {
+  "servers": {
       "title": "Máy chủ",
       "lede": "Đây là góc nhìn hạ tầng của các ứng dụng và workspace ở trên.",
       "empty": "nivo chưa bán máy chủ riêng. Mục này chỉ có nội dung sau khi một ứng dụng hoặc một workspace được dựng.",
@@ -440,7 +441,12 @@
       "shapeUnknown": "chưa có pod riêng",
       "plan": "Gói {plan}",
       "renewsAt": "gia hạn {date}"
-    },
+  },
+  "infrastructure": {
+    "title": "Hạ tầng",
+    "context": "Các dịch vụ đã dựng và tên miền đang giữ dùng chung ngữ cảnh hạ tầng này.",
+    "empty": "Chưa dựng hạ tầng cho ứng dụng hoặc workspace nào."
+  },
     "domains": {
       "title": "Tên miền",
       "empty": "Chưa giữ tên miền nào. Tên miền riêng chỉ cần đến sau khi một ứng dụng đã chạy.",
