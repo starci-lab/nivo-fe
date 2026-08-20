@@ -73,7 +73,7 @@ describe("connected console pages", () => {
     it("settles the workspace list after its owner-scoped query answers", async () => {
         vi.mocked(myAgentWorkspace).mockResolvedValue({ ok: true, data: [{ id: "workspace-1", name: "Workspace", status: "ready", catalogOrder: { id: "order-1" } }] } as never)
         render(<AgentOSWorkspaceList />)
-        await waitFor(() => expect(screen.getByText("agentos.workspacesLabel")).toBeInTheDocument())
+        expect(await screen.findByText("agentos.workspacesLabel")).toBeInTheDocument()
         fireEvent.click(screen.getByText("Workspace"))
     })
 
@@ -108,7 +108,7 @@ describe("connected console pages", () => {
         vi.mocked(myAgentosSolutionModules).mockResolvedValue({ ok: true, data: [{ key: "sales-copilot", name: "Sales", summary: "Assist", agentRoles: [], channelRoles: [], safetyMode: "strict", version: "1" }, { key: "multichannel-chatbot", name: "Chat", summary: "Chat", agentRoles: [], channelRoles: [], safetyMode: "strict", version: "1" }] } as never)
         vi.mocked(myAgentosModuleInstallations).mockResolvedValue({ ok: true, data: [{ id: "install-1", moduleKey: "sales-copilot", moduleVersion: "1.0", status: "ready", failureCode: null }, { id: "install-2", moduleKey: "multichannel-chatbot", moduleVersion: "1.0", status: "failed", failureCode: "BROKEN" }, { id: "install-3", moduleKey: "missing", moduleVersion: "1.0", status: "provisioning", failureCode: null }] } as never)
         render(<AgentOSSolutionModuleCenter workspaceId="workspace-1" />)
-        await waitFor(() => expect(screen.getByText("Sales")).toBeInTheDocument())
+        expect(await screen.findByText("Sales")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("tab", { name: "modes.installed" }))
     })
 
@@ -156,7 +156,7 @@ describe("connected console pages", () => {
         vi.mocked(myCatalogOrders).mockResolvedValue({ ok: true, data: [] } as never)
         vi.mocked(catalogItems).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
         render(<AppsPage />)
-        await waitFor(() => expect(screen.getByText("academy")).toBeInTheDocument())
+        expect(await screen.findByText("academy")).toBeInTheDocument()
         cleanup()
         localeState.value = "vi"
         vi.mocked(myAgentWorkspace).mockResolvedValue({ ok: true, data: [{ id: "workspace-1", name: null, status: "unknown", catalogOrder: null }] } as never)
