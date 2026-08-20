@@ -98,13 +98,20 @@ describe("pure page twins", () => {
             title: "Module",
             loading: "Loading module",
             refused: "Module unavailable",
-            summary: { section: "Summary" } as AgentOSSolutionModulePageLabels["summary"],
-            bindings: { section: "Bindings" } as AgentOSSolutionModulePageLabels["bindings"],
+            summary: { section: "Summary", module: "Module", version: "Version", status: "Status", failure: "Failure", empty: "None" },
+            bindings: { section: "Bindings", agents: "Agents", channels: "Channels", sharedKnowledge: "Knowledge", knowledgeVersions: "Versions", empty: "None" },
         } satisfies AgentOSSolutionModulePageLabels
         const loading = renderToStaticMarkup(<AgentOSSolutionModulePageBase state="loading" labels={labels} />)
         const refused = renderToStaticMarkup(<AgentOSSolutionModulePageBase state="refused" labels={labels} />)
         expect(loading).toContain("Loading module")
+        expect(loading).toContain('data-node="module-summary"')
+        expect(loading).toContain('data-node="module-bindings"')
+        expect(loading.match(/data-node="binding-identity-list"/g)).toHaveLength(4)
+        expect(loading).toContain("Agents")
+        expect(loading).toContain("Versions")
         expect(refused).toContain("Module unavailable")
+        expect(refused).not.toContain('data-node="module-summary"')
+        expect(refused).not.toContain('data-node="module-bindings"')
     })
 
     it("executes the renamed pure twins across their settled state branches", () => {

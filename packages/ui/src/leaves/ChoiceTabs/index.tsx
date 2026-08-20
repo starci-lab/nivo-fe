@@ -19,9 +19,9 @@ export type ChoiceTabsProps = LeafProps<ChoiceTabsData, ChoiceTabsActions>
 
 /** Text-only peer choices. Business categories do not gain decorative glyphs. */
 export const ChoiceTabs = ({ props, on }: ChoiceTabsProps) => (
-    <Tabs variant={props.variant ?? "secondary"} selectedKey={props.selectedKey} onSelectionChange={(key) => on?.select?.(String(key))}>
-        <Tabs.ListContainer>
-            <Tabs.List aria-label={props.label}>
+    <Tabs className="w-full" variant={props.variant ?? "secondary"} selectedKey={props.selectedKey} onSelectionChange={(key) => on?.select?.(String(key))}>
+        <Tabs.ListContainer className="w-full overflow-x-auto">
+            <Tabs.List aria-label={props.label} className="min-w-max">
                 {props.tabs.map((tab) => (
                     <Tabs.Tab key={tab.id} id={tab.id}>
                         {tab.label}

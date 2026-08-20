@@ -23,10 +23,12 @@ export const AgentOSPageBase = (props: AgentOSPageProps) => (
                     <Heading props={{ content: "AgentOS", level: 1 }} />
                 )),
             }),
-            section: [
-                defineContractProjection("label-row-over-card", () => <AgentOSWorkspaceList />),
-                defineContractProjection("label-row-over-card", () => <AgentOSProvisioning context={props} />),
-            ],
+            section: props.mode === "new"
+                ? [
+                    defineContractProjection("label-row-over-card", () => <AgentOSWorkspaceList />),
+                    defineContractProjection("label-row-over-card", () => <AgentOSProvisioning context={props} />),
+                ]
+                : [defineContractProjection("label-row-over-card", () => <AgentOSProvisioning context={props} />)],
         })}
     />
 )

@@ -11,17 +11,36 @@ const steps = [
     },
     {
         ordinal: "2",
-        label: "Prepare",
+        label: "Payment",
         state: "current" as const,
         stateLabel: "Active",
     },
+    { ordinal: "3", label: "Create workspace", state: "upcoming" as const, stateLabel: "Upcoming" },
+    { ordinal: "4", label: "Build infrastructure", state: "upcoming" as const, stateLabel: "Upcoming" },
+    { ordinal: "5", label: "Manage", state: "upcoming" as const, stateLabel: "Upcoming" },
 ]
 
 describe("AgentOS provisioning lifecycle", () => {
-    it("renders request and preparing states with their status copy", () => {
-        const base = { props: { steps, subject: "AgentOS", detail: "Workspace plan", statusTitle: "Preparing", statusText: "Provisioning in progress", requestActionLabel: "Order", statusActionLabel: "Refresh" }, on: { request: vi.fn(), statusAction: vi.fn() } }
-        expect(renderToStaticMarkup(<AgentOSProvisioningBase state="request" {...base} />)).toContain("Provisioning in progress")
-        expect(renderToStaticMarkup(<AgentOSProvisioningBase state="preparing" {...base} />)).toContain("Refresh")
+    it("keeps request pending inside the responsive five-stage composition", () => {
+        const html = renderToStaticMarkup(<AgentOSProvisioningBase
+            state="submitting"
+            props={{ steps, subject: "AgentOS", detail: "Workspace plan", statusTitle: "Requesting", statusText: "Submitting", requestActionLabel: "Order", isRequestPending: true }}
+            on={{ request: vi.fn() }}
+        />)
+        expect(html).toContain('data-node="responsive-five-stage-lifecycle-run"')
+        expect(html).toContain('data-action-pending="true"')
+    })
+
+    it("renders all five progress stages responsively and keeps watch controls disabled", () => {
+        const html = renderToStaticMarkup(<AgentOSProvisioningBase
+            state="preparing"
+            props={{ steps, subject: "AgentOS", detail: "Workspace plan", statusTitle: "Preparing", statusText: "Provisioning in progress", statusActionLabel: "Watch provisioning", statusActionDisabled: true }}
+            on={{ statusAction: vi.fn() }}
+        />)
+        expect(html).toContain('data-node="responsive-five-stage-lifecycle-run"')
+        expect(html.match(/data-node="ordinal-over-label-and-state"/g)).toHaveLength(5)
+        expect(html).toContain("Watch provisioning")
+        expect(html).toContain("disabled")
     })
 
     it("keeps failure copy and actions visible", () => {

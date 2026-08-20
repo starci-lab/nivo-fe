@@ -29,7 +29,7 @@ export type LayoutClassName =
     | "items-center" | "items-baseline" | "items-start"
     | "justify-between" | "justify-center" | "justify-around" | "[&>*]:w-full" | "[&>*]:max-w-sm"
     | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
-    | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "lg:grid-cols-3"
+    | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "sm:grid-cols-5" | "lg:grid-cols-3"
     | "md:flex" | "md:flex-row" | "md:items-start"
     | "mx-auto" | "min-h-screen" | "w-full" | "w-64" | "min-w-0" | "grow" | "flex-1" | "hidden" | "fixed" | "inset-x-0" | "bottom-0" | "max-w-app-lg" | "max-w-6xl" | "max-w-sm"
     // The two reading measures between the form width and the dashboard width. `max-w-sm` is a
@@ -68,6 +68,8 @@ export type LayoutClassName =
     | "md:[&>*:first-child]:top-0" | "md:[&>*:first-child]:self-start" | "md:[&>*:first-child]:max-h-rail"
     | "md:[&>*:first-child]:max-h-screen" | "md:[&>*:first-child]:w-64"
     | "md:[&>*:first-child]:overflow-y-auto"
+    | "[&>*:first-child]:hidden" | "md:[&>*:first-child]:flex"
+    | "[&>*:nth-child(2)]:pb-16" | "md:[&>*:nth-child(2)]:pb-0"
     | "md:[&>*:nth-child(2)]:min-w-0" | "md:[&>*:nth-child(2)]:grow" | "md:hidden"
     | "[&>*]:px-4" | "[&>*]:py-3" | "[&>*]:p-2" | "[&>*]:p-3" | "[&>*]:border-separator"
     | "[&>*:nth-child(odd)]:border-r" | "[&>*:nth-child(-n+4)]:border-b"
@@ -78,7 +80,7 @@ export type LayoutClassName =
     // the rail layouts, which only take the flexible-first shape above the md breakpoint; a row
     // whose FIRST child takes the slack at every width needs the same two names without the prefix.
     | "[&>*:first-child]:min-w-0" | "[&>*:first-child]:grow"
-    | "sm:[&>*:first-child]:col-span-2"
+    | "sm:[&>*:first-child]:col-span-2" | "sm:[&>*:last-child]:col-span-2"
 
 /** Literal values a contract may require from a child component's data props. */
 export type ContractPropValue = string | number | boolean | null
@@ -328,7 +330,7 @@ export const CONTRACTS = buildContracts({
                     // nothing was there when the server in fact declined to say.
                     "body-with-refusal-note", "heading-body-action-stack", "form-column", "identity-action-list",
                     "status-action-card-grid", "workspace-runtime-stack", "helm-component-status-table",
-                    "infrastructure-summary", "wallet-summary",
+                    "infrastructure-summary", "wallet-summary", "module-summary", "module-bindings",
                 ],
                 leaf: "text",
             },
@@ -792,6 +794,8 @@ export const CONTRACTS = buildContracts({
          */
         classes: [
             "flex", "min-h-screen", "w-full", "flex-col",
+            "[&>*:first-child]:hidden", "md:[&>*:first-child]:flex",
+            "[&>*:nth-child(2)]:pb-16", "md:[&>*:nth-child(2)]:pb-0",
             "md:flex-row", "md:items-start",
             "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-0",
             "md:[&>*:first-child]:max-h-screen", "md:[&>*:first-child]:w-64",
@@ -842,6 +846,19 @@ export const CONTRACTS = buildContracts({
             account: { leaf: "nav-link", repeats: true, restingCount: 2 },
         },
         why: "if you need a console nav rail whose fixed overview link sits above two captioned runs of destinations, one for services and one for the account, so a screen reader hears which group a link belongs to",
+    },
+    "responsive-identity-kind-status-action-row": {
+        classes: [
+            "flex", "w-full", "flex-col", "gap-3",
+            "md:flex-row", "md:items-start", "md:[&>*:first-child]:min-w-0", "md:[&>*:first-child]:grow",
+        ],
+        children: {
+            identity: { contract: "name-over-handle" },
+            kind: { leaf: "badge", props: { tone: "neutral" } },
+            status: { leaf: "badge" },
+            action: { leaf: "button", optional: true },
+        },
+        why: "if you need a resource identity, kind, lifecycle status and optional action to remain one ordered row when wide and stack in that same order when narrow",
     },
     "console-mobile-tab-bar": {
         host: "nav",
@@ -947,6 +964,13 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need a left-to-right run of lifecycle steps that wraps as whole steps on a narrow screen instead of clipping or turning into a second nav rail",
     },
+    "responsive-five-stage-lifecycle-run": {
+        classes: ["grid", "w-full", "grid-cols-1", "gap-3", "sm:grid-cols-5"],
+        children: {
+            step: { composite: "lifecycle-step", repeats: true, restingCount: 5 },
+        },
+        why: "if you need the five AgentOS lifecycle stages to compare in one row when wide and remain a complete ordered vertical sequence when narrow",
+    },
     "ordinal-over-label-and-state": {
         classes: ["flex", "min-w-0", "flex-col", "gap-1"],
         children: {
@@ -967,7 +991,7 @@ export const CONTRACTS = buildContracts({
     "request-beside-live-status": {
         classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-2", "sm:[&>*:first-child]:col-span-2"],
         children: {
-            journey: { contract: "horizontal-lifecycle-run" },
+            journey: { contract: ["horizontal-lifecycle-run", "responsive-five-stage-lifecycle-run"] },
             request: { contract: ["form-column", "subject-over-muted-caption-with-action"] },
             status: { contract: ["heading-body-action-stack", "body-with-refusal-note"] },
         },
@@ -1008,9 +1032,40 @@ export const CONTRACTS = buildContracts({
         children: {
             heading: { contract: "title-with-end-action" },
             tabs: { leaf: "choice-tabs" },
-            section: { contract: "label-row-over-card", repeats: true, restingCount: 2 },
+            section: { contract: ["label-row-over-card", "workspace-overview-grid"], repeats: true, restingCount: 2 },
         },
         why: "if you need a single managed resource's control-center page with a heading, a tab switcher, and stacked sections that all stay in the main column rather than becoming sidebar navigation",
+    },
+    "workspace-overview-grid": {
+        classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-2"],
+        children: {
+            section: { contract: "label-row-over-card", repeats: true, restingCount: 2 },
+        },
+        why: "if you need stable workspace facts and measured runtime to compare as peer sections when wide while preserving their order in one column when narrow",
+    },
+    "module-summary": {
+        classes: ["grid", "grid-cols-1", "gap-3", "sm:grid-cols-2", "sm:[&>*:last-child]:col-span-2"],
+        children: {
+            identity: { leaf: "text" },
+            status: { leaf: "badge" },
+            facts: { contract: "labelled-fact-stack" },
+        },
+        why: "if you need one immutable module installation identity, version, lifecycle state and optional failure code to read as one summary",
+    },
+    "module-bindings": {
+        classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-2"],
+        children: {
+            group: { contract: "binding-identity-list", repeats: true, restingCount: 4 },
+        },
+        why: "if you need generated agents, channel accounts, shared knowledge sources and knowledge versions from one immutable installation grouped as read-only bindings",
+    },
+    "binding-identity-list": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-2", "rounded-xl", "border", "border-separator", "p-4"],
+        children: {
+            name: { leaf: "heading" },
+            identity: { leaf: "text", repeats: true, restingCount: 2 },
+        },
+        why: "if you need one named binding kind followed by its complete generated identifiers without turning those machine values into actions",
     },
     "status-action-card-grid": {
         classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-2"],

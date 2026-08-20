@@ -240,6 +240,7 @@
           "securityUpgradeRequired": "Nivo is upgrading n8n before enabling secure one-click access. Your workspace stays protected while the editor remains closed.",
           "unavailableDetail": "This application is not ready to open yet.",
           "opening": "Opening OpenClaw…",
+          "openAgain": "Open again",
           "blocked": "The popup was blocked or the secure launch could not be issued. Allow popups and try again.",
           "expired": "The secure OpenClaw session expired. Open it again to reconnect.",
           "disconnected": "The OpenClaw window disconnected from this Nivo session."
@@ -373,7 +374,9 @@
         "openWallet": "Open Wallet",
         "acceptedTitle": "Order accepted",
         "acceptedText": "Payment is settled and nivo is creating the workspace identity.",
+        "watchFulfillment": "Watch fulfillment",
         "preparingText": "The workspace event stream is following this workspace only.",
+        "watchProvisioning": "Watch provisioning",
         "readyText": "The workspace is ready and now appears in your AgentOS management list.",
         "manage": "Manage AgentOS",
         "orderMissing": "This AgentOS order was not found for the signed-in account.",

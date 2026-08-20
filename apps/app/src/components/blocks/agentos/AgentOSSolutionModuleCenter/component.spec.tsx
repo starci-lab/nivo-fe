@@ -7,7 +7,9 @@ const card = { id: "sales", title: "Sales Copilot", description: "Assist sales",
 
 describe("AgentOS solution module center", () => {
     it("renders refusal and empty installed states", () => {
-        expect(renderToStaticMarkup(<AgentOSSolutionModuleCenterBase {...base} state="refused" mode="catalog" cards={[]} />)).toContain("Unavailable")
+        const refused = renderToStaticMarkup(<AgentOSSolutionModuleCenterBase {...base} state="refused" mode="catalog" cards={[]} />)
+        expect(refused).toContain("Unavailable")
+        expect(refused).not.toContain("Retry")
         expect(renderToStaticMarkup(<AgentOSSolutionModuleCenterBase {...base} state="answered" mode="installed" cards={[]} />)).toContain("No modules")
     })
 

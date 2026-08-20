@@ -120,7 +120,7 @@ export const AgentOSWorkspacePage = ({ workspaceId }: AgentOSWorkspacePageProps)
             unavailableAction: t("applications.unavailableAction"),
             securityUpgradeRequired: t("applications.securityUpgradeRequired"),
             unavailableDetail: t("applications.unavailableDetail"),
-            opening: t("applications.opening"), blocked: t("applications.blocked"),
+            opening: t("applications.opening"), openAgain: t("applications.openAgain"), blocked: t("applications.blocked"),
             expired: t("applications.expired"), disconnected: t("applications.disconnected"),
         },
         runtime: {

@@ -12,6 +12,9 @@ describe("AgentOS workspace runtime metrics", () => {
         const html = renderToStaticMarkup(<AgentOSWorkspaceRuntime data={data} labels={labels} formatDate={(value) => `date:${value}`} />)
         expect(html).toContain("250m / 500m")
         expect(html).toContain("4 MiB / 8 MiB")
+        expect(html).toContain("100m · 2 MiB")
+        expect(html).toContain("500m · 8 MiB")
+        expect(html).toContain("available")
         expect(html).toContain("Stale · date:2026-01-01T00:00:00Z")
     })
 

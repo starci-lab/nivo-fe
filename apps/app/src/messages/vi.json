@@ -240,6 +240,7 @@
           "securityUpgradeRequired": "Nivo đang nâng cấp n8n trước khi bật đăng nhập một chạm an toàn. Workspace vẫn được bảo vệ trong lúc editor tạm khóa.",
           "unavailableDetail": "Ứng dụng này chưa sẵn sàng để mở.",
           "opening": "Đang mở OpenClaw…",
+          "openAgain": "Mở lại",
           "blocked": "Cửa sổ bật lên bị chặn hoặc chưa cấp được phiên an toàn. Hãy cho phép popup rồi thử lại.",
           "expired": "Phiên OpenClaw an toàn đã hết hạn. Mở lại để kết nối.",
           "disconnected": "Cửa sổ OpenClaw đã ngắt khỏi phiên Nivo này."
@@ -425,7 +426,9 @@
         "openWallet": "Mở Ví",
         "acceptedTitle": "Order đã được nhận",
         "acceptedText": "Thanh toán đã hoàn tất và nivo đang tạo định danh workspace.",
+        "watchFulfillment": "Theo dõi fulfillment",
         "preparingText": "Luồng sự kiện workspace chỉ đang theo dõi workspace này.",
+        "watchProvisioning": "Theo dõi cấp phát",
         "readyText": "Workspace đã sẵn sàng và xuất hiện trong trang quản lý AgentOS.",
         "manage": "Quản lý AgentOS",
         "orderMissing": "Không tìm thấy order AgentOS này trong tài khoản đang đăng nhập.",

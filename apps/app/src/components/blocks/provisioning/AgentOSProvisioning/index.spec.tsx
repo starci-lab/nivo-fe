@@ -21,7 +21,7 @@ const mocks = vi.hoisted(() => {
 
 type AgentProbeProps = {
     state: string
-    props: { subject: string, detail: string, statusText: string }
+    props: { subject: string, detail: string, statusText: string, statusActionLabel?: string, statusActionDisabled?: boolean, isRequestPending?: boolean }
     on?: { request?: () => void, statusAction?: () => void }
 }
 
@@ -37,7 +37,7 @@ vi.mock("@/modules/realtime/provisioning", () => ({ default: () => mocks.realtim
 vi.mock("./component", () => ({
     AgentOSProvisioningBase: (props: AgentProbeProps) => (
         <div>
-            <output data-testid="agent-flow">{JSON.stringify({ state: props.state, subject: props.props.subject, detail: props.props.detail, text: props.props.statusText })}</output>
+            <output data-testid="agent-flow">{JSON.stringify({ state: props.state, subject: props.props.subject, detail: props.props.detail, text: props.props.statusText, pending: props.props.isRequestPending, action: props.props.statusActionLabel, disabled: props.props.statusActionDisabled })}</output>
             <button data-testid="request" onClick={props.on?.request}>request</button>
             <button data-testid="status" onClick={props.on?.statusAction}>status</button>
         </div>
@@ -77,6 +77,20 @@ describe("AgentOSProvisioning connected flow", () => {
         expect(mocks.replace).toHaveBeenCalledWith("/en/agentos/orders/order")
     })
 
+    it("keeps the submit action pending while the order request is unsettled", async () => {
+        let resolveOrder: ((value: { ok: true, data: typeof order }) => void) | undefined
+        mocks.api.orderAgentOs.mockReturnValue(new Promise((resolve) => {
+            resolveOrder = resolve
+        }))
+        render(<AgentOSProvisioning context={{ mode: "new" }} />)
+        await waitFor(() => expect(flow()).toContain('"state":"request"'))
+        fireEvent.click(screen.getByTestId("request"))
+        await waitFor(() => expect(flow()).toContain('"state":"submitting"'))
+        expect(flow()).toContain('"pending":true')
+        resolveOrder?.({ ok: true, data: order })
+        await waitFor(() => expect(flow()).toContain('"state":"awaiting_payment"'))
+    })
+
     it("reports catalogue and submit failures and routes recovery actions", async () => {
         mocks.api.catalogItems.mockResolvedValue({ ok: false, reason: "catalog-down" })
         render(<AgentOSProvisioning context={{ mode: "new" }} />)
@@ -107,6 +121,8 @@ describe("AgentOSProvisioning connected flow", () => {
         snapshot({ orders: [{ ...order, status: "paid" }] })
         const accepted = render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"accepted"'))
+        expect(flow()).toContain('"action":"agentos.watchFulfillment"')
+        expect(flow()).toContain('"disabled":true')
         accepted.unmount()
 
         snapshot({ orders: [{ ...order, status: "paid" }], workspaces: [{ id: "workspace", status: "active", name: "Ready workspace", catalogOrder: { id: "order" } }] })

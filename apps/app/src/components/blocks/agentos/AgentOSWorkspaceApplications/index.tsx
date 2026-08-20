@@ -18,6 +18,7 @@ export type AgentOSWorkspaceApplicationsProps = {
         readonly securityUpgradeRequired: string
         readonly unavailableDetail: string
         readonly opening: string
+        readonly openAgain: string
         readonly blocked: string
         readonly expired: string
         readonly disconnected: string
@@ -88,7 +89,10 @@ const actionLabelFor = (labels: ApplicationLabels, launchState: LaunchState, ope
     if (!openClaw) {
         return labels.unavailableAction
     }
-    return launchState === "opening" ? labels.opening : labels.manage
+    if (launchState === "opening") {
+        return labels.opening
+    }
+    return launchState === "expired" ? labels.openAgain : labels.manage
 }
 
 /**

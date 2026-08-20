@@ -1,6 +1,5 @@
 import {
     Heading,
-    SurfaceCard,
     Text,
     Tree,
     defineContractComponent,
@@ -28,20 +27,6 @@ export type AgentOSSolutionModulePageViewProps = {
     readonly labels: AgentOSSolutionModulePageLabels
 }
 
-const loadingSection = (label: string) => (
-    <SurfaceCard
-        props={{ label }}
-        contract="labelled-fact-stack"
-        isLoading
-        render={defineContractComponent("labelled-fact-stack", {
-            fact: ["loading-1", "loading-2", "loading-3", "loading-4"].map((id) => defineContractComponent("label-value-row", {
-                label: defineLeafComponent("text", { size: "sm" }, () => <Text key={`${id}-label`} props={{ content: "" }} isLoading />),
-                value: defineLeafComponent("text", { size: "sm" }, () => <Text key={`${id}-value`} props={{ content: "" }} isLoading />),
-            })),
-        })}
-    />
-)
-
 /** Compose one exact installation snapshot without owning API or realtime mechanics. */
 export const AgentOSSolutionModulePageBase = ({ state, installation, labels }: AgentOSSolutionModulePageViewProps) => {
     // A refusal and a missing installation are the same page: there is nothing to lay out, so the
@@ -49,13 +34,13 @@ export const AgentOSSolutionModulePageBase = ({ state, installation, labels }: A
     const settledSections = state === "refused" || installation === undefined
         ? [defineContractProjection("label-row-over-card", () => <EmptyNotice props={{ message: labels.refused }} />)]
         : [
-            defineContractProjection("label-row-over-card", () => <AgentOSSolutionModuleSummary installation={installation} labels={labels.summary} />),
-            defineContractProjection("label-row-over-card", () => <AgentOSSolutionModuleBindings installation={installation} labels={labels.bindings} />),
+            defineContractProjection("label-row-over-card", () => <AgentOSSolutionModuleSummary state="ready" installation={installation} labels={labels.summary} />),
+            defineContractProjection("label-row-over-card", () => <AgentOSSolutionModuleBindings state="ready" installation={installation} labels={labels.bindings} />),
         ]
     const sections = state === "loading"
         ? [
-            defineContractProjection("label-row-over-card", () => loadingSection(labels.summary.section)),
-            defineContractProjection("label-row-over-card", () => loadingSection(labels.bindings.section)),
+            defineContractProjection("label-row-over-card", () => <AgentOSSolutionModuleSummary state="pending" labels={labels.summary} />),
+            defineContractProjection("label-row-over-card", () => <AgentOSSolutionModuleBindings state="pending" labels={labels.bindings} />),
         ]
         : settledSections
     return (

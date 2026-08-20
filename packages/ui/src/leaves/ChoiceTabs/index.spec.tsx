@@ -16,4 +16,19 @@ describe("ChoiceTabs", () => {
         fireEvent.click(week)
         expect(select).toHaveBeenCalledWith("week")
     })
+
+    it("keeps every peer choice in one horizontally reachable run", () => {
+        render(<ChoiceTabs props={{ label: "Workspace area", selectedKey: "overview", tabs: [
+            { id: "overview", label: "Overview" },
+            { id: "solutions", label: "Solutions" },
+            { id: "applications", label: "Applications" },
+            { id: "infrastructure", label: "Infrastructure" },
+            { id: "operations", label: "Operations" },
+            { id: "access", label: "Access" },
+        ] }} />)
+        const tabList = screen.getByRole("tablist", { name: "Workspace area" })
+        expect(tabList).toHaveClass("min-w-max")
+        expect(tabList.closest(".overflow-x-auto")).toBeInTheDocument()
+        expect(screen.getAllByRole("tab")).toHaveLength(6)
+    })
 })

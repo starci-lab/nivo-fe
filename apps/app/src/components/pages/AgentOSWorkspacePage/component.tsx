@@ -54,10 +54,16 @@ export const AgentOSWorkspacePageBase = ({ state, message, data, section, labels
             return [defineContractProjection("label-row-over-card", () => <EmptyNotice props={{ message: message ?? labels.loading }} />)]
         }
         if (section === "overview") {
-            return [
+            const overviewSections = [
                 defineContractProjection("label-row-over-card", () => <AgentOSWorkspaceSummary data={data} labels={labels.summary} />),
                 defineContractProjection("label-row-over-card", () => <AgentOSWorkspaceRuntime data={data} labels={labels.runtime} formatDate={formatDate} />),
             ]
+            return [defineContractProjection("workspace-overview-grid", () => (
+                <Tree
+                    contract="workspace-overview-grid"
+                    render={defineContractComponent("workspace-overview-grid", { section: overviewSections })}
+                />
+            ))]
         }
         if (section === "applications" || section === "access") {
             return [defineContractProjection("label-row-over-card", () => (

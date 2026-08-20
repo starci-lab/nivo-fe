@@ -1,41 +1,59 @@
-import { SurfaceCard, Text, defineContractComponent, defineLeafComponent } from "@nivo/ui"
+import { Heading, SurfaceCard, Text, defineContractComponent, defineLeafComponent } from "@nivo/ui"
 import type { AgentosModuleInstallationDetail } from "@/modules/api/console"
 
 /** Runtime bindings and resolved labels consumed by the module bindings block. */
-export type AgentOSSolutionModuleBindingsProps = {
-    readonly installation: AgentosModuleInstallationDetail
-    readonly labels: {
-        readonly section: string
-        readonly agents: string
-        readonly channels: string
-        readonly sharedKnowledge: string
-        readonly knowledgeVersions: string
-        readonly empty: string
-    }
+type AgentOSSolutionModuleBindingsLabels = {
+    readonly section: string
+    readonly agents: string
+    readonly channels: string
+    readonly sharedKnowledge: string
+    readonly knowledgeVersions: string
+    readonly empty: string
 }
 
-const fact = (label: string, value: string) => defineContractComponent("label-value-row", {
-    label: defineLeafComponent("text", { size: "sm" }, () => <Text props={{ content: label, size: "sm" }} />),
-    value: defineLeafComponent("text", { size: "sm" }, () => <Text props={{ content: value, size: "sm" }} />),
+/** Closed pending and answered inputs for the generated binding inventory. */
+export type AgentOSSolutionModuleBindingsProps = {
+    readonly labels: {
+        readonly [K in keyof AgentOSSolutionModuleBindingsLabels]: AgentOSSolutionModuleBindingsLabels[K]
+    }
+} & (
+    | { readonly state: "pending"; readonly installation?: never }
+    | { readonly state: "ready"; readonly installation: AgentosModuleInstallationDetail }
+)
+
+const bindingGroup = (name: string, values: ReadonlyArray<string> | undefined, empty: string, isLoading: boolean) => defineContractComponent("binding-identity-list", {
+    name: defineLeafComponent("heading", {}, () => <Heading props={{ content: name, level: 4 }} />),
+    identity: (isLoading ? [undefined, undefined] : values?.length === 0 ? [empty] : values ?? []).map((value) => (
+        defineLeafComponent("text", { size: "sm" }, () => (
+            <Text props={{ content: value, size: "sm" }} isLoading={isLoading} />
+        ))
+    )),
 })
 
-const listValue = (values: ReadonlyArray<string>, empty: string) => values.length === 0 ? empty : values.join(", ")
-
 /** Render generated agents, channels and common/private knowledge versions from the live snapshot. */
-export const AgentOSSolutionModuleBindings = ({ installation, labels }: AgentOSSolutionModuleBindingsProps) => (
-    <SurfaceCard
-        props={{ label: labels.section }}
-        contract="labelled-fact-stack"
-        render={defineContractComponent("labelled-fact-stack", {
-            fact: [
-                fact(labels.agents, listValue(installation.generatedAgentIds, labels.empty)),
-                fact(labels.channels, listValue(installation.channelAccountRefs, labels.empty)),
-                fact(labels.sharedKnowledge, listValue(installation.sharedKnowledgeSourceIds, labels.empty)),
-                fact(labels.knowledgeVersions, `${installation.commonKnowledgeVersion} · ${installation.privateKnowledgeVersion}`),
-            ],
-        })}
-    />
-)
+export const AgentOSSolutionModuleBindings = (input: AgentOSSolutionModuleBindingsProps) => {
+    const isLoading = input.state === "pending"
+    const installation = input.state === "ready" ? input.installation : undefined
+    const { labels } = input
+
+    return (
+        <SurfaceCard
+            props={{ label: labels.section }}
+            contract="module-bindings"
+            render={defineContractComponent("module-bindings", {
+                group: [
+                    bindingGroup(labels.agents, installation?.generatedAgentIds, labels.empty, isLoading),
+                    bindingGroup(labels.channels, installation?.channelAccountRefs, labels.empty, isLoading),
+                    bindingGroup(labels.sharedKnowledge, installation?.sharedKnowledgeSourceIds, labels.empty, isLoading),
+                    bindingGroup(labels.knowledgeVersions, installation === undefined ? undefined : [
+                        installation.commonKnowledgeVersion,
+                        installation.privateKnowledgeVersion,
+                    ], labels.empty, isLoading),
+                ],
+            })}
+        />
+    )
+}
 
 /** Source-level tier marker for the pure module bindings block. */
 export const meta = { shape: "block", world: "pure" } as const

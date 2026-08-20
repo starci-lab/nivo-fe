@@ -4,12 +4,10 @@ import {
     Button,
     Heading,
     LifecycleStep,
-    RequestSummary,
     Text,
     Tree,
     defineCompositeComponent,
     defineContractComponent,
-    defineContractProjection,
     defineLeafComponent,
     type LifecycleStepData,
 } from "@nivo/ui"
@@ -25,6 +23,7 @@ export type AgentOSProvisioningViewProps = {
         readonly statusText: string
         readonly requestActionLabel?: string
         readonly statusActionLabel?: string
+        readonly statusActionDisabled?: boolean
         readonly isRequestPending?: boolean
     }
     readonly on?: {
@@ -35,18 +34,29 @@ export type AgentOSProvisioningViewProps = {
 
 /** Draw an AgentOS order beside its exact live workspace status. */
 export const AgentOSProvisioningBase = ({ state, props, on }: AgentOSProvisioningViewProps) => {
-    const journey = defineContractComponent("horizontal-lifecycle-run", {
+    const journey = defineContractComponent("responsive-five-stage-lifecycle-run", {
         step: props.steps.map((step) => defineCompositeComponent("lifecycle-step", {}, () => (
             <LifecycleStep props={step} isLoading={state === "catalog_loading"} />
         ))),
     })
-    const request = defineContractProjection("subject-over-muted-caption-with-action", () => (
-        <RequestSummary
-            props={{ subject: props.subject, detail: props.detail, actionLabel: props.requestActionLabel }}
-            on={{ press: on?.request }}
-            isLoading={state === "catalog_loading"}
-        />
-    ))
+    const request = defineContractComponent("subject-over-muted-caption-with-action", {
+        identity: defineContractComponent("subject-over-muted-caption", {
+            subject: defineLeafComponent("text", {}, () => (
+                <Text props={{ content: props.subject, size: "sm", weight: "semibold" }} isLoading={state === "catalog_loading"} />
+            )),
+            caption: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                <Text props={{ content: props.detail, size: "xs", tone: "muted" }} isLoading={state === "catalog_loading"} />
+            )),
+        }),
+        ...(props.requestActionLabel === undefined ? {} : {
+            action: defineLeafComponent("button", {}, () => (
+                <Button
+                    props={{ label: props.requestActionLabel ?? "", size: "sm", variant: "secondary", isPending: props.isRequestPending }}
+                    on={{ press: on?.request }}
+                />
+            )),
+        }),
+    })
     const status = defineContractComponent("heading-body-action-stack", {
         heading: defineLeafComponent("heading", {}, () => (
             <Heading props={{ content: props.statusTitle, level: 3 }} />
@@ -56,7 +66,10 @@ export const AgentOSProvisioningBase = ({ state, props, on }: AgentOSProvisionin
         )),
         ...(props.statusActionLabel === undefined ? {} : {
             action: defineLeafComponent("button", {}, () => (
-                <Button props={{ label: props.statusActionLabel ?? "", size: "sm", variant: "secondary" }} on={{ press: on?.statusAction }} />
+                <Button
+                    props={{ label: props.statusActionLabel ?? "", size: "sm", variant: "secondary", disabled: props.statusActionDisabled }}
+                    on={{ press: on?.statusAction }}
+                />
             )),
         }),
     })

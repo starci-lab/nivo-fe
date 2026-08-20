@@ -29,11 +29,18 @@ describe("AgentOSWorkspacePage pure sections", () => {
                 onSelectSection={vi.fn()} onOpenAgentConsole={vi.fn()} formatDate={(value) => value}
             />)
             expect(html).toContain("Agent workspace")
+            if (section === "overview") {
+                expect(html).toContain('data-node="workspace-overview-grid"')
+                expect(html).toContain("summary")
+                expect(html).toContain("runtime")
+            }
         }
         const refused = renderToStaticMarkup(<AgentOSWorkspacePageBase
             state="refused" message="Unavailable" section="overview" labels={labels} launchState="idle" openClawLaunchHref="#"
             onSelectSection={vi.fn()} onOpenAgentConsole={vi.fn()} formatDate={(value) => value}
         />)
         expect(refused).toContain("Unavailable")
+        expect(refused).not.toContain("Return to workspace list")
+        expect(refused).not.toContain("Retry reading solutions")
     })
 })

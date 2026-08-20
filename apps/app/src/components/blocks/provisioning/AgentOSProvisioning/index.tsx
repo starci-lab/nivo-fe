@@ -236,7 +236,18 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
         const isAccepted = flow.phase === "accepted"
         const settledText = isAccepted ? t("agentos.acceptedText") : t("agentos.preparingText")
         const statusText = realtime.status === "connecting" ? t("connecting") : settledText
-        return { state: flow.phase, props: { steps, subject: flow.subject, detail: flow.detail, statusTitle: isAccepted ? t("agentos.acceptedTitle") : t("preparingTitle"), statusText } }
+        return {
+            state: flow.phase,
+            props: {
+                steps,
+                subject: flow.subject,
+                detail: flow.detail,
+                statusTitle: isAccepted ? t("agentos.acceptedTitle") : t("preparingTitle"),
+                statusText,
+                statusActionLabel: isAccepted ? t("agentos.watchFulfillment") : t("agentos.watchProvisioning"),
+                statusActionDisabled: true,
+            },
+        }
     }
 
     return <AgentOSProvisioningBase {...view()} />
