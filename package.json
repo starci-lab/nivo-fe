@@ -22,7 +22,7 @@
     "test": "vitest run",
     "test:ci": "vitest run --coverage && node scripts/write-patch-coverage.mjs",
     "coverage:patch": "node scripts/write-patch-coverage.mjs",
-    "test:e2e": "npm run build && node scripts/e2e-smoke.mjs",
+    "test:e2e": "npm run build && node e2e/built-app-http.e2e-spec.mjs",
     "test:watch": "vitest",
     "typecheck": "turbo run typecheck"
   },

@@ -1,3 +1,4 @@
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import { AcademySectionsBase, type AcademySectionsViewProps } from "./component"
@@ -16,6 +17,10 @@ const sections: ReadonlyArray<AcademySection> = [
     { kind: "offer", id: "offer", title: "Offer", body: "Join" },
     { kind: "faq", id: "faq", title: "FAQ", faq: [{ q: "When?", a: "Now" }] },
     { kind: "magnet", id: "magnet", magnet: { title: "Guide", description: "Download", cta: "Get it" } },
+    { kind: "custom", id: "cta", content: { variant: "cta", heading: "Start", body: "Join now", action: { label: "Join", href: "/join" } } },
+    { kind: "custom", id: "image", content: { variant: "image-left", heading: "Picture", body: "See this", imageUrl: "https://img.test/picture.jpg" } },
+    { kind: "custom", id: "stack", content: { variant: "stack", heading: "Stack", body: "Read", action: { label: "Read", href: "/read" } } },
+    { kind: "custom", id: "bare", content: { variant: "stack" } },
 ]
 
 describe("AcademySections authored variants", () => {
@@ -26,5 +31,18 @@ describe("AcademySections authored variants", () => {
         expect(html).toContain("Busy")
         expect(html).toContain("When?")
         expect(html).toContain("Get it")
+    })
+
+    it("handles image failure and submits the lead form", async () => {
+        const onSubmitLead = vi.fn().mockResolvedValue(true)
+        render(<AcademySectionsBase sections={sections} onSubmitLead={onSubmitLead} />)
+        fireEvent.error(screen.getAllByRole("img")[0])
+        const lead: AcademySection = { kind: "lead", id: "lead", title: "Contact", body: "Tell us", nameLabel: "Name", phoneLabel: "Phone", submitLabel: "Send", sendingLabel: "Sending", sentMessage: "Sent", errorMessage: "Failed" }
+        render(<AcademySectionsBase sections={[lead]} onSubmitLead={onSubmitLead} />)
+        fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Reader" } })
+        fireEvent.change(screen.getByLabelText("Phone"), { target: { value: "0123" } })
+        fireEvent.click(screen.getByRole("button", { name: "Send" }))
+        await waitFor(() => expect(onSubmitLead).toHaveBeenCalledWith({ name: "Reader", contact: "0123" }))
+        expect(screen.getByText("Sent")).toBeInTheDocument()
     })
 })

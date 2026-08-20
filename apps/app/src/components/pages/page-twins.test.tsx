@@ -5,6 +5,12 @@ import { AppsPageBase } from "./AppsPage/component"
 import { OverviewPageBase, type OverviewPageViewProps } from "./OverviewPage/component"
 import { AgentOSWorkspacePageBase, type AgentOSWorkspacePageLabels } from "./AgentOSWorkspacePage/component"
 import { AgentOSSolutionModulePageBase, type AgentOSSolutionModulePageLabels } from "./AgentOSSolutionModulePage/component"
+import { AgentOSPageBase } from "./AgentOSPage/component"
+import { AgentOSPage } from "./AgentOSPage"
+import { TemplateAppProvisioningPageBase } from "./TemplateAppProvisioningPage/component"
+import { TemplateAppProvisioningPage } from "./TemplateAppProvisioningPage"
+import { AcademyControlCenterPageBase } from "./AcademyControlCenterPage/component"
+import { AgentOSWorkspaceListBase } from "../blocks/agentos/AgentOSWorkspaceList/component"
 
 const actions = { openApps: vi.fn(), openAgentOs: vi.fn(), openWallet: vi.fn() }
 
@@ -39,6 +45,13 @@ describe("pure page twins", () => {
         expect(html).toContain("100 VND")
         expect(html).toContain("No transactions")
         expect(html).toContain("Invoices unavailable")
+        expect(renderToStaticMarkup(<WalletPageBase
+            title="Wallet"
+            balance={{ phase: "resting", label: "Balance", actionLabel: "Top up" }}
+            transactions={{ phase: "refused", label: "Transactions", note: "Transactions unavailable" }}
+            invoices={{ phase: "answered", label: "Invoices", facts: [{ id: "invoice-1", label: "Starter", value: "100 VND" }], actionLabel: "Pay" }}
+            on={{ topUp: vi.fn(), payInvoice: vi.fn() }}
+        />)).toContain("Transactions unavailable")
     })
 
     it("renders AppsPage owned apps and buyable catalogue offers", () => {
@@ -92,5 +105,29 @@ describe("pure page twins", () => {
         const refused = renderToStaticMarkup(<AgentOSSolutionModulePageBase state="refused" labels={labels} />)
         expect(loading).toContain("Loading module")
         expect(refused).toContain("Module unavailable")
+    })
+
+    it("executes the renamed pure twins across their settled state branches", () => {
+        expect(AgentOSPageBase({ mode: "new" })).toBeTruthy()
+        expect(AgentOSPageBase({ mode: "resume", orderId: "order-1" })).toBeTruthy()
+        expect(AgentOSPage({ mode: "new" })).toBeTruthy()
+        expect(TemplateAppProvisioningPageBase({ mode: "new", templateKey: "ai_academy" })).toBeTruthy()
+        expect(TemplateAppProvisioningPageBase({ mode: "resume", siteId: "site-1" })).toBeTruthy()
+        expect(TemplateAppProvisioningPage({ mode: "resume", siteId: "site-1" })).toBeTruthy()
+
+        expect(AgentOSWorkspaceListBase({ state: "resting", props: { label: "Workspaces" } })).toBeTruthy()
+        expect(AgentOSWorkspaceListBase({ state: "empty", props: { label: "Workspaces", message: "None" } })).toBeTruthy()
+        expect(AgentOSWorkspaceListBase({ state: "refused", props: { label: "Workspaces", message: "Unavailable" } })).toBeTruthy()
+        expect(AgentOSWorkspaceListBase({
+            state: "answered",
+            props: { label: "Workspaces", rows: [{ id: "workspace-1", name: "Workspace", detail: "Order", kindLabel: "Workspace", status: "ready", statusLabel: "Ready" }] },
+            on: { openWorkspace: vi.fn() },
+        })).toBeTruthy()
+
+        const labels = { loading: "Loading", refused: "Refused", openSite: "Open", tabsLabel: "Mode", tabs: [{ id: "growth" as const, label: "Growth" }, { id: "system" as const, label: "System" }] }
+        for (const state of ["restoring", "refused", "ready"] as const) {
+            expect(AcademyControlCenterPageBase({ state, title: "Academy", siteId: "site-1", mode: "growth", labels, onSelectMode: vi.fn(), onOpenPublicSite: vi.fn() })).toBeTruthy()
+        }
+        expect(AcademyControlCenterPageBase({ state: "ready", title: "Academy", siteId: "site-1", publicHost: "academy.test", mode: "system", labels, onSelectMode: vi.fn(), onOpenPublicSite: vi.fn() })).toBeTruthy()
     })
 })
