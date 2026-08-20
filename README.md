@@ -1,14 +1,14 @@
 # nivo-fe
 
 [![Codecov](https://codecov.io/gh/starci-lab/nivo-fe/graph/badge.svg)](https://app.codecov.io/gh/starci-lab/nivo-fe)
-[![SonarQube Quality Gate](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=alert_status)](https://sonar.starci.org/dashboard?id=nivo-fe)
-[![SonarQube Coverage](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=coverage)](https://sonar.starci.org/dashboard?id=nivo-fe)
-[![SonarQube Bugs](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=bugs)](https://sonar.starci.org/dashboard?id=nivo-fe)
-[![SonarQube Vulnerabilities](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=vulnerabilities)](https://sonar.starci.org/dashboard?id=nivo-fe)
-[![SonarQube Code Smells](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=code_smells)](https://sonar.starci.org/dashboard?id=nivo-fe)
-[![SonarQube Maintainability](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=sqale_rating)](https://sonar.starci.org/dashboard?id=nivo-fe)
-[![SonarQube Reliability](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=reliability_rating)](https://sonar.starci.org/dashboard?id=nivo-fe)
-[![SonarQube Security](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=security_rating)](https://sonar.starci.org/dashboard?id=nivo-fe)
+[![SonarQube Quality Gate](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=alert_status&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
+[![SonarQube Coverage](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=coverage&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
+[![SonarQube Bugs](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=bugs&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
+[![SonarQube Vulnerabilities](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=vulnerabilities&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
+[![SonarQube Code Smells](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=code_smells&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
+[![SonarQube Maintainability](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=sqale_rating&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
+[![SonarQube Reliability](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=reliability_rating&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
+[![SonarQube Security](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=security_rating&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
 
 Monorepo giao diện của nivo: ba ứng dụng dựng trên **một** bản canon dùng chung.
 
