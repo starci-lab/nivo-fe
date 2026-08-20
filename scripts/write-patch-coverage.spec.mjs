@@ -21,7 +21,7 @@ test("normalizes monorepo paths and measures every metric", () => {
 
 test("fails missing changed production and ignores tests", () => {
     assert.throws(() => buildPatchSummary({}, ["packages/ui/src/missing.tsx"], "C:/repo"), /missing from coverage-final/)
-    assert.equal(buildPatchSummary({}, ["apps/app/src/example.test.tsx", "apps/app/vitest.config.ts"], "C:/repo").notApplicable, true)
+    assert.equal(buildPatchSummary({}, ["apps/app/src/example.spec.tsx", "apps/app/vitest.config.ts"], "C:/repo").notApplicable, true)
 })
 
 test("requires an explicit base and executes on this platform", () => {

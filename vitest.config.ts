@@ -30,7 +30,7 @@ export default defineConfig({
             ],
             exclude: [
                 "**/*.d.ts",
-                "**/*.test.{ts,tsx}",
+                "**/*.spec.{ts,tsx}",
                 "**/src/messages/**",
                 "**/src/app/**/layout.tsx",
                 "**/src/app/**/page.tsx",
