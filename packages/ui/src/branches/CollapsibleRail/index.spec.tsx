@@ -18,14 +18,14 @@ const createStorage = (): Storage => {
     }
 }
 
-const renderRail = (onCollapsedChange = vi.fn()) => {
+const renderRail = (onCollapsedChange = vi.fn(), title?: string) => {
     render(
         <CollapsibleRail
             ariaLabel="Console navigation"
+            title={title}
             rail={<span>Expanded destinations</span>}
             collapsedRail={<span>Compact destinations</span>}
-            collapseControl={<span aria-hidden="true">Collapse icon</span>}
-            expandControl={<span aria-hidden="true">Expand icon</span>}
+            toggleControl={<span aria-hidden="true" data-testid="sidebar-glyph">Sidebar icon</span>}
             collapseLabel="Collapse navigation"
             expandLabel="Expand navigation"
             storageKey={STORAGE_KEY}
@@ -43,21 +43,40 @@ describe("CollapsibleRail", () => {
         })
     })
 
-    it("keeps one host while toggling its accessible collapsed state and destination form", () => {
+    it("keeps one host while toggling its accessible collapsed state and destination form", async () => {
         const onCollapsedChange = renderRail()
         const host = screen.getByRole("complementary", { name: "Console navigation" })
+        const toggle = screen.getByRole("button", { name: "Collapse navigation" })
+        const destinations = screen.getByText("Expanded destinations")
 
         expect(host).toHaveAttribute("data-collapsed", "false")
-        expect(screen.getByText("Expanded destinations")).toBeInTheDocument()
+        expect(host.style.borderInlineEnd).toBe("1px solid var(--separator)")
+        expect(host.style.padding).toBe("1.5rem")
+        expect(screen.queryByText("Console")).not.toBeInTheDocument()
+        expect(toggle.style.borderRadius).toBe("9999px")
+        expect(toggle.style.background).toBe("")
+        const glyph = screen.getByTestId("sidebar-glyph")
+        expect(toggle.compareDocumentPosition(destinations) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+        expect(destinations).toBeInTheDocument()
 
         fireEvent.click(screen.getByRole("button", { name: "Collapse navigation" }))
 
         expect(screen.getByRole("complementary", { name: "Console navigation" })).toBe(host)
         expect(host).toHaveAttribute("data-collapsed", "true")
+        expect(host.style.padding).toBe("1.5rem 0.75rem")
+        expect(screen.getByTestId("sidebar-glyph")).toBe(glyph)
         expect(screen.getByText("Compact destinations")).toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Expand navigation" })).toHaveAttribute("aria-pressed", "true")
         expect(localStorage.getItem(STORAGE_KEY)).toBe("true")
         expect(onCollapsedChange).toHaveBeenCalledWith(true)
+    })
+
+    it("renders a title only when the caller supplies evidenced copy", async () => {
+        renderRail(vi.fn(), "Course progress")
+        expect(screen.getByText("Course progress")).toBeInTheDocument()
+
+        fireEvent.click(screen.getByRole("button", { name: "Collapse navigation" }))
+        await waitFor(() => expect(screen.queryByText("Course progress")).not.toBeInTheDocument())
     })
 
     it("restores a persisted collapsed preference after mounting", async () => {

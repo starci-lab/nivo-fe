@@ -72,8 +72,7 @@ icon leaf selects the outline or micro drawing from the role.
 | `domains` | Managed domains | `GlobeAmericasIcon` | The globe names internet namespace while remaining distinct from the Explore globe cut |
 | `wallet` | Wallet and billing | `WalletIcon` | A wallet names stored balance and payment activity |
 | `support` | Product support | `LifebuoyIcon` | A lifebuoy is the established help and assistance metaphor |
-| `collapse` | Collapse the console rail | `ChevronDoubleLeftIcon` | Paired left chevrons name contraction toward the rail edge |
-| `expand` | Expand the console rail | `ChevronDoubleRightIcon` | Paired right chevrons reverse the collapse direction without changing control identity |
+| `sidebar` | Toggle the console rail | StarCi `SidebarSimpleIcon` regular path | One stable sidebar glyph preserves the control identity in both expanded and collapsed states; direction is communicated by state and accessible label, not by swapping drawings |
 
 ## Selection procedure
 

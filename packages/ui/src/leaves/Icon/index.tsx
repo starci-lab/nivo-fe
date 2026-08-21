@@ -13,8 +13,6 @@ import {
     ClipboardDocumentCheckIcon,
     CodeBracketIcon,
     CpuChipIcon,
-    ChevronDoubleLeftIcon,
-    ChevronDoubleRightIcon,
     EnvelopeIcon,
     EyeIcon,
     EyeSlashIcon,
@@ -59,8 +57,6 @@ import {
     ClipboardDocumentCheckIcon as ClipboardDocumentCheckSolidIcon,
     CodeBracketIcon as CodeBracketSolidIcon,
     CpuChipIcon as CpuChipSolidIcon,
-    ChevronDoubleLeftIcon as ChevronDoubleLeftSolidIcon,
-    ChevronDoubleRightIcon as ChevronDoubleRightSolidIcon,
     EnvelopeIcon as EnvelopeSolidIcon,
     EyeIcon as EyeSolidIcon,
     EyeSlashIcon as EyeSlashSolidIcon,
@@ -119,7 +115,7 @@ export type IconName =
     | "home" | "explore" | "community" | "league" | "review"
     | "light" | "dark" | "locale" | "google" | "github"
     | "search" | "cart" | "notification" | "account" | "saved" | "blog" | "talents" | "jobs" | "practice"
-    | "overview" | "apps" | "agentos" | "servers" | "domains" | "wallet" | "support" | "collapse" | "expand"
+    | "overview" | "apps" | "agentos" | "servers" | "domains" | "wallet" | "support" | "sidebar"
 
 /** The two native Heroicon roles used by the product. */
 export type IconRole = "heading" | "leading" | "chip"
@@ -163,6 +159,20 @@ const CircleIcon = (props: SVGProps<SVGSVGElement>) => (
             strokeLinejoin="round"
             d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
         />
+    </svg>
+)
+
+/** The exact regular Phosphor SidebarSimple drawing used by the StarCi rail owner. */
+const SidebarSimpleIcon = (props: SVGProps<SVGSVGElement>) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 256 256"
+        fill="currentColor"
+        aria-hidden="true"
+        data-slot="icon"
+        {...props}
+    >
+        <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H80V200H40ZM216,200H96V56H216V200Z" />
     </svg>
 )
 
@@ -220,8 +230,7 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     domains: cuts(GlobeAmericasIcon, GlobeAmericasSolidIcon),
     wallet: cuts(WalletIcon, WalletSolidIcon),
     support: cuts(LifebuoyIcon, LifebuoySolidIcon),
-    collapse: cuts(ChevronDoubleLeftIcon, ChevronDoubleLeftSolidIcon),
-    expand: cuts(ChevronDoubleRightIcon, ChevronDoubleRightSolidIcon),
+    sidebar: cuts(SidebarSimpleIcon, SidebarSimpleIcon),
     google: cuts(GoogleMark, GoogleMark),
     github: cuts(GithubMark, GithubMark),
 }

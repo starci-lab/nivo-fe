@@ -27,6 +27,7 @@ describe("ConsoleNav", () => {
     it("keeps the complete grouped destination set in the desktop rail", () => {
         render(<ConsoleNav />)
 
+        expect(screen.queryByText("title")).not.toBeInTheDocument()
         expect(screen.getAllByRole("option")).toHaveLength(7)
         expect(screen.getByText("nav.servers")).toBeInTheDocument()
         expect(screen.getByText("nav.domains")).toBeInTheDocument()
@@ -39,8 +40,15 @@ describe("ConsoleNav", () => {
         const user = userEvent.setup()
         render(<ConsoleNav />)
 
+        const glyphPath = screen.getByRole("button", { name: "closeMenu" }).querySelector("path")
+        expect(glyphPath).toHaveAttribute(
+            "d",
+            "M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H80V200H40ZM216,200H96V56H216V200Z",
+        )
         await user.click(screen.getByRole("button", { name: "closeMenu" }))
-        expect(screen.getByRole("button", { name: "openMenu" })).toHaveAttribute("aria-pressed", "true")
+        const expandedControl = screen.getByRole("button", { name: "openMenu" })
+        expect(expandedControl).toHaveAttribute("aria-pressed", "true")
+        expect(expandedControl.querySelector("path")).toHaveAttribute("d", glyphPath?.getAttribute("d"))
         const compactOverview = screen.getByRole("option", { name: "nav.overview" })
         expect(compactOverview.querySelector("[title='nav.overview']")).toBeInTheDocument()
     })

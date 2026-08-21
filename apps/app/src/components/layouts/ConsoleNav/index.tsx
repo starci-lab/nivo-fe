@@ -233,8 +233,7 @@ export const ConsoleNav = ({ mode = "desktop" }: ConsoleNavProps) => {
                     content={destinations("compact")}
                 />
             )}
-            collapseControl={<Icon props={{ name: "collapse", role: "leading" }} />}
-            expandControl={<Icon props={{ name: "expand", role: "leading" }} />}
+            toggleControl={<Icon props={{ name: "sidebar", role: "leading" }} />}
             collapseLabel={t("closeMenu")}
             expandLabel={t("openMenu")}
             storageKey="nivo-console-navigation-collapsed"

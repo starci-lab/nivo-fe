@@ -26,11 +26,18 @@ describe("Icon", () => {
         "domains",
         "wallet",
         "support",
-        "collapse",
-        "expand",
+        "sidebar",
     ] as const)("draws the closed console meaning %s with the leading outline cut", (name) => {
         const { container } = render(<Icon props={{ name, role: "leading" }} />)
-        expect(container.querySelector("svg")).toHaveAttribute("stroke", "currentColor")
+        if (name === "sidebar") {
+            expect(container.querySelector("svg")).toHaveAttribute("fill", "currentColor")
+            expect(container.querySelector("path")).toHaveAttribute(
+                "d",
+                "M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H80V200H40ZM216,200H96V56H216V200Z",
+            )
+        } else {
+            expect(container.querySelector("svg")).toHaveAttribute("stroke", "currentColor")
+        }
         expect(container.querySelector("svg")).toHaveClass("size-5", "shrink-0")
     })
 
