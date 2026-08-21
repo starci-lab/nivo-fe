@@ -39,6 +39,8 @@ describe("pure page twins", () => {
             balance={{ phase: "answered", label: "Balance", actionLabel: "Top up", facts: [{ id: "b", label: "Balance", value: "100 VND" }] }}
             transactions={{ phase: "empty", label: "Transactions", note: "No transactions" }}
             invoices={{ phase: "refused", label: "Invoices", note: "Invoices unavailable" }}
+            topUp={{ open: false, title: "Top up", closeLabel: "Close", amountLabel: "Amount", amountPlaceholder: "10000", hint: "IPN", submitLabel: "Continue", amount: "", pending: false }}
+            result={{ open: false, title: "Result", closeLabel: "Close", state: "Pending", tone: "warning", amount: "100 VND", note: "Waiting", actionLabel: "Back" }}
             on={{ topUp: vi.fn(), payInvoice: vi.fn() }}
         />)
         expect(html).toContain("Wallet")
@@ -49,7 +51,9 @@ describe("pure page twins", () => {
             title="Wallet"
             balance={{ phase: "resting", label: "Balance", actionLabel: "Top up" }}
             transactions={{ phase: "refused", label: "Transactions", note: "Transactions unavailable" }}
-            invoices={{ phase: "answered", label: "Invoices", facts: [{ id: "invoice-1", label: "Starter", value: "100 VND" }], actionLabel: "Pay" }}
+            invoices={{ phase: "answered", label: "Invoices", rows: [{ id: "invoice-1", title: "Starter", caption: "Today", amount: "100 VND", state: "Unpaid", tone: "warning", detailLabel: "Details", detailFacts: [] }], actionLabel: "Pay" }}
+            topUp={{ open: false, title: "Top up", closeLabel: "Close", amountLabel: "Amount", amountPlaceholder: "10000", hint: "IPN", submitLabel: "Continue", amount: "", pending: false }}
+            result={{ open: false, title: "Result", closeLabel: "Close", state: "Pending", tone: "warning", amount: "100 VND", note: "Waiting", actionLabel: "Back" }}
             on={{ topUp: vi.fn(), payInvoice: vi.fn() }}
         />)).toContain("Transactions unavailable")
     })

@@ -6,6 +6,7 @@ describe("UI public exports", () => {
         expect(UI.Button).toBeTypeOf("function")
         expect(UI.Field).toBeTypeOf("function")
         expect(UI.SurfaceCard).toBeTypeOf("function")
+        expect(UI.ModalBranch).toBeTypeOf("function")
         expect(UI.Tree).toBeTypeOf("function")
         expect(UI.defineContractComponent).toBeTypeOf("function")
     })

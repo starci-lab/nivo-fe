@@ -136,6 +136,18 @@ export type WalletTransactionRow = {
     readonly createdAt: string
 }
 
+/** Gateway-supported evidence returned when a wallet top-up checkout is created. */
+export type WalletTopUpPayLink = {
+    readonly paymentId: string
+    readonly gateway: "payos" | "sepay"
+    readonly referenceId: string
+    readonly checkoutUrl: string
+    readonly qrCode: string | null
+    readonly checkoutFields: string | null
+    readonly amountVnd: number
+    readonly chargedAmountVnd: number
+}
+
 /** What an order bought, as the two relations an order carries. */
 export type OrderProduct = {
     /** The product. Nullable: the relation is `ON DELETE SET NULL`. */
@@ -395,6 +407,7 @@ const WALLET = "{ id balanceVnd }"
 
 /** One movement of money. */
 const WALLET_TRANSACTION = "{ id amountVnd type note createdAt }"
+const WALLET_TOP_UP_PAY_LINK = "{ paymentId gateway referenceId checkoutUrl qrCode checkoutFields amountVnd chargedAmountVnd }"
 
 /**
  * What an order bought. Shared, because an invoice reaches the same two relations through it.
@@ -473,6 +486,19 @@ export const myWallet = (): Promise<Result<WalletRow>> =>
  */
 export const myWalletTransactions = (): Promise<Result<ReadonlyArray<WalletTransactionRow>>> =>
     graphql(`query MyWalletTransactions { myWalletTransactions { data ${WALLET_TRANSACTION} message success error } }`)
+
+/** Create one real gateway checkout. Settlement remains owned by the provider IPN. */
+export const createWalletTopUpPayLink = (
+    amountVnd: number,
+    returnUrl: string,
+    cancelUrl: string,
+): Promise<Result<WalletTopUpPayLink>> =>
+    graphql(
+        `mutation CreateWalletTopUpPayLink($input: CreateWalletTopUpPayLinkInput!) {
+            createWalletTopUpPayLink(input: $input) { data ${WALLET_TOP_UP_PAY_LINK} message success error }
+        }`,
+        { input: { amountVnd, gateway: "sepay", returnUrl, cancelUrl } },
+    )
 
 /**
  * Every invoice, newest first.

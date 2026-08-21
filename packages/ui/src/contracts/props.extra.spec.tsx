@@ -24,4 +24,18 @@ describe("contract helper slot shapes", () => {
         expect(frame.slots.content).toBe(content)
         expect(content.slots.sidebar).toBe(sidebar)
     })
+
+    it("keeps wallet rows joined and balance actions inside the padded balance body", () => {
+        const fact = defineContractComponent("label-value-row", {
+            label: defineLeafComponent("text", { size: "sm" }, () => "Balance"),
+            value: defineLeafComponent("text", { size: "sm" }, () => "100,000 VND"),
+        })
+        const facts = defineContractComponent("labelled-fact-stack", { fact: [fact] })
+        const action = defineLeafComponent("button", {}, () => "Top up")
+        const shortcuts = defineContractComponent("inline-action-run", { action: [action] })
+        const balance = defineContractComponent("wallet-balance-surface", { facts, shortcuts })
+
+        expect(balance.slots.facts).toBe(facts)
+        expect(balance.slots.shortcuts).toBe(shortcuts)
+    })
 })

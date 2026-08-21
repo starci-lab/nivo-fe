@@ -3,7 +3,7 @@ import { cleanup } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-    api: { myInvoices: vi.fn(), myWallet: vi.fn(), myWalletTransactions: vi.fn(), payInvoice: vi.fn() },
+    api: { createWalletTopUpPayLink: vi.fn(), myInvoices: vi.fn(), myWallet: vi.fn(), myWalletTransactions: vi.fn(), payInvoice: vi.fn() },
     session: { state: { status: "signed-in", accessToken: "token" } },
     t: (key: string, values?: Record<string, unknown>) => values === undefined ? key : `${key}:${JSON.stringify(values)}`,
 }))
@@ -12,7 +12,9 @@ type WalletProbeProps = {
     balance: unknown
     transactions: unknown
     invoices: unknown
-    on?: { payInvoice?: () => void }
+    topUp: unknown
+    result: unknown
+    on?: { topUp?: () => void, changeTopUpAmount?: (value: string) => void, submitTopUp?: () => void, payInvoice?: () => void }
 }
 
 vi.mock("next-intl", () => ({ useTranslations: () => mocks.t, useFormatter: () => ({ number: (value: number) => `money-${value}`, dateTime: (value: Date) => `date-${value.toISOString().slice(0, 10)}` }) }))
@@ -21,8 +23,11 @@ vi.mock("@/modules/api/console", () => mocks.api)
 vi.mock("./component", () => ({
     WalletPageBase: (props: WalletProbeProps) => (
         <div>
-            <output data-testid="wallet">{JSON.stringify({ balance: props.balance, transactions: props.transactions, invoices: props.invoices })}</output>
+            <output data-testid="wallet">{JSON.stringify({ balance: props.balance, transactions: props.transactions, invoices: props.invoices, topUp: props.topUp, result: props.result })}</output>
             <button data-testid="pay" onClick={props.on?.payInvoice}>pay</button>
+            <button data-testid="open-top-up" onClick={props.on?.topUp}>top-up</button>
+            <button data-testid="amount" onClick={() => props.on?.changeTopUpAmount?.("25000")}>amount</button>
+            <button data-testid="submit-top-up" onClick={props.on?.submitTopUp}>submit-top-up</button>
         </div>
     ),
 }))
@@ -40,6 +45,7 @@ describe("WalletPage connected states", () => {
         mocks.api.myInvoices.mockResolvedValue({ ok: true, data: [] })
         mocks.api.myWalletTransactions.mockResolvedValue({ ok: true, data: [] })
         mocks.api.payInvoice.mockResolvedValue({ ok: true })
+        mocks.api.createWalletTopUpPayLink.mockResolvedValue({ ok: false, reason: "gateway-unconfigured" })
     })
 
     it("keeps an unsettled session resting and does not query", () => {
@@ -79,5 +85,20 @@ describe("WalletPage connected states", () => {
         await waitFor(() => expect(output()).toContain("wallet.transactionsLabel"))
         await act(async () => { screen.getByTestId("pay").click() })
         await waitFor(() => expect(mocks.api.payInvoice).toHaveBeenCalledWith("invoice"))
+    })
+
+    it("opens top-up and keeps a gateway refusal inside that flow", async () => {
+        render(<WalletPage />)
+        await waitFor(() => expect(output()).toContain("money-0"))
+        await act(async () => { screen.getByTestId("open-top-up").click() })
+        expect(output()).toContain('"open":true')
+        await act(async () => { screen.getByTestId("amount").click() })
+        await act(async () => { screen.getByTestId("submit-top-up").click() })
+        await waitFor(() => expect(mocks.api.createWalletTopUpPayLink).toHaveBeenCalledWith(
+            25000,
+            "http://localhost:3000/en/wallet/top-up/return",
+            "http://localhost:3000/en/wallet/top-up/return?status=cancelled",
+        ))
+        await waitFor(() => expect(output()).toContain("gateway-unconfigured"))
     })
 })

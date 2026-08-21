@@ -335,6 +335,8 @@ export const CONTRACTS = buildContracts({
                     "body-with-refusal-note", "heading-body-action-stack", "form-column", "identity-action-list",
                     "status-action-card-grid", "workspace-runtime-stack", "helm-component-status-table",
                     "infrastructure-summary", "wallet-summary", "module-summary", "module-bindings",
+                    "wallet-balance-surface", "wallet-top-up-form", "wallet-payment-result",
+                    "wallet-checkout-evidence", "wallet-ledger-detail",
                 ],
                 leaf: "text",
             },
@@ -574,6 +576,69 @@ export const CONTRACTS = buildContracts({
             fact: { contract: "label-value-row", repeats: true, restingCount: 4 },
         },
         why: "if you need a tight column of label-and-figure lines read as facts about one thing, closer together than the section gap would allow",
+    },
+    "wallet-balance-surface": {
+        classes: ["flex", "flex-col", "gap-4", "p-4"],
+        children: {
+            facts: { contract: "labelled-fact-stack" },
+            shortcuts: { contract: "inline-action-run", optional: true },
+        },
+        why: "if you need the wallet's balance facts and its payment-management ways out to share one correctly inset surface without turning each action into another card",
+    },
+    "wallet-top-up-form": {
+        classes: ["flex", "flex-col", "gap-4", "p-4"],
+        children: {
+            field: { composite: "field" },
+            note: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            action: { leaf: "button" },
+            refusal: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "if you need one wallet top-up amount, its provider-settlement explanation and the single checkout action inside the controlled modal",
+    },
+    "wallet-checkout-evidence": {
+        classes: ["flex", "flex-col", "gap-3", "rounded-xl", "border", "border-separator", "p-4"],
+        children: {
+            reference: { leaf: "text", props: { size: "sm" } },
+            amount: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            note: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if you need the exact provider reference and charged amount shown as checkout evidence before handing navigation to the gateway",
+    },
+    "wallet-payment-result": {
+        classes: ["flex", "flex-col", "items-start", "gap-4", "p-4"],
+        children: {
+            state: { leaf: "badge" },
+            amount: { leaf: "heading" },
+            reference: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            note: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            action: { leaf: "button" },
+        },
+        why: "if you need a wallet return screen to distinguish confirmed, cancelled and still-unresolved settlement without claiming a provider state the API did not return",
+    },
+    "wallet-ledger-list": {
+        classes: ["overflow-hidden", "divide-y", "divide-separator", "p-0", "[&>*]:px-4", "[&>*]:py-3"],
+        children: {
+            row: { contract: "wallet-ledger-row", repeats: true, restingCount: 3 },
+        },
+        why: "if you need wallet movements or invoices compared as one joined ledger whose shared surface, not each row, owns the separators",
+    },
+    "wallet-ledger-row": {
+        classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "gap-3", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow"],
+        children: {
+            identity: { contract: "subject-over-muted-caption" },
+            state: { leaf: "badge" },
+            amount: { leaf: "text", props: { size: "sm", weight: "semibold" } },
+            action: { leaf: "button", optional: true },
+        },
+        why: "if you need one ledger row to keep its identity and date together while status, amount and an optional detail action remain comparable at the trailing edge",
+    },
+    "wallet-ledger-detail": {
+        classes: ["flex", "flex-col", "gap-4", "p-4"],
+        children: {
+            facts: { contract: "labelled-fact-stack" },
+            note: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "if you need one selected wallet movement or invoice expanded into exact facts in the right-edge drawer without duplicating its summary surface",
     },
     "label-value-row": {
         classes: ["flex", "flex-row", "flex-wrap", "items-baseline", "justify-between", "gap-2"],
@@ -941,7 +1006,7 @@ export const CONTRACTS = buildContracts({
          * absence, and a sentence centred over a left-aligned answer reads as an apology for the
          * page instead of a note about one section of it.
          */
-        classes: ["flex", "flex-col", "items-start", "gap-3"],
+        classes: ["flex", "flex-col", "items-start", "gap-3", "p-4"],
         children: {
             /*
              * OPTIONAL, AND IT IS THE SLOT THAT MAKES THE `label-row-over-card` BODY EXTEND
