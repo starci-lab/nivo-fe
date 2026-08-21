@@ -4,7 +4,13 @@ import "../globals.css"
 import { notFound } from "next/navigation"
 import { hasLocale } from "next-intl"
 import { getMessages, getTimeZone, getTranslations } from "next-intl/server"
+import { Open_Sans } from "next/font/google"
+import type { CSSProperties } from "react"
 import { routing } from "@/i18n/routing"
+
+const openSans = Open_Sans({
+    subsets: ["latin", "vietnamese"],
+})
 
 /**
  * Browser-level metadata for every route under this shell.
@@ -83,7 +89,10 @@ const RootLayout = async ({ children, params }: RootLayoutProps) => {
     const [messages, timeZone] = await Promise.all([getMessages(), getTimeZone()])
     return (
         <html lang={locale} suppressHydrationWarning>
-            <body className="min-h-dvh bg-background text-foreground antialiased">
+            <body
+                className="min-h-dvh bg-background text-foreground antialiased"
+                style={{ "--font-open-sans": openSans.style.fontFamily } as CSSProperties}
+            >
                 <AppProviders locale={locale} messages={messages} timeZone={timeZone}>{children}</AppProviders>
             </body>
         </html>

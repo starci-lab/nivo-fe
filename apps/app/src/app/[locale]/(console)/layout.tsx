@@ -3,8 +3,9 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useLocale } from "next-intl"
-import { Tree, defineContractComponent, defineContractProjection, defineLeafComponent } from "@nivo/ui"
+import { StarCiDashboardThemeBoundary, Tree, defineContractComponent, defineContractProjection, defineLeafComponent } from "@nivo/ui"
 import { ConsoleNav } from "@/components/layouts/ConsoleNav"
+import { ConsoleTopBar } from "@/components/layouts/ConsoleTopBar"
 import { DEFAULT_LOCALE } from "@/i18n/config"
 import { useSession } from "@/modules/auth/session"
 import type { ReactNode } from "react"
@@ -70,30 +71,30 @@ const ConsoleLayout = ({ children }: ConsoleLayoutProps) => {
         }
     }, [status, locale, router])
 
-    return (
+    const frame = (
         <Tree
-            contract="sidebar-then-body-app"
-            render={defineContractComponent("sidebar-then-body-app", {
-                mobileNav: defineContractProjection("console-mobile-drawer-bar", () => (
-                    <ConsoleNav mode="mobile" />
-                )),
-                /*
-                 * A PROJECTION RATHER THAN A SLOT RECORD, because `ConsoleNav` draws that whole node
-                 * itself: which destination is current is navigation, and navigation is the chrome's
-                 * own domain rather than something this layout resolves and hands down.
-                 */
-                sidebar: defineContractProjection("home-services-account-nav", () => <ConsoleNav />),
-                body: defineContractProjection("console-body-main", () => (
-                    <Tree
-                        contract="console-body-main"
-                        render={defineContractComponent("console-body-main", {
-                            page: defineLeafComponent("page", {}, () => children),
-                        })}
-                    />
-                )),
+            contract="console-topbar-over-sidebar-body"
+            render={defineContractComponent("console-topbar-over-sidebar-body", {
+                topbar: defineContractProjection("console-desktop-topbar", () => <ConsoleTopBar />),
+                content: defineContractComponent("sidebar-then-body-app", {
+                    mobileNav: defineContractProjection("console-mobile-drawer-bar", () => (
+                        <ConsoleNav mode="mobile" />
+                    )),
+                    sidebar: defineLeafComponent("collapsible-rail", {}, () => <ConsoleNav />),
+                    body: defineContractProjection("console-body-main", () => (
+                        <Tree
+                            contract="console-body-main"
+                            render={defineContractComponent("console-body-main", {
+                                page: defineLeafComponent("page", {}, () => children),
+                            })}
+                        />
+                    )),
+                }),
             })}
         />
     )
+
+    return <StarCiDashboardThemeBoundary content={frame} />
 }
 
 export default ConsoleLayout

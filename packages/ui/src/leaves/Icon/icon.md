@@ -65,6 +65,15 @@ icon leaf selects the outline or micro drawing from the role.
 | `talents` | Talent discovery | `SparklesIcon` | Sparkles name exceptional ability without reusing account creation |
 | `jobs` | IT jobs | `BriefcaseIcon` | A briefcase names employment and vacancies |
 | `practice` | Programming/code practice | `CodeBracketIcon` | Code brackets name programming without reusing verification code |
+| `overview` | Console overview | `Squares2X2Icon` | Four equal tiles name the dashboard summary without borrowing the learner Home destination |
+| `apps` | Deployed applications | `WindowIcon` | A browser window names a runnable web application without implying creation |
+| `agentos` | AgentOS workspaces | `CpuChipIcon` | A processor names the managed agent runtime without borrowing account or automation imagery |
+| `servers` | Managed servers | `ServerStackIcon` | The stacked server cut directly names host infrastructure |
+| `domains` | Managed domains | `GlobeAmericasIcon` | The globe names internet namespace while remaining distinct from the Explore globe cut |
+| `wallet` | Wallet and billing | `WalletIcon` | A wallet names stored balance and payment activity |
+| `support` | Product support | `LifebuoyIcon` | A lifebuoy is the established help and assistance metaphor |
+| `collapse` | Collapse the console rail | `ChevronDoubleLeftIcon` | Paired left chevrons name contraction toward the rail edge |
+| `expand` | Expand the console rail | `ChevronDoubleRightIcon` | Paired right chevrons reverse the collapse direction without changing control identity |
 
 ## Selection procedure
 

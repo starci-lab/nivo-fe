@@ -785,6 +785,26 @@ export const CONTRACTS = buildContracts({
      * beside a routed body, and the landmark that body opens. Splitting them would put a frame in
      * the table that nothing can legally sit inside.
      */
+    "console-topbar-over-sidebar-body": {
+        classes: ["flex", "min-h-screen", "w-full", "flex-col"],
+        children: {
+            topbar: { contract: "console-desktop-topbar" },
+            content: { contract: "sidebar-then-body-app" },
+        },
+        why: "if you need authenticated console chrome to keep one desktop product bar above the standing navigation and routed body without exposing that bar on narrow screens",
+    },
+    "console-desktop-topbar": {
+        host: "header",
+        classes: [
+            "sticky", "top-0", "z-40", "hidden", "h-16", "w-full", "items-center",
+            "justify-between", "border-b", "border-separator", "px-3", "md:flex",
+        ],
+        children: {
+            brand: { leaf: "heading" },
+            title: { leaf: "text" },
+        },
+        why: "if you need wide authenticated console routes to preserve product identity and the console label in one persistent band above navigation and content",
+    },
     "sidebar-then-body-app": {
         /*
          * NO HOST, ON PURPOSE. A `nav` here would pull the routed body inside the navigation
@@ -797,16 +817,13 @@ export const CONTRACTS = buildContracts({
          * already exist.
          */
         classes: [
-            "flex", "min-h-screen", "w-full", "flex-col",
+            "flex", "w-full", "flex-col",
             "md:flex-row", "md:items-start",
-            "md:[&>*:nth-child(2)]:sticky", "md:[&>*:nth-child(2)]:top-0",
-            "md:[&>*:nth-child(2)]:max-h-screen", "md:[&>*:nth-child(2)]:w-64",
-            "md:[&>*:nth-child(2)]:shrink-0", "md:[&>*:nth-child(2)]:overflow-y-auto",
             "md:[&>*:nth-child(3)]:min-w-0", "md:[&>*:nth-child(3)]:grow",
         ],
         children: {
             mobileNav: { contract: "console-mobile-drawer-bar", optional: true },
-            sidebar: { contract: ["sidebar-nav-cluster", "home-services-account-nav"] },
+            sidebar: { leaf: "collapsible-rail" },
             body: { contract: "console-body-main" },
         },
         why: "if you need the console's outer frame — a fixed-width destination rail standing as a sibling of the routed body, never its wrapper, so swapping the body on every navigation cannot take the way back with it",
@@ -830,15 +847,6 @@ export const CONTRACTS = buildContracts({
             page: { leaf: "page" },
         },
         why: "if you need the routed body marked once as the document's one main landmark, without adding any measure, seam or inset of its own",
-    },
-    "home-services-account-nav": {
-        host: "nav",
-        classes: ["hidden", "w-full", "flex-col", "gap-2", "px-3", "py-6", "md:flex"],
-        children: {
-            brand: { leaf: "heading" },
-            destinations: { leaf: "selection-list" },
-        },
-        why: "if you need a console nav rail whose brand leads one keyboard-traversable, single-selection destination collection with the overview, service and account groups kept explicit",
     },
     "responsive-identity-kind-status-action-row": {
         classes: [
@@ -865,16 +873,6 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need narrow console chrome to keep product identity visible while one control opens the complete destination set from the right edge",
     },
-    "sidebar-nav-cluster": {
-        host: "nav",
-        classes: ["flex", "w-full", "flex-col", "gap-2", "p-4"],
-        children: {
-            brand: { leaf: "heading" },
-            link: { leaf: "nav-link", repeats: true, restingCount: 4 },
-        },
-        why: "if you need a single-heading nav rail listing one flat run of destinations, rather than splitting them into captioned groups the way home-services-account-nav does",
-    },
-
     /*
      * ── THE PAGE MEASURE, AND THE TWO BODIES ─────────────────────────────────────────────────────
      */

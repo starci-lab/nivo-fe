@@ -35,6 +35,16 @@ describe("ConsoleNav", () => {
         expect(push).not.toHaveBeenCalled()
     })
 
+    it("collapses to the accessible icon destination presentation", async () => {
+        const user = userEvent.setup()
+        render(<ConsoleNav />)
+
+        await user.click(screen.getByRole("button", { name: "closeMenu" }))
+        expect(screen.getByRole("button", { name: "openMenu" })).toHaveAttribute("aria-pressed", "true")
+        const compactOverview = screen.getByRole("option", { name: "nav.overview" })
+        expect(compactOverview.querySelector("[title='nav.overview']")).toBeInTheDocument()
+    })
+
     it("keeps the complete destination set in the right-side mobile drawer", async () => {
         const user = userEvent.setup()
         render(<ConsoleNav mode="mobile" />)

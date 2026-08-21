@@ -2,8 +2,18 @@
 
 import { usePathname, useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
-import { DrawerBranch, Heading, SelectionList, Tree, defineContractComponent, defineLeafComponent } from "@nivo/ui"
-import type { SelectionListGroup } from "@nivo/ui"
+import {
+    CollapsibleRail,
+    DrawerBranch,
+    Heading,
+    Icon,
+    ScrollViewport,
+    SelectionList,
+    Tree,
+    defineContractComponent,
+    defineLeafComponent,
+} from "@nivo/ui"
+import type { IconName, SelectionListGroup } from "@nivo/ui"
 import { DEFAULT_LOCALE } from "@/i18n/config"
 
 /**
@@ -21,9 +31,8 @@ import { DEFAULT_LOCALE } from "@/i18n/config"
  * all - every `my*` query returns a complete set with no `total`, no `cursor` and no `hasMore`. A
  * number here would be one the browser computed over a list this component does not own.
  *
- * IT OWNS NO CLASS. What is fixed-width and what fills is `home-services-account-nav` and its parent
- * `sidebar-then-body-app`; the rail holding its width while the body's blocks arrive comes from
- * `md:[&>*:first-child]:w-72` plus `shrink-0` on the parent entry, never from anything written here.
+ * IT OWNS NO CLASS. `CollapsibleRail` owns the two widths and transition, while
+ * `sidebar-then-body-app` only keeps the rail and routed body as siblings.
  *
  * TWO CAPTIONS, AND A KNOWN LIMIT OF THEM. The wallet and support talk ABOUT the four services rather
  * than standing beside them, so HeroUI ListBox sections keep both runs labelled inside one controlled
@@ -90,6 +99,17 @@ const SERVICE_KEYS: ReadonlyArray<ConsoleDestinationKey> = ["apps", "agentos", "
 /** The two destinations that talk about the other four. */
 const ACCOUNT_KEYS: ReadonlyArray<ConsoleDestinationKey> = ["wallet", "support"]
 
+/** The meaning of each destination's stable visual marker. */
+const DESTINATION_ICONS: Readonly<Record<ConsoleDestinationKey, IconName>> = {
+    overview: "overview",
+    apps: "apps",
+    agentos: "agentos",
+    servers: "servers",
+    domains: "domains",
+    wallet: "wallet",
+    support: "support",
+}
+
 /**
  * The path with its locale segment removed.
  *
@@ -154,6 +174,7 @@ export const ConsoleNav = ({ mode = "desktop" }: ConsoleNavProps) => {
         return {
             id: key,
             label: t(`nav.${key}`),
+            icon: DESTINATION_ICONS[key],
             ...(destination.route === null ? { status: t("unavailable"), isDisabled: true } : {}),
         }
     }
@@ -168,9 +189,10 @@ export const ConsoleNav = ({ mode = "desktop" }: ConsoleNavProps) => {
             router.push(hrefOf(destination.route, locale))
         }
     }
-    const destinations = (
+    const destinations = (presentation: "expanded" | "compact" = "expanded") => (
         <SelectionList
-            props={{ label: t("navigationLabel"), selectedKey, groups }}
+            key={presentation}
+            props={{ label: t("navigationLabel"), selectedKey, groups, presentation }}
             on={{ activate }}
         />
     )
@@ -188,7 +210,7 @@ export const ConsoleNav = ({ mode = "desktop" }: ConsoleNavProps) => {
                             triggerLabel={t("openMenu")}
                             title={t("title")}
                             closeLabel={t("closeMenu")}
-                            content={destinations}
+                            content={destinations()}
                         />
                     )),
                 })}
@@ -197,14 +219,25 @@ export const ConsoleNav = ({ mode = "desktop" }: ConsoleNavProps) => {
     }
 
     return (
-        <Tree
-            contract="home-services-account-nav"
-            render={defineContractComponent("home-services-account-nav", {
-                brand: defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: t("brand"), level: 2 }} />
-                )),
-                destinations: defineLeafComponent("selection-list", {}, () => destinations),
-            })}
+        <CollapsibleRail
+            ariaLabel={t("navigationLabel")}
+            rail={(
+                <ScrollViewport
+                    ariaLabel={t("navigationLabel")}
+                    content={destinations("expanded")}
+                />
+            )}
+            collapsedRail={(
+                <ScrollViewport
+                    ariaLabel={t("navigationLabel")}
+                    content={destinations("compact")}
+                />
+            )}
+            collapseControl={<Icon props={{ name: "collapse", role: "leading" }} />}
+            expandControl={<Icon props={{ name: "expand", role: "leading" }} />}
+            collapseLabel={t("closeMenu")}
+            expandLabel={t("openMenu")}
+            storageKey="nivo-console-navigation-collapsed"
         />
     )
 }

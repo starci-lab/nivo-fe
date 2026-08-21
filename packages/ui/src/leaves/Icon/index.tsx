@@ -12,27 +12,36 @@ import {
     ChevronRightIcon,
     ClipboardDocumentCheckIcon,
     CodeBracketIcon,
+    CpuChipIcon,
+    ChevronDoubleLeftIcon,
+    ChevronDoubleRightIcon,
     EnvelopeIcon,
     EyeIcon,
     EyeSlashIcon,
     FireIcon,
     GiftIcon,
     GlobeAltIcon,
+    GlobeAmericasIcon,
     HomeIcon,
     LanguageIcon,
     LockClosedIcon,
     MagnifyingGlassIcon,
     MoonIcon,
     NewspaperIcon,
+    LifebuoyIcon,
     PaperAirplaneIcon,
     ShieldCheckIcon,
     ShoppingCartIcon,
+    Squares2X2Icon,
+    ServerStackIcon,
     SparklesIcon,
     SunIcon,
     TrophyIcon,
     UserCircleIcon,
     UserGroupIcon,
     UserPlusIcon,
+    WalletIcon,
+    WindowIcon,
     XMarkIcon,
 } from "@heroicons/react/24/outline"
 import {
@@ -49,27 +58,36 @@ import {
     ChevronRightIcon as ChevronRightSolidIcon,
     ClipboardDocumentCheckIcon as ClipboardDocumentCheckSolidIcon,
     CodeBracketIcon as CodeBracketSolidIcon,
+    CpuChipIcon as CpuChipSolidIcon,
+    ChevronDoubleLeftIcon as ChevronDoubleLeftSolidIcon,
+    ChevronDoubleRightIcon as ChevronDoubleRightSolidIcon,
     EnvelopeIcon as EnvelopeSolidIcon,
     EyeIcon as EyeSolidIcon,
     EyeSlashIcon as EyeSlashSolidIcon,
     FireIcon as FireSolidIcon,
     GiftIcon as GiftSolidIcon,
     GlobeAltIcon as GlobeAltSolidIcon,
+    GlobeAmericasIcon as GlobeAmericasSolidIcon,
     HomeIcon as HomeSolidIcon,
     LanguageIcon as LanguageSolidIcon,
     LockClosedIcon as LockClosedSolidIcon,
     MagnifyingGlassIcon as MagnifyingGlassSolidIcon,
     MoonIcon as MoonSolidIcon,
     NewspaperIcon as NewspaperSolidIcon,
+    LifebuoyIcon as LifebuoySolidIcon,
     PaperAirplaneIcon as PaperAirplaneSolidIcon,
     ShieldCheckIcon as ShieldCheckSolidIcon,
     ShoppingCartIcon as ShoppingCartSolidIcon,
+    Squares2X2Icon as Squares2X2SolidIcon,
+    ServerStackIcon as ServerStackSolidIcon,
     SparklesIcon as SparklesSolidIcon,
     SunIcon as SunSolidIcon,
     TrophyIcon as TrophySolidIcon,
     UserCircleIcon as UserCircleSolidIcon,
     UserGroupIcon as UserGroupSolidIcon,
     UserPlusIcon as UserPlusSolidIcon,
+    WalletIcon as WalletSolidIcon,
+    WindowIcon as WindowSolidIcon,
     XMarkIcon as XMarkSolidIcon,
 } from "@heroicons/react/16/solid"
 import type { ComponentType, SVGProps } from "react"
@@ -101,6 +119,7 @@ export type IconName =
     | "home" | "explore" | "community" | "league" | "review"
     | "light" | "dark" | "locale" | "google" | "github"
     | "search" | "cart" | "notification" | "account" | "saved" | "blog" | "talents" | "jobs" | "practice"
+    | "overview" | "apps" | "agentos" | "servers" | "domains" | "wallet" | "support" | "collapse" | "expand"
 
 /** The two native Heroicon roles used by the product. */
 export type IconRole = "heading" | "leading" | "chip"
@@ -194,6 +213,15 @@ const GLYPHS: Record<IconName, GlyphCuts> = {
     talents: cuts(SparklesIcon, SparklesSolidIcon),
     jobs: cuts(BriefcaseIcon, BriefcaseSolidIcon),
     practice: cuts(CodeBracketIcon, CodeBracketSolidIcon),
+    overview: cuts(Squares2X2Icon, Squares2X2SolidIcon),
+    apps: cuts(WindowIcon, WindowSolidIcon),
+    agentos: cuts(CpuChipIcon, CpuChipSolidIcon),
+    servers: cuts(ServerStackIcon, ServerStackSolidIcon),
+    domains: cuts(GlobeAmericasIcon, GlobeAmericasSolidIcon),
+    wallet: cuts(WalletIcon, WalletSolidIcon),
+    support: cuts(LifebuoyIcon, LifebuoySolidIcon),
+    collapse: cuts(ChevronDoubleLeftIcon, ChevronDoubleLeftSolidIcon),
+    expand: cuts(ChevronDoubleRightIcon, ChevronDoubleRightSolidIcon),
     google: cuts(GoogleMark, GoogleMark),
     github: cuts(GithubMark, GithubMark),
 }
@@ -217,10 +245,7 @@ export const Icon = ({ props, isLoading = false }: IconProps) => {
     if (isLoading) {
         return <span aria-hidden="true" data-tier="leaf" data-component="Icon" className="size-5 shrink-0 animate-pulse rounded-full bg-default" />
     }
-    const className = props.name === "complete"
-        ? `${ROLE_CLASSES[role]} text-success-soft-foreground`
-        : ROLE_CLASSES[role]
-    return <Glyph aria-hidden className={className} />
+    return <Glyph aria-hidden className={ROLE_CLASSES[role]} />
 }
 
 /** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */

@@ -12,9 +12,26 @@ describe("Icon", () => {
         expect(container.querySelector("svg")).toHaveClass(size, "shrink-0")
     })
 
-    it("marks the complete glyph with its success color", () => {
+    it("leaves semantic color ownership with the surrounding state", () => {
         const { container } = render(<Icon props={{ name: "complete", role: "leading" }} />)
-        expect(container.querySelector("svg")).toHaveClass("text-success-soft-foreground")
+        expect(container.querySelector("svg")).toHaveAttribute("stroke", "currentColor")
+        expect(container.querySelector("svg")).not.toHaveClass("text-success-soft-foreground")
+    })
+
+    it.each([
+        "overview",
+        "apps",
+        "agentos",
+        "servers",
+        "domains",
+        "wallet",
+        "support",
+        "collapse",
+        "expand",
+    ] as const)("draws the closed console meaning %s with the leading outline cut", (name) => {
+        const { container } = render(<Icon props={{ name, role: "leading" }} />)
+        expect(container.querySelector("svg")).toHaveAttribute("stroke", "currentColor")
+        expect(container.querySelector("svg")).toHaveClass("size-5", "shrink-0")
     })
 
     it("uses the provider mark and loading placeholder branches", () => {
