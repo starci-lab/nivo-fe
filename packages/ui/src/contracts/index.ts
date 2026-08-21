@@ -781,9 +781,8 @@ export const CONTRACTS = buildContracts({
     /*
      * ── THE CONSOLE RAIL AND ITS ROUTED BODY ─────────────────────────────────────────────────────
      *
-     * Three entries admitted together because they are one topology: a standing run of destinations
-     * beside a routed body, and the landmark that body opens. Splitting them would put a frame in
-     * the table that nothing can legally sit inside.
+     * Five entries belong to one topology: desktop top chrome, the standing destination rail, its
+     * narrow drawer replacement, the routed body and the landmark that body opens.
      */
     "console-topbar-over-sidebar-body": {
         classes: ["flex", "min-h-screen", "w-full", "flex-col"],
@@ -811,10 +810,8 @@ export const CONTRACTS = buildContracts({
          * landmark, which is the opposite of what the sibling relationship is for. The `nav` belongs
          * to the destination run alone.
          *
-         * NO `gap`, ALSO ON PURPOSE. The union carries no bare vertical-rule token - only the
-         * positional `[&>*:nth-child(odd)]:border-r` - so the rail and the body meet at a seam and
-         * each owns its own inset. A gap written here would be a second inset on top of two that
-         * already exist.
+         * NO `gap`, ALSO ON PURPOSE. CollapsibleRail owns its inset and boundary while the routed
+         * body owns its own content inset; a parent gap would state that seam a second time.
          */
         classes: [
             "flex", "w-full", "flex-col",
@@ -826,13 +823,13 @@ export const CONTRACTS = buildContracts({
             sidebar: { leaf: "collapsible-rail" },
             body: { contract: "console-body-main" },
         },
-        why: "if you need the console's outer frame — a fixed-width destination rail standing as a sibling of the routed body, never its wrapper, so swapping the body on every navigation cannot take the way back with it",
+        why: "if you need the console's outer frame — a bounded collapsible destination rail standing as a sibling of the routed body, never its wrapper, so swapping the body on every navigation cannot take the way back with it",
     },
     "console-body-main": {
         host: "main",
         /*
          * `min-w-0` IS WRITTEN UNPREFIXED AS WELL AS INHERITED, and the duplication is the point.
-         * The parent supplies it only through `md:[&>*:last-child]:min-w-0`, so below the breakpoint
+         * The parent supplies it only through `md:[&>*:nth-child(3)]:min-w-0`, so below the breakpoint
          * nothing stops a long resource handle from pushing this column wider than the viewport.
          */
         classes: ["flex", "min-w-0", "w-full", "flex-col"],
