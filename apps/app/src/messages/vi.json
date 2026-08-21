@@ -105,6 +105,10 @@
     "title": "Bảng điều khiển",
     "servicesCaption": "Dịch vụ",
     "accountCaption": "Tài khoản",
+    "navigationLabel": "Điều hướng bảng điều khiển",
+    "openMenu": "Menu",
+    "closeMenu": "Đóng",
+    "unavailable": "Chưa sẵn sàng",
     "nav": {
       "overview": "Tổng quan",
       "apps": "Ứng dụng",

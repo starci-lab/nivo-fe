@@ -1,4 +1,6 @@
-import { Heading, SurfaceCard, Text, defineContractComponent, defineLeafComponent } from "@nivo/ui"
+import { Heading, SurfaceCard, SurfaceListCard, Text, Tree, defineContractComponent, defineLeafComponent } from "@nivo/ui"
+import type { LeafProps } from "@nivo/ui"
+import type { SurfaceListCardActions } from "@nivo/ui/branches/SurfaceListCard"
 
 /** One already-formatted domain and expiry fact. */
 export type InfrastructureDomainFact = {
@@ -36,6 +38,26 @@ export const InfrastructureSummary = ({ label, context, domains }: Infrastructur
     const isLoading = domains.phase === "pending"
     const facts = domains.phase === "populated" || domains.phase === "partial" ? domains.facts : []
     const note = domains.phase === "empty" || domains.phase === "failed" || domains.phase === "partial" ? domains.note : undefined
+    if (domains.phase === "pending" || domains.phase === "populated" || domains.phase === "partial") {
+        const renderedFacts = isLoading
+            ? [fact({ id: "pending-1", label: "", value: "" }, true), fact({ id: "pending-2", label: "", value: "" }, true)]
+            : facts.map((item) => fact(item))
+        const content = defineContractComponent("domain-evidence-list", (input: LeafProps<{ readonly label: string, readonly description: string }, SurfaceListCardActions>) => {
+            void input
+            return <Tree
+                contract="domain-evidence-list"
+                render={defineContractComponent("domain-evidence-list", { fact: renderedFacts })}
+            />
+        })
+        return (
+            <SurfaceListCard
+                props={{ label, description: note === undefined ? context : `${context} ${note}` }}
+                contract="domain-evidence-list"
+                render={content}
+                isLoading={isLoading}
+            />
+        )
+    }
     return (
         <SurfaceCard
             contract="infrastructure-summary"
@@ -44,12 +66,8 @@ export const InfrastructureSummary = ({ label, context, domains }: Infrastructur
                     title: defineLeafComponent("heading", {}, () => <Heading props={{ content: label, level: 3 }} />),
                 }),
                 context: defineLeafComponent("text", {}, () => <Text props={{ content: context, size: "sm" }} />),
-                ...(isLoading || facts.length > 0 ? {
-                    domains: defineContractComponent("labelled-fact-stack", {
-                        fact: isLoading
-                            ? [fact({ id: "pending-1", label: "", value: "" }, true), fact({ id: "pending-2", label: "", value: "" }, true)]
-                            : facts.map((item) => fact(item)),
-                    }),
+                ...(facts.length > 0 ? {
+                    domains: defineContractComponent("labelled-fact-stack", { fact: facts.map((item) => fact(item)) }),
                 } : {}),
                 ...(note === undefined ? {} : { note: refusal(note) }),
             })}

@@ -105,6 +105,10 @@
     "title": "Console",
     "servicesCaption": "Services",
     "accountCaption": "Account",
+    "navigationLabel": "Console navigation",
+    "openMenu": "Menu",
+    "closeMenu": "Close",
+    "unavailable": "Unavailable",
     "nav": {
       "overview": "Overview",
       "apps": "Apps",

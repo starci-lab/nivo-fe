@@ -2,8 +2,8 @@
 
 import { usePathname, useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
-import { Heading, Text, Tree, defineContractComponent, defineLeafComponent } from "@nivo/ui"
-import { NavLink } from "@nivo/ui/leaves/NavLink"
+import { DrawerBranch, Heading, SelectionList, Tree, defineContractComponent, defineLeafComponent } from "@nivo/ui"
+import type { SelectionListGroup } from "@nivo/ui"
 import { DEFAULT_LOCALE } from "@/i18n/config"
 
 /**
@@ -17,7 +17,7 @@ import { DEFAULT_LOCALE } from "@/i18n/config"
  * IT RESOLVES ITS OWN DOMAIN. Which destination is current is navigation, and navigation is the
  * chrome's own question, so it reads the path itself rather than being told.
  *
- * IT CARRIES NO COUNT, AND CANNOT. `NavLink` has no count slot and nivo publishes no count query at
+ * IT CARRIES NO COUNT, AND CANNOT. `SelectionList` has no count slot and nivo publishes no count query at
  * all - every `my*` query returns a complete set with no `total`, no `cursor` and no `hasMore`. A
  * number here would be one the browser computed over a list this component does not own.
  *
@@ -26,10 +26,8 @@ import { DEFAULT_LOCALE } from "@/i18n/config"
  * `md:[&>*:first-child]:w-72` plus `shrink-0` on the parent entry, never from anything written here.
  *
  * TWO CAPTIONS, AND A KNOWN LIMIT OF THEM. The wallet and support talk ABOUT the four services rather
- * than standing beside them, so each run is introduced by a caption a reader can read. Neither `Text`
- * nor `NavLink` exposes an aria hook, so the grouping is VISUAL: the promise in the entry's `why` is
- * kept by the caption being read, not by list semantics. Real grouping would be two nested labelled
- * `nav` entries, which is a Preview revision rather than an Apply improvisation.
+ * than standing beside them, so HeroUI ListBox sections keep both runs labelled inside one controlled
+ * destination collection. Arrow traversal, focus-visible and the selected key stay with that owner.
  *
  * ONE FILE RATHER THAN TWO, per SPLIT-6: the split exists because a request exists, and this reads
  * the router rather than the network. `connected-block-has-presentational-twin` scopes to blocks, and
@@ -49,7 +47,7 @@ export interface ConsoleDestination {
      *
      * Named `route` rather than `href`, and the rename is the point: a destination held as an `href`
      * is one a pure leaf could follow on its own, and internal navigation belongs to connected code
-     * that can decide what a press means. `NavLink` reports a press; this layout calls the router.
+     * that can decide what a press means. `SelectionList` reports an id; this layout calls the router.
      *
      * NULL IS DRAWN RATHER THAN HIDDEN. The three services this case did not ship and the support
      * destination are part of the rail's shape, and a rail that grew an entry per delivery would move
@@ -91,9 +89,6 @@ const SERVICE_KEYS: ReadonlyArray<ConsoleDestinationKey> = ["apps", "agentos", "
 
 /** The two destinations that talk about the other four. */
 const ACCOUNT_KEYS: ReadonlyArray<ConsoleDestinationKey> = ["wallet", "support"]
-
-/** The real destinations that remain reachable from the narrow-screen tab bar. */
-const MOBILE_KEYS: ReadonlyArray<ConsoleDestinationKey> = ["overview", "apps", "agentos", "wallet"]
 
 /**
  * The path with its locale segment removed.
@@ -153,38 +148,49 @@ export const ConsoleNav = ({ mode = "desktop" }: ConsoleNavProps) => {
 
     const destinationOf = (key: ConsoleDestinationKey) =>
         DESTINATIONS.find((one) => one.key === key) ?? DESTINATIONS[0]
-
-    const link = (key: ConsoleDestinationKey) => {
+    const selectedKey = DESTINATIONS.find((destination) => isCurrentDestination(destination, route))?.key ?? "overview"
+    const item = (key: ConsoleDestinationKey) => {
         const destination = destinationOf(key)
-        const target = destination.route
-        return defineLeafComponent("nav-link", {}, () => (
-            <NavLink
-                props={{
-                    label: t(`nav.${key}`),
-                    kind: "route",
-                    /*
-                     * ONE FACT, TWO OUTPUTS. `isCurrent` drives the weight a reader sees AND the
-                     * `aria-current` a screen reader is told, inside the leaf - so the two cannot
-                     * disagree, which is exactly what happens when they are set in two places.
-                     */
-                    isCurrent: isCurrentDestination(destination, route),
-                }}
-                on={{ press: target === null ? undefined : () => router.push(hrefOf(target, locale)) }}
-            />
-        ))
+        return {
+            id: key,
+            label: t(`nav.${key}`),
+            ...(destination.route === null ? { status: t("unavailable"), isDisabled: true } : {}),
+        }
     }
-
-    const caption = (content: string) =>
-        defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-            <Text props={{ content, size: "xs", tone: "muted" }} />
-        ))
+    const groups: ReadonlyArray<SelectionListGroup> = [
+        { id: "home", items: [item("overview")] },
+        { id: "services", label: t("servicesCaption"), items: SERVICE_KEYS.map(item) },
+        { id: "account", label: t("accountCaption"), items: ACCOUNT_KEYS.map(item) },
+    ]
+    const activate = (key: string) => {
+        const destination = DESTINATIONS.find((one) => one.key === key)
+        if (destination?.route !== null && destination?.route !== undefined) {
+            router.push(hrefOf(destination.route, locale))
+        }
+    }
+    const destinations = (
+        <SelectionList
+            props={{ label: t("navigationLabel"), selectedKey, groups }}
+            on={{ activate }}
+        />
+    )
 
     if (mode === "mobile") {
         return (
             <Tree
-                contract="console-mobile-tab-bar"
-                render={defineContractComponent("console-mobile-tab-bar", {
-                    destination: MOBILE_KEYS.map(link),
+                contract="console-mobile-drawer-bar"
+                render={defineContractComponent("console-mobile-drawer-bar", {
+                    brand: defineLeafComponent("heading", {}, () => (
+                        <Heading props={{ content: t("brand"), level: 2 }} />
+                    )),
+                    drawer: defineLeafComponent("drawer-branch", {}, () => (
+                        <DrawerBranch
+                            triggerLabel={t("openMenu")}
+                            title={t("title")}
+                            closeLabel={t("closeMenu")}
+                            content={destinations}
+                        />
+                    )),
                 })}
             />
         )
@@ -197,11 +203,7 @@ export const ConsoleNav = ({ mode = "desktop" }: ConsoleNavProps) => {
                 brand: defineLeafComponent("heading", {}, () => (
                     <Heading props={{ content: t("brand"), level: 2 }} />
                 )),
-                home: link("overview"),
-                servicesCaption: caption(t("servicesCaption")),
-                service: SERVICE_KEYS.map(link),
-                accountCaption: caption(t("accountCaption")),
-                account: ACCOUNT_KEYS.map(link),
+                destinations: defineLeafComponent("selection-list", {}, () => destinations),
             })}
         />
     )

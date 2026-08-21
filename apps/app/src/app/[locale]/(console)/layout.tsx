@@ -74,6 +74,9 @@ const ConsoleLayout = ({ children }: ConsoleLayoutProps) => {
         <Tree
             contract="sidebar-then-body-app"
             render={defineContractComponent("sidebar-then-body-app", {
+                mobileNav: defineContractProjection("console-mobile-drawer-bar", () => (
+                    <ConsoleNav mode="mobile" />
+                )),
                 /*
                  * A PROJECTION RATHER THAN A SLOT RECORD, because `ConsoleNav` draws that whole node
                  * itself: which destination is current is navigation, and navigation is the chrome's
@@ -87,9 +90,6 @@ const ConsoleLayout = ({ children }: ConsoleLayoutProps) => {
                             page: defineLeafComponent("page", {}, () => children),
                         })}
                     />
-                )),
-                mobileNav: defineContractProjection("console-mobile-tab-bar", () => (
-                    <ConsoleNav mode="mobile" />
                 )),
             })}
         />

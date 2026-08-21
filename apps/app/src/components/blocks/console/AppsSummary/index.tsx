@@ -3,13 +3,17 @@ import {
     Badge,
     Button,
     SurfaceCard,
+    SurfaceListCard,
     Text,
     TextLink,
+    Tree,
     defineCompositeComponent,
     defineContractComponent,
     defineLeafComponent,
 } from "@nivo/ui"
 import type { BadgeTone } from "@nivo/ui"
+import type { LeafProps } from "@nivo/ui"
+import type { SurfaceListCardActions } from "@nivo/ui/branches/SurfaceListCard"
 import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice"
 
 /** One owned application, with display copy and lifecycle meaning already resolved. */
@@ -93,13 +97,20 @@ export const AppsSummary = ({ label, state, onOpenApp }: AppsSummaryProps) => {
         )
     }
     const isLoading = state.phase === "pending"
-    return (
-        <SurfaceCard
-            props={{ label }}
+    const content = defineContractComponent("identity-action-list", (input: LeafProps<{ readonly label: string }, SurfaceListCardActions>) => {
+        void input
+        return <Tree
             contract="identity-action-list"
             render={defineContractComponent("identity-action-list", {
                 item: isLoading ? pendingRows() : rows(state.items, onOpenApp),
             })}
+        />
+    })
+    return (
+        <SurfaceListCard
+            props={{ label }}
+            contract="identity-action-list"
+            render={content}
             isLoading={isLoading}
         />
     )

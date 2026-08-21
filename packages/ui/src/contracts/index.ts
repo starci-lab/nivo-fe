@@ -68,6 +68,10 @@ export type LayoutClassName =
     | "md:[&>*:first-child]:top-0" | "md:[&>*:first-child]:self-start" | "md:[&>*:first-child]:max-h-rail"
     | "md:[&>*:first-child]:max-h-screen" | "md:[&>*:first-child]:w-64"
     | "md:[&>*:first-child]:overflow-y-auto"
+    | "md:[&>*:nth-child(2)]:sticky" | "md:[&>*:nth-child(2)]:top-0"
+    | "md:[&>*:nth-child(2)]:max-h-screen" | "md:[&>*:nth-child(2)]:w-64"
+    | "md:[&>*:nth-child(2)]:shrink-0" | "md:[&>*:nth-child(2)]:overflow-y-auto"
+    | "md:[&>*:nth-child(3)]:min-w-0" | "md:[&>*:nth-child(3)]:grow"
     | "[&>*:first-child]:hidden" | "md:[&>*:first-child]:flex"
     | "[&>*:nth-child(2)]:pb-16" | "md:[&>*:nth-child(2)]:pb-0"
     | "md:[&>*:nth-child(2)]:min-w-0" | "md:[&>*:nth-child(2)]:grow" | "md:hidden"
@@ -154,7 +158,7 @@ export type ChildrenOf<K extends ContractKey> = {
  * tag, so every rule that knew `Tree` had to be taught it separately, and one that was not taught
  * reported the landmark as a node with no key.
  */
-export type ContractHostTag = "div" | "main" | "nav" | "ul" | "ol" | "form" | "section" | "aside"
+export type ContractHostTag = "div" | "main" | "nav" | "ul" | "ol" | "form" | "section" | "aside" | "header"
 
 /** One registry entry: a node's own classes, and why what it holds sits that way. */
 export interface ContractSpec {
@@ -794,18 +798,16 @@ export const CONTRACTS = buildContracts({
          */
         classes: [
             "flex", "min-h-screen", "w-full", "flex-col",
-            "[&>*:first-child]:hidden", "md:[&>*:first-child]:flex",
-            "[&>*:nth-child(2)]:pb-16", "md:[&>*:nth-child(2)]:pb-0",
             "md:flex-row", "md:items-start",
-            "md:[&>*:first-child]:sticky", "md:[&>*:first-child]:top-0",
-            "md:[&>*:first-child]:max-h-screen", "md:[&>*:first-child]:w-64",
-            "md:[&>*:first-child]:shrink-0", "md:[&>*:first-child]:overflow-y-auto",
-            "md:[&>*:nth-child(2)]:min-w-0", "md:[&>*:nth-child(2)]:grow",
+            "md:[&>*:nth-child(2)]:sticky", "md:[&>*:nth-child(2)]:top-0",
+            "md:[&>*:nth-child(2)]:max-h-screen", "md:[&>*:nth-child(2)]:w-64",
+            "md:[&>*:nth-child(2)]:shrink-0", "md:[&>*:nth-child(2)]:overflow-y-auto",
+            "md:[&>*:nth-child(3)]:min-w-0", "md:[&>*:nth-child(3)]:grow",
         ],
         children: {
+            mobileNav: { contract: "console-mobile-drawer-bar", optional: true },
             sidebar: { contract: ["sidebar-nav-cluster", "home-services-account-nav"] },
             body: { contract: "console-body-main" },
-            mobileNav: { contract: "console-mobile-tab-bar", optional: true },
         },
         why: "if you need the console's outer frame — a fixed-width destination rail standing as a sibling of the routed body, never its wrapper, so swapping the body on every navigation cannot take the way back with it",
     },
@@ -831,21 +833,12 @@ export const CONTRACTS = buildContracts({
     },
     "home-services-account-nav": {
         host: "nav",
-        classes: ["flex", "w-full", "flex-col", "gap-2", "px-3", "py-6"],
+        classes: ["hidden", "w-full", "flex-col", "gap-2", "px-3", "py-6", "md:flex"],
         children: {
             brand: { leaf: "heading" },
-            /*
-             * `home` IS ITS OWN SLOT RATHER THAN THE FIRST `service`: the permanent overview stands
-             * ABOVE the services rather than being one of them, and a run that swallowed it would
-             * make the way back read as one more thing a reader could have bought.
-             */
-            home: { leaf: "nav-link" },
-            servicesCaption: { leaf: "text", props: { size: "xs", tone: "muted" } },
-            service: { leaf: "nav-link", repeats: true, restingCount: 4 },
-            accountCaption: { leaf: "text", props: { size: "xs", tone: "muted" } },
-            account: { leaf: "nav-link", repeats: true, restingCount: 2 },
+            destinations: { leaf: "selection-list" },
         },
-        why: "if you need a console nav rail whose fixed overview link sits above two captioned runs of destinations, one for services and one for the account, so a screen reader hears which group a link belongs to",
+        why: "if you need a console nav rail whose brand leads one keyboard-traversable, single-selection destination collection with the overview, service and account groups kept explicit",
     },
     "responsive-identity-kind-status-action-row": {
         classes: [
@@ -860,17 +853,17 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need a resource identity, kind, lifecycle status and optional action to remain one ordered row when wide and stack in that same order when narrow",
     },
-    "console-mobile-tab-bar": {
-        host: "nav",
+    "console-mobile-drawer-bar": {
+        host: "header",
         classes: [
-            "fixed", "inset-x-0", "bottom-0", "z-40", "flex", "w-full",
-            "items-center", "justify-around", "gap-1", "border-t", "border-separator",
-            "bg-surface", "px-2", "py-2", "md:hidden",
+            "sticky", "top-0", "z-40", "flex", "w-full", "items-center", "justify-between",
+            "border-b", "border-separator", "bg-surface", "px-4", "py-2", "md:hidden",
         ],
         children: {
-            destination: { leaf: "nav-link", repeats: true, restingCount: 4 },
+            brand: { leaf: "heading" },
+            drawer: { leaf: "drawer-branch" },
         },
-        why: "if you need the four real console destinations to remain reachable at the bottom edge on narrow screens while the standing desktop rail is absent.",
+        why: "if you need narrow console chrome to keep product identity visible while one control opens the complete destination set from the right edge",
     },
     "sidebar-nav-cluster": {
         host: "nav",
@@ -914,6 +907,18 @@ export const CONTRACTS = buildContracts({
             },
         },
         why: "if you need a single-column operations page with a heading and independently-loading labelled sections stacked one after another so one section refusing never nests inside, or reads as, another",
+    },
+    "dashboard-overview-page": {
+        classes: ["flex", "w-full", "flex-col", "gap-6", "p-6"],
+        children: {
+            heading: { contract: "title-with-end-action" },
+            section: {
+                contract: ["label-row-over-card", "infrastructure-summary", "wallet-summary"],
+                repeats: true,
+                restingCount: 4,
+            },
+        },
+        why: "if you need the operations overview to use the routed primary plane's full normal-flow width while keeping one heading above four independently settling business regions",
     },
     "infrastructure-summary": {
         classes: ["flex", "flex-col", "gap-4"],
@@ -1090,6 +1095,13 @@ export const CONTRACTS = buildContracts({
             item: { contract: "avatar-identity-badge-action-row", repeats: true, restingCount: 3 },
         },
         why: "if you need a joined list of identity rows, each with one status badge and one available action, without becoming separate cards.",
+    },
+    "domain-evidence-list": {
+        classes: ["flex", "flex-col", "divide-y", "divide-separator"],
+        children: {
+            fact: { contract: "label-value-row", repeats: true, restingCount: 2 },
+        },
+        why: "if you need comparable domain and runtime evidence rows to share one boundary so their labels and current values can be scanned without nesting a card per fact",
     },
     "workspace-runtime-stack": {
         classes: ["flex", "flex-col", "gap-6"],

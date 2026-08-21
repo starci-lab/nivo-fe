@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const push = vi.fn()
@@ -26,7 +27,7 @@ describe("ConsoleNav", () => {
     it("keeps the complete grouped destination set in the desktop rail", () => {
         render(<ConsoleNav />)
 
-        expect(screen.getAllByRole("link")).toHaveLength(7)
+        expect(screen.getAllByRole("option")).toHaveLength(7)
         expect(screen.getByText("nav.servers")).toBeInTheDocument()
         expect(screen.getByText("nav.domains")).toBeInTheDocument()
         expect(screen.getByText("nav.support")).toBeInTheDocument()
@@ -34,24 +35,28 @@ describe("ConsoleNav", () => {
         expect(push).not.toHaveBeenCalled()
     })
 
-    it("keeps only the four real routes in the mobile tab bar", () => {
+    it("keeps the complete destination set in the right-side mobile drawer", async () => {
+        const user = userEvent.setup()
         render(<ConsoleNav mode="mobile" />)
 
-        expect(screen.getAllByRole("link")).toHaveLength(4)
-        expect(screen.queryByText("nav.servers")).not.toBeInTheDocument()
-        expect(screen.queryByText("nav.domains")).not.toBeInTheDocument()
-        expect(screen.queryByText("nav.support")).not.toBeInTheDocument()
-        fireEvent.click(screen.getByText("nav.wallet"))
+        fireEvent.click(screen.getByRole("button", { name: "openMenu" }))
+        expect(await screen.findAllByRole("option")).toHaveLength(7)
+        expect(screen.getByText("nav.servers")).toBeInTheDocument()
+        expect(screen.getByText("nav.domains")).toBeInTheDocument()
+        expect(screen.getByText("nav.support")).toBeInTheDocument()
+        await user.click(screen.getByRole("option", { name: "nav.wallet" }))
         expect(push).toHaveBeenCalledWith("/wallet")
     })
 
-    it("normalizes the locale before marking and opening a destination", () => {
+    it("normalizes the locale before marking and opening a destination", async () => {
+        const user = userEvent.setup()
         location.pathname = "/en/apps/detail"
         location.locale = "en"
         render(<ConsoleNav mode="mobile" />)
 
-        expect(screen.getByText("nav.apps")).toHaveAttribute("aria-current", "page")
-        fireEvent.click(screen.getByText("nav.agentos"))
+        fireEvent.click(screen.getByRole("button", { name: "openMenu" }))
+        expect(await screen.findByRole("option", { name: "nav.apps" })).toHaveAttribute("aria-selected", "true")
+        await user.click(screen.getByRole("option", { name: "nav.agentos" }))
         expect(push).toHaveBeenCalledWith("/en/agentos")
     })
 })

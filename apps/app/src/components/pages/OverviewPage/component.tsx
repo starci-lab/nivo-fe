@@ -96,8 +96,8 @@ export const OverviewPageBase = (input: OverviewPageViewProps) => {
     const { title, apps, agentOs, infrastructure, wallet } = normalize(input)
     return (
     <Tree
-        contract="titled-section-stack-page"
-        render={defineContractComponent("titled-section-stack-page", {
+        contract="dashboard-overview-page"
+        render={defineContractComponent("dashboard-overview-page", {
             heading: defineContractComponent("title-with-end-action", {
                 title: defineLeafComponent("heading", {}, () => <Heading props={{ content: title, level: 1 }} />),
             }),
