@@ -18,17 +18,20 @@
  * every screen in this app rendered as unstyled HTML while looking, from the source, entirely
  * correct.
  *
- * WHY NO BRAND TOKENS ARE WRITTEN HERE YET.
+ * WHERE THE CONSOLE'S BRAND TOKENS COME FROM.
  *
- * nivo has no approved palette. The design record for case-d1 approved hierarchy, states and
- * ownership against a NEUTRAL placeholder and explicitly withheld colour, so this file takes the
- * vendor's default palette and stops there - a deliberate absence, not an oversight. Porting
- * `starci-academy-fe/src/app/globals.css` would dress nivo in StarCi Academy's rose brand, which
- * that record forbids.
+ * Not from this file. The routed `nivo-console` grammar profile owns the console palette, and the
+ * values under `[data-theme="starci-dashboard"]` are copied from its visual contract VERBATIM -
+ * digit forms included, because the artifact gate compares the declared string against the locked
+ * string and `0.003` is not `0.0030` to a string comparison even though it is the same colour.
  *
- * When the palette is decided, it belongs here and only here, as base-token overrides on
- * `:root` / `.dark` in the manner HeroUI expects: write the BASE token and the vendor derives its
- * soft, foreground and focus families from it with `color-mix`.
+ * THE ACCENT IS `--nivo-accent`, NOT `--starci-accent`. The profile says it plainly: nivo reuses
+ * StarCi's console topology but owns its own unicorn red, and Academy rose is invalid here. This
+ * file used to declare that rose - the very value `starci-academy-fe` ships - which is the one
+ * thing the profile refuses.
+ *
+ * Public and auth routes keep the vendor default. Only the dashboard theme boundary is bound to
+ * the profile, so one place decides the console's colour and nothing downstream re-decides it.
  */
 
 /*
@@ -51,20 +54,20 @@
     --starci-surface: oklch(100% 0.0008 354.13);
     --starci-surface-secondary: oklch(95.24% 0.0012 354.13);
     --starci-foreground: oklch(21.03% 0.0015 354.13);
-    --starci-muted: oklch(55.17% 0.003 354.13);
-    --starci-accent: oklch(70.03% 0.2092 354.13);
-    --starci-accent-foreground: oklch(100% 0 0);
-    --starci-accent-soft: color-mix(in oklab, var(--starci-accent) 15%, transparent);
+    --starci-muted: oklch(55.17% 0.0030 354.13);
+    --nivo-accent: oklch(57% 0.24 25);
+    --nivo-accent-foreground: oklch(100% 0 0);
+    --nivo-accent-soft: color-mix(in oklab, var(--nivo-accent) 15%, transparent);
     --starci-separator: oklch(92% 0.0015 354.13);
     --starci-border: oklch(90% 0.0015 354.13);
     --starci-success: oklch(73.29% 0.1941 162.85);
     --starci-success-soft: color-mix(in oklab, var(--starci-success) 15%, transparent);
-    --starci-warning: oklch(78.19% 0.159 84.37);
+    --starci-warning: oklch(78.19% 0.1590 84.37);
     --starci-warning-soft: color-mix(in oklab, var(--starci-warning) 18%, transparent);
     --starci-danger: oklch(65.32% 0.2335 37.78);
     --starci-danger-soft: color-mix(in oklab, var(--starci-danger) 15%, transparent);
     --starci-scrim: oklch(21.03% 0.0015 354.13 / 48%);
-    --starci-font-sans: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+    --starci-font-sans: Open Sans, ui-sans-serif, system-ui, sans-serif;
     --starci-radius-3xl: 1.5rem;
     --starci-surface-shadow:
         0 2px 4px 0 rgba(0, 0, 0, 0.04),
@@ -78,9 +81,9 @@
     --surface-secondary: var(--starci-surface-secondary);
     --foreground: var(--starci-foreground);
     --muted: var(--starci-muted);
-    --accent: var(--starci-accent);
-    --accent-foreground: var(--starci-accent-foreground);
-    --accent-soft: var(--starci-accent-soft);
+    --accent: var(--nivo-accent);
+    --accent-foreground: var(--nivo-accent-foreground);
+    --accent-soft: var(--nivo-accent-soft);
     --separator: var(--starci-separator);
     --border: var(--starci-border);
     --success: var(--starci-success);
