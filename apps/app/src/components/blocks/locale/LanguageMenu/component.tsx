@@ -19,6 +19,10 @@ export type LanguageMenuViewProps = {
     }
 }
 
+const languageTrigger = defineLeafComponent("icon", {}, () => (
+    <Icon props={{ name: "locale", role: "leading" }} />
+))
+
 /** Pure single-select locale menu over the shared dropdown mechanics owner. */
 export const LanguageMenuBase = (input: LanguageMenuViewProps) => (
     <DropdownBranch
@@ -31,9 +35,7 @@ export const LanguageMenuBase = (input: LanguageMenuViewProps) => (
             }],
         }}
         on={{ action: (next) => input.on?.select?.(next) }}
-        trigger={defineLeafComponent("icon", {}, () => (
-            <Icon props={{ name: "locale", role: "leading" }} />
-        ))}
+        trigger={languageTrigger}
     />
 )
 

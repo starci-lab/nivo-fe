@@ -115,6 +115,43 @@ const noteSection = (label: string, note: string) => defineContractProjection("l
     })} />
 ))
 
+const ledgerDetail = (row: WalletLedgerRow) => (
+    <Tree contract="wallet-ledger-detail" render={defineContractComponent("wallet-ledger-detail", {
+        facts: defineContractComponent("labelled-fact-stack", { fact: row.detailFacts.map((fact) => factRow(fact)) }),
+        note: row.note === undefined ? undefined : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+            <Text props={{ content: row.note ?? "", size: "sm", tone: "muted" }} />
+        )),
+    })} />
+)
+
+const ledgerRow = (row: WalletLedgerRow | undefined, isLoading: boolean, closeLabel: string) => defineContractComponent("wallet-ledger-row", {
+    identity: defineContractComponent("subject-over-muted-caption", {
+        subject: defineLeafComponent("text", {}, () => <Text props={{ content: row?.title ?? "", size: "sm" }} isLoading={isLoading} />),
+        caption: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: row?.caption ?? "", size: "xs", tone: "muted" }} isLoading={isLoading} />),
+    }),
+    state: defineLeafComponent("badge", {}, () => <Badge props={{ content: row?.state ?? "", tone: row?.tone ?? "neutral" }} isLoading={isLoading} />),
+    amount: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => <Text props={{ content: row?.amount ?? "", size: "sm", weight: "semibold" }} isLoading={isLoading} />),
+    action: row === undefined ? undefined : defineLeafComponent("button", {}, () => (
+        <DrawerBranch
+            triggerLabel={row.detailLabel}
+            title={row.title}
+            closeLabel={closeLabel}
+            content={ledgerDetail(row)}
+        />
+    )),
+})
+
+const walletLedgerContent = (ledger: LedgerSectionView, closeLabel: string) => {
+    const isLoading = ledger.phase === "resting"
+    const rows: ReadonlyArray<WalletLedgerRow> = ledger.phase === "answered" ? ledger.rows : []
+    const entries: ReadonlyArray<WalletLedgerRow | undefined> = isLoading ? [undefined, undefined, undefined] : rows
+    return defineContractComponent("wallet-ledger-list", (input: LeafProps<SurfaceListCardData, SurfaceListCardActions>) => (
+        <Tree key={`${input.props.label}:${input.props.actionLabel ?? ""}`} contract="wallet-ledger-list" render={defineContractComponent("wallet-ledger-list", {
+            row: entries.map((row) => ledgerRow(row, isLoading, closeLabel)),
+        })} />
+    ))
+}
+
 /** Pure drawing half of the accepted wallet and payment flow. */
 export const WalletControlCenterBase = (view: WalletControlCenterViewProps) => {
     const { title, balance, transactions, invoices, topUp, result, on } = view
@@ -134,34 +171,9 @@ export const WalletControlCenterBase = (view: WalletControlCenterViewProps) => {
 
     const ledgerSection = (ledger: LedgerSectionView, action?: () => void) => {
         if (ledger.phase === "empty" || ledger.phase === "refused") return noteSection(ledger.label, ledger.note)
-        const rows: ReadonlyArray<WalletLedgerRow> = ledger.phase === "answered" ? ledger.rows : []
-        const Content = defineContractComponent("wallet-ledger-list", (input: LeafProps<SurfaceListCardData, SurfaceListCardActions>) => {
-            void input
-            return (
-            <Tree contract="wallet-ledger-list" render={defineContractComponent("wallet-ledger-list", {
-                row: (ledger.phase === "resting" ? [0, 1, 2] : rows).map((entry) => {
-                    const row = typeof entry === "number" ? undefined : entry
-                    return defineContractComponent("wallet-ledger-row", {
-                        identity: defineContractComponent("subject-over-muted-caption", {
-                            subject: defineLeafComponent("text", {}, () => <Text props={{ content: row?.title ?? "", size: "sm" }} isLoading={ledger.phase === "resting"} />),
-                            caption: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: row?.caption ?? "", size: "xs", tone: "muted" }} isLoading={ledger.phase === "resting"} />),
-                        }),
-                        state: defineLeafComponent("badge", {}, () => <Badge props={{ content: row?.state ?? "", tone: row?.tone ?? "neutral" }} isLoading={ledger.phase === "resting"} />),
-                        amount: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => <Text props={{ content: row?.amount ?? "", size: "sm", weight: "semibold" }} isLoading={ledger.phase === "resting"} />),
-                        action: row === undefined ? undefined : defineLeafComponent("button", {}, () => <DrawerBranch
-                            triggerLabel={row.detailLabel} title={row.title} closeLabel={topUp.closeLabel}
-                            content={<Tree contract="wallet-ledger-detail" render={defineContractComponent("wallet-ledger-detail", {
-                                facts: defineContractComponent("labelled-fact-stack", { fact: row.detailFacts.map((fact) => factRow(fact)) }),
-                                note: row.note === undefined ? undefined : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: row.note ?? "", size: "sm", tone: "muted" }} />),
-                            })} />}
-                        />),
-                    })
-                }),
-            })} />
-            )
-        })
+        const content = walletLedgerContent(ledger, topUp.closeLabel)
         return defineContractProjection("label-row-over-card", () => (
-            <SurfaceListCard contract="wallet-ledger-list" render={Content} props={{ label: ledger.label, actionLabel: ledger.phase === "answered" ? ledger.actionLabel : undefined }} on={{ act: action }} isLoading={ledger.phase === "resting"} />
+            <SurfaceListCard contract="wallet-ledger-list" render={content} props={{ label: ledger.label, actionLabel: ledger.phase === "answered" ? ledger.actionLabel : undefined }} on={{ act: action }} isLoading={ledger.phase === "resting"} />
         ))
     }
 

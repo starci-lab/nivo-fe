@@ -73,8 +73,8 @@ export const DropdownBranch = <const I extends string>(input: DropdownBranchProp
                 selectionMode={input.props.selectionMode}
                 selectedKeys={input.props.selectedId === undefined ? undefined : new Set([input.props.selectedId])}
             >
-                {input.props.sections.map((section, sectionIndex) => (
-                    <Dropdown.Section key={`section-${sectionIndex}`}>
+                {input.props.sections.map((section) => (
+                    <Dropdown.Section key={section.items.map((item) => item.id).join(":")}>
                         {section.items.map((item) => (
                             <Dropdown.Item
                                 key={item.id}

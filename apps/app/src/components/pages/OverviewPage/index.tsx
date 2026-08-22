@@ -120,6 +120,10 @@ export const OverviewPage = () => {
     const money = (amountVnd: number) =>
         format.number(amountVnd, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
     const day = (iso: string) => format.dateTime(new Date(iso), { day: "2-digit", month: "2-digit" })
+    const domainCaption = (domain: DomainRow) => {
+        if (domain.expiresAt !== null) return t("domains.expiresAt", { date: day(domain.expiresAt) })
+        return domain.autoRenew ? t("domains.autoRenewOn") : t("domains.autoRenewOff")
+    }
     const open = (route: string) => router.push(locale === DEFAULT_LOCALE ? route : `/${locale}${route}`)
 
     const appsState = (): AppsSummaryState => {
@@ -166,9 +170,7 @@ export const OverviewPage = () => {
             facts: domains.data.map((domain) => ({
                 id: domain.id,
                 label: domain.name,
-                value: domain.expiresAt === null
-                    ? (domain.autoRenew ? t("domains.autoRenewOn") : t("domains.autoRenewOff"))
-                    : t("domains.expiresAt", { date: day(domain.expiresAt) }),
+                value: domainCaption(domain),
             })),
         }
     }
@@ -234,7 +236,7 @@ export const OverviewPage = () => {
             const first = domains.data[0]
             return first === undefined
                 ? { id: "domains", label: t("domains.title"), phase: "answered" as const, value: t("overview.none"), caption: t("domains.empty") }
-                : { id: "domains", label: t("domains.title"), phase: "answered" as const, value: first.name, caption: first.expiresAt === null ? (first.autoRenew ? t("domains.autoRenewOn") : t("domains.autoRenewOff")) : t("domains.expiresAt", { date: day(first.expiresAt) }) }
+                : { id: "domains", label: t("domains.title"), phase: "answered" as const, value: first.name, caption: domainCaption(first) }
         })()
         const walletSignal = (() => {
             if (wallet === null) return pending("wallet", t("wallet.title"))

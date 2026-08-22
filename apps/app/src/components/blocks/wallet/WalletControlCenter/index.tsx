@@ -33,6 +33,12 @@ type TopUpSession = { readonly amountVnd: number, readonly startingBalanceVnd: n
 type WalletWaypoint = { readonly orderId: string, readonly invoiceId: string, readonly returnTo: string }
 const TOP_UP_SESSION_KEY = "nivo.wallet.top-up"
 
+const invoiceTone = (status: InvoiceRow["status"]): WalletLedgerRow["tone"] => {
+    if (status === "paid") return "success"
+    if (status === "unpaid") return "warning"
+    return "neutral"
+}
+
 /** Read an exact AgentOS Wallet continuation, while leaving an ordinary Wallet route uncorrelated. */
 const readWalletWaypoint = (search: string, locale: string): WalletWaypoint | null | undefined => {
     const params = new URLSearchParams(search)
@@ -101,7 +107,7 @@ export const WalletControlCenter = ({ pageState }: WalletControlCenterProps) => 
         caption: t("wallet.dueAt", { date: day(invoice.dueAt) }),
         amount: amount(invoice.amountVnd),
         state: t(`wallet.status.${invoice.status}`),
-        tone: invoice.status === "paid" ? "success" : invoice.status === "unpaid" ? "warning" : "neutral",
+        tone: invoiceTone(invoice.status),
         detailLabel: t("wallet.viewDetail"),
         detailFacts: [
             { id: "amount", label: t("wallet.amountLabel"), value: amount(invoice.amountVnd) },
@@ -151,9 +157,13 @@ export const WalletControlCenter = ({ pageState }: WalletControlCenterProps) => 
         if (!money.invoices.ok) return { phase: "refused", label, note: t("refusal.unknown") }
         if (money.invoices.data.length === 0) return { phase: "empty", label, note: t("wallet.invoicesEmpty") }
         const rows = money.invoices.data
-            .filter((invoice) => waypoint === undefined || waypoint === null || invoice.id !== waypoint.invoiceId)
+            .filter((invoice) => waypoint?.invoiceId === undefined || invoice.id !== waypoint.invoiceId)
             .map(invoiceRow)
-        return { phase: "answered", label, actionLabel: waypoint === undefined && money.invoices.data.some((row) => row.status === "unpaid") ? (payingInvoice ? t("wallet.paying") : t("wallet.pay")) : undefined, rows }
+        let actionLabel: string | undefined
+        if (waypoint === undefined && money.invoices.data.some((row) => row.status === "unpaid")) {
+            actionLabel = payingInvoice ? t("wallet.paying") : t("wallet.pay")
+        }
+        return { phase: "answered", label, actionLabel, rows }
     }
 
     const linkedInvoiceView = (currentWaypoint: WalletWaypoint | null): LinkedInvoiceSectionView => {
@@ -164,15 +174,21 @@ export const WalletControlCenter = ({ pageState }: WalletControlCenterProps) => 
         const invoice = money.invoices.data.find((row) => row.id === currentWaypoint.invoiceId && row.catalogOrder?.id === currentWaypoint.orderId)
         if (invoice === undefined) return { phase: "refused", label, note: t("wallet.linkedInvoiceMissing") }
         const insufficient = invoice.status === "unpaid" && money.wallet.data.balanceVnd < invoice.amountVnd
+        let actionLabel = t("wallet.payLinkedInvoice")
+        if (invoice.status === "paid") actionLabel = t("wallet.returnToOrder")
+        else if (payingInvoice) actionLabel = t("wallet.paying")
+        let consequence = t("wallet.linkedInvoiceConsequence")
+        if (insufficient) consequence = t("wallet.insufficientBalance")
+        else if (invoice.status === "paid") consequence = t("wallet.paidContinuation")
         return {
             phase: "answered",
             label,
             orderLabel: t("wallet.orderLabel", { orderId: currentWaypoint.orderId }),
             row: invoiceRow(invoice),
-            actionLabel: invoice.status === "paid" ? t("wallet.returnToOrder") : payingInvoice ? t("wallet.paying") : t("wallet.payLinkedInvoice"),
+            actionLabel,
             actionKind: invoice.status === "paid" ? "return" : "pay",
             actionDisabled: payingInvoice || insufficient,
-            consequence: insufficient ? t("wallet.insufficientBalance") : invoice.status === "paid" ? t("wallet.paidContinuation") : t("wallet.linkedInvoiceConsequence"),
+            consequence,
         }
     }
 
@@ -194,7 +210,7 @@ export const WalletControlCenter = ({ pageState }: WalletControlCenterProps) => 
     }
 
     const submitTopUp = async () => {
-        const amountVnd = Number(topUpAmount.replace(/[^0-9]/g, ""))
+        const amountVnd = Number(topUpAmount.replace(/\D/g, ""))
         if (!Number.isSafeInteger(amountVnd) || amountVnd < 10_000) { setTopUpError(t("wallet.topUpInvalid")); return }
         if (money?.wallet.ok !== true) { setTopUpError(t("wallet.topUpUnavailable")); return }
         setTopUpPending(true)
@@ -222,15 +238,27 @@ export const WalletControlCenter = ({ pageState }: WalletControlCenterProps) => 
     const isReturn = pathname.endsWith("/wallet/top-up/return")
     const isCancelled = searchParams.get("status") === "cancelled"
     const confirmed = stored !== null && money?.wallet.ok === true && money.wallet.data.balanceVnd >= stored.startingBalanceVnd + stored.amountVnd
+    let resultState = t("wallet.resultPending")
+    let resultTone: PaymentResultView["tone"] = "warning"
+    let resultNote = t("wallet.resultPendingNote")
+    if (isCancelled) {
+        resultState = t("wallet.resultCancelled")
+        resultTone = "neutral"
+        resultNote = t("wallet.resultCancelledNote")
+    } else if (confirmed) {
+        resultState = t("wallet.resultConfirmed")
+        resultTone = "success"
+        resultNote = t("wallet.resultConfirmedNote")
+    }
     const resultView: PaymentResultView = {
         overlayState: isReturn ? "open" : "closed",
         title: t("wallet.resultTitle"),
         closeLabel: t("wallet.close"),
-        state: isCancelled ? t("wallet.resultCancelled") : confirmed ? t("wallet.resultConfirmed") : t("wallet.resultPending"),
-        tone: isCancelled ? "neutral" : confirmed ? "success" : "warning",
+        state: resultState,
+        tone: resultTone,
         amount: stored === null ? t("wallet.amountUnknown") : amount(stored.amountVnd),
         reference: stored?.referenceId,
-        note: isCancelled ? t("wallet.resultCancelledNote") : confirmed ? t("wallet.resultConfirmedNote") : t("wallet.resultPendingNote"),
+        note: resultNote,
         actionLabel: t("wallet.backToWallet"),
     }
     const topUpView: TopUpView = {

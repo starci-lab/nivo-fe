@@ -108,6 +108,15 @@ const stepState = (index: number, phaseIndex: number): "done" | "current" | "upc
     return "upcoming"
 }
 
+type RouteBuilder = (path: string) => string
+
+const walletTargetOf = (orderId: string, invoiceId: string | null, route: RouteBuilder): string | undefined => {
+    if (invoiceId === null) return undefined
+    const returnTo = route(`/agentos/orders/${orderId}`)
+    const query = new URLSearchParams({ orderId, invoiceId, returnTo })
+    return route(`/wallet?${query.toString()}`)
+}
+
 /** Own the real order → payment → workspace lifecycle and its matching Socket.IO target. */
 export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
     const t = useTranslations("console.provisioningFlows")
@@ -226,18 +235,30 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
     })
     const viewLabels = { progressLabel: t("agentos.progressLabel"), continuationLabel: t("agentos.continuationLabel") }
     const view = (): AgentOSProvisioningViewProps => {
-        if (flow.phase === "catalog_loading") return { state: flow.phase, props: { ...viewLabels, steps, subject: "AgentOS", detail: t("loadingText"), statusTitle: t("loadingTitle"), statusText: t("loadingText") } }
-        if (flow.phase === "request" || flow.phase === "submitting") {
-            const price = flow.tier?.priceMonthlyVnd
-            const detail = price === null || price === undefined ? flow.tier?.name ?? flow.item.slug : `${flow.tier?.name ?? ""} · ${format.number(price, { style: "currency", currency: "VND", maximumFractionDigits: 0 })}`
-            return { state: flow.phase, props: { ...viewLabels, steps, subject: flow.item.name, detail, statusTitle: t("agentos.requestTitle"), statusText: t("agentos.requestText"), requestActionLabel: t("agentos.submit"), isRequestPending: flow.phase === "submitting" }, on: { request: () => void submit() } }
+        switch (flow.phase) {
+            case "catalog_loading":
+                return { state: flow.phase, props: { ...viewLabels, steps, subject: "AgentOS", detail: t("loadingText"), statusTitle: t("loadingTitle"), statusText: t("loadingText") } }
+            case "request":
+            case "submitting": {
+                const price = flow.tier?.priceMonthlyVnd
+                let detail = flow.tier?.name ?? flow.item.slug
+                if (price !== null && price !== undefined) {
+                    const priceLabel = format.number(price, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
+                    detail = `${flow.tier?.name ?? ""} · ${priceLabel}`
+                }
+                return { state: flow.phase, props: { ...viewLabels, steps, subject: flow.item.name, detail, statusTitle: t("agentos.requestTitle"), statusText: t("agentos.requestText"), requestActionLabel: t("agentos.submit"), isRequestPending: flow.phase === "submitting" }, on: { request: () => void submit() } }
+            }
+            case "failed":
+                return { state: "failed", props: { ...viewLabels, steps, subject: flow.subject, detail: flow.detail, statusTitle: t("failedTitle"), statusText: flow.reason, statusActionLabel: t("agentos.startAgain") }, on: { statusAction: () => router.push(route("/agentos")) } }
+            case "awaiting_payment": {
+                const walletTarget = walletTargetOf(flow.orderId, flow.invoiceId, route)
+                return { state: flow.phase, props: { ...viewLabels, steps, subject: flow.subject, detail: flow.detail, statusTitle: t("agentos.paymentTitle"), statusText: t("agentos.paymentText"), statusActionLabel: t("agentos.openWallet"), statusActionDisabled: walletTarget === undefined }, on: { statusAction: walletTarget === undefined ? undefined : () => router.push(walletTarget) } }
+            }
+            case "ready":
+                return { state: flow.phase, props: { ...viewLabels, steps, subject: flow.subject, detail: flow.detail, statusTitle: t("readyTitle"), statusText: t("agentos.readyText"), statusActionLabel: t("agentos.manage") }, on: { statusAction: () => router.push(route(`/agentos/workspaces/${flow.workspaceId}`)) } }
+            default:
+                break
         }
-        if (flow.phase === "failed") return { state: "failed", props: { ...viewLabels, steps, subject: flow.subject, detail: flow.detail, statusTitle: t("failedTitle"), statusText: flow.reason, statusActionLabel: t("agentos.startAgain") }, on: { statusAction: () => router.push(route("/agentos")) } }
-        if (flow.phase === "awaiting_payment") {
-            const walletTarget = flow.invoiceId === null ? undefined : route(`/wallet?orderId=${encodeURIComponent(flow.orderId)}&invoiceId=${encodeURIComponent(flow.invoiceId)}&returnTo=${encodeURIComponent(route(`/agentos/orders/${flow.orderId}`))}`)
-            return { state: flow.phase, props: { ...viewLabels, steps, subject: flow.subject, detail: flow.detail, statusTitle: t("agentos.paymentTitle"), statusText: t("agentos.paymentText"), statusActionLabel: t("agentos.openWallet"), statusActionDisabled: walletTarget === undefined }, on: { statusAction: walletTarget === undefined ? undefined : () => router.push(walletTarget) } }
-        }
-        if (flow.phase === "ready") return { state: flow.phase, props: { ...viewLabels, steps, subject: flow.subject, detail: flow.detail, statusTitle: t("readyTitle"), statusText: t("agentos.readyText"), statusActionLabel: t("agentos.manage") }, on: { statusAction: () => router.push(route(`/agentos/workspaces/${flow.workspaceId}`)) } }
         const isAccepted = flow.phase === "accepted"
         const settledText = isAccepted ? t("agentos.acceptedText") : t("agentos.preparingText")
         const statusText = realtime.status === "connecting" ? t("connecting") : settledText

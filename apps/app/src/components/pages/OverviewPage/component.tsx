@@ -57,42 +57,87 @@ type LegacyOverviewPageViewProps = {
 /** Fully resolved overview content, including the previous call shape during migration. */
 export type OverviewPageViewProps = AcceptedOverviewPageViewProps | LegacyOverviewPageViewProps
 
-const legacyTone = (status: FleetStatus) => status === "failed" ? "danger" as const
-    : status === "awaiting_dns" ? "warning" as const
-        : status === "ready" || status === "active" ? "success" as const : "neutral" as const
+const legacyTone = (status: FleetStatus) => {
+    if (status === "failed") return "danger" as const
+    if (status === "awaiting_dns") return "warning" as const
+    if (status === "ready" || status === "active") return "success" as const
+    return "neutral" as const
+}
+
+const normalizeLegacyApps = (input: LegacyOverviewPageViewProps): AppsSummaryProps => {
+    let state: AppsSummaryProps["state"]
+    if (input.apps.phase === "resting") state = { phase: "pending" }
+    else if (input.apps.phase === "refused") state = { phase: "forbidden", message: input.apps.note }
+    else if (input.apps.phase === "empty") state = { phase: "empty", message: input.apps.fact }
+    else {
+        state = {
+            phase: "populated",
+            items: input.apps.rows.map((row) => ({ ...row, statusTone: legacyTone(row.status) })),
+        }
+    }
+    return {
+        label: input.apps.label,
+        onOpenApp: () => input.on?.openApps?.(),
+        state,
+    }
+}
+
+const normalizeLegacyAgentOs = (input: LegacyOverviewPageViewProps): AgentOSSummaryProps => {
+    const agentRows = input.agentOs.phase === "answered" || input.agentOs.phase === "refused"
+        ? input.agentOs.rows
+        : []
+    const row = agentRows[0]
+    let state: AgentOSSummaryProps["state"]
+    if (input.agentOs.phase === "resting") state = { phase: "pending" }
+    else if (input.agentOs.phase === "empty") state = { phase: "empty", message: input.agentOs.message }
+    else if (row === undefined) {
+        const message = input.agentOs.phase === "refused" ? input.agentOs.note : ""
+        state = { phase: "empty", message }
+    } else {
+        state = {
+            phase: input.agentOs.phase === "refused" ? "partial" : "populated",
+            workspace: {
+                ...row,
+                description: "",
+                statusTone: legacyTone(row.status),
+                actionLabel: input.agentOs.openLabel,
+            },
+        }
+    }
+    return {
+        label: input.agentOs.label,
+        onOpenService: () => input.on?.openAgentOs?.(),
+        state,
+    }
+}
+
+const normalizeLegacyDomains = (input: LegacyOverviewPageViewProps): InfrastructureSummaryProps["domains"] => {
+    if (input.domains.phase === "resting") return { phase: "pending" }
+    if (input.domains.phase === "answered") return { phase: "populated", facts: input.domains.facts }
+    if (input.domains.phase === "empty") return { phase: "empty", note: input.domains.note }
+    return { phase: "failed", note: input.domains.note }
+}
+
+const normalizeLegacyWallet = (input: LegacyOverviewPageViewProps): WalletSummaryProps["state"] => {
+    if (input.wallet.phase === "resting") return { phase: "pending" }
+    if (input.wallet.phase === "refused") return { phase: "failed", note: input.wallet.note }
+    if (input.wallet.phase === "empty") return { phase: "empty", facts: input.wallet.facts }
+    return { phase: "populated", facts: input.wallet.facts }
+}
 
 const normalize = (input: OverviewPageViewProps): AcceptedOverviewPageViewProps => {
     if ("infrastructure" in input) return input
-    const apps: AppsSummaryProps = {
-        label: input.apps.label,
-        onOpenApp: () => input.on?.openApps?.(),
-        state: input.apps.phase === "resting" ? { phase: "pending" }
-            : input.apps.phase === "refused" ? { phase: "forbidden", message: input.apps.note }
-                : input.apps.phase === "empty" ? { phase: "empty", message: input.apps.fact }
-                    : { phase: "populated", items: input.apps.rows.map((row) => ({ ...row, statusTone: legacyTone(row.status) })) },
-    }
-    const agentRows = input.agentOs.phase === "answered" || input.agentOs.phase === "refused" ? input.agentOs.rows : []
-    const row = agentRows[0]
-    const agentOs: AgentOSSummaryProps = {
-        label: input.agentOs.label,
-        onOpenService: () => input.on?.openAgentOs?.(),
-        state: input.agentOs.phase === "resting" ? { phase: "pending" }
-            : input.agentOs.phase === "empty" || row === undefined ? { phase: "empty", message: input.agentOs.phase === "empty" ? input.agentOs.message : input.agentOs.phase === "refused" ? input.agentOs.note : "" }
-                : { phase: input.agentOs.phase === "refused" ? "partial" : "populated", workspace: { ...row, description: "", statusTone: legacyTone(row.status), actionLabel: input.agentOs.openLabel } },
-    }
-    const domainState = input.domains.phase === "resting" ? { phase: "pending" as const }
-        : input.domains.phase === "answered" ? { phase: "populated" as const, facts: input.domains.facts }
-            : input.domains.phase === "empty" ? { phase: "empty" as const, note: input.domains.note }
-                : { phase: "failed" as const, note: input.domains.note }
-    const walletState = input.wallet.phase === "resting" ? { phase: "pending" as const }
-        : input.wallet.phase === "refused" ? { phase: "failed" as const, note: input.wallet.note }
-            : { phase: input.wallet.phase === "empty" ? "empty" as const : "populated" as const, facts: input.wallet.facts }
     return {
         title: input.title,
-        apps,
-        agentOs,
-        infrastructure: { label: input.domains.label, context: input.servers.note, domains: domainState },
-        wallet: { label: input.wallet.label, actionLabel: "actionLabel" in input.wallet ? input.wallet.actionLabel : undefined, state: walletState, onOpenWallet: input.on?.openWallet },
+        apps: normalizeLegacyApps(input),
+        agentOs: normalizeLegacyAgentOs(input),
+        infrastructure: { label: input.domains.label, context: input.servers.note, domains: normalizeLegacyDomains(input) },
+        wallet: {
+            label: input.wallet.label,
+            actionLabel: "actionLabel" in input.wallet ? input.wallet.actionLabel : undefined,
+            state: normalizeLegacyWallet(input),
+            onOpenWallet: input.on?.openWallet,
+        },
     }
 }
 

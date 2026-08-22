@@ -45,7 +45,9 @@ const toneOf: Readonly<Record<OpenClawLaunchBlockState, BadgeTone>> = {
 /** Draw every launch-axis state without accepting a launch URL, token or credential-shaped value. */
 export const AgentOSOpenClawLaunchBase = ({ launchState, workspaceId, detail, labels, onRetry, onReturn }: AgentOSOpenClawLaunchViewProps) => {
     const settled = labels.states[launchState]
-    const actionLabel = launchState === "connected" ? labels.returnToWorkspace : launchState === "issuing" ? settled.label : labels.retry
+    let actionLabel = labels.retry
+    if (launchState === "connected") actionLabel = labels.returnToWorkspace
+    else if (launchState === "issuing") actionLabel = settled.label
     const card = defineContractComponent("status-action-card", {
         identity: defineContractComponent("subject-over-muted-caption", {
             subject: defineLeafComponent("text", { weight: "semibold" }, () => <Text props={{ content: labels.workspaceLabel, weight: "semibold" }} />),

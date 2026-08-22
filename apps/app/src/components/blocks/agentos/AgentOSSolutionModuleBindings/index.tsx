@@ -21,9 +21,15 @@ export type AgentOSSolutionModuleBindingsProps = {
     | { readonly state: "ready"; readonly installation: AgentosModuleInstallationDetail }
 )
 
+const displayedBindings = (values: ReadonlyArray<string> | undefined, empty: string, isLoading: boolean): ReadonlyArray<string | undefined> => {
+    if (isLoading) return [undefined, undefined]
+    if (values?.length === 0) return [empty]
+    return values ?? []
+}
+
 const bindingGroup = (name: string, values: ReadonlyArray<string> | undefined, empty: string, isLoading: boolean) => defineContractComponent("binding-identity-list", {
     name: defineLeafComponent("heading", {}, () => <Heading props={{ content: name, level: 4 }} />),
-    identity: (isLoading ? [undefined, undefined] : values?.length === 0 ? [empty] : values ?? []).map((value) => (
+    identity: displayedBindings(values, empty, isLoading).map((value) => (
         defineLeafComponent("text", { size: "sm" }, () => (
             <Text props={{ content: value, size: "sm" }} isLoading={isLoading} />
         ))

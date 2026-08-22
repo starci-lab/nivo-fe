@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
+import { describe, expect, expectTypeOf, it } from "vitest"
 import { Text } from "../../leaves/Text"
 import { defineContractComponent, defineLeafComponent } from "../../contracts/props"
 import { HighlightCard, type HighlightCardProps } from "."
@@ -30,12 +30,8 @@ describe("HighlightCard", () => {
 
     it("does not expose a ReactNode body or children escape hatch", () => {
         type Props = HighlightCardProps<"identity-phase-action">
-        type HasBody = "body" extends keyof Props ? true : false
-        type HasChildren = "children" extends keyof Props ? true : false
-        const hasBody: HasBody = false
-        const hasChildren: HasChildren = false
 
-        expect(hasBody).toBe(false)
-        expect(hasChildren).toBe(false)
+        expectTypeOf<Props>().not.toHaveProperty("body")
+        expectTypeOf<Props>().not.toHaveProperty("children")
     })
 })

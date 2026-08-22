@@ -13,6 +13,10 @@ export type AccountMenuViewProps = {
     }
 }
 
+const accountTrigger = defineLeafComponent("icon", {}, () => (
+    <Icon props={{ name: "account", role: "leading" }} />
+))
+
 /** Pure account menu: vendor mechanics stay in DropdownBranch, session behavior stays above. */
 export const AccountMenuBase = (input: AccountMenuViewProps) => (
     <DropdownBranch
@@ -26,9 +30,7 @@ export const AccountMenuBase = (input: AccountMenuViewProps) => (
             }] }],
         }}
         on={{ action: () => input.on?.signOut?.() }}
-        trigger={defineLeafComponent("icon", {}, () => (
-            <Icon props={{ name: "account", role: "leading" }} />
-        ))}
+        trigger={accountTrigger}
     />
 )
 

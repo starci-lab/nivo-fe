@@ -1,4 +1,5 @@
-import { act, fireEvent, render, screen } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import { AgentOSWorkspaceControlCenterBase as AgentOSWorkspacePageBase, type AgentOSWorkspaceControlCenterLabels as AgentOSWorkspacePageLabels, type AgentOSWorkspacePageState } from "../blocks/agentos/AgentOSWorkspaceControlCenter/component"
@@ -47,12 +48,13 @@ describe("AgentOSWorkspacePage pure sections", () => {
 
     it("reports the next selected workspace section", async () => {
         const select = vi.fn()
+        const user = userEvent.setup()
         render(<AgentOSWorkspacePageBase
             pageState="overview" controlCenterState="ready" data={data} labels={labels} launchState="idle" openClawLaunchHref="#"
             onSelectPageState={select} onOpenAgentConsole={vi.fn()} formatDate={(value) => value}
         />)
 
-        await act(async () => fireEvent.click(screen.getByRole("tab", { name: "applications" })))
+        await user.click(screen.getByRole("tab", { name: "applications" }))
 
         expect(select).toHaveBeenCalledWith("applications")
     })

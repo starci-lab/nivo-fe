@@ -146,7 +146,9 @@ export const AgentOSWorkspaceControlCenter = ({ workspaceId, pageState, onSelect
             backup: t("operations.backup"), reset: t("operations.reset"), rebuild: t("operations.rebuild"),
         },
     }
-    const controlCenterState: AgentOSWorkspaceControlCenterState = answer === null ? "loading" : answer.ok ? "ready" : "refused"
+    let controlCenterState: AgentOSWorkspaceControlCenterState = "refused"
+    if (answer === null) controlCenterState = "loading"
+    else if (answer.ok) controlCenterState = "ready"
     return (
         <AgentOSWorkspaceControlCenterBase
             pageState={pageState}
