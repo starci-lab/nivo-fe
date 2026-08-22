@@ -32,7 +32,6 @@ export default defineConfig({
                 "**/*.d.ts",
                 "**/*.spec.{ts,tsx}",
                 "**/src/messages/**",
-                "**/src/app/**/layout.tsx",
                 "**/src/app/**/page.tsx",
             ],
         },
