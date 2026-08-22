@@ -1201,9 +1201,9 @@ export const CONTRACTS = buildContracts({
     "provisioning-brand-mark-cell": {
         classes: ["flex", "items-center", "justify-center", "p-4"],
         children: {
-            mark: { leaf: "microchip-artwork" },
+            mark: { leaf: "icon" },
         },
-        why: "if a single controlled brand artwork closes the open edge of an order phase without becoming another content surface.",
+        why: "if a single controlled product glyph closes the open edge of an order phase without becoming another content surface.",
     },
     "subject-over-muted-caption-with-action": {
         classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3"],

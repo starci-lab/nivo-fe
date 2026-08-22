@@ -3,8 +3,8 @@
 import {
     Button,
     HighlightCard,
+    Icon,
     LifecycleStep,
-    MicrochipArtwork,
     SurfaceCard,
     Text,
     Tree,
@@ -86,9 +86,9 @@ export const AgentOSProvisioningBase = ({ state, props, on }: AgentOSProvisionin
         action,
     })
     const artwork = defineContractComponent("provisioning-brand-mark-cell", {
-        mark: defineLeafComponent("microchip-artwork", {}, () => (
-            <MicrochipArtwork
-                props={{ tone: "brand" }}
+        mark: defineLeafComponent("icon", {}, () => (
+            <Icon
+                props={{ name: "agentos", role: "heading" }}
                 isLoading={state === "catalog_loading"}
             />
         )),

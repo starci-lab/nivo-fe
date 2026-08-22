@@ -36,10 +36,8 @@ describe("AgentOS provisioning lifecycle", () => {
         expect(html).toContain("AgentOS order")
         expect(html).not.toContain("Next step")
         expect(html).toContain('data-node="provisioning-order-content"')
-        expect(html).toContain('data-component="MicrochipArtwork"')
-        expect(html).toContain('data-tone="brand"')
-        expect(html).toContain('data-layer="chip-back"')
-        expect(html).toContain('data-layer="chip-face"')
+        expect(html).toContain("<svg")
+        expect(html).toContain("size-6 shrink-0")
         expect(html).not.toContain('data-component="IconTile"')
     })
 
