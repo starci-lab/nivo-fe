@@ -20,6 +20,7 @@ describe("IconTile", () => {
         expect(tile).toHaveAttribute("data-loading", "true")
         expect(tile?.querySelector("svg")).not.toBeInTheDocument()
     })
+
 })
 
 describe("DayCell", () => {

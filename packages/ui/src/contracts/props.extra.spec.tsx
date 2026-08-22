@@ -10,10 +10,15 @@ describe("contract helper slot shapes", () => {
         expect(component.slots.action[0]).toBe(leaf)
     })
 
-    it("keeps desktop chrome above the collapsible console rail and routed body", () => {
+    it("keeps one global navbar above the collapsible console rail and routed body", () => {
         const heading = defineLeafComponent("heading", {}, () => "nivo")
         const text = defineLeafComponent("text", {}, () => "Console")
-        const topbar = defineContractComponent("console-desktop-topbar", { brand: heading, title: text })
+        const locale = defineLeafComponent("language-menu", {}, () => "locale")
+        const theme = defineLeafComponent("theme-switch", {}, () => "theme")
+        const account = defineLeafComponent("account-menu", {}, () => "account")
+        const identity = defineContractComponent("console-navbar-identity", { brand: heading, context: text })
+        const tools = defineContractComponent("console-navbar-tools", { locale, theme, account })
+        const topbar = defineContractComponent("console-global-navbar", { identity, tools })
         const page = defineLeafComponent("page", {}, () => "page")
         const body = defineContractComponent("console-body-main", { page })
         const sidebar = defineLeafComponent("collapsible-rail", {}, () => "navigation")

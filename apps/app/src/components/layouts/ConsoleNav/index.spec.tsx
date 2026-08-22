@@ -77,4 +77,14 @@ describe("ConsoleNav", () => {
         await user.click(screen.getByRole("option", { name: "nav.agentos" }))
         expect(push).toHaveBeenCalledWith("/en/agentos")
     })
+
+    it("treats the exact locale root as overview", async () => {
+        location.pathname = "/en"
+        location.locale = "en"
+        render(<ConsoleNav mode="mobile" />)
+
+        fireEvent.click(screen.getByRole("button", { name: "openMenu" }))
+
+        expect(await screen.findByRole("option", { name: "nav.overview" })).toHaveAttribute("aria-selected", "true")
+    })
 })

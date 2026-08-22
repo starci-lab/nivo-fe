@@ -109,6 +109,21 @@
     "openMenu": "Menu",
     "closeMenu": "Đóng",
     "unavailable": "Chưa sẵn sàng",
+    "locale": {
+      "label": "Ngôn ngữ",
+      "options": {
+        "vi": "Tiếng Việt",
+        "en": "Tiếng Anh"
+      }
+    },
+    "theme": {
+      "light": "Dùng giao diện sáng",
+      "dark": "Dùng giao diện tối"
+    },
+    "account": {
+      "label": "Tài khoản",
+      "signOut": "Đăng xuất"
+    },
     "nav": {
       "overview": "Tổng quan",
       "apps": "Ứng dụng",
@@ -129,7 +144,10 @@
       "unknown": "Chưa đọc được phần này. Phần còn lại trên màn hình vẫn đúng."
     },
     "overview": {
-      "title": "Tổng quan"
+      "title": "Tổng quan",
+      "lede": "Mọi thứ tài khoản của bạn đang chạy, cần xử lý và sắp đến hạn — trong một lượt quét.",
+      "buildApp": "Dựng một ứng dụng",
+      "none": "Chưa có"
     },
     "apps": {
       "title": "Ứng dụng",
@@ -139,16 +157,19 @@
       "namesNotCount": "Mục này gọi tên vài ứng dụng đầu tiên chứ không đếm. Một trang danh sách không phải là tổng số.",
       "empty": "Chưa có ứng dụng nào.",
       "emptyDescription": "Chọn một mẫu bên dưới để dựng cái đầu tiên.",
-      "catalogueLabel": "Dựng thêm ứng dụng",
+      "catalogueLabel": "Dùng thêm ứng dụng",
       "catalogueFact": "danh mục mẫu",
       "kindTemplateApp": "Mẫu ứng dụng",
       "build": "Dựng",
+      "buildApp": "Dựng ứng dụng",
       "unavailable": "Chưa sẵn sàng",
       "open": "Mở",
       "viewDns": "Xem bản ghi",
       "orderInProgress": "đơn đã thanh toán · đang dựng",
       "priceFrom": "Từ {price}/tháng",
-      "priceTier": "{tier} · {price}"
+      "priceTier": "{tier} · {price}",
+      "attentionGroup": "Cần bạn xử lý",
+      "steadyGroup": "Đang chạy và đang dựng"
     },
   "agentos": {
       "title": "AgentOS",
@@ -166,6 +187,7 @@
         "titleFallback": "Workspace AgentOS",
         "loading": "Đang đọc workspace và runtime mới nhất.",
         "refused": "Không thể mở workspace này hoặc tài khoản hiện tại không sở hữu nó.",
+        "accessUnavailable": "Không hiển thị thông tin đăng nhập workspace có thể tái sử dụng. Hãy dùng luồng mở ứng dụng ngắn hạn được hỗ trợ.",
         "tabsLabel": "Khu vực quản lý workspace",
         "tabs": {
         "overview": "Tổng quan",
@@ -204,6 +226,7 @@
         },
         "detail": {
           "title": "Solution module",
+          "backToWorkspace": "Quay lại workspace",
           "loading": "Đang đọc snapshot cài đặt mới nhất.",
           "refused": "Không thể mở module này hoặc module không thuộc workspace hiện tại.",
           "empty": "Chưa có",
@@ -248,6 +271,21 @@
           "blocked": "Cửa sổ bật lên bị chặn hoặc chưa cấp được phiên an toàn. Hãy cho phép popup rồi thử lại.",
           "expired": "Phiên OpenClaw an toàn đã hết hạn. Mở lại để kết nối.",
           "disconnected": "Cửa sổ OpenClaw đã ngắt khỏi phiên Nivo này."
+        },
+        "launch": {
+          "title": "Kết nối OpenClaw",
+          "workspaceLabel": "Đúng workspace AgentOS",
+          "securityNote": "Nivo cấp một lượt mở ngắn hạn, dùng một lần. Trang này không hiển thị hoặc lưu thông tin đăng nhập có thể tái sử dụng.",
+          "returnToWorkspace": "Quay lại workspace",
+          "retry": "Thử mở an toàn lại",
+          "expiresAt": "Đã kết nối · hết hạn lúc {time}",
+          "states": {
+            "issuing": { "label": "Đang cấp lượt mở an toàn", "detail": "Đang kiểm tra quyền sở hữu workspace và độ sẵn sàng runtime." },
+            "connected": { "label": "Đã kết nối", "detail": "Lượt mở OpenClaw ngắn hạn đã sẵn sàng." },
+            "blocked": { "label": "Không thể mở", "detail": "Kiểm tra quyền sở hữu, khả dụng, popup hoặc redirect an toàn đã từ chối lượt mở này." },
+            "expired": { "label": "Lượt mở đã hết hạn", "detail": "Lượt mở dùng một lần không còn hiệu lực. Hãy cấp lượt mới." },
+            "disconnected": { "label": "Đã ngắt kết nối", "detail": "Cửa sổ mở không còn kết nối với phiên Nivo này." }
+          }
         },
         "runtime": {
           "section": "CPU và bộ nhớ",
@@ -401,7 +439,8 @@
         "createApp": "Tạo ứng dụng",
         "createWorkspace": "Tạo workspace",
         "infrastructure": "Dựng hạ tầng",
-        "manage": "Quản lý"
+        "manage": "Quản lý",
+        "ready": "Sẵn sàng"
       },
       "stepState": {
         "done": "Đã xong",
@@ -422,6 +461,8 @@
         "readyText": "Stack ứng dụng đã sẵn sàng. Quay về Ứng dụng để quản lý."
       },
       "agentos": {
+        "progressLabel": "Đơn AgentOS",
+        "continuationLabel": "Bước tiếp theo",
         "requestTitle": "Yêu cầu workspace AgentOS",
         "requestText": "Request tạo hóa đơn trước. Cấp phát chỉ bắt đầu sau khi thanh toán.",
         "submit": "Yêu cầu AgentOS",
@@ -468,6 +509,17 @@
     },
     "wallet": {
       "title": "Ví",
+      "pathLabel": "Đường dẫn đơn AgentOS",
+      "agentOsParent": "AgentOS",
+      "orderLabel": "Đơn {orderId}",
+      "linkedInvoiceLabel": "Invoice của đơn AgentOS này",
+      "linkedInvoiceConsequence": "Thanh toán đúng invoice này để tiếp tục cùng một đơn AgentOS.",
+      "linkedInvoiceMissing": "Invoice không thuộc đơn AgentOS này hoặc không còn khả dụng.",
+      "invalidContinuation": "Thông tin tiếp tục qua Ví không đầy đủ hoặc không an toàn. Hãy quay về đúng đơn AgentOS rồi mở Ví lại.",
+      "insufficientBalance": "Số dư khả dụng thấp hơn invoice này. Hãy nạp thêm trước khi thanh toán.",
+      "payLinkedInvoice": "Thanh toán invoice liên kết",
+      "returnToOrder": "Quay lại đơn",
+      "paidContinuation": "Thanh toán đã hoàn tất. Tiếp tục với đúng đơn AgentOS.",
       "balanceLabel": "Số dư",
       "availableBalance": "Số dư khả dụng",
       "topUp": "Nạp ví",

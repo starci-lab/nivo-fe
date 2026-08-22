@@ -251,6 +251,9 @@ export const AppsPage = () => {
         <AppsPageView
             title={t("apps.title")}
             lede={t("apps.lede")}
+            buildAppLabel={t("apps.buildApp")}
+            attentionGroupLabel={t("apps.attentionGroup")}
+            steadyGroupLabel={t("apps.steadyGroup")}
             owned={ownedView()}
             catalogue={catalogueView()}
             onBuildTemplate={buildTemplate}

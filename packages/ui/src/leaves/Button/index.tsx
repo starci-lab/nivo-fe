@@ -23,8 +23,8 @@ import type { LeafProps } from "../../contracts/props"
  */
 export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost"
 
-/** Control heights. Two, because a third is a size nobody can pick consistently. */
-export type ButtonSize = "sm" | "md"
+/** Control heights. `lg` is an opt-in page-root primary action, never the default. */
+export type ButtonSize = "sm" | "md" | "lg"
 
 /** What pressing the button means to the form around it. */
 export type ButtonType = "button" | "submit" | "reset"
@@ -60,7 +60,7 @@ export type ButtonProps = LeafProps<ButtonData, ButtonActions>
 const VARIANTS = { primary: "primary", secondary: "secondary", outline: "outline", ghost: "ghost" } as const
 
 /** The size step, as the vendor names it. */
-const SIZES = { sm: "sm", md: "md" } as const
+const SIZES = { sm: "sm", md: "md", lg: "lg" } as const
 
 /** Data-loading paint shared with the other leaves; action progress uses a spinner instead. */
 const LOADING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({

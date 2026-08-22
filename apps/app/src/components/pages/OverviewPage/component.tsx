@@ -1,7 +1,8 @@
-import { Heading, Tree, defineContractComponent, defineContractProjection, defineLeafComponent } from "@nivo/ui"
+import { Button, Heading, Text, Tree, defineContractComponent, defineContractProjection, defineLeafComponent } from "@nivo/ui"
 import { AgentOSSummary, type AgentOSSummaryProps } from "@/components/blocks/console/AgentOSSummary"
 import { AppsSummary, type AppsSummaryProps } from "@/components/blocks/console/AppsSummary"
 import { InfrastructureSummary, type InfrastructureSummaryProps } from "@/components/blocks/console/InfrastructureSummary"
+import { OverviewPulse, type OverviewPulseProps } from "@/components/blocks/console/OverviewPulse"
 import { WalletSummary, type WalletSummaryProps } from "@/components/blocks/console/WalletSummary"
 import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow"
 
@@ -33,10 +34,14 @@ export type WalletSectionView =
 
 type AcceptedOverviewPageViewProps = {
     readonly title: string
+    readonly lede?: string
+    readonly buildAppLabel?: string
+    readonly pulse?: OverviewPulseProps
     readonly apps: AppsSummaryProps
     readonly agentOs: AgentOSSummaryProps
     readonly infrastructure: InfrastructureSummaryProps
     readonly wallet: WalletSummaryProps
+    readonly onBuildApp?: () => void
 }
 
 type LegacyOverviewPageViewProps = {
@@ -93,20 +98,44 @@ const normalize = (input: OverviewPageViewProps): AcceptedOverviewPageViewProps 
 
 /** Draw the accepted dashboard shell from its four independently settled summary blocks. */
 export const OverviewPageBase = (input: OverviewPageViewProps) => {
-    const { title, apps, agentOs, infrastructure, wallet } = normalize(input)
+    const { title, lede, buildAppLabel, pulse, apps, agentOs, infrastructure, wallet, onBuildApp } = normalize(input)
+    const hasBuildAction = buildAppLabel !== undefined && onBuildApp !== undefined
     return (
     <Tree
-        contract="dashboard-overview-page"
-        render={defineContractComponent("dashboard-overview-page", {
-            heading: defineContractComponent("title-with-end-action", {
-                title: defineLeafComponent("heading", {}, () => <Heading props={{ content: title, level: 1 }} />),
+        contract="console-primary-aside-page"
+        render={defineContractComponent("console-primary-aside-page", {
+            heading: defineContractComponent("display-title-with-end-action", {
+                title: defineLeafComponent("heading", { scale: "display" }, () => (
+                    <Heading props={{ content: title, level: 1, scale: "display" }} />
+                )),
+                ...(hasBuildAction ? {
+                    end: defineLeafComponent("button", { size: "lg" }, () => (
+                        <Button props={{ label: buildAppLabel, size: "lg", variant: "primary" }} on={{ press: onBuildApp }} />
+                    )),
+                } : {}),
             }),
-            section: [
-                defineContractProjection("label-row-over-card", () => <AppsSummary {...apps} />),
-                defineContractProjection("label-row-over-card", () => <AgentOSSummary {...agentOs} />),
-                defineContractProjection("label-row-over-card", () => <InfrastructureSummary {...infrastructure} />),
-                defineContractProjection("label-row-over-card", () => <WalletSummary {...wallet} />),
-            ],
+            ...(lede === undefined ? {} : {
+                lede: defineLeafComponent("text", { size: "md", tone: "muted" }, () => (
+                    <Text props={{ content: lede, size: "md", tone: "muted" }} />
+                )),
+            }),
+            ...(pulse === undefined ? {} : {
+                signals: defineContractProjection("account-signal-grid", () => <OverviewPulse {...pulse} />),
+            }),
+            content: defineContractComponent("console-primary-aside", {
+                primary: defineContractComponent("console-section-stack", {
+                    section: [
+                        defineContractProjection("label-row-over-card", () => <AppsSummary {...apps} />),
+                        defineContractProjection("label-row-over-card", () => <AgentOSSummary {...agentOs} />),
+                    ],
+                }),
+                aside: defineContractComponent("console-section-stack", {
+                    section: [
+                        defineContractProjection("wallet-summary", () => <WalletSummary {...wallet} />),
+                        defineContractProjection("infrastructure-summary", () => <InfrastructureSummary {...infrastructure} />),
+                    ],
+                }),
+            }),
         })}
     />
     )
