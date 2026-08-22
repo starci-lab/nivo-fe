@@ -1,5 +1,4 @@
-import { Heading, SurfaceCard, SurfaceListCard, Text, Tree, defineContractComponent, defineLeafComponent } from "@nivo/ui"
-import type { LeafProps } from "@nivo/ui"
+import { Heading, SurfaceCard, SurfaceListCard, Text, Tree, defineContractComponent, defineLeafComponent, type LeafProps } from "@nivo/ui"
 import type { SurfaceListCardActions } from "@nivo/ui/branches/SurfaceListCard"
 
 /** One already-formatted domain and expiry fact. */
@@ -42,13 +41,13 @@ export const InfrastructureSummary = ({ label, context, domains }: Infrastructur
         const renderedFacts = isLoading
             ? [fact({ id: "pending-1", label: "", value: "" }, true), fact({ id: "pending-2", label: "", value: "" }, true)]
             : facts.map((item) => fact(item))
-        const content = defineContractComponent("domain-evidence-list", (input: LeafProps<{ readonly label: string, readonly description: string }, SurfaceListCardActions>) => {
-            void input
-            return <Tree
+        const content = defineContractComponent("domain-evidence-list", (input: LeafProps<{ readonly label: string, readonly description: string }, SurfaceListCardActions>) => (
+            <Tree
+                key={`${input.props.label}:${input.props.description}`}
                 contract="domain-evidence-list"
                 render={defineContractComponent("domain-evidence-list", { fact: renderedFacts })}
             />
-        })
+        ))
         return (
             <SurfaceListCard
                 props={{ label, description: note === undefined ? context : `${context} ${note}` }}

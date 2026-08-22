@@ -31,7 +31,7 @@ type AgentOSFlow =
     | { readonly phase: "catalog_loading" }
     | { readonly phase: "request"; readonly item: CatalogItemRow; readonly tier: CatalogTierRow | null }
     | { readonly phase: "submitting"; readonly item: CatalogItemRow; readonly tier: CatalogTierRow | null }
-    | { readonly phase: "awaiting_payment"; readonly orderId: string; readonly subject: string; readonly detail: string }
+    | { readonly phase: "awaiting_payment"; readonly orderId: string; readonly invoiceId: string | null; readonly subject: string; readonly detail: string }
     | { readonly phase: "accepted"; readonly orderId: string; readonly subject: string; readonly detail: string }
     | { readonly phase: "preparing"; readonly orderId: string; readonly workspaceId: string; readonly subject: string; readonly detail: string }
     | { readonly phase: "ready"; readonly orderId: string; readonly workspaceId: string; readonly subject: string; readonly detail: string }
@@ -70,13 +70,13 @@ const settleOrder = (orderId: string, snapshot: ProvisioningSnapshot, t: Provisi
     if (workspace !== undefined) {
         const phase = workspacePhase(workspace.status)
         if (phase === "failed") {
-            return { phase: "failed", orderId, subject, detail: workspace.id, reason: t("failedProvision"), atStep: 3 }
+            return { phase: "failed", orderId, subject, detail: workspace.id, reason: t("failedProvision"), atStep: 2 }
         }
         return { phase, orderId, workspaceId: workspace.id, subject, detail: workspace.name ?? workspace.id }
     }
     const invoice = snapshot.invoices.find((candidate) => candidate.catalogOrder?.id === orderId)
     if (order.status === "pending_payment" || invoice?.status === "unpaid") {
-        return { phase: "awaiting_payment", orderId, subject, detail }
+        return { phase: "awaiting_payment", orderId, invoiceId: invoice?.id ?? null, subject, detail }
     }
     if (order.status === "cancelled") {
         return { phase: "failed", orderId, subject, detail, reason: t("agentos.orderCancelled"), atStep: 1 }
@@ -91,14 +91,14 @@ const realtimeTarget = (flow: AgentOSFlow): ProvisioningTarget | null => {
     return null
 }
 
-/** Which of the five ordered steps the flow is standing on. A failure keeps the step it failed at. */
+/** Which of the four customer outcomes the flow is standing on. A failure keeps its outcome. */
 const phaseIndexOf = (flow: AgentOSFlow): number => {
     if (flow.phase === "catalog_loading" || flow.phase === "request" || flow.phase === "submitting") return 0
     if (flow.phase === "awaiting_payment") return 1
     if (flow.phase === "accepted") return 2
-    if (flow.phase === "preparing") return 3
+    if (flow.phase === "preparing") return 2
     if (flow.phase === "failed") return flow.atStep
-    return 4
+    return 3
 }
 
 /** Where one step sits relative to the step the flow is on. */
@@ -106,6 +106,15 @@ const stepState = (index: number, phaseIndex: number): "done" | "current" | "upc
     if (index < phaseIndex) return "done"
     if (index === phaseIndex) return "current"
     return "upcoming"
+}
+
+type RouteBuilder = (path: string) => string
+
+const walletTargetOf = (orderId: string, invoiceId: string | null, route: RouteBuilder): string | undefined => {
+    if (invoiceId === null) return undefined
+    const returnTo = route(`/agentos/orders/${orderId}`)
+    const query = new URLSearchParams({ orderId, invoiceId, returnTo })
+    return route(`/wallet?${query.toString()}`)
 }
 
 /** Own the real order → payment → workspace lifecycle and its matching Socket.IO target. */
@@ -209,6 +218,7 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
         const next = {
             phase: "awaiting_payment" as const,
             orderId: order.data.id,
+            invoiceId: null,
             subject: order.data.catalogItem?.name ?? flow.item.name,
             detail: order.data.catalogTier?.name ?? flow.tier?.name ?? order.data.id,
         }
@@ -217,28 +227,45 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
     }
 
     const phaseIndex = phaseIndexOf(flow)
-    const stepLabels = [t("steps.request"), t("steps.payment"), t("steps.createWorkspace"), t("steps.infrastructure"), t("steps.manage")]
+    const stepLabels = [t("steps.request"), t("steps.payment"), t("steps.createWorkspace"), t("steps.ready")]
     const stateLabels = { done: t("stepState.done"), current: t("stepState.current"), upcoming: t("stepState.upcoming") } as const
     const steps = stepLabels.map((label, index) => {
         const state = stepState(index, phaseIndex)
         return { ordinal: String(index + 1), label, state, stateLabel: stateLabels[state] }
     })
+    const viewLabels = { progressLabel: t("agentos.progressLabel"), continuationLabel: t("agentos.continuationLabel") }
     const view = (): AgentOSProvisioningViewProps => {
-        if (flow.phase === "catalog_loading") return { state: flow.phase, props: { steps, subject: "AgentOS", detail: t("loadingText"), statusTitle: t("loadingTitle"), statusText: t("loadingText") } }
-        if (flow.phase === "request" || flow.phase === "submitting") {
-            const price = flow.tier?.priceMonthlyVnd
-            const detail = price === null || price === undefined ? flow.tier?.name ?? flow.item.slug : `${flow.tier?.name ?? ""} · ${format.number(price, { style: "currency", currency: "VND", maximumFractionDigits: 0 })}`
-            return { state: flow.phase, props: { steps, subject: flow.item.name, detail, statusTitle: t("agentos.requestTitle"), statusText: t("agentos.requestText"), requestActionLabel: t("agentos.submit"), isRequestPending: flow.phase === "submitting" }, on: { request: () => void submit() } }
+        switch (flow.phase) {
+            case "catalog_loading":
+                return { state: flow.phase, props: { ...viewLabels, steps, subject: "AgentOS", detail: t("loadingText"), statusTitle: t("loadingTitle"), statusText: t("loadingText") } }
+            case "request":
+            case "submitting": {
+                const price = flow.tier?.priceMonthlyVnd
+                let detail = flow.tier?.name ?? flow.item.slug
+                if (price !== null && price !== undefined) {
+                    const priceLabel = format.number(price, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
+                    detail = `${flow.tier?.name ?? ""} · ${priceLabel}`
+                }
+                return { state: flow.phase, props: { ...viewLabels, steps, subject: flow.item.name, detail, statusTitle: t("agentos.requestTitle"), statusText: t("agentos.requestText"), requestActionLabel: t("agentos.submit"), isRequestPending: flow.phase === "submitting" }, on: { request: () => void submit() } }
+            }
+            case "failed":
+                return { state: "failed", props: { ...viewLabels, steps, subject: flow.subject, detail: flow.detail, statusTitle: t("failedTitle"), statusText: flow.reason, statusActionLabel: t("agentos.startAgain") }, on: { statusAction: () => router.push(route("/agentos")) } }
+            case "awaiting_payment": {
+                const walletTarget = walletTargetOf(flow.orderId, flow.invoiceId, route)
+                return { state: flow.phase, props: { ...viewLabels, steps, subject: flow.subject, detail: flow.detail, statusTitle: t("agentos.paymentTitle"), statusText: t("agentos.paymentText"), statusActionLabel: t("agentos.openWallet"), statusActionDisabled: walletTarget === undefined }, on: { statusAction: walletTarget === undefined ? undefined : () => router.push(walletTarget) } }
+            }
+            case "ready":
+                return { state: flow.phase, props: { ...viewLabels, steps, subject: flow.subject, detail: flow.detail, statusTitle: t("readyTitle"), statusText: t("agentos.readyText"), statusActionLabel: t("agentos.manage") }, on: { statusAction: () => router.push(route(`/agentos/workspaces/${flow.workspaceId}`)) } }
+            default:
+                break
         }
-        if (flow.phase === "failed") return { state: "failed", props: { steps, subject: flow.subject, detail: flow.detail, statusTitle: t("failedTitle"), statusText: flow.reason, statusActionLabel: t("agentos.startAgain") }, on: { statusAction: () => router.push(route("/agentos")) } }
-        if (flow.phase === "awaiting_payment") return { state: flow.phase, props: { steps, subject: flow.subject, detail: flow.detail, statusTitle: t("agentos.paymentTitle"), statusText: t("agentos.paymentText"), statusActionLabel: t("agentos.openWallet") }, on: { statusAction: () => router.push(route("/wallet")) } }
-        if (flow.phase === "ready") return { state: flow.phase, props: { steps, subject: flow.subject, detail: flow.detail, statusTitle: t("readyTitle"), statusText: t("agentos.readyText"), statusActionLabel: t("agentos.manage") }, on: { statusAction: () => router.push(route("/agentos")) } }
         const isAccepted = flow.phase === "accepted"
         const settledText = isAccepted ? t("agentos.acceptedText") : t("agentos.preparingText")
         const statusText = realtime.status === "connecting" ? t("connecting") : settledText
         return {
             state: flow.phase,
             props: {
+                ...viewLabels,
                 steps,
                 subject: flow.subject,
                 detail: flow.detail,

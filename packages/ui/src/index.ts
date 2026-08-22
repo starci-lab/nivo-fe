@@ -69,6 +69,8 @@ export { Badge } from "./leaves/Badge"
 export type { BadgeData, BadgeProps, BadgeTone } from "./leaves/Badge"
 export { Button } from "./leaves/Button"
 export type { ButtonActions, ButtonData, ButtonProps } from "./leaves/Button"
+export { Breadcrumbs } from "./leaves/Breadcrumbs"
+export type { BreadcrumbsActions, BreadcrumbsData, BreadcrumbsProps, BreadcrumbStep } from "./leaves/Breadcrumbs"
 export { Checkbox } from "./leaves/Checkbox"
 export { ChoiceTabs } from "./leaves/ChoiceTabs"
 export type { ChoiceTabData, ChoiceTabsActions, ChoiceTabsData, ChoiceTabsProps } from "./leaves/ChoiceTabs"
@@ -85,6 +87,8 @@ export { Text } from "./leaves/Text"
 export type { TextData, TextProps } from "./leaves/Text"
 export { TextLink } from "./leaves/TextLink"
 export type { TextLinkData, TextLinkProps } from "./leaves/TextLink"
+export { ThemeSwitch } from "./leaves/ThemeSwitch"
+export type { ThemeSwitchActions, ThemeSwitchData, ThemeSwitchProps } from "./leaves/ThemeSwitch"
 export { SelectionList } from "./leaves/SelectionList"
 export type { SelectionListActions, SelectionListData, SelectionListGroup, SelectionListItem, SelectionListProps } from "./leaves/SelectionList"
 
@@ -110,8 +114,19 @@ export { SurfaceFormCard } from "./branches/SurfaceFormCard"
 export type { SurfaceFormCardProps } from "./branches/SurfaceFormCard"
 export { SurfaceListCard } from "./branches/SurfaceListCard"
 export type { SurfaceListCardActions, SurfaceListCardData, SurfaceListCardProps } from "./branches/SurfaceListCard"
+export { HighlightCard } from "./branches/HighlightCard"
+export type { HighlightCardProps } from "./branches/HighlightCard"
 export { DrawerBranch } from "./branches/DrawerBranch"
 export type { DrawerBranchProps } from "./branches/DrawerBranch"
+export { DropdownBranch } from "./branches/DropdownBranch"
+export type {
+    DropdownBranchActions,
+    DropdownBranchData,
+    DropdownBranchItemData,
+    DropdownBranchPlacement,
+    DropdownBranchProps,
+    DropdownBranchSectionData,
+} from "./branches/DropdownBranch"
 export { ModalBranch } from "./branches/ModalBranch"
 export type { ModalBranchProps } from "./branches/ModalBranch"
 export { CollapsibleRail } from "./branches/CollapsibleRail"

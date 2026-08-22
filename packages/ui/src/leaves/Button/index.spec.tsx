@@ -16,6 +16,7 @@ describe("Button", () => {
         render(<Button props={{ label: "Publish", isPending: true }} on={{ press: vi.fn() }} />)
         const control = screen.getByRole("button", { name: "Publish" })
         expect(control).toBeDisabled()
+        expect(control).toHaveAttribute("data-size", "md")
         expect(control).toHaveAttribute("data-action-pending", "true")
         expect(screen.getByText("Publish")).toHaveClass("invisible")
     })
@@ -25,5 +26,10 @@ describe("Button", () => {
         const control = screen.getByRole("button")
         expect(control).toBeDisabled()
         expect(control).toHaveAttribute("data-loading", "true")
+    })
+
+    it("opts a page-root action into the large control size", () => {
+        render(<Button props={{ label: "Build an app", variant: "primary", size: "lg" }} />)
+        expect(screen.getByRole("button", { name: "Build an app" })).toHaveAttribute("data-size", "lg")
     })
 })

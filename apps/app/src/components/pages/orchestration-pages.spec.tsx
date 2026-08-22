@@ -8,7 +8,11 @@ const localeState = { value: "en" }
 const t = (key: string) => key
 if (!Element.prototype.getAnimations) Element.prototype.getAnimations = () => []
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push, replace }) }))
+vi.mock("next/navigation", () => ({
+    useRouter: () => ({ push, replace }),
+    usePathname: () => "/en/wallet",
+    useSearchParams: () => new URLSearchParams(),
+}))
 vi.mock("next-intl", () => ({
     useTranslations: () => t,
     useLocale: () => localeState.value,

@@ -16,29 +16,39 @@ const steps = [
         stateLabel: "Active",
     },
     { ordinal: "3", label: "Create workspace", state: "upcoming" as const, stateLabel: "Upcoming" },
-    { ordinal: "4", label: "Build infrastructure", state: "upcoming" as const, stateLabel: "Upcoming" },
-    { ordinal: "5", label: "Manage", state: "upcoming" as const, stateLabel: "Upcoming" },
+    { ordinal: "4", label: "Ready", state: "upcoming" as const, stateLabel: "Upcoming" },
 ]
 
 describe("AgentOS provisioning lifecycle", () => {
-    it("keeps request pending inside the responsive five-stage composition", () => {
+    it("keeps request pending inside the connected four-stage composition", () => {
         const html = renderToStaticMarkup(<AgentOSProvisioningBase
             state="submitting"
-            props={{ steps, subject: "AgentOS", detail: "Workspace plan", statusTitle: "Requesting", statusText: "Submitting", requestActionLabel: "Order", isRequestPending: true }}
+            props={{ progressLabel: "AgentOS order", continuationLabel: "Next step", steps, subject: "AgentOS", detail: "Workspace plan", statusTitle: "Requesting", statusText: "Submitting", requestActionLabel: "Order", isRequestPending: true }}
             on={{ request: vi.fn() }}
         />)
-        expect(html).toContain('data-node="responsive-five-stage-lifecycle-run"')
+        expect(html).toContain('data-node="responsive-four-stage-lifecycle-stepper"')
         expect(html).toContain('data-action-pending="true"')
+        expect(html).toContain('data-size="md"')
+        expect(html).toContain('data-weight="medium"')
+        expect(html).not.toContain("<h2")
+        expect(html).not.toContain('data-component="HighlightCardSweep"')
+        expect(html.match(/<h3/g)).toHaveLength(1)
+        expect(html).toContain("AgentOS order")
+        expect(html).not.toContain("Next step")
+        expect(html).toContain('data-node="provisioning-order-content"')
+        expect(html).toContain("<svg")
+        expect(html).toContain("size-6 shrink-0")
+        expect(html).not.toContain('data-component="IconTile"')
     })
 
-    it("renders all five progress stages responsively and keeps watch controls disabled", () => {
+    it("renders all four progress stages responsively and keeps watch controls disabled", () => {
         const html = renderToStaticMarkup(<AgentOSProvisioningBase
             state="preparing"
             props={{ steps, subject: "AgentOS", detail: "Workspace plan", statusTitle: "Preparing", statusText: "Provisioning in progress", statusActionLabel: "Watch provisioning", statusActionDisabled: true }}
             on={{ statusAction: vi.fn() }}
         />)
-        expect(html).toContain('data-node="responsive-five-stage-lifecycle-run"')
-        expect(html.match(/data-node="ordinal-over-label-and-state"/g)).toHaveLength(5)
+        expect(html).toContain('data-node="responsive-four-stage-lifecycle-stepper"')
+        expect(html.match(/data-node="lifecycle-marker-over-label-and-state"/g)).toHaveLength(4)
         expect(html).toContain("Watch provisioning")
         expect(html).toContain("disabled")
     })
@@ -47,5 +57,18 @@ describe("AgentOS provisioning lifecycle", () => {
         const html = renderToStaticMarkup(<AgentOSProvisioningBase state="failed" props={{ steps, subject: "AgentOS", detail: "Workspace plan", statusTitle: "Failed", statusText: "Could not provision", statusActionLabel: "Retry" }} on={{ statusAction: vi.fn() }} />)
         expect(html).toContain("Could not provision")
         expect(html).toContain("Retry")
+    })
+
+    it("highlights only a persisted continuation with an operable destination", () => {
+        const html = renderToStaticMarkup(<AgentOSProvisioningBase
+            state="awaiting_payment"
+            props={{ steps, subject: "AgentOS", detail: "Workspace plan", statusTitle: "Complete payment", statusText: "Pay the linked invoice", statusActionLabel: "Open Wallet" }}
+            on={{ statusAction: vi.fn() }}
+        />)
+
+        expect(html).toContain('data-component="HighlightCardSweep"')
+        expect(html).toContain('data-node="identity-phase-action"')
+        expect(html).toContain('data-node="provisioning-phase-with-mark"')
+        expect(html.match(/<h3/g)).toHaveLength(1)
     })
 })

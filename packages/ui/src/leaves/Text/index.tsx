@@ -17,7 +17,7 @@ import type { LeafProps } from "../../contracts/props"
 export type TextTone = "default" | "muted" | "accent"
 
 /** The reading size. `xs` is reserved for supporting captions beneath primary content. */
-export type TextSize = "xs" | "sm" | "md"
+export type TextSize = "xs" | "sm" | "md" | "metric-lead"
 
 /** How firmly the words are set. */
 export type TextWeight = "normal" | "medium" | "semibold"
@@ -80,6 +80,7 @@ const TEXT_CLASSES = [
     "text-base leading-6 font-normal text-foreground",
     "data-[size=xs]:text-xs data-[size=xs]:leading-4 data-[size=xs]:text-muted",
     "data-[size=sm]:text-sm data-[size=sm]:leading-5",
+    "data-[size=metric-lead]:text-3xl data-[size=metric-lead]:leading-9",
     "data-[tone=muted]:text-muted",
     "data-[tone=accent]:text-accent-soft-foreground",
     "data-[weight=medium]:font-medium data-[weight=semibold]:font-semibold",
@@ -100,6 +101,9 @@ const RESTING_CLASSES = {
     }),
     md: skeletonVariants({ animationType: "shimmer" }).base({
         className: "inline-block w-40 max-w-full select-none rounded text-base leading-6 text-transparent",
+    }),
+    "metric-lead": skeletonVariants({ animationType: "shimmer" }).base({
+        className: "inline-block w-40 max-w-full select-none rounded text-3xl leading-9 text-transparent",
     }),
 } as const
 

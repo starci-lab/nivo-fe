@@ -12,6 +12,7 @@ import {
     defineLeafComponent,
 } from "@nivo/ui"
 import { FleetRow, type FleetStatus } from "@/components/blocks/provisioning/FleetRow"
+import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice"
 
 /**
  * PAGE (drawing half) - the middle level, and the reason an academy is a ROW rather than a destination.
@@ -106,6 +107,12 @@ export interface AppsPageViewProps {
     readonly title: string
     /** The sentence under the title, saying what an app is and why the set is open. */
     readonly lede: string
+    /** The page-level continuation into the one supported template flow. */
+    readonly buildAppLabel?: string
+    /** Plain-text partition for states that require owner attention. */
+    readonly attentionGroupLabel?: string
+    /** Plain-text partition for healthy and in-progress resources. */
+    readonly steadyGroupLabel?: string
     /** The owned section's settled situation. */
     readonly owned: OwnedSectionView
     /** The catalogue section's settled situation. */
@@ -228,32 +235,105 @@ const refusedSection = (label: string, note: string) => defineContractProjection
     />
 ))
 
+const ATTENTION_STATUSES: ReadonlySet<FleetStatus> = new Set(["awaiting_dns", "failed", "suspended"])
+
+const groupedOwnedList = (
+    rows: ReadonlyArray<OwnedAppRow>,
+    attentionGroupLabel: string,
+    steadyGroupLabel: string,
+    onOpenOwnedApp: (siteId: string) => void,
+) => {
+    const attention = rows.filter((row) => ATTENTION_STATUSES.has(row.status))
+    const steady = rows.filter((row) => !ATTENTION_STATUSES.has(row.status))
+    const group = (label: string, members: ReadonlyArray<OwnedAppRow>) => defineContractComponent("attention-fleet-group", {
+        marker: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
+            <Text props={{ content: label, size: "sm", tone: "muted" }} />
+        )),
+        resources: defineContractComponent("fleet-resource-list", {
+            resource: members.map((row) => ownedRow(row, onOpenOwnedApp)),
+        }),
+    })
+    return defineContractComponent("attention-grouped-fleet-list", {
+        group: [
+            ...(attention.length === 0 ? [] : [group(attentionGroupLabel, attention)]),
+            ...(steady.length === 0 ? [] : [group(steadyGroupLabel, steady)]),
+        ],
+    })
+}
+
 /**
  * The app set, and how a new one is started.
  *
  * @param input - {@link AppsPageViewProps}
  * @returns The page node.
  */
-export const AppsPageBase = ({ title, lede, owned, catalogue, onBuildTemplate, onOpenOwnedApp }: AppsPageViewProps) => {
+export const AppsPageBase = ({
+    title,
+    lede,
+    buildAppLabel,
+    attentionGroupLabel,
+    steadyGroupLabel,
+    owned,
+    catalogue,
+    onBuildTemplate,
+    onOpenOwnedApp,
+}: AppsPageViewProps) => {
+    const supportedOffer = catalogue.phase === "answered"
+        ? catalogue.offers.find((offer) => !offer.actionDisabled)
+        : undefined
     /*
      * SECTION 1 - the apps this account owns, in every situation the set can be in.
      */
     const ownedSection = () => {
         if (owned.phase === "empty") {
-            return sentenceSection(owned.label, owned.note)
+            return defineContractProjection("label-row-over-card", () => (
+                <SurfaceCard
+                    props={{ label: owned.label }}
+                    contract="centred-empty-notice"
+                    render={defineContractComponent("centred-empty-notice", {
+                        notice: defineCompositeComponent("empty-notice", {}, () => (
+                            <EmptyNotice
+                                props={{
+                                    message: owned.note,
+                                    actionLabel: supportedOffer === undefined ? undefined : buildAppLabel,
+                                }}
+                                on={{ act: supportedOffer === undefined || buildAppLabel === undefined ? undefined : () => onBuildTemplate(supportedOffer.templateKey) }}
+                            />
+                        )),
+                    })}
+                />
+            ))
         }
         if (owned.phase === "refused") {
             return refusedSection(owned.label, owned.note)
         }
         const isResting = owned.phase === "resting"
+        if (owned.phase === "answered" && attentionGroupLabel !== undefined && steadyGroupLabel !== undefined) {
+            return defineContractProjection("label-row-over-card", () => (
+                <SurfaceCard
+                    props={{ label: owned.label }}
+                    contract="attention-grouped-fleet-list"
+                    render={groupedOwnedList(owned.rows, attentionGroupLabel, steadyGroupLabel, onOpenOwnedApp)}
+                />
+            ))
+        }
+        if (owned.phase === "answered") {
+            return defineContractProjection("label-row-over-card", () => (
+                <SurfaceCard
+                    props={{ label: owned.label }}
+                    contract="fleet-resource-list"
+                    render={defineContractComponent("fleet-resource-list", {
+                        resource: owned.rows.map((row) => ownedRow(row, onOpenOwnedApp)),
+                    })}
+                />
+            ))
+        }
         return defineContractProjection("label-row-over-card", () => (
             <SurfaceCard
                 props={{ label: owned.label }}
                 contract="fleet-resource-list"
                 render={defineContractComponent("fleet-resource-list", {
-                    resource: owned.phase === "answered"
-                        ? owned.rows.map((row) => ownedRow(row, onOpenOwnedApp))
-                        : [restingRow(1), restingRow(2), restingRow(3)],
+                    resource: [restingRow(1), restingRow(2), restingRow(3)],
                 })}
                 isLoading={isResting}
             />
@@ -288,22 +368,38 @@ export const AppsPageBase = ({ title, lede, owned, catalogue, onBuildTemplate, o
         ))
     }
 
+    const headingAction = supportedOffer === undefined || buildAppLabel === undefined ? {} : {
+        end: defineLeafComponent("button", { size: "lg" }, () => (
+            <Button props={{ label: buildAppLabel, size: "lg", variant: "primary" }} on={{ press: () => onBuildTemplate(supportedOffer.templateKey) }} />
+        )),
+    }
+
     return (
         <Tree
-            contract="titled-section-stack-page"
-            render={defineContractComponent("titled-section-stack-page", {
-                heading: defineContractComponent("title-with-end-action", {
-                    title: defineLeafComponent("heading", {}, () => <Heading props={{ content: title, level: 1 }} />),
+            contract="console-primary-aside-page"
+            render={defineContractComponent("console-primary-aside-page", {
+                heading: defineContractComponent("display-title-with-end-action", {
+                    title: defineLeafComponent("heading", { scale: "display" }, () => (
+                        <Heading props={{ content: title, level: 1, scale: "display" }} />
+                    )),
+                    ...headingAction,
                 }),
                 /*
                  * THE LEDE IS WHAT `title-with-baseline-fact` CANNOT HOLD. A baseline fact is a short
                  * phrase beside a title; this is a sentence about what an app IS and why the set is
                  * open, which is the claim the whole middle level rests on.
                  */
-                lede: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                    <Text props={{ content: lede, size: "sm", tone: "muted" }} />
+                lede: defineLeafComponent("text", { size: "md", tone: "muted" }, () => (
+                    <Text props={{ content: lede, size: "md", tone: "muted" }} />
                 )),
-                section: [ownedSection(), catalogueSection()],
+                content: defineContractComponent("console-primary-aside", {
+                    primary: defineContractComponent("console-section-stack", {
+                        section: [ownedSection()],
+                    }),
+                    aside: defineContractComponent("console-section-stack", {
+                        section: [catalogueSection()],
+                    }),
+                }),
             })}
         />
     )

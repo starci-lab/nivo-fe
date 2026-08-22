@@ -1,6 +1,8 @@
+import { render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { AgentOSWorkspacePageBase, type AgentOSWorkspacePageLabels, type AgentOSWorkspaceSection } from "./AgentOSWorkspacePage/component"
+import { AgentOSWorkspaceControlCenterBase as AgentOSWorkspacePageBase, type AgentOSWorkspaceControlCenterLabels as AgentOSWorkspacePageLabels, type AgentOSWorkspacePageState } from "../blocks/agentos/AgentOSWorkspaceControlCenter/component"
 
 vi.mock("@/components/blocks/agentos/AgentOSWorkspaceApplications", () => ({ AgentOSWorkspaceApplications: () => <div>applications</div> }))
 vi.mock("@/components/blocks/agentos/AgentOSSolutionModuleCenter", () => ({ AgentOSSolutionModuleCenter: () => <div>solutions</div> }))
@@ -22,25 +24,38 @@ const data = {
 
 describe("AgentOSWorkspacePage pure sections", () => {
     it("draws every ready section and the refused fallback", () => {
-        const sections: ReadonlyArray<AgentOSWorkspaceSection> = ["overview", "solutions", "applications", "access", "infrastructure", "operations"]
-        for (const section of sections) {
+        const pageStates: ReadonlyArray<AgentOSWorkspacePageState> = ["overview", "solutions", "applications", "access", "infrastructure", "operations"]
+        for (const pageState of pageStates) {
             const html = renderToStaticMarkup(<AgentOSWorkspacePageBase
-                state="ready" data={data} section={section} labels={labels} launchState="idle" openClawLaunchHref="#"
-                onSelectSection={vi.fn()} onOpenAgentConsole={vi.fn()} formatDate={(value) => value}
+                pageState={pageState} controlCenterState="ready" data={data} labels={labels} launchState="idle" openClawLaunchHref="#"
+                onSelectPageState={vi.fn()} onOpenAgentConsole={vi.fn()} formatDate={(value) => value}
             />)
             expect(html).toContain("Agent workspace")
-            if (section === "overview") {
+            if (pageState === "overview") {
                 expect(html).toContain('data-node="workspace-overview-grid"')
                 expect(html).toContain("summary")
                 expect(html).toContain("runtime")
             }
         }
         const refused = renderToStaticMarkup(<AgentOSWorkspacePageBase
-            state="refused" message="Unavailable" section="overview" labels={labels} launchState="idle" openClawLaunchHref="#"
-            onSelectSection={vi.fn()} onOpenAgentConsole={vi.fn()} formatDate={(value) => value}
+            pageState="overview" controlCenterState="refused" message="Unavailable" labels={labels} launchState="idle" openClawLaunchHref="#"
+            onSelectPageState={vi.fn()} onOpenAgentConsole={vi.fn()} formatDate={(value) => value}
         />)
         expect(refused).toContain("Unavailable")
         expect(refused).not.toContain("Return to workspace list")
         expect(refused).not.toContain("Retry reading solutions")
+    })
+
+    it("reports the next selected workspace section", async () => {
+        const select = vi.fn()
+        const user = userEvent.setup()
+        render(<AgentOSWorkspacePageBase
+            pageState="overview" controlCenterState="ready" data={data} labels={labels} launchState="idle" openClawLaunchHref="#"
+            onSelectPageState={select} onOpenAgentConsole={vi.fn()} formatDate={(value) => value}
+        />)
+
+        await user.click(screen.getByRole("tab", { name: "applications" }))
+
+        expect(select).toHaveBeenCalledWith("applications")
     })
 })

@@ -113,7 +113,7 @@ describe("AgentOSProvisioning connected flow", () => {
         await waitFor(() => expect(flow()).toContain('"state":"failed"'))
         missing.unmount()
 
-        snapshot({ invoices: [{ status: "unpaid", catalogOrder: { id: "order" } }] })
+        snapshot({ invoices: [{ id: "invoice", status: "unpaid", catalogOrder: { id: "order" } }] })
         const unpaid = render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"awaiting_payment"'))
         unpaid.unmount()
@@ -148,17 +148,17 @@ describe("AgentOSProvisioning connected flow", () => {
     })
 
     it("routes payment and ready status actions", async () => {
-        snapshot({ orders: [{ ...order, status: "pending_payment" }] })
+        snapshot({ orders: [{ ...order, status: "pending_payment" }], invoices: [{ id: "invoice", status: "unpaid", catalogOrder: { id: "order" } }] })
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"awaiting_payment"'))
         fireEvent.click(screen.getByTestId("status"))
-        expect(mocks.push).toHaveBeenCalledWith("/en/wallet")
+        expect(mocks.push).toHaveBeenCalledWith("/en/wallet?orderId=order&invoiceId=invoice&returnTo=%2Fen%2Fagentos%2Forders%2Forder")
 
         cleanup()
         snapshot({ orders: [{ ...order, status: "paid" }], workspaces: [{ id: "workspace", status: "active", catalogOrder: { id: "order" } }] })
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"ready"'))
         fireEvent.click(screen.getByTestId("status"))
-        expect(mocks.push).toHaveBeenCalledWith("/en/agentos")
+        expect(mocks.push).toHaveBeenCalledWith("/en/agentos/workspaces/workspace")
     })
 })

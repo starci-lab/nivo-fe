@@ -25,11 +25,12 @@
  * when the bad value cannot be typed.
  */
 export type LayoutClassName =
-    | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "overflow-hidden"
+    | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "overflow-hidden" | "relative"
     | "items-center" | "items-baseline" | "items-start"
     | "justify-between" | "justify-center" | "justify-around" | "[&>*]:w-full" | "[&>*]:max-w-sm"
     | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
-    | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "sm:grid-cols-5" | "lg:grid-cols-3"
+    | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "sm:grid-cols-4" | "sm:grid-cols-5" | "sm:grid-cols-[minmax(0,1fr)_12rem]" | "lg:grid-cols-3" | "lg:grid-cols-4"
+    | "lg:grid-cols-[minmax(0,1fr)_20rem]"
     | "md:flex" | "md:flex-row" | "md:items-start"
     | "mx-auto" | "min-h-screen" | "w-full" | "w-64" | "min-w-0" | "grow" | "flex-1" | "hidden" | "fixed" | "inset-x-0" | "bottom-0" | "max-w-app-lg" | "max-w-6xl" | "max-w-sm"
     // The two reading measures between the form width and the dashboard width. `max-w-sm` is a
@@ -40,7 +41,7 @@ export type LayoutClassName =
     // in this union but has no theme definition anywhere in the repository, so it compiles to
     // nothing at all.
     | "max-w-3xl" | "max-w-4xl"
-    | "h-16" | "min-h-16" | "sticky" | "top-0" | "top-16" | "z-40" | "z-50"
+    | "h-16" | "min-h-16" | "sticky" | "top-0" | "top-16" | "z-40" | "z-50" | "shrink-0" | "justify-end"
     | "border" | "border-b" | "border-t" | "border-separator" | "divide-y" | "divide-separator" | "bg-background"
     | "px-3" | "px-4" | "px-6" | "py-2" | "py-3" | "py-6" | "py-8" | "p-0" | "p-2" | "p-4" | "p-6"
     | "px-2"
@@ -61,7 +62,7 @@ export type LayoutClassName =
     | "bg-surface" | "text-center"
     | "[&>*:nth-child(2)]:min-w-0" | "[&>*:nth-child(2)]:grow"
     | "md:[&>*:first-child]:min-w-0" | "md:[&>*:first-child]:grow"
-    | "md:[&>*:last-child]:w-72" | "md:[&>*:last-child]:shrink-0"
+    | "md:[&>*:last-child]:w-72" | "md:[&>*:last-child]:shrink-0" | "md:[&>*:last-child]:hidden"
     | "md:[&>*:first-child]:w-72" | "md:[&>*:first-child]:shrink-0"
     | "md:[&>*:last-child]:min-w-0" | "md:[&>*:last-child]:grow"
     | "md:[&>*:first-child]:sticky" | "md:[&>*:first-child]:top-6"
@@ -73,6 +74,7 @@ export type LayoutClassName =
     | "md:[&>*:nth-child(2)]:shrink-0" | "md:[&>*:nth-child(2)]:overflow-y-auto"
     | "md:[&>*:nth-child(3)]:min-w-0" | "md:[&>*:nth-child(3)]:grow"
     | "[&>*:first-child]:hidden" | "md:[&>*:first-child]:flex"
+    | "[&>*:last-child]:hidden" | "sm:[&>*:last-child]:block"
     | "[&>*:nth-child(2)]:pb-16" | "md:[&>*:nth-child(2)]:pb-0"
     | "md:[&>*:nth-child(2)]:min-w-0" | "md:[&>*:nth-child(2)]:grow" | "md:hidden"
     | "[&>*]:px-4" | "[&>*]:py-3" | "[&>*]:p-2" | "[&>*]:p-3" | "[&>*]:border-separator"
@@ -80,6 +82,8 @@ export type LayoutClassName =
     | "[&>*:first-child]:w-5" | "[&>*:first-child]:shrink-0"
     | "[&>*:first-child]:text-center" | "[&>*:first-child]:tabular-nums"
     | "[&>*:first-child]:pt-4" | "[&>*:last-child]:pb-4"
+    | "[&>*:first-child]:bg-surface-secondary" | "[&>*:first-child]:px-4" | "[&>*:first-child]:py-2"
+    | "[&>*:not(:last-child)]:border-b" | "sm:[&>*:not(:last-child)]:border-b-0" | "sm:[&>*:not(:last-child)]:border-r"
     // The unprefixed pair. `md:[&>*:first-child]:min-w-0` and its `grow` twin were already here for
     // the rail layouts, which only take the flexible-first shape above the md breakpoint; a row
     // whose FIRST child takes the slack at every width needs the same two names without the prefix.
@@ -291,6 +295,14 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need a section title with one optional trailing button or see-more link at the far end of its line, dropping under the title when the line runs out.",
     },
+    "display-title-with-end-action": {
+        classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-6"],
+        children: {
+            title: { leaf: "heading", props: { scale: "display" } },
+            end: { leaf: "button", props: { size: "lg" }, optional: true },
+        },
+        why: "if you need the accepted console page root to pair one display-scale title with its optional large primary action, without promoting section headings or ordinary controls.",
+    },
     "inline-action-run": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "gap-2"],
         children: {
@@ -333,15 +345,25 @@ export const CONTRACTS = buildContracts({
                     // cannot draw one has to fall back on the empty notice, which tells the reader
                     // nothing was there when the server in fact declined to say.
                     "body-with-refusal-note", "heading-body-action-stack", "form-column", "identity-action-list",
-                    "status-action-card-grid", "workspace-runtime-stack", "helm-component-status-table",
+                    "account-signal-card", "attention-grouped-fleet-list",
+                    "status-action-card", "status-action-card-grid", "workspace-runtime-stack", "helm-component-status-table",
                     "infrastructure-summary", "wallet-summary", "module-summary", "module-bindings",
                     "wallet-balance-surface", "wallet-top-up-form", "wallet-payment-result",
-                    "wallet-checkout-evidence", "wallet-ledger-detail",
+                    "responsive-four-stage-lifecycle-stepper", "identity-phase-action", "provisioning-order-content",
+                    "wallet-checkout-evidence", "wallet-ledger-detail", "wallet-linked-invoice",
                 ],
                 leaf: "text",
             },
         },
         why: "if you need a labelled section whose body is itself a card, a grid or a list, with the label held outside so a card never draws inside another card.",
+    },
+    "highlight-card-shell": {
+        classes: ["relative"],
+        children: {
+            sweep: { leaf: "accent-sweep", optional: true },
+            surface: { leaf: "highlight-card-surface" },
+        },
+        why: "if one typed surface needs a transient perimeter accent behind it without giving the caller an untyped content opening.",
     },
     "empty-notice-stack": {
         classes: ["flex", "flex-col", "items-center", "gap-3", "text-center"],
@@ -489,6 +511,24 @@ export const CONTRACTS = buildContracts({
             resource: { composite: ["fleet-row", "template-offer-row"], repeats: true, restingCount: 3 },
         },
         why: "if you need one joined surface comparing rows of resources at a glance, mixing something already provisioned with something still on offer in the same scan",
+    },
+    "attention-grouped-fleet-list": {
+        classes: ["flex", "flex-col", "divide-y", "divide-separator"],
+        children: {
+            group: { contract: "attention-fleet-group", repeats: true, restingCount: 2 },
+        },
+        why: "if you need one joined fleet surface partitioned by attention so urgent resources scan first without turning either partition into a separate card or displaying a synthetic total.",
+    },
+    "attention-fleet-group": {
+        classes: [
+            "flex", "flex-col",
+            "[&>*:first-child]:bg-surface-secondary", "[&>*:first-child]:px-4", "[&>*:first-child]:py-2",
+        ],
+        children: {
+            marker: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            resources: { contract: "fleet-resource-list" },
+        },
+        why: "if you need one plain-text partition marker immediately above comparable fleet rows, with row rhythm still owned by the joined list and no status chip promoted from the marker.",
     },
     "dual-tabs-toolbar": {
         classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3"],
@@ -639,6 +679,18 @@ export const CONTRACTS = buildContracts({
             note: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
         },
         why: "if you need one selected wallet movement or invoice expanded into exact facts in the right-edge drawer without duplicating its summary surface",
+    },
+    "wallet-linked-invoice": {
+        classes: ["flex", "min-w-0", "flex-col", "items-start", "gap-4", "p-4"],
+        children: {
+            identity: { contract: "subject-over-muted-caption" },
+            state: { leaf: "badge" },
+            amount: { leaf: "heading" },
+            order: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            consequence: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            action: { leaf: "button", optional: true },
+        },
+        why: "if you need the exact invoice correlated to one AgentOS order to keep identity, settlement state, amount, order context and its one safe outcome together.",
     },
     "label-value-row": {
         classes: ["flex", "flex-row", "flex-wrap", "items-baseline", "justify-between", "gap-2"],
@@ -846,28 +898,49 @@ export const CONTRACTS = buildContracts({
     /*
      * ── THE CONSOLE RAIL AND ITS ROUTED BODY ─────────────────────────────────────────────────────
      *
-     * Five entries belong to one topology: desktop top chrome, the standing destination rail, its
-     * narrow drawer replacement, the routed body and the landmark that body opens.
+     * Four entries belong to one topology: one responsive global navbar, the standing destination
+     * rail, the routed body and the landmark that body opens.
      */
     "console-topbar-over-sidebar-body": {
         classes: ["flex", "min-h-screen", "w-full", "flex-col"],
         children: {
-            topbar: { contract: "console-desktop-topbar" },
+            topbar: { contract: "console-global-navbar" },
             content: { contract: "sidebar-then-body-app" },
         },
-        why: "if you need authenticated console chrome to keep one desktop product bar above the standing navigation and routed body without exposing that bar on narrow screens",
+        why: "if you need authenticated console chrome to keep one capability-backed global navbar above the standing navigation and routed body across every viewport",
     },
-    "console-desktop-topbar": {
+    "console-global-navbar": {
         host: "header",
         classes: [
-            "sticky", "top-0", "z-40", "hidden", "h-16", "w-full", "items-center",
-            "justify-between", "border-b", "border-separator", "px-3", "md:flex",
+            "sticky", "top-0", "z-40", "flex", "h-16", "w-full", "items-center",
+            "justify-between", "gap-3", "border-b", "border-separator", "bg-surface", "px-3",
+        ],
+        children: {
+            identity: { contract: "console-navbar-identity" },
+            tools: { contract: "console-navbar-tools" },
+        },
+        why: "if you need authenticated console routes to preserve product identity and expose only real global capabilities in one persistent landmark on wide and narrow screens",
+    },
+    "console-navbar-identity": {
+        classes: [
+            "flex", "min-w-0", "items-center", "gap-3",
+            "[&>*:last-child]:hidden", "sm:[&>*:last-child]:block",
         ],
         children: {
             brand: { leaf: "heading" },
-            title: { leaf: "text" },
+            context: { leaf: "text" },
         },
-        why: "if you need wide authenticated console routes to preserve product identity and the console label in one persistent band above navigation and content",
+        why: "if you need the global navbar's product identity and console context to remain one leading run while narrow space keeps the brand primary",
+    },
+    "console-navbar-tools": {
+        classes: ["flex", "shrink-0", "items-center", "justify-end", "gap-1", "md:[&>*:last-child]:hidden"],
+        children: {
+            locale: { leaf: "language-menu" },
+            theme: { leaf: "theme-switch" },
+            account: { leaf: "account-menu" },
+            drawer: { leaf: "drawer-branch", optional: true },
+        },
+        why: "if you need one trailing run of capability-backed global tools, including the narrow destination trigger without inventing unsupported actions",
     },
     "sidebar-then-body-app": {
         /*
@@ -881,10 +954,9 @@ export const CONTRACTS = buildContracts({
         classes: [
             "flex", "w-full", "flex-col",
             "md:flex-row", "md:items-start",
-            "md:[&>*:nth-child(3)]:min-w-0", "md:[&>*:nth-child(3)]:grow",
+            "md:[&>*:nth-child(2)]:min-w-0", "md:[&>*:nth-child(2)]:grow",
         ],
         children: {
-            mobileNav: { contract: "console-mobile-drawer-bar", optional: true },
             sidebar: { leaf: "collapsible-rail" },
             body: { contract: "console-body-main" },
         },
@@ -923,18 +995,6 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need a resource identity, kind, lifecycle status and optional action to remain one ordered row when wide and stack in that same order when narrow",
     },
-    "console-mobile-drawer-bar": {
-        host: "header",
-        classes: [
-            "sticky", "top-0", "z-40", "flex", "w-full", "items-center", "justify-between",
-            "border-b", "border-separator", "bg-surface", "px-4", "py-2", "md:hidden",
-        ],
-        children: {
-            brand: { leaf: "heading" },
-            drawer: { leaf: "drawer-branch" },
-        },
-        why: "if you need narrow console chrome to keep product identity visible while one control opens the complete destination set from the right edge",
-    },
     /*
      * ── THE PAGE MEASURE, AND THE TWO BODIES ─────────────────────────────────────────────────────
      */
@@ -946,6 +1006,7 @@ export const CONTRACTS = buildContracts({
          */
         classes: ["mx-auto", "flex", "w-full", "max-w-4xl", "flex-col", "gap-6", "px-6", "py-6"],
         children: {
+            path: { leaf: "breadcrumbs", optional: true },
             heading: { contract: ["title-with-end-action", "title-with-baseline-fact"] },
             /*
              * A SENTENCE, WHERE `title-with-baseline-fact` HOLDS ONLY A PHRASE. Its `fact` reads as
@@ -968,17 +1029,69 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need a single-column operations page with a heading and independently-loading labelled sections stacked one after another so one section refusing never nests inside, or reads as, another",
     },
-    "dashboard-overview-page": {
-        classes: ["flex", "w-full", "flex-col", "gap-6", "p-6"],
+    "wallet-waypoint-page": {
+        classes: ["mx-auto", "flex", "w-full", "max-w-4xl", "flex-col", "gap-6", "px-6", "py-6"],
         children: {
+            path: { leaf: "breadcrumbs", optional: true },
             heading: { contract: "title-with-end-action" },
+            section: { contract: "label-row-over-card", repeats: true, restingCount: 4 },
+        },
+        why: "if Wallet can be entered as an exact-order waypoint and must keep its path above the page title while wallet-owned sections remain in their ordinary reading order.",
+    },
+    "module-detail-page": {
+        classes: ["mx-auto", "flex", "w-full", "max-w-4xl", "flex-col", "gap-6", "px-6", "py-6"],
+        children: {
+            back: { leaf: "text-link" },
+            heading: { contract: "title-with-end-action" },
+            lede: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            section: { contract: "label-row-over-card", repeats: true, restingCount: 2 },
+        },
+        why: "if one nested module installation must preserve an exact workspace return before its title while summary and binding sections settle independently below.",
+    },
+    "console-primary-aside-page": {
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-8", "px-6", "py-8"],
+        children: {
+            heading: { contract: "display-title-with-end-action" },
+            lede: { leaf: "text", props: { size: "md", tone: "muted" }, optional: true },
+            signals: { contract: "account-signal-grid", optional: true },
+            content: { contract: "console-primary-aside" },
+        },
+        why: "if you need one complete console page with a stable heading and explanation above a primary work column and a narrower evidence or catalogue rail.",
+    },
+    "console-primary-aside": {
+        classes: ["grid", "grid-cols-1", "gap-8", "lg:grid-cols-[minmax(0,1fr)_20rem]"],
+        children: {
+            primary: { contract: "console-section-stack" },
+            aside: { contract: "console-section-stack" },
+        },
+        why: "if you need a primary work region beside a fixed-role evidence or catalogue rail when wide, with both retaining source order in one column when the primary track can no longer yield.",
+    },
+    "console-section-stack": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-6"],
+        children: {
             section: {
                 contract: ["label-row-over-card", "infrastructure-summary", "wallet-summary"],
                 repeats: true,
-                restingCount: 4,
+                restingCount: 2,
             },
         },
-        why: "if you need the operations overview to use the routed primary plane's full normal-flow width while keeping one heading above four independently settling business regions",
+        why: "if you need peer console sections with independent states to keep one vertical reading order inside either the primary or secondary page region.",
+    },
+    "account-signal-grid": {
+        classes: ["grid", "grid-cols-2", "gap-4", "lg:grid-cols-4"],
+        children: {
+            signal: { contract: "account-signal-card", repeats: true, restingCount: 4 },
+        },
+        why: "if you need four independently settling account signals to align for comparison while showing named members and exact values instead of inventing collection totals.",
+    },
+    "account-signal-card": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-3", "p-6"],
+        children: {
+            label: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            value: { leaf: "text", props: { size: "metric-lead", weight: "semibold" } },
+            caption: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if you need one independently settled account signal to state its subject, one named or exact value, and the qualifying evidence beneath it on its own page-level surface.",
     },
     "infrastructure-summary": {
         classes: ["flex", "flex-col", "gap-4"],
@@ -1036,14 +1149,61 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need the five AgentOS lifecycle stages to compare in one row when wide and remain a complete ordered vertical sequence when narrow",
     },
-    "ordinal-over-label-and-state": {
-        classes: ["flex", "min-w-0", "flex-col", "gap-1"],
+    "responsive-four-stage-lifecycle-stepper": {
+        classes: ["grid", "w-full", "grid-cols-1", "sm:grid-cols-4", "[&>*:not(:last-child)]:border-b", "sm:[&>*:not(:last-child)]:border-b-0", "sm:[&>*:not(:last-child)]:border-r", "[&>*]:border-separator"],
         children: {
-            ordinal: { leaf: "text" },
-            label: { leaf: "text" },
-            state: { leaf: "badge" },
+            step: { composite: "lifecycle-step", repeats: true, restingCount: 4 },
         },
-        why: "if you need one lifecycle step showing its position, its label, and its current state stacked so the state never replaces the step's own identity",
+        why: "if you need four customer outcomes to stay one connected ordered sequence, with separators joining completed, current and upcoming markers horizontally when wide and vertically when narrow.",
+    },
+    "lifecycle-marker-over-label-and-state": {
+        classes: ["flex", "min-w-0", "flex-col", "items-start", "gap-1", "p-4"],
+        children: {
+            marker: { leaf: "badge" },
+            label: { leaf: "text" },
+            state: { leaf: "text" },
+        },
+        why: "if you need one lifecycle marker to keep its ordinal, outcome label and semantic state in one readable unit while the parent owns the connector.",
+    },
+    "identity-phase-action": {
+        classes: ["flex", "flex-col", "items-start", "gap-4", "p-4"],
+        children: {
+            identity: { contract: "subject-over-muted-caption" },
+            prompt: { leaf: "text", props: { size: "sm" } },
+            body: { leaf: "text" },
+            action: { leaf: "button", optional: true },
+        },
+        why: "if one order phase must keep its dominant product identity ahead of the phase prompt, consequence and optional primary action without letting the prompt enter the page outline.",
+    },
+    "provisioning-order-stack": {
+        classes: ["flex", "w-full", "flex-col"],
+        children: {
+            order: { contract: "label-row-over-card" },
+        },
+        why: "if one AgentOS order must remain one labelled page section while its progress and phase-correct continuation share one surface.",
+    },
+    "provisioning-order-content": {
+        classes: ["flex", "w-full", "flex-col"],
+        children: {
+            journey: { contract: "responsive-four-stage-lifecycle-stepper" },
+            continuation: { contract: "provisioning-phase-with-mark" },
+        },
+        why: "if one AgentOS order surface must keep its connected customer journey directly above the action that advances that same order.",
+    },
+    "provisioning-phase-with-mark": {
+        classes: ["grid", "grid-cols-1", "items-center", "border-t", "border-separator", "sm:grid-cols-[minmax(0,1fr)_12rem]"],
+        children: {
+            details: { contract: "identity-phase-action" },
+            artwork: { contract: "provisioning-brand-mark-cell" },
+        },
+        why: "if one order phase needs its identity, consequence and action beside one large product mark when wide while retaining the same source order in a narrow stack.",
+    },
+    "provisioning-brand-mark-cell": {
+        classes: ["flex", "items-center", "justify-center", "p-4"],
+        children: {
+            mark: { leaf: "icon" },
+        },
+        why: "if a single controlled product glyph closes the open edge of an order phase without becoming another content surface.",
     },
     "subject-over-muted-caption-with-action": {
         classes: ["flex", "w-full", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-3"],
@@ -1148,6 +1308,15 @@ export const CONTRACTS = buildContracts({
             action: { leaf: ["button", "action-link"] },
         },
         why: "if you need one capability card stating what it is, its current status and exactly one safe action, with refusal detail kept quiet and no credential-shaped value ever entering it",
+    },
+    "secure-launch-bridge-page": {
+        classes: ["mx-auto", "flex", "min-h-screen", "w-full", "max-w-sm", "flex-col", "justify-center", "gap-6", "px-6", "py-8"],
+        children: {
+            heading: { leaf: "heading" },
+            card: { contract: "status-action-card" },
+            security: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
+        why: "if a short-lived application launch needs one bounded status surface, exact workspace identity and a credential-free consequence outside the persistent console chrome.",
     },
     "identity-action-list": {
         classes: ["flex", "flex-col", "divide-y", "divide-separator"],

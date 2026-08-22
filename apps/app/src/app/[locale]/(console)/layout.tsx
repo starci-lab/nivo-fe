@@ -75,11 +75,8 @@ const ConsoleLayout = ({ children }: ConsoleLayoutProps) => {
         <Tree
             contract="console-topbar-over-sidebar-body"
             render={defineContractComponent("console-topbar-over-sidebar-body", {
-                topbar: defineContractProjection("console-desktop-topbar", () => <ConsoleTopBar />),
+                topbar: defineContractProjection("console-global-navbar", () => <ConsoleTopBar />),
                 content: defineContractComponent("sidebar-then-body-app", {
-                    mobileNav: defineContractProjection("console-mobile-drawer-bar", () => (
-                        <ConsoleNav mode="mobile" />
-                    )),
                     sidebar: defineLeafComponent("collapsible-rail", {}, () => <ConsoleNav />),
                     body: defineContractProjection("console-body-main", () => (
                         <Tree

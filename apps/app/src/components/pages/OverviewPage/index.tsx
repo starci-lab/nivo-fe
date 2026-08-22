@@ -7,6 +7,7 @@ import type { BadgeTone } from "@nivo/ui"
 import type { AgentOSSummaryState } from "@/components/blocks/console/AgentOSSummary"
 import type { AppsSummaryState } from "@/components/blocks/console/AppsSummary"
 import type { InfrastructureDomainsState } from "@/components/blocks/console/InfrastructureSummary"
+import type { OverviewPulseSignal } from "@/components/blocks/console/OverviewPulse"
 import type { WalletSummaryState } from "@/components/blocks/console/WalletSummary"
 import { DEFAULT_LOCALE } from "@/i18n/config"
 import { useSession } from "@/modules/auth/session"
@@ -119,6 +120,10 @@ export const OverviewPage = () => {
     const money = (amountVnd: number) =>
         format.number(amountVnd, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
     const day = (iso: string) => format.dateTime(new Date(iso), { day: "2-digit", month: "2-digit" })
+    const domainCaption = (domain: DomainRow) => {
+        if (domain.expiresAt !== null) return t("domains.expiresAt", { date: day(domain.expiresAt) })
+        return domain.autoRenew ? t("domains.autoRenewOn") : t("domains.autoRenewOff")
+    }
     const open = (route: string) => router.push(locale === DEFAULT_LOCALE ? route : `/${locale}${route}`)
 
     const appsState = (): AppsSummaryState => {
@@ -165,9 +170,7 @@ export const OverviewPage = () => {
             facts: domains.data.map((domain) => ({
                 id: domain.id,
                 label: domain.name,
-                value: domain.expiresAt === null
-                    ? (domain.autoRenew ? t("domains.autoRenewOn") : t("domains.autoRenewOff"))
-                    : t("domains.expiresAt", { date: day(domain.expiresAt) }),
+                value: domainCaption(domain),
             })),
         }
     }
@@ -194,13 +197,78 @@ export const OverviewPage = () => {
         ? t("infrastructure.empty")
         : t("infrastructure.context")
 
+    const pulseSignals = (): ReadonlyArray<OverviewPulseSignal> => {
+        const pending = (id: string, label: string): OverviewPulseSignal => ({
+            id,
+            label,
+            phase: "pending",
+            value: "",
+            caption: t("state.loading"),
+        })
+        const failed = (id: string, label: string, code: string | undefined): OverviewPulseSignal => ({
+            id,
+            label,
+            phase: "failed",
+            value: "—",
+            caption: refusal(code),
+        })
+
+        const appSignal = (() => {
+            if (apps === null) return pending("apps", t("apps.title"))
+            if (!apps.ok) return failed("apps", t("apps.title"), apps.code)
+            const first = apps.data.find((site) => ["awaiting_dns", "failed", "suspended"].includes(site.provisionStatus))
+                ?? apps.data[0]
+            return first === undefined
+                ? { id: "apps", label: t("apps.title"), phase: "answered" as const, value: t("overview.none"), caption: t("apps.emptyDescription") }
+                : { id: "apps", label: t("apps.title"), phase: "answered" as const, value: first.slug, caption: statusLabel(first.provisionStatus), emphasis: "accent" as const }
+        })()
+        const agentSignal = (() => {
+            if (agentOs === null) return pending("agentos", t("agentos.title"))
+            if (!agentOs.workspaces.ok) return failed("agentos", t("agentos.title"), agentOs.workspaces.code)
+            const first = agentOs.workspaces.data[0]
+            return first === undefined
+                ? { id: "agentos", label: t("agentos.title"), phase: "answered" as const, value: t("overview.none"), caption: t("agentos.emptyDescription") }
+                : { id: "agentos", label: t("agentos.title"), phase: "answered" as const, value: first.name ?? t("agentos.kindWorkspace"), caption: statusLabel(first.status) }
+        })()
+        const domainSignal = (() => {
+            if (domains === null) return pending("domains", t("domains.title"))
+            if (!domains.ok) return failed("domains", t("domains.title"), domains.code)
+            const first = domains.data[0]
+            return first === undefined
+                ? { id: "domains", label: t("domains.title"), phase: "answered" as const, value: t("overview.none"), caption: t("domains.empty") }
+                : { id: "domains", label: t("domains.title"), phase: "answered" as const, value: first.name, caption: domainCaption(first) }
+        })()
+        const walletSignal = (() => {
+            if (wallet === null) return pending("wallet", t("wallet.title"))
+            if (!wallet.wallet.ok) return failed("wallet", t("wallet.title"), wallet.wallet.code)
+            const unpaid = wallet.invoices.ok
+                ? wallet.invoices.data.find((invoice) => invoice.status === "unpaid")
+                : undefined
+            return {
+                id: "wallet",
+                label: t("wallet.title"),
+                phase: "answered" as const,
+                value: money(wallet.wallet.data.balanceVnd),
+                caption: unpaid === undefined
+                    ? t("wallet.noUnpaid")
+                    : `${money(unpaid.amountVnd)} · ${t("wallet.dueAt", { date: day(unpaid.dueAt) })}`,
+                emphasis: "accent" as const,
+            }
+        })()
+        return [appSignal, agentSignal, domainSignal, walletSignal]
+    }
+
     return (
         <OverviewPageBase
             title={t("overview.title")}
+            lede={t("overview.lede")}
+            buildAppLabel={t("overview.buildApp")}
+            pulse={{ signals: pulseSignals() }}
             apps={{ label: t("apps.title"), state: appsState(), onOpenApp: () => open("/apps") }}
             agentOs={{ label: t("agentos.title"), state: agentOsState(), onOpenService: () => open("/agentos") }}
             infrastructure={{ label: t("infrastructure.title"), context: infrastructureContext, domains: domainsState() }}
             wallet={{ label: t("wallet.title"), actionLabel: wallet?.wallet.ok === true && wallet.wallet.data.balanceVnd === 0 ? t("wallet.topUp") : t("wallet.viewTransactions"), state: walletState(), onOpenWallet: () => open("/wallet") }}
+            onBuildApp={() => open("/apps")}
         />
     )
 }

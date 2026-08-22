@@ -109,6 +109,21 @@
     "openMenu": "Menu",
     "closeMenu": "Close",
     "unavailable": "Unavailable",
+    "locale": {
+      "label": "Language",
+      "options": {
+        "vi": "Vietnamese",
+        "en": "English"
+      }
+    },
+    "theme": {
+      "light": "Use light theme",
+      "dark": "Use dark theme"
+    },
+    "account": {
+      "label": "Account",
+      "signOut": "Sign out"
+    },
     "nav": {
       "overview": "Overview",
       "apps": "Apps",
@@ -129,7 +144,10 @@
       "unknown": "This part could not be read. The rest of the screen is still correct."
     },
     "overview": {
-      "title": "Overview"
+      "title": "Overview",
+      "lede": "Scan what is running, needs attention, and is coming due across your account.",
+      "buildApp": "Build an app",
+      "none": "None yet"
     },
     "apps": {
       "title": "Apps",
@@ -139,16 +157,19 @@
       "namesNotCount": "This section names the first few apps rather than counting them. A list page is not a total.",
       "empty": "No apps yet.",
       "emptyDescription": "Pick a template below to build the first one.",
-      "catalogueLabel": "Build another app",
+      "catalogueLabel": "Use another app",
       "catalogueFact": "template catalogue",
       "kindTemplateApp": "Template app",
       "build": "Build",
+      "buildApp": "Build an app",
       "unavailable": "Not available yet",
       "open": "Open",
       "viewDns": "View record",
       "orderInProgress": "paid order · being built",
       "priceFrom": "From {price}/month",
-      "priceTier": "{tier} · {price}"
+      "priceTier": "{tier} · {price}",
+      "attentionGroup": "Needs your attention",
+      "steadyGroup": "Running and building"
     },
   "agentos": {
       "title": "AgentOS",
@@ -166,6 +187,7 @@
         "titleFallback": "AgentOS workspace",
         "loading": "Reading the latest workspace and runtime snapshot.",
         "refused": "This workspace could not be opened or is not owned by the current account.",
+        "accessUnavailable": "Reusable workspace credentials are not exposed. Use a supported short-lived application launch instead.",
         "tabsLabel": "Workspace management area",
         "tabs": {
         "overview": "Overview",
@@ -204,6 +226,7 @@
         },
         "detail": {
           "title": "Solution module",
+          "backToWorkspace": "Back to workspace",
           "loading": "Reading the latest installation snapshot.",
           "refused": "This module installation could not be opened or does not belong to this workspace.",
           "empty": "None",
@@ -248,6 +271,21 @@
           "blocked": "The popup was blocked or the secure launch could not be issued. Allow popups and try again.",
           "expired": "The secure OpenClaw session expired. Open it again to reconnect.",
           "disconnected": "The OpenClaw window disconnected from this Nivo session."
+        },
+        "launch": {
+          "title": "Connect OpenClaw",
+          "workspaceLabel": "Exact AgentOS workspace",
+          "securityNote": "Nivo issues a short-lived, one-use launch. No reusable credential is shown or stored on this page.",
+          "returnToWorkspace": "Return to workspace",
+          "retry": "Try secure launch again",
+          "expiresAt": "Connected · expires at {time}",
+          "states": {
+            "issuing": { "label": "Issuing secure launch", "detail": "Checking exact workspace ownership and runtime readiness." },
+            "connected": { "label": "Connected", "detail": "The short-lived OpenClaw launch is ready." },
+            "blocked": { "label": "Launch blocked", "detail": "Ownership, availability, popup or redirect safety checks refused this launch." },
+            "expired": { "label": "Launch expired", "detail": "The one-use launch is no longer valid. Issue a fresh launch." },
+            "disconnected": { "label": "Disconnected", "detail": "The launch window is no longer connected to this Nivo session." }
+          }
         },
         "runtime": {
           "section": "CPU and memory",
@@ -349,7 +387,8 @@
         "createApp": "Create app",
         "createWorkspace": "Create workspace",
         "infrastructure": "Build infrastructure",
-        "manage": "Manage"
+        "manage": "Manage",
+        "ready": "Ready"
       },
       "stepState": {
         "done": "Done",
@@ -370,6 +409,8 @@
         "readyText": "The app stack is ready. Return to Apps to manage it."
       },
       "agentos": {
+        "progressLabel": "AgentOS order",
+        "continuationLabel": "Next step",
         "requestTitle": "Request an AgentOS workspace",
         "requestText": "The request creates an invoice first. Provisioning begins after payment.",
         "submit": "Request AgentOS",
@@ -416,6 +457,17 @@
     },
     "wallet": {
       "title": "Wallet",
+      "pathLabel": "AgentOS order path",
+      "agentOsParent": "AgentOS",
+      "orderLabel": "Order {orderId}",
+      "linkedInvoiceLabel": "Invoice for this AgentOS order",
+      "linkedInvoiceConsequence": "Pay this exact invoice to resume the same AgentOS order.",
+      "linkedInvoiceMissing": "The invoice does not belong to this AgentOS order or is no longer available.",
+      "invalidContinuation": "This Wallet continuation is incomplete or unsafe. Return to the exact AgentOS order and open Wallet again.",
+      "insufficientBalance": "Available balance is lower than this invoice. Top up before paying.",
+      "payLinkedInvoice": "Pay linked invoice",
+      "returnToOrder": "Return to order",
+      "paidContinuation": "Payment is settled. Continue with the exact AgentOS order.",
       "balanceLabel": "Balance",
       "availableBalance": "Available balance",
       "topUp": "Top up",

@@ -6,11 +6,8 @@
  * build would fail at runtime with `tsc` still reporting zero errors. So the names live here, where
  * both sides may read them.
  *
- * WHAT IS DELIBERATELY NOT HERE YET: a locale ROUTE. The academy resolves its locale from a path
- * segment, which it needs because its pages are public and `generateMetadata` has to see the locale
- * before a crawler does. This control plane is signed-in and unindexed, so the same machinery would
- * buy nothing and would restructure every route to get it. The catalogue and the provider are real;
- * the negotiation is one decision, deferred on purpose and recorded here rather than half-built.
+ * Locale routing is owned by `routing.ts` and `navigation.ts`. Keeping only the closed vocabulary
+ * here lets server and client code share locale identities without importing either runtime.
  */
 
 /** The locales this app ships copy for. The first is what an unrecognised value falls back to. */

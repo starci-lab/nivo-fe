@@ -29,7 +29,27 @@ describe("typography leaves", () => {
 
     it.each([[1, "H1"], [3, "H3"], [4, "H4"]] as const)("uses heading level %s", (level, name) => {
         render(<Heading props={{ content: name, level }} />)
-        expect(screen.getByRole("heading", { name, level })).toHaveAttribute("data-level", String(level))
+        const heading = screen.getByRole("heading", { name, level })
+        expect(heading).toHaveAttribute("data-level", String(level))
+        expect(heading).toHaveAttribute("data-scale", "standard")
+    })
+
+    it("opts a page-root heading into display scale without changing its outline level", () => {
+        render(<Heading props={{ content: "Overview", level: 1, scale: "display" }} />)
+        const heading = screen.getByRole("heading", { name: "Overview", level: 1 })
+        expect(heading).toHaveAttribute("data-scale", "display")
+        expect(heading).toHaveClass("text-4xl")
+    })
+
+    it("opts a signal value into metric-lead scale while xs remains muted", () => {
+        render(
+            <>
+                <Text props={{ content: "1,250,000", size: "metric-lead", weight: "semibold" }} />
+                <Text props={{ content: "Caption", size: "xs" }} />
+            </>,
+        )
+        expect(screen.getByText("1,250,000")).toHaveAttribute("data-size", "metric-lead")
+        expect(screen.getByText("Caption")).toHaveAttribute("data-tone", "muted")
     })
 
     it("keeps a loading heading hidden while preserving its level", () => {

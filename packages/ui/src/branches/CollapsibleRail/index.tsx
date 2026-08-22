@@ -119,6 +119,9 @@ export const CollapsibleRail = ({
     }
 
     const label = collapsed ? expandLabel : collapseLabel
+    let headerJustification: CSSProperties["justifyContent"] = "space-between"
+    if (collapsed) headerJustification = "center"
+    else if (title === undefined) headerJustification = "flex-end"
 
     return (
         <motion.aside
@@ -136,7 +139,7 @@ export const CollapsibleRail = ({
         >
             <motion.div style={{
                 ...HEADER_STYLE,
-                justifyContent: collapsed ? "center" : title === undefined ? "flex-end" : "space-between",
+                justifyContent: headerJustification,
             }}>
                 <AnimatePresence initial={false}>
                     {!collapsed && title !== undefined ? (

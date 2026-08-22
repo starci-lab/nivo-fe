@@ -5,13 +5,9 @@ import { useLocale, useTranslations } from "next-intl"
 import {
     CollapsibleRail,
     DrawerBranch,
-    Heading,
     Icon,
     ScrollViewport,
     SelectionList,
-    Tree,
-    defineContractComponent,
-    defineLeafComponent,
 } from "@nivo/ui"
 import type { IconName, SelectionListGroup } from "@nivo/ui"
 import { DEFAULT_LOCALE } from "@/i18n/config"
@@ -199,21 +195,11 @@ export const ConsoleNav = ({ mode = "desktop" }: ConsoleNavProps) => {
 
     if (mode === "mobile") {
         return (
-            <Tree
-                contract="console-mobile-drawer-bar"
-                render={defineContractComponent("console-mobile-drawer-bar", {
-                    brand: defineLeafComponent("heading", {}, () => (
-                        <Heading props={{ content: t("brand"), level: 2 }} />
-                    )),
-                    drawer: defineLeafComponent("drawer-branch", {}, () => (
-                        <DrawerBranch
-                            triggerLabel={t("openMenu")}
-                            title={t("title")}
-                            closeLabel={t("closeMenu")}
-                            content={destinations()}
-                        />
-                    )),
-                })}
+            <DrawerBranch
+                triggerLabel={t("openMenu")}
+                title={t("title")}
+                closeLabel={t("closeMenu")}
+                content={destinations()}
             />
         )
     }
