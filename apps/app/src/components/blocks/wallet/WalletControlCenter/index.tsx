@@ -39,6 +39,18 @@ const invoiceTone = (status: InvoiceRow["status"]): WalletLedgerRow["tone"] => {
     return "neutral"
 }
 
+type PaymentResultCopy = Pick<PaymentResultView, "state" | "tone" | "note">
+
+const paymentResultCopy = (
+    isCancelled: boolean,
+    isConfirmed: boolean,
+    copy: Readonly<{ cancelled: string, confirmed: string, pending: string, cancelledNote: string, confirmedNote: string, pendingNote: string }>,
+): PaymentResultCopy => {
+    if (isCancelled) return { state: copy.cancelled, tone: "neutral", note: copy.cancelledNote }
+    if (isConfirmed) return { state: copy.confirmed, tone: "success", note: copy.confirmedNote }
+    return { state: copy.pending, tone: "warning", note: copy.pendingNote }
+}
+
 /** Read an exact AgentOS Wallet continuation, while leaving an ordinary Wallet route uncorrelated. */
 const readWalletWaypoint = (search: string, locale: string): WalletWaypoint | null | undefined => {
     const params = new URLSearchParams(search)
@@ -238,27 +250,23 @@ export const WalletControlCenter = ({ pageState }: WalletControlCenterProps) => 
     const isReturn = pathname.endsWith("/wallet/top-up/return")
     const isCancelled = searchParams.get("status") === "cancelled"
     const confirmed = stored !== null && money?.wallet.ok === true && money.wallet.data.balanceVnd >= stored.startingBalanceVnd + stored.amountVnd
-    let resultState = t("wallet.resultPending")
-    let resultTone: PaymentResultView["tone"] = "warning"
-    let resultNote = t("wallet.resultPendingNote")
-    if (isCancelled) {
-        resultState = t("wallet.resultCancelled")
-        resultTone = "neutral"
-        resultNote = t("wallet.resultCancelledNote")
-    } else if (confirmed) {
-        resultState = t("wallet.resultConfirmed")
-        resultTone = "success"
-        resultNote = t("wallet.resultConfirmedNote")
-    }
+    const resultCopy = paymentResultCopy(isCancelled, confirmed, {
+        cancelled: t("wallet.resultCancelled"),
+        confirmed: t("wallet.resultConfirmed"),
+        pending: t("wallet.resultPending"),
+        cancelledNote: t("wallet.resultCancelledNote"),
+        confirmedNote: t("wallet.resultConfirmedNote"),
+        pendingNote: t("wallet.resultPendingNote"),
+    })
     const resultView: PaymentResultView = {
         overlayState: isReturn ? "open" : "closed",
         title: t("wallet.resultTitle"),
         closeLabel: t("wallet.close"),
-        state: resultState,
-        tone: resultTone,
+        state: resultCopy.state,
+        tone: resultCopy.tone,
         amount: stored === null ? t("wallet.amountUnknown") : amount(stored.amountVnd),
         reference: stored?.referenceId,
-        note: resultNote,
+        note: resultCopy.note,
         actionLabel: t("wallet.backToWallet"),
     }
     const topUpView: TopUpView = {
