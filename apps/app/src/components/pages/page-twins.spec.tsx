@@ -1,13 +1,12 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import { WalletControlCenterBase as WalletPageBase } from "../blocks/wallet/WalletControlCenter/component"
-import { AppsPageBase } from "./AppsPage/component"
+import { AppsDashboardBase } from "../blocks/apps/AppsDashboard/component"
 import { OverviewPageBase, type OverviewPageViewProps } from "./OverviewPage/component"
 import { AgentOSWorkspaceControlCenterBase as AgentOSWorkspacePageBase, type AgentOSWorkspaceControlCenterLabels as AgentOSWorkspacePageLabels } from "../blocks/agentos/AgentOSWorkspaceControlCenter/component"
 import { AgentOSSolutionModuleDetailBase as AgentOSSolutionModulePageBase, type AgentOSSolutionModuleDetailLabels as AgentOSSolutionModulePageLabels } from "../blocks/agentos/AgentOSSolutionModuleDetail/component"
 import { AgentOSPageBase } from "./AgentOSPage/component"
 import { TemplateAppProvisioningPageBase } from "./TemplateAppProvisioningPage/component"
-import { TemplateAppProvisioningPage } from "./TemplateAppProvisioningPage"
 import { AcademyControlCenterPageBase } from "./AcademyControlCenterPage/component"
 import { AgentOSWorkspaceListBase } from "../blocks/agentos/AgentOSWorkspaceList/component"
 
@@ -60,7 +59,7 @@ describe("pure page twins", () => {
     })
 
     it("renders AppsPage owned apps and buyable catalogue offers", () => {
-        const html = renderToStaticMarkup(<AppsPageBase
+        const html = renderToStaticMarkup(<AppsDashboardBase
             title="Apps"
             lede="Your applications"
             buildAppLabel="Build an app"
@@ -125,15 +124,15 @@ describe("pure page twins", () => {
     })
 
     it("executes the renamed pure twins across their settled state branches", () => {
-        const agentOsPath = { label: "Path", overviewLabel: "Overview", currentLabel: "AgentOS" }
-        expect(AgentOSPageBase({ mode: "new", path: agentOsPath })).toBeTruthy()
-        expect(AgentOSPageBase({ mode: "resume", orderId: "order-1", path: agentOsPath })).toBeTruthy()
-        expect(TemplateAppProvisioningPageBase({ mode: "new", templateKey: "ai_academy" })).toBeTruthy()
-        expect(TemplateAppProvisioningPageBase({ mode: "resume", siteId: "site-1" })).toBeTruthy()
-        expect(TemplateAppProvisioningPage({ mode: "resume", siteId: "site-1" })).toBeTruthy()
+        const agentOsLabels = { path: "Path", agentos: "AgentOS", dashboardDescription: "Manage AgentOS", createTitle: "Create", createDescription: "Create AgentOS", orderTitle: "Order", orderDescription: "Resume order", createAction: "Create" }
+        const agentOsActions = { onOpenDashboard: vi.fn(), onCreate: vi.fn() }
+        expect(AgentOSPageBase({ mode: "dashboard", labels: agentOsLabels, ...agentOsActions })).toBeTruthy()
+        expect(AgentOSPageBase({ mode: "resume", orderId: "order-1", labels: agentOsLabels, ...agentOsActions })).toBeTruthy()
+        const templateLabels = { path: "Path", apps: "Apps", createTitle: "Create", createDescription: "Configure", provisioningTitle: "Provisioning", provisioningDescription: "Resume" }
+        expect(TemplateAppProvisioningPageBase({ mode: "new", templateKey: "ai_academy", labels: templateLabels, onOpenApps: vi.fn() })).toBeTruthy()
+        expect(TemplateAppProvisioningPageBase({ mode: "resume", siteId: "site-1", labels: templateLabels, onOpenApps: vi.fn() })).toBeTruthy()
 
         expect(AgentOSWorkspaceListBase({ state: "resting", props: { label: "Workspaces" } })).toBeTruthy()
-        expect(AgentOSWorkspaceListBase({ state: "empty", props: { label: "Workspaces", message: "None" } })).toBeTruthy()
         expect(AgentOSWorkspaceListBase({ state: "refused", props: { label: "Workspaces", message: "Unavailable" } })).toBeTruthy()
         expect(AgentOSWorkspaceListBase({
             state: "answered",
@@ -141,10 +140,7 @@ describe("pure page twins", () => {
             on: { openWorkspace: vi.fn() },
         })).toBeTruthy()
 
-        const labels = { loading: "Loading", refused: "Refused", openSite: "Open", tabsLabel: "Mode", tabs: [{ id: "growth" as const, label: "Growth" }, { id: "system" as const, label: "System" }] }
-        for (const state of ["restoring", "refused", "ready"] as const) {
-            expect(AcademyControlCenterPageBase({ state, title: "Academy", siteId: "site-1", mode: "growth", labels, onSelectMode: vi.fn(), onOpenPublicSite: vi.fn() })).toBeTruthy()
-        }
-        expect(AcademyControlCenterPageBase({ state: "ready", title: "Academy", siteId: "site-1", publicHost: "academy.test", mode: "system", labels, onSelectMode: vi.fn(), onOpenPublicSite: vi.fn() })).toBeTruthy()
+        expect(AcademyControlCenterPageBase({ siteId: "site-1", mode: "growth", onSelectMode: vi.fn() })).toBeTruthy()
+        expect(AcademyControlCenterPageBase({ siteId: "site-1", mode: "system", onSelectMode: vi.fn() })).toBeTruthy()
     })
 })

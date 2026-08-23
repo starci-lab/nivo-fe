@@ -125,7 +125,7 @@ describe("TemplateAppProvisioning connected flow", () => {
         render(<TemplateAppProvisioning context={{ mode: "resume", siteId: "site" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"ready"'))
         fireEvent.click(screen.getByTestId("act"))
-        expect(mocks.push).toHaveBeenCalledWith("/en/apps")
+        expect(mocks.push).toHaveBeenCalledWith("/en/apps/site")
 
         cleanup()
         mocks.api.myExpertSiteDeployment.mockResolvedValue({ ok: false, reason: "snapshot-down" })

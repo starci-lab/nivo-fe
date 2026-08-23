@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
+import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow"
 import { DEFAULT_LOCALE } from "@/i18n/config"
-import { useSession } from "@/modules/auth/session"
 import { myAgentWorkspace, type AgentWorkspaceRow } from "@/modules/api/console"
 import type { Result } from "@/modules/api/graphql"
-import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow"
+import { useSession } from "@/modules/auth/session"
 import { AgentOSWorkspaceListBase, type AgentOSWorkspaceListViewProps } from "./component"
 
 const STATUS: Readonly<Record<string, FleetStatus | undefined>> = {
@@ -18,7 +18,7 @@ const STATUS: Readonly<Record<string, FleetStatus | undefined>> = {
     suspended: "suspended",
 }
 
-/** Own the AgentOS workspace query and settle its management-list states. */
+/** Own the workspace query and dashboard continuations for the AgentOS collection. */
 export const AgentOSWorkspaceList = () => {
     const t = useTranslations("console")
     const locale = useLocale()
@@ -26,6 +26,7 @@ export const AgentOSWorkspaceList = () => {
     const session = useSession()
     const signedIn = session.state.status === "signed-in"
     const [answer, setAnswer] = useState<Result<ReadonlyArray<AgentWorkspaceRow>> | null>(null)
+    const localeSegment = locale === DEFAULT_LOCALE ? "" : `/${locale}`
 
     useEffect(() => {
         if (!signedIn) return
@@ -38,19 +39,31 @@ export const AgentOSWorkspaceList = () => {
         }
     }, [signedIn])
 
-    // The default locale is served off the bare path, so it contributes no segment of its own.
-    const localeSegment = locale === DEFAULT_LOCALE ? "" : `/${locale}`
-
     const view = (): AgentOSWorkspaceListViewProps => {
         const label = t("agentos.workspacesLabel")
-        if (answer === null) return { state: "resting", props: { label } }
-        if (!answer.ok) return { state: "refused", props: { label, message: t("refusal.unknown") } }
-        if (answer.data.length === 0) return { state: "empty", props: { label, message: t("agentos.empty") } }
+        const summary = {
+            workspaces: t("agentos.summary.workspaces"),
+            workspacesCaption: t("agentos.summary.workspacesCaption"),
+            running: t("agentos.summary.running"),
+            runningCaption: t("agentos.summary.runningCaption"),
+            attention: t("agentos.summary.attention"),
+            attentionCaption: t("agentos.summary.attentionCaption"),
+        }
+        if (answer === null) return { state: "resting", props: { label, summary } }
+        if (!answer.ok) return { state: "refused", props: { label, summary, message: t("refusal.unknown") } }
+        if (answer.data.length === 0) {
+            return {
+                state: "empty",
+                props: { label, summary, message: t("agentos.emptyDescription"), actionLabel: t("agentos.create") },
+                on: { create: () => router.push(`${localeSegment}/agentos/create`) },
+            }
+        }
         return {
             state: "answered",
             on: { openWorkspace: (id) => router.push(`${localeSegment}/agentos/workspaces/${id}`) },
             props: {
                 label,
+                summary,
                 rows: answer.data.map((workspace) => {
                     const status = STATUS[workspace.status] ?? "not_provisioned"
                     return {

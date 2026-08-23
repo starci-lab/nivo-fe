@@ -1,72 +1,19 @@
-import {
-    Button,
-    ChoiceTabs,
-    Heading,
-    Tree,
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-} from "@nivo/ui"
-import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice"
-import { AcademyGrowthSummary } from "@/components/blocks/academy/AcademyGrowthSummary"
-import { AcademyStudentCrm } from "@/components/blocks/academy/AcademyStudentCrm"
-import { AcademyLeadPipeline } from "@/components/blocks/academy/AcademyLeadPipeline"
-import { AcademyIntegrationCenter } from "@/components/blocks/academy/AcademyIntegrationCenter"
+import { AcademyControlCenter } from "@/components/blocks/academy/AcademyControlCenter"
+import type { AcademyControlCenterMode } from "@/components/blocks/academy/AcademyControlCenter/component"
 
-/** The two jobs performed inside one Academy resource. */
-export type AcademyControlCenterMode = "growth" | "system"
-
-/** Resolved copy passed into the pure Academy page. */
-export type AcademyControlCenterPageLabels = {
-    readonly loading: string
-    readonly refused: string
-    readonly openSite: string
-    readonly tabsLabel: string
-    readonly tabs: ReadonlyArray<{ readonly id: AcademyControlCenterMode, readonly label: string }>
-}
-
-/** Pure page state; domain blocks own their own requests and failures. */
+/** Page-owned route identity and tab composition. */
 export type AcademyControlCenterPageViewProps = {
-    readonly state: "restoring" | "refused" | "ready"
-    readonly title: string
     readonly siteId: string
-    readonly publicHost?: string
     readonly mode: AcademyControlCenterMode
-    readonly labels: AcademyControlCenterPageLabels
     readonly onSelectMode: (mode: AcademyControlCenterMode) => void
-    readonly onOpenPublicSite: () => void
 }
 
-/** Compose one Academy destination without taking ownership of block requests. */
-export const AcademyControlCenterPageBase = ({ state, title, siteId, publicHost, mode, labels, onSelectMode, onOpenPublicSite }: AcademyControlCenterPageViewProps) => {
-    const settledSections = mode === "growth"
-        ? [
-            defineContractProjection("label-row-over-card", () => <AcademyGrowthSummary siteId={siteId} />),
-            defineContractProjection("label-row-over-card", () => <AcademyStudentCrm siteId={siteId} />),
-            defineContractProjection("label-row-over-card", () => <AcademyLeadPipeline siteId={siteId} />),
-        ]
-        : [defineContractProjection("label-row-over-card", () => <AcademyIntegrationCenter siteId={siteId} />)]
-    const sections = state !== "ready"
-        ? [defineContractProjection("label-row-over-card", () => <EmptyNotice props={{ message: state === "restoring" ? labels.loading : labels.refused }} />)]
-        : settledSections
-    return (
-        <Tree
-            contract="tabbed-control-center-page"
-            render={defineContractComponent("tabbed-control-center-page", {
-                heading: defineContractComponent("title-with-end-action", {
-                    title: defineLeafComponent("heading", {}, () => <Heading props={{ content: title, level: 1 }} />),
-                    ...(publicHost === undefined ? {} : {
-                        end: defineLeafComponent("button", {}, () => <Button props={{ label: labels.openSite, variant: "secondary", size: "sm" }} on={{ press: onOpenPublicSite }} />),
-                    }),
-                }),
-                tabs: defineLeafComponent("choice-tabs", {}, () => (
-                    <ChoiceTabs props={{ label: labels.tabsLabel, selectedKey: mode, tabs: labels.tabs, variant: "primary" }} on={{ select: (key) => onSelectMode(key as AcademyControlCenterMode) }} />
-                )),
-                section: sections,
-            })}
-        />
-    )
-}
+/** Compose the connected site block while retaining page-level tab state. */
+export const AcademyControlCenterPageBase = (view: AcademyControlCenterPageViewProps) => (
+    <AcademyControlCenter siteId={view.siteId} mode={view.mode} onSelectMode={view.onSelectMode} />
+)
 
-/** Source-level tier marker for the pure Academy page twin. */
+export type { AcademyControlCenterMode }
+
+/** Source-level tier marker for the pure Academy page compositor. */
 export const meta = { shape: "page", world: "pure" } as const

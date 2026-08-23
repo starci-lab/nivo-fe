@@ -1,65 +1,45 @@
-import { Button, Heading, SurfaceCard, Text, defineContractComponent, defineLeafComponent } from "@nivo/ui"
+"use client"
 
-/** One already-formatted wallet fact. */
-export type WalletSummaryFact = {
-    readonly id: string
-    readonly label: string
-    readonly value: string
+import { useFormatter, useLocale, useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
+import { DEFAULT_LOCALE } from "@/i18n/config"
+import { useOverviewData } from "@/modules/overview/context"
+import { WalletSummaryBase, type WalletSummaryFact, type WalletSummaryState } from "./component"
+
+export type { WalletSummaryFact, WalletSummaryProps, WalletSummaryState } from "./component"
+
+/** Connect exact balance and newest unpaid invoice to the wallet surface. */
+export const WalletSummary = () => {
+    const { wallet, invoices } = useOverviewData()
+    const t = useTranslations("console")
+    const format = useFormatter()
+    const locale = useLocale()
+    const router = useRouter()
+    const open = (route: string) => router.push(locale === DEFAULT_LOCALE ? route : `/${locale}${route}`)
+    const refusal = () => t("refusal.unknown")
+    const money = (value: number) => format.number(value, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
+    const day = (value: string) => format.dateTime(new Date(value), { day: "2-digit", month: "short", year: "numeric" })
+    let state: WalletSummaryState
+    if (wallet === null || invoices === null) state = { phase: "pending" }
+    else if (!wallet.ok) state = { phase: "failed", note: refusal() }
+    else {
+        const facts: Array<WalletSummaryFact> = [{ id: "balance", label: t("wallet.availableBalance"), value: money(wallet.data.balanceVnd), emphasis: true }]
+        if (invoices.ok) {
+            const unpaid = invoices.data.find((invoice) => invoice.status === "unpaid")
+            if (unpaid !== undefined) facts.push({ id: unpaid.id, label: `#${unpaid.id.slice(0, 8).toUpperCase()}`, value: `${money(unpaid.amountVnd)} · ${t("wallet.dueAt", { date: day(unpaid.dueAt) })}`, emphasis: false })
+        }
+        if (!invoices.ok) state = { phase: "partial", facts, note: refusal() }
+        else state = wallet.data.balanceVnd === 0 && invoices.data.every((invoice) => invoice.status !== "unpaid") ? { phase: "empty", facts } : { phase: "populated", facts }
+    }
+    return <WalletSummaryBase
+        label={t("wallet.title")}
+        actionLabel={t("wallet.viewTransactions")}
+        secondaryActionLabel={t("wallet.topUp")}
+        state={state}
+        onOpenWallet={() => open("/wallet")}
+        onTopUp={() => open("/wallet/top-up")}
+    />
 }
 
-/** Independently settled wallet situation. */
-export type WalletSummaryState =
-    | { readonly phase: "pending" }
-    | { readonly phase: "empty", readonly facts: ReadonlyArray<WalletSummaryFact> }
-    | { readonly phase: "populated", readonly facts: ReadonlyArray<WalletSummaryFact> }
-    | { readonly phase: "failed", readonly note: string }
-    | { readonly phase: "partial", readonly facts: ReadonlyArray<WalletSummaryFact>, readonly note: string }
-
-/** Resolved wallet data, copy, and context-sensitive destination action. */
-export type WalletSummaryProps = {
-    readonly label: string
-    readonly actionLabel?: string
-    readonly state: WalletSummaryState
-    readonly onOpenWallet?: () => void
-}
-
-const fact = (item: WalletSummaryFact, isLoading = false) => defineContractComponent("label-value-row", {
-    label: defineLeafComponent("text", { size: "sm" }, () => <Text props={{ content: item.label, size: "sm" }} isLoading={isLoading} />),
-    value: defineLeafComponent("text", { size: "sm" }, () => <Text props={{ content: item.value, size: "sm" }} isLoading={isLoading} />),
-})
-
-/** Draw balance and invoice evidence without calculating or formatting either value. */
-export const WalletSummary = ({ label, actionLabel, state, onOpenWallet }: WalletSummaryProps) => {
-    const isLoading = state.phase === "pending"
-    const facts = state.phase === "empty" || state.phase === "populated" || state.phase === "partial" ? state.facts : []
-    const note = state.phase === "failed" || state.phase === "partial" ? state.note : undefined
-    const hasAction = actionLabel !== undefined && onOpenWallet !== undefined
-    return (
-        <SurfaceCard
-            contract="wallet-summary"
-            render={defineContractComponent("wallet-summary", {
-                heading: defineContractComponent("title-with-end-action", {
-                    title: defineLeafComponent("heading", {}, () => <Heading props={{ content: label, level: 3 }} />),
-                    ...(hasAction ? {
-                        end: defineLeafComponent("button", {}, () => (
-                            <Button props={{ label: actionLabel }} on={{ press: onOpenWallet }} />
-                        )),
-                    } : {}),
-                }),
-                facts: defineContractComponent("labelled-fact-stack", {
-                    fact: isLoading
-                        ? [fact({ id: "pending-1", label: "", value: "" }, true), fact({ id: "pending-2", label: "", value: "" }, true)]
-                        : facts.map((item) => fact(item)),
-                }),
-                ...(note === undefined ? {} : {
-                    note: defineContractComponent("body-with-refusal-note", {
-                        note: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: note, size: "sm", tone: "muted" }} />),
-                    }),
-                }),
-            })}
-        />
-    )
-}
-
-/** Source-level tier marker for the pure wallet summary block. */
-export const meta = { shape: "block", world: "pure" } as const
+/** Registry identity for the connected wallet summary twin. */
+export const meta = { shape: "block", world: "connected" } as const

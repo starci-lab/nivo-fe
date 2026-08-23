@@ -1,9 +1,14 @@
-import { Button, Heading, Text, Tree, defineContractComponent, defineContractProjection, defineLeafComponent } from "@nivo/ui"
+import { Breadcrumbs, Button, Heading, Text, Tree, defineContractComponent, defineContractProjection, defineLeafComponent } from "@nivo/ui"
 import { AgentOSSummary, type AgentOSSummaryProps } from "@/components/blocks/console/AgentOSSummary"
+import { AgentOSSummaryBase } from "@/components/blocks/console/AgentOSSummary/component"
 import { AppsSummary, type AppsSummaryProps } from "@/components/blocks/console/AppsSummary"
+import { AppsSummaryBase } from "@/components/blocks/console/AppsSummary/component"
 import { InfrastructureSummary, type InfrastructureSummaryProps } from "@/components/blocks/console/InfrastructureSummary"
+import { InfrastructureSummaryBase } from "@/components/blocks/console/InfrastructureSummary/component"
 import { OverviewPulse, type OverviewPulseProps } from "@/components/blocks/console/OverviewPulse"
+import { OverviewPulseBase } from "@/components/blocks/console/OverviewPulse/component"
 import { WalletSummary, type WalletSummaryProps } from "@/components/blocks/console/WalletSummary"
+import { WalletSummaryBase } from "@/components/blocks/console/WalletSummary/component"
 import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow"
 
 /** Legacy app-section view retained for existing pure-page consumers during this revision. */
@@ -44,6 +49,15 @@ type AcceptedOverviewPageViewProps = {
     readonly onBuildApp?: () => void
 }
 
+type ConnectedOverviewPageViewProps = {
+    readonly title: string
+    readonly lede: string
+    readonly pathLabel: string
+    readonly consoleLabel: string
+    readonly buildAppLabel: string
+    readonly onBuildApp: () => void
+}
+
 type LegacyOverviewPageViewProps = {
     readonly title: string
     readonly apps: AppsSectionView
@@ -55,7 +69,7 @@ type LegacyOverviewPageViewProps = {
 }
 
 /** Fully resolved overview content, including the previous call shape during migration. */
-export type OverviewPageViewProps = AcceptedOverviewPageViewProps | LegacyOverviewPageViewProps
+export type OverviewPageViewProps = ConnectedOverviewPageViewProps | AcceptedOverviewPageViewProps | LegacyOverviewPageViewProps
 
 const legacyTone = (status: FleetStatus) => {
     if (status === "failed") return "danger" as const
@@ -125,7 +139,8 @@ const normalizeLegacyWallet = (input: LegacyOverviewPageViewProps): WalletSummar
     return { phase: "populated", facts: input.wallet.facts }
 }
 
-const normalize = (input: OverviewPageViewProps): AcceptedOverviewPageViewProps => {
+const normalize = (input: OverviewPageViewProps): ConnectedOverviewPageViewProps | AcceptedOverviewPageViewProps => {
+    if (!("apps" in input)) return input
     if ("infrastructure" in input) return input
     return {
         title: input.title,
@@ -143,12 +158,26 @@ const normalize = (input: OverviewPageViewProps): AcceptedOverviewPageViewProps 
 
 /** Draw the accepted dashboard shell from its four independently settled summary blocks. */
 export const OverviewPageBase = (input: OverviewPageViewProps) => {
-    const { title, lede, buildAppLabel, pulse, apps, agentOs, infrastructure, wallet, onBuildApp } = normalize(input)
+    const resolved = normalize(input)
+    const { title, lede, buildAppLabel, onBuildApp } = resolved
+    const accepted = "apps" in resolved ? resolved : null
     const hasBuildAction = buildAppLabel !== undefined && onBuildApp !== undefined
     return (
     <Tree
         contract="console-primary-aside-page"
         render={defineContractComponent("console-primary-aside-page", {
+            ...(!("pathLabel" in resolved) ? {} : {
+                path: defineLeafComponent("breadcrumbs", {}, () => (
+                    <Breadcrumbs props={{
+                        mode: "trail",
+                        label: resolved.pathLabel,
+                        steps: [
+                            { id: "console", label: resolved.consoleLabel },
+                            { id: "overview", label: resolved.title, isCurrent: true },
+                        ],
+                    }} />
+                )),
+            }),
             heading: defineContractComponent("display-title-with-end-action", {
                 title: defineLeafComponent("heading", { scale: "display" }, () => (
                     <Heading props={{ content: title, level: 1, scale: "display" }} />
@@ -164,20 +193,20 @@ export const OverviewPageBase = (input: OverviewPageViewProps) => {
                     <Text props={{ content: lede, size: "md", tone: "muted" }} />
                 )),
             }),
-            ...(pulse === undefined ? {} : {
-                signals: defineContractProjection("account-signal-grid", () => <OverviewPulse {...pulse} />),
+            ...(accepted !== null && accepted.pulse === undefined ? {} : {
+                signals: defineContractProjection("account-signal-grid", () => accepted === null ? <OverviewPulse /> : <OverviewPulseBase {...accepted.pulse!} />),
             }),
             content: defineContractComponent("console-primary-aside", {
                 primary: defineContractComponent("console-section-stack", {
                     section: [
-                        defineContractProjection("label-row-over-card", () => <AppsSummary {...apps} />),
-                        defineContractProjection("label-row-over-card", () => <AgentOSSummary {...agentOs} />),
+                        defineContractProjection("label-row-over-card", () => accepted === null ? <AppsSummary /> : <AppsSummaryBase {...accepted.apps} />),
+                        defineContractProjection("label-row-over-card", () => accepted === null ? <AgentOSSummary /> : <AgentOSSummaryBase {...accepted.agentOs} />),
                     ],
                 }),
                 aside: defineContractComponent("console-section-stack", {
                     section: [
-                        defineContractProjection("wallet-summary", () => <WalletSummary {...wallet} />),
-                        defineContractProjection("infrastructure-summary", () => <InfrastructureSummary {...infrastructure} />),
+                        defineContractProjection("wallet-summary", () => accepted === null ? <WalletSummary /> : <WalletSummaryBase {...accepted.wallet} />),
+                        defineContractProjection("infrastructure-summary", () => accepted === null ? <InfrastructureSummary /> : <InfrastructureSummaryBase {...accepted.infrastructure} />),
                     ],
                 }),
             }),

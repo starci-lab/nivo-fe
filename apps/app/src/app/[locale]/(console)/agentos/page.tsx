@@ -1,6 +1,6 @@
 import { AgentOSPage } from "@/components/pages/AgentOSPage"
 
-/** Mount the independent AgentOS product surface for a new order. */
-const AgentOSRoute = () => <AgentOSPage mode="new" />
+/** Mount the dashboard that manages existing AgentOS workspaces. */
+const AgentOSRoute = () => <AgentOSPage mode="dashboard" />
 
 export default AgentOSRoute

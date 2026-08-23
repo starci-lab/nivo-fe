@@ -3,9 +3,11 @@ import {
     SurfaceCard,
     Text,
     TextLink,
+    TileIcon,
     Tree,
     defineCompositeComponent,
     defineContractComponent,
+    defineContractProjection,
     defineLeafComponent,
     type BadgeTone,
 } from "@nivo/ui"
@@ -32,16 +34,79 @@ export type AgentOSWorkspaceView = {
     readonly statusLabel: string
 }
 
-/** Every settled state of the independent AgentOS workspace list. */
-export type AgentOSWorkspaceListViewProps =
-    | { readonly state: "resting"; readonly props: { readonly label: string } }
-    | { readonly state: "empty"; readonly props: { readonly label: string; readonly message: string } }
-    | { readonly state: "refused"; readonly props: { readonly label: string; readonly message: string } }
-    | { readonly state: "answered"; readonly props: { readonly label: string; readonly rows: ReadonlyArray<AgentOSWorkspaceView> }; readonly on: { readonly openWorkspace: (id: string) => void } }
+/** Copy for the three measured dashboard signals. */
+export type AgentOSWorkspaceSummaryLabels = {
+    readonly workspaces: string
+    readonly workspacesCaption: string
+    readonly running: string
+    readonly runningCaption: string
+    readonly attention: string
+    readonly attentionCaption: string
+}
 
-/** Draw the workspace list independently from the creation flow below it. */
+type AgentOSWorkspaceListCommonProps = {
+    readonly label: string
+    readonly summary?: AgentOSWorkspaceSummaryLabels
+}
+
+/** Every settled state of the independently connected AgentOS workspace list. */
+export type AgentOSWorkspaceListViewProps =
+    | { readonly state: "resting"; readonly props: AgentOSWorkspaceListCommonProps }
+    | { readonly state: "empty"; readonly props: AgentOSWorkspaceListCommonProps & { readonly message: string; readonly actionLabel: string }; readonly on: { readonly create: () => void } }
+    | { readonly state: "refused"; readonly props: AgentOSWorkspaceListCommonProps & { readonly message: string } }
+    | { readonly state: "answered"; readonly props: AgentOSWorkspaceListCommonProps & { readonly rows: ReadonlyArray<AgentOSWorkspaceView> }; readonly on: { readonly openWorkspace: (id: string) => void } }
+
+/** Draw the workspace collection without owning its query or dashboard route. */
 export const AgentOSWorkspaceListBase = (view: AgentOSWorkspaceListViewProps) => {
     const { state, props } = view
+    const rows = state === "answered" ? props.rows : []
+    const isLoading = state === "resting"
+    const isRefused = state === "refused"
+    const summaryLabels = props.summary ?? {
+        workspaces: props.label,
+        workspacesCaption: "",
+        running: props.label,
+        runningCaption: "",
+        attention: props.label,
+        attentionCaption: "",
+    }
+    const runningCount = rows.filter((row) => row.status === "ready" || row.status === "active").length
+    const attentionCount = rows.filter((row) => row.status === "failed" || row.status === "suspended" || row.status === "awaiting_dns").length
+    const totals = [
+        { id: "workspaces", icon: "agentos" as const, label: summaryLabels.workspaces, value: rows.length, caption: summaryLabels.workspacesCaption, signal: "none" as const },
+        { id: "running", icon: "complete" as const, label: summaryLabels.running, value: runningCount, caption: summaryLabels.runningCaption, signal: "active" as const },
+        { id: "attention", icon: "notification" as const, label: summaryLabels.attention, value: attentionCount, caption: summaryLabels.attentionCaption, signal: attentionCount > 0 ? "attention" as const : "none" as const },
+    ]
+    const summary = (
+        <Tree
+            contract="agentos-summary-grid"
+            render={defineContractComponent("agentos-summary-grid", {
+                signal: totals.map((total) => defineContractProjection("agentos-summary-card", () => (
+                    <SurfaceCard
+                        contract="agentos-summary-card"
+                        render={defineContractComponent("agentos-summary-card", {
+                            heading: defineContractComponent("agentos-summary-heading", {
+                                mark: defineLeafComponent("tile-icon", {}, () => (
+                                    <TileIcon props={{ icon: total.icon, signal: total.signal }} isLoading={isLoading} />
+                                )),
+                                label: defineLeafComponent("text", { size: "sm", weight: "medium" }, () => (
+                                    <Text props={{ content: total.label, size: "sm", weight: "medium" }} />
+                                )),
+                            }),
+                            value: defineLeafComponent("text", { size: "metric-lead" }, () => (
+                                <Text props={{ content: isRefused ? "—" : String(total.value), size: "metric-lead", weight: "semibold" }} isLoading={isLoading} />
+                            )),
+                            caption: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                                <Text props={{ content: total.caption, size: "xs", tone: "muted" }} />
+                            )),
+                        })}
+                        isLoading={isLoading}
+                    />
+                ))),
+            })}
+        />
+    )
+    const collection = (() => {
     if (state === "empty" || state === "refused") {
         return (
             <SurfaceCard
@@ -49,13 +114,18 @@ export const AgentOSWorkspaceListBase = (view: AgentOSWorkspaceListViewProps) =>
                 contract="centred-empty-notice"
                 render={defineContractComponent("centred-empty-notice", {
                     notice: defineCompositeComponent("empty-notice", {}, () => (
-                        <EmptyNotice props={{ message: props.message }} />
+                        <EmptyNotice
+                            props={{
+                                message: props.message,
+                                actionLabel: state === "empty" ? props.actionLabel : undefined,
+                            }}
+                            on={{ act: state === "empty" ? view.on.create : undefined }}
+                        />
                     )),
                 })}
             />
         )
     }
-    const rows = state === "answered" ? props.rows : []
     const workspaceRow = (row: AgentOSWorkspaceView, isLoading = false) => defineCompositeComponent("fleet-row", {}, () => (
         <Tree
             contract="responsive-identity-kind-status-action-row"
@@ -90,6 +160,16 @@ export const AgentOSWorkspaceListBase = (view: AgentOSWorkspaceListViewProps) =>
                     : rows.map((row) => workspaceRow(row)),
             })}
             isLoading={state === "resting"}
+        />
+    )
+    })()
+    return (
+        <Tree
+            contract="agentos-dashboard-body"
+            render={defineContractComponent("agentos-dashboard-body", {
+                summary: defineContractProjection("agentos-summary-grid", () => summary),
+                collection: defineContractProjection("label-row-over-card", () => collection),
+            })}
         />
     )
 }

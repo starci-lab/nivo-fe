@@ -88,7 +88,8 @@ export type LayoutClassName =
     // the rail layouts, which only take the flexible-first shape above the md breakpoint; a row
     // whose FIRST child takes the slack at every width needs the same two names without the prefix.
     | "[&>*:first-child]:min-w-0" | "[&>*:first-child]:grow"
-    | "sm:[&>*:first-child]:col-span-2" | "sm:[&>*:last-child]:col-span-2"
+    | "[&>*:first-child]:col-span-2" | "sm:[&>*:first-child]:col-span-2" | "sm:[&>*:last-child]:col-span-2"
+    | "sm:[&>*:only-child]:col-span-2" | "lg:[&>*:first-child]:col-span-4"
 
 /** Literal values a contract may require from a child component's data props. */
 export type ContractPropValue = string | number | boolean | null
@@ -295,6 +296,14 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need a section title with one optional trailing button or see-more link at the far end of its line, dropping under the title when the line runs out.",
     },
+    "title-over-description": {
+        classes: ["flex", "flex-col", "gap-2"],
+        children: {
+            title: { leaf: "heading" },
+            description: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
+        why: "if one page header needs its explanatory sentence directly under the page title as one compact identity block rather than as a separate page section.",
+    },
     "display-title-with-end-action": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "justify-between", "gap-6"],
         children: {
@@ -302,6 +311,82 @@ export const CONTRACTS = buildContracts({
             end: { leaf: "button", props: { size: "lg" }, optional: true },
         },
         why: "if you need the accepted console page root to pair one display-scale title with its optional large primary action, without promoting section headings or ordinary controls.",
+    },
+    "agentos-page-heading": {
+        classes: ["flex", "min-w-0", "flex-row", "flex-wrap", "items-start", "justify-between", "gap-6"],
+        children: {
+            identity: { contract: "agentos-page-identity" },
+            action: { leaf: "button", props: { size: "lg" }, optional: true },
+        },
+        why: "if an AgentOS route needs one persistent tile mark, page identity and optional primary continuation to remain a single header across dashboard and narrow compositions.",
+    },
+    "agentos-page-identity": {
+        classes: ["flex", "min-w-0", "flex-row", "items-start", "gap-4"],
+        children: {
+            mark: { leaf: "tile-icon" },
+            copy: { contract: "agentos-page-title-stack" },
+        },
+        why: "if the AgentOS product mark must lead the route title and explanation without becoming a decorative card or detaching on narrow screens.",
+    },
+    "agentos-page-title-stack": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-2"],
+        children: {
+            eyebrow: { leaf: "text", props: { size: "sm", tone: "accent" } },
+            title: { leaf: "heading", props: { scale: "display" } },
+            description: { leaf: "text", props: { size: "md", tone: "muted" } },
+            status: { leaf: "badge", optional: true },
+        },
+        why: "if one AgentOS route identity needs its product context, display title, explanatory consequence and optional lifecycle status in one ordered copy column.",
+    },
+    "agentos-summary-heading": {
+        classes: ["flex", "flex-row", "items-center", "gap-3"],
+        children: {
+            mark: { leaf: "tile-icon" },
+            label: { leaf: "text", props: { size: "sm", weight: "medium" } },
+        },
+        why: "if one AgentOS account summary needs a semantic tile mark and compact label before its measured value.",
+    },
+    "agentos-summary-card": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-3", "p-4"],
+        children: {
+            heading: { contract: "agentos-summary-heading" },
+            value: { leaf: "text", props: { size: "metric-lead" } },
+            caption: { leaf: "text", props: { size: "xs", tone: "muted" } },
+        },
+        why: "if one dashboard signal needs its identity, measured total and current consequence to compare with two peer signals.",
+    },
+    "agentos-summary-grid": {
+        classes: ["grid", "grid-cols-1", "gap-4", "lg:grid-cols-3"],
+        children: {
+            signal: { contract: "agentos-summary-card", repeats: true, restingCount: 3 },
+        },
+        why: "if the three AgentOS account signals must compare in one row when wide and preserve their reading order as full cards when narrow.",
+    },
+    "agentos-dashboard-body": {
+        classes: ["flex", "w-full", "flex-col", "gap-8"],
+        children: {
+            summary: { contract: "agentos-summary-grid" },
+            collection: { contract: "label-row-over-card" },
+        },
+        why: "if the AgentOS dashboard must keep account-level signals before the owned workspace collection without merging either state owner into the other.",
+    },
+    "agentos-state-notice": {
+        classes: ["flex", "min-w-0", "flex-row", "items-start", "gap-4", "p-6"],
+        children: {
+            mark: { leaf: "tile-icon" },
+            copy: { contract: "heading-body-action-stack" },
+        },
+        why: "if loading or refusing one exact AgentOS workspace needs a strong state mark beside its consequence and optional recovery without pretending the workspace is empty.",
+    },
+    "agentos-route-page": {
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-8", "px-6", "py-8"],
+        host: "main",
+        children: {
+            path: { leaf: "breadcrumbs", optional: true },
+            heading: { contract: ["title-with-end-action", "agentos-page-heading"] },
+            section: { contract: ["label-row-over-card", "agentos-dashboard-body"], repeats: true, restingCount: 2 },
+        },
+        why: "if dashboard, pre-persistence creation and persisted AgentOS orders must share one mature page measure and product identity while keeping their route-owned sections separate.",
     },
     "inline-action-run": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "gap-2"],
@@ -321,7 +406,13 @@ export const CONTRACTS = buildContracts({
     "label-row-over-card": {
         classes: ["flex", "flex-col", "gap-3"],
         children: {
-            label: { contract: ["title-with-end-action", "title-with-baseline-fact"] },
+            /*
+             * ONE TITLE OWNER. A body such as `module-intake-form` or
+             * `module-specification-review` already carries the heading that explains its work.
+             * Requiring another label here makes both layers repeat the same sentence. Keep the
+             * outer label for anonymous lists and cards; omit it when the body names itself.
+             */
+            label: { contract: ["title-with-end-action", "title-with-baseline-fact"], optional: true },
             /*
              * `$content` USED TO SIT HERE, AND NOTHING COULD EVER FILL IT. It is not a ContractKey, so
              * `ContractChild` resolved it to `never` and every attempt to render this node with a
@@ -347,15 +438,103 @@ export const CONTRACTS = buildContracts({
                     "body-with-refusal-note", "heading-body-action-stack", "form-column", "identity-action-list",
                     "account-signal-card", "attention-grouped-fleet-list",
                     "status-action-card", "status-action-card-grid", "workspace-runtime-stack", "helm-component-status-table",
+                    "agentos-summary-card", "agentos-summary-grid", "agentos-state-notice",
                     "infrastructure-summary", "wallet-summary", "module-summary", "module-bindings",
                     "wallet-balance-surface", "wallet-top-up-form", "wallet-payment-result",
                     "responsive-four-stage-lifecycle-stepper", "identity-phase-action", "provisioning-order-content",
                     "wallet-checkout-evidence", "wallet-ledger-detail", "wallet-linked-invoice",
+                    "custom-module-collection", "module-intake-form", "adaptive-intake-explanation",
+                    "adaptive-module-interview", "live-module-profile", "module-attachment-list",
+                    "module-integration-list", "module-specification-review",
                 ],
                 leaf: "text",
             },
         },
-        why: "if you need a labelled section whose body is itself a card, a grid or a list, with the label held outside so a card never draws inside another card.",
+        why: "if you need one section whose anonymous body receives a label outside the card, or whose self-naming body remains the sole title owner, so cards never nest and headings never repeat.",
+    },
+    "custom-module-collection": {
+        classes: ["flex", "w-full", "flex-col", "divide-y", "divide-separator"],
+        children: {
+            module: { contract: "identity-kind-status-action-row", repeats: true, restingCount: 3 },
+        },
+        why: "if one workspace owner needs custom-module identities, lifecycle status and one exact continuation to remain a single joined scan rather than a grid of competing cards.",
+    },
+    "module-intake-form": {
+        host: "form",
+        classes: ["flex", "w-full", "flex-col", "gap-4", "p-6"],
+        children: {
+            prompt: { contract: "title-over-description" },
+            goal: { composite: "field" },
+            note: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            action: { leaf: "button" },
+        },
+        why: "if one meaningful opening goal must remain beside its zero-write consequence and the only action that creates a persistent intake identity.",
+    },
+    "adaptive-intake-explanation": {
+        classes: ["flex", "w-full", "flex-col", "gap-4", "p-6"],
+        children: {
+            title: { leaf: "heading" },
+            steps: { contract: "numbered-step-stack" },
+            note: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
+        why: "if the owner must understand adaptive follow-up, resumability and explicit review before beginning work that will persist.",
+    },
+    "module-interview-message": {
+        classes: ["flex", "w-full", "flex-col", "gap-1", "p-4", "rounded-2xl", "border", "border-separator"],
+        children: {
+            actor: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            content: { leaf: "text", props: { size: "sm" } },
+        },
+        why: "if one persisted interview turn needs its speaker and accepted content kept together in chronological reading order.",
+    },
+    "adaptive-module-interview": {
+        classes: ["flex", "w-full", "flex-col", "gap-4", "p-6"],
+        children: {
+            heading: { contract: "subject-over-muted-caption" },
+            message: { contract: "module-interview-message", repeats: true, restingCount: 3 },
+            composer: { contract: "form-column", optional: true },
+            notice: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "if persisted turns, the backend-selected next question and its answer composer must remain the primary resumable work surface.",
+    },
+    "live-module-profile": {
+        classes: ["flex", "w-full", "flex-col", "gap-4", "p-4"],
+        children: {
+            progress: { composite: "labelled-progress-row" },
+            facts: { contract: "labelled-fact-stack" },
+            missing: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+        },
+        why: "if backend-owned completeness, accepted facts and unresolved fields must stay visible while the interview advances.",
+    },
+    "module-attachment-list": {
+        classes: ["flex", "w-full", "flex-col", "gap-3", "p-4"],
+        children: {
+            attachment: { contract: "subject-over-muted-caption-with-action", repeats: true, restingCount: 2 },
+            upload: { leaf: "button" },
+            notice: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+        },
+        why: "if quarantined evidence files must show their scan lifecycle and a safe removal or retry beside the one bounded add-file action.",
+    },
+    "module-integration-list": {
+        classes: ["flex", "w-full", "flex-col", "gap-4", "p-4"],
+        children: {
+            integration: { contract: "subject-over-muted-caption-with-action", repeats: true, restingCount: 1 },
+            key: { composite: "field" },
+            action: { leaf: "button" },
+            notice: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+        },
+        why: "if configured providers may return only masked status while replacement remains a separate write-only key operation.",
+    },
+    "module-specification-review": {
+        classes: ["flex", "w-full", "flex-col", "gap-6", "p-6"],
+        children: {
+            heading: { contract: "title-with-baseline-fact" },
+            summary: { contract: "labelled-fact-stack" },
+            acknowledgement: { leaf: "checkbox" },
+            action: { leaf: "button" },
+            notice: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "if one immutable specification version must be read, explicitly acknowledged and only then submitted for installation.",
     },
     "highlight-card-shell": {
         classes: ["relative"],
@@ -799,7 +978,7 @@ export const CONTRACTS = buildContracts({
     "centred-title-pair": {
         classes: ["flex", "flex-col", "gap-3", "items-center", "text-center"],
         children: {
-            mark: { leaf: "icon", optional: true },
+            mark: { leaf: ["icon", "brand-mark"], optional: true },
             title: { leaf: "heading" },
             description: { leaf: "text", props: { size: "sm" } },
         },
@@ -927,7 +1106,7 @@ export const CONTRACTS = buildContracts({
             "[&>*:last-child]:hidden", "sm:[&>*:last-child]:block",
         ],
         children: {
-            brand: { leaf: "heading" },
+            brand: { leaf: ["heading", "brand-mark"] },
             context: { leaf: "text" },
         },
         why: "if you need the global navbar's product identity and console context to remain one leading run while narrow space keeps the brand primary",
@@ -1007,7 +1186,7 @@ export const CONTRACTS = buildContracts({
         classes: ["mx-auto", "flex", "w-full", "max-w-4xl", "flex-col", "gap-6", "px-6", "py-6"],
         children: {
             path: { leaf: "breadcrumbs", optional: true },
-            heading: { contract: ["title-with-end-action", "title-with-baseline-fact"] },
+            heading: { contract: ["title-with-end-action", "title-with-baseline-fact", "title-over-description"] },
             /*
              * A SENTENCE, WHERE `title-with-baseline-fact` HOLDS ONLY A PHRASE. Its `fact` reads as
              * part of the heading's own line, so a page whose subject needs a full explanatory line
@@ -1051,6 +1230,7 @@ export const CONTRACTS = buildContracts({
     "console-primary-aside-page": {
         classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-8", "px-6", "py-8"],
         children: {
+            path: { leaf: "breadcrumbs", optional: true },
             heading: { contract: "display-title-with-end-action" },
             lede: { leaf: "text", props: { size: "md", tone: "muted" }, optional: true },
             signals: { contract: "account-signal-grid", optional: true },
@@ -1078,20 +1258,32 @@ export const CONTRACTS = buildContracts({
         why: "if you need peer console sections with independent states to keep one vertical reading order inside either the primary or secondary page region.",
     },
     "account-signal-grid": {
-        classes: ["grid", "grid-cols-2", "gap-4", "lg:grid-cols-4"],
+        classes: [
+            "grid", "grid-cols-2", "gap-4", "lg:grid-cols-4",
+            "[&>*:first-child]:col-span-2", "lg:[&>*:first-child]:col-span-4",
+        ],
         children: {
+            artwork: { leaf: "nivo-unicorn-artwork" },
             signal: { contract: "account-signal-card", repeats: true, restingCount: 4 },
         },
-        why: "if you need four independently settling account signals to align for comparison while showing named members and exact values instead of inventing collection totals.",
+        why: "if one Nivo brand-artwork band introduces four independently settling account signals that align for comparison while showing named members and exact values instead of inventing collection totals.",
+    },
+    "account-signal-heading": {
+        classes: ["flex", "flex-row", "items-center", "gap-2"],
+        children: {
+            mark: { leaf: "icon-tile", props: { size: "sm", tone: "accent" } },
+            label: { leaf: "text", props: { size: "sm", weight: "medium" } },
+        },
+        why: "if one of four heterogeneous account-signal peers needs a semantic icon tile and compact label to identify its service kind before the current value.",
     },
     "account-signal-card": {
-        classes: ["flex", "min-w-0", "flex-col", "gap-3", "p-6"],
+        classes: ["flex", "min-w-0", "flex-col", "gap-3", "p-4"],
         children: {
-            label: { leaf: "text", props: { size: "xs", tone: "muted" } },
-            value: { leaf: "text", props: { size: "metric-lead", weight: "semibold" } },
+            heading: { contract: "account-signal-heading" },
+            value: { leaf: "text", props: { size: "sm" } },
             caption: { leaf: "text", props: { size: "xs", tone: "muted" } },
         },
-        why: "if you need one independently settled account signal to state its subject, one named or exact value, and the qualifying evidence beneath it on its own page-level surface.",
+        why: "if one compact ordinary surface in the account-signal peer set needs a service identity, one current named or exact value, and qualifying evidence without promoting every peer into a leading metric.",
     },
     "infrastructure-summary": {
         classes: ["flex", "flex-col", "gap-4"],
@@ -1106,8 +1298,8 @@ export const CONTRACTS = buildContracts({
     "wallet-summary": {
         classes: ["flex", "flex-col", "gap-4"],
         children: {
-            heading: { contract: "title-with-end-action" },
             facts: { contract: "labelled-fact-stack" },
+            action: { leaf: "button", optional: true },
             note: { contract: "body-with-refusal-note", optional: true },
         },
         why: "if the overview needs one independently settled balance and unpaid-invoice summary whose wallet actions remain attached to the facts they affect.",
@@ -1201,7 +1393,7 @@ export const CONTRACTS = buildContracts({
     "provisioning-brand-mark-cell": {
         classes: ["flex", "items-center", "justify-center", "p-4"],
         children: {
-            mark: { leaf: "icon" },
+            mark: { leaf: ["icon", "tile-icon"] },
         },
         why: "if a single controlled product glyph closes the open edge of an order phase without becoming another content surface.",
     },
@@ -1253,10 +1445,10 @@ export const CONTRACTS = buildContracts({
         why: "if you need a catalogue row for something still for sale, showing identity, kind and price beside exactly one required purchase action, rather than a status a resource can be in",
     },
     "tabbed-control-center-page": {
-        classes: ["mx-auto", "flex", "w-full", "max-w-4xl", "flex-col", "gap-6", "px-6", "py-6"],
+        classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-8", "px-6", "py-8"],
         children: {
-            heading: { contract: "title-with-end-action" },
-            tabs: { leaf: "choice-tabs" },
+            heading: { contract: ["title-with-end-action", "agentos-page-heading"] },
+            tabs: { leaf: "choice-tabs", optional: true },
             section: { contract: ["label-row-over-card", "workspace-overview-grid"], repeats: true, restingCount: 2 },
         },
         why: "if you need a single managed resource's control-center page with a heading, a tab switcher, and stacked sections that all stay in the main column rather than becoming sidebar navigation",
@@ -1293,7 +1485,7 @@ export const CONTRACTS = buildContracts({
         why: "if you need one named binding kind followed by its complete generated identifiers without turning those machine values into actions",
     },
     "status-action-card-grid": {
-        classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-2"],
+        classes: ["grid", "grid-cols-1", "gap-4", "sm:grid-cols-2", "sm:[&>*:only-child]:col-span-2"],
         children: {
             item: { composite: "status-action-card", repeats: true, restingCount: 2 },
         },

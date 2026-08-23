@@ -222,7 +222,7 @@ export const TemplateAppProvisioning = ({ context }: TemplateAppProvisioningProp
             case "ready":
                 return flow.publicHost ?? flow.siteId
             default:
-                return "Template App"
+                return t("template.productName")
         }
     }
     const detail = (): string => {
@@ -243,7 +243,7 @@ export const TemplateAppProvisioning = ({ context }: TemplateAppProvisioningProp
         if (flow.phase === "unsupported") return { state: "unsupported", props: { ...common, statusTitle: t("unsupportedTitle"), statusText: t("unsupportedText"), actionLabel: t("backToApps") }, on: { act: () => router.push(route("/apps")) } }
         if (flow.phase === "failed") return { state: "failed", props: { ...common, statusTitle: t("failedTitle"), statusText: flow.reason, actionLabel: t("backToApps") }, on: { act: () => router.push(route("/apps")) } }
         if (flow.phase === "request" || flow.phase === "submitting") return { state: flow.phase, props: { ...common, statusTitle: t("template.requestTitle"), statusText: t("template.requestText") }, on: { changeSlug: setSlug, submit: () => void submit() } }
-        if (flow.phase === "ready") return { state: "ready", props: { ...common, statusTitle: t("readyTitle"), statusText: t("template.readyText"), actionLabel: t("manageApps") }, on: { act: () => router.push(route("/apps")) } }
+        if (flow.phase === "ready") return { state: "ready", props: { ...common, statusTitle: t("readyTitle"), statusText: t("template.readyText"), actionLabel: t("manageApps") }, on: { act: () => router.push(route(`/apps/${flow.siteId}`)) } }
         if (flow.phase === "accepted") return { state: "accepted", props: { ...common, statusTitle: t("template.acceptedTitle"), statusText: t("template.acceptedText") } }
         const isCatalogLoading = flow.phase === "catalog_loading"
         const waitingText = realtime.status === "connecting" ? t("connecting") : t("template.preparingText")

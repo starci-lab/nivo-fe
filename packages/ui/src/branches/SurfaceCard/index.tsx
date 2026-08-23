@@ -3,6 +3,7 @@ import { Tree } from "../Tree"
 import { Heading } from "../../leaves/Heading"
 import { Text } from "../../leaves/Text"
 import { SeeMoreLink } from "../../leaves/SeeMoreLink"
+import { Button } from "../../leaves/Button"
 import { CONTRACTS } from "../../contracts"
 import {
     defineContractComponent,
@@ -62,6 +63,11 @@ export type SurfaceCardData = {
      */
     readonly seeMoreLabel?: string
     /**
+     * The already-resolved primary action at the end of the label line. It outranks both a
+     * see-more link and a fact because the three compete for the same semantic end position.
+     */
+    readonly actionLabel?: string
+    /**
      * Drop the inner surface and let the content sit straight under the label - for a section whose
      * content is ALREADY a set of surfaces. The label stays either way.
      */
@@ -70,6 +76,8 @@ export type SurfaceCardData = {
 
 /** What the section reports. */
 export type SurfaceCardActions = {
+    /** Called when the reader starts the section's primary operation. */
+    readonly act?: () => void
     /** Called when the reader follows the way out at the end of the label line. */
     readonly seeMore?: () => void
 }
@@ -105,15 +113,18 @@ export const SurfaceCard = <const K extends SectionBodyKey>({
     isLoading = false,
 }: SurfaceCardProps<K>) => {
     // One place at the end of the line: the way out wins it, the fact takes it only if free.
+    const hasAction = props.actionLabel !== undefined && on?.act !== undefined
     const hasSeeMore = props.seeMoreLabel !== undefined && on?.seeMore !== undefined
     const fact = props.fact === undefined
         ? null
         : <Text props={{ content: props.fact, size: "sm", tone: "muted" }} isLoading={isLoading} />
-    const end = hasSeeMore
-        ? <SeeMoreLink props={{ label: props.seeMoreLabel }} on={{ press: on.seeMore }} />
-        : fact
+    const end = hasAction
+        ? <Button props={{ label: props.actionLabel, size: "sm", variant: "primary" }} on={{ press: on.act }} />
+        : hasSeeMore
+            ? <SeeMoreLink props={{ label: props.seeMoreLabel }} on={{ press: on.seeMore }} />
+            : fact
 
-    const labelContract = !hasSeeMore && props.fact !== undefined
+    const labelContract = !hasAction && !hasSeeMore && props.fact !== undefined
         ? "title-with-baseline-fact"
         : "title-with-end-action"
     const title = defineLeafComponent("heading", {}, () => (
@@ -126,7 +137,9 @@ export const SurfaceCard = <const K extends SectionBodyKey>({
         })
         : defineContractComponent("title-with-end-action", {
             title,
-            ...(hasSeeMore ? {
+            ...(hasAction ? {
+                end: defineLeafComponent("button", {}, () => end),
+            } : hasSeeMore ? {
                 end: defineLeafComponent("see-more-link", {}, () => end),
             } : {}),
         })

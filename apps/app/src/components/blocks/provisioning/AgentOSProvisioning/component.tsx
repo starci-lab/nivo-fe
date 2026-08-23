@@ -3,10 +3,10 @@
 import {
     Button,
     HighlightCard,
-    Icon,
     LifecycleStep,
     SurfaceCard,
     Text,
+    TileIcon,
     Tree,
     defineCompositeComponent,
     defineContractComponent,
@@ -86,9 +86,9 @@ export const AgentOSProvisioningBase = ({ state, props, on }: AgentOSProvisionin
         action,
     })
     const artwork = defineContractComponent("provisioning-brand-mark-cell", {
-        mark: defineLeafComponent("icon", {}, () => (
-            <Icon
-                props={{ name: "agentos", role: "heading" }}
+        mark: defineLeafComponent("tile-icon", {}, () => (
+            <TileIcon
+                props={{ icon: "agentos", signal: state === "failed" ? "attention" : state === "ready" ? "active" : "none" }}
                 isLoading={state === "catalog_loading"}
             />
         )),

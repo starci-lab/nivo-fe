@@ -6,7 +6,7 @@ import { AcademyLeadPipelineBase } from "./blocks/academy/AcademyLeadPipeline/co
 import { AcademyStudentCrmBase } from "./blocks/academy/AcademyStudentCrm/component"
 import { AgentOSSolutionModuleCenterBase } from "./blocks/agentos/AgentOSSolutionModuleCenter/component"
 import { AgentOSProvisioningBase } from "./blocks/provisioning/AgentOSProvisioning/component"
-import { AppsPageBase } from "./pages/AppsPage/component"
+import { AppsDashboardBase } from "./blocks/apps/AppsDashboard/component"
 
 const leadLabels = { section: "Leads", empty: "No leads", refused: "Unavailable", open: "Open", detail: "Detail", advance: "Advance", draft: "Draft", saved: "Saved", actionFailed: "Failed" }
 const studentLabels = { section: "Students", empty: "No students", refused: "Unavailable", open: "Open", active: "Active", banned: "Banned", detail: "Detail", create: "Create", name: "Name", email: "Email", password: "Password", saveStudent: "Save", courseSlug: "Course", grant: "Grant", revoke: "Revoke", ban: "Ban", activate: "Activate", loadingDetail: "Loading", actionFailed: "Failed" }
@@ -74,13 +74,13 @@ describe("source quality interaction coverage", () => {
     it("fires AppsPage row and offer actions across resting and refused sections", () => {
         const onBuildTemplate = vi.fn()
         const onOpenOwnedApp = vi.fn()
-        render(<AppsPageBase title="Apps" lede="Lede" owned={{ phase: "answered", label: "Owned", rows: [{ id: "site-1", name: "Academy", detail: "academy.test", kindLabel: "Academy", status: "ready", statusLabel: "Ready", actionLabel: "Open" }] }} catalogue={{ phase: "answered", label: "Catalogue", fact: "Templates", offers: [{ id: "offer-1", templateKey: "ai_academy", name: "Academy", tagline: "Learn", kindLabel: "Template", priceLabel: "100", actionLabel: "Build", actionDisabled: false }] }} onBuildTemplate={onBuildTemplate} onOpenOwnedApp={onOpenOwnedApp} />)
+        render(<AppsDashboardBase title="Apps" lede="Lede" owned={{ phase: "answered", label: "Owned", rows: [{ id: "site-1", name: "Academy", detail: "academy.test", kindLabel: "Academy", status: "ready", statusLabel: "Ready", actionLabel: "Open" }] }} catalogue={{ phase: "answered", label: "Catalogue", fact: "Templates", offers: [{ id: "offer-1", templateKey: "ai_academy", name: "Academy", tagline: "Learn", kindLabel: "Template", priceLabel: "100", actionLabel: "Build", actionDisabled: false }] }} onBuildTemplate={onBuildTemplate} onOpenOwnedApp={onOpenOwnedApp} />)
         fireEvent.click(screen.getByRole("button", { name: "Build" }))
         for (const link of screen.getAllByRole("link", { name: "Academy" })) fireEvent.click(link)
         expect(onBuildTemplate).toHaveBeenCalledWith("ai_academy")
         expect(onOpenOwnedApp).toHaveBeenCalledWith("site-1")
-        render(<AppsPageBase title="Apps" lede="Lede" owned={{ phase: "resting", label: "Owned" }} catalogue={{ phase: "resting", label: "Catalogue", fact: "Fact" }} onBuildTemplate={onBuildTemplate} onOpenOwnedApp={onOpenOwnedApp} />)
-        render(<AppsPageBase title="Apps" lede="Lede" owned={{ phase: "refused", label: "Owned", note: "Unavailable" }} catalogue={{ phase: "empty", label: "Catalogue", note: "Empty" }} onBuildTemplate={onBuildTemplate} onOpenOwnedApp={onOpenOwnedApp} />)
+        render(<AppsDashboardBase title="Apps" lede="Lede" owned={{ phase: "resting", label: "Owned" }} catalogue={{ phase: "resting", label: "Catalogue", fact: "Fact" }} onBuildTemplate={onBuildTemplate} onOpenOwnedApp={onOpenOwnedApp} />)
+        render(<AppsDashboardBase title="Apps" lede="Lede" owned={{ phase: "refused", label: "Owned", note: "Unavailable" }} catalogue={{ phase: "empty", label: "Catalogue", note: "Empty" }} onBuildTemplate={onBuildTemplate} onOpenOwnedApp={onOpenOwnedApp} />)
         expect(screen.getAllByText("Unavailable").length).toBeGreaterThan(0)
     })
 })
