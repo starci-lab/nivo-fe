@@ -7,6 +7,7 @@ import createNextIntlPlugin from "next-intl/plugin"
  * a per-app copy caused.
  */
 const nextConfig: NextConfig = {
+    output: "standalone",
     transpilePackages: ["@nivo/ui"],
     experimental: {
         optimizePackageImports: ["@heroui/react"],

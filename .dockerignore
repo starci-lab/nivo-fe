@@ -1,0 +1,13 @@
+.git
+.github
+.artifacts
+.claude
+.scannerwork
+.sonar
+.turbo
+**/.next
+**/node_modules
+coverage
+design-plans
+e2e
+*.log
