@@ -8,6 +8,10 @@ type AgentOSSolutionModuleBindingsLabels = {
     readonly channels: string
     readonly sharedKnowledge: string
     readonly knowledgeVersions: string
+    readonly artifact: string
+    readonly currentness: string
+    readonly embedding: string
+    readonly retrievalScope: string
     readonly empty: string
 }
 
@@ -54,6 +58,25 @@ export const AgentOSSolutionModuleBindings = (input: AgentOSSolutionModuleBindin
                     bindingGroup(labels.knowledgeVersions, installation === undefined ? undefined : [
                         installation.commonKnowledgeVersion,
                         installation.privateKnowledgeVersion,
+                    ], labels.empty, isLoading),
+                    bindingGroup(labels.artifact, installation === undefined ? undefined : installation.knowledgeArtifact === null ? [] : [
+                        installation.knowledgeArtifact.id,
+                        installation.knowledgeArtifact.knowledgeVersion,
+                        installation.knowledgeArtifact.snapshotDigest,
+                        `${installation.knowledgeArtifact.pointCount} points`,
+                    ], labels.empty, isLoading),
+                    bindingGroup(labels.currentness, installation === undefined ? undefined : [
+                        installation.knowledgeState,
+                        `${installation.desiredDigest ?? labels.empty} → ${installation.appliedDigest ?? labels.empty}`,
+                    ], labels.empty, isLoading),
+                    bindingGroup(labels.embedding, installation === undefined ? undefined : installation.knowledgeArtifact === null ? [] : [
+                        installation.knowledgeArtifact.embeddingProfile,
+                        `${installation.knowledgeArtifact.embeddingDimension} dimensions`,
+                    ], labels.empty, isLoading),
+                    bindingGroup(labels.retrievalScope, installation === undefined ? undefined : [
+                        installation.retrievalScope.installationId,
+                        installation.retrievalScope.moduleKey,
+                        installation.retrievalScope.knowledgeVersion,
                     ], labels.empty, isLoading),
                 ],
             })}

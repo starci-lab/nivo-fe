@@ -107,15 +107,15 @@ describe("pure page twins", () => {
             backToWorkspace: "Back to workspace",
             loading: "Loading module",
             refused: "Module unavailable",
-            summary: { section: "Summary", module: "Module", version: "Version", status: "Status", failure: "Failure", empty: "None" },
-            bindings: { section: "Bindings", agents: "Agents", channels: "Channels", sharedKnowledge: "Knowledge", knowledgeVersions: "Versions", empty: "None" },
+            summary: { section: "Summary", module: "Module", version: "Version", status: "Status", failure: "Failure", modelProfile: "Model profile", manifest: "Manifest", empty: "None" },
+            bindings: { section: "Bindings", agents: "Agents", channels: "Channels", sharedKnowledge: "Knowledge", knowledgeVersions: "Versions", artifact: "Artifact", currentness: "Currentness", embedding: "Embedding", retrievalScope: "Retrieval scope", empty: "None" },
         } satisfies AgentOSSolutionModulePageLabels
         const loading = renderToStaticMarkup(<AgentOSSolutionModulePageBase detailState="loading" labels={labels} onBack={vi.fn()} />)
         const refused = renderToStaticMarkup(<AgentOSSolutionModulePageBase detailState="refused" labels={labels} onBack={vi.fn()} />)
         expect(loading).toContain("Loading module")
         expect(loading).toContain('data-node="module-summary"')
         expect(loading).toContain('data-node="module-bindings"')
-        expect(loading.match(/data-node="binding-identity-list"/g)).toHaveLength(4)
+        expect(loading.match(/data-node="binding-identity-list"/g)).toHaveLength(8)
         expect(loading).toContain("Agents")
         expect(loading).toContain("Versions")
         expect(refused).toContain("Module unavailable")

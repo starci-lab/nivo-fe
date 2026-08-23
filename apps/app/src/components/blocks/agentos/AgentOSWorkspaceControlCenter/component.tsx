@@ -14,6 +14,7 @@ import {
 import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice"
 import { AgentOSWorkspaceApplications } from "@/components/blocks/agentos/AgentOSWorkspaceApplications"
 import { AgentOSSolutionModuleCenter } from "@/components/blocks/agentos/AgentOSSolutionModuleCenter"
+import { AgentOSWorkspaceAiKnowledge } from "@/components/blocks/agentos/AgentOSWorkspaceAiKnowledge"
 import { AgentOSWorkspaceRuntime } from "@/components/blocks/agentos/AgentOSWorkspaceRuntime"
 import { AgentOSWorkspaceSummary } from "@/components/blocks/agentos/AgentOSWorkspaceSummary"
 import { AgentOSWorkspaceOperations } from "@/components/blocks/operations/AgentOSWorkspaceOperations"
@@ -21,7 +22,7 @@ import { HelmStackSnapshot } from "@/components/blocks/operations/HelmStackSnaps
 import type { AgentWorkspaceControlCenter } from "@/modules/api/console"
 
 /** Page-level compositions available inside one workspace control center. */
-export type AgentOSWorkspacePageState = "overview" | "solutions" | "applications" | "infrastructure" | "operations" | "access"
+export type AgentOSWorkspacePageState = "overview" | "solutions" | "ai-knowledge" | "applications" | "infrastructure" | "operations" | "access"
 
 /** Request-owned situations for the workspace control-center aggregate. */
 export type AgentOSWorkspaceControlCenterState = "loading" | "refused" | "ready"
@@ -139,6 +140,9 @@ export const AgentOSWorkspaceControlCenterBase = ({ workspaceId, pageState, cont
         }
         if (pageState === "solutions") {
             return [defineContractProjection("label-row-over-card", () => <AgentOSSolutionModuleCenter workspaceId={data.workspace.id} />)]
+        }
+        if (pageState === "ai-knowledge") {
+            return [defineContractProjection("label-row-over-card", () => <AgentOSWorkspaceAiKnowledge workspaceId={data.workspace.id} />)]
         }
         if (pageState === "access") {
             return [defineContractProjection("label-row-over-card", () => <EmptyNotice props={{ message: labels.accessUnavailable }} />)]

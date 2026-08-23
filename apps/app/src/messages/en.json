@@ -219,10 +219,19 @@
         "tabs": {
         "overview": "Overview",
         "solutions": "Solutions",
+        "ai-knowledge": "AI & Knowledge",
         "applications": "Applications",
           "infrastructure": "Infrastructure",
           "operations": "Operations",
           "access": "Access"
+      },
+      "aiKnowledge": {
+        "title": "AI & Knowledge readiness",
+        "description": "Per-workspace OpenRouter credential, DeepSeek model, Nivo/module snapshots, uploaded documents and private Qdrant retrieval.",
+        "ready": "AI ready", "testing": "Checking readiness", "refused": "Needs attention",
+        "provider": "Provider", "model": "Chat model", "embedding": "Embedding profile", "qdrant": "Qdrant", "credential": "Workspace credential", "testedAt": "Last tested",
+        "runTest": "Test AI readiness", "recover": "Recover knowledge", "origins": "Knowledge origins", "components": "Readiness evidence", "evidence": "Owner-safe component verdict",
+        "documents": "{count, plural, =0 {No documents} one {# document} other {# documents}}", "current": "Current", "unknownVersion": "Version pending"
       },
       "solutions": {
         "modesLabel": "Solution module view",
@@ -262,14 +271,20 @@
             "module": "Module",
             "version": "Version",
             "status": "Status",
-            "failure": "Failure code"
+            "failure": "Failure code",
+            "modelProfile": "Model profile",
+            "manifest": "Manifest digest"
           },
           "bindings": {
             "section": "Agents and knowledge",
             "agents": "Generated agents",
             "channels": "Channel accounts",
             "sharedKnowledge": "Shared knowledge sources",
-            "knowledgeVersions": "Common · private knowledge"
+            "knowledgeVersions": "Common · private knowledge",
+            "artifact": "Pinned knowledge artifact",
+            "currentness": "Workspace import",
+            "embedding": "Embedding",
+            "retrievalScope": "Private retrieval scope"
           }
         }
       },
@@ -353,7 +368,7 @@
         "studio": {
           "interview": { "title": "Module interview", "saved": "Accepted answers are saved before Nivo selects the next question.", "refused": "The interview could not be read. Other module sections remain independent.", "field": "Answer the current question", "placeholder": "Type the clearest answer you have", "send": "Send answer", "complete": "The interview is complete and ready for review.", "agent": "Nivo Agent", "you": "You" },
           "profile": { "title": "Module profile", "progress": "Readiness", "missing": "Still unresolved: {fields}", "refused": "The live profile is unavailable." },
-          "attachments": { "title": "Files", "upload": "Add file", "remove": "Remove", "refused": "File evidence is unavailable.", "empty": "No supporting files yet.", "scanning": "Scanning" },
+          "attachments": { "title": "Knowledge documents", "upload": "Add document", "remove": "Remove", "refused": "File evidence is unavailable.", "empty": "No supporting documents yet.", "uploaded": "Uploaded", "scanning": "Scanning", "extracting": "Extracting", "embedding": "Embedding", "indexing": "Indexing", "indexed": "Indexed", "complete": "Complete", "current": "Current", "upcoming": "Upcoming", "chunks": "{count, plural, one {# chunk} other {# chunks}}", "refusedStatus": "Refused", "removed": "Removed" },
           "integrations": { "title": "Integrations", "provider": "Helpdesk API", "field": "Integration key", "placeholder": "Paste a new write-only key", "save": "Configure key", "remove": "Remove", "refused": "Integration status is unavailable.", "writeOnly": "Nivo encrypts the submitted value and returns only a masked hint.", "reveal": "Show key", "hide": "Hide key" },
           "specification": { "title": "Review specification", "refused": "The specification could not be read.", "incomplete": "Complete the interview before a versioned specification can be reviewed.", "version": "Version {version}", "acknowledge": "I reviewed specification v{version}", "publish": "Publish module", "publishing": "Publishing module", "published": "The installation request has been accepted." }
         }
@@ -429,6 +444,11 @@
         "createApp": "Create app",
         "createWorkspace": "Create workspace",
         "infrastructure": "Build infrastructure",
+        "credential": "Workspace key",
+        "deepseek": "DeepSeek model",
+        "knowledge": "Knowledge recovery",
+        "qdrant": "Qdrant",
+        "aiTest": "AI readiness",
         "manage": "Manage",
         "ready": "Ready"
       },
@@ -467,6 +487,10 @@
         "preparingText": "The workspace event stream is following this workspace only.",
         "watchProvisioning": "Watch provisioning",
         "readyText": "The workspace is ready and now appears in your AgentOS management list.",
+        "aiLoading": "Reading the workspace AI and knowledge readiness snapshot.",
+        "aiTesting": "The bounded readiness test is checking the provider, model and private retrieval path.",
+        "aiRecovering": "Nivo is restoring pinned Nivo/module snapshots and uploaded documents into this workspace's private Qdrant collection.",
+        "aiReady": "The OpenRouter credential, DeepSeek model, knowledge snapshot, Qdrant collection and bounded AI test are ready.",
         "manage": "Manage AgentOS",
         "orderMissing": "This AgentOS order was not found for the signed-in account.",
         "orderCancelled": "This AgentOS order was cancelled.",

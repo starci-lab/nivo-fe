@@ -15,6 +15,8 @@ type AgentOSSolutionModuleSummaryLabels = {
     readonly version: string
     readonly status: string
     readonly failure: string
+    readonly modelProfile: string
+    readonly manifest: string
     readonly empty: string
 }
 
@@ -70,6 +72,8 @@ export const AgentOSSolutionModuleSummary = (input: AgentOSSolutionModuleSummary
                         fact(labels.module, installation?.moduleKey, isLoading),
                         fact(labels.version, installation?.moduleVersion, isLoading),
                         fact(labels.status, installation?.status, isLoading),
+                        fact(labels.modelProfile, installation?.modelProfileRef, isLoading),
+                        fact(labels.manifest, installation?.manifestDigest, isLoading),
                         fact(labels.failure, installation?.failureCode ?? (isLoading ? undefined : labels.empty), isLoading),
                     ],
                 }),

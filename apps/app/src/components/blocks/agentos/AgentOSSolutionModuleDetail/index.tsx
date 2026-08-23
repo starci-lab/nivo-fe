@@ -51,11 +51,12 @@ export const AgentOSSolutionModuleDetail = ({ workspaceId, installationId }: Age
         refused: t("refused"),
         summary: {
             section: t("summary.section"), module: t("summary.module"), version: t("summary.version"),
-            status: t("summary.status"), failure: t("summary.failure"), empty: t("empty"),
+            status: t("summary.status"), failure: t("summary.failure"), modelProfile: t("summary.modelProfile"), manifest: t("summary.manifest"), empty: t("empty"),
         },
         bindings: {
             section: t("bindings.section"), agents: t("bindings.agents"), channels: t("bindings.channels"),
-            sharedKnowledge: t("bindings.sharedKnowledge"), knowledgeVersions: t("bindings.knowledgeVersions"), empty: t("empty"),
+            sharedKnowledge: t("bindings.sharedKnowledge"), knowledgeVersions: t("bindings.knowledgeVersions"),
+            artifact: t("bindings.artifact"), currentness: t("bindings.currentness"), embedding: t("bindings.embedding"), retrievalScope: t("bindings.retrievalScope"), empty: t("empty"),
         },
     }
     return <AgentOSSolutionModuleDetailBase

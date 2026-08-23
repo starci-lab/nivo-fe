@@ -46,7 +46,12 @@ export const AgentOSModuleAttachments = ({ workspaceId, moduleId }: AgentOSModul
         finally { setPending(false) }
     }
     const remove = async (attachmentId: string) => { setPending(true); const result = await removeAgentosModuleAttachment({ agentWorkspaceId: workspaceId, moduleId, attachmentId }); if (result.ok) await load(); setPending(false) }
-    return <AgentOSModuleAttachmentsBase studio={studio ?? undefined} state={studio === undefined ? "loading" : studio === null ? "refused" : "ready"} pending={pending} labels={{ title: t("title"), upload: t("upload"), remove: t("remove"), refused: t("refused"), empty: t("empty"), scanning: t("scanning") }} onChoose={(file) => void choose(file)} onRemove={(id) => void remove(id)} />
+    return <AgentOSModuleAttachmentsBase studio={studio ?? undefined} state={studio === undefined ? "loading" : studio === null ? "refused" : "ready"} pending={pending} labels={{
+        title: t("title"), upload: t("upload"), remove: t("remove"), refused: t("refused"), empty: t("empty"),
+        uploaded: t("uploaded"), scanning: t("scanning"), extracting: t("extracting"), embedding: t("embedding"), indexing: t("indexing"), indexed: t("indexed"),
+        complete: t("complete"), current: t("current"), upcoming: t("upcoming"),
+        chunks: (count) => t("chunks", { count }), refusedStatus: t("refusedStatus"), removed: t("removed"),
+    }} onChoose={(file) => void choose(file)} onRemove={(id) => void remove(id)} />
 }
 
 /** Source-level tier marker for the connected attachments owner. */

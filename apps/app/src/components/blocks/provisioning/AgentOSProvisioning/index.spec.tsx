@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => {
         myAgentWorkspace: vi.fn(),
         myCatalogOrders: vi.fn(),
         myInvoices: vi.fn(),
+        myAgentosAiKnowledgeReadiness: vi.fn(),
         orderAgentOs: vi.fn(),
     }
     return {
@@ -66,6 +67,7 @@ describe("AgentOSProvisioning connected flow", () => {
         mocks.realtime.event = undefined
         mocks.api.catalogItems.mockResolvedValue({ ok: true, data: [item] })
         mocks.api.orderAgentOs.mockResolvedValue({ ok: true, data: order })
+        mocks.api.myAgentosAiKnowledgeReadiness.mockResolvedValue({ ok: true, data: { provider: "OpenRouter", chatModel: "deepseek/deepseek-chat", embeddingProfile: "nivo", embeddingDimension: 1024, credentialStatus: "configured", credentialMaskedHint: "or-…", qdrantHealth: "healthy", readinessStatus: "ready", aiReady: true, readinessOperationId: null, knowledgeRecoveryOperationId: null, components: [], origins: [{ origin: "nivo", version: "v1", digest: "digest", documentCount: 1, lastUpdatedAt: null }], failureCode: null, testedAt: null } })
         snapshot()
     })
 

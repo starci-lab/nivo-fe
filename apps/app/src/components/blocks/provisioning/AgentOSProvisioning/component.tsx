@@ -50,7 +50,8 @@ export type AgentOSProvisioningViewProps = {
 
 /** Draw an AgentOS order beside its exact live workspace status. */
 export const AgentOSProvisioningBase = ({ state, props, on }: AgentOSProvisioningViewProps) => {
-    const journey = defineContractComponent("responsive-four-stage-lifecycle-stepper", {
+    const journeyContract = props.steps.length === 5 ? "responsive-agentos-readiness-stepper" : "responsive-four-stage-lifecycle-stepper"
+    const journey = defineContractComponent(journeyContract, {
         step: props.steps.map((step) => defineCompositeComponent("lifecycle-step", {}, () => (
             <LifecycleStep props={step} isLoading={state === "catalog_loading"} />
         ))),

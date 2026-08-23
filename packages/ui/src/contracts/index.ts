@@ -446,6 +446,9 @@ export const CONTRACTS = buildContracts({
                     "custom-module-collection", "module-intake-form", "adaptive-intake-explanation",
                     "adaptive-module-interview", "live-module-profile", "module-attachment-list",
                     "module-integration-list", "module-specification-review",
+                    "responsive-agentos-readiness-stepper", "workspace-ai-readiness-summary",
+                    "knowledge-origin-list", "readiness-component-list", "module-document-ingestion-list",
+                    "workspace-ai-knowledge-stack",
                 ],
                 leaf: "text",
             },
@@ -514,6 +517,24 @@ export const CONTRACTS = buildContracts({
             notice: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
         },
         why: "if quarantined evidence files must show their scan lifecycle and a safe removal or retry beside the one bounded add-file action.",
+    },
+    "module-document-ingestion-list": {
+        classes: ["flex", "w-full", "flex-col", "gap-4", "p-4"],
+        children: {
+            attachment: { contract: "document-ingestion-row", repeats: true, restingCount: 2 },
+            upload: { leaf: "button" },
+            notice: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+        },
+        why: "if uploaded module documents must expose the complete scan, extraction, embedding and private indexing lifecycle instead of collapsing progress into one raw status string.",
+    },
+    "document-ingestion-row": {
+        classes: ["flex", "w-full", "flex-col", "gap-3", "rounded-xl", "border", "border-separator", "p-4"],
+        children: {
+            identity: { contract: "subject-over-muted-caption-with-action" },
+            progress: { contract: "responsive-agentos-readiness-stepper" },
+            notice: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+        },
+        why: "if one module document must keep its immutable file identity above a bounded connected ingestion progression and any local refusal consequence.",
     },
     "module-integration-list": {
         classes: ["flex", "w-full", "flex-col", "gap-4", "p-4"],
@@ -1348,6 +1369,69 @@ export const CONTRACTS = buildContracts({
         },
         why: "if you need four customer outcomes to stay one connected ordered sequence, with separators joining completed, current and upcoming markers horizontally when wide and vertically when narrow.",
     },
+    "responsive-agentos-readiness-stepper": {
+        classes: ["grid", "w-full", "grid-cols-1", "sm:grid-cols-5", "[&>*:not(:last-child)]:border-b", "sm:[&>*:not(:last-child)]:border-b-0", "sm:[&>*:not(:last-child)]:border-r", "[&>*]:border-separator"],
+        children: {
+            step: { composite: "lifecycle-step", repeats: true, restingCount: 5 },
+        },
+        why: "if provider credential, model, knowledge recovery, Qdrant and bounded AI test form one connected readiness spine horizontally when wide and vertically when narrow.",
+    },
+    "workspace-ai-readiness-summary": {
+        classes: ["grid", "w-full", "grid-cols-1", "gap-4", "p-4", "sm:grid-cols-2", "items-center"],
+        children: {
+            identity: { contract: "subject-over-muted-caption" },
+            status: { leaf: "badge" },
+            facts: { contract: "ai-readiness-fact-stack" },
+            actions: { contract: "inline-action-run" },
+        },
+        why: "if one workspace needs a compact source-owned AI verdict, safe configuration facts and bounded recovery/test actions without exposing provider secrets.",
+    },
+    "ai-readiness-fact-stack": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-3"],
+        children: {
+            fact: { contract: "ai-readiness-fact-row", repeats: true, restingCount: 6 },
+        },
+        why: "if provider, model, embedding, credential, vector-store and test facts must remain fully readable even when technical values are longer than a compact workspace card.",
+    },
+    "ai-readiness-fact-row": {
+        classes: ["grid", "min-w-0", "grid-cols-1", "gap-1", "sm:grid-cols-2"],
+        children: {
+            label: { leaf: "text", props: { size: "sm" } },
+            value: { leaf: "text", props: { size: "sm" } },
+        },
+        why: "if one AI readiness label and its owner-safe technical value must stack on a narrow screen and compare in aligned columns when space permits.",
+    },
+    "workspace-ai-knowledge-stack": {
+        classes: ["grid", "w-full", "grid-cols-1", "gap-4", "sm:grid-cols-2"],
+        children: {
+            summary: { contract: "workspace-ai-readiness-summary" },
+            origins: { contract: "knowledge-origin-list" },
+            components: { contract: "readiness-component-list" },
+        },
+        why: "if workspace AI readiness and source provenance are the dominant operating column while bounded component verdicts remain a scannable evidence aside.",
+    },
+    "knowledge-origin-list": {
+        classes: ["flex", "w-full", "flex-col", "divide-y", "divide-separator"],
+        children: {
+            origin: { contract: "provenance-status-row", repeats: true, restingCount: 3 },
+        },
+        why: "if Nivo, installed-module and uploaded-document knowledge origins must compare as peer provenance rows with version, digest and document count.",
+    },
+    "readiness-component-list": {
+        classes: ["flex", "w-full", "flex-col", "divide-y", "divide-separator"],
+        children: {
+            component: { contract: "provenance-status-row", repeats: true, restingCount: 5 },
+        },
+        why: "if provider, model, embedding, Qdrant and retrieval test verdicts need a bounded owner-safe evidence list beside the aggregate verdict.",
+    },
+    "provenance-status-row": {
+        classes: ["flex", "w-full", "min-w-0", "flex-col", "items-start", "gap-3", "p-4", "md:flex-row", "md:items-start", "[&>*:first-child]:min-w-0", "[&>*:first-child]:grow"],
+        children: {
+            identity: { contract: "subject-over-muted-caption" },
+            status: { leaf: "badge" },
+        },
+        why: "if one owner-safe source or component identity needs its version and evidence caption kept whole beside one semantic verdict.",
+    },
     "lifecycle-marker-over-label-and-state": {
         classes: ["flex", "min-w-0", "flex-col", "items-start", "gap-1", "p-4"],
         children: {
@@ -1377,7 +1461,7 @@ export const CONTRACTS = buildContracts({
     "provisioning-order-content": {
         classes: ["flex", "w-full", "flex-col"],
         children: {
-            journey: { contract: "responsive-four-stage-lifecycle-stepper" },
+            journey: { contract: ["responsive-four-stage-lifecycle-stepper", "responsive-agentos-readiness-stepper"] },
             continuation: { contract: "provisioning-phase-with-mark" },
         },
         why: "if one AgentOS order surface must keep its connected customer journey directly above the action that advances that same order.",

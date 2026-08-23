@@ -14,6 +14,13 @@ const installation = {
     channelAccountRefs: ["channel-1"],
     commonKnowledgeVersion: "common-v1",
     privateKnowledgeVersion: "private-v1",
+    manifestDigest: "manifest",
+    modelProfileRef: "nivo-default",
+    desiredDigest: "desired",
+    appliedDigest: "desired",
+    knowledgeState: "current" as const,
+    knowledgeArtifact: { id: "artifact-1", knowledgeVersion: "knowledge-v1", sourceDigest: "source", snapshotDigest: "snapshot", embeddingProfile: "nivo-embedding-v1", embeddingDimension: 1024, pointCount: 12 },
+    retrievalScope: { installationId: "installation-1", moduleKey: "sales-copilot", knowledgeVersion: "knowledge-v1" },
     failureCode: null,
 }
 
@@ -24,8 +31,8 @@ const props: Omit<AgentOSSolutionModuleDetailViewProps, "detailState"> = {
         backToWorkspace: "Back to workspace",
         loading: "Loading module",
         refused: "Module unavailable",
-        summary: { section: "Summary", module: "Module", version: "Version", status: "Status", failure: "Failure", empty: "None" },
-        bindings: { section: "Bindings", agents: "Agents", channels: "Channels", sharedKnowledge: "Knowledge", knowledgeVersions: "Versions", empty: "None" },
+        summary: { section: "Summary", module: "Module", version: "Version", status: "Status", failure: "Failure", modelProfile: "Model profile", manifest: "Manifest", empty: "None" },
+        bindings: { section: "Bindings", agents: "Agents", channels: "Channels", sharedKnowledge: "Knowledge", knowledgeVersions: "Versions", artifact: "Artifact", currentness: "Currentness", embedding: "Embedding", retrievalScope: "Retrieval scope", empty: "None" },
     },
     onBack: vi.fn(),
 }

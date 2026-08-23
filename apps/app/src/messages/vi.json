@@ -219,10 +219,19 @@
         "tabs": {
         "overview": "Tổng quan",
         "solutions": "Giải pháp",
+        "ai-knowledge": "AI & Tri thức",
         "applications": "Ứng dụng",
           "infrastructure": "Hạ tầng",
           "operations": "Thao tác",
           "access": "Truy cập"
+      },
+      "aiKnowledge": {
+        "title": "Mức sẵn sàng AI & Tri thức",
+        "description": "Key OpenRouter riêng theo workspace, model DeepSeek, snapshot Nivo/module, tài liệu tải lên và truy xuất Qdrant riêng tư.",
+        "ready": "AI sẵn sàng", "testing": "Đang kiểm tra", "refused": "Cần xử lý",
+        "provider": "Nhà cung cấp", "model": "Chat model", "embedding": "Hồ sơ embedding", "qdrant": "Qdrant", "credential": "Key workspace", "testedAt": "Lần kiểm tra cuối",
+        "runTest": "Test AI readiness", "recover": "Khôi phục tri thức", "origins": "Nguồn tri thức", "components": "Bằng chứng sẵn sàng", "evidence": "Kết luận component an toàn",
+        "documents": "{count, plural, =0 {Chưa có tài liệu} one {# tài liệu} other {# tài liệu}}", "current": "Hiện hành", "unknownVersion": "Đang chờ phiên bản"
       },
       "solutions": {
         "modesLabel": "Chế độ xem solution module",
@@ -262,14 +271,20 @@
             "module": "Module",
             "version": "Phiên bản",
             "status": "Trạng thái",
-            "failure": "Mã lỗi"
+            "failure": "Mã lỗi",
+            "modelProfile": "Hồ sơ model",
+            "manifest": "Manifest digest"
           },
           "bindings": {
             "section": "Agent và tri thức",
             "agents": "Agent đã tạo",
             "channels": "Tài khoản channel",
             "sharedKnowledge": "Nguồn tri thức dùng chung",
-            "knowledgeVersions": "Tri thức chung · riêng"
+            "knowledgeVersions": "Tri thức chung · riêng",
+            "artifact": "Artifact tri thức đã pin",
+            "currentness": "Import vào workspace",
+            "embedding": "Embedding",
+            "retrievalScope": "Phạm vi truy xuất riêng"
           }
         }
       },
@@ -353,7 +368,7 @@
         "studio": {
           "interview": { "title": "Hỏi dồn về module", "saved": "Câu trả lời được lưu trước khi Nivo chọn câu hỏi tiếp theo.", "refused": "Chưa đọc được hội thoại. Các phần khác của module vẫn độc lập.", "field": "Trả lời câu hỏi hiện tại", "placeholder": "Nhập câu trả lời rõ nhất", "send": "Gửi câu trả lời", "complete": "Hỏi dồn đã hoàn tất và sẵn sàng duyệt.", "agent": "Nivo Agent", "you": "Thầy" },
           "profile": { "title": "Hồ sơ module", "progress": "Mức sẵn sàng", "missing": "Còn thiếu: {fields}", "refused": "Chưa đọc được hồ sơ module." },
-          "attachments": { "title": "Tệp", "upload": "Thêm tệp", "remove": "Gỡ", "refused": "Chưa đọc được tài liệu đính kèm.", "empty": "Chưa có tài liệu hỗ trợ.", "scanning": "Đang quét" },
+          "attachments": { "title": "Tài liệu tri thức", "upload": "Thêm tài liệu", "remove": "Gỡ", "refused": "Chưa đọc được tài liệu đính kèm.", "empty": "Chưa có tài liệu hỗ trợ.", "uploaded": "Đã tải lên", "scanning": "Đang quét", "extracting": "Đang trích xuất", "embedding": "Đang vector hóa", "indexing": "Đang lập chỉ mục", "indexed": "Đã lập chỉ mục", "complete": "Đã xong", "current": "Hiện tại", "upcoming": "Sắp tới", "chunks": "{count} đoạn", "refusedStatus": "Bị từ chối", "removed": "Đã gỡ" },
           "integrations": { "title": "Tích hợp", "provider": "Helpdesk API", "field": "Integration key", "placeholder": "Dán key mới chỉ ghi", "save": "Cấu hình key", "remove": "Gỡ", "refused": "Chưa đọc được trạng thái tích hợp.", "writeOnly": "Nivo mã hóa giá trị đã gửi và chỉ trả về phần gợi ý được che.", "reveal": "Hiện key", "hide": "Ẩn key" },
           "specification": { "title": "Duyệt đặc tả", "refused": "Chưa đọc được đặc tả.", "incomplete": "Hoàn tất hỏi dồn trước khi duyệt đặc tả có phiên bản.", "version": "Phiên bản {version}", "acknowledge": "Tôi đã duyệt đặc tả v{version}", "publish": "Publish module", "publishing": "Đang publish module", "published": "Yêu cầu cài đặt đã được tiếp nhận." }
         }
@@ -481,6 +496,11 @@
         "createApp": "Tạo ứng dụng",
         "createWorkspace": "Tạo workspace",
         "infrastructure": "Dựng hạ tầng",
+        "credential": "Key workspace",
+        "deepseek": "Model DeepSeek",
+        "knowledge": "Khôi phục tri thức",
+        "qdrant": "Qdrant",
+        "aiTest": "AI readiness",
         "manage": "Quản lý",
         "ready": "Sẵn sàng"
       },
@@ -519,6 +539,10 @@
         "preparingText": "Luồng sự kiện workspace chỉ đang theo dõi workspace này.",
         "watchProvisioning": "Theo dõi cấp phát",
         "readyText": "Workspace đã sẵn sàng và xuất hiện trong trang quản lý AgentOS.",
+        "aiLoading": "Đang đọc snapshot mức sẵn sàng AI và tri thức của workspace.",
+        "aiTesting": "Bài test có giới hạn đang kiểm tra provider, model và đường truy xuất riêng tư.",
+        "aiRecovering": "Nivo đang khôi phục snapshot Nivo/module và tài liệu tải lên vào collection Qdrant riêng của workspace.",
+        "aiReady": "Key OpenRouter, model DeepSeek, snapshot tri thức, Qdrant và bài test AI đã sẵn sàng.",
         "manage": "Quản lý AgentOS",
         "orderMissing": "Không tìm thấy order AgentOS này trong tài khoản đang đăng nhập.",
         "orderCancelled": "Order AgentOS này đã bị hủy.",

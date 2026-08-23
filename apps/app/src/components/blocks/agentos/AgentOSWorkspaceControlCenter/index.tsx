@@ -124,7 +124,7 @@ export const AgentOSWorkspaceControlCenter = ({ workspaceId, pageState, onSelect
         loading: t("loading"),
         accessUnavailable: t("accessUnavailable"),
         tabsLabel: t("tabsLabel"),
-        tabs: (["overview", "solutions", "applications", "infrastructure", "operations", "access"] as const).map((id) => ({ id, label: t(`tabs.${id}`) })),
+        tabs: (["overview", "solutions", "ai-knowledge", "applications", "infrastructure", "operations", "access"] as const).map((id) => ({ id, label: t(`tabs.${id}`) })),
         summary: {
             section: t("summary.section"), status: t("summary.status"), plan: t("summary.plan"),
             allocation: t("summary.allocation"), host: t("summary.host"), chart: t("summary.chart"),

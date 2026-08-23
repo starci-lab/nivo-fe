@@ -8,10 +8,12 @@ import { useSession } from "@/modules/auth/session"
 import {
     catalogItems,
     myAgentWorkspace,
+    myAgentosAiKnowledgeReadiness,
     myCatalogOrders,
     myInvoices,
     orderAgentOs,
     type AgentWorkspaceRow,
+    type AgentosAiKnowledgeReadiness,
     type CatalogItemRow,
     type CatalogOrderRow,
     type CatalogTierRow,
@@ -126,6 +128,7 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
     const productName = t("agentos.productName")
     const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
     const [flow, setFlow] = useState<AgentOSFlow>({ phase: "catalog_loading" })
+    const [aiReadiness, setAiReadiness] = useState<AgentosAiKnowledgeReadiness | null | undefined>()
     const route = useCallback((path: string) => locale === DEFAULT_LOCALE ? path : `/${locale}${path}`, [locale])
 
     const reconcile = useCallback(async (orderId: string) => {
@@ -207,6 +210,18 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
         void reconcile(context.orderId)
     }, [context, realtime.status, reconcile])
 
+    useEffect(() => {
+        if (flow.phase !== "ready") { setAiReadiness(undefined); return }
+        let cancelled = false
+        const read = async () => {
+            const result = await myAgentosAiKnowledgeReadiness(flow.workspaceId)
+            if (!cancelled) setAiReadiness(result.ok ? result.data : null)
+        }
+        void read()
+        const timer = window.setInterval(() => { void read() }, 4_000)
+        return () => { cancelled = true; window.clearInterval(timer) }
+    }, [flow])
+
     const submit = async () => {
         if (flow.phase !== "request") return
         setFlow({ phase: "submitting", item: flow.item, tier: flow.tier })
@@ -229,10 +244,25 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
     const phaseIndex = phaseIndexOf(flow)
     const stepLabels = [t("steps.request"), t("steps.payment"), t("steps.createWorkspace"), t("steps.ready")]
     const stateLabels = { done: t("stepState.done"), current: t("stepState.current"), upcoming: t("stepState.upcoming") } as const
-    const steps = stepLabels.map((label, index) => {
+    let steps = stepLabels.map((label, index) => {
         const state = stepState(index, phaseIndex)
         return { ordinal: String(index + 1), label, state, stateLabel: stateLabels[state] }
     })
+    if (flow.phase === "ready") {
+        const milestones = [
+            aiReadiness?.credentialStatus === "configured",
+            Boolean(aiReadiness?.chatModel),
+            (aiReadiness?.origins.length ?? 0) > 0 && aiReadiness?.knowledgeRecoveryOperationId === null,
+            aiReadiness?.qdrantHealth === "healthy",
+            aiReadiness?.aiReady === true,
+        ]
+        const current = milestones.findIndex((done) => !done)
+        const readinessLabels = [t("steps.credential"), t("steps.deepseek"), t("steps.knowledge"), t("steps.qdrant"), t("steps.aiTest")]
+        steps = readinessLabels.map((label, index) => {
+            const state = current === -1 ? index < 4 ? "done" as const : "current" as const : index < current ? "done" as const : index === current ? "current" as const : "upcoming" as const
+            return { ordinal: String(index + 1), label, state, stateLabel: stateLabels[state] }
+        })
+    }
     const viewLabels = { progressLabel: t("agentos.progressLabel"), continuationLabel: t("agentos.continuationLabel") }
     const view = (): AgentOSProvisioningViewProps => {
         switch (flow.phase) {
@@ -255,7 +285,12 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
                 return { state: flow.phase, props: { ...viewLabels, steps, subject: flow.subject, detail: flow.detail, statusTitle: t("agentos.paymentTitle"), statusText: t("agentos.paymentText"), statusActionLabel: t("agentos.openWallet"), statusActionDisabled: walletTarget === undefined }, on: { statusAction: walletTarget === undefined ? undefined : () => router.push(walletTarget) } }
             }
             case "ready":
-                return { state: flow.phase, props: { ...viewLabels, steps, subject: flow.subject, detail: flow.detail, statusTitle: t("readyTitle"), statusText: t("agentos.readyText"), statusActionLabel: t("agentos.manage") }, on: { statusAction: () => router.push(route(`/agentos/workspaces/${flow.workspaceId}`)) } }
+                return { state: flow.phase, props: {
+                    ...viewLabels, steps, subject: flow.subject, detail: flow.detail,
+                    statusTitle: aiReadiness?.aiReady === true ? t("readyTitle") : aiReadiness === null ? t("failedTitle") : t("preparingTitle"),
+                    statusText: aiReadiness === undefined ? t("agentos.aiLoading") : aiReadiness === null ? t("failedLoad") : aiReadiness.aiReady ? t("agentos.aiReady") : aiReadiness.knowledgeRecoveryOperationId !== null ? t("agentos.aiRecovering") : t("agentos.aiTesting"),
+                    statusActionLabel: t("agentos.manage"),
+                }, on: { statusAction: () => router.push(route(`/agentos/workspaces/${flow.workspaceId}`)) } }
             default:
                 break
         }
