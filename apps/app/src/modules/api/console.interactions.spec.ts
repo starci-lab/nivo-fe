@@ -14,7 +14,10 @@ import {
     grantAcademyCourseAccess, revokeAcademyCourseAccess, updateExpertSiteLead, draftLeadReply,
     saveAcademyCredential, setAcademyCustomDomain, saveAcademyGoogleOAuth, disconnectAcademyGoogleOAuth,
     beginAcademyZaloAuthorization, saveAcademyAnalytics, createAcademyWebhook, rotateAcademyWebhookSecret,
-    disableAcademyWebhook,
+    disableAcademyWebhook, myAgentosCustomModules, myAgentosCustomModuleStudio,
+    startAgentosCustomModuleIntake, answerAgentosCustomModuleIntake, prepareAgentosModuleAttachmentUpload,
+    finalizeAgentosModuleAttachment, removeAgentosModuleAttachment, saveAgentosModuleIntegrationSecret,
+    removeAgentosModuleIntegrationSecret, publishAgentosCustomModule,
 } from "./console"
 
 describe("console API interaction wrappers", () => {
@@ -33,9 +36,19 @@ describe("console API interaction wrappers", () => {
             grantAcademyCourseAccess({ siteId: "site-1" } as never), revokeAcademyCourseAccess({ siteId: "site-1" } as never), updateExpertSiteLead({ siteId: "site-1" } as never), draftLeadReply({ siteId: "site-1" } as never),
             saveAcademyCredential({ siteId: "site-1" } as never), setAcademyCustomDomain({ siteId: "site-1" } as never), saveAcademyGoogleOAuth({ siteId: "site-1" } as never), disconnectAcademyGoogleOAuth("site-1"),
             beginAcademyZaloAuthorization("site-1"), saveAcademyAnalytics({ siteId: "site-1" } as never), createAcademyWebhook({ siteId: "site-1" } as never), rotateAcademyWebhookSecret({ siteId: "site-1" } as never), disableAcademyWebhook("site-1", "webhook-1"),
+            myAgentosCustomModules("workspace-1"), myAgentosCustomModuleStudio("workspace-1", "module-1"),
+            startAgentosCustomModuleIntake({ agentWorkspaceId: "workspace-1", goal: "Qualify support", idempotencyKey: "intake-1" }),
+            answerAgentosCustomModuleIntake({ agentWorkspaceId: "workspace-1", moduleId: "module-1", answer: "Support team" }),
+            prepareAgentosModuleAttachmentUpload({ agentWorkspaceId: "workspace-1", moduleId: "module-1", fileName: "playbook.pdf", mediaType: "application/pdf", sizeBytes: 42 }),
+            finalizeAgentosModuleAttachment({ agentWorkspaceId: "workspace-1", moduleId: "module-1", attachmentId: "attachment-1" }),
+            removeAgentosModuleAttachment({ agentWorkspaceId: "workspace-1", moduleId: "module-1", attachmentId: "attachment-1" }),
+            saveAgentosModuleIntegrationSecret({ agentWorkspaceId: "workspace-1", moduleId: "module-1", providerKey: "helpdesk-api", secret: "secret-value" }),
+            removeAgentosModuleIntegrationSecret({ agentWorkspaceId: "workspace-1", moduleId: "module-1", providerKey: "helpdesk-api" }),
+            publishAgentosCustomModule({ agentWorkspaceId: "workspace-1", moduleId: "module-1", acknowledgedVersion: 3, idempotencyKey: "publish-1" }),
         ])
-        expect(graphql.mock.calls.length).toBeGreaterThan(40)
+        expect(graphql.mock.calls.length).toBeGreaterThan(50)
         expect(graphql.mock.calls.some(([document]) => String(document).includes("myWallet"))).toBe(true)
         expect(graphql.mock.calls.some((call) => call.length > 0)).toBe(true)
+        expect(graphql.mock.calls.some(([document]) => String(document).includes("PublishAgentosCustomModule"))).toBe(true)
     })
 })

@@ -1,120 +1,44 @@
-import {
-    Avatar,
-    Badge,
-    Button,
-    SurfaceCard,
-    SurfaceListCard,
-    Text,
-    TextLink,
-    Tree,
-    defineCompositeComponent,
-    defineContractComponent,
-    defineLeafComponent,
-    type BadgeTone,
-    type LeafProps,
-} from "@nivo/ui"
-import type { SurfaceListCardActions } from "@nivo/ui/branches/SurfaceListCard"
-import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice"
+"use client"
 
-/** One owned application, with display copy and lifecycle meaning already resolved. */
-export type AppsSummaryItem = {
-    readonly id: string
-    readonly name: string
-    readonly detail: string
-    readonly statusLabel: string
-    readonly statusTone: BadgeTone
-    readonly actionLabel: string
+import { useLocale, useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
+import type { BadgeTone } from "@nivo/ui"
+import { DEFAULT_LOCALE } from "@/i18n/config"
+import { useOverviewData } from "@/modules/overview/context"
+import { AppsSummaryBase, type AppsSummaryState } from "./component"
+
+export type { AppsSummaryItem, AppsSummaryProps, AppsSummaryState } from "./component"
+
+const HOST_SUFFIX = process.env.NEXT_PUBLIC_ACADEMY_HOST_SUFFIX ?? ".nivo.vn"
+const STATUS_KEY: Readonly<Record<string, string | undefined>> = { not_provisioned: "status.notProvisioned", provisioning: "status.provisioning", awaiting_dns: "status.awaitingDns", ready: "status.ready", failed: "status.failed", active: "status.active", suspended: "status.suspended" }
+const STATUS_TONE: Readonly<Record<string, BadgeTone | undefined>> = { not_provisioned: "neutral", provisioning: "accent", awaiting_dns: "warning", ready: "success", failed: "danger", active: "success", suspended: "neutral" }
+const NAMED_REFUSALS = new Set(["EXPERT_SITE_NOT_FOUND_EXCEPTION", "EXPERT_SITE_AMBIGUOUS_FOR_VIEWER_EXCEPTION"])
+
+/** Connect the joined Apps collection to its one source-owned slice. */
+export const AppsSummary = () => {
+    const { apps } = useOverviewData()
+    const t = useTranslations("console")
+    const locale = useLocale()
+    const router = useRouter()
+    const open = (route: string) => router.push(locale === DEFAULT_LOCALE ? route : `/${locale}${route}`)
+    const refusal = (code: string | undefined) => code !== undefined && NAMED_REFUSALS.has(code) ? t(`refusal.${code}`) : t("refusal.unknown")
+    const statusLabel = (status: string) => STATUS_KEY[status] === undefined ? t("status.unknown") : t(STATUS_KEY[status]!)
+    const state: AppsSummaryState = apps === null
+        ? { phase: "pending" }
+        : !apps.ok
+            ? { phase: "forbidden", message: refusal(apps.code) }
+            : apps.data.length === 0
+                ? { phase: "empty", message: t("apps.emptyDescription") }
+                : { phase: "populated", items: apps.data.map((site) => ({
+                    id: site.id,
+                    name: site.slug,
+                    detail: site.customDomain ?? `${site.slug}${HOST_SUFFIX}`,
+                    statusLabel: statusLabel(site.provisionStatus),
+                    statusTone: STATUS_TONE[site.provisionStatus] ?? "neutral",
+                    actionLabel: site.provisionStatus === "awaiting_dns" ? t("apps.viewDns") : t("apps.open"),
+                })) }
+    return <AppsSummaryBase label={t("apps.title")} openAllLabel={t("apps.openSet")} state={state} onOpenAll={() => open("/apps")} onOpenApp={(id) => open(`/apps/${id}`)} />
 }
 
-/** Settled situation drawn by the applications summary. */
-export type AppsSummaryState =
-    | { readonly phase: "pending" }
-    | { readonly phase: "empty", readonly message: string }
-    | { readonly phase: "populated", readonly items: ReadonlyArray<AppsSummaryItem> }
-    | { readonly phase: "forbidden", readonly message: string }
-
-/** Business data, resolved copy, and actions consumed by the applications summary. */
-export type AppsSummaryProps = {
-    readonly label: string
-    readonly state: AppsSummaryState
-    readonly onOpenApp: (id: string) => void
-}
-
-const rows = (
-    items: ReadonlyArray<AppsSummaryItem>,
-    onOpenApp: AppsSummaryProps["onOpenApp"],
-) => items.map((item) => defineContractComponent("avatar-identity-badge-action-row", {
-    avatar: defineLeafComponent("avatar", {}, () => <Avatar props={{ name: item.name, size: "md" }} />),
-    identity: defineContractComponent("name-over-handle", {
-        name: defineLeafComponent("text-link", { size: "sm" }, () => (
-            <TextLink props={{ label: item.name, size: "sm" }} on={{ press: () => onOpenApp(item.id) }} />
-        )),
-        handle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-            <Text props={{ content: item.detail, size: "xs", tone: "muted" }} />
-        )),
-    }),
-    badge: defineLeafComponent("badge", {}, () => (
-        <Badge props={{ content: item.statusLabel, tone: item.statusTone }} />
-    )),
-    action: defineLeafComponent("button", {}, () => (
-        <Button props={{ label: item.actionLabel, size: "sm" }} on={{ press: () => onOpenApp(item.id) }} />
-    )),
-}))
-
-const pendingRows = () => Array.from({ length: 3 }, () => defineContractComponent("avatar-identity-badge-action-row", {
-    avatar: defineLeafComponent("avatar", {}, () => <Avatar props={{ size: "md" }} isLoading />),
-    identity: defineContractComponent("name-over-handle", {
-        name: defineLeafComponent("text-link", { size: "sm" }, () => <TextLink props={{ label: "", size: "sm" }} isLoading />),
-        handle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: "" }} isLoading />),
-    }),
-    action: defineLeafComponent("button", {}, () => <Button props={{ label: "" }} isLoading />),
-}))
-
-/** Draw owned applications without fetching, translating, or deriving collection totals. */
-export const AppsSummary = ({ label, state, onOpenApp }: AppsSummaryProps) => {
-    if (state.phase === "empty") {
-        return (
-            <SurfaceCard
-                props={{ label }}
-                contract="centred-empty-notice"
-                render={defineContractComponent("centred-empty-notice", {
-                    notice: defineCompositeComponent("empty-notice", {}, () => <EmptyNotice props={{ message: state.message }} />),
-                })}
-            />
-        )
-    }
-    if (state.phase === "forbidden") {
-        return (
-            <SurfaceCard
-                props={{ label }}
-                contract="body-with-refusal-note"
-                render={defineContractComponent("body-with-refusal-note", {
-                    note: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                        <Text props={{ content: state.message, size: "sm", tone: "muted" }} />
-                    )),
-                })}
-            />
-        )
-    }
-    const isLoading = state.phase === "pending"
-    const content = defineContractComponent("identity-action-list", (input: LeafProps<{ readonly label: string }, SurfaceListCardActions>) => (
-        <Tree
-            key={input.props.label}
-            contract="identity-action-list"
-            render={defineContractComponent("identity-action-list", {
-                item: isLoading ? pendingRows() : rows(state.items, onOpenApp),
-            })}
-        />
-    ))
-    return (
-        <SurfaceListCard
-            props={{ label }}
-            contract="identity-action-list"
-            render={content}
-            isLoading={isLoading}
-        />
-    )
-}
-
-/** Source-level tier marker for the pure applications summary block. */
-export const meta = { shape: "block", world: "pure" } as const
+/** Registry identity for the connected Apps summary twin. */
+export const meta = { shape: "block", world: "connected" } as const

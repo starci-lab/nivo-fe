@@ -114,6 +114,13 @@ export const AgentOSWorkspaceControlCenter = ({ workspaceId, pageState, onSelect
 
     const labels: AgentOSWorkspaceControlCenterLabels = {
         titleFallback: t("titleFallback"),
+        eyebrow: t("eyebrow"),
+        description: t("description"),
+        stateSection: t("stateSection"),
+        readyStatus: t("readyStatus"),
+        loadingTitle: t("loadingTitle"),
+        refusedTitle: t("refusedTitle"),
+        retry: t("retry"),
         loading: t("loading"),
         accessUnavailable: t("accessUnavailable"),
         tabsLabel: t("tabsLabel"),
@@ -151,6 +158,7 @@ export const AgentOSWorkspaceControlCenter = ({ workspaceId, pageState, onSelect
     else if (answer.ok) controlCenterState = "ready"
     return (
         <AgentOSWorkspaceControlCenterBase
+            workspaceId={workspaceId}
             pageState={pageState}
             controlCenterState={controlCenterState}
             message={answer !== null && !answer.ok ? t("refused") : undefined}
@@ -160,6 +168,7 @@ export const AgentOSWorkspaceControlCenter = ({ workspaceId, pageState, onSelect
             openClawLaunchHref={`/${locale}/launch/agentos/${workspaceId}/openclaw`}
             onSelectPageState={onSelectPageState}
             onOpenAgentConsole={openOpenClaw}
+            onRetry={() => { void load() }}
             formatDate={(value) => format.dateTime(new Date(value), { dateStyle: "medium", timeStyle: "short" })}
         />
     )

@@ -1,6 +1,11 @@
 import {
+    Badge,
+    Button,
     ChoiceTabs,
     Heading,
+    SurfaceCard,
+    Text,
+    TileIcon,
     Tree,
     defineContractComponent,
     defineContractProjection,
@@ -24,6 +29,13 @@ export type AgentOSWorkspaceControlCenterState = "loading" | "refused" | "ready"
 /** Fully resolved bilingual copy passed into the pure workspace page. */
 export type AgentOSWorkspaceControlCenterLabels = {
     readonly titleFallback: string
+    readonly eyebrow?: string
+    readonly description?: string
+    readonly stateSection?: string
+    readonly readyStatus?: string
+    readonly loadingTitle?: string
+    readonly refusedTitle?: string
+    readonly retry?: string
     readonly loading: string
     readonly accessUnavailable: string
     readonly tabsLabel: string
@@ -37,6 +49,7 @@ export type AgentOSWorkspaceControlCenterLabels = {
 
 /** Settled view state consumed by the pure workspace page twin. */
 export type AgentOSWorkspaceControlCenterViewProps = {
+    readonly workspaceId?: string
     readonly pageState: AgentOSWorkspacePageState
     readonly controlCenterState: AgentOSWorkspaceControlCenterState
     readonly message?: string
@@ -44,18 +57,52 @@ export type AgentOSWorkspaceControlCenterViewProps = {
     readonly labels: AgentOSWorkspaceControlCenterLabels
     readonly onSelectPageState: (pageState: AgentOSWorkspacePageState) => void
     readonly onOpenAgentConsole: () => void
+    readonly onRetry?: () => void
     readonly openClawLaunchHref: string
     readonly launchState: Parameters<typeof AgentOSWorkspaceApplications>[0]["launchState"]
     readonly formatDate: (value: string) => string
 }
 
 /** Compose one AgentOS workspace from domain blocks; the page owns no API or operational JSX. */
-export const AgentOSWorkspaceControlCenterBase = ({ pageState, controlCenterState, message, data, labels, launchState, openClawLaunchHref, onSelectPageState, onOpenAgentConsole, formatDate }: AgentOSWorkspaceControlCenterViewProps) => {
-    const title = data?.workspace.name ?? labels.titleFallback
+export const AgentOSWorkspaceControlCenterBase = ({ workspaceId, pageState, controlCenterState, message, data, labels, launchState, openClawLaunchHref, onSelectPageState, onOpenAgentConsole, onRetry, formatDate }: AgentOSWorkspaceControlCenterViewProps) => {
+    const title = data?.workspace.name ?? workspaceId ?? labels.titleFallback
+    const pageCopy = {
+        eyebrow: labels.eyebrow ?? labels.titleFallback,
+        description: labels.description ?? labels.accessUnavailable,
+        stateSection: labels.stateSection ?? labels.titleFallback,
+        readyStatus: labels.readyStatus ?? "Ready",
+        loadingTitle: labels.loadingTitle ?? labels.loading,
+        refusedTitle: labels.refusedTitle ?? labels.titleFallback,
+        retry: labels.retry ?? "Retry",
+    }
     /** One tab decides one list of projections; an unsettled page shows the notice instead. */
     const sectionsOf = () => {
         if (controlCenterState !== "ready" || data === undefined) {
-            return [defineContractProjection("label-row-over-card", () => <EmptyNotice props={{ message: message ?? labels.loading }} />)]
+            const isRefused = controlCenterState === "refused"
+            return [defineContractProjection("label-row-over-card", () => (
+                <SurfaceCard
+                    props={{ label: pageCopy.stateSection }}
+                    contract="agentos-state-notice"
+                    render={defineContractComponent("agentos-state-notice", {
+                        mark: defineLeafComponent("tile-icon", {}, () => (
+                            <TileIcon props={{ icon: isRefused ? "retry" : "agentos", signal: isRefused ? "attention" : "none" }} isLoading={!isRefused} />
+                        )),
+                        copy: defineContractComponent("heading-body-action-stack", {
+                            heading: defineLeafComponent("heading", {}, () => (
+                                <Heading props={{ content: isRefused ? pageCopy.refusedTitle : pageCopy.loadingTitle, level: 2 }} />
+                            )),
+                            body: defineLeafComponent("text", {}, () => (
+                                <Text props={{ content: message ?? labels.loading, size: "md", tone: "muted" }} />
+                            )),
+                            ...(isRefused ? {
+                                action: defineLeafComponent("button", {}, () => (
+                                    <Button props={{ label: pageCopy.retry, variant: "primary" }} on={{ press: onRetry }} />
+                                )),
+                            } : {}),
+                        }),
+                    })}
+                />
+            ))]
         }
         if (pageState === "overview") {
             const overviewSections = [
@@ -109,12 +156,32 @@ export const AgentOSWorkspaceControlCenterBase = ({ pageState, controlCenterStat
         <Tree
             contract="tabbed-control-center-page"
             render={defineContractComponent("tabbed-control-center-page", {
-                heading: defineContractComponent("title-with-end-action", {
-                    title: defineLeafComponent("heading", {}, () => <Heading props={{ content: title, level: 1 }} />),
+                heading: defineContractComponent("agentos-page-heading", {
+                    identity: defineContractComponent("agentos-page-identity", {
+                        mark: defineLeafComponent("tile-icon", {}, () => (
+                            <TileIcon props={{ icon: "agentos", signal: controlCenterState === "refused" ? "attention" : controlCenterState === "ready" ? "active" : "none" }} isLoading={controlCenterState === "loading"} />
+                        )),
+                        copy: defineContractComponent("agentos-page-title-stack", {
+                            eyebrow: defineLeafComponent("text", { size: "sm", tone: "accent" }, () => (
+                                <Text props={{ content: pageCopy.eyebrow, size: "sm", tone: "accent", weight: "semibold" }} />
+                            )),
+                            title: defineLeafComponent("heading", { scale: "display" }, () => (
+                                <Heading props={{ content: title, level: 1, scale: "display" }} />
+                            )),
+                            description: defineLeafComponent("text", { size: "md", tone: "muted" }, () => (
+                                <Text props={{ content: pageCopy.description, size: "md", tone: "muted" }} />
+                            )),
+                            ...(controlCenterState === "ready" ? {
+                                status: defineLeafComponent("badge", {}, () => (
+                                    <Badge props={{ content: pageCopy.readyStatus, tone: "success" }} />
+                                )),
+                            } : {}),
+                        }),
+                    }),
                 }),
-                tabs: defineLeafComponent("choice-tabs", {}, () => (
+                ...(controlCenterState === "ready" ? { tabs: defineLeafComponent("choice-tabs", {}, () => (
                     <ChoiceTabs props={{ label: labels.tabsLabel, selectedKey: pageState, tabs: labels.tabs, variant: "primary" }} on={{ select: (key) => onSelectPageState(key as AgentOSWorkspacePageState) }} />
-                )),
+                )) } : {}),
                 section: sections,
             })}
         />

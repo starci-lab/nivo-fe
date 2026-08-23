@@ -1,4 +1,4 @@
-import { Heading, Icon, Tree, Text, defineContractComponent, defineLeafComponent } from "@nivo/ui"
+import { Heading, NivoBrand, Tree, Text, defineContractComponent, defineLeafComponent } from "@nivo/ui"
 import { LANDING_DESCRIPTION } from "@/resources/copy"
 
 /**
@@ -23,8 +23,8 @@ export const LandingPage = () => (
         contract="centred-viewport-main"
         render={defineContractComponent("centred-viewport-main", {
             content: defineContractComponent("centred-title-pair", {
-                mark: defineLeafComponent("icon", {}, () => (
-                    <Icon props={{ name: "brand", role: "heading" }} />
+                mark: defineLeafComponent("brand-mark", {}, () => (
+                    <NivoBrand props={{ label: "nivo", variant: "lockup", scale: "hero" }} />
                 )),
                 title: defineLeafComponent("heading", {}, () => (
                     <Heading props={{ content: "nivo", level: 1 }} />

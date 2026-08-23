@@ -152,6 +152,10 @@
     "apps": {
       "title": "Apps",
       "lede": "Each app is built from a template and has a lifecycle of its own.",
+      "createTitle": "Create Template App",
+      "createDescription": "Configure the selected template before a site identity exists.",
+      "provisioningTitle": "Provisioning Template App",
+      "provisioningDescription": "Follow this persisted site until its isolated stack is ready.",
       "listLabel": "Your apps",
       "openSet": "Open Apps",
       "namesNotCount": "This section names the first few apps rather than counting them. A list page is not a total.",
@@ -172,19 +176,42 @@
       "steadyGroup": "Running and building"
     },
   "agentos": {
-      "title": "AgentOS",
+    "title": "AgentOS",
+    "description": "See what is running, what needs attention, and continue each persisted workspace from one operational dashboard.",
+    "dashboardEyebrow": "Workspace operations",
+    "createEyebrow": "New workspace",
+    "orderEyebrow": "Persisted order",
+    "createTitle": "Create AgentOS workspace",
+    "createDescription": "Choose the AgentOS tier and submit the request before an order exists.",
+    "orderTitle": "AgentOS order",
+    "orderDescription": "Continue this persisted order through payment and workspace provisioning.",
     "openService": "Open service",
     "workspaceDescription": "Your agent workspace and its current runtime reachability.",
       "kindWorkspace": "Workspace",
-      "empty": "No workspace yet.",
-      "emptyDescription": "Your own agent workspace, on duty across Zalo and Telegram to your process.",
+      "emptyDescription": "Create your first AgentOS workspace.",
+      "create": "Create AgentOS",
       "viewPlans": "See plans",
       "workspacesLabel": "Your workspaces",
+      "summary": {
+        "workspaces": "Workspaces",
+        "workspacesCaption": "Owned by this account",
+        "running": "Running",
+        "runningCaption": "Ready to operate now",
+        "attention": "Needs attention",
+        "attentionCaption": "Requires an owner decision"
+      },
       "podReachable": "Pod is answering",
       "podUnreachable": "Pod is not answering",
       "checkedAt": "checked at {time}",
       "workspace": {
         "titleFallback": "AgentOS workspace",
+        "eyebrow": "Workspace control center",
+        "description": "Operate this persisted AgentOS workspace, its applications, infrastructure, and recovery actions.",
+        "stateSection": "Workspace state",
+        "readyStatus": "Ready",
+        "loadingTitle": "Loading workspace",
+        "refusedTitle": "Workspace unavailable",
+        "retry": "Retry",
         "loading": "Reading the latest workspace and runtime snapshot.",
         "refused": "This workspace could not be opened or is not owned by the current account.",
         "accessUnavailable": "Reusable workspace credentials are not exposed. Use a supported short-lived application launch instead.",
@@ -315,6 +342,21 @@
           "reset": "Reset VPS",
           "rebuild": "Rebuild"
         }
+      },
+      "modules": {
+        "page": { "path": "Module path", "workspace": "Workspace", "title": "Modules", "description": "Create adaptive custom modules or install an immutable Nivo solution for this workspace.", "eyebrow": "AgentOS module studio", "create": "Create module" },
+        "createPage": { "path": "Module creation path", "modules": "Back to modules", "title": "Create a custom module", "description": "Start with the outcome. Nivo will ask only the unresolved follow-up questions.", "eyebrow": "Adaptive intake" },
+        "studioPage": { "path": "Module studio path", "modules": "Back to modules", "title": "Module studio", "description": "Continue the saved interview, add evidence and review the exact specification before publishing.", "eyebrow": "Resumable custom module" },
+        "collection": { "title": "Custom modules", "refused": "Nivo could not read custom modules for this workspace. The solution catalogue remains available below.", "empty": "No custom module has been created in this workspace yet.", "create": "Create module", "custom": "Custom", "progress": "{progress}% complete", "inspect": "View module", "resume": "Resume interview" },
+        "status": { "draft": "Needs input", "ready_for_review": "Ready for review", "publishing": "Publishing", "active": "Active", "publish_failed": "Publish failed" },
+        "intake": { "title": "What should this module help your team do?", "description": "Describe the outcome in your own words. The draft begins only after you continue.", "fieldLabel": "Module goal", "placeholder": "For example: qualify support requests before assigning an agent", "note": "Nothing is saved until you start the interview.", "action": "Start interview", "refused": "Nivo could not start this interview.", "guideTitle": "How the interview works", "guideNote": "Accepted answers are saved so you can leave and resume later.", "steps": { "goal": "Describe the outcome", "followUp": "Answer only unresolved follow-up questions", "review": "Review one exact version before publishing" } },
+        "studio": {
+          "interview": { "title": "Module interview", "saved": "Accepted answers are saved before Nivo selects the next question.", "refused": "The interview could not be read. Other module sections remain independent.", "field": "Answer the current question", "placeholder": "Type the clearest answer you have", "send": "Send answer", "complete": "The interview is complete and ready for review.", "agent": "Nivo Agent", "you": "You" },
+          "profile": { "title": "Module profile", "progress": "Readiness", "missing": "Still unresolved: {fields}", "refused": "The live profile is unavailable." },
+          "attachments": { "title": "Files", "upload": "Add file", "remove": "Remove", "refused": "File evidence is unavailable.", "empty": "No supporting files yet.", "scanning": "Scanning" },
+          "integrations": { "title": "Integrations", "provider": "Helpdesk API", "field": "Integration key", "placeholder": "Paste a new write-only key", "save": "Configure key", "remove": "Remove", "refused": "Integration status is unavailable.", "writeOnly": "Nivo encrypts the submitted value and returns only a masked hint.", "reveal": "Show key", "hide": "Hide key" },
+          "specification": { "title": "Review specification", "refused": "The specification could not be read.", "incomplete": "Complete the interview before a versioned specification can be reviewed.", "version": "Version {version}", "acknowledge": "I reviewed specification v{version}", "publish": "Publish module", "publishing": "Publishing module", "published": "The installation request has been accepted." }
+        }
       }
     },
     "academyControlCenter": {
@@ -396,6 +438,7 @@
         "upcoming": "Upcoming"
       },
       "template": {
+        "productName": "Template App",
         "detail": "Template App request",
         "slugLabel": "App slug",
         "slugPlaceholder": "my-academy",
@@ -409,6 +452,7 @@
         "readyText": "The app stack is ready. Return to Apps to manage it."
       },
       "agentos": {
+        "productName": "AgentOS",
         "progressLabel": "AgentOS order",
         "continuationLabel": "Next step",
         "requestTitle": "Request an AgentOS workspace",

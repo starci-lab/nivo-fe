@@ -1,78 +1,30 @@
-import { Heading, SurfaceCard, SurfaceListCard, Text, Tree, defineContractComponent, defineLeafComponent, type LeafProps } from "@nivo/ui"
-import type { SurfaceListCardActions } from "@nivo/ui/branches/SurfaceListCard"
+"use client"
 
-/** One already-formatted domain and expiry fact. */
-export type InfrastructureDomainFact = {
-    readonly id: string
-    readonly label: string
-    readonly value: string
+import { useFormatter, useTranslations } from "next-intl"
+import { useOverviewData } from "@/modules/overview/context"
+import { InfrastructureSummaryBase, type InfrastructureDomainsState } from "./component"
+
+export type { InfrastructureDomainFact, InfrastructureDomainsState, InfrastructureSummaryProps } from "./component"
+
+/** Connect service presence and exact held domains to the supporting rail. */
+export const InfrastructureSummary = () => {
+    const { apps, workspaces, domains } = useOverviewData()
+    const t = useTranslations("console")
+    const format = useFormatter()
+    const day = (value: string) => format.dateTime(new Date(value), { day: "2-digit", month: "short", year: "numeric" })
+    const hasBuiltService = (apps?.ok === true && apps.data.length > 0) || (workspaces?.ok === true && workspaces.data.length > 0)
+    const context = apps !== null && workspaces !== null && !hasBuiltService ? t("infrastructure.empty") : t("infrastructure.context")
+    let state: InfrastructureDomainsState
+    if (domains === null) state = { phase: "pending" }
+    else if (!domains.ok) state = hasBuiltService ? { phase: "partial", facts: [], note: t("refusal.unknown") } : { phase: "failed", note: t("refusal.unknown") }
+    else if (domains.data.length === 0) state = { phase: "empty", note: t("domains.empty") }
+    else state = { phase: "populated", facts: domains.data.map((domain) => ({
+        id: domain.id,
+        label: domain.name,
+        value: `${t(`domains.status.${domain.status}`)} · ${domain.expiresAt !== null ? t("domains.expiresAt", { date: day(domain.expiresAt) }) : domain.autoRenew ? t("domains.autoRenewOn") : t("domains.autoRenewOff")}`,
+    })) }
+    return <InfrastructureSummaryBase label={t("infrastructure.title")} context={context} domains={state} />
 }
 
-/** Independently settled domain-query situation. */
-export type InfrastructureDomainsState =
-    | { readonly phase: "pending" }
-    | { readonly phase: "empty", readonly note: string }
-    | { readonly phase: "populated", readonly facts: ReadonlyArray<InfrastructureDomainFact> }
-    | { readonly phase: "failed", readonly note: string }
-    | { readonly phase: "partial", readonly facts: ReadonlyArray<InfrastructureDomainFact>, readonly note: string }
-
-/** Derived infrastructure context and independent domain evidence consumed by the block. */
-export type InfrastructureSummaryProps = {
-    readonly label: string
-    readonly context: string
-    readonly domains: InfrastructureDomainsState
-}
-
-const fact = (item: InfrastructureDomainFact, isLoading = false) => defineContractComponent("label-value-row", {
-    label: defineLeafComponent("text", { size: "sm" }, () => <Text props={{ content: item.label, size: "sm" }} isLoading={isLoading} />),
-    value: defineLeafComponent("text", { size: "sm" }, () => <Text props={{ content: item.value, size: "sm" }} isLoading={isLoading} />),
-})
-
-const refusal = (note: string) => defineContractComponent("body-with-refusal-note", {
-    note: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: note, size: "sm", tone: "muted" }} />),
-})
-
-/** Draw derived built-service context beside independently settled domain facts. */
-export const InfrastructureSummary = ({ label, context, domains }: InfrastructureSummaryProps) => {
-    const isLoading = domains.phase === "pending"
-    const facts = domains.phase === "populated" || domains.phase === "partial" ? domains.facts : []
-    const note = domains.phase === "empty" || domains.phase === "failed" || domains.phase === "partial" ? domains.note : undefined
-    if (domains.phase === "pending" || domains.phase === "populated" || domains.phase === "partial") {
-        const renderedFacts = isLoading
-            ? [fact({ id: "pending-1", label: "", value: "" }, true), fact({ id: "pending-2", label: "", value: "" }, true)]
-            : facts.map((item) => fact(item))
-        const content = defineContractComponent("domain-evidence-list", (input: LeafProps<{ readonly label: string, readonly description: string }, SurfaceListCardActions>) => (
-            <Tree
-                key={`${input.props.label}:${input.props.description}`}
-                contract="domain-evidence-list"
-                render={defineContractComponent("domain-evidence-list", { fact: renderedFacts })}
-            />
-        ))
-        return (
-            <SurfaceListCard
-                props={{ label, description: note === undefined ? context : `${context} ${note}` }}
-                contract="domain-evidence-list"
-                render={content}
-                isLoading={isLoading}
-            />
-        )
-    }
-    return (
-        <SurfaceCard
-            contract="infrastructure-summary"
-            render={defineContractComponent("infrastructure-summary", {
-                heading: defineContractComponent("title-with-end-action", {
-                    title: defineLeafComponent("heading", {}, () => <Heading props={{ content: label, level: 3 }} />),
-                }),
-                context: defineLeafComponent("text", {}, () => <Text props={{ content: context, size: "sm" }} />),
-                ...(facts.length > 0 ? {
-                    domains: defineContractComponent("labelled-fact-stack", { fact: facts.map((item) => fact(item)) }),
-                } : {}),
-                ...(note === undefined ? {} : { note: refusal(note) }),
-            })}
-        />
-    )
-}
-
-/** Source-level tier marker for the pure infrastructure summary block. */
-export const meta = { shape: "block", world: "pure" } as const
+/** Registry identity for the connected infrastructure summary twin. */
+export const meta = { shape: "block", world: "connected" } as const

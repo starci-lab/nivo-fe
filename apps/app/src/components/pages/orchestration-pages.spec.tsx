@@ -29,7 +29,7 @@ vi.mock("@/modules/api/console", () => ({
     myTransactions: vi.fn().mockResolvedValue({ ok: true, data: [] }),
     myWalletTransactions: vi.fn().mockResolvedValue({ ok: true, data: [] }),
     myInvoices: vi.fn().mockResolvedValue({ ok: true, data: [] }),
-    myAgentWorkspace: vi.fn().mockResolvedValue({ ok: true, data: undefined }),
+    myAgentWorkspace: vi.fn().mockResolvedValue({ ok: true, data: [] }),
     myAgentWorkspaces: vi.fn().mockResolvedValue({ ok: true, data: [] }),
     myAgentosWorkspaceApplications: vi.fn().mockResolvedValue({ ok: true, data: [] }),
     myAgentosWorkspaceRuntime: vi.fn().mockResolvedValue({ ok: true, data: undefined }),
@@ -45,7 +45,7 @@ import { AppsPage } from "./AppsPage"
 import { WalletPage } from "./WalletPage"
 import { AgentOSWorkspacePage } from "./AgentOSWorkspacePage"
 import { AgentOSSolutionModulePage } from "./AgentOSSolutionModulePage"
-import { AgentOSWorkspaceList } from "../blocks/agentos/AgentOSWorkspaceList"
+import { AgentOSPage } from "./AgentOSPage"
 import { myAgentWorkspace, myExpertSites, myInstances, myCatalogOrders, catalogItems, myAcademyGrowthSnapshot, myAgentosSolutionModules, myAgentosModuleInstallations, myAgentosModuleInstallation } from "@/modules/api/console"
 import { AcademyGrowthSummary } from "../blocks/academy/AcademyGrowthSummary"
 import { AgentOSSolutionModuleCenter } from "../blocks/agentos/AgentOSSolutionModuleCenter"
@@ -76,14 +76,14 @@ describe("connected console pages", () => {
 
     it("settles the workspace list after its owner-scoped query answers", async () => {
         vi.mocked(myAgentWorkspace).mockResolvedValue({ ok: true, data: [{ id: "workspace-1", name: "Workspace", status: "ready", catalogOrder: { id: "order-1" } }] } as never)
-        render(<AgentOSWorkspaceList />)
+        render(<AgentOSPage mode="dashboard" />)
         expect(await screen.findByText("agentos.workspacesLabel")).toBeInTheDocument()
         fireEvent.click(screen.getByText("Workspace"))
     })
 
     it("records refusal states for the workspace list", async () => {
         vi.mocked(myAgentWorkspace).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
-        render(<AgentOSWorkspaceList />)
+        render(<AgentOSPage mode="dashboard" />)
         await waitFor(() => expect(screen.getAllByText("refusal.unknown").length).toBeGreaterThan(0))
     })
 
@@ -137,7 +137,7 @@ describe("connected console pages", () => {
     it("keeps module and workspace lists resting when signed out and refused when reads fail", async () => {
         signedIn.state = { status: "signed-out", accessToken: "" }
         render(<AgentOSSolutionModuleCenter workspaceId="workspace-1" />)
-        render(<AgentOSWorkspaceList />)
+        render(<AgentOSPage mode="dashboard" />)
         expect(screen.getAllByText("modes.catalog").length).toBeGreaterThan(0)
         cleanup()
         signedIn.state = { status: "signed-in", accessToken: "token" }
@@ -164,7 +164,7 @@ describe("connected console pages", () => {
         cleanup()
         localeState.value = "vi"
         vi.mocked(myAgentWorkspace).mockResolvedValue({ ok: true, data: [{ id: "workspace-1", name: null, status: "unknown", catalogOrder: null }] } as never)
-        render(<AgentOSWorkspaceList />)
+        render(<AgentOSPage mode="dashboard" />)
         await waitFor(() => expect(screen.getAllByText("agentos.kindWorkspace").length).toBeGreaterThan(0))
         fireEvent.click(screen.getAllByRole("link", { name: "agentos.kindWorkspace" })[0])
     })
@@ -176,7 +176,7 @@ describe("connected console pages", () => {
 
     it("renders the workspace route while its snapshot is loading", async () => {
         render(<AgentOSWorkspacePage workspaceId="workspace-1" />)
-        expect(screen.getByText("titleFallback")).toBeInTheDocument()
+        expect(screen.getByRole("heading", { name: "workspace-1" })).toBeInTheDocument()
     })
 
     it("renders the solution module route while its detail is loading", async () => {

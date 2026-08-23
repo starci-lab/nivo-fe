@@ -1,12 +1,14 @@
-import { TemplateAppProvisioningPage } from "@/components/pages/TemplateAppProvisioningPage"
+import { redirect } from "next/navigation"
 
-/** Dynamic route values for starting one catalogue template. */
-type TemplateAppNewRouteProps = { readonly params: Promise<{ readonly templateKey: string }> }
-
-/** Mount the template-app provisioning page in new-request mode. */
-const TemplateAppNewRoute = async ({ params }: TemplateAppNewRouteProps) => {
-    const { templateKey } = await params
-    return <TemplateAppProvisioningPage mode="new" templateKey={templateKey} />
+type LegacyTemplateRouteProps = {
+    readonly params: Promise<{ readonly locale: string, readonly templateKey: string }>
 }
 
-export default TemplateAppNewRoute
+/** Preserve old bookmarks while keeping `/apps/create/:templateKey` canonical. */
+const LegacyTemplateRoute = async ({ params }: LegacyTemplateRouteProps) => {
+    const { locale, templateKey } = await params
+    const localeSegment = locale === "vi" ? "" : `/${locale}`
+    redirect(`${localeSegment}/apps/create/${encodeURIComponent(templateKey)}`)
+}
+
+export default LegacyTemplateRoute

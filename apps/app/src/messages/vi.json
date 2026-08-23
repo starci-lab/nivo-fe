@@ -152,6 +152,10 @@
     "apps": {
       "title": "Ứng dụng",
       "lede": "Mỗi ứng dụng dựng từ một mẫu và có vòng đời riêng.",
+      "createTitle": "Tạo Template App",
+      "createDescription": "Cấu hình mẫu đã chọn trước khi site có định danh persisted.",
+      "provisioningTitle": "Đang cấp phát Template App",
+      "provisioningDescription": "Theo dõi site đã persisted này tới khi stack độc lập sẵn sàng.",
       "listLabel": "Ứng dụng của bạn",
       "openSet": "Mở Ứng dụng",
       "namesNotCount": "Mục này gọi tên vài ứng dụng đầu tiên chứ không đếm. Một trang danh sách không phải là tổng số.",
@@ -172,19 +176,42 @@
       "steadyGroup": "Đang chạy và đang dựng"
     },
   "agentos": {
-      "title": "AgentOS",
+    "title": "AgentOS",
+    "description": "Theo dõi workspace đang chạy, phần cần xử lý và tiếp tục từng workspace persisted từ một dashboard vận hành.",
+    "dashboardEyebrow": "Vận hành workspace",
+    "createEyebrow": "Workspace mới",
+    "orderEyebrow": "Order đã persisted",
+    "createTitle": "Tạo workspace AgentOS",
+    "createDescription": "Chọn gói AgentOS và gửi yêu cầu trước khi order được tạo.",
+    "orderTitle": "Order AgentOS",
+    "orderDescription": "Tiếp tục order đã persisted này qua thanh toán và cấp phát workspace.",
     "openService": "Mở dịch vụ",
     "workspaceDescription": "Workspace agent của bạn và khả năng phản hồi runtime hiện tại.",
       "kindWorkspace": "Workspace",
-      "empty": "Chưa có workspace nào.",
-      "emptyDescription": "Một workspace agent riêng, trực Zalo/Telegram theo quy trình của bạn.",
+      "emptyDescription": "Tạo workspace AgentOS đầu tiên của bạn.",
+      "create": "Tạo AgentOS",
       "viewPlans": "Xem gói",
       "workspacesLabel": "Workspace của bạn",
+      "summary": {
+        "workspaces": "Workspace",
+        "workspacesCaption": "Thuộc tài khoản này",
+        "running": "Đang chạy",
+        "runningCaption": "Sẵn sàng vận hành",
+        "attention": "Cần xử lý",
+        "attentionCaption": "Cần quyết định của chủ sở hữu"
+      },
       "podReachable": "Pod đang trả lời",
       "podUnreachable": "Pod chưa trả lời",
       "checkedAt": "kiểm tra lúc {time}",
       "workspace": {
         "titleFallback": "Workspace AgentOS",
+        "eyebrow": "Trung tâm điều khiển workspace",
+        "description": "Vận hành workspace AgentOS đã persisted cùng ứng dụng, hạ tầng và các thao tác phục hồi.",
+        "stateSection": "Trạng thái workspace",
+        "readyStatus": "Sẵn sàng",
+        "loadingTitle": "Đang tải workspace",
+        "refusedTitle": "Không thể mở workspace",
+        "retry": "Thử lại",
         "loading": "Đang đọc workspace và runtime mới nhất.",
         "refused": "Không thể mở workspace này hoặc tài khoản hiện tại không sở hữu nó.",
         "accessUnavailable": "Không hiển thị thông tin đăng nhập workspace có thể tái sử dụng. Hãy dùng luồng mở ứng dụng ngắn hạn được hỗ trợ.",
@@ -314,6 +341,21 @@
           "backup": "Backup",
           "reset": "Reset VPS",
           "rebuild": "Rebuild"
+        }
+      },
+      "modules": {
+        "page": { "path": "Đường dẫn module", "workspace": "Workspace", "title": "Module", "description": "Tạo custom module hỏi dồn hoặc cài một giải pháp Nivo bất biến cho workspace này.", "eyebrow": "AgentOS module studio", "create": "Tạo module" },
+        "createPage": { "path": "Đường dẫn tạo module", "modules": "Quay lại module", "title": "Tạo custom module", "description": "Bắt đầu từ kết quả cần đạt. Nivo chỉ hỏi tiếp những thông tin còn thiếu.", "eyebrow": "Hỏi dồn thích ứng" },
+        "studioPage": { "path": "Đường dẫn module studio", "modules": "Quay lại module", "title": "Module studio", "description": "Tiếp tục hội thoại đã lưu, bổ sung tài liệu và duyệt đúng phiên bản trước khi publish.", "eyebrow": "Custom module có thể tiếp tục" },
+        "collection": { "title": "Custom module", "refused": "Nivo chưa đọc được custom module của workspace này. Catalogue giải pháp bên dưới vẫn dùng được.", "empty": "Workspace này chưa có custom module nào.", "create": "Tạo module", "custom": "Tùy chỉnh", "progress": "Hoàn thành {progress}%", "inspect": "Xem module", "resume": "Tiếp tục hỏi dồn" },
+        "status": { "draft": "Cần bổ sung", "ready_for_review": "Sẵn sàng duyệt", "publishing": "Đang publish", "active": "Đang hoạt động", "publish_failed": "Publish thất bại" },
+        "intake": { "title": "Module này cần giúp đội ngũ làm gì?", "description": "Mô tả kết quả bằng lời của thầy. Draft chỉ được tạo sau khi tiếp tục.", "fieldLabel": "Mục tiêu module", "placeholder": "Ví dụ: sàng lọc yêu cầu hỗ trợ trước khi giao cho agent", "note": "Chưa lưu gì cho tới khi bắt đầu hỏi dồn.", "action": "Bắt đầu hỏi dồn", "refused": "Nivo chưa thể bắt đầu phiên hỏi dồn này.", "guideTitle": "Cách hỏi dồn hoạt động", "guideNote": "Câu trả lời đã chấp nhận được lưu để thầy có thể rời đi và quay lại.", "steps": { "goal": "Mô tả kết quả cần đạt", "followUp": "Chỉ trả lời phần còn thiếu", "review": "Duyệt đúng một phiên bản trước khi publish" } },
+        "studio": {
+          "interview": { "title": "Hỏi dồn về module", "saved": "Câu trả lời được lưu trước khi Nivo chọn câu hỏi tiếp theo.", "refused": "Chưa đọc được hội thoại. Các phần khác của module vẫn độc lập.", "field": "Trả lời câu hỏi hiện tại", "placeholder": "Nhập câu trả lời rõ nhất", "send": "Gửi câu trả lời", "complete": "Hỏi dồn đã hoàn tất và sẵn sàng duyệt.", "agent": "Nivo Agent", "you": "Thầy" },
+          "profile": { "title": "Hồ sơ module", "progress": "Mức sẵn sàng", "missing": "Còn thiếu: {fields}", "refused": "Chưa đọc được hồ sơ module." },
+          "attachments": { "title": "Tệp", "upload": "Thêm tệp", "remove": "Gỡ", "refused": "Chưa đọc được tài liệu đính kèm.", "empty": "Chưa có tài liệu hỗ trợ.", "scanning": "Đang quét" },
+          "integrations": { "title": "Tích hợp", "provider": "Helpdesk API", "field": "Integration key", "placeholder": "Dán key mới chỉ ghi", "save": "Cấu hình key", "remove": "Gỡ", "refused": "Chưa đọc được trạng thái tích hợp.", "writeOnly": "Nivo mã hóa giá trị đã gửi và chỉ trả về phần gợi ý được che.", "reveal": "Hiện key", "hide": "Ẩn key" },
+          "specification": { "title": "Duyệt đặc tả", "refused": "Chưa đọc được đặc tả.", "incomplete": "Hoàn tất hỏi dồn trước khi duyệt đặc tả có phiên bản.", "version": "Phiên bản {version}", "acknowledge": "Tôi đã duyệt đặc tả v{version}", "publish": "Publish module", "publishing": "Đang publish module", "published": "Yêu cầu cài đặt đã được tiếp nhận." }
         }
       }
     },
@@ -448,6 +490,7 @@
         "upcoming": "Sắp tới"
       },
       "template": {
+        "productName": "Template App",
         "detail": "Request Template App",
         "slugLabel": "Slug ứng dụng",
         "slugPlaceholder": "hoc-vien-cua-toi",
@@ -461,6 +504,7 @@
         "readyText": "Stack ứng dụng đã sẵn sàng. Quay về Ứng dụng để quản lý."
       },
       "agentos": {
+        "productName": "AgentOS",
         "progressLabel": "Đơn AgentOS",
         "continuationLabel": "Bước tiếp theo",
         "requestTitle": "Yêu cầu workspace AgentOS",

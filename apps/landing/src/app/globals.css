@@ -7,6 +7,22 @@
  */
 @source "../../../../packages/ui/src";
 
+:root {
+    --nivo-brand-ink: oklch(16% 0.035 255);
+    --nivo-brand-accent: oklch(57% 0.24 25);
+}
+
+.nivo-brand__ink {
+    fill: var(--nivo-brand-ink);
+}
+
+.nivo-brand__accent {
+    fill: none;
+    stroke: var(--nivo-brand-accent);
+    stroke-linecap: butt;
+    stroke-width: 18;
+}
+
 /*
  * A press label is ruled with the SAME mark the vendor link uses, because the two sit in one card
  * and stand for one promise. The vendor bakes `--separator-tertiary` at 1.5px into `.link`; naming

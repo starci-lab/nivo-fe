@@ -22,7 +22,7 @@ const openSans = Open_Sans({
  */
 export const generateMetadata = async (): Promise<Metadata> => {
     const t = await getTranslations("app")
-    return { title: "nivo app", description: t("description") }
+    return { title: "nivo Console", description: t("description") }
 }
 
 /** Viewport behaviour for every route under this shell. */

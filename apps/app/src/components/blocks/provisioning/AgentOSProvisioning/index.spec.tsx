@@ -46,8 +46,8 @@ vi.mock("./component", () => ({
 
 import { AgentOSProvisioning } from "./"
 
-const item = { id: "item", slug: "agent-os", name: "AgentOS", tiers: [{ id: "tier", name: "Pro", orderIndex: 1, priceMonthlyVnd: 1000 }] }
-const order = { id: "order", status: "pending_payment", catalogItem: { name: "AgentOS" }, catalogTier: { name: "Pro" } }
+const item = { id: "item", slug: "agent-os", name: "nivo AI Agent", tiers: [{ id: "tier", name: "Pro", orderIndex: 1, priceMonthlyVnd: 1000 }] }
+const order = { id: "order", status: "pending_payment", catalogItem: { name: "nivo AI Agent" }, catalogTier: { name: "Pro" } }
 const flow = () => screen.getByTestId("agent-flow").textContent ?? ""
 
 const snapshot = (overrides: { orders?: unknown[], invoices?: unknown[], workspaces?: unknown[] } = {}) => {
@@ -72,8 +72,11 @@ describe("AgentOSProvisioning connected flow", () => {
     it("loads a catalogue, submits an order and opens payment", async () => {
         render(<AgentOSProvisioning context={{ mode: "new" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"request"'))
+        expect(flow()).toContain('"subject":"agentos.productName"')
+        expect(flow()).not.toContain("nivo AI Agent")
         fireEvent.click(screen.getByTestId("request"))
         await waitFor(() => expect(flow()).toContain('"state":"awaiting_payment"'))
+        expect(flow()).toContain('"subject":"agentos.productName"')
         expect(mocks.replace).toHaveBeenCalledWith("/en/agentos/orders/order")
     })
 
