@@ -19,11 +19,11 @@ export const AgentOSModuleAttachmentsBase = ({ studio, state, pending, labels, o
         attachment: rows.map((file) => defineContractComponent("subject-over-muted-caption-with-action", {
             identity: defineContractComponent("subject-over-muted-caption", {
                 subject: defineLeafComponent("text", {}, () => <Text props={{ content: file.fileName, size: "sm", weight: "semibold" }} isLoading={state === "loading"} />),
-                caption: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: `${file.mediaType} · ${file.status}`, size: "xs" }} isLoading={state === "loading"} />),
+                caption: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: `${file.mediaType} · ${"ingestionStatus" in file ? file.ingestionStatus : file.status}${"chunkCount" in file && file.chunkCount > 0 ? ` · ${file.chunkCount} chunks` : ""}`, size: "xs" }} isLoading={state === "loading"} />),
             }),
             action: defineLeafComponent("button", {}, () => <Button props={{ label: labels.remove, variant: "ghost", size: "sm", disabled: pending }} on={{ press: () => onRemove(file.id) }} isLoading={state === "loading"} />),
         })),
-        upload: defineLeafComponent("button", {}, () => <label data-tier="leaf" data-component="FileUpload"><input type="file" hidden disabled={pending} onChange={(event) => { const file = event.currentTarget.files?.[0]; if (file !== undefined) onChoose(file) }} /><Button props={{ label: labels.upload, variant: "secondary", isPending: pending }} /></label>),
+        upload: defineLeafComponent("button", {}, () => <label data-tier="leaf" data-component="FileUpload"><input type="file" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown" hidden disabled={pending} onChange={(event) => { const file = event.currentTarget.files?.[0]; if (file !== undefined) onChoose(file) }} /><Button props={{ label: labels.upload, variant: "secondary", isPending: pending }} /></label>),
         ...(rows.length === 0 ? { notice: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: labels.empty, size: "xs" }} />) } : {}),
     })} />
 }

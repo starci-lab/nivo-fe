@@ -17,7 +17,7 @@ import {
     disableAcademyWebhook, myAgentosCustomModules, myAgentosCustomModuleStudio,
     startAgentosCustomModuleIntake, answerAgentosCustomModuleIntake, prepareAgentosModuleAttachmentUpload,
     finalizeAgentosModuleAttachment, removeAgentosModuleAttachment, saveAgentosModuleIntegrationSecret,
-    removeAgentosModuleIntegrationSecret, publishAgentosCustomModule,
+    removeAgentosModuleIntegrationSecret, publishAgentosCustomModule, resolveCoreApiCapabilityUrl,
 } from "./console"
 
 describe("console API interaction wrappers", () => {
@@ -50,5 +50,9 @@ describe("console API interaction wrappers", () => {
         expect(graphql.mock.calls.some(([document]) => String(document).includes("myWallet"))).toBe(true)
         expect(graphql.mock.calls.some((call) => call.length > 0)).toBe(true)
         expect(graphql.mock.calls.some(([document]) => String(document).includes("PublishAgentosCustomModule"))).toBe(true)
+        expect(graphql.mock.calls.some(([document]) => String(document).includes("attachmentId uploadUrl uploadMethod uploadExpiresAt"))).toBe(true)
+        expect(graphql.mock.calls.some(([document]) => String(document).includes("ingestionStatus detectedMediaType sha256 chunkCount"))).toBe(true)
+        expect(resolveCoreApiCapabilityUrl("/pods/self/module-document-uploads/document-1?signature=signed"))
+            .toBe("http://localhost:3068/pods/self/module-document-uploads/document-1?signature=signed")
     })
 })

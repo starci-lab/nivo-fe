@@ -694,7 +694,22 @@ export type AgentosModuleStudio = {
     readonly module: AgentosCustomModule
     readonly profileFacts: ReadonlyArray<{ readonly key: string, readonly value: string }>
     readonly messages: ReadonlyArray<{ readonly id: string, readonly role: "assistant" | "user", readonly content: string, readonly sequence: number }>
-    readonly attachments: ReadonlyArray<{ readonly id: string, readonly fileName: string, readonly mediaType: string, readonly sizeBytes: number, readonly status: "uploading" | "scanning" | "ready" | "refused", readonly failureCode: string | null }>
+    readonly attachments: ReadonlyArray<{
+        readonly id: string
+        readonly fileName: string
+        readonly mediaType: string
+        readonly sizeBytes: number
+        readonly status: "uploading" | "scanning" | "ready" | "refused"
+        readonly ingestionStatus: "pending" | "scanning" | "extracting" | "embedding" | "indexing" | "indexed" | "refused" | "removed"
+        readonly detectedMediaType: string | null
+        readonly sha256: string | null
+        readonly chunkCount: number
+        readonly indexedAt: string | null
+        readonly retrievalRemovedAt: string | null
+        readonly objectDeletionStatus: "retained" | "pending" | "deleted" | "failed"
+        readonly objectDeletionDueAt: string | null
+        readonly failureCode: string | null
+    }>
     readonly integrations: ReadonlyArray<{ readonly id: string, readonly providerKey: string, readonly maskedHint: string, readonly status: "configured" | "refused" }>
     readonly specification: { readonly id: string, readonly version: number, readonly status: "ready" | "published" | "publish_failed" } | null
 }
@@ -703,7 +718,7 @@ const MODULE_STUDIO_FIELDS = `
     module { id agentWorkspaceId name status progress missingFields currentQuestion specificationVersion installationId failureCode }
     profileFacts { key value }
     messages { id role content sequence }
-    attachments { id fileName mediaType sizeBytes status failureCode }
+    attachments { id fileName mediaType sizeBytes status ingestionStatus detectedMediaType sha256 chunkCount indexedAt retrievalRemovedAt objectDeletionStatus objectDeletionDueAt failureCode }
     integrations { id providerKey maskedHint status }
     specification { id version status }
 `
@@ -759,9 +774,34 @@ export const startAgentosCustomModuleIntake = (input: StartAgentosCustomModuleIn
 export const answerAgentosCustomModuleIntake = (input: AnswerAgentosCustomModuleIntakeInput) =>
     studioMutation("AnswerAgentosCustomModuleIntake", "AnswerAgentosCustomModuleIntakeInput", input)
 
-/** Register one quarantined file identity before scanner processing begins. */
-export const prepareAgentosModuleAttachmentUpload = (input: PrepareAgentosModuleAttachmentUploadInput) =>
-    studioMutation("PrepareAgentosModuleAttachmentUpload", "PrepareAgentosModuleAttachmentUploadInput", input)
+/** Browser upload contract: studio state plus one short-lived PUT-only capability. */
+export type AgentosModuleUploadCapability = AgentosModuleStudio & {
+    readonly attachmentId: string
+    readonly uploadUrl: string
+    readonly uploadMethod: "PUT"
+    readonly uploadExpiresAt: string
+}
+
+/** Resolve a backend-issued relative capability without exposing internal object-storage hosts. */
+export const resolveCoreApiCapabilityUrl = (capabilityUrl: string): string => {
+    const configuredApiUrl = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql"
+    const apiUrl = new URL(configuredApiUrl,
+        typeof window === "undefined" ? "http://localhost:3068" : window.location.origin)
+    return new URL(capabilityUrl,
+        `${apiUrl.origin}/`).toString()
+}
+
+/** Register one quarantined file identity and return its bounded byte-transfer capability. */
+export const prepareAgentosModuleAttachmentUpload = (input: PrepareAgentosModuleAttachmentUploadInput): Promise<Result<AgentosModuleUploadCapability>> =>
+    graphql(
+        `mutation PrepareAgentosModuleAttachmentUpload($input: PrepareAgentosModuleAttachmentUploadInput!) {
+            prepareAgentosModuleAttachmentUpload(input: $input) {
+                data { ${MODULE_STUDIO_FIELDS} attachmentId uploadUrl uploadMethod uploadExpiresAt }
+                message success error
+            }
+        }`,
+        { input },
+    )
 
 /** Mark the prepared attachment ready for external scanner processing. */
 export const finalizeAgentosModuleAttachment = (input: AgentosModuleAttachmentIdentityInput) =>
