@@ -54,7 +54,7 @@ describe("AgentOSWorkspacePage pure sections", () => {
             onSelectPageState={select} onOpenAgentConsole={vi.fn()} formatDate={(value) => value}
         />)
 
-        await user.click(screen.getByRole("tab", { name: "applications" }))
+        await user.click(screen.getByRole("radio", { name: "applications" }))
 
         expect(select).toHaveBeenCalledWith("applications")
     })

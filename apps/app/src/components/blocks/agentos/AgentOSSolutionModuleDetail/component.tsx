@@ -1,7 +1,8 @@
 import {
+    Breadcrumbs,
+    Button,
     Heading,
     Text,
-    TextLink,
     Tree,
     defineContractComponent,
     defineContractProjection,
@@ -13,7 +14,7 @@ import { AgentOSSolutionModuleSummary } from "@/components/blocks/agentos/AgentO
 import type { AgentosModuleInstallationDetail } from "@/modules/api/console"
 
 /** Detail-block states for one module installation snapshot. */
-export type AgentOSSolutionModuleDetailState = "loading" | "refused" | "ready"
+export type AgentOSSolutionModuleDetailState = "loading" | "refused" | "ready" | "refreshing" | "current" | "knowledge-refused"
 
 /** Resolved labels for one module installation detail route. */
 export type AgentOSSolutionModuleDetailLabels = {
@@ -21,6 +22,10 @@ export type AgentOSSolutionModuleDetailLabels = {
     readonly backToWorkspace: string
     readonly loading: string
     readonly refused: string
+    readonly openAiKnowledge?: string
+    readonly knowledgeCurrent?: string
+    readonly knowledgeRefreshing?: string
+    readonly knowledgeRefused?: string
     readonly summary: Parameters<typeof AgentOSSolutionModuleSummary>[0]["labels"]
     readonly bindings: Parameters<typeof AgentOSSolutionModuleBindings>[0]["labels"]
 }
@@ -31,10 +36,11 @@ export type AgentOSSolutionModuleDetailViewProps = {
     readonly installation?: AgentosModuleInstallationDetail
     readonly labels: AgentOSSolutionModuleDetailLabels
     readonly onBack: () => void
+    readonly onOpenAiKnowledge?: () => void
 }
 
 /** Compose one exact installation snapshot without owning API or realtime mechanics. */
-export const AgentOSSolutionModuleDetailBase = ({ detailState, installation, labels, onBack }: AgentOSSolutionModuleDetailViewProps) => {
+export const AgentOSSolutionModuleDetailBase = ({ detailState, installation, labels, onBack, onOpenAiKnowledge }: AgentOSSolutionModuleDetailViewProps) => {
     // A refusal and a missing installation are the same page: there is nothing to lay out, so the
     // stack carries the one notice rather than two empty cards.
     const settledSections = detailState === "refused" || installation === undefined
@@ -53,11 +59,12 @@ export const AgentOSSolutionModuleDetailBase = ({ detailState, installation, lab
         <Tree
             contract="module-detail-page"
             render={defineContractComponent("module-detail-page", {
-                back: defineLeafComponent("text-link", {}, () => <TextLink props={{ label: labels.backToWorkspace, size: "sm" }} on={{ press: onBack }} />),
+                back: defineLeafComponent("breadcrumbs", {}, () => <Breadcrumbs props={{ mode: "back", label: labels.title, backLabel: labels.backToWorkspace }} on={{ back: onBack }} />),
                 heading: defineContractComponent("title-with-end-action", {
                     title: defineLeafComponent("heading", {}, () => <Heading props={{ content: labels.title, level: 1 }} />),
+                    ...(onOpenAiKnowledge === undefined ? {} : { end: defineLeafComponent("button", {}, () => <Button props={{ label: labels.openAiKnowledge ?? "Open AI & Knowledge", variant: "primary" }} on={{ press: onOpenAiKnowledge }} />) }),
                 }),
-                lede: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: detailState === "loading" ? labels.loading : installation?.moduleKey ?? labels.title, size: "sm", tone: "muted" }} />),
+                lede: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: detailState === "loading" ? labels.loading : detailState === "current" ? labels.knowledgeCurrent ?? installation?.moduleKey : detailState === "refreshing" ? labels.knowledgeRefreshing ?? installation?.moduleKey : detailState === "knowledge-refused" ? labels.knowledgeRefused ?? labels.refused : installation?.moduleKey ?? labels.title, size: "sm", tone: detailState === "knowledge-refused" ? "accent" : "muted" }} />),
                 section: sections,
             })}
         />

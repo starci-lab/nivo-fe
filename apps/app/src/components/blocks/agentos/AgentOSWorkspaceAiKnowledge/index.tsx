@@ -14,6 +14,7 @@ export const AgentOSWorkspaceAiKnowledge = ({ workspaceId }: AgentOSWorkspaceAiK
     const locale = useLocale()
     const [readiness, setReadiness] = useState<AgentosAiKnowledgeReadiness | null | undefined>()
     const [action, setAction] = useState<"testing" | "recovering" | "success" | null>(null)
+    const [actionRefused, setActionRefused] = useState(false)
     const load = useCallback(async () => { const result = await myAgentosAiKnowledgeReadiness(workspaceId); setReadiness(result.ok ? result.data : null) }, [workspaceId])
     useEffect(() => { void load() }, [load])
     useEffect(() => {
@@ -24,21 +25,23 @@ export const AgentOSWorkspaceAiKnowledge = ({ workspaceId }: AgentOSWorkspaceAiK
     }, [action, load, readiness?.knowledgeRecoveryOperationId, readiness?.readinessOperationId])
     useEffect(() => {
         if (action === null || action === "success" || readiness === undefined || readiness === null) return
-        if (readiness.readinessOperationId === null && readiness.knowledgeRecoveryOperationId === null && readiness.readinessStatus !== "testing") setAction("success")
+        if (readiness.readinessOperationId === null && readiness.knowledgeRecoveryOperationId === null && readiness.readinessStatus !== "testing") setAction(readiness.aiReady ? "success" : null)
     }, [action, readiness])
-    const run = async () => { setAction("testing"); const result = await runAgentosAiReadinessTest({ workspaceId, idempotencyKey: crypto.randomUUID() }); if (!result.ok) { setReadiness(null); setAction(null); return }; await load() }
-    const recover = async () => { setAction("recovering"); const result = await reindexAgentWorkspaceKnowledge({ workspaceId, idempotencyKey: crypto.randomUUID() }); if (!result.ok) { setReadiness(null); setAction(null); return }; await load() }
+    const run = async () => { setActionRefused(false); setAction("testing"); const result = await runAgentosAiReadinessTest({ workspaceId, idempotencyKey: crypto.randomUUID() }); if (!result.ok) { setActionRefused(true); setAction(null); return }; await load() }
+    const recover = async () => { setActionRefused(false); setAction("recovering"); const result = await reindexAgentWorkspaceKnowledge({ workspaceId, idempotencyKey: crypto.randomUUID() }); if (!result.ok) { setActionRefused(true); setAction(null); return }; await load() }
     let state: AgentOSWorkspaceAiKnowledgeViewProps["state"] = "loading"
-    if (readiness === null) state = "refused"
+    if (readiness === null || actionRefused) state = "refused"
     else if (action === "testing" || readiness?.readinessStatus === "testing") state = "testing"
     else if (action === "recovering" || readiness?.knowledgeRecoveryOperationId !== null && readiness?.knowledgeRecoveryOperationId !== undefined) state = "recovering"
     else if (action === "success") state = "success"
-    else if (readiness !== undefined) state = readiness.aiReady ? "ready" : "refused"
+    else if (readiness !== undefined) state = readiness.credentialStatus !== "configured" ? "key-configuring" : readiness.aiReady ? "ready" : "refused"
     const labels = {
-        title: t("title"), description: t("description"), ready: t("ready"), testing: t("testing"), refused: t("refused"),
+        sectionHeading: t("sectionHeading"), title: t("title"), description: t("description"), ready: t("ready"), testing: t("testing"), refused: t("refused"),
         provider: t("provider"), model: t("model"), embedding: t("embedding"), qdrant: t("qdrant"), credential: t("credential"), testedAt: t("testedAt"),
         runTest: t("runTest"), recover: t("recover"), origins: t("origins"), components: t("components"), evidence: t("evidence"),
         documents: (count: number) => t("documents", { count }), current: t("current"), unknownVersion: t("unknownVersion"),
+        readinessStages: [t("stages.credential"), t("stages.model"), t("stages.knowledge"), t("stages.qdrant"), t("stages.test")],
+        complete: t("complete"), upcoming: t("upcoming"), failureTitle: t("failureTitle"),
         formatTestedAt: (value: string) => new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)),
     }
     return <AgentOSWorkspaceAiKnowledgeBase state={state} readiness={readiness ?? undefined} labels={labels} onTest={() => void run()} onRecover={() => void recover()} />

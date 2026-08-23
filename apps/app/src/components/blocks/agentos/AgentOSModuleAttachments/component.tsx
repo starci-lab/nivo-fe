@@ -7,17 +7,18 @@ export type AgentOSModuleAttachmentsViewProps = {
     readonly state: "loading" | "refused" | "ready"
     readonly pending: boolean
     readonly labels: {
-        readonly title: string; readonly upload: string; readonly remove: string; readonly refused: string; readonly empty: string
+        readonly title: string; readonly upload: string; readonly retry?: string; readonly remove: string; readonly refused: string; readonly empty: string
         readonly uploaded: string; readonly scanning: string; readonly extracting: string; readonly embedding: string; readonly indexing: string; readonly indexed: string
         readonly complete: string; readonly current: string; readonly upcoming: string
         readonly chunks: (count: number) => string; readonly refusedStatus: string; readonly removed: string
     }
     readonly onChoose: (file: File) => void
+    readonly onRetry?: (id: string) => void
     readonly onRemove: (id: string) => void
 }
 
 /** Draw quarantined file evidence with explicit scan outcomes. */
-export const AgentOSModuleAttachmentsBase = ({ studio, state, pending, labels, onChoose, onRemove }: AgentOSModuleAttachmentsViewProps) => {
+export const AgentOSModuleAttachmentsBase = ({ studio, state, pending, labels, onChoose, onRetry, onRemove }: AgentOSModuleAttachmentsViewProps) => {
     if (state === "refused") return <SurfaceCard props={{ label: labels.title }} contract="body-with-refusal-note" render={defineContractComponent("body-with-refusal-note", { note: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: labels.refused, size: "sm", tone: "muted" }} />) })} />
     const rows = state === "loading" ? [{ id: "loading", fileName: labels.title, mediaType: "", sizeBytes: 0, status: "scanning" as const }] : (studio?.attachments ?? [])
     const stageLabels = [labels.uploaded, labels.scanning, labels.extracting, labels.embedding, labels.indexing, labels.indexed]
@@ -42,9 +43,11 @@ export const AgentOSModuleAttachmentsBase = ({ studio, state, pending, labels, o
                         subject: defineLeafComponent("text", {}, () => <Text props={{ content: file.fileName, size: "sm", weight: "semibold" }} isLoading={state === "loading"} />),
                         caption: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: `${file.mediaType || "—"}${"chunkCount" in file && file.chunkCount > 0 ? ` · ${labels.chunks(file.chunkCount)}` : ""}`, size: "xs", tone: "muted" }} isLoading={state === "loading"} />),
                     }),
-                    action: defineLeafComponent("button", {}, () => <Button props={{ label: labels.remove, variant: "ghost", size: "sm", disabled: pending }} on={{ press: () => onRemove(file.id) }} isLoading={state === "loading"} />),
+                    action: defineLeafComponent("button", {}, () => refused && labels.retry !== undefined && onRetry !== undefined
+                        ? <Button props={{ label: labels.retry, variant: "secondary", size: "sm", disabled: pending }} on={{ press: () => onRetry(file.id) }} />
+                        : <Button props={{ label: labels.remove, variant: "ghost", size: "sm", disabled: pending }} on={{ press: () => onRemove(file.id) }} isLoading={state === "loading"} />),
                 }),
-                progress: defineContractComponent("responsive-agentos-readiness-stepper", { step: stages.map((step) => defineCompositeComponent("lifecycle-step", {}, () => <LifecycleStep props={step} isLoading={state === "loading"} />)) }),
+                progress: defineContractComponent("responsive-document-ingestion-stepper", { step: stages.map((step) => defineCompositeComponent("lifecycle-step", {}, () => <LifecycleStep props={step} isLoading={state === "loading"} />)) }),
                 ...(refused ? { notice: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: labels.refusedStatus, size: "xs", tone: "muted" }} />) } : {}),
             })
         }),

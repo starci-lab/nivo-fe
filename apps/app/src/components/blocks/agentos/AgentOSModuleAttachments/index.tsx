@@ -1,9 +1,9 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
-import { finalizeAgentosModuleAttachment, myAgentosCustomModuleStudio, prepareAgentosModuleAttachmentUpload, removeAgentosModuleAttachment, resolveCoreApiCapabilityUrl, type AgentosModuleStudio } from "@/modules/api/console"
-import { useSession } from "@/modules/auth/session"
+import { finalizeAgentosModuleAttachment, prepareAgentosModuleAttachmentUpload, removeAgentosModuleAttachment, resolveCoreApiCapabilityUrl } from "@/modules/api/console"
+import { useAgentOSModuleStudioProjection } from "@/components/pages/AgentOSModuleStudioPage/component"
 import { AgentOSModuleAttachmentsBase } from "./component"
 
 type AgentOSModuleAttachmentsProps = { readonly workspaceId: string, readonly moduleId: string }
@@ -17,41 +17,41 @@ const mediaTypeFor = (file: File) => {
     return "text/plain"
 }
 
-/** Own attachment preparation, scan handoff and removal for one module. */
+/** Own attachment preparation, scan polling, retry and removal over the shared studio projection. */
 export const AgentOSModuleAttachments = ({ workspaceId, moduleId }: AgentOSModuleAttachmentsProps) => {
     const t = useTranslations("console.agentos.modules.studio.attachments")
-    const session = useSession()
-    const [studio, setStudio] = useState<AgentosModuleStudio | null | undefined>()
+    const { studio, refresh } = useAgentOSModuleStudioProjection()
+    const [refused, setRefused] = useState(false)
     const [pending, setPending] = useState(false)
-    const load = useCallback(async () => { const result = await myAgentosCustomModuleStudio(workspaceId, moduleId); setStudio(result.ok ? result.data : null) }, [moduleId, workspaceId])
-    useEffect(() => { if (session.state.status === "signed-in") void load() }, [load, session.state.status])
     useEffect(() => {
         if (!studio?.attachments.some((item) => item.status === "scanning" || item.ingestionStatus === "extracting" || item.ingestionStatus === "embedding" || item.ingestionStatus === "indexing")) return
-        const timer = window.setInterval(() => void load(), 2_000)
+        const timer = window.setInterval(() => void refresh(), 2_000)
         return () => window.clearInterval(timer)
-    }, [load, studio])
+    }, [refresh, studio])
     const choose = async (file: File) => {
-        if (file.size < 1 || file.size > MAX_UPLOAD_BYTES) { setStudio(null); return }
+        if (file.size < 1 || file.size > MAX_UPLOAD_BYTES) { setRefused(true); return }
         setPending(true)
         try {
             const mediaType = mediaTypeFor(file)
             const prepared = await prepareAgentosModuleAttachmentUpload({ agentWorkspaceId: workspaceId, moduleId, fileName: file.name, mediaType, sizeBytes: file.size })
-            if (!prepared.ok) { setStudio(null); return }
-            setStudio(prepared.data)
+            if (!prepared.ok) { setRefused(true); return }
+            await refresh()
             const upload = await fetch(resolveCoreApiCapabilityUrl(prepared.data.uploadUrl), { method: prepared.data.uploadMethod, headers: { "content-type": mediaType }, body: file })
-            if (!upload.ok) { await load(); return }
+            if (!upload.ok) { setRefused(true); await refresh(); return }
             const finalized = await finalizeAgentosModuleAttachment({ agentWorkspaceId: workspaceId, moduleId, attachmentId: prepared.data.attachmentId })
-            setStudio(finalized.ok ? finalized.data : null)
-        } catch { setStudio(null) }
+            setRefused(!finalized.ok)
+            await refresh()
+        } catch { setRefused(true) }
         finally { setPending(false) }
     }
-    const remove = async (attachmentId: string) => { setPending(true); const result = await removeAgentosModuleAttachment({ agentWorkspaceId: workspaceId, moduleId, attachmentId }); if (result.ok) await load(); setPending(false) }
-    return <AgentOSModuleAttachmentsBase studio={studio ?? undefined} state={studio === undefined ? "loading" : studio === null ? "refused" : "ready"} pending={pending} labels={{
-        title: t("title"), upload: t("upload"), remove: t("remove"), refused: t("refused"), empty: t("empty"),
+    const retry = async (attachmentId: string) => { setPending(true); const result = await finalizeAgentosModuleAttachment({ agentWorkspaceId: workspaceId, moduleId, attachmentId }); setRefused(!result.ok); await refresh(); setPending(false) }
+    const remove = async (attachmentId: string) => { setPending(true); const result = await removeAgentosModuleAttachment({ agentWorkspaceId: workspaceId, moduleId, attachmentId }); setRefused(!result.ok); if (result.ok) await refresh(); setPending(false) }
+    return <AgentOSModuleAttachmentsBase studio={studio ?? undefined} state={refused || studio === null ? "refused" : studio === undefined ? "loading" : "ready"} pending={pending} labels={{
+        title: t("title"), upload: t("upload"), retry: t("retry"), remove: t("remove"), refused: t("refused"), empty: t("empty"),
         uploaded: t("uploaded"), scanning: t("scanning"), extracting: t("extracting"), embedding: t("embedding"), indexing: t("indexing"), indexed: t("indexed"),
         complete: t("complete"), current: t("current"), upcoming: t("upcoming"),
         chunks: (count) => t("chunks", { count }), refusedStatus: t("refusedStatus"), removed: t("removed"),
-    }} onChoose={(file) => void choose(file)} onRemove={(id) => void remove(id)} />
+    }} onChoose={(file) => void choose(file)} onRetry={(id) => void retry(id)} onRemove={(id) => void remove(id)} />
 }
 
 /** Source-level tier marker for the connected attachments owner. */

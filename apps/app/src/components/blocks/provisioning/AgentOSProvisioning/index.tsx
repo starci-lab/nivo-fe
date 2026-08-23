@@ -12,6 +12,7 @@ import {
     myCatalogOrders,
     myInvoices,
     orderAgentOs,
+    runAgentosAiReadinessTest,
     type AgentWorkspaceRow,
     type AgentosAiKnowledgeReadiness,
     type CatalogItemRow,
@@ -129,7 +130,10 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
     const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
     const [flow, setFlow] = useState<AgentOSFlow>({ phase: "catalog_loading" })
     const [aiReadiness, setAiReadiness] = useState<AgentosAiKnowledgeReadiness | null | undefined>()
+    const [aiRetryPending, setAiRetryPending] = useState(false)
     const route = useCallback((path: string) => locale === DEFAULT_LOCALE ? path : `/${locale}${path}`, [locale])
+    const contextMode = context.mode
+    const resumeOrderId = context.mode === "resume" ? context.orderId : null
 
     const reconcile = useCallback(async (orderId: string) => {
         const [orders, invoices, workspaces] = await Promise.all([
@@ -145,11 +149,11 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
     }, [productName, t])
 
     useEffect(() => {
-        if (context.mode === "resume" && accessToken === null) return
+        if (contextMode === "resume" && accessToken === null) return
         let cancelled = false
         const settle = async () => {
-            if (context.mode === "resume") {
-                if (!cancelled) await reconcile(context.orderId)
+            if (contextMode === "resume" && resumeOrderId !== null) {
+                if (!cancelled) await reconcile(resumeOrderId)
                 return
             }
             const catalogue = await catalogItems("ai_agent")
@@ -166,7 +170,7 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
         return () => {
             cancelled = true
         }
-    }, [accessToken, context, productName, reconcile, t])
+    }, [accessToken, contextMode, productName, reconcile, resumeOrderId, t])
 
     const target = realtimeTarget(flow)
     const realtime = useProvisioningRealtime({ accessToken, target })
@@ -182,6 +186,7 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
         const phase = workspacePhase(event.status)
         setFlow((current) => {
             if (current.phase !== "preparing" && current.phase !== "ready") return current
+            if (phase === current.phase) return current
             if (phase === "failed") return { phase: "failed", orderId: current.orderId, subject: current.subject, detail: current.detail, reason: event.reason ?? t("failedProvision"), atStep: 3 }
             return { ...current, phase }
         })
@@ -206,9 +211,9 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
     }, [flow, reconcile])
 
     useEffect(() => {
-        if (context.mode !== "resume" || realtime.status !== "connected") return
-        void reconcile(context.orderId)
-    }, [context, realtime.status, reconcile])
+        if (contextMode !== "resume" || resumeOrderId === null || realtime.status !== "connected") return
+        void reconcile(resumeOrderId)
+    }, [contextMode, realtime.status, reconcile, resumeOrderId])
 
     useEffect(() => {
         if (flow.phase !== "ready") { setAiReadiness(undefined); return }
@@ -263,6 +268,17 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
             return { ordinal: String(index + 1), label, state, stateLabel: stateLabels[state] }
         })
     }
+
+    const retryAiReadiness = async (workspaceId: string) => {
+        setAiRetryPending(true)
+        const result = await runAgentosAiReadinessTest({ workspaceId, idempotencyKey: crypto.randomUUID() })
+        if (!result.ok) setAiReadiness(null)
+        else {
+            const readiness = await myAgentosAiKnowledgeReadiness(workspaceId)
+            setAiReadiness(readiness.ok ? readiness.data : null)
+        }
+        setAiRetryPending(false)
+    }
     const viewLabels = { progressLabel: t("agentos.progressLabel"), continuationLabel: t("agentos.continuationLabel") }
     const view = (): AgentOSProvisioningViewProps => {
         switch (flow.phase) {
@@ -285,12 +301,26 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
                 return { state: flow.phase, props: { ...viewLabels, steps, subject: flow.subject, detail: flow.detail, statusTitle: t("agentos.paymentTitle"), statusText: t("agentos.paymentText"), statusActionLabel: t("agentos.openWallet"), statusActionDisabled: walletTarget === undefined }, on: { statusAction: walletTarget === undefined ? undefined : () => router.push(walletTarget) } }
             }
             case "ready":
-                return { state: flow.phase, props: {
+                if (aiReadiness?.aiReady === true) return { state: "ready", props: {
                     ...viewLabels, steps, subject: flow.subject, detail: flow.detail,
-                    statusTitle: aiReadiness?.aiReady === true ? t("readyTitle") : aiReadiness === null ? t("failedTitle") : t("preparingTitle"),
-                    statusText: aiReadiness === undefined ? t("agentos.aiLoading") : aiReadiness === null ? t("failedLoad") : aiReadiness.aiReady ? t("agentos.aiReady") : aiReadiness.knowledgeRecoveryOperationId !== null ? t("agentos.aiRecovering") : t("agentos.aiTesting"),
+                    statusTitle: t("readyTitle"),
+                    statusText: t("agentos.aiReady"),
                     statusActionLabel: t("agentos.manage"),
-                }, on: { statusAction: () => router.push(route(`/agentos/workspaces/${flow.workspaceId}`)) } }
+                }, on: { statusAction: () => router.push(route(`/agentos/workspaces/${flow.workspaceId}?view=ai-knowledge`)) } }
+                if (aiReadiness === null || aiReadiness?.failureCode !== null && aiReadiness?.failureCode !== undefined && aiReadiness.readinessOperationId === null && aiReadiness.knowledgeRecoveryOperationId === null) return { state: "failed", props: {
+                    ...viewLabels, steps, subject: flow.subject, detail: flow.detail,
+                    statusTitle: t("failedTitle"),
+                    statusText: aiReadiness?.failureCode ?? t("failedLoad"),
+                    statusActionLabel: t("agentos.retryAi"),
+                    isRequestPending: aiRetryPending,
+                }, on: { statusAction: () => void retryAiReadiness(flow.workspaceId) } }
+                return { state: "preparing", props: {
+                    ...viewLabels, steps, subject: flow.subject, detail: flow.detail,
+                    statusTitle: t("preparingTitle"),
+                    statusText: aiReadiness === undefined ? t("agentos.aiLoading") : aiReadiness.knowledgeRecoveryOperationId !== null ? t("agentos.aiRecovering") : t("agentos.aiTesting"),
+                    statusActionLabel: t("agentos.watchProvisioning"),
+                    statusActionDisabled: true,
+                } }
             default:
                 break
         }

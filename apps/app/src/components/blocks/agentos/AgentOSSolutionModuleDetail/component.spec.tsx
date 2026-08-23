@@ -31,10 +31,15 @@ const props: Omit<AgentOSSolutionModuleDetailViewProps, "detailState"> = {
         backToWorkspace: "Back to workspace",
         loading: "Loading module",
         refused: "Module unavailable",
+        openAiKnowledge: "Open AI & Knowledge",
+        knowledgeCurrent: "Knowledge current",
+        knowledgeRefreshing: "Knowledge refreshing",
+        knowledgeRefused: "Knowledge refused",
         summary: { section: "Summary", module: "Module", version: "Version", status: "Status", failure: "Failure", modelProfile: "Model profile", manifest: "Manifest", empty: "None" },
         bindings: { section: "Bindings", agents: "Agents", channels: "Channels", sharedKnowledge: "Knowledge", knowledgeVersions: "Versions", artifact: "Artifact", currentness: "Currentness", embedding: "Embedding", retrievalScope: "Retrieval scope", empty: "None" },
     },
     onBack: vi.fn(),
+    onOpenAiKnowledge: vi.fn(),
 }
 
 describe("AgentOSSolutionModuleDetail drawing", () => {
@@ -59,5 +64,6 @@ describe("AgentOSSolutionModuleDetail drawing", () => {
         expect(html).toContain("sales-copilot")
         expect(html).toContain("agent-1")
         expect(html).toContain("Back to workspace")
+        expect(html).toContain("Open AI &amp; Knowledge")
     })
 })

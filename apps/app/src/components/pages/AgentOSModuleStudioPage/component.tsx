@@ -1,11 +1,39 @@
+"use client"
+
+import { createContext, useContext, type ReactNode } from "react"
 import { Breadcrumbs, Heading, Text, TileIcon, Tree, defineContractComponent, defineContractProjection, defineLeafComponent } from "@nivo/ui"
+import type { AgentosModuleStudio } from "@/modules/api/console"
 import { AgentOSModuleAttachments } from "@/components/blocks/agentos/AgentOSModuleAttachments"
 import { AgentOSModuleIntegrations } from "@/components/blocks/agentos/AgentOSModuleIntegrations"
 import { AgentOSModuleInterview } from "@/components/blocks/agentos/AgentOSModuleInterview"
 import { AgentOSModuleProfile } from "@/components/blocks/agentos/AgentOSModuleProfile"
 import { AgentOSModuleSpecification } from "@/components/blocks/agentos/AgentOSModuleSpecification"
 
-type AgentOSModuleStudioPageViewProps = { readonly workspaceId: string, readonly moduleId: string, readonly labels: { readonly path: string, readonly modules: string, readonly title: string, readonly description: string, readonly eyebrow: string }, readonly onBack: () => void }
+type AgentOSModuleStudioPageViewProps = { readonly workspaceId: string, readonly moduleId: string, readonly labels: { readonly path: string, readonly modules: string, readonly title: string, readonly description: string, readonly eyebrow: string, readonly sections: string }, readonly onBack: () => void }
+
+type AgentOSModuleStudioProjection = {
+    readonly studio: AgentosModuleStudio | null | undefined
+    readonly refresh: () => Promise<void>
+}
+
+type AgentOSModuleStudioProjectionProviderProps = {
+    readonly value: AgentOSModuleStudioProjection
+    readonly render: () => ReactNode
+}
+
+const AgentOSModuleStudioProjectionContext = createContext<AgentOSModuleStudioProjection | null>(null)
+
+/** Share one page-owned studio read while child blocks keep their own mutation and pending state. */
+export const AgentOSModuleStudioProjectionProvider = ({ value, render }: AgentOSModuleStudioProjectionProviderProps) => (
+    <AgentOSModuleStudioProjectionContext.Provider value={value}>{render()}</AgentOSModuleStudioProjectionContext.Provider>
+)
+
+/** Read the page-owned projection without repeating the module-studio request in sibling blocks. */
+export const useAgentOSModuleStudioProjection = () => {
+    const projection = useContext(AgentOSModuleStudioProjectionContext)
+    if (projection === null) throw new Error("AgentOSModuleStudioProjectionProvider is required")
+    return projection
+}
 
 /** Compose independently-owned interview, profile, file, integration and review sections. */
 export const AgentOSModuleStudioPageBase = ({ workspaceId, moduleId, labels, onBack }: AgentOSModuleStudioPageViewProps) => (
@@ -19,6 +47,7 @@ export const AgentOSModuleStudioPageBase = ({ workspaceId, moduleId, labels, onB
                 description: defineLeafComponent("text", { size: "md", tone: "muted" }, () => <Text props={{ content: labels.description, size: "md", tone: "muted" }} />),
             }),
         }) }),
+        sectionHeading: defineLeafComponent("heading", {}, () => <Heading props={{ content: labels.sections, level: 2 }} />),
         section: [defineContractProjection("label-row-over-card", () => <Tree contract="console-primary-aside" render={defineContractComponent("console-primary-aside", {
             primary: defineContractComponent("console-section-stack", { section: [
                 defineContractProjection("label-row-over-card", () => <AgentOSModuleInterview workspaceId={workspaceId} moduleId={moduleId} />),

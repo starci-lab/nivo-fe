@@ -113,11 +113,11 @@ describe("connected console pages", () => {
         vi.mocked(myAgentosModuleInstallations).mockResolvedValue({ ok: true, data: [{ id: "install-1", moduleKey: "sales-copilot", moduleVersion: "1.0", status: "ready", failureCode: null }, { id: "install-2", moduleKey: "multichannel-chatbot", moduleVersion: "1.0", status: "failed", failureCode: "BROKEN" }, { id: "install-3", moduleKey: "missing", moduleVersion: "1.0", status: "provisioning", failureCode: null }] } as never)
         render(<AgentOSSolutionModuleCenter workspaceId="workspace-1" />)
         expect(await screen.findByText("Sales")).toBeInTheDocument()
-        fireEvent.click(screen.getByRole("tab", { name: "modes.installed" }))
+        fireEvent.click(screen.getByRole("radio", { name: "modes.installed" }))
     })
 
     it("renders an answered module installation detail", async () => {
-        vi.mocked(myAgentosModuleInstallation).mockResolvedValue({ ok: true, data: { id: "install-1", agentWorkspaceId: "workspace-1", moduleKey: "sales-copilot", moduleVersion: "1.0", status: "ready", sagaId: null, generatedAgentIds: ["agent-1"], sharedKnowledgeSourceIds: ["knowledge-1"], channelAccountRefs: ["channel-1"], commonKnowledgeVersion: "common-1", privateKnowledgeVersion: "private-1", failureCode: null } } as never)
+        vi.mocked(myAgentosModuleInstallation).mockResolvedValue({ ok: true, data: { id: "install-1", agentWorkspaceId: "workspace-1", moduleKey: "sales-copilot", moduleVersion: "1.0", status: "ready", sagaId: null, generatedAgentIds: ["agent-1"], sharedKnowledgeSourceIds: ["knowledge-1"], channelAccountRefs: ["channel-1"], commonKnowledgeVersion: "common-1", privateKnowledgeVersion: "private-1", manifestDigest: "manifest-1", modelProfileRef: "nivo-default", desiredDigest: "desired-1", appliedDigest: "desired-1", knowledgeState: "current", knowledgeArtifact: { id: "artifact-1", knowledgeVersion: "private-1", sourceDigest: "source-1", snapshotDigest: "snapshot-1", embeddingProfile: "nivo-qwen3-embedding-8b-4096-v1", embeddingDimension: 4096, pointCount: 3 }, retrievalScope: { installationId: "install-1", moduleKey: "sales-copilot", knowledgeVersion: "private-1" }, failureCode: null } } as never)
         render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="install-1" />)
         await waitFor(() => expect(screen.getAllByText("sales-copilot").length).toBeGreaterThan(0))
     })

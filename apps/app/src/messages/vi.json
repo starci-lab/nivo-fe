@@ -226,12 +226,15 @@
           "access": "Truy cập"
       },
       "aiKnowledge": {
+        "sectionHeading": "Vận hành AI",
         "title": "Mức sẵn sàng AI & Tri thức",
         "description": "Key OpenRouter riêng theo workspace, model DeepSeek, snapshot Nivo/module, tài liệu tải lên và truy xuất Qdrant riêng tư.",
         "ready": "AI sẵn sàng", "testing": "Đang kiểm tra", "refused": "Cần xử lý",
         "provider": "Nhà cung cấp", "model": "Chat model", "embedding": "Hồ sơ embedding", "qdrant": "Qdrant", "credential": "Key workspace", "testedAt": "Lần kiểm tra cuối",
         "runTest": "Test AI readiness", "recover": "Khôi phục tri thức", "origins": "Nguồn tri thức", "components": "Bằng chứng sẵn sàng", "evidence": "Kết luận component an toàn",
-        "documents": "{count, plural, =0 {Chưa có tài liệu} one {# tài liệu} other {# tài liệu}}", "current": "Hiện hành", "unknownVersion": "Đang chờ phiên bản"
+        "documents": "{count, plural, =0 {Chưa có tài liệu} one {# tài liệu} other {# tài liệu}}", "current": "Hiện hành", "unknownVersion": "Đang chờ phiên bản",
+        "complete": "Đã xác minh", "upcoming": "Sắp tới", "failureTitle": "AI readiness cần xử lý",
+        "stages": { "credential": "Credential", "model": "Model", "knowledge": "Tri thức", "qdrant": "Qdrant", "test": "Readiness test" }
       },
       "solutions": {
         "modesLabel": "Chế độ xem solution module",
@@ -265,6 +268,10 @@
           "backToWorkspace": "Quay lại workspace",
           "loading": "Đang đọc snapshot cài đặt mới nhất.",
           "refused": "Không thể mở module này hoặc module không thuộc workspace hiện tại.",
+          "openAiKnowledge": "Mở AI & Tri thức",
+          "knowledgeCurrent": "Artifact bất biến, workspace snapshot và phạm vi truy xuất riêng đã được xác minh và đang hiện hành.",
+          "knowledgeRefreshing": "Nivo đang làm mới tri thức module; generation đã xác minh gần nhất vẫn tiếp tục phục vụ.",
+          "knowledgeRefused": "Lần làm mới tri thức gần nhất bị từ chối; generation đã xác minh gần nhất vẫn tiếp tục phục vụ.",
           "empty": "Chưa có",
           "summary": {
             "section": "Gói và vòng đời",
@@ -361,14 +368,14 @@
       "modules": {
         "page": { "path": "Đường dẫn module", "workspace": "Workspace", "title": "Module", "description": "Tạo custom module hỏi dồn hoặc cài một giải pháp Nivo bất biến cho workspace này.", "eyebrow": "AgentOS module studio", "create": "Tạo module" },
         "createPage": { "path": "Đường dẫn tạo module", "modules": "Quay lại module", "title": "Tạo custom module", "description": "Bắt đầu từ kết quả cần đạt. Nivo chỉ hỏi tiếp những thông tin còn thiếu.", "eyebrow": "Hỏi dồn thích ứng" },
-        "studioPage": { "path": "Đường dẫn module studio", "modules": "Quay lại module", "title": "Module studio", "description": "Tiếp tục hội thoại đã lưu, bổ sung tài liệu và duyệt đúng phiên bản trước khi publish.", "eyebrow": "Custom module có thể tiếp tục" },
+        "studioPage": { "path": "Đường dẫn module studio", "modules": "Quay lại module", "title": "Module studio", "description": "Tiếp tục hội thoại đã lưu, bổ sung tài liệu và duyệt đúng phiên bản trước khi publish.", "eyebrow": "Custom module có thể tiếp tục", "sections": "Quy trình module" },
         "collection": { "title": "Custom module", "refused": "Nivo chưa đọc được custom module của workspace này. Catalogue giải pháp bên dưới vẫn dùng được.", "empty": "Workspace này chưa có custom module nào.", "create": "Tạo module", "custom": "Tùy chỉnh", "progress": "Hoàn thành {progress}%", "inspect": "Xem module", "resume": "Tiếp tục hỏi dồn" },
         "status": { "draft": "Cần bổ sung", "ready_for_review": "Sẵn sàng duyệt", "publishing": "Đang publish", "active": "Đang hoạt động", "publish_failed": "Publish thất bại" },
         "intake": { "title": "Module này cần giúp đội ngũ làm gì?", "description": "Mô tả kết quả bằng lời của thầy. Draft chỉ được tạo sau khi tiếp tục.", "fieldLabel": "Mục tiêu module", "placeholder": "Ví dụ: sàng lọc yêu cầu hỗ trợ trước khi giao cho agent", "note": "Chưa lưu gì cho tới khi bắt đầu hỏi dồn.", "action": "Bắt đầu hỏi dồn", "refused": "Nivo chưa thể bắt đầu phiên hỏi dồn này.", "guideTitle": "Cách hỏi dồn hoạt động", "guideNote": "Câu trả lời đã chấp nhận được lưu để thầy có thể rời đi và quay lại.", "steps": { "goal": "Mô tả kết quả cần đạt", "followUp": "Chỉ trả lời phần còn thiếu", "review": "Duyệt đúng một phiên bản trước khi publish" } },
         "studio": {
           "interview": { "title": "Hỏi dồn về module", "saved": "Câu trả lời được lưu trước khi Nivo chọn câu hỏi tiếp theo.", "refused": "Chưa đọc được hội thoại. Các phần khác của module vẫn độc lập.", "field": "Trả lời câu hỏi hiện tại", "placeholder": "Nhập câu trả lời rõ nhất", "send": "Gửi câu trả lời", "complete": "Hỏi dồn đã hoàn tất và sẵn sàng duyệt.", "agent": "Nivo Agent", "you": "Thầy" },
           "profile": { "title": "Hồ sơ module", "progress": "Mức sẵn sàng", "missing": "Còn thiếu: {fields}", "refused": "Chưa đọc được hồ sơ module." },
-          "attachments": { "title": "Tài liệu tri thức", "upload": "Thêm tài liệu", "remove": "Gỡ", "refused": "Chưa đọc được tài liệu đính kèm.", "empty": "Chưa có tài liệu hỗ trợ.", "uploaded": "Đã tải lên", "scanning": "Đang quét", "extracting": "Đang trích xuất", "embedding": "Đang vector hóa", "indexing": "Đang lập chỉ mục", "indexed": "Đã lập chỉ mục", "complete": "Đã xong", "current": "Hiện tại", "upcoming": "Sắp tới", "chunks": "{count} đoạn", "refusedStatus": "Bị từ chối", "removed": "Đã gỡ" },
+          "attachments": { "title": "Tài liệu tri thức", "upload": "Thêm tài liệu", "retry": "Thử lại", "remove": "Gỡ", "refused": "Chưa đọc được tài liệu đính kèm.", "empty": "Chưa có tài liệu hỗ trợ.", "uploaded": "Đã tải lên", "scanning": "Đang quét", "extracting": "Đang trích xuất", "embedding": "Đang vector hóa", "indexing": "Đang lập chỉ mục", "indexed": "Đã lập chỉ mục", "complete": "Đã xong", "current": "Hiện tại", "upcoming": "Sắp tới", "chunks": "{count} đoạn", "refusedStatus": "Bị từ chối", "removed": "Đã gỡ" },
           "integrations": { "title": "Tích hợp", "provider": "Helpdesk API", "field": "Integration key", "placeholder": "Dán key mới chỉ ghi", "save": "Cấu hình key", "remove": "Gỡ", "refused": "Chưa đọc được trạng thái tích hợp.", "writeOnly": "Nivo mã hóa giá trị đã gửi và chỉ trả về phần gợi ý được che.", "reveal": "Hiện key", "hide": "Ẩn key" },
           "specification": { "title": "Duyệt đặc tả", "refused": "Chưa đọc được đặc tả.", "incomplete": "Hoàn tất hỏi dồn trước khi duyệt đặc tả có phiên bản.", "version": "Phiên bản {version}", "acknowledge": "Tôi đã duyệt đặc tả v{version}", "publish": "Publish module", "publishing": "Đang publish module", "published": "Yêu cầu cài đặt đã được tiếp nhận." }
         }
@@ -530,6 +537,7 @@
         "requestTitle": "Yêu cầu workspace AgentOS",
         "requestText": "Request tạo hóa đơn trước. Cấp phát chỉ bắt đầu sau khi thanh toán.",
         "submit": "Yêu cầu AgentOS",
+        "retryAi": "Thử lại AI readiness",
         "paymentTitle": "Đang chờ thanh toán",
         "paymentText": "Mở Ví và thanh toán hóa đơn của order này để bắt đầu fulfillment.",
         "openWallet": "Mở Ví",

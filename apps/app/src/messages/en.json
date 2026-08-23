@@ -226,12 +226,15 @@
           "access": "Access"
       },
       "aiKnowledge": {
+        "sectionHeading": "AI operations",
         "title": "AI & Knowledge readiness",
         "description": "Per-workspace OpenRouter credential, DeepSeek model, Nivo/module snapshots, uploaded documents and private Qdrant retrieval.",
         "ready": "AI ready", "testing": "Checking readiness", "refused": "Needs attention",
         "provider": "Provider", "model": "Chat model", "embedding": "Embedding profile", "qdrant": "Qdrant", "credential": "Workspace credential", "testedAt": "Last tested",
         "runTest": "Test AI readiness", "recover": "Recover knowledge", "origins": "Knowledge origins", "components": "Readiness evidence", "evidence": "Owner-safe component verdict",
-        "documents": "{count, plural, =0 {No documents} one {# document} other {# documents}}", "current": "Current", "unknownVersion": "Version pending"
+        "documents": "{count, plural, =0 {No documents} one {# document} other {# documents}}", "current": "Current", "unknownVersion": "Version pending",
+        "complete": "Verified", "upcoming": "Upcoming", "failureTitle": "AI readiness needs attention",
+        "stages": { "credential": "Credential", "model": "Model", "knowledge": "Knowledge", "qdrant": "Qdrant", "test": "Readiness test" }
       },
       "solutions": {
         "modesLabel": "Solution module view",
@@ -265,6 +268,10 @@
           "backToWorkspace": "Back to workspace",
           "loading": "Reading the latest installation snapshot.",
           "refused": "This module installation could not be opened or does not belong to this workspace.",
+          "openAiKnowledge": "Open AI & Knowledge",
+          "knowledgeCurrent": "The immutable artifact, workspace snapshot and private retrieval scope are verified and current.",
+          "knowledgeRefreshing": "Nivo is refreshing this module knowledge while the last verified generation remains available.",
+          "knowledgeRefused": "The latest knowledge refresh was refused; the last verified generation remains available.",
           "empty": "None",
           "summary": {
             "section": "Package and lifecycle",
@@ -361,14 +368,14 @@
       "modules": {
         "page": { "path": "Module path", "workspace": "Workspace", "title": "Modules", "description": "Create adaptive custom modules or install an immutable Nivo solution for this workspace.", "eyebrow": "AgentOS module studio", "create": "Create module" },
         "createPage": { "path": "Module creation path", "modules": "Back to modules", "title": "Create a custom module", "description": "Start with the outcome. Nivo will ask only the unresolved follow-up questions.", "eyebrow": "Adaptive intake" },
-        "studioPage": { "path": "Module studio path", "modules": "Back to modules", "title": "Module studio", "description": "Continue the saved interview, add evidence and review the exact specification before publishing.", "eyebrow": "Resumable custom module" },
+        "studioPage": { "path": "Module studio path", "modules": "Back to modules", "title": "Module studio", "description": "Continue the saved interview, add evidence and review the exact specification before publishing.", "eyebrow": "Resumable custom module", "sections": "Module workflow" },
         "collection": { "title": "Custom modules", "refused": "Nivo could not read custom modules for this workspace. The solution catalogue remains available below.", "empty": "No custom module has been created in this workspace yet.", "create": "Create module", "custom": "Custom", "progress": "{progress}% complete", "inspect": "View module", "resume": "Resume interview" },
         "status": { "draft": "Needs input", "ready_for_review": "Ready for review", "publishing": "Publishing", "active": "Active", "publish_failed": "Publish failed" },
         "intake": { "title": "What should this module help your team do?", "description": "Describe the outcome in your own words. The draft begins only after you continue.", "fieldLabel": "Module goal", "placeholder": "For example: qualify support requests before assigning an agent", "note": "Nothing is saved until you start the interview.", "action": "Start interview", "refused": "Nivo could not start this interview.", "guideTitle": "How the interview works", "guideNote": "Accepted answers are saved so you can leave and resume later.", "steps": { "goal": "Describe the outcome", "followUp": "Answer only unresolved follow-up questions", "review": "Review one exact version before publishing" } },
         "studio": {
           "interview": { "title": "Module interview", "saved": "Accepted answers are saved before Nivo selects the next question.", "refused": "The interview could not be read. Other module sections remain independent.", "field": "Answer the current question", "placeholder": "Type the clearest answer you have", "send": "Send answer", "complete": "The interview is complete and ready for review.", "agent": "Nivo Agent", "you": "You" },
           "profile": { "title": "Module profile", "progress": "Readiness", "missing": "Still unresolved: {fields}", "refused": "The live profile is unavailable." },
-          "attachments": { "title": "Knowledge documents", "upload": "Add document", "remove": "Remove", "refused": "File evidence is unavailable.", "empty": "No supporting documents yet.", "uploaded": "Uploaded", "scanning": "Scanning", "extracting": "Extracting", "embedding": "Embedding", "indexing": "Indexing", "indexed": "Indexed", "complete": "Complete", "current": "Current", "upcoming": "Upcoming", "chunks": "{count, plural, one {# chunk} other {# chunks}}", "refusedStatus": "Refused", "removed": "Removed" },
+          "attachments": { "title": "Knowledge documents", "upload": "Add document", "retry": "Retry", "remove": "Remove", "refused": "File evidence is unavailable.", "empty": "No supporting documents yet.", "uploaded": "Uploaded", "scanning": "Scanning", "extracting": "Extracting", "embedding": "Embedding", "indexing": "Indexing", "indexed": "Indexed", "complete": "Complete", "current": "Current", "upcoming": "Upcoming", "chunks": "{count, plural, one {# chunk} other {# chunks}}", "refusedStatus": "Refused", "removed": "Removed" },
           "integrations": { "title": "Integrations", "provider": "Helpdesk API", "field": "Integration key", "placeholder": "Paste a new write-only key", "save": "Configure key", "remove": "Remove", "refused": "Integration status is unavailable.", "writeOnly": "Nivo encrypts the submitted value and returns only a masked hint.", "reveal": "Show key", "hide": "Hide key" },
           "specification": { "title": "Review specification", "refused": "The specification could not be read.", "incomplete": "Complete the interview before a versioned specification can be reviewed.", "version": "Version {version}", "acknowledge": "I reviewed specification v{version}", "publish": "Publish module", "publishing": "Publishing module", "published": "The installation request has been accepted." }
         }
@@ -478,6 +485,7 @@
         "requestTitle": "Request an AgentOS workspace",
         "requestText": "The request creates an invoice first. Provisioning begins after payment.",
         "submit": "Request AgentOS",
+        "retryAi": "Retry AI readiness",
         "paymentTitle": "Waiting for payment",
         "paymentText": "Open Wallet and settle this order's invoice to start fulfillment.",
         "openWallet": "Open Wallet",

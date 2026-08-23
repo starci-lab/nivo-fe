@@ -1,6 +1,6 @@
 "use client"
 
-import { Tabs } from "@heroui/react"
+import { ToggleButton, ToggleButtonGroup } from "@heroui/react"
 import type { LeafProps } from "../../contracts/props"
 
 /** One text-only peer choice. */
@@ -17,20 +17,36 @@ export type ChoiceTabsActions = { readonly select?: (key: string) => void }
 /** Props for the peer-choice control. */
 export type ChoiceTabsProps = LeafProps<ChoiceTabsData, ChoiceTabsActions>
 
-/** Text-only peer choices. Business categories do not gain decorative glyphs. */
+/**
+ * Text-only peer choices. Business categories do not gain decorative glyphs.
+ *
+ * This is a single-value mode switch, not an ARIA tab set: the selected mode's content is owned
+ * and rendered by the parent block, so claiming a tabpanel here would point assistive technology
+ * at content this leaf does not own. HeroUI's toggle group supplies the matching group, pressed,
+ * focus and arrow-key behavior without inventing that relationship.
+ */
 export const ChoiceTabs = ({ props, on }: ChoiceTabsProps) => (
-    <Tabs className="w-full" variant={props.variant ?? "secondary"} selectedKey={props.selectedKey} onSelectionChange={(key) => on?.select?.(String(key))}>
-        <Tabs.ListContainer className="w-full overflow-x-auto">
-            <Tabs.List aria-label={props.label} className="min-w-max">
-                {props.tabs.map((tab) => (
-                    <Tabs.Tab key={tab.id} id={tab.id}>
-                        {tab.label}
-                        <Tabs.Indicator />
-                    </Tabs.Tab>
-                ))}
-            </Tabs.List>
-        </Tabs.ListContainer>
-    </Tabs>
+    <div className="w-full overflow-x-auto">
+        <ToggleButtonGroup
+            aria-label={props.label}
+            className={props.variant === "primary" ? "min-w-max rounded-full bg-default p-1" : "min-w-max"}
+            fullWidth={props.variant === "primary"}
+            isDetached
+            selectedKeys={new Set([props.selectedKey])}
+            selectionMode="single"
+            disallowEmptySelection
+            onSelectionChange={(keys) => {
+                const key = [...keys][0]
+                if (key !== undefined) on?.select?.(String(key))
+            }}
+        >
+            {props.tabs.map((tab) => (
+                <ToggleButton key={tab.id} id={tab.id} variant="ghost">
+                    {tab.label}
+                </ToggleButton>
+            ))}
+        </ToggleButtonGroup>
+    </div>
 )
 
 /** Source-level tier marker for the intrinsic peer-choice control. */

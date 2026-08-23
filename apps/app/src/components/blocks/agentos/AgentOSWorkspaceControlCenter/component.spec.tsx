@@ -43,7 +43,7 @@ describe("AgentOSWorkspaceControlCenterBase", () => {
         render(<AgentOSWorkspaceControlCenterBase workspaceId="workspace-1" pageState="infrastructure" controlCenterState="ready" data={data} labels={labels} onSelectPageState={select} onOpenAgentConsole={vi.fn()} onRetry={vi.fn()} openClawLaunchHref="#" launchState="idle" formatDate={(value) => value} />)
         expect(screen.getByText("runtime")).toBeInTheDocument()
         expect(screen.getByText("helm stack")).toBeInTheDocument()
-        fireEvent.click(screen.getByRole("tab", { name: "operations" }))
+        fireEvent.click(screen.getByRole("radio", { name: "operations" }))
         expect(select).toHaveBeenCalledWith("operations")
     })
 })

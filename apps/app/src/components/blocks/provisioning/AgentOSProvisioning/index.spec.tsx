@@ -164,6 +164,6 @@ describe("AgentOSProvisioning connected flow", () => {
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"ready"'))
         fireEvent.click(screen.getByTestId("status"))
-        expect(mocks.push).toHaveBeenCalledWith("/en/agentos/workspaces/workspace")
+        expect(mocks.push).toHaveBeenCalledWith("/en/agentos/workspaces/workspace?view=ai-knowledge")
     })
 })

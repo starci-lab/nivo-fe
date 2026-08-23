@@ -61,7 +61,7 @@ describe("source quality interaction coverage", () => {
         const pressCard = vi.fn()
         render(<AgentOSSolutionModuleCenterBase state="answered" mode="catalog" sectionLabel="Solutions" modesLabel="Mode" modes={[{ id: "catalog", label: "Catalog" }, { id: "installed", label: "Installed" }]} refusedLabel="Unavailable" emptyLabel="Empty" emptyActionLabel="Browse" cards={[{ id: "sales", title: "Sales", description: "Assist", statusLabel: "Ready", statusTone: "success", actionLabel: "Install" }]} onSelectMode={selectMode} onPressCard={pressCard} />)
         fireEvent.click(screen.getByRole("button", { name: "Install" }))
-        fireEvent.click(screen.getByRole("tab", { name: "Installed" }))
+        fireEvent.click(screen.getByRole("radio", { name: "Installed" }))
         expect(pressCard).toHaveBeenCalledWith("sales")
         expect(selectMode).toHaveBeenCalledWith("installed")
         cleanup()

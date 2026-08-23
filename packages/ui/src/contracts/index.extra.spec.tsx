@@ -17,6 +17,12 @@ describe("console operations contracts", () => {
         expect(CONTRACTS["status-action-card-grid"].classes).toContain("sm:[&>*:only-child]:col-span-2")
     })
 
+    it("keeps AgentOS route measures inside the console main landmark and admits an outline bridge", () => {
+        expect("host" in CONTRACTS["agentos-route-page"]).toBe(false)
+        expect(CONTRACTS["agentos-route-page"].children.sectionHeading).toEqual({ leaf: "heading", optional: true })
+        expect(CONTRACTS["workspace-ai-knowledge-stack"].children.heading).toEqual({ leaf: "heading" })
+    })
+
     it("keeps the signal strip compact and gives its four heterogeneous peers semantic icon tiles", () => {
         expect(CONTRACTS["account-signal-grid"].children.artwork).toEqual({ leaf: "nivo-unicorn-artwork" })
         expect(CONTRACTS["account-signal-grid"].classes).toEqual(expect.arrayContaining([

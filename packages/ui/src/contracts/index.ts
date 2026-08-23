@@ -380,13 +380,13 @@ export const CONTRACTS = buildContracts({
     },
     "agentos-route-page": {
         classes: ["mx-auto", "flex", "w-full", "max-w-6xl", "flex-col", "gap-8", "px-6", "py-8"],
-        host: "main",
         children: {
             path: { leaf: "breadcrumbs", optional: true },
             heading: { contract: ["title-with-end-action", "agentos-page-heading"] },
+            sectionHeading: { leaf: "heading", optional: true },
             section: { contract: ["label-row-over-card", "agentos-dashboard-body"], repeats: true, restingCount: 2 },
         },
-        why: "if dashboard, pre-persistence creation and persisted AgentOS orders must share one mature page measure and product identity while keeping their route-owned sections separate.",
+        why: "if dashboard, pre-persistence creation and persisted AgentOS orders must share one mature page measure inside the console's existing main landmark while keeping their route-owned sections separate.",
     },
     "inline-action-run": {
         classes: ["flex", "flex-row", "flex-wrap", "items-center", "gap-2"],
@@ -531,7 +531,7 @@ export const CONTRACTS = buildContracts({
         classes: ["flex", "w-full", "flex-col", "gap-3", "rounded-xl", "border", "border-separator", "p-4"],
         children: {
             identity: { contract: "subject-over-muted-caption-with-action" },
-            progress: { contract: "responsive-agentos-readiness-stepper" },
+            progress: { contract: "responsive-document-ingestion-stepper" },
             notice: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
         },
         why: "if one module document must keep its immutable file identity above a bounded connected ingestion progression and any local refusal consequence.",
@@ -1241,7 +1241,7 @@ export const CONTRACTS = buildContracts({
     "module-detail-page": {
         classes: ["mx-auto", "flex", "w-full", "max-w-4xl", "flex-col", "gap-6", "px-6", "py-6"],
         children: {
-            back: { leaf: "text-link" },
+            back: { leaf: ["text-link", "breadcrumbs"] },
             heading: { contract: "title-with-end-action" },
             lede: { leaf: "text", props: { size: "sm", tone: "muted" } },
             section: { contract: "label-row-over-card", repeats: true, restingCount: 2 },
@@ -1376,6 +1376,20 @@ export const CONTRACTS = buildContracts({
         },
         why: "if provider credential, model, knowledge recovery, Qdrant and bounded AI test form one connected readiness spine horizontally when wide and vertically when narrow.",
     },
+    "responsive-document-ingestion-stepper": {
+        /*
+         * DOCUMENT PROGRESS OFTEN LIVES IN THE STUDIO'S NARROW EVIDENCE RAIL.
+         * Viewport-wide five/six-column steppers therefore receive less than a
+         * word per column even on a desktop. Two columns keep each lifecycle
+         * label intact in that rail; compact screens retain the ordered vertical
+         * sequence instead of compressing the labels into one unreadable line.
+         */
+        classes: ["grid", "w-full", "grid-cols-1", "gap-2", "sm:grid-cols-2"],
+        children: {
+            step: { composite: "lifecycle-step", repeats: true, restingCount: 6 },
+        },
+        why: "if six uploaded-document stages must stay readable inside the Module Studio evidence rail without stacking labels on one line.",
+    },
     "workspace-ai-readiness-summary": {
         classes: ["grid", "w-full", "grid-cols-1", "gap-4", "p-4", "sm:grid-cols-2", "items-center"],
         children: {
@@ -1402,13 +1416,23 @@ export const CONTRACTS = buildContracts({
         why: "if one AI readiness label and its owner-safe technical value must stack on a narrow screen and compare in aligned columns when space permits.",
     },
     "workspace-ai-knowledge-stack": {
-        classes: ["grid", "w-full", "grid-cols-1", "gap-4", "sm:grid-cols-2"],
+        classes: ["grid", "w-full", "grid-cols-1", "gap-4"],
         children: {
+            heading: { leaf: "heading" },
             summary: { contract: "workspace-ai-readiness-summary" },
+            notice: { contract: "agentos-state-notice", optional: true },
+            progress: { contract: "responsive-agentos-readiness-stepper" },
+            evidence: { contract: "workspace-ai-evidence-grid" },
+        },
+        why: "if workspace AI readiness and source provenance are the dominant operating column while bounded component verdicts remain a scannable evidence aside.",
+    },
+    "workspace-ai-evidence-grid": {
+        classes: ["grid", "w-full", "grid-cols-1", "gap-4", "lg:grid-cols-[minmax(0,1fr)_20rem]"],
+        children: {
             origins: { contract: "knowledge-origin-list" },
             components: { contract: "readiness-component-list" },
         },
-        why: "if workspace AI readiness and source provenance are the dominant operating column while bounded component verdicts remain a scannable evidence aside.",
+        why: "if knowledge origins need the dominant evidence column while bounded readiness verdicts remain readable beside them and move below on narrower screens.",
     },
     "knowledge-origin-list": {
         classes: ["flex", "w-full", "flex-col", "divide-y", "divide-separator"],

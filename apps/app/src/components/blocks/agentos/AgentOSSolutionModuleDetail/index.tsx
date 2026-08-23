@@ -18,7 +18,10 @@ export type AgentOSSolutionModuleDetailProps = { readonly workspaceId: string; r
 /** Settle the detail block state from what the snapshot returned. */
 const detailStateOf = (installation: AgentosModuleInstallationDetail | null | undefined): AgentOSSolutionModuleDetailState => {
     if (installation === undefined) return "loading" as const
-    return installation === null ? "refused" as const : "ready" as const
+    if (installation === null) return "refused" as const
+    if (installation.knowledgeState === "recovering") return "refreshing" as const
+    if (installation.knowledgeState === "refused" || installation.status === "failed") return "knowledge-refused" as const
+    return installation.knowledgeState === "current" ? "current" as const : "ready" as const
 }
 
 /** Own the canonical detail snapshot and refresh it on exact Saga updates or reconnect. */
@@ -49,6 +52,10 @@ export const AgentOSSolutionModuleDetail = ({ workspaceId, installationId }: Age
         backToWorkspace: t("backToWorkspace"),
         loading: t("loading"),
         refused: t("refused"),
+        openAiKnowledge: t("openAiKnowledge"),
+        knowledgeCurrent: t("knowledgeCurrent"),
+        knowledgeRefreshing: t("knowledgeRefreshing"),
+        knowledgeRefused: t("knowledgeRefused"),
         summary: {
             section: t("summary.section"), module: t("summary.module"), version: t("summary.version"),
             status: t("summary.status"), failure: t("summary.failure"), modelProfile: t("summary.modelProfile"), manifest: t("summary.manifest"), empty: t("empty"),
@@ -64,6 +71,7 @@ export const AgentOSSolutionModuleDetail = ({ workspaceId, installationId }: Age
         installation={installation ?? undefined}
         labels={labels}
         onBack={() => router.push(`/${locale}/agentos/workspaces/${workspaceId}`)}
+        onOpenAiKnowledge={() => router.push(`/${locale}/agentos/workspaces/${workspaceId}?view=ai-knowledge`)}
     />
 }
 

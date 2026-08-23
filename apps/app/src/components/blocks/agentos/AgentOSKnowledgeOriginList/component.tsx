@@ -27,7 +27,7 @@ export const AgentOSKnowledgeOriginListBase = ({ origins, labels, loading = fals
                 subject: defineLeafComponent("text", {}, () => <Text props={{ content: origin.origin, size: "sm", weight: "semibold" }} isLoading={loading} />),
                 caption: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: `${origin.version ?? labels.unknownVersion} · ${shortDigest(origin.digest)} · ${labels.documents(origin.documentCount)}`, size: "xs", tone: "muted" }} isLoading={loading} />),
             }),
-            status: defineLeafComponent("badge", {}, () => <Badge props={{ content: labels.current, tone: "success" }} isLoading={loading} />),
+            status: defineLeafComponent("badge", {}, () => <Badge props={{ content: origin.digest === null ? labels.unknownVersion : labels.current, tone: origin.digest === null ? "warning" : "success" }} isLoading={loading} />),
         })),
     })} />
 }

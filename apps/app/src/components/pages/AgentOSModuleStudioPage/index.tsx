@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { myAgentosCustomModuleStudio, type AgentosModuleStudio } from "@/modules/api/console"
 import { useSession } from "@/modules/auth/session"
-import { AgentOSModuleStudioPageBase } from "./component"
+import { AgentOSModuleStudioPageBase, AgentOSModuleStudioProjectionProvider } from "./component"
 
 type AgentOSModuleStudioPageProps = { readonly workspaceId: string, readonly moduleId: string }
 
@@ -23,7 +23,9 @@ export const AgentOSModuleStudioPage = ({ workspaceId, moduleId }: AgentOSModule
     useEffect(() => {
         if (session.state.status === "signed-in") void loadIdentity()
     }, [loadIdentity, session.state.status])
-    return <AgentOSModuleStudioPageBase workspaceId={workspaceId} moduleId={moduleId} labels={{ path: t("path"), modules: t("modules"), title: studio?.module.name ?? t("title"), description: t("description"), eyebrow: t("eyebrow") }} onBack={() => router.push(`/${locale}/agentos/workspaces/${workspaceId}/modules`)} />
+    return <AgentOSModuleStudioProjectionProvider value={{ studio, refresh: loadIdentity }} render={() => (
+        <AgentOSModuleStudioPageBase workspaceId={workspaceId} moduleId={moduleId} labels={{ path: t("path"), modules: t("modules"), title: studio?.module.name ?? t("title"), description: t("description"), eyebrow: t("eyebrow"), sections: t("sections") }} onBack={() => router.push(`/${locale}/agentos/workspaces/${workspaceId}/modules`)} />
+    )} />
 }
 
 /** Source-level tier marker for the connected module studio page. */

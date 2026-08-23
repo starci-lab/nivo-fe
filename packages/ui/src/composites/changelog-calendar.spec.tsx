@@ -23,6 +23,6 @@ describe("ContributionCalendar", () => {
         expect(screen.getByText("7 day streak")).toBeInTheDocument()
         expect(screen.getByText("Less")).toBeInTheDocument()
         expect(screen.getByText("More")).toBeInTheDocument()
-        expect(screen.getByRole("tab", { name: "2023" })).toBeInTheDocument()
+        expect(screen.getByRole("radio", { name: "2023" })).toBeInTheDocument()
     })
 })
