@@ -1,15 +1,19 @@
 "use client"
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react"
+import { useEffect, useId, useState, type ComponentType, type CSSProperties } from "react"
+import { NIVO_GRAMMAR_CONTRACTS, NIVO_GRAMMAR_TREATMENTS } from "../../contracts/grammar"
 
 /** Fixed slots and labels owned by the collapsible navigation rail. */
-export type CollapsibleRailProps = {
+export type CollapsibleRailProps<RailProps extends object, CompactProps extends object, ToggleProps extends object> = {
     readonly ariaLabel: string
     readonly title?: string
-    readonly rail: ReactNode
-    readonly collapsedRail: ReactNode
-    readonly toggleControl: ReactNode
+    readonly rail: ComponentType<RailProps>
+    readonly railProps: RailProps
+    readonly collapsedRail: ComponentType<CompactProps>
+    readonly collapsedRailProps: CompactProps
+    readonly toggleControl: ComponentType<ToggleProps>
+    readonly toggleControlProps: ToggleProps
     readonly collapseLabel: string
     readonly expandLabel: string
     readonly storageKey?: string
@@ -23,6 +27,7 @@ const DEFAULT_STORAGE_KEY = "nivo:console-rail-collapsed"
 const SPRING_TRANSITION = { type: "spring" as const, stiffness: 420, damping: 38 }
 const INSTANT_TRANSITION = { duration: 0 }
 const FADE_TRANSITION = { duration: 0.15 }
+const NEUTRAL_TREATMENT = NIVO_GRAMMAR_TREATMENTS.neutral
 
 const RAIL_STYLE: CSSProperties = {
     position: "sticky",
@@ -54,8 +59,8 @@ const TITLE_STYLE: CSSProperties = {
 
 const CONTROL_STYLE: CSSProperties = {
     display: "flex",
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     flexShrink: 0,
     alignItems: "center",
     justifyContent: "center",
@@ -89,19 +94,23 @@ const persistState = (storageKey: string, collapsed: boolean): void => {
 }
 
 /** Draw one stable desktop rail whose visible destination form follows its persisted width state. */
-export const CollapsibleRail = ({
+export const CollapsibleRail = <RailProps extends object, CompactProps extends object, ToggleProps extends object>({
     ariaLabel,
     title,
-    rail,
-    collapsedRail,
-    toggleControl,
+    rail: Rail,
+    railProps,
+    collapsedRail: CompactRail,
+    collapsedRailProps,
+    toggleControl: ToggleControl,
+    toggleControlProps,
     collapseLabel,
     expandLabel,
     storageKey = DEFAULT_STORAGE_KEY,
     defaultCollapsed = false,
     onCollapsedChange,
-}: CollapsibleRailProps) => {
+}: CollapsibleRailProps<RailProps, CompactProps, ToggleProps>) => {
     const reduceMotion = useReducedMotion()
+    const headingId = useId()
     const [collapsed, setCollapsed] = useState(defaultCollapsed)
 
     useEffect(() => {
@@ -125,8 +134,18 @@ export const CollapsibleRail = ({
 
     return (
         <motion.aside
-            aria-label={ariaLabel}
+            aria-labelledby={headingId}
+            className="starci-core-rail"
             data-component="CollapsibleRail"
+            data-grammar-contract={NIVO_GRAMMAR_CONTRACTS.rail.key}
+            data-grammar-collapse={collapsed ? "collapsed" : "expanded"}
+            data-grammar-landmark="complementary"
+            data-grammar-motion={reduceMotion === true ? "reduced" : "animated"}
+            data-grammar-rail="true"
+            data-grammar-rail-mode="sticky"
+            data-grammar-rail-width={collapsed ? "compact" : "standard"}
+            data-grammar-state="neutral"
+            data-grammar-treatment={NEUTRAL_TREATMENT.tone}
             data-collapsed={collapsed ? "true" : "false"}
             initial={false}
             animate={{ width: collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH }}
@@ -134,40 +153,63 @@ export const CollapsibleRail = ({
             style={{
                 ...RAIL_STYLE,
                 gap: "1.5rem",
-                padding: collapsed ? "1.5rem 0.75rem" : "1.5rem",
+                padding: collapsed ? "1.5rem 0.625rem" : "1.5rem",
             }}
         >
-            <motion.div style={{
-                ...HEADER_STYLE,
-                justifyContent: headerJustification,
-            }}>
-                <AnimatePresence initial={false}>
-                    {!collapsed && title !== undefined ? (
-                        <motion.div
-                            key="title"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={reduceMotion === true ? INSTANT_TRANSITION : FADE_TRANSITION}
-                            style={TITLE_STYLE}
-                        >
-                            {title}
-                        </motion.div>
-                    ) : null}
-                </AnimatePresence>
-                <button
-                    type="button"
-                    aria-label={label}
-                    aria-expanded={!collapsed}
-                    aria-pressed={collapsed}
-                    data-component="CollapsibleRailControl"
-                    onClick={onToggle}
-                    style={CONTROL_STYLE}
+            <motion.div
+                className="starci-core-rail-frame"
+                data-grammar-rail-frame="true"
+                initial={false}
+                style={{ maxHeight: "none", minHeight: 0, flex: 1 }}
+            >
+                <motion.h2
+                    className="sr-only"
+                    data-grammar-rail-heading="true"
+                    id={headingId}
+                    initial={false}
                 >
-                    {toggleControl}
-                </button>
+                    {ariaLabel}
+                </motion.h2>
+                <motion.div
+                    style={{
+                        ...HEADER_STYLE,
+                        justifyContent: headerJustification,
+                    }}
+                >
+                    <AnimatePresence initial={false}>
+                        {!collapsed && title !== undefined ? (
+                            <motion.div
+                                key="title"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={reduceMotion === true ? INSTANT_TRANSITION : FADE_TRANSITION}
+                                style={TITLE_STYLE}
+                            >
+                                {title}
+                            </motion.div>
+                        ) : null}
+                    </AnimatePresence>
+                    <button
+                        type="button"
+                        aria-label={label}
+                        aria-expanded={!collapsed}
+                        aria-pressed={collapsed}
+                        data-component="CollapsibleRailControl"
+                        onClick={onToggle}
+                        style={CONTROL_STYLE}
+                    >
+                        <ToggleControl {...toggleControlProps} />
+                    </button>
+                </motion.div>
+                <motion.div
+                    className="starci-core-rail-body"
+                    data-grammar-rail-body="true"
+                    initial={false}
+                >
+                    {collapsed ? <CompactRail {...collapsedRailProps} /> : <Rail {...railProps} />}
+                </motion.div>
             </motion.div>
-            {collapsed ? collapsedRail : rail}
         </motion.aside>
     )
 }

@@ -1,8 +1,13 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { myAgentosAiKnowledgeReadiness, reindexAgentWorkspaceKnowledge, runAgentosAiReadinessTest, type AgentosAiKnowledgeReadiness } from "@/modules/api/console"
+import {
+    useMutateReindexAgentWorkspaceKnowledgeSwr,
+    useMutateRunAgentosAiReadinessTestSwr,
+    useQueryMyAgentosAiKnowledgeReadinessSwr,
+} from "@/hooks/swr"
+import { type AgentosAiKnowledgeReadiness } from "@/modules/api/console"
 import { AgentOSWorkspaceAiKnowledgeBase, type AgentOSWorkspaceAiKnowledgeViewProps } from "./component"
 
 /** Exact workspace identity whose AI and knowledge readiness is owned by this block. */
@@ -40,30 +45,31 @@ export const resolveAgentOSWorkspaceAiKnowledgeState = (
     if (action?.kind === "recovering") return "recovering"
     if (action?.kind === "success") return "success"
     if (readiness === undefined) return "loading"
-    return readiness.credentialStatus !== "configured" ? "key-configuring" : readiness.aiReady ? "ready" : "refused"
+    if (readiness.credentialStatus !== "configured") return "key-configuring"
+    return readiness.aiReady ? "ready" : "refused"
 }
 
 /** Own workspace AI readiness reads, bounded tests, recovery dispatch and operation polling. */
 export const AgentOSWorkspaceAiKnowledge = ({ workspaceId }: AgentOSWorkspaceAiKnowledgeProps) => {
     const t = useTranslations("console.agentos.workspace.aiKnowledge")
     const locale = useLocale()
-    const [readiness, setReadiness] = useState<AgentosAiKnowledgeReadiness | null | undefined>()
     const [action, setAction] = useState<AgentOSWorkspaceAiKnowledgeAction>(null)
     const [actionRefused, setActionRefused] = useState(false)
-    const load = useCallback(async () => { const result = await myAgentosAiKnowledgeReadiness(workspaceId); setReadiness(result.ok ? result.data : null) }, [workspaceId])
-    useEffect(() => { void load() }, [load])
+    const runReadinessTest = useMutateRunAgentosAiReadinessTestSwr(workspaceId)
+    const reindexKnowledge = useMutateReindexAgentWorkspaceKnowledgeSwr(workspaceId)
+    const query = useQueryMyAgentosAiKnowledgeReadinessSwr(
+        workspaceId,
+        action?.kind === "testing" || action?.kind === "recovering",
+    )
+    const readiness = query.data === undefined ? undefined : query.data.ok ? query.data.data : null
+    const visibleAction = resolveAgentOSWorkspaceAiKnowledgeAction(action, readiness)
     useEffect(() => {
-        if (action?.kind !== "testing" && action?.kind !== "recovering" && readiness?.readinessStatus !== "testing") return
-        const timer = window.setInterval(() => { void load() }, 2_000)
-        return () => window.clearInterval(timer)
-    }, [action?.kind, load, readiness?.readinessStatus])
-    useEffect(() => {
-        const nextAction = resolveAgentOSWorkspaceAiKnowledgeAction(action, readiness)
-        if (nextAction !== action) setAction(nextAction)
-    }, [action, readiness])
-    const run = async () => { setActionRefused(false); setAction({ kind: "testing", operationId: null }); const result = await runAgentosAiReadinessTest({ workspaceId, idempotencyKey: crypto.randomUUID() }); if (!result.ok) { setActionRefused(true); setAction(null); return }; setAction({ kind: "testing", operationId: result.data.operationId }); await load() }
-    const recover = async () => { setActionRefused(false); setAction({ kind: "recovering", operationId: null }); const result = await reindexAgentWorkspaceKnowledge({ workspaceId, idempotencyKey: crypto.randomUUID() }); if (!result.ok) { setActionRefused(true); setAction(null); return }; setAction({ kind: "recovering", operationId: result.data.operationId }); await load() }
-    const state = resolveAgentOSWorkspaceAiKnowledgeState(readiness, action, actionRefused)
+        if (visibleAction === action) return
+        setAction(visibleAction)
+    }, [action, visibleAction])
+    const run = async () => { setActionRefused(false); setAction({ kind: "testing", operationId: null }); const result = await runReadinessTest.trigger(crypto.randomUUID()); if (!result.ok) { setActionRefused(true); setAction(null); return }; setAction({ kind: "testing", operationId: result.data.operationId }) }
+    const recover = async () => { setActionRefused(false); setAction({ kind: "recovering", operationId: null }); const result = await reindexKnowledge.trigger(crypto.randomUUID()); if (!result.ok) { setActionRefused(true); setAction(null); return }; setAction({ kind: "recovering", operationId: result.data.operationId }) }
+    const state = resolveAgentOSWorkspaceAiKnowledgeState(readiness, visibleAction, actionRefused)
     const labels = {
         sectionHeading: t("sectionHeading"), title: t("title"), description: t("description"), ready: t("ready"), testing: t("testing"), refused: t("refused"),
         provider: t("provider"), model: t("model"), embedding: t("embedding"), qdrant: t("qdrant"), credential: t("credential"), testedAt: t("testedAt"),

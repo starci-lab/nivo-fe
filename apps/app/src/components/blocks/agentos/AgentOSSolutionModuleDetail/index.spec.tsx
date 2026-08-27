@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
     session: { state: { status: "signed-in", accessToken: "token" } },
 }))
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key, useLocale: () => "en" }))
 vi.mock("@/modules/api/console", () => ({ myAgentosModuleInstallation: mocks.installation }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
@@ -63,6 +63,6 @@ describe("AgentOSSolutionModuleDetail connected orchestration", () => {
         mocks.installation.mockReturnValue(new Promise(() => undefined))
         render(<AgentOSSolutionModuleDetail workspaceId="workspace-1" installationId="installation-1" />)
         fireEvent.click(screen.getByRole("button", { name: "back" }))
-        expect(mocks.push).toHaveBeenCalledWith("/en/agentos/workspaces/workspace-1")
+        expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/workspace-1")
     })
 })

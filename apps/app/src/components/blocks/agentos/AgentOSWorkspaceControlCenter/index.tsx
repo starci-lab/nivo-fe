@@ -3,13 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import {
-    myAgentWorkspaceControlCenter,
-    renewAgentWorkspaceAppLaunch,
-    revokeAgentWorkspaceAppLaunch,
-    type AgentWorkspaceControlCenter,
-} from "@/modules/api/console"
-import type { Result } from "@/modules/api/graphql"
-import { refreshSession } from "@/modules/api/auth"
+    useMutateRenewAgentWorkspaceAppLaunchSwr,
+    useMutateRevokeAgentWorkspaceAppLaunchSwr,
+    useQueryMyAgentWorkspaceControlCenterSwr,
+} from "@/hooks/swr"
 import { useSession } from "@/modules/auth/session"
 import useProvisioningRealtime from "@/modules/realtime/provisioning"
 import { workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@/modules/window/workspace-app-launch"
@@ -33,16 +30,13 @@ export const AgentOSWorkspaceControlCenter = ({ workspaceId, pageState, onSelect
     const format = useFormatter()
     const locale = useLocale()
     const session = useSession()
-    const adoptSession = session.adopt
     const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
     const [mounted, setMounted] = useState(false)
-    const [answer, setAnswer] = useState<Result<AgentWorkspaceControlCenter> | null>(null)
-    const lastFingerprint = useRef<string | null>(null)
-    const load = useCallback(async () => {
-        const result = await myAgentWorkspaceControlCenter(workspaceId)
-        if (result.ok) lastFingerprint.current = result.data.runtime?.fingerprint ?? null
-        setAnswer(result)
-    }, [workspaceId])
+    const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId)
+    const { trigger: renewLaunch } = useMutateRenewAgentWorkspaceAppLaunchSwr(workspaceId)
+    const { trigger: revokeLaunch } = useMutateRevokeAgentWorkspaceAppLaunchSwr(workspaceId)
+    const answer = controlCenter.data
+    const refreshControlCenter = controlCenter.mutate
     const realtime = useProvisioningRealtime({ accessToken, target: accessToken === null ? null : { kind: "workspace", id: workspaceId } })
     const launchId = useRef<string | null>(null)
     const renewingLaunch = useRef(false)
@@ -53,16 +47,12 @@ export const AgentOSWorkspaceControlCenter = ({ workspaceId, pageState, onSelect
     }, [])
 
     useEffect(() => {
-        if (accessToken === null) return
-        void load()
-    }, [accessToken, load])
-
-    useEffect(() => {
         if (realtime.status !== "event") return
-        if (realtime.event.kind === "workspace-runtime" && realtime.event.fingerprint === lastFingerprint.current) return
+        const currentFingerprint = answer?.ok === true ? answer.data.runtime?.fingerprint ?? null : null
+        if (realtime.event.kind === "workspace-runtime" && realtime.event.fingerprint === currentFingerprint) return
         if (realtime.event.kind !== "workspace-runtime" && realtime.event.kind !== "workspace") return
-        void load()
-    }, [load, realtime])
+        void refreshControlCenter()
+    }, [answer, realtime, refreshControlCenter])
 
     useEffect(() => {
         const channel = new BroadcastChannel(workspaceAppLaunchChannelName(workspaceId))
@@ -73,38 +63,35 @@ export const AgentOSWorkspaceControlCenter = ({ workspaceId, pageState, onSelect
                 return
             }
             if (launchId.current !== null && launchId.current !== event.data.launchId) {
-                void revokeAgentWorkspaceAppLaunch(launchId.current)
+                void revokeLaunch(launchId.current).catch(() => undefined)
             }
             launchId.current = event.data.launchId
             setLaunchState("connected")
         })
         return () => channel.close()
-    }, [workspaceId])
+    }, [revokeLaunch, workspaceId])
 
     useEffect(() => {
         const timer = window.setInterval(() => {
             if (launchId.current === null || renewingLaunch.current) return
             const activeLaunchId = launchId.current
             renewingLaunch.current = true
-            void refreshSession()
-                .then(async (refreshed) => {
-                    if (!refreshed.ok || refreshed.data.accessToken === null || refreshed.data.requiresTwoFactor) {
+            void renewLaunch(activeLaunchId)
+                .then((renewed) => {
+                    if (!renewed.ok) {
                         setLaunchState("expired")
-                        return
                     }
-                    adoptSession(refreshed.data)
-                    const renewed = await renewAgentWorkspaceAppLaunch(activeLaunchId)
-                    if (!renewed.ok) setLaunchState("expired")
                 })
+                .catch(() => setLaunchState("expired"))
                 .finally(() => {
                     renewingLaunch.current = false
                 })
         }, 20_000)
         return () => {
             window.clearInterval(timer)
-            if (launchId.current !== null) void revokeAgentWorkspaceAppLaunch(launchId.current)
+            if (launchId.current !== null) void revokeLaunch(launchId.current).catch(() => undefined)
         }
-    }, [adoptSession])
+    }, [renewLaunch, revokeLaunch])
 
     const openOpenClaw = useCallback(() => {
         setLaunchState("opening")
@@ -154,21 +141,21 @@ export const AgentOSWorkspaceControlCenter = ({ workspaceId, pageState, onSelect
         },
     }
     let controlCenterState: AgentOSWorkspaceControlCenterState = "refused"
-    if (answer === null) controlCenterState = "loading"
+    if (answer === undefined) controlCenterState = "loading"
     else if (answer.ok) controlCenterState = "ready"
     return (
         <AgentOSWorkspaceControlCenterBase
             workspaceId={workspaceId}
             pageState={pageState}
             controlCenterState={controlCenterState}
-            message={answer !== null && !answer.ok ? t("refused") : undefined}
+            message={answer !== undefined && !answer.ok ? t("refused") : undefined}
             data={answer?.ok === true ? answer.data : undefined}
             labels={labels}
             launchState={launchState}
             openClawLaunchHref={`/${locale}/launch/agentos/${workspaceId}/openclaw`}
             onSelectPageState={onSelectPageState}
             onOpenAgentConsole={openOpenClaw}
-            onRetry={() => { void load() }}
+            onRetry={() => { void refreshControlCenter() }}
             formatDate={(value) => format.dateTime(new Date(value), { dateStyle: "medium", timeStyle: "short" })}
         />
     )

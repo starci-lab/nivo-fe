@@ -35,7 +35,10 @@ export interface ContractContentProps<K extends ContractKey> {
 
 /** Render validated slots without choosing or opening their host. */
 export const ContractContent = <const K extends ContractKey>({ contract, render }: ContractContentProps<K>) => {
-    if (render.kind === "projection") return <>{render.project()}</>
+    if (render.kind === "projection") {
+        const { project: Projection } = render
+        return <Projection />
+    }
     const spec = contractSpec(contract)
     const slots = render.slots
     return Object.keys(spec.children).flatMap((slot) => {
@@ -52,7 +55,8 @@ export const ContractContent = <const K extends ContractKey>({ contract, render 
                 // another Tree around it changes the DOM and therefore the layout: the navbar was
                 // inset twice and every projected SurfaceCard gained a duplicate section wrapper.
                 if (contractChild.kind === "projection") {
-                    return <Fragment key={`${slot}-${index}`}>{contractChild.project()}</Fragment>
+                    const { project: Projection } = contractChild
+                    return <Projection key={`${slot}-${index}`} />
                 }
                 return <Tree key={`${slot}-${index}`} contract={contractChild.meta.contract} render={contractChild} />
             }

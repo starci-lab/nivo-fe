@@ -18,6 +18,8 @@ import {
     startAgentosCustomModuleIntake, answerAgentosCustomModuleIntake, prepareAgentosModuleAttachmentUpload,
     finalizeAgentosModuleAttachment, removeAgentosModuleAttachment, saveAgentosModuleIntegrationSecret,
     removeAgentosModuleIntegrationSecret, publishAgentosCustomModule, resolveCoreApiCapabilityUrl,
+    manageAgentosModuleRuntime, myAgentosModuleRuntime, myAgentosModuleTestRun, myAgentosModuleTestSurface,
+    runAgentosModuleTest,
 } from "./console"
 
 describe("console API interaction wrappers", () => {
@@ -26,6 +28,10 @@ describe("console API interaction wrappers", () => {
             myExpertSites(), myAgentWorkspace(), myInstances(), myDomains(), myWallet(), myWalletTransactions(),
             myInvoices(), myCatalogOrders(), myPodOpenclawStatus(), myAgentWorkspaceControlCenter("workspace-1"),
             myAgentosSolutionModules(), myAgentosModuleInstallations("workspace-1"), myAgentosModuleInstallation("install-1"),
+            myAgentosModuleRuntime("install-1", true),
+            myAgentosModuleTestSurface("install-1"), myAgentosModuleTestRun("install-1", "run-1"),
+            runAgentosModuleTest({ installationId: "install-1", contextVersionId: "context-1", scenarioKey: "safe-fixture", idempotencyKey: "test-run-1", scenarioInput: {} }),
+            manageAgentosModuleRuntime({ action: "CREATE_EXECUTE_SESSION", installationId: "install-1", idempotencyKey: "runtime-key", title: "Planning" }),
             myExpertSiteDeployment("site-1"),
             payInvoice("invoice-1"), catalogItems("site_from_template"), issueAgentWorkspaceAppLaunch("workspace-1"),
             renewAgentWorkspaceAppLaunch("launch-1"), revokeAgentWorkspaceAppLaunch("launch-1"),
@@ -50,6 +56,11 @@ describe("console API interaction wrappers", () => {
         expect(graphql.mock.calls.some(([document]) => String(document).includes("myWallet"))).toBe(true)
         expect(graphql.mock.calls.some((call) => call.length > 0)).toBe(true)
         expect(graphql.mock.calls.some(([document]) => String(document).includes("PublishAgentosCustomModule"))).toBe(true)
+        expect(graphql.mock.calls.some(([document]) => String(document).includes("MyAgentosModuleRuntime"))).toBe(true)
+        expect(graphql.mock.calls.some(([document]) => String(document).includes("ManageAgentosModuleRuntime"))).toBe(true)
+        expect(graphql.mock.calls.some(([document]) => String(document).includes("MyAgentosModuleTestSurface"))).toBe(true)
+        expect(graphql.mock.calls.some(([document]) => String(document).includes("MyAgentosModuleTestRun"))).toBe(true)
+        expect(graphql.mock.calls.some(([document]) => String(document).includes("RunAgentosModuleTest"))).toBe(true)
         expect(graphql.mock.calls.some(([document]) => String(document).includes("attachmentId uploadUrl uploadMethod uploadExpiresAt"))).toBe(true)
         expect(graphql.mock.calls.some(([document]) => String(document).includes("ingestionStatus detectedMediaType sha256 chunkCount"))).toBe(true)
         expect(resolveCoreApiCapabilityUrl("/pods/self/module-document-uploads/document-1?signature=signed"))

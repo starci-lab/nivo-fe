@@ -1,6 +1,6 @@
 "use client"
 
-import type { ReactNode } from "react"
+import type { ComponentType } from "react"
 import { useLocale } from "next-intl"
 import type { Locale } from "@/i18n/config"
 import { ACADEMY, inLocale, isSafeThemeValue, type ThemeVariables } from "@/modules/academy/template"
@@ -156,7 +156,7 @@ const themeCss = (name: string | undefined): string => {
 }
 
 /** Props for {@link AcademyChrome}. */
-interface AcademyChromeProps {
+interface AcademyChromeProps<P extends object> {
     /**
      * The page to wrap. Opaque on purpose -- this component styles a document, not a tree.
      *
@@ -166,7 +166,8 @@ interface AcademyChromeProps {
      * `content` says the same thing out loud: this layout receives exactly one routed interior, at a
      * name a reader can grep, and a second one cannot be slipped in beside it.
      */
-    readonly content: ReactNode
+    readonly content: ComponentType<P>
+    readonly contentProps: P
 }
 
 /**
@@ -175,7 +176,7 @@ interface AcademyChromeProps {
  * @param input - {@link AcademyChromeProps}
  * @returns The themed shell.
  */
-export const AcademyChrome = ({ content }: AcademyChromeProps) => {
+export const AcademyChrome = <P extends object>({ content: Content, contentProps }: AcademyChromeProps<P>) => {
     const locale = useLocale() as Locale
     const theme = themeCss(inLocale(ACADEMY.identity.name, locale))
     return (
@@ -190,7 +191,7 @@ export const AcademyChrome = ({ content }: AcademyChromeProps) => {
               */}
             <style>{theme}</style>
             {ACADEMY.customCss ? <style>{ACADEMY.customCss}</style> : null}
-            {content}
+            <Content {...contentProps} />
         </>
     )
 }

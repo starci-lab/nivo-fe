@@ -1,16 +1,13 @@
 "use client"
 
-import { useLocale, useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
-import { DEFAULT_LOCALE } from "@/i18n/config"
+import { useTranslations } from "next-intl"
+import { useRouter } from "@/i18n/navigation"
 import { AgentOSPageBase, type AgentOSPageProps } from "./component"
 
 /** Resolve page copy and route navigation while child blocks own every request. */
 export const AgentOSPage = (props: AgentOSPageProps) => {
     const t = useTranslations("console")
-    const locale = useLocale()
     const router = useRouter()
-    const localeSegment = locale === DEFAULT_LOCALE ? "" : `/${locale}`
     return (
         <AgentOSPageBase
             {...props}
@@ -27,8 +24,8 @@ export const AgentOSPage = (props: AgentOSPageProps) => {
                 createEyebrow: t("agentos.createEyebrow"),
                 orderEyebrow: t("agentos.orderEyebrow"),
             }}
-            onOpenDashboard={() => router.push(`${localeSegment}/agentos`)}
-            onCreate={() => router.push(`${localeSegment}/agentos/create`)}
+            onOpenDashboard={() => router.push("/agentos")}
+            onCreate={() => router.push("/agentos/create")}
         />
     )
 }

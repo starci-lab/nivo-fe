@@ -56,6 +56,31 @@ export type AgentOSWorkspaceListViewProps =
     | { readonly state: "refused"; readonly props: AgentOSWorkspaceListCommonProps & { readonly message: string } }
     | { readonly state: "answered"; readonly props: AgentOSWorkspaceListCommonProps & { readonly rows: ReadonlyArray<AgentOSWorkspaceView> }; readonly on: { readonly openWorkspace: (id: string) => void } }
 
+const workspaceRow = (row: AgentOSWorkspaceView, isLoading: boolean, openWorkspace?: (id: string) => void) => defineCompositeComponent("fleet-row", {}, () => (
+    <Tree
+        contract="responsive-identity-kind-status-action-row"
+        render={defineContractComponent("responsive-identity-kind-status-action-row", {
+            identity: defineContractComponent("name-over-handle", {
+                name: defineLeafComponent("text-link", { size: "sm" }, () => (
+                    <TextLink
+                        props={{ label: row.name, size: "sm" }}
+                        on={{ press: openWorkspace === undefined ? undefined : () => openWorkspace(row.id) }}
+                    />
+                )),
+                handle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
+                    <Text props={{ content: row.detail, size: "xs", tone: "muted" }} isLoading={isLoading} />
+                )),
+            }),
+            kind: defineLeafComponent("badge", { tone: "neutral" }, () => (
+                <Badge props={{ content: row.kindLabel, tone: "neutral" }} isLoading={isLoading} />
+            )),
+            status: defineLeafComponent("badge", {}, () => (
+                <Badge props={{ content: row.statusLabel, tone: STATUS_TONE[row.status] }} isLoading={isLoading} />
+            )),
+        })}
+    />
+))
+
 /** Draw the workspace collection without owning its query or dashboard route. */
 export const AgentOSWorkspaceListBase = (view: AgentOSWorkspaceListViewProps) => {
     const { state, props } = view
@@ -126,30 +151,7 @@ export const AgentOSWorkspaceListBase = (view: AgentOSWorkspaceListViewProps) =>
             />
         )
     }
-    const workspaceRow = (row: AgentOSWorkspaceView, isLoading = false) => defineCompositeComponent("fleet-row", {}, () => (
-        <Tree
-            contract="responsive-identity-kind-status-action-row"
-            render={defineContractComponent("responsive-identity-kind-status-action-row", {
-                identity: defineContractComponent("name-over-handle", {
-                    name: defineLeafComponent("text-link", { size: "sm" }, () => (
-                        <TextLink
-                            props={{ label: row.name, size: "sm" }}
-                            on={{ press: state === "answered" ? () => view.on.openWorkspace(row.id) : undefined }}
-                        />
-                    )),
-                    handle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                        <Text props={{ content: row.detail, size: "xs", tone: "muted" }} isLoading={isLoading} />
-                    )),
-                }),
-                kind: defineLeafComponent("badge", { tone: "neutral" }, () => (
-                    <Badge props={{ content: row.kindLabel, tone: "neutral" }} isLoading={isLoading} />
-                )),
-                status: defineLeafComponent("badge", {}, () => (
-                    <Badge props={{ content: row.statusLabel, tone: STATUS_TONE[row.status] }} isLoading={isLoading} />
-                )),
-            })}
-        />
-    ))
+    const openWorkspace = state === "answered" ? view.on.openWorkspace : undefined
     return (
         <SurfaceCard
             props={{ label: props.label }}
@@ -157,7 +159,7 @@ export const AgentOSWorkspaceListBase = (view: AgentOSWorkspaceListViewProps) =>
             render={defineContractComponent("fleet-resource-list", {
                 resource: state === "resting"
                     ? [workspaceRow({ id: "agentos-resting", name: "", detail: "", kindLabel: "", status: "provisioning", statusLabel: "" }, true)]
-                    : rows.map((row) => workspaceRow(row)),
+                    : rows.map((row) => workspaceRow(row, false, openWorkspace)),
             })}
             isLoading={state === "resting"}
         />

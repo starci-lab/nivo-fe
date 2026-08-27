@@ -3,12 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import {
-    installAgentosSolutionModule,
-    myAgentosModuleInstallations,
-    myAgentosSolutionModules,
-    type AgentosModuleInstallation,
-    type AgentosSolutionModule,
-} from "@/modules/api/console"
+    useMutateInstallAgentosSolutionModuleSwr,
+    useQueryMyAgentosModuleInstallationsSwr,
+    useQueryMyAgentosSolutionModulesSwr,
+} from "@/hooks/swr"
+import type { AgentosSolutionModule } from "@/modules/api/console"
 import { useSession } from "@/modules/auth/session"
 import useProvisioningRealtime from "@/modules/realtime/provisioning"
 import { AgentOSSolutionModuleCenterBase, type AgentOSSolutionModuleCard } from "./component"
@@ -30,24 +29,22 @@ export const AgentOSSolutionModuleCenter = ({ workspaceId }: AgentOSSolutionModu
     const session = useSession()
     const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
     const [mode, setMode] = useState<"catalog" | "installed">("catalog")
-    const [catalog, setCatalog] = useState<ReadonlyArray<AgentosSolutionModule> | null | undefined>(undefined)
-    const [installations, setInstallations] = useState<ReadonlyArray<AgentosModuleInstallation> | null | undefined>(undefined)
+    const catalogQuery = useQueryMyAgentosSolutionModulesSwr()
+    const installationsQuery = useQueryMyAgentosModuleInstallationsSwr(workspaceId)
+    const { trigger: installModule } = useMutateInstallAgentosSolutionModuleSwr(workspaceId)
+    const refreshCatalog = catalogQuery.mutate
+    const refreshInstallations = installationsQuery.mutate
+    const catalog = catalogQuery.data === undefined ? undefined : catalogQuery.data.ok ? catalogQuery.data.data : null
+    const installations = installationsQuery.data === undefined
+        ? undefined
+        : installationsQuery.data.ok ? installationsQuery.data.data : null
     const [pendingKey, setPendingKey] = useState<string>()
     const [trackedInstallationId, setTrackedInstallationId] = useState<string>()
     const [outcome, setOutcome] = useState<string>()
 
-    const load = useCallback(async () => {
-        const [catalogResult, installationsResult] = await Promise.all([
-            myAgentosSolutionModules(),
-            myAgentosModuleInstallations(workspaceId),
-        ])
-        setCatalog(catalogResult.ok ? catalogResult.data : null)
-        setInstallations(installationsResult.ok ? installationsResult.data : null)
-    }, [workspaceId])
-
-    useEffect(() => {
-        if (accessToken !== null) void load()
-    }, [accessToken, load])
+    const refresh = useCallback(async () => {
+        await Promise.all([refreshCatalog(), refreshInstallations()])
+    }, [refreshCatalog, refreshInstallations])
 
     const realtime = useProvisioningRealtime({
         accessToken,
@@ -56,47 +53,46 @@ export const AgentOSSolutionModuleCenter = ({ workspaceId }: AgentOSSolutionModu
     useEffect(() => {
         if (realtime.status !== "event" && realtime.status !== "connected") return
         if (realtime.status === "event" && realtime.event.kind !== "module-installation") return
-        void load()
-    }, [load, realtime])
+        void refresh()
+    }, [realtime, refresh])
 
     const catalogByKey = useMemo(() => new Map(catalog?.map((item) => [item.key, item])), [catalog])
     const install = useCallback(async (moduleKey: AgentosSolutionModule["key"]) => {
         setPendingKey(moduleKey)
         setOutcome(undefined)
-        const result = await installAgentosSolutionModule({
-            agentWorkspaceId: workspaceId,
-            moduleKey,
-            idempotencyKey: `nivo-fe:${crypto.randomUUID()}`,
-        })
-        setPendingKey(undefined)
-        if (!result.ok) {
+        try {
+            const result = await installModule({
+                moduleKey,
+                idempotencyKey: `nivo-fe:${crypto.randomUUID()}`,
+            })
+            setPendingKey(undefined)
+            if (!result.ok) { setOutcome(t("installFailed")); return }
+            setTrackedInstallationId(result.data.id)
+            setOutcome(t("installAccepted"))
+            setMode("installed")
+        } catch {
+            setPendingKey(undefined)
             setOutcome(t("installFailed"))
-            return
         }
-        setTrackedInstallationId(result.data.id)
-        setOutcome(t("installAccepted"))
-        setMode("installed")
-        await load()
-    }, [load, t, workspaceId])
+    }, [installModule, t])
 
     const catalogCards: ReadonlyArray<AgentOSSolutionModuleCard> = (catalog ?? []).map((module) => {
-        const installed = installations?.find((item) => item.moduleKey === module.key)
+        const installed = installations?.filter((item) => item.moduleKey === module.key) ?? []
         return {
             id: module.key,
             title: module.name,
             description: module.summary,
-            statusLabel: installed === undefined ? t("status.available") : t(`status.${installed.status}`),
-            statusTone: installed === undefined ? "neutral" : toneOf(installed.status),
+            statusLabel: installed.length === 0 ? t("status.available") : `${installed.length} installed`,
+            statusTone: installed.length === 0 ? "neutral" : "success",
             detail: t("catalogDetail", { agents: module.agentRoles.length, channels: module.channelRoles.length, safety: module.safetyMode }),
-            actionLabel: installed === undefined ? t("install") : t("installed"),
-            disabled: installed !== undefined,
+            actionLabel: t("install"),
         }
     })
     const installedCards: ReadonlyArray<AgentOSSolutionModuleCard> = (installations ?? []).map((installation) => {
         const module = catalogByKey.get(installation.moduleKey as AgentosSolutionModule["key"])
         return {
             id: installation.id,
-            title: module?.name ?? installation.moduleKey,
+            title: installation.displayName || module?.name || installation.moduleKey,
             description: module?.summary ?? t("installedDescription"),
             statusLabel: t(`status.${installation.status}`),
             statusTone: toneOf(installation.status),

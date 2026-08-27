@@ -21,6 +21,12 @@ const refusal = (note: string) => defineContractComponent("body-with-refusal-not
     note: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: note, size: "sm", tone: "muted" }} />),
 })
 
+const domainEvidenceContent = (renderedFacts: ReadonlyArray<ReturnType<typeof fact>>) => (
+    defineContractComponent("domain-evidence-list", (input: LeafProps<{ readonly label: string, readonly description: string }, SurfaceListCardActions>) => (
+        <Tree key={`${input.props.label}:${input.props.description}`} contract="domain-evidence-list" render={defineContractComponent("domain-evidence-list", { fact: renderedFacts })} />
+    ))
+)
+
 /** Draw derived service context beside independently settled domain evidence. */
 export const InfrastructureSummaryBase = ({ label, context, domains }: InfrastructureSummaryProps) => {
     const isLoading = domains.phase === "pending"
@@ -28,9 +34,7 @@ export const InfrastructureSummaryBase = ({ label, context, domains }: Infrastru
     const note = domains.phase === "empty" || domains.phase === "failed" || domains.phase === "partial" ? domains.note : undefined
     if (domains.phase === "pending" || domains.phase === "populated" || domains.phase === "partial") {
         const renderedFacts = isLoading ? [fact({ id: "pending-1", label: "", value: "" }, true), fact({ id: "pending-2", label: "", value: "" }, true)] : facts.map((item) => fact(item))
-        const content = defineContractComponent("domain-evidence-list", (input: LeafProps<{ readonly label: string, readonly description: string }, SurfaceListCardActions>) => (
-            <Tree key={`${input.props.label}:${input.props.description}`} contract="domain-evidence-list" render={defineContractComponent("domain-evidence-list", { fact: renderedFacts })} />
-        ))
+        const content = domainEvidenceContent(renderedFacts)
         return <SurfaceListCard props={{ label, description: note === undefined ? context : `${context} ${note}` }} contract="domain-evidence-list" render={content} isLoading={isLoading} />
     }
     return <SurfaceCard contract="infrastructure-summary" render={defineContractComponent("infrastructure-summary", {

@@ -1,7 +1,8 @@
 "use client"
 
 import { useLocale, useTranslations } from "next-intl"
-import { submitLead, type Course } from "@/modules/api/academy"
+import { useSubmitAcademyLead } from "@/hooks/academy/use-submit-academy-lead"
+import type { Course } from "@/modules/api/academy"
 import type { Locale } from "@/i18n/config"
 import {
     ACADEMY,
@@ -147,6 +148,7 @@ export const AcademySections = ({ courses }: AcademySectionsProps) => {
     const offer = useTranslations("landing.offer")
     const faq = useTranslations("landing.faq")
     const lead = useTranslations("landing.lead")
+    const submitAcademyLead = useSubmitAcademyLead()
 
     const academy = {
         name: inLocale(ACADEMY.identity.name, locale) ?? "",
@@ -256,7 +258,5 @@ export const AcademySections = ({ courses }: AcademySectionsProps) => {
      * @param input - The name and contact the reader typed.
      * @returns Whether it landed.
      */
-    const onSubmitLead: LeadSubmit = async (input) => (await submitLead(input)).ok
-
-    return <AcademySectionsBase sections={sections} onSubmitLead={onSubmitLead} />
+    return <AcademySectionsBase sections={sections} onSubmitLead={submitAcademyLead} />
 }

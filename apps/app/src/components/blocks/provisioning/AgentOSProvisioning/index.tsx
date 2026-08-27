@@ -1,20 +1,20 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useFormatter, useLocale, useTranslations } from "next-intl"
-import { DEFAULT_LOCALE } from "@/i18n/config"
+import { useFormatter, useTranslations } from "next-intl"
+import {
+    useQueryCatalogItemsSwr,
+    useQueryMyAgentosAiKnowledgeReadinessSwr,
+    useQueryMyAgentWorkspacesSwr,
+    useQueryMyCatalogOrdersSwr,
+    useQueryMyInvoicesSwr,
+    useMutateOrderAgentosSwr,
+    useMutateRunAgentosAiReadinessTestSwr,
+} from "@/hooks/swr"
+import { useRouter } from "@/i18n/navigation"
 import { useSession } from "@/modules/auth/session"
 import {
-    catalogItems,
-    myAgentWorkspace,
-    myAgentosAiKnowledgeReadiness,
-    myCatalogOrders,
-    myInvoices,
-    orderAgentOs,
-    runAgentosAiReadinessTest,
     type AgentWorkspaceRow,
-    type AgentosAiKnowledgeReadiness,
     type CatalogItemRow,
     type CatalogOrderRow,
     type CatalogTierRow,
@@ -110,67 +110,88 @@ const stepState = (index: number, phaseIndex: number): "done" | "current" | "upc
     return "upcoming"
 }
 
-type RouteBuilder = (path: string) => string
+const readinessMilestoneState = (index: number, current: number): "done" | "current" | "upcoming" => {
+    if (current === -1) return index < 4 ? "done" : "current"
+    return stepState(index, current)
+}
 
-const walletTargetOf = (orderId: string, invoiceId: string | null, route: RouteBuilder): string | undefined => {
+const walletTargetOf = (orderId: string, invoiceId: string | null): string | undefined => {
     if (invoiceId === null) return undefined
-    const returnTo = route(`/agentos/orders/${orderId}`)
+    const returnTo = `/agentos/orders/${orderId}`
     const query = new URLSearchParams({ orderId, invoiceId, returnTo })
-    return route(`/wallet?${query.toString()}`)
+    return `/wallet?${query.toString()}`
 }
 
 /** Own the real order → payment → workspace lifecycle and its matching Socket.IO target. */
 export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
     const t = useTranslations("console.provisioningFlows")
     const format = useFormatter()
-    const locale = useLocale()
     const router = useRouter()
     const session = useSession()
     const productName = t("agentos.productName")
     const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
     const [flow, setFlow] = useState<AgentOSFlow>({ phase: "catalog_loading" })
-    const [aiReadiness, setAiReadiness] = useState<AgentosAiKnowledgeReadiness | null | undefined>()
     const [aiRetryPending, setAiRetryPending] = useState(false)
-    const route = useCallback((path: string) => locale === DEFAULT_LOCALE ? path : `/${locale}${path}`, [locale])
+    const orderAgentos = useMutateOrderAgentosSwr()
     const contextMode = context.mode
     const resumeOrderId = context.mode === "resume" ? context.orderId : null
+    const isResume = contextMode === "resume"
+    const catalogQuery = useQueryCatalogItemsSwr("ai_agent", !isResume)
+    const ordersQuery = useQueryMyCatalogOrdersSwr(isResume)
+    const invoicesQuery = useQueryMyInvoicesSwr(isResume)
+    const workspacesQuery = useQueryMyAgentWorkspacesSwr(isResume)
+    const refreshOrders = ordersQuery.mutate
+    const refreshInvoices = invoicesQuery.mutate
+    const refreshWorkspaces = workspacesQuery.mutate
+    const readyWorkspaceId = flow.phase === "ready" ? flow.workspaceId : undefined
+    const aiReadinessQuery = useQueryMyAgentosAiKnowledgeReadinessSwr(readyWorkspaceId, aiRetryPending)
+    const retryReadiness = useMutateRunAgentosAiReadinessTestSwr(readyWorkspaceId)
+    const refreshAiReadiness = aiReadinessQuery.mutate
+    const aiReadiness = aiReadinessQuery.data === undefined
+        ? undefined
+        : aiReadinessQuery.data.ok ? aiReadinessQuery.data.data : null
 
     const reconcile = useCallback(async (orderId: string) => {
         const [orders, invoices, workspaces] = await Promise.all([
-            myCatalogOrders(),
-            myInvoices(),
-            myAgentWorkspace(),
+            refreshOrders(),
+            refreshInvoices(),
+            refreshWorkspaces(),
         ])
-        if (!orders.ok || !invoices.ok || !workspaces.ok) {
+        if (orders?.ok !== true || invoices?.ok !== true || workspaces?.ok !== true) {
             setFlow({ phase: "failed", orderId, subject: productName, detail: orderId, reason: t("failedLoad"), atStep: 0 })
             return
         }
         setFlow(settleOrder(orderId, { orders: orders.data, invoices: invoices.data, workspaces: workspaces.data }, t, productName))
-    }, [productName, t])
+    }, [productName, refreshInvoices, refreshOrders, refreshWorkspaces, t])
 
     useEffect(() => {
-        if (contextMode === "resume" && accessToken === null) return
-        let cancelled = false
-        const settle = async () => {
-            if (contextMode === "resume" && resumeOrderId !== null) {
-                if (!cancelled) await reconcile(resumeOrderId)
-                return
-            }
-            const catalogue = await catalogItems("ai_agent")
-            if (cancelled) return
-            if (!catalogue.ok || catalogue.data.length === 0) {
-                setFlow({ phase: "failed", orderId: null, subject: productName, detail: "", reason: t("failedLoad"), atStep: 0 })
-                return
-            }
+        const catalogue = catalogQuery.data
+        if (isResume || catalogue === undefined) return
+        if (!catalogue.ok || catalogue.data.length === 0) {
+            setFlow({ phase: "failed", orderId: null, subject: productName, detail: "", reason: t("failedLoad"), atStep: 0 })
+            return
+        }
+        setFlow((current) => {
+            if (current.phase !== "catalog_loading") return current
             const item = catalogue.data[0]
             const tier = [...(item.tiers ?? [])].sort((left, right) => left.orderIndex - right.orderIndex)[0] ?? null
-            setFlow({ phase: "request", item, tier })
+            return { phase: "request", item, tier }
+        })
+    }, [catalogQuery.data, isResume, productName, t])
+
+    useEffect(() => {
+        if (!isResume || accessToken === null || resumeOrderId === null) return
+        if (ordersQuery.data === undefined || invoicesQuery.data === undefined || workspacesQuery.data === undefined) return
+        if (!ordersQuery.data.ok || !invoicesQuery.data.ok || !workspacesQuery.data.ok) {
+            setFlow({ phase: "failed", orderId: resumeOrderId, subject: productName, detail: resumeOrderId, reason: t("failedLoad"), atStep: 0 })
+            return
         }
-        void settle()
-        return () => {
-            cancelled = true
-        }
-    }, [accessToken, contextMode, productName, reconcile, resumeOrderId, t])
+        setFlow(settleOrder(resumeOrderId, {
+            orders: ordersQuery.data.data,
+            invoices: invoicesQuery.data.data,
+            workspaces: workspacesQuery.data.data,
+        }, t, productName))
+    }, [accessToken, invoicesQuery.data, isResume, ordersQuery.data, productName, resumeOrderId, t, workspacesQuery.data])
 
     const target = realtimeTarget(flow)
     const realtime = useProvisioningRealtime({ accessToken, target })
@@ -215,35 +236,27 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
         void reconcile(resumeOrderId)
     }, [contextMode, realtime.status, reconcile, resumeOrderId])
 
-    useEffect(() => {
-        if (flow.phase !== "ready") { setAiReadiness(undefined); return }
-        let cancelled = false
-        const read = async () => {
-            const result = await myAgentosAiKnowledgeReadiness(flow.workspaceId)
-            if (!cancelled) setAiReadiness(result.ok ? result.data : null)
-        }
-        void read()
-        const timer = window.setInterval(() => { void read() }, 4_000)
-        return () => { cancelled = true; window.clearInterval(timer) }
-    }, [flow])
-
     const submit = async () => {
         if (flow.phase !== "request") return
         setFlow({ phase: "submitting", item: flow.item, tier: flow.tier })
-        const order = await orderAgentOs(flow.item.slug, flow.tier?.id)
-        if (!order.ok) {
-            setFlow({ phase: "failed", orderId: null, subject: productName, detail: flow.tier?.name ?? flow.item.slug, reason: order.reason, atStep: 0 })
-            return
+        try {
+            const order = await orderAgentos.trigger({ catalogItemSlug: flow.item.slug, catalogTierId: flow.tier?.id })
+            if (!order.ok) {
+                setFlow({ phase: "failed", orderId: null, subject: productName, detail: flow.tier?.name ?? flow.item.slug, reason: order.reason, atStep: 0 })
+                return
+            }
+            const next = {
+                phase: "awaiting_payment" as const,
+                orderId: order.data.id,
+                invoiceId: null,
+                subject: productName,
+                detail: order.data.catalogTier?.name ?? flow.tier?.name ?? order.data.id,
+            }
+            setFlow(next)
+            router.replace(`/agentos/orders/${order.data.id}`)
+        } catch {
+            setFlow({ phase: "failed", orderId: null, subject: productName, detail: flow.tier?.name ?? flow.item.slug, reason: t("failedLoad"), atStep: 0 })
         }
-        const next = {
-            phase: "awaiting_payment" as const,
-            orderId: order.data.id,
-            invoiceId: null,
-            subject: productName,
-            detail: order.data.catalogTier?.name ?? flow.tier?.name ?? order.data.id,
-        }
-        setFlow(next)
-        router.replace(route(`/agentos/orders/${order.data.id}`))
     }
 
     const phaseIndex = phaseIndexOf(flow)
@@ -264,81 +277,87 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
         const current = milestones.findIndex((done) => !done)
         const readinessLabels = [t("steps.credential"), t("steps.deepseek"), t("steps.knowledge"), t("steps.qdrant"), t("steps.aiTest")]
         steps = readinessLabels.map((label, index) => {
-            const state = current === -1 ? index < 4 ? "done" as const : "current" as const : index < current ? "done" as const : index === current ? "current" as const : "upcoming" as const
+            const state = readinessMilestoneState(index, current)
             return { ordinal: String(index + 1), label, state, stateLabel: stateLabels[state] }
         })
     }
 
-    const retryAiReadiness = async (workspaceId: string) => {
+    const retryAiReadiness = async () => {
         setAiRetryPending(true)
-        const result = await runAgentosAiReadinessTest({ workspaceId, idempotencyKey: crypto.randomUUID() })
-        if (!result.ok) setAiReadiness(null)
-        else {
-            const readiness = await myAgentosAiKnowledgeReadiness(workspaceId)
-            setAiReadiness(readiness.ok ? readiness.data : null)
-        }
+        await retryReadiness.trigger(crypto.randomUUID())
+        await refreshAiReadiness()
         setAiRetryPending(false)
     }
     const viewLabels = { progressLabel: t("agentos.progressLabel"), continuationLabel: t("agentos.continuationLabel") }
+    const requestView = (requestFlow: Extract<AgentOSFlow, { readonly phase: "request" | "submitting" }>): AgentOSProvisioningViewProps => {
+        const price = requestFlow.tier?.priceMonthlyVnd
+        let detail = requestFlow.tier?.name ?? requestFlow.item.slug
+        if (price !== null && price !== undefined) {
+            const priceLabel = format.number(price, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
+            detail = `${requestFlow.tier?.name ?? ""} · ${priceLabel}`
+        }
+        return { state: requestFlow.phase, props: { ...viewLabels, steps, subject: productName, detail, statusTitle: t("agentos.requestTitle"), statusText: t("agentos.requestText"), requestActionLabel: t("agentos.submit"), isRequestPending: requestFlow.phase === "submitting" }, on: { request: () => void submit() } }
+    }
+    const readyView = (readyFlow: Extract<AgentOSFlow, { readonly phase: "ready" }>): AgentOSProvisioningViewProps => {
+        if (aiReadiness?.aiReady === true) return { state: "ready", props: {
+            ...viewLabels, steps, subject: readyFlow.subject, detail: readyFlow.detail,
+            statusTitle: t("readyTitle"),
+            statusText: t("agentos.aiReady"),
+            statusActionLabel: t("agentos.manage"),
+        }, on: { statusAction: () => router.push(`/agentos/workspaces/${readyFlow.workspaceId}?view=ai-knowledge`) } }
+        const operationsSettled = aiReadiness?.readinessOperationId === null && aiReadiness.knowledgeRecoveryOperationId === null
+        if (aiReadiness === null || aiReadiness?.failureCode !== null && aiReadiness?.failureCode !== undefined && operationsSettled) return { state: "failed", props: {
+            ...viewLabels, steps, subject: readyFlow.subject, detail: readyFlow.detail,
+            statusTitle: t("failedTitle"),
+            statusText: aiReadiness?.failureCode ?? t("failedLoad"),
+            statusActionLabel: t("agentos.retryAi"),
+            isRequestPending: aiRetryPending,
+        }, on: { statusAction: () => void retryAiReadiness() } }
+        let statusText = t("agentos.aiTesting")
+        if (aiReadiness === undefined) statusText = t("agentos.aiLoading")
+        else if (aiReadiness.knowledgeRecoveryOperationId !== null) statusText = t("agentos.aiRecovering")
+        return { state: "preparing", props: {
+            ...viewLabels, steps, subject: readyFlow.subject, detail: readyFlow.detail,
+            statusTitle: t("preparingTitle"),
+            statusText,
+            statusActionLabel: t("agentos.watchProvisioning"),
+            statusActionDisabled: true,
+        } }
+    }
     const view = (): AgentOSProvisioningViewProps => {
         switch (flow.phase) {
             case "catalog_loading":
                 return { state: flow.phase, props: { ...viewLabels, steps, subject: productName, detail: t("loadingText"), statusTitle: t("loadingTitle"), statusText: t("loadingText") } }
             case "request":
-            case "submitting": {
-                const price = flow.tier?.priceMonthlyVnd
-                let detail = flow.tier?.name ?? flow.item.slug
-                if (price !== null && price !== undefined) {
-                    const priceLabel = format.number(price, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
-                    detail = `${flow.tier?.name ?? ""} · ${priceLabel}`
-                }
-                return { state: flow.phase, props: { ...viewLabels, steps, subject: productName, detail, statusTitle: t("agentos.requestTitle"), statusText: t("agentos.requestText"), requestActionLabel: t("agentos.submit"), isRequestPending: flow.phase === "submitting" }, on: { request: () => void submit() } }
-            }
+            case "submitting":
+                return requestView(flow)
             case "failed":
-                return { state: "failed", props: { ...viewLabels, steps, subject: flow.subject, detail: flow.detail, statusTitle: t("failedTitle"), statusText: flow.reason, statusActionLabel: t("agentos.startAgain") }, on: { statusAction: () => router.push(route("/agentos")) } }
+                return { state: "failed", props: { ...viewLabels, steps, subject: flow.subject, detail: flow.detail, statusTitle: t("failedTitle"), statusText: flow.reason, statusActionLabel: t("agentos.startAgain") }, on: { statusAction: () => router.push("/agentos") } }
             case "awaiting_payment": {
-                const walletTarget = walletTargetOf(flow.orderId, flow.invoiceId, route)
+                const walletTarget = walletTargetOf(flow.orderId, flow.invoiceId)
                 return { state: flow.phase, props: { ...viewLabels, steps, subject: flow.subject, detail: flow.detail, statusTitle: t("agentos.paymentTitle"), statusText: t("agentos.paymentText"), statusActionLabel: t("agentos.openWallet"), statusActionDisabled: walletTarget === undefined }, on: { statusAction: walletTarget === undefined ? undefined : () => router.push(walletTarget) } }
             }
             case "ready":
-                if (aiReadiness?.aiReady === true) return { state: "ready", props: {
-                    ...viewLabels, steps, subject: flow.subject, detail: flow.detail,
-                    statusTitle: t("readyTitle"),
-                    statusText: t("agentos.aiReady"),
-                    statusActionLabel: t("agentos.manage"),
-                }, on: { statusAction: () => router.push(route(`/agentos/workspaces/${flow.workspaceId}?view=ai-knowledge`)) } }
-                if (aiReadiness === null || aiReadiness?.failureCode !== null && aiReadiness?.failureCode !== undefined && aiReadiness.readinessOperationId === null && aiReadiness.knowledgeRecoveryOperationId === null) return { state: "failed", props: {
-                    ...viewLabels, steps, subject: flow.subject, detail: flow.detail,
-                    statusTitle: t("failedTitle"),
-                    statusText: aiReadiness?.failureCode ?? t("failedLoad"),
-                    statusActionLabel: t("agentos.retryAi"),
-                    isRequestPending: aiRetryPending,
-                }, on: { statusAction: () => void retryAiReadiness(flow.workspaceId) } }
-                return { state: "preparing", props: {
-                    ...viewLabels, steps, subject: flow.subject, detail: flow.detail,
-                    statusTitle: t("preparingTitle"),
-                    statusText: aiReadiness === undefined ? t("agentos.aiLoading") : aiReadiness.knowledgeRecoveryOperationId !== null ? t("agentos.aiRecovering") : t("agentos.aiTesting"),
-                    statusActionLabel: t("agentos.watchProvisioning"),
-                    statusActionDisabled: true,
-                } }
-            default:
-                break
-        }
-        const isAccepted = flow.phase === "accepted"
-        const settledText = isAccepted ? t("agentos.acceptedText") : t("agentos.preparingText")
-        const statusText = realtime.status === "connecting" ? t("connecting") : settledText
-        return {
-            state: flow.phase,
-            props: {
-                ...viewLabels,
-                steps,
-                subject: flow.subject,
-                detail: flow.detail,
-                statusTitle: isAccepted ? t("agentos.acceptedTitle") : t("preparingTitle"),
-                statusText,
-                statusActionLabel: isAccepted ? t("agentos.watchFulfillment") : t("agentos.watchProvisioning"),
-                statusActionDisabled: true,
-            },
+                return readyView(flow)
+            case "accepted":
+            case "preparing": {
+                const isAccepted = flow.phase === "accepted"
+                const settledText = isAccepted ? t("agentos.acceptedText") : t("agentos.preparingText")
+                const statusText = realtime.status === "connecting" ? t("connecting") : settledText
+                return {
+                    state: flow.phase,
+                    props: {
+                        ...viewLabels,
+                        steps,
+                        subject: flow.subject,
+                        detail: flow.detail,
+                        statusTitle: isAccepted ? t("agentos.acceptedTitle") : t("preparingTitle"),
+                        statusText,
+                        statusActionLabel: isAccepted ? t("agentos.watchFulfillment") : t("agentos.watchProvisioning"),
+                        statusActionDisabled: true,
+                    },
+                }
+            }
         }
     }
 

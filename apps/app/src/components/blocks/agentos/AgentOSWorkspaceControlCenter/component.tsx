@@ -64,6 +64,11 @@ export type AgentOSWorkspaceControlCenterViewProps = {
     readonly formatDate: (value: string) => string
 }
 
+const workspaceSignal = (state: AgentOSWorkspaceControlCenterState) => {
+    if (state === "refused") return "attention"
+    return state === "ready" ? "active" : "none"
+}
+
 /** Compose one AgentOS workspace from domain blocks; the page owns no API or operational JSX. */
 export const AgentOSWorkspaceControlCenterBase = ({ workspaceId, pageState, controlCenterState, message, data, labels, launchState, openClawLaunchHref, onSelectPageState, onOpenAgentConsole, onRetry, formatDate }: AgentOSWorkspaceControlCenterViewProps) => {
     const title = data?.workspace.name ?? workspaceId ?? labels.titleFallback
@@ -163,7 +168,7 @@ export const AgentOSWorkspaceControlCenterBase = ({ workspaceId, pageState, cont
                 heading: defineContractComponent("agentos-page-heading", {
                     identity: defineContractComponent("agentos-page-identity", {
                         mark: defineLeafComponent("tile-icon", {}, () => (
-                            <TileIcon props={{ icon: "agentos", signal: controlCenterState === "refused" ? "attention" : controlCenterState === "ready" ? "active" : "none" }} isLoading={controlCenterState === "loading"} />
+                            <TileIcon props={{ icon: "agentos", signal: workspaceSignal(controlCenterState) }} isLoading={controlCenterState === "loading"} />
                         )),
                         copy: defineContractComponent("agentos-page-title-stack", {
                             eyebrow: defineLeafComponent("text", { size: "sm", tone: "accent" }, () => (

@@ -1,31 +1,36 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
-import { useLocale, useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
-import { myAgentosCustomModuleStudio, type AgentosModuleStudio } from "@/modules/api/console"
-import { useSession } from "@/modules/auth/session"
+import { useTranslations } from "next-intl"
+import { useRouter } from "@/i18n/navigation"
+import { useQueryMyAgentosCustomModuleStudioSwr } from "@/hooks/swr"
 import { AgentOSModuleStudioPageBase, AgentOSModuleStudioProjectionProvider } from "./component"
 
 type AgentOSModuleStudioPageProps = { readonly workspaceId: string, readonly moduleId: string }
 
+type StudioPageContentProps = AgentOSModuleStudioPageProps & {
+    readonly labels: Parameters<typeof AgentOSModuleStudioPageBase>[0]["labels"]
+    readonly onBack: () => void
+}
+
+const StudioPageContent = (props: StudioPageContentProps) => <AgentOSModuleStudioPageBase {...props} />
+
 /** Connect localized copy and exact module identity for the resumable studio. */
 export const AgentOSModuleStudioPage = ({ workspaceId, moduleId }: AgentOSModuleStudioPageProps) => {
     const t = useTranslations("console.agentos.modules.studioPage")
-    const locale = useLocale()
     const router = useRouter()
-    const session = useSession()
-    const [studio, setStudio] = useState<AgentosModuleStudio | null>()
-    const loadIdentity = useCallback(async () => {
-        const result = await myAgentosCustomModuleStudio(workspaceId, moduleId)
-        setStudio(result.ok ? result.data : null)
-    }, [moduleId, workspaceId])
-    useEffect(() => {
-        if (session.state.status === "signed-in") void loadIdentity()
-    }, [loadIdentity, session.state.status])
-    return <AgentOSModuleStudioProjectionProvider value={{ studio, refresh: loadIdentity }} render={() => (
-        <AgentOSModuleStudioPageBase workspaceId={workspaceId} moduleId={moduleId} labels={{ path: t("path"), modules: t("modules"), title: studio?.module.name ?? t("title"), description: t("description"), eyebrow: t("eyebrow"), sections: t("sections") }} onBack={() => router.push(`/${locale}/agentos/workspaces/${workspaceId}/modules`)} />
-    )} />
+    const query = useQueryMyAgentosCustomModuleStudioSwr(workspaceId, moduleId)
+    const studio = query.data === undefined ? undefined : query.data.ok ? query.data.data : null
+    const refresh = async () => { await query.mutate() }
+    return <AgentOSModuleStudioProjectionProvider
+        value={{ studio, refresh }}
+        render={StudioPageContent}
+        renderProps={{
+            workspaceId,
+            moduleId,
+            labels: { path: t("path"), modules: t("modules"), title: studio?.module.name ?? t("title"), description: t("description"), eyebrow: t("eyebrow"), sections: t("sections") },
+            onBack: () => router.push(`/agentos/workspaces/${workspaceId}/modules`),
+        }}
+    />
 }
 
 /** Source-level tier marker for the connected module studio page. */

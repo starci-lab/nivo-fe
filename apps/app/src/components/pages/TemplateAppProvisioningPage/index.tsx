@@ -1,16 +1,13 @@
 "use client"
 
-import { useLocale, useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
-import { DEFAULT_LOCALE } from "@/i18n/config"
+import { useTranslations } from "next-intl"
+import { useRouter } from "@/i18n/navigation"
 import { TemplateAppProvisioningPageBase, type TemplateAppProvisioningPageProps } from "./component"
 
 /** Resolve route-level copy and navigation around the connected lifecycle block. */
 export const TemplateAppProvisioningPage = (props: TemplateAppProvisioningPageProps) => {
     const t = useTranslations("console")
-    const locale = useLocale()
     const router = useRouter()
-    const localeSegment = locale === DEFAULT_LOCALE ? "" : `/${locale}`
     return (
         <TemplateAppProvisioningPageBase
             {...props}
@@ -22,7 +19,7 @@ export const TemplateAppProvisioningPage = (props: TemplateAppProvisioningPagePr
                 provisioningTitle: t("apps.provisioningTitle"),
                 provisioningDescription: t("apps.provisioningDescription"),
             }}
-            onOpenApps={() => router.push(`${localeSegment}/apps`)}
+            onOpenApps={() => router.push("/apps")}
         />
     )
 }

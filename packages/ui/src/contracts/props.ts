@@ -131,7 +131,7 @@ export type ContractSlots<K extends ContractKey> = {
 export type ContractProjection<K extends ContractKey> = {
     readonly kind: "projection"
     readonly meta: ContractComponentMeta<K>
-    readonly project: () => ReactNode
+    readonly project: ComponentType
 }
 
 /** A real component type whose runtime input remains separate from its contract identity. */
@@ -194,7 +194,7 @@ export const defineContractComponent = ((contract: ContractKey, input: unknown) 
 /** Brand the complete node produced by a branch that owns wrappers a contract cannot express. */
 export const defineContractProjection = <const K extends ContractKey>(
     contract: K,
-    render: () => ReactNode,
+    render: ComponentType,
 ): ContractProjection<K> => ({
         kind: "projection",
         meta: { shape: "contract", contract } as const,

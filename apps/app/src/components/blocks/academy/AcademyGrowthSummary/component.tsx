@@ -30,7 +30,7 @@ export type AcademyGrowthSummaryViewProps = {
 }
 
 /** Render aggregate facts without fetching or formatting. */
-export const AcademyGrowthSummaryBase = ({ state, data, labels, revenue }: AcademyGrowthSummaryViewProps) => {
+const AcademyGrowthSummaryContent = ({ state, data, labels, revenue }: AcademyGrowthSummaryViewProps) => {
     const facts = [
         { id: "revenue", subject: revenue, caption: labels.revenue },
         { id: "orders", subject: String(data?.paidOrders ?? 0), caption: labels.orders },
@@ -70,6 +70,9 @@ export const AcademyGrowthSummaryBase = ({ state, data, labels, revenue }: Acade
         </>
     )
 }
+
+/** Stable typed root for the Academy growth block. */
+export const AcademyGrowthSummaryBase = (props: AcademyGrowthSummaryViewProps) => <AcademyGrowthSummaryContent {...props} />
 
 /** Source-level tier marker for the pure Academy growth block. */
 export const meta = { shape: "block", world: "pure" } as const

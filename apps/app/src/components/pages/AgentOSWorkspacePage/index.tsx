@@ -1,6 +1,7 @@
 "use client"
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
+import { usePathname, useRouter } from "@/i18n/navigation"
 import { AgentOSWorkspacePageBase, type AgentOSWorkspacePageState } from "./component"
 
 /** Exact workspace route identity connected by the page. */

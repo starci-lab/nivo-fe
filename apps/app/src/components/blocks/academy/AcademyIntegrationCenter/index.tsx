@@ -1,18 +1,8 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useState } from "react"
 import { useTranslations } from "next-intl"
-import {
-    beginAcademyZaloAuthorization,
-    createAcademyWebhook,
-    myAcademyIntegrations,
-    saveAcademyAnalytics,
-    saveAcademyCredential,
-    saveAcademyGoogleOAuth,
-    setAcademyCustomDomain,
-    type AcademyIntegrations,
-} from "@/modules/api/console"
-import { useSession } from "@/modules/auth/session"
+import { useMutateAcademyIntegrationSwr, useQueryMyAcademyIntegrationsSwr } from "@/hooks/swr"
 import { AcademyIntegrationCenterBase, type AcademyIntegrationCard, type AcademyIntegrationFormField } from "./component"
 
 /** Owner-scoped identity consumed by Integration Center. */
@@ -36,20 +26,13 @@ const toneOf = (status: string): "neutral" | "success" | "warning" | "danger" =>
 /** Own provider forms and write-only mutations; safe status is reloaded after each save. */
 export const AcademyIntegrationCenter = ({ siteId }: AcademyIntegrationCenterProps) => {
     const t = useTranslations("console.academyControlCenter.integrations")
-    const session = useSession()
-    const [answer, setAnswer] = useState<AcademyIntegrations | null | undefined>(undefined)
+    const query = useQueryMyAcademyIntegrationsSwr(siteId)
+    const integrationMutation = useMutateAcademyIntegrationSwr(siteId)
+    const answer = query.data === undefined ? undefined : query.data.ok ? query.data.data : null
     const [selectedId, setSelectedId] = useState<ProviderId>()
     const [values, setValues] = useState<Readonly<Record<string, string>>>({})
     const [pendingId, setPendingId] = useState<ProviderId>()
     const [outcome, setOutcome] = useState<string>()
-    const load = useCallback(async () => {
-        const result = await myAcademyIntegrations(siteId)
-        setAnswer(result.ok ? result.data : null)
-    }, [siteId])
-    useEffect(() => {
-        if (session.state.status === "signed-in") void load()
-    }, [load, session.state.status])
-
     const provider = (id: ProviderId) => {
         if (answer === null || answer === undefined) return undefined
         if (id === "google") return answer.google
@@ -116,12 +99,12 @@ export const AcademyIntegrationCenter = ({ siteId }: AcademyIntegrationCenterPro
 
     /** Each provider writes through its own mutation; the caller owns the shared pending state. */
     const saveProvider = async (id: ProviderId) => {
-        if (id === "domain") return setAcademyCustomDomain({ siteId, domain: values.domain?.trim() || null })
-        if (id === "google") return saveAcademyGoogleOAuth({ siteId, clientId: values.clientId ?? "", clientSecret: values.clientSecret ?? "" })
-        if (id === "smtp" || id === "payment") return saveAcademyCredential({ siteId, key: values.credentialKey ?? "", value: values.credentialValue ?? "" })
-        if (id === "zalo") return beginAcademyZaloAuthorization(siteId)
-        if (id === "ga4" || id === "meta_pixel") return saveAcademyAnalytics({ siteId, provider: id, identifier: values.identifier?.trim() || null, consentMode: consentModeOf(values.consentMode) })
-        return createAcademyWebhook({ siteId, endpoint: values.endpoint ?? "", events: (values.events ?? "").split(",").map((event) => event.trim()).filter(Boolean) })
+        if (id === "domain") return integrationMutation.trigger({ kind: "domain", domain: values.domain?.trim() || null })
+        if (id === "google") return integrationMutation.trigger({ kind: "google", clientId: values.clientId ?? "", clientSecret: values.clientSecret ?? "" })
+        if (id === "smtp" || id === "payment") return integrationMutation.trigger({ kind: "credential", key: values.credentialKey ?? "", value: values.credentialValue ?? "" })
+        if (id === "zalo") return integrationMutation.trigger({ kind: "zalo" })
+        if (id === "ga4" || id === "meta_pixel") return integrationMutation.trigger({ kind: "analytics", provider: id, identifier: values.identifier?.trim() || null, consentMode: consentModeOf(values.consentMode) })
+        return integrationMutation.trigger({ kind: "webhook", endpoint: values.endpoint ?? "", events: (values.events ?? "").split(",").map((event) => event.trim()).filter(Boolean) })
     }
 
     /** A webhook reports the copied signing secret; every other provider reports a plain save. */
@@ -135,13 +118,12 @@ export const AcademyIntegrationCenter = ({ siteId }: AcademyIntegrationCenterPro
         setPendingId(selectedId)
         setOutcome(undefined)
         const result = await saveProvider(selectedId)
-        if (result.ok && selectedId === "zalo" && "authorizationUrl" in result.data) window.open(result.data.authorizationUrl, "academy-zalo-oauth", "popup,width=520,height=720")
-        if (result.ok && selectedId === "webhook" && "signingSecret" in result.data) {
-            try { await navigator.clipboard.writeText(result.data.signingSecret) } catch { /* Browser permission may refuse clipboard; never echo the secret into the DOM. */ }
+        if (result.ok && selectedId === "zalo" && result.authorizationUrl !== undefined) window.open(result.authorizationUrl, "academy-zalo-oauth", "popup,width=520,height=720")
+        if (result.ok && selectedId === "webhook" && result.signingSecret !== undefined) {
+            try { await navigator.clipboard.writeText(result.signingSecret) } catch { /* Browser permission may refuse clipboard; never echo the secret into the DOM. */ }
         }
         setOutcome(outcomeOf(selectedId, result.ok))
         setPendingId(undefined)
-        if (result.ok) await load()
     }
 
     const settledState = answer === null ? "refused" : "answered"

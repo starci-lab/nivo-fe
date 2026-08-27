@@ -1,3 +1,6 @@
+@import "@starci/grammar/common/styles.css";
+@import "@starci/grammar/core/styles.css";
+@import "@nivo/ui/styles.css";
 @import "tailwindcss";
 
 /*
@@ -10,35 +13,4 @@
 :root {
     --nivo-brand-ink: oklch(16% 0.035 255);
     --nivo-brand-accent: oklch(57% 0.24 25);
-}
-
-.nivo-brand__ink {
-    fill: var(--nivo-brand-ink);
-}
-
-.nivo-brand__accent {
-    fill: none;
-    stroke: var(--nivo-brand-accent);
-    stroke-linecap: butt;
-    stroke-width: 18;
-}
-
-/*
- * A press label is ruled with the SAME mark the vendor link uses, because the two sit in one card
- * and stand for one promise. The vendor bakes `--separator-tertiary` at 1.5px into `.link`; naming
- * a token from the scale instead gives the title a 91% hairline beside a link ruled at 85%, and the
- * pair reads as two different weights of underline.
- */
-[data-press-label="true"] {
-    text-decoration-color: var(--separator-tertiary);
-    text-decoration-thickness: 1.5px;
-}
-
-/*
- * Hovering a control INSIDE a press target is not hovering the press target. The label underlines
- * to say "this whole surface opens something", and while the pointer is on a link that opens
- * something else, that sentence is false: the reader is told two destinations answer one gesture.
- */
-[data-component="PressableSurface"]:has([data-component="TextLink"]:hover) [data-press-label="true"] {
-    text-decoration-line: none;
 }

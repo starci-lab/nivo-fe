@@ -42,6 +42,14 @@ const pendingRows = () => Array.from({ length: 3 }, (_, index) => defineContract
     action: defineLeafComponent("button", {}, () => <Button props={{ label: "" }} isLoading />),
 }))
 
+const appsListContent = (state: Extract<AppsSummaryState, { readonly phase: "pending" | "populated" }>, onOpenApp: AppsSummaryProps["onOpenApp"]) => (
+    defineContractComponent("identity-action-list", (input: LeafProps<{ readonly label: string, readonly actionLabel?: string }, SurfaceListCardActions>) => (
+        <Tree key={input.props.label} contract="identity-action-list" render={defineContractComponent("identity-action-list", {
+            item: state.phase === "pending" ? pendingRows() : rows(state.items, onOpenApp),
+        })} />
+    ))
+)
+
 /** Draw exact owned applications as one joined collection. */
 export const AppsSummaryBase = ({ label, openAllLabel, state, onOpenApp, onOpenAll }: AppsSummaryProps) => {
     if (state.phase === "empty") return <SurfaceCard props={{ label }} contract="centred-empty-notice" render={defineContractComponent("centred-empty-notice", {
@@ -51,11 +59,7 @@ export const AppsSummaryBase = ({ label, openAllLabel, state, onOpenApp, onOpenA
         note: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: state.message, size: "sm", tone: "muted" }} />),
     })} />
     const isLoading = state.phase === "pending"
-    const content = defineContractComponent("identity-action-list", (input: LeafProps<{ readonly label: string, readonly actionLabel?: string }, SurfaceListCardActions>) => (
-        <Tree key={input.props.label} contract="identity-action-list" render={defineContractComponent("identity-action-list", {
-            item: isLoading ? pendingRows() : rows(state.items, onOpenApp),
-        })} />
-    ))
+    const content = appsListContent(state, onOpenApp)
     return <SurfaceListCard props={{ label, actionLabel: openAllLabel }} on={{ act: onOpenAll }} contract="identity-action-list" render={content} isLoading={isLoading} />
 }
 

@@ -10,7 +10,10 @@ export type AgentOSReadinessComponentListViewProps = {
     readonly loading?: boolean
 }
 
-const toneOf = (verdict: string): BadgeTone => verdict === "ready" || verdict === "healthy" || verdict === "passed" || verdict === "configured" ? "success" : verdict === "pending" || verdict === "testing" ? "warning" : "danger"
+const toneOf = (verdict: string): BadgeTone => {
+    if (["ready", "healthy", "passed", "configured"].includes(verdict)) return "success"
+    return verdict === "pending" || verdict === "testing" ? "warning" : "danger"
+}
 
 /** Draw the bounded provider, model, embedding, Qdrant and retrieval verdicts. */
 export const AgentOSReadinessComponentListBase = ({ components, labels, loading = false }: AgentOSReadinessComponentListViewProps) => {

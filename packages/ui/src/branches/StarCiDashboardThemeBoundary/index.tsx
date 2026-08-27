@@ -1,15 +1,16 @@
 import { motion } from "framer-motion"
-import type { ReactNode } from "react"
+import type { ComponentType } from "react"
 
 /** Fixed content projected into the one authenticated-dashboard visual theme. */
-export type StarCiDashboardThemeBoundaryProps = {
-    readonly content: ReactNode
+export type StarCiDashboardThemeBoundaryProps<P extends object> = {
+    readonly content: ComponentType<P>
+    readonly contentProps: P
 }
 
 /** Bind every authenticated dashboard viewport and disclosure state to the StarCi theme. */
-export const StarCiDashboardThemeBoundary = ({ content }: StarCiDashboardThemeBoundaryProps) => (
-    <motion.div layout data-theme="starci-dashboard" data-visual-contract="starci-dashboard-theme">
-        {content}
+export const StarCiDashboardThemeBoundary = <P extends object>({ content: Content, contentProps }: StarCiDashboardThemeBoundaryProps<P>) => (
+    <motion.div data-theme="starci-dashboard" data-visual-contract="starci-dashboard-theme">
+        <Content {...contentProps} />
     </motion.div>
 )
 

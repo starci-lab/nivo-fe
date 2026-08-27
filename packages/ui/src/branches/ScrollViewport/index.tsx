@@ -1,9 +1,10 @@
 import { motion } from "framer-motion"
-import type { CSSProperties, ReactNode } from "react"
+import type { ComponentType, CSSProperties } from "react"
 
 /** Fixed content owned by the navigation scroll viewport. */
-export type ScrollViewportProps = {
-    readonly content: ReactNode
+export type ScrollViewportProps<P extends object> = {
+    readonly content: ComponentType<P>
+    readonly contentProps: P
     readonly ariaLabel?: string
 }
 
@@ -16,7 +17,7 @@ const VIEWPORT_STYLE: CSSProperties = {
 }
 
 /** Own the single contained vertical scroll region while keeping native scrollbar paint hidden. */
-export const ScrollViewport = ({ content, ariaLabel }: ScrollViewportProps) => (
+export const ScrollViewport = <P extends object>({ content: Content, contentProps, ariaLabel }: ScrollViewportProps<P>) => (
     <motion.div
         aria-label={ariaLabel}
         data-component="ScrollViewport"
@@ -24,7 +25,7 @@ export const ScrollViewport = ({ content, ariaLabel }: ScrollViewportProps) => (
         layoutScroll
         style={VIEWPORT_STYLE}
     >
-        {content}
+        <Content {...contentProps} />
     </motion.div>
 )
 

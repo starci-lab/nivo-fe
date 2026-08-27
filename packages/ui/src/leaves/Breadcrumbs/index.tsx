@@ -48,6 +48,7 @@ export const Breadcrumbs = ({ props, on }: BreadcrumbsProps) => props.mode === "
                 key={step.id}
                 id={step.id}
                 onPress={step.isCurrent === true ? undefined : () => on?.activate?.(step.id)}
+                className={step.isCurrent === true ? "min-w-0 max-w-[40vw] overflow-hidden text-ellipsis whitespace-nowrap" : undefined}
             >
                 {step.label}
             </HeroBreadcrumbs.Item>

@@ -1,8 +1,8 @@
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-    session: { state: { status: "signed-in" } },
+    session: { state: { status: "signed-in", accessToken: "test-token" } },
     api: {
         myExpertSites: vi.fn(),
         myAgentWorkspace: vi.fn(),
@@ -23,7 +23,7 @@ const Probe = () => <output>{JSON.stringify(useOverviewData())}</output>
 describe("OverviewDataProvider", () => {
     beforeEach(() => {
         vi.clearAllMocks()
-        mocks.session.state = { status: "signed-in" }
+        mocks.session.state = { status: "signed-in", accessToken: "test-token" }
         mocks.api.myExpertSites.mockResolvedValue({ ok: true, data: [{ id: "app" }] })
         mocks.api.myAgentWorkspace.mockResolvedValue({ ok: true, data: [{ id: "workspace" }] })
         mocks.api.myPodOpenclawStatus.mockResolvedValue({ ok: true, data: { reachable: false } })
@@ -33,17 +33,17 @@ describe("OverviewDataProvider", () => {
     })
 
     it("asks all six operations once and keeps their answers in one shared owner", async () => {
-        render(<OverviewDataProvider><Probe /></OverviewDataProvider>)
+        render(<OverviewDataProvider content={Probe} contentProps={{}} />)
 
-        await waitFor(() => expect(screen.getByText(/2450000/)).toBeInTheDocument())
+        expect(await screen.findByText(/2450000/)).toBeInTheDocument()
         for (const request of Object.values(mocks.api)) expect(request).toHaveBeenCalledTimes(1)
         expect(screen.getByText(/workspace/)).toBeInTheDocument()
         expect(screen.getByText(/invoice/)).toBeInTheDocument()
     })
 
     it("does not ask protected operations before the session is signed in", () => {
-        mocks.session.state = { status: "restoring" }
-        render(<OverviewDataProvider><Probe /></OverviewDataProvider>)
+        mocks.session.state = { status: "restoring", accessToken: "" }
+        render(<OverviewDataProvider content={Probe} contentProps={{}} />)
 
         for (const request of Object.values(mocks.api)) expect(request).not.toHaveBeenCalled()
         expect(screen.getByText(/"apps":null/)).toBeInTheDocument()

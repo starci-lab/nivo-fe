@@ -24,9 +24,10 @@ export const OverviewPulse = () => {
     const refusal = (code: string | undefined) => code !== undefined && NAMED_REFUSALS.has(code) ? t(`refusal.${code}`) : t("refusal.unknown")
     const money = (value: number) => format.number(value, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
     const day = (value: string) => format.dateTime(new Date(value), { day: "2-digit", month: "2-digit" })
-    const domainCaption = (domain: DomainRow) => domain.expiresAt !== null
-        ? t("domains.expiresAt", { date: day(domain.expiresAt) })
-        : domain.autoRenew ? t("domains.autoRenewOn") : t("domains.autoRenewOff")
+    const domainCaption = (domain: DomainRow) => {
+        if (domain.expiresAt !== null) return t("domains.expiresAt", { date: day(domain.expiresAt) })
+        return domain.autoRenew ? t("domains.autoRenewOn") : t("domains.autoRenewOff")
+    }
     const pending = (id: string, icon: OverviewPulseSignal["icon"], label: string): OverviewPulseSignal => ({ id, icon, label, phase: "pending", value: "", caption: t("state.loading") })
     const failed = (id: string, icon: OverviewPulseSignal["icon"], label: string, code: string | undefined): OverviewPulseSignal => ({ id, icon, label, phase: "failed", value: "—", caption: refusal(code) })
 
@@ -43,7 +44,9 @@ export const OverviewPulse = () => {
         if (!data.workspaces.ok) return failed("agentos", "agentos", t("agentos.title"), data.workspaces.code)
         const first = data.workspaces.data[0]
         if (first === undefined) return { id: "agentos", icon: "agentos" as const, label: t("agentos.title"), phase: "answered" as const, value: t("overview.none"), caption: t("agentos.emptyDescription") }
-        const caption = data.pod.ok ? (data.pod.data.reachable ? t("agentos.podReachable") : t("agentos.podUnreachable")) : refusal(data.pod.code)
+        let caption: string
+        if (data.pod.ok) caption = data.pod.data.reachable ? t("agentos.podReachable") : t("agentos.podUnreachable")
+        else caption = refusal(data.pod.code)
         return { id: "agentos", icon: "agentos" as const, label: t("agentos.title"), phase: "answered" as const, value: first.name ?? t("agentos.kindWorkspace"), caption }
     })()
     const domains = (() => {

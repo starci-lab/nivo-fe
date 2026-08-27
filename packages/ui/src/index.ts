@@ -22,6 +22,7 @@ export {
     contractNodeProps,
     contractSpec,
 } from "./contracts"
+export { NIVO_GRAMMAR, NIVO_GRAMMAR_CONTRACTS, NIVO_GRAMMAR_TREATMENTS } from "./contracts/grammar"
 export type {
     ChildrenOf,
     ContractChildSpec,
@@ -143,5 +144,7 @@ export { CollapsibleRail } from "./branches/CollapsibleRail"
 export type { CollapsibleRailProps } from "./branches/CollapsibleRail"
 export { ScrollViewport } from "./branches/ScrollViewport"
 export type { ScrollViewportProps } from "./branches/ScrollViewport"
+export { MarkdownComponent } from "./branches/MarkdownComponent"
+export type { MarkdownComponentProps } from "./branches/MarkdownComponent"
 export { StarCiDashboardThemeBoundary } from "./branches/StarCiDashboardThemeBoundary"
 export type { StarCiDashboardThemeBoundaryProps } from "./branches/StarCiDashboardThemeBoundary"

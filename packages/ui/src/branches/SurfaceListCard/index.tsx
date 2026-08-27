@@ -1,10 +1,7 @@
-import { Card } from "@heroui/react"
-import { Tree } from "../Tree"
-import { Heading } from "../../leaves/Heading"
 import { Text } from "../../leaves/Text"
 import { Button } from "../../leaves/Button"
 import type { JoinedListContractKey } from "../../contracts"
-import { defineContractComponent, defineLeafComponent } from "../../contracts/props"
+import { NivoCoreSurfaceListCard as CoreSurfaceListCard } from "../../contracts/grammar"
 import type {
     ContractRenderComponent,
     DataValue,
@@ -54,20 +51,8 @@ export const SurfaceListCard = <
     A extends SurfaceListCardActions = SurfaceListCardActions,
 >(input: SurfaceListCardProps<K, D, A>) => {
     const { props: surfaceProps, on, render: Content, isLoading = false } = input
-    const label = surfaceProps.fact === undefined ? (
-        <Heading props={{ content: surfaceProps.label, level: 3 }} />
-    ) : (
-        <Tree
-            contract="label-with-muted-fact-row"
-            render={defineContractComponent("label-with-muted-fact-row", {
-                label: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => (
-                    <Text props={{ content: surfaceProps.label, size: "sm", weight: "semibold" }} isLoading={isLoading} />
-                )),
-                fact: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                    <Text props={{ content: surfaceProps.fact, size: "xs", tone: "muted" }} isLoading={isLoading} />
-                )),
-            })}
-        />
+    const labelEnd = surfaceProps.fact === undefined ? undefined : (
+        <Text props={{ content: surfaceProps.fact, size: "xs", tone: "muted" }} isLoading={isLoading} />
     )
 
     // A whole-list action outranks the supporting sentence: only one of the two closes the surface.
@@ -77,21 +62,22 @@ export const SurfaceListCard = <
     )
 
     return (
-        <div data-component="SurfaceListCard" className="flex flex-col gap-3">
-            {surfaceProps.isLabelHidden === true ? null : label}
-            <Card
-                className="p-0"
-                data-component="SurfaceListCardSurface"
+        <CoreSurfaceListCard
+            depth={surfaceProps.isNested === true ? "nested" : "top"}
+            footer={showsAction ? (
+                <Button props={{ label: surfaceProps.actionLabel, size: "sm", variant: "primary" }} on={{ press: on?.act }} isLoading={isLoading} />
+            ) : description ?? undefined}
+            label={surfaceProps.label}
+            labelEnd={labelEnd}
+            labelHidden={surfaceProps.isLabelHidden === true}
+            rowMode="interactive"
+        >
+            <div
                 data-surface-context={surfaceProps.isNested === true ? "nested" : "page"}
             >
-                <Card.Content className="p-0" data-component="SurfaceListCardBody">
-                    <Content props={surfaceProps} on={on} isLoading={isLoading} />
-                </Card.Content>
-            </Card>
-            {showsAction ? (
-                <Button props={{ label: surfaceProps.actionLabel, size: "sm", variant: "primary" }} on={{ press: on?.act }} isLoading={isLoading} />
-            ) : description}
-        </div>
+                <Content props={surfaceProps} on={on} isLoading={isLoading} />
+            </div>
+        </CoreSurfaceListCard>
     )
 }
 

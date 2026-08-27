@@ -1,8 +1,20 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useEffect, useRef, useState } from "react"
+import {
+    authenticationOauthRedirectUrl,
+    rememberOauthProvider,
+    useMutateForgotPasswordInitSwr,
+    useMutateForgotPasswordResendSwr,
+    useMutateForgotPasswordVerifyOtpSwr,
+    useMutateSignInSwr,
+    useMutateSignUpInitSwr,
+    useMutateSignUpResendSwr,
+    useMutateSignUpVerifyOtpSwr,
+    useOauthReturnExchange,
+} from "@/hooks/swr"
 import { AuthenticationPageBase as AuthenticationPageView } from "./component"
 import type {
     AuthActions,
@@ -11,19 +23,7 @@ import type {
     AuthMode,
     AuthenticationPanelProps,
 } from "@/components/blocks/auth/AuthenticationPanel"
-import {
-    exchangeOauthCode,
-    forgotPasswordInit,
-    forgotPasswordResend,
-    forgotPasswordVerifyOtp,
-    oauthRedirectUrl,
-    signIn,
-    signUpInit,
-    signUpResend,
-    signUpVerifyOtp,
-    type OauthProvider,
-    type OtpChallenge,
-} from "@/modules/api/auth"
+import type { OtpChallenge } from "@/modules/api/auth"
 import { useSession } from "@/modules/auth/session"
 
 /**
@@ -82,51 +82,6 @@ const RESEND_COOLDOWN_SECONDS = 60
 /** Seconds per minute, so the code hint states a lifetime rather than a raw count. */
 const SECONDS_PER_MINUTE = 60
 
-/** Where the door a hand-off left through is kept while the reader is away at the provider. */
-const PROVIDER_KEY = "nivo.oauth.provider"
-
-/** The door this build offers, and what an unreadable memory falls back to. */
-const DEFAULT_PROVIDER: OauthProvider = "google"
-
-/**
- * Note which door a hand-off is leaving through.
- *
- * SESSION STORAGE RATHER THAN THE URL, because the return address is replayed verbatim at the token
- * exchange and anything appended to it would have to match on both legs exactly. This survives the
- * round trip and dies with the tab, which is the same lifetime the sign-in has.
- *
- * IN A TRY/CATCH, BECAUSE STORAGE THROWS. Some private modes and some cookie settings refuse it
- * outright. What is being remembered is only which of two names to send, and the backend refuses a
- * name that disagrees with the bundle it cached - so a sign-in that crashed over this would be
- * failing over something it can do without.
- *
- * @param provider - The door being left through.
- */
-const rememberProvider = (provider: OauthProvider) => {
-    try {
-        window.sessionStorage.setItem(PROVIDER_KEY, provider)
-    } catch {
-        // Unreadable storage is handled where it is read, by naming the door this build offers.
-    }
-}
-
-/**
- * Recall the door a hand-off left through, and forget it.
- *
- * SPENT ON READING, so a later reload cannot resurrect a journey that already ended.
- *
- * @returns The remembered door, or the one this build offers when nothing could be read.
- */
-const takeProvider = (): OauthProvider => {
-    try {
-        const remembered = window.sessionStorage.getItem(PROVIDER_KEY)
-        window.sessionStorage.removeItem(PROVIDER_KEY)
-        return remembered === "github" ? "github" : DEFAULT_PROVIDER
-    } catch {
-        return DEFAULT_PROVIDER
-    }
-}
-
 /**
  * The authentication screen.
  *
@@ -136,6 +91,14 @@ export const AuthenticationPage = () => {
     const t = useTranslations("authentication")
     const router = useRouter()
     const session = useSession()
+    const signInMutation = useMutateSignInSwr()
+    const signUpInitMutation = useMutateSignUpInitSwr()
+    const signUpResendMutation = useMutateSignUpResendSwr()
+    const signUpVerifyMutation = useMutateSignUpVerifyOtpSwr()
+    const forgotPasswordInitMutation = useMutateForgotPasswordInitSwr()
+    const forgotPasswordResendMutation = useMutateForgotPasswordResendSwr()
+    const forgotPasswordVerifyMutation = useMutateForgotPasswordVerifyOtpSwr()
+    const oauthReturn = useOauthReturnExchange()
     const [mode, setMode] = useState<AuthMode>("signIn")
     const [phase, setPhase] = useState<AuthPhase>("details")
     const [email, setEmail] = useState("")
@@ -161,7 +124,7 @@ export const AuthenticationPage = () => {
      * design - and development's deliberate double-mounting would otherwise turn a working sign-in
      * into a refusal that appears only on a developer's machine.
      */
-    const hasExchanged = useRef(false)
+    const hasAdoptedOauth = useRef(false)
 
     useEffect(() => {
         if (cooldownSeconds === 0) return undefined
@@ -216,50 +179,21 @@ export const AuthenticationPage = () => {
      * would send that reader to a console they are not signed in to, silently.
      */
     useEffect(() => {
-        const query = new URLSearchParams(window.location.search)
-        const code = query.get("code")
-        const state = query.get("state")
-        const wasRefused = query.has("error")
-        if ((code === null || state === null) && !wasRefused) {
+        const result = oauthReturn.answer
+        if (result === undefined || hasAdoptedOauth.current) return
+        hasAdoptedOauth.current = true
+        if (!result.ok) {
+            refuse(result.reason)
             return
         }
-        if (hasExchanged.current) {
+        if (result.data.requiresTwoFactor) {
+            setStatusMessage("")
+            setPhase("twoFactor")
             return
         }
-        hasExchanged.current = true
-        const provider = takeProvider()
-        window.history.replaceState(null, "", window.location.pathname)
-
-        if (code === null || state === null) {
-            /*
-             * A REFUSAL AT THE PROVIDER IS NOT AN ERROR TO REPORT. Keycloak writes `error` on the
-             * return address for the case that dominates it - the reader pressing cancel at the
-             * provider - and telling somebody their deliberate choice failed is worse than saying
-             * nothing. Clearing the query is the whole handling: they are back at a clean form, which
-             * is where cancelling meant to leave them. Keycloak's own `error_description` is not
-             * shown, because it is protocol prose in a language nobody chose.
-             */
-            return
-        }
-        setIsPending(true)
-
-        const finish = async () => {
-            const result = await exchangeOauthCode({ code, provider, state })
-            setIsPending(false)
-            if (!result.ok) {
-                refuse(result.reason)
-                return
-            }
-            if (result.data.requiresTwoFactor) {
-                setStatusMessage("")
-                setPhase("twoFactor")
-                return
-            }
-            session.adopt(result.data)
-            router.push("/overview")
-        }
-        void finish()
-    }, [router, session])
+        session.adopt(result.data)
+        router.push("/overview")
+    }, [oauthReturn.answer, router, session])
 
     /**
      * Submit the first step of whichever journey is running.
@@ -272,7 +206,7 @@ export const AuthenticationPage = () => {
         setStatusMessage("")
 
         if (mode === "signIn") {
-            const result = await signIn(details)
+            const result = await signInMutation.trigger(details)
             setIsPending(false)
             if (!result.ok) {
                 refuse(result.reason)
@@ -289,8 +223,8 @@ export const AuthenticationPage = () => {
         }
 
         const result = mode === "signUp"
-            ? await signUpInit(details)
-            : await forgotPasswordInit({ email: details.email })
+            ? await signUpInitMutation.trigger(details)
+            : await forgotPasswordInitMutation.trigger({ email: details.email })
         setIsPending(false)
         if (!result.ok) {
             refuse(result.reason)
@@ -312,7 +246,7 @@ export const AuthenticationPage = () => {
         setStatusMessage("")
 
         if (mode === "signUp") {
-            const result = await signUpVerifyOtp({ challengeId: challengeId.current, otp: code.otp })
+            const result = await signUpVerifyMutation.trigger({ challengeId: challengeId.current, otp: code.otp })
             setIsPending(false)
             if (!result.ok) {
                 refuse(result.reason)
@@ -325,7 +259,7 @@ export const AuthenticationPage = () => {
             return
         }
 
-        const result = await forgotPasswordVerifyOtp({
+        const result = await forgotPasswordVerifyMutation.trigger({
             challengeId: challengeId.current,
             otp: code.otp,
             newPassword: code.newPassword,
@@ -344,8 +278,8 @@ export const AuthenticationPage = () => {
     const resend = async () => {
         setIsPending(true)
         const result = mode === "signUp"
-            ? await signUpResend({ challengeId: challengeId.current })
-            : await forgotPasswordResend({ challengeId: challengeId.current })
+            ? await signUpResendMutation.trigger({ challengeId: challengeId.current })
+            : await forgotPasswordResendMutation.trigger({ challengeId: challengeId.current })
         setIsPending(false)
         if (!result.ok) {
             refuse(result.reason)
@@ -393,11 +327,11 @@ export const AuthenticationPage = () => {
              * press costs nothing instead - each hand-off mints its own state on the backend and the
              * one that is completed is the one that counts.
              */
-            rememberProvider(provider)
+            rememberOauthProvider(provider)
             setIsError(false)
             setStatusMessage(t("providerUnavailable", { provider: provider === "google" ? "Google" : provider }))
             const returnTo = `${window.location.origin}${window.location.pathname}`
-            window.location.assign(oauthRedirectUrl(provider, returnTo))
+            window.location.assign(authenticationOauthRedirectUrl(provider, returnTo))
         },
         onward: () => {
             if (mode === "forgotPassword") {
@@ -413,7 +347,7 @@ export const AuthenticationPage = () => {
         },
     }
 
-    const frame = { title: t(`${mode}.title`), subtitle: t(`${mode}.subtitle`), isPending }
+    const frame = { title: t(`${mode}.title`), subtitle: t(`${mode}.subtitle`), isPending: isPending || oauthReturn.isMutating }
 
     /*
      * THE PANEL'S SITUATION, RESOLVED HERE AND HANDED OVER WHOLE. Every string is read as

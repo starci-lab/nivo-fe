@@ -12,8 +12,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
       '@starci/eslint-canon-fe':
-        specifier: ^1.4.0
-        version: 1.4.0(eslint@10.8.1(supports-color@7.2.0))
+        specifier: ^2.0.0
+        version: 2.0.0(eslint@10.8.1(supports-color@7.2.0))
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -605,8 +605,8 @@ packages:
     engines: {node: '>=22.12.0'}
     hasBin: true
 
-  '@starci/eslint-canon-fe@1.4.0':
-    resolution: {integrity: sha512-2yn7TuV8w6XLoUQp0m7OUXzCBAYI78Gh/IjGZx25HW5G0FQcTTkYCQyu8Ak4UP0Kef7EIadWfB6pYlEydh/Irg==}
+  '@starci/eslint-canon-fe@2.0.0':
+    resolution: {integrity: sha512-/j1goAKnIM5biTLN496bzFYWVyLV3D8PAYQDWKoWhKALfyD61a5Qt08Qv9A2Ny/FmBpRnC1V6y7hl4TJL/9lCA==}
     engines: {node: '>=20.9.0'}
     peerDependencies:
       eslint: '>=9'
@@ -2251,7 +2251,7 @@ snapshots:
       - react-native-b4a
       - supports-color
 
-  '@starci/eslint-canon-fe@1.4.0(eslint@10.8.1(supports-color@7.2.0))':
+  '@starci/eslint-canon-fe@2.0.0(eslint@10.8.1(supports-color@7.2.0))':
     dependencies:
       eslint: 10.8.1(supports-color@7.2.0)
 

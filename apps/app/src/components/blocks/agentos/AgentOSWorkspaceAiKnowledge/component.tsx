@@ -26,7 +26,10 @@ const fact = (label: string, value: string | undefined, loading: boolean) => def
     label: defineLeafComponent("text", { size: "sm" }, () => <Text props={{ content: label, size: "sm" }} />),
     value: defineLeafComponent("text", { size: "sm" }, () => <Text props={{ content: value, size: "sm" }} isLoading={loading} />),
 })
-const toneOf = (state: AgentOSWorkspaceAiKnowledgeViewProps["state"]): BadgeTone => state === "ready" || state === "success" ? "success" : state === "refused" ? "danger" : "warning"
+const toneOf = (state: AgentOSWorkspaceAiKnowledgeViewProps["state"]): BadgeTone => {
+    if (state === "ready" || state === "success") return "success"
+    return state === "refused" ? "danger" : "warning"
+}
 
 const refusingStage = (readiness: AgentosAiKnowledgeReadiness | undefined) => {
     if (readiness?.credentialStatus !== "configured") return 0
@@ -36,20 +39,43 @@ const refusingStage = (readiness: AgentosAiKnowledgeReadiness | undefined) => {
     return 4
 }
 
+const currentStage = (state: AgentOSWorkspaceAiKnowledgeViewProps["state"], readiness: AgentosAiKnowledgeReadiness | undefined) => {
+    if (state === "recovering") return 2
+    if (state === "testing" || state === "ready" || state === "success") return 4
+    return state === "refused" ? refusingStage(readiness) : 0
+}
+
+const readinessStepState = (index: number, current: number): LifecycleStepData["state"] => {
+    if (index < current) return "done"
+    return index === current ? "current" : "upcoming"
+}
+
+const readinessStepLabel = (index: number, current: number, state: AgentOSWorkspaceAiKnowledgeViewProps["state"], labels: AgentOSWorkspaceAiKnowledgeLabels) => {
+    if (index < current) return labels.complete
+    if (index !== current) return labels.upcoming
+    if (state === "refused") return labels.refused
+    return state === "ready" || state === "success" ? labels.ready : labels.testing
+}
+
 const readinessSteps = (state: AgentOSWorkspaceAiKnowledgeViewProps["state"], readiness: AgentosAiKnowledgeReadiness | undefined, labels: AgentOSWorkspaceAiKnowledgeLabels): ReadonlyArray<LifecycleStepData> => {
-    const current = state === "recovering" ? 2 : state === "testing" || state === "ready" || state === "success" ? 4 : state === "refused" ? refusingStage(readiness) : 0
+    const current = currentStage(state, readiness)
     return labels.readinessStages.map((label, index) => ({
         ordinal: String(index + 1),
         label,
-        state: index < current ? "done" : index === current ? "current" : "upcoming",
-        stateLabel: index < current ? labels.complete : index === current ? (state === "refused" ? labels.refused : state === "ready" || state === "success" ? labels.ready : labels.testing) : labels.upcoming,
+        state: readinessStepState(index, current),
+        stateLabel: readinessStepLabel(index, current, state, labels),
     }))
 }
 
 /** Compose the complete workspace AI verdict, source provenance and bounded recovery controls. */
 export const AgentOSWorkspaceAiKnowledgeBase = ({ state, readiness, labels, onTest, onRecover }: AgentOSWorkspaceAiKnowledgeViewProps) => {
     const loading = state === "loading"
-    const status = state === "ready" || state === "success" ? labels.ready : state === "refused" ? labels.refused : labels.testing
+    let status = labels.testing
+    if (state === "ready" || state === "success") status = labels.ready
+    else if (state === "refused") status = labels.refused
+    const embedding = readiness === undefined ? undefined : `${readiness.embeddingProfile} · ${readiness.embeddingDimension}`
+    let credential = readiness?.credentialStatus
+    if (credential !== undefined && readiness !== undefined && readiness.credentialMaskedHint !== null) credential += ` · ${readiness.credentialMaskedHint}`
     const summary = defineContractProjection("workspace-ai-readiness-summary", () => <SurfaceCard props={{ label: labels.title }} contract="workspace-ai-readiness-summary" render={defineContractComponent("workspace-ai-readiness-summary", {
         identity: defineContractComponent("subject-over-muted-caption", {
             subject: defineLeafComponent("text", {}, () => <Text props={{ content: labels.title, size: "md", weight: "semibold" }} />),
@@ -59,8 +85,8 @@ export const AgentOSWorkspaceAiKnowledgeBase = ({ state, readiness, labels, onTe
         facts: defineContractComponent("ai-readiness-fact-stack", { fact: [
             fact(labels.provider, readiness?.provider, loading),
             fact(labels.model, readiness?.chatModel, loading),
-            fact(labels.embedding, readiness === undefined ? undefined : `${readiness.embeddingProfile} · ${readiness.embeddingDimension}`, loading),
-            fact(labels.credential, readiness === undefined ? undefined : `${readiness.credentialStatus}${readiness.credentialMaskedHint === null ? "" : ` · ${readiness.credentialMaskedHint}`}`, loading),
+            fact(labels.embedding, embedding, loading),
+            fact(labels.credential, credential, loading),
             fact(labels.qdrant, readiness?.qdrantHealth, loading),
             fact(labels.testedAt, readiness?.testedAt === null || readiness?.testedAt === undefined ? "—" : labels.formatTestedAt(readiness.testedAt), loading),
         ] }),

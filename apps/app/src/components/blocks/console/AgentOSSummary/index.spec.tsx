@@ -13,7 +13,7 @@ vi.mock("next-intl", () => ({
     useTranslations: () => (key: string) => key,
     useFormatter: () => ({ dateTime: (value: Date) => value.toISOString().slice(11, 16) }),
 }))
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("@/modules/overview/context", () => ({ useOverviewData: () => mocks.data }))
 
 import { AgentOSSummary } from "."
@@ -56,7 +56,7 @@ describe("AgentOSSummary", () => {
         render(<AgentOSSummary />)
         expect(screen.getByText("refusal.POD_REGISTRATION_MISSING_EXCEPTION")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "agentos.openService" }))
-        expect(mocks.push).toHaveBeenCalledWith("/en/agentos/workspaces/workspace-2")
+        expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/workspace-2")
     })
 
     it("settles missing and refused workspace answers", () => {

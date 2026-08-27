@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => {
@@ -26,7 +27,7 @@ type AgentProbeProps = {
     on?: { request?: () => void, statusAction?: () => void }
 }
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: mocks.replace, push: mocks.push }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ replace: mocks.replace, push: mocks.push }) }))
 vi.mock("next-intl", () => ({
     useTranslations: () => mocks.t,
     useLocale: () => "en",
@@ -50,6 +51,9 @@ import { AgentOSProvisioning } from "./"
 const item = { id: "item", slug: "agent-os", name: "nivo AI Agent", tiers: [{ id: "tier", name: "Pro", orderIndex: 1, priceMonthlyVnd: 1000 }] }
 const order = { id: "order", status: "pending_payment", catalogItem: { name: "nivo AI Agent" }, catalogTier: { name: "Pro" } }
 const flow = () => screen.getByTestId("agent-flow").textContent ?? ""
+const resetQueryCache = () => {
+    for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key)
+}
 
 const snapshot = (overrides: { orders?: unknown[], invoices?: unknown[], workspaces?: unknown[] } = {}) => {
     mocks.api.myCatalogOrders.mockResolvedValue({ ok: true, data: overrides.orders ?? [order] })
@@ -79,7 +83,7 @@ describe("AgentOSProvisioning connected flow", () => {
         fireEvent.click(screen.getByTestId("request"))
         await waitFor(() => expect(flow()).toContain('"state":"awaiting_payment"'))
         expect(flow()).toContain('"subject":"agentos.productName"')
-        expect(mocks.replace).toHaveBeenCalledWith("/en/agentos/orders/order")
+        expect(mocks.replace).toHaveBeenCalledWith("/agentos/orders/order")
     })
 
     it("keeps the submit action pending while the order request is unsettled", async () => {
@@ -101,9 +105,10 @@ describe("AgentOSProvisioning connected flow", () => {
         render(<AgentOSProvisioning context={{ mode: "new" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"failed"'))
         fireEvent.click(screen.getByTestId("status"))
-        expect(mocks.push).toHaveBeenCalledWith("/en/agentos")
+        expect(mocks.push).toHaveBeenCalledWith("/agentos")
 
         cleanup()
+        resetQueryCache()
         mocks.api.catalogItems.mockResolvedValue({ ok: true, data: [item] })
         mocks.api.orderAgentOs.mockResolvedValue({ ok: false, reason: "order-down" })
         render(<AgentOSProvisioning context={{ mode: "new" }} />)
@@ -117,11 +122,13 @@ describe("AgentOSProvisioning connected flow", () => {
         const missing = render(<AgentOSProvisioning context={{ mode: "resume", orderId: "missing" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"failed"'))
         missing.unmount()
+        resetQueryCache()
 
         snapshot({ invoices: [{ id: "invoice", status: "unpaid", catalogOrder: { id: "order" } }] })
         const unpaid = render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"awaiting_payment"'))
         unpaid.unmount()
+        resetQueryCache()
 
         snapshot({ orders: [{ ...order, status: "paid" }] })
         const accepted = render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
@@ -129,11 +136,13 @@ describe("AgentOSProvisioning connected flow", () => {
         expect(flow()).toContain('"action":"agentos.watchFulfillment"')
         expect(flow()).toContain('"disabled":true')
         accepted.unmount()
+        resetQueryCache()
 
         snapshot({ orders: [{ ...order, status: "paid" }], workspaces: [{ id: "workspace", status: "active", name: "Ready workspace", catalogOrder: { id: "order" } }] })
         const ready = render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"ready"'))
         ready.unmount()
+        resetQueryCache()
 
         snapshot({ orders: [{ ...order, status: "paid" }], workspaces: [{ id: "workspace", status: "failed", catalogOrder: { id: "order" } }] })
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
@@ -157,13 +166,14 @@ describe("AgentOSProvisioning connected flow", () => {
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"awaiting_payment"'))
         fireEvent.click(screen.getByTestId("status"))
-        expect(mocks.push).toHaveBeenCalledWith("/en/wallet?orderId=order&invoiceId=invoice&returnTo=%2Fen%2Fagentos%2Forders%2Forder")
+        expect(mocks.push).toHaveBeenCalledWith("/wallet?orderId=order&invoiceId=invoice&returnTo=%2Fagentos%2Forders%2Forder")
 
         cleanup()
+        resetQueryCache()
         snapshot({ orders: [{ ...order, status: "paid" }], workspaces: [{ id: "workspace", status: "active", catalogOrder: { id: "order" } }] })
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"ready"'))
         fireEvent.click(screen.getByTestId("status"))
-        expect(mocks.push).toHaveBeenCalledWith("/en/agentos/workspaces/workspace?view=ai-knowledge")
+        expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/workspace?view=ai-knowledge")
     })
 })

@@ -12,6 +12,10 @@ vi.mock("next/navigation",
     () => ({
         redirect: vi.fn(),
     }))
+vi.mock("@/i18n/navigation", () => ({
+    useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+    usePathname: () => "/",
+}))
 
 describe("console route entrypoints",
     () => {

@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
 const push = vi.fn()
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push }) }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => ({ state: { status: "anonymous" }, adopt: vi.fn(), end: vi.fn() }) }))
 vi.mock("@/modules/api/auth", () => ({ signIn: vi.fn().mockResolvedValue({ ok: false, reason: "Invalid credentials" }), signUpInit: vi.fn(), signUpResend: vi.fn(), signUpVerifyOtp: vi.fn(), forgotPasswordInit: vi.fn(), forgotPasswordResend: vi.fn(), forgotPasswordVerifyOtp: vi.fn(), exchangeOauthCode: vi.fn(), oauthRedirectUrl: vi.fn(() => "https://auth.test") }))

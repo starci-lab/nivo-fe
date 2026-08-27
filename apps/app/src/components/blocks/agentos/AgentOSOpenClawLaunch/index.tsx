@@ -1,9 +1,12 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { useFormatter, useLocale, useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
-import { issueAgentWorkspaceAppLaunch, revokeAgentWorkspaceAppLaunch } from "@/modules/api/console"
+import { useFormatter, useTranslations } from "next-intl"
+import { useRouter } from "@/i18n/navigation"
+import {
+    useMutateIssueAgentWorkspaceAppLaunchSwr,
+    useMutateRevokeAgentWorkspaceAppLaunchSwr,
+} from "@/hooks/swr"
 import { useSession } from "@/modules/auth/session"
 import { followWorkspaceAppRedirect, safeWorkspaceAppRedirect, workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@/modules/window/workspace-app-launch"
 import { AgentOSOpenClawLaunchBase, type AgentOSOpenClawLaunchLabels, type OpenClawLaunchBlockState } from "./component"
@@ -15,9 +18,10 @@ export type AgentOSOpenClawLaunchProps = { readonly workspaceId: string }
 export const AgentOSOpenClawLaunch = ({ workspaceId }: AgentOSOpenClawLaunchProps) => {
     const session = useSession()
     const t = useTranslations("console.agentos.workspace.launch")
-    const locale = useLocale()
     const format = useFormatter()
     const router = useRouter()
+    const { trigger: issueLaunch } = useMutateIssueAgentWorkspaceAppLaunchSwr(workspaceId)
+    const { trigger: revokeLaunch } = useMutateRevokeAgentWorkspaceAppLaunchSwr(workspaceId)
     const started = useRef(false)
     const [retry, setRetry] = useState(0)
     const [launchState, setLaunchState] = useState<OpenClawLaunchBlockState>("issuing")
@@ -33,7 +37,7 @@ export const AgentOSOpenClawLaunch = ({ workspaceId }: AgentOSOpenClawLaunchProp
         const channel = new BroadcastChannel(workspaceAppLaunchChannelName(workspaceId))
         const publish = (message: WorkspaceAppLaunchMessage) => channel.postMessage(message)
         const launch = async () => {
-            const issued = await issueAgentWorkspaceAppLaunch(workspaceId)
+            const issued = await issueLaunch(undefined)
             if (!issued.ok) {
                 publish({ status: "failed", workspaceId })
                 channel.close()
@@ -42,7 +46,7 @@ export const AgentOSOpenClawLaunch = ({ workspaceId }: AgentOSOpenClawLaunchProp
             }
             const destination = safeWorkspaceAppRedirect(issued.data.redirectUrl)
             if (destination === null) {
-                await revokeAgentWorkspaceAppLaunch(issued.data.launchId)
+                await revokeLaunch(issued.data.launchId)
                 publish({ status: "failed", workspaceId })
                 channel.close()
                 setLaunchState("blocked")
@@ -54,8 +58,12 @@ export const AgentOSOpenClawLaunch = ({ workspaceId }: AgentOSOpenClawLaunchProp
             setLaunchState("connected")
             window.requestAnimationFrame(() => followWorkspaceAppRedirect(destination))
         }
-        void launch()
-    }, [retry, session.state.status, workspaceId])
+        void launch().catch(() => {
+            publish({ status: "failed", workspaceId })
+            channel.close()
+            setLaunchState("blocked")
+        })
+    }, [issueLaunch, retry, revokeLaunch, session.state.status, workspaceId])
 
     const labels: AgentOSOpenClawLaunchLabels = {
         title: t("title"),
@@ -84,7 +92,7 @@ export const AgentOSOpenClawLaunch = ({ workspaceId }: AgentOSOpenClawLaunchProp
             setLaunchState("issuing")
             setRetry((value) => value + 1)
         }}
-        onReturn={() => router.push(`/${locale}/agentos/workspaces/${workspaceId}`)}
+        onReturn={() => router.push(`/agentos/workspaces/${workspaceId}`)}
     />
 }
 

@@ -48,7 +48,7 @@ export const AuthenticationPageBase = ({ panel }: AuthenticationPageProps) => {
             contract="centred-authentication-page"
             render={defineContractComponent("centred-authentication-page", {
                 surface: defineContractProjection("authentication-panel-card", () => (
-                    <SurfaceFormCard contract="authentication-panel-card" render={cardContent} />
+                    <SurfaceFormCard ariaLabel={panel.props.title} contract="authentication-panel-card" render={cardContent} />
                 )),
             })}
         />

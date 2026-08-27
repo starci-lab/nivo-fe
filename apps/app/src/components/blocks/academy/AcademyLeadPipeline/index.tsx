@@ -1,9 +1,9 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { draftLeadReply, myExpertSiteLeads, updateExpertSiteLead, type ExpertSiteLead } from "@/modules/api/console"
-import { useSession } from "@/modules/auth/session"
+import { useMutateDraftLeadReplySwr, useMutateUpdateExpertSiteLeadSwr, useQueryMyExpertSiteLeadsSwr } from "@/hooks/swr"
+import type { ExpertSiteLead } from "@/modules/api/console"
 import { AcademyLeadPipelineBase } from "./component"
 
 /** Owner-scoped identity consumed by the lead pipeline. */
@@ -32,24 +32,19 @@ const pipelineState = (leads: ReadonlyArray<ExpertSiteLead> | null | undefined) 
 export const AcademyLeadPipeline = ({ siteId }: AcademyLeadPipelineProps) => {
     const t = useTranslations("console.academyControlCenter.leads")
     const locale = useLocale()
-    const session = useSession()
-    const [leads, setLeads] = useState<ReadonlyArray<ExpertSiteLead> | null | undefined>(undefined)
+    const query = useQueryMyExpertSiteLeadsSwr(siteId)
+    const draftMutation = useMutateDraftLeadReplySwr(siteId)
+    const updateMutation = useMutateUpdateExpertSiteLeadSwr(siteId)
+    const leads = query.data === undefined ? undefined : query.data.ok ? query.data.data : null
     const [selectedId, setSelectedId] = useState<string>()
     const [draft, setDraft] = useState<string>()
     const [pendingAction, setPendingAction] = useState<"advance" | "draft">()
     const [message, setMessage] = useState<string>()
-    const load = useCallback(async () => {
-        const result = await myExpertSiteLeads(siteId)
-        setLeads(result.ok ? result.data : null)
-    }, [siteId])
-    useEffect(() => {
-        if (session.state.status === "signed-in") void load()
-    }, [load, session.state.status])
     const selected = leads?.find((lead) => lead.id === selectedId)
     const draftReply = async () => {
         if (selected === undefined) return
         setPendingAction("draft")
-        const result = await draftLeadReply({ leadId: selected.id, locale: locale === "en" ? "en" : "vi" })
+        const result = await draftMutation.trigger({ leadId: selected.id, locale: locale === "en" ? "en" : "vi" })
         if (result.ok) setDraft(result.data.reply)
         else setMessage(t("actionFailed"))
         setPendingAction(undefined)
@@ -58,10 +53,9 @@ export const AcademyLeadPipeline = ({ siteId }: AcademyLeadPipelineProps) => {
         if (selected === undefined) return
         setPendingAction("advance")
         const status = NEXT_STATUS[selected.status] ?? "converted"
-        const result = await updateExpertSiteLead({ leadId: selected.id, status, ...(draft === undefined ? {} : { note: draft }) })
+        const result = await updateMutation.trigger({ leadId: selected.id, status, ...(draft === undefined ? {} : { note: draft }) })
         setMessage(result.ok ? t("saved") : t("actionFailed"))
         setPendingAction(undefined)
-        if (result.ok) await load()
     }
     return (
         <AcademyLeadPipelineBase

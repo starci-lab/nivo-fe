@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
+import { renderToStaticMarkup } from "react-dom/server"
 import { defineContractComponent, defineContractProjection, defineLeafComponent } from "./props"
 
 describe("contract component helpers", () => {
@@ -16,7 +17,8 @@ describe("contract component helpers", () => {
         const projection = defineContractProjection("inline-action-run", render)
         expect(projection.kind).toBe("projection")
         expect(render).not.toHaveBeenCalled()
-        expect(projection.project()).toBe("projected")
+        const { project: Project } = projection
+        expect(renderToStaticMarkup(<Project />)).toBe("projected")
         expect(render).toHaveBeenCalledTimes(1)
     })
 })

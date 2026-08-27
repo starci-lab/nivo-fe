@@ -1,15 +1,14 @@
 "use client"
 
-import { Card } from "@heroui/react"
 import { motion, useReducedMotion, type MotionStyle } from "framer-motion"
 import { Tree } from "../Tree"
 import type { SectionBodyKey, SurfaceCardData } from "../SurfaceCard"
-import { Heading } from "../../leaves/Heading"
-import { defineContractComponent, defineContractProjection, defineLeafComponent, type ContractBranchProps } from "../../contracts/props"
+import { NivoCoreSurfaceCard as CoreSurfaceCard, type NivoCorePresentationState as PresentationState } from "../../contracts/grammar"
+import { defineContractComponent, defineLeafComponent, type ContractBranchProps } from "../../contracts/props"
 
 /** One contract-bound surface admitted by the named-section body vocabulary. */
 export type HighlightCardProps<K extends SectionBodyKey> = ContractBranchProps<K> & {
-    readonly props?: Pick<SurfaceCardData, "label">
+    readonly props?: Pick<SurfaceCardData, "label" | "ariaLabel">
 }
 
 const SWEEP_STYLE = {
@@ -28,7 +27,8 @@ const SWEEP_STYLE = {
 export const HighlightCard = <const K extends SectionBodyKey>({ props = {}, contract, render, isLoading = false }: HighlightCardProps<K>) => {
     const reduceMotion = useReducedMotion()
     const showsSweep = !isLoading
-    const surface = <Tree contract="highlight-card-shell" render={defineContractComponent("highlight-card-shell", {
+    const presentationState: PresentationState = isLoading ? "pending" : "neutral"
+    const decoratedSurface = <Tree contract="highlight-card-shell" render={defineContractComponent("highlight-card-shell", {
         sweep: showsSweep
             ? defineLeafComponent("accent-sweep", {}, () => (
                 <motion.span
@@ -40,22 +40,18 @@ export const HighlightCard = <const K extends SectionBodyKey>({ props = {}, cont
                 />
             ))
             : undefined,
-        surface: defineLeafComponent("highlight-card-surface", {}, () => (
-            <Card className="p-0">
-                <Card.Content className="p-0" data-component="HighlightCardBody">
+        surface: defineLeafComponent("highlight-card-surface", {}, () => {
+            const identity = props.label === undefined
+                ? { ariaLabel: props.ariaLabel ?? contract.replaceAll("-", " ") }
+                : { label: props.label }
+            return (
+                <CoreSurfaceCard {...identity} frame="bounded" scroll="page" state={presentationState}>
                     <Tree contract={contract} render={render} />
-                </Card.Content>
-            </Card>
-        )),
-    })} />
-    if (props.label === undefined) return surface
-
-    return <Tree contract="label-row-over-card" render={defineContractComponent("label-row-over-card", {
-        label: defineContractComponent("title-with-end-action", {
-            title: defineLeafComponent("heading", {}, () => <Heading props={{ content: props.label, level: 3 }} />),
+                </CoreSurfaceCard>
+            )
         }),
-        body: defineContractProjection(contract, () => surface),
     })} />
+    return decoratedSurface
 }
 
 /** Source-level tier marker for the single highlighted surface branch. */

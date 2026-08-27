@@ -4,6 +4,10 @@ import { CollapsibleRail } from "."
 
 const STORAGE_KEY = "test:console-rail"
 
+const ExpandedDestinations = () => <span>Expanded destinations</span>
+const CompactDestinations = () => <span>Compact destinations</span>
+const SidebarGlyph = () => <span aria-hidden="true" data-testid="sidebar-glyph">Sidebar icon</span>
+
 const createStorage = (): Storage => {
     const values = new Map<string, string>()
     return {
@@ -23,9 +27,12 @@ const renderRail = (onCollapsedChange = vi.fn(), title?: string) => {
         <CollapsibleRail
             ariaLabel="Console navigation"
             title={title}
-            rail={<span>Expanded destinations</span>}
-            collapsedRail={<span>Compact destinations</span>}
-            toggleControl={<span aria-hidden="true" data-testid="sidebar-glyph">Sidebar icon</span>}
+            rail={ExpandedDestinations}
+            railProps={{}}
+            collapsedRail={CompactDestinations}
+            collapsedRailProps={{}}
+            toggleControl={SidebarGlyph}
+            toggleControlProps={{}}
             collapseLabel="Collapse navigation"
             expandLabel="Expand navigation"
             storageKey={STORAGE_KEY}
@@ -50,10 +57,21 @@ describe("CollapsibleRail", () => {
         const destinations = screen.getByText("Expanded destinations")
 
         expect(host).toHaveAttribute("data-collapsed", "false")
+        expect(host).toHaveAttribute("data-grammar-contract", "core.rail")
+        expect(host).toHaveAttribute("data-grammar-collapse", "expanded")
+        expect(host).toHaveAttribute("data-grammar-landmark", "complementary")
+        expect(host).toHaveAttribute("data-grammar-motion", "animated")
+        expect(host).toHaveAttribute("data-grammar-rail", "true")
+        expect(host.querySelector("[data-grammar-rail-frame]")).toBeInTheDocument()
+        expect(host.querySelector("h2[data-grammar-rail-heading]"))
+            .toHaveTextContent("Console navigation")
+        expect(host.querySelector("[data-grammar-rail-body]")).toContainElement(destinations)
         expect(host.style.borderInlineEnd).toBe("1px solid var(--separator)")
         expect(host.style.padding).toBe("1.5rem")
         expect(screen.queryByText("Console")).not.toBeInTheDocument()
         expect(toggle.style.borderRadius).toBe("9999px")
+        expect(toggle.style.width).toBe("44px")
+        expect(toggle.style.height).toBe("44px")
         expect(toggle.style.background).toBe("")
         const glyph = screen.getByTestId("sidebar-glyph")
         expect(toggle.compareDocumentPosition(destinations) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
@@ -63,7 +81,9 @@ describe("CollapsibleRail", () => {
 
         expect(screen.getByRole("complementary", { name: "Console navigation" })).toBe(host)
         expect(host).toHaveAttribute("data-collapsed", "true")
-        expect(host.style.padding).toBe("1.5rem 0.75rem")
+        expect(host).toHaveAttribute("data-grammar-collapse", "collapsed")
+        expect(host).toHaveAttribute("data-grammar-rail-width", "compact")
+        expect(host.style.padding).toBe("1.5rem 0.625rem")
         expect(screen.getByTestId("sidebar-glyph")).toBe(glyph)
         expect(screen.getByText("Compact destinations")).toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Expand navigation" })).toHaveAttribute("aria-pressed", "true")

@@ -40,6 +40,23 @@ const bindingGroup = (name: string, values: ReadonlyArray<string> | undefined, e
     )),
 })
 
+const artifactValues = (installation: AgentosModuleInstallationDetail | undefined): ReadonlyArray<string> | undefined => {
+    if (installation === undefined) return undefined
+    if (installation.knowledgeArtifact === null) return []
+    return [
+        installation.knowledgeArtifact.id,
+        installation.knowledgeArtifact.knowledgeVersion,
+        installation.knowledgeArtifact.snapshotDigest,
+        `${installation.knowledgeArtifact.pointCount} points`,
+    ]
+}
+
+const embeddingValues = (installation: AgentosModuleInstallationDetail | undefined): ReadonlyArray<string> | undefined => {
+    if (installation === undefined) return undefined
+    if (installation.knowledgeArtifact === null) return []
+    return [installation.knowledgeArtifact.embeddingProfile, `${installation.knowledgeArtifact.embeddingDimension} dimensions`]
+}
+
 /** Render generated agents, channels and common/private knowledge versions from the live snapshot. */
 export const AgentOSSolutionModuleBindings = (input: AgentOSSolutionModuleBindingsProps) => {
     const isLoading = input.state === "pending"
@@ -59,20 +76,12 @@ export const AgentOSSolutionModuleBindings = (input: AgentOSSolutionModuleBindin
                         installation.commonKnowledgeVersion,
                         installation.privateKnowledgeVersion,
                     ], labels.empty, isLoading),
-                    bindingGroup(labels.artifact, installation === undefined ? undefined : installation.knowledgeArtifact === null ? [] : [
-                        installation.knowledgeArtifact.id,
-                        installation.knowledgeArtifact.knowledgeVersion,
-                        installation.knowledgeArtifact.snapshotDigest,
-                        `${installation.knowledgeArtifact.pointCount} points`,
-                    ], labels.empty, isLoading),
+                    bindingGroup(labels.artifact, artifactValues(installation), labels.empty, isLoading),
                     bindingGroup(labels.currentness, installation === undefined ? undefined : [
                         installation.knowledgeState,
                         `${installation.desiredDigest ?? labels.empty} → ${installation.appliedDigest ?? labels.empty}`,
                     ], labels.empty, isLoading),
-                    bindingGroup(labels.embedding, installation === undefined ? undefined : installation.knowledgeArtifact === null ? [] : [
-                        installation.knowledgeArtifact.embeddingProfile,
-                        `${installation.knowledgeArtifact.embeddingDimension} dimensions`,
-                    ], labels.empty, isLoading),
+                    bindingGroup(labels.embedding, embeddingValues(installation), labels.empty, isLoading),
                     bindingGroup(labels.retrievalScope, installation === undefined ? undefined : [
                         installation.retrievalScope.installationId,
                         installation.retrievalScope.moduleKey,

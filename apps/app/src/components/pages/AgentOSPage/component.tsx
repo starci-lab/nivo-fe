@@ -37,24 +37,28 @@ export type AgentOSPageViewProps = AgentOSPageProps & {
     readonly onCreate: () => void
 }
 
+const pageCopy = (view: AgentOSPageViewProps) => {
+    if (view.mode === "create") return {
+        title: view.labels.createTitle,
+        description: view.labels.createDescription,
+        eyebrow: view.labels.createEyebrow ?? view.labels.agentos,
+    }
+    if (view.mode === "resume") return {
+        title: view.labels.orderTitle,
+        description: view.labels.orderDescription,
+        eyebrow: view.labels.orderEyebrow ?? view.labels.agentos,
+    }
+    return {
+        title: view.labels.agentos,
+        description: view.labels.dashboardDescription,
+        eyebrow: view.labels.dashboardEyebrow ?? view.labels.agentos,
+    }
+}
+
 /** Compose dashboard, create, and order routes without proxying child request data. */
 export const AgentOSPageBase = (view: AgentOSPageViewProps) => {
     const isDashboard = view.mode === "dashboard"
-    const title = view.mode === "create"
-        ? view.labels.createTitle
-        : view.mode === "resume"
-            ? view.labels.orderTitle
-            : view.labels.agentos
-    const description = view.mode === "create"
-        ? view.labels.createDescription
-        : view.mode === "resume"
-            ? view.labels.orderDescription
-            : view.labels.dashboardDescription
-    const eyebrow = view.mode === "create"
-        ? view.labels.createEyebrow ?? view.labels.agentos
-        : view.mode === "resume"
-            ? view.labels.orderEyebrow ?? view.labels.agentos
-            : view.labels.dashboardEyebrow ?? view.labels.agentos
+    const { title, description, eyebrow } = pageCopy(view)
     const path = isDashboard ? undefined : defineLeafComponent("breadcrumbs", {}, () => (
         <Breadcrumbs
             props={{

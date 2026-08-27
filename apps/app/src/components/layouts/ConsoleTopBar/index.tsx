@@ -28,9 +28,12 @@ export const ConsoleTopBar = () => {
         isDark={isDark}
         lightThemeLabel={t("theme.light")}
         darkThemeLabel={t("theme.dark")}
-        localeControl={<LanguageMenu />}
-        accountControl={<AccountMenu />}
-        drawerControl={<ConsoleNav mode="mobile" />}
+        localeControl={LanguageMenu}
+        localeControlProps={{}}
+        accountControl={AccountMenu}
+        accountControlProps={{}}
+        drawerControl={ConsoleNav}
+        drawerControlProps={{ mode: "mobile" }}
         onToggleTheme={() => setTheme(isDark ? "light" : "dark")}
     />
 }

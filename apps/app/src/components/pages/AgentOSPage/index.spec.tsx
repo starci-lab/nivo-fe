@@ -15,7 +15,7 @@ vi.mock("next-intl", () => ({
     useLocale: () => mocks.locale,
     useTranslations: () => (key: string) => key,
 }))
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("./component", () => ({
     AgentOSPageBase: (props: AgentOSPageProbeProps) => (
         <div>
@@ -41,7 +41,7 @@ describe("AgentOSPage route owner", () => {
         mocks.locale = "en"
         render(<AgentOSPage mode="resume" orderId="order-1" />)
         fireEvent.click(screen.getByRole("button", { name: "dashboard" }))
-        expect(mocks.push).toHaveBeenCalledWith("/en/agentos")
+        expect(mocks.push).toHaveBeenCalledWith("/agentos")
         expect(screen.getByText("resume:order-1")).toBeInTheDocument()
     })
 })

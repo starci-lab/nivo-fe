@@ -6,6 +6,7 @@ import { ACADEMY, inLocale } from "@/modules/academy/template"
 import { routing } from "@/i18n/routing"
 import type { Locale } from "@/i18n/config"
 import "../globals.css"
+import type { ComponentProps } from "react"
 
 /** The routed locale segment, awaited by every handler in this file. */
 export interface LocaleSegment {
@@ -16,7 +17,7 @@ export interface LocaleSegment {
 /** Props every route under this shell receives. */
 interface LocaleLayoutProps {
     /** The rendered route. */
-    readonly children: React.ReactNode
+    readonly children: ComponentProps<"div">["children"]
     /** The locale segment, which Next hands over as a promise. */
     readonly params: Promise<{ locale: string }>
 }
@@ -85,7 +86,7 @@ const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
     }
     const messages = await getMessages()
     return (
-        <html lang={locale} suppressHydrationWarning>
+        <html lang={locale} data-grammar="core" suppressHydrationWarning>
             <body className="min-h-dvh antialiased">
                 <NextIntlClientProvider locale={locale} messages={messages}>
                     {children}

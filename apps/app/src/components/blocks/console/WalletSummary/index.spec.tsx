@@ -16,7 +16,7 @@ vi.mock("next-intl", () => ({
         dateTime: (value: Date) => `date-${value.toISOString().slice(0, 10)}`,
     }),
 }))
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("@/modules/overview/context", () => ({ useOverviewData: () => mocks.data }))
 
 import { WalletSummary } from "."
@@ -63,7 +63,7 @@ describe("WalletSummary", () => {
         mocks.data.invoices = { ok: true, data: [] }
         const { rerender } = render(<WalletSummary />)
         fireEvent.click(screen.getByRole("link", { name: "wallet.viewTransactions" }))
-        expect(mocks.push).toHaveBeenCalledWith("/en/wallet")
+        expect(mocks.push).toHaveBeenCalledWith("/wallet")
 
         mocks.data.invoices = { ok: false, code: "UNKNOWN" }
         rerender(<WalletSummary />)

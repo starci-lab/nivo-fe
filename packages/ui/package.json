@@ -5,7 +5,9 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css",
     "./contracts": "./src/contracts/index.ts",
+    "./contracts/grammar": "./src/contracts/grammar.ts",
     "./contracts/props": "./src/contracts/props.ts",
     "./leaves/*": "./src/leaves/*/index.tsx",
     "./composites/*": "./src/composites/*/index.tsx",
@@ -22,6 +24,7 @@
     "@heroicons/react": "^2.2.0",
     "@heroui/react": "^3.2.4",
     "@heroui/styles": "^3.2.4",
+    "@starci/grammar": "0.2.0",
     "framer-motion": "^13.1.0"
   },
   "peerDependencies": {

@@ -64,11 +64,13 @@ const data = {
 }
 
 const state = () => screen.getByTestId("workspace-state").textContent ?? ""
+let viewerSequence = 0
 
 describe("AgentOSWorkspaceControlCenter connected owner", () => {
     beforeEach(() => {
         vi.clearAllMocks()
-        mocks.session.state = { status: "signed-in", accessToken: "token" }
+        viewerSequence += 1
+        mocks.session.state = { status: "signed-in", accessToken: `token-${viewerSequence}` }
         mocks.realtime = { status: "idle" }
         mocks.message = undefined
         mocks.api.load.mockResolvedValue({ ok: true, data })

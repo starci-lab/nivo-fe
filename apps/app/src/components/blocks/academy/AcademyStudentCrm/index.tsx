@@ -1,18 +1,16 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useState } from "react"
 import { useTranslations } from "next-intl"
 import {
-    createAcademyStudent,
-    grantAcademyCourseAccess,
-    myAcademyStudentDetail,
-    myAcademyStudents,
-    revokeAcademyCourseAccess,
-    setAcademyStudentStatus,
-    type AcademyStudent,
-    type AcademyStudentDetail,
-} from "@/modules/api/console"
-import { useSession } from "@/modules/auth/session"
+    useMutateCreateAcademyStudentSwr,
+    useMutateGrantAcademyCourseAccessSwr,
+    useMutateRevokeAcademyCourseAccessSwr,
+    useMutateSetAcademyStudentStatusSwr,
+    useQueryMyAcademyStudentDetailSwr,
+    useQueryMyAcademyStudentsSwr,
+} from "@/hooks/swr"
+import type { AcademyStudent, AcademyStudentDetail } from "@/modules/api/console"
 import { AcademyStudentCrmBase } from "./component"
 
 /** Owner-scoped identity consumed by the student CRM. */
@@ -60,10 +58,20 @@ const detailStateOf = (detailLoading: boolean, detail: AcademyStudentDetail | nu
 /** Own student requests and targeted action state. */
 export const AcademyStudentCrm = ({ siteId }: AcademyStudentCrmProps) => {
     const t = useTranslations("console.academyControlCenter.students")
-    const session = useSession()
-    const [students, setStudents] = useState<ReadonlyArray<AcademyStudent> | null | undefined>(undefined)
-    const [detail, setDetail] = useState<AcademyStudentDetail | null | undefined>(undefined)
-    const [detailLoading, setDetailLoading] = useState(false)
+    const studentsQuery = useQueryMyAcademyStudentsSwr(siteId)
+    const students = studentsQuery.data === undefined
+        ? undefined
+        : studentsQuery.data.ok ? studentsQuery.data.data.items : null
+    const [selectedMemberId, setSelectedMemberId] = useState<string>()
+    const detailQuery = useQueryMyAcademyStudentDetailSwr(siteId, selectedMemberId)
+    const createMutation = useMutateCreateAcademyStudentSwr(siteId)
+    const statusMutation = useMutateSetAcademyStudentStatusSwr(siteId, selectedMemberId)
+    const grantMutation = useMutateGrantAcademyCourseAccessSwr(siteId, selectedMemberId)
+    const revokeMutation = useMutateRevokeAcademyCourseAccessSwr(siteId, selectedMemberId)
+    const detail = selectedMemberId === undefined || detailQuery.data === undefined
+        ? undefined
+        : detailQuery.data.ok ? detailQuery.data.data : null
+    const detailLoading = selectedMemberId !== undefined && detailQuery.isLoading
     const [pendingAction, setPendingAction] = useState<string>()
     const [actionMessage, setActionMessage] = useState<string>()
     const [name, setName] = useState("")
@@ -71,27 +79,12 @@ export const AcademyStudentCrm = ({ siteId }: AcademyStudentCrmProps) => {
     const [password, setPassword] = useState("")
     const [courseSlug, setCourseSlug] = useState("")
 
-    const load = useCallback(async () => {
-        const result = await myAcademyStudents({ siteId })
-        setStudents(result.ok ? result.data.items : null)
-    }, [siteId])
-    useEffect(() => {
-        if (session.state.status === "signed-in") void load()
-    }, [load, session.state.status])
-
     const run = async (kind: string, operation: () => Promise<{ readonly ok: boolean }>) => {
         setPendingAction(kind)
         setActionMessage(undefined)
         const result = await operation()
         setActionMessage(result.ok ? t("saved") : t("actionFailed"))
         setPendingAction(undefined)
-        if (result.ok) await load()
-    }
-    const openStudent = async (memberId: string) => {
-        setDetailLoading(true)
-        const result = await myAcademyStudentDetail(siteId, memberId)
-        setDetail(result.ok ? result.data : null)
-        setDetailLoading(false)
     }
     return (
         <AcademyStudentCrmBase
@@ -107,15 +100,15 @@ export const AcademyStudentCrm = ({ siteId }: AcademyStudentCrmProps) => {
                 courseSlug: t("courseSlug"), grant: t("grant"), revoke: t("revoke"), ban: t("ban"), activate: t("activate"), loadingDetail: t("loadingDetail"), actionFailed: t("actionFailed"),
             }}
             on={{
-                openStudent,
+                openStudent: (memberId) => { setSelectedMemberId(memberId) },
                 changeName: setName,
                 changeEmail: setEmail,
                 changePassword: setPassword,
-                createStudent: () => void run("create", () => createAcademyStudent({ siteId, name, email, ...(password === "" ? {} : { password }) })),
+                createStudent: () => void run("create", () => createMutation.trigger({ siteId, name, email, ...(password === "" ? {} : { password }) })),
                 changeCourseSlug: setCourseSlug,
-                setStatus: (status) => detail === null || detail === undefined ? undefined : void run("status", () => setAcademyStudentStatus({ siteId, memberId: detail.member.id, status })),
-                grantAccess: () => detail === null || detail === undefined ? undefined : void run("grant", () => grantAcademyCourseAccess({ siteId, email: detail.member.email, courseSlug })),
-                revokeAccess: () => detail === null || detail === undefined ? undefined : void run("revoke", () => revokeAcademyCourseAccess({ siteId, email: detail.member.email, courseSlug })),
+                setStatus: (status) => detail === null || detail === undefined ? undefined : void run("status", () => statusMutation.trigger({ siteId, memberId: detail.member.id, status })),
+                grantAccess: () => detail === null || detail === undefined ? undefined : void run("grant", () => grantMutation.trigger({ siteId, email: detail.member.email, courseSlug })),
+                revokeAccess: () => detail === null || detail === undefined ? undefined : void run("revoke", () => revokeMutation.trigger({ siteId, email: detail.member.email, courseSlug })),
             }}
         />
     )

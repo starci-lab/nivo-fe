@@ -1,12 +1,13 @@
 import { fireEvent, render, screen } from "@testing-library/react"
-import type { ReactNode } from "react"
+import type { ComponentType } from "react"
 import { describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({ push: vi.fn(), locale: "en" }))
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("next-intl", () => ({ useLocale: () => mocks.locale, useTranslations: () => (key: string) => key }))
 interface MockPageProps { readonly title: string, readonly pathLabel: string, readonly consoleLabel: string, readonly buildAppLabel: string, readonly onBuildApp: () => void }
-vi.mock("@/modules/overview/context", () => ({ OverviewDataProvider: (props: unknown) => <section data-testid="provider">{(props as Record<string, ReactNode>)["children"]}</section> }))
+type MockProviderProps = { readonly content: ComponentType<MockPageProps>; readonly contentProps: MockPageProps }
+vi.mock("@/modules/overview/context", () => ({ OverviewDataProvider: ({ content: Content, contentProps }: MockProviderProps) => <section data-testid="provider"><Content {...contentProps} /></section> }))
 vi.mock("./component", () => ({ OverviewPageBase: (props: MockPageProps) => <div>
     <span>{props.pathLabel}:{props.consoleLabel}:{props.title}</span><button type="button" onClick={props.onBuildApp}>{props.buildAppLabel}</button>
 </div> }))
@@ -19,6 +20,6 @@ describe("OverviewPage connected entry", () => {
         expect(screen.getByTestId("provider")).toBeInTheDocument()
         expect(screen.getByText("navigationLabel:title:overview.title")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "overview.buildApp" }))
-        expect(mocks.push).toHaveBeenCalledWith("/en/apps")
+        expect(mocks.push).toHaveBeenCalledWith("/apps")
     })
 })

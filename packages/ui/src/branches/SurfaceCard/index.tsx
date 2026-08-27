@@ -1,15 +1,12 @@
-import { Card } from "@heroui/react"
 import { Tree } from "../Tree"
-import { Heading } from "../../leaves/Heading"
 import { Text } from "../../leaves/Text"
 import { SeeMoreLink } from "../../leaves/SeeMoreLink"
 import { Button } from "../../leaves/Button"
 import { CONTRACTS } from "../../contracts"
+import { NivoCoreSurfaceCard as CoreSurfaceCard, type NivoCorePresentationState as PresentationState } from "../../contracts/grammar"
 import {
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
     type ContractBranchProps,
+    type ContractRenderComponent,
 } from "../../contracts/props"
 
 /**
@@ -23,12 +20,10 @@ import {
  * THIS IS WHY BRANCHES EXIST. `Tree` draws ONE node; a section is three - the column, the label
  * line, the surface - and nothing in the registry stacks nodes. Assembly is a branch's whole job.
  *
- * WHAT IT MAY CONTAIN, AND NOTHING ELSE: `Tree`, leaves, other branches. No markup of its own, no
- * class of its own. Every class on screen comes from a registry entry. That single sentence is
- * what stops a branch quietly becoming a second registry. The one class written here is `p-0`, and
- * it ADDS nothing - it removes the vendor card's own inset so that the only inset on screen is the
- * one the entry declares. A branch forbidden to write that would be forced to leave an undeclared
- * inset standing around every entry it grounds.
+ * PRODUCT LAYOUT STILL COMES FROM `Tree`; reusable surface anatomy comes from Grammar Core. This
+ * adapter renders the package-owned Core branch, then projects the product contract unchanged
+ * inside it. The shared Core variable removes surface inset so the product contract remains the
+ * sole owner of interior spacing.
  *
  * THE END OF THE LABEL LINE HOLDS ONE THING OR NOTHING, and an action outranks a fact when both are
  * passed. They compete for the same place on purpose: a fact and a control that look alike, sitting
@@ -51,6 +46,8 @@ export type SurfaceCardData = {
      * line each.
      */
     readonly label?: string
+    /** Accessible name used when the body names itself and no visible section label is needed. */
+    readonly ariaLabel?: string
     /**
      * A supporting fact at the end of the label line - a count, a record, a unit. Never an action:
      * it reads as part of the label sentence, and a control there gets pressed by somebody who
@@ -94,55 +91,44 @@ export type SurfaceCardActions = {
 export type SectionBodyKey = (typeof CONTRACTS)["label-row-over-card"]["children"]["body"]["contract"][number]
 
 /** Props for {@link SurfaceCard}. Fixed slots plus what it assembles - see {@link ContractBranchProps}. */
-export type SurfaceCardProps<K extends SectionBodyKey> = ContractBranchProps<K> & {
+type BoundSurfaceCardProps<K extends SectionBodyKey> = ContractBranchProps<K> & {
     /** Absent altogether when the object names itself: then this draws the ground and nothing else. */
     readonly props?: SurfaceCardData
     readonly on?: SurfaceCardActions
 }
+
+type RuntimeSurfaceCardProps<K extends SectionBodyKey, P extends object> = {
+    readonly contract: K
+    readonly render: ContractRenderComponent<NoInfer<K>, P>
+    readonly contentProps: P
+    readonly props?: SurfaceCardData
+    readonly on?: SurfaceCardActions
+    readonly isLoading?: boolean
+}
+
+/** A bound contract or one runtime ComponentType whose own implementation opens the matching Tree. */
+export type SurfaceCardProps<K extends SectionBodyKey, P extends object = never> =
+    [P] extends [never] ? BoundSurfaceCardProps<K> : RuntimeSurfaceCardProps<K, P>
 
 /**
  * Draw a named section.
  *
  * @param input - {@link SurfaceCardProps}
  */
-export const SurfaceCard = <const K extends SectionBodyKey>({
-    props = {},
-    on,
-    contract,
-    render,
-    isLoading = false,
-}: SurfaceCardProps<K>) => {
+export const SurfaceCard = <const K extends SectionBodyKey, P extends object = object>(
+    input: BoundSurfaceCardProps<K> | RuntimeSurfaceCardProps<K, P>,
+) => {
+    const { props = {}, on, contract, isLoading = false } = input
+    const presentationState: PresentationState = isLoading ? "pending" : "neutral"
     // One place at the end of the line: the way out wins it, the fact takes it only if free.
     const hasAction = props.actionLabel !== undefined && on?.act !== undefined
     const hasSeeMore = props.seeMoreLabel !== undefined && on?.seeMore !== undefined
     const fact = props.fact === undefined
         ? null
         : <Text props={{ content: props.fact, size: "sm", tone: "muted" }} isLoading={isLoading} />
-    const end = hasAction
-        ? <Button props={{ label: props.actionLabel, size: "sm", variant: "primary" }} on={{ press: on.act }} />
-        : hasSeeMore
-            ? <SeeMoreLink props={{ label: props.seeMoreLabel }} on={{ press: on.seeMore }} />
-            : fact
-
-    const labelContract = !hasAction && !hasSeeMore && props.fact !== undefined
-        ? "title-with-baseline-fact"
-        : "title-with-end-action"
-    const title = defineLeafComponent("heading", {}, () => (
-        <Heading props={{ content: props.label, level: 3 }} />
-    ))
-    const labelRow = labelContract === "title-with-baseline-fact"
-        ? defineContractComponent("title-with-baseline-fact", {
-            title,
-            fact: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => end),
-        })
-        : defineContractComponent("title-with-end-action", {
-            title,
-            ...(hasAction ? {
-                end: defineLeafComponent("button", {}, () => end),
-            } : hasSeeMore ? {
-                end: defineLeafComponent("see-more-link", {}, () => end),
-            } : {}),
-        })
+    let end = fact
+    if (hasSeeMore) end = <SeeMoreLink props={{ label: props.seeMoreLabel, }} on={{ press: on.seeMore }} />
+    if (hasAction) end = <Button props={{ label: props.actionLabel, size: "sm", variant: "primary" }} on={{ press: on.act }} />
 
     /*
      * ONE NODE, DRAWN THE SAME WAY WHETHER OR NOT A CARD STANDS BEHIND IT. The framed and frameless
@@ -154,41 +140,28 @@ export const SurfaceCard = <const K extends SectionBodyKey>({
      * not the compiler, not the linter, not a screenshot. `Tree` is the only place that reads
      * `spec.host`, so the entry survives only by going through it.
      */
-    const content = <Tree contract={contract} render={render} />
+    const identity = props.label === undefined
+        ? { ariaLabel: props.ariaLabel ?? contract.replaceAll("-", " ") }
+        : { label: props.label }
 
-    /*
-     * `p-0` IS THE BRANCH'S ONLY CLASS AND IT IS THE ABSENCE OF ONE. The vendor card carries its own
-     * `p-4`; with the entry's node now INSIDE that card rather than painted onto it, the vendor inset
-     * would sit outside the entry and become a second one nobody declared. Zeroing it hands the whole
-     * interior to the entry - which is where an inset is readable, and where `SurfaceListCard`
-     * already puts it.
-     */
-    const surface = props.isFrameless === true ? content : (
-        <Card className="p-0">
-            <Card.Content className="p-0" data-component="SurfaceCardBody">
-                {content}
-            </Card.Content>
-        </Card>
-    )
-
-    // No name, no section: the column and the label line exist to hold a label, so an object that
-    // names itself gets the ground alone rather than an empty row above it.
-    if (props.label === undefined) return surface
+    let content = input.render.kind === "component" ? null : <Tree contract={contract} render={input.render} />
+    if (input.render.kind === "component" && "contentProps" in input) {
+        const Content = input.render
+        content = <Content {...input.contentProps} />
+    }
 
     return (
-        <Tree
-            contract="label-row-over-card"
-            render={defineContractComponent("label-row-over-card", {
-                label: labelRow,
-                /*
-                 * The surface is ALREADY a whole node - the vendor card, its body, and the caller's
-                 * own contract rendered inside - so it enters the section as a projection. Handing
-                 * the caller's key back as slots would open a second node around a node already
-                 * drawn, which is the duplicate wrapper this branch was inset twice by.
-                 */
-                body: defineContractProjection(contract, () => surface),
-            })}
-        />
+        <CoreSurfaceCard
+            {...identity}
+            frame={props.isFrameless === true ? "frameless" : "bounded"}
+            labelEnd={end}
+            scroll="page"
+            state={presentationState}
+        >
+            <div data-component="SurfaceCardBody">
+                {content}
+            </div>
+        </CoreSurfaceCard>
     )
 }
 

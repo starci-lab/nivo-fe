@@ -11,9 +11,11 @@ vi.mock("./component", () => ({
 
 const navigation = vi.hoisted(() => ({ push: vi.fn(), view: "" }))
 vi.mock("next/navigation", () => ({
-    usePathname: () => "/en/agentos/workspaces/workspace-1",
-    useRouter: () => ({ push: navigation.push }),
     useSearchParams: () => new URLSearchParams(navigation.view),
+}))
+vi.mock("@/i18n/navigation", () => ({
+    usePathname: () => "/agentos/workspaces/workspace-1",
+    useRouter: () => ({ push: navigation.push }),
 }))
 
 import { AgentOSWorkspacePage } from "."
@@ -22,7 +24,7 @@ describe("AgentOSWorkspacePage", () => {
     it("owns the tab composition for one persisted workspace", () => {
         render(<AgentOSWorkspacePage workspaceId="workspace-1" />)
         fireEvent.click(screen.getByRole("button", { name: "workspace-1:overview" }))
-        expect(navigation.push).toHaveBeenCalledWith("/en/agentos/workspaces/workspace-1?view=infrastructure")
+        expect(navigation.push).toHaveBeenCalledWith("/agentos/workspaces/workspace-1?view=infrastructure")
     })
 
     it("restores the addressable AI and Knowledge view from the URL", () => {

@@ -1,4 +1,4 @@
-import { CollapsibleRail, DrawerBranch, Icon, ScrollViewport, SelectionList } from "@nivo/ui"
+import { CollapsibleRail, DrawerBranch, Icon, SelectionList } from "@nivo/ui"
 import type { IconName, SelectionListGroup } from "@nivo/ui"
 
 /** Stable destination keys owned by the console navigation. */
@@ -32,6 +32,23 @@ const ICONS: Readonly<Record<ConsoleDestinationKey, IconName>> = {
     domains: "domains", wallet: "wallet", support: "support",
 }
 
+type ConsoleSelectionProps = {
+    readonly label: string
+    readonly selectedKey: ConsoleDestinationKey
+    readonly groups: ReadonlyArray<SelectionListGroup>
+    readonly presentation: "expanded" | "compact"
+    readonly onActivate: (key: ConsoleDestinationKey) => void
+}
+
+const ConsoleSelection = ({ label, selectedKey, groups, presentation, onActivate }: ConsoleSelectionProps) => (
+    <SelectionList
+        props={{ label, selectedKey, groups, presentation }}
+        on={{ activate: (key) => onActivate(key as ConsoleDestinationKey) }}
+    />
+)
+
+const ConsoleRailToggle = () => <Icon props={{ name: "sidebar", role: "leading" }} />
+
 /** Draw the selected grouped destinations as a rail or right-edge drawer. */
 export const ConsoleNavBase = ({ mode = "desktop", selectedKey, labels, onActivate }: ConsoleNavBaseProps) => {
     const item = (key: ConsoleDestinationKey) => ({
@@ -45,17 +62,17 @@ export const ConsoleNavBase = ({ mode = "desktop", selectedKey, labels, onActiva
         { id: "services", label: labels.services, items: SERVICE_KEYS.map(item) },
         { id: "account", label: labels.account, items: ACCOUNT_KEYS.map(item) },
     ]
-    const destinations = (presentation: "expanded" | "compact" = "expanded") => <SelectionList
-        key={presentation}
-        props={{ label: labels.navigation, selectedKey, groups, presentation }}
-        on={{ activate: (key) => onActivate(key as ConsoleDestinationKey) }}
-    />
-    if (mode === "mobile") return <DrawerBranch triggerLabel={labels.openMenu} title={labels.title} closeLabel={labels.closeMenu} content={destinations()} />
+    const expanded = { label: labels.navigation, selectedKey, groups, presentation: "expanded" as const, onActivate }
+    const compact = { ...expanded, presentation: "compact" as const }
+    if (mode === "mobile") return <DrawerBranch triggerLabel={labels.openMenu} title={labels.title} closeLabel={labels.closeMenu} content={ConsoleSelection} contentProps={expanded} />
     return <CollapsibleRail
         ariaLabel={labels.navigation}
-        rail={<ScrollViewport ariaLabel={labels.navigation} content={destinations("expanded")} />}
-        collapsedRail={<ScrollViewport ariaLabel={labels.navigation} content={destinations("compact")} />}
-        toggleControl={<Icon props={{ name: "sidebar", role: "leading" }} />}
+        rail={ConsoleSelection}
+        railProps={expanded}
+        collapsedRail={ConsoleSelection}
+        collapsedRailProps={compact}
+        toggleControl={ConsoleRailToggle}
+        toggleControlProps={{}}
         collapseLabel={labels.closeMenu}
         expandLabel={labels.openMenu}
         storageKey="nivo-console-navigation-collapsed"

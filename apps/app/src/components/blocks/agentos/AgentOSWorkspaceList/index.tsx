@@ -1,13 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useLocale, useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
+import { useRouter } from "@/i18n/navigation"
 import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow"
-import { DEFAULT_LOCALE } from "@/i18n/config"
-import { myAgentWorkspace, type AgentWorkspaceRow } from "@/modules/api/console"
-import type { Result } from "@/modules/api/graphql"
-import { useSession } from "@/modules/auth/session"
+import { useQueryMyAgentWorkspacesSwr } from "@/hooks/swr"
 import { AgentOSWorkspaceListBase, type AgentOSWorkspaceListViewProps } from "./component"
 
 const STATUS: Readonly<Record<string, FleetStatus | undefined>> = {
@@ -21,23 +17,9 @@ const STATUS: Readonly<Record<string, FleetStatus | undefined>> = {
 /** Own the workspace query and dashboard continuations for the AgentOS collection. */
 export const AgentOSWorkspaceList = () => {
     const t = useTranslations("console")
-    const locale = useLocale()
     const router = useRouter()
-    const session = useSession()
-    const signedIn = session.state.status === "signed-in"
-    const [answer, setAnswer] = useState<Result<ReadonlyArray<AgentWorkspaceRow>> | null>(null)
-    const localeSegment = locale === DEFAULT_LOCALE ? "" : `/${locale}`
-
-    useEffect(() => {
-        if (!signedIn) return
-        let cancelled = false
-        void myAgentWorkspace().then((result) => {
-            if (!cancelled) setAnswer(result)
-        })
-        return () => {
-            cancelled = true
-        }
-    }, [signedIn])
+    const query = useQueryMyAgentWorkspacesSwr()
+    const answer = query.data
 
     const view = (): AgentOSWorkspaceListViewProps => {
         const label = t("agentos.workspacesLabel")
@@ -49,18 +31,18 @@ export const AgentOSWorkspaceList = () => {
             attention: t("agentos.summary.attention"),
             attentionCaption: t("agentos.summary.attentionCaption"),
         }
-        if (answer === null) return { state: "resting", props: { label, summary } }
+        if (answer === undefined) return { state: "resting", props: { label, summary } }
         if (!answer.ok) return { state: "refused", props: { label, summary, message: t("refusal.unknown") } }
         if (answer.data.length === 0) {
             return {
                 state: "empty",
                 props: { label, summary, message: t("agentos.emptyDescription"), actionLabel: t("agentos.create") },
-                on: { create: () => router.push(`${localeSegment}/agentos/create`) },
+                on: { create: () => router.push("/agentos/create") },
             }
         }
         return {
             state: "answered",
-            on: { openWorkspace: (id) => router.push(`${localeSegment}/agentos/workspaces/${id}`) },
+            on: { openWorkspace: (id) => router.push(`/agentos/workspaces/${id}`) },
             props: {
                 label,
                 summary,

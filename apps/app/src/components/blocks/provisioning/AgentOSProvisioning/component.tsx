@@ -48,6 +48,11 @@ export type AgentOSProvisioningViewProps = {
     }
 }
 
+const signalFor = (state: AgentOSProvisioningBlockState) => {
+    if (state === "failed") return "attention"
+    return state === "ready" ? "active" : "none"
+}
+
 /** Draw an AgentOS order beside its exact live workspace status. */
 export const AgentOSProvisioningBase = ({ state, props, on }: AgentOSProvisioningViewProps) => {
     const journeyContract = props.steps.length === 5 ? "responsive-agentos-readiness-stepper" : "responsive-four-stage-lifecycle-stepper"
@@ -89,7 +94,7 @@ export const AgentOSProvisioningBase = ({ state, props, on }: AgentOSProvisionin
     const artwork = defineContractComponent("provisioning-brand-mark-cell", {
         mark: defineLeafComponent("tile-icon", {}, () => (
             <TileIcon
-                props={{ icon: "agentos", signal: state === "failed" ? "attention" : state === "ready" ? "active" : "none" }}
+                props={{ icon: "agentos", signal: signalFor(state) }}
                 isLoading={state === "catalog_loading"}
             />
         )),

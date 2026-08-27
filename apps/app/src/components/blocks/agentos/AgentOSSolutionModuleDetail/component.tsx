@@ -39,6 +39,18 @@ export type AgentOSSolutionModuleDetailViewProps = {
     readonly onOpenAiKnowledge?: () => void
 }
 
+const ledeContent = (
+    detailState: AgentOSSolutionModuleDetailState,
+    installation: AgentosModuleInstallationDetail | undefined,
+    labels: AgentOSSolutionModuleDetailLabels,
+): string => {
+    if (detailState === "loading") return labels.loading
+    if (detailState === "current") return labels.knowledgeCurrent ?? installation?.moduleKey ?? labels.title
+    if (detailState === "refreshing") return labels.knowledgeRefreshing ?? installation?.moduleKey ?? labels.title
+    if (detailState === "knowledge-refused") return labels.knowledgeRefused ?? labels.refused
+    return installation?.moduleKey ?? labels.title
+}
+
 /** Compose one exact installation snapshot without owning API or realtime mechanics. */
 export const AgentOSSolutionModuleDetailBase = ({ detailState, installation, labels, onBack, onOpenAiKnowledge }: AgentOSSolutionModuleDetailViewProps) => {
     // A refusal and a missing installation are the same page: there is nothing to lay out, so the
@@ -64,7 +76,7 @@ export const AgentOSSolutionModuleDetailBase = ({ detailState, installation, lab
                     title: defineLeafComponent("heading", {}, () => <Heading props={{ content: labels.title, level: 1 }} />),
                     ...(onOpenAiKnowledge === undefined ? {} : { end: defineLeafComponent("button", {}, () => <Button props={{ label: labels.openAiKnowledge ?? "Open AI & Knowledge", variant: "primary" }} on={{ press: onOpenAiKnowledge }} />) }),
                 }),
-                lede: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: detailState === "loading" ? labels.loading : detailState === "current" ? labels.knowledgeCurrent ?? installation?.moduleKey : detailState === "refreshing" ? labels.knowledgeRefreshing ?? installation?.moduleKey : detailState === "knowledge-refused" ? labels.knowledgeRefused ?? labels.refused : installation?.moduleKey ?? labels.title, size: "sm", tone: detailState === "knowledge-refused" ? "accent" : "muted" }} />),
+                lede: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: ledeContent(detailState, installation, labels), size: "sm", tone: detailState === "knowledge-refused" ? "accent" : "muted" }} />),
                 section: sections,
             })}
         />

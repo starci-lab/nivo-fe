@@ -45,6 +45,7 @@ export const NivoBrand = ({ props, isLoading = false }: NivoBrandProps) => {
     const variant = props.variant ?? "lockup"
     const scale = props.scale ?? "navbar"
     const wrapperClasses = WRAPPER_CLASSES[scale]
+    const loadingClasses = isLoading ? `${RESTING_CLASSES} aspect-square rounded-full` : ""
 
     return (
         <span
@@ -54,7 +55,7 @@ export const NivoBrand = ({ props, isLoading = false }: NivoBrandProps) => {
             data-scale={scale}
             data-loading={isLoading ? "true" : "false"}
             aria-hidden={isLoading ? true : undefined}
-            className={`${wrapperClasses} ${isLoading ? `${RESTING_CLASSES} aspect-square rounded-full` : ""}`}
+            className={`${wrapperClasses} ${loadingClasses}`}
         >
             {isLoading ? null : (
                 <svg

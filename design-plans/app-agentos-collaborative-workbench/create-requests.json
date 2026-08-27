@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "id": "NIVO-AGENTOS-SETUP-FIRST-CREATE-REQUESTS-V1",
+  "project": "nivo",
+  "role": "fe",
+  "businessHead": "86fcb8fbe6ec2f984b8fc7ece190725e4a78aa7376c119b0a6557cbfe338f263",
+  "layout": "LAYOUT-01-PERSISTENT-MODULE-SHELL",
+  "grammar": {
+    "id": "core",
+    "package": "@starci/grammar",
+    "version": "0.2.0",
+    "convergence": "90121dbb87f5babf608d6f06c4b9c32427bdb35ab56bf318bf8eb9eccd1c565c"
+  },
+  "requests": [
+    {
+      "id": "NIVO-BLOCK-MODULE-ROUTE-SHELL-V1",
+      "contentSha256": "sha256:372009cf38e310634faf1395074f07e4df5945877af81e96363c8dfc73b5bf09",
+      "kind": "create",
+      "owner": "nivo-fe/apps/app",
+      "need": "Persistent module-local shell owning breadcrumbs, module identity, lifecycle/context continuity, and Operate, Settings, and Diagnostics composition.",
+      "contractDelta": "Create ModuleRouteShellBlock by composing Nivo Breadcrumbs and CollapsibleRail with Core surfaces; module-lifecycle-context remains the single continuity owner.",
+      "negativeBoundary": [
+        "Do not add module or business semantics to Grammar.",
+        "Do not hard-code routes by module kind.",
+        "Do not create another continuity owner."
+      ],
+      "blockedLocalBehavior": "Do not implement page-specific shell copies or bypass the shared module route shell.",
+      "evidence": [
+        "business:86fcb8fbe6ec2f984b8fc7ece190725e4a78aa7376c119b0a6557cbfe338f263",
+        "layout:LAYOUT-01-PERSISTENT-MODULE-SHELL",
+        "grammar:90121dbb87f5babf608d6f06c4b9c32427bdb35ab56bf318bf8eb9eccd1c565c",
+        "source-fit:c7fa22a6535d8b870f5b84d736f780d4fcc75b39a7d6294350d3e7544be84203"
+      ]
+    },
+    {
+      "id": "NIVO-BLOCK-PRIVATE-SETUP-CHAT-V1",
+      "contentSha256": "sha256:e28b3dc835ce821932ee71f56866587f144a457cb0be762c6dcf5d35863e60a3",
+      "kind": "create",
+      "owner": "nivo-fe/apps/app",
+      "need": "One private Setup conversation used before Operate to teach the module business context.",
+      "contractDelta": "Create PrivateSetupChatBlock with conversation states, composer, draft summary handoff, and explicit separation from execute sessions.",
+      "negativeBoundary": [
+        "Do not merge Setup messages into Execute history.",
+        "Do not activate context implicitly.",
+        "Do not expose secrets or backend-owned permissions."
+      ],
+      "blockedLocalBehavior": "Do not reuse the ExecuteChatBlock as the Setup session.",
+      "evidence": [
+        "business:86fcb8fbe6ec2f984b8fc7ece190725e4a78aa7376c119b0a6557cbfe338f263",
+        "layout:LAYOUT-01-PERSISTENT-MODULE-SHELL",
+        "grammar:90121dbb87f5babf608d6f06c4b9c32427bdb35ab56bf318bf8eb9eccd1c565c",
+        "source-fit:c7fa22a6535d8b870f5b84d736f780d4fcc75b39a7d6294350d3e7544be84203"
+      ]
+    },
+    {
+      "id": "NIVO-BLOCK-CONTEXT-VERSION-V1",
+      "contentSha256": "sha256:d9b6f00079aceb527af50b22b1669442fd771299ea572dac1a58aed0e27d051d",
+      "kind": "create",
+      "owner": "nivo-fe/apps/app",
+      "need": "Review a versioned context draft and explicitly apply it while preserving the prior active version.",
+      "contractDelta": "Create ContextVersionBlock using Core surface, collection, neutral state, and action hierarchy; application owns version and Apply behavior.",
+      "negativeBoundary": [
+        "Do not put context-version semantics into Grammar.",
+        "Do not synthesize readiness or permission.",
+        "Do not replace the active version before explicit Apply succeeds."
+      ],
+      "blockedLocalBehavior": "Do not render context as an unversioned free-form settings panel.",
+      "evidence": [
+        "business:86fcb8fbe6ec2f984b8fc7ece190725e4a78aa7376c119b0a6557cbfe338f263",
+        "layout:LAYOUT-01-PERSISTENT-MODULE-SHELL",
+        "grammar:90121dbb87f5babf608d6f06c4b9c32427bdb35ab56bf318bf8eb9eccd1c565c",
+        "source-fit:c7fa22a6535d8b870f5b84d736f780d4fcc75b39a7d6294350d3e7544be84203"
+      ]
+    },
+    {
+      "id": "NIVO-BLOCK-EXECUTE-SESSION-RAIL-V1",
+      "contentSha256": "sha256:e02a910289dd1d29d3274a8ea44919824e9eeecc55b40f2d2e799018744995cd",
+      "kind": "create",
+      "owner": "nivo-fe/apps/app",
+      "need": "Navigate, create, select, and revisit multiple Execute chat sessions for one module.",
+      "contractDelta": "Create ExecuteSessionRailBlock as a Nivo application adapter over CollapsibleRail/Core Rail with compact drawer transformation.",
+      "negativeBoundary": [
+        "Do not include the private Setup session.",
+        "Do not lose selected session on responsive transformation.",
+        "Do not make Rail own workflow completion."
+      ],
+      "blockedLocalBehavior": "Do not collapse all Execute messages into one permanent conversation.",
+      "evidence": [
+        "business:86fcb8fbe6ec2f984b8fc7ece190725e4a78aa7376c119b0a6557cbfe338f263",
+        "layout:LAYOUT-01-PERSISTENT-MODULE-SHELL",
+        "grammar:90121dbb87f5babf608d6f06c4b9c32427bdb35ab56bf318bf8eb9eccd1c565c",
+        "source-fit:c7fa22a6535d8b870f5b84d736f780d4fcc75b39a7d6294350d3e7544be84203"
+      ]
+    },
+    {
+      "id": "NIVO-BLOCK-EXECUTE-CHAT-V1",
+      "contentSha256": "sha256:11e3fad714a295d01da0eaca321859fb0f3bab7222bf69fa1281a1ab8190742c",
+      "kind": "create",
+      "owner": "nivo-fe/apps/app",
+      "need": "Persistent Execute conversation with composer and inline typed widgets while the kind workbench remains visible.",
+      "contractDelta": "Create ExecuteChatBlock using Core surfaces and an application-owned typed widget registry, schema validation, capability checks, sandbox, and refusal state.",
+      "negativeBoundary": [
+        "Do not execute arbitrary HTML or scripts.",
+        "Do not allow widget payloads to mutate shell ownership.",
+        "Do not hide the workbench on non-compact layouts."
+      ],
+      "blockedLocalBehavior": "Do not render unregistered widget markup directly from model output.",
+      "evidence": [
+        "business:86fcb8fbe6ec2f984b8fc7ece190725e4a78aa7376c119b0a6557cbfe338f263",
+        "layout:LAYOUT-01-PERSISTENT-MODULE-SHELL",
+        "grammar:90121dbb87f5babf608d6f06c4b9c32427bdb35ab56bf318bf8eb9eccd1c565c",
+        "source-fit:c7fa22a6535d8b870f5b84d736f780d4fcc75b39a7d6294350d3e7544be84203"
+      ]
+    },
+    {
+      "id": "NIVO-BLOCK-KIND-WORKBENCH-V1",
+      "contentSha256": "sha256:d2fce2d8065b6857d3f9ecdf879a737bae62df519bbb80ffd41d4388fd89feaa",
+      "kind": "create",
+      "owner": "nivo-fe/apps/app",
+      "need": "Resolve one workbench from the module kind registry while preserving the shared module shell and chat.",
+      "contractDelta": "Create KindWorkbenchBlock with registry resolution, loading, ready, unavailable, and refusal states; each new kind registers a workbench without editing the shell.",
+      "negativeBoundary": [
+        "Do not encode Excel, Calendar, or Document as a closed enum in the shell.",
+        "Do not move kind semantics into Grammar.",
+        "Do not replace chat with the workbench on non-compact layouts."
+      ],
+      "blockedLocalBehavior": "Do not branch ModuleRouteShellBlock source for every new module kind.",
+      "evidence": [
+        "business:86fcb8fbe6ec2f984b8fc7ece190725e4a78aa7376c119b0a6557cbfe338f263",
+        "layout:LAYOUT-01-PERSISTENT-MODULE-SHELL",
+        "grammar:90121dbb87f5babf608d6f06c4b9c32427bdb35ab56bf318bf8eb9eccd1c565c",
+        "source-fit:c7fa22a6535d8b870f5b84d736f780d4fcc75b39a7d6294350d3e7544be84203"
+      ]
+    }
+  ]
+}

@@ -1,28 +1,30 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { useLocale, useTranslations } from "next-intl"
-import { DEFAULT_LOCALE } from "@/i18n/config"
+import { useTranslations } from "next-intl"
+import { useRouter } from "@/i18n/navigation"
 import { OverviewDataProvider } from "@/modules/overview/context"
 import { OverviewPageBase } from "./component"
+
+type OverviewContentProps = Parameters<typeof OverviewPageBase>[0]
+const OverviewContent = (props: OverviewContentProps) => <OverviewPageBase {...props} />
 
 /** Connect only the outer page command; blocks own their own shared-data slices. */
 export const OverviewPage = () => {
     const t = useTranslations("console")
-    const locale = useLocale()
     const router = useRouter()
-    const openApps = () => router.push(locale === DEFAULT_LOCALE ? "/apps" : `/${locale}/apps`)
+    const openApps = () => router.push("/apps")
     return (
-        <OverviewDataProvider>
-            <OverviewPageBase
-                title={t("overview.title")}
-                lede={t("overview.lede")}
-                pathLabel={t("navigationLabel")}
-                consoleLabel={t("title")}
-                buildAppLabel={t("overview.buildApp")}
-                onBuildApp={openApps}
-            />
-        </OverviewDataProvider>
+        <OverviewDataProvider
+            content={OverviewContent}
+            contentProps={{
+                title: t("overview.title"),
+                lede: t("overview.lede"),
+                pathLabel: t("navigationLabel"),
+                consoleLabel: t("title"),
+                buildAppLabel: t("overview.buildApp"),
+                onBuildApp: openApps,
+            }}
+        />
     )
 }
 

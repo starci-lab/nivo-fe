@@ -1,5 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react"
 import { cleanup } from "@testing-library/react"
+import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
@@ -31,7 +32,8 @@ type WalletProbeProps = {
 }
 
 vi.mock("next-intl", () => ({ useLocale: () => "en", useTranslations: () => mocks.t, useFormatter: () => ({ number: (value: number) => `money-${value}`, dateTime: (value: Date) => `date-${value.toISOString().slice(0, 10)}` }) }))
-vi.mock("next/navigation", () => ({ usePathname: () => mocks.navigation.pathname, useSearchParams: () => new URLSearchParams(mocks.navigation.search) }))
+vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(mocks.navigation.search) }))
+vi.mock("@/i18n/navigation", () => ({ usePathname: () => mocks.navigation.pathname }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => mocks.api)
 vi.mock("./component", () => ({
@@ -55,6 +57,7 @@ import { WalletControlCenter } from "./"
 
 const output = () => screen.getByTestId("wallet").textContent ?? ""
 const renderWallet = () => render(<WalletControlCenter pageState={mocks.navigation.search === "" ? "ordinary" : "waypoint"} />)
+const resetQueryCache = () => { for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key) }
 
 describe("WalletControlCenter connected states", () => {
     afterEach(() => cleanup())
@@ -101,6 +104,7 @@ describe("WalletControlCenter connected states", () => {
         await waitFor(() => expect(output()).toContain('"phase":"refused"'))
 
         cleanup()
+        resetQueryCache()
         mocks.api.myWallet.mockResolvedValue({ ok: true, data: { balanceVnd: 100 } })
         mocks.api.myInvoices.mockResolvedValue({ ok: true, data: [{ id: "invoice", amountVnd: 100, status: "unpaid", dueAt: "2026-08-20T00:00:00.000Z", catalogOrder: null }] })
         mocks.api.myWalletTransactions.mockResolvedValue({ ok: true, data: [{ id: "movement", amountVnd: 100, type: "spend", createdAt: "2026-08-20T00:00:00.000Z" }] })

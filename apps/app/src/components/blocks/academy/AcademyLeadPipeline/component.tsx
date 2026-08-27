@@ -39,7 +39,7 @@ export type AcademyLeadPipelineViewProps = {
 }
 
 /** Render leads as a joined identity scan with one selected follow-up. */
-export const AcademyLeadPipelineBase = ({ state, leads, selected, draft, pendingAction, message, labels, onOpenLead, onAdvance, onDraftReply }: AcademyLeadPipelineViewProps) => {
+const AcademyLeadPipelineContent = ({ state, leads, selected, draft, pendingAction, message, labels, onOpenLead, onAdvance, onDraftReply }: AcademyLeadPipelineViewProps) => {
     const rows = state === "resting"
         ? [0, 1, 2].map(() => defineContractComponent("avatar-identity-badge-action-row", {
             avatar: defineLeafComponent("avatar", {}, () => <Avatar props={{ size: "md" }} isLoading />),
@@ -89,6 +89,9 @@ export const AcademyLeadPipelineBase = ({ state, leads, selected, draft, pending
         </>
     )
 }
+
+/** Stable typed root for the Academy lead block. */
+export const AcademyLeadPipelineBase = (props: AcademyLeadPipelineViewProps) => <AcademyLeadPipelineContent {...props} />
 
 /** Source-level tier marker for the pure Academy lead block. */
 export const meta = { shape: "block", world: "pure" } as const

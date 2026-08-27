@@ -328,7 +328,7 @@ export type AgentWorkspaceControlCenter = {
 
 /** Immutable AgentOS solution package offered by the Nivo catalog. */
 export type AgentosSolutionModule = {
-    readonly key: "multichannel-chatbot" | "sales-copilot"
+    readonly key: string
     readonly version: string
     readonly name: string
     readonly summary: string
@@ -343,6 +343,7 @@ export type AgentosModuleInstallation = {
     readonly agentWorkspaceId: string
     readonly moduleKey: string
     readonly moduleVersion: string
+    readonly displayName: string
     readonly status: string
     readonly failureCode: string | null
     readonly createdAt: string
@@ -414,6 +415,324 @@ export type InstallAgentosSolutionModuleInput = {
     readonly agentWorkspaceId: string
     readonly moduleKey: AgentosSolutionModule["key"]
     readonly idempotencyKey: string
+}
+
+/** JSON value admitted by the trusted Module Studio runtime boundary. */
+export type AgentosRuntimeValue = string | number | boolean | null | ReadonlyArray<AgentosRuntimeValue> | { readonly [key: string]: AgentosRuntimeValue }
+
+/** Versioned trusted widget node returned by the backend registry. */
+export type AgentosRuntimeWidgetNode = {
+    readonly component: string
+    readonly version: string
+    readonly props: Readonly<Record<string, AgentosRuntimeValue>>
+    readonly children?: ReadonlyArray<AgentosRuntimeWidgetNode>
+}
+
+/** Closed MarkdownComponent/tree message contract accepted from the trusted backend boundary. */
+export type AgentosRuntimeMessageTree = {
+    readonly schemaVersion: 1
+    readonly nodes: ReadonlyArray<
+        | { readonly type: "markdown"; readonly markdown: string }
+        | { readonly type: "widget"; readonly widget: AgentosRuntimeWidgetNode }
+        | { readonly type: "attachment"; readonly attachmentId: string; readonly label: string; readonly mediaType: string }
+    >
+}
+
+/** One declarative assertion pinned to a side-effect-free module test scenario. */
+export type AgentosModuleTestAssertionContract = {
+    readonly key: string
+    readonly label: string
+    readonly source: "input" | "context"
+    readonly path: string
+    readonly operator: "equals" | "contains" | "count-at-least" | "present"
+    readonly expected?: AgentosRuntimeValue
+    readonly severity: "fail" | "warning"
+}
+
+/** One fake-data scenario registered by a kind-owned test workbench. */
+export type AgentosModuleTestScenarioContract = {
+    readonly key: string
+    readonly label: string
+    readonly description: string
+    readonly fixture: Readonly<Record<string, AgentosRuntimeValue>>
+    readonly assertions: ReadonlyArray<AgentosModuleTestAssertionContract>
+}
+
+/** Open versioned test registry contract pinned to an installation manifest. */
+export type AgentosModuleTestContract = {
+    readonly workbench: { readonly key: string; readonly version: string }
+    readonly contract: { readonly key: string; readonly version: string }
+    readonly sandboxAdapter: { readonly key: string; readonly version: string }
+    readonly evidenceWidget: { readonly key: string; readonly version: string }
+    readonly scenarios: ReadonlyArray<AgentosModuleTestScenarioContract>
+}
+
+/** Open, versioned kind/workbench registry manifest pinned to one installation. */
+export type AgentosRuntimeManifest = {
+    readonly schemaVersion: number
+    readonly kind: { readonly key: string; readonly version: string }
+    readonly workbench: { readonly key: string; readonly version: string }
+    readonly test?: AgentosModuleTestContract
+    readonly operations?: {
+        readonly replyContract: { readonly key: string; readonly version: string }
+        readonly taskContract: { readonly key: string; readonly version: string }
+        readonly toolSchema: { readonly key: string; readonly version: string }
+        readonly proactiveWidget: { readonly key: string; readonly version: string }
+        readonly setupFields: ReadonlyArray<string>
+    }
+    readonly widgets: ReadonlyArray<{
+        readonly component: string
+        readonly version: string
+        readonly allowedProps: ReadonlyArray<string>
+        readonly actions: ReadonlyArray<{ readonly key: string; readonly inputKeys: ReadonlyArray<string> }>
+    }>
+    readonly credentialSlots?: ReadonlyArray<{
+        readonly key: string
+        readonly label: string
+        readonly provider: string
+        readonly secret: true
+    }>
+    readonly config: Readonly<Record<string, AgentosRuntimeValue>>
+}
+
+/** Immutable summary for one persisted module test run. */
+export type AgentosModuleTestRun = {
+    readonly id: string
+    readonly installationId: string
+    readonly moduleDefinitionId: string
+    readonly contextVersionId: string | null
+    readonly setupSessionId: string | null
+    readonly draftDigest: string | null
+    readonly requestedByUserId: string
+    readonly kindKey: string
+    readonly kindVersion: string
+    readonly testContractKey: string
+    readonly testContractVersion: string
+    readonly scenarioKey: string
+    readonly status: "running" | "passed" | "warning" | "failed"
+    readonly scenarioInput: Readonly<Record<string, AgentosRuntimeValue>>
+    readonly summary: Readonly<Record<string, AgentosRuntimeValue>>
+    readonly completedAt: string | null
+    readonly createdAt: string
+}
+
+/** Trusted, normalized assertion evidence for one module test run. */
+export type AgentosModuleTestAssertionResult = {
+    readonly id: string
+    readonly runId: string
+    readonly ordinal: number
+    readonly assertionKey: string
+    readonly label: string
+    readonly verdict: "pass" | "warning" | "fail"
+    readonly expected: AgentosRuntimeValue | null
+    readonly actual: AgentosRuntimeValue | null
+    readonly evidence: AgentosRuntimeWidgetNode
+    readonly createdAt: string
+}
+
+/** Owner-only Test surface, including the open contract and persisted evidence. */
+export type AgentosModuleTestSurface = {
+    readonly contract: AgentosModuleTestContract
+    readonly runs: ReadonlyArray<AgentosModuleTestRun>
+    readonly run: AgentosModuleTestRun | null
+    readonly assertions: ReadonlyArray<AgentosModuleTestAssertionResult>
+}
+
+/** Explicit immutable-context request for one isolated module test. */
+export type RunAgentosModuleTestInput = {
+    readonly installationId: string
+    readonly contextVersionId?: string
+    readonly setupSessionId?: string
+    readonly scenarioKey: string
+    readonly idempotencyKey: string
+    readonly scenarioInput?: Readonly<Record<string, AgentosRuntimeValue>>
+}
+
+/** One owner- or participant-safe persistent Module Studio projection. */
+export type AgentosModuleRuntime = {
+    readonly installation: AgentosModuleInstallation & {
+        readonly kindKey: string
+        readonly kindVersion: string
+        readonly workbenchKey: string
+        readonly workbenchVersion: string
+        readonly runtimeManifest: AgentosRuntimeManifest
+        readonly settingsVersion: number
+        readonly activeContextVersionId: string | null
+        readonly liveEnabled: boolean
+        readonly operatingMode: "assist" | "autopilot"
+        readonly channelAccountRef: string | null
+        readonly primaryOpsSessionId: string | null
+    }
+    readonly setupSession: AgentosRuntimeSession | null
+    readonly setupSessions: ReadonlyArray<AgentosRuntimeSession>
+    readonly executeSessions: ReadonlyArray<AgentosRuntimeSession>
+    readonly participants: ReadonlyArray<{ readonly id: string; readonly sessionId: string; readonly userId: string }>
+    readonly messages: ReadonlyArray<AgentosRuntimeMessage>
+    readonly contextVersions: ReadonlyArray<AgentosRuntimeContextVersion>
+    readonly widgets: ReadonlyArray<AgentosRuntimeWidget>
+    readonly operationEvents: ReadonlyArray<AgentosRuntimeOperationEvent>
+    readonly tasks: ReadonlyArray<AgentosRuntimeTask>
+    readonly credentials: ReadonlyArray<AgentosRuntimeCredential>
+    readonly settings: Readonly<Record<string, AgentosRuntimeValue>> | null
+    readonly diagnostics: Readonly<Record<string, AgentosRuntimeValue>>
+}
+
+/** Masked installation credential status; the secret value is never returned. */
+export type AgentosRuntimeCredential = {
+    readonly id: string
+    readonly installationId: string
+    readonly providerKey: string
+    readonly maskedHint: string
+    readonly status: "configured" | "invalid"
+}
+
+/** Write-only workspace channel configuration delivered to that workspace's controller. */
+export type ConfigureAgentWorkspaceChannelInput = {
+    readonly agentWorkspaceId: string
+    readonly provider: "Telegram"
+    readonly accountId: string
+    readonly displayName?: string
+    readonly credentials: ReadonlyArray<{ readonly key: "TELEGRAM_BOT_TOKEN"; readonly value: string }>
+}
+
+/** Safe delivery status returned without ever returning the submitted secret. */
+export type AgentWorkspaceChannelSetting = {
+    readonly provider: string
+    readonly accountId: string
+    readonly state: "NOT_CONFIGURED" | "PENDING" | "APPLIED" | "ERROR"
+    readonly displayName: string | null
+    readonly credentials: ReadonlyArray<{
+        readonly key: string
+        readonly required: boolean
+        readonly configured: boolean
+        readonly hint: string | null
+        readonly syncedAt: string | null
+    }>
+}
+
+/** Persistent private Setup or collaborative Execute conversation identity. */
+export type AgentosRuntimeSession = {
+    readonly id: string
+    readonly installationId: string
+    readonly createdByUserId: string
+    readonly mode: "setup" | "execute"
+    readonly title: string
+    readonly isArchived: boolean
+    readonly setupRevision: number | null
+    readonly setupStatus: "open" | "ready" | "completed" | "superseded" | null
+    readonly draftSnapshot: Readonly<Record<string, AgentosRuntimeValue>> | null
+    readonly draftDigest: string | null
+    readonly gateEvidence: Readonly<Record<string, AgentosRuntimeValue>> | null
+    readonly basedOnContextVersionId: string | null
+    readonly completedAt: string | null
+    readonly createdAt: string
+    readonly updatedAt: string
+}
+
+/** Immutable business-context snapshot created by Setup. */
+export type AgentosRuntimeContextVersion = {
+    readonly id: string
+    readonly installationId: string
+    readonly createdByUserId: string
+    readonly version: number
+    readonly snapshot: Readonly<Record<string, AgentosRuntimeValue>>
+    readonly digest: string
+    readonly sourceSetupSessionId: string | null
+    readonly createdAt: string
+}
+
+/** Append-only message bound to the context that was active when it was accepted. */
+export type AgentosRuntimeMessage = {
+    readonly id: string
+    readonly sessionId: string
+    readonly actorUserId: string | null
+    readonly contextVersionId: string | null
+    readonly role: "user" | "assistant" | "system"
+    readonly content: string
+    readonly messageTree: AgentosRuntimeMessageTree | null
+    readonly operationEventId: string | null
+    readonly taskId: string | null
+    readonly sequence: number
+    readonly createdAt: string
+}
+
+/** Append-only authenticated event accepted by one workspace-owned controller boundary. */
+export type AgentosRuntimeOperationEvent = {
+    readonly id: string
+    readonly installationId: string
+    readonly contextVersionId: string
+    readonly source: string
+    readonly externalEventId: string
+    readonly eventType: string
+    readonly observedAt: string
+    readonly kindKey: string
+    readonly kindVersion: string
+    readonly replyContractKey: string
+    readonly replyContractVersion: string
+    readonly toolSchemaDigest: string
+    readonly payload: Readonly<Record<string, AgentosRuntimeValue>>
+    readonly evidence: Readonly<Record<string, AgentosRuntimeValue>>
+    readonly createdAt: string
+}
+
+/** Durable work item projected from exactly one accepted operation event. */
+export type AgentosRuntimeTask = {
+    readonly id: string
+    readonly installationId: string
+    readonly sourceEventId: string
+    readonly contextVersionId: string
+    readonly title: string
+    readonly summary: string
+    readonly priority: "low" | "normal" | "high" | "urgent"
+    readonly status: "open" | "in_progress" | "completed" | "refused" | "failed"
+    readonly expectedVersion: number
+    readonly workbenchKey: string
+    readonly workbenchVersion: string
+    readonly workbenchRef: string
+    readonly evidence: Readonly<Record<string, AgentosRuntimeValue>>
+    readonly dueAt: string | null
+    readonly createdAt: string
+    readonly updatedAt: string
+}
+
+/** Trusted widget tree attached to exactly one immutable Execute message. */
+export type AgentosRuntimeWidget = {
+    readonly id: string
+    readonly messageId: string
+    readonly rootComponent: string
+    readonly rootVersion: string
+    readonly tree: AgentosRuntimeWidgetNode
+}
+
+/** Closed commands accepted by the shared Module Studio mutation. */
+export type AgentosModuleRuntimeAction =
+    | "START_SETUP_REVISION" | "APPEND_SETUP_MESSAGE" | "UPDATE_SETUP_DRAFT" | "REVISE_CONTEXT"
+    | "APPLY_SETUP_REVISION" | "APPLY_CONTEXT_VERSION" | "ENABLE_LIVE" | "DISABLE_LIVE" | "CREATE_EXECUTE_SESSION"
+    | "RENAME_EXECUTE_SESSION" | "ARCHIVE_EXECUTE_SESSION" | "SET_EXECUTE_PARTICIPANTS"
+    | "APPEND_EXECUTE_MESSAGE" | "INVOKE_WIDGET_ACTION" | "UPDATE_SETTINGS"
+    | "SAVE_MODULE_CREDENTIAL" | "REMOVE_MODULE_CREDENTIAL"
+
+/** Exact mutation envelope; optional fields are validated again by the backend action boundary. */
+export type ManageAgentosModuleRuntimeInput = {
+    readonly action: AgentosModuleRuntimeAction
+    readonly installationId: string
+    readonly idempotencyKey: string
+    readonly sessionId?: string
+    readonly contextVersion?: number
+    readonly content?: string
+    readonly title?: string
+    readonly participantUserIds?: ReadonlyArray<string>
+    readonly contextSnapshot?: Readonly<Record<string, AgentosRuntimeValue>>
+    readonly widgetTree?: AgentosRuntimeWidgetNode
+    readonly widgetId?: string
+    readonly widgetAction?: string
+    readonly widgetInput?: Readonly<Record<string, AgentosRuntimeValue>>
+    readonly taskExpectedVersion?: number
+    readonly settings?: Readonly<Record<string, AgentosRuntimeValue>>
+    readonly credentialKey?: string
+    readonly credentialValue?: string
+    readonly operatingMode?: "assist" | "autopilot"
+    readonly channelAccountRef?: string
 }
 
 /** One credential-free callback grant for opening a workspace application. */
@@ -648,7 +967,7 @@ export const myAgentosModuleInstallations = (agentWorkspaceId: string): Promise<
     graphql(
         `query MyAgentosModuleInstallations($agentWorkspaceId: ID!) {
             myAgentosModuleInstallations(agentWorkspaceId: $agentWorkspaceId) {
-                data { id agentWorkspaceId moduleKey moduleVersion status failureCode createdAt updatedAt }
+                data { id agentWorkspaceId moduleKey moduleVersion displayName status failureCode createdAt updatedAt }
                 message success error
             }
         }`,
@@ -674,12 +993,135 @@ export const myAgentosModuleInstallation = (installationId: string): Promise<Res
         { installationId },
     )
 
+const MODULE_RUNTIME_FIELDS = `
+    installation {
+        id agentWorkspaceId moduleKey moduleVersion displayName kindKey kindVersion workbenchKey workbenchVersion
+        runtimeManifest settingsVersion activeContextVersionId liveEnabled operatingMode channelAccountRef primaryOpsSessionId
+        status failureCode createdAt updatedAt
+    }
+    setupSession {
+        id installationId createdByUserId mode title isArchived setupRevision setupStatus draftSnapshot draftDigest
+        gateEvidence basedOnContextVersionId completedAt createdAt updatedAt
+    }
+    setupSessions {
+        id installationId createdByUserId mode title isArchived setupRevision setupStatus draftSnapshot draftDigest
+        gateEvidence basedOnContextVersionId completedAt createdAt updatedAt
+    }
+    executeSessions {
+        id installationId createdByUserId mode title isArchived setupRevision setupStatus draftSnapshot draftDigest
+        gateEvidence basedOnContextVersionId completedAt createdAt updatedAt
+    }
+    participants { id sessionId userId }
+    messages { id sessionId actorUserId contextVersionId role content messageTree operationEventId taskId sequence createdAt }
+    contextVersions { id installationId createdByUserId version snapshot digest sourceSetupSessionId createdAt }
+    widgets { id messageId rootComponent rootVersion tree }
+    operationEvents {
+        id installationId contextVersionId source externalEventId eventType observedAt kindKey kindVersion
+        replyContractKey replyContractVersion toolSchemaDigest payload evidence createdAt
+    }
+    tasks {
+        id installationId sourceEventId contextVersionId title summary priority status expectedVersion
+        workbenchKey workbenchVersion workbenchRef evidence dueAt createdAt updatedAt
+    }
+    credentials { id installationId providerKey maskedHint status }
+    settings diagnostics
+`
+
+/** Read one shared Module Studio runtime with progressive diagnostics disclosure. */
+export const myAgentosModuleRuntime = (installationId: string, includeDiagnostics = false): Promise<Result<AgentosModuleRuntime>> =>
+    graphql(
+        `query MyAgentosModuleRuntime($installationId: ID!, $includeDiagnostics: Boolean!) {
+            myAgentosModuleRuntime(installationId: $installationId, includeDiagnostics: $includeDiagnostics) {
+                data { ${MODULE_RUNTIME_FIELDS} }
+                message success error
+            }
+        }`,
+        { installationId, includeDiagnostics },
+    )
+
+/** Apply one explicit Setup, Execute, widget, or settings command and return the settled runtime. */
+export const manageAgentosModuleRuntime = (input: ManageAgentosModuleRuntimeInput): Promise<Result<AgentosModuleRuntime>> =>
+    graphql(
+        `mutation ManageAgentosModuleRuntime($input: ManageAgentosModuleRuntimeInput!) {
+            manageAgentosModuleRuntime(input: $input) {
+                data { ${MODULE_RUNTIME_FIELDS} }
+                message success error
+            }
+        }`,
+        { input },
+    )
+
+/** Deliver one write-only Telegram credential set to the owning Agent Workspace controller. */
+export const configureAgentWorkspaceChannel = (
+    input: ConfigureAgentWorkspaceChannelInput,
+): Promise<Result<AgentWorkspaceChannelSetting>> => graphql(
+    `mutation ConfigureAgentWorkspaceChannel($input: ConfigureAgentWorkspaceChannelInput!) {
+        configureAgentWorkspaceChannel(input: $input) {
+            data {
+                provider accountId state displayName
+                credentials { key required configured hint syncedAt }
+            }
+            message success error
+        }
+    }`,
+    { input },
+)
+
+const MODULE_TEST_FIELDS = `
+    contract
+    runs {
+        id installationId moduleDefinitionId contextVersionId setupSessionId draftDigest requestedByUserId kindKey kindVersion
+        testContractKey testContractVersion scenarioKey status scenarioInput summary completedAt createdAt
+    }
+    run {
+        id installationId moduleDefinitionId contextVersionId setupSessionId draftDigest requestedByUserId kindKey kindVersion
+        testContractKey testContractVersion scenarioKey status scenarioInput summary completedAt createdAt
+    }
+    assertions { id runId ordinal assertionKey label verdict expected actual evidence createdAt }
+`
+
+/** Read the kind-owned Test contract and recent persisted runs for one installation. */
+export const myAgentosModuleTestSurface = (installationId: string): Promise<Result<AgentosModuleTestSurface>> =>
+    graphql(
+        `query MyAgentosModuleTestSurface($installationId: ID!) {
+            myAgentosModuleTestSurface(installationId: $installationId) {
+                data { ${MODULE_TEST_FIELDS} }
+                message success error
+            }
+        }`,
+        { installationId },
+    )
+
+/** Read one exact persisted Test result without inferring it from Execute history. */
+export const myAgentosModuleTestRun = (installationId: string, runId: string): Promise<Result<AgentosModuleTestSurface>> =>
+    graphql(
+        `query MyAgentosModuleTestRun($installationId: ID!, $runId: ID!) {
+            myAgentosModuleTestRun(installationId: $installationId, runId: $runId) {
+                data { ${MODULE_TEST_FIELDS} }
+                message success error
+            }
+        }`,
+        { installationId, runId },
+    )
+
+/** Run one side-effect-free scenario against one explicit immutable context version. */
+export const runAgentosModuleTest = (input: RunAgentosModuleTestInput): Promise<Result<AgentosModuleTestSurface>> =>
+    graphql(
+        `mutation RunAgentosModuleTest($input: RunAgentosModuleTestInput!) {
+            runAgentosModuleTest(input: $input) {
+                data { ${MODULE_TEST_FIELDS} }
+                message success error
+            }
+        }`,
+        { input },
+    )
+
 /** Install one immutable solution package using one browser-generated idempotency identity. */
 export const installAgentosSolutionModule = (input: InstallAgentosSolutionModuleInput): Promise<Result<AgentosModuleInstallation>> =>
     graphql(
         `mutation InstallAgentosSolutionModule($input: InstallAgentosSolutionModuleInput!) {
             installAgentosSolutionModule(input: $input) {
-                data { id agentWorkspaceId moduleKey moduleVersion status failureCode createdAt updatedAt }
+                data { id agentWorkspaceId moduleKey moduleVersion displayName status failureCode createdAt updatedAt }
                 message success error
             }
         }`,
@@ -807,8 +1249,10 @@ const studioMutation = (name: string, inputType: string, input: Readonly<Record<
 
 type StartAgentosCustomModuleIntakeInput = { readonly agentWorkspaceId: string, readonly goal: string, readonly idempotencyKey: string }
 type AnswerAgentosCustomModuleIntakeInput = { readonly agentWorkspaceId: string, readonly moduleId: string, readonly answer: string }
-type PrepareAgentosModuleAttachmentUploadInput = { readonly agentWorkspaceId: string, readonly moduleId: string, readonly fileName: string, readonly mediaType: string, readonly sizeBytes: number }
-type AgentosModuleAttachmentIdentityInput = { readonly agentWorkspaceId: string, readonly moduleId: string, readonly attachmentId: string }
+/** File metadata required before Core issues one short-lived upload capability. */
+export type PrepareAgentosModuleAttachmentUploadInput = { readonly agentWorkspaceId: string, readonly moduleId: string, readonly fileName: string, readonly mediaType: string, readonly sizeBytes: number }
+/** Stable attachment identity used by ingestion retry and removal commands. */
+export type AgentosModuleAttachmentIdentityInput = { readonly agentWorkspaceId: string, readonly moduleId: string, readonly attachmentId: string }
 type SaveAgentosModuleIntegrationSecretInput = { readonly agentWorkspaceId: string, readonly moduleId: string, readonly providerKey: string, readonly secret: string }
 type AgentosModuleIntegrationIdentityInput = { readonly agentWorkspaceId: string, readonly moduleId: string, readonly providerKey: string }
 type PublishAgentosCustomModuleInput = { readonly agentWorkspaceId: string, readonly moduleId: string, readonly acknowledgedVersion: number, readonly idempotencyKey: string }
@@ -849,6 +1293,26 @@ export const prepareAgentosModuleAttachmentUpload = (input: PrepareAgentosModule
         }`,
         { input },
     )
+
+/** Transfer bytes through one backend-issued upload capability; UI never owns raw transport. */
+export const uploadAgentosModuleAttachment = async (
+    capability: Pick<AgentosModuleUploadCapability, "uploadUrl" | "uploadMethod">,
+    mediaType: string,
+    body: Blob,
+): Promise<Result<boolean>> => {
+    try {
+        const response = await fetch(resolveCoreApiCapabilityUrl(capability.uploadUrl), {
+            method: capability.uploadMethod,
+            headers: { "content-type": mediaType },
+            body,
+        })
+        return response.ok
+            ? { ok: true, data: true }
+            : { ok: false, reason: `upload refused with ${response.status}`, code: "UPLOAD_REFUSED" }
+    } catch {
+        return { ok: false, reason: "network", code: "NETWORK" }
+    }
+}
 
 /** Read current per-workspace provider, model, global-Qdrant recovery and readiness evidence. */
 export const myAgentosAiKnowledgeReadiness = (workspaceId: string): Promise<Result<AgentosAiKnowledgeReadiness>> =>

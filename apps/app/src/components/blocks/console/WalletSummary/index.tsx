@@ -1,8 +1,7 @@
 "use client"
 
-import { useFormatter, useLocale, useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
-import { DEFAULT_LOCALE } from "@/i18n/config"
+import { useFormatter, useTranslations } from "next-intl"
+import { useRouter } from "@/i18n/navigation"
 import { useOverviewData } from "@/modules/overview/context"
 import { WalletSummaryBase, type WalletSummaryFact, type WalletSummaryState } from "./component"
 
@@ -13,9 +12,8 @@ export const WalletSummary = () => {
     const { wallet, invoices } = useOverviewData()
     const t = useTranslations("console")
     const format = useFormatter()
-    const locale = useLocale()
     const router = useRouter()
-    const open = (route: string) => router.push(locale === DEFAULT_LOCALE ? route : `/${locale}${route}`)
+    const open = (route: string) => router.push(route)
     const refusal = () => t("refusal.unknown")
     const money = (value: number) => format.number(value, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
     const day = (value: string) => format.dateTime(new Date(value), { day: "2-digit", month: "short", year: "numeric" })

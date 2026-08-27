@@ -1,4 +1,6 @@
-import { Tree, defineContractProjection } from "@nivo/ui"
+"use client"
+
+import { Tree, defineContractComponent, defineContractProjection } from "@nivo/ui"
 import { AcademyChrome } from "@/components/layouts/AcademyChrome"
 import { AcademySections } from "@/components/blocks/academy/AcademySections"
 import type { Course } from "@/modules/api/academy"
@@ -22,6 +24,12 @@ export interface AcademyPageProps {
     readonly courses: ReadonlyArray<Course>
 }
 
+const AcademyRoutedContent = ({ courses }: AcademyPageProps) => (
+    <Tree contract="academy-band-run" render={defineContractComponent("academy-band-run", {
+        content: defineContractProjection("academy-band-list", () => <AcademySections courses={[...courses]} />),
+    })} />
+)
+
 /**
  * Draw the academy landing screen.
  *
@@ -40,13 +48,7 @@ export const AcademyPageBase = ({ courses }: AcademyPageProps) => (
          * written for exactly this node - its `why` says the node that stacks the bands adds no
          * measure of its own, which is why its class list is empty.
          */
-        content={(
-            <Tree
-                contract="academy-band-run"
-                render={defineContractProjection("academy-band-run", () => (
-                    <AcademySections courses={[...courses]} />
-                ))}
-            />
-        )}
+        content={AcademyRoutedContent}
+        contentProps={{ courses: [...courses] }}
     />
 )

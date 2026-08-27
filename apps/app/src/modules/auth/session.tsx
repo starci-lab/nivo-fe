@@ -1,7 +1,7 @@
 "use client"
 
 import { useLocale } from "next-intl"
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ComponentProps } from "react"
 import { refreshSession, signOut as signOutMutation, type AuthPayload } from "../api/auth"
 import { useAccessTokenFrom, useLocaleFrom } from "../api/graphql"
 
@@ -46,7 +46,7 @@ const SessionContext = createContext<Session | null>(null)
 /** Props for {@link SessionProvider}. */
 export interface SessionProviderProps {
     /** Everything that may read the session. */
-    readonly children: ReactNode
+    readonly children: ComponentProps<"div">["children"]
 }
 
 /**

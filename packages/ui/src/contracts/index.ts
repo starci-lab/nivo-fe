@@ -17,6 +17,8 @@
  * whoever inserts one is looking at this file beside it.
  */
 
+import type { CoreLayoutClassName } from "@starci/grammar/core"
+
 /**
  * The closed set of classes a node may lay its children out with.
  *
@@ -24,15 +26,17 @@
  * property is what makes a whole family of patrol rules unnecessary: there is nothing to police
  * when the bad value cannot be typed.
  */
-export type LayoutClassName =
-    | "flex" | "grid" | "flex-col" | "flex-row" | "flex-wrap" | "overflow-hidden" | "relative"
-    | "items-center" | "items-baseline" | "items-start"
-    | "justify-between" | "justify-center" | "justify-around" | "[&>*]:w-full" | "[&>*]:max-w-sm"
-    | "gap-1" | "gap-2" | "gap-3" | "gap-4" | "gap-6" | "gap-8"
-    | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "sm:grid-cols-4" | "sm:grid-cols-5" | "sm:grid-cols-[minmax(0,1fr)_12rem]" | "lg:grid-cols-3" | "lg:grid-cols-4"
+export type LayoutClassName = CoreLayoutClassName
+    | "items-baseline"
+    | "justify-around" | "[&>*]:w-full" | "[&>*]:max-w-sm"
+    | "grid-cols-1" | "grid-cols-2" | "sm:grid-cols-2" | "sm:grid-cols-4" | "sm:grid-cols-5" | "sm:grid-cols-[minmax(0,1fr)_12rem]" | "md:grid-cols-2" | "lg:grid-cols-3" | "lg:grid-cols-4"
     | "lg:grid-cols-[minmax(0,1fr)_20rem]"
+    | "lg:grid-cols-[minmax(0,7fr)_minmax(20rem,5fr)]"
+    | "lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
+    | "lg:grid-cols-[16rem_minmax(0,5fr)_minmax(0,7fr)]"
+    | "lg:grid-cols-[14rem_minmax(0,6fr)_minmax(20rem,4fr)]"
     | "md:flex" | "md:flex-row" | "md:items-start"
-    | "mx-auto" | "min-h-screen" | "w-full" | "w-64" | "min-w-0" | "grow" | "flex-1" | "hidden" | "fixed" | "inset-x-0" | "bottom-0" | "max-w-app-lg" | "max-w-6xl" | "max-w-sm"
+    | "mx-auto" | "min-h-screen" | "w-64" | "fixed" | "inset-x-0" | "bottom-0" | "max-w-app-lg" | "max-w-6xl" | "max-w-screen-2xl" | "max-w-sm"
     // The two reading measures between the form width and the dashboard width. `max-w-sm` is a
     // control column and `max-w-6xl` is a two-column page at 72rem; a band of prose read straight
     // down needs 48rem, and a single-column operations page needs 56rem. Neither is expressible by
@@ -41,10 +45,10 @@ export type LayoutClassName =
     // in this union but has no theme definition anywhere in the repository, so it compiles to
     // nothing at all.
     | "max-w-3xl" | "max-w-4xl"
-    | "h-16" | "min-h-16" | "sticky" | "top-0" | "top-16" | "z-40" | "z-50" | "shrink-0" | "justify-end"
+    | "h-16" | "min-h-16" | "top-0" | "top-16" | "z-40" | "z-50" | "lg:sticky" | "lg:top-6"
     | "border" | "border-b" | "border-t" | "border-separator" | "divide-y" | "divide-separator" | "bg-background"
     | "px-3" | "px-4" | "px-6" | "py-2" | "py-3" | "py-6" | "py-8" | "p-0" | "p-2" | "p-4" | "p-6"
-    | "px-2"
+    | "px-2" | "md:px-6"
     // THE INTERACTION AND PAINT TOKENS LEFT WHEN THE PRESS TARGET BECAME A BRANCH. A cursor, a
     // hover answer and the colour of set words are claims one node makes about how it REACTS and
     // how it looks, not about how its children stand together, so CONTRACT-12 gives them to the
@@ -75,6 +79,7 @@ export type LayoutClassName =
     | "md:[&>*:nth-child(3)]:min-w-0" | "md:[&>*:nth-child(3)]:grow"
     | "[&>*:first-child]:hidden" | "md:[&>*:first-child]:flex"
     | "[&>*:last-child]:hidden" | "sm:[&>*:last-child]:block"
+    | "lg:[&>*:first-child]:hidden" | "lg:[&>*:last-child]:block" | "lg:block"
     | "[&>*:nth-child(2)]:pb-16" | "md:[&>*:nth-child(2)]:pb-0"
     | "md:[&>*:nth-child(2)]:min-w-0" | "md:[&>*:nth-child(2)]:grow" | "md:hidden"
     | "[&>*]:px-4" | "[&>*]:py-3" | "[&>*]:p-2" | "[&>*]:p-3" | "[&>*]:border-separator"
@@ -245,10 +250,13 @@ export const CONTRACTS = buildContracts({
         // bands inside own their own rhythm; the element is the meaning, not the spacing.
         host: "main",
         classes: [],
-        children: {
-            band: { composite: "academy-band", repeats: true, restingCount: 0 },
-        },
+        children: { content: { contract: "academy-band-list" } },
         why: "if you need the landmark that stacks an academy landing page's bands without adding any seam, gap or padding of its own, because each band already owns its own full-bleed inset and closing rule",
+    },
+    "academy-band-list": {
+        classes: [],
+        children: { band: { composite: "academy-band", repeats: true, restingCount: 0 } },
+        why: "if the AcademySections block needs one typed non-landmark owner for its ordered business bands.",
     },
     "banded-measure-column": {
         classes: ["w-full", "border-b", "border-separator", "px-6", "py-6"],
@@ -448,7 +456,9 @@ export const CONTRACTS = buildContracts({
                     "module-integration-list", "module-specification-review",
                     "responsive-agentos-readiness-stepper", "workspace-ai-readiness-summary",
                     "knowledge-origin-list", "readiness-component-list", "module-document-ingestion-list",
-                    "workspace-ai-knowledge-stack",
+                    "workspace-ai-knowledge-stack", "agentos-chat-body", "agentos-context-review",
+                    "agentos-workbench-body", "agentos-settings-form", "agentos-diagnostics-body", "agentos-cockpit-rail-body",
+                    "agentos-test-scenario-body", "agentos-test-evidence-body",
                 ],
                 leaf: "text",
             },
@@ -556,6 +566,217 @@ export const CONTRACTS = buildContracts({
             notice: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
         },
         why: "if one immutable specification version must be read, explicitly acknowledged and only then submitted for installation.",
+    },
+    "agentos-module-shell-page": {
+        host: "div",
+        classes: ["mx-auto", "flex", "w-full", "max-w-screen-2xl", "flex-col", "gap-4", "px-4", "py-6", "md:px-6"],
+        children: {
+            path: { leaf: "breadcrumbs" },
+            heading: { contract: "agentos-page-heading" },
+            navigation: { leaf: "choice-tabs" },
+            body: { contract: ["agentos-setup-layout", "agentos-test-layout", "agentos-operate-layout", "agentos-settings-layout", "agentos-diagnostics-layout"] },
+        },
+        why: "if one installed AgentOS module must retain its path, identity, lifecycle and local navigation while Setup, Test, Operate, Settings and Diagnostics replace only the task body.",
+    },
+    "agentos-setup-layout": {
+        classes: ["grid", "grid-cols-1", "items-start", "gap-4", "lg:grid-cols-[14rem_minmax(0,6fr)_minmax(20rem,4fr)]", "lg:[&>*:first-child]:hidden"],
+        children: {
+            mode: { contract: "agentos-cockpit-mode-compact" },
+            versions: { contract: ["agentos-cockpit-pane", "agentos-cockpit-pane-wide-only"] },
+            conversation: { contract: ["agentos-cockpit-pane", "agentos-cockpit-pane-wide-only"] },
+            context: { contract: ["agentos-cockpit-pane", "agentos-cockpit-pane-wide-only"] },
+        },
+        why: "if immutable Setup revisions, the private follow-up conversation and business-understanding evidence must form one desktop cockpit while one explicit pane remains visible on compact screens.",
+    },
+    "agentos-test-layout": {
+        classes: ["grid", "grid-cols-1", "items-start", "gap-4", "lg:grid-cols-[14rem_minmax(0,6fr)_minmax(20rem,4fr)]", "lg:[&>*:first-child]:hidden"],
+        children: {
+            mode: { contract: "agentos-cockpit-mode-compact" },
+            scenarios: { contract: ["agentos-cockpit-pane", "agentos-cockpit-pane-wide-only"] },
+            conversation: { contract: ["agentos-cockpit-pane", "agentos-cockpit-pane-wide-only"] },
+            evidence: { contract: ["agentos-cockpit-sidecar-pane", "agentos-cockpit-sidecar-pane-wide-only"] },
+        },
+        why: "if a side-effect-free kind scenario suite, its test conversation and persisted trust evidence must remain visible together on desktop and explicitly switch on compact screens.",
+    },
+    "agentos-cockpit-pane": {
+        classes: ["min-w-0"],
+        children: { body: { contract: "label-row-over-card" } },
+        why: "if the selected compact cockpit pane must remain visible and retain its ordinary desktop column.",
+    },
+    "agentos-cockpit-mode-compact": {
+        classes: ["min-w-0"],
+        children: { navigation: { leaf: "choice-tabs" } },
+        why: "if compact cockpit navigation must switch one visible pane below the desktop breakpoint without consuming a column in the approved three-pane desktop composition.",
+    },
+    "agentos-cockpit-pane-wide-only": {
+        classes: ["hidden", "min-w-0", "lg:block"],
+        children: { body: { contract: "label-row-over-card" } },
+        why: "if an unselected compact cockpit pane must stand down below desktop without leaving the approved three-pane composition.",
+    },
+    "agentos-cockpit-sidecar-pane": {
+        classes: ["min-w-0", "lg:sticky", "lg:top-6"],
+        children: { body: { contract: "label-row-over-card" } },
+        why: "if selected evidence must remain readable on compact screens and stay visible beside a longer desktop task.",
+    },
+    "agentos-cockpit-sidecar-pane-wide-only": {
+        classes: ["hidden", "min-w-0", "lg:block", "lg:sticky", "lg:top-6"],
+        children: { body: { contract: "label-row-over-card" } },
+        why: "if unselected compact evidence must stand down while preserving its sticky desktop sidecar position.",
+    },
+    "agentos-cockpit-rail-body": {
+        classes: ["flex", "min-h-0", "flex-col", "gap-3", "p-2"],
+        children: {
+            summary: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+            items: { leaf: "selection-list" },
+            action: { leaf: "button", optional: true },
+        },
+        why: "if context versions, test scenarios or diagnostic signals need one typed data-only rail without a ReactNode content opening.",
+    },
+    "agentos-test-scenario-body": {
+        classes: ["flex", "flex-col", "gap-4", "p-4"],
+        children: {
+            identity: { contract: "subject-over-muted-caption" },
+            scenario: { leaf: "choice-tabs", optional: true },
+            context: { contract: "labelled-fact-stack" },
+            field: { contract: "label-field-hint", repeats: true, restingCount: 1, optional: true },
+            notice: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            action: { leaf: "button" },
+        },
+        why: "if one registered kind test needs editable fake inputs, an explicit immutable context identity and one isolated run command without exposing live integrations.",
+    },
+    "agentos-test-evidence-body": {
+        classes: ["flex", "flex-col", "gap-4", "p-4"],
+        children: {
+            identity: { contract: "title-with-baseline-fact" },
+            summary: { contract: "labelled-fact-stack" },
+            assertion: { contract: "labelled-fact-stack", repeats: true, restingCount: 1, optional: true },
+            notice: { leaf: "text", props: { size: "sm", tone: "muted" } },
+        },
+        why: "if persisted pass, warning and fail assertions must explain exactly what was expected and observed before a business owner trusts or applies the tested context.",
+    },
+    "agentos-operate-layout": {
+        classes: ["grid", "grid-cols-1", "items-start", "gap-4", "lg:grid-cols-[14rem_minmax(0,6fr)_minmax(20rem,4fr)]", "lg:[&>*:first-child]:hidden"],
+        children: {
+            mode: { contract: "agentos-cockpit-mode-compact" },
+            sessions: { contract: "agentos-session-rail-responsive" },
+            chat: { contract: ["agentos-cockpit-pane", "agentos-cockpit-pane-wide-only"] },
+            workbench: { contract: ["agentos-cockpit-pane", "agentos-cockpit-pane-wide-only"] },
+        },
+        why: "if collaborative Execute sessions, persistent Chat and the kind workbench must read as three peers when wide while one explicit Chat/Workbench choice controls the compact presentation.",
+    },
+    "agentos-session-rail-responsive": {
+        classes: ["min-w-0", "[&>*:last-child]:hidden", "lg:[&>*:first-child]:hidden", "lg:[&>*:last-child]:block"],
+        children: {
+            compact: { contract: "agentos-session-rail-compact" },
+            expanded: { leaf: "collapsible-rail" },
+        },
+        why: "if one Execute session selection must transform from a compact keyboard choice into the persistent collapsible rail without losing its selected identity.",
+    },
+    "agentos-session-rail-compact": {
+        classes: ["flex", "flex-col", "gap-2"],
+        children: {
+            sessions: { leaf: ["choice-tabs", "selection-list"] },
+            create: { leaf: "button" },
+        },
+        why: "if compact Execute navigation needs one horizontally scrollable peer choice followed by the bounded create-session action.",
+    },
+    "agentos-chat-body": {
+        classes: ["flex", "min-h-0", "flex-col", "gap-4", "p-4"],
+        children: {
+            session: { leaf: "choice-tabs", optional: true },
+            message: { contract: ["module-interview-message", "agentos-execute-message"], repeats: true, restingCount: 3 },
+            composer: { contract: "form-column", optional: true },
+            action: { leaf: "button", optional: true },
+            notice: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "if one persistent Module Studio conversation must keep its accepted messages before one bounded composer and an optional refusal consequence.",
+    },
+    "agentos-execute-message": {
+        classes: ["flex", "w-full", "flex-col", "gap-2", "rounded-2xl", "border", "border-separator", "p-4"],
+        children: {
+            actor: { leaf: "text", props: { size: "xs", tone: "muted" } },
+            content: { contract: "agentos-markdown-content" },
+            context: { leaf: "text", props: { size: "xs", tone: "muted" }, optional: true },
+            widget: { contract: "agentos-widget-panel", optional: true },
+        },
+        why: "if one immutable Execute message must keep its actor, accepted content, bound context identity and optional trusted widget together without admitting arbitrary markup.",
+    },
+    "agentos-markdown-content": {
+        classes: ["flex", "min-w-0", "flex-col", "gap-2"],
+        children: {
+            block: { leaf: ["heading", "text"], repeats: true, restingCount: 1 },
+        },
+        why: "if sanitized MessageTree Markdown must vary between headings, paragraphs and list lines without admitting HTML or a ReactNode escape slot.",
+    },
+    "agentos-widget-panel": {
+        classes: ["flex", "flex-col", "gap-3", "rounded-xl", "border", "border-separator", "p-4"],
+        children: {
+            identity: { contract: "subject-over-muted-caption" },
+            facts: { contract: "labelled-fact-stack", optional: true },
+            action: { contract: "inline-action-run", optional: true },
+            refusal: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "if a registry-validated widget must expose its exact component identity, typed values and admitted actions while an unknown schema fails closed in the same bounded shape.",
+    },
+    "agentos-context-review": {
+        classes: ["flex", "flex-col", "gap-4", "p-4"],
+        children: {
+            heading: { contract: "title-with-baseline-fact" },
+            summary: { leaf: "text", props: { size: "sm" } },
+            facts: { contract: "labelled-fact-stack" },
+            notice: { leaf: "text", props: { size: "sm", tone: "muted" } },
+            action: { leaf: "button", repeats: true, restingCount: 1 },
+        },
+        why: "if one immutable context candidate must name its version, summarize its snapshot and require an explicit Apply action while the prior version remains active.",
+    },
+    "agentos-workbench-body": {
+        classes: ["flex", "min-h-0", "flex-col", "gap-4", "p-4"],
+        children: {
+            identity: { contract: "subject-over-muted-caption" },
+            facts: { contract: "labelled-fact-stack" },
+            notice: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "if one open registry workbench must explain its versioned identity and current kind-owned facts without changing the shared Module Studio shell.",
+    },
+    "agentos-settings-layout": {
+        classes: ["grid", "grid-cols-1", "gap-4", "lg:grid-cols-[minmax(0,1fr)_20rem]"],
+        children: {
+            settings: { contract: "label-row-over-card" },
+            context: { contract: "label-row-over-card" },
+        },
+        why: "if owner settings remain the primary operation while active context history is progressively disclosed as a narrower consequence rail.",
+    },
+    "agentos-settings-form": {
+        classes: ["flex", "flex-col", "gap-4", "p-4"],
+        children: {
+            field: { contract: "label-field-hint", repeats: true, restingCount: 1 },
+            mode: { leaf: "choice-tabs", optional: true },
+            confirmation: { leaf: "checkbox", optional: true },
+            action: { leaf: "button", repeats: true, restingCount: 1 },
+            credentialField: { contract: "label-field-hint", repeats: true, restingCount: 0, optional: true },
+            credentialStatus: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+            credentialAction: { leaf: "button", repeats: true, restingCount: 0, optional: true },
+            notice: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "if one module's owner-editable display and confirmation settings must remain separate from backend-owned kind and permission facts.",
+    },
+    "agentos-diagnostics-layout": {
+        classes: ["grid", "grid-cols-1", "items-start", "gap-4", "lg:grid-cols-[14rem_minmax(0,6fr)_minmax(20rem,4fr)]", "lg:[&>*:first-child]:hidden"],
+        children: {
+            mode: { contract: "agentos-cockpit-mode-compact" },
+            signals: { contract: ["agentos-cockpit-pane", "agentos-cockpit-pane-wide-only"] },
+            readiness: { contract: ["agentos-cockpit-pane", "agentos-cockpit-pane-wide-only"] },
+            evidence: { contract: ["agentos-cockpit-sidecar-pane", "agentos-cockpit-sidecar-pane-wide-only"] },
+        },
+        why: "if diagnostics are requested explicitly and must keep signal navigation, operating health and redacted event evidence together on desktop without exposing credentials.",
+    },
+    "agentos-diagnostics-body": {
+        classes: ["flex", "flex-col", "gap-4", "p-4"],
+        children: {
+            facts: { contract: "labelled-fact-stack" },
+            notice: { leaf: "text", props: { size: "sm", tone: "muted" }, optional: true },
+        },
+        why: "if progressive diagnostics must compare already-safe runtime facts and one bounded consequence without leaking configuration or credentials.",
     },
     "highlight-card-shell": {
         classes: ["relative"],

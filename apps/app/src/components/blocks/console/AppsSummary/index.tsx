@@ -1,9 +1,8 @@
 "use client"
 
-import { useLocale, useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
+import { useRouter } from "@/i18n/navigation"
 import type { BadgeTone } from "@nivo/ui"
-import { DEFAULT_LOCALE } from "@/i18n/config"
 import { useOverviewData } from "@/modules/overview/context"
 import { AppsSummaryBase, type AppsSummaryState } from "./component"
 
@@ -18,25 +17,22 @@ const NAMED_REFUSALS = new Set(["EXPERT_SITE_NOT_FOUND_EXCEPTION", "EXPERT_SITE_
 export const AppsSummary = () => {
     const { apps } = useOverviewData()
     const t = useTranslations("console")
-    const locale = useLocale()
     const router = useRouter()
-    const open = (route: string) => router.push(locale === DEFAULT_LOCALE ? route : `/${locale}${route}`)
+    const open = (route: string) => router.push(route)
     const refusal = (code: string | undefined) => code !== undefined && NAMED_REFUSALS.has(code) ? t(`refusal.${code}`) : t("refusal.unknown")
     const statusLabel = (status: string) => STATUS_KEY[status] === undefined ? t("status.unknown") : t(STATUS_KEY[status]!)
-    const state: AppsSummaryState = apps === null
-        ? { phase: "pending" }
-        : !apps.ok
-            ? { phase: "forbidden", message: refusal(apps.code) }
-            : apps.data.length === 0
-                ? { phase: "empty", message: t("apps.emptyDescription") }
-                : { phase: "populated", items: apps.data.map((site) => ({
-                    id: site.id,
-                    name: site.slug,
-                    detail: site.customDomain ?? `${site.slug}${HOST_SUFFIX}`,
-                    statusLabel: statusLabel(site.provisionStatus),
-                    statusTone: STATUS_TONE[site.provisionStatus] ?? "neutral",
-                    actionLabel: site.provisionStatus === "awaiting_dns" ? t("apps.viewDns") : t("apps.open"),
-                })) }
+    let state: AppsSummaryState
+    if (apps === null) state = { phase: "pending" }
+    else if (!apps.ok) state = { phase: "forbidden", message: refusal(apps.code) }
+    else if (apps.data.length === 0) state = { phase: "empty", message: t("apps.emptyDescription") }
+    else state = { phase: "populated", items: apps.data.map((site) => ({
+        id: site.id,
+        name: site.slug,
+        detail: site.customDomain ?? `${site.slug}${HOST_SUFFIX}`,
+        statusLabel: statusLabel(site.provisionStatus),
+        statusTone: STATUS_TONE[site.provisionStatus] ?? "neutral",
+        actionLabel: site.provisionStatus === "awaiting_dns" ? t("apps.viewDns") : t("apps.open"),
+    })) }
     return <AppsSummaryBase label={t("apps.title")} openAllLabel={t("apps.openSet")} state={state} onOpenAll={() => open("/apps")} onOpenApp={(id) => open(`/apps/${id}`)} />
 }
 

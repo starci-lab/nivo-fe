@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, type ReactNode } from "react"
+import { createContext, useContext, type ComponentType } from "react"
 import { Breadcrumbs, Heading, Text, TileIcon, Tree, defineContractComponent, defineContractProjection, defineLeafComponent } from "@nivo/ui"
 import type { AgentosModuleStudio } from "@/modules/api/console"
 import { AgentOSModuleAttachments } from "@/components/blocks/agentos/AgentOSModuleAttachments"
@@ -16,16 +16,17 @@ type AgentOSModuleStudioProjection = {
     readonly refresh: () => Promise<void>
 }
 
-type AgentOSModuleStudioProjectionProviderProps = {
+type AgentOSModuleStudioProjectionProviderProps<P extends object> = {
     readonly value: AgentOSModuleStudioProjection
-    readonly render: () => ReactNode
+    readonly render: ComponentType<P>
+    readonly renderProps: P
 }
 
 const AgentOSModuleStudioProjectionContext = createContext<AgentOSModuleStudioProjection | null>(null)
 
 /** Share one page-owned studio read while child blocks keep their own mutation and pending state. */
-export const AgentOSModuleStudioProjectionProvider = ({ value, render }: AgentOSModuleStudioProjectionProviderProps) => (
-    <AgentOSModuleStudioProjectionContext.Provider value={value}>{render()}</AgentOSModuleStudioProjectionContext.Provider>
+export const AgentOSModuleStudioProjectionProvider = <P extends object>({ value, render: Content, renderProps }: AgentOSModuleStudioProjectionProviderProps<P>) => (
+    <AgentOSModuleStudioProjectionContext.Provider value={value}><Content {...renderProps} /></AgentOSModuleStudioProjectionContext.Provider>
 )
 
 /** Read the page-owned projection without repeating the module-studio request in sibling blocks. */

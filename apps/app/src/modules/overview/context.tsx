@@ -1,15 +1,16 @@
 "use client"
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react"
-import type { ReactNode } from "react"
-import { useSession } from "@/modules/auth/session"
+import { createContext, useContext, useMemo } from "react"
+import type { ComponentType } from "react"
 import {
-    myAgentWorkspace,
-    myDomains,
-    myExpertSites,
-    myInvoices,
-    myPodOpenclawStatus,
-    myWallet,
+    useQueryMyAgentWorkspacesSwr,
+    useQueryMyDomainsSwr,
+    useQueryMyExpertSitesSwr,
+    useQueryMyInvoicesSwr,
+    useQueryMyPodOpenclawStatusSwr,
+    useQueryMyWalletSwr,
+} from "@/hooks/swr"
+import {
     type AgentWorkspaceRow,
     type DomainRow,
     type ExpertSiteRow,
@@ -44,35 +45,25 @@ const EMPTY_OVERVIEW: OverviewData = {
 const OverviewDataContext = createContext<OverviewData | null>(null)
 
 /** Props for the one owner of overview network settlement. */
-export type OverviewDataProviderProps = { readonly children: ReactNode }
+export type OverviewDataProviderProps<P extends object> = { readonly content: ComponentType<P>; readonly contentProps: P }
 
 /** Ask every overview operation once and keep each answer independent. */
-export const OverviewDataProvider = ({ children }: OverviewDataProviderProps) => {
-    const isSignedIn = useSession().state.status === "signed-in"
-    const [data, setData] = useState<OverviewData>(EMPTY_OVERVIEW)
-
-    useEffect(() => {
-        if (!isSignedIn) {
-            setData(EMPTY_OVERVIEW)
-            return
-        }
-        let active = true
-        const settle = <K extends keyof OverviewData>(key: K, request: () => Promise<Exclude<OverviewData[K], null>>) => {
-            void request().then((answer) => {
-                if (active) setData((current) => ({ ...current, [key]: answer }))
-            })
-        }
-        settle("apps", myExpertSites)
-        settle("workspaces", myAgentWorkspace)
-        settle("pod", myPodOpenclawStatus)
-        settle("domains", myDomains)
-        settle("wallet", myWallet)
-        settle("invoices", myInvoices)
-        return () => { active = false }
-    }, [isSignedIn])
-
-    const value = useMemo(() => data, [data])
-    return <OverviewDataContext.Provider value={value}>{children}</OverviewDataContext.Provider>
+export const OverviewDataProvider = <P extends object>({ content: Content, contentProps }: OverviewDataProviderProps<P>) => {
+    const apps = useQueryMyExpertSitesSwr()
+    const workspaces = useQueryMyAgentWorkspacesSwr()
+    const pod = useQueryMyPodOpenclawStatusSwr()
+    const domains = useQueryMyDomainsSwr()
+    const wallet = useQueryMyWalletSwr()
+    const invoices = useQueryMyInvoicesSwr()
+    const value = useMemo<OverviewData>(() => ({
+        apps: apps.data ?? EMPTY_OVERVIEW.apps,
+        workspaces: workspaces.data ?? EMPTY_OVERVIEW.workspaces,
+        pod: pod.data ?? EMPTY_OVERVIEW.pod,
+        domains: domains.data ?? EMPTY_OVERVIEW.domains,
+        wallet: wallet.data ?? EMPTY_OVERVIEW.wallet,
+        invoices: invoices.data ?? EMPTY_OVERVIEW.invoices,
+    }), [apps.data, domains.data, invoices.data, pod.data, wallet.data, workspaces.data])
+    return <OverviewDataContext.Provider value={value}><Content {...contentProps} /></OverviewDataContext.Provider>
 }
 
 /** Read the shared account answers from a connected overview block. */

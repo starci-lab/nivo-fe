@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import "./globals.css"
 import { LANDING_DESCRIPTION } from "@/resources/copy"
+import type { ComponentProps } from "react"
 
 /** Browser-level metadata for every route under this shell. */
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export const viewport: Viewport = {
 /** Props for {@link RootLayout}. */
 interface RootLayoutProps {
     /** The rendered route. */
-    readonly children: React.ReactNode
+    readonly children: ComponentProps<"div">["children"]
 }
 
 /**
@@ -27,7 +28,7 @@ interface RootLayoutProps {
  * @returns The html document.
  */
 const RootLayout = ({ children }: RootLayoutProps) => (
-    <html lang="vi" suppressHydrationWarning>
+    <html lang="vi" data-grammar="core" suppressHydrationWarning>
         <body className="min-h-dvh antialiased">{children}</body>
     </html>
 )

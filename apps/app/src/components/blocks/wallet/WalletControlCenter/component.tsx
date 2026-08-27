@@ -124,7 +124,9 @@ const ledgerDetail = (row: WalletLedgerRow) => (
     })} />
 )
 
-const ledgerRow = (row: WalletLedgerRow | undefined, isLoading: boolean, closeLabel: string) => defineContractComponent("wallet-ledger-row", {
+const ledgerRow = (row: WalletLedgerRow | undefined, isLoading: boolean, closeLabel: string) => {
+    const LedgerDetailContent = () => row === undefined ? null : ledgerDetail(row)
+    return defineContractComponent("wallet-ledger-row", {
     identity: defineContractComponent("subject-over-muted-caption", {
         subject: defineLeafComponent("text", {}, () => <Text props={{ content: row?.title ?? "", size: "sm" }} isLoading={isLoading} />),
         caption: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: row?.caption ?? "", size: "xs", tone: "muted" }} isLoading={isLoading} />),
@@ -136,10 +138,12 @@ const ledgerRow = (row: WalletLedgerRow | undefined, isLoading: boolean, closeLa
             triggerLabel={row.detailLabel}
             title={row.title}
             closeLabel={closeLabel}
-            content={ledgerDetail(row)}
+            content={LedgerDetailContent}
+            contentProps={{}}
         />
     )),
-})
+    })
+}
 
 const walletLedgerContent = (ledger: LedgerSectionView, closeLabel: string) => {
     const isLoading = ledger.phase === "resting"
@@ -152,8 +156,31 @@ const walletLedgerContent = (ledger: LedgerSectionView, closeLabel: string) => {
     ))
 }
 
+type TopUpContentProps = { readonly topUp: TopUpView; readonly on?: WalletControlCenterActions }
+const TopUpContent = ({ topUp, on }: TopUpContentProps) => topUp.checkout === undefined ? (
+    <Tree contract="wallet-top-up-form" render={defineContractComponent("wallet-top-up-form", {
+        field: defineCompositeComponent("field", {}, () => <Field props={{ id: "wallet-top-up-amount", name: "amountVnd", label: topUp.amountLabel, kind: "text", placeholder: topUp.amountPlaceholder, disabled: topUp.pending, isInvalid: topUp.refusal !== undefined }} on={{ change: on?.changeTopUpAmount }} />),
+        note: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: topUp.hint, size: "xs", tone: "muted" }} />),
+        action: defineLeafComponent("button", {}, () => <Button props={{ label: topUp.submitLabel, variant: "primary", isPending: topUp.pending }} on={{ press: on?.submitTopUp }} />),
+        refusal: topUp.refusal === undefined ? undefined : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: topUp.refusal ?? "", size: "sm", tone: "muted", live: "assertive" }} />),
+    })} />
+) : <Tree contract="wallet-checkout-evidence" render={defineContractComponent("wallet-checkout-evidence", {
+    reference: defineLeafComponent("text", { size: "sm" }, () => <Text props={{ content: topUp.checkout?.reference ?? "", size: "sm" }} />),
+    amount: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => <Text props={{ content: topUp.checkout?.amount ?? "", size: "sm", weight: "semibold" }} />),
+    note: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: topUp.checkout?.note ?? "", size: "xs", tone: "muted" }} />),
+})} />
+
+type ResultContentProps = { readonly result: PaymentResultView; readonly on?: WalletControlCenterActions }
+const ResultContent = ({ result, on }: ResultContentProps) => <Tree contract="wallet-payment-result" render={defineContractComponent("wallet-payment-result", {
+    state: defineLeafComponent("badge", {}, () => <Badge props={{ content: result.state, tone: result.tone }} />),
+    amount: defineLeafComponent("heading", {}, () => <Heading props={{ content: result.amount, level: 2 }} />),
+    reference: result.reference === undefined ? undefined : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: result.reference ?? "", size: "sm", tone: "muted" }} />),
+    note: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: result.note, size: "sm", tone: "muted" }} />),
+    action: defineLeafComponent("button", {}, () => <Button props={{ label: result.actionLabel, variant: "primary" }} on={{ press: on?.closeResult }} />),
+})} />
+
 /** Pure drawing half of the accepted wallet and payment flow. */
-export const WalletControlCenterBase = (view: WalletControlCenterViewProps) => {
+const WalletControlCenterContent = (view: WalletControlCenterViewProps) => {
     const { title, balance, transactions, invoices, topUp, result, on } = view
     const balanceSection = () => {
         if (balance.phase === "refused") return noteSection(balance.label, balance.note)
@@ -181,7 +208,7 @@ export const WalletControlCenterBase = (view: WalletControlCenterViewProps) => {
         if (linkedInvoice.phase === "refused") return noteSection(linkedInvoice.label, linkedInvoice.note)
         const loading = linkedInvoice.phase === "resting"
         const row = linkedInvoice.phase === "answered" ? linkedInvoice.row : undefined
-        const content = defineContractComponent("wallet-linked-invoice", {
+        const linkedContent = defineContractComponent("wallet-linked-invoice", {
             identity: defineContractComponent("subject-over-muted-caption", {
                 subject: defineLeafComponent("text", {}, () => <Text props={{ content: row?.title ?? linkedInvoice.orderLabel, size: "sm", weight: "semibold" }} isLoading={loading} />),
                 caption: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: row?.caption ?? "", size: "xs", tone: "muted" }} isLoading={loading} />),
@@ -201,32 +228,11 @@ export const WalletControlCenterBase = (view: WalletControlCenterViewProps) => {
             <Tree contract="label-row-over-card" render={defineContractComponent("label-row-over-card", {
                 label: sectionLabel(linkedInvoice.label),
                 body: defineContractProjection("wallet-linked-invoice", () => (
-                    <HighlightCard contract="wallet-linked-invoice" render={content} isLoading={loading} />
+                    <HighlightCard contract="wallet-linked-invoice" render={linkedContent} isLoading={loading} />
                 )),
             })} />
         ))
     }
-
-    const topUpContent = topUp.checkout === undefined ? (
-        <Tree contract="wallet-top-up-form" render={defineContractComponent("wallet-top-up-form", {
-            field: defineCompositeComponent("field", {}, () => <Field props={{ id: "wallet-top-up-amount", name: "amountVnd", label: topUp.amountLabel, kind: "text", placeholder: topUp.amountPlaceholder, disabled: topUp.pending, isInvalid: topUp.refusal !== undefined }} on={{ change: on?.changeTopUpAmount }} />),
-            note: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: topUp.hint, size: "xs", tone: "muted" }} />),
-            action: defineLeafComponent("button", {}, () => <Button props={{ label: topUp.submitLabel, variant: "primary", isPending: topUp.pending }} on={{ press: on?.submitTopUp }} />),
-            refusal: topUp.refusal === undefined ? undefined : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: topUp.refusal ?? "", size: "sm", tone: "muted", live: "assertive" }} />),
-        })} />
-    ) : <Tree contract="wallet-checkout-evidence" render={defineContractComponent("wallet-checkout-evidence", {
-        reference: defineLeafComponent("text", { size: "sm" }, () => <Text props={{ content: topUp.checkout?.reference ?? "", size: "sm" }} />),
-        amount: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => <Text props={{ content: topUp.checkout?.amount ?? "", size: "sm", weight: "semibold" }} />),
-        note: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: topUp.checkout?.note ?? "", size: "xs", tone: "muted" }} />),
-    })} />
-
-    const resultContent = <Tree contract="wallet-payment-result" render={defineContractComponent("wallet-payment-result", {
-        state: defineLeafComponent("badge", {}, () => <Badge props={{ content: result.state, tone: result.tone }} />),
-        amount: defineLeafComponent("heading", {}, () => <Heading props={{ content: result.amount, level: 2 }} />),
-        reference: result.reference === undefined ? undefined : defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: result.reference ?? "", size: "sm", tone: "muted" }} />),
-        note: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: result.note, size: "sm", tone: "muted" }} />),
-        action: defineLeafComponent("button", {}, () => <Button props={{ label: result.actionLabel, variant: "primary" }} on={{ press: on?.closeResult }} />),
-    })} />
 
     const breadcrumb = view.state === "waypoint" ? view.breadcrumb : undefined
     const path = breadcrumb === undefined ? undefined : defineLeafComponent("breadcrumbs", {}, () => (
@@ -247,10 +253,13 @@ export const WalletControlCenterBase = (view: WalletControlCenterViewProps) => {
     )
     return <>
         {page}
-        <ModalBranch isOpen={topUp.overlayState === "open"} title={topUp.title} closeLabel={topUp.closeLabel} content={topUpContent} onDismiss={() => on?.closeTopUp?.()} />
-        <ModalBranch isOpen={result.overlayState === "open"} title={result.title} closeLabel={result.closeLabel} content={resultContent} onDismiss={() => on?.closeResult?.()} />
+        <ModalBranch isOpen={topUp.overlayState === "open"} title={topUp.title} closeLabel={topUp.closeLabel} content={TopUpContent} contentProps={{ topUp, on }} onDismiss={() => on?.closeTopUp?.()} />
+        <ModalBranch isOpen={result.overlayState === "open"} title={result.title} closeLabel={result.closeLabel} content={ResultContent} contentProps={{ result, on }} onDismiss={() => on?.closeResult?.()} />
     </>
 }
+
+/** Stable typed root for the wallet control-center block. */
+export const WalletControlCenterBase = (props: WalletControlCenterViewProps) => <WalletControlCenterContent {...props} />
 
 /** Source-level tier marker for the pure Wallet control-center block. */
 export const meta = { shape: "block", world: "pure" } as const

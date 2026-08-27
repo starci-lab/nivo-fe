@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
-import { myExpertSites, type ExpertSiteRow } from "@/modules/api/console"
-import { useSession } from "@/modules/auth/session"
+import { useQueryMyExpertSitesSwr } from "@/hooks/swr"
 import { AcademyControlCenterBase, type AcademyControlCenterMode } from "./component"
 
 /** Exact Academy identity supplied by the resource route. */
@@ -16,21 +15,15 @@ export type AcademyControlCenterProps = {
 /** Resolve ownership and page identity; each block resolves its own domain state. */
 export const AcademyControlCenter = ({ siteId, mode, onSelectMode }: AcademyControlCenterProps) => {
     const t = useTranslations("console.academyControlCenter")
-    const session = useSession()
-    const isSignedIn = session.state.status === "signed-in"
     const [mounted, setMounted] = useState(false)
-    const [site, setSite] = useState<ExpertSiteRow | null | undefined>(undefined)
+    const answer = useQueryMyExpertSitesSwr()
+    const site = answer.data === undefined
+        ? undefined
+        : answer.data.ok
+            ? answer.data.data.find((item) => item.id === siteId) ?? null
+            : null
 
     useEffect(() => { setMounted(true) }, [])
-
-    useEffect(() => {
-        if (!isSignedIn) return
-        let cancelled = false
-        void myExpertSites().then((answer) => {
-            if (!cancelled) setSite(answer.ok ? answer.data.find((item) => item.id === siteId) ?? null : null)
-        })
-        return () => { cancelled = true }
-    }, [isSignedIn, siteId])
 
     const publicHost = site === null || site === undefined
         ? undefined

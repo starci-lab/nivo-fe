@@ -1,9 +1,8 @@
 "use client"
 
-import { useFormatter, useLocale, useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+import { useFormatter, useTranslations } from "next-intl"
+import { useRouter } from "@/i18n/navigation"
 import type { BadgeTone } from "@nivo/ui"
-import { DEFAULT_LOCALE } from "@/i18n/config"
 import { useOverviewData } from "@/modules/overview/context"
 import { AgentOSSummaryBase, type AgentOSSummaryState } from "./component"
 
@@ -13,39 +12,52 @@ const STATUS_KEY: Readonly<Record<string, string | undefined>> = { provisioning:
 const STATUS_TONE: Readonly<Record<string, BadgeTone | undefined>> = { provisioning: "accent", waiting_capacity: "warning", installing: "accent", starting: "accent", active: "success", suspended: "neutral", failed: "danger" }
 const NAMED_REFUSALS = new Set(["AGENT_WORKSPACE_NOT_FOUND_EXCEPTION", "POD_REGISTRATION_MISSING_EXCEPTION"])
 
-/** Connect one workspace surface to workspace and pod answers. */
-export const AgentOSSummary = () => {
-    const { workspaces, pod } = useOverviewData()
-    const t = useTranslations("console")
-    const format = useFormatter()
-    const locale = useLocale()
-    const router = useRouter()
-    const open = (route: string) => router.push(locale === DEFAULT_LOCALE ? route : `/${locale}${route}`)
+type OverviewData = ReturnType<typeof useOverviewData>
+type ConsoleCopy = ReturnType<typeof useTranslations>
+type ConsoleFormat = ReturnType<typeof useFormatter>
+
+const accessLabel = (pod: OverviewData["pod"], t: ConsoleCopy): string | undefined => {
+    if (pod?.ok !== true) return undefined
+    if (!pod.data.tokenConfigured) return t("agentos.workspace.applications.unavailable")
+    const available = t("agentos.workspace.applications.available")
+    return pod.data.tokenHint === null ? available : `${available} · ${pod.data.tokenHint}`
+}
+
+const resolveSummaryState = (
+    { workspaces, pod }: OverviewData,
+    t: ConsoleCopy,
+    format: ConsoleFormat,
+): AgentOSSummaryState => {
     const refusal = (code: string | undefined) => code !== undefined && NAMED_REFUSALS.has(code) ? t(`refusal.${code}`) : t("refusal.unknown")
     const statusLabel = (status: string) => STATUS_KEY[status] === undefined ? t("status.unknown") : t(STATUS_KEY[status]!)
-    let state: AgentOSSummaryState
-    if (workspaces === null || pod === null) state = { phase: "pending" }
-    else if (!workspaces.ok || workspaces.data.length === 0) state = { phase: "empty", message: workspaces.ok ? t("agentos.emptyDescription") : refusal(workspaces.code) }
-    else {
-        const workspace = workspaces.data[0]!
-        const runtime = pod.ok
-            ? pod.data.reachable ? t("agentos.podReachable") : t("agentos.podUnreachable")
-            : refusal(pod.code)
-        const checked = pod.ok ? t("agentos.checkedAt", { time: format.dateTime(new Date(pod.data.checkedAt), { hour: "2-digit", minute: "2-digit" }) }) : undefined
-        const access = pod.ok
-            ? pod.data.tokenConfigured ? `${t("agentos.workspace.applications.available")}${pod.data.tokenHint === null ? "" : ` · ${pod.data.tokenHint}`}` : t("agentos.workspace.applications.unavailable")
-            : undefined
-        const display = {
-            id: workspace.id,
-            name: workspace.name ?? t("agentos.kindWorkspace"),
-            description: t("agentos.workspaceDescription"),
-            statusLabel: statusLabel(workspace.status),
-            statusTone: STATUS_TONE[workspace.status] ?? "neutral" as BadgeTone,
-            actionLabel: t("agentos.openService"),
-            detail: [runtime, access, checked].filter(Boolean).join(" · "),
-        }
-        state = pod.ok ? { phase: "populated", workspace: display } : { phase: "partial", workspace: display }
+    if (workspaces === null || pod === null) return { phase: "pending" }
+    if (!workspaces.ok || workspaces.data.length === 0) return { phase: "empty", message: workspaces.ok ? t("agentos.emptyDescription") : refusal(workspaces.code) }
+    const workspace = workspaces.data[0]!
+    let runtime: string
+    if (pod.ok) runtime = pod.data.reachable ? t("agentos.podReachable") : t("agentos.podUnreachable")
+    else runtime = refusal(pod.code)
+    const checked = pod.ok ? t("agentos.checkedAt", { time: format.dateTime(new Date(pod.data.checkedAt), { hour: "2-digit", minute: "2-digit" }) }) : undefined
+    const access = accessLabel(pod, t)
+    const display = {
+        id: workspace.id,
+        name: workspace.name ?? t("agentos.kindWorkspace"),
+        description: t("agentos.workspaceDescription"),
+        statusLabel: statusLabel(workspace.status),
+        statusTone: STATUS_TONE[workspace.status] ?? "neutral" as BadgeTone,
+        actionLabel: t("agentos.openService"),
+        detail: [runtime, access, checked].filter(Boolean).join(" · "),
     }
+    return pod.ok ? { phase: "populated", workspace: display } : { phase: "partial", workspace: display }
+}
+
+/** Connect one workspace surface to workspace and pod answers. */
+export const AgentOSSummary = () => {
+    const overview = useOverviewData()
+    const t = useTranslations("console")
+    const format = useFormatter()
+    const router = useRouter()
+    const open = (route: string) => router.push(route)
+    const state = resolveSummaryState(overview, t, format)
     return <AgentOSSummaryBase label={t("agentos.title")} state={state} onOpenService={(id) => open(`/agentos/workspaces/${id}`)} />
 }
 

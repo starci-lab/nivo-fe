@@ -52,7 +52,7 @@ export type AcademyIntegrationCenterViewProps = {
 }
 
 /** Render provider status and one selected write-only setup form. */
-export const AcademyIntegrationCenterBase = ({ state, sectionLabel, refusedLabel, cards, selected, pendingId, outcome, onSelect, onChangeField, onSubmit }: AcademyIntegrationCenterViewProps) => (
+const AcademyIntegrationCenterContent = ({ state, sectionLabel, refusedLabel, cards, selected, pendingId, outcome, onSelect, onChangeField, onSubmit }: AcademyIntegrationCenterViewProps) => (
     <>
         {state === "refused" ? (
             <SurfaceCard
@@ -97,6 +97,9 @@ export const AcademyIntegrationCenterBase = ({ state, sectionLabel, refusedLabel
         {outcome === undefined ? null : <Text props={{ content: outcome, size: "sm", tone: "muted", live: "polite" }} />}
     </>
 )
+
+/** Stable typed root for the Academy integration block. */
+export const AcademyIntegrationCenterBase = (props: AcademyIntegrationCenterViewProps) => <AcademyIntegrationCenterContent {...props} />
 
 /** Source-level tier marker for the pure Academy Integration Center. */
 export const meta = { shape: "block", world: "pure" } as const

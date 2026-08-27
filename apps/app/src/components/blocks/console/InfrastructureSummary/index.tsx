@@ -18,11 +18,16 @@ export const InfrastructureSummary = () => {
     if (domains === null) state = { phase: "pending" }
     else if (!domains.ok) state = hasBuiltService ? { phase: "partial", facts: [], note: t("refusal.unknown") } : { phase: "failed", note: t("refusal.unknown") }
     else if (domains.data.length === 0) state = { phase: "empty", note: t("domains.empty") }
-    else state = { phase: "populated", facts: domains.data.map((domain) => ({
-        id: domain.id,
-        label: domain.name,
-        value: `${t(`domains.status.${domain.status}`)} · ${domain.expiresAt !== null ? t("domains.expiresAt", { date: day(domain.expiresAt) }) : domain.autoRenew ? t("domains.autoRenewOn") : t("domains.autoRenewOff")}`,
-    })) }
+    else state = { phase: "populated", facts: domains.data.map((domain) => {
+        let renewal = domain.autoRenew ? t("domains.autoRenewOn") : t("domains.autoRenewOff")
+        if (domain.expiresAt !== null) renewal = t("domains.expiresAt", { date: day(domain.expiresAt) })
+        const statusLabel = t(`domains.status.${domain.status}`)
+        return {
+            id: domain.id,
+            label: domain.name,
+            value: `${statusLabel} · ${renewal}`,
+        }
+    }) }
     return <InfrastructureSummaryBase label={t("infrastructure.title")} context={context} domains={state} />
 }
 

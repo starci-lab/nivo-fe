@@ -12,7 +12,7 @@ vi.mock("next-intl", () => ({
     useLocale: () => mocks.locale,
     useTranslations: () => (key: string) => key,
 }))
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("@/modules/overview/context", () => ({ useOverviewData: () => mocks.data }))
 
 import { AppsSummary } from "."
@@ -54,7 +54,7 @@ describe("AppsSummary", () => {
         mocks.data.apps = { ok: true, data: [{ id: "site-2", slug: "sales", customDomain: "sales.example", provisionStatus: "mystery", status: "active" }] }
         const { rerender } = render(<AppsSummary />)
         fireEvent.click(screen.getByRole("button", { name: "apps.open" }))
-        expect(mocks.push).toHaveBeenCalledWith("/en/apps/site-2")
+        expect(mocks.push).toHaveBeenCalledWith("/apps/site-2")
 
         mocks.data.apps = { ok: true, data: [] }
         rerender(<AppsSummary />)

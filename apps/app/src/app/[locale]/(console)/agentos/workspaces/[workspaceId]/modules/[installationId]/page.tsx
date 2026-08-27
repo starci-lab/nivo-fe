@@ -8,7 +8,7 @@ export type AgentOSSolutionModuleRouteProps = {
 /** Mount the owner-scoped module detail page under its workspace identity. */
 const AgentOSSolutionModuleRoute = async ({ params }: AgentOSSolutionModuleRouteProps) => {
     const { workspaceId, installationId } = await params
-    return <AgentOSSolutionModulePage workspaceId={workspaceId} installationId={installationId} />
+    return <AgentOSSolutionModulePage workspaceId={workspaceId} installationId={installationId} view="setup" />
 }
 
 export default AgentOSSolutionModuleRoute

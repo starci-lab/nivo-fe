@@ -1,22 +1,15 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useFormatter, useLocale, useTranslations } from "next-intl"
+import { useFormatter, useTranslations } from "next-intl"
 import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow"
-import { DEFAULT_LOCALE } from "@/i18n/config"
-import { useSession } from "@/modules/auth/session"
 import {
-    catalogItems,
-    myCatalogOrders,
-    myExpertSites,
-    myInstances,
-    type CatalogItemRow,
-    type CatalogOrderRow,
-    type ExpertSiteRow,
-    type InstanceRow,
-} from "@/modules/api/console"
-import type { Result } from "@/modules/api/graphql"
+    useQueryCatalogItemsSwr,
+    useQueryMyCatalogOrdersSwr,
+    useQueryMyExpertSitesSwr,
+    useQueryMyInstancesSwr,
+} from "@/hooks/swr"
+import { useRouter } from "@/i18n/navigation"
+import type { CatalogItemRow } from "@/modules/api/console"
 import {
     AppsDashboardBase,
     type CatalogueSectionView,
@@ -70,14 +63,6 @@ const STATUS_KEY: Readonly<Record<FleetStatus, string>> = {
 /** Where the host of an academy with no custom domain is rooted. */
 const ACADEMY_HOST_SUFFIX = process.env.NEXT_PUBLIC_ACADEMY_HOST_SUFFIX ?? ".nivo.vn"
 
-/** What this page asked for, once every one of its questions has come back. */
-type AppsAnswer = {
-    readonly sites: Result<ReadonlyArray<ExpertSiteRow>>
-    readonly instances: Result<ReadonlyArray<InstanceRow>>
-    readonly orders: Result<ReadonlyArray<CatalogOrderRow>>
-    readonly catalogue: Result<ReadonlyArray<CatalogItemRow>>
-}
-
 /**
  * The cheapest rung of one template that publishes a monthly price.
  *
@@ -109,33 +94,11 @@ const cheapestTier = (item: CatalogItemRow) => {
 export const AppsDashboard = () => {
     const t = useTranslations("console")
     const format = useFormatter()
-    const locale = useLocale()
     const router = useRouter()
-    const session = useSession()
-    const isSignedIn = session.state.status === "signed-in"
-    const [answer, setAnswer] = useState<AppsAnswer | null>(null)
-
-    useEffect(() => {
-        if (!isSignedIn) {
-            return
-        }
-        let cancelled = false
-        const ask = async () => {
-            const [sites, instances, orders, catalogue] = await Promise.all([
-                myExpertSites(),
-                myInstances(),
-                myCatalogOrders(),
-                catalogItems("site_from_template"),
-            ])
-            if (!cancelled) {
-                setAnswer({ sites, instances, orders, catalogue })
-            }
-        }
-        void ask()
-        return () => {
-            cancelled = true
-        }
-    }, [isSignedIn])
+    const sites = useQueryMyExpertSitesSwr()
+    const instances = useQueryMyInstancesSwr()
+    const orders = useQueryMyCatalogOrdersSwr()
+    const catalogue = useQueryCatalogItemsSwr("site_from_template")
 
     const money = (amountVnd: number) =>
         format.number(amountVnd, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
@@ -154,19 +117,19 @@ export const AppsDashboard = () => {
 
     const ownedView = (): OwnedSectionView => {
         const label = t("apps.listLabel")
-        if (answer === null) {
+        if (sites.data === undefined) {
             return { phase: "resting", label }
         }
-        if (!answer.sites.ok) {
+        if (!sites.data.ok) {
             return { phase: "refused", label, note: t("refusal.unknown") }
         }
-        const catalogue = answer.catalogue.ok ? answer.catalogue.data : []
-        const instances = answer.instances.ok ? answer.instances.data : []
-        const apps: Array<OwnedAppRow> = answer.sites.data.map((site) => {
-            const instance = instances.find((one) => one.detailId === site.id)
+        const catalogueRows = catalogue.data?.ok === true ? catalogue.data.data : []
+        const instanceRows = instances.data?.ok === true ? instances.data.data : []
+        const apps: Array<OwnedAppRow> = sites.data.data.map((site) => {
+            const instance = instanceRows.find((one) => one.detailId === site.id)
             const template = instance === undefined
                 ? undefined
-                : catalogue.find((item) => item.templateKey === instance.appKey)
+                : catalogueRows.find((item) => item.templateKey === instance.appKey)
             return {
                 id: site.id,
                 name: site.slug,
@@ -184,7 +147,7 @@ export const AppsDashboard = () => {
          * repeats the other, and reading `in_progress` as `provisioning` is the one interpretation
          * here: it is the same moment in the same lifecycle under two vocabularies.
          */
-        const standingUp: Array<OwnedAppRow> = (answer.orders.ok ? answer.orders.data : [])
+        const standingUp: Array<OwnedAppRow> = (orders.data?.ok === true ? orders.data.data : [])
             .filter((order) => order.status === "in_progress")
             .map((order) => ({
                 id: order.id,
@@ -203,20 +166,20 @@ export const AppsDashboard = () => {
     const catalogueView = (): CatalogueSectionView => {
         const label = t("apps.catalogueLabel")
         const fact = t("apps.catalogueFact")
-        if (answer === null) {
+        if (catalogue.data === undefined) {
             return { phase: "resting", label, fact }
         }
-        if (!answer.catalogue.ok) {
+        if (!catalogue.data.ok) {
             return { phase: "refused", label, note: t("refusal.unknown") }
         }
-        if (answer.catalogue.data.length === 0) {
+        if (catalogue.data.data.length === 0) {
             return { phase: "empty", label, note: t("apps.emptyDescription") }
         }
         return {
             phase: "answered",
             label,
             fact,
-            offers: answer.catalogue.data.flatMap((item) => {
+            offers: catalogue.data.data.flatMap((item) => {
                 if (item.templateKey === null) {
                     return []
                 }
@@ -239,12 +202,12 @@ export const AppsDashboard = () => {
 
     const buildTemplate = (templateKey: string) => {
         const route = `/apps/create/${encodeURIComponent(templateKey)}`
-        router.push(locale === DEFAULT_LOCALE ? route : `/${locale}${route}`)
+        router.push(route)
     }
 
     const openOwnedApp = (siteId: string) => {
         const route = `/apps/${encodeURIComponent(siteId)}`
-        router.push(locale === DEFAULT_LOCALE ? route : `/${locale}${route}`)
+        router.push(route)
     }
 
     return (

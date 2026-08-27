@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
     session: { state: { status: "signed-in", accessToken: "token" } },
 }))
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("next-intl", () => ({
     useTranslations: () => (key: string, values?: Record<string, unknown>) => values === undefined ? key : `${key}:${JSON.stringify(values)}`,
     useLocale: () => "en",
@@ -101,6 +101,6 @@ describe("AgentOSOpenClawLaunch connected orchestration", () => {
         render(<AgentOSOpenClawLaunch workspaceId="workspace-1" />)
         await waitFor(() => expect(screen.getByTestId("launch-state")).toHaveTextContent("connected"))
         fireEvent.click(screen.getByRole("button", { name: "return" }))
-        expect(mocks.push).toHaveBeenCalledWith("/en/agentos/workspaces/workspace-1")
+        expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/workspace-1")
     })
 })

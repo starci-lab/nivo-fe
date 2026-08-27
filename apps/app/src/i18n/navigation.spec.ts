@@ -10,6 +10,7 @@ const navigation = vi.hoisted(() => ({
 const createNavigation = vi.hoisted(() => vi.fn(() => navigation))
 
 vi.mock("next-intl/navigation", () => ({ createNavigation }))
+vi.unmock("@/i18n/navigation")
 
 import { Link, getPathname, redirect, usePathname, useRouter } from "./navigation"
 import { routing } from "./routing"

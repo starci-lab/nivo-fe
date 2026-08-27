@@ -1,4 +1,4 @@
-import { fetchCourses } from "@/modules/api/academy"
+import { queryAcademyCourses } from "@/hooks/academy/query-academy-courses"
 import { AcademyPageBase as AcademyPageView } from "./component"
 
 /**
@@ -24,6 +24,6 @@ import { AcademyPageBase as AcademyPageView } from "./component"
  * @returns The page.
  */
 export const AcademyPage = async () => {
-    const { courses } = await fetchCourses()
+    const { courses } = await queryAcademyCourses()
     return <AcademyPageView courses={courses} />
 }

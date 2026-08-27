@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { AcademyControlCenter } from "./index"
 
-const m = vi.hoisted(() => ({ session: { state: { status: "signed-in" } }, sites: { ok: true, data: [] as unknown[] }, list: vi.fn(), open: vi.fn() }))
+const m = vi.hoisted(() => ({ session: { state: { status: "signed-in", accessToken: "test-token" } }, sites: { ok: true, data: [] as unknown[] }, list: vi.fn(), open: vi.fn() }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => m.session }))
 vi.mock("@/modules/api/console", () => ({ myExpertSites: m.list }))

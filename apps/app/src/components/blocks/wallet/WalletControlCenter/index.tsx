@@ -1,22 +1,18 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
-import { usePathname, useSearchParams } from "next/navigation"
-import { DEFAULT_LOCALE } from "@/i18n/config"
-import { useSession } from "@/modules/auth/session"
+import { useSearchParams } from "next/navigation"
+import { usePathname } from "@/i18n/navigation"
 import {
-    createWalletTopUpPayLink,
-    myInvoices,
-    myWallet,
-    myWalletTransactions,
-    payInvoice as payInvoiceMutation,
-    type InvoiceRow,
-    type WalletRow,
-    type WalletTopUpPayLink,
-    type WalletTransactionRow,
-} from "@/modules/api/console"
-import type { Result } from "@/modules/api/graphql"
+    useMutateCreateWalletTopUpPayLinkSwr,
+    useMutatePayInvoiceSwr,
+    useQueryMyInvoicesSwr,
+    useQueryMyWalletSwr,
+    useQueryMyWalletTransactionsSwr,
+} from "@/hooks/swr"
+import { DEFAULT_LOCALE } from "@/i18n/config"
+import type { InvoiceRow, WalletTopUpPayLink } from "@/modules/api/console"
 import {
     WalletControlCenterBase,
     type BalanceSectionView,
@@ -28,7 +24,6 @@ import {
     type WalletLedgerRow,
 } from "./component"
 
-type MoneyAnswer = { readonly wallet: Result<WalletRow>, readonly invoices: Result<ReadonlyArray<InvoiceRow>> }
 type TopUpSession = { readonly amountVnd: number, readonly startingBalanceVnd: number, readonly referenceId: string }
 type WalletWaypoint = { readonly orderId: string, readonly invoiceId: string, readonly returnTo: string }
 const TOP_UP_SESSION_KEY = "nivo.wallet.top-up"
@@ -85,10 +80,14 @@ export const WalletControlCenter = ({ pageState }: WalletControlCenterProps) => 
     const searchParams = useSearchParams()
     const route = (path: string) => locale === DEFAULT_LOCALE ? path : `/${locale}${path}`
     const waypoint = readWalletWaypoint(searchParams.toString(), locale)
-    const session = useSession()
-    const isSignedIn = session.state.status === "signed-in"
-    const [money, setMoney] = useState<MoneyAnswer | null>(null)
-    const [movements, setMovements] = useState<Result<ReadonlyArray<WalletTransactionRow>> | null>(null)
+    const wallet = useQueryMyWalletSwr()
+    const invoices = useQueryMyInvoicesSwr()
+    const transactions = useQueryMyWalletTransactionsSwr()
+    const payInvoiceMutation = useMutatePayInvoiceSwr()
+    const topUpMutation = useMutateCreateWalletTopUpPayLinkSwr()
+    const walletAnswer = wallet.data
+    const invoicesAnswer = invoices.data
+    const movements = transactions.data
     const [payingInvoice, setPayingInvoice] = useState(false)
     const [paymentError, setPaymentError] = useState<string | null>(null)
     const [topUpOpen, setTopUpOpen] = useState(pathname.endsWith("/wallet/top-up"))
@@ -98,12 +97,8 @@ export const WalletControlCenter = ({ pageState }: WalletControlCenterProps) => 
     const [checkout, setCheckout] = useState<WalletTopUpPayLink | undefined>()
 
     const refresh = useCallback(async () => {
-        const [wallet, invoices, transactions] = await Promise.all([myWallet(), myInvoices(), myWalletTransactions()])
-        setMoney({ wallet, invoices })
-        setMovements(transactions)
-    }, [])
-
-    useEffect(() => { if (isSignedIn) void refresh() }, [isSignedIn, refresh])
+        await Promise.all([wallet.mutate(), invoices.mutate(), transactions.mutate()])
+    }, [invoices, transactions, wallet])
 
     const amount = (amountVnd: number) => format.number(amountVnd, { style: "currency", currency: "VND", maximumFractionDigits: 0 })
     const day = (iso: string) => format.dateTime(new Date(iso), { day: "2-digit", month: "2-digit", year: "numeric" })
@@ -131,19 +126,19 @@ export const WalletControlCenter = ({ pageState }: WalletControlCenterProps) => 
 
     const balanceView = (): BalanceSectionView => {
         const label = t("wallet.availableBalance")
-        if (money === null) return { phase: "resting", label, actionLabel: t("wallet.topUp") }
-        if (!money.wallet.ok) return { phase: "refused", label, note: t("refusal.unknown") }
-        const facts: Array<WalletFactRow> = [{ id: "balance", label: t("wallet.balanceLabel"), value: amount(money.wallet.data.balanceVnd) }]
-        if (money.invoices.ok) {
-            const unpaid = money.invoices.data.find((invoice) => invoice.status === "unpaid")
+        if (walletAnswer === undefined) return { phase: "resting", label, actionLabel: t("wallet.topUp") }
+        if (!walletAnswer.ok) return { phase: "refused", label, note: t("refusal.unknown") }
+        const facts: Array<WalletFactRow> = [{ id: "balance", label: t("wallet.balanceLabel"), value: amount(walletAnswer.data.balanceVnd) }]
+        if (invoicesAnswer?.ok === true) {
+            const unpaid = invoicesAnswer.data.find((invoice) => invoice.status === "unpaid")
             facts.push({ id: "unpaid", label: t("wallet.unpaidLabel"), value: unpaid === undefined ? t("wallet.noUnpaid") : amount(unpaid.amountVnd) })
         }
-        return { phase: money.wallet.data.balanceVnd === 0 ? "empty" : "answered", label, actionLabel: t("wallet.topUp"), facts }
+        return { phase: walletAnswer.data.balanceVnd === 0 ? "empty" : "answered", label, actionLabel: t("wallet.topUp"), facts }
     }
 
     const transactionsView = (): LedgerSectionView => {
         const label = t("wallet.transactionsLabel")
-        if (movements === null) return { phase: "resting", label }
+        if (movements === undefined) return { phase: "resting", label }
         if (!movements.ok) return { phase: "refused", label, note: t("refusal.unknown") }
         if (movements.data.length === 0) return { phase: "empty", label, note: t("wallet.transactionsEmpty") }
         return { phase: "answered", label, rows: movements.data.map((movement) => ({
@@ -165,14 +160,14 @@ export const WalletControlCenter = ({ pageState }: WalletControlCenterProps) => 
 
     const invoicesView = (): LedgerSectionView => {
         const label = t("wallet.invoicesLabel")
-        if (money === null) return { phase: "resting", label }
-        if (!money.invoices.ok) return { phase: "refused", label, note: t("refusal.unknown") }
-        if (money.invoices.data.length === 0) return { phase: "empty", label, note: t("wallet.invoicesEmpty") }
-        const rows = money.invoices.data
+        if (invoicesAnswer === undefined) return { phase: "resting", label }
+        if (!invoicesAnswer.ok) return { phase: "refused", label, note: t("refusal.unknown") }
+        if (invoicesAnswer.data.length === 0) return { phase: "empty", label, note: t("wallet.invoicesEmpty") }
+        const rows = invoicesAnswer.data
             .filter((invoice) => waypoint?.invoiceId === undefined || invoice.id !== waypoint.invoiceId)
             .map(invoiceRow)
         let actionLabel: string | undefined
-        if (waypoint === undefined && money.invoices.data.some((row) => row.status === "unpaid")) {
+        if (waypoint === undefined && invoicesAnswer.data.some((row) => row.status === "unpaid")) {
             actionLabel = payingInvoice ? t("wallet.paying") : t("wallet.pay")
         }
         return { phase: "answered", label, actionLabel, rows }
@@ -181,11 +176,11 @@ export const WalletControlCenter = ({ pageState }: WalletControlCenterProps) => 
     const linkedInvoiceView = (currentWaypoint: WalletWaypoint | null): LinkedInvoiceSectionView => {
         const label = t("wallet.linkedInvoiceLabel")
         if (currentWaypoint === null) return { phase: "refused", label, note: t("wallet.invalidContinuation") }
-        if (money === null) return { phase: "resting", label, orderLabel: t("wallet.orderLabel", { orderId: currentWaypoint.orderId }) }
-        if (!money.invoices.ok || !money.wallet.ok) return { phase: "refused", label, note: t("refusal.unknown") }
-        const invoice = money.invoices.data.find((row) => row.id === currentWaypoint.invoiceId && row.catalogOrder?.id === currentWaypoint.orderId)
+        if (invoicesAnswer === undefined || walletAnswer === undefined) return { phase: "resting", label, orderLabel: t("wallet.orderLabel", { orderId: currentWaypoint.orderId }) }
+        if (!invoicesAnswer.ok || !walletAnswer.ok) return { phase: "refused", label, note: t("refusal.unknown") }
+        const invoice = invoicesAnswer.data.find((row) => row.id === currentWaypoint.invoiceId && row.catalogOrder?.id === currentWaypoint.orderId)
         if (invoice === undefined) return { phase: "refused", label, note: t("wallet.linkedInvoiceMissing") }
-        const insufficient = invoice.status === "unpaid" && money.wallet.data.balanceVnd < invoice.amountVnd
+        const insufficient = invoice.status === "unpaid" && walletAnswer.data.balanceVnd < invoice.amountVnd
         let actionLabel = t("wallet.payLinkedInvoice")
         if (invoice.status === "paid") actionLabel = t("wallet.returnToOrder")
         else if (payingInvoice) actionLabel = t("wallet.paying")
@@ -205,14 +200,14 @@ export const WalletControlCenter = ({ pageState }: WalletControlCenterProps) => 
     }
 
     const payInvoice = async () => {
-        if (payingInvoice || money?.invoices.ok !== true) return
+        if (payingInvoice || invoicesAnswer?.ok !== true) return
         const invoice = waypoint === null
             ? undefined
-            : money.invoices.data.find((row) => row.status === "unpaid" && (waypoint === undefined || row.id === waypoint.invoiceId && row.catalogOrder?.id === waypoint.orderId))
+            : invoicesAnswer.data.find((row) => row.status === "unpaid" && (waypoint === undefined || row.id === waypoint.invoiceId && row.catalogOrder?.id === waypoint.orderId))
         if (invoice === undefined) return
         setPayingInvoice(true)
         setPaymentError(null)
-        const paid = await payInvoiceMutation(invoice.id)
+        const paid = await payInvoiceMutation.trigger(invoice.id)
         if (!paid.ok) setPaymentError(paid.reason)
         else {
             await refresh()
@@ -224,15 +219,15 @@ export const WalletControlCenter = ({ pageState }: WalletControlCenterProps) => 
     const submitTopUp = async () => {
         const amountVnd = Number(topUpAmount.replace(/\D/g, ""))
         if (!Number.isSafeInteger(amountVnd) || amountVnd < 10_000) { setTopUpError(t("wallet.topUpInvalid")); return }
-        if (money?.wallet.ok !== true) { setTopUpError(t("wallet.topUpUnavailable")); return }
+        if (walletAnswer?.ok !== true) { setTopUpError(t("wallet.topUpUnavailable")); return }
         setTopUpPending(true)
         setTopUpError(undefined)
         const origin = window.location.origin
         const returnUrl = `${origin}${route("/wallet/top-up/return")}`
-        const answer = await createWalletTopUpPayLink(amountVnd, returnUrl, `${returnUrl}?status=cancelled`)
+        const answer = await topUpMutation.trigger({ amountVnd, returnUrl, cancelUrl: `${returnUrl}?status=cancelled` })
         if (!answer.ok) { setTopUpError(answer.reason); setTopUpPending(false); return }
         setCheckout(answer.data)
-        sessionStorage.setItem(TOP_UP_SESSION_KEY, JSON.stringify({ amountVnd, startingBalanceVnd: money.wallet.data.balanceVnd, referenceId: answer.data.referenceId }))
+        sessionStorage.setItem(TOP_UP_SESSION_KEY, JSON.stringify({ amountVnd, startingBalanceVnd: walletAnswer.data.balanceVnd, referenceId: answer.data.referenceId }))
         const form = document.createElement("form")
         form.method = "POST"
         form.action = answer.data.checkoutUrl
@@ -249,7 +244,7 @@ export const WalletControlCenter = ({ pageState }: WalletControlCenterProps) => 
     const stored = typeof window === "undefined" ? null : readTopUpSession()
     const isReturn = pathname.endsWith("/wallet/top-up/return")
     const isCancelled = searchParams.get("status") === "cancelled"
-    const confirmed = stored !== null && money?.wallet.ok === true && money.wallet.data.balanceVnd >= stored.startingBalanceVnd + stored.amountVnd
+    const confirmed = stored !== null && walletAnswer?.ok === true && walletAnswer.data.balanceVnd >= stored.startingBalanceVnd + stored.amountVnd
     const resultCopy = paymentResultCopy(isCancelled, confirmed, {
         cancelled: t("wallet.resultCancelled"),
         confirmed: t("wallet.resultConfirmed"),

@@ -34,7 +34,7 @@ type AuthPageProbeInput = { panel: AuthProbePanel }
 const details = { email: "reader@example.test", password: "secret-password" } satisfies AuthDetails
 const code = { otp: "123456", newPassword: "new-password" } satisfies AuthCode
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("next-intl", () => ({ useTranslations: () => mocks.t }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/auth", () => mocks.api)

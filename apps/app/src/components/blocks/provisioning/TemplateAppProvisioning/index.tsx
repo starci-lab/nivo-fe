@@ -1,16 +1,15 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useLocale, useTranslations } from "next-intl"
-import { DEFAULT_LOCALE } from "@/i18n/config"
-import { useSession } from "@/modules/auth/session"
+import { useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import {
-    catalogItems,
-    createExpertSite,
-    myExpertSiteDeployment,
-    publishExpertSite,
-} from "@/modules/api/console"
+    useMutateCreateAndPublishExpertSiteSwr,
+    useQueryCatalogItemsSwr,
+    useQueryMyExpertSiteDeploymentSwr,
+} from "@/hooks/swr"
+import { useRouter } from "@/i18n/navigation"
+import { useSession } from "@/modules/auth/session"
+import type { ExpertDeploymentSnapshot } from "@/modules/api/console"
 import useProvisioningRealtime, { type ProvisioningTarget } from "@/modules/realtime/provisioning"
 import { TemplateAppProvisioningBase, type TemplateAppProvisioningViewProps } from "./component"
 
@@ -36,6 +35,19 @@ const deploymentPhase = (status: string): "preparing" | "ready" | "failed" => {
     if (status === "running" || status === "ready") return "ready"
     if (status === "failed") return "failed"
     return "preparing"
+}
+
+/** Map the durable deployment projection into the provisioning state machine. */
+const settleDeployment = (
+    siteId: string,
+    subject: string,
+    snapshot: ExpertDeploymentSnapshot | null,
+    failedProvision: string,
+): TemplateFlow => {
+    if (snapshot === null) return { phase: "accepted", siteId, subject }
+    const phase = deploymentPhase(snapshot.status)
+    if (phase === "failed") return { phase: "failed", subject, reason: failedProvision }
+    return { phase, siteId, deploymentId: snapshot.id, publicHost: snapshot.publicHost }
 }
 
 /**
@@ -69,61 +81,55 @@ const stepState = (index: number, phaseIndex: number): StepState => {
 /** Own academy creation, K8s deployment snapshots and the matching deployment stream. */
 export const TemplateAppProvisioning = ({ context }: TemplateAppProvisioningProps) => {
     const t = useTranslations("console.provisioningFlows")
-    const locale = useLocale()
     const router = useRouter()
     const session = useSession()
     const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
     const [slug, setSlug] = useState("")
+    const createAndPublish = useMutateCreateAndPublishExpertSiteSwr()
     const [flow, setFlow] = useState<TemplateFlow>({ phase: "catalog_loading" })
-
-    const deploymentSnapshot = useCallback(async (siteId: string, subject = siteId): Promise<TemplateFlow> => {
-        const snapshot = await myExpertSiteDeployment(siteId)
-        if (!snapshot.ok) {
-            return { phase: "failed", subject, reason: t("failedLoad") }
-        }
-        if (snapshot.data === null) {
-            return { phase: "accepted", siteId, subject }
-        }
-        const phase = deploymentPhase(snapshot.data.status)
-        if (phase === "failed") {
-            return { phase: "failed", subject, reason: t("failedProvision") }
-        }
-        return {
-            phase,
-            siteId,
-            deploymentId: snapshot.data.id,
-            publicHost: snapshot.data.publicHost,
-        }
-    }, [t])
+    const isNew = context.mode === "new"
+    const templateKey = context.mode === "new" ? context.templateKey : null
+    const resumeSiteId = context.mode === "resume" ? context.siteId : null
+    const trackedSiteId = resumeSiteId ?? (
+        flow.phase === "accepted" || flow.phase === "preparing" || flow.phase === "ready"
+            ? flow.siteId
+            : undefined
+    )
+    const catalogueQuery = useQueryCatalogItemsSwr("site_from_template", isNew)
+    const deploymentQuery = useQueryMyExpertSiteDeploymentSwr(
+        trackedSiteId ?? undefined,
+        flow.phase === "accepted" || flow.phase === "preparing",
+    )
+    const refreshDeployment = deploymentQuery.mutate
 
     useEffect(() => {
-        if (context.mode === "resume" && accessToken === null) return
-        let cancelled = false
-        const settle = async () => {
-            if (context.mode === "new") {
-                const catalogue = await catalogItems("site_from_template")
-                if (cancelled) return
-                if (!catalogue.ok) {
-                    setFlow({ phase: "failed", subject: context.templateKey, reason: t("failedLoad") })
-                    return
-                }
-                const item = catalogue.data.find((candidate) => candidate.templateKey === context.templateKey)
-                if (item === undefined || context.templateKey !== "ai_academy") {
-                    setFlow({ phase: "unsupported", name: item?.name ?? context.templateKey })
-                    return
-                }
-                setFlow({ phase: "request", name: item.name })
-                return
-            }
-            const snapshot = await deploymentSnapshot(context.siteId)
-            if (cancelled) return
-            setFlow(snapshot)
+        if (!isNew || templateKey === null || catalogueQuery.data === undefined) return
+        if (!catalogueQuery.data.ok) {
+            setFlow({ phase: "failed", subject: templateKey, reason: t("failedLoad") })
+            return
         }
-        void settle()
-        return () => {
-            cancelled = true
+        const item = catalogueQuery.data.data.find((candidate) => candidate.templateKey === templateKey)
+        if (item === undefined || templateKey !== "ai_academy") {
+            setFlow({ phase: "unsupported", name: item?.name ?? templateKey })
+            return
         }
-    }, [accessToken, context, deploymentSnapshot, t])
+        setFlow((current) => current.phase === "catalog_loading" ? { phase: "request", name: item.name } : current)
+    }, [catalogueQuery.data, isNew, t, templateKey])
+
+    useEffect(() => {
+        const deployment = deploymentQuery.data
+        if (trackedSiteId === undefined || accessToken === null || deployment === undefined) return
+        if (!deployment.ok) {
+            setFlow({ phase: "failed", subject: trackedSiteId, reason: t("failedLoad") })
+            return
+        }
+        setFlow((current) => {
+            const subject = current.phase === "accepted" ? current.subject : trackedSiteId
+            const settled = settleDeployment(trackedSiteId, subject, deployment.data, t("failedProvision"))
+            if (current.phase === settled.phase && current.phase !== "accepted") return current
+            return settled
+        })
+    }, [accessToken, deploymentQuery.data, t, trackedSiteId])
 
     const target: ProvisioningTarget | null = flow.phase === "preparing" || flow.phase === "ready"
         ? { kind: "deployment", id: flow.deploymentId }
@@ -143,54 +149,28 @@ export const TemplateAppProvisioning = ({ context }: TemplateAppProvisioningProp
     }, [realtime, t])
 
     useEffect(() => {
-        if (context.mode !== "resume" || realtime.status !== "connected") return
-        let cancelled = false
-        void deploymentSnapshot(context.siteId).then((snapshot) => {
-            if (!cancelled) setFlow(snapshot)
-        })
-        return () => {
-            cancelled = true
-        }
-    }, [context, deploymentSnapshot, realtime.status])
+        if (realtime.status !== "connected" || trackedSiteId === undefined) return
+        void refreshDeployment()
+    }, [realtime.status, refreshDeployment, trackedSiteId])
 
-    useEffect(() => {
-        if (flow.phase !== "accepted") return
-        const timer = window.setInterval(() => {
-            void deploymentSnapshot(flow.siteId, flow.subject).then(setFlow)
-        }, 2000)
-        return () => window.clearInterval(timer)
-    }, [deploymentSnapshot, flow])
-
-    useEffect(() => {
-        if (flow.phase !== "preparing") return
-        // Keep the durable projection as a recovery path when the browser reconnects after the
-        // terminal Kafka event; Socket.IO remains the normal low-latency transition path.
-        const timer = window.setInterval(() => {
-            void deploymentSnapshot(flow.siteId).then(setFlow)
-        }, 4000)
-        return () => window.clearInterval(timer)
-    }, [deploymentSnapshot, flow])
-
-    const route = (path: string) => locale === DEFAULT_LOCALE ? path : `/${locale}${path}`
     const submit = async () => {
         if (flow.phase !== "request" || slug.trim() === "") return
         setFlow({ phase: "submitting", name: flow.name })
-        const created = await createExpertSite(slug.trim())
-        if (!created.ok) {
-            setFlow({ phase: "failed", subject: slug.trim(), reason: created.reason })
-            return
+        try {
+            const published = await createAndPublish.trigger(slug.trim())
+            if (!published.ok) {
+                setFlow({ phase: "failed", subject: slug.trim(), reason: published.reason })
+                return
+            }
+            setFlow({
+                phase: "accepted",
+                siteId: published.data.id,
+                subject: published.data.slug,
+            })
+            router.replace(`/apps/${published.data.id}/provisioning`)
+        } catch {
+            setFlow({ phase: "failed", subject: slug.trim(), reason: t("failedLoad") })
         }
-        const published = await publishExpertSite(created.data.id)
-        if (!published.ok) {
-            setFlow({ phase: "failed", subject: created.data.slug, reason: published.reason })
-            return
-        }
-        setFlow({
-            phase: "accepted",
-            siteId: created.data.id,
-            subject: published.data.slug,
-        })
-        router.replace(route(`/apps/${created.data.id}/provisioning`))
     }
 
     const phaseIndex = PHASE_INDEX[flow.phase]
@@ -211,6 +191,8 @@ export const TemplateAppProvisioning = ({ context }: TemplateAppProvisioningProp
     })
     const subject = (): string => {
         switch (flow.phase) {
+            case "catalog_loading":
+                return t("template.productName")
             case "request":
             case "submitting":
             case "unsupported":
@@ -221,8 +203,6 @@ export const TemplateAppProvisioning = ({ context }: TemplateAppProvisioningProp
             case "preparing":
             case "ready":
                 return flow.publicHost ?? flow.siteId
-            default:
-                return t("template.productName")
         }
     }
     const detail = (): string => {
@@ -240,10 +220,10 @@ export const TemplateAppProvisioning = ({ context }: TemplateAppProvisioningProp
             slugHint: t("template.slugHint"),
             submitLabel: t("template.submit"),
         }
-        if (flow.phase === "unsupported") return { state: "unsupported", props: { ...common, statusTitle: t("unsupportedTitle"), statusText: t("unsupportedText"), actionLabel: t("backToApps") }, on: { act: () => router.push(route("/apps")) } }
-        if (flow.phase === "failed") return { state: "failed", props: { ...common, statusTitle: t("failedTitle"), statusText: flow.reason, actionLabel: t("backToApps") }, on: { act: () => router.push(route("/apps")) } }
+        if (flow.phase === "unsupported") return { state: "unsupported", props: { ...common, statusTitle: t("unsupportedTitle"), statusText: t("unsupportedText"), actionLabel: t("backToApps") }, on: { act: () => router.push("/apps") } }
+        if (flow.phase === "failed") return { state: "failed", props: { ...common, statusTitle: t("failedTitle"), statusText: flow.reason, actionLabel: t("backToApps") }, on: { act: () => router.push("/apps") } }
         if (flow.phase === "request" || flow.phase === "submitting") return { state: flow.phase, props: { ...common, statusTitle: t("template.requestTitle"), statusText: t("template.requestText") }, on: { changeSlug: setSlug, submit: () => void submit() } }
-        if (flow.phase === "ready") return { state: "ready", props: { ...common, statusTitle: t("readyTitle"), statusText: t("template.readyText"), actionLabel: t("manageApps") }, on: { act: () => router.push(route(`/apps/${flow.siteId}`)) } }
+        if (flow.phase === "ready") return { state: "ready", props: { ...common, statusTitle: t("readyTitle"), statusText: t("template.readyText"), actionLabel: t("manageApps") }, on: { act: () => router.push(`/apps/${flow.siteId}`) } }
         if (flow.phase === "accepted") return { state: "accepted", props: { ...common, statusTitle: t("template.acceptedTitle"), statusText: t("template.acceptedText") } }
         const isCatalogLoading = flow.phase === "catalog_loading"
         const waitingText = realtime.status === "connecting" ? t("connecting") : t("template.preparingText")

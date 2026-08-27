@@ -253,7 +253,7 @@ const statusCard = (
 }
 
 /** Render student CRM state without owning requests or secrets. */
-export const AcademyStudentCrmBase = ({ state, students, detailState, detail, pendingAction, actionMessage, labels, on }: AcademyStudentCrmViewProps) => {
+const AcademyStudentCrmContent = ({ state, students, detailState, detail, pendingAction, actionMessage, labels, on }: AcademyStudentCrmViewProps) => {
     const rows = state === "resting" ? restingRows(labels) : studentRows(students, labels, on)
     const note = noteFor(state, labels)
     return (
@@ -278,6 +278,9 @@ export const AcademyStudentCrmBase = ({ state, students, detailState, detail, pe
         </>
     )
 }
+
+/** Stable typed root for the Academy student CRM block. */
+export const AcademyStudentCrmBase = (props: AcademyStudentCrmViewProps) => <AcademyStudentCrmContent {...props} />
 
 /** Source-level tier marker for the pure Academy student CRM block. */
 export const meta = { shape: "block", world: "pure" } as const

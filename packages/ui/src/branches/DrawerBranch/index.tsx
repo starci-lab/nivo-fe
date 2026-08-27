@@ -1,18 +1,19 @@
 "use client"
 
 import { Drawer } from "@heroui/react"
-import type { ReactNode } from "react"
+import type { ComponentType } from "react"
 
 /** Fixed copy and content owned by the right-edge drawer mechanic. */
-export type DrawerBranchProps = {
+export type DrawerBranchProps<P extends object> = {
     readonly triggerLabel: string
     readonly title: string
     readonly closeLabel: string
-    readonly content: ReactNode
+    readonly content: ComponentType<P>
+    readonly contentProps: P
 }
 
 /** Own HeroUI drawer placement, focus, dismissal, backdrop and the single scroll body. */
-export const DrawerBranch = ({ triggerLabel, title, closeLabel, content }: DrawerBranchProps) => (
+export const DrawerBranch = <P extends object>({ triggerLabel, title, closeLabel, content: Content, contentProps }: DrawerBranchProps<P>) => (
     <Drawer.Root>
         <Drawer.Trigger className="min-h-10 rounded-large px-3 text-sm font-semibold text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent">
             {triggerLabel}
@@ -26,7 +27,7 @@ export const DrawerBranch = ({ triggerLabel, title, closeLabel, content }: Drawe
                             {closeLabel}
                         </Drawer.CloseTrigger>
                     </Drawer.Header>
-                    <Drawer.Body className="p-0">{content}</Drawer.Body>
+                    <Drawer.Body className="p-0"><Content {...contentProps} /></Drawer.Body>
                 </Drawer.Dialog>
             </Drawer.Content>
         </Drawer.Backdrop>

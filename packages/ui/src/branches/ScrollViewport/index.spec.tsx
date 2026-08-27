@@ -2,9 +2,11 @@ import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { ScrollViewport } from "."
 
+const Destinations = () => <span>Destinations</span>
+
 describe("ScrollViewport", () => {
     it("owns one keyboard-reachable labelled scroll region", () => {
-        render(<ScrollViewport ariaLabel="Service destinations" content={<span>Destinations</span>} />)
+        render(<ScrollViewport ariaLabel="Service destinations" content={Destinations} contentProps={{}} />)
 
         const viewport = screen.getByLabelText("Service destinations")
         expect(viewport).toHaveAttribute("data-component", "ScrollViewport")

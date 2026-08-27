@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
-interface MockConsoleLayoutProps { readonly body: React.ReactNode }
-vi.mock("@/components/layouts/ConsoleLayout", () => ({ ConsoleLayout: (props: MockConsoleLayoutProps) => <section data-testid="console-layout">{props.body}</section> }))
+interface MockConsoleLayoutProps { readonly body: React.ComponentType; readonly bodyProps: object }
+vi.mock("@/components/layouts/ConsoleLayout", () => ({ ConsoleLayout: ({ body: Body, bodyProps }: MockConsoleLayoutProps) => <section data-testid="console-layout"><Body {...bodyProps} /></section> }))
 
 import ConsoleRouteLayout from "./layout"
 

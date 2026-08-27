@@ -35,11 +35,89 @@ describe("AgentOS SPLIT-6 page owner chains", () => {
         expect(html).toContain("workspace-1:applications")
     })
 
-    it("passes route identities, never detail state or data, into the connected module block", () => {
-        expect(renderToStaticMarkup(<AgentOSSolutionModulePageBase workspaceId="workspace-1" installationId="installation-1" />)).toContain("workspace-1:installation-1")
+    it("projects one backend-owned module runtime through the pure routed shell", () => {
+        const html = renderToStaticMarkup(
+            <AgentOSSolutionModulePageBase
+                shell={{
+                    workspaceLabel: "Workspace workspac",
+                    moduleName: "Sales Copilot",
+                    moduleKind: "sales",
+                    lifecycleLabel: "ready",
+                    contextVersion: "not applied",
+                    channelLabel: "Channel not connected",
+                    controllerLabel: "Controller healthy",
+                    activeView: "diagnostics",
+                    onBackToModules: vi.fn(),
+                    onNavigate: vi.fn(),
+                }}
+                screen={{
+                    view: "diagnostics",
+                    contentProps: {
+                        installationId: "installation-1",
+                        kindKey: "sales",
+                        workbenchKey: "sales-pipeline",
+                        diagnostics: { available: true },
+                        events: [],
+                        selectedSignal: "all",
+                        compactPane: "readiness",
+                        onSelectSignal: vi.fn(),
+                        onSelectPane: vi.fn(),
+                    },
+                }}
+            />,
+        )
+        expect(html).toContain("Workspace workspac")
+        expect(html).toContain("installation-1")
+        expect(html).toContain("Signals")
+        expect(html).toContain("Runtime health")
+        expect(html).toContain("Event trace")
+        expect(html).toContain("Controller healthy")
     })
 
     it("passes route identity, never launch state, into the connected OpenClaw block", () => {
         expect(renderToStaticMarkup(<AgentOSOpenClawLaunchBridgeBase workspaceId="workspace-1" />)).toContain("workspace-1")
+    })
+
+    it("renders only a masked credential status and a password input in Settings", () => {
+        const html = renderToStaticMarkup(
+            <AgentOSSolutionModulePageBase
+                shell={{
+                    workspaceLabel: "Workspace workspac",
+                    moduleName: "Support Desk",
+                    moduleKind: "customer-support",
+                    lifecycleLabel: "ready",
+                    contextVersion: "not applied",
+                    channelLabel: "Channel not connected",
+                    controllerLabel: "Controller healthy",
+                    activeView: "settings",
+                    onBackToModules: vi.fn(),
+                    onNavigate: vi.fn(),
+                }}
+                screen={{
+                    view: "settings",
+                    contentProps: {
+                        currentDisplayName: "Support Desk",
+                        currentModelProfile: "nivo-default",
+                        currentConfirmation: true,
+                        currentOperatingMode: "assist",
+                        currentChannelAccountRef: "",
+                        liveEnabled: false,
+                        canEnableLive: false,
+                        pending: false,
+                        refused: false,
+                        credentialSlots: [{ key: "telegram-bot-token", label: "Telegram bot token", provider: "telegram" }],
+                        credentialStatuses: [{ providerKey: "telegram-bot-token", maskedHint: "•••• 1234", status: "configured" }],
+                        activeVersion: null,
+                        onSave: vi.fn(),
+                        onSetLiveEnabled: vi.fn(),
+                        onSaveCredential: vi.fn(),
+                        onRemoveCredential: vi.fn(),
+                    },
+                }}
+            />,
+        )
+        expect(html).toContain("Telegram bot token")
+        expect(html).toContain("•••• 1234")
+        expect(html).toContain('type="password"')
     })
 })

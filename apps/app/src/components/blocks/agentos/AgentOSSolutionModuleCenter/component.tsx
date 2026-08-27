@@ -45,7 +45,7 @@ const loadingCards: ReadonlyArray<AgentOSSolutionModuleCard> = ["module-loading-
 }))
 
 /** Render the selected solution mode from already-resolved card projections. */
-export const AgentOSSolutionModuleCenterBase = ({ state, mode, sectionLabel, modesLabel, modes, refusedLabel, emptyLabel, emptyActionLabel, cards, pendingId, outcome, onSelectMode, onPressCard }: AgentOSSolutionModuleCenterViewProps) => {
+const AgentOSSolutionModuleCenterContent = ({ state, mode, sectionLabel, modesLabel, modes, refusedLabel, emptyLabel, emptyActionLabel, cards, pendingId, outcome, onSelectMode, onPressCard }: AgentOSSolutionModuleCenterViewProps) => {
     // The three situations under the tabs, read in order: a refusal, an answer with nothing in it,
     // and otherwise the grid - which draws the resting placeholders when the answer has not landed.
     const body = () => {
@@ -88,6 +88,9 @@ export const AgentOSSolutionModuleCenterBase = ({ state, mode, sectionLabel, mod
         </>
     )
 }
+
+/** Stable typed root for the module-center block. */
+export const AgentOSSolutionModuleCenterBase = (props: AgentOSSolutionModuleCenterViewProps) => <AgentOSSolutionModuleCenterContent {...props} />
 
 /** Source-level tier marker for the pure solution-module center. */
 export const meta = { shape: "block", world: "pure" } as const

@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 const push = vi.fn()
 const location = { pathname: "/overview", locale: "vi" }
 
-vi.mock("next/navigation", () => ({
+vi.mock("@/i18n/navigation", () => ({
     usePathname: () => location.pathname,
     useRouter: () => ({ push }),
 }))
@@ -68,18 +68,18 @@ describe("ConsoleNav", () => {
 
     it("normalizes the locale before marking and opening a destination", async () => {
         const user = userEvent.setup()
-        location.pathname = "/en/apps/detail"
+        location.pathname = "/apps/detail"
         location.locale = "en"
         render(<ConsoleNav mode="mobile" />)
 
         fireEvent.click(screen.getByRole("button", { name: "openMenu" }))
         expect(await screen.findByRole("option", { name: "nav.apps" })).toHaveAttribute("aria-selected", "true")
         await user.click(screen.getByRole("option", { name: "nav.agentos" }))
-        expect(push).toHaveBeenCalledWith("/en/agentos")
+        expect(push).toHaveBeenCalledWith("/agentos")
     })
 
     it("treats the exact locale root as overview", async () => {
-        location.pathname = "/en"
+        location.pathname = "/"
         location.locale = "en"
         render(<ConsoleNav mode="mobile" />)
 

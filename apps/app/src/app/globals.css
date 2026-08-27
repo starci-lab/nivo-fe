@@ -1,3 +1,6 @@
+@import "@starci/grammar/common/styles.css";
+@import "@starci/grammar/core/styles.css";
+@import "@nivo/ui/styles.css";
 @import "tailwindcss";
 @import "@heroui/styles/css";
 
@@ -207,46 +210,6 @@
     --starci-border: oklch(28% 0.0015 354.13);
 }
 
-/* Port the accepted StarCi navbar switch geometry without changing the shared leaf. */
-[data-component="ThemeSwitch"] .switch__control {
-    width: 4rem !important;
-    height: 2.25rem !important;
-    border-radius: 9999px !important;
-}
-
-.nivo-brand__ink {
-    fill: var(--nivo-brand-ink);
-}
-
-.nivo-brand__accent {
-    fill: none;
-    stroke: var(--nivo-brand-accent);
-    stroke-linecap: butt;
-    stroke-width: 18;
-}
-
-[data-component="ThemeSwitch"] .switch__thumb {
-    display: flex;
-    width: 1.75rem !important;
-    height: 1.75rem !important;
-    margin-inline-start: 0.25rem !important;
-    align-items: center;
-    justify-content: center;
-    border-radius: 9999px !important;
-}
-
-[data-component="ThemeSwitch"][data-selected="true"] .switch__thumb,
-[data-component="ThemeSwitch"][aria-checked="true"] .switch__thumb {
-    margin-inline-start: calc(100% - 1.75rem - 0.25rem) !important;
-}
-
-[data-component="ThemeSwitch"] .switch__thumb [data-slot="icon"] {
-    display: block;
-    width: 1rem;
-    height: 1rem;
-    flex: none;
-}
-
 /* HeroUI's icon-only dropdown trigger must center its one glyph at every browser zoom. */
 [data-theme="starci-dashboard"] .button--icon-only {
     display: inline-flex;
@@ -260,65 +223,8 @@
     flex: none;
 }
 
-[data-component="ScrollViewport"] {
-    overscroll-behavior: contain;
-    scrollbar-width: none;
-}
-
-[data-component="ScrollViewport"]::-webkit-scrollbar {
-    display: none;
-}
-
-[data-component="CollapsibleRail"] {
-    display: none;
-    color: var(--foreground);
-}
-
-[data-component="CollapsibleRailControl"] {
-    cursor: pointer;
-    border: 0;
-    border-radius: 9999px;
-    background: transparent;
-    color: var(--foreground);
-}
-
-[data-component="CollapsibleRailControl"]:hover {
-    background: var(--default);
-}
-
-[data-component="CollapsibleRailControl"]:focus-visible {
-    outline: 2px solid var(--focus);
-    outline-offset: 2px;
-}
-
-@media (min-width: 768px) {
-    [data-component="CollapsibleRail"] {
-        display: flex;
-    }
-}
-
 body {
     background: var(--background);
     color: var(--foreground);
     font-family: var(--nivo-font-interface);
-}
-
-/*
- * A press label is ruled with the SAME mark the vendor link uses, because the two sit in one card
- * and stand for one promise. The vendor bakes `--separator-tertiary` at 1.5px into `.link`; naming
- * a token from the scale instead gives the title a 91% hairline beside a link ruled at 85%, and the
- * pair reads as two different weights of underline.
- */
-[data-press-label="true"] {
-    text-decoration-color: var(--separator-tertiary);
-    text-decoration-thickness: 1.5px;
-}
-
-/*
- * Hovering a control INSIDE a press target is not hovering the press target. The label underlines
- * to say "this whole surface opens something", and while the pointer is on a link that opens
- * something else, that sentence is false: the reader is told two destinations answer one gesture.
- */
-[data-component="PressableSurface"]:has([data-component="TextLink"]:hover) [data-press-label="true"] {
-    text-decoration-line: none;
 }

@@ -384,7 +384,7 @@ const LeadBand = ({ section, onSubmit }: LeadBandProps) => {
                     status,
                     submitLabel: section.submitLabel,
                     sendingLabel: section.sendingLabel,
-                    onSubmit: send,
+                    onSubmit: (event) => { void send(event) },
                 }),
                 /*
                  * The outcome sits in the BAND rather than in the form, because `form-column`
@@ -930,7 +930,8 @@ export interface AcademySectionsViewProps {
  * @returns Every visible section, in the expert's order.
  */
 export const AcademySectionsBase = ({ sections, onSubmitLead }: AcademySectionsViewProps) => (
-    <>
+    <Tree contract="academy-band-list" render={defineContractProjection("academy-band-list", () => (
+        <>
         {/*
           * A keyed `Fragment` rather than a wrapper element. React needs a key per item and the band
           * below already owns its own node, so anything opened here would be a second host that no
@@ -940,5 +941,6 @@ export const AcademySectionsBase = ({ sections, onSubmitLead }: AcademySectionsV
         {sections.map((section) => (
             <Fragment key={section.id}>{band(section, onSubmitLead)}</Fragment>
         ))}
-    </>
+        </>
+    ))} />
 )

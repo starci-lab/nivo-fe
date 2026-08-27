@@ -1,0 +1,91 @@
+@layer nivo-ui {
+    [data-grammar-contract="core.surface-card"] {
+        --starci-core-surface-inset: 0;
+    }
+
+    .nivo-brand__ink {
+        fill: var(--nivo-brand-ink);
+    }
+
+    .nivo-brand__accent {
+        fill: none;
+        stroke: var(--nivo-brand-accent);
+        stroke-linecap: butt;
+        stroke-width: 18;
+    }
+
+    [data-component="ThemeSwitch"] .switch__control {
+        width: 4rem !important;
+        height: 2.25rem !important;
+        border-radius: 9999px !important;
+    }
+
+    [data-component="ThemeSwitch"] .switch__thumb {
+        display: flex;
+        width: 1.75rem !important;
+        height: 1.75rem !important;
+        margin-inline-start: 0.25rem !important;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px !important;
+    }
+
+    [data-component="ThemeSwitch"][data-selected="true"] .switch__thumb,
+    [data-component="ThemeSwitch"][aria-checked="true"] .switch__thumb {
+        margin-inline-start: calc(100% - 1.75rem - 0.25rem) !important;
+    }
+
+    [data-component="ThemeSwitch"] .switch__thumb [data-slot="icon"] {
+        display: block;
+        width: 1rem;
+        height: 1rem;
+        flex: none;
+    }
+
+    [data-component="ScrollViewport"] {
+        overscroll-behavior: contain;
+        scrollbar-width: none;
+    }
+
+    [data-component="ScrollViewport"]::-webkit-scrollbar {
+        display: none;
+    }
+
+    [data-component="CollapsibleRail"] {
+        --starci-core-rail-gap: 1.5rem;
+        display: none;
+        color: var(--foreground);
+    }
+
+    [data-component="CollapsibleRailControl"] {
+        cursor: pointer;
+        border: 0;
+        border-radius: 9999px;
+        background: transparent;
+        color: var(--foreground);
+    }
+
+    [data-component="CollapsibleRailControl"]:hover {
+        background: var(--default);
+    }
+
+    [data-component="CollapsibleRailControl"]:focus-visible {
+        outline: 2px solid var(--focus);
+        outline-offset: 2px;
+    }
+
+    [data-press-label="true"] {
+        text-decoration-color: var(--separator-tertiary);
+        text-decoration-thickness: 1.5px;
+    }
+
+    [data-component="PressableSurface"]:has([data-component="TextLink"]:hover) [data-press-label="true"] {
+        text-decoration-line: none;
+    }
+
+    @media (min-width: 768px) {
+        [data-component="CollapsibleRail"] {
+            display: flex;
+        }
+    }
+}
