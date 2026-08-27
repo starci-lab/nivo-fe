@@ -18,6 +18,7 @@
  */
 
 import type { CoreLayoutClassName } from "@starci/grammar/core"
+import type { CompositeComponent, ContractComponent, LeafComponent } from "./props"
 
 /**
  * The closed set of classes a node may lay its children out with.
@@ -119,19 +120,19 @@ type ChildProps<S> = S extends { readonly props?: infer P }
 
 type ContractChild<S> = S extends { readonly contract: infer K }
     ? (K extends ReadonlyArray<infer A> ? A : K) extends infer C extends ContractKey
-        ? import("./props").ContractComponent<C>
+        ? ContractComponent<C>
         : never
     : never
 
 type LeafChild<S> = S extends { readonly leaf: infer N }
     ? (N extends ReadonlyArray<infer A> ? A : N) extends infer L extends string
-        ? import("./props").LeafComponent<L, ChildProps<S>>
+        ? LeafComponent<L, ChildProps<S>>
         : never
     : never
 
 type CompositeChild<S> = S extends { readonly composite: infer N }
     ? (N extends ReadonlyArray<infer A> ? A : N) extends infer C extends string
-        ? import("./props").CompositeComponent<C, ChildProps<S>>
+        ? CompositeComponent<C, ChildProps<S>>
         : never
     : never
 

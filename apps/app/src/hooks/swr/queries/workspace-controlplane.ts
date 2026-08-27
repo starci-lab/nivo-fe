@@ -19,19 +19,19 @@ export type SupportQueryIdentity = {
 
 /** Cache identity for one module's external customer conversations. */
 export const supportConversationsQueryKey = (identity: SupportQueryIdentity) => [
-    "support", "conversations", identity.workspaceId, identity.installationId,
+    "support", "conversations", identity.hostname, identity.workspaceId, identity.installationId,
 ] as const
 /** Cache identity for one module's durable support ticket queue. */
 export const supportTicketsQueryKey = (identity: SupportQueryIdentity) => [
-    "support", "tickets", identity.workspaceId, identity.installationId,
+    "support", "tickets", identity.hostname, identity.workspaceId, identity.installationId,
 ] as const
 /** Cache identity for important facts extracted by one support module. */
 export const supportImportantFactsQueryKey = (identity: SupportQueryIdentity) => [
-    "support", "facts", identity.workspaceId, identity.installationId,
+    "support", "facts", identity.hostname, identity.workspaceId, identity.installationId,
 ] as const
 /** Cache identity for one selected external customer conversation. */
-export const supportMessagesQueryKey = (workspaceId: string, conversationId: string) => [
-    "support", "messages", workspaceId, conversationId,
+export const supportMessagesQueryKey = (identity: SupportQueryIdentity, conversationId: string) => [
+    "support", "messages", identity.hostname, identity.workspaceId, identity.installationId, conversationId,
 ] as const
 
 const useSupportAccessToken = (): string | null => {
@@ -92,17 +92,15 @@ export const useQuerySupportImportantFactsSwr = (identity: SupportQueryIdentity)
 
 /** Poll only the selected external conversation; selection remains route-block interaction state. */
 export const useQuerySupportCustomerMessagesSwr = (
-    hostname: string | null,
-    workspaceId: string,
+    identity: SupportQueryIdentity,
     conversationId: string | null,
-    enabled: boolean,
 ) => {
     const accessToken = useSupportAccessToken()
     return useNivoQuery(
-        enabled && hostname !== null && conversationId !== null && accessToken !== null
-            ? supportMessagesQueryKey(workspaceId, conversationId)
+        identity.enabled && identity.hostname !== null && conversationId !== null && accessToken !== null
+            ? supportMessagesQueryKey(identity, conversationId)
             : null,
-        () => supportCustomerMessages(hostname ?? "", workspaceId, accessToken ?? "", conversationId ?? ""),
-        { refreshInterval: enabled ? 3_000 : 0 },
+        () => supportCustomerMessages(identity.hostname ?? "", identity.workspaceId, accessToken ?? "", conversationId ?? ""),
+        { refreshInterval: identity.enabled ? 3_000 : 0 },
     )
 }

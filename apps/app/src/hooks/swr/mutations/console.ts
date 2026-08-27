@@ -196,6 +196,13 @@ export const useMutateRunAgentosModuleTestSwr = (installationId: string) => useN
 export const useMutateConfigureAgentWorkspaceChannelSwr = (workspaceId: string) => useNivoMutation(
     ["agentos", "workspace-channel", workspaceId],
     (input: ConfigureAgentWorkspaceChannelInput) => configureAgentWorkspaceChannel(input),
+    {
+        // Channel configuration is rendered by the workspace control center as well as by
+        // module settings. Keep both surfaces coherent for every consumer of this mutation;
+        // callers may still apply an immediate response when they need optimistic UX.
+        invalidates: [agentWorkspaceControlCenterQueryKey(workspaceId)],
+        shouldInvalidate: accepted,
+    },
 )
 
 /** Execute the three-step capability upload without exposing transport sequencing to a component. */

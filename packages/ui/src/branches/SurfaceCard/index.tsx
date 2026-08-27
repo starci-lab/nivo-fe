@@ -2,7 +2,7 @@ import { Tree } from "../Tree"
 import { Text } from "../../leaves/Text"
 import { SeeMoreLink } from "../../leaves/SeeMoreLink"
 import { Button } from "../../leaves/Button"
-import { CONTRACTS } from "../../contracts"
+import type { CONTRACTS } from "../../contracts"
 import { NivoCoreSurfaceCard as CoreSurfaceCard, type NivoCorePresentationState as PresentationState } from "../../contracts/grammar"
 import {
     type ContractBranchProps,

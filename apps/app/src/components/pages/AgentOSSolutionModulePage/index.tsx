@@ -221,10 +221,8 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
         ? selectedSupportConversationId
         : supportConversations[0]?.id ?? null
     const messagesQuery = useQuerySupportCustomerMessagesSwr(
-        controllerHostname,
-        workspaceId,
+        supportIdentity,
         effectiveSupportConversationId,
-        supportEnabled,
     )
     const supportMessages = messagesQuery.data?.ok === true ? messagesQuery.data.data.nodes : []
     const supportTicketsState = ticketsQuery.data?.ok === true ? ticketsQuery.data.data.nodes : []

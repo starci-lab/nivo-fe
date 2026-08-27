@@ -34,7 +34,7 @@ const supportInvalidations = (identity: SupportMutationIdentity) => [
     supportImportantFactsQueryKey(identity),
     ...(identity.conversationId === null
         ? []
-        : [supportMessagesQueryKey(identity.workspaceId, identity.conversationId)]),
+        : [supportMessagesQueryKey(identity, identity.conversationId)]),
 ]
 
 /** Approve one AI reply while keeping credentials and support cache ownership out of the page. */
