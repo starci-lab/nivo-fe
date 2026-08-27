@@ -1,5 +1,5 @@
-export { nivoViewerQueryKeyFor, useNivoQuery, viewerCacheKeyFor } from "./use-nivo-query"
-export type { NivoQueryKey, NivoViewerQueryKey } from "./use-nivo-query"
+export { nivoQueryData, nivoViewerQueryKeyFor, useNivoQuery, viewerCacheKeyFor } from "./use-nivo-query"
+export type { NivoQueryAnswer, NivoQueryKey, NivoViewerQueryKey } from "./use-nivo-query"
 export { useNivoMutation } from "./use-nivo-mutation"
 export type { NivoMutationKey, NivoViewerMutationKey } from "./use-nivo-mutation"
 export * from "./queries/console"

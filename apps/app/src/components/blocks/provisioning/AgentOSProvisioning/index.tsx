@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { useFormatter, useTranslations } from "next-intl"
 import {
+    nivoQueryData,
     useQueryCatalogItemsSwr,
     useQueryMyAgentosAiKnowledgeReadinessSwr,
     useQueryMyAgentWorkspacesSwr,
@@ -147,9 +148,7 @@ export const AgentOSProvisioning = ({ context }: AgentOSProvisioningProps) => {
     const aiReadinessQuery = useQueryMyAgentosAiKnowledgeReadinessSwr(readyWorkspaceId, aiRetryPending)
     const retryReadiness = useMutateRunAgentosAiReadinessTestSwr(readyWorkspaceId)
     const refreshAiReadiness = aiReadinessQuery.mutate
-    const aiReadiness = aiReadinessQuery.data === undefined
-        ? undefined
-        : aiReadinessQuery.data.ok ? aiReadinessQuery.data.data : null
+    const aiReadiness = nivoQueryData(aiReadinessQuery.data)
 
     const reconcile = useCallback(async (orderId: string) => {
         const [orders, invoices, workspaces] = await Promise.all([

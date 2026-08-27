@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
-import { useQueryMyAgentosCustomModulesSwr } from "@/hooks/swr"
+import { nivoQueryData, useQueryMyAgentosCustomModulesSwr } from "@/hooks/swr"
 import type { AgentosCustomModule } from "@/modules/api/console"
 import { AgentOSCustomModuleCollectionBase } from "./component"
 
@@ -19,7 +19,7 @@ export const AgentOSCustomModuleCollection = ({ workspaceId }: AgentOSCustomModu
     const t = useTranslations("console.agentos.modules")
     const router = useRouter()
     const query = useQueryMyAgentosCustomModulesSwr(workspaceId)
-    const modules = query.data === undefined ? undefined : query.data.ok ? query.data.data : null
+    const modules = nivoQueryData(query.data)
     const open = (module: AgentosCustomModule) => {
         const route = module.installationId === null
             ? `/agentos/workspaces/${workspaceId}/modules/studio/${module.id}`

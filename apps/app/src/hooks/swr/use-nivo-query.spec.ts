@@ -4,7 +4,7 @@ import { createElement, type PropsWithChildren } from "react"
 import { renderHook, waitFor } from "@testing-library/react"
 import { SWRConfig } from "swr"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { nivoViewerQueryKeyFor, useNivoQuery, viewerCacheKeyFor } from "./use-nivo-query"
+import { nivoQueryData, nivoViewerQueryKeyFor, useNivoQuery, viewerCacheKeyFor } from "./use-nivo-query"
 
 const mocks = vi.hoisted(() => ({
     state: { status: "anonymous" } as
@@ -44,6 +44,18 @@ describe("viewerCacheKeyFor", () => {
         const second = nivoViewerQueryKeyFor(secondToken, ["wallet"])
         expect(first).not.toEqual(second)
         expect(JSON.stringify(first)).not.toContain(firstToken)
+    })
+
+    it("fingerprints malformed tokens containing full Unicode code points", () => {
+        expect(viewerCacheKeyFor("not-a-jwt-🤖")).toMatch(/^opaque-/u)
+    })
+})
+
+describe("nivoQueryData", () => {
+    it("preserves loading, accepted data and refusal as distinct states", () => {
+        expect(nivoQueryData(undefined)).toBeUndefined()
+        expect(nivoQueryData({ ok: true, data: { id: "one" } })).toEqual({ id: "one" })
+        expect(nivoQueryData({ ok: false })).toBeNull()
     })
 })
 

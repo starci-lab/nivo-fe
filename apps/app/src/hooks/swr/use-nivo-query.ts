@@ -9,13 +9,22 @@ export type NivoQueryKey = readonly [name: string, ...parts: ReadonlyArray<strin
 /** The cache key used by every signed-in Nivo query. */
 export type NivoViewerQueryKey = readonly ["NIVO_QUERY", viewerKey: string, ...queryKey: NivoQueryKey]
 
+/** Small transport shape accepted by the shared three-state query-data settlement helper. */
+export type NivoQueryAnswer<T> = { readonly ok: true; readonly data: T } | { readonly ok: false }
+
 const tokenHash = (value: string): string => {
     let hash = 2166136261
-    for (let index = 0; index < value.length; index += 1) {
-        hash ^= value.charCodeAt(index)
+    for (const character of value) {
+        hash ^= character.codePointAt(0) ?? 0
         hash = Math.imul(hash, 16777619)
     }
     return `opaque-${(hash >>> 0).toString(36)}`
+}
+
+/** Preserve loading, successful data and an explicit refused result as three distinct states. */
+export const nivoQueryData = <T,>(answer: NivoQueryAnswer<T> | undefined): T | null | undefined => {
+    if (answer === undefined) return undefined
+    return answer.ok ? answer.data : null
 }
 
 const decodeJwtSubject = (accessToken: string): string | null => {

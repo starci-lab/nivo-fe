@@ -28,33 +28,38 @@ type AcademyIntegrationAnswer =
     | { readonly ok: true; readonly authorizationUrl?: string; readonly signingSecret?: string }
     | { readonly ok: false }
 
+const executeAcademyIntegrationCommand = async (
+    siteId: string,
+    command: AcademyIntegrationCommand,
+): Promise<AcademyIntegrationAnswer> => {
+    if (command.kind === "domain") {
+        const answer = await setAcademyCustomDomain({ siteId, domain: command.domain })
+        return answer.ok ? { ok: true } : { ok: false }
+    }
+    if (command.kind === "google") {
+        const answer = await saveAcademyGoogleOAuth({ siteId, clientId: command.clientId, clientSecret: command.clientSecret })
+        return answer.ok ? { ok: true } : { ok: false }
+    }
+    if (command.kind === "credential") {
+        const answer = await saveAcademyCredential({ siteId, key: command.key, value: command.value })
+        return answer.ok ? { ok: true } : { ok: false }
+    }
+    if (command.kind === "zalo") {
+        const answer = await beginAcademyZaloAuthorization(siteId)
+        return answer.ok ? { ok: true, authorizationUrl: answer.data.authorizationUrl } : { ok: false }
+    }
+    if (command.kind === "analytics") {
+        const answer = await saveAcademyAnalytics({ siteId, provider: command.provider, identifier: command.identifier, consentMode: command.consentMode })
+        return answer.ok ? { ok: true } : { ok: false }
+    }
+    const answer = await createAcademyWebhook({ siteId, endpoint: command.endpoint, events: [...command.events] })
+    return answer.ok ? { ok: true, signingSecret: answer.data.signingSecret } : { ok: false }
+}
+
 /** Own every Academy integration transport while preserving the provider-specific UI command. */
 export const useMutateAcademyIntegrationSwr = (siteId: string) => useNivoMutation<AcademyIntegrationAnswer, AcademyIntegrationCommand>(
     ["academy", "integration", siteId],
-    async (command) => {
-        if (command.kind === "domain") {
-            const answer = await setAcademyCustomDomain({ siteId, domain: command.domain })
-            return answer.ok ? { ok: true } : { ok: false }
-        }
-        if (command.kind === "google") {
-            const answer = await saveAcademyGoogleOAuth({ siteId, clientId: command.clientId, clientSecret: command.clientSecret })
-            return answer.ok ? { ok: true } : { ok: false }
-        }
-        if (command.kind === "credential") {
-            const answer = await saveAcademyCredential({ siteId, key: command.key, value: command.value })
-            return answer.ok ? { ok: true } : { ok: false }
-        }
-        if (command.kind === "zalo") {
-            const answer = await beginAcademyZaloAuthorization(siteId)
-            return answer.ok ? { ok: true, authorizationUrl: answer.data.authorizationUrl } : { ok: false }
-        }
-        if (command.kind === "analytics") {
-            const answer = await saveAcademyAnalytics({ siteId, provider: command.provider, identifier: command.identifier, consentMode: command.consentMode })
-            return answer.ok ? { ok: true } : { ok: false }
-        }
-        const answer = await createAcademyWebhook({ siteId, endpoint: command.endpoint, events: [...command.events] })
-        return answer.ok ? { ok: true, signingSecret: answer.data.signingSecret } : { ok: false }
-    },
+    (command) => executeAcademyIntegrationCommand(siteId, command),
     {
         invalidates: [["academy", "integrations", siteId]],
         shouldInvalidate: (answer) => answer.ok,

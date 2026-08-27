@@ -17,9 +17,20 @@ export type SupportCustomerChatBlockProps = {
     readonly onReconcile: (outboxId: string, delivered: boolean) => void
 }
 
-const senderLabel = (message: SupportCustomerMessage): string => message.direction === "inbound"
-    ? "Customer"
-    : message.senderType === "operator" ? "Operator" : "Nivo AI"
+const senderLabel = (message: SupportCustomerMessage): string => {
+    if (message.direction === "inbound") return "Customer"
+    return message.senderType === "operator" ? "Operator" : "Nivo AI"
+}
+
+const takeoverLabel = (conversation: SupportCustomerConversation): string => (
+    conversation.takeoverState === "operator" ? "Return to Nivo AI" : "Take over conversation"
+)
+
+const transcriptNotice = (refused: boolean, pending: boolean, messageCount: number): string => {
+    if (refused) return "The workspace controller refused or could not return this conversation."
+    if (messageCount > 0) return "Customer history is workspace-local and separate from internal Execute chat."
+    return pending ? "Loading customer history…" : "No messages in this conversation."
+}
 
 const contextLabel = (message: SupportCustomerMessage): string => [
     message.deliveryState,
@@ -75,14 +86,12 @@ export const SupportCustomerChatBlock = ({ conversation, messages, pending, refu
             })),
             action: conversation === null ? undefined : defineLeafComponent("button", {}, () => (
                 <Button
-                    props={{ label: conversation.takeoverState === "operator" ? "Return to Nivo AI" : "Take over conversation", variant: "secondary", isPending: pending }}
+                    props={{ label: takeoverLabel(conversation), variant: "secondary", isPending: pending }}
                     on={{ press: () => onTakeover(conversation.id, conversation.takeoverState !== "operator") }}
                 />
             )),
             notice: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{
-                content: refused
-                    ? "The workspace controller refused or could not return this conversation."
-                    : messages.length === 0 ? pending ? "Loading customer history…" : "No messages in this conversation." : "Customer history is workspace-local and separate from internal Execute chat.",
+                content: transcriptNotice(refused, pending, messages.length),
                 size: "sm", tone: "muted", live: refused ? "assertive" : undefined,
             }} />),
         })}

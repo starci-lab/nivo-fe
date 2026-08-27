@@ -14,17 +14,19 @@ export type SupportCustomerConversationRailBlockProps = {
     readonly onSelect: (conversationId: string) => void
 }
 
+const conversationStatus = (conversation: SupportCustomerConversation): string => {
+    if (conversation.unreadCount > 0) return `${conversation.unreadCount} unread`
+    if (conversation.takeoverState === "operator") return "Human takeover"
+    return new Date(conversation.lastMessageAt).toLocaleString()
+}
+
 const groupsFor = (conversations: ReadonlyArray<SupportCustomerConversation>): ReadonlyArray<SelectionListGroup> => [{
     id: "support-customers",
     items: conversations.map((conversation) => ({
         id: conversation.id,
         label: conversation.customerName ?? conversation.displayHandle,
         icon: "agentos" as const,
-        status: conversation.unreadCount > 0
-            ? `${conversation.unreadCount} unread`
-            : conversation.takeoverState === "operator"
-                ? "Human takeover"
-                : new Date(conversation.lastMessageAt).toLocaleString(),
+        status: conversationStatus(conversation),
     })),
 }]
 

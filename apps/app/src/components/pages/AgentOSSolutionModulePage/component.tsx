@@ -698,9 +698,14 @@ const diagnosticFacts = (entries: ReadonlyArray<readonly [string, AgentosRuntime
 
 type DiagnosticsHealthCardProps = Pick<DiagnosticsSurfaceProps, "diagnostics" | "selectedSignal">
 
+const diagnosticHealthFact = (selectedSignal: DiagnosticsSurfaceProps["selectedSignal"]): string => {
+    if (selectedSignal === "all") return "All systems"
+    return selectedSignal === "channel" ? "Channel ingress" : "AI controller"
+}
+
 const DiagnosticsHealthCard = ({ diagnostics, selectedSignal }: DiagnosticsHealthCardProps) => (
     <SurfaceCard
-        props={{ label: "Runtime health", fact: selectedSignal === "all" ? "All systems" : selectedSignal === "channel" ? "Channel ingress" : "AI controller" }}
+        props={{ label: "Runtime health", fact: diagnosticHealthFact(selectedSignal) }}
         contract="agentos-diagnostics-body"
         render={defineContractComponent("agentos-diagnostics-body", {
             facts: defineContractComponent("labelled-fact-stack", { fact: diagnosticFacts(diagnosticEntries(diagnostics, selectedSignal)) }),

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
-import { useQueryMyAgentosCustomModuleStudioSwr } from "@/hooks/swr"
+import { nivoQueryData, useQueryMyAgentosCustomModuleStudioSwr } from "@/hooks/swr"
 import { AgentOSModuleStudioPageBase, AgentOSModuleStudioProjectionProvider } from "./component"
 
 type AgentOSModuleStudioPageProps = { readonly workspaceId: string, readonly moduleId: string }
@@ -19,7 +19,7 @@ export const AgentOSModuleStudioPage = ({ workspaceId, moduleId }: AgentOSModule
     const t = useTranslations("console.agentos.modules.studioPage")
     const router = useRouter()
     const query = useQueryMyAgentosCustomModuleStudioSwr(workspaceId, moduleId)
-    const studio = query.data === undefined ? undefined : query.data.ok ? query.data.data : null
+    const studio = nivoQueryData(query.data)
     const refresh = async () => { await query.mutate() }
     return <AgentOSModuleStudioProjectionProvider
         value={{ studio, refresh }}

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useTranslations } from "next-intl"
 import {
+    nivoQueryData,
     useMutateCreateAcademyStudentSwr,
     useMutateGrantAcademyCourseAccessSwr,
     useMutateRevokeAcademyCourseAccessSwr,
@@ -59,18 +60,15 @@ const detailStateOf = (detailLoading: boolean, detail: AcademyStudentDetail | nu
 export const AcademyStudentCrm = ({ siteId }: AcademyStudentCrmProps) => {
     const t = useTranslations("console.academyControlCenter.students")
     const studentsQuery = useQueryMyAcademyStudentsSwr(siteId)
-    const students = studentsQuery.data === undefined
-        ? undefined
-        : studentsQuery.data.ok ? studentsQuery.data.data.items : null
+    const studentPage = nivoQueryData(studentsQuery.data)
+    const students = studentPage === null || studentPage === undefined ? studentPage : studentPage.items
     const [selectedMemberId, setSelectedMemberId] = useState<string>()
     const detailQuery = useQueryMyAcademyStudentDetailSwr(siteId, selectedMemberId)
     const createMutation = useMutateCreateAcademyStudentSwr(siteId)
     const statusMutation = useMutateSetAcademyStudentStatusSwr(siteId, selectedMemberId)
     const grantMutation = useMutateGrantAcademyCourseAccessSwr(siteId, selectedMemberId)
     const revokeMutation = useMutateRevokeAcademyCourseAccessSwr(siteId, selectedMemberId)
-    const detail = selectedMemberId === undefined || detailQuery.data === undefined
-        ? undefined
-        : detailQuery.data.ok ? detailQuery.data.data : null
+    const detail = selectedMemberId === undefined ? undefined : nivoQueryData(detailQuery.data)
     const detailLoading = selectedMemberId !== undefined && detailQuery.isLoading
     const [pendingAction, setPendingAction] = useState<string>()
     const [actionMessage, setActionMessage] = useState<string>()

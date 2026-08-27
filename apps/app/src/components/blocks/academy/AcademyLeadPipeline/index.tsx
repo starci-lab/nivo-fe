@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { useMutateDraftLeadReplySwr, useMutateUpdateExpertSiteLeadSwr, useQueryMyExpertSiteLeadsSwr } from "@/hooks/swr"
+import { nivoQueryData, useMutateDraftLeadReplySwr, useMutateUpdateExpertSiteLeadSwr, useQueryMyExpertSiteLeadsSwr } from "@/hooks/swr"
 import type { ExpertSiteLead } from "@/modules/api/console"
 import { AcademyLeadPipelineBase } from "./component"
 
@@ -35,7 +35,7 @@ export const AcademyLeadPipeline = ({ siteId }: AcademyLeadPipelineProps) => {
     const query = useQueryMyExpertSiteLeadsSwr(siteId)
     const draftMutation = useMutateDraftLeadReplySwr(siteId)
     const updateMutation = useMutateUpdateExpertSiteLeadSwr(siteId)
-    const leads = query.data === undefined ? undefined : query.data.ok ? query.data.data : null
+    const leads = nivoQueryData(query.data)
     const [selectedId, setSelectedId] = useState<string>()
     const [draft, setDraft] = useState<string>()
     const [pendingAction, setPendingAction] = useState<"advance" | "draft">()

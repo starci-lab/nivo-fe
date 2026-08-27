@@ -123,7 +123,7 @@ const contextDraftFor = (
     setup: AgentosModuleRuntime["setupSession"],
     testSurface: ReturnType<typeof exactTestSurfaceFor>,
 ): ContextDraft | null => {
-    if (setup === null || setup.setupRevision === null || setup.setupStatus === null) return null
+    if (setup?.setupRevision === null || setup?.setupRevision === undefined || setup.setupStatus === null) return null
     const context = runtime.contextVersions.find((candidate) => candidate.sourceSetupSessionId === setup.id) ?? null
     const snapshot = context?.snapshot ?? setup.draftSnapshot
     const summary = snapshot === null
@@ -149,7 +149,7 @@ const activeVersionFor = (runtime: AgentosModuleRuntime): number | null => runti
 )?.version ?? null
 
 const testContextLabelFor = (draft: ContextDraft | null): string => {
-    if (draft === null || draft.digest === null) return "Complete enough Setup chat to create a testable draft"
+    if (draft?.digest === null || draft?.digest === undefined) return "Complete enough Setup chat to create a testable draft"
     const version = draft.version === null ? "draft" : `context v${draft.version}`
     return `Setup r${draft.revision} · ${version} · digest ${draft.digest.slice(0, 8)}`
 }
@@ -163,6 +163,20 @@ const primarySessionFor = (runtime: AgentosModuleRuntime): string | null => {
     return primaryId !== null && runtime.executeSessions.some((session) => session.id === primaryId)
         ? primaryId
         : runtime.executeSessions[0]?.id ?? null
+}
+
+const channelLabelFor = (channelAccountRef: string | null): string => {
+    if (channelAccountRef === null) return "Channel not connected"
+    return channelAccountRef.toLowerCase().includes("telegram") ? "Telegram connected" : "Channel connected"
+}
+
+const selectedSessionTitleFor = (
+    selectedSession: AgentosModuleRuntime["executeSessions"][number] | null,
+    runtime: AgentosModuleRuntime,
+): string => {
+    if (selectedSession === null) return "No Execute session"
+    if (selectedSession.id === runtime.installation.primaryOpsSessionId) return "Primary Operations"
+    return executeSessionTitleFor(selectedSession.title, runtime.executeSessions.indexOf(selectedSession))
 }
 
 /** Connect one stable module shell to its persistent backend runtime and separate task URLs. */
@@ -592,9 +606,7 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
         moduleKind: runtime.installation.kindKey,
         lifecycleLabel: runtime.installation.liveEnabled ? "live" : runtime.installation.status,
         contextVersion: activeVersion === null ? "not applied" : `v${activeVersion}`,
-        channelLabel: channelAccountRef === null
-            ? "Channel not connected"
-            : channelAccountRef.toLowerCase().includes("telegram") ? "Telegram connected" : "Channel connected",
+        channelLabel: channelLabelFor(channelAccountRef),
         controllerLabel: runtime.diagnostics.controllerHealthy === false || runtime.diagnostics.controllerStatus === "degraded"
             ? "Controller needs attention"
             : "Controller healthy",
@@ -603,9 +615,10 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
         onNavigate: (nextView) => router.push(`${moduleRoot}/${nextView}`),
     }
 
-    let screen: AgentOSSolutionModuleScreen
+    const screen = ((): AgentOSSolutionModuleScreen => {
+        let resolvedScreen: AgentOSSolutionModuleScreen
     if (view === "setup") {
-        screen = {
+        resolvedScreen = {
             view: "setup",
             contentProps: {
                 messages: setupMessages,
@@ -626,7 +639,7 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
             },
         }
     } else if (view === "operate") {
-        screen = {
+        resolvedScreen = {
             view: "operate",
             contentProps: {
                 installationId: runtime.installation.id,
@@ -635,11 +648,7 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
                 workbenchVersion: runtime.installation.workbenchVersion,
                 sessions,
                 selectedSessionId,
-                selectedSessionTitle: selectedSession === null
-                    ? "No Execute session"
-                    : selectedSession.id === runtime.installation.primaryOpsSessionId
-                        ? "Primary Operations"
-                        : executeSessionTitleFor(selectedSession.title, runtime.executeSessions.indexOf(selectedSession)),
+                selectedSessionTitle: selectedSessionTitleFor(selectedSession, runtime),
                 messages: executeMessages,
                 tasks: runtime.tasks,
                 events: runtime.operationEvents,
@@ -666,9 +675,9 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
             },
         }
     } else if (view === "test" && testContract === undefined) {
-        screen = { view: "test-unavailable" }
+        resolvedScreen = { view: "test-unavailable" }
     } else if (view === "test" && testContract !== undefined) {
-        screen = {
+        resolvedScreen = {
             view: "test",
             contentProps: {
                 contract: testContract,
@@ -688,7 +697,7 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
             },
         }
     } else if (view === "settings") {
-        screen = {
+        resolvedScreen = {
             view: "settings",
             contentProps: {
                 currentDisplayName: displayName,
@@ -710,7 +719,7 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
             },
         }
     } else {
-        screen = {
+        resolvedScreen = {
             view: "diagnostics",
             contentProps: {
                 installationId: runtime.installation.id,
@@ -725,6 +734,8 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
             },
         }
     }
+        return resolvedScreen
+    })()
 
     return <AgentOSSolutionModulePageBase shell={shell} screen={screen} />
 }

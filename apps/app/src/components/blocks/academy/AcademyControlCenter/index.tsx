@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
-import { useQueryMyExpertSitesSwr } from "@/hooks/swr"
+import { nivoQueryData, useQueryMyExpertSitesSwr } from "@/hooks/swr"
 import { AcademyControlCenterBase, type AcademyControlCenterMode } from "./component"
 
 /** Exact Academy identity supplied by the resource route. */
@@ -17,11 +17,10 @@ export const AcademyControlCenter = ({ siteId, mode, onSelectMode }: AcademyCont
     const t = useTranslations("console.academyControlCenter")
     const [mounted, setMounted] = useState(false)
     const answer = useQueryMyExpertSitesSwr()
-    const site = answer.data === undefined
-        ? undefined
-        : answer.data.ok
-            ? answer.data.data.find((item) => item.id === siteId) ?? null
-            : null
+    const sites = nivoQueryData(answer.data)
+    const site = sites === null || sites === undefined
+        ? sites
+        : sites.find((item) => item.id === siteId) ?? null
 
     useEffect(() => { setMounted(true) }, [])
 

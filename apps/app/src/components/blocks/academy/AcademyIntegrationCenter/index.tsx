@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
-import { useMutateAcademyIntegrationSwr, useQueryMyAcademyIntegrationsSwr } from "@/hooks/swr"
+import { nivoQueryData, useMutateAcademyIntegrationSwr, useQueryMyAcademyIntegrationsSwr } from "@/hooks/swr"
 import { AcademyIntegrationCenterBase, type AcademyIntegrationCard, type AcademyIntegrationFormField } from "./component"
 
 /** Owner-scoped identity consumed by Integration Center. */
@@ -28,7 +28,7 @@ export const AcademyIntegrationCenter = ({ siteId }: AcademyIntegrationCenterPro
     const t = useTranslations("console.academyControlCenter.integrations")
     const query = useQueryMyAcademyIntegrationsSwr(siteId)
     const integrationMutation = useMutateAcademyIntegrationSwr(siteId)
-    const answer = query.data === undefined ? undefined : query.data.ok ? query.data.data : null
+    const answer = nivoQueryData(query.data)
     const [selectedId, setSelectedId] = useState<ProviderId>()
     const [values, setValues] = useState<Readonly<Record<string, string>>>({})
     const [pendingId, setPendingId] = useState<ProviderId>()

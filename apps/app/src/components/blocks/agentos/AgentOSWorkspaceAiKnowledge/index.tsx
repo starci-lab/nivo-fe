@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import {
+    nivoQueryData,
     useMutateReindexAgentWorkspaceKnowledgeSwr,
     useMutateRunAgentosAiReadinessTestSwr,
     useQueryMyAgentosAiKnowledgeReadinessSwr,
@@ -61,7 +62,7 @@ export const AgentOSWorkspaceAiKnowledge = ({ workspaceId }: AgentOSWorkspaceAiK
         workspaceId,
         action?.kind === "testing" || action?.kind === "recovering",
     )
-    const readiness = query.data === undefined ? undefined : query.data.ok ? query.data.data : null
+    const readiness = nivoQueryData(query.data)
     const visibleAction = resolveAgentOSWorkspaceAiKnowledgeAction(action, readiness)
     useEffect(() => {
         if (visibleAction === action) return

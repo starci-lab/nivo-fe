@@ -71,15 +71,20 @@ const externallyReachableHostname = (hostname: string, workspaceId: string): str
     return WORKSPACE_ID.test(workspaceId) ? `agent-${workspaceId}.nivo.vn` : null
 }
 
+const endpointCandidate = (configured: string | undefined, hostname: string): string => {
+    if (configured !== undefined) return configured
+    if (/^https?:\/\//u.test(hostname)) return `${hostname.replace(/\/$/u, "")}/graphql`
+    const localHostname = hostname === "localhost" || hostname.startsWith("localhost:") || hostname.startsWith("127.")
+    const protocol = localHostname ? "http" : "https"
+    return `${protocol}://${hostname}/graphql`
+}
+
 const endpointFor = (hostname: string, workspaceId: string): string | null => {
     const configured = configuredEndpoint?.replaceAll("{hostname}", hostname).replaceAll("{workspaceId}", workspaceId)
     const reachableHostname = externallyReachableHostname(hostname, workspaceId)
     if (configured === undefined && reachableHostname === null) return null
     const selectedHostname = reachableHostname ?? hostname
-    const localHostname = selectedHostname === "localhost" || selectedHostname.startsWith("localhost:") || selectedHostname.startsWith("127.")
-    const candidate = configured ?? (/^https?:\/\//u.test(selectedHostname)
-        ? `${selectedHostname.replace(/\/$/u, "")}/graphql`
-        : `${localHostname ? "http" : "https"}://${selectedHostname}/graphql`)
+    const candidate = endpointCandidate(configured, selectedHostname)
     try {
         const url = new URL(candidate)
         if (url.protocol !== "https:" && !(url.protocol === "http:" && (url.hostname === "localhost" || url.hostname.startsWith("127.")))) return null

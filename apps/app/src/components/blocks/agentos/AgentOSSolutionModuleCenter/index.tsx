@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import {
+    nivoQueryData,
     useMutateInstallAgentosSolutionModuleSwr,
     useQueryMyAgentosModuleInstallationsSwr,
     useQueryMyAgentosSolutionModulesSwr,
@@ -34,10 +35,8 @@ export const AgentOSSolutionModuleCenter = ({ workspaceId }: AgentOSSolutionModu
     const { trigger: installModule } = useMutateInstallAgentosSolutionModuleSwr(workspaceId)
     const refreshCatalog = catalogQuery.mutate
     const refreshInstallations = installationsQuery.mutate
-    const catalog = catalogQuery.data === undefined ? undefined : catalogQuery.data.ok ? catalogQuery.data.data : null
-    const installations = installationsQuery.data === undefined
-        ? undefined
-        : installationsQuery.data.ok ? installationsQuery.data.data : null
+    const catalog = nivoQueryData(catalogQuery.data)
+    const installations = nivoQueryData(installationsQuery.data)
     const [pendingKey, setPendingKey] = useState<string>()
     const [trackedInstallationId, setTrackedInstallationId] = useState<string>()
     const [outcome, setOutcome] = useState<string>()

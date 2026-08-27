@@ -23,6 +23,20 @@ export type NivoMutationOptions<TAnswer, TInput> = {
     readonly shouldInvalidate?: (answer: TAnswer) => boolean
 }
 
+const invalidateQueries = async <TAnswer, TInput>(
+    accessToken: string | null,
+    input: TInput,
+    answer: TAnswer,
+    options: NivoMutationOptions<TAnswer, TInput> | undefined,
+    mutateCache: ReturnType<typeof useSWRConfig>["mutate"],
+): Promise<void> => {
+    if (accessToken === null || options?.shouldInvalidate?.(answer) === false) return
+    const invalidates = typeof options?.invalidates === "function"
+        ? options.invalidates(input, answer)
+        : options?.invalidates ?? []
+    await Promise.all(invalidates.map((queryKey) => mutateCache(nivoViewerQueryKeyFor(accessToken, queryKey))))
+}
+
 /** Own one signed-in command and expose its press-local lifecycle without mixing it into query state. */
 export const useNivoMutation = <TAnswer, TInput>(
     mutationKey: NivoMutationKey | null,
@@ -41,11 +55,7 @@ export const useNivoMutation = <TAnswer, TInput>(
         key,
         async (_key: NivoViewerMutationKey, { arg }: NivoMutationTrigger<TInput>) => {
             const answer = await mutation(arg)
-            if (accessToken === null || options?.shouldInvalidate?.(answer) === false) return answer
-            const invalidates = typeof options?.invalidates === "function"
-                ? options.invalidates(arg, answer)
-                : options?.invalidates ?? []
-            await Promise.all(invalidates.map((queryKey) => mutateCache(nivoViewerQueryKeyFor(accessToken, queryKey))))
+            await invalidateQueries(accessToken, arg, answer, options, mutateCache)
             return answer
         },
     )
