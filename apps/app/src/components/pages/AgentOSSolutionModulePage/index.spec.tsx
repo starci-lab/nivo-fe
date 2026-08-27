@@ -58,8 +58,14 @@ const testSurface = {
     assertions: [],
 }
 
+type MockQueryAnswer = { readonly ok: true; readonly data: unknown } | { readonly ok: false } | undefined
+
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("@/hooks/swr", () => ({
+    nivoQueryData: (answer: MockQueryAnswer) => {
+        if (answer === undefined) return undefined
+        return answer.ok ? answer.data : null
+    },
     useQueryMyAgentosModuleRuntimeSwr: () => ({ data: { ok: true, data: runtime }, mutate: mocks.runtimeMutate }),
     useQueryMyAgentosModuleTestSurfaceSwr: () => ({ data: { ok: true, data: testSurface }, mutate: vi.fn() }),
     useQueryMyAgentWorkspaceControlCenterSwr: () => ({ data: { ok: true, data: { workspace: { id: "workspace-1" }, instance: { hostname: "controller.example.test" } } } }),

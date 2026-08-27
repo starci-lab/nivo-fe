@@ -28,32 +28,40 @@ type AcademyIntegrationAnswer =
     | { readonly ok: true; readonly authorizationUrl?: string; readonly signingSecret?: string }
     | { readonly ok: false }
 
+const integrationAnswer = (ok: boolean): AcademyIntegrationAnswer => ok ? { ok: true } : { ok: false }
+const authorizationAnswer = (answer: Awaited<ReturnType<typeof beginAcademyZaloAuthorization>>): AcademyIntegrationAnswer => (
+    answer.ok ? { ok: true, authorizationUrl: answer.data.authorizationUrl } : { ok: false }
+)
+const signingAnswer = (answer: Awaited<ReturnType<typeof createAcademyWebhook>>): AcademyIntegrationAnswer => (
+    answer.ok ? { ok: true, signingSecret: answer.data.signingSecret } : { ok: false }
+)
+
 const executeAcademyIntegrationCommand = async (
     siteId: string,
     command: AcademyIntegrationCommand,
 ): Promise<AcademyIntegrationAnswer> => {
     if (command.kind === "domain") {
         const answer = await setAcademyCustomDomain({ siteId, domain: command.domain })
-        return answer.ok ? { ok: true } : { ok: false }
+        return integrationAnswer(answer.ok)
     }
     if (command.kind === "google") {
         const answer = await saveAcademyGoogleOAuth({ siteId, clientId: command.clientId, clientSecret: command.clientSecret })
-        return answer.ok ? { ok: true } : { ok: false }
+        return integrationAnswer(answer.ok)
     }
     if (command.kind === "credential") {
         const answer = await saveAcademyCredential({ siteId, key: command.key, value: command.value })
-        return answer.ok ? { ok: true } : { ok: false }
+        return integrationAnswer(answer.ok)
     }
     if (command.kind === "zalo") {
         const answer = await beginAcademyZaloAuthorization(siteId)
-        return answer.ok ? { ok: true, authorizationUrl: answer.data.authorizationUrl } : { ok: false }
+        return authorizationAnswer(answer)
     }
     if (command.kind === "analytics") {
         const answer = await saveAcademyAnalytics({ siteId, provider: command.provider, identifier: command.identifier, consentMode: command.consentMode })
-        return answer.ok ? { ok: true } : { ok: false }
+        return integrationAnswer(answer.ok)
     }
     const answer = await createAcademyWebhook({ siteId, endpoint: command.endpoint, events: [...command.events] })
-    return answer.ok ? { ok: true, signingSecret: answer.data.signingSecret } : { ok: false }
+    return signingAnswer(answer)
 }
 
 /** Own every Academy integration transport while preserving the provider-specific UI command. */

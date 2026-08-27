@@ -8,6 +8,8 @@ import type { ExecuteSession } from "@/components/blocks/agentos/ExecuteSessionR
 import type { AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteShellBlock"
 import type { SetupMessage, SetupRevision } from "@/components/blocks/agentos/PrivateSetupChatBlock"
 import {
+    nivoQueryData,
+    type NivoQueryAnswer,
     useQueryMyAgentosModuleRuntimeSwr,
     useQueryMyAgentosModuleTestSurfaceSwr,
     useQueryMyAgentWorkspaceControlCenterSwr,
@@ -179,6 +181,44 @@ const selectedSessionTitleFor = (
     return executeSessionTitleFor(selectedSession.title, runtime.executeSessions.indexOf(selectedSession))
 }
 
+const runtimeForWorkspace = (
+    answer: NivoQueryAnswer<AgentosModuleRuntime> | undefined,
+    workspaceId: string,
+): AgentosModuleRuntime | null => {
+    const candidate = nivoQueryData(answer)
+    return candidate?.installation.agentWorkspaceId === workspaceId ? candidate : null
+}
+
+const controllerHostnameForWorkspace = (
+    answer: NivoQueryAnswer<{
+        readonly workspace: { readonly id: string }
+        readonly instance: { readonly hostname: string }
+    }> | undefined,
+    workspaceId: string,
+): string | null => {
+    const candidate = nivoQueryData(answer)
+    return candidate?.workspace.id === workspaceId ? candidate.instance.hostname : null
+}
+
+const queryNodes = <T,>(answer: NivoQueryAnswer<{ readonly nodes: ReadonlyArray<T> }> | undefined): ReadonlyArray<T> => (
+    nivoQueryData(answer)?.nodes ?? []
+)
+
+const selectedIdentity = <T extends { readonly id: string }>(
+    rows: ReadonlyArray<T>,
+    selectedId: string | null,
+): string | null => rows.some((row) => row.id === selectedId) ? selectedId : rows[0]?.id ?? null
+
+const moduleQueriesRefused = (
+    runtimeAnswer: NivoQueryAnswer<AgentosModuleRuntime> | undefined,
+    runtime: AgentosModuleRuntime | null,
+    testAnswer: NivoQueryAnswer<unknown> | undefined,
+): boolean => runtimeAnswer?.ok === false || runtimeAnswer !== undefined && runtime === null || testAnswer?.ok === false
+
+const anyQueryRefused = (answers: ReadonlyArray<NivoQueryAnswer<unknown> | undefined>): boolean => (
+    answers.some((answer) => answer?.ok === false)
+)
+
 /** Connect one stable module shell to its persistent backend runtime and separate task URLs. */
 export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = "setup" }: AgentOSSolutionModulePageProps) => {
     const router = useRouter()
@@ -203,24 +243,16 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
     const mutateRuntime = runtimeMutation.trigger
     const mutateTest = testMutation.trigger
     const mutateChannel = channelMutation.trigger
-    const runtime = runtimeQuery.data?.ok === true
-        && runtimeQuery.data.data.installation.agentWorkspaceId === workspaceId
-        ? runtimeQuery.data.data
-        : null
+    const runtime = runtimeForWorkspace(runtimeQuery.data, workspaceId)
     const testSurfaceQuery = useQueryMyAgentosModuleTestSurfaceSwr(
         installationId,
         view === "test" || view === "setup",
     )
-    const testSurface = testSurfaceQuery.data?.ok === true ? testSurfaceQuery.data.data : null
-    const refused = actionRefused
-        || runtimeQuery.data !== undefined && (runtimeQuery.data.ok === false || runtime === null)
-        || testSurfaceQuery.data?.ok === false
+    const testSurface = nivoQueryData(testSurfaceQuery.data) ?? null
+    const refused = actionRefused || moduleQueriesRefused(runtimeQuery.data, runtime, testSurfaceQuery.data)
     const supportEnabled = view === "operate" && runtime?.installation.kindKey === "customer-support"
     const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId, supportEnabled)
-    const controllerHostname = controlCenter.data?.ok === true
-        && controlCenter.data.data.workspace.id === workspaceId
-        ? controlCenter.data.data.instance.hostname
-        : null
+    const controllerHostname = controllerHostnameForWorkspace(controlCenter.data, workspaceId)
     const supportIdentity = { hostname: controllerHostname, workspaceId, installationId, enabled: supportEnabled }
     const conversationsQuery = useQuerySupportCustomerConversationsSwr(supportIdentity)
     const ticketsQuery = useQuerySupportTicketsSwr(supportIdentity)
@@ -230,23 +262,20 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
     const takeoverMutation = useMutateSetSupportTakeoverSwr(supportMutationIdentity)
     const deliveryMutation = useMutateReconcileSupportDeliverySwr(supportMutationIdentity)
     const readTestRun = useReadMyAgentosModuleTestRun(installationId)
-    const supportConversations = conversationsQuery.data?.ok === true ? conversationsQuery.data.data.nodes : []
-    const effectiveSupportConversationId = supportConversations.some((item) => item.id === selectedSupportConversationId)
-        ? selectedSupportConversationId
-        : supportConversations[0]?.id ?? null
+    const supportConversations = queryNodes(conversationsQuery.data)
+    const effectiveSupportConversationId = selectedIdentity(supportConversations, selectedSupportConversationId)
     const messagesQuery = useQuerySupportCustomerMessagesSwr(
         supportIdentity,
         effectiveSupportConversationId,
     )
-    const supportMessages = messagesQuery.data?.ok === true ? messagesQuery.data.data.nodes : []
-    const supportTicketsState = ticketsQuery.data?.ok === true ? ticketsQuery.data.data.nodes : []
-    const supportFacts = factsQuery.data?.ok === true ? factsQuery.data.data.nodes : []
-    const supportPending = supportActionPending
-        || conversationsQuery.isLoading || ticketsQuery.isLoading || factsQuery.isLoading || messagesQuery.isLoading
-    const supportRefused = supportActionRefused
-        || controlCenter.data?.ok === false
-        || conversationsQuery.data?.ok === false || ticketsQuery.data?.ok === false
-        || factsQuery.data?.ok === false || messagesQuery.data?.ok === false
+    const supportMessages = queryNodes(messagesQuery.data)
+    const supportTicketsState = queryNodes(ticketsQuery.data)
+    const supportFacts = queryNodes(factsQuery.data)
+    const supportPending = supportActionPending || [conversationsQuery, ticketsQuery, factsQuery, messagesQuery]
+        .some((query) => query.isLoading)
+    const supportRefused = supportActionRefused || anyQueryRefused([
+        controlCenter.data, conversationsQuery.data, ticketsQuery.data, factsQuery.data, messagesQuery.data,
+    ])
 
     useEffect(() => {
         if (runtime === null) return
@@ -268,6 +297,11 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
         if (testContract.scenarios.some((scenario) => scenario.key === selectedTestScenarioKey)) return
         setSelectedTestScenarioKey(testContract.scenarios[0]?.key ?? "")
     }, [selectedTestScenarioKey, testContract])
+
+    const runtimeMessages = runtime?.messages
+    const runtimeSetupSessions = runtime?.setupSessions
+    const runtimeExecuteSessions = runtime?.executeSessions
+    const runtimeDisplayName = runtime?.installation.displayName
 
     const perform = useCallback(async (input: ManageAgentosModuleRuntimeInput): Promise<AgentosModuleRuntime | null> => {
         setPending(true)
@@ -317,8 +351,8 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
     }, [installationId, perform])
 
     const sendSetupMessage = useCallback(async (sessionId: string, content: string) => {
-        const assistantCount = runtime?.messages.filter((message) => message.sessionId === sessionId && message.role === "assistant").length ?? 0
-        const priorDigest = runtime?.setupSessions.find((session) => session.id === sessionId)?.draftDigest ?? null
+        const assistantCount = runtimeMessages?.filter((message) => message.sessionId === sessionId && message.role === "assistant").length ?? 0
+        const priorDigest = runtimeSetupSessions?.find((session) => session.id === sessionId)?.draftDigest ?? null
         const appended = await perform({
             action: "APPEND_SETUP_MESSAGE",
             installationId,
@@ -332,7 +366,7 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
             const setup = candidate.setupSessions.find((session) => session.id === sessionId)
             return nextAssistantCount > assistantCount || setup?.draftDigest !== priorDigest || setup?.setupStatus === "completed"
         })
-    }, [installationId, perform, pollRuntimeUntil, runtime?.messages, runtime?.setupSessions])
+    }, [installationId, perform, pollRuntimeUntil, runtimeMessages, runtimeSetupSessions])
 
     const applySetupRevision = useCallback((sessionId: string) => {
         void perform({
@@ -344,18 +378,18 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
     }, [installationId, perform])
 
     const createExecuteSession = useCallback(async (): Promise<string | null> => {
-        const existingIds = new Set(runtime?.executeSessions.map((session) => session.id) ?? [])
+        const existingIds = new Set(runtimeExecuteSessions?.map((session) => session.id) ?? [])
         const nextRuntime = await perform({
             action: "CREATE_EXECUTE_SESSION",
             installationId,
             idempotencyKey: idempotencyKey(),
-            title: `Conversation ${(runtime?.executeSessions.length ?? 0) + 1}`,
+            title: `Conversation ${(runtimeExecuteSessions?.length ?? 0) + 1}`,
         })
         return nextRuntime?.executeSessions.find((session) => !existingIds.has(session.id))?.id ?? null
-    }, [installationId, perform, runtime?.executeSessions])
+    }, [installationId, perform, runtimeExecuteSessions])
 
     const sendExecuteMessage = useCallback(async (sessionId: string, content: string) => {
-        const assistantCount = runtime?.messages.filter((message) => message.sessionId === sessionId && message.role === "assistant").length ?? 0
+        const assistantCount = runtimeMessages?.filter((message) => message.sessionId === sessionId && message.role === "assistant").length ?? 0
         const appended = await perform({
             action: "APPEND_EXECUTE_MESSAGE",
             installationId,
@@ -367,7 +401,7 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
         await pollRuntimeUntil((candidate) => candidate.messages.filter(
             (message) => message.sessionId === sessionId && message.role === "assistant",
         ).length > assistantCount)
-    }, [installationId, perform, pollRuntimeUntil, runtime?.messages])
+    }, [installationId, perform, pollRuntimeUntil, runtimeMessages])
 
     const saveSettings = useCallback((
         settings: Readonly<Record<string, AgentosRuntimeValue>>,
@@ -405,7 +439,7 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
                 agentWorkspaceId: workspaceId,
                 provider: "Telegram",
                 accountId,
-                displayName: runtime?.installation.displayName ?? "Support Desk Telegram",
+                displayName: runtimeDisplayName ?? "Support Desk Telegram",
                 credentials: [{ key: "TELEGRAM_BOT_TOKEN", value: credentialValue }],
             })
             setPending(false)
@@ -438,7 +472,7 @@ export const AgentOSSolutionModulePage = ({ workspaceId, installationId, view = 
             credentialKey,
             credentialValue,
         })
-    }, [installationId, mutateChannel, perform, runtime?.installation.displayName, workspaceId])
+    }, [installationId, mutateChannel, perform, runtimeDisplayName, workspaceId])
 
     const removeCredential = useCallback((credentialKey: string) => {
         void perform({
