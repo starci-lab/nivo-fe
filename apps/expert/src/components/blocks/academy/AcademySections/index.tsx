@@ -1,22 +1,11 @@
-"use client"
+"use client";
 
-import { useLocale, useTranslations } from "next-intl"
-import { useSubmitAcademyLead } from "@/hooks/academy/use-submit-academy-lead"
-import type { Course } from "@/modules/api/academy"
-import type { Locale } from "@/i18n/config"
-import {
-    ACADEMY,
-    CUSTOM_SECTION_PREFIX,
-    inLocale,
-    type CustomContent,
-    type Faq,
-    type GalleryItem,
-    type Instructor,
-    type Magnet,
-    type Stat,
-    type Testimonial,
-} from "@/modules/academy/template"
-import { AcademySectionsBase } from "./component"
+import { useLocale, useTranslations } from "next-intl";
+import { useSubmitAcademyLead } from "@/hooks/academy/use-submit-academy-lead";
+import type { Course } from "@/modules/api/academy";
+import type { Locale } from "@/i18n/config";
+import { ACADEMY, CUSTOM_SECTION_PREFIX, inLocale, type CustomContent, type Faq, type GalleryItem, type Instructor, type Magnet, type Stat, type Testimonial } from "@/modules/academy/template";
+import { AcademySectionsBase } from "./component";
 
 /**
  * BLOCK - `AcademySections`, connected half.
@@ -48,33 +37,88 @@ import { AcademySectionsBase } from "./component"
  */
 
 /** What one section needs in order to be drawn, once every world lookup is done. */
-export type AcademySection =
-    | { readonly kind: "hero"; readonly id: string; readonly name: string; readonly tagline: string; readonly tryFreeLabel: string; readonly seeCoursesLabel: string }
-    | { readonly kind: "problems"; readonly id: string; readonly title: string; readonly problems: ReadonlyArray<string> }
-    | { readonly kind: "outcomes"; readonly id: string; readonly title: string; readonly outcomes: ReadonlyArray<string> }
-    | { readonly kind: "roadmap"; readonly id: string; readonly title: string; readonly steps: ReadonlyArray<string> }
-    | { readonly kind: "instructor"; readonly id: string; readonly person: Instructor }
-    | { readonly kind: "stats"; readonly id: string; readonly stats: ReadonlyArray<Stat> }
-    | { readonly kind: "testimonials"; readonly id: string; readonly title: string; readonly testimonials: ReadonlyArray<Testimonial> }
-    | { readonly kind: "gallery"; readonly id: string; readonly title: string; readonly gallery: ReadonlyArray<GalleryItem> }
-    | { readonly kind: "courses"; readonly id: string; readonly title: string; readonly emptyTitle: string; readonly emptyBody: string; readonly courses: ReadonlyArray<Course> }
-    | { readonly kind: "community"; readonly id: string; readonly title: string; readonly body: string }
-    | { readonly kind: "offer"; readonly id: string; readonly title: string; readonly body: string }
-    | { readonly kind: "faq"; readonly id: string; readonly title: string; readonly faq: ReadonlyArray<Faq> }
-    | { readonly kind: "magnet"; readonly id: string; readonly magnet: Magnet }
-    | {
-        readonly kind: "lead"
-        readonly id: string
-        readonly title: string
-        readonly body: string
-        readonly nameLabel: string
-        readonly phoneLabel: string
-        readonly submitLabel: string
-        readonly sendingLabel: string
-        readonly sentMessage: string
-        readonly errorMessage: string
-    }
-    | { readonly kind: "custom"; readonly id: string; readonly content: CustomContent }
+export type AcademySection = {
+  readonly kind: "hero";
+  readonly id: string;
+  readonly name: string;
+  readonly tagline: string;
+  readonly tryFreeLabel: string;
+  readonly seeCoursesLabel: string;
+} | {
+  readonly kind: "problems";
+  readonly id: string;
+  readonly title: string;
+  readonly problems: ReadonlyArray<string>;
+} | {
+  readonly kind: "outcomes";
+  readonly id: string;
+  readonly title: string;
+  readonly outcomes: ReadonlyArray<string>;
+} | {
+  readonly kind: "roadmap";
+  readonly id: string;
+  readonly title: string;
+  readonly steps: ReadonlyArray<string>;
+} | {
+  readonly kind: "instructor";
+  readonly id: string;
+  readonly person: Instructor;
+} | {
+  readonly kind: "stats";
+  readonly id: string;
+  readonly stats: ReadonlyArray<Stat>;
+} | {
+  readonly kind: "testimonials";
+  readonly id: string;
+  readonly title: string;
+  readonly testimonials: ReadonlyArray<Testimonial>;
+} | {
+  readonly kind: "gallery";
+  readonly id: string;
+  readonly title: string;
+  readonly gallery: ReadonlyArray<GalleryItem>;
+} | {
+  readonly kind: "courses";
+  readonly id: string;
+  readonly title: string;
+  readonly emptyTitle: string;
+  readonly emptyBody: string;
+  readonly courses: ReadonlyArray<Course>;
+} | {
+  readonly kind: "community";
+  readonly id: string;
+  readonly title: string;
+  readonly body: string;
+} | {
+  readonly kind: "offer";
+  readonly id: string;
+  readonly title: string;
+  readonly body: string;
+} | {
+  readonly kind: "faq";
+  readonly id: string;
+  readonly title: string;
+  readonly faq: ReadonlyArray<Faq>;
+} | {
+  readonly kind: "magnet";
+  readonly id: string;
+  readonly magnet: Magnet;
+} | {
+  readonly kind: "lead";
+  readonly id: string;
+  readonly title: string;
+  readonly body: string;
+  readonly nameLabel: string;
+  readonly phoneLabel: string;
+  readonly submitLabel: string;
+  readonly sendingLabel: string;
+  readonly sentMessage: string;
+  readonly errorMessage: string;
+} | {
+  readonly kind: "custom";
+  readonly id: string;
+  readonly content: CustomContent;
+};
 
 /**
  * Keep a list-backed section only when the expert authored something for it.
@@ -87,8 +131,7 @@ export type AcademySection =
  * @param build - How to settle the section when there is content.
  * @returns The settled section, or null to drop it.
  */
-const whenAuthored = <T,>(items: ReadonlyArray<T>, build: () => AcademySection): AcademySection | null =>
-    items.length === 0 ? null : build()
+const whenAuthored = <T,>(items: ReadonlyArray<T>, build: () => AcademySection): AcademySection | null => items.length === 0 ? null : build();
 
 /**
  * Keep a single-value section only when the expert authored the one thing it draws.
@@ -97,16 +140,18 @@ const whenAuthored = <T,>(items: ReadonlyArray<T>, build: () => AcademySection):
  * @param build - How to settle the section around that value.
  * @returns The settled section, or null to drop it.
  */
-const whenPresent = <T,>(value: T | undefined, build: (value: T) => AcademySection): AcademySection | null =>
-    value === undefined ? null : build(value)
+const whenPresent = <T,>(value: T | undefined, build: (value: T) => AcademySection): AcademySection | null => value === undefined ? null : build(value);
 
 /** Hand a reader's details to whoever owns the request; answers whether it landed. */
-export type LeadSubmit = (input: { readonly name: string; readonly contact: string }) => Promise<boolean>
+export type LeadSubmit = (input: {
+  readonly name: string;
+  readonly contact: string;
+}) => Promise<boolean>;
 
 /** Props for {@link AcademySections}. */
 export interface AcademySectionsProps {
-    /** The catalog fetched on the server. */
-    readonly courses: Array<Course>
+  /** The catalog fetched on the server. */
+  readonly courses: Array<Course>;
 }
 
 /**
@@ -135,128 +180,175 @@ export interface AcademySectionsProps {
  * @param input - {@link AcademySectionsProps}
  * @returns Every visible section, in the expert's order.
  */
-export const AcademySections = ({ courses }: AcademySectionsProps) => {
-    const locale = useLocale() as Locale
-    const hero = useTranslations("landing.hero")
-    const problems = useTranslations("landing.problems")
-    const outcomes = useTranslations("landing.outcomes")
-    const roadmap = useTranslations("landing.roadmap")
-    const testimonials = useTranslations("landing.testimonials")
-    const gallery = useTranslations("landing.gallery")
-    const coursesCopy = useTranslations("landing.courses")
-    const community = useTranslations("landing.community")
-    const offer = useTranslations("landing.offer")
-    const faq = useTranslations("landing.faq")
-    const lead = useTranslations("landing.lead")
-    const submitAcademyLead = useSubmitAcademyLead()
+export const AcademySections = (props: AcademySectionsProps) => {
+  const {
+    courses
+  }: AcademySectionsProps = props;
+  const locale = useLocale() as Locale;
+  const hero = useTranslations("landing.hero");
+  const problems = useTranslations("landing.problems");
+  const outcomes = useTranslations("landing.outcomes");
+  const roadmap = useTranslations("landing.roadmap");
+  const testimonials = useTranslations("landing.testimonials");
+  const gallery = useTranslations("landing.gallery");
+  const coursesCopy = useTranslations("landing.courses");
+  const community = useTranslations("landing.community");
+  const offer = useTranslations("landing.offer");
+  const faq = useTranslations("landing.faq");
+  const lead = useTranslations("landing.lead");
+  const submitAcademyLead = useSubmitAcademyLead();
+  const academy = {
+    name: inLocale(ACADEMY.identity.name, locale) ?? "",
+    tagline: inLocale(ACADEMY.identity.tagline, locale) ?? "",
+    instructor: inLocale(ACADEMY.content.instructor, locale),
+    testimonials: inLocale(ACADEMY.content.testimonials, locale) ?? [],
+    stats: inLocale(ACADEMY.content.stats, locale) ?? [],
+    gallery: inLocale(ACADEMY.content.gallery, locale) ?? [],
+    problems: inLocale(ACADEMY.content.problems, locale) ?? [],
+    roadmap: inLocale(ACADEMY.content.roadmap, locale) ?? [],
+    faq: inLocale(ACADEMY.content.faq, locale) ?? [],
+    magnet: inLocale(ACADEMY.content.magnet, locale)
+  };
 
-    const academy = {
-        name: inLocale(ACADEMY.identity.name, locale) ?? "",
-        tagline: inLocale(ACADEMY.identity.tagline, locale) ?? "",
-        instructor: inLocale(ACADEMY.content.instructor, locale),
-        testimonials: inLocale(ACADEMY.content.testimonials, locale) ?? [],
-        stats: inLocale(ACADEMY.content.stats, locale) ?? [],
-        gallery: inLocale(ACADEMY.content.gallery, locale) ?? [],
-        problems: inLocale(ACADEMY.content.problems, locale) ?? [],
-        roadmap: inLocale(ACADEMY.content.roadmap, locale) ?? [],
-        faq: inLocale(ACADEMY.content.faq, locale) ?? [],
-        magnet: inLocale(ACADEMY.content.magnet, locale),
+  /**
+   * One system section, resolved - or `null` when it has nothing to say.
+   *
+   * @param key - The section key the stored layout named.
+   * @returns The settled section, or null to drop it.
+   */
+  const systemSection = (key: string): AcademySection | null => {
+    switch (key) {
+      case "hero":
+        return {
+          kind: "hero",
+          id: key,
+          name: academy.name,
+          tagline: academy.tagline,
+          tryFreeLabel: hero("tryFree"),
+          seeCoursesLabel: hero("seeCourses")
+        };
+      case "problems":
+        return whenAuthored(academy.problems, () => ({
+          kind: "problems",
+          id: key,
+          title: problems("title"),
+          problems: academy.problems
+        }));
+      case "outcomes":
+        return {
+          kind: "outcomes",
+          id: key,
+          title: outcomes("title"),
+          outcomes: [outcomes("first"), outcomes("second"), outcomes("third")]
+        };
+      case "roadmap":
+        return whenAuthored(academy.roadmap, () => ({
+          kind: "roadmap",
+          id: key,
+          title: roadmap("title"),
+          steps: academy.roadmap
+        }));
+      case "instructor":
+        return whenPresent(academy.instructor, person => ({
+          kind: "instructor",
+          id: key,
+          person
+        }));
+      case "stats":
+        return whenAuthored(academy.stats, () => ({
+          kind: "stats",
+          id: key,
+          stats: academy.stats
+        }));
+      case "testimonials":
+        return whenAuthored(academy.testimonials, () => ({
+          kind: "testimonials",
+          id: key,
+          title: testimonials("title"),
+          testimonials: academy.testimonials
+        }));
+      case "gallery":
+        return whenAuthored(academy.gallery, () => ({
+          kind: "gallery",
+          id: key,
+          title: gallery("title"),
+          gallery: academy.gallery
+        }));
+      case "courses":
+        return {
+          kind: "courses",
+          id: key,
+          title: coursesCopy("title"),
+          emptyTitle: coursesCopy("emptyTitle"),
+          emptyBody: coursesCopy("emptyBody"),
+          courses
+        };
+      case "community":
+        return {
+          kind: "community",
+          id: key,
+          title: community("title"),
+          body: community("body")
+        };
+      case "offer":
+        return {
+          kind: "offer",
+          id: key,
+          title: offer("title"),
+          body: offer("body")
+        };
+      case "faq":
+        return whenAuthored(academy.faq, () => ({
+          kind: "faq",
+          id: key,
+          title: faq("title"),
+          faq: academy.faq
+        }));
+      case "magnet":
+        return whenPresent(academy.magnet, magnet => ({
+          kind: "magnet",
+          id: key,
+          magnet
+        }));
+      case "lead":
+        return {
+          kind: "lead",
+          id: key,
+          title: lead("title"),
+          body: lead("body"),
+          nameLabel: lead("name"),
+          phoneLabel: lead("phone"),
+          submitLabel: lead("submit"),
+          sendingLabel: lead("sending"),
+          sentMessage: lead("sent"),
+          errorMessage: lead("error")
+        };
+      default:
+        return null;
     }
-
-    /**
-     * One system section, resolved - or `null` when it has nothing to say.
-     *
-     * @param key - The section key the stored layout named.
-     * @returns The settled section, or null to drop it.
-     */
-    const systemSection = (key: string): AcademySection | null => {
-        switch (key) {
-            case "hero":
-                return {
-                    kind: "hero",
-                    id: key,
-                    name: academy.name,
-                    tagline: academy.tagline,
-                    tryFreeLabel: hero("tryFree"),
-                    seeCoursesLabel: hero("seeCourses"),
-                }
-            case "problems":
-                return whenAuthored(academy.problems, () => ({ kind: "problems", id: key, title: problems("title"), problems: academy.problems }))
-            case "outcomes":
-                return {
-                    kind: "outcomes",
-                    id: key,
-                    title: outcomes("title"),
-                    outcomes: [outcomes("first"), outcomes("second"), outcomes("third")],
-                }
-            case "roadmap":
-                return whenAuthored(academy.roadmap, () => ({ kind: "roadmap", id: key, title: roadmap("title"), steps: academy.roadmap }))
-            case "instructor":
-                return whenPresent(academy.instructor, (person) => ({ kind: "instructor", id: key, person }))
-            case "stats":
-                return whenAuthored(academy.stats, () => ({ kind: "stats", id: key, stats: academy.stats }))
-            case "testimonials":
-                return whenAuthored(academy.testimonials, () => ({ kind: "testimonials", id: key, title: testimonials("title"), testimonials: academy.testimonials }))
-            case "gallery":
-                return whenAuthored(academy.gallery, () => ({ kind: "gallery", id: key, title: gallery("title"), gallery: academy.gallery }))
-            case "courses":
-                return {
-                    kind: "courses",
-                    id: key,
-                    title: coursesCopy("title"),
-                    emptyTitle: coursesCopy("emptyTitle"),
-                    emptyBody: coursesCopy("emptyBody"),
-                    courses,
-                }
-            case "community":
-                return { kind: "community", id: key, title: community("title"), body: community("body") }
-            case "offer":
-                return { kind: "offer", id: key, title: offer("title"), body: offer("body") }
-            case "faq":
-                return whenAuthored(academy.faq, () => ({ kind: "faq", id: key, title: faq("title"), faq: academy.faq }))
-            case "magnet":
-                return whenPresent(academy.magnet, (magnet) => ({ kind: "magnet", id: key, magnet }))
-            case "lead":
-                return {
-                    kind: "lead",
-                    id: key,
-                    title: lead("title"),
-                    body: lead("body"),
-                    nameLabel: lead("name"),
-                    phoneLabel: lead("phone"),
-                    submitLabel: lead("submit"),
-                    sendingLabel: lead("sending"),
-                    sentMessage: lead("sent"),
-                    errorMessage: lead("error"),
-                }
-            default:
-                return null
-        }
+  };
+  const sections = ACADEMY.layout.sections.filter(section => section.visible).map((section): AcademySection | null => {
+    if (section.key.startsWith(CUSTOM_SECTION_PREFIX)) {
+      // An expert-authored section carries its own content; without it there is nothing to
+      // draw, and a heading-shaped hole reads as a broken page.
+      return section.content === undefined ? null : {
+        kind: "custom",
+        id: section.key,
+        content: section.content
+      };
     }
+    return systemSection(section.key);
+  }).filter((section): section is AcademySection => section !== null);
 
-    const sections = ACADEMY.layout.sections
-        .filter((section) => section.visible)
-        .map((section): AcademySection | null => {
-            if (section.key.startsWith(CUSTOM_SECTION_PREFIX)) {
-                // An expert-authored section carries its own content; without it there is nothing to
-                // draw, and a heading-shaped hole reads as a broken page.
-                return section.content === undefined
-                    ? null
-                    : { kind: "custom", id: section.key, content: section.content }
-            }
-            return systemSection(section.key)
-        })
-        .filter((section): section is AcademySection => section !== null)
-
-    /**
-     * Send a reader's details.
-     *
-     * IT LIVES HERE BECAUSE IT IS A REQUEST. The band that collects the details decides only what a
-     * reader sees while it is in flight; whether anything reaches a server is not a drawing
-     * decision, and a fixture render of that band must not post anywhere.
-     *
-     * @param input - The name and contact the reader typed.
-     * @returns Whether it landed.
-     */
-    return <AcademySectionsBase sections={sections} onSubmitLead={submitAcademyLead} />
-}
+  /**
+   * Send a reader's details.
+   *
+   * IT LIVES HERE BECAUSE IT IS A REQUEST. The band that collects the details decides only what a
+   * reader sees while it is in flight; whether anything reaches a server is not a drawing
+   * decision, and a fixture render of that band must not post anywhere.
+   *
+   * @param input - The name and contact the reader typed.
+   * @returns Whether it landed.
+   */
+  return <AcademySectionsBase sections={sections} onSubmitLead={submitAcademyLead} />;
+};

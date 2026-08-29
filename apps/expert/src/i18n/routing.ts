@@ -1,5 +1,5 @@
-import { defineRouting } from "next-intl/routing"
-import { DEFAULT_LOCALE, LOCALES } from "./config"
+import { defineRouting } from "next-intl/routing";
+import { DEFAULT_LOCALE, LOCALES } from "./config";
 
 /**
  * The locale lives in the URL.
@@ -16,7 +16,7 @@ import { DEFAULT_LOCALE, LOCALES } from "./config"
  * visitor and the page they asked for, and the second language still gets the address it needed.
  */
 export const routing = defineRouting({
-    locales: LOCALES,
-    defaultLocale: DEFAULT_LOCALE,
-    localePrefix: "as-needed",
-})
+  locales: LOCALES,
+  defaultLocale: DEFAULT_LOCALE,
+  localePrefix: "as-needed"
+});

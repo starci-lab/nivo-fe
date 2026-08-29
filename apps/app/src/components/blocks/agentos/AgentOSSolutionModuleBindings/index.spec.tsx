@@ -6,7 +6,6 @@ const base = { id: "i", agentWorkspaceId: "w", moduleKey: "sales-copilot", modul
 describe("solution module bindings", () => {
     it("keeps each empty producer-owned group visible", () => {
         const html = renderToStaticMarkup(<AgentOSSolutionModuleBindings state="ready" installation={base} labels={labels} />)
-        expect(html).toContain('data-node="module-bindings"')
         expect(html.match(/data-level="4"/g)).toHaveLength(8)
         expect(html.match(/None/g)).toHaveLength(3)
         expect(html).toContain("v1")
@@ -27,8 +26,6 @@ describe("solution module bindings", () => {
 
     it("rests as eight binding and artifact groups with the same anatomy", () => {
         const html = renderToStaticMarkup(<AgentOSSolutionModuleBindings state="pending" labels={labels} />)
-        expect(html).toContain('data-node="module-bindings"')
-        expect(html.match(/data-node="binding-identity-list"/g)).toHaveLength(8)
         expect(html.match(/data-loading="true"/g)).toHaveLength(16)
     })
 })

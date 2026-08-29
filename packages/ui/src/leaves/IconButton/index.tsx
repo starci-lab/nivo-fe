@@ -1,6 +1,5 @@
-import { Button as HeroButton } from "@heroui/react"
-import { Icon, type IconName } from "../Icon"
-import type { LeafProps } from "../../contracts/props"
+import { Button as HeroButton } from "@heroui/react";
+import { Icon, type IconName } from "../Icon";
 
 /**
  * LEAF - `IconButton`: a control the bar has room for only as a glyph.
@@ -16,43 +15,42 @@ import type { LeafProps } from "../../contracts/props"
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type IconButtonData = {
-    /** The meaning drawn. */
-    readonly icon: IconName
-    /** The already-resolved name. Read, never seen. */
-    readonly label: string
-    /** Whether this control is currently the active one, for a toggle that has a state. */
-    readonly isActive?: boolean
-}
+  /** The meaning drawn. */
+  readonly icon: IconName;
+  /** The already-resolved name. Read, never seen. */
+  readonly label: string;
+  /** Whether this control is currently the active one, for a toggle that has a state. */
+  readonly isActive?: boolean;
+};
 
 /** What pressing it does. */
 export type IconButtonActions = {
-    /** Called on press. */
-    readonly press?: () => void
-}
+  /** Called on press. */
+  readonly press?: () => void;
+};
 
 /** Props for {@link IconButton}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type IconButtonProps = LeafProps<IconButtonData, IconButtonActions>
+export type IconButtonProps = {readonly props: IconButtonData;readonly on?: IconButtonActions;readonly isLoading?: boolean;};
 
 /**
  * Draw a glyph that acts.
  *
  * @param input - {@link IconButtonProps}
  */
-export const IconButton = ({ props, on }: IconButtonProps) => (
-    <HeroButton
-        data-tier="leaf"
-        data-component="IconButton"
-        data-active={props.isActive === true ? "true" : "false"}
-        type="button"
-        variant="tertiary"
-        className="rounded-full"
-        isIconOnly
-        aria-label={props.label}
-        onPress={on?.press}
-    >
-        <Icon props={{ name: props.icon, role: "leading" }} />
-    </HeroButton>
-)
+export const IconButton = (props: IconButtonProps) => IconButtonView(props);
+const IconButtonView = ({ props, on }: IconButtonProps) =>
+<HeroButton
 
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const
+
+  data-active={props.isActive === true ? "true" : "false"}
+  type="button"
+  variant="tertiary"
+  className="rounded-full"
+  isIconOnly
+  aria-label={props.label}
+  onPress={on?.press}>
+  
+        <Icon props={{ name: props.icon, role: "leading" }} />
+    </HeroButton>;
+
+

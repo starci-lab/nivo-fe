@@ -26,19 +26,14 @@ describe("AgentOS provisioning lifecycle", () => {
             props={{ progressLabel: "AgentOS order", continuationLabel: "Next step", steps, subject: "AgentOS", detail: "Workspace plan", statusTitle: "Requesting", statusText: "Submitting", requestActionLabel: "Order", isRequestPending: true }}
             on={{ request: vi.fn() }}
         />)
-        expect(html).toContain('data-node="responsive-four-stage-lifecycle-stepper"')
         expect(html).toContain('data-action-pending="true"')
         expect(html).toContain('data-size="md"')
         expect(html).toContain('data-weight="medium"')
-        expect(html).not.toContain("<h2")
-        expect(html).not.toContain('data-component="HighlightCardSweep"')
-        expect(html.match(/<h3/g)).toHaveLength(1)
+        expect(html.match(/<h2/g)).toHaveLength(1)
         expect(html).toContain("AgentOS order")
         expect(html).not.toContain("Next step")
-        expect(html).toContain('data-node="provisioning-order-content"')
-        expect(html).toContain('data-component="TileIcon"')
+        expect(html).toContain("AgentOS")
         expect(html).toContain('data-signal="none"')
-        expect(html).not.toContain('data-component="IconTile"')
     })
 
     it("renders all four progress stages responsively and keeps watch controls disabled", () => {
@@ -47,8 +42,7 @@ describe("AgentOS provisioning lifecycle", () => {
             props={{ steps, subject: "AgentOS", detail: "Workspace plan", statusTitle: "Preparing", statusText: "Provisioning in progress", statusActionLabel: "Watch provisioning", statusActionDisabled: true }}
             on={{ statusAction: vi.fn() }}
         />)
-        expect(html).toContain('data-node="responsive-four-stage-lifecycle-stepper"')
-        expect(html.match(/data-node="lifecycle-marker-over-label-and-state"/g)).toHaveLength(4)
+        expect(html.match(/Upcoming/g)).toHaveLength(2)
         expect(html).toContain("Watch provisioning")
         expect(html).toContain("disabled")
     })
@@ -66,9 +60,7 @@ describe("AgentOS provisioning lifecycle", () => {
             on={{ statusAction: vi.fn() }}
         />)
 
-        expect(html).toContain('data-component="HighlightCardSweep"')
-        expect(html).toContain('data-node="identity-phase-action"')
-        expect(html).toContain('data-node="provisioning-phase-with-mark"')
-        expect(html.match(/<h3/g)).toHaveLength(1)
+        expect(html).toContain("Request")
+        expect(html.match(/<h2/g)).toHaveLength(1)
     })
 })

@@ -1,6 +1,5 @@
-import { Checkbox as HeroCheckbox } from "@heroui/react"
-import { TextLink } from "../TextLink"
-import type { LeafProps } from "../../contracts/props"
+import { Checkbox as HeroCheckbox } from "@heroui/react";
+import { TextLink } from "../TextLink";
 
 /**
  * LEAF - `Checkbox`: a choice the reader makes about the form around it.
@@ -15,73 +14,72 @@ import type { LeafProps } from "../../contracts/props"
 
 /** One textual or navigable fragment inside a compound checkbox label. */
 export type CheckboxLabelPart =
-    | { readonly kind: "text", readonly content: string }
-    | { readonly kind: "link", readonly id: string, readonly label: string }
+{readonly kind: "text";readonly content: string;} |
+{readonly kind: "link";readonly id: string;readonly label: string;};
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type CheckboxData = {
-    /** The already-resolved words beside the tick. */
-    readonly label: string
-    /** Optional sentence anatomy when part of the label has its own destination. */
-    readonly labelParts?: ReadonlyArray<CheckboxLabelPart>
-    /** Whether it is ticked. Controlled - see the file header. */
-    readonly isSelected: boolean
-    /** The form field name, for the submitted payload. */
-    readonly name?: string
-}
+  /** The already-resolved words beside the tick. */
+  readonly label: string;
+  /** Optional sentence anatomy when part of the label has its own destination. */
+  readonly labelParts?: ReadonlyArray<CheckboxLabelPart>;
+  /** Whether it is ticked. Controlled - see the file header. */
+  readonly isSelected: boolean;
+  /** The form field name, for the submitted payload. */
+  readonly name?: string;
+};
 
 /** What ticking it does. */
 export type CheckboxActions = {
-    /** Called with the new value when the reader changes it. */
-    readonly change?: (isSelected: boolean) => void
-    /** Reports which navigable phrase was followed; connected code owns routing. */
-    readonly follow?: (id: string) => void
-}
+  /** Called with the new value when the reader changes it. */
+  readonly change?: (isSelected: boolean) => void;
+  /** Reports which navigable phrase was followed; connected code owns routing. */
+  readonly follow?: (id: string) => void;
+};
 
 /** Props for {@link Checkbox}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type CheckboxProps = LeafProps<CheckboxData, CheckboxActions>
+export type CheckboxProps = {readonly props: CheckboxData;readonly on?: CheckboxActions;readonly isLoading?: boolean;};
 
 /** The tick and its words on one baseline, with the whole row pressable. */
-const ROOT_CLASSES = "flex flex-row items-center gap-2 text-sm"
+const ROOT_CLASSES = "flex flex-row items-center gap-2 text-sm";
 
 /**
  * Draw a choice.
  *
  * @param input - {@link CheckboxProps}
  */
-export const Checkbox = ({ props, on }: CheckboxProps) => (
-    <HeroCheckbox
-        data-tier="leaf"
-        data-component="Checkbox"
-        data-selected={props.isSelected ? "true" : "false"}
-        aria-label={props.label}
-        name={props.name}
-        isSelected={props.isSelected}
-        onChange={(isSelected: boolean) => on?.change?.(isSelected)}
-        className={ROOT_CLASSES}
-    >
+export const Checkbox = (props: CheckboxProps) => CheckboxView(props);
+const CheckboxView = ({ props, on }: CheckboxProps) =>
+<HeroCheckbox
+
+
+  data-selected={props.isSelected ? "true" : "false"}
+  aria-label={props.label}
+  name={props.name}
+  isSelected={props.isSelected}
+  onChange={(isSelected: boolean) => on?.change?.(isSelected)}
+  className={ROOT_CLASSES}>
+  
         <HeroCheckbox.Content>
             <HeroCheckbox.Control>
                 <HeroCheckbox.Indicator />
             </HeroCheckbox.Control>
-            {props.labelParts === undefined ? props.label : (
-                <span>
-                    {props.labelParts.map((part, index) => (
-                        part.kind === "text" ? (
-                            <span key={`${part.kind}-${index}`}>{part.content}</span>
-                        ) : (
-                            <TextLink
-                                key={`${part.kind}-${index}`}
-                                props={{ label: part.label, size: "sm" }}
-                                on={{ press: () => on?.follow?.(part.id) }}
-                            />
-                        )
-                    ))}
-                </span>
-            )}
-        </HeroCheckbox.Content>
-    </HeroCheckbox>
-)
+            {props.labelParts === undefined ? props.label :
+    <span>
+                    {props.labelParts.map((part, index) =>
+      part.kind === "text" ?
+      <span key={`${part.kind}-${index}`}>{part.content}</span> :
 
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const
+      <TextLink
+        key={`${part.kind}-${index}`}
+        props={{ label: part.label, size: "sm" }}
+        on={{ press: () => on?.follow?.(part.id) }} />
+
+
+      )}
+                </span>
+    }
+        </HeroCheckbox.Content>
+    </HeroCheckbox>;
+
+

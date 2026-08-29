@@ -1,150 +1,70 @@
-/**
- * THE PUBLIC SURFACE of the shared canon.
- *
- * ONE COPY, THREE APPS. In the previous repository each app carried its own `components/` tree, and
- * the cost was not duplication in the abstract: ten separate files independently redeclared
- * `ComponentType<SVGProps<SVGSVGElement>>`, so the glyph vendor had leaked into ten places and no
- * single edit could remove it. A tier that lives here cannot drift, because there is nowhere for it
- * to drift to.
- *
- * WHAT MAY LIVE HERE. Everything below a block: the contract registry, leaves, composites, branches
- * and shells. A block carries feature meaning and therefore belongs to the app that owns the
- * feature - putting one here would make the package know what a course, an invoice or a landing
- * hero is, and it must not.
- *
- * The registry itself is the exception worth naming: it is shared MACHINERY with per-product
- * ENTRIES, so the table starts small and grows one checked entry at a time.
- */
+/** Public React components and their ordinary TypeScript props. */
 
-export {
-    CONTRACTS,
-    CONTRACT_KEYS,
-    contractNodeProps,
-    contractSpec,
-} from "./contracts"
-export { NIVO_GRAMMAR, NIVO_GRAMMAR_CONTRACTS, NIVO_GRAMMAR_TREATMENTS } from "./contracts/grammar"
-export type {
-    ChildrenOf,
-    ContractChildSpec,
-    ContractKey,
-    ContractPropValue,
-    ContractSpec,
-    LayoutClassName,
-} from "./contracts"
+export * from "./leaves/ActionLink"
+export * from "./leaves/Avatar"
+export * from "./leaves/Badge"
+export * from "./leaves/Breadcrumbs"
+export * from "./leaves/Button"
+export * from "./leaves/Checkbox"
+export * from "./leaves/ChoiceTabs"
+export * from "./leaves/ContributionGrid"
+export * from "./leaves/ContributionIntensityLegend"
+export * from "./leaves/DayCell"
+export * from "./leaves/Divider"
+export * from "./leaves/ExtendedTabs"
+export * from "./leaves/Heading"
+export * from "./leaves/Icon"
+export * from "./leaves/IconButton"
+export * from "./leaves/IconTile"
+export * from "./leaves/Input"
+export * from "./leaves/Label"
+export * from "./leaves/Link"
+export * from "./leaves/MicrochipArtwork"
+export * from "./leaves/NavLink"
+export * from "./leaves/NivoBrand"
+export * from "./leaves/NivoUnicornArtwork"
+export * from "./leaves/PressableInputLike"
+export * from "./leaves/Progress"
+export * from "./leaves/QuickActionRow"
+export * from "./leaves/QuickActionsList"
+export * from "./leaves/ReactionPicker"
+export * from "./leaves/RouteTabs"
+export * from "./leaves/SearchBox"
+export * from "./leaves/SeeMoreLink"
+export * from "./leaves/SelectionList"
+export * from "./leaves/Text"
+export * from "./leaves/TextLink"
+export * from "./leaves/ThemeSwitch"
+export * from "./leaves/TileIcon"
 
-export {
-    defineCompositeComponent,
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-} from "./contracts/props"
-export type {
-    BlockProps,
-    ComponentActions,
-    ComponentData,
-    CompositeComponent,
-    CompositeProps,
-    ContractBranchProps,
-    ContractComponent,
-    DataValue,
-    LeafComponent,
-    LeafProps,
-} from "./contracts/props"
+export * from "./composites/ActivityRow"
+export * from "./composites/ChangelogEntryRow"
+export * from "./composites/ContributionCalendar"
+export * from "./composites/DualTabsToolbar"
+export * from "./composites/EmptyNotice"
+export * from "./composites/Field"
+export * from "./composites/HelmComponentStatusTable"
+export * from "./composites/LabelledProgressRow"
+export * from "./composites/LifecycleStep"
+export * from "./composites/OperationActionRail"
+export * from "./composites/ProfileRow"
+export * from "./composites/RequestSummary"
+export * from "./composites/StatRow"
+export * from "./composites/StatusActionCard"
+export * from "./composites/StreakWeekRun"
+export * from "./composites/SuggestedUserRow"
+export * from "./composites/TaskProgressRow"
+export * from "./composites/TrendingContentRow"
 
-/*
- * The tiers, named one at a time.
- *
- * `export *` is not used and must not be: every tier file also exports a `meta` marker, so a star
- * re-export would collide on the first two tiers and then silently shadow as more arrive. Naming
- * each symbol also keeps this file an honest inventory of what the package actually offers.
- *
- * This list grows as screens need it rather than all at once - an export nobody imports is a
- * promise the package has not been asked to keep.
- */
-
-export { Avatar } from "./leaves/Avatar"
-export type { AvatarData, AvatarProps } from "./leaves/Avatar"
-export { ActionLink } from "./leaves/ActionLink"
-export type { ActionLinkActions, ActionLinkData, ActionLinkProps } from "./leaves/ActionLink"
-export { Badge } from "./leaves/Badge"
-export type { BadgeData, BadgeProps, BadgeTone } from "./leaves/Badge"
-export { Button } from "./leaves/Button"
-export type { ButtonActions, ButtonData, ButtonProps } from "./leaves/Button"
-export { Breadcrumbs } from "./leaves/Breadcrumbs"
-export type { BreadcrumbsActions, BreadcrumbsData, BreadcrumbsProps, BreadcrumbStep } from "./leaves/Breadcrumbs"
-export { Checkbox } from "./leaves/Checkbox"
-export { ChoiceTabs } from "./leaves/ChoiceTabs"
-export type { ChoiceTabData, ChoiceTabsActions, ChoiceTabsData, ChoiceTabsProps } from "./leaves/ChoiceTabs"
-export { Divider } from "./leaves/Divider"
-export type { DividerData, DividerProps } from "./leaves/Divider"
-export { Heading } from "./leaves/Heading"
-export type { HeadingData, HeadingProps } from "./leaves/Heading"
-export { Icon } from "./leaves/Icon"
-export type { IconData, IconName, IconProps, IconRole } from "./leaves/Icon"
-export { IconTile } from "./leaves/IconTile"
-export type { IconTileData, IconTileProps, IconTileSize, IconTileTone } from "./leaves/IconTile"
-export { MicrochipArtwork } from "./leaves/MicrochipArtwork"
-export type { MicrochipArtworkData, MicrochipArtworkProps, MicrochipArtworkTone } from "./leaves/MicrochipArtwork"
-export { NivoBrand } from "./leaves/NivoBrand"
-export type { NivoBrandData, NivoBrandProps, NivoBrandScale, NivoBrandVariant } from "./leaves/NivoBrand"
-export { NivoUnicornArtwork } from "./leaves/NivoUnicornArtwork"
-export type { NivoUnicornArtworkData, NivoUnicornArtworkProps } from "./leaves/NivoUnicornArtwork"
-export { Input } from "./leaves/Input"
-export type { InputData, InputKind, InputProps } from "./leaves/Input"
-export { Label } from "./leaves/Label"
-export { Text } from "./leaves/Text"
-export type { TextData, TextProps } from "./leaves/Text"
-export { TextLink } from "./leaves/TextLink"
-export type { TextLinkData, TextLinkProps } from "./leaves/TextLink"
-export { TileIcon } from "./leaves/TileIcon"
-export type { TileIconData, TileIconProps, TileIconSignal } from "./leaves/TileIcon"
-export { ThemeSwitch } from "./leaves/ThemeSwitch"
-export type { ThemeSwitchActions, ThemeSwitchData, ThemeSwitchProps } from "./leaves/ThemeSwitch"
-export { SelectionList } from "./leaves/SelectionList"
-export type { SelectionListActions, SelectionListData, SelectionListGroup, SelectionListItem, SelectionListProps } from "./leaves/SelectionList"
-
-export { Field } from "./composites/Field"
-export type { FieldActions, FieldData, FieldKind, FieldProps } from "./composites/Field"
-export { LifecycleStep } from "./composites/LifecycleStep"
-export type { LifecycleStepData, LifecycleStepProps, LifecycleStepState } from "./composites/LifecycleStep"
-export { LabelledProgressRow } from "./composites/LabelledProgressRow"
-export type { LabelledProgressRowData, LabelledProgressRowProps } from "./composites/LabelledProgressRow"
-export { RequestSummary } from "./composites/RequestSummary"
-export type { RequestSummaryActions, RequestSummaryData, RequestSummaryProps } from "./composites/RequestSummary"
-export { StatusActionCard } from "./composites/StatusActionCard"
-export type { StatusActionCardActions, StatusActionCardData, StatusActionCardProps } from "./composites/StatusActionCard"
-export { HelmComponentStatusTable } from "./composites/HelmComponentStatusTable"
-export type { HelmComponentStatusRow, HelmComponentStatusTableData, HelmComponentStatusTableProps } from "./composites/HelmComponentStatusTable"
-export { OperationActionRail } from "./composites/OperationActionRail"
-export type { OperationAction, OperationActionRailActions, OperationActionRailData, OperationActionRailProps } from "./composites/OperationActionRail"
-
-export { ContractContent, Tree } from "./branches/Tree"
-export type { TreeProps } from "./branches/Tree"
-export { SurfaceCard } from "./branches/SurfaceCard"
-export { SurfaceFormCard } from "./branches/SurfaceFormCard"
-export type { SurfaceFormCardProps } from "./branches/SurfaceFormCard"
-export { SurfaceListCard } from "./branches/SurfaceListCard"
-export type { SurfaceListCardActions, SurfaceListCardData, SurfaceListCardProps } from "./branches/SurfaceListCard"
-export { HighlightCard } from "./branches/HighlightCard"
-export type { HighlightCardProps } from "./branches/HighlightCard"
-export { DrawerBranch } from "./branches/DrawerBranch"
-export type { DrawerBranchProps } from "./branches/DrawerBranch"
-export { DropdownBranch } from "./branches/DropdownBranch"
-export type {
-    DropdownBranchActions,
-    DropdownBranchData,
-    DropdownBranchItemData,
-    DropdownBranchPlacement,
-    DropdownBranchProps,
-    DropdownBranchSectionData,
-} from "./branches/DropdownBranch"
-export { ModalBranch } from "./branches/ModalBranch"
-export type { ModalBranchProps } from "./branches/ModalBranch"
-export { CollapsibleRail } from "./branches/CollapsibleRail"
-export type { CollapsibleRailProps } from "./branches/CollapsibleRail"
-export { ScrollViewport } from "./branches/ScrollViewport"
-export type { ScrollViewportProps } from "./branches/ScrollViewport"
-export { MarkdownComponent } from "./branches/MarkdownComponent"
-export type { MarkdownComponentProps } from "./branches/MarkdownComponent"
-export { StarCiDashboardThemeBoundary } from "./branches/StarCiDashboardThemeBoundary"
-export type { StarCiDashboardThemeBoundaryProps } from "./branches/StarCiDashboardThemeBoundary"
+export * from "./branches/CollapsibleRail"
+export * from "./branches/DrawerBranch"
+export * from "./branches/DropdownBranch"
+export * from "./branches/HighlightCard"
+export * from "./branches/MarkdownComponent"
+export * from "./branches/ModalBranch"
+export * from "./branches/PressableSurface"
+export * from "./branches/ScrollViewport"
+export * from "./branches/StarCiDashboardThemeBoundary"
+export * from "./branches/SurfaceCard"
+export * from "./branches/SurfaceFormCard"
+export * from "./branches/SurfaceListCard"

@@ -1,67 +1,117 @@
-import {
-    Avatar, Badge, Button, SurfaceCard, SurfaceListCard, Text, TextLink, Tree,
-    defineCompositeComponent, defineContractComponent, defineLeafComponent,
-    type BadgeTone, type LeafProps,
-} from "@nivo/ui"
-import type { SurfaceListCardActions } from "@nivo/ui/branches/SurfaceListCard"
-import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice"
+import { Avatar, Badge, Button, SurfaceCard, SurfaceListCard, Text, TextLink, type BadgeTone } from "@nivo/ui";
+import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice";
 
 /** One exact owned application prepared for the joined summary list. */
-export type AppsSummaryItem = { readonly id: string, readonly name: string, readonly detail: string, readonly statusLabel: string, readonly statusTone: BadgeTone, readonly actionLabel: string }
+export type AppsSummaryItem = {
+  readonly id: string;
+  readonly name: string;
+  readonly detail: string;
+  readonly statusLabel: string;
+  readonly statusTone: BadgeTone;
+  readonly actionLabel: string;
+};
 /** Settled states the owned-application collection can render. */
-export type AppsSummaryState =
-    | { readonly phase: "pending" }
-    | { readonly phase: "empty", readonly message: string }
-    | { readonly phase: "populated", readonly items: ReadonlyArray<AppsSummaryItem> }
-    | { readonly phase: "forbidden", readonly message: string }
+export type AppsSummaryState = {
+  readonly phase: "pending";
+} | {
+  readonly phase: "empty";
+  readonly message: string;
+} | {
+  readonly phase: "populated";
+  readonly items: ReadonlyArray<AppsSummaryItem>;
+} | {
+  readonly phase: "forbidden";
+  readonly message: string;
+};
 /** Pure owned-application list input and its legal navigation commands. */
 export type AppsSummaryProps = {
-    readonly label: string
-    readonly openAllLabel?: string
-    readonly state: AppsSummaryState
-    readonly onOpenApp: (id: string) => void
-    readonly onOpenAll?: () => void
-}
+  readonly label: string;
+  readonly openAllLabel?: string;
+  readonly state: AppsSummaryState;
+  readonly onOpenApp: (id: string) => void;
+  readonly onOpenAll?: () => void;
+};
+const rows = (items: ReadonlyArray<AppsSummaryItem>, onOpenApp: AppsSummaryProps["onOpenApp"]) => items.map((item, index) => <div key={index}>
+  <Avatar props={{
+    name: item.name,
+    size: "md"
+  }} /><div>
 
-const rows = (items: ReadonlyArray<AppsSummaryItem>, onOpenApp: AppsSummaryProps["onOpenApp"]) => items.map((item) => defineContractComponent("avatar-identity-badge-action-row", {
-    avatar: defineLeafComponent("avatar", {}, () => <Avatar props={{ name: item.name, size: "md" }} />),
-    identity: defineContractComponent("name-over-handle", {
-        name: defineLeafComponent("text-link", { size: "sm" }, () => <TextLink props={{ label: item.name, size: "sm" }} on={{ press: () => onOpenApp(item.id) }} />),
-        handle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: item.detail, size: "xs", tone: "muted" }} />),
-    }),
-    badge: defineLeafComponent("badge", {}, () => <Badge props={{ content: item.statusLabel, tone: item.statusTone }} />),
-    action: defineLeafComponent("button", {}, () => <Button props={{ label: item.actionLabel, size: "sm" }} on={{ press: () => onOpenApp(item.id) }} />),
-}))
+    <TextLink props={{
+      label: item.name,
+      size: "sm"
+    }} on={{
+      press: () => onOpenApp(item.id)
+    }} />
+    <Text props={{
+      content: item.detail,
+      size: "xs",
+      tone: "muted"
+    }} /></div>
 
-const pendingRows = () => Array.from({ length: 3 }, (_, index) => defineContractComponent("avatar-identity-badge-action-row", {
-    avatar: defineLeafComponent("avatar", {}, () => <Avatar key={index} props={{ size: "md" }} isLoading />),
-    identity: defineContractComponent("name-over-handle", {
-        name: defineLeafComponent("text-link", { size: "sm" }, () => <TextLink props={{ label: "", size: "sm" }} isLoading />),
-        handle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: "" }} isLoading />),
-    }),
-    action: defineLeafComponent("button", {}, () => <Button props={{ label: "" }} isLoading />),
-}))
+  <Badge props={{
+    content: item.statusLabel,
+    tone: item.statusTone
+  }} />
+  <Button props={{
+    label: item.actionLabel,
+    size: "sm"
+  }} on={{
+    press: () => onOpenApp(item.id)
+  }} /></div>);
+const pendingRows = () => Array.from({
+  length: 3
+}, (_, index) => <div key={index}>
+  <Avatar key={index} props={{
+    size: "md"
+  }} isLoading /><div>
 
-const appsListContent = (state: Extract<AppsSummaryState, { readonly phase: "pending" | "populated" }>, onOpenApp: AppsSummaryProps["onOpenApp"]) => (
-    defineContractComponent("identity-action-list", (input: LeafProps<{ readonly label: string, readonly actionLabel?: string }, SurfaceListCardActions>) => (
-        <Tree key={input.props.label} contract="identity-action-list" render={defineContractComponent("identity-action-list", {
-            item: state.phase === "pending" ? pendingRows() : rows(state.items, onOpenApp),
-        })} />
-    ))
-)
+    <TextLink props={{
+      label: "",
+      size: "sm"
+    }} isLoading />
+    <Text props={{
+      content: ""
+    }} isLoading /></div>
+
+  <Button props={{
+    label: ""
+  }} isLoading /></div>);
+const appsListContent = (state: Extract<AppsSummaryState, {
+  readonly phase: "pending" | "populated";
+}>, onOpenApp: AppsSummaryProps["onOpenApp"]) => <div>{state.phase === "pending" ? pendingRows() : rows(state.items, onOpenApp)}</div>;
 
 /** Draw exact owned applications as one joined collection. */
-export const AppsSummaryBase = ({ label, openAllLabel, state, onOpenApp, onOpenAll }: AppsSummaryProps) => {
-    if (state.phase === "empty") return <SurfaceCard props={{ label }} contract="centred-empty-notice" render={defineContractComponent("centred-empty-notice", {
-        notice: defineCompositeComponent("empty-notice", {}, () => <EmptyNotice props={{ message: state.message }} />),
-    })} />
-    if (state.phase === "forbidden") return <SurfaceCard props={{ label }} contract="body-with-refusal-note" render={defineContractComponent("body-with-refusal-note", {
-        note: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => <Text props={{ content: state.message, size: "sm", tone: "muted" }} />),
-    })} />
-    const isLoading = state.phase === "pending"
-    const content = appsListContent(state, onOpenApp)
-    return <SurfaceListCard props={{ label, actionLabel: openAllLabel }} on={{ act: onOpenAll }} contract="identity-action-list" render={content} isLoading={isLoading} />
-}
+export const AppsSummaryBase = (props: AppsSummaryProps) => {
+  const {
+    label,
+    openAllLabel,
+    state,
+    onOpenApp,
+    onOpenAll
+  }: AppsSummaryProps = props;
+  if (state.phase === "empty") return <SurfaceCard props={{
+    label
+  }}><div>
+      <EmptyNotice props={{
+        message: state.message
+      }} /></div></SurfaceCard>;
+  if (state.phase === "forbidden") return <SurfaceCard props={{
+    label
+  }}><div>
+      <Text props={{
+        content: state.message,
+        size: "sm",
+        tone: "muted"
+      }} /></div></SurfaceCard>;
+  const isLoading = state.phase === "pending";
+  const content = appsListContent(state, onOpenApp);
+  return <SurfaceListCard props={{
+    label,
+    actionLabel: openAllLabel
+  }} on={{
+    act: onOpenAll
+  }} isLoading={isLoading}>{content}</SurfaceListCard>;
+};
 
 /** Registry identity for the pure Apps summary twin. */
-export const meta = { shape: "block", world: "pure" } as const

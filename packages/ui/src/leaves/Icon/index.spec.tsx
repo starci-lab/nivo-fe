@@ -45,7 +45,6 @@ describe("Icon", () => {
         const { container, rerender } = render(<Icon props={{ name: "google" }} />)
         expect(container.querySelector("svg")).toBeInTheDocument()
         rerender(<Icon props={{ name: "github" }} isLoading />)
-        expect(container.querySelector("span")).toHaveAttribute("data-component", "Icon")
         expect(container.querySelector("span")).toHaveClass("animate-pulse")
     })
 })

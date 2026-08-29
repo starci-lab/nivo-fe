@@ -9,7 +9,7 @@ describe("ScrollViewport", () => {
         render(<ScrollViewport ariaLabel="Service destinations" content={Destinations} contentProps={{}} />)
 
         const viewport = screen.getByLabelText("Service destinations")
-        expect(viewport).toHaveAttribute("data-component", "ScrollViewport")
+        expect(viewport).toHaveClass("scroll-viewport")
         expect(viewport).toHaveAttribute("tabindex", "0")
         expect(viewport).toHaveStyle({ overflowY: "auto", overscrollBehavior: "contain" })
         expect(screen.getByText("Destinations")).toBeInTheDocument()

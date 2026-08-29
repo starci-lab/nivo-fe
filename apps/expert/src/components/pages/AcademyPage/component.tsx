@@ -1,9 +1,8 @@
-"use client"
+"use client";
 
-import { Tree, defineContractComponent, defineContractProjection } from "@nivo/ui"
-import { AcademyChrome } from "@/components/layouts/AcademyChrome"
-import { AcademySections } from "@/components/blocks/academy/AcademySections"
-import type { Course } from "@/modules/api/academy"
+import { AcademyChrome } from "@/components/layouts/AcademyChrome";
+import { AcademySections } from "@/components/blocks/academy/AcademySections";
+import type { Course } from "@/modules/api/academy";
 
 /**
  * PAGE - the academy's landing screen, drawing half.
@@ -20,15 +19,14 @@ import type { Course } from "@/modules/api/academy"
 
 /** Props for {@link AcademyPageBase}. */
 export interface AcademyPageProps {
-    /** The catalog this academy sells, already resolved. */
-    readonly courses: ReadonlyArray<Course>
+  /** The catalog this academy sells, already resolved. */
+  readonly courses: ReadonlyArray<Course>;
 }
+const AcademyRoutedContent = ({
+  courses
+}: AcademyPageProps) => <div>
 
-const AcademyRoutedContent = ({ courses }: AcademyPageProps) => (
-    <Tree contract="academy-band-run" render={defineContractComponent("academy-band-run", {
-        content: defineContractProjection("academy-band-list", () => <AcademySections courses={[...courses]} />),
-    })} />
-)
+  <AcademySections courses={[...courses]} /></div>;
 
 /**
  * Draw the academy landing screen.
@@ -36,19 +34,14 @@ const AcademyRoutedContent = ({ courses }: AcademyPageProps) => (
  * @param props - {@link AcademyPageProps}
  * @returns The page.
  */
-export const AcademyPageBase = ({ courses }: AcademyPageProps) => (
-    <AcademyChrome
-        /*
-         * `content`, not `children`: the layout names the one routed interior it takes, so nothing
-         * else can arrive beside it unannounced. Only the three closed vendor shells may take the
-         * anonymous slot.
-         *
-         * The interior opens the `host` its registry entry names rather than a hand-written `main`.
-         * The landmark lets a reader skip the chrome above it, and `academy-band-run` is the key
-         * written for exactly this node - its `why` says the node that stacks the bands adds no
-         * measure of its own, which is why its class list is empty.
-         */
-        content={AcademyRoutedContent}
-        contentProps={{ courses: [...courses] }}
-    />
-)
+export const AcademyPageBase = (props: AcademyPageProps) => <AcademyChrome
+/*
+ * `content`, not `children`: the layout names the one routed interior it takes, so nothing
+ * else can arrive beside it unannounced. Only the three closed vendor shells may take the
+ * anonymous slot.
+ *
+ * The interior is a semantic main landmark so a reader can skip the chrome above it. The page
+ * keeps the section block responsible for its own internal structure.
+ */ content={AcademyRoutedContent} contentProps={{
+  courses: [...props.courses]
+}} />;

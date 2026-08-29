@@ -1,4 +1,4 @@
-import { graphql } from "./graphql"
+import { graphql } from "./graphql";
 
 /**
  * The two public operations an academy's landing page needs.
@@ -11,12 +11,12 @@ import { graphql } from "./graphql"
 
 /** One course in the catalog. A subset of `CourseEntity` -- what a landing page can show. */
 export interface Course {
-    id: string
-    slug: string
-    title: string
-    summary: string | null
-    priceText: string | null
-    sortIndex: number
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  priceText: string | null;
+  sortIndex: number;
 }
 
 /**
@@ -33,35 +33,42 @@ export interface Course {
  *
  * @returns The catalog in the expert's own order.
  */
-export const fetchCourses = async (): Promise<{ courses: Array<Course>, reason?: string }> => {
-    const result = await graphql<Array<Course>>(
-        `query Courses {
+export const fetchCourses = async (): Promise<{
+  courses: Array<Course>;
+  reason?: string;
+}> => {
+  const result = await graphql<Array<Course>>(`query Courses {
             courses {
                 success
                 message
                 error
                 data { id slug title summary priceText sortIndex }
             }
-        }`,
-        undefined,
-        // Re-read once a minute. A course list changes when the expert edits it, which is rare and
-        // never urgent; serving it from cache is what keeps a marketing page fast for the visitor
-        // who arrives while the API is busy.
-        { next: { revalidate: 60 } },
-    )
-    if (!result.ok) {
-        return { courses: [], reason: result.reason }
+        }`, undefined,
+  // Re-read once a minute. A course list changes when the expert edits it, which is rare and
+  // never urgent; serving it from cache is what keeps a marketing page fast for the visitor
+  // who arrives while the API is busy.
+  {
+    next: {
+      revalidate: 60
     }
+  });
+  if (!result.ok) {
     return {
-        courses: [...(result.data ?? [])].sort((a, b) => a.sortIndex - b.sortIndex),
-    }
-}
+      courses: [],
+      reason: result.reason
+    };
+  }
+  return {
+    courses: [...(result.data ?? [])].sort((a, b) => a.sortIndex - b.sortIndex)
+  };
+};
 
 /** What the lead form collects. `contact` is a phone number or an email -- the backend takes either. */
 export interface LeadSubmission {
-    name: string
-    contact: string
-    message?: string
+  name: string;
+  contact: string;
+  message?: string;
 }
 
 /**
@@ -73,17 +80,26 @@ export interface LeadSubmission {
  * @param input - The reader's name and how to reach them.
  * @returns Whether it was accepted, and the API's own words if not.
  */
-export const submitLead = async (input: LeadSubmission): Promise<{ ok: boolean, reason?: string }> => {
-    const result = await graphql<{ id: string }>(
-        `mutation SubmitLead($input: SubmitLeadInput!) {
+export const submitLead = async (input: LeadSubmission): Promise<{
+  ok: boolean;
+  reason?: string;
+}> => {
+  const result = await graphql<{
+    id: string;
+  }>(`mutation SubmitLead($input: SubmitLeadInput!) {
             submitLead(input: $input) {
                 success
                 message
                 error
                 data { id }
             }
-        }`,
-        { input },
-    )
-    return result.ok ? { ok: true } : { ok: false, reason: result.reason }
-}
+        }`, {
+    input
+  });
+  return result.ok ? {
+    ok: true
+  } : {
+    ok: false,
+    reason: result.reason
+  };
+};

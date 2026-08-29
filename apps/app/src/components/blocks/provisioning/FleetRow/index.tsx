@@ -1,14 +1,4 @@
-import {
-    Badge,
-    Button,
-    Text,
-    TextLink,
-    Tree,
-    defineContractComponent,
-    defineLeafComponent,
-    type BadgeTone,
-    type CompositeProps,
-} from "@nivo/ui"
+import { Badge, Button, Text, TextLink, type BadgeTone } from "@nivo/ui";
 
 /**
  * BLOCK - one row of the provisioning fleet, whichever kind of thing it is.
@@ -28,88 +18,93 @@ import {
  */
 
 /** How far a fleet resource has got. The union is nivo-backend's, not this app's invention. */
-export type FleetStatus =
-    | "not_provisioned" | "provisioning" | "awaiting_dns" | "ready" | "failed"
-    | "active" | "suspended"
+export type FleetStatus = "not_provisioned" | "provisioning" | "awaiting_dns" | "ready" | "failed" | "active" | "suspended";
 
 /** Which kind of thing the row is. Two kinds, one row shape. */
-export type FleetKind = "site" | "workspace"
+export type FleetKind = "site" | "workspace";
 
 /**
  * Status to tone. Written out rather than derived, because the interesting cases are exactly the
  * ones a rule would get wrong.
  */
 const STATUS_TONE: Readonly<Record<FleetStatus, BadgeTone>> = {
-    not_provisioned: "neutral",
-    provisioning: "accent",
-    // Not `danger`. See the block comment above; this is the whole reason it is written down.
-    awaiting_dns: "warning",
-    ready: "success",
-    failed: "danger",
-    active: "success",
-    suspended: "neutral",
-}
+  not_provisioned: "neutral",
+  provisioning: "accent",
+  // Not `danger`. See the block comment above; this is the whole reason it is written down.
+  awaiting_dns: "warning",
+  ready: "success",
+  failed: "danger",
+  active: "success",
+  suspended: "neutral"
+};
 
 /** Resolved identity, kind, state and the one action this row currently permits. */
 export type FleetRowData = {
-    readonly id: string
-    readonly name?: string
-    readonly detail?: string
-    readonly kind: FleetKind
-    readonly kindLabel: string
-    readonly status: FleetStatus
-    readonly statusLabel?: string
-    /**
-     * Absent when the row's state permits nothing. A resource mid-provision is the ordinary case:
-     * nothing anybody may do to it until the job finishes.
-     */
-    readonly actionLabel?: string
-    readonly isActionPending?: boolean
-}
+  readonly id: string;
+  readonly name?: string;
+  readonly detail?: string;
+  readonly kind: FleetKind;
+  readonly kindLabel: string;
+  readonly status: FleetStatus;
+  readonly statusLabel?: string;
+  /**
+   * Absent when the row's state permits nothing. A resource mid-provision is the ordinary case:
+   * nothing anybody may do to it until the job finishes.
+   */
+  readonly actionLabel?: string;
+  readonly isActionPending?: boolean;
+};
 
 /** Product journeys reported by one fleet row. */
-export type FleetRowActions = { readonly open?: () => void; readonly act?: () => void }
+export type FleetRowActions = {
+  readonly open?: () => void;
+  readonly act?: () => void;
+};
 
 /** Props for the closed fleet-row composition. */
-export type FleetRowProps = CompositeProps<FleetRowData, FleetRowActions>
+export type FleetRowProps = {
+  readonly props: FleetRowData;
+  readonly on?: FleetRowActions;
+  readonly isLoading?: boolean;
+};
 
 /** Draw one provisioned resource: what it is, what state it is in, and what may be done to it. */
-export const FleetRow = ({ props, on, isLoading = false }: FleetRowProps) => {
-    const identity = defineContractComponent("name-over-handle", {
-        name: defineLeafComponent("text-link", { size: "sm" }, () => (
-            <TextLink props={{ label: props.name ?? "", size: "sm" }} on={{ press: on?.open }} />
-        )),
-        handle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-            <Text props={{ content: props.detail, size: "xs", tone: "muted" }} isLoading={isLoading} />
-        )),
-    })
+export const FleetRow = (props: FleetRowProps) => {
+  const data = props.props;
+  const isLoading = props.isLoading;
+  const on = props.on;
+  const identity = <div>
 
-    return (
-        <Tree contract="identity-kind-status-action-row" render={defineContractComponent("identity-kind-status-action-row", {
-            identity,
-            kind: defineLeafComponent("badge", { tone: "neutral" }, () => (
-                <Badge props={{ content: props.kindLabel, tone: "neutral" }} />
-            )),
-            status: defineLeafComponent("badge", {}, () => (
-                <Badge props={{ content: props.statusLabel, tone: STATUS_TONE[props.status] }} />
-            )),
-            ...(props.actionLabel === undefined ? {} : {
-                action: defineLeafComponent("button", {}, () => (
-                    <Button
-                        props={{
-                            label: props.actionLabel ?? "",
-                            size: "sm",
-                            variant: "secondary",
-                            isPending: props.isActionPending,
-                        }}
-                        on={{ press: on?.act }}
-                        isLoading={isLoading}
-                    />
-                )),
-            }),
-        })} />
-    )
-}
+    <TextLink props={{
+      label: data.name ?? "",
+      size: "sm"
+    }} on={{
+      press: on?.open
+    }} />
 
-/** Source-level tier marker: this one knows the domain, so it is a block rather than a composite. */
-export const meta = { shape: "block", world: "pure" } as const
+
+    <Text props={{
+      content: data.detail,
+      size: "xs",
+      tone: "muted"
+    }} isLoading={isLoading} /></div>;
+  return <div>{identity}
+
+    <Badge props={{
+      content: data.kindLabel,
+      tone: "neutral"
+    }} />
+
+
+    <Badge props={{
+      content: data.statusLabel,
+      tone: STATUS_TONE[data.status]
+    }} />{data.actionLabel === undefined ? null : <Button props={{
+      label: data.actionLabel ?? "",
+      size: "sm",
+      variant: "secondary",
+      isPending: data.isActionPending
+    }} on={{
+      press: on?.act
+    }} isLoading={isLoading} />}</div>;
+};

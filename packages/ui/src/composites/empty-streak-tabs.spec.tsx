@@ -12,27 +12,27 @@ describe("EmptyNotice", () => {
         expect(screen.getByText("Try another query")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Retry" }))
         expect(act).toHaveBeenCalledTimes(1)
-        expect(document.querySelector("[data-component='IconTile']")).toBeInTheDocument()
+        expect(document.querySelector("[data-tone] svg")).toBeInTheDocument()
     })
 
     it("omits optional mark, detail, and action", () => {
         render(<EmptyNotice props={{ message: "No records" }} />)
         expect(screen.getByText("No records")).toBeInTheDocument()
         expect(screen.queryByRole("button")).not.toBeInTheDocument()
-        expect(document.querySelector("[data-component='IconTile']")).not.toBeInTheDocument()
+        expect(document.querySelector("[data-tone] svg")).not.toBeInTheDocument()
     })
 })
 
 describe("StreakWeekRun", () => {
     it("renders the supplied week", () => {
         render(<StreakWeekRun props={{ days: Array.from({ length: 7 }, (_, index) => ({ id: String(index), weekday: String(index), title: `Day ${index}`, active: index === 6 })) }} />)
-        expect(document.querySelectorAll("[data-component='DayCell']")).toHaveLength(7)
+        expect(document.querySelectorAll("li")).toHaveLength(7)
         expect(screen.getByText("Day 6")).toBeInTheDocument()
     })
 
     it("renders seven loading placeholders when data is absent", () => {
         render(<StreakWeekRun props={{}} isLoading />)
-        expect(document.querySelectorAll("[data-component='DayCell'][data-loading='true']")).toHaveLength(7)
+        expect(document.querySelectorAll("li[data-loading='true']")).toHaveLength(7)
     })
 })
 

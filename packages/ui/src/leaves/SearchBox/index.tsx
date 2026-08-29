@@ -1,6 +1,5 @@
-import { Input as HeroInput } from "@heroui/react"
-import { Icon } from "../Icon"
-import type { LeafProps } from "../../contracts/props"
+import { Input as HeroInput } from "@heroui/react";
+import { Icon } from "../Icon";
 
 /**
  * LEAF - `SearchBox`: the one field that lives in the bar.
@@ -19,59 +18,58 @@ import type { LeafProps } from "../../contracts/props"
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type SearchBoxData = {
-    /** The already-resolved prompt shown in an empty box. */
-    readonly placeholder: string
-    /** The already-resolved accessible name. Read, never seen. */
-    readonly label: string
-    /** The keyboard shortcut, already written the way a reader would press it. */
-    readonly shortcut?: string
-}
+  /** The already-resolved prompt shown in an empty box. */
+  readonly placeholder: string;
+  /** The already-resolved accessible name. Read, never seen. */
+  readonly label: string;
+  /** The keyboard shortcut, already written the way a reader would press it. */
+  readonly shortcut?: string;
+};
 
 /** What searching does. */
 export type SearchBoxActions = {
-    /** Called with the query when the reader submits. */
-    readonly search?: (query: string) => void
-}
+  /** Called with the query when the reader submits. */
+  readonly search?: (query: string) => void;
+};
 
 /** Props for {@link SearchBox}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type SearchBoxProps = LeafProps<SearchBoxData, SearchBoxActions>
+export type SearchBoxProps = {readonly props: SearchBoxData;readonly on?: SearchBoxActions;readonly isLoading?: boolean;};
 
 /** The glyph leads, the box takes the slack, the hint trails inside the same well. */
-const BOX_CLASSES = "flex flex-row items-center gap-2 rounded-full bg-default px-3 py-2 w-full max-w-xs"
+const BOX_CLASSES = "flex flex-row items-center gap-2 rounded-full bg-default px-3 py-2 w-full max-w-xs";
 
 /** The hint is set as a key, not as a word. */
-const SHORTCUT_CLASSES = "shrink-0 rounded border px-2 py-1 text-xs text-muted"
+const SHORTCUT_CLASSES = "shrink-0 rounded border px-2 py-1 text-xs text-muted";
 
 /**
  * Draw the search field.
  *
  * @param input - {@link SearchBoxProps}
  */
-export const SearchBox = ({ props, on }: SearchBoxProps) => (
-    <form
-        data-tier="leaf"
-        data-component="SearchBox"
-        role="search"
-        className={BOX_CLASSES}
-        onSubmit={(event) => {
-            event.preventDefault()
-            const field = event.currentTarget.elements.namedItem("q")
-            on?.search?.(field instanceof HTMLInputElement ? field.value : "")
-        }}
-    >
+export const SearchBox = (props: SearchBoxProps) => SearchBoxView(props);
+const SearchBoxView = ({ props, on }: SearchBoxProps) =>
+<form
+
+
+  role="search"
+  className={BOX_CLASSES}
+  onSubmit={(event) => {
+    event.preventDefault();
+    const field = event.currentTarget.elements.namedItem("q");
+    on?.search?.(field instanceof HTMLInputElement ? field.value : "");
+  }}>
+  
         <Icon props={{ name: "search", role: "chip" }} />
         <HeroInput
-            name="q"
-            type="search"
-            aria-label={props.label}
-            placeholder={props.placeholder}
-            fullWidth
-        />
-        {props.shortcut === undefined ? null : (
-            <kbd className={SHORTCUT_CLASSES}>{props.shortcut}</kbd>
-        )}
-    </form>
-)
+    name="q"
+    type="search"
+    aria-label={props.label}
+    placeholder={props.placeholder}
+    fullWidth />
+  
+        {props.shortcut === undefined ? null :
+  <kbd className={SHORTCUT_CLASSES}>{props.shortcut}</kbd>
+  }
+    </form>;
 
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const
+

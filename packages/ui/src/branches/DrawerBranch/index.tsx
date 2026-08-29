@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { Drawer } from "@heroui/react"
-import type { ComponentType } from "react"
+import { Drawer } from "@heroui/react";
+import type { ComponentType } from "react";
 
 /** Fixed copy and content owned by the right-edge drawer mechanic. */
 export type DrawerBranchProps<P extends object> = {
-    readonly triggerLabel: string
-    readonly title: string
-    readonly closeLabel: string
-    readonly content: ComponentType<P>
-    readonly contentProps: P
-}
+  readonly triggerLabel: string;
+  readonly title: string;
+  readonly closeLabel: string;
+  readonly content: ComponentType<P>;
+  readonly contentProps: P;
+};
 
 /** Own HeroUI drawer placement, focus, dismissal, backdrop and the single scroll body. */
-export const DrawerBranch = <P extends object>({ triggerLabel, title, closeLabel, content: Content, contentProps }: DrawerBranchProps<P>) => (
-    <Drawer.Root>
+export const DrawerBranch = <P extends object,>({ triggerLabel, title, closeLabel, content: Content, contentProps }: DrawerBranchProps<P>) =>
+<Drawer.Root>
         <Drawer.Trigger className="min-h-10 rounded-large px-3 text-sm font-semibold text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent">
             {triggerLabel}
         </Drawer.Trigger>
@@ -31,8 +31,6 @@ export const DrawerBranch = <P extends object>({ triggerLabel, title, closeLabel
                 </Drawer.Dialog>
             </Drawer.Content>
         </Drawer.Backdrop>
-    </Drawer.Root>
-)
+    </Drawer.Root>;
 
-/** Source-level tier marker for the named drawer mechanics owner. */
-export const meta = { shape: "branch", world: "pure" } as const
+

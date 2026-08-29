@@ -1,5 +1,9 @@
-import { Heading, NivoBrand, Tree, Text, defineContractComponent, defineLeafComponent } from "@nivo/ui"
-import { LANDING_DESCRIPTION } from "@/resources/copy"
+import { Heading, NivoBrand, Text } from "@nivo/ui";
+import { LANDING_DESCRIPTION } from "@/resources/copy";
+import { CONTENT_CLASS_NAME, ROOT_CLASS_NAME } from "./classNames";
+
+/** Props for the static landing page. */
+export type LandingPageProps = Record<string, never>;
 
 /**
  * PAGE - the public landing screen.
@@ -18,21 +22,23 @@ import { LANDING_DESCRIPTION } from "@/resources/copy"
  *
  * @returns The page.
  */
-export const LandingPage = () => (
-    <Tree
-        contract="centred-viewport-main"
-        render={defineContractComponent("centred-viewport-main", {
-            content: defineContractComponent("centred-title-pair", {
-                mark: defineLeafComponent("brand-mark", {}, () => (
-                    <NivoBrand props={{ label: "nivo", variant: "lockup", scale: "hero" }} />
-                )),
-                title: defineLeafComponent("heading", {}, () => (
-                    <Heading props={{ content: "nivo", level: 1 }} />
-                )),
-                description: defineLeafComponent("text", { size: "sm" }, () => (
-                    <Text props={{ content: LANDING_DESCRIPTION, size: "sm" }} />
-                )),
-            }),
-        })}
-    />
-)
+export const LandingPage = (props: LandingPageProps) => {
+  void props;
+  return <main className={ROOT_CLASS_NAME}>
+        <div className={CONTENT_CLASS_NAME}>
+            <NivoBrand props={{
+        label: "nivo",
+        variant: "lockup",
+        scale: "hero"
+      }} />
+            <Heading props={{
+        content: "nivo",
+        level: 1
+      }} />
+            <Text props={{
+        content: LANDING_DESCRIPTION,
+        size: "sm"
+      }} />
+        </div>
+    </main>;
+};

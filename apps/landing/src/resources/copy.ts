@@ -10,4 +10,4 @@
  */
 
 /** How the landing site describes itself, in metadata and on the page. */
-export const LANDING_DESCRIPTION = "Trang giới thiệu sản phẩm."
+export const LANDING_DESCRIPTION = "Trang giới thiệu sản phẩm.";

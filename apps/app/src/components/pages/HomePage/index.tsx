@@ -1,5 +1,9 @@
-import { Heading, Icon, Tree, Text, defineContractComponent, defineLeafComponent } from "@nivo/ui"
-import { useTranslations } from "next-intl"
+import { Heading, Icon, Text } from "@nivo/ui";
+import { useTranslations } from "next-intl";
+import { CONTENT_CLASS_NAME, ROOT_CLASS_NAME } from "./classNames";
+
+/** Props for the static home page. */
+export type HomePageProps = Record<string, never>;
 
 /**
  * PAGE - the control plane's landing screen.
@@ -18,24 +22,23 @@ import { useTranslations } from "next-intl"
  *
  * @returns The page.
  */
-export const HomePage = () => {
-    const t = useTranslations("app")
-    return (
-        <Tree
-            contract="centred-viewport-main"
-            render={defineContractComponent("centred-viewport-main", {
-                content: defineContractComponent("centred-title-pair", {
-                    mark: defineLeafComponent("icon", {}, () => (
-                        <Icon props={{ name: "brand", role: "heading" }} />
-                    )),
-                    title: defineLeafComponent("heading", {}, () => (
-                        <Heading props={{ content: "nivo app", level: 1 }} />
-                    )),
-                    description: defineLeafComponent("text", { size: "sm" }, () => (
-                        <Text props={{ content: t("description"), size: "sm" }} />
-                    )),
-                }),
-            })}
-        />
-    )
-}
+export const HomePage = (props: HomePageProps) => {
+  void props;
+  const t = useTranslations("app");
+  return <main className={ROOT_CLASS_NAME}>
+            <div className={CONTENT_CLASS_NAME}>
+                <Icon props={{
+        name: "brand",
+        role: "heading"
+      }} />
+                <Heading props={{
+        content: "nivo app",
+        level: 1
+      }} />
+                <Text props={{
+        content: t("description"),
+        size: "sm"
+      }} />
+            </div>
+        </main>;
+};

@@ -1,7 +1,10 @@
-import { AppsDashboard } from "@/components/blocks/apps/AppsDashboard"
+import { AppsDashboard } from "@/components/blocks/apps/AppsDashboard";
 
 /** Compose the connected dashboard block without proxying its request states. */
-export const AppsPageBase = () => <AppsDashboard />
+export type AppsPageProps = Record<string, never>;
+/** Public API role for AppsPageBase. */
+export const AppsPageBase = (props: AppsPageProps) => {
+  void props;
+  return <AppsDashboard />;
+};
 
-/** Source-level tier marker for the pure Apps page compositor. */
-export const meta = { shape: "page", world: "pure" } as const

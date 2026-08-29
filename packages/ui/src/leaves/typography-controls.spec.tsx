@@ -13,14 +13,14 @@ describe("typography leaves", () => {
         expect(text).toHaveAttribute("role", "status")
         expect(text).toHaveAttribute("aria-live", "polite")
         expect(text).toHaveAttribute("data-icon", "true")
-        expect(text).toHaveAttribute("data-press-label", "true")
+        expect(text).toHaveClass("text-press-label")
         expect(text).toHaveAttribute("data-tone", "accent")
         expect(text).toHaveTextContent("Ready")
     })
 
     it("uses a measured loading bar and suppresses its icon", () => {
         render(<Text props={{ content: "Loading", size: "xs", icon: "search" }} isLoading />)
-        const text = document.querySelector("[data-component='Text']")
+        const text = document.querySelector("[data-loading='true']")
         expect(text).toHaveAttribute("data-loading", "true")
         expect(text).toHaveAttribute("data-icon", "false")
         expect(text).toHaveClass("w-10")
@@ -54,7 +54,7 @@ describe("typography leaves", () => {
 
     it("keeps a loading heading hidden while preserving its level", () => {
         render(<Heading props={{ content: "Title", level: 2 }} isLoading />)
-        const heading = document.querySelector("[data-component='Heading']")
+        const heading = document.querySelector("h2")
         expect(heading).toHaveAttribute("aria-hidden", "true")
         expect(heading).toHaveAttribute("data-loading", "true")
     })

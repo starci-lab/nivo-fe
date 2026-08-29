@@ -5,6 +5,6 @@ vi.mock("./component", () => ({ AcademyPageBase: ({ courses }: PageProps) => <ou
 import { fetchCourses } from "@/modules/api/academy"
 import { AcademyPage } from "./index"
 describe("academy page server orchestration", () => {
-    it("passes a successful catalog", async () => { vi.mocked(fetchCourses).mockResolvedValue({ courses: [{ id: "1", slug: "starter", title: "Starter", summary: null, priceText: null, sortIndex: 0 }] }); await expect(AcademyPage()).resolves.toMatchObject({ props: { courses: [{ title: "Starter" }] } }) })
-    it("passes an empty catalog after a failed fetch", async () => { vi.mocked(fetchCourses).mockResolvedValue({ courses: [], reason: "offline" }); await expect(AcademyPage()).resolves.toMatchObject({ props: { courses: [] } }) })
+    it("passes a successful catalog", async () => { vi.mocked(fetchCourses).mockResolvedValue({ courses: [{ id: "1", slug: "starter", title: "Starter", summary: null, priceText: null, sortIndex: 0 }] }); await expect(AcademyPage({})).resolves.toMatchObject({ props: { courses: [{ title: "Starter" }] } }) })
+    it("passes an empty catalog after a failed fetch", async () => { vi.mocked(fetchCourses).mockResolvedValue({ courses: [], reason: "offline" }); await expect(AcademyPage({})).resolves.toMatchObject({ props: { courses: [] } }) })
 })

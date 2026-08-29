@@ -11,13 +11,13 @@
  */
 
 /** The locales this app ships copy for. The first is what an unrecognised value falls back to. */
-export const LOCALES = ["vi", "en"] as const
+export const LOCALES = ["vi", "en"] as const;
 
 /** One of the locales the app ships. */
-export type Locale = (typeof LOCALES)[number]
+export type Locale = (typeof LOCALES)[number];
 
 /** What an unrecognised or absent locale resolves to. */
-export const DEFAULT_LOCALE: Locale = "vi"
+export const DEFAULT_LOCALE: Locale = "vi";
 
 /**
  * The zone every date on the screen is written in.
@@ -33,7 +33,7 @@ export const DEFAULT_LOCALE: Locale = "vi"
  * catalogue directly. Two entry points naming the zone independently is exactly the drift this
  * constant exists to prevent.
  */
-export const TIME_ZONE = "Asia/Ho_Chi_Minh"
+export const TIME_ZONE = "Asia/Ho_Chi_Minh";
 
 /**
  * Narrow an unknown value to a locale this app actually has messages for.
@@ -46,5 +46,4 @@ export const TIME_ZONE = "Asia/Ho_Chi_Minh"
  * @param value - The candidate locale.
  * @returns A locale this app ships.
  */
-export const toLocale = (value: unknown): Locale =>
-    LOCALES.includes(value as Locale) ? (value as Locale) : DEFAULT_LOCALE
+export const toLocale = (value: unknown): Locale => LOCALES.includes(value as Locale) ? value as Locale : DEFAULT_LOCALE;

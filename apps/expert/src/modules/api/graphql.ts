@@ -15,7 +15,7 @@
  */
 
 /** Where the academy API answers. */
-const ENDPOINT = process.env.NEXT_PUBLIC_ACADEMY_API_URL ?? "http://localhost:4068/graphql"
+const ENDPOINT = process.env.NEXT_PUBLIC_ACADEMY_API_URL ?? "http://localhost:4068/graphql";
 
 /**
  * Every response this API sends, whatever the operation.
@@ -26,16 +26,20 @@ const ENDPOINT = process.env.NEXT_PUBLIC_ACADEMY_API_URL ?? "http://localhost:40
  * refused -- and conflating them is how a validation error gets reported as "network problem".
  */
 interface Envelope<T> {
-    data: T | null
-    error?: string | null
-    message: string
-    success: boolean
+  data: T | null;
+  error?: string | null;
+  message: string;
+  success: boolean;
 }
 
 /** What a caller gets back: the payload, or the reason there is none. */
-export type Result<T> =
-    | { ok: true, data: T }
-    | { ok: false, reason: string }
+export type Result<T> = {
+  ok: true;
+  data: T;
+} | {
+  ok: false;
+  reason: string;
+};
 
 /**
  * Runs one GraphQL operation.
@@ -47,8 +51,10 @@ export type Result<T> =
  *
 /** Fetch options plus the Next revalidation hint this transport understands. */
 export interface FetchInit extends RequestInit {
-    /** Next's own cache directive for this request. */
-    readonly next?: { readonly revalidate?: number }
+  /** Next's own cache directive for this request. */
+  readonly next?: {
+    readonly revalidate?: number;
+  };
 }
 
 /**
@@ -57,44 +63,70 @@ export interface FetchInit extends RequestInit {
  * @param init - Extra fetch options; `next` revalidation belongs here.
  * @returns The unwrapped payload, or why there is none.
  */
-export const graphql = async <T,>(
-    query: string,
-    variables?: Record<string, unknown>,
-    init?: FetchInit,
-): Promise<Result<T>> => {
-    let response: Response
-    try {
-        response = await fetch(ENDPOINT, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query, variables }),
-            ...init,
-        })
-    } catch (error) {
-        return { ok: false, reason: error instanceof Error ? error.message : "network error" }
-    }
-    if (!response.ok) {
-        return { ok: false, reason: `HTTP ${response.status}` }
-    }
-
-    let body: { data?: Record<string, Envelope<T>>, errors?: Array<{ message: string }> }
-    try {
-        body = await response.json()
-    } catch {
-        return { ok: false, reason: "response was not JSON" }
-    }
-    if (body.errors?.length) {
-        return { ok: false, reason: body.errors[0].message }
-    }
-    // One operation per call, so the envelope is whatever single key came back. Read positionally
-    // rather than by name: the caller already knows which operation it asked for, and repeating the
-    // name here would be a second place to keep in step with the document above.
-    const envelope = Object.values(body.data ?? {})[0]
-    if (!envelope) {
-        return { ok: false, reason: "empty response" }
-    }
-    if (!envelope.success) {
-        return { ok: false, reason: envelope.error || envelope.message }
-    }
-    return { ok: true, data: envelope.data as T }
-}
+export const graphql = async <T,>(query: string, variables?: Record<string, unknown>, init?: FetchInit): Promise<Result<T>> => {
+  let response: Response;
+  try {
+    response = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        query,
+        variables
+      }),
+      ...init
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error instanceof Error ? error.message : "network error"
+    };
+  }
+  if (!response.ok) {
+    return {
+      ok: false,
+      reason: `HTTP ${response.status}`
+    };
+  }
+  let body: {
+    data?: Record<string, Envelope<T>>;
+    errors?: Array<{
+      message: string;
+    }>;
+  };
+  try {
+    body = await response.json();
+  } catch {
+    return {
+      ok: false,
+      reason: "response was not JSON"
+    };
+  }
+  if (body.errors?.length) {
+    return {
+      ok: false,
+      reason: body.errors[0].message
+    };
+  }
+  // One operation per call, so the envelope is whatever single key came back. Read positionally
+  // rather than by name: the caller already knows which operation it asked for, and repeating the
+  // name here would be a second place to keep in step with the document above.
+  const envelope = Object.values(body.data ?? {})[0];
+  if (!envelope) {
+    return {
+      ok: false,
+      reason: "empty response"
+    };
+  }
+  if (!envelope.success) {
+    return {
+      ok: false,
+      reason: envelope.error || envelope.message
+    };
+  }
+  return {
+    ok: true,
+    data: envelope.data as T
+  };
+};

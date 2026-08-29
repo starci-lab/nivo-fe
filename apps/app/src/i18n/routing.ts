@@ -1,5 +1,5 @@
-import { defineRouting } from "next-intl/routing"
-import { DEFAULT_LOCALE, LOCALES } from "./config"
+import { defineRouting } from "next-intl/routing";
+import { DEFAULT_LOCALE, LOCALES } from "./config";
 
 /**
  * Which locales are routed, and how they show up in the address.
@@ -18,7 +18,7 @@ import { DEFAULT_LOCALE, LOCALES } from "./config"
  * The same shape `apps/expert` already runs, so the workspace has one answer rather than two.
  */
 export const routing = defineRouting({
-    locales: LOCALES,
-    defaultLocale: DEFAULT_LOCALE,
-    localePrefix: "as-needed",
-})
+  locales: LOCALES,
+  defaultLocale: DEFAULT_LOCALE,
+  localePrefix: "as-needed"
+});

@@ -1,5 +1,5 @@
-import createMiddleware from "next-intl/middleware"
-import { routing } from "./i18n/routing"
+import createMiddleware from "next-intl/middleware";
+import { routing } from "./i18n/routing";
 
 /**
  * Resolves the locale before the route is matched.
@@ -14,9 +14,9 @@ import { routing } from "./i18n/routing"
  * file has no language to negotiate -- running this over them would put a redirect in front of
  * every script tag on the page.
  */
-export default createMiddleware(routing)
+export default createMiddleware(routing);
 
 /** Which paths the locale middleware runs on: everything except API, build output and real files. */
 export const config = {
-    matcher: ["/((?!api|_next|_vercel|.*[.].*).*)"],
-}
+  matcher: ["/((?!api|_next|_vercel|.*[.].*).*)"]
+};

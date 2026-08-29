@@ -1,10 +1,7 @@
 import { Badge, type BadgeTone } from "../../leaves/Badge"
 import { Text } from "../../leaves/Text"
-import { Tree } from "../../branches/Tree"
-import type { CompositeProps } from "../../contracts/props"
-import { defineCompositeComponent, defineContractComponent, defineLeafComponent } from "../../contracts/props"
 
-/** One public-safe Helm component row. */
+/** One public-safe component row returned by a Helm status view. */
 export type HelmComponentStatusRow = {
     readonly id: string
     readonly name: string
@@ -15,37 +12,28 @@ export type HelmComponentStatusRow = {
     readonly resources: string
 }
 
-/** Stable table identity and its component rows. */
+/** Resolved release identity and component rows. */
 export type HelmComponentStatusTableData = { readonly id: string; readonly rows: ReadonlyArray<HelmComponentStatusRow> }
-/** Closed data surface for the Helm component table. */
-export type HelmComponentStatusTableProps = CompositeProps<HelmComponentStatusTableData>
 
-/** Draw the public-safe component projection of a Helm release. */
-export const HelmComponentStatusTable = ({ props, isLoading = false }: HelmComponentStatusTableProps) => (
-    <Tree
-        contract="helm-component-status-table"
-        render={defineContractComponent("helm-component-status-table", {
-            component: (isLoading ? [0, 1, 2] : props.rows).map((row, index) => {
-                const value = typeof row === "number" ? undefined : row
-                return defineCompositeComponent("helm-component-status-row", {}, () => (
-                    <Tree
-                        key={value?.id ?? index}
-                        contract="helm-component-status-row"
-                        render={defineContractComponent("helm-component-status-row", {
-                            identity: defineContractComponent("subject-over-muted-caption", {
-                                subject: defineLeafComponent("text", { weight: "semibold" }, () => <Text props={{ content: value?.name, weight: "semibold" }} isLoading={isLoading} />),
-                                caption: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: value?.detail, size: "xs", tone: "muted" }} isLoading={isLoading} />),
-                            }),
-                            kind: defineLeafComponent("badge", { tone: "neutral" }, () => <Badge props={{ content: value?.kind, tone: "neutral" }} isLoading={isLoading} />),
-                            state: defineLeafComponent("badge", {}, () => <Badge props={{ content: value?.status, tone: value?.statusTone }} isLoading={isLoading} />),
-                            resources: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: value?.resources, size: "xs", tone: "muted" }} isLoading={isLoading} />),
-                        })}
-                    />
-                ))
-            }),
-        })}
-    />
-)
+/** Props for the Helm component status table. */
+export type HelmComponentStatusTableProps = { readonly props: HelmComponentStatusTableData; readonly isLoading?: boolean }
 
-/** Source-level tier marker for the Helm component table. */
-export const meta = { shape: "composite", world: "pure" } as const
+/** Render safe component status rows, including stable loading placeholders. */
+export const HelmComponentStatusTable = (props: HelmComponentStatusTableProps) => {
+    const rows = props.isLoading ? [undefined, undefined, undefined] : props.props.rows
+    return (
+        <div>
+            {rows.map((row, index) => (
+                <div key={row?.id ?? `loading-${index}`}>
+                    <div>
+                        <Text props={{ content: row?.name, weight: "semibold" }} isLoading={props.isLoading} />
+                        <Text props={{ content: row?.detail, size: "xs", tone: "muted" }} isLoading={props.isLoading} />
+                    </div>
+                    <Badge props={{ content: row?.kind, tone: "neutral" }} isLoading={props.isLoading} />
+                    <Badge props={{ content: row?.status, tone: row?.statusTone }} isLoading={props.isLoading} />
+                    <Text props={{ content: row?.resources, size: "xs", tone: "muted" }} isLoading={props.isLoading} />
+                </div>
+            ))}
+        </div>
+    )
+}

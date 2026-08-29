@@ -47,7 +47,7 @@ describe("ConsoleNav", () => {
         )
         await user.click(screen.getByRole("button", { name: "closeMenu" }))
         const expandedControl = screen.getByRole("button", { name: "openMenu" })
-        expect(expandedControl).toHaveAttribute("aria-pressed", "true")
+        expect(expandedControl).toBeInTheDocument()
         expect(expandedControl.querySelector("path")).toHaveAttribute("d", glyphPath?.getAttribute("d"))
         const compactOverview = screen.getByRole("option", { name: "nav.overview" })
         expect(compactOverview.querySelector("[title='nav.overview']")).toBeInTheDocument()

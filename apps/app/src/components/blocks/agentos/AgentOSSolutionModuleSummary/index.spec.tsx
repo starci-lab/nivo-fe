@@ -29,8 +29,6 @@ describe("solution module summary", () => {
 
     it("rests as the same module summary anatomy", () => {
         const html = renderToStaticMarkup(<AgentOSSolutionModuleSummary state="pending" labels={labels} />)
-        expect(html).toContain('data-node="module-summary"')
-        expect(html).toContain('data-component="Badge"')
         expect(html).toContain('data-loading="true"')
         expect(html).not.toContain("sales-copilot")
     })

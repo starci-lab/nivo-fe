@@ -8,10 +8,10 @@
  */
 
 /** The locales this app ships copy for. The first is what an unrecognised cookie falls back to. */
-export const LOCALES = ["en", "vi"] as const
+export const LOCALES = ["en", "vi"] as const;
 
 /** One of the locales the app ships. */
-export type Locale = (typeof LOCALES)[number]
+export type Locale = (typeof LOCALES)[number];
 
 /*
  * THE COOKIE CONSTANTS ARE GONE, and their absence is the point.
@@ -34,7 +34,7 @@ export type Locale = (typeof LOCALES)[number]
  * this product. It only picks which of the versions the expert authored to show, and this is the
  * one it falls back to when the expert did not write the reader's language.
  */
-export const DEFAULT_LOCALE: Locale = "en"
+export const DEFAULT_LOCALE: Locale = "en";
 
 /**
  * Narrow an arbitrary value to a locale the app actually ships.
@@ -46,5 +46,4 @@ export const DEFAULT_LOCALE: Locale = "en"
  * @param value - The raw cookie value, if there was one.
  * @returns A locale this app ships copy for.
  */
-export const toLocale = (value: string | undefined): Locale =>
-    LOCALES.includes(value as Locale) ? (value as Locale) : DEFAULT_LOCALE
+export const toLocale = (value: string | undefined): Locale => LOCALES.includes(value as Locale) ? value as Locale : DEFAULT_LOCALE;

@@ -1,5 +1,5 @@
-import { SurfaceFormCard, Tree, defineContractComponent, defineContractProjection } from "@nivo/ui"
-import { AuthenticationPanel, type AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel"
+import { SurfaceFormCard } from "@nivo/ui";
+import { AuthenticationPanel, type AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";
 
 /**
  * PAGE - `/authentication`, presentational half.
@@ -21,16 +21,16 @@ import { AuthenticationPanel, type AuthenticationPanelProps } from "@/components
 
 /** Props for {@link AuthenticationPageBase}. */
 export type AuthenticationPageProps = {
-    /**
-     * The panel's complete situation, already discriminated and already in words.
-     *
-     * Passed WHOLE rather than unpacked into a dozen props. The panel's own union is what guarantees
-     * the copy of a state it is not drawing cannot be supplied and the copy of the one it is drawing
-     * cannot be forgotten; splitting that union apart here would hand this file the job of
-     * reassembling it, and every reassembly is a chance to get it wrong.
-     */
-    readonly panel: AuthenticationPanelProps
-}
+  /**
+   * The panel's complete situation, already discriminated and already in words.
+   *
+   * Passed WHOLE rather than unpacked into a dozen props. The panel's own union is what guarantees
+   * the copy of a state it is not drawing cannot be supplied and the copy of the one it is drawing
+   * cannot be forgotten; splitting that union apart here would hand this file the job of
+   * reassembling it, and every reassembly is a chance to get it wrong.
+   */
+  readonly panel: AuthenticationPanelProps;
+};
 
 /**
  * Draw the authentication screen.
@@ -38,19 +38,16 @@ export type AuthenticationPageProps = {
  * @param props - {@link AuthenticationPageProps}
  * @returns The page node.
  */
-export const AuthenticationPageBase = ({ panel }: AuthenticationPageProps) => {
-    const cardContent = defineContractComponent("authentication-panel-card", {
-        panel: defineContractProjection("centred-page-column", () => <AuthenticationPanel {...panel} />),
-    })
+export const AuthenticationPageBase = (props: AuthenticationPageProps) => {
+  const {
+    panel
+  }: AuthenticationPageProps = props;
+  const cardContent = <div>
+    <AuthenticationPanel {...panel} /></div>;
+  return <div>
 
-    return (
-        <Tree
-            contract="centred-authentication-page"
-            render={defineContractComponent("centred-authentication-page", {
-                surface: defineContractProjection("authentication-panel-card", () => (
-                    <SurfaceFormCard ariaLabel={panel.props.title} contract="authentication-panel-card" render={cardContent} />
-                )),
-            })}
-        />
-    )
-}
+
+
+
+    <SurfaceFormCard ariaLabel={panel.props.title}>{cardContent}</SurfaceFormCard></div>;
+};

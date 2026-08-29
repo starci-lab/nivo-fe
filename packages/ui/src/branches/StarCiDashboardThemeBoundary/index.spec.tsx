@@ -5,11 +5,10 @@ import { StarCiDashboardThemeBoundary } from "."
 const Dashboard = () => <span>Dashboard</span>
 
 describe("StarCiDashboardThemeBoundary", () => {
-    it("binds projected dashboard content to the strict visual contract", () => {
+    it("binds dashboard content to the shared visual theme", () => {
         render(<StarCiDashboardThemeBoundary content={Dashboard} contentProps={{}} />)
 
         const boundary = screen.getByText("Dashboard").parentElement
-        expect(boundary).toHaveAttribute("data-theme", "starci-dashboard")
-        expect(boundary).toHaveAttribute("data-visual-contract", "starci-dashboard-theme")
+        expect(boundary).toHaveClass("starci-dashboard-theme")
     })
 })

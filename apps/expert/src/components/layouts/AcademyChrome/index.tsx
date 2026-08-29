@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import type { ComponentType } from "react"
-import { useLocale } from "next-intl"
-import type { Locale } from "@/i18n/config"
-import { ACADEMY, inLocale, isSafeThemeValue, type ThemeVariables } from "@/modules/academy/template"
+import type { ComponentType } from "react";
+import { useLocale } from "next-intl";
+import type { Locale } from "@/i18n/config";
+import { ACADEMY, inLocale, isSafeThemeValue, type ThemeVariables } from "@/modules/academy/template";
 
 /**
  * The only place in this app that knows what colour the academy is.
@@ -25,12 +25,9 @@ import { ACADEMY, inLocale, isSafeThemeValue, type ThemeVariables } from "@/modu
  * confined to this file rather than offered as a hook any section could call.
  *
  * IT OPENS NO ELEMENT OF ITS OWN, AND THAT IS THE HONEST SHAPE RATHER THAN A CONCESSION. This
- * component takes `children` as an opaque `ReactNode`: whatever a route hands it, it wraps. A
- * registry key is the opposite promise -- it fixes a node's classes AND names the children that
- * node admits -- so no key can describe a wrapper whose whole point is not to know its interior,
- * and `<Tree contract="…" render={…} />` cannot be reached from here at all because `render` takes
- * a typed contract component and `children` is not one. The old `<div>` was therefore a node with
- * no key by construction, not for want of one being written.
+ * component takes `children` as an opaque `ReactNode`: whatever a route hands it, it wraps. The
+ * wrapper deliberately leaves the interior to the route so each page can preserve its own
+ * semantic structure and interaction model.
  *
  * WHAT THAT DIV ACTUALLY CARRIED HAS MOVED TO THE STYLESHEET THIS FILE ALREADY OWNS, which is where
  * it belonged: the page's ground is a DOCUMENT fact, not a node in any page's tree. See
@@ -48,14 +45,11 @@ import { ACADEMY, inLocale, isSafeThemeValue, type ThemeVariables } from "@/modu
  * @returns CSS declarations, or "" when nothing survived.
  */
 const declarationsFor = (variables: ThemeVariables | undefined): string => {
-    if (!variables) {
-        return ""
-    }
-    return Object.entries(variables)
-        .filter(([name, value]) => /^--[a-z0-9-]+$/i.test(name) && isSafeThemeValue(value))
-        .map(([name, value]) => `  ${name}: ${value};`)
-        .join("\n")
-}
+  if (!variables) {
+    return "";
+  }
+  return Object.entries(variables).filter(([name, value]) => /^--[a-z0-9-]+$/i.test(name) && isSafeThemeValue(value)).map(([name, value]) => `  ${name}: ${value};`).join("\n");
+};
 
 /**
  * The two characters that end a quoted CSS string early, and what they become inside one.
@@ -66,10 +60,10 @@ const declarationsFor = (variables: ThemeVariables | undefined): string => {
  * the sequence can be written literally; a lone backslash cannot be, because a template literal
  * ending in one escapes its own closing backtick.
  */
-const BACKSLASH = "\\"
-const ESCAPED_BACKSLASH = String.raw`\\`
-const QUOTATION_MARK = '"'
-const ESCAPED_QUOTATION_MARK = String.raw`\"`
+const BACKSLASH = "\\";
+const ESCAPED_BACKSLASH = String.raw`\\`;
+const QUOTATION_MARK = '"';
+const ESCAPED_QUOTATION_MARK = String.raw`\"`;
 
 /**
  * Names the mounted academy on the root, beside the palette that belongs to it.
@@ -95,14 +89,12 @@ const ESCAPED_QUOTATION_MARK = String.raw`\"`
  * @returns The declaration, or "" when the name cannot be emitted safely.
  */
 const identityDeclarationFor = (name: string | undefined): string => {
-    if (name === undefined || !isSafeThemeValue(name)) {
-        return ""
-    }
-    const quoted = name
-        .replaceAll(BACKSLASH, ESCAPED_BACKSLASH)
-        .replaceAll(QUOTATION_MARK, ESCAPED_QUOTATION_MARK)
-    return `  --academy: "${quoted}";`
-}
+  if (name === undefined || !isSafeThemeValue(name)) {
+    return "";
+  }
+  const quoted = name.replaceAll(BACKSLASH, ESCAPED_BACKSLASH).replaceAll(QUOTATION_MARK, ESCAPED_QUOTATION_MARK);
+  return `  --academy: "${quoted}";`;
+};
 
 /**
  * The page's ground.
@@ -129,7 +121,7 @@ const identityDeclarationFor = (name: string | undefined): string => {
  * It is emitted unconditionally, unlike the theme block: a template that overrides nothing still
  * needs its page painted, and before this the ground came from a class that was always present.
  */
-const GROUND_CSS = "body {\n  background-color: var(--background);\n  color: var(--foreground);\n}"
+const GROUND_CSS = "body {\n  background-color: var(--background);\n  color: var(--foreground);\n}";
 
 /**
  * Builds the vendor's theming block for this academy, plus the ground it is painted on.
@@ -141,33 +133,31 @@ const GROUND_CSS = "body {\n  background-color: var(--background);\n  color: var
  * @returns The stylesheet text.
  */
 const themeCss = (name: string | undefined): string => {
-    const light = [declarationsFor(ACADEMY.theme.light), identityDeclarationFor(name)]
-        .filter(Boolean)
-        .join("\n")
-    const dark = declarationsFor(ACADEMY.theme.dark)
-    const blocks: Array<string> = [GROUND_CSS]
-    if (light) {
-        blocks.push(`:root,\n.light,\n[data-theme="light"] {\n${light}\n}`)
-    }
-    if (dark) {
-        blocks.push(`.dark,\n[data-theme="dark"] {\n${dark}\n}`)
-    }
-    return blocks.join("\n")
-}
+  const light = [declarationsFor(ACADEMY.theme.light), identityDeclarationFor(name)].filter(Boolean).join("\n");
+  const dark = declarationsFor(ACADEMY.theme.dark);
+  const blocks: Array<string> = [GROUND_CSS];
+  if (light) {
+    blocks.push(`:root,\n.light,\n[data-theme="light"] {\n${light}\n}`);
+  }
+  if (dark) {
+    blocks.push(`.dark,\n[data-theme="dark"] {\n${dark}\n}`);
+  }
+  return blocks.join("\n");
+};
 
 /** Props for {@link AcademyChrome}. */
 interface AcademyChromeProps<P extends object> {
-    /**
-     * The page to wrap. Opaque on purpose -- this component styles a document, not a tree.
-     *
-     * A NAMED PROP RATHER THAN `children`, and the difference is not cosmetic. `children` is the one
-     * slot every JSX element already has, so a component that takes it accepts markup from anywhere
-     * without saying what it expects, and only the three closed vendor shells are allowed that.
-     * `content` says the same thing out loud: this layout receives exactly one routed interior, at a
-     * name a reader can grep, and a second one cannot be slipped in beside it.
-     */
-    readonly content: ComponentType<P>
-    readonly contentProps: P
+  /**
+   * The page to wrap. Opaque on purpose -- this component styles a document, not a tree.
+   *
+   * A NAMED PROP RATHER THAN `children`, and the difference is not cosmetic. `children` is the one
+   * slot every JSX element already has, so a component that takes it accepts markup from anywhere
+   * without saying what it expects, and only the three closed vendor shells are allowed that.
+   * `content` says the same thing out loud: this layout receives exactly one routed interior, at a
+   * name a reader can grep, and a second one cannot be slipped in beside it.
+   */
+  readonly content: ComponentType<P>;
+  readonly contentProps: P;
 }
 
 /**
@@ -176,22 +166,20 @@ interface AcademyChromeProps<P extends object> {
  * @param input - {@link AcademyChromeProps}
  * @returns The themed shell.
  */
-export const AcademyChrome = <P extends object>({ content: Content, contentProps }: AcademyChromeProps<P>) => {
-    const locale = useLocale() as Locale
-    const theme = themeCss(inLocale(ACADEMY.identity.name, locale))
-    return (
-        <>
+export const AcademyChrome = <P extends object,>(props: AcademyChromeProps<P>) => {
+  const locale = useLocale() as Locale;
+  const theme = themeCss(inLocale(ACADEMY.identity.name, locale));
+  return <>
             {/*
-              * The academy's theme, then the academy's own CSS -- in that order, so a hand-written
-              * rule can override a token rather than losing to one.
-              *
-              * Both are inlined rather than linked. A stylesheet that arrives after the page has
-              * painted shows every visitor an unstyled flash of somebody else's defaults, and the
-              * custom CSS has already had its XSS vectors stripped by the backend.
-              */}
+             * The academy's theme, then the academy's own CSS -- in that order, so a hand-written
+             * rule can override a token rather than losing to one.
+             *
+             * Both are inlined rather than linked. A stylesheet that arrives after the page has
+             * painted shows every visitor an unstyled flash of somebody else's defaults, and the
+             * custom CSS has already had its XSS vectors stripped by the backend.
+             */}
             <style>{theme}</style>
             {ACADEMY.customCss ? <style>{ACADEMY.customCss}</style> : null}
-            <Content {...contentProps} />
-        </>
-    )
-}
+            <props.content {...props.contentProps} />
+        </>;
+};

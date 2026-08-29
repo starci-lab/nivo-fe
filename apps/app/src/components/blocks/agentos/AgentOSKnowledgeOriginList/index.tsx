@@ -1,7 +1,7 @@
-import { AgentOSKnowledgeOriginListBase, type AgentOSKnowledgeOriginListViewProps } from "./component"
+import { AgentOSKnowledgeOriginListBase, type AgentOSKnowledgeOriginListViewProps } from "./component";
 
 /** Keep provenance presentation independently reusable inside workspace AI surfaces. */
-export const AgentOSKnowledgeOriginList = (props: AgentOSKnowledgeOriginListViewProps) => <AgentOSKnowledgeOriginListBase {...props} />
+export type AgentOSKnowledgeOriginListProps = AgentOSKnowledgeOriginListViewProps;
+/** Public API role for AgentOSKnowledgeOriginList. */
+export const AgentOSKnowledgeOriginList = (props: AgentOSKnowledgeOriginListProps) => <AgentOSKnowledgeOriginListBase {...props} />;
 
-/** Source-level tier marker for the connected provenance block. */
-export const meta = { shape: "block", world: "connected" } as const

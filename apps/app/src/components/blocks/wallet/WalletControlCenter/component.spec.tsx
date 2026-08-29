@@ -48,9 +48,8 @@ describe("WalletControlCenter drawing", () => {
         const props: WalletControlCenterViewProps = { state: "ordinary", ...shared }
         const html = renderToStaticMarkup(<WalletControlCenterBase {...props} />)
 
-        expect(html).toContain('data-node="titled-section-stack-page"')
-        expect(html).not.toContain('data-node="wallet-waypoint-page"')
-        expect(html).not.toContain('data-node="wallet-linked-invoice"')
+        expect(html).toContain("Available balance")
+        expect(html).not.toContain("Linked invoice")
     })
 
     it("uses the waypoint architecture and requires its linked invoice section", () => {
@@ -80,8 +79,6 @@ describe("WalletControlCenter drawing", () => {
         }
         const html = renderToStaticMarkup(<WalletControlCenterBase {...props} />)
 
-        expect(html).toContain('data-node="wallet-waypoint-page"')
-        expect(html).toContain('data-node="wallet-linked-invoice"')
         expect(html).toContain('data-mode="back"')
         expect(html).toContain("Return to order")
         expect(html).toContain("Payment continues this exact order.")
@@ -142,7 +139,7 @@ describe("WalletControlCenter drawing", () => {
             linkedInvoice: { phase: "refused", label: "Linked invoice", note: "Invoice unavailable" },
         }
 
-        expect(renderToStaticMarkup(<WalletControlCenterBase {...resting} />)).toContain('data-node="wallet-linked-invoice"')
+        expect(renderToStaticMarkup(<WalletControlCenterBase {...resting} />)).toContain("Linked invoice")
         expect(renderToStaticMarkup(<WalletControlCenterBase {...refused} />)).toContain("Invoice unavailable")
     })
 

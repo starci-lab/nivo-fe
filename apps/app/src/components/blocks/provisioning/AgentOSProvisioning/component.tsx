@@ -1,127 +1,91 @@
-"use client"
+"use client";
 
-import {
-    Button,
-    HighlightCard,
-    LifecycleStep,
-    SurfaceCard,
-    Text,
-    TileIcon,
-    Tree,
-    defineCompositeComponent,
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-    type LifecycleStepData,
-} from "@nivo/ui"
+import { Button, HighlightCard, LifecycleStep, SurfaceCard, Text, TileIcon, type LifecycleStepData } from "@nivo/ui";
 
 /** Block-owned conditions of the AgentOS order and provisioning continuation. */
-export type AgentOSProvisioningBlockState =
-    | "catalog_loading"
-    | "request"
-    | "submitting"
-    | "awaiting_payment"
-    | "accepted"
-    | "preparing"
-    | "ready"
-    | "failed"
+export type AgentOSProvisioningProps = AgentOSProvisioningViewProps;
+/** Public API role for AgentOSProvisioningBlockState. */
+export type AgentOSProvisioningBlockState = "catalog_loading" | "request" | "submitting" | "awaiting_payment" | "accepted" | "preparing" | "ready" | "failed";
 
 /** Every settled tree the AgentOS provisioning block can draw. */
 export type AgentOSProvisioningViewProps = {
-    readonly state: AgentOSProvisioningBlockState
-    readonly props: {
-        readonly progressLabel?: string
-        readonly continuationLabel?: string
-        readonly steps: ReadonlyArray<LifecycleStepData>
-        readonly subject: string
-        readonly detail: string
-        readonly statusTitle: string
-        readonly statusText: string
-        readonly requestActionLabel?: string
-        readonly statusActionLabel?: string
-        readonly statusActionDisabled?: boolean
-        readonly isRequestPending?: boolean
-    }
-    readonly on?: {
-        readonly request?: () => void
-        readonly statusAction?: () => void
-    }
-}
-
+  readonly state: AgentOSProvisioningBlockState;
+  readonly props: {
+    readonly progressLabel?: string;
+    readonly continuationLabel?: string;
+    readonly steps: ReadonlyArray<LifecycleStepData>;
+    readonly subject: string;
+    readonly detail: string;
+    readonly statusTitle: string;
+    readonly statusText: string;
+    readonly requestActionLabel?: string;
+    readonly statusActionLabel?: string;
+    readonly statusActionDisabled?: boolean;
+    readonly isRequestPending?: boolean;
+  };
+  readonly on?: {
+    readonly request?: () => void;
+    readonly statusAction?: () => void;
+  };
+};
 const signalFor = (state: AgentOSProvisioningBlockState) => {
-    if (state === "failed") return "attention"
-    return state === "ready" ? "active" : "none"
-}
+  if (state === "failed") return "attention";
+  return state === "ready" ? "active" : "none";
+};
 
 /** Draw an AgentOS order beside its exact live workspace status. */
-export const AgentOSProvisioningBase = ({ state, props, on }: AgentOSProvisioningViewProps) => {
-    const journeyContract = props.steps.length === 5 ? "responsive-agentos-readiness-stepper" : "responsive-four-stage-lifecycle-stepper"
-    const journey = defineContractComponent(journeyContract, {
-        step: props.steps.map((step) => defineCompositeComponent("lifecycle-step", {}, () => (
-            <LifecycleStep props={step} isLoading={state === "catalog_loading"} />
-        ))),
-    })
-    const identity = defineContractComponent("subject-over-muted-caption", {
-        subject: defineLeafComponent("text", {}, () => (
-            <Text props={{ content: props.subject, size: "md", weight: "medium" }} isLoading={state === "catalog_loading"} />
-        )),
-        caption: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-            <Text props={{ content: props.detail, size: "xs", tone: "muted" }} isLoading={state === "catalog_loading"} />
-        )),
-    })
-    const actionLabel = props.requestActionLabel ?? props.statusActionLabel
-    const action = actionLabel === undefined ? undefined : defineLeafComponent("button", {}, () => (
-        <Button
-            props={{
-                label: actionLabel,
-                variant: "primary",
-                isPending: props.isRequestPending,
-                disabled: props.statusActionDisabled,
-            }}
-            on={{ press: props.requestActionLabel === undefined ? on?.statusAction : on?.request }}
-        />
-    ))
-    const phaseAction = defineContractComponent("identity-phase-action", {
-        identity,
-        prompt: defineLeafComponent("text", { size: "sm" }, () => (
-            <Text props={{ content: props.statusTitle, size: "sm" }} />
-        )),
-        body: defineLeafComponent("text", {}, () => (
-            <Text props={{ content: props.statusText, size: "sm", tone: state === "failed" ? "accent" : "muted" }} />
-        )),
-        action,
-    })
-    const artwork = defineContractComponent("provisioning-brand-mark-cell", {
-        mark: defineLeafComponent("tile-icon", {}, () => (
-            <TileIcon
-                props={{ icon: "agentos", signal: signalFor(state) }}
-                isLoading={state === "catalog_loading"}
-            />
-        )),
-    })
-    const continuation = defineContractComponent("provisioning-phase-with-mark", {
-        details: phaseAction,
-        artwork,
-    })
-    const orderContent = defineContractComponent("provisioning-order-content", {
-        journey,
-        continuation,
-    })
-    const highlightsContinuation = state === "ready"
-        || state === "awaiting_payment" && props.statusActionDisabled !== true && on?.statusAction !== undefined
-    return (
-        <Tree
-            contract="provisioning-order-stack"
-            render={defineContractComponent("provisioning-order-stack", {
-                order: defineContractProjection("label-row-over-card", () => highlightsContinuation ? (
-                    <HighlightCard props={{ label: props.progressLabel ?? props.subject }} contract="provisioning-order-content" render={orderContent} />
-                ) : (
-                    <SurfaceCard props={{ label: props.progressLabel ?? props.subject }} contract="provisioning-order-content" render={orderContent} isLoading={state === "catalog_loading"} />
-                )),
-            })}
-        />
-    )
-}
+export const AgentOSProvisioningBase = (props: AgentOSProvisioningProps) => {
+  const { state, props: viewProps, on }: AgentOSProvisioningViewProps = props;
+  const journey = <div>{viewProps.steps.map((step, index) => <LifecycleStep key={index} props={step} isLoading={state === "catalog_loading"} />)}</div>;
+  const identity = <div>
 
-/** Source-level tier marker for the pure block half. */
-export const meta = { shape: "block", world: "pure" } as const
+    <Text props={{
+      content: viewProps.subject,
+      size: "md",
+      weight: "medium"
+    }} isLoading={state === "catalog_loading"} />
+
+
+    <Text props={{
+      content: viewProps.detail,
+      size: "xs",
+      tone: "muted"
+    }} isLoading={state === "catalog_loading"} /></div>;
+  const actionLabel = viewProps.requestActionLabel ?? viewProps.statusActionLabel;
+  const action = actionLabel === undefined ? undefined : <Button props={{
+    label: actionLabel,
+    variant: "primary",
+    isPending: viewProps.isRequestPending,
+    disabled: viewProps.statusActionDisabled
+  }} on={{
+    press: viewProps.requestActionLabel === undefined ? on?.statusAction : on?.request
+  }} />;
+  const phaseAction = <div>{identity}
+
+    <Text props={{
+      content: viewProps.statusTitle,
+      size: "sm"
+    }} />
+
+
+    <Text props={{
+      content: viewProps.statusText,
+      size: "sm",
+      tone: state === "failed" ? "accent" : "muted"
+    }} />{action}</div>;
+  const artwork = <div>
+
+    <TileIcon props={{
+      icon: "agentos",
+      signal: signalFor(state)
+    }} isLoading={state === "catalog_loading"} /></div>;
+  const continuation = <div>{phaseAction}{artwork}</div>;
+  const orderContent = <div>{journey}{continuation}</div>;
+  const highlightsContinuation = state === "ready" || state === "awaiting_payment" && viewProps.statusActionDisabled !== true && on?.statusAction !== undefined;
+  return <div>{highlightsContinuation ? <HighlightCard props={{
+      label: viewProps.progressLabel ?? viewProps.subject
+    }}>{orderContent}</HighlightCard> : <SurfaceCard props={{
+      label: viewProps.progressLabel ?? viewProps.subject
+    }} isLoading={state === "catalog_loading"}>{orderContent}</SurfaceCard>}</div>;
+};
+

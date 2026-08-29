@@ -1,16 +1,15 @@
-import type { Metadata, Viewport } from "next"
-import { AppProviders } from "../providers"
-import "../globals.css"
-import { notFound } from "next/navigation"
-import { hasLocale } from "next-intl"
-import { getMessages, getTimeZone, getTranslations } from "next-intl/server"
-import { Open_Sans } from "next/font/google"
-import type { ComponentProps, CSSProperties } from "react"
-import { routing } from "@/i18n/routing"
-
+import type { Metadata, Viewport } from "next";
+import { AppProviders } from "../providers";
+import "../globals.css";
+import { notFound } from "next/navigation";
+import { hasLocale } from "next-intl";
+import { getMessages, getTimeZone, getTranslations } from "next-intl/server";
+import { Open_Sans } from "next/font/google";
+import type { ComponentProps, CSSProperties } from "react";
+import { routing } from "@/i18n/routing";
 const openSans = Open_Sans({
-    subsets: ["latin", "vietnamese"],
-})
+  subsets: ["latin", "vietnamese"]
+});
 
 /**
  * Browser-level metadata for every route under this shell.
@@ -21,22 +20,27 @@ const openSans = Open_Sans({
  * @returns The document metadata.
  */
 export const generateMetadata = async (): Promise<Metadata> => {
-    const t = await getTranslations("app")
-    return { title: "nivo Console", description: t("description") }
-}
+  const t = await getTranslations("app");
+  return {
+    title: "nivo Console",
+    description: t("description")
+  };
+};
 
 /** Viewport behaviour for every route under this shell. */
 export const viewport: Viewport = {
-    width: "device-width",
-    initialScale: 1,
-}
+  width: "device-width",
+  initialScale: 1
+};
 
 /** Props for {@link RootLayout}. */
 interface RootLayoutProps {
-    /** The rendered route. */
-    readonly children: ComponentProps<"div">["children"]
-    /** The routed locale segment, which Next hands over as a promise. */
-    readonly params: Promise<{ readonly locale: string }>
+  /** The rendered route. */
+  readonly children: ComponentProps<"div">["children"];
+  /** The routed locale segment, which Next hands over as a promise. */
+  readonly params: Promise<{
+    readonly locale: string;
+  }>;
 }
 
 /**
@@ -47,7 +51,9 @@ interface RootLayoutProps {
  *
  * @returns One entry per locale this app ships copy for.
  */
-export const generateStaticParams = () => routing.locales.map((locale) => ({ locale }))
+export const generateStaticParams = () => routing.locales.map(locale => ({
+  locale
+}));
 
 /**
  * The document shell.
@@ -76,27 +82,29 @@ export const generateStaticParams = () => routing.locales.map((locale) => ({ loc
  * @param input - The rendered route.
  * @returns The html document.
  */
-const RootLayout = async ({ children, params }: RootLayoutProps) => {
-    /*
-     * THE SEGMENT IS VALIDATED BEFORE ANYTHING ELSE. `/xx/provisioning` is a path a reader can type,
-     * and an unrecognised locale reaching the message loader throws on a file that is not there -
-     * a 500 where a 404 is the truthful answer.
-     */
-    const { locale } = await params
-    if (!hasLocale(routing.locales, locale)) {
-        notFound()
-    }
-    const [messages, timeZone] = await Promise.all([getMessages(), getTimeZone()])
-    return (
-        <html lang={locale} data-grammar="core" suppressHydrationWarning>
-            <body
-                className="min-h-dvh bg-background text-foreground antialiased"
-                style={{ "--font-open-sans": openSans.style.fontFamily } as CSSProperties}
-            >
+const RootLayout = async ({
+  children,
+  params
+}: RootLayoutProps) => {
+  /*
+   * THE SEGMENT IS VALIDATED BEFORE ANYTHING ELSE. `/xx/provisioning` is a path a reader can type,
+   * and an unrecognised locale reaching the message loader throws on a file that is not there -
+   * a 500 where a 404 is the truthful answer.
+   */
+  const {
+    locale
+  } = await params;
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+  const [messages, timeZone] = await Promise.all([getMessages(), getTimeZone()]);
+  return <html lang={locale} suppressHydrationWarning>
+            <body className="min-h-dvh bg-background text-foreground antialiased" style={{
+      "--font-open-sans": openSans.style.fontFamily
+    } as CSSProperties}>
+        
                 <AppProviders locale={locale} messages={messages} timeZone={timeZone}>{children}</AppProviders>
             </body>
-        </html>
-    )
-}
-
-export default RootLayout
+        </html>;
+};
+export default RootLayout;

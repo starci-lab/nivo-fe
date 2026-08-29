@@ -1,6 +1,6 @@
-import { Button as HeroButton, skeletonVariants, Spinner } from "@heroui/react"
-import { Icon, type IconName } from "../Icon"
-import type { LeafProps } from "../../contracts/props"
+import { Button as HeroButton, skeletonVariants, Spinner } from "@heroui/react";
+import { Icon, type IconName } from "../Icon";
+import { LOADING_CLASS_NAME, PENDING_LABEL_CLASS_NAME, PENDING_SPINNER_CLASS_NAME, ROOT_CLASS_NAME } from "./classNames";
 
 /**
  * LEAF - `Button`: the thing a reader presses.
@@ -21,88 +21,87 @@ import type { LeafProps } from "../../contracts/props"
  * take INSTEAD of the main action - a sign-in shortcut beside a form - and it reads as an equal
  * offer rather than a lesser one, which a filled `secondary` does not.
  */
-export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost"
+export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost";
 
 /** Control heights. `lg` is an opt-in page-root primary action, never the default. */
-export type ButtonSize = "sm" | "md" | "lg"
+export type ButtonSize = "sm" | "md" | "lg";
 
 /** What pressing the button means to the form around it. */
-export type ButtonType = "button" | "submit" | "reset"
+export type ButtonType = "button" | "submit" | "reset";
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type ButtonData = {
-    /** The already-resolved label. Required at rest too - see the file header. */
-    readonly label: string
-    /** Which of the three appearances this press target wears. */
-    readonly variant?: ButtonVariant
-    /** The control height. */
-    readonly size?: ButtonSize
-    /** Form semantics. Defaults to `button` so a stray control cannot submit by accident. */
-    readonly type?: ButtonType
-    /** The meaning drawn before the label. It inherits the label's colour, never its own. */
-    readonly icon?: IconName
-    /** Blocks the press because the action is unavailable before it starts. */
-    readonly disabled?: boolean
-    /** The action is already running; block another press and show progress in this control. */
-    readonly isPending?: boolean
-}
+  /** The already-resolved label. Required at rest too - see the file header. */
+  readonly label: string;
+  /** Which of the three appearances this press target wears. */
+  readonly variant?: ButtonVariant;
+  /** The control height. */
+  readonly size?: ButtonSize;
+  /** Form semantics. Defaults to `button` so a stray control cannot submit by accident. */
+  readonly type?: ButtonType;
+  /** The meaning drawn before the label. It inherits the label's colour, never its own. */
+  readonly icon?: IconName;
+  /** Blocks the press because the action is unavailable before it starts. */
+  readonly disabled?: boolean;
+  /** The action is already running; block another press and show progress in this control. */
+  readonly isPending?: boolean;
+};
 
 /** What pressing it does. Handlers travel apart from data: a function is not a `DataValue`. */
 export type ButtonActions = {
-    /** Called on press. */
-    readonly press?: () => void
-}
+  /** Called on press. */
+  readonly press?: () => void;
+};
 
 /** Props for {@link Button}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type ButtonProps = LeafProps<ButtonData, ButtonActions>
+export type ButtonProps = {readonly props: ButtonData;readonly on?: ButtonActions;readonly isLoading?: boolean;};
 
 /** The four appearances, as the vendor names them, so fill and foreground travel together. */
-const VARIANTS = { primary: "primary", secondary: "secondary", outline: "outline", ghost: "ghost" } as const
+const VARIANTS = { primary: "primary", secondary: "secondary", outline: "outline", ghost: "ghost" } as const;
 
 /** The size step, as the vendor names it. */
-const SIZES = { sm: "sm", md: "md", lg: "lg" } as const
+const SIZES = { sm: "sm", md: "md", lg: "lg" } as const;
 
 /** Data-loading paint shared with the other leaves; action progress uses a spinner instead. */
 const LOADING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
-    className: "select-none text-transparent",
-})
+  className: LOADING_CLASS_NAME
+});
 
 /**
  * Draw a press target.
  *
  * @param input - {@link ButtonProps}
  */
-export const Button = ({ props, on, isLoading = false }: ButtonProps) => {
-    const variant = props.variant ?? "secondary"
-    const size = props.size ?? "md"
-    const isPending = props.isPending === true
-    /*
-     * WHAT SITS BEFORE THE LABEL, decided once. A running action shows its progress there and the
-     * meaning glyph stands down for as long as it runs - the two never occupy the slot together, so
-     * the choice is one named value rather than a condition read inside another condition.
-     */
-    const glyph = props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "chip" }} />
-    const ornament = isPending ? <Spinner size="sm" className="absolute" aria-hidden="true" /> : glyph
-    return (
-        <HeroButton
-            data-tier="leaf"
-            data-component="Button"
-            data-variant={variant}
-            data-size={size}
-            data-loading={isLoading ? "true" : "false"}
-            data-action-pending={isPending ? "true" : "false"}
-            type={props.type ?? "button"}
-            variant={VARIANTS[variant]}
-            size={SIZES[size]}
-            isDisabled={props.disabled === true || isLoading || isPending}
-            onPress={on?.press}
-            className={isLoading ? LOADING_CLASSES : "relative"}
-        >
-            {isLoading ? null : ornament}
-            <span className={isPending ? "invisible" : undefined}>{props.label}</span>
-        </HeroButton>
-    )
-}
+export const Button = (props: ButtonProps) => ButtonView(props);
+const ButtonView = ({ props, on, isLoading = false }: ButtonProps) => {
+  const variant = props.variant ?? "secondary";
+  const size = props.size ?? "md";
+  const isPending = props.isPending === true;
+  /*
+   * WHAT SITS BEFORE THE LABEL, decided once. A running action shows its progress there and the
+   * meaning glyph stands down for as long as it runs - the two never occupy the slot together, so
+   * the choice is one named value rather than a condition read inside another condition.
+   */
+  const glyph = props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "chip" }} />;
+  const ornament = isPending ? <Spinner size="sm" className={PENDING_SPINNER_CLASS_NAME} aria-hidden="true" /> : glyph;
+  return (
+    <HeroButton
 
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const
+
+      data-variant={variant}
+      data-size={size}
+      data-loading={isLoading ? "true" : "false"}
+      data-action-pending={isPending ? "true" : "false"}
+      type={props.type ?? "button"}
+      variant={VARIANTS[variant]}
+      size={SIZES[size]}
+      isDisabled={props.disabled === true || isLoading || isPending}
+      onPress={on?.press}
+      className={isLoading ? LOADING_CLASSES : ROOT_CLASS_NAME}>
+      
+            {isLoading ? null : ornament}
+            <span className={isPending ? PENDING_LABEL_CLASS_NAME : undefined}>{props.label}</span>
+        </HeroButton>);
+
+};
+

@@ -12,7 +12,7 @@ describe("Progress", () => {
 
     it("renders an inert seam while loading", () => {
         render(<Progress props={{ label: "Course completion" }} isLoading />)
-        const loading = document.querySelector("[data-component='Progress']")
+        const loading = document.querySelector("[data-loading='true']")
         expect(loading).toHaveAttribute("data-loading", "true")
         expect(loading).toHaveAttribute("aria-hidden", "true")
         expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()

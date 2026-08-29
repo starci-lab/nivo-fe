@@ -1,12 +1,10 @@
 import { Avatar } from "../../leaves/Avatar"
-import { Tree } from "../../branches/Tree"
 import { Badge } from "../../leaves/Badge"
 import { Button } from "../../leaves/Button"
 import { Text } from "../../leaves/Text"
 import { TextLink } from "../../leaves/TextLink"
-import { defineContractComponent, defineLeafComponent, type CompositeProps } from "../../contracts/props"
 
-/** Resolved identity, qualification and follow state for one suggested person. */
+/** Resolved identity, qualification, and follow state for one suggested person. */
 export type SuggestedUserRowData = {
     readonly id: string
     readonly name?: string
@@ -19,48 +17,24 @@ export type SuggestedUserRowData = {
     readonly isFollowing?: boolean
     readonly isPending?: boolean
 }
-/** Product journeys reported by a suggested-person row. */
+/** Journeys reported by a suggested-person row. */
 export type SuggestedUserRowActions = { readonly open?: () => void; readonly follow?: () => void }
-/** Props for the closed suggested-person composition. */
-export type SuggestedUserRowProps = CompositeProps<SuggestedUserRowData, SuggestedUserRowActions>
+/** Props for a suggested-person row. */
+export type SuggestedUserRowProps = { readonly props: SuggestedUserRowData; readonly on?: SuggestedUserRowActions; readonly isLoading?: boolean }
 
-/** Draw one suggested identity with its optional badge and follow action. */
-export const SuggestedUserRow = ({ props, on, isLoading = false }: SuggestedUserRowProps) => {
-    const identity = defineContractComponent("name-over-handle", {
-        name: defineLeafComponent("text-link", { size: "sm" }, () => (
-            <TextLink props={{ label: props.name ?? "", size: "sm" }} on={{ press: on?.open }} />
-        )),
-        handle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-            <Text props={{ content: props.username, size: "xs", tone: "muted" }} isLoading={isLoading} />
-        )),
-    })
-
-    return (
-        <Tree contract="avatar-identity-badge-action-row" render={defineContractComponent("avatar-identity-badge-action-row", {
-            avatar: defineLeafComponent("avatar", {}, () => (
-                <Avatar props={{ name: props.name, src: props.avatar, size: "sm" }} isLoading={isLoading} />
-            )),
-            identity,
-            ...(props.openToWork === true ? {
-                badge: defineLeafComponent("badge", {}, () => (
-                    <Badge props={{ content: props.openToWorkLabel, tone: "success" }} />
-                )),
-            } : {}),
-            action: defineLeafComponent("button", {}, () => (
-                <Button
-                    props={{
-                        label: props.isFollowing === true ? props.followingLabel : props.followLabel,
-                        size: "sm",
-                        variant: "secondary",
-                        isPending: props.isPending,
-                    }}
-                    on={{ press: props.isFollowing === true ? undefined : on?.follow }}
-                    isLoading={isLoading}
-                />
-            )),
-        })} />
-    )
-}
-
-/** Source-level tier marker for the pure suggested-person composition. */
-export const meta = { shape: "composite", world: "pure" } as const
+/** Render one suggested identity with its optional badge and follow action. */
+export const SuggestedUserRow = (props: SuggestedUserRowProps) => (
+    <div>
+        <Avatar props={{ name: props.props.name, src: props.props.avatar, size: "sm" }} isLoading={props.isLoading} />
+        <div>
+            <TextLink props={{ label: props.props.name ?? "", size: "sm" }} on={{ press: props.on?.open }} />
+            <Text props={{ content: props.props.username, size: "xs", tone: "muted" }} isLoading={props.isLoading} />
+        </div>
+        {props.props.openToWork === true ? <Badge props={{ content: props.props.openToWorkLabel, tone: "success" }} /> : null}
+        <Button
+            props={{ label: props.props.isFollowing === true ? props.props.followingLabel : props.props.followLabel, size: "sm", variant: "secondary", isPending: props.props.isPending }}
+            on={{ press: props.props.isFollowing === true ? undefined : props.on?.follow }}
+            isLoading={props.isLoading}
+        />
+    </div>
+)

@@ -1,38 +1,22 @@
 import { Avatar } from "../../leaves/Avatar"
 import { Icon } from "../../leaves/Icon"
 import { Text } from "../../leaves/Text"
-import type { CompositeProps } from "../../contracts/props"
-import { PressableSurface } from "../../branches/PressableSurface"
-import { defineContractComponent, defineLeafComponent } from "../../contracts/props"
 
 /** Resolved identity shown at the head of the dashboard rail. */
-export type ProfileRowData = {
-    readonly displayName?: string
-    readonly username?: string
-    readonly avatar?: string
-}
-
-/** Internal profile navigation reported to the connected owner. */
-export type ProfileRowActions = {
-    readonly press?: () => void
-}
-
+export type ProfileRowData = { readonly displayName?: string; readonly username?: string; readonly avatar?: string }
+/** Profile navigation reported to the connected owner. */
+export type ProfileRowActions = { readonly press?: () => void }
 /** Props for the fixed dashboard profile cluster. */
-export type ProfileRowProps = CompositeProps<ProfileRowData, ProfileRowActions>
+export type ProfileRowProps = { readonly props: ProfileRowData; readonly on?: ProfileRowActions; readonly isLoading?: boolean }
 
-/** Fixed profile cluster copied from the legacy rail: avatar, name/handle, disclosure. */
-export const ProfileRow = ({ props, on, isLoading = false }: ProfileRowProps) => {
-    const identity = defineContractComponent("profile-name-over-handle", {
-        name: defineLeafComponent("text", { size: "sm", weight: "semibold" }, () => <Text props={{ content: props.displayName, size: "sm", weight: "semibold" }} isLoading={isLoading} />),
-        handle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => <Text props={{ content: props.username === undefined ? undefined : `@${props.username}`, size: "xs" }} isLoading={isLoading} />),
-    })
-    const content = defineContractComponent("profile-avatar-name-handle-disclosure-row", {
-        avatar: defineLeafComponent("avatar", {}, () => <Avatar props={{ name: props.displayName, src: props.avatar, size: "md" }} isLoading={isLoading} />),
-        identity,
-        disclosure: defineLeafComponent("icon", {}, () => <Icon props={{ name: "disclosure", role: "chip" }} />),
-    })
-    return <PressableSurface contract="profile-avatar-name-handle-disclosure-row" render={content} label={props.displayName ?? "Profile"} press={on?.press} />
-}
-
-/** Source-level tier marker for the fixed profile-row composition. */
-export const meta = { shape: "composite", world: "pure" } as const
+/** Render a profile identity and disclosure control. */
+export const ProfileRow = (props: ProfileRowProps) => (
+    <button type="button" aria-label={props.props.displayName ?? "Profile"} onClick={props.on?.press} disabled={props.isLoading}>
+        <Avatar props={{ name: props.props.displayName, src: props.props.avatar, size: "md" }} isLoading={props.isLoading} />
+        <span>
+            <Text props={{ content: props.props.displayName, size: "sm", weight: "semibold" }} isLoading={props.isLoading} />
+            <Text props={{ content: props.props.username === undefined ? undefined : `@${props.props.username}`, size: "xs" }} isLoading={props.isLoading} />
+        </span>
+        <Icon props={{ name: "disclosure", role: "chip" }} />
+    </button>
+)

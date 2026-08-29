@@ -1,8 +1,4 @@
 @layer nivo-ui {
-    [data-grammar-contract="core.surface-card"] {
-        --starci-core-surface-inset: 0;
-    }
-
     .nivo-brand__ink {
         fill: var(--nivo-brand-ink);
     }
@@ -14,13 +10,13 @@
         stroke-width: 18;
     }
 
-    [data-component="ThemeSwitch"] .switch__control {
+    .theme-switch .switch__control {
         width: 4rem !important;
         height: 2.25rem !important;
         border-radius: 9999px !important;
     }
 
-    [data-component="ThemeSwitch"] .switch__thumb {
+    .theme-switch .switch__thumb {
         display: flex;
         width: 1.75rem !important;
         height: 1.75rem !important;
@@ -30,34 +26,34 @@
         border-radius: 9999px !important;
     }
 
-    [data-component="ThemeSwitch"][data-selected="true"] .switch__thumb,
-    [data-component="ThemeSwitch"][aria-checked="true"] .switch__thumb {
+    .theme-switch[data-selected="true"] .switch__thumb,
+    .theme-switch[aria-checked="true"] .switch__thumb {
         margin-inline-start: calc(100% - 1.75rem - 0.25rem) !important;
     }
 
-    [data-component="ThemeSwitch"] .switch__thumb [data-slot="icon"] {
+    .theme-switch .switch__thumb svg {
         display: block;
         width: 1rem;
         height: 1rem;
         flex: none;
     }
 
-    [data-component="ScrollViewport"] {
+    .scroll-viewport {
         overscroll-behavior: contain;
         scrollbar-width: none;
     }
 
-    [data-component="ScrollViewport"]::-webkit-scrollbar {
+    .scroll-viewport::-webkit-scrollbar {
         display: none;
     }
 
-    [data-component="CollapsibleRail"] {
+    .collapsible-rail {
         --starci-core-rail-gap: 1.5rem;
         display: none;
         color: var(--foreground);
     }
 
-    [data-component="CollapsibleRailControl"] {
+    .collapsible-rail-control {
         cursor: pointer;
         border: 0;
         border-radius: 9999px;
@@ -65,26 +61,26 @@
         color: var(--foreground);
     }
 
-    [data-component="CollapsibleRailControl"]:hover {
+    .collapsible-rail-control:hover {
         background: var(--default);
     }
 
-    [data-component="CollapsibleRailControl"]:focus-visible {
+    .collapsible-rail-control:focus-visible {
         outline: 2px solid var(--focus);
         outline-offset: 2px;
     }
 
-    [data-press-label="true"] {
+    .pressable-surface .text-press-label {
         text-decoration-color: var(--separator-tertiary);
         text-decoration-thickness: 1.5px;
     }
 
-    [data-component="PressableSurface"]:has([data-component="TextLink"]:hover) [data-press-label="true"] {
+    .pressable-surface:has(a:hover) .text-press-label {
         text-decoration-line: none;
     }
 
     @media (min-width: 768px) {
-        [data-component="CollapsibleRail"] {
+        .collapsible-rail {
             display: flex;
         }
     }

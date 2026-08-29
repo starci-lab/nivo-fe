@@ -5,7 +5,7 @@ import { MicrochipArtwork } from "."
 describe("MicrochipArtwork", () => {
     it("draws red and black vector layers without a tile background", () => {
         const { container } = render(<MicrochipArtwork props={{ tone: "brand" }} />)
-        const artwork = container.querySelector("[data-component='MicrochipArtwork']")
+        const artwork = container.firstElementChild
         expect(artwork).toHaveAttribute("data-tone", "brand")
         expect(artwork).toHaveClass("h-28", "w-40")
         expect(artwork).not.toHaveClass("bg-foreground")
@@ -16,7 +16,7 @@ describe("MicrochipArtwork", () => {
 
     it("keeps its artwork footprint while loading without exposing partial vectors", () => {
         const { container } = render(<MicrochipArtwork props={{}} isLoading />)
-        const artwork = container.querySelector("[data-component='MicrochipArtwork']")
+        const artwork = container.firstElementChild
         expect(artwork).toHaveAttribute("data-loading", "true")
         expect(artwork).toHaveAttribute("aria-hidden", "true")
         expect(artwork?.querySelector("svg")).not.toBeInTheDocument()

@@ -24,7 +24,7 @@
  */
 
 /** Where the core API answers. Overridable so a deployed build can point at its own host. */
-const ENDPOINT = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql"
+const ENDPOINT = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql";
 
 /**
  * Every response this API sends, whatever the operation.
@@ -35,26 +35,31 @@ const ENDPOINT = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/
  * was refused - and conflating them is how a wrong password gets reported as "network problem".
  */
 interface Envelope<T> {
-    /** The operation's payload, or null when there is none. */
-    readonly data: T | null
-    /** A machine-readable refusal code, when the backend supplies one. */
-    readonly error?: string | null
-    /** The refusal or success sentence, already in the reader's language. */
-    readonly message: string
-    /** Whether the operation itself succeeded. */
-    readonly success: boolean
+  /** The operation's payload, or null when there is none. */
+  readonly data: T | null;
+  /** A machine-readable refusal code, when the backend supplies one. */
+  readonly error?: string | null;
+  /** The refusal or success sentence, already in the reader's language. */
+  readonly message: string;
+  /** Whether the operation itself succeeded. */
+  readonly success: boolean;
 }
 
 /** What a caller gets back: the payload, or the reason there is none. */
-export type Result<T> =
-    | { readonly ok: true, readonly data: T }
-    | { readonly ok: false, readonly reason: string, readonly code?: string }
+export type Result<T> = {
+  readonly ok: true;
+  readonly data: T;
+} | {
+  readonly ok: false;
+  readonly reason: string;
+  readonly code?: string;
+};
 
 /** How a caller supplies the credential without this module knowing where sessions are kept. */
-export type TokenReader = () => string | null
+export type TokenReader = () => string | null;
 
 /** How a caller supplies the reader's language without this module knowing how routing works. */
-export type LocaleReader = () => string
+export type LocaleReader = () => string;
 
 /**
  * The access token this transport puts on the wire.
@@ -64,7 +69,7 @@ export type LocaleReader = () => string
  * the dependency runs one way: the session knows about the transport, and the transport knows only
  * how to ask for a string.
  */
-let readToken: TokenReader = () => null
+let readToken: TokenReader = () => null;
 
 /**
  * The language every refusal should come back in.
@@ -75,7 +80,7 @@ let readToken: TokenReader = () => null
  * unreachable. This header is the FE end of closing that; until the interceptor reads it, a refusal
  * still arrives in English and the screen shows the API's sentence as it was sent.
  */
-let readLocale: LocaleReader = () => "vi"
+let readLocale: LocaleReader = () => "vi";
 
 /**
  * Tell the transport where the current access token lives.
@@ -83,8 +88,8 @@ let readLocale: LocaleReader = () => "vi"
  * @param reader - Answers with the token in force right now, or null when signed out.
  */
 export const useAccessTokenFrom = (reader: TokenReader) => {
-    readToken = reader
-}
+  readToken = reader;
+};
 
 /**
  * Tell the transport which language the reader is in.
@@ -92,8 +97,8 @@ export const useAccessTokenFrom = (reader: TokenReader) => {
  * @param reader - Answers with the active locale.
  */
 export const useLocaleFrom = (reader: LocaleReader) => {
-    readLocale = reader
-}
+  readLocale = reader;
+};
 
 /**
  * Run one GraphQL operation.
@@ -106,56 +111,84 @@ export const useLocaleFrom = (reader: LocaleReader) => {
  * @param variables - Its variables, if any.
  * @returns The unwrapped payload, or why there is none.
  */
-export const graphql = async <T,>(
-    query: string,
-    variables?: Readonly<Record<string, unknown>>,
-): Promise<Result<T>> => {
-    const token = readToken()
-    let response: Response
-    try {
-        response = await fetch(ENDPOINT, {
-            method: "POST",
-            // The refresh cookie rides on this. Without it `refreshSession` looks like a signed-out
-            // user rather than like a missing credential, which is a much harder failure to read.
-            credentials: "include",
-            headers: {
-                "content-type": "application/json",
-                /*
-                 * Standard `Accept-Language` rather than a private header, so the backend can read it
-                 * with the same mechanism any other client would use and no bespoke contract has to
-                 * be agreed for it.
-                 */
-                "accept-language": readLocale(),
-                ...(token === null ? {} : { authorization: `Bearer ${token}` }),
-            },
-            body: JSON.stringify({ query, variables: variables ?? {} }),
+export const graphql = async <T,>(query: string, variables?: Readonly<Record<string, unknown>>): Promise<Result<T>> => {
+  const token = readToken();
+  let response: Response;
+  try {
+    response = await fetch(ENDPOINT, {
+      method: "POST",
+      // The refresh cookie rides on this. Without it `refreshSession` looks like a signed-out
+      // user rather than like a missing credential, which is a much harder failure to read.
+      credentials: "include",
+      headers: {
+        "content-type": "application/json",
+        /*
+         * Standard `Accept-Language` rather than a private header, so the backend can read it
+         * with the same mechanism any other client would use and no bespoke contract has to
+         * be agreed for it.
+         */
+        "accept-language": readLocale(),
+        ...(token === null ? {} : {
+          authorization: `Bearer ${token}`
         })
-    } catch {
-        return { ok: false, reason: "network", code: "NETWORK" }
-    }
+      },
+      body: JSON.stringify({
+        query,
+        variables: variables ?? {}
+      })
+    });
+  } catch {
+    return {
+      ok: false,
+      reason: "network",
+      code: "NETWORK"
+    };
+  }
+  let body: {
+    data?: Record<string, Envelope<T>>;
+    errors?: ReadonlyArray<{
+      message: string;
+    }>;
+  };
+  try {
+    body = await response.json();
+  } catch {
+    return {
+      ok: false,
+      reason: "malformed",
+      code: "MALFORMED"
+    };
+  }
 
-    let body: { data?: Record<string, Envelope<T>>, errors?: ReadonlyArray<{ message: string }> }
-    try {
-        body = await response.json()
-    } catch {
-        return { ok: false, reason: "malformed", code: "MALFORMED" }
-    }
-
-    /*
-     * A GraphQL-level error is a different animal from a refused operation: the document was wrong,
-     * or the request was unauthenticated before any resolver ran. It never carries the interceptor's
-     * envelope, so it has to be read before the envelope is looked for.
-     */
-    if (body.errors !== undefined && body.errors.length > 0) {
-        return { ok: false, reason: body.errors[0].message, code: "GRAPHQL" }
-    }
-
-    const envelope = body.data === undefined ? undefined : Object.values(body.data)[0]
-    if (envelope === undefined) {
-        return { ok: false, reason: "empty", code: "EMPTY" }
-    }
-    if (!envelope.success || envelope.data === null) {
-        return { ok: false, reason: envelope.message, code: envelope.error ?? undefined }
-    }
-    return { ok: true, data: envelope.data }
-}
+  /*
+   * A GraphQL-level error is a different animal from a refused operation: the document was wrong,
+   * or the request was unauthenticated before any resolver ran. It never carries the interceptor's
+   * envelope, so it has to be read before the envelope is looked for.
+   */
+  if (body.errors !== undefined && body.errors.length > 0) {
+    return {
+      ok: false,
+      reason: body.errors[0].message,
+      code: "GRAPHQL"
+    };
+  }
+  const envelope = body.data === undefined ? undefined : Object.values(body.data)[0];
+  if (envelope === undefined) {
+    return {
+      ok: false,
+      reason: "empty",
+      code: "EMPTY"
+    };
+  }
+  if (!envelope.success || envelope.data === null) {
+    return {
+      ok: false,
+      reason: envelope.message,
+      code: envelope.error ?? undefined
+    };
+  }
+  return {
+    ok: true,
+    data: envelope.data
+  };
+};

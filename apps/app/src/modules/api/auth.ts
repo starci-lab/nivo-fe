@@ -1,4 +1,4 @@
-import { graphql, type Result } from "./graphql"
+import { graphql, type Result } from "./graphql";
 
 /**
  * Every authentication operation nivo-core publishes, typed once.
@@ -22,14 +22,13 @@ import { graphql, type Result } from "./graphql"
 
 /** What the backend answers to every credential exchange. */
 export interface AuthPayload {
-    /** The Bearer credential, or null while a second factor is still owed. */
-    readonly accessToken: string | null
-    /** Whether a TOTP code is required to finish this sign-in. */
-    readonly requiresTwoFactor: boolean
-    /** The opaque challenge to hand back to `verifyTwoFactor`; present only with the flag above. */
-    readonly twoFactorToken: string | null
+  /** The Bearer credential, or null while a second factor is still owed. */
+  readonly accessToken: string | null;
+  /** Whether a TOTP code is required to finish this sign-in. */
+  readonly requiresTwoFactor: boolean;
+  /** The opaque challenge to hand back to `verifyTwoFactor`; present only with the flag above. */
+  readonly twoFactorToken: string | null;
 }
-
 
 /**
  * What a mailed-code journey answers to its first step, and to a resend.
@@ -39,76 +38,76 @@ export interface AuthPayload {
  * must start over rather than guess.
  */
 export interface OtpChallenge {
-    /** The opaque handle to spend at the second step. */
-    readonly challengeId: string
-    /** How long the code lasts, in seconds, as the backend reports it. */
-    readonly expiresInSeconds: number
+  /** The opaque handle to spend at the second step. */
+  readonly challengeId: string;
+  /** How long the code lasts, in seconds, as the backend reports it. */
+  readonly expiresInSeconds: number;
 }
 
 /** What opening a code-gated account asks for. */
 export interface SignUpInitInput {
-    /** The address the account is keyed on, and where the code is sent. */
-    readonly email: string
-    /** The password as typed. `@MinLength(8)` refuses anything shorter BEFORE a code is sent. */
-    readonly password: string
-    /** A display name, when the reader gave one. */
-    readonly name?: string
+  /** The address the account is keyed on, and where the code is sent. */
+  readonly email: string;
+  /** The password as typed. `@MinLength(8)` refuses anything shorter BEFORE a code is sent. */
+  readonly password: string;
+  /** A display name, when the reader gave one. */
+  readonly name?: string;
 }
 
 /** What spending a sign-up code asks for. */
 export interface SignUpVerifyOtpInput {
-    /** The challenge from the first step. */
-    readonly challengeId: string
-    /** The code out of the inbox. */
-    readonly otp: string
+  /** The challenge from the first step. */
+  readonly challengeId: string;
+  /** The code out of the inbox. */
+  readonly otp: string;
 }
 
 /** What asking for a reset code needs. */
 export interface ForgotPasswordInitInput {
-    /** The address as typed. */
-    readonly email: string
+  /** The address as typed. */
+  readonly email: string;
 }
 
 /** What spending a reset code needs. */
 export interface ForgotPasswordVerifyOtpInput {
-    /** The challenge from the first step. */
-    readonly challengeId: string
-    /** The code out of the inbox. */
-    readonly otp: string
-    /** The password to set. Spent and set in ONE request, which is why they travel together. */
-    readonly newPassword: string
+  /** The challenge from the first step. */
+  readonly challengeId: string;
+  /** The code out of the inbox. */
+  readonly otp: string;
+  /** The password to set. Spent and set in ONE request, which is why they travel together. */
+  readonly newPassword: string;
 }
 
 /** What renewing a code needs, on either journey. */
 export interface OtpResendInput {
-    /** The challenge to renew. */
-    readonly challengeId: string
+  /** The challenge to renew. */
+  readonly challengeId: string;
 }
 
 /** What creating an account asks for. */
 export interface SignUpInput {
-    /** The address the account is keyed on. */
-    readonly email: string
-    /** The password as typed. */
-    readonly password: string
-    /** A display name, when the reader gave one. */
-    readonly name?: string
+  /** The address the account is keyed on. */
+  readonly email: string;
+  /** The password as typed. */
+  readonly password: string;
+  /** A display name, when the reader gave one. */
+  readonly name?: string;
 }
 
 /** What exchanging credentials asks for. */
 export interface SignInInput {
-    /** The address. */
-    readonly email: string
-    /** The password as typed. */
-    readonly password: string
+  /** The address. */
+  readonly email: string;
+  /** The password as typed. */
+  readonly password: string;
 }
 
 /** What finishing a two-factor sign-in asks for. */
 export interface VerifyTwoFactorInput {
-    /** The challenge handed back by the first step. */
-    readonly twoFactorToken: string
-    /** The code the reader read off their authenticator. */
-    readonly code: string
+  /** The challenge handed back by the first step. */
+  readonly twoFactorToken: string;
+  /** The code the reader read off their authenticator. */
+  readonly code: string;
 }
 
 /**
@@ -117,7 +116,7 @@ export interface VerifyTwoFactorInput {
  * The value travels exactly as spelled here: it is the Keycloak identity-provider alias, and the
  * backend puts it straight on the authorization URL as `kc_idp_hint`.
  */
-export type OauthProvider = "google" | "github"
+export type OauthProvider = "google" | "github";
 
 /**
  * What trading an OAuth authorization code asks for.
@@ -129,26 +128,26 @@ export type OauthProvider = "google" | "github"
  * wire is an opaque handle that the backend spends once.
  */
 export interface ExchangeOauthCodeInput {
-    /** The code Keycloak put on the callback URL. */
-    readonly code: string
-    /** Which door the hand-off went through; the backend refuses a bundle cached for another one. */
-    readonly provider: OauthProvider
-    /** The opaque handle the redirect endpoint issued, and the only state this browser carries. */
-    readonly state: string
+  /** The code Keycloak put on the callback URL. */
+  readonly code: string;
+  /** Which door the hand-off went through; the backend refuses a bundle cached for another one. */
+  readonly provider: OauthProvider;
+  /** The opaque handle the redirect endpoint issued, and the only state this browser carries. */
+  readonly state: string;
 }
 
 /** What asking for a reset link needs. */
 export interface RequestPasswordResetInput {
-    /** Where to send it. */
-    readonly email: string
+  /** Where to send it. */
+  readonly email: string;
 }
 
 /** What spending a reset link needs. */
 export interface ResetPasswordInput {
-    /** The token out of the link. */
-    readonly token: string
-    /** The password to set. */
-    readonly newPassword: string
+  /** The token out of the link. */
+  readonly token: string;
+  /** The password to set. */
+  readonly newPassword: string;
 }
 
 /**
@@ -163,7 +162,7 @@ export interface ResetPasswordInput {
  * there is nothing to import; the smaller shape is that file exporting the value and this one
  * reading it, and that file is not this change's to edit.
  */
-const CORE_API_URL = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql"
+const CORE_API_URL = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql";
 
 /**
  * Where a provider hand-off starts.
@@ -181,21 +180,21 @@ const CORE_API_URL = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3
  * @returns The absolute URL to navigate to.
  */
 export const oauthRedirectUrl = (provider: OauthProvider, redirectUri: string): string => {
-    /*
-     * An ABSOLUTE path against the endpoint, so the whole path is replaced rather than appended.
-     * `CORE_API_URL` ends in `/graphql`, and concatenating would aim the hand-off at
-     * `/graphql/api/v1/...` - a 404 that looks like a broken provider rather than a broken URL.
-     */
-    const url = new URL(`/api/v1/keycloak/${provider}/redirect`, CORE_API_URL)
-    url.searchParams.set("redirect_uri", redirectUri)
-    return url.toString()
-}
+  /*
+   * An ABSOLUTE path against the endpoint, so the whole path is replaced rather than appended.
+   * `CORE_API_URL` ends in `/graphql`, and concatenating would aim the hand-off at
+   * `/graphql/api/v1/...` - a 404 that looks like a broken provider rather than a broken URL.
+   */
+  const url = new URL(`/api/v1/keycloak/${provider}/redirect`, CORE_API_URL);
+  url.searchParams.set("redirect_uri", redirectUri);
+  return url.toString();
+};
 
 /** The fields every payload-returning operation selects. */
-const AUTH_PAYLOAD = "{ accessToken requiresTwoFactor twoFactorToken }"
+const AUTH_PAYLOAD = "{ accessToken requiresTwoFactor twoFactorToken }";
 
 /** The fields every challenge-returning operation selects. */
-const OTP_CHALLENGE = "{ challengeId expiresInSeconds }"
+const OTP_CHALLENGE = "{ challengeId expiresInSeconds }";
 
 /**
  * Open an account behind a mailed code.
@@ -207,11 +206,9 @@ const OTP_CHALLENGE = "{ challengeId expiresInSeconds }"
  * @param input - The email, the password and an optional display name.
  * @returns The challenge, or why there is none.
  */
-export const signUpInit = (input: SignUpInitInput): Promise<Result<OtpChallenge>> =>
-    graphql(
-        `mutation SignUpInit($input: SignUpInitInput!) { signUpInit(input: $input) { data ${OTP_CHALLENGE} message success error } }`,
-        { input },
-    )
+export const signUpInit = (input: SignUpInitInput): Promise<Result<OtpChallenge>> => graphql(`mutation SignUpInit($input: SignUpInitInput!) { signUpInit(input: $input) { data ${OTP_CHALLENGE} message success error } }`, {
+  input
+});
 
 /**
  * Send another sign-up code.
@@ -222,11 +219,9 @@ export const signUpInit = (input: SignUpInitInput): Promise<Result<OtpChallenge>
  * @param input - The challenge to renew.
  * @returns The renewed challenge, or why it was refused.
  */
-export const signUpResend = (input: OtpResendInput): Promise<Result<OtpChallenge>> =>
-    graphql(
-        `mutation SignUpResend($input: SignUpResendInput!) { signUpResend(input: $input) { data ${OTP_CHALLENGE} message success error } }`,
-        { input },
-    )
+export const signUpResend = (input: OtpResendInput): Promise<Result<OtpChallenge>> => graphql(`mutation SignUpResend($input: SignUpResendInput!) { signUpResend(input: $input) { data ${OTP_CHALLENGE} message success error } }`, {
+  input
+});
 
 /**
  * Spend a sign-up code, which is what actually creates the account.
@@ -234,11 +229,9 @@ export const signUpResend = (input: OtpResendInput): Promise<Result<OtpChallenge
  * @param input - The challenge and the code.
  * @returns The session, or why there is none.
  */
-export const signUpVerifyOtp = (input: SignUpVerifyOtpInput): Promise<Result<AuthPayload>> =>
-    graphql(
-        `mutation SignUpVerifyOtp($input: SignUpVerifyOtpInput!) { signUpVerifyOtp(input: $input) { data ${AUTH_PAYLOAD} message success error } }`,
-        { input },
-    )
+export const signUpVerifyOtp = (input: SignUpVerifyOtpInput): Promise<Result<AuthPayload>> => graphql(`mutation SignUpVerifyOtp($input: SignUpVerifyOtpInput!) { signUpVerifyOtp(input: $input) { data ${AUTH_PAYLOAD} message success error } }`, {
+  input
+});
 
 /**
  * Ask for a reset code.
@@ -251,11 +244,9 @@ export const signUpVerifyOtp = (input: SignUpVerifyOtpInput): Promise<Result<Aut
  * @param input - The address as typed.
  * @returns The challenge.
  */
-export const forgotPasswordInit = (input: ForgotPasswordInitInput): Promise<Result<OtpChallenge>> =>
-    graphql(
-        `mutation ForgotPasswordInit($input: ForgotPasswordInitInput!) { forgotPasswordInit(input: $input) { data ${OTP_CHALLENGE} message success error } }`,
-        { input },
-    )
+export const forgotPasswordInit = (input: ForgotPasswordInitInput): Promise<Result<OtpChallenge>> => graphql(`mutation ForgotPasswordInit($input: ForgotPasswordInitInput!) { forgotPasswordInit(input: $input) { data ${OTP_CHALLENGE} message success error } }`, {
+  input
+});
 
 /**
  * Send another reset code.
@@ -263,11 +254,9 @@ export const forgotPasswordInit = (input: ForgotPasswordInitInput): Promise<Resu
  * @param input - The challenge to renew.
  * @returns The renewed challenge, or why it was refused.
  */
-export const forgotPasswordResend = (input: OtpResendInput): Promise<Result<OtpChallenge>> =>
-    graphql(
-        `mutation ForgotPasswordResend($input: ForgotPasswordResendInput!) { forgotPasswordResend(input: $input) { data ${OTP_CHALLENGE} message success error } }`,
-        { input },
-    )
+export const forgotPasswordResend = (input: OtpResendInput): Promise<Result<OtpChallenge>> => graphql(`mutation ForgotPasswordResend($input: ForgotPasswordResendInput!) { forgotPasswordResend(input: $input) { data ${OTP_CHALLENGE} message success error } }`, {
+  input
+});
 
 /**
  * Spend a reset code and set the password, in one request.
@@ -281,11 +270,9 @@ export const forgotPasswordResend = (input: OtpResendInput): Promise<Result<OtpC
  * @param input - The challenge, the code and the password to set.
  * @returns Whether the password was set.
  */
-export const forgotPasswordVerifyOtp = (input: ForgotPasswordVerifyOtpInput): Promise<Result<boolean>> =>
-    graphql(
-        `mutation ForgotPasswordVerifyOtp($input: ForgotPasswordVerifyOtpInput!) { forgotPasswordVerifyOtp(input: $input) { data message success error } }`,
-        { input },
-    )
+export const forgotPasswordVerifyOtp = (input: ForgotPasswordVerifyOtpInput): Promise<Result<boolean>> => graphql(`mutation ForgotPasswordVerifyOtp($input: ForgotPasswordVerifyOtpInput!) { forgotPasswordVerifyOtp(input: $input) { data message success error } }`, {
+  input
+});
 
 /**
  * Create an account.
@@ -293,11 +280,9 @@ export const forgotPasswordVerifyOtp = (input: ForgotPasswordVerifyOtpInput): Pr
  * @param input - The email, the password and an optional display name.
  * @returns The session, or a two-factor challenge, or why there is neither.
  */
-export const signUp = (input: SignUpInput): Promise<Result<AuthPayload>> =>
-    graphql(
-        `mutation SignUp($input: SignUpInput!) { signUp(input: $input) { data ${AUTH_PAYLOAD} message success error } }`,
-        { input },
-    )
+export const signUp = (input: SignUpInput): Promise<Result<AuthPayload>> => graphql(`mutation SignUp($input: SignUpInput!) { signUp(input: $input) { data ${AUTH_PAYLOAD} message success error } }`, {
+  input
+});
 
 /**
  * Exchange an email and password for a session.
@@ -305,11 +290,9 @@ export const signUp = (input: SignUpInput): Promise<Result<AuthPayload>> =>
  * @param input - The credentials as typed.
  * @returns The session, or a two-factor challenge, or why there is neither.
  */
-export const signIn = (input: SignInInput): Promise<Result<AuthPayload>> =>
-    graphql(
-        `mutation SignIn($input: SignInInput!) { signIn(input: $input) { data ${AUTH_PAYLOAD} message success error } }`,
-        { input },
-    )
+export const signIn = (input: SignInInput): Promise<Result<AuthPayload>> => graphql(`mutation SignIn($input: SignInInput!) { signIn(input: $input) { data ${AUTH_PAYLOAD} message success error } }`, {
+  input
+});
 
 /**
  * Finish a sign-in that owed a second factor.
@@ -317,11 +300,9 @@ export const signIn = (input: SignInInput): Promise<Result<AuthPayload>> =>
  * @param input - The challenge token from the first step, and the code the reader typed.
  * @returns The session, or why the code was refused.
  */
-export const verifyTwoFactor = (input: VerifyTwoFactorInput): Promise<Result<AuthPayload>> =>
-    graphql(
-        `mutation VerifyTwoFactor($input: VerifyTwoFactorInput!) { verifyTwoFactor(input: $input) { data ${AUTH_PAYLOAD} message success error } }`,
-        { input },
-    )
+export const verifyTwoFactor = (input: VerifyTwoFactorInput): Promise<Result<AuthPayload>> => graphql(`mutation VerifyTwoFactor($input: VerifyTwoFactorInput!) { verifyTwoFactor(input: $input) { data ${AUTH_PAYLOAD} message success error } }`, {
+  input
+});
 
 /**
  * Trade an OAuth authorization code for a session.
@@ -334,11 +315,9 @@ export const verifyTwoFactor = (input: VerifyTwoFactorInput): Promise<Result<Aut
  * @param input - The code Keycloak returned, the provider it came from, and the handle to spend.
  * @returns The session, or a two-factor challenge, or why there is neither.
  */
-export const exchangeOauthCode = (input: ExchangeOauthCodeInput): Promise<Result<AuthPayload>> =>
-    graphql(
-        `mutation ExchangeOauthCode($input: ExchangeOauthCodeInput!) { exchangeOauthCode(input: $input) { data ${AUTH_PAYLOAD} message success error } }`,
-        { input },
-    )
+export const exchangeOauthCode = (input: ExchangeOauthCodeInput): Promise<Result<AuthPayload>> => graphql(`mutation ExchangeOauthCode($input: ExchangeOauthCodeInput!) { exchangeOauthCode(input: $input) { data ${AUTH_PAYLOAD} message success error } }`, {
+  input
+});
 
 /**
  * Ask for a password reset link.
@@ -350,11 +329,9 @@ export const exchangeOauthCode = (input: ExchangeOauthCodeInput): Promise<Result
  * @param input - The email to send to.
  * @returns Whether the request was accepted.
  */
-export const requestPasswordReset = (input: RequestPasswordResetInput): Promise<Result<boolean>> =>
-    graphql(
-        `mutation RequestPasswordReset($input: RequestPasswordResetInput!) { requestPasswordReset(input: $input) { data message success error } }`,
-        { input },
-    )
+export const requestPasswordReset = (input: RequestPasswordResetInput): Promise<Result<boolean>> => graphql(`mutation RequestPasswordReset($input: RequestPasswordResetInput!) { requestPasswordReset(input: $input) { data message success error } }`, {
+  input
+});
 
 /**
  * Set a new password from a reset link.
@@ -362,11 +339,9 @@ export const requestPasswordReset = (input: RequestPasswordResetInput): Promise<
  * @param input - The token out of the link, and the new password.
  * @returns Whether it was accepted.
  */
-export const resetPassword = (input: ResetPasswordInput): Promise<Result<boolean>> =>
-    graphql(
-        `mutation ResetPassword($input: ResetPasswordInput!) { resetPassword(input: $input) { data message success error } }`,
-        { input },
-    )
+export const resetPassword = (input: ResetPasswordInput): Promise<Result<boolean>> => graphql(`mutation ResetPassword($input: ResetPasswordInput!) { resetPassword(input: $input) { data message success error } }`, {
+  input
+});
 
 /**
  * Trade the HttpOnly refresh cookie for a fresh access token.
@@ -377,13 +352,11 @@ export const resetPassword = (input: ResetPasswordInput): Promise<Result<boolean
  *
  * @returns A fresh session, or why there is none.
  */
-export const refreshSession = (): Promise<Result<AuthPayload>> =>
-    graphql(`mutation RefreshSession { refreshSession { data ${AUTH_PAYLOAD} message success error } }`)
+export const refreshSession = (): Promise<Result<AuthPayload>> => graphql(`mutation RefreshSession { refreshSession { data ${AUTH_PAYLOAD} message success error } }`);
 
 /**
  * End the session and clear the refresh cookie.
  *
  * @returns Whether the server acknowledged.
  */
-export const signOut = (): Promise<Result<boolean>> =>
-    graphql("mutation SignOut { signOut { data message success error } }")
+export const signOut = (): Promise<Result<boolean>> => graphql("mutation SignOut { signOut { data message success error } }");

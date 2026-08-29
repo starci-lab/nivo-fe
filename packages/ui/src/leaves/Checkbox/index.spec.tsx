@@ -7,7 +7,7 @@ describe("Checkbox", () => {
         render(<Checkbox props={{ label: "Accept terms", isSelected: true, name: "terms" }} />)
         const control = screen.getByRole("checkbox", { name: "Accept terms" })
         expect(control).toBeChecked()
-        expect(document.querySelector("[data-component='Checkbox']")).toHaveAttribute("data-selected", "true")
+        expect(document.querySelector("[data-selected='true']")).toBeInTheDocument()
     })
 
     it("reports a changed selection and link follow", () => {

@@ -1,33 +1,18 @@
-import { Tree } from "../../branches/Tree"
-import { ChoiceTabs, type ChoiceTabsData } from "../../leaves/ChoiceTabs"
-import { defineContractComponent, defineLeafComponent, type CompositeProps } from "../../contracts/props"
+import { ChoiceTabs, type ChoiceTabsData } from "../../leaves/ChoiceTabs";
+import type { ComponentProps } from "../component-props";
+import { ROOT_CLASS_NAME } from "./classNames";
 
-/** Two controlled peer-choice axes sharing one toolbar row. */
-export type DualTabsToolbarData = {
-    readonly leading: ChoiceTabsData
-    readonly trailing: ChoiceTabsData
-}
+/** Public DualTabsToolbarData declaration. */
+export type DualTabsToolbarData = {readonly leading: ChoiceTabsData;readonly trailing: ChoiceTabsData;};
+/** Public DualTabsToolbarActions declaration. */
+export type DualTabsToolbarActions = {readonly selectLeading?: (key: string) => void;readonly selectTrailing?: (key: string) => void;};
+/** Public DualTabsToolbarProps declaration. */
+export type DualTabsToolbarProps = ComponentProps<DualTabsToolbarData, DualTabsToolbarActions>;
 
-/** Selection changes reported by the two axes. */
-export type DualTabsToolbarActions = {
-    readonly selectLeading?: (key: string) => void
-    readonly selectTrailing?: (key: string) => void
-}
-
-/** Props for the closed two-axis toolbar arrangement. */
-export type DualTabsToolbarProps = CompositeProps<DualTabsToolbarData, DualTabsToolbarActions>
-
-/** Draw two primary peer-choice axes on the same toolbar. */
-export const DualTabsToolbar = ({ props, on }: DualTabsToolbarProps) => (
-    <Tree contract="dual-tabs-toolbar" render={defineContractComponent("dual-tabs-toolbar", {
-        leading: defineLeafComponent("choice-tabs", {}, () => (
-            <ChoiceTabs props={{ ...props.leading, variant: "primary" }} on={{ select: on?.selectLeading }} />
-        )),
-        trailing: defineLeafComponent("choice-tabs", {}, () => (
-            <ChoiceTabs props={{ ...props.trailing, variant: "primary" }} on={{ select: on?.selectTrailing }} />
-        )),
-    })} />
-)
-
-/** Source-level tier marker for the pure composite. */
-export const meta = { shape: "composite", world: "pure" } as const
+/** Public DualTabsToolbar declaration. */
+export const DualTabsToolbar = (props: DualTabsToolbarProps) => DualTabsToolbarView(props);
+const DualTabsToolbarView = ({ props, on }: DualTabsToolbarProps) =>
+<div className={ROOT_CLASS_NAME}>
+        <ChoiceTabs props={{ ...props.leading, variant: "primary" }} on={{ select: on?.selectLeading }} />
+        <ChoiceTabs props={{ ...props.trailing, variant: "primary" }} on={{ select: on?.selectTrailing }} />
+    </div>;

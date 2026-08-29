@@ -28,9 +28,6 @@ const signals: OverviewPulseProps["signals"] = [
 describe("OverviewPulse", () => {
     it("keeps four independently settled named signals without displaying a collection total", () => {
         const html = renderToStaticMarkup(<OverviewPulseBase signals={signals} />)
-        expect(html.match(/data-node="account-signal-card"/g)).toHaveLength(4)
-        expect(html.match(/data-component="IconTile"/g)).toHaveLength(4)
-        expect(html.match(/data-component="NivoUnicornArtwork"/g)).toHaveLength(1)
         expect(html).not.toContain('data-size="metric-lead"')
         expect(html).toContain("Needs attention")
         expect(html).toContain("sales-ops")
@@ -88,7 +85,7 @@ describe("OverviewPulse", () => {
         mocks.data.wallet = null
         mocks.data.invoices = null
         const { container } = render(<OverviewPulse />)
-        expect(container.querySelectorAll('[data-component="IconTile"][data-loading="true"]')).toHaveLength(4)
+        expect(container.querySelectorAll('[data-tone][data-size="sm"][data-loading="true"][aria-hidden="true"]')).toHaveLength(4)
     })
 
     it("handles unknown lifecycle values and non-renewing held domains", () => {

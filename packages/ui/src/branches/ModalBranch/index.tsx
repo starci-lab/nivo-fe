@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import { Modal } from "@heroui/react"
-import type { ComponentType } from "react"
+import { Modal } from "@heroui/react";
+import type { ComponentType } from "react";
 
 /** Copy and content owned by the centered, controlled modal mechanic. */
 export type ModalBranchProps<P extends object> = {
-    readonly isOpen: boolean
-    readonly title: string
-    readonly closeLabel: string
-    readonly content: ComponentType<P>
-    readonly contentProps: P
-    readonly onDismiss: () => void
-}
+  readonly isOpen: boolean;
+  readonly title: string;
+  readonly closeLabel: string;
+  readonly content: ComponentType<P>;
+  readonly contentProps: P;
+  readonly onDismiss: () => void;
+};
 
 /** Own modal focus, dismissal, backdrop and the single scrolling body. */
-export const ModalBranch = <P extends object>({ isOpen, title, closeLabel, content: Content, contentProps, onDismiss }: ModalBranchProps<P>) => (
-    <Modal.Root isOpen={isOpen} onOpenChange={(open) => { if (!open) onDismiss() }}>
+export const ModalBranch = <P extends object,>({ isOpen, title, closeLabel, content: Content, contentProps, onDismiss }: ModalBranchProps<P>) =>
+<Modal.Root isOpen={isOpen} onOpenChange={(open) => {if (!open) onDismiss();}}>
         <Modal.Trigger className="hidden" aria-hidden="true" tabIndex={-1} />
         <Modal.Backdrop isDismissable>
             <Modal.Container placement="center" scroll="inside" size="md">
@@ -30,8 +30,6 @@ export const ModalBranch = <P extends object>({ isOpen, title, closeLabel, conte
                 </Modal.Dialog>
             </Modal.Container>
         </Modal.Backdrop>
-    </Modal.Root>
-)
+    </Modal.Root>;
 
-/** Source-level tier marker for the named modal mechanics owner. */
-export const meta = { shape: "branch", world: "pure" } as const
+

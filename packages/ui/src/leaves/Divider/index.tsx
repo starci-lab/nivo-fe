@@ -1,5 +1,5 @@
-import { Text } from "../Text"
-import type { LeafProps } from "../../contracts/props"
+import { Text } from "../Text";
+import { ROOT_CLASS_NAME, RULE_CLASS_NAME } from "./classNames";
 
 /**
  * LEAF - `Divider`: the line that says two things above and below it are alternatives.
@@ -14,31 +14,25 @@ import type { LeafProps } from "../../contracts/props"
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type DividerData = {
-    /** The already-resolved word that names the choice. */
-    readonly label: string
-}
+  /** The already-resolved word that names the choice. */
+  readonly label: string;
+};
 
 /** Props for {@link Divider}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type DividerProps = LeafProps<DividerData>
+export type DividerProps = {readonly props: DividerData;readonly isLoading?: boolean;};
 
 /** A rule either side of the word, with the word holding them apart. */
-const DIVIDER_CLASSES = "flex flex-row items-center gap-3"
-
-/** Each rule takes the room the word leaves. */
-const RULE_CLASSES = "h-px grow bg-border"
-
 /**
  * Draw a labelled boundary.
  *
  * @param input - {@link DividerProps}
  */
-export const Divider = ({ props }: DividerProps) => (
-    <div data-tier="leaf" data-component="Divider" role="separator" aria-label={props.label} className={DIVIDER_CLASSES}>
-        <span aria-hidden="true" className={RULE_CLASSES} />
+export const Divider = (props: DividerProps) => DividerView(props);
+const DividerView = ({ props }: DividerProps) =>
+<div role="separator" aria-label={props.label} className={ROOT_CLASS_NAME}>
+        <span aria-hidden="true" className={RULE_CLASS_NAME} />
         <Text props={{ content: props.label, size: "sm", tone: "muted" }} />
-        <span aria-hidden="true" className={RULE_CLASSES} />
-    </div>
-)
+        <span aria-hidden="true" className={RULE_CLASS_NAME} />
+    </div>;
 
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const
+

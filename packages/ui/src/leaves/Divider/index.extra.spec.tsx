@@ -5,7 +5,7 @@ import { Divider } from "./"
 describe("Divider extra semantics", () => {
     it("labels the separator and keeps both rules decorative", () => {
         render(<Divider props={{ label: "OR" }} />)
-        expect(screen.getByRole("separator", { name: "OR" })).toHaveAttribute("data-tier", "leaf")
+        expect(screen.getByRole("separator", { name: "OR" })).toBeInTheDocument()
         expect(document.querySelectorAll("[aria-hidden='true']")).toHaveLength(2)
     })
 })

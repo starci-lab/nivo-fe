@@ -1,5 +1,5 @@
-import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/i18n/config"
-import data from "./template.data.json"
+import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/i18n/config";
+import data from "./template.data.json";
 
 /**
  * A value the expert authored once, or once per locale.
@@ -18,7 +18,7 @@ import data from "./template.data.json"
  * must not be translated. Rewriting them in English to satisfy the rule would demonstrate the
  * mistake the comment exists to warn against.
  */
-export type Localized<T> = T | Partial<Record<Locale, T>>
+export type Localized<T> = T | Partial<Record<Locale, T>>;
 
 /**
  * Whether a value is a per-locale map rather than the thing itself.
@@ -30,12 +30,7 @@ export type Localized<T> = T | Partial<Record<Locale, T>>
  * @param value - The authored value.
  * @returns Whether to index it by locale.
  */
-const isLocaleMap = <T,>(value: Localized<T>): value is Partial<Record<Locale, T>> =>
-    typeof value === "object"
-    && value !== null
-    && !Array.isArray(value)
-    && Object.keys(value).length > 0
-    && Object.keys(value).every((key) => (LOCALES as ReadonlyArray<string>).includes(key))
+const isLocaleMap = <T,>(value: Localized<T>): value is Partial<Record<Locale, T>> => typeof value === "object" && value !== null && !Array.isArray(value) && Object.keys(value).length > 0 && Object.keys(value).every(key => (LOCALES as ReadonlyArray<string>).includes(key));
 
 /**
  * Reads an authored value in one locale.
@@ -49,14 +44,14 @@ const isLocaleMap = <T,>(value: Localized<T>): value is Partial<Record<Locale, T
  * @returns The value in the best available language, or undefined when there is nothing.
  */
 export const inLocale = <T,>(value: Localized<T> | undefined, locale: Locale): T | undefined => {
-    if (value === undefined) {
-        return undefined
-    }
-    if (!isLocaleMap(value)) {
-        return value
-    }
-    return value[locale] ?? value[DEFAULT_LOCALE] ?? Object.values(value)[0]
-}
+  if (value === undefined) {
+    return undefined;
+  }
+  if (!isLocaleMap(value)) {
+    return value;
+  }
+  return value[locale] ?? value[DEFAULT_LOCALE] ?? Object.values(value)[0];
+};
 
 /**
  * THE MOUNTED TEMPLATE - this academy's entire appearance, as one file.
@@ -101,12 +96,12 @@ export const inLocale = <T,>(value: Localized<T> | undefined, locale: Locale): T
  * EVERY ENTRY IS OPTIONAL. Whatever a template omits keeps the value from HeroUI's own stylesheet,
  * which is what makes an unprovisioned instance render as the vendor intends.
  */
-export type ThemeVariables = Record<string, string>
+export type ThemeVariables = Record<string, string>;
 
 /** A template's overrides for both colour schemes. `dark` may be omitted entirely. */
 export interface AcademyTheme {
-    light?: ThemeVariables
-    dark?: ThemeVariables
+  light?: ThemeVariables;
+  dark?: ThemeVariables;
 }
 
 /**
@@ -119,12 +114,7 @@ export interface AcademyTheme {
  * @param value - The proposed variable value.
  * @returns Whether it is safe to emit.
  */
-export const isSafeThemeValue = (value: string): boolean =>
-    typeof value === "string"
-    && value.length > 0
-    && value.length <= 200
-    && !/[;{}<>]/.test(value)
-    && !/url\s*\(|expression\s*\(|@import/i.test(value)
+export const isSafeThemeValue = (value: string): boolean => typeof value === "string" && value.length > 0 && value.length <= 200 && !/[;{}<>]/.test(value) && !/url\s*\(|expression\s*\(|@import/i.test(value);
 
 /**
  * Every section this app knows how to draw, in catalog order.
@@ -134,28 +124,13 @@ export const isSafeThemeValue = (value: string): boolean =>
  * newer catalog; the cost is a section the expert configured and cannot see, so the two lists
  * drifting is a real defect and not a tolerance.
  */
-export const SYSTEM_SECTION_KEYS = [
-    "hero",
-    "problems",
-    "outcomes",
-    "roadmap",
-    "instructor",
-    "stats",
-    "testimonials",
-    "gallery",
-    "courses",
-    "community",
-    "offer",
-    "faq",
-    "magnet",
-    "lead",
-] as const
+export const SYSTEM_SECTION_KEYS = ["hero", "problems", "outcomes", "roadmap", "instructor", "stats", "testimonials", "gallery", "courses", "community", "offer", "faq", "magnet", "lead"] as const;
 
 /** One of the fixed sections. */
-export type SystemSectionKey = typeof SYSTEM_SECTION_KEYS[number]
+export type SystemSectionKey = typeof SYSTEM_SECTION_KEYS[number];
 
 /** What marks a section the expert wrote rather than one the product ships. */
-export const CUSTOM_SECTION_PREFIX = "custom:"
+export const CUSTOM_SECTION_PREFIX = "custom:";
 
 /**
  * The shape an expert-authored section is drawn in. A CLOSED set, like the colour slots.
@@ -167,24 +142,18 @@ export const CUSTOM_SECTION_PREFIX = "custom:"
  * that reads as a system notice, which is the deception BR-B07 exists to prevent, reached through
  * layout instead of through an input field.
  */
-export type CustomVariant =
-    | "stack"
-    | "image-left"
-    | "image-right"
-    | "quote"
-    | "columns"
-    | "cta"
+export type CustomVariant = "stack" | "image-left" | "image-right" | "quote" | "columns" | "cta";
 
 /** The single onward link an expert-authored section may carry. Never a field. */
 export interface CustomAction {
-    label: string
-    href: string
+  label: string;
+  href: string;
 }
 
 /** One item inside the `columns` shape. */
 export interface CustomColumn {
-    title: string
-    text?: string
+  title: string;
+  text?: string;
 }
 
 /**
@@ -194,80 +163,80 @@ export interface CustomColumn {
  * closed set of permitted sources to be designed first.
  */
 export interface CustomContent {
-    /** Set by the template, not by the expert. */
-    variant?: CustomVariant
-    heading?: string
-    /** Plain text. No markup is interpreted. */
-    body?: string
-    /** A link the expert pasted. Nothing is uploaded to nivo. */
-    imageUrl?: string
-    action?: CustomAction
-    /** Used by the `columns` shape only. */
-    columns?: Array<CustomColumn>
-    /** Used by the `quote` shape only. */
-    attribution?: string
+  /** Set by the template, not by the expert. */
+  variant?: CustomVariant;
+  heading?: string;
+  /** Plain text. No markup is interpreted. */
+  body?: string;
+  /** A link the expert pasted. Nothing is uploaded to nivo. */
+  imageUrl?: string;
+  action?: CustomAction;
+  /** Used by the `columns` shape only. */
+  columns?: Array<CustomColumn>;
+  /** Used by the `quote` shape only. */
+  attribution?: string;
 }
 
 /** One row of the stored layout. Position in the array IS render order. */
 export interface LayoutSection {
-    /** A catalog key, or `custom:<id>` for one the expert wrote. */
-    key: string
-    visible: boolean
-    /** Present on expert-authored sections only; a system section owns its own content. */
-    content?: CustomContent
+  /** A catalog key, or `custom:<id>` for one the expert wrote. */
+  key: string;
+  visible: boolean;
+  /** Present on expert-authored sections only; a system section owns its own content. */
+  content?: CustomContent;
 }
 
 /** Who is teaching. */
 export interface Instructor {
-    name: string
-    /** Portrait, as a pasted link. */
-    photoUrl?: string
-    title: string
-    bio: string
-    credentials: Array<string>
-    quote?: string
+  name: string;
+  /** Portrait, as a pasted link. */
+  photoUrl?: string;
+  title: string;
+  bio: string;
+  credentials: Array<string>;
+  quote?: string;
 }
 
 /** One testimonial. A measurable result carries further than praise. */
 export interface Testimonial {
-    name: string
-    avatarUrl?: string
-    role: string
-    stars: number
-    quote: string
-    result?: string
+  name: string;
+  avatarUrl?: string;
+  role: string;
+  stars: number;
+  quote: string;
+  result?: string;
 }
 
 /** One figure on the statistics strip. */
 export interface Stat {
-    value: string
-    label: string
+  value: string;
+  label: string;
 }
 
 /** One gallery photo: the expert's link, plus a caption. */
 export interface GalleryItem {
-    url?: string
-    caption: string
+  url?: string;
+  caption: string;
 }
 
 /** One frequently asked question. */
 export interface Faq {
-    q: string
-    a: string
+  q: string;
+  a: string;
 }
 
 /** Something free offered in exchange for contact. It collects nothing; its button leads to `lead`. */
 export interface Magnet {
-    title: string
-    description: string
-    cta: string
+  title: string;
+  description: string;
+  cta: string;
 }
 
 /** Everything provisioning writes into this instance. */
 export interface AcademyIdentity {
-    /** The academy's own name, shown in the header and the document title. */
-    name: Localized<string>
-    tagline: Localized<string>
+  /** The academy's own name, shown in the header and the document title. */
+  name: Localized<string>;
+  tagline: Localized<string>;
 }
 
 /**
@@ -279,20 +248,20 @@ export interface AcademyIdentity {
  * have forbidden it while making every value harder to read and to diff.
  */
 export interface AcademyContent {
-    instructor?: Localized<Instructor>
-    testimonials: Localized<Array<Testimonial>>
-    stats: Localized<Array<Stat>>
-    gallery: Localized<Array<GalleryItem>>
-    problems: Localized<Array<string>>
-    roadmap: Localized<Array<string>>
-    faq: Localized<Array<Faq>>
-    magnet?: Localized<Magnet>
+  instructor?: Localized<Instructor>;
+  testimonials: Localized<Array<Testimonial>>;
+  stats: Localized<Array<Stat>>;
+  gallery: Localized<Array<GalleryItem>>;
+  problems: Localized<Array<string>>;
+  roadmap: Localized<Array<string>>;
+  faq: Localized<Array<Faq>>;
+  magnet?: Localized<Magnet>;
 }
 
 /** Which sections render, and in what order. */
 export interface AcademyLayout {
-    /** The full ordered section list, exactly as `TenantBrandEntity.layoutConfig` stores it. */
-    sections: Array<LayoutSection>
+  /** The full ordered section list, exactly as `TenantBrandEntity.layoutConfig` stores it. */
+  sections: Array<LayoutSection>;
 }
 
 /**
@@ -317,22 +286,22 @@ export interface AcademyLayout {
  * because it already knows its own". That absence is what makes re-applying a template safe.
  */
 export interface AcademyTemplate {
-    identity: AcademyIdentity
-    /** HeroUI variable overrides, per colour scheme. Emitted as the vendor's own theming block. */
-    theme: AcademyTheme
-    /**
-     * Hand-written CSS, already sanitised by the backend's `sanitizeTenantCss`.
-     *
-     * Real selectors survive here -- this is the escape hatch an admin is meant to write
-     * `.my-class { … }` in -- while `@import`, `url()`, `expression()` and friends do not. It is
-     * inlined rather than served as a file so it cannot arrive after the page has painted.
-     *
-     * Separate from `theme` on purpose: this is the half that is only safe because something
-     * cleaned it.
-     */
-    customCss?: string
-    layout: AcademyLayout
-    content: AcademyContent
+  identity: AcademyIdentity;
+  /** HeroUI variable overrides, per colour scheme. Emitted as the vendor's own theming block. */
+  theme: AcademyTheme;
+  /**
+   * Hand-written CSS, already sanitised by the backend's `sanitizeTenantCss`.
+   *
+   * Real selectors survive here -- this is the escape hatch an admin is meant to write
+   * `.my-class { … }` in -- while `@import`, `url()`, `expression()` and friends do not. It is
+   * inlined rather than served as a file so it cannot arrive after the page has painted.
+   *
+   * Separate from `theme` on purpose: this is the half that is only safe because something
+   * cleaned it.
+   */
+  customCss?: string;
+  layout: AcademyLayout;
+  content: AcademyContent;
 }
 
 /**
@@ -359,4 +328,4 @@ export interface AcademyTemplate {
  * and the `courses` SECTION draws whatever the academy has -- which is what lets re-applying a
  * template be safe.
  */
-export const ACADEMY: AcademyTemplate = data as AcademyTemplate
+export const ACADEMY: AcademyTemplate = data as AcademyTemplate;

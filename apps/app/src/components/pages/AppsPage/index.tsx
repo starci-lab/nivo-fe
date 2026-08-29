@@ -1,9 +1,12 @@
-"use client"
+"use client";
 
-import { AppsPageBase } from "./component"
+import { AppsPageBase } from "./component";
 
 /** Mount the Apps dashboard compositor; the child block owns all external state. */
-export const AppsPage = () => <AppsPageBase />
+export type AppsPageProps = Record<string, never>;
+/** Public API role for AppsPage. */
+export const AppsPage = (props: AppsPageProps) => {
+  void props;
+  return <AppsPageBase />;
+};
 
-/** Source-level tier marker for the connected Apps page entry. */
-export const meta = { shape: "page", world: "connected" } as const

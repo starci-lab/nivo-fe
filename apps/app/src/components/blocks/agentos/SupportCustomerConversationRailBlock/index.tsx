@@ -1,88 +1,53 @@
-"use client"
+"use client";
 
-import {
-    Button, ChoiceTabs, CollapsibleRail, Icon, SelectionList, Tree,
-    defineContractComponent, defineLeafComponent, type SelectionListGroup,
-} from "@nivo/ui"
-import type { SupportCustomerConversation } from "@/modules/api/workspace-controlplane"
+import { Button, SelectionList, type SelectionListGroup } from "@nivo/ui";
+import type { SupportCustomerConversation } from "@/modules/api/workspace-controlplane";
 
 /** Customer-inbox projection owned by one workspace controller. */
 export type SupportCustomerConversationRailBlockProps = {
-    readonly conversations: ReadonlyArray<SupportCustomerConversation>
-    readonly selectedId: string | null
-    readonly pending: boolean
-    readonly onSelect: (conversationId: string) => void
-}
-
+  readonly conversations: ReadonlyArray<SupportCustomerConversation>;
+  readonly selectedId: string | null;
+  readonly pending: boolean;
+  readonly onSelect: (conversationId: string) => void;
+};
 const conversationStatus = (conversation: SupportCustomerConversation): string => {
-    if (conversation.unreadCount > 0) return `${conversation.unreadCount} unread`
-    if (conversation.takeoverState === "operator") return "Human takeover"
-    return new Date(conversation.lastMessageAt).toLocaleString()
-}
-
+  if (conversation.unreadCount > 0) return `${conversation.unreadCount} unread`;
+  if (conversation.takeoverState === "operator") return "Human takeover";
+  return new Date(conversation.lastMessageAt).toLocaleString();
+};
 const groupsFor = (conversations: ReadonlyArray<SupportCustomerConversation>): ReadonlyArray<SelectionListGroup> => [{
-    id: "support-customers",
-    items: conversations.map((conversation) => ({
-        id: conversation.id,
-        label: conversation.customerName ?? conversation.displayHandle,
-        icon: "agentos" as const,
-        status: conversationStatus(conversation),
-    })),
-}]
+  id: "support-customers",
+  items: conversations.map(conversation => ({
+    id: conversation.id,
+    label: conversation.customerName ?? conversation.displayHandle,
+    icon: "agentos" as const,
+    status: conversationStatus(conversation)
+  }))
+}];
+type CustomerSelectionProps = Pick<SupportCustomerConversationRailBlockProps, "conversations" | "selectedId" | "onSelect">;
+const CustomerSelection = ({
+  conversations,
+  selectedId,
+  onSelect
+}: CustomerSelectionProps) => <SelectionList props={{
+  label: "Customer conversations",
+  selectedKey: selectedId ?? "",
+  presentation: "expanded",
+  groups: groupsFor(conversations)
+}} on={{
+  activate: onSelect
+}} />;
+const CustomerRailBody = (props: SupportCustomerConversationRailBlockProps) => <div>
 
-type CustomerSelectionProps = Pick<SupportCustomerConversationRailBlockProps, "conversations" | "selectedId" | "onSelect"> & {
-    readonly presentation: "expanded" | "compact"
-}
+  <CustomerSelection {...props} />
+  <Button props={{
+    label: props.pending ? "Syncing inbox" : "Inbox synced",
+    variant: "secondary",
+    disabled: true
+  }} /></div>;
 
-const CustomerSelection = ({ conversations, selectedId, onSelect, presentation }: CustomerSelectionProps) => (
-    <SelectionList
-        props={{ label: "Customer conversations", selectedKey: selectedId ?? "", presentation, groups: groupsFor(conversations) }}
-        on={{ activate: onSelect }}
-    />
-)
+/** Keep the customer inbox as one stable list pane at every responsive size. */
+export const SupportCustomerConversationRailBlock = (props: SupportCustomerConversationRailBlockProps) => <div>
 
-const CustomerRailBody = (props: SupportCustomerConversationRailBlockProps) => (
-    <Tree contract="agentos-session-rail-compact" render={defineContractComponent("agentos-session-rail-compact", {
-        sessions: defineLeafComponent("selection-list", {}, () => <CustomerSelection {...props} presentation="expanded" />),
-        create: defineLeafComponent("button", {}, () => <Button props={{ label: props.pending ? "Syncing inbox" : "Inbox synced", variant: "secondary", disabled: true }} />),
-    })} />
-)
-
-const CustomerRailToggle = () => <Icon props={{ name: "sidebar", role: "leading" }} />
-
-/** Show customer identities as a compact choice or persistent desktop rail. */
-export const SupportCustomerConversationRailBlock = (props: SupportCustomerConversationRailBlockProps) => (
-    <Tree contract="agentos-session-rail-responsive" render={defineContractComponent("agentos-session-rail-responsive", {
-        compact: defineContractComponent("agentos-session-rail-compact", {
-            sessions: defineLeafComponent("choice-tabs", {}, () => (
-                <ChoiceTabs
-                    props={{
-                        label: props.pending ? "Loading customer conversations" : "Customer conversations",
-                        selectedKey: props.selectedId ?? "",
-                        tabs: props.conversations.map((conversation) => ({ id: conversation.id, label: conversation.customerName ?? conversation.displayHandle })),
-                    }}
-                    on={{ select: props.onSelect }}
-                />
-            )),
-            create: defineLeafComponent("button", {}, () => <Button props={{ label: props.pending ? "Syncing inbox" : "Inbox synced", variant: "secondary", disabled: true }} />),
-        }),
-        expanded: defineLeafComponent("collapsible-rail", {}, () => (
-            <CollapsibleRail
-                ariaLabel="Customer conversations"
-                title="Customer inbox"
-                rail={CustomerRailBody}
-                railProps={props}
-                collapsedRail={CustomerSelection}
-                collapsedRailProps={{ ...props, presentation: "compact" }}
-                toggleControl={CustomerRailToggle}
-                toggleControlProps={{}}
-                collapseLabel="Collapse customer inbox"
-                expandLabel="Expand customer inbox"
-                storageKey="nivo:agentos:support-customers"
-            />
-        )),
-    })} />
-)
-
-/** Source-level tier marker for the pure customer-conversation rail. */
-export const meta = { shape: "block", world: "pure" } as const
+  <CustomerRailBody {...props} />
+  <CustomerRailBody {...props} /></div>;

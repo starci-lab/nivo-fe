@@ -1,26 +1,20 @@
-import { skeletonVariants } from "@heroui/react"
-import { Icon, type IconName } from "../Icon"
-import type { LeafProps } from "../../contracts/props"
+import { cn, skeletonVariants } from "@heroui/react";
+import { Icon, type IconName } from "../Icon";
+import { TILE_ICON_CLASS_NAME, TILE_ICON_RESTING_CLASS_NAME, TILE_ICON_SIGNAL_CLASS_NAME, TILE_ICON_SIGNAL_CLASS_NAMES } from "./classNames";
 
 /** Semantic state carried by the corner signal on a console tile. */
-export type TileIconSignal = "none" | "active" | "attention"
+export type TileIconSignal = "none" | "active" | "attention";
 
 /** Meaning and state drawn by the console tile mark. */
 export type TileIconData = {
-    readonly icon: IconName
-    readonly signal?: TileIconSignal
-}
+  readonly icon: IconName;
+  readonly signal?: TileIconSignal;
+};
 
 /** Props for the fixed console tile mark. */
-export type TileIconProps = LeafProps<TileIconData>
+export type TileIconProps = {readonly props: TileIconData;readonly isLoading?: boolean;};
 
-const SIGNAL_CLASSES = {
-    none: "hidden",
-    active: "bg-success",
-    attention: "bg-warning",
-} as const
-
-const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base()
+const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base();
 
 /**
  * Draw the persistent 40px console tile icon and its optional state signal.
@@ -28,28 +22,24 @@ const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base()
  * The corner signal is part of the mark's anatomy, so callers name its meaning instead of
  * assembling an absolute-positioned dot beside a generic icon.
  */
-export const TileIcon = ({ props, isLoading = false }: TileIconProps) => {
-    const signal = props.signal ?? "none"
-    return (
-        <span
-            data-tier="leaf"
-            data-component="TileIcon"
-            data-signal={signal}
-            data-loading={isLoading ? "true" : "false"}
-            aria-hidden="true"
-            className={[
-                "relative inline-flex size-10 shrink-0 items-center justify-center rounded-xl",
-                isLoading ? RESTING_CLASSES : "bg-accent-soft text-accent-soft-foreground",
-            ].join(" ")}
-        >
-            {isLoading ? null : <Icon props={{ name: props.icon, role: "leading" }} />}
-            <span
-                data-component="TileIconSignal"
-                className={`absolute -right-0.5 -top-0.5 size-2.5 rounded-full ring-2 ring-background ${SIGNAL_CLASSES[signal]}`}
-            />
-        </span>
-    )
-}
+export const TileIcon = (props: TileIconProps) => {
+  const { props: data, isLoading = false } = props;
+  const signal = data.signal ?? "none";
+  return (
+    <span
 
-/** Source-level tier marker for the pure leaf. */
-export const meta = { shape: "leaf", world: "pure" } as const
+
+      data-signal={signal}
+      data-loading={isLoading ? "true" : "false"}
+      aria-hidden="true"
+      className={cn(TILE_ICON_CLASS_NAME, isLoading ? RESTING_CLASSES : TILE_ICON_RESTING_CLASS_NAME)}>
+      
+            {isLoading ? null : <Icon props={{ name: data.icon, role: "leading" }} />}
+            <span
+
+        className={cn(TILE_ICON_SIGNAL_CLASS_NAME, TILE_ICON_SIGNAL_CLASS_NAMES[signal])} />
+      
+        </span>);
+
+};
+

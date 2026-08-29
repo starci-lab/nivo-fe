@@ -25,14 +25,12 @@ const props: Omit<AgentOSOpenClawLaunchViewProps, "launchState"> = {
 describe("AgentOSOpenClawLaunch drawing", () => {
     it("keeps the fixed page anatomy while the launch block is issuing", () => {
         const html = renderToStaticMarkup(<AgentOSOpenClawLaunchBase {...props} launchState="issuing" />)
-        expect(html).toContain('data-node="secure-launch-bridge-page"')
         expect(html).toContain("Issuing")
         expect(html).toContain('data-action-pending="true"')
     })
 
     it("maps connected launch state to the return action", () => {
         const html = renderToStaticMarkup(<AgentOSOpenClawLaunchBase {...props} launchState="connected" detail="Expires soon" />)
-        expect(html).toContain('data-node="secure-launch-bridge-page"')
         expect(html).toContain("Return to workspace")
         expect(html).toContain("Expires soon")
         expect(html).toContain('data-tone="success"')
@@ -40,7 +38,6 @@ describe("AgentOSOpenClawLaunch drawing", () => {
 
     it("maps blocked launch state to retry without introducing a page state", () => {
         const html = renderToStaticMarkup(<AgentOSOpenClawLaunchBase {...props} launchState="blocked" />)
-        expect(html).toContain('data-node="secure-launch-bridge-page"')
         expect(html).toContain("Retry")
         expect(html).toContain("Launch blocked")
         expect(html).toContain('data-tone="danger"')

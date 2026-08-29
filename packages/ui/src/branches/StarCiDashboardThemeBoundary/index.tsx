@@ -1,18 +1,13 @@
 import { motion } from "framer-motion"
 import type { ComponentType } from "react"
+import { DASHBOARD_THEME_CLASS_NAME } from "./classNames"
 
-/** Fixed content projected into the one authenticated-dashboard visual theme. */
-export type StarCiDashboardThemeBoundaryProps<P extends object> = {
-    readonly content: ComponentType<P>
-    readonly contentProps: P
-}
+/** Content and props rendered inside the dashboard theme boundary. */
+export type StarCiDashboardThemeBoundaryProps<P extends object> = { readonly content: ComponentType<P>; readonly contentProps: P }
 
-/** Bind every authenticated dashboard viewport and disclosure state to the StarCi theme. */
-export const StarCiDashboardThemeBoundary = <P extends object>({ content: Content, contentProps }: StarCiDashboardThemeBoundaryProps<P>) => (
-    <motion.div data-theme="starci-dashboard" data-visual-contract="starci-dashboard-theme">
-        <Content {...contentProps} />
+/** Bind dashboard content to the shared visual theme. */
+export const StarCiDashboardThemeBoundary = <P extends object>(props: StarCiDashboardThemeBoundaryProps<P>) => (
+    <motion.div className={DASHBOARD_THEME_CLASS_NAME}>
+        <props.content {...props.contentProps} />
     </motion.div>
 )
-
-/** Source-level tier marker for the strict dashboard theme boundary. */
-export const meta = { shape: "branch", world: "pure" } as const

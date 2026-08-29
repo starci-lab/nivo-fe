@@ -1,25 +1,29 @@
-import type { Metadata, Viewport } from "next"
-import { notFound } from "next/navigation"
-import { NextIntlClientProvider, hasLocale } from "next-intl"
-import { getMessages } from "next-intl/server"
-import { ACADEMY, inLocale } from "@/modules/academy/template"
-import { routing } from "@/i18n/routing"
-import type { Locale } from "@/i18n/config"
-import "../globals.css"
-import type { ComponentProps } from "react"
+import type { Metadata, Viewport } from "next";
+import { notFound } from "next/navigation";
+import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { ACADEMY, inLocale } from "@/modules/academy/template";
+import { routing } from "@/i18n/routing";
+import type { Locale } from "@/i18n/config";
+import "../globals.css";
+import type { ComponentProps } from "react";
 
 /** The routed locale segment, awaited by every handler in this file. */
 export interface LocaleSegment {
-    /** Next hands the dynamic segment over as a promise. */
-    readonly params: Promise<{ readonly locale: string }>
+  /** Next hands the dynamic segment over as a promise. */
+  readonly params: Promise<{
+    readonly locale: string;
+  }>;
 }
 
 /** Props every route under this shell receives. */
 interface LocaleLayoutProps {
-    /** The rendered route. */
-    readonly children: ComponentProps<"div">["children"]
-    /** The locale segment, which Next hands over as a promise. */
-    readonly params: Promise<{ locale: string }>
+  /** The rendered route. */
+  readonly children: ComponentProps<"div">["children"];
+  /** The locale segment, which Next hands over as a promise. */
+  readonly params: Promise<{
+    locale: string;
+  }>;
 }
 
 /**
@@ -30,7 +34,9 @@ interface LocaleLayoutProps {
  *
  * @returns One entry per locale this app ships copy for.
  */
-export const generateStaticParams = () => routing.locales.map((locale) => ({ locale }))
+export const generateStaticParams = () => routing.locales.map(locale => ({
+  locale
+}));
 
 /**
  * The tab and the search result belong to the ACADEMY, not to nivo.
@@ -48,22 +54,24 @@ export const generateStaticParams = () => routing.locales.map((locale) => ({ loc
  * @param input - The locale segment.
  * @returns Title and description in the reader's language.
  */
-export const generateMetadata = async (
-    { params }: LocaleSegment,
-): Promise<Metadata> => {
-    const { locale } = await params
-    const resolved = (hasLocale(routing.locales, locale) ? locale : routing.defaultLocale) as Locale
-    return {
-        title: inLocale(ACADEMY.identity.name, resolved),
-        description: inLocale(ACADEMY.identity.tagline, resolved),
-    }
-}
+export const generateMetadata = async ({
+  params
+}: LocaleSegment): Promise<Metadata> => {
+  const {
+    locale
+  } = await params;
+  const resolved = (hasLocale(routing.locales, locale) ? locale : routing.defaultLocale) as Locale;
+  return {
+    title: inLocale(ACADEMY.identity.name, resolved),
+    description: inLocale(ACADEMY.identity.tagline, resolved)
+  };
+};
 
 /** Viewport behaviour for every route under this shell. */
 export const viewport: Viewport = {
-    width: "device-width",
-    initialScale: 1,
-}
+  width: "device-width",
+  initialScale: 1
+};
 
 /**
  * The document shell.
@@ -79,21 +87,23 @@ export const viewport: Viewport = {
  * @param input - {@link LocaleLayoutProps}
  * @returns The html document.
  */
-const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
-    const { locale } = await params
-    if (!hasLocale(routing.locales, locale)) {
-        notFound()
-    }
-    const messages = await getMessages()
-    return (
-        <html lang={locale} data-grammar="core" suppressHydrationWarning>
+const LocaleLayout = async ({
+  children,
+  params
+}: LocaleLayoutProps) => {
+  const {
+    locale
+  } = await params;
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+  const messages = await getMessages();
+  return <html lang={locale} suppressHydrationWarning>
             <body className="min-h-dvh antialiased">
                 <NextIntlClientProvider locale={locale} messages={messages}>
                     {children}
                 </NextIntlClientProvider>
             </body>
-        </html>
-    )
-}
-
-export default LocaleLayout
+        </html>;
+};
+export default LocaleLayout;

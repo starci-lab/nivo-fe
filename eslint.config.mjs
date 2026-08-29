@@ -19,24 +19,18 @@ import jsxA11y from "eslint-plugin-jsx-a11y"
 import { defineConfig } from "eslint/config"
 
 /**
- * The contract gate for this workspace.
+ * The frontend canon gate for this workspace.
  *
  * WHY THIS FILE DID NOT EXIST UNTIL NOW, AND WHAT THAT COST. All four packages already declared a
  * `lint` script and eslint was already installed, so the gate looked present in every package.json
  * and in `turbo run lint`. It was not: with no config file eslint exits with code 2 and the words
  * "couldn't find an eslint.config file", so the shared component package - the one that owns the
- * contract registry - has never once been checked against the rules it is built on.
+ * shared UI package - had never once been checked against the rules it is built on.
  *
  * WHY THE RULE MODULES ARE THE SAME ONES AS THE SINGLE-APP REPOSITORY. The tier vocabulary here is
- * identical - `leaves`, `composites`, `branches`, `blocks`, `contracts` - and so is the registry
- * shape, right down to the `buildContracts({` call the reader parses. Only the prefix above the
- * tiers differs: `packages/ui/src/*` instead of `src/components/*`. The rule modules read that
- * prefix from a list in `plugins/eslint/registry.mjs` rather than writing it out, which is what
- * makes one implementation serve both layouts instead of a fork that drifts.
- *
- * A copy that had kept the old prefix would have been WORSE than no gate at all: the registry
- * reader returns null when it cannot find the table, every registry rule then does nothing, and
- * eslint reports a clean tree. Green, silent, and wrong.
+ * identical - `leaves`, `composites`, `branches`, and `blocks`. Only the prefix above the tiers
+ * differs: `packages/ui/src/*` instead of `src/components/*`. The published canon receives that
+ * workspace layout through configuration, so one implementation serves both layouts.
  */
 export default defineConfig([
     {
@@ -92,7 +86,7 @@ export default defineConfig([
     {
         settings: { react: { version: "detect" } },
         rules: {
-            // Runtime PropTypes duplicate the TypeScript contracts owned by every component.
+            // Runtime PropTypes duplicate the TypeScript interfaces owned by every component.
             "react/prop-types": "off",
         },
     },

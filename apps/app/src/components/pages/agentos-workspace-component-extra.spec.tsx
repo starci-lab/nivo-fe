@@ -32,7 +32,6 @@ describe("AgentOSWorkspacePage pure sections", () => {
             />)
             expect(html).toContain("Agent workspace")
             if (pageState === "overview") {
-                expect(html).toContain('data-node="workspace-overview-grid"')
                 expect(html).toContain("summary")
                 expect(html).toContain("runtime")
             }

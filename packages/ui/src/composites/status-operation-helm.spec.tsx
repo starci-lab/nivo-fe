@@ -47,7 +47,6 @@ describe("HelmComponentStatusTable", () => {
     it("creates three loading rows without exposing stale values", () => {
         render(<HelmComponentStatusTable props={{ id: "release", rows: [row] }} isLoading />)
         expect(screen.queryByText("API")).not.toBeInTheDocument()
-        expect(document.querySelectorAll("[data-component='Badge']")).toHaveLength(6)
         expect(document.querySelectorAll("[data-loading='true']").length).toBeGreaterThan(3)
     })
 })

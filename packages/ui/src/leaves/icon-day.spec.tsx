@@ -6,7 +6,7 @@ import { IconTile } from "./IconTile"
 describe("IconTile", () => {
     it("maps tone and size to the plate", () => {
         const { container } = render(<IconTile props={{ icon: "reward", tone: "success", size: "md" }} />)
-        const tile = container.querySelector("[data-component='IconTile']")
+        const tile = container.firstElementChild
         expect(tile).toHaveAttribute("data-tone", "success")
         expect(tile).toHaveAttribute("data-size", "md")
         expect(tile).toHaveClass("size-10", "bg-success-soft")
@@ -15,7 +15,7 @@ describe("IconTile", () => {
 
     it("renders a hidden loading plate without its glyph", () => {
         const { container } = render(<IconTile props={{ icon: "reward" }} isLoading />)
-        const tile = container.querySelector("[data-component='IconTile']")
+        const tile = container.firstElementChild
         expect(tile).toHaveAttribute("aria-hidden", "true")
         expect(tile).toHaveAttribute("data-loading", "true")
         expect(tile?.querySelector("svg")).not.toBeInTheDocument()
@@ -26,7 +26,7 @@ describe("IconTile", () => {
 describe("DayCell", () => {
     it("distinguishes active days and keeps the full date screen-reader only", () => {
         const { container } = render(<DayCell props={{ id: "2026-08-19", weekday: "W", title: "August 19", active: true }} />)
-        const day = container.querySelector("[data-component='DayCell']")
+        const day = container.querySelector("li")
         expect(day).toHaveAttribute("data-active", "true")
         expect(day?.querySelector("[aria-hidden='true']")).toHaveClass("bg-accent/80")
         expect(day).toHaveTextContent("W")

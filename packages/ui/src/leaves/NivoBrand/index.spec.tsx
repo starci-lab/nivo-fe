@@ -14,7 +14,7 @@ describe("NivoBrand", () => {
 
     it("uses the standalone mark for hero identity and hides partial artwork while loading", () => {
         const { container, rerender } = render(<NivoBrand props={{ label: "nivo", variant: "mark", scale: "hero" }} />)
-        const brand = container.querySelector("[data-component='NivoBrand']")
+        const brand = container.firstElementChild
 
         expect(brand).toHaveAttribute("data-variant", "mark")
         expect(brand).toHaveClass("h-20")
@@ -22,6 +22,6 @@ describe("NivoBrand", () => {
 
         rerender(<NivoBrand props={{ label: "nivo" }} isLoading />)
         expect(container.querySelector("svg")).not.toBeInTheDocument()
-        expect(container.querySelector("[data-component='NivoBrand']")).toHaveAttribute("aria-hidden", "true")
+        expect(container.firstElementChild).toHaveAttribute("aria-hidden", "true")
     })
 })

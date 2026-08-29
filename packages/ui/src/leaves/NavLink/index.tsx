@@ -1,6 +1,5 @@
-import { Link as HeroLink } from "@heroui/react"
-import { Icon, type IconName } from "../Icon"
-import type { LeafProps } from "../../contracts/props"
+import { Link as HeroLink } from "@heroui/react";
+import { Icon, type IconName } from "../Icon";
 
 /**
  * LEAF - `NavLink`: one destination in the bar, or one tab under it.
@@ -15,63 +14,62 @@ import type { LeafProps } from "../../contracts/props"
  */
 
 /** Whether this names a page or a section of one. */
-export type NavLinkKind = "route" | "tab"
+export type NavLinkKind = "route" | "tab";
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type NavLinkData = {
-    /** The already-resolved words. */
-    readonly label: string
-    /** The meaning drawn before the words, for a tab that carries one. */
-    readonly icon?: IconName
-    /** Whether this is where the reader already is. */
-    readonly isCurrent?: boolean
-    /** A page destination, or a section of the page. */
-    readonly kind?: NavLinkKind
-}
+  /** The already-resolved words. */
+  readonly label: string;
+  /** The meaning drawn before the words, for a tab that carries one. */
+  readonly icon?: IconName;
+  /** Whether this is where the reader already is. */
+  readonly isCurrent?: boolean;
+  /** A page destination, or a section of the page. */
+  readonly kind?: NavLinkKind;
+};
 
 /** Internal route choice reported to the connected navigation owner. */
 export type NavLinkActions = {
-    readonly press?: () => void
-}
+  readonly press?: () => void;
+};
 
 /** Props for {@link NavLink}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type NavLinkProps = LeafProps<NavLinkData, NavLinkActions>
+export type NavLinkProps = {readonly props: NavLinkData;readonly on?: NavLinkActions;readonly isLoading?: boolean;};
 
 /** The set per kind, with the current one carrying its own weight and rule. */
 const KIND_CLASSES = {
-    route: {
-        base: "inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-sm text-muted",
-        current: "inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-accent-soft px-3 py-2 text-sm font-semibold text-accent-soft-foreground",
-    },
-    tab: {
-        base: "inline-flex items-center gap-2 border-b-2 border-transparent py-3 text-sm text-muted",
-        current: "inline-flex items-center gap-2 border-b-2 border-accent py-3 text-sm font-semibold text-accent",
-    },
-} as const
+  route: {
+    base: "inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-sm text-muted",
+    current: "inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-accent-soft px-3 py-2 text-sm font-semibold text-accent-soft-foreground"
+  },
+  tab: {
+    base: "inline-flex items-center gap-2 border-b-2 border-transparent py-3 text-sm text-muted",
+    current: "inline-flex items-center gap-2 border-b-2 border-accent py-3 text-sm font-semibold text-accent"
+  }
+} as const;
 
 /**
  * Draw one destination.
  *
  * @param input - {@link NavLinkProps}
  */
-export const NavLink = ({ props, on }: NavLinkProps) => {
-    const kind = KIND_CLASSES[props.kind ?? "route"]
-    const isCurrent = props.isCurrent === true
-    return (
-        <HeroLink
-            data-tier="leaf"
-            data-component="NavLink"
-            data-kind={props.kind ?? "route"}
-            data-current={isCurrent ? "true" : "false"}
-            onPress={on?.press}
-            aria-current={isCurrent ? "page" : undefined}
-            className={isCurrent ? kind.current : kind.base}
-        >
+export const NavLink = (props: NavLinkProps) => NavLinkView(props);
+const NavLinkView = ({ props, on }: NavLinkProps) => {
+  const kind = KIND_CLASSES[props.kind ?? "route"];
+  const isCurrent = props.isCurrent === true;
+  return (
+    <HeroLink
+
+
+      data-kind={props.kind ?? "route"}
+      data-current={isCurrent ? "true" : "false"}
+      onPress={on?.press}
+      aria-current={isCurrent ? "page" : undefined}
+      className={isCurrent ? kind.current : kind.base}>
+      
             {props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "leading" }} />}
             {props.label}
-        </HeroLink>
-    )
-}
+        </HeroLink>);
 
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const
+};
+

@@ -17,24 +17,24 @@ describe("Badge", () => {
 
     it("falls back to the neutral tone when none is stated", () => {
         const { container } = render(<Badge props={{ content: "x" }} />)
-        expect(container.querySelector("[data-component='Badge']")).toHaveAttribute("data-tone", "neutral")
+        expect(container.querySelector("[data-tone='neutral']")).toHaveAttribute("data-tone", "neutral")
     })
 
     it("carries the stated tone through to the rendered node", () => {
         const { container } = render(<Badge props={{ content: "x", tone: "danger" }} />)
-        expect(container.querySelector("[data-component='Badge']")).toHaveAttribute("data-tone", "danger")
+        expect(container.querySelector("[data-tone='danger']")).toHaveAttribute("data-tone", "danger")
     })
 
     it("hides itself from assistive technology while resting", () => {
         const { container } = render(<Badge props={{}} isLoading />)
-        const node = container.querySelector("[data-component='Badge']")
+        const node = container.querySelector("[data-loading='true']")
         expect(node).toHaveAttribute("data-loading", "true")
         expect(node).toHaveAttribute("aria-hidden", "true")
     })
 
     it("is exposed to assistive technology once it has settled", () => {
         const { container } = render(<Badge props={{ content: "x" }} />)
-        const node = container.querySelector("[data-component='Badge']")
+        const node = container.querySelector("[data-loading='false']")
         expect(node).toHaveAttribute("data-loading", "false")
         expect(node).not.toHaveAttribute("aria-hidden")
     })

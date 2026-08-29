@@ -39,7 +39,7 @@ describe("AgentOSPage", () => {
         expect(html).toContain("Workspace list")
         expect(html).toContain("Manage AgentOS workspaces.")
         expect(html).toContain('data-scale="display"')
-        expect(html).toContain('data-component="TileIcon"')
+        expect(html).toContain("AgentOS")
         expect(html).not.toContain("new:")
     })
 

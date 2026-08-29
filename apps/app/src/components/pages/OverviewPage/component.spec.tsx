@@ -32,12 +32,7 @@ describe("OverviewPage drawing", () => {
 
     it("keeps the overview pulse and primary-aside page owner in the complete composition", () => {
         const html = renderToStaticMarkup(<OverviewPageBase {...props} />)
-        expect(html).toContain('data-node="console-primary-aside-page"')
-        expect(html).toContain('data-node="account-signal-grid"')
-        expect(html).toContain('data-node="console-primary-aside"')
         expect(html).toContain('data-scale="display"')
-        expect(html).toContain('data-component="Button" data-variant="primary" data-size="lg"')
-        expect(html).toContain('data-component="Text" data-tone="muted" data-size="md"')
         expect(html).toContain("Build an app")
     })
 

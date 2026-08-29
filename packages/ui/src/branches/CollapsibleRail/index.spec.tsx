@@ -56,22 +56,15 @@ describe("CollapsibleRail", () => {
         const toggle = screen.getByRole("button", { name: "Collapse navigation" })
         const destinations = screen.getByText("Expanded destinations")
 
-        expect(host).toHaveAttribute("data-collapsed", "false")
-        expect(host).toHaveAttribute("data-grammar-contract", "core.rail")
-        expect(host).toHaveAttribute("data-grammar-collapse", "expanded")
-        expect(host).toHaveAttribute("data-grammar-landmark", "complementary")
-        expect(host).toHaveAttribute("data-grammar-motion", "animated")
-        expect(host).toHaveAttribute("data-grammar-rail", "true")
-        expect(host.querySelector("[data-grammar-rail-frame]")).toBeInTheDocument()
-        expect(host.querySelector("h2[data-grammar-rail-heading]"))
-            .toHaveTextContent("Console navigation")
-        expect(host.querySelector("[data-grammar-rail-body]")).toContainElement(destinations)
+        expect(host).toHaveClass("collapsible-rail")
+        expect(toggle).toHaveAttribute("aria-expanded", "true")
+        expect(screen.getByRole("heading", { name: "Console navigation", level: 2 }))
+            .toBeInTheDocument()
+        expect(host).toContainElement(destinations)
         expect(host.style.borderInlineEnd).toBe("1px solid var(--separator)")
         expect(host.style.padding).toBe("1.5rem")
         expect(screen.queryByText("Console")).not.toBeInTheDocument()
-        expect(toggle.style.borderRadius).toBe("9999px")
-        expect(toggle.style.width).toBe("44px")
-        expect(toggle.style.height).toBe("44px")
+        expect(toggle).toHaveClass("rounded-full", "size-11")
         expect(toggle.style.background).toBe("")
         const glyph = screen.getByTestId("sidebar-glyph")
         expect(toggle.compareDocumentPosition(destinations) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
@@ -80,13 +73,11 @@ describe("CollapsibleRail", () => {
         fireEvent.click(screen.getByRole("button", { name: "Collapse navigation" }))
 
         expect(screen.getByRole("complementary", { name: "Console navigation" })).toBe(host)
-        expect(host).toHaveAttribute("data-collapsed", "true")
-        expect(host).toHaveAttribute("data-grammar-collapse", "collapsed")
-        expect(host).toHaveAttribute("data-grammar-rail-width", "compact")
+        expect(screen.getByRole("button", { name: "Expand navigation" })).toHaveAttribute("aria-expanded", "false")
         expect(host.style.padding).toBe("1.5rem 0.625rem")
         expect(screen.getByTestId("sidebar-glyph")).toBe(glyph)
         expect(screen.getByText("Compact destinations")).toBeInTheDocument()
-        expect(screen.getByRole("button", { name: "Expand navigation" })).toHaveAttribute("aria-pressed", "true")
+        expect(screen.getByRole("button", { name: "Expand navigation" })).toBeInTheDocument()
         expect(localStorage.getItem(STORAGE_KEY)).toBe("true")
         expect(onCollapsedChange).toHaveBeenCalledWith(true)
     })
@@ -104,8 +95,8 @@ describe("CollapsibleRail", () => {
         renderRail()
 
         await waitFor(() => expect(
-            screen.getByRole("complementary", { name: "Console navigation" }),
-        ).toHaveAttribute("data-collapsed", "true"))
+            screen.getByRole("button", { name: "Expand navigation" }),
+        ).toBeInTheDocument())
         expect(screen.getByText("Compact destinations")).toBeInTheDocument()
     })
 
@@ -123,10 +114,7 @@ describe("CollapsibleRail", () => {
         expect(() => fireEvent.click(
             screen.getByRole("button", { name: "Collapse navigation" }),
         )).not.toThrow()
-        expect(screen.getByRole("complementary", { name: "Console navigation" })).toHaveAttribute(
-            "data-collapsed",
-            "true",
-        )
+        expect(screen.getByRole("button", { name: "Expand navigation" })).toBeInTheDocument()
         write.mockRestore()
     })
 })

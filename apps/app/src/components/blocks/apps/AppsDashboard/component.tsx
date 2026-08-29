@@ -1,18 +1,6 @@
-import {
-    Badge,
-    Button,
-    Heading,
-    SurfaceCard,
-    Text,
-    TextLink,
-    Tree,
-    defineCompositeComponent,
-    defineContractComponent,
-    defineContractProjection,
-    defineLeafComponent,
-} from "@nivo/ui"
-import { FleetRow, type FleetStatus } from "@/components/blocks/provisioning/FleetRow"
-import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice"
+import { Badge, Button, Heading, SurfaceCard, Text, TextLink } from "@nivo/ui";
+import { FleetRow, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
+import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice";
 
 /**
  * PAGE (drawing half) - the middle level, and the reason an academy is a ROW rather than a destination.
@@ -41,87 +29,104 @@ import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice"
  */
 
 /** One app the account owns, with every word already chosen. */
+export type AppsDashboardProps = AppsDashboardViewProps;
+/** Public API role for OwnedAppRow. */
 export type OwnedAppRow = {
-    /** The row's identity, and its React key. */
-    readonly id: string
-    /** What the app is called. */
-    readonly name: string
-    /** The address a customer would type, or what an unbuilt order can say instead. */
-    readonly detail: string
-    /** Which template it was built from, or the generic word when the join found nothing. */
-    readonly kindLabel: string
-    /** How far it has got. Drives the tone `FleetRow` owns. */
-    readonly status: FleetStatus
-    /** That state in the reader's words. */
-    readonly statusLabel: string
-    /** The one thing this row's state permits, absent when it permits nothing. */
-    readonly actionLabel?: string
-}
+  /** The row's identity, and its React key. */
+  readonly id: string;
+  /** What the app is called. */
+  readonly name: string;
+  /** The address a customer would type, or what an unbuilt order can say instead. */
+  readonly detail: string;
+  /** Which template it was built from, or the generic word when the join found nothing. */
+  readonly kindLabel: string;
+  /** How far it has got. Drives the tone `FleetRow` owns. */
+  readonly status: FleetStatus;
+  /** That state in the reader's words. */
+  readonly statusLabel: string;
+  /** The one thing this row's state permits, absent when it permits nothing. */
+  readonly actionLabel?: string;
+};
 
 /** One buyable template, with every word and every figure already chosen. */
 export type TemplateOfferRowView = {
-    /** The row's identity, and its React key. */
-    readonly id: string
-    /** Stable provisionable-app key carried by this catalogue item. */
-    readonly templateKey: string
-    /** What the seller calls the template. */
-    readonly name: string
-    /** The seller's own sentence about it. */
-    readonly tagline: string
-    /** The word for what kind of thing this is. */
-    readonly kindLabel: string
-    /** The cheapest rung, already formatted as money in the reader's locale. */
-    readonly priceLabel: string
-    /** The words on the one press an offer carries. */
-    readonly actionLabel: string
-    /** True when the catalogue can name the template but the backend cannot provision it yet. */
-    readonly actionDisabled: boolean
-}
+  /** The row's identity, and its React key. */
+  readonly id: string;
+  /** Stable provisionable-app key carried by this catalogue item. */
+  readonly templateKey: string;
+  /** What the seller calls the template. */
+  readonly name: string;
+  /** The seller's own sentence about it. */
+  readonly tagline: string;
+  /** The word for what kind of thing this is. */
+  readonly kindLabel: string;
+  /** The cheapest rung, already formatted as money in the reader's locale. */
+  readonly priceLabel: string;
+  /** The words on the one press an offer carries. */
+  readonly actionLabel: string;
+  /** True when the catalogue can name the template but the backend cannot provision it yet. */
+  readonly actionDisabled: boolean;
+};
 
 /** The section holding the apps this account owns, in every situation the set can be in. */
-export type OwnedSectionView =
-    | { readonly phase: "resting", readonly label: string }
-    | { readonly phase: "empty", readonly label: string, readonly note: string }
-    | {
-        readonly phase: "answered"
-        readonly label: string
-        readonly rows: ReadonlyArray<OwnedAppRow>
-    }
-    | { readonly phase: "refused", readonly label: string, readonly note: string }
+export type OwnedSectionView = {
+  readonly phase: "resting";
+  readonly label: string;
+} | {
+  readonly phase: "empty";
+  readonly label: string;
+  readonly note: string;
+} | {
+  readonly phase: "answered";
+  readonly label: string;
+  readonly rows: ReadonlyArray<OwnedAppRow>;
+} | {
+  readonly phase: "refused";
+  readonly label: string;
+  readonly note: string;
+};
 
 /** The section holding the catalogue, which is how a new app is started. */
-export type CatalogueSectionView =
-    | { readonly phase: "resting", readonly label: string, readonly fact: string }
-    | { readonly phase: "empty", readonly label: string, readonly note: string }
-    | {
-        readonly phase: "answered"
-        readonly label: string
-        readonly fact: string
-        readonly offers: ReadonlyArray<TemplateOfferRowView>
-    }
-    | { readonly phase: "refused", readonly label: string, readonly note: string }
+export type CatalogueSectionView = {
+  readonly phase: "resting";
+  readonly label: string;
+  readonly fact: string;
+} | {
+  readonly phase: "empty";
+  readonly label: string;
+  readonly note: string;
+} | {
+  readonly phase: "answered";
+  readonly label: string;
+  readonly fact: string;
+  readonly offers: ReadonlyArray<TemplateOfferRowView>;
+} | {
+  readonly phase: "refused";
+  readonly label: string;
+  readonly note: string;
+};
 
 /** Props for the pure Apps dashboard block. */
 export type AppsDashboardViewProps = {
-    /** The page's own name. */
-    readonly title: string
-    /** The sentence under the title, saying what an app is and why the set is open. */
-    readonly lede: string
-    /** The page-level continuation into the one supported template flow. */
-    readonly buildAppLabel?: string
-    /** Plain-text partition for states that require owner attention. */
-    readonly attentionGroupLabel?: string
-    /** Plain-text partition for healthy and in-progress resources. */
-    readonly steadyGroupLabel?: string
-    /** The owned section's settled situation. */
-    readonly owned: OwnedSectionView
-    /** The catalogue section's settled situation. */
-    readonly catalogue: CatalogueSectionView
-    /** Start a new app from the selected template catalogue row. */
-    readonly onBuildTemplate: (templateKey: string) => void
-    /** Open one already provisioned Academy resource. */
-    readonly onOpenOwnedApp: (siteId: string) => void
-}
+  /** The page's own name. */
+  readonly title: string;
+  /** The sentence under the title, saying what an app is and why the set is open. */
+  readonly lede: string;
+  /** The page-level continuation into the one supported template flow. */
+  readonly buildAppLabel?: string;
+  /** Plain-text partition for states that require owner attention. */
+  readonly attentionGroupLabel?: string;
+  /** Plain-text partition for healthy and in-progress resources. */
+  readonly steadyGroupLabel?: string;
+  /** The owned section's settled situation. */
+  readonly owned: OwnedSectionView;
+  /** The catalogue section's settled situation. */
+  readonly catalogue: CatalogueSectionView;
+  /** Start a new app from the selected template catalogue row. */
+  readonly onBuildTemplate: (templateKey: string) => void;
+  /** Open one already provisioned Academy resource. */
+  readonly onOpenOwnedApp: (siteId: string) => void;
+};
 
 /**
  * One resting row, which is the real row asked to rest as itself.
@@ -129,9 +134,12 @@ export type AppsDashboardViewProps = {
  * @param index - Which resting row this is, so the run has stable keys.
  * @returns The resting row, bound to the slot's composite identity.
  */
-const restingRow = (index: number) => defineCompositeComponent("fleet-row", {}, () => (
-    <FleetRow props={{ id: `resting-${index}`, kind: "site", kindLabel: "", status: "provisioning" }} isLoading />
-))
+const restingRow = (index: number) => <FleetRow props={{
+  id: `resting-${index}`,
+  kind: "site",
+  kindLabel: "",
+  status: "provisioning"
+}} isLoading />;
 
 /**
  * One app the account owns, or one order that has been paid for and is still being built.
@@ -139,21 +147,19 @@ const restingRow = (index: number) => defineCompositeComponent("fleet-row", {}, 
  * @param row - The already-worded row.
  * @returns The row, bound to the slot's composite identity.
  */
-const ownedRow = (row: OwnedAppRow, onOpenOwnedApp: (siteId: string) => void) => defineCompositeComponent("fleet-row", {}, () => (
-    <FleetRow
-        props={{
-            id: row.id,
-            name: row.name,
-            detail: row.detail,
-            kind: "site",
-            kindLabel: row.kindLabel,
-            status: row.status,
-            statusLabel: row.statusLabel,
-            actionLabel: row.actionLabel,
-        }}
-        on={{ open: () => onOpenOwnedApp(row.id), act: () => onOpenOwnedApp(row.id) }}
-    />
-))
+const ownedRow = (row: OwnedAppRow, onOpenOwnedApp: (siteId: string) => void) => <FleetRow props={{
+  id: row.id,
+  name: row.name,
+  detail: row.detail,
+  kind: "site",
+  kindLabel: row.kindLabel,
+  status: row.status,
+  statusLabel: row.statusLabel,
+  actionLabel: row.actionLabel
+}} on={{
+  open: () => onOpenOwnedApp(row.id),
+  act: () => onOpenOwnedApp(row.id)
+}} />;
 
 /**
  * One buyable template.
@@ -171,30 +177,27 @@ const ownedRow = (row: OwnedAppRow, onOpenOwnedApp: (siteId: string) => void) =>
  * @param row - The already-worded offer.
  * @returns The row, bound to the slot's composite identity.
  */
-const offerRow = (row: TemplateOfferRowView, onBuildTemplate: (templateKey: string) => void) => defineCompositeComponent("template-offer-row", {}, () => (
-    <Tree
-        contract="template-offer-row"
-        render={defineContractComponent("template-offer-row", {
-            identity: defineContractComponent("name-over-handle", {
-                name: defineLeafComponent("text-link", { size: "sm" }, () => (
-                    <TextLink props={{ label: row.name, size: "sm" }} />
-                )),
-                handle: defineLeafComponent("text", { size: "xs", tone: "muted" }, () => (
-                    <Text props={{ content: row.tagline, size: "xs", tone: "muted" }} />
-                )),
-            }),
-            kind: defineLeafComponent("badge", { tone: "neutral" }, () => (
-                <Badge props={{ content: row.kindLabel, tone: "neutral" }} />
-            )),
-            price: defineLeafComponent("text", { size: "sm" }, () => (
-                <Text props={{ content: row.priceLabel, size: "sm" }} />
-            )),
-            action: defineLeafComponent("button", {}, () => (
-                <Button props={{ label: row.actionLabel, size: "sm", variant: "primary", disabled: row.actionDisabled }} on={{ press: () => onBuildTemplate(row.templateKey) }} />
-            )),
-        })}
-    />
-))
+const offerRow = (row: TemplateOfferRowView, onBuildTemplate: (templateKey: string) => void) => <div>{<div>{<TextLink props={{
+      label: row.name,
+      size: "sm"
+    }} />}{<Text props={{
+      content: row.tagline,
+      size: "xs",
+      tone: "muted"
+    }} />}</div>}{<Badge props={{
+    content: row.kindLabel,
+    tone: "neutral"
+  }} />}{<Text props={{
+    content: row.priceLabel,
+    size: "sm"
+  }} />}{<Button props={{
+    label: row.actionLabel,
+    size: "sm",
+    variant: "primary",
+    disabled: row.actionDisabled
+  }} on={{
+    press: () => onBuildTemplate(row.templateKey)
+  }} />}</div>;
 
 /**
  * A section that says one sentence in the column its rows would have used.
@@ -207,14 +210,19 @@ const offerRow = (row: TemplateOfferRowView, onBuildTemplate: (templateKey: stri
  * @param note - The sentence.
  * @returns The section, bound to its contract identity.
  */
-const sentenceSection = (label: string, note: string) => defineContractComponent("label-row-over-card", {
-    label: defineContractComponent("title-with-end-action", {
-        title: defineLeafComponent("heading", {}, () => <Heading props={{ content: label, level: 3 }} />),
-    }),
-    body: defineLeafComponent("text", {}, () => (
-        <Text props={{ content: note, size: "sm", tone: "muted" }} />
-    )),
-})
+const sentenceSection = (label: string, note: string) => <div><div>
+
+    <Heading props={{
+      content: label,
+      level: 3
+    }} /></div>
+
+
+  <Text props={{
+    content: note,
+    size: "sm",
+    tone: "muted"
+  }} /></div>;
 
 /**
  * A section whose subject was REFUSED rather than empty.
@@ -223,43 +231,26 @@ const sentenceSection = (label: string, note: string) => defineContractComponent
  * @param note - The refusal, in the reader's words.
  * @returns The section, bound to its contract identity.
  */
-const refusedSection = (label: string, note: string) => defineContractProjection("label-row-over-card", () => (
-    <SurfaceCard
-        props={{ label }}
-        contract="body-with-refusal-note"
-        render={defineContractComponent("body-with-refusal-note", {
-            note: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-                <Text props={{ content: note, size: "sm", tone: "muted" }} />
-            )),
-        })}
-    />
-))
+const refusedSection = (label: string, note: string) => <SurfaceCard props={{
+  label
+}}><div>{<Text props={{
+      content: note,
+      size: "sm",
+      tone: "muted"
+    }} />}</div></SurfaceCard>;
+const ATTENTION_STATUSES: ReadonlySet<FleetStatus> = new Set(["awaiting_dns", "failed", "suspended"]);
+const groupedOwnedList = (rows: ReadonlyArray<OwnedAppRow>, attentionGroupLabel: string, steadyGroupLabel: string, onOpenOwnedApp: (siteId: string) => void) => {
+  const attention = rows.filter(row => ATTENTION_STATUSES.has(row.status));
+  const steady = rows.filter(row => !ATTENTION_STATUSES.has(row.status));
+  const group = (label: string, members: ReadonlyArray<OwnedAppRow>) => <div>
 
-const ATTENTION_STATUSES: ReadonlySet<FleetStatus> = new Set(["awaiting_dns", "failed", "suspended"])
-
-const groupedOwnedList = (
-    rows: ReadonlyArray<OwnedAppRow>,
-    attentionGroupLabel: string,
-    steadyGroupLabel: string,
-    onOpenOwnedApp: (siteId: string) => void,
-) => {
-    const attention = rows.filter((row) => ATTENTION_STATUSES.has(row.status))
-    const steady = rows.filter((row) => !ATTENTION_STATUSES.has(row.status))
-    const group = (label: string, members: ReadonlyArray<OwnedAppRow>) => defineContractComponent("attention-fleet-group", {
-        marker: defineLeafComponent("text", { size: "sm", tone: "muted" }, () => (
-            <Text props={{ content: label, size: "sm", tone: "muted" }} />
-        )),
-        resources: defineContractComponent("fleet-resource-list", {
-            resource: members.map((row) => ownedRow(row, onOpenOwnedApp)),
-        }),
-    })
-    return defineContractComponent("attention-grouped-fleet-list", {
-        group: [
-            ...(attention.length === 0 ? [] : [group(attentionGroupLabel, attention)]),
-            ...(steady.length === 0 ? [] : [group(steadyGroupLabel, steady)]),
-        ],
-    })
-}
+    <Text props={{
+      content: label,
+      size: "sm",
+      tone: "muted"
+    }} /><div>{members.map(row => ownedRow(row, onOpenOwnedApp))}</div></div>;
+  return <div><>{attention.length === 0 ? [] : [group(attentionGroupLabel, attention)]}{steady.length === 0 ? [] : [group(steadyGroupLabel, steady)]}</></div>;
+};
 
 /**
  * The app set, and how a new one is started.
@@ -267,7 +258,8 @@ const groupedOwnedList = (
  * @param input - {@link AppsPageViewProps}
  * @returns The page node.
  */
-export const AppsDashboardBase = ({
+export const AppsDashboardBase = (props: AppsDashboardProps) => {
+  const {
     title,
     lede,
     buildAppLabel,
@@ -276,134 +268,92 @@ export const AppsDashboardBase = ({
     owned,
     catalogue,
     onBuildTemplate,
-    onOpenOwnedApp,
-}: AppsDashboardViewProps) => {
-    const supportedOffer = catalogue.phase === "answered"
-        ? catalogue.offers.find((offer) => !offer.actionDisabled)
-        : undefined
-    /*
-     * SECTION 1 - the apps this account owns, in every situation the set can be in.
-     */
-    const ownedSection = () => {
-        if (owned.phase === "empty") {
-            return defineContractProjection("label-row-over-card", () => (
-                <SurfaceCard
-                    props={{ label: owned.label }}
-                    contract="centred-empty-notice"
-                    render={defineContractComponent("centred-empty-notice", {
-                        notice: defineCompositeComponent("empty-notice", {}, () => (
-                            <EmptyNotice
-                                props={{
-                                    message: owned.note,
-                                    actionLabel: supportedOffer === undefined ? undefined : buildAppLabel,
-                                }}
-                                on={{ act: supportedOffer === undefined || buildAppLabel === undefined ? undefined : () => onBuildTemplate(supportedOffer.templateKey) }}
-                            />
-                        )),
-                    })}
-                />
-            ))
-        }
-        if (owned.phase === "refused") {
-            return refusedSection(owned.label, owned.note)
-        }
-        const isResting = owned.phase === "resting"
-        if (owned.phase === "answered" && attentionGroupLabel !== undefined && steadyGroupLabel !== undefined) {
-            return defineContractProjection("label-row-over-card", () => (
-                <SurfaceCard
-                    props={{ label: owned.label }}
-                    contract="attention-grouped-fleet-list"
-                    render={groupedOwnedList(owned.rows, attentionGroupLabel, steadyGroupLabel, onOpenOwnedApp)}
-                />
-            ))
-        }
-        if (owned.phase === "answered") {
-            return defineContractProjection("label-row-over-card", () => (
-                <SurfaceCard
-                    props={{ label: owned.label }}
-                    contract="fleet-resource-list"
-                    render={defineContractComponent("fleet-resource-list", {
-                        resource: owned.rows.map((row) => ownedRow(row, onOpenOwnedApp)),
-                    })}
-                />
-            ))
-        }
-        return defineContractProjection("label-row-over-card", () => (
-            <SurfaceCard
-                props={{ label: owned.label }}
-                contract="fleet-resource-list"
-                render={defineContractComponent("fleet-resource-list", {
-                    resource: [restingRow(1), restingRow(2), restingRow(3)],
-                })}
-                isLoading={isResting}
-            />
-        ))
+    onOpenOwnedApp
+  }: AppsDashboardViewProps = props;
+  const supportedOffer = catalogue.phase === "answered" ? catalogue.offers.find(offer => !offer.actionDisabled) : undefined;
+  /*
+   * SECTION 1 - the apps this account owns, in every situation the set can be in.
+   */
+  const ownedSection = () => {
+    if (owned.phase === "empty") {
+      return <SurfaceCard props={{
+        label: owned.label
+      }}><div>{<EmptyNotice props={{
+            message: owned.note,
+            actionLabel: supportedOffer === undefined ? undefined : buildAppLabel
+          }} on={{
+            act: supportedOffer === undefined || buildAppLabel === undefined ? undefined : () => onBuildTemplate(supportedOffer.templateKey)
+          }} />}</div></SurfaceCard>;
     }
-
-    /*
-     * SECTION 2 - the catalogue. It is a LIST because `catalogItems` returns one, filtered to
-     * `site_from_template` - not because a second template has been promised. Today the filter yields
-     * exactly one, and template #2 appears here with no new screen, no new route and no change to the
-     * rail.
-     */
-    const catalogueSection = () => {
-        if (catalogue.phase === "empty") {
-            return sentenceSection(catalogue.label, catalogue.note)
-        }
-        if (catalogue.phase === "refused") {
-            return refusedSection(catalogue.label, catalogue.note)
-        }
-        const isResting = catalogue.phase === "resting"
-        return defineContractProjection("label-row-over-card", () => (
-            <SurfaceCard
-                props={{ label: catalogue.label, fact: catalogue.fact }}
-                contract="fleet-resource-list"
-                render={defineContractComponent("fleet-resource-list", {
-                    resource: catalogue.phase === "answered"
-                        ? catalogue.offers.map((offer) => offerRow(offer, onBuildTemplate))
-                        : [restingRow(4)],
-                })}
-                isLoading={isResting}
-            />
-        ))
+    if (owned.phase === "refused") {
+      return refusedSection(owned.label, owned.note);
     }
+    const isResting = owned.phase === "resting";
+    if (owned.phase === "answered" && attentionGroupLabel !== undefined && steadyGroupLabel !== undefined) {
+      return <SurfaceCard props={{
+        label: owned.label
+      }}>
 
-    const headingAction = supportedOffer === undefined || buildAppLabel === undefined ? {} : {
-        end: defineLeafComponent("button", { size: "lg" }, () => (
-            <Button props={{ label: buildAppLabel, size: "lg", variant: "primary" }} on={{ press: () => onBuildTemplate(supportedOffer.templateKey) }} />
-        )),
+          {groupedOwnedList(owned.rows, attentionGroupLabel, steadyGroupLabel, onOpenOwnedApp)}</SurfaceCard>;
     }
+    if (owned.phase === "answered") {
+      return <SurfaceCard props={{
+        label: owned.label
+      }}><div>{owned.rows.map(row => ownedRow(row, onOpenOwnedApp))}</div></SurfaceCard>;
+    }
+    return <SurfaceCard props={{
+      label: owned.label
+    }} isLoading={isResting}><div>{[restingRow(1), restingRow(2), restingRow(3)]}</div></SurfaceCard>;
+  };
 
-    return (
-        <Tree
-            contract="console-primary-aside-page"
-            render={defineContractComponent("console-primary-aside-page", {
-                heading: defineContractComponent("display-title-with-end-action", {
-                    title: defineLeafComponent("heading", { scale: "display" }, () => (
-                        <Heading props={{ content: title, level: 1, scale: "display" }} />
-                    )),
-                    ...headingAction,
-                }),
-                /*
-                 * THE LEDE IS WHAT `title-with-baseline-fact` CANNOT HOLD. A baseline fact is a short
-                 * phrase beside a title; this is a sentence about what an app IS and why the set is
-                 * open, which is the claim the whole middle level rests on.
-                 */
-                lede: defineLeafComponent("text", { size: "md", tone: "muted" }, () => (
-                    <Text props={{ content: lede, size: "md", tone: "muted" }} />
-                )),
-                content: defineContractComponent("console-primary-aside", {
-                    primary: defineContractComponent("console-section-stack", {
-                        section: [ownedSection()],
-                    }),
-                    aside: defineContractComponent("console-section-stack", {
-                        section: [catalogueSection()],
-                    }),
-                }),
-            })}
-        />
-    )
-}
+  /*
+   * SECTION 2 - the catalogue. It is a LIST because `catalogItems` returns one, filtered to
+   * `site_from_template` - not because a second template has been promised. Today the filter yields
+   * exactly one, and template #2 appears here with no new screen, no new route and no change to the
+   * rail.
+   */
+  const catalogueSection = () => {
+    if (catalogue.phase === "empty") {
+      return sentenceSection(catalogue.label, catalogue.note);
+    }
+    if (catalogue.phase === "refused") {
+      return refusedSection(catalogue.label, catalogue.note);
+    }
+    const isResting = catalogue.phase === "resting";
+    return <SurfaceCard props={{
+      label: catalogue.label,
+      fact: catalogue.fact
+    }} isLoading={isResting}><div>{catalogue.phase === "answered" ? catalogue.offers.map(offer => offerRow(offer, onBuildTemplate)) : [restingRow(4)]}</div></SurfaceCard>;
+  };
+  const headingAction = supportedOffer === undefined || buildAppLabel === undefined ? null : <Button props={{
+    label: buildAppLabel,
+    size: "lg",
+    variant: "primary"
+  }} on={{
+    press: () => onBuildTemplate(supportedOffer.templateKey)
+  }} />;
+  return <div><div>
 
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "block", world: "pure" } as const
+
+
+
+
+      <Heading props={{
+        content: title,
+        level: 1,
+        scale: "display"
+      }} />{headingAction}</div>
+
+
+
+
+
+
+
+    <Text props={{
+      content: lede,
+      size: "md",
+      tone: "muted"
+    }} /><div><div><>{ownedSection()}</></div><div><>{catalogueSection()}</></div></div></div>;
+};
+

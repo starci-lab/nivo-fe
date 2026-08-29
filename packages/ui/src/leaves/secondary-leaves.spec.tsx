@@ -17,13 +17,13 @@ describe("secondary leaves", () => {
         const fallback = document.querySelector("[data-avatar-fallback='dicebear-lorelei']")
         expect(fallback).toHaveAttribute("alt", "Ada Lovelace")
         rerender(<Avatar props={{ name: "Ada Lovelace", src: "/ada.png", size: "sm" }} />)
-        expect(document.querySelector("[data-component='Avatar']")).toHaveAttribute("data-size", "sm")
-        expect(document.querySelector("[data-component='Avatar'] [data-avatar-fallback='dicebear-lorelei']")).toBeInTheDocument()
+        expect(document.querySelector("[data-size='sm']")).toHaveAttribute("data-size", "sm")
+        expect(document.querySelector("[data-avatar-fallback='dicebear-lorelei']")).toBeInTheDocument()
     })
 
     it("renders the loading shape and normal see-more callback", () => {
         const { rerender } = render(<SeeMoreLink props={{ label: "More" }} isLoading />)
-        expect(document.querySelector("[data-component='SeeMoreLink']")).toHaveAttribute("data-loading", "true")
+        expect(document.querySelector("[data-loading='true']")).toHaveAttribute("data-loading", "true")
         rerender(<SeeMoreLink props={{ label: "More" }} />)
         expect(screen.getByRole("link", { name: /More/ })).toBeInTheDocument()
     })

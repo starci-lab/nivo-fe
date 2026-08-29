@@ -1,6 +1,5 @@
-import { Link as HeroLink, skeletonVariants } from "@heroui/react"
-import { Icon } from "../Icon"
-import type { LeafProps } from "../../contracts/props"
+import { Link as HeroLink, skeletonVariants } from "@heroui/react";
+import { Icon } from "../Icon";
 
 /**
  * LEAF - `SeeMoreLink`: the way out of a section, drawn at the end of its label line.
@@ -20,63 +19,62 @@ import type { LeafProps } from "../../contracts/props"
 
 /** What this leaf draws. A `type`, not an `interface` - only an alias satisfies the data fence. */
 export type SeeMoreLinkData = {
-    /** The already-resolved words. Absent while loading. */
-    readonly label?: string
-}
+  /** The already-resolved words. Absent while loading. */
+  readonly label?: string;
+};
 
 /** What following it does. Connected code owns any resulting route. */
 export type SeeMoreLinkActions = {
-    /** Called when the reader follows it. */
-    readonly press?: () => void
-}
+  /** Called when the reader follows it. */
+  readonly press?: () => void;
+};
 
 /** Props for {@link SeeMoreLink}. Three fixed slots, no fourth - see {@link LeafProps}. */
-export type SeeMoreLinkProps = LeafProps<SeeMoreLinkData, SeeMoreLinkActions>
+export type SeeMoreLinkProps = {readonly props: SeeMoreLinkData;readonly on?: SeeMoreLinkActions;readonly isLoading?: boolean;};
 
 /** The line: never wraps, never grows, and carries the hover group the caret rides. */
-const LINE_CLASSES = "group inline-flex w-fit shrink-0 cursor-pointer items-center gap-1 text-sm font-semibold text-accent-soft-foreground no-underline"
+const LINE_CLASSES = "group inline-flex w-fit shrink-0 cursor-pointer items-center gap-1 text-sm font-semibold text-accent-soft-foreground no-underline";
 
 /** The hover movement belongs to the cluster; the glyph keeps the icon vocabulary's small step. */
-const CARET_CLASSES = "shrink-0 transition-[translate] group-hover:translate-x-1"
+const CARET_CLASSES = "shrink-0 transition-[translate] group-hover:translate-x-1";
 
 /** The resting shape - the same line box with the glyphs out. */
 const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
-    className: "inline-flex w-16 shrink-0 select-none text-sm text-transparent",
-})
+  className: "inline-flex w-16 shrink-0 select-none text-sm text-transparent"
+});
 
 /**
  * Draw the way out.
  *
  * @param input - {@link SeeMoreLinkProps}
  */
-export const SeeMoreLink = ({ props, on, isLoading = false }: SeeMoreLinkProps) => {
-    if (isLoading) {
-        return (
-            <span
-                data-tier="leaf"
-                data-component="SeeMoreLink"
-                data-loading="true"
-                aria-hidden
-                className={RESTING_CLASSES}
-            >
-                &nbsp;
-            </span>
-        )
-    }
+export const SeeMoreLink = (props: SeeMoreLinkProps) => SeeMoreLinkView(props);
+const SeeMoreLinkView = ({ props, on, isLoading = false }: SeeMoreLinkProps) => {
+  if (isLoading) {
+    return (
+      <span
 
-    const inside = (
-        <>
+
+        data-loading="true"
+        aria-hidden
+        className={RESTING_CLASSES}>
+        
+                &nbsp;
+            </span>);
+
+  }
+
+  const inside =
+  <>
             {props.label ?? ""}
             <span className={CARET_CLASSES}><Icon props={{ name: "next" }} /></span>
-        </>
-    )
+        </>;
 
-    return (
-        <HeroLink data-tier="leaf" data-component="SeeMoreLink" onPress={on?.press} className={LINE_CLASSES}>
+
+  return (
+    <HeroLink onPress={on?.press} className={LINE_CLASSES}>
             {inside}
-        </HeroLink>
-    )
-}
+        </HeroLink>);
 
-/** Source-level tier marker - lets a gate read the tier without guessing from the folder path. */
-export const meta = { shape: "leaf", world: "pure" } as const
+};
+
