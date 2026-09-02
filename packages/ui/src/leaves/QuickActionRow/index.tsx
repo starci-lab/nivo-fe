@@ -52,7 +52,7 @@ const QuickActionRowView = ({ props, on }: QuickActionRowProps) =>
   onPress={on?.press}
   className={ROW_CLASSES}>
   
-        <Icon source={nivoIconSource(props.icon, "leading")} role="leading" />
+        <Icon source={nivoIconSource(props.icon, "leading")} usage="leading" />
         {props.label}
     </HeroLink>;
 

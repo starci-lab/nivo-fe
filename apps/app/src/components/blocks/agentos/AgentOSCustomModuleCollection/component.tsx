@@ -56,7 +56,7 @@ export const AgentOSCustomModuleCollectionBase = (props: AgentOSCustomModuleColl
   ><div><EmptyNotice
         message={empty}
         actionLabel={createLabel}
-        actionStartContent={<Icon source={nivoIconSource("retry", "chip")} role="chip" />}
+        actionStartContent={<Icon source={nivoIconSource("retry", "chip")} usage="chip" />}
         onAction={onCreate}
       /></div></SurfaceCard>;
   const shown = state === "loading" ? [0, 1, 2].map(index => ({

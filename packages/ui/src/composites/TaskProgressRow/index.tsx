@@ -11,7 +11,7 @@ export type TaskProgressRowProps = { readonly props: TaskProgressRowData; readon
 /** Render one read-only task row. */
 export const TaskProgressRow = (props: TaskProgressRowProps) => (
     <div>
-        <Icon source={nivoIconSource(props.props.isComplete === true ? "complete" : "pending", "leading")} role="leading" isSkeleton={props.isLoading} />
+        <Icon source={nivoIconSource(props.props.isComplete === true ? "complete" : "pending", "leading")} usage="leading" isSkeleton={props.isLoading} />
         <Text isSkeleton={props.isLoading}>{props.props.title}</Text>
         <Text size="xs" isSkeleton={props.isLoading}>{props.props.fact}</Text>
     </div>

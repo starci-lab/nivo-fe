@@ -139,7 +139,7 @@ export const AgentOSWorkspaceListBase = (props: AgentOSWorkspaceListProps) => {
             <EmptyNotice
             message={props.props.message}
             actionLabel={state === "empty" ? props.props.actionLabel : undefined}
-            actionStartContent={state === "empty" ? <Icon source={nivoIconSource("retry", "chip")} role="chip" /> : undefined}
+            actionStartContent={state === "empty" ? <Icon source={nivoIconSource("retry", "chip")} usage="chip" /> : undefined}
             onAction={state === "empty" ? props.on.create : undefined}
           /></div></SurfaceCard>;
     }

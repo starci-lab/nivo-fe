@@ -86,7 +86,7 @@ import {
   WindowIcon as WindowSolidIcon,
   XMarkIcon as XMarkSolidIcon } from
 "@heroicons/react/16/solid";
-import type { IconRole } from "@starci/grammar/common";
+import type { IconUsage } from "@starci/grammar/common";
 import type { SVGProps } from "react";
 import { GithubMark, GoogleMark } from "./iconography-brands";
 
@@ -227,5 +227,5 @@ export const NIVO_ICON_SOURCES: Record<IconName, GlyphCuts> = {
 };
 
 /** Resolve an app-owned semantic name to the glyph cut required by Grammar's public role. */
-export const nivoIconSource = (name: IconName, role: IconRole = "chip") => NIVO_ICON_SOURCES[name][role];
+export const nivoIconSource = (name: IconName, usage: IconUsage = "chip") => NIVO_ICON_SOURCES[name][usage];
 

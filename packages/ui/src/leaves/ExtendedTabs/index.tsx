@@ -53,7 +53,7 @@ const ExtendedTabsView = ({ props, on }: ExtendedTabsProps) =>
           aria-controls={`dashboard-panel-${tab.id}`}>
           
                             <span className="flex items-center gap-2">
-                                <Icon source={nivoIconSource(tab.icon, "leading")} role="leading" />
+                                <Icon source={nivoIconSource(tab.icon, "leading")} usage="leading" />
                                 <span className="hidden md:inline">{tab.label}</span>
                             </span>
                             <Tabs.Indicator />

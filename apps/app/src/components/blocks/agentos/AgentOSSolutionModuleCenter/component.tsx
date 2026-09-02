@@ -75,7 +75,7 @@ const AgentOSSolutionModuleCenterContent = ({
       return <EmptyNotice
         message={emptyLabel}
         actionLabel={emptyActionLabel}
-        actionStartContent={<Icon source={nivoIconSource("retry", "chip")} role="chip" />}
+        actionStartContent={<Icon source={nivoIconSource("retry", "chip")} usage="chip" />}
         onAction={() => onSelectMode("catalog")}
       />;
     }

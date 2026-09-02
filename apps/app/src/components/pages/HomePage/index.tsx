@@ -28,7 +28,7 @@ export const HomePage = (props: HomePageProps) => {
   const t = useTranslations("app");
   return <main className={ROOT_CLASS_NAME}>
             <div className={CONTENT_CLASS_NAME}>
-                <Icon source={nivoIconSource("brand", "heading")} role="heading" />
+                <Icon source={nivoIconSource("brand", "heading")} usage="heading" />
                 <Heading level={1}>{"nivo app"}</Heading>
                 <Text size="sm">{t("description")}</Text>
             </div>

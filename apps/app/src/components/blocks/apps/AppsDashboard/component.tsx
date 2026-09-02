@@ -251,7 +251,7 @@ export const AppsDashboardBase = (props: AppsDashboardProps) => {
       ><div>{<EmptyNotice
             message={owned.note}
             actionLabel={supportedOffer === undefined ? undefined : buildAppLabel}
-            actionStartContent={supportedOffer === undefined || buildAppLabel === undefined ? undefined : <Icon source={nivoIconSource("retry", "chip")} role="chip" />}
+            actionStartContent={supportedOffer === undefined || buildAppLabel === undefined ? undefined : <Icon source={nivoIconSource("retry", "chip")} usage="chip" />}
             onAction={supportedOffer === undefined || buildAppLabel === undefined ? undefined : () => onBuildTemplate(supportedOffer.templateKey)}
           />}</div></SurfaceCard>;
     }

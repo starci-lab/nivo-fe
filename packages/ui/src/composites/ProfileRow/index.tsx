@@ -19,6 +19,6 @@ export const ProfileRow = (props: ProfileRowProps) => (
             <Text size="sm" weight="semibold" isSkeleton={props.isLoading}>{props.props.displayName}</Text>
             <Text size="xs" isSkeleton={props.isLoading}>{props.props.username === undefined ? undefined : `@${props.props.username}`}</Text>
         </span>
-        <Icon source={nivoIconSource("disclosure", "chip")} role="chip" />
+        <Icon source={nivoIconSource("disclosure", "chip")} usage="chip" />
     </button>
 )

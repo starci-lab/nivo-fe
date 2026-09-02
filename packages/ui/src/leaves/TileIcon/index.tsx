@@ -36,7 +36,7 @@ export const TileIcon = (props: TileIconProps) => {
       aria-hidden="true"
       className={cn(TILE_ICON_CLASS_NAME, isLoading ? RESTING_CLASSES : TILE_ICON_RESTING_CLASS_NAME)}>
       
-            {isLoading ? null : <Icon source={nivoIconSource(data.icon, "leading")} role="leading" />}
+            {isLoading ? null : <Icon source={nivoIconSource(data.icon, "leading")} usage="leading" />}
             <span
 
         className={cn(TILE_ICON_SIGNAL_CLASS_NAME, TILE_ICON_SIGNAL_CLASS_NAMES[signal])} />

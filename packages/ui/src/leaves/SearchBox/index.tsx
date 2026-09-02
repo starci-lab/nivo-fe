@@ -61,7 +61,7 @@ const SearchBoxView = ({ props, on }: SearchBoxProps) =>
     on?.search?.(field instanceof HTMLInputElement ? field.value : "");
   }}>
   
-        <Icon source={nivoIconSource("search", "chip")} role="chip" />
+        <Icon source={nivoIconSource("search", "chip")} usage="chip" />
         <HeroInput
     name="q"
     type="search"

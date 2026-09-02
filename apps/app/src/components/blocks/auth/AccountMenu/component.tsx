@@ -16,7 +16,7 @@ export type AccountMenuViewProps = {
     readonly signOut?: () => void;
   };
 };
-const accountTrigger = <Icon source={nivoIconSource("account", "leading")} role="leading" />;
+const accountTrigger = <Icon source={nivoIconSource("account", "leading")} usage="leading" />;
 
 /** Pure account menu: vendor mechanics stay in DropdownBranch, session behavior stays above. */
 export const AccountMenuBase = (props: AccountMenuProps) => <DropdownBranch props={{

@@ -33,7 +33,7 @@ export const ThemeSwitch = (props: ThemeSwitchProps) =>
                 <Switch.Control>
                     <Switch.Thumb>
                         <Switch.Icon>
-                            <Icon source={nivoIconSource(isSelected ? "dark" : "light", "leading")} role="leading" />
+                            <Icon source={nivoIconSource(isSelected ? "dark" : "light", "leading")} usage="leading" />
                         </Switch.Icon>
                     </Switch.Thumb>
                 </Switch.Control>

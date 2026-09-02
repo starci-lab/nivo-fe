@@ -34,7 +34,7 @@ const LABEL_CLASSES = "inline-flex items-center gap-2 text-sm font-medium";
 export const Label = (props: LabelProps) => LabelView(props);
 const LabelView = ({ props }: LabelProps) =>
 <label htmlFor={props.htmlFor} className={LABEL_CLASSES}>
-        {props.icon === undefined ? null : <Icon source={nivoIconSource(props.icon, "chip")} role="chip" />}
+        {props.icon === undefined ? null : <Icon source={nivoIconSource(props.icon, "chip")} usage="chip" />}
         {props.content}
     </label>;
 

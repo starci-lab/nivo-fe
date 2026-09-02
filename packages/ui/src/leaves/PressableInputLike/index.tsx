@@ -33,7 +33,7 @@ const PressableInputLikeView = ({ props, on }: PressableInputLikeProps) =>
   className="h-9 min-h-9 w-64 justify-between gap-2 rounded-field border-[var(--field-border)] bg-field px-3 font-normal text-field-foreground shadow-[var(--field-shadow)] hover:bg-field">
   
         <span className="inline-flex min-w-0 items-center gap-2">
-            <Icon source={nivoIconSource("search", "leading")} role="leading" />
+            <Icon source={nivoIconSource("search", "leading")} usage="leading" />
             <span className="truncate text-sm text-field-placeholder">{props.placeholder}</span>
         </span>
         {props.shortcut === undefined ? null : <Kbd>{props.shortcut}</Kbd>}

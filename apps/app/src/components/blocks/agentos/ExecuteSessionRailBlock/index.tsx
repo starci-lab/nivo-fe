@@ -56,7 +56,7 @@ const SessionRailBody = (props: ExecuteSessionRailBlockProps) => <div>
     isPending={props.pending}
     onPress={props.onCreate}
   >New session</Button></div>;
-const SessionRailToggle = () => <Icon source={nivoIconSource("sidebar", "leading")} role="leading" />;
+const SessionRailToggle = () => <Icon source={nivoIconSource("sidebar", "leading")} usage="leading" />;
 
 /** Navigate multiple Execute conversations through one selected identity at every breakpoint. */
 export const ExecuteSessionRailBlock = (props: ExecuteSessionRailBlockProps) => {

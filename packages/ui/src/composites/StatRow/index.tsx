@@ -11,7 +11,7 @@ export type StatRowProps = { readonly props: StatRowData; readonly isLoading?: b
 /** Render one standing figure with its meaning. */
 export const StatRow = (props: StatRowProps) => (
     <div>
-        <Icon source={nivoIconSource(props.props.icon, "leading")} role="leading" />
+        <Icon source={nivoIconSource(props.props.icon, "leading")} usage="leading" />
         <Text size="md">{props.props.label}</Text>
         <Text size="xs" isSkeleton={props.isLoading}>{props.props.value}</Text>
     </div>
