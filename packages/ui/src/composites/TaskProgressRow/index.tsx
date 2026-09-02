@@ -1,5 +1,7 @@
-import { Icon } from "../../leaves/Icon"
-import { Text } from "../../leaves/Text"
+import { nivoIconSource } from "../../iconography";
+import { Icon, Text } from "@starci/grammar/common";
+
+
 
 /** Resolved task identity and completion state. */
 export type TaskProgressRowData = { readonly id: string; readonly title?: string; readonly fact?: string; readonly isComplete?: boolean }
@@ -9,8 +11,8 @@ export type TaskProgressRowProps = { readonly props: TaskProgressRowData; readon
 /** Render one read-only task row. */
 export const TaskProgressRow = (props: TaskProgressRowProps) => (
     <div>
-        <Icon props={{ name: props.props.isComplete === true ? "complete" : "pending", role: "leading" }} isLoading={props.isLoading} />
-        <Text props={{ content: props.props.title }} isLoading={props.isLoading} />
-        <Text props={{ content: props.props.fact, size: "xs" }} isLoading={props.isLoading} />
+        <Icon source={nivoIconSource(props.props.isComplete === true ? "complete" : "pending", "leading")} role="leading" isSkeleton={props.isLoading} />
+        <Text isSkeleton={props.isLoading}>{props.props.title}</Text>
+        <Text size="xs" isSkeleton={props.isLoading}>{props.props.fact}</Text>
     </div>
 )

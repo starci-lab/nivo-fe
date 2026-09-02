@@ -1,5 +1,7 @@
+import { nivoIconSource } from "../../iconography";
+import { Icon } from "@starci/grammar/common";
 import { Switch } from "@heroui/react";
-import { Icon } from "../Icon";
+
 import { THEME_SWITCH_CLASS_NAME } from "./classNames";
 
 /** Current appearance and accessible copy for the navbar switch. */
@@ -31,7 +33,7 @@ export const ThemeSwitch = (props: ThemeSwitchProps) =>
                 <Switch.Control>
                     <Switch.Thumb>
                         <Switch.Icon>
-                            <Icon props={{ name: isSelected ? "dark" : "light", role: "leading" }} />
+                            <Icon source={nivoIconSource(isSelected ? "dark" : "light", "leading")} role="leading" />
                         </Switch.Icon>
                     </Switch.Thumb>
                 </Switch.Control>

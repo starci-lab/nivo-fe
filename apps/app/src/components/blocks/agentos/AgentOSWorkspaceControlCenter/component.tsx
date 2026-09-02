@@ -1,5 +1,5 @@
-import { Button, ChoiceTabs, Heading, SurfaceCard, Text, TileIcon } from "@nivo/ui";
-import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice";
+import { ChoiceTabs, TileIcon } from "@nivo/ui";
+import { SurfaceCard, Button, EmptyNotice, Heading, Text } from "@starci/grammar/common";
 import { AgentOSWorkspaceApplications } from "@/components/blocks/agentos/AgentOSWorkspaceApplications";
 import { AgentOSSolutionModuleCenter } from "@/components/blocks/agentos/AgentOSSolutionModuleCenter";
 import { AgentOSWorkspaceAiKnowledge } from "@/components/blocks/agentos/AgentOSWorkspaceAiKnowledge";
@@ -91,9 +91,10 @@ export const AgentOSWorkspaceControlCenterBase = (props: AgentOSWorkspaceControl
   const sectionsOf = () => {
     if (controlCenterState !== "ready" || data === undefined) {
       const isRefused = controlCenterState === "refused";
-      return [<SurfaceCard key="item-0" props={{
-        label: pageCopy.stateSection
-      }}><div>
+      return [<SurfaceCard
+        key="item-0"
+        label={pageCopy.stateSection}
+      ><div>
 
 
 
@@ -104,23 +105,14 @@ export const AgentOSWorkspaceControlCenterBase = (props: AgentOSWorkspaceControl
 
 
 
-            <Heading props={{
-              content: isRefused ? pageCopy.refusedTitle : pageCopy.loadingTitle,
-              level: 2
-            }} />
+            <Heading level={2}>{isRefused ? pageCopy.refusedTitle : pageCopy.loadingTitle}</Heading>
 
 
-            <Text props={{
-              content: message ?? labels.loading,
-              size: "md",
-              tone: "muted"
-            }} />
-            {isRefused ? <Button props={{
-              label: pageCopy.retry,
-              variant: "primary"
-            }} on={{
-              press: onRetry
-            }} /> : null}</div></div></SurfaceCard>];
+            <Text size="md" tone="muted">{message ?? labels.loading}</Text>
+            {isRefused ? <Button
+              variant="primary"
+              onPress={onRetry}
+            >{pageCopy.retry}</Button> : null}</div></div></SurfaceCard>];
     }
     if (pageState === "overview") {
       const overviewSections = [<AgentOSWorkspaceSummary key="item-0" data={data} labels={labels.summary} />, <AgentOSWorkspaceRuntime key="item-1" data={data} labels={labels.runtime} formatDate={formatDate} />];
@@ -136,9 +128,7 @@ export const AgentOSWorkspaceControlCenterBase = (props: AgentOSWorkspaceControl
       return [<AgentOSWorkspaceAiKnowledge key="item-0" workspaceId={data.workspace.id} />];
     }
     if (pageState === "access") {
-      return [<EmptyNotice key="item-0" props={{
-        message: labels.accessUnavailable
-      }} />];
+      return [<EmptyNotice key="item-0" message={labels.accessUnavailable} />];
     }
     if (pageState === "infrastructure") {
       return [<AgentOSWorkspaceRuntime key="item-0" data={data} labels={labels.runtime} formatDate={formatDate} />, <HelmStackSnapshot key="item-1" runtime={data.runtime} labels={labels.stack} />];
@@ -168,25 +158,12 @@ export const AgentOSWorkspaceControlCenterBase = (props: AgentOSWorkspaceControl
 
 
 
-          <Text props={{
-            content: pageCopy.eyebrow,
-            size: "sm",
-            tone: "accent",
-            weight: "semibold"
-          }} />
+          <Text size="sm" tone="accent" weight="semibold">{pageCopy.eyebrow}</Text>
 
 
-          <Heading props={{
-            content: title,
-            level: 1,
-            scale: "display"
-          }} />
+          <Heading level={1} scale="display">{title}</Heading>
 
 
-          <Text props={{
-            content: pageCopy.description,
-            size: "md",
-            tone: "muted"
-          }} /></div></div></div>{tabs}{sections}</div>;
+          <Text size="md" tone="muted">{pageCopy.description}</Text></div></div></div>{tabs}{sections}</div>;
 };
 

@@ -1,6 +1,7 @@
 "use client";
+import { SurfaceCard, Button, Heading, Text } from "@starci/grammar/common";
 
-import { Button, Heading, SurfaceCard, Text } from "@nivo/ui";
+
 
 /** Reviewable immutable context version projected from the backend snapshot. */
 export type ContextVersionBlockProps = ContextVersionContentProps;
@@ -53,87 +54,39 @@ const ContextVersionContent = ({
   return <div><div>
 
 
-      <Heading props={{
-        content: candidateLabel,
-        level: 3
-      }} />
+      <Heading level={3}>{candidateLabel}</Heading>
 
-      <Text props={{
-        content: activeLabel,
-        size: "sm",
-        tone: "muted"
-      }} /></div>
+      <Text size="sm" tone="muted">{activeLabel}</Text></div>
 
 
 
-    <Text props={{
-      content: draft?.summary ?? "Setup has not produced a candidate yet.",
-      size: "sm",
-      weight: "semibold"
-    }} /><div><><div>
+    <Text size="sm" weight="semibold">{draft?.summary ?? "Setup has not produced a candidate yet."}</Text><div><><div>
 
 
 
 
-          <Text props={{
-            content: "Setup gates",
-            size: "sm"
-          }} />
+          <Text size="sm">{"Setup gates"}</Text>
 
-          <Text props={{
-            content: `${passedGateCount}/${gateCount} complete`,
-            size: "sm",
-            weight: "semibold",
-            tone: gateCount > 0 && passedGateCount === gateCount ? "accent" : undefined
-          }} /></div>{gates.map((gate, index) => <div key={index}>{<Text props={{
-            content: gate.label,
-            size: "sm"
-          }} />}{<Text props={{
-            content: gate.passed ? "Complete" : "Needs follow-up",
-            size: "sm",
-            weight: "semibold",
-            tone: gate.passed ? "accent" : "muted"
-          }} />}</div>)}{reviewFacts.slice(0, 4).map((fact, index) => <div key={index}>{<Text props={{
-            content: `Evidence ${index + 1}`,
-            size: "sm"
-          }} />}{<Text props={{
-            content: fact,
-            size: "sm"
-          }} />}</div>)}<div>
+          <Text size="sm" tone={gateCount > 0 && passedGateCount === gateCount ? "accent" : undefined} weight="semibold">{`${passedGateCount}/${gateCount} complete`}</Text></div>{gates.map((gate, index) => <div key={index}>{<Text size="sm">{gate.label}</Text>}{<Text size="sm" tone={gate.passed ? "accent" : "muted"} weight="semibold">{gate.passed ? "Complete" : "Needs follow-up"}</Text>}</div>)}{reviewFacts.slice(0, 4).map((fact, index) => <div key={index}>{<Text size="sm">{`Evidence ${index + 1}`}</Text>}{<Text size="sm">{fact}</Text>}</div>)}<div>
 
-          <Text props={{
-            content: "Exact Test",
-            size: "sm"
-          }} />
+          <Text size="sm">{"Exact Test"}</Text>
 
-          <Text props={{
-            content: draft?.exactTestPassed === true ? "Passed for this digest" : "Required before Apply",
-            size: "sm",
-            weight: "semibold",
-            tone: draft?.exactTestPassed === true ? "accent" : "muted"
-          }} /></div></></div>
+          <Text size="sm" tone={draft?.exactTestPassed === true ? "accent" : "muted"} weight="semibold">{draft?.exactTestPassed === true ? "Passed for this digest" : "Required before Apply"}</Text></div></></div>
 
 
 
 
 
-    <Text props={{
-      content: refused ? "The context operation was refused; the active version did not change." : "Apply activates only this tested immutable version, disables Live, and never rewrites earlier Execute messages.",
-      size: "sm",
-      tone: "muted",
-      live: refused ? "assertive" : undefined
-    }} /><>
+    <Text size="sm" tone="muted" live={refused ? "assertive" : undefined}>{refused ? "The context operation was refused; the active version did not change." : "Apply activates only this tested immutable version, disables Live, and never rewrites earlier Execute messages."}</Text><>
 
 
 
-      <Button props={{
-        label: applyLabel,
-        variant: "primary",
-        disabled: !applyReady,
-        isPending: pending
-      }} on={{
-        press: onApply
-      }} /></></div>;
+      <Button
+        variant="primary"
+        isDisabled={!applyReady}
+        isPending={pending}
+        onPress={onApply}
+      >{applyLabel}</Button></></div>;
 };
 
 /** Draw one immutable candidate and preserve explicit application as the only state transition. */
@@ -145,10 +98,10 @@ export const ContextVersionBlock = (props: ContextVersionBlockProps) => {
     refused,
     onApply
   }: ContextVersionContentProps = props;
-  return <SurfaceCard props={{
-    label: "Business context",
-    fact: activeVersion === null ? "Not applied" : `v${activeVersion} active`
-  }}>
+  return <SurfaceCard
+    label="Business context"
+    fact={activeVersion === null ? "Not applied" : `v${activeVersion} active`}
+  >
   <ContextVersionContent activeVersion={activeVersion} draft={draft} pending={pending} refused={refused} onApply={onApply} />
 </SurfaceCard>;
 };

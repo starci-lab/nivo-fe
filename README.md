@@ -48,7 +48,22 @@ tên theo *nghĩa*: `refresh` sống sót qua một lần đổi gói icon, `Arr
 
 ## Chạy
 
+Nivo dùng trực tiếp checkout nguồn `@starci/grammar`, không tải package này từ npm. Hai repo cần
+nằm cạnh nhau theo layout sau để dependency `file:` trong `packages/ui` giữ được tính tương đối và
+portable giữa các máy:
+
+```text
+<workspace>/
+├── nivo-fe/
+└── starci-academy-fe/
+```
+
+Grammar công bố contract qua `dist`, nên các lệnh dev, build, test và typecheck của Nivo đều build
+lại package nguồn trước khi chạy. App chỉ import adapter từ `@nivo/ui`; không import thẳng nội bộ
+`@starci/grammar` hay đường dẫn `src` của repo bên cạnh.
+
 ```bash
+npm --prefix ../starci-academy-fe install
 npm install
 npm run dev:app
 ```

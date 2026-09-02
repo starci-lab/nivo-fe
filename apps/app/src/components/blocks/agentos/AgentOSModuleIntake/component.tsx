@@ -1,4 +1,5 @@
-import { Button, Field, Heading, SurfaceCard, Text } from "@nivo/ui";
+
+import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common";
 
 /** Opening-goal form copy, local state and persistence action. */
 export type AgentOSModuleIntakeProps = AgentOSModuleIntakeViewProps;
@@ -43,59 +44,34 @@ export const AgentOSModuleIntakeBase = (props: AgentOSModuleIntakeProps) => {
 
         <SurfaceCard><div><div>
 
-              <Heading props={{
-                  content: title,
-                  level: 2
-                }} />
-              <Text props={{
-                  content: description,
-                  size: "sm",
-                  tone: "muted"
-                }} /></div>
+              <Heading level={2}>{title}</Heading>
+              <Text size="sm" tone="muted">{description}</Text></div>
 
-            <Field props={{
-                id: "module-goal",
-                name: "goal",
-                label: fieldLabel,
-                placeholder,
-                hint: error,
-                isInvalid: error !== undefined,
-                disabled: pending
-              }} on={{
-                change: onGoal
-              }} />
-            <Text props={{
-                content: note,
-                size: "xs"
-              }} />
-            <Button props={{
-                label: action,
-                variant: "primary",
-                isPending: pending,
-                disabled: goal.trim().length < 3
-              }} on={{
-                press: onSubmit
-              }} /></div></SurfaceCard>
+            <Input
+              id="module-goal"
+              name="goal"
+              label={fieldLabel}
+              placeholder={placeholder}
+              isDisabled={pending}
+              variant="secondary"
+              hint={error !== undefined ? undefined : error}
+              errorMessage={error !== undefined ? error : undefined}
+              isError={error !== undefined}
+              onValueChange={onGoal}
+            />
+            <Text size="xs">{note}</Text>
+            <Button
+              variant="primary"
+              isPending={pending}
+              isDisabled={goal.trim().length < 3}
+              onPress={onSubmit}
+            >{action}</Button></div></SurfaceCard>
       </div></></div><div><><div>
 
 
         <SurfaceCard><div>
-            <Heading props={{
-                content: guideTitle,
-                level: 3
-              }} /><div>{guideSteps.map((step, index) => <div key={index}><Text props={{
-                    content: String(index + 1),
-                    size: "sm",
-                    weight: "semibold"
-                  }} /><Text props={{
-                    content: step,
-                    size: "sm"
-                  }} /></div>)}</div>
-            <Text props={{
-                content: guideNote,
-                size: "sm",
-                tone: "muted"
-              }} /></div></SurfaceCard>
+            <Heading level={3}>{guideTitle}</Heading><div>{guideSteps.map((step, index) => <div key={index}><Text size="sm" weight="semibold">{String(index + 1)}</Text><Text size="sm">{step}</Text></div>)}</div>
+            <Text size="sm" tone="muted">{guideNote}</Text></div></SurfaceCard>
       </div></></div></div>;
 };
 

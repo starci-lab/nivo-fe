@@ -1,7 +1,9 @@
+import { nivoIconSource, type IconName } from "../../iconography";
+import { Icon } from "@starci/grammar/common";
 "use client";
 
 import { Header, ListBox } from "@heroui/react";
-import { Icon, type IconName } from "../Icon";
+
 
 /** The two rail presentations owned by the same keyboard navigation collection. */
 export type SelectionListPresentation = "expanded" | "compact";
@@ -94,11 +96,11 @@ const SelectionListView = ({ props, on }: SelectionListProps) => {
             title={item.label}
             className="flex size-10 items-center justify-center rounded-full group-data-[hovered=true]:bg-default group-data-[selected=true]:bg-accent-soft group-data-[selected=true]:text-accent">
             
-                                    <Icon props={{ name: item.icon, role: "leading" }} />
+                                    <Icon source={nivoIconSource(item.icon, "leading")} role="leading" />
                                 </span> :
 
           <>
-                                    <Icon props={{ name: item.icon, role: "leading" }} />
+                                    <Icon source={nivoIconSource(item.icon, "leading")} role="leading" />
                                     <span className="min-w-0 flex-1 truncate text-sm font-medium">{item.label}</span>
                                     {item.status === undefined ? null :
             <span className="shrink-0 text-xs text-muted">{item.status}</span>

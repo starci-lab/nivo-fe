@@ -1,5 +1,5 @@
-import { Badge, Button, SurfaceCard, SurfaceListCard, Text, TextLink } from "@nivo/ui";
-import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice";
+import { nivoIconSource } from "@nivo/ui";
+import { SurfaceCard, SurfaceListCard, Button, Button as CoreButton, EmptyNotice, Icon, Text, TextAction, Badge } from "@starci/grammar/common";
 
 /** One custom-module identity prepared for the joined management list. */
 export type AgentOSCustomModuleCollectionProps = AgentOSCustomModuleCollectionViewProps;
@@ -27,32 +27,12 @@ export type AgentOSCustomModuleCollectionViewProps = {
 const rowView = (row: CustomModuleCollectionRow, loading: boolean, onOpen: (id: string) => void) => <div><div>
 
 
-    <TextLink props={{
-      label: row.name,
-      size: "sm"
-    }} on={{
-      press: () => onOpen(row.id)
-    }} />
-    <Text props={{
-      content: row.detail,
-      size: "xs"
-    }} isLoading={loading} /></div>
+    <TextAction size="sm" isSkeleton={loading} onPress={() => onOpen(row.id)}>{row.name}</TextAction>
+    <Text size="xs" isSkeleton={loading}>{row.detail}</Text></div>
 
-  <Badge props={{
-    content: row.kind,
-    tone: "neutral"
-  }} isLoading={loading} />
-  <Badge props={{
-    content: row.status,
-    tone: row.status === "Active" ? "success" : "warning"
-  }} isLoading={loading} />
-  <Button props={{
-    label: row.action,
-    size: "sm",
-    variant: "secondary"
-  }} on={{
-    press: () => onOpen(row.id)
-  }} isLoading={loading} /></div>;
+  <Badge tone="neutral" isSkeleton={loading}>{row.kind}</Badge>
+  <Badge tone={row.status === "Active" ? "success" : "warning"} isSkeleton={loading}>{row.status}</Badge>
+  <Button variant="secondary" size="sm" isSkeleton={loading} onPress={() => onOpen(row.id)}>{row.action}</Button></div>;
 const customModuleContent = (shown: ReadonlyArray<CustomModuleCollectionRow>, loading: boolean, onOpen: (id: string) => void) => <div>{shown.map(row => rowView(row, loading, onOpen))}</div>;
 
 /** Draw custom drafts and active modules with local refusal and empty states. */
@@ -67,24 +47,18 @@ export const AgentOSCustomModuleCollectionBase = (props: AgentOSCustomModuleColl
     onOpen,
     onCreate
   }: AgentOSCustomModuleCollectionViewProps = props;
-  if (state === "refused") return <SurfaceCard props={{
-    label: title,
-    actionLabel: createLabel
-  }} on={{
-    act: onCreate
-  }}><div><Text props={{
-        content: refused,
-        size: "sm",
-        tone: "muted"
-      }} /></div></SurfaceCard>;
-  if (state === "empty") return <SurfaceCard props={{
-    label: title
-  }}><div><EmptyNotice props={{
-        message: empty,
-        actionLabel: createLabel
-      }} on={{
-        act: onCreate
-      }} /></div></SurfaceCard>;
+  if (state === "refused") return <SurfaceCard
+    label={title}
+    labelEnd={createLabel !== undefined && onCreate !== undefined ? <CoreButton size="sm" variant="primary" onPress={onCreate}>{createLabel}</CoreButton> : null}
+  ><div><Text size="sm" tone="muted">{refused}</Text></div></SurfaceCard>;
+  if (state === "empty") return <SurfaceCard
+    label={title}
+  ><div><EmptyNotice
+        message={empty}
+        actionLabel={createLabel}
+        actionStartContent={<Icon source={nivoIconSource("retry", "chip")} role="chip" />}
+        onAction={onCreate}
+      /></div></SurfaceCard>;
   const shown = state === "loading" ? [0, 1, 2].map(index => ({
     id: `loading-${index}`,
     name: title,
@@ -94,11 +68,10 @@ export const AgentOSCustomModuleCollectionBase = (props: AgentOSCustomModuleColl
     action: createLabel
   })) : rows;
   const content = customModuleContent(shown, state === "loading", onOpen);
-  return <SurfaceListCard props={{
-    label: title,
-    actionLabel: createLabel
-  }} on={{
-    act: onCreate
-  }} isLoading={state === "loading"}>{content}</SurfaceListCard>;
+  return <SurfaceListCard
+    label={title}
+    footer={<Button variant="primary" size="sm" isSkeleton={state === "loading"} onPress={onCreate}>{createLabel}</Button>}
+    isLoading={state === "loading"}
+  >{content}</SurfaceListCard>;
 };
 

@@ -1,7 +1,8 @@
 "use client";
+import { SurfaceCard, Heading, Text } from "@starci/grammar/common";
 
 import type { ComponentType } from "react";
-import { Heading, SurfaceCard, Text } from "@nivo/ui";
+
 import type { AgentosRuntimeOperationEvent, AgentosRuntimeTask } from "@/modules/api/console";
 
 /** Runtime data every open-registry workbench receives from the shared shell. */
@@ -36,27 +37,9 @@ const WorkbenchContent = ({
 }: WorkbenchContentProps) => <div><div>
 
 
-    <Heading props={{
-      content: title,
-      level: 3
-    }} />
+    <Heading level={3}>{title}</Heading>
 
-    <Text props={{
-      content: caption,
-      size: "xs",
-      tone: "muted"
-    }} /></div><div>{facts.map((fact, index) => <div key={index}>{<Text props={{
-        content: fact.label,
-        size: "sm"
-      }} />}{<Text props={{
-        content: fact.value,
-        size: "sm",
-        weight: "semibold"
-      }} />}</div>)}</div>{notice === undefined ? undefined : <Text props={{
-    content: notice,
-    size: "sm",
-    tone: "muted"
-  }} />}</div>;
+    <Text size="xs" tone="muted">{caption}</Text></div><div>{facts.map((fact, index) => <div key={index}>{<Text size="sm">{fact.label}</Text>}{<Text size="sm" weight="semibold">{fact.value}</Text>}</div>)}</div>{notice === undefined ? undefined : <Text size="sm" tone="muted">{notice}</Text>}</div>;
 const SalesPipelineWorkbench = (props: WorkbenchProps) => <WorkbenchContent title="Sales pipeline" caption={`Registered for ${props.kindKey}@${props.workbenchVersion}`} facts={[{
   id: "qualified",
   label: "Qualified",
@@ -192,8 +175,8 @@ export const KindWorkbenchBlock = (props: KindWorkbenchBlockProps) => {
   }: KindWorkbenchBlockProps = props;
   const Workbench = registry[workbenchKey] ?? UnavailableWorkbench;
   const render = <Workbench moduleId={moduleId} kindKey={kindKey} workbenchVersion={workbenchVersion} tasks={tasks} events={events} />;
-  return <SurfaceCard props={{
-    label: "Workbench",
-    fact: `${workbenchKey}@${workbenchVersion}`
-  }}>{render}</SurfaceCard>;
+  return <SurfaceCard
+    label="Workbench"
+    fact={`${workbenchKey}@${workbenchVersion}`}
+  >{render}</SurfaceCard>;
 };

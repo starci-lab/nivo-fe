@@ -1,4 +1,5 @@
-import { Breadcrumbs, Button, Heading, Text, TileIcon } from "@nivo/ui";
+import { Breadcrumbs, TileIcon } from "@nivo/ui";
+import { Button, Heading, Text } from "@starci/grammar/common";
 import { AgentOSCustomModuleCollection } from "@/components/blocks/agentos/AgentOSCustomModuleCollection";
 import { AgentOSSolutionModuleCenter } from "@/components/blocks/agentos/AgentOSSolutionModuleCenter";
 /** Public API role for AgentOSModuleCollectionPageProps. */
@@ -48,31 +49,16 @@ export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPa
           signal: "active"
         }} /><div>
 
-        <Text props={{
-            content: labels.eyebrow,
-            size: "sm",
-            tone: "accent",
-            weight: "semibold"
-          }} />
-        <Heading props={{
-            content: labels.title,
-            level: 1,
-            scale: "display"
-          }} />
-        <Text props={{
-            content: labels.description,
-            size: "md",
-            tone: "muted"
-          }} /></div></div>
+        <Text size="sm" tone="accent" weight="semibold">{labels.eyebrow}</Text>
+        <Heading level={1} scale="display">{labels.title}</Heading>
+        <Text size="md" tone="muted">{labels.description}</Text></div></div>
 
 
-    <Button props={{
-        label: labels.create,
-        size: "lg",
-        variant: "primary"
-      }} on={{
-        press: onCreate
-      }} /></div><>
+    <Button
+      size="lg"
+      variant="primary"
+      onPress={onCreate}
+    >{labels.create}</Button></div><>
 
     <AgentOSCustomModuleCollection workspaceId={workspaceId} /><AgentOSSolutionModuleCenter workspaceId={workspaceId} /></></div>;
 };

@@ -1,4 +1,5 @@
-import { Button, Field, StatusActionCard, SurfaceCard, Text, type BadgeTone, type FieldKind } from "@nivo/ui";
+import { StatusActionCard } from "@nivo/ui";
+import { SurfaceCard, Button, Input, type InputKind, Text, type BadgeTone } from "@starci/grammar/common";
 
 /** One safe provider card; it contains no credential value. */
 export type AcademyIntegrationCenterProps = AcademyIntegrationCenterViewProps;
@@ -18,7 +19,7 @@ export type AcademyIntegrationFormField = {
   readonly id: string;
   readonly name: string;
   readonly label: string;
-  readonly kind?: FieldKind;
+  readonly kind?: InputKind;
   readonly hint?: string;
 };
 
@@ -54,47 +55,37 @@ const AcademyIntegrationCenterContent = ({
   onChangeField,
   onSubmit
 }: AcademyIntegrationCenterViewProps) => <>
-        {state === "refused" ? <SurfaceCard props={{
-    label: sectionLabel
-  }}><div>
+        {state === "refused" ? <SurfaceCard
+          label={sectionLabel}
+        ><div>
 
 
-      <Text props={{
-        content: refusedLabel,
-        size: "sm",
-        tone: "muted"
-      }} /></div></SurfaceCard> : <SurfaceCard props={{
-    label: sectionLabel
-  }}><div>{cards.map(card => <StatusActionCard key={card.id} props={{
+      <Text size="sm" tone="muted">{refusedLabel}</Text></div></SurfaceCard> : <SurfaceCard
+        label={sectionLabel}
+      ><div>{cards.map(card => <StatusActionCard key={card.id} props={{
         ...card,
         isPending: pendingId === card.id,
         disabled: pendingId !== undefined
       }} on={{
         press: () => onSelect(card.id)
       }} isLoading={state === "resting"} />)}</div></SurfaceCard>}
-        {selected === undefined ? null : <SurfaceCard props={{
-    label: selected.label
-  }}><div>{selected.fields.map(field => <Field key={field.id} props={{
-        ...field,
-        disabled: pendingId !== undefined,
-        revealLabel: field.kind === "password" ? "Show" : undefined,
-        hideLabel: field.kind === "password" ? "Hide" : undefined
-      }} on={{
-        change: value => onChangeField(field.name, value)
-      }} />)}
-      <Button props={{
-        label: selected.submitLabel,
-        variant: "primary",
-        isPending: pendingId === selected.id
-      }} on={{
-        press: onSubmit
-      }} /></div></SurfaceCard>}
-        {outcome === undefined ? null : <Text props={{
-    content: outcome,
-    size: "sm",
-    tone: "muted",
-    live: "polite"
-  }} />}
+        {selected === undefined ? null : <SurfaceCard
+          label={selected.label}
+        ><div>{selected.fields.map(field => <Input
+    key={field.id}
+    {...field}
+    isDisabled={pendingId !== undefined}
+    revealLabel={field.kind === "password" ? "Show" : undefined}
+    hideLabel={field.kind === "password" ? "Hide" : undefined}
+    variant="secondary"
+    onValueChange={value => onChangeField(field.name, value)}
+  />)}
+      <Button
+        variant="primary"
+        isPending={pendingId === selected.id}
+        onPress={onSubmit}
+      >{selected.submitLabel}</Button></div></SurfaceCard>}
+        {outcome === undefined ? null : <Text size="sm" tone="muted" live="polite">{outcome}</Text>}
     </>;
 
 /** Stable typed root for the Academy integration block. */

@@ -1,6 +1,6 @@
-import { Badge, Button, Heading, SurfaceCard, Text, TextLink } from "@nivo/ui";
+import { nivoIconSource } from "@nivo/ui";
+import { SurfaceCard, Button, EmptyNotice, Heading, Icon, Text, TextAction, Badge } from "@starci/grammar/common";
 import { FleetRow, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
-import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice";
 
 /**
  * PAGE (drawing half) - the middle level, and the reason an academy is a ROW rather than a destination.
@@ -177,27 +177,12 @@ const ownedRow = (row: OwnedAppRow, onOpenOwnedApp: (siteId: string) => void) =>
  * @param row - The already-worded offer.
  * @returns The row, bound to the slot's composite identity.
  */
-const offerRow = (row: TemplateOfferRowView, onBuildTemplate: (templateKey: string) => void) => <div>{<div>{<TextLink props={{
-      label: row.name,
-      size: "sm"
-    }} />}{<Text props={{
-      content: row.tagline,
-      size: "xs",
-      tone: "muted"
-    }} />}</div>}{<Badge props={{
-    content: row.kindLabel,
-    tone: "neutral"
-  }} />}{<Text props={{
-    content: row.priceLabel,
-    size: "sm"
-  }} />}{<Button props={{
-    label: row.actionLabel,
-    size: "sm",
-    variant: "primary",
-    disabled: row.actionDisabled
-  }} on={{
-    press: () => onBuildTemplate(row.templateKey)
-  }} />}</div>;
+const offerRow = (row: TemplateOfferRowView, onBuildTemplate: (templateKey: string) => void) => <div>{<div>{<TextAction size="sm">{row.name}</TextAction>}{<Text size="xs" tone="muted">{row.tagline}</Text>}</div>}{<Badge tone="neutral">{row.kindLabel}</Badge>}{<Text size="sm">{row.priceLabel}</Text>}{<Button
+    size="sm"
+    variant="primary"
+    isDisabled={row.actionDisabled}
+    onPress={() => onBuildTemplate(row.templateKey)}
+  >{row.actionLabel}</Button>}</div>;
 
 /**
  * A section that says one sentence in the column its rows would have used.
@@ -212,17 +197,10 @@ const offerRow = (row: TemplateOfferRowView, onBuildTemplate: (templateKey: stri
  */
 const sentenceSection = (label: string, note: string) => <div><div>
 
-    <Heading props={{
-      content: label,
-      level: 3
-    }} /></div>
+    <Heading level={3}>{label}</Heading></div>
 
 
-  <Text props={{
-    content: note,
-    size: "sm",
-    tone: "muted"
-  }} /></div>;
+  <Text size="sm" tone="muted">{note}</Text></div>;
 
 /**
  * A section whose subject was REFUSED rather than empty.
@@ -231,24 +209,16 @@ const sentenceSection = (label: string, note: string) => <div><div>
  * @param note - The refusal, in the reader's words.
  * @returns The section, bound to its contract identity.
  */
-const refusedSection = (label: string, note: string) => <SurfaceCard props={{
-  label
-}}><div>{<Text props={{
-      content: note,
-      size: "sm",
-      tone: "muted"
-    }} />}</div></SurfaceCard>;
+const refusedSection = (label: string, note: string) => <SurfaceCard
+  label={label}
+><div>{<Text size="sm" tone="muted">{note}</Text>}</div></SurfaceCard>;
 const ATTENTION_STATUSES: ReadonlySet<FleetStatus> = new Set(["awaiting_dns", "failed", "suspended"]);
 const groupedOwnedList = (rows: ReadonlyArray<OwnedAppRow>, attentionGroupLabel: string, steadyGroupLabel: string, onOpenOwnedApp: (siteId: string) => void) => {
   const attention = rows.filter(row => ATTENTION_STATUSES.has(row.status));
   const steady = rows.filter(row => !ATTENTION_STATUSES.has(row.status));
   const group = (label: string, members: ReadonlyArray<OwnedAppRow>) => <div>
 
-    <Text props={{
-      content: label,
-      size: "sm",
-      tone: "muted"
-    }} /><div>{members.map(row => ownedRow(row, onOpenOwnedApp))}</div></div>;
+    <Text size="sm" tone="muted">{label}</Text><div>{members.map(row => ownedRow(row, onOpenOwnedApp))}</div></div>;
   return <div><>{attention.length === 0 ? [] : [group(attentionGroupLabel, attention)]}{steady.length === 0 ? [] : [group(steadyGroupLabel, steady)]}</></div>;
 };
 
@@ -276,34 +246,33 @@ export const AppsDashboardBase = (props: AppsDashboardProps) => {
    */
   const ownedSection = () => {
     if (owned.phase === "empty") {
-      return <SurfaceCard props={{
-        label: owned.label
-      }}><div>{<EmptyNotice props={{
-            message: owned.note,
-            actionLabel: supportedOffer === undefined ? undefined : buildAppLabel
-          }} on={{
-            act: supportedOffer === undefined || buildAppLabel === undefined ? undefined : () => onBuildTemplate(supportedOffer.templateKey)
-          }} />}</div></SurfaceCard>;
+      return <SurfaceCard
+        label={owned.label}
+      ><div>{<EmptyNotice
+            message={owned.note}
+            actionLabel={supportedOffer === undefined ? undefined : buildAppLabel}
+            actionStartContent={supportedOffer === undefined || buildAppLabel === undefined ? undefined : <Icon source={nivoIconSource("retry", "chip")} role="chip" />}
+            onAction={supportedOffer === undefined || buildAppLabel === undefined ? undefined : () => onBuildTemplate(supportedOffer.templateKey)}
+          />}</div></SurfaceCard>;
     }
     if (owned.phase === "refused") {
       return refusedSection(owned.label, owned.note);
     }
-    const isResting = owned.phase === "resting";
     if (owned.phase === "answered" && attentionGroupLabel !== undefined && steadyGroupLabel !== undefined) {
-      return <SurfaceCard props={{
-        label: owned.label
-      }}>
+      return <SurfaceCard
+        label={owned.label}
+      >
 
           {groupedOwnedList(owned.rows, attentionGroupLabel, steadyGroupLabel, onOpenOwnedApp)}</SurfaceCard>;
     }
     if (owned.phase === "answered") {
-      return <SurfaceCard props={{
-        label: owned.label
-      }}><div>{owned.rows.map(row => ownedRow(row, onOpenOwnedApp))}</div></SurfaceCard>;
+      return <SurfaceCard
+        label={owned.label}
+      ><div>{owned.rows.map(row => ownedRow(row, onOpenOwnedApp))}</div></SurfaceCard>;
     }
-    return <SurfaceCard props={{
-      label: owned.label
-    }} isLoading={isResting}><div>{[restingRow(1), restingRow(2), restingRow(3)]}</div></SurfaceCard>;
+    return <SurfaceCard
+      label={owned.label}
+    ><div>{[restingRow(1), restingRow(2), restingRow(3)]}</div></SurfaceCard>;
   };
 
   /*
@@ -320,29 +289,23 @@ export const AppsDashboardBase = (props: AppsDashboardProps) => {
       return refusedSection(catalogue.label, catalogue.note);
     }
     const isResting = catalogue.phase === "resting";
-    return <SurfaceCard props={{
-      label: catalogue.label,
-      fact: catalogue.fact
-    }} isLoading={isResting}><div>{catalogue.phase === "answered" ? catalogue.offers.map(offer => offerRow(offer, onBuildTemplate)) : [restingRow(4)]}</div></SurfaceCard>;
+    return <SurfaceCard
+      label={catalogue.label}
+      labelEnd={catalogue.fact === undefined ? null : <Text size="sm" tone="muted" isSkeleton={isResting}>{catalogue.fact}</Text>}
+    ><div>{catalogue.phase === "answered" ? catalogue.offers.map(offer => offerRow(offer, onBuildTemplate)) : [restingRow(4)]}</div></SurfaceCard>;
   };
-  const headingAction = supportedOffer === undefined || buildAppLabel === undefined ? null : <Button props={{
-    label: buildAppLabel,
-    size: "lg",
-    variant: "primary"
-  }} on={{
-    press: () => onBuildTemplate(supportedOffer.templateKey)
-  }} />;
+  const headingAction = supportedOffer === undefined || buildAppLabel === undefined ? null : <Button
+    size="lg"
+    variant="primary"
+    onPress={() => onBuildTemplate(supportedOffer.templateKey)}
+  >{buildAppLabel}</Button>;
   return <div><div>
 
 
 
 
 
-      <Heading props={{
-        content: title,
-        level: 1,
-        scale: "display"
-      }} />{headingAction}</div>
+      <Heading level={1} scale="display">{title}</Heading>{headingAction}</div>
 
 
 
@@ -350,10 +313,6 @@ export const AppsDashboardBase = (props: AppsDashboardProps) => {
 
 
 
-    <Text props={{
-      content: lede,
-      size: "md",
-      tone: "muted"
-    }} /><div><div><>{ownedSection()}</></div><div><>{catalogueSection()}</></div></div></div>;
+    <Text size="md" tone="muted">{lede}</Text><div><div><>{ownedSection()}</></div><div><>{catalogueSection()}</></div></div></div>;
 };
 

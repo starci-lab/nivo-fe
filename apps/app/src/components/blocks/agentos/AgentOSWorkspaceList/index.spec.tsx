@@ -34,7 +34,7 @@ describe("AgentOSWorkspaceList", () => {
         mocks.locale = "en"
         mocks.load.mockResolvedValue({ ok: true, data: [{ id: "workspace-1", name: "Support", status: "ready", catalogOrder: { id: "order-1" } }] })
         render(<AgentOSWorkspaceList />)
-        fireEvent.click(await screen.findByRole("link", { name: "Support" }))
+        fireEvent.click(await screen.findByRole("button", { name: "Support" }))
         expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/workspace-1")
     })
 

@@ -62,6 +62,8 @@ describe("CollapsibleRail", () => {
             .toBeInTheDocument()
         expect(host).toContainElement(destinations)
         expect(host.style.borderInlineEnd).toBe("1px solid var(--separator)")
+        expect(host.style.flexDirection).toBe("column")
+        expect(host.style.transition).toBe("")
         expect(host.style.padding).toBe("1.5rem")
         expect(screen.queryByText("Console")).not.toBeInTheDocument()
         expect(toggle).toHaveClass("rounded-full", "size-11")
@@ -88,6 +90,28 @@ describe("CollapsibleRail", () => {
 
         fireEvent.click(screen.getByRole("button", { name: "Collapse navigation" }))
         await waitFor(() => expect(screen.queryByText("Course progress")).not.toBeInTheDocument())
+    })
+
+    it("can defer landmark ownership to a surrounding navigation", () => {
+        render(
+            <CollapsibleRail
+                ariaLabel="Console navigation"
+                landmark="none"
+                rail={ExpandedDestinations}
+                railProps={{}}
+                collapsedRail={CompactDestinations}
+                collapsedRailProps={{}}
+                toggleControl={SidebarGlyph}
+                toggleControlProps={{}}
+                collapseLabel="Collapse navigation"
+                expandLabel="Expand navigation"
+                storageKey={STORAGE_KEY}
+            />,
+        )
+
+        expect(screen.queryByRole("complementary")).not.toBeInTheDocument()
+        expect(screen.getByText("Expanded destinations").closest(".collapsible-rail"))
+            .toBeInTheDocument()
     })
 
     it("restores a persisted collapsed preference after mounting", async () => {

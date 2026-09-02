@@ -1,8 +1,8 @@
+import { Button, Text, TextAction, Badge } from "@starci/grammar/common";
 import { Avatar } from "../../leaves/Avatar"
-import { Badge } from "../../leaves/Badge"
-import { Button } from "../../leaves/Button"
-import { Text } from "../../leaves/Text"
-import { TextLink } from "../../leaves/TextLink"
+
+
+
 
 /** Resolved identity, qualification, and follow state for one suggested person. */
 export type SuggestedUserRowData = {
@@ -27,14 +27,10 @@ export const SuggestedUserRow = (props: SuggestedUserRowProps) => (
     <div>
         <Avatar props={{ name: props.props.name, src: props.props.avatar, size: "sm" }} isLoading={props.isLoading} />
         <div>
-            <TextLink props={{ label: props.props.name ?? "", size: "sm" }} on={{ press: props.on?.open }} />
-            <Text props={{ content: props.props.username, size: "xs", tone: "muted" }} isLoading={props.isLoading} />
+            <TextAction size="sm" isSkeleton={props.isLoading} onPress={props.on?.open}>{props.props.name ?? ""}</TextAction>
+            <Text size="xs" tone="muted" isSkeleton={props.isLoading}>{props.props.username}</Text>
         </div>
-        {props.props.openToWork === true ? <Badge props={{ content: props.props.openToWorkLabel, tone: "success" }} /> : null}
-        <Button
-            props={{ label: props.props.isFollowing === true ? props.props.followingLabel : props.props.followLabel, size: "sm", variant: "secondary", isPending: props.props.isPending }}
-            on={{ press: props.props.isFollowing === true ? undefined : props.on?.follow }}
-            isLoading={props.isLoading}
-        />
+        {props.props.openToWork === true ? <Badge tone="success">{props.props.openToWorkLabel}</Badge> : null}
+        <Button variant="secondary" size="sm" isPending={props.props.isPending} isSkeleton={props.isLoading} onPress={props.props.isFollowing === true ? undefined : props.on?.follow}>{props.props.isFollowing === true ? props.props.followingLabel : props.props.followLabel}</Button>
     </div>
 )

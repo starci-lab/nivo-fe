@@ -1,4 +1,5 @@
-import { Badge, Breadcrumbs, Button, DrawerBranch, Field, Heading, HighlightCard, ModalBranch, SurfaceCard, SurfaceListCard, Text, type BadgeTone } from "@nivo/ui";
+import { Breadcrumbs, DrawerBranch, ModalBranch } from "@nivo/ui";
+import { SurfaceCard, SurfaceListCard, Button, Button as CoreButton, Input, Heading, Text, Badge, type BadgeTone } from "@starci/grammar/common";
 
 /** One already-formatted label and value used by wallet evidence surfaces. */
 export type WalletControlCenterProps = WalletControlCenterViewProps;
@@ -145,54 +146,23 @@ const RESTING_FACTS: ReadonlyArray<WalletFactRow> = [{
   value: ""
 }];
 const factRow = (row: WalletFactRow, isLoading = false) => <div>
-  <Text props={{
-    content: row.label,
-    size: "sm"
-  }} isLoading={isLoading} />
-  <Text props={{
-    content: row.value,
-    size: "sm"
-  }} isLoading={isLoading} /></div>;
+  <Text size="sm" isSkeleton={isLoading}>{row.label}</Text>
+  <Text size="sm" isSkeleton={isLoading}>{row.value}</Text></div>;
 const sectionLabel = (label: string) => <div>
-  <Heading props={{
-    content: label,
-    level: 3
-  }} /></div>;
-const noteSection = (label: string, note: string) => <SurfaceCard props={{
-  label
-}}><div>{<Text props={{
-      content: note,
-      size: "sm",
-      tone: "muted"
-    }} />}</div></SurfaceCard>;
-const ledgerDetail = (row: WalletLedgerRow) => <div><div>{row.detailFacts.map(fact => factRow(fact))}</div>{row.note === undefined ? undefined : <Text props={{
-    content: row.note ?? "",
-    size: "sm",
-    tone: "muted"
-  }} />}</div>;
+  <Heading level={3}>{label}</Heading></div>;
+const noteSection = (label: string, note: string) => <SurfaceCard
+  label={label}
+><div>{<Text size="sm" tone="muted">{note}</Text>}</div></SurfaceCard>;
+const ledgerDetail = (row: WalletLedgerRow) => <div><div>{row.detailFacts.map(fact => factRow(fact))}</div>{row.note === undefined ? undefined : <Text size="sm" tone="muted">{row.note ?? ""}</Text>}</div>;
 const ledgerRow = (row: WalletLedgerRow | undefined, isLoading: boolean, closeLabel: string) => {
   const LedgerDetailContent = () => row === undefined ? null : ledgerDetail(row);
   return <div><div>
 
-      <Text props={{
-        content: row?.title ?? "",
-        size: "sm"
-      }} isLoading={isLoading} />
-      <Text props={{
-        content: row?.caption ?? "",
-        size: "xs",
-        tone: "muted"
-      }} isLoading={isLoading} /></div>
+      <Text size="sm" isSkeleton={isLoading}>{row?.title ?? ""}</Text>
+      <Text size="xs" tone="muted" isSkeleton={isLoading}>{row?.caption ?? ""}</Text></div>
 
-    <Badge props={{
-      content: row?.state ?? "",
-      tone: row?.tone ?? "neutral"
-    }} isLoading={isLoading} />
-    <Text props={{
-      content: row?.amount ?? "",
-      size: "sm",
-      weight: "semibold"
-    }} isLoading={isLoading} />{row === undefined ? undefined : <DrawerBranch triggerLabel={row.detailLabel} title={row.title} closeLabel={closeLabel} content={LedgerDetailContent} contentProps={{}} />}</div>;
+    <Badge tone={row?.tone ?? "neutral"} isSkeleton={isLoading}>{row?.state ?? ""}</Badge>
+    <Text size="sm" weight="semibold" isSkeleton={isLoading}>{row?.amount ?? ""}</Text>{row === undefined ? undefined : <DrawerBranch triggerLabel={row.detailLabel} title={row.title} closeLabel={closeLabel} content={LedgerDetailContent} contentProps={{}} />}</div>;
 };
 const walletLedgerContent = (ledger: LedgerSectionView, closeLabel: string) => {
   const isLoading = ledger.phase === "resting";
@@ -209,50 +179,28 @@ const TopUpContent = ({
   on
 }: TopUpContentProps) => topUp.checkout === undefined ? <div>
 
-  <Field props={{
-    id: "wallet-top-up-amount",
-    name: "amountVnd",
-    label: topUp.amountLabel,
-    kind: "text",
-    placeholder: topUp.amountPlaceholder,
-    disabled: topUp.pending,
-    isInvalid: topUp.refusal !== undefined
-  }} on={{
-    change: on?.changeTopUpAmount
-  }} />
-  <Text props={{
-    content: topUp.hint,
-    size: "xs",
-    tone: "muted"
-  }} />
-  <Button props={{
-    label: topUp.submitLabel,
-    variant: "primary",
-    isPending: topUp.pending
-  }} on={{
-    press: on?.submitTopUp
-  }} />{topUp.refusal === undefined ? undefined : <Text props={{
-    content: topUp.refusal ?? "",
-    size: "sm",
-    tone: "muted",
-    live: "assertive"
-  }} />}</div> : <div>
+  <Input
+    id="wallet-top-up-amount"
+    name="amountVnd"
+    label={topUp.amountLabel}
+    kind="text"
+    placeholder={topUp.amountPlaceholder}
+    isDisabled={topUp.pending}
+    variant="secondary"
+    isError={topUp.refusal !== undefined}
+    onValueChange={on?.changeTopUpAmount}
+  />
+  <Text size="xs" tone="muted">{topUp.hint}</Text>
+  <CoreButton
+    variant="primary"
+    isPending={topUp.pending}
+    onPress={on?.submitTopUp}
+  >{topUp.submitLabel}</CoreButton>{topUp.refusal === undefined ? undefined : <Text size="sm" tone="muted" live="assertive">{topUp.refusal ?? ""}</Text>}</div> : <div>
 
 
-  <Text props={{
-    content: topUp.checkout?.reference ?? "",
-    size: "sm"
-  }} />
-  <Text props={{
-    content: topUp.checkout?.amount ?? "",
-    size: "sm",
-    weight: "semibold"
-  }} />
-  <Text props={{
-    content: topUp.checkout?.note ?? "",
-    size: "xs",
-    tone: "muted"
-  }} /></div>;
+  <Text size="sm">{topUp.checkout?.reference ?? ""}</Text>
+  <Text size="sm" weight="semibold">{topUp.checkout?.amount ?? ""}</Text>
+  <Text size="xs" tone="muted">{topUp.checkout?.note ?? ""}</Text></div>;
 type ResultContentProps = {
   readonly result: PaymentResultView;
   readonly on?: WalletControlCenterActions;
@@ -261,29 +209,13 @@ const ResultContent = ({
   result,
   on
 }: ResultContentProps) => <div>
-  <Badge props={{
-    content: result.state,
-    tone: result.tone
-  }} />
-  <Heading props={{
-    content: result.amount,
-    level: 2
-  }} />{result.reference === undefined ? undefined : <Text props={{
-    content: result.reference ?? "",
-    size: "sm",
-    tone: "muted"
-  }} />}
-  <Text props={{
-    content: result.note,
-    size: "sm",
-    tone: "muted"
-  }} />
-  <Button props={{
-    label: result.actionLabel,
-    variant: "primary"
-  }} on={{
-    press: on?.closeResult
-  }} /></div>;
+  <Badge tone={result.tone}>{result.state}</Badge>
+  <Heading level={2}>{result.amount}</Heading>{result.reference === undefined ? undefined : <Text size="sm" tone="muted">{result.reference ?? ""}</Text>}
+  <Text size="sm" tone="muted">{result.note}</Text>
+  <CoreButton
+    variant="primary"
+    onPress={on?.closeResult}
+  >{result.actionLabel}</CoreButton></div>;
 
 /** Pure drawing half of the accepted wallet and payment flow. */
 const WalletControlCenterContent = (view: WalletControlCenterViewProps) => {
@@ -300,24 +232,20 @@ const WalletControlCenterContent = (view: WalletControlCenterViewProps) => {
     if (balance.phase === "refused") return noteSection(balance.label, balance.note);
     const loading = balance.phase === "resting";
     const facts = loading ? RESTING_FACTS : balance.facts;
-    return <SurfaceCard props={{
-      label: balance.label
-    }} isLoading={loading}><div>{<div>{facts.map(row => factRow(row, loading))}</div>}{<div>{[<Button key="item-0" props={{
-            label: balance.actionLabel,
-            variant: "primary"
-          }} on={{
-            press: on?.topUp
-          }} isLoading={loading} />]}</div>}</div></SurfaceCard>;
+    return <SurfaceCard
+      label={balance.label}
+    ><div>{<div>{facts.map(row => factRow(row, loading))}</div>}{<div>{[<Button key="item-0" variant="primary" isSkeleton={loading} onPress={on?.topUp}>{balance.actionLabel}</Button>]}</div>}</div></SurfaceCard>;
   };
   const ledgerSection = (ledger: LedgerSectionView, action?: () => void) => {
     if (ledger.phase === "empty" || ledger.phase === "refused") return noteSection(ledger.label, ledger.note);
     const content = walletLedgerContent(ledger, topUp.closeLabel);
-    return <SurfaceListCard props={{
-      label: ledger.label,
-      actionLabel: ledger.phase === "answered" ? ledger.actionLabel : undefined
-    }} on={{
-      act: action
-    }} isLoading={ledger.phase === "resting"}>{content}</SurfaceListCard>;
+    const actionLabel = ledger.phase === "answered" ? ledger.actionLabel : undefined;
+    const isLoading = ledger.phase === "resting";
+    return <SurfaceListCard
+      label={ledger.label}
+      footer={actionLabel !== undefined && (isLoading || action !== undefined) ? <Button variant="primary" size="sm" isSkeleton={isLoading} onPress={action}>{actionLabel}</Button> : undefined}
+      isLoading={isLoading}
+    >{content}</SurfaceListCard>;
   };
   const linkedInvoiceSection = (linkedInvoice: LinkedInvoiceSectionView) => {
     if (linkedInvoice.phase === "refused") return noteSection(linkedInvoice.label, linkedInvoice.note);
@@ -325,42 +253,18 @@ const WalletControlCenterContent = (view: WalletControlCenterViewProps) => {
     const row = linkedInvoice.phase === "answered" ? linkedInvoice.row : undefined;
     const linkedContent = <div><div>
 
-        <Text props={{
-          content: row?.title ?? linkedInvoice.orderLabel,
-          size: "sm",
-          weight: "semibold"
-        }} isLoading={loading} />
-        <Text props={{
-          content: row?.caption ?? "",
-          size: "xs",
-          tone: "muted"
-        }} isLoading={loading} /></div>
+        <Text size="sm" weight="semibold" isSkeleton={loading}>{row?.title ?? linkedInvoice.orderLabel}</Text>
+        <Text size="xs" tone="muted" isSkeleton={loading}>{row?.caption ?? ""}</Text></div>
 
-      <Badge props={{
-        content: row?.state ?? "",
-        tone: row?.tone ?? "neutral"
-      }} isLoading={loading} />
-      <Heading props={{
-        content: row?.amount ?? "",
-        level: 2
-      }} />
-      <Text props={{
-        content: linkedInvoice.orderLabel,
-        size: "xs",
-        tone: "muted"
-      }} isLoading={loading} />
-      <Text props={{
-        content: linkedInvoice.phase === "answered" ? linkedInvoice.consequence : "",
-        size: "sm",
-        tone: "muted"
-      }} isLoading={loading} />{linkedInvoice.phase === "answered" ? <Button props={{
-        label: linkedInvoice.actionLabel,
-        variant: "primary",
-        disabled: linkedInvoice.actionDisabled
-      }} on={{
-        press: linkedInvoice.actionKind === "return" ? on?.returnToOrder : on?.payInvoice
-      }} /> : undefined}</div>;
-    return <div>{sectionLabel(linkedInvoice.label)}{<HighlightCard isLoading={loading}>{linkedContent}</HighlightCard>}</div>;
+      <Badge tone={row?.tone ?? "neutral"} isSkeleton={loading}>{row?.state ?? ""}</Badge>
+      <Heading level={2}>{row?.amount ?? ""}</Heading>
+      <Text size="xs" tone="muted" isSkeleton={loading}>{linkedInvoice.orderLabel}</Text>
+      <Text size="sm" tone="muted" isSkeleton={loading}>{linkedInvoice.phase === "answered" ? linkedInvoice.consequence : ""}</Text>{linkedInvoice.phase === "answered" ? <CoreButton
+        variant="primary"
+        isDisabled={linkedInvoice.actionDisabled}
+        onPress={linkedInvoice.actionKind === "return" ? on?.returnToOrder : on?.payInvoice}
+      >{linkedInvoice.actionLabel}</CoreButton> : undefined}</div>;
+    return <div>{sectionLabel(linkedInvoice.label)}{<SurfaceCard isHighlight state={loading ? "pending" : "neutral"}>{linkedContent}</SurfaceCard>}</div>;
   };
   const breadcrumb = view.state === "waypoint" ? view.breadcrumb : undefined;
   const path = breadcrumb === undefined ? undefined : <Breadcrumbs props={{

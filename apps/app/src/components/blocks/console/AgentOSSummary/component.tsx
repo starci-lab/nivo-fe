@@ -1,6 +1,5 @@
-import { StatusActionCard, SurfaceCard } from "@nivo/ui";
-import type { BadgeTone } from "@nivo/ui";
-import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice";
+import { StatusActionCard } from "@nivo/ui";
+import { EmptyNotice, SurfaceCard, type BadgeTone } from "@starci/grammar/common";
 
 /** One workspace row prepared for the pure AgentOS summary surface. */
 export type AgentOSSummaryWorkspace = {
@@ -43,16 +42,14 @@ export const AgentOSSummaryBase = (props: AgentOSSummaryProps) => {
     state,
     onOpenService
   }: AgentOSSummaryProps = props;
-  if (state.phase === "empty") return <SurfaceCard props={{
-    label
-  }}><div>
-      <EmptyNotice props={{
-        message: state.message
-      }} /></div></SurfaceCard>;
+  if (state.phase === "empty") return <SurfaceCard
+    label={label}
+  ><div>
+      <EmptyNotice message={state.message} /></div></SurfaceCard>;
   const workspace = state.phase === "pending" ? undefined : state.workspace;
-  return <SurfaceCard props={{
-    label
-  }} isLoading={workspace === undefined}><div><><StatusActionCard props={{
+  return <SurfaceCard
+    label={label}
+  ><div><><StatusActionCard props={{
           id: workspace?.id ?? "pending",
           title: workspace?.name ?? "",
           description: workspace?.description ?? "",

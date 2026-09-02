@@ -1,3 +1,4 @@
+import { resolve } from "node:path"
 import type { NextConfig } from "next"
 
 /**
@@ -6,9 +7,16 @@ import type { NextConfig } from "next"
  * a per-app copy caused.
  */
 const nextConfig: NextConfig = {
-    transpilePackages: ["@nivo/ui"],
+    transpilePackages: ["@nivo/ui", "@starci/grammar"],
+    turbopack: {
+        root: resolve(import.meta.dirname, "../../.."),
+    },
     experimental: {
         optimizePackageImports: ["@heroui/react"],
+    },
+    webpack: (config) => {
+        config.resolve.symlinks = false
+        return config
     },
 }
 

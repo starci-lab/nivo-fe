@@ -1,5 +1,18 @@
 import { useRef, useState, type SubmitEvent } from "react";
-import { Button, Checkbox, Divider, Field, Heading, Text, TextLink } from "@nivo/ui";
+import { Checkbox, nivoIconSource } from "@nivo/ui";
+import { Button, Input, Heading, Icon, Text, TextAction, Divider } from "@starci/grammar/common";
+import {
+  AUTH_PANEL_CLASS_NAME,
+  AUTH_PANEL_DETAILS_CLASS_NAME,
+  AUTH_PANEL_FOOTER_CLASS_NAME,
+  AUTH_PANEL_FORM_CLASS_NAME,
+  AUTH_PANEL_HEADER_CLASS_NAME,
+  AUTH_PANEL_NOTICE_ACTIONS_CLASS_NAME,
+  AUTH_PANEL_NOTICE_CLASS_NAME,
+  AUTH_PANEL_OPTIONS_CLASS_NAME,
+  AUTH_PANEL_PROVIDER_CLASS_NAME,
+  AUTH_PANEL_TEXT_ACTIONS_CLASS_NAME
+} from "./classNames";
 
 /**
  * BLOCK - `AuthenticationPanel`: one surface, three journeys, the steps each of them takes.
@@ -50,6 +63,9 @@ export type AuthState = /** The shortcut and the credential form. */
 /** The journey finished. */ | "done"
 /** The account holds a second factor this build cannot complete. Sign-in only. */ | "twoFactorUnsupported";
 
+/** The exact control whose action is currently running. */
+export type AuthPendingAction = "provider" | "submit" | "resend";
+
 /** What the reader hands over at the first step. */
 export type AuthDetails = {
   /** The address. */
@@ -78,6 +94,8 @@ export type AuthFrame = {
   readonly isError: boolean;
   /** A request is already on its way, so every control refuses a second press. */
   readonly isPending: boolean;
+  /** The exact action that owns the pending indicator. */
+  readonly pendingAction?: AuthPendingAction;
 };
 
 /** Copy for the first step. */
@@ -86,14 +104,19 @@ export type AuthDetailsCopy = AuthFrame & {
   readonly mode: AuthMode;
   readonly emailLabel: string;
   readonly emailPlaceholder: string;
+  readonly emailRequired: string;
+  readonly emailInvalid: string;
   /** Said only on the reset journey: the code goes to the address AS TYPED. */
   readonly emailHint: string;
   readonly passwordLabel: string;
   readonly passwordPlaceholder: string;
+  readonly passwordRequired: string;
+  readonly passwordTooShort: string;
   /** The backend's own rule, said before it is broken rather than as a refusal after. */
   readonly passwordHint: string;
   readonly confirmPasswordLabel: string;
   readonly confirmPasswordPlaceholder: string;
+  readonly confirmPasswordRequired: string;
   /** What the second box says when it does not match the first. */
   readonly confirmPasswordMismatch: string;
   readonly revealLabel: string;
@@ -117,10 +140,14 @@ export type AuthCodeCopy = AuthFrame & {
   readonly mode: AuthMode;
   readonly codeLabel: string;
   readonly codePlaceholder: string;
+  readonly codeRequired: string;
+  readonly codeInvalid: string;
   /** How long the code lasts, in words. */
   readonly codeHint: string;
   readonly newPasswordLabel: string;
   readonly newPasswordPlaceholder: string;
+  readonly newPasswordRequired: string;
+  readonly newPasswordTooShort: string;
   readonly newPasswordHint: string;
   readonly revealLabel: string;
   readonly hideLabel: string;
@@ -193,6 +220,12 @@ const CONFIRM_ID = "authentication-confirm-password";
 const CODE_ID = "authentication-code";
 const NEW_PASSWORD_ID = "authentication-new-password";
 
+type AuthFieldName = "email" | "password" | "confirmPassword" | "otp" | "newPassword";
+type AuthFieldErrors = Partial<Record<AuthFieldName, string>>;
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MINIMUM_PASSWORD_LENGTH = 8;
+
 /** What the form starts with. */
 const EMPTY = {
   email: "",
@@ -211,116 +244,112 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
   const values = useRef({
     ...EMPTY
   });
-  const [hasMismatch, setHasMismatch] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
+  const clearFieldError = (field: AuthFieldName) => {
+    setFieldErrors(current => current[field] === undefined ? current : {
+      ...current,
+      [field]: undefined
+    });
+  };
 
   /*
    * `mark` IS NAMED AND LEFT EMPTY, which is not the same as leaving it out. A concurrent change
    * gave the title pair an optional glyph slot. Saying `undefined` states the design decision out
    * loud: this surface has no glyph above its name.
    */
-  const header = <div>{undefined}
+  const header = <div className={AUTH_PANEL_HEADER_CLASS_NAME}>{undefined}
 
-    <Heading props={{
-      content: props.props.title,
-      level: 2
-    }} />
+    <Heading level={2}>{props.props.title}</Heading>
 
 
-    <Text props={{
-      content: props.props.subtitle,
-      size: "sm",
-      tone: "muted"
-    }} /></div>;
+    <Text size="sm" tone="muted">{props.props.subtitle}</Text></div>;
 
   /** The one sentence, announced when it is a refusal and merely shown when it is not. */
-  const status = props.props.statusMessage === "" ? undefined : <Text props={{
-    content: props.props.statusMessage,
-    tone: "muted",
-    size: "sm",
-    live: props.props.isError ? "assertive" : "polite"
-  }} />;
+  const status = props.props.statusMessage === "" ? undefined : <Text size="sm" tone="muted" live={props.props.isError ? "assertive" : "polite"}>{props.props.statusMessage}</Text>;
   if (props.state === "done" || props.state === "twoFactorUnsupported") {
-    return <div>{header}<><div>{undefined}
+    return <div className={AUTH_PANEL_CLASS_NAME}>{header}<><div className={AUTH_PANEL_NOTICE_CLASS_NAME}>{undefined}
 
-          <Heading props={{
-            content: props.props.doneTitle,
-            level: 3
-          }} />
+          <Heading level={3}>{props.props.doneTitle}</Heading>
 
 
-          <Text props={{
-            content: props.props.doneHint,
-            size: "sm",
-            tone: "muted"
-          }} /></div><div><>{status === undefined ? [] : [status]}
+          <Text size="sm" tone="muted">{props.props.doneHint}</Text></div><div className={AUTH_PANEL_NOTICE_ACTIONS_CLASS_NAME}><>{status === undefined ? [] : [status]}
 
-            <Button props={{
-              label: props.props.onwardLabel,
-              variant: "primary"
-            }} on={{
-              press: props.on?.onward
-            }} /></></div></></div>;
+            <Button
+              variant="primary"
+              onPress={props.on?.onward}
+            >{props.props.onwardLabel}</Button></></div></></div>;
   }
   if (props.state === "code") {
     const copy = props.props;
+    const setsPassword = copy.mode === "forgotPassword";
     const submitCode = (event: SubmitEvent<HTMLFormElement>) => {
       event.preventDefault();
+      const nextErrors: AuthFieldErrors = {};
+      if (values.current.otp.trim() === "") nextErrors.otp = copy.codeRequired;
+      else if (!/^\d{6}$/.test(values.current.otp.trim())) nextErrors.otp = copy.codeInvalid;
+      if (setsPassword && values.current.newPassword === "") nextErrors.newPassword = copy.newPasswordRequired;
+      else if (setsPassword && values.current.newPassword.length < MINIMUM_PASSWORD_LENGTH) nextErrors.newPassword = copy.newPasswordTooShort;
+      setFieldErrors(nextErrors);
+      if (Object.keys(nextErrors).length > 0) return;
       props.on?.submitCode?.({
-        otp: values.current.otp,
+        otp: values.current.otp.trim(),
         newPassword: values.current.newPassword
       });
     };
     // Only the reset journey spends its code and sets a password in one request, which is what
     // `forgotPasswordVerifyOtp` takes.
-    const setsPassword = copy.mode === "forgotPassword";
     const isCoolingDown = copy.cooldownLabel !== "";
-    return <div>{header}<>
+    return <div className={AUTH_PANEL_CLASS_NAME}>{header}<>
 
 
         <form onSubmit={submitCode}>
-                                <div>{[<Field key="item-0" props={{
-              id: CODE_ID,
-              name: "otp",
-              // `code` is what sets autocomplete=one-time-code and
-              // inputmode=numeric, which is how a phone offers the
-              // code straight from the notification.
-              kind: "code",
-              label: copy.codeLabel,
-              placeholder: copy.codePlaceholder,
-              hint: copy.isError ? undefined : copy.codeHint,
-              isInvalid: copy.isError,
-              disabled: copy.isPending
-            }} on={{
-              change: value => {
+                                <div className={AUTH_PANEL_FORM_CLASS_NAME}>{[<Input
+                                  key="code"
+                                  id={CODE_ID}
+                                  name="otp"
+                                  variant="primary"
+                                  kind="code"
+                                  label={copy.codeLabel}
+                                  placeholder={copy.codePlaceholder}
+                                  isDisabled={copy.isPending}
+                                  hint={fieldErrors.otp !== undefined ? undefined : fieldErrors.otp ?? copy.codeHint}
+                                  errorMessage={fieldErrors.otp !== undefined ? fieldErrors.otp ?? copy.codeHint : undefined}
+                                  isError={fieldErrors.otp !== undefined}
+                                  onValueChange={value => {
                 values.current.otp = value;
-              }
-            }} />, ...(!setsPassword ? [] : [<Field key="item-0" props={{
-              id: NEW_PASSWORD_ID,
-              name: "newPassword",
-              kind: "newPassword",
-              label: copy.newPasswordLabel,
-              placeholder: copy.newPasswordPlaceholder,
-              hint: copy.newPasswordHint,
-              revealLabel: copy.revealLabel,
-              hideLabel: copy.hideLabel,
-              disabled: copy.isPending
-            }} on={{
-              change: value => {
+                clearFieldError("otp");
+              }}
+                                />, ...(!setsPassword ? [] : [<Input
+              key="new-password"
+              id={NEW_PASSWORD_ID}
+              name="newPassword"
+              variant="primary"
+              kind="newPassword"
+              label={copy.newPasswordLabel}
+              placeholder={copy.newPasswordPlaceholder}
+              revealLabel={copy.revealLabel}
+              hideLabel={copy.hideLabel}
+              isDisabled={copy.isPending}
+              hint={fieldErrors.newPassword !== undefined ? undefined : fieldErrors.newPassword ?? copy.newPasswordHint}
+              errorMessage={fieldErrors.newPassword !== undefined ? fieldErrors.newPassword ?? copy.newPasswordHint : undefined}
+              isError={fieldErrors.newPassword !== undefined}
+              onValueChange={value => {
                 values.current.newPassword = value;
-              }
-            }} />]), ...(status === undefined ? [] : [status]), <Button key="item-3" props={{
-              label: copy.submitLabel,
-              variant: "primary",
-              type: "submit",
-              disabled: copy.isPending,
-              isPending: copy.isPending
-            }} />]}</div>
+                clearFieldError("newPassword");
+              }}
+            />]), ...(status === undefined ? [] : [status]), <Button
+              key="submit"
+              variant="primary"
+              type="submit"
+              isDisabled={copy.isPending}
+              isPending={copy.pendingAction === "submit"}
+            >{copy.submitLabel}</Button>]}</div>
 
 
 
           
           
-                            </form><div>
+                            </form><div className={AUTH_PANEL_TEXT_ACTIONS_CLASS_NAME}>
 
 
 
@@ -333,86 +362,91 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
 
 
 
-          <TextLink props={{
-            label: isCoolingDown ? copy.cooldownLabel : copy.resendLabel,
-            size: "sm"
-          }} on={{
-            press: isCoolingDown ? undefined : props.on?.resend
-          }} />
+          <TextAction size="sm" onPress={isCoolingDown || copy.isPending ? undefined : props.on?.resend}>
+            {isCoolingDown ? copy.cooldownLabel : copy.resendLabel}
+          </TextAction>
 
 
 
-          <TextLink props={{
-            label: copy.backLabel,
-            size: "sm"
-          }} on={{
-            press: props.on?.back
-          }} /></div></></div>;
+          <TextAction size="sm" onPress={props.on?.back}>{copy.backLabel}</TextAction></div></></div>;
   }
   const copy = props.props;
   const isSignUp = copy.mode === "signUp";
   const isReset = copy.mode === "forgotPassword";
   const submitDetails = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Whether two boxes hold the same characters is intrinsic to this form. No request answers
-    // it, and sending a mismatched pair would spend a code to learn what a comparison knew.
-    if (isSignUp && values.current.password !== values.current.confirmPassword) {
-      setHasMismatch(true);
-      return;
-    }
-    setHasMismatch(false);
+    const nextErrors: AuthFieldErrors = {};
+    const email = values.current.email.trim();
+    if (email === "") nextErrors.email = copy.emailRequired;
+    else if (!EMAIL_PATTERN.test(email)) nextErrors.email = copy.emailInvalid;
+    if (!isReset && values.current.password === "") nextErrors.password = copy.passwordRequired;
+    else if (!isReset && values.current.password.length < MINIMUM_PASSWORD_LENGTH) nextErrors.password = copy.passwordTooShort;
+    if (isSignUp && values.current.confirmPassword === "") nextErrors.confirmPassword = copy.confirmPasswordRequired;
+    else if (isSignUp && values.current.password !== values.current.confirmPassword) nextErrors.confirmPassword = copy.confirmPasswordMismatch;
+    setFieldErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
     props.on?.submitDetails?.({
-      email: values.current.email,
+      email,
       password: values.current.password
     });
   };
-  const credentialControls = [<Field key="item-0" props={{
-    id: EMAIL_ID,
-    name: "email",
-    kind: "email",
-    label: copy.emailLabel,
-    placeholder: copy.emailPlaceholder,
-    hint: isReset ? copy.emailHint : undefined,
-    disabled: copy.isPending,
-    isInvalid: copy.isError
-  }} on={{
-    change: value => {
+  const credentialFields = [<Input
+    key="email"
+    id={EMAIL_ID}
+    name="email"
+    variant="primary"
+    kind="email"
+    label={copy.emailLabel}
+    placeholder={copy.emailPlaceholder}
+    isDisabled={copy.isPending}
+    hint={fieldErrors.email !== undefined ? undefined : fieldErrors.email ?? (isReset ? copy.emailHint : undefined)}
+    errorMessage={fieldErrors.email !== undefined ? fieldErrors.email ?? (isReset ? copy.emailHint : undefined) : undefined}
+    isError={fieldErrors.email !== undefined}
+    onValueChange={value => {
       values.current.email = value;
-    }
-  }} />,
+      clearFieldError("email");
+    }}
+  />,
   // The reset journey asks for NO password: it proves the inbox first and sets one at step two.
-  ...(isReset ? [] : [<Field key="item-0" props={{
-    id: PASSWORD_ID,
-    name: "password",
-    kind: isSignUp ? "newPassword" : "password",
-    label: copy.passwordLabel,
-    placeholder: copy.passwordPlaceholder,
-    hint: isSignUp ? copy.passwordHint : undefined,
-    revealLabel: copy.revealLabel,
-    hideLabel: copy.hideLabel,
-    disabled: copy.isPending,
-    isInvalid: copy.isError
-  }} on={{
-    change: value => {
+  ...(isReset ? [] : [<Input
+    key="password"
+    id={PASSWORD_ID}
+    name="password"
+    variant="primary"
+    kind={isSignUp ? "newPassword" : "password"}
+    label={copy.passwordLabel}
+    placeholder={copy.passwordPlaceholder}
+    revealLabel={copy.revealLabel}
+    hideLabel={copy.hideLabel}
+    isDisabled={copy.isPending}
+    hint={fieldErrors.password !== undefined ? undefined : fieldErrors.password ?? (isSignUp ? copy.passwordHint : undefined)}
+    errorMessage={fieldErrors.password !== undefined ? fieldErrors.password ?? (isSignUp ? copy.passwordHint : undefined) : undefined}
+    isError={fieldErrors.password !== undefined}
+    onValueChange={value => {
       values.current.password = value;
-    }
-  }} />]), ...(!isSignUp ? [] : [<Field key="item-0" props={{
-    id: CONFIRM_ID,
-    name: "confirmPassword",
-    kind: "newPassword",
-    label: copy.confirmPasswordLabel,
-    placeholder: copy.confirmPasswordPlaceholder,
-    hint: hasMismatch ? copy.confirmPasswordMismatch : undefined,
-    isInvalid: hasMismatch,
-    revealLabel: copy.revealLabel,
-    hideLabel: copy.hideLabel,
-    disabled: copy.isPending
-  }} on={{
-    change: value => {
+      clearFieldError("password");
+      clearFieldError("confirmPassword");
+    }}
+  />]), ...(!isSignUp ? [] : [<Input
+    key="confirm-password"
+    id={CONFIRM_ID}
+    name="confirmPassword"
+    variant="primary"
+    kind="newPassword"
+    label={copy.confirmPasswordLabel}
+    placeholder={copy.confirmPasswordPlaceholder}
+    revealLabel={copy.revealLabel}
+    hideLabel={copy.hideLabel}
+    isDisabled={copy.isPending}
+    hint={fieldErrors.confirmPassword !== undefined ? undefined : fieldErrors.confirmPassword}
+    errorMessage={fieldErrors.confirmPassword !== undefined ? fieldErrors.confirmPassword : undefined}
+    isError={fieldErrors.confirmPassword !== undefined}
+    onValueChange={value => {
       values.current.confirmPassword = value;
-      if (hasMismatch) setHasMismatch(false);
-    }
-  }} />]),
+      clearFieldError("confirmPassword");
+    }}
+  />])];
+  const credentialActions = [
   /*
    * BOTH ENDS FILLED, which is what `justify-between` is describing: a choice the reader makes
    * about this sign-in, and the way out of it. Only signing in has either.
@@ -423,7 +457,7 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
    * it mean something is a backend change - the cookie has to take a lifetime from this flag -
    * and it is recorded as an enabler rather than faked here.
    */
-  ...(copy.mode !== "signIn" ? [] : [<div key="item-0">
+  ...(copy.mode !== "signIn" ? [] : [<div key="options" className={AUTH_PANEL_OPTIONS_CLASS_NAME}>
 
 
     <Checkbox props={{
@@ -436,46 +470,37 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
 
 
 
-    <TextLink props={{
-      label: copy.forgotPasswordLabel,
-      size: "sm"
-    }} on={{
-      press: () => props.on?.changeMode?.("forgotPassword")
-    }} /></div>]), ...(status === undefined ? [] : [status]), <Button key="item-5" props={{
-    label: copy.submitLabel,
-    variant: "primary",
-    type: "submit",
-    disabled: copy.isPending,
-    isPending: copy.isPending
-  }} />];
-  return <div>{header}<><div><div><>
+    <TextAction size="sm" onPress={() => props.on?.changeMode?.("forgotPassword")}>{copy.forgotPasswordLabel}</TextAction></div>]), ...(status === undefined ? [] : [status]), <Button
+      key="submit"
+      variant="primary"
+      type="submit"
+      isDisabled={copy.isPending}
+      isPending={copy.pendingAction === "submit"}
+    >{copy.submitLabel}</Button>];
+  return <div className={AUTH_PANEL_CLASS_NAME}>{header}<><div className={AUTH_PANEL_DETAILS_CLASS_NAME}><div className={AUTH_PANEL_PROVIDER_CLASS_NAME}><>
 
 
 
 
 
-            <Button props={{
-              label: copy.googleLabel,
-              variant: "outline",
-              icon: "google",
-              disabled: copy.isPending
-            }} on={{
-              press: () => props.on?.chooseProvider?.("google")
-            }} /></>
+            <Button
+              variant="outline"
+              isDisabled={copy.isPending}
+              isPending={copy.pendingAction === "provider"}
+              onPress={() => props.on?.chooseProvider?.("google")}
+            ><Icon source={nivoIconSource("google", "chip")} role="chip" />{copy.googleLabel}</Button></>
 
 
 
 
-          <Divider props={{
-            label: copy.orLabel
-          }} /></div>
+          <Divider label={copy.orLabel} /></div>
 
 
 
         <form onSubmit={submitDetails}>
-                                <div>{credentialControls}</div>
+                                <div className={AUTH_PANEL_FORM_CLASS_NAME}>{credentialFields}{credentialActions}</div>
           
-                            </form></div></><div>
+                            </form></div></><div className={AUTH_PANEL_FOOTER_CLASS_NAME}>
 
 
 
@@ -483,19 +508,10 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
 
 
 
-      <Text props={{
-        content: copy.promptQuestion,
-        size: "sm",
-        tone: "muted"
-      }} />
+      <Text size="sm" tone="muted">{copy.promptQuestion}</Text>
 
 
-      <TextLink props={{
-        label: copy.promptAction,
-        size: "sm"
-      }} on={{
-        press: () => props.on?.changeMode?.(copy.mode === "signIn" ? "signUp" : "signIn")
-      }} /></div></div>;
+      <TextAction size="sm" onPress={() => props.on?.changeMode?.(copy.mode === "signIn" ? "signUp" : "signIn")}>{copy.promptAction}</TextAction></div></div>;
 };
 
 

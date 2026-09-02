@@ -11,7 +11,18 @@ export default defineConfig({
         globals: true,
         setupFiles: ["../../vitest.setup.ts"],
         include: ["src/**/*.spec.{ts,tsx}"],
+        server: {
+            deps: {
+                inline: [
+                    /[\\/]node_modules[\\/]@starci[\\/]grammar[\\/]/,
+                    /[\\/]starci-academy-fe[\\/]packages[\\/]grammar[\\/]/,
+                ],
+            },
+        },
     },
-    resolve: { alias: { "@": resolve(import.meta.dirname, "src") } },
+    resolve: {
+        dedupe: ["react", "react-dom", "@heroui/react", "@heroui/styles"],
+        alias: { "@": resolve(import.meta.dirname, "src") },
+    },
     plugins: [react()],
 })

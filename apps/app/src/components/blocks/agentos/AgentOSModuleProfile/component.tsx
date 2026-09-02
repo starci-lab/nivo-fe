@@ -1,4 +1,5 @@
-import { LabelledProgressRow, SurfaceCard, Text } from "@nivo/ui";
+import { LabelledProgressRow } from "@nivo/ui";
+import { SurfaceCard, Text } from "@starci/grammar/common";
 import type { AgentosModuleStudio } from "@/modules/api/console";
 /** Public API role for AgentOSModuleProfileProps. */
 export type AgentOSModuleProfileProps = AgentOSModuleProfileViewProps;
@@ -22,32 +23,21 @@ export const AgentOSModuleProfileBase = (props: AgentOSModuleProfileProps) => {
     refused,
     labels
   }: AgentOSModuleProfileViewProps = props;
-  if (refused) return <SurfaceCard props={{
-    label: labels.title
-  }}><div><Text props={{
-        content: labels.refused,
-        size: "sm",
-        tone: "muted"
-      }} /></div></SurfaceCard>;
+  if (refused) return <SurfaceCard
+    label={labels.title}
+  ><div><Text size="sm" tone="muted">{labels.refused}</Text></div></SurfaceCard>;
   const facts = loading ? [{
     key: labels.title,
     value: ""
   }] : studio?.profileFacts ?? [];
-  return <SurfaceCard props={{
-    label: labels.title
-  }}><div>
+  return <SurfaceCard
+    label={labels.title}
+  ><div>
       <LabelledProgressRow props={{
         id: "module-progress",
         title: labels.progress,
         percent: studio?.module.progress ?? 0,
         percentText: `${studio?.module.progress ?? 0}%`
-      }} isLoading={loading} /><div>{facts.map((fact, index) => <div key={index}><Text props={{
-            content: fact.key,
-            size: "sm"
-          }} isLoading={loading} /><Text props={{
-            content: fact.value,
-            size: "sm",
-            weight: "semibold"
-          }} isLoading={loading} /></div>)}</div></div></SurfaceCard>;
+      }} isLoading={loading} /><div>{facts.map((fact, index) => <div key={index}><Text size="sm" isSkeleton={loading}>{fact.key}</Text><Text size="sm" weight="semibold" isSkeleton={loading}>{fact.value}</Text></div>)}</div></div></SurfaceCard>;
 };
 

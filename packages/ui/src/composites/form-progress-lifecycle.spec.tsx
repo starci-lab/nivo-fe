@@ -1,27 +1,8 @@
-import { fireEvent, render, screen } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
-import { Field } from "./Field"
+import { render, screen } from "@testing-library/react"
+import { describe, expect, it } from "vitest"
 import { LabelledProgressRow } from "./LabelledProgressRow"
 import { LifecycleStep } from "./LifecycleStep"
 import { TaskProgressRow } from "./TaskProgressRow"
-
-describe("Field", () => {
-    it("connects label, input, invalid hint, and change callback", () => {
-        const change = vi.fn()
-        render(<Field props={{ id: "email", name: "email", label: "Email", placeholder: "you@example.com", hint: "Invalid email", isInvalid: true }} on={{ change }} />)
-        const input = screen.getByRole("textbox", { name: "Email" })
-        expect(input).toHaveAttribute("aria-describedby", "email-hint")
-        expect(screen.getByText("Invalid email")).toHaveAttribute("role", "alert")
-        fireEvent.change(input, { target: { value: "a@b.com" } })
-        expect(change).toHaveBeenCalledWith("a@b.com")
-    })
-
-    it("renders password reveal controls through the field", () => {
-        render(<Field props={{ id: "password", name: "password", label: "Password", kind: "password", revealLabel: "Show", hideLabel: "Hide" }} />)
-        expect(screen.getByLabelText("Password")).toHaveAttribute("type", "password")
-        expect(screen.getByRole("button", { name: "Show" })).toBeInTheDocument()
-    })
-})
 
 describe("progress and lifecycle rows", () => {
     it("renders progress value and hides it while loading", () => {

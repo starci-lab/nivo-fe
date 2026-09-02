@@ -1,5 +1,7 @@
+import { nivoIconSource, type IconName } from "../../iconography";
+import { Icon } from "@starci/grammar/common";
 import { Link as HeroLink } from "@heroui/react";
-import { Icon, type IconName } from "../Icon";
+
 
 /**
  * LEAF - `QuickActionRow`: one shortcut on the rail.
@@ -50,7 +52,7 @@ const QuickActionRowView = ({ props, on }: QuickActionRowProps) =>
   onPress={on?.press}
   className={ROW_CLASSES}>
   
-        <Icon props={{ name: props.icon, role: "leading" }} />
+        <Icon source={nivoIconSource(props.icon, "leading")} role="leading" />
         {props.label}
     </HeroLink>;
 

@@ -1,6 +1,8 @@
+import { nivoIconSource, type IconName } from "../../iconography";
+import { Icon } from "@starci/grammar/common";
 import { Dropdown, Header } from "@heroui/react"
 import type { ReactNode } from "react"
-import { Icon, type IconName } from "../../leaves/Icon"
+
 
 /** Placement choices exposed without leaking vendor vocabulary. */
 export type DropdownBranchPlacement = "bottom left" | "bottom right" | "top left" | "top right"
@@ -31,7 +33,7 @@ export const DropdownBranch = <I extends string>(props: DropdownBranchProps<I>) 
                         {section.items.map((item) => (
                             <Dropdown.Item key={item.id} id={item.id} textValue={item.label} isDisabled={item.isDisabled} onAction={() => props.on?.action?.(item.id)}>
                                 {item.showsIndicator === true ? <Dropdown.ItemIndicator /> : null}
-                                {item.icon === undefined ? null : <Icon props={{ name: item.icon, role: "leading" }} />}
+                                {item.icon === undefined ? null : <Icon source={nivoIconSource(item.icon, "leading")} role="leading" />}
                                 {item.label}
                             </Dropdown.Item>
                         ))}

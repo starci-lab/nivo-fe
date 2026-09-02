@@ -1,5 +1,7 @@
+import { nivoIconSource, type IconName } from "../../iconography";
+import { Icon } from "@starci/grammar/common";
 import { cn, skeletonVariants } from "@heroui/react";
-import { Icon, type IconName } from "../Icon";
+
 import { TILE_ICON_CLASS_NAME, TILE_ICON_RESTING_CLASS_NAME, TILE_ICON_SIGNAL_CLASS_NAME, TILE_ICON_SIGNAL_CLASS_NAMES } from "./classNames";
 
 /** Semantic state carried by the corner signal on a console tile. */
@@ -34,7 +36,7 @@ export const TileIcon = (props: TileIconProps) => {
       aria-hidden="true"
       className={cn(TILE_ICON_CLASS_NAME, isLoading ? RESTING_CLASSES : TILE_ICON_RESTING_CLASS_NAME)}>
       
-            {isLoading ? null : <Icon props={{ name: data.icon, role: "leading" }} />}
+            {isLoading ? null : <Icon source={nivoIconSource(data.icon, "leading")} role="leading" />}
             <span
 
         className={cn(TILE_ICON_SIGNAL_CLASS_NAME, TILE_ICON_SIGNAL_CLASS_NAMES[signal])} />

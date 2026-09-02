@@ -1,7 +1,8 @@
 "use client";
+import { SurfaceCard, Heading, Text } from "@starci/grammar/common";
 
 import type { ComponentType } from "react";
-import { Heading, SurfaceCard, Text } from "@nivo/ui";
+
 import type { AgentosModuleTestAssertionResult, AgentosModuleTestContract, AgentosModuleTestRun, AgentosRuntimeValue } from "@/modules/api/console";
 type EvidenceComponentProps = {
   readonly assertion: AgentosModuleTestAssertionResult;
@@ -27,51 +28,23 @@ const NivoTestEvidence = ({
 
 
 
-      <Text props={{
-        content: assertion.label,
-        size: "sm",
-        weight: "semibold"
-      }} />
-      <Text props={{
-        content: assertion.verdict.toUpperCase(),
-        size: "sm",
-        tone: assertion.verdict === "pass" ? "accent" : "muted",
-        weight: "semibold"
-      }} /></div><div>
+      <Text size="sm" weight="semibold">{assertion.label}</Text>
+      <Text size="sm" tone={assertion.verdict === "pass" ? "accent" : "muted"} weight="semibold">{assertion.verdict.toUpperCase()}</Text></div><div>
 
 
-      <Text props={{
-        content: "Expected",
-        size: "sm"
-      }} />
-      <Text props={{
-        content: valueLabel(assertion.expected),
-        size: "sm"
-      }} /></div><div>
+      <Text size="sm">{"Expected"}</Text>
+      <Text size="sm">{valueLabel(assertion.expected)}</Text></div><div>
 
 
-      <Text props={{
-        content: "Observed",
-        size: "sm"
-      }} />
-      <Text props={{
-        content: valueLabel(assertion.actual),
-        size: "sm"
-      }} /></div></></div>;
+      <Text size="sm">{"Observed"}</Text>
+      <Text size="sm">{valueLabel(assertion.actual)}</Text></div></></div>;
 const RejectedEvidence = ({
   assertion
 }: EvidenceComponentProps) => <div><><div>
 
 
-      <Text props={{
-        content: assertion.label,
-        size: "sm"
-      }} />
-      <Text props={{
-        content: "Untrusted evidence rejected",
-        size: "sm",
-        weight: "semibold"
-      }} /></div></></div>;
+      <Text size="sm">{assertion.label}</Text>
+      <Text size="sm" weight="semibold">{"Untrusted evidence rejected"}</Text></div></></div>;
 const DEFAULT_EVIDENCE_REGISTRY: EvidenceRegistry = {
   "nivo.test-evidence@1.0.0": NivoTestEvidence
 };
@@ -89,48 +62,23 @@ export const TestTrustResultBlock = (props: TestTrustResultBlockProps) => {
     contextLabel,
     registry = DEFAULT_EVIDENCE_REGISTRY
   }: TestTrustResultBlockProps = props;
-  return <SurfaceCard props={{
-    label: "Trust evidence",
-    fact: run === null ? "Not run" : run.status
-  }}><div><div>
+  return <SurfaceCard
+    label="Trust evidence"
+    fact={run === null ? "Not run" : run.status}
+  ><div><div>
 
 
 
-      <Heading props={{
-          content: run === null ? "Run a scenario to collect evidence" : `Result: ${run.status}`,
-          level: 3
-        }} />
-      <Text props={{
-          content: contextLabel,
-          size: "sm",
-          tone: "muted"
-        }} /></div><div>{run === null ? [<div key="item-0">
-        <Text props={{
-            content: "Evidence",
-            size: "sm"
-          }} />
-        <Text props={{
-            content: "No persisted run yet",
-            size: "sm"
-          }} /></div>] : (["total", "pass", "warning", "fail"] as const).map((key, index) => <div key={index}>
-        <Text props={{
-            content: key,
-            size: "sm"
-          }} />
-        <Text props={{
-            content: count(run, key),
-            size: "sm",
-            weight: "semibold"
-          }} /></div>)}</div>{assertions.map(assertion => {
+      <Heading level={3}>{run === null ? "Run a scenario to collect evidence" : `Result: ${run.status}`}</Heading>
+      <Text size="sm" tone="muted">{contextLabel}</Text></div><div>{run === null ? [<div key="item-0">
+        <Text size="sm">{"Evidence"}</Text>
+        <Text size="sm">{"No persisted run yet"}</Text></div>] : (["total", "pass", "warning", "fail"] as const).map((key, index) => <div key={index}>
+        <Text size="sm">{key}</Text>
+        <Text size="sm" weight="semibold">{count(run, key)}</Text></div>)}</div>{assertions.map(assertion => {
         const identity = `${assertion.evidence.component}@${assertion.evidence.version}`;
         const Evidence = identity === `${contract.evidenceWidget.key}@${contract.evidenceWidget.version}` ? registry[identity] ?? RejectedEvidence : RejectedEvidence;
         return <Evidence key={identity} assertion={assertion} />;
       })}
 
-    <Text props={{
-        content: "Evidence is persisted against this exact Setup draft digest or context version. It does not rewrite Execute history or apply anything automatically.",
-        size: "sm",
-        tone: "muted",
-        live: "polite"
-      }} /></div></SurfaceCard>;
+    <Text size="sm" tone="muted" live="polite">{"Evidence is persisted against this exact Setup draft digest or context version. It does not rewrite Execute history or apply anything automatically."}</Text></div></SurfaceCard>;
 };

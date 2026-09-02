@@ -1,6 +1,7 @@
 "use client";
+import { Button, Icon } from "@starci/grammar/common";
 
-import { Button, ChoiceTabs, CollapsibleRail, Icon, SelectionList, type SelectionListGroup } from "@nivo/ui";
+import { ChoiceTabs, CollapsibleRail, SelectionList, type SelectionListGroup, nivoIconSource } from "@nivo/ui";
 
 /** One collaborative Execute conversation listed outside the private Setup session. */
 export type ExecuteSession = {
@@ -50,17 +51,12 @@ const SessionRailBody = (props: ExecuteSessionRailBlockProps) => <div>
 
   <SessionSelection {...props} presentation="expanded" />
 
-  <Button props={{
-    label: "New session",
-    variant: "primary",
-    isPending: props.pending
-  }} on={{
-    press: props.onCreate
-  }} /></div>;
-const SessionRailToggle = () => <Icon props={{
-  name: "sidebar",
-  role: "leading"
-}} />;
+  <Button
+    variant="primary"
+    isPending={props.pending}
+    onPress={props.onCreate}
+  >New session</Button></div>;
+const SessionRailToggle = () => <Icon source={nivoIconSource("sidebar", "leading")} role="leading" />;
 
 /** Navigate multiple Execute conversations through one selected identity at every breakpoint. */
 export const ExecuteSessionRailBlock = (props: ExecuteSessionRailBlockProps) => {
@@ -95,13 +91,11 @@ export const ExecuteSessionRailBlock = (props: ExecuteSessionRailBlockProps) => 
 
 
 
-      <Button props={{
-        label: "New session",
-        variant: "secondary",
-        isPending: pending
-      }} on={{
-        press: onCreate
-      }} /></div>
+      <Button
+        variant="secondary"
+        isPending={pending}
+        onPress={onCreate}
+      >New session</Button></div>
 
 
 

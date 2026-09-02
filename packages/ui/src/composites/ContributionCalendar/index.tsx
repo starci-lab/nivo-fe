@@ -1,7 +1,8 @@
+import { Text } from "@starci/grammar/common";
 import { ChoiceTabs } from "../../leaves/ChoiceTabs";
 import { ContributionGrid } from "../../leaves/ContributionGrid";
 import { ContributionIntensityLegend } from "../../leaves/ContributionIntensityLegend";
-import { Text } from "../../leaves/Text";
+
 import type { ComponentProps } from "../component-props";
 import { ROOT_CLASS_NAME, ROW_CLASS_NAME } from "./classNames";
 
@@ -19,12 +20,12 @@ export const ContributionCalendar = (props: ContributionCalendarProps) => Contri
 const ContributionCalendarView = ({ props, on, isLoading = false }: ContributionCalendarProps) =>
 <div className={ROOT_CLASS_NAME}>
         <div className={ROW_CLASS_NAME}>
-            <Text props={{ content: props.totalLabel, size: "xs", tone: "muted" }} isLoading={isLoading} />
+            <Text size="xs" tone="muted" isSkeleton={isLoading}>{props.totalLabel}</Text>
             <ChoiceTabs props={{ label: props.totalLabel ?? "", selectedKey: String(props.year), tabs: props.years.map((year) => ({ id: String(year), label: String(year) })) }} on={{ select: (key) => on?.selectYear?.(Number(key)) }} />
         </div>
         <ContributionGrid props={{ year: props.year, monthLabels: props.monthLabels ?? [], weekdayLabels: props.weekdayLabels ?? [], days: props.days ?? [] }} isLoading={isLoading} />
         <div className={ROW_CLASS_NAME}>
-            <Text props={{ content: props.streakLabel, size: "sm" }} isLoading={isLoading} />
+            <Text size="sm" isSkeleton={isLoading}>{props.streakLabel}</Text>
             <ContributionIntensityLegend props={{ lessLabel: props.lessLabel, moreLabel: props.moreLabel }} isLoading={isLoading} />
         </div>
     </div>;

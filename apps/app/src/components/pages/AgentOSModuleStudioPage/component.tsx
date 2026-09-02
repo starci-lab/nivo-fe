@@ -1,7 +1,8 @@
+import { Heading, Text } from "@starci/grammar/common";
 "use client";
 
 import { createContext, useContext, type ComponentType } from "react";
-import { Breadcrumbs, Heading, Text, TileIcon } from "@nivo/ui";
+import { Breadcrumbs, TileIcon } from "@nivo/ui";
 import type { AgentosModuleStudio } from "@/modules/api/console";
 import { AgentOSModuleAttachments } from "@/components/blocks/agentos/AgentOSModuleAttachments";
 import { AgentOSModuleIntegrations } from "@/components/blocks/agentos/AgentOSModuleIntegrations";
@@ -74,28 +75,12 @@ export const AgentOSModuleStudioPageBase = (props: AgentOSModuleStudioPageProps)
           signal: "attention"
         }} /><div>
 
-        <Text props={{
-            content: labels.eyebrow,
-            size: "sm",
-            tone: "accent",
-            weight: "semibold"
-          }} />
-        <Heading props={{
-            content: labels.title,
-            level: 1,
-            scale: "display"
-          }} />
-        <Text props={{
-            content: labels.description,
-            size: "md",
-            tone: "muted"
-          }} /></div></div></div>
+        <Text size="sm" tone="accent" weight="semibold">{labels.eyebrow}</Text>
+        <Heading level={1} scale="display">{labels.title}</Heading>
+        <Text size="md" tone="muted">{labels.description}</Text></div></div></div>
 
 
-  <Heading props={{
-      content: labels.sections,
-      level: 2
-    }} /><>
+  <Heading level={2}>{labels.sections}</Heading><>
     <div>{<div>{[<AgentOSModuleInterview key="item-0" workspaceId={workspaceId} moduleId={moduleId} />, <AgentOSModuleSpecification key="item-1" workspaceId={workspaceId} moduleId={moduleId} />]}</div>}{<div>{[<AgentOSModuleProfile key="item-0" workspaceId={workspaceId} moduleId={moduleId} />, <AgentOSModuleAttachments key="item-1" workspaceId={workspaceId} moduleId={moduleId} />, <AgentOSModuleIntegrations key="item-2" workspaceId={workspaceId} moduleId={moduleId} />]}</div>}</div>
   </></div>;
 };

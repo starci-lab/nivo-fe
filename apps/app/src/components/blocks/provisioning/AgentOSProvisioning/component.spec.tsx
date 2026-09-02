@@ -29,7 +29,7 @@ describe("AgentOS provisioning lifecycle", () => {
         expect(html).toContain('data-action-pending="true"')
         expect(html).toContain('data-size="md"')
         expect(html).toContain('data-weight="medium"')
-        expect(html.match(/<h2/g)).toHaveLength(1)
+        expect(html.match(/<h3/g)).toHaveLength(1)
         expect(html).toContain("AgentOS order")
         expect(html).not.toContain("Next step")
         expect(html).toContain("AgentOS")
@@ -61,6 +61,6 @@ describe("AgentOS provisioning lifecycle", () => {
         />)
 
         expect(html).toContain("Request")
-        expect(html.match(/<h2/g)).toHaveLength(1)
+        expect(html.match(/<h3/g)).toHaveLength(1)
     })
 })

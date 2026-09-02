@@ -1,5 +1,5 @@
 import { Checkbox as HeroCheckbox } from "@heroui/react";
-import { TextLink } from "../TextLink";
+import { TextAction } from "@starci/grammar/common";
 
 /**
  * LEAF - `Checkbox`: a choice the reader makes about the form around it.
@@ -70,10 +70,11 @@ const CheckboxView = ({ props, on }: CheckboxProps) =>
       part.kind === "text" ?
       <span key={`${part.kind}-${index}`}>{part.content}</span> :
 
-      <TextLink
+      <TextAction
         key={`${part.kind}-${index}`}
-        props={{ label: part.label, size: "sm" }}
-        on={{ press: () => on?.follow?.(part.id) }} />
+        size="sm"
+        onPress={() => on?.follow?.(part.id)}
+      >{part.label}</TextAction>
 
 
       )}

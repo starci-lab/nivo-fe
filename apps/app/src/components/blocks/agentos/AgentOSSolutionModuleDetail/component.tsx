@@ -1,5 +1,5 @@
-import { Breadcrumbs, Button, Heading, Text } from "@nivo/ui";
-import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice";
+import { Breadcrumbs } from "@nivo/ui";
+import { Button, EmptyNotice, Heading, Text } from "@starci/grammar/common";
 import { AgentOSSolutionModuleBindings } from "@/components/blocks/agentos/AgentOSSolutionModuleBindings";
 import { AgentOSSolutionModuleSummary } from "@/components/blocks/agentos/AgentOSSolutionModuleSummary";
 import type { AgentosModuleInstallationDetail } from "@/modules/api/console";
@@ -50,16 +50,12 @@ export const AgentOSSolutionModuleDetailBase = (props: AgentOSSolutionModuleDeta
   }: AgentOSSolutionModuleDetailViewProps = props;
   // A refusal and a missing installation are the same page: there is nothing to lay out, so the
   // stack carries the one notice rather than two empty cards.
-  const settledSections = detailState === "refused" || installation === undefined ? [<EmptyNotice key="empty" props={{
-    message: labels.refused
-  }} />] : [<AgentOSSolutionModuleSummary key="summary" state="ready" installation={installation} labels={labels.summary} />, <AgentOSSolutionModuleBindings key="bindings" state="ready" installation={installation} labels={labels.bindings} />];
+  const settledSections = detailState === "refused" || installation === undefined ? [<EmptyNotice key="empty" message={labels.refused} />] : [<AgentOSSolutionModuleSummary key="summary" state="ready" installation={installation} labels={labels.summary} />, <AgentOSSolutionModuleBindings key="bindings" state="ready" installation={installation} labels={labels.bindings} />];
   const sections = detailState === "loading" ? [<AgentOSSolutionModuleSummary key="summary-loading" state="pending" labels={labels.summary} />, <AgentOSSolutionModuleBindings key="bindings-loading" state="pending" labels={labels.bindings} />] : settledSections;
-  const knowledgeAction = onOpenAiKnowledge === undefined ? undefined : <Button props={{
-    label: labels.openAiKnowledge ?? "Open AI & Knowledge",
-    variant: "primary"
-  }} on={{
-    press: onOpenAiKnowledge
-  }} />;
+  const knowledgeAction = onOpenAiKnowledge === undefined ? undefined : <Button
+    variant="primary"
+    onPress={onOpenAiKnowledge}
+  >{labels.openAiKnowledge ?? "Open AI & Knowledge"}</Button>;
   return <div>
 
 
@@ -72,16 +68,9 @@ export const AgentOSSolutionModuleDetailBase = (props: AgentOSSolutionModuleDeta
       back: onBack
     }} /><div>
 
-      <Heading props={{
-        content: labels.title,
-        level: 1
-      }} />{knowledgeAction}</div>
+      <Heading level={1}>{labels.title}</Heading>{knowledgeAction}</div>
 
 
-    <Text props={{
-      content: ledeContent(detailState, installation, labels),
-      size: "sm",
-      tone: detailState === "knowledge-refused" ? "accent" : "muted"
-    }} />{sections}</div>;
+    <Text size="sm" tone={detailState === "knowledge-refused" ? "accent" : "muted"}>{ledeContent(detailState, installation, labels)}</Text>{sections}</div>;
 };
 

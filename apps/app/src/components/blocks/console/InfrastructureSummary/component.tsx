@@ -1,4 +1,4 @@
-import { Heading, SurfaceCard, SurfaceListCard, Text } from "@nivo/ui";
+import { SurfaceCard, SurfaceListCard, Heading, Text } from "@starci/grammar/common";
 
 /** One exact domain fact displayed in infrastructure context. */
 export type InfrastructureDomainFact = {
@@ -30,20 +30,10 @@ export type InfrastructureSummaryProps = {
   readonly domains: InfrastructureDomainsState;
 };
 const fact = (item: InfrastructureDomainFact, isLoading = false) => <div>
-  <Text props={{
-    content: item.label,
-    size: "sm"
-  }} isLoading={isLoading} />
-  <Text props={{
-    content: item.value,
-    size: "sm"
-  }} isLoading={isLoading} /></div>;
+  <Text size="sm" isSkeleton={isLoading}>{item.label}</Text>
+  <Text size="sm" isSkeleton={isLoading}>{item.value}</Text></div>;
 const refusal = (note: string) => <div>
-  <Text props={{
-    content: note,
-    size: "sm",
-    tone: "muted"
-  }} /></div>;
+  <Text size="sm" tone="muted">{note}</Text></div>;
 const domainEvidenceContent = (renderedFacts: ReadonlyArray<ReturnType<typeof fact>>) => <div>{renderedFacts}</div>;
 
 /** Draw derived service context beside independently settled domain evidence. */
@@ -67,20 +57,15 @@ export const InfrastructureSummaryBase = (props: InfrastructureSummaryProps) => 
       value: ""
     }, true)] : facts.map(item => fact(item));
     const content = domainEvidenceContent(renderedFacts);
-    return <SurfaceListCard props={{
-      label,
-      description: note === undefined ? context : `${context} ${note}`
-    }} isLoading={isLoading}>{content}</SurfaceListCard>;
+    return <SurfaceListCard
+      label={label}
+      footer={<Text size="xs" tone="muted" isSkeleton={isLoading}>{note === undefined ? context : `${context} ${note}`}</Text>}
+      isLoading={isLoading}
+    >{content}</SurfaceListCard>;
   }
   return <SurfaceCard><div><div>
-        <Heading props={{
-          content: label,
-          level: 3
-        }} /></div>
-      <Text props={{
-        content: context,
-        size: "sm"
-      }} />
+        <Heading level={3}>{label}</Heading></div>
+      <Text size="sm">{context}</Text>
       {facts.length > 0 ? <div>{facts.map(item => fact(item))}</div> : null}
       {note === undefined ? null : refusal(note)}</div></SurfaceCard>;
 };

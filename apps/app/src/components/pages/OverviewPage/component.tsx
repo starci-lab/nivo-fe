@@ -1,4 +1,5 @@
-import { Breadcrumbs, Button, Heading, Text } from "@nivo/ui";
+import { Breadcrumbs } from "@nivo/ui";
+import { Button, Heading, Text } from "@starci/grammar/common";
 import { AgentOSSummary } from "@/components/blocks/console/AgentOSSummary";
 import type { AgentOSSummaryProps } from "@/components/blocks/console/AgentOSSummary/component";
 import { AgentOSSummaryBase } from "@/components/blocks/console/AgentOSSummary/component";
@@ -300,22 +301,12 @@ export const OverviewPageBase = (props: OverviewPageProps) => {
     <div>
 
 
-      <Heading props={{
-        content: title,
-        level: 1,
-        scale: "display"
-      }} />{hasBuildAction ? <Button props={{
-        label: buildAppLabel,
-        size: "lg",
-        variant: "primary"
-      }} on={{
-        press: onBuildApp
-      }} /> : null}</div>
-    {lede === undefined ? null : <Text props={{
-      content: lede,
-      size: "md",
-      tone: "muted"
-    }} />}
+      <Heading level={1} scale="display">{title}</Heading>{hasBuildAction ? <Button
+        size="lg"
+        variant="primary"
+        onPress={onBuildApp}
+      >{buildAppLabel}</Button> : null}</div>
+    {lede === undefined ? null : <Text size="md" tone="muted">{lede}</Text>}
     {accepted !== null && accepted.pulse === undefined ? null : accepted === null ? <OverviewPulse /> : <OverviewPulseBase {...accepted.pulse!} />}
     <div><div><>{accepted === null ? <AppsSummary /> : <AppsSummaryBase {...accepted.apps} />}{accepted === null ? <AgentOSSummary /> : <AgentOSSummaryBase {...accepted.agentOs} />}</></div><div><>{accepted === null ? <WalletSummary /> : <WalletSummaryBase {...accepted.wallet} />}{accepted === null ? <InfrastructureSummary /> : <InfrastructureSummaryBase {...accepted.infrastructure} />}</></div></div></div>;
 };

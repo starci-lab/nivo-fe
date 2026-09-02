@@ -1,4 +1,5 @@
-import { Breadcrumbs, Heading, Text, TileIcon } from "@nivo/ui";
+import { Heading, Text } from "@starci/grammar/common";
+import { Breadcrumbs, TileIcon } from "@nivo/ui";
 import { AgentOSModuleIntake } from "@/components/blocks/agentos/AgentOSModuleIntake";
 /** Public API role for AgentOSModuleCreatePageProps. */
 export type AgentOSModuleCreatePageProps = AgentOSModuleCreatePageViewProps;
@@ -35,22 +36,9 @@ export const AgentOSModuleCreatePageBase = (props: AgentOSModuleCreatePageProps)
           icon: "agentos"
         }} /><div>
 
-        <Text props={{
-            content: labels.eyebrow,
-            size: "sm",
-            tone: "accent",
-            weight: "semibold"
-          }} />
-        <Heading props={{
-            content: labels.title,
-            level: 1,
-            scale: "display"
-          }} />
-        <Text props={{
-            content: labels.description,
-            size: "md",
-            tone: "muted"
-          }} /></div></div></div><>
+        <Text size="sm" tone="accent" weight="semibold">{labels.eyebrow}</Text>
+        <Heading level={1} scale="display">{labels.title}</Heading>
+        <Text size="md" tone="muted">{labels.description}</Text></div></div></div><>
 
 
     <AgentOSModuleIntake workspaceId={workspaceId} /></></div>;

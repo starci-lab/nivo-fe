@@ -1,5 +1,6 @@
-import { Badge } from "../../leaves/Badge"
-import { Text } from "../../leaves/Text"
+import { Text, Badge } from "@starci/grammar/common";
+
+
 
 /** The settled lifecycle positions. */
 export type LifecycleStepState = "done" | "current" | "upcoming"
@@ -13,8 +14,8 @@ const STATE_TONES: Readonly<Record<LifecycleStepState, "success" | "accent" | "n
 /** Render one ordered lifecycle step. */
 export const LifecycleStep = (props: LifecycleStepProps) => (
     <div>
-        <Badge props={{ content: props.props.ordinal, tone: STATE_TONES[props.props.state] }} isLoading={props.isLoading} />
-        <Text props={{ content: props.props.label, size: "sm", weight: "semibold" }} isLoading={props.isLoading} />
-        <Text props={{ content: props.props.stateLabel, size: "xs", tone: "muted" }} isLoading={props.isLoading} />
+        <Badge tone={STATE_TONES[props.props.state]} isSkeleton={props.isLoading}>{props.props.ordinal}</Badge>
+        <Text size="sm" weight="semibold" isSkeleton={props.isLoading}>{props.props.label}</Text>
+        <Text size="xs" tone="muted" isSkeleton={props.isLoading}>{props.props.stateLabel}</Text>
     </div>
 )

@@ -1,4 +1,5 @@
-import { LabelledProgressRow, SurfaceCard, Text } from "@nivo/ui";
+import { LabelledProgressRow } from "@nivo/ui";
+import { SurfaceCard, Text } from "@starci/grammar/common";
 import type { AcademyGrowthSnapshot } from "@/modules/api/console";
 
 /** Resolved copy for the growth block. */
@@ -49,32 +50,21 @@ const AcademyGrowthSummaryContent = ({
     caption: labels.completions
   }];
   const activePercent = data === undefined || data.totalMembers === 0 ? 0 : Math.round(data.activeMembers / data.totalMembers * 100);
-  if (state === "refused") return <SurfaceCard props={{
-    label: labels.section
-  }}><div>
-        <Text props={{
-        content: labels.refused,
-        size: "sm",
-        tone: "muted"
-      }} /></div></SurfaceCard>;
+  if (state === "refused") return <SurfaceCard
+    label={labels.section}
+  ><div>
+        <Text size="sm" tone="muted">{labels.refused}</Text></div></SurfaceCard>;
   return <>
-            <SurfaceCard props={{
-      label: labels.section
-    }}><div>{facts.map((fact, index) => <div key={index}>
-            <Text props={{
-            content: fact.subject,
-            weight: "semibold"
-          }} isLoading={state === "resting"} />
-            <Text props={{
-            content: fact.caption,
-            size: "xs",
-            tone: "muted"
-          }} /></div>)}</div></SurfaceCard>
+            <SurfaceCard
+              label={labels.section}
+            ><div>{facts.map((fact, index) => <div key={index}>
+            <Text weight="semibold" isSkeleton={state === "resting"}>{fact.subject}</Text>
+            <Text size="xs" tone="muted">{fact.caption}</Text></div>)}</div></SurfaceCard>
 
       
-            <SurfaceCard props={{
-      label: labels.health
-    }}><div><>
+            <SurfaceCard
+              label={labels.health}
+            ><div><>
 
 
 

@@ -5,6 +5,7 @@ import { resolve } from "node:path"
 /** Workspace lane for `@nivo/landing`. The root config owns coverage; this owns the environment. */
 export default defineConfig({
     resolve: {
+        dedupe: ["react", "react-dom", "@heroui/react", "@heroui/styles"],
         alias: {
             "@": resolve(import.meta.dirname, "src"),
         },
@@ -16,6 +17,14 @@ export default defineConfig({
         globals: true,
         setupFiles: ["../../vitest.setup.ts"],
         include: ["src/**/*.spec.{ts,tsx}"],
+        server: {
+            deps: {
+                inline: [
+                    /[\\/]node_modules[\\/]@starci[\\/]grammar[\\/]/,
+                    /[\\/]starci-academy-fe[\\/]packages[\\/]grammar[\\/]/,
+                ],
+            },
+        },
     },
     plugins: [react()],
 })

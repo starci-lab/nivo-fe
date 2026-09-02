@@ -1,4 +1,5 @@
-import { IconTile, NivoUnicornArtwork, SurfaceCard, Text } from "@nivo/ui";
+import { NivoUnicornArtwork, nivoIconSource } from "@nivo/ui";
+import { SurfaceCard, IconTile, Text } from "@starci/grammar/common";
 
 /** One independently settled account signal shown before detailed evidence. */
 export type OverviewPulseSignal = {
@@ -17,23 +18,7 @@ export type OverviewPulseProps = {
 };
 const signalCard = (signal: OverviewPulseSignal) => {
   const isLoading = signal.phase === "pending";
-  return <SurfaceCard isLoading={isLoading}><div>{<div>{<IconTile props={{
-          icon: signal.icon,
-          size: "sm",
-          tone: "accent"
-        }} isLoading={isLoading} />}{<Text props={{
-          content: signal.label,
-          size: "sm",
-          weight: "medium"
-        }} />}</div>}{<Text props={{
-        content: signal.value,
-        size: "sm",
-        tone: signal.emphasis ?? "default"
-      }} isLoading={isLoading} />}{<Text props={{
-        content: signal.caption,
-        size: "xs",
-        tone: "muted"
-      }} isLoading={isLoading} />}</div></SurfaceCard>;
+  return <SurfaceCard><div>{<div>{<IconTile source={nivoIconSource(signal.icon, "leading")} tone="accent" size="sm" isSkeleton={isLoading} />}{<Text size="sm" weight="medium">{signal.label}</Text>}</div>}{<Text size="sm" tone={signal.emphasis ?? "default"} isSkeleton={isLoading}>{signal.value}</Text>}{<Text size="xs" tone="muted" isSkeleton={isLoading}>{signal.caption}</Text>}</div></SurfaceCard>;
 };
 
 /** Draw four exact signals without fetching or deriving collection totals. */

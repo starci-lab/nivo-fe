@@ -1,4 +1,5 @@
-import { Heading, NivoBrand, Text } from "@nivo/ui";
+import { Heading, Text } from "@starci/grammar/common";
+import { NivoBrand } from "@nivo/ui";
 import { LANDING_DESCRIPTION } from "@/resources/copy";
 import { CONTENT_CLASS_NAME, ROOT_CLASS_NAME } from "./classNames";
 
@@ -31,14 +32,8 @@ export const LandingPage = (props: LandingPageProps) => {
         variant: "lockup",
         scale: "hero"
       }} />
-            <Heading props={{
-        content: "nivo",
-        level: 1
-      }} />
-            <Text props={{
-        content: LANDING_DESCRIPTION,
-        size: "sm"
-      }} />
+            <Heading level={1}>{"nivo"}</Heading>
+            <Text size="sm">{LANDING_DESCRIPTION}</Text>
         </div>
     </main>;
 };

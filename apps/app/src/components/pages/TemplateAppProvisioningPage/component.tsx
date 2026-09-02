@@ -1,4 +1,5 @@
-import { Breadcrumbs, Heading, Text } from "@nivo/ui";
+import { Heading, Text } from "@starci/grammar/common";
+import { Breadcrumbs } from "@nivo/ui";
 import { TemplateAppProvisioning } from "@/components/blocks/provisioning/TemplateAppProvisioning";
 
 /** Route identity needed to create or resume one Template App. */
@@ -59,17 +60,10 @@ export const TemplateAppProvisioningPageBase = (props: TemplateAppProvisioningPa
 
 
 
-      <Heading props={{
-        content: title,
-        level: 1
-      }} />
+      <Heading level={1}>{title}</Heading>
 
 
-      <Text props={{
-        content: description,
-        size: "sm",
-        tone: "muted"
-      }} /></div><>
+      <Text size="sm" tone="muted">{description}</Text></div><>
 
 
 

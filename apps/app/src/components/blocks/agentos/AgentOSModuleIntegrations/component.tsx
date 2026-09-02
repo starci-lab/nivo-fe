@@ -1,4 +1,5 @@
-import { Button, Field, SurfaceCard, Text } from "@nivo/ui";
+
+import { SurfaceCard, Button, Button as CoreButton, Input, Text } from "@starci/grammar/common";
 import type { AgentosModuleStudio } from "@/modules/api/console";
 /** Public API role for AgentOSModuleIntegrationsProps. */
 export type AgentOSModuleIntegrationsProps = AgentOSModuleIntegrationsViewProps;
@@ -36,64 +37,41 @@ export const AgentOSModuleIntegrationsBase = (props: AgentOSModuleIntegrationsPr
     onSave,
     onRemove
   }: AgentOSModuleIntegrationsViewProps = props;
-  if (state === "refused") return <SurfaceCard props={{
-    label: labels.title
-  }}><div><Text props={{
-        content: labels.refused,
-        size: "sm",
-        tone: "muted"
-      }} /></div></SurfaceCard>;
+  if (state === "refused") return <SurfaceCard
+    label={labels.title}
+  ><div><Text size="sm" tone="muted">{labels.refused}</Text></div></SurfaceCard>;
   const integrations = state === "loading" ? [{
     id: "loading",
     providerKey: labels.provider,
     maskedHint: "",
     status: "configured" as const
   }] : studio?.integrations ?? [];
-  return <SurfaceCard props={{
-    label: labels.title
-  }}><div>{integrations.map((integration, index) => <div key={index}><div>
+  return <SurfaceCard
+    label={labels.title}
+  ><div>{integrations.map((integration, index) => <div key={index}><div>
 
-          <Text props={{
-            content: integration.providerKey,
-            size: "sm",
-            weight: "semibold"
-          }} isLoading={state === "loading"} />
-          <Text props={{
-            content: integration.maskedHint,
-            size: "xs"
-          }} isLoading={state === "loading"} /></div>
+          <Text size="sm" weight="semibold" isSkeleton={state === "loading"}>{integration.providerKey}</Text>
+          <Text size="xs" isSkeleton={state === "loading"}>{integration.maskedHint}</Text></div>
 
-        <Button props={{
-          label: labels.remove,
-          size: "sm",
-          variant: "ghost",
-          disabled: pending
-        }} on={{
-          press: () => onRemove(integration.providerKey)
-        }} isLoading={state === "loading"} /></div>)}
-      <Field props={{
-        id: "integration-key",
-        name: "integrationKey",
-        label: labels.field,
-        placeholder: labels.placeholder,
-        kind: "password",
-        revealLabel: labels.reveal,
-        hideLabel: labels.hide,
-        disabled: pending
-      }} on={{
-        change: onSecret
-      }} />
-      <Button props={{
-        label: labels.save,
-        variant: "secondary",
-        isPending: pending,
-        disabled: secret.trim().length < 4
-      }} on={{
-        press: onSave
-      }} />
-      <Text props={{
-        content: labels.writeOnly,
-        size: "xs"
-      }} /></div></SurfaceCard>;
+        <Button variant="ghost" size="sm" isDisabled={pending} isSkeleton={state === "loading"} onPress={() => onRemove(integration.providerKey)}>{labels.remove}</Button></div>)}
+      <Input
+        id="integration-key"
+        name="integrationKey"
+        label={labels.field}
+        placeholder={labels.placeholder}
+        kind="password"
+        revealLabel={labels.reveal}
+        hideLabel={labels.hide}
+        isDisabled={pending}
+        variant="secondary"
+        onValueChange={onSecret}
+      />
+      <CoreButton
+        variant="secondary"
+        isPending={pending}
+        isDisabled={secret.trim().length < 4}
+        onPress={onSave}
+      >{labels.save}</CoreButton>
+      <Text size="xs">{labels.writeOnly}</Text></div></SurfaceCard>;
 };
 

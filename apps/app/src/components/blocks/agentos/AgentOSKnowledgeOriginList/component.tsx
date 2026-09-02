@@ -1,4 +1,5 @@
-import { Badge, SurfaceCard, Text } from "@nivo/ui";
+
+import { SurfaceCard, Text, Badge } from "@starci/grammar/common";
 import type { AgentosAiKnowledgeReadiness } from "@/modules/api/console";
 
 /** Resolved copy used by the owner-safe knowledge provenance inventory. */
@@ -33,24 +34,13 @@ export const AgentOSKnowledgeOriginListBase = (props: AgentOSKnowledgeOriginList
     documentCount: 0,
     lastUpdatedAt: null
   }] : origins;
-  return <SurfaceCard props={{
-    label: labels.title
-  }}><div>{rows.map((origin, index) => <div key={index}><div>
+  return <SurfaceCard
+    label={labels.title}
+  ><div>{rows.map((origin, index) => <div key={index}><div>
 
-          <Text props={{
-            content: origin.origin,
-            size: "sm",
-            weight: "semibold"
-          }} isLoading={loading} />
-          <Text props={{
-            content: `${origin.version ?? labels.unknownVersion} · ${shortDigest(origin.digest)} · ${labels.documents(origin.documentCount)}`,
-            size: "xs",
-            tone: "muted"
-          }} isLoading={loading} /></div>
+          <Text size="sm" weight="semibold" isSkeleton={loading}>{origin.origin}</Text>
+          <Text size="xs" tone="muted" isSkeleton={loading}>{`${origin.version ?? labels.unknownVersion} · ${shortDigest(origin.digest)} · ${labels.documents(origin.documentCount)}`}</Text></div>
 
-        <Badge props={{
-          content: origin.digest === null ? labels.unknownVersion : labels.current,
-          tone: origin.digest === null ? "warning" : "success"
-        }} isLoading={loading} /></div>)}</div></SurfaceCard>;
+        <Badge tone={origin.digest === null ? "warning" : "success"} isSkeleton={loading}>{origin.digest === null ? labels.unknownVersion : labels.current}</Badge></div>)}</div></SurfaceCard>;
 };
 

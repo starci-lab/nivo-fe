@@ -16,7 +16,7 @@ describe("AgentOSWorkspaceListBase", () => {
             props={{ label: "Workspaces", summary, rows: [{ id: "workspace-1", name: "Support", detail: "order-1", kindLabel: "Workspace", status: "ready", statusLabel: "Ready" }] }}
             on={{ openWorkspace }}
         />)
-        fireEvent.click(screen.getByRole("link", { name: "Support" }))
+        fireEvent.click(screen.getByRole("button", { name: "Support" }))
         expect(openWorkspace).toHaveBeenCalledWith("workspace-1")
     })
 

@@ -1,5 +1,5 @@
-import { Button, ChoiceTabs, Heading } from "@nivo/ui";
-import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice";
+import { ChoiceTabs } from "@nivo/ui";
+import { Button, EmptyNotice, Heading } from "@starci/grammar/common";
 import { AcademyGrowthSummary } from "@/components/blocks/academy/AcademyGrowthSummary";
 import { AcademyStudentCrm } from "@/components/blocks/academy/AcademyStudentCrm";
 import { AcademyLeadPipeline } from "@/components/blocks/academy/AcademyLeadPipeline";
@@ -47,25 +47,18 @@ export const AcademyControlCenterBase = (props: AcademyControlCenterProps) => {
     onOpenPublicSite
   }: AcademyControlCenterViewProps = props;
   const settledSections = mode === "growth" ? [<AcademyGrowthSummary key="item-0" siteId={siteId} />, <AcademyStudentCrm key="item-1" siteId={siteId} />, <AcademyLeadPipeline key="item-2" siteId={siteId} />] : [<AcademyIntegrationCenter key="item-0" siteId={siteId} />];
-  const sections = state !== "ready" ? [<EmptyNotice key="item-0" props={{
-    message: state === "restoring" ? labels.loading : labels.refused
-  }} />] : settledSections;
-  const publicSite = publicHost === undefined ? undefined : <Button props={{
-    label: labels.openSite,
-    variant: "secondary",
-    size: "sm"
-  }} on={{
-    press: onOpenPublicSite
-  }} />;
+  const sections = state !== "ready" ? [<EmptyNotice key="item-0" message={state === "restoring" ? labels.loading : labels.refused} />] : settledSections;
+  const publicSite = publicHost === undefined ? undefined : <Button
+    variant="secondary"
+    size="sm"
+    onPress={onOpenPublicSite}
+  >{labels.openSite}</Button>;
   return <div><div>
 
 
 
 
-      <Heading props={{
-        content: title,
-        level: 1
-      }} />{publicSite}</div>
+      <Heading level={1}>{title}</Heading>{publicSite}</div>
 
 
 

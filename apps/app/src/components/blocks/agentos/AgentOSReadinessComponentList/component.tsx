@@ -1,4 +1,5 @@
-import { Badge, SurfaceCard, Text, type BadgeTone } from "@nivo/ui";
+
+import { SurfaceCard, Text, Badge, type BadgeTone } from "@starci/grammar/common";
 import type { AgentosAiKnowledgeReadiness } from "@/modules/api/console";
 
 /** Resolved copy used by the readiness component evidence inventory. */
@@ -30,24 +31,13 @@ export const AgentOSReadinessComponentListBase = (props: AgentOSReadinessCompone
     component: labels.title,
     verdict: labels.evidence
   }] : components;
-  return <SurfaceCard props={{
-    label: labels.title
-  }}><div>{rows.map((component, index) => <div key={index}><div>
+  return <SurfaceCard
+    label={labels.title}
+  ><div>{rows.map((component, index) => <div key={index}><div>
 
-          <Text props={{
-            content: component.component,
-            size: "sm",
-            weight: "semibold"
-          }} isLoading={loading} />
-          <Text props={{
-            content: labels.evidence,
-            size: "xs",
-            tone: "muted"
-          }} isLoading={loading} /></div>
+          <Text size="sm" weight="semibold" isSkeleton={loading}>{component.component}</Text>
+          <Text size="xs" tone="muted" isSkeleton={loading}>{labels.evidence}</Text></div>
 
-        <Badge props={{
-          content: component.verdict,
-          tone: toneOf(component.verdict)
-        }} isLoading={loading} /></div>)}</div></SurfaceCard>;
+        <Badge tone={toneOf(component.verdict)} isSkeleton={loading}>{component.verdict}</Badge></div>)}</div></SurfaceCard>;
 };
 

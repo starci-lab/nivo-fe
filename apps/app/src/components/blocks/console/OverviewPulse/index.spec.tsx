@@ -85,7 +85,7 @@ describe("OverviewPulse", () => {
         mocks.data.wallet = null
         mocks.data.invoices = null
         const { container } = render(<OverviewPulse />)
-        expect(container.querySelectorAll('[data-tone][data-size="sm"][data-loading="true"][aria-hidden="true"]')).toHaveLength(4)
+        expect(container.querySelectorAll('[data-component="Text"][data-tone][data-size="sm"][data-loading="true"][aria-hidden="true"]')).toHaveLength(4)
     })
 
     it("handles unknown lifecycle values and non-renewing held domains", () => {

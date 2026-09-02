@@ -1,4 +1,6 @@
-import { Icon, type IconName } from "../Icon";
+import { nivoIconSource, type IconName } from "../../iconography";
+import { Icon } from "@starci/grammar/common";
+
 
 /**
  * LEAF - `Label`: the name of a box, tied to it.
@@ -32,7 +34,7 @@ const LABEL_CLASSES = "inline-flex items-center gap-2 text-sm font-medium";
 export const Label = (props: LabelProps) => LabelView(props);
 const LabelView = ({ props }: LabelProps) =>
 <label htmlFor={props.htmlFor} className={LABEL_CLASSES}>
-        {props.icon === undefined ? null : <Icon props={{ name: props.icon, role: "chip" }} />}
+        {props.icon === undefined ? null : <Icon source={nivoIconSource(props.icon, "chip")} role="chip" />}
         {props.content}
     </label>;
 

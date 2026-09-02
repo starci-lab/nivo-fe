@@ -1,5 +1,6 @@
 import { useRef } from "react";
-import { Button, LifecycleStep, SurfaceCard, Text, type LifecycleStepData } from "@nivo/ui";
+import { SurfaceCard, Button, Button as CoreButton, Text } from "@starci/grammar/common";
+import { LifecycleStep, type LifecycleStepData } from "@nivo/ui";
 import type { AgentosModuleStudio } from "@/modules/api/console";
 
 /** Attachment lifecycle rows and their bounded upload/removal actions. */
@@ -54,13 +55,9 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProp
     onRemove
   }: AgentOSModuleAttachmentsViewProps = props;
   const fileInput = useRef<HTMLInputElement>(null);
-  if (state === "refused") return <SurfaceCard props={{
-    label: labels.title
-  }}><div><Text props={{
-        content: labels.refused,
-        size: "sm",
-        tone: "muted"
-      }} /></div></SurfaceCard>;
+  if (state === "refused") return <SurfaceCard
+    label={labels.title}
+  ><div><Text size="sm" tone="muted">{labels.refused}</Text></div></SurfaceCard>;
   const rows = state === "loading" ? [{
     id: "loading",
     fileName: labels.title,
@@ -82,9 +79,9 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProp
       removed: 5
     } as const)[file.ingestionStatus];
   };
-  return <SurfaceCard props={{
-    label: labels.title
-  }}><div>{rows.map(file => {
+  return <SurfaceCard
+    label={labels.title}
+  ><div>{rows.map(file => {
         const active = stageOf(file);
         const stages: ReadonlyArray<LifecycleStepData> = stageLabels.map((label, index) => ({
           ordinal: String(index + 1),
@@ -99,30 +96,13 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProp
         return <div key={file.id}><div><div>
 
 
-              <Text props={{
-                content: file.fileName,
-                size: "sm",
-                weight: "semibold"
-              }} isLoading={state === "loading"} />
-              <Text props={{
-                content: caption,
-                size: "xs",
-                tone: "muted"
-              }} isLoading={state === "loading"} /></div>{refused && labels.retry !== undefined && onRetry !== undefined ? <Button props={{
-              label: labels.retry,
-              variant: "secondary",
-              size: "sm",
-              disabled: pending
-            }} on={{
-              press: () => onRetry(file.id)
-            }} /> : <Button props={{
-              label: labels.remove,
-              variant: "ghost",
-              size: "sm",
-              disabled: pending
-            }} on={{
-              press: () => onRemove(file.id)
-            }} isLoading={state === "loading"} />}</div><div>{stages.map((step, index) => <LifecycleStep key={index} props={step} isLoading={state === "loading"} />)}</div></div>;
+              <Text size="sm" weight="semibold" isSkeleton={state === "loading"}>{file.fileName}</Text>
+              <Text size="xs" tone="muted" isSkeleton={state === "loading"}>{caption}</Text></div>{refused && labels.retry !== undefined && onRetry !== undefined ? <CoreButton
+                variant="secondary"
+                size="sm"
+                isDisabled={pending}
+                onPress={() => onRetry(file.id)}
+              >{labels.retry}</CoreButton> : <Button variant="ghost" size="sm" isDisabled={pending} isSkeleton={state === "loading"} onPress={() => onRemove(file.id)}>{labels.remove}</Button>}</div><div>{stages.map((step, index) => <LifecycleStep key={index} props={step} isLoading={state === "loading"} />)}</div></div>;
       })}
 
       <>
@@ -132,13 +112,11 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProp
           event.currentTarget.value = "";
         }} />
         
-                <Button props={{
-          label: labels.upload,
-          variant: "secondary",
-          isPending: pending
-        }} on={{
-          press: () => fileInput.current?.click()
-        }} />
+                <CoreButton
+                  variant="secondary"
+                  isPending={pending}
+                  onPress={() => fileInput.current?.click()}
+                >{labels.upload}</CoreButton>
         
             </></div></SurfaceCard>;
 };

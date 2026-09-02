@@ -1,3 +1,4 @@
+import { resolve } from "node:path"
 import type { NextConfig } from "next"
 import createNextIntlPlugin from "next-intl/plugin"
 
@@ -8,10 +9,17 @@ import createNextIntlPlugin from "next-intl/plugin"
  */
 const nextConfig: NextConfig = {
     output: "standalone",
-    transpilePackages: ["@nivo/ui"],
+    transpilePackages: ["@nivo/ui", "@starci/grammar"],
+    turbopack: {
+        root: resolve(import.meta.dirname, "../../.."),
+    },
     experimental: {
         optimizePackageImports: ["@heroui/react"],
         rootParams: true,
+    },
+    webpack: (config) => {
+        config.resolve.symlinks = false
+        return config
     },
 }
 

@@ -1,5 +1,5 @@
-import { ChoiceTabs, StatusActionCard, SurfaceCard, Text, type BadgeTone } from "@nivo/ui";
-import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice";
+import { ChoiceTabs, nivoIconSource, StatusActionCard } from "@nivo/ui";
+import { EmptyNotice, Icon, SurfaceCard, Text, type BadgeTone } from "@starci/grammar/common";
 
 /** One resolved catalog or installation card visible in the module center. */
 export type AgentOSSolutionModuleCenterProps = AgentOSSolutionModuleCenterViewProps;
@@ -64,29 +64,25 @@ const AgentOSSolutionModuleCenterContent = ({
   // and otherwise the grid - which draws the resting placeholders when the answer has not landed.
   const body = () => {
     if (state === "refused") {
-      return <SurfaceCard props={{
-        label: sectionLabel
-      }}><div>
+      return <SurfaceCard
+        label={sectionLabel}
+      ><div>
 
 
-            <Text props={{
-            content: refusedLabel,
-            size: "sm",
-            tone: "muted"
-          }} /></div></SurfaceCard>;
+            <Text size="sm" tone="muted">{refusedLabel}</Text></div></SurfaceCard>;
     }
     if (state === "answered" && cards.length === 0) {
-      return <EmptyNotice props={{
-        message: emptyLabel,
-        actionLabel: emptyActionLabel
-      }} on={{
-        act: () => onSelectMode("catalog")
-      }} />;
+      return <EmptyNotice
+        message={emptyLabel}
+        actionLabel={emptyActionLabel}
+        actionStartContent={<Icon source={nivoIconSource("retry", "chip")} role="chip" />}
+        onAction={() => onSelectMode("catalog")}
+      />;
     }
-    return <SurfaceCard props={{
-      label: sectionLabel,
-      isFrameless: true
-    }}><div>{(state === "resting" ? loadingCards : cards).map(card => <StatusActionCard key={card.id} props={{
+    return <SurfaceCard
+      label={sectionLabel}
+      frame="frameless"
+    ><div>{(state === "resting" ? loadingCards : cards).map(card => <StatusActionCard key={card.id} props={{
           ...card,
           isPending: pendingId === card.id,
           disabled: card.disabled === true || pendingId !== undefined,
@@ -104,12 +100,7 @@ const AgentOSSolutionModuleCenterContent = ({
       select: key => onSelectMode(key as "catalog" | "installed")
     }} />
             {body()}
-            {outcome === undefined ? null : <Text props={{
-      content: outcome,
-      size: "sm",
-      tone: "muted",
-      live: "polite"
-    }} />}
+            {outcome === undefined ? null : <Text size="sm" tone="muted" live="polite">{outcome}</Text>}
         </>;
 };
 

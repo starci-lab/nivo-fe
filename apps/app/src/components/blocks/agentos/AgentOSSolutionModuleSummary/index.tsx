@@ -1,4 +1,5 @@
-import { Badge, SurfaceCard, Text, type BadgeTone } from "@nivo/ui";
+
+import { SurfaceCard, Text, Badge, type BadgeTone } from "@starci/grammar/common";
 import type { AgentosModuleInstallationDetail } from "@/modules/api/console";
 
 /** Canonical installation snapshot and resolved labels consumed by the summary block. */
@@ -24,14 +25,8 @@ export type AgentOSSolutionModuleSummaryProps = {
   readonly installation: AgentosModuleInstallationDetail;
 });
 const fact = (label: string, value?: string, isLoading = false) => <div>
-  <Text props={{
-    content: label,
-    size: "sm"
-  }} />
-  <Text props={{
-    content: value,
-    size: "sm"
-  }} isLoading={isLoading} /></div>;
+  <Text size="sm">{label}</Text>
+  <Text size="sm" isSkeleton={isLoading}>{value}</Text></div>;
 const statusTone = (status: AgentosModuleInstallationDetail["status"]): BadgeTone => {
   if (status === "ready") return "success";
   if (status === "failed") return "danger";
@@ -45,22 +40,15 @@ export const AgentOSSolutionModuleSummary = (props: AgentOSSolutionModuleSummary
   const {
     labels
   } = props;
-  return <SurfaceCard props={{
-    label: labels.section
-  }}><div>
+  return <SurfaceCard
+    label={labels.section}
+  ><div>
 
 
 
-        <Text props={{
-        content: installation?.moduleKey,
-        size: "md",
-        weight: "semibold"
-      }} isLoading={isLoading} />
+        <Text size="md" weight="semibold" isSkeleton={isLoading}>{installation?.moduleKey}</Text>
 
 
 
-        <Badge props={{
-        content: installation?.status,
-        tone: installation === undefined ? "neutral" : statusTone(installation.status)
-      }} isLoading={isLoading} /><div><>{fact(labels.module, installation?.moduleKey, isLoading)}{fact(labels.version, installation?.moduleVersion, isLoading)}{fact(labels.status, installation?.status, isLoading)}{fact(labels.modelProfile, installation?.modelProfileRef, isLoading)}{fact(labels.manifest, installation?.manifestDigest, isLoading)}{fact(labels.failure, installation?.failureCode ?? (isLoading ? undefined : labels.empty), isLoading)}</></div></div></SurfaceCard>;
+        <Badge tone={installation === undefined ? "neutral" : statusTone(installation.status)} isSkeleton={isLoading}>{installation?.status}</Badge><div><>{fact(labels.module, installation?.moduleKey, isLoading)}{fact(labels.version, installation?.moduleVersion, isLoading)}{fact(labels.status, installation?.status, isLoading)}{fact(labels.modelProfile, installation?.modelProfileRef, isLoading)}{fact(labels.manifest, installation?.manifestDigest, isLoading)}{fact(labels.failure, installation?.failureCode ?? (isLoading ? undefined : labels.empty), isLoading)}</></div></div></SurfaceCard>;
 };

@@ -1,7 +1,9 @@
+import { nivoIconSource, type IconName } from "../../iconography";
+import { Icon } from "@starci/grammar/common";
 "use client";
 
 import { Tabs } from "@heroui/react";
-import { Icon, type IconName } from "../Icon";
+
 
 /** One tab in the legacy dashboard strip. */
 export type ExtendedTab = {
@@ -50,7 +52,7 @@ const ExtendedTabsView = ({ props, on }: ExtendedTabsProps) =>
           aria-controls={`dashboard-panel-${tab.id}`}>
           
                             <span className="flex items-center gap-2">
-                                <Icon props={{ name: tab.icon, role: "leading" }} />
+                                <Icon source={nivoIconSource(tab.icon, "leading")} role="leading" />
                                 <span className="hidden md:inline">{tab.label}</span>
                             </span>
                             <Tabs.Indicator />

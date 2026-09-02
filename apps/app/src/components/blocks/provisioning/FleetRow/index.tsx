@@ -1,4 +1,4 @@
-import { Badge, Button, Text, TextLink, type BadgeTone } from "@nivo/ui";
+import { Button, Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/common";
 
 /**
  * BLOCK - one row of the provisioning fleet, whichever kind of thing it is.
@@ -75,36 +75,14 @@ export const FleetRow = (props: FleetRowProps) => {
   const on = props.on;
   const identity = <div>
 
-    <TextLink props={{
-      label: data.name ?? "",
-      size: "sm"
-    }} on={{
-      press: on?.open
-    }} />
+    <TextAction size="sm" isSkeleton={isLoading} onPress={on?.open}>{data.name ?? ""}</TextAction>
 
 
-    <Text props={{
-      content: data.detail,
-      size: "xs",
-      tone: "muted"
-    }} isLoading={isLoading} /></div>;
+    <Text size="xs" tone="muted" isSkeleton={isLoading}>{data.detail}</Text></div>;
   return <div>{identity}
 
-    <Badge props={{
-      content: data.kindLabel,
-      tone: "neutral"
-    }} />
+    <Badge tone="neutral">{data.kindLabel}</Badge>
 
 
-    <Badge props={{
-      content: data.statusLabel,
-      tone: STATUS_TONE[data.status]
-    }} />{data.actionLabel === undefined ? null : <Button props={{
-      label: data.actionLabel ?? "",
-      size: "sm",
-      variant: "secondary",
-      isPending: data.isActionPending
-    }} on={{
-      press: on?.act
-    }} isLoading={isLoading} />}</div>;
+    <Badge tone={STATUS_TONE[data.status]}>{data.statusLabel}</Badge>{data.actionLabel === undefined ? null : <Button variant="secondary" size="sm" isPending={data.isActionPending} isSkeleton={isLoading} onPress={on?.act}>{data.actionLabel ?? ""}</Button>}</div>;
 };

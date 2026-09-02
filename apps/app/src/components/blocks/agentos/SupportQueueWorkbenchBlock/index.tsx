@@ -1,6 +1,5 @@
 "use client";
-
-import { SurfaceCard, SurfaceListCard, Text } from "@nivo/ui";
+import { SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common";
 import type { SupportImportantFact, SupportTicket } from "@/modules/api/workspace-controlplane";
 
 /** Evidence-sidecar input for one selected customer or the whole support queue. */
@@ -16,15 +15,8 @@ type WorkbenchRow = {
   readonly value: string;
 };
 const rowView = (row: WorkbenchRow) => <div>
-  <Text props={{
-    content: row.label,
-    size: "sm"
-  }} />
-  <Text props={{
-    content: row.value,
-    size: "sm",
-    weight: "semibold"
-  }} /></div>;
+  <Text size="sm">{row.label}</Text>
+  <Text size="sm" weight="semibold">{row.value}</Text></div>;
 const factList = (rows: ReadonlyArray<WorkbenchRow>) => <div>{rows.map(rowView)}</div>;
 const ticketList = (rows: ReadonlyArray<WorkbenchRow>) => <div>{rows.map(rowView)}</div>;
 const emptyRow = (id: string, label: string, value: string): WorkbenchRow => ({
@@ -56,36 +48,32 @@ export const SupportQueueWorkbenchBlock = (props: SupportQueueWorkbenchBlockProp
   const shownFacts = factRows.length === 0 ? [emptyRow("facts", "Important information", pending ? "Loading customer facts…" : "No extracted fact for this customer")] : factRows;
   const shownTickets = ticketRows.length === 0 ? [emptyRow("tickets", "Task queue", pending ? "Loading queued tasks…" : "No queued task for this customer")] : ticketRows;
   const itemCount = factRows.length + ticketRows.length;
-  return <SurfaceCard props={{
-    label: "Support workbench",
-    fact: `${itemCount} important items`,
-    isFrameless: true
-  }}><div>
+  return <SurfaceCard
+    label="Support workbench"
+    frame="frameless"
+    fact={`${itemCount} important items`}
+  ><div>
 
 
 
-        <SurfaceListCard props={{
-        label: "Important information",
-        fact: `${factRows.length} facts`,
-        isNested: true
-      }}>
+        <SurfaceListCard
+        label="Important information"
+        fact={`${factRows.length} facts`}
+        depth="nested"
+      >
 
           {factList(shownFacts)}</SurfaceListCard>
 
 
 
-        <SurfaceListCard props={{
-        label: "Customer queue",
-        fact: `${ticketRows.length} tasks`,
-        isNested: true
-      }}>
+        <SurfaceListCard
+        label="Customer queue"
+        fact={`${ticketRows.length} tasks`}
+        depth="nested"
+      >
 
           {ticketList(shownTickets)}</SurfaceListCard>
 
 
-        <Text props={{
-        content: "Queue entries keep their source conversation and evidence count; they do not rewrite customer history.",
-        size: "sm",
-        tone: "muted"
-      }} /></div></SurfaceCard>;
+        <Text size="sm" tone="muted">{"Queue entries keep their source conversation and evidence count; they do not rewrite customer history."}</Text></div></SurfaceCard>;
 };

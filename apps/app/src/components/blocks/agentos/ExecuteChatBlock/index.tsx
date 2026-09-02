@@ -1,7 +1,8 @@
 "use client";
 
 import { createElement, useState, type ComponentType } from "react";
-import { Button, Field, Heading, MarkdownComponent, SurfaceCard, Text } from "@nivo/ui";
+import { MarkdownComponent } from "@nivo/ui";
+import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common";
 import type { AgentosRuntimeMessageTree, AgentosRuntimeValue, AgentosRuntimeWidgetNode } from "@/modules/api/console";
 
 /** Trusted widget action advertised by the pinned runtime manifest. */
@@ -76,31 +77,13 @@ const StructuredWidget = ({
   return <div><div>
 
 
-      <Heading props={{
-        content: payload.node.component,
-        level: 4
-      }} />
+      <Heading level={4}>{payload.node.component}</Heading>
 
-      <Text props={{
-        content: `Trusted schema ${payload.node.version}`,
-        size: "xs",
-        tone: "muted"
-      }} /></div>{facts.length === 0 ? undefined : <div>{facts.map(([ key, value], index) => <div key={index}>{<Text props={{
-          content: key,
-          size: "sm"
-        }} />}{<Text props={{
-          content: valueLabel(value),
-          size: "sm"
-        }} />}</div>)}</div>}{immediateActions.length === 0 ? undefined : <div>{immediateActions.map((action, index) => <Button key={index} props={{
-        label: action.key,
-        variant: "secondary"
-      }} on={{
-        press: () => onAction?.(payload.id, action.key, {})
-      }} />)}</div>}{payload.actions.some(action => action.inputKeys.length > 0) ? <Text props={{
-      content: "Actions requiring typed input continue in the registered workbench.",
-      size: "sm",
-      tone: "muted"
-    }} /> : undefined}</div>;
+      <Text size="xs" tone="muted">{`Trusted schema ${payload.node.version}`}</Text></div>{facts.length === 0 ? undefined : <div>{facts.map(([ key, value], index) => <div key={index}>{<Text size="sm">{key}</Text>}{<Text size="sm">{valueLabel(value)}</Text>}</div>)}</div>}{immediateActions.length === 0 ? undefined : <div>{immediateActions.map((action, index) => <Button
+          key={index}
+          variant="secondary"
+          onPress={() => onAction?.(payload.id, action.key, {})}
+        >{action.key}</Button>)}</div>}{payload.actions.some(action => action.inputKeys.length > 0) ? <Text size="sm" tone="muted">{"Actions requiring typed input continue in the registered workbench."}</Text> : undefined}</div>;
 };
 type OperationWidgetProps = TrustedWidgetComponentProps & {
   readonly title: string;
@@ -126,44 +109,24 @@ const OperationWidget = ({
   return <div><div>
 
 
-      <Heading props={{
-        content: title,
-        level: 4
-      }} />
+      <Heading level={4}>{title}</Heading>
 
-      <Text props={{
-        content: caption,
-        size: "xs",
-        tone: "muted"
-      }} /></div><div>{facts.map(([ key, value], index) => <div key={index}>{<Text props={{
-          content: readableKey(key),
-          size: "sm"
-        }} />}{<Text props={{
-          content: valueLabel(value),
-          size: "sm",
-          weight: "semibold"
-        }} />}</div>)}</div>{!canOpen && !canAccept ? undefined : <div>{[...(canOpen ? [<Button key="item-0" props={{
-        label: "Open in workbench",
-        variant: "secondary"
-      }} on={{
-        press: () => onAction?.(payload.id, "open-task", {
+      <Text size="xs" tone="muted">{caption}</Text></div><div>{facts.map(([ key, value], index) => <div key={index}>{<Text size="sm">{readableKey(key)}</Text>}{<Text size="sm" weight="semibold">{valueLabel(value)}</Text>}</div>)}</div>{!canOpen && !canAccept ? undefined : <div>{[...(canOpen ? [<Button
+          key="item-0"
+          variant="secondary"
+          onPress={() => onAction?.(payload.id, "open-task", {
           taskId
-        })
-      }} />] : []), ...(canAccept ? [<Button key="item-1" props={{
-        label: "Accept task",
-        variant: "primary"
-      }} on={{
-        press: () => onAction?.(payload.id, "accept", {
+        })}
+        >Open in workbench</Button>] : []), ...(canAccept ? [<Button
+        key="item-1"
+        variant="primary"
+        onPress={() => onAction?.(payload.id, "accept", {
           taskId,
           expectedVersion
-        }, expectedVersion)
-      }} />] : [])]}</div>}
+        }, expectedVersion)}
+      >Accept task</Button>] : [])]}</div>}
 
-    <Text props={{
-      content: notice,
-      size: "sm",
-      tone: "muted"
-    }} /></div>;
+    <Text size="sm" tone="muted">{notice}</Text></div>;
 };
 const SupportTaskWidget = (props: TrustedWidgetComponentProps) => <OperationWidget {...props} title="Support follow-up" caption="SLA-aware customer task" factKeys={["title", "summary", "priority", "status", "sla"]} notice="Nivo may triage and draft; refunds, remedies and sensitive-data disclosure still require the configured authority." />;
 const FinanceApprovalWidget = (props: TrustedWidgetComponentProps) => <OperationWidget {...props} title="Finance approval" caption="Evidence-backed owner decision" factKeys={["title", "amount", "currency", "approvalState", "priority", "status"]} notice="Accept queues a review task only. Nivo cannot approve its own work or execute payment." />;
@@ -188,12 +151,7 @@ const actorLabel = (role: ExecuteMessage["role"]): string => {
 };
 const widgetProjection = (payload: ChatWidgetPayload, registry: TrustedWidgetRegistry, onAction: TrustedWidgetActionHandler | undefined) => {
   const Widget = registry[`${payload.node.component}@${payload.node.version}`];
-  return Widget === undefined ? <Text props={{
-    content: "Widget refused: No trusted ComponentType is registered.",
-    size: "sm",
-    tone: "muted",
-    live: "assertive"
-  }} /> : createElement(Widget, {
+  return Widget === undefined ? <Text size="sm" tone="muted" live="assertive">{"Widget refused: No trusted ComponentType is registered."}</Text> : createElement(Widget, {
     payload,
     onAction
   });
@@ -217,43 +175,28 @@ const ExecuteChatContent = ({
   onDraft,
   onSubmit,
   onWidgetAction
-}: ExecuteChatContentProps) => <div>{messages.map((message, index) => <div key={index}>{<Text props={{
-      content: actorLabel(message.role),
-      size: "xs",
-      tone: "muted",
-      weight: "semibold"
-    }} />}{<MarkdownComponent markdown={markdownFor(message)} />}{<Text props={{
-      content: message.contextLabel,
-      size: "xs",
-      tone: "muted"
-    }} />}{message.widget === undefined ? undefined : widgetProjection(message.widget, registry, onWidgetAction)}</div>)}<div><>
+}: ExecuteChatContentProps) => <div>{messages.map((message, index) => <div key={index}>{<Text size="xs" tone="muted" weight="semibold">{actorLabel(message.role)}</Text>}{<MarkdownComponent markdown={markdownFor(message)} />}{<Text size="xs" tone="muted">{message.contextLabel}</Text>}{message.widget === undefined ? undefined : widgetProjection(message.widget, registry, onWidgetAction)}</div>)}<div><>
 
 
-      <Field key={composerKey} props={{
-        id: "agentos-execute-message",
-        name: "executeMessage",
-        label: "Message this Execute session",
-        placeholder: "Ask Nivo to execute…",
-        disabled: pending
-      }} on={{
-        change: onDraft
-      }} /></>
+      <Input
+        key={composerKey}
+        id="agentos-execute-message"
+        name="executeMessage"
+        label="Message this Execute session"
+        placeholder="Ask Nivo to execute…"
+        isDisabled={pending}
+        variant="secondary"
+        onValueChange={onDraft}
+      /></>
 
 
 
-    <Button props={{
-      label: "Send",
-      variant: "primary",
-      disabled: draft.trim().length === 0,
-      isPending: pending
-    }} on={{
-      press: onSubmit
-    }} /></div>{refused ? <Text props={{
-    content: "The Execute operation was refused; no message or widget was appended.",
-    size: "sm",
-    tone: "muted",
-    live: "assertive"
-  }} /> : undefined}</div>;
+    <Button
+      variant="primary"
+      isDisabled={draft.trim().length === 0}
+      isPending={pending}
+      onPress={onSubmit}
+    >Send</Button></div>{refused ? <Text size="sm" tone="muted" live="assertive">{"The Execute operation was refused; no message or widget was appended."}</Text> : undefined}</div>;
 
 /** Draw Execute messages and fail-closed widgets through the trusted ComponentType registry. */
 export const ExecuteChatBlock = (props: ExecuteChatBlockProps) => {
@@ -275,10 +218,10 @@ export const ExecuteChatBlock = (props: ExecuteChatBlockProps) => {
     setDraft("");
     setComposerKey(current => current + 1);
   };
-  return <SurfaceCard props={{
-    label: "Execute chat",
-    fact: sessionTitle
-  }}>
+  return <SurfaceCard
+    label="Execute chat"
+    fact={sessionTitle}
+  >
       <ExecuteChatContent messages={messages} draft={draft} composerKey={composerKey} pending={pending} refused={refused} registry={registry} onDraft={setDraft} onSubmit={submit} onWidgetAction={onWidgetAction} />
     </SurfaceCard>;
 };

@@ -1,5 +1,5 @@
-import { HelmComponentStatusTable, SurfaceCard } from "@nivo/ui";
-import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice";
+import { HelmComponentStatusTable } from "@nivo/ui";
+import { EmptyNotice, SurfaceCard } from "@starci/grammar/common";
 import type { AgentWorkspaceRuntime } from "@/modules/api/console";
 
 /** Public-safe Helm snapshot and resolved labels consumed by the stack block. */
@@ -21,19 +21,17 @@ export const HelmStackSnapshot = (props: HelmStackSnapshotProps) => {
     labels
   }: HelmStackSnapshotProps = props;
   if (runtime === null) {
-    return <SurfaceCard props={{
-      label: labels.section
-    }}>
+    return <SurfaceCard
+      label={labels.section}
+    >
 
-        <EmptyNotice props={{
-        message: labels.unavailable
-      }} /></SurfaceCard>;
+        <EmptyNotice message={labels.unavailable} /></SurfaceCard>;
   }
   const storage = runtime.storage.length === 0 ? labels.unavailable : runtime.storage.map(item => `${item.key}: ${item.size ?? "—"} · ${item.policy ?? "—"}`).join(" · ");
-  return <SurfaceCard props={{
-    label: labels.section,
-    fact: `${labels.release}: ${runtime.releaseName ?? "—"} · ${labels.chart}: ${runtime.chartName ?? runtime.appKey}@${runtime.chartVersion ?? "—"}`
-  }}>
+  return <SurfaceCard
+    label={labels.section}
+    fact={`${labels.release}: ${runtime.releaseName ?? "—"} · ${labels.chart}: ${runtime.chartName ?? runtime.appKey}@${runtime.chartVersion ?? "—"}`}
+  >
 
 
       <HelmComponentStatusTable props={{

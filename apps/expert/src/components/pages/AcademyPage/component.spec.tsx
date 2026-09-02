@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 type ChromeProps = { readonly content: React.ComponentType<SectionsProps>, readonly contentProps: SectionsProps }
 type SectionsProps = { readonly courses: ReadonlyArray<{ readonly title: string }> }
-vi.mock("@/components/layouts/AcademyChrome", () => ({ AcademyChrome: ({ content: Content, contentProps }: ChromeProps) => <div data-testid="chrome"><Content {...contentProps} /></div> }))
+vi.mock("@/components/product-shells/AcademyChrome", () => ({ AcademyChrome: ({ content: Content, contentProps }: ChromeProps) => <div data-testid="chrome"><Content {...contentProps} /></div> }))
 vi.mock("@/components/blocks/academy/AcademySections", () => ({ AcademySections: ({ courses }: SectionsProps) => <div>{courses.map((course) => <span key={course.title}>{course.title}</span>)}</div> }))
 import { AcademyPageBase } from "./component"
 describe("academy page presentation", () => {

@@ -1,5 +1,6 @@
-import { Badge, type BadgeTone } from "../../leaves/Badge"
-import { Text } from "../../leaves/Text"
+import { Text, Badge, type BadgeTone } from "@starci/grammar/common";
+
+
 
 /** One public-safe component row returned by a Helm status view. */
 export type HelmComponentStatusRow = {
@@ -26,12 +27,12 @@ export const HelmComponentStatusTable = (props: HelmComponentStatusTableProps) =
             {rows.map((row, index) => (
                 <div key={row?.id ?? `loading-${index}`}>
                     <div>
-                        <Text props={{ content: row?.name, weight: "semibold" }} isLoading={props.isLoading} />
-                        <Text props={{ content: row?.detail, size: "xs", tone: "muted" }} isLoading={props.isLoading} />
+                        <Text weight="semibold" isSkeleton={props.isLoading}>{row?.name}</Text>
+                        <Text size="xs" tone="muted" isSkeleton={props.isLoading}>{row?.detail}</Text>
                     </div>
-                    <Badge props={{ content: row?.kind, tone: "neutral" }} isLoading={props.isLoading} />
-                    <Badge props={{ content: row?.status, tone: row?.statusTone }} isLoading={props.isLoading} />
-                    <Text props={{ content: row?.resources, size: "xs", tone: "muted" }} isLoading={props.isLoading} />
+                    <Badge tone="neutral" isSkeleton={props.isLoading}>{row?.kind}</Badge>
+                    <Badge tone={row?.statusTone} isSkeleton={props.isLoading}>{row?.status}</Badge>
+                    <Text size="xs" tone="muted" isSkeleton={props.isLoading}>{row?.resources}</Text>
                 </div>
             ))}
         </div>

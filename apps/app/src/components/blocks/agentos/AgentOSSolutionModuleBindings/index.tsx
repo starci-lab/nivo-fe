@@ -1,4 +1,5 @@
-import { Heading, SurfaceCard, Text } from "@nivo/ui";
+
+import { SurfaceCard, Heading, Text } from "@starci/grammar/common";
 import type { AgentosModuleInstallationDetail } from "@/modules/api/console";
 
 /** Runtime bindings and resolved labels consumed by the module bindings block. */
@@ -31,13 +32,7 @@ const displayedBindings = (values: ReadonlyArray<string> | undefined, empty: str
   return values ?? [];
 };
 const bindingGroup = (name: string, values: ReadonlyArray<string> | undefined, empty: string, isLoading: boolean) => <div>
-  <Heading props={{
-    content: name,
-    level: 4
-  }} />{displayedBindings(values, empty, isLoading).map((value, index) => <Text key={index} props={{
-    content: value,
-    size: "sm"
-  }} isLoading={isLoading} />)}</div>;
+  <Heading level={4}>{name}</Heading>{displayedBindings(values, empty, isLoading).map((value, index) => <Text size="sm" isSkeleton={isLoading}>{value}</Text>)}</div>;
 const artifactValues = (installation: AgentosModuleInstallationDetail | undefined): ReadonlyArray<string> | undefined => {
   if (installation === undefined) return undefined;
   if (installation.knowledgeArtifact === null) return [];
@@ -56,7 +51,7 @@ export const AgentOSSolutionModuleBindings = (props: AgentOSSolutionModuleBindin
   const {
     labels
   } = props;
-  return <SurfaceCard props={{
-    label: labels.section
-  }}><div><>{bindingGroup(labels.agents, installation?.generatedAgentIds, labels.empty, isLoading)}{bindingGroup(labels.channels, installation?.channelAccountRefs, labels.empty, isLoading)}{bindingGroup(labels.sharedKnowledge, installation?.sharedKnowledgeSourceIds, labels.empty, isLoading)}{bindingGroup(labels.knowledgeVersions, installation === undefined ? undefined : [installation.commonKnowledgeVersion, installation.privateKnowledgeVersion], labels.empty, isLoading)}{bindingGroup(labels.artifact, artifactValues(installation), labels.empty, isLoading)}{bindingGroup(labels.currentness, installation === undefined ? undefined : [installation.knowledgeState, `${installation.desiredDigest ?? labels.empty} → ${installation.appliedDigest ?? labels.empty}`], labels.empty, isLoading)}{bindingGroup(labels.embedding, embeddingValues(installation), labels.empty, isLoading)}{bindingGroup(labels.retrievalScope, installation === undefined ? undefined : [installation.retrievalScope.installationId, installation.retrievalScope.moduleKey, installation.retrievalScope.knowledgeVersion], labels.empty, isLoading)}</></div></SurfaceCard>;
+  return <SurfaceCard
+    label={labels.section}
+  ><div><>{bindingGroup(labels.agents, installation?.generatedAgentIds, labels.empty, isLoading)}{bindingGroup(labels.channels, installation?.channelAccountRefs, labels.empty, isLoading)}{bindingGroup(labels.sharedKnowledge, installation?.sharedKnowledgeSourceIds, labels.empty, isLoading)}{bindingGroup(labels.knowledgeVersions, installation === undefined ? undefined : [installation.commonKnowledgeVersion, installation.privateKnowledgeVersion], labels.empty, isLoading)}{bindingGroup(labels.artifact, artifactValues(installation), labels.empty, isLoading)}{bindingGroup(labels.currentness, installation === undefined ? undefined : [installation.knowledgeState, `${installation.desiredDigest ?? labels.empty} → ${installation.appliedDigest ?? labels.empty}`], labels.empty, isLoading)}{bindingGroup(labels.embedding, embeddingValues(installation), labels.empty, isLoading)}{bindingGroup(labels.retrievalScope, installation === undefined ? undefined : [installation.retrievalScope.installationId, installation.retrievalScope.moduleKey, installation.retrievalScope.knowledgeVersion], labels.empty, isLoading)}</></div></SurfaceCard>;
 };

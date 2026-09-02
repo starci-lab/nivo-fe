@@ -1,6 +1,7 @@
 "use client";
+import { Button } from "@starci/grammar/common";
 
-import { Button, SelectionList, type SelectionListGroup } from "@nivo/ui";
+import { SelectionList, type SelectionListGroup } from "@nivo/ui";
 import type { SupportCustomerConversation } from "@/modules/api/workspace-controlplane";
 
 /** Customer-inbox projection owned by one workspace controller. */
@@ -40,11 +41,10 @@ const CustomerSelection = ({
 const CustomerRailBody = (props: SupportCustomerConversationRailBlockProps) => <div>
 
   <CustomerSelection {...props} />
-  <Button props={{
-    label: props.pending ? "Syncing inbox" : "Inbox synced",
-    variant: "secondary",
-    disabled: true
-  }} /></div>;
+  <Button
+    variant="secondary"
+    isDisabled={true}
+  >{props.pending ? "Syncing inbox" : "Inbox synced"}</Button></div>;
 
 /** Keep the customer inbox as one stable list pane at every responsive size. */
 export const SupportCustomerConversationRailBlock = (props: SupportCustomerConversationRailBlockProps) => <div>

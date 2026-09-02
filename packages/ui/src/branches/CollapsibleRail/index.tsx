@@ -1,13 +1,16 @@
+import { Heading } from "@starci/grammar/common";
 "use client"
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { createElement, useEffect, useId, useState, type ComponentType, type CSSProperties } from "react"
-import { Heading } from "../../leaves/Heading"
+
 import { RAIL_CLASS_NAME, RAIL_CONTROL_CLASS_NAME, RAIL_HEADING_CLASS_NAME } from "./classNames"
 
 /** Props for a persisted, accessible navigation rail. */
 export type CollapsibleRailProps<RailProps extends object, CompactProps extends object, ToggleProps extends object> = {
     readonly ariaLabel: string
+    /** Whether this standalone rail owns a complementary landmark. */
+    readonly landmark?: "complementary" | "none"
     readonly title?: string
     readonly rail: ComponentType<RailProps>
     readonly railProps: RailProps
@@ -51,9 +54,9 @@ export const CollapsibleRail = <R extends object, C extends object, T extends ob
     }
     const label = collapsed ? props.expandLabel : props.collapseLabel
     const railStyle: CSSProperties = {
+        flexDirection: "column",
         minHeight: "100%",
         overflow: "hidden",
-        transition: reduceMotion === true ? "none" : "width 180ms ease",
         borderInlineEnd: "1px solid var(--separator)",
         gap: "1.5rem",
         padding: collapsed ? "1.5rem 0.625rem" : "1.5rem",
@@ -62,9 +65,18 @@ export const CollapsibleRail = <R extends object, C extends object, T extends ob
         ? createElement(props.collapsedRail, props.collapsedRailProps)
         : createElement(props.rail, props.railProps)
     const toggleControl = createElement(props.toggleControl, props.toggleControlProps)
+    const Root = props.landmark === "none" ? motion.div : motion.aside
     return (
-        <motion.aside className={RAIL_CLASS_NAME} aria-labelledby={headingId} aria-label={props.ariaLabel} animate={{ width: collapsed ? 64 : 256 }} initial={false} style={railStyle}>
-            <div id={headingId}><Heading props={{ content: props.ariaLabel, level: 2, className: RAIL_HEADING_CLASS_NAME }} /></div>
+        <Root
+            className={RAIL_CLASS_NAME}
+            aria-labelledby={props.landmark === "none" ? undefined : headingId}
+            aria-label={props.landmark === "none" ? undefined : props.ariaLabel}
+            animate={{ width: collapsed ? 64 : 256 }}
+            initial={false}
+            transition={{ duration: reduceMotion === true ? 0 : 0.18, ease: "easeOut" }}
+            style={railStyle}
+        >
+            <div id={headingId}><Heading level={2} isVisuallyHidden>{props.ariaLabel}</Heading></div>
             <div>
                 <AnimatePresence initial={false}>
                     {!collapsed && props.title === undefined ? null : <span>{collapsed ? null : props.title}</span>}
@@ -74,6 +86,6 @@ export const CollapsibleRail = <R extends object, C extends object, T extends ob
                 </button>
             </div>
             <div>{rail}</div>
-        </motion.aside>
+        </Root>
     )
 }

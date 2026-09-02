@@ -1,5 +1,5 @@
-import { Avatar, Badge, Button, SurfaceCard, SurfaceListCard, Text, TextLink, type BadgeTone } from "@nivo/ui";
-import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice";
+import { Avatar } from "@nivo/ui";
+import { EmptyNotice, SurfaceCard, SurfaceListCard, Button, Button as CoreButton, Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/common";
 
 /** One exact owned application prepared for the joined summary list. */
 export type AppsSummaryItem = {
@@ -37,28 +37,14 @@ const rows = (items: ReadonlyArray<AppsSummaryItem>, onOpenApp: AppsSummaryProps
     size: "md"
   }} /><div>
 
-    <TextLink props={{
-      label: item.name,
-      size: "sm"
-    }} on={{
-      press: () => onOpenApp(item.id)
-    }} />
-    <Text props={{
-      content: item.detail,
-      size: "xs",
-      tone: "muted"
-    }} /></div>
+    <TextAction size="sm" onPress={() => onOpenApp(item.id)}>{item.name}</TextAction>
+    <Text size="xs" tone="muted">{item.detail}</Text></div>
 
-  <Badge props={{
-    content: item.statusLabel,
-    tone: item.statusTone
-  }} />
-  <Button props={{
-    label: item.actionLabel,
-    size: "sm"
-  }} on={{
-    press: () => onOpenApp(item.id)
-  }} /></div>);
+  <Badge tone={item.statusTone}>{item.statusLabel}</Badge>
+  <CoreButton
+    size="sm"
+    onPress={() => onOpenApp(item.id)}
+  >{item.actionLabel}</CoreButton></div>);
 const pendingRows = () => Array.from({
   length: 3
 }, (_, index) => <div key={index}>
@@ -66,17 +52,10 @@ const pendingRows = () => Array.from({
     size: "md"
   }} isLoading /><div>
 
-    <TextLink props={{
-      label: "",
-      size: "sm"
-    }} isLoading />
-    <Text props={{
-      content: ""
-    }} isLoading /></div>
+    <TextAction size="sm" isSkeleton>{""}</TextAction>
+    <Text isSkeleton>{""}</Text></div>
 
-  <Button props={{
-    label: ""
-  }} isLoading /></div>);
+  <Button isSkeleton>{""}</Button></div>);
 const appsListContent = (state: Extract<AppsSummaryState, {
   readonly phase: "pending" | "populated";
 }>, onOpenApp: AppsSummaryProps["onOpenApp"]) => <div>{state.phase === "pending" ? pendingRows() : rows(state.items, onOpenApp)}</div>;
@@ -90,28 +69,21 @@ export const AppsSummaryBase = (props: AppsSummaryProps) => {
     onOpenApp,
     onOpenAll
   }: AppsSummaryProps = props;
-  if (state.phase === "empty") return <SurfaceCard props={{
-    label
-  }}><div>
-      <EmptyNotice props={{
-        message: state.message
-      }} /></div></SurfaceCard>;
-  if (state.phase === "forbidden") return <SurfaceCard props={{
-    label
-  }}><div>
-      <Text props={{
-        content: state.message,
-        size: "sm",
-        tone: "muted"
-      }} /></div></SurfaceCard>;
+  if (state.phase === "empty") return <SurfaceCard
+    label={label}
+  ><div>
+      <EmptyNotice message={state.message} /></div></SurfaceCard>;
+  if (state.phase === "forbidden") return <SurfaceCard
+    label={label}
+  ><div>
+      <Text size="sm" tone="muted">{state.message}</Text></div></SurfaceCard>;
   const isLoading = state.phase === "pending";
   const content = appsListContent(state, onOpenApp);
-  return <SurfaceListCard props={{
-    label,
-    actionLabel: openAllLabel
-  }} on={{
-    act: onOpenAll
-  }} isLoading={isLoading}>{content}</SurfaceListCard>;
+  return <SurfaceListCard
+    label={label}
+    footer={openAllLabel !== undefined && (isLoading || onOpenAll !== undefined) ? <Button variant="primary" size="sm" isSkeleton={isLoading} onPress={onOpenAll}>{openAllLabel}</Button> : undefined}
+    isLoading={isLoading}
+  >{content}</SurfaceListCard>;
 };
 
 /** Registry identity for the pure Apps summary twin. */

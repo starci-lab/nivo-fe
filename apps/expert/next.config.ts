@@ -1,3 +1,4 @@
+import { resolve } from "node:path"
 import createNextIntlPlugin from "next-intl/plugin"
 import type { NextConfig } from "next"
 
@@ -10,10 +11,17 @@ import type { NextConfig } from "next"
  * section can ask for a string instead of holding an English sentence beside its markup.
  */
 const nextConfig: NextConfig = {
-    transpilePackages: ["@nivo/ui"],
+    transpilePackages: ["@nivo/ui", "@starci/grammar"],
+    turbopack: {
+        root: resolve(import.meta.dirname, "../../.."),
+    },
     experimental: {
         optimizePackageImports: ["@heroui/react"],
         rootParams: true,
+    },
+    webpack: (config) => {
+        config.resolve.symlinks = false
+        return config
     },
 }
 

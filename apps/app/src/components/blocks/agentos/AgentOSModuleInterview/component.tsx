@@ -1,4 +1,5 @@
-import { Button, Field, Heading, SurfaceCard, Text } from "@nivo/ui";
+
+import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common";
 import type { AgentosModuleStudio } from "@/modules/api/console";
 
 /** Durable conversation projection and the one current answer operation. */
@@ -35,13 +36,9 @@ export const AgentOSModuleInterviewBase = (props: AgentOSModuleInterviewProps) =
     onAnswer,
     onSend
   }: AgentOSModuleInterviewViewProps = props;
-  if (state === "refused") return <SurfaceCard props={{
-    label: labels.title
-  }}><div><Text props={{
-        content: labels.refused,
-        size: "sm",
-        tone: "muted"
-      }} /></div></SurfaceCard>;
+  if (state === "refused") return <SurfaceCard
+    label={labels.title}
+  ><div><Text size="sm" tone="muted">{labels.refused}</Text></div></SurfaceCard>;
   const loading = state === "loading";
   const messages = loading ? [{
     id: "1",
@@ -57,39 +54,24 @@ export const AgentOSModuleInterviewBase = (props: AgentOSModuleInterviewProps) =
     content: ""
   }] : studio?.messages ?? [];
   const composer = studio?.module.currentQuestion === null ? undefined : <div>
-    <Field props={{
-      id: "module-answer",
-      name: "answer",
-      label: labels.field,
-      placeholder: labels.placeholder,
-      disabled: pending
-    }} on={{
-      change: onAnswer
-    }} />
-    <Button props={{
-      label: labels.send,
-      variant: "primary",
-      isPending: pending,
-      disabled: answer.trim().length === 0
-    }} on={{
-      press: onSend
-    }} />
+    <Input
+      id="module-answer"
+      name="answer"
+      label={labels.field}
+      placeholder={labels.placeholder}
+      isDisabled={pending}
+      variant="secondary"
+      onValueChange={onAnswer}
+    />
+    <Button
+      variant="primary"
+      isPending={pending}
+      isDisabled={answer.trim().length === 0}
+      onPress={onSend}
+    >{labels.send}</Button>
   </div>;
-  return <SurfaceCard props={{
-    label: labels.title
-  }} isLoading={loading}><div><div><Heading props={{
-          content: studio?.module.currentQuestion ?? labels.complete,
-          level: 3
-        }} isLoading={loading} /><Text props={{
-          content: labels.saved,
-          size: "xs"
-        }} /></div>{messages.map((message, index) => <div key={index}><Text props={{
-          content: message.role === "assistant" ? labels.agent : labels.you,
-          size: "xs",
-          weight: "semibold"
-        }} isLoading={loading} /><Text props={{
-          content: message.content,
-          size: "sm"
-        }} isLoading={loading} /></div>)}{composer}</div></SurfaceCard>;
+  return <SurfaceCard
+    label={labels.title}
+  ><div><div><Heading level={3} isSkeleton={loading}>{studio?.module.currentQuestion ?? labels.complete}</Heading><Text size="xs">{labels.saved}</Text></div>{messages.map((message, index) => <div key={index}><Text size="xs" weight="semibold" isSkeleton={loading}>{message.role === "assistant" ? labels.agent : labels.you}</Text><Text size="sm" isSkeleton={loading}>{message.content}</Text></div>)}{composer}</div></SurfaceCard>;
 };
 

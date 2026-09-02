@@ -1,4 +1,5 @@
-import { Breadcrumbs, Button, TileIcon, Heading, Text } from "@nivo/ui";
+import { Breadcrumbs, TileIcon } from "@nivo/ui";
+import { Button, Heading, Text } from "@starci/grammar/common";
 import { AgentOSWorkspaceList } from "@/components/blocks/agentos/AgentOSWorkspaceList";
 import { AgentOSProvisioning } from "@/components/blocks/provisioning/AgentOSProvisioning";
 
@@ -90,32 +91,17 @@ export const AgentOSPageBase = (props: AgentOSPageProps) => {
 
 
 
-        <Text props={{
-          content: eyebrow,
-          size: "sm",
-          tone: "accent",
-          weight: "semibold"
-        }} />
+        <Text size="sm" tone="accent" weight="semibold">{eyebrow}</Text>
 
 
-        <Heading props={{
-          content: title,
-          level: 1,
-          scale: "display"
-        }} />
+        <Heading level={1} scale="display">{title}</Heading>
 
 
-        <Text props={{
-          content: description,
-          size: "md",
-          tone: "muted"
-        }} /></div></div>{isDashboard ? <Button props={{
-      label: view.labels.createAction,
-      variant: "primary",
-      size: "lg"
-    }} on={{
-      press: view.onCreate
-    }} /> : null}</div>;
+        <Text size="md" tone="muted">{description}</Text></div></div>{isDashboard ? <Button
+          variant="primary"
+          size="lg"
+          onPress={view.onCreate}
+        >{view.labels.createAction}</Button> : null}</div>;
   const section = isDashboard ? [<AgentOSWorkspaceList key="item-0" />] : [<AgentOSProvisioning key="item-0" context={view.mode === "create" ? {
     mode: "new"
   } : {

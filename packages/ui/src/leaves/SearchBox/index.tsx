@@ -1,5 +1,7 @@
+import { nivoIconSource } from "../../iconography";
+import { Icon } from "@starci/grammar/common";
 import { Input as HeroInput } from "@heroui/react";
-import { Icon } from "../Icon";
+
 
 /**
  * LEAF - `SearchBox`: the one field that lives in the bar.
@@ -59,7 +61,7 @@ const SearchBoxView = ({ props, on }: SearchBoxProps) =>
     on?.search?.(field instanceof HTMLInputElement ? field.value : "");
   }}>
   
-        <Icon props={{ name: "search", role: "chip" }} />
+        <Icon source={nivoIconSource("search", "chip")} role="chip" />
         <HeroInput
     name="q"
     type="search"

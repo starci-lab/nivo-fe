@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, type ComponentType } from "react";
-import { Button, Checkbox, ChoiceTabs, Field, Heading, RouteTabs, SurfaceCard, Text } from "@nivo/ui";
+import { Checkbox, ChoiceTabs, RouteTabs } from "@nivo/ui";
+import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common";
 import { ContextVersionBlock, type ContextDraft } from "@/components/blocks/agentos/ContextVersionBlock";
 import { DEFAULT_WIDGET_REGISTRY, ExecuteChatBlock, type ExecuteMessage, type TrustedWidgetComponentProps } from "@/components/blocks/agentos/ExecuteChatBlock";
 import { ExecuteSessionRailBlock, type ExecuteSession } from "@/components/blocks/agentos/ExecuteSessionRailBlock";
@@ -240,15 +241,9 @@ const TestUnavailableSurface = () => <div><div>
 
 
 
-    <SurfaceCard props={{
-      label: "Test contract unavailable"
-    }}><div>{<div>{[<div key="item-0">{<Text props={{
-              content: "State",
-              size: "sm"
-            }} />}{<Text props={{
-              content: "No versioned test contract is registered",
-              size: "sm"
-            }} />}</div>]}</div>}</div></SurfaceCard>
+    <SurfaceCard
+      label="Test contract unavailable"
+    ><div>{<div>{[<div key="item-0">{<Text size="sm">{"State"}</Text>}{<Text size="sm">{"No versioned test contract is registered"}</Text>}</div>]}</div>}</div></SurfaceCard>
 
 
   </div><div>
@@ -257,16 +252,10 @@ const TestUnavailableSurface = () => <div><div>
 
 
 
-    <SurfaceCard props={{
-      label: "Trust evidence",
-      fact: "Unavailable"
-    }}><div>{<div>{[<div key="item-0">{<Text props={{
-              content: "Safety",
-              size: "sm"
-            }} />}{<Text props={{
-              content: "Failed closed; nothing was executed",
-              size: "sm"
-            }} />}</div>]}</div>}</div></SurfaceCard>
+    <SurfaceCard
+      label="Trust evidence"
+      fact="Unavailable"
+    ><div>{<div>{[<div key="item-0">{<Text size="sm">{"Safety"}</Text>}{<Text size="sm">{"Failed closed; nothing was executed"}</Text>}</div>]}</div>}</div></SurfaceCard>
 
 
   </div></div>;
@@ -388,40 +377,43 @@ const SettingsFormContent = ({
 
 
 
-      <Field key={`display-${currentDisplayName}`} props={{
-        id: "agentos-module-display-name",
-        name: "displayName",
-        label: "Display name",
-        placeholder: currentDisplayName,
-        disabled: pending
-      }} on={{
-        change: setDisplayName
-      }} />
+      <Input
+        key={`display-${currentDisplayName}`}
+        id="agentos-module-display-name"
+        name="displayName"
+        label="Display name"
+        placeholder={currentDisplayName}
+        isDisabled={pending}
+        variant="secondary"
+        onValueChange={setDisplayName}
+      />
 
 
 
-      <Field key={`profile-${currentModelProfile}`} props={{
-        id: "agentos-module-model-profile",
-        name: "modelProfile",
-        label: "Model profile",
-        placeholder: currentModelProfile,
-        disabled: pending
-      }} on={{
-        change: setModelProfile
-      }} />
+      <Input
+        key={`profile-${currentModelProfile}`}
+        id="agentos-module-model-profile"
+        name="modelProfile"
+        label="Model profile"
+        placeholder={currentModelProfile}
+        isDisabled={pending}
+        variant="secondary"
+        onValueChange={setModelProfile}
+      />
 
 
 
-      <Field key={`channel-${currentChannelAccountRef}`} props={{
-        id: "agentos-module-channel-account-ref",
-        name: "channelAccountRef",
-        label: "Telegram channel account reference",
-        placeholder: currentChannelAccountRef || "telegram:nivo-support",
-        hint: "Reference to the Telegram account owned by this Agent Workspace controller.",
-        disabled: pending
-      }} on={{
-        change: setChannelAccountRef
-      }} /></>
+      <Input
+        key={`channel-${currentChannelAccountRef}`}
+        id="agentos-module-channel-account-ref"
+        name="channelAccountRef"
+        label="Telegram channel account reference"
+        placeholder={currentChannelAccountRef || "telegram:nivo-support"}
+        isDisabled={pending}
+        variant="secondary"
+        hint="Reference to the Telegram account owned by this Agent Workspace controller."
+        onValueChange={setChannelAccountRef}
+      /></>
 
 
 
@@ -453,76 +445,56 @@ const SettingsFormContent = ({
 
 
 
-      <Button props={{
-        label: "Save settings",
-        variant: "primary",
-        isPending: pending,
-        disabled: channelAccountRef.trim().length < 3
-      }} on={{
-        press: () => onSave({
+      <Button
+        variant="primary"
+        isPending={pending}
+        isDisabled={channelAccountRef.trim().length < 3}
+        onPress={() => onSave({
           displayName,
           modelProfile,
           requireConfirmation
-        }, operatingMode, channelAccountRef.trim())
-      }} />
+        }, operatingMode, channelAccountRef.trim())}
+      >Save settings</Button>
 
 
 
-      <Button props={{
-        label: liveEnabled ? "Disable Live" : "Enable Live",
-        variant: "secondary",
-        isPending: pending,
-        disabled: !liveEnabled && !canEnableLive
-      }} on={{
-        press: () => onSetLiveEnabled(!liveEnabled)
-      }} /></>{credentialSlots.map(slot => <Field key={`${slot.key}-${credentialStatuses.find(row => row.providerKey === slot.key)?.maskedHint ?? "empty"}`} props={{
-      id: `agentos-module-credential-${slot.key}`,
-      name: slot.key,
-      label: slot.label,
-      kind: "password",
-      placeholder: credentialStatuses.find(row => row.providerKey === slot.key)?.maskedHint ?? "Enter credential",
-      hint: `${slot.provider} · encrypted at rest; only the masked suffix is returned`,
-      disabled: pending,
-      revealLabel: `Show ${slot.label}`,
-      hideLabel: `Hide ${slot.label}`
-    }} on={{
-      change: value => setCredentialValues(current => ({
+      <Button
+        variant="secondary"
+        isPending={pending}
+        isDisabled={!liveEnabled && !canEnableLive}
+        onPress={() => onSetLiveEnabled(!liveEnabled)}
+      >{liveEnabled ? "Disable Live" : "Enable Live"}</Button></>{credentialSlots.map(slot => <Input
+        key={`${slot.key}-${credentialStatuses.find(row => row.providerKey === slot.key)?.maskedHint ?? "empty"}`}
+        id={`agentos-module-credential-${slot.key}`}
+        name={slot.key}
+        label={slot.label}
+        kind="password"
+        placeholder={credentialStatuses.find(row => row.providerKey === slot.key)?.maskedHint ?? "Enter credential"}
+        isDisabled={pending}
+        revealLabel={`Show ${slot.label}`}
+        hideLabel={`Hide ${slot.label}`}
+        variant="secondary"
+        hint={`${slot.provider} · encrypted at rest; only the masked suffix is returned`}
+        onValueChange={value => setCredentialValues(current => ({
         ...current,
         [slot.key]: value
-      }))
-    }} />)}{credentialSlots.length === 0 ? undefined : <Text props={{
-      content: credentialStatuses.length === 0 ? "No credential configured" : credentialStatuses.map(row => `${row.providerKey}: ${row.maskedHint} · ${row.status}`).join(" · "),
-      size: "sm",
-      tone: "muted",
-      live: "polite"
-    }} />}{credentialSlots.flatMap(slot => {
+      }))}
+      />)}{credentialSlots.length === 0 ? undefined : <Text size="sm" tone="muted" live="polite">{credentialStatuses.length === 0 ? "No credential configured" : credentialStatuses.map(row => `${row.providerKey}: ${row.maskedHint} · ${row.status}`).join(" · ")}</Text>}{credentialSlots.flatMap(slot => {
       const configured = credentialStatuses.some(row => row.providerKey === slot.key);
       const value = credentialValues[slot.key]?.trim() ?? "";
-      return [<Button key="item-0" props={{
-        label: `Save ${slot.label}`,
-        variant: "secondary",
-        disabled: value.length === 0,
-        isPending: pending
-      }} on={{
-        press: () => value.length > 0 && onSaveCredential(slot.key, value)
-      }} />, ...(configured ? [<Button key="item-0" props={{
-        label: `Remove ${slot.label}`,
-        variant: "ghost",
-        disabled: pending
-      }} on={{
-        press: () => onRemoveCredential(slot.key)
-      }} />] : [])];
-    })}{refused ? <Text props={{
-      content: "Settings were refused and the prior version remains active.",
-      size: "sm",
-      tone: "muted",
-      live: "assertive"
-    }} /> : <Text props={{
-      content: liveEnabled ? "Live is enabled for the currently applied context. Applying another version disables Live." : canEnableLive ? "Live is ready to enable. Assist remains the safer starting mode." : "Live requires an applied context, a Telegram account reference, and a configured Telegram bot token.",
-      size: "sm",
-      tone: "muted",
-      live: "polite"
-    }} />}</div>;
+      return [<Button
+        key="item-0"
+        variant="secondary"
+        isDisabled={value.length === 0}
+        isPending={pending}
+        onPress={() => value.length > 0 && onSaveCredential(slot.key, value)}
+      >{`Save ${slot.label}`}</Button>, ...(configured ? [<Button
+        key="item-0"
+        variant="ghost"
+        isDisabled={pending}
+        onPress={() => onRemoveCredential(slot.key)}
+      >{`Remove ${slot.label}`}</Button>] : [])];
+    })}{refused ? <Text size="sm" tone="muted" live="assertive">{"Settings were refused and the prior version remains active."}</Text> : <Text size="sm" tone="muted" live="polite">{liveEnabled ? "Live is enabled for the currently applied context. Applying another version disables Live." : canEnableLive ? "Live is ready to enable. Assist remains the safer starting mode." : "Live requires an applied context, a Telegram account reference, and a configured Telegram bot token."}</Text>}</div>;
 };
 type SettingsSurfaceProps = SettingsFormContentProps & {
   readonly activeVersion: number | null;
@@ -547,25 +519,18 @@ const SettingsSurface = ({
 }: SettingsSurfaceProps) => <div>
 
 
-  <SurfaceCard props={{
-    label: "Module settings"
-  }}>
+  <SurfaceCard
+    label="Module settings"
+  >
     <SettingsFormContent currentDisplayName={currentDisplayName} currentModelProfile={currentModelProfile} currentConfirmation={currentConfirmation} currentOperatingMode={currentOperatingMode} currentChannelAccountRef={currentChannelAccountRef} liveEnabled={liveEnabled} canEnableLive={canEnableLive} pending={pending} refused={refused} credentialSlots={credentialSlots} credentialStatuses={credentialStatuses} onSave={onSave} onSetLiveEnabled={onSetLiveEnabled} onSaveCredential={onSaveCredential} onRemoveCredential={onRemoveCredential} />
   </SurfaceCard>
 
 
 
-  <SurfaceCard props={{
-    label: "Authority & safeguards",
-    fact: activeVersion === null ? "Context required" : `v${activeVersion} active`
-  }}><div>{<div>{[["External sends", currentConfirmation ? "Require confirmation" : `Allowed by ${currentOperatingMode} policy`], ["Refund / legal promise", "Human approval required"], ["Prompt cache", activeVersion === null ? "Inactive until Apply" : `Stable Nivo knowledge + context v${activeVersion}`], ["Cache invalidation", "Automatic on context Apply"], ["Execute history", "Original context binding retained"]].map(([ label, value], index) => <div key={index}>{<Text props={{
-            content: label,
-            size: "sm"
-          }} />}{<Text props={{
-            content: value,
-            size: "sm",
-            weight: "semibold"
-          }} />}</div>)}</div>}</div></SurfaceCard>
+  <SurfaceCard
+    label="Authority & safeguards"
+    fact={activeVersion === null ? "Context required" : `v${activeVersion} active`}
+  ><div>{<div>{[["External sends", currentConfirmation ? "Require confirmation" : `Allowed by ${currentOperatingMode} policy`], ["Refund / legal promise", "Human approval required"], ["Prompt cache", activeVersion === null ? "Inactive until Apply" : `Stable Nivo knowledge + context v${activeVersion}`], ["Cache invalidation", "Automatic on context Apply"], ["Execute history", "Original context binding retained"]].map(([ label, value], index) => <div key={index}>{<Text size="sm">{label}</Text>}{<Text size="sm" weight="semibold">{value}</Text>}</div>)}</div>}</div></SurfaceCard>
 
 </div>;
 type DiagnosticsSurfaceProps = {
@@ -595,15 +560,8 @@ const diagnosticEntries = (diagnostics: Readonly<Record<string, AgentosRuntimeVa
 };
 const diagnosticFacts = (entries: ReadonlyArray<readonly [string, AgentosRuntimeValue]>) => entries.map(([ key, value], index) => <div key={index}>
 
-  <Text props={{
-    content: key,
-    size: "sm"
-  }} />
-  <Text props={{
-    content: safeValue(value),
-    size: "sm",
-    weight: "semibold"
-  }} /></div>);
+  <Text size="sm">{key}</Text>
+  <Text size="sm" weight="semibold">{safeValue(value)}</Text></div>);
 type DiagnosticsHealthCardProps = Pick<DiagnosticsSurfaceProps, "diagnostics" | "selectedSignal">;
 const diagnosticHealthFact = (selectedSignal: DiagnosticsSurfaceProps["selectedSignal"]): string => {
   if (selectedSignal === "all") return "All systems";
@@ -612,16 +570,12 @@ const diagnosticHealthFact = (selectedSignal: DiagnosticsSurfaceProps["selectedS
 const DiagnosticsHealthCard = ({
   diagnostics,
   selectedSignal
-}: DiagnosticsHealthCardProps) => <SurfaceCard props={{
-  label: "Runtime health",
-  fact: diagnosticHealthFact(selectedSignal)
-}}><div><div>{diagnosticFacts(diagnosticEntries(diagnostics, selectedSignal))}</div>
+}: DiagnosticsHealthCardProps) => <SurfaceCard
+  label="Runtime health"
+  fact={diagnosticHealthFact(selectedSignal)}
+><div><div>{diagnosticFacts(diagnosticEntries(diagnostics, selectedSignal))}</div>
 
-    <Text props={{
-      content: "Only owner-safe runtime checks are disclosed; secrets and raw configuration remain server-side.",
-      size: "sm",
-      tone: "muted"
-    }} /></div></SurfaceCard>;
+    <Text size="sm" tone="muted">{"Only owner-safe runtime checks are disclosed; secrets and raw configuration remain server-side."}</Text></div></SurfaceCard>;
 type DiagnosticsTraceCardProps = Pick<DiagnosticsSurfaceProps, "installationId" | "kindKey" | "workbenchKey" | "events">;
 const DiagnosticsTraceCard = ({
   installationId,
@@ -630,19 +584,12 @@ const DiagnosticsTraceCard = ({
   events
 }: DiagnosticsTraceCardProps) => {
   const facts: ReadonlyArray<readonly [string, string]> = [["Installation", installationId], ["Kind", kindKey], ["Workbench", workbenchKey], ...events.slice(-5).reverse().map(event => [event.eventType, `${event.source} · ${new Date(event.observedAt).toLocaleString()}`] as const)];
-  return <SurfaceCard props={{
-    label: "Event trace",
-    fact: events.length === 0 ? "No events" : `${events.length} accepted`
-  }}><div><div>{facts.map(([ label, value], index) => <div key={index}>
-            <Text props={{
-            content: label,
-            size: "sm"
-          }} />
-            <Text props={{
-            content: value,
-            size: "sm",
-            weight: "semibold"
-          }} /></div>)}</div></div></SurfaceCard>;
+  return <SurfaceCard
+    label="Event trace"
+    fact={events.length === 0 ? "No events" : `${events.length} accepted`}
+  ><div><div>{facts.map(([ label, value], index) => <div key={index}>
+            <Text size="sm">{label}</Text>
+            <Text size="sm" weight="semibold">{value}</Text></div>)}</div></div></SurfaceCard>;
 };
 const DiagnosticsSurface = ({
   installationId,
@@ -773,21 +720,12 @@ export const AgentOSSolutionModuleState = (props: AgentOSSolutionModuleStateProp
   return <div><div>
 
 
-    <Heading props={{
-        content: "Module Studio",
-        level: 1
-      }} /></div><>
+    <Heading level={1}>{"Module Studio"}</Heading></div><>
 
 
-    <SurfaceCard props={{
-        label: refused ? "Runtime unavailable" : "Loading runtime"
-      }} isLoading={!refused}><div>{<div>{[<div key="item-0">{<Text props={{
-                content: "State",
-                size: "sm"
-              }} />}{<Text props={{
-                content: refused ? "The server refused this installation or workspace identity." : "Reading sessions, context, widgets, and registry…",
-                size: "sm"
-              }} />}</div>]}</div>}</div></SurfaceCard></></div>;
+    <SurfaceCard
+      label={refused ? "Runtime unavailable" : "Loading runtime"}
+    ><div>{<div>{[<div key="item-0">{<Text size="sm">{"State"}</Text>}{<Text size="sm">{refused ? "The server refused this installation or workspace identity." : "Reading sessions, context, widgets, and registry…"}</Text>}</div>]}</div>}</div></SurfaceCard></></div>;
 };
 
 

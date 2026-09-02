@@ -1,6 +1,7 @@
 "use client";
+import { SurfaceCard, Button, Heading, Text } from "@starci/grammar/common";
 
-import { Button, Heading, MarkdownComponent, SurfaceCard, Text } from "@nivo/ui";
+import { MarkdownComponent } from "@nivo/ui";
 import type { SupportCustomerConversation, SupportCustomerMessage } from "@/modules/api/workspace-controlplane";
 
 /** Inputs for one selected durable channel conversation. */
@@ -28,54 +29,34 @@ const messageWidget = (message: SupportCustomerMessage, pending: boolean, onAppr
   if (message.deliveryState === "approval_required" && message.decisionId !== null) {
     return <div><div>
 
-        <Heading props={{
-          content: "Owner approval required",
-          level: 4
-        }} />
-        <Text props={{
-          content: "This reply can create a risky commitment and has not been sent.",
-          size: "xs",
-          tone: "muted"
-        }} /></div><div><>
+        <Heading level={4}>{"Owner approval required"}</Heading>
+        <Text size="xs" tone="muted">{"This reply can create a risky commitment and has not been sent."}</Text></div><div><>
 
 
-          <Button props={{
-            label: "Approve & send",
-            variant: "primary",
-            isPending: pending
-          }} on={{
-            press: () => onApprove(message.decisionId!)
-          }} /></></div></div>;
+          <Button
+            variant="primary"
+            isPending={pending}
+            onPress={() => onApprove(message.decisionId!)}
+          >Approve & send</Button></></div></div>;
   }
   if (message.deliveryState === "ambiguous" && message.deliveryOutboxId !== null) {
     return <div><div>
 
-        <Heading props={{
-          content: "Delivery needs reconciliation",
-          level: 4
-        }} />
-        <Text props={{
-          content: "Telegram timed out after send. Confirm the observed result before retrying.",
-          size: "xs",
-          tone: "muted"
-        }} /></div><div><>
+        <Heading level={4}>{"Delivery needs reconciliation"}</Heading>
+        <Text size="xs" tone="muted">{"Telegram timed out after send. Confirm the observed result before retrying."}</Text></div><div><>
 
 
 
-          <Button props={{
-            label: "Mark sent",
-            variant: "primary",
-            isPending: pending
-          }} on={{
-            press: () => onReconcile(message.deliveryOutboxId!, true)
-          }} />
-          <Button props={{
-            label: "Mark failed",
-            variant: "secondary",
-            isPending: pending
-          }} on={{
-            press: () => onReconcile(message.deliveryOutboxId!, false)
-          }} /></></div></div>;
+          <Button
+            variant="primary"
+            isPending={pending}
+            onPress={() => onReconcile(message.deliveryOutboxId!, true)}
+          >Mark sent</Button>
+          <Button
+            variant="secondary"
+            isPending={pending}
+            onPress={() => onReconcile(message.deliveryOutboxId!, false)}
+          >Mark failed</Button></></div></div>;
   }
   return undefined;
 };
@@ -91,35 +72,19 @@ export const SupportCustomerChatBlock = (props: SupportCustomerChatBlockProps) =
     onTakeover,
     onReconcile
   }: SupportCustomerChatBlockProps = props;
-  return <SurfaceCard props={{
-    label: "Telegram history",
-    fact: conversation?.customerName ?? conversation?.displayHandle ?? "Select a customer",
-    isFrameless: true
-  }}><div>{messages.map((message, index) => <div key={index}>
-      <Text props={{
-          content: senderLabel(message),
-          size: "xs",
-          tone: "muted",
-          weight: "semibold"
-        }} />
+  return <SurfaceCard
+    label="Telegram history"
+    frame="frameless"
+    fact={conversation?.customerName ?? conversation?.displayHandle ?? "Select a customer"}
+  ><div>{messages.map((message, index) => <div key={index}>
+      <Text size="xs" tone="muted" weight="semibold">{senderLabel(message)}</Text>
       <MarkdownComponent markdown={message.body} />
-      <Text props={{
-          content: `${contextLabel(message)} · ${new Date(message.occurredAt).toLocaleString()}`,
-          size: "xs",
-          tone: "muted"
-        }} />{messageWidget(message, pending, onApprove, onReconcile)}</div>)}{conversation === null ? undefined : <Button props={{
-        label: takeoverLabel(conversation),
-        variant: "secondary",
-        isPending: pending
-      }} on={{
-        press: () => onTakeover(conversation.id, conversation.takeoverState !== "operator")
-      }} />}
+      <Text size="xs" tone="muted">{`${contextLabel(message)} · ${new Date(message.occurredAt).toLocaleString()}`}</Text>{messageWidget(message, pending, onApprove, onReconcile)}</div>)}{conversation === null ? undefined : <Button
+          variant="secondary"
+          isPending={pending}
+          onPress={() => onTakeover(conversation.id, conversation.takeoverState !== "operator")}
+        >{takeoverLabel(conversation)}</Button>}
 
 
-    <Text props={{
-        content: transcriptNotice(refused, pending, messages.length),
-        size: "sm",
-        tone: "muted",
-        live: refused ? "assertive" : undefined
-      }} /></div></SurfaceCard>;
+    <Text size="sm" tone="muted" live={refused ? "assertive" : undefined}>{transcriptNotice(refused, pending, messages.length)}</Text></div></SurfaceCard>;
 };

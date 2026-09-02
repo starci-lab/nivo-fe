@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ComponentType } from "react";
-import { Button, ChoiceTabs, Field, Heading, SurfaceCard, Text } from "@nivo/ui";
+import { ChoiceTabs } from "@nivo/ui";
+import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common";
 import type { AgentosModuleTestContract, AgentosModuleTestScenarioContract, AgentosRuntimeValue } from "@/modules/api/console";
 type ScenarioField = {
   readonly path: string;
@@ -82,16 +83,9 @@ const TestWorkbenchContent = ({
   return <div><div>
 
 
-      <Heading props={{
-        content: title,
-        level: 3
-      }} />
+      <Heading level={3}>{title}</Heading>
 
-      <Text props={{
-        content: scenario.description,
-        size: "xs",
-        tone: "muted"
-      }} /></div>{!showScenarioPicker || contract.scenarios.length < 2 ? undefined : <ChoiceTabs props={{
+      <Text size="xs" tone="muted">{scenario.description}</Text></div>{!showScenarioPicker || contract.scenarios.length < 2 ? undefined : <ChoiceTabs props={{
       label: "Test scenario",
       selectedKey: scenario.key,
       tabs: contract.scenarios.map(({
@@ -107,50 +101,31 @@ const TestWorkbenchContent = ({
 
 
 
-          <Text props={{
-            content: "Immutable context",
-            size: "sm"
-          }} />
-          <Text props={{
-            content: contextLabel,
-            size: "sm",
-            weight: "semibold"
-          }} /></div><div>
+          <Text size="sm">{"Immutable context"}</Text>
+          <Text size="sm" weight="semibold">{contextLabel}</Text></div><div>
 
 
-          <Text props={{
-            content: "Sandbox",
-            size: "sm"
-          }} />
-          <Text props={{
-            content: `${contract.sandboxAdapter.key}@${contract.sandboxAdapter.version}`,
-            size: "sm",
-            weight: "semibold"
-          }} /></div></></div>{fields.map(field => <Field key={`${scenario.key}-${field.path}`} props={{
-      id: `agentos-test-${field.path.replaceAll(".", "-")}`,
-      name: field.path,
-      label: field.path,
-      placeholder: JSON.stringify(overrides[field.path] ?? field.value),
-      hint: "Fake input only. Leave unchanged to use the registered fixture.",
-      disabled: pending
-    }} on={{
-      change: value => onOverride(field.path, parseOverride(value, field.value))
-    }} />)}
+          <Text size="sm">{"Sandbox"}</Text>
+          <Text size="sm" weight="semibold">{`${contract.sandboxAdapter.key}@${contract.sandboxAdapter.version}`}</Text></div></></div>{fields.map(field => <Input
+            key={`${scenario.key}-${field.path}`}
+            id={`agentos-test-${field.path.replaceAll(".", "-")}`}
+            name={field.path}
+            label={field.path}
+            placeholder={JSON.stringify(overrides[field.path] ?? field.value)}
+            isDisabled={pending}
+            variant="secondary"
+            hint="Fake input only. Leave unchanged to use the registered fixture."
+            onValueChange={value => onOverride(field.path, parseOverride(value, field.value))}
+          />)}
 
-    <Text props={{
-      content: "This run cannot call live channels, calendars, payment providers, credentials, or Execute sessions.",
-      size: "sm",
-      tone: "muted"
-    }} />
+    <Text size="sm" tone="muted">{"This run cannot call live channels, calendars, payment providers, credentials, or Execute sessions."}</Text>
 
 
-    <Button props={{
-      label: `Run ${scenario.label}`,
-      variant: "primary",
-      isPending: pending
-    }} on={{
-      press: onRun
-    }} /></div>;
+    <Button
+      variant="primary"
+      isPending={pending}
+      onPress={onRun}
+    >{`Run ${scenario.label}`}</Button></div>;
 };
 
 /** Built-in registrations; adding a kind extends this table without editing the shell. */
@@ -178,49 +153,25 @@ const UnavailableTestWorkbench = ({
   return <div><div>
 
 
-      <Heading props={{
-        content: "Test workbench unavailable",
-        level: 3
-      }} />
-      <Text props={{
-        content: contract.workbench.key,
-        size: "xs",
-        tone: "muted"
-      }} /></div><div><><div>
+      <Heading level={3}>{"Test workbench unavailable"}</Heading>
+      <Text size="xs" tone="muted">{contract.workbench.key}</Text></div><div><><div>
 
 
 
 
-          <Text props={{
-            content: "State",
-            size: "sm"
-          }} />
-          <Text props={{
-            content: state,
-            size: "sm"
-          }} /></div><div>
+          <Text size="sm">{"State"}</Text>
+          <Text size="sm">{state}</Text></div><div>
 
 
-          <Text props={{
-            content: "Boundary",
-            size: "sm"
-          }} />
-          <Text props={{
-            content: detail,
-            size: "sm"
-          }} /></div></></div>
+          <Text size="sm">{"Boundary"}</Text>
+          <Text size="sm">{detail}</Text></div></></div>
 
 
 
-    <Text props={{
-      content: "The registry failed closed; no test was executed.",
-      size: "sm",
-      tone: "muted"
-    }} />
-    <Button props={{
-      label: "Run unavailable",
-      disabled: true
-    }} /></div>;
+    <Text size="sm" tone="muted">{"The registry failed closed; no test was executed."}</Text>
+    <Button
+      isDisabled={true}
+    >Run unavailable</Button></div>;
 };
 const setPath = (root: Readonly<Record<string, AgentosRuntimeValue>>, path: string, value: AgentosRuntimeValue): Readonly<Record<string, AgentosRuntimeValue>> => {
   const [head, ...tail] = path.split(".");
@@ -272,8 +223,8 @@ export const KindTestWorkbenchBlock = (props: KindTestWorkbenchBlockProps) => {
   };
   const Workbench = registry[contract.workbench.key] ?? UnavailableTestWorkbench;
   const render = <Workbench {...contentProps} />;
-  return <SurfaceCard props={{
-    label: "Test scenario",
-    fact: `${contract.workbench.key}@${contract.workbench.version}`
-  }}>{render}</SurfaceCard>;
+  return <SurfaceCard
+    label="Test scenario"
+    fact={`${contract.workbench.key}@${contract.workbench.version}`}
+  >{render}</SurfaceCard>;
 };

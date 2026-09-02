@@ -1,5 +1,5 @@
-import { Badge, SurfaceCard, Text, TextLink, TileIcon, type BadgeTone } from "@nivo/ui";
-import { EmptyNotice } from "@nivo/ui/composites/EmptyNotice";
+import { nivoIconSource, TileIcon } from "@nivo/ui";
+import { EmptyNotice, Icon, SurfaceCard, Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/common";
 import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow";
 /** Public API role for AgentOSWorkspaceListProps. */
 export type AgentOSWorkspaceListProps = AgentOSWorkspaceListViewProps;
@@ -70,33 +70,18 @@ const workspaceRow = (row: AgentOSWorkspaceView, isLoading: boolean, openWorkspa
 
 
 
-    <TextLink props={{
-      label: row.name,
-      size: "sm"
-    }} on={{
-      press: openWorkspace === undefined ? undefined : () => openWorkspace(row.id)
-    }} />
+    <TextAction size="sm" isSkeleton={isLoading} onPress={openWorkspace === undefined ? undefined : () => openWorkspace(row.id)}>{row.name}</TextAction>
 
 
 
-    <Text props={{
-      content: row.detail,
-      size: "xs",
-      tone: "muted"
-    }} isLoading={isLoading} /></div>
+    <Text size="xs" tone="muted" isSkeleton={isLoading}>{row.detail}</Text></div>
 
 
 
-  <Badge props={{
-    content: row.kindLabel,
-    tone: "neutral"
-  }} isLoading={isLoading} />
+  <Badge tone="neutral" isSkeleton={isLoading}>{row.kindLabel}</Badge>
 
 
-  <Badge props={{
-    content: row.statusLabel,
-    tone: STATUS_TONE[row.status]
-  }} isLoading={isLoading} /></div>;
+  <Badge tone={STATUS_TONE[row.status]} isSkeleton={isLoading}>{row.statusLabel}</Badge></div>;
 
 /** Draw the workspace collection without owning its query or dashboard route. */
 export const AgentOSWorkspaceListBase = (props: AgentOSWorkspaceListProps) => {
@@ -137,41 +122,31 @@ export const AgentOSWorkspaceListBase = (props: AgentOSWorkspaceListProps) => {
     caption: summaryLabels.attentionCaption,
     signal: attentionCount > 0 ? "attention" as const : "none" as const
   }];
-  const summary = <div>{totals.map((total, index) => <SurfaceCard key={index} isLoading={isLoading}><div>{<div>{<TileIcon props={{
+  const summary = <div>{totals.map((total, index) => <SurfaceCard
+    key={index}
+  ><div>{<div>{<TileIcon props={{
             icon: total.icon,
             signal: total.signal
-          }} isLoading={isLoading} />}{<Text props={{
-            content: total.label,
-            size: "sm",
-            weight: "medium"
-          }} />}</div>}{<Text props={{
-          content: isRefused ? "—" : String(total.value),
-          size: "metric-lead",
-          weight: "semibold"
-        }} isLoading={isLoading} />}{<Text props={{
-          content: total.caption,
-          size: "xs",
-          tone: "muted"
-        }} />}</div></SurfaceCard>)}</div>;
+          }} isLoading={isLoading} />}{<Text size="sm" weight="medium">{total.label}</Text>}</div>}{<Text size="metric-lead" weight="semibold" isSkeleton={isLoading}>{isRefused ? "—" : String(total.value)}</Text>}{<Text size="xs" tone="muted">{total.caption}</Text>}</div></SurfaceCard>)}</div>;
   const collection = (() => {
     if (state === "empty" || state === "refused") {
-      return <SurfaceCard props={{
-        label: common.label
-      }}><div>
+      return <SurfaceCard
+        label={common.label}
+      ><div>
 
 
 
-            <EmptyNotice props={{
-            message: props.props.message,
-            actionLabel: state === "empty" ? props.props.actionLabel : undefined
-          }} on={{
-            act: state === "empty" ? props.on.create : undefined
-          }} /></div></SurfaceCard>;
+            <EmptyNotice
+            message={props.props.message}
+            actionLabel={state === "empty" ? props.props.actionLabel : undefined}
+            actionStartContent={state === "empty" ? <Icon source={nivoIconSource("retry", "chip")} role="chip" /> : undefined}
+            onAction={state === "empty" ? props.on.create : undefined}
+          /></div></SurfaceCard>;
     }
     const openWorkspace = state === "answered" ? props.on.openWorkspace : undefined;
-    return <SurfaceCard props={{
-      label: common.label
-    }} isLoading={state === "resting"}><div>{state === "resting" ? [workspaceRow({
+    return <SurfaceCard
+      label={common.label}
+    ><div>{state === "resting" ? [workspaceRow({
           id: "agentos-resting",
           name: "",
           detail: "",

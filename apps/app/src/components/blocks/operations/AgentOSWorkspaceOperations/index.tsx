@@ -1,4 +1,5 @@
-import { OperationActionRail, SurfaceCard, Text } from "@nivo/ui";
+import { OperationActionRail } from "@nivo/ui";
+import { SurfaceCard, Text } from "@starci/grammar/common";
 
 /** Resolved lifecycle labels consumed by the operations block. */
 export type AgentOSWorkspaceOperationsProps = {
@@ -18,9 +19,9 @@ export const AgentOSWorkspaceOperations = (props: AgentOSWorkspaceOperationsProp
   const {
     labels
   }: AgentOSWorkspaceOperationsProps = props;
-  return <SurfaceCard props={{
-    label: labels.section
-  }}><div>
+  return <SurfaceCard
+    label={labels.section}
+  ><div>
 
 
 
@@ -34,9 +35,5 @@ export const AgentOSWorkspaceOperations = (props: AgentOSWorkspaceOperationsProp
       }} />
 
 
-    <Text props={{
-        content: labels.note,
-        size: "sm",
-        tone: "muted"
-      }} /></div></SurfaceCard>;
+    <Text size="sm" tone="muted">{labels.note}</Text></div></SurfaceCard>;
 };

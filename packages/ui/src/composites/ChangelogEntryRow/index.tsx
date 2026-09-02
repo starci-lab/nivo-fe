@@ -1,6 +1,4 @@
-import { Badge, type BadgeTone } from "../../leaves/Badge";
-import { Text } from "../../leaves/Text";
-import { TextLink } from "../../leaves/TextLink";
+import { Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/common";
 import type { ComponentProps } from "../component-props";
 import { META_CLASS_NAME, ROOT_CLASS_NAME } from "./classNames";
 
@@ -16,9 +14,9 @@ export const ChangelogEntryRow = (props: ChangelogEntryRowProps) => ChangelogEnt
 const ChangelogEntryRowView = ({ props, on, isLoading = false }: ChangelogEntryRowProps) =>
 <div className={ROOT_CLASS_NAME}>
         <div className={META_CLASS_NAME}>
-            <Text props={{ content: props.dateLabel, size: "xs", tone: "muted" }} isLoading={isLoading} />
-            {props.categoryLabel === undefined ? null : <Badge props={{ content: props.categoryLabel, tone: props.categoryTone }} isLoading={isLoading} />}
+            <Text size="xs" tone="muted" isSkeleton={isLoading}>{props.dateLabel}</Text>
+            {props.categoryLabel === undefined ? null : <Badge tone={props.categoryTone} isSkeleton={isLoading}>{props.categoryLabel}</Badge>}
         </div>
-        {props.isAction === true && on?.open !== undefined ? <TextLink props={{ label: props.title ?? "", size: "sm" }} on={{ press: on.open }} /> : <Text props={{ content: props.title, size: "sm", weight: "medium" }} isLoading={isLoading} />}
-        {props.body === undefined && !isLoading ? null : <Text props={{ content: props.body, size: "xs", tone: "muted" }} isLoading={isLoading} />}
+        {props.isAction === true && on?.open !== undefined ? <TextAction size="sm" isSkeleton={isLoading} onPress={on.open}>{props.title ?? ""}</TextAction> : <Text size="sm" weight="medium" isSkeleton={isLoading}>{props.title}</Text>}
+        {props.body === undefined && !isLoading ? null : <Text size="xs" tone="muted" isSkeleton={isLoading}>{props.body}</Text>}
     </div>;

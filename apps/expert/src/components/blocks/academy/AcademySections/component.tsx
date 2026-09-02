@@ -1,9 +1,10 @@
 "use client";
+import { SurfaceCard, Button, Heading, Text, Badge } from "@starci/grammar/common";
 
 /* The section renderer intentionally assembles heterogeneous ReactNode arrays. */
 import { Fragment, useState, type ReactNode } from "react";
 import { CUSTOM_BODY_CLASS_NAME, FIGURE_CLASS_NAME, FIGURE_IMAGE_CLASS_NAME, FIGURE_PLACEHOLDER_CLASS_NAME, PULL_QUOTE_CLASS_NAME, QUOTE_CLASS_NAME, LEAD_INPUT_CLASS_NAME } from "./classNames";
-import { Avatar, Badge, Button, Heading, Label, SurfaceCard, Text } from "@nivo/ui";
+import { Avatar, Label } from "@nivo/ui";
 import type { AcademySection, LeadSubmit } from "./index";
 
 /**
@@ -112,20 +113,14 @@ const Figure = ({
  * @param content - The already-resolved words.
  * @param level - Where the title sits in the document outline.
  */
-const headingPart = (content: string, level: 1 | 2 = 2) => <Heading props={{
-  content,
-  level
-}} />;
+const headingPart = (content: string, level: 1 | 2 = 2) => <Heading level={level}>{content}</Heading>;
 
 /**
  * A paragraph of supporting copy, as the leaf identity a band part admits.
  *
  * @param content - The already-resolved words.
  */
-const textPart = (content: string) => <Text props={{
-  content,
-  tone: "muted"
-}} />;
+const textPart = (content: string) => <Text tone="muted">{content}</Text>;
 
 /**
  * One press, as the leaf identity an action run admits.
@@ -134,13 +129,11 @@ const textPart = (content: string) => <Text props={{
  * @param variant - Whether this is the main press or the alternative beside it.
  * @param href - Where it leads, when it leads anywhere.
  */
-const buttonPart = (label: string, variant: "primary" | "outline", href?: string) => href === undefined ? <Button props={{
-  label,
-  variant
-}} /> : <a href={href}><Button props={{
-    label,
-    variant
-  }} /></a>;
+const buttonPart = (label: string, variant: "primary" | "outline", href?: string) => href === undefined ? <Button
+  variant={variant}
+>{label}</Button> : <a href={href}><Button
+  variant={variant}
+>{label}</Button></a>;
 
 /**
  * A muted caption under a subject, the pair three sections all reach for.
@@ -150,10 +143,7 @@ const buttonPart = (label: string, variant: "primary" | "outline", href?: string
  */
 const subjectOverCaption = (subject: ReactNode, caption: string) => <div>{subject}
 
-  <Text props={{
-    content: caption,
-    size: "xs"
-  }} /></div>;
+  <Text size="xs">{caption}</Text></div>;
 
 /**
  * One claim, standing on a surface of its own.
@@ -242,12 +232,11 @@ const leadForm = ({
             <div>{fields.map(([id, label, kind]) => <div key={id}>{<Label props={{
           htmlFor: id,
           content: label
-        }} />}{<input id={id} name={id} type={kind} placeholder={label} required disabled={locked} className={LEAD_INPUT_CLASS_NAME} />}</div>)}{<Button props={{
-        label: status === "sending" ? sendingLabel : submitLabel,
-        variant: "primary",
-        type: "submit",
-        disabled: locked
-      }} />}</div>
+        }} />}{<input id={id} name={id} type={kind} placeholder={label} required disabled={locked} className={LEAD_INPUT_CLASS_NAME} />}</div>)}{<Button
+          variant="primary"
+          type="submit"
+          isDisabled={locked}
+        >{status === "sending" ? sendingLabel : submitLabel}</Button>}</div>
 
 
       
@@ -342,15 +331,11 @@ const customPieces = (content: CustomContent) => {
   const actionSpec = content.action;
   const imageUrl = content.imageUrl;
   const imageAlt = headingText ?? "";
-  const heading = headingText === undefined ? undefined : <Heading props={{
-    content: headingText,
-    level: 2
-  }} />;
+  const heading = headingText === undefined ? undefined : <Heading level={2}>{headingText}</Heading>;
   const body = bodyText === undefined ? undefined : <p className={CUSTOM_BODY_CLASS_NAME}>{bodyText}</p>;
-  const actionLeaf = actionSpec === undefined ? undefined : <Button props={{
-    label: actionSpec.label,
-    variant: "primary"
-  }} />;
+  const actionLeaf = actionSpec === undefined ? undefined : <Button
+    variant="primary"
+  >{actionSpec.label}</Button>;
   const actionRun = actionLeaf === undefined ? undefined : <div><>{actionLeaf}</></div>;
   const figure = <Figure src={imageUrl} alt={imageAlt} />;
   return {
@@ -386,11 +371,7 @@ const quoteBand = ({
   attribution
 }: CustomPieces) => {
   const quoted = bodyText ?? headingText;
-  const attributed: Array<BandPart> = attribution === undefined ? [] : [<Text key="attribution" props={{
-    content: `— ${attribution}`,
-    size: "sm",
-    tone: "muted"
-  }} />];
+  const attributed: Array<BandPart> = attribution === undefined ? [] : [<Text size="sm" tone="muted">{`— ${attribution}`}</Text>];
   return <Band parts={[<blockquote key="quote" className={PULL_QUOTE_CLASS_NAME}>
                         {quoted}
                     </blockquote>, ...attributed]} />;
@@ -409,15 +390,8 @@ const columnsBand = ({
 }: CustomPieces) => <Band parts={[...(heading === undefined ? [] : [heading]), <div key="columns">{columns.map(column => {
     const note = column.text;
     return claimPanel({
-      claim: <Text props={{
-        content: column.title,
-        weight: "medium"
-      }} />,
-      note: note === undefined ? undefined : <Text props={{
-        content: note,
-        size: "sm",
-        tone: "muted"
-      }} />
+      claim: <Text weight="medium">{column.title}</Text>,
+      note: note === undefined ? undefined : <Text size="sm" tone="muted">{note}</Text>
     });
   })}</div>, ...(actionRun === undefined ? [] : [actionRun])]} />;
 
@@ -518,46 +492,20 @@ const band = (section: AcademySection, onSubmitLead: LeadSubmit) => {
       return <Band parts={[headingPart(section.name, 1), textPart(section.tagline), <div key="hero-actions">{[buttonPart(section.tryFreeLabel, "primary", "/sign-in"), buttonPart(section.seeCoursesLabel, "outline", "#courses")]}</div>]} />;
     case "problems":
       return <Band parts={[headingPart(section.title), <div key="problems">{section.problems.map(problem => <Fragment key={problem}>{claimPanel({
-            claim: <Text props={{
-              content: problem,
-              size: "sm"
-            }} />
+            claim: <Text size="sm">{problem}</Text>
           })}</Fragment>)}</div>]} />;
     case "outcomes":
       return <Band alt parts={[headingPart(section.title), <div key="outcomes">{section.outcomes.map(outcome => <Fragment key={outcome}>{claimPanel({
-            claim: <Text props={{
-              content: outcome,
-              weight: "medium"
-            }} />
+            claim: <Text weight="medium">{outcome}</Text>
           })}</Fragment>)}</div>]} />;
     case "roadmap":
-      return <Band alt parts={[headingPart(section.title), <div key="roadmap">{section.steps.map((step, index) => <div key={step}>{<Text props={{
-            content: String(index + 1),
-            size: "sm",
-            weight: "semibold"
-          }} />}{<Text props={{
-            content: step,
-            size: "sm"
-          }} />}</div>)}</div>]} />;
+      return <Band alt parts={[headingPart(section.title), <div key="roadmap">{section.steps.map((step, index) => <div key={step}>{<Text size="sm" weight="semibold">{String(index + 1)}</Text>}{<Text size="sm">{step}</Text>}</div>)}</div>]} />;
     case "instructor":
       {
         const person = section.person;
         const quote = person.quote;
-        return <Band alt parts={[<div key="instructor">{<Figure src={person.photoUrl} alt={person.name} ratio="3/4" />}{<div>{subjectOverCaption(<Heading props={{
-              content: person.name,
-              level: 2
-            }} />, person.title)}{<Text props={{
-              content: person.bio,
-              tone: "muted"
-            }} />}{<div>{person.credentials.map(credential => <Text key={credential} props={{
-                content: credential,
-                size: "sm"
-              }} />)}</div>}{quote === undefined ? undefined : <blockquote key="quote" className={QUOTE_CLASS_NAME}>
-                                            <Text props={{
-                content: quote,
-                size: "sm",
-                tone: "muted"
-              }} />
+        return <Band alt parts={[<div key="instructor">{<Figure src={person.photoUrl} alt={person.name} ratio="3/4" />}{<div>{subjectOverCaption(<Heading level={2}>{person.name}</Heading>, person.title)}{<Text tone="muted">{person.bio}</Text>}{<div>{person.credentials.map(credential => <Text size="sm">{credential}</Text>)}</div>}{quote === undefined ? undefined : <blockquote key="quote" className={QUOTE_CLASS_NAME}>
+                                            <Text size="sm" tone="muted">{quote}</Text>
                                         </blockquote>}</div>}</div>]} />;
       }
     case "stats":
@@ -566,10 +514,7 @@ const band = (section: AcademySection, onSubmitLead: LeadSubmit) => {
           // type scale belongs to the `Heading` atom, and level 1 is spoken
           // for: the academy's own name is the page's one first-level heading.
 
-          <Heading props={{
-            content: stat.value,
-            level: 2
-          }} />, stat.label)}</Fragment>)}</div>]} />;
+          <Heading level={2}>{stat.value}</Heading>, stat.label)}</Fragment>)}</div>]} />;
     case "testimonials":
       return <Band alt parts={[headingPart(section.title), <div key="testimonials">{section.testimonials.map(testimonial => {
           const result = testimonial.result;
@@ -578,22 +523,9 @@ const band = (section: AcademySection, onSubmitLead: LeadSubmit) => {
                   name: testimonial.name,
                   src: testimonial.avatarUrl,
                   size: "sm"
-                }} />}{subjectOverCaption(<Text props={{
-                  content: testimonial.name,
-                  size: "sm",
-                  weight: "medium"
-                }} />, testimonial.role)}{<Text props={{
-                  content: `${testimonial.stars}/${STAR_SCALE}`,
-                  size: "xs"
-                }} />}</div>,
-              claim: <Text props={{
-                content: testimonial.quote,
-                size: "sm",
-                tone: "muted"
-              }} />,
-              proof: result === undefined ? undefined : <Badge props={{
-                content: result
-              }} />
+                }} />}{subjectOverCaption(<Text size="sm" weight="medium">{testimonial.name}</Text>, testimonial.role)}{<Text size="xs">{`${testimonial.stars}/${STAR_SCALE}`}</Text>}</div>,
+              claim: <Text size="sm" tone="muted">{testimonial.quote}</Text>,
+              proof: result === undefined ? undefined : <Badge>{result}</Badge>
             })}</Fragment>;
         })}</div>]} />;
     case "gallery":
@@ -604,30 +536,14 @@ const band = (section: AcademySection, onSubmitLead: LeadSubmit) => {
         // the surface branch's rather than the entry's - a band that swapped a card for a bare
         // centred column would read as a section that failed to load rather than one with
         // nothing in it yet.
-        const emptyNotice = <SurfaceCard><div>{<div>{<Text props={{
-                content: section.emptyTitle,
-                size: "sm",
-                weight: "medium"
-              }} />}{<Text props={{
-                content: section.emptyBody,
-                size: "xs"
-              }} />}</div>}</div></SurfaceCard>;
+        const emptyNotice = <SurfaceCard><div>{<div>{<Text size="sm" weight="medium">{section.emptyTitle}</Text>}{<Text size="xs">{section.emptyBody}</Text>}</div>}</div></SurfaceCard>;
 
         // A course is a claim with an optional note and an optional proof, using the same card
         // composition as the other catalog entries.
         const catalog = <div>{section.courses.map(course => claimPanel({
-            claim: <Text props={{
-              content: course.title,
-              weight: "medium"
-            }} />,
-            note: course.summary === null ? undefined : <Text props={{
-              content: course.summary ?? "",
-              size: "sm",
-              tone: "muted"
-            }} />,
-            proof: course.priceText === null ? undefined : <Badge props={{
-              content: course.priceText ?? ""
-            }} />
+            claim: <Text weight="medium">{course.title}</Text>,
+            note: course.summary === null ? undefined : <Text size="sm" tone="muted">{course.summary ?? ""}</Text>,
+            proof: course.priceText === null ? undefined : <Badge>{course.priceText ?? ""}</Badge>
           }))}</div>;
         return <Band parts={[headingPart(section.title), section.courses.length === 0 ? emptyNotice : catalog]} />;
       }
@@ -636,15 +552,7 @@ const band = (section: AcademySection, onSubmitLead: LeadSubmit) => {
     case "offer":
       return <Band parts={[headingPart(section.title), textPart(section.body)]} />;
     case "faq":
-      return <Band alt parts={[headingPart(section.title), <div key="faq">{section.faq.map(entry => <div key={entry.q}>{<Text props={{
-            content: entry.q,
-            size: "sm",
-            weight: "medium"
-          }} />}{<Text props={{
-            content: entry.a,
-            size: "sm",
-            tone: "muted"
-          }} />}</div>)}</div>]} />;
+      return <Band alt parts={[headingPart(section.title), <div key="faq">{section.faq.map(entry => <div key={entry.q}>{<Text size="sm" weight="medium">{entry.q}</Text>}{<Text size="sm" tone="muted">{entry.a}</Text>}</div>)}</div>]} />;
     case "magnet":
       return <Band alt parts={[headingPart(section.magnet.title), textPart(section.magnet.description), <div key="magnet-actions">{[buttonPart(section.magnet.cta, "primary")]}</div>]} />;
     case "lead":

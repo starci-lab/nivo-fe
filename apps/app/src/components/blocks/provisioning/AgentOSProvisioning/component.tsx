@@ -1,6 +1,7 @@
 "use client";
+import { SurfaceCard, Button, Text } from "@starci/grammar/common";
 
-import { Button, HighlightCard, LifecycleStep, SurfaceCard, Text, TileIcon, type LifecycleStepData } from "@nivo/ui";
+import { LifecycleStep, TileIcon, type LifecycleStepData } from "@nivo/ui";
 
 /** Block-owned conditions of the AgentOS order and provisioning continuation. */
 export type AgentOSProvisioningProps = AgentOSProvisioningViewProps;
@@ -39,40 +40,23 @@ export const AgentOSProvisioningBase = (props: AgentOSProvisioningProps) => {
   const journey = <div>{viewProps.steps.map((step, index) => <LifecycleStep key={index} props={step} isLoading={state === "catalog_loading"} />)}</div>;
   const identity = <div>
 
-    <Text props={{
-      content: viewProps.subject,
-      size: "md",
-      weight: "medium"
-    }} isLoading={state === "catalog_loading"} />
+    <Text size="md" weight="medium" isSkeleton={state === "catalog_loading"}>{viewProps.subject}</Text>
 
 
-    <Text props={{
-      content: viewProps.detail,
-      size: "xs",
-      tone: "muted"
-    }} isLoading={state === "catalog_loading"} /></div>;
+    <Text size="xs" tone="muted" isSkeleton={state === "catalog_loading"}>{viewProps.detail}</Text></div>;
   const actionLabel = viewProps.requestActionLabel ?? viewProps.statusActionLabel;
-  const action = actionLabel === undefined ? undefined : <Button props={{
-    label: actionLabel,
-    variant: "primary",
-    isPending: viewProps.isRequestPending,
-    disabled: viewProps.statusActionDisabled
-  }} on={{
-    press: viewProps.requestActionLabel === undefined ? on?.statusAction : on?.request
-  }} />;
+  const action = actionLabel === undefined ? undefined : <Button
+    variant="primary"
+    isPending={viewProps.isRequestPending}
+    isDisabled={viewProps.statusActionDisabled}
+    onPress={viewProps.requestActionLabel === undefined ? on?.statusAction : on?.request}
+  >{actionLabel}</Button>;
   const phaseAction = <div>{identity}
 
-    <Text props={{
-      content: viewProps.statusTitle,
-      size: "sm"
-    }} />
+    <Text size="sm">{viewProps.statusTitle}</Text>
 
 
-    <Text props={{
-      content: viewProps.statusText,
-      size: "sm",
-      tone: state === "failed" ? "accent" : "muted"
-    }} />{action}</div>;
+    <Text size="sm" tone={state === "failed" ? "accent" : "muted"}>{viewProps.statusText}</Text>{action}</div>;
   const artwork = <div>
 
     <TileIcon props={{
@@ -82,10 +66,11 @@ export const AgentOSProvisioningBase = (props: AgentOSProvisioningProps) => {
   const continuation = <div>{phaseAction}{artwork}</div>;
   const orderContent = <div>{journey}{continuation}</div>;
   const highlightsContinuation = state === "ready" || state === "awaiting_payment" && viewProps.statusActionDisabled !== true && on?.statusAction !== undefined;
-  return <div>{highlightsContinuation ? <HighlightCard props={{
-      label: viewProps.progressLabel ?? viewProps.subject
-    }}>{orderContent}</HighlightCard> : <SurfaceCard props={{
-      label: viewProps.progressLabel ?? viewProps.subject
-    }} isLoading={state === "catalog_loading"}>{orderContent}</SurfaceCard>}</div>;
+  return <div>{highlightsContinuation ? <SurfaceCard
+      label={viewProps.progressLabel ?? viewProps.subject}
+      isHighlight
+    >{orderContent}</SurfaceCard> : <SurfaceCard
+      label={viewProps.progressLabel ?? viewProps.subject}
+    >{orderContent}</SurfaceCard>}</div>;
 };
 

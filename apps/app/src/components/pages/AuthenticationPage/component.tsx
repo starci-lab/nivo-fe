@@ -1,34 +1,31 @@
-import { SurfaceFormCard } from "@nivo/ui";
+import Image from "next/image";
 import { AuthenticationPanel, type AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";
+import {
+  AUTH_FORM_CONTENT_CLASS_NAME,
+  AUTH_FORM_REGION_CLASS_NAME,
+  AUTH_PAGE_CLASS_NAME,
+  AUTH_VISUAL_ACCENT_CLASS_NAME,
+  AUTH_VISUAL_CLASS_NAME,
+  AUTH_VISUAL_IMAGE_CLASS_NAME,
+  AUTH_VISUAL_SCRIM_CLASS_NAME
+} from "./classNames";
 
 /**
  * PAGE - `/authentication`, presentational half.
  *
- * ONE ROUTE FOR ALL THREE JOURNEYS, which is the named reference's own shape: starci has exactly one
- * authentication address and no `/sign-up` or `/forgot-password` beside it, and which journey is
- * running is panel state rather than a URL.
+ * ONE ROUTE FOR ALL THREE JOURNEYS. Sign in, sign up and password recovery stay panel state rather
+ * than becoming separate addresses, so this page can change its composition without changing any
+ * authentication behaviour.
  *
- * WHAT THIS HALF OWNS IS THE SURFACE, and it is not a formality. `authentication-panel-card` on its
- * own is three classes; `SurfaceFormCard` is the branch that turns it into a real card with a border,
- * a ground and an elevation, and deciding that an authentication screen IS one bounded card - rather
- * than a form standing on the page - is a page-level decision. The shipped screen did not make it,
- * which is why it rendered as a form floating on the ground.
- *
- * IT RENDERS FROM A FIXTURE AND NOTHING ELSE. Every string arrives already resolved, so this file
- * needs no locale, no session and no request to draw any of its states - which is what makes the
- * state matrix testable without standing the world up first.
+ * THE COMPOSITION IS DELIBERATELY FLAT. The product image owns the left side on wide screens and the
+ * form stands directly on the right-side page surface. There is no card, border or elevation around
+ * it. On narrow screens the decorative image leaves the reading order entirely so the form remains
+ * the first and only task.
  */
 
 /** Props for {@link AuthenticationPageBase}. */
 export type AuthenticationPageProps = {
-  /**
-   * The panel's complete situation, already discriminated and already in words.
-   *
-   * Passed WHOLE rather than unpacked into a dozen props. The panel's own union is what guarantees
-   * the copy of a state it is not drawing cannot be supplied and the copy of the one it is drawing
-   * cannot be forgotten; splitting that union apart here would hand this file the job of
-   * reassembling it, and every reassembly is a chance to get it wrong.
-   */
+  /** The panel's complete translated state and actions. */
   readonly panel: AuthenticationPanelProps;
 };
 
@@ -42,12 +39,26 @@ export const AuthenticationPageBase = (props: AuthenticationPageProps) => {
   const {
     panel
   }: AuthenticationPageProps = props;
-  const cardContent = <div>
-    <AuthenticationPanel {...panel} /></div>;
-  return <div>
+  const panelIdentity = panel.state === "details" || panel.state === "code" ? `${panel.state}:${panel.props.mode}` : panel.state;
 
+  return <main className={AUTH_PAGE_CLASS_NAME}>
+    <aside aria-hidden="true" className={AUTH_VISUAL_CLASS_NAME}>
+      <Image
+        src="/images/nivo-login-infra-anime.png"
+        alt=""
+        fill
+        priority
+        sizes="(min-width: 1024px) 55vw, 0px"
+        className={AUTH_VISUAL_IMAGE_CLASS_NAME}
+      />
+      <div className={AUTH_VISUAL_SCRIM_CLASS_NAME} />
+      <div className={AUTH_VISUAL_ACCENT_CLASS_NAME} />
+    </aside>
 
-
-
-    <SurfaceFormCard ariaLabel={panel.props.title}>{cardContent}</SurfaceFormCard></div>;
+    <section aria-label={panel.props.title} className={AUTH_FORM_REGION_CLASS_NAME}>
+      <div className={AUTH_FORM_CONTENT_CLASS_NAME}>
+        <AuthenticationPanel key={panelIdentity} {...panel} />
+      </div>
+    </section>
+  </main>;
 };

@@ -15,7 +15,7 @@ describe("Checkbox", () => {
         const follow = vi.fn()
         render(<Checkbox props={{ label: "Terms", isSelected: false, labelParts: [{ kind: "text", content: "Read " }, { kind: "link", id: "terms", label: "terms" }] }} on={{ change, follow }} />)
         fireEvent.click(screen.getByRole("checkbox"))
-        fireEvent.click(screen.getByRole("link", { name: "terms" }))
+        fireEvent.click(screen.getByRole("button", { name: "terms" }))
         expect(change).toHaveBeenCalledWith(true)
         expect(follow).toHaveBeenCalledWith("terms")
     })

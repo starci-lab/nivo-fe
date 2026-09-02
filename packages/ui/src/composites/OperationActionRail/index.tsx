@@ -1,4 +1,5 @@
-import { Button } from "../../leaves/Button"
+import { Button } from "@starci/grammar/common";
+
 
 /** One lifecycle action resolved by the owning domain block. */
 export type OperationAction = { readonly id: string; readonly label: string; readonly disabled?: boolean; readonly pending?: boolean }
@@ -13,12 +14,7 @@ export type OperationActionRailProps = { readonly props: OperationActionRailData
 export const OperationActionRail = (props: OperationActionRailProps) => (
     <div>
         {props.props.actions.map((action) => (
-            <Button
-                key={action.id}
-                props={{ label: action.label, disabled: action.disabled, isPending: action.pending }}
-                on={{ press: () => props.on?.select?.(action.id) }}
-                isLoading={props.isLoading}
-            />
+            <Button key={action.id} isDisabled={action.disabled} isPending={action.pending} isSkeleton={props.isLoading} onPress={() => props.on?.select?.(action.id)}>{action.label}</Button>
         ))}
     </div>
 )

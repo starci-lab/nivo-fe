@@ -1,4 +1,5 @@
-import { Badge, Button, Heading, SurfaceCard, Text, type BadgeTone } from "@nivo/ui";
+
+import { SurfaceCard, Button, Heading, Text, Badge, type BadgeTone } from "@starci/grammar/common";
 
 /** Source-owned launch phases rendered independently from workspace readiness. */
 export type AgentOSOpenClawLaunchProps = AgentOSOpenClawLaunchViewProps;
@@ -50,45 +51,22 @@ export const AgentOSOpenClawLaunchBase = (props: AgentOSOpenClawLaunchProps) => 
   if (launchState === "connected") actionLabel = labels.returnToWorkspace;else if (launchState === "issuing") actionLabel = settled.label;
   const card = <div><div>
 
-      <Text props={{
-        content: labels.workspaceLabel,
-        weight: "semibold"
-      }} />
-      <Text props={{
-        content: workspaceId,
-        size: "xs",
-        tone: "muted"
-      }} /></div>
+      <Text weight="semibold">{labels.workspaceLabel}</Text>
+      <Text size="xs" tone="muted">{workspaceId}</Text></div>
 
-    <Badge props={{
-      content: settled.label,
-      tone: toneOf[launchState]
-    }} />
-    <Text props={{
-      content: detail ?? settled.detail,
-      size: "sm",
-      tone: "muted"
-    }} />
+    <Badge tone={toneOf[launchState]}>{settled.label}</Badge>
+    <Text size="sm" tone="muted">{detail ?? settled.detail}</Text>
 
-    <Button props={{
-      label: actionLabel,
-      variant: "primary",
-      disabled: launchState === "issuing",
-      isPending: launchState === "issuing"
-    }} on={{
-      press: launchState === "connected" ? onReturn : onRetry
-    }} /></div>;
+    <Button
+      variant="primary"
+      isDisabled={launchState === "issuing"}
+      isPending={launchState === "issuing"}
+      onPress={launchState === "connected" ? onReturn : onRetry}
+    >{actionLabel}</Button></div>;
   return <div>
 
-    <Heading props={{
-      content: labels.title,
-      level: 1
-    }} />
+    <Heading level={1}>{labels.title}</Heading>
     <SurfaceCard>{card}</SurfaceCard>
-    <Text props={{
-      content: labels.securityNote,
-      size: "sm",
-      tone: "muted"
-    }} /></div>;
+    <Text size="sm" tone="muted">{labels.securityNote}</Text></div>;
 };
 

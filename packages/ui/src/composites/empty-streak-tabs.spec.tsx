@@ -1,27 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { DualTabsToolbar } from "./DualTabsToolbar"
-import { EmptyNotice } from "./EmptyNotice"
 import { StreakWeekRun } from "./StreakWeekRun"
-
-describe("EmptyNotice", () => {
-    it("renders its mark, explanation, and recovery action", () => {
-        const act = vi.fn()
-        render(<EmptyNotice props={{ icon: "search", message: "Nothing found", description: "Try another query", actionLabel: "Retry" }} on={{ act }} />)
-        expect(screen.getByText("Nothing found")).toBeInTheDocument()
-        expect(screen.getByText("Try another query")).toBeInTheDocument()
-        fireEvent.click(screen.getByRole("button", { name: "Retry" }))
-        expect(act).toHaveBeenCalledTimes(1)
-        expect(document.querySelector("[data-tone] svg")).toBeInTheDocument()
-    })
-
-    it("omits optional mark, detail, and action", () => {
-        render(<EmptyNotice props={{ message: "No records" }} />)
-        expect(screen.getByText("No records")).toBeInTheDocument()
-        expect(screen.queryByRole("button")).not.toBeInTheDocument()
-        expect(document.querySelector("[data-tone] svg")).not.toBeInTheDocument()
-    })
-})
 
 describe("StreakWeekRun", () => {
     it("renders the supplied week", () => {

@@ -1,5 +1,6 @@
-import { Button } from "../../leaves/Button"
-import { Text } from "../../leaves/Text"
+import { Button, Text } from "@starci/grammar/common";
+
+
 
 /** Resolved identity and optional onward action for one submitted request. */
 export type RequestSummaryData = { readonly subject: string; readonly detail: string; readonly actionLabel?: string }
@@ -12,9 +13,9 @@ export type RequestSummaryProps = { readonly props: RequestSummaryData; readonly
 export const RequestSummary = (props: RequestSummaryProps) => (
     <div>
         <div>
-            <Text props={{ content: props.props.subject, size: "sm", weight: "semibold" }} isLoading={props.isLoading} />
-            <Text props={{ content: props.props.detail, size: "xs", tone: "muted" }} isLoading={props.isLoading} />
+            <Text size="sm" weight="semibold" isSkeleton={props.isLoading}>{props.props.subject}</Text>
+            <Text size="xs" tone="muted" isSkeleton={props.isLoading}>{props.props.detail}</Text>
         </div>
-        {props.props.actionLabel === undefined ? null : <Button props={{ label: props.props.actionLabel, size: "sm", variant: "secondary" }} on={{ press: props.on?.press }} isLoading={props.isLoading} />}
+        {props.props.actionLabel === undefined ? null : <Button variant="secondary" size="sm" isSkeleton={props.isLoading} onPress={props.on?.press}>{props.props.actionLabel}</Button>}
     </div>
 )

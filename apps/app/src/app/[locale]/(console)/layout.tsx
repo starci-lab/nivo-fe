@@ -2,7 +2,7 @@
 
 import type { ComponentProps } from "react";
 
-import { ConsoleLayout } from "@/components/layouts/ConsoleLayout";
+import { ConsoleLayout } from "@/components/product-shells/ConsoleLayout";
 
 interface ConsoleRouteLayoutProps {readonly children: ComponentProps<"div">["children"];}
 

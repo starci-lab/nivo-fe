@@ -1,7 +1,9 @@
+import { nivoIconSource, type IconName } from "../../iconography";
+import { Icon } from "@starci/grammar/common";
 "use client";
 
 import { ListBox } from "@heroui/react";
-import { Icon, type IconName } from "../Icon";
+
 
 /** One destination in the legacy quick-access ListBox. */
 export type QuickActionItem = {
@@ -42,7 +44,7 @@ const QuickActionsListView = ({ props, on }: QuickActionsListProps) =>
     textValue={item.label}
     className="flex cursor-pointer items-center gap-2 rounded-large px-2 py-2 text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent data-[hovered=true]:bg-default">
     
-                <Icon props={{ name: item.icon, role: "leading" }} />
+                <Icon source={nivoIconSource(item.icon, "leading")} role="leading" />
                 <span className="min-w-0 flex-1 truncate text-sm">{item.label}</span>
             </ListBox.Item>
   )}

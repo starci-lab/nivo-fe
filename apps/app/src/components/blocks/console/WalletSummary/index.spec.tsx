@@ -51,7 +51,7 @@ describe("WalletSummary", () => {
         render(<WalletSummary />)
         expect(screen.getByText("money-2450000")).toBeInTheDocument()
         expect(screen.getByText(/money-490000/)).toBeInTheDocument()
-        fireEvent.click(screen.getByRole("link", { name: "wallet.viewTransactions" }))
+        fireEvent.click(screen.getByRole("button", { name: "wallet.viewTransactions" }))
         fireEvent.click(screen.getByRole("button", { name: "wallet.topUp" }))
         expect(mocks.push).toHaveBeenNthCalledWith(1, "/wallet")
         expect(mocks.push).toHaveBeenNthCalledWith(2, "/wallet/top-up")
@@ -62,7 +62,7 @@ describe("WalletSummary", () => {
         mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 0 } }
         mocks.data.invoices = { ok: true, data: [] }
         const { rerender } = render(<WalletSummary />)
-        fireEvent.click(screen.getByRole("link", { name: "wallet.viewTransactions" }))
+        fireEvent.click(screen.getByRole("button", { name: "wallet.viewTransactions" }))
         expect(mocks.push).toHaveBeenCalledWith("/wallet")
 
         mocks.data.invoices = { ok: false, code: "UNKNOWN" }

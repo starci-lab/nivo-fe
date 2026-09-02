@@ -1,4 +1,5 @@
-import { LabelledProgressRow, SurfaceCard, Text } from "@nivo/ui";
+import { LabelledProgressRow } from "@nivo/ui";
+import { SurfaceCard, Text } from "@starci/grammar/common";
 import type { AgentWorkspaceControlCenter } from "@/modules/api/console";
 
 /** Runtime snapshot and resolved copy consumed by the metrics block. */
@@ -21,14 +22,8 @@ export type AgentOSWorkspaceRuntimeProps = {
 const percentage = (usage: number | null, limit: number): number => usage === null || limit <= 0 ? 0 : Math.min(100, Math.round(usage / limit * 100));
 const mib = (bytes: number): string => `${Math.round(bytes / 1024 / 1024)} MiB`;
 const fact = (label: string, value: string) => <div>
-  <Text props={{
-    content: label,
-    size: "sm"
-  }} />
-  <Text props={{
-    content: value,
-    size: "sm"
-  }} /></div>;
+  <Text size="sm">{label}</Text>
+  <Text size="sm">{value}</Text></div>;
 
 /** Draw measured usage without presenting allocation or a missing metric as current usage. */
 export const AgentOSWorkspaceRuntime = (props: AgentOSWorkspaceRuntimeProps) => {
@@ -43,9 +38,9 @@ export const AgentOSWorkspaceRuntime = (props: AgentOSWorkspaceRuntimeProps) => 
   const memoryText = totals?.memoryUsageBytes === null || totals === undefined ? labels.unavailable : `${mib(totals.memoryUsageBytes)} / ${mib(totals.memoryLimitBytes)}`;
   const freshness = runtime?.stale === true ? labels.stale : labels.fresh;
   const note = runtime === null ? labels.unavailable : `${freshness} · ${formatDate(runtime.observedAt)}`;
-  return <SurfaceCard props={{
-    label: labels.section
-  }}><div><>
+  return <SurfaceCard
+    label={labels.section}
+  ><div><>
 
 
 
@@ -66,9 +61,5 @@ export const AgentOSWorkspaceRuntime = (props: AgentOSWorkspaceRuntimeProps) => 
         }} /></><div><>{fact(labels.requests, totals === undefined ? "—" : `${Math.round(totals.cpuRequestMillicores)}m · ${mib(totals.memoryRequestBytes)}`)}{fact(labels.limits, totals === undefined ? "—" : `${Math.round(totals.cpuLimitMillicores)}m · ${mib(totals.memoryLimitBytes)}`)}{fact(labels.restarts, String(totals?.restartCount ?? 0))}{fact(labels.health, runtime?.probeStatus ?? "unavailable")}</></div>
 
 
-        <Text props={{
-        content: note,
-        size: "sm",
-        tone: "muted"
-      }} /></div></SurfaceCard>;
+        <Text size="sm" tone="muted">{note}</Text></div></SurfaceCard>;
 };

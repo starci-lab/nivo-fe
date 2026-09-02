@@ -82,7 +82,7 @@ describe("AuthenticationPage connected journeys", () => {
         render(<AuthenticationPage />)
         fireEvent.click(screen.getByTestId("remember"))
         fireEvent.click(screen.getByTestId("submit-details"))
-        await waitFor(() => expect(panel()).toContain("invalid"))
+        await waitFor(() => expect(panel()).toContain("signIn.refused"))
         fireEvent.click(screen.getByTestId("sign-up"))
         expect(panel()).toContain("signUp.title")
         fireEvent.click(screen.getByTestId("sign-in"))
@@ -114,7 +114,7 @@ describe("AuthenticationPage connected journeys", () => {
         await waitFor(() => expect(panel()).toContain("resentLabel"))
         mocks.api.signUpVerifyOtp.mockResolvedValue({ ok: false, reason: "used" })
         fireEvent.click(screen.getByTestId("submit-code"))
-        await waitFor(() => expect(panel()).toContain("used"))
+        await waitFor(() => expect(panel()).toContain("signUp.codeRefused"))
         mocks.api.signUpVerifyOtp.mockResolvedValue({ ok: true, data: { accessToken: "signup-access" } })
         fireEvent.click(screen.getByTestId("submit-code"))
         await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/overview"))
@@ -128,7 +128,7 @@ describe("AuthenticationPage connected journeys", () => {
         await waitFor(() => expect(panel()).toContain('"state":"code"'))
         mocks.api.forgotPasswordResend.mockResolvedValue({ ok: false, reason: "reset-resend-failed" })
         fireEvent.click(screen.getByTestId("resend"))
-        await waitFor(() => expect(panel()).toContain("reset-resend-failed"))
+        await waitFor(() => expect(panel()).toContain("resendRefused"))
         mocks.api.forgotPasswordVerifyOtp.mockResolvedValue({ ok: false, reason: "do-not-leak" })
         fireEvent.click(screen.getByTestId("submit-code"))
         await waitFor(() => expect(panel()).toContain("forgotPassword.codeRefused"))
@@ -146,7 +146,7 @@ describe("AuthenticationPage connected journeys", () => {
         render(<AuthenticationPage />)
         fireEvent.click(screen.getByTestId("sign-up"))
         fireEvent.click(screen.getByTestId("submit-details"))
-        await waitFor(() => expect(panel()).toContain("signup-init-failed"))
+        await waitFor(() => expect(panel()).toContain("requestRefused"))
 
         cleanup()
         mocks.api.signUpInit.mockResolvedValue({ ok: true, data: { challengeId: "challenge", expiresInSeconds: 300 } })
@@ -156,7 +156,7 @@ describe("AuthenticationPage connected journeys", () => {
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(panel()).toContain('"state":"code"'))
         fireEvent.click(screen.getByTestId("resend"))
-        await waitFor(() => expect(panel()).toContain("resend-failed"))
+        await waitFor(() => expect(panel()).toContain("resendRefused"))
     })
 
     it("handles provider redirects and callback exchange outcomes", async () => {
@@ -164,6 +164,8 @@ describe("AuthenticationPage connected journeys", () => {
         fireEvent.click(screen.getByTestId("google"))
         expect(window.sessionStorage.getItem("nivo.oauth.provider")).toBe("google")
         expect(mocks.api.oauthRedirectUrl).toHaveBeenCalledWith("google", expect.stringContaining("/authentication"))
+        await waitFor(() => expect(panel()).toContain('"pendingAction":"provider"'))
+        expect(panel()).not.toContain("providerUnavailable")
 
         cleanup()
         window.sessionStorage.setItem("nivo.oauth.provider", "google")
@@ -183,7 +185,7 @@ describe("AuthenticationPage connected journeys", () => {
         window.history.replaceState(null, "", "/authentication?code=bad&state=bad-state")
         mocks.api.exchangeOauthCode.mockResolvedValue({ ok: false, reason: "oauth-failed" })
         render(<AuthenticationPage />)
-        await waitFor(() => expect(panel()).toContain("oauth-failed"))
+        await waitFor(() => expect(panel()).toContain("signIn.oauthRefused"))
 
         cleanup()
         window.history.replaceState(null, "", "/authentication?error=cancelled")

@@ -108,7 +108,7 @@ describe("module studio pure surfaces", () => {
             onOpen={open}
             onCreate={create}
         />)
-        fireEvent.click(screen.getByRole("link", { name: "Lead intake" }))
+        fireEvent.click(screen.getByRole("button", { name: "Lead intake" }))
         fireEvent.click(screen.getByRole("button", { name: "Inspect" }))
         expect(open).toHaveBeenNthCalledWith(1, "module-1")
         expect(open).toHaveBeenNthCalledWith(2, "module-1")

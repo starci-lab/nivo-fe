@@ -1,6 +1,7 @@
 "use client";
 
-import { Button, Field, Heading, LifecycleStep, RequestSummary, Text, type LifecycleStepData } from "@nivo/ui";
+import { LifecycleStep, RequestSummary, type LifecycleStepData } from "@nivo/ui";
+import { Button, Input, Heading, Text } from "@starci/grammar/common";
 
 /** The settled trees the template-app flow can draw. */
 export type TemplateAppProvisioningProps = TemplateAppProvisioningViewProps;
@@ -35,26 +36,24 @@ export const TemplateAppProvisioningBase = (props: TemplateAppProvisioningProps)
   const request = isRequest ? <div><>
 
 
-      <Field props={{
-        id: "template-app-slug",
-        name: "slug",
-        label: viewProps.slugLabel,
-        placeholder: viewProps.slugPlaceholder,
-        hint: viewProps.slugHint,
-        disabled: state === "submitting"
-      }} on={{
-        change: on?.changeSlug
-      }} /></>
+      <Input
+        id="template-app-slug"
+        name="slug"
+        label={viewProps.slugLabel}
+        placeholder={viewProps.slugPlaceholder}
+        isDisabled={state === "submitting"}
+        variant="secondary"
+        hint={viewProps.slugHint}
+        onValueChange={on?.changeSlug}
+      /></>
 
 
 
-    <Button props={{
-      label: viewProps.submitLabel,
-      variant: "primary",
-      isPending: state === "submitting"
-    }} on={{
-      press: on?.submit
-    }} /></div> : <RequestSummary props={{
+    <Button
+      variant="primary"
+      isPending={state === "submitting"}
+      onPress={on?.submit}
+    >{viewProps.submitLabel}</Button></div> : <RequestSummary props={{
     subject: viewProps.subject,
     detail: viewProps.detail,
     actionLabel: viewProps.actionLabel
@@ -63,23 +62,14 @@ export const TemplateAppProvisioningBase = (props: TemplateAppProvisioningProps)
   }} isLoading={state === "catalog_loading"} />;
   const status = <div>
 
-    <Heading props={{
-      content: viewProps.statusTitle,
-      level: 3
-    }} />
+    <Heading level={3}>{viewProps.statusTitle}</Heading>
 
 
-    <Text props={{
-      content: viewProps.statusText,
-      size: "sm",
-      tone: state === "failed" ? "accent" : "muted"
-    }} />{state === "failed" || state === "unsupported" ? <Button props={{
-      label: viewProps.actionLabel ?? "",
-      size: "sm",
-      variant: "secondary"
-    }} on={{
-      press: on?.act
-    }} /> : null}</div>;
+    <Text size="sm" tone={state === "failed" ? "accent" : "muted"}>{viewProps.statusText}</Text>{state === "failed" || state === "unsupported" ? <Button
+      size="sm"
+      variant="secondary"
+      onPress={on?.act}
+    >{viewProps.actionLabel ?? ""}</Button> : null}</div>;
   return <div>{journey}{request}{status}</div>;
 };
 

@@ -1,6 +1,7 @@
 "use client";
+import { SurfaceCard, Button, Text } from "@starci/grammar/common";
 
-import { Button, SelectionList, SurfaceCard, Text, type SelectionListGroup } from "@nivo/ui";
+import { SelectionList, type SelectionListGroup } from "@nivo/ui";
 
 /** One data-only identity rendered in a Module Studio cockpit rail. */
 export type ModuleCockpitRailItem = {
@@ -44,14 +45,10 @@ export const ModuleCockpitRailBlock = (props: ModuleCockpitRailBlockProps) => {
     onSelect,
     onAction
   }: ModuleCockpitRailBlockProps = props;
-  return <SurfaceCard props={{
-    label,
-    fact
-  }}><div>{summary === undefined ? undefined : <Text props={{
-        content: summary,
-        size: "xs",
-        tone: "muted"
-      }} />}
+  return <SurfaceCard
+    label={label}
+    fact={fact}
+  ><div>{summary === undefined ? undefined : <Text size="xs" tone="muted">{summary}</Text>}
 
 
     <SelectionList props={{
@@ -61,11 +58,9 @@ export const ModuleCockpitRailBlock = (props: ModuleCockpitRailBlockProps) => {
         groups: groupsFor(label, items)
       }} on={{
         activate: onSelect
-      }} />{actionLabel === undefined || onAction === undefined ? undefined : <Button props={{
-        label: actionLabel,
-        variant: "secondary",
-        isPending: pending
-      }} on={{
-        press: onAction
-      }} />}</div></SurfaceCard>;
+      }} />{actionLabel === undefined || onAction === undefined ? undefined : <Button
+        variant="secondary"
+        isPending={pending}
+        onPress={onAction}
+      >{actionLabel}</Button>}</div></SurfaceCard>;
 };

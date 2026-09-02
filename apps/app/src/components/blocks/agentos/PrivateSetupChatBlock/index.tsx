@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button, ChoiceTabs, Field, SurfaceCard, Text } from "@nivo/ui";
+import { ChoiceTabs } from "@nivo/ui";
+import { SurfaceCard, Button, Input, Text } from "@starci/grammar/common";
 
 /** One accepted turn in the installation's private resumable Setup session. */
 export type SetupMessage = {
@@ -78,45 +79,25 @@ const PrivateSetupChatContent = ({
     }))
   }} on={{
     select: onSelectRevision
-  }} />}{messages.map((message, index) => <div key={index}>{<Text props={{
-      content: actorLabel(message.role),
-      size: "xs",
-      tone: "muted",
-      weight: "semibold"
-    }} />}{<Text props={{
-      content: message.content,
-      size: "sm"
-    }} />}</div>)}{canSend ? <div>{[<Field key={composerKey} props={{
-      id: "agentos-private-setup-message",
-      name: "setupMessage",
-      label: "Teach this module about your business",
-      placeholder: "Describe priorities, policies, or exceptions…",
-      disabled: pending
-    }} on={{
-      change: onDraft
-    }} />]}{<Button props={{
-      label: "Send",
-      variant: "primary",
-      disabled: draft.trim().length === 0,
-      isPending: pending
-    }} on={{
-      press: onSubmit
-    }} />}</div> : undefined}{showRevisionControls && canStartRevision ? <Button props={{
-    label: "Start new AI Setup chat",
-    variant: "secondary",
-    isPending: pending
-  }} on={{
-    press: onStartRevision
-  }} /> : undefined}{refused ? <Text props={{
-    content: "Setup message was refused. Nothing was added to the context draft.",
-    size: "sm",
-    tone: "muted",
-    live: "assertive"
-  }} /> : canStartRevision ? <Text props={{
-    content: "This Setup revision is complete. Start a new private AI chat to revise the business context; the active version stays unchanged until Test and Apply pass.",
-    size: "sm",
-    tone: "muted"
-  }} /> : undefined}</div>;
+  }} />}{messages.map((message, index) => <div key={index}>{<Text size="xs" tone="muted" weight="semibold">{actorLabel(message.role)}</Text>}{<Text size="sm">{message.content}</Text>}</div>)}{canSend ? <div>{[<Input
+      key={composerKey}
+      id="agentos-private-setup-message"
+      name="setupMessage"
+      label="Teach this module about your business"
+      placeholder="Describe priorities, policies, or exceptions…"
+      isDisabled={pending}
+      variant="secondary"
+      onValueChange={onDraft}
+    />]}{<Button
+      variant="primary"
+      isDisabled={draft.trim().length === 0}
+      isPending={pending}
+      onPress={onSubmit}
+    >Send</Button>}</div> : undefined}{showRevisionControls && canStartRevision ? <Button
+      variant="secondary"
+      isPending={pending}
+      onPress={onStartRevision}
+    >Start new AI Setup chat</Button> : undefined}{refused ? <Text size="sm" tone="muted" live="assertive">{"Setup message was refused. Nothing was added to the context draft."}</Text> : canStartRevision ? <Text size="sm" tone="muted">{"This Setup revision is complete. Start a new private AI chat to revise the business context; the active version stays unchanged until Test and Apply pass."}</Text> : undefined}</div>;
 
 /** Draw the private context-building conversation through one runtime ComponentType and Tree. */
 export const PrivateSetupChatBlock = (props: PrivateSetupChatBlockProps) => {
@@ -142,10 +123,10 @@ export const PrivateSetupChatBlock = (props: PrivateSetupChatBlockProps) => {
     setDraft("");
     setComposerKey(current => current + 1);
   };
-  return <SurfaceCard props={{
-    label: "Private Setup chat",
-    fact: revisions.find(revision => revision.id === selectedRevisionId) === undefined ? "Setup only" : `r${revisions.find(revision => revision.id === selectedRevisionId)?.revision} · ${revisions.find(revision => revision.id === selectedRevisionId)?.status}`
-  }}>
+  return <SurfaceCard
+    label="Private Setup chat"
+    fact={revisions.find(revision => revision.id === selectedRevisionId) === undefined ? "Setup only" : `r${revisions.find(revision => revision.id === selectedRevisionId)?.revision} · ${revisions.find(revision => revision.id === selectedRevisionId)?.status}`}
+  >
       <PrivateSetupChatContent messages={messages} draft={draft} composerKey={composerKey} pending={pending} refused={refused} revisions={revisions} selectedRevisionId={selectedRevisionId} canSend={canSend} canStartRevision={canStartRevision} showRevisionControls={showRevisionControls} onDraft={setDraft} onSubmit={submit} onSelectRevision={onSelectRevision} onStartRevision={onStartRevision} />
     </SurfaceCard>;
 };

@@ -1,5 +1,6 @@
-import { Progress } from "../../leaves/Progress"
-import { Text } from "../../leaves/Text"
+import { Progress, Text } from "@starci/grammar/common";
+
+
 
 /** Resolved label and completion figure for a progress row. */
 export type LabelledProgressRowData = { readonly id: string; readonly title?: string; readonly percent?: number; readonly percentText?: string }
@@ -10,9 +11,9 @@ export type LabelledProgressRowProps = { readonly props: LabelledProgressRowData
 export const LabelledProgressRow = (props: LabelledProgressRowProps) => (
     <div>
         <div>
-            <Text props={{ content: props.props.title, size: "sm", weight: "semibold" }} isLoading={props.isLoading} />
-            <Text props={{ content: props.props.percentText, size: "xs" }} isLoading={props.isLoading} />
+            <Text size="sm" weight="semibold" isSkeleton={props.isLoading}>{props.props.title}</Text>
+            <Text size="xs" isSkeleton={props.isLoading}>{props.props.percentText}</Text>
         </div>
-        <Progress props={{ value: props.props.percent, label: props.props.title ?? "" }} isLoading={props.isLoading} />
+        <Progress label={props.props.title ?? ""} value={props.props.percent} isSkeleton={props.isLoading} />
     </div>
 )

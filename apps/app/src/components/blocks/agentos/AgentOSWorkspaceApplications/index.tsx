@@ -1,4 +1,5 @@
-import { StatusActionCard, SurfaceCard } from "@nivo/ui";
+import { StatusActionCard } from "@nivo/ui";
+import { SurfaceCard } from "@starci/grammar/common";
 import type { StatusActionCardData } from "@nivo/ui";
 import type { AgentWorkspaceAppCapability } from "@/modules/api/console";
 
@@ -128,9 +129,9 @@ export const AgentOSWorkspaceApplications = (props: AgentOSWorkspaceApplications
     openClawLaunchHref,
     onManageOpenClaw
   }: AgentOSWorkspaceApplicationsProps = props;
-  return <SurfaceCard props={{
-    label: labels.section
-  }}><div>{apps.map(app => <StatusActionCard key={app.app} props={cardDataFor(app, labels, launchState, openClawLaunchHref)} on={{
+  return <SurfaceCard
+    label={labels.section}
+  ><div>{apps.map(app => <StatusActionCard key={app.app} props={cardDataFor(app, labels, launchState, openClawLaunchHref)} on={{
         press: app.app === "OPENCLAW" ? onManageOpenClaw : undefined
       }} />)}</div></SurfaceCard>;
 };

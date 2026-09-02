@@ -1,6 +1,7 @@
 "use client";
+import { SurfaceCard, Button, Heading, Text, Badge, type BadgeTone } from "@starci/grammar/common";
 
-import { Badge, Button, Heading, LifecycleStep, SurfaceCard, Text, TileIcon, type BadgeTone, type LifecycleStepData } from "@nivo/ui";
+import { LifecycleStep, TileIcon, type LifecycleStepData } from "@nivo/ui";
 import { AgentOSKnowledgeOriginList } from "@/components/blocks/agentos/AgentOSKnowledgeOriginList";
 import { AgentOSReadinessComponentList } from "@/components/blocks/agentos/AgentOSReadinessComponentList";
 import type { AgentosAiKnowledgeReadiness } from "@/modules/api/console";
@@ -44,14 +45,8 @@ export type AgentOSWorkspaceAiKnowledgeViewProps = {
   readonly onRecover: () => void;
 };
 const fact = (label: string, value: string | undefined, loading: boolean) => <div>
-  <Text props={{
-    content: label,
-    size: "sm"
-  }} />
-  <Text props={{
-    content: value,
-    size: "sm"
-  }} isLoading={loading} /></div>;
+  <Text size="sm">{label}</Text>
+  <Text size="sm" isSkeleton={loading}>{value}</Text></div>;
 const toneOf = (state: AgentOSWorkspaceAiKnowledgeViewProps["state"]): BadgeTone => {
   if (state === "ready" || state === "success") return "success";
   return state === "refused" ? "danger" : "warning";
@@ -103,65 +98,42 @@ export const AgentOSWorkspaceAiKnowledgeBase = (props: AgentOSWorkspaceAiKnowled
   const embedding = readiness === undefined ? undefined : `${readiness.embeddingProfile} · ${readiness.embeddingDimension}`;
   let credential = readiness?.credentialStatus;
   if (credential !== undefined && readiness !== undefined && readiness.credentialMaskedHint !== null) credential += ` · ${readiness.credentialMaskedHint}`;
-  const summary = <SurfaceCard props={{
-    label: labels.title
-  }}><div><div>
+  const summary = <SurfaceCard
+    label={labels.title}
+  ><div><div>
 
-        <Text props={{
-          content: labels.title,
-          size: "md",
-          weight: "semibold"
-        }} />
-        <Text props={{
-          content: state === "refused" ? readiness?.failureCode ?? labels.refused : labels.description,
-          size: "xs",
-          tone: "muted"
-        }} /></div>
+        <Text size="md" weight="semibold">{labels.title}</Text>
+        <Text size="xs" tone="muted">{state === "refused" ? readiness?.failureCode ?? labels.refused : labels.description}</Text></div>
 
-      <Badge props={{
-        content: status,
-        tone: toneOf(state)
-      }} isLoading={loading} /><div><>{fact(labels.provider, readiness?.provider, loading)}{fact(labels.model, readiness?.chatModel, loading)}{fact(labels.embedding, embedding, loading)}{fact(labels.credential, credential, loading)}{fact(labels.qdrant, readiness?.qdrantHealth, loading)}{fact(labels.testedAt, readiness?.testedAt === null || readiness?.testedAt === undefined ? "—" : labels.formatTestedAt(readiness.testedAt), loading)}</></div><div><>
+      <Badge tone={toneOf(state)} isSkeleton={loading}>{status}</Badge><div><>{fact(labels.provider, readiness?.provider, loading)}{fact(labels.model, readiness?.chatModel, loading)}{fact(labels.embedding, embedding, loading)}{fact(labels.credential, credential, loading)}{fact(labels.qdrant, readiness?.qdrantHealth, loading)}{fact(labels.testedAt, readiness?.testedAt === null || readiness?.testedAt === undefined ? "—" : labels.formatTestedAt(readiness.testedAt), loading)}</></div><div><>
 
 
-          <Button props={{
-            label: labels.runTest,
-            variant: "primary",
-            disabled: loading || state === "testing" || readiness?.credentialStatus !== "configured",
-            isPending: state === "testing"
-          }} on={{
-            press: onTest
-          }} />{state === "refused" ? [] : [<Button key="item-0" props={{
-            label: labels.recover,
-            variant: "secondary",
-            disabled: loading || state === "recovering",
-            isPending: state === "recovering"
-          }} on={{
-            press: onRecover
-          }} />]}</></div></div></SurfaceCard>;
-  const notice = state === "refused" ? <SurfaceCard props={{
-    label: labels.failureTitle
-  }}><div>
+          <Button
+            variant="primary"
+            isDisabled={loading || state === "testing" || readiness?.credentialStatus !== "configured"}
+            isPending={state === "testing"}
+            onPress={onTest}
+          >{labels.runTest}</Button>{state === "refused" ? [] : [<Button
+            key="item-0"
+            variant="secondary"
+            isDisabled={loading || state === "recovering"}
+            isPending={state === "recovering"}
+            onPress={onRecover}
+          >{labels.recover}</Button>]}</></div></div></SurfaceCard>;
+  const notice = state === "refused" ? <SurfaceCard
+    label={labels.failureTitle}
+  ><div>
       <TileIcon props={{
         icon: "retry",
         signal: "attention"
       }} /><div>
 
-        <Heading props={{
-          content: labels.failureTitle,
-          level: 2
-        }} />
-        <Text props={{
-          content: readiness?.failureCode ?? labels.refused,
-          size: "sm",
-          tone: "muted"
-        }} />
-        <Button props={{
-          label: labels.recover,
-          variant: "primary"
-        }} on={{
-          press: onRecover
-        }} /></div></div></SurfaceCard> : undefined;
+        <Heading level={2}>{labels.failureTitle}</Heading>
+        <Text size="sm" tone="muted">{readiness?.failureCode ?? labels.refused}</Text>
+        <Button
+          variant="primary"
+          onPress={onRecover}
+        >{labels.recover}</Button></div></div></SurfaceCard> : undefined;
   const progress = <div>{readinessSteps(state, readiness, labels).map((step, index) => <LifecycleStep key={index} props={step} isLoading={loading} />)}</div>;
   const origins = <AgentOSKnowledgeOriginList origins={readiness?.origins ?? []} loading={loading} labels={{
     title: labels.origins,
@@ -174,10 +146,7 @@ export const AgentOSWorkspaceAiKnowledgeBase = (props: AgentOSWorkspaceAiKnowled
     evidence: labels.evidence
   }} />;
   const evidence = <div>{origins}{components}</div>;
-  const heading = <Heading props={{
-    content: labels.sectionHeading,
-    level: 2
-  }} />;
+  const heading = <Heading level={2}>{labels.sectionHeading}</Heading>;
   return <div>{heading}{summary}{notice}{progress}{evidence}</div>;
 };
 

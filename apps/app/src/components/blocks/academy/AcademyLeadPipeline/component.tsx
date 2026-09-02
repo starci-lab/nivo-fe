@@ -1,4 +1,5 @@
-import { Avatar, Badge, Button, Heading, SurfaceCard, Text, TextLink } from "@nivo/ui";
+import { Avatar } from "@nivo/ui";
+import { SurfaceCard, Button, Button as CoreButton, Heading, Text, TextAction, Badge } from "@starci/grammar/common";
 import type { ExpertSiteLead } from "@/modules/api/console";
 
 /** Resolved copy for the lead pipeline. */
@@ -48,84 +49,46 @@ const AcademyLeadPipelineContent = ({
       size: "md"
     }} isLoading /><div>
 
-      <TextLink props={{
-        label: "",
-        size: "sm"
-      }} isLoading />
-      <Text props={{
-        content: ""
-      }} isLoading /></div>
+      <TextAction size="sm" isSkeleton>{""}</TextAction>
+      <Text isSkeleton>{""}</Text></div>
 
-    <Button props={{
-      label: labels.open
-    }} isLoading /></div>) : leads.map((lead, index) => <div key={index}>
+    <Button isSkeleton>{labels.open}</Button></div>) : leads.map((lead, index) => <div key={index}>
     <Avatar props={{
       name: lead.name,
       size: "md"
     }} /><div>
 
-      <TextLink props={{
-        label: lead.name,
-        size: "sm"
-      }} on={{
-        press: () => onOpenLead(lead.id)
-      }} />
-      <Text props={{
-        content: lead.contact,
-        size: "xs",
-        tone: "muted"
-      }} /></div>
+      <TextAction size="sm" onPress={() => onOpenLead(lead.id)}>{lead.name}</TextAction>
+      <Text size="xs" tone="muted">{lead.contact}</Text></div>
 
-    <Badge props={{
-      content: lead.status,
-      tone: lead.status === "converted" ? "success" : "neutral"
-    }} />
-    <Button props={{
-      label: labels.open,
-      size: "sm"
-    }} on={{
-      press: () => onOpenLead(lead.id)
-    }} /></div>);
+    <Badge tone={lead.status === "converted" ? "success" : "neutral"}>{lead.status}</Badge>
+    <CoreButton
+      size="sm"
+      onPress={() => onOpenLead(lead.id)}
+    >{labels.open}</CoreButton></div>);
   const refusalNote = state === "refused" ? labels.refused : undefined;
   const note = state === "empty" ? labels.empty : refusalNote;
   return <>
-            {note === undefined ? <SurfaceCard props={{
-      label: labels.section,
-      fact: state === "answered" ? String(leads.length) : undefined
-    }} isLoading={state === "resting"}><div>{rows}</div></SurfaceCard> : <SurfaceCard props={{
-      label: labels.section
-    }}><div>
-          <Text props={{
-          content: note,
-          size: "sm",
-          tone: "muted"
-        }} /></div></SurfaceCard>}
-            {selected === undefined ? null : <SurfaceCard props={{
-      label: labels.detail
-    }}><div>
+            {note === undefined ? <SurfaceCard
+              label={labels.section}
+              labelEnd={(state === "answered" ? String(leads.length) : undefined) === undefined ? null : <Text size="sm" tone="muted" isSkeleton={state === "resting"}>{state === "answered" ? String(leads.length) : undefined}</Text>}
+            ><div>{rows}</div></SurfaceCard> : <SurfaceCard
+      label={labels.section}
+    ><div>
+          <Text size="sm" tone="muted">{note}</Text></div></SurfaceCard>}
+            {selected === undefined ? null : <SurfaceCard
+              label={labels.detail}
+            ><div>
 
 
-          <Heading props={{
-          content: selected.name,
-          level: 3
-        }} />
-          <Text props={{
-          content: draft ?? selected.message ?? selected.contact,
-          size: "sm",
-          tone: "muted"
-        }} />
-          <Button props={{
-          label: draft === undefined ? labels.draft : labels.advance,
-          variant: "primary",
-          isPending: pendingAction !== undefined
-        }} on={{
-          press: draft === undefined ? onDraftReply : onAdvance
-        }} /></div></SurfaceCard>}
-            {message === undefined ? null : <Text props={{
-      content: message,
-      size: "sm",
-      tone: "muted"
-    }} />}
+          <Heading level={3}>{selected.name}</Heading>
+          <Text size="sm" tone="muted">{draft ?? selected.message ?? selected.contact}</Text>
+          <CoreButton
+            variant="primary"
+            isPending={pendingAction !== undefined}
+            onPress={draft === undefined ? onDraftReply : onAdvance}
+          >{draft === undefined ? labels.draft : labels.advance}</CoreButton></div></SurfaceCard>}
+            {message === undefined ? null : <Text size="sm" tone="muted">{message}</Text>}
         </>;
 };
 

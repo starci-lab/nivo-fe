@@ -1,7 +1,7 @@
-import { ActionLink } from "../../leaves/ActionLink"
-import { Badge, type BadgeTone } from "../../leaves/Badge"
-import { Button } from "../../leaves/Button"
-import { Text } from "../../leaves/Text"
+import { Button, Link, Text, Badge, type BadgeTone } from "@starci/grammar/common";
+
+
+
 
 /** Resolved customer-safe capability with one action. */
 export type StatusActionCardData = {
@@ -26,15 +26,15 @@ export type StatusActionCardProps = { readonly props: StatusActionCardData; read
 export const StatusActionCard = (props: StatusActionCardProps) => (
     <div>
         <div>
-            <Text props={{ content: props.props.title, weight: "semibold" }} isLoading={props.isLoading} />
-            <Text props={{ content: props.props.description, size: "xs", tone: "muted" }} isLoading={props.isLoading} />
+            <Text weight="semibold" isSkeleton={props.isLoading}>{props.props.title}</Text>
+            <Text size="xs" tone="muted" isSkeleton={props.isLoading}>{props.props.description}</Text>
         </div>
-        <Badge props={{ content: props.props.statusLabel, tone: props.props.statusTone }} isLoading={props.isLoading} />
-        {props.props.detail === undefined ? null : <Text props={{ content: props.props.detail, size: "sm", tone: "muted" }} />}
+        <Badge tone={props.props.statusTone} isSkeleton={props.isLoading}>{props.props.statusLabel}</Badge>
+        {props.props.detail === undefined ? null : <Text size="sm" tone="muted">{props.props.detail}</Text>}
         {props.props.actionHref !== undefined && props.props.disabled !== true ? (
-            <ActionLink props={{ label: props.props.actionLabel, href: props.props.actionHref, target: props.props.actionTarget }} on={{ press: props.on?.press }} />
+            <Link href={props.props.actionHref} target={props.props.actionTarget} appearance="button" onFollow={props.on?.press}>{props.props.actionLabel}</Link>
         ) : (
-            <Button props={{ label: props.props.actionLabel, disabled: props.props.disabled, isPending: props.props.isPending }} on={{ press: props.on?.press }} isLoading={props.isLoading} />
+            <Button isDisabled={props.props.disabled} isPending={props.props.isPending} isSkeleton={props.isLoading} onPress={props.on?.press}>{props.props.actionLabel}</Button>
         )}
     </div>
 )

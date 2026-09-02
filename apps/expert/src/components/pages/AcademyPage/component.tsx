@@ -1,6 +1,6 @@
 "use client";
 
-import { AcademyChrome } from "@/components/layouts/AcademyChrome";
+import { AcademyChrome } from "@/components/product-shells/AcademyChrome";
 import { AcademySections } from "@/components/blocks/academy/AcademySections";
 import type { Course } from "@/modules/api/academy";
 

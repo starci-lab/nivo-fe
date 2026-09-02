@@ -1,7 +1,8 @@
+import { Heading, Text, Badge } from "@starci/grammar/common";
 "use client";
 
 import type { ComponentType } from "react";
-import { Badge, Breadcrumbs, Heading, RouteTabs, Text, TileIcon } from "@nivo/ui";
+import { Breadcrumbs, RouteTabs, TileIcon } from "@nivo/ui";
 
 /** Stable routed task identities owned by the shared installed-module shell. */
 export type AgentOSModuleView = "setup" | "test" | "operate" | "settings" | "diagnostics";
@@ -91,31 +92,15 @@ export const ModuleRouteShellBlock = <P extends object,>(props: ModuleRouteShell
         }} /><div>
 
 
-        <Text props={{
-            content: moduleKind,
-            size: "sm",
-            tone: "accent",
-            weight: "semibold"
-          }} />
+        <Text size="sm" tone="accent" weight="semibold">{moduleKind}</Text>
 
 
-        <Heading props={{
-            content: moduleName,
-            level: 1,
-            scale: "display"
-          }} />
+        <Heading level={1} scale="display">{moduleName}</Heading>
 
 
-        <Text props={{
-            content: `Active context ${contextVersion} · ${channelLabel} · ${controllerLabel}`,
-            size: "md",
-            tone: "muted"
-          }} />
+        <Text size="md" tone="muted">{`Active context ${contextVersion} · ${channelLabel} · ${controllerLabel}`}</Text>
 
-        <Badge props={{
-            content: lifecycleLabel,
-            tone: "success"
-          }} /></div></div></div>
+        <Badge tone="success">{lifecycleLabel}</Badge></div></div></div>
 
 
 

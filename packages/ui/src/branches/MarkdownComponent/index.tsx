@@ -1,5 +1,6 @@
-import { Heading } from "../../leaves/Heading"
-import { Text } from "../../leaves/Text"
+import { Heading, Text } from "@starci/grammar/common";
+
+
 
 /** Raw Markdown subset accepted by the safe renderer. */
 export type MarkdownComponentProps = { readonly markdown: string }
@@ -15,7 +16,7 @@ const blocks = (markdown: string): ReadonlyArray<MarkdownBlock> => markdown.trim
 export const MarkdownComponent = (props: MarkdownComponentProps) => (
     <div>
         {blocks(props.markdown).map((item, index) => item.kind === "heading"
-            ? <Heading key={index} props={{ content: item.content, level: item.level }} />
-            : <Text key={index} props={{ content: item.content, size: "sm" }} />)}
+            ? <Heading level={item.level}>{item.content}</Heading>
+            : <Text size="sm">{item.content}</Text>)}
     </div>
 )

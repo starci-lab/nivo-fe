@@ -8,7 +8,7 @@ describe("content rows", () => {
         const open = vi.fn()
         render(<TrendingContentRow props={{ id: "one", rank: "1", title: "Popular", isTopRank: true }} on={{ open }} />)
         expect(screen.getByText("1")).toHaveAttribute("data-tone", "accent")
-        fireEvent.click(screen.getByRole("link", { name: "Popular" }))
+        fireEvent.click(screen.getByRole("button", { name: "Popular" }))
         expect(open).toHaveBeenCalledTimes(1)
     })
 
@@ -17,7 +17,7 @@ describe("content rows", () => {
         const follow = vi.fn()
         render(<SuggestedUserRow props={{ id: "u1", name: "Ada", username: "ada", openToWork: true, openToWorkLabel: "Open to work", followLabel: "Follow", followingLabel: "Following" }} on={{ open, follow }} />)
         expect(screen.getByText("Open to work")).toBeInTheDocument()
-        fireEvent.click(screen.getByRole("link", { name: "Ada" }))
+        fireEvent.click(screen.getByRole("button", { name: "Ada" }))
         fireEvent.click(screen.getByRole("button", { name: "Follow" }))
         expect(open).toHaveBeenCalledTimes(1)
         expect(follow).toHaveBeenCalledTimes(1)

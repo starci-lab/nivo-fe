@@ -12,4 +12,18 @@ describe("DrawerBranch", () => {
         fireEvent.click(screen.getByRole("button", { name: "Close" }))
         expect(screen.queryByText("Destinations")).not.toBeInTheDocument()
     })
+
+    it("lets action-aware content close only after its successful command", async () => {
+        render(<DrawerBranch
+            triggerLabel="Menu"
+            title="Console"
+            closeLabel="Close"
+            renderContent={(close) => <button type="button" onClick={close}>Open destination</button>}
+        />)
+
+        fireEvent.click(screen.getByRole("button", { name: "Menu" }))
+        expect(await screen.findByRole("dialog")).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Open destination" }))
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    })
 })

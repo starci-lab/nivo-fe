@@ -5,7 +5,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useEffect, useRef, useState } from "react";
 import { authenticationOauthRedirectUrl, rememberOauthProvider, useMutateForgotPasswordInitSwr, useMutateForgotPasswordResendSwr, useMutateForgotPasswordVerifyOtpSwr, useMutateSignInSwr, useMutateSignUpInitSwr, useMutateSignUpResendSwr, useMutateSignUpVerifyOtpSwr, useOauthReturnExchange } from "@/hooks/swr";
 import { AuthenticationPageBase as AuthenticationPageView } from "./component";
-import type { AuthActions, AuthCode, AuthDetails, AuthMode, AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";
+import type { AuthActions, AuthCode, AuthDetails, AuthMode, AuthPendingAction, AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";
 import type { OtpChallenge } from "@/modules/api/auth";
 import { useSession } from "@/modules/auth/session";
 
@@ -91,7 +91,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const [statusMessage, setStatusMessage] = useState("");
   const [isError, setIsError] = useState(false);
-  const [isPending, setIsPending] = useState(false);
+  const [pendingAction, setPendingAction] = useState<AuthPendingAction | null>(null);
   /*
    * THE SWITCH IS REAL STATE AND IT CHANGES NOTHING SERVER-SIDE YET. The refresh cookie is written
    * with a fixed thirty-day `maxAge` and no per-request control, so a session lasts the same length
@@ -115,6 +115,21 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     const timer = setTimeout(() => setCooldownSeconds(left => left - 1), 1000);
     return () => clearTimeout(timer);
   }, [cooldownSeconds]);
+
+  useEffect(() => {
+    const releaseRestoredAction = () => setPendingAction(null);
+    window.addEventListener("pageshow", releaseRestoredAction);
+    return () => window.removeEventListener("pageshow", releaseRestoredAction);
+  }, []);
+
+  const runPending = async <Answer,>(action: AuthPendingAction, request: () => Promise<Answer>): Promise<Answer> => {
+    setPendingAction(action);
+    try {
+      return await request();
+    } finally {
+      setPendingAction(null);
+    }
+  };
 
   /** Put the screen back to a clean first step, keeping only the journey. */
   const clear = () => {
@@ -167,7 +182,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     if (result === undefined || hasAdoptedOauth.current) return;
     hasAdoptedOauth.current = true;
     if (!result.ok) {
-      refuse(result.reason);
+      refuse(t("signIn.oauthRefused"));
       return;
     }
     if (result.data.requiresTwoFactor) {
@@ -177,7 +192,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     }
     session.adopt(result.data);
     router.push("/overview");
-  }, [oauthReturn.answer, router, session]);
+  }, [oauthReturn.answer, router, session, t]);
 
   /**
    * Submit the first step of whichever journey is running.
@@ -185,14 +200,12 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
    * @param details - The email, and the password on the journeys that ask for one.
    */
   const submitDetails = async (details: AuthDetails) => {
-    setIsPending(true);
     setIsError(false);
     setStatusMessage("");
     if (mode === "signIn") {
-      const result = await signInMutation.trigger(details);
-      setIsPending(false);
+      const result = await runPending("submit", () => signInMutation.trigger(details));
       if (!result.ok) {
-        refuse(result.reason);
+        refuse(t("signIn.refused"));
         return;
       }
       if (result.data.requiresTwoFactor) {
@@ -204,12 +217,11 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
       router.push("/overview");
       return;
     }
-    const result = mode === "signUp" ? await signUpInitMutation.trigger(details) : await forgotPasswordInitMutation.trigger({
+    const result = await runPending("submit", () => mode === "signUp" ? signUpInitMutation.trigger(details) : forgotPasswordInitMutation.trigger({
       email: details.email
-    });
-    setIsPending(false);
+    }));
     if (!result.ok) {
-      refuse(result.reason);
+      refuse(t("requestRefused"));
       return;
     }
     setEmail(details.email);
@@ -223,17 +235,15 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
    * @param code - The code, and the new password on the journey that sets one.
    */
   const submitCode = async (code: AuthCode) => {
-    setIsPending(true);
     setIsError(false);
     setStatusMessage("");
     if (mode === "signUp") {
-      const result = await signUpVerifyMutation.trigger({
+      const result = await runPending("submit", () => signUpVerifyMutation.trigger({
         challengeId: challengeId.current,
         otp: code.otp
-      });
-      setIsPending(false);
+      }));
       if (!result.ok) {
-        refuse(result.reason);
+        refuse(t("signUp.codeRefused"));
         return;
       }
       // A brand new account has no second factor, so there is no challenge to read for here.
@@ -242,12 +252,11 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
       router.push("/overview");
       return;
     }
-    const result = await forgotPasswordVerifyMutation.trigger({
+    const result = await runPending("submit", () => forgotPasswordVerifyMutation.trigger({
       challengeId: challengeId.current,
       otp: code.otp,
       newPassword: code.newPassword
-    });
-    setIsPending(false);
+    }));
     if (!result.ok) {
       // ONE SENTENCE FOR BOTH REFUSALS. `result.reason` is deliberately not shown.
       refuse(t("forgotPassword.codeRefused"));
@@ -259,15 +268,13 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
 
   /** Ask for another code. Refused inside the cooldown, which the control already says. */
   const resend = async () => {
-    setIsPending(true);
-    const result = mode === "signUp" ? await signUpResendMutation.trigger({
+    const result = await runPending("resend", () => mode === "signUp" ? signUpResendMutation.trigger({
       challengeId: challengeId.current
-    }) : await forgotPasswordResendMutation.trigger({
+    }) : forgotPasswordResendMutation.trigger({
       challengeId: challengeId.current
-    });
-    setIsPending(false);
+    }));
     if (!result.ok) {
-      refuse(result.reason);
+      refuse(t("resendRefused"));
       return;
     }
     adoptChallenge(result.data);
@@ -311,18 +318,13 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
        * This page, because the reader came from here and should land back in the language they
        * left from; `pathname` already carries the locale prefix when there is one.
        *
-       * THE CONTROLS ARE DELIBERATELY NOT LOCKED. Locking them reads as the careful choice and
-       * is the trap: a reader who presses Back from the provider can be restored from the
-       * browser's cache with this component's state exactly as it was left, and a form frozen
-       * pending a request that will never answer is a dead end only a reload escapes. A second
-       * press costs nothing instead - each hand-off mints its own state on the backend and the
-       * one that is completed is the one that counts.
+       * THE PROVIDER BUTTON OWNS THE WAIT. `pageshow` releases that pending state when Back restores
+       * this document from the browser cache, so progress is visible without creating a dead end.
        */
       rememberOauthProvider(provider);
       setIsError(false);
-      setStatusMessage(t("providerUnavailable", {
-        provider: provider === "google" ? "Google" : provider
-      }));
+      setStatusMessage("");
+      setPendingAction("provider");
       const returnTo = `${window.location.origin}${window.location.pathname}`;
       window.location.assign(authenticationOauthRedirectUrl(provider, returnTo));
     },
@@ -342,7 +344,8 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
   const frame = {
     title: t(`${mode}.title`),
     subtitle: t(`${mode}.subtitle`),
-    isPending: isPending || oauthReturn.isMutating
+    isPending: pendingAction !== null || oauthReturn.isMutating,
+    pendingAction: oauthReturn.isMutating ? "provider" as const : pendingAction ?? undefined
   };
 
   /*
@@ -400,11 +403,15 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
           isError,
           codeLabel: t("codeLabel"),
           codePlaceholder: t("codePlaceholder"),
+          codeRequired: t("codeRequired"),
+          codeInvalid: t("codeInvalid"),
           codeHint: t("codeHint", {
             minutes: ttlMinutes
           }),
           newPasswordLabel: t("newPasswordLabel"),
           newPasswordPlaceholder: t("newPasswordPlaceholder"),
+          newPasswordRequired: t("newPasswordRequired"),
+          newPasswordTooShort: t("newPasswordTooShort"),
           newPasswordHint: t("newPasswordHint"),
           revealLabel: t("revealLabel"),
           hideLabel: t("hideLabel"),
@@ -427,12 +434,17 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
         isError,
         emailLabel: t("emailLabel"),
         emailPlaceholder: t("emailPlaceholder"),
+        emailRequired: t("emailRequired"),
+        emailInvalid: t("emailInvalid"),
         emailHint: t("emailHint"),
         passwordLabel: t("passwordLabel"),
         passwordPlaceholder: mode === "signUp" ? t("newAccountPasswordPlaceholder") : t("passwordPlaceholder"),
+        passwordRequired: t("passwordRequired"),
+        passwordTooShort: t("passwordTooShort"),
         passwordHint: t("passwordHint"),
         confirmPasswordLabel: t("confirmPasswordLabel"),
         confirmPasswordPlaceholder: t("confirmPasswordPlaceholder"),
+        confirmPasswordRequired: t("confirmPasswordRequired"),
         confirmPasswordMismatch: t("confirmPasswordMismatch"),
         revealLabel: t("revealLabel"),
         hideLabel: t("hideLabel"),

@@ -1,4 +1,5 @@
-import { Heading, Icon, Text } from "@nivo/ui";
+import { Heading, Icon, Text } from "@starci/grammar/common";
+import { nivoIconSource } from "@nivo/ui";
 import { useTranslations } from "next-intl";
 import { CONTENT_CLASS_NAME, ROOT_CLASS_NAME } from "./classNames";
 
@@ -27,18 +28,9 @@ export const HomePage = (props: HomePageProps) => {
   const t = useTranslations("app");
   return <main className={ROOT_CLASS_NAME}>
             <div className={CONTENT_CLASS_NAME}>
-                <Icon props={{
-        name: "brand",
-        role: "heading"
-      }} />
-                <Heading props={{
-        content: "nivo app",
-        level: 1
-      }} />
-                <Text props={{
-        content: t("description"),
-        size: "sm"
-      }} />
+                <Icon source={nivoIconSource("brand", "heading")} role="heading" />
+                <Heading level={1}>{"nivo app"}</Heading>
+                <Text size="sm">{t("description")}</Text>
             </div>
         </main>;
 };
