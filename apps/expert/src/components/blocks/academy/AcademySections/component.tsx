@@ -371,7 +371,7 @@ const quoteBand = ({
   attribution
 }: CustomPieces) => {
   const quoted = bodyText ?? headingText;
-  const attributed: Array<BandPart> = attribution === undefined ? [] : [<Text size="sm" tone="muted">{`— ${attribution}`}</Text>];
+  const attributed: Array<BandPart> = attribution === undefined ? [] : [<Text key="attribution" size="sm" tone="muted">{`— ${attribution}`}</Text>];
   return <Band parts={[<blockquote key="quote" className={PULL_QUOTE_CLASS_NAME}>
                         {quoted}
                     </blockquote>, ...attributed]} />;
@@ -504,7 +504,7 @@ const band = (section: AcademySection, onSubmitLead: LeadSubmit) => {
       {
         const person = section.person;
         const quote = person.quote;
-        return <Band alt parts={[<div key="instructor">{<Figure src={person.photoUrl} alt={person.name} ratio="3/4" />}{<div>{subjectOverCaption(<Heading level={2}>{person.name}</Heading>, person.title)}{<Text tone="muted">{person.bio}</Text>}{<div>{person.credentials.map(credential => <Text size="sm">{credential}</Text>)}</div>}{quote === undefined ? undefined : <blockquote key="quote" className={QUOTE_CLASS_NAME}>
+        return <Band alt parts={[<div key="instructor">{<Figure src={person.photoUrl} alt={person.name} ratio="3/4" />}{<div>{subjectOverCaption(<Heading level={2}>{person.name}</Heading>, person.title)}{<Text tone="muted">{person.bio}</Text>}{<div>{person.credentials.map(credential => <Text key={credential} size="sm">{credential}</Text>)}</div>}{quote === undefined ? undefined : <blockquote key="quote" className={QUOTE_CLASS_NAME}>
                                             <Text size="sm" tone="muted">{quote}</Text>
                                         </blockquote>}</div>}</div>]} />;
       }

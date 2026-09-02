@@ -16,7 +16,7 @@ const blocks = (markdown: string): ReadonlyArray<MarkdownBlock> => markdown.trim
 export const MarkdownComponent = (props: MarkdownComponentProps) => (
     <div>
         {blocks(props.markdown).map((item, index) => item.kind === "heading"
-            ? <Heading level={item.level}>{item.content}</Heading>
-            : <Text size="sm">{item.content}</Text>)}
+            ? <Heading key={`${String(index)}-${item.kind}`} level={item.level}>{item.content}</Heading>
+            : <Text key={`${String(index)}-${item.kind}`} size="sm">{item.content}</Text>)}
     </div>
 )

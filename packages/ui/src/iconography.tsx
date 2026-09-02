@@ -173,6 +173,10 @@ const cuts = (outline: GlyphComponent, chip: GlyphComponent): GlyphCuts => ({
   chip
 });
 
+/**
+ * The app's answer to "which glyph means this". Every Nivo semantic icon name resolves here to the
+ * three cuts Grammar's `Icon` may ask for, so a screen names a MEANING and never a glyph library.
+ */
 export const NIVO_ICON_SOURCES: Record<IconName, GlyphCuts> = {
   brand: cuts(AcademicCapIcon, AcademicCapSolidIcon),
   streak: cuts(FireIcon, FireSolidIcon),
