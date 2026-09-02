@@ -1,10 +1,11 @@
-import { Heading } from "@starci/grammar/common";
 "use client"
+
+import { Heading } from "@starci/grammar/common"
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { createElement, useEffect, useId, useState, type ComponentType, type CSSProperties } from "react"
 
-import { RAIL_CLASS_NAME, RAIL_CONTROL_CLASS_NAME, RAIL_HEADING_CLASS_NAME } from "./classNames"
+import { RAIL_CLASS_NAME, RAIL_CONTROL_CLASS_NAME } from "./classNames"
 
 /** Props for a persisted, accessible navigation rail. */
 export type CollapsibleRailProps<RailProps extends object, CompactProps extends object, ToggleProps extends object> = {

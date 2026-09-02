@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow";
+import { fleetResourceHref, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
 import { useQueryCatalogItemsSwr, useQueryMyCatalogOrdersSwr, useQueryMyExpertSitesSwr, useQueryMyInstancesSwr } from "@/hooks/swr";
 import { useRouter } from "@/i18n/navigation";
 import type { CatalogItemRow } from "@/modules/api/console";
@@ -223,8 +223,7 @@ export const AppsDashboard = (props: AppsDashboardProps) => {
     router.push(route);
   };
   const openOwnedApp = (siteId: string) => {
-    const route = `/apps/${encodeURIComponent(siteId)}`;
-    router.push(route);
+    router.push(fleetResourceHref("site", siteId));
   };
   return <AppsDashboardBase title={t("apps.title")} lede={t("apps.lede")} buildAppLabel={t("apps.buildApp")} attentionGroupLabel={t("apps.attentionGroup")} steadyGroupLabel={t("apps.steadyGroup")} owned={ownedView()} catalogue={catalogueView()} onBuildTemplate={buildTemplate} onOpenOwnedApp={openOwnedApp} />;
 };

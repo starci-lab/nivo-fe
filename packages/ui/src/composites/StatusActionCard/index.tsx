@@ -1,4 +1,4 @@
-import { Button, Link, Text, Badge, type BadgeTone } from "@starci/grammar/common";
+import { Button, Text, Badge, type BadgeTone } from "@starci/grammar/common";
 
 
 
@@ -32,7 +32,7 @@ export const StatusActionCard = (props: StatusActionCardProps) => (
         <Badge tone={props.props.statusTone} isSkeleton={props.isLoading}>{props.props.statusLabel}</Badge>
         {props.props.detail === undefined ? null : <Text size="sm" tone="muted">{props.props.detail}</Text>}
         {props.props.actionHref !== undefined && props.props.disabled !== true ? (
-            <Link href={props.props.actionHref} target={props.props.actionTarget} appearance="button" onFollow={props.on?.press}>{props.props.actionLabel}</Link>
+            <Button href={props.props.actionHref} target={props.props.actionTarget} onFollow={props.on?.press}>{props.props.actionLabel}</Button>
         ) : (
             <Button isDisabled={props.props.disabled} isPending={props.props.isPending} isSkeleton={props.isLoading} onPress={props.on?.press}>{props.props.actionLabel}</Button>
         )}

@@ -1,6 +1,6 @@
 import { nivoIconSource, TileIcon } from "@nivo/ui";
-import { EmptyNotice, Icon, SurfaceCard, Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/common";
-import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow";
+import { EmptyNotice, Icon, SurfaceCard, Text, Badge, type BadgeTone, TextAction } from "@starci/grammar/common";
+import { fleetResourceHref, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
 /** Public API role for AgentOSWorkspaceListProps. */
 export type AgentOSWorkspaceListProps = AgentOSWorkspaceListViewProps;
 const STATUS_TONE: Readonly<Record<FleetStatus, BadgeTone>> = {
@@ -70,7 +70,7 @@ const workspaceRow = (row: AgentOSWorkspaceView, isLoading: boolean, openWorkspa
 
 
 
-    <TextAction size="sm" isSkeleton={isLoading} onPress={openWorkspace === undefined ? undefined : () => openWorkspace(row.id)}>{row.name}</TextAction>
+    <TextAction size="sm" href={fleetResourceHref("workspace", row.id)} isSkeleton={isLoading} onFollow={openWorkspace === undefined ? undefined : () => openWorkspace(row.id)}>{row.name}</TextAction>
 
 
 

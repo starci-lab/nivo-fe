@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow";
+import { fleetResourceHref, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
 import { useQueryMyAgentWorkspacesSwr } from "@/hooks/swr";
 import { AgentOSWorkspaceListBase, type AgentOSWorkspaceListViewProps } from "./component";
 /** Public API role for AgentOSWorkspaceListProps. */
@@ -64,7 +64,7 @@ export const AgentOSWorkspaceList = (props: AgentOSWorkspaceListProps) => {
     return {
       state: "answered",
       on: {
-        openWorkspace: id => router.push(`/agentos/workspaces/${id}`)
+        openWorkspace: id => router.push(fleetResourceHref("workspace", id))
       },
       props: {
         label,

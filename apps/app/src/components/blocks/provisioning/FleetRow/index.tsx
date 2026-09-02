@@ -1,4 +1,4 @@
-import { Button, Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/common";
+import { Button, Text, Badge, type BadgeTone, TextAction } from "@starci/grammar/common";
 
 /**
  * BLOCK - one row of the provisioning fleet, whichever kind of thing it is.
@@ -38,6 +38,17 @@ const STATUS_TONE: Readonly<Record<FleetStatus, BadgeTone>> = {
   suspended: "neutral"
 };
 
+/**
+ * Where one fleet resource lives, by kind.
+ *
+ * THE ROW'S NAME IS A DESTINATION, not a state change, so it is drawn as a real link and the
+ * browser keeps middle-click, copy-link and the status bar. The two paths are the ones the
+ * connected callers already push to; they are written here once so the row and its caller cannot
+ * disagree about where a resource lives.
+ */
+export const fleetResourceHref = (kind: FleetKind, id: string): string =>
+  kind === "workspace" ? `/agentos/workspaces/${encodeURIComponent(id)}` : `/apps/${encodeURIComponent(id)}`;
+
 /** Resolved identity, kind, state and the one action this row currently permits. */
 export type FleetRowData = {
   readonly id: string;
@@ -75,7 +86,7 @@ export const FleetRow = (props: FleetRowProps) => {
   const on = props.on;
   const identity = <div>
 
-    <TextAction size="sm" isSkeleton={isLoading} onPress={on?.open}>{data.name ?? ""}</TextAction>
+    <TextAction size="sm" href={fleetResourceHref(data.kind, data.id)} isSkeleton={isLoading} onFollow={on?.open}>{data.name ?? ""}</TextAction>
 
 
     <Text size="xs" tone="muted" isSkeleton={isLoading}>{data.detail}</Text></div>;
