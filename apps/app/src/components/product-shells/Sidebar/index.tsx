@@ -6,7 +6,10 @@ import { Sidebar as GrammarSidebar, Text } from "@starci/grammar/common"
 import { DrawerBranch, nivoIconSource } from "@nivo/ui"
 import { usePathname, useRouter } from "@/i18n/navigation"
 
+/** Which console surface the navigation is drawn on: the persistent rail, or the mobile drawer. */
 export type SidebarMode = "desktop" | "mobile"
+
+/** What a caller states about the navigation - the surface it belongs to, and nothing else. */
 export type SidebarProps = { readonly mode?: SidebarMode }
 type DestinationKey = "overview" | "apps" | "agentos" | "servers" | "domains" | "wallet" | "support"
 type Destination = { readonly key: DestinationKey; readonly route: string | null; readonly group: "home" | "services" | "account" }
@@ -23,7 +26,8 @@ const DESTINATIONS: ReadonlyArray<Destination> = [
 const STORAGE_KEY = "nivo-console-navigation-collapsed"
 
 /** Nivo route/translation adapter over the shared Grammar sidebar renderer. */
-export const Sidebar = ({ mode = "desktop" }: SidebarProps) => {
+export const Sidebar = (props: SidebarProps) => {
+    const mode = props.mode ?? "desktop"
     const t = useTranslations("console")
     const router = useRouter()
     const pathname = usePathname()

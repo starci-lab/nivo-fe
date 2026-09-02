@@ -8,6 +8,8 @@ export * from "./leaves/ContributionGrid"
 export * from "./leaves/ContributionIntensityLegend"
 export * from "./leaves/DayCell"
 export * from "./leaves/ExtendedTabs"
+/** Nivo-owned semantic names resolve to app glyph sources consumed by Grammar Icon. */
+export * from "./leaves/Icon"
 export * from "./leaves/Label"
 export * from "./leaves/MicrochipArtwork"
 export * from "./leaves/NivoBrand"
@@ -48,6 +50,3 @@ export * from "./branches/PressableSurface"
 export * from "./branches/ScrollViewport"
 export * from "./branches/StarCiDashboardThemeBoundary"
 export * from "./branches/SurfaceFormCard"
-
-/** Nivo-owned semantic names resolve to app glyph sources consumed by Grammar Icon. */
-export * from "./iconography"

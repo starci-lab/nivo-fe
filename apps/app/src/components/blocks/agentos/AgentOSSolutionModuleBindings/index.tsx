@@ -32,7 +32,7 @@ const displayedBindings = (values: ReadonlyArray<string> | undefined, empty: str
   return values ?? [];
 };
 const bindingGroup = (name: string, values: ReadonlyArray<string> | undefined, empty: string, isLoading: boolean) => <div>
-  <Heading level={4}>{name}</Heading>{displayedBindings(values, empty, isLoading).map((value, index) => <Text size="sm" isSkeleton={isLoading}>{value}</Text>)}</div>;
+  <Heading level={4}>{name}</Heading>{displayedBindings(values, empty, isLoading).map((value, index) => <Text key={`${name}-${index}`} size="sm" isSkeleton={isLoading}>{value}</Text>)}</div>;
 const artifactValues = (installation: AgentosModuleInstallationDetail | undefined): ReadonlyArray<string> | undefined => {
   if (installation === undefined) return undefined;
   if (installation.knowledgeArtifact === null) return [];

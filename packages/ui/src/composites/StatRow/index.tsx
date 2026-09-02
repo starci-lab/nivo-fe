@@ -1,4 +1,4 @@
-import { nivoIconSource, type IconName } from "../../iconography";
+import { nivoIconSource, type IconName } from "../../leaves/Icon";
 import { Icon, Text } from "@starci/grammar/common";
 
 

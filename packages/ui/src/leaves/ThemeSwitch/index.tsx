@@ -1,4 +1,4 @@
-import { nivoIconSource } from "../../iconography";
+import { nivoIconSource } from "../Icon";
 import { Icon } from "@starci/grammar/common";
 import { Switch } from "@heroui/react";
 

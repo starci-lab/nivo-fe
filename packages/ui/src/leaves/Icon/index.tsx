@@ -88,7 +88,7 @@ import {
 "@heroicons/react/16/solid";
 import type { IconUsage } from "@starci/grammar/common";
 import type { SVGProps } from "react";
-import { GithubMark, GoogleMark } from "./iconography-brands";
+import { GithubMark, GoogleMark } from "../../iconography-brands";
 
 /**
  * LEAF - `Icon`: the picture a word needs when the word alone is slower to find.
@@ -100,8 +100,8 @@ import { GithubMark, GoogleMark } from "./iconography-brands";
  *
  * WHY THE SET IS CLOSED. Heroicons ships a large glyph catalogue, and a product that can reach all
  * of them has no iconography, it has a search box.
- * `iconography.md` is the canonical feature-to-glyph table: read it before adding a meaning or choosing a
- * nearby glyph, and update it in the same change as this map.
+ * `src/iconography.md` is the canonical feature-to-glyph table: read it before adding a meaning
+ * or choosing a nearby glyph, and update it in the same change as this map.
  *
  * COLOUR IS NOT A PROP. The glyph draws in `currentColor`, so it inherits whatever `text-*` the
  * node above carries and can never disagree with the label beside it.
@@ -177,7 +177,7 @@ const cuts = (outline: GlyphComponent, chip: GlyphComponent): GlyphCuts => ({
  * The app's answer to "which glyph means this". Every Nivo semantic icon name resolves here to the
  * three cuts Grammar's `Icon` may ask for, so a screen names a MEANING and never a glyph library.
  */
-export const NIVO_ICON_SOURCES: Record<IconName, GlyphCuts> = {
+export const IconSources: Record<IconName, GlyphCuts> = {
   brand: cuts(AcademicCapIcon, AcademicCapSolidIcon),
   streak: cuts(FireIcon, FireSolidIcon),
   credit: cuts(BoltIcon, BoltSolidIcon),
@@ -227,5 +227,5 @@ export const NIVO_ICON_SOURCES: Record<IconName, GlyphCuts> = {
 };
 
 /** Resolve an app-owned semantic name to the glyph cut required by Grammar's public role. */
-export const nivoIconSource = (name: IconName, usage: IconUsage = "chip") => NIVO_ICON_SOURCES[name][usage];
+export const nivoIconSource = (name: IconName, usage: IconUsage = "chip") => IconSources[name][usage];
 

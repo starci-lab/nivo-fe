@@ -1,6 +1,6 @@
-import { Heading, Text } from "@starci/grammar/common";
 "use client";
 
+import { Heading, Text } from "@starci/grammar/common";
 import { createContext, useContext, type ComponentType } from "react";
 import { Breadcrumbs, TileIcon } from "@nivo/ui";
 import type { AgentosModuleStudio } from "@/modules/api/console";

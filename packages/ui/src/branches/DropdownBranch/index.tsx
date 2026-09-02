@@ -1,4 +1,4 @@
-import { nivoIconSource, type IconName } from "../../iconography";
+import { nivoIconSource, type IconName } from "../../leaves/Icon";
 import { Icon } from "@starci/grammar/common";
 import { Dropdown, Header } from "@heroui/react"
 import type { ReactNode } from "react"
