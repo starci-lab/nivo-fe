@@ -3,6 +3,7 @@
 import { Heading, Text, Badge } from "@starci/grammar/common";
 import type { ComponentType } from "react";
 import { Breadcrumbs, RouteTabs, TileIcon } from "@nivo/ui";
+import { MODULE_ROUTE_SHELL_CLASS_NAME, MODULE_ROUTE_SHELL_DETAIL_CLASS_NAME, MODULE_ROUTE_SHELL_IDENTITY_CLASS_NAME } from "./classNames";
 
 /** Stable routed task identities owned by the shared installed-module shell. */
 export type AgentOSModuleView = "setup" | "test" | "operate" | "settings" | "diagnostics";
@@ -62,7 +63,9 @@ export const ModuleRouteShellBlock = <P extends object,>(props: ModuleRouteShell
     onBackToModules,
     onNavigate
   }: ModuleRouteShellBlockProps<P> = props;
-  return <div>
+  const machineKey = /^custom:[0-9a-f-]{20,}$/i.test(moduleName);
+  const heading = machineKey && moduleKind === "generic-agent" ? "Generic agent" : moduleName;
+  return <div className={MODULE_ROUTE_SHELL_CLASS_NAME} data-contract="MEASURE-2 GAP-4 FLOW-3">
 
 
   <Breadcrumbs props={{
@@ -81,7 +84,7 @@ export const ModuleRouteShellBlock = <P extends object,>(props: ModuleRouteShell
       }]
     }} on={{
       activate: id => id !== "module" && onBackToModules()
-    }} /><div><div>
+      }} /><div>
 
 
 
@@ -89,18 +92,22 @@ export const ModuleRouteShellBlock = <P extends object,>(props: ModuleRouteShell
       <TileIcon props={{
           icon: "agentos",
           signal: "attention"
-        }} /><div>
+      }} /><div className={MODULE_ROUTE_SHELL_IDENTITY_CLASS_NAME} data-contract="GAP-2">
 
 
-        <Text size="sm" tone="accent" weight="semibold">{moduleKind}</Text>
+        <Text size="xs">{moduleKind}</Text>
 
 
-        <Heading level={1} scale="display">{moduleName}</Heading>
+        <Heading level={1}>{heading}</Heading>
+        {machineKey ? <Text size="sm" tone="muted">{moduleName}</Text> : null}
 
 
-        <Text size="md" tone="muted">{`Active context ${contextVersion} · ${channelLabel} · ${controllerLabel}`}</Text>
+        <div className={MODULE_ROUTE_SHELL_DETAIL_CLASS_NAME} data-contract="GAP-2">
+          <Text size="sm" tone="muted">{`Active context ${contextVersion} · ${channelLabel} · ${controllerLabel}`}</Text>
 
-        <Badge tone="success">{lifecycleLabel}</Badge></div></div></div>
+          <Badge tone="neutral">{lifecycleLabel}</Badge>
+        </div>
+      </div></div>
 
 
 

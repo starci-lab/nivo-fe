@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import type { ContextDraft } from "@/components/blocks/agentos/ContextVersionBlock";
 import type { ExecuteMessage } from "@/components/blocks/agentos/ExecuteChatBlock";
@@ -28,6 +28,8 @@ const telegramAccountIdFromToken = (token: string): string | null => {
   const accountId = separator > 0 ? token.slice(0, separator) : "";
   return /^\d{5,20}$/u.test(accountId) ? accountId : null;
 };
+type SetupAction = { readonly kind: "send" | "apply"; readonly sessionId: string } | { readonly kind: "start" };
+type SetupFeedback = { readonly refused?: "send" | "apply"; readonly unconfirmed?: boolean };
 type AgentosModuleTestTarget = {
   readonly contextVersionId?: string;
   readonly setupSessionId?: string;
@@ -190,6 +192,12 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
   const [supportActionRefused, setSupportActionRefused] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [selectedSetupSessionId, setSelectedSetupSessionId] = useState<string | null>(null);
+  const [setupDrafts, setSetupDrafts] = useState<Record<string, string>>({});
+  const [setupAction, setSetupAction] = useState<SetupAction | null>(null);
+  const [setupFeedback, setSetupFeedback] = useState<Record<string, SetupFeedback>>({});
+  const [setupStartRefused, setSetupStartRefused] = useState(false);
+  const setupLock = useRef(false);
+
   const [selectedOperationTarget, setSelectedOperationTarget] = useState<OperationTarget | null>(null);
   const [setupPane, setSetupPane] = useState<SetupPane>("conversation");
   const [testPane, setTestPane] = useState<TestPane>("conversation");
@@ -244,7 +252,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
   useEffect(() => {
     if (runtime === null) return;
     const selected = runtime.setupSessions.find(item => item.id === selectedSetupSessionId);
-    if (selected !== undefined && (runtime.setupSession?.id === selected.id || selected.setupStatus === "open" || selected.setupStatus === "ready")) return;
+    if (selected !== undefined) return;
     setSelectedSetupSessionId(runtime.setupSession?.id ?? runtime.setupSessions.at(-1)?.id ?? null);
   }, [runtime, selectedSetupSessionId]);
   const testContract = testSurface?.contract ?? runtime?.installation.runtimeManifest.test;
@@ -257,13 +265,13 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
   const runtimeSetupSessions = runtime?.setupSessions;
   const runtimeExecuteSessions = runtime?.executeSessions;
   const runtimeDisplayName = runtime?.installation.displayName;
-  const perform = useCallback(async (input: ManageAgentosModuleRuntimeInput): Promise<AgentosModuleRuntime | null> => {
+  const perform = useCallback(async (input: ManageAgentosModuleRuntimeInput, markRefused = true): Promise<AgentosModuleRuntime | null> => {
     setPending(true);
     setActionRefused(false);
     const result = await mutateRuntime(input);
     setPending(false);
     if (!result.ok || result.data.installation.agentWorkspaceId !== workspaceId) {
-      setActionRefused(true);
+      if (markRefused) setActionRefused(true);
       return null;
     }
     await runtimeQuery.mutate(result, {
@@ -271,19 +279,19 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     });
     return result.data;
   }, [mutateRuntime, runtimeQuery, workspaceId]);
-  const pollRuntimeUntil = useCallback(async (settled: (candidate: AgentosModuleRuntime) => boolean): Promise<AgentosModuleRuntime | null> => {
+  const pollRuntimeUntil = useCallback(async (settled: (candidate: AgentosModuleRuntime) => boolean, markRefused = true): Promise<AgentosModuleRuntime | null> => {
     setPending(true);
     for (let attempt = 0; attempt < POLL_ATTEMPTS; attempt += 1) {
       await wait(POLL_INTERVAL_MS);
       const result = await runtimeQuery.mutate();
       if (result === undefined) {
         setPending(false);
-        setActionRefused(true);
+        if (markRefused) setActionRefused(true);
         return null;
       }
       if (!result.ok || result.data.installation.agentWorkspaceId !== workspaceId) {
         setPending(false);
-        setActionRefused(true);
+        if (markRefused) setActionRefused(true);
         return null;
       }
       if (settled(result.data)) {
@@ -292,18 +300,36 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
       }
     }
     setPending(false);
-    setActionRefused(true);
+    if (markRefused) setActionRefused(true);
     return null;
   }, [runtimeQuery, workspaceId]);
   const startSetupRevision = useCallback(() => {
+    if (setupLock.current || pending) return;
+    setupLock.current = true;
+    setSetupAction({ kind: "start" });
+    setSetupStartRefused(false);
     void perform({
       action: "START_SETUP_REVISION",
       installationId,
       idempotencyKey: idempotencyKey(),
       title: "Setup revision"
+    }, false).then(result => {
+      if (result === null) setSetupStartRefused(true);
+      else {
+        const newId = result.setupSession?.id;
+        if (newId !== undefined && result.setupSessions.some(session => session.id === newId)) {
+          setSelectedSetupSessionId(newId);
+          setSetupFeedback(current => ({ ...current, [newId]: {} }));
+        }
+      }
+      setSetupAction(null); setupLock.current = false;
     });
-  }, [installationId, perform]);
+  }, [installationId, perform, pending]);
   const sendSetupMessage = useCallback(async (sessionId: string, content: string) => {
+    if (setupLock.current || pending) return;
+    setupLock.current = true;
+    setSetupAction({ kind: "send", sessionId });
+    setSetupFeedback(current => ({ ...current, [sessionId]: {} }));
     const assistantCount = runtimeMessages?.filter(message => message.sessionId === sessionId && message.role === "assistant").length ?? 0;
     const priorDigest = runtimeSetupSessions?.find(session => session.id === sessionId)?.draftDigest ?? null;
     const appended = await perform({
@@ -312,22 +338,32 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
       idempotencyKey: idempotencyKey(),
       sessionId,
       content
-    });
-    if (appended === null) return;
-    await pollRuntimeUntil(candidate => {
+    }, false);
+    if (appended === null) { setSetupFeedback(current => ({ ...current, [sessionId]: { refused: "send" } })); setSetupAction(null); setupLock.current = false; return; }
+    setSetupDrafts(current => ({ ...current, [sessionId]: "" }));
+    const settled = await pollRuntimeUntil(candidate => {
       const nextAssistantCount = candidate.messages.filter(message => message.sessionId === sessionId && message.role === "assistant").length;
       const setup = candidate.setupSessions.find(session => session.id === sessionId);
       return nextAssistantCount > assistantCount || setup?.draftDigest !== priorDigest || setup?.setupStatus === "completed";
-    });
-  }, [installationId, perform, pollRuntimeUntil, runtimeMessages, runtimeSetupSessions]);
+    }, false);
+    if (settled === null) setSetupFeedback(current => ({ ...current, [sessionId]: { unconfirmed: true } }));
+    setSetupAction(null); setupLock.current = false;
+  }, [installationId, perform, pollRuntimeUntil, runtimeMessages, runtimeSetupSessions, pending]);
   const applySetupRevision = useCallback((sessionId: string) => {
+    if (setupLock.current || pending) return;
+    setupLock.current = true;
+    setSetupAction({ kind: "apply", sessionId });
+    setSetupFeedback(current => ({ ...current, [sessionId]: {} }));
     void perform({
       action: "APPLY_SETUP_REVISION",
       installationId,
       idempotencyKey: idempotencyKey(),
       sessionId
+    }, false).then(result => {
+      if (result === null) setSetupFeedback(current => ({ ...current, [sessionId]: { refused: "apply" } }));
+      setSetupAction(null); setupLock.current = false;
     });
-  }, [installationId, perform]);
+  }, [installationId, perform, pending]);
   const createExecuteSession = useCallback(async (): Promise<string | null> => {
     const existingIds = new Set(runtimeExecuteSessions?.map(session => session.id) ?? []);
     const nextRuntime = await perform({
@@ -505,6 +541,8 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
   const activeVersion = activeVersionFor(runtime);
   const selectedSetup = runtime.setupSessions.find(item => item.id === selectedSetupSessionId) ?? runtime.setupSession;
   const draft = contextDraftFor(runtime, selectedSetup, testSurface);
+  const selectedSetupFeedback = setupFeedback[selectedSetup?.id ?? ""];
+  const ownsSetupAction = setupAction !== null && setupAction.kind !== "start" && setupAction.sessionId === selectedSetup?.id;
   const exactTestSurface = exactTestSurfaceFor(testSurface, draft);
   const setupMessages: ReadonlyArray<SetupMessage> = selectedSetup === null ? [] : runtime.messages.filter(message => message.sessionId === selectedSetup.id).map(({
     id,
@@ -559,7 +597,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     };
   });
   const settings = runtime.settings ?? {};
-  const displayName = stringSetting(settings.displayName, runtime.installation.moduleKey);
+  const displayName = stringSetting(settings.displayName, stringSetting(runtime.installation.displayName, runtime.installation.moduleKey)).trim();
   const modelProfile = stringSetting(settings.modelProfile, "nivo-default");
   const requireConfirmation = typeof settings.requireConfirmation === "boolean" ? settings.requireConfirmation : true;
   const hasTelegramCredential = runtime.credentials.some(credential => credential.providerKey === "telegram-bot-token" && credential.status === "configured");
@@ -601,11 +639,21 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
           activeVersion,
           draft,
           pending,
+          setupSendPending: ownsSetupAction && setupAction?.kind === "send",
+          setupApplyPending: ownsSetupAction && setupAction?.kind === "apply",
+          setupStartPending: setupAction?.kind === "start",
+          setupPeerDisabled: (pending || setupAction !== null) && !ownsSetupAction,
           refused,
+          setupSendRefused: selectedSetupFeedback?.refused === "send",
+          setupApplyRefused: selectedSetupFeedback?.refused === "apply",
+          setupStartRefused,
+          setupUnconfirmed: selectedSetupFeedback?.unconfirmed ?? false,
+          draftText: setupDrafts[selectedSetup?.id ?? ""] ?? "",
           compactPane: setupPane,
           onSelectRevision: setSelectedSetupSessionId,
           onStartRevision: startSetupRevision,
           onSend: content => selectedSetup !== null && void sendSetupMessage(selectedSetup.id, content),
+          onDraft: content => selectedSetup !== null && setSetupDrafts(current => ({ ...current, [selectedSetup.id]: content })),
           onApply: () => draft !== null && applySetupRevision(draft.setupSessionId),
           onSelectPane: setSetupPane
         }

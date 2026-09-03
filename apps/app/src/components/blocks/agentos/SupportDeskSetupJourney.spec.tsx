@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { beforeAll, describe, expect, it, vi } from "vitest"
 import { ContextVersionBlock, type ContextDraft } from "./ContextVersionBlock"
 import { PrivateSetupChatBlock } from "./PrivateSetupChatBlock"
 import { exactTestSurfaceFor } from "@/components/pages/AgentOSSolutionModulePage/component"
@@ -25,9 +25,11 @@ const testedDraft: ContextDraft = {
 }
 
 describe("Support Desk Setup journey", () => {
+    beforeAll(() => { window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() }) })
     it("keeps completed Setup history private and starts a separate revision", () => {
         const selectRevision = vi.fn()
         const startRevision = vi.fn()
+        const openVersions = vi.fn()
         render(<PrivateSetupChatBlock
             messages={[{ id: "message-1", role: "assistant", content: "What SLA should I follow?" }]}
             revisions={[
@@ -40,14 +42,15 @@ describe("Support Desk Setup journey", () => {
             onSelectRevision={selectRevision}
             onStartRevision={startRevision}
             onSend={vi.fn()}
+            onOpenVersions={openVersions}
         />)
 
         expect(screen.queryByLabelText("Teach this module about your business")).toBeNull()
-        fireEvent.click(screen.getByRole("radio", { name: "r1 · completed" }))
-        expect(screen.getByText(/active version stays unchanged until Test and Apply pass/)).toBeTruthy()
-        fireEvent.click(screen.getByRole("button", { name: "Start new AI Setup chat" }))
-        expect(selectRevision).toHaveBeenCalledWith("revision-1")
-        expect(startRevision).toHaveBeenCalledTimes(1)
+        expect(screen.queryByRole("button", { name: "Send" })).toBeNull()
+        fireEvent.click(screen.getByRole("button", { name: "Open Versions" }))
+        expect(openVersions).toHaveBeenCalledTimes(1)
+        expect(selectRevision).not.toHaveBeenCalled()
+        expect(startRevision).not.toHaveBeenCalled()
     })
 
     it("permits Apply only after the exact Setup digest has trusted Test evidence", () => {

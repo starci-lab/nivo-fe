@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ComponentType } from "react";
 import { Checkbox, ChoiceTabs, RouteTabs } from "@nivo/ui";
-import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common";
+import { SurfaceCard, Button, Input, Heading, Text, Tabs, PrimaryRailLayout, TextAction } from "@starci/grammar/common";
 import { ContextVersionBlock, type ContextDraft } from "@/components/blocks/agentos/ContextVersionBlock";
 import { DEFAULT_WIDGET_REGISTRY, ExecuteChatBlock, type ExecuteMessage, type TrustedWidgetComponentProps } from "@/components/blocks/agentos/ExecuteChatBlock";
 import { ExecuteSessionRailBlock, type ExecuteSession } from "@/components/blocks/agentos/ExecuteSessionRailBlock";
@@ -17,7 +17,8 @@ import { SupportQueueWorkbenchBlock } from "@/components/blocks/agentos/SupportQ
 import { TestTrustResultBlock } from "@/components/blocks/agentos/TestTrustResultBlock";
 import type { AgentosModuleRuntime, AgentosModuleTestContract, AgentosModuleTestSurface, AgentosRuntimeValue } from "@/modules/api/console";
 import type { SupportCustomerConversation, SupportCustomerMessage, SupportImportantFact, SupportTicket } from "@/modules/api/workspace-controlplane";
-/** Public API role for AgentOSSolutionModulePageProps. */
+import { AGENTOS_SETUP_SURFACE_CLASS_NAME, CONTEXT_BAND_CLASS_NAME, CONTEXT_RAISED_BAND_CLASS_NAME } from "./classNames";
+/** Shell and screen contract resolved by the connected module route. */
 export type AgentOSSolutionModulePageProps = AgentOSSolutionModulePageViewProps;
 type AgentOSSolutionModuleSupportInbox = {
   readonly conversations: ReadonlyArray<SupportCustomerConversation>;
@@ -53,103 +54,62 @@ type SetupSurfaceProps = {
   readonly activeVersion: number | null;
   readonly draft: ContextDraft | null;
   readonly pending: boolean;
+  readonly draftText: string;
+  readonly setupSendPending?: boolean;
+  readonly setupApplyPending?: boolean;
+  readonly setupStartPending?: boolean;
+  readonly setupPeerDisabled?: boolean;
   readonly refused: boolean;
+  readonly setupSendRefused?: boolean;
+  readonly setupApplyRefused?: boolean;
+  readonly setupStartRefused?: boolean;
+  readonly setupUnconfirmed?: boolean;
   readonly compactPane: "versions" | "conversation" | "context";
   readonly onSelectRevision: (sessionId: string) => void;
   readonly onStartRevision: () => void;
   readonly onSend: (content: string) => void;
+  readonly onDraft: (content: string) => void;
   readonly onApply: () => void;
   readonly onSelectPane: (pane: "versions" | "conversation" | "context") => void;
 };
-const setupVersionsPane = (props: SetupSurfaceProps, wideOnly: boolean) => cockpitPane(wideOnly, ModuleCockpitRailBlock, {
-  label: "Setup revisions",
-  fact: `${props.revisions.length} total`,
-  summary: "Each completed revision produces an immutable context candidate; applying a newer version never rewrites Execute history.",
-  items: props.revisions.map(revision => ({
-    id: revision.id,
-    label: `Revision r${revision.revision}`,
-    status: revision.id === props.selectedRevisionId ? `${revision.status} · selected` : revision.status
-  })),
-  selectedId: props.selectedRevisionId,
-  actionLabel: props.canStartRevision ? "New Setup chat" : undefined,
-  pending: props.pending,
-  onSelect: props.onSelectRevision,
-  onAction: props.canStartRevision ? props.onStartRevision : undefined
-});
-const setupConversationPane = (props: SetupSurfaceProps, wideOnly: boolean) => cockpitPane(wideOnly, PrivateSetupChatBlock, {
-  messages: props.messages,
-  pending: props.pending,
-  refused: props.refused,
-  revisions: props.revisions,
-  selectedRevisionId: props.selectedRevisionId,
-  canSend: props.canSend,
-  canStartRevision: props.canStartRevision,
-  showRevisionControls: false,
-  onSelectRevision: props.onSelectRevision,
-  onStartRevision: props.onStartRevision,
-  onSend: props.onSend
-});
-const setupContextPane = (props: SetupSurfaceProps, wideOnly: boolean) => cockpitPane(wideOnly, ContextVersionBlock, {
-  activeVersion: props.activeVersion,
-  draft: props.draft,
-  pending: props.pending,
-  refused: props.refused,
-  onApply: props.onApply
-});
-const SetupSurface = ({
-  messages,
-  revisions,
-  selectedRevisionId,
-  canSend,
-  canStartRevision,
-  activeVersion,
-  draft,
-  pending,
-  refused,
-  compactPane,
-  onSelectRevision,
-  onStartRevision,
-  onSend,
-  onApply,
-  onSelectPane
-}: SetupSurfaceProps) => {
-  const props = {
-    messages,
-    revisions,
-    selectedRevisionId,
-    canSend,
-    canStartRevision,
-    activeVersion,
-    draft,
-    pending,
-    refused,
-    compactPane,
-    onSelectRevision,
-    onStartRevision,
-    onSend,
-    onApply,
-    onSelectPane
-  };
-  return <div><div>
-
-
-
-      <ChoiceTabs props={{
-        label: "Compact Setup view",
-        selectedKey: compactPane,
-        tabs: [{
-          id: "conversation",
-          label: "Setup chat"
-        }, {
-          id: "context",
-          label: "Gates"
-        }, {
-          id: "versions",
-          label: "Versions"
-        }]
-      }} on={{
-        select: key => onSelectPane(key as SetupSurfaceProps["compactPane"])
-      }} /></div>{setupVersionsPane(props, compactPane !== "versions")}{setupConversationPane(props, compactPane !== "conversation")}{setupContextPane(props, compactPane !== "context")}</div>;
+const setupVersionsPane = (props: SetupSurfaceProps) => <SurfaceCard ariaLabel="Setup revisions" composition="joined">
+  <div className={CONTEXT_RAISED_BAND_CLASS_NAME} data-contract="SURFACE-3 GAP-3 PADDING-4">
+    <Heading level={3}>Setup revisions</Heading>
+    <Text size="sm" tone="muted">Select a revision to review its conversation and context. Completed revisions are immutable.</Text>
+  </div>
+  <div className={CONTEXT_BAND_CLASS_NAME} data-contract="BOUNDARY-1 GAP-3 PADDING-4">
+    <Tabs label="Setup revisions" selectedKey={props.selectedRevisionId} labelVisibility="always" items={props.revisions.map(r => ({ id: r.id, label: "Revision r" + r.revision + " · " + r.status }))} onSelect={props.onSelectRevision} />
+    <Text size="sm">Selected revision: {props.selectedRevisionId}</Text>
+    <TextAction onPress={() => props.onSelectPane("conversation")}>Open Setup chat</TextAction>
+    {props.setupStartRefused ? <Text size="sm" live="assertive">Starting a new Setup revision was refused; the current revision remains selected.</Text> : null}
+  </div>
+  {props.canStartRevision ? <div className={CONTEXT_BAND_CLASS_NAME} data-contract="BOUNDARY-1 GAP-3 PADDING-4">
+    <Button variant="secondary" isPending={props.setupStartPending} isDisabled={props.setupPeerDisabled || props.setupSendPending || props.setupApplyPending || props.setupStartPending} onPress={props.onStartRevision}>New Setup chat</Button>
+  </div> : null}
+</SurfaceCard>;
+const setupConversationPane = (props: SetupSurfaceProps) => <PrivateSetupChatBlock messages={props.messages} pending={props.pending} ownPending={props.setupSendPending} peerDisabled={props.setupPeerDisabled || props.setupApplyPending || props.setupStartPending} refused={props.setupSendRefused} unconfirmed={props.setupUnconfirmed} revisions={props.revisions} selectedRevisionId={props.selectedRevisionId} canSend={props.canSend} canStartRevision={props.canStartRevision} showRevisionControls={false} draft={props.draftText} onDraft={props.onDraft} onSelectRevision={props.onSelectRevision} onStartRevision={props.onStartRevision} onSend={props.onSend} onOpenVersions={() => props.onSelectPane("versions")} />;
+const setupContextPane = (props: SetupSurfaceProps) => <ContextVersionBlock activeVersion={props.activeVersion} draft={props.draft} pending={props.pending} ownPending={props.setupApplyPending} peerDisabled={props.setupPeerDisabled || props.setupSendPending || props.setupStartPending} refused={props.setupApplyRefused ?? false} onApply={props.onApply} />;
+const setupSummaryPane = (props: SetupSurfaceProps) => {
+  const draft = props.draft;
+  return <SurfaceCard label="Business context" composition="joined">
+    <div className={CONTEXT_RAISED_BAND_CLASS_NAME} data-contract="SURFACE-3 GAP-3 PADDING-4">
+      <Heading level={4}>{draft === null ? "No Setup draft" : draft.version === null ? `Setup draft r${draft.revision}` : `Context v${draft.version}`}</Heading>
+      <Text size="sm" tone="muted">{draft === null ? "No Setup draft" : "Built from this private conversation"}</Text>
+    </div>
+    <div className={CONTEXT_BAND_CLASS_NAME} data-contract="BOUNDARY-1 GAP-3 PADDING-4">
+      <Text size="sm" weight="semibold">{draft?.summary ?? "Your business context starts here"}</Text>
+      <Text size="sm" tone="muted">{draft ? "Review the collected facts and remaining gates before testing this revision." : "Tell Nivo about your priorities, policies, and exceptions. Your active context changes only after Test and Apply."}</Text>
+      <TextAction onPress={() => props.onSelectPane("context")}>Review gates</TextAction>
+    </div>
+    <div className={CONTEXT_BAND_CLASS_NAME} data-contract="BOUNDARY-1 GAP-3 PADDING-4">
+      <Text size="sm">Active context: {props.activeVersion === null ? "not applied" : `v${props.activeVersion}`}</Text>
+      <Text size="sm" tone="muted">Setup changes do not rewrite Execute history.</Text>
+    </div>
+  </SurfaceCard>;
+};
+const SetupSurface = (props: SetupSurfaceProps) => {
+  const { compactPane } = props;
+  return <section className={AGENTOS_SETUP_SURFACE_CLASS_NAME} data-contract="MEASURE-2 GAP-4"><Heading level={2}>Set up your module</Heading><Text size="sm" tone="muted">Build the business context in chat, review the gates, then test and apply the exact revision.</Text><Tabs label="Setup views" selectedKey={compactPane} labelVisibility="always" items={[{ id: "conversation", label: "Setup chat" }, { id: "context", label: "Gates" }, { id: "versions", label: "Versions" }]} onSelect={key => props.onSelectPane(key as SetupSurfaceProps["compactPane"])} panelId={key => `setup-panel-${key}`} />{compactPane === "conversation" ? <section id="setup-panel-conversation" role="tabpanel" aria-label="Setup chat"><PrimaryRailLayout primary={setupConversationPane(props)} rail={setupSummaryPane(props)} railWidth="standard" align="start" collapsedOrder="primary-first" /></section> : compactPane === "context" ? <section id="setup-panel-context" role="tabpanel" aria-label="Gates">{setupContextPane(props)}</section> : <section id="setup-panel-versions" role="tabpanel" aria-label="Versions">{setupVersionsPane(props)}</section>}</section>;
 };
 type TestSurfaceProps = {
   readonly contract: AgentosModuleTestContract;
@@ -727,6 +687,3 @@ export const AgentOSSolutionModuleState = (props: AgentOSSolutionModuleStateProp
       label={refused ? "Runtime unavailable" : "Loading runtime"}
     ><div>{<div>{[<div key="item-0">{<Text size="sm">{"State"}</Text>}{<Text size="sm">{refused ? "The server refused this installation or workspace identity." : "Reading sessions, context, widgets, and registry…"}</Text>}</div>]}</div>}</div></SurfaceCard></></div>;
 };
-
-
-
