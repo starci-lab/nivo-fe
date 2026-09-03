@@ -28,7 +28,25 @@ describe("InfrastructureSummaryBase", () => {
         render(<InfrastructureSummaryBase label="Infrastructure" context="One built service" domains={{ phase: "partial", facts, note: "Some domains unavailable" }} />)
 
         expect(screen.getByText("example.com")).toBeInTheDocument()
-        expect(screen.getByText("One built service Some domains unavailable")).toBeInTheDocument()
+        expect(screen.getByText("One built service")).toBeInTheDocument()
+        expect(screen.getByText("Some domains unavailable")).toBeInTheDocument()
+    })
+
+    it("carries a refused and a partially refused read on the card's own published state, not the note alone", () => {
+        const failed = render(<InfrastructureSummaryBase label="Infrastructure" context="Two built services" domains={{ phase: "failed", note: "Domains unavailable" }} />)
+        expect(failed.container.querySelector('[data-grammar-state="unavailable"]')).not.toBeNull()
+        failed.unmount()
+
+        const partial = render(<InfrastructureSummaryBase label="Infrastructure" context="One built service" domains={{ phase: "partial", facts, note: "Some domains unavailable" }} />)
+        expect(partial.container.querySelector('[data-grammar-state="cautionary"]')).not.toBeNull()
+        partial.unmount()
+    })
+
+    it("carries an empty domain read on its own EmptyNotice, not the refusal note", () => {
+        render(<InfrastructureSummaryBase label="Infrastructure" context="Two built services" domains={{ phase: "empty", note: "No domains" }} />)
+
+        expect(screen.getByText("Two built services")).toBeInTheDocument()
+        expect(screen.getByText("No domains")).toBeInTheDocument()
     })
 
     it("renders maximum-length DNS labels and values in full", () => {

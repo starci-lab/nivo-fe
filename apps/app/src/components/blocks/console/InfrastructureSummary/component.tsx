@@ -1,4 +1,4 @@
-import { SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common";
+import { EmptyNotice, SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common";
 import {
   INFRASTRUCTURE_SUMMARY_COLLECTION_CLASS_NAME,
   INFRASTRUCTURE_SUMMARY_FACT_COLUMN_CLASS_NAME,
@@ -58,10 +58,8 @@ export const InfrastructureSummaryBase = (props: InfrastructureSummaryProps) => 
     context,
     domains
   }: InfrastructureSummaryProps = props;
-  const isLoading = domains.phase === "pending";
-  const facts = domains.phase === "populated" || domains.phase === "partial" ? domains.facts : [];
-  const note = domains.phase === "empty" || domains.phase === "failed" || domains.phase === "partial" ? domains.note : undefined;
-  if (domains.phase === "pending" || domains.phase === "populated" || domains.phase === "partial") {
+  if (domains.phase === "pending" || domains.phase === "populated") {
+    const isLoading = domains.phase === "pending";
     const renderedFacts = isLoading ? [fact({
       id: "pending-1",
       label: "",
@@ -70,20 +68,26 @@ export const InfrastructureSummaryBase = (props: InfrastructureSummaryProps) => 
       id: "pending-2",
       label: "",
       value: ""
-    }, true)] : facts.map(item => fact(item));
+    }, true)] : domains.facts.map(item => fact(item));
     const content = domainEvidenceContent(renderedFacts);
     return <SurfaceListCard
       label={label}
       footer={<div className={INFRASTRUCTURE_SUMMARY_NOTE_CLASS_NAME}>
-        <Text size="xs" tone="muted" isSkeleton={isLoading}>{note === undefined ? context : `${context} ${note}`}</Text>
+        <Text size="xs" tone="muted" isSkeleton={isLoading}>{context}</Text>
       </div>}
       isLoading={isLoading}
     >{content}</SurfaceListCard>;
   }
-  return <SurfaceCard label={label}><div className={INFRASTRUCTURE_SUMMARY_FALLBACK_CLASS_NAME}>
+  if (domains.phase === "partial") return <SurfaceCard label={label} state="cautionary"><div className={INFRASTRUCTURE_SUMMARY_FALLBACK_CLASS_NAME}>
       <Text size="sm">{context}</Text>
-      {facts.length > 0 ? <div>{facts.map(item => fact(item))}</div> : null}
-      {note === undefined ? null : refusal(note)}</div></SurfaceCard>;
+      {domains.facts.length > 0 ? domainEvidenceContent(domains.facts.map(item => fact(item))) : null}
+      {refusal(domains.note)}</div></SurfaceCard>;
+  if (domains.phase === "empty") return <SurfaceCard label={label}><div className={INFRASTRUCTURE_SUMMARY_FALLBACK_CLASS_NAME}>
+      <Text size="sm">{context}</Text>
+      <EmptyNotice message={domains.note} /></div></SurfaceCard>;
+  return <SurfaceCard label={label} state="unavailable"><div className={INFRASTRUCTURE_SUMMARY_FALLBACK_CLASS_NAME}>
+      <Text size="sm">{context}</Text>
+      {refusal(domains.note)}</div></SurfaceCard>;
 };
 
 /** Registry identity for the pure infrastructure summary twin. */
