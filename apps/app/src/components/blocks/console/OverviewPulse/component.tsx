@@ -1,10 +1,11 @@
-import { NivoUnicornArtwork, nivoIconSource } from "@nivo/ui";
+import { nivoIconSource } from "@nivo/ui";
 import { Badge, SurfaceCard, IconTile, Text } from "@starci/grammar/common";
 import {
-  OVERVIEW_PULSE_SIGNAL_COLLECTION_CLASS_NAME,
+  OVERVIEW_PULSE_COLLECTION_CLASS_NAME,
   OVERVIEW_PULSE_SIGNAL_CONTENT_CLASS_NAME,
   OVERVIEW_PULSE_SIGNAL_FACT_CLASS_NAME,
-  OVERVIEW_PULSE_SIGNAL_ROW_CLASS_NAME
+  OVERVIEW_PULSE_SIGNAL_ROW_CLASS_NAME,
+  OVERVIEW_PULSE_SUMMARY_CLASS_NAME
 } from "./classNames";
 
 /** How much attention one signal's caption asks for. */
@@ -22,8 +23,10 @@ export type OverviewPulseSignal = {
   readonly emphasis?: "default" | "accent";
 };
 
-/** Resolved signal values consumed by the pure overview pulse. */
+/** Resolved signal values and the card's own label and summary line. */
 export type OverviewPulseProps = {
+  readonly label: string;
+  readonly summary: string;
   readonly signals: ReadonlyArray<OverviewPulseSignal>;
 };
 const caption = (signal: OverviewPulseSignal, isLoading: boolean) => signal.tone === "default"
@@ -51,16 +54,24 @@ const signalRow = (signal: OverviewPulseSignal) => {
   </div>;
 };
 
-/** Draw four exact signals without fetching or deriving collection totals. */
+/** Draw the card's own neutral summary band, then four exact signals without fetching or deriving totals. */
 export const OverviewPulseBase = (props: OverviewPulseProps) => {
   const {
+    label,
+    summary,
     signals
   }: OverviewPulseProps = props;
-  return <SurfaceCard composition="joined">
-    <NivoUnicornArtwork props={{
-      tone: "brand"
-    }} />
-    <div className={OVERVIEW_PULSE_SIGNAL_COLLECTION_CLASS_NAME}>
+  return <SurfaceCard label={label} composition="joined">
+    <div
+      className={OVERVIEW_PULSE_SUMMARY_CLASS_NAME}
+      data-contract="PADDING-4 PADDING-3"
+    >
+      <Text size="sm" tone="muted">{summary}</Text>
+    </div>
+    <div
+      className={OVERVIEW_PULSE_COLLECTION_CLASS_NAME}
+      data-contract="BOUNDARY-1 BOUNDARY-3"
+    >
       {signals.map(signalRow)}
     </div>
   </SurfaceCard>;

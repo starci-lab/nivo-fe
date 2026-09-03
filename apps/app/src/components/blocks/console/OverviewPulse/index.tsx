@@ -6,7 +6,10 @@ import type { DomainRow } from "@/modules/api/console";
 import { BILLING_CURRENCY } from "@/modules/config";
 import { OverviewPulseBase, type OverviewPulseSignal, type OverviewPulseTone } from "./component";
 /** Public API role for OverviewPulseProps. */
-export type OverviewPulseProps = Record<string, never>;
+export type OverviewPulseProps = {
+  readonly label: string;
+  readonly summary: string;
+};
 export type { OverviewPulseSignal, OverviewPulseTone } from "./component";
 const STATUS_KEY: Readonly<Record<string, string | undefined>> = {
   not_provisioned: "status.notProvisioned",
@@ -34,7 +37,7 @@ const dueTone = (dueAt: string): OverviewPulseTone => new Date(dueAt).getTime() 
 
 /** Connect the account signal strip to the shared overview answers. */
 export const OverviewPulse = (props: OverviewPulseProps) => {
-  void props;
+  const { label, summary } = props;
   const data = useOverviewData();
   const t = useTranslations("console");
   const format = useFormatter();
@@ -164,7 +167,7 @@ export const OverviewPulse = (props: OverviewPulseProps) => {
       emphasis: "accent" as const
     };
   })();
-  return <OverviewPulseBase signals={[apps, agent, domains, wallet]} />;
+  return <OverviewPulseBase label={label} summary={summary} signals={[apps, agent, domains, wallet]} />;
 };
 
 /** Registry identity for the connected overview pulse twin. */

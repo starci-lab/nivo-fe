@@ -20,6 +20,7 @@ const props: OverviewPageProps = {
     consoleLabel: "Console",
     buildAppLabel: "Build an app",
     atAGlanceLabel: "At a glance",
+    atAGlanceSummary: "Four operations asked, four answered.",
     servicesLabel: "Services",
     accountLabel: "Account",
     onBuildApp: vi.fn(),
@@ -32,7 +33,6 @@ describe("OverviewPageBase", () => {
 
         expect(screen.getByRole("heading", { level: 1, name: "Overview" })).toBeInTheDocument()
         expect(screen.getByText("Everything running and needing attention.")).toBeInTheDocument()
-        expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument()
         expect(screen.getByRole("heading", { level: 2, name: "Services" })).toBeInTheDocument()
         expect(screen.getByRole("heading", { level: 2, name: "Account" })).toBeInTheDocument()
 

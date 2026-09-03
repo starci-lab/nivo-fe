@@ -24,6 +24,7 @@ const overviewProps: OverviewPageProps = {
     consoleLabel: "Console",
     buildAppLabel: "Build an app",
     atAGlanceLabel: "At a glance",
+    atAGlanceSummary: "Four operations asked, four answered.",
     servicesLabel: "Services",
     accountLabel: "Account",
     onBuildApp: vi.fn(),

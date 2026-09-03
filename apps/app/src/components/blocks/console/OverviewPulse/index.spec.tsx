@@ -27,7 +27,7 @@ describe("OverviewPulse", () => {
         mocks.data.domains = { ok: true, data: [{ id: "domain-1", name: "api.nivo.vn", status: "expiring", expiresAt: "2026-09-12T00:00:00.000Z", autoRenew: false }] }
         mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 2450000 } }
         mocks.data.invoices = { ok: true, data: [{ id: "invoice-1", amountVnd: 490000, status: "unpaid", dueAt: "2026-08-25T00:00:00.000Z", paidAt: null, catalogOrder: null }] }
-        const { container } = render(<OverviewPulse />)
+        const { container } = render(<OverviewPulse label="At a glance" summary="Four operations asked, four answered." />)
         expect(container).toHaveTextContent("attention-app")
         expect(container).toHaveTextContent("nivo AI Agent")
         expect(container).toHaveTextContent("api.nivo.vn")
@@ -41,7 +41,7 @@ describe("OverviewPulse", () => {
         mocks.data.domains = { ok: true, data: [{ id: "domain-1", name: "held.nivo.vn", status: "active", expiresAt: null, autoRenew: true }] }
         mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 0 } }
         mocks.data.invoices = { ok: true, data: [] }
-        const { container } = render(<OverviewPulse />)
+        const { container } = render(<OverviewPulse label="At a glance" summary="Four operations asked, four answered." />)
         expect(container).toHaveTextContent("overview.none")
         expect(container).toHaveTextContent("domains.autoRenewOn")
         expect(container).toHaveTextContent("wallet.noUnpaid")
@@ -54,7 +54,7 @@ describe("OverviewPulse", () => {
         mocks.data.domains = { ok: false, code: "UNKNOWN" }
         mocks.data.wallet = { ok: false, code: "UNKNOWN" }
         mocks.data.invoices = { ok: false, code: "UNKNOWN" }
-        const { container } = render(<OverviewPulse />)
+        const { container } = render(<OverviewPulse label="At a glance" summary="Four operations asked, four answered." />)
         expect(container).toHaveTextContent("refusal.EXPERT_SITE_NOT_FOUND_EXCEPTION")
         expect(container).toHaveTextContent("refusal.unknown")
     })
@@ -66,7 +66,7 @@ describe("OverviewPulse", () => {
         mocks.data.domains = null
         mocks.data.wallet = null
         mocks.data.invoices = null
-        const { container } = render(<OverviewPulse />)
+        const { container } = render(<OverviewPulse label="At a glance" summary="Four operations asked, four answered." />)
         expect(container.querySelectorAll('[data-component="Text"][data-tone][data-size="sm"][data-loading="true"][aria-hidden="true"]')).toHaveLength(4)
     })
 
@@ -78,7 +78,7 @@ describe("OverviewPulse", () => {
         mocks.data.domains = { ok: true, data: [{ id: "domain-1", name: "api.nivo.vn", status: "active", expiresAt: inDays(21), autoRenew: false }] }
         mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 2450000 } }
         mocks.data.invoices = { ok: true, data: [{ id: "invoice-1", amountVnd: 490000, status: "unpaid", dueAt: inDays(-2), paidAt: null, catalogOrder: null }] }
-        const { container } = render(<OverviewPulse />)
+        const { container } = render(<OverviewPulse label="At a glance" summary="Four operations asked, four answered." />)
 
         expect(container.querySelectorAll('[data-component="Badge"][data-tone="warning"]')).toHaveLength(2)
         expect(container.querySelectorAll('[data-component="Badge"][data-tone="danger"]')).toHaveLength(2)
@@ -92,7 +92,7 @@ describe("OverviewPulse", () => {
         mocks.data.domains = { ok: true, data: [{ id: "domain-1", name: "api.nivo.vn", status: "active", expiresAt: inDays(120), autoRenew: true }] }
         mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 2450000 } }
         mocks.data.invoices = { ok: true, data: [{ id: "invoice-1", amountVnd: 490000, status: "unpaid", dueAt: inDays(9), paidAt: null, catalogOrder: null }] }
-        const { container } = render(<OverviewPulse />)
+        const { container } = render(<OverviewPulse label="At a glance" summary="Four operations asked, four answered." />)
 
         expect(container.querySelectorAll('[data-component="Badge"]')).toHaveLength(0)
     })
@@ -104,7 +104,7 @@ describe("OverviewPulse", () => {
         mocks.data.domains = { ok: true, data: [{ id: "domain-1", name: "held.nivo.vn", status: "active", expiresAt: null, autoRenew: false }] }
         mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 0 } }
         mocks.data.invoices = { ok: false, code: "UNKNOWN" }
-        const { container } = render(<OverviewPulse />)
+        const { container } = render(<OverviewPulse label="At a glance" summary="Four operations asked, four answered." />)
         expect(container).toHaveTextContent("status.unknown")
         expect(container).toHaveTextContent("agentos.podReachable")
         expect(container).toHaveTextContent("domains.autoRenewOff")

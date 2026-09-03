@@ -11,7 +11,7 @@ const signals: OverviewPulseProps["signals"] = [
 
 describe("OverviewPulseBase", () => {
     it("keeps four independently settled named signals without a collection total", () => {
-        const { container } = render(<OverviewPulseBase signals={signals} />)
+        const { container } = render(<OverviewPulseBase label="At a glance" summary="Four operations asked, four answered." signals={signals} />)
 
         expect(screen.getByText("Needs attention")).toBeInTheDocument()
         expect(screen.getByText("sales-ops")).toBeInTheDocument()
@@ -20,21 +20,21 @@ describe("OverviewPulseBase", () => {
     })
 
     it("raises a warning and a danger caption out of the healthy tone", () => {
-        const { container } = render(<OverviewPulseBase signals={signals} />)
+        const { container } = render(<OverviewPulseBase label="At a glance" summary="Four operations asked, four answered." signals={signals} />)
 
         expect(container.querySelector('[data-component="Badge"][data-tone="warning"]')).toHaveTextContent("Awaiting DNS")
         expect(container.querySelector('[data-component="Badge"][data-tone="danger"]')).toHaveTextContent("Pod is not answering")
     })
 
     it("leaves a default-toned caption as plain muted copy", () => {
-        const { container } = render(<OverviewPulseBase signals={[signals[2]!, signals[3]!]} />)
+        const { container } = render(<OverviewPulseBase label="At a glance" summary="Four operations asked, four answered." signals={[signals[2]!, signals[3]!]} />)
 
         expect(container.querySelectorAll('[data-component="Badge"]')).toHaveLength(0)
         expect(screen.getByText("Could not read domains")).toBeInTheDocument()
     })
 
     it("renders every signal phase without inventing a value", () => {
-        render(<OverviewPulseBase signals={[
+        render(<OverviewPulseBase label="At a glance" summary="Four operations asked, four answered." signals={[
             { id: "pending", icon: "apps", label: "Apps", phase: "pending", value: "", caption: "Loading", tone: "default" },
             { id: "answered", icon: "agentos", label: "AgentOS", phase: "answered", value: "sales-ops", caption: "Ready", tone: "default" },
             { id: "failed", icon: "wallet", label: "Wallet", phase: "failed", value: "—", caption: "Unavailable", tone: "default" },

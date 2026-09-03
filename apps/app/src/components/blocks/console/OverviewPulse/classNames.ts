@@ -1,9 +1,11 @@
 import { cn } from "@heroui/react";
 
+/** Neutral opening band naming what the card summarises, before the divided signal rows. */
+export const OVERVIEW_PULSE_SUMMARY_CLASS_NAME = cn("px-4", "pt-4", "pb-3");
+
 /** Joined boundary for independently settled overview signals. */
-export const OVERVIEW_PULSE_SIGNAL_COLLECTION_CLASS_NAME = cn(
+export const OVERVIEW_PULSE_COLLECTION_CLASS_NAME = cn(
   "flex",
-  "w-full",
   "min-w-0",
   "flex-col",
   "border-t",
