@@ -33,6 +33,7 @@ describe("OverviewPage drawing", () => {
     it("keeps the overview pulse and primary-aside page owner in the complete composition", () => {
         const html = renderToStaticMarkup(<OverviewPageBase {...props} />)
         expect(html).toContain('data-grammar-section-header="true"')
+        expect(html).toContain('class="starci-core-section-header flex-col items-start sm:flex-row sm:items-end sm:justify-between"')
         expect(html).toContain('data-grammar-surface-composition="joined"')
         expect(html).toContain('data-grammar-layout-rail="present"')
         expect(html).toContain("Build an app")

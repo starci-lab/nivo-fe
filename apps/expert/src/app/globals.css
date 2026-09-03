@@ -1,8 +1,8 @@
-@import "@starci/grammar/common.css";
-@import "@starci/grammar/core.css";
 @import "@nivo/ui/styles.css";
 @import "tailwindcss";
 @import "@heroui/styles/css";
+@import "@starci/grammar/common.css";
+@import "@starci/grammar/core.css";
 
 /*
  * The shared canon lives outside this app's folder, so Tailwind cannot find its class names by
@@ -12,7 +12,7 @@
 @source "../../../../packages/ui/src";
 
 /*
- * WHY THE SECOND IMPORT IS THE WHOLE FIX -- the same one `apps/app` already carries.
+ * WHY THE HEROUI IMPORT IS REQUIRED -- the same one `apps/app` already carries.
  *
  * Every leaf in `@nivo/ui`, and every band in `src/academy`, names a SEMANTIC token -
  * `bg-surface`, `text-muted`, `border-border`, `bg-background`, `text-foreground` - rather than a

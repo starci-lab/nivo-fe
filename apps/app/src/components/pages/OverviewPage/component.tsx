@@ -22,6 +22,7 @@ import type { WalletSummaryProps } from "@/components/blocks/console/WalletSumma
 import { WalletSummaryBase } from "@/components/blocks/console/WalletSummary/component";
 import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow";
 import {
+  OVERVIEW_HEADER_CLASS_NAME,
   OVERVIEW_PAGE_CLASS_NAME,
   OVERVIEW_SECTION_CLASS_NAME
 } from "./classNames";
@@ -332,6 +333,7 @@ export const OverviewPageBase = (props: OverviewPageProps) => {
       }]
     }} />}
     <SectionHeader
+      className={OVERVIEW_HEADER_CLASS_NAME}
       level={1}
       title={title}
       description={lede}
