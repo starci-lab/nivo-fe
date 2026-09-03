@@ -1,5 +1,10 @@
 import { Breadcrumbs } from "@nivo/ui";
-import { Button, Heading, Text } from "@starci/grammar/core";
+import {
+  Button,
+  PageContainer,
+  PrimaryRailLayout,
+  SectionHeader
+} from "@starci/grammar/core";
 import { AgentOSSummary } from "@/components/blocks/console/AgentOSSummary";
 import type { AgentOSSummaryProps } from "@/components/blocks/console/AgentOSSummary/component";
 import { AgentOSSummaryBase } from "@/components/blocks/console/AgentOSSummary/component";
@@ -16,6 +21,10 @@ import { WalletSummary } from "@/components/blocks/console/WalletSummary";
 import type { WalletSummaryProps } from "@/components/blocks/console/WalletSummary/component";
 import { WalletSummaryBase } from "@/components/blocks/console/WalletSummary/component";
 import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow";
+import {
+  OVERVIEW_PAGE_CLASS_NAME,
+  OVERVIEW_SECTION_CLASS_NAME
+} from "./classNames";
 
 /** Legacy app-section view retained for existing pure-page consumers during this revision. */
 export type OverviewPageProps = OverviewPageViewProps;
@@ -122,6 +131,9 @@ type AcceptedOverviewPageViewProps = {
   readonly title: string;
   readonly lede?: string;
   readonly buildAppLabel?: string;
+  readonly atAGlanceLabel?: string;
+  readonly servicesLabel?: string;
+  readonly accountLabel?: string;
   readonly pulse?: OverviewPulseProps;
   readonly apps: AppsSummaryProps;
   readonly agentOs: AgentOSSummaryProps;
@@ -135,10 +147,16 @@ type ConnectedOverviewPageViewProps = {
   readonly pathLabel: string;
   readonly consoleLabel: string;
   readonly buildAppLabel: string;
+  readonly atAGlanceLabel: string;
+  readonly servicesLabel: string;
+  readonly accountLabel: string;
   readonly onBuildApp: () => void;
 };
 type LegacyOverviewPageViewProps = {
   readonly title: string;
+  readonly atAGlanceLabel?: string;
+  readonly servicesLabel?: string;
+  readonly accountLabel?: string;
   readonly apps: AppsSectionView;
   readonly agentOs: AgentOsSectionView;
   readonly servers: {
@@ -258,6 +276,9 @@ const normalize = (input: OverviewPageViewProps): ConnectedOverviewPageViewProps
   if ("infrastructure" in input) return input;
   return {
     title: input.title,
+    atAGlanceLabel: input.atAGlanceLabel,
+    servicesLabel: input.servicesLabel,
+    accountLabel: input.accountLabel,
     apps: normalizeLegacyApps(input),
     agentOs: normalizeLegacyAgentOs(input),
     infrastructure: {
@@ -281,11 +302,23 @@ export const OverviewPageBase = (props: OverviewPageProps) => {
     title,
     lede,
     buildAppLabel,
+    atAGlanceLabel,
+    servicesLabel,
+    accountLabel,
     onBuildApp
   } = resolved;
   const accepted = "apps" in resolved ? resolved : null;
   const hasBuildAction = buildAppLabel !== undefined && onBuildApp !== undefined;
-  return <div>
+  const hasPulse = accepted === null || accepted.pulse !== undefined;
+  const apps = accepted === null ? <AppsSummary /> : <AppsSummaryBase {...accepted.apps} />;
+  const agentOs = accepted === null ? <AgentOSSummary /> : <AgentOSSummaryBase {...accepted.agentOs} />;
+  const wallet = accepted === null ? <WalletSummary /> : <WalletSummaryBase {...accepted.wallet} />;
+  const infrastructure = accepted === null ? <InfrastructureSummary /> : <InfrastructureSummaryBase {...accepted.infrastructure} />;
+  return <PageContainer
+    measure="product"
+    className={OVERVIEW_PAGE_CLASS_NAME}
+    data-contract="GAP-5"
+  >
     {!("pathLabel" in resolved) ? null : <Breadcrumbs props={{
       mode: "trail",
       label: resolved.pathLabel,
@@ -298,16 +331,40 @@ export const OverviewPageBase = (props: OverviewPageProps) => {
         isCurrent: true
       }]
     }} />}
-    <div>
-
-
-      <Heading level={1} scale="display">{title}</Heading>{hasBuildAction ? <Button
+    <SectionHeader
+      level={1}
+      title={title}
+      description={lede}
+      action={hasBuildAction ? <Button
         size="lg"
         variant="primary"
         onPress={onBuildApp}
-      >{buildAppLabel}</Button> : null}</div>
-    {lede === undefined ? null : <Text size="md" tone="muted">{lede}</Text>}
-    {accepted !== null && accepted.pulse === undefined ? null : accepted === null ? <OverviewPulse /> : <OverviewPulseBase {...accepted.pulse!} />}
-    <div><div><>{accepted === null ? <AppsSummary /> : <AppsSummaryBase {...accepted.apps} />}{accepted === null ? <AgentOSSummary /> : <AgentOSSummaryBase {...accepted.agentOs} />}</></div><div><>{accepted === null ? <WalletSummary /> : <WalletSummaryBase {...accepted.wallet} />}{accepted === null ? <InfrastructureSummary /> : <InfrastructureSummaryBase {...accepted.infrastructure} />}</></div></div></div>;
+      >{buildAppLabel}</Button> : undefined}
+    />
+    {!hasPulse ? null : <>
+      {atAGlanceLabel === undefined ? null : <SectionHeader level={2} title={atAGlanceLabel} />}
+      {accepted === null ? <OverviewPulse /> : <OverviewPulseBase {...accepted.pulse!} />}
+    </>}
+    <PrimaryRailLayout
+      align="start"
+      railWidth="standard"
+      primary={<section
+        className={OVERVIEW_SECTION_CLASS_NAME}
+        data-contract="GAP-4 MEASURE-2"
+      >
+        {servicesLabel === undefined ? null : <SectionHeader level={2} title={servicesLabel} />}
+        {apps}
+        {agentOs}
+      </section>}
+      rail={<section
+        className={OVERVIEW_SECTION_CLASS_NAME}
+        data-contract="GAP-4 MEASURE-2"
+      >
+        {accountLabel === undefined ? null : <SectionHeader level={2} title={accountLabel} />}
+        {wallet}
+        {infrastructure}
+      </section>}
+    />
+  </PageContainer>;
 };
 

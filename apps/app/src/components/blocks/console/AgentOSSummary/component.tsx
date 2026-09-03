@@ -1,5 +1,12 @@
-import { StatusActionCard } from "@nivo/ui";
-import { EmptyNotice, SurfaceCard, type BadgeTone } from "@starci/grammar/core";
+import { Badge, Button, EmptyNotice, SurfaceCard, Text, type BadgeTone } from "@starci/grammar/core";
+import {
+  AGENT_OS_SUMMARY_ACTION_CLASS_NAME,
+  AGENT_OS_SUMMARY_CONTENT_CLASS_NAME,
+  AGENT_OS_SUMMARY_COPY_CLASS_NAME,
+  AGENT_OS_SUMMARY_DETAIL_CLASS_NAME,
+  AGENT_OS_SUMMARY_ROW_CLASS_NAME,
+  AGENT_OS_SUMMARY_STATUS_CLASS_NAME
+} from "./classNames";
 
 /** One workspace row prepared for the pure AgentOS summary surface. */
 export type AgentOSSummaryWorkspace = {
@@ -44,23 +51,49 @@ export const AgentOSSummaryBase = (props: AgentOSSummaryProps) => {
   }: AgentOSSummaryProps = props;
   if (state.phase === "empty") return <SurfaceCard
     label={label}
-  ><div>
-      <EmptyNotice message={state.message} /></div></SurfaceCard>;
+    composition="joined"
+  ><div
+      className={AGENT_OS_SUMMARY_CONTENT_CLASS_NAME}
+      data-contract="GAP-4 PADDING-4"
+    >
+      <EmptyNotice message={state.message} />
+    </div></SurfaceCard>;
   const workspace = state.phase === "pending" ? undefined : state.workspace;
+  const isLoading = workspace === undefined;
+  const action = workspace?.actionHref === undefined ? <Button
+    isSkeleton={isLoading}
+    onPress={workspace === undefined ? undefined : () => onOpenService(workspace.id)}
+  >{workspace?.actionLabel ?? ""}</Button> : <Button
+    href={workspace.actionHref}
+    onFollow={() => onOpenService(workspace.id)}
+  >{workspace.actionLabel}</Button>;
   return <SurfaceCard
     label={label}
-  ><div><><StatusActionCard props={{
-          id: workspace?.id ?? "pending",
-          title: workspace?.name ?? "",
-          description: workspace?.description ?? "",
-          statusLabel: workspace?.statusLabel ?? "",
-          statusTone: workspace?.statusTone ?? "neutral",
-          actionLabel: workspace?.actionLabel ?? "",
-          actionHref: workspace?.actionHref,
-          detail: workspace?.detail
-        }} on={{
-          press: workspace === undefined ? undefined : () => onOpenService(workspace.id)
-        }} isLoading={workspace === undefined} /></></div></SurfaceCard>;
+    composition="joined"
+  ><div
+      className={AGENT_OS_SUMMARY_CONTENT_CLASS_NAME}
+      data-contract="GAP-4 PADDING-4"
+    >
+      <div
+        className={AGENT_OS_SUMMARY_ROW_CLASS_NAME}
+        data-contract="GAP-3"
+      >
+        <div
+          className={AGENT_OS_SUMMARY_COPY_CLASS_NAME}
+          data-contract="GAP-1"
+        >
+          <Text weight="semibold" isSkeleton={isLoading}>{workspace?.name ?? ""}</Text>
+          <Text size="xs" tone="muted" isSkeleton={isLoading}>{workspace?.description ?? ""}</Text>
+        </div>
+        <div className={AGENT_OS_SUMMARY_STATUS_CLASS_NAME}>
+          <Badge tone={workspace?.statusTone ?? "neutral"} isSkeleton={isLoading}>{workspace?.statusLabel ?? ""}</Badge>
+        </div>
+      </div>
+      {workspace?.detail === undefined ? null : <div className={AGENT_OS_SUMMARY_DETAIL_CLASS_NAME}>
+        <Text size="sm" tone="muted">{workspace.detail}</Text>
+      </div>}
+      <div className={AGENT_OS_SUMMARY_ACTION_CLASS_NAME}>{action}</div>
+    </div></SurfaceCard>;
 };
 
 /** Registry identity for the pure AgentOS summary twin. */

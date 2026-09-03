@@ -157,6 +157,7 @@
     "overview": {
       "title": "Overview",
       "lede": "Scan what is running, needs attention, and is coming due across your account.",
+      "atAGlance": "At a glance",
       "buildApp": "Build an app",
       "none": "None yet"
     },

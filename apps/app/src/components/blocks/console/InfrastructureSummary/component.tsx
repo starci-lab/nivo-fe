@@ -1,4 +1,10 @@
-import { SurfaceCard, SurfaceListCard, Heading, Text } from "@starci/grammar/core";
+import { SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/core";
+import {
+  INFRASTRUCTURE_SUMMARY_COLLECTION_CLASS_NAME,
+  INFRASTRUCTURE_SUMMARY_FACT_ROW_CLASS_NAME,
+  INFRASTRUCTURE_SUMMARY_FALLBACK_CLASS_NAME,
+  INFRASTRUCTURE_SUMMARY_NOTE_CLASS_NAME
+} from "./classNames";
 
 /** One exact domain fact displayed in infrastructure context. */
 export type InfrastructureDomainFact = {
@@ -29,12 +35,19 @@ export type InfrastructureSummaryProps = {
   readonly context: string;
   readonly domains: InfrastructureDomainsState;
 };
-const fact = (item: InfrastructureDomainFact, isLoading = false) => <div>
+const fact = (item: InfrastructureDomainFact, isLoading = false) => <div
+  key={item.id}
+  className={INFRASTRUCTURE_SUMMARY_FACT_ROW_CLASS_NAME}
+  data-contract="GAP-3 PADDING-3 PADDING-4"
+>
   <Text size="sm" isSkeleton={isLoading}>{item.label}</Text>
   <Text size="sm" isSkeleton={isLoading}>{item.value}</Text></div>;
-const refusal = (note: string) => <div>
+const refusal = (note: string) => <div className={INFRASTRUCTURE_SUMMARY_NOTE_CLASS_NAME}>
   <Text size="sm" tone="muted">{note}</Text></div>;
-const domainEvidenceContent = (renderedFacts: ReadonlyArray<ReturnType<typeof fact>>) => <div>{renderedFacts}</div>;
+const domainEvidenceContent = (renderedFacts: ReadonlyArray<ReturnType<typeof fact>>) => <div
+  className={INFRASTRUCTURE_SUMMARY_COLLECTION_CLASS_NAME}
+  data-contract="BOUNDARY-3"
+>{renderedFacts}</div>;
 
 /** Draw derived service context beside independently settled domain evidence. */
 export const InfrastructureSummaryBase = (props: InfrastructureSummaryProps) => {
@@ -59,12 +72,16 @@ export const InfrastructureSummaryBase = (props: InfrastructureSummaryProps) => 
     const content = domainEvidenceContent(renderedFacts);
     return <SurfaceListCard
       label={label}
-      footer={<Text size="xs" tone="muted" isSkeleton={isLoading}>{note === undefined ? context : `${context} ${note}`}</Text>}
+      footer={<div className={INFRASTRUCTURE_SUMMARY_NOTE_CLASS_NAME}>
+        <Text size="xs" tone="muted" isSkeleton={isLoading}>{note === undefined ? context : `${context} ${note}`}</Text>
+      </div>}
       isLoading={isLoading}
     >{content}</SurfaceListCard>;
   }
-  return <SurfaceCard><div><div>
-        <Heading level={3}>{label}</Heading></div>
+  return <SurfaceCard label={label}><div
+      className={INFRASTRUCTURE_SUMMARY_FALLBACK_CLASS_NAME}
+      data-contract="GAP-4"
+    >
       <Text size="sm">{context}</Text>
       {facts.length > 0 ? <div>{facts.map(item => fact(item))}</div> : null}
       {note === undefined ? null : refusal(note)}</div></SurfaceCard>;
