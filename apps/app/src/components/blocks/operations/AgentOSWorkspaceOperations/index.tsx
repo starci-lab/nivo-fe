@@ -1,3 +1,4 @@
+import { CONTENT_CLASS_NAME } from "./classNames";
 import { Button as DirectionButton, SurfaceCard, Text } from "@starci/grammar/common";
 /** Resolved lifecycle labels consumed by the operations block. */
 export type AgentOSWorkspaceOperationsProps = {
@@ -14,5 +15,5 @@ export type AgentOSWorkspaceOperationsProps = {
 /** Expose the approved lifecycle vocabulary without inventing mutations the public API does not own yet. */
 export const AgentOSWorkspaceOperations = (props: AgentOSWorkspaceOperationsProps) => {
     const { labels } = props;
-    return <SurfaceCard label={labels.section}><div className="flex min-w-0 flex-col gap-2" data-contract="GAP-2"><Text size="sm" tone="muted">{labels.note}</Text>{[labels.update, labels.plan, labels.backup, labels.reset, labels.rebuild].map(label => <DirectionButton key={label} variant="secondary" type="button" isDisabled>{label}</DirectionButton>)}</div></SurfaceCard>;
+    return <SurfaceCard label={labels.section}><div className={CONTENT_CLASS_NAME} data-contract="GAP-2"><Text size="sm" tone="muted">{labels.note}</Text>{[labels.update, labels.plan, labels.backup, labels.reset, labels.rebuild].map(label => <DirectionButton key={label} variant="secondary" type="button" isDisabled>{label}</DirectionButton>)}</div></SurfaceCard>;
 };

@@ -1,3 +1,4 @@
+import { CONTENT_CLASS_NAME } from "./classNames";
 import type { AgentWorkspaceAppCapability } from "@/modules/api/console";
 import { Badge as DirectionBadge, Button as DirectionButton, SectionHeader as DirectionHeader, Text as DirectionText, SurfaceCard } from "@starci/grammar/common";
 /** Workspace capabilities and resolved copy consumed by the application block. */
@@ -32,10 +33,11 @@ type LaunchState = AgentOSWorkspaceApplicationsProps["launchState"];
 /**
  * The launch states that speak for themselves on the card's detail line.
  *
- * `idle`, `opening` and `connected` are deliberately absent: they are reported by the action label
- * rather than the detail line, and a missing entry here means "the detail line has nothing to add".
+ * `idle` and `connected` are deliberately absent: the available application version remains
+ * the detail. Opening is announced by this line while the action keeps its stable label.
  */
 const LAUNCH_DETAIL_LABEL: Partial<Record<LaunchState, keyof ApplicationLabels>> = {
+    opening: "opening",
     blocked: "blocked",
     expired: "expired",
     disconnected: "disconnected"
@@ -65,10 +67,10 @@ const detailFor = (app: AgentWorkspaceAppCapability, labels: ApplicationLabels, 
 /** Render application capability only; no credential or one-time code enters this boundary. */
 export const AgentOSWorkspaceApplications = (props: AgentOSWorkspaceApplicationsProps) => {
     const { apps, labels, launchState, openClawLaunchHref, onManageOpenClaw } = props;
-    return <SurfaceCard label={labels.section}><div className="flex min-w-0 flex-col gap-2" data-contract="GAP-2">{apps.map(app => {
+    return <SurfaceCard label={labels.section}><div className={CONTENT_CLASS_NAME} data-contract="GAP-2">{apps.map(app => {
             const openClaw = app.app === "OPENCLAW";
             const label = launchState === "expired" ? labels.openAgain : labels.manage;
             const action = openClaw ? <DirectionButton variant="primary" href={openClawLaunchHref} target="_blank" rel="noopener noreferrer" onFollow={onManageOpenClaw} isDisabled={!app.available} isPending={launchState === "opening"}>{label}</DirectionButton> : <DirectionButton variant="secondary" type="button" isDisabled>{labels.unavailableAction}</DirectionButton>;
-            return <div key={app.app} className="flex min-w-0 flex-col gap-2" data-contract="GAP-2"><DirectionHeader level={2} title={openClaw ? labels.openclaw : labels.n8n} description={<DirectionText size="sm" tone="muted">{openClaw ? labels.openclawDescription : labels.n8nDescription}</DirectionText>} action={action}/><DirectionBadge tone={app.available ? "success" : "warning"}>{app.available ? labels.available : labels.unavailable}</DirectionBadge><DirectionText size="sm" tone="muted" live={openClaw ? "polite" : "off"}>{detailFor(app, labels, launchState, openClaw)}</DirectionText></div>;
+            return <div key={app.app} className={CONTENT_CLASS_NAME} data-contract="GAP-2"><DirectionHeader level={2} title={openClaw ? labels.openclaw : labels.n8n} description={<DirectionText size="sm" tone="muted">{openClaw ? labels.openclawDescription : labels.n8nDescription}</DirectionText>} action={action}/><DirectionBadge tone={app.available ? "success" : "warning"}>{app.available ? labels.available : labels.unavailable}</DirectionBadge><DirectionText size="sm" tone="muted" live={openClaw ? "polite" : "off"}>{detailFor(app, labels, launchState, openClaw)}</DirectionText></div>;
         })}</div></SurfaceCard>;
 };

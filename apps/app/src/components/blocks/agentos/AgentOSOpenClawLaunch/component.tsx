@@ -1,3 +1,4 @@
+import { CONTENT_CLASS_NAME } from "./classNames";
 import { SectionHeader as DirectionHeader, PageContainer as DirectionPage, Badge, Button, SurfaceCard, Text, type BadgeTone } from "@starci/grammar/common";
 /** Source-owned launch phases rendered independently from workspace readiness. */
 export type AgentOSOpenClawLaunchProps = AgentOSOpenClawLaunchViewProps;
@@ -37,5 +38,5 @@ export const AgentOSOpenClawLaunchBase = (props: AgentOSOpenClawLaunchProps) => 
     const { launchState, workspaceId, detail, labels, onRetry, onReturn, isRetryPending = false } = props;
     const settled = labels.states[launchState];
     const action = launchState === "issuing" && !isRetryPending ? null : <Button variant="primary" type="button" isPending={isRetryPending} onPress={launchState === "connected" ? onReturn : onRetry}>{launchState === "connected" ? labels.returnToWorkspace : labels.retry}</Button>;
-    return <DirectionPage measure="product"><div className="flex min-w-0 flex-col gap-2" data-contract="GAP-2"><DirectionHeader level={1} title={labels.title}/><SurfaceCard><div className="flex min-w-0 flex-col gap-2" data-contract="GAP-2"><Text weight="semibold">{labels.workspaceLabel}: {workspaceId}</Text><Badge tone={toneOf[launchState]}>{settled.label}</Badge><Text size="sm" tone="muted" live="polite">{detail ?? settled.detail}</Text>{action}</div></SurfaceCard><Text size="sm" tone="muted">{labels.securityNote}</Text></div></DirectionPage>;
+    return <DirectionPage measure="product"><div className={CONTENT_CLASS_NAME} data-contract="GAP-2"><DirectionHeader level={1} title={labels.title}/><SurfaceCard><div className={CONTENT_CLASS_NAME} data-contract="GAP-2"><Text weight="semibold">{labels.workspaceLabel}: {workspaceId}</Text><Badge tone={toneOf[launchState]}>{settled.label}</Badge><Text size="sm" tone="muted" live="polite">{detail ?? settled.detail}</Text>{action}</div></SurfaceCard><Text size="sm" tone="muted">{labels.securityNote}</Text></div></DirectionPage>;
 };

@@ -1,3 +1,4 @@
+import { fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 
@@ -30,15 +31,19 @@ const labels: AgentOSPageViewProps["labels"] = {
 
 describe("AgentOSPage", () => {
     it("keeps the dashboard management-only", () => {
-        const html = renderToStaticMarkup(<AgentOSPageBase
+        const create = vi.fn()
+        const { container } = render(<AgentOSPageBase
             mode="dashboard"
             labels={labels}
             onOpenDashboard={vi.fn()}
-            onCreate={vi.fn()}
+            onCreate={create}
         />)
+        const html = container.innerHTML
         expect(html).toContain("Workspace list")
         expect(html).toContain("Manage AgentOS workspaces.")
-        expect(html).toContain('data-scale="display"')
+        expect(screen.getByRole("heading", { level: 1, name: "AgentOS" })).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Create" }))
+        expect(create).toHaveBeenCalledOnce()
         expect(html).toContain("AgentOS")
         expect(html).not.toContain("new:")
     })

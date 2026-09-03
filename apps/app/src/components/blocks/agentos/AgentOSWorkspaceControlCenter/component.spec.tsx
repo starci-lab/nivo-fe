@@ -31,7 +31,7 @@ describe("AgentOSWorkspaceControlCenterBase", () => {
     it("renders unsettled lifecycle notices", () => {
         const retry = vi.fn()
         const { rerender } = render(<AgentOSWorkspaceControlCenterBase workspaceId="workspace-1" pageState="overview" controlCenterState="loading" labels={labels} onSelectPageState={vi.fn()} onOpenAgentConsole={vi.fn()} onRetry={retry} openClawLaunchHref="#" launchState="idle" formatDate={(value) => value} />)
-        expect(screen.getByText("Loading")).toBeInTheDocument()
+        expect(screen.getByRole("status")).toHaveTextContent("Loading workspace")
         rerender(<AgentOSWorkspaceControlCenterBase workspaceId="workspace-1" pageState="overview" controlCenterState="refused" message="Refused" labels={labels} onSelectPageState={vi.fn()} onOpenAgentConsole={vi.fn()} onRetry={retry} openClawLaunchHref="#" launchState="idle" formatDate={(value) => value} />)
         expect(screen.getByText("Refused")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Retry" }))
@@ -43,7 +43,8 @@ describe("AgentOSWorkspaceControlCenterBase", () => {
         render(<AgentOSWorkspaceControlCenterBase workspaceId="workspace-1" pageState="infrastructure" controlCenterState="ready" data={data} labels={labels} onSelectPageState={select} onOpenAgentConsole={vi.fn()} onRetry={vi.fn()} openClawLaunchHref="#" launchState="idle" formatDate={(value) => value} />)
         expect(screen.getByText("runtime")).toBeInTheDocument()
         expect(screen.getByText("helm stack")).toBeInTheDocument()
-        fireEvent.click(screen.getByRole("radio", { name: "operations" }))
+        expect(screen.getByRole("tab", { name: "infrastructure", selected: true })).toHaveAttribute("aria-controls", "workspace-panel-infrastructure")
+        fireEvent.click(screen.getByRole("tab", { name: "operations" }))
         expect(select).toHaveBeenCalledWith("operations")
     })
 })

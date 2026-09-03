@@ -1,3 +1,4 @@
+import { SECTIONS_CLASS_NAME } from "./classNames";
 import { AgentOSWorkspaceList } from "@/components/blocks/agentos/AgentOSWorkspaceList";
 import { AgentOSProvisioning } from "@/components/blocks/provisioning/AgentOSProvisioning";
 import { Breadcrumbs } from "@nivo/ui";
@@ -84,5 +85,5 @@ export const AgentOSPageBase = (props: AgentOSPageProps) => {
                 mode: "resume",
                 orderId: view.orderId
             }}/>];
-    return <DirectionPage measure="product"><div className="flex min-w-0 flex-col gap-6" data-contract="GAP-5">{path === undefined ? null : path}{heading}{section}</div></DirectionPage>;
+    return <DirectionPage measure="product"><div className={SECTIONS_CLASS_NAME} data-contract="GAP-5">{path === undefined ? null : path}{heading}{section}</div></DirectionPage>;
 };
