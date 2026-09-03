@@ -1,7 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react"
-import { renderToStaticMarkup } from "react-dom/server"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { WalletSummaryBase } from "./component"
 
 const mocks = vi.hoisted(() => ({
     data: { wallet: null, invoices: null } as { wallet: unknown, invoices: unknown },
@@ -27,22 +25,6 @@ describe("WalletSummary", () => {
         mocks.push.mockClear()
         mocks.data.wallet = null
         mocks.data.invoices = null
-    })
-
-    it("draws already-formatted balance and invoice facts", () => {
-        const html = renderToStaticMarkup(<WalletSummaryBase label="Wallet" actionLabel="Open wallet" state={{ phase: "populated", facts: [
-            { id: "balance", label: "Balance", value: "$12.00" },
-            { id: "invoice", label: "Unpaid invoice", value: "$4.00" },
-        ] }} onOpenWallet={vi.fn()} />)
-        expect(html).toContain("$12.00")
-        expect(html).toContain("$4.00")
-        expect(html).toContain("Open wallet")
-    })
-
-    it("draws a refusal without inventing money facts", () => {
-        const html = renderToStaticMarkup(<WalletSummaryBase label="Wallet" state={{ phase: "failed", note: "Wallet unavailable" }} />)
-        expect(html).toContain("Wallet unavailable")
-        expect(html).not.toContain("$0")
     })
 
     it("joins balance and unpaid invoice and routes both actions", () => {

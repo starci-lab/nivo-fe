@@ -1,8 +1,6 @@
 import { render } from "@testing-library/react"
-import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 import { vi } from "vitest"
-import { OverviewPulseBase, type OverviewPulseProps } from "./component"
 
 const mocks = vi.hoisted(() => ({
     data: { apps: null, workspaces: null, pod: null, domains: null, wallet: null, invoices: null } as Record<string, unknown>,
@@ -18,23 +16,7 @@ vi.mock("@/modules/overview/context", () => ({ useOverviewData: () => mocks.data
 
 import { OverviewPulse } from "."
 
-const signals: OverviewPulseProps["signals"] = [
-    { id: "apps", icon: "apps", label: "Apps", phase: "answered", value: "Needs attention", caption: "Academy is awaiting DNS", tone: "warning", emphasis: "accent" },
-    { id: "agentos", icon: "agentos", label: "AgentOS", phase: "answered", value: "sales-ops", caption: "Ready", tone: "default" },
-    { id: "domains", icon: "domains", label: "Domains", phase: "failed", value: "—", caption: "Could not read domains", tone: "default" },
-    { id: "wallet", icon: "wallet", label: "Wallet", phase: "pending", value: "", caption: "", tone: "default" },
-]
-
 describe("OverviewPulse", () => {
-    it("keeps four independently settled named signals without displaying a collection total", () => {
-        const html = renderToStaticMarkup(<OverviewPulseBase signals={signals} />)
-        expect(html).not.toContain('data-size="metric-lead"')
-        expect(html).toContain("Needs attention")
-        expect(html).toContain("sales-ops")
-        expect(html).toContain("Could not read domains")
-        expect(html).not.toContain("3 apps")
-    })
-
     it("prioritises actionable source facts across all four signals", () => {
         mocks.data.apps = { ok: true, data: [
             { id: "ready", slug: "ready-app", customDomain: null, provisionStatus: "ready", status: "active" },

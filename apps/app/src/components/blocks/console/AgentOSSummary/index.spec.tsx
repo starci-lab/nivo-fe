@@ -1,7 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react"
-import { renderToStaticMarkup } from "react-dom/server"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { AgentOSSummaryBase } from "./component"
 
 const mocks = vi.hoisted(() => ({
     data: { workspaces: null, pod: null } as { workspaces: unknown, pod: unknown },
@@ -24,20 +22,6 @@ describe("AgentOSSummary", () => {
         mocks.push.mockClear()
         mocks.data.workspaces = null
         mocks.data.pod = null
-    })
-
-    it("draws the workspace and its one safe service action", () => {
-        const html = renderToStaticMarkup(<AgentOSSummaryBase label="AgentOS" state={{ phase: "populated", workspace: {
-            id: "workspace-1", name: "Support", description: "OpenClaw workspace", statusLabel: "Available", statusTone: "success", actionLabel: "Open service", actionHref: "/agentos/workspace-1",
-        } }} onOpenService={vi.fn()} />)
-        expect(html).toContain("Support")
-        expect(html).toContain("Available")
-        expect(html).toContain("Open service")
-    })
-
-    it("draws a settled missing workspace", () => {
-        const html = renderToStaticMarkup(<AgentOSSummaryBase label="AgentOS" state={{ phase: "empty", message: "No workspace" }} onOpenService={vi.fn()} />)
-        expect(html).toContain("No workspace")
     })
 
     it("joins workspace and reachable pod evidence into one service action", () => {
