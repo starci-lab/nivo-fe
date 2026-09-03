@@ -2,9 +2,10 @@ import { Breadcrumbs, TileIcon } from "@nivo/ui";
 import { Button, Heading, PageContainer, Text } from "@starci/grammar/core";
 import { AgentOSCustomModuleCollection } from "@/components/blocks/agentos/AgentOSCustomModuleCollection";
 import { AgentOSSolutionModuleCenter } from "@/components/blocks/agentos/AgentOSSolutionModuleCenter";
-
-const MODULE_COLLECTION_PAGE_CLASS_NAME = "gap-6";
-const MODULE_COLLECTION_GRID_CLASS_NAME = "gap-4";
+import {
+  MODULE_COLLECTION_GRID_CLASS_NAME,
+  MODULE_COLLECTION_PAGE_CLASS_NAME
+} from "./classNames";
 
 /** Public API role for AgentOSModuleCollectionPageProps. */
 export type AgentOSModuleCollectionPageProps = AgentOSModuleCollectionPageViewProps;
