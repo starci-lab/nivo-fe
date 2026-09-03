@@ -16,7 +16,7 @@ export const OverviewPage = (props: OverviewPageProps) => {
   return <OverviewDataProvider content={OverviewPageBase} contentProps={{
     title: t("overview.title"),
     lede: t("overview.lede"),
-    pathLabel: t("navigationLabel"),
+    pathLabel: t("breadcrumbLabel"),
     consoleLabel: t("title"),
     buildAppLabel: t("overview.buildApp"),
     atAGlanceLabel: t("overview.atAGlance"),

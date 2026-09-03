@@ -51,7 +51,7 @@ describe("OverviewPage route", () => {
     it("hands the page every resolved label and routes the one page command", () => {
         render(<OverviewPage />)
 
-        expect(screen.getByText("navigationLabel:title:overview.title")).toBeInTheDocument()
+        expect(screen.getByText("breadcrumbLabel:title:overview.title")).toBeInTheDocument()
         expect(screen.getByText("overview.lede:overview.atAGlance:servicesCaption:accountCaption")).toBeInTheDocument()
 
         fireEvent.click(screen.getByRole("button", { name: "overview.buildApp" }))
@@ -68,7 +68,7 @@ describe("OverviewPage route", () => {
         mocks.domains.mockImplementation(() => ({ data: undefined, error: undefined, isLoading: true, mutate: vi.fn() }))
         render(<OverviewPage />)
 
-        expect(screen.getByText("navigationLabel:title:overview.title")).toBeInTheDocument()
+        expect(screen.getByText("breadcrumbLabel:title:overview.title")).toBeInTheDocument()
         expect(mocks.domains).toHaveBeenCalledTimes(1)
     })
 })

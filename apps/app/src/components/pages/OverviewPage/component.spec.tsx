@@ -13,7 +13,7 @@ import { OverviewPageBase, type OverviewPageProps } from "./component"
 const props: OverviewPageProps = {
     title: "Overview",
     lede: "Everything running and needing attention.",
-    pathLabel: "Console navigation",
+    pathLabel: "You are here",
     consoleLabel: "Console",
     buildAppLabel: "Build an app",
     atAGlanceLabel: "At a glance",

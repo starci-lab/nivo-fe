@@ -20,7 +20,7 @@ import { AgentOSWorkspaceListBase } from "../blocks/agentos/AgentOSWorkspaceList
 const overviewProps: OverviewPageProps = {
     title: "Overview",
     lede: "Everything running and needing attention",
-    pathLabel: "Console navigation",
+    pathLabel: "You are here",
     consoleLabel: "Console",
     buildAppLabel: "Build an app",
     atAGlanceLabel: "At a glance",
