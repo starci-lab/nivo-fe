@@ -61,6 +61,7 @@ describe("AppProviders", () => {
     renderProviders();
 
     const grammarRoot = screen.getByTestId("grammar-root");
+    expect(grammarRoot).toHaveAttribute("data-grammar-family", "nivo");
     expect(grammarRoot).toHaveAttribute("data-grammar-theme", expectedTheme);
     expect(screen.getByTestId("theme-provider")).toContainElement(grammarRoot);
     expect(screen.getByText("workspace")).toBeInTheDocument();
@@ -74,6 +75,7 @@ describe("AppProviders", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     let root: ReturnType<typeof hydrateRoot> | undefined;
 
+    expect(serverHtml).toContain('data-grammar-family="nivo"');
     expect(serverHtml).toContain('data-grammar-theme="system"');
 
     try {
@@ -81,10 +83,9 @@ describe("AppProviders", () => {
         root = hydrateRoot(container, providersTree());
       });
 
-      expect(container.querySelector('[data-testid="grammar-root"]')).toHaveAttribute(
-        "data-grammar-theme",
-        "light"
-      );
+      const hydrated = container.querySelector('[data-testid="grammar-root"]');
+      expect(hydrated).toHaveAttribute("data-grammar-family", "nivo");
+      expect(hydrated).toHaveAttribute("data-grammar-theme", "light");
       expect(consoleError).not.toHaveBeenCalled();
     } finally {
       await act(async () => root?.unmount());
