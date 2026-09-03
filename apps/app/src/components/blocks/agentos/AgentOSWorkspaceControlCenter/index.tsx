@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { useMutateRenewAgentWorkspaceAppLaunchSwr, useMutateRevokeAgentWorkspaceAppLaunchSwr, useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr";
+import { useMutateRenewAgentWorkspaceAppLaunchSwr, useMutateRevokeAgentWorkspaceAppLaunchSwr, useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks";
 import { useSession } from "@/modules/auth/session";
 import useProvisioningRealtime from "@/modules/realtime/provisioning";
 import { workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@/modules/window/workspace-app-launch";

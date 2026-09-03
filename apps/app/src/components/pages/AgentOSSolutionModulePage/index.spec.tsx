@@ -61,7 +61,7 @@ const testSurface = {
 type MockQueryAnswer = { readonly ok: true; readonly data: unknown } | { readonly ok: false } | undefined
 
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
-vi.mock("@/hooks/swr", () => ({
+vi.mock("@/hooks", () => ({
     nivoQueryData: (answer: MockQueryAnswer) => {
         if (answer === undefined) return undefined
         return answer.ok ? answer.data : null

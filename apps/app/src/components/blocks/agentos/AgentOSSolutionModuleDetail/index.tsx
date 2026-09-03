@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { nivoQueryData, useQueryMyAgentosModuleInstallationSwr } from "@/hooks/swr";
+import { nivoQueryData, useQueryMyAgentosModuleInstallationSwr } from "@/hooks";
 import type { AgentosModuleInstallationDetail } from "@/modules/api/console";
 import { useSession } from "@/modules/auth/session";
 import useProvisioningRealtime from "@/modules/realtime/provisioning";

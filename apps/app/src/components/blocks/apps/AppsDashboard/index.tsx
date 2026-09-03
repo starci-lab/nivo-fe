@@ -2,7 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { fleetResourceHref, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
-import { useQueryCatalogItemsSwr, useQueryMyCatalogOrdersSwr, useQueryMyExpertSitesSwr, useQueryMyInstancesSwr } from "@/hooks/swr";
+import { useQueryCatalogItemsSwr, useQueryMyCatalogOrdersSwr, useQueryMyExpertSitesSwr, useQueryMyInstancesSwr } from "@/hooks";
 import { useRouter } from "@/i18n/navigation";
 import type { CatalogItemRow } from "@/modules/api/console";
 import { AppsDashboardBase, type CatalogueSectionView, type OwnedAppRow, type OwnedSectionView } from "./component";

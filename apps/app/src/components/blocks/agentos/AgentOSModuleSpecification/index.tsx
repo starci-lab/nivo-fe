@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { useMutatePublishAgentosCustomModuleSwr } from "@/hooks/swr";
+import { useMutatePublishAgentosCustomModuleSwr } from "@/hooks";
 import { useAgentOSModuleStudioProjection } from "@/components/pages/AgentOSModuleStudioPage/component";
 import { AgentOSModuleSpecificationBase } from "./component";
 type AgentOSModuleSpecificationProps = {

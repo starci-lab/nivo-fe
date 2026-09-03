@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { nivoQueryData, useQueryMyExpertSitesSwr } from "@/hooks/swr";
+import { nivoQueryData, useQueryMyExpertSitesSwr } from "@/hooks";
 import { AcademyControlCenterBase, type AcademyControlCenterMode } from "./component";
 
 /** Exact Academy identity supplied by the resource route. */

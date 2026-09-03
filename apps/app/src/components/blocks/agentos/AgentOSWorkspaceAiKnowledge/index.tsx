@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { nivoQueryData, useMutateReindexAgentWorkspaceKnowledgeSwr, useMutateRunAgentosAiReadinessTestSwr, useQueryMyAgentosAiKnowledgeReadinessSwr } from "@/hooks/swr";
+import { nivoQueryData, useMutateReindexAgentWorkspaceKnowledgeSwr, useMutateRunAgentosAiReadinessTestSwr, useQueryMyAgentosAiKnowledgeReadinessSwr } from "@/hooks";
 import { type AgentosAiKnowledgeReadiness } from "@/modules/api/console";
 import { AgentOSWorkspaceAiKnowledgeBase, type AgentOSWorkspaceAiKnowledgeViewProps } from "./component";
 

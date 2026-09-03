@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { nivoQueryData, useQueryMyAgentosCustomModulesSwr } from "@/hooks/swr";
+import { nivoQueryData, useQueryMyAgentosCustomModulesSwr } from "@/hooks";
 import type { AgentosCustomModule } from "@/modules/api/console";
 import { AgentOSCustomModuleCollectionBase } from "./component";
 type AgentOSCustomModuleCollectionProps = {

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { nivoQueryData, useMutateAcademyIntegrationSwr, useQueryMyAcademyIntegrationsSwr } from "@/hooks/swr";
+import { nivoQueryData, useMutateAcademyIntegrationSwr, useQueryMyAcademyIntegrationsSwr } from "@/hooks";
 import { AcademyIntegrationCenterBase, type AcademyIntegrationCard, type AcademyIntegrationFormField } from "./component";
 
 /** Owner-scoped identity consumed by Integration Center. */

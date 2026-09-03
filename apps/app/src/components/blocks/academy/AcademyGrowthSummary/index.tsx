@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { useQueryMyAcademyGrowthSnapshotSwr } from "@/hooks/swr";
+import { useQueryMyAcademyGrowthSnapshotSwr } from "@/hooks";
 import { AcademyGrowthSummaryBase } from "./component";
 
 /** Owner-scoped identity consumed by the connected growth block. */

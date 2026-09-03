@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { usePathname } from "@/i18n/navigation";
-import { useMutateCreateWalletTopUpPayLinkSwr, useMutatePayInvoiceSwr, useQueryMyInvoicesSwr, useQueryMyWalletSwr, useQueryMyWalletTransactionsSwr } from "@/hooks/swr";
+import { useMutateCreateWalletTopUpPayLinkSwr, useMutatePayInvoiceSwr, useQueryMyInvoicesSwr, useQueryMyWalletSwr, useQueryMyWalletTransactionsSwr } from "@/hooks";
 import { DEFAULT_LOCALE } from "@/i18n/config";
 import type { InvoiceRow, WalletTopUpPayLink } from "@/modules/api/console";
 import { WalletControlCenterBase, type BalanceSectionView, type LedgerSectionView, type LinkedInvoiceSectionView, type PaymentResultView, type TopUpView, type WalletFactRow, type WalletLedgerRow } from "./component";

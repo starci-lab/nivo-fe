@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { nivoQueryData, useMutateCreateAcademyStudentSwr, useMutateGrantAcademyCourseAccessSwr, useMutateRevokeAcademyCourseAccessSwr, useMutateSetAcademyStudentStatusSwr, useQueryMyAcademyStudentDetailSwr, useQueryMyAcademyStudentsSwr } from "@/hooks/swr";
+import { nivoQueryData, useMutateCreateAcademyStudentSwr, useMutateGrantAcademyCourseAccessSwr, useMutateRevokeAcademyCourseAccessSwr, useMutateSetAcademyStudentStatusSwr, useQueryMyAcademyStudentDetailSwr, useQueryMyAcademyStudentsSwr } from "@/hooks";
 import type { AcademyStudent, AcademyStudentDetail } from "@/modules/api/console";
 import { AcademyStudentCrmBase } from "./component";
 
