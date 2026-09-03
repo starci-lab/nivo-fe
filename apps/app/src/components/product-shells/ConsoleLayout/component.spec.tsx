@@ -17,17 +17,17 @@ describe("ConsoleLayoutBase", () => {
         render(<ConsoleLayoutBase
             body={RoutedBody}
             bodyProps={{}}
-            navigationLabel="Console navigation"
-            primaryLabel="Console"
+            navigationLabel="Console destinations"
+            primaryLabel="Console workspace"
         />)
 
         expect(screen.getByRole("banner")).toHaveTextContent("Nivo")
-        expect(screen.getByRole("navigation", { name: "Console navigation" })).toHaveTextContent("Overview")
-        const layout = screen.getByRole("navigation", { name: "Console navigation" }).parentElement
+        expect(screen.getByRole("navigation", { name: "Console destinations" })).toHaveTextContent("Overview")
+        const layout = screen.getByRole("navigation", { name: "Console destinations" }).parentElement
         expect(layout?.closest('[data-grammar-workspace-shell="true"]')).toBeInTheDocument()
         expect(layout).toHaveAttribute("data-grammar-workspace-navigation-track", "intrinsic")
         expect(layout).toHaveAttribute("data-grammar-workspace-navigation-visibility", "wide")
-        expect(screen.getByRole("main", { name: "Console" })).toHaveTextContent("Workspace body")
+        expect(screen.getByRole("main", { name: "Console workspace" })).toHaveTextContent("Workspace body")
         expect(screen.getAllByRole("main")).toHaveLength(1)
     })
 
@@ -37,8 +37,8 @@ describe("ConsoleLayoutBase", () => {
         const { container } = render(<ConsoleLayoutBase
             body={RoutedBody}
             bodyProps={{}}
-            navigationLabel="Console navigation"
-            primaryLabel="Console"
+            navigationLabel="Console destinations"
+            primaryLabel="Console workspace"
         />)
 
         const banners = screen.getAllByRole("banner")

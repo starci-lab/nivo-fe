@@ -114,10 +114,11 @@
   "console": {
     "brand": "nivo",
     "title": "Console",
+    "workspaceLabel": "Console workspace",
     "servicesCaption": "Services",
     "accountCaption": "Account",
-    "navigationLabel": "Console navigation",
-    "actionsLabel": "Account actions",
+    "navigationLabel": "Console destinations",
+    "actionsLabel": "Console controls",
     "breadcrumbLabel": "You are here",
     "openMenu": "Menu",
     "closeMenu": "Close",

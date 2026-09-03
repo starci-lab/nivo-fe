@@ -114,10 +114,11 @@
   "console": {
     "brand": "nivo",
     "title": "Bảng điều khiển",
+    "workspaceLabel": "Không gian làm việc",
     "servicesCaption": "Dịch vụ",
     "accountCaption": "Tài khoản",
-    "navigationLabel": "Điều hướng bảng điều khiển",
-    "actionsLabel": "Thao tác tài khoản",
+    "navigationLabel": "Điểm đến trong bảng điều khiển",
+    "actionsLabel": "Công cụ bảng điều khiển",
     "breadcrumbLabel": "Vị trí hiện tại",
     "openMenu": "Menu",
     "closeMenu": "Đóng",
