@@ -34,7 +34,6 @@ const signalRow = (signal: OverviewPulseSignal) => {
   return <div
     key={signal.id}
     className={OVERVIEW_PULSE_SIGNAL_ROW_CLASS_NAME}
-    data-contract="GAP-3 PADDING-3 PADDING-4"
   >
     <IconTile
       source={nivoIconSource(signal.icon, "leading")}
@@ -42,15 +41,9 @@ const signalRow = (signal: OverviewPulseSignal) => {
       size="sm"
       isSkeleton={isLoading}
     />
-    <div
-      className={OVERVIEW_PULSE_SIGNAL_CONTENT_CLASS_NAME}
-      data-contract="GAP-3"
-    >
+    <div className={OVERVIEW_PULSE_SIGNAL_CONTENT_CLASS_NAME}>
       <Text size="sm" weight="medium">{signal.label}</Text>
-      <div
-        className={OVERVIEW_PULSE_SIGNAL_FACT_CLASS_NAME}
-        data-contract="GAP-1"
-      >
+      <div className={OVERVIEW_PULSE_SIGNAL_FACT_CLASS_NAME}>
         <Text size="sm" tone={signal.emphasis ?? "default"} isSkeleton={isLoading}>{signal.value}</Text>
         {caption(signal, isLoading)}
       </div>
@@ -67,10 +60,7 @@ export const OverviewPulseBase = (props: OverviewPulseProps) => {
     <NivoUnicornArtwork props={{
       tone: "brand"
     }} />
-    <div
-      className={OVERVIEW_PULSE_SIGNAL_COLLECTION_CLASS_NAME}
-      data-contract="BOUNDARY-1 BOUNDARY-3 MEASURE-2"
-    >
+    <div className={OVERVIEW_PULSE_SIGNAL_COLLECTION_CLASS_NAME}>
       {signals.map(signalRow)}
     </div>
   </SurfaceCard>;

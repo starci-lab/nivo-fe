@@ -43,7 +43,6 @@ export const OverviewPageBase = (props: OverviewPageProps) => {
   return <PageContainer
     measure="product"
     className={OVERVIEW_PAGE_CLASS_NAME}
-    data-contract="GAP-5"
   >
     <Breadcrumbs props={{
       mode: "trail",
@@ -72,18 +71,12 @@ export const OverviewPageBase = (props: OverviewPageProps) => {
     <PrimaryRailLayout
       align="start"
       railWidth="standard"
-      primary={<section
-        className={OVERVIEW_SECTION_CLASS_NAME}
-        data-contract="GAP-4 MEASURE-2"
-      >
+      primary={<section className={OVERVIEW_SECTION_CLASS_NAME}>
         <SectionHeader level={2} title={servicesLabel} />
         <AppsSummary />
         <AgentOSSummary />
       </section>}
-      rail={<section
-        className={OVERVIEW_SECTION_CLASS_NAME}
-        data-contract="GAP-4 MEASURE-2"
-      >
+      rail={<section className={OVERVIEW_SECTION_CLASS_NAME}>
         <SectionHeader level={2} title={accountLabel} />
         <WalletSummary />
         <InfrastructureSummary />
