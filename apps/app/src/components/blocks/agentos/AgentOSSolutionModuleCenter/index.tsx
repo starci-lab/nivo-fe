@@ -169,6 +169,7 @@ export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterPr
     catalogueRefusedTitle: t("catalogueRefusedTitle"),
     catalogueRefused: t("catalogueRefusedHint"),
     retry: t("retry"),
+    installedEmptyAction: t("emptyAction"),
     retryingInstalled,
     retryingCatalogue,
     onRetryInstalled,
