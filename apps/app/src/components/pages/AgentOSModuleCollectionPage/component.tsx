@@ -26,45 +26,63 @@ export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPa
     onBack,
     onCreate
   }: AgentOSModuleCollectionPageViewProps = props;
-  return <PageContainer measure="product">
-
-  <main className="gap-6" data-contract="GAP-5"><div>
-
-  <Breadcrumbs props={{
-      mode: "trail",
-      label: labels.path,
-      steps: [{
-        id: "workspace",
-        label: labels.workspace
-      }, {
-        id: "modules",
-        label: labels.title,
-        isCurrent: true
-      }]
-    }} on={{
-      activate: onBack
-    }} /><div><div>
-
-
-      <TileIcon props={{
-          icon: "agentos",
-          signal: "active"
-        }} /><div>
-
-        <Text size="sm" tone="accent" weight="semibold">{labels.eyebrow}</Text>
-        <Heading level={1} scale="display">{labels.title}</Heading>
-        <Text size="md" tone="muted">{labels.description}</Text></div></div>
-
-
-    <Button
-      size="lg"
-      variant="primary"
-      onPress={onCreate}
-    >{labels.create}</Button></div><>
-
-    <section aria-label={labels.title} data-region="module-collection"><div className="gap-4" data-contract="GAP-4">
-      <AgentOSCustomModuleCollection workspaceId={workspaceId} />
-      <AgentOSSolutionModuleCenter workspaceId={workspaceId} />
-    </div></section></></main></PageContainer>;
+  return (
+    <PageContainer measure="product">
+      <main className="gap-6" data-contract="GAP-5">
+        <div>
+          <Breadcrumbs
+            props={{
+              mode: "trail",
+              label: labels.path,
+              steps: [
+                {
+                  id: "workspace",
+                  label: labels.workspace,
+                },
+                {
+                  id: "modules",
+                  label: labels.title,
+                  isCurrent: true,
+                },
+              ],
+            }}
+            on={{
+              activate: onBack,
+            }}
+          />
+          <div>
+            <div>
+              <TileIcon
+                props={{
+                  icon: "agentos",
+                  signal: "active",
+                }}
+              />
+              <div>
+                <Text size="sm" tone="accent" weight="semibold">
+                  {labels.eyebrow}
+                </Text>
+                <Heading level={1} scale="display">
+                  {labels.title}
+                </Heading>
+                <Text size="md" tone="muted">
+                  {labels.description}
+                </Text>
+              </div>
+            </div>
+          </div>
+          <Button size="lg" variant="primary" onPress={onCreate}>
+            {labels.create}
+          </Button>
+        </div>
+        <section aria-label={labels.title} data-region="module-collection">
+          <div className="gap-4" data-contract="GAP-4">
+            <AgentOSCustomModuleCollection workspaceId={workspaceId} />
+            <AgentOSSolutionModuleCenter workspaceId={workspaceId} />
+          </div>
+        </section>
+      </main>
+    </PageContainer>
+  );
 };
 
