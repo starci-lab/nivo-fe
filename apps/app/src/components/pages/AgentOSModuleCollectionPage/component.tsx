@@ -2,6 +2,10 @@ import { Breadcrumbs, TileIcon } from "@nivo/ui";
 import { Button, Heading, PageContainer, Text } from "@starci/grammar/core";
 import { AgentOSCustomModuleCollection } from "@/components/blocks/agentos/AgentOSCustomModuleCollection";
 import { AgentOSSolutionModuleCenter } from "@/components/blocks/agentos/AgentOSSolutionModuleCenter";
+
+const MODULE_COLLECTION_PAGE_CLASS_NAME = "gap-6";
+const MODULE_COLLECTION_GRID_CLASS_NAME = "gap-4";
+
 /** Public API role for AgentOSModuleCollectionPageProps. */
 export type AgentOSModuleCollectionPageProps = AgentOSModuleCollectionPageViewProps;
 type AgentOSModuleCollectionPageViewProps = {
@@ -28,7 +32,7 @@ export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPa
   }: AgentOSModuleCollectionPageViewProps = props;
   return (
     <PageContainer measure="product">
-      <main className="gap-6" data-contract="GAP-5">
+      <main className={MODULE_COLLECTION_PAGE_CLASS_NAME} data-contract="GAP-5">
         <div>
           <Breadcrumbs
             props={{
@@ -76,7 +80,7 @@ export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPa
           </Button>
         </div>
         <section aria-label={labels.title} data-region="module-collection">
-          <div className="gap-4" data-contract="GAP-4">
+          <div className={MODULE_COLLECTION_GRID_CLASS_NAME} data-contract="GAP-4">
             <AgentOSCustomModuleCollection workspaceId={workspaceId} />
             <AgentOSSolutionModuleCenter workspaceId={workspaceId} />
           </div>
