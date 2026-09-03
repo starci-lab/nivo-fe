@@ -24,6 +24,14 @@ test("fails missing changed production and ignores tests", () => {
     assert.equal(buildPatchSummary({}, ["apps/app/src/example.spec.tsx", "apps/app/vitest.config.ts"], "C:/repo").notApplicable, true)
 })
 
+test("skips deleted production files", () => {
+    const report = file("C:/repo/apps/app/src/kept.ts", {0: {start: {line: 1}, end: {line: 1}}}, [1])
+    const changed = ["apps/app/src/kept.ts", "apps/app/src/removed.tsx"]
+    const summary = buildPatchSummary(report, changed, "C:/repo", ["apps/app/src/removed.tsx"])
+    assert.deepEqual(summary.total.lines, {total: 1, covered: 1, pct: 100})
+    assert.equal(buildPatchSummary({}, ["apps/app/src/removed.tsx"], "C:/repo", ["apps/app/src/removed.tsx"]).notApplicable, true)
+})
+
 test("requires an explicit base and executes on this platform", () => {
     assert.equal(resolveBase({}, ["node", "script"]), undefined)
     const cwd = mkdtempSync(join(tmpdir(), "nivo-patch-cli-"))

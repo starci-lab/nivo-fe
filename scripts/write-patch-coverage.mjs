@@ -24,8 +24,10 @@ const metric = (values) => ({
     pct: values.length ? values.filter((value) => value > 0).length / values.length * 100 : null,
 })
 
-export const buildPatchSummary = (report, changedFiles, cwd = process.cwd()) => {
+export const buildPatchSummary = (report, changedFiles, cwd = process.cwd(), deletedFiles = []) => {
+    const deleted = new Set(deletedFiles.map((file) => normalize(resolve(cwd, file), cwd)))
     const changed = [...new Set(changedFiles.map((file) => normalize(resolve(cwd, file), cwd)).filter(production))]
+        .filter((file) => !deleted.has(file))
     if (changed.length === 0) return {notApplicable: true, reason: "no changed production files"}
     const entries = new Map(Object.entries(report).map(([file, data]) => [normalize(file, cwd), data]))
     const missing = changed.filter((file) => !entries.has(file))
@@ -52,8 +54,8 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
     const report = JSON.parse(readFileSync(reportPath, "utf8"))
     const base = resolveBase(process.env, process.argv)
     if (!base) throw new Error("Set COVERAGE_BASE_SHA or pass --base <merge-base-sha> to measure committed PR changes")
-    const tracked = execFileSync("git", ["diff", "--name-only", base, "HEAD"], {encoding: "utf8"}).split(/\r?\n/)
-    const summary = buildPatchSummary(report, tracked)
+    const diff = (...flags) => execFileSync("git", ["diff", "--name-only", ...flags, base, "HEAD"], {encoding: "utf8"}).split(/\r?\n/)
+    const summary = buildPatchSummary(report, diff(), process.cwd(), diff("--diff-filter=D"))
     writeFileSync("coverage/patch-summary.json", JSON.stringify(summary, null, 2) + "\n")
     assertPatchThresholds(summary)
 }
