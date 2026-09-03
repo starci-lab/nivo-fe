@@ -3,7 +3,9 @@
 import { Badge, Button, Heading, SurfaceCard, Text } from "@starci/grammar/common";
 import { CONTEXT_BAND_CLASS_NAME, CONTEXT_GATE_ROW_CLASS_NAME, CONTEXT_RAISED_BAND_CLASS_NAME } from "./classNames";
 
+/** One readiness requirement and its measured evidence for the selected revision. */
 export type SetupGate = { readonly key: string; readonly label: string; readonly passed: boolean };
+/** Immutable context identity and exact Test evidence resolved for the selected Setup revision. */
 export type ContextDraft = {
   readonly contextId: string | null;
   readonly setupSessionId: string;
@@ -17,6 +19,7 @@ export type ContextDraft = {
   readonly exactTestPassed: boolean;
   readonly isActive: boolean;
 };
+/** Facts and action state supplied by the selected revision owner. */
 export type ContextVersionContentProps = {
   readonly activeVersion: number | null;
   readonly draft: ContextDraft | null;
@@ -26,10 +29,12 @@ export type ContextVersionContentProps = {
   readonly refused: boolean;
   readonly onApply: () => void;
 };
+/** Public review contract for activating one tested context version. */
 export type ContextVersionBlockProps = ContextVersionContentProps;
 
 /** Render complete facts, gates and exact Test state with Apply as the sole mutation. */
-export const ContextVersionBlock = ({ activeVersion, draft, pending, ownPending = pending, peerDisabled = false, refused, onApply }: ContextVersionBlockProps) => {
+export const ContextVersionBlock = (props: ContextVersionBlockProps) => {
+  const { activeVersion, draft, pending, ownPending = pending, peerDisabled = false, refused, onApply } = props;
   const gates = draft?.gates ?? [];
   const passed = gates.filter(gate => gate.passed).length;
   const applyReady = draft !== null && draft.version !== null && draft.status === "completed" && draft.exactTestPassed && !draft.isActive;

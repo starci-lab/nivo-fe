@@ -17,9 +17,8 @@ import { SupportQueueWorkbenchBlock } from "@/components/blocks/agentos/SupportQ
 import { TestTrustResultBlock } from "@/components/blocks/agentos/TestTrustResultBlock";
 import type { AgentosModuleRuntime, AgentosModuleTestContract, AgentosModuleTestSurface, AgentosRuntimeValue } from "@/modules/api/console";
 import type { SupportCustomerConversation, SupportCustomerMessage, SupportImportantFact, SupportTicket } from "@/modules/api/workspace-controlplane";
-import { AGENTOS_SETUP_SURFACE_CLASS_NAME } from "./classNames";
-import { CONTEXT_BAND_CLASS_NAME, CONTEXT_RAISED_BAND_CLASS_NAME } from "@/components/blocks/agentos/ContextVersionBlock/classNames";
-/** Public API role for AgentOSSolutionModulePageProps. */
+import { AGENTOS_SETUP_SURFACE_CLASS_NAME, CONTEXT_BAND_CLASS_NAME, CONTEXT_RAISED_BAND_CLASS_NAME } from "./classNames";
+/** Shell and screen contract resolved by the connected module route. */
 export type AgentOSSolutionModulePageProps = AgentOSSolutionModulePageViewProps;
 type AgentOSSolutionModuleSupportInbox = {
   readonly conversations: ReadonlyArray<SupportCustomerConversation>;

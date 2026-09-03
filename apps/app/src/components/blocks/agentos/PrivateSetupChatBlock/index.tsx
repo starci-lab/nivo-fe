@@ -12,18 +12,21 @@ import {
   PRIVATE_SETUP_READONLY_CLASS_NAME,
 } from "./classNames";
 
+/** A persisted conversation turn belonging to a private Setup revision. */
 export type SetupMessage = {
   readonly id: string;
   readonly role: "user" | "assistant" | "system";
   readonly content: string;
 };
 
+/** Revision identity and lifecycle used by the history selector. */
 export type SetupRevision = {
   readonly id: string;
   readonly revision: number;
   readonly status: "open" | "ready" | "completed" | "superseded";
 };
 
+/** Controlled conversation, draft and command feedback supplied by the Setup owner. */
 export type PrivateSetupChatBlockProps = {
   readonly messages: ReadonlyArray<SetupMessage>;
   readonly pending?: boolean;
