@@ -5,7 +5,7 @@ import {tmpdir} from "node:os"
 import {dirname, join} from "node:path"
 import test from "node:test"
 import {fileURLToPath} from "node:url"
-import {assertPatchThresholds, buildPatchSummary, lineCounts, resolveBase} from "./write-patch-coverage.mjs"
+import {assertPatchThresholds, buildPatchSummary, changedPaths, lineCounts, resolveBase} from "./write-patch-coverage.mjs"
 
 const file = (name, statementMap, statements) => ({[name]: {statementMap, s: statements, f: {0: statements[0]}, b: {0: statements}}})
 
@@ -33,6 +33,34 @@ test("requires an explicit base and executes on this platform", () => {
     const result = spawnSync(process.execPath, [script], {cwd, encoding: "utf8", env: {}})
     assert.notEqual(result.status, 0)
     assert.match(result.stderr, /COVERAGE_BASE_SHA/)
+})
+
+test("excludes deleted paths from the changed-file list so a deletion cannot crash the gate", () => {
+    const nameStatus = [
+        "M\tapps/app/src/components/blocks/console/OverviewAccount/component.tsx",
+        "D\tapps/app/src/components/blocks/console/AgentOSSummary/component.tsx",
+        "D\tapps/app/src/components/blocks/console/AgentOSSummary/index.tsx",
+        "A\tapps/app/src/components/blocks/console/OverviewRuntime/index.tsx",
+    ].join("\n")
+    assert.deepEqual(changedPaths(nameStatus), [
+        "apps/app/src/components/blocks/console/OverviewAccount/component.tsx",
+        "apps/app/src/components/blocks/console/OverviewRuntime/index.tsx",
+    ])
+})
+
+test("keeps a rename's resulting path and ignores a blank trailing line", () => {
+    const nameStatus = "R100\told/path.ts\tnew/path.ts\n\n"
+    assert.deepEqual(changedPaths(nameStatus), ["new/path.ts"])
+})
+
+test("a deleted production file no longer fails buildPatchSummary once excluded up front", () => {
+    const report = file("C:/repo/apps/app/src/kept.ts", {0: {start: {line: 1}, end: {line: 1}}}, [1])
+    const nameStatus = [
+        "D\tapps/app/src/removed.ts",
+        "M\tapps/app/src/kept.ts",
+    ].join("\n")
+    const summary = buildPatchSummary(report, changedPaths(nameStatus), "C:/repo")
+    assert.equal(summary.total.lines.total, 1)
 })
 
 test("blocks every patch metric below ninety percent", () => {

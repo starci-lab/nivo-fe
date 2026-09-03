@@ -59,4 +59,43 @@ describe("OverviewAccount", () => {
 
         expect(container.querySelectorAll('[data-loading="true"]').length).toBeGreaterThan(0)
     })
+
+    it("routes the label row's own transactions command once settled", () => {
+        mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 150000 } }
+        mocks.data.invoices = { ok: true, data: [] }
+        render(<OverviewAccount label="Account" />)
+
+        fireEvent.click(screen.getByRole("button", { name: "wallet.viewTransactions" }))
+        expect(mocks.push).toHaveBeenCalledWith("/wallet")
+    })
+
+    it("names the invoice as overdue once its due date already lies behind the current instant", () => {
+        mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 150000 } }
+        mocks.data.invoices = { ok: true, data: [{ id: "abcdef1234", amountVnd: 120000, status: "unpaid", dueAt: "2020-01-01T00:00:00.000Z", paidAt: null, catalogOrder: null }] }
+        const { container } = render(<OverviewAccount label="Account" />)
+
+        expect(screen.getByText("overview.account.overdue")).toBeInTheDocument()
+        expect(container.querySelector('[data-component="Badge"][data-tone="danger"]')).toBeInTheDocument()
+    })
+
+    it("marks the account cautionary and names the count as unknown when the invoice read itself was refused", () => {
+        mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 150000 } }
+        mocks.data.invoices = { ok: false, code: "UNKNOWN" }
+        const { container } = render(<OverviewAccount label="Account" />)
+
+        expect(container.querySelector('[data-grammar-state="cautionary"]')).toBeInTheDocument()
+        expect(screen.getByText("refusal.unknown")).toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "overview.account.topUpWallet" })).not.toBeInTheDocument()
+    })
+
+    it("carries the skeleton row's own no-op top-up command while unresolved", () => {
+        mocks.data.wallet = null
+        mocks.data.invoices = null
+        const callsBefore = mocks.push.mock.calls.length
+        render(<OverviewAccount label="Account" />)
+
+        const [pendingAction] = screen.getAllByRole("button", { name: "" })
+        expect(() => fireEvent.click(pendingAction!)).not.toThrow()
+        expect(mocks.push.mock.calls.length).toBe(callsBefore)
+    })
 })

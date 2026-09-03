@@ -46,4 +46,37 @@ describe("OverviewRuntime", () => {
 
         expect(container.querySelectorAll('[data-loading="true"]').length).toBeGreaterThan(0)
     })
+
+    it("names the pod as unreachable and its status as unread once httpStatus never arrived", () => {
+        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }] }
+        mocks.data.pod = { ok: true, data: { reachable: false, httpStatus: null, tokenConfigured: true, tokenHint: "4f21", checkedAt: "2026-09-03T22:31:00.000Z" } }
+        render(<OverviewRuntime />)
+
+        expect(screen.getByText("overview.runtime.no")).toBeInTheDocument()
+        expect(screen.getByText("—")).toBeInTheDocument()
+    })
+
+    it("names the token as not configured when the pod itself carries none", () => {
+        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }] }
+        mocks.data.pod = { ok: true, data: { reachable: true, httpStatus: 200, tokenConfigured: false, tokenHint: null, checkedAt: "2026-09-03T22:31:00.000Z" } }
+        render(<OverviewRuntime />)
+
+        expect(screen.getByText("overview.runtime.tokenNotConfigured")).toBeInTheDocument()
+    })
+
+    it("names the token as configured with no hint when the pod carries a configured token but no hint", () => {
+        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }] }
+        mocks.data.pod = { ok: true, data: { reachable: true, httpStatus: 200, tokenConfigured: true, tokenHint: null, checkedAt: "2026-09-03T22:31:00.000Z" } }
+        render(<OverviewRuntime />)
+
+        expect(screen.getByText("overview.runtime.tokenConfiguredNoHint")).toBeInTheDocument()
+    })
+
+    it("names the refusal as unknown once the pod's own code carries no named refusal", () => {
+        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }] }
+        mocks.data.pod = { ok: false, code: "SOME_UNNAMED_EXCEPTION" }
+        render(<OverviewRuntime />)
+
+        expect(screen.getByText("refusal.unknown")).toBeInTheDocument()
+    })
 })

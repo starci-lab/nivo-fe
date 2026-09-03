@@ -84,6 +84,45 @@ describe("OverviewSignals", () => {
         expect(container.querySelectorAll('[data-component="Badge"][data-tone="danger"]')).toHaveLength(2)
     })
 
+    it("covers the remaining source-derived fallbacks: an unmapped app status, a domain with no expiry that does not auto-renew, an unnamed workspace with its own pod refusal, and no domains held", () => {
+        mocks.data.apps = { ok: true, data: [{ id: "site-1", slug: "mystery-app", customDomain: null, provisionStatus: "mystery_status", status: "active" }] }
+        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: null, status: "active", catalogOrder: null }] }
+        mocks.data.pod = { ok: false, code: "UNKNOWN" }
+        mocks.data.domains = { ok: true, data: [] }
+        mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 1000 } }
+        mocks.data.invoices = { ok: true, data: [] }
+        const { container } = render(<OverviewSignals label="At a glance" />)
+
+        expect(container).toHaveTextContent("status.unknown")
+        expect(container).toHaveTextContent("agentos.kindWorkspace")
+        expect(container).toHaveTextContent("refusal.unknown")
+        expect(container).toHaveTextContent("overview.signals.nothingToOpen")
+    })
+
+    it("reads auto-renew as off for a domain signal that carries no expiry and does not renew", () => {
+        mocks.data.apps = { ok: true, data: [{ id: "site-1", slug: "ready-app", customDomain: null, provisionStatus: "ready", status: "active" }] }
+        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "nivo AI Agent", status: "active", catalogOrder: null }] }
+        mocks.data.pod = { ok: true, data: { reachable: true, httpStatus: 200, tokenConfigured: true, tokenHint: null, checkedAt: "2026-08-23T10:20:00.000Z" } }
+        mocks.data.domains = { ok: true, data: [{ id: "domain-1", name: "manual.nivo.vn", status: "active", expiresAt: null, autoRenew: false }] }
+        mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 1000 } }
+        mocks.data.invoices = { ok: true, data: [] }
+        const { container } = render(<OverviewSignals label="At a glance" />)
+
+        expect(container).toHaveTextContent("domains.autoRenewOff")
+    })
+
+    it("reads the wallet signal as settled with no unpaid invoice once the invoice read itself was refused", () => {
+        mocks.data.apps = { ok: true, data: [{ id: "site-1", slug: "ready-app", customDomain: null, provisionStatus: "ready", status: "active" }] }
+        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "nivo AI Agent", status: "active", catalogOrder: null }] }
+        mocks.data.pod = { ok: true, data: { reachable: true, httpStatus: 200, tokenConfigured: true, tokenHint: null, checkedAt: "2026-08-23T10:20:00.000Z" } }
+        mocks.data.domains = { ok: true, data: [{ id: "domain-1", name: "held.nivo.vn", status: "active", expiresAt: null, autoRenew: true }] }
+        mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 2450000 } }
+        mocks.data.invoices = { ok: false, code: "UNKNOWN" }
+        const { container } = render(<OverviewSignals label="At a glance" />)
+
+        expect(container).toHaveTextContent("wallet.noUnpaid")
+    })
+
     it("leaves a settled healthy account with no raised badge and names the fact none needs attention", () => {
         const inDays = (days: number) => new Date(Date.now() + days * 86400000).toISOString()
         mocks.data.apps = { ok: true, data: [{ id: "site-1", slug: "ready-app", customDomain: null, provisionStatus: "ready", status: "active" }] }
