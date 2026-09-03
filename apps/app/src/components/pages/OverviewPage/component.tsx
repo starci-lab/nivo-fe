@@ -21,11 +21,7 @@ import { WalletSummary } from "@/components/blocks/console/WalletSummary";
 import type { WalletSummaryProps } from "@/components/blocks/console/WalletSummary/component";
 import { WalletSummaryBase } from "@/components/blocks/console/WalletSummary/component";
 import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow";
-import {
-  OVERVIEW_HEADER_CLASS_NAME,
-  OVERVIEW_PAGE_CLASS_NAME,
-  OVERVIEW_SECTION_CLASS_NAME
-} from "./classNames";
+import { OVERVIEW_PAGE_CLASS_NAME, OVERVIEW_SECTION_CLASS_NAME } from "./classNames";
 
 /** Legacy app-section view retained for existing pure-page consumers during this revision. */
 export type OverviewPageProps = OverviewPageViewProps;
@@ -333,7 +329,6 @@ export const OverviewPageBase = (props: OverviewPageProps) => {
       }]
     }} />}
     <SectionHeader
-      className={OVERVIEW_HEADER_CLASS_NAME}
       level={1}
       title={title}
       description={lede}
