@@ -1,5 +1,5 @@
 import { Breadcrumbs, TileIcon } from "@nivo/ui";
-import { Button, Heading, Text } from "@starci/grammar/core";
+import { Button, Heading, PageContainer, Text } from "@starci/grammar/core";
 import { AgentOSCustomModuleCollection } from "@/components/blocks/agentos/AgentOSCustomModuleCollection";
 import { AgentOSSolutionModuleCenter } from "@/components/blocks/agentos/AgentOSSolutionModuleCenter";
 /** Public API role for AgentOSModuleCollectionPageProps. */
@@ -26,7 +26,9 @@ export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPa
     onBack,
     onCreate
   }: AgentOSModuleCollectionPageViewProps = props;
-  return <div>
+  return <PageContainer measure="product">
+
+  <main className="gap-6" data-contract="GAP-5"><div>
 
   <Breadcrumbs props={{
       mode: "trail",
@@ -60,6 +62,9 @@ export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPa
       onPress={onCreate}
     >{labels.create}</Button></div><>
 
-    <AgentOSCustomModuleCollection workspaceId={workspaceId} /><AgentOSSolutionModuleCenter workspaceId={workspaceId} /></></div>;
+    <section aria-label={labels.title} data-region="module-collection"><div className="gap-4" data-contract="GAP-4">
+      <AgentOSCustomModuleCollection workspaceId={workspaceId} />
+      <AgentOSSolutionModuleCenter workspaceId={workspaceId} />
+    </div></section></></main></PageContainer>;
 };
 
