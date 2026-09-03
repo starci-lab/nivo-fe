@@ -490,7 +490,8 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
               isDisabled={copy.isPending}
               isPending={copy.pendingAction === "provider"}
               onPress={() => props.on?.chooseProvider?.("google")}
-            ><Icon source={nivoIconSource("google", "chip")} usage="chip" />{copy.googleLabel}</Button></>
+              startContent={<Icon source={nivoIconSource("google", "chip")} usage="chip" />}
+            >{copy.googleLabel}</Button></>
 
 
 
