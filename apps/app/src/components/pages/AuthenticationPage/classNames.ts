@@ -61,9 +61,8 @@ export const AUTH_FORM_REGION_CLASS_NAME = cn(
 );
 
 /**
- * Readable form measure only. Grammar's `Heading` and `Button` publish no size or width override
- * path (`HeadingProps`/`ButtonProps` carry no `className`), so this file no longer reaches through
- * them with a descendant selector; see the panel's own `scale="display"` heading and the recorded
- * Grammar gap for full-width `Button`.
+ * Readable form measure only. Grammar's leaves own their own size and width: the heading takes its
+ * `scale` and the actions take `width="fill"` on the panel itself, so this file never reaches
+ * through the boundary with a descendant selector.
  */
 export const AUTH_FORM_CONTENT_CLASS_NAME = cn("w-full", "max-w-md");

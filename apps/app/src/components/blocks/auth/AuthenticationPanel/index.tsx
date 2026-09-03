@@ -474,6 +474,7 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
       key="submit"
       variant="primary"
       type="submit"
+      width="fill"
       isDisabled={copy.isPending}
       isPending={copy.pendingAction === "submit"}
     >{copy.submitLabel}</Button>];
@@ -485,6 +486,7 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
 
             <Button
               variant="outline"
+              width="fill"
               isDisabled={copy.isPending}
               isPending={copy.pendingAction === "provider"}
               onPress={() => props.on?.chooseProvider?.("google")}
