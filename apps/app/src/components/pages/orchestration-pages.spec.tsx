@@ -57,7 +57,7 @@ import { WalletPage } from "./WalletPage"
 import { AgentOSWorkspacePage } from "./AgentOSWorkspacePage"
 import { AgentOSSolutionModulePage } from "./AgentOSSolutionModulePage"
 import { AgentOSPage } from "./AgentOSPage"
-import { myAgentWorkspace, myExpertSites, myInstances, myCatalogOrders, catalogItems, myAcademyGrowthSnapshot, myAgentosSolutionModules, myAgentosModuleInstallations, myAgentosCustomModules, myAgentosModuleInstallation, myAgentosModuleRuntime } from "@/modules/api/console"
+import { myAgentWorkspace, myExpertSites, myInstances, myCatalogOrders, catalogItems, myAcademyGrowthSnapshot, myAgentosSolutionModules, myAgentosModuleInstallations, myAgentosCustomModules, myAgentosModuleInstallation, myAgentosModuleRuntime, installAgentosSolutionModule } from "@/modules/api/console"
 import { AcademyGrowthSummary } from "../blocks/academy/AcademyGrowthSummary"
 import { AgentOSSolutionModuleCenter } from "../blocks/agentos/AgentOSSolutionModuleCenter"
 import { AgentOSCustomModuleCollection } from "../blocks/agentos/AgentOSCustomModuleCollection"
@@ -234,5 +234,30 @@ describe("connected console pages", () => {
         expect((await screen.findByRole("link", { name: "Partner guide" })).getAttribute("href")).toBe("/en/agentos/workspaces/workspace-1/modules/studio/draft-1")
         expect((await screen.findByRole("link", { name: "Sales copilot" })).getAttribute("href")).toBe("/en/agentos/workspaces/workspace-1/modules/install-1")
         expect(screen.queryByRole("radio")).toBeNull()
+    })
+    it("recovers each refused ledger section on its own and installs from the catalogue beneath", async () => {
+        cleanup()
+        resetQueryCache()
+        viewerSequence += 1
+        signedIn.state = { status: "signed-in", accessToken: `orchestration-pages-${viewerSequence}-recovery` }
+        vi.mocked(myAgentosSolutionModules).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
+        vi.mocked(myAgentosModuleInstallations).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
+        vi.mocked(myAgentosCustomModules).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
+        render(<AgentOSSolutionModuleCenter workspaceId="workspace-1" layout="ledger" />)
+        render(<AgentOSCustomModuleCollection workspaceId="workspace-1" />)
+        // Three reads refused, so three sections each carry their own recovery: installed, catalogue, custom.
+        // The solution centre translates under its own namespace, the custom collection under `collection`.
+        await waitFor(() => expect(screen.getAllByRole("button", { name: "retry" })).toHaveLength(2))
+        const retries = [...screen.getAllByRole("button", { name: "retry" }), await screen.findByRole("button", { name: "collection.retry" })]
+        vi.mocked(myAgentosSolutionModules).mockResolvedValue({ ok: true, data: [{ key: "knowledge-hub", name: "Knowledge Hub", summary: "Reads", agentRoles: [], channelRoles: [], safetyMode: "strict", version: "1" }] } as never)
+        vi.mocked(myAgentosModuleInstallations).mockResolvedValue({ ok: true, data: [{ id: "install-1", agentWorkspaceId: "workspace-1", moduleKey: "knowledge-hub", moduleVersion: "1.0.0", displayName: "UAT Knowledge Hub", status: "ready", failureCode: null, createdAt: "", updatedAt: "" }] } as never)
+        vi.mocked(myAgentosCustomModules).mockResolvedValue({ ok: true, data: [{ id: "draft-1", agentWorkspaceId: "workspace-1", name: "Partner guide", status: "draft", progress: 40, missingFields: [], currentQuestion: null, specificationVersion: null, installationId: null, failureCode: null }] } as never)
+        for (const retry of retries) fireEvent.click(retry)
+        expect(await screen.findByRole("link", { name: "UAT Knowledge Hub" })).toBeInTheDocument()
+        expect(await screen.findByRole("link", { name: "Partner guide" })).toBeInTheDocument()
+        // The catalogue beneath still installs, and a refused install is reported without losing the rows above.
+        fireEvent.click(await screen.findByRole("button", { name: "install" }))
+        await waitFor(() => expect(installAgentosSolutionModule).toHaveBeenCalled())
+        expect(await screen.findByText("installFailed")).toBeInTheDocument()
     })
 })
