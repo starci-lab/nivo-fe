@@ -1,4 +1,4 @@
-import { Icon } from "@starci/grammar/common";
+import { Icon } from "@starci/grammar/core";
 import { DropdownBranch, nivoIconSource } from "@nivo/ui";
 import type { Locale } from "@/i18n/config";
 

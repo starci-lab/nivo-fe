@@ -1,4 +1,4 @@
-import { Heading, Text } from "@starci/grammar/common";
+import { Heading, Text } from "@starci/grammar/core";
 
 
 

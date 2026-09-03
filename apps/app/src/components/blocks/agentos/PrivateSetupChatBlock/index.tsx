@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChoiceTabs } from "@nivo/ui";
-import { SurfaceCard, Button, Input, Text } from "@starci/grammar/common";
+import { SurfaceCard, Button, Input, Text } from "@starci/grammar/core";
 
 /** One accepted turn in the installation's private resumable Setup session. */
 export type SetupMessage = {

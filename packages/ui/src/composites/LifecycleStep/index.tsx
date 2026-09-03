@@ -1,4 +1,4 @@
-import { Text, Badge } from "@starci/grammar/common";
+import { Text, Badge } from "@starci/grammar/core";
 
 
 

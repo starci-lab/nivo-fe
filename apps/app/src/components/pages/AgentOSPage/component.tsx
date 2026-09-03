@@ -1,5 +1,5 @@
 import { Breadcrumbs, TileIcon } from "@nivo/ui";
-import { Button, Heading, Text } from "@starci/grammar/common";
+import { Button, Heading, Text } from "@starci/grammar/core";
 import { AgentOSWorkspaceList } from "@/components/blocks/agentos/AgentOSWorkspaceList";
 import { AgentOSProvisioning } from "@/components/blocks/provisioning/AgentOSProvisioning";
 

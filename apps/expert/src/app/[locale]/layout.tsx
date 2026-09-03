@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { CoreGrammarRoot } from "@starci/grammar/core";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages } from "next-intl/server";
@@ -100,9 +101,11 @@ const LocaleLayout = async ({
   const messages = await getMessages();
   return <html lang={locale} suppressHydrationWarning>
             <body className="min-h-dvh antialiased">
-                <NextIntlClientProvider locale={locale} messages={messages}>
-                    {children}
-                </NextIntlClientProvider>
+                <CoreGrammarRoot>
+                    <NextIntlClientProvider locale={locale} messages={messages}>
+                        {children}
+                    </NextIntlClientProvider>
+                </CoreGrammarRoot>
             </body>
         </html>;
 };

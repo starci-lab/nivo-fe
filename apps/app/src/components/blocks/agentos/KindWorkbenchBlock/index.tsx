@@ -1,5 +1,5 @@
 "use client";
-import { SurfaceCard, Heading, Text } from "@starci/grammar/common";
+import { SurfaceCard, Heading, Text } from "@starci/grammar/core";
 
 import type { ComponentType } from "react";
 

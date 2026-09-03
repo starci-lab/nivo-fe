@@ -1,5 +1,5 @@
 import { nivoIconSource } from "@nivo/ui";
-import { SurfaceCard, Button, EmptyNotice, Heading, Icon, Text, TextAction, Badge } from "@starci/grammar/common";
+import { SurfaceCard, Button, EmptyNotice, Heading, Icon, Text, TextAction, Badge } from "@starci/grammar/core";
 import { FleetRow, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
 
 /**

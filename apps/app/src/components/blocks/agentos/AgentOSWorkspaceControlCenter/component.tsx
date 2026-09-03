@@ -1,5 +1,5 @@
 import { ChoiceTabs, TileIcon } from "@nivo/ui";
-import { SurfaceCard, Button, EmptyNotice, Heading, Text } from "@starci/grammar/common";
+import { SurfaceCard, Button, EmptyNotice, Heading, Text } from "@starci/grammar/core";
 import { AgentOSWorkspaceApplications } from "@/components/blocks/agentos/AgentOSWorkspaceApplications";
 import { AgentOSSolutionModuleCenter } from "@/components/blocks/agentos/AgentOSSolutionModuleCenter";
 import { AgentOSWorkspaceAiKnowledge } from "@/components/blocks/agentos/AgentOSWorkspaceAiKnowledge";

@@ -1,5 +1,3 @@
-@import "@starci/grammar/core.css";
-
 @layer nivo-ui {
     .nivo-brand__ink {
         fill: var(--nivo-brand-ink);

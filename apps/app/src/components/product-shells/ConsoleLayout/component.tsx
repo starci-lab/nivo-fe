@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import { StarCiDashboardThemeBoundary } from "@nivo/ui";
-import { WorkspaceShell } from "@starci/grammar/common";
+import { WorkspaceShell } from "@starci/grammar/core";
 import { Sidebar } from "@/components/product-shells/Sidebar";
 import { ConsoleTopBar } from "@/components/product-shells/ConsoleTopBar";
 

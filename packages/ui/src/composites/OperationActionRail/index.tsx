@@ -1,4 +1,4 @@
-import { Button } from "@starci/grammar/common";
+import { Button } from "@starci/grammar/core";
 
 
 /** One lifecycle action resolved by the owning domain block. */

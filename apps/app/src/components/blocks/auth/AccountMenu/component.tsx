@@ -1,5 +1,5 @@
 import { nivoIconSource } from "@nivo/ui";
-import { Icon } from "@starci/grammar/common";
+import { Icon } from "@starci/grammar/core";
 
 import { DropdownBranch } from "@nivo/ui/components/branches/DropdownBranch";
 

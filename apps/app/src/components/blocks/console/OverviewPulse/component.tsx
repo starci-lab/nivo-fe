@@ -1,5 +1,5 @@
 import { NivoUnicornArtwork, nivoIconSource } from "@nivo/ui";
-import { SurfaceCard, IconTile, Text } from "@starci/grammar/common";
+import { SurfaceCard, IconTile, Text } from "@starci/grammar/core";
 
 /** One independently settled account signal shown before detailed evidence. */
 export type OverviewPulseSignal = {

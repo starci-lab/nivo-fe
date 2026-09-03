@@ -1,5 +1,5 @@
 import { nivoIconSource, type IconName } from "../../leaves/Icon";
-import { Icon } from "@starci/grammar/common";
+import { Icon } from "@starci/grammar/core";
 import { Dropdown, Header } from "@heroui/react"
 import type { ReactNode } from "react"
 

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { CoreGrammarRoot } from "@starci/grammar/core";
 import "./globals.css";
 import { LANDING_DESCRIPTION } from "@/resources/copy";
 import type { ComponentProps } from "react";
@@ -30,6 +31,8 @@ interface RootLayoutProps {
 const RootLayout = ({
   children
 }: RootLayoutProps) => <html lang="vi" suppressHydrationWarning>
-        <body className="min-h-dvh antialiased">{children}</body>
+        <body className="min-h-dvh antialiased">
+            <CoreGrammarRoot>{children}</CoreGrammarRoot>
+        </body>
     </html>;
 export default RootLayout;

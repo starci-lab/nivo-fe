@@ -1,4 +1,4 @@
-import { Heading, Text } from "@starci/grammar/common";
+import { Heading, Text } from "@starci/grammar/core";
 import { Breadcrumbs } from "@nivo/ui";
 import { TemplateAppProvisioning } from "@/components/blocks/provisioning/TemplateAppProvisioning";
 

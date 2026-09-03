@@ -1,6 +1,6 @@
 "use client";
 
-import { Heading, Text, Badge } from "@starci/grammar/common";
+import { Heading, Text, Badge } from "@starci/grammar/core";
 import type { ComponentType } from "react";
 import { Breadcrumbs, RouteTabs, TileIcon } from "@nivo/ui";
 

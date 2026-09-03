@@ -1,4 +1,4 @@
-import { Text } from "@starci/grammar/common";
+import { Text } from "@starci/grammar/core";
 import type { ComponentType } from "react";
 import { NivoBrand, ThemeSwitch } from "@nivo/ui";
 import {

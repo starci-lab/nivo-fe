@@ -1,5 +1,5 @@
 import { Breadcrumbs } from "@nivo/ui";
-import { Button, Heading, Text } from "@starci/grammar/common";
+import { Button, Heading, Text } from "@starci/grammar/core";
 import { AgentOSSummary } from "@/components/blocks/console/AgentOSSummary";
 import type { AgentOSSummaryProps } from "@/components/blocks/console/AgentOSSummary/component";
 import { AgentOSSummaryBase } from "@/components/blocks/console/AgentOSSummary/component";

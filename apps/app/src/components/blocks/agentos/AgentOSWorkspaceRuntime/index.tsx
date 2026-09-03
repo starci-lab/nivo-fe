@@ -1,5 +1,5 @@
 import { LabelledProgressRow } from "@nivo/ui";
-import { SurfaceCard, Text } from "@starci/grammar/common";
+import { SurfaceCard, Text } from "@starci/grammar/core";
 import type { AgentWorkspaceControlCenter } from "@/modules/api/console";
 
 /** Runtime snapshot and resolved copy consumed by the metrics block. */

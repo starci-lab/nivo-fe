@@ -1,5 +1,5 @@
 import { nivoIconSource, type IconName } from "../Icon";
-import { Icon } from "@starci/grammar/common";
+import { Icon } from "@starci/grammar/core";
 import { Link as HeroLink } from "@heroui/react";
 
 

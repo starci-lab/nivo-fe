@@ -1,5 +1,5 @@
 import { Breadcrumbs, DrawerBranch, ModalBranch } from "@nivo/ui";
-import { SurfaceCard, SurfaceListCard, Button, Button as CoreButton, Input, Heading, Text, Badge, type BadgeTone } from "@starci/grammar/common";
+import { SurfaceCard, SurfaceListCard, Button, Button as CoreButton, Input, Heading, Text, Badge, type BadgeTone } from "@starci/grammar/core";
 
 /** One already-formatted label and value used by wallet evidence surfaces. */
 export type WalletControlCenterProps = WalletControlCenterViewProps;

@@ -1,4 +1,4 @@
-import { SurfaceCard, SurfaceListCard, Heading, Text } from "@starci/grammar/common";
+import { SurfaceCard, SurfaceListCard, Heading, Text } from "@starci/grammar/core";
 
 /** One exact domain fact displayed in infrastructure context. */
 export type InfrastructureDomainFact = {

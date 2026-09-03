@@ -1,5 +1,5 @@
 import { ChoiceTabs } from "@nivo/ui";
-import { Button, EmptyNotice, Heading } from "@starci/grammar/common";
+import { Button, EmptyNotice, Heading } from "@starci/grammar/core";
 import { AcademyGrowthSummary } from "@/components/blocks/academy/AcademyGrowthSummary";
 import { AcademyStudentCrm } from "@/components/blocks/academy/AcademyStudentCrm";
 import { AcademyLeadPipeline } from "@/components/blocks/academy/AcademyLeadPipeline";

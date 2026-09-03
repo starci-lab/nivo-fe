@@ -1,5 +1,5 @@
 "use client";
-import { SurfaceCard, Button, Heading, Text, Badge } from "@starci/grammar/common";
+import { SurfaceCard, Button, Heading, Text, Badge } from "@starci/grammar/core";
 
 /* The section renderer intentionally assembles heterogeneous ReactNode arrays. */
 import { Fragment, useState, type ReactNode } from "react";

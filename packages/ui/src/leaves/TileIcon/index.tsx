@@ -1,5 +1,5 @@
 import { nivoIconSource, type IconName } from "../Icon";
-import { Icon } from "@starci/grammar/common";
+import { Icon } from "@starci/grammar/core";
 import { cn, skeletonVariants } from "@heroui/react";
 
 import { TILE_ICON_CLASS_NAME, TILE_ICON_RESTING_CLASS_NAME, TILE_ICON_SIGNAL_CLASS_NAME, TILE_ICON_SIGNAL_CLASS_NAMES } from "./classNames";

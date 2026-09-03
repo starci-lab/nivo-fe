@@ -1,5 +1,5 @@
 import { nivoIconSource } from "@nivo/ui";
-import { Icon, SurfaceCard, Button, Text, TextAction } from "@starci/grammar/common";
+import { Icon, SurfaceCard, Button, Text, TextAction } from "@starci/grammar/core";
 
 /** One exact balance or invoice fact displayed by the wallet summary. */
 export type WalletSummaryFact = {

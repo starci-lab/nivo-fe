@@ -1,5 +1,5 @@
 import { StatusActionCard } from "@nivo/ui";
-import { EmptyNotice, SurfaceCard, type BadgeTone } from "@starci/grammar/common";
+import { EmptyNotice, SurfaceCard, type BadgeTone } from "@starci/grammar/core";
 
 /** One workspace row prepared for the pure AgentOS summary surface. */
 export type AgentOSSummaryWorkspace = {

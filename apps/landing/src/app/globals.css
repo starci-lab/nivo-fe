@@ -1,3 +1,5 @@
+@import "@starci/grammar/common.css";
+@import "@starci/grammar/core.css";
 @import "@nivo/ui/styles.css";
 @import "tailwindcss";
 

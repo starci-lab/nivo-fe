@@ -1,5 +1,5 @@
 "use client";
-import { SurfaceCard, Button, Heading, Text } from "@starci/grammar/common";
+import { SurfaceCard, Button, Heading, Text } from "@starci/grammar/core";
 
 
 

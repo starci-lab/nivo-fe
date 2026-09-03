@@ -1,4 +1,4 @@
-import { Text, TextAction } from "@starci/grammar/common";
+import { Text, TextAction } from "@starci/grammar/core";
 
 /** Rank and title for one trending result. */
 export type TrendingContentRowData = { readonly id: string; readonly rank?: string; readonly title?: string; readonly isTopRank?: boolean }

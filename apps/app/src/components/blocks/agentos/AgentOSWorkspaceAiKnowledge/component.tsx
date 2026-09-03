@@ -1,5 +1,5 @@
 "use client";
-import { SurfaceCard, Button, Heading, Text, Badge, type BadgeTone } from "@starci/grammar/common";
+import { SurfaceCard, Button, Heading, Text, Badge, type BadgeTone } from "@starci/grammar/core";
 
 import { LifecycleStep, TileIcon, type LifecycleStepData } from "@nivo/ui";
 import { AgentOSKnowledgeOriginList } from "@/components/blocks/agentos/AgentOSKnowledgeOriginList";

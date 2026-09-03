@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { CoreGrammarRoot } from "@starci/grammar/core";
 import { AppProviders } from "../providers";
 import "../globals.css";
 import { notFound } from "next/navigation";
@@ -103,7 +104,9 @@ const RootLayout = async ({
       "--font-open-sans": openSans.style.fontFamily
     } as CSSProperties}>
         
-                <AppProviders locale={locale} messages={messages} timeZone={timeZone}>{children}</AppProviders>
+                <CoreGrammarRoot>
+                    <AppProviders locale={locale} messages={messages} timeZone={timeZone}>{children}</AppProviders>
+                </CoreGrammarRoot>
             </body>
         </html>;
 };

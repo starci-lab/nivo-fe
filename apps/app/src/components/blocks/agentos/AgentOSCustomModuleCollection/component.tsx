@@ -1,5 +1,5 @@
 import { nivoIconSource } from "@nivo/ui";
-import { SurfaceCard, SurfaceListCard, Button, Button as CoreButton, EmptyNotice, Icon, Text, TextAction, Badge } from "@starci/grammar/common";
+import { SurfaceCard, SurfaceListCard, Button, Button as CoreButton, EmptyNotice, Icon, Text, TextAction, Badge } from "@starci/grammar/core";
 
 /** One custom-module identity prepared for the joined management list. */
 export type AgentOSCustomModuleCollectionProps = AgentOSCustomModuleCollectionViewProps;

@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "@starci/grammar/common";
+import { Button } from "@starci/grammar/core";
 
 import { SelectionList, type SelectionListGroup } from "@nivo/ui";
 import type { SupportCustomerConversation } from "@/modules/api/workspace-controlplane";

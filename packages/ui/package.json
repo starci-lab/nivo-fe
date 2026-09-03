@@ -21,7 +21,7 @@
     "@heroicons/react": "^2.2.0",
     "@heroui/react": "^3.2.4",
     "@heroui/styles": "^3.2.4",
-    "@starci/grammar": "file:../../../starci-academy-fe/packages/grammar",
+    "@starci/grammar": "0.4.2",
     "framer-motion": "^13.1.0"
   },
   "peerDependencies": {

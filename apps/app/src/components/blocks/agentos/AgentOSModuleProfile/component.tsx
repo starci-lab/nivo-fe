@@ -1,5 +1,5 @@
 import { LabelledProgressRow } from "@nivo/ui";
-import { SurfaceCard, Text } from "@starci/grammar/common";
+import { SurfaceCard, Text } from "@starci/grammar/core";
 import type { AgentosModuleStudio } from "@/modules/api/console";
 /** Public API role for AgentOSModuleProfileProps. */
 export type AgentOSModuleProfileProps = AgentOSModuleProfileViewProps;

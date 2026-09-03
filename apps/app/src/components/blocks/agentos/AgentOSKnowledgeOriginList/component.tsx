@@ -1,5 +1,5 @@
 
-import { SurfaceCard, Text, Badge } from "@starci/grammar/common";
+import { SurfaceCard, Text, Badge } from "@starci/grammar/core";
 import type { AgentosAiKnowledgeReadiness } from "@/modules/api/console";
 
 /** Resolved copy used by the owner-safe knowledge provenance inventory. */

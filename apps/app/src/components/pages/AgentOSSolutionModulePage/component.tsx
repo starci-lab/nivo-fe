@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ComponentType } from "react";
 import { Checkbox, ChoiceTabs, RouteTabs } from "@nivo/ui";
-import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common";
+import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/core";
 import { ContextVersionBlock, type ContextDraft } from "@/components/blocks/agentos/ContextVersionBlock";
 import { DEFAULT_WIDGET_REGISTRY, ExecuteChatBlock, type ExecuteMessage, type TrustedWidgetComponentProps } from "@/components/blocks/agentos/ExecuteChatBlock";
 import { ExecuteSessionRailBlock, type ExecuteSession } from "@/components/blocks/agentos/ExecuteSessionRailBlock";

@@ -1,4 +1,4 @@
-import { Heading, Icon, Text } from "@starci/grammar/common";
+import { Heading, Icon, Text } from "@starci/grammar/core";
 import { nivoIconSource } from "@nivo/ui";
 import { useTranslations } from "next-intl";
 import { CONTENT_CLASS_NAME, ROOT_CLASS_NAME } from "./classNames";

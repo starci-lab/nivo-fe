@@ -1,5 +1,5 @@
 
-import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common";
+import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/core";
 
 /** Opening-goal form copy, local state and persistence action. */
 export type AgentOSModuleIntakeProps = AgentOSModuleIntakeViewProps;

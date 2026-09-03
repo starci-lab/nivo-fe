@@ -1,4 +1,4 @@
-import { Button, Text, Badge, type BadgeTone } from "@starci/grammar/common";
+import { Button, Text, Badge, type BadgeTone } from "@starci/grammar/core";
 
 
 

@@ -1,5 +1,5 @@
 
-import { SurfaceCard, Button, Button as CoreButton, Input, Text } from "@starci/grammar/common";
+import { SurfaceCard, Button, Button as CoreButton, Input, Text } from "@starci/grammar/core";
 import type { AgentosModuleStudio } from "@/modules/api/console";
 /** Public API role for AgentOSModuleIntegrationsProps. */
 export type AgentOSModuleIntegrationsProps = AgentOSModuleIntegrationsViewProps;

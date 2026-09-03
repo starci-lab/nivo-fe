@@ -1,5 +1,5 @@
 import { nivoIconSource } from "../Icon";
-import { Icon } from "@starci/grammar/common";
+import { Icon } from "@starci/grammar/core";
 import { Button, Kbd } from "@heroui/react";
 
 

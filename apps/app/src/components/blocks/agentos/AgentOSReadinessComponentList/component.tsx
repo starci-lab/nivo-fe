@@ -1,5 +1,5 @@
 
-import { SurfaceCard, Text, Badge, type BadgeTone } from "@starci/grammar/common";
+import { SurfaceCard, Text, Badge, type BadgeTone } from "@starci/grammar/core";
 import type { AgentosAiKnowledgeReadiness } from "@/modules/api/console";
 
 /** Resolved copy used by the readiness component evidence inventory. */

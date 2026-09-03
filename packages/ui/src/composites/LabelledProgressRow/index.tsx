@@ -1,4 +1,4 @@
-import { Progress, Text } from "@starci/grammar/common";
+import { Progress, Text } from "@starci/grammar/core";
 
 
 

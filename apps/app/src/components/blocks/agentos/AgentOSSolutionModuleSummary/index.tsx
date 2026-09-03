@@ -1,5 +1,5 @@
 
-import { SurfaceCard, Text, Badge, type BadgeTone } from "@starci/grammar/common";
+import { SurfaceCard, Text, Badge, type BadgeTone } from "@starci/grammar/core";
 import type { AgentosModuleInstallationDetail } from "@/modules/api/console";
 
 /** Canonical installation snapshot and resolved labels consumed by the summary block. */

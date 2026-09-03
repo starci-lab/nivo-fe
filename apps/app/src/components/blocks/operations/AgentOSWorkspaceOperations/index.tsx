@@ -1,5 +1,5 @@
 import { OperationActionRail } from "@nivo/ui";
-import { SurfaceCard, Text } from "@starci/grammar/common";
+import { SurfaceCard, Text } from "@starci/grammar/core";
 
 /** Resolved lifecycle labels consumed by the operations block. */
 export type AgentOSWorkspaceOperationsProps = {

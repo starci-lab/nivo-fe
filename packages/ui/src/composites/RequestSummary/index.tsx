@@ -1,4 +1,4 @@
-import { Button, Text } from "@starci/grammar/common";
+import { Button, Text } from "@starci/grammar/core";
 
 
 

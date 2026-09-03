@@ -1,7 +1,7 @@
 "use client";
 
 import { LifecycleStep, RequestSummary, type LifecycleStepData } from "@nivo/ui";
-import { Button, Input, Heading, Text } from "@starci/grammar/common";
+import { Button, Input, Heading, Text } from "@starci/grammar/core";
 
 /** The settled trees the template-app flow can draw. */
 export type TemplateAppProvisioningProps = TemplateAppProvisioningViewProps;

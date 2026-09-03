@@ -1,5 +1,5 @@
 import { Avatar } from "@nivo/ui";
-import { EmptyNotice, SurfaceCard, SurfaceListCard, Button, Button as CoreButton, Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/common";
+import { EmptyNotice, SurfaceCard, SurfaceListCard, Button, Button as CoreButton, Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/core";
 
 /** One exact owned application prepared for the joined summary list. */
 export type AppsSummaryItem = {

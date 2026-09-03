@@ -1,5 +1,5 @@
 
-import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common";
+import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/core";
 import type { AgentosModuleStudio } from "@/modules/api/console";
 
 /** Durable conversation projection and the one current answer operation. */

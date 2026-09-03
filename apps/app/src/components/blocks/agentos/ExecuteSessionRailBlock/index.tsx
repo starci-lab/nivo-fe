@@ -1,5 +1,5 @@
 "use client";
-import { Button, Icon } from "@starci/grammar/common";
+import { Button, Icon } from "@starci/grammar/core";
 
 import { ChoiceTabs, CollapsibleRail, SelectionList, type SelectionListGroup, nivoIconSource } from "@nivo/ui";
 

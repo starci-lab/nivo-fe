@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { ChoiceTabs } from "@nivo/ui";
-import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common";
+import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/core";
 import type { AgentosModuleTestContract, AgentosModuleTestScenarioContract, AgentosRuntimeValue } from "@/modules/api/console";
 type ScenarioField = {
   readonly path: string;

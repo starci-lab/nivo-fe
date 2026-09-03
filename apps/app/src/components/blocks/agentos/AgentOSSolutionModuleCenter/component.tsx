@@ -1,5 +1,5 @@
 import { ChoiceTabs, nivoIconSource, StatusActionCard } from "@nivo/ui";
-import { EmptyNotice, Icon, SurfaceCard, Text, type BadgeTone } from "@starci/grammar/common";
+import { EmptyNotice, Icon, SurfaceCard, Text, type BadgeTone } from "@starci/grammar/core";
 
 /** One resolved catalog or installation card visible in the module center. */
 export type AgentOSSolutionModuleCenterProps = AgentOSSolutionModuleCenterViewProps;

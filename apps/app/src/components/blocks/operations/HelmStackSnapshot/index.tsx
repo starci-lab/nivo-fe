@@ -1,5 +1,5 @@
 import { HelmComponentStatusTable } from "@nivo/ui";
-import { EmptyNotice, SurfaceCard } from "@starci/grammar/common";
+import { EmptyNotice, SurfaceCard } from "@starci/grammar/core";
 import type { AgentWorkspaceRuntime } from "@/modules/api/console";
 
 /** Public-safe Helm snapshot and resolved labels consumed by the stack block. */
