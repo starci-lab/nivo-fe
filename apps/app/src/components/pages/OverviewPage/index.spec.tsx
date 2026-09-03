@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
 }))
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("next-intl", () => ({ useLocale: () => "en", useTranslations: () => (key: string) => key }))
-vi.mock("@/hooks/swr", () => ({
+vi.mock("@/hooks", () => ({
     useQueryMyExpertSitesSwr: mocks.apps,
     useQueryMyAgentWorkspacesSwr: mocks.workspaces,
     useQueryMyPodOpenclawStatusSwr: mocks.pod,
