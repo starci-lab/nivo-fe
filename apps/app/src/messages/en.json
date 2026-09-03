@@ -181,6 +181,7 @@
       },
       "runtime": {
         "podAnswered": "Pod answered",
+        "podUnavailable": "Pod unavailable",
         "httpStatus": "HTTP status",
         "token": "Token",
         "checked": "Checked",

@@ -26,9 +26,10 @@ export const OverviewRuntime = (props: OverviewRuntimeProps) => {
   if (!workspaces.ok || workspaces.data.length === 0) return null;
   if (!pod.ok) return <OverviewRuntimeBase
     label={t("overview.runtimeLabel")}
+    state="unavailable"
     facts={[{
       id: "refusal",
-      label: t("overview.runtime.podAnswered"),
+      label: t("overview.runtime.podUnavailable"),
       value: refusal(pod.code)
     }]}
   />;
