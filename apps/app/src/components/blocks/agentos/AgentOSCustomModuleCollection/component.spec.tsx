@@ -13,6 +13,8 @@ const base = {
     retry: "Try again",
     retrying: false,
     onRetry: vi.fn(),
+    emptyAction: "Create module",
+    onEmptyAction: vi.fn(),
 }
 const rows = [
     { id: "draft", name: "Partner guide", detail: "40% complete", kind: "Custom", status: "Needs input", active: false, action: "Resume interview", href: "/en/agentos/workspaces/w/modules/studio/draft" },
@@ -37,11 +39,13 @@ describe("AgentOSCustomModuleCollectionBase", () => {
         expect(html).toContain("Custom modules")
     })
 
-    it("states absence as a title and one line, and offers no action of its own", () => {
-        render(<AgentOSCustomModuleCollectionBase {...base} state="empty" rows={[]} />)
+    it("states absence as a title and one line, and carries the action that ends it", () => {
+        const onEmptyAction = vi.fn()
+        render(<AgentOSCustomModuleCollectionBase {...base} state="empty" rows={[]} onEmptyAction={onEmptyAction} />)
         expect(screen.getByText(base.emptyTitle)).toBeTruthy()
         expect(screen.getByText(base.empty)).toBeTruthy()
-        expect(screen.queryByRole("button")).toBeNull()
+        fireEvent.click(screen.getByRole("button", { name: base.emptyAction }))
+        expect(onEmptyAction).toHaveBeenCalledTimes(1)
     })
 
     it("states a refusal as a title and one line, and recovers that read from its own section", () => {

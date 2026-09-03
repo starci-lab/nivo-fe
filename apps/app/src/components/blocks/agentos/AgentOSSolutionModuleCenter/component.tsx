@@ -1,3 +1,4 @@
+import { useCallback, useRef } from "react";
 import { ChoiceTabs, nivoIconSource, StatusActionCard } from "@nivo/ui";
 import { Badge, Button, EmptyNotice, Icon, SurfaceCard, SurfaceListCard, Text, TextAction, type BadgeTone } from "@starci/grammar/common";
 import {
@@ -63,6 +64,8 @@ export type AgentOSSolutionModuleLedgerProps = {
   readonly catalogueRefusedTitle: string;
   readonly catalogueRefused: string;
   readonly retry: string;
+  /** The action that ends the installed section’s own emptiness: it moves the reader to the catalogue beneath. */
+  readonly installedEmptyAction: string;
   readonly retryingInstalled: boolean;
   readonly retryingCatalogue: boolean;
   readonly onRetryInstalled: () => void;
@@ -154,13 +157,28 @@ const AgentOSSolutionModuleLedger = ({
   const installed = () => {
     if (ledger.installedState === "refused") return refusal(ledger.installedLabel, ledger.installedRefusedTitle, ledger.installedRefused, ledger.retry, ledger.retryingInstalled, ledger.onRetryInstalled);
     if (ledger.installedState === "empty") return <SurfaceCard label={ledger.installedLabel}>
-      <EmptyNotice message={ledger.installedEmptyTitle} description={ledger.installedEmpty} />
+      <EmptyNotice
+        message={ledger.installedEmptyTitle}
+        description={ledger.installedEmpty}
+        actionLabel={ledger.installedEmptyAction}
+        actionVariant="secondary"
+        onAction={browseCatalogue}
+      />
     </SurfaceCard>;
     const loading = ledger.installedState === "resting";
     return <SurfaceListCard label={ledger.installedLabel} isLoading={loading}>
       <div className={SOLUTION_LEDGER_ROWS_CLASS_NAME} data-contract="BOUNDARY-3">{(loading ? restingRows : ledger.installedRows).map(row => ledgerRow(row, loading))}</div>
     </SurfaceListCard>;
   };
+  const catalogueRef = useRef<HTMLDivElement>(null);
+  // The installed notice sends the reader to the catalogue rather than to another page: the region
+  // marker below is the only node this adds, and it carries no presentation of its own.
+  const browseCatalogue = useCallback(() => {
+    const node = catalogueRef.current;
+    if (node === null) return;
+    node.scrollIntoView({ behavior: "smooth", block: "start" });
+    node.focus();
+  }, []);
   const catalogue = () => {
     if (ledger.catalogueState === "refused") return refusal(ledger.catalogLabel, ledger.catalogueRefusedTitle, ledger.catalogueRefused, ledger.retry, ledger.retryingCatalogue, ledger.onRetryCatalogue);
     if (ledger.catalogueState === "empty") return <SurfaceCard label={ledger.catalogLabel}>
@@ -170,7 +188,7 @@ const AgentOSSolutionModuleLedger = ({
   };
   return <>
     {installed()}
-    {catalogue()}
+    <div ref={catalogueRef} tabIndex={-1} data-region="module-catalogue">{catalogue()}</div>
     {outcome === undefined ? null : <Text size="sm" tone="muted" live="polite">{outcome}</Text>}
   </>;
 };

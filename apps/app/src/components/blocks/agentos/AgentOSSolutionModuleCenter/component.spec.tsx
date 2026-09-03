@@ -22,6 +22,7 @@ const ledger = (over: Partial<AgentOSSolutionModuleLedgerProps> = {}): AgentOSSo
     catalogueRefusedTitle: "The catalogue could not be read",
     catalogueRefused: "Your own modules above are unaffected.",
     retry: "Try again",
+    installedEmptyAction: "Browse the catalogue",
     retryingInstalled: false,
     retryingCatalogue: false,
     onRetryInstalled: vi.fn(),
@@ -75,6 +76,7 @@ describe("AgentOS solution module center", () => {
         expect(html).toContain("No solution installed yet")
         expect(html).toContain("Installing a package adds it here.")
         expect(html).toContain("No solution package is available")
+        expect(html).toContain("Browse the catalogue")
         expect(html).not.toContain("Try again")
     })
 
@@ -92,6 +94,16 @@ describe("AgentOS solution module center", () => {
         expect(onRetryCatalogue).toHaveBeenCalledTimes(1)
         const pending = renderToStaticMarkup(<AgentOSSolutionModuleCenterBase {...base} layout="ledger" ledger={ledger({ installedState: "refused", catalogueState: "ready", installedRows: [], retryingInstalled: true })} state="refused" mode="catalog" cards={[card]} />)
         expect(pending).toContain("aria-busy=\"true\"")
+    })
+
+    it("sends an empty installed section to the catalogue beneath it", () => {
+        render(<AgentOSSolutionModuleCenterBase {...base} layout="ledger" ledger={ledger({ installedState: "empty", installedRows: [] })} state="answered" mode="catalog" cards={[card]} />)
+        const region = document.querySelector("[data-region='module-catalogue']") as HTMLElement
+        expect(region).toBeTruthy()
+        region.scrollIntoView = vi.fn()
+        fireEvent.click(screen.getByRole("button", { name: "Browse the catalogue" }))
+        expect(region.scrollIntoView).toHaveBeenCalled()
+        expect(document.activeElement).toBe(region)
     })
 
     it("keeps a refused catalogue from hiding an answered installed section", () => {
