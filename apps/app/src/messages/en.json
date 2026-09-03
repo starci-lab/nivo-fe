@@ -117,6 +117,8 @@
     "servicesCaption": "Services",
     "accountCaption": "Account",
     "navigationLabel": "Console navigation",
+    "topNavigationLabel": "Console primary navigation",
+    "actionsLabel": "Account actions",
     "openMenu": "Menu",
     "closeMenu": "Close",
     "unavailable": "Unavailable",

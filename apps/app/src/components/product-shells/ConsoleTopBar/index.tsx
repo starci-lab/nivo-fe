@@ -27,7 +27,7 @@ export const ConsoleTopBar = (props: ConsoleTopBarProps) => {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
   const isDark = isMounted && resolvedTheme === "dark";
-  return <ConsoleTopBarBase brandLabel={t("brand")} contextLabel={t("title")} isDark={isDark} lightThemeLabel={t("theme.light")} darkThemeLabel={t("theme.dark")} localeControl={LanguageMenu} localeControlProps={{}} accountControl={AccountMenu} accountControlProps={{}} drawerControl={Sidebar} drawerControlProps={{
+  return <ConsoleTopBarBase brandLabel={t("brand")} contextLabel={t("title")} navigationLabel={t("topNavigationLabel")} actionsLabel={t("actionsLabel")} compactNavigationTriggerLabel={t("openMenu")} isDark={isDark} lightThemeLabel={t("theme.light")} darkThemeLabel={t("theme.dark")} localeControl={LanguageMenu} localeControlProps={{}} accountControl={AccountMenu} accountControlProps={{}} drawerControl={Sidebar} drawerControlProps={{
     mode: "mobile"
   }} onToggleTheme={() => setTheme(isDark ? "light" : "dark")} />;
 };
