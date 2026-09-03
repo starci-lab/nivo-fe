@@ -1,6 +1,7 @@
 import { SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/core";
 import {
   INFRASTRUCTURE_SUMMARY_COLLECTION_CLASS_NAME,
+  INFRASTRUCTURE_SUMMARY_FACT_COLUMN_CLASS_NAME,
   INFRASTRUCTURE_SUMMARY_FACT_ROW_CLASS_NAME,
   INFRASTRUCTURE_SUMMARY_FALLBACK_CLASS_NAME,
   INFRASTRUCTURE_SUMMARY_NOTE_CLASS_NAME
@@ -40,8 +41,13 @@ const fact = (item: InfrastructureDomainFact, isLoading = false) => <div
   className={INFRASTRUCTURE_SUMMARY_FACT_ROW_CLASS_NAME}
   data-contract="GAP-3 PADDING-3 PADDING-4"
 >
-  <Text size="sm" isSkeleton={isLoading}>{item.label}</Text>
-  <Text size="sm" isSkeleton={isLoading}>{item.value}</Text></div>;
+  <div className={INFRASTRUCTURE_SUMMARY_FACT_COLUMN_CLASS_NAME}>
+    <Text size="sm" isSkeleton={isLoading}>{item.label}</Text>
+  </div>
+  <div className={INFRASTRUCTURE_SUMMARY_FACT_COLUMN_CLASS_NAME}>
+    <Text size="sm" isSkeleton={isLoading}>{item.value}</Text>
+  </div>
+</div>;
 const refusal = (note: string) => <div className={INFRASTRUCTURE_SUMMARY_NOTE_CLASS_NAME}>
   <Text size="sm" tone="muted">{note}</Text></div>;
 const domainEvidenceContent = (renderedFacts: ReadonlyArray<ReturnType<typeof fact>>) => <div

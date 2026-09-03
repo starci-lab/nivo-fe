@@ -34,6 +34,21 @@ describe("AppsSummary", () => {
         expect(html).not.toContain("total")
     })
 
+    it("gives repeated row actions an item-specific accessible name", () => {
+        const onOpenApp = vi.fn()
+        render(<AppsSummaryBase label="Apps" state={{ phase: "populated", items: [
+            { id: "app-1", name: "Store", detail: "store.example", statusLabel: "Ready", statusTone: "success", actionLabel: "Open" },
+            { id: "app-2", name: "Docs", detail: "docs.example", statusLabel: "Ready", statusTone: "success", actionLabel: "Open" },
+        ] }} onOpenApp={onOpenApp} />)
+
+        fireEvent.click(screen.getByRole("button", { name: "Open Store" }))
+        fireEvent.click(screen.getByRole("button", { name: "Open Docs" }))
+
+        expect(screen.getAllByText("Open")).toHaveLength(2)
+        expect(onOpenApp).toHaveBeenNthCalledWith(1, "app-1")
+        expect(onOpenApp).toHaveBeenNthCalledWith(2, "app-2")
+    })
+
     it("keeps a forbidden answer local to the section", () => {
         const html = renderToStaticMarkup(<AppsSummaryBase label="Apps" state={{ phase: "forbidden", message: "Access denied" }} onOpenApp={vi.fn()} />)
         expect(html).toContain("Access denied")
@@ -44,7 +59,7 @@ describe("AppsSummary", () => {
         render(<AppsSummary />)
         expect(screen.getByText("academy.nivo.vn")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "apps.openSet" }))
-        fireEvent.click(screen.getByRole("button", { name: "apps.viewDns" }))
+        fireEvent.click(screen.getByRole("button", { name: "apps.viewDns academy" }))
         expect(mocks.push).toHaveBeenCalledWith("/apps")
         expect(mocks.push).toHaveBeenCalledWith("/apps/site-1")
     })
@@ -53,7 +68,7 @@ describe("AppsSummary", () => {
         mocks.locale = "en"
         mocks.data.apps = { ok: true, data: [{ id: "site-2", slug: "sales", customDomain: "sales.example", provisionStatus: "mystery", status: "active" }] }
         const { rerender } = render(<AppsSummary />)
-        fireEvent.click(screen.getByRole("button", { name: "apps.open" }))
+        fireEvent.click(screen.getByRole("button", { name: "apps.open sales" }))
         expect(mocks.push).toHaveBeenCalledWith("/apps/site-2")
 
         mocks.data.apps = { ok: true, data: [] }

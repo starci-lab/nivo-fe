@@ -36,3 +36,6 @@ export const APPS_SUMMARY_STATUS_CLASS_NAME = cn("shrink-0");
 
 /** Fixed-width command owner within a wrapping application row. */
 export const APPS_SUMMARY_ACTION_CLASS_NAME = cn("shrink-0");
+
+/** Item identity appended to a repeated visible command for assistive technology. */
+export const APPS_SUMMARY_ACTION_CONTEXT_CLASS_NAME = cn("sr-only");

@@ -2,6 +2,7 @@ import { Avatar } from "@nivo/ui";
 import { EmptyNotice, SurfaceCard, SurfaceListCard, Button, Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/core";
 import {
   APPS_SUMMARY_ACTION_CLASS_NAME,
+  APPS_SUMMARY_ACTION_CONTEXT_CLASS_NAME,
   APPS_SUMMARY_COLLECTION_CLASS_NAME,
   APPS_SUMMARY_COPY_CLASS_NAME,
   APPS_SUMMARY_ROW_CLASS_NAME,
@@ -55,7 +56,10 @@ const rows = (items: ReadonlyArray<AppsSummaryItem>, onOpenApp: AppsSummaryProps
     <Badge tone={item.statusTone}>{item.statusLabel}</Badge>
   </div>
   <div className={APPS_SUMMARY_ACTION_CLASS_NAME}>
-    <Button size="sm" onPress={() => onOpenApp(item.id)}>{item.actionLabel}</Button>
+    <Button size="sm" onPress={() => onOpenApp(item.id)}>
+      <span>{item.actionLabel}</span>{" "}
+      <span className={APPS_SUMMARY_ACTION_CONTEXT_CLASS_NAME}>{item.name}</span>
+    </Button>
   </div>
 </div>);
 const pendingRows = () => Array.from({
