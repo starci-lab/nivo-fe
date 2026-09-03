@@ -48,7 +48,7 @@ describe("SelectionList", () => {
         expect(selected).toHaveAttribute("aria-selected", "true")
         expect(selected).toHaveClass("size-11", "rounded-full")
         expect(glyphSurface).toHaveClass("size-10", "rounded-full", "group-data-[selected=true]:bg-accent-soft")
-        expect(glyphSurface?.querySelector("svg")).toHaveClass("size-5", "shrink-0")
+        expect(glyphSurface?.querySelector("svg")).toHaveClass("starci-core-icon")
         expect(screen.getByText("Services")).toHaveClass("sr-only")
     })
 
