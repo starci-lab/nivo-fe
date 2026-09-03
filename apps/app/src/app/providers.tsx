@@ -4,7 +4,7 @@ import { I18nProvider } from "@heroui/react";
 import { CoreGrammarRoot } from "@starci/grammar/core";
 import { NextIntlClientProvider, type Messages } from "next-intl";
 import { ThemeProvider, useTheme } from "next-themes";
-import type { ComponentProps } from "react";
+import { useSyncExternalStore, type ComponentProps } from "react";
 import { SessionProvider } from "@/modules/auth/session";
 
 /** Closed framework provider input; only Next's routed stream occupies the children slot. */
@@ -15,12 +15,21 @@ export type AppProvidersProps = {
   readonly children: ComponentProps<"div">["children"];
 };
 
+const subscribeToHydration = () => () => undefined;
+const getClientHydrationSnapshot = () => true;
+const getServerHydrationSnapshot = () => false;
+
 /** Keep the Core family palette on the same resolved theme as the console shell. */
 const ResolvedCoreGrammarRoot = ({
   children
 }: Pick<AppProvidersProps, "children">) => {
   const { resolvedTheme } = useTheme();
-  const grammarTheme = resolvedTheme === "dark" || resolvedTheme === "light"
+  const isHydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getClientHydrationSnapshot,
+    getServerHydrationSnapshot
+  );
+  const grammarTheme = isHydrated && (resolvedTheme === "dark" || resolvedTheme === "light")
     ? resolvedTheme
     : "system";
 
