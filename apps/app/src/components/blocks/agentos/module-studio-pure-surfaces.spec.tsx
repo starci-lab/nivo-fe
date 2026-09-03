@@ -17,10 +17,7 @@ describe("module studio pure surfaces", () => {
             title="Custom modules"
             refused="Unavailable"
             empty="No modules"
-            createLabel="Create module"
-            rows={[{ id: "module-1", name: "Lead intake", detail: "80% complete", kind: "Custom", status: "Active", action: "Inspect" }]}
-            onOpen={vi.fn()}
-            onCreate={vi.fn()}
+            rows={[{ id: "module-1", name: "Lead intake", detail: "80% complete", kind: "Custom", status: "Active", active: true, action: "Inspect", href: "/en/agentos/workspaces/w/modules/install-1" }]}
         />)
         expect(html).toContain("Lead intake")
         expect(html).toContain("80% complete")
@@ -96,22 +93,15 @@ describe("module studio pure surfaces", () => {
     })
 
     it("reports collection, upload, and write-only integration actions", () => {
-        const open = vi.fn()
-        const create = vi.fn()
         const collection = render(<AgentOSCustomModuleCollectionBase
             state="ready"
             title="Custom modules"
             refused="Unavailable"
             empty="No modules"
-            createLabel="Create module"
-            rows={[{ id: "module-1", name: "Lead intake", detail: "Ready", kind: "Custom", status: "Active", action: "Inspect" }]}
-            onOpen={open}
-            onCreate={create}
+            rows={[{ id: "module-1", name: "Lead intake", detail: "Ready", kind: "Custom", status: "Active", active: true, action: "Inspect", href: "/en/agentos/workspaces/w/modules/install-1" }]}
         />)
-        fireEvent.click(screen.getByRole("button", { name: "Lead intake" }))
-        fireEvent.click(screen.getByRole("button", { name: "Inspect" }))
-        expect(open).toHaveBeenNthCalledWith(1, "module-1")
-        expect(open).toHaveBeenNthCalledWith(2, "module-1")
+        expect(screen.getByRole("link", { name: "Lead intake" }).getAttribute("href")).toBe("/en/agentos/workspaces/w/modules/install-1")
+        expect(screen.getByRole("link", { name: "Inspect" }).getAttribute("href")).toBe("/en/agentos/workspaces/w/modules/install-1")
         collection.unmount()
 
         const choose = vi.fn()

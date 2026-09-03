@@ -1,5 +1,12 @@
 import { ChoiceTabs, nivoIconSource, StatusActionCard } from "@nivo/ui";
-import { EmptyNotice, Icon, SurfaceCard, Text, type BadgeTone } from "@starci/grammar/common";
+import { Badge, Button, EmptyNotice, Icon, SurfaceCard, SurfaceListCard, Text, TextAction, type BadgeTone } from "@starci/grammar/common";
+import {
+  SOLUTION_CATALOG_GRID_CLASS_NAME,
+  SOLUTION_LEDGER_COPY_CLASS_NAME,
+  SOLUTION_LEDGER_ROW_CLASS_NAME,
+  SOLUTION_LEDGER_ROWS_CLASS_NAME,
+  SOLUTION_LEDGER_TRAILING_CLASS_NAME
+} from "./classNames";
 
 /** One resolved catalog or installation card visible in the module center. */
 export type AgentOSSolutionModuleCenterProps = AgentOSSolutionModuleCenterViewProps;
@@ -14,6 +21,18 @@ export type AgentOSSolutionModuleCard = {
   readonly actionLabel: string;
   readonly disabled?: boolean;
   readonly actionHref?: string;
+};
+
+/** One installed solution prepared as a ledger row whose name and action lead to its workspace. */
+export type AgentOSSolutionLedgerRow = {
+  readonly id: string;
+  readonly name: string;
+  readonly detail: string;
+  readonly kind: string;
+  readonly status: string;
+  readonly statusTone: BadgeTone;
+  readonly action: string;
+  readonly href: string;
 };
 
 /** Closed pure state for the solution-module catalog and installation fleet. */
@@ -34,6 +53,11 @@ export type AgentOSSolutionModuleCenterViewProps = {
   readonly outcome?: string;
   readonly onSelectMode: (mode: "catalog" | "installed") => void;
   readonly onPressCard: (id: string) => void;
+  /** `ledger` lists the installed solutions above the catalogue on one surface; `tabs` keeps the mode switch. */
+  readonly layout?: "tabs" | "ledger";
+  readonly installedLabel?: string;
+  readonly catalogLabel?: string;
+  readonly installedRows?: ReadonlyArray<AgentOSSolutionLedgerRow>;
 };
 const loadingCards: ReadonlyArray<AgentOSSolutionModuleCard> = ["module-loading-1", "module-loading-2"].map(id => ({
   id,
@@ -43,6 +67,65 @@ const loadingCards: ReadonlyArray<AgentOSSolutionModuleCard> = ["module-loading-
   statusTone: "neutral",
   actionLabel: ""
 }));
+const restingRows: ReadonlyArray<AgentOSSolutionLedgerRow> = ["installed-loading-1", "installed-loading-2"].map(id => ({
+  id,
+  name: "",
+  detail: "",
+  kind: "",
+  status: "",
+  statusTone: "neutral",
+  action: "",
+  href: "#"
+}));
+
+const ledgerRow = (row: AgentOSSolutionLedgerRow, loading: boolean) => <div key={row.id} className={SOLUTION_LEDGER_ROW_CLASS_NAME} data-contract="GAP-3 PADDING-4 PADDING-3">
+  <div className={SOLUTION_LEDGER_COPY_CLASS_NAME} data-contract="GAP-1">
+    <TextAction size="sm" isSkeleton={loading} href={row.href}>{row.name}</TextAction>
+    <Text size="xs" tone="muted" isSkeleton={loading}>{row.detail}</Text>
+  </div>
+  <div className={SOLUTION_LEDGER_TRAILING_CLASS_NAME} data-contract="GAP-2">
+    <Badge tone="neutral" isSkeleton={loading}>{row.kind}</Badge>
+    <Badge tone={row.statusTone} isSkeleton={loading}>{row.status}</Badge>
+    <Button variant="secondary" size="sm" isSkeleton={loading} href={row.href}>{row.action}</Button>
+  </div>
+</div>;
+
+const catalogGrid = (cards: ReadonlyArray<AgentOSSolutionModuleCard>, loading: boolean, pendingId: string | undefined, onPressCard: (id: string) => void) => <div className={SOLUTION_CATALOG_GRID_CLASS_NAME} data-contract="GAP-4">{(loading ? loadingCards : cards).map(card => <StatusActionCard key={card.id} props={{
+  ...card,
+  isPending: pendingId === card.id,
+  disabled: card.disabled === true || pendingId !== undefined,
+  actionTarget: card.actionHref === undefined ? undefined : "_self"
+}} on={{
+  press: () => onPressCard(card.id)
+}} isLoading={loading} />)}</div>;
+
+/** The ledger form: installed solutions listed first, the catalogue beneath, no mode switch and no second accent. */
+const AgentOSSolutionModuleLedger = ({
+  state,
+  refusedLabel,
+  emptyLabel,
+  cards,
+  pendingId,
+  outcome,
+  onPressCard,
+  installedLabel = "",
+  catalogLabel = "",
+  installedRows = []
+}: AgentOSSolutionModuleCenterViewProps) => {
+  const installed = () => {
+    if (state === "refused") return <SurfaceCard label={installedLabel}><EmptyNotice message={refusedLabel} /></SurfaceCard>;
+    if (state === "answered" && installedRows.length === 0) return <SurfaceCard label={installedLabel}><EmptyNotice message={emptyLabel} /></SurfaceCard>;
+    const loading = state === "resting";
+    return <SurfaceListCard label={installedLabel} isLoading={loading}>
+      <div className={SOLUTION_LEDGER_ROWS_CLASS_NAME} data-contract="BOUNDARY-3">{(loading ? restingRows : installedRows).map(row => ledgerRow(row, loading))}</div>
+    </SurfaceListCard>;
+  };
+  return <>
+    {installed()}
+    <SurfaceCard label={catalogLabel}>{state === "refused" ? <EmptyNotice message={refusedLabel} /> : catalogGrid(cards, state === "resting", pendingId, onPressCard)}</SurfaceCard>
+    {outcome === undefined ? null : <Text size="sm" tone="muted" live="polite">{outcome}</Text>}
+  </>;
+};
 
 /** Render the selected solution mode from already-resolved card projections. */
 const AgentOSSolutionModuleCenterContent = ({
@@ -104,6 +187,5 @@ const AgentOSSolutionModuleCenterContent = ({
         </>;
 };
 
-/** Stable typed root for the module-center block. */
-export const AgentOSSolutionModuleCenterBase = (props: AgentOSSolutionModuleCenterProps) => <AgentOSSolutionModuleCenterContent {...props} />;
-
+/** Stable typed root for the module-center block: the tabs form by default, the ledger form on the module route. */
+export const AgentOSSolutionModuleCenterBase = (props: AgentOSSolutionModuleCenterProps) => props.layout === "ledger" ? <AgentOSSolutionModuleLedger {...props} /> : <AgentOSSolutionModuleCenterContent {...props} />;

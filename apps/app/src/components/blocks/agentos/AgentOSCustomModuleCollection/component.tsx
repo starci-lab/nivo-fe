@@ -1,7 +1,12 @@
-import { nivoIconSource } from "@nivo/ui";
-import { SurfaceCard, SurfaceListCard, Button, Button as CoreButton, EmptyNotice, Icon, Text, TextAction, Badge } from "@starci/grammar/common";
+import { Badge, Button, EmptyNotice, SurfaceCard, SurfaceListCard, Text, TextAction } from "@starci/grammar/common";
+import {
+  MODULE_LEDGER_COPY_CLASS_NAME,
+  MODULE_LEDGER_ROW_CLASS_NAME,
+  MODULE_LEDGER_ROWS_CLASS_NAME,
+  MODULE_LEDGER_TRAILING_CLASS_NAME
+} from "./classNames";
 
-/** One custom-module identity prepared for the joined management list. */
+/** One custom-module identity prepared for the ledger. */
 export type AgentOSCustomModuleCollectionProps = AgentOSCustomModuleCollectionViewProps;
 /** Public API role for CustomModuleCollectionRow. */
 export type CustomModuleCollectionRow = {
@@ -10,68 +15,58 @@ export type CustomModuleCollectionRow = {
   readonly detail: string;
   readonly kind: string;
   readonly status: string;
+  readonly active: boolean;
   readonly action: string;
+  readonly href: string;
 };
 
-/** Settled collection state and exact navigation actions for the pure block. */
+/** Settled collection state and the exact destinations of the pure block. */
 export type AgentOSCustomModuleCollectionViewProps = {
   readonly state: "loading" | "refused" | "empty" | "ready";
   readonly title: string;
   readonly refused: string;
   readonly empty: string;
-  readonly createLabel: string;
   readonly rows: ReadonlyArray<CustomModuleCollectionRow>;
-  readonly onOpen: (id: string) => void;
-  readonly onCreate: () => void;
 };
-const rowView = (row: CustomModuleCollectionRow, loading: boolean, onOpen: (id: string) => void) => <div><div>
 
+/** Three skeleton rows keep the resolved list's shape while the read is unresolved. */
+const restingRows = (title: string): ReadonlyArray<CustomModuleCollectionRow> => [0, 1, 2].map(index => ({
+  id: `loading-${index}`,
+  name: title,
+  detail: "",
+  kind: "",
+  status: "",
+  active: false,
+  action: "",
+  href: "#"
+}));
 
-    <TextAction size="sm" isSkeleton={loading} onPress={() => onOpen(row.id)}>{row.name}</TextAction>
-    <Text size="xs" isSkeleton={loading}>{row.detail}</Text></div>
+const rowView = (row: CustomModuleCollectionRow, loading: boolean) => <div key={row.id} className={MODULE_LEDGER_ROW_CLASS_NAME} data-contract="GAP-3 PADDING-4 PADDING-3">
+  <div className={MODULE_LEDGER_COPY_CLASS_NAME} data-contract="GAP-1">
+    <TextAction size="sm" isSkeleton={loading} href={row.href}>{row.name}</TextAction>
+    <Text size="xs" tone="muted" isSkeleton={loading}>{row.detail}</Text>
+  </div>
+  <div className={MODULE_LEDGER_TRAILING_CLASS_NAME} data-contract="GAP-2">
+    <Badge tone="neutral" isSkeleton={loading}>{row.kind}</Badge>
+    <Badge tone={row.active ? "success" : "warning"} isSkeleton={loading}>{row.status}</Badge>
+    <Button variant="secondary" size="sm" isSkeleton={loading} href={row.href}>{row.action}</Button>
+  </div>
+</div>;
 
-  <Badge tone="neutral" isSkeleton={loading}>{row.kind}</Badge>
-  <Badge tone={row.status === "Active" ? "success" : "warning"} isSkeleton={loading}>{row.status}</Badge>
-  <Button variant="secondary" size="sm" isSkeleton={loading} onPress={() => onOpen(row.id)}>{row.action}</Button></div>;
-const customModuleContent = (shown: ReadonlyArray<CustomModuleCollectionRow>, loading: boolean, onOpen: (id: string) => void) => <div>{shown.map(row => rowView(row, loading, onOpen))}</div>;
-
-/** Draw custom drafts and active modules with local refusal and empty states. */
+/** Draw custom drafts and active modules as ledger rows, with local refusal and empty states. */
 export const AgentOSCustomModuleCollectionBase = (props: AgentOSCustomModuleCollectionProps) => {
   const {
     state,
     title,
     refused,
     empty,
-    createLabel,
-    rows,
-    onOpen,
-    onCreate
+    rows
   }: AgentOSCustomModuleCollectionViewProps = props;
-  if (state === "refused") return <SurfaceCard
-    label={title}
-    labelEnd={createLabel !== undefined && onCreate !== undefined ? <CoreButton size="sm" variant="primary" onPress={onCreate}>{createLabel}</CoreButton> : null}
-  ><div><Text size="sm" tone="muted">{refused}</Text></div></SurfaceCard>;
-  if (state === "empty") return <SurfaceCard
-    label={title}
-  ><div><EmptyNotice
-        message={empty}
-        actionLabel={createLabel}
-        actionStartContent={<Icon source={nivoIconSource("retry", "chip")} usage="chip" />}
-        onAction={onCreate}
-      /></div></SurfaceCard>;
-  const shown = state === "loading" ? [0, 1, 2].map(index => ({
-    id: `loading-${index}`,
-    name: title,
-    detail: "",
-    kind: "Custom",
-    status: "Draft",
-    action: createLabel
-  })) : rows;
-  const content = customModuleContent(shown, state === "loading", onOpen);
-  return <SurfaceListCard
-    label={title}
-    footer={<Button variant="primary" size="sm" isSkeleton={state === "loading"} onPress={onCreate}>{createLabel}</Button>}
-    isLoading={state === "loading"}
-  >{content}</SurfaceListCard>;
+  if (state === "refused") return <SurfaceCard label={title}><EmptyNotice message={refused} /></SurfaceCard>;
+  if (state === "empty") return <SurfaceCard label={title}><EmptyNotice message={empty} /></SurfaceCard>;
+  const loading = state === "loading";
+  const shown = loading ? restingRows(title) : rows;
+  return <SurfaceListCard label={title} isLoading={loading}>
+    <div className={MODULE_LEDGER_ROWS_CLASS_NAME} data-contract="BOUNDARY-3">{shown.map(row => rowView(row, loading))}</div>
+  </SurfaceListCard>;
 };
-

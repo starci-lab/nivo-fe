@@ -47,6 +47,7 @@ vi.mock("@/modules/api/console", () => ({
     manageAgentosModuleRuntime: vi.fn().mockResolvedValue({ ok: false, reason: "unavailable" }),
     myAgentosSolutionModules: vi.fn().mockResolvedValue({ ok: true, data: [] }),
     myAgentosModuleInstallations: vi.fn().mockResolvedValue({ ok: true, data: [] }),
+    myAgentosCustomModules: vi.fn().mockResolvedValue({ ok: true, data: [] }),
     installAgentosSolutionModule: vi.fn().mockResolvedValue({ ok: false, reason: "unavailable" }),
     myAcademyGrowthSnapshot: vi.fn().mockResolvedValue({ ok: true, data: { revenueVnd: 1000, paidOrders: 1, totalMembers: 2, activeMembers: 1, totalCompletions: 3 } }),
 }))
@@ -56,9 +57,10 @@ import { WalletPage } from "./WalletPage"
 import { AgentOSWorkspacePage } from "./AgentOSWorkspacePage"
 import { AgentOSSolutionModulePage } from "./AgentOSSolutionModulePage"
 import { AgentOSPage } from "./AgentOSPage"
-import { myAgentWorkspace, myExpertSites, myInstances, myCatalogOrders, catalogItems, myAcademyGrowthSnapshot, myAgentosSolutionModules, myAgentosModuleInstallations, myAgentosModuleInstallation, myAgentosModuleRuntime } from "@/modules/api/console"
+import { myAgentWorkspace, myExpertSites, myInstances, myCatalogOrders, catalogItems, myAcademyGrowthSnapshot, myAgentosSolutionModules, myAgentosModuleInstallations, myAgentosCustomModules, myAgentosModuleInstallation, myAgentosModuleRuntime } from "@/modules/api/console"
 import { AcademyGrowthSummary } from "../blocks/academy/AcademyGrowthSummary"
 import { AgentOSSolutionModuleCenter } from "../blocks/agentos/AgentOSSolutionModuleCenter"
+import { AgentOSCustomModuleCollection } from "../blocks/agentos/AgentOSCustomModuleCollection"
 
 const moduleRuntime = (agentWorkspaceId: string) => ({
     installation: {
@@ -217,5 +219,20 @@ describe("connected console pages", () => {
         vi.mocked(myAgentosModuleRuntime).mockReturnValue(new Promise(() => undefined))
         render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
         expect(screen.getByRole("heading", { name: "Module Studio" })).toBeInTheDocument()
+    })
+
+    it("lists installed solutions and custom modules as ledger rows with locale-prefixed destinations", async () => {
+        cleanup()
+        resetQueryCache()
+        signedIn.state = { status: "signed-in", accessToken: `orchestration-pages-${viewerSequence}-ledger` }
+        vi.mocked(myAgentosSolutionModules).mockResolvedValue({ ok: true, data: [{ key: "knowledge-hub", name: "Knowledge Hub", summary: "Reads", agentRoles: [], channelRoles: [], safetyMode: "strict", version: "1" }] } as never)
+        vi.mocked(myAgentosModuleInstallations).mockResolvedValue({ ok: true, data: [{ id: "install-1", agentWorkspaceId: "workspace-1", moduleKey: "knowledge-hub", moduleVersion: "1.0.0", displayName: "UAT Knowledge Hub", status: "ready", failureCode: null, createdAt: "", updatedAt: "" }] } as never)
+        vi.mocked(myAgentosCustomModules).mockResolvedValue({ ok: true, data: [{ id: "draft-1", agentWorkspaceId: "workspace-1", name: "Partner guide", status: "draft", progress: 40, missingFields: [], currentQuestion: null, specificationVersion: null, installationId: null, failureCode: null }, { id: "live-1", agentWorkspaceId: "workspace-1", name: "Sales copilot", status: "active", progress: 100, missingFields: [], currentQuestion: null, specificationVersion: 1, installationId: "install-1", failureCode: null }] } as never)
+        render(<AgentOSSolutionModuleCenter workspaceId="workspace-1" layout="ledger" />)
+        render(<AgentOSCustomModuleCollection workspaceId="workspace-1" />)
+        expect((await screen.findByRole("link", { name: "UAT Knowledge Hub" })).getAttribute("href")).toBe("/en/agentos/workspaces/workspace-1/modules/install-1")
+        expect((await screen.findByRole("link", { name: "Partner guide" })).getAttribute("href")).toBe("/en/agentos/workspaces/workspace-1/modules/studio/draft-1")
+        expect((await screen.findByRole("link", { name: "Sales copilot" })).getAttribute("href")).toBe("/en/agentos/workspaces/workspace-1/modules/install-1")
+        expect(screen.queryByRole("radio")).toBeNull()
     })
 })

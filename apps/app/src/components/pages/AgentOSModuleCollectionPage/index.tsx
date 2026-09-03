@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { AgentOSModuleCollectionPageBase } from "./component";
 type AgentOSModuleCollectionPageProps = {
@@ -13,6 +13,7 @@ export const AgentOSModuleCollectionPage = (props: AgentOSModuleCollectionPagePr
     workspaceId
   }: AgentOSModuleCollectionPageProps = props;
   const t = useTranslations("console.agentos.modules.page");
+  const locale = useLocale();
   const router = useRouter();
   return <AgentOSModuleCollectionPageBase workspaceId={workspaceId} labels={{
     path: t("path"),
@@ -21,5 +22,5 @@ export const AgentOSModuleCollectionPage = (props: AgentOSModuleCollectionPagePr
     description: t("description"),
     eyebrow: t("eyebrow"),
     create: t("create")
-  }} onBack={() => router.push(`/agentos/workspaces/${workspaceId}`)} onCreate={() => router.push(`/agentos/workspaces/${workspaceId}/modules/create`)} />;
+  }} createHref={`/${locale}/agentos/workspaces/${workspaceId}/modules/create`} onBack={() => router.push(`/agentos/workspaces/${workspaceId}`)} />;
 };
