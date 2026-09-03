@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useQueryMyAgentosCustomModulesSwr } from "@/hooks";
 import { nivoQueryData } from "@/modules/query";
@@ -14,7 +15,7 @@ const collectionState = (modules: ReadonlyArray<AgentosCustomModule> | null | un
   return modules.length === 0 ? "empty" : "ready";
 };
 
-/** Own the workspace custom-module query and project each row's exact destination. */
+/** Own the workspace custom-module query, project each row destination and recover its own read. */
 export const AgentOSCustomModuleCollection = (props: AgentOSCustomModuleCollectionProps) => {
   const {
     workspaceId
@@ -23,8 +24,14 @@ export const AgentOSCustomModuleCollection = (props: AgentOSCustomModuleCollecti
   const locale = useLocale();
   const query = useQueryMyAgentosCustomModulesSwr(workspaceId);
   const modules = nivoQueryData(query.data);
+  const [retrying, setRetrying] = useState(false);
+  const revalidate = query.mutate;
+  const onRetry = useCallback(() => {
+    setRetrying(true);
+    void Promise.resolve(revalidate()).finally(() => setRetrying(false));
+  }, [revalidate]);
   const hrefOf = (module: AgentosCustomModule) => module.installationId === null ? `/${locale}/agentos/workspaces/${workspaceId}/modules/studio/${module.id}` : `/${locale}/agentos/workspaces/${workspaceId}/modules/${module.installationId}`;
-  return <AgentOSCustomModuleCollectionBase state={collectionState(modules)} title={t("collection.title")} refused={t("collection.refused")} empty={t("collection.empty")} rows={(modules ?? []).map(module => ({
+  return <AgentOSCustomModuleCollectionBase state={collectionState(modules)} title={t("collection.title")} emptyTitle={t("collection.emptyTitle")} empty={t("collection.empty")} refusedTitle={t("collection.refusedTitle")} refused={t("collection.refused")} retry={t("collection.retry")} retrying={retrying} onRetry={onRetry} rows={(modules ?? []).map(module => ({
     id: module.id,
     name: module.name,
     detail: t("collection.progress", {

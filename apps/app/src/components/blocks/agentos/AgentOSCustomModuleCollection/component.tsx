@@ -20,16 +20,21 @@ export type CustomModuleCollectionRow = {
   readonly href: string;
 };
 
-/** Settled collection state and the exact destinations of the pure block. */
+/** Settled collection state, the copy each state carries, and the recovery of a refused read. */
 export type AgentOSCustomModuleCollectionViewProps = {
   readonly state: "loading" | "refused" | "empty" | "ready";
   readonly title: string;
-  readonly refused: string;
+  readonly emptyTitle: string;
   readonly empty: string;
+  readonly refusedTitle: string;
+  readonly refused: string;
+  readonly retry: string;
   readonly rows: ReadonlyArray<CustomModuleCollectionRow>;
+  readonly retrying: boolean;
+  readonly onRetry: () => void;
 };
 
-/** Three skeleton rows keep the resolved list's shape while the read is unresolved. */
+/** Three skeleton rows keep the resolved list shape while the read is unresolved. */
 const restingRows = (title: string): ReadonlyArray<CustomModuleCollectionRow> => [0, 1, 2].map(index => ({
   id: `loading-${index}`,
   name: title,
@@ -53,17 +58,36 @@ const rowView = (row: CustomModuleCollectionRow, loading: boolean) => <div key={
   </div>
 </div>;
 
-/** Draw custom drafts and active modules as ledger rows, with local refusal and empty states. */
+/**
+ * Draw custom drafts and active modules as ledger rows. Absence and refusal each state what the
+ * section holds, in a title and one line, and a refused section carries the retry that re-reads it.
+ */
 export const AgentOSCustomModuleCollectionBase = (props: AgentOSCustomModuleCollectionProps) => {
   const {
     state,
     title,
-    refused,
+    emptyTitle,
     empty,
-    rows
+    refusedTitle,
+    refused,
+    retry,
+    rows,
+    retrying,
+    onRetry
   }: AgentOSCustomModuleCollectionViewProps = props;
-  if (state === "refused") return <SurfaceCard label={title}><EmptyNotice message={refused} /></SurfaceCard>;
-  if (state === "empty") return <SurfaceCard label={title}><EmptyNotice message={empty} /></SurfaceCard>;
+  if (state === "refused") return <SurfaceCard label={title}>
+    <EmptyNotice
+      message={refusedTitle}
+      description={refused}
+      actionLabel={retry}
+      actionVariant="secondary"
+      isActionPending={retrying}
+      onAction={onRetry}
+    />
+  </SurfaceCard>;
+  if (state === "empty") return <SurfaceCard label={title}>
+    <EmptyNotice message={emptyTitle} description={empty} />
+  </SurfaceCard>;
   const loading = state === "loading";
   const shown = loading ? restingRows(title) : rows;
   return <SurfaceListCard label={title} isLoading={loading}>
