@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 
 import { act, render, screen } from "@testing-library/react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
     pageProps: null as null | { readonly screen: { readonly view: string; readonly contentProps?: Record<string, unknown> } },
@@ -86,7 +86,50 @@ vi.mock("./component", () => ({
 
 import { AgentOSSolutionModulePage } from "./index"
 
+type SetupProps = Extract<import("./component").AgentOSSolutionModuleScreen, { view: "setup" }>["contentProps"]
+const setupProps = () => mocks.pageProps!.screen.contentProps as unknown as SetupProps
 describe("AgentOSSolutionModulePage projections", () => {
+    afterEach(() => vi.useRealTimers())
+    it("retains historical selection and revision drafts across Setup tabs", () => {
+        const historical = { ...runtime.setupSession, id: "history", setupRevision: 0 }
+        runtime.setupSessions.unshift(historical)
+        const view = render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        act(() => { setupProps().onSelectRevision("history") })
+        act(() => { setupProps().onDraft("Historical note"); setupProps().onSelectPane("versions") })
+        view.rerender(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        expect(setupProps().selectedRevisionId).toBe("history")
+        act(() => { setupProps().onSelectPane("conversation") })
+        expect(setupProps().draftText).toBe("Historical note")
+        runtime.setupSessions.shift()
+    })
+    it("retains a refused append draft and reports only send refusal", async () => {
+        mocks.runtimeTrigger.mockResolvedValue({ ok: false })
+        render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        act(() => setupProps().onDraft("Keep policy"))
+        await act(async () => { setupProps().onSend("Keep policy") })
+        expect(setupProps().draftText).toBe("Keep policy")
+        expect(setupProps().setupSendRefused).toBe(true)
+        expect(setupProps().setupApplyRefused).toBe(false)
+        expect(setupProps().setupStartRefused).toBe(false)
+    })
+    it("guards same-tick submissions and keeps accepted polling timeout unconfirmed", async () => {
+        vi.useFakeTimers()
+        render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        act(() => setupProps().onDraft("Accepted policy"))
+        // An unchanged open revision never satisfies the existing settlement predicate.
+        mocks.runtimeMutate.mockResolvedValue({ ok: true, data: { ...runtime, setupSessions: runtime.setupSessions.map(s => ({ ...s, setupStatus: "open" })) } })
+        const send = setupProps().onSend
+        await act(async () => { send("Accepted policy"); send("Accepted policy") })
+        expect(mocks.runtimeTrigger).toHaveBeenCalledTimes(1)
+        expect(setupProps().draftText).toBe("")
+        expect(setupProps().setupSendPending).toBe(true)
+        expect(setupProps().setupApplyPending).toBe(false)
+        await act(async () => { await vi.advanceTimersByTimeAsync(90000) })
+        expect(setupProps().setupSendPending).toBe(false)
+        expect(setupProps().setupUnconfirmed).toBe(true)
+        expect(setupProps().setupSendRefused).toBe(false)
+        expect(mocks.runtimeTrigger).toHaveBeenCalledTimes(1)
+    })
     beforeEach(() => {
         mocks.pageProps = null
         mocks.push.mockReset()

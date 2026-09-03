@@ -49,6 +49,7 @@ const screens: ReadonlyArray<AgentOSSolutionModuleScreen> = [
             activeVersion: 1,
             draft: null,
             pending: false,
+            draftText: "",
             refused: false,
             compactPane: "conversation",
             onSelectRevision: action,
@@ -56,6 +57,7 @@ const screens: ReadonlyArray<AgentOSSolutionModuleScreen> = [
             onSend: action,
             onApply: action,
             onSelectPane: action,
+            onDraft: action,
         },
     },
     {
@@ -151,6 +153,15 @@ describe("AgentOSSolutionModulePageBase", () => {
     it.each(screens)("renders the $view screen through its typed Grammar contract", (screen) => {
         const html = renderToStaticMarkup(<AgentOSSolutionModulePageBase shell={{ ...shell, activeView: screen.view === "test-unavailable" ? "test" : screen.view }} screen={screen} />)
         expect(html).toContain("Support Desk")
+    })
+
+    it("mounts exactly one controlled Setup panel", () => {
+        const setup = screens[0]!
+        const html = renderToStaticMarkup(<AgentOSSolutionModulePageBase shell={shell} screen={setup} />)
+        expect((html.match(/role="tabpanel"/g) ?? []).length).toBe(1)
+        expect(html).toContain('id="setup-panel-conversation"')
+        expect(html).not.toContain('id="setup-panel-context"')
+        expect(html).not.toContain('id="setup-panel-versions"')
     })
 
     it("accepts only exact setup digest evidence", () => {
