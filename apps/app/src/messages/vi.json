@@ -159,11 +159,47 @@
     },
     "overview": {
       "title": "Tổng quan",
-      "lede": "Mọi thứ tài khoản của bạn đang chạy, cần xử lý và sắp đến hạn — trong một lượt quét.",
+      "lede": "Mọi thứ tài khoản đang chạy, và một việc nên làm tiếp theo.",
       "atAGlance": "Nhìn nhanh",
-      "atAGlanceSummary": "Bốn việc đã được hỏi, cả bốn đều đã có câu trả lời. Một việc đang cần bạn quyết định.",
       "buildApp": "Dựng một ứng dụng",
-      "none": "Chưa có"
+      "none": "Chưa có",
+      "runtimeLabel": "Runtime",
+      "runtimeFact": "Trạng thái pod của workspace, như đã trả lời",
+      "addressesLabel": "Tên miền",
+      "signals": {
+        "factNone": "Không có tín hiệu nào cần chú ý",
+        "fact": "{count, plural, other {# tín hiệu cần chú ý}}",
+        "nothingToOpen": "Chưa có gì để mở"
+      },
+      "services": {
+        "factAnswered": "{count, plural, other {# đã có kết quả}}",
+        "factDegradedNone": "không có mục nào cần chú ý",
+        "factDegraded": "{count, plural, other {# cần chú ý}}",
+        "workspaceDetailWithOrder": "Agent workspace · phục vụ đơn hàng {orderId}",
+        "workspaceDetailNoOrder": "Agent workspace",
+        "openWorkspace": "Mở workspace"
+      },
+      "runtime": {
+        "podAnswered": "Pod đã trả lời",
+        "httpStatus": "Mã HTTP",
+        "token": "Token",
+        "checked": "Đã kiểm tra",
+        "yes": "Có",
+        "no": "Không",
+        "tokenConfigured": "Đã cấu hình · {hint}",
+        "tokenConfiguredNoHint": "Đã cấu hình",
+        "tokenNotConfigured": "Chưa cấu hình"
+      },
+      "account": {
+        "walletBalance": "Số dư ví",
+        "unpaidInvoices": "Hoá đơn chưa thanh toán",
+        "unpaidCount": "{unpaid}/{total}",
+        "invoiceName": "Hoá đơn {id}",
+        "invoiceDetailUnpaid": "Chưa thanh toán · hạn {date} · trừ vào ví ở trên",
+        "dueSoon": "Sắp đến hạn",
+        "overdue": "Quá hạn",
+        "topUpWallet": "Nạp ví"
+      }
     },
     "apps": {
       "title": "Ứng dụng",
@@ -581,11 +617,6 @@
       "shapeUnknown": "chưa có pod riêng",
       "plan": "Gói {plan}",
       "renewsAt": "gia hạn {date}"
-  },
-  "infrastructure": {
-    "title": "Hạ tầng",
-    "context": "Các dịch vụ đã dựng và tên miền đang giữ dùng chung ngữ cảnh hạ tầng này.",
-    "empty": "Chưa dựng hạ tầng cho ứng dụng hoặc workspace nào."
   },
     "domains": {
       "title": "Tên miền",

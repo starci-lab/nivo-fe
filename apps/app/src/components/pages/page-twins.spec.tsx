@@ -1,11 +1,11 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 
-vi.mock("@/components/blocks/console/OverviewPulse", () => ({ OverviewPulse: () => <div>overview-pulse</div> }))
-vi.mock("@/components/blocks/console/AppsSummary", () => ({ AppsSummary: () => <div>apps-summary</div> }))
-vi.mock("@/components/blocks/console/AgentOSSummary", () => ({ AgentOSSummary: () => <div>agentos-summary</div> }))
-vi.mock("@/components/blocks/console/WalletSummary", () => ({ WalletSummary: () => <div>wallet-summary</div> }))
-vi.mock("@/components/blocks/console/InfrastructureSummary", () => ({ InfrastructureSummary: () => <div>infrastructure-summary</div> }))
+vi.mock("@/components/blocks/console/OverviewSignals", () => ({ OverviewSignals: () => <div>overview-signals</div> }))
+vi.mock("@/components/blocks/console/OverviewServices", () => ({ OverviewServices: () => <div>overview-services</div> }))
+vi.mock("@/components/blocks/console/OverviewRuntime", () => ({ OverviewRuntime: () => <div>overview-runtime</div> }))
+vi.mock("@/components/blocks/console/OverviewAccount", () => ({ OverviewAccount: () => <div>overview-account</div> }))
+vi.mock("@/components/blocks/console/OverviewAddresses", () => ({ OverviewAddresses: () => <div>overview-addresses</div> }))
 
 import { WalletControlCenterBase as WalletPageBase } from "../blocks/wallet/WalletControlCenter/component"
 import { AppsDashboardBase } from "../blocks/apps/AppsDashboard/component"
@@ -19,28 +19,25 @@ import { AgentOSWorkspaceListBase } from "../blocks/agentos/AgentOSWorkspaceList
 
 const overviewProps: OverviewPageProps = {
     title: "Overview",
-    lede: "Everything running and needing attention",
+    lede: "Everything this account runs, and the one thing to do next.",
     pathLabel: "You are here",
     consoleLabel: "Console",
     buildAppLabel: "Build an app",
     atAGlanceLabel: "At a glance",
-    atAGlanceSummary: "Four operations asked, four answered.",
     servicesLabel: "Services",
     accountLabel: "Account",
     onBuildApp: vi.fn(),
 }
 
 describe("pure page twins", () => {
-    it("renders the overview anatomy around its five connected summary blocks", () => {
+    it("renders the overview anatomy around its five connected regions", () => {
         const html = renderToStaticMarkup(<OverviewPageBase {...overviewProps} />)
         expect(html).toContain("Overview")
-        expect(html).toContain("Services")
-        expect(html).toContain("Account")
-        expect(html).toContain("overview-pulse")
-        expect(html).toContain("apps-summary")
-        expect(html).toContain("agentos-summary")
-        expect(html).toContain("wallet-summary")
-        expect(html).toContain("infrastructure-summary")
+        expect(html).toContain("overview-signals")
+        expect(html).toContain("overview-services")
+        expect(html).toContain("overview-runtime")
+        expect(html).toContain("overview-account")
+        expect(html).toContain("overview-addresses")
     })
 
     it("renders wallet resting, empty, and refused ledger branches", () => {

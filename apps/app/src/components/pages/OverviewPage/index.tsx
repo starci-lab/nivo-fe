@@ -20,7 +20,6 @@ export const OverviewPage = (props: OverviewPageProps) => {
     consoleLabel: t("title"),
     buildAppLabel: t("overview.buildApp"),
     atAGlanceLabel: t("overview.atAGlance"),
-    atAGlanceSummary: t("overview.atAGlanceSummary"),
     servicesLabel: t("servicesCaption"),
     accountLabel: t("accountCaption"),
     onBuildApp: openApps
