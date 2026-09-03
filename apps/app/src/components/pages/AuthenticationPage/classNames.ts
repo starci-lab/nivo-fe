@@ -48,15 +48,18 @@ export const AUTH_VISUAL_ACCENT_CLASS_NAME = cn("absolute", "inset-x-0", "top-0"
  * Inset stays on `COMMON_SPACING_SCALE` (PADDING-5 to PADDING-6, `p-6` to `p-8`): the scale has no
  * step past `p-8`, so the inset steps once at `sm` and holds rather than escalating further at
  * `lg`/`xl` with off-scale values.
+ *
+ * BOTH AXES STEP TOGETHER (PADDING-7 Case 2). The previous `px-6 py-8` held the two axes one step
+ * apart with no reason that survived reading: the region is a centering surface for one column,
+ * not a band whose vertical breathing room is owned separately from its gutter.
  */
 export const AUTH_FORM_REGION_CLASS_NAME = cn(
   "flex",
   "min-h-dvh",
   "items-center",
   "justify-center",
-  "px-6",
-  "py-8",
-  "sm:px-8",
+  "p-6",
+  "sm:p-8",
   "lg:col-span-5"
 );
 
