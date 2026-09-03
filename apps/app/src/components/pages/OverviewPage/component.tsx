@@ -13,7 +13,9 @@ import { WalletSummary } from "@/components/blocks/console/WalletSummary";
 import { OVERVIEW_PAGE_CLASS_NAME, OVERVIEW_SECTION_CLASS_NAME } from "./classNames";
 
 /** Resolved copy and the one page-level command of the operations briefing. */
-export type OverviewPageProps = {
+export type OverviewPageProps = OverviewPageViewProps;
+/** Public API role for OverviewPageViewProps. */
+export type OverviewPageViewProps = {
   readonly title: string;
   readonly lede: string;
   readonly pathLabel: string;
@@ -37,7 +39,7 @@ export const OverviewPageBase = (props: OverviewPageProps) => {
     servicesLabel,
     accountLabel,
     onBuildApp
-  }: OverviewPageProps = props;
+  }: OverviewPageViewProps = props;
   return <PageContainer
     measure="product"
     className={OVERVIEW_PAGE_CLASS_NAME}
