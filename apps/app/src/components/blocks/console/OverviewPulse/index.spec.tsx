@@ -19,10 +19,10 @@ vi.mock("@/modules/overview/context", () => ({ useOverviewData: () => mocks.data
 import { OverviewPulse } from "."
 
 const signals: OverviewPulseProps["signals"] = [
-    { id: "apps", icon: "apps", label: "Apps", phase: "answered", value: "Needs attention", caption: "Academy is awaiting DNS", emphasis: "accent" },
-    { id: "agentos", icon: "agentos", label: "AgentOS", phase: "answered", value: "sales-ops", caption: "Ready" },
-    { id: "domains", icon: "domains", label: "Domains", phase: "failed", value: "—", caption: "Could not read domains" },
-    { id: "wallet", icon: "wallet", label: "Wallet", phase: "pending", value: "", caption: "" },
+    { id: "apps", icon: "apps", label: "Apps", phase: "answered", value: "Needs attention", caption: "Academy is awaiting DNS", tone: "warning", emphasis: "accent" },
+    { id: "agentos", icon: "agentos", label: "AgentOS", phase: "answered", value: "sales-ops", caption: "Ready", tone: "default" },
+    { id: "domains", icon: "domains", label: "Domains", phase: "failed", value: "—", caption: "Could not read domains", tone: "default" },
+    { id: "wallet", icon: "wallet", label: "Wallet", phase: "pending", value: "", caption: "", tone: "default" },
 ]
 
 describe("OverviewPulse", () => {
@@ -86,6 +86,33 @@ describe("OverviewPulse", () => {
         mocks.data.invoices = null
         const { container } = render(<OverviewPulse />)
         expect(container.querySelectorAll('[data-component="Text"][data-tone][data-size="sm"][data-loading="true"][aria-hidden="true"]')).toHaveLength(4)
+    })
+
+    it("raises every warning caption out of the healthy tone", () => {
+        const inDays = (days: number) => new Date(Date.now() + days * 86400000).toISOString()
+        mocks.data.apps = { ok: true, data: [{ id: "site-1", slug: "waiting-app", customDomain: null, provisionStatus: "awaiting_dns", status: "active" }] }
+        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "nivo AI Agent", status: "active", catalogOrder: null }] }
+        mocks.data.pod = { ok: true, data: { reachable: false, httpStatus: null, tokenConfigured: true, tokenHint: null, checkedAt: inDays(0) } }
+        mocks.data.domains = { ok: true, data: [{ id: "domain-1", name: "api.nivo.vn", status: "active", expiresAt: inDays(21), autoRenew: false }] }
+        mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 2450000 } }
+        mocks.data.invoices = { ok: true, data: [{ id: "invoice-1", amountVnd: 490000, status: "unpaid", dueAt: inDays(-2), paidAt: null, catalogOrder: null }] }
+        const { container } = render(<OverviewPulse />)
+
+        expect(container.querySelectorAll('[data-component="Badge"][data-tone="warning"]')).toHaveLength(2)
+        expect(container.querySelectorAll('[data-component="Badge"][data-tone="danger"]')).toHaveLength(2)
+    })
+
+    it("leaves a settled healthy account with no raised caption", () => {
+        const inDays = (days: number) => new Date(Date.now() + days * 86400000).toISOString()
+        mocks.data.apps = { ok: true, data: [{ id: "site-1", slug: "ready-app", customDomain: null, provisionStatus: "ready", status: "active" }] }
+        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "nivo AI Agent", status: "active", catalogOrder: null }] }
+        mocks.data.pod = { ok: true, data: { reachable: true, httpStatus: 200, tokenConfigured: true, tokenHint: null, checkedAt: inDays(0) } }
+        mocks.data.domains = { ok: true, data: [{ id: "domain-1", name: "api.nivo.vn", status: "active", expiresAt: inDays(120), autoRenew: true }] }
+        mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 2450000 } }
+        mocks.data.invoices = { ok: true, data: [{ id: "invoice-1", amountVnd: 490000, status: "unpaid", dueAt: inDays(9), paidAt: null, catalogOrder: null }] }
+        const { container } = render(<OverviewPulse />)
+
+        expect(container.querySelectorAll('[data-component="Badge"]')).toHaveLength(0)
     })
 
     it("handles unknown lifecycle values and non-renewing held domains", () => {

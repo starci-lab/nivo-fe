@@ -1,11 +1,14 @@
 import { NivoUnicornArtwork, nivoIconSource } from "@nivo/ui";
-import { SurfaceCard, IconTile, Text } from "@starci/grammar/core";
+import { Badge, SurfaceCard, IconTile, Text } from "@starci/grammar/core";
 import {
   OVERVIEW_PULSE_SIGNAL_COLLECTION_CLASS_NAME,
   OVERVIEW_PULSE_SIGNAL_CONTENT_CLASS_NAME,
   OVERVIEW_PULSE_SIGNAL_FACT_CLASS_NAME,
   OVERVIEW_PULSE_SIGNAL_ROW_CLASS_NAME
 } from "./classNames";
+
+/** How much attention one signal's caption asks for. */
+export type OverviewPulseTone = "default" | "warning" | "danger";
 
 /** One independently settled account signal shown before detailed evidence. */
 export type OverviewPulseSignal = {
@@ -15,6 +18,7 @@ export type OverviewPulseSignal = {
   readonly phase: "pending" | "answered" | "failed";
   readonly value: string;
   readonly caption: string;
+  readonly tone: OverviewPulseTone;
   readonly emphasis?: "default" | "accent";
 };
 
@@ -22,6 +26,9 @@ export type OverviewPulseSignal = {
 export type OverviewPulseProps = {
   readonly signals: ReadonlyArray<OverviewPulseSignal>;
 };
+const caption = (signal: OverviewPulseSignal, isLoading: boolean) => signal.tone === "default"
+  ? <Text size="xs" tone="muted" isSkeleton={isLoading}>{signal.caption}</Text>
+  : <Badge tone={signal.tone} isSkeleton={isLoading}>{signal.caption}</Badge>;
 const signalRow = (signal: OverviewPulseSignal) => {
   const isLoading = signal.phase === "pending";
   return <div
@@ -45,7 +52,7 @@ const signalRow = (signal: OverviewPulseSignal) => {
         data-contract="GAP-1"
       >
         <Text size="sm" tone={signal.emphasis ?? "default"} isSkeleton={isLoading}>{signal.value}</Text>
-        <Text size="xs" tone="muted" isSkeleton={isLoading}>{signal.caption}</Text>
+        {caption(signal, isLoading)}
       </div>
     </div>
   </div>;

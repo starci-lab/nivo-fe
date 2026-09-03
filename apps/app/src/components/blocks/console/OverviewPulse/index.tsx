@@ -4,10 +4,10 @@ import { useFormatter, useTranslations } from "next-intl";
 import { useOverviewData } from "@/modules/overview/context";
 import type { DomainRow } from "@/modules/api/console";
 import { BILLING_CURRENCY } from "@/modules/config";
-import { OverviewPulseBase, type OverviewPulseSignal } from "./component";
+import { OverviewPulseBase, type OverviewPulseSignal, type OverviewPulseTone } from "./component";
 /** Public API role for OverviewPulseProps. */
 export type OverviewPulseProps = Record<string, never>;
-export type { OverviewPulseSignal } from "./component";
+export type { OverviewPulseSignal, OverviewPulseTone } from "./component";
 const STATUS_KEY: Readonly<Record<string, string | undefined>> = {
   not_provisioned: "status.notProvisioned",
   provisioning: "status.provisioning",
@@ -18,6 +18,19 @@ const STATUS_KEY: Readonly<Record<string, string | undefined>> = {
   suspended: "status.suspended"
 };
 const NAMED_REFUSALS = new Set(["EXPERT_SITE_NOT_FOUND_EXCEPTION", "EXPERT_SITE_AMBIGUOUS_FOR_VIEWER_EXCEPTION", "AGENT_WORKSPACE_NOT_FOUND_EXCEPTION", "POD_REGISTRATION_MISSING_EXCEPTION"]);
+const STATUS_TONE: Readonly<Record<string, OverviewPulseTone | undefined>> = {
+  awaiting_dns: "warning",
+  suspended: "warning",
+  failed: "danger"
+};
+const EXPIRY_NOTICE_DAYS = 30;
+const DAY_IN_MS = 86400000;
+const expiryTone = (expiresAt: string | null): OverviewPulseTone => {
+  if (expiresAt === null) return "default";
+  const remainingDays = (new Date(expiresAt).getTime() - Date.now()) / DAY_IN_MS;
+  return remainingDays <= EXPIRY_NOTICE_DAYS ? "warning" : "default";
+};
+const dueTone = (dueAt: string): OverviewPulseTone => new Date(dueAt).getTime() < Date.now() ? "danger" : "default";
 
 /** Connect the account signal strip to the shared overview answers. */
 export const OverviewPulse = (props: OverviewPulseProps) => {
@@ -48,7 +61,8 @@ export const OverviewPulse = (props: OverviewPulseProps) => {
     label,
     phase: "pending",
     value: "",
-    caption: t("state.loading")
+    caption: t("state.loading"),
+    tone: "default"
   });
   const failed = (id: string, icon: OverviewPulseSignal["icon"], label: string, code: string | undefined): OverviewPulseSignal => ({
     id,
@@ -56,7 +70,8 @@ export const OverviewPulse = (props: OverviewPulseProps) => {
     label,
     phase: "failed",
     value: "—",
-    caption: refusal(code)
+    caption: refusal(code),
+    tone: "default"
   });
   const apps = (() => {
     if (data.apps === null) return pending("apps", "apps", t("apps.title"));
@@ -68,7 +83,8 @@ export const OverviewPulse = (props: OverviewPulseProps) => {
       label: t("apps.title"),
       phase: "answered" as const,
       value: t("overview.none"),
-      caption: t("apps.emptyDescription")
+      caption: t("apps.emptyDescription"),
+      tone: "default" as const
     } : {
       id: "apps",
       icon: "apps" as const,
@@ -76,6 +92,7 @@ export const OverviewPulse = (props: OverviewPulseProps) => {
       phase: "answered" as const,
       value: first.slug,
       caption: status(first.provisionStatus),
+      tone: STATUS_TONE[first.provisionStatus] ?? "default",
       emphasis: "accent" as const
     };
   })();
@@ -89,17 +106,23 @@ export const OverviewPulse = (props: OverviewPulseProps) => {
       label: t("agentos.title"),
       phase: "answered" as const,
       value: t("overview.none"),
-      caption: t("agentos.emptyDescription")
+      caption: t("agentos.emptyDescription"),
+      tone: "default" as const
     };
     let caption: string;
-    if (data.pod.ok) caption = data.pod.data.reachable ? t("agentos.podReachable") : t("agentos.podUnreachable");else caption = refusal(data.pod.code);
+    let tone: OverviewPulseTone = "default";
+    if (data.pod.ok) {
+      caption = data.pod.data.reachable ? t("agentos.podReachable") : t("agentos.podUnreachable");
+      tone = data.pod.data.reachable ? "default" : "danger";
+    } else caption = refusal(data.pod.code);
     return {
       id: "agentos",
       icon: "agentos" as const,
       label: t("agentos.title"),
       phase: "answered" as const,
       value: first.name ?? t("agentos.kindWorkspace"),
-      caption
+      caption,
+      tone
     };
   })();
   const domains = (() => {
@@ -112,14 +135,16 @@ export const OverviewPulse = (props: OverviewPulseProps) => {
       label: t("domains.title"),
       phase: "answered" as const,
       value: t("overview.none"),
-      caption: t("domains.empty")
+      caption: t("domains.empty"),
+      tone: "default" as const
     } : {
       id: "domains",
       icon: "domains" as const,
       label: t("domains.title"),
       phase: "answered" as const,
       value: first.name,
-      caption: domainCaption(first)
+      caption: domainCaption(first),
+      tone: expiryTone(first.expiresAt)
     };
   })();
   const wallet = (() => {
@@ -135,6 +160,7 @@ export const OverviewPulse = (props: OverviewPulseProps) => {
       caption: unpaid === undefined ? t("wallet.noUnpaid") : `${money(unpaid.amountVnd)} · ${t("wallet.dueAt", {
         date: day(unpaid.dueAt)
       })}`,
+      tone: unpaid === undefined ? "default" as const : dueTone(unpaid.dueAt),
       emphasis: "accent" as const
     };
   })();
