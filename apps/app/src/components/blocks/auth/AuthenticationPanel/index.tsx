@@ -259,7 +259,7 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
    */
   const header = <div className={AUTH_PANEL_HEADER_CLASS_NAME}>{undefined}
 
-    <Heading level={2}>{props.props.title}</Heading>
+    <Heading level={2} scale="display">{props.props.title}</Heading>
 
 
     <Text size="sm" tone="muted">{props.props.subtitle}</Text></div>;
@@ -474,6 +474,7 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
       key="submit"
       variant="primary"
       type="submit"
+      width="fill"
       isDisabled={copy.isPending}
       isPending={copy.pendingAction === "submit"}
     >{copy.submitLabel}</Button>];
@@ -485,10 +486,12 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
 
             <Button
               variant="outline"
+              width="fill"
               isDisabled={copy.isPending}
               isPending={copy.pendingAction === "provider"}
               onPress={() => props.on?.chooseProvider?.("google")}
-            ><Icon source={nivoIconSource("google", "chip")} usage="chip" />{copy.googleLabel}</Button></>
+              startContent={<Icon source={nivoIconSource("google", "chip")} usage="chip" />}
+            >{copy.googleLabel}</Button></>
 
 
 

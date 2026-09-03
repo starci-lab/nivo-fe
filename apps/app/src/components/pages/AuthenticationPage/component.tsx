@@ -23,11 +23,20 @@ import {
  * the first and only task.
  */
 
-/** Props for {@link AuthenticationPageBase}. */
-export type AuthenticationPageProps = {
+/**
+ * Props for {@link AuthenticationPageBase}.
+ *
+ * Named `…ViewProps` with a `…Props` alias, the same pattern the connected `index.tsx` uses for
+ * its own empty `AuthenticationPageProps`: the two files each own a type of that name for a
+ * different role, and aliasing the pure half's real shape keeps the two from reading as one
+ * shared contract.
+ */
+export type AuthenticationPageViewProps = {
   /** The panel's complete translated state and actions. */
   readonly panel: AuthenticationPanelProps;
 };
+/** Public API role for {@link AuthenticationPageViewProps}. */
+export type AuthenticationPageProps = AuthenticationPageViewProps;
 
 /**
  * Draw the authentication screen.
