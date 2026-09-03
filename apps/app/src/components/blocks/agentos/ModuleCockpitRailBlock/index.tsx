@@ -1,5 +1,5 @@
 "use client";
-import { SurfaceCard, Button, Text } from "@starci/grammar/core";
+import { SurfaceCard, Button, Text } from "@starci/grammar/common";
 
 import { SelectionList, type SelectionListGroup } from "@nivo/ui";
 

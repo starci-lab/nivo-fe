@@ -1,5 +1,5 @@
 import { nivoIconSource } from "../Icon";
-import { Icon } from "@starci/grammar/core";
+import { Icon } from "@starci/grammar/common";
 import { Switch } from "@heroui/react";
 
 import { THEME_SWITCH_CLASS_NAME } from "./classNames";

@@ -1,4 +1,4 @@
-import { Text, TextAction } from "@starci/grammar/core";
+import { Text, TextAction } from "@starci/grammar/common";
 import { Avatar } from "../../leaves/Avatar";
 import { ReactionPicker, type ReactionChoiceData } from "../../leaves/ReactionPicker";
 

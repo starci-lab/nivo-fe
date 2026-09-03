@@ -1,5 +1,5 @@
 "use client";
-import { SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/core";
+import { SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common";
 import type { SupportImportantFact, SupportTicket } from "@/modules/api/workspace-controlplane";
 
 /** Evidence-sidecar input for one selected customer or the whole support queue. */

@@ -1,4 +1,4 @@
-import { Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/core";
+import { Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/common";
 import type { ComponentProps } from "../component-props";
 import { META_CLASS_NAME, ROOT_CLASS_NAME } from "./classNames";
 

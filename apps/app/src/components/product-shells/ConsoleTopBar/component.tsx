@@ -1,4 +1,4 @@
-import { NavigationFeatureNav, Text } from "@starci/grammar/core";
+import { NavigationFeatureNav, Text } from "@starci/grammar/common";
 import type { ComponentType } from "react";
 import { NivoBrand, ThemeSwitch } from "@nivo/ui";
 

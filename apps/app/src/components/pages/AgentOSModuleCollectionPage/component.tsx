@@ -1,5 +1,5 @@
 import { Breadcrumbs, TileIcon } from "@nivo/ui";
-import { Button, Heading, Text } from "@starci/grammar/core";
+import { Button, Heading, Text } from "@starci/grammar/common";
 import { AgentOSCustomModuleCollection } from "@/components/blocks/agentos/AgentOSCustomModuleCollection";
 import { AgentOSSolutionModuleCenter } from "@/components/blocks/agentos/AgentOSSolutionModuleCenter";
 /** Public API role for AgentOSModuleCollectionPageProps. */

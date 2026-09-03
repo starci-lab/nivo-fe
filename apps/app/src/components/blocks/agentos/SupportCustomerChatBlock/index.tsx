@@ -1,5 +1,5 @@
 "use client";
-import { SurfaceCard, Button, Heading, Text } from "@starci/grammar/core";
+import { SurfaceCard, Button, Heading, Text } from "@starci/grammar/common";
 
 import { MarkdownComponent } from "@nivo/ui";
 import type { SupportCustomerConversation, SupportCustomerMessage } from "@/modules/api/workspace-controlplane";

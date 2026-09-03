@@ -1,5 +1,5 @@
 import { Checkbox as HeroCheckbox } from "@heroui/react";
-import { TextAction } from "@starci/grammar/core";
+import { TextAction } from "@starci/grammar/common";
 
 /**
  * LEAF - `Checkbox`: a choice the reader makes about the form around it.

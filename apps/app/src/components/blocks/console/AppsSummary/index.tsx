@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import type { BadgeTone } from "@starci/grammar/core";
+import type { BadgeTone } from "@starci/grammar/common";
 import { useOverviewData } from "@/modules/overview/context";
 import { ACADEMY_HOST_SUFFIX } from "@/modules/config";
 import { AppsSummaryBase, type AppsSummaryState } from "./component";

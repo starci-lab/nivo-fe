@@ -4,7 +4,7 @@ import {
   PageContainer,
   PrimaryRailLayout,
   SectionHeader
-} from "@starci/grammar/core";
+} from "@starci/grammar/common";
 import { AgentOSSummary } from "@/components/blocks/console/AgentOSSummary";
 import { AppsSummary } from "@/components/blocks/console/AppsSummary";
 import { InfrastructureSummary } from "@/components/blocks/console/InfrastructureSummary";

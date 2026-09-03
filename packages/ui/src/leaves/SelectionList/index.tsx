@@ -1,7 +1,7 @@
 "use client";
 
 import { nivoIconSource, type IconName } from "../Icon";
-import { Icon } from "@starci/grammar/core";
+import { Icon } from "@starci/grammar/common";
 
 import { Header, ListBox } from "@heroui/react";
 

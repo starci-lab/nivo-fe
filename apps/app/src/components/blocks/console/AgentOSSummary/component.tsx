@@ -1,4 +1,4 @@
-import { Badge, Button, EmptyNotice, SurfaceCard, Text, type BadgeTone } from "@starci/grammar/core";
+import { Badge, Button, EmptyNotice, SurfaceCard, Text, type BadgeTone } from "@starci/grammar/common";
 import {
   AGENT_OS_SUMMARY_ACTION_CLASS_NAME,
   AGENT_OS_SUMMARY_CONTENT_CLASS_NAME,

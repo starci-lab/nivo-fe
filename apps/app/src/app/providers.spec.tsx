@@ -28,12 +28,12 @@ vi.mock("next-themes", () => ({
   ),
   useTheme: () => ({ resolvedTheme: themeState.resolvedTheme })
 }));
-vi.mock("@starci/grammar/core", () => ({
-  CoreGrammarRoot: ({
+vi.mock("@nivo/ui", () => ({
+  NivoGrammarRoot: ({
     children,
     theme
   }: GrammarRootProbeProps) => (
-    <div data-testid="grammar-root" data-grammar-theme={theme}>{children}</div>
+    <div data-testid="grammar-root" data-grammar-family="nivo" data-grammar-theme={theme}>{children}</div>
   )
 }));
 vi.mock("@/modules/auth/session", () => ({
@@ -55,7 +55,7 @@ describe("AppProviders", () => {
     ["light", "light"],
     ["system", "system"],
     [undefined, "system"]
-  ] as const)("forwards resolved theme %s to the Core Grammar root", (resolvedTheme, expectedTheme) => {
+  ] as const)("forwards resolved theme %s to the nivo Grammar root", (resolvedTheme, expectedTheme) => {
     themeState.resolvedTheme = resolvedTheme;
 
     renderProviders();

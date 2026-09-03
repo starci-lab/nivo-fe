@@ -1,4 +1,4 @@
-import { Button, Text, TextAction, Badge } from "@starci/grammar/core";
+import { Button, Text, TextAction, Badge } from "@starci/grammar/common";
 import { Avatar } from "../../leaves/Avatar"
 
 

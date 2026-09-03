@@ -1,7 +1,7 @@
 "use client"
 
-import { Icon } from "@starci/grammar/core"
-import type { IconUsage } from "@starci/grammar/core"
+import { Icon } from "@starci/grammar/common"
+import type { IconUsage } from "@starci/grammar/common"
 import { nivoIconSource, type IconName } from "../Icon"
 
 /** What the client-resolved glyph draws. */
@@ -17,7 +17,7 @@ export type NivoIconProps = { readonly props: NivoIconData }
 /**
  * LEAF - `NivoIcon`: the client boundary an app-owned glyph needs to reach a Server Component caller.
  *
- * WHY THIS EXISTS. `@starci/grammar/core` is a `"use client"` barrel, so Grammar's `Icon` is a Client
+ * WHY THIS EXISTS. `@starci/grammar/common` is a `"use client"` barrel, so Grammar's `Icon` is a Client
  * Component from Next's point of view even though its own file carries no directive. A Server
  * Component that resolves `nivoIconSource(name, usage)` to a glyph function and hands that function
  * to `Icon` as `source` is passing a function across the server -> client boundary, which React

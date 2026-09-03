@@ -1,6 +1,6 @@
 "use client"
 
-import { Heading } from "@starci/grammar/core"
+import { Heading } from "@starci/grammar/common"
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { createElement, useEffect, useId, useState, type ComponentType, type CSSProperties } from "react"

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { PressableField } from "@starci/grammar/core"
+import { PressableField } from "@starci/grammar/common"
 import { Label } from "./Label"
 import { ThemeSwitch } from "./ThemeSwitch"
 

@@ -1,5 +1,5 @@
 import { LabelledProgressRow } from "@nivo/ui";
-import { SurfaceCard, Text } from "@starci/grammar/core";
+import { SurfaceCard, Text } from "@starci/grammar/common";
 import type { AcademyGrowthSnapshot } from "@/modules/api/console";
 
 /** Resolved copy for the growth block. */

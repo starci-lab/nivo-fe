@@ -1,5 +1,5 @@
 import { Breadcrumbs } from "@nivo/ui";
-import { Button, EmptyNotice, Heading, Text } from "@starci/grammar/core";
+import { Button, EmptyNotice, Heading, Text } from "@starci/grammar/common";
 import { AgentOSSolutionModuleBindings } from "@/components/blocks/agentos/AgentOSSolutionModuleBindings";
 import { AgentOSSolutionModuleSummary } from "@/components/blocks/agentos/AgentOSSolutionModuleSummary";
 import type { AgentosModuleInstallationDetail } from "@/modules/api/console";

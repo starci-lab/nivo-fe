@@ -1,5 +1,5 @@
 import { Avatar } from "@nivo/ui";
-import { EmptyNotice, SurfaceCard, SurfaceListCard, Button, Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/core";
+import { EmptyNotice, SurfaceCard, SurfaceListCard, Button, Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/common";
 import {
   APPS_SUMMARY_ACTION_CLASS_NAME,
   APPS_SUMMARY_ACTION_CONTEXT_CLASS_NAME,

@@ -1,5 +1,5 @@
 import { StatusActionCard } from "@nivo/ui";
-import { SurfaceCard, Button, Input, type InputKind, Text, type BadgeTone } from "@starci/grammar/core";
+import { SurfaceCard, Button, Input, type InputKind, Text, type BadgeTone } from "@starci/grammar/common";
 
 /** One safe provider card; it contains no credential value. */
 export type AcademyIntegrationCenterProps = AcademyIntegrationCenterViewProps;

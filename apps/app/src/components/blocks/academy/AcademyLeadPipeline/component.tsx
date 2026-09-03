@@ -1,5 +1,5 @@
 import { Avatar } from "@nivo/ui";
-import { SurfaceCard, Button, Button as CoreButton, Heading, Text, TextAction, Badge } from "@starci/grammar/core";
+import { SurfaceCard, Button, Button as CoreButton, Heading, Text, TextAction, Badge } from "@starci/grammar/common";
 import type { ExpertSiteLead } from "@/modules/api/console";
 
 /** Resolved copy for the lead pipeline. */

@@ -2,7 +2,7 @@
 
 import { createElement, useState, type ComponentType } from "react";
 import { MarkdownComponent } from "@nivo/ui";
-import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/core";
+import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common";
 import type { AgentosRuntimeMessageTree, AgentosRuntimeValue, AgentosRuntimeWidgetNode } from "@/modules/api/console";
 
 /** Trusted widget action advertised by the pinned runtime manifest. */

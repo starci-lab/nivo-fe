@@ -1,4 +1,4 @@
-import { SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/core";
+import { SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common";
 import {
   INFRASTRUCTURE_SUMMARY_COLLECTION_CLASS_NAME,
   INFRASTRUCTURE_SUMMARY_FACT_COLUMN_CLASS_NAME,

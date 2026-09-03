@@ -2,7 +2,7 @@
 @import "tailwindcss";
 @import "@heroui/styles/css";
 @import "@starci/grammar/common.css";
-@import "@starci/grammar/core.css";
+@import "@nivo/ui/family.css";
 
 /*
  * The shared canon lives outside this app's folder, so Tailwind cannot find its class names by
@@ -21,21 +21,14 @@
  * every screen in this app rendered as unstyled HTML while looking, from the source, entirely
  * correct.
  *
- * WHERE THE CONSOLE'S BRAND TOKENS COME FROM.
+ * WHERE THE PALETTE COMES FROM.
  *
- * Not from this file. The routed `nivo-console` theme owns the console palette, and the
- * values under `.starci-dashboard-theme` are copied from its visual specification VERBATIM -
- * digit forms included, because the artifact gate compares the declared string against the locked
- * string and `0.003` is not `0.0030` to a string comparison even though it is the same colour.
- *
- * THE ACCENT IS `--nivo-accent`, NOT `--starci-accent`. The profile says it plainly: nivo reuses
- * StarCi's console topology but owns its own unicorn red, and Academy rose is invalid here. This
- * file used to declare that rose - the very value `starci-academy-fe` ships - which is the one
- * thing the profile refuses.
- *
- * HeroUI renders overlays beside the app tree, not below the dashboard boundary. The semantic
- * palette therefore lives at the document theme hooks in this file as well: leaves keep naming
- * roles, portals inherit the same roles, and no component owns a colour literal.
+ * Not from this file, and not from `@starci/grammar/core.css` either. nivo is its own Grammar
+ * family: `@nivo/ui/family.css` above owns every `--nivo-*` value and every semantic binding, in
+ * light, dark, forced colours and reduced motion. This file used to answer Core's family root by
+ * re-declaring the accent under the console boundary, which is why every surface OUTSIDE that
+ * boundary - the sign-in page's checkbox and focus rings among them - painted StarCi purple. There
+ * is now one owner, so there is nothing left here to lose an argument with.
  */
 
 /*
@@ -44,170 +37,16 @@
  */
 @custom-variant dark (&:where(.dark, .dark *));
 
-:root,
-.light,
-.default,
-[data-theme="light"],
-[data-theme="default"] {
-    --nivo-font-interface: ui-sans-serif, system-ui, sans-serif;
-    --nivo-accent: oklch(57% 0.24 25);
-    --nivo-accent-foreground: oklch(100% 0 0);
-    --nivo-brand-ink: oklch(16% 0.035 255);
-    --nivo-brand-accent: var(--nivo-accent);
-
-    --accent: var(--nivo-accent);
-    --accent-foreground: var(--nivo-accent-foreground);
-    --background: oklch(97.02% 0.0015 354.13);
-    --surface: oklch(100% 0.0008 354.13);
-    --surface-foreground: oklch(21.03% 0.0015 354.13);
-    --surface-secondary: oklch(95.24% 0.0012 354.13);
-    --surface-secondary-foreground: oklch(21.03% 0.0015 354.13);
-    --surface-tertiary: oklch(93.73% 0.0012 354.13);
-    --surface-tertiary-foreground: oklch(21.03% 0.0015 354.13);
-    --overlay: oklch(100% 0.0004 354.13);
-    --overlay-foreground: oklch(21.03% 0.0015 354.13);
-    --default: oklch(94% 0.0015 354.13);
-    --default-foreground: oklch(21.03% 0.0059 354.13);
-    --segment: oklch(100% 0.0015 354.13);
-    --segment-foreground: oklch(21.03% 0.0015 354.13);
-    --foreground: oklch(21.03% 0.0015 354.13);
-    --muted: oklch(55.17% 0.003 354.13);
-
-    --success: oklch(73.29% 0.1941 162.85);
-    --success-foreground: oklch(21.03% 0.0059 162.85);
-    --warning: oklch(78.19% 0.159 84.37);
-    --warning-foreground: oklch(21.03% 0.0059 84.37);
-    --danger: oklch(65.32% 0.2335 37.78);
-    --danger-foreground: oklch(99.11% 0 0);
-    --info: oklch(72% 0.17 250);
-    --info-foreground: oklch(21.03% 0.0059 250);
-
-    --border: oklch(90% 0.0015 354.13);
-    --separator: oklch(92% 0.0015 354.13);
-    --focus: var(--nivo-accent);
-    --scrollbar: oklch(87.1% 0.0015 354.13);
-    --field-background: oklch(100% 0.0008 354.13);
-    --field-border: transparent;
-    --field-foreground: oklch(21.03% 0.0015 354.13);
-    --field-placeholder: oklch(55.17% 0.003 354.13);
-    --radius: 0.5rem;
-    --field-radius: 0.75rem;
-    --tooltip-delay: 0ms;
-    --tooltip-close-delay: 0ms;
-    --skeleton-animation: shimmer;
-}
-
-.dark,
-[data-theme="dark"] {
-    color-scheme: dark;
-
-    --nivo-accent: oklch(57% 0.24 25);
-    --nivo-accent-foreground: oklch(100% 0 0);
-    --nivo-brand-ink: oklch(99.11% 0.0015 354.13);
-    --nivo-brand-accent: var(--nivo-accent);
-    --accent: var(--nivo-accent);
-    --accent-foreground: var(--nivo-accent-foreground);
-    --background: oklch(12% 0.0015 354.13);
-    --surface: oklch(21.03% 0.003 354.13);
-    --surface-foreground: oklch(99.11% 0.0015 354.13);
-    --surface-secondary: oklch(25.7% 0.0023 354.13);
-    --surface-secondary-foreground: oklch(99.11% 0.0015 354.13);
-    --surface-tertiary: oklch(27.21% 0.0023 354.13);
-    --surface-tertiary-foreground: oklch(99.11% 0.0015 354.13);
-    --overlay: oklch(21.03% 0.003 354.13);
-    --overlay-foreground: oklch(99.11% 0.0015 354.13);
-    --default: oklch(27.4% 0.0015 354.13);
-    --default-foreground: oklch(99.11% 0 0);
-    --segment: oklch(39.64% 0.0015 354.13);
-    --segment-foreground: oklch(99.11% 0.0015 354.13);
-    --foreground: oklch(99.11% 0.0015 354.13);
-    --muted: oklch(70.5% 0.003 354.13);
-
-    --success: oklch(73.29% 0.1941 162.85);
-    --success-foreground: oklch(21.03% 0.0059 162.85);
-    --warning: oklch(82.03% 0.1392 88.38);
-    --warning-foreground: oklch(21.03% 0.0059 88.38);
-    --danger: oklch(59.4% 0.1973 36.67);
-    --danger-foreground: oklch(99.11% 0 0);
-    --info: oklch(72% 0.17 250);
-    --info-foreground: oklch(21.03% 0.0059 250);
-
-    --border: oklch(28% 0.0015 354.13);
-    --separator: oklch(25% 0.0015 354.13);
-    --focus: var(--nivo-accent);
-    --scrollbar: oklch(70.5% 0.0015 354.13);
-    --field-background: oklch(21.03% 0.003 354.13);
-    --field-border: transparent;
-    --field-foreground: oklch(99.11% 0.0015 354.13);
-    --field-placeholder: oklch(70.5% 0.003 354.13);
-}
-
 /*
- * Authenticated console surfaces have one routed StarCi theme. The protected boundary
- * below aliases HeroUI's semantic roles to the exact shared values, so auth and public
- * routes keep their own theme while every console page shares one palette and typeset.
+ * Authenticated console surfaces are a boundary of CHROME, not of colour. The palette below it is
+ * the family's, identical to every public route's; what the console owns is its own full-height
+ * canvas and its own typeface.
  */
 .starci-dashboard-theme {
-    --starci-background: oklch(97.02% 0.0015 354.13);
-    --starci-surface: oklch(100% 0.0008 354.13);
-    --starci-surface-secondary: oklch(95.24% 0.0012 354.13);
-    --starci-foreground: oklch(21.03% 0.0015 354.13);
-    --starci-muted: oklch(55.17% 0.0030 354.13);
-    --nivo-accent: oklch(57% 0.24 25);
-    --nivo-accent-foreground: oklch(100% 0 0);
-    --nivo-accent-soft: color-mix(in oklab, var(--nivo-accent) 15%, transparent);
-    --starci-separator: oklch(92% 0.0015 354.13);
-    --starci-border: oklch(90% 0.0015 354.13);
-    --starci-success: oklch(73.29% 0.1941 162.85);
-    --starci-success-soft: color-mix(in oklab, var(--starci-success) 15%, transparent);
-    --starci-warning: oklch(78.19% 0.1590 84.37);
-    --starci-warning-soft: color-mix(in oklab, var(--starci-warning) 18%, transparent);
-    --starci-danger: oklch(65.32% 0.2335 37.78);
-    --starci-danger-soft: color-mix(in oklab, var(--starci-danger) 15%, transparent);
-    --starci-scrim: oklch(21.03% 0.0015 354.13 / 48%);
-    --starci-font-sans: Open Sans, ui-sans-serif, system-ui, sans-serif;
-    --starci-radius-3xl: 1.5rem;
-    --starci-surface-shadow:
-        0 2px 4px 0 rgba(0, 0, 0, 0.04),
-        0 1px 2px 0 rgba(0, 0, 0, 0.06),
-        0 0 1px 0 rgba(0, 0, 0, 0.06);
-    --starci-duration: 150ms;
-    --starci-easing: cubic-bezier(0.4, 0, 0.2, 1);
-
-    --background: var(--starci-background);
-    --surface: var(--starci-surface);
-    --surface-secondary: var(--starci-surface-secondary);
-    --foreground: var(--starci-foreground);
-    --muted: var(--starci-muted);
-    --accent: var(--nivo-accent);
-    --accent-foreground: var(--nivo-accent-foreground);
-    --accent-soft: var(--nivo-accent-soft);
-    --separator: var(--starci-separator);
-    --border: var(--starci-border);
-    --success: var(--starci-success);
-    --success-soft: var(--starci-success-soft);
-    --warning: var(--starci-warning);
-    --warning-soft: var(--starci-warning-soft);
-    --danger: var(--starci-danger);
-    --danger-soft: var(--starci-danger-soft);
-    --surface-shadow: var(--starci-surface-shadow);
-    --radius: 0.5rem;
-
     min-height: 100dvh;
     background: var(--background);
     color: var(--foreground);
-    font-family: var(--font-open-sans), var(--starci-font-sans);
-}
-
-/* The console aliases above are light-theme literals; dark mode changes their source roles. */
-.dark .starci-dashboard-theme {
-    --starci-background: oklch(12% 0.0015 354.13);
-    --starci-surface: oklch(21.03% 0.003 354.13);
-    --starci-surface-secondary: oklch(25.7% 0.0023 354.13);
-    --starci-foreground: oklch(99.11% 0.0015 354.13);
-    --starci-muted: oklch(70.5% 0.003 354.13);
-    --starci-separator: oklch(25% 0.0015 354.13);
-    --starci-border: oklch(28% 0.0015 354.13);
+    font-family: var(--font-open-sans), var(--nivo-font-console);
 }
 
 /* HeroUI's icon-only dropdown trigger must center its one glyph at every browser zoom. */

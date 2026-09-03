@@ -1,5 +1,5 @@
 import { NivoUnicornArtwork, nivoIconSource } from "@nivo/ui";
-import { Badge, SurfaceCard, IconTile, Text } from "@starci/grammar/core";
+import { Badge, SurfaceCard, IconTile, Text } from "@starci/grammar/common";
 import {
   OVERVIEW_PULSE_SIGNAL_COLLECTION_CLASS_NAME,
   OVERVIEW_PULSE_SIGNAL_CONTENT_CLASS_NAME,

@@ -1,4 +1,4 @@
-import { Heading, Text } from "@starci/grammar/core";
+import { Heading, Text } from "@starci/grammar/common";
 import { Breadcrumbs, TileIcon } from "@nivo/ui";
 import { AgentOSModuleIntake } from "@/components/blocks/agentos/AgentOSModuleIntake";
 /** Public API role for AgentOSModuleCreatePageProps. */

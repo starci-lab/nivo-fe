@@ -1,5 +1,5 @@
 import { nivoIconSource } from "@nivo/ui";
-import { Icon, SurfaceCard, Button, Text, TextAction } from "@starci/grammar/core";
+import { Icon, SurfaceCard, Button, Text, TextAction } from "@starci/grammar/common";
 import {
   WALLET_SUMMARY_ACTION_CLASS_NAME,
   WALLET_SUMMARY_CONTENT_CLASS_NAME,

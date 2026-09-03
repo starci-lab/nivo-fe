@@ -1,5 +1,5 @@
 import { nivoIconSource } from "../../leaves/Icon";
-import { Icon, Text } from "@starci/grammar/core";
+import { Icon, Text } from "@starci/grammar/common";
 import { Avatar } from "../../leaves/Avatar"
 
 

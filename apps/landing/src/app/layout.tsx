@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { CoreGrammarRoot } from "@starci/grammar/core";
+import { NivoGrammarRoot } from "@nivo/ui";
 import "./globals.css";
 import { LANDING_DESCRIPTION } from "@/resources/copy";
 import type { ComponentProps } from "react";
@@ -32,7 +32,7 @@ const RootLayout = ({
   children
 }: RootLayoutProps) => <html lang="vi" suppressHydrationWarning>
         <body className="min-h-dvh antialiased">
-            <CoreGrammarRoot>{children}</CoreGrammarRoot>
+            <NivoGrammarRoot>{children}</NivoGrammarRoot>
         </body>
     </html>;
 export default RootLayout;

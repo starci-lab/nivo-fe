@@ -1,7 +1,7 @@
 @import "@nivo/ui/styles.css";
 @import "tailwindcss";
 @import "@starci/grammar/common.css";
-@import "@starci/grammar/core.css";
+@import "@nivo/ui/family.css";
 
 /*
  * The shared canon lives outside this app's folder, so Tailwind cannot find its class names by
@@ -10,7 +10,10 @@
  */
 @source "../../../../packages/ui/src";
 
-:root {
-    --nivo-brand-ink: oklch(16% 0.035 255);
-    --nivo-brand-accent: oklch(57% 0.24 25);
-}
+/*
+ * NO PALETTE BLOCK HERE, AND THAT IS THE POINT.
+ *
+ * `@nivo/ui/family.css` above is the nivo Grammar family: it owns the brand ink, the accent and
+ * every semantic role, in both themes. This file used to restate two of them beside StarCi Core's
+ * family root, which is exactly the arrangement that let a foreign family's accent win.
+ */

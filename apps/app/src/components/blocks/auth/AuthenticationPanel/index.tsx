@@ -1,6 +1,6 @@
 import { useRef, useState, type SubmitEvent } from "react";
 import { Checkbox, nivoIconSource } from "@nivo/ui";
-import { Button, Input, Heading, Icon, Text, TextAction, Divider } from "@starci/grammar/core";
+import { Button, Input, Heading, Icon, Text, TextAction, Divider } from "@starci/grammar/common";
 import {
   AUTH_PANEL_CLASS_NAME,
   AUTH_PANEL_DETAILS_CLASS_NAME,
