@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { SurfaceCard, Button, Button as CoreButton, Text } from "@starci/grammar/core";
+import { SurfaceCard, Button, Button as CoreButton, Text } from "@starci/grammar/common";
 import { LifecycleStep, type LifecycleStepData } from "@nivo/ui";
 import type { AgentosModuleStudio } from "@/modules/api/console";
 

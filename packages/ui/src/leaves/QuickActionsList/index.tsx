@@ -1,7 +1,7 @@
 "use client";
 
 import { nivoIconSource, type IconName } from "../Icon";
-import { Icon } from "@starci/grammar/core";
+import { Icon } from "@starci/grammar/common";
 
 import { ListBox } from "@heroui/react";
 
@@ -43,7 +43,7 @@ const QuickActionsListView = ({ props, on }: QuickActionsListProps) =>
     key={item.id}
     id={item.id}
     textValue={item.label}
-    className="flex cursor-pointer items-center gap-2 rounded-large px-2 py-2 text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent data-[hovered=true]:bg-default">
+    className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent data-[hovered=true]:bg-default">
     
                 <Icon source={nivoIconSource(item.icon, "leading")} usage="leading" />
                 <span className="min-w-0 flex-1 truncate text-sm">{item.label}</span>

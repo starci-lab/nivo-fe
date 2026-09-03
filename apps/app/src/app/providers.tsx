@@ -1,7 +1,7 @@
 "use client";
 
 import { I18nProvider } from "@heroui/react";
-import { CoreGrammarRoot } from "@starci/grammar/core";
+import { NivoGrammarRoot } from "@nivo/ui";
 import { NextIntlClientProvider, type Messages } from "next-intl";
 import { ThemeProvider, useTheme } from "next-themes";
 import { useSyncExternalStore, type ComponentProps } from "react";
@@ -19,8 +19,8 @@ const subscribeToHydration = () => () => undefined;
 const getClientHydrationSnapshot = () => true;
 const getServerHydrationSnapshot = () => false;
 
-/** Keep the Core family palette on the same resolved theme as the console shell. */
-const ResolvedCoreGrammarRoot = ({
+/** Keep the nivo family palette on the same resolved theme as the console shell. */
+const ResolvedNivoGrammarRoot = ({
   children
 }: Pick<AppProvidersProps, "children">) => {
   const { resolvedTheme } = useTheme();
@@ -33,7 +33,7 @@ const ResolvedCoreGrammarRoot = ({
     ? resolvedTheme
     : "system";
 
-  return <CoreGrammarRoot theme={grammarTheme}>{children}</CoreGrammarRoot>;
+  return <NivoGrammarRoot theme={grammarTheme}>{children}</NivoGrammarRoot>;
 };
 
 /** Mount request locale, vendor theme and session contexts around the routed stream. */
@@ -42,9 +42,9 @@ export const AppProviders = (props: AppProvidersProps) => {
   return <NextIntlClientProvider locale={locale} messages={messages} timeZone={timeZone}>
         <I18nProvider locale={locale}>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-                <ResolvedCoreGrammarRoot>
+                <ResolvedNivoGrammarRoot>
                     <SessionProvider>{children}</SessionProvider>
-                </ResolvedCoreGrammarRoot>
+                </ResolvedNivoGrammarRoot>
             </ThemeProvider>
         </I18nProvider>
     </NextIntlClientProvider>;

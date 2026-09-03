@@ -22,7 +22,7 @@ export const ModalBranch = <P extends object,>({ isOpen, title, closeLabel, cont
                 <Modal.Dialog>
                     <Modal.Header className="border-b border-separator px-4 py-4">
                         <Modal.Heading className="text-lg font-semibold text-foreground">{title}</Modal.Heading>
-                        <Modal.CloseTrigger aria-label={closeLabel} className="min-h-10 rounded-large px-3 text-sm font-semibold text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent">
+                        <Modal.CloseTrigger aria-label={closeLabel} className="min-h-10 rounded-lg px-3 text-sm font-semibold text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent">
                             {closeLabel}
                         </Modal.CloseTrigger>
                     </Modal.Header>

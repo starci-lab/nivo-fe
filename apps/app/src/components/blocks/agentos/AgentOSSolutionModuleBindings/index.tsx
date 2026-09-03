@@ -1,5 +1,5 @@
 
-import { SurfaceCard, Heading, Text } from "@starci/grammar/core";
+import { SurfaceCard, Heading, Text } from "@starci/grammar/common";
 import type { AgentosModuleInstallationDetail } from "@/modules/api/console";
 
 /** Runtime bindings and resolved labels consumed by the module bindings block. */

@@ -1,5 +1,5 @@
 import { StatusActionCard } from "@nivo/ui";
-import { SurfaceCard } from "@starci/grammar/core";
+import { SurfaceCard } from "@starci/grammar/common";
 import type { StatusActionCardData } from "@nivo/ui";
 import type { AgentWorkspaceAppCapability } from "@/modules/api/console";
 

@@ -1,4 +1,4 @@
-import { SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/core";
+import { SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common";
 import {
   INFRASTRUCTURE_SUMMARY_COLLECTION_CLASS_NAME,
   INFRASTRUCTURE_SUMMARY_FACT_COLUMN_CLASS_NAME,
@@ -39,7 +39,6 @@ export type InfrastructureSummaryProps = {
 const fact = (item: InfrastructureDomainFact, isLoading = false) => <div
   key={item.id}
   className={INFRASTRUCTURE_SUMMARY_FACT_ROW_CLASS_NAME}
-  data-contract="GAP-3 PADDING-3 PADDING-4"
 >
   <div className={INFRASTRUCTURE_SUMMARY_FACT_COLUMN_CLASS_NAME}>
     <Text size="sm" isSkeleton={isLoading}>{item.label}</Text>
@@ -50,10 +49,7 @@ const fact = (item: InfrastructureDomainFact, isLoading = false) => <div
 </div>;
 const refusal = (note: string) => <div className={INFRASTRUCTURE_SUMMARY_NOTE_CLASS_NAME}>
   <Text size="sm" tone="muted">{note}</Text></div>;
-const domainEvidenceContent = (renderedFacts: ReadonlyArray<ReturnType<typeof fact>>) => <div
-  className={INFRASTRUCTURE_SUMMARY_COLLECTION_CLASS_NAME}
-  data-contract="BOUNDARY-3"
->{renderedFacts}</div>;
+const domainEvidenceContent = (renderedFacts: ReadonlyArray<ReturnType<typeof fact>>) => <div className={INFRASTRUCTURE_SUMMARY_COLLECTION_CLASS_NAME}>{renderedFacts}</div>;
 
 /** Draw derived service context beside independently settled domain evidence. */
 export const InfrastructureSummaryBase = (props: InfrastructureSummaryProps) => {
@@ -84,10 +80,7 @@ export const InfrastructureSummaryBase = (props: InfrastructureSummaryProps) => 
       isLoading={isLoading}
     >{content}</SurfaceListCard>;
   }
-  return <SurfaceCard label={label}><div
-      className={INFRASTRUCTURE_SUMMARY_FALLBACK_CLASS_NAME}
-      data-contract="GAP-4"
-    >
+  return <SurfaceCard label={label}><div className={INFRASTRUCTURE_SUMMARY_FALLBACK_CLASS_NAME}>
       <Text size="sm">{context}</Text>
       {facts.length > 0 ? <div>{facts.map(item => fact(item))}</div> : null}
       {note === undefined ? null : refusal(note)}</div></SurfaceCard>;

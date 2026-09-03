@@ -1,4 +1,4 @@
-import { Heading, Text } from "@starci/grammar/core";
+import { Heading, Text } from "@starci/grammar/common";
 import { NivoBrand } from "@nivo/ui";
 import { LANDING_DESCRIPTION } from "@/resources/copy";
 import { CONTENT_CLASS_NAME, ROOT_CLASS_NAME } from "./classNames";

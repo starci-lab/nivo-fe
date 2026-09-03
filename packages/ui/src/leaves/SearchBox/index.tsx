@@ -1,5 +1,5 @@
 import { nivoIconSource } from "../Icon";
-import { Icon } from "@starci/grammar/core";
+import { Icon } from "@starci/grammar/common";
 import { Input as HeroInput } from "@heroui/react";
 
 

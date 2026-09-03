@@ -48,7 +48,6 @@
     }
 
     .collapsible-rail {
-        --starci-core-rail-gap: 1.5rem;
         display: none;
         color: var(--foreground);
     }

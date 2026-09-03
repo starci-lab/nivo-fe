@@ -6,19 +6,17 @@ import { OverviewDataProvider } from "@/modules/overview/context";
 import { OverviewPageBase } from "./component";
 /** Public API role for OverviewPageProps. */
 export type OverviewPageProps = Record<string, never>;
-type OverviewContentProps = Parameters<typeof OverviewPageBase>[0];
-const OverviewContent = (props: OverviewContentProps) => <OverviewPageBase {...props} />;
 
-/** Connect only the outer page command; blocks own their own shared-data slices. */
+/** Own the one settlement of every slice and hand the page its resolved copy. */
 export const OverviewPage = (props: OverviewPageProps) => {
   void props;
   const t = useTranslations("console");
   const router = useRouter();
   const openApps = () => router.push("/apps");
-  return <OverviewDataProvider content={OverviewContent} contentProps={{
+  return <OverviewDataProvider content={OverviewPageBase} contentProps={{
     title: t("overview.title"),
     lede: t("overview.lede"),
-    pathLabel: t("navigationLabel"),
+    pathLabel: t("breadcrumbLabel"),
     consoleLabel: t("title"),
     buildAppLabel: t("overview.buildApp"),
     atAGlanceLabel: t("overview.atAGlance"),

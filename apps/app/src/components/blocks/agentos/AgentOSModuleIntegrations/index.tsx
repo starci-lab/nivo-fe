@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useMutateRemoveAgentosModuleIntegrationSecretSwr, useMutateSaveAgentosModuleIntegrationSecretSwr } from "@/hooks/swr";
+import { useMutateRemoveAgentosModuleIntegrationSecretSwr, useMutateSaveAgentosModuleIntegrationSecretSwr } from "@/hooks";
 import { useAgentOSModuleStudioProjection } from "@/components/pages/AgentOSModuleStudioPage/component";
 import { AgentOSModuleIntegrationsBase } from "./component";
 type AgentOSModuleIntegrationsProps = {

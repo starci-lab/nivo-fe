@@ -1,8 +1,15 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
+
+vi.mock("@/components/blocks/console/OverviewPulse", () => ({ OverviewPulse: () => <div>overview-pulse</div> }))
+vi.mock("@/components/blocks/console/AppsSummary", () => ({ AppsSummary: () => <div>apps-summary</div> }))
+vi.mock("@/components/blocks/console/AgentOSSummary", () => ({ AgentOSSummary: () => <div>agentos-summary</div> }))
+vi.mock("@/components/blocks/console/WalletSummary", () => ({ WalletSummary: () => <div>wallet-summary</div> }))
+vi.mock("@/components/blocks/console/InfrastructureSummary", () => ({ InfrastructureSummary: () => <div>infrastructure-summary</div> }))
+
 import { WalletControlCenterBase as WalletPageBase } from "../blocks/wallet/WalletControlCenter/component"
 import { AppsDashboardBase } from "../blocks/apps/AppsDashboard/component"
-import { OverviewPageBase, type OverviewPageViewProps } from "./OverviewPage/component"
+import { OverviewPageBase, type OverviewPageProps } from "./OverviewPage/component"
 import { AgentOSWorkspaceControlCenterBase as AgentOSWorkspacePageBase, type AgentOSWorkspaceControlCenterLabels as AgentOSWorkspacePageLabels } from "../blocks/agentos/AgentOSWorkspaceControlCenter/component"
 import { AgentOSSolutionModuleDetailBase as AgentOSSolutionModulePageBase, type AgentOSSolutionModuleDetailLabels as AgentOSSolutionModulePageLabels } from "../blocks/agentos/AgentOSSolutionModuleDetail/component"
 import { AgentOSPageBase } from "./AgentOSPage/component"
@@ -10,25 +17,29 @@ import { TemplateAppProvisioningPageBase } from "./TemplateAppProvisioningPage/c
 import { AcademyControlCenterPageBase } from "./AcademyControlCenterPage/component"
 import { AgentOSWorkspaceListBase } from "../blocks/agentos/AgentOSWorkspaceList/component"
 
-const actions = { openApps: vi.fn(), openAgentOs: vi.fn(), openWallet: vi.fn() }
-
-const overviewProps: OverviewPageViewProps = {
+const overviewProps: OverviewPageProps = {
     title: "Overview",
-    apps: { phase: "answered", label: "Apps", openSetLabel: "Open apps", rows: [{ id: "site-1", name: "Academy", detail: "academy.test", kindLabel: "Template", status: "ready", statusLabel: "Ready", actionLabel: "Open" }] },
-    agentOs: { phase: "refused", label: "AgentOS", openLabel: "Open AgentOS", note: "Unavailable", rows: [] },
-    servers: { label: "Servers", note: "No standalone servers" },
-    domains: { phase: "empty", label: "Domains", note: "No domains" },
-    wallet: { phase: "empty", label: "Wallet", actionLabel: "Top up", facts: [{ id: "balance", label: "Balance", value: "0 VND" }] },
-    on: actions,
+    lede: "Everything running and needing attention",
+    pathLabel: "You are here",
+    consoleLabel: "Console",
+    buildAppLabel: "Build an app",
+    atAGlanceLabel: "At a glance",
+    servicesLabel: "Services",
+    accountLabel: "Account",
+    onBuildApp: vi.fn(),
 }
 
 describe("pure page twins", () => {
-    it("renders overview answered, refused, and empty sections", () => {
+    it("renders the overview anatomy around its five connected summary blocks", () => {
         const html = renderToStaticMarkup(<OverviewPageBase {...overviewProps} />)
         expect(html).toContain("Overview")
-        expect(html).toContain("Academy")
-        expect(html).toContain("Unavailable")
-        expect(html).toContain("No domains")
+        expect(html).toContain("Services")
+        expect(html).toContain("Account")
+        expect(html).toContain("overview-pulse")
+        expect(html).toContain("apps-summary")
+        expect(html).toContain("agentos-summary")
+        expect(html).toContain("wallet-summary")
+        expect(html).toContain("infrastructure-summary")
     })
 
     it("renders wallet resting, empty, and refused ledger branches", () => {

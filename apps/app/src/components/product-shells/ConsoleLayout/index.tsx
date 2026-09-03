@@ -29,7 +29,7 @@ export const ConsoleLayout = <P extends object,>(props: ConsoleLayoutProps<P>) =
     body={body}
     bodyProps={bodyProps}
     navigationLabel={t("navigationLabel")}
-    primaryLabel={t("title")}
+    primaryLabel={t("workspaceLabel")}
   />;
 };
 

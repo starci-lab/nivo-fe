@@ -86,7 +86,7 @@ import {
   WindowIcon as WindowSolidIcon,
   XMarkIcon as XMarkSolidIcon } from
 "@heroicons/react/16/solid";
-import type { IconUsage } from "@starci/grammar/core";
+import type { IconUsage } from "@starci/grammar/common";
 import type { SVGProps } from "react";
 import { GithubMark, GoogleMark } from "../../iconography-brands";
 

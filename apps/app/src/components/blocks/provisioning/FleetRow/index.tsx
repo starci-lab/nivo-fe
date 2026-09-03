@@ -1,4 +1,4 @@
-import { Button, Text, Badge, type BadgeTone, TextAction } from "@starci/grammar/core";
+import { Button, Text, Badge, type BadgeTone, TextAction } from "@starci/grammar/common";
 
 /**
  * BLOCK - one row of the provisioning fleet, whichever kind of thing it is.

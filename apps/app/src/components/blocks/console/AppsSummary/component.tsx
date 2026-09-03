@@ -1,5 +1,5 @@
 import { Avatar } from "@nivo/ui";
-import { EmptyNotice, SurfaceCard, SurfaceListCard, Button, Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/core";
+import { EmptyNotice, SurfaceCard, SurfaceListCard, Button, Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/common";
 import {
   APPS_SUMMARY_ACTION_CLASS_NAME,
   APPS_SUMMARY_ACTION_CONTEXT_CLASS_NAME,
@@ -42,13 +42,12 @@ export type AppsSummaryProps = {
 const rows = (items: ReadonlyArray<AppsSummaryItem>, onOpenApp: AppsSummaryProps["onOpenApp"]) => items.map(item => <div
   key={item.id}
   className={APPS_SUMMARY_ROW_CLASS_NAME}
-  data-contract="GAP-3 PADDING-3 PADDING-4"
 >
   <Avatar props={{
     name: item.name,
     size: "md"
   }} />
-  <div className={APPS_SUMMARY_COPY_CLASS_NAME} data-contract="GAP-1">
+  <div className={APPS_SUMMARY_COPY_CLASS_NAME}>
     <TextAction size="sm" onPress={() => onOpenApp(item.id)}>{item.name}</TextAction>
     <Text size="xs" tone="muted">{item.detail}</Text>
   </div>
@@ -67,12 +66,11 @@ const pendingRows = () => Array.from({
 }, (_, index) => <div
   key={index}
   className={APPS_SUMMARY_ROW_CLASS_NAME}
-  data-contract="GAP-3 PADDING-3 PADDING-4"
 >
   <Avatar props={{
     size: "md"
   }} isLoading />
-  <div className={APPS_SUMMARY_COPY_CLASS_NAME} data-contract="GAP-1">
+  <div className={APPS_SUMMARY_COPY_CLASS_NAME}>
     <TextAction size="sm" isSkeleton>{""}</TextAction>
     <Text isSkeleton>{""}</Text>
   </div>
@@ -85,10 +83,7 @@ const pendingRows = () => Array.from({
 </div>);
 const appsListContent = (state: Extract<AppsSummaryState, {
   readonly phase: "pending" | "populated";
-}>, onOpenApp: AppsSummaryProps["onOpenApp"]) => <div
-    className={APPS_SUMMARY_COLLECTION_CLASS_NAME}
-    data-contract="BOUNDARY-3"
-  >{state.phase === "pending" ? pendingRows() : rows(state.items, onOpenApp)}</div>;
+}>, onOpenApp: AppsSummaryProps["onOpenApp"]) => <div className={APPS_SUMMARY_COLLECTION_CLASS_NAME}>{state.phase === "pending" ? pendingRows() : rows(state.items, onOpenApp)}</div>;
 
 /** Draw exact owned applications as one joined collection. */
 export const AppsSummaryBase = (props: AppsSummaryProps) => {

@@ -1,5 +1,8 @@
 /** Public React components and their ordinary TypeScript props. */
 
+/** The nivo visual family over the Common contract; its values ship as `@nivo/ui/family.css`. */
+export * from "./family"
+
 export * from "./leaves/Avatar"
 export * from "./leaves/Breadcrumbs"
 export * from "./leaves/Checkbox"
@@ -13,8 +16,9 @@ export * from "./leaves/Icon"
 export * from "./leaves/Label"
 export * from "./leaves/MicrochipArtwork"
 export * from "./leaves/NivoBrand"
+/** Client boundary that resolves an `IconName` to Grammar's `Icon`, safe to call from Server Components. */
+export * from "./leaves/NivoIcon"
 export * from "./leaves/NivoUnicornArtwork"
-export * from "./leaves/PressableInputLike"
 export * from "./leaves/QuickActionRow"
 export * from "./leaves/QuickActionsList"
 export * from "./leaves/ReactionPicker"

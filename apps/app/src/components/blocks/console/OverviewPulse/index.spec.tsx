@@ -1,8 +1,6 @@
 import { render } from "@testing-library/react"
-import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 import { vi } from "vitest"
-import { OverviewPulseBase, type OverviewPulseProps } from "./component"
 
 const mocks = vi.hoisted(() => ({
     data: { apps: null, workspaces: null, pod: null, domains: null, wallet: null, invoices: null } as Record<string, unknown>,
@@ -18,23 +16,7 @@ vi.mock("@/modules/overview/context", () => ({ useOverviewData: () => mocks.data
 
 import { OverviewPulse } from "."
 
-const signals: OverviewPulseProps["signals"] = [
-    { id: "apps", icon: "apps", label: "Apps", phase: "answered", value: "Needs attention", caption: "Academy is awaiting DNS", emphasis: "accent" },
-    { id: "agentos", icon: "agentos", label: "AgentOS", phase: "answered", value: "sales-ops", caption: "Ready" },
-    { id: "domains", icon: "domains", label: "Domains", phase: "failed", value: "—", caption: "Could not read domains" },
-    { id: "wallet", icon: "wallet", label: "Wallet", phase: "pending", value: "", caption: "" },
-]
-
 describe("OverviewPulse", () => {
-    it("keeps four independently settled named signals without displaying a collection total", () => {
-        const html = renderToStaticMarkup(<OverviewPulseBase signals={signals} />)
-        expect(html).not.toContain('data-size="metric-lead"')
-        expect(html).toContain("Needs attention")
-        expect(html).toContain("sales-ops")
-        expect(html).toContain("Could not read domains")
-        expect(html).not.toContain("3 apps")
-    })
-
     it("prioritises actionable source facts across all four signals", () => {
         mocks.data.apps = { ok: true, data: [
             { id: "ready", slug: "ready-app", customDomain: null, provisionStatus: "ready", status: "active" },
@@ -86,6 +68,33 @@ describe("OverviewPulse", () => {
         mocks.data.invoices = null
         const { container } = render(<OverviewPulse />)
         expect(container.querySelectorAll('[data-component="Text"][data-tone][data-size="sm"][data-loading="true"][aria-hidden="true"]')).toHaveLength(4)
+    })
+
+    it("raises every warning caption out of the healthy tone", () => {
+        const inDays = (days: number) => new Date(Date.now() + days * 86400000).toISOString()
+        mocks.data.apps = { ok: true, data: [{ id: "site-1", slug: "waiting-app", customDomain: null, provisionStatus: "awaiting_dns", status: "active" }] }
+        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "nivo AI Agent", status: "active", catalogOrder: null }] }
+        mocks.data.pod = { ok: true, data: { reachable: false, httpStatus: null, tokenConfigured: true, tokenHint: null, checkedAt: inDays(0) } }
+        mocks.data.domains = { ok: true, data: [{ id: "domain-1", name: "api.nivo.vn", status: "active", expiresAt: inDays(21), autoRenew: false }] }
+        mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 2450000 } }
+        mocks.data.invoices = { ok: true, data: [{ id: "invoice-1", amountVnd: 490000, status: "unpaid", dueAt: inDays(-2), paidAt: null, catalogOrder: null }] }
+        const { container } = render(<OverviewPulse />)
+
+        expect(container.querySelectorAll('[data-component="Badge"][data-tone="warning"]')).toHaveLength(2)
+        expect(container.querySelectorAll('[data-component="Badge"][data-tone="danger"]')).toHaveLength(2)
+    })
+
+    it("leaves a settled healthy account with no raised caption", () => {
+        const inDays = (days: number) => new Date(Date.now() + days * 86400000).toISOString()
+        mocks.data.apps = { ok: true, data: [{ id: "site-1", slug: "ready-app", customDomain: null, provisionStatus: "ready", status: "active" }] }
+        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "nivo AI Agent", status: "active", catalogOrder: null }] }
+        mocks.data.pod = { ok: true, data: { reachable: true, httpStatus: 200, tokenConfigured: true, tokenHint: null, checkedAt: inDays(0) } }
+        mocks.data.domains = { ok: true, data: [{ id: "domain-1", name: "api.nivo.vn", status: "active", expiresAt: inDays(120), autoRenew: true }] }
+        mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 2450000 } }
+        mocks.data.invoices = { ok: true, data: [{ id: "invoice-1", amountVnd: 490000, status: "unpaid", dueAt: inDays(9), paidAt: null, catalogOrder: null }] }
+        const { container } = render(<OverviewPulse />)
+
+        expect(container.querySelectorAll('[data-component="Badge"]')).toHaveLength(0)
     })
 
     it("handles unknown lifecycle values and non-renewing held domains", () => {

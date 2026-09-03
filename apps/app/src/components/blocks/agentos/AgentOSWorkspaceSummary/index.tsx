@@ -1,5 +1,5 @@
 
-import { SurfaceCard, Text } from "@starci/grammar/core";
+import { SurfaceCard, Text } from "@starci/grammar/common";
 import type { AgentWorkspaceControlCenter } from "@/modules/api/console";
 
 /** Stable workspace identity and labels consumed by the summary block. */

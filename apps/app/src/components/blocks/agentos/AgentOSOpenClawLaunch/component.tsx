@@ -1,5 +1,5 @@
 
-import { SurfaceCard, Button, Heading, Text, Badge, type BadgeTone } from "@starci/grammar/core";
+import { SurfaceCard, Button, Heading, Text, Badge, type BadgeTone } from "@starci/grammar/common";
 
 /** Source-owned launch phases rendered independently from workspace readiness. */
 export type AgentOSOpenClawLaunchProps = AgentOSOpenClawLaunchViewProps;

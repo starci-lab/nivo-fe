@@ -1,5 +1,5 @@
 import { nivoIconSource, TileIcon } from "@nivo/ui";
-import { EmptyNotice, Icon, SurfaceCard, Text, Badge, type BadgeTone, TextAction } from "@starci/grammar/core";
+import { EmptyNotice, Icon, SurfaceCard, Text, Badge, type BadgeTone, TextAction } from "@starci/grammar/common";
 import { fleetResourceHref, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
 /** Public API role for AgentOSWorkspaceListProps. */
 export type AgentOSWorkspaceListProps = AgentOSWorkspaceListViewProps;

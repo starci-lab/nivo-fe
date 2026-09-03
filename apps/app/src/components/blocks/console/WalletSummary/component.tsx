@@ -1,5 +1,5 @@
 import { nivoIconSource } from "@nivo/ui";
-import { Icon, SurfaceCard, Button, Text, TextAction } from "@starci/grammar/core";
+import { Icon, SurfaceCard, Button, Text, TextAction } from "@starci/grammar/common";
 import {
   WALLET_SUMMARY_ACTION_CLASS_NAME,
   WALLET_SUMMARY_CONTENT_CLASS_NAME,
@@ -44,7 +44,6 @@ export type WalletSummaryProps = {
 const fact = (item: WalletSummaryFact, isLoading = false) => <div
   key={item.id}
   className={WALLET_SUMMARY_FACT_CLASS_NAME}
-  data-contract="GAP-1"
 >
   <Text size="sm" tone="muted" isSkeleton={isLoading}>{item.label}</Text>
   <Text size="sm" weight={item.emphasis === true ? "semibold" : undefined} isSkeleton={isLoading}>{item.value}</Text></div>;
@@ -66,13 +65,7 @@ export const WalletSummaryBase = (props: WalletSummaryProps) => {
     label={label}
     composition="joined"
     labelEnd={actionLabel !== undefined && onOpenWallet !== undefined ? <TextAction appearance="disclosure" size="sm" endContent={<Icon source={nivoIconSource("next")} />} onPress={onOpenWallet}>{actionLabel}</TextAction> : null}
-  ><div
-      className={WALLET_SUMMARY_CONTENT_CLASS_NAME}
-      data-contract="GAP-4 PADDING-4"
-    ><div
-        className={WALLET_SUMMARY_FACTS_CLASS_NAME}
-        data-contract="GAP-3"
-      >{isLoading ? [fact({
+  ><div className={WALLET_SUMMARY_CONTENT_CLASS_NAME}><div className={WALLET_SUMMARY_FACTS_CLASS_NAME}>{isLoading ? [fact({
           id: "pending-balance",
           label: "",
           value: "",

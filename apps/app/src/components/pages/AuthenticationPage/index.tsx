@@ -3,7 +3,8 @@
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useEffect, useRef, useState } from "react";
-import { authenticationOauthRedirectUrl, rememberOauthProvider, useMutateForgotPasswordInitSwr, useMutateForgotPasswordResendSwr, useMutateForgotPasswordVerifyOtpSwr, useMutateSignInSwr, useMutateSignUpInitSwr, useMutateSignUpResendSwr, useMutateSignUpVerifyOtpSwr, useOauthReturnExchange } from "@/hooks/swr";
+import { useMutateForgotPasswordInitSwr, useMutateForgotPasswordResendSwr, useMutateForgotPasswordVerifyOtpSwr, useMutateSignInSwr, useMutateSignUpInitSwr, useMutateSignUpResendSwr, useMutateSignUpVerifyOtpSwr, useOauthReturnExchange } from "@/hooks";
+import { authenticationOauthRedirectUrl, rememberOauthProvider } from "@/modules/auth";
 import { AuthenticationPageBase as AuthenticationPageView } from "./component";
 import type { AuthActions, AuthCode, AuthDetails, AuthMode, AuthPendingAction, AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";
 import type { OtpChallenge } from "@/modules/api/auth";

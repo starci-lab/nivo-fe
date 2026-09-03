@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import useSWRMutation from "swr/mutation";
-import { exchangeOauthCode, forgotPasswordInit, forgotPasswordResend, forgotPasswordVerifyOtp, oauthRedirectUrl, signIn, signUpInit, signUpResend, signUpVerifyOtp, type OauthProvider } from "@/modules/api/auth";
+import { exchangeOauthCode, forgotPasswordInit, forgotPasswordResend, forgotPasswordVerifyOtp, signIn, signUpInit, signUpResend, signUpVerifyOtp } from "@/modules/api/auth";
+import { takeOauthProvider } from "@/modules/auth";
 type AuthMutationTrigger<TInput> = {
   readonly arg: TInput;
 };
@@ -26,29 +27,6 @@ export const useMutateForgotPasswordInitSwr = () => useAuthMutation("forgot-pass
 export const useMutateForgotPasswordResendSwr = () => useAuthMutation("forgot-password-resend", forgotPasswordResend);
 /** Own the password-recovery code exchange. */
 export const useMutateForgotPasswordVerifyOtpSwr = () => useAuthMutation("forgot-password-verify", forgotPasswordVerifyOtp);
-const PROVIDER_KEY = "nivo.oauth.provider";
-const DEFAULT_PROVIDER: OauthProvider = "google";
-
-/** Remember the OAuth provider for the return leg without placing it in the callback URL. */
-export const rememberOauthProvider = (provider: OauthProvider) => {
-  try {
-    window.sessionStorage.setItem(PROVIDER_KEY, provider);
-  } catch {
-    // Storage can be unavailable; the return hook safely falls back to the offered provider.
-  }
-};
-const takeOauthProvider = (): OauthProvider => {
-  try {
-    const remembered = window.sessionStorage.getItem(PROVIDER_KEY);
-    window.sessionStorage.removeItem(PROVIDER_KEY);
-    return remembered === "github" ? "github" : DEFAULT_PROVIDER;
-  } catch {
-    return DEFAULT_PROVIDER;
-  }
-};
-
-/** Build the backend-owned provider hand-off URL from the authentication boundary. */
-export const authenticationOauthRedirectUrl = (provider: OauthProvider, returnTo: string) => oauthRedirectUrl(provider, returnTo);
 type OauthReturnAnswer = Awaited<ReturnType<typeof exchangeOauthCode>>;
 
 /**

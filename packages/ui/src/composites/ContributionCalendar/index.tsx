@@ -1,4 +1,4 @@
-import { Text } from "@starci/grammar/core";
+import { Text } from "@starci/grammar/common";
 import { ChoiceTabs } from "../../leaves/ChoiceTabs";
 import { ContributionGrid } from "../../leaves/ContributionGrid";
 import { ContributionIntensityLegend } from "../../leaves/ContributionIntensityLegend";

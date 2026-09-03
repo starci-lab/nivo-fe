@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useMutateAgentosModuleAttachmentUploadSwr, useMutateFinalizeAgentosModuleAttachmentSwr, useMutateRemoveAgentosModuleAttachmentSwr } from "@/hooks/swr";
+import { useMutateAgentosModuleAttachmentUploadSwr, useMutateFinalizeAgentosModuleAttachmentSwr, useMutateRemoveAgentosModuleAttachmentSwr } from "@/hooks";
 import { useAgentOSModuleStudioProjection } from "@/components/pages/AgentOSModuleStudioPage/component";
 import { AgentOSModuleAttachmentsBase } from "./component";
 type AgentOSModuleAttachmentsProps = {

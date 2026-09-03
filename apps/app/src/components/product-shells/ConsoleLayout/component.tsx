@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import { StarCiDashboardThemeBoundary } from "@nivo/ui";
-import { WorkspaceShell } from "@starci/grammar/core";
+import { WorkspaceShell } from "@starci/grammar/common";
 import { Sidebar } from "@/components/product-shells/Sidebar";
 import { ConsoleTopBar } from "@/components/product-shells/ConsoleTopBar";
 
@@ -14,22 +14,30 @@ export type ConsoleLayoutBaseProps<P extends object> = {
   readonly primaryLabel: string;
 };
 
-/** Draw stable authenticated chrome around one opaque routed page. */
+/**
+ * Draw stable authenticated chrome around one opaque routed page.
+ *
+ * The navigation band is mounted as a sibling above the shell, never in `WorkspaceShell.header`:
+ * that slot is the page-level hero and wraps its content in its own `<header>`, so placing
+ * `NavigationFeatureNav` (itself a `<header>`) there would expose two banner landmarks.
+ */
 const ConsoleFrame = <P extends object,>({
   body: Body,
   bodyProps,
   navigationLabel,
   primaryLabel
-}: ConsoleLayoutBaseProps<P>) => <WorkspaceShell
-  align="stretch"
-  header={<ConsoleTopBar />}
-  navigation={<Sidebar />}
-  navigationLabel={navigationLabel}
-  navigationTrack="intrinsic"
-  navigationVisibility="wide"
-  primary={<Body {...bodyProps} />}
-  primaryLabel={primaryLabel}
-/>;
+}: ConsoleLayoutBaseProps<P>) => <>
+  <ConsoleTopBar />
+  <WorkspaceShell
+    align="stretch"
+    navigation={<Sidebar />}
+    navigationLabel={navigationLabel}
+    navigationTrack="intrinsic"
+    navigationVisibility="wide"
+    primary={<Body {...bodyProps} />}
+    primaryLabel={primaryLabel}
+  />
+</>;
 
 /** Draw stable authenticated chrome around one opaque routed page. */
 export const ConsoleLayoutBase = <P extends object,>(props: ConsoleLayoutProps<P>) => {

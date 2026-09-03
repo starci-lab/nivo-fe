@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
-import { Sidebar as GrammarSidebar, Text } from "@starci/grammar/core"
+import { Sidebar as GrammarSidebar, Text } from "@starci/grammar/common"
 import { DrawerBranch, nivoIconSource } from "@nivo/ui"
 import { usePathname, useRouter } from "@/i18n/navigation"
 
