@@ -1,6 +1,9 @@
-import { fireEvent, render, screen } from "@testing-library/react"
-import { renderToStaticMarkup } from "react-dom/server"
+import { fireEvent, render, screen, within } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+
+/** Whether the first node is reached before the second in reading order. */
+const precedes = (first: HTMLElement, second: HTMLElement) =>
+    Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING)
 
 vi.mock("@/components/blocks/console/OverviewPulse", () => ({ OverviewPulse: () => <div data-testid="overview-pulse" /> }))
 vi.mock("@/components/blocks/console/AppsSummary", () => ({ AppsSummary: () => <div data-testid="apps-summary" /> }))
@@ -48,11 +51,16 @@ describe("OverviewPageBase", () => {
     })
 
     it("keeps services before the account rail and trails the console path", () => {
-        const html = renderToStaticMarkup(<OverviewPageBase {...props} />)
+        render(<OverviewPageBase {...props} />)
 
-        expect(html).toContain('data-grammar-layout-rail="present"')
-        expect(html.indexOf("apps-summary")).toBeLessThan(html.indexOf("agentos-summary"))
-        expect(html.indexOf("wallet-summary")).toBeLessThan(html.indexOf("infrastructure-summary"))
-        expect(html).toContain("Console")
+        const account = screen.getByRole("heading", { level: 2, name: "Account" })
+        expect(account).toBeInTheDocument()
+        expect(precedes(account, screen.getByTestId("wallet-summary"))).toBe(true)
+        expect(precedes(screen.getByTestId("apps-summary"), screen.getByTestId("agentos-summary"))).toBe(true)
+        expect(precedes(screen.getByTestId("wallet-summary"), screen.getByTestId("infrastructure-summary"))).toBe(true)
+
+        const trail = screen.getByRole("list", { name: "You are here" })
+        expect(within(trail).getByText("Console")).toBeInTheDocument()
+        expect(within(trail).getByText("Overview")).toBeInTheDocument()
     })
 })
