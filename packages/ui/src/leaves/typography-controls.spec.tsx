@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { PressableField } from "@starci/grammar/core"
 import { Label } from "./Label"
-import { PressableInputLike } from "./PressableInputLike"
 import { ThemeSwitch } from "./ThemeSwitch"
 
 describe("typography leaves", () => {
@@ -22,13 +22,12 @@ describe("theme and pressable input controls", () => {
         expect(change).toHaveBeenCalledWith(true)
     })
 
-    it("renders the optional shortcut and reports presses", () => {
+    it("reports presses from the grammar's pressable field by its accessible name", () => {
         const press = vi.fn()
-        render(<PressableInputLike props={{ label: "Open search", placeholder: "Find anything", shortcut: "⌘K" }} on={{ press }} />)
-        expect(screen.getByRole("button", { name: "Open search" })).toBeInTheDocument()
-        expect(screen.getByText("Find anything")).toBeInTheDocument()
-        expect(screen.getByText("⌘K")).toBeInTheDocument()
-        fireEvent.click(screen.getByRole("button", { name: "Open search" }))
+        render(<PressableField label="Open search" placeholder="Find anything" shortcut="⌘K" onPress={press} />)
+        const control = screen.getByRole("button", { name: "Open search" })
+        expect(control).toBeInTheDocument()
+        fireEvent.click(control)
         expect(press).toHaveBeenCalledTimes(1)
     })
 })
