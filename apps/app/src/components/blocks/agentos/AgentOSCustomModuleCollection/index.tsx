@@ -2,8 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { nivoQueryData, useQueryMyAgentosCustomModulesSwr } from "@/hooks";
+import { useQueryMyAgentosCustomModulesSwr } from "@/hooks";
 import type { AgentosCustomModule } from "@/modules/api/console";
+import { nivoQueryData } from "@/modules/api/graphql";
 import { AgentOSCustomModuleCollectionBase } from "./component";
 type AgentOSCustomModuleCollectionProps = {
   readonly workspaceId: string;

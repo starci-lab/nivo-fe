@@ -55,6 +55,20 @@ export type Result<T> = {
   readonly code?: string;
 };
 
+/** The narrowest answer shape the settlement helper below accepts; every `Result<T>` satisfies it. */
+export type NivoQueryAnswer<T> = {
+  readonly ok: true;
+  readonly data: T;
+} | {
+  readonly ok: false;
+};
+
+/** Preserve loading, successful data and an explicit refused result as three distinct states. */
+export const nivoQueryData = <T,>(answer: NivoQueryAnswer<T> | undefined): T | null | undefined => {
+  if (answer === undefined) return undefined;
+  return answer.ok ? answer.data : null;
+};
+
 /** How a caller supplies the credential without this module knowing where sessions are kept. */
 export type TokenReader = () => string | null;
 

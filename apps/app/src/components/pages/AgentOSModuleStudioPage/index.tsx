@@ -2,7 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { nivoQueryData, useQueryMyAgentosCustomModuleStudioSwr } from "@/hooks";
+import { useQueryMyAgentosCustomModuleStudioSwr } from "@/hooks";
+import { nivoQueryData } from "@/modules/api/graphql";
 import { AgentOSModuleStudioPageBase, AgentOSModuleStudioProjectionProvider } from "./component";
 type AgentOSModuleStudioPageProps = {
   readonly workspaceId: string;

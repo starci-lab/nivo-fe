@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { nivoQueryData, useQueryMyExpertSitesSwr } from "@/hooks";
+import { useQueryMyExpertSitesSwr } from "@/hooks";
+import { nivoQueryData } from "@/modules/api/graphql";
 import { ACADEMY_HOST_SUFFIX } from "@/modules/config";
 import { AcademyControlCenterBase, type AcademyControlCenterMode } from "./component";
 

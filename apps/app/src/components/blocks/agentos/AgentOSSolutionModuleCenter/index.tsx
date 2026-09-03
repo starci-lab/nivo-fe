@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { nivoQueryData, useMutateInstallAgentosSolutionModuleSwr, useQueryMyAgentosModuleInstallationsSwr, useQueryMyAgentosSolutionModulesSwr } from "@/hooks";
+import { useMutateInstallAgentosSolutionModuleSwr, useQueryMyAgentosModuleInstallationsSwr, useQueryMyAgentosSolutionModulesSwr } from "@/hooks";
 import type { AgentosSolutionModule } from "@/modules/api/console";
+import { nivoQueryData } from "@/modules/api/graphql";
 import { useSession } from "@/modules/auth/session";
 import useProvisioningRealtime from "@/modules/realtime/provisioning";
 import { AgentOSSolutionModuleCenterBase, type AgentOSSolutionModuleCard } from "./component";

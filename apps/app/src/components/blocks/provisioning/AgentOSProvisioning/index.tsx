@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import { nivoQueryData, useQueryCatalogItemsSwr, useQueryMyAgentosAiKnowledgeReadinessSwr, useQueryMyAgentWorkspacesSwr, useQueryMyCatalogOrdersSwr, useQueryMyInvoicesSwr, useMutateOrderAgentosSwr, useMutateRunAgentosAiReadinessTestSwr } from "@/hooks";
+import { useQueryCatalogItemsSwr, useQueryMyAgentosAiKnowledgeReadinessSwr, useQueryMyAgentWorkspacesSwr, useQueryMyCatalogOrdersSwr, useQueryMyInvoicesSwr, useMutateOrderAgentosSwr, useMutateRunAgentosAiReadinessTestSwr } from "@/hooks";
 import { useRouter } from "@/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
 import { type AgentWorkspaceRow, type CatalogItemRow, type CatalogOrderRow, type CatalogTierRow, type InvoiceRow } from "@/modules/api/console";
+import { nivoQueryData } from "@/modules/api/graphql";
 import useProvisioningRealtime, { type ProvisioningTarget } from "@/modules/realtime/provisioning";
 import { BILLING_CURRENCY } from "@/modules/config";
 import { AgentOSProvisioningBase, type AgentOSProvisioningViewProps } from "./component";

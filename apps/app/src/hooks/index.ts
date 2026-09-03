@@ -5,12 +5,10 @@
  * internal transport folder, and this file is its only public face. Every line
  * below names one hook, so a reader can see the whole surface without opening a
  * second file and a spec can mock the door in one `vi.mock("@/hooks", ...)`.
- * `nivoQueryData` and `NivoQueryAnswer` travel with the read hooks because a
- * caller cannot read a query answer without them; cache keys, request modules
- * and response types stay behind their own paths.
+ * Hooks only: cache keys, request modules, response types and the helpers that
+ * read a transport answer stay behind their own paths — `nivoQueryData` and
+ * `NivoQueryAnswer` belong to `@/modules/api/graphql`, which owns that answer.
  */
-export { nivoQueryData } from "./swr/use-nivo-query"
-export type { NivoQueryAnswer } from "./swr/use-nivo-query"
 export { useNivoQuery } from "./swr/use-nivo-query"
 export { useNivoMutation } from "./swr/use-nivo-mutation"
 
