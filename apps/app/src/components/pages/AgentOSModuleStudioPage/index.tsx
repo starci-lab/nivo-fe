@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useQueryMyAgentosCustomModuleStudioSwr } from "@/hooks";
-import { nivoQueryData } from "@/modules/api/graphql";
+import { nivoQueryData } from "@/modules/query";
 import { AgentOSModuleStudioPageBase, AgentOSModuleStudioProjectionProvider } from "./component";
 type AgentOSModuleStudioPageProps = {
   readonly workspaceId: string;

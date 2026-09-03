@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMutateReindexAgentWorkspaceKnowledgeSwr, useMutateRunAgentosAiReadinessTestSwr, useQueryMyAgentosAiKnowledgeReadinessSwr } from "@/hooks";
 import { type AgentosAiKnowledgeReadiness } from "@/modules/api/console";
-import { nivoQueryData } from "@/modules/api/graphql";
+import { nivoQueryData } from "@/modules/query";
 import { AgentOSWorkspaceAiKnowledgeBase, type AgentOSWorkspaceAiKnowledgeViewProps } from "./component";
 
 /** Exact workspace identity whose AI and knowledge readiness is owned by this block. */

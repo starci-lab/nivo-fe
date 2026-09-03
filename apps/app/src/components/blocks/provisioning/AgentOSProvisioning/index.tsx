@@ -6,7 +6,7 @@ import { useQueryCatalogItemsSwr, useQueryMyAgentosAiKnowledgeReadinessSwr, useQ
 import { useRouter } from "@/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
 import { type AgentWorkspaceRow, type CatalogItemRow, type CatalogOrderRow, type CatalogTierRow, type InvoiceRow } from "@/modules/api/console";
-import { nivoQueryData } from "@/modules/api/graphql";
+import { nivoQueryData } from "@/modules/query";
 import useProvisioningRealtime, { type ProvisioningTarget } from "@/modules/realtime/provisioning";
 import { BILLING_CURRENCY } from "@/modules/config";
 import { AgentOSProvisioningBase, type AgentOSProvisioningViewProps } from "./component";

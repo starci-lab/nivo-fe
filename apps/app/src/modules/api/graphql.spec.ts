@@ -1,13 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { graphql, nivoQueryData, useAccessTokenFrom, useLocaleFrom } from "./graphql"
-
-describe("nivoQueryData", () => {
-    it("preserves loading, accepted data and refusal as distinct states", () => {
-        expect(nivoQueryData(undefined)).toBeUndefined()
-        expect(nivoQueryData({ ok: true, data: { id: "one" } })).toEqual({ id: "one" })
-        expect(nivoQueryData({ ok: false })).toBeNull()
-    })
-})
+import { graphql, useAccessTokenFrom, useLocaleFrom } from "./graphql"
 
 describe("console graphql transport", () => {
     beforeEach(() => {

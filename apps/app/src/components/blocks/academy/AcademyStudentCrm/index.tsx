@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useMutateCreateAcademyStudentSwr, useMutateGrantAcademyCourseAccessSwr, useMutateRevokeAcademyCourseAccessSwr, useMutateSetAcademyStudentStatusSwr, useQueryMyAcademyStudentDetailSwr, useQueryMyAcademyStudentsSwr } from "@/hooks";
 import type { AcademyStudent, AcademyStudentDetail } from "@/modules/api/console";
-import { nivoQueryData } from "@/modules/api/graphql";
+import { nivoQueryData } from "@/modules/query";
 import { AcademyStudentCrmBase } from "./component";
 
 /** Owner-scoped identity consumed by the student CRM. */

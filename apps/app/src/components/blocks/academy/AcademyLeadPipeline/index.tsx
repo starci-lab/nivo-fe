@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMutateDraftLeadReplySwr, useMutateUpdateExpertSiteLeadSwr, useQueryMyExpertSiteLeadsSwr } from "@/hooks";
 import type { ExpertSiteLead } from "@/modules/api/console";
-import { nivoQueryData } from "@/modules/api/graphql";
+import { nivoQueryData } from "@/modules/query";
 import { AcademyLeadPipelineBase } from "./component";
 
 /** Owner-scoped identity consumed by the lead pipeline. */

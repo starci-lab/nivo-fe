@@ -9,7 +9,7 @@ import type { AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteS
 import type { SetupMessage, SetupRevision } from "@/components/blocks/agentos/PrivateSetupChatBlock";
 import { useQueryMyAgentosModuleRuntimeSwr, useQueryMyAgentosModuleTestSurfaceSwr, useQueryMyAgentWorkspaceControlCenterSwr, useQuerySupportCustomerConversationsSwr, useQuerySupportCustomerMessagesSwr, useQuerySupportImportantFactsSwr, useQuerySupportTicketsSwr, useReadMyAgentosModuleTestRun, useMutateApproveSupportReplySwr, useMutateConfigureAgentWorkspaceChannelSwr, useMutateManageAgentosModuleRuntimeSwr, useMutateReconcileSupportDeliverySwr, useMutateRunAgentosModuleTestSwr, useMutateSetSupportTakeoverSwr } from "@/hooks";
 import { type AgentosModuleRuntime, type AgentosRuntimeValue, type ManageAgentosModuleRuntimeInput } from "@/modules/api/console";
-import { nivoQueryData, type NivoQueryAnswer } from "@/modules/api/graphql";
+import { nivoQueryData, type NivoQueryAnswer } from "@/modules/query";
 import { AgentOSSolutionModulePageBase, AgentOSSolutionModuleState, exactTestSurfaceFor, type AgentOSSolutionModulePageViewProps, type AgentOSSolutionModuleScreen } from "./component";
 
 /** Exact workspace and installation route identities connected by the page. */

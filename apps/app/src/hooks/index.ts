@@ -7,7 +7,7 @@
  * second file and a spec can mock the door in one `vi.mock("@/hooks", ...)`.
  * Hooks only: cache keys, request modules, response types and the helpers that
  * read a transport answer stay behind their own paths — `nivoQueryData` and
- * `NivoQueryAnswer` belong to `@/modules/api/graphql`, which owns that answer.
+ * `NivoQueryAnswer` live in `@/modules/query`.
  */
 export { useNivoQuery } from "./swr/use-nivo-query"
 export { useNivoMutation } from "./swr/use-nivo-mutation"

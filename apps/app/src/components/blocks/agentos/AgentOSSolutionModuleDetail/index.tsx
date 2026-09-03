@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useQueryMyAgentosModuleInstallationSwr } from "@/hooks";
 import type { AgentosModuleInstallationDetail } from "@/modules/api/console";
-import { nivoQueryData } from "@/modules/api/graphql";
+import { nivoQueryData } from "@/modules/query";
 import { useSession } from "@/modules/auth/session";
 import useProvisioningRealtime from "@/modules/realtime/provisioning";
 import { AgentOSSolutionModuleDetailBase, type AgentOSSolutionModuleDetailState, type AgentOSSolutionModuleDetailLabels } from "./component";
