@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import type { AuthDetailsCopy, AuthNoticeCopy } from "@/components/blocks/auth/AuthenticationPanel"
 
@@ -50,19 +50,28 @@ const notice: AuthNoticeCopy = {
 
 describe("AuthenticationPageBase", () => {
     it("composes the decorative visual and the details panel without owning journey behaviour", () => {
-        render(<AuthenticationPageBase panel={{ state: "details", props: details, on: { submitDetails: vi.fn() } }} />)
+        const { container } = render(<AuthenticationPageBase panel={{ state: "details", props: details, on: { submitDetails: vi.fn() } }} />)
         expect(screen.getByRole("heading", { name: "Sign in" })).toBeInTheDocument()
         expect(screen.getByLabelText("Email")).toBeInTheDocument()
         expect(screen.getByRole("region", { name: "Sign in" })).toBeInTheDocument()
-        // The product image is decorative: it carries no accessible name and sits in a
-        // hidden landmark, so it never competes with the form for a screen reader's attention.
-        expect(screen.queryByRole("img")).not.toBeInTheDocument()
+        /*
+         * The product art is decorative, and the aside is what makes it so: `aria-hidden` takes
+         * the whole visual column out of the accessibility tree, so nothing inside it competes
+         * with the form. The assertion names that cause. It cannot be written through a role or
+         * label query - an element removed from the tree has neither - so the aside is read from
+         * the container, which is the only honest way to state the fact.
+         */
+        const decorativeAside = container.querySelector("aside")
+        expect(decorativeAside).not.toBeNull()
+        expect(decorativeAside).toHaveAttribute("aria-hidden", "true")
     })
 
     it("keys the panel by step and journey so switching mode remounts uncontrolled fields", () => {
         const { rerender } = render(<AuthenticationPageBase panel={{ state: "details", props: details, on: {} }} />)
-        const emailField = screen.getByLabelText("Email") as HTMLInputElement
-        emailField.value = "reader@example.test"
+        // Typed through the event path rather than assigned: an uncontrolled field only proves it
+        // was remounted if the value it lost was one a reader could actually have put there.
+        fireEvent.change(screen.getByLabelText("Email"), { target: { value: "reader@example.test" } })
+        expect((screen.getByLabelText("Email") as HTMLInputElement).value).toBe("reader@example.test")
         rerender(<AuthenticationPageBase panel={{ state: "details", props: { ...details, mode: "signUp" }, on: {} }} />)
         expect((screen.getByLabelText("Email") as HTMLInputElement).value).toBe("")
     })
