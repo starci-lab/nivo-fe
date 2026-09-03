@@ -10,6 +10,8 @@ vi.mock("@/components/product-shells/ConsoleTopBar", () => ({
 
 import { ConsoleLayoutBase } from "./component"
 
+const precedes = (first: Element, second: Element) => Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING)
+
 describe("ConsoleLayoutBase", () => {
     it("projects Nivo chrome into the shared workspace landmarks", () => {
         const RoutedBody = () => <p>Workspace body</p>
@@ -23,18 +25,15 @@ describe("ConsoleLayoutBase", () => {
 
         expect(screen.getByRole("banner")).toHaveTextContent("Nivo")
         expect(screen.getByRole("navigation", { name: "Console destinations" })).toHaveTextContent("Overview")
-        const layout = screen.getByRole("navigation", { name: "Console destinations" }).parentElement
-        expect(layout?.closest('[data-grammar-workspace-shell="true"]')).toBeInTheDocument()
-        expect(layout).toHaveAttribute("data-grammar-workspace-navigation-track", "intrinsic")
-        expect(layout).toHaveAttribute("data-grammar-workspace-navigation-visibility", "wide")
         expect(screen.getByRole("main", { name: "Console workspace" })).toHaveTextContent("Workspace body")
         expect(screen.getAllByRole("main")).toHaveLength(1)
+        expect(screen.getAllByRole("navigation")).toHaveLength(1)
     })
 
-    it("mounts the navigation band once, above the workspace shell rather than inside its header slot", () => {
+    it("mounts the navigation band once, ahead of the workspace landmarks rather than inside them", () => {
         const RoutedBody = () => <p>Workspace body</p>
 
-        const { container } = render(<ConsoleLayoutBase
+        render(<ConsoleLayoutBase
             body={RoutedBody}
             bodyProps={{}}
             navigationLabel="Console destinations"
@@ -43,11 +42,14 @@ describe("ConsoleLayoutBase", () => {
 
         const banners = screen.getAllByRole("banner")
         expect(banners).toHaveLength(1)
-        const shell = container.querySelector('[data-grammar-workspace-shell="true"]')
-        expect(shell).not.toBeNull()
-        expect(shell?.contains(banners[0])).toBe(false)
-        expect(shell?.querySelector('[data-grammar-workspace-header="true"]')).toBeNull()
-        const bandBeforeShell = Boolean(banners[0].compareDocumentPosition(shell as Node) & Node.DOCUMENT_POSITION_FOLLOWING)
-        expect(bandBeforeShell).toBe(true)
+        const [band] = banners
+        const rail = screen.getByRole("navigation", { name: "Console destinations" })
+        const workspace = screen.getByRole("main", { name: "Console workspace" })
+        expect(band.contains(rail)).toBe(false)
+        expect(band.contains(workspace)).toBe(false)
+        expect(rail.contains(band)).toBe(false)
+        expect(workspace.contains(band)).toBe(false)
+        expect(precedes(band, rail)).toBe(true)
+        expect(precedes(band, workspace)).toBe(true)
     })
 })
