@@ -5,14 +5,14 @@ import {
   PrimaryRailLayout,
   SectionHeader
 } from "@starci/grammar/common";
-import { AgentOSSummary } from "@/components/blocks/console/AgentOSSummary";
-import { AppsSummary } from "@/components/blocks/console/AppsSummary";
-import { InfrastructureSummary } from "@/components/blocks/console/InfrastructureSummary";
-import { OverviewPulse } from "@/components/blocks/console/OverviewPulse";
-import { WalletSummary } from "@/components/blocks/console/WalletSummary";
-import { OVERVIEW_FRAME_CLASS_NAME, OVERVIEW_SECTION_CLASS_NAME } from "./classNames";
+import { OverviewAccount } from "@/components/blocks/console/OverviewAccount";
+import { OverviewAddresses } from "@/components/blocks/console/OverviewAddresses";
+import { OverviewRuntime } from "@/components/blocks/console/OverviewRuntime";
+import { OverviewServices } from "@/components/blocks/console/OverviewServices";
+import { OverviewSignals } from "@/components/blocks/console/OverviewSignals";
+import { OVERVIEW_FRAME_CLASS_NAME, OVERVIEW_TRACK_CLASS_NAME } from "./classNames";
 
-/** Resolved copy and the one page-level command of the operations briefing. */
+/** Resolved copy and the one page-level command of the operations overview. */
 export type OverviewPageProps = OverviewPageViewProps;
 /** Public API role for OverviewPageViewProps. */
 export type OverviewPageViewProps = {
@@ -22,13 +22,16 @@ export type OverviewPageViewProps = {
   readonly consoleLabel: string;
   readonly buildAppLabel: string;
   readonly atAGlanceLabel: string;
-  readonly atAGlanceSummary: string;
   readonly servicesLabel: string;
   readonly accountLabel: string;
   readonly onBuildApp: () => void;
 };
 
-/** Draw the briefing anatomy; each summary block settles its own slice. */
+/**
+ * Draw the overview anatomy: one level-1 orientation region names the page and holds its one
+ * page-level decision; every other region is anchored by its own labelled surface instead of a
+ * second heading. Each connected block settles its own slice independently.
+ */
 export const OverviewPageBase = (props: OverviewPageProps) => {
   const {
     title,
@@ -37,7 +40,6 @@ export const OverviewPageBase = (props: OverviewPageProps) => {
     consoleLabel,
     buildAppLabel,
     atAGlanceLabel,
-    atAGlanceSummary,
     servicesLabel,
     accountLabel,
     onBuildApp
@@ -70,30 +72,30 @@ export const OverviewPageBase = (props: OverviewPageProps) => {
           onPress={onBuildApp}
         >{buildAppLabel}</Button>}
       />
-      <OverviewPulse label={atAGlanceLabel} summary={atAGlanceSummary} />
+      <OverviewSignals label={atAGlanceLabel} />
       <PrimaryRailLayout
         align="start"
         railWidth="standard"
         collapsedOrder="primary-first"
         primary={<div
-          className={OVERVIEW_SECTION_CLASS_NAME}
+          className={OVERVIEW_TRACK_CLASS_NAME}
           data-contract="GAP-4 MEASURE-2"
-          data-overview-services="true"
+          data-overview-primary="true"
         >
-          <SectionHeader level={2} title={servicesLabel} />
-          <AppsSummary />
-          <AgentOSSummary />
+          <OverviewServices label={servicesLabel} />
+          <OverviewRuntime />
         </div>}
         rail={<div
-          className={OVERVIEW_SECTION_CLASS_NAME}
+          className={OVERVIEW_TRACK_CLASS_NAME}
           data-contract="GAP-4 MEASURE-2"
-          data-overview-account="true"
+          data-overview-rail="true"
         >
-          <SectionHeader level={2} title={accountLabel} />
-          <WalletSummary />
-          <InfrastructureSummary />
+          <OverviewAccount label={accountLabel} />
+          <OverviewAddresses />
         </div>}
       />
     </div>
   </PageContainer>;
 };
+
+/** Registry identity for the pure overview page twin. */

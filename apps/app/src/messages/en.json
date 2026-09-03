@@ -159,11 +159,47 @@
     },
     "overview": {
       "title": "Overview",
-      "lede": "Scan what is running, needs attention, and is coming due across your account.",
+      "lede": "Everything this account runs, and the one thing to do next.",
       "atAGlance": "At a glance",
-      "atAGlanceSummary": "Four operations asked, four answered. One needs a decision.",
       "buildApp": "Build an app",
-      "none": "None yet"
+      "none": "None yet",
+      "runtimeLabel": "Runtime",
+      "runtimeFact": "The workspace pod, as it answered",
+      "addressesLabel": "Addresses",
+      "signals": {
+        "factNone": "Nothing needs attention",
+        "fact": "{count, plural, one {# signal needs attention} other {# signals need attention}}",
+        "nothingToOpen": "Nothing to open"
+      },
+      "services": {
+        "factAnswered": "{count, plural, one {# answered} other {# answered}}",
+        "factDegradedNone": "nothing degraded",
+        "factDegraded": "{count, plural, one {# degraded} other {# degraded}}",
+        "workspaceDetailWithOrder": "Agent workspace · fulfils catalog order {orderId}",
+        "workspaceDetailNoOrder": "Agent workspace",
+        "openWorkspace": "Open workspace"
+      },
+      "runtime": {
+        "podAnswered": "Pod answered",
+        "httpStatus": "HTTP status",
+        "token": "Token",
+        "checked": "Checked",
+        "yes": "Yes",
+        "no": "No",
+        "tokenConfigured": "Configured · {hint}",
+        "tokenConfiguredNoHint": "Configured",
+        "tokenNotConfigured": "Not configured"
+      },
+      "account": {
+        "walletBalance": "Wallet balance",
+        "unpaidInvoices": "Unpaid invoices",
+        "unpaidCount": "{unpaid} of {total}",
+        "invoiceName": "Invoice {id}",
+        "invoiceDetailUnpaid": "Unpaid · due {date} · charged to the wallet above",
+        "dueSoon": "Due soon",
+        "overdue": "Overdue",
+        "topUpWallet": "Top up wallet"
+      }
     },
     "apps": {
       "title": "Apps",
@@ -538,11 +574,6 @@
       "shapeUnknown": "no dedicated pod",
       "plan": "{plan} plan",
       "renewsAt": "renews {date}"
-  },
-  "infrastructure": {
-    "title": "Infrastructure",
-    "context": "Built services and held domains share this infrastructure context.",
-    "empty": "No app or workspace infrastructure has been built yet."
   },
     "domains": {
       "title": "Domains",

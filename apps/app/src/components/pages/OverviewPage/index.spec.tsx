@@ -28,14 +28,13 @@ interface MockPageProps {
     readonly consoleLabel: string
     readonly buildAppLabel: string
     readonly atAGlanceLabel: string
-    readonly atAGlanceSummary: string
     readonly servicesLabel: string
     readonly accountLabel: string
     readonly onBuildApp: () => void
 }
 vi.mock("./component", () => ({ OverviewPageBase: (props: MockPageProps) => <div>
     <span>{props.pathLabel}:{props.consoleLabel}:{props.title}</span>
-    <span>{props.lede}:{props.atAGlanceLabel}:{props.atAGlanceSummary}:{props.servicesLabel}:{props.accountLabel}</span>
+    <span>{props.lede}:{props.atAGlanceLabel}:{props.servicesLabel}:{props.accountLabel}</span>
     <button type="button" onClick={props.onBuildApp}>{props.buildAppLabel}</button>
 </div> }))
 
@@ -53,7 +52,7 @@ describe("OverviewPage route", () => {
         render(<OverviewPage />)
 
         expect(screen.getByText("breadcrumbLabel:title:overview.title")).toBeInTheDocument()
-        expect(screen.getByText("overview.lede:overview.atAGlance:overview.atAGlanceSummary:servicesCaption:accountCaption")).toBeInTheDocument()
+        expect(screen.getByText("overview.lede:overview.atAGlance:servicesCaption:accountCaption")).toBeInTheDocument()
 
         fireEvent.click(screen.getByRole("button", { name: "overview.buildApp" }))
         expect(mocks.push).toHaveBeenCalledWith("/apps")
