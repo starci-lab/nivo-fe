@@ -26,8 +26,8 @@ describe("ConsoleTopBar", () => {
     it("renders one capability-backed global navbar and no unsupported actions", () => {
         render(<ConsoleTopBar />)
 
-        expect(screen.getByRole("banner")).toBeInTheDocument()
-        expect(screen.getByRole("navigation", { name: "topNavigationLabel" })).toBeInTheDocument()
+        expect(screen.getAllByRole("banner")).toHaveLength(1)
+        expect(screen.queryAllByRole("navigation")).toHaveLength(0)
         expect(screen.getByRole("img", { name: "brand" })).toBeInTheDocument()
         expect(screen.getByText("title")).toBeInTheDocument()
         expect(screen.getByRole("group", { name: "actionsLabel" })).toBeInTheDocument()

@@ -6,7 +6,6 @@ import { NivoBrand, ThemeSwitch } from "@nivo/ui";
 export type ConsoleTopBarProps<L extends object, A extends object, D extends object> = {
   readonly brandLabel: string;
   readonly contextLabel: string;
-  readonly navigationLabel: string;
   readonly actionsLabel: string;
   readonly compactNavigationTriggerLabel: string;
   readonly isDark: boolean;
@@ -24,17 +23,15 @@ export type ConsoleTopBarProps<L extends object, A extends object, D extends obj
 /**
  * Draw the protected Nivo lockup and only capability-backed global tools.
  *
- * The console has no top-bar-level primary destinations today (every route lives in the
- * persistent Sidebar rail), so `navigation` carries no content. `NavigationFeatureNav.navigation`
- * is a required slot in the installed grammar contract - unlike the starci-academy-fe reference,
- * where it is effectively always populated - so this passes `null` rather than omitting the prop
- * (which the type does not allow) or inventing placeholder destinations.
+ * The console has no top-bar-level primary destinations today - every route lives in the
+ * persistent Sidebar rail - so the `navigation` slot is omitted entirely. The grammar renders no
+ * `nav` element when it is absent, which is the point: an empty navigation landmark is still
+ * announced, reached and counted by assistive technology while naming nothing.
  */
 export const ConsoleTopBarBase = <L extends object, A extends object, D extends object>(props: ConsoleTopBarProps<L, A, D>) => {
   const {
     brandLabel,
     contextLabel,
-    navigationLabel,
     actionsLabel,
     compactNavigationTriggerLabel,
     isDark,
@@ -57,8 +54,6 @@ export const ConsoleTopBarBase = <L extends object, A extends object, D extends 
         }} />
       <Text weight="semibold">{contextLabel}</Text>
     </>}
-    navigation={null}
-    navigationLabel={navigationLabel}
     compactNavigationTrigger={<DrawerControl {...drawerControlProps} />}
     compactNavigationTriggerLabel={compactNavigationTriggerLabel}
     actions={<>

@@ -15,7 +15,6 @@ describe("ConsoleTopBarBase", () => {
         render(<ConsoleTopBarBase
             brandLabel="nivo"
             contextLabel="Console"
-            navigationLabel="Console primary navigation"
             actionsLabel="Account actions"
             compactNavigationTriggerLabel="Menu"
             isDark={false}
@@ -30,8 +29,8 @@ describe("ConsoleTopBarBase", () => {
             onToggleTheme={onToggleTheme}
         />)
 
-        expect(screen.getByRole("banner")).toBeInTheDocument()
-        expect(screen.getByRole("navigation", { name: "Console primary navigation" })).toBeInTheDocument()
+        expect(screen.getAllByRole("banner")).toHaveLength(1)
+        expect(screen.queryAllByRole("navigation")).toHaveLength(0)
         expect(screen.getByRole("group", { name: "Menu" })).toContainElement(screen.getByText("drawer"))
         expect(screen.getByRole("group", { name: "Account actions" })).toBeInTheDocument()
         expect(screen.getByRole("img", { name: "nivo" })).toBeInTheDocument()
@@ -47,7 +46,6 @@ describe("ConsoleTopBarBase", () => {
         render(<ConsoleTopBarBase
             brandLabel="nivo"
             contextLabel="Console"
-            navigationLabel="Console primary navigation"
             actionsLabel="Account actions"
             compactNavigationTriggerLabel="Menu"
             isDark={false}
