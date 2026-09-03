@@ -1,5 +1,5 @@
 import { Avatar } from "@nivo/ui";
-import { EmptyNotice, SurfaceCard, SurfaceListCard, Button, Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/common";
+import { EmptyNotice, SurfaceListCard, Button, Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/common";
 import {
   APPS_SUMMARY_ACTION_CLASS_NAME,
   APPS_SUMMARY_ACTION_CONTEXT_CLASS_NAME,
@@ -94,17 +94,23 @@ export const AppsSummaryBase = (props: AppsSummaryProps) => {
     onOpenApp,
     onOpenAll
   }: AppsSummaryProps = props;
-  if (state.phase === "empty") return <SurfaceCard label={label}>
+  if (state.phase === "empty") return <SurfaceListCard
+    label={label}
+    footer={openAllLabel !== undefined && onOpenAll !== undefined ? <Button variant="secondary" size="sm" onPress={onOpenAll}>{openAllLabel}</Button> : undefined}
+  >
     <EmptyNotice message={state.message} />
-  </SurfaceCard>;
-  if (state.phase === "forbidden") return <SurfaceCard label={label}>
+  </SurfaceListCard>;
+  if (state.phase === "forbidden") return <SurfaceListCard
+    label={label}
+    footer={openAllLabel !== undefined && onOpenAll !== undefined ? <Button variant="secondary" size="sm" onPress={onOpenAll}>{openAllLabel}</Button> : undefined}
+  >
     <Text size="sm" tone="muted">{state.message}</Text>
-  </SurfaceCard>;
+  </SurfaceListCard>;
   const isLoading = state.phase === "pending";
   const content = appsListContent(state, onOpenApp);
   return <SurfaceListCard
     label={label}
-    footer={openAllLabel !== undefined && (isLoading || onOpenAll !== undefined) ? <Button variant="primary" size="sm" isSkeleton={isLoading} onPress={onOpenAll}>{openAllLabel}</Button> : undefined}
+    footer={openAllLabel !== undefined && (isLoading || onOpenAll !== undefined) ? <Button variant="secondary" size="sm" isSkeleton={isLoading} onPress={onOpenAll}>{openAllLabel}</Button> : undefined}
     isLoading={isLoading}
   >{content}</SurfaceListCard>;
 };

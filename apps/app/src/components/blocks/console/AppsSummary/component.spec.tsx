@@ -60,4 +60,17 @@ describe("AppsSummaryBase", () => {
         render(<AppsSummaryBase label="Apps" state={{ phase: "forbidden", message: "Access denied" }} onOpenApp={vi.fn()} />)
         expect(screen.getByText("Access denied")).toBeInTheDocument()
     })
+
+    it("closes the empty and the forbidden answer on the same action band as every other state", () => {
+        const onOpenAllEmpty = vi.fn()
+        const empty = render(<AppsSummaryBase label="Apps" openAllLabel="Open apps" state={{ phase: "empty", message: "No apps yet" }} onOpenApp={vi.fn()} onOpenAll={onOpenAllEmpty} />)
+        fireEvent.click(screen.getByRole("button", { name: "Open apps" }))
+        expect(onOpenAllEmpty).toHaveBeenCalledTimes(1)
+        empty.unmount()
+
+        const onOpenAllForbidden = vi.fn()
+        render(<AppsSummaryBase label="Apps" openAllLabel="Open apps" state={{ phase: "forbidden", message: "Access denied" }} onOpenApp={vi.fn()} onOpenAll={onOpenAllForbidden} />)
+        fireEvent.click(screen.getByRole("button", { name: "Open apps" }))
+        expect(onOpenAllForbidden).toHaveBeenCalledTimes(1)
+    })
 })

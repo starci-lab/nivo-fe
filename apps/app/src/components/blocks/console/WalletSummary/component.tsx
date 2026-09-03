@@ -61,9 +61,11 @@ export const WalletSummaryBase = (props: WalletSummaryProps) => {
   const isLoading = state.phase === "pending";
   const facts = state.phase === "empty" || state.phase === "populated" || state.phase === "partial" ? state.facts : [];
   const note = state.phase === "failed" || state.phase === "partial" ? state.note : undefined;
+  const cardState = state.phase === "failed" ? "unavailable" : state.phase === "partial" ? "cautionary" : undefined;
   return <SurfaceCard
     label={label}
     composition="joined"
+    state={cardState}
     labelEnd={actionLabel !== undefined && onOpenWallet !== undefined ? <TextAction appearance="disclosure" size="sm" endContent={<Icon source={nivoIconSource("next")} />} onPress={onOpenWallet}>{actionLabel}</TextAction> : null}
   ><div className={WALLET_SUMMARY_CONTENT_CLASS_NAME}><div className={WALLET_SUMMARY_FACTS_CLASS_NAME}>{isLoading ? [fact({
           id: "pending-balance",
@@ -75,12 +77,12 @@ export const WalletSummaryBase = (props: WalletSummaryProps) => {
           label: "",
           value: ""
         }, true)] : facts.map(item => fact(item))}</div>
-      {secondaryActionLabel !== undefined && onTopUp !== undefined ? <div className={WALLET_SUMMARY_ACTION_CLASS_NAME}>
-        <Button variant="primary" onPress={onTopUp}>{secondaryActionLabel}</Button>
-      </div> : null}
       {note === undefined ? null : <div className={WALLET_SUMMARY_NOTE_CLASS_NAME}>
         <Text size="sm" tone="muted">{note}</Text>
       </div>}
+      {secondaryActionLabel !== undefined && onTopUp !== undefined ? <div className={WALLET_SUMMARY_ACTION_CLASS_NAME}>
+        <Button variant="secondary" onPress={onTopUp}>{secondaryActionLabel}</Button>
+      </div> : null}
     </div></SurfaceCard>;
 };
 

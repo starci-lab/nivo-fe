@@ -57,4 +57,25 @@ describe("WalletSummaryBase", () => {
             view.unmount()
         }
     })
+
+    it("carries a refused and a partially refused read on the card's own published state, not the note alone", () => {
+        const failed = render(<WalletSummaryBase label="Wallet" state={{ phase: "failed", note: "Wallet unavailable" }} />)
+        expect(failed.container.querySelector('[data-grammar-state="unavailable"]')).not.toBeNull()
+        failed.unmount()
+
+        render(<WalletSummaryBase label="Wallet" state={{ phase: "partial", facts, note: "Invoices unavailable" }} />)
+        expect(screen.getByText("Invoices unavailable")).toBeInTheDocument()
+    })
+
+    it("closes the card on the top-up band, after the balance and any refusal note", () => {
+        render(<WalletSummaryBase
+            label="Wallet"
+            secondaryActionLabel="Top up"
+            state={{ phase: "failed", note: "Wallet unavailable" }}
+            onTopUp={vi.fn()}
+        />)
+        const noteText = screen.getByText("Wallet unavailable")
+        const action = screen.getByRole("button", { name: "Top up" })
+        expect(noteText.compareDocumentPosition(action) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
 })
