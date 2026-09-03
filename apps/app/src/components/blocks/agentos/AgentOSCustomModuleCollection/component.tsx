@@ -29,9 +29,6 @@ export type AgentOSCustomModuleCollectionViewProps = {
   readonly refusedTitle: string;
   readonly refused: string;
   readonly retry: string;
-  /** The action that ends this section’s own emptiness, offered inside the empty notice. */
-  readonly emptyAction: string;
-  readonly onEmptyAction: () => void;
   readonly rows: ReadonlyArray<CustomModuleCollectionRow>;
   readonly retrying: boolean;
   readonly onRetry: () => void;
@@ -63,8 +60,9 @@ const rowView = (row: CustomModuleCollectionRow, loading: boolean) => <div key={
 
 /**
  * Draw custom drafts and active modules as ledger rows. Absence and refusal each state what the
- * section holds, in a title and one line; an empty section carries the action that ends its own
- * emptiness and a refused one the retry that re-reads it.
+ * section holds, in a title and one line, and a refused section carries the retry that re-reads it.
+ * The empty section names its way forward in that line rather than carrying a control: the action
+ * that ends it is a destination, and EmptyNotice publishes no anchor form for its action.
  */
 export const AgentOSCustomModuleCollectionBase = (props: AgentOSCustomModuleCollectionProps) => {
   const {
@@ -75,8 +73,6 @@ export const AgentOSCustomModuleCollectionBase = (props: AgentOSCustomModuleColl
     refusedTitle,
     refused,
     retry,
-    emptyAction,
-    onEmptyAction,
     rows,
     retrying,
     onRetry
@@ -92,13 +88,7 @@ export const AgentOSCustomModuleCollectionBase = (props: AgentOSCustomModuleColl
     />
   </SurfaceCard>;
   if (state === "empty") return <SurfaceCard label={title}>
-    <EmptyNotice
-      message={emptyTitle}
-      description={empty}
-      actionLabel={emptyAction}
-      actionVariant="secondary"
-      onAction={onEmptyAction}
-    />
+    <EmptyNotice message={emptyTitle} description={empty} />
   </SurfaceCard>;
   const loading = state === "loading";
   const shown = loading ? restingRows(title) : rows;

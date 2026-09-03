@@ -2,7 +2,6 @@
 
 import { useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import { useQueryMyAgentosCustomModulesSwr } from "@/hooks";
 import { nivoQueryData } from "@/modules/query";
 import type { AgentosCustomModule } from "@/modules/api/console";
@@ -23,7 +22,6 @@ export const AgentOSCustomModuleCollection = (props: AgentOSCustomModuleCollecti
   }: AgentOSCustomModuleCollectionProps = props;
   const t = useTranslations("console.agentos.modules");
   const locale = useLocale();
-  const router = useRouter();
   const query = useQueryMyAgentosCustomModulesSwr(workspaceId);
   const modules = nivoQueryData(query.data);
   const [retrying, setRetrying] = useState(false);
@@ -32,11 +30,8 @@ export const AgentOSCustomModuleCollection = (props: AgentOSCustomModuleCollecti
     setRetrying(true);
     void Promise.resolve(revalidate()).finally(() => setRetrying(false));
   }, [revalidate]);
-  const onEmptyAction = useCallback(() => {
-    router.push(`/agentos/workspaces/${workspaceId}/modules/create`);
-  }, [router, workspaceId]);
   const hrefOf = (module: AgentosCustomModule) => module.installationId === null ? `/${locale}/agentos/workspaces/${workspaceId}/modules/studio/${module.id}` : `/${locale}/agentos/workspaces/${workspaceId}/modules/${module.installationId}`;
-  return <AgentOSCustomModuleCollectionBase state={collectionState(modules)} title={t("collection.title")} emptyTitle={t("collection.emptyTitle")} empty={t("collection.empty")} refusedTitle={t("collection.refusedTitle")} refused={t("collection.refused")} retry={t("collection.retry")} emptyAction={t("collection.emptyAction")} onEmptyAction={onEmptyAction} retrying={retrying} onRetry={onRetry} rows={(modules ?? []).map(module => ({
+  return <AgentOSCustomModuleCollectionBase state={collectionState(modules)} title={t("collection.title")} emptyTitle={t("collection.emptyTitle")} empty={t("collection.empty")} refusedTitle={t("collection.refusedTitle")} refused={t("collection.refused")} retry={t("collection.retry")} retrying={retrying} onRetry={onRetry} rows={(modules ?? []).map(module => ({
     id: module.id,
     name: module.name,
     detail: t("collection.progress", {
