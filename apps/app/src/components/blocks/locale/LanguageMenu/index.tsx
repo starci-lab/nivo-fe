@@ -24,11 +24,10 @@ export const LanguageMenu = (props: LanguageMenuProps) => {
   }} on={{
     select: next => {
       if (next !== locale) {
-        router.replace(`${pathname}${globalThis.location?.search ?? ""}`, {
+        router.replace(`${pathname}${globalThis.location?.search ?? ""}${globalThis.location?.hash ?? ""}`, {
           locale: next
         });
       }
     }
   }} />;
 };
-

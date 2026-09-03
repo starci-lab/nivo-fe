@@ -1,8 +1,9 @@
 "use client";
-import { type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
+import { fleetResourceHref, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
 import { useQueryMyAgentWorkspacesSwr } from "@/hooks";
-import { useRouter } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { getPathname, useRouter } from "@/i18n/navigation";
+import { toLocale } from "@/i18n/config";
+import { useLocale, useTranslations } from "next-intl";
 import { AgentOSWorkspaceListBase, type AgentOSWorkspaceListViewProps } from "./component";
 /** Public API role for AgentOSWorkspaceListProps. */
 export type AgentOSWorkspaceListProps = object;
@@ -17,6 +18,7 @@ const STATUS: Readonly<Record<string, FleetStatus | undefined>> = {
 export const AgentOSWorkspaceList = (props: AgentOSWorkspaceListProps) => {
     void props;
     const t = useTranslations("console");
+    const locale = toLocale(useLocale());
     const router = useRouter();
     const query = useQueryMyAgentWorkspacesSwr();
     const answer = query.data;
@@ -73,6 +75,7 @@ export const AgentOSWorkspaceList = (props: AgentOSWorkspaceListProps) => {
                     const status = STATUS[workspace.status] ?? "not_provisioned";
                     return {
                         id: workspace.id,
+                        href: getPathname({ locale, href: fleetResourceHref("workspace", workspace.id) }),
                         name: workspace.name ?? t("agentos.kindWorkspace"),
                         detail: workspace.catalogOrder?.id ?? workspace.id,
                         kindLabel: t("agentos.kindWorkspace"),
