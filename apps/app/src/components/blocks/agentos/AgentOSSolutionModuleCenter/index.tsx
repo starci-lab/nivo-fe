@@ -7,11 +7,13 @@ import type { AgentosSolutionModule } from "@/modules/api/console";
 import { nivoQueryData } from "@/modules/query";
 import { useSession } from "@/modules/auth/session";
 import useProvisioningRealtime from "@/modules/realtime/provisioning";
-import { AgentOSSolutionModuleCenterBase, type AgentOSSolutionModuleCard } from "./component";
+import { AgentOSSolutionModuleCenterBase, type AgentOSSolutionLedgerRow, type AgentOSSolutionModuleCard } from "./component";
 
 /** Exact owner workspace scope consumed by the connected module center. */
 export type AgentOSSolutionModuleCenterProps = {
   readonly workspaceId: string;
+  /** `ledger` lists installed solutions above the catalogue (the module route); the default keeps the mode switch. */
+  readonly layout?: "tabs" | "ledger";
 };
 const toneOf = (status: string): "neutral" | "success" | "warning" | "danger" => {
   if (status === "ready") return "success";
@@ -23,7 +25,8 @@ const toneOf = (status: string): "neutral" | "success" | "warning" | "danger" =>
 /** Own catalog/list/install calls and follow one exact installation Saga at a time. */
 export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterProps) => {
   const {
-    workspaceId
+    workspaceId,
+    layout = "tabs"
   }: AgentOSSolutionModuleCenterProps = props;
   const t = useTranslations("console.agentos.workspace.solutions");
   const locale = useLocale();
@@ -110,15 +113,31 @@ export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterPr
       actionHref: `/${locale}/agentos/workspaces/${workspaceId}/modules/${installation.id}`
     };
   });
+  const installedRows: ReadonlyArray<AgentOSSolutionLedgerRow> = (installations ?? []).map(installation => {
+    const module = catalogByKey.get(installation.moduleKey as AgentosSolutionModule["key"]);
+    return {
+      id: installation.id,
+      name: installation.displayName || module?.name || installation.moduleKey,
+      detail: installation.failureCode ?? t("version", {
+        version: installation.moduleVersion
+      }),
+      kind: t("installed"),
+      status: t(`status.${installation.status}`),
+      statusTone: toneOf(installation.status),
+      action: t("viewDetails"),
+      href: `/${locale}/agentos/workspaces/${workspaceId}/modules/${installation.id}`
+    };
+  });
   const refused = catalog === null || installations === null;
   const settledState = refused ? "refused" : "answered";
-  return <AgentOSSolutionModuleCenterBase state={catalog === undefined || installations === undefined ? "resting" : settledState} mode={mode} sectionLabel={mode === "catalog" ? t("catalogSection") : t("installedSection")} modesLabel={t("modesLabel")} modes={[{
+  const ledger = layout === "ledger";
+  return <AgentOSSolutionModuleCenterBase layout={layout} state={catalog === undefined || installations === undefined ? "resting" : settledState} mode={mode} sectionLabel={mode === "catalog" ? t("catalogSection") : t("installedSection")} installedLabel={t("installedSection")} catalogLabel={t("catalogSection")} installedRows={installedRows} modesLabel={t("modesLabel")} modes={[{
     id: "catalog",
     label: t("modes.catalog")
   }, {
     id: "installed",
     label: t("modes.installed")
-  }]} refusedLabel={t("refused")} emptyLabel={t("empty")} emptyActionLabel={t("browse")} cards={mode === "catalog" ? catalogCards : installedCards} pendingId={pendingKey} outcome={outcome} onSelectMode={setMode} onPressCard={id => {
-    if (mode === "catalog") void install(id as AgentosSolutionModule["key"]);
+  }]} refusedLabel={t("refused")} emptyLabel={t("empty")} emptyActionLabel={t("browse")} cards={ledger || mode === "catalog" ? catalogCards : installedCards} pendingId={pendingKey} outcome={outcome} onSelectMode={setMode} onPressCard={id => {
+    if (ledger || mode === "catalog") void install(id as AgentosSolutionModule["key"]);
   }} />;
 };
