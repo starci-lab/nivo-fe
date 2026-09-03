@@ -117,6 +117,7 @@
     "servicesCaption": "Services",
     "accountCaption": "Account",
     "navigationLabel": "Console navigation",
+    "breadcrumbLabel": "You are here",
     "openMenu": "Menu",
     "closeMenu": "Close",
     "unavailable": "Unavailable",

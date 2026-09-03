@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { useMutateIssueAgentWorkspaceAppLaunchSwr, useMutateRevokeAgentWorkspaceAppLaunchSwr } from "@/hooks/swr";
+import { useMutateIssueAgentWorkspaceAppLaunchSwr, useMutateRevokeAgentWorkspaceAppLaunchSwr } from "@/hooks";
 import { useSession } from "@/modules/auth/session";
 import { followWorkspaceAppRedirect, safeWorkspaceAppRedirect, workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@/modules/window/workspace-app-launch";
 import { AgentOSOpenClawLaunchBase, type AgentOSOpenClawLaunchLabels, type OpenClawLaunchBlockState } from "./component";

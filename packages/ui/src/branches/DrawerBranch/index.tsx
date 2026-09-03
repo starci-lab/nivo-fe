@@ -31,7 +31,7 @@ export const DrawerBranch = <P extends object,>(props: DrawerBranchProps<P>) => 
     ? <props.content {...props.contentProps} />
     : props.renderContent(close);
   return <Drawer.Root isOpen={isOpen} onOpenChange={setIsOpen}>
-        <Drawer.Trigger className="min-h-10 rounded-large px-3 text-sm font-semibold text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent">
+        <Drawer.Trigger className="min-h-10 rounded-lg px-3 text-sm font-semibold text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent">
             {props.triggerLabel}
         </Drawer.Trigger>
         <Drawer.Backdrop isDismissable>
@@ -39,7 +39,7 @@ export const DrawerBranch = <P extends object,>(props: DrawerBranchProps<P>) => 
                 <Drawer.Dialog>
                     <Drawer.Header className="border-b border-separator px-4 py-4">
                         <Drawer.Heading className="text-lg font-semibold text-foreground">{props.title}</Drawer.Heading>
-                        <Drawer.CloseTrigger className="min-h-10 rounded-large px-3 text-sm font-semibold text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent">
+                        <Drawer.CloseTrigger className="min-h-10 rounded-lg px-3 text-sm font-semibold text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent">
                             {props.closeLabel}
                         </Drawer.CloseTrigger>
                     </Drawer.Header>

@@ -3,6 +3,7 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useOverviewData } from "@/modules/overview/context";
+import { BILLING_CURRENCY } from "@/modules/config";
 import { WalletSummaryBase, type WalletSummaryFact, type WalletSummaryState } from "./component";
 /** Public API role for WalletSummaryProps. */
 export type WalletSummaryProps = Record<string, never>;
@@ -22,7 +23,7 @@ export const WalletSummary = (props: WalletSummaryProps) => {
   const refusal = () => t("refusal.unknown");
   const money = (value: number) => format.number(value, {
     style: "currency",
-    currency: "VND",
+    currency: BILLING_CURRENCY,
     maximumFractionDigits: 0
   });
   const day = (value: string) => format.dateTime(new Date(value), {
