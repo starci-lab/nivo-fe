@@ -37,6 +37,17 @@ describe("AgentOS solution module center", () => {
         expect(renderToStaticMarkup(<AgentOSSolutionModuleCenterBase {...base} state="answered" mode="installed" cards={[]} />)).toContain("No modules")
     })
 
+    it("sends an empty installed view back to the catalogue, and installs from the ledger catalogue", () => {
+        const onSelectMode = vi.fn()
+        const onPressCard = vi.fn()
+        render(<AgentOSSolutionModuleCenterBase {...base} state="answered" mode="installed" cards={[]} onSelectMode={onSelectMode} />)
+        fireEvent.click(screen.getByRole("button", { name: base.emptyActionLabel }))
+        expect(onSelectMode).toHaveBeenCalledWith("catalog")
+        render(<AgentOSSolutionModuleCenterBase {...base} layout="ledger" ledger={ledger()} state="answered" mode="catalog" cards={[card]} onPressCard={onPressCard} />)
+        fireEvent.click(screen.getByRole("button", { name: card.actionLabel }))
+        expect(onPressCard).toHaveBeenCalledWith(card.id)
+    })
+
     it("renders pending catalog cards and outcomes", () => {
         const html = renderToStaticMarkup(<AgentOSSolutionModuleCenterBase {...base} state="answered" mode="catalog" cards={[card]} pendingId="sales" outcome="Started" />)
         expect(html).toContain("Sales Copilot")
