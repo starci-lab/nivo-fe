@@ -27,6 +27,13 @@ const STATUS_TONE: Readonly<Record<string, BadgeTone | undefined>> = {
   active: "success",
   suspended: "neutral"
 };
+/**
+ * Provision states in which a site has reached no address, so its row has nothing to open.
+ *
+ * `awaiting_dns` is deliberately absent: that row keeps its own onward step, the DNS instructions,
+ * and is the one unready state that still has somewhere to go.
+ */
+const UNOPENABLE_PROVISION_STATUS: ReadonlySet<string> = new Set(["not_provisioned", "provisioning", "failed"]);
 const NAMED_REFUSALS = new Set(["EXPERT_SITE_NOT_FOUND_EXCEPTION", "EXPERT_SITE_AMBIGUOUS_FOR_VIEWER_EXCEPTION"]);
 
 /** Connect the joined Apps collection to its one source-owned slice. */
@@ -57,7 +64,8 @@ export const AppsSummary = (props: AppsSummaryProps) => {
       detail: site.customDomain ?? `${site.slug}${ACADEMY_HOST_SUFFIX}`,
       statusLabel: statusLabel(site.provisionStatus),
       statusTone: STATUS_TONE[site.provisionStatus] ?? "neutral",
-      actionLabel: site.provisionStatus === "awaiting_dns" ? t("apps.viewDns") : t("apps.open")
+      actionLabel: site.provisionStatus === "awaiting_dns" ? t("apps.viewDns") : t("apps.open"),
+      isDisabled: UNOPENABLE_PROVISION_STATUS.has(site.provisionStatus)
     }))
   };
   return <AppsSummaryBase label={t("apps.title")} openAllLabel={t("apps.openSet")} state={state} onOpenAll={() => open("/apps")} onOpenApp={id => open(`/apps/${id}`)} />;

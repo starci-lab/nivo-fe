@@ -1,4 +1,4 @@
-import { Badge, Button, EmptyNotice, SurfaceCard, Text, type BadgeTone } from "@starci/grammar/common";
+import { Badge, Button, EmptyNotice, SurfaceCard, Text, type BadgeTone, type PresentationState } from "@starci/grammar/common";
 import {
   AGENT_OS_SUMMARY_ACTION_CLASS_NAME,
   AGENT_OS_SUMMARY_CONTENT_CLASS_NAME,
@@ -17,6 +17,8 @@ export type AgentOSSummaryWorkspace = {
   readonly statusTone: BadgeTone;
   readonly actionLabel: string;
   readonly actionHref?: string;
+  /** Whether the workspace runs no service yet, so its own control has nothing to open. */
+  readonly isDisabled?: boolean;
   readonly detail?: string;
 };
 /** Settled states the AgentOS summary can render independently. */
@@ -57,16 +59,19 @@ export const AgentOSSummaryBase = (props: AgentOSSummaryProps) => {
     </div></SurfaceCard>;
   const workspace = state.phase === "pending" ? undefined : state.workspace;
   const isLoading = workspace === undefined;
-  const action = workspace?.actionHref === undefined ? <Button
+  const isDisabled = workspace?.isDisabled === true;
+  const surfaceState: PresentationState | undefined = state.phase === "partial" ? "cautionary" : state.phase === "forbidden" ? "unavailable" : undefined;
+  const action = workspace?.actionHref === undefined || isDisabled ? <Button
     isSkeleton={isLoading}
-    onPress={workspace === undefined ? undefined : () => onOpenService(workspace.id)}
+    isDisabled={isDisabled}
+    onPress={workspace === undefined || isDisabled ? undefined : () => onOpenService(workspace.id)}
   >{workspace?.actionLabel ?? ""}</Button> : <Button
     href={workspace.actionHref}
-    onFollow={() => onOpenService(workspace.id)}
   >{workspace.actionLabel}</Button>;
   return <SurfaceCard
     label={label}
     composition="joined"
+    state={surfaceState}
   ><div className={AGENT_OS_SUMMARY_CONTENT_CLASS_NAME}>
       <div className={AGENT_OS_SUMMARY_ROW_CLASS_NAME}>
         <div className={AGENT_OS_SUMMARY_COPY_CLASS_NAME}>

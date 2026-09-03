@@ -40,7 +40,7 @@ describe("InfrastructureSummary", () => {
         expect(screen.getByText(/domains\.empty/)).toBeInTheDocument()
     })
 
-    it("keeps a domain refusal partial while a built service still exists", () => {
+    it("reports a domain refusal outright even while a built service still exists", () => {
         mocks.data.apps = { ok: true, data: [{ id: "site-1", slug: "academy", customDomain: null, provisionStatus: "ready", status: "active" }] }
         mocks.data.workspaces = { ok: true, data: [] }
         mocks.data.domains = { ok: false, code: "UNKNOWN" }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import type { BadgeTone } from "@starci/grammar/common";
 import { useOverviewData } from "@/modules/overview/context";
@@ -36,10 +36,18 @@ const accessLabel = (pod: OverviewData["pod"], t: ConsoleCopy): string | undefin
   const available = t("agentos.workspace.applications.available");
   return pod.data.tokenHint === null ? available : `${available} · ${pod.data.tokenHint}`;
 };
+/**
+ * The workspace's own onward address, supplied only where authority actually holds one.
+ *
+ * The launch bridge issues the session the pod expects, so it is an address only while the pod
+ * answered, is reachable and holds a token; anything less has nowhere to send a visitor, and the
+ * row falls back to its command into the console.
+ */
+const serviceHref = (id: string, locale: string, pod: OverviewData["pod"]): string | undefined => pod?.ok === true && pod.data.reachable && pod.data.tokenConfigured ? `/${locale}/launch/agentos/${id}/openclaw` : undefined;
 const resolveSummaryState = ({
   workspaces,
   pod
-}: OverviewData, t: ConsoleCopy, format: ConsoleFormat): AgentOSSummaryState => {
+}: OverviewData, t: ConsoleCopy, format: ConsoleFormat, locale: string): AgentOSSummaryState => {
   const refusal = (code: string | undefined) => code !== undefined && NAMED_REFUSALS.has(code) ? t(`refusal.${code}`) : t("refusal.unknown");
   const statusLabel = (status: string) => STATUS_KEY[status] === undefined ? t("status.unknown") : t(STATUS_KEY[status]!);
   if (workspaces === null || pod === null) return {
@@ -66,6 +74,8 @@ const resolveSummaryState = ({
     statusLabel: statusLabel(workspace.status),
     statusTone: STATUS_TONE[workspace.status] ?? "neutral" as BadgeTone,
     actionLabel: t("agentos.openService"),
+    actionHref: serviceHref(workspace.id, locale, pod),
+    isDisabled: workspace.status !== "active",
     detail: [runtime, access, checked].filter(Boolean).join(" · ")
   };
   return pod.ok ? {
@@ -83,9 +93,10 @@ export const AgentOSSummary = (props: AgentOSSummaryProps) => {
   const overview = useOverviewData();
   const t = useTranslations("console");
   const format = useFormatter();
+  const locale = useLocale();
   const router = useRouter();
   const open = (route: string) => router.push(route);
-  const state = resolveSummaryState(overview, t, format);
+  const state = resolveSummaryState(overview, t, format, locale);
   return <AgentOSSummaryBase label={t("agentos.title")} state={state} onOpenService={id => open(`/agentos/workspaces/${id}`)} />;
 };
 

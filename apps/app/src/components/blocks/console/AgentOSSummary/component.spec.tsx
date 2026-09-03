@@ -37,6 +37,26 @@ describe("AgentOSSummaryBase", () => {
         expect(screen.getByRole("link", { name: "Open service" })).toHaveAttribute("href", "/agentos/workspaces/workspace-1")
     })
 
+    it("disables the workspace control when no service is running to open", () => {
+        const onOpenService = vi.fn()
+        render(<AgentOSSummaryBase
+            label="AgentOS"
+            state={{ phase: "populated", workspace: { ...workspace, actionHref: "/agentos/workspaces/workspace-1", isDisabled: true } }}
+            onOpenService={onOpenService}
+        />)
+
+        expect(screen.queryByRole("link", { name: "Open service" })).not.toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Open service" }))
+        expect(onOpenService).not.toHaveBeenCalled()
+    })
+
+    it("marks the region cautionary when its own read answered and a dependency did not", () => {
+        const { container } = render(<AgentOSSummaryBase label="AgentOS" state={{ phase: "partial", workspace }} onOpenService={vi.fn()} />)
+
+        expect(screen.getByText("Support")).toBeInTheDocument()
+        expect(container.querySelector("[data-grammar-state=\"cautionary\"]")).not.toBeNull()
+    })
+
     it("draws a settled missing workspace as a notice, not an empty row", () => {
         render(<AgentOSSummaryBase label="AgentOS" state={{ phase: "empty", message: "No workspace" }} onOpenService={vi.fn()} />)
 

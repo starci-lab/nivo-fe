@@ -29,6 +29,14 @@ describe("AppsSummaryBase", () => {
         expect(onOpenApp).toHaveBeenNthCalledWith(2, "app-2")
     })
 
+    it("disables the row's own onward control when the application has nothing to open", () => {
+        const onOpenApp = vi.fn()
+        render(<AppsSummaryBase label="Apps" state={{ phase: "populated", items: [{ ...item, isDisabled: true }] }} onOpenApp={onOpenApp} />)
+
+        fireEvent.click(screen.getByRole("button", { name: "Open Store" }))
+        expect(onOpenApp).not.toHaveBeenCalled()
+    })
+
     it("offers the whole collection only when the caller gave it a route", () => {
         const onOpenAll = vi.fn()
         render(<AppsSummaryBase label="Apps" openAllLabel="Open apps" state={{ phase: "populated", items: [item] }} onOpenApp={vi.fn()} onOpenAll={onOpenAll} />)

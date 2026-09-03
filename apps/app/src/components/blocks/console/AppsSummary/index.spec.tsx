@@ -47,4 +47,12 @@ describe("AppsSummary", () => {
         rerender(<AppsSummary />)
         expect(screen.getByText("refusal.EXPERT_SITE_NOT_FOUND_EXCEPTION")).toBeInTheDocument()
     })
+
+    it("leaves a row with no address yet unable to open anything", () => {
+        mocks.data.apps = { ok: true, data: [{ id: "site-3", slug: "pending", customDomain: null, provisionStatus: "provisioning", status: "active" }] }
+        render(<AppsSummary />)
+
+        fireEvent.click(screen.getByRole("button", { name: "apps.open pending" }))
+        expect(mocks.push).not.toHaveBeenCalled()
+    })
 })

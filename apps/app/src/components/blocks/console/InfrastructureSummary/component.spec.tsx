@@ -24,13 +24,6 @@ describe("InfrastructureSummaryBase", () => {
         expect(screen.getByText("Domains unavailable")).toBeInTheDocument()
     })
 
-    it("shows the note beside the facts a partial answer did return", () => {
-        render(<InfrastructureSummaryBase label="Infrastructure" context="One built service" domains={{ phase: "partial", facts, note: "Some domains unavailable" }} />)
-
-        expect(screen.getByText("example.com")).toBeInTheDocument()
-        expect(screen.getByText("One built service Some domains unavailable")).toBeInTheDocument()
-    })
-
     it("renders maximum-length DNS labels and values in full", () => {
         const label = "a".repeat(63)
         const value = "b".repeat(63)
@@ -46,7 +39,6 @@ describe("InfrastructureSummaryBase", () => {
             { phase: "empty", note: "No domains" },
             { phase: "populated", facts },
             { phase: "failed", note: "Domains unavailable" },
-            { phase: "partial", facts, note: "Some domains unavailable" },
         ]
 
         for (const state of states) {

@@ -25,10 +25,6 @@ export type InfrastructureDomainsState = {
 } | {
   readonly phase: "failed";
   readonly note: string;
-} | {
-  readonly phase: "partial";
-  readonly facts: ReadonlyArray<InfrastructureDomainFact>;
-  readonly note: string;
 };
 /** Pure infrastructure summary input derived from service and domain evidence. */
 export type InfrastructureSummaryProps = {
@@ -59,9 +55,9 @@ export const InfrastructureSummaryBase = (props: InfrastructureSummaryProps) => 
     domains
   }: InfrastructureSummaryProps = props;
   const isLoading = domains.phase === "pending";
-  const facts = domains.phase === "populated" || domains.phase === "partial" ? domains.facts : [];
-  const note = domains.phase === "empty" || domains.phase === "failed" || domains.phase === "partial" ? domains.note : undefined;
-  if (domains.phase === "pending" || domains.phase === "populated" || domains.phase === "partial") {
+  const facts = domains.phase === "populated" ? domains.facts : [];
+  const note = domains.phase === "empty" || domains.phase === "failed" ? domains.note : undefined;
+  if (domains.phase === "pending" || domains.phase === "populated") {
     const renderedFacts = isLoading ? [fact({
       id: "pending-1",
       label: "",
@@ -75,14 +71,13 @@ export const InfrastructureSummaryBase = (props: InfrastructureSummaryProps) => 
     return <SurfaceListCard
       label={label}
       footer={<div className={INFRASTRUCTURE_SUMMARY_NOTE_CLASS_NAME}>
-        <Text size="xs" tone="muted" isSkeleton={isLoading}>{note === undefined ? context : `${context} ${note}`}</Text>
+        <Text size="xs" tone="muted" isSkeleton={isLoading}>{context}</Text>
       </div>}
       isLoading={isLoading}
     >{content}</SurfaceListCard>;
   }
   return <SurfaceCard label={label}><div className={INFRASTRUCTURE_SUMMARY_FALLBACK_CLASS_NAME}>
       <Text size="sm">{context}</Text>
-      {facts.length > 0 ? <div>{facts.map(item => fact(item))}</div> : null}
       {note === undefined ? null : refusal(note)}</div></SurfaceCard>;
 };
 

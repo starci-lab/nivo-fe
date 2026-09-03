@@ -17,6 +17,8 @@ export type AppsSummaryItem = {
   readonly statusLabel: string;
   readonly statusTone: BadgeTone;
   readonly actionLabel: string;
+  /** Whether this row's application holds no onward address, so there is nothing to open. */
+  readonly isDisabled?: boolean;
 };
 /** Settled states the owned-application collection can render. */
 export type AppsSummaryState = {
@@ -48,14 +50,14 @@ const rows = (items: ReadonlyArray<AppsSummaryItem>, onOpenApp: AppsSummaryProps
     size: "md"
   }} />
   <div className={APPS_SUMMARY_COPY_CLASS_NAME}>
-    <TextAction size="sm" onPress={() => onOpenApp(item.id)}>{item.name}</TextAction>
+    <TextAction size="sm" isDisabled={item.isDisabled} onPress={() => onOpenApp(item.id)}>{item.name}</TextAction>
     <Text size="xs" tone="muted">{item.detail}</Text>
   </div>
   <div className={APPS_SUMMARY_STATUS_CLASS_NAME}>
     <Badge tone={item.statusTone}>{item.statusLabel}</Badge>
   </div>
   <div className={APPS_SUMMARY_ACTION_CLASS_NAME}>
-    <Button size="sm" onPress={() => onOpenApp(item.id)}>
+    <Button size="sm" isDisabled={item.isDisabled} onPress={() => onOpenApp(item.id)}>
       <span>{item.actionLabel}</span>{" "}
       <span className={APPS_SUMMARY_ACTION_CONTEXT_CLASS_NAME}>{item.name}</span>
     </Button>

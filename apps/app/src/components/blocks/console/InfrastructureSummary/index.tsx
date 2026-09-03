@@ -27,11 +27,7 @@ export const InfrastructureSummary = (props: InfrastructureSummaryProps) => {
   let state: InfrastructureDomainsState;
   if (domains === null) state = {
     phase: "pending"
-  };else if (!domains.ok) state = hasBuiltService ? {
-    phase: "partial",
-    facts: [],
-    note: t("refusal.unknown")
-  } : {
+  };else if (!domains.ok) state = {
     phase: "failed",
     note: t("refusal.unknown")
   };else if (domains.data.length === 0) state = {
