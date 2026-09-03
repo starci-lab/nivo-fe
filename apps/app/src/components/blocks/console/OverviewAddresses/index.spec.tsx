@@ -41,4 +41,18 @@ describe("OverviewAddresses", () => {
 
         expect(container.querySelectorAll('[data-loading="true"]').length).toBeGreaterThan(0)
     })
+
+    it("names the exact expiry date once a domain carries one, over the auto-renew reading", () => {
+        mocks.data.domains = { ok: true, data: [{ id: "domain-1", name: "expiring.nivo.vn", status: "expiring", expiresAt: "2026-09-30T00:00:00.000Z", autoRenew: true }] }
+        render(<OverviewAddresses />)
+
+        expect(screen.getByText("domains.status.expiring · domains.expiresAt:{\"date\":\"date-2026-09-30\"}")).toBeInTheDocument()
+    })
+
+    it("reads auto-renew as off when a domain carries no expiry and is not set to renew", () => {
+        mocks.data.domains = { ok: true, data: [{ id: "domain-1", name: "manual.nivo.vn", status: "active", expiresAt: null, autoRenew: false }] }
+        render(<OverviewAddresses />)
+
+        expect(screen.getByText("domains.status.active · domains.autoRenewOff")).toBeInTheDocument()
+    })
 })

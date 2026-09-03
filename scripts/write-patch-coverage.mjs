@@ -9,6 +9,15 @@ const production = (file) => /^(?:apps|packages)\/.+\.(?:ts|tsx|js|jsx)$/.test(f
     && !/(?:^|\/)(?:vitest|vite|jest|eslint|next|playwright)\.config\.[cm]?[jt]s$/.test(file)
 export const resolveBase = (env, args) => env.COVERAGE_BASE_SHA ?? (args.includes("--base") ? args[args.indexOf("--base") + 1] : undefined)
 
+// git diff --name-status prefixes each line with a status code (A/M/D/R100/...) then one or more
+// tab-separated paths. A deleted path can never carry a coverage-final.json entry, so it is excluded
+// here rather than left for buildPatchSummary to reject; a rename's resulting path is its last field.
+export const changedPaths = (nameStatusOutput) => nameStatusOutput
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .filter((line) => !line.startsWith("D\t"))
+    .map((line) => line.split("\t").pop())
+
 export const lineCounts = (data) => {
     const lines = new Map()
     for (const [index, location] of Object.entries(data.statementMap ?? {})) {
@@ -52,7 +61,7 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
     const report = JSON.parse(readFileSync(reportPath, "utf8"))
     const base = resolveBase(process.env, process.argv)
     if (!base) throw new Error("Set COVERAGE_BASE_SHA or pass --base <merge-base-sha> to measure committed PR changes")
-    const tracked = execFileSync("git", ["diff", "--name-only", base, "HEAD"], {encoding: "utf8"}).split(/\r?\n/)
+    const tracked = changedPaths(execFileSync("git", ["diff", "--name-status", base, "HEAD"], {encoding: "utf8"}))
     const summary = buildPatchSummary(report, tracked)
     writeFileSync("coverage/patch-summary.json", JSON.stringify(summary, null, 2) + "\n")
     assertPatchThresholds(summary)
