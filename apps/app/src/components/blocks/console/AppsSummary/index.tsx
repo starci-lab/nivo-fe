@@ -4,11 +4,11 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import type { BadgeTone } from "@starci/grammar/core";
 import { useOverviewData } from "@/modules/overview/context";
+import { ACADEMY_HOST_SUFFIX } from "@/modules/config";
 import { AppsSummaryBase, type AppsSummaryState } from "./component";
 /** Public API role for AppsSummaryProps. */
 export type AppsSummaryProps = Record<string, never>;
 export type { AppsSummaryItem, AppsSummaryState } from "./component";
-const HOST_SUFFIX = process.env.NEXT_PUBLIC_ACADEMY_HOST_SUFFIX ?? ".nivo.vn";
 const STATUS_KEY: Readonly<Record<string, string | undefined>> = {
   not_provisioned: "status.notProvisioned",
   provisioning: "status.provisioning",
@@ -54,7 +54,7 @@ export const AppsSummary = (props: AppsSummaryProps) => {
     items: apps.data.map(site => ({
       id: site.id,
       name: site.slug,
-      detail: site.customDomain ?? `${site.slug}${HOST_SUFFIX}`,
+      detail: site.customDomain ?? `${site.slug}${ACADEMY_HOST_SUFFIX}`,
       statusLabel: statusLabel(site.provisionStatus),
       statusTone: STATUS_TONE[site.provisionStatus] ?? "neutral",
       actionLabel: site.provisionStatus === "awaiting_dns" ? t("apps.viewDns") : t("apps.open")

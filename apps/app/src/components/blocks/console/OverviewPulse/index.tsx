@@ -3,6 +3,7 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { useOverviewData } from "@/modules/overview/context";
 import type { DomainRow } from "@/modules/api/console";
+import { BILLING_CURRENCY } from "@/modules/config";
 import { OverviewPulseBase, type OverviewPulseSignal } from "./component";
 /** Public API role for OverviewPulseProps. */
 export type OverviewPulseProps = Record<string, never>;
@@ -28,7 +29,7 @@ export const OverviewPulse = (props: OverviewPulseProps) => {
   const refusal = (code: string | undefined) => code !== undefined && NAMED_REFUSALS.has(code) ? t(`refusal.${code}`) : t("refusal.unknown");
   const money = (value: number) => format.number(value, {
     style: "currency",
-    currency: "VND",
+    currency: BILLING_CURRENCY,
     maximumFractionDigits: 0
   });
   const day = (value: string) => format.dateTime(new Date(value), {

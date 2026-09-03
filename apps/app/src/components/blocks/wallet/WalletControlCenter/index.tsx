@@ -7,6 +7,7 @@ import { usePathname } from "@/i18n/navigation";
 import { useMutateCreateWalletTopUpPayLinkSwr, useMutatePayInvoiceSwr, useQueryMyInvoicesSwr, useQueryMyWalletSwr, useQueryMyWalletTransactionsSwr } from "@/hooks";
 import { DEFAULT_LOCALE } from "@/i18n/config";
 import type { InvoiceRow, WalletTopUpPayLink } from "@/modules/api/console";
+import { BILLING_CURRENCY } from "@/modules/config";
 import { WalletControlCenterBase, type BalanceSectionView, type LedgerSectionView, type LinkedInvoiceSectionView, type PaymentResultView, type TopUpView, type WalletFactRow, type WalletLedgerRow } from "./component";
 type TopUpSession = {
   readonly amountVnd: number;
@@ -114,7 +115,7 @@ export const WalletControlCenter = (props: WalletControlCenterProps) => {
   }, [invoices, transactions, wallet]);
   const amount = (amountVnd: number) => format.number(amountVnd, {
     style: "currency",
-    currency: "VND",
+    currency: BILLING_CURRENCY,
     maximumFractionDigits: 0
   });
   const day = (iso: string) => format.dateTime(new Date(iso), {

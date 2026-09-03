@@ -2,6 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { useQueryMyAcademyGrowthSnapshotSwr } from "@/hooks";
+import { BILLING_CURRENCY } from "@/modules/config";
 import { AcademyGrowthSummaryBase } from "./component";
 
 /** Owner-scoped identity consumed by the connected growth block. */
@@ -21,7 +22,7 @@ export const AcademyGrowthSummary = (props: AcademyGrowthSummaryProps) => {
   const settledState = answer?.ok === true ? "answered" : "refused";
   return <AcademyGrowthSummaryBase state={answer === undefined ? "resting" : settledState} data={data} revenue={format.number(data?.revenueVnd ?? 0, {
     style: "currency",
-    currency: "VND",
+    currency: BILLING_CURRENCY,
     maximumFractionDigits: 0
   })} labels={{
     section: t("section"),

@@ -5,6 +5,7 @@ import { fleetResourceHref, type FleetStatus } from "@/components/blocks/provisi
 import { useQueryCatalogItemsSwr, useQueryMyCatalogOrdersSwr, useQueryMyExpertSitesSwr, useQueryMyInstancesSwr } from "@/hooks";
 import { useRouter } from "@/i18n/navigation";
 import type { CatalogItemRow } from "@/modules/api/console";
+import { ACADEMY_HOST_SUFFIX, BILLING_CURRENCY } from "@/modules/config";
 import { AppsDashboardBase, type CatalogueSectionView, type OwnedAppRow, type OwnedSectionView } from "./component";
 
 /**
@@ -52,7 +53,6 @@ const STATUS_KEY: Readonly<Record<FleetStatus, string>> = {
 };
 
 /** Where the host of an academy with no custom domain is rooted. */
-const ACADEMY_HOST_SUFFIX = process.env.NEXT_PUBLIC_ACADEMY_HOST_SUFFIX ?? ".nivo.vn";
 
 /**
  * The cheapest rung of one template that publishes a monthly price.
@@ -99,7 +99,7 @@ export const AppsDashboard = (props: AppsDashboardProps) => {
   const catalogue = useQueryCatalogItemsSwr("site_from_template");
   const money = (amountVnd: number) => format.number(amountVnd, {
     style: "currency",
-    currency: "VND",
+    currency: BILLING_CURRENCY,
     maximumFractionDigits: 0
   });
   const statusLabel = (wire: string) => {
