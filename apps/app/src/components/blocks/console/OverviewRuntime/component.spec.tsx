@@ -24,4 +24,11 @@ describe("OverviewRuntimeBase", () => {
 
         expect(container.querySelectorAll('[data-loading="true"]').length).toBeGreaterThan(0)
     })
+
+    it("marks the runtime unavailable when its own pod read was refused", () => {
+        const { container } = render(<OverviewRuntimeBase label="Runtime" state="unavailable" facts={[{ id: "refusal", label: "Pod unavailable", value: "Pod registration is missing" }]} />)
+
+        expect(container.querySelector('[data-grammar-surface-card="true"]')).toBeInTheDocument()
+        expect(container.querySelector('[data-grammar-state="unavailable"]')).toBeInTheDocument()
+    })
 })

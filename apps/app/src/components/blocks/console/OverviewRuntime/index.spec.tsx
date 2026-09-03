@@ -26,9 +26,12 @@ describe("OverviewRuntime", () => {
     it("names which part could not be read when the pod refuses", () => {
         mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }] }
         mocks.data.pod = { ok: false, code: "POD_REGISTRATION_MISSING_EXCEPTION" }
-        render(<OverviewRuntime />)
+        const { container } = render(<OverviewRuntime />)
 
         expect(screen.getByText("refusal.POD_REGISTRATION_MISSING_EXCEPTION")).toBeInTheDocument()
+        expect(screen.getByText("overview.runtime.podUnavailable")).toBeInTheDocument()
+        expect(screen.queryByText("overview.runtime.podAnswered")).not.toBeInTheDocument()
+        expect(container.querySelector('[data-grammar-state="unavailable"]')).toBeInTheDocument()
     })
 
     it("renders no wrapper when there is no workspace to read a pod for", () => {

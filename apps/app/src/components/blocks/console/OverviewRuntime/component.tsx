@@ -1,4 +1,4 @@
-import { SurfaceCard, Text } from "@starci/grammar/common";
+import { SurfaceCard, Text, type PresentationState } from "@starci/grammar/common";
 import { OVERVIEW_RUNTIME_CELL_CLASS_NAME, OVERVIEW_RUNTIME_FACTS_CLASS_NAME } from "./classNames";
 
 /** One field of the workspace pod's own status read. */
@@ -13,13 +13,14 @@ export type OverviewRuntimeFact = {
 export type OverviewRuntimeProps = {
   readonly label: string;
   readonly fact?: string;
+  readonly state?: PresentationState;
   readonly facts: ReadonlyArray<OverviewRuntimeFact>;
 };
 
 /** Draw the workspace pod's own status read as its own labelled surface, never a caption. */
 export const OverviewRuntimeBase = (props: OverviewRuntimeProps) => {
-  const { label, fact, facts }: OverviewRuntimeProps = props;
-  return <SurfaceCard label={label} fact={fact} composition="joined">
+  const { label, fact, state, facts }: OverviewRuntimeProps = props;
+  return <SurfaceCard label={label} fact={fact} state={state} composition="joined">
     <div
       className={OVERVIEW_RUNTIME_FACTS_CLASS_NAME}
       data-contract="BOUNDARY-1 BOUNDARY-3 BOUNDARY-4"

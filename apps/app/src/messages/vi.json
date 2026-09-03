@@ -181,6 +181,7 @@
       },
       "runtime": {
         "podAnswered": "Pod đã trả lời",
+        "podUnavailable": "Pod không khả dụng",
         "httpStatus": "Mã HTTP",
         "token": "Token",
         "checked": "Đã kiểm tra",
