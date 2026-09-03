@@ -7,16 +7,22 @@ export const AUTH_PAGE_CLASS_NAME = cn(
   "overflow-hidden",
   "bg-background",
   "text-foreground",
-  "lg:grid-cols-[7fr_6fr]"
+  "lg:grid-cols-12"
 );
 
-/** Desktop-only visual side of the authentication page. */
+/**
+ * Desktop-only visual side of the authentication page.
+ *
+ * `col-span-7` of 12 approximates the intended 7:6 visual weighting without an arbitrary
+ * `grid-template-columns` value, which the closed Tailwind scale does not publish.
+ */
 export const AUTH_VISUAL_CLASS_NAME = cn(
   "relative",
   "hidden",
   "min-h-dvh",
   "overflow-hidden",
   "bg-foreground",
+  "lg:col-span-7",
   "lg:block"
 );
 
@@ -36,26 +42,28 @@ export const AUTH_VISUAL_SCRIM_CLASS_NAME = cn(
 /** Brand accent at the top edge of the visual column. */
 export const AUTH_VISUAL_ACCENT_CLASS_NAME = cn("absolute", "inset-x-0", "top-0", "h-1", "bg-accent");
 
-/** Flat right-side surface that centers the form without a card. */
+/**
+ * Flat right-side surface that centers the form without a card.
+ *
+ * Inset stays on `COMMON_SPACING_SCALE` (PADDING-5 to PADDING-6, `p-6` to `p-8`): the scale has no
+ * step past `p-8`, so the inset steps once at `sm` and holds rather than escalating further at
+ * `lg`/`xl` with off-scale values.
+ */
 export const AUTH_FORM_REGION_CLASS_NAME = cn(
   "flex",
   "min-h-dvh",
   "items-center",
   "justify-center",
   "px-6",
-  "py-10",
-  "sm:px-10",
-  "lg:px-14",
-  "lg:py-10",
-  "xl:px-20"
+  "py-8",
+  "sm:px-8",
+  "lg:col-span-5"
 );
 
-/** Readable form measure plus page-level control sizing. */
-export const AUTH_FORM_CONTENT_CLASS_NAME = cn(
-  "w-full",
-  "max-w-md",
-  "[&_[data-slot=button]]:w-full",
-  "[&_h2]:!text-3xl",
-  "[&_h2]:!leading-tight",
-  "sm:[&_h2]:!text-4xl"
-);
+/**
+ * Readable form measure only. Grammar's `Heading` and `Button` publish no size or width override
+ * path (`HeadingProps`/`ButtonProps` carry no `className`), so this file no longer reaches through
+ * them with a descendant selector; see the panel's own `scale="display"` heading and the recorded
+ * Grammar gap for full-width `Button`.
+ */
+export const AUTH_FORM_CONTENT_CLASS_NAME = cn("w-full", "max-w-md");

@@ -259,7 +259,7 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
    */
   const header = <div className={AUTH_PANEL_HEADER_CLASS_NAME}>{undefined}
 
-    <Heading level={2}>{props.props.title}</Heading>
+    <Heading level={2} scale="display">{props.props.title}</Heading>
 
 
     <Text size="sm" tone="muted">{props.props.subtitle}</Text></div>;
