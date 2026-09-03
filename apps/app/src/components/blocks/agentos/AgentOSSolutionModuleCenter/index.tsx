@@ -7,7 +7,7 @@ import type { AgentosSolutionModule } from "@/modules/api/console";
 import { nivoQueryData } from "@/modules/query";
 import { useSession } from "@/modules/auth/session";
 import useProvisioningRealtime from "@/modules/realtime/provisioning";
-import { AgentOSSolutionModuleCenterBase, type AgentOSSolutionLedgerRow, type AgentOSSolutionModuleCard } from "./component";
+import { AgentOSSolutionModuleCenterBase, type AgentOSSolutionLedgerRow, type AgentOSSolutionLedgerSectionState, type AgentOSSolutionModuleCard } from "./component";
 
 /** Exact owner workspace scope consumed by the connected module center. */
 export type AgentOSSolutionModuleCenterProps = {
@@ -20,6 +20,11 @@ const toneOf = (status: string): "neutral" | "success" | "warning" | "danger" =>
   if (status === "failed") return "danger";
   if (status === "provisioning" || status === "degraded") return "warning";
   return "neutral";
+};
+const sectionState = (answer: ReadonlyArray<unknown> | null | undefined): AgentOSSolutionLedgerSectionState => {
+  if (answer === undefined) return "resting";
+  if (answer === null) return "refused";
+  return answer.length === 0 ? "empty" : "ready";
 };
 
 /** Own catalog/list/install calls and follow one exact installation Saga at a time. */
@@ -45,9 +50,19 @@ export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterPr
   const [pendingKey, setPendingKey] = useState<string>();
   const [trackedInstallationId, setTrackedInstallationId] = useState<string>();
   const [outcome, setOutcome] = useState<string>();
+  const [retryingInstalled, setRetryingInstalled] = useState(false);
+  const [retryingCatalogue, setRetryingCatalogue] = useState(false);
   const refresh = useCallback(async () => {
     await Promise.all([refreshCatalog(), refreshInstallations()]);
   }, [refreshCatalog, refreshInstallations]);
+  const onRetryInstalled = useCallback(() => {
+    setRetryingInstalled(true);
+    void Promise.resolve(refreshInstallations()).finally(() => setRetryingInstalled(false));
+  }, [refreshInstallations]);
+  const onRetryCatalogue = useCallback(() => {
+    setRetryingCatalogue(true);
+    void Promise.resolve(refreshCatalog()).finally(() => setRetryingCatalogue(false));
+  }, [refreshCatalog]);
   const realtime = useProvisioningRealtime({
     accessToken,
     target: accessToken === null || trackedInstallationId === undefined ? null : {
@@ -131,7 +146,7 @@ export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterPr
   const refused = catalog === null || installations === null;
   const settledState = refused ? "refused" : "answered";
   const ledger = layout === "ledger";
-  return <AgentOSSolutionModuleCenterBase layout={layout} state={catalog === undefined || installations === undefined ? "resting" : settledState} mode={mode} sectionLabel={mode === "catalog" ? t("catalogSection") : t("installedSection")} installedLabel={t("installedSection")} catalogLabel={t("catalogSection")} installedRows={installedRows} modesLabel={t("modesLabel")} modes={[{
+  return <AgentOSSolutionModuleCenterBase layout={layout} state={catalog === undefined || installations === undefined ? "resting" : settledState} mode={mode} sectionLabel={mode === "catalog" ? t("catalogSection") : t("installedSection")} modesLabel={t("modesLabel")} modes={[{
     id: "catalog",
     label: t("modes.catalog")
   }, {
@@ -139,5 +154,24 @@ export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterPr
     label: t("modes.installed")
   }]} refusedLabel={t("refused")} emptyLabel={t("empty")} emptyActionLabel={t("browse")} cards={ledger || mode === "catalog" ? catalogCards : installedCards} pendingId={pendingKey} outcome={outcome} onSelectMode={setMode} onPressCard={id => {
     if (ledger || mode === "catalog") void install(id as AgentosSolutionModule["key"]);
+  }} ledger={{
+    installedLabel: t("installedSection"),
+    catalogLabel: t("catalogSection"),
+    installedState: sectionState(installations),
+    catalogueState: sectionState(catalog),
+    installedRows,
+    installedEmptyTitle: t("emptyTitle"),
+    installedEmpty: t("emptyHint"),
+    installedRefusedTitle: t("refusedTitle"),
+    installedRefused: t("refusedHint"),
+    catalogueEmptyTitle: t("catalogueEmptyTitle"),
+    catalogueEmpty: t("catalogueEmptyHint"),
+    catalogueRefusedTitle: t("catalogueRefusedTitle"),
+    catalogueRefused: t("catalogueRefusedHint"),
+    retry: t("retry"),
+    retryingInstalled,
+    retryingCatalogue,
+    onRetryInstalled,
+    onRetryCatalogue
   }} />;
 };

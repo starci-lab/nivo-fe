@@ -253,6 +253,15 @@
       },
       "solutions": {
         "modesLabel": "Chế độ xem solution module",
+        "emptyTitle": "Chưa cài solution nào",
+        "emptyHint": "Cài một gói từ catalogue bên dưới thì nó sẽ hiện ở đây.",
+        "refusedTitle": "Chưa đọc được danh sách solution đã cài",
+        "refusedHint": "Catalogue bên dưới vẫn dùng được.",
+        "catalogueEmptyTitle": "Chưa có gói solution nào",
+        "catalogueEmptyHint": "Nivo xuất bản gói vào catalogue này; chưa có gói thì chưa cài được.",
+        "catalogueRefusedTitle": "Chưa đọc được catalogue",
+        "catalogueRefusedHint": "Các module của bạn ở trên không bị ảnh hưởng.",
+        "retry": "Thử lại",
         "modes": {
           "catalog": "Khám phá",
           "installed": "Đã cài"
@@ -384,7 +393,7 @@
         "page": { "path": "Đường dẫn module", "workspace": "Workspace", "title": "Module", "description": "Tạo custom module hỏi dồn hoặc cài một giải pháp Nivo bất biến cho workspace này.", "eyebrow": "AgentOS module studio", "create": "Tạo module" },
         "createPage": { "path": "Đường dẫn tạo module", "modules": "Quay lại module", "title": "Tạo custom module", "description": "Bắt đầu từ kết quả cần đạt. Nivo chỉ hỏi tiếp những thông tin còn thiếu.", "eyebrow": "Hỏi dồn thích ứng" },
         "studioPage": { "path": "Đường dẫn module studio", "modules": "Quay lại module", "title": "Module studio", "description": "Tiếp tục hội thoại đã lưu, bổ sung tài liệu và duyệt đúng phiên bản trước khi publish.", "eyebrow": "Custom module có thể tiếp tục", "sections": "Quy trình module" },
-        "collection": { "title": "Custom module", "refused": "Nivo chưa đọc được custom module của workspace này. Catalogue giải pháp bên dưới vẫn dùng được.", "empty": "Workspace này chưa có custom module nào.", "create": "Tạo module", "custom": "Tùy chỉnh", "progress": "Hoàn thành {progress}%", "inspect": "Xem module", "resume": "Tiếp tục hỏi dồn" },
+        "collection": { "title": "Custom module", "refused": "Nivo chưa đọc được custom module của workspace này. Catalogue giải pháp bên dưới vẫn dùng được.", "empty": "Nút Tạo module ở trên sẽ mở phần hỏi dồn, và bản nháp sẽ hiện ở đây.", "emptyTitle": "Chưa có custom module", "refusedTitle": "Chưa đọc được custom module", "retry": "Thử lại", "create": "Tạo module", "custom": "Tùy chỉnh", "progress": "Hoàn thành {progress}%", "inspect": "Xem module", "resume": "Tiếp tục hỏi dồn" },
         "status": { "draft": "Cần bổ sung", "ready_for_review": "Sẵn sàng duyệt", "publishing": "Đang publish", "active": "Đang hoạt động", "publish_failed": "Publish thất bại" },
         "intake": { "title": "Module này cần giúp đội ngũ làm gì?", "description": "Mô tả kết quả bằng lời của thầy. Draft chỉ được tạo sau khi tiếp tục.", "fieldLabel": "Mục tiêu module", "placeholder": "Ví dụ: sàng lọc yêu cầu hỗ trợ trước khi giao cho agent", "note": "Chưa lưu gì cho tới khi bắt đầu hỏi dồn.", "action": "Bắt đầu hỏi dồn", "refused": "Nivo chưa thể bắt đầu phiên hỏi dồn này.", "guideTitle": "Cách hỏi dồn hoạt động", "guideNote": "Câu trả lời đã chấp nhận được lưu để thầy có thể rời đi và quay lại.", "steps": { "goal": "Mô tả kết quả cần đạt", "followUp": "Chỉ trả lời phần còn thiếu", "review": "Duyệt đúng một phiên bản trước khi publish" } },
         "studio": {
