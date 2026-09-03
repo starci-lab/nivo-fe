@@ -54,7 +54,7 @@ describe("OverviewPage drawing", () => {
         }
         render(<OverviewPageBase {...legacy} />)
 
-        fireEvent.click(screen.getByRole("button", { name: "Open" }))
+        fireEvent.click(screen.getByRole("button", { name: "Open Academy" }))
         fireEvent.click(screen.getByRole("button", { name: "Open AgentOS" }))
 
         expect(openApps).toHaveBeenCalledTimes(1)
