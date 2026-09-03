@@ -41,13 +41,13 @@ export type AuthenticationPageProps = AuthenticationPageViewProps;
 /**
  * Draw the authentication screen.
  *
- * @param props - {@link AuthenticationPageViewProps}
+ * @param props - {@link AuthenticationPageProps}
  * @returns The page node.
  */
-export const AuthenticationPageBase = (props: AuthenticationPageViewProps) => {
+export const AuthenticationPageBase = (props: AuthenticationPageProps) => {
   const {
     panel
-  }: AuthenticationPageViewProps = props;
+  }: AuthenticationPageProps = props;
   const panelIdentity = panel.state === "details" || panel.state === "code" ? `${panel.state}:${panel.props.mode}` : panel.state;
 
   return <main className={AUTH_PAGE_CLASS_NAME}>
