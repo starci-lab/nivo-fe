@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useMutateAnswerAgentosCustomModuleIntakeSwr } from "@/hooks/swr";
+import { useMutateAnswerAgentosCustomModuleIntakeSwr } from "@/hooks";
 import { useAgentOSModuleStudioProjection } from "@/components/pages/AgentOSModuleStudioPage/component";
 import { AgentOSModuleInterviewBase } from "./component";
 type AgentOSModuleInterviewProps = {

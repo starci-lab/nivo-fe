@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { nivoQueryData, useQueryMyExpertSitesSwr } from "@/hooks/swr";
+import { useQueryMyExpertSitesSwr } from "@/hooks";
+import { nivoQueryData } from "@/modules/query";
+import { ACADEMY_HOST_SUFFIX } from "@/modules/config";
 import { AcademyControlCenterBase, type AcademyControlCenterMode } from "./component";
 
 /** Exact Academy identity supplied by the resource route. */
@@ -27,7 +29,7 @@ export const AcademyControlCenter = (props: AcademyControlCenterProps) => {
   useEffect(() => {
     setMounted(true);
   }, []);
-  const publicHost = site === null || site === undefined ? undefined : site.customDomain ?? `${site.slug}${process.env.NEXT_PUBLIC_ACADEMY_HOST_SUFFIX ?? ".nivo.vn"}`;
+  const publicHost = site === null || site === undefined ? undefined : site.customDomain ?? `${site.slug}${ACADEMY_HOST_SUFFIX}`;
   if (!mounted) return null;
   const settledState = site === null ? "refused" : "ready";
   return <AcademyControlCenterBase state={site === undefined ? "restoring" : settledState} title={site?.slug ?? t("title")} siteId={siteId} publicHost={publicHost} mode={mode} labels={{

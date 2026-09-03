@@ -52,10 +52,7 @@ export const AgentOSSummaryBase = (props: AgentOSSummaryProps) => {
   if (state.phase === "empty") return <SurfaceCard
     label={label}
     composition="joined"
-  ><div
-      className={AGENT_OS_SUMMARY_CONTENT_CLASS_NAME}
-      data-contract="GAP-4 PADDING-4"
-    >
+  ><div className={AGENT_OS_SUMMARY_CONTENT_CLASS_NAME}>
       <EmptyNotice message={state.message} />
     </div></SurfaceCard>;
   const workspace = state.phase === "pending" ? undefined : state.workspace;
@@ -70,18 +67,9 @@ export const AgentOSSummaryBase = (props: AgentOSSummaryProps) => {
   return <SurfaceCard
     label={label}
     composition="joined"
-  ><div
-      className={AGENT_OS_SUMMARY_CONTENT_CLASS_NAME}
-      data-contract="GAP-4 PADDING-4"
-    >
-      <div
-        className={AGENT_OS_SUMMARY_ROW_CLASS_NAME}
-        data-contract="GAP-3"
-      >
-        <div
-          className={AGENT_OS_SUMMARY_COPY_CLASS_NAME}
-          data-contract="GAP-1"
-        >
+  ><div className={AGENT_OS_SUMMARY_CONTENT_CLASS_NAME}>
+      <div className={AGENT_OS_SUMMARY_ROW_CLASS_NAME}>
+        <div className={AGENT_OS_SUMMARY_COPY_CLASS_NAME}>
           <Text weight="semibold" isSkeleton={isLoading}>{workspace?.name ?? ""}</Text>
           <Text size="xs" tone="muted" isSkeleton={isLoading}>{workspace?.description ?? ""}</Text>
         </div>

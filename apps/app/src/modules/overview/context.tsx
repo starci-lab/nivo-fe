@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo } from "react";
 import type { ComponentType } from "react";
-import { useQueryMyAgentWorkspacesSwr, useQueryMyDomainsSwr, useQueryMyExpertSitesSwr, useQueryMyInvoicesSwr, useQueryMyPodOpenclawStatusSwr, useQueryMyWalletSwr } from "@/hooks/swr";
+import { useQueryMyAgentWorkspacesSwr, useQueryMyDomainsSwr, useQueryMyExpertSitesSwr, useQueryMyInvoicesSwr, useQueryMyPodOpenclawStatusSwr, useQueryMyWalletSwr } from "@/hooks";
 import { type AgentWorkspaceRow, type DomainRow, type ExpertSiteRow, type InvoiceRow, type PodStatusRow, type WalletRow } from "@/modules/api/console";
 import type { Result } from "@/modules/api/graphql";
 

@@ -119,6 +119,7 @@
     "navigationLabel": "Console navigation",
     "topNavigationLabel": "Console primary navigation",
     "actionsLabel": "Account actions",
+    "breadcrumbLabel": "You are here",
     "openMenu": "Menu",
     "closeMenu": "Close",
     "unavailable": "Unavailable",

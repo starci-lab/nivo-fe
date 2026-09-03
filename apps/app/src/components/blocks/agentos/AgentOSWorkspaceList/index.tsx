@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { fleetResourceHref, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
-import { useQueryMyAgentWorkspacesSwr } from "@/hooks/swr";
+import { useQueryMyAgentWorkspacesSwr } from "@/hooks";
 import { AgentOSWorkspaceListBase, type AgentOSWorkspaceListViewProps } from "./component";
 /** Public API role for AgentOSWorkspaceListProps. */
 export type AgentOSWorkspaceListProps = object;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { useMutateStartAgentosCustomModuleIntakeSwr } from "@/hooks/swr";
+import { useMutateStartAgentosCustomModuleIntakeSwr } from "@/hooks";
 import { AgentOSModuleIntakeBase } from "./component";
 type AgentOSModuleIntakeProps = {
   readonly workspaceId: string;

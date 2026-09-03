@@ -88,7 +88,7 @@ const SelectionListView = ({ props, on }: SelectionListProps) => {
           isDisabled={item.isDisabled}
           className={compact ?
           "group flex size-11 cursor-pointer items-center justify-center rounded-full text-foreground outline-none data-[disabled=true]:cursor-default data-[disabled=true]:opacity-50 data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent" :
-          "flex cursor-pointer items-center gap-3 rounded-large px-3 py-2 text-foreground outline-none data-[disabled=true]:cursor-default data-[disabled=true]:opacity-50 data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent data-[hovered=true]:bg-default data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
+          "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-foreground outline-none data-[disabled=true]:cursor-default data-[disabled=true]:opacity-50 data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent data-[hovered=true]:bg-default data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           }>
           
                             {compact ?

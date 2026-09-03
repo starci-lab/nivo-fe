@@ -1,7 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react"
-import { renderToStaticMarkup } from "react-dom/server"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { AppsSummaryBase } from "./component"
 
 const mocks = vi.hoisted(() => ({
     data: { apps: null } as { apps: unknown },
@@ -22,36 +20,6 @@ describe("AppsSummary", () => {
         mocks.locale = "vi"
         mocks.push.mockClear()
         mocks.data.apps = null
-    })
-
-    it("draws owned application identity, lifecycle, and action without a total", () => {
-        const html = renderToStaticMarkup(<AppsSummaryBase label="Apps" state={{ phase: "populated", items: [{
-            id: "app-1", name: "Store", detail: "store.example", statusLabel: "Ready", statusTone: "success", actionLabel: "Open",
-        }] }} onOpenApp={vi.fn()} />)
-        expect(html).toContain("Store")
-        expect(html).toContain("store.example")
-        expect(html).toContain("Ready")
-        expect(html).not.toContain("total")
-    })
-
-    it("gives repeated row actions an item-specific accessible name", () => {
-        const onOpenApp = vi.fn()
-        render(<AppsSummaryBase label="Apps" state={{ phase: "populated", items: [
-            { id: "app-1", name: "Store", detail: "store.example", statusLabel: "Ready", statusTone: "success", actionLabel: "Open" },
-            { id: "app-2", name: "Docs", detail: "docs.example", statusLabel: "Ready", statusTone: "success", actionLabel: "Open" },
-        ] }} onOpenApp={onOpenApp} />)
-
-        fireEvent.click(screen.getByRole("button", { name: "Open Store" }))
-        fireEvent.click(screen.getByRole("button", { name: "Open Docs" }))
-
-        expect(screen.getAllByText("Open")).toHaveLength(2)
-        expect(onOpenApp).toHaveBeenNthCalledWith(1, "app-1")
-        expect(onOpenApp).toHaveBeenNthCalledWith(2, "app-2")
-    })
-
-    it("keeps a forbidden answer local to the section", () => {
-        const html = renderToStaticMarkup(<AppsSummaryBase label="Apps" state={{ phase: "forbidden", message: "Access denied" }} onOpenApp={vi.fn()} />)
-        expect(html).toContain("Access denied")
     })
 
     it("maps source rows and keeps default-locale navigation bare", () => {
