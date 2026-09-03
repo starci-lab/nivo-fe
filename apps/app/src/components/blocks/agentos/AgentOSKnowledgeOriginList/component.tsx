@@ -1,3 +1,4 @@
+import { ROW_CLASS_NAME } from "./classNames";
 import { EmptyNotice as DirectionEmpty, SectionHeader as DirectionHeader, SurfaceListCard as DirectionList, Badge, Text } from "@starci/grammar/common";
 import type { AgentosAiKnowledgeReadiness } from "@/modules/api/console";
 /** Resolved copy used by the owner-safe knowledge provenance inventory. */
@@ -19,5 +20,5 @@ const shortDigest = (digest: string | null) => digest === null ? "—" : `${dige
 /** Draw Nivo, installed-module and uploaded-document knowledge as peer provenance rows. */
 export const AgentOSKnowledgeOriginListBase = (props: AgentOSKnowledgeOriginListProps) => {
     const { origins, labels, loading = false } = props;
-    return <DirectionList label={labels.title} isLoading={loading}>{loading ? <div className="border-b border-separator px-4 py-3 last:border-b-0" data-contract="BOUNDARY-2 PADDING-4 PADDING-3"><Text isSkeleton>{labels.title}</Text></div> : origins.length === 0 ? <DirectionEmpty message={labels.unknownVersion}/> : origins.map((origin, index) => <div key={index} className="border-b border-separator px-4 py-3 last:border-b-0" data-contract="BOUNDARY-2 PADDING-4 PADDING-3"><DirectionHeader level={3} title={origin.origin} description={<Text size="xs" tone="muted">{origin.version ?? labels.unknownVersion} · {shortDigest(origin.digest)} · {labels.documents(origin.documentCount)}</Text>} action={<Badge tone={origin.digest === null ? "warning" : "success"}>{origin.digest === null ? labels.unknownVersion : labels.current}</Badge>}/></div>)}</DirectionList>;
+    return <DirectionList label={labels.title} isLoading={loading}>{loading ? <div className={ROW_CLASS_NAME} data-contract="BOUNDARY-2 PADDING-4 PADDING-3"><Text isSkeleton>{labels.title}</Text></div> : origins.length === 0 ? <DirectionEmpty message={labels.unknownVersion}/> : origins.map((origin, index) => <div key={index} className={ROW_CLASS_NAME} data-contract="BOUNDARY-2 PADDING-4 PADDING-3"><DirectionHeader level={3} title={origin.origin} description={<Text size="xs" tone="muted">{origin.version ?? labels.unknownVersion} · {shortDigest(origin.digest)} · {labels.documents(origin.documentCount)}</Text>} action={<Badge tone={origin.digest === null ? "warning" : "success"}>{origin.digest === null ? labels.unknownVersion : labels.current}</Badge>}/></div>)}</DirectionList>;
 };

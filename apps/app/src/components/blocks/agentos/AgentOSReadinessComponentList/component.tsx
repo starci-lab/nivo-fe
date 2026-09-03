@@ -1,3 +1,4 @@
+import { ROW_CLASS_NAME } from "./classNames";
 import { EmptyNotice as DirectionEmpty, SectionHeader as DirectionHeader, SurfaceListCard as DirectionList, Badge, Text, type BadgeTone } from "@starci/grammar/common";
 import type { AgentosAiKnowledgeReadiness } from "@/modules/api/console";
 /** Resolved copy used by the readiness component evidence inventory. */
@@ -21,5 +22,5 @@ const toneOf = (verdict: string): BadgeTone => {
 /** Draw the bounded provider, model, embedding, Qdrant and retrieval verdicts. */
 export const AgentOSReadinessComponentListBase = (props: AgentOSReadinessComponentListProps) => {
     const { components, labels, loading = false } = props;
-    return <DirectionList label={labels.title} isLoading={loading}>{loading ? <div className="border-b border-separator px-4 py-3 last:border-b-0" data-contract="BOUNDARY-2 PADDING-4 PADDING-3"><Text isSkeleton>{labels.evidence}</Text></div> : components.length === 0 ? <DirectionEmpty message={labels.evidence}/> : components.map((component, index) => <div key={index} className="border-b border-separator px-4 py-3 last:border-b-0" data-contract="BOUNDARY-2 PADDING-4 PADDING-3"><DirectionHeader level={3} title={component.component} description={<Text size="xs" tone="muted">{labels.evidence}</Text>} action={<Badge tone={toneOf(component.verdict)}>{component.verdict}</Badge>}/></div>)}</DirectionList>;
+    return <DirectionList label={labels.title} isLoading={loading}>{loading ? <div className={ROW_CLASS_NAME} data-contract="BOUNDARY-2 PADDING-4 PADDING-3"><Text isSkeleton>{labels.evidence}</Text></div> : components.length === 0 ? <DirectionEmpty message={labels.evidence}/> : components.map((component, index) => <div key={index} className={ROW_CLASS_NAME} data-contract="BOUNDARY-2 PADDING-4 PADDING-3"><DirectionHeader level={3} title={component.component} description={<Text size="xs" tone="muted">{labels.evidence}</Text>} action={<Badge tone={toneOf(component.verdict)}>{component.verdict}</Badge>}/></div>)}</DirectionList>;
 };

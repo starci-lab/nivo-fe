@@ -1,3 +1,4 @@
+import { SECTIONS_CLASS_NAME, CONTENT_CLASS_NAME } from "./classNames";
 import { AgentOSSolutionModuleCenter } from "@/components/blocks/agentos/AgentOSSolutionModuleCenter";
 import { AgentOSWorkspaceAiKnowledge } from "@/components/blocks/agentos/AgentOSWorkspaceAiKnowledge";
 import { AgentOSWorkspaceApplications } from "@/components/blocks/agentos/AgentOSWorkspaceApplications";
@@ -69,10 +70,10 @@ export const AgentOSWorkspaceControlCenterBase = (props: AgentOSWorkspaceControl
     const sectionsOf = () => {
         if (controlCenterState !== "ready" || data === undefined) {
             const isRefused = controlCenterState === "refused";
-            return [isRefused ? <EmptyNotice key="state" message={message ?? pageCopy.refusedTitle} actionLabel={pageCopy.retry} onAction={onRetry} isActionPending={retryPending}/> : <SurfaceCard key="state" label={pageCopy.stateSection}><Text isSkeleton>{pageCopy.loadingTitle}</Text></SurfaceCard>];
+            return [isRefused ? <EmptyNotice key="state" message={message ?? pageCopy.refusedTitle} actionLabel={pageCopy.retry} onAction={onRetry} isActionPending={retryPending}/> : <SurfaceCard key="state" label={pageCopy.stateSection}><Text live="polite">{pageCopy.loadingTitle}</Text></SurfaceCard>];
         }
         if (pageState === "overview") {
-            return [<DirectionLayout key="overview" primary={<div className="flex min-w-0 flex-col gap-6" data-contract="GAP-5"><AgentOSWorkspaceSummary data={data} labels={labels.summary}/><AgentOSSolutionModuleCenter workspaceId={data.workspace.id}/><AgentOSWorkspaceApplications apps={data.apps} labels={labels.applications} launchState={launchState} openClawLaunchHref={openClawLaunchHref} onManageOpenClaw={onOpenAgentConsole}/></div>} rail={<AgentOSWorkspaceRuntime data={data} labels={labels.runtime} formatDate={formatDate}/>} railWidth="standard" align="start"/>];
+            return [<DirectionLayout key="overview" primary={<div className={SECTIONS_CLASS_NAME} data-contract="GAP-5"><AgentOSWorkspaceSummary data={data} labels={labels.summary}/><AgentOSSolutionModuleCenter workspaceId={data.workspace.id}/><AgentOSWorkspaceApplications apps={data.apps} labels={labels.applications} launchState={launchState} openClawLaunchHref={openClawLaunchHref} onManageOpenClaw={onOpenAgentConsole}/></div>} rail={<AgentOSWorkspaceRuntime data={data} labels={labels.runtime} formatDate={formatDate}/>} railWidth="standard" align="start"/>];
         }
         if (pageState === "applications") {
             return [<AgentOSWorkspaceApplications key="item-0" apps={data.apps} labels={labels.applications} launchState={launchState} openClawLaunchHref={openClawLaunchHref} onManageOpenClaw={onOpenAgentConsole}/>];
@@ -93,5 +94,5 @@ export const AgentOSWorkspaceControlCenterBase = (props: AgentOSWorkspaceControl
     };
     const sections = sectionsOf();
     const tabs = controlCenterState === "ready" ? <DirectionTabs label={labels.tabsLabel} selectedKey={pageState} items={labels.tabs} onSelect={key => onSelectPageState(key as AgentOSWorkspacePageState)} panelId={key => "workspace-panel-" + key} labelVisibility="always" inset="none"/> : null;
-    return <DirectionPage measure="product"><div className="flex min-w-0 flex-col gap-2" data-contract="GAP-2"><DirectionHeader level={1} eyebrow={pageCopy.eyebrow} title={title} description={<Text size="md" tone="muted">{pageCopy.description}</Text>}/>{tabs}<section role="tabpanel" id={"workspace-panel-" + pageState} aria-label={labels.tabs.find(tab => tab.id === pageState)?.label}><div className="flex min-w-0 flex-col gap-6" data-contract="GAP-5">{sections}</div></section></div></DirectionPage>;
+    return <DirectionPage measure="product"><div className={CONTENT_CLASS_NAME} data-contract="GAP-2"><DirectionHeader level={1} eyebrow={pageCopy.eyebrow} title={title} description={<Text size="md" tone="muted">{pageCopy.description}</Text>}/>{tabs}<section role="tabpanel" id={"workspace-panel-" + pageState} aria-label={labels.tabs.find(tab => tab.id === pageState)?.label}><div className={SECTIONS_CLASS_NAME} data-contract="GAP-5">{sections}</div></section></div></DirectionPage>;
 };

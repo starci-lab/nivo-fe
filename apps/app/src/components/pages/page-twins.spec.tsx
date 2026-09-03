@@ -1,3 +1,4 @@
+import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 
@@ -99,7 +100,7 @@ describe("pure page twins", () => {
             stack: {} as AgentOSWorkspacePageLabels["stack"],
             operations: {} as AgentOSWorkspacePageLabels["operations"],
         } satisfies AgentOSWorkspacePageLabels
-        const html = renderToStaticMarkup(<AgentOSWorkspacePageBase
+        render(<AgentOSWorkspacePageBase
             pageState="overview"
             controlCenterState="loading"
             labels={labels}
@@ -109,7 +110,7 @@ describe("pure page twins", () => {
             onOpenAgentConsole={vi.fn()}
             formatDate={(value) => value}
         />)
-        expect(html).toContain("Loading workspace")
+        expect(screen.getByRole("status")).toHaveTextContent("Loading workspace")
     })
 
     it("renders module loading and refused projections", () => {
