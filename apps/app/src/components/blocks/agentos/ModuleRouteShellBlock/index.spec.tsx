@@ -44,8 +44,24 @@ describe.each(["en", "vi"] as const)("Shell display names and navigation %s", lo
   for (const destination of ["test", "operate", "settings", "diagnostics"] as const) fireEvent.click(screen.getByRole("tab", { name: copy[destination] }))
   expect(onNavigate.mock.calls).toEqual([["test"], ["operate"], ["settings"], ["diagnostics"]])
   fireEvent.click(screen.getByText(copy.modules))
-  expect(onBackToModules).toHaveBeenCalledExactlyOnceWith()
+  expect(onBackToModules).toHaveBeenCalledTimes(1)
   view.unmount()
  })
 })
 
+
+describe.each(["en", "vi"] as const)("Module back navigation %s", locale => {
+ it("returns to Modules while retaining the human heading and full machine key", () => {
+  const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.shell
+  const onBackToModules = vi.fn()
+  const view = render(<ModuleRouteShellBlock locale={locale} workspaceLabel="Workspace with a long identity" moduleName="custom:1234567890abcdef1234567890" moduleKind="generic-agent" lifecycleLabel="ready" contextVersion="not applied" channelLabel="Channel not connected" controllerLabel="Controller healthy" activeView="setup" content={() => <div>Setup body</div>} contentProps={{}} onBackToModules={onBackToModules} onNavigate={() => undefined} />)
+  expect(screen.getByRole("heading", { level: 1, name: copy.genericAgent })).toBeInTheDocument()
+  expect(screen.getByText("custom:1234567890abcdef1234567890")).toBeInTheDocument()
+  expect(screen.getByText("Setup body")).toBeInTheDocument()
+  const backLink = screen.getByRole("link", { name: copy.modules })
+  expect(backLink).toHaveTextContent(copy.modules)
+  fireEvent.click(backLink)
+  expect(onBackToModules).toHaveBeenCalledTimes(1)
+  view.unmount()
+ })
+})

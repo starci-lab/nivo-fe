@@ -102,7 +102,6 @@ const ROUTES: ReadonlyArray<{
 export const ModuleRouteShellBlock = <P extends object,>(props: ModuleRouteShellBlockProps<P>) => {
   const { copy } = props;
   const {
-    workspaceLabel,
     moduleName,
     moduleKind,
     lifecycleLabel,
@@ -123,21 +122,11 @@ export const ModuleRouteShellBlock = <P extends object,>(props: ModuleRouteShell
 
 
   <Breadcrumbs props={{
-      mode: "trail",
-      label: copy.shell.path,
-      steps: [{
-        id: "workspace",
-        label: workspaceLabel
-      }, {
-        id: "modules",
-        label: copy.shell.modules
-      }, {
-        id: "module",
-        label: moduleName,
-        isCurrent: true
-      }]
+      mode: "back",
+      label: copy.shell.modules,
+      backLabel: copy.shell.modules
     }} on={{
-      activate: id => id !== "module" && onBackToModules()
+      back: onBackToModules
       }} /><div>
 
 
