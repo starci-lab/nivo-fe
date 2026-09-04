@@ -1,4 +1,22 @@
 "use client";
+
+
+
+/** Settled display labels and typed formatters supplied by the page owner. */
+export type ExecuteSessionRailBlockCopy = {
+  readonly "sessions": {
+    readonly "archived": string;
+    readonly "collapse": string;
+    readonly "expand": string;
+    readonly "label": string;
+    readonly "new": string;
+    readonly "title": string;
+  };
+};
+
+
+
+
 import { Button, Icon } from "@starci/grammar/common";
 
 import { ChoiceTabs, CollapsibleRail, SelectionList, type SelectionListGroup, nivoIconSource } from "@nivo/ui";
@@ -13,6 +31,7 @@ export type ExecuteSession = {
 
 /** Session navigation commands owned by the responsive rail adapter. */
 export type ExecuteSessionRailBlockProps = {
+  readonly copy: ExecuteSessionRailBlockCopy;
   readonly sessions: ReadonlyArray<ExecuteSession>;
   readonly selectedId: string | null;
   readonly pending?: boolean;
@@ -20,34 +39,40 @@ export type ExecuteSessionRailBlockProps = {
   readonly onCreate: () => void;
 };
 type SessionSelectionProps = {
+  readonly copy: ExecuteSessionRailBlockCopy;
   readonly sessions: ReadonlyArray<ExecuteSession>;
   readonly selectedId: string | null;
   readonly onSelect: (sessionId: string) => void;
   readonly presentation: "expanded" | "compact";
 };
-const groupsFor = (sessions: ReadonlyArray<ExecuteSession>): ReadonlyArray<SelectionListGroup> => [{
+const groupsFor = (sessions: ReadonlyArray<ExecuteSession>, copy: ExecuteSessionRailBlockCopy): ReadonlyArray<SelectionListGroup> => [{
   id: "execute-sessions",
   items: sessions.map(session => ({
     id: session.id,
     label: session.title,
     icon: "agentos" as const,
-    status: session.status === "archived" ? "Archived" : session.updatedLabel
+    status: session.status === "archived" ? copy.sessions.archived : session.updatedLabel
   }))
 }];
-const SessionSelection = ({
+const SessionSelection = ({ copy,
   sessions,
   selectedId,
   presentation,
   onSelect
-}: SessionSelectionProps) => <SelectionList props={{
-  label: "Execute sessions",
+}: SessionSelectionProps) => {
+  
+  return (<SelectionList props={{
+  label: copy.sessions.label,
   selectedKey: selectedId ?? "",
   presentation,
-  groups: groupsFor(sessions)
+  groups: groupsFor(sessions, copy)
 }} on={{
   activate: onSelect
-}} />;
-const SessionRailBody = (props: ExecuteSessionRailBlockProps) => <div>
+}} />);
+};
+const SessionRailBody = (props: ExecuteSessionRailBlockProps) => {
+  const { copy } = props;
+  return (<div>
 
   <SessionSelection {...props} presentation="expanded" />
 
@@ -55,11 +80,13 @@ const SessionRailBody = (props: ExecuteSessionRailBlockProps) => <div>
     variant="primary"
     isPending={props.pending}
     onPress={props.onCreate}
-  >New session</Button></div>;
+  >{copy.sessions.new}</Button></div>);
+};
 const SessionRailToggle = () => <Icon source={nivoIconSource("sidebar", "leading")} usage="leading" />;
 
 /** Navigate multiple Execute conversations through one selected identity at every breakpoint. */
 export const ExecuteSessionRailBlock = (props: ExecuteSessionRailBlockProps) => {
+  const { copy } = props;
   const {
     sessions,
     selectedId,
@@ -68,6 +95,7 @@ export const ExecuteSessionRailBlock = (props: ExecuteSessionRailBlockProps) => 
     onCreate
   }: ExecuteSessionRailBlockProps = props;
   const railProps = {
+    copy,
     sessions,
     selectedId,
     pending,
@@ -79,7 +107,7 @@ export const ExecuteSessionRailBlock = (props: ExecuteSessionRailBlockProps) => 
 
 
       <ChoiceTabs props={{
-        label: "Execute sessions",
+        label: copy.sessions.label,
         selectedKey: selectedId ?? "",
         tabs: sessions.map(session => ({
           id: session.id,
@@ -95,12 +123,12 @@ export const ExecuteSessionRailBlock = (props: ExecuteSessionRailBlockProps) => 
         variant="secondary"
         isPending={pending}
         onPress={onCreate}
-      >New session</Button></div>
+      >{copy.sessions.new}</Button></div>
 
 
 
-    <CollapsibleRail ariaLabel="Execute sessions" title="Sessions" rail={SessionRailBody} railProps={railProps} collapsedRail={SessionSelection} collapsedRailProps={{
+    <CollapsibleRail ariaLabel={copy.sessions.label} title={copy.sessions.title} rail={SessionRailBody} railProps={railProps} collapsedRail={SessionSelection} collapsedRailProps={{
       ...railProps,
       presentation: "compact"
-    }} toggleControl={SessionRailToggle} toggleControlProps={{}} collapseLabel="Collapse session rail" expandLabel="Expand session rail" storageKey="nivo:agentos:execute-sessions" /></div>;
+    }} toggleControl={SessionRailToggle} toggleControlProps={{}} collapseLabel={copy.sessions.collapse} expandLabel={copy.sessions.expand} storageKey="nivo:agentos:execute-sessions" /></div>;
 };

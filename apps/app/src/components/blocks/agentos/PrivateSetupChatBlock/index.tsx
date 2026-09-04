@@ -1,132 +1,168 @@
 "use client";
 
-import { useState } from "react";
-import { ChoiceTabs } from "@nivo/ui";
-import { SurfaceCard, Button, Input, Text } from "@starci/grammar/common";
+type SetupRevisionValues = { readonly revision: number | "?"; readonly status: string };
 
-/** One accepted turn in the installation's private resumable Setup session. */
+/** Settled display labels and typed formatters supplied by the page owner. */
+export type PrivateSetupChatBlockCopy = {
+  readonly "setup": {
+    readonly "actor": {
+      readonly "assistant": string;
+      readonly "system": string;
+      readonly "user": string;
+    };
+    readonly "emptyDescription": string;
+    readonly "emptyTitle": string;
+    readonly "messageHint": string;
+    readonly "messageLabel": string;
+    readonly "messagePlaceholder": string;
+    readonly "messageRefused": string;
+    readonly "messageUnconfirmed": string;
+    readonly "messages": string;
+    readonly "openVersions": string;
+    readonly "private": string;
+    readonly "privateChat": string;
+    readonly "revision": (values: SetupRevisionValues) => string;
+    readonly "revisionComplete": string;
+    readonly "revisionStatus": {
+      readonly "completed": string;
+      readonly "open": string;
+      readonly "ready": string;
+      readonly "superseded": string;
+      readonly "unavailable": string;
+    };
+    readonly "send": string;
+  };
+};
+
+
+import { Badge, Button, ChatWorkspace, Heading, Input, SurfaceCard, Text, TextAction } from "@starci/grammar/common";
+
+import {
+  PRIVATE_SETUP_COMPOSER_CLASS_NAME,
+  PRIVATE_SETUP_CONVERSATION_CLASS_NAME,
+  PRIVATE_SETUP_EMPTY_CLASS_NAME,
+  PRIVATE_SETUP_HEADER_CLASS_NAME,
+  PRIVATE_SETUP_HEADER_COPY_CLASS_NAME,
+  PRIVATE_SETUP_HOST_CLASS_NAME,
+  PRIVATE_SETUP_MESSAGE_CLASS_NAME,
+  PRIVATE_SETUP_READONLY_CLASS_NAME,
+} from "./classNames";
+
+/** A persisted conversation turn belonging to a private Setup revision. */
 export type SetupMessage = {
   readonly id: string;
   readonly role: "user" | "assistant" | "system";
   readonly content: string;
 };
 
-/** One immutable or resumable Setup revision identity visible only to the owner. */
+/** Revision identity and lifecycle used by the history selector. */
 export type SetupRevision = {
   readonly id: string;
   readonly revision: number;
   readonly status: "open" | "ready" | "completed" | "superseded";
 };
 
-/** Runtime data passed through the typed Setup chat body component. */
-export type PrivateSetupChatContentProps = {
-  readonly messages: ReadonlyArray<SetupMessage>;
-  readonly draft: string;
-  readonly composerKey: number;
-  readonly pending: boolean;
-  readonly refused: boolean;
-  readonly revisions: ReadonlyArray<SetupRevision>;
-  readonly selectedRevisionId: string;
-  readonly canSend: boolean;
-  readonly canStartRevision: boolean;
-  readonly showRevisionControls: boolean;
-  readonly onDraft: (content: string) => void;
-  readonly onSubmit: () => void;
-  readonly onSelectRevision: (sessionId: string) => void;
-  readonly onStartRevision: () => void;
-};
-
-/** Public Setup chat boundary; Execute histories are intentionally absent. */
+/** Controlled conversation, draft and command feedback supplied by the Setup owner. */
 export type PrivateSetupChatBlockProps = {
+  readonly copy: PrivateSetupChatBlockCopy;
   readonly messages: ReadonlyArray<SetupMessage>;
   readonly pending?: boolean;
+  readonly ownPending?: boolean;
+  readonly peerDisabled?: boolean;
   readonly refused?: boolean;
+  readonly unconfirmed?: boolean;
   readonly revisions: ReadonlyArray<SetupRevision>;
   readonly selectedRevisionId: string;
   readonly canSend: boolean;
   readonly canStartRevision: boolean;
   readonly showRevisionControls?: boolean;
+  readonly draft?: string;
+  readonly onDraft?: (content: string) => void;
   readonly onSelectRevision: (sessionId: string) => void;
   readonly onStartRevision: () => void;
   readonly onSend: (content: string) => void;
+  readonly onOpenVersions?: () => void;
 };
-const actorLabel = (role: SetupMessage["role"]): string => {
-  if (role === "user") return "You";
-  if (role === "assistant") return "Nivo AI";
-  return "System";
-};
-const PrivateSetupChatContent = ({
-  messages,
-  draft,
-  composerKey,
-  pending,
-  refused,
-  revisions,
-  selectedRevisionId,
-  canSend,
-  canStartRevision,
-  showRevisionControls,
-  onDraft,
-  onSubmit,
-  onSelectRevision,
-  onStartRevision
-}: PrivateSetupChatContentProps) => <div>{!showRevisionControls || revisions.length < 2 ? undefined : <ChoiceTabs props={{
-    label: "Setup revisions",
-    selectedKey: selectedRevisionId,
-    tabs: revisions.map(revision => ({
-      id: revision.id,
-      label: `r${revision.revision} · ${revision.status}`
-    }))
-  }} on={{
-    select: onSelectRevision
-  }} />}{messages.map((message, index) => <div key={index}>{<Text size="xs" tone="muted" weight="semibold">{actorLabel(message.role)}</Text>}{<Text size="sm">{message.content}</Text>}</div>)}{canSend ? <div>{[<Input
-      key={composerKey}
-      id="agentos-private-setup-message"
-      name="setupMessage"
-      label="Teach this module about your business"
-      placeholder="Describe priorities, policies, or exceptions…"
-      isDisabled={pending}
-      variant="secondary"
-      onValueChange={onDraft}
-    />]}{<Button
-      variant="primary"
-      isDisabled={draft.trim().length === 0}
-      isPending={pending}
-      onPress={onSubmit}
-    >Send</Button>}</div> : undefined}{showRevisionControls && canStartRevision ? <Button
-      variant="secondary"
-      isPending={pending}
-      onPress={onStartRevision}
-    >Start new AI Setup chat</Button> : undefined}{refused ? <Text size="sm" tone="muted" live="assertive">{"Setup message was refused. Nothing was added to the context draft."}</Text> : canStartRevision ? <Text size="sm" tone="muted">{"This Setup revision is complete. Start a new private AI chat to revise the business context; the active version stays unchanged until Test and Apply pass."}</Text> : undefined}</div>;
 
-/** Draw the private context-building conversation through one runtime ComponentType and Tree. */
+
+
+/** Render the private Setup conversation and its revision aware composer. */
 export const PrivateSetupChatBlock = (props: PrivateSetupChatBlockProps) => {
-  const {
-    messages,
-    pending = false,
-    refused = false,
-    revisions,
-    selectedRevisionId,
-    canSend,
-    canStartRevision,
-    showRevisionControls = true,
-    onSelectRevision,
-    onStartRevision,
-    onSend
-  }: PrivateSetupChatBlockProps = props;
-  const [draft, setDraft] = useState("");
-  const [composerKey, setComposerKey] = useState(0);
-  const submit = () => {
-    const content = draft.trim();
-    if (content.length === 0) return;
-    onSend(content);
-    setDraft("");
-    setComposerKey(current => current + 1);
-  };
-  return <SurfaceCard
-    label="Private Setup chat"
-    fact={revisions.find(revision => revision.id === selectedRevisionId) === undefined ? "Setup only" : `r${revisions.find(revision => revision.id === selectedRevisionId)?.revision} · ${revisions.find(revision => revision.id === selectedRevisionId)?.status}`}
-  >
-      <PrivateSetupChatContent messages={messages} draft={draft} composerKey={composerKey} pending={pending} refused={refused} revisions={revisions} selectedRevisionId={selectedRevisionId} canSend={canSend} canStartRevision={canStartRevision} showRevisionControls={showRevisionControls} onDraft={setDraft} onSubmit={submit} onSelectRevision={onSelectRevision} onStartRevision={onStartRevision} />
-    </SurfaceCard>;
+  const { copy } = props;
+  const revision = props.revisions.find(item => item.id === props.selectedRevisionId);
+  const draft = props.draft ?? "";
+  const ownPending = props.ownPending ?? props.pending ?? false;
+  const peerDisabled = props.peerDisabled ?? false;
+  const canEdit = props.canSend;
+  const conversation = props.messages.length > 0 ? (
+    <div className={PRIVATE_SETUP_CONVERSATION_CLASS_NAME} data-contract="GAP-5 FLOW-3 PADDING-4">
+      {props.messages.map(message => (
+        <div className={PRIVATE_SETUP_MESSAGE_CLASS_NAME} data-contract="GAP-2 FLOW-3" key={message.id}>
+          <Text size="xs" weight="semibold">{copy.setup.actor[message.role]}</Text>
+          <Text size="sm">{message.content}</Text>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div className={PRIVATE_SETUP_EMPTY_CLASS_NAME} data-contract="GAP-2 MEASURE-4 FLOW-3">
+      <Heading level={4}>{copy.setup.emptyTitle}</Heading>
+      <Text size="sm" tone="muted">{copy.setup.emptyDescription}</Text>
+    </div>
+  );
+  const composer = canEdit ? (
+    <form
+      className={PRIVATE_SETUP_COMPOSER_CLASS_NAME}
+      data-contract="GAP-3 PADDING-4"
+      onSubmit={event => {
+        event.preventDefault();
+        const content = draft.trim();
+        if (content.length > 0 && !ownPending && !peerDisabled) props.onSend(content);
+      }}
+    >
+      <Input
+        id="agentos-private-setup-message"
+        name="setupMessage"
+        label={copy.setup.messageLabel}
+        hint={copy.setup.messageHint}
+        placeholder={copy.setup.messagePlaceholder}
+        variant="secondary"
+        value={draft}
+        onValueChange={props.onDraft}
+        isDisabled={ownPending || peerDisabled}
+      />
+      <Button type="submit" variant="primary" isPending={ownPending} isDisabled={draft.trim().length === 0 || ownPending || peerDisabled}>{copy.setup.send}</Button>
+      {props.refused ? <Text size="sm" live="assertive">{copy.setup.messageRefused}</Text> : null}
+      {props.unconfirmed ? <Text size="sm" tone="muted">{copy.setup.messageUnconfirmed}</Text> : null}
+    </form>
+  ) : (
+    <div className={PRIVATE_SETUP_READONLY_CLASS_NAME} data-contract="GAP-2 PADDING-4">
+      <Text size="sm" tone="muted">{copy.setup.revisionComplete}</Text>
+      <TextAction onPress={props.onOpenVersions}>{copy.setup.openVersions}</TextAction>
+    </div>
+  );
+  return (
+    <SurfaceCard ariaLabel={copy.setup.privateChat} composition="joined">
+      <div
+        className={PRIVATE_SETUP_HOST_CLASS_NAME}
+        data-contract="MEASURE-2"
+        style={props.messages.length > 0 ? { height: "clamp(26rem,56dvh,36rem)" } : undefined}
+      >
+        <ChatWorkspace
+          label={copy.setup.privateChat}
+          conversationLabel={copy.setup.messages}
+          header={
+            <div className={PRIVATE_SETUP_HEADER_CLASS_NAME} data-contract="GAP-3 PADDING-4">
+              <div className={PRIVATE_SETUP_HEADER_COPY_CLASS_NAME} data-contract="GAP-2">
+                <Heading level={3}>{copy.setup.privateChat}</Heading>
+                <Text size="sm" tone="muted">{copy.setup.revision({ revision: revision?.revision ?? "?", status: copy.setup.revisionStatus[revision?.status ?? "unavailable"] })}</Text>
+              </div>
+              <Badge tone="neutral">{copy.setup.private}</Badge>
+            </div>
+          }
+          conversation={conversation}
+          composer={composer}
+        />
+      </div>
+    </SurfaceCard>
+  );
 };

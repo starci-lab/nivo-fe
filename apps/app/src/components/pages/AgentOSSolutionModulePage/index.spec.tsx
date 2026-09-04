@@ -1,7 +1,13 @@
+import type { ComponentProps } from "react"
+import { NextIntlClientProvider, createTranslator } from "next-intl"
+import enMessages from "@/messages/en.json"
+import viMessages from "@/messages/vi.json"
+import { TIME_ZONE } from "@/i18n/config"
+
 /** @vitest-environment jsdom */
 
 import { act, render, screen } from "@testing-library/react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
     pageProps: null as null | { readonly screen: { readonly view: string; readonly contentProps?: Record<string, unknown> } },
@@ -10,10 +16,12 @@ const mocks = vi.hoisted(() => ({
     runtimeTrigger: vi.fn(),
     testTrigger: vi.fn(),
     channelTrigger: vi.fn(),
-    supportTrigger: vi.fn(),
+    approveTrigger: vi.fn(),
+    takeoverTrigger: vi.fn(),
+    deliveryTrigger: vi.fn(),
 }))
 
-const runtime = {
+let runtime = {
     installation: {
         id: "installation-1", agentWorkspaceId: "workspace-1", moduleKey: "support-desk", moduleVersion: "1.0",
         displayName: "Support Desk", kindKey: "customer-support", kindVersion: "1.0", workbenchKey: "support-queue", workbenchVersion: "1.0",
@@ -52,6 +60,8 @@ const runtime = {
     tasks: [], operationEvents: [],
 }
 
+const initialRuntime = structuredClone(runtime)
+
 const testSurface = {
     contract: runtime.installation.runtimeManifest.test,
     runs: [{ id: "run-1", status: "passed", setupSessionId: "setup-1", draftDigest: "a".repeat(64) }],
@@ -70,12 +80,13 @@ vi.mock("@/hooks", () => ({
     useMutateManageAgentosModuleRuntimeSwr: () => ({ trigger: mocks.runtimeTrigger }),
     useMutateRunAgentosModuleTestSwr: () => ({ trigger: mocks.testTrigger }),
     useMutateConfigureAgentWorkspaceChannelSwr: () => ({ trigger: mocks.channelTrigger }),
-    useMutateApproveSupportReplySwr: () => ({ trigger: mocks.supportTrigger }),
-    useMutateSetSupportTakeoverSwr: () => ({ trigger: mocks.supportTrigger }),
-    useMutateReconcileSupportDeliverySwr: () => ({ trigger: mocks.supportTrigger }),
+    useMutateApproveSupportReplySwr: () => ({ trigger: mocks.approveTrigger }),
+    useMutateSetSupportTakeoverSwr: () => ({ trigger: mocks.takeoverTrigger }),
+    useMutateReconcileSupportDeliverySwr: () => ({ trigger: mocks.deliveryTrigger }),
     useReadMyAgentosModuleTestRun: () => vi.fn(),
 }))
-vi.mock("./component", () => ({
+vi.mock("./component", async () => ({
+    ...await vi.importActual("./component"),
     exactTestSurfaceFor: (surface: unknown) => surface,
     AgentOSSolutionModuleState: () => <div>module-state</div>,
     AgentOSSolutionModulePageBase: (props: typeof mocks.pageProps) => {
@@ -84,17 +95,143 @@ vi.mock("./component", () => ({
     },
 }))
 
-import { AgentOSSolutionModulePage } from "./index"
+import { AgentOSSolutionModulePage as ActualAgentOSSolutionModulePage } from "./index"
+import { buildModulePageCopy, type AgentOSSolutionModuleScreen } from "./component"
 
+type RuntimeAnswer = { readonly ok: boolean; readonly data: typeof runtime }
+type SetupProps = Extract<AgentOSSolutionModuleScreen, { view: "setup" }>["contentProps"]
+const setupProps = () => mocks.pageProps!.screen.contentProps as unknown as SetupProps
 describe("AgentOSSolutionModulePage projections", () => {
+    afterEach(() => vi.useRealTimers())
+    it("retains historical selection and revision drafts across Setup tabs", () => {
+        const historical = { ...runtime.setupSession, id: "history", setupRevision: 0 }
+        runtime.setupSessions.unshift(historical)
+        const view = render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        act(() => { setupProps().onSelectRevision("history") })
+        act(() => { setupProps().onDraft("Historical note"); setupProps().onSelectPane("versions") })
+        view.rerender(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        expect(setupProps().selectedRevisionId).toBe("history")
+        act(() => { setupProps().onSelectPane("conversation") })
+        expect(setupProps().draftText).toBe("Historical note")
+        runtime.setupSessions.shift()
+    })
+    it("retains a refused append draft and reports only send refusal", async () => {
+        mocks.runtimeTrigger.mockResolvedValue({ ok: false })
+        render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        act(() => setupProps().onDraft("Keep policy"))
+        await act(async () => { setupProps().onSend("Keep policy") })
+        expect(setupProps().draftText).toBe("Keep policy")
+        expect(setupProps().setupSendRefused).toBe(true)
+        expect(setupProps().setupApplyRefused).toBe(false)
+        expect(setupProps().setupStartRefused).toBe(false)
+    })
+    it("guards same-tick submissions and keeps accepted polling timeout unconfirmed", async () => {
+        vi.useFakeTimers()
+        render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        act(() => setupProps().onDraft("Accepted policy"))
+        // An unchanged open revision never satisfies the existing settlement predicate.
+        mocks.runtimeMutate.mockResolvedValue({ ok: true, data: { ...runtime, setupSessions: runtime.setupSessions.map(s => ({ ...s, setupStatus: "open" })) } })
+        const send = setupProps().onSend
+        await act(async () => { send("Accepted policy"); send("Accepted policy") })
+        expect(mocks.runtimeTrigger).toHaveBeenCalledTimes(1)
+        expect(setupProps().draftText).toBe("")
+        expect(setupProps().setupSendPending).toBe(true)
+        expect(setupProps().setupApplyPending).toBe(false)
+        await act(async () => { await vi.advanceTimersByTimeAsync(90000) })
+        expect(setupProps().setupSendPending).toBe(false)
+        expect(setupProps().setupUnconfirmed).toBe(true)
+        expect(setupProps().setupSendRefused).toBe(false)
+        expect(mocks.runtimeTrigger).toHaveBeenCalledTimes(1)
+    })
+
+    it("selects the returned new Setup revision and retains historical selection on refresh", async () => {
+        const revision = { ...runtime.setupSession, id: "setup-2", setupRevision: 2, setupStatus: "open" }
+        mocks.runtimeTrigger.mockResolvedValue({ ok: true, data: { ...runtime, setupSession: revision, setupSessions: [...runtime.setupSessions, revision] } })
+        const view = render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        await act(async () => { setupProps().onStartRevision() })
+        expect(setupProps().selectedRevisionId).toBe("setup-2")
+        expect(setupProps().revisions.map(item => item.id)).toEqual(["setup-1", "setup-2"])
+        expect(setupProps().setupSendRefused).toBe(false)
+        expect(setupProps().setupUnconfirmed).toBe(false)
+        act(() => { setupProps().onSelectRevision("setup-1") })
+        runtime = structuredClone(runtime)
+        view.rerender(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        expect(setupProps().selectedRevisionId).toBe("setup-1")
+    })
+    it("keeps the selected revision when START is refused or returns an unlisted session", async () => {
+        mocks.runtimeTrigger.mockResolvedValueOnce({ ok: false })
+        render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        await act(async () => { setupProps().onStartRevision() })
+        expect(setupProps().selectedRevisionId).toBe("setup-1")
+        expect(setupProps().setupStartRefused).toBe(true)
+        mocks.runtimeTrigger.mockResolvedValueOnce({ ok: true, data: { ...runtime, setupSession: { ...runtime.setupSession, id: "unlisted" } } })
+        await act(async () => { setupProps().onStartRevision() })
+        expect(setupProps().selectedRevisionId).toBe("setup-1")
+    })
+    it.each(["send", "apply"] as const)("keeps late %s refusal and pending on its captured revision", async kind => {
+        runtime.setupSessions.push({ ...runtime.setupSession, id: "setup-2", setupRevision: 2 })
+        let finish: (value: { ok: false }) => void = () => { throw new Error("Operation did not start") }
+        mocks.runtimeTrigger.mockImplementation(() => new Promise(resolve => { finish = resolve }))
+        render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        act(() => { setupProps().onDraft("Keep A"); if (kind === "send") setupProps().onSend("Keep A"); else setupProps().onApply() })
+        expect(kind === "send" ? setupProps().setupSendPending : setupProps().setupApplyPending).toBe(true)
+        act(() => { setupProps().onSelectRevision("setup-2") })
+        expect(setupProps().setupSendPending).toBe(false)
+        expect(setupProps().setupApplyPending).toBe(false)
+        expect(setupProps().setupPeerDisabled).toBe(true)
+        act(() => { setupProps().onSend("Blocked peer") })
+        expect(mocks.runtimeTrigger).toHaveBeenCalledTimes(1)
+        await act(async () => { finish({ ok: false }) })
+        expect(setupProps().setupSendRefused).toBe(false)
+        expect(setupProps().setupApplyRefused).toBe(false)
+        expect(setupProps().refused).toBe(false)
+        expect(setupProps().setupPeerDisabled).toBe(false)
+        act(() => { setupProps().onSelectRevision("setup-1") })
+        expect(kind === "send" ? setupProps().setupSendRefused : setupProps().setupApplyRefused).toBe(true)
+        expect(setupProps().draftText).toBe("Keep A")
+    })
+    it("keeps accepted timeout on A while preserving the draft and idle controls of B", async () => {
+        vi.useFakeTimers()
+        runtime.setupSession.setupStatus = "open"
+        runtime.setupSessions[0].setupStatus = "open"
+        runtime.setupSessions.push({ ...runtime.setupSession, id: "setup-2", setupRevision: 2 })
+        let finish: (value: { ok: true; data: typeof runtime }) => void = () => { throw new Error("Operation did not start") }
+        mocks.runtimeTrigger.mockImplementation(() => new Promise(resolve => { finish = resolve }))
+        render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        act(() => { setupProps().onDraft("Accepted A"); setupProps().onSend("Accepted A") })
+        act(() => { setupProps().onSelectRevision("setup-2") })
+        act(() => { setupProps().onDraft("Keep B") })
+        await act(async () => { finish({ ok: true, data: runtime }) })
+        expect(setupProps().draftText).toBe("Keep B")
+        expect(setupProps().setupSendPending).toBe(false)
+        expect(setupProps().setupPeerDisabled).toBe(true)
+        act(() => { setupProps().onSelectRevision("setup-1") })
+        expect(setupProps().draftText).toBe("")
+        expect(setupProps().setupSendPending).toBe(true)
+        act(() => { setupProps().onSelectRevision("setup-2") })
+        await act(async () => { await vi.advanceTimersByTimeAsync(90000) })
+        expect(setupProps().setupUnconfirmed).toBe(false)
+        expect(setupProps().setupSendRefused).toBe(false)
+        expect(setupProps().setupPeerDisabled).toBe(false)
+        expect(setupProps().draftText).toBe("Keep B")
+        act(() => { setupProps().onSelectRevision("setup-1") })
+        expect(setupProps().setupUnconfirmed).toBe(true)
+        expect(setupProps().setupSendRefused).toBe(false)
+    })
     beforeEach(() => {
+        runtime = structuredClone(initialRuntime)
         mocks.pageProps = null
         mocks.push.mockReset()
-        mocks.runtimeMutate.mockReset().mockResolvedValue({ ok: true, data: runtime })
+        mocks.runtimeMutate.mockReset().mockImplementation(async (answer?: RuntimeAnswer) => {
+            if (answer?.ok) runtime = answer.data
+            return { ok: true, data: runtime }
+        })
         mocks.runtimeTrigger.mockReset().mockResolvedValue({ ok: true, data: runtime })
         mocks.testTrigger.mockReset().mockResolvedValue({ ok: true, data: { ...testSurface, run: { status: "passed" } } })
         mocks.channelTrigger.mockReset().mockResolvedValue({ ok: true, data: { state: "APPLIED" } })
-        mocks.supportTrigger.mockReset().mockResolvedValue({ ok: true })
+        mocks.approveTrigger.mockReset().mockResolvedValue({ ok: true })
+        mocks.takeoverTrigger.mockReset().mockResolvedValue({ ok: true })
+        mocks.deliveryTrigger.mockReset().mockResolvedValue({ ok: true })
     })
 
     it.each(["setup", "test", "operate", "settings", "diagnostics"] as const)("projects the %s cockpit surface", async (view) => {
@@ -103,6 +240,86 @@ describe("AgentOSSolutionModulePage projections", () => {
         expect(mocks.pageProps?.screen.view).toBe(view)
     })
 
+    describe.each(["en", "vi"] as const)("Connected bilingual invariants %s", locale => {
+        it("maps all declared gates, including unknown and prototype keys, without changing raw evidence", () => {
+            const messages = locale === "en" ? enMessages : viMessages
+            const copy = buildModulePageCopy(createTranslator({ locale, messages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } }))
+            const known = ["businessIdentity", "productsServices", "supportScope", "customerSegments", "channels", "hoursAndSla", "escalationAndHandoff", "prohibitedCommitments", "privacyAndSensitiveData", "toneAndLanguage", "automationPolicy", "readinessOwnership", "accountingScope", "currencyAndLocale", "sourceSystems", "approvalPolicy", "approvalThresholds", "evidenceRequirements", "prohibitedActions", "schedulingScope", "timeZone", "calendarSources", "participantRules", "availabilityRules", "conflictPolicy", "confirmationPolicy", "reminderPolicy", "researchScope", "sourcePolicy", "citationPolicy", "confidencePolicy", "prohibitedClaims", "freshnessPolicy"] as const
+            const keys = [...known, "unknown/raw", "constructor", "__proto__"]
+            runtime.installation.runtimeManifest.operations.setupFields = keys
+            runtime.setupSessions[0]!.gateEvidence.gates = keys.map((key, index) => ({ key, passed: index % 2 === 0 }))
+            const view = render(<AgentOSSolutionModulePage locale={locale} workspaceId="workspace-1" installationId="installation-1" />)
+            expect(known).toHaveLength(33)
+            expect(setupProps().draft!.gates).toEqual(keys.map((key, index) => ({ key, passed: index % 2 === 0, label: Object.hasOwn(copy.setup.gateLabels, key) ? copy.setup.gateLabels[key as keyof typeof copy.setup.gateLabels] : copy.setup.unknownGate({ key }) })))
+            expect(setupProps().draft!.summary).toBe("A support desk")
+            view.unmount()
+        })
+        it("keeps Setup revision and Conversation N mutation titles literal", async () => {
+            const view = render(<AgentOSSolutionModulePage locale={locale} workspaceId="workspace-1" installationId="installation-1" />)
+            await act(async () => { setupProps().onStartRevision() })
+            expect(mocks.runtimeTrigger).toHaveBeenLastCalledWith({ action: "START_SETUP_REVISION", installationId: "installation-1", idempotencyKey: expect.any(String), title: "Setup revision" })
+            view.rerender(<AgentOSSolutionModulePage locale={locale} workspaceId="workspace-1" installationId="installation-1" view="operate" />)
+            const operate = mocks.pageProps!.screen.contentProps as unknown as Extract<AgentOSSolutionModuleScreen, { view: "operate" }>["contentProps"]
+            await act(async () => { operate.onCreateSession() })
+            expect(mocks.runtimeTrigger).toHaveBeenLastCalledWith({ action: "CREATE_EXECUTE_SESSION", installationId: "installation-1", idempotencyKey: expect.any(String), title: "Conversation 2" })
+            view.unmount()
+        })
+        it("forwards raw widget and customer mutations through the connected operate owner", async () => {
+            const view = render(<AgentOSSolutionModulePage locale={locale} workspaceId="workspace-1" installationId="installation-1" view="operate" />)
+            const operate = () => mocks.pageProps!.screen.contentProps as unknown as Extract<AgentOSSolutionModuleScreen, { view: "operate" }>["contentProps"]
+            await act(async () => { operate().onWidgetAction("widget/raw", "open-task", { taskId: "task/raw" }, 7) })
+            expect(mocks.runtimeTrigger).toHaveBeenLastCalledWith({ action: "INVOKE_WIDGET_ACTION", installationId: "installation-1", idempotencyKey: expect.any(String), widgetId: "widget/raw", widgetAction: "open-task", widgetInput: { taskId: "task/raw" }, taskExpectedVersion: 7 })
+            expect(operate().operationTarget).toBe("internal-workbench")
+            await act(async () => { operate().onApproveSupportReply("decision/raw") })
+            await act(async () => { operate().onSetSupportTakeover("conversation/raw", true) })
+            await act(async () => { operate().onReconcileSupportDelivery("outbox/raw", false) })
+            expect(mocks.approveTrigger).toHaveBeenCalledExactlyOnceWith("decision/raw")
+            expect(mocks.takeoverTrigger).toHaveBeenCalledExactlyOnceWith({ conversationId: "conversation/raw", takeover: true })
+            expect(mocks.deliveryTrigger).toHaveBeenCalledExactlyOnceWith({ outboxId: "outbox/raw", delivered: false })
+            view.unmount()
+        })
+        it("preserves raw snapshot facts when no facts array or summary is supplied", () => {
+            runtime.contextVersions = []
+            Object.assign(runtime.setupSession, { draftSnapshot: { rawNull: null, rawNumber: 7, rawBoolean: true, rawObject: { value: "owner" } } })
+            runtime.setupSessions = [runtime.setupSession]
+            const view = render(<AgentOSSolutionModulePage locale={locale} workspaceId="workspace-1" installationId="installation-1" />)
+            expect(setupProps().draft!.facts).toEqual(["rawNull: —", "rawNumber: 7", "rawBoolean: true", 'rawObject: {"value":"owner"}'])
+            view.unmount()
+        })
+        it.each(["not-a-token", "abcde:synthetic"])("refuses invalid Telegram account syntax %s before mutation", async token => {
+            const view = render(<AgentOSSolutionModulePage locale={locale} workspaceId="workspace-1" installationId="installation-1" view="settings" />)
+            const settings = () => mocks.pageProps!.screen.contentProps as unknown as Extract<AgentOSSolutionModuleScreen, { view: "settings" }>["contentProps"]
+            await act(async () => { settings().onSaveCredential("telegram-bot-token", token) })
+            expect(mocks.channelTrigger).not.toHaveBeenCalled()
+            expect(mocks.runtimeTrigger).not.toHaveBeenCalled()
+            expect(settings().refused).toBe(true)
+            view.unmount()
+        })
+        it.each([{ ok: false }, { ok: true, data: { state: "REFUSED" } }])("refuses a channel that did not apply before saving a credential", async answer => {
+            mocks.channelTrigger.mockResolvedValue(answer)
+            const view = render(<AgentOSSolutionModulePage locale={locale} workspaceId="workspace-1" installationId="installation-1" view="settings" />)
+            const settings = () => mocks.pageProps!.screen.contentProps as unknown as Extract<AgentOSSolutionModuleScreen, { view: "settings" }>["contentProps"]
+            await act(async () => { settings().onSaveCredential("telegram-bot-token", "123456:synthetic") })
+            expect(mocks.channelTrigger).toHaveBeenCalledTimes(1)
+            expect(mocks.runtimeTrigger).not.toHaveBeenCalled()
+            expect(settings().refused).toBe(true)
+            view.unmount()
+        })
+        it("keeps Telegram provider, fallback display name, token and account payloads literal", async () => {
+            // Only this raw server field is nullable; the fixture otherwise keeps its full runtime.
+            Object.assign(runtime.installation, { displayName: null })
+            const view = render(<AgentOSSolutionModulePage locale={locale} workspaceId="workspace-1" installationId="installation-1" view="settings" />)
+            const settings = mocks.pageProps!.screen.contentProps as unknown as Extract<AgentOSSolutionModuleScreen, { view: "settings" }>["contentProps"]
+            const token = "123456789:" + "x".repeat(35)
+            await act(async () => { settings.onSaveCredential("telegram-bot-token", token) })
+            expect(mocks.channelTrigger).toHaveBeenCalledExactlyOnceWith({ agentWorkspaceId: "workspace-1", provider: "Telegram", accountId: "123456789", displayName: "Support Desk Telegram", credentials: [{ key: "TELEGRAM_BOT_TOKEN", value: token }] })
+            expect(mocks.runtimeTrigger.mock.calls).toEqual([
+                [{ action: "SAVE_MODULE_CREDENTIAL", installationId: "installation-1", idempotencyKey: expect.any(String), credentialKey: "telegram-bot-token", credentialValue: token }],
+                [{ action: "UPDATE_SETTINGS", installationId: "installation-1", idempotencyKey: expect.any(String), settings: runtime.settings, operatingMode: "assist", channelAccountRef: "TELEGRAM:123456789" }],
+            ])
+            view.unmount()
+        })
+    })
     it("dispatches settings, live, credential, widget and support actions through their owners", async () => {
         render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" view="settings" />)
         const settings = mocks.pageProps?.screen.contentProps as {
@@ -120,3 +337,15 @@ describe("AgentOSSolutionModulePage projections", () => {
         expect(mocks.runtimeTrigger).toHaveBeenCalled()
     })
 })
+type AgentOSSolutionModulePageFixtureProps = Omit<ComponentProps<typeof ActualAgentOSSolutionModulePage>, "copy"> & { readonly locale?: "en" | "vi" }
+const AgentOSSolutionModulePageCopyFixture = (props: AgentOSSolutionModulePageFixtureProps) => {
+
+    return <ActualAgentOSSolutionModulePage {...props} />
+}
+const AgentOSSolutionModulePage = ({ locale = "en", ...props }: AgentOSSolutionModulePageFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><AgentOSSolutionModulePageCopyFixture {...props} /></NextIntlClientProvider>
+
+
+
+
+
+

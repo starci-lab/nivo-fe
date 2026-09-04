@@ -29,18 +29,20 @@ export type AgentOSCustomModuleCollectionViewProps = {
   readonly refusedTitle: string;
   readonly refused: string;
   readonly retry: string;
+  readonly loadingKind: string;
+  readonly loadingStatus: string;
   readonly rows: ReadonlyArray<CustomModuleCollectionRow>;
   readonly retrying: boolean;
   readonly onRetry: () => void;
 };
 
 /** Three skeleton rows keep the resolved list shape while the read is unresolved. */
-const restingRows = (title: string): ReadonlyArray<CustomModuleCollectionRow> => [0, 1, 2].map(index => ({
+const restingRows = (title: string, loadingKind: string, loadingStatus: string): ReadonlyArray<CustomModuleCollectionRow> => [0, 1, 2].map(index => ({
   id: `loading-${index}`,
   name: title,
   detail: "",
-  kind: "",
-  status: "",
+  kind: loadingKind,
+  status: loadingStatus,
   active: false,
   action: "",
   href: "#"
@@ -74,6 +76,8 @@ export const AgentOSCustomModuleCollectionBase = (props: AgentOSCustomModuleColl
     refused,
     retry,
     rows,
+    loadingKind,
+    loadingStatus,
     retrying,
     onRetry
   }: AgentOSCustomModuleCollectionViewProps = props;
@@ -91,7 +95,7 @@ export const AgentOSCustomModuleCollectionBase = (props: AgentOSCustomModuleColl
     <EmptyNotice message={emptyTitle} description={empty} />
   </SurfaceCard>;
   const loading = state === "loading";
-  const shown = loading ? restingRows(title) : rows;
+  const shown = loading ? restingRows(title, loadingKind, loadingStatus) : rows;
   return <SurfaceListCard label={title} isLoading={loading}>
     <div className={MODULE_LEDGER_ROWS_CLASS_NAME} data-contract="BOUNDARY-3">{shown.map(row => rowView(row, loading))}</div>
   </SurfaceListCard>;

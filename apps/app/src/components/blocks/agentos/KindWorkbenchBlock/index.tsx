@@ -1,4 +1,70 @@
 "use client";
+
+type RuntimeWorkbenchGenericCaptionValues = { readonly version: string };
+type RuntimeWorkbenchKnowledgeCaptionValues = { readonly kind: string; readonly version: string };
+type RuntimeWorkbenchPayableCaptionValues = { readonly kind: string; readonly version: string };
+type RuntimeWorkbenchRegisteredValues = { readonly kind: string; readonly version: string };
+type RuntimeWorkbenchScheduleCaptionValues = { readonly kind: string; readonly version: string };
+type RuntimeWorkbenchSlaCaptionValues = { readonly kind: string; readonly version: string };
+
+/** Settled display labels and typed formatters supplied by the page owner. */
+export type KindWorkbenchBlockCopy = {
+  readonly "workbench": {
+    readonly "acceptedEvents": string;
+    readonly "accounting": string;
+    readonly "accountingNotice": string;
+    readonly "blocked": string;
+    readonly "calendar": string;
+    readonly "calendarMutation": string;
+    readonly "calendarNotice": string;
+    readonly "channel": string;
+    readonly "citations": string;
+    readonly "clear": string;
+    readonly "confirmation": string;
+    readonly "due": string;
+    readonly "evidencePack": string;
+    readonly "evidenceTasks": string;
+    readonly "execution": string;
+    readonly "generic": string;
+    readonly "genericCaption": (values: RuntimeWorkbenchGenericCaptionValues) => string;
+    readonly "genericNotice": string;
+    readonly "groundedAnswer": string;
+    readonly "highUrgent": string;
+    readonly "inbox": string;
+    readonly "kind": string;
+    readonly "knowledgeCaption": (values: RuntimeWorkbenchKnowledgeCaptionValues) => string;
+    readonly "module": string;
+    readonly "needsReview": string;
+    readonly "next": string;
+    readonly "noAnswer": string;
+    readonly "noApprovals": string;
+    readonly "noMeeting": string;
+    readonly "notScheduled": string;
+    readonly "open": string;
+    readonly "ownerReview": string;
+    readonly "payableCaption": (values: RuntimeWorkbenchPayableCaptionValues) => string;
+    readonly "policy": string;
+    readonly "proposals": string;
+    readonly "qualified": string;
+    readonly "reader": string;
+    readonly "readerNotice": string;
+    readonly "registered": (values: RuntimeWorkbenchRegisteredValues) => string;
+    readonly "reviewOnly": string;
+    readonly "sales": string;
+    readonly "scheduleCaption": (values: RuntimeWorkbenchScheduleCaptionValues) => string;
+    readonly "slaCaption": (values: RuntimeWorkbenchSlaCaptionValues) => string;
+    readonly "support": string;
+    readonly "supportNotice": string;
+    readonly "title": string;
+    readonly "unavailable": string;
+    readonly "unavailableNotice": string;
+    readonly "waitChannel": string;
+    readonly "waiting": string;
+  };
+};
+
+
+
 import { SurfaceCard, Heading, Text } from "@starci/grammar/common";
 
 import type { ComponentType } from "react";
@@ -7,6 +73,7 @@ import type { AgentosRuntimeOperationEvent, AgentosRuntimeTask } from "@/modules
 
 /** Runtime data every open-registry workbench receives from the shared shell. */
 export type WorkbenchProps = {
+  readonly copy: KindWorkbenchBlockCopy;
   readonly moduleId: string;
   readonly kindKey: string;
   readonly workbenchVersion: string;
@@ -40,110 +107,134 @@ const WorkbenchContent = ({
     <Heading level={3}>{title}</Heading>
 
     <Text size="xs" tone="muted">{caption}</Text></div><div>{facts.map((fact, index) => <div key={index}>{<Text size="sm">{fact.label}</Text>}{<Text size="sm" weight="semibold">{fact.value}</Text>}</div>)}</div>{notice === undefined ? undefined : <Text size="sm" tone="muted">{notice}</Text>}</div>;
-const SalesPipelineWorkbench = (props: WorkbenchProps) => <WorkbenchContent title="Sales pipeline" caption={`Registered for ${props.kindKey}@${props.workbenchVersion}`} facts={[{
+const SalesPipelineWorkbench = (props: WorkbenchProps) => {
+  const { copy } = props;
+  return (<WorkbenchContent title={copy.workbench.sales} caption={copy.workbench.registered({ kind: props.kindKey, version: props.workbenchVersion })} facts={[{
   id: "qualified",
-  label: "Qualified",
+  label: copy.workbench.qualified,
   value: "12"
 }, {
   id: "review",
-  label: "Needs review",
+  label: copy.workbench.needsReview,
   value: "4"
 }, {
   id: "module",
-  label: "Module",
+  label: copy.workbench.module,
   value: props.moduleId
-}]} />;
-const ConversationInboxWorkbench = (props: WorkbenchProps) => <WorkbenchContent title="Conversation inbox" caption={`Registered for ${props.kindKey}@${props.workbenchVersion}`} facts={[{
+}]} />);
+};
+const ConversationInboxWorkbench = (props: WorkbenchProps) => {
+  const { copy } = props;
+  return (<WorkbenchContent title={copy.workbench.inbox} caption={copy.workbench.registered({ kind: props.kindKey, version: props.workbenchVersion })} facts={[{
   id: "open",
-  label: "Open",
+  label: copy.workbench.open,
   value: "8"
 }, {
   id: "waiting",
-  label: "Waiting",
+  label: copy.workbench.waiting,
   value: "3"
 }, {
   id: "module",
-  label: "Module",
+  label: copy.workbench.module,
   value: props.moduleId
-}]} />;
-const SupportQueueWorkbench = (props: WorkbenchProps) => <WorkbenchContent key={props.moduleId} title="Support queue" caption={`SLA queue for ${props.kindKey}@${props.workbenchVersion}`} facts={[{
+}]} />);
+};
+const SupportQueueWorkbench = (props: WorkbenchProps) => {
+  const { copy } = props;
+  return (<WorkbenchContent key={props.moduleId} title={copy.workbench.support} caption={copy.workbench.slaCaption({ kind: props.kindKey, version: props.workbenchVersion })} facts={[{
   id: "open",
-  label: "Open",
+  label: copy.workbench.open,
   value: String(activeTasks(props).length)
 }, {
   id: "risk",
-  label: "High / urgent",
+  label: copy.workbench.highUrgent,
   value: String(activeTasks(props).filter(task => task.priority === "high" || task.priority === "urgent").length)
 }, {
   id: "next",
-  label: "Next",
-  value: nextTask(props)?.title ?? "Queue clear"
+  label: copy.workbench.next,
+  value: nextTask(props)?.title ?? copy.workbench.clear
 }, {
   id: "source",
-  label: "Latest channel",
-  value: props.events?.[0]?.source ?? "Waiting for channel events"
-}]} notice="Tickets remain in the kind-owned queue while Setup context and Execute chat stay in the shared module shell." />;
-const AccountingSheetWorkbench = (props: WorkbenchProps) => <WorkbenchContent key={props.moduleId} title="Accounting sheet" caption={`Payable review for ${props.kindKey}@${props.workbenchVersion}`} facts={[{
+  label: copy.workbench.channel,
+  value: props.events?.[0]?.source ?? copy.workbench.waitChannel
+}]} notice={copy.workbench.supportNotice} />);
+};
+const AccountingSheetWorkbench = (props: WorkbenchProps) => {
+  const { copy } = props;
+  return (<WorkbenchContent key={props.moduleId} title={copy.workbench.accounting} caption={copy.workbench.payableCaption({ kind: props.kindKey, version: props.workbenchVersion })} facts={[{
   id: "review",
-  label: "Needs owner review",
+  label: copy.workbench.ownerReview,
   value: String(activeTasks(props).length)
 }, {
   id: "next",
-  label: "Next evidence pack",
-  value: nextTask(props)?.title ?? "No pending approvals"
+  label: copy.workbench.evidencePack,
+  value: nextTask(props)?.title ?? copy.workbench.noApprovals
 }, {
   id: "state",
-  label: "Execution",
-  value: "Review only · no self-approval"
-}]} notice="Approval remains explicit; the assistant prepares evidence but does not authorize payment." />;
-const CalendarWeekWorkbench = (props: WorkbenchProps) => <WorkbenchContent key={props.moduleId} title="Calendar week" caption={`Collaborative schedule for ${props.kindKey}@${props.workbenchVersion}`} facts={[{
+  label: copy.workbench.execution,
+  value: copy.workbench.reviewOnly
+}]} notice={copy.workbench.accountingNotice} />);
+};
+const CalendarWeekWorkbench = (props: WorkbenchProps) => {
+  const { copy } = props;
+  return (<WorkbenchContent key={props.moduleId} title={copy.workbench.calendar} caption={copy.workbench.scheduleCaption({ kind: props.kindKey, version: props.workbenchVersion })} facts={[{
   id: "proposals",
-  label: "Pending proposals",
+  label: copy.workbench.proposals,
   value: String(activeTasks(props).length)
 }, {
   id: "next",
-  label: "Next confirmation",
-  value: nextTask(props)?.title ?? "No meeting awaiting confirmation"
+  label: copy.workbench.confirmation,
+  value: nextTask(props)?.title ?? copy.workbench.noMeeting
 }, {
   id: "due",
-  label: "Due",
-  value: nextTask(props)?.dueAt === null || nextTask(props) === undefined ? "Not scheduled" : new Date(nextTask(props)?.dueAt ?? "").toLocaleString()
+  label: copy.workbench.due,
+  value: nextTask(props)?.dueAt === null || nextTask(props) === undefined ? copy.workbench.notScheduled : new Date(nextTask(props)?.dueAt ?? "").toLocaleString()
 }, {
   id: "state",
-  label: "Calendar mutation",
-  value: "Blocked until confirmation"
-}]} notice="Proposals do not overwrite events until a participant confirms them." />;
-const DocumentReaderWorkbench = (props: WorkbenchProps) => <WorkbenchContent key={props.moduleId} title="Document reader" caption={`Cited workspace knowledge for ${props.kindKey}@${props.workbenchVersion}`} facts={[{
+  label: copy.workbench.calendarMutation,
+  value: copy.workbench.blocked
+}]} notice={copy.workbench.calendarNotice} />);
+};
+const DocumentReaderWorkbench = (props: WorkbenchProps) => {
+  const { copy } = props;
+  return (<WorkbenchContent key={props.moduleId} title={copy.workbench.reader} caption={copy.workbench.knowledgeCaption({ kind: props.kindKey, version: props.workbenchVersion })} facts={[{
   id: "answers",
-  label: "Evidence tasks",
+  label: copy.workbench.evidenceTasks,
   value: String(activeTasks(props).length)
 }, {
   id: "next",
-  label: "Latest grounded answer",
-  value: nextTask(props)?.title ?? "No answer awaiting review"
+  label: copy.workbench.groundedAnswer,
+  value: nextTask(props)?.title ?? copy.workbench.noAnswer
 }, {
   id: "events",
-  label: "Accepted source events",
+  label: copy.workbench.acceptedEvents,
   value: String(props.events?.length ?? 0)
 }, {
   id: "policy",
-  label: "Policy",
-  value: "Citations + conflict disclosure"
-}]} notice="Nivo bootstrap knowledge is generated from the mounted package and every important answer keeps a source reference." />;
-const GenericWorkbench = (props: WorkbenchProps) => <WorkbenchContent title="Module workbench" caption={`Generic registry surface ${props.workbenchVersion}`} facts={[{
+  label: copy.workbench.policy,
+  value: copy.workbench.citations
+}]} notice={copy.workbench.readerNotice} />);
+};
+const GenericWorkbench = (props: WorkbenchProps) => {
+  const { copy } = props;
+  return (<WorkbenchContent title={copy.workbench.generic} caption={copy.workbench.genericCaption({ version: props.workbenchVersion })} facts={[{
   id: "kind",
-  label: "Kind",
+  label: copy.workbench.kind,
   value: props.kindKey
 }, {
   id: "module",
-  label: "Module",
+  label: copy.workbench.module,
   value: props.moduleId
-}]} notice="Register another trusted ComponentType under the workbench key to extend this surface without editing the shell." />;
-const UnavailableWorkbench = (props: WorkbenchProps) => <WorkbenchContent title="No registered workbench" caption={`${props.kindKey}@${props.workbenchVersion}`} facts={[{
+}]} notice={copy.workbench.genericNotice} />);
+};
+const UnavailableWorkbench = (props: WorkbenchProps) => {
+  const { copy } = props;
+  return (<WorkbenchContent title={copy.workbench.unavailable} caption={`${props.kindKey}@${props.workbenchVersion}`} facts={[{
   id: "module",
-  label: "Module",
+  label: copy.workbench.module,
   value: props.moduleId
-}]} notice="Chat remains available. The workbench failed closed because this key has no trusted ComponentType registration." />;
+}]} notice={copy.workbench.unavailableNotice} />);
+};
 
 /** Built-in open registry aligned with backend workbench identities. */
 export const DEFAULT_WORKBENCH_REGISTRY: WorkbenchRegistry = {
@@ -164,6 +255,7 @@ export type KindWorkbenchBlockProps = WorkbenchProps & {
 
 /** Resolve one kind-owned ComponentType while Chat and the shared shell remain unchanged. */
 export const KindWorkbenchBlock = (props: KindWorkbenchBlockProps) => {
+  const { copy } = props;
   const {
     moduleId,
     kindKey,
@@ -174,9 +266,9 @@ export const KindWorkbenchBlock = (props: KindWorkbenchBlockProps) => {
     registry
   }: KindWorkbenchBlockProps = props;
   const Workbench = registry[workbenchKey] ?? UnavailableWorkbench;
-  const render = <Workbench moduleId={moduleId} kindKey={kindKey} workbenchVersion={workbenchVersion} tasks={tasks} events={events} />;
+  const render = <Workbench copy={copy} moduleId={moduleId} kindKey={kindKey} workbenchVersion={workbenchVersion} tasks={tasks} events={events} />;
   return <SurfaceCard
-    label="Workbench"
+    label={copy.workbench.title}
     fact={`${workbenchKey}@${workbenchVersion}`}
   >{render}</SurfaceCard>;
 };

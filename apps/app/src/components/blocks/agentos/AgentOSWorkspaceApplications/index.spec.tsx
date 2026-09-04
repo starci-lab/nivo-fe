@@ -1,3 +1,4 @@
+import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import { AgentOSWorkspaceApplications } from "./index"
@@ -13,8 +14,13 @@ describe("AgentOS workspace applications", () => {
 
     it("renders opening and connected launch copy", () => {
         const app = [{ app: "OPENCLAW" as const, accessMode: "NIVO_CONSOLE" as const, available: true, reason: null, observedVersion: "1.2.3" }]
-        expect(renderToStaticMarkup(<AgentOSWorkspaceApplications apps={app} labels={labels} launchState="opening" openClawLaunchHref="/openclaw" onManageOpenClaw={vi.fn()} />)).toContain("Opening")
-        expect(renderToStaticMarkup(<AgentOSWorkspaceApplications apps={app} labels={labels} launchState="connected" openClawLaunchHref="/openclaw" onManageOpenClaw={vi.fn()} />)).toContain("1.2.3")
+        const { rerender } = render(<AgentOSWorkspaceApplications apps={app} labels={labels} launchState="opening" openClawLaunchHref="/openclaw" onManageOpenClaw={vi.fn()} />)
+        expect(screen.getByRole("status")).toHaveTextContent("Opening")
+        expect(screen.getByRole("link", { name: "Manage" })).toHaveAttribute("aria-busy", "true")
+        expect(screen.getByRole("link", { name: "Manage" })).toHaveAttribute("aria-disabled", "true")
+        rerender(<AgentOSWorkspaceApplications apps={app} labels={labels} launchState="connected" openClawLaunchHref="/openclaw" onManageOpenClaw={vi.fn()} />)
+        expect(screen.getByRole("status")).toHaveTextContent("1.2.3")
+        expect(screen.getByRole("link", { name: "Manage" })).toHaveAttribute("href", "/openclaw")
     })
 
     it("offers the accepted open-again transition only after launch expiry", () => {

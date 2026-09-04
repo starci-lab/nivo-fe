@@ -1,3 +1,4 @@
+import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 
@@ -97,7 +98,7 @@ describe("pure page twins", () => {
             stack: {} as AgentOSWorkspacePageLabels["stack"],
             operations: {} as AgentOSWorkspacePageLabels["operations"],
         } satisfies AgentOSWorkspacePageLabels
-        const html = renderToStaticMarkup(<AgentOSWorkspacePageBase
+        render(<AgentOSWorkspacePageBase
             pageState="overview"
             controlCenterState="loading"
             labels={labels}
@@ -107,7 +108,7 @@ describe("pure page twins", () => {
             onOpenAgentConsole={vi.fn()}
             formatDate={(value) => value}
         />)
-        expect(html).toContain("Loading workspace")
+        expect(screen.getByRole("status")).toHaveTextContent("Loading workspace")
     })
 
     it("renders module loading and refused projections", () => {
@@ -141,7 +142,7 @@ describe("pure page twins", () => {
         expect(AgentOSWorkspaceListBase({ state: "refused", props: { label: "Workspaces", message: "Unavailable" } })).toBeTruthy()
         expect(AgentOSWorkspaceListBase({
             state: "answered",
-            props: { label: "Workspaces", rows: [{ id: "workspace-1", name: "Workspace", detail: "Order", kindLabel: "Workspace", status: "ready", statusLabel: "Ready" }] },
+            props: { label: "Workspaces", rows: [{ id: "workspace-1", href: "/en/agentos/workspaces/workspace-1", name: "Workspace", detail: "Order", kindLabel: "Workspace", status: "ready", statusLabel: "Ready" }] },
             on: { openWorkspace: vi.fn() },
         })).toBeTruthy()
 
@@ -149,3 +150,4 @@ describe("pure page twins", () => {
         expect(AcademyControlCenterPageBase({ siteId: "site-1", mode: "system", onSelectMode: vi.fn() })).toBeTruthy()
     })
 })
+

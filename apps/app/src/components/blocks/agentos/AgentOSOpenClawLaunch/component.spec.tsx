@@ -1,3 +1,4 @@
+import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import { AgentOSOpenClawLaunchBase, type AgentOSOpenClawLaunchViewProps } from "./component"
@@ -24,9 +25,17 @@ const props: Omit<AgentOSOpenClawLaunchViewProps, "launchState"> = {
 
 describe("AgentOSOpenClawLaunch drawing", () => {
     it("keeps the fixed page anatomy while the launch block is issuing", () => {
-        const html = renderToStaticMarkup(<AgentOSOpenClawLaunchBase {...props} launchState="issuing" />)
-        expect(html).toContain("Issuing")
-        expect(html).toContain('data-action-pending="true"')
+        render(<AgentOSOpenClawLaunchBase {...props} launchState="issuing" />)
+        expect(screen.getByText("Issuing")).toBeInTheDocument()
+        expect(screen.getByRole("status")).toHaveTextContent("Preparing launch")
+        expect(screen.queryByRole("button")).not.toBeInTheDocument()
+    })
+
+    it("keeps an explicitly initiated retry pending on Retry", () => {
+        render(<AgentOSOpenClawLaunchBase {...props} launchState="issuing" isRetryPending />)
+        expect(screen.getByRole("status")).toHaveTextContent("Preparing launch")
+        expect(screen.getByRole("button", { name: "Retry" })).toHaveAttribute("data-action-pending", "true")
+        expect(screen.getByRole("button", { name: "Retry" })).toBeDisabled()
     })
 
     it("maps connected launch state to the return action", () => {

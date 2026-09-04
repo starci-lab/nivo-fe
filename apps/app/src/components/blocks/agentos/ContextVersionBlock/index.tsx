@@ -1,18 +1,47 @@
 "use client";
-import { SurfaceCard, Button, Heading, Text } from "@starci/grammar/common";
 
+type SetupApplyVersionValues = { readonly version: number };
+type SetupCompleteCountValues = { readonly passed: number; readonly total: number };
+type SetupDraftRevisionValues = { readonly revision: number };
+type SetupReviewSummaryValues = { readonly draft: string; readonly version: string };
+type SetupVersionActiveValues = { readonly version: string | number };
 
-
-/** Reviewable immutable context version projected from the backend snapshot. */
-export type ContextVersionBlockProps = ContextVersionContentProps;
-/** Public API role for SetupGate. */
-export type SetupGate = {
-  readonly key: string;
-  readonly label: string;
-  readonly passed: boolean;
+/** Settled display labels and typed formatters supplied by the page owner. */
+export type ContextVersionBlockCopy = {
+  readonly "setup": {
+    readonly "applyHint": string;
+    readonly "applyVersion": (values: SetupApplyVersionValues) => string;
+    readonly "complete": string;
+    readonly "completeCount": (values: SetupCompleteCountValues) => string;
+    readonly "completeGates": string;
+    readonly "continueChat": string;
+    readonly "draftRevision": (values: SetupDraftRevisionValues) => string;
+    readonly "exactTest": string;
+    readonly "gatesReview": string;
+    readonly "needsFollowUp": string;
+    readonly "noCandidate": string;
+    readonly "noDraft": string;
+    readonly "noGates": string;
+    readonly "notApplied": string;
+    readonly "operationRefused": string;
+    readonly "passTestFirst": string;
+    readonly "reviewContext": string;
+    readonly "reviewSummary": (values: SetupReviewSummaryValues) => string;
+    readonly "setupGates": string;
+    readonly "testPassed": string;
+    readonly "testRequired": string;
+    readonly "versionActive": (values: SetupVersionActiveValues) => string;
+  };
 };
 
-/** Owner-reviewable Setup draft and the immutable context produced from it. */
+
+import { Badge, Button, Heading, SurfaceCard, Text } from "@starci/grammar/common";
+
+import { CONTEXT_BAND_CLASS_NAME, CONTEXT_GATE_ROW_CLASS_NAME, CONTEXT_RAISED_BAND_CLASS_NAME } from "./classNames";
+
+/** One readiness requirement and its measured evidence for the selected revision. */
+export type SetupGate = { readonly key: string; readonly label: string; readonly passed: boolean };
+/** Immutable context identity and exact Test evidence resolved for the selected Setup revision. */
 export type ContextDraft = {
   readonly contextId: string | null;
   readonly setupSessionId: string;
@@ -26,83 +55,49 @@ export type ContextDraft = {
   readonly exactTestPassed: boolean;
   readonly isActive: boolean;
 };
-
-/** Runtime data consumed by the stable context-review ComponentType. */
+/** Facts and action state supplied by the selected revision owner. */
 export type ContextVersionContentProps = {
+  readonly copy: ContextVersionBlockCopy;
   readonly activeVersion: number | null;
   readonly draft: ContextDraft | null;
   readonly pending: boolean;
+  readonly ownPending?: boolean;
+  readonly peerDisabled?: boolean;
   readonly refused: boolean;
   readonly onApply: () => void;
 };
-const ContextVersionContent = ({
-  activeVersion,
-  draft,
-  pending,
-  refused,
-  onApply
-}: ContextVersionContentProps) => {
-  const candidateLabel = draft === null ? "No Setup draft" : draft.version === null ? `Setup draft r${draft.revision}` : `Context v${draft.version}`;
-  const activeLabel = activeVersion === null ? "No active context" : `Active v${activeVersion}`;
-  const gates = draft?.gates ?? [];
-  const passedGateCount = gates.filter(gate => gate.passed).length;
-  const gateCount = gates.length;
-  const gatesLabel = gateCount === 0 ? "Complete Setup gates" : `Complete all ${gateCount} Setup gates`;
-  const reviewFacts = draft?.facts.length ? draft.facts : ["Continue the private Setup chat so Nivo can ask the missing business questions."];
-  const applyReady = draft !== null && draft.version !== null && draft.status === "completed" && draft.exactTestPassed && !draft.isActive;
-  const applyLabel = draft === null ? gatesLabel : draft.isActive ? `v${draft.version} active` : draft.version === null ? gatesLabel : !draft.exactTestPassed ? "Pass this revision's Test first" : `Apply context v${draft.version}`;
-  return <div><div>
+/** Public review contract for activating one tested context version. */
+export type ContextVersionBlockProps = ContextVersionContentProps;
 
-
-      <Heading level={3}>{candidateLabel}</Heading>
-
-      <Text size="sm" tone="muted">{activeLabel}</Text></div>
-
-
-
-    <Text size="sm" weight="semibold">{draft?.summary ?? "Setup has not produced a candidate yet."}</Text><div><><div>
-
-
-
-
-          <Text size="sm">{"Setup gates"}</Text>
-
-          <Text size="sm" tone={gateCount > 0 && passedGateCount === gateCount ? "accent" : undefined} weight="semibold">{`${passedGateCount}/${gateCount} complete`}</Text></div>{gates.map((gate, index) => <div key={index}>{<Text size="sm">{gate.label}</Text>}{<Text size="sm" tone={gate.passed ? "accent" : "muted"} weight="semibold">{gate.passed ? "Complete" : "Needs follow-up"}</Text>}</div>)}{reviewFacts.slice(0, 4).map((fact, index) => <div key={index}>{<Text size="sm">{`Evidence ${index + 1}`}</Text>}{<Text size="sm">{fact}</Text>}</div>)}<div>
-
-          <Text size="sm">{"Exact Test"}</Text>
-
-          <Text size="sm" tone={draft?.exactTestPassed === true ? "accent" : "muted"} weight="semibold">{draft?.exactTestPassed === true ? "Passed for this digest" : "Required before Apply"}</Text></div></></div>
-
-
-
-
-
-    <Text size="sm" tone="muted" live={refused ? "assertive" : undefined}>{refused ? "The context operation was refused; the active version did not change." : "Apply activates only this tested immutable version, disables Live, and never rewrites earlier Execute messages."}</Text><>
-
-
-
-      <Button
-        variant="primary"
-        isDisabled={!applyReady}
-        isPending={pending}
-        onPress={onApply}
-      >{applyLabel}</Button></></div>;
-};
-
-/** Draw one immutable candidate and preserve explicit application as the only state transition. */
+/** Render complete facts, gates and exact Test state with Apply as the sole mutation. */
 export const ContextVersionBlock = (props: ContextVersionBlockProps) => {
-  const {
-    activeVersion,
-    draft,
-    pending,
-    refused,
-    onApply
-  }: ContextVersionContentProps = props;
-  return <SurfaceCard
-    label="Business context"
-    fact={activeVersion === null ? "Not applied" : `v${activeVersion} active`}
-  >
-  <ContextVersionContent activeVersion={activeVersion} draft={draft} pending={pending} refused={refused} onApply={onApply} />
-</SurfaceCard>;
+  const { copy } = props;
+  const { activeVersion, draft, pending, ownPending = pending, peerDisabled = false, refused, onApply } = props;
+  const gates = draft?.gates ?? [];
+  const passed = gates.filter(gate => gate.passed).length;
+  const applyReady = draft !== null && draft.version !== null && draft.status === "completed" && draft.exactTestPassed && !draft.isActive;
+  const applyLabel = draft === null ? copy.setup.completeGates : draft.isActive ? copy.setup.versionActive({ version: String(draft.version) }) : draft.version === null ? copy.setup.completeGates : !draft.exactTestPassed ? copy.setup.passTestFirst : copy.setup.applyVersion({ version: draft.version });
+  return (
+    <SurfaceCard ariaLabel={copy.setup.gatesReview} composition="joined">
+      <div className={CONTEXT_RAISED_BAND_CLASS_NAME} data-contract="SURFACE-3 GAP-3 PADDING-4">
+        <Heading level={3}>{copy.setup.reviewContext}</Heading>
+        <Text size="sm" tone="muted">{copy.setup.reviewSummary({ draft: draft === null ? copy.setup.noDraft : copy.setup.draftRevision({ revision: draft.revision }), version: activeVersion === null ? copy.setup.notApplied : `v${activeVersion}` })}</Text>
+      </div>
+      <div className={CONTEXT_BAND_CLASS_NAME} data-contract="BOUNDARY-1 GAP-3 PADDING-4">
+        <Text size="sm" weight="semibold">{draft?.summary ?? copy.setup.noCandidate}</Text>
+        {(draft?.facts.length ? draft.facts : [copy.setup.continueChat]).slice(0, 4).map((fact, index) => <Text size="sm" key={`${draft?.setupSessionId ?? "empty"}-fact-${index}`}>{fact}</Text>)}
+      </div>
+      <div className={CONTEXT_BAND_CLASS_NAME} data-contract="BOUNDARY-1 GAP-3 PADDING-4">
+        <Heading level={4}>{copy.setup.setupGates}</Heading>
+        {gates.length > 0 ? <Text size="sm" weight="semibold">{copy.setup.completeCount({ passed, total: gates.length })}</Text> : <Text size="sm" tone="muted">{copy.setup.noGates}</Text>}
+        {gates.map(gate => <div className={CONTEXT_GATE_ROW_CLASS_NAME} data-contract="BOUNDARY-1 GAP-2 PADDING-3" key={gate.key}><Text size="sm">{gate.label}</Text><Badge tone={gate.passed ? "success" : "neutral"}>{gate.passed ? copy.setup.complete : copy.setup.needsFollowUp}</Badge></div>)}
+      </div>
+      <div className={CONTEXT_BAND_CLASS_NAME} data-contract="BOUNDARY-1 GAP-3 PADDING-4">
+        <Heading level={4}>{copy.setup.exactTest}</Heading>
+        <Text size="sm" weight="semibold">{draft?.exactTestPassed ? copy.setup.testPassed : copy.setup.testRequired}</Text>
+        <Text size="sm" tone="muted" live={refused ? "assertive" : undefined}>{refused ? copy.setup.operationRefused : copy.setup.applyHint}</Text>
+        <Button variant="primary" isPending={ownPending} isDisabled={!applyReady || peerDisabled || ownPending} onPress={onApply}>{applyLabel}</Button>
+      </div>
+    </SurfaceCard>
+  );
 };
-

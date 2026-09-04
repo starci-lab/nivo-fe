@@ -13,7 +13,7 @@ describe("AgentOSWorkspaceListBase", () => {
         const openWorkspace = vi.fn()
         render(<AgentOSWorkspaceListBase
             state="answered"
-            props={{ label: "Workspaces", summary, rows: [{ id: "workspace-1", name: "Support", detail: "order-1", kindLabel: "Workspace", status: "ready", statusLabel: "Ready" }] }}
+            props={{ label: "Workspaces", summary, rows: [{ id: "workspace-1", href: "/agentos/workspaces/workspace-1", name: "Support", detail: "order-1", kindLabel: "Workspace", status: "ready", statusLabel: "Ready" }] }}
             on={{ openWorkspace }}
         />)
         fireEvent.click(screen.getByRole("link", { name: "Support" }))

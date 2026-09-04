@@ -1,3 +1,4 @@
+import viMessages from "@/messages/vi.json"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
@@ -14,6 +15,8 @@ describe("module studio pure surfaces", () => {
     it("draws the custom-module collection rows and their owned actions", () => {
         const html = renderToStaticMarkup(<AgentOSCustomModuleCollectionBase
             state="ready"
+            loadingKind="Custom"
+            loadingStatus="Draft"
             title="Custom modules"
             emptyTitle="No custom module yet"
             refusedTitle="Custom modules could not be read"
@@ -100,6 +103,8 @@ describe("module studio pure surfaces", () => {
     it("reports collection, upload, and write-only integration actions", () => {
         const collection = render(<AgentOSCustomModuleCollectionBase
             state="ready"
+            loadingKind="Custom"
+            loadingStatus="Draft"
             title="Custom modules"
             emptyTitle="No custom module yet"
             refusedTitle="Custom modules could not be read"
@@ -147,4 +152,11 @@ describe("module studio pure surfaces", () => {
         fireEvent.click(screen.getByRole("button", { name: "Remove key" }))
         expect(removeIntegration).toHaveBeenCalledWith("helpdesk-api")
     })
+})
+
+it("keeps the actual Vietnamese active Badge success tone from its raw key", () => {
+ const copy = viMessages.console.agentos.modules
+ const view = render(<AgentOSCustomModuleCollectionBase state="ready" loadingKind={copy.collection.custom} loadingStatus={copy.status.draft} title={copy.collection.title} refused={copy.collection.refused} empty={copy.collection.empty} emptyTitle={copy.collection.emptyTitle} refusedTitle={copy.collection.refusedTitle} retry={copy.collection.retry} retrying={false} onRetry={vi.fn()} rows={[{ id: "module/raw", name: "Owner module", detail: "Raw detail", kind: copy.collection.custom, status: copy.status.active, active: true, href: "/vi/agentos/workspaces/w/modules/module/raw", action: copy.collection.inspect }]} />)
+ expect(screen.getByText(copy.status.active).closest('[data-component="Badge"]')).toHaveAttribute("data-tone", "success")
+ view.unmount()
 })

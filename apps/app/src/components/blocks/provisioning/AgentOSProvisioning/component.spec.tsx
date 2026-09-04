@@ -1,3 +1,4 @@
+import { fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import { AgentOSProvisioningBase } from "./component"
@@ -21,19 +22,25 @@ const steps = [
 
 describe("AgentOS provisioning lifecycle", () => {
     it("keeps request pending inside the connected four-stage composition", () => {
-        const html = renderToStaticMarkup(<AgentOSProvisioningBase
+        const { container } = render(<AgentOSProvisioningBase
             state="submitting"
             props={{ progressLabel: "AgentOS order", continuationLabel: "Next step", steps, subject: "AgentOS", detail: "Workspace plan", statusTitle: "Requesting", statusText: "Submitting", requestActionLabel: "Order", isRequestPending: true }}
             on={{ request: vi.fn() }}
         />)
-        expect(html).toContain('data-action-pending="true"')
+        const html = container.innerHTML
+        expect(screen.getByRole("button", { name: "Order" })).toHaveAttribute("data-action-pending", "true")
+        expect(screen.getByRole("button", { name: "Order" })).toBeDisabled()
         expect(html).toContain('data-size="md"')
         expect(html).toContain('data-weight="medium"')
-        expect(html.match(/<h3/g)).toHaveLength(1)
+        expect(screen.getByRole("heading", { name: "AgentOS order" })).toBeInTheDocument()
+        expect(screen.getByRole("heading", { name: "Next step" })).toBeInTheDocument()
+        for (const step of steps) expect(screen.getByText(step.label)).toBeInTheDocument()
         expect(html).toContain("AgentOS order")
-        expect(html).not.toContain("Next step")
+        expect(screen.getByRole("status")).toHaveTextContent("Submitting")
         expect(html).toContain("AgentOS")
-        expect(html).toContain('data-signal="none"')
+        expect(screen.getByText("Complete")).toBeInTheDocument()
+        expect(screen.getByText("Active")).toBeInTheDocument()
+        expect(screen.getAllByText("Upcoming")).toHaveLength(2)
     })
 
     it("renders all four progress stages responsively and keeps watch controls disabled", () => {
@@ -53,14 +60,20 @@ describe("AgentOS provisioning lifecycle", () => {
         expect(html).toContain("Retry")
     })
 
-    it("highlights only a persisted continuation with an operable destination", () => {
-        const html = renderToStaticMarkup(<AgentOSProvisioningBase
+    it("keeps persisted payment continuation operable beside progress", () => {
+        const continuePayment = vi.fn()
+        render(<AgentOSProvisioningBase
             state="awaiting_payment"
-            props={{ steps, subject: "AgentOS", detail: "Workspace plan", statusTitle: "Complete payment", statusText: "Pay the linked invoice", statusActionLabel: "Open Wallet" }}
-            on={{ statusAction: vi.fn() }}
+            props={{ progressLabel: "AgentOS order", continuationLabel: "Payment continuation", steps, subject: "AgentOS", detail: "Workspace plan", statusTitle: "Complete payment", statusText: "Pay the linked invoice", statusActionLabel: "Open Wallet" }}
+            on={{ statusAction: continuePayment }}
         />)
 
-        expect(html).toContain("Request")
-        expect(html.match(/<h3/g)).toHaveLength(1)
+        expect(screen.getByRole("heading", { name: "AgentOS order" })).toBeInTheDocument()
+        expect(screen.getByRole("heading", { name: "Payment continuation" })).toBeInTheDocument()
+        expect(screen.getByRole("status")).toHaveTextContent("Pay the linked invoice")
+        const continuation = screen.getByRole("button", { name: "Open Wallet" })
+        expect(continuation).toBeEnabled()
+        fireEvent.click(continuation)
+        expect(continuePayment).toHaveBeenCalledOnce()
     })
 })

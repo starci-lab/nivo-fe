@@ -5,6 +5,8 @@ import { AgentOSCustomModuleCollectionBase } from "./component"
 import { MODULE_LEDGER_ROW_CLASS_NAME, MODULE_LEDGER_ROWS_CLASS_NAME } from "./classNames"
 
 const base = {
+    loadingKind: "Custom",
+    loadingStatus: "Draft",
     title: "Custom modules",
     emptyTitle: "No custom module yet",
     empty: "Create module above starts the interview.",

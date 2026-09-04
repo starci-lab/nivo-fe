@@ -31,7 +31,7 @@ export const AgentOSCustomModuleCollection = (props: AgentOSCustomModuleCollecti
     void Promise.resolve(revalidate()).finally(() => setRetrying(false));
   }, [revalidate]);
   const hrefOf = (module: AgentosCustomModule) => module.installationId === null ? `/${locale}/agentos/workspaces/${workspaceId}/modules/studio/${module.id}` : `/${locale}/agentos/workspaces/${workspaceId}/modules/${module.installationId}`;
-  return <AgentOSCustomModuleCollectionBase state={collectionState(modules)} title={t("collection.title")} emptyTitle={t("collection.emptyTitle")} empty={t("collection.empty")} refusedTitle={t("collection.refusedTitle")} refused={t("collection.refused")} retry={t("collection.retry")} retrying={retrying} onRetry={onRetry} rows={(modules ?? []).map(module => ({
+  return <AgentOSCustomModuleCollectionBase loadingKind={t("collection.custom")} loadingStatus={t("status.draft")} state={collectionState(modules)} title={t("collection.title")} emptyTitle={t("collection.emptyTitle")} empty={t("collection.empty")} refusedTitle={t("collection.refusedTitle")} refused={t("collection.refused")} retry={t("collection.retry")} retrying={retrying} onRetry={onRetry} rows={(modules ?? []).map(module => ({
     id: module.id,
     name: module.name,
     detail: t("collection.progress", {

@@ -1,8 +1,59 @@
 "use client";
 
+type ShellActiveContextValues = { readonly version: string; readonly channel: string; readonly controller: string };
+type ShellBoundContextValues = { readonly version: number };
+type ShellConversationValues = { readonly number: number };
+type ShellUnknownKindValues = { readonly kind: string };
+type ShellUnknownStatusValues = { readonly status: string };
+type ShellWorkspaceValues = { readonly id: string };
+
+/** Settled display labels and typed formatters supplied by the page owner. */
+export type ModuleRouteShellBlockCopy = {
+  readonly "shell": {
+    readonly "activeContext": (values: ShellActiveContextValues) => string;
+    readonly "boundContext": (values: ShellBoundContextValues) => string;
+    readonly "channelConnected": string;
+    readonly "channelDisconnected": string;
+    readonly "controllerAttention": string;
+    readonly "controllerHealthy": string;
+    readonly "conversation": (values: ShellConversationValues) => string;
+    readonly "diagnostics": string;
+    readonly "genericAgent": string;
+    readonly "kind": {
+      readonly "accounting": string;
+      readonly "customer-support": string;
+      readonly "generic-agent": string;
+      readonly "research": string;
+      readonly "scheduling": string;
+    };
+    readonly "live": string;
+    readonly "loading": string;
+    readonly "modules": string;
+    readonly "noContextApplied": string;
+    readonly "noExecuteSession": string;
+    readonly "operate": string;
+    readonly "path": string;
+    readonly "primaryOperations": string;
+    readonly "reading": string;
+    readonly "refused": string;
+    readonly "sections": string;
+    readonly "settings": string;
+    readonly "setup": string;
+    readonly "telegramConnected": string;
+    readonly "test": string;
+    readonly "unavailable": string;
+    readonly "unknownKind": (values: ShellUnknownKindValues) => string;
+    readonly "unknownStatus": (values: ShellUnknownStatusValues) => string;
+    readonly "workspace": (values: ShellWorkspaceValues) => string;
+  };
+};
+
+
 import { Heading, Text, Badge } from "@starci/grammar/common";
+
 import type { ComponentType } from "react";
 import { Breadcrumbs, RouteTabs, TileIcon } from "@nivo/ui";
+import { MODULE_ROUTE_SHELL_CLASS_NAME, MODULE_ROUTE_SHELL_DETAIL_CLASS_NAME, MODULE_ROUTE_SHELL_IDENTITY_CLASS_NAME } from "./classNames";
 
 /** Stable routed task identities owned by the shared installed-module shell. */
 export type AgentOSModuleView = "setup" | "test" | "operate" | "settings" | "diagnostics";
@@ -21,6 +72,7 @@ export type ModuleRouteShellData = {
 
 /** Stable component-type lane used to replace the shell body without accepting prebuilt JSX. */
 export type ModuleRouteShellBlockProps<P extends object> = ModuleRouteShellData & {
+  readonly copy: ModuleRouteShellBlockCopy;
   readonly content: ComponentType<P>;
   readonly contentProps: P;
   readonly onBackToModules: () => void;
@@ -31,25 +83,25 @@ const ROUTES: ReadonlyArray<{
   readonly label: string;
 }> = [{
   id: "setup",
-  label: "Setup"
+  label: ""
 }, {
   id: "test",
-  label: "Test"
+  label: ""
 }, {
   id: "operate",
-  label: "Operate"
+  label: ""
 }, {
   id: "settings",
-  label: "Settings"
+  label: ""
 }, {
   id: "diagnostics",
-  label: "Diagnostics"
+  label: ""
 }];
 
 /** Keep module identity and context continuity stable while one typed task body changes. */
 export const ModuleRouteShellBlock = <P extends object,>(props: ModuleRouteShellBlockProps<P>) => {
+  const { copy } = props;
   const {
-    workspaceLabel,
     moduleName,
     moduleKind,
     lifecycleLabel,
@@ -62,26 +114,20 @@ export const ModuleRouteShellBlock = <P extends object,>(props: ModuleRouteShell
     onBackToModules,
     onNavigate
   }: ModuleRouteShellBlockProps<P> = props;
-  return <div>
+  const routes = ROUTES.map(route => ({ ...route, label: copy.shell[route.id] }));
+  const kindLabels: Readonly<Record<string, string>> = { "generic-agent": copy.shell.kind["generic-agent"], "customer-support": copy.shell.kind["customer-support"], accounting: copy.shell.kind.accounting, scheduling: copy.shell.kind.scheduling, research: copy.shell.kind.research };
+  const machineKey = /^custom:[0-9a-f-]{20,}$/i.test(moduleName);
+  const heading = machineKey && moduleKind === "generic-agent" ? copy.shell.genericAgent : moduleName;
+  return <div className={MODULE_ROUTE_SHELL_CLASS_NAME} data-contract="MEASURE-2 GAP-4 FLOW-3">
 
 
   <Breadcrumbs props={{
-      mode: "trail",
-      label: "AgentOS module path",
-      steps: [{
-        id: "workspace",
-        label: workspaceLabel
-      }, {
-        id: "modules",
-        label: "Modules"
-      }, {
-        id: "module",
-        label: moduleName,
-        isCurrent: true
-      }]
+      mode: "back",
+      label: copy.shell.modules,
+      backLabel: copy.shell.modules
     }} on={{
-      activate: id => id !== "module" && onBackToModules()
-    }} /><div><div>
+      back: onBackToModules
+      }} /><div>
 
 
 
@@ -89,26 +135,30 @@ export const ModuleRouteShellBlock = <P extends object,>(props: ModuleRouteShell
       <TileIcon props={{
           icon: "agentos",
           signal: "attention"
-        }} /><div>
+      }} /><div className={MODULE_ROUTE_SHELL_IDENTITY_CLASS_NAME} data-contract="GAP-2">
 
 
-        <Text size="sm" tone="accent" weight="semibold">{moduleKind}</Text>
+        <Text size="xs">{(Object.hasOwn(kindLabels, moduleKind) ? kindLabels[moduleKind] : copy.shell.unknownKind({ kind: moduleKind }))}</Text>
 
 
-        <Heading level={1} scale="display">{moduleName}</Heading>
+        <Heading level={1}>{heading}</Heading>
+        {machineKey ? <Text size="sm" tone="muted">{moduleName}</Text> : null}
 
 
-        <Text size="md" tone="muted">{`Active context ${contextVersion} · ${channelLabel} · ${controllerLabel}`}</Text>
+        <div className={MODULE_ROUTE_SHELL_DETAIL_CLASS_NAME} data-contract="GAP-2">
+          <Text size="sm" tone="muted">{copy.shell.activeContext({ version: contextVersion, channel: channelLabel, controller: controllerLabel })}</Text>
 
-        <Badge tone="success">{lifecycleLabel}</Badge></div></div></div>
+          <Badge tone="neutral">{lifecycleLabel}</Badge>
+        </div>
+      </div></div>
 
 
 
 
   <RouteTabs props={{
-      label: "Module sections",
+      label: copy.shell.sections,
       selectedKey: activeView,
-      tabs: ROUTES
+      tabs: routes
     }} on={{
       select: key => onNavigate(key as AgentOSModuleView)
     }} />
