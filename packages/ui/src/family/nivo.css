@@ -40,7 +40,17 @@
         --nivo-default-foreground: oklch(21.03% 0.0059 354.13);
         --nivo-segment: oklch(100% 0.0015 354.13);
         --nivo-foreground: oklch(21.03% 0.0015 354.13);
-        --nivo-muted: oklch(55.17% 0.003 354.13);
+        /*
+         * Muted text is small, normal-weight body copy, so it owes the 4.5:1 floor and not the 3:1
+         * large-text one. At 55.17% it computed rgb(115, 113, 114) and measured 4.4527:1 on the
+         * sidebar canvas and 4.2220:1 on the secondary ground - under the floor on BOTH. 53% gives
+         * rgb(109, 107, 108) at 4.86 and 4.61, which clears both with enough headroom to survive the
+         * rounding difference between a browser's oklch conversion and a computed one, and stays
+         * plainly muted against a near-black foreground. Hue and chroma are untouched, so the ramp
+         * keeps its tint. The dark value at the block below is a separate ground and a separate
+         * measurement; this mission audited light only and left it alone.
+         */
+        --nivo-muted: oklch(53% 0.003 354.13);
 
         --nivo-success: oklch(73.29% 0.1941 162.85);
         --nivo-success-foreground: oklch(21.03% 0.0059 162.85);
