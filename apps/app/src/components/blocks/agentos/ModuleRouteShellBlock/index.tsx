@@ -50,7 +50,6 @@ const ROUTES: ReadonlyArray<{
 /** Keep module identity and context continuity stable while one typed task body changes. */
 export const ModuleRouteShellBlock = <P extends object,>(props: ModuleRouteShellBlockProps<P>) => {
   const {
-    workspaceLabel,
     moduleName,
     moduleKind,
     lifecycleLabel,
@@ -69,21 +68,11 @@ export const ModuleRouteShellBlock = <P extends object,>(props: ModuleRouteShell
 
 
   <Breadcrumbs props={{
-      mode: "trail",
-      label: "AgentOS module path",
-      steps: [{
-        id: "workspace",
-        label: workspaceLabel
-      }, {
-        id: "modules",
-        label: "Modules"
-      }, {
-        id: "module",
-        label: moduleName,
-        isCurrent: true
-      }]
+      mode: "back",
+      label: "Modules",
+      backLabel: "Modules"
     }} on={{
-      activate: id => id !== "module" && onBackToModules()
+      back: onBackToModules
       }} /><div>
 
 
