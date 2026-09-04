@@ -1,5 +1,41 @@
 "use client";
 
+type RuntimeKindTestBoundaryDetailValues = { readonly scenario: string; readonly context: string; readonly count: number; readonly picker: string; readonly commands: string };
+type RuntimeKindTestRunValues = { readonly scenario: string };
+
+/** Settled display labels and typed formatters supplied by the page owner. */
+export type KindTestWorkbenchBlockCopy = {
+  readonly "kindTest": {
+    readonly "accounting": string;
+    readonly "boundary": string;
+    readonly "boundaryDetail": (values: RuntimeKindTestBoundaryDetailValues) => string;
+    readonly "calendar": string;
+    readonly "citation": string;
+    readonly "closed": string;
+    readonly "cockpit": string;
+    readonly "context": string;
+    readonly "conversation": string;
+    readonly "default": string;
+    readonly "fakeHint": string;
+    readonly "generic": string;
+    readonly "local": string;
+    readonly "noRegistration": string;
+    readonly "pending": string;
+    readonly "ready": string;
+    readonly "refused": string;
+    readonly "run": (values: RuntimeKindTestRunValues) => string;
+    readonly "runUnavailable": string;
+    readonly "safety": string;
+    readonly "sandbox": string;
+    readonly "scenario": string;
+    readonly "state": string;
+    readonly "unavailable": string;
+  };
+};
+
+
+
+
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { ChoiceTabs } from "@nivo/ui";
 import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common";
@@ -11,6 +47,7 @@ type ScenarioField = {
 
 /** Shared runtime input for one registered kind-owned Test workbench. */
 export type TestWorkbenchComponentProps = {
+  readonly copy: KindTestWorkbenchBlockCopy;
   readonly contract: AgentosModuleTestContract;
   readonly scenario: AgentosModuleTestScenarioContract;
   readonly contextLabel: string;
@@ -27,6 +64,7 @@ export type TestWorkbenchRegistry = Readonly<Record<string, ComponentType<TestWo
 
 /** Exact block boundary for resolving a registered Test workbench. */
 export type KindTestWorkbenchBlockProps = {
+  readonly copy: KindTestWorkbenchBlockCopy;
   readonly contract: AgentosModuleTestContract;
   readonly contextLabel: string;
   readonly targetReady: boolean;
@@ -60,14 +98,14 @@ const parseOverride = (raw: string, fixture: AgentosRuntimeValue): AgentosRuntim
   }
   return raw;
 };
-const titleByWorkbench: Readonly<Record<string, string>> = {
-  "conversation-sandbox": "Conversation test",
-  "accounting-fixture": "Accounting fixture test",
-  "calendar-sandbox": "Calendar sandbox test",
-  "citation-check": "Citation grounding test",
-  "generic-sandbox": "Context readiness test"
+const titleByWorkbench: Readonly<Partial<Record<string, "conversation" | "accounting" | "calendar" | "citation" | "generic">>> = {
+  "conversation-sandbox": "conversation",
+  "accounting-fixture": "accounting",
+  "calendar-sandbox": "calendar",
+  "citation-check": "citation",
+  "generic-sandbox": "generic"
 };
-const TestWorkbenchContent = ({
+const TestWorkbenchContent = ({ copy,
   contract,
   scenario,
   contextLabel,
@@ -78,15 +116,17 @@ const TestWorkbenchContent = ({
   onOverride,
   onRun
 }: TestWorkbenchComponentProps) => {
+  
   const fields = flattenFixture(scenario.fixture);
-  const title = titleByWorkbench[contract.workbench.key] ?? "Module scenario test";
+  const titleKey = Object.hasOwn(titleByWorkbench, contract.workbench.key) ? titleByWorkbench[contract.workbench.key] : undefined;
+  const title = titleKey === undefined ? copy.kindTest.default : copy.kindTest[titleKey];
   return <div><div>
 
 
       <Heading level={3}>{title}</Heading>
 
       <Text size="xs" tone="muted">{scenario.description}</Text></div>{!showScenarioPicker || contract.scenarios.length < 2 ? undefined : <ChoiceTabs props={{
-      label: "Test scenario",
+      label: copy.kindTest.scenario,
       selectedKey: scenario.key,
       tabs: contract.scenarios.map(({
         key,
@@ -101,11 +141,11 @@ const TestWorkbenchContent = ({
 
 
 
-          <Text size="sm">{"Immutable context"}</Text>
+          <Text size="sm">{copy.kindTest.context}</Text>
           <Text size="sm" weight="semibold">{contextLabel}</Text></div><div>
 
 
-          <Text size="sm">{"Sandbox"}</Text>
+          <Text size="sm">{copy.kindTest.sandbox}</Text>
           <Text size="sm" weight="semibold">{`${contract.sandboxAdapter.key}@${contract.sandboxAdapter.version}`}</Text></div></></div>{fields.map(field => <Input
             key={`${scenario.key}-${field.path}`}
             id={`agentos-test-${field.path.replaceAll(".", "-")}`}
@@ -114,18 +154,18 @@ const TestWorkbenchContent = ({
             placeholder={JSON.stringify(overrides[field.path] ?? field.value)}
             isDisabled={pending}
             variant="secondary"
-            hint="Fake input only. Leave unchanged to use the registered fixture."
+            hint={copy.kindTest.fakeHint}
             onValueChange={value => onOverride(field.path, parseOverride(value, field.value))}
           />)}
 
-    <Text size="sm" tone="muted">{"This run cannot call live channels, calendars, payment providers, credentials, or Execute sessions."}</Text>
+    <Text size="sm" tone="muted">{copy.kindTest.safety}</Text>
 
 
     <Button
       variant="primary"
       isPending={pending}
       onPress={onRun}
-    >{`Run ${scenario.label}`}</Button></div>;
+    >{copy.kindTest.run({ scenario: scenario.label })}</Button></div>;
 };
 
 /** Built-in registrations; adding a kind extends this table without editing the shell. */
@@ -136,7 +176,7 @@ export const DEFAULT_TEST_WORKBENCH_REGISTRY: TestWorkbenchRegistry = {
   "citation-check": TestWorkbenchContent,
   "generic-sandbox": TestWorkbenchContent
 };
-const UnavailableTestWorkbench = ({
+const UnavailableTestWorkbench = ({ copy,
   contract,
   scenario,
   contextLabel,
@@ -147,31 +187,32 @@ const UnavailableTestWorkbench = ({
   onOverride,
   onRun
 }: TestWorkbenchComponentProps) => {
+  
   const callbacksReady = [onSelectScenario, onOverride, onRun].every(callback => typeof callback === "function");
-  const state = pending ? "Pending" : "No trusted ComponentType registration";
-  const detail = `${scenario.key} · ${contextLabel} · ${Object.keys(overrides).length} override(s) · picker ${showScenarioPicker ? "local" : "cockpit"} · commands ${callbacksReady ? "ready" : "refused"}`;
+  const state = pending ? copy.kindTest.pending : copy.kindTest.noRegistration;
+  const detail = copy.kindTest.boundaryDetail({ scenario: scenario.key, context: contextLabel, count: Object.keys(overrides).length, picker: showScenarioPicker ? copy.kindTest.local : copy.kindTest.cockpit, commands: callbacksReady ? copy.kindTest.ready : copy.kindTest.refused });
   return <div><div>
 
 
-      <Heading level={3}>{"Test workbench unavailable"}</Heading>
+      <Heading level={3}>{copy.kindTest.unavailable}</Heading>
       <Text size="xs" tone="muted">{contract.workbench.key}</Text></div><div><><div>
 
 
 
 
-          <Text size="sm">{"State"}</Text>
+          <Text size="sm">{copy.kindTest.state}</Text>
           <Text size="sm">{state}</Text></div><div>
 
 
-          <Text size="sm">{"Boundary"}</Text>
+          <Text size="sm">{copy.kindTest.boundary}</Text>
           <Text size="sm">{detail}</Text></div></></div>
 
 
 
-    <Text size="sm" tone="muted">{"The registry failed closed; no test was executed."}</Text>
+    <Text size="sm" tone="muted">{copy.kindTest.closed}</Text>
     <Button
       isDisabled={true}
-    >Run unavailable</Button></div>;
+    >{copy.kindTest.runUnavailable}</Button></div>;
 };
 const setPath = (root: Readonly<Record<string, AgentosRuntimeValue>>, path: string, value: AgentosRuntimeValue): Readonly<Record<string, AgentosRuntimeValue>> => {
   const [head, ...tail] = path.split(".");
@@ -190,6 +231,7 @@ const setPath = (root: Readonly<Record<string, AgentosRuntimeValue>>, path: stri
 
 /** Resolve and run one kind Test workbench from its versioned registry identity. */
 export const KindTestWorkbenchBlock = (props: KindTestWorkbenchBlockProps) => {
+  const { copy } = props;
   const {
     contract,
     contextLabel,
@@ -208,6 +250,7 @@ export const KindTestWorkbenchBlock = (props: KindTestWorkbenchBlockProps) => {
   useEffect(() => setOverrides({}), [scenarioKey]);
   if (scenario === undefined) return null;
   const contentProps: TestWorkbenchComponentProps = {
+    copy,
     contract,
     scenario,
     contextLabel,
@@ -224,7 +267,7 @@ export const KindTestWorkbenchBlock = (props: KindTestWorkbenchBlockProps) => {
   const Workbench = registry[contract.workbench.key] ?? UnavailableTestWorkbench;
   const render = <Workbench {...contentProps} />;
   return <SurfaceCard
-    label="Test scenario"
+    label={copy.kindTest.scenario}
     fact={`${contract.workbench.key}@${contract.workbench.version}`}
   >{render}</SurfaceCard>;
 };

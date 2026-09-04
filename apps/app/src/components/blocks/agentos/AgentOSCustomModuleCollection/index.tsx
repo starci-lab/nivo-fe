@@ -28,7 +28,7 @@ export const AgentOSCustomModuleCollection = (props: AgentOSCustomModuleCollecti
     const route = module.installationId === null ? `/agentos/workspaces/${workspaceId}/modules/studio/${module.id}` : `/agentos/workspaces/${workspaceId}/modules/${module.installationId}`;
     router.push(route);
   };
-  return <AgentOSCustomModuleCollectionBase state={collectionState(modules)} title={t("collection.title")} refused={t("collection.refused")} empty={t("collection.empty")} createLabel={t("collection.create")} rows={(modules ?? []).map(module => ({
+  return <AgentOSCustomModuleCollectionBase state={collectionState(modules)} loadingKind={t("collection.custom")} loadingStatus={t("status.draft")} title={t("collection.title")} refused={t("collection.refused")} empty={t("collection.empty")} createLabel={t("collection.create")} rows={(modules ?? []).map(module => ({
     id: module.id,
     name: module.name,
     detail: t("collection.progress", {
@@ -36,6 +36,7 @@ export const AgentOSCustomModuleCollection = (props: AgentOSCustomModuleCollecti
     }),
     kind: t("collection.custom"),
     status: t(`status.${module.status}`),
+    statusKey: module.status,
     action: module.status === "active" ? t("collection.inspect") : t("collection.resume")
   }))} onOpen={id => {
     const module = modules?.find(item => item.id === id);

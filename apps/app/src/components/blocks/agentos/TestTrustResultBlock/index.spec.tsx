@@ -1,7 +1,13 @@
+import type { ComponentProps } from "react"
+import { NextIntlClientProvider, useTranslations } from "next-intl"
+import enMessages from "@/messages/en.json"
+import viMessages from "@/messages/vi.json"
+import { TIME_ZONE } from "@/i18n/config"
+import { buildModulePageCopy } from "@/components/pages/AgentOSSolutionModulePage/component"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 import type { AgentosModuleTestAssertionResult, AgentosModuleTestContract, AgentosModuleTestRun } from "@/modules/api/console"
-import { TestTrustResultBlock } from "."
+import { TestTrustResultBlock as ActualTestTrustResultBlock } from "."
 
 const contract: AgentosModuleTestContract = {
     workbench: { key: "conversation-sandbox", version: "1.0.0" },
@@ -29,7 +35,7 @@ const assertion = (component = "nivo.test-evidence"): AgentosModuleTestAssertion
 describe("TestTrustResultBlock", () => {
     it("renders persisted assertion evidence through the trusted registration", () => {
         const html = renderToStaticMarkup(<TestTrustResultBlock contract={contract} run={run} assertions={[assertion()]} contextLabel="Context v2 · candidate" />)
-        expect(html).toContain("Result: passed")
+        expect(html).toContain("Result: Passed")
         expect(html).toContain("Acknowledges before acting")
         expect(html).toContain("verify the contract")
         expect(html).not.toContain("Untrusted evidence rejected")
@@ -40,4 +46,20 @@ describe("TestTrustResultBlock", () => {
         expect(html).toContain("Untrusted evidence rejected")
         expect(html).not.toContain("verify the contract")
     })
+})
+type TestTrustResultBlockFixtureProps = Omit<ComponentProps<typeof ActualTestTrustResultBlock>, "copy"> & { readonly locale?: "en" | "vi" }
+const TestTrustResultBlockCopyFixture = (props: TestTrustResultBlockFixtureProps) => {
+    const t = useTranslations("console.agentos.modules")
+    return <ActualTestTrustResultBlock {...props} copy={buildModulePageCopy(t)} />
+}
+const TestTrustResultBlock = ({ locale = "en", ...props }: TestTrustResultBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><TestTrustResultBlockCopyFixture {...props} /></NextIntlClientProvider>
+
+describe.each(["en", "vi"] as const)("Trust evidence copy %s", locale => {
+ it.each(["running", "passed", "warning", "failed"] as const)("renders %s without changing assertions", status => {
+  const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime
+  const html = renderToStaticMarkup(<TestTrustResultBlock locale={locale} contract={contract} run={{ ...run, status }} assertions={[assertion()]} contextLabel="Raw context" />)
+  expect(html).toContain(copy.testStatus[status])
+  expect(html).toContain(copy.trust.verdictPass)
+  expect(html).toContain("verify the contract")
+ })
 })

@@ -10,6 +10,7 @@ export type CustomModuleCollectionRow = {
   readonly detail: string;
   readonly kind: string;
   readonly status: string;
+  readonly statusKey: string;
   readonly action: string;
 };
 
@@ -21,6 +22,8 @@ export type AgentOSCustomModuleCollectionViewProps = {
   readonly empty: string;
   readonly createLabel: string;
   readonly rows: ReadonlyArray<CustomModuleCollectionRow>;
+  readonly loadingKind: string;
+  readonly loadingStatus: string;
   readonly onOpen: (id: string) => void;
   readonly onCreate: () => void;
 };
@@ -31,7 +34,7 @@ const rowView = (row: CustomModuleCollectionRow, loading: boolean, onOpen: (id: 
     <Text size="xs" isSkeleton={loading}>{row.detail}</Text></div>
 
   <Badge tone="neutral" isSkeleton={loading}>{row.kind}</Badge>
-  <Badge tone={row.status === "Active" ? "success" : "warning"} isSkeleton={loading}>{row.status}</Badge>
+  <Badge tone={row.statusKey === "active" ? "success" : "warning"} isSkeleton={loading}>{row.status}</Badge>
   <Button variant="secondary" size="sm" isSkeleton={loading} onPress={() => onOpen(row.id)}>{row.action}</Button></div>;
 const customModuleContent = (shown: ReadonlyArray<CustomModuleCollectionRow>, loading: boolean, onOpen: (id: string) => void) => <div>{shown.map(row => rowView(row, loading, onOpen))}</div>;
 
@@ -44,6 +47,8 @@ export const AgentOSCustomModuleCollectionBase = (props: AgentOSCustomModuleColl
     empty,
     createLabel,
     rows,
+    loadingKind,
+    loadingStatus,
     onOpen,
     onCreate
   }: AgentOSCustomModuleCollectionViewProps = props;
@@ -63,8 +68,9 @@ export const AgentOSCustomModuleCollectionBase = (props: AgentOSCustomModuleColl
     id: `loading-${index}`,
     name: title,
     detail: "",
-    kind: "Custom",
-    status: "Draft",
+    kind: loadingKind,
+    status: loadingStatus,
+    statusKey: "draft",
     action: createLabel
   })) : rows;
   const content = customModuleContent(shown, state === "loading", onOpen);

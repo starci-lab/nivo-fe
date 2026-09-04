@@ -11,10 +11,12 @@ const resetQueryCache = () => { for (const key of SWRConfig.defaultValue.cache.k
 let viewerSequence = 0
 if (!Element.prototype.getAnimations) Element.prototype.getAnimations = () => []
 
-vi.mock("next/navigation", () => ({
+vi.mock("next/navigation", async () => ({
+    ...await vi.importActual("next/navigation"),
     useSearchParams: () => new URLSearchParams(),
 }))
-vi.mock("@/i18n/navigation", () => ({
+vi.mock("@/i18n/navigation", async () => ({
+    ...await vi.importActual("@/i18n/navigation"),
     useRouter: () => ({ push, replace }),
     usePathname: () => "/wallet",
 }))
@@ -74,6 +76,7 @@ const moduleRuntime = (agentWorkspaceId: string) => ({
 describe("connected console pages", () => {
     afterEach(() => { localeState.value = "en"; cleanup(); resetQueryCache() })
     beforeEach(() => {
+        window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })
         viewerSequence += 1
         signedIn.state = { status: "signed-in", accessToken: `orchestration-pages-${viewerSequence}` }
         push.mockClear()
@@ -100,8 +103,7 @@ describe("connected console pages", () => {
     it("settles the workspace list after its owner-scoped query answers", async () => {
         vi.mocked(myAgentWorkspace).mockResolvedValue({ ok: true, data: [{ id: "workspace-1", name: "Workspace", status: "ready", catalogOrder: { id: "order-1" } }] } as never)
         render(<AgentOSPage mode="dashboard" />)
-        fireEvent.click(await screen.findByText("Workspace"))
-        expect(push).toHaveBeenCalledWith("/agentos/workspaces/workspace-1")
+        expect((await screen.findByRole("link", { name: /Workspace/ })).getAttribute("href")).toBe("/en/agentos/workspaces/workspace-1")
     })
 
     it("records refusal states for the workspace list", async () => {
@@ -154,14 +156,14 @@ describe("connected console pages", () => {
         signedIn.state = { status: "signed-out", accessToken: "" }
         vi.mocked(myAgentosModuleRuntime).mockReturnValue(new Promise(() => undefined))
         render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="install-1" />)
-        expect(screen.getByRole("heading", { name: "Module Studio" })).toBeInTheDocument()
+        expect(screen.getByRole("heading", { name: "studioPage.title" })).toBeInTheDocument()
         cleanup()
         resetQueryCache()
         signedIn.state = { status: "signed-in", accessToken: `orchestration-pages-${viewerSequence}-owner-refusal` }
         vi.mocked(myAgentosModuleInstallation).mockResolvedValue({ ok: true, data: { id: "install-1", agentWorkspaceId: "other", moduleKey: "sales-copilot", moduleVersion: "1.0", status: "ready", sagaId: null, generatedAgentIds: [], sharedKnowledgeSourceIds: [], channelAccountRefs: [], commonKnowledgeVersion: "common-1", privateKnowledgeVersion: "private-1", failureCode: null } } as never)
         vi.mocked(myAgentosModuleRuntime).mockResolvedValue({ ok: true, data: moduleRuntime("other") } as never)
         render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="install-1" />)
-        expect(await screen.findByText("The server refused this installation or workspace identity.")).toBeInTheDocument()
+        expect(await screen.findByText("shell.refused")).toBeInTheDocument()
     })
 
     it("keeps module and workspace lists resting when signed out and refused when reads fail", async () => {
@@ -216,6 +218,7 @@ describe("connected console pages", () => {
     it("renders the solution module route while its detail is loading", async () => {
         vi.mocked(myAgentosModuleRuntime).mockReturnValue(new Promise(() => undefined))
         render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
-        expect(screen.getByRole("heading", { name: "Module Studio" })).toBeInTheDocument()
+        expect(screen.getByRole("heading", { name: "studioPage.title" })).toBeInTheDocument()
     })
 })
+

@@ -1,7 +1,13 @@
+import type { ComponentProps } from "react"
+import { NextIntlClientProvider, useTranslations } from "next-intl"
+import enMessages from "@/messages/en.json"
+import viMessages from "@/messages/vi.json"
+import { TIME_ZONE } from "@/i18n/config"
+import { buildModulePageCopy } from "@/components/pages/AgentOSSolutionModulePage/component"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import type { AgentosModuleTestContract } from "@/modules/api/console"
-import { DEFAULT_TEST_WORKBENCH_REGISTRY, KindTestWorkbenchBlock } from "."
+import { DEFAULT_TEST_WORKBENCH_REGISTRY, KindTestWorkbenchBlock as ActualKindTestWorkbenchBlock } from "."
 
 const contractFor = (workbenchKey: string): AgentosModuleTestContract => ({
     workbench: { key: workbenchKey, version: "1.0.0" },
@@ -53,4 +59,19 @@ describe("KindTestWorkbenchBlock", () => {
         expect(html).toContain("Test workbench unavailable")
         expect(html).toContain("no test was executed")
     })
+})
+type KindTestWorkbenchBlockFixtureProps = Omit<ComponentProps<typeof ActualKindTestWorkbenchBlock>, "copy"> & { readonly locale?: "en" | "vi" }
+const KindTestWorkbenchBlockCopyFixture = (props: KindTestWorkbenchBlockFixtureProps) => {
+    const t = useTranslations("console.agentos.modules")
+    return <ActualKindTestWorkbenchBlock {...props} copy={buildModulePageCopy(t)} />
+}
+const KindTestWorkbenchBlock = ({ locale = "en", ...props }: KindTestWorkbenchBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><KindTestWorkbenchBlockCopyFixture {...props} /></NextIntlClientProvider>
+
+describe.each(["en", "vi"] as const)("Kind test copy %s", locale => {
+ it.each(["conversation-sandbox", "accounting-fixture", "calendar-sandbox", "citation-check", "generic-sandbox", "missing"])("renders %s with its real fixture and fail-closed fallback", workbenchKey => {
+  const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.kindTest
+  const html = renderToStaticMarkup(<KindTestWorkbenchBlock locale={locale} contract={contractFor(workbenchKey)} contextLabel="Untranslated context" targetReady pending={false} registry={DEFAULT_TEST_WORKBENCH_REGISTRY} onRun={vi.fn()} />)
+  expect(html).toContain(workbenchKey === "missing" ? copy.unavailable : "Safe fixture")
+  expect(html).toContain(workbenchKey === "missing" ? copy.closed : copy.fakeHint)
+ })
 })

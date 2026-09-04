@@ -1,6 +1,12 @@
+import type { ComponentProps } from "react"
+import { NextIntlClientProvider, useTranslations } from "next-intl"
+import enMessages from "@/messages/en.json"
+import viMessages from "@/messages/vi.json"
+import { TIME_ZONE } from "@/i18n/config"
+import { buildModulePageCopy } from "@/components/pages/AgentOSSolutionModulePage/component"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
-import { DEFAULT_WORKBENCH_REGISTRY, KindWorkbenchBlock } from "."
+import { DEFAULT_WORKBENCH_REGISTRY, KindWorkbenchBlock as ActualKindWorkbenchBlock } from "."
 
 describe("KindWorkbenchBlock", () => {
     it.each([
@@ -43,4 +49,20 @@ describe("KindWorkbenchBlock", () => {
         expect(html).toContain("High / urgent")
         expect(html).not.toContain("#4821")
     })
+})
+type KindWorkbenchBlockFixtureProps = Omit<ComponentProps<typeof ActualKindWorkbenchBlock>, "copy"> & { readonly locale?: "en" | "vi" }
+const KindWorkbenchBlockCopyFixture = (props: KindWorkbenchBlockFixtureProps) => {
+    const t = useTranslations("console.agentos.modules")
+    return <ActualKindWorkbenchBlock {...props} copy={buildModulePageCopy(t)} />
+}
+const KindWorkbenchBlock = ({ locale = "en", ...props }: KindWorkbenchBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><KindWorkbenchBlockCopyFixture {...props} /></NextIntlClientProvider>
+
+describe.each(["en", "vi"] as const)("Workbench copy %s", locale => {
+ it.each(["support-queue", "accounting-sheet", "calendar-week", "document-reader", "sales-pipeline", "conversation-inbox", "generic-workbench", "missing"])("keeps %s registration identity while translating its title", workbenchKey => {
+  const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.workbench
+  const html = renderToStaticMarkup(<KindWorkbenchBlock locale={locale} moduleId="raw-module" kindKey="raw-kind" workbenchKey={workbenchKey} workbenchVersion="1.0.0" registry={DEFAULT_WORKBENCH_REGISTRY} />)
+  expect(html).toContain(copy.title)
+  expect(html).toContain(workbenchKey + "@1.0.0")
+  if (workbenchKey === "missing") expect(html).toContain(copy.unavailableNotice)
+ })
 })

@@ -1,3 +1,9 @@
+import type { ComponentProps } from "react"
+import { NextIntlClientProvider } from "next-intl"
+import enMessages from "@/messages/en.json"
+import viMessages from "@/messages/vi.json"
+import { TIME_ZONE } from "@/i18n/config"
+
 /** @vitest-environment jsdom */
 
 import { act, render, screen } from "@testing-library/react"
@@ -77,7 +83,8 @@ vi.mock("@/hooks", () => ({
     useMutateReconcileSupportDeliverySwr: () => ({ trigger: mocks.supportTrigger }),
     useReadMyAgentosModuleTestRun: () => vi.fn(),
 }))
-vi.mock("./component", () => ({
+vi.mock("./component", async () => ({
+    ...await vi.importActual("./component"),
     exactTestSurfaceFor: (surface: unknown) => surface,
     AgentOSSolutionModuleState: () => <div>module-state</div>,
     AgentOSSolutionModulePageBase: (props: typeof mocks.pageProps) => {
@@ -86,7 +93,7 @@ vi.mock("./component", () => ({
     },
 }))
 
-import { AgentOSSolutionModulePage } from "./index"
+import { AgentOSSolutionModulePage as ActualAgentOSSolutionModulePage } from "./index"
 import type { AgentOSSolutionModuleScreen } from "./component"
 
 type RuntimeAnswer = { readonly ok: boolean; readonly data: typeof runtime }
@@ -246,3 +253,10 @@ describe("AgentOSSolutionModulePage projections", () => {
         expect(mocks.runtimeTrigger).toHaveBeenCalled()
     })
 })
+type AgentOSSolutionModulePageFixtureProps = Omit<ComponentProps<typeof ActualAgentOSSolutionModulePage>, "copy"> & { readonly locale?: "en" | "vi" }
+const AgentOSSolutionModulePageCopyFixture = (props: AgentOSSolutionModulePageFixtureProps) => {
+
+    return <ActualAgentOSSolutionModulePage {...props} />
+}
+const AgentOSSolutionModulePage = ({ locale = "en", ...props }: AgentOSSolutionModulePageFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><AgentOSSolutionModulePageCopyFixture {...props} /></NextIntlClientProvider>
+

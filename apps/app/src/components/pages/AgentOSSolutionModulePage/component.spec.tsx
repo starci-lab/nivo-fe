@@ -1,4 +1,8 @@
 import { renderToStaticMarkup } from "react-dom/server"
+import { NextIntlClientProvider, useTranslations } from "next-intl"
+import enMessages from "@/messages/en.json"
+import viMessages from "@/messages/vi.json"
+import { TIME_ZONE } from "@/i18n/config"
 import { describe, expect, it, vi } from "vitest"
 import type { ContextDraft } from "@/components/blocks/agentos/ContextVersionBlock"
 import type { AgentosModuleTestContract } from "@/modules/api/console"
@@ -7,6 +11,7 @@ import {
     exactTestSurfaceFor,
     type AgentOSSolutionModulePageViewProps,
     type AgentOSSolutionModuleScreen,
+    buildModulePageCopy,
 } from "./component"
 
 const action = vi.fn()
@@ -36,6 +41,11 @@ const contract: AgentosModuleTestContract = {
         assertions: [],
     }],
 }
+
+type CopyFixtureProps = Omit<AgentOSSolutionModulePageViewProps, "copy">
+type PageFixtureProps = CopyFixtureProps & { readonly locale: "en" | "vi" }
+const CopyFixture = ({ shell, screen }: CopyFixtureProps) => { const t = useTranslations("console.agentos.modules"); return <AgentOSSolutionModulePageBase shell={shell} screen={screen} copy={buildModulePageCopy(t)} /> }
+const PageFixture = ({ shell, screen, locale }: PageFixtureProps) => <NextIntlClientProvider locale={locale} timeZone={TIME_ZONE} messages={locale === "en" ? enMessages : viMessages} onError={error => { throw error }}><CopyFixture shell={shell} screen={screen} /></NextIntlClientProvider>
 
 const screens: ReadonlyArray<AgentOSSolutionModuleScreen> = [
     {
@@ -151,13 +161,13 @@ const screens: ReadonlyArray<AgentOSSolutionModuleScreen> = [
 
 describe("AgentOSSolutionModulePageBase", () => {
     it.each(screens)("renders the $view screen through its typed Grammar contract", (screen) => {
-        const html = renderToStaticMarkup(<AgentOSSolutionModulePageBase shell={{ ...shell, activeView: screen.view === "test-unavailable" ? "test" : screen.view }} screen={screen} />)
+        const html = renderToStaticMarkup(<PageFixture shell={{ ...shell, activeView: screen.view === "test-unavailable" ? "test" : screen.view }} screen={screen} locale="en" />)
         expect(html).toContain("Support Desk")
     })
 
     it("mounts exactly one controlled Setup panel", () => {
         const setup = screens[0]!
-        const html = renderToStaticMarkup(<AgentOSSolutionModulePageBase shell={shell} screen={setup} />)
+        const html = renderToStaticMarkup(<PageFixture shell={shell} screen={setup} locale="en" />)
         expect((html.match(/role="tabpanel"/g) ?? []).length).toBe(1)
         expect(html).toContain('id="setup-panel-conversation"')
         expect(html).not.toContain('id="setup-panel-context"')
@@ -187,5 +197,26 @@ describe("AgentOSSolutionModulePageBase", () => {
         expect(exactTestSurfaceFor(exact as never, draft)).toBe(exact)
         expect(exactTestSurfaceFor({ ...exact, run: { ...exact.run, draftDigest: "b".repeat(64) } } as never, draft)).toBeNull()
         expect(exactTestSurfaceFor(null, draft)).toBeNull()
+    })
+})
+
+// Real catalog assertions for every route body and every controlled Setup pane.
+describe.each(["en", "vi"] as const)("Module page copy in %s", locale => {
+    const messages = locale === "en" ? enMessages : viMessages
+    const copy = messages.console.agentos.modules
+    it.each(screens)("localizes the $view route without translating supplied identity", screen => {
+        const html = renderToStaticMarkup(<PageFixture locale={locale} shell={{ ...shell, activeView: screen.view === "test-unavailable" ? "test" : screen.view }} screen={screen} />)
+        const expected = screen.view === "setup" ? copy.setup.title : screen.view === "test" ? copy.runtime.pageTest.suite : screen.view === "test-unavailable" ? copy.runtime.pageTest.unavailable : screen.view === "operate" ? copy.runtime.operate.view : screen.view === "settings" ? copy.runtime.settings.title : copy.runtime.diagnostics.health
+        expect(html).toContain(expected)
+        expect(html).toContain("Support Desk")
+        expect(html).toContain(copy.shell.sections)
+    })
+    it.each(["conversation", "context", "versions"] as const)("keeps exactly one %s Setup panel", compactPane => {
+        const setup = screens.find(screen => screen.view === "setup")!
+        if (setup.view !== "setup") throw new Error("Setup fixture missing")
+        const html = renderToStaticMarkup(<PageFixture locale={locale} shell={shell} screen={{ ...setup, contentProps: { ...setup.contentProps, compactPane } }} />)
+        expect((html.match(/role="tabpanel"/g) ?? []).length).toBe(1)
+        expect(html).toContain('id="setup-panel-' + compactPane + '"')
+        expect(html).toContain(compactPane === "conversation" ? copy.setup.privateChat : compactPane === "context" ? copy.setup.reviewContext : copy.setup.revisionsHint)
     })
 })

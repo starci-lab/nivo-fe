@@ -1,6 +1,12 @@
+import type { ComponentProps } from "react"
+import { NextIntlClientProvider, useTranslations } from "next-intl"
+import enMessages from "@/messages/en.json"
+import viMessages from "@/messages/vi.json"
+import { TIME_ZONE } from "@/i18n/config"
+import { buildModulePageCopy } from "@/components/pages/AgentOSSolutionModulePage/component"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { ExecuteChatBlock, type ExecuteMessage } from "."
+import { ExecuteChatBlock as ActualExecuteChatBlock, type ExecuteMessage } from "."
 
 const message = (component: string, props: Readonly<Record<string, string | number>>): ExecuteMessage => ({
     id: component,
@@ -49,4 +55,22 @@ describe("ExecuteChatBlock", () => {
         expect(html).toContain("Widget refused")
         expect(html).toContain("No trusted ComponentType is registered")
     })
+})
+type ExecuteChatBlockFixtureProps = Omit<ComponentProps<typeof ActualExecuteChatBlock>, "copy"> & { readonly locale?: "en" | "vi" }
+const ExecuteChatBlockCopyFixture = (props: ExecuteChatBlockFixtureProps) => {
+    const t = useTranslations("console.agentos.modules")
+    return <ActualExecuteChatBlock {...props} copy={buildModulePageCopy(t)} />
+}
+const ExecuteChatBlock = ({ locale = "en", ...props }: ExecuteChatBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><ExecuteChatBlockCopyFixture {...props} /></NextIntlClientProvider>
+
+describe.each(["en", "vi"] as const)("Execute widget copy %s", locale => {
+ it.each(["support", "finance", "calendar", "knowledge"] as const)("localizes %s while preserving runtime values", family => {
+  const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime
+  const identities = { support: "nivo.support-task", finance: "nivo.finance-approval", calendar: "nivo.calendar-options", knowledge: "nivo.knowledge-evidence" }
+  const titles = { support: copy.widgets.supportTitle, finance: copy.widgets.financeTitle, calendar: copy.widgets.calendarTitle, knowledge: copy.widgets.knowledgeTitle }
+  const html = renderToStaticMarkup(<ExecuteChatBlock locale={locale} sessionTitle="Owner conversation" messages={[message(identities[family], { taskId: "raw-task", expectedVersion: 7, title: "Untranslated task" })]} onSend={vi.fn()} />)
+  expect(html).toContain(titles[family])
+  expect(html).toContain("Untranslated task")
+  expect(html).toContain(copy.executeChat.acceptTask)
+ })
 })

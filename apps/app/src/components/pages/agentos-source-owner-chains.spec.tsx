@@ -1,3 +1,9 @@
+import type { ComponentProps } from "react"
+import { NextIntlClientProvider, useTranslations } from "next-intl"
+import enMessages from "@/messages/en.json"
+import viMessages from "@/messages/vi.json"
+import { TIME_ZONE } from "@/i18n/config"
+import { buildModulePageCopy } from "@/components/pages/AgentOSSolutionModulePage/component"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 
@@ -21,7 +27,7 @@ vi.mock("@/components/blocks/agentos/AgentOSOpenClawLaunch", () => ({
 
 import { WalletPageBase } from "./WalletPage/component"
 import { AgentOSWorkspacePageBase } from "./AgentOSWorkspacePage/component"
-import { AgentOSSolutionModulePageBase } from "./AgentOSSolutionModulePage/component"
+import { AgentOSSolutionModulePageBase as ActualAgentOSSolutionModulePageBase } from "./AgentOSSolutionModulePage/component"
 import { AgentOSOpenClawLaunchBridgeBase } from "./AgentOSOpenClawLaunchBridge/component"
 
 describe("AgentOS SPLIT-6 page owner chains", () => {
@@ -66,7 +72,8 @@ describe("AgentOS SPLIT-6 page owner chains", () => {
                 }}
             />,
         )
-        expect(html).toContain("Workspace workspac")
+        expect(html).toContain("Modules")
+        expect(html).toContain("Sales Copilot")
         expect(html).toContain("installation-1")
         expect(html).toContain("Signals")
         expect(html).toContain("Runtime health")
@@ -121,3 +128,10 @@ describe("AgentOS SPLIT-6 page owner chains", () => {
         expect(html).toContain('type="password"')
     })
 })
+type AgentOSSolutionModulePageBaseFixtureProps = Omit<ComponentProps<typeof ActualAgentOSSolutionModulePageBase>, "copy"> & { readonly locale?: "en" | "vi" }
+const AgentOSSolutionModulePageBaseCopyFixture = (props: AgentOSSolutionModulePageBaseFixtureProps) => {
+    const t = useTranslations("console.agentos.modules")
+    return <ActualAgentOSSolutionModulePageBase {...props} copy={buildModulePageCopy(t)} />
+}
+const AgentOSSolutionModulePageBase = ({ locale = "en", ...props }: AgentOSSolutionModulePageBaseFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><AgentOSSolutionModulePageBaseCopyFixture {...props} /></NextIntlClientProvider>
+
