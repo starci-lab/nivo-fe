@@ -1,3 +1,4 @@
+import type * as Navigation from "@/i18n/navigation"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { NextIntlClientProvider } from "next-intl"
@@ -7,7 +8,7 @@ import { TIME_ZONE } from "@/i18n/config"
 
 const replace = vi.fn()
 vi.mock("@/i18n/navigation", async () => ({
-    ...(await vi.importActual<typeof import("@/i18n/navigation")>("@/i18n/navigation")),
+    ...(await vi.importActual<typeof Navigation>("@/i18n/navigation")),
     usePathname: () => "/agentos",
     useRouter: () => ({ replace }),
 }))
@@ -50,3 +51,4 @@ describe("LanguageMenu", () => {
         expect(replace).toHaveBeenCalledWith("/agentos?workspace=one#details", { locale: "en" })
     })
 })
+

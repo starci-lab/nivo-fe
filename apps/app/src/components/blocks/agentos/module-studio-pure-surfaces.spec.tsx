@@ -1,3 +1,4 @@
+import viMessages from "@/messages/vi.json"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
@@ -151,4 +152,12 @@ describe("module studio pure surfaces", () => {
         fireEvent.click(screen.getByRole("button", { name: "Remove key" }))
         expect(removeIntegration).toHaveBeenCalledWith("helpdesk-api")
     })
+})
+
+
+it("keeps the actual Vietnamese active Badge success tone from its raw key", () => {
+ const copy = viMessages.console.agentos.modules
+ const view = render(<AgentOSCustomModuleCollectionBase state="ready" loadingKind={copy.collection.custom} loadingStatus={copy.status.draft} title={copy.collection.title} refused={copy.collection.refused} empty={copy.collection.empty} createLabel={copy.collection.create} rows={[{ id: "module/raw", name: "Owner module", detail: "Raw detail", kind: copy.collection.custom, status: copy.status.active, statusKey: "active", action: copy.collection.inspect }]} onOpen={vi.fn()} onCreate={vi.fn()} />)
+ expect(screen.getByText(copy.status.active).closest('[data-component="Badge"]')).toHaveAttribute("data-tone", "success")
+ view.unmount()
 })

@@ -31,7 +31,7 @@ const testedDraft: ContextDraft = {
 }
 
 describe.each(["en", "vi"] as const)("Support Desk Setup journey %s", locale => {
-    const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules" })).setup
+    const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
     beforeAll(() => { window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() }) })
     it("keeps completed Setup history private and starts a separate revision", () => {
         const selectRevision = vi.fn()
@@ -119,3 +119,4 @@ const PrivateSetupChatBlockCopyFixture = (props: PrivateSetupChatBlockFixturePro
     return <ActualPrivateSetupChatBlock {...props} copy={buildModulePageCopy(t)} />
 }
 const PrivateSetupChatBlock = ({ locale = "en", ...props }: PrivateSetupChatBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><PrivateSetupChatBlockCopyFixture {...props} /></NextIntlClientProvider>
+

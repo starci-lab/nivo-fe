@@ -1,3 +1,4 @@
+import { fireEvent, render, screen } from "@testing-library/react"
 import type { ComponentProps } from "react"
 import { NextIntlClientProvider, useTranslations, createTranslator } from "next-intl"
 import enMessages from "@/messages/en.json"
@@ -50,3 +51,30 @@ describe.each(["en", "vi"] as const)("Context pending copy %s", locale => {
   expect(html).toContain("Support context")
  })
 })
+
+
+describe.each(["en", "vi"] as const)("Context actionable guards %s", locale => {
+ it("applies only a completed inactive version and keeps incomplete and peer work inert", () => {
+  const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
+  const onApply = vi.fn()
+  const props = { locale, activeVersion: null, pending: false, refused: false, onApply }
+  const view = render(<ContextVersionBlock {...props} draft={{ ...draft, status: "open", version: null, exactTestPassed: false, gates: [{ key: "raw-key", label: "Owner gate", passed: false }] }} />)
+  expect(screen.getByText(copy.needsFollowUp)).toBeInTheDocument()
+  expect(screen.getByText("Owner gate")).toBeInTheDocument()
+  fireEvent.click(screen.getByRole("button", { name: copy.completeGates }))
+  expect(onApply).not.toHaveBeenCalled()
+  view.rerender(<ContextVersionBlock {...props} draft={draft} peerDisabled />)
+  expect(screen.getByRole("button", { name: copy.applyVersion({ version: 1 }) })).toBeDisabled()
+  fireEvent.click(screen.getByRole("button", { name: copy.applyVersion({ version: 1 }) }))
+  expect(onApply).not.toHaveBeenCalled()
+  view.rerender(<ContextVersionBlock {...props} draft={draft} />)
+  expect(screen.getByText("Support context")).toBeInTheDocument()
+  expect(screen.getByText("24/7 support")).toBeInTheDocument()
+  fireEvent.click(screen.getByRole("button", { name: copy.applyVersion({ version: 1 }) }))
+  expect(onApply).toHaveBeenCalledTimes(1)
+  view.rerender(<ContextVersionBlock {...props} activeVersion={1} draft={{ ...draft, isActive: true }} />)
+  expect(screen.getByRole("button", { name: copy.versionActive({ version: "1" }) })).toBeDisabled()
+  view.unmount()
+ })
+})
+

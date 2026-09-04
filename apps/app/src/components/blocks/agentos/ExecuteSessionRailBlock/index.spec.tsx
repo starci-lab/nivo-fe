@@ -5,7 +5,7 @@ import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/i18n/config"
 import { buildModulePageCopy } from "@/components/pages/AgentOSSolutionModulePage/component"
 import { fireEvent, render, screen, cleanup } from "@testing-library/react"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { ExecuteSessionRailBlock as ActualExecuteSessionRailBlock } from "./index"
 
 type ExecuteSessionRailBlockFixtureProps = Omit<ComponentProps<typeof ActualExecuteSessionRailBlock>, "copy"> & { readonly locale?: "en" | "vi" }
@@ -30,4 +30,43 @@ describe.each(["en", "vi"] as const)("Execute session rail %s", locale => {
   expect(onSelect).toHaveBeenCalledWith("session-raw")
  })
 })
+
+
+describe.each(["en", "vi"] as const)("Session rail pending and collapse %s", locale => {
+ const targets = [...new Set([globalThis, window])]
+ let descriptors: Array<PropertyDescriptor | undefined> = []
+ beforeEach(() => {
+  descriptors = targets.map(target => Object.getOwnPropertyDescriptor(target, "localStorage"))
+  const values = new Map<string, string>()
+  const storage: Storage = { get length() { return values.size }, clear: () => values.clear(), getItem: key => values.get(key) ?? null, key: index => [...values.keys()][index] ?? null, removeItem: key => { values.delete(key) }, setItem: (key, value) => { values.set(key, value) } }
+  for (const target of targets) Object.defineProperty(target, "localStorage", { configurable: true, value: storage })
+ })
+ afterEach(() => {
+  targets.forEach((target, index) => {
+   const descriptor = descriptors[index]
+   if (descriptor) Object.defineProperty(target, "localStorage", descriptor)
+   else Reflect.deleteProperty(target, "localStorage")
+  })
+ })
+
+ it("preserves the active timestamp and toggles localized controls while create is pending", () => {
+
+  const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.sessions
+  const onCreate = vi.fn()
+  render(<ExecuteSessionRailBlock locale={locale} sessions={[{ id: "active/raw", title: "Owner title", updatedLabel: "Raw updated label", status: "active" }]} selectedId={null} pending onSelect={vi.fn()} onCreate={onCreate} />)
+  expect(screen.getByText("Raw updated label")).toBeInTheDocument()
+  for (const button of screen.getAllByRole("button", { name: copy.new })) {
+   expect(button).toBeDisabled()
+   fireEvent.click(button)
+  }
+  expect(onCreate).not.toHaveBeenCalled()
+  fireEvent.click(screen.getByRole("button", { name: copy.collapse }))
+  expect(screen.getByRole("button", { name: copy.expand })).toBeInTheDocument()
+  fireEvent.click(screen.getByRole("button", { name: copy.expand }))
+  expect(screen.getByRole("button", { name: copy.collapse })).toBeInTheDocument()
+
+ })
+})
+
+
 

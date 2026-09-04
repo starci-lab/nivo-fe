@@ -30,7 +30,8 @@ import { AgentOSWorkspacePageBase } from "./AgentOSWorkspacePage/component"
 import { AgentOSSolutionModulePageBase as ActualAgentOSSolutionModulePageBase } from "./AgentOSSolutionModulePage/component"
 import { AgentOSOpenClawLaunchBridgeBase } from "./AgentOSOpenClawLaunchBridge/component"
 
-describe("AgentOS SPLIT-6 page owner chains", () => {
+describe.each(["en", "vi"] as const)("AgentOS SPLIT-6 page owner chains %s", locale => {
+    const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules
     it("keeps only the Wallet page architecture axis above the connected Wallet block", () => {
         expect(renderToStaticMarkup(<WalletPageBase pageState="ordinary" />)).toContain("ordinary")
         expect(renderToStaticMarkup(<WalletPageBase pageState="waypoint" />)).toContain("waypoint")
@@ -43,7 +44,7 @@ describe("AgentOS SPLIT-6 page owner chains", () => {
 
     it("projects one backend-owned module runtime through the pure routed shell", () => {
         const html = renderToStaticMarkup(
-            <AgentOSSolutionModulePageBase
+            <AgentOSSolutionModulePageBase locale={locale}
                 shell={{
                     workspaceLabel: "Workspace workspac",
                     moduleName: "Sales Copilot",
@@ -72,12 +73,12 @@ describe("AgentOS SPLIT-6 page owner chains", () => {
                 }}
             />,
         )
-        expect(html).toContain("Modules")
+        expect(html).toContain(copy.shell.modules)
         expect(html).toContain("Sales Copilot")
         expect(html).toContain("installation-1")
-        expect(html).toContain("Signals")
-        expect(html).toContain("Runtime health")
-        expect(html).toContain("Event trace")
+        expect(html).toContain(copy.runtime.diagnostics.signals)
+        expect(html).toContain(copy.runtime.diagnostics.health)
+        expect(html).toContain(copy.runtime.diagnostics.trace)
         expect(html).toContain("Controller healthy")
     })
 
@@ -87,7 +88,7 @@ describe("AgentOS SPLIT-6 page owner chains", () => {
 
     it("renders only a masked credential status and a password input in Settings", () => {
         const html = renderToStaticMarkup(
-            <AgentOSSolutionModulePageBase
+            <AgentOSSolutionModulePageBase locale={locale}
                 shell={{
                     workspaceLabel: "Workspace workspac",
                     moduleName: "Support Desk",
@@ -134,4 +135,5 @@ const AgentOSSolutionModulePageBaseCopyFixture = (props: AgentOSSolutionModulePa
     return <ActualAgentOSSolutionModulePageBase {...props} copy={buildModulePageCopy(t)} />
 }
 const AgentOSSolutionModulePageBase = ({ locale = "en", ...props }: AgentOSSolutionModulePageBaseFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><AgentOSSolutionModulePageBaseCopyFixture {...props} /></NextIntlClientProvider>
+
 

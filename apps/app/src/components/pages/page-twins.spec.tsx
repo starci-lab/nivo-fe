@@ -144,7 +144,7 @@ describe("pure page twins", () => {
         expect(AgentOSWorkspaceListBase({ state: "refused", props: { label: "Workspaces", message: "Unavailable" } })).toBeTruthy()
         expect(AgentOSWorkspaceListBase({
             state: "answered",
-            props: { label: "Workspaces", rows: [{ id: "workspace-1", href: "/agentos/workspaces/workspace-1", name: "Workspace", detail: "Order", kindLabel: "Workspace", status: "ready", statusLabel: "Ready" }] },
+            props: { label: "Workspaces", rows: [{ id: "workspace-1", href: "/en/agentos/workspaces/workspace-1", name: "Workspace", detail: "Order", kindLabel: "Workspace", status: "ready", statusLabel: "Ready" }] },
             on: { openWorkspace: vi.fn() },
         })).toBeTruthy()
 
@@ -152,3 +152,4 @@ describe("pure page twins", () => {
         expect(AcademyControlCenterPageBase({ siteId: "site-1", mode: "system", onSelectMode: vi.fn() })).toBeTruthy()
     })
 })
+

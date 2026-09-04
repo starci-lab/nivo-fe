@@ -63,3 +63,26 @@ describe.each(["en", "vi"] as const)("Trust evidence copy %s", locale => {
   expect(html).toContain("verify the contract")
  })
 })
+
+describe.each(["en", "vi"] as const)("Trust summary branches %s", locale => {
+ it.each(["warning", "fail"] as const)("renders the persisted %s verdict and structured evidence", verdict => {
+  const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.trust
+  const html = renderToStaticMarkup(<TestTrustResultBlock locale={locale} contract={contract} run={{ ...run, summary: { total: 23, pass: "17", warning: null } }} assertions={[{ ...assertion(), verdict, expected: null, actual: [1, true] }]} contextLabel="Raw digest" />)
+  expect(html).toContain(verdict === "warning" ? copy.verdictWarning : copy.verdictFail)
+  expect(html).toContain("[1,true]")
+  expect(html).toContain("—")
+  expect(html).toMatch(/>23</u)
+  expect(html).toMatch(/>17</u)
+  expect(html.match(/>0</gu)).toHaveLength(2)
+ })
+ it("distinguishes no run from missing registered evidence", () => {
+  const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.trust
+  const empty = renderToStaticMarkup(<TestTrustResultBlock locale={locale} contract={contract} run={null} assertions={[]} contextLabel="Raw digest" />)
+  expect(empty).toContain(copy.notRun)
+  expect(empty).toContain(copy.collect)
+  expect(empty).toContain(copy.noRun)
+  const rejected = renderToStaticMarkup(<TestTrustResultBlock locale={locale} contract={contract} run={run} assertions={[assertion()]} contextLabel="Raw digest" registry={{}} />)
+  expect(rejected).toContain(copy.rejected)
+  expect(rejected).not.toContain("verify the contract")
+ })
+})

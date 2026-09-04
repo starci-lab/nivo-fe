@@ -1,3 +1,4 @@
+import type * as Navigation from "@/i18n/navigation"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { NextIntlClientProvider } from "next-intl"
@@ -13,7 +14,7 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/i18n/navigation", async () => ({
-    ...(await vi.importActual<typeof import("@/i18n/navigation")>("@/i18n/navigation")),
+    ...(await vi.importActual<typeof Navigation>("@/i18n/navigation")),
     useRouter: () => ({ push: mocks.push }),
 }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
@@ -65,3 +66,4 @@ describe("AgentOSWorkspaceList", () => {
         expect(mocks.load).toHaveBeenCalledTimes(1)
     })
 })
+

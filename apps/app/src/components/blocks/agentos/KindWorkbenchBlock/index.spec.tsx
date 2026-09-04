@@ -1,3 +1,4 @@
+import type { AgentosRuntimeTask, AgentosRuntimeOperationEvent } from "@/modules/api/console"
 import type { ComponentProps } from "react"
 import { NextIntlClientProvider, useTranslations } from "next-intl"
 import enMessages from "@/messages/en.json"
@@ -64,5 +65,28 @@ describe.each(["en", "vi"] as const)("Workbench copy %s", locale => {
   expect(html).toContain(copy.title)
   expect(html).toContain(workbenchKey + "@1.0.0")
   if (workbenchKey === "missing") expect(html).toContain(copy.unavailableNotice)
+ })
+})
+
+
+describe.each(["en", "vi"] as const)("Workbench persisted branches %s", locale => {
+ const task: AgentosRuntimeTask = { id: "task/raw", installationId: "installation/raw", sourceEventId: "event/raw", contextVersionId: "context/raw", title: "Owner task", summary: "Raw summary", priority: "high", status: "in_progress", expectedVersion: 7, workbenchKey: "calendar-week", workbenchVersion: "1.0.0", workbenchRef: "reference/raw", evidence: {}, dueAt: "2026-08-26T12:30:00.000Z", createdAt: "2026-08-26T00:00:00.000Z", updatedAt: "2026-08-26T00:00:00.000Z" }
+ const event: AgentosRuntimeOperationEvent = { id: "event/raw", installationId: "installation/raw", contextVersionId: "context/raw", source: "raw-source", externalEventId: "external/raw", eventType: "raw-event", observedAt: "2026-08-26T00:00:00.000Z", kindKey: "raw-kind", kindVersion: "1.0.0", replyContractKey: "reply/raw", replyContractVersion: "1.0.0", toolSchemaDigest: "raw-digest", payload: {}, evidence: {}, createdAt: "2026-08-26T00:00:00.000Z" }
+ it.each(["support-queue", "accounting-sheet", "calendar-week", "document-reader"])("renders active tasks and excludes completed work in %s", workbenchKey => {
+  const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.workbench
+  const props = { locale, moduleId: "installation/raw", kindKey: "raw-kind", workbenchKey, workbenchVersion: "1.0.0", registry: DEFAULT_WORKBENCH_REGISTRY }
+  const html = renderToStaticMarkup(<KindWorkbenchBlock {...props} tasks={[{ ...task, id: "completed", title: "Completed excluded", status: "completed" }, task, { ...task, id: "normal", status: "open", priority: "normal" }]} events={[event]} />)
+  expect(html).toContain("Owner task")
+  expect(html).not.toContain("Completed excluded")
+  expect(html).toMatch(/>2</u)
+  if (workbenchKey === "support-queue") expect(html).toContain("raw-source")
+  if (workbenchKey === "calendar-week") expect(html).toContain(new Date(task.dueAt!).toLocaleString())
+  const empty = renderToStaticMarkup(<KindWorkbenchBlock {...props} tasks={[]} events={[]} />)
+  const emptyLabel = workbenchKey === "support-queue" ? copy.clear : workbenchKey === "accounting-sheet" ? copy.noApprovals : workbenchKey === "calendar-week" ? copy.noMeeting : copy.noAnswer
+  expect(empty).toContain(emptyLabel)
+  if (workbenchKey === "calendar-week") {
+   const unscheduled = renderToStaticMarkup(<KindWorkbenchBlock {...props} tasks={[{ ...task, dueAt: null }]} />)
+   expect(unscheduled).toContain(copy.notScheduled)
+  }
  })
 })

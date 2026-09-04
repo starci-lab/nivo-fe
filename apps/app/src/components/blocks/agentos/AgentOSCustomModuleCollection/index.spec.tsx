@@ -37,3 +37,24 @@ describe.each(["en", "vi"] as const)("Custom module loading labels %s", locale =
  })
 })
 
+
+describe.each(["en", "vi"] as const)("Collection recovery routes %s", locale => {
+ it.each(["refused", "empty"] as const)("offers the exact create route when %s", state => {
+  mocks.push.mockClear()
+  const messages = locale === "en" ? enMessages : viMessages
+  const copy = messages.console.agentos.modules.collection
+  mocks.answer = state === "refused" ? { ok: false } : { ok: true, data: [] }
+  render(<NextIntlClientProvider locale={locale} messages={messages} timeZone={TIME_ZONE} onError={error => { throw error }}><AgentOSCustomModuleCollection workspaceId="workspace/raw" /></NextIntlClientProvider>)
+  expect(screen.getByText(copy[state])).toBeInTheDocument()
+  fireEvent.click(screen.getByRole("button", { name: copy.create }))
+  expect(mocks.push).toHaveBeenCalledExactlyOnceWith("/agentos/workspaces/workspace/raw/modules/create")
+ })
+ it("resumes the raw studio identity before an installation exists", () => {
+  mocks.push.mockClear()
+  const messages = locale === "en" ? enMessages : viMessages
+  mocks.answer = { ok: true, data: [{ id: "draft-raw", name: "Owner draft", progress: 20, status: "draft", installationId: null }] }
+  render(<NextIntlClientProvider locale={locale} messages={messages} timeZone={TIME_ZONE} onError={error => { throw error }}><AgentOSCustomModuleCollection workspaceId="workspace-raw" /></NextIntlClientProvider>)
+  fireEvent.click(screen.getByRole("button", { name: messages.console.agentos.modules.collection.resume }))
+  expect(mocks.push).toHaveBeenCalledExactlyOnceWith("/agentos/workspaces/workspace-raw/modules/studio/draft-raw")
+ })
+})

@@ -75,3 +75,20 @@ describe.each(["en", "vi"] as const)("Setup identity states %s", locale => {
   expect(html).toContain("Raw system detail")
  })
 })
+
+describe.each(["en", "vi"] as const)("Setup missing and unconfirmed %s", locale => {
+ it("retains an unconfirmed draft and opens version history from read-only mode", () => {
+  const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.setup
+  const onOpenVersions = vi.fn()
+  const props = { locale, messages: [], revisions: [], selectedRevisionId: "missing", canStartRevision: false, onSend: vi.fn(), onSelectRevision: vi.fn(), onStartRevision: vi.fn(), onOpenVersions }
+  const view = render(<PrivateSetupChatBlock {...props} canSend draft="Durable owner text" unconfirmed />)
+  expect(screen.getByText(copy.revisionStatus.unavailable, { exact: false })).toBeInTheDocument()
+  expect(screen.getByText(copy.messageUnconfirmed)).toBeInTheDocument()
+  expect(screen.getByRole("textbox", { name: copy.messageLabel })).toHaveValue("Durable owner text")
+  view.rerender(<PrivateSetupChatBlock {...props} canSend={false} />)
+  expect(screen.queryByRole("textbox")).toBeNull()
+  fireEvent.click(screen.getByRole("button", { name: copy.openVersions }))
+  expect(onOpenVersions).toHaveBeenCalledExactlyOnceWith()
+  view.unmount()
+ })
+})
