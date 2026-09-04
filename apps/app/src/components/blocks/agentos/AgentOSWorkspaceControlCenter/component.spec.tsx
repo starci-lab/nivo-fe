@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
 vi.mock("@/components/blocks/agentos/AgentOSWorkspaceSummary", () => ({ AgentOSWorkspaceSummary: () => <div>summary</div> }))
@@ -38,12 +38,12 @@ describe("AgentOSWorkspaceControlCenterBase", () => {
         expect(retry).toHaveBeenCalledOnce()
     })
 
-    it("renders and selects the infrastructure composition", () => {
+    it("renders and selects the infrastructure composition", async () => {
         const select = vi.fn()
         render(<AgentOSWorkspaceControlCenterBase workspaceId="workspace-1" pageState="infrastructure" controlCenterState="ready" data={data} labels={labels} onSelectPageState={select} onOpenAgentConsole={vi.fn()} onRetry={vi.fn()} openClawLaunchHref="#" launchState="idle" formatDate={(value) => value} />)
         expect(screen.getByText("runtime")).toBeInTheDocument()
         expect(screen.getByText("helm stack")).toBeInTheDocument()
-        expect(screen.getByRole("tab", { name: "infrastructure", selected: true })).toHaveAttribute("aria-controls", "workspace-panel-infrastructure")
+        await waitFor(() => expect(screen.getByRole("tab", { name: "infrastructure", selected: true })).toHaveAttribute("aria-controls", "workspace-panel-infrastructure"))
         fireEvent.click(screen.getByRole("tab", { name: "operations" }))
         expect(select).toHaveBeenCalledWith("operations")
     })
