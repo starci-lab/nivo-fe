@@ -12,6 +12,17 @@
 @source "../../../../packages/ui/src";
 
 /*
+ * The SAME failure mode, one layer further out. Grammar's own Common renderers spell their
+ * typography in Tailwind utilities - `text-xl` on FONT-4, `text-base` on FONT-3 - and ship them
+ * inside `node_modules`, which Tailwind never scans by default. Without this line those two
+ * utilities are absent from the build, HeroUI's `.typography--h1` / `--h2` win uncontested in
+ * `@layer components`, and every Common heading renders at 36/30px while the component honestly
+ * claims 20/16px. The app resolves Grammar at its own workspace level, so the path is the app's
+ * `node_modules` and not the hoisted root copy, which is a version behind.
+ */
+@source "../../node_modules/@starci/grammar/dist";
+
+/*
  * WHY THE HEROUI IMPORT IS REQUIRED.
  *
  * Every leaf in `@nivo/ui` wraps a HeroUI control and names a SEMANTIC token - `bg-surface`,
