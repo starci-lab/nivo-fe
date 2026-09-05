@@ -35,6 +35,15 @@ describe("PrivateSetupChatBlock", () => {
         fireEvent.submit(screen.getByRole("button", { name: "Send" }).closest("form")!)
         expect(onSend).not.toHaveBeenCalled()
     })
+    it("keeps the send action beside the field and bounds the chat host so the composer stays in reach", () => {
+        const { container } = render(<PrivateSetupChatBlock messages={[{ id: "u", role: "user", content: "Owner question" }]} revisions={revisions} selectedRevisionId="setup-1" canSend canStartRevision={false} draft="" onDraft={vi.fn()} onSend={vi.fn()} onSelectRevision={vi.fn()} onStartRevision={vi.fn()} />)
+        const send = screen.getByRole("button", { name: "Send" })
+        const row = send.parentElement
+        expect(row?.getAttribute("data-contract")).toBe("GAP-3")
+        expect(row?.querySelector("[data-contract='MEASURE-2'] input[name='setupMessage']")).not.toBeNull()
+        expect(container.querySelector("[data-contract='MEASURE-2 MEASURE-7']")).not.toBeNull()
+        expect(screen.getByText(enMessages.console.agentos.modules.setup.messageHint)).toBeInTheDocument()
+    })
     it("prevents duplicate submit while its own append is pending", () => {
         const onSend = vi.fn()
         render(<PrivateSetupChatBlock messages={[]} revisions={revisions} selectedRevisionId="setup-1" canSend canStartRevision={false} draft="A policy" ownPending onDraft={vi.fn()} onSend={onSend} onSelectRevision={vi.fn()} onStartRevision={vi.fn()} />)
