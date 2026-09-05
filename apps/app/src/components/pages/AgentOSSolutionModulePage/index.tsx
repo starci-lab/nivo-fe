@@ -167,10 +167,11 @@ const controllerHostnameForWorkspace = (answer: NivoQueryAnswer<{
   };
   readonly instance: {
     readonly hostname: string;
-  };
+  } | null;
 }> | undefined, workspaceId: string): string | null => {
   const candidate = nivoQueryData(answer);
-  return candidate?.workspace.id === workspaceId ? candidate.instance.hostname : null;
+  // An owned workspace with no instance yet has no controller to name.
+  return candidate?.workspace.id === workspaceId ? candidate.instance?.hostname ?? null : null;
 };
 const queryNodes = <T,>(answer: NivoQueryAnswer<{
   readonly nodes: ReadonlyArray<T>;
