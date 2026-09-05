@@ -70,6 +70,7 @@ import { SurfaceCard, Heading, Text } from "@starci/grammar/common";
 import type { ComponentType } from "react";
 
 import type { AgentosRuntimeOperationEvent, AgentosRuntimeTask } from "@/modules/api/console";
+import { AccountingWorkbenchBlock } from "@/components/blocks/agentos/AccountingWorkbenchBlock";
 
 /** Runtime data every open-registry workbench receives from the shared shell. */
 export type WorkbenchProps = {
@@ -159,22 +160,7 @@ const SupportQueueWorkbench = (props: WorkbenchProps) => {
   value: props.events?.[0]?.source ?? copy.workbench.waitChannel
 }]} notice={copy.workbench.supportNotice} />);
 };
-const AccountingSheetWorkbench = (props: WorkbenchProps) => {
-  const { copy } = props;
-  return (<WorkbenchContent key={props.moduleId} title={copy.workbench.accounting} caption={copy.workbench.payableCaption({ kind: props.kindKey, version: props.workbenchVersion })} facts={[{
-  id: "review",
-  label: copy.workbench.ownerReview,
-  value: String(activeTasks(props).length)
-}, {
-  id: "next",
-  label: copy.workbench.evidencePack,
-  value: nextTask(props)?.title ?? copy.workbench.noApprovals
-}, {
-  id: "state",
-  label: copy.workbench.execution,
-  value: copy.workbench.reviewOnly
-}]} notice={copy.workbench.accountingNotice} />);
-};
+const AccountingSheetWorkbench = (props: WorkbenchProps) => <AccountingWorkbenchBlock moduleId={props.moduleId} kindKey={props.kindKey} workbenchVersion={props.workbenchVersion} />;
 const CalendarWeekWorkbench = (props: WorkbenchProps) => {
   const { copy } = props;
   return (<WorkbenchContent key={props.moduleId} title={copy.workbench.calendar} caption={copy.workbench.scheduleCaption({ kind: props.kindKey, version: props.workbenchVersion })} facts={[{
