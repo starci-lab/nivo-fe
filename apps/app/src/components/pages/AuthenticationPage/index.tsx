@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutateForgotPasswordInitSwr, useMutateForgotPasswordResendSwr, useMutateForgotPasswordVerifyOtpSwr, useMutateSignInSwr, useMutateSignUpInitSwr, useMutateSignUpResendSwr, useMutateSignUpVerifyOtpSwr, useOauthReturnExchange } from "@/hooks";
 import { authenticationOauthRedirectUrl, rememberOauthProvider } from "@/modules/auth";
 import { AuthenticationPageBase as AuthenticationPageView } from "./component";
@@ -67,6 +67,31 @@ const RESEND_COOLDOWN_SECONDS = 60;
 /** Seconds per minute, so the code hint states a lifetime rather than a raw count. */
 const SECONDS_PER_MINUTE = 60;
 
+/** Where a finished sign-in lands when nothing interrupted the reader on their way here. */
+const HOME_ROUTE = "/overview";
+
+/**
+ * Where the interrupted console route waits across the provider round trip. The provider leg drops
+ * this page's query on purpose (see `chooseProvider`), so the address cannot carry it back; the
+ * session store can, and it is cleared the moment the reader lands.
+ */
+const RETURN_TO_STORAGE_KEY = "nivo.auth.return-to";
+
+/**
+ * Accept only a route of this app as a place to return to.
+ *
+ * A same-origin path starts with one slash: a protocol-relative address, an absolute URL, or
+ * anything with whitespace or a backslash could carry a reader off this origin after they have just
+ * typed a password, so none of those is ever honoured.
+ *
+ * @param value - What the address or the store carried.
+ * @returns The path when it is one of ours, else null.
+ */
+const returnToOf = (value: string | null): string | null => {
+  if (value === null || !value.startsWith("/") || value.startsWith("//") || /[\s\\]/.test(value)) return null;
+  return value;
+};
+
 /**
  * The authentication screen.
  *
@@ -111,6 +136,36 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
    * into a refusal that appears only on a developer's machine.
    */
   const hasAdoptedOauth = useRef(false);
+  /*
+   * WHERE THE READER WAS GOING. The console guard sends an anonymous reader here with the route it
+   * interrupted on the query, so a sign-in from a deep link ends on that route and not on the home
+   * screen. It is read ONCE, at mount, from the address for the same reason the provider return is:
+   * a subscription to a query string that never changes under this page buys nothing. It is held in
+   * a ref because nothing on screen shows it, and mirrored into the session store so the provider
+   * journey, which drops this page's query on the way out, still finds it on the way back.
+   */
+  const returnTo = useRef<string | null>(null);
+  useEffect(() => {
+    const fromAddress = returnToOf(new URLSearchParams(window.location.search).get("returnTo"));
+    try {
+      if (fromAddress !== null) window.sessionStorage.setItem(RETURN_TO_STORAGE_KEY, fromAddress);
+      returnTo.current = fromAddress ?? returnToOf(window.sessionStorage.getItem(RETURN_TO_STORAGE_KEY));
+    } catch {
+      // A browser that refuses storage still gets the address it arrived with.
+      returnTo.current = fromAddress;
+    }
+  }, []);
+
+  /** Leave for the console: the interrupted route when there was one, the home screen otherwise. */
+  const landInConsole = useCallback(() => {
+    const destination = returnTo.current ?? HOME_ROUTE;
+    try {
+      window.sessionStorage.removeItem(RETURN_TO_STORAGE_KEY);
+    } catch {
+      // Nothing was stored, so there is nothing to clear.
+    }
+    router.push(destination);
+  }, [router]);
   useEffect(() => {
     if (cooldownSeconds === 0) return undefined;
     const timer = setTimeout(() => setCooldownSeconds(left => left - 1), 1000);
@@ -192,8 +247,8 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
       return;
     }
     session.adopt(result.data);
-    router.push("/overview");
-  }, [oauthReturn.answer, router, session, t]);
+    landInConsole();
+  }, [landInConsole, oauthReturn.answer, session, t]);
 
   /**
    * Submit the first step of whichever journey is running.
@@ -215,7 +270,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
         return;
       }
       session.adopt(result.data);
-      router.push("/overview");
+      landInConsole();
       return;
     }
     const result = await runPending("submit", () => mode === "signUp" ? signUpInitMutation.trigger(details) : forgotPasswordInitMutation.trigger({
@@ -250,7 +305,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
       // A brand new account has no second factor, so there is no challenge to read for here.
       session.adopt(result.data);
       setPhase("done");
-      router.push("/overview");
+      landInConsole();
       return;
     }
     const result = await runPending("submit", () => forgotPasswordVerifyMutation.trigger({
@@ -339,7 +394,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
         clear();
         return;
       }
-      router.push("/overview");
+      landInConsole();
     }
   };
   const frame = {
