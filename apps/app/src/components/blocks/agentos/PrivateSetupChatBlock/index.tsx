@@ -39,6 +39,8 @@ import { Badge, Button, ChatWorkspace, Heading, Input, SurfaceCard, Text, TextAc
 
 import {
   PRIVATE_SETUP_COMPOSER_CLASS_NAME,
+  PRIVATE_SETUP_COMPOSER_FIELD_CLASS_NAME,
+  PRIVATE_SETUP_COMPOSER_ROW_CLASS_NAME,
   PRIVATE_SETUP_CONVERSATION_CLASS_NAME,
   PRIVATE_SETUP_EMPTY_CLASS_NAME,
   PRIVATE_SETUP_HEADER_CLASS_NAME,
@@ -119,18 +121,22 @@ export const PrivateSetupChatBlock = (props: PrivateSetupChatBlockProps) => {
         if (content.length > 0 && !ownPending && !peerDisabled) props.onSend(content);
       }}
     >
-      <Input
-        id="agentos-private-setup-message"
-        name="setupMessage"
-        label={copy.setup.messageLabel}
-        hint={copy.setup.messageHint}
-        placeholder={copy.setup.messagePlaceholder}
-        variant="secondary"
-        value={draft}
-        onValueChange={props.onDraft}
-        isDisabled={ownPending || peerDisabled}
-      />
-      <Button type="submit" variant="primary" isPending={ownPending} isDisabled={draft.trim().length === 0 || ownPending || peerDisabled}>{copy.setup.send}</Button>
+      <div className={PRIVATE_SETUP_COMPOSER_ROW_CLASS_NAME} data-contract="GAP-3">
+        <div className={PRIVATE_SETUP_COMPOSER_FIELD_CLASS_NAME} data-contract="MEASURE-2">
+          <Input
+            id="agentos-private-setup-message"
+            name="setupMessage"
+            label={copy.setup.messageLabel}
+            hint={copy.setup.messageHint}
+            placeholder={copy.setup.messagePlaceholder}
+            variant="secondary"
+            value={draft}
+            onValueChange={props.onDraft}
+            isDisabled={ownPending || peerDisabled}
+          />
+        </div>
+        <Button type="submit" variant="primary" isPending={ownPending} isDisabled={draft.trim().length === 0 || ownPending || peerDisabled}>{copy.setup.send}</Button>
+      </div>
       {props.refused ? <Text size="sm" live="assertive">{copy.setup.messageRefused}</Text> : null}
       {props.unconfirmed ? <Text size="sm" tone="muted">{copy.setup.messageUnconfirmed}</Text> : null}
     </form>
@@ -142,11 +148,7 @@ export const PrivateSetupChatBlock = (props: PrivateSetupChatBlockProps) => {
   );
   return (
     <SurfaceCard ariaLabel={copy.setup.privateChat} composition="joined">
-      <div
-        className={PRIVATE_SETUP_HOST_CLASS_NAME}
-        data-contract="MEASURE-2"
-        style={props.messages.length > 0 ? { height: "clamp(26rem,56dvh,36rem)" } : undefined}
-      >
+      <div className={PRIVATE_SETUP_HOST_CLASS_NAME} data-contract="MEASURE-2 MEASURE-7">
         <ChatWorkspace
           label={copy.setup.privateChat}
           conversationLabel={copy.setup.messages}
