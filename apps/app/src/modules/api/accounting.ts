@@ -128,14 +128,16 @@ const narrowWorkbench = (raw: RawWorkbench): Result<AccountingWorkbench> => {
   }
 };
 
-const OPERATION_FIELDS = `amountMinor contextVersionId currency details installationId ledgerVersion operation resourceId status`;
-const operation = <T extends AccountingCommandBase>(name: string, inputType: string, input: T) => graphql<AccountingOperation>(`mutation ${name}($input: ${inputType}!) { ${name}(input: $input) { ${OPERATION_FIELDS} } }`, { input });
+const OPERATION_RESPONSE_FIELDS = `success message error data { amountMinor contextVersionId currency details installationId ledgerVersion operation resourceId status }`;
+const CONTEXT_RESPONSE_FIELDS = `success message error data { digest installationId snapshot versionId }`;
+const WORKBENCH_RESPONSE_FIELDS = `success message error data { capabilities { canApproveCorrection canSubmitCorrection reason viewerRole } corrections currency documents events installationId ledger ledgerAmountMinor ledgerVersion periods reconciliations }`;
+const operation = <T extends AccountingCommandBase>(name: string, inputType: string, input: T) => graphql<AccountingOperation>(`mutation ${name}($input: ${inputType}!) { ${name}(input: $input) { ${OPERATION_RESPONSE_FIELDS} } }`, { input });
 
 /** Read the exact immutable context applied to one installation. */
-export const resolveAppliedAccountingContext = (installationId: string) => graphql<AppliedAccountingContext>(`query ResolveAppliedAccountingContext($input: ResolveAppliedAccountingContextInput!) { resolveAppliedAccountingContext(input: $input) { digest installationId snapshot versionId } }`, { input: { installationId } });
+export const resolveAppliedAccountingContext = (installationId: string) => graphql<AppliedAccountingContext>(`query ResolveAppliedAccountingContext($input: ResolveAppliedAccountingContextInput!) { resolveAppliedAccountingContext(input: $input) { ${CONTEXT_RESPONSE_FIELDS} } }`, { input: { installationId } });
 /** Read and narrow one current or historical Accounting workbench. */
 export const readAccountingWorkbench = async (installationId: string, currency: string, ledgerVersion?: string): Promise<Result<AccountingWorkbench>> => {
-  const answer = await graphql<RawWorkbench>(`query ReadAccountingWorkbench($input: ReadAccountingWorkbenchInput!) { readAccountingWorkbench(input: $input) { capabilities { canApproveCorrection canSubmitCorrection reason viewerRole } corrections currency documents events installationId ledger ledgerAmountMinor ledgerVersion periods reconciliations } }`, { input: { installationId, currency, ...(ledgerVersion === undefined ? {} : { ledgerVersion }) } });
+  const answer = await graphql<RawWorkbench>(`query ReadAccountingWorkbench($input: ReadAccountingWorkbenchInput!) { readAccountingWorkbench(input: $input) { ${WORKBENCH_RESPONSE_FIELDS} } }`, { input: { installationId, currency, ...(ledgerVersion === undefined ? {} : { ledgerVersion }) } });
   return answer.ok ? narrowWorkbench(answer.data) : answer;
 };
 /** Initialize Accounting through its one-root GraphQL command. */

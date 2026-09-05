@@ -31,7 +31,7 @@ describe("Accounting GraphQL API", () => {
     graphql.mockResolvedValueOnce({ ok: true, data: rawWorkbench });
     const answer = await readAccountingWorkbench("installation-1", "VND", "7");
     expect(answer).toMatchObject({ ok: true, data: { ledgerAmountMinor: "-100", documents: [{ fileName: "receipt.pdf" }], ledger: [{ signedAmountMinor: "-100" }], corrections: [{ signedDeltaMinor: "-50" }], reconciliations: [{ sourceAmountMinor: "0" }] } });
-    expect(graphql).toHaveBeenCalledWith(expect.stringMatching(/^query ReadAccountingWorkbench[\s\S]+\{ readAccountingWorkbench\(input: \$input\) \{[\s\S]+\} \}$/), { input: { installationId: "installation-1", currency: "VND", ledgerVersion: "7" } });
+    expect(graphql).toHaveBeenCalledWith(expect.stringMatching(/^query ReadAccountingWorkbench[\s\S]+\{ readAccountingWorkbench\(input: \$input\) \{ success message error data \{ capabilities \{ canApproveCorrection canSubmitCorrection reason viewerRole \} corrections currency documents events installationId ledger ledgerAmountMinor ledgerVersion periods reconciliations \} \} \}$/), { input: { installationId: "installation-1", currency: "VND", ledgerVersion: "7" } });
   });
 
   it("refuses malformed JSON rows at the API boundary", async () => {
@@ -42,6 +42,7 @@ describe("Accounting GraphQL API", () => {
   it("dispatches every backend operation with its exact input type and one root field", async () => {
     graphql.mockResolvedValue({ ok: true, data: operation });
     await resolveAppliedAccountingContext("installation-1");
+    await readAccountingWorkbench("installation-1", "VND");
     await initializeAccounting({ installationId: "installation-1", approverUserId: "approver-1", requestToken: "token" });
     await ingestAccountingDocument({ installationId: "installation-1", amountMinor: "100", classification: "expense", contentBase64: "ZGF0YQ==", currency: "VND", fileName: "receipt.pdf", mimeType: "application/pdf", periodKey: "2026-09-01", requestToken: "token" });
     await submitAccountingDocument({ installationId: "installation-1", documentId: "document-1", requestToken: "token" });
@@ -51,13 +52,19 @@ describe("Accounting GraphQL API", () => {
     await closeAccountingPeriod({ installationId: "installation-1", periodKey: "2026-09-01", requestToken: "token" });
     await submitAccountingCorrection({ installationId: "installation-1", sourceEntryId: "entry-1", effectivePeriodKey: "2026-10-01", signedDeltaMinor: "-50", reason: "Fix", requestToken: "token" });
     await approveAccountingCorrection({ installationId: "installation-1", correctionId: "correction-1", requestToken: "token" });
-    expect(graphql).toHaveBeenCalledTimes(10);
+    expect(graphql).toHaveBeenCalledTimes(11);
     const documents = graphql.mock.calls.map(([document]) => String(document));
     expect(documents).toEqual(expect.arrayContaining([
       expect.stringContaining("resolveAppliedAccountingContext(input: $input)"),
       expect.stringContaining("initializeAccounting(input: $input)"),
       expect.stringContaining("approveAccountingCorrection(input: $input)")
     ]));
-    for (const document of documents) expect((document.match(/\(input: \$input\)/g) ?? [])).toHaveLength(1);
+    for (const document of documents) {
+      expect((document.match(/\(input: \$input\)/g) ?? [])).toHaveLength(1);
+    }
+    expect(documents[0]).toMatch(/success message error data \{ digest installationId snapshot versionId \}/);
+    expect(documents[1]).toMatch(/success message error data \{ capabilities \{ canApproveCorrection canSubmitCorrection reason viewerRole \} corrections currency documents events installationId ledger ledgerAmountMinor ledgerVersion periods reconciliations \}/);
+    for (const document of documents.slice(2)) expect(document).toMatch(/success message error data \{ amountMinor contextVersionId currency details installationId ledgerVersion operation resourceId status \}/);
+    expect(documents.every(document => !document.includes("payload"))).toBe(true);
   });
 });
