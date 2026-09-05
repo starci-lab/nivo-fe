@@ -310,7 +310,13 @@ export type AgentWorkspaceRuntime = {
   readonly stale: boolean;
 };
 
-/** Owner-scoped aggregate used by the AgentOS workspace control center. */
+/**
+ * Owner-scoped aggregate used by the AgentOS workspace control center.
+ *
+ * `instance` is null for an owned workspace that has no AgentOS instance yet: the backend answers
+ * the workspace and its status, reports both apps unavailable with reason `WORKSPACE_NOT_PROVISIONED`,
+ * and carries no runtime. A workspace the account does not own is refused, never answered with a null.
+ */
 export type AgentWorkspaceControlCenter = {
   readonly workspace: {
     readonly id: string;
@@ -329,7 +335,7 @@ export type AgentWorkspaceControlCenter = {
     readonly planCode: string | null;
     readonly planRamGb: number | null;
     readonly planVcpu: number | null;
-  };
+  } | null;
   readonly apps: ReadonlyArray<AgentWorkspaceAppCapability>;
   readonly runtime: AgentWorkspaceRuntime | null;
 };

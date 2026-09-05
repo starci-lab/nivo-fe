@@ -385,7 +385,8 @@
           "plan": "Gói",
           "allocation": "Không gian tên được cấp",
           "host": "Tên máy chủ",
-          "chart": "Phiên bản chart"
+          "chart": "Phiên bản chart",
+          "unprovisioned": "Không gian làm việc này chưa được cấp instance."
         },
         "applications": {
           "section": "Ứng dụng trong không gian làm việc",

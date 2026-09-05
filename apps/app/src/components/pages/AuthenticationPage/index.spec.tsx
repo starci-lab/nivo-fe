@@ -192,4 +192,38 @@ describe("AuthenticationPage connected journeys", () => {
         render(<AuthenticationPage />)
         expect(panel()).toContain('"state":"details"')
     })
+
+    it("returns a signed-in reader to the console route that interrupted them", async () => {
+        mocks.api.signIn.mockResolvedValue({ ok: true, data: { accessToken: "access" } })
+        window.history.replaceState(null, "", "/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fw1%2Fmodules%2Fm1%2Fsetup")
+        render(<AuthenticationPage />)
+        fireEvent.click(screen.getByTestId("submit-details"))
+        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/w1/modules/m1/setup"))
+        expect(window.sessionStorage.getItem("nivo.auth.return-to")).toBeNull()
+
+        cleanup()
+        window.history.replaceState(null, "", "/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fw1")
+        render(<AuthenticationPage />)
+        fireEvent.click(screen.getByTestId("google"))
+        expect(window.sessionStorage.getItem("nivo.auth.return-to")).toBe("/agentos/workspaces/w1")
+
+        cleanup()
+        window.sessionStorage.setItem("nivo.oauth.provider", "google")
+        window.history.replaceState(null, "", "/authentication?code=abc&state=xyz")
+        mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: "oauth-access" } })
+        render(<AuthenticationPage />)
+        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/w1"))
+    })
+
+    it("never follows a return address off this origin", async () => {
+        mocks.api.signIn.mockResolvedValue({ ok: true, data: { accessToken: "access" } })
+        for (const bad of ["https%3A%2F%2Fevil.test%2F", "%2F%2Fevil.test", "%2Fagentos%20x"]) {
+            cleanup()
+            window.sessionStorage.clear()
+            window.history.replaceState(null, "", `/authentication?returnTo=${bad}`)
+            render(<AuthenticationPage />)
+            fireEvent.click(screen.getByTestId("submit-details"))
+            await waitFor(() => expect(mocks.push).toHaveBeenLastCalledWith("/overview"))
+        }
+    })
 })

@@ -114,7 +114,8 @@ export const AgentOSWorkspaceControlCenter = (props: AgentOSWorkspaceControlCent
             plan: t("summary.plan"),
             allocation: t("summary.allocation"),
             host: t("summary.host"),
-            chart: t("summary.chart")
+            chart: t("summary.chart"),
+            unprovisioned: t("summary.unprovisioned")
         },
         applications: {
             section: t("applications.section"),

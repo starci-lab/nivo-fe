@@ -385,7 +385,8 @@
           "plan": "Plan",
           "allocation": "Namespace allocation",
           "host": "Hostname",
-          "chart": "Chart version"
+          "chart": "Chart version",
+          "unprovisioned": "No instance is provisioned for this workspace yet."
         },
         "applications": {
           "section": "Workspace applications",
