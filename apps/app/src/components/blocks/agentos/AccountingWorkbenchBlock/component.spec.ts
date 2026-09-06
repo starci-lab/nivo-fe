@@ -1,12 +1,17 @@
 import { describe, expect, it } from "vitest";
 import en from "@/messages/en.json";
 import vi from "@/messages/vi.json";
-import { accountingCorrectionAccess, accountingDocumentAction, bytesToBase64, canonicalMonthKey, currencyAmountToMinor, eligibleCorrectionSourceEntries, formatMinorCurrency, maskParticipantId } from ".";
+import { accountingCorrectionAccess, accountingDocumentAction, accountingNoticeLive, bytesToBase64, canonicalMonthKey, currencyAmountToMinor, eligibleCorrectionSourceEntries, formatMinorCurrency, maskParticipantId } from ".";
 
 const pending = { status: "pending", effectivePeriodKey: "2026-09-01", submittedByUserId: "owner-1", approverUserId: "approver-1" } as const;
 const periods = [{ periodKey: "2026-09-01", status: "open" }] as const;
 
 describe("AccountingWorkbenchBlock authority projection", () => {
+  it("announces refusals assertively without interrupting successful confirmations", () => {
+    expect(accountingNoticeLive("refused")).toBe("assertive");
+    expect(accountingNoticeLive("success")).toBe("polite");
+  });
+
   it("uses the backend-exact closed document statuses", () => {
     expect(accountingDocumentAction("draft", "owner")).toBe("submit");
     expect(accountingDocumentAction("submitted", "approver")).toBe("approve");

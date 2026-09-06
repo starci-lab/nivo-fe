@@ -12,6 +12,8 @@ type TranslationValues = Readonly<Record<string, string | number | undefined>>;
 export type AccountingTranslation = (key: string, values?: TranslationValues) => string;
 /** Accessible settled command feedback projected into the pure view. */
 export type AccountingNotice = { readonly kind: "success" | "refused"; readonly message: string };
+/** Refusals interrupt the current task; confirmations remain non-disruptive. */
+export const accountingNoticeLive = (kind: AccountingNotice["kind"]): "assertive" | "polite" => kind === "refused" ? "assertive" : "polite";
 type CommandAnswer = Promise<Result<AccountingOperation>>;
 type CorrectionAccessReason = "allowed" | "historical" | "not-owner" | "not-approver" | "advisory-denied" | "not-pending" | "self-assigned" | "period-not-open";
 /** Advisory facts used to project safe correction controls for one exact proposal. */
@@ -152,9 +154,12 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
       const answer = await command(commandToken(key, value));
       if (!answer.ok) { setNotice({ kind: "refused", message: t("operationRefused", { reason: answer.reason }) }); return; }
       delete tokens.current[key];
+      const [refreshedWorkbench, refreshedContext] = await Promise.all([workbench.mutate(), context.mutate()]);
+      if (refreshedWorkbench?.ok !== true || refreshedContext?.ok !== true) {
+        setNotice({ kind: "refused", message: t("transportError") });
+        return;
+      }
       setNotice({ kind: "success", message: t("operationAccepted", { operation: answer.data.operation }) });
-      await workbench.mutate();
-      await context.mutate();
     } catch { setNotice({ kind: "refused", message: t("transportError") }); }
   };
   const answer = workbench.data;

@@ -1,7 +1,7 @@
 import { useRef, type ChangeEvent, type ReactNode } from "react";
 import { Badge, Button, EmptyNotice, Heading, Input, PrimaryRailLayout, SectionHeader, SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common";
 import type { AccountingCorrection, AccountingDocument } from "@/modules/api/accounting";
-import { accountingDocumentAction, formatMinorCurrency, maskParticipantId, type AccountingNotice, type useAccountingWorkbench } from "./useAccountingWorkbench";
+import { accountingDocumentAction, accountingNoticeLive, formatMinorCurrency, maskParticipantId, type AccountingNotice, type useAccountingWorkbench } from "./useAccountingWorkbench";
 import { ACCOUNTING_ACTION_ROW_CLASS_NAME, ACCOUNTING_FIELD_STACK_CLASS_NAME, ACCOUNTING_NATIVE_CONTROL_CLASS_NAME, ACCOUNTING_NATIVE_FIELD_CLASS_NAME, ACCOUNTING_ROW_CLASS_NAME, ACCOUNTING_WORKBENCH_CLASS_NAME } from "./classNames";
 
 const unsignedVersion = /^\d+$/;
@@ -9,7 +9,7 @@ type ChildrenProps = { readonly children: ReactNode };
 type StatusNoticeProps = { readonly notice: AccountingNotice | null };
 /** Settled data and interactions projected by the connected Accounting owner. */
 export type AccountingWorkbenchBlockProps = { readonly view: ReturnType<typeof useAccountingWorkbench> };
-const StatusNotice = ({ notice }: StatusNoticeProps) => notice === null ? null : <SurfaceCard><Text live="polite" tone={notice.kind === "success" ? "accent" : "default"}>{notice.message}</Text></SurfaceCard>;
+const StatusNotice = ({ notice }: StatusNoticeProps) => notice === null ? null : <SurfaceCard><Text live={accountingNoticeLive(notice.kind)} tone={notice.kind === "success" ? "accent" : "default"}>{notice.message}</Text></SurfaceCard>;
 const FieldStack = ({ children }: ChildrenProps) => <div className={ACCOUNTING_FIELD_STACK_CLASS_NAME} data-contract="GAP-4">{children}</div>;
 const Row = ({ children }: ChildrenProps) => <div className={ACCOUNTING_ROW_CLASS_NAME} data-contract="GAP-2 PADDING-4">{children}</div>;
 const ActionRow = ({ children }: ChildrenProps) => <div className={ACCOUNTING_ACTION_ROW_CLASS_NAME} data-contract="GAP-2">{children}</div>;
@@ -70,7 +70,7 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
         <Heading level={3}>{model === undefined ? t("loadingAmount") : formatAmount(model.ledgerAmountMinor, model.currency)}</Heading>
       </FieldStack>
     </SurfaceCard>
-    {workbench.error !== undefined ? <EmptyNotice message={t("transportError")} description={t("nothingChanged")} actionLabel={t("retry")} onAction={() => void workbench.mutate()} /> : answer?.ok === false ? <EmptyNotice message={t("readRefused", { reason: answer.reason })} description={t("nothingChanged")} actionLabel={t("retry")} onAction={() => void workbench.mutate()} /> : null}
+    {workbench.error !== undefined ? <div role="alert"><EmptyNotice message={t("transportError")} description={t("nothingChanged")} actionLabel={t("retry")} onAction={() => void workbench.mutate()} /></div> : answer?.ok === false ? <div role="alert"><EmptyNotice message={t("readRefused", { reason: answer.reason })} description={t("nothingChanged")} actionLabel={t("retry")} onAction={() => void workbench.mutate()} /></div> : null}
     <SurfaceListCard label={t("ledger")} fact={model === undefined ? undefined : t("rowCount", { count: model.ledger.length })} isLoading={answer === undefined && workbench.error === undefined}>
       {model?.ledger.length === 0 ? <EmptyNotice message={t("emptyLedger")} description={t("emptyLedgerHint")} /> : model?.ledger.map(entry => <Row key={entry.id}><ActionRow><Text weight="semibold">{formatAmount(entry.signedAmountMinor, entry.currency)}</Text><Badge tone={entry.kind === "correction" ? "warning" : "neutral"}>{t(entry.kind === "correction" ? "correctionEntry" : "documentEntry")}</Badge></ActionRow><Text size="sm">{formatMonth(entry.periodKey)} · {t("ledgerVersion", { version: entry.ledgerVersion })}</Text>{entry.reason === null ? null : <Text size="sm">{entry.reason}</Text>}<details><summary>{t("auditDetails")}</summary><Text size="xs" tone="muted">{t("ledgerAudit", { entry: entry.id, document: entry.documentId ?? "—" })}</Text></details></Row>)}
     </SurfaceListCard>
@@ -95,7 +95,7 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
   </FieldStack>;
 
   const rail = <FieldStack>
-    <SurfaceCard label={t("appliedContext")}>{context.error !== undefined ? <Text live="polite">{t("transportError")}</Text> : context.data?.ok === false ? <Text live="polite">{t("readRefused", { reason: context.data.reason })}</Text> : context.data?.ok === true ? <details><summary>{t("auditDetails")}</summary><Text size="xs" tone="muted">{t("contextAudit", { version: context.data.data.versionId, digest: context.data.data.digest })}</Text></details> : <Text size="sm" tone="muted" isSkeleton>{t("loadingContext")}</Text>}</SurfaceCard>
+    <SurfaceCard label={t("appliedContext")}>{context.error !== undefined ? <div role="alert"><EmptyNotice message={t("transportError")} description={t("nothingChanged")} actionLabel={t("retry")} onAction={() => void context.mutate()} /></div> : context.data?.ok === false ? <Text live="assertive">{t("readRefused", { reason: context.data.reason })}</Text> : context.data?.ok === true ? <details><summary>{t("auditDetails")}</summary><Text size="xs" tone="muted">{t("contextAudit", { version: context.data.data.versionId, digest: context.data.data.digest })}</Text></details> : <Text size="sm" tone="muted" isSkeleton>{t("loadingContext")}</Text>}</SurfaceCard>
     <SurfaceListCard label={t("pendingCorrections")} fact={t("rowCount", { count: pendingCorrections.length })} isLoading={answer === undefined && workbench.error === undefined}>
       {model !== undefined && pendingCorrections.length === 0 ? <EmptyNotice message={t("emptyCorrections")} description={t("emptyCorrectionsHint")} /> : pendingCorrections.map(correctionRow)}
     </SurfaceListCard>
@@ -110,5 +110,5 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
     </FieldStack></form></SurfaceCard>
     <SurfaceCard label={t("initialize")}>{model !== undefined ? <Text size="sm" tone="muted">{t("initializationComplete")}</Text> : runtime.error !== undefined || runtime.data?.ok === false ? <EmptyNotice message={t("initializationUnavailable")} description={t("participantSourceUnavailable")} actionLabel={t("retry")} onAction={() => void runtime.mutate()} /> : participantUserIds.length === 0 ? <EmptyNotice message={t("initializationUnavailable")} description={t("initializationUnavailableReason")} /> : <form onSubmit={onInitialize}><FieldStack><Text size="xs" tone="muted">{t("participantSuggestionNotice")}</Text><label className={ACCOUNTING_NATIVE_FIELD_CLASS_NAME} htmlFor="accounting-approver"><Text size="sm" weight="semibold">{t("approverCandidate")}</Text><select className={ACCOUNTING_NATIVE_CONTROL_CLASS_NAME} id="accounting-approver" name="accounting-approver" value={approverId} onChange={event => setApproverId(event.currentTarget.value)} required><option value="">{t("chooseApproverCandidate")}</option>{participantUserIds.map(userId => <option key={userId} value={userId}>{t("participantOption", { participant: maskParticipantId(userId) })}</option>)}</select></label>{approverId.length === 0 ? null : <details><summary>{t("auditDetails")}</summary><Text size="xs" tone="muted">{t("selectedParticipantAudit", { id: approverId })}</Text></details>}<Button type="submit" variant="secondary" isPending={initialize.isMutating} isDisabled={approverId.length === 0}>{t("initializeAction")}</Button></FieldStack></form>}</SurfaceCard>
   </FieldStack>;
-  return <div className={ACCOUNTING_WORKBENCH_CLASS_NAME} data-contract="GAP-5 MEASURE-2"><StatusNotice notice={notice} /><PrimaryRailLayout primary={primary} rail={rail} railWidth="standard" align="start" collapsedOrder="primary-first" /></div>;
+  return <div className={ACCOUNTING_WORKBENCH_CLASS_NAME} data-contract="GAP-5 MEASURE-2" aria-busy={answer === undefined && workbench.error === undefined ? true : undefined}><StatusNotice notice={notice} /><PrimaryRailLayout primary={primary} rail={rail} railWidth="standard" align="start" collapsedOrder="primary-first" /></div>;
 };

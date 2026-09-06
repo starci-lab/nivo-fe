@@ -6,7 +6,7 @@ import { useAccountingWorkbench } from "./useAccountingWorkbench";
 
 /** Registry input identifying the installed Accounting workbench. */
 export type AccountingWorkbenchBlockProps = { readonly moduleId: string; readonly kindKey: string; readonly workbenchVersion: string };
-export { accountingCorrectionAccess, accountingDocumentAction, bytesToBase64, canonicalMonthKey, currencyAmountToMinor, eligibleCorrectionSourceEntries, formatMinorCurrency, maskParticipantId, type CorrectionAccessInput } from "./useAccountingWorkbench";
+export { accountingCorrectionAccess, accountingDocumentAction, accountingNoticeLive, bytesToBase64, canonicalMonthKey, currencyAmountToMinor, eligibleCorrectionSourceEntries, formatMinorCurrency, maskParticipantId, type CorrectionAccessInput } from "./useAccountingWorkbench";
 
 /** Connect one installed Accounting module to its responsive operational workbench. */
 export const AccountingWorkbenchBlock = (props: AccountingWorkbenchBlockProps) => {
