@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
+    chatbotWorkbenchQueryKey,
     supportConversationsQueryKey,
     supportMessagesQueryKey,
     supportTicketsQueryKey,
@@ -32,5 +33,12 @@ describe("workspace control-plane cache identities", () => {
         expect(supportMessagesQueryKey(identity, "conversation-1")).not.toEqual(
             supportMessagesQueryKey(otherController, "conversation-1"),
         )
+    })
+
+    it("keeps each Chatbot workbench on its installation-qualified cache key", () => {
+        expect(chatbotWorkbenchQueryKey(identity)).toEqual([
+            "chatbot", "workbench", "agent-workspace.nivo.vn", "workspace-1", "installation-1",
+        ])
+        expect(chatbotWorkbenchQueryKey(identity)).not.toEqual(chatbotWorkbenchQueryKey({ ...identity, installationId: "installation-2" }))
     })
 })

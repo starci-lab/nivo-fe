@@ -741,6 +741,33 @@
           "unknownKind": "Kind: {kind}"
         },
         "runtime": {
+          "chatbot": {
+            "title": "Chatbot workbench",
+            "installation": "Installation",
+            "approvedVersion": "Approved context v{version}",
+            "noApprovedVersion": "No approved context is active",
+            "channels": "Channels",
+            "noChannels": "No channel is connected to this installation",
+            "connectZalo": "Connect Zalo OA",
+            "conversations": "Conversations",
+            "noConversations": "No channel conversations yet",
+            "selectConversation": "Select a conversation",
+            "automated": "Automated",
+            "humanHandoff": "Human handoff",
+            "requestHandoff": "Take over",
+            "resolveHandoff": "Return to automation",
+            "messages": "Messages",
+            "noMessages": "No recorded messages",
+            "pending": "Waiting for confirmed readback",
+            "refused": "The workbench could not be read. Retry the installation page.",
+            "permissionDenied": "You do not have permission to operate this Chatbot installation.",
+            "ambiguous": "Provider delivery is ambiguous. Do not retry blindly.",
+            "markDelivered": "Mark delivered",
+            "markFailed": "Mark failed",
+            "recorded": "Recorded only",
+            "delivered": "Delivered",
+            "failed": "Failed"
+          },
           "pageTest": {
             "compact": "Compact Test view",
             "conversation": "Conversation",

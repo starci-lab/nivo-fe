@@ -101,6 +101,9 @@ const screens: ReadonlyArray<AgentOSSolutionModuleScreen> = [
             tasks: [],
             events: [],
             operationTarget: "customer-chat",
+            isChatbot: false,
+            chatbotWorkbench: null,
+            chatbotRefusedCode: null,
             supportInbox: {
                 conversations: [],
                 selectedConversationId: null,
@@ -121,6 +124,10 @@ const screens: ReadonlyArray<AgentOSSolutionModuleScreen> = [
             onApproveSupportReply: action,
             onSetSupportTakeover: action,
             onReconcileSupportDelivery: action,
+            onConnectChatbotZalo: action,
+            onSetChatbotHandoff: action,
+            onResolveChatbotHandoff: action,
+            onReconcileChatbotDelivery: action,
         },
     },
     {
