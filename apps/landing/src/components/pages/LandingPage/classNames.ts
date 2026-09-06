@@ -4,9 +4,12 @@ import { cn } from "@heroui/react";
 export const CLASS_NAMES = {
   skipLink: cn("skip-link"),
   siteHeader: cn("site-header"),
+  headerAction: cn("header-action"),
   button_buttonSmall: cn("button", "button-small"),
   hero_sectionShell: cn("hero", "section-shell"),
-  heroCopy: cn("hero-copy"),
+  heroVisual: cn("hero-visual"),
+  heroArtwork: cn("hero-artwork"),
+  srOnly: cn("sr-only"),
   eyebrow: cn("eyebrow"),
   heroLede: cn("hero-lede"),
   actions: cn("actions"),
