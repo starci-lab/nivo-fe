@@ -6,7 +6,7 @@ import type { ComponentProps } from "react";
 
 /** Browser-level metadata for every route under this shell. */
 export const metadata: Metadata = {
-  title: "nivo",
+  title: "NIVO Agentic OS — System of Responsibility",
   description: LANDING_DESCRIPTION
 };
 
