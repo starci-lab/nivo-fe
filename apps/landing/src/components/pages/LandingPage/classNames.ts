@@ -1,7 +1,48 @@
 import { cn } from "@heroui/react";
 
-/** Layout classes for the full-viewport landing landmark. */
-export const ROOT_CLASS_NAME = cn("flex", "min-h-screen", "w-full", "items-center", "justify-center", "p-6");
-
-/** Layout classes for the centered landing content. */
-export const CONTENT_CLASS_NAME = cn("flex", "flex-col", "gap-3", "items-center", "text-center");
+/** Colocated CSS hooks owned by the public landing composition. */
+export const CLASS_NAMES = {
+  skipLink: cn("skip-link"),
+  siteHeader: cn("site-header"),
+  button_buttonSmall: cn("button", "button-small"),
+  hero_sectionShell: cn("hero", "section-shell"),
+  heroCopy: cn("hero-copy"),
+  eyebrow: cn("eyebrow"),
+  heroLede: cn("hero-lede"),
+  actions: cn("actions"),
+  button: cn("button"),
+  button_buttonGhost: cn("button", "button-ghost"),
+  heroNote: cn("hero-note"),
+  responsibilityMap: cn("responsibility-map"),
+  mapTop: cn("map-top"),
+  statusDot: cn("status-dot"),
+  mapCenter: cn("map-center"),
+  mapKicker: cn("map-kicker"),
+  mapFlow: cn("map-flow"),
+  mapProof: cn("map-proof"),
+  problem: cn("problem"),
+  sectionShell_split: cn("section-shell", "split"),
+  sectionIndex: cn("section-index"),
+  sectionShell_responsibility: cn("section-shell", "responsibility"),
+  sectionHeading: cn("section-heading"),
+  responsibilityGrid: cn("responsibility-grid"),
+  loop: cn("loop"),
+  sectionShell: cn("section-shell"),
+  sectionHeading_light: cn("section-heading", "light"),
+  loopTrack: cn("loop-track"),
+  loopCaption: cn("loop-caption"),
+  sectionShell_roles: cn("section-shell", "roles"),
+  roleGrid: cn("role-grid"),
+  intentSection: cn("intent-section"),
+  intentGrid: cn("intent-grid"),
+  sectionShell_instances: cn("section-shell", "instances"),
+  instanceStack: cn("instance-stack"),
+  offer: cn("offer"),
+  sectionShell_offerGrid: cn("section-shell", "offer-grid"),
+  priceCard: cn("price-card"),
+  price: cn("price"),
+  button_buttonFull: cn("button", "button-full"),
+  cardNote: cn("card-note"),
+  sectionShell_footerInner: cn("section-shell", "footer-inner"),
+  roleFeatured: cn("role-featured"),
+} as const;
