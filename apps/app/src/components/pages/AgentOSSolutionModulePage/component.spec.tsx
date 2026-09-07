@@ -211,6 +211,8 @@ describe("AgentOSSolutionModulePageBase", () => {
             run: { setupSessionId: "setup-1", draftDigest: "a".repeat(64), definitionDigest: "d".repeat(64), targetDigest: "a".repeat(64), authorityGeneration: 1, sourceGeneration: 1, retrievalGeneration: 1 },
         }
         expect(exactTestSurfaceFor(exact as never, draft)).toBe(exact)
+        const contextTargeted = { ...exact, run: { ...exact.run, setupSessionId: null, draftDigest: null, contextVersionId: draft.contextId } }
+        expect(exactTestSurfaceFor(contextTargeted as never, draft)).toBe(contextTargeted)
         expect(exactTestSurfaceFor({ ...exact, run: { ...exact.run, draftDigest: "b".repeat(64) } } as never, draft)).toBeNull()
         expect(exactTestSurfaceFor(null, draft)).toBeNull()
     })
