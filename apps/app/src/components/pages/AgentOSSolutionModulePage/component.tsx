@@ -3,6 +3,7 @@
 import { useEffect, useState, type ComponentType } from "react";
 import { Checkbox, ChoiceTabs, RouteTabs } from "@nivo/ui";
 import { SurfaceCard, Button, Input, Heading, Text, Tabs, PrimaryRailLayout, TextAction } from "@starci/grammar/common";
+import { ChatbotWorkbenchBlock } from "@/components/blocks/agentos/ChatbotWorkbenchBlock";
 import { ContextVersionBlock, type ContextDraft } from "@/components/blocks/agentos/ContextVersionBlock";
 import { DEFAULT_WIDGET_REGISTRY, ExecuteChatBlock, type ExecuteMessage, type TrustedWidgetComponentProps } from "@/components/blocks/agentos/ExecuteChatBlock";
 import { ExecuteSessionRailBlock, type ExecuteSession } from "@/components/blocks/agentos/ExecuteSessionRailBlock";
@@ -16,10 +17,35 @@ import { SupportCustomerConversationRailBlock } from "@/components/blocks/agento
 import { SupportQueueWorkbenchBlock } from "@/components/blocks/agentos/SupportQueueWorkbenchBlock";
 import { TestTrustResultBlock } from "@/components/blocks/agentos/TestTrustResultBlock";
 import type { AgentosModuleRuntime, AgentosModuleTestContract, AgentosModuleTestSurface, AgentosRuntimeValue } from "@/modules/api/console";
-import type { SupportCustomerConversation, SupportCustomerMessage, SupportImportantFact, SupportTicket } from "@/modules/api/workspace-controlplane";
+import type { ChatbotWorkbench, SupportCustomerConversation, SupportCustomerMessage, SupportImportantFact, SupportTicket } from "@/modules/api/workspace-controlplane";
 import { AGENTOS_SETUP_SURFACE_CLASS_NAME, CONTEXT_BAND_CLASS_NAME, CONTEXT_RAISED_BAND_CLASS_NAME } from "./classNames";
 /** Catalog keys resolved only by the connected owner or a real-provider fixture. */
 export type ModulePageMessageKey =
+  | "runtime.chatbot.ambiguous"
+  | "runtime.chatbot.approvedVersion"
+  | "runtime.chatbot.automated"
+  | "runtime.chatbot.channels"
+  | "runtime.chatbot.connectZalo"
+  | "runtime.chatbot.conversations"
+  | "runtime.chatbot.delivered"
+  | "runtime.chatbot.failed"
+  | "runtime.chatbot.humanHandoff"
+  | "runtime.chatbot.installation"
+  | "runtime.chatbot.markDelivered"
+  | "runtime.chatbot.markFailed"
+  | "runtime.chatbot.messages"
+  | "runtime.chatbot.noApprovedVersion"
+  | "runtime.chatbot.noChannels"
+  | "runtime.chatbot.noConversations"
+  | "runtime.chatbot.noMessages"
+  | "runtime.chatbot.pending"
+  | "runtime.chatbot.permissionDenied"
+  | "runtime.chatbot.recorded"
+  | "runtime.chatbot.refused"
+  | "runtime.chatbot.requestHandoff"
+  | "runtime.chatbot.resolveHandoff"
+  | "runtime.chatbot.selectConversation"
+  | "runtime.chatbot.title"
   | "runtime.conversations.synced"
   | "runtime.conversations.syncing"
   | "runtime.conversations.takeover"
@@ -509,6 +535,33 @@ type ShellWorkspaceValues = { readonly id: string };
 
 /** Resolve labels and formatters at the existing connected owner boundary. */
 export const buildModulePageCopy = (t: ModulePageTranslator) => ({
+  "chatbot": {
+    "ambiguous": t("runtime.chatbot.ambiguous"),
+    "approvedVersion": (version: string) => t("runtime.chatbot.approvedVersion", { version }),
+    "automated": t("runtime.chatbot.automated"),
+    "channels": t("runtime.chatbot.channels"),
+    "connectZalo": t("runtime.chatbot.connectZalo"),
+    "conversations": t("runtime.chatbot.conversations"),
+    "delivered": t("runtime.chatbot.delivered"),
+    "failed": t("runtime.chatbot.failed"),
+    "humanHandoff": t("runtime.chatbot.humanHandoff"),
+    "installation": t("runtime.chatbot.installation"),
+    "markDelivered": t("runtime.chatbot.markDelivered"),
+    "markFailed": t("runtime.chatbot.markFailed"),
+    "messages": t("runtime.chatbot.messages"),
+    "noApprovedVersion": t("runtime.chatbot.noApprovedVersion"),
+    "noChannels": t("runtime.chatbot.noChannels"),
+    "noConversations": t("runtime.chatbot.noConversations"),
+    "noMessages": t("runtime.chatbot.noMessages"),
+    "pending": t("runtime.chatbot.pending"),
+    "permissionDenied": t("runtime.chatbot.permissionDenied"),
+    "recorded": t("runtime.chatbot.recorded"),
+    "refused": t("runtime.chatbot.refused"),
+    "requestHandoff": t("runtime.chatbot.requestHandoff"),
+    "resolveHandoff": t("runtime.chatbot.resolveHandoff"),
+    "selectConversation": t("runtime.chatbot.selectConversation"),
+    "title": t("runtime.chatbot.title"),
+  },
   "conversations": {
     "synced": t("runtime.conversations.synced"),
     "syncing": t("runtime.conversations.syncing"),
@@ -1232,6 +1285,9 @@ type OperateSurfaceProps = {
   readonly tasks: AgentosModuleRuntime["tasks"];
   readonly events: AgentosModuleRuntime["operationEvents"];
   readonly operationTarget: "customer-chat" | "customer-workbench" | "internal-chat" | "internal-workbench";
+  readonly isChatbot: boolean;
+  readonly chatbotWorkbench: ChatbotWorkbench | null;
+  readonly chatbotRefusedCode: string | null;
   readonly supportInbox: AgentOSSolutionModuleSupportInbox;
   readonly pending: boolean;
   readonly refused: boolean;
@@ -1244,12 +1300,16 @@ type OperateSurfaceProps = {
   readonly onApproveSupportReply: (decisionId: string) => void;
   readonly onSetSupportTakeover: (conversationId: string, takeover: boolean) => void;
   readonly onReconcileSupportDelivery: (outboxId: string, delivered: boolean) => void;
+  readonly onConnectChatbotZalo: () => void;
+  readonly onSetChatbotHandoff: (conversationId: string) => void;
+  readonly onResolveChatbotHandoff: (conversationId: string) => void;
+  readonly onReconcileChatbotDelivery: (outboxId: string, delivered: boolean) => void;
 };
 const chatPane = (props: WithModulePageCopy<OperateSurfaceProps>) => <div>{props.operationTarget.startsWith("customer-") ? <SupportCustomerChatBlock copy={props.copy} conversation={props.supportInbox.conversations.find(item => item.id === props.supportInbox.selectedConversationId) ?? null} messages={props.supportInbox.messages} pending={props.supportInbox.pending} refused={props.supportInbox.refused} onApprove={props.onApproveSupportReply} onTakeover={props.onSetSupportTakeover} onReconcile={props.onReconcileSupportDelivery} /> : <ExecuteChatBlock copy={props.copy} sessionTitle={props.selectedSessionTitle} messages={props.messages} pending={props.pending} refused={props.refused} registry={DEFAULT_WIDGET_REGISTRY} onSend={props.onSend} onWidgetAction={props.onWidgetAction} />}</div>;
 const chatPaneWideOnly = (props: WithModulePageCopy<OperateSurfaceProps>) => <div>{props.operationTarget.startsWith("customer-") ? <SupportCustomerChatBlock copy={props.copy} conversation={props.supportInbox.conversations.find(item => item.id === props.supportInbox.selectedConversationId) ?? null} messages={props.supportInbox.messages} pending={props.supportInbox.pending} refused={props.supportInbox.refused} onApprove={props.onApproveSupportReply} onTakeover={props.onSetSupportTakeover} onReconcile={props.onReconcileSupportDelivery} /> : <ExecuteChatBlock copy={props.copy} sessionTitle={props.selectedSessionTitle} messages={props.messages} pending={props.pending} refused={props.refused} registry={DEFAULT_WIDGET_REGISTRY} onSend={props.onSend} onWidgetAction={props.onWidgetAction} />}</div>;
 const workbenchPane = (props: WithModulePageCopy<OperateSurfaceProps>) => <div>{props.operationTarget.startsWith("customer-") ? <SupportQueueWorkbenchBlock copy={props.copy} tickets={props.supportInbox.tickets} facts={props.supportInbox.facts} selectedConversationId={props.supportInbox.selectedConversationId} pending={props.supportInbox.pending} /> : <KindWorkbenchBlock copy={props.copy} moduleId={props.installationId} kindKey={props.kindKey} workbenchKey={props.workbenchKey} workbenchVersion={props.workbenchVersion} tasks={props.tasks} events={props.events} registry={DEFAULT_WORKBENCH_REGISTRY} />}</div>;
 const workbenchPaneWideOnly = (props: WithModulePageCopy<OperateSurfaceProps>) => <div>{props.operationTarget.startsWith("customer-") ? <SupportQueueWorkbenchBlock copy={props.copy} tickets={props.supportInbox.tickets} facts={props.supportInbox.facts} selectedConversationId={props.supportInbox.selectedConversationId} pending={props.supportInbox.pending} /> : <KindWorkbenchBlock copy={props.copy} moduleId={props.installationId} kindKey={props.kindKey} workbenchKey={props.workbenchKey} workbenchVersion={props.workbenchVersion} tasks={props.tasks} events={props.events} registry={DEFAULT_WORKBENCH_REGISTRY} />}</div>;
-const OperateSurface = (props: WithModulePageCopy<OperateSurfaceProps>) => { const { copy } = props; return (<div><div>
+const OperateSurface = (props: WithModulePageCopy<OperateSurfaceProps>) => { const { copy } = props; if (props.isChatbot) return <ChatbotWorkbenchBlock installationId={props.installationId} workbench={props.chatbotWorkbench} selectedConversationId={props.supportInbox.selectedConversationId} pending={props.supportInbox.pending} refusedCode={props.chatbotRefusedCode} copy={copy.chatbot} onSelectConversation={props.onSelectSupportConversation} onConnectZalo={props.onConnectChatbotZalo} onSetHandoff={props.onSetChatbotHandoff} onResolveHandoff={props.onResolveChatbotHandoff} onReconcile={props.onReconcileChatbotDelivery} />; return (<div><div>
 
 
 

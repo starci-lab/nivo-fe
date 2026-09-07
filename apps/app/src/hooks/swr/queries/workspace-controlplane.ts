@@ -1,6 +1,6 @@
 "use client";
 
-import { supportCustomerConversations, supportCustomerMessages, supportImportantFacts, supportTickets } from "@/modules/api/workspace-controlplane";
+import { chatbotWorkbench, supportCustomerConversations, supportCustomerMessages, supportImportantFacts, supportTickets } from "@/modules/api/workspace-controlplane";
 import { useSession } from "@/modules/auth/session";
 import { useNivoQuery } from "../use-nivo-query";
 
@@ -11,6 +11,9 @@ export type SupportQueryIdentity = {
   readonly installationId: string;
   readonly enabled: boolean;
 };
+
+/** Cache identity for the complete state of one installed Chatbot. */
+export const chatbotWorkbenchQueryKey = (identity: SupportQueryIdentity) => ["chatbot", "workbench", identity.hostname, identity.workspaceId, identity.installationId] as const;
 
 /** Cache identity for one module's external customer conversations. */
 export const supportConversationsQueryKey = (identity: SupportQueryIdentity) => ["support", "conversations", identity.hostname, identity.workspaceId, identity.installationId] as const;
@@ -23,6 +26,14 @@ export const supportMessagesQueryKey = (identity: SupportQueryIdentity, conversa
 const useSupportAccessToken = (): string | null => {
   const session = useSession();
   return session.state.status === "signed-in" ? session.state.accessToken : null;
+};
+
+/** Poll one installation-qualified Chatbot workbench without sharing sibling cache state. */
+export const useQueryChatbotWorkbenchSwr = (identity: SupportQueryIdentity) => {
+  const accessToken = useSupportAccessToken();
+  return useNivoQuery(identity.enabled && identity.hostname !== null && accessToken !== null ? chatbotWorkbenchQueryKey(identity) : null, () => chatbotWorkbench(identity.hostname ?? "", identity.workspaceId, accessToken ?? "", identity.installationId), {
+    refreshInterval: identity.enabled ? 3_000 : 0
+  });
 };
 
 /** Poll the owner-scoped support inbox while the operations pane is active. */

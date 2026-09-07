@@ -8,7 +8,7 @@ import type { ExecuteMessage } from "@/components/blocks/agentos/ExecuteChatBloc
 import type { ExecuteSession } from "@/components/blocks/agentos/ExecuteSessionRailBlock";
 import type { AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteShellBlock";
 import type { SetupMessage, SetupRevision } from "@/components/blocks/agentos/PrivateSetupChatBlock";
-import { useQueryMyAgentosModuleRuntimeSwr, useQueryMyAgentosModuleTestSurfaceSwr, useQueryMyAgentWorkspaceControlCenterSwr, useQuerySupportCustomerConversationsSwr, useQuerySupportCustomerMessagesSwr, useQuerySupportImportantFactsSwr, useQuerySupportTicketsSwr, useReadMyAgentosModuleTestRun, useMutateApproveSupportReplySwr, useMutateConfigureAgentWorkspaceChannelSwr, useMutateManageAgentosModuleRuntimeSwr, useMutateReconcileSupportDeliverySwr, useMutateRunAgentosModuleTestSwr, useMutateSetSupportTakeoverSwr } from "@/hooks";
+import { useQueryChatbotWorkbenchSwr, useQueryMyAgentosModuleRuntimeSwr, useQueryMyAgentosModuleTestSurfaceSwr, useQueryMyAgentWorkspaceControlCenterSwr, useQuerySupportCustomerConversationsSwr, useQuerySupportCustomerMessagesSwr, useQuerySupportImportantFactsSwr, useQuerySupportTicketsSwr, useReadMyAgentosModuleTestRun, useMutateApproveSupportReplySwr, useMutateConfigureAgentWorkspaceChannelSwr, useMutateManageAgentosModuleRuntimeSwr, useMutateReconcileChatbotDeliverySwr, useMutateReconcileSupportDeliverySwr, useMutateResolveChatbotHandoffSwr, useMutateRunAgentosModuleTestSwr, useMutateSetChatbotHandoffSwr, useMutateSetSupportTakeoverSwr, useMutateStartChatbotZaloOauthSwr } from "@/hooks";
 import { type AgentosModuleRuntime, type AgentosRuntimeManifest, type AgentosRuntimeValue, type ManageAgentosModuleRuntimeInput } from "@/modules/api/console";
 import { nivoQueryData, type NivoQueryAnswer } from "@/modules/query";
 import { AgentOSSolutionModulePageBase, AgentOSSolutionModuleState, buildModulePageCopy, exactTestSurfaceFor, type ModulePageCopy, type AgentOSSolutionModulePageViewProps, type AgentOSSolutionModuleScreen } from "./component";
@@ -257,8 +257,10 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
   const testSurfaceQuery = useQueryMyAgentosModuleTestSurfaceSwr(installationId, view === "test" || view === "setup");
   const testSurface = nivoQueryData(testSurfaceQuery.data) ?? null;
   const refused = actionRefused || moduleQueriesRefused(runtimeQuery.data, runtime, testSurfaceQuery.data);
-  const supportEnabled = view === "operate" && runtime?.installation.kindKey === "customer-support";
-  const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId, supportEnabled);
+  const isChatbotInstallation = runtime !== null && ["chatbot", "agentos-chatbot", "multichannel-chatbot"].includes(runtime.installation.moduleKey);
+  const chatbotEnabled = view === "operate" && isChatbotInstallation;
+  const supportEnabled = view === "operate" && runtime?.installation.kindKey === "customer-support" && !isChatbotInstallation;
+  const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId, chatbotEnabled || supportEnabled);
   const controllerHostname = controllerHostnameForWorkspace(controlCenter.data, workspaceId);
   const supportIdentity = {
     hostname: controllerHostname,
@@ -266,6 +268,14 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     installationId,
     enabled: supportEnabled
   };
+  const chatbotIdentity = { ...supportIdentity, enabled: chatbotEnabled };
+  const chatbotQuery = useQueryChatbotWorkbenchSwr(chatbotIdentity);
+  const chatbotWorkbench = nivoQueryData(chatbotQuery.data) ?? null;
+  const chatbotRefusedCode = chatbotQuery.data?.ok === false ? chatbotQuery.data.code : null;
+  const startZaloOauthMutation = useMutateStartChatbotZaloOauthSwr(chatbotIdentity);
+  const setChatbotHandoffMutation = useMutateSetChatbotHandoffSwr(chatbotIdentity);
+  const resolveChatbotHandoffMutation = useMutateResolveChatbotHandoffSwr(chatbotIdentity);
+  const reconcileChatbotDeliveryMutation = useMutateReconcileChatbotDeliverySwr(chatbotIdentity);
   const conversationsQuery = useQuerySupportCustomerConversationsSwr(supportIdentity);
   const ticketsQuery = useQuerySupportTicketsSwr(supportIdentity);
   const factsQuery = useQuerySupportImportantFactsSwr(supportIdentity);
@@ -278,13 +288,15 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
   const deliveryMutation = useMutateReconcileSupportDeliverySwr(supportMutationIdentity);
   const readTestRun = useReadMyAgentosModuleTestRun(installationId);
   const supportConversations = queryNodes(conversationsQuery.data);
-  const effectiveSupportConversationId = selectedIdentity(supportConversations, selectedSupportConversationId);
+  const effectiveSupportConversationId = chatbotEnabled
+    ? selectedIdentity(chatbotWorkbench?.conversations ?? [], selectedSupportConversationId)
+    : selectedIdentity(supportConversations, selectedSupportConversationId);
   const messagesQuery = useQuerySupportCustomerMessagesSwr(supportIdentity, effectiveSupportConversationId);
   const supportMessages = queryNodes(messagesQuery.data);
   const supportTicketsState = queryNodes(ticketsQuery.data);
   const supportFacts = queryNodes(factsQuery.data);
-  const supportPending = supportActionPending || [conversationsQuery, ticketsQuery, factsQuery, messagesQuery].some(query => query.isLoading);
-  const supportRefused = supportActionRefused || anyQueryRefused([controlCenter.data, conversationsQuery.data, ticketsQuery.data, factsQuery.data, messagesQuery.data]);
+  const supportPending = supportActionPending || chatbotQuery.isLoading || [conversationsQuery, ticketsQuery, factsQuery, messagesQuery].some(query => query.isLoading);
+  const supportRefused = supportActionRefused || anyQueryRefused([controlCenter.data, chatbotQuery.data, conversationsQuery.data, ticketsQuery.data, factsQuery.data, messagesQuery.data]);
   useEffect(() => {
     if (runtime === null) return;
     if (selectedSessionId !== null && runtime.executeSessions.some(item => item.id === selectedSessionId)) return;
@@ -570,6 +582,26 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
       delivered
     }));
   }, [deliveryMutation, runSupportAction]);
+  const connectChatbotZalo = useCallback(() => {
+    void runSupportAction(async () => {
+      const answer = await startZaloOauthMutation.trigger({ installationId, requestToken: idempotencyKey() });
+      if (answer.ok && answer.data.authorizationUrl !== null && answer.data.authorizationUrl !== undefined) {
+        const authorization = new URL(answer.data.authorizationUrl);
+        if (authorization.protocol === "https:" && authorization.hostname === "oauth.zaloapp.com") window.open(authorization.toString(), "chatbot-zalo-oauth", "popup,width=520,height=720,noopener,noreferrer");
+      }
+      return answer;
+    });
+  }, [installationId, runSupportAction, startZaloOauthMutation]);
+  const setChatbotHandoff = useCallback((conversationId: string) => {
+    void runSupportAction(() => setChatbotHandoffMutation.trigger({ installationId, conversationId, requestToken: idempotencyKey() }));
+  }, [installationId, runSupportAction, setChatbotHandoffMutation]);
+  const resolveChatbotHandoff = useCallback((conversationId: string) => {
+    const conversation = chatbotWorkbench?.conversations.find(candidate => candidate.id === conversationId);
+    if (conversation !== undefined) void runSupportAction(() => resolveChatbotHandoffMutation.trigger({ installationId, conversationId, requestToken: idempotencyKey(), authorityEpoch: conversation.authorityEpoch }));
+  }, [chatbotWorkbench?.conversations, installationId, resolveChatbotHandoffMutation, runSupportAction]);
+  const reconcileChatbotDelivery = useCallback((providerOutboxId: string, delivered: boolean) => {
+    void runSupportAction(() => reconcileChatbotDeliveryMutation.trigger({ installationId, providerOutboxId, outcome: delivered ? "delivered" : "failed", requestToken: idempotencyKey() }));
+  }, [installationId, reconcileChatbotDeliveryMutation, runSupportAction]);
   const runTest = useCallback(async (target: AgentosModuleTestTarget, mode: "exploratory" | "acceptance", scenarioKey: string, scenarioInput: Readonly<Record<string, AgentosRuntimeValue>>) => {
     setPending(true);
     setActionRefused(false);
@@ -751,6 +783,9 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
           tasks: runtime.tasks,
           events: runtime.operationEvents,
           operationTarget,
+          isChatbot: isChatbotInstallation,
+          chatbotWorkbench,
+          chatbotRefusedCode,
           supportInbox,
           pending,
           refused,
@@ -769,7 +804,11 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
           onSelectSupportConversation: setSelectedSupportConversationId,
           onApproveSupportReply: approveSupportReply,
           onSetSupportTakeover: setSupportTakeover,
-          onReconcileSupportDelivery: reconcileSupportDelivery
+          onReconcileSupportDelivery: reconcileSupportDelivery,
+          onConnectChatbotZalo: connectChatbotZalo,
+          onSetChatbotHandoff: setChatbotHandoff,
+          onResolveChatbotHandoff: resolveChatbotHandoff,
+          onReconcileChatbotDelivery: reconcileChatbotDelivery
         }
       };
     } else if (view === "test" && testContract === undefined) {

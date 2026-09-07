@@ -70,6 +70,58 @@ export type SupportConnection<T> = {
   readonly nodes: ReadonlyArray<T>;
   readonly nextCursor: string | null;
 };
+
+/** One installation-qualified channel projection; credential material never crosses this boundary. */
+export type ChatbotChannelBinding = {
+  readonly id: string;
+  readonly installationId: string;
+  readonly provider: "telegram" | "zalo" | string;
+  readonly accountRef: string;
+  readonly state: string;
+  readonly credentialRef: string | null;
+};
+
+/** One conversation owned by exactly one Chatbot installation. */
+export type ChatbotConversation = {
+  readonly id: string;
+  readonly installationId: string;
+  readonly participantRef: string;
+  readonly handoffState: string;
+  readonly authorityEpoch: number;
+  readonly approvedVersion: number | null;
+  readonly lastMessageAt: string;
+};
+
+/** Truthful recorded delivery state; ambiguous is never treated as sent. */
+export type ChatbotMessage = {
+  readonly id: string;
+  readonly conversationId: string;
+  readonly direction: string;
+  readonly sequence: string;
+  readonly body: string;
+  readonly deliveryState: string;
+  readonly providerOutboxId: string | null;
+  readonly failureCode: string | null;
+  readonly occurredAt: string;
+};
+
+/** Complete read model for one installed Chatbot workbench. */
+export type ChatbotWorkbench = {
+  readonly installationId: string;
+  readonly lifecycleState: string;
+  readonly approvedVersion: number | null;
+  readonly channels: ReadonlyArray<ChatbotChannelBinding>;
+  readonly conversations: ReadonlyArray<ChatbotConversation>;
+  readonly messages: ReadonlyArray<ChatbotMessage>;
+};
+
+/** Stable command result returned after installation-scoped readback. */
+export type ChatbotCommandResult = {
+  readonly id: string;
+  readonly installationId: string;
+  readonly state: string;
+  readonly authorizationUrl?: string | null;
+};
 type GraphqlEnvelope<T> = {
   readonly data?: T;
   readonly errors?: ReadonlyArray<{
@@ -139,6 +191,58 @@ const request = async <T,>(hostname: string, workspaceId: string, accessToken: s
     };
   }
 };
+
+/** Read the accepted installation-qualified Chatbot workbench contract. */
+export const chatbotWorkbench = async (hostname: string, workspaceId: string, accessToken: string, installationId: string): Promise<WorkspaceControlplaneResult<ChatbotWorkbench>> => {
+  const result = await request<{ readonly chatbotWorkbench: ChatbotWorkbench }>(hostname, workspaceId, accessToken, `query ChatbotWorkbench($installationId: ID!) {
+    chatbotWorkbench(installationId: $installationId) {
+      installationId lifecycleState approvedVersion
+      channels { id installationId provider accountRef state credentialRef }
+      conversations { id installationId participantRef handoffState authorityEpoch approvedVersion lastMessageAt }
+      messages { id conversationId direction sequence body deliveryState providerOutboxId failureCode occurredAt }
+    }
+  }`, { installationId });
+  return result.ok ? { ok: true, data: result.data.chatbotWorkbench } : result;
+};
+
+const mutateChatbot = async (hostname: string, workspaceId: string, accessToken: string, query: string, variables: Readonly<Record<string, unknown>>, field: string): Promise<WorkspaceControlplaneResult<ChatbotCommandResult>> => {
+  const result = await request<Readonly<Record<string, ChatbotCommandResult>>>(hostname, workspaceId, accessToken, query, variables);
+  if (!result.ok) return result;
+  const action = result.data[field];
+  return action === undefined ? { ok: false, code: "WORKSPACE_CONTROLLER_FAILED" } : { ok: true, data: action };
+};
+
+/** Bind an opaque, already-sealed channel reference to one installation. */
+export const bindChatbotChannel = (hostname: string, workspaceId: string, accessToken: string, input: Readonly<Record<string, unknown>>) => mutateChatbot(hostname, workspaceId, accessToken, `mutation BindChatbotChannel($input: BindChatbotChannelInput!) {
+    bindChatbotChannel(input: $input) { id installationId state authorizationUrl }
+  }`, { input }, "bindChatbotChannel");
+
+/** Start a one-time Zalo OAuth intent; the browser receives no provider token. */
+export const startChatbotZaloOauth = (hostname: string, workspaceId: string, accessToken: string, input: Readonly<Record<string, unknown>>) => mutateChatbot(hostname, workspaceId, accessToken, `mutation StartZaloChatbotAuthorization($input: StartZaloChatbotAuthorizationInput!) {
+    startZaloChatbotAuthorization(input: $input) { id installationId state authorizationUrl }
+  }`, { input }, "startZaloChatbotAuthorization");
+
+/** Fence one conversation into human mode before any later provider start. */
+export const setChatbotHandoff = (hostname: string, workspaceId: string, accessToken: string, input: Readonly<Record<string, unknown>>) => mutateChatbot(hostname, workspaceId, accessToken, `mutation SetChatbotHandoff($input: ChangeChatbotHandoffInput!) {
+    setChatbotHandoff(input: $input) { id installationId state authorizationUrl }
+  }`, { input }, "setChatbotHandoff");
+
+/** Resolve human mode only through the installation-qualified authority command. */
+export const resolveChatbotHandoff = (hostname: string, workspaceId: string, accessToken: string, input: Readonly<Record<string, unknown>>) => mutateChatbot(hostname, workspaceId, accessToken, `mutation ResolveChatbotHandoff($input: ChangeChatbotHandoffInput!) {
+    resolveChatbotHandoff(input: $input) { id installationId state authorizationUrl }
+  }`, { input }, "resolveChatbotHandoff");
+
+/** Reconcile ambiguous delivery evidence without issuing a blind resend. */
+export const reconcileChatbotDelivery = (hostname: string, workspaceId: string, accessToken: string, input: Readonly<Record<string, unknown>>) => mutateChatbot(hostname, workspaceId, accessToken, `mutation ReconcileChatbotDelivery($input: ReconcileChatbotDeliveryInput!) {
+    reconcileChatbotDelivery(input: $input) { id installationId state authorizationUrl }
+  }`, { input: {
+    ...input,
+    outboxId: input.providerOutboxId,
+    terminalState: input.outcome === "delivered" ? "sent" : "failed",
+    evidenceRef: `operator://manual-reconciliation/${String(input.providerOutboxId)}`,
+    providerOutboxId: undefined,
+    outcome: undefined
+  } }, "reconcileChatbotDelivery");
 
 /** Read customer identities from one workspace without proxying transcripts through Core. */
 export const supportCustomerConversations = async (hostname: string, workspaceId: string, accessToken: string, installationId: string): Promise<WorkspaceControlplaneResult<SupportConnection<SupportCustomerConversation>>> => {

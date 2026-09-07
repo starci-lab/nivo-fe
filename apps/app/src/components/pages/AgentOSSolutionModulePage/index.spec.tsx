@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
     approveTrigger: vi.fn(),
     takeoverTrigger: vi.fn(),
     deliveryTrigger: vi.fn(),
+    chatbotTrigger: vi.fn(),
 }))
 
 let runtime = {
@@ -70,6 +71,7 @@ const testSurface = {
 
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("@/hooks", () => ({
+    useQueryChatbotWorkbenchSwr: () => ({ data: undefined, isLoading: false }),
     useQueryMyAgentosModuleRuntimeSwr: () => ({ data: { ok: true, data: runtime }, mutate: mocks.runtimeMutate }),
     useQueryMyAgentosModuleTestSurfaceSwr: () => ({ data: { ok: true, data: testSurface }, mutate: vi.fn() }),
     useQueryMyAgentWorkspaceControlCenterSwr: () => ({ data: { ok: true, data: { workspace: { id: "workspace-1" }, instance: { hostname: "controller.example.test" } } } }),
@@ -83,6 +85,10 @@ vi.mock("@/hooks", () => ({
     useMutateApproveSupportReplySwr: () => ({ trigger: mocks.approveTrigger }),
     useMutateSetSupportTakeoverSwr: () => ({ trigger: mocks.takeoverTrigger }),
     useMutateReconcileSupportDeliverySwr: () => ({ trigger: mocks.deliveryTrigger }),
+    useMutateStartChatbotZaloOauthSwr: () => ({ trigger: mocks.chatbotTrigger }),
+    useMutateSetChatbotHandoffSwr: () => ({ trigger: mocks.chatbotTrigger }),
+    useMutateResolveChatbotHandoffSwr: () => ({ trigger: mocks.chatbotTrigger }),
+    useMutateReconcileChatbotDeliverySwr: () => ({ trigger: mocks.chatbotTrigger }),
     useReadMyAgentosModuleTestRun: () => vi.fn(),
 }))
 vi.mock("./component", async () => ({

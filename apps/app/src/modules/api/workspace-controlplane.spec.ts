@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import {
+    chatbotWorkbench,
+    reconcileChatbotDelivery,
     supportCustomerMessages,
     workspaceControlplaneTesting,
 } from "./workspace-controlplane"
@@ -49,5 +51,22 @@ describe("workspace control-plane transport", () => {
         expect(fetchMock).toHaveBeenCalledWith("https://support-1.nivo.vn/graphql", expect.objectContaining({
             headers: expect.objectContaining({ authorization: "Bearer memory-token" }),
         }))
+    })
+
+    it("qualifies Chatbot workbench reads and reconciliation by installation", async () => {
+        const fetchMock = vi.fn()
+            .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ data: { chatbotWorkbench: { installationId: "chatbot-2", lifecycleState: "active", approvedVersion: 4, channels: [], conversations: [], messages: [] } } }) })
+            .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ data: { reconcileChatbotDelivery: { id: "receipt-1", installationId: "chatbot-2", state: "recorded" } } }) })
+        vi.stubGlobal("fetch", fetchMock)
+
+        await chatbotWorkbench("localhost:6068", "workspace-1", "memory-token", "chatbot-2")
+        await reconcileChatbotDelivery("localhost:6068", "workspace-1", "memory-token", { installationId: "chatbot-2", providerOutboxId: "outbox-1", outcome: "failed", requestToken: "request-1" })
+
+        const readBody = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body)) as { query: string; variables: unknown }
+        const mutationBody = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)) as { query: string; variables: { input: { installationId: string; providerOutboxId: string } } }
+        expect(readBody.query).toContain("chatbotWorkbench(installationId: $installationId)")
+        expect(readBody.variables).toEqual({ installationId: "chatbot-2" })
+        expect(mutationBody.query).toContain("reconcileChatbotDelivery(input: $input)")
+        expect(mutationBody.variables.input).toMatchObject({ installationId: "chatbot-2", outboxId: "outbox-1", terminalState: "failed", evidenceRef: "operator://manual-reconciliation/outbox-1" })
     })
 })

@@ -745,6 +745,33 @@
           "unknownKind": "Loại: {kind}"
         },
         "runtime": {
+          "chatbot": {
+            "title": "Bàn làm việc Chatbot",
+            "installation": "Bản cài đặt",
+            "approvedVersion": "Ngữ cảnh đã duyệt v{version}",
+            "noApprovedVersion": "Chưa có ngữ cảnh đã duyệt đang hoạt động",
+            "channels": "Kênh",
+            "noChannels": "Bản cài đặt này chưa kết nối kênh",
+            "connectZalo": "Kết nối Zalo OA",
+            "conversations": "Hội thoại",
+            "noConversations": "Chưa có hội thoại từ kênh",
+            "selectConversation": "Chọn một hội thoại",
+            "automated": "Tự động",
+            "humanHandoff": "Nhân viên đang tiếp quản",
+            "requestHandoff": "Tiếp quản",
+            "resolveHandoff": "Trả lại tự động",
+            "messages": "Tin nhắn",
+            "noMessages": "Chưa có tin nhắn được ghi nhận",
+            "pending": "Đang chờ hệ thống đọc lại trạng thái xác nhận",
+            "refused": "Không đọc được bàn làm việc. Hãy tải lại trang bản cài đặt.",
+            "permissionDenied": "Bạn không có quyền vận hành bản cài đặt Chatbot này.",
+            "ambiguous": "Kết quả gửi từ nhà cung cấp chưa rõ. Không được thử gửi lại mù.",
+            "markDelivered": "Đánh dấu đã gửi",
+            "markFailed": "Đánh dấu thất bại",
+            "recorded": "Chỉ ghi nhận",
+            "delivered": "Đã gửi",
+            "failed": "Thất bại"
+          },
           "pageTest": {
             "mode": "Chế độ kiểm thử",
             "exploratory": "Khám phá",
