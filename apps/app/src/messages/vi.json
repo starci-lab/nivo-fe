@@ -563,18 +563,6 @@
             "refusedStatus": "Bị từ chối",
             "removed": "Đã gỡ"
           },
-          "integrations": {
-            "title": "Tích hợp",
-            "provider": "Helpdesk API",
-            "field": "Khóa tích hợp",
-            "placeholder": "Dán khóa mới chỉ ghi",
-            "save": "Cấu hình khóa",
-            "remove": "Gỡ",
-            "refused": "Chưa đọc được trạng thái tích hợp.",
-            "writeOnly": "Nivo mã hóa giá trị đã gửi và chỉ trả về phần gợi ý được che.",
-            "reveal": "Hiện khóa",
-            "hide": "Ẩn khóa"
-          },
           "specification": {
             "title": "Duyệt đặc tả",
             "refused": "Chưa đọc được đặc tả.",

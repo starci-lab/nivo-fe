@@ -6,7 +6,6 @@ import type { AgentosModuleStudio } from "@/modules/api/console"
 import { AgentOSCustomModuleCollectionBase } from "./AgentOSCustomModuleCollection/component"
 import { AgentOSModuleAttachmentsBase } from "./AgentOSModuleAttachments/component"
 import { AgentOSModuleIntakeBase } from "./AgentOSModuleIntake/component"
-import { AgentOSModuleIntegrationsBase } from "./AgentOSModuleIntegrations/component"
 import { AgentOSModuleInterviewBase } from "./AgentOSModuleInterview/component"
 import { AgentOSModuleProfileBase } from "./AgentOSModuleProfile/component"
 import { AgentOSModuleSpecificationBase } from "./AgentOSModuleSpecification/component"
@@ -61,19 +60,7 @@ describe("module studio pure surfaces", () => {
         expect(intake).toContain("Answer follow-ups")
     })
 
-    it("draws write-only integration, interview, profile, and specification states", () => {
-        const integrations = renderToStaticMarkup(<AgentOSModuleIntegrationsBase
-            state="loading"
-            secret=""
-            pending={false}
-            labels={{ title: "Integrations", provider: "Helpdesk", field: "API key", placeholder: "Paste key", save: "Save", remove: "Remove", refused: "Unavailable", writeOnly: "The key cannot be read back.", reveal: "Reveal", hide: "Hide" }}
-            onSecret={vi.fn()}
-            onSave={vi.fn()}
-            onRemove={vi.fn()}
-        />)
-        expect(integrations).toContain("Integrations")
-        expect(integrations).toContain("The key cannot be read back.")
-
+    it("draws interview, profile, and specification states", () => {
         const interview = renderToStaticMarkup(<AgentOSModuleInterviewBase
             state="loading"
             answer=""
@@ -100,7 +87,7 @@ describe("module studio pure surfaces", () => {
         />)
     })
 
-    it("reports collection, upload, and write-only integration actions", () => {
+    it("reports collection and upload actions", () => {
         const collection = render(<AgentOSCustomModuleCollectionBase
             state="ready"
             loadingKind="Custom"
@@ -138,19 +125,6 @@ describe("module studio pure surfaces", () => {
         expect(choose).toHaveBeenCalledTimes(1)
         attachments.unmount()
 
-        const removeIntegration = vi.fn()
-        render(<AgentOSModuleIntegrationsBase
-            studio={{ integrations: [{ id: "integration-1", providerKey: "helpdesk-api", maskedHint: "...abcd", status: "configured" }] } as unknown as AgentosModuleStudio}
-            state="ready"
-            secret="replacement"
-            pending={false}
-            labels={{ title: "Integrations", provider: "Helpdesk", field: "API key", placeholder: "Paste key", save: "Save", remove: "Remove key", refused: "Unavailable", writeOnly: "Write only", reveal: "Reveal", hide: "Hide" }}
-            onSecret={vi.fn()}
-            onSave={vi.fn()}
-            onRemove={removeIntegration}
-        />)
-        fireEvent.click(screen.getByRole("button", { name: "Remove key" }))
-        expect(removeIntegration).toHaveBeenCalledWith("helpdesk-api")
     })
 })
 

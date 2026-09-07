@@ -95,8 +95,8 @@ const screens: ReadonlyArray<AgentOSSolutionModuleScreen> = [
         view: "operate",
         contentProps: {
             installationId: "installation-1",
-            kindKey: "customer-support",
-            workbenchKey: "support-queue",
+            kindKey: "accounting",
+            workbenchKey: "accounting-sheet",
             workbenchVersion: "1.0.0",
             sessions: [],
             selectedSessionId: null,
@@ -104,18 +104,13 @@ const screens: ReadonlyArray<AgentOSSolutionModuleScreen> = [
             messages: [],
             tasks: [],
             events: [],
-            operationTarget: "customer-chat",
+            operationTarget: "internal-chat",
             isChatbot: false,
             chatbotWorkbench: null,
             chatbotRefusedCode: null,
             supportInbox: {
-                conversations: [],
                 selectedConversationId: null,
-                messages: [],
-                tickets: [],
-                facts: [],
                 pending: false,
-                refused: false,
             },
             pending: false,
             refused: false,
@@ -125,9 +120,6 @@ const screens: ReadonlyArray<AgentOSSolutionModuleScreen> = [
             onSend: action,
             onWidgetAction: action,
             onSelectSupportConversation: action,
-            onApproveSupportReply: action,
-            onSetSupportTakeover: action,
-            onReconcileSupportDelivery: action,
             onConnectChatbotZalo: action,
             onSetChatbotHandoff: action,
             onResolveChatbotHandoff: action,
@@ -378,14 +370,14 @@ describe.each(["en", "vi"] as const)("Page owner action forwarding %s", locale =
   expect(onSelectPane).toHaveBeenCalledExactlyOnceWith("evidence")
   view.unmount()
  })
- it.each(["customer-chat", "customer-workbench", "internal-chat", "internal-workbench"] as const)("keeps %s owner identity and selection tokens", operationTarget => {
+ it.each(["internal-chat", "internal-workbench"] as const)("keeps %s owner identity and selection tokens", operationTarget => {
   const operate = screens.find(candidate => candidate.view === "operate")!
   if (operate.view !== "operate") throw new Error("Operate fixture missing")
   const onSelectTarget = vi.fn()
   const view = render(<PageFixture locale={locale} shell={{ ...shell, activeView: "operate" }} screen={{ view: "operate", contentProps: { ...operate.contentProps, operationTarget, onSelectTarget } }} />)
   expect(screen.getByRole("tablist", { name: copy.operate.view })).toBeInTheDocument()
-  const destination = operationTarget === "internal-chat" ? "customer-workbench" : "internal-chat"
-  fireEvent.click(screen.getByRole("tab", { name: destination === "internal-chat" ? copy.operate.internalChat : copy.operate.customerQueue }))
+  const destination = operationTarget === "internal-chat" ? "internal-workbench" : "internal-chat"
+  fireEvent.click(screen.getByRole("tab", { name: destination === "internal-chat" ? copy.operate.chat : copy.operate.workbench }))
   expect(onSelectTarget).toHaveBeenCalledExactlyOnceWith(destination)
   view.unmount()
  })

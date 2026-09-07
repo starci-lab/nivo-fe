@@ -24,7 +24,7 @@ const mocks = vi.hoisted(() => ({
 
 let runtime = {
     installation: {
-        id: "installation-1", agentWorkspaceId: "workspace-1", moduleKey: "support-desk", moduleVersion: "1.0",
+        id: "installation-1", agentWorkspaceId: "workspace-1", moduleKey: "finance-copilot", moduleVersion: "1.0",
         displayName: "Support Desk", kindKey: "customer-support", kindVersion: "1.0", workbenchKey: "support-queue", workbenchVersion: "1.0",
         runtimeManifest: {
             schemaVersion: 1,
@@ -75,16 +75,11 @@ vi.mock("@/hooks", () => ({
     useQueryMyAgentosModuleRuntimeSwr: () => ({ data: { ok: true, data: runtime }, mutate: mocks.runtimeMutate }),
     useQueryMyAgentosModuleTestSurfaceSwr: () => ({ data: { ok: true, data: testSurface }, mutate: vi.fn() }),
     useQueryMyAgentWorkspaceControlCenterSwr: () => ({ data: { ok: true, data: { workspace: { id: "workspace-1" }, instance: { hostname: "controller.example.test" } } } }),
-    useQuerySupportCustomerConversationsSwr: () => ({ data: { ok: true, data: { nodes: [], nextCursor: null } }, isLoading: false }),
-    useQuerySupportCustomerMessagesSwr: () => ({ data: { ok: true, data: { nodes: [], nextCursor: null } }, isLoading: false }),
     useQuerySupportImportantFactsSwr: () => ({ data: { ok: true, data: { nodes: [], nextCursor: null } }, isLoading: false }),
     useQuerySupportTicketsSwr: () => ({ data: { ok: true, data: { nodes: [], nextCursor: null } }, isLoading: false }),
     useMutateManageAgentosModuleRuntimeSwr: () => ({ trigger: mocks.runtimeTrigger }),
     useMutateRunAgentosModuleTestSwr: () => ({ trigger: mocks.testTrigger }),
     useMutateConfigureAgentWorkspaceChannelSwr: () => ({ trigger: mocks.channelTrigger }),
-    useMutateApproveSupportReplySwr: () => ({ trigger: mocks.approveTrigger }),
-    useMutateSetSupportTakeoverSwr: () => ({ trigger: mocks.takeoverTrigger }),
-    useMutateReconcileSupportDeliverySwr: () => ({ trigger: mocks.deliveryTrigger }),
     useMutateStartChatbotZaloOauthSwr: () => ({ trigger: mocks.chatbotTrigger }),
     useMutateSetChatbotHandoffSwr: () => ({ trigger: mocks.chatbotTrigger }),
     useMutateResolveChatbotHandoffSwr: () => ({ trigger: mocks.chatbotTrigger }),
@@ -324,18 +319,12 @@ describe("AgentOSSolutionModulePage projections", () => {
             expect(mocks.runtimeTrigger).toHaveBeenLastCalledWith({ action: "CREATE_EXECUTE_SESSION", installationId: "installation-1", idempotencyKey: expect.any(String), title: "Conversation 2" })
             view.unmount()
         })
-        it("forwards raw widget and customer mutations through the connected operate owner", async () => {
+        it("forwards raw widget mutations through the connected operate owner", async () => {
             const view = render(<AgentOSSolutionModulePage locale={locale} workspaceId="workspace-1" installationId="installation-1" view="operate" />)
             const operate = () => mocks.pageProps!.screen.contentProps as unknown as Extract<AgentOSSolutionModuleScreen, { view: "operate" }>["contentProps"]
             await act(async () => { operate().onWidgetAction("widget/raw", "open-task", { taskId: "task/raw" }, 7) })
             expect(mocks.runtimeTrigger).toHaveBeenLastCalledWith({ action: "INVOKE_WIDGET_ACTION", installationId: "installation-1", idempotencyKey: expect.any(String), widgetId: "widget/raw", widgetAction: "open-task", widgetInput: { taskId: "task/raw" }, taskExpectedVersion: 7 })
             expect(operate().operationTarget).toBe("internal-workbench")
-            await act(async () => { operate().onApproveSupportReply("decision/raw") })
-            await act(async () => { operate().onSetSupportTakeover("conversation/raw", true) })
-            await act(async () => { operate().onReconcileSupportDelivery("outbox/raw", false) })
-            expect(mocks.approveTrigger).toHaveBeenCalledExactlyOnceWith("decision/raw")
-            expect(mocks.takeoverTrigger).toHaveBeenCalledExactlyOnceWith({ conversationId: "conversation/raw", takeover: true })
-            expect(mocks.deliveryTrigger).toHaveBeenCalledExactlyOnceWith({ outboxId: "outbox/raw", delivered: false })
             view.unmount()
         })
         it("preserves raw snapshot facts when no facts array or summary is supplied", () => {

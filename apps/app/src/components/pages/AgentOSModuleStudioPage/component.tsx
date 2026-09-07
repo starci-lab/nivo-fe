@@ -5,7 +5,6 @@ import { createContext, useContext, type ComponentType } from "react";
 import { Breadcrumbs, TileIcon } from "@nivo/ui";
 import type { AgentosModuleStudio } from "@/modules/api/console";
 import { AgentOSModuleAttachments } from "@/components/blocks/agentos/AgentOSModuleAttachments";
-import { AgentOSModuleIntegrations } from "@/components/blocks/agentos/AgentOSModuleIntegrations";
 import { AgentOSModuleInterview } from "@/components/blocks/agentos/AgentOSModuleInterview";
 import { AgentOSModuleProfile } from "@/components/blocks/agentos/AgentOSModuleProfile";
 import { AgentOSModuleSpecification } from "@/components/blocks/agentos/AgentOSModuleSpecification";
@@ -81,7 +80,6 @@ export const AgentOSModuleStudioPageBase = (props: AgentOSModuleStudioPageProps)
 
 
   <Heading level={2}>{labels.sections}</Heading><>
-    <div>{<div>{[<AgentOSModuleInterview key="item-0" workspaceId={workspaceId} moduleId={moduleId} />, <AgentOSModuleSpecification key="item-1" workspaceId={workspaceId} moduleId={moduleId} />]}</div>}{<div>{[<AgentOSModuleProfile key="item-0" workspaceId={workspaceId} moduleId={moduleId} />, <AgentOSModuleAttachments key="item-1" workspaceId={workspaceId} moduleId={moduleId} />, <AgentOSModuleIntegrations key="item-2" workspaceId={workspaceId} moduleId={moduleId} />]}</div>}</div>
+    <div>{<div>{[<AgentOSModuleInterview key="item-0" workspaceId={workspaceId} moduleId={moduleId} />, <AgentOSModuleSpecification key="item-1" workspaceId={workspaceId} moduleId={moduleId} />]}</div>}{<div>{[<AgentOSModuleProfile key="item-0" workspaceId={workspaceId} moduleId={moduleId} />, <AgentOSModuleAttachments key="item-1" workspaceId={workspaceId} moduleId={moduleId} />]}</div>}</div>
   </></div>;
 };
-
