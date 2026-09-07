@@ -86,6 +86,10 @@ describe("AccountingWorkbenchBlock adverse states", () => {
     expect(screen.getByText("ledgerBalance")).toBeTruthy();
     expect(container.querySelector("#accounting-classification")?.className).toContain("min-h-11");
     expect(container.querySelector("#accounting-document-month")?.className).toContain("min-h-11");
+    expect(screen.getByRole("button", { name: "chooseEvidenceFile" }).className).toContain("button--lg");
+    expect(screen.getByRole("button", { name: "addDocument" }).className).toContain("button--lg");
+    expect(screen.getByRole("button", { name: "closePeriodAction" }).className).toContain("button--lg");
+    expect(screen.getByRole("button", { name: "submitCorrection" }).className).toContain("button--lg");
     expect(screen.getByText("draft.pdf")).toBeTruthy();
     expect(screen.getByText("late adjustment")).toBeTruthy();
     expect(screen.getByText(/reconciliationDifference/)).toBeTruthy();
