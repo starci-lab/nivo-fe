@@ -48,8 +48,8 @@ describe("console API interaction wrappers", () => {
             prepareAgentosModuleAttachmentUpload({ agentWorkspaceId: "workspace-1", moduleId: "module-1", fileName: "playbook.pdf", mediaType: "application/pdf", sizeBytes: 42 }),
             finalizeAgentosModuleAttachment({ agentWorkspaceId: "workspace-1", moduleId: "module-1", attachmentId: "attachment-1" }),
             removeAgentosModuleAttachment({ agentWorkspaceId: "workspace-1", moduleId: "module-1", attachmentId: "attachment-1" }),
-            saveAgentosModuleIntegrationSecret({ agentWorkspaceId: "workspace-1", moduleId: "module-1", providerKey: "helpdesk-api", secret: "secret-value" }),
-            removeAgentosModuleIntegrationSecret({ agentWorkspaceId: "workspace-1", moduleId: "module-1", providerKey: "helpdesk-api" }),
+            saveAgentosModuleIntegrationSecret({ agentWorkspaceId: "workspace-1", moduleId: "module-1", providerKey: "crm-api", secret: "secret-value" }),
+            removeAgentosModuleIntegrationSecret({ agentWorkspaceId: "workspace-1", moduleId: "module-1", providerKey: "crm-api" }),
             publishAgentosCustomModule({ agentWorkspaceId: "workspace-1", moduleId: "module-1", acknowledgedVersion: 3, idempotencyKey: "publish-1" }),
         ])
         expect(graphql.mock.calls.length).toBeGreaterThan(50)

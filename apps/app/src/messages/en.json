@@ -563,18 +563,6 @@
             "refusedStatus": "Refused",
             "removed": "Removed"
           },
-          "integrations": {
-            "title": "Integrations",
-            "provider": "Helpdesk API",
-            "field": "Integration key",
-            "placeholder": "Paste a new write-only key",
-            "save": "Configure key",
-            "remove": "Remove",
-            "refused": "Integration status is unavailable.",
-            "writeOnly": "Nivo encrypts the submitted value and returns only a masked hint.",
-            "reveal": "Reveal key",
-            "hide": "Hide key"
-          },
           "specification": {
             "title": "Review specification",
             "refused": "The specification could not be read.",

@@ -9,7 +9,7 @@ import type { ExecuteSession } from "@/components/blocks/agentos/ExecuteSessionR
 import type { AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteShellBlock";
 import type { SetupMessage, SetupRevision } from "@/components/blocks/agentos/PrivateSetupChatBlock";
 import { AgentOSSolutionModuleAttachments } from "@/components/blocks/agentos/AgentOSSolutionModuleAttachments";
-import { useQueryChatbotWorkbenchSwr, useQueryMyAgentosModuleRuntimeSwr, useQueryMyAgentosModuleTestSurfaceSwr, useQueryMyAgentWorkspaceControlCenterSwr, useQuerySupportCustomerConversationsSwr, useQuerySupportCustomerMessagesSwr, useQuerySupportImportantFactsSwr, useQuerySupportTicketsSwr, useReadMyAgentosModuleTestRun, useMutateApproveSupportReplySwr, useMutateConfigureAgentWorkspaceChannelSwr, useMutateManageAgentosModuleRuntimeSwr, useMutateReconcileChatbotDeliverySwr, useMutateReconcileSupportDeliverySwr, useMutateResolveChatbotHandoffSwr, useMutateRunAgentosModuleTestSwr, useMutateSetChatbotHandoffSwr, useMutateSetSupportTakeoverSwr, useMutateStartChatbotZaloOauthSwr } from "@/hooks";
+import { useQueryChatbotWorkbenchSwr, useQueryMyAgentosModuleRuntimeSwr, useQueryMyAgentosModuleTestSurfaceSwr, useQueryMyAgentWorkspaceControlCenterSwr, useReadMyAgentosModuleTestRun, useMutateConfigureAgentWorkspaceChannelSwr, useMutateManageAgentosModuleRuntimeSwr, useMutateReconcileChatbotDeliverySwr, useMutateResolveChatbotHandoffSwr, useMutateRunAgentosModuleTestSwr, useMutateSetChatbotHandoffSwr, useMutateStartChatbotZaloOauthSwr } from "@/hooks";
 import { type AgentosModuleRuntime, type AgentosRuntimeManifest, type AgentosRuntimeValue, type ManageAgentosModuleRuntimeInput } from "@/modules/api/console";
 import { nivoQueryData, type NivoQueryAnswer } from "@/modules/query";
 import { AgentOSSolutionModulePageBase, AgentOSSolutionModuleState, buildModulePageCopy, exactTestSurfaceFor, type ModulePageCopy, type AgentOSSolutionModulePageViewProps, type AgentOSSolutionModuleScreen } from "./component";
@@ -203,14 +203,10 @@ const controllerHostnameForWorkspace = (answer: NivoQueryAnswer<{
   // An owned workspace with no instance yet has no controller to name.
   return candidate?.workspace.id === workspaceId ? candidate.instance?.hostname ?? null : null;
 };
-const queryNodes = <T,>(answer: NivoQueryAnswer<{
-  readonly nodes: ReadonlyArray<T>;
-}> | undefined): ReadonlyArray<T> => nivoQueryData(answer)?.nodes ?? [];
 const selectedIdentity = <T extends {
   readonly id: string;
 },>(rows: ReadonlyArray<T>, selectedId: string | null): string | null => rows.some(row => row.id === selectedId) ? selectedId : rows[0]?.id ?? null;
 const moduleQueriesRefused = (runtimeAnswer: NivoQueryAnswer<AgentosModuleRuntime> | undefined, runtime: AgentosModuleRuntime | null, testAnswer: NivoQueryAnswer<unknown> | undefined): boolean => runtimeAnswer?.ok === false || runtimeAnswer !== undefined && runtime === null || testAnswer?.ok === false;
-const anyQueryRefused = (answers: ReadonlyArray<NivoQueryAnswer<unknown> | undefined>): boolean => answers.some(answer => answer?.ok === false);
 
 /** Connect one stable module shell to its persistent backend runtime and separate task URLs. */
 export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps) => {
@@ -265,16 +261,14 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
   const refused = actionRefused || moduleQueriesRefused(runtimeQuery.data, runtime, testSurfaceQuery.data);
   const isChatbotInstallation = runtime !== null && ["chatbot", "agentos-chatbot", "multichannel-chatbot"].includes(runtime.installation.moduleKey);
   const chatbotEnabled = view === "operate" && isChatbotInstallation;
-  const supportEnabled = view === "operate" && runtime?.installation.kindKey === "customer-support" && !isChatbotInstallation;
-  const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId, chatbotEnabled || supportEnabled);
+  const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId, chatbotEnabled);
   const controllerHostname = controllerHostnameForWorkspace(controlCenter.data, workspaceId);
-  const supportIdentity = {
+  const chatbotIdentity = {
     hostname: controllerHostname,
     workspaceId,
     installationId,
-    enabled: supportEnabled
+    enabled: chatbotEnabled
   };
-  const chatbotIdentity = { ...supportIdentity, enabled: chatbotEnabled };
   const chatbotQuery = useQueryChatbotWorkbenchSwr(chatbotIdentity);
   const chatbotWorkbench = nivoQueryData(chatbotQuery.data) ?? null;
   const chatbotRefusedCode = chatbotQuery.data?.ok === false ? chatbotQuery.data.code : null;
@@ -282,27 +276,9 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
   const setChatbotHandoffMutation = useMutateSetChatbotHandoffSwr(chatbotIdentity);
   const resolveChatbotHandoffMutation = useMutateResolveChatbotHandoffSwr(chatbotIdentity);
   const reconcileChatbotDeliveryMutation = useMutateReconcileChatbotDeliverySwr(chatbotIdentity);
-  const conversationsQuery = useQuerySupportCustomerConversationsSwr(supportIdentity);
-  const ticketsQuery = useQuerySupportTicketsSwr(supportIdentity);
-  const factsQuery = useQuerySupportImportantFactsSwr(supportIdentity);
-  const supportMutationIdentity = {
-    ...supportIdentity,
-    conversationId: selectedSupportConversationId
-  };
-  const approveSupportMutation = useMutateApproveSupportReplySwr(supportMutationIdentity);
-  const takeoverMutation = useMutateSetSupportTakeoverSwr(supportMutationIdentity);
-  const deliveryMutation = useMutateReconcileSupportDeliverySwr(supportMutationIdentity);
   const readTestRun = useReadMyAgentosModuleTestRun(installationId);
-  const supportConversations = queryNodes(conversationsQuery.data);
-  const effectiveSupportConversationId = chatbotEnabled
-    ? selectedIdentity(chatbotWorkbench?.conversations ?? [], selectedSupportConversationId)
-    : selectedIdentity(supportConversations, selectedSupportConversationId);
-  const messagesQuery = useQuerySupportCustomerMessagesSwr(supportIdentity, effectiveSupportConversationId);
-  const supportMessages = queryNodes(messagesQuery.data);
-  const supportTicketsState = queryNodes(ticketsQuery.data);
-  const supportFacts = queryNodes(factsQuery.data);
-  const supportPending = supportActionPending || chatbotQuery.isLoading || [conversationsQuery, ticketsQuery, factsQuery, messagesQuery].some(query => query.isLoading);
-  const supportRefused = supportActionRefused || anyQueryRefused([controlCenter.data, chatbotQuery.data, conversationsQuery.data, ticketsQuery.data, factsQuery.data, messagesQuery.data]);
+  const effectiveSupportConversationId = selectedIdentity(chatbotWorkbench?.conversations ?? [], selectedSupportConversationId);
+  const supportPending = supportActionPending || chatbotQuery.isLoading;
   useEffect(() => {
     if (runtime === null) return;
     if (selectedSessionId !== null && runtime.executeSessions.some(item => item.id === selectedSessionId)) return;
@@ -578,21 +554,6 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     setSupportActionPending(false);
     setSupportActionRefused(!result.ok);
   }, []);
-  const approveSupportReply = useCallback((decisionId: string) => {
-    void runSupportAction(() => approveSupportMutation.trigger(decisionId));
-  }, [approveSupportMutation, runSupportAction]);
-  const setSupportTakeover = useCallback((conversationId: string, takeover: boolean) => {
-    void runSupportAction(() => takeoverMutation.trigger({
-      conversationId,
-      takeover
-    }));
-  }, [runSupportAction, takeoverMutation]);
-  const reconcileSupportDelivery = useCallback((outboxId: string, delivered: boolean) => {
-    void runSupportAction(() => deliveryMutation.trigger({
-      outboxId,
-      delivered
-    }));
-  }, [deliveryMutation, runSupportAction]);
   const connectChatbotZalo = useCallback(() => {
     void runSupportAction(async () => {
       const answer = await startZaloOauthMutation.trigger({ installationId, requestToken: idempotencyKey() });
@@ -723,15 +684,10 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
   const channelAccountRef = runtime.installation.channelAccountRef ?? null;
   const canEnableLive = activeVersion !== null && channelAccountRef !== null && hasTelegramCredential;
   const supportInbox = {
-    conversations: supportConversations,
     selectedConversationId: effectiveSupportConversationId,
-    messages: supportMessages,
-    tickets: supportTicketsState,
-    facts: supportFacts,
-    pending: supportPending,
-    refused: supportRefused
+    pending: supportPending
   };
-  const operationTarget = selectedOperationTarget ?? (runtime.installation.kindKey === "customer-support" ? "customer-chat" : "internal-chat");
+  const operationTarget = selectedOperationTarget ?? "internal-chat";
   const shell: AgentOSSolutionModulePageViewProps["shell"] = {
     workspaceLabel: copy.shell.workspace({ id: workspaceId.slice(0, 8) }),
     moduleName: displayName,
@@ -817,9 +773,6 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
             if (actionKey === "open-task") setSelectedOperationTarget("internal-workbench");
           },
           onSelectSupportConversation: setSelectedSupportConversationId,
-          onApproveSupportReply: approveSupportReply,
-          onSetSupportTakeover: setSupportTakeover,
-          onReconcileSupportDelivery: reconcileSupportDelivery,
           onConnectChatbotZalo: connectChatbotZalo,
           onSetChatbotHandoff: setChatbotHandoff,
           onResolveChatbotHandoff: resolveChatbotHandoff,

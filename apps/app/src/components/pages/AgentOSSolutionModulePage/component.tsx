@@ -12,12 +12,9 @@ import { DEFAULT_TEST_WORKBENCH_REGISTRY, KindTestWorkbenchBlock } from "@/compo
 import { ModuleCockpitRailBlock } from "@/components/blocks/agentos/ModuleCockpitRailBlock";
 import { ModuleRouteShellBlock, type AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteShellBlock";
 import { PrivateSetupChatBlock, type SetupMessage, type SetupRevision } from "@/components/blocks/agentos/PrivateSetupChatBlock";
-import { SupportCustomerChatBlock } from "@/components/blocks/agentos/SupportCustomerChatBlock";
-import { SupportCustomerConversationRailBlock } from "@/components/blocks/agentos/SupportCustomerConversationRailBlock";
-import { SupportQueueWorkbenchBlock } from "@/components/blocks/agentos/SupportQueueWorkbenchBlock";
 import { TestTrustResultBlock } from "@/components/blocks/agentos/TestTrustResultBlock";
 import type { AgentosModuleRuntime, AgentosModuleTestContract, AgentosModuleTestSurface, AgentosRuntimeValue } from "@/modules/api/console";
-import type { ChatbotWorkbench, SupportCustomerConversation, SupportCustomerMessage, SupportImportantFact, SupportTicket } from "@/modules/api/workspace-controlplane";
+import type { ChatbotWorkbench } from "@/modules/api/workspace-controlplane";
 import { AGENTOS_SETUP_SURFACE_CLASS_NAME, CONTEXT_BAND_CLASS_NAME, CONTEXT_RAISED_BAND_CLASS_NAME } from "./classNames";
 /** Catalog keys resolved only by the connected owner or a real-provider fixture. */
 export type ModulePageMessageKey =
@@ -1067,13 +1064,8 @@ const credentialStatusLabel = (status: string, copy: ModulePageCopy): string => 
 /** Shell and screen contract resolved by the connected module route. */
 export type AgentOSSolutionModulePageProps = AgentOSSolutionModulePageViewProps;
 type AgentOSSolutionModuleSupportInbox = {
-  readonly conversations: ReadonlyArray<SupportCustomerConversation>;
   readonly selectedConversationId: string | null;
-  readonly messages: ReadonlyArray<SupportCustomerMessage>;
-  readonly tickets: ReadonlyArray<SupportTicket>;
-  readonly facts: ReadonlyArray<SupportImportantFact>;
   readonly pending: boolean;
-  readonly refused: boolean;
 };
 
 /** Keep compact pane visibility in Grammar while callers supply only typed ComponentTypes and props. */
@@ -1306,18 +1298,13 @@ type OperateSurfaceProps = {
   readonly onSend: (content: string) => void;
   readonly onWidgetAction: NonNullable<TrustedWidgetComponentProps["onAction"]>;
   readonly onSelectSupportConversation: (conversationId: string) => void;
-  readonly onApproveSupportReply: (decisionId: string) => void;
-  readonly onSetSupportTakeover: (conversationId: string, takeover: boolean) => void;
-  readonly onReconcileSupportDelivery: (outboxId: string, delivered: boolean) => void;
   readonly onConnectChatbotZalo: () => void;
   readonly onSetChatbotHandoff: (conversationId: string) => void;
   readonly onResolveChatbotHandoff: (conversationId: string) => void;
   readonly onReconcileChatbotDelivery: (outboxId: string, delivered: boolean) => void;
 };
-const chatPane = (props: WithModulePageCopy<OperateSurfaceProps>) => <div>{props.operationTarget.startsWith("customer-") ? <SupportCustomerChatBlock copy={props.copy} conversation={props.supportInbox.conversations.find(item => item.id === props.supportInbox.selectedConversationId) ?? null} messages={props.supportInbox.messages} pending={props.supportInbox.pending} refused={props.supportInbox.refused} onApprove={props.onApproveSupportReply} onTakeover={props.onSetSupportTakeover} onReconcile={props.onReconcileSupportDelivery} /> : <ExecuteChatBlock copy={props.copy} sessionTitle={props.selectedSessionTitle} messages={props.messages} pending={props.pending} refused={props.refused} registry={DEFAULT_WIDGET_REGISTRY} onSend={props.onSend} onWidgetAction={props.onWidgetAction} />}</div>;
-const chatPaneWideOnly = (props: WithModulePageCopy<OperateSurfaceProps>) => <div>{props.operationTarget.startsWith("customer-") ? <SupportCustomerChatBlock copy={props.copy} conversation={props.supportInbox.conversations.find(item => item.id === props.supportInbox.selectedConversationId) ?? null} messages={props.supportInbox.messages} pending={props.supportInbox.pending} refused={props.supportInbox.refused} onApprove={props.onApproveSupportReply} onTakeover={props.onSetSupportTakeover} onReconcile={props.onReconcileSupportDelivery} /> : <ExecuteChatBlock copy={props.copy} sessionTitle={props.selectedSessionTitle} messages={props.messages} pending={props.pending} refused={props.refused} registry={DEFAULT_WIDGET_REGISTRY} onSend={props.onSend} onWidgetAction={props.onWidgetAction} />}</div>;
-const workbenchPane = (props: WithModulePageCopy<OperateSurfaceProps>) => <div>{props.operationTarget.startsWith("customer-") ? <SupportQueueWorkbenchBlock copy={props.copy} tickets={props.supportInbox.tickets} facts={props.supportInbox.facts} selectedConversationId={props.supportInbox.selectedConversationId} pending={props.supportInbox.pending} /> : <KindWorkbenchBlock copy={props.copy} moduleId={props.installationId} kindKey={props.kindKey} workbenchKey={props.workbenchKey} workbenchVersion={props.workbenchVersion} tasks={props.tasks} events={props.events} registry={DEFAULT_WORKBENCH_REGISTRY} />}</div>;
-const workbenchPaneWideOnly = (props: WithModulePageCopy<OperateSurfaceProps>) => <div>{props.operationTarget.startsWith("customer-") ? <SupportQueueWorkbenchBlock copy={props.copy} tickets={props.supportInbox.tickets} facts={props.supportInbox.facts} selectedConversationId={props.supportInbox.selectedConversationId} pending={props.supportInbox.pending} /> : <KindWorkbenchBlock copy={props.copy} moduleId={props.installationId} kindKey={props.kindKey} workbenchKey={props.workbenchKey} workbenchVersion={props.workbenchVersion} tasks={props.tasks} events={props.events} registry={DEFAULT_WORKBENCH_REGISTRY} />}</div>;
+const chatPane = (props: WithModulePageCopy<OperateSurfaceProps>) => <div><ExecuteChatBlock copy={props.copy} sessionTitle={props.selectedSessionTitle} messages={props.messages} pending={props.pending} refused={props.refused} registry={DEFAULT_WIDGET_REGISTRY} onSend={props.onSend} onWidgetAction={props.onWidgetAction} /></div>;
+const workbenchPane = (props: WithModulePageCopy<OperateSurfaceProps>) => <div><KindWorkbenchBlock copy={props.copy} moduleId={props.installationId} kindKey={props.kindKey} workbenchKey={props.workbenchKey} workbenchVersion={props.workbenchVersion} tasks={props.tasks} events={props.events} registry={DEFAULT_WORKBENCH_REGISTRY} /></div>;
 const OperateSurface = (props: WithModulePageCopy<OperateSurfaceProps>) => { const { copy } = props; if (props.isChatbot) return <ChatbotWorkbenchBlock installationId={props.installationId} workbench={props.chatbotWorkbench} selectedConversationId={props.supportInbox.selectedConversationId} pending={props.supportInbox.pending} refusedCode={props.chatbotRefusedCode} copy={copy.chatbot} onSelectConversation={props.onSelectSupportConversation} onConnectZalo={props.onConnectChatbotZalo} onSetHandoff={props.onSetChatbotHandoff} onResolveHandoff={props.onResolveChatbotHandoff} onReconcile={props.onReconcileChatbotDelivery} />; return (<div><div>
 
 
@@ -1325,19 +1312,7 @@ const OperateSurface = (props: WithModulePageCopy<OperateSurfaceProps>) => { con
     <RouteTabs props={{
       label: copy.operate.view,
       selectedKey: props.operationTarget,
-      tabs: props.kindKey === "customer-support" ? [{
-        id: "customer-chat",
-        label: copy.operate.customers
-      }, {
-        id: "customer-workbench",
-        label: copy.operate.customerQueue
-      }, {
-        id: "internal-chat",
-        label: copy.operate.internalChat
-      }, {
-        id: "internal-workbench",
-        label: copy.operate.internalWorkbench
-      }] : [{
+      tabs: [{
         id: "internal-chat",
         label: copy.operate.chat
       }, {
@@ -1346,7 +1321,7 @@ const OperateSurface = (props: WithModulePageCopy<OperateSurfaceProps>) => { con
       }]
     }} on={{
       select: key => props.onSelectTarget(key as OperateSurfaceProps["operationTarget"])
-    }} /></div>{props.operationTarget.startsWith("customer-") ? <SupportCustomerConversationRailBlock copy={props.copy} conversations={props.supportInbox.conversations} selectedId={props.supportInbox.selectedConversationId} pending={props.supportInbox.pending} onSelect={props.onSelectSupportConversation} /> : <ExecuteSessionRailBlock copy={props.copy} sessions={props.sessions} selectedId={props.selectedSessionId} pending={props.pending} onSelect={props.onSelectSession} onCreate={props.onCreateSession} />}{props.operationTarget.endsWith("-chat") ? chatPane(props) : chatPaneWideOnly(props)}{props.operationTarget.endsWith("-workbench") ? workbenchPane(props) : workbenchPaneWideOnly(props)}</div>); };
+    }} /></div><ExecuteSessionRailBlock copy={props.copy} sessions={props.sessions} selectedId={props.selectedSessionId} pending={props.pending} onSelect={props.onSelectSession} onCreate={props.onCreateSession} />{chatPane(props)}{workbenchPane(props)}</div>); };
 type SettingsFormContentProps = {
   readonly currentDisplayName: string;
   readonly currentModelProfile: string;
