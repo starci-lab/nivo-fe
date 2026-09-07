@@ -1688,7 +1688,9 @@ const DiagnosticsSurface = ({
 export const exactTestSurfaceFor = (testSurface: AgentosModuleTestSurface | null, draft: ContextDraft | null): AgentosModuleTestSurface | null => {
   if (draft?.digest === null || draft === null || draft.definitionDigest === null || testSurface?.run === null || testSurface === null) return null;
   const run = testSurface.run;
-  return run.setupSessionId === draft.setupSessionId && run.draftDigest === draft.digest
+  const exactTarget = run.contextVersionId === draft.contextId
+    || run.setupSessionId === draft.setupSessionId && run.draftDigest === draft.digest;
+  return exactTarget
     && run.definitionDigest === draft.definitionDigest && run.targetDigest === draft.digest
     && run.authorityGeneration === draft.authorityGeneration && run.sourceGeneration === draft.sourceGeneration
     && run.retrievalGeneration === draft.retrievalGeneration ? testSurface : null;
