@@ -27,6 +27,8 @@ export type ModulePageMessageKey =
   | "runtime.chatbot.channels"
   | "runtime.chatbot.connectZalo"
   | "runtime.chatbot.conversations"
+  | "runtime.chatbot.openConversations"
+  | "runtime.chatbot.closeConversations"
   | "runtime.chatbot.delivered"
   | "runtime.chatbot.failed"
   | "runtime.chatbot.humanHandoff"
@@ -45,6 +47,7 @@ export type ModulePageMessageKey =
   | "runtime.chatbot.requestHandoff"
   | "runtime.chatbot.resolveHandoff"
   | "runtime.chatbot.selectConversation"
+  | "runtime.chatbot.selected"
   | "runtime.chatbot.title"
   | "runtime.conversations.synced"
   | "runtime.conversations.syncing"
@@ -542,6 +545,8 @@ export const buildModulePageCopy = (t: ModulePageTranslator) => ({
     "channels": t("runtime.chatbot.channels"),
     "connectZalo": t("runtime.chatbot.connectZalo"),
     "conversations": t("runtime.chatbot.conversations"),
+    "openConversations": t("runtime.chatbot.openConversations"),
+    "closeConversations": t("runtime.chatbot.closeConversations"),
     "delivered": t("runtime.chatbot.delivered"),
     "failed": t("runtime.chatbot.failed"),
     "humanHandoff": t("runtime.chatbot.humanHandoff"),
@@ -560,6 +565,7 @@ export const buildModulePageCopy = (t: ModulePageTranslator) => ({
     "requestHandoff": t("runtime.chatbot.requestHandoff"),
     "resolveHandoff": t("runtime.chatbot.resolveHandoff"),
     "selectConversation": t("runtime.chatbot.selectConversation"),
+    "selected": t("runtime.chatbot.selected"),
     "title": t("runtime.chatbot.title"),
   },
   "conversations": {
