@@ -81,7 +81,11 @@ describe("AccountingWorkbenchBlock adverse states", () => {
 
   it("renders loaded business facts and dispatches owner document actions", () => {
     const documentCommand = vi.fn();
-    render(<AccountingWorkbenchBlockBase view={view({ documentCommand })} />);
+    const { container } = render(<AccountingWorkbenchBlockBase view={view({ documentCommand })} />);
+    expect(screen.getByText("appliedSetup")).toBeTruthy();
+    expect(screen.getByText("ledgerBalance")).toBeTruthy();
+    expect(container.querySelector("#accounting-classification")?.className).toContain("min-h-11");
+    expect(container.querySelector("#accounting-document-month")?.className).toContain("min-h-11");
     expect(screen.getByText("draft.pdf")).toBeTruthy();
     expect(screen.getByText("late adjustment")).toBeTruthy();
     expect(screen.getByText(/reconciliationDifference/)).toBeTruthy();

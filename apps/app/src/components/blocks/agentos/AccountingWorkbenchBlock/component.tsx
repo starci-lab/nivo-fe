@@ -2,7 +2,7 @@ import { useRef, type ChangeEvent, type ReactNode } from "react";
 import { Badge, Button, EmptyNotice, Heading, Input, PrimaryRailLayout, SectionHeader, SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common";
 import type { AccountingCorrection, AccountingDocument } from "@/modules/api/accounting";
 import { accountingDocumentAction, accountingNoticeLive, formatMinorCurrency, maskParticipantId, type AccountingNotice, type useAccountingWorkbench } from "./useAccountingWorkbench";
-import { ACCOUNTING_ACTION_ROW_CLASS_NAME, ACCOUNTING_FIELD_STACK_CLASS_NAME, ACCOUNTING_NATIVE_CONTROL_CLASS_NAME, ACCOUNTING_NATIVE_FIELD_CLASS_NAME, ACCOUNTING_ROW_CLASS_NAME, ACCOUNTING_WORKBENCH_CLASS_NAME } from "./classNames";
+import { ACCOUNTING_ACTION_ROW_CLASS_NAME, ACCOUNTING_FIELD_STACK_CLASS_NAME, ACCOUNTING_FORM_FULL_SPAN_CLASS_NAME, ACCOUNTING_FORM_GRID_CLASS_NAME, ACCOUNTING_NATIVE_CONTROL_CLASS_NAME, ACCOUNTING_NATIVE_FIELD_CLASS_NAME, ACCOUNTING_OPERATIONS_GRID_CLASS_NAME, ACCOUNTING_ROW_CLASS_NAME, ACCOUNTING_SUMMARY_GRID_CLASS_NAME, ACCOUNTING_WORKBENCH_CLASS_NAME } from "./classNames";
 
 const unsignedVersion = /^\d+$/;
 type ChildrenProps = { readonly children: ReactNode };
@@ -62,13 +62,15 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
   const primary = <FieldStack>
     <SectionHeader level={2} title={t("title")} description={t("description")} />
     <SurfaceCard label={t("statementSnapshot")} fact={model === undefined ? undefined : t("ledgerVersion", { version: model.ledgerVersion })}>
-      <FieldStack>
-        <ActionRow><Badge tone={isAsOf ? "warning" : "neutral"}>{isAsOf ? t("asOfMode", { version: ledgerVersion }) : t("currentMode")}</Badge>{role === undefined ? null : <Badge tone="neutral">{t(`role.${role}`)}</Badge>}<Badge tone="neutral">{currency}</Badge></ActionRow>
-        <Input id="accounting-ledger-version" name="accounting-ledger-version" label={t("asOfVersion")} hint={t("asOfHint")} value={asOfDraft} onValueChange={setAsOfDraft} />
-        <ActionRow><Button variant="secondary" isDisabled={asOfDraft.length === 0 || !unsignedVersion.test(asOfDraft)} onPress={() => setLedgerVersion(asOfDraft)}>{t("viewAsOf")}</Button><Button variant="ghost" isDisabled={!isAsOf} onPress={() => { setLedgerVersion(undefined); setAsOfDraft(""); }}>{t("returnCurrent")}</Button></ActionRow>
-        {isAsOf ? <Text tone="accent" live="polite">{t("historicalAdvisory")}</Text> : null}
-        <Heading level={3}>{model === undefined ? t("loadingAmount") : formatAmount(model.ledgerAmountMinor, model.currency)}</Heading>
-      </FieldStack>
+      <div className={ACCOUNTING_SUMMARY_GRID_CLASS_NAME}>
+        <FieldStack>
+          <ActionRow><Badge tone={isAsOf ? "warning" : "neutral"}>{isAsOf ? t("asOfMode", { version: ledgerVersion }) : t("currentMode")}</Badge>{context.data?.ok === true ? <Badge tone="success">{t("appliedSetup")}</Badge> : null}{role === undefined ? null : <Badge tone="neutral">{t(`role.${role}`)}</Badge>}<Badge tone="neutral">{currency}</Badge></ActionRow>
+          <Input id="accounting-ledger-version" name="accounting-ledger-version" label={t("asOfVersion")} hint={t("asOfHint")} value={asOfDraft} onValueChange={setAsOfDraft} />
+          <ActionRow><Button variant="secondary" isDisabled={asOfDraft.length === 0 || !unsignedVersion.test(asOfDraft)} onPress={() => setLedgerVersion(asOfDraft)}>{t("viewAsOf")}</Button><Button variant="ghost" isDisabled={!isAsOf} onPress={() => { setLedgerVersion(undefined); setAsOfDraft(""); }}>{t("returnCurrent")}</Button></ActionRow>
+          {isAsOf ? <Text tone="accent" live="polite">{t("historicalAdvisory")}</Text> : null}
+        </FieldStack>
+        <FieldStack><Text size="sm" tone="muted">{t("ledgerBalance")}</Text><Heading level={3}>{model === undefined ? t("loadingAmount") : formatAmount(model.ledgerAmountMinor, model.currency)}</Heading><Text size="xs" tone="muted">{t("immutableBalance")}</Text></FieldStack>
+      </div>
     </SurfaceCard>
     {workbench.error !== undefined ? <div role="alert"><EmptyNotice message={t("transportError")} description={t("nothingChanged")} actionLabel={t("retry")} onAction={() => void workbench.mutate()} /></div> : answer?.ok === false ? <div role="alert"><EmptyNotice message={t("readRefused", { reason: answer.reason })} description={t("nothingChanged")} actionLabel={t("retry")} onAction={() => void workbench.mutate()} /></div> : null}
     <SurfaceListCard label={t("ledger")} fact={model === undefined ? undefined : t("rowCount", { count: model.ledger.length })} isLoading={answer === undefined && workbench.error === undefined}>
@@ -77,22 +79,22 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
     <SurfaceListCard label={t("documents")} fact={model === undefined ? undefined : t("rowCount", { count: model.documents.length })} isLoading={answer === undefined && workbench.error === undefined}>
       {model?.documents.length === 0 ? <EmptyNotice message={t("emptyDocuments")} description={t("emptyDocumentsHint")} /> : model?.documents.map(documentRow)}
     </SurfaceListCard>
-    <SurfaceCard label={t("documentIntake")}><form onSubmit={onIngest}><FieldStack>
-      <Text size="sm" tone={intakeReady || intakeLoading ? "muted" : "accent"} live={intakeLoading ? "polite" : intakeReady ? "polite" : "assertive"}>{intakeLoading ? t("loadingContext") : intakeReady ? t("intakePolicy", { currency, classifications: classifications.map(item => t(`classification${item[0].toUpperCase()}${item.slice(1)}`)).join(", ") }) : t("intakePolicyUnavailable")}</Text>
+    <SurfaceCard label={t("documentIntake")}><form onSubmit={onIngest}><div className={ACCOUNTING_FORM_GRID_CLASS_NAME}>
+      <div className={ACCOUNTING_FORM_FULL_SPAN_CLASS_NAME}><Text size="sm" tone={intakeReady || intakeLoading ? "muted" : "accent"} live={intakeLoading ? "polite" : intakeReady ? "polite" : "assertive"}>{intakeLoading ? t("loadingContext") : intakeReady ? t("intakePolicy", { currency, classifications: classifications.map(item => t(`classification${item[0].toUpperCase()}${item.slice(1)}`)).join(", ") }) : t("intakePolicyUnavailable")}</Text></div>
       <input ref={fileInput} type="file" accept="application/pdf,image/*,.pdf" hidden disabled={!intakeReady || ingest.isMutating} aria-label={t("chooseEvidenceFile")} onChange={chooseFile} />
-      <ActionRow><Button type="button" variant="secondary" isDisabled={!intakeReady} isPending={ingest.isMutating} onPress={() => fileInput.current?.click()}>{fileName.length === 0 ? t("chooseEvidenceFile") : t("replaceEvidenceFile")}</Button><Text size="sm" tone="muted">{fileName.length === 0 ? t("noFileSelected") : t("selectedFile", { name: fileName, size: fileSize })}</Text></ActionRow>
+      <div className={ACCOUNTING_FORM_FULL_SPAN_CLASS_NAME}><ActionRow><Button type="button" variant="secondary" isDisabled={!intakeReady} isPending={ingest.isMutating} onPress={() => fileInput.current?.click()}>{fileName.length === 0 ? t("chooseEvidenceFile") : t("replaceEvidenceFile")}</Button><Text size="sm" tone="muted">{fileName.length === 0 ? t("noFileSelected") : t("selectedFile", { name: fileName, size: fileSize })}</Text></ActionRow></div>
       <label className={ACCOUNTING_NATIVE_FIELD_CLASS_NAME} htmlFor="accounting-classification"><Text size="sm" weight="semibold">{t("classification")}</Text><select className={ACCOUNTING_NATIVE_CONTROL_CLASS_NAME} id="accounting-classification" name="accounting-classification" value={classification} onChange={event => setClassification(event.currentTarget.value)} disabled={!intakeReady} required>{classifications.map(item => <option key={item} value={item}>{t(`classification${item[0].toUpperCase()}${item.slice(1)}`)}</option>)}</select></label>
       <Input id="accounting-document-amount" name="accounting-document-amount" label={t("documentAmount", { currency })} hint={t("currencyAmountHint")} value={documentAmount} onValueChange={setDocumentAmount} isRequired isDisabled={!intakeReady} isError={documentAmount.length > 0 && (documentAmountMinor === null || documentAmountMinor === "0")} errorMessage={t("positiveAmountRequired")} />
       <label className={ACCOUNTING_NATIVE_FIELD_CLASS_NAME} htmlFor="accounting-document-month"><Text size="sm" weight="semibold">{t("documentMonth")}</Text><input className={ACCOUNTING_NATIVE_CONTROL_CLASS_NAME} id="accounting-document-month" name="accounting-document-month" type="month" value={documentMonth} onChange={event => setDocumentMonth(event.currentTarget.value)} disabled={!intakeReady} required /></label>
-      <Button type="submit" variant="primary" isPending={ingest.isMutating} isDisabled={!intakeReady || documentAmountMinor === null || documentAmountMinor === "0" || documentMonth.length === 0 || fileName.length === 0}>{t("addDocument")}</Button>
-    </FieldStack></form></SurfaceCard>
+      <div className={ACCOUNTING_NATIVE_FIELD_CLASS_NAME}><Text size="sm" weight="semibold">{t("intakeAction")}</Text><Button type="submit" variant="primary" isPending={ingest.isMutating} isDisabled={!intakeReady || documentAmountMinor === null || documentAmountMinor === "0" || documentMonth.length === 0 || fileName.length === 0}>{t("addDocument")}</Button></div>
+    </div></form></SurfaceCard>
     <SurfaceListCard label={t("reconciliationHistory")} fact={model === undefined ? undefined : t("rowCount", { count: model.reconciliations.length })} isLoading={answer === undefined && workbench.error === undefined}>
       {model?.reconciliations.length === 0 ? <EmptyNotice message={t("emptyReconciliations")} description={t("emptyReconciliationsHint")} /> : model?.reconciliations.map(item => <Row key={item.id}><Text weight="semibold">{t("reconciliationDifference", { amount: formatAmount(item.differenceMinor, item.currency) })}</Text><Text size="sm">{t("reconciliationValues", { source: formatAmount(item.sourceAmountMinor, item.currency), ledger: formatAmount(item.ledgerAmountMinor, item.currency), version: item.ledgerVersionH })}</Text></Row>)}
     </SurfaceListCard>
-    <SurfaceCard label={t("reconciliationAndClose")}><FieldStack>
-      <form onSubmit={onReconcile}><FieldStack><Input id="accounting-source-amount" name="accounting-source-amount" label={t("sourceAmount", { currency })} hint={t("currencyAmountHintSigned")} value={sourceAmount} onValueChange={setSourceAmount} isRequired isError={sourceAmount.length > 0 && sourceAmountMinor === null} errorMessage={t("validCurrencyRequired")} /><Button type="submit" variant="secondary" isPending={reconcile.isMutating} isDisabled={sourceAmountMinor === null}>{t("reconcile")}</Button></FieldStack></form>
-      <form onSubmit={onClose}><FieldStack><label className={ACCOUNTING_NATIVE_FIELD_CLASS_NAME} htmlFor="accounting-close-month"><Text size="sm" weight="semibold">{t("closeMonth")}</Text><input className={ACCOUNTING_NATIVE_CONTROL_CLASS_NAME} id="accounting-close-month" name="accounting-close-month" type="month" value={closeMonth} onChange={event => setCloseMonth(event.currentTarget.value)} required /></label><Button type="submit" variant="secondary" isPending={close.isMutating} isDisabled={closeMonth.length === 0}>{t("closePeriodAction")}</Button></FieldStack></form>
-    </FieldStack></SurfaceCard>
+    <div className={ACCOUNTING_OPERATIONS_GRID_CLASS_NAME}>
+      <SurfaceCard label={t("reconciliationAndClose")}><form onSubmit={onReconcile}><FieldStack><Input id="accounting-source-amount" name="accounting-source-amount" label={t("sourceAmount", { currency })} hint={t("currencyAmountHintSigned")} value={sourceAmount} onValueChange={setSourceAmount} isRequired isError={sourceAmount.length > 0 && sourceAmountMinor === null} errorMessage={t("validCurrencyRequired")} /><Button type="submit" variant="secondary" isPending={reconcile.isMutating} isDisabled={sourceAmountMinor === null}>{t("reconcile")}</Button></FieldStack></form></SurfaceCard>
+      <SurfaceCard label={t("closePeriodAction")}><form onSubmit={onClose}><FieldStack><label className={ACCOUNTING_NATIVE_FIELD_CLASS_NAME} htmlFor="accounting-close-month"><Text size="sm" weight="semibold">{t("closeMonth")}</Text><input className={ACCOUNTING_NATIVE_CONTROL_CLASS_NAME} id="accounting-close-month" name="accounting-close-month" type="month" value={closeMonth} onChange={event => setCloseMonth(event.currentTarget.value)} required /></label><Button type="submit" variant="secondary" isPending={close.isMutating} isDisabled={closeMonth.length === 0}>{t("closePeriodAction")}</Button></FieldStack></form></SurfaceCard>
+    </div>
   </FieldStack>;
 
   const rail = <FieldStack>
