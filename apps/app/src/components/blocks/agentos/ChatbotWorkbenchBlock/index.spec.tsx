@@ -41,4 +41,13 @@ describe("ChatbotWorkbenchBlock", () => {
     fireEvent.click(screen.getByRole("button", { name: "Connect Zalo" }));
     expect(connect).toHaveBeenCalledOnce();
   });
+
+  it("keeps the Zalo connection action available beside an active Telegram channel", () => {
+    const connect = vi.fn();
+    render(<ChatbotWorkbenchBlock installationId="chatbot-1" workbench={{ ...workbench, channels: [{ ...workbench.channels[0], provider: "telegram", accountRef: "nivodeptrai_bot" }] }} selectedConversationId={null} pending={false} refusedCode={null} copy={copy} onSelectConversation={() => undefined} onConnectZalo={connect} onSetHandoff={() => undefined} onResolveHandoff={() => undefined} onReconcile={() => undefined} />);
+
+    expect(screen.getByText("nivodeptrai_bot")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Connect Zalo" }));
+    expect(connect).toHaveBeenCalledOnce();
+  });
 });
