@@ -53,20 +53,23 @@ describe("workspace control-plane transport", () => {
         }))
     })
 
-    it("qualifies Chatbot workbench reads and reconciliation by installation", async () => {
+    it("routes Chatbot reads and reconciliation through Core without trusting the workspace hostname", async () => {
+        const workspaceId = "f9ad3fac-34b3-4a82-a5f4-dc62782bc472"
         const fetchMock = vi.fn()
-            .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ data: { chatbotWorkbench: { installationId: "chatbot-2", lifecycleState: "active", approvedVersion: 4, channels: [], conversations: [], messages: [] } } }) })
-            .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ data: { reconcileChatbotDelivery: { id: "receipt-1", installationId: "chatbot-2", state: "recorded" } } }) })
+            .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ data: { chatbotWorkspaceWorkbench: { data: { chatbotWorkbench: { installationId: "chatbot-2", lifecycleState: "active", approvedVersion: 4, channels: [], conversations: [], messages: [] } } } } }) })
+            .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ data: { chatbotWorkspaceCommand: { data: { reconcileChatbotDelivery: { id: "receipt-1", installationId: "chatbot-2", state: "recorded" } } } } }) })
         vi.stubGlobal("fetch", fetchMock)
 
-        await chatbotWorkbench("localhost:6068", "workspace-1", "memory-token", "chatbot-2")
-        await reconcileChatbotDelivery("localhost:6068", "workspace-1", "memory-token", { installationId: "chatbot-2", providerOutboxId: "outbox-1", outcome: "failed", requestToken: "request-1" })
+        await chatbotWorkbench("attacker.invalid", workspaceId, "memory-token", "chatbot-2")
+        await reconcileChatbotDelivery("attacker.invalid", workspaceId, "memory-token", { installationId: "chatbot-2", providerOutboxId: "outbox-1", outcome: "failed", requestToken: "request-1" })
 
         const readBody = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body)) as { query: string; variables: unknown }
-        const mutationBody = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)) as { query: string; variables: { input: { installationId: string; providerOutboxId: string } } }
-        expect(readBody.query).toContain("chatbotWorkbench(installationId: $installationId)")
-        expect(readBody.variables).toEqual({ installationId: "chatbot-2" })
-        expect(mutationBody.query).toContain("reconcileChatbotDelivery(input: $input)")
-        expect(mutationBody.variables.input).toMatchObject({ installationId: "chatbot-2", outboxId: "outbox-1", terminalState: "failed", evidenceRef: "operator://manual-reconciliation/outbox-1" })
+        const mutationBody = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)) as { query: string; variables: { request: { installationId: string; operation: string; input: { outboxId: string; terminalState: string; evidenceRef: string } } } }
+        expect(fetchMock.mock.calls[0]?.[0]).toBe("http://localhost:3068/graphql")
+        expect(fetchMock.mock.calls[1]?.[0]).toBe("http://localhost:3068/graphql")
+        expect(readBody.query).toContain("chatbotWorkspaceWorkbench(request: $request)")
+        expect(readBody.variables).toEqual({ request: { workspaceId, installationId: "chatbot-2" } })
+        expect(mutationBody.query).toContain("chatbotWorkspaceCommand(request: $request)")
+        expect(mutationBody.variables.request).toMatchObject({ installationId: "chatbot-2", operation: "reconcile-delivery", input: { outboxId: "outbox-1", terminalState: "failed", evidenceRef: "operator://manual-reconciliation/outbox-1" } })
     })
 })
