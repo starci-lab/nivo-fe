@@ -7,6 +7,7 @@ import { TIME_ZONE } from "@/i18n/config"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import type { ContextDraft } from "@/components/blocks/agentos/ContextVersionBlock"
 import type { AgentosModuleTestContract } from "@/modules/api/console"
+import { SessionProvider } from "@/modules/auth/session"
 import {
     AgentOSSolutionModulePageBase,
     exactTestSurfaceFor,
@@ -46,7 +47,7 @@ const contract: AgentosModuleTestContract = {
 type CopyFixtureProps = Omit<AgentOSSolutionModulePageViewProps, "copy">
 type PageFixtureProps = CopyFixtureProps & { readonly locale: "en" | "vi" }
 const CopyFixture = ({ shell, screen }: CopyFixtureProps) => { const t = useTranslations("console.agentos.modules"); return <AgentOSSolutionModulePageBase shell={shell} screen={screen} copy={buildModulePageCopy(t)} /> }
-const PageFixture = ({ shell, screen, locale }: PageFixtureProps) => <NextIntlClientProvider locale={locale} timeZone={TIME_ZONE} messages={locale === "en" ? enMessages : viMessages} onError={error => { throw error }}><CopyFixture shell={shell} screen={screen} /></NextIntlClientProvider>
+const PageFixture = ({ shell, screen, locale }: PageFixtureProps) => <NextIntlClientProvider locale={locale} timeZone={TIME_ZONE} messages={locale === "en" ? enMessages : viMessages} onError={error => { throw error }}><SessionProvider><CopyFixture shell={shell} screen={screen} /></SessionProvider></NextIntlClientProvider>
 
 const screens: ReadonlyArray<AgentOSSolutionModuleScreen> = [
     {
