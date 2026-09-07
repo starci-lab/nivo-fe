@@ -1,6 +1,9 @@
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vitest/config"
 import { resolve } from "node:path"
+import { createRequire } from "node:module"
+
+const require = createRequire(import.meta.url)
 
 /** Workspace lane for `@nivo/app`. The root config owns coverage; this owns the environment. */
 export default defineConfig({
@@ -10,7 +13,7 @@ export default defineConfig({
             "@": resolve(import.meta.dirname, "src"),
             // next-intl imports the package subpath without an extension; Node's ESM runner used
             // by Vitest needs the concrete compatibility entry while Next resolves it itself.
-            "next/navigation": resolve(import.meta.dirname, "../../node_modules/next/navigation.js"),
+            "next/navigation": require.resolve("next/navigation"),
         },
     },
     test: {
