@@ -30,7 +30,7 @@ const view = (overrides: Record<string, unknown> = {}) => ({
   submitDocument: idle, approveDocument: idle, postDocument: idle, reconcile: idle, close: idle, submitCorrection: idle, approveCorrection: idle,
   answer, model, role: "owner", isAsOf: false, correctionSubmitAllowed: true, pendingCorrections: [correction], eligibleSourceEntries: [ledger],
   sourceEntryEligible: false, documentAmountMinor: null, sourceAmountMinor: null, deltaAmountMinor: null,
-  onFileSelected: noop, onInitialize: noop, onIngest: noop, onReconcile: noop, reconcileCurrent: noop, onClose: noop, onCorrection: noop, submitCurrentCorrection: noop,
+  onFileSelected: noop, onInitialize: noop, onIngest: noop, onReconcile: noop, onClose: noop, onCorrection: noop,
   documentCommand: vi.fn(), correctionAccess: vi.fn(() => ({ submit: true, approve: false, approvalReason: "not-owner" })), approvePendingCorrection: vi.fn(),
   ...overrides,
 }) as never;
@@ -110,14 +110,29 @@ describe("AccountingWorkbenchBlock adverse states", () => {
     expect(approvePendingCorrection).toHaveBeenCalledWith("correction-1");
   });
 
-  it("dispatches reconciliation and correction commands from explicit button presses", () => {
-    const reconcileCurrent = vi.fn();
-    const submitCurrentCorrection = vi.fn();
-    render(<AccountingWorkbenchBlockBase view={view({ sourceAmount: "-1,250,000", sourceAmountMinor: "-1250000", sourceEntryId: "ledger-1", sourceEntryEligible: true, effectiveMonth: "2026-10", deltaAmount: "-50,000", deltaAmountMinor: "-50000", correctionReason: "late adjustment", reconcileCurrent, submitCurrentCorrection })} />);
-    fireEvent.click(screen.getByRole("button", { name: "reconcile" }));
-    fireEvent.click(screen.getByRole("button", { name: "submitCorrection" }));
-    expect(reconcileCurrent).toHaveBeenCalledOnce();
-    expect(submitCurrentCorrection).toHaveBeenCalledOnce();
+  it("keeps valid amounts native-valid and forwards native form submissions", () => {
+    const onReconcile = vi.fn(event => event.preventDefault());
+    const onCorrection = vi.fn(event => event.preventDefault());
+    const { container } = render(<AccountingWorkbenchBlockBase view={view({ documentAmount: "1,250,000", documentAmountMinor: "1250000", sourceAmount: "-1,250,000", sourceAmountMinor: "-1250000", sourceEntryId: "ledger-1", sourceEntryEligible: true, effectiveMonth: "2026-10", deltaAmount: "-50,000", deltaAmountMinor: "-50000", correctionReason: "late adjustment", onReconcile, onCorrection })} />);
+    const documentAmountInput = container.querySelector("#accounting-document-amount")!;
+    const sourceAmountInput = container.querySelector("#accounting-source-amount")!;
+    const deltaAmountInput = container.querySelector("#accounting-delta")!;
+    expect(documentAmountInput).not.toHaveAttribute("aria-invalid", "true");
+    expect(sourceAmountInput).not.toHaveAttribute("aria-invalid", "true");
+    expect(deltaAmountInput).not.toHaveAttribute("aria-invalid", "true");
+    fireEvent.submit(sourceAmountInput.closest("form")!);
+    fireEvent.submit(deltaAmountInput.closest("form")!);
+    expect(onReconcile).toHaveBeenCalledOnce();
+    expect(onCorrection).toHaveBeenCalledOnce();
+  });
+
+  it("keeps invalid amounts marked invalid and their mutation actions disabled", () => {
+    const { container } = render(<AccountingWorkbenchBlockBase view={view({ documentAmount: "0", documentAmountMinor: "0", sourceAmount: "not-money", sourceAmountMinor: null, sourceEntryId: "ledger-1", sourceEntryEligible: true, effectiveMonth: "2026-10", deltaAmount: "0", deltaAmountMinor: "0", correctionReason: "late adjustment" })} />);
+    expect(container.querySelector("#accounting-document-amount")).toHaveAttribute("aria-invalid", "true");
+    expect(container.querySelector("#accounting-source-amount")).toHaveAttribute("aria-invalid", "true");
+    expect(container.querySelector("#accounting-delta")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("button", { name: "reconcile" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "submitCorrection" })).toBeDisabled();
   });
 
   it("forwards native controls, historical navigation, file choice and setup recovery", () => {

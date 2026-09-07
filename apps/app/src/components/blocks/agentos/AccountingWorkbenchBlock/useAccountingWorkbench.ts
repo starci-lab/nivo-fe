@@ -217,18 +217,17 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
     const value = { amountMinor: documentAmountMinor, classification, contentBase64, currency, fileName, mimeType, periodKey };
     void run("ingest", value, requestToken => ingest.trigger({ ...value, classification, requestToken }));
   };
-  const reconcileCurrent = () => { if (sourceAmountMinor !== null) { const value = { currency, sourceAmountMinor }; void run("reconcile", value, requestToken => reconcile.trigger({ ...value, requestToken })); } };
-  const onReconcile = (event: FormEvent) => { event.preventDefault(); reconcileCurrent(); };
+  const onReconcile = (event: FormEvent) => { event.preventDefault(); if (sourceAmountMinor !== null) { const value = { currency, sourceAmountMinor }; void run("reconcile", value, requestToken => reconcile.trigger({ ...value, requestToken })); } };
   const onClose = (event: FormEvent) => { event.preventDefault(); const periodKey = canonicalMonthKey(closeMonth); if (periodKey !== null) { const value = { periodKey }; void run("close", value, requestToken => close.trigger({ ...value, requestToken })); } };
-  const submitCurrentCorrection = () => {
+  const onCorrection = (event: FormEvent) => {
+    event.preventDefault();
     const effectivePeriodKey = canonicalMonthKey(effectiveMonth);
     if (effectivePeriodKey === null || deltaAmountMinor === null || deltaAmountMinor === "0" || !sourceEntryEligible) return;
     const value = { effectivePeriodKey, reason: correctionReason, signedDeltaMinor: deltaAmountMinor, sourceEntryId };
     void run("correction-submit", value, requestToken => submitCorrection.trigger({ ...value, requestToken }));
   };
-  const onCorrection = (event: FormEvent) => { event.preventDefault(); submitCurrentCorrection(); };
   const documentCommand = (operation: "submit" | "approve" | "post", documentId: string) => { const command = operation === "submit" ? submitDocument : operation === "approve" ? approveDocument : postDocument; void run(`document-${operation}-${documentId}`, { documentId }, requestToken => command.trigger({ documentId, requestToken })); };
   const correctionAccess = (correction: AccountingCorrection) => accountingCorrectionAccess({ explicitLedgerVersion: isAsOf, role, canApproveCorrection: model?.capabilities.canApproveCorrection, correction, periods: model?.periods });
   const approvePendingCorrection = (correctionId: string) => void run(`correction-approve-${correctionId}`, { correctionId }, requestToken => approveCorrection.trigger({ correctionId, requestToken }));
-  return { t, locale, currency, classifications, intakeReady, intakeLoading, asOfDraft, setAsOfDraft, ledgerVersion, setLedgerVersion, notice, approverId, setApproverId, fileName, fileSize, classification, setClassification, documentAmount, setDocumentAmount, documentMonth, setDocumentMonth, sourceAmount, setSourceAmount, closeMonth, setCloseMonth, sourceEntryId, setSourceEntryId, effectiveMonth, setEffectiveMonth, deltaAmount, setDeltaAmount, correctionReason, setCorrectionReason, workbench, context, runtime, participantUserIds, initialize, ingest, submitDocument, approveDocument, postDocument, reconcile, close, submitCorrection, approveCorrection, answer, model, role, isAsOf, correctionSubmitAllowed, pendingCorrections, eligibleSourceEntries, sourceEntryEligible, documentAmountMinor, sourceAmountMinor, deltaAmountMinor, onFileSelected, onInitialize, onIngest, onReconcile, reconcileCurrent, onClose, onCorrection, submitCurrentCorrection, documentCommand, correctionAccess, approvePendingCorrection };
+  return { t, locale, currency, classifications, intakeReady, intakeLoading, asOfDraft, setAsOfDraft, ledgerVersion, setLedgerVersion, notice, approverId, setApproverId, fileName, fileSize, classification, setClassification, documentAmount, setDocumentAmount, documentMonth, setDocumentMonth, sourceAmount, setSourceAmount, closeMonth, setCloseMonth, sourceEntryId, setSourceEntryId, effectiveMonth, setEffectiveMonth, deltaAmount, setDeltaAmount, correctionReason, setCorrectionReason, workbench, context, runtime, participantUserIds, initialize, ingest, submitDocument, approveDocument, postDocument, reconcile, close, submitCorrection, approveCorrection, answer, model, role, isAsOf, correctionSubmitAllowed, pendingCorrections, eligibleSourceEntries, sourceEntryEligible, documentAmountMinor, sourceAmountMinor, deltaAmountMinor, onFileSelected, onInitialize, onIngest, onReconcile, onClose, onCorrection, documentCommand, correctionAccess, approvePendingCorrection };
 };
