@@ -229,6 +229,7 @@ describe("AgentOSSolutionModulePage projections", () => {
             return { ok: true, data: runtime }
         })
         mocks.runtimeTrigger.mockReset().mockResolvedValue({ ok: true, data: runtime })
+        Object.assign(testSurface.runs[0]!, { status: "passed", mode: "acceptance", retrievalGeneration: 1 })
         mocks.testTrigger.mockReset().mockResolvedValue({ ok: true, data: { ...testSurface, run: { status: "passed" } } })
         mocks.channelTrigger.mockReset().mockResolvedValue({ ok: true, data: { state: "APPLIED" } })
         mocks.approveTrigger.mockReset().mockResolvedValue({ ok: true })
@@ -355,6 +356,46 @@ describe("AgentOSSolutionModulePage projections", () => {
         render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
         await act(async () => { setupProps().onCreateVersion() })
         expect(mocks.runtimeTrigger).toHaveBeenLastCalledWith({ action: "REVISE_CONTEXT", installationId: "installation-1", idempotencyKey: expect.any(String), sessionId: "setup-1" })
+    })
+    it("rejects warning, exploratory and stale-generation evidence for Apply", () => {
+        const run = testSurface.runs[0]!
+        const view = render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        expect(setupProps().draft!.exactTestPassed).toBe(true)
+        run.status = "warning"
+        view.rerender(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        expect(setupProps().draft!.exactTestPassed).toBe(false)
+        run.status = "passed"
+        run.mode = "exploratory"
+        view.rerender(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        expect(setupProps().draft!.exactTestPassed).toBe(false)
+        run.mode = "acceptance"
+        run.retrievalGeneration = 0
+        view.rerender(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        expect(setupProps().draft!.exactTestPassed).toBe(false)
+    })
+    it("binds owner confirmation to the selected requirement and draft digest", async () => {
+        Object.assign(runtime.installation.runtimeManifest, { setup: {
+            schemaVersion: 1,
+            contract: { key: "support-setup", version: "1.0.0" },
+            requirements: [{ key: "businessIdentity", label: "Verified business identity", validator: { key: "setup.present", version: "1.0.0" }, dependencies: [], citationPolicy: "none", ownerConfirmation: true, requiredFor: ["acceptance", "apply"] }],
+            requiredAcceptanceScenarios: ["triage"],
+        } })
+        runtime.setupSession.setupStatus = "ready"
+        runtime.setupSessions[0]!.setupStatus = "ready"
+        runtime.contextVersions = []
+        render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        expect(setupProps().draft!.gates[0]!.label).toBe("Verified business identity")
+        await act(async () => { setupProps().onConfirmRequirement(setupProps().draft!.gates[0]!) })
+        expect(mocks.runtimeTrigger).toHaveBeenLastCalledWith({
+            action: "CONFIRM_SETUP_REQUIREMENT",
+            installationId: "installation-1",
+            idempotencyKey: expect.any(String),
+            sessionId: "setup-1",
+            requirementKey: "businessIdentity",
+            expectedDraftDigest: "a".repeat(64),
+            evidenceDigest: expect.stringMatching(/^[a-f0-9]{64}$/u),
+            citations: [],
+        })
     })
 })
 type AgentOSSolutionModulePageFixtureProps = Omit<ComponentProps<typeof ActualAgentOSSolutionModulePage>, "copy"> & { readonly locale?: "en" | "vi" }
