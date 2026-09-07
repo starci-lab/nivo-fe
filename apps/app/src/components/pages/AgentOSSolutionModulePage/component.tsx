@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ComponentType } from "react";
+import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { Checkbox, ChoiceTabs, RouteTabs } from "@nivo/ui";
 import { SurfaceCard, Button, Input, Heading, Text, Tabs, PrimaryRailLayout, TextAction } from "@starci/grammar/common";
 import { ChatbotWorkbenchBlock } from "@/components/blocks/agentos/ChatbotWorkbenchBlock";
@@ -1109,6 +1109,7 @@ type SetupSurfaceProps = {
   readonly setupStartRefused?: boolean;
   readonly setupUnconfirmed?: boolean;
   readonly compactPane: "versions" | "conversation" | "context";
+  readonly sourceAttachmentPanel?: ReactNode;
   readonly onSelectRevision: (sessionId: string) => void;
   readonly onStartRevision: () => void;
   readonly onSend: (content: string) => void;
@@ -1134,7 +1135,7 @@ const setupVersionsPane = (props: WithModulePageCopy<SetupSurfaceProps>) => { co
   </div> : null}
 </SurfaceCard>); };
 const setupConversationPane = (props: WithModulePageCopy<SetupSurfaceProps>) => <PrivateSetupChatBlock copy={props.copy} messages={props.messages} pending={props.pending} ownPending={props.setupSendPending} peerDisabled={props.setupPeerDisabled || props.setupApplyPending || props.setupStartPending} refused={props.setupSendRefused} unconfirmed={props.setupUnconfirmed} revisions={props.revisions} selectedRevisionId={props.selectedRevisionId} canSend={props.canSend} canStartRevision={props.canStartRevision} showRevisionControls={false} draft={props.draftText} onDraft={props.onDraft} onSelectRevision={props.onSelectRevision} onStartRevision={props.onStartRevision} onSend={props.onSend} onOpenVersions={() => props.onSelectPane("versions")} />;
-const setupContextPane = (props: WithModulePageCopy<SetupSurfaceProps>) => <ContextVersionBlock copy={props.copy} activeVersion={props.activeVersion} draft={props.draft} pending={props.pending} ownPending={props.setupApplyPending} peerDisabled={props.setupPeerDisabled || props.setupSendPending || props.setupStartPending} refused={props.setupApplyRefused ?? false} onApply={props.onApply} onCreateVersion={props.onCreateVersion} onConfirmRequirement={props.onConfirmRequirement} />;
+const setupContextPane = (props: WithModulePageCopy<SetupSurfaceProps>) => <div>{props.sourceAttachmentPanel}<ContextVersionBlock copy={props.copy} activeVersion={props.activeVersion} draft={props.draft} pending={props.pending} ownPending={props.setupApplyPending} peerDisabled={props.setupPeerDisabled || props.setupSendPending || props.setupStartPending} refused={props.setupApplyRefused ?? false} onApply={props.onApply} onCreateVersion={props.onCreateVersion} onConfirmRequirement={props.onConfirmRequirement} /></div>;
 const setupSummaryPane = (props: WithModulePageCopy<SetupSurfaceProps>) => {
   const { copy } = props; 
   const draft = props.draft;
