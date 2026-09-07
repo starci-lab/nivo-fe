@@ -4,6 +4,7 @@ import { cn } from "@heroui/react";
 export const CLASS_NAMES = {
   skipLink: cn("skip-link"),
   siteHeader: cn("site-header"),
+  brandMeta: cn("brand-meta"),
   headerAction: cn("header-action"),
   hero_sectionShell: cn("hero", "section-shell"),
   heroVisual: cn("hero-visual"),
@@ -34,6 +35,7 @@ export const CLASS_NAMES = {
   sectionShell: cn("section-shell"),
   sectionHeading_light: cn("section-heading", "light"),
   loopTrack: cn("loop-track"),
+  loopGlyph: cn("loop-glyph"),
   loopCaption: cn("loop-caption"),
   sectionShell_roles: cn("section-shell", "roles"),
   roleIntro: cn("role-intro"),
@@ -58,4 +60,7 @@ export const CLASS_NAMES = {
   price: cn("price"),
   cardNote: cn("card-note"),
   sectionShell_footerInner: cn("section-shell", "footer-inner"),
+  footerBrand: cn("footer-brand"),
+  footerDirectory: cn("footer-directory"),
+  footerNewsletter: cn("footer-newsletter"),
 } as const;

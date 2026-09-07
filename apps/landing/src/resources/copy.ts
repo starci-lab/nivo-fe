@@ -33,5 +33,17 @@ export const LANDING_COPY = {
     { intent: "Revenue", tone: "accent", name: "Product Launch", owner: "Growth Agent", status: "Completed", outcome: "+18.7% SQLs", evidence: "15 evidence items" },
     { intent: "Money", tone: "success", name: "Budget Optimization", owner: "Finance Agent", status: "Completed", outcome: "-14% CAC", evidence: "9 evidence items" }
   ] },
+  footer: {
+    groups: [
+      { title: "Sản phẩm", items: [{ label: "Tổng quan", href: "#main" }, { label: "Modules", href: "#intent-modules" }, { label: "Instances", href: "#module-instances" }, { label: "Ecosystem", href: "#responsibility" }] },
+      { title: "Giải pháp", items: [{ label: "Marketing", href: "#intent-modules" }, { label: "Sales", href: "#intent-modules" }, { label: "Operations", href: "#responsibility" }, { label: "Finance", href: "#intent-modules" }] },
+      { title: "Tài nguyên", items: [{ label: "Tài liệu", href: "#operating-loop" }, { label: "Hướng dẫn", href: "#operating-loop" }, { label: "Case studies", href: "#module-instances" }, { label: "Blog", href: "#main" }] },
+      { title: "Công ty", items: [{ label: "Về NIVO", href: "#main" }, { label: "Sự nghiệp", href: "mailto:hello@nivo.vn?subject=Sự nghiệp tại NIVO" }, { label: "Liên hệ", href: "mailto:hello@nivo.vn" }] }
+    ],
+    newsletterTitle: "Đăng ký nhận tin",
+    newsletterBody: "Nhận cập nhật về sản phẩm và hệ điều hành trách nhiệm.",
+    newsletterAction: "Email của bạn",
+    newsletterHref: "mailto:hello@nivo.vn?subject=Đăng ký nhận tin NIVO"
+  },
   offer: { eyebrow: "NIVO Agentic OS", title: "NIVO Agentic OS", body: "Hệ điều hành trách nhiệm cho tổ chức AI-native.", plan: "NIVO START", price: "499.000", unit: " VND / tháng", benefits: ["Rõ ngữ cảnh, đúng trách nhiệm", "Bằng chứng tự động, kết quả được kiểm chứng", "Niềm tin được tạo ra, hiệu suất được nhân lên"], href: "mailto:hello@nivo.vn?subject=Đặt lịch demo NIVO", note: "Không cần thẻ. Dừng bất cứ lúc nào." }
 } as const;
