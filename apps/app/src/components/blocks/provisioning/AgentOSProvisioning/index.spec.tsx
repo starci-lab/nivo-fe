@@ -166,7 +166,7 @@ describe("AgentOSProvisioning connected flow", () => {
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"awaiting_payment"'))
         fireEvent.click(screen.getByTestId("status"))
-        expect(mocks.push).toHaveBeenCalledWith("/wallet?orderId=order&invoiceId=invoice&returnTo=%2Fagentos%2Forders%2Forder")
+        expect(mocks.push).toHaveBeenCalledWith("/wallet?orderId=order&invoiceId=invoice&returnTo=%2Fen%2Fagentos%2Forders%2Forder")
 
         cleanup()
         resetQueryCache()
