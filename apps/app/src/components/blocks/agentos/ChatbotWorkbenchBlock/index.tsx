@@ -40,6 +40,7 @@ export type ChatbotWorkbenchBlockCopy = {
   readonly noMessages: string;
   readonly pending: string;
   readonly refused: string;
+  readonly actionRefused: string;
   readonly permissionDenied: string;
   readonly ambiguous: string;
   readonly markDelivered: string;
@@ -140,7 +141,7 @@ export const ChatbotWorkbenchBlock = (props: ChatbotWorkbenchBlockProps) => {
           <Heading level={3}>{selected?.participantRef ?? props.copy.selectConversation}</Heading>
           {selected === null ? null : <Badge tone={selected.handoffState === "human" ? "warning" : "success"}>{conversationLabel(selected, props.copy)}</Badge>}
         </div>}
-        conversation={<>{conversationRegion}{props.pending ? <Text size="sm" live="polite">{props.copy.pending}</Text> : null}{props.refusedCode === null ? null : <Text size="sm" live="assertive">{props.refusedCode === "WORKSPACE_CONTROLLER_REFUSED" ? props.copy.permissionDenied : props.copy.refused}</Text>}</>}
+        conversation={<>{conversationRegion}{props.pending ? <Text size="sm" live="polite">{props.copy.pending}</Text> : null}{props.refusedCode === null ? null : <Text size="sm" live="assertive">{props.refusedCode === "WORKSPACE_CONTROLLER_REFUSED" ? props.copy.permissionDenied : props.refusedCode === "CHATBOT_ACTION_REFUSED" ? props.copy.actionRefused : props.copy.refused}</Text>}</>}
         composer={actionRegion}
         rail={<div className={CHATBOT_RAIL_CLASS_NAME}><ChannelRail props={props} /><ConversationRail props={props} /></div>}
         railLabel={props.copy.conversations}

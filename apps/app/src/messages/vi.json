@@ -767,6 +767,7 @@
             "noMessages": "Chưa có tin nhắn được ghi nhận",
             "pending": "Đang chờ hệ thống đọc lại trạng thái xác nhận",
             "refused": "Không đọc được bàn làm việc. Hãy tải lại trang bản cài đặt.",
+            "actionRefused": "Không thể hoàn tất thao tác với nhà cung cấp. Cấu hình và thông tin xác thực vẫn không thay đổi.",
             "permissionDenied": "Bạn không có quyền vận hành bản cài đặt Chatbot này.",
             "ambiguous": "Kết quả gửi từ nhà cung cấp chưa rõ. Không được thử gửi lại mù.",
             "markDelivered": "Đánh dấu đã gửi",

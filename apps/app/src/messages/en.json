@@ -767,6 +767,7 @@
             "noMessages": "No recorded messages",
             "pending": "Waiting for confirmed readback",
             "refused": "The workbench could not be read. Retry the installation page.",
+            "actionRefused": "The provider action could not be completed. Its configuration and credentials remain unchanged.",
             "permissionDenied": "You do not have permission to operate this Chatbot installation.",
             "ambiguous": "Provider delivery is ambiguous. Do not retry blindly.",
             "markDelivered": "Mark delivered",

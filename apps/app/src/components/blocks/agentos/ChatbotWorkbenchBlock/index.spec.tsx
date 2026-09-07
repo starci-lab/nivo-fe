@@ -7,7 +7,7 @@ const copy: ChatbotWorkbenchBlockCopy = {
   noApprovedVersion: "No approved context", channels: "Channels", noChannels: "No channel connected", connectZalo: "Connect Zalo",
   conversations: "Conversations", openConversations: "Open channels and conversations", closeConversations: "Close channels and conversations", noConversations: "No conversations", selectConversation: "Select a conversation", selected: "Selected", automated: "Automated",
   humanHandoff: "Human handoff", requestHandoff: "Take over", resolveHandoff: "Return to automation", messages: "Messages", noMessages: "No messages",
-  pending: "Waiting for confirmed readback", refused: "Could not load", permissionDenied: "Permission denied", ambiguous: "Delivery is ambiguous",
+  pending: "Waiting for confirmed readback", refused: "Could not load", actionRefused: "Provider action refused", permissionDenied: "Permission denied", ambiguous: "Delivery is ambiguous",
   markDelivered: "Mark delivered", markFailed: "Mark failed", recorded: "Recorded only", delivered: "Delivered", failed: "Failed"
 };
 
@@ -49,5 +49,12 @@ describe("ChatbotWorkbenchBlock", () => {
     expect(screen.getByText("nivodeptrai_bot")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Connect Zalo" }));
     expect(connect).toHaveBeenCalledOnce();
+  });
+
+  it("distinguishes provider action refusal from workbench read failure", () => {
+    render(<ChatbotWorkbenchBlock installationId="chatbot-1" workbench={{ ...workbench, conversations: [], messages: [] }} selectedConversationId={null} pending={false} refusedCode="CHATBOT_ACTION_REFUSED" copy={copy} onSelectConversation={() => undefined} onConnectZalo={() => undefined} onSetHandoff={() => undefined} onResolveHandoff={() => undefined} onReconcile={() => undefined} />);
+
+    expect(screen.getByText("Provider action refused")).toBeInTheDocument();
+    expect(screen.queryByText("Could not load")).not.toBeInTheDocument();
   });
 });
