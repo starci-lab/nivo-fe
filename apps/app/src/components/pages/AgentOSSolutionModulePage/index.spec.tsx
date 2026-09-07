@@ -241,6 +241,7 @@ describe("AgentOSSolutionModulePage projections", () => {
         mocks.approveTrigger.mockReset().mockResolvedValue({ ok: true })
         mocks.takeoverTrigger.mockReset().mockResolvedValue({ ok: true })
         mocks.deliveryTrigger.mockReset().mockResolvedValue({ ok: true })
+        mocks.chatbotTrigger.mockReset().mockResolvedValue({ ok: true, data: { authorizationUrl: null } })
     })
 
     it("binds indexed solution-module attachments to attachment-content confirmations", async () => {
@@ -284,6 +285,19 @@ describe("AgentOSSolutionModulePage projections", () => {
         render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" view={view} />)
         expect(await screen.findByText(view)).toBeInTheDocument()
         expect(mocks.pageProps?.screen.view).toBe(view)
+    })
+
+    it("surfaces a refused Chatbot action in the connected Operate workbench", async () => {
+        Object.assign(runtime.installation, {
+            moduleKey: "multichannel-chatbot",
+        })
+        mocks.chatbotTrigger.mockResolvedValue({ ok: false })
+        render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" view="operate" />)
+        const operate = () => mocks.pageProps!.screen.contentProps as unknown as Extract<AgentOSSolutionModuleScreen, { view: "operate" }>["contentProps"]
+
+        await act(async () => operate().onConnectChatbotZalo())
+
+        expect(operate().chatbotRefusedCode).toBe("CHATBOT_ACTION_REFUSED")
     })
 
     describe.each(["en", "vi"] as const)("Connected bilingual invariants %s", locale => {

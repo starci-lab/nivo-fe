@@ -800,7 +800,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
           operationTarget,
           isChatbot: isChatbotInstallation,
           chatbotWorkbench,
-          chatbotRefusedCode,
+          chatbotRefusedCode: chatbotRefusedCode ?? (supportActionRefused ? "CHATBOT_ACTION_REFUSED" : null),
           supportInbox,
           pending,
           refused,
