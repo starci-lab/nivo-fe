@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useQueryCatalogItemsSwr, useQueryMyAgentosAiKnowledgeReadinessSwr, useQueryMyAgentWorkspacesSwr, useQueryMyCatalogOrdersSwr, useQueryMyInvoicesSwr, useMutateOrderAgentosSwr, useMutateRunAgentosAiReadinessTestSwr } from "@/hooks";
 import { useRouter } from "@/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
@@ -9,6 +9,7 @@ import { type AgentWorkspaceRow, type CatalogItemRow, type CatalogOrderRow, type
 import { nivoQueryData } from "@/modules/query";
 import useProvisioningRealtime, { type ProvisioningTarget } from "@/modules/realtime/provisioning";
 import { BILLING_CURRENCY } from "@/modules/config";
+import { DEFAULT_LOCALE } from "@/i18n/config";
 import { AgentOSProvisioningBase, type AgentOSProvisioningViewProps } from "./component";
 
 /** Route identity owned by the AgentOS provisioning block. */
@@ -178,9 +179,9 @@ const readinessMilestoneState = (index: number, current: number): "done" | "curr
   if (current === -1) return index < 4 ? "done" : "current";
   return stepState(index, current);
 };
-const walletTargetOf = (orderId: string, invoiceId: string | null): string | undefined => {
+const walletTargetOf = (orderId: string, invoiceId: string | null, locale: string): string | undefined => {
   if (invoiceId === null) return undefined;
-  const returnTo = `/agentos/orders/${orderId}`;
+  const returnTo = `${locale === DEFAULT_LOCALE ? "" : `/${locale}`}/agentos/orders/${orderId}`;
   const query = new URLSearchParams({
     orderId,
     invoiceId,
@@ -196,6 +197,7 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
   }: AgentOSProvisioningProps = props;
   const t = useTranslations("console.provisioningFlows");
   const format = useFormatter();
+  const locale = useLocale();
   const router = useRouter();
   const session = useSession();
   const productName = t("agentos.productName");
@@ -534,7 +536,7 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
         };
       case "awaiting_payment":
         {
-          const walletTarget = walletTargetOf(flow.orderId, flow.invoiceId);
+          const walletTarget = walletTargetOf(flow.orderId, flow.invoiceId, locale);
           return {
             state: flow.phase,
             props: {
