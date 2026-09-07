@@ -165,6 +165,9 @@ export type ModulePageMessageKey =
   | "runtime.pageTest.conversation"
   | "runtime.pageTest.count"
   | "runtime.pageTest.evidence"
+  | "runtime.pageTest.exploratory"
+  | "runtime.pageTest.acceptance"
+  | "runtime.pageTest.mode"
   | "runtime.pageTest.noContract"
   | "runtime.pageTest.notRun"
   | "runtime.pageTest.safety"
@@ -332,10 +335,14 @@ export type ModulePageMessageKey =
   | "setup.completeAllGates"
   | "setup.completeCount"
   | "setup.completeGates"
+  | "setup.confirmRequirement"
+  | "setup.confirmed"
+  | "setup.evidenceRequired"
   | "setup.contextHint"
   | "setup.contextStartsHere"
   | "setup.contextVersion"
   | "setup.continueChat"
+  | "setup.createVersion"
   | "setup.description"
   | "setup.draft"
   | "setup.draftRevision"
@@ -689,12 +696,15 @@ export const buildModulePageCopy = (t: ModulePageTranslator) => ({
     "workbench": t("runtime.operate.workbench"),
   },
   "pageTest": {
+    "acceptance": t("runtime.pageTest.acceptance"),
     "closed": t("runtime.pageTest.closed"),
     "compact": t("runtime.pageTest.compact"),
     "contractUnavailable": t("runtime.pageTest.contractUnavailable"),
     "conversation": t("runtime.pageTest.conversation"),
     "count": (values: RuntimePageTestCountValues) => t("runtime.pageTest.count", values),
     "evidence": t("runtime.pageTest.evidence"),
+    "exploratory": t("runtime.pageTest.exploratory"),
+    "mode": t("runtime.pageTest.mode"),
     "noContract": t("runtime.pageTest.noContract"),
     "notRun": t("runtime.pageTest.notRun"),
     "safety": t("runtime.pageTest.safety"),
@@ -882,10 +892,14 @@ export const buildModulePageCopy = (t: ModulePageTranslator) => ({
     "completeAllGates": (values: SetupCompleteAllGatesValues) => t("setup.completeAllGates", values),
     "completeCount": (values: SetupCompleteCountValues) => t("setup.completeCount", values),
     "completeGates": t("setup.completeGates"),
+    "confirmRequirement": t("setup.confirmRequirement"),
+    "confirmed": t("setup.confirmed"),
+    "evidenceRequired": t("setup.evidenceRequired"),
     "contextHint": t("setup.contextHint"),
     "contextStartsHere": t("setup.contextStartsHere"),
     "contextVersion": (values: SetupContextVersionValues) => t("setup.contextVersion", values),
     "continueChat": t("setup.continueChat"),
+    "createVersion": t("setup.createVersion"),
     "description": t("setup.description"),
     "draft": t("setup.draft"),
     "draftRevision": (values: SetupDraftRevisionValues) => t("setup.draftRevision", values),
@@ -1094,6 +1108,8 @@ type SetupSurfaceProps = {
   readonly onSend: (content: string) => void;
   readonly onDraft: (content: string) => void;
   readonly onApply: () => void;
+  readonly onCreateVersion: () => void;
+  readonly onConfirmRequirement: (gate: ContextDraft["gates"][number]) => void;
   readonly onSelectPane: (pane: "versions" | "conversation" | "context") => void;
 };
 const setupVersionsPane = (props: WithModulePageCopy<SetupSurfaceProps>) => { const { copy } = props; return (<SurfaceCard ariaLabel={copy.setup.revisions} composition="joined">
@@ -1112,7 +1128,7 @@ const setupVersionsPane = (props: WithModulePageCopy<SetupSurfaceProps>) => { co
   </div> : null}
 </SurfaceCard>); };
 const setupConversationPane = (props: WithModulePageCopy<SetupSurfaceProps>) => <PrivateSetupChatBlock copy={props.copy} messages={props.messages} pending={props.pending} ownPending={props.setupSendPending} peerDisabled={props.setupPeerDisabled || props.setupApplyPending || props.setupStartPending} refused={props.setupSendRefused} unconfirmed={props.setupUnconfirmed} revisions={props.revisions} selectedRevisionId={props.selectedRevisionId} canSend={props.canSend} canStartRevision={props.canStartRevision} showRevisionControls={false} draft={props.draftText} onDraft={props.onDraft} onSelectRevision={props.onSelectRevision} onStartRevision={props.onStartRevision} onSend={props.onSend} onOpenVersions={() => props.onSelectPane("versions")} />;
-const setupContextPane = (props: WithModulePageCopy<SetupSurfaceProps>) => <ContextVersionBlock copy={props.copy} activeVersion={props.activeVersion} draft={props.draft} pending={props.pending} ownPending={props.setupApplyPending} peerDisabled={props.setupPeerDisabled || props.setupSendPending || props.setupStartPending} refused={props.setupApplyRefused ?? false} onApply={props.onApply} />;
+const setupContextPane = (props: WithModulePageCopy<SetupSurfaceProps>) => <ContextVersionBlock copy={props.copy} activeVersion={props.activeVersion} draft={props.draft} pending={props.pending} ownPending={props.setupApplyPending} peerDisabled={props.setupPeerDisabled || props.setupSendPending || props.setupStartPending} refused={props.setupApplyRefused ?? false} onApply={props.onApply} onCreateVersion={props.onCreateVersion} onConfirmRequirement={props.onConfirmRequirement} />;
 const setupSummaryPane = (props: WithModulePageCopy<SetupSurfaceProps>) => {
   const { copy } = props; 
   const draft = props.draft;
@@ -1144,10 +1160,12 @@ type TestSurfaceProps = {
   readonly testSurface: AgentosModuleTestSurface | null;
   readonly pending: boolean;
   readonly selectedScenarioKey: string;
+  readonly mode: "exploratory" | "acceptance";
   readonly compactPane: "scenarios" | "conversation" | "evidence";
   readonly onSelectScenario: (scenarioKey: string) => void;
+  readonly onSelectMode: (mode: "exploratory" | "acceptance") => void;
   readonly onSelectPane: (pane: "scenarios" | "conversation" | "evidence") => void;
-  readonly onRun: (scenarioKey: string, scenarioInput: Readonly<Record<string, AgentosRuntimeValue>>) => void;
+  readonly onRun: (mode: "exploratory" | "acceptance", scenarioKey: string, scenarioInput: Readonly<Record<string, AgentosRuntimeValue>>) => void;
 };
 const TestSurface = ({
   copy,
@@ -1157,8 +1175,10 @@ const TestSurface = ({
   testSurface,
   pending,
   selectedScenarioKey,
+  mode,
   compactPane,
   onSelectScenario,
+  onSelectMode,
   onSelectPane,
   onRun
 }: WithModulePageCopy<TestSurfaceProps>) => { return (<div><div>
@@ -1180,7 +1200,12 @@ const TestSurface = ({
       }]
     }} on={{
       select: key => onSelectPane(key as TestSurfaceProps["compactPane"])
-    }} /></div>{cockpitPane(compactPane !== "scenarios", ModuleCockpitRailBlock, {
+    }} />
+    <ChoiceTabs props={{
+      label: copy.pageTest.mode,
+      selectedKey: mode,
+      tabs: [{ id: "exploratory", label: copy.pageTest.exploratory }, { id: "acceptance", label: copy.pageTest.acceptance }]
+    }} on={{ select: key => onSelectMode(key as "exploratory" | "acceptance") }} /></div>{cockpitPane(compactPane !== "scenarios", ModuleCockpitRailBlock, {
     label: copy.pageTest.suite,
     fact: copy.pageTest.count({ count: contract.scenarios.length }),
     summary: copy.pageTest.summary,
@@ -1201,7 +1226,7 @@ const TestSurface = ({
     showScenarioPicker: false,
     registry: DEFAULT_TEST_WORKBENCH_REGISTRY,
     onSelectScenario,
-    onRun
+    onRun: (scenarioKey, scenarioInput) => onRun(mode, scenarioKey, scenarioInput)
   })}{cockpitSidecarPane(compactPane !== "evidence", TestTrustResultBlock, {
     copy,
     contract,
@@ -1654,8 +1679,12 @@ const DiagnosticsSurface = ({
 
 /** One exact Setup Test result whose revision and digest still match the draft on screen. */
 export const exactTestSurfaceFor = (testSurface: AgentosModuleTestSurface | null, draft: ContextDraft | null): AgentosModuleTestSurface | null => {
-  if (draft?.digest === null || draft === null || testSurface?.run === null || testSurface === null) return null;
-  return testSurface.run.setupSessionId === draft.setupSessionId && testSurface.run.draftDigest === draft.digest ? testSurface : null;
+  if (draft?.digest === null || draft === null || draft.definitionDigest === null || testSurface?.run === null || testSurface === null) return null;
+  const run = testSurface.run;
+  return run.setupSessionId === draft.setupSessionId && run.draftDigest === draft.digest
+    && run.definitionDigest === draft.definitionDigest && run.targetDigest === draft.digest
+    && run.authorityGeneration === draft.authorityGeneration && run.sourceGeneration === draft.sourceGeneration
+    && run.retrievalGeneration === draft.retrievalGeneration ? testSurface : null;
 };
 type AgentOSSolutionModuleShellProps = {
   readonly workspaceLabel: string;

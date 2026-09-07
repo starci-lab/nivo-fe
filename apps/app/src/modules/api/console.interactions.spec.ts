@@ -30,7 +30,7 @@ describe("console API interaction wrappers", () => {
             myAgentosSolutionModules(), myAgentosModuleInstallations("workspace-1"), myAgentosModuleInstallation("install-1"),
             myAgentosModuleRuntime("install-1", true),
             myAgentosModuleTestSurface("install-1"), myAgentosModuleTestRun("install-1", "run-1"),
-            runAgentosModuleTest({ installationId: "install-1", contextVersionId: "context-1", scenarioKey: "safe-fixture", idempotencyKey: "test-run-1", scenarioInput: {} }),
+            runAgentosModuleTest({ installationId: "install-1", contextVersionId: "context-1", scenarioKey: "safe-fixture", mode: "exploratory", idempotencyKey: "test-run-1", scenarioInput: {} }),
             manageAgentosModuleRuntime({ action: "CREATE_EXECUTE_SESSION", installationId: "install-1", idempotencyKey: "runtime-key", title: "Planning" }),
             myExpertSiteDeployment("site-1"),
             payInvoice("invoice-1"), catalogItems("site_from_template"), issueAgentWorkspaceAppLaunch("workspace-1"),

@@ -34,7 +34,7 @@ let runtime = {
             operations: { setupFields: ["businessIdentity"] },
             test: { scenarios: [{ key: "triage", title: "Triage", inputSchema: {} }] },
         },
-        settingsVersion: 1, activeContextVersionId: "context-1", primaryOpsSessionId: "execute-1",
+        settingsVersion: 1, setupAuthorityGeneration: 1, setupSourceGeneration: 1, setupRetrievalGeneration: 1, activeContextVersionId: "context-1", primaryOpsSessionId: "execute-1",
         channelAccountRef: "TELEGRAM:12345", operatingMode: "assist", liveEnabled: true,
         status: "ready", failureCode: null, createdAt: "2026-08-25T00:00:00.000Z", updatedAt: "2026-08-25T00:00:00.000Z",
     },
@@ -54,7 +54,7 @@ let runtime = {
         { id: "setup-message", sessionId: "setup-1", role: "assistant", content: "Tell me about the business", contextVersionId: null, taskId: null, messageTree: null },
         { id: "execute-message", sessionId: "execute-1", role: "assistant", content: "Queue ready", contextVersionId: "context-1", taskId: null, messageTree: null },
     ],
-    contextVersions: [{ id: "context-1", sourceSetupSessionId: "setup-1", version: 1, snapshot: { summary: "A support desk" } }],
+    contextVersions: [{ id: "context-1", sourceSetupSessionId: "setup-1", version: 1, snapshot: { summary: "A support desk" }, digest: "a".repeat(64), definitionDigest: "d".repeat(64), authorityGeneration: 1, sourceGeneration: 1, retrievalGeneration: 1 }],
     widgets: [], credentials: [{ providerKey: "telegram-bot-token", status: "configured" }],
     settings: { displayName: "Support Desk", modelProfile: "nivo-default", requireConfirmation: true },
     diagnostics: { available: true, controllerHealthy: true, controllerStatus: "ready" },
@@ -65,7 +65,7 @@ const initialRuntime = structuredClone(runtime)
 
 const testSurface = {
     contract: runtime.installation.runtimeManifest.test,
-    runs: [{ id: "run-1", status: "passed", setupSessionId: "setup-1", draftDigest: "a".repeat(64) }],
+    runs: [{ id: "run-1", status: "passed", mode: "acceptance", scenarioKey: "triage", setupSessionId: "setup-1", draftDigest: "a".repeat(64), definitionDigest: "d".repeat(64), targetDigest: "a".repeat(64), authorityGeneration: 1, sourceGeneration: 1, retrievalGeneration: 1 }],
     assertions: [],
 }
 
@@ -107,6 +107,8 @@ import { buildModulePageCopy, type AgentOSSolutionModuleScreen } from "./compone
 type RuntimeAnswer = { readonly ok: boolean; readonly data: typeof runtime }
 type SetupProps = Extract<AgentOSSolutionModuleScreen, { view: "setup" }>["contentProps"]
 const setupProps = () => mocks.pageProps!.screen.contentProps as unknown as SetupProps
+type TestProps = Extract<AgentOSSolutionModuleScreen, { view: "test" }>["contentProps"]
+const testProps = () => mocks.pageProps!.screen.contentProps as unknown as TestProps
 describe("AgentOSSolutionModulePage projections", () => {
     afterEach(() => vi.useRealTimers())
     it("retains historical selection and revision drafts across Setup tabs", () => {
@@ -256,7 +258,7 @@ describe("AgentOSSolutionModulePage projections", () => {
             runtime.setupSessions[0]!.gateEvidence.gates = keys.map((key, index) => ({ key, passed: index % 2 === 0 }))
             const view = render(<AgentOSSolutionModulePage locale={locale} workspaceId="workspace-1" installationId="installation-1" />)
             expect(known).toHaveLength(33)
-            expect(setupProps().draft!.gates).toEqual(keys.map((key, index) => ({ key, passed: index % 2 === 0, label: Object.hasOwn(copy.setup.gateLabels, key) ? copy.setup.gateLabels[key as keyof typeof copy.setup.gateLabels] : copy.setup.unknownGate({ key }) })))
+            expect(setupProps().draft!.gates).toEqual(keys.map((key, index) => ({ key, passed: index % 2 === 0, label: Object.hasOwn(copy.setup.gateLabels, key) ? copy.setup.gateLabels[key as keyof typeof copy.setup.gateLabels] : copy.setup.unknownGate({ key }), ownerConfirmation: false, confirmed: false, citationPolicy: "none" })))
             expect(setupProps().draft!.summary).toBe("A support desk")
             view.unmount()
         })
@@ -341,6 +343,24 @@ describe("AgentOSSolutionModulePage projections", () => {
             await settings.onSaveCredential("provider-key", "secret")
         })
         expect(mocks.runtimeTrigger).toHaveBeenCalled()
+    })
+    it("runs exploratory by default and forwards an explicit Acceptance mode", async () => {
+        const view = render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" view="test" />)
+        await act(async () => { testProps().onRun("exploratory", "triage", {}) })
+        expect(mocks.testTrigger).toHaveBeenLastCalledWith(expect.objectContaining({ mode: "exploratory", scenarioKey: "triage", setupSessionId: "setup-1" }))
+        act(() => testProps().onSelectMode("acceptance"))
+        view.rerender(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" view="test" />)
+        expect(testProps().mode).toBe("acceptance")
+        await act(async () => { testProps().onRun("acceptance", "triage", {}) })
+        expect(mocks.testTrigger).toHaveBeenLastCalledWith(expect.objectContaining({ mode: "acceptance", scenarioKey: "triage" }))
+    })
+    it("creates the immutable context explicitly before Test or Apply", async () => {
+        runtime.contextVersions = []
+        runtime.setupSession.setupStatus = "ready"
+        runtime.setupSessions[0]!.setupStatus = "ready"
+        render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        await act(async () => { setupProps().onCreateVersion() })
+        expect(mocks.runtimeTrigger).toHaveBeenLastCalledWith({ action: "REVISE_CONTEXT", installationId: "installation-1", idempotencyKey: expect.any(String), sessionId: "setup-1" })
     })
 })
 type AgentOSSolutionModulePageFixtureProps = Omit<ComponentProps<typeof ActualAgentOSSolutionModulePage>, "copy"> & { readonly locale?: "en" | "vi" }
