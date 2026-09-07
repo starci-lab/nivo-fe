@@ -595,10 +595,10 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
   const setChatbotHandoff = useCallback((conversationId: string) => {
     void runSupportAction(() => setChatbotHandoffMutation.trigger({ installationId, conversationId, requestToken: idempotencyKey() }));
   }, [installationId, runSupportAction, setChatbotHandoffMutation]);
-  const resolveChatbotHandoff = useCallback((conversationId: string) => {
+  const resolveChatbotHandoff = (conversationId: string) => {
     const conversation = chatbotWorkbench?.conversations.find(candidate => candidate.id === conversationId);
     if (conversation !== undefined) void runSupportAction(() => resolveChatbotHandoffMutation.trigger({ installationId, conversationId, requestToken: idempotencyKey(), authorityEpoch: conversation.authorityEpoch }));
-  }, [chatbotWorkbench?.conversations, installationId, resolveChatbotHandoffMutation, runSupportAction]);
+  };
   const reconcileChatbotDelivery = useCallback((providerOutboxId: string, delivered: boolean) => {
     void runSupportAction(() => reconcileChatbotDeliveryMutation.trigger({ installationId, providerOutboxId, outcome: delivered ? "delivered" : "failed", requestToken: idempotencyKey() }));
   }, [installationId, reconcileChatbotDeliveryMutation, runSupportAction]);
