@@ -1048,6 +1048,8 @@
                 "classificationExpense": "Chi phí",
                 "classificationReceivable": "Khoản phải thu",
                 "classificationPayable": "Khoản phải trả",
+                "intakePolicy": "Setup đã áp dụng cho phép nhập liệu bằng {currency} với các phân loại: {classifications}.",
+                "intakePolicyUnavailable": "Chưa thể nhập chứng từ cho đến khi Setup đã áp dụng có đơn vị tiền chức năng và phạm vi phân loại hợp lệ.",
                 "documentAmount": "Số tiền chứng từ ({currency})",
                 "currencyAmountHint": "Nhập số tiền nghiệp vụ hiển thị trên chứng từ.",
                 "currencyAmountHintSigned": "Dùng dấu trừ cho số âm; đối soát chấp nhận số 0.",

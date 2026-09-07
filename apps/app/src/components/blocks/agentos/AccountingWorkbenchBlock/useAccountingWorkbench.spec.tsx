@@ -34,7 +34,7 @@ import { AccountingWorkbenchBlock } from ".";
 
 const accepted = { ok: true, data: { operation: "submit-document" } } as const;
 const readback = { ok: true, data: { capabilities: {}, ledger: [], documents: [], reconciliations: [], periods: [], corrections: [] } } as const;
-const contextReadback = { ok: true, data: { versionId: "context-2", digest: "digest-2" } } as const;
+const contextReadback = { ok: true, data: { versionId: "context-2", digest: "digest-2", snapshot: { accountingScope: { classifications: ["income", "expense"] }, currencyAndLocale: { functionalCurrency: "USD" } } } } as const;
 const translate = (key: string, values?: Readonly<Record<string, string | number | undefined>>) => `${key}${values?.reason === undefined ? "" : `:${values.reason}`}`;
 const event = { preventDefault: vi.fn() } as never;
 
@@ -178,7 +178,19 @@ describe("useAccountingWorkbench settlement", () => {
     act(() => result.current.onIngest(event));
     act(() => result.current.onCorrection(event));
     await waitFor(() => expect(trigger.mock.calls.length).toBeGreaterThanOrEqual(2));
+    expect(trigger.mock.calls.find(call => call[0].fileName === "invoice.pdf")?.[0]).toMatchObject({ currency: "USD", classification: "expense" });
     expect(result.current.correctionAccess({ status: "pending", effectivePeriodKey: "2026-10-01", submittedByUserId: "owner-1", approverUserId: "approver-1" } as never).approvalReason).toBe("not-owner");
+  });
+
+  it("does not send document intake when the applied Setup intake policy is invalid", async () => {
+    contextQuery.mockReturnValue({ data: { ok: true, data: { versionId: "context-2", digest: "digest-2", snapshot: {} } }, error: undefined, mutate: mutateContext });
+    const { result } = renderHook(() => useAccountingWorkbench("module-1", "en", translate));
+    const file = { name: "invoice.pdf", type: "application/pdf", size: 1, arrayBuffer: vi.fn().mockResolvedValue(new Uint8Array([1]).buffer) } as unknown as File;
+    await act(async () => result.current.onFileSelected(file));
+    act(() => { result.current.setDocumentAmount("100"); result.current.setDocumentMonth("2026-09"); });
+    act(() => result.current.onIngest(event));
+    expect(result.current.intakeReady).toBe(false);
+    expect(trigger).not.toHaveBeenCalled();
   });
 
   it("connects the installed block through locale and translation owners", () => {

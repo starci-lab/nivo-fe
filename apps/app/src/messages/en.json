@@ -1048,6 +1048,8 @@
                 "classificationExpense": "Expense",
                 "classificationReceivable": "Receivable",
                 "classificationPayable": "Payable",
+                "intakePolicy": "Applied Setup authorizes {currency} intake for: {classifications}.",
+                "intakePolicyUnavailable": "Document intake is unavailable until the applied Setup provides a valid functional currency and classification scope.",
                 "documentAmount": "Document amount ({currency})",
                 "currencyAmountHint": "Enter the business amount shown on the evidence.",
                 "currencyAmountHintSigned": "Use a minus sign for a negative amount; zero is accepted for reconciliation.",

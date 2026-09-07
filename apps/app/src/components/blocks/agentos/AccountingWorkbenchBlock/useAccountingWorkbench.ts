@@ -1,19 +1,36 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
-import type { AccountingCorrection, AccountingLedgerEntry, AccountingOperation, AccountingPeriod, AccountingViewerRole } from "@/modules/api/accounting";
+import type { AccountingClassification, AccountingCorrection, AccountingLedgerEntry, AccountingOperation, AccountingPeriod, AccountingViewerRole } from "@/modules/api/accounting";
 import { useQueryAccountingWorkbenchSwr, useQueryAppliedAccountingContextSwr } from "@/hooks/swr/queries/accounting";
 import { useQueryMyAgentosModuleRuntimeSwr } from "@/hooks/swr/queries/console";
 import { useMutateApproveAccountingCorrectionSwr, useMutateApproveAccountingDocumentSwr, useMutateCloseAccountingPeriodSwr, useMutateIngestAccountingDocumentSwr, useMutateInitializeAccountingSwr, useMutatePostAccountingDocumentSwr, useMutateReconcileAccountingSwr, useMutateSubmitAccountingCorrectionSwr, useMutateSubmitAccountingDocumentSwr } from "@/hooks/swr/mutations/accounting";
 import type { Result } from "@/modules/api/graphql";
 
 type TranslationValues = Readonly<Record<string, string | number | undefined>>;
+const ACCOUNTING_CLASSIFICATIONS = ["income", "expense", "receivable", "payable"] as const;
+type AccountingIntakePolicy = { readonly currency: string; readonly classifications: ReadonlyArray<AccountingClassification> };
 /** Minimal message formatter accepted by the Accounting controller. */
 export type AccountingTranslation = (key: string, values?: TranslationValues) => string;
 /** Accessible settled command feedback projected into the pure view. */
 export type AccountingNotice = { readonly kind: "success" | "refused"; readonly message: string };
 /** Refusals interrupt the current task; confirmations remain non-disruptive. */
 export const accountingNoticeLive = (kind: AccountingNotice["kind"]): "assertive" | "polite" => kind === "refused" ? "assertive" : "polite";
+/** Narrow only the Setup facts that authorize document intake; every command remains server-authorized. */
+export const accountingIntakePolicy = (snapshot: unknown): AccountingIntakePolicy | null => {
+  if (snapshot === null || typeof snapshot !== "object" || Array.isArray(snapshot)) return null;
+  const record = snapshot as Readonly<Record<string, unknown>>;
+  const scope = record.accountingScope;
+  const currencyAndLocale = record.currencyAndLocale;
+  if (scope === null || typeof scope !== "object" || Array.isArray(scope) || currencyAndLocale === null || typeof currencyAndLocale !== "object" || Array.isArray(currencyAndLocale)) return null;
+  const rawClassifications = (scope as Readonly<Record<string, unknown>>).classifications;
+  const currency = (currencyAndLocale as Readonly<Record<string, unknown>>).functionalCurrency;
+  if (!Array.isArray(rawClassifications) || rawClassifications.length === 0 || typeof currency !== "string" || !/^[A-Z]{3}$/.test(currency) || currency === "XXX" || currency === "XTS") return null;
+  if (!rawClassifications.every(value => typeof value === "string" && ACCOUNTING_CLASSIFICATIONS.includes(value as AccountingClassification))) return null;
+  const classifications = [...new Set(rawClassifications)] as Array<AccountingClassification>;
+  if (classifications.length !== rawClassifications.length) return null;
+  return { currency, classifications };
+};
 type CommandAnswer = Promise<Result<AccountingOperation>>;
 type CorrectionAccessReason = "allowed" | "historical" | "not-owner" | "not-approver" | "advisory-denied" | "not-pending" | "self-assigned" | "period-not-open";
 /** Advisory facts used to project safe correction controls for one exact proposal. */
@@ -109,7 +126,6 @@ const requestId = () => globalThis.crypto?.randomUUID?.() ?? `request-${Date.now
 
 /** Own Accounting form state, viewer-scoped reads, idempotent command tokens and server readback. */
 export const useAccountingWorkbench = (moduleId: string, locale: string, t: AccountingTranslation) => {
-  const currency = "VND";
   const [asOfDraft, setAsOfDraft] = useState("");
   const [ledgerVersion, setLedgerVersion] = useState<string>();
   const [notice, setNotice] = useState<AccountingNotice | null>(null);
@@ -118,7 +134,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
   const [mimeType, setMimeType] = useState("");
   const [contentBase64, setContentBase64] = useState("");
   const [fileSize, setFileSize] = useState(0);
-  const [classification, setClassification] = useState("expense");
+  const [classificationDraft, setClassificationDraft] = useState<AccountingClassification>("expense");
   const [documentAmount, setDocumentAmount] = useState("");
   const [documentMonth, setDocumentMonth] = useState("");
   const [sourceAmount, setSourceAmount] = useState("");
@@ -128,8 +144,15 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
   const [deltaAmount, setDeltaAmount] = useState("");
   const [correctionReason, setCorrectionReason] = useState("");
   const tokens = useRef<Record<string, { readonly fingerprint: string; readonly token: string }>>({});
-  const workbench = useQueryAccountingWorkbenchSwr(moduleId, currency, ledgerVersion);
   const context = useQueryAppliedAccountingContextSwr(moduleId);
+  const intakePolicy = context.data?.ok === true ? accountingIntakePolicy(context.data.data.snapshot) : null;
+  const currency = intakePolicy?.currency ?? "VND";
+  const classifications = intakePolicy?.classifications ?? [];
+  const classification = classifications.includes(classificationDraft) ? classificationDraft : classifications[0] ?? "";
+  const intakeReady = intakePolicy !== null;
+  const intakeLoading = context.data === undefined && context.error === undefined;
+  const setClassification = (value: string) => { if (ACCOUNTING_CLASSIFICATIONS.includes(value as AccountingClassification)) setClassificationDraft(value as AccountingClassification); };
+  const workbench = useQueryAccountingWorkbenchSwr(moduleId, intakePolicy?.currency, ledgerVersion);
   const runtime = useQueryMyAgentosModuleRuntimeSwr(moduleId, moduleId, false);
   const initialize = useMutateInitializeAccountingSwr(moduleId, currency);
   const ingest = useMutateIngestAccountingDocumentSwr(moduleId, currency);
@@ -190,9 +213,9 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
   const onIngest = (event: FormEvent) => {
     event.preventDefault();
     const periodKey = canonicalMonthKey(documentMonth);
-    if (documentAmountMinor === null || periodKey === null || contentBase64.length === 0) return;
+    if (!intakeReady || classification.length === 0 || documentAmountMinor === null || periodKey === null || contentBase64.length === 0) return;
     const value = { amountMinor: documentAmountMinor, classification, contentBase64, currency, fileName, mimeType, periodKey };
-    void run("ingest", value, requestToken => ingest.trigger({ ...value, classification: classification as "income" | "expense" | "receivable" | "payable", requestToken }));
+    void run("ingest", value, requestToken => ingest.trigger({ ...value, classification, requestToken }));
   };
   const onReconcile = (event: FormEvent) => { event.preventDefault(); if (sourceAmountMinor !== null) { const value = { currency, sourceAmountMinor }; void run("reconcile", value, requestToken => reconcile.trigger({ ...value, requestToken })); } };
   const onClose = (event: FormEvent) => { event.preventDefault(); const periodKey = canonicalMonthKey(closeMonth); if (periodKey !== null) { const value = { periodKey }; void run("close", value, requestToken => close.trigger({ ...value, requestToken })); } };
@@ -206,5 +229,5 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
   const documentCommand = (operation: "submit" | "approve" | "post", documentId: string) => { const command = operation === "submit" ? submitDocument : operation === "approve" ? approveDocument : postDocument; void run(`document-${operation}-${documentId}`, { documentId }, requestToken => command.trigger({ documentId, requestToken })); };
   const correctionAccess = (correction: AccountingCorrection) => accountingCorrectionAccess({ explicitLedgerVersion: isAsOf, role, canApproveCorrection: model?.capabilities.canApproveCorrection, correction, periods: model?.periods });
   const approvePendingCorrection = (correctionId: string) => void run(`correction-approve-${correctionId}`, { correctionId }, requestToken => approveCorrection.trigger({ correctionId, requestToken }));
-  return { t, locale, currency, asOfDraft, setAsOfDraft, ledgerVersion, setLedgerVersion, notice, approverId, setApproverId, fileName, fileSize, classification, setClassification, documentAmount, setDocumentAmount, documentMonth, setDocumentMonth, sourceAmount, setSourceAmount, closeMonth, setCloseMonth, sourceEntryId, setSourceEntryId, effectiveMonth, setEffectiveMonth, deltaAmount, setDeltaAmount, correctionReason, setCorrectionReason, workbench, context, runtime, participantUserIds, initialize, ingest, submitDocument, approveDocument, postDocument, reconcile, close, submitCorrection, approveCorrection, answer, model, role, isAsOf, correctionSubmitAllowed, pendingCorrections, eligibleSourceEntries, sourceEntryEligible, documentAmountMinor, sourceAmountMinor, deltaAmountMinor, onFileSelected, onInitialize, onIngest, onReconcile, onClose, onCorrection, documentCommand, correctionAccess, approvePendingCorrection };
+  return { t, locale, currency, classifications, intakeReady, intakeLoading, asOfDraft, setAsOfDraft, ledgerVersion, setLedgerVersion, notice, approverId, setApproverId, fileName, fileSize, classification, setClassification, documentAmount, setDocumentAmount, documentMonth, setDocumentMonth, sourceAmount, setSourceAmount, closeMonth, setCloseMonth, sourceEntryId, setSourceEntryId, effectiveMonth, setEffectiveMonth, deltaAmount, setDeltaAmount, correctionReason, setCorrectionReason, workbench, context, runtime, participantUserIds, initialize, ingest, submitDocument, approveDocument, postDocument, reconcile, close, submitCorrection, approveCorrection, answer, model, role, isAsOf, correctionSubmitAllowed, pendingCorrections, eligibleSourceEntries, sourceEntryEligible, documentAmountMinor, sourceAmountMinor, deltaAmountMinor, onFileSelected, onInitialize, onIngest, onReconcile, onClose, onCorrection, documentCommand, correctionAccess, approvePendingCorrection };
 };

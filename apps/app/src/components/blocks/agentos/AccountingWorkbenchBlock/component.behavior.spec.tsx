@@ -20,7 +20,7 @@ const contextAnswer = { ok: true, data: { installationId: "module-1", versionId:
 const translate = (key: string, values?: Readonly<Record<string, string | number | undefined>>) => `${key}${values === undefined ? "" : ` ${Object.values(values).join(" ")}`}`;
 
 const view = (overrides: Record<string, unknown> = {}) => ({
-  t: translate, locale: "en", currency: "VND", asOfDraft: "", setAsOfDraft: noop, ledgerVersion: undefined, setLedgerVersion: noop,
+  t: translate, locale: "en", currency: "VND", classifications: ["income", "expense", "receivable", "payable"], intakeReady: true, intakeLoading: false, asOfDraft: "", setAsOfDraft: noop, ledgerVersion: undefined, setLedgerVersion: noop,
   notice: null, approverId: "", setApproverId: noop, fileName: "", fileSize: 0, classification: "expense", setClassification: noop,
   documentAmount: "", setDocumentAmount: noop, documentMonth: "", setDocumentMonth: noop, sourceAmount: "", setSourceAmount: noop,
   closeMonth: "", setCloseMonth: noop, sourceEntryId: "", setSourceEntryId: noop, effectiveMonth: "", setEffectiveMonth: noop,

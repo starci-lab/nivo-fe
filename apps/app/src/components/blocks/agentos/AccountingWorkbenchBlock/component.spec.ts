@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import en from "@/messages/en.json";
 import vi from "@/messages/vi.json";
-import { accountingCorrectionAccess, accountingDocumentAction, accountingNoticeLive, bytesToBase64, canonicalMonthKey, currencyAmountToMinor, eligibleCorrectionSourceEntries, formatMinorCurrency, maskParticipantId } from ".";
+import { accountingCorrectionAccess, accountingDocumentAction, accountingIntakePolicy, accountingNoticeLive, bytesToBase64, canonicalMonthKey, currencyAmountToMinor, eligibleCorrectionSourceEntries, formatMinorCurrency, maskParticipantId } from ".";
 
 const pending = { status: "pending", effectivePeriodKey: "2026-09-01", submittedByUserId: "owner-1", approverUserId: "approver-1" } as const;
 const periods = [{ periodKey: "2026-09-01", status: "open" }] as const;
@@ -51,6 +51,13 @@ describe("AccountingWorkbenchBlock authority projection", () => {
     expect(formatMinorCurrency("1234567", "VND", "vi")).toContain("1.234.567");
     expect(bytesToBase64(new Uint8Array([100, 97, 116, 97]))).toBe("ZGF0YQ==");
     expect(maskParticipantId("participant-user-1234")).toBe("part…1234");
+  });
+
+  it("narrows document intake to the applied Setup currency and classifications", () => {
+    expect(accountingIntakePolicy({ accountingScope: { classifications: ["income", "receivable"] }, currencyAndLocale: { functionalCurrency: "USD" } })).toEqual({ currency: "USD", classifications: ["income", "receivable"] });
+    expect(accountingIntakePolicy({ accountingScope: { classifications: ["income", "income"] }, currencyAndLocale: { functionalCurrency: "USD" } })).toBeNull();
+    expect(accountingIntakePolicy({ accountingScope: { classifications: ["expense"] }, currencyAndLocale: { functionalCurrency: "XXX" } })).toBeNull();
+    expect(accountingIntakePolicy({})).toBeNull();
   });
 
   it("keeps Accounting message keys in English and Vietnamese in exact parity", () => {

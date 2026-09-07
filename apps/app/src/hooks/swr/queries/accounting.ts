@@ -11,4 +11,4 @@ export const accountingWorkbenchQueryKey = (installationId: string, currency: st
 /** Read one installation's applied immutable Accounting context. */
 export const useQueryAppliedAccountingContextSwr = (installationId: string) => useNivoQuery(accountingContextQueryKey(installationId), () => resolveAppliedAccountingContext(installationId));
 /** Read one versioned Accounting workbench in the signed-in viewer cache. */
-export const useQueryAccountingWorkbenchSwr = (installationId: string, currency: string, ledgerVersion?: string) => useNivoQuery(accountingWorkbenchQueryKey(installationId, currency, ledgerVersion), () => readAccountingWorkbench(installationId, currency, ledgerVersion));
+export const useQueryAccountingWorkbenchSwr = (installationId: string, currency?: string, ledgerVersion?: string) => useNivoQuery(currency === undefined ? null : accountingWorkbenchQueryKey(installationId, currency, ledgerVersion), () => readAccountingWorkbench(installationId, currency!, ledgerVersion));
