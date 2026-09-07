@@ -9,9 +9,10 @@ import createNextIntlPlugin from "next-intl/plugin"
  */
 const nextConfig: NextConfig = {
     output: "standalone",
+    outputFileTracingRoot: resolve(import.meta.dirname, "../.."),
     transpilePackages: ["@nivo/ui", "@starci/grammar"],
     turbopack: {
-        root: resolve(import.meta.dirname, "../../.."),
+        root: resolve(import.meta.dirname, "../.."),
     },
     experimental: {
         optimizePackageImports: ["@heroui/react"],
