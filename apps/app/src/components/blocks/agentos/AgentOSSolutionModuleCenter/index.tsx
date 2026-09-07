@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMutateInstallAgentosSolutionModuleSwr, useQueryMyAgentosModuleInstallationsSwr, useQueryMyAgentosSolutionModulesSwr } from "@/hooks";
 import type { AgentosSolutionModule } from "@/modules/api/console";
@@ -52,6 +52,7 @@ export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterPr
   const [outcome, setOutcome] = useState<string>();
   const [retryingInstalled, setRetryingInstalled] = useState(false);
   const [retryingCatalogue, setRetryingCatalogue] = useState(false);
+  const installRequestKeys = useRef(new Map<AgentosSolutionModule["key"], string>());
   const refresh = useCallback(async () => {
     await Promise.all([refreshCatalog(), refreshInstallations()]);
   }, [refreshCatalog, refreshInstallations]);
@@ -79,16 +80,20 @@ export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterPr
   const install = useCallback(async (moduleKey: AgentosSolutionModule["key"]) => {
     setPendingKey(moduleKey);
     setOutcome(undefined);
+    const idempotencyKey = installRequestKeys.current.get(moduleKey) ?? `nivo-fe:${crypto.randomUUID()}`;
+    installRequestKeys.current.set(moduleKey, idempotencyKey);
     try {
       const result = await installModule({
         moduleKey,
-        idempotencyKey: `nivo-fe:${crypto.randomUUID()}`
+        idempotencyKey
       });
       setPendingKey(undefined);
       if (!result.ok) {
+        if (!new Set(["NETWORK", "MALFORMED", "GRAPHQL", "EMPTY"]).has(result.code ?? "")) installRequestKeys.current.delete(moduleKey);
         setOutcome(t("installFailed"));
         return;
       }
+      installRequestKeys.current.delete(moduleKey);
       setTrackedInstallationId(result.data.id);
       setOutcome(t("installAccepted"));
       setMode("installed");

@@ -262,4 +262,30 @@ describe("connected console pages", () => {
         await waitFor(() => expect(installAgentosSolutionModule).toHaveBeenCalled())
         expect(await screen.findByText("installFailed")).toBeInTheDocument()
     })
+
+    it("reuses one installation request key after an ambiguous failure and rotates it after success", async () => {
+        cleanup()
+        resetQueryCache()
+        vi.mocked(installAgentosSolutionModule).mockClear()
+        vi.mocked(myAgentosSolutionModules).mockResolvedValue({ ok: true, data: [{ key: "knowledge-hub", name: "Knowledge Hub", summary: "Reads", agentRoles: [], channelRoles: [], safetyMode: "strict", version: "1" }] } as never)
+        vi.mocked(myAgentosModuleInstallations).mockResolvedValue({ ok: true, data: [] } as never)
+        vi.mocked(installAgentosSolutionModule)
+            .mockResolvedValueOnce({ ok: false, reason: "response lost", code: "NETWORK" } as never)
+            .mockResolvedValueOnce({ ok: true, data: { id: "install-1" } } as never)
+            .mockResolvedValueOnce({ ok: true, data: { id: "install-2" } } as never)
+        render(<AgentOSSolutionModuleCenter workspaceId="workspace-1" />)
+
+        fireEvent.click(await screen.findByRole("button", { name: "install" }))
+        expect(await screen.findByText("installFailed")).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "install" }))
+        await waitFor(() => expect(installAgentosSolutionModule).toHaveBeenCalledTimes(2))
+        const firstKey = vi.mocked(installAgentosSolutionModule).mock.calls[0][0].idempotencyKey
+        const replayKey = vi.mocked(installAgentosSolutionModule).mock.calls[1][0].idempotencyKey
+        expect(replayKey).toBe(firstKey)
+
+        fireEvent.click(screen.getByRole("radio", { name: "modes.catalog" }))
+        fireEvent.click(screen.getByRole("button", { name: "install" }))
+        await waitFor(() => expect(installAgentosSolutionModule).toHaveBeenCalledTimes(3))
+        expect(vi.mocked(installAgentosSolutionModule).mock.calls[2][0].idempotencyKey).not.toBe(firstKey)
+    })
 })
