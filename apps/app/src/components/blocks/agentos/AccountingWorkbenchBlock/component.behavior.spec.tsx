@@ -30,7 +30,7 @@ const view = (overrides: Record<string, unknown> = {}) => ({
   submitDocument: idle, approveDocument: idle, postDocument: idle, reconcile: idle, close: idle, submitCorrection: idle, approveCorrection: idle,
   answer, model, role: "owner", isAsOf: false, correctionSubmitAllowed: true, pendingCorrections: [correction], eligibleSourceEntries: [ledger],
   sourceEntryEligible: false, documentAmountMinor: null, sourceAmountMinor: null, deltaAmountMinor: null,
-  onFileSelected: noop, onInitialize: noop, onIngest: noop, onReconcile: noop, onClose: noop, onCorrection: noop,
+  onFileSelected: noop, onInitialize: noop, onIngest: noop, onReconcile: noop, reconcileCurrent: noop, onClose: noop, onCorrection: noop, submitCurrentCorrection: noop,
   documentCommand: vi.fn(), correctionAccess: vi.fn(() => ({ submit: true, approve: false, approvalReason: "not-owner" })), approvePendingCorrection: vi.fn(),
   ...overrides,
 }) as never;
@@ -108,6 +108,16 @@ describe("AccountingWorkbenchBlock adverse states", () => {
     fireEvent.click(screen.getByText("approveCorrection"));
     expect(documentCommand).toHaveBeenCalledWith("approve", "submitted");
     expect(approvePendingCorrection).toHaveBeenCalledWith("correction-1");
+  });
+
+  it("dispatches reconciliation and correction commands from explicit button presses", () => {
+    const reconcileCurrent = vi.fn();
+    const submitCurrentCorrection = vi.fn();
+    render(<AccountingWorkbenchBlockBase view={view({ sourceAmount: "-1,250,000", sourceAmountMinor: "-1250000", sourceEntryId: "ledger-1", sourceEntryEligible: true, effectiveMonth: "2026-10", deltaAmount: "-50,000", deltaAmountMinor: "-50000", correctionReason: "late adjustment", reconcileCurrent, submitCurrentCorrection })} />);
+    fireEvent.click(screen.getByRole("button", { name: "reconcile" }));
+    fireEvent.click(screen.getByRole("button", { name: "submitCorrection" }));
+    expect(reconcileCurrent).toHaveBeenCalledOnce();
+    expect(submitCurrentCorrection).toHaveBeenCalledOnce();
   });
 
   it("forwards native controls, historical navigation, file choice and setup recovery", () => {
