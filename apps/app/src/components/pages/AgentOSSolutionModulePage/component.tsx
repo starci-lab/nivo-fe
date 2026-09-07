@@ -1511,13 +1511,13 @@ const SettingsFormContent = ({
       const configured = credentialStatuses.some(row => row.providerKey === slot.key);
       const value = credentialValues[slot.key]?.trim() ?? "";
       return [<Button
-        key="item-0"
+        key={`${slot.key}-save`}
         variant="secondary"
         isDisabled={value.length === 0}
         isPending={pending}
         onPress={() => value.length > 0 && onSaveCredential(slot.key, value)}
       >{copy.settings.saveCredential({ label: slot.label })}</Button>, ...(configured ? [<Button
-        key="item-0"
+        key={`${slot.key}-remove`}
         variant="ghost"
         isDisabled={pending}
         onPress={() => onRemoveCredential(slot.key)}

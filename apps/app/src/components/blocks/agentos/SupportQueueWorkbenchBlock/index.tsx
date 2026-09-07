@@ -59,7 +59,7 @@ type WorkbenchRow = {
   readonly label: string;
   readonly value: string;
 };
-const rowView = (row: WorkbenchRow) => <div>
+const rowView = (row: WorkbenchRow) => <div key={row.id}>
   <Text size="sm">{row.label}</Text>
   <Text size="sm" weight="semibold">{row.value}</Text></div>;
 const factList = (rows: ReadonlyArray<WorkbenchRow>) => <div>{rows.map(rowView)}</div>;
