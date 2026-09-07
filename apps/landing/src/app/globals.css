@@ -87,15 +87,17 @@ a:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 4px; }
 .section-heading.inverse .eyebrow { color: var(--accent-glow); }
 .section-heading.inverse h2 { margin: 0; font-size: clamp(28px, 2.4vw, 34px); line-height: 1.12; letter-spacing: -.035em; }
 .section-heading.inverse > p:last-child:empty { display: none; }
-.loop-track-shell { position: relative; margin: 42px 0 0; }
-.loop-track-shell::before { content: ""; position: absolute; top: 41px; left: 2%; right: 2%; height: 5px; border-radius: 99px; background: rgba(255,117,105,.28); }
-.loop-progress { position: absolute; top: 41px; left: 2%; right: 2%; height: 5px; z-index: 1; transform-origin: left; border-radius: 99px; background: var(--accent-glow); box-shadow: 0 0 16px #ff534a, 0 0 28px rgba(255,83,74,.8); }
-.loop-track { display: grid; grid-template-columns: repeat(6, 1fr); list-style: none; padding: 0; margin: 0; text-align: center; }
-.loop-track li { position: relative; min-height: 174px; padding: 0 10px; display: flex; flex-direction: column; align-items: center; }
-.loop-track li > span { margin-bottom: 8px; color: #ffb0aa; font: 700 10px ui-monospace, monospace; }
+.loop-track-shell { position: relative; height: 202px; margin: 42px 0 0; }
+.loop-path { position: absolute; inset: 0; width: 100%; height: 210px; overflow: visible; }
+.loop-path path { fill: none; stroke-linecap: round; }
+.loop-path-bed { stroke: rgba(255,117,105,.24); stroke-width: 7; }
+.loop-path-signal { stroke: url(#loop-signal); stroke-width: 4; stroke-dasharray: 1220; stroke-dashoffset: 0; animation: loop-path-draw 1.25s cubic-bezier(.22,1,.36,1) both; }
+.loop-track { position: absolute; inset: 22px 0 auto; height: 180px; list-style: none; padding: 0; margin: 0; text-align: center; }
+.loop-track li { position: absolute; top: 0; left: var(--loop-x); width: 166px; min-height: 174px; padding: 0 7px; display: flex; flex-direction: column; align-items: center; transform: translateX(-50%); }
+.loop-track li > span { margin-top: 8px; color: #ffb0aa; font: 700 10px ui-monospace, monospace; }
 .loop-glyph { width: 66px; height: 66px; z-index: 2; display: grid; place-items: center; border: 2px solid var(--accent-glow); border-radius: 50%; background: #3b1014; color: #ff756c; box-shadow: 0 0 0 7px rgba(255,102,93,.1), 0 0 22px rgba(255,102,93,.9); }
 .loop-glyph svg { width: 29px; height: 29px; }
-.loop-track strong { margin-top: 12px; font-size: 14px; line-height: 1.3; }
+.loop-track strong { margin-top: 5px; font-size: 14px; line-height: 1.3; }
 .loop-track small { margin-top: 7px; color: #cdbfc0; font-size: 10px; line-height: 1.45; }
 
 .roles { position: relative; padding-block: 92px; }
@@ -147,10 +149,11 @@ footer { --nivo-brand-ink: #fff; --nivo-brand-accent: #e72b32; padding: 34px 0 2
 .footer-inner small { grid-column: 1/-1; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.12); color: #806d6f; }
 
 @keyframes node-pulse { 50% { transform: scale(1.18); box-shadow: 0 0 0 8px rgba(231,43,50,.05); } }
+@keyframes loop-path-draw { from { stroke-dashoffset: 1220; } to { stroke-dashoffset: 0; } }
 
 @media (max-width: 900px) {
   .hero { grid-template-areas: "copy" "visual" "evidence"; grid-template-columns: 1fr; grid-template-rows: auto; gap: 32px; padding-top: 40px; }.hero-copy { max-width: 760px; padding-top: 0; }.hero-visual { width: min(760px, 100%); justify-self: center; }.visual-overlay { margin-top: -78px; }
-  .loop-track { grid-template-columns: repeat(3, 1fr); row-gap: 26px; }.loop-track-shell::before, .loop-progress { display: none; }
+  .loop-track-shell { height: auto; }.loop-path { display: none; }.loop-track { position: relative; inset: auto; height: auto; display: grid; grid-template-columns: repeat(3, 1fr); row-gap: 26px; }.loop-track li { position: relative; inset: auto; left: auto; width: auto; transform: none; }
   .roles { padding-bottom: 82px; }.role-intro { width: 100%; max-width: 760px; }.role-grid { position: relative; inset: auto; margin-top: 150px; }.role-rail { left: 2%; top: 46%; width: 96%; }
   .intent-grid { grid-template-columns: repeat(2, 1fr); row-gap: 44px; }.intent-grid article:nth-child(2) { border-right: 0; }
   .instance-stack { grid-template-columns: repeat(2, 1fr); }

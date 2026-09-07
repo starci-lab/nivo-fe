@@ -7,5 +7,4 @@ export const CLASS_NAMES = {
   visualOverlay: cn("visual-overlay"),
   responsibilityGraph: cn("responsibility-graph"),
   loopTrackShell: cn("loop-track-shell"),
-  loopProgress: cn("loop-progress"),
 } as const;

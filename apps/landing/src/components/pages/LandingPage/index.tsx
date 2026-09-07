@@ -11,6 +11,7 @@ export type LandingPageProps = Record<string, never>;
 const INTENT_ICONS = ["apps", "overview", "agentos", "wallet"] as const;
 const LOOP_ICONS = ["community", "agentos", "servers", "search", "code", "talents"] as const;
 const ROLE_ART = ["/images/handoff-human-v1.png", "/images/handoff-ai-v1.png", "/images/handoff-system-v1.png"] as const;
+const LOOP_POSITIONS = ["7%", "25%", "43%", "61%", "79%", "94%"] as const;
 
 /** Renders the public NIVO Agentic OS product narrative and entry offer. */
 export const LandingPage = (props: LandingPageProps) => {
@@ -41,7 +42,7 @@ export const LandingPage = (props: LandingPageProps) => {
 
         <div className={C.heroVisual}>
           <MediaFrame className={C.heroArtwork} aspect="landscape" fit="cover" treatment="plain">
-            <Image src="/images/nivo-unicorn-responsibility-transparent-v4.png" alt={hero.artAlt} width={1536} height={1024} priority sizes="(max-width: 900px) 100vw, 58vw" />
+            <Image src="/images/nivo-unicorn-responsibility-transparent-v13.png" alt={hero.artAlt} width={1536} height={1024} priority sizes="(max-width: 900px) 100vw, 58vw" />
           </MediaFrame>
           <LandingMotionResponsibilityGraph>
             <svg aria-hidden="true" viewBox="0 0 640 440" preserveAspectRatio="none"><path d="M62 318C150 372 219 382 302 326S438 172 579 124" /><path d="M64 318C182 260 235 155 327 146s148 52 252-22" /></svg>
@@ -60,7 +61,10 @@ export const LandingPage = (props: LandingPageProps) => {
       <section id="operating-loop" className={C.loop}>
         <div className={C.sectionShell}>
           <LandingMotionLightSectionReveal><p className={C.eyebrow}>{loop.eyebrow}</p><Heading level={2}>{loop.title}</Heading><p>{loop.lede}</p></LandingMotionLightSectionReveal>
-          <LandingMotionLoopTrack><ol className={C.loopTrack}>{loop.steps.map((step, index) => <LandingMotionLoopStep key={step} index={index}><span>{String(index + 1).padStart(2, "0")}</span><div className={C.loopGlyph}><NivoIcon props={{ name: LOOP_ICONS[index], usage: "heading" }} /></div><strong>{step}</strong><small>{loop.stepBodies[index]}</small></LandingMotionLoopStep>)}</ol></LandingMotionLoopTrack>
+          <LandingMotionLoopTrack>
+            <svg className={C.loopPath} aria-hidden="true" viewBox="0 0 1200 210" preserveAspectRatio="none"><defs><linearGradient id="loop-signal" x1="0" x2="1"><stop stopColor="#ff7469"/><stop offset="1" stopColor="#ff5148"/></linearGradient><filter id="loop-glow"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter><marker id="loop-arrow" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto"><path d="M1 1.5 11 6.5 1 11.5" fill="none" stroke="#ff7469" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></marker></defs><path className={C.loopPathBed} d="M20 82V70Q20 56 34 56H1166"/><path className={C.loopPathSignal} d="M20 82V70Q20 56 34 56H1166" markerEnd="url(#loop-arrow)" filter="url(#loop-glow)"/></svg>
+            <ol className={C.loopTrack}>{loop.steps.map((step, index) => <LandingMotionLoopStep key={step} index={index} position={LOOP_POSITIONS[index]}><div className={C.loopGlyph}><NivoIcon props={{ name: LOOP_ICONS[index], usage: "heading" }} /></div><span>{String(index + 1).padStart(2, "0")}</span><strong>{step}</strong><small>{loop.stepBodies[index]}</small></LandingMotionLoopStep>)}</ol>
+          </LandingMotionLoopTrack>
         </div>
       </section>
 
@@ -86,7 +90,7 @@ export const LandingPage = (props: LandingPageProps) => {
 
       <section id="offer" className={C.offer}>
         <div id="responsibility-first" className={C.sectionShell_offerGrid}>
-          <div className={C.offerArtwork}><Image src="/images/nivo-unicorn-responsibility-transparent-v4.png" alt="" width={1536} height={1024} sizes="320px" /></div>
+          <div className={C.offerArtwork}><Image src="/images/nivo-unicorn-responsibility-transparent-v13.png" alt="" width={1536} height={1024} sizes="320px" /></div>
           <div className={C.offerCopy}><Heading level={2}>{offer.title}</Heading><p>{offer.body}</p><ul>{offer.benefits.map(item => <li key={item}><NivoIcon props={{ name: "complete", usage: "chip" }} />{item}</li>)}</ul></div>
           <Button href={offer.href} size="lg" variant="outline" endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}>{hero.primary}</Button>
         </div>

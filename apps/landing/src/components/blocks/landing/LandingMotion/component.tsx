@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { CLASS_NAMES as C } from "./classNames";
 
 /** Content revealed as the landing hero enters the viewport. */
@@ -11,7 +11,7 @@ export type LandingMotionLightSectionRevealProps = { children: ReactNode };
 /** Decorative artwork content given restrained ambient movement. */
 export type LandingMotionArtworkDriftProps = { children: ReactNode };
 /** One ordered operating-loop step and its stagger position. */
-export type LandingMotionLoopStepProps = { children: ReactNode; index: number };
+export type LandingMotionLoopStepProps = { children: ReactNode; index: number; position: string };
 /** One responsibility instance and its stagger position. */
 export type LandingMotionInstanceCardProps = { children: ReactNode; index: number };
 /** The code-native responsibility constellation layered over the hero artwork. */
@@ -50,13 +50,13 @@ export const LandingMotionResponsibilityGraph = (props: LandingMotionResponsibil
 /** Reveals one operating-loop step in reading order. */
 export const LandingMotionLoopStep = (props: LandingMotionLoopStepProps) => {
   const reduced = useReducedMotion();
-  return <motion.li initial={false} whileInView={reduced ? undefined : { opacity: [0.5, 1], x: [-10, 0] }} viewport={{ once: true, amount: 0.6 }} transition={{ duration: 0.42, delay: props.index * 0.065, ease: "easeOut" }}>{props.children}</motion.li>;
+  return <motion.li style={{ "--loop-x": props.position } as CSSProperties} initial={false} whileInView={reduced ? undefined : { opacity: [0.5, 1], y: [8, 0] }} viewport={{ once: true, amount: 0.6 }} transition={{ duration: 0.42, delay: props.index * 0.065, ease: "easeOut" }}>{props.children}</motion.li>;
 };
 
 /** Illuminates the operating path in reading order as it enters view. */
 export const LandingMotionLoopTrack = (props: LandingMotionLoopTrackProps) => {
   const reduced = useReducedMotion();
-  return <motion.div className={C.loopTrackShell} initial={false} whileInView="visible" viewport={{ once: true, amount: 0.35 }}><motion.span className={C.loopProgress} aria-hidden="true" variants={{ visible: { scaleX: 1 } }} initial={{ scaleX: reduced ? 1 : 0 }} transition={{ duration: reduced ? 0 : 1.25, ease: [0.22, 1, 0.36, 1] }} />{props.children}</motion.div>;
+  return <motion.div className={C.loopTrackShell} initial={false} whileInView={reduced ? undefined : { opacity: [0.7, 1] }} viewport={{ once: true, amount: 0.35 }} transition={{ duration: reduced ? 0 : 0.35 }}>{props.children}</motion.div>;
 };
 
 /** Moves responsibility across the three operating layers without scroll hijacking. */

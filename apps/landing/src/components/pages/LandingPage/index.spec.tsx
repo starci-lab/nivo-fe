@@ -12,7 +12,7 @@ describe("LandingPage", () => {
 
     it("keeps generated handoff artwork independently composable", () => {
         const html = renderToStaticMarkup(<LandingPage />)
-        expect(html).toContain("nivo-unicorn-responsibility-transparent-v4.png")
+        expect(html).toContain("nivo-unicorn-responsibility-transparent-v13.png")
         expect(html).toContain("handoff-human-v1.png")
         expect(html).toContain("handoff-ai-v1.png")
         expect(html).toContain("handoff-system-v1.png")
