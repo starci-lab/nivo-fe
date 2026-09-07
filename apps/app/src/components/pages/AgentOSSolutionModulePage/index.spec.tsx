@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react"
+import type { ComponentProps, ReactElement } from "react"
 import { NextIntlClientProvider, createTranslator } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
@@ -240,6 +240,43 @@ describe("AgentOSSolutionModulePage projections", () => {
         mocks.approveTrigger.mockReset().mockResolvedValue({ ok: true })
         mocks.takeoverTrigger.mockReset().mockResolvedValue({ ok: true })
         mocks.deliveryTrigger.mockReset().mockResolvedValue({ ok: true })
+    })
+
+    it("binds indexed solution-module attachments to attachment-content confirmations", async () => {
+        runtime.installation.runtimeManifest.setup = {
+            schemaVersion: 1,
+            contract: { key: "chatbot-setup", version: "1.0.0" },
+            requirements: [{
+                key: "offeringsAndCanonicalFacts",
+                label: "Offerings",
+                validator: { key: "chatbot.offerings-canonical-facts", version: "1.0.0" },
+                dependencies: ["source", "retrieval"],
+                citationPolicy: "attachment-content",
+                ownerConfirmation: true,
+                requiredFor: ["acceptance", "apply"]
+            }],
+            requiredAcceptanceScenarios: []
+        }
+        runtime.setupSession.gateEvidence.gates = [{ key: "offeringsAndCanonicalFacts", passed: true }]
+        runtime.setupSessions[0]!.gateEvidence.gates = [{ key: "offeringsAndCanonicalFacts", passed: true }]
+        render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
+        const panel = setupProps().sourceAttachmentPanel as ReactElement<{
+            readonly onIndexedAttachmentsChange: (attachments: ReadonlyArray<{ readonly attachmentId: string; readonly sha256: string }>) => void;
+        }>
+        act(() => panel.props.onIndexedAttachmentsChange([{
+            attachmentId: "attachment-1",
+            sha256: "b".repeat(64)
+        }]))
+        await act(async () => setupProps().onConfirmRequirement(setupProps().draft!.gates[0]!))
+        expect(mocks.runtimeTrigger).toHaveBeenLastCalledWith(expect.objectContaining({
+            action: "CONFIRM_SETUP_REQUIREMENT",
+            requirementKey: "offeringsAndCanonicalFacts",
+            citations: [{
+                attachmentId: "attachment-1",
+                sha256: "b".repeat(64),
+                locator: "owner-approved-source"
+            }]
+        }))
     })
 
     it.each(["setup", "test", "operate", "settings", "diagnostics"] as const)("projects the %s cockpit surface", async (view) => {

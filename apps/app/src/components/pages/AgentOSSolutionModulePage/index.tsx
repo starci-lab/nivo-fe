@@ -8,6 +8,7 @@ import type { ExecuteMessage } from "@/components/blocks/agentos/ExecuteChatBloc
 import type { ExecuteSession } from "@/components/blocks/agentos/ExecuteSessionRailBlock";
 import type { AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteShellBlock";
 import type { SetupMessage, SetupRevision } from "@/components/blocks/agentos/PrivateSetupChatBlock";
+import { AgentOSSolutionModuleAttachments } from "@/components/blocks/agentos/AgentOSSolutionModuleAttachments";
 import { useQueryChatbotWorkbenchSwr, useQueryMyAgentosModuleRuntimeSwr, useQueryMyAgentosModuleTestSurfaceSwr, useQueryMyAgentWorkspaceControlCenterSwr, useQuerySupportCustomerConversationsSwr, useQuerySupportCustomerMessagesSwr, useQuerySupportImportantFactsSwr, useQuerySupportTicketsSwr, useReadMyAgentosModuleTestRun, useMutateApproveSupportReplySwr, useMutateConfigureAgentWorkspaceChannelSwr, useMutateManageAgentosModuleRuntimeSwr, useMutateReconcileChatbotDeliverySwr, useMutateReconcileSupportDeliverySwr, useMutateResolveChatbotHandoffSwr, useMutateRunAgentosModuleTestSwr, useMutateSetChatbotHandoffSwr, useMutateSetSupportTakeoverSwr, useMutateStartChatbotZaloOauthSwr } from "@/hooks";
 import { type AgentosModuleRuntime, type AgentosRuntimeManifest, type AgentosRuntimeValue, type ManageAgentosModuleRuntimeInput } from "@/modules/api/console";
 import { nivoQueryData, type NivoQueryAnswer } from "@/modules/query";
@@ -32,6 +33,7 @@ const telegramAccountIdFromToken = (token: string): string | null => {
 };
 type SetupAction = { readonly kind: "send" | "apply" | "confirm"; readonly sessionId: string } | { readonly kind: "start" };
 type SetupFeedback = { readonly refused?: "send" | "apply"; readonly unconfirmed?: boolean };
+type IndexedSourceAttachment = { readonly attachmentId: string; readonly sha256: string };
 type AgentosModuleTestTarget = {
   readonly contextVersionId?: string;
   readonly setupSessionId?: string;
@@ -236,6 +238,10 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
   const [setupAction, setSetupAction] = useState<SetupAction | null>(null);
   const [setupFeedback, setSetupFeedback] = useState<Record<string, SetupFeedback>>({});
   const [setupStartRefused, setSetupStartRefused] = useState(false);
+  const [indexedSourceAttachments, setIndexedSourceAttachments] = useState<ReadonlyArray<IndexedSourceAttachment>>([]);
+  const updateIndexedSourceAttachments = useCallback((attachments: ReadonlyArray<IndexedSourceAttachment>) => {
+    setIndexedSourceAttachments(current => JSON.stringify(current) === JSON.stringify(attachments) ? current : attachments);
+  }, []);
   const setupLock = useRef(false);
 
   const [selectedOperationTarget, setSelectedOperationTarget] = useState<OperationTarget | null>(null);
@@ -433,11 +439,16 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
       setupLock.current = false;
     });
   }, [installationId, perform, pending]);
-  const confirmSetupRequirement = useCallback(async (sessionId: string, draftDigest: string, requirementKey: string) => {
+  const confirmSetupRequirement = useCallback(async (sessionId: string, draftDigest: string, requirementKey: string,
+    citationPolicy: "none" | "attachment-content") => {
     if (setupLock.current || pending) return;
     setupLock.current = true;
     setSetupAction({ kind: "confirm", sessionId });
-    const evidenceDigest = await sha256(JSON.stringify({ draftDigest, requirementKey, passed: true }));
+    const citations = citationPolicy === "attachment-content" ? indexedSourceAttachments.map(attachment => ({
+      ...attachment,
+      locator: "owner-approved-source",
+    })) : [];
+    const evidenceDigest = await sha256(JSON.stringify({ draftDigest, requirementKey, passed: true, citations }));
     await perform({
       action: "CONFIRM_SETUP_REQUIREMENT",
       installationId,
@@ -446,11 +457,11 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
       requirementKey,
       expectedDraftDigest: draftDigest,
       evidenceDigest,
-      citations: []
+      citations
     });
     setSetupAction(null);
     setupLock.current = false;
-  }, [installationId, perform, pending]);
+  }, [indexedSourceAttachments, installationId, perform, pending]);
   const createExecuteSession = useCallback(async (): Promise<string | null> => {
     const existingIds = new Set(runtimeExecuteSessions?.map(session => session.id) ?? []);
     const nextRuntime = await perform({
@@ -758,13 +769,17 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
           setupUnconfirmed: selectedSetupFeedback?.unconfirmed ?? false,
           draftText: setupDrafts[selectedSetup?.id ?? ""] ?? "",
           compactPane: setupPane,
+          sourceAttachmentPanel: runtime.installation.runtimeManifest.setup?.requirements.some(requirement => requirement.citationPolicy === "attachment-content") === true
+            ? <AgentOSSolutionModuleAttachments workspaceId={workspaceId} installationId={installationId} onIndexedAttachmentsChange={updateIndexedSourceAttachments} />
+            : undefined,
           onSelectRevision: setSelectedSetupSessionId,
           onStartRevision: startSetupRevision,
           onSend: content => selectedSetup !== null && void sendSetupMessage(selectedSetup.id, content),
           onDraft: content => selectedSetup !== null && setSetupDrafts(current => ({ ...current, [selectedSetup.id]: content })),
           onApply: () => draft !== null && applySetupRevision(draft.setupSessionId),
           onCreateVersion: () => draft !== null && createContextVersion(draft.setupSessionId),
-          onConfirmRequirement: gate => draft?.digest !== null && draft?.digest !== undefined && void confirmSetupRequirement(draft.setupSessionId, draft.digest, gate.key),
+          onConfirmRequirement: gate => draft?.digest !== null && draft?.digest !== undefined
+            && void confirmSetupRequirement(draft.setupSessionId, draft.digest, gate.key, gate.citationPolicy),
           onSelectPane: setSetupPane
         }
       };

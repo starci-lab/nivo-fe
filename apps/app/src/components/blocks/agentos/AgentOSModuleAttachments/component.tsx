@@ -7,7 +7,7 @@ import type { AgentosModuleStudio } from "@/modules/api/console";
 export type AgentOSModuleAttachmentsProps = AgentOSModuleAttachmentsViewProps;
 /** Public API role for AgentOSModuleAttachmentsViewProps. */
 export type AgentOSModuleAttachmentsViewProps = {
-  readonly studio?: AgentosModuleStudio;
+  readonly studio?: Pick<AgentosModuleStudio, "attachments">;
   readonly state: "loading" | "refused" | "ready";
   readonly pending: boolean;
   readonly labels: {
@@ -120,4 +120,3 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProp
         
             </></div></SurfaceCard>;
 };
-
