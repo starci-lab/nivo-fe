@@ -78,6 +78,7 @@ type WorkbenchRegionProps = { readonly props: ChatbotWorkbenchBlockProps };
 
 const ChannelRail = ({ props }: WorkbenchRegionProps) => {
   const channels = props.workbench?.channels ?? [];
+  const hasZaloChannel = channels.some(channel => channel.provider.toLowerCase() === "zalo" && channel.state !== "revoked");
   return <SurfaceCard label={props.copy.channels} composition="joined">
     {channels.length === 0 ? <EmptyNotice message={props.copy.noChannels} actionLabel={props.copy.connectZalo} actionVariant="secondary" isActionPending={props.pending} onAction={props.onConnectZalo} /> : <SurfaceListCard label={props.copy.channels} depth="nested">
       {channels.map(channel => <div className={CHATBOT_CHANNEL_ROW_CLASS_NAME} key={channel.id}>
@@ -86,6 +87,7 @@ const ChannelRail = ({ props }: WorkbenchRegionProps) => {
         <Badge tone={channel.state === "active" ? "success" : "neutral"}>{channel.state}</Badge>
       </div>)}
     </SurfaceListCard>}
+    {channels.length > 0 && !hasZaloChannel ? <Button variant="secondary" width="fill" isPending={props.pending} onPress={props.onConnectZalo}>{props.copy.connectZalo}</Button> : null}
     <Text size="xs" tone="muted">{props.copy.installation}: {props.installationId}</Text>
   </SurfaceCard>;
 };
