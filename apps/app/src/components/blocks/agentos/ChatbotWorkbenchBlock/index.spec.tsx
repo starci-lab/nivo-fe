@@ -1,11 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { ChatbotWorkbenchBlock, type ChatbotWorkbenchBlockCopy } from ".";
 
 const copy: ChatbotWorkbenchBlockCopy = {
   title: "Chatbot workbench", installation: "Installation", approvedVersion: version => `Approved v${version}`,
   noApprovedVersion: "No approved context", channels: "Channels", noChannels: "No channel connected", connectZalo: "Connect Zalo",
-  conversations: "Conversations", noConversations: "No conversations", selectConversation: "Select a conversation", automated: "Automated",
+  conversations: "Conversations", openConversations: "Open channels and conversations", closeConversations: "Close channels and conversations", noConversations: "No conversations", selectConversation: "Select a conversation", selected: "Selected", automated: "Automated",
   humanHandoff: "Human handoff", requestHandoff: "Take over", resolveHandoff: "Return to automation", messages: "Messages", noMessages: "No messages",
   pending: "Waiting for confirmed readback", refused: "Could not load", permissionDenied: "Permission denied", ambiguous: "Delivery is ambiguous",
   markDelivered: "Mark delivered", markFailed: "Mark failed", recorded: "Recorded only", delivered: "Delivered", failed: "Failed"
@@ -19,11 +19,15 @@ const workbench = {
 } as const;
 
 describe("ChatbotWorkbenchBlock", () => {
+  beforeAll(() => {
+    window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() }) as unknown as typeof window.matchMedia;
+  });
+
   it("keeps installation identity, handoff and ambiguous delivery distinct", () => {
     const resolve = vi.fn(); const reconcile = vi.fn();
     render(<ChatbotWorkbenchBlock installationId="chatbot-1" workbench={workbench} selectedConversationId="conversation-1" pending={false} refusedCode={null} copy={copy} onSelectConversation={() => undefined} onConnectZalo={() => undefined} onSetHandoff={() => undefined} onResolveHandoff={resolve} onReconcile={reconcile} />);
     expect(screen.getByText("Installation: chatbot-1")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /customer-1.*Human handoff/u })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /customer-1.*Human handoff.*Selected/u })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Return to automation" }));
     fireEvent.click(screen.getByRole("button", { name: "Mark delivered" }));
     expect(resolve).toHaveBeenCalledWith("conversation-1");
