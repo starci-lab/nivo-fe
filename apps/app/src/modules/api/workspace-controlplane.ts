@@ -87,6 +87,7 @@ export type ChatbotConversation = {
   readonly installationId: string;
   readonly participantRef: string;
   readonly handoffState: string;
+  readonly authorityEpoch: number;
   readonly approvedVersion: number | null;
   readonly lastMessageAt: string;
 };
@@ -96,6 +97,7 @@ export type ChatbotMessage = {
   readonly id: string;
   readonly conversationId: string;
   readonly direction: string;
+  readonly sequence: string;
   readonly body: string;
   readonly deliveryState: string;
   readonly providerOutboxId: string | null;
@@ -118,6 +120,7 @@ export type ChatbotCommandResult = {
   readonly id: string;
   readonly installationId: string;
   readonly state: string;
+  readonly authorizationUrl?: string | null;
 };
 type GraphqlEnvelope<T> = {
   readonly data?: T;
@@ -195,8 +198,8 @@ export const chatbotWorkbench = async (hostname: string, workspaceId: string, ac
     chatbotWorkbench(installationId: $installationId) {
       installationId lifecycleState approvedVersion
       channels { id installationId provider accountRef state credentialRef }
-      conversations { id installationId participantRef handoffState approvedVersion lastMessageAt }
-      messages { id conversationId direction body deliveryState providerOutboxId failureCode occurredAt }
+      conversations { id installationId participantRef handoffState authorityEpoch approvedVersion lastMessageAt }
+      messages { id conversationId direction sequence body deliveryState providerOutboxId failureCode occurredAt }
     }
   }`, { installationId });
   return result.ok ? { ok: true, data: result.data.chatbotWorkbench } : result;
@@ -210,29 +213,36 @@ const mutateChatbot = async (hostname: string, workspaceId: string, accessToken:
 };
 
 /** Bind an opaque, already-sealed channel reference to one installation. */
-export const bindChatbotChannel = (hostname: string, workspaceId: string, accessToken: string, input: Readonly<Record<string, unknown>>) => mutateChatbot(hostname, workspaceId, accessToken, `mutation BindChatbotChannel($input: ChatbotChannelBindingInput!) {
-    bindChatbotChannel(input: $input) { id installationId state }
+export const bindChatbotChannel = (hostname: string, workspaceId: string, accessToken: string, input: Readonly<Record<string, unknown>>) => mutateChatbot(hostname, workspaceId, accessToken, `mutation BindChatbotChannel($input: BindChatbotChannelInput!) {
+    bindChatbotChannel(input: $input) { id installationId state authorizationUrl }
   }`, { input }, "bindChatbotChannel");
 
 /** Start a one-time Zalo OAuth intent; the browser receives no provider token. */
-export const startChatbotZaloOauth = (hostname: string, workspaceId: string, accessToken: string, input: Readonly<Record<string, unknown>>) => mutateChatbot(hostname, workspaceId, accessToken, `mutation StartZaloOauthIntent($input: ChatbotZaloOauthIntentInput!) {
-    startZaloOauthIntent(input: $input) { id installationId state }
-  }`, { input }, "startZaloOauthIntent");
+export const startChatbotZaloOauth = (hostname: string, workspaceId: string, accessToken: string, input: Readonly<Record<string, unknown>>) => mutateChatbot(hostname, workspaceId, accessToken, `mutation StartZaloChatbotAuthorization($input: StartZaloChatbotAuthorizationInput!) {
+    startZaloChatbotAuthorization(input: $input) { id installationId state authorizationUrl }
+  }`, { input }, "startZaloChatbotAuthorization");
 
 /** Fence one conversation into human mode before any later provider start. */
-export const setChatbotHandoff = (hostname: string, workspaceId: string, accessToken: string, input: Readonly<Record<string, unknown>>) => mutateChatbot(hostname, workspaceId, accessToken, `mutation SetChatbotHandoff($input: ChatbotHandoffInput!) {
-    setChatbotHandoff(input: $input) { id installationId state }
+export const setChatbotHandoff = (hostname: string, workspaceId: string, accessToken: string, input: Readonly<Record<string, unknown>>) => mutateChatbot(hostname, workspaceId, accessToken, `mutation SetChatbotHandoff($input: ChangeChatbotHandoffInput!) {
+    setChatbotHandoff(input: $input) { id installationId state authorizationUrl }
   }`, { input }, "setChatbotHandoff");
 
 /** Resolve human mode only through the installation-qualified authority command. */
-export const resolveChatbotHandoff = (hostname: string, workspaceId: string, accessToken: string, input: Readonly<Record<string, unknown>>) => mutateChatbot(hostname, workspaceId, accessToken, `mutation ResolveChatbotHandoff($input: ChatbotHandoffInput!) {
-    resolveChatbotHandoff(input: $input) { id installationId state }
+export const resolveChatbotHandoff = (hostname: string, workspaceId: string, accessToken: string, input: Readonly<Record<string, unknown>>) => mutateChatbot(hostname, workspaceId, accessToken, `mutation ResolveChatbotHandoff($input: ChangeChatbotHandoffInput!) {
+    resolveChatbotHandoff(input: $input) { id installationId state authorizationUrl }
   }`, { input }, "resolveChatbotHandoff");
 
 /** Reconcile ambiguous delivery evidence without issuing a blind resend. */
-export const reconcileChatbotDelivery = (hostname: string, workspaceId: string, accessToken: string, input: Readonly<Record<string, unknown>>) => mutateChatbot(hostname, workspaceId, accessToken, `mutation ReconcileChatbotDelivery($input: ChatbotDeliveryReconciliationInput!) {
-    reconcileChatbotDelivery(input: $input) { id installationId state }
-  }`, { input }, "reconcileChatbotDelivery");
+export const reconcileChatbotDelivery = (hostname: string, workspaceId: string, accessToken: string, input: Readonly<Record<string, unknown>>) => mutateChatbot(hostname, workspaceId, accessToken, `mutation ReconcileChatbotDelivery($input: ReconcileChatbotDeliveryInput!) {
+    reconcileChatbotDelivery(input: $input) { id installationId state authorizationUrl }
+  }`, { input: {
+    ...input,
+    outboxId: input.providerOutboxId,
+    terminalState: input.outcome === "delivered" ? "sent" : "failed",
+    evidenceRef: `operator://manual-reconciliation/${String(input.providerOutboxId)}`,
+    providerOutboxId: undefined,
+    outcome: undefined
+  } }, "reconcileChatbotDelivery");
 
 /** Read customer identities from one workspace without proxying transcripts through Core. */
 export const supportCustomerConversations = async (hostname: string, workspaceId: string, accessToken: string, installationId: string): Promise<WorkspaceControlplaneResult<SupportConnection<SupportCustomerConversation>>> => {

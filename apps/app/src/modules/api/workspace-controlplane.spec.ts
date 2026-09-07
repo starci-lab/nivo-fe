@@ -67,6 +67,6 @@ describe("workspace control-plane transport", () => {
         expect(readBody.query).toContain("chatbotWorkbench(installationId: $installationId)")
         expect(readBody.variables).toEqual({ installationId: "chatbot-2" })
         expect(mutationBody.query).toContain("reconcileChatbotDelivery(input: $input)")
-        expect(mutationBody.variables.input).toMatchObject({ installationId: "chatbot-2", providerOutboxId: "outbox-1" })
+        expect(mutationBody.variables.input).toMatchObject({ installationId: "chatbot-2", outboxId: "outbox-1", terminalState: "failed", evidenceRef: "operator://manual-reconciliation/outbox-1" })
     })
 })

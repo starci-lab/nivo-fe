@@ -14,8 +14,8 @@ const copy: ChatbotWorkbenchBlockCopy = {
 const workbench = {
   installationId: "chatbot-1", lifecycleState: "active", approvedVersion: 3,
   channels: [{ id: "channel-1", installationId: "chatbot-1", provider: "zalo", accountRef: "oa:NIVO", state: "active", credentialRef: "sealed:1" }],
-  conversations: [{ id: "conversation-1", installationId: "chatbot-1", participantRef: "customer-1", handoffState: "human", approvedVersion: 3, lastMessageAt: "2026-09-06T00:00:00.000Z" }],
-  messages: [{ id: "message-1", conversationId: "conversation-1", direction: "outbound", body: "Xin chào", deliveryState: "ambiguous", providerOutboxId: "outbox-1", failureCode: null, occurredAt: "2026-09-06T00:00:00.000Z" }]
+  conversations: [{ id: "conversation-1", installationId: "chatbot-1", participantRef: "customer-1", handoffState: "human", authorityEpoch: 2, approvedVersion: 3, lastMessageAt: "2026-09-06T00:00:00.000Z" }],
+  messages: [{ id: "message-1", conversationId: "conversation-1", direction: "outbound", sequence: "1", body: "Xin chào", deliveryState: "ambiguous", providerOutboxId: "outbox-1", failureCode: null, occurredAt: "2026-09-06T00:00:00.000Z" }]
 } as const;
 
 describe("ChatbotWorkbenchBlock", () => {

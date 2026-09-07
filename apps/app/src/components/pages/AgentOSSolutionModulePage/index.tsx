@@ -228,7 +228,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
   const testSurfaceQuery = useQueryMyAgentosModuleTestSurfaceSwr(installationId, view === "test" || view === "setup");
   const testSurface = nivoQueryData(testSurfaceQuery.data) ?? null;
   const refused = actionRefused || moduleQueriesRefused(runtimeQuery.data, runtime, testSurfaceQuery.data);
-  const isChatbotInstallation = runtime !== null && (runtime.installation.moduleKey === "chatbot" || runtime.installation.moduleKey === "agentos-chatbot");
+  const isChatbotInstallation = runtime !== null && ["chatbot", "agentos-chatbot", "multichannel-chatbot"].includes(runtime.installation.moduleKey);
   const chatbotEnabled = view === "operate" && isChatbotInstallation;
   const supportEnabled = view === "operate" && runtime?.installation.kindKey === "customer-support" && !isChatbotInstallation;
   const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId, chatbotEnabled || supportEnabled);
@@ -520,14 +520,22 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     }));
   }, [deliveryMutation, runSupportAction]);
   const connectChatbotZalo = useCallback(() => {
-    void runSupportAction(() => startZaloOauthMutation.trigger({ installationId, requestToken: idempotencyKey(), returnUri: globalThis.location.href }));
+    void runSupportAction(async () => {
+      const answer = await startZaloOauthMutation.trigger({ installationId, requestToken: idempotencyKey() });
+      if (answer.ok && answer.data.authorizationUrl !== null && answer.data.authorizationUrl !== undefined) {
+        const authorization = new URL(answer.data.authorizationUrl);
+        if (authorization.protocol === "https:" && authorization.hostname === "oauth.zaloapp.com") window.open(authorization.toString(), "chatbot-zalo-oauth", "popup,width=520,height=720,noopener,noreferrer");
+      }
+      return answer;
+    });
   }, [installationId, runSupportAction, startZaloOauthMutation]);
   const setChatbotHandoff = useCallback((conversationId: string) => {
     void runSupportAction(() => setChatbotHandoffMutation.trigger({ installationId, conversationId, requestToken: idempotencyKey() }));
   }, [installationId, runSupportAction, setChatbotHandoffMutation]);
   const resolveChatbotHandoff = useCallback((conversationId: string) => {
-    void runSupportAction(() => resolveChatbotHandoffMutation.trigger({ installationId, conversationId, requestToken: idempotencyKey() }));
-  }, [installationId, resolveChatbotHandoffMutation, runSupportAction]);
+    const conversation = chatbotWorkbench?.conversations.find(candidate => candidate.id === conversationId);
+    if (conversation !== undefined) void runSupportAction(() => resolveChatbotHandoffMutation.trigger({ installationId, conversationId, requestToken: idempotencyKey(), authorityEpoch: conversation.authorityEpoch }));
+  }, [chatbotWorkbench?.conversations, installationId, resolveChatbotHandoffMutation, runSupportAction]);
   const reconcileChatbotDelivery = useCallback((providerOutboxId: string, delivered: boolean) => {
     void runSupportAction(() => reconcileChatbotDeliveryMutation.trigger({ installationId, providerOutboxId, outcome: delivered ? "delivered" : "failed", requestToken: idempotencyKey() }));
   }, [installationId, reconcileChatbotDeliveryMutation, runSupportAction]);
