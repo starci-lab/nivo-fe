@@ -244,7 +244,7 @@ describe("AgentOSSolutionModulePage projections", () => {
     })
 
     it("binds indexed solution-module attachments to attachment-content confirmations", async () => {
-        runtime.installation.runtimeManifest.setup = {
+        Object.assign(runtime.installation.runtimeManifest, { setup: {
             schemaVersion: 1,
             contract: { key: "chatbot-setup", version: "1.0.0" },
             requirements: [{
@@ -257,7 +257,7 @@ describe("AgentOSSolutionModulePage projections", () => {
                 requiredFor: ["acceptance", "apply"]
             }],
             requiredAcceptanceScenarios: []
-        }
+        } })
         runtime.setupSession.gateEvidence.gates = [{ key: "offeringsAndCanonicalFacts", passed: true }]
         runtime.setupSessions[0]!.gateEvidence.gates = [{ key: "offeringsAndCanonicalFacts", passed: true }]
         render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" />)
