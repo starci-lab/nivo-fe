@@ -127,7 +127,7 @@ describe("useAccountingWorkbench settlement", () => {
       result.current.setCloseMonth("2026-09");
     });
     act(() => result.current.onInitialize(event));
-    act(() => result.current.reconcileCurrent());
+    act(() => result.current.onReconcile(event));
     act(() => result.current.onClose(event));
     act(() => result.current.documentCommand("submit", "document-1"));
     act(() => result.current.documentCommand("approve", "document-1"));
@@ -176,7 +176,7 @@ describe("useAccountingWorkbench settlement", () => {
       result.current.setCorrectionReason("late evidence");
     });
     act(() => result.current.onIngest(event));
-    act(() => result.current.submitCurrentCorrection());
+    act(() => result.current.onCorrection(event));
     await waitFor(() => expect(trigger.mock.calls.length).toBeGreaterThanOrEqual(2));
     expect(trigger.mock.calls.find(call => call[0].fileName === "invoice.pdf")?.[0]).toMatchObject({ currency: "USD", classification: "expense" });
     expect(result.current.correctionAccess({ status: "pending", effectivePeriodKey: "2026-10-01", submittedByUserId: "owner-1", approverUserId: "approver-1" } as never).approvalReason).toBe("not-owner");
