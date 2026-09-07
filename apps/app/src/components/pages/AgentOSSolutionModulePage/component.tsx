@@ -22,6 +22,7 @@ import { AGENTOS_SETUP_SURFACE_CLASS_NAME, CONTEXT_BAND_CLASS_NAME, CONTEXT_RAIS
 /** Catalog keys resolved only by the connected owner or a real-provider fixture. */
 export type ModulePageMessageKey =
   | "runtime.chatbot.ambiguous"
+  | "runtime.chatbot.actionRefused"
   | "runtime.chatbot.approvedVersion"
   | "runtime.chatbot.automated"
   | "runtime.chatbot.channels"
@@ -540,6 +541,7 @@ type ShellWorkspaceValues = { readonly id: string };
 export const buildModulePageCopy = (t: ModulePageTranslator) => ({
   "chatbot": {
     "ambiguous": t("runtime.chatbot.ambiguous"),
+    "actionRefused": t("runtime.chatbot.actionRefused"),
     "approvedVersion": (version: string) => t("runtime.chatbot.approvedVersion", { version }),
     "automated": t("runtime.chatbot.automated"),
     "channels": t("runtime.chatbot.channels"),
