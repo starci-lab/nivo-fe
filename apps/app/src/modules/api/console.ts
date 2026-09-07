@@ -529,6 +529,22 @@ export type AgentosRuntimeManifest = {
     readonly version: string;
   };
   readonly test?: AgentosModuleTestContract;
+  readonly setup?: {
+    readonly schemaVersion: 1;
+    readonly contract: { readonly key: string; readonly version: string };
+    readonly requirements: ReadonlyArray<{
+      readonly key: string;
+      readonly label: string;
+      readonly validator: { readonly key: string; readonly version: string };
+      readonly dependencies: ReadonlyArray<"authority" | "source" | "retrieval">;
+      readonly citationPolicy: "none" | "attachment-content";
+      readonly ownerConfirmation: boolean;
+      readonly requiredFor: ReadonlyArray<"acceptance" | "apply">;
+      readonly guidance?: string;
+      readonly valueSchema?: Readonly<Record<string, AgentosRuntimeValue>>;
+    }>;
+    readonly requiredAcceptanceScenarios: ReadonlyArray<string>;
+  };
   readonly operations?: {
     readonly replyContract: {
       readonly key: string;
@@ -580,6 +596,12 @@ export type AgentosModuleTestRun = {
   readonly testContractKey: string;
   readonly testContractVersion: string;
   readonly scenarioKey: string;
+  readonly mode: "exploratory" | "acceptance";
+  readonly definitionDigest: string;
+  readonly targetDigest: string;
+  readonly authorityGeneration: number;
+  readonly sourceGeneration: number;
+  readonly retrievalGeneration: number;
   readonly status: "running" | "passed" | "warning" | "failed";
   readonly scenarioInput: Readonly<Record<string, AgentosRuntimeValue>>;
   readonly summary: Readonly<Record<string, AgentosRuntimeValue>>;
@@ -615,6 +637,7 @@ export type RunAgentosModuleTestInput = {
   readonly contextVersionId?: string;
   readonly setupSessionId?: string;
   readonly scenarioKey: string;
+  readonly mode: "exploratory" | "acceptance";
   readonly idempotencyKey: string;
   readonly scenarioInput?: Readonly<Record<string, AgentosRuntimeValue>>;
 };
@@ -628,6 +651,9 @@ export type AgentosModuleRuntime = {
     readonly workbenchVersion: string;
     readonly runtimeManifest: AgentosRuntimeManifest;
     readonly settingsVersion: number;
+    readonly setupAuthorityGeneration: number;
+    readonly setupSourceGeneration: number;
+    readonly setupRetrievalGeneration: number;
     readonly activeContextVersionId: string | null;
     readonly liveEnabled: boolean;
     readonly operatingMode: "assist" | "autopilot";
@@ -715,6 +741,10 @@ export type AgentosRuntimeContextVersion = {
   readonly version: number;
   readonly snapshot: Readonly<Record<string, AgentosRuntimeValue>>;
   readonly digest: string;
+  readonly definitionDigest: string;
+  readonly authorityGeneration: number;
+  readonly sourceGeneration: number;
+  readonly retrievalGeneration: number;
   readonly sourceSetupSessionId: string | null;
   readonly createdAt: string;
 };
@@ -783,7 +813,7 @@ export type AgentosRuntimeWidget = {
 };
 
 /** Closed commands accepted by the shared Module Studio mutation. */
-export type AgentosModuleRuntimeAction = "START_SETUP_REVISION" | "APPEND_SETUP_MESSAGE" | "UPDATE_SETUP_DRAFT" | "REVISE_CONTEXT" | "APPLY_SETUP_REVISION" | "APPLY_CONTEXT_VERSION" | "ENABLE_LIVE" | "DISABLE_LIVE" | "CREATE_EXECUTE_SESSION" | "RENAME_EXECUTE_SESSION" | "ARCHIVE_EXECUTE_SESSION" | "SET_EXECUTE_PARTICIPANTS" | "APPEND_EXECUTE_MESSAGE" | "INVOKE_WIDGET_ACTION" | "UPDATE_SETTINGS" | "SAVE_MODULE_CREDENTIAL" | "REMOVE_MODULE_CREDENTIAL";
+export type AgentosModuleRuntimeAction = "START_SETUP_REVISION" | "APPEND_SETUP_MESSAGE" | "UPDATE_SETUP_DRAFT" | "REVISE_CONTEXT" | "CONFIRM_SETUP_REQUIREMENT" | "APPLY_SETUP_REVISION" | "APPLY_CONTEXT_VERSION" | "ENABLE_LIVE" | "DISABLE_LIVE" | "CREATE_EXECUTE_SESSION" | "RENAME_EXECUTE_SESSION" | "ARCHIVE_EXECUTE_SESSION" | "SET_EXECUTE_PARTICIPANTS" | "APPEND_EXECUTE_MESSAGE" | "INVOKE_WIDGET_ACTION" | "UPDATE_SETTINGS" | "SAVE_MODULE_CREDENTIAL" | "REMOVE_MODULE_CREDENTIAL";
 
 /** Exact mutation envelope; optional fields are validated again by the backend action boundary. */
 export type ManageAgentosModuleRuntimeInput = {
@@ -796,6 +826,10 @@ export type ManageAgentosModuleRuntimeInput = {
   readonly title?: string;
   readonly participantUserIds?: ReadonlyArray<string>;
   readonly contextSnapshot?: Readonly<Record<string, AgentosRuntimeValue>>;
+  readonly requirementKey?: string;
+  readonly expectedDraftDigest?: string;
+  readonly evidenceDigest?: string;
+  readonly citations?: ReadonlyArray<{ readonly attachmentId: string; readonly sha256: string; readonly locator?: string }>;
   readonly widgetTree?: AgentosRuntimeWidgetNode;
   readonly widgetId?: string;
   readonly widgetAction?: string;
@@ -1047,7 +1081,7 @@ export const myAgentosModuleInstallation = (installationId: string): Promise<Res
 const MODULE_RUNTIME_FIELDS = `
     installation {
         id agentWorkspaceId moduleKey moduleVersion displayName kindKey kindVersion workbenchKey workbenchVersion
-        runtimeManifest settingsVersion activeContextVersionId liveEnabled operatingMode channelAccountRef primaryOpsSessionId
+        runtimeManifest settingsVersion setupAuthorityGeneration setupSourceGeneration setupRetrievalGeneration activeContextVersionId liveEnabled operatingMode channelAccountRef primaryOpsSessionId
         status failureCode createdAt updatedAt
     }
     setupSession {
@@ -1064,7 +1098,7 @@ const MODULE_RUNTIME_FIELDS = `
     }
     participants { id sessionId userId }
     messages { id sessionId actorUserId contextVersionId role content messageTree operationEventId taskId sequence createdAt }
-    contextVersions { id installationId createdByUserId version snapshot digest sourceSetupSessionId createdAt }
+    contextVersions { id installationId createdByUserId version snapshot digest definitionDigest authorityGeneration sourceGeneration retrievalGeneration sourceSetupSessionId createdAt }
     widgets { id messageId rootComponent rootVersion tree }
     operationEvents {
         id installationId contextVersionId source externalEventId eventType observedAt kindKey kindVersion
@@ -1115,11 +1149,11 @@ const MODULE_TEST_FIELDS = `
     contract
     runs {
         id installationId moduleDefinitionId contextVersionId setupSessionId draftDigest requestedByUserId kindKey kindVersion
-        testContractKey testContractVersion scenarioKey status scenarioInput summary completedAt createdAt
+        testContractKey testContractVersion scenarioKey mode definitionDigest targetDigest authorityGeneration sourceGeneration retrievalGeneration status scenarioInput summary completedAt createdAt
     }
     run {
         id installationId moduleDefinitionId contextVersionId setupSessionId draftDigest requestedByUserId kindKey kindVersion
-        testContractKey testContractVersion scenarioKey status scenarioInput summary completedAt createdAt
+        testContractKey testContractVersion scenarioKey mode definitionDigest targetDigest authorityGeneration sourceGeneration retrievalGeneration status scenarioInput summary completedAt createdAt
     }
     assertions { id runId ordinal assertionKey label verdict expected actual evidence createdAt }
 `;

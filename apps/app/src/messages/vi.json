@@ -636,6 +636,7 @@
           "reviewSummary": "{draft} · Ngữ cảnh đang dùng {version}",
           "noCandidate": "Thiết lập chưa tạo ra bản đề xuất.",
           "continueChat": "Tiếp tục trò chuyện thiết lập riêng tư để Nivo hỏi những thông tin nghiệp vụ còn thiếu.",
+          "createVersion": "Tạo ngữ cảnh bất biến",
           "setupGates": "Điều kiện thiết lập",
           "completeCount": "Đã hoàn tất {passed}/{total}",
           "complete": "Hoàn tất",
@@ -652,6 +653,9 @@
           "startRefused": "Không thể bắt đầu bản sửa đổi thiết lập mới; bản hiện tại vẫn được chọn.",
           "newChat": "Trò chuyện thiết lập mới",
           "completeGates": "Hoàn tất các điều kiện thiết lập",
+          "confirmRequirement": "Xác nhận với tư cách chủ sở hữu",
+          "confirmed": "Chủ sở hữu đã xác nhận",
+          "evidenceRequired": "Đính kèm bằng chứng nguồn đã lập chỉ mục để xác nhận yêu cầu này.",
           "completeAllGates": "Hoàn tất cả {count} điều kiện thiết lập",
           "versionActive": "v{version} đang dùng",
           "passTestFirst": "Kiểm thử bản sửa đổi này trước",
@@ -742,6 +746,9 @@
         },
         "runtime": {
           "pageTest": {
+            "mode": "Chế độ kiểm thử",
+            "exploratory": "Khám phá",
+            "acceptance": "Chấp nhận",
             "compact": "Chế độ Kiểm thử thu gọn",
             "conversation": "Hội thoại",
             "scenarios": "Kịch bản",

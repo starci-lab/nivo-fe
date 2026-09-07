@@ -22,6 +22,7 @@ const run: AgentosModuleTestRun = {
     setupSessionId: null, draftDigest: null,
     requestedByUserId: "owner-1", kindKey: "customer-support", kindVersion: "1.0.0",
     testContractKey: "conversation-test", testContractVersion: "1.0.0", scenarioKey: "support-conversation",
+    mode: "acceptance", definitionDigest: "d".repeat(64), targetDigest: "c".repeat(64), authorityGeneration: 1, sourceGeneration: 1, retrievalGeneration: 1,
     status: "passed", scenarioInput: {}, summary: { total: 1, pass: 1, warning: 0, fail: 0 },
     completedAt: "2026-08-25T00:00:01.000Z", createdAt: "2026-08-25T00:00:00.000Z",
 }

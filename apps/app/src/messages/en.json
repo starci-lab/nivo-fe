@@ -636,6 +636,7 @@
           "reviewSummary": "{draft} · Active context {version}",
           "noCandidate": "Setup has not produced a candidate yet.",
           "continueChat": "Continue the private Setup chat so Nivo can ask the missing business questions.",
+          "createVersion": "Create immutable context",
           "setupGates": "Setup gates",
           "completeCount": "{passed}/{total} complete",
           "complete": "Complete",
@@ -652,6 +653,9 @@
           "startRefused": "Starting a new Setup revision was refused; the current revision remains selected.",
           "newChat": "New Setup chat",
           "completeGates": "Complete Setup gates",
+          "confirmRequirement": "Confirm as owner",
+          "confirmed": "Owner confirmed",
+          "evidenceRequired": "Attach indexed source evidence to confirm this requirement.",
           "completeAllGates": "Complete all {count} Setup gates",
           "versionActive": "v{version} active",
           "passTestFirst": "Pass this revision's Test first",
@@ -742,6 +746,9 @@
         },
         "runtime": {
           "pageTest": {
+            "mode": "Test mode",
+            "exploratory": "Exploratory",
+            "acceptance": "Acceptance",
             "compact": "Compact Test view",
             "conversation": "Conversation",
             "scenarios": "Scenarios",

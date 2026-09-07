@@ -9,7 +9,7 @@ import type { ExecuteSession } from "@/components/blocks/agentos/ExecuteSessionR
 import type { AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteShellBlock";
 import type { SetupMessage, SetupRevision } from "@/components/blocks/agentos/PrivateSetupChatBlock";
 import { useQueryMyAgentosModuleRuntimeSwr, useQueryMyAgentosModuleTestSurfaceSwr, useQueryMyAgentWorkspaceControlCenterSwr, useQuerySupportCustomerConversationsSwr, useQuerySupportCustomerMessagesSwr, useQuerySupportImportantFactsSwr, useQuerySupportTicketsSwr, useReadMyAgentosModuleTestRun, useMutateApproveSupportReplySwr, useMutateConfigureAgentWorkspaceChannelSwr, useMutateManageAgentosModuleRuntimeSwr, useMutateReconcileSupportDeliverySwr, useMutateRunAgentosModuleTestSwr, useMutateSetSupportTakeoverSwr } from "@/hooks";
-import { type AgentosModuleRuntime, type AgentosRuntimeValue, type ManageAgentosModuleRuntimeInput } from "@/modules/api/console";
+import { type AgentosModuleRuntime, type AgentosRuntimeManifest, type AgentosRuntimeValue, type ManageAgentosModuleRuntimeInput } from "@/modules/api/console";
 import { nivoQueryData, type NivoQueryAnswer } from "@/modules/query";
 import { AgentOSSolutionModulePageBase, AgentOSSolutionModuleState, buildModulePageCopy, exactTestSurfaceFor, type ModulePageCopy, type AgentOSSolutionModulePageViewProps, type AgentOSSolutionModuleScreen } from "./component";
 
@@ -24,12 +24,13 @@ const POLL_INTERVAL_MS = 1000;
 // Controller AI turns may legitimately use the 75-second provider budget.
 const POLL_ATTEMPTS = 90;
 const wait = (duration: number): Promise<void> => new Promise(resolve => globalThis.setTimeout(resolve, duration));
+const sha256 = async (value: string): Promise<string> => Array.from(new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)))).map(byte => byte.toString(16).padStart(2, "0")).join("");
 const telegramAccountIdFromToken = (token: string): string | null => {
   const separator = token.indexOf(":");
   const accountId = separator > 0 ? token.slice(0, separator) : "";
   return /^\d{5,20}$/u.test(accountId) ? accountId : null;
 };
-type SetupAction = { readonly kind: "send" | "apply"; readonly sessionId: string } | { readonly kind: "start" };
+type SetupAction = { readonly kind: "send" | "apply" | "confirm"; readonly sessionId: string } | { readonly kind: "start" };
 type SetupFeedback = { readonly refused?: "send" | "apply"; readonly unconfirmed?: boolean };
 type AgentosModuleTestTarget = {
   readonly contextVersionId?: string;
@@ -95,16 +96,27 @@ const readableGate = (key: string, copy: ModulePageCopy): string => {
   const known = Object.hasOwn(SETUP_GATE_LABELS, key) ? SETUP_GATE_LABELS[key] : undefined;
   return known === undefined ? copy.setup.unknownGate({ key }) : copy.setup.gateLabels[known];
 };
-const setupGatesFor = (session: AgentosModuleRuntime["setupSession"], fields: ReadonlyArray<string>, copy: ModulePageCopy): ContextDraft["gates"] => {
+type SetupRequirement = NonNullable<AgentosRuntimeManifest["setup"]>["requirements"][number];
+type SetupGenerations = { readonly authority: number; readonly source: number; readonly retrieval: number };
+const setupGatesFor = (session: AgentosModuleRuntime["setupSession"], requirements: ReadonlyArray<SetupRequirement>, legacyFields: ReadonlyArray<string>, generations: SetupGenerations, copy: ModulePageCopy): ContextDraft["gates"] => {
   const rawGates = session?.gateEvidence?.gates;
   const evidence = Array.isArray(rawGates) ? rawGates : [];
   const evidenceKeys = evidence.flatMap(candidate => candidate !== null && typeof candidate === "object" && !Array.isArray(candidate) && typeof candidate.key === "string" ? [candidate.key] : []);
-  return (fields.length > 0 ? fields : evidenceKeys).map(key => {
+  const fields = requirements.length > 0 ? requirements.map(requirement => requirement.key) : legacyFields.length > 0 ? legacyFields : evidenceKeys;
+  return fields.map(key => {
     const row = evidence.find(candidate => candidate !== null && typeof candidate === "object" && !Array.isArray(candidate) && candidate.key === key);
+    const requirement = requirements.find(candidate => candidate.key === key);
+    const confirmation = row?.confirmation;
+    const confirmed = confirmation !== null && typeof confirmation === "object" && !Array.isArray(confirmation)
+      && confirmation.draftDigest === session?.draftDigest && confirmation.authorityGeneration === generations.authority
+      && confirmation.sourceGeneration === generations.source && confirmation.retrievalGeneration === generations.retrieval;
     return {
       key,
-      label: readableGate(key, copy),
-      passed: row !== undefined && row.passed === true
+      label: requirement?.label ?? readableGate(key, copy),
+      passed: row !== undefined && row.passed === true,
+      ownerConfirmation: requirement?.ownerConfirmation ?? false,
+      confirmed,
+      citationPolicy: requirement?.citationPolicy ?? "none"
     };
   });
 };
@@ -114,9 +126,17 @@ const draftFactsFor = (snapshot: Readonly<Record<string, AgentosRuntimeValue>> |
   if (Array.isArray(rawFacts)) return rawFacts.filter((value): value is string => typeof value === "string");
   return Object.entries(snapshot).filter(([key]) => key !== "summary").slice(0, 4).map(([key, value]) => `${key}: ${runtimeValueText(value)}`);
 };
-const exactTestPassedFor = (testSurface: ReturnType<typeof exactTestSurfaceFor>, sessionId: string, digest: string | null): boolean => {
-  if (digest === null) return false;
-  return (testSurface?.runs ?? []).some(run => (run.status === "passed" || run.status === "warning") && run.setupSessionId === sessionId && run.draftDigest === digest);
+const exactTestPassedFor = (testSurface: ReturnType<typeof exactTestSurfaceFor>, runtime: AgentosModuleRuntime, context: AgentosModuleRuntime["contextVersions"][number] | null, sessionId: string, digest: string | null): boolean => {
+  if (digest === null || context === null) return false;
+  const required = runtime.installation.runtimeManifest.setup?.requiredAcceptanceScenarios ?? runtime.installation.runtimeManifest.test?.scenarios.map(scenario => scenario.key) ?? [];
+  if (required.length === 0) return false;
+  const passed = new Set((testSurface?.runs ?? []).filter(run => run.mode === "acceptance" && run.status === "passed"
+    && (run.contextVersionId === context.id || run.setupSessionId === sessionId && run.draftDigest === digest)
+    && run.definitionDigest === context.definitionDigest && run.targetDigest === digest
+    && run.authorityGeneration === runtime.installation.setupAuthorityGeneration
+    && run.sourceGeneration === runtime.installation.setupSourceGeneration
+    && run.retrievalGeneration === runtime.installation.setupRetrievalGeneration).map(run => run.scenarioKey));
+  return required.every(scenario => passed.has(scenario));
 };
 const contextDraftFor = (runtime: AgentosModuleRuntime, setup: AgentosModuleRuntime["setupSession"], testSurface: ReturnType<typeof exactTestSurfaceFor>, copy: ModulePageCopy): ContextDraft | null => {
   if (setup?.setupRevision === null || setup?.setupRevision === undefined || setup.setupStatus === null) return null;
@@ -132,8 +152,16 @@ const contextDraftFor = (runtime: AgentosModuleRuntime, setup: AgentosModuleRunt
     digest: setup.draftDigest,
     summary,
     facts: draftFactsFor(snapshot),
-    gates: setupGatesFor(setup, runtime.installation.runtimeManifest.operations?.setupFields ?? [], copy),
-    exactTestPassed: exactTestPassedFor(testSurface, setup.id, setup.draftDigest),
+    gates: setupGatesFor(setup, runtime.installation.runtimeManifest.setup?.requirements ?? [], runtime.installation.runtimeManifest.operations?.setupFields ?? [], {
+      authority: runtime.installation.setupAuthorityGeneration,
+      source: runtime.installation.setupSourceGeneration,
+      retrieval: runtime.installation.setupRetrievalGeneration
+    }, copy),
+    exactTestPassed: exactTestPassedFor(testSurface, runtime, context, setup.id, setup.draftDigest),
+    definitionDigest: context?.definitionDigest ?? null,
+    authorityGeneration: runtime.installation.setupAuthorityGeneration,
+    sourceGeneration: runtime.installation.setupSourceGeneration,
+    retrievalGeneration: runtime.installation.setupRetrievalGeneration,
     isActive: context?.id === runtime.installation.activeContextVersionId
   };
 };
@@ -216,6 +244,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
   const [diagnosticsPane, setDiagnosticsPane] = useState<DiagnosticsPane>("readiness");
   const [diagnosticSignal, setDiagnosticSignal] = useState<DiagnosticSignal>("all");
   const [selectedTestScenarioKey, setSelectedTestScenarioKey] = useState("");
+  const [testMode, setTestMode] = useState<"exploratory" | "acceptance">("exploratory");
   const moduleRoot = `/agentos/workspaces/${workspaceId}/modules/${installationId}`;
   const runtimeQuery = useQueryMyAgentosModuleRuntimeSwr(workspaceId, installationId, view === "diagnostics");
   const runtimeMutation = useMutateManageAgentosModuleRuntimeSwr(installationId);
@@ -376,6 +405,40 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
       setSetupAction(null); setupLock.current = false;
     });
   }, [installationId, perform, pending]);
+  const createContextVersion = useCallback((sessionId: string) => {
+    if (setupLock.current || pending) return;
+    setupLock.current = true;
+    setSetupAction({ kind: "apply", sessionId });
+    setSetupFeedback(current => ({ ...current, [sessionId]: {} }));
+    void perform({
+      action: "REVISE_CONTEXT",
+      installationId,
+      idempotencyKey: idempotencyKey(),
+      sessionId
+    }, false).then(result => {
+      if (result === null) setSetupFeedback(current => ({ ...current, [sessionId]: { refused: "apply" } }));
+      setSetupAction(null);
+      setupLock.current = false;
+    });
+  }, [installationId, perform, pending]);
+  const confirmSetupRequirement = useCallback(async (sessionId: string, draftDigest: string, requirementKey: string) => {
+    if (setupLock.current || pending) return;
+    setupLock.current = true;
+    setSetupAction({ kind: "confirm", sessionId });
+    const evidenceDigest = await sha256(JSON.stringify({ draftDigest, requirementKey, passed: true }));
+    await perform({
+      action: "CONFIRM_SETUP_REQUIREMENT",
+      installationId,
+      idempotencyKey: idempotencyKey(),
+      sessionId,
+      requirementKey,
+      expectedDraftDigest: draftDigest,
+      evidenceDigest,
+      citations: []
+    });
+    setSetupAction(null);
+    setupLock.current = false;
+  }, [installationId, perform, pending]);
   const createExecuteSession = useCallback(async (): Promise<string | null> => {
     const existingIds = new Set(runtimeExecuteSessions?.map(session => session.id) ?? []);
     const nextRuntime = await perform({
@@ -507,12 +570,13 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
       delivered
     }));
   }, [deliveryMutation, runSupportAction]);
-  const runTest = useCallback(async (target: AgentosModuleTestTarget, scenarioKey: string, scenarioInput: Readonly<Record<string, AgentosRuntimeValue>>) => {
+  const runTest = useCallback(async (target: AgentosModuleTestTarget, mode: "exploratory" | "acceptance", scenarioKey: string, scenarioInput: Readonly<Record<string, AgentosRuntimeValue>>) => {
     setPending(true);
     setActionRefused(false);
     const result = await mutateTest({
       installationId,
       ...target,
+      mode,
       scenarioKey,
       scenarioInput,
       idempotencyKey: idempotencyKey()
@@ -667,6 +731,8 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
           onSend: content => selectedSetup !== null && void sendSetupMessage(selectedSetup.id, content),
           onDraft: content => selectedSetup !== null && setSetupDrafts(current => ({ ...current, [selectedSetup.id]: content })),
           onApply: () => draft !== null && applySetupRevision(draft.setupSessionId),
+          onCreateVersion: () => draft !== null && createContextVersion(draft.setupSessionId),
+          onConfirmRequirement: gate => draft?.digest !== null && draft?.digest !== undefined && void confirmSetupRequirement(draft.setupSessionId, draft.digest, gate.key),
           onSelectPane: setSetupPane
         }
       };
@@ -720,14 +786,16 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
           testSurface: exactTestSurface,
           pending,
           selectedScenarioKey: selectedTestScenarioKey,
+          mode: testMode,
           compactPane: testPane,
           onSelectScenario: setSelectedTestScenarioKey,
+          onSelectMode: setTestMode,
           onSelectPane: setTestPane,
-          onRun: (scenarioKey, scenarioInput) => {
+          onRun: (mode, scenarioKey, scenarioInput) => {
             if (draft !== null && draft.digest !== null) {
               void runTest({
                 setupSessionId: draft.setupSessionId
-              }, scenarioKey, scenarioInput);
+              }, mode, scenarioKey, scenarioInput);
             }
           }
         }

@@ -12,15 +12,16 @@ import { HorizontalScrollRegion, SurfaceCard } from "@starci/grammar/common"
  * the markup, so it fails at 0.4.9 (the audited defect) and passes at 0.4.11.
  */
 describe("GrammarFamilyOverflow", () => {
-    it("stamps a HorizontalScrollRegion overflow answer so one axis scrolls", () => {
+    it("preserves the horizontal scroll affordance with the supported Grammar API", () => {
         const { container } = render(
-            <HorizontalScrollRegion overflow="needed">
+            <HorizontalScrollRegion>
                 <span>a wide row of tabs</span>
             </HorizontalScrollRegion>,
         )
-        const region = container.querySelector("[data-grammar-overflow]")
-        expect(region, "HorizontalScrollRegion stamps no data-grammar-overflow answer").not.toBeNull()
-        expect(region?.getAttribute("data-grammar-overflow")).toBe("needed")
+        const region = container.querySelector(".starci-core-horizontal-scroll-region")
+        expect(region).not.toBeNull()
+        expect(region?.getAttribute("data-orientation")).toBe("horizontal")
+        expect(region?.textContent).toContain("a wide row of tabs")
     })
 
     it("a frameless SurfaceCard body claims OVERFLOW-1 alone, not a double overflow", () => {

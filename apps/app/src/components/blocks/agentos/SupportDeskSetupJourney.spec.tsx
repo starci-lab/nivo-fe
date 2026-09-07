@@ -14,7 +14,7 @@ const gates = [
     "Business identity", "Products and services", "Support scope", "Customer segments", "Channels", "Hours and SLA",
     "Escalation and handoff", "Prohibited commitments", "Privacy and sensitive data", "Tone and language",
     "Automation policy", "Readiness ownership",
-].map((label, index) => ({ key: `gate-${index}`, label, passed: true }))
+].map((label, index) => ({ key: `gate-${index}`, label, passed: true, ownerConfirmation: false, confirmed: false, citationPolicy: "none" as const }))
 
 const testedDraft: ContextDraft = {
     contextId: "22222222-2222-4222-8222-222222222222",
@@ -23,6 +23,10 @@ const testedDraft: ContextDraft = {
     status: "completed",
     version: 2,
     digest: "a".repeat(64),
+    definitionDigest: "d".repeat(64),
+    authorityGeneration: 1,
+    sourceGeneration: 1,
+    retrievalGeneration: 1,
     summary: "A Vietnamese real-estate Support Desk",
     facts: ["Escalate qualified leads to the sales team"],
     gates,
@@ -96,6 +100,11 @@ describe.each(["en", "vi"] as const)("Support Desk Setup journey %s", locale => 
             run: {
                 setupSessionId: testedDraft.setupSessionId,
                 draftDigest: testedDraft.digest,
+                definitionDigest: testedDraft.definitionDigest,
+                targetDigest: testedDraft.digest,
+                authorityGeneration: 1,
+                sourceGeneration: 1,
+                retrievalGeneration: 1,
             },
             assertions: [{ id: "assertion-2" }],
         } as never
@@ -105,10 +114,10 @@ describe.each(["en", "vi"] as const)("Support Desk Setup journey %s", locale => 
         expect(exactTestSurfaceFor(exact, { ...testedDraft, digest: null })).toBeNull()
     })
 })
-type ContextVersionBlockFixtureProps = Omit<ComponentProps<typeof ActualContextVersionBlock>, "copy"> & { readonly locale?: "en" | "vi" }
+type ContextVersionBlockFixtureProps = Omit<ComponentProps<typeof ActualContextVersionBlock>, "copy" | "onConfirmRequirement" | "onCreateVersion"> & { readonly locale?: "en" | "vi"; readonly onConfirmRequirement?: ComponentProps<typeof ActualContextVersionBlock>["onConfirmRequirement"]; readonly onCreateVersion?: ComponentProps<typeof ActualContextVersionBlock>["onCreateVersion"] }
 const ContextVersionBlockCopyFixture = (props: ContextVersionBlockFixtureProps) => {
     const t = useTranslations("console.agentos.modules")
-    return <ActualContextVersionBlock {...props} copy={buildModulePageCopy(t)} />
+    return <ActualContextVersionBlock {...props} onCreateVersion={props.onCreateVersion ?? (() => undefined)} onConfirmRequirement={props.onConfirmRequirement ?? (() => undefined)} copy={buildModulePageCopy(t)} />
 }
 const ContextVersionBlock = ({ locale = "en", ...props }: ContextVersionBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><ContextVersionBlockCopyFixture {...props} /></NextIntlClientProvider>
 
