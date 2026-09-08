@@ -21,6 +21,9 @@ export const OverviewPage = (props: OverviewPageProps) => {
     pathLabel: t("navigationLabel"),
     consoleLabel: t("title"),
     buildAppLabel: t("overview.buildApp"),
+    atAGlanceLabel: t("overview.atAGlance"),
+    servicesLabel: t("servicesCaption"),
+    accountLabel: t("accountCaption"),
     onBuildApp: openApps
   }} />;
 };
