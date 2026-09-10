@@ -139,7 +139,11 @@ describe("pure page twins", () => {
         expect(TemplateAppProvisioningPageBase({ mode: "resume", siteId: "site-1", labels: templateLabels, onOpenApps: vi.fn() })).toBeTruthy()
 
         expect(AgentOSWorkspaceListBase({ state: "resting", props: { label: "Workspaces" } })).toBeTruthy()
-        expect(AgentOSWorkspaceListBase({ state: "refused", props: { label: "Workspaces", message: "Unavailable" } })).toBeTruthy()
+        expect(AgentOSWorkspaceListBase({
+            state: "refused",
+            props: { label: "Workspaces", message: "Unavailable" },
+            on: { retry: vi.fn() },
+        })).toBeTruthy()
         expect(AgentOSWorkspaceListBase({
             state: "answered",
             props: { label: "Workspaces", rows: [{ id: "workspace-1", href: "/en/agentos/workspaces/workspace-1", name: "Workspace", detail: "Order", kindLabel: "Workspace", status: "ready", statusLabel: "Ready" }] },

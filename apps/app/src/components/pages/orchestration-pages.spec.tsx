@@ -105,7 +105,7 @@ describe("connected console pages", () => {
     it("settles the workspace list after its owner-scoped query answers", async () => {
         vi.mocked(myAgentWorkspace).mockResolvedValue({ ok: true, data: [{ id: "workspace-1", name: "Workspace", status: "ready", catalogOrder: { id: "order-1" } }] } as never)
         render(<AgentOSPage mode="dashboard" />)
-        expect((await screen.findByRole("link", { name: /Workspace/ })).getAttribute("href")).toBe("/en/agentos/workspaces/workspace-1")
+        expect((await screen.findByRole("link", { name: "Workspace" })).getAttribute("href")).toBe("/en/agentos/workspaces/workspace-1")
     })
 
     it("records refusal states for the workspace list", async () => {

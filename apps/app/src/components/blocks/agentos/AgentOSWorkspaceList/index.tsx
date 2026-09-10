@@ -25,14 +25,19 @@ export const AgentOSWorkspaceList = (props: AgentOSWorkspaceListProps) => {
     const view = (): AgentOSWorkspaceListViewProps => {
         const label = t("agentos.workspacesLabel");
         const summary = {
+            overview: t("agentos.summary.overview"),
             workspaces: t("agentos.summary.workspaces"),
             workspacesCaption: t("agentos.summary.workspacesCaption"),
             running: t("agentos.summary.running"),
             runningCaption: t("agentos.summary.runningCaption"),
             attention: t("agentos.summary.attention"),
-            attentionCaption: t("agentos.summary.attentionCaption")
+            attentionCaption: t("agentos.summary.attentionCaption"),
+            attentionGroup: t("agentos.summary.attentionGroup"),
+            steadyGroup: t("agentos.summary.steadyGroup"),
+            manage: t("agentos.manageWorkspace"),
+            retry: t("agentos.retry")
         };
-        if (answer === undefined)
+        if (answer === undefined && query.error === undefined)
             return {
                 state: "resting",
                 props: {
@@ -40,13 +45,17 @@ export const AgentOSWorkspaceList = (props: AgentOSWorkspaceListProps) => {
                     summary
                 }
             };
-        if (!answer.ok)
+        if (query.error !== undefined || answer?.ok !== true)
             return {
                 state: "refused",
                 props: {
                     label,
                     summary,
                     message: t("refusal.unknown")
+                },
+                on: {
+                    retry: () => void query.mutate(),
+                    isRetrying: query.isValidating
                 }
             };
         if (answer.data.length === 0) {
@@ -77,7 +86,7 @@ export const AgentOSWorkspaceList = (props: AgentOSWorkspaceListProps) => {
                         id: workspace.id,
                         href: getPathname({ locale, href: fleetResourceHref("workspace", workspace.id) }),
                         name: workspace.name ?? t("agentos.kindWorkspace"),
-                        detail: workspace.catalogOrder?.id ?? workspace.id,
+                        detail: workspace.catalogOrder == null ? t("agentos.workspaceReference", { id: workspace.id }) : t("agentos.orderReference", { id: workspace.catalogOrder.id }),
                         kindLabel: t("agentos.kindWorkspace"),
                         status,
                         statusLabel: t(`status.${status === "not_provisioned" ? "notProvisioned" : status}`)

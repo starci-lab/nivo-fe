@@ -243,15 +243,22 @@
       "kindWorkspace": "Không gian làm việc",
       "emptyDescription": "Tạo không gian làm việc AgentOS đầu tiên của bạn.",
       "create": "Tạo AgentOS",
+      "manageWorkspace": "Quản lý workspace",
+      "retry": "Thử lại",
+      "orderReference": "Đơn hàng {id}",
+      "workspaceReference": "Mã workspace {id}",
       "viewPlans": "Xem gói",
       "workspacesLabel": "Không gian làm việc của bạn",
       "summary": {
+        "overview": "Trạng thái đội AgentOS",
         "workspaces": "Không gian làm việc",
         "workspacesCaption": "Thuộc tài khoản này",
         "running": "Đang chạy",
         "runningCaption": "Sẵn sàng vận hành",
         "attention": "Cần xử lý",
-        "attentionCaption": "Cần quyết định của chủ sở hữu"
+        "attentionCaption": "Cần quyết định của chủ sở hữu",
+        "attentionGroup": "Cần bạn xử lý",
+        "steadyGroup": "Đang chạy và khởi tạo"
       },
       "podReachable": "Pod đang trả lời",
       "podUnreachable": "Pod chưa trả lời",

@@ -243,15 +243,22 @@
       "kindWorkspace": "Workspace",
       "emptyDescription": "Create your first AgentOS workspace.",
       "create": "Create AgentOS",
+      "manageWorkspace": "Manage workspace",
+      "retry": "Try again",
+      "orderReference": "Order {id}",
+      "workspaceReference": "Workspace ID {id}",
       "viewPlans": "See plans",
       "workspacesLabel": "Your workspaces",
       "summary": {
+        "overview": "AgentOS team status",
         "workspaces": "Workspaces",
         "workspacesCaption": "Owned by this account",
         "running": "Running",
         "runningCaption": "Ready to operate now",
         "attention": "Needs attention",
-        "attentionCaption": "Requires an owner decision"
+        "attentionCaption": "Requires an owner decision",
+        "attentionGroup": "Needs your attention",
+        "steadyGroup": "Running and starting up"
       },
       "podReachable": "Pod is answering",
       "podUnreachable": "Pod is not answering",

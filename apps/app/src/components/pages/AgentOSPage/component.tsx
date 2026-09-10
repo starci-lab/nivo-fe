@@ -78,7 +78,7 @@ export const AgentOSPageBase = (props: AgentOSPageProps) => {
                     view.onOpenDashboard();
             }
         }}/>;
-    const heading = <DirectionHeader level={1} eyebrow={eyebrow} title={title} description={<Text size="md" tone="muted">{description}</Text>} action={isDashboard ? <Button variant="primary" size="md" type="button" onPress={view.onCreate}>{view.labels.createAction}</Button> : undefined}/>;
+    const heading = <DirectionHeader level={1} eyebrow={eyebrow} title={title} description={<Text size="md" tone="muted">{description}</Text>} action={isDashboard ? <Button variant="primary" size="lg" type="button" onPress={view.onCreate}>{view.labels.createAction}</Button> : undefined}/>;
     const section = isDashboard ? [<AgentOSWorkspaceList key="item-0"/>] : [<AgentOSProvisioning key="item-0" context={view.mode === "create" ? {
                 mode: "new"
             } : {
