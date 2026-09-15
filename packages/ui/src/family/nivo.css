@@ -56,7 +56,7 @@
         --nivo-success-foreground: oklch(21.03% 0.0059 162.85);
         --nivo-warning: oklch(78.19% 0.159 84.37);
         --nivo-warning-foreground: oklch(21.03% 0.0059 84.37);
-        --nivo-danger: oklch(65.32% 0.2335 37.78);
+        --nivo-danger: var(--nivo-accent);
         --nivo-danger-foreground: oklch(99.11% 0 0);
         --nivo-info: oklch(72% 0.17 250);
         --nivo-info-foreground: oklch(21.03% 0.0059 250);
@@ -107,7 +107,7 @@
 
         --nivo-warning: oklch(82.03% 0.1392 88.38);
         --nivo-warning-foreground: oklch(21.03% 0.0059 88.38);
-        --nivo-danger: oklch(59.4% 0.1973 36.67);
+        --nivo-danger: var(--nivo-accent);
         --nivo-danger-foreground: oklch(99.11% 0 0);
 
         --nivo-border: oklch(28% 0.0015 354.13);
@@ -207,7 +207,7 @@
 
             --nivo-warning: oklch(82.03% 0.1392 88.38);
             --nivo-warning-foreground: oklch(21.03% 0.0059 88.38);
-            --nivo-danger: oklch(59.4% 0.1973 36.67);
+            --nivo-danger: var(--nivo-accent);
             --nivo-danger-foreground: oklch(99.11% 0 0);
 
             --nivo-border: oklch(28% 0.0015 354.13);
