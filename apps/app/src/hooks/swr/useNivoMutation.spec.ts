@@ -3,7 +3,7 @@
 import { act, renderHook } from "@testing-library/react"
 import type * as SwrModule from "swr"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { useNivoMutation } from "./use-nivo-mutation"
+import { useNivoMutation } from "./useNivoMutation"
 
 const mocks = vi.hoisted(() => ({
     mutateCache: vi.fn(),

@@ -1,4 +1,4 @@
-import { queryAcademyCourses } from "@/hooks/academy/query-academy-courses";
+import { queryAcademyCourses } from "@/modules/academy/query-academy-courses";
 import { AcademyPageBase as AcademyPageView } from "./component";
 /** Props for the routed academy page. */
 export type AcademyPageProps = Record<string, never>;

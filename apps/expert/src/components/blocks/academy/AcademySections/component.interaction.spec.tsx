@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import { AcademySectionsBase, type AcademySectionsProps } from "./component"
@@ -25,7 +25,7 @@ const sections: ReadonlyArray<AcademySection> = [
 
 describe("AcademySections authored variants", () => {
     it("draws the authored section switch cases in order", () => {
-        const props: AcademySectionsProps = { sections, onSubmitLead: vi.fn() }
+        const props: AcademySectionsProps = { sections, failedImageSources: new Set(), leadStatus: "idle", on: { submitLead: vi.fn(), failImage: vi.fn() } }
         const html = renderToStaticMarkup(<AcademySectionsBase {...props} />)
         expect(html).toContain("Academy")
         expect(html).toContain("Busy")
@@ -33,16 +33,19 @@ describe("AcademySections authored variants", () => {
         expect(html).toContain("Get it")
     })
 
-    it("handles image failure and submits the lead form", async () => {
+    it("forwards image failures and lead submissions to the connected owner", () => {
         const onSubmitLead = vi.fn().mockResolvedValue(true)
-        render(<AcademySectionsBase sections={sections} onSubmitLead={onSubmitLead} />)
+        const failImage = vi.fn()
+        render(<AcademySectionsBase sections={sections} failedImageSources={new Set()} leadStatus="idle" on={{ submitLead: onSubmitLead, failImage }} />)
         fireEvent.error(screen.getAllByRole("img")[0])
+        expect(failImage).toHaveBeenCalledWith("https://img.test/teacher.jpg")
         const lead: AcademySection = { kind: "lead", id: "lead", title: "Contact", body: "Tell us", nameLabel: "Name", phoneLabel: "Phone", submitLabel: "Send", sendingLabel: "Sending", sentMessage: "Sent", errorMessage: "Failed" }
-        render(<AcademySectionsBase sections={[lead]} onSubmitLead={onSubmitLead} />)
+        const view = render(<AcademySectionsBase sections={[lead]} failedImageSources={new Set()} leadStatus="idle" on={{ submitLead: onSubmitLead, failImage }} />)
         fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Reader" } })
         fireEvent.change(screen.getByLabelText("Phone"), { target: { value: "0123" } })
         fireEvent.click(screen.getByRole("button", { name: "Send" }))
-        await waitFor(() => expect(onSubmitLead).toHaveBeenCalledWith({ name: "Reader", contact: "0123" }))
+        expect(onSubmitLead).toHaveBeenCalledWith({ name: "Reader", contact: "0123" })
+        view.rerender(<AcademySectionsBase sections={[lead]} failedImageSources={new Set()} leadStatus="sent" on={{ submitLead: onSubmitLead, failImage }} />)
         expect(screen.getByText("Sent")).toBeInTheDocument()
     })
 })

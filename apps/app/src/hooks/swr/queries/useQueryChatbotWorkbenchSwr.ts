@@ -2,7 +2,7 @@
 
 import { chatbotWorkbench } from "@/modules/api/workspace-controlplane";
 import { useSession } from "@/modules/auth/session";
-import { useNivoQuery } from "../use-nivo-query";
+import { useNivoQuery } from "../useNivoQuery";
 
 /** Exact workspace/module controller identity required by support projections. */
 export type SupportQueryIdentity = {

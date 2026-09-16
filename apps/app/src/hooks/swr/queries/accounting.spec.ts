@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 const { useNivoQuery } = vi.hoisted(() => ({ useNivoQuery: vi.fn((_key, query) => ({ key: _key, query })) }));
-vi.mock("../use-nivo-query", () => ({ useNivoQuery }));
+vi.mock("../useNivoQuery", () => ({ useNivoQuery }));
 vi.mock("@/modules/api/accounting", () => ({ readAccountingWorkbench: vi.fn(), resolveAppliedAccountingContext: vi.fn() }));
 
 import { accountingContextQueryKey, accountingWorkbenchQueryKey, useQueryAccountingWorkbenchSwr } from "./accounting";

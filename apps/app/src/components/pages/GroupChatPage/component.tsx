@@ -2,9 +2,11 @@ import { ChatWorkspace, EmptyNotice, Input, PageContainer, SectionHeader, Surfac
 import { GROUP_CHAT_COMPOSER_CLASS_NAME, GROUP_CHAT_HOST_CLASS_NAME, GROUP_LIST_CLASS_NAME } from "./classNames";
 
 /** User-facing copy for the safe pre-contract group-chat surface. */
+export type GroupChatPageActions = { readonly changeRailOpen: (isOpen: boolean) => void };
+/** Settled state and copy rendered by the pure Group Chat page. */
 export type GroupChatPageProps = {
   readonly isRailOpen: boolean;
-  readonly onRailOpenChange: (isOpen: boolean) => void;
+  readonly on: GroupChatPageActions;
   readonly labels: {
     readonly title: string;
     readonly description: string;
@@ -24,7 +26,7 @@ export type GroupChatPageProps = {
 
 /** Implement the approved Grammar anatomy while unsupported collaboration actions fail closed. */
 export const GroupChatPageBase = (props: GroupChatPageProps) => {
-  const { isRailOpen, labels, onRailOpenChange } = props;
+  const { isRailOpen, labels, on } = props;
   const groups = <section className={GROUP_LIST_CLASS_NAME} aria-label={labels.groups}>
     <Text size="sm" weight="semibold">{labels.groups}</Text>
     <EmptyNotice message={labels.groupsEmpty} />
@@ -55,7 +57,7 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
         railOpenLabel={labels.openMembers}
         railCloseLabel={labels.closeMembers}
         isRailOpen={isRailOpen}
-        onRailOpenChange={onRailOpenChange}
+        onRailOpenChange={on.changeRailOpen}
         railWidth="standard"
       />
     </div>

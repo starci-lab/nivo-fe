@@ -65,7 +65,7 @@ describe("FE architecture boundary", () => {
     it("allows lifecycle effects and hook-owned refreshes", () => {
         assert.deepEqual(codes(`
             import { useEffect } from "react"
-            import { useWorkspace } from "@/hooks/swr/useWorkspace"
+            import { useWorkspace } from "@/hooks"
             export const Example = () => {
                 const { refresh } = useWorkspace()
                 useEffect(() => {
@@ -93,5 +93,31 @@ describe("FE architecture boundary", () => {
             "export const request = () => fetch('/fixture')",
             "/apps/app/src/components/Example/index.spec.tsx",
         ), [])
+    })
+
+    it("keeps pure component twins free of client ownership and world hooks", () => {
+        const purePath = "/apps/app/src/components/blocks/Example/component.tsx"
+        assert.deepEqual(codes(`
+            "use client"
+            import { useState } from "react"
+            export const ExampleBase = () => { const [value] = useState(0); return value }
+        `, purePath), ["pure-component-client-directive", "pure-component-world-hook"])
+        assert.deepEqual(codes(`
+            import { useRef } from "react"
+            export const ExampleBase = (props) => { const ref = useRef(null); return <div ref={ref}>{props.value}</div> }
+        `, purePath), [])
+    })
+
+    it("enforces the hook barrel and downward component dependencies", () => {
+        assert.deepEqual(codes(`
+            import { useWorkspace } from "@/hooks/swr/useWorkspace"
+            import { ExamplePageBase } from "@/components/pages/ExamplePage/component"
+            export const Example = () => <ExamplePageBase value={useWorkspace()} />
+        `), ["component-deep-hook-import", "block-imports-page"])
+        assert.deepEqual(codes(`
+            import { useWorkspace } from "@/hooks"
+            import { workspaceProjection } from "@/modules/workspace/projection"
+            export const Example = () => workspaceProjection(useWorkspace())
+        `), [])
     })
 })

@@ -19,8 +19,8 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/modules/api/accounting", () => mocks.api);
-vi.mock("@/hooks/swr/use-nivo-mutation", () => ({ useNivoMutation: mocks.useNivoMutation }));
-vi.mock("@/hooks/swr/use-nivo-query", () => ({ useNivoQuery: mocks.useNivoQuery }));
+vi.mock("@/hooks/swr/useNivoMutation", () => ({ useNivoMutation: mocks.useNivoMutation }));
+vi.mock("@/hooks/swr/useNivoQuery", () => ({ useNivoQuery: mocks.useNivoQuery }));
 
 import {
   useMutateApproveAccountingCorrectionSwr,

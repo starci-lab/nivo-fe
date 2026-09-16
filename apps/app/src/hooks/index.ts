@@ -9,8 +9,12 @@
  * read a transport answer stay behind their own paths — `nivoQueryData` and
  * `NivoQueryAnswer` live in `@/modules/query`.
  */
-export { useNivoQuery } from "./swr/use-nivo-query"
-export { useNivoMutation } from "./swr/use-nivo-mutation"
+export { useNivoQuery } from "./swr/useNivoQuery"
+export { useNivoMutation } from "./swr/useNivoMutation"
+export { useAccountingWorkbench } from "./agentos/useAccountingWorkbench"
+
+export { useQueryAccountingWorkbenchSwr } from "./swr/queries/accounting"
+export { useQueryAppliedAccountingContextSwr } from "./swr/queries/accounting"
 
 export { useQueryCatalogItemsSwr } from "./swr/queries/console"
 export { useQueryMyAcademyGrowthSnapshotSwr } from "./swr/queries/console"
@@ -40,7 +44,7 @@ export { useQueryMyWalletSwr } from "./swr/queries/console"
 export { useQueryMyWalletTransactionsSwr } from "./swr/queries/console"
 export { useReadMyAgentosModuleTestRun } from "./swr/queries/console"
 
-export { useQueryChatbotWorkbenchSwr } from "./swr/queries/workspace-controlplane"
+export { useQueryChatbotWorkbenchSwr } from "./swr/queries/useQueryChatbotWorkbenchSwr"
 
 export { useMutateAcademyIntegrationSwr } from "./swr/mutations/academy"
 export { useMutateCreateAcademyStudentSwr } from "./swr/mutations/academy"
@@ -58,6 +62,16 @@ export { useMutateSignUpInitSwr } from "./swr/mutations/auth"
 export { useMutateSignUpResendSwr } from "./swr/mutations/auth"
 export { useMutateSignUpVerifyOtpSwr } from "./swr/mutations/auth"
 export { useOauthReturnExchange } from "./swr/mutations/auth"
+
+export { useMutateApproveAccountingCorrectionSwr } from "./swr/mutations/accounting"
+export { useMutateApproveAccountingDocumentSwr } from "./swr/mutations/accounting"
+export { useMutateCloseAccountingPeriodSwr } from "./swr/mutations/accounting"
+export { useMutateIngestAccountingDocumentSwr } from "./swr/mutations/accounting"
+export { useMutateInitializeAccountingSwr } from "./swr/mutations/accounting"
+export { useMutatePostAccountingDocumentSwr } from "./swr/mutations/accounting"
+export { useMutateReconcileAccountingSwr } from "./swr/mutations/accounting"
+export { useMutateSubmitAccountingCorrectionSwr } from "./swr/mutations/accounting"
+export { useMutateSubmitAccountingDocumentSwr } from "./swr/mutations/accounting"
 
 export { useMutateCreateWalletTopUpPayLinkSwr } from "./swr/mutations/commerce"
 export { useMutatePayInvoiceSwr } from "./swr/mutations/commerce"

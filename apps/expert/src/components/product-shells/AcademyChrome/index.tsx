@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentType } from "react";
+import type { ReactNode } from "react";
 import { useLocale } from "next-intl";
 import type { Locale } from "@/i18n/config";
 import { ACADEMY, inLocale, isSafeThemeValue, type ThemeVariables } from "@/modules/academy/template";
@@ -146,9 +146,9 @@ const themeCss = (name: string | undefined): string => {
 };
 
 /** Props for {@link AcademyChrome}. */
-interface AcademyChromeProps<P extends object> {
+type AcademyChromeProps = {
   /**
-   * The page to wrap. Opaque on purpose -- this component styles a document, not a tree.
+   * The routed page to wrap. Opaque on purpose -- this component styles a document, not a tree.
    *
    * A NAMED PROP RATHER THAN `children`, and the difference is not cosmetic. `children` is the one
    * slot every JSX element already has, so a component that takes it accepts markup from anywhere
@@ -156,9 +156,8 @@ interface AcademyChromeProps<P extends object> {
    * `content` says the same thing out loud: this layout receives exactly one routed interior, at a
    * name a reader can grep, and a second one cannot be slipped in beside it.
    */
-  readonly content: ComponentType<P>;
-  readonly contentProps: P;
-}
+  readonly content: ReactNode;
+};
 
 /**
  * Wrap a page in this academy's theme and its own CSS.
@@ -166,7 +165,7 @@ interface AcademyChromeProps<P extends object> {
  * @param input - {@link AcademyChromeProps}
  * @returns The themed shell.
  */
-export const AcademyChrome = <P extends object,>(props: AcademyChromeProps<P>) => {
+export const AcademyChrome = (props: AcademyChromeProps) => {
   const locale = useLocale() as Locale;
   const theme = themeCss(inLocale(ACADEMY.identity.name, locale));
   return <>
@@ -180,6 +179,6 @@ export const AcademyChrome = <P extends object,>(props: AcademyChromeProps<P>) =
              */}
             <style>{theme}</style>
             {ACADEMY.customCss ? <style>{ACADEMY.customCss}</style> : null}
-            <props.content {...props.contentProps} />
+            {props.content}
         </>;
 };

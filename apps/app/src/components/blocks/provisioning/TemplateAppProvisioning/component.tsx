@@ -1,5 +1,3 @@
-"use client";
-
 import { LifecycleStep, RequestSummary, type LifecycleStepData } from "@nivo/ui";
 import { Button, Input, Heading, Text } from "@starci/grammar/common";
 

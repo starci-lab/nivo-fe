@@ -1,5 +1,3 @@
-"use client";
-
 import { AcademyChrome } from "@/components/product-shells/AcademyChrome";
 import { AcademySections } from "@/components/blocks/academy/AcademySections";
 import type { Course } from "@/modules/api/academy";
@@ -18,10 +16,10 @@ import type { Course } from "@/modules/api/academy";
  */
 
 /** Props for {@link AcademyPageBase}. */
-export interface AcademyPageProps {
+export type AcademyPageProps = {
   /** The catalog this academy sells, already resolved. */
   readonly courses: ReadonlyArray<Course>;
-}
+};
 const AcademyRoutedContent = ({
   courses
 }: AcademyPageProps) => <div>
@@ -42,6 +40,4 @@ export const AcademyPageBase = (props: AcademyPageProps) => <AcademyChrome
  *
  * The interior is a semantic main landmark so a reader can skip the chrome above it. The page
  * keeps the section block responsible for its own internal structure.
- */ content={AcademyRoutedContent} contentProps={{
-  courses: [...props.courses]
-}} />;
+ */ content={<AcademyRoutedContent courses={[...props.courses]} />} />;

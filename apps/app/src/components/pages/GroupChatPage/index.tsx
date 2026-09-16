@@ -12,7 +12,7 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
   void props;
   const t = useTranslations("console.groupChat");
   const [isRailOpen, setRailOpen] = useState(false);
-  return <GroupChatPageBase isRailOpen={isRailOpen} onRailOpenChange={setRailOpen} labels={{
+  return <GroupChatPageBase isRailOpen={isRailOpen} on={{ changeRailOpen: setRailOpen }} labels={{
     title: t("title"),
     description: t("description"),
     groups: t("groups"),

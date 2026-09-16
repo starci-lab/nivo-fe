@@ -1,6 +1,4 @@
-"use client";
-
-import { useEffect, useState, type ComponentType, type ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { Checkbox, ChoiceTabs, RouteTabs } from "@nivo/ui";
 import { SurfaceCard, Button, Input, Heading, Text, Tabs, PrimaryRailLayout, TextAction } from "@starci/grammar/common";
 import { ChatbotWorkbenchBlock } from "@/components/blocks/agentos/ChatbotWorkbenchBlock";
@@ -1322,12 +1320,30 @@ const OperateSurface = (props: WithModulePageCopy<OperateSurfaceProps>) => { con
     }} on={{
       select: key => props.onSelectTarget(key as OperateSurfaceProps["operationTarget"])
     }} /></div><ExecuteSessionRailBlock copy={props.copy} sessions={props.sessions} selectedId={props.selectedSessionId} pending={props.pending} onSelect={props.onSelectSession} onCreate={props.onCreateSession} />{chatPane(props)}{workbenchPane(props)}</div>); };
+type SettingsFormActions = {
+  readonly save: (settings: Readonly<Record<string, AgentosRuntimeValue>>, operatingMode: "assist" | "autopilot", channelAccountRef: string) => void;
+  readonly setLiveEnabled: (enabled: boolean) => void;
+  readonly saveCredential: (credentialKey: string, credentialValue: string) => void;
+  readonly removeCredential: (credentialKey: string) => void;
+  readonly changeDisplayName: (value: string) => void;
+  readonly changeModelProfile: (value: string) => void;
+  readonly changeConfirmation: (value: boolean) => void;
+  readonly changeOperatingMode: (value: "assist" | "autopilot") => void;
+  readonly changeChannelAccountRef: (value: string) => void;
+  readonly changeCredential: (credentialKey: string, value: string) => void;
+};
 type SettingsFormContentProps = {
   readonly currentDisplayName: string;
   readonly currentModelProfile: string;
   readonly currentConfirmation: boolean;
   readonly currentOperatingMode: "assist" | "autopilot";
   readonly currentChannelAccountRef: string;
+  readonly displayName: string;
+  readonly modelProfile: string;
+  readonly requireConfirmation: boolean;
+  readonly operatingMode: "assist" | "autopilot";
+  readonly channelAccountRef: string;
+  readonly credentialValues: Readonly<Record<string, string>>;
   readonly liveEnabled: boolean;
   readonly canEnableLive: boolean;
   readonly pending: boolean;
@@ -1342,43 +1358,10 @@ type SettingsFormContentProps = {
     readonly maskedHint: string;
     readonly status: string;
   }>;
-  readonly onSave: (settings: Readonly<Record<string, AgentosRuntimeValue>>, operatingMode: "assist" | "autopilot", channelAccountRef: string) => void;
-  readonly onSetLiveEnabled: (enabled: boolean) => void;
-  readonly onSaveCredential: (credentialKey: string, credentialValue: string) => void;
-  readonly onRemoveCredential: (credentialKey: string) => void;
+  readonly on: SettingsFormActions;
 };
-const SettingsFormContent = ({
-  copy,
-  currentDisplayName,
-  currentModelProfile,
-  currentConfirmation,
-  currentOperatingMode,
-  currentChannelAccountRef,
-  liveEnabled,
-  canEnableLive,
-  pending,
-  refused,
-  credentialSlots,
-  credentialStatuses,
-  onSave,
-  onSetLiveEnabled,
-  onSaveCredential,
-  onRemoveCredential
-}: WithModulePageCopy<SettingsFormContentProps>) => {
-  const [displayName, setDisplayName] = useState(currentDisplayName);
-  const [modelProfile, setModelProfile] = useState(currentModelProfile);
-  const [requireConfirmation, setRequireConfirmation] = useState(currentConfirmation);
-  const [operatingMode, setOperatingMode] = useState<"assist" | "autopilot">(currentOperatingMode);
-  const [channelAccountRef, setChannelAccountRef] = useState(currentChannelAccountRef);
-  const [credentialValues, setCredentialValues] = useState<Readonly<Record<string, string>>>({});
-  useEffect(() => {
-    setDisplayName(currentDisplayName);
-    setModelProfile(currentModelProfile);
-    setRequireConfirmation(currentConfirmation);
-    setOperatingMode(currentOperatingMode);
-    setChannelAccountRef(currentChannelAccountRef);
-    setCredentialValues({});
-  }, [currentChannelAccountRef, currentConfirmation, currentDisplayName, currentModelProfile, currentOperatingMode]);
+const SettingsFormContent = (props: WithModulePageCopy<SettingsFormContentProps>) => {
+  const { copy, currentDisplayName, currentModelProfile, currentChannelAccountRef, liveEnabled, canEnableLive, pending, refused, credentialSlots, credentialStatuses, displayName, modelProfile, requireConfirmation, operatingMode, channelAccountRef, credentialValues } = props;
   return <div><>
 
 
@@ -1389,9 +1372,10 @@ const SettingsFormContent = ({
         name="displayName"
         label={copy.settings.displayName}
         placeholder={currentDisplayName}
+        value={displayName}
         isDisabled={pending}
         variant="secondary"
-        onValueChange={setDisplayName}
+        onValueChange={props.on.changeDisplayName}
       />
 
 
@@ -1402,9 +1386,10 @@ const SettingsFormContent = ({
         name="modelProfile"
         label={copy.settings.modelProfile}
         placeholder={currentModelProfile}
+        value={modelProfile}
         isDisabled={pending}
         variant="secondary"
-        onValueChange={setModelProfile}
+        onValueChange={props.on.changeModelProfile}
       />
 
 
@@ -1415,10 +1400,11 @@ const SettingsFormContent = ({
         name="channelAccountRef"
         label={copy.settings.channelRef}
         placeholder={currentChannelAccountRef || "telegram:nivo-support"}
+        value={channelAccountRef}
         isDisabled={pending}
         variant="secondary"
         hint={copy.settings.channelHint}
-        onValueChange={setChannelAccountRef}
+        onValueChange={props.on.changeChannelAccountRef}
       /></>
 
 
@@ -1435,7 +1421,7 @@ const SettingsFormContent = ({
         label: copy.settings.autopilot
       }]
     }} on={{
-      select: key => setOperatingMode(key as "assist" | "autopilot")
+      select: key => props.on.changeOperatingMode(key as "assist" | "autopilot")
     }} />
 
 
@@ -1445,7 +1431,7 @@ const SettingsFormContent = ({
       isSelected: requireConfirmation,
       name: "requireConfirmation"
     }} on={{
-      change: setRequireConfirmation
+      change: props.on.changeConfirmation
     }} /><>
 
 
@@ -1455,7 +1441,7 @@ const SettingsFormContent = ({
         variant="primary"
         isPending={pending}
         isDisabled={channelAccountRef.trim().length < 3}
-        onPress={() => onSave({
+        onPress={() => props.on.save({
           displayName,
           modelProfile,
           requireConfirmation
@@ -1468,7 +1454,7 @@ const SettingsFormContent = ({
         variant="secondary"
         isPending={pending}
         isDisabled={!liveEnabled && !canEnableLive}
-        onPress={() => onSetLiveEnabled(!liveEnabled)}
+        onPress={() => props.on.setLiveEnabled(!liveEnabled)}
       >{liveEnabled ? copy.settings.disableLive : copy.settings.enableLive}</Button></>{credentialSlots.map(slot => <Input
         key={`${slot.key}-${credentialStatuses.find(row => row.providerKey === slot.key)?.maskedHint ?? "empty"}`}
         id={`agentos-module-credential-${slot.key}`}
@@ -1481,10 +1467,8 @@ const SettingsFormContent = ({
         hideLabel={copy.settings.hideCredential({ label: slot.label })}
         variant="secondary"
         hint={copy.settings.credentialHint({ provider: slot.provider })}
-        onValueChange={value => setCredentialValues(current => ({
-        ...current,
-        [slot.key]: value
-      }))}
+        value={credentialValues[slot.key] ?? ""}
+        onValueChange={value => props.on.changeCredential(slot.key, value)}
       />)}{credentialSlots.length === 0 ? undefined : <Text size="sm" tone="muted" live="polite">{credentialStatuses.length === 0 ? copy.settings.noCredential : credentialStatuses.map(row => `${row.providerKey}: ${row.maskedHint} · ${credentialStatusLabel(row.status, copy)}`).join(" · ")}</Text>}{credentialSlots.flatMap(slot => {
       const configured = credentialStatuses.some(row => row.providerKey === slot.key);
       const value = credentialValues[slot.key]?.trim() ?? "";
@@ -1493,51 +1477,33 @@ const SettingsFormContent = ({
         variant="secondary"
         isDisabled={value.length === 0}
         isPending={pending}
-        onPress={() => value.length > 0 && onSaveCredential(slot.key, value)}
+        onPress={() => value.length > 0 && props.on.saveCredential(slot.key, value)}
       >{copy.settings.saveCredential({ label: slot.label })}</Button>, ...(configured ? [<Button
         key={`${slot.key}-remove`}
         variant="ghost"
         isDisabled={pending}
-        onPress={() => onRemoveCredential(slot.key)}
+        onPress={() => props.on.removeCredential(slot.key)}
       >{copy.settings.removeCredential({ label: slot.label })}</Button>] : [])];
     })}{refused ? <Text size="sm" tone="muted" live="assertive">{copy.settings.refused}</Text> : <Text size="sm" tone="muted" live="polite">{liveEnabled ? copy.settings.liveEnabled : canEnableLive ? copy.settings.liveReady : copy.settings.liveRequires}</Text>}</div>;
 };
 type SettingsSurfaceProps = SettingsFormContentProps & {
   readonly activeVersion: number | null;
 };
-const SettingsSurface = ({
-  copy,
-  activeVersion,
-  currentDisplayName,
-  currentModelProfile,
-  currentConfirmation,
-  currentOperatingMode,
-  currentChannelAccountRef,
-  liveEnabled,
-  canEnableLive,
-  pending,
-  refused,
-  credentialSlots,
-  credentialStatuses,
-  onSave,
-  onSetLiveEnabled,
-  onSaveCredential,
-  onRemoveCredential
-}: WithModulePageCopy<SettingsSurfaceProps>) => { return (<div>
+const SettingsSurface = (props: WithModulePageCopy<SettingsSurfaceProps>) => { return (<div>
 
 
   <SurfaceCard
-    label={copy.settings.title}
+    label={props.copy.settings.title}
   >
-    <SettingsFormContent copy={copy} currentDisplayName={currentDisplayName} currentModelProfile={currentModelProfile} currentConfirmation={currentConfirmation} currentOperatingMode={currentOperatingMode} currentChannelAccountRef={currentChannelAccountRef} liveEnabled={liveEnabled} canEnableLive={canEnableLive} pending={pending} refused={refused} credentialSlots={credentialSlots} credentialStatuses={credentialStatuses} onSave={onSave} onSetLiveEnabled={onSetLiveEnabled} onSaveCredential={onSaveCredential} onRemoveCredential={onRemoveCredential} />
+    <SettingsFormContent {...props} />
   </SurfaceCard>
 
 
 
   <SurfaceCard
-    label={copy.settings.safeguards}
-    fact={activeVersion === null ? copy.settings.contextRequired : copy.settings.activeVersion({ version: activeVersion })}
-  ><div>{<div>{[[copy.settings.externalSends, currentConfirmation ? copy.settings.requireConfirmation : copy.settings.allowedPolicy({ mode: copy.settings[currentOperatingMode] })], [copy.settings.refundLegal, copy.settings.humanApproval], [copy.settings.promptCache, activeVersion === null ? copy.settings.inactive : copy.settings.stableKnowledge({ version: activeVersion })], [copy.settings.cacheInvalidation, copy.settings.automaticApply], [copy.settings.executeHistory, copy.settings.bindingRetained]].map(([ label, value], index) => <div key={index}>{<Text size="sm">{label}</Text>}{<Text size="sm" weight="semibold">{value}</Text>}</div>)}</div>}</div></SurfaceCard>
+    label={props.copy.settings.safeguards}
+    fact={props.activeVersion === null ? props.copy.settings.contextRequired : props.copy.settings.activeVersion({ version: props.activeVersion })}
+  ><div>{<div>{[[props.copy.settings.externalSends, props.currentConfirmation ? props.copy.settings.requireConfirmation : props.copy.settings.allowedPolicy({ mode: props.copy.settings[props.currentOperatingMode] })], [props.copy.settings.refundLegal, props.copy.settings.humanApproval], [props.copy.settings.promptCache, props.activeVersion === null ? props.copy.settings.inactive : props.copy.settings.stableKnowledge({ version: props.activeVersion })], [props.copy.settings.cacheInvalidation, props.copy.settings.automaticApply], [props.copy.settings.executeHistory, props.copy.settings.bindingRetained]].map(([ label, value], index) => <div key={index}>{<Text size="sm">{label}</Text>}{<Text size="sm" weight="semibold">{value}</Text>}</div>)}</div>}</div></SurfaceCard>
 
 </div>); };
 type DiagnosticsSurfaceProps = {

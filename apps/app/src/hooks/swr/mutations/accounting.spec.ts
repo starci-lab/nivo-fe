@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { useNivoMutation } = vi.hoisted(() => ({ useNivoMutation: vi.fn((_key, mutation, options) => ({ key: _key, mutation, options })) }));
-vi.mock("../use-nivo-mutation", () => ({ useNivoMutation }));
+vi.mock("../useNivoMutation", () => ({ useNivoMutation }));
 vi.mock("@/modules/api/accounting", () => ({
   approveAccountingCorrection: vi.fn(), approveAccountingDocument: vi.fn(), closeAccountingPeriod: vi.fn(), ingestAccountingDocument: vi.fn(), initializeAccounting: vi.fn(), postAccountingDocument: vi.fn(), reconcileAccounting: vi.fn(), submitAccountingCorrection: vi.fn(), submitAccountingDocument: vi.fn()
 }));

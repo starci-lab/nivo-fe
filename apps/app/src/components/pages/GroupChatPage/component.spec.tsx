@@ -28,13 +28,13 @@ describe("GroupChatPageBase", () => {
   });
 
   it("renders the accepted chat anatomy while unsupported actions fail closed", () => {
-    const onRailOpenChange = vi.fn();
-    const { container } = render(<GroupChatPageBase isRailOpen={false} onRailOpenChange={onRailOpenChange} labels={labels} />);
+    const changeRailOpen = vi.fn();
+    const { container } = render(<GroupChatPageBase isRailOpen={false} on={{ changeRailOpen }} labels={labels} />);
     expect(screen.getByRole("heading", { name: "Group chat" })).toBeInTheDocument();
     expect(screen.getByText("Permissions are not ready")).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Message" })).toBeDisabled();
     expect(container.querySelector('[data-grammar-chat-workspace="true"]')).not.toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Open members" }));
-    expect(onRailOpenChange).toHaveBeenCalledWith(true);
+    expect(changeRailOpen).toHaveBeenCalledWith(true);
   });
 });

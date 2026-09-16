@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
     chatbotWorkbenchQueryKey,
     type SupportQueryIdentity,
-} from "./workspace-controlplane"
+} from "./useQueryChatbotWorkbenchSwr"
 
 const identity: SupportQueryIdentity = {
     hostname: "agent-workspace.nivo.vn",

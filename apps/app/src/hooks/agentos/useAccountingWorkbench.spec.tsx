@@ -30,7 +30,7 @@ vi.mock("next-intl", () => ({
 }));
 
 import { useAccountingWorkbench } from "./useAccountingWorkbench";
-import { AccountingWorkbenchBlock } from ".";
+import { AccountingWorkbenchBlock } from "@/components/blocks/agentos/AccountingWorkbenchBlock";
 
 const accepted = { ok: true, data: { operation: "submit-document" } } as const;
 const readback = { ok: true, data: { capabilities: {}, ledger: [], documents: [], reconciliations: [], periods: [], corrections: [] } } as const;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useMutateAnswerAgentosCustomModuleIntakeSwr } from "@/hooks";
-import { useAgentOSModuleStudioProjection } from "@/components/pages/AgentOSModuleStudioPage/component";
+import { useAgentOSModuleStudioProjection } from "@/modules/agentos/module-studio-projection";
 import { AgentOSModuleInterviewBase } from "./component";
 type AgentOSModuleInterviewProps = {
   readonly workspaceId: string;

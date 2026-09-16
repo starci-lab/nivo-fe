@@ -36,21 +36,21 @@ export type SessionState = /** The refresh cookie is being traded for a token; n
 };
 
 /** What a caller may do with the session. */
-export interface Session {
+export type Session = {
   /** The current state. */
   readonly state: SessionState;
   /** Adopt the payload an auth mutation just returned. Ignores a payload still owing a factor. */
   readonly adopt: (payload: AuthPayload) => void;
   /** Drop the session here and on the server. */
   readonly end: () => Promise<void>;
-}
+};
 const SessionContext = createContext<Session | null>(null);
 
 /** Props for {@link SessionProvider}. */
-export interface SessionProviderProps {
+export type SessionProviderProps = {
   /** Everything that may read the session. */
   readonly children: ComponentProps<"div">["children"];
-}
+};
 
 /**
  * Hold the session above every route.

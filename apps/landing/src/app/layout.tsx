@@ -17,10 +17,10 @@ export const viewport: Viewport = {
 };
 
 /** Props for {@link RootLayout}. */
-interface RootLayoutProps {
+type RootLayoutProps = {
   /** The rendered route. */
   readonly children: ComponentProps<"div">["children"];
-}
+};
 
 /**
  * The document shell.

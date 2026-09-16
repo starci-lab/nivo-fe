@@ -4,7 +4,7 @@ import type { ComponentProps } from "react";
 
 import { ConsoleLayout } from "@/components/product-shells/ConsoleLayout";
 
-interface ConsoleRouteLayoutProps {readonly children: ComponentProps<"div">["children"];}
+type ConsoleRouteLayoutProps = {readonly children: ComponentProps<"div">["children"];};
 
 const ConsoleRoutedBody = ({ children }: ConsoleRouteLayoutProps) => <div>{
 

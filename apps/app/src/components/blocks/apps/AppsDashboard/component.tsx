@@ -134,7 +134,7 @@ export type AppsDashboardViewProps = {
  * @param index - Which resting row this is, so the run has stable keys.
  * @returns The resting row, bound to the slot's composite identity.
  */
-const restingRow = (index: number) => <FleetRow props={{
+const restingRow = (index: number) => <FleetRow key={`resting-${index}`} props={{
   id: `resting-${index}`,
   kind: "site",
   kindLabel: "",
@@ -147,7 +147,7 @@ const restingRow = (index: number) => <FleetRow props={{
  * @param row - The already-worded row.
  * @returns The row, bound to the slot's composite identity.
  */
-const ownedRow = (row: OwnedAppRow, onOpenOwnedApp: (siteId: string) => void) => <FleetRow props={{
+const ownedRow = (row: OwnedAppRow, onOpenOwnedApp: (siteId: string) => void) => <FleetRow key={row.id} props={{
   id: row.id,
   name: row.name,
   detail: row.detail,
@@ -177,7 +177,7 @@ const ownedRow = (row: OwnedAppRow, onOpenOwnedApp: (siteId: string) => void) =>
  * @param row - The already-worded offer.
  * @returns The row, bound to the slot's composite identity.
  */
-const offerRow = (row: TemplateOfferRowView, onBuildTemplate: (templateKey: string) => void) => <div>{<div>{<TextAction size="sm">{row.name}</TextAction>}{<Text size="xs" tone="muted">{row.tagline}</Text>}</div>}{<Badge tone="neutral">{row.kindLabel}</Badge>}{<Text size="sm">{row.priceLabel}</Text>}{<Button
+const offerRow = (row: TemplateOfferRowView, onBuildTemplate: (templateKey: string) => void) => <div key={row.id}>{<div>{<TextAction size="sm">{row.name}</TextAction>}{<Text size="xs" tone="muted">{row.tagline}</Text>}</div>}{<Badge tone="neutral">{row.kindLabel}</Badge>}{<Text size="sm">{row.priceLabel}</Text>}{<Button
     size="sm"
     variant="primary"
     isDisabled={row.actionDisabled}
@@ -216,7 +216,7 @@ const ATTENTION_STATUSES: ReadonlySet<FleetStatus> = new Set(["awaiting_dns", "f
 const groupedOwnedList = (rows: ReadonlyArray<OwnedAppRow>, attentionGroupLabel: string, steadyGroupLabel: string, onOpenOwnedApp: (siteId: string) => void) => {
   const attention = rows.filter(row => ATTENTION_STATUSES.has(row.status));
   const steady = rows.filter(row => !ATTENTION_STATUSES.has(row.status));
-  const group = (label: string, members: ReadonlyArray<OwnedAppRow>) => <div>
+  const group = (label: string, members: ReadonlyArray<OwnedAppRow>) => <div key={label}>
 
     <Text size="sm" tone="muted">{label}</Text><div>{members.map(row => ownedRow(row, onOpenOwnedApp))}</div></div>;
   return <div><>{attention.length === 0 ? [] : [group(attentionGroupLabel, attention)]}{steady.length === 0 ? [] : [group(steadyGroupLabel, steady)]}</></div>;
@@ -315,4 +315,3 @@ export const AppsDashboardBase = (props: AppsDashboardProps) => {
 
     <Text size="md" tone="muted">{lede}</Text><div><div><>{ownedSection()}</></div><div><>{catalogueSection()}</></div></div></div>;
 };
-

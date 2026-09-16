@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
+import { useState } from "react"
 import { NextIntlClientProvider, useTranslations, createTranslator } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
@@ -48,6 +49,34 @@ type CopyFixtureProps = Omit<AgentOSSolutionModulePageViewProps, "copy">
 type PageFixtureProps = CopyFixtureProps & { readonly locale: "en" | "vi" }
 const CopyFixture = ({ shell, screen }: CopyFixtureProps) => { const t = useTranslations("console.agentos.modules"); return <AgentOSSolutionModulePageBase shell={shell} screen={screen} copy={buildModulePageCopy(t)} /> }
 const PageFixture = ({ shell, screen, locale }: PageFixtureProps) => <NextIntlClientProvider locale={locale} timeZone={TIME_ZONE} messages={locale === "en" ? enMessages : viMessages} onError={error => { throw error }}><SessionProvider><CopyFixture shell={shell} screen={screen} /></SessionProvider></NextIntlClientProvider>
+type SettingsContentProps = Extract<AgentOSSolutionModuleScreen, { readonly view: "settings" }>["contentProps"]
+type SettingsInteractionFixtureProps = { readonly locale: "en" | "vi"; readonly contentProps: SettingsContentProps }
+const SettingsInteractionFixture = (props: SettingsInteractionFixtureProps) => {
+    const [displayName, setDisplayName] = useState(props.contentProps.displayName)
+    const [modelProfile, setModelProfile] = useState(props.contentProps.modelProfile)
+    const [requireConfirmation, setRequireConfirmation] = useState(props.contentProps.requireConfirmation)
+    const [operatingMode, setOperatingMode] = useState(props.contentProps.operatingMode)
+    const [channelAccountRef, setChannelAccountRef] = useState(props.contentProps.channelAccountRef)
+    const [credentialValues, setCredentialValues] = useState<Readonly<Record<string, string>>>(props.contentProps.credentialValues)
+    return <PageFixture locale={props.locale} shell={{ ...shell, activeView: "settings" }} screen={{ view: "settings", contentProps: {
+        ...props.contentProps,
+        displayName,
+        modelProfile,
+        requireConfirmation,
+        operatingMode,
+        channelAccountRef,
+        credentialValues,
+        on: {
+            ...props.contentProps.on,
+            changeDisplayName: setDisplayName,
+            changeModelProfile: setModelProfile,
+            changeConfirmation: setRequireConfirmation,
+            changeOperatingMode: setOperatingMode,
+            changeChannelAccountRef: setChannelAccountRef,
+            changeCredential: (key, value) => setCredentialValues(current => ({ ...current, [key]: value })),
+        },
+    } }} />
+}
 
 const screens: ReadonlyArray<AgentOSSolutionModuleScreen> = [
     {
@@ -136,16 +165,30 @@ const screens: ReadonlyArray<AgentOSSolutionModuleScreen> = [
             currentConfirmation: true,
             currentOperatingMode: "assist",
             currentChannelAccountRef: "TELEGRAM:12345",
+            displayName: "Support Desk",
+            modelProfile: "nivo-default",
+            requireConfirmation: true,
+            operatingMode: "assist",
+            channelAccountRef: "TELEGRAM:12345",
+            credentialValues: {},
             liveEnabled: false,
             canEnableLive: true,
             pending: false,
             refused: false,
             credentialSlots: [{ key: "telegram-bot-token", label: "Telegram bot token", provider: "Telegram" }],
             credentialStatuses: [{ providerKey: "telegram-bot-token", maskedHint: "••••1234", status: "configured" }],
-            onSave: action,
-            onSetLiveEnabled: action,
-            onSaveCredential: action,
-            onRemoveCredential: action,
+            on: {
+                save: action,
+                setLiveEnabled: action,
+                saveCredential: action,
+                removeCredential: action,
+                changeDisplayName: action,
+                changeModelProfile: action,
+                changeConfirmation: action,
+                changeOperatingMode: action,
+                changeChannelAccountRef: action,
+                changeCredential: action,
+            },
         },
     },
     {
@@ -242,8 +285,8 @@ describe.each(["en", "vi"] as const)("Settings interaction copy %s", locale => {
   const settings = screens.find(candidate => candidate.view === "settings")!
   if (settings.view !== "settings") throw new Error("Settings fixture missing")
   const onSaveCredential = vi.fn(); const onRemoveCredential = vi.fn(); const onSave = vi.fn(); const onSetLiveEnabled = vi.fn()
-  const contentProps = { ...settings.contentProps, onSaveCredential, onRemoveCredential, onSave, onSetLiveEnabled }
-  const view = render(<PageFixture locale={locale} shell={{ ...shell, activeView: "settings" }} screen={{ view: "settings", contentProps }} />)
+  const contentProps = { ...settings.contentProps, on: { ...settings.contentProps.on, saveCredential: onSaveCredential, removeCredential: onRemoveCredential, save: onSave, setLiveEnabled: onSetLiveEnabled } }
+  const view = render(<SettingsInteractionFixture locale={locale} contentProps={contentProps} />)
   const input = screen.getByLabelText("Telegram bot token", { selector: "input" })
   expect(input).toHaveAttribute("type", "password")
   expect(input).toHaveAttribute("placeholder", "••••1234")
@@ -267,7 +310,7 @@ describe.each(["en", "vi"] as const)("Settings interaction copy %s", locale => {
   expect(screen.getByText(copy.settings.liveReady)).toBeInTheDocument()
   fireEvent.click(screen.getByRole("button", { name: copy.settings.enableLive }))
   expect(onSetLiveEnabled).toHaveBeenCalledExactlyOnceWith(true)
-  view.rerender(<PageFixture locale={locale} shell={{ ...shell, activeView: "settings" }} screen={{ view: "settings", contentProps: { ...contentProps, liveEnabled: true } }} />)
+  view.rerender(<SettingsInteractionFixture locale={locale} contentProps={{ ...contentProps, liveEnabled: true }} />)
   expect(screen.getByText(copy.settings.liveEnabled)).toBeInTheDocument()
   fireEvent.click(screen.getByRole("button", { name: copy.settings.disableLive }))
   expect(onSetLiveEnabled.mock.calls).toEqual([[true], [false]])
@@ -383,6 +426,4 @@ describe.each(["en", "vi"] as const)("Page owner action forwarding %s", locale =
   view.unmount()
  })
 })
-
-
 

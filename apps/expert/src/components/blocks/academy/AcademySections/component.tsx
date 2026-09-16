@@ -1,8 +1,7 @@
-"use client";
 import { SurfaceCard, Button, Heading, Text, Badge } from "@starci/grammar/common";
 
 /* The section renderer intentionally assembles heterogeneous ReactNode arrays. */
-import { Fragment, useState, type ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { CUSTOM_BODY_CLASS_NAME, FIGURE_CLASS_NAME, FIGURE_IMAGE_CLASS_NAME, FIGURE_PLACEHOLDER_CLASS_NAME, PULL_QUOTE_CLASS_NAME, QUOTE_CLASS_NAME, LEAD_INPUT_CLASS_NAME } from "./classNames";
 import { Avatar, Label } from "@nivo/ui";
 import type { AcademySection, LeadSubmit } from "./index";
@@ -53,7 +52,7 @@ const Band = ({
   alt = false,
   parts
 }: BandProps) => {
-  const column = <div>{parts}</div>;
+  const column = <div>{parts.map((part, index) => <Fragment key={index}>{part}</Fragment>)}</div>;
   if (alt) {
     return <div>{column}</div>;
   }
@@ -68,7 +67,14 @@ type FigureProps = {
   readonly alt: string;
   /** The shape of the space the picture holds. */
   readonly ratio?: string;
+  /** Image sources already known to have failed in this connected render. */
+  readonly failedImageSources: ReadonlySet<string>;
+  /** Record one failed image source in the connected owner. */
+  readonly failImage: (src: string) => void;
 };
+
+/** Image failure state resolved by the connected block owner. */
+type ImageState = Pick<FigureProps, "failedImageSources" | "failImage">;
 
 /**
  * One image, from a link the expert pasted.
@@ -89,18 +95,14 @@ type FigureProps = {
  *
  * @param input - {@link FigureProps}
  */
-const Figure = ({
-  src,
-  alt,
-  ratio = "4/3"
-}: FigureProps) => {
-  const [failed, setFailed] = useState(false);
-  const usable = src !== undefined && src !== "" && !failed;
+const Figure = (props: FigureProps) => {
+  const ratio = props.ratio ?? "4/3";
+  const usable = props.src !== undefined && props.src !== "" && !props.failedImageSources.has(props.src);
   return <figure className={FIGURE_CLASS_NAME} style={{
     aspectRatio: ratio
   }}>
       
-            {usable ? <img src={src} alt={alt} referrerPolicy="no-referrer" onError={() => setFailed(true)} className={FIGURE_IMAGE_CLASS_NAME} /> : <svg viewBox="-64 -64 192 192" className={FIGURE_PLACEHOLDER_CLASS_NAME} aria-hidden="true">
+            {usable ? <img src={props.src} alt={props.alt} referrerPolicy="no-referrer" onError={() => props.src !== undefined && props.failImage(props.src)} className={FIGURE_IMAGE_CLASS_NAME} /> : <svg viewBox="-64 -64 192 192" className={FIGURE_PLACEHOLDER_CLASS_NAME} aria-hidden="true">
                         <circle cx="32" cy="22" r="12" fill="currentColor" />
                         <path d="M8 62c0-13 11-22 24-22s24 9 24 22z" fill="currentColor" />
                     </svg>}
@@ -178,7 +180,7 @@ const STAR_SCALE = 5;
 type LeadField = readonly [id: string, label: string, kind: "text" | "tel"];
 
 /** Where a reader's details have got to. */
-type LeadStatus = "idle" | "sending" | "sent" | "failed";
+export type LeadStatus = "idle" | "sending" | "sent" | "failed";
 
 /**
  * One value the reader typed, read as a string.
@@ -251,7 +253,8 @@ type LeadBandProps = {
     kind: "lead";
   }>;
   /** Hand the reader's details to whoever owns the request. */
-  readonly onSubmit: LeadSubmit;
+  readonly status: LeadStatus;
+  readonly submit: (input: Parameters<LeadSubmit>[0]) => void;
 };
 
 /**
@@ -270,12 +273,8 @@ type LeadBandProps = {
  *
  * @param input - {@link LeadBandProps}
  */
-const LeadBand = ({
-  section,
-  onSubmit
-}: LeadBandProps) => {
-  const [status, setStatus] = useState<LeadStatus>("idle");
-  const fields: ReadonlyArray<LeadField> = [["lead-name", section.nameLabel, "text"], ["lead-phone", section.phoneLabel, "tel"]];
+const LeadBand = (props: LeadBandProps) => {
+  const fields: ReadonlyArray<LeadField> = [["lead-name", props.section.nameLabel, "text"], ["lead-phone", props.section.phoneLabel, "tel"]];
 
   /**
    * Sends the reader's details.
@@ -285,30 +284,26 @@ const LeadBand = ({
    *
    * @param event - The submit that started it.
    */
-  const send = async (event: React.SubmitEvent<HTMLFormElement>) => {
+  const send = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (status === "sending") {
+    if (props.status === "sending") {
       return;
     }
     const form = new FormData(event.currentTarget);
-    setStatus("sending");
-    const ok = await onSubmit({
+    props.submit({
       name: leadField(form, "lead-name"),
       contact: leadField(form, "lead-phone")
     });
-    setStatus(ok ? "sent" : "failed");
   };
-  return <Band alt parts={[headingPart(section.title), textPart(section.body), leadForm({
+  return <Band alt parts={[headingPart(props.section.title), textPart(props.section.body), leadForm({
     fields,
-    status,
-    submitLabel: section.submitLabel,
-    sendingLabel: section.sendingLabel,
-    onSubmit: event => {
-      void send(event);
-    }
+    status: props.status,
+    submitLabel: props.section.submitLabel,
+    sendingLabel: props.section.sendingLabel,
+    onSubmit: send
   }),
   /* Keep submission feedback in the band so it remains visible after the form state changes. */
-  ...(status === "failed" ? [textPart(section.errorMessage)] : []), ...(status === "sent" ? [textPart(section.sentMessage)] : [])]} />;
+  ...(props.status === "failed" ? [textPart(props.section.errorMessage)] : []), ...(props.status === "sent" ? [textPart(props.section.sentMessage)] : [])]} />;
 };
 
 /** Everything an expert authored for one section, whatever shape the template chose for it. */
@@ -325,7 +320,7 @@ type CustomContent = Extract<AcademySection, {
  *
  * @param content - The expert's own content for one section.
  */
-const customPieces = (content: CustomContent) => {
+const customPieces = (content: CustomContent, imageState: ImageState) => {
   const headingText = content.heading;
   const bodyText = content.body;
   const actionSpec = content.action;
@@ -337,7 +332,7 @@ const customPieces = (content: CustomContent) => {
     variant="primary"
   >{actionSpec.label}</Button>;
   const actionRun = actionLeaf === undefined ? undefined : <div><>{actionLeaf}</></div>;
-  const figure = <Figure src={imageUrl} alt={imageAlt} />;
+  const figure = <Figure src={imageUrl} alt={imageAlt} {...imageState} />;
   return {
     shape: content.variant ?? "stack",
     attribution: content.attribution,
@@ -387,13 +382,10 @@ const columnsBand = ({
   heading,
   columns,
   actionRun
-}: CustomPieces) => <Band parts={[...(heading === undefined ? [] : [heading]), <div key="columns">{columns.map(column => {
-    const note = column.text;
-    return claimPanel({
+}: CustomPieces) => <Band parts={[...(heading === undefined ? [] : [heading]), <div key="columns">{columns.map(column => <Fragment key={column.title}>{claimPanel({
       claim: <Text weight="medium">{column.title}</Text>,
-      note: note === undefined ? undefined : <Text size="sm" tone="muted">{note}</Text>
-    });
-  })}</div>, ...(actionRun === undefined ? [] : [actionRun])]} />;
+      note: column.text === undefined ? undefined : <Text size="sm" tone="muted">{column.text}</Text>
+    })}</Fragment>)}</div>, ...(actionRun === undefined ? [] : [actionRun])]} />;
 
 /**
  * `cta` - one centred ask.
@@ -457,8 +449,8 @@ const stackBand = ({
  */
 const customBand = (section: Extract<AcademySection, {
   kind: "custom";
-}>) => {
-  const pieces = customPieces(section.content);
+}>, imageState: ImageState) => {
+  const pieces = customPieces(section.content, imageState);
   if (pieces.shape === "quote") {
     return quoteBand(pieces);
   }
@@ -486,10 +478,14 @@ const customBand = (section: Extract<AcademySection, {
  * @param onSubmitLead - Handed through to the one section that takes a reader's details.
  * @returns The band.
  */
-const band = (section: AcademySection, onSubmitLead: LeadSubmit) => {
+type BandState = ImageState & {
+  readonly leadStatus: LeadStatus;
+  readonly submitLead: (input: Parameters<LeadSubmit>[0]) => void;
+};
+const band = (section: AcademySection, state: BandState) => {
   switch (section.kind) {
     case "hero":
-      return <Band parts={[headingPart(section.name, 1), textPart(section.tagline), <div key="hero-actions">{[buttonPart(section.tryFreeLabel, "primary", "/sign-in"), buttonPart(section.seeCoursesLabel, "outline", "#courses")]}</div>]} />;
+      return <Band parts={[headingPart(section.name, 1), textPart(section.tagline), <div key="hero-actions">{buttonPart(section.tryFreeLabel, "primary", "/sign-in")}{buttonPart(section.seeCoursesLabel, "outline", "#courses")}</div>]} />;
     case "problems":
       return <Band parts={[headingPart(section.title), <div key="problems">{section.problems.map(problem => <Fragment key={problem}>{claimPanel({
             claim: <Text size="sm">{problem}</Text>
@@ -504,7 +500,7 @@ const band = (section: AcademySection, onSubmitLead: LeadSubmit) => {
       {
         const person = section.person;
         const quote = person.quote;
-        return <Band alt parts={[<div key="instructor">{<Figure src={person.photoUrl} alt={person.name} ratio="3/4" />}{<div>{subjectOverCaption(<Heading level={2}>{person.name}</Heading>, person.title)}{<Text tone="muted">{person.bio}</Text>}{<div>{person.credentials.map(credential => <Text key={credential} size="sm">{credential}</Text>)}</div>}{quote === undefined ? undefined : <blockquote key="quote" className={QUOTE_CLASS_NAME}>
+        return <Band alt parts={[<div key="instructor">{<Figure src={person.photoUrl} alt={person.name} ratio="3/4" failedImageSources={state.failedImageSources} failImage={state.failImage} />}{<div>{subjectOverCaption(<Heading level={2}>{person.name}</Heading>, person.title)}{<Text tone="muted">{person.bio}</Text>}{<div>{person.credentials.map(credential => <Text key={credential} size="sm">{credential}</Text>)}</div>}{quote === undefined ? undefined : <blockquote key="quote" className={QUOTE_CLASS_NAME}>
                                             <Text size="sm" tone="muted">{quote}</Text>
                                         </blockquote>}</div>}</div>]} />;
       }
@@ -529,7 +525,7 @@ const band = (section: AcademySection, onSubmitLead: LeadSubmit) => {
             })}</Fragment>;
         })}</div>]} />;
     case "gallery":
-      return <Band parts={[headingPart(section.title), <div key="gallery">{section.gallery.map(item => <Fragment key={item.caption}>{subjectOverCaption(<Figure src={item.url} alt={item.caption} />, item.caption)}</Fragment>)}</div>]} />;
+      return <Band parts={[headingPart(section.title), <div key="gallery">{section.gallery.map(item => <Fragment key={item.caption}>{subjectOverCaption(<Figure src={item.url} alt={item.caption} failedImageSources={state.failedImageSources} failImage={state.failImage} />, item.caption)}</Fragment>)}</div>]} />;
     case "courses":
       {
         // An empty catalog still stands on the same ground a full one does, and that ground is
@@ -540,11 +536,11 @@ const band = (section: AcademySection, onSubmitLead: LeadSubmit) => {
 
         // A course is a claim with an optional note and an optional proof, using the same card
         // composition as the other catalog entries.
-        const catalog = <div>{section.courses.map(course => claimPanel({
+        const catalog = <div>{section.courses.map(course => <Fragment key={course.id}>{claimPanel({
             claim: <Text weight="medium">{course.title}</Text>,
             note: course.summary === null ? undefined : <Text size="sm" tone="muted">{course.summary ?? ""}</Text>,
             proof: course.priceText === null ? undefined : <Badge>{course.priceText ?? ""}</Badge>
-          }))}</div>;
+          })}</Fragment>)}</div>;
         return <Band parts={[headingPart(section.title), section.courses.length === 0 ? emptyNotice : catalog]} />;
       }
     case "community":
@@ -554,21 +550,26 @@ const band = (section: AcademySection, onSubmitLead: LeadSubmit) => {
     case "faq":
       return <Band alt parts={[headingPart(section.title), <div key="faq">{section.faq.map(entry => <div key={entry.q}>{<Text size="sm" weight="medium">{entry.q}</Text>}{<Text size="sm" tone="muted">{entry.a}</Text>}</div>)}</div>]} />;
     case "magnet":
-      return <Band alt parts={[headingPart(section.magnet.title), textPart(section.magnet.description), <div key="magnet-actions">{[buttonPart(section.magnet.cta, "primary")]}</div>]} />;
+      return <Band alt parts={[headingPart(section.magnet.title), textPart(section.magnet.description), <div key="magnet-actions">{buttonPart(section.magnet.cta, "primary")}</div>]} />;
     case "lead":
-      return <LeadBand section={section} onSubmit={onSubmitLead} />;
+      return <LeadBand section={section} status={state.leadStatus} submit={state.submitLead} />;
     case "custom":
-      return customBand(section);
+      return customBand(section, state);
   }
 };
 
-/** Props for {@link AcademySectionsBase}. */
-export interface AcademySectionsProps {
-  /** Every visible section, already resolved, in the expert's own order. */
+/** Commands whose request and browser state remain owned by the connected academy block. */
+export type AcademySectionsActions = {
+  readonly submitLead: LeadSubmit;
+  readonly failImage: (src: string) => void;
+};
+/** Settled public sections, transient feedback state, and connected commands drawn by the academy. */
+export type AcademySectionsProps = {
   readonly sections: ReadonlyArray<AcademySection>;
-  /** Hand the reader's details to whoever owns the request. */
-  readonly onSubmitLead: LeadSubmit;
-}
+  readonly failedImageSources: ReadonlySet<string>;
+  readonly leadStatus: LeadStatus;
+  readonly on: AcademySectionsActions;
+};
 
 /**
  * Draw every settled section in the order it arrived.
@@ -582,5 +583,10 @@ export interface AcademySectionsProps {
  */
 export const AcademySectionsBase = (props: AcademySectionsProps) => <>
         {/* A keyed Fragment keeps React's list identity without adding an unnecessary wrapper. */}
-        {props.sections.map(section => <Fragment key={section.id}>{band(section, props.onSubmitLead)}</Fragment>)}
+        {props.sections.map(section => <Fragment key={section.id}>{band(section, {
+          failedImageSources: props.failedImageSources,
+          failImage: props.on.failImage,
+          leadStatus: props.leadStatus,
+          submitLead: input => { void props.on.submitLead(input); }
+        })}</Fragment>)}
         </>;

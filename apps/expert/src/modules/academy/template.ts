@@ -99,10 +99,10 @@ export const inLocale = <T,>(value: Localized<T> | undefined, locale: Locale): T
 export type ThemeVariables = Record<string, string>;
 
 /** A template's overrides for both colour schemes. `dark` may be omitted entirely. */
-export interface AcademyTheme {
-  light?: ThemeVariables;
-  dark?: ThemeVariables;
-}
+export type AcademyTheme = {
+  readonly light?: ThemeVariables;
+  readonly dark?: ThemeVariables;
+};
 
 /**
  * Rejects anything that could escape a custom-property declaration.
@@ -145,16 +145,16 @@ export const CUSTOM_SECTION_PREFIX = "custom:";
 export type CustomVariant = "stack" | "image-left" | "image-right" | "quote" | "columns" | "cta";
 
 /** The single onward link an expert-authored section may carry. Never a field. */
-export interface CustomAction {
-  label: string;
-  href: string;
-}
+export type CustomAction = {
+  readonly label: string;
+  readonly href: string;
+};
 
 /** One item inside the `columns` shape. */
-export interface CustomColumn {
-  title: string;
-  text?: string;
-}
+export type CustomColumn = {
+  readonly title: string;
+  readonly text?: string;
+};
 
 /**
  * What an expert-authored section says. Static; it names no data source.
@@ -162,82 +162,82 @@ export interface CustomColumn {
  * Static on purpose: a section bound to nothing cannot break when a course is deleted, and needs no
  * closed set of permitted sources to be designed first.
  */
-export interface CustomContent {
+export type CustomContent = {
   /** Set by the template, not by the expert. */
-  variant?: CustomVariant;
-  heading?: string;
+  readonly variant?: CustomVariant;
+  readonly heading?: string;
   /** Plain text. No markup is interpreted. */
-  body?: string;
+  readonly body?: string;
   /** A link the expert pasted. Nothing is uploaded to nivo. */
-  imageUrl?: string;
-  action?: CustomAction;
+  readonly imageUrl?: string;
+  readonly action?: CustomAction;
   /** Used by the `columns` shape only. */
-  columns?: Array<CustomColumn>;
+  readonly columns?: ReadonlyArray<CustomColumn>;
   /** Used by the `quote` shape only. */
-  attribution?: string;
-}
+  readonly attribution?: string;
+};
 
 /** One row of the stored layout. Position in the array IS render order. */
-export interface LayoutSection {
+export type LayoutSection = {
   /** A catalog key, or `custom:<id>` for one the expert wrote. */
-  key: string;
-  visible: boolean;
+  readonly key: string;
+  readonly visible: boolean;
   /** Present on expert-authored sections only; a system section owns its own content. */
-  content?: CustomContent;
-}
+  readonly content?: CustomContent;
+};
 
 /** Who is teaching. */
-export interface Instructor {
-  name: string;
+export type Instructor = {
+  readonly name: string;
   /** Portrait, as a pasted link. */
-  photoUrl?: string;
-  title: string;
-  bio: string;
-  credentials: Array<string>;
-  quote?: string;
-}
+  readonly photoUrl?: string;
+  readonly title: string;
+  readonly bio: string;
+  readonly credentials: ReadonlyArray<string>;
+  readonly quote?: string;
+};
 
 /** One testimonial. A measurable result carries further than praise. */
-export interface Testimonial {
-  name: string;
-  avatarUrl?: string;
-  role: string;
-  stars: number;
-  quote: string;
-  result?: string;
-}
+export type Testimonial = {
+  readonly name: string;
+  readonly avatarUrl?: string;
+  readonly role: string;
+  readonly stars: number;
+  readonly quote: string;
+  readonly result?: string;
+};
 
 /** One figure on the statistics strip. */
-export interface Stat {
-  value: string;
-  label: string;
-}
+export type Stat = {
+  readonly value: string;
+  readonly label: string;
+};
 
 /** One gallery photo: the expert's link, plus a caption. */
-export interface GalleryItem {
-  url?: string;
-  caption: string;
-}
+export type GalleryItem = {
+  readonly url?: string;
+  readonly caption: string;
+};
 
 /** One frequently asked question. */
-export interface Faq {
-  q: string;
-  a: string;
-}
+export type Faq = {
+  readonly q: string;
+  readonly a: string;
+};
 
 /** Something free offered in exchange for contact. It collects nothing; its button leads to `lead`. */
-export interface Magnet {
-  title: string;
-  description: string;
-  cta: string;
-}
+export type Magnet = {
+  readonly title: string;
+  readonly description: string;
+  readonly cta: string;
+};
 
 /** Everything provisioning writes into this instance. */
-export interface AcademyIdentity {
+export type AcademyIdentity = {
   /** The academy's own name, shown in the header and the document title. */
-  name: Localized<string>;
-  tagline: Localized<string>;
-}
+  readonly name: Localized<string>;
+  readonly tagline: Localized<string>;
+};
 
 /**
  * What the expert wrote, as opposed to how it is arranged or painted.
@@ -247,22 +247,22 @@ export interface AcademyIdentity {
  * and three English ones is a normal thing for a real academy, and a per-leaf `{ vi, en }` would
  * have forbidden it while making every value harder to read and to diff.
  */
-export interface AcademyContent {
-  instructor?: Localized<Instructor>;
-  testimonials: Localized<Array<Testimonial>>;
-  stats: Localized<Array<Stat>>;
-  gallery: Localized<Array<GalleryItem>>;
-  problems: Localized<Array<string>>;
-  roadmap: Localized<Array<string>>;
-  faq: Localized<Array<Faq>>;
-  magnet?: Localized<Magnet>;
-}
+export type AcademyContent = {
+  readonly instructor?: Localized<Instructor>;
+  readonly testimonials: Localized<ReadonlyArray<Testimonial>>;
+  readonly stats: Localized<ReadonlyArray<Stat>>;
+  readonly gallery: Localized<ReadonlyArray<GalleryItem>>;
+  readonly problems: Localized<ReadonlyArray<string>>;
+  readonly roadmap: Localized<ReadonlyArray<string>>;
+  readonly faq: Localized<ReadonlyArray<Faq>>;
+  readonly magnet?: Localized<Magnet>;
+};
 
 /** Which sections render, and in what order. */
-export interface AcademyLayout {
+export type AcademyLayout = {
   /** The full ordered section list, exactly as `TenantBrandEntity.layoutConfig` stores it. */
-  sections: Array<LayoutSection>;
-}
+  readonly sections: ReadonlyArray<LayoutSection>;
+};
 
 /**
  * Everything provisioning writes into this instance, in four parts that do not mix.
@@ -285,10 +285,10 @@ export interface AcademyLayout {
  * the backend says the same thing about the `courses` section, which "carries no content here
  * because it already knows its own". That absence is what makes re-applying a template safe.
  */
-export interface AcademyTemplate {
-  identity: AcademyIdentity;
+export type AcademyTemplate = {
+  readonly identity: AcademyIdentity;
   /** HeroUI variable overrides, per colour scheme. Emitted as the vendor's own theming block. */
-  theme: AcademyTheme;
+  readonly theme: AcademyTheme;
   /**
    * Hand-written CSS, already sanitised by the backend's `sanitizeTenantCss`.
    *
@@ -299,10 +299,10 @@ export interface AcademyTemplate {
    * Separate from `theme` on purpose: this is the half that is only safe because something
    * cleaned it.
    */
-  customCss?: string;
-  layout: AcademyLayout;
-  content: AcademyContent;
-}
+  readonly customCss?: string;
+  readonly layout: AcademyLayout;
+  readonly content: AcademyContent;
+};
 
 /**
  * This instance's mounted template, as DATA rather than as source.

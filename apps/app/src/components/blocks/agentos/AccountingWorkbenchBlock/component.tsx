@@ -1,7 +1,8 @@
 import { useRef, type ChangeEvent, type ReactNode } from "react";
 import { Badge, Button, EmptyNotice, Heading, Input, PrimaryRailLayout, SectionHeader, SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common";
 import type { AccountingCorrection, AccountingDocument } from "@/modules/api/accounting";
-import { accountingDocumentAction, accountingNoticeLive, formatMinorCurrency, maskParticipantId, type AccountingNotice, type useAccountingWorkbench } from "./useAccountingWorkbench";
+import type { useAccountingWorkbench } from "@/hooks";
+import { accountingDocumentAction, accountingNoticeLive, formatMinorCurrency, maskParticipantId, type AccountingNotice } from "@/modules/accounting/accounting-workbench";
 import { ACCOUNTING_ACTION_ROW_CLASS_NAME, ACCOUNTING_FIELD_STACK_CLASS_NAME, ACCOUNTING_FORM_FULL_SPAN_CLASS_NAME, ACCOUNTING_FORM_GRID_CLASS_NAME, ACCOUNTING_NATIVE_CONTROL_CLASS_NAME, ACCOUNTING_NATIVE_FIELD_CLASS_NAME, ACCOUNTING_OPERATIONS_GRID_CLASS_NAME, ACCOUNTING_ROW_CLASS_NAME, ACCOUNTING_SUMMARY_GRID_CLASS_NAME, ACCOUNTING_WORKBENCH_CLASS_NAME } from "./classNames";
 
 const unsignedVersion = /^\d+$/;

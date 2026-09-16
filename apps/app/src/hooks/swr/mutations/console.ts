@@ -4,7 +4,7 @@ import { answerAgentosCustomModuleIntake, configureAgentWorkspaceChannel, create
 import { refreshSession } from "@/modules/api/auth";
 import type { Result } from "@/modules/api/graphql";
 import { useSession } from "@/modules/auth/session";
-import { useNivoMutation } from "../use-nivo-mutation";
+import { useNivoMutation } from "../useNivoMutation";
 import { agentosAiKnowledgeQueryKey, agentosCustomModulesQueryKey, agentosModuleInstallationsQueryKey, agentosModuleStudioQueryKey, agentWorkspaceControlCenterQueryKey, agentWorkspacesQueryKey, catalogOrdersQueryKey, expertSiteDeploymentQueryKey, expertSitesQueryKey, invoicesQueryKey } from "../queries/console";
 type AgentosModuleAttachmentUploadCommand = {
   readonly file: File;

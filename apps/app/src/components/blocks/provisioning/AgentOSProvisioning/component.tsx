@@ -1,4 +1,3 @@
-"use client";
 import { CONTENT_CLASS_NAME, OFFER_CLASS_NAME, ROW_CLASS_NAME, TIER_ACTIONS_CLASS_NAME } from "./classNames";
 import { Badge, SectionHeader as DirectionHeader, PrimaryRailLayout as DirectionLayout, SurfaceListCard as DirectionList, Button, SurfaceCard, Text } from "@starci/grammar/common";
 import { LifecycleStep, type LifecycleStepData } from "@nivo/ui";

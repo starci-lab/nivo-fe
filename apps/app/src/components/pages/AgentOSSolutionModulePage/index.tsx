@@ -247,6 +247,12 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
   const [diagnosticSignal, setDiagnosticSignal] = useState<DiagnosticSignal>("all");
   const [selectedTestScenarioKey, setSelectedTestScenarioKey] = useState("");
   const [testMode, setTestMode] = useState<"exploratory" | "acceptance">("exploratory");
+  const [settingsDisplayName, setSettingsDisplayName] = useState("");
+  const [settingsModelProfile, setSettingsModelProfile] = useState("");
+  const [settingsRequireConfirmation, setSettingsRequireConfirmation] = useState(true);
+  const [settingsOperatingMode, setSettingsOperatingMode] = useState<"assist" | "autopilot">("assist");
+  const [settingsChannelAccountRef, setSettingsChannelAccountRef] = useState("");
+  const [settingsCredentialValues, setSettingsCredentialValues] = useState<Readonly<Record<string, string>>>({});
   const moduleRoot = `/agentos/workspaces/${workspaceId}/modules/${installationId}`;
   const runtimeQuery = useQueryMyAgentosModuleRuntimeSwr(workspaceId, installationId, view === "diagnostics");
   const runtimeMutation = useMutateManageAgentosModuleRuntimeSwr(installationId);
@@ -617,6 +623,31 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     setPending(false);
     setActionRefused(true);
   }, [installationId, mutateTest, readTestRun, testSurfaceQuery]);
+  const settings = runtime?.settings ?? {};
+  const displayName = runtime === null ? "" : stringSetting(settings.displayName, stringSetting(runtime.installation.displayName, runtime.installation.moduleKey)).trim();
+  const modelProfile = stringSetting(settings.modelProfile, "nivo-default");
+  const requireConfirmation = typeof settings.requireConfirmation === "boolean" ? settings.requireConfirmation : true;
+  const operatingMode = runtime?.installation.operatingMode ?? "assist";
+  const channelAccountRef = runtime?.installation.channelAccountRef ?? null;
+  const hasRuntime = runtime !== null;
+  const credentialRevision = JSON.stringify(runtime?.credentials.map(credential => [credential.providerKey, credential.status, credential.maskedHint]) ?? []);
+  useEffect(() => {
+    if (!hasRuntime || view !== "settings") {
+      setSettingsDisplayName("");
+      setSettingsModelProfile("");
+      setSettingsRequireConfirmation(true);
+      setSettingsOperatingMode("assist");
+      setSettingsChannelAccountRef("");
+      setSettingsCredentialValues({});
+      return;
+    }
+    setSettingsDisplayName(displayName);
+    setSettingsModelProfile(modelProfile);
+    setSettingsRequireConfirmation(requireConfirmation);
+    setSettingsOperatingMode(operatingMode);
+    setSettingsChannelAccountRef(channelAccountRef ?? "");
+    setSettingsCredentialValues({});
+  }, [channelAccountRef, credentialRevision, displayName, hasRuntime, installationId, modelProfile, operatingMode, requireConfirmation, view, workspaceId]);
   if (runtime === null) return <AgentOSSolutionModuleState refused={refused} copy={copy} />;
   const activeVersion = activeVersionFor(runtime);
   const selectedSetup = runtime.setupSessions.find(item => item.id === selectedSetupSessionId) ?? runtime.setupSession;
@@ -676,12 +707,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
       }
     };
   });
-  const settings = runtime.settings ?? {};
-  const displayName = stringSetting(settings.displayName, stringSetting(runtime.installation.displayName, runtime.installation.moduleKey)).trim();
-  const modelProfile = stringSetting(settings.modelProfile, "nivo-default");
-  const requireConfirmation = typeof settings.requireConfirmation === "boolean" ? settings.requireConfirmation : true;
   const hasTelegramCredential = runtime.credentials.some(credential => credential.providerKey === "telegram-bot-token" && credential.status === "configured");
-  const channelAccountRef = runtime.installation.channelAccountRef ?? null;
   const canEnableLive = activeVersion !== null && channelAccountRef !== null && hasTelegramCredential;
   const supportInbox = {
     selectedConversationId: effectiveSupportConversationId,
@@ -814,8 +840,14 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
           currentDisplayName: displayName,
           currentModelProfile: modelProfile,
           currentConfirmation: requireConfirmation,
-          currentOperatingMode: runtime.installation.operatingMode,
-          currentChannelAccountRef: runtime.installation.channelAccountRef ?? "",
+          currentOperatingMode: operatingMode,
+          currentChannelAccountRef: channelAccountRef ?? "",
+          displayName: settingsDisplayName,
+          modelProfile: settingsModelProfile,
+          requireConfirmation: settingsRequireConfirmation,
+          operatingMode: settingsOperatingMode,
+          channelAccountRef: settingsChannelAccountRef,
+          credentialValues: settingsCredentialValues,
           liveEnabled: runtime.installation.liveEnabled,
           canEnableLive,
           credentialSlots: runtime.installation.runtimeManifest.credentialSlots ?? [],
@@ -823,10 +855,18 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
           activeVersion,
           pending,
           refused,
-          onSave: saveSettings,
-          onSetLiveEnabled: setLiveEnabled,
-          onSaveCredential: (key, value) => void saveCredential(key, value),
-          onRemoveCredential: removeCredential
+          on: {
+            save: saveSettings,
+            setLiveEnabled,
+            saveCredential: (key, value) => void saveCredential(key, value),
+            removeCredential,
+            changeDisplayName: setSettingsDisplayName,
+            changeModelProfile: setSettingsModelProfile,
+            changeConfirmation: setSettingsRequireConfirmation,
+            changeOperatingMode: setSettingsOperatingMode,
+            changeChannelAccountRef: setSettingsChannelAccountRef,
+            changeCredential: (key, value) => setSettingsCredentialValues(current => ({ ...current, [key]: value }))
+          }
         }
       };
     } else {

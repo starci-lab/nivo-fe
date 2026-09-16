@@ -2,8 +2,8 @@
 
 import { bindChatbotChannel, reconcileChatbotDelivery, resolveChatbotHandoff, setChatbotHandoff, startChatbotZaloOauth } from "@/modules/api/workspace-controlplane";
 import { useSession } from "@/modules/auth/session";
-import { useNivoMutation } from "../use-nivo-mutation";
-import { chatbotWorkbenchQueryKey, type SupportQueryIdentity } from "../queries/workspace-controlplane";
+import { useNivoMutation } from "../useNivoMutation";
+import { chatbotWorkbenchQueryKey, type SupportQueryIdentity } from "../queries/useQueryChatbotWorkbenchSwr";
 type AcceptedAnswer = {
   readonly ok: boolean;
 };

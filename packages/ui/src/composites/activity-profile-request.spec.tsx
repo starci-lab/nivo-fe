@@ -4,21 +4,21 @@ import { ActivityRow } from "./ActivityRow"
 import { ProfileRow } from "./ProfileRow"
 import { RequestSummary } from "./RequestSummary"
 import { StatRow } from "./StatRow"
-import { ReactionType } from "../leaves/ReactionPicker/reaction-type"
+import { ReactionLike } from "../leaves/ReactionPicker/reaction-type"
 
 describe("ActivityRow", () => {
     it("opens actor and target links and allows reactions", () => {
         const openActor = vi.fn()
         const openTarget = vi.fn()
         const react = vi.fn()
-        render(<ActivityRow props={{ id: "a", actor: "Ada", action: "completed", target: "Task", time: "today", reactionLabel: "React", reactionCount: 1, reactionChoices: [{ id: ReactionType.Like, label: "Like" }] }} on={{ openActor, openTarget, react }} />)
+        render(<ActivityRow props={{ id: "a", actor: "Ada", action: "completed", target: "Task", time: "today", reactionLabel: "React", reactionCount: 1, reactionChoices: [{ id: ReactionLike, label: "Like" }] }} on={{ openActor, openTarget, react }} />)
         fireEvent.click(screen.getByRole("button", { name: "Ada" }))
         fireEvent.click(screen.getByRole("button", { name: "Task" }))
         fireEvent.click(screen.getByRole("button", { name: "React" }))
         fireEvent.click(screen.getByRole("button", { name: "Like" }))
         expect(openActor).toHaveBeenCalledTimes(1)
         expect(openTarget).toHaveBeenCalledTimes(1)
-        expect(react).toHaveBeenCalledWith(ReactionType.Like)
+        expect(react).toHaveBeenCalledWith(ReactionLike)
     })
 
     it("keeps a mine reaction read-only and omits absent target/reaction", () => {

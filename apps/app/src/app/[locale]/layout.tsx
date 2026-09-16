@@ -34,14 +34,14 @@ export const viewport: Viewport = {
 };
 
 /** Props for {@link RootLayout}. */
-interface RootLayoutProps {
+type RootLayoutProps = {
   /** The rendered route. */
   readonly children: ComponentProps<"div">["children"];
   /** The routed locale segment, which Next hands over as a promise. */
   readonly params: Promise<{
     readonly locale: string;
   }>;
-}
+};
 
 /**
  * Which locales are built.

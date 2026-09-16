@@ -55,11 +55,12 @@ let runtime = {
         { id: "execute-message", sessionId: "execute-1", role: "assistant", content: "Queue ready", contextVersionId: "context-1", taskId: null, messageTree: null },
     ],
     contextVersions: [{ id: "context-1", sourceSetupSessionId: "setup-1", version: 1, snapshot: { summary: "A support desk" }, digest: "a".repeat(64), definitionDigest: "d".repeat(64), authorityGeneration: 1, sourceGeneration: 1, retrievalGeneration: 1 }],
-    widgets: [], credentials: [{ providerKey: "telegram-bot-token", status: "configured" }],
+    widgets: [], credentials: [{ providerKey: "telegram-bot-token", status: "configured", maskedHint: "••••1234" }],
     settings: { displayName: "Support Desk", modelProfile: "nivo-default", requireConfirmation: true },
     diagnostics: { available: true, controllerHealthy: true, controllerStatus: "ready" },
     tasks: [], operationEvents: [],
 }
+let runtimeAvailable = true
 
 const initialRuntime = structuredClone(runtime)
 
@@ -72,7 +73,7 @@ const testSurface = {
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("@/hooks", () => ({
     useQueryChatbotWorkbenchSwr: () => ({ data: undefined, isLoading: false }),
-    useQueryMyAgentosModuleRuntimeSwr: () => ({ data: { ok: true, data: runtime }, mutate: mocks.runtimeMutate }),
+    useQueryMyAgentosModuleRuntimeSwr: () => ({ data: runtimeAvailable ? { ok: true, data: runtime } : undefined, mutate: mocks.runtimeMutate }),
     useQueryMyAgentosModuleTestSurfaceSwr: () => ({ data: { ok: true, data: testSurface }, mutate: vi.fn() }),
     useQueryMyAgentWorkspaceControlCenterSwr: () => ({ data: { ok: true, data: { workspace: { id: "workspace-1" }, instance: { hostname: "controller.example.test" } } } }),
     useQuerySupportImportantFactsSwr: () => ({ data: { ok: true, data: { nodes: [], nextCursor: null } }, isLoading: false }),
@@ -223,6 +224,7 @@ describe("AgentOSSolutionModulePage projections", () => {
     })
     beforeEach(() => {
         runtime = structuredClone(initialRuntime)
+        runtimeAvailable = true
         mocks.pageProps = null
         mocks.push.mockReset()
         mocks.runtimeMutate.mockReset().mockImplementation(async (answer?: RuntimeAnswer) => {
@@ -338,7 +340,7 @@ describe("AgentOSSolutionModulePage projections", () => {
         it.each(["not-a-token", "abcde:synthetic"])("refuses invalid Telegram account syntax %s before mutation", async token => {
             const view = render(<AgentOSSolutionModulePage locale={locale} workspaceId="workspace-1" installationId="installation-1" view="settings" />)
             const settings = () => mocks.pageProps!.screen.contentProps as unknown as Extract<AgentOSSolutionModuleScreen, { view: "settings" }>["contentProps"]
-            await act(async () => { settings().onSaveCredential("telegram-bot-token", token) })
+            await act(async () => { settings().on.saveCredential("telegram-bot-token", token) })
             expect(mocks.channelTrigger).not.toHaveBeenCalled()
             expect(mocks.runtimeTrigger).not.toHaveBeenCalled()
             expect(settings().refused).toBe(true)
@@ -348,7 +350,7 @@ describe("AgentOSSolutionModulePage projections", () => {
             mocks.channelTrigger.mockResolvedValue(answer)
             const view = render(<AgentOSSolutionModulePage locale={locale} workspaceId="workspace-1" installationId="installation-1" view="settings" />)
             const settings = () => mocks.pageProps!.screen.contentProps as unknown as Extract<AgentOSSolutionModuleScreen, { view: "settings" }>["contentProps"]
-            await act(async () => { settings().onSaveCredential("telegram-bot-token", "123456:synthetic") })
+            await act(async () => { settings().on.saveCredential("telegram-bot-token", "123456:synthetic") })
             expect(mocks.channelTrigger).toHaveBeenCalledTimes(1)
             expect(mocks.runtimeTrigger).not.toHaveBeenCalled()
             expect(settings().refused).toBe(true)
@@ -360,7 +362,7 @@ describe("AgentOSSolutionModulePage projections", () => {
             const view = render(<AgentOSSolutionModulePage locale={locale} workspaceId="workspace-1" installationId="installation-1" view="settings" />)
             const settings = mocks.pageProps!.screen.contentProps as unknown as Extract<AgentOSSolutionModuleScreen, { view: "settings" }>["contentProps"]
             const token = "123456789:" + "x".repeat(35)
-            await act(async () => { settings.onSaveCredential("telegram-bot-token", token) })
+            await act(async () => { settings.on.saveCredential("telegram-bot-token", token) })
             expect(mocks.channelTrigger).toHaveBeenCalledExactlyOnceWith({ agentWorkspaceId: "workspace-1", provider: "Telegram", accountId: "123456789", displayName: "Support Desk Telegram", credentials: [{ key: "TELEGRAM_BOT_TOKEN", value: token }] })
             expect(mocks.runtimeTrigger.mock.calls).toEqual([
                 [{ action: "SAVE_MODULE_CREDENTIAL", installationId: "installation-1", idempotencyKey: expect.any(String), credentialKey: "telegram-bot-token", credentialValue: token }],
@@ -372,18 +374,48 @@ describe("AgentOSSolutionModulePage projections", () => {
     it("dispatches settings, live, credential, widget and support actions through their owners", async () => {
         render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" view="settings" />)
         const settings = mocks.pageProps?.screen.contentProps as {
-            readonly onSave: (value: { readonly displayName: string }, mode: string, channelRef: string) => unknown
-            readonly onSetLiveEnabled: (enabled: boolean) => unknown
-            readonly onRemoveCredential: (providerKey: string) => unknown
-            readonly onSaveCredential: (providerKey: string, secret: string) => Promise<unknown>
+            readonly on: {
+                readonly save: (value: { readonly displayName: string }, mode: string, channelRef: string) => unknown
+                readonly setLiveEnabled: (enabled: boolean) => unknown
+                readonly removeCredential: (providerKey: string) => unknown
+                readonly saveCredential: (providerKey: string, secret: string) => Promise<unknown>
+            }
         }
         await act(async () => {
-            settings.onSave({ displayName: "Desk" }, "assist", "TELEGRAM:12345")
-            settings.onSetLiveEnabled(false)
-            settings.onRemoveCredential("telegram-bot-token")
-            await settings.onSaveCredential("provider-key", "secret")
+            settings.on.save({ displayName: "Desk" }, "assist", "TELEGRAM:12345")
+            settings.on.setLiveEnabled(false)
+            settings.on.removeCredential("telegram-bot-token")
+            await settings.on.saveCredential("provider-key", "secret")
         })
         expect(mocks.runtimeTrigger).toHaveBeenCalled()
+    })
+    it("clears unsaved settings drafts across identity, route and credential revisions", () => {
+        type SettingsProps = Extract<AgentOSSolutionModuleScreen, { view: "settings" }>["contentProps"]
+        const settings = () => mocks.pageProps!.screen.contentProps as unknown as SettingsProps
+        const view = render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" view="settings" />)
+        act(() => {
+            settings().on.changeDisplayName("Unsaved owner")
+            settings().on.changeCredential("telegram-bot-token", "unsaved-secret")
+        })
+        expect(settings().displayName).toBe("Unsaved owner")
+        expect(settings().credentialValues).toEqual({ "telegram-bot-token": "unsaved-secret" })
+
+        runtimeAvailable = false
+        view.rerender(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-2" view="settings" />)
+        runtimeAvailable = true
+        view.rerender(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-2" view="settings" />)
+        expect(settings().displayName).toBe("Support Desk")
+        expect(settings().credentialValues).toEqual({})
+
+        act(() => settings().on.changeCredential("telegram-bot-token", "second-secret"))
+        view.rerender(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-2" view="operate" />)
+        view.rerender(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-2" view="settings" />)
+        expect(settings().credentialValues).toEqual({})
+
+        act(() => settings().on.changeCredential("telegram-bot-token", "third-secret"))
+        runtime = { ...runtime, credentials: [{ providerKey: "telegram-bot-token", status: "configured", maskedHint: "••••9876" }] }
+        view.rerender(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-2" view="settings" />)
+        expect(settings().credentialValues).toEqual({})
     })
     it("runs exploratory by default and forwards an explicit Acceptance mode", async () => {
         const view = render(<AgentOSSolutionModulePage workspaceId="workspace-1" installationId="installation-1" view="test" />)
@@ -450,7 +482,6 @@ const AgentOSSolutionModulePageCopyFixture = (props: AgentOSSolutionModulePageFi
     return <ActualAgentOSSolutionModulePage {...props} />
 }
 const AgentOSSolutionModulePage = ({ locale = "en", ...props }: AgentOSSolutionModulePageFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><AgentOSSolutionModulePageCopyFixture {...props} /></NextIntlClientProvider>
-
 
 
 

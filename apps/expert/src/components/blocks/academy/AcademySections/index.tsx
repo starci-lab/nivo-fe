@@ -1,7 +1,8 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useSubmitAcademyLead } from "@/hooks/academy/use-submit-academy-lead";
+import { useState } from "react";
+import { useSubmitAcademyLead } from "@/hooks";
 import type { Course } from "@/modules/api/academy";
 import type { Locale } from "@/i18n/config";
 import { ACADEMY, CUSTOM_SECTION_PREFIX, inLocale, type CustomContent, type Faq, type GalleryItem, type Instructor, type Magnet, type Stat, type Testimonial } from "@/modules/academy/template";
@@ -149,10 +150,10 @@ export type LeadSubmit = (input: {
 }) => Promise<boolean>;
 
 /** Props for {@link AcademySections}. */
-export interface AcademySectionsProps {
+export type AcademySectionsProps = {
   /** The catalog fetched on the server. */
-  readonly courses: Array<Course>;
-}
+  readonly courses: ReadonlyArray<Course>;
+};
 
 /**
  * Resolve every visible section the academy configured, in its own order, and render them.
@@ -197,6 +198,8 @@ export const AcademySections = (props: AcademySectionsProps) => {
   const faq = useTranslations("landing.faq");
   const lead = useTranslations("landing.lead");
   const submitAcademyLead = useSubmitAcademyLead();
+  const [failedImageSources, setFailedImageSources] = useState<ReadonlySet<string>>(() => new Set());
+  const [leadStatus, setLeadStatus] = useState<"idle" | "sending" | "sent" | "failed">("idle");
   const academy = {
     name: inLocale(ACADEMY.identity.name, locale) ?? "",
     tagline: inLocale(ACADEMY.identity.tagline, locale) ?? "",
@@ -350,5 +353,13 @@ export const AcademySections = (props: AcademySectionsProps) => {
    * @param input - The name and contact the reader typed.
    * @returns Whether it landed.
    */
-  return <AcademySectionsBase sections={sections} onSubmitLead={submitAcademyLead} />;
+  const submitLead: LeadSubmit = async input => {
+    if (leadStatus === "sending") return false;
+    setLeadStatus("sending");
+    const ok = await submitAcademyLead(input);
+    setLeadStatus(ok ? "sent" : "failed");
+    return ok;
+  };
+  const failImage = (src: string) => setFailedImageSources(current => current.has(src) ? current : new Set([...current, src]));
+  return <AcademySectionsBase sections={sections} failedImageSources={failedImageSources} leadStatus={leadStatus} on={{ submitLead, failImage }} />;
 };

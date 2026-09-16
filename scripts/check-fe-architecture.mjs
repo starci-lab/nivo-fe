@@ -9,6 +9,8 @@ const IGNORED_DIRECTORIES = new Set([".next", ".turbo", "coverage", "dist", "nod
 const normalizePath = (value) => String(value).replaceAll("\\", "/")
 const isTestFile = (filePath) => /\.(?:spec|test)\.[cm]?[jt]sx?$/u.test(normalizePath(filePath))
 const isComponentFile = (filePath) => normalizePath(filePath).includes("/src/components/")
+const isPureComponentFile = (filePath) => normalizePath(filePath).endsWith("/component.tsx")
+const isBlockFile = (filePath) => normalizePath(filePath).includes("/src/components/blocks/")
 const isApiTransportFile = (filePath) => normalizePath(filePath).includes("/src/modules/api/")
 const isTransportSource = (value) => /(?:^|\/)modules\/api(?:\/|$)/u.test(String(value))
 
@@ -151,8 +153,19 @@ export const analyzeSource = (sourceText, filePath) => {
     const transport = isApiTransportFile(filePath)
     const imports = runtimeImportBindings(sourceFile)
     const functions = localFunctions(sourceFile)
+    const pureComponent = isPureComponentFile(filePath)
 
     if (component) {
+        for (const statement of sourceFile.statements) {
+            if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue
+            const source = statement.moduleSpecifier.text
+            if (source.startsWith("@/hooks/")) {
+                findings.push(finding(sourceFile, filePath, statement, "component-deep-hook-import", `Component source imports ${source}; use the published @/hooks barrel.`))
+            }
+            if (isBlockFile(filePath) && source.startsWith("@/components/pages/")) {
+                findings.push(finding(sourceFile, filePath, statement, "block-imports-page", `Block source imports upward from ${source}; move the shared contract to a module or hook owner.`))
+            }
+        }
         for (const declaration of imports.declarations) {
             findings.push(finding(
                 sourceFile,
@@ -161,6 +174,28 @@ export const analyzeSource = (sourceText, filePath) => {
                 "component-runtime-transport-import",
                 `Component source imports runtime transport ${declaration.names.join(", ")} from ${declaration.source}; expose a named hook instead.`,
             ))
+        }
+    }
+
+    if (pureComponent) {
+        const clientDirective = sourceFile.statements.find((statement) => ts.isExpressionStatement(statement)
+            && ts.isStringLiteral(statement.expression)
+            && statement.expression.text === "use client")
+        if (clientDirective) {
+            findings.push(finding(sourceFile, filePath, clientDirective, "pure-component-client-directive", "Pure component.tsx must stay server-safe; the connected index.tsx owns the client boundary."))
+        }
+        const worldHooks = new Set(["createContext", "useContext", "useEffect", "useState"])
+        for (const statement of sourceFile.statements) {
+            if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue
+            const source = statement.moduleSpecifier.text
+            const named = statement.importClause?.namedBindings
+            if (!named || !ts.isNamedImports(named)) continue
+            for (const specifier of named.elements) {
+                const imported = specifier.propertyName?.text ?? specifier.name.text
+                if ((source === "react" && worldHooks.has(imported)) || (source === "framer-motion" && imported === "useReducedMotion")) {
+                    findings.push(finding(sourceFile, filePath, specifier, "pure-component-world-hook", `Pure component.tsx imports ${imported}; resolve state and world context in index.tsx and pass explicit props.`))
+                }
+            }
         }
     }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { readAccountingWorkbench, resolveAppliedAccountingContext } from "@/modules/api/accounting";
-import { useNivoQuery } from "../use-nivo-query";
+import { useNivoQuery } from "../useNivoQuery";
 
 /** Cache identity for one applied Accounting context. */
 export const accountingContextQueryKey = (installationId: string) => ["accounting", "context", installationId] as const;

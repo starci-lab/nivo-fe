@@ -6,7 +6,7 @@ import {
   currencyAmountToMinor,
   formatMinorCurrency,
   maskParticipantId
-} from "./useAccountingWorkbench";
+} from "@/modules/accounting/accounting-workbench";
 
 const pending = { status: "pending", effectivePeriodKey: "2026-09-01", submittedByUserId: "owner-1", approverUserId: "approver-1" } as const;
 const periods = [{ periodKey: "2026-09-01", status: "open" }] as const;

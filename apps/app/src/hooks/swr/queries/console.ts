@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { catalogItems, myAcademyGrowthSnapshot, myAcademyIntegrations, myAcademyStudentDetail, myAcademyStudents, myAgentosAiKnowledgeReadiness, myAgentosCustomModuleStudio, myAgentosCustomModules, myAgentosModuleInstallation, myAgentosModuleInstallations, myAgentosModuleRuntime, myAgentosModuleTestRun, myAgentosModuleTestSurface, myAgentosSolutionModules, myAgentWorkspace, myAgentWorkspaceControlCenter, myCatalogOrders, myDomains, myExpertSiteDeployment, myExpertSiteLeads, myExpertSites, myInstances, myInvoices, myPodOpenclawStatus, myWallet, myWalletTransactions, type CatalogCategory } from "@/modules/api/console";
-import { useNivoQuery } from "../use-nivo-query";
+import { useNivoQuery } from "../useNivoQuery";
 
 /** Stable resource keys shared by reads and the commands that invalidate them. */
 export const agentWorkspacesQueryKey = ["agent-workspaces"] as const;

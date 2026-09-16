@@ -4,7 +4,7 @@ import { createElement, type PropsWithChildren } from "react"
 import { renderHook, waitFor } from "@testing-library/react"
 import { SWRConfig } from "swr"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { nivoViewerQueryKeyFor, useNivoQuery, viewerCacheKeyFor } from "./use-nivo-query"
+import { nivoViewerQueryKeyFor, useNivoQuery, viewerCacheKeyFor } from "./useNivoQuery"
 
 const mocks = vi.hoisted(() => ({
     state: { status: "anonymous" } as

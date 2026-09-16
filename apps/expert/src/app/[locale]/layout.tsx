@@ -10,22 +10,22 @@ import "../globals.css";
 import type { ComponentProps } from "react";
 
 /** The routed locale segment, awaited by every handler in this file. */
-export interface LocaleSegment {
+export type LocaleSegment = {
   /** Next hands the dynamic segment over as a promise. */
   readonly params: Promise<{
     readonly locale: string;
   }>;
-}
+};
 
 /** Props every route under this shell receives. */
-interface LocaleLayoutProps {
+type LocaleLayoutProps = {
   /** The rendered route. */
   readonly children: ComponentProps<"div">["children"];
   /** The locale segment, which Next hands over as a promise. */
   readonly params: Promise<{
     locale: string;
   }>;
-}
+};
 
 /**
  * Which locales are built.

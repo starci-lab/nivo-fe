@@ -109,6 +109,12 @@ describe.each(["en", "vi"] as const)("AgentOS SPLIT-6 page owner chains %s", loc
                         currentConfirmation: true,
                         currentOperatingMode: "assist",
                         currentChannelAccountRef: "",
+                        displayName: "Support Desk",
+                        modelProfile: "nivo-default",
+                        requireConfirmation: true,
+                        operatingMode: "assist",
+                        channelAccountRef: "",
+                        credentialValues: {},
                         liveEnabled: false,
                         canEnableLive: false,
                         pending: false,
@@ -116,10 +122,18 @@ describe.each(["en", "vi"] as const)("AgentOS SPLIT-6 page owner chains %s", loc
                         credentialSlots: [{ key: "telegram-bot-token", label: "Telegram bot token", provider: "telegram" }],
                         credentialStatuses: [{ providerKey: "telegram-bot-token", maskedHint: "•••• 1234", status: "configured" }],
                         activeVersion: null,
-                        onSave: vi.fn(),
-                        onSetLiveEnabled: vi.fn(),
-                        onSaveCredential: vi.fn(),
-                        onRemoveCredential: vi.fn(),
+                        on: {
+                            save: vi.fn(),
+                            setLiveEnabled: vi.fn(),
+                            saveCredential: vi.fn(),
+                            removeCredential: vi.fn(),
+                            changeDisplayName: vi.fn(),
+                            changeModelProfile: vi.fn(),
+                            changeConfirmation: vi.fn(),
+                            changeOperatingMode: vi.fn(),
+                            changeChannelAccountRef: vi.fn(),
+                            changeCredential: vi.fn(),
+                        },
                     },
                 }}
             />,
@@ -135,5 +149,4 @@ const AgentOSSolutionModulePageBaseCopyFixture = (props: AgentOSSolutionModulePa
     return <ActualAgentOSSolutionModulePageBase {...props} copy={buildModulePageCopy(t)} />
 }
 const AgentOSSolutionModulePageBase = ({ locale = "en", ...props }: AgentOSSolutionModulePageBaseFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><AgentOSSolutionModulePageBaseCopyFixture {...props} /></NextIntlClientProvider>
-
 

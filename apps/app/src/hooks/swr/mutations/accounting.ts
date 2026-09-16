@@ -7,7 +7,7 @@ import {
   type CloseAccountingPeriodInput, type IngestAccountingDocumentInput, type InitializeAccountingInput,
   type ReconcileAccountingInput, type SubmitAccountingCorrectionInput
 } from "@/modules/api/accounting";
-import { useNivoMutation } from "../use-nivo-mutation";
+import { useNivoMutation } from "../useNivoMutation";
 import { accountingContextQueryKey, accountingWorkbenchQueryKey } from "../queries/accounting";
 
 type ScopedInput<T> = Omit<T, "installationId">;
