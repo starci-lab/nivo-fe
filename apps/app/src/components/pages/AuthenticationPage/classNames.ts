@@ -68,4 +68,4 @@ export const AUTH_FORM_REGION_CLASS_NAME = cn(
  * `scale` and the actions take `width="fill"` on the panel itself, so this file never reaches
  * through the boundary with a descendant selector.
  */
-export const AUTH_FORM_CONTENT_CLASS_NAME = cn("w-full", "max-w-md");
+export const AUTH_FORM_CONTENT_CLASS_NAME = cn("flex", "w-full", "max-w-md", "flex-col", "gap-6");

@@ -102,16 +102,17 @@ describe("connected console pages", () => {
         }
     })
 
-    it("settles the workspace list after its owner-scoped query answers", async () => {
+    it("settles the single-business dashboard after its owner-scoped query answers", async () => {
         vi.mocked(myAgentWorkspace).mockResolvedValue({ ok: true, data: [{ id: "workspace-1", name: "Workspace", status: "ready", catalogOrder: { id: "order-1" } }] } as never)
         render(<AgentOSPage mode="dashboard" />)
-        expect((await screen.findByRole("link", { name: "Workspace" })).getAttribute("href")).toBe("/en/agentos/workspaces/workspace-1")
+        expect(await screen.findByText("Workspace")).toBeInTheDocument()
+        expect(screen.queryByRole("link", { name: "Workspace" })).toBeNull()
     })
 
-    it("records refusal states for the workspace list", async () => {
+    it("records refusal states for the single-business binding", async () => {
         vi.mocked(myAgentWorkspace).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
         render(<AgentOSPage mode="dashboard" />)
-        await waitFor(() => expect(screen.getAllByText("refusal.unknown").length).toBeGreaterThan(0))
+        await waitFor(() => expect(screen.getAllByText("unavailableHint").length).toBeGreaterThan(0))
     })
 
     it("covers AppsPage refusal and empty catalogue answers", async () => {
@@ -203,8 +204,8 @@ describe("connected console pages", () => {
         localeState.value = "vi"
         vi.mocked(myAgentWorkspace).mockResolvedValue({ ok: true, data: [{ id: "workspace-1", name: null, status: "unknown", catalogOrder: null }] } as never)
         render(<AgentOSPage mode="dashboard" />)
-        await waitFor(() => expect(screen.getAllByText("agentos.kindWorkspace").length).toBeGreaterThan(0))
-        fireEvent.click(screen.getAllByRole("link", { name: "agentos.kindWorkspace" })[0])
+        await waitFor(() => expect(screen.getAllByText("workspaceFallback").length).toBeGreaterThan(0))
+        expect(screen.queryByRole("link", { name: "workspaceFallback" })).toBeNull()
     })
 
     it("settles WalletPage into empty ledgers", async () => {

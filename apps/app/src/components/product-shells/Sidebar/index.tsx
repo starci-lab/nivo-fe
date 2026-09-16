@@ -11,17 +11,20 @@ export type SidebarMode = "desktop" | "mobile"
 
 /** What a caller states about the navigation - the surface it belongs to, and nothing else. */
 export type SidebarProps = { readonly mode?: SidebarMode }
-type DestinationKey = "overview" | "apps" | "agentos" | "servers" | "domains" | "wallet" | "support"
-type Destination = { readonly key: DestinationKey; readonly route: string | null; readonly group: "home" | "services" | "account" }
+type DestinationKey = "chat" | "modules" | "packages" | "wallet" | "settings"
+type Destination = {
+    readonly key: DestinationKey
+    readonly route: string | null
+    readonly group: "workspace" | "account"
+    readonly icon: "community" | "agentos" | "cart" | "wallet" | "account"
+}
 
 const DESTINATIONS: ReadonlyArray<Destination> = [
-    { key: "overview", route: "/overview", group: "home" },
-    { key: "apps", route: "/apps", group: "services" },
-    { key: "agentos", route: "/agentos", group: "services" },
-    { key: "servers", route: null, group: "services" },
-    { key: "domains", route: null, group: "services" },
-    { key: "wallet", route: "/wallet", group: "account" },
-    { key: "support", route: null, group: "account" },
+    { key: "chat", route: "/chat", group: "workspace", icon: "community" },
+    { key: "modules", route: "/agentos", group: "workspace", icon: "agentos" },
+    { key: "packages", route: "/agentos/create", group: "workspace", icon: "cart" },
+    { key: "wallet", route: "/wallet", group: "account", icon: "wallet" },
+    { key: "settings", route: null, group: "account", icon: "account" },
 ]
 const STORAGE_KEY = "nivo-console-navigation-collapsed"
 
@@ -32,7 +35,9 @@ export const Sidebar = (props: SidebarProps) => {
     const router = useRouter()
     const pathname = usePathname()
     const [isCollapsed, setIsCollapsed] = useState(false)
-    const selectedKey = DESTINATIONS.find((destination) => destination.route !== null && pathname.startsWith(destination.route))?.key ?? "overview"
+    const selectedKey = [...DESTINATIONS]
+        .filter((destination) => destination.route !== null && pathname.startsWith(destination.route))
+        .sort((left, right) => (right.route?.length ?? 0) - (left.route?.length ?? 0))[0]?.key ?? "modules"
 
     useEffect(() => {
         try { setIsCollapsed(globalThis.localStorage?.getItem(STORAGE_KEY) === "true") } catch { /* persistence is optional */ }
@@ -51,12 +56,12 @@ export const Sidebar = (props: SidebarProps) => {
     const item = (destination: Destination) => ({
         id: destination.key,
         label: t(`nav.${destination.key}`),
-        source: nivoIconSource(destination.key, "leading"),
+        source: nivoIconSource(destination.icon, "leading"),
         ...(destination.route === null ? { isDisabled: true, trailing: <Text size="xs" tone="muted">{t("unavailable")}</Text> } : {}),
     })
-    const groups = (["home", "services", "account"] as const).map((group) => ({
+    const groups = (["workspace", "account"] as const).map((group) => ({
         id: group,
-        ...(group === "home" ? {} : { label: t(group === "services" ? "servicesCaption" : "accountCaption") }),
+        ...(group === "workspace" ? {} : { label: t("accountCaption") }),
         items: DESTINATIONS.filter((destination) => destination.group === group).map(item),
     }))
     const content = (presentation: "rail" | "drawer", close?: () => void) => <GrammarSidebar

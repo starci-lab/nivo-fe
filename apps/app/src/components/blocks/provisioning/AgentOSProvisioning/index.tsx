@@ -25,10 +25,12 @@ type AgentOSFlow = {
   readonly phase: "catalog_loading";
 } | {
   readonly phase: "request";
-  readonly item: CatalogItemRow;
+  readonly catalogue: ReadonlyArray<CatalogItemRow>;
+  readonly item: CatalogItemRow | null;
   readonly tier: CatalogTierRow | null;
 } | {
   readonly phase: "submitting";
+  readonly catalogue: ReadonlyArray<CatalogItemRow>;
   readonly item: CatalogItemRow;
   readonly tier: CatalogTierRow | null;
 } | {
@@ -257,12 +259,11 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
     }
     setFlow(current => {
       if (current.phase !== "catalog_loading") return current;
-      const item = catalogue.data[0];
-      const tier = [...(item.tiers ?? [])].sort((left, right) => left.orderIndex - right.orderIndex)[0] ?? null;
       return {
         phase: "request",
-        item,
-        tier
+        catalogue: catalogue.data,
+        item: null,
+        tier: null
       };
     });
   }, [catalogQuery.data, isResume, productName, t]);
@@ -338,9 +339,10 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
     void reconcile(resumeOrderId);
   }, [contextMode, realtime.status, reconcile, resumeOrderId]);
   const submit = async () => {
-    if (flow.phase !== "request") return;
+    if (flow.phase !== "request" || flow.item === null || (flow.item.tiers?.length ?? 0) > 0 && flow.tier === null) return;
     setFlow({
       phase: "submitting",
+      catalogue: flow.catalogue,
       item: flow.item,
       tier: flow.tier
     });
@@ -380,6 +382,16 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
       });
     }
   };
+  const selectOffer = (id: string) => setFlow(current => {
+    if (current.phase !== "request") return current;
+    const item = current.catalogue.find(candidate => candidate.id === id) ?? null;
+    return { ...current, item, tier: null };
+  });
+  const selectTier = (id: string) => setFlow(current => {
+    if (current.phase !== "request" || current.item === null) return current;
+    const tier = current.item.tiers?.find(candidate => candidate.id === id) ?? null;
+    return { ...current, tier };
+  });
   const phaseIndex = phaseIndexOf(flow);
   const stepLabels = [t("steps.request"), t("steps.payment"), t("steps.createWorkspace"), t("steps.ready")];
   const stateLabels = {
@@ -424,7 +436,7 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
     readonly phase: "request" | "submitting";
   }>): AgentOSProvisioningViewProps => {
     const price = requestFlow.tier?.priceMonthlyVnd;
-    let detail = requestFlow.tier?.name ?? requestFlow.item.slug;
+    let detail = requestFlow.item === null ? t("agentos.chooseOffer") : requestFlow.tier?.name ?? requestFlow.item.name;
     if (price !== null && price !== undefined) {
       const priceLabel = format.number(price, {
         style: "currency",
@@ -438,15 +450,40 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
       props: {
         ...viewLabels,
         steps,
-        subject: productName,
+        subject: requestFlow.item?.name ?? productName,
         detail,
         statusTitle: t("agentos.requestTitle"),
         statusText: t("agentos.requestText"),
         requestActionLabel: t("agentos.submit"),
-        isRequestPending: requestFlow.phase === "submitting"
+        requestActionDisabled: requestFlow.item === null || (requestFlow.item.tiers?.length ?? 0) > 0 && requestFlow.tier === null,
+        isRequestPending: requestFlow.phase === "submitting",
+        selection: {
+          label: t("agentos.selectionLabel"),
+          chooseOffer: t("agentos.chooseOffer"),
+          chooseTier: t("agentos.chooseTier"),
+          selected: t("agentos.selected"),
+          offers: requestFlow.catalogue.map(item => ({
+            id: item.id,
+            label: item.name,
+            description: item.tagline ?? undefined,
+            tiers: [...(item.tiers ?? [])].sort((left, right) => left.orderIndex - right.orderIndex).map(tier => ({
+              id: tier.id,
+              label: tier.name,
+              detail: tier.priceMonthlyVnd === null ? undefined : format.number(tier.priceMonthlyVnd, {
+                style: "currency",
+                currency: BILLING_CURRENCY,
+                maximumFractionDigits: 0
+              })
+            }))
+          })),
+          selectedOfferId: requestFlow.item?.id,
+          selectedTierId: requestFlow.tier?.id
+        }
       },
       on: {
-        request: () => void submit()
+        request: () => void submit(),
+        selectOffer,
+        selectTier
       }
     };
   };

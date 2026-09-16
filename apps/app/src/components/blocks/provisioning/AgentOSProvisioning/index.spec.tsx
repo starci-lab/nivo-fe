@@ -23,8 +23,8 @@ const mocks = vi.hoisted(() => {
 
 type AgentProbeProps = {
     state: string
-    props: { subject: string, detail: string, statusText: string, statusActionLabel?: string, statusActionDisabled?: boolean, isRequestPending?: boolean }
-    on?: { request?: () => void, statusAction?: () => void }
+    props: { subject: string, detail: string, statusText: string, statusActionLabel?: string, statusActionDisabled?: boolean, requestActionDisabled?: boolean, isRequestPending?: boolean }
+    on?: { request?: () => void, statusAction?: () => void, selectOffer?: (id: string) => void, selectTier?: (id: string) => void }
 }
 
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ replace: mocks.replace, push: mocks.push }) }))
@@ -41,6 +41,8 @@ vi.mock("./component", () => ({
         <div>
             <output data-testid="agent-flow">{JSON.stringify({ state: props.state, subject: props.props.subject, detail: props.props.detail, text: props.props.statusText, pending: props.props.isRequestPending, action: props.props.statusActionLabel, disabled: props.props.statusActionDisabled })}</output>
             <button data-testid="request" onClick={props.on?.request}>request</button>
+            <button data-testid="select-offer" onClick={() => props.on?.selectOffer?.("item")}>select offer</button>
+            <button data-testid="select-tier" onClick={() => props.on?.selectTier?.("tier")}>select tier</button>
             <button data-testid="status" onClick={props.on?.statusAction}>status</button>
         </div>
     ),
@@ -48,7 +50,7 @@ vi.mock("./component", () => ({
 
 import { AgentOSProvisioning } from "./"
 
-const item = { id: "item", slug: "agent-os", name: "nivo AI Agent", tiers: [{ id: "tier", name: "Pro", orderIndex: 1, priceMonthlyVnd: 1000 }] }
+const item = { id: "item", slug: "agent-os", name: "nivo AI Agent", tagline: "Agent team", templateKey: "agent-os", tiers: [{ id: "tier", tierKey: "pro", name: "Pro", orderIndex: 1, priceMonthlyVnd: 1000 }] }
 const order = { id: "order", status: "pending_payment", catalogItem: { name: "nivo AI Agent" }, catalogTier: { name: "Pro" } }
 const flow = () => screen.getByTestId("agent-flow").textContent ?? ""
 const resetQueryCache = () => {
@@ -80,6 +82,8 @@ describe("AgentOSProvisioning connected flow", () => {
         await waitFor(() => expect(flow()).toContain('"state":"request"'))
         expect(flow()).toContain('"subject":"agentos.productName"')
         expect(flow()).not.toContain("nivo AI Agent")
+        fireEvent.click(screen.getByTestId("select-offer"))
+        fireEvent.click(screen.getByTestId("select-tier"))
         fireEvent.click(screen.getByTestId("request"))
         await waitFor(() => expect(flow()).toContain('"state":"awaiting_payment"'))
         expect(flow()).toContain('"subject":"agentos.productName"')
@@ -93,6 +97,8 @@ describe("AgentOSProvisioning connected flow", () => {
         }))
         render(<AgentOSProvisioning context={{ mode: "new" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"request"'))
+        fireEvent.click(screen.getByTestId("select-offer"))
+        fireEvent.click(screen.getByTestId("select-tier"))
         fireEvent.click(screen.getByTestId("request"))
         await waitFor(() => expect(flow()).toContain('"state":"submitting"'))
         expect(flow()).toContain('"pending":true')
@@ -113,6 +119,8 @@ describe("AgentOSProvisioning connected flow", () => {
         mocks.api.orderAgentOs.mockResolvedValue({ ok: false, reason: "order-down" })
         render(<AgentOSProvisioning context={{ mode: "new" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"request"'))
+        fireEvent.click(screen.getByTestId("select-offer"))
+        fireEvent.click(screen.getByTestId("select-tier"))
         fireEvent.click(screen.getByTestId("request"))
         await waitFor(() => expect(flow()).toContain('"state":"failed"'))
     })

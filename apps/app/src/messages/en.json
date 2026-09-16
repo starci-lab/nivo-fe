@@ -139,13 +139,26 @@
       "signOut": "Sign out"
     },
     "nav": {
-      "overview": "Overview",
-      "apps": "Apps",
-      "agentos": "AgentOS",
-      "servers": "Servers",
-      "domains": "Domains",
+      "chat": "Chat",
+      "modules": "Modules",
+      "packages": "Packages",
       "wallet": "Wallet",
-      "support": "Support"
+      "settings": "Settings"
+    },
+    "groupChat": {
+      "title": "Group chat",
+      "description": "Work with human members and agents inside the business workspace.",
+      "groups": "Conversations",
+      "groupsEmpty": "There are no group conversations yet.",
+      "conversation": "Conversation messages",
+      "unavailable": "Group chat is not ready yet",
+      "unavailableHint": "Messages and members will appear after the business collaboration permissions are confirmed.",
+      "composer": "Message",
+      "composerPlaceholder": "Choose a group to start a conversation",
+      "members": "Members",
+      "membersEmpty": "There is no member list to show yet.",
+      "openMembers": "Open members",
+      "closeMembers": "Close members"
     },
     "state": {
       "loading": "Asking the server"
@@ -229,9 +242,9 @@
       "steadyGroup": "Running and building"
     },
     "agentos": {
-      "title": "AgentOS",
-      "description": "Monitor workspaces, address issues, and continue operations from one dashboard.",
-      "dashboardEyebrow": "Workspace operations",
+      "title": "Modules",
+      "description": "Monitor the business modules, activation state, and the next available action.",
+      "dashboardEyebrow": "One business · one workspace",
       "createEyebrow": "New workspace",
       "orderEyebrow": "Created order",
       "createTitle": "Create an AgentOS workspace",
@@ -259,6 +272,17 @@
         "attentionCaption": "Requires an owner decision",
         "attentionGroup": "Needs your attention",
         "steadyGroup": "Running and starting up"
+      },
+      "businessDashboard": {
+        "workspaceLabel": "Operating workspace",
+        "workspaceReference": "Workspace ID {id}",
+        "workspaceFallback": "Business workspace",
+        "loading": "Reading the workspace linked to this business.",
+        "empty": "This business has no workspace yet. Choose a package to begin.",
+        "create": "Choose a package",
+        "unavailable": "The business workspace could not be resolved",
+        "unavailableHint": "Nivo will not choose the first workspace automatically. Try again after the business binding is confirmed.",
+        "retry": "Try again"
       },
       "podReachable": "Pod is answering",
       "podUnreachable": "Pod is not answering",
@@ -1388,9 +1412,13 @@
         "productName": "AgentOS",
         "progressLabel": "AgentOS order",
         "continuationLabel": "Next step",
+        "selectionLabel": "Choose a package for the business",
+        "chooseOffer": "Choose a package",
+        "chooseTier": "Choose a usage level",
+        "selected": "Selected",
         "requestTitle": "Request an AgentOS workspace",
         "requestText": "The request creates an invoice first. Provisioning begins after payment.",
-        "submit": "Request AgentOS",
+        "submit": "Continue with selected package",
         "retryAi": "Retry AI readiness",
         "paymentTitle": "Waiting for payment",
         "paymentText": "Open Wallet and settle this order's invoice to start fulfillment.",

@@ -52,6 +52,7 @@ describe("AuthenticationPageBase", () => {
     it("composes the decorative visual and the details panel without owning journey behaviour", () => {
         const { container } = render(<AuthenticationPageBase panel={{ state: "details", props: details, on: { submitDetails: vi.fn() } }} />)
         expect(screen.getByRole("heading", { name: "Sign in" })).toBeInTheDocument()
+        expect(screen.getByRole("img", { name: "Nivo" })).toBeInTheDocument()
         expect(screen.getByLabelText("Email")).toBeInTheDocument()
         expect(screen.getByRole("region", { name: "Sign in" })).toBeInTheDocument()
         /*

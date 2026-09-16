@@ -13,10 +13,12 @@ describe("product Sidebar adapter", () => {
 
     it("projects the complete destination registry through Grammar Sidebar", () => {
         render(<Sidebar />)
-        expect(screen.getAllByRole("option")).toHaveLength(7)
-        expect(screen.getByText("nav.servers")).toBeInTheDocument()
-        fireEvent.click(screen.getByText("nav.servers"))
+        expect(screen.getAllByRole("option")).toHaveLength(5)
+        expect(screen.getByText("nav.settings")).toBeInTheDocument()
+        fireEvent.click(screen.getByText("nav.settings"))
         expect(push).not.toHaveBeenCalled()
+        fireEvent.click(screen.getByText("nav.chat"))
+        expect(push).toHaveBeenCalledWith("/chat")
         fireEvent.click(screen.getByText("nav.wallet"))
         expect(push).toHaveBeenCalledWith("/wallet")
     })

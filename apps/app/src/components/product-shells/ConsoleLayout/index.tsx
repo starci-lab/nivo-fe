@@ -40,6 +40,7 @@ export const ConsoleLayout = <P extends object,>(props: ConsoleLayoutProps<P>) =
   useEffect(() => {
     if (status === "anonymous") router.replace(signInHrefFor(pathname));
   }, [status, router, pathname]);
+  if (status !== "signed-in") return null;
   return <ConsoleLayoutBase
     body={body}
     bodyProps={bodyProps}

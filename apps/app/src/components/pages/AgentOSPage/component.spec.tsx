@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from "vitest"
 
 type ProvisioningProbeProps = { readonly context: { readonly mode: string, readonly orderId?: string } }
 
-vi.mock("@/components/blocks/agentos/AgentOSWorkspaceList", () => ({
-    AgentOSWorkspaceList: () => <div>Workspace list</div>,
+vi.mock("@/components/blocks/agentos/BusinessModulesDashboard", () => ({
+    BusinessModulesDashboard: () => <div>Business modules dashboard</div>,
 }))
 vi.mock("@/components/blocks/provisioning/AgentOSProvisioning", () => ({
     AgentOSProvisioning: ({ context }: ProvisioningProbeProps) => (
@@ -39,7 +39,7 @@ describe("AgentOSPage", () => {
             onCreate={create}
         />)
         const html = container.innerHTML
-        expect(html).toContain("Workspace list")
+        expect(html).toContain("Business modules dashboard")
         expect(html).toContain("Manage AgentOS workspaces.")
         expect(screen.getByRole("heading", { level: 1, name: "AgentOS" })).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Create" }))
@@ -57,7 +57,7 @@ describe("AgentOSPage", () => {
         />)
         expect(html).toContain("Create workspace")
         expect(html).toContain("new:")
-        expect(html).not.toContain("Workspace list")
+        expect(html).not.toContain("Business modules dashboard")
     })
 
     it("passes the persisted order id only to resume mode", () => {

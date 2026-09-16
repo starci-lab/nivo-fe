@@ -145,7 +145,7 @@ const RESTING_FACTS: ReadonlyArray<WalletFactRow> = [{
   label: "",
   value: ""
 }];
-const factRow = (row: WalletFactRow, isLoading = false) => <div>
+const factRow = (row: WalletFactRow, isLoading = false) => <div key={row.id}>
   <Text size="sm" isSkeleton={isLoading}>{row.label}</Text>
   <Text size="sm" isSkeleton={isLoading}>{row.value}</Text></div>;
 const sectionLabel = (label: string) => <div>
@@ -168,7 +168,7 @@ const walletLedgerContent = (ledger: LedgerSectionView, closeLabel: string) => {
   const isLoading = ledger.phase === "resting";
   const rows: ReadonlyArray<WalletLedgerRow> = ledger.phase === "answered" ? ledger.rows : [];
   const entries: ReadonlyArray<WalletLedgerRow | undefined> = isLoading ? [undefined, undefined, undefined] : rows;
-  return <div>{entries.map(row => ledgerRow(row, isLoading, closeLabel))}</div>;
+  return <div>{entries.map((row, index) => <div key={row?.id ?? `resting-${index}`}>{ledgerRow(row, isLoading, closeLabel)}</div>)}</div>;
 };
 type TopUpContentProps = {
   readonly topUp: TopUpView;
@@ -274,8 +274,7 @@ const WalletControlCenterContent = (view: WalletControlCenterViewProps) => {
   }} on={{
     back: on?.openOrder
   }} />;
-  const ordinarySections = [balanceSection(), ledgerSection(transactions), ledgerSection(invoices, on?.payInvoice)];
-  const page = view.state === "ordinary" ? <div>{sectionLabel(title)}{ordinarySections}</div> : <div>{path}{sectionLabel(title)}<>{balanceSection()}{linkedInvoiceSection(view.linkedInvoice)}{ledgerSection(transactions)}{ledgerSection(invoices, on?.payInvoice)}</></div>;
+  const page = view.state === "ordinary" ? <div>{sectionLabel(title)}{balanceSection()}{ledgerSection(transactions)}{ledgerSection(invoices, on?.payInvoice)}</div> : <div>{path}{sectionLabel(title)}<>{balanceSection()}{linkedInvoiceSection(view.linkedInvoice)}{ledgerSection(transactions)}{ledgerSection(invoices, on?.payInvoice)}</></div>;
   return <>
         {page}
         <ModalBranch isOpen={topUp.overlayState === "open"} title={topUp.title} closeLabel={topUp.closeLabel} content={TopUpContent} contentProps={{

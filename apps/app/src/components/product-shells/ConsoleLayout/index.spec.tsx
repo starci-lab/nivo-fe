@@ -28,11 +28,18 @@ describe("ConsoleLayout connected guard", () => {
     it("returns an anonymous reader to the locale-aware door carrying the interrupted route", async () => {
         mocks.locale = "en"; mocks.session.state = { status: "anonymous" }; mocks.pathname = "/agentos/workspaces/w1/modules/m1/setup"
         render(<ConsoleLayout body={Workspace} bodyProps={{}} />)
+        expect(screen.queryByText("workspace")).toBeNull()
         await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith("/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fw1%2Fmodules%2Fm1%2Fsetup"))
     })
     it("carries nothing when the interrupted route is the root", async () => {
         mocks.session.state = { status: "anonymous" }; mocks.pathname = "/"
         render(<ConsoleLayout body={Workspace} bodyProps={{}} />)
         await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith("/authentication"))
+    })
+    it("draws no private shell while the refresh cookie is still being restored", () => {
+        mocks.session.state = { status: "restoring" }
+        render(<ConsoleLayout body={Workspace} bodyProps={{}} />)
+        expect(screen.queryByText("workspace")).toBeNull()
+        expect(mocks.replace).not.toHaveBeenCalled()
     })
 })

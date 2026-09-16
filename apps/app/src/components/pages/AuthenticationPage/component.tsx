@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { NivoBrand } from "@nivo/ui";
 import { AuthenticationPanel, type AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";
 import {
   AUTH_FORM_CONTENT_CLASS_NAME,
@@ -66,6 +67,7 @@ export const AuthenticationPageBase = (props: AuthenticationPageProps) => {
 
     <section aria-label={panel.props.title} className={AUTH_FORM_REGION_CLASS_NAME}>
       <div className={AUTH_FORM_CONTENT_CLASS_NAME}>
+        <NivoBrand props={{ label: "Nivo", variant: "lockup", scale: "navbar" }} />
         <AuthenticationPanel key={panelIdentity} {...panel} />
       </div>
     </section>

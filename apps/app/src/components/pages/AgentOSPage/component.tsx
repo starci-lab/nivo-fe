@@ -1,5 +1,5 @@
 import { SECTIONS_CLASS_NAME } from "./classNames";
-import { AgentOSWorkspaceList } from "@/components/blocks/agentos/AgentOSWorkspaceList";
+import { BusinessModulesDashboard } from "@/components/blocks/agentos/BusinessModulesDashboard";
 import { AgentOSProvisioning } from "@/components/blocks/provisioning/AgentOSProvisioning";
 import { Breadcrumbs } from "@nivo/ui";
 import { Button, SectionHeader as DirectionHeader, PageContainer as DirectionPage, Text } from "@starci/grammar/common";
@@ -79,11 +79,11 @@ export const AgentOSPageBase = (props: AgentOSPageProps) => {
             }
         }}/>;
     const heading = <DirectionHeader level={1} eyebrow={eyebrow} title={title} description={<Text size="md" tone="muted">{description}</Text>} action={isDashboard ? <Button variant="primary" size="lg" type="button" onPress={view.onCreate}>{view.labels.createAction}</Button> : undefined}/>;
-    const section = isDashboard ? [<AgentOSWorkspaceList key="item-0"/>] : [<AgentOSProvisioning key="item-0" context={view.mode === "create" ? {
+    const section = isDashboard ? <BusinessModulesDashboard /> : <AgentOSProvisioning context={view.mode === "create" ? {
                 mode: "new"
             } : {
                 mode: "resume",
                 orderId: view.orderId
-            }}/>];
+            }}/>;
     return <DirectionPage measure="product"><div className={SECTIONS_CLASS_NAME} data-contract="GAP-5">{path === undefined ? null : path}{heading}{section}</div></DirectionPage>;
 };

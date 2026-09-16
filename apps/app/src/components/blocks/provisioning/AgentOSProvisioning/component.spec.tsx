@@ -76,4 +76,37 @@ describe("AgentOS provisioning lifecycle", () => {
         fireEvent.click(continuation)
         expect(continuePayment).toHaveBeenCalledOnce()
     })
+
+    it("requires an explicit catalogue item and tier before ordering", () => {
+        const request = vi.fn()
+        const selectOffer = vi.fn()
+        const selectTier = vi.fn()
+        render(<AgentOSProvisioningBase
+            state="request"
+            props={{
+                steps,
+                subject: "AgentOS",
+                detail: "Choose a package",
+                statusTitle: "Request",
+                statusText: "Select from the catalogue",
+                requestActionLabel: "Continue",
+                requestActionDisabled: true,
+                selection: {
+                    label: "Packages",
+                    chooseOffer: "Choose product",
+                    chooseTier: "Choose tier",
+                    selected: "Selected",
+                    offers: [{ id: "item", label: "AgentOS", tiers: [{ id: "tier", label: "Current tier", detail: "₫1,000" }] }],
+                    selectedOfferId: "item"
+                }
+            }}
+            on={{ request, selectOffer, selectTier }}
+        />)
+        expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled()
+        fireEvent.click(screen.getByRole("button", { name: "AgentOS" }))
+        fireEvent.click(screen.getByRole("button", { name: "Current tier · ₫1,000" }))
+        expect(selectOffer).toHaveBeenCalledWith("item")
+        expect(selectTier).toHaveBeenCalledWith("tier")
+        expect(request).not.toHaveBeenCalled()
+    })
 })
