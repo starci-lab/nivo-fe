@@ -1,16 +1,18 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { GroupChatPageBase } from "./component";
 
-/** This page has no route-controlled presentation state. */
+/** This page has no route-controlled inputs. */
 export type GroupChatPageProps = Record<string, never>;
 
-/** Connect localized copy to the contract-gated group-chat surface. */
+/** Connect localized copy and transient rail state to the group-chat surface. */
 export const GroupChatPage = (props: GroupChatPageProps) => {
   void props;
   const t = useTranslations("console.groupChat");
-  return <GroupChatPageBase labels={{
+  const [isRailOpen, setRailOpen] = useState(false);
+  return <GroupChatPageBase isRailOpen={isRailOpen} onRailOpenChange={setRailOpen} labels={{
     title: t("title"),
     description: t("description"),
     groups: t("groups"),

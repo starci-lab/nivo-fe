@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { GroupChatPageBase, type GroupChatPageProps } from "./component";
 
@@ -21,17 +21,20 @@ const labels: GroupChatPageProps["labels"] = {
 describe("GroupChatPageBase", () => {
   beforeAll(() => {
     window.matchMedia = vi.fn().mockReturnValue({
-      matches: false,
+      matches: true,
       addEventListener: vi.fn(),
       removeEventListener: vi.fn()
     }) as unknown as typeof window.matchMedia;
   });
 
   it("renders the accepted chat anatomy while unsupported actions fail closed", () => {
-    const { container } = render(<GroupChatPageBase labels={labels} />);
+    const onRailOpenChange = vi.fn();
+    const { container } = render(<GroupChatPageBase isRailOpen={false} onRailOpenChange={onRailOpenChange} labels={labels} />);
     expect(screen.getByRole("heading", { name: "Group chat" })).toBeInTheDocument();
     expect(screen.getByText("Permissions are not ready")).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Message" })).toBeDisabled();
     expect(container.querySelector('[data-grammar-chat-workspace="true"]')).not.toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Open members" }));
+    expect(onRailOpenChange).toHaveBeenCalledWith(true);
   });
 });

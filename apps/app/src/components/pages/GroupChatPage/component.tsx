@@ -1,11 +1,10 @@
-"use client";
-
-import { useState } from "react";
 import { ChatWorkspace, EmptyNotice, Input, PageContainer, SectionHeader, SurfaceCard, Text } from "@starci/grammar/common";
 import { GROUP_CHAT_COMPOSER_CLASS_NAME, GROUP_CHAT_HOST_CLASS_NAME, GROUP_LIST_CLASS_NAME } from "./classNames";
 
 /** User-facing copy for the safe pre-contract group-chat surface. */
 export type GroupChatPageProps = {
+  readonly isRailOpen: boolean;
+  readonly onRailOpenChange: (isOpen: boolean) => void;
   readonly labels: {
     readonly title: string;
     readonly description: string;
@@ -25,8 +24,7 @@ export type GroupChatPageProps = {
 
 /** Implement the approved Grammar anatomy while unsupported collaboration actions fail closed. */
 export const GroupChatPageBase = (props: GroupChatPageProps) => {
-  const { labels } = props;
-  const [isRailOpen, setRailOpen] = useState(false);
+  const { isRailOpen, labels, onRailOpenChange } = props;
   const groups = <section className={GROUP_LIST_CLASS_NAME} aria-label={labels.groups}>
     <Text size="sm" weight="semibold">{labels.groups}</Text>
     <EmptyNotice message={labels.groupsEmpty} />
@@ -57,7 +55,7 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
         railOpenLabel={labels.openMembers}
         railCloseLabel={labels.closeMembers}
         isRailOpen={isRailOpen}
-        onRailOpenChange={setRailOpen}
+        onRailOpenChange={onRailOpenChange}
         railWidth="standard"
       />
     </div>
