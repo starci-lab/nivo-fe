@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutateForgotPasswordInitSwr, useMutateForgotPasswordResendSwr, useMutateForgotPasswordVerifyOtpSwr, useMutateSignInSwr, useMutateSignUpInitSwr, useMutateSignUpResendSwr, useMutateSignUpVerifyOtpSwr, useOauthReturnExchange } from "@/hooks";
 import { authenticationOauthRedirectUrl, rememberOauthProvider } from "@/modules/auth";
 import { AuthenticationPageBase as AuthenticationPageView } from "./component";
-import type { AuthActions, AuthCode, AuthDetails, AuthMode, AuthPendingAction, AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";
+import type { AuthActions, AuthCode, AuthDetails, AuthMode, AuthPendingAction, AuthProvider, AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";
 import type { OtpChallenge } from "@/modules/api/auth";
 import { useSession } from "@/modules/auth/session";
 
@@ -119,6 +119,36 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
   const [isError, setIsError] = useState(false);
   const [pendingAction, setPendingAction] = useState<AuthPendingAction | null>(null);
   /*
+   * WHICH PROVIDER BUTTON OWNS THE WAIT. Tracked on the way OUT through `chooseProvider`; on the
+   * way BACK the whole page has remounted, so the remembered provider is peeked at instead - read
+   * only, never taken, because `useOauthReturnExchange` spends it during the exchange. A storage
+   * failure or a missing memory degrades to "provider pending, button unknown", which still
+   * disables both shortcuts.
+   */
+  const [pendingProvider, setPendingProvider] = useState<AuthProvider | null>(null);
+  const [oauthProviderOnArrival] = useState<AuthProvider | null>(() => {
+    try {
+      const remembered = window.sessionStorage.getItem("nivo.oauth.provider");
+      return remembered === "github" || remembered === "google" ? remembered : null;
+    } catch {
+      return null;
+    }
+  });
+  /*
+   * THE PROVIDER'S OWN ANSWER, captured before the exchange hook strips the query. A refused
+   * hand-off arrives as `?error=...` with no `code`/`state`, and the hook consumes that and
+   * returns nothing - so unless it is read here, in the initializer that runs before any effect,
+   * a provider-side refusal would land on a silent sign-in form.
+   */
+  const [oauthRefusedOnArrival] = useState(() => {
+    try {
+      const query = new URLSearchParams(window.location.search);
+      return query.has("error");
+    } catch {
+      return false;
+    }
+  });
+  /*
    * THE SWITCH IS REAL STATE AND IT CHANGES NOTHING SERVER-SIDE YET. The refresh cookie is written
    * with a fixed thirty-day `maxAge` and no per-request control, so a session lasts the same length
    * either way. It is held here rather than dropped because making it mean something is one backend
@@ -129,6 +159,14 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
   // Held in a ref rather than state: nothing on screen shows it, and re-rendering to store it would
   // cost the uncontrolled fields their contents.
   const challengeId = useRef("");
+  /*
+   * The opaque second-factor challenge. It is CAPTURED here but never spent: completing it is a
+   * `verifyTwoFactor` transport call, and a component may not import transport - that wiring is a
+   * `useMutateVerifyTwoFactorSwr` in `hooks/`, outside this cut's grant. Until it exists the panel
+   * draws `twoFactorUnsupported`, the honest notice, rather than a code field that cannot submit.
+   * The panel's `secondFactor` state is already implemented against this ref's shape.
+   */
+  const twoFactorToken = useRef("");
   /*
    * ONE HAND-OFF PER ARRIVAL, held in a ref because the guard has to outlive a re-render and must
    * not cause one. `state` is spent by the first exchange, so a second attempt is refused by
@@ -212,10 +250,20 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
    *
    * @param reason - The sentence to show.
    */
-  const refuse = (reason: string) => {
+  const refuse = useCallback((reason: string) => {
     setIsError(true);
     setStatusMessage(reason);
-  };
+  }, []);
+
+  /*
+   * THE PROVIDER'S OWN REFUSAL, shown on arrival rather than discovered. `?error` means the
+   * hand-off died upstream - the exchange hook strips the query and settles nothing, so this
+   * page says the refusal itself instead of landing the reader on a silent form.
+   */
+  useEffect(() => {
+    if (!oauthRefusedOnArrival) return;
+    refuse(t("signIn.oauthRefused"));
+  }, [oauthRefusedOnArrival, refuse, t]);
 
   /*
    * THE RETURN LEG OF A PROVIDER SIGN-IN.
@@ -242,13 +290,14 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
       return;
     }
     if (result.data.requiresTwoFactor) {
+      twoFactorToken.current = result.data.twoFactorToken ?? "";
       setStatusMessage("");
       setPhase("twoFactor");
       return;
     }
     session.adopt(result.data);
     landInConsole();
-  }, [landInConsole, oauthReturn.answer, session, t]);
+  }, [landInConsole, oauthReturn.answer, refuse, session, t]);
 
   /**
    * Submit the first step of whichever journey is running.
@@ -259,12 +308,16 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     setIsError(false);
     setStatusMessage("");
     if (mode === "signIn") {
-      const result = await runPending("submit", () => signInMutation.trigger(details));
+      const result = await runPending("submit", () => signInMutation.trigger({
+        email: details.email,
+        password: details.password
+      }));
       if (!result.ok) {
         refuse(t("signIn.refused"));
         return;
       }
       if (result.data.requiresTwoFactor) {
+        twoFactorToken.current = result.data.twoFactorToken ?? "";
         setStatusMessage("");
         setPhase("twoFactor");
         return;
@@ -273,7 +326,11 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
       landInConsole();
       return;
     }
-    const result = await runPending("submit", () => mode === "signUp" ? signUpInitMutation.trigger(details) : forgotPasswordInitMutation.trigger({
+    const result = await runPending("submit", () => mode === "signUp" ? signUpInitMutation.trigger({
+      email: details.email,
+      password: details.password,
+      ...(details.name === "" ? {} : { name: details.name })
+    }) : forgotPasswordInitMutation.trigger({
       email: details.email
     }));
     if (!result.ok) {
@@ -302,10 +359,11 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
         refuse(t("signUp.codeRefused"));
         return;
       }
-      // A brand new account has no second factor, so there is no challenge to read for here.
+      // A brand new account has no second factor, so there is no challenge to read for here. The
+      // journey finishes ON the done surface rather than being routed away mid-sentence: the
+      // account exists, the session is adopted, and `onward` is the reader's own way in.
       session.adopt(result.data);
       setPhase("done");
-      landInConsole();
       return;
     }
     const result = await runPending("submit", () => forgotPasswordVerifyMutation.trigger({
@@ -342,8 +400,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
    * Everything the panel can do, in one place so each state hands over the same set.
    *
    * `onward` is the only one that reads the current journey: the reset journey finishes at a
-   * password rather than a session, so its way onward is back to signing in - and the two-factor
-   * notice has nowhere to go at all, since this build cannot complete that step.
+   * password rather than a session, so its way onward is back to signing in.
    */
   const actions: AuthActions = {
     submitDetails: details => {
@@ -381,6 +438,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
       setIsError(false);
       setStatusMessage("");
       setPendingAction("provider");
+      setPendingProvider(provider);
       const returnTo = `${window.location.origin}${window.location.pathname}`;
       window.location.assign(authenticationOauthRedirectUrl(provider, returnTo));
     },
@@ -397,11 +455,23 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
       landInConsole();
     }
   };
+  /*
+   * A SIGNED-IN READER DOES NOT GET THE FORM. The restore effect signs somebody in without this
+   * page lifting a finger, so an already-adopted session lands on the route it interrupted rather
+   * than staring at credentials it does not need. While custody is still being verified the
+   * surface owes only a wait - the form would offer controls that cannot be honoured yet.
+   */
+  const isRestoring = session.state.status === "restoring";
+  const isSignedInArrival = session.state.status === "signed-in" && phase === "details";
+  useEffect(() => {
+    if (isSignedInArrival) landInConsole();
+  }, [isSignedInArrival, landInConsole]);
   const frame = {
     title: t(`${mode}.title`),
     subtitle: t(`${mode}.subtitle`),
     isPending: pendingAction !== null || oauthReturn.isMutating,
-    pendingAction: oauthReturn.isMutating ? "provider" as const : pendingAction ?? undefined
+    pendingAction: oauthReturn.isMutating ? "provider" as const : pendingAction ?? undefined,
+    pendingProvider: pendingProvider ?? oauthProviderOnArrival ?? undefined
   };
 
   /*
@@ -416,6 +486,17 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
    * starts.
    */
   const panelFor = (): AuthenticationPanelProps => {
+    if (isRestoring || isSignedInArrival) {
+      return {
+        state: "restoring",
+        props: {
+          title: t("restoringTitle"),
+          subtitle: t("restoringSubtitle"),
+          progressLabel: t("restoringLabel")
+        },
+        on: actions
+      };
+    }
     if (phase === "twoFactor") {
       return {
         state: "twoFactorUnsupported",
@@ -423,7 +504,8 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
           ...frame,
           statusMessage: "",
           // A challenge is not a refusal: the password was right and the session is simply
-          // not owed yet.
+          // not owed yet. The `secondFactor` panel state exists; it goes live when the hooks
+          // barrel owns `useMutateVerifyTwoFactorSwr` (this cut cannot import transport).
           isError: false,
           doneTitle: t("signIn.twoFactorTitle"),
           doneHint: t("signIn.twoFactorHint"),
@@ -458,7 +540,6 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
           statusMessage,
           isError,
           codeLabel: t("codeLabel"),
-          codePlaceholder: t("codePlaceholder"),
           codeRequired: t("codeRequired"),
           codeInvalid: t("codeInvalid"),
           codeHint: t("codeHint", {
@@ -469,6 +550,10 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
           newPasswordRequired: t("newPasswordRequired"),
           newPasswordTooShort: t("newPasswordTooShort"),
           newPasswordHint: t("newPasswordHint"),
+          confirmNewPasswordLabel: t("confirmNewPasswordLabel"),
+          confirmNewPasswordPlaceholder: t("confirmNewPasswordPlaceholder"),
+          confirmNewPasswordRequired: t("confirmNewPasswordRequired"),
+          confirmNewPasswordMismatch: t("confirmNewPasswordMismatch"),
           revealLabel: t("revealLabel"),
           hideLabel: t("hideLabel"),
           submitLabel: t(`${mode}.codeSubmitLabel`),
@@ -502,11 +587,17 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
         confirmPasswordPlaceholder: t("confirmPasswordPlaceholder"),
         confirmPasswordRequired: t("confirmPasswordRequired"),
         confirmPasswordMismatch: t("confirmPasswordMismatch"),
+        nameLabel: t("nameLabel"),
+        namePlaceholder: t("namePlaceholder"),
+        nameHint: t("nameOptionalHint"),
+        nameTooLong: t("nameTooLong"),
+        authorityHint: t("signUp.authorityHint"),
         revealLabel: t("revealLabel"),
         hideLabel: t("hideLabel"),
         submitLabel: t(`${mode}.submitLabel`),
         orLabel: t("orLabel"),
         googleLabel: t("googleLabel"),
+        githubLabel: t("githubLabel"),
         forgotPasswordLabel: t("forgotPasswordLabel"),
         rememberMeLabel: t("rememberMeLabel"),
         isRememberMe,

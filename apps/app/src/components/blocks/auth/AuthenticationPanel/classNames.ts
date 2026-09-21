@@ -21,6 +21,9 @@ export const AUTH_PANEL_PROVIDER_CLASS_NAME = cn("flex", "flex-col", "gap-3");
 /** Credentials and their submit controls form one semantic unit. */
 export const AUTH_PANEL_FORM_CLASS_NAME = cn("flex", "flex-col", "gap-4");
 
+/** The code field's visible name, slots and hint-or-refusal line stay visually coupled. */
+export const AUTH_PANEL_OTP_FIELD_CLASS_NAME = cn("flex", "flex-col", "gap-2");
+
 /** Sign-in options share one row and retain separation on narrow widths. */
 export const AUTH_PANEL_OPTIONS_CLASS_NAME = cn("!flex", "items-center", "justify-between", "gap-4");
 

@@ -31,7 +31,7 @@ type AuthProbePanel = {
 
 type AuthPageProbeInput = { panel: AuthProbePanel }
 
-const details = { email: "reader@example.test", password: "secret-password" } satisfies AuthDetails
+const details = { email: "reader@example.test", password: "secret-password", name: "Reader" } satisfies AuthDetails
 const code = { otp: "123456", newPassword: "new-password" } satisfies AuthCode
 
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
@@ -97,7 +97,7 @@ describe("AuthenticationPage connected journeys", () => {
         expect(mocks.session.adopt).toHaveBeenCalledWith({ accessToken: "access" })
 
         cleanup()
-        mocks.api.signIn.mockResolvedValue({ ok: true, data: { requiresTwoFactor: true } })
+        mocks.api.signIn.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: true, twoFactorToken: "two-factor-token" } })
         render(<AuthenticationPage />)
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(panel()).toContain('"state":"twoFactorUnsupported"'))
@@ -117,8 +117,10 @@ describe("AuthenticationPage connected journeys", () => {
         await waitFor(() => expect(panel()).toContain("signUp.codeRefused"))
         mocks.api.signUpVerifyOtp.mockResolvedValue({ ok: true, data: { accessToken: "signup-access" } })
         fireEvent.click(screen.getByTestId("submit-code"))
-        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/overview"))
+        await waitFor(() => expect(panel()).toContain('"state":"done"'))
         expect(mocks.session.adopt).toHaveBeenCalledWith({ accessToken: "signup-access" })
+        fireEvent.click(screen.getByTestId("onward"))
+        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/overview"))
     })
 
     it("completes reset, masks code refusal and returns onward to sign-in", async () => {
@@ -177,7 +179,7 @@ describe("AuthenticationPage connected journeys", () => {
 
         cleanup()
         window.history.replaceState(null, "", "/authentication?code=two-factor&state=two-factor-state")
-        mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { requiresTwoFactor: true } })
+        mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: true, twoFactorToken: "oauth-two-factor" } })
         render(<AuthenticationPage />)
         await waitFor(() => expect(panel()).toContain('"state":"twoFactorUnsupported"'))
 
@@ -190,6 +192,7 @@ describe("AuthenticationPage connected journeys", () => {
         cleanup()
         window.history.replaceState(null, "", "/authentication?error=cancelled")
         render(<AuthenticationPage />)
+        await waitFor(() => expect(panel()).toContain("signIn.oauthRefused"))
         expect(panel()).toContain('"state":"details"')
     })
 

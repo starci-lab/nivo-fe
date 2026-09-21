@@ -1,6 +1,6 @@
 import { useRef, useState, type SubmitEvent } from "react";
 import { Checkbox, nivoIconSource } from "@nivo/ui";
-import { Button, Input, Heading, Icon, Text, TextAction, Divider } from "@starci/grammar/common";
+import { Button, Divider, Heading, Icon, Input, Label, OtpInput, Progress, Text, TextAction } from "@starci/grammar/common";
 import {
   AUTH_PANEL_CLASS_NAME,
   AUTH_PANEL_DETAILS_CLASS_NAME,
@@ -10,6 +10,7 @@ import {
   AUTH_PANEL_NOTICE_ACTIONS_CLASS_NAME,
   AUTH_PANEL_NOTICE_CLASS_NAME,
   AUTH_PANEL_OPTIONS_CLASS_NAME,
+  AUTH_PANEL_OTP_FIELD_CLASS_NAME,
   AUTH_PANEL_PROVIDER_CLASS_NAME,
   AUTH_PANEL_TEXT_ACTIONS_CLASS_NAME
 } from "./classNames";
@@ -25,26 +26,29 @@ import {
  * `OtpStep`: it existed because two panels each needed a code step and a sixty-second cooldown, and
  * with one panel there is only ever one of each.
  *
- * THE STEP IS THE STATE, AND THE MODE IS NOT. `details`, `code` and `done` each draw a DIFFERENT tree
- * - a form of two or three boxes, a form of one or two, a confirmation - so they are states. Which
- * journey is running changes which words and which fields appear inside the same tree, so it is
- * props. `isPending` is props for the same reason.
+ * THE STEP IS THE STATE, AND THE MODE IS NOT. `details`, `code`, `secondFactor` and `done` each
+ * draw a DIFFERENT tree - a form of two or four boxes, a six-slot code with an optional password
+ * pair, a six-slot code alone, a confirmation - so they are states. Which journey is running
+ * changes which words and which fields appear inside the same tree, so it is props. `isPending`
+ * is props for the same reason. `restoring` is a state because while it holds the surface owes the
+ * reader only a wait, and drawing a sign-in form under it would offer controls that cannot be
+ * honoured yet.
  *
- * SIGNING IN DOES NOT PASS THROUGH `code`, and this is where nivo genuinely differs from the
- * reference rather than by choice. `signIn` exchanges a password for a session in one request; the
- * reference's backend mails a code for every journey. So `signIn` runs `details -> done`, and an
- * account owing TOTP lands on `twoFactorUnsupported` instead - a challenge is neither a refusal nor a
- * session, and reusing the refusal sentence would tell those readers their password was wrong.
+ * SIGNING IN DOES NOT PASS THROUGH `code`. `signIn` exchanges a password for a session in one
+ * request; an account owing TOTP lands on `secondFactor`, which is neither a refusal nor a
+ * session - and reusing the refusal sentence would tell those readers their password was wrong.
+ * `twoFactorUnsupported` remains in the union so a build whose session layer cannot complete the
+ * challenge can still say so honestly rather than dead-ending on a form that cannot submit.
  *
- * THE ORDER IS THE DESIGN. The shortcut comes FIRST because many readers take it and never reach the
- * form; the divider NAMES the choice between them rather than merely separating them; the form
- * follows; and the way to the other journey is the last line, phrased as a question and its answer -
- * which is what makes one road the main one and the rest alternatives.
+ * THE ORDER IS THE DESIGN. The shortcuts come FIRST because many readers take one and never reach
+ * the form; the divider NAMES the choice between them rather than merely separating them; the form
+ * follows; and the way to the other journey is the last line, phrased as a question and its
+ * answer - which is what makes one road the main one and the rest alternatives.
  *
- * THE RESET JOURNEY MUST NEVER SAY WHETHER AN ADDRESS IS REGISTERED. `forgotPasswordInit` answers an
- * unknown address with the same flag, sentence, lifetime and mailed code as a known one, so the code
- * step's lead is phrased as a CONDITION for that mode and as a fact for the others, and one refusal
- * sentence covers both ways its second step can fail.
+ * THE RESET JOURNEY MUST NEVER SAY WHETHER AN ADDRESS IS REGISTERED. `forgotPasswordInit` answers
+ * an unknown address with the same flag, sentence, lifetime and mailed code as a known one, so the
+ * code step's lead is phrased as a CONDITION for that mode and as a fact for the others, and one
+ * refusal sentence covers both ways its second step can fail.
  *
  * THE VALUES ARE UNCONTROLLED, held in a ref. A form that re-renders on every keystroke drops
  * characters on a slow phone, and nothing here needs to see a half-typed address.
@@ -53,14 +57,16 @@ import {
 /** Which journey the reader is on. */
 export type AuthMode = "signIn" | "signUp" | "forgotPassword";
 
-/** The identity provider this product signs in with. */
-export type AuthProvider = "google";
+/** The identity providers this product signs in with. */
+export type AuthProvider = "google" | "github";
 
 /** Which tree the panel draws. */
-export type AuthState = /** The shortcut and the credential form. */
+export type AuthState = /** The shortcuts and the credential form. */
 "details"
-/** The mailed code, and on the reset journey the new password beside it. */ | "code"
+/** The mailed code, and on the reset journey the new password pair beside it. */ | "code"
+/** The authenticator code, on the sign-in journey that owes one. */ | "secondFactor"
 /** The journey finished. */ | "done"
+/** A stored sign-in is being verified; no control is owed yet. */ | "restoring"
 /** The account holds a second factor this build cannot complete. Sign-in only. */ | "twoFactorUnsupported";
 
 /** The exact control whose action is currently running. */
@@ -72,14 +78,22 @@ export type AuthDetails = {
   readonly email: string;
   /** The secret, whichever journey names it. `""` on the reset journey, which asks for none. */
   readonly password: string;
+  /** The display name. `""` unless the registration journey collected one. */
+  readonly name: string;
 };
 
-/** What the reader hands over at the second step. */
+/** What the reader hands over at the mailed-code step. */
 export type AuthCode = {
   /** The one-time code from their inbox. */
   readonly otp: string;
   /** The password to set. `""` on the journey that sets none. */
   readonly newPassword: string;
+};
+
+/** What the reader hands over at the second-factor step. */
+export type AuthFactor = {
+  /** The current code from the authenticator app. */
+  readonly code: string;
 };
 
 /** Copy and situation shared by every tree here. Already resolved - a block never translates. */
@@ -96,6 +110,14 @@ export type AuthFrame = {
   readonly isPending: boolean;
   /** The exact action that owns the pending indicator. */
   readonly pendingAction?: AuthPendingAction;
+  /**
+   * Which provider button owns the wait while `pendingAction` is `provider`.
+   *
+   * `undefined` means a provider exchange is in flight but the button that started it is gone -
+   * the page left and came back - so both shortcut buttons stay disabled without either claiming
+   * the wait.
+   */
+  readonly pendingProvider?: AuthProvider;
 };
 
 /** Copy for the first step. */
@@ -119,11 +141,23 @@ export type AuthDetailsCopy = AuthFrame & {
   readonly confirmPasswordRequired: string;
   /** What the second box says when it does not match the first. */
   readonly confirmPasswordMismatch: string;
+  /** The display name is the only optional field, so it is the only one that says so. */
+  readonly nameLabel: string;
+  readonly namePlaceholder: string;
+  readonly nameHint: string;
+  /** The backend's own limit, said when it is crossed rather than as a refusal after. */
+  readonly nameTooLong: string;
+  /**
+   * The authority sentence, said on the registration journey: an account signs the reader in and
+   * grants nothing by itself, so nobody creates one expecting workspace or purchase rights.
+   */
+  readonly authorityHint: string;
   readonly revealLabel: string;
   readonly hideLabel: string;
   readonly submitLabel: string;
   readonly orLabel: string;
   readonly googleLabel: string;
+  readonly githubLabel: string;
   readonly forgotPasswordLabel: string;
   /** What the remembering switch is called. Sign-in only. */
   readonly rememberMeLabel: string;
@@ -134,12 +168,11 @@ export type AuthDetailsCopy = AuthFrame & {
   readonly promptAction: string;
 };
 
-/** Copy for the second step. */
+/** Copy for the mailed-code step. */
 export type AuthCodeCopy = AuthFrame & {
   /** Which journey is running: the reset one also sets a password here. */
   readonly mode: AuthMode;
   readonly codeLabel: string;
-  readonly codePlaceholder: string;
   readonly codeRequired: string;
   readonly codeInvalid: string;
   /** How long the code lasts, in words. */
@@ -149,6 +182,11 @@ export type AuthCodeCopy = AuthFrame & {
   readonly newPasswordRequired: string;
   readonly newPasswordTooShort: string;
   readonly newPasswordHint: string;
+  readonly confirmNewPasswordLabel: string;
+  readonly confirmNewPasswordPlaceholder: string;
+  readonly confirmNewPasswordRequired: string;
+  /** What the repeat box says when it does not match the new password. */
+  readonly confirmNewPasswordMismatch: string;
   readonly revealLabel: string;
   readonly hideLabel: string;
   readonly submitLabel: string;
@@ -164,6 +202,24 @@ export type AuthCodeCopy = AuthFrame & {
   readonly backLabel: string;
 };
 
+/** Copy for the second-factor step: the same six slots, nothing mailed, no resend. */
+export type AuthFactorCopy = AuthFrame & {
+  readonly codeLabel: string;
+  readonly codeRequired: string;
+  readonly codeInvalid: string;
+  readonly submitLabel: string;
+  /** The way back to the first step. */
+  readonly backLabel: string;
+};
+
+/** Copy for the restoring tree: no form, only a wait with a name. */
+export type AuthRestoringCopy = {
+  readonly title: string;
+  readonly subtitle: string;
+  /** The accessible name of the wait indicator and the words under it. */
+  readonly progressLabel: string;
+};
+
 /** Copy for a tree that says one thing and offers one way onward. */
 export type AuthNoticeCopy = AuthFrame & {
   readonly doneTitle: string;
@@ -177,8 +233,10 @@ export type AuthActions = {
   readonly chooseProvider?: (provider: AuthProvider) => void;
   /** Submit the first step. */
   readonly submitDetails?: (details: AuthDetails) => void;
-  /** Submit the second step. */
+  /** Submit the mailed-code step. */
   readonly submitCode?: (code: AuthCode) => void;
+  /** Submit the second-factor step. */
+  readonly submitFactor?: (factor: AuthFactor) => void;
   /** Ask for another code. */
   readonly resend?: () => void;
   /** Abandon the challenge and go back to the first step. */
@@ -207,7 +265,11 @@ export type AuthenticationPanelProps = (StateBlockProps<"details", AuthDetailsCo
   readonly on?: AuthActions;
 }) | (StateBlockProps<"code", AuthCodeCopy> & {
   readonly on?: AuthActions;
+}) | (StateBlockProps<"secondFactor", AuthFactorCopy> & {
+  readonly on?: AuthActions;
 }) | (StateBlockProps<"done", AuthNoticeCopy> & {
+  readonly on?: AuthActions;
+}) | (StateBlockProps<"restoring", AuthRestoringCopy> & {
   readonly on?: AuthActions;
 }) | (StateBlockProps<"twoFactorUnsupported", AuthNoticeCopy> & {
   readonly on?: AuthActions;
@@ -217,23 +279,83 @@ export type AuthenticationPanelProps = (StateBlockProps<"details", AuthDetailsCo
 const EMAIL_ID = "authentication-email";
 const PASSWORD_ID = "authentication-password";
 const CONFIRM_ID = "authentication-confirm-password";
+const NAME_ID = "authentication-name";
 const CODE_ID = "authentication-code";
+const CODE_LABEL_ID = "authentication-code-label";
+const CODE_STATUS_ID = "authentication-code-status";
 const NEW_PASSWORD_ID = "authentication-new-password";
+const CONFIRM_NEW_PASSWORD_ID = "authentication-confirm-new-password";
 
-type AuthFieldName = "email" | "password" | "confirmPassword" | "otp" | "newPassword";
+type AuthFieldName = "email" | "password" | "confirmPassword" | "name" | "otp" | "newPassword" | "confirmNewPassword";
 type AuthFieldErrors = Partial<Record<AuthFieldName, string>>;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MINIMUM_PASSWORD_LENGTH = 8;
+/** The backend's own limit on the optional display name, `SignUpInitInput.name`'s `MaxLength`. */
+const MAXIMUM_NAME_LENGTH = 120;
 
 /** What the form starts with. */
 const EMPTY = {
   email: "",
   password: "",
   confirmPassword: "",
+  name: "",
   otp: "",
-  newPassword: ""
+  newPassword: "",
+  confirmNewPassword: ""
 };
+
+/** The two provider shortcuts, in the order the direction draws them. */
+const PROVIDERS: readonly {
+  readonly provider: AuthProvider;
+  readonly icon: "google" | "github";
+}[] = [{
+  provider: "google",
+  icon: "google"
+}, {
+  provider: "github",
+  icon: "github"
+}];
+
+/** What the labelled six-slot code field needs. */
+type OtpFieldProps = {
+  /** The input's id. */
+  readonly id: string;
+  /** The visible label, pointed at by the control's described-by. */
+  readonly label: string;
+  /** The id the label element wears. */
+  readonly labelId: string;
+  /** The id the hint-or-refusal line wears. */
+  readonly statusId: string;
+  /** The hint, or the refusal when the field is in error. */
+  readonly message: string;
+  /** Whether `message` is a refusal. */
+  readonly isError: boolean;
+  /** Whether the field refuses input. */
+  readonly isPending: boolean;
+  /** Called with the current digits on every change. */
+  readonly onValue: (value: string) => void;
+};
+
+/**
+ * The six-slot code field: an {@link OtpInput} carries no label or message of its own, so the
+ * visible name, the hint and the refusal live beside it and the control points at all of them.
+ *
+ * @param props - {@link OtpFieldProps}
+ * @returns The labelled code field.
+ */
+const OtpField = (props: OtpFieldProps) => <div className={AUTH_PANEL_OTP_FIELD_CLASS_NAME}>
+    <Label id={props.labelId}>{props.label}</Label>
+    <OtpInput
+      id={props.id}
+      name="otp"
+      disabled={props.isPending}
+      invalid={props.isError}
+      describedBy={`${props.labelId} ${props.statusId}`}
+      onChange={props.onValue}
+    />
+    <Text id={props.statusId} size="sm" tone="muted" live={props.isError ? "assertive" : "polite"}>{props.message}</Text>
+  </div>;
 
 /**
  * Draw the authentication panel.
@@ -263,22 +385,61 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
 
 
     <Text size="sm" tone="muted">{props.props.subtitle}</Text></div>;
-
-  /** The one sentence, announced when it is a refusal and merely shown when it is not. */
-  const status = props.props.statusMessage === "" ? undefined : <Text size="sm" tone="muted" live={props.props.isError ? "assertive" : "polite"}>{props.props.statusMessage}</Text>;
+  if (props.state === "restoring") {
+    return <div className={AUTH_PANEL_CLASS_NAME}>{header}<div className={AUTH_PANEL_NOTICE_CLASS_NAME}>
+      <Progress label={props.props.progressLabel} isSkeleton />
+      <Text size="sm" tone="muted" live="polite">{props.props.progressLabel}</Text></div></div>;
+  }
   if (props.state === "done" || props.state === "twoFactorUnsupported") {
     return <div className={AUTH_PANEL_CLASS_NAME}>{header}<><div className={AUTH_PANEL_NOTICE_CLASS_NAME}>{undefined}
 
           <Heading level={3}>{props.props.doneTitle}</Heading>
 
 
-          <Text size="sm" tone="muted">{props.props.doneHint}</Text></div><div className={AUTH_PANEL_NOTICE_ACTIONS_CLASS_NAME}><>{status === undefined ? [] : [status]}
+          <Text size="sm" tone="muted">{props.props.doneHint}</Text></div><div className={AUTH_PANEL_NOTICE_ACTIONS_CLASS_NAME}><>{props.props.statusMessage === "" ? [] : [<Text key="status" size="sm" tone="muted" live={props.props.isError ? "assertive" : "polite"}>{props.props.statusMessage}</Text>]}
 
             <Button
               variant="primary"
               onPress={props.on?.onward}
             >{props.props.onwardLabel}</Button></></div></></div>;
   }
+  if (props.state === "secondFactor") {
+    const copy = props.props;
+    const submitFactor = (event: SubmitEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const nextErrors: AuthFieldErrors = {};
+      if (values.current.otp.trim() === "") nextErrors.otp = copy.codeRequired;
+      else if (!/^\d{6}$/.test(values.current.otp.trim())) nextErrors.otp = copy.codeInvalid;
+      setFieldErrors(nextErrors);
+      if (Object.keys(nextErrors).length > 0) return;
+      props.on?.submitFactor?.({
+        code: values.current.otp.trim()
+      });
+    };
+    return <div className={AUTH_PANEL_CLASS_NAME}>{header}<form onSubmit={submitFactor}>
+      <div className={AUTH_PANEL_FORM_CLASS_NAME}><OtpField
+        id={CODE_ID}
+        label={copy.codeLabel}
+        labelId={CODE_LABEL_ID}
+        statusId={CODE_STATUS_ID}
+        message={fieldErrors.otp ?? (copy.statusMessage === "" ? "" : copy.statusMessage)}
+        isError={fieldErrors.otp !== undefined || copy.isError}
+        isPending={copy.isPending}
+        onValue={value => {
+          values.current.otp = value;
+          clearFieldError("otp");
+        }}
+      /><Button
+        variant="primary"
+        type="submit"
+        width="fill"
+        isDisabled={copy.isPending}
+        isPending={copy.pendingAction === "submit"}
+      >{copy.submitLabel}</Button></div></form><div className={AUTH_PANEL_TEXT_ACTIONS_CLASS_NAME}>
+        <TextAction size="sm" onPress={props.on?.back}>{copy.backLabel}</TextAction></div></div>;
+  }
+  /** The one sentence, announced when it is a refusal and merely shown when it is not. */
+  const status = props.props.statusMessage === "" ? undefined : <Text key="status" size="sm" tone="muted" live={props.props.isError ? "assertive" : "polite"}>{props.props.statusMessage}</Text>;
   if (props.state === "code") {
     const copy = props.props;
     const setsPassword = copy.mode === "forgotPassword";
@@ -289,6 +450,8 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
       else if (!/^\d{6}$/.test(values.current.otp.trim())) nextErrors.otp = copy.codeInvalid;
       if (setsPassword && values.current.newPassword === "") nextErrors.newPassword = copy.newPasswordRequired;
       else if (setsPassword && values.current.newPassword.length < MINIMUM_PASSWORD_LENGTH) nextErrors.newPassword = copy.newPasswordTooShort;
+      if (setsPassword && values.current.confirmNewPassword === "") nextErrors.confirmNewPassword = copy.confirmNewPasswordRequired;
+      else if (setsPassword && values.current.newPassword !== values.current.confirmNewPassword) nextErrors.confirmNewPassword = copy.confirmNewPasswordMismatch;
       setFieldErrors(nextErrors);
       if (Object.keys(nextErrors).length > 0) return;
       props.on?.submitCode?.({
@@ -301,21 +464,17 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
     const isCoolingDown = copy.cooldownLabel !== "";
     return <div className={AUTH_PANEL_CLASS_NAME}>{header}<>
 
-
         <form onSubmit={submitCode}>
-                                <div className={AUTH_PANEL_FORM_CLASS_NAME}>{[<Input
+                                <div className={AUTH_PANEL_FORM_CLASS_NAME}>{[<OtpField
                                   key="code"
                                   id={CODE_ID}
-                                  name="otp"
-                                  variant="primary"
-                                  kind="code"
                                   label={copy.codeLabel}
-                                  placeholder={copy.codePlaceholder}
-                                  isDisabled={copy.isPending}
-                                  hint={fieldErrors.otp !== undefined ? undefined : fieldErrors.otp ?? copy.codeHint}
-                                  errorMessage={fieldErrors.otp !== undefined ? fieldErrors.otp ?? copy.codeHint : undefined}
+                                  labelId={CODE_LABEL_ID}
+                                  statusId={CODE_STATUS_ID}
+                                  message={fieldErrors.otp ?? copy.codeHint}
                                   isError={fieldErrors.otp !== undefined}
-                                  onValueChange={value => {
+                                  isPending={copy.isPending}
+                                  onValue={value => {
                 values.current.otp = value;
                 clearFieldError("otp");
               }}
@@ -336,6 +495,25 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
               onValueChange={value => {
                 values.current.newPassword = value;
                 clearFieldError("newPassword");
+                clearFieldError("confirmNewPassword");
+              }}
+            />, <Input
+              key="confirm-new-password"
+              id={CONFIRM_NEW_PASSWORD_ID}
+              name="confirmNewPassword"
+              variant="primary"
+              kind="newPassword"
+              label={copy.confirmNewPasswordLabel}
+              placeholder={copy.confirmNewPasswordPlaceholder}
+              revealLabel={copy.revealLabel}
+              hideLabel={copy.hideLabel}
+              isDisabled={copy.isPending}
+              hint={fieldErrors.confirmNewPassword !== undefined ? undefined : fieldErrors.confirmNewPassword}
+              errorMessage={fieldErrors.confirmNewPassword !== undefined ? fieldErrors.confirmNewPassword : undefined}
+              isError={fieldErrors.confirmNewPassword !== undefined}
+              onValueChange={value => {
+                values.current.confirmNewPassword = value;
+                clearFieldError("confirmNewPassword");
               }}
             />]), ...(status === undefined ? [] : [status]), <Button
               key="submit"
@@ -351,22 +529,9 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
           
                             </form><div className={AUTH_PANEL_TEXT_ACTIONS_CLASS_NAME}>
 
-
-
-
-
-
-
-
-
-
-
-
           <TextAction size="sm" onPress={isCoolingDown || copy.isPending ? undefined : props.on?.resend}>
             {isCoolingDown ? copy.cooldownLabel : copy.resendLabel}
           </TextAction>
-
-
 
           <TextAction size="sm" onPress={props.on?.back}>{copy.backLabel}</TextAction></div></></div>;
   }
@@ -377,17 +542,20 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
     event.preventDefault();
     const nextErrors: AuthFieldErrors = {};
     const email = values.current.email.trim();
+    const name = values.current.name.trim();
     if (email === "") nextErrors.email = copy.emailRequired;
     else if (!EMAIL_PATTERN.test(email)) nextErrors.email = copy.emailInvalid;
     if (!isReset && values.current.password === "") nextErrors.password = copy.passwordRequired;
     else if (!isReset && values.current.password.length < MINIMUM_PASSWORD_LENGTH) nextErrors.password = copy.passwordTooShort;
     if (isSignUp && values.current.confirmPassword === "") nextErrors.confirmPassword = copy.confirmPasswordRequired;
     else if (isSignUp && values.current.password !== values.current.confirmPassword) nextErrors.confirmPassword = copy.confirmPasswordMismatch;
+    if (isSignUp && name.length > MAXIMUM_NAME_LENGTH) nextErrors.name = copy.nameTooLong;
     setFieldErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
     props.on?.submitDetails?.({
       email,
-      password: values.current.password
+      password: values.current.password,
+      name
     });
   };
   const credentialFields = [<Input
@@ -445,7 +613,23 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
       values.current.confirmPassword = value;
       clearFieldError("confirmPassword");
     }}
-  />])];
+  />, <Input
+    key="name"
+    id={NAME_ID}
+    name="name"
+    variant="primary"
+    kind="text"
+    label={copy.nameLabel}
+    placeholder={copy.namePlaceholder}
+    isDisabled={copy.isPending}
+    hint={fieldErrors.name !== undefined ? undefined : fieldErrors.name ?? copy.nameHint}
+    errorMessage={fieldErrors.name !== undefined ? fieldErrors.name ?? copy.nameHint : undefined}
+    isError={fieldErrors.name !== undefined}
+    onValueChange={value => {
+      values.current.name = value;
+      clearFieldError("name");
+    }}
+  />, <Text key="authority-hint" size="sm" tone="muted">{copy.authorityHint}</Text>])];
   const credentialActions = [
   /*
    * BOTH ENDS FILLED, which is what `justify-between` is describing: a choice the reader makes
@@ -469,7 +653,6 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
     }} />
 
 
-
     <TextAction size="sm" onPress={() => props.on?.changeMode?.("forgotPassword")}>{copy.forgotPasswordLabel}</TextAction></div>]), ...(status === undefined ? [] : [status]), <Button
       key="submit"
       variant="primary"
@@ -478,26 +661,17 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
       isDisabled={copy.isPending}
       isPending={copy.pendingAction === "submit"}
     >{copy.submitLabel}</Button>];
-  return <div className={AUTH_PANEL_CLASS_NAME}>{header}<><div className={AUTH_PANEL_DETAILS_CLASS_NAME}><div className={AUTH_PANEL_PROVIDER_CLASS_NAME}><>
-
-
-
-
-
-            <Button
-              variant="outline"
-              width="fill"
-              isDisabled={copy.isPending}
-              isPending={copy.pendingAction === "provider"}
-              onPress={() => props.on?.chooseProvider?.("google")}
-              startContent={<Icon source={nivoIconSource("google", "chip")} usage="chip" />}
-            >{copy.googleLabel}</Button></>
-
-
-
+  return <div className={AUTH_PANEL_CLASS_NAME}>{header}<><div className={AUTH_PANEL_DETAILS_CLASS_NAME}><div className={AUTH_PANEL_PROVIDER_CLASS_NAME}>{PROVIDERS.map(entry => <Button
+            key={entry.provider}
+            variant="outline"
+            width="fill"
+            isDisabled={copy.isPending}
+            isPending={copy.pendingAction === "provider" && copy.pendingProvider === entry.provider}
+            onPress={() => props.on?.chooseProvider?.(entry.provider)}
+            startContent={<Icon source={nivoIconSource(entry.icon, "chip")} usage="chip" />}
+          >{entry.provider === "google" ? copy.googleLabel : copy.githubLabel}</Button>)}
 
           <Divider label={copy.orLabel} /></div>
-
 
 
         <form onSubmit={submitDetails}>
@@ -505,16 +679,8 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
           
                             </form></div></><div className={AUTH_PANEL_FOOTER_CLASS_NAME}>
 
-
-
-
-
-
-
       <Text size="sm" tone="muted">{copy.promptQuestion}</Text>
 
 
       <TextAction size="sm" onPress={() => props.on?.changeMode?.(copy.mode === "signIn" ? "signUp" : "signIn")}>{copy.promptAction}</TextAction></div></div>;
 };
-
-
