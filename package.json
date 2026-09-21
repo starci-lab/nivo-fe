@@ -26,6 +26,7 @@
     "dev:app": "npm run dev -w @nivo/app",
     "dev:expert": "npm run dev -w @nivo/expert",
     "dev:landing": "npm run dev -w @nivo/landing",
+    "dev:landing-draft": "npm run dev -w @nivo/landing-draft",
     "format:check": "turbo run lint -- --max-warnings=0",
     "lint": "turbo run lint",
     "lint:check": "turbo run lint -- --max-warnings=0 && npm run lint:architecture",
@@ -38,10 +39,12 @@
     "test:ci": "vitest run --coverage && node --test scripts/*.spec.mjs && node scripts/write-patch-coverage.mjs",
     "coverage:patch": "node scripts/write-patch-coverage.mjs",
     "test:e2e": "npm run build && node --test e2e/*.spec.mjs",
+    "test:landing-draft:e2e": "playwright test --config playwright.landing-draft.config.ts",
     "test:watch": "vitest",
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
+    "@playwright/test": "1.51.1",
     "@sonar/scan": "^5.0.0",
     "@starci/eslint-canon-fe": "3.0.2",
     "@testing-library/dom": "^10.4.1",

@@ -1,0 +1,589 @@
+{
+  "nivo-os": {
+    "metadata": {
+      "title": "NIVO OS — Hệ điều hành kinh doanh AI-Native",
+      "description": "NIVO OS biến điều cần xảy ra thành Responsibility rõ, phối hợp Human + AI thực thi và kiểm chứng Outcome.",
+      "canonical": "/nivo-os"
+    },
+    "hero": {
+      "eyebrow": "NIVO OS",
+      "title": "HỆ ĐIỀU HÀNH KINH DOANH AI-NATIVE",
+      "descriptor": "AI-Native Business Operating System",
+      "supporting": "NIVO OS giúp doanh nghiệp biến điều cần xảy ra thành Responsibility rõ, phối hợp Human + AI thực thi và kiểm chứng Outcome.",
+      "philosophy": "Human Leads. AI Operates. System Learns.",
+      "signalLabel": "Operating signal",
+      "signalValue": "Business intent · Responsibility · Verified outcome",
+      "signalNote": "NIVO OS được giải thích bằng logic vận hành kinh doanh, không phải bằng một feature inventory.",
+      "actions": [
+        { "label": "Tìm hiểu cách NIVO OS vận hành", "href": "#operating-model", "appearance": "primary" },
+        { "label": "Khám phá Giải pháp", "href": "/applications", "appearance": "secondary" }
+      ]
+    },
+    "sections": [
+      {
+        "id": "responsibility-center",
+        "eyebrow": "S02 · Operating center",
+        "title": "NIVO OS không bắt đầu từ Agent. Nó bắt đầu từ Responsibility.",
+        "description": "Doanh nghiệp không cần thêm hoạt động chỉ để có thêm hoạt động. Điều quan trọng phải thực sự được đảm bảo xảy ra.",
+        "tone": "soft",
+        "blocks": [
+          { "type": "cards", "columns": 4, "items": [
+            { "title": "Outcome", "body": "Điều gì phải thực sự xảy ra?" },
+            { "title": "Accountability", "body": "Ai vẫn chịu trách nhiệm?" },
+            { "title": "Boundary", "body": "Hệ thống được phép làm tới đâu?" },
+            { "title": "Evidence", "body": "Điều gì chứng minh Outcome đã xảy ra?" }
+          ] },
+          { "type": "actions", "items": [{ "label": "Tìm hiểu System of Responsibility", "href": "/system-of-responsibility", "appearance": "link" }] }
+        ]
+      },
+      {
+        "id": "operating-model",
+        "eyebrow": "S03 · Operating model",
+        "title": "Từ điều doanh nghiệp cần xảy ra đến kết quả có thể kiểm chứng.",
+        "description": "Năm tầng giữ Business Intent và Verified Outcome trong cùng một logic vận hành.",
+        "tone": "default",
+        "blocks": [
+          { "type": "flow", "label": "Mô hình vận hành năm bước của NIVO OS", "steps": [
+            { "label": "Business intent", "description": "Điều doanh nghiệp phải đạt được — không phải feature nào cần chạy." },
+            { "label": "Context & state", "description": "Bối cảnh, dữ liệu và trạng thái liên quan ngay lúc này." },
+            { "label": "Responsibility", "description": "Outcome, accountability, boundary và evidence cần được đảm bảo." },
+            { "label": "Governed execution", "description": "Human, AI, workflow và systems phối hợp trong giới hạn rõ." },
+            { "label": "Verified outcome", "description": "Trạng thái kinh doanh được đối chiếu bằng bằng chứng phù hợp." }
+          ] },
+          { "type": "status", "label": "LOCKED", "detail": "Governed execution không đồng nghĩa với AI-only execution.", "tone": "accent" }
+        ]
+      },
+      {
+        "id": "capability-model",
+        "eyebrow": "S04 · Capability model",
+        "title": "Context. Action. Intelligence.",
+        "description": "Responsibility giữ cả ba năng lực hướng về Outcome — không để Intelligence trở thành mục tiêu tự thân.",
+        "tone": "dark",
+        "blocks": [
+          { "type": "cards", "columns": 3, "items": [
+            { "title": "Context", "body": "Hiểu trạng thái vận hành liên quan để hành động đúng bối cảnh." },
+            { "title": "Action", "body": "Giúp một Responsibility tiến lên qua Human, AI, workflow, tools và systems.", "strong": true },
+            { "title": "Intelligence", "body": "Diễn giải bối cảnh, đề xuất hành động và hỗ trợ quyết định tốt hơn." }
+          ] },
+          { "type": "note", "text": "Systems of Record lưu trữ. NIVO OS giúp vận hành quanh Responsibility." }
+        ]
+      },
+      {
+        "id": "nivo-os-today",
+        "eyebrow": "S05 · NIVO OS today",
+        "title": "Current focus: Lead to Revenue",
+        "description": "Ý nghĩa ứng dụng đã được khóa; mức trưởng thành sản phẩm và evidence vẫn phải được xác minh trước khi trở thành claim hiện tại.",
+        "tone": "soft",
+        "blocks": [
+          { "type": "status", "label": "CURRENT FOCUS · BUILDING & VERIFYING", "detail": "Không suy diễn capability từ UI, mockup, roadmap hoặc strategy.", "tone": "warning" },
+          { "type": "cards", "columns": 2, "items": [
+            { "title": "Responsibility hiện tại", "body": "Đảm bảo cơ hội bán hàng quan trọng không bị bỏ quên và luôn có bước tiếp theo rõ ràng.", "strong": true },
+            { "title": "Truth gate", "body": "Lead state, owner, next action, follow-up và evidence chỉ được công bố khi Product / CTO xác minh từng phần." }
+          ] },
+          { "type": "actions", "items": [{ "label": "Khám phá Giải pháp", "href": "/applications", "appearance": "primary" }] }
+        ]
+      },
+      {
+        "id": "trust-bridge",
+        "eyebrow": "S06 · Governed execution & trust",
+        "title": "Accountability, permission và evidence phải cùng hiện diện.",
+        "description": "Human vẫn chịu trách nhiệm. AI vận hành trong giới hạn. Evidence hỗ trợ Outcome claim. Autonomy phải được tạo dựng.",
+        "tone": "crimson",
+        "blocks": [
+          { "type": "cards", "columns": 4, "items": [
+            { "title": "Who is accountable?", "body": "Human accountability luôn rõ ràng." },
+            { "title": "What may AI do?", "body": "Hành động được giới hạn theo Responsibility." },
+            { "title": "With what permission?", "body": "Permission theo phạm vi đã được xác nhận." },
+            { "title": "What evidence proves it?", "body": "Outcome claim cần evidence phù hợp." }
+          ] },
+          { "type": "actions", "items": [{ "label": "Tìm hiểu Trust & Governance", "href": "/trust", "appearance": "link" }] }
+        ]
+      },
+      {
+        "id": "target-architecture",
+        "eyebrow": "S07 · Today to target",
+        "title": "Architecture direction không phải shipping capability.",
+        "description": "Hướng dài hạn mở rộng từ verified responsibility, không được trình bày như sự thật hiện tại.",
+        "tone": "default",
+        "blocks": [
+          { "type": "flow", "label": "Từ hiện tại đến Target Architecture", "steps": [
+            { "label": "NIVO OS today", "description": "Chỉ capability được Product / CTO xác minh mới được công bố." },
+            { "label": "Current focus", "description": "Lead to Revenue đang được xây dựng và kiểm chứng." },
+            { "label": "Evidence / learning", "description": "Bằng chứng thực tế quyết định bước tiếp theo." },
+            { "label": "Target Architecture", "description": "Hướng hệ thống mong muốn; không phải capability đang shipping." }
+          ] },
+          { "type": "status", "label": "LONG-TERM DESTINATION", "detail": "AI-Self-Sustaining Business là hướng dài hạn, không phải lời hứa bán hàng.", "tone": "neutral" }
+        ]
+      },
+      {
+        "id": "next-path",
+        "eyebrow": "S08 · Choose the right next path",
+        "title": "Đi tiếp theo đúng ý định.",
+        "description": "Áp dụng, đánh giá thương mại hoặc bắt đầu — không cần đi qua một vòng không cần thiết.",
+        "tone": "soft",
+        "blocks": [
+          { "type": "paths", "items": [
+            { "label": "APPLY", "title": "Khám phá Giải pháp", "body": "Xem Responsibility áp dụng vào business need nào.", "href": "/applications", "action": "Khám phá Giải pháp" },
+            { "label": "BUY", "title": "Xem Mức giá", "body": "Đánh giá cách bắt đầu thương mại.", "href": "/pricing", "action": "Xem Mức giá" },
+            { "label": "START", "title": "Dùng thử NIVO OS", "body": "Bắt đầu product journey khi activation sẵn sàng.", "activation": true, "action": "Dùng thử NIVO OS" }
+          ] }
+        ]
+      }
+    ]
+  },
+  "system-of-responsibility": {
+    "metadata": {
+      "title": "System of Responsibility",
+      "description": "Responsibility là điều phải được đảm bảo xảy ra — với Outcome, Accountability, Boundary và Evidence rõ ràng.",
+      "canonical": "/system-of-responsibility"
+    },
+    "hero": {
+      "eyebrow": "SYSTEM OF RESPONSIBILITY",
+      "title": "KHÔNG CHỈ LÀM XONG VIỆC. PHẢI ĐẢM BẢO ĐIỀU CẦN XẢY RA.",
+      "supporting": "Task cho biết một hành động cần hoàn thành. Responsibility xác định một kết quả phải được đảm bảo — cùng người chịu trách nhiệm, giới hạn thực thi và bằng chứng cần có.",
+      "philosophy": "Responsibility is not a Task.",
+      "signalLabel": "Strategic signature",
+      "signalValue": "Context · Responsibility · Outcome",
+      "signalNote": "Responsibility là nút trung tâm. Execution hỗ trợ Responsibility nhưng không trở thành peer chiến lược thứ tư.",
+      "actions": [
+        { "label": "Hiểu Responsibility", "href": "#definition", "appearance": "primary" },
+        { "label": "Tìm hiểu NIVO OS", "href": "/nivo-os", "appearance": "secondary" }
+      ]
+    },
+    "sections": [
+      {
+        "id": "definition",
+        "eyebrow": "S02 · Canonical definition",
+        "title": "Responsibility là điều phải được đảm bảo xảy ra.",
+        "description": "Nó được định nghĩa bằng việc required business outcome trở thành sự thật trong boundary đã thỏa thuận và có evidence hỗ trợ — không phải số action, AI output, workflow completion hay dấu Done.",
+        "tone": "soft",
+        "blocks": [{ "type": "status", "label": "LOCKED", "detail": "Context · Responsibility · Outcome", "tone": "accent" }]
+      },
+      {
+        "id": "core-anatomy",
+        "eyebrow": "S03 · Core anatomy",
+        "title": "Một Responsibility cần bốn điều rõ ràng.",
+        "description": "Permission và Exception / Escalation là governance conditions quanh core anatomy, không phải thành phần thứ năm và thứ sáu.",
+        "tone": "default",
+        "blocks": [
+          { "type": "cards", "columns": 4, "items": [
+            { "title": "Outcome", "body": "Điều gì phải thực sự đúng khi Responsibility thành công?", "strong": true },
+            { "title": "Accountability", "body": "Ai vẫn chịu trách nhiệm rằng Outcome xảy ra đúng?" },
+            { "title": "Boundary", "body": "Responsibility áp dụng trong phạm vi nào và hệ thống được phép đi tới đâu?" },
+            { "title": "Evidence", "body": "Điều gì chứng minh Outcome đã thực sự xảy ra?" }
+          ] },
+          { "type": "cards", "columns": 2, "items": [
+            { "label": "GOVERNANCE CONDITION", "title": "Permission", "body": "Execution nào hiện đang được cho phép?" },
+            { "label": "GOVERNANCE CONDITION", "title": "Exception / Escalation", "body": "Điều gì xảy ra khi thiếu context, thiếu confidence, chạm policy boundary hoặc thiếu evidence?" }
+          ] }
+        ]
+      },
+      {
+        "id": "task-vs-responsibility",
+        "eyebrow": "S04 · Task vs Responsibility",
+        "title": "Action completion không phải Outcome assurance.",
+        "description": "Một email được gửi chưa chứng minh opportunity đã tiến lên; một workflow hoàn thành chưa chứng minh Responsibility đã được thực hiện.",
+        "tone": "dark",
+        "blocks": [
+          { "type": "table", "label": "So sánh Task và Responsibility", "headers": ["Task", "Responsibility"], "rows": [
+            ["Gửi email follow-up", "Cơ hội quan trọng không bị bỏ quên"],
+            ["Action completion", "Outcome assurance"],
+            ["Một hành động hữu hạn", "Có thể cần nhiều hành động và sự kiện"],
+            ["Human / AI / Workflow có thể thực hiện", "Human accountability vẫn tồn tại"],
+            ["Done có thể chỉ là trạng thái thao tác", "Evidence phải chứng minh business state"],
+            ["Output đã được tạo", "Desired Outcome vẫn có thể chưa xảy ra"]
+          ] },
+          { "type": "note", "text": "ACTION ≠ OUTCOME. TASK COMPLETED ≠ RESPONSIBILITY FULFILLED." }
+        ]
+      },
+      {
+        "id": "evidence",
+        "eyebrow": "S05 · Evidence to Verified Outcome",
+        "title": "Outcome chỉ trở nên đáng tin khi có Evidence.",
+        "description": "Target Outcome, Observed Outcome và Verified Outcome là ba trạng thái khác nhau. Observed không tự động là Verified.",
+        "tone": "default",
+        "blocks": [
+          { "type": "flow", "label": "Chuỗi evidence và verification", "steps": [
+            { "label": "Evidence required", "description": "Bằng chứng cần có được xác định trước khi thực thi." },
+            { "label": "Execution", "description": "Human, AI, workflow và systems thực thi trong boundary." },
+            { "label": "Evidence observed", "description": "Trạng thái và bằng chứng thực tế được ghi nhận." },
+            { "label": "Verification", "description": "Evidence được đối chiếu với điều kiện thành công." },
+            { "label": "Verified outcome", "description": "Outcome chỉ được gọi là verified khi verification rule được thỏa mãn." }
+          ] },
+          { "type": "cards", "columns": 3, "items": [
+            { "title": "Target outcome", "body": "Điều nên xảy ra và success conditions áp dụng." },
+            { "title": "Observed outcome", "body": "Điều có vẻ đã xảy ra theo quan sát hiện có." },
+            { "title": "Verified outcome", "body": "Điều evidence sẵn có đủ để xác nhận theo verification rule.", "strong": true }
+          ] }
+        ]
+      },
+      {
+        "id": "nivo-os-current",
+        "eyebrow": "S06 · NIVO OS + current grounding",
+        "title": "NIVO OS biến Responsibility thành thứ có thể vận hành và kiểm chứng.",
+        "description": "Bridge được giữ ngắn để /nivo-os tiếp tục sở hữu deep HOW.",
+        "tone": "soft",
+        "blocks": [
+          { "type": "flow", "label": "NIVO OS vận hành Responsibility", "steps": [
+            { "label": "Contextualize", "description": "Hiểu context và current state liên quan." },
+            { "label": "Coordinate", "description": "Xác định Human, AI, workflow và systems tham gia." },
+            { "label": "Execute", "description": "Đưa Responsibility tiến lên trong boundary." },
+            { "label": "Observe", "description": "Ghi nhận state và evidence thực tế." },
+            { "label": "Verify", "description": "Đánh giá Outcome có thực sự đạt được hay không." }
+          ] },
+          { "type": "cards", "columns": 1, "items": [{ "title": "Current focus · Lead to Revenue", "body": "Cơ hội bán hàng quan trọng không bị bỏ quên. Exact maturity và evidence vẫn phải được Product / Operations xác minh.", "strong": true }] },
+          { "type": "status", "label": "CURRENT FOCUS · BUILDING & VERIFYING", "detail": "Không có ROI hoặc revenue uplift claim khi chưa có evidence.", "tone": "warning" },
+          { "type": "actions", "items": [
+            { "label": "Tìm hiểu NIVO OS", "href": "/nivo-os", "appearance": "primary" },
+            { "label": "Khám phá Giải pháp", "href": "/applications", "appearance": "link" }
+          ] }
+        ]
+      },
+      {
+        "id": "trust-bridge",
+        "eyebrow": "S07 · Verified Outcome to Trust",
+        "title": "Trust bắt đầu từ kết quả có thể kiểm chứng.",
+        "description": "Trang này dừng ở Evidence, Verification và Verified Outcome rồi nối sang Trust. Permission và Autonomy sâu hơn thuộc /trust.",
+        "tone": "crimson",
+        "blocks": [
+          { "type": "flow", "label": "Từ evidence đến trust", "steps": [
+            { "label": "Evidence", "description": "Dữ liệu và quan sát phù hợp." },
+            { "label": "Verification", "description": "Đối chiếu với rule đã định." },
+            { "label": "Verified outcome", "description": "Outcome được evidence xác nhận." },
+            { "label": "Trust", "description": "Cơ sở để cân nhắc thêm permission." }
+          ] },
+          { "type": "actions", "items": [{ "label": "Tìm hiểu Trust", "href": "/trust", "appearance": "link" }] }
+        ]
+      },
+      {
+        "id": "next-path",
+        "eyebrow": "S08 · Right next path",
+        "title": "Hiểu khái niệm rồi, chọn đúng chiều sâu tiếp theo.",
+        "tone": "soft",
+        "blocks": [
+          { "type": "paths", "items": [
+            { "label": "HOW", "title": "NIVO OS", "body": "NIVO vận hành Responsibility như một product system.", "href": "/nivo-os", "action": "Tìm hiểu NIVO OS" },
+            { "label": "APPLY", "title": "Giải pháp", "body": "Responsibility áp dụng vào business job nào.", "href": "/applications", "action": "Khám phá Giải pháp" },
+            { "label": "TRUST", "title": "Trust", "body": "Evidence, Permission và Autonomy được quản trị thế nào.", "href": "/trust", "action": "Tìm hiểu Trust" }
+          ] },
+          { "type": "actions", "items": [{ "label": "Xem Mức giá — commercial next path", "href": "/pricing", "appearance": "link" }] }
+        ]
+      }
+    ]
+  },
+  "applications": {
+    "metadata": {
+      "title": "Giải pháp NIVO theo nhu cầu kinh doanh",
+      "description": "Khám phá NIVO theo Business Need và Responsibility cần được đảm bảo, với Current và Directional được phân biệt rõ.",
+      "canonical": "/applications"
+    },
+    "hero": {
+      "eyebrow": "GIẢI PHÁP",
+      "title": "DOANH NGHIỆP ĐANG CẦN ĐIỀU GÌ ĐƯỢC ĐẢM BẢO XẢY RA?",
+      "supporting": "NIVO tổ chức Giải pháp theo business need và Responsibility cần được đảm bảo — không bắt đầu từ danh sách AI feature, Agent hay automation.",
+      "signalLabel": "Business relevance",
+      "signalValue": "Business need · Responsibility · Outcome",
+      "signalNote": "Application không đồng nghĩa với feature, Agent, pricing plan hay industry page.",
+      "actions": [
+        { "label": "Khám phá theo Nhu cầu", "href": "#by-need", "appearance": "primary" },
+        { "label": "Tìm hiểu NIVO OS", "href": "/nivo-os", "appearance": "secondary" }
+      ]
+    },
+    "sections": [
+      {
+        "id": "need-selector",
+        "eyebrow": "S01 · Light need selector",
+        "title": "Doanh nghiệp của bạn đang cần hệ thống đảm bảo điều gì?",
+        "description": "Lựa chọn dẫn đến phần liên quan trên cùng canonical page; không tự tạo thêm page hoặc thay đổi truth state.",
+        "tone": "soft",
+        "blocks": [{ "type": "selector", "label": "Khám phá Giải pháp theo nhu cầu", "items": [
+          { "label": "Lãnh đạo & Thực thi", "href": "#need-leadership" },
+          { "label": "Tăng trưởng & Doanh thu", "href": "#need-growth" },
+          { "label": "Khách hàng & Dịch vụ", "href": "#need-customer" },
+          { "label": "Vận hành & Kết quả", "href": "#need-operations" },
+          { "label": "Tri thức & Quyết định", "href": "#need-knowledge" }
+        ] }]
+      },
+      {
+        "id": "current-focus",
+        "eyebrow": "S02 · Current focus",
+        "title": "Lead to Revenue",
+        "description": "Đảm bảo cơ hội bán hàng quan trọng không bị bỏ quên và luôn có bước tiếp theo rõ ràng.",
+        "tone": "crimson",
+        "blocks": [
+          { "type": "status", "label": "CURRENT FOCUS · BUILDING & VERIFYING", "detail": "Business application meaning đã khóa; product maturity và current evidence vẫn phải xác minh.", "tone": "warning" },
+          { "type": "flow", "label": "Operating view của Lead đến Revenue", "steps": [
+            { "label": "Lead / opportunity", "description": "Cơ hội cần được ghi nhận." },
+            { "label": "Owner", "description": "Accountable Human rõ ràng." },
+            { "label": "Current state", "description": "Trạng thái có thể quan sát." },
+            { "label": "Next action", "description": "Bước tiếp theo rõ ràng." },
+            { "label": "Evidence", "description": "Bằng chứng phù hợp với claim." }
+          ] },
+          { "type": "actions", "items": [
+            { "label": "Xem Mức giá", "href": "/pricing", "appearance": "secondary" },
+            { "label": "Tìm hiểu NIVO OS", "href": "/nivo-os", "appearance": "link" },
+            { "label": "Dùng thử NIVO OS", "activation": true, "appearance": "secondary" }
+          ] }
+        ]
+      },
+      {
+        "id": "by-need",
+        "eyebrow": "S03 · Explore by need",
+        "title": "Năm nhóm nhu cầu. Một câu hỏi: điều gì cần được đảm bảo?",
+        "description": "Một current focus được phân biệt rõ với bốn hướng Directional. Directional không đồng nghĩa với available hoặc purchasable.",
+        "tone": "default",
+        "blocks": [{ "type": "cards", "columns": 2, "items": [
+          { "id": "need-leadership", "label": "DIRECTIONAL · VERIFY", "title": "Lãnh đạo & Thực thi", "body": "Những cam kết quan trọng có owner, trạng thái và bước tiếp theo rõ ràng." },
+          { "id": "need-growth", "label": "CURRENT FOCUS · BUILDING & VERIFYING", "title": "Tăng trưởng & Doanh thu", "body": "Cơ hội bán hàng quan trọng không bị bỏ quên và luôn có bước tiếp theo rõ ràng.", "strong": true },
+          { "id": "need-customer", "label": "DIRECTIONAL · VERIFY", "title": "Khách hàng & Dịch vụ", "body": "Follow-up và cam kết dịch vụ quan trọng được theo đến trạng thái rõ ràng." },
+          { "id": "need-operations", "label": "DIRECTIONAL · VERIFY", "title": "Vận hành & Kết quả", "body": "Vấn đề vận hành quan trọng có owner, trạng thái và Outcome được theo dõi." },
+          { "id": "need-knowledge", "label": "DIRECTIONAL · VERIFY", "title": "Tri thức & Quyết định", "body": "Tri thức liên quan xuất hiện đúng lúc để hỗ trợ quyết định hoặc hành động cần thiết." }
+        ] }]
+      },
+      {
+        "id": "by-role",
+        "eyebrow": "S04 · Explore by role",
+        "title": "Role thay đổi relevance view — không thay đổi truth.",
+        "description": "Role là discovery context thứ hai; cùng một application có thể phục vụ nhiều vai trò.",
+        "tone": "soft",
+        "blocks": [{ "type": "cards", "columns": 4, "items": [
+          { "title": "Founder / CEO", "body": "Visibility · commitments · priorities · exceptions · decisions" },
+          { "title": "Revenue / Growth", "body": "Lead · opportunity · next action · follow-up · pipeline state", "strong": true },
+          { "title": "Customer / Operations", "body": "Customer commitments · service follow-up · exceptions · operational state" },
+          { "title": "Expert / Knowledge Worker", "body": "Knowledge · recommendation · decision support · expertise reuse" }
+        ] }]
+      },
+      {
+        "id": "by-context",
+        "eyebrow": "S05 · Explore by industry / context",
+        "title": "Context giúp nhận ra bài toán — không chứng minh product availability.",
+        "description": "Wave 1 chỉ giữ hai context: Expert / Knowledge Services và B2B Services.",
+        "tone": "default",
+        "blocks": [{ "type": "cards", "columns": 2, "items": [
+          { "label": "TERTIARY CONTEXT", "title": "Expert / Knowledge Services", "body": "Expert-led sales, consultation, knowledge-heavy service, founder dependency và repeated follow-up." },
+          { "label": "TERTIARY CONTEXT", "title": "B2B Services", "body": "Lead qualification, consultation, proposal follow-up, opportunity progression và customer commitments." }
+        ] }]
+      },
+      {
+        "id": "truth-evidence",
+        "eyebrow": "S06 · Current / directional truth + evidence",
+        "title": "Current và Directional phải được nhìn thấy khác nhau.",
+        "description": "UI không suy diễn truth từ card style; trạng thái vật chất luôn có nhãn chữ.",
+        "tone": "dark",
+        "blocks": [
+          { "type": "cards", "columns": 3, "items": [
+            { "title": "Current focus", "body": "Điều NIVO đang chủ động xây dựng và kiểm chứng." },
+            { "title": "Directional", "body": "Nơi NIVO nhìn thấy application potential đáng tin, chưa phải offer." },
+            { "title": "Future / target", "body": "Nơi architecture có thể mở rộng về sau, không phải capability hiện tại." }
+          ] },
+          { "type": "flow", "label": "Bốn cấp evidence của Applications", "steps": [
+            { "label": "Build evidence", "description": "Chứng minh có build/test thật; chưa chứng minh impact." },
+            { "label": "Operational evidence", "description": "Một event, action hoặc state đã xảy ra." },
+            { "label": "Business outcome evidence", "description": "Hỗ trợ claim rằng desired business state đã thay đổi." },
+            { "label": "Verified outcome", "description": "Outcome thỏa verification policy áp dụng." }
+          ] }
+        ]
+      },
+      {
+        "id": "next-path",
+        "eyebrow": "S07 · Choose the right next path",
+        "title": "Đi từ relevance tới đúng hành động tiếp theo.",
+        "tone": "soft",
+        "blocks": [
+          { "type": "paths", "items": [
+            { "label": "UNDERSTAND", "title": "NIVO OS", "body": "Hiểu product operating model trước khi đánh giá sâu hơn.", "href": "/nivo-os", "action": "Tìm hiểu NIVO OS" },
+            { "label": "BUY", "title": "Mức giá", "body": "Đánh giá Start, Pro và commercial progression.", "href": "/pricing", "action": "Xem Mức giá" },
+            { "label": "START", "title": "Dùng thử NIVO OS", "body": "Đi tới activation khi destination được xác minh.", "activation": true, "action": "Dùng thử NIVO OS" }
+          ] },
+          { "type": "actions", "items": [{ "label": "Cần hỗ trợ với context phức tạp? Liên hệ", "href": "/contact?intent=product", "appearance": "link" }] }
+        ]
+      }
+    ]
+  },
+  "pricing": {
+    "metadata": {
+      "title": "Mức giá NIVO OS — Start và Pro",
+      "description": "Bắt đầu bằng một Responsibility thật, kiểm chứng Outcome và mở rộng khi bài toán kinh doanh thay đổi.",
+      "canonical": "/pricing"
+    },
+    "hero": {
+      "eyebrow": "MỨC GIÁ NIVO OS",
+      "title": "BẮT ĐẦU BẰNG MỘT TRÁCH NHIỆM. MỞ RỘNG KHI BẠN SẴN SÀNG.",
+      "supporting": "Bắt đầu từ một việc kinh doanh thật. Kiểm chứng kết quả. Lặp lại điều đã chứng minh. Mở rộng khi bài toán thay đổi.",
+      "signalLabel": "Commercial progression",
+      "signalValue": "Find · Prove · Repeat · Expand",
+      "signalNote": "7 ngày miễn phí · Không cần thẻ. Pricing là decision architecture, không phải feature catalog.",
+      "actions": [
+        { "label": "Dùng thử NIVO Start 7 ngày", "activation": true, "appearance": "primary" },
+        { "label": "Tìm điểm bắt đầu phù hợp", "href": "#discover", "appearance": "secondary" }
+      ]
+    },
+    "sections": [
+      {
+        "id": "discover",
+        "eyebrow": "S02 · Discover",
+        "title": "Chưa chắc nên bắt đầu ở đâu?",
+        "description": "Discover là qualification experience trong /pricing — không phải Free Plan và không tạo /discover canonical page.",
+        "tone": "soft",
+        "blocks": [
+          { "type": "flow", "label": "Discover qualification", "steps": [
+            { "label": "Right problem", "description": "Vấn đề vận hành nào đủ quan trọng?" },
+            { "label": "Responsibility candidate", "description": "Điều gì cần được đảm bảo xảy ra?" },
+            { "label": "Readiness", "description": "Context, boundary và evidence đã đủ chưa?" },
+            { "label": "Right next path", "description": "Start, Pro Qualification, nurture, alternate path hoặc not fit." }
+          ] },
+          { "type": "actions", "items": [{ "label": "Cần hỗ trợ xác định điểm bắt đầu? Liên hệ", "href": "/contact?intent=product", "appearance": "link" }] }
+        ]
+      },
+      {
+        "id": "available-now",
+        "eyebrow": "S03 · Available now",
+        "title": "Hai trạng thái thương mại hiện tại: Proof và Repeat.",
+        "description": "Giá là source snapshot và phải được reverify với Pricing Execution Register trước publication.",
+        "tone": "default",
+        "blocks": [{ "type": "offers", "items": [
+          {
+            "label": "NIVO START",
+            "title": "Bắt đầu & kiểm chứng",
+            "price": "499.000đ",
+            "period": "/ tháng · 7 ngày đầu miễn phí · Không cần thẻ",
+            "state": "CURRENT · AVAILABLE / CONTROLLED",
+            "detail": "First proof",
+            "body": "Một việc kinh doanh thật được giao trong phạm vi rõ và một kết quả đầu tiên được kiểm chứng.",
+            "bullets": ["Xác định một việc quan trọng đáng giao.", "Đưa đủ context, success condition và boundary.", "Theo dõi execution và evidence.", "Kiểm chứng Outcome đầu tiên."],
+            "action": { "label": "Dùng thử NIVO Start 7 ngày", "activation": true, "appearance": "primary" },
+            "qualifier": "Nguồn giá tham chiếu · VERIFY BEFORE PUBLICATION",
+            "featured": true
+          },
+          {
+            "label": "NIVO PRO",
+            "title": "Vận hành lặp lại",
+            "price": "1.590.000đ",
+            "period": "/ tháng · thanh toán hàng tháng · không có trial riêng",
+            "state": "CURRENT · CONTROLLED PAID",
+            "detail": "Repeatable operating value",
+            "body": "Biến một việc đã proven thành cách vận hành lặp lại, tích lũy context, Evidence và Learning qua nhiều chu kỳ.",
+            "bullets": ["Giao lại việc đã chứng minh qua nhiều chu kỳ.", "Duy trì context thay vì bắt đầu lại.", "Theo dõi Outcome và tích lũy Evidence.", "Hình thành Operating Rhythm đáng tin cậy."],
+            "action": { "label": "Bắt đầu với NIVO Pro", "href": "#pro-decision", "appearance": "primary" },
+            "qualifier": "Nguồn giá tham chiếu · VERIFY BEFORE PUBLICATION"
+          }
+        ] }]
+      },
+      {
+        "id": "pro-decision",
+        "eyebrow": "S04 · Start hay Pro?",
+        "title": "Start tồn tại để prove. Pro tồn tại để repeat.",
+        "description": "Direct Pro entry có thể xảy ra sau qualification; buyer không bị buộc phải đi Start trước.",
+        "tone": "dark",
+        "blocks": [
+          { "type": "cards", "columns": 2, "items": [
+            { "label": "CHƯA PROVEN?", "title": "START", "body": "One real job · First proof", "strong": true },
+            { "label": "ĐÃ PROVEN?", "title": "PRO", "body": "Proven job · Reliable operating rhythm" }
+          ] },
+          { "type": "status", "label": "LOCKED", "detail": "Start ≠ smaller Pro. Pro ≠ Start + more features.", "tone": "accent" }
+        ]
+      },
+      {
+        "id": "comparison",
+        "eyebrow": "S05 · Primary comparison",
+        "title": "Bảy hàng quyết định — không phải entitlement wall.",
+        "tone": "default",
+        "blocks": [{ "type": "table", "label": "So sánh NIVO Start và NIVO Pro", "headers": ["Quyết định", "NIVO Start", "NIVO Pro"], "rows": [
+          ["Phù hợp khi", "Muốn bắt đầu giao một việc thật", "Việc đã chứng minh và cần chạy lặp lại"],
+          ["Mục tiêu", "Kiểm chứng kết quả đầu tiên", "Tạo một nhịp vận hành đáng tin cậy"],
+          ["Phạm vi", "Một việc rõ", "Một việc đã proven và recurring"],
+          ["Bối cảnh", "Đủ để bắt đầu", "Tích lũy theo vận hành"],
+          ["Kết quả", "Outcome đầu tiên", "Outcome qua nhiều chu kỳ"],
+          ["Tài nguyên", "Có đi kèm", "Cao hơn, có thể mua thêm"],
+          ["Giá tham chiếu", "499.000đ/tháng", "1.590.000đ/tháng"]
+        ] }]
+      },
+      {
+        "id": "what-you-buy",
+        "eyebrow": "S06 · What you're really buying",
+        "title": "Bạn mua Outcome — và vận hành bằng cách giao một Responsibility.",
+        "description": "Agents, tokens, storage, workflow runs và connectors không phải lớp ngôn ngữ đầu tiên của commercial choice.",
+        "tone": "soft",
+        "blocks": [{ "type": "cards", "columns": 2, "items": [
+          { "title": "START · First proof", "body": "Minimum context · one real business job · boundary · execution · evidence · first verified outcome.", "strong": true },
+          { "title": "PRO · Repeatable value", "body": "Proven responsibility · recurring execution · repeated outcomes · evidence · learning · operating rhythm · trust." }
+        ] }]
+      },
+      {
+        "id": "usage-resources",
+        "eyebrow": "S07 · Usage & resources",
+        "title": "More usage, buy more resources.",
+        "description": "More usage không tự động có nghĩa buyer đã đi từ Proof sang Repeat. Exact quota và top-up price chỉ được công bố khi register tồn tại.",
+        "tone": "default",
+        "blocks": [
+          { "type": "flow", "label": "Usage routing", "steps": [
+            { "label": "More usage", "description": "Inference, actions, workflow, storage, messaging hoặc compute tăng." },
+            { "label": "Additional resources", "description": "Mua thêm khi commercial register đã xác minh quota và price." },
+            { "label": "No forced maturity upgrade", "description": "Không bị buộc lên Pro chỉ vì usage tăng." }
+          ] },
+          { "type": "status", "label": "VERIFY", "detail": "Exact quota, top-up price và usage-limit behavior chưa được phép suy diễn.", "tone": "warning" }
+        ]
+      },
+      {
+        "id": "growth",
+        "eyebrow": "S08 · NIVO grows with your business",
+        "title": "Sau Pro, bài toán rẽ nhánh theo capacity, coordination và governance.",
+        "description": "OPC và Team là hai nhánh từ Pro — không phải các level nối tiếp. Cả ba growth offer đều chưa phải current public plan.",
+        "tone": "dark",
+        "blocks": [
+          { "type": "cards", "columns": 3, "items": [
+            { "title": "OPC · Expand", "body": "Founder Capacity — more Responsibility. Research / Hypothesis, không phải current offer." },
+            { "title": "Team · Coordinate", "body": "Coordination — more coordination. Future Option, chưa standardized." },
+            { "title": "Enterprise · Govern", "body": "Governance — more governance. Target Architecture, không đồng nghĩa unlimited." }
+          ] },
+          { "type": "status", "label": "AUTONOMY IS EARNED · NOT BOUGHT", "detail": "Plan cao hơn không tự động trao thêm autonomy.", "tone": "neutral" }
+        ]
+      },
+      {
+        "id": "service-support",
+        "eyebrow": "S09 · Service & support",
+        "title": "Service mode không phải Offer maturity.",
+        "description": "Assisted và Managed / Run & Care là service line riêng; chúng không phải tên khác của Pro, Team hoặc Enterprise.",
+        "tone": "soft",
+        "blocks": [{ "type": "cards", "columns": 3, "items": [
+          { "title": "Start", "body": "Self-Service. Optional Assisted được mua riêng." },
+          { "title": "Pro", "body": "Self-Service + Standard Product Support. Exact support scope: VERIFY.", "strong": true },
+          { "title": "Managed / Run & Care", "body": "Separate service line. Pricing và scope cần service policy riêng." }
+        ] }]
+      },
+      {
+        "id": "faq",
+        "eyebrow": "S10 · Trust / FAQ",
+        "title": "Những câu hỏi phải rõ trước commercial progression.",
+        "tone": "default",
+        "blocks": [{ "type": "faq", "items": [
+          { "question": "Start hay Pro?", "answer": "Start để chứng minh một việc kinh doanh thật có thể được giao và tạo Outcome. Pro để biến việc đã proven thành nhịp vận hành lặp lại." },
+          { "question": "Có phải đi Start trước Pro?", "answer": "Không. Direct Pro entry được phép sau Pro Qualification khi Responsibility được hỗ trợ, maturity phù hợp và evidence đủ." },
+          { "question": "Start có trial không?", "answer": "Có: 7 ngày đầu miễn phí và không cần thẻ, theo commercial truth đã khóa." },
+          { "question": "Pro có trial riêng không?", "answer": "Không. Pro không có trial riêng; Start là con đường first proof, Pro là repeat." },
+          { "question": "Hết tài nguyên có phải lên Pro?", "answer": "Không. Usage không phải maturity. Nhu cầu dùng thêm đi tới additional usage khi register và giá top-up được xác minh." },
+          { "question": "Tại sao Pro đắt hơn?", "answer": "Pro duy trì context, execution, evidence và learning qua nhiều chu kỳ để tạo reliable operating rhythm." },
+          { "question": "Support có bao gồm không?", "answer": "Start là self-service; assisted mua riêng. Pro gồm Standard Product Support nhưng exact scope vẫn phải xác minh." },
+          { "question": "OPC có mua được chưa?", "answer": "Chưa. OPC là research / hypothesis cho Founder Capacity, không phải current public plan." },
+          { "question": "Team có mua được chưa?", "answer": "Chưa. Team là future option cho coordination, không phải current offer." },
+          { "question": "Enterprise có phải Unlimited plan?", "answer": "Không. Enterprise là target architecture cho governance; không đồng nghĩa unlimited." },
+          { "question": "Gói cao hơn có AI tự chủ hơn không?", "answer": "Không. Autonomy được tạo dựng từ evidence, trust và permission; không được mua bằng plan." },
+          { "question": "VAT, refund và proration thế nào?", "answer": "Chưa có policy công bố. Pricing không tự suy diễn các điều khoản này." }
+        ] }]
+      },
+      {
+        "id": "start-right",
+        "eyebrow": "S11 · Bắt đầu ở đúng chỗ",
+        "title": "Chọn First Proof, Repeat hoặc Qualification.",
+        "description": "Checkout và authenticated operation không thuộc Pricing; activation sở hữu trial / transaction / identity entry.",
+        "tone": "crimson",
+        "blocks": [{ "type": "actions", "items": [
+          { "label": "Dùng thử NIVO Start 7 ngày", "activation": true, "appearance": "secondary" },
+          { "label": "Bắt đầu với NIVO Pro", "href": "#pro-decision", "appearance": "secondary" },
+          { "label": "Tìm điểm bắt đầu phù hợp", "href": "#discover", "appearance": "tertiary" },
+          { "label": "Liên hệ", "href": "/contact?intent=product", "appearance": "link" }
+        ] }]
+      }
+    ]
+  }
+}
