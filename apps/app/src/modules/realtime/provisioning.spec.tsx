@@ -97,6 +97,24 @@ describe("provisioning realtime boundaries", () => {
         act(() => { socket.handlers.get("workspace.runtime")?.({ workspaceId: "w-1", instanceId: "i-1", fingerprint: "fp", probeStatus: "partial", observedAt: "now", sequence: 2 }) })
         expect(state()).toMatchObject({ event: { kind: "workspace-runtime", id: "w-1", instanceId: "i-1", probeStatus: "partial" } })
     })
+    it("accepts instance operations only for the selected instance", () => {
+        mount("token", { kind: "instance", id: "i-1" })
+        const socket = sockets[0]
+        act(() => { socket.handlers.get("instance.operation")?.({ operationId: "op-1", instanceId: "i-2", phase: "running", observedAt: "1" }) })
+        expect(state().status).toBe("connecting")
+        act(() => { socket.handlers.get("instance.operation")?.({ success: true, data: { operationId: "op-2", instanceId: "i-1", phase: "running", componentKey: "pod", reason: null, observedAt: "2" } }) })
+        expect(state()).toMatchObject({ status: "event", event: { kind: "instance-operation", id: "op-2", instanceId: "i-1", phase: "running", componentKey: "pod" } })
+    })
+    it("follows one saga directly by its own identity", () => {
+        mount("token", { kind: "saga", id: "s-1" })
+        const socket = sockets[0]
+        act(() => { socket.handlers.get("provisioning.saga.status")?.({ eventId: "e-1", sequence: 1, sagaId: "s-9", resourceKind: "agent_workspace", resourceId: "w-9", status: "running_forward", direction: "forward", stepKey: null, reason: null, updatedAt: "1" }) })
+        expect(state().status).toBe("connecting")
+        act(() => { socket.handlers.get("provisioning.saga.status")?.({ eventId: "e-2", sequence: 2, sagaId: "s-1", resourceKind: "agent_workspace", resourceId: "w-1", status: "waiting_retry", direction: "forward", stepKey: "create-pod", reason: "timeout", updatedAt: "2" }) })
+        expect(state()).toMatchObject({ status: "event", event: { kind: "saga", id: "s-1", status: "waiting_retry", direction: "forward", stepKey: "create-pod", reason: "timeout" } })
+        act(() => { socket.handlers.get("provisioning.saga.status")?.({ eventId: "e-3", sequence: 1, sagaId: "s-1", resourceKind: "agent_workspace", resourceId: "w-1", status: "running_forward", direction: "forward", stepKey: null, reason: null, updatedAt: "3" }) })
+        expect(state()).toMatchObject({ event: { kind: "saga", status: "waiting_retry" } })
+    })
     it("cleans up the socket when the target is removed", () => {
         mount("token", { kind: "workspace", id: "w-1" })
         const socket = sockets[0]

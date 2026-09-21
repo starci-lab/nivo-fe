@@ -12,6 +12,8 @@ export type ProvisioningTarget =
     | { readonly kind: "deployment"; readonly id: string }
     | { readonly kind: "workspace"; readonly id: string }
     | { readonly kind: "module-installation"; readonly id: string }
+    | { readonly kind: "instance"; readonly id: string }
+    | { readonly kind: "saga"; readonly id: string }
 
 /** One event after the hook has rejected unrelated owner-room traffic. */
 export type ProvisioningEvent =
@@ -20,6 +22,8 @@ export type ProvisioningEvent =
     | { readonly kind: "deployment"; readonly id: string; readonly status: string; readonly reason: string | null; readonly updatedAt: string }
     | { readonly kind: "module-installation"; readonly id: string; readonly status: string; readonly stepKey: string | null; readonly reason: string | null; readonly updatedAt: string }
     | { readonly kind: "order"; readonly id: string; readonly status: string }
+    | { readonly kind: "instance-operation"; readonly id: string; readonly instanceId: string; readonly phase: string; readonly componentKey: string | null; readonly reason: string | null; readonly updatedAt: string }
+    | { readonly kind: "saga"; readonly id: string; readonly status: string; readonly direction: "forward" | "compensating"; readonly stepKey: string | null; readonly reason: string | null; readonly updatedAt: string }
 
 /** Connection and event states visible to a provisioning block. */
 export type ProvisioningRealtimeState =
@@ -47,6 +51,7 @@ type SagaMessage = {
     readonly reason: string | null
     readonly updatedAt: string
 }
+type InstanceOperationMessage = { readonly operationId: string; readonly instanceId: string; readonly phase: string; readonly componentKey?: string; readonly reason?: string | null; readonly observedAt: string }
 
 const unwrapMessage = <T,>(payload: T | SocketEnvelope<T>): T | null => {
     if (typeof payload !== "object" || payload === null || !("success" in payload)) return payload
@@ -66,7 +71,8 @@ export type UseProvisioningRealtimeInput = {
 }
 
 /**
- * Follow one order, deployment, workspace or module installation in the authenticated owner's room.
+ * Follow one order, deployment, workspace, module installation, instance or saga in the
+ * authenticated owner's room.
  *
  * A null target deliberately keeps the socket closed: before a request has an identity there is no
  * event this screen can safely claim. Re-entry snapshots choose the target before the connection is
@@ -154,6 +160,19 @@ const useProvisioningRealtime = ({
         socket.on("provisioning.saga.status", (payload: SagaMessage | SocketEnvelope<SagaMessage>) => {
             const message = unwrapMessage(payload)
             if (message === null) return
+            if (targetKind === "saga") {
+                if (message.sagaId !== targetId) return
+                acceptOrdered(message.updatedAt, {
+                    kind: "saga",
+                    id: message.sagaId,
+                    status: message.status,
+                    direction: message.direction,
+                    stepKey: message.stepKey,
+                    reason: message.reason,
+                    updatedAt: message.updatedAt,
+                }, message.sequence)
+                return
+            }
             const isWorkspace = targetKind === "workspace"
                 && message.resourceKind === "agent_workspace"
             const isDeployment = targetKind === "deployment"
@@ -186,6 +205,20 @@ const useProvisioningRealtime = ({
             if (message === null) return
             if (targetKind !== "order" || message.orderId !== targetId) return
             setState({ status: "event", reason: null, event: { kind: "order", id: message.orderId, status: message.status } })
+        })
+        socket.on("instance.operation", (payload: InstanceOperationMessage | SocketEnvelope<InstanceOperationMessage>) => {
+            const message = unwrapMessage(payload)
+            if (message === null) return
+            if (targetKind !== "instance" || message.instanceId !== targetId) return
+            acceptOrdered(message.observedAt, {
+                kind: "instance-operation",
+                id: message.operationId,
+                instanceId: message.instanceId,
+                phase: message.phase,
+                componentKey: message.componentKey ?? null,
+                reason: message.reason ?? null,
+                updatedAt: message.observedAt,
+            })
         })
 
         return () => {
