@@ -3,10 +3,10 @@
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useMutateForgotPasswordInitSwr, useMutateForgotPasswordResendSwr, useMutateForgotPasswordVerifyOtpSwr, useMutateSignInSwr, useMutateSignUpInitSwr, useMutateSignUpResendSwr, useMutateSignUpVerifyOtpSwr, useOauthReturnExchange } from "@/hooks";
+import { useMutateForgotPasswordInitSwr, useMutateForgotPasswordResendSwr, useMutateForgotPasswordVerifyOtpSwr, useMutateSignInSwr, useMutateSignUpInitSwr, useMutateSignUpResendSwr, useMutateSignUpVerifyOtpSwr, useMutateVerifyTwoFactorSwr, useOauthReturnExchange } from "@/hooks";
 import { authenticationOauthRedirectUrl, rememberOauthProvider } from "@/modules/auth";
 import { AuthenticationPageBase as AuthenticationPageView } from "./component";
-import type { AuthActions, AuthCode, AuthDetails, AuthMode, AuthPendingAction, AuthProvider, AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";
+import type { AuthActions, AuthCode, AuthDetails, AuthFactor, AuthMode, AuthPendingAction, AuthProvider, AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";
 import type { OtpChallenge } from "@/modules/api/auth";
 import { useSession } from "@/modules/auth/session";
 
@@ -103,6 +103,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
   const router = useRouter();
   const session = useSession();
   const signInMutation = useMutateSignInSwr();
+  const verifyTwoFactorMutation = useMutateVerifyTwoFactorSwr();
   const signUpInitMutation = useMutateSignUpInitSwr();
   const signUpResendMutation = useMutateSignUpResendSwr();
   const signUpVerifyMutation = useMutateSignUpVerifyOtpSwr();
@@ -159,13 +160,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
   // Held in a ref rather than state: nothing on screen shows it, and re-rendering to store it would
   // cost the uncontrolled fields their contents.
   const challengeId = useRef("");
-  /*
-   * The opaque second-factor challenge. It is CAPTURED here but never spent: completing it is a
-   * `verifyTwoFactor` transport call, and a component may not import transport - that wiring is a
-   * `useMutateVerifyTwoFactorSwr` in `hooks/`, outside this cut's grant. Until it exists the panel
-   * draws `twoFactorUnsupported`, the honest notice, rather than a code field that cannot submit.
-   * The panel's `secondFactor` state is already implemented against this ref's shape.
-   */
+  /* The opaque second-factor challenge is held here until the authenticator code is submitted. */
   const twoFactorToken = useRef("");
   /*
    * ONE HAND-OFF PER ARRIVAL, held in a ref because the guard has to outlive a re-render and must
@@ -228,6 +223,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
   /** Put the screen back to a clean first step, keeping only the journey. */
   const clear = () => {
     challengeId.current = "";
+    twoFactorToken.current = "";
     setCooldownSeconds(0);
     setStatusMessage("");
     setIsError(false);
@@ -380,6 +376,22 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     setPhase("done");
   };
 
+  /** Spend the authenticator challenge and adopt the resulting session. */
+  const submitFactor = async (factor: AuthFactor) => {
+    setIsError(false);
+    setStatusMessage("");
+    const result = await runPending("submit", () => verifyTwoFactorMutation.trigger({
+      twoFactorToken: twoFactorToken.current,
+      code: factor.code
+    }));
+    if (!result.ok || result.data.requiresTwoFactor || result.data.accessToken === null) {
+      refuse(t("signIn.twoFactorRefused"));
+      return;
+    }
+    session.adopt(result.data);
+    landInConsole();
+  };
+
   /** Ask for another code. Refused inside the cooldown, which the control already says. */
   const resend = async () => {
     const result = await runPending("resend", () => mode === "signUp" ? signUpResendMutation.trigger({
@@ -408,6 +420,9 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     },
     submitCode: code => {
       void submitCode(code);
+    },
+    submitFactor: factor => {
+      void submitFactor(factor);
     },
     resend: () => {
       void resend();
@@ -499,17 +514,17 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     }
     if (phase === "twoFactor") {
       return {
-        state: "twoFactorUnsupported",
+        state: "secondFactor",
         props: {
           ...frame,
-          statusMessage: "",
-          // A challenge is not a refusal: the password was right and the session is simply
-          // not owed yet. The `secondFactor` panel state exists; it goes live when the hooks
-          // barrel owns `useMutateVerifyTwoFactorSwr` (this cut cannot import transport).
-          isError: false,
-          doneTitle: t("signIn.twoFactorTitle"),
-          doneHint: t("signIn.twoFactorHint"),
-          onwardLabel: t("signIn.backLabel")
+          subtitle: t("signIn.twoFactorSubtitle"),
+          statusMessage,
+          isError,
+          codeLabel: t("codeLabel"),
+          codeRequired: t("codeRequired"),
+          codeInvalid: t("codeInvalid"),
+          submitLabel: t("signIn.twoFactorSubmitLabel"),
+          backLabel: t("signIn.backLabel")
         },
         on: actions
       };

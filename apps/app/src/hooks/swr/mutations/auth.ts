@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import useSWRMutation from "swr/mutation";
-import { exchangeOauthCode, forgotPasswordInit, forgotPasswordResend, forgotPasswordVerifyOtp, signIn, signUpInit, signUpResend, signUpVerifyOtp } from "@/modules/api/auth";
+import { exchangeOauthCode, forgotPasswordInit, forgotPasswordResend, forgotPasswordVerifyOtp, signIn, signUpInit, signUpResend, signUpVerifyOtp, verifyTwoFactor } from "@/modules/api/auth";
 import { takeOauthProvider } from "@/modules/auth";
 type AuthMutationTrigger<TInput> = {
   readonly arg: TInput;
@@ -15,6 +15,8 @@ const useAuthMutation = <TAnswer, TInput>(key: string, mutation: (input: TInput)
 
 /** Own the signed-out password exchange. */
 export const useMutateSignInSwr = () => useAuthMutation("sign-in", signIn);
+/** Own completion of a sign-in that requires an authenticator code. */
+export const useMutateVerifyTwoFactorSwr = () => useAuthMutation("verify-two-factor", verifyTwoFactor);
 /** Own the first step of mailed-code account creation. */
 export const useMutateSignUpInitSwr = () => useAuthMutation("sign-up-init", signUpInit);
 /** Own renewal of an account-creation code. */

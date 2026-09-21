@@ -7,7 +7,7 @@ const signIn = vi.hoisted(() => vi.fn().mockResolvedValue({ ok: false, reason: "
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push }) }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => ({ state: { status: "anonymous" }, adopt: vi.fn(), end: vi.fn() }) }))
-vi.mock("@/modules/api/auth", () => ({ signIn, signUpInit: vi.fn(), signUpResend: vi.fn(), signUpVerifyOtp: vi.fn(), forgotPasswordInit: vi.fn(), forgotPasswordResend: vi.fn(), forgotPasswordVerifyOtp: vi.fn(), exchangeOauthCode: vi.fn(), oauthRedirectUrl: vi.fn(() => "https://auth.test") }))
+vi.mock("@/modules/api/auth", () => ({ signIn, signUpInit: vi.fn(), signUpResend: vi.fn(), signUpVerifyOtp: vi.fn(), forgotPasswordInit: vi.fn(), forgotPasswordResend: vi.fn(), forgotPasswordVerifyOtp: vi.fn(), verifyTwoFactor: vi.fn(), exchangeOauthCode: vi.fn(), oauthRedirectUrl: vi.fn(() => "https://auth.test") }))
 
 import { AuthenticationPage } from "./AuthenticationPage"
 

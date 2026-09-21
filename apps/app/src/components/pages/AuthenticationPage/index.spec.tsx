@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => {
         forgotPasswordVerifyOtp: vi.fn(),
         oauthRedirectUrl: vi.fn(() => "https://auth.test/redirect"),
         signIn: vi.fn(),
+        verifyTwoFactor: vi.fn(),
         signUpInit: vi.fn(),
         signUpResend: vi.fn(),
         signUpVerifyOtp: vi.fn(),
@@ -44,6 +45,7 @@ vi.mock("./component", () => ({
             <output data-testid="auth-panel">{JSON.stringify({ state: input.panel.state, props: input.panel.props })}</output>
             <button data-testid="submit-details" onClick={() => input.panel.on?.submitDetails?.(details)}>details</button>
             <button data-testid="submit-code" onClick={() => input.panel.on?.submitCode?.(code)}>code</button>
+            <button data-testid="submit-factor" onClick={() => input.panel.on?.submitFactor?.({ code: "123456" })}>factor</button>
             <button data-testid="resend" onClick={() => input.panel.on?.resend?.()}>resend</button>
             <button data-testid="back" onClick={() => input.panel.on?.back?.()}>back</button>
             <button data-testid="sign-in" onClick={() => input.panel.on?.changeMode?.("signIn")}>sign in</button>
@@ -67,6 +69,7 @@ describe("AuthenticationPage connected journeys", () => {
         vi.clearAllMocks()
         mocks.session.state = { status: "anonymous" }
         mocks.api.signIn.mockResolvedValue({ ok: false, reason: "invalid" })
+        mocks.api.verifyTwoFactor.mockResolvedValue({ ok: true, data: { accessToken: "two-factor-access", requiresTwoFactor: false, twoFactorToken: null } })
         mocks.api.signUpInit.mockResolvedValue({ ok: true, data: { challengeId: "challenge", expiresInSeconds: 300 } })
         mocks.api.signUpVerifyOtp.mockResolvedValue({ ok: true, data: { accessToken: "access" } })
         mocks.api.signUpResend.mockResolvedValue({ ok: true, data: { challengeId: "challenge-2", expiresInSeconds: 120 } })
@@ -100,7 +103,7 @@ describe("AuthenticationPage connected journeys", () => {
         mocks.api.signIn.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: true, twoFactorToken: "two-factor-token" } })
         render(<AuthenticationPage />)
         fireEvent.click(screen.getByTestId("submit-details"))
-        await waitFor(() => expect(panel()).toContain('"state":"twoFactorUnsupported"'))
+        await waitFor(() => expect(panel()).toContain('"state":"secondFactor"'))
         fireEvent.click(screen.getByTestId("onward"))
         expect(panel()).toContain('"state":"details"')
     })
@@ -181,7 +184,7 @@ describe("AuthenticationPage connected journeys", () => {
         window.history.replaceState(null, "", "/authentication?code=two-factor&state=two-factor-state")
         mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: true, twoFactorToken: "oauth-two-factor" } })
         render(<AuthenticationPage />)
-        await waitFor(() => expect(panel()).toContain('"state":"twoFactorUnsupported"'))
+        await waitFor(() => expect(panel()).toContain('"state":"secondFactor"'))
 
         cleanup()
         window.history.replaceState(null, "", "/authentication?code=bad&state=bad-state")
