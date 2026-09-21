@@ -2,6 +2,19 @@ import { cn } from "@heroui/react";
 
 /** Colocated CSS hooks owned by the public landing composition. */
 export const CLASS_NAMES = {
+  canonicalPage: cn("canonical-page"),
+  canonicalShell: cn("canonical-shell"),
+  canonicalBack: cn("canonical-back"),
+  canonicalLede: cn("canonical-lede"),
+  canonicalSections: cn("canonical-sections"),
+  canonicalSection: cn("canonical-section"),
+  canonicalSectionLabel: cn("canonical-section-label"),
+  canonicalGrid: cn("canonical-grid"),
+  canonicalCard: cn("canonical-card"),
+  canonicalActions: cn("canonical-actions"),
+  canonicalButton: cn("canonical-button"),
+  canonicalLink: cn("canonical-link"),
+  contactForm: cn("contact-form"),
   skipLink: cn("skip-link"),
   siteHeader: cn("site-header"),
   brandMeta: cn("brand-meta"),

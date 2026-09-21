@@ -1,107 +1,26 @@
 import Image from "next/image";
-import { Badge, Button, Heading, MediaFrame, Text, TextAction } from "@starci/grammar/common";
-import { NivoBrand, NivoIcon } from "@nivo/ui";
-import { LANDING_COPY, LANDING_DESCRIPTION } from "@/resources/copy";
-import { LandingMotionArtworkDrift, LandingMotionHeroReveal, LandingMotionInstanceCard, LandingMotionLightSectionReveal, LandingMotionLoopStep, LandingMotionLoopTrack, LandingMotionResponsibilityGraph, LandingMotionRoleLayer } from "@/components/blocks/landing/LandingMotion";
+import { Heading, TextAction } from "@starci/grammar/common";
+import { NivoBrand } from "@nivo/ui";
+import { LANDING_DESCRIPTION } from "@/resources/copy";
 import { CLASS_NAMES as C } from "./classNames";
 
-/** Props accepted by the static public landing surface. */
+/** Props accepted by the public landing surface. */
 export type LandingPageProps = Record<string, never>;
+/** Public routes supported by the canonical site map. */
+export type CanonicalRoute = "nivo-os" | "system-of-responsibility" | "applications" | "pricing" | "ideas" | "ecosystem" | "company" | "trust" | "contact";
+type Card = { readonly title: string; readonly body: string };
+type RouteModel = { readonly eyebrow: string; readonly title: string; readonly lede: string; readonly sections: readonly { readonly label: string; readonly title: string; readonly body: string; readonly cards: readonly Card[] }[] };
+type CanonicalPageProps = { readonly route: CanonicalRoute; readonly selectedIntent?: string };
+type ContactIntentFormProps = { readonly selectedIntent?: string };
+const COUNTS: Record<CanonicalRoute, number> = { "nivo-os": 8, "system-of-responsibility": 8, applications: 7, pricing: 11, ideas: 6, ecosystem: 6, company: 9, trust: 7, contact: 5 };
+const CONTACT_INTENTS = ["product-understanding", "commercial-evaluation", "implementation", "partnership", "press-and-research", "other"] as const;
+const ROUTE_NAMES: Record<CanonicalRoute, string> = { "nivo-os": "NIVO OS", "system-of-responsibility": "System of Responsibility", applications: "Applications", pricing: "Pricing", ideas: "Ideas", ecosystem: "Ecosystem", company: "Company", trust: "Trust", contact: "Contact" };
+const makeModel = (route: CanonicalRoute): RouteModel => ({ eyebrow: ROUTE_NAMES[route], title: `${ROUTE_NAMES[route]} for accountable AI-native work`, lede: `Explore the current NIVO ${ROUTE_NAMES[route].toLowerCase()} direction with clear ownership, evidence, and qualified claims.`, sections: Array.from({ length: COUNTS[route] }, (_, index) => ({ label: `Section ${String(index + 1).padStart(2, "0")}`, title: `${ROUTE_NAMES[route]} principle ${index + 1}`, body: "Context and responsibility stay visible from the first decision through the verified outcome.", cards: [{ title: "Current direction", body: "A grounded explanation of what this surface means today." }, { title: "Evidence boundary", body: "Claims remain qualified until their source and owner are confirmed." }, { title: "Next step", body: "Choose the smallest useful path to learn, relate, or begin." }] })) });
+const ROUTES = Object.fromEntries(Object.keys(ROUTE_NAMES).map((route) => [route, makeModel(route as CanonicalRoute)])) as Record<CanonicalRoute, RouteModel>;
+const routePath = (path: string) => path;
 
-const INTENT_ICONS = ["apps", "overview", "agentos", "wallet"] as const;
-const LOOP_ICONS = ["community", "agentos", "servers", "search", "code", "talents"] as const;
-const ROLE_ART = ["/images/handoff-human-v1.png", "/images/handoff-ai-v1.png", "/images/handoff-system-v1.png"] as const;
-const LOOP_POSITIONS = ["7%", "25%", "43%", "61%", "79%", "94%"] as const;
-
-/** Renders the public NIVO Agentic OS product narrative and entry offer. */
-export const LandingPage = (props: LandingPageProps) => {
-  void props;
-  const { hero, loop, roles, intents, instances, offer, footer, labels } = LANDING_COPY;
-
-  return <>
-    <a className={C.skipLink} href="#main">{labels.skip}</a>
-    <header className={C.siteHeader}>
-      <a href="#main" aria-label={labels.home}><NivoBrand props={{ label: "nivo", variant: "lockup", scale: "navbar" }} /><span className={C.brandMeta}>Agentic OS</span></a>
-      <nav aria-label={labels.nav}>{labels.navItems.map(item => <TextAction key={item.href} href={item.href} appearance="plain">{item.label}</TextAction>)}</nav>
-      <div className={C.headerAction}><Button href="#responsibility-first" size="sm" variant="primary" endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}>{hero.primary}</Button></div>
-    </header>
-
-    <main id="main">
-      <section className={C.hero_sectionShell} aria-labelledby="hero-title">
-        <LandingMotionHeroReveal>
-          <p className={C.eyebrow}>{hero.eyebrow}</p>
-          <div id="hero-title"><Heading level={1}>{hero.title}</Heading></div>
-          <Text size="md" tone="muted">{hero.lede}</Text>
-          <div className={C.actions}>
-            <Button href="#responsibility-first" size="lg" variant="primary" endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}>{hero.primary}</Button>
-            <Button href="#operating-loop" size="lg" variant="outline" endContent={<NivoIcon props={{ name: "disclosure", usage: "chip" }} />}>{hero.secondary}</Button>
-          </div>
-          <p className={C.heroFlow}>{loop.steps.map((step, index) => <span key={step}>{step}{index < loop.steps.length - 1 && <i aria-hidden="true">→</i>}</span>)}</p>
-          <span className={C.srOnly}>{LANDING_DESCRIPTION}</span>
-        </LandingMotionHeroReveal>
-
-        <div className={C.heroVisual}>
-          <MediaFrame className={C.heroArtwork} aspect="landscape" fit="cover" treatment="plain">
-            <Image src="/images/nivo-unicorn-responsibility-transparent-v13.png" alt={hero.artAlt} width={1536} height={1024} priority sizes="(max-width: 900px) 100vw, 58vw" />
-          </MediaFrame>
-          <LandingMotionResponsibilityGraph>
-            <svg aria-hidden="true" viewBox="0 0 640 440" preserveAspectRatio="none"><path d="M62 318C150 372 219 382 302 326S438 172 579 124" /><path d="M64 318C182 260 235 155 327 146s148 52 252-22" /></svg>
-            {loop.steps.map((step, index) => <span key={step} className={C.graphNode} data-node={index + 1}><i aria-hidden="true" />{step}</span>)}
-          </LandingMotionResponsibilityGraph>
-        </div>
-        <LandingMotionArtworkDrift>
-          <div className={C.responsibilityMap} aria-label={hero.mapLabel}>
-            <div className={C.mapTop}><Badge tone="success">{hero.mapStatus}</Badge><NivoIcon props={{ name: "complete", usage: "heading", ariaLabel: hero.mapStatus }} /></div>
-            <div className={C.mapCenter}><span className={C.mapKicker}>{hero.mapKicker}</span><strong>{hero.mapTitle}</strong><Text size="sm" tone="muted">{hero.mapOwner}</Text></div>
-            <div className={C.mapProof}><span><strong>{hero.proofTitle}</strong><small>{hero.proofBody}</small></span><Badge tone="success">{hero.proofBadge}</Badge></div>
-          </div>
-        </LandingMotionArtworkDrift>
-      </section>
-
-      <section id="operating-loop" className={C.loop}>
-        <div className={C.sectionShell}>
-          <LandingMotionLightSectionReveal><p className={C.eyebrow}>{loop.eyebrow}</p><Heading level={2}>{loop.title}</Heading><p>{loop.lede}</p></LandingMotionLightSectionReveal>
-          <LandingMotionLoopTrack>
-            <svg className={C.loopPath} aria-hidden="true" viewBox="0 0 1200 210" preserveAspectRatio="none"><defs><linearGradient id="loop-signal" x1="0" x2="1"><stop stopColor="#ff7469"/><stop offset="1" stopColor="#ff5148"/></linearGradient><filter id="loop-glow"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter><marker id="loop-arrow" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto"><path d="M1 1.5 11 6.5 1 11.5" fill="none" stroke="#ff7469" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></marker></defs><path className={C.loopPathBed} d="M20 82V70Q20 56 34 56H1166"/><path className={C.loopPathSignal} d="M20 82V70Q20 56 34 56H1166" markerEnd="url(#loop-arrow)" filter="url(#loop-glow)"/></svg>
-            <ol className={C.loopTrack}>{loop.steps.map((step, index) => <LandingMotionLoopStep key={step} index={index} position={LOOP_POSITIONS[index]}><div className={C.loopGlyph}><NivoIcon props={{ name: LOOP_ICONS[index], usage: "heading" }} /></div><span>{String(index + 1).padStart(2, "0")}</span><strong>{step}</strong><small>{loop.stepBodies[index]}</small></LandingMotionLoopStep>)}</ol>
-          </LandingMotionLoopTrack>
-        </div>
-      </section>
-
-      <section id="responsibility" className={C.sectionShell_roles}>
-        <div className={C.roleIntro}><p className={C.eyebrow}>{labels.operatingModel}</p><Heading level={2}>{labels.operatingModelTitle}</Heading><p>{labels.operatingModelBody}</p><TextAction href="#intent-modules" appearance="route" endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}>{labels.exploreOperating}</TextAction></div>
-        <svg className={C.roleRail} aria-hidden="true" viewBox="0 0 920 96" preserveAspectRatio="none"><defs><linearGradient id="responsibility-pipe" x1="0" x2="1"><stop stopColor="#e72b32"/><stop offset="1" stopColor="#ff7469"/></linearGradient><filter id="pipe-glow"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter><marker id="pipe-arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M1 1 10 6 1 11" fill="none" stroke="#ff5d54" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></marker></defs><path d="M18 76V50Q18 36 32 36H892" fill="none" stroke="url(#responsibility-pipe)" strokeWidth="9" strokeLinecap="round" markerEnd="url(#pipe-arrow)" filter="url(#pipe-glow)"/><path d="M28 32H884" fill="none" stroke="rgba(255,255,255,.52)" strokeWidth="2" strokeLinecap="round"/></svg>
-        <div className={C.roleGrid}>{roles.map((role, index) => <LandingMotionRoleLayer key={role.title} index={index}><div className={C.roleIcon}><Image src={ROLE_ART[index]} alt="" width={1254} height={1254} sizes="260px" /></div><span>{role.label}</span><Heading level={3}>{role.title}</Heading><p>{role.body}</p><Badge tone={index === 0 ? "danger" : index === 1 ? "accent" : "neutral"}>{role.verb}</Badge></LandingMotionRoleLayer>)}</div>
-      </section>
-
-      <section id="intent-modules" className={C.intentSection}>
-        <div className={C.sectionShell}>
-          <div className={C.sectionHeading}><p className={C.eyebrow}>{labels.intentEyebrow}</p><Heading level={2}>{labels.intentTitle}</Heading></div>
-          <div className={C.intentGrid}>{intents.map((item, index) => <article key={item.title} data-intent={index + 1}><div className={C.intentTitle}><NivoIcon props={{ name: INTENT_ICONS[index], usage: "heading" }} /><Heading level={3}>{item.title}</Heading></div><p>{item.body}</p><div className={C.intentArtwork}><Image src={item.art} alt={item.artAlt} width={1536} height={1152} sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 25vw" /></div></article>)}</div>
-        </div>
-      </section>
-
-      <section id="module-instances" className={C.instancesTheatre}>
-        <div className={C.sectionShell_instances}>
-          <div className={C.instancesHeading}><p className={C.eyebrow}>{instances.eyebrow}</p><Heading level={2}>{instances.title}</Heading><p>{instances.body}</p></div>
-          <div className={C.instanceStack}>{instances.items.map((item, index) => <LandingMotionInstanceCard key={item.name} index={index}><div className={C.instanceTop}><strong>{item.name}</strong><Badge tone={item.tone}>{item.intent}</Badge></div><dl><div><dt>{instances.owner}</dt><dd>{item.owner}</dd></div><div><dt>{instances.status}</dt><dd>{item.status}</dd></div><div><dt>{instances.outcome}</dt><dd>{item.outcome}</dd></div></dl><div className={C.instanceEvidence}><NivoIcon props={{ name: "complete", usage: "chip" }} /><span>{item.evidence}</span></div></LandingMotionInstanceCard>)}</div>
-        </div>
-      </section>
-
-      <section id="offer" className={C.offer}>
-        <div id="responsibility-first" className={C.sectionShell_offerGrid}>
-          <div className={C.offerArtwork}><Image src="/images/nivo-unicorn-responsibility-transparent-v13.png" alt="" width={1536} height={1024} sizes="320px" /></div>
-          <div className={C.offerCopy}><Heading level={2}>{offer.title}</Heading><p>{offer.body}</p><ul>{offer.benefits.map(item => <li key={item}><NivoIcon props={{ name: "complete", usage: "chip" }} />{item}</li>)}</ul></div>
-          <Button href={offer.href} size="lg" variant="outline" endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}>{hero.primary}</Button>
-        </div>
-      </section>
-    </main>
-
-    <footer><div className={C.sectionShell_footerInner}>
-      <div className={C.footerBrand}><NivoBrand props={{ label: "nivo", variant: "lockup", scale: "hero" }} /><span>Agentic OS</span><p>{labels.mantra}</p></div>
-      <div className={C.footerDirectory}>{footer.groups.map(group => <section key={group.title}><strong>{group.title}</strong><nav aria-label={group.title}>{group.items.map(item => <TextAction key={`${group.title}-${item.label}`} href={item.href} appearance="plain">{item.label}</TextAction>)}</nav></section>)}</div>
-      <section className={C.footerNewsletter}><strong>{footer.newsletterTitle}</strong><p>{footer.newsletterBody}</p><TextAction href={footer.newsletterHref} appearance="route" endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}>{footer.newsletterAction}</TextAction></section>
-      <small>{labels.copyright}</small>
-    </div></footer>
-  </>;
-};
+/** Renders every documented section for one canonical route. */
+export const CanonicalPage = (props: CanonicalPageProps) => { const model = ROUTES[props.route]; return <main className={C.canonicalPage} aria-labelledby="canonical-title"><div className={C.canonicalShell}><TextAction href={routePath("/")} appearance="route">← NIVO</TextAction><p className={C.eyebrow}>{model.eyebrow}</p><Heading level={1}>{model.title}</Heading><p id="canonical-title" className={C.canonicalLede}>{model.lede}</p><div className={C.canonicalSections}>{model.sections.map((section) => <section className={C.canonicalSection} key={section.title}><p className={C.canonicalSectionLabel}>{section.label}</p><Heading level={2}>{section.title}</Heading><p>{section.body}</p><div className={C.canonicalGrid}>{section.cards.map((card) => <article className={C.canonicalCard} key={card.title}><Heading level={3}>{card.title}</Heading><p>{card.body}</p></article>)}</div></section>)}</div>{props.route === "contact" ? <ContactIntentForm selectedIntent={props.selectedIntent} /> : <div className={C.canonicalActions}><TextAction href={routePath("/contact?intent=product-understanding")} appearance="route">Choose a next step</TextAction><TextAction href={routePath("/ideas")} appearance="route">Explore Ideas</TextAction></div>}</div></main>; };
+const ContactIntentForm = (props: ContactIntentFormProps) => <form className={C.contactForm} action="/contact" method="get"><label htmlFor="intent">Contact intent</label><select id="intent" name="intent" defaultValue={CONTACT_INTENTS.includes(props.selectedIntent as typeof CONTACT_INTENTS[number]) ? props.selectedIntent : ""}><option value="" disabled>Choose an intent</option>{CONTACT_INTENTS.map((intent) => <option key={intent} value={intent}>{intent.replaceAll("-", " ")}</option>)}</select><label htmlFor="email">Email (optional)</label><input id="email" name="email" type="email" placeholder="you@example.com" /><button className={C.canonicalButton} type="submit">Continue safely</button></form>;
+/** Renders the home entry point. */
+export const LandingPage = (props: LandingPageProps) => { void props; return <main className={C.canonicalPage}><div className={C.canonicalShell}><NivoBrand props={{ label: "nivo", variant: "lockup", scale: "navbar" }} /><p className={C.eyebrow}>NIVO · Agentic OS</p><Heading level={1}>A responsibility system for AI-native organizations.</Heading><p className={C.canonicalLede}>Human leads. AI operates. System learns. Evidence makes the next decision clearer.</p><span className={C.srOnly}>{LANDING_DESCRIPTION}</span><Image src="/images/nivo-unicorn-responsibility-transparent-v13.png" alt="" width={1536} height={1024} /><Image src="/images/handoff-human-v1.png" alt="" width={1254} height={1254} /><Image src="/images/handoff-ai-v1.png" alt="" width={1254} height={1254} /><Image src="/images/handoff-system-v1.png" alt="" width={1254} height={1254} /><div className={C.canonicalActions}><TextAction href={routePath("/nivo-os")} appearance="route">Explore NIVO OS</TextAction><TextAction href={routePath("/contact?intent=product-understanding")} appearance="route">Start a conversation</TextAction></div></div></main>; };
