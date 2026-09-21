@@ -22,10 +22,10 @@ export const LANDING_COPY = {
   loop: { eyebrow: "Operating loop", title: "Trách nhiệm vận hành theo một đường đi rõ ràng.", lede: "", steps: ["Context", "Responsibility", "Human + AI + System", "Evidence", "Verified outcome", "Trust"], stepBodies: ["Hiểu đúng bối cảnh và mục tiêu.", "Giao đúng việc cho đúng chủ thể.", "Phối hợp con người, AI và hệ thống.", "Tự động thu thập bằng chứng.", "Kết quả được đo lường và kiểm chứng.", "Tạo niềm tin để mở rộng liên tục."], caption: "Mỗi vòng lặp làm hệ thống hiểu business hơn — không phải bằng lời hứa, mà bằng evidence." },
   roles: [{ label: "Human", title: "Human Leads.", body: "Đặt mục tiêu, quyết định và chịu trách nhiệm cuối cùng.", verb: "Lead" }, { label: "AI", title: "AI Operates.", body: "Lập kế hoạch, thực thi, đề xuất và tối ưu.", verb: "Operate" }, { label: "System", title: "System Learns.", body: "Ghi lại, kiểm chứng, học hỏi và cải thiện.", verb: "Learn" }],
   intents: [
-    { title: "Create", body: "Tạo nội dung, chiến dịch và tài sản có trách nhiệm.", art: "/images/intent/create-v1.png", artAlt: "Minh họa cửa sổ sáng tạo, nút phát và bút chì của module Create." },
-    { title: "Operate", body: "Vận hành quy trình, dự án và đội nhóm hiệu quả.", art: "/images/intent/operate-v1.png", artAlt: "Minh họa checklist và bánh răng của module Operate." },
-    { title: "Revenue", body: "Tối ưu tăng trưởng và hiệu suất doanh thu.", art: "/images/intent/revenue-v1.png", artAlt: "Minh họa biểu đồ tăng trưởng của module Revenue." },
-    { title: "Money", body: "Quản trị chi phí, lợi nhuận và dòng tiền thông minh.", art: "/images/intent/money-v1.png", artAlt: "Minh họa các chồng tiền xu của module Money." }
+    { title: "Create", body: "Tạo nội dung, chiến dịch và tài sản có trách nhiệm.", art: "/images/intent/create-v2.png", artAlt: "Điêu khắc lăng kính biến tín hiệu thành một hình thái mới có thể kiểm chứng." },
+    { title: "Operate", body: "Vận hành quy trình, dự án và đội nhóm hiệu quả.", art: "/images/intent/operate-v2.png", artAlt: "Điêu khắc lõi vận hành liên kết các handoff bằng một luồng tín hiệu có thể theo dõi." },
+    { title: "Revenue", body: "Tối ưu tăng trưởng và hiệu suất doanh thu.", art: "/images/intent/revenue-v2.png", artAlt: "Điêu khắc tín hiệu tăng trưởng đi qua các vòng kiểm soát tới kết quả sáng rõ." },
+    { title: "Money", body: "Quản trị chi phí, lợi nhuận và dòng tiền thông minh.", art: "/images/intent/money-v2.png", artAlt: "Điêu khắc dòng giá trị được đo lường và phân bổ giữa hai bể cân bằng." }
   ],
   instances: { eyebrow: "Module instances", title: "Mọi việc đều là Module. Mỗi Module là một trách nhiệm.", body: "", owner: "Owner", status: "Status", outcome: "Outcome", items: [
     { intent: "Create", tone: "danger", name: "Content Campaign", owner: "Content Agent", status: "Completed", outcome: "+27% Engagement", evidence: "12 evidence items" },

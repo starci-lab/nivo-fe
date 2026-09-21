@@ -183,10 +183,10 @@ const ProductHeroVisual = (props: ProductHeroVisualProps) => {
 
     if (props.page === "applications") {
         const applications = [
-            ["Tạo tăng trưởng", "/images/intent/revenue-v1.png"], // vn-ok: Canonical Vietnamese public label.
-            ["Vận hành tốt hơn", "/images/intent/operate-v1.png"], // vn-ok: Canonical Vietnamese public label.
-            ["Quản trị dòng tiền", "/images/intent/money-v1.png"], // vn-ok: Canonical Vietnamese public label.
-            ["Tạo điều mới", "/images/intent/create-v1.png"], // vn-ok: Canonical Vietnamese public label.
+            ["Tạo tăng trưởng", "/images/intent/revenue-v2.png"], // vn-ok: Canonical Vietnamese public label.
+            ["Vận hành tốt hơn", "/images/intent/operate-v2.png"], // vn-ok: Canonical Vietnamese public label.
+            ["Quản trị dòng tiền", "/images/intent/money-v2.png"], // vn-ok: Canonical Vietnamese public label.
+            ["Tạo điều mới", "/images/intent/create-v2.png"], // vn-ok: Canonical Vietnamese public label.
         ] as const
         return (
             <aside className={PRODUCT_CLASS_NAMES.heroVisual} aria-label={props.hero.signalLabel}>
