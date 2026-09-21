@@ -35,14 +35,29 @@ export type SessionState = /** The refresh cookie is being traded for a token; n
   readonly accessToken: string;
 };
 
+/**
+ * What ending a session actually observed, told apart the way the custody contract demands.
+ *
+ * `signOut` on the wire answers only that the request completed: the resolver clears the refresh
+ * cookie and returns `true` whether or not the provider's revocation was observed - its revoke is
+ * best-effort and swallows failures. Reading that as "revoked remotely" would describe a
+ * revocation nobody saw, so honesty is `unknown` until the API reports the outcome separately.
+ */
+export type SessionEndReport = {
+  /** Local access state and the browser's refresh custody are gone either way. */
+  readonly localCleared: true;
+  /** Whether provider revocation was observed; never inflated from a merely completed request. */
+  readonly remoteRevocation: "observed" | "unknown";
+};
+
 /** What a caller may do with the session. */
 export type Session = {
   /** The current state. */
   readonly state: SessionState;
   /** Adopt the payload an auth mutation just returned. Ignores a payload still owing a factor. */
   readonly adopt: (payload: AuthPayload) => void;
-  /** Drop the session here and on the server. */
-  readonly end: () => Promise<void>;
+  /** Drop the session here and on the server, and report what the server actually confirmed. */
+  readonly end: () => Promise<SessionEndReport>;
 };
 const SessionContext = createContext<Session | null>(null);
 
@@ -73,6 +88,15 @@ export const SessionProvider = (props: SessionProviderProps) => {
   useAccessTokenFrom(useCallback(() => token.current, []));
 
   /*
+   * A CUSTODY EPOCH BESIDE THE TOKEN, because a refresh answer can arrive after a newer custody
+   * decision already settled. `adopt` and `end` each bump it; the restore below applies its result
+   * only while the epoch is still the one it started under. A losing or late observation - a
+   * refusal that was overtaken by a sign-in, or a success that was overtaken by a sign-out - must
+   * never clear or overwrite the newer custody result.
+   */
+  const custodyEpoch = useRef(0);
+
+  /*
    * THE TRANSPORT ASKS FOR THE LANGUAGE THE SAME WAY IT ASKS FOR THE TOKEN, and for the same
    * reason: it must not import the routing runtime. A refusal sentence comes from the API, so the
    * API has to be told which language to refuse in.
@@ -87,29 +111,42 @@ export const SessionProvider = (props: SessionProviderProps) => {
     if (payload.requiresTwoFactor || payload.accessToken === null) {
       return;
     }
+    custodyEpoch.current += 1;
     token.current = payload.accessToken;
     setState({
       status: "signed-in",
       accessToken: payload.accessToken
     });
   }, []);
-  const end = useCallback(async () => {
+  const end = useCallback(async (): Promise<SessionEndReport> => {
     /*
      * The local state is cleared FIRST. If the network call fails the reader is still signed out
      * of this tab, which is the outcome they asked for; the alternative leaves somebody staring
-     * at a console they just tried to leave.
+     * at a console they just tried to leave. Bumping the epoch also retires any refresh still in
+     * flight, so its answer cannot put a session back after this one was ended.
      */
+    custodyEpoch.current += 1;
     token.current = null;
     setState({
       status: "anonymous"
     });
+    /*
+     * The mutation's `data` reports a completed request, not an observed revocation: the resolver
+     * answers `true` whether the provider revoke succeeded, failed or never ran, so the report
+     * below can only ever be `unknown` until the API names the outcome.
+     */
     await signOutMutation();
+    return {
+      localCleared: true,
+      remoteRevocation: "unknown"
+    };
   }, []);
   useEffect(() => {
     let cancelled = false;
     const restore = async () => {
+      const epochAtStart = custodyEpoch.current;
       const result = await refreshSession();
-      if (cancelled) {
+      if (cancelled || custodyEpoch.current !== epochAtStart) {
         return;
       }
       if (result.ok && !result.data.requiresTwoFactor && result.data.accessToken !== null) {

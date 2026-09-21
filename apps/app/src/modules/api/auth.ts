@@ -357,6 +357,12 @@ export const refreshSession = (): Promise<Result<AuthPayload>> => graphql(`mutat
 /**
  * End the session and clear the refresh cookie.
  *
- * @returns Whether the server acknowledged.
+ * `data` MEANS THE REQUEST COMPLETED, NOT THAT REVOCATION WAS OBSERVED. The resolver clears the
+ * cookie and answers `true` whether the provider revoke succeeded, failed or never ran - the
+ * backend's revoke is best-effort and swallows its outcome. A caller that reports remote sign-out
+ * from this flag is describing a revocation nobody saw; the custody contract requires those two
+ * answers to travel separately.
+ *
+ * @returns Whether the server completed the request.
  */
 export const signOut = (): Promise<Result<boolean>> => graphql("mutation SignOut { signOut { data message success error } }");
