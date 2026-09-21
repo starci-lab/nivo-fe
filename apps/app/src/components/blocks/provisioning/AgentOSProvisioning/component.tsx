@@ -4,7 +4,7 @@ import { LifecycleStep, type LifecycleStepData } from "@nivo/ui";
 /** Block-owned conditions of the AgentOS order and provisioning continuation. */
 export type AgentOSProvisioningProps = AgentOSProvisioningViewProps;
 /** Public API role for AgentOSProvisioningBlockState. */
-export type AgentOSProvisioningBlockState = "catalog_loading" | "request" | "submitting" | "awaiting_payment" | "accepted" | "preparing" | "ready" | "failed";
+export type AgentOSProvisioningBlockState = "catalog_loading" | "request" | "submitting" | "awaiting_payment" | "payment_unknown" | "accepted" | "preparing" | "provisioning_unknown" | "ready" | "failed";
 /** One actual catalogue tier available to the buyer. */
 export type AgentOSProvisioningTierView = {
     readonly id: string;
@@ -55,6 +55,7 @@ export type AgentOSProvisioningViewProps = {
 export const AgentOSProvisioningBase = (props: AgentOSProvisioningProps) => {
     const { state, props: view, on } = props;
     const actionLabel = view.requestActionLabel ?? view.statusActionLabel;
+    const cardState = state === "failed" ? "negative" : state === "payment_unknown" || state === "provisioning_unknown" ? "cautionary" : state === "ready" ? "affirmative" : "neutral";
     const selection = view.selection === undefined ? null : <DirectionList label={view.selection.label}>{view.selection.offers.map(offer => {
         const selected = offer.id === view.selection?.selectedOfferId;
         return <div key={offer.id} className={OFFER_CLASS_NAME}>
@@ -68,7 +69,7 @@ export const AgentOSProvisioningBase = (props: AgentOSProvisioningProps) => {
             </div>}
         </div>;
     })}</DirectionList>;
-    const continuation = <div className={CONTENT_CLASS_NAME}>{selection}<SurfaceCard label={view.continuationLabel ?? view.subject} state={state === "failed" ? "negative" : "neutral"}><div className={CONTENT_CLASS_NAME} data-contract="GAP-2"><DirectionHeader level={2} title={<Text isSkeleton={state === "catalog_loading"}>{view.subject}</Text>} description={<Text size="sm" tone="muted" isSkeleton={state === "catalog_loading"}>{view.detail}</Text>}/><Text weight="medium" isSkeleton={state === "catalog_loading"}>{view.statusTitle}</Text><Text size="sm" live="polite" isSkeleton={state === "catalog_loading"}>{view.statusText}</Text>{actionLabel === undefined ? null : <Button variant="primary" type="button" isPending={view.isRequestPending} isDisabled={view.statusActionDisabled || view.requestActionDisabled} onPress={view.requestActionLabel === undefined ? on?.statusAction : on?.request}>{actionLabel}</Button>}</div></SurfaceCard></div>;
+    const continuation = <div className={CONTENT_CLASS_NAME}>{selection}<SurfaceCard label={view.continuationLabel ?? view.subject} state={cardState}><div className={CONTENT_CLASS_NAME} data-contract="GAP-2"><DirectionHeader level={2} title={<Text isSkeleton={state === "catalog_loading"}>{view.subject}</Text>} description={<Text size="sm" tone="muted" isSkeleton={state === "catalog_loading"}>{view.detail}</Text>}/><Text weight="medium" isSkeleton={state === "catalog_loading"}>{view.statusTitle}</Text><Text size="sm" live="polite" isSkeleton={state === "catalog_loading"}>{view.statusText}</Text>{actionLabel === undefined ? null : <Button variant="primary" type="button" isPending={view.isRequestPending} isDisabled={view.statusActionDisabled || view.requestActionDisabled} onPress={view.requestActionLabel === undefined ? on?.statusAction : on?.request}>{actionLabel}</Button>}</div></SurfaceCard></div>;
     const journey = <DirectionList label={view.progressLabel ?? view.subject}>{view.steps.map((step, index) => <div key={index} className={ROW_CLASS_NAME} data-contract="BOUNDARY-2 PADDING-4 PADDING-3"><LifecycleStep props={step} isLoading={state === "catalog_loading"}/></div>)}</DirectionList>;
     return <DirectionLayout primary={continuation} rail={journey} railWidth="compact" align="start"/>;
 };

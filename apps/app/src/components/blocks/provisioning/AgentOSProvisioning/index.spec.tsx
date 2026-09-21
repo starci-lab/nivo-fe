@@ -10,11 +10,13 @@ const mocks = vi.hoisted(() => {
         myInvoices: vi.fn(),
         myAgentosAiKnowledgeReadiness: vi.fn(),
         orderAgentOs: vi.fn(),
+        issueAgentWorkspaceAppLaunch: vi.fn(),
     }
     return {
         api,
         replace: vi.fn(),
         push: vi.fn(),
+        followRedirect: vi.fn(),
         session: { state: { status: "signed-in", accessToken: "token" } },
         realtime: { status: "disconnected" as string, event: undefined as { kind: string, id: string, status?: string, reason?: string } | undefined },
         t: (key: string) => key,
@@ -36,6 +38,10 @@ vi.mock("next-intl", () => ({
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => mocks.api)
 vi.mock("@/modules/realtime/provisioning", () => ({ default: () => mocks.realtime }))
+vi.mock("@/modules/window/workspace-app-launch", () => ({
+    safeWorkspaceAppRedirect: (url: string) => url.startsWith("https://") ? url : null,
+    followWorkspaceAppRedirect: mocks.followRedirect,
+}))
 vi.mock("./component", () => ({
     AgentOSProvisioningBase: (props: AgentProbeProps) => (
         <div>
@@ -57,10 +63,10 @@ const resetQueryCache = () => {
     for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key)
 }
 
-const snapshot = (overrides: { orders?: unknown[], invoices?: unknown[], workspaces?: unknown[] } = {}) => {
-    mocks.api.myCatalogOrders.mockResolvedValue({ ok: true, data: overrides.orders ?? [order] })
-    mocks.api.myInvoices.mockResolvedValue({ ok: true, data: overrides.invoices ?? [] })
-    mocks.api.myAgentWorkspace.mockResolvedValue({ ok: true, data: overrides.workspaces ?? [] })
+const snapshot = (overrides: { orders?: unknown[], invoices?: unknown[], workspaces?: unknown[], ordersResult?: unknown, invoicesResult?: unknown, workspacesResult?: unknown } = {}) => {
+    mocks.api.myCatalogOrders.mockResolvedValue(overrides.ordersResult ?? { ok: true, data: overrides.orders ?? [order] })
+    mocks.api.myInvoices.mockResolvedValue(overrides.invoicesResult ?? { ok: true, data: overrides.invoices ?? [] })
+    mocks.api.myAgentWorkspace.mockResolvedValue(overrides.workspacesResult ?? { ok: true, data: overrides.workspaces ?? [] })
 }
 
 describe("AgentOSProvisioning connected flow", () => {
@@ -73,6 +79,7 @@ describe("AgentOSProvisioning connected flow", () => {
         mocks.realtime.event = undefined
         mocks.api.catalogItems.mockResolvedValue({ ok: true, data: [item] })
         mocks.api.orderAgentOs.mockResolvedValue({ ok: true, data: order })
+        mocks.api.issueAgentWorkspaceAppLaunch.mockResolvedValue({ ok: true, data: { launchId: "launch", redirectUrl: "https://pod.example.test/launch", expiresAt: "2030-01-01T00:00:00Z" } })
         mocks.api.myAgentosAiKnowledgeReadiness.mockResolvedValue({ ok: true, data: { provider: "OpenRouter", chatModel: "deepseek/deepseek-chat", embeddingProfile: "nivo", embeddingDimension: 1024, credentialStatus: "configured", credentialMaskedHint: "or-…", qdrantHealth: "healthy", readinessStatus: "ready", aiReady: true, readinessOperationId: null, knowledgeRecoveryOperationId: null, components: [], origins: [{ origin: "nivo", version: "v1", digest: "digest", documentCount: 1, lastUpdatedAt: null }], failureCode: null, testedAt: null } })
         snapshot()
     })
@@ -87,6 +94,7 @@ describe("AgentOSProvisioning connected flow", () => {
         fireEvent.click(screen.getByTestId("request"))
         await waitFor(() => expect(flow()).toContain('"state":"awaiting_payment"'))
         expect(flow()).toContain('"subject":"agentos.productName"')
+        expect(mocks.api.orderAgentOs).toHaveBeenCalledWith("agent-os", "tier")
         expect(mocks.replace).toHaveBeenCalledWith("/agentos/orders/order")
     })
 
@@ -110,6 +118,7 @@ describe("AgentOSProvisioning connected flow", () => {
         mocks.api.catalogItems.mockResolvedValue({ ok: false, reason: "catalog-down" })
         render(<AgentOSProvisioning context={{ mode: "new" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"failed"'))
+        expect(flow()).toContain("catalog-down")
         fireEvent.click(screen.getByTestId("status"))
         expect(mocks.push).toHaveBeenCalledWith("/agentos")
 
@@ -123,6 +132,7 @@ describe("AgentOSProvisioning connected flow", () => {
         fireEvent.click(screen.getByTestId("select-tier"))
         fireEvent.click(screen.getByTestId("request"))
         await waitFor(() => expect(flow()).toContain('"state":"failed"'))
+        expect(flow()).toContain("order-down")
     })
 
     it("reconciles resume snapshots into missing, payment, accepted, ready and failed phases", async () => {
@@ -138,7 +148,7 @@ describe("AgentOSProvisioning connected flow", () => {
         unpaid.unmount()
         resetQueryCache()
 
-        snapshot({ orders: [{ ...order, status: "paid" }] })
+        snapshot({ orders: [{ ...order, status: "in_progress" }] })
         const accepted = render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"accepted"'))
         expect(flow()).toContain('"action":"agentos.watchFulfillment"')
@@ -146,19 +156,49 @@ describe("AgentOSProvisioning connected flow", () => {
         accepted.unmount()
         resetQueryCache()
 
-        snapshot({ orders: [{ ...order, status: "paid" }], workspaces: [{ id: "workspace", status: "active", name: "Ready workspace", catalogOrder: { id: "order" } }] })
+        snapshot({ orders: [{ ...order, status: "in_progress" }], workspaces: [{ id: "workspace", status: "active", name: "Ready workspace", catalogOrder: { id: "order" } }] })
         const ready = render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"ready"'))
         ready.unmount()
         resetQueryCache()
 
-        snapshot({ orders: [{ ...order, status: "paid" }], workspaces: [{ id: "workspace", status: "failed", catalogOrder: { id: "order" } }] })
+        snapshot({ orders: [{ ...order, status: "in_progress" }], workspaces: [{ id: "workspace", status: "failed", catalogOrder: { id: "order" } }] })
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"failed"'))
     })
 
+    it("keeps refused payment and provisioning reads as unknown phases with a reconcile action", async () => {
+        snapshot({ invoicesResult: { ok: false, reason: "invoice source refused", code: "INVOICES_REFUSED" } })
+        const payment = render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
+        await waitFor(() => expect(flow()).toContain('"state":"payment_unknown"'))
+        expect(flow()).toContain('"action":"agentos.retry"')
+        expect(flow()).toContain("INVOICES_REFUSED")
+        mocks.api.myInvoices.mockResolvedValue({ ok: true, data: [{ id: "invoice", status: "unpaid", catalogOrder: { id: "order" } }] })
+        fireEvent.click(screen.getByTestId("status"))
+        await waitFor(() => expect(flow()).toContain('"state":"awaiting_payment"'))
+        payment.unmount()
+        resetQueryCache()
+
+        snapshot({ orders: [{ ...order, status: "in_progress" }], workspacesResult: { ok: false, reason: "workspace source refused", code: "WORKSPACES_REFUSED" } })
+        render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning_unknown"'))
+        expect(flow()).toContain("WORKSPACES_REFUSED")
+        expect(flow()).not.toContain('"state":"ready"')
+    })
+
+    it("keeps a fully refused status read as payment-unknown, not a terminal failure", async () => {
+        snapshot({
+            ordersResult: { ok: false, reason: "all sources refused" },
+            invoicesResult: { ok: false, reason: "all sources refused" },
+            workspacesResult: { ok: false, reason: "all sources refused" },
+        })
+        render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
+        await waitFor(() => expect(flow()).toContain('"state":"payment_unknown"'))
+        expect(flow()).toContain("all sources refused")
+    })
+
     it("turns workspace realtime events into ready and failed states", async () => {
-        snapshot({ orders: [{ ...order, status: "paid" }], workspaces: [{ id: "workspace", status: "pending", catalogOrder: { id: "order" } }] })
+        snapshot({ orders: [{ ...order, status: "in_progress" }], workspaces: [{ id: "workspace", status: "provisioning", catalogOrder: { id: "order" } }] })
         const view = render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"preparing"'))
         mocks.realtime = { status: "event", event: { kind: "workspace", id: "workspace", status: "active" } }
@@ -169,7 +209,7 @@ describe("AgentOSProvisioning connected flow", () => {
         await waitFor(() => expect(flow()).toContain('"state":"failed"'))
     })
 
-    it("routes payment and ready status actions", async () => {
+    it("routes payment and enters the ready workspace through the issued launch grant", async () => {
         snapshot({ orders: [{ ...order, status: "pending_payment" }], invoices: [{ id: "invoice", status: "unpaid", catalogOrder: { id: "order" } }] })
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"awaiting_payment"'))
@@ -178,10 +218,22 @@ describe("AgentOSProvisioning connected flow", () => {
 
         cleanup()
         resetQueryCache()
-        snapshot({ orders: [{ ...order, status: "paid" }], workspaces: [{ id: "workspace", status: "active", catalogOrder: { id: "order" } }] })
+        snapshot({ orders: [{ ...order, status: "in_progress" }], workspaces: [{ id: "workspace", status: "active", catalogOrder: { id: "order" } }] })
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"ready"'))
         fireEvent.click(screen.getByTestId("status"))
-        expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/workspace?view=ai-knowledge")
+        await waitFor(() => expect(mocks.followRedirect).toHaveBeenCalledWith("https://pod.example.test/launch"))
+        expect(mocks.api.issueAgentWorkspaceAppLaunch).toHaveBeenCalledWith("workspace")
+    })
+
+    it("keeps the ready surface mounted and shows the refusal when entry is refused", async () => {
+        mocks.api.issueAgentWorkspaceAppLaunch.mockResolvedValue({ ok: false, reason: "workspace not launchable" })
+        snapshot({ orders: [{ ...order, status: "in_progress" }], workspaces: [{ id: "workspace", status: "active", catalogOrder: { id: "order" } }] })
+        render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
+        await waitFor(() => expect(flow()).toContain('"state":"ready"'))
+        fireEvent.click(screen.getByTestId("status"))
+        await waitFor(() => expect(flow()).toContain("workspace not launchable"))
+        expect(mocks.followRedirect).not.toHaveBeenCalled()
+        expect(flow()).toContain('"state":"ready"')
     })
 })

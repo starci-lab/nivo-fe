@@ -11,6 +11,7 @@ const STATUS: Readonly<Record<string, FleetStatus | undefined>> = {
     active: "active",
     ready: "ready",
     provisioning: "provisioning",
+    starting: "provisioning",
     failed: "failed",
     suspended: "suspended"
 };

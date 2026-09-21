@@ -2,12 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { useQueryCatalogItemsSwr, useQueryMyAgentosAiKnowledgeReadinessSwr, useQueryMyAgentWorkspacesSwr, useQueryMyCatalogOrdersSwr, useQueryMyInvoicesSwr, useMutateOrderAgentosSwr, useMutateRunAgentosAiReadinessTestSwr } from "@/hooks";
+import { useQueryCatalogItemsSwr, useQueryMyAgentosAiKnowledgeReadinessSwr, useQueryMyAgentWorkspacesSwr, useQueryMyCatalogOrdersSwr, useQueryMyInvoicesSwr, useMutateIssueAgentWorkspaceAppLaunchSwr, useMutateOrderAgentosSwr, useMutateRunAgentosAiReadinessTestSwr } from "@/hooks";
 import { useRouter } from "@/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
 import { type AgentWorkspaceRow, type CatalogItemRow, type CatalogOrderRow, type CatalogTierRow, type InvoiceRow } from "@/modules/api/console";
+import { type Result } from "@/modules/api/graphql";
+import { type WorkspacePurchaseStatus } from "@/modules/api/workspace-controlplane";
 import { nivoQueryData } from "@/modules/query";
 import useProvisioningRealtime, { type ProvisioningTarget } from "@/modules/realtime/provisioning";
+import { followWorkspaceAppRedirect, safeWorkspaceAppRedirect } from "@/modules/window/workspace-app-launch";
 import { BILLING_CURRENCY } from "@/modules/config";
 import { DEFAULT_LOCALE } from "@/i18n/config";
 import { AgentOSProvisioningBase, type AgentOSProvisioningViewProps } from "./component";
@@ -40,6 +43,12 @@ type AgentOSFlow = {
   readonly subject: string;
   readonly detail: string;
 } | {
+  readonly phase: "payment_unknown";
+  readonly orderId: string;
+  readonly subject: string;
+  readonly detail: string;
+  readonly reason: string;
+} | {
   readonly phase: "accepted";
   readonly orderId: string;
   readonly subject: string;
@@ -50,6 +59,12 @@ type AgentOSFlow = {
   readonly workspaceId: string;
   readonly subject: string;
   readonly detail: string;
+} | {
+  readonly phase: "provisioning_unknown";
+  readonly orderId: string;
+  readonly subject: string;
+  readonly detail: string;
+  readonly reason: string;
 } | {
   readonly phase: "ready";
   readonly orderId: string;
@@ -64,87 +79,188 @@ type AgentOSFlow = {
   readonly reason: string;
   readonly atStep: 0 | 1 | 2 | 3;
 };
-const workspacePhase = (status: string): "preparing" | "ready" | "failed" => {
-  if (status === "active" || status === "ready") return "ready";
-  if (status === "failed") return "failed";
-  return "preparing";
-};
 
 /** The namespaced copy reader, so the settlement below can read the same strings off the surface. */
 type ProvisioningCopy = ReturnType<typeof useTranslations>;
 
-/** The three owner-scoped snapshots one order is settled against. */
-type ProvisioningSnapshot = {
-  readonly orders: ReadonlyArray<CatalogOrderRow>;
-  readonly invoices: ReadonlyArray<InvoiceRow>;
-  readonly workspaces: ReadonlyArray<AgentWorkspaceRow>;
+/** Order lifecycle positions an order row can only reach after its payment settled. */
+const ORDER_SETTLED: ReadonlySet<string> = new Set(["active", "completed", "in_progress", "paid"]);
+
+/**
+ * Assemble one source-qualified purchase status out of the three owner-scoped snapshots.
+ *
+ * This mirrors `readWorkspacePurchaseStatus` in the workspace-controlplane seam fact for fact:
+ * each source keeps its own name, a refused source reports "unavailable" rather than a verdict,
+ * a missing invoice is "not-raised", a missing workspace is "not-admitted", and only a persisted
+ * invoice status of "paid" reports paid. When no source answered at all the read fails closed.
+ */
+const purchaseStatusOf = (orderId: string, orders: Result<ReadonlyArray<CatalogOrderRow>> | undefined, invoices: Result<ReadonlyArray<InvoiceRow>> | undefined, workspaces: Result<ReadonlyArray<AgentWorkspaceRow>> | undefined): Result<WorkspacePurchaseStatus> => {
+  if (orders?.ok !== true && invoices?.ok !== true && workspaces?.ok !== true) {
+    return {
+      ok: false,
+      reason: orders?.ok === false ? orders.reason : invoices?.ok === false ? invoices.reason : workspaces?.ok === false ? workspaces.reason : "unavailable"
+    };
+  }
+  const order = orders?.ok === true ? orders.data.find(candidate => candidate.id === orderId) : undefined;
+  const invoice = invoices?.ok === true ? invoices.data.find(candidate => candidate.catalogOrder?.id === orderId) : undefined;
+  const workspace = workspaces?.ok === true ? workspaces.data.find(candidate => candidate.catalogOrder?.id === orderId) : undefined;
+  return {
+    ok: true,
+    data: {
+      purchaseId: orderId,
+      observedAt: new Date().toISOString(),
+      order: orders?.ok !== true ? {
+        state: "unavailable",
+        code: orders?.ok === false ? orders.code ?? null : null
+      } : order === undefined ? {
+        state: "missing"
+      } : {
+        state: "observed",
+        status: order.status,
+        offerName: order.catalogItem?.name ?? null,
+        tierName: order.catalogTier?.name ?? null
+      },
+      payment: invoices?.ok !== true ? {
+        state: "unavailable",
+        code: invoices?.ok === false ? invoices.code ?? null : null
+      } : invoice === undefined ? {
+        state: "not-raised"
+      } : {
+        state: "observed",
+        invoiceId: invoice.id,
+        status: invoice.status,
+        amountVnd: invoice.amountVnd,
+        paidAt: invoice.paidAt
+      },
+      provisioning: workspaces?.ok !== true ? {
+        state: "unavailable",
+        code: workspaces?.ok === false ? workspaces.code ?? null : null
+      } : workspace === undefined ? {
+        state: "not-admitted"
+      } : {
+        state: "observed",
+        workspaceId: workspace.id,
+        workspaceName: workspace.name,
+        workspaceStatus: workspace.status
+      }
+    }
+  };
 };
 
 /**
- * Read one order out of a settled snapshot and say which phase it leaves the flow in.
+ * Settle one source-qualified purchase status into the phase the flow is standing on.
  *
- * The workspace answers first because it is the later fact: once one exists, the order and the
- * invoice behind it have already been spent and no longer decide anything.
+ * A refused read is an unknown phase with a safe reconcile action, never a terminal verdict; only
+ * a persisted `paid` invoice or an order already past payment reports payment settled; and only a
+ * bound ready workspace exposes the ready phase.
  */
-const settleOrder = (orderId: string, snapshot: ProvisioningSnapshot, t: ProvisioningCopy, productName: string): AgentOSFlow => {
-  const order = snapshot.orders.find(candidate => candidate.id === orderId);
-  if (order === undefined) {
+const phaseFromStatus = (status: WorkspacePurchaseStatus, t: ProvisioningCopy, productName: string): AgentOSFlow => {
+  const purchaseId = status.purchaseId;
+  const order = status.order;
+  if (order.state === "unavailable") {
+    return {
+      phase: "payment_unknown",
+      orderId: purchaseId,
+      subject: productName,
+      detail: purchaseId,
+      reason: order.code ?? t("failedLoad")
+    };
+  }
+  if (order.state === "missing") {
     return {
       phase: "failed",
-      orderId,
+      orderId: purchaseId,
       subject: productName,
-      detail: orderId,
+      detail: purchaseId,
       reason: t("agentos.orderMissing"),
       atStep: 0
     };
   }
-  const detail = order.catalogTier?.name ?? orderId;
-  const workspace = snapshot.workspaces.find(candidate => candidate.catalogOrder?.id === orderId);
-  if (workspace !== undefined) {
-    const phase = workspacePhase(workspace.status);
-    if (phase === "failed") {
-      return {
-        phase: "failed",
-        orderId,
-        subject: productName,
-        detail: workspace.id,
-        reason: t("failedProvision"),
-        atStep: 2
-      };
-    }
-    return {
-      phase,
-      orderId,
-      workspaceId: workspace.id,
-      subject: productName,
-      detail: workspace.name ?? workspace.id
-    };
-  }
-  const invoice = snapshot.invoices.find(candidate => candidate.catalogOrder?.id === orderId);
-  if (order.status === "pending_payment" || invoice?.status === "unpaid") {
-    return {
-      phase: "awaiting_payment",
-      orderId,
-      invoiceId: invoice?.id ?? null,
-      subject: productName,
-      detail
-    };
-  }
-  if (order.status === "cancelled") {
+  const detail = order.tierName ?? order.offerName ?? purchaseId;
+  if (order.status === "cancelled" || order.status === "suspended") {
     return {
       phase: "failed",
-      orderId,
+      orderId: purchaseId,
       subject: productName,
       detail,
       reason: t("agentos.orderCancelled"),
       atStep: 1
     };
   }
+  const payment = status.payment;
+  if (payment.state === "observed" && payment.status === "unpaid") {
+    return {
+      phase: "awaiting_payment",
+      orderId: purchaseId,
+      invoiceId: payment.invoiceId,
+      subject: productName,
+      detail
+    };
+  }
+  if (payment.state === "observed" && payment.status === "cancelled") {
+    return {
+      phase: "failed",
+      orderId: purchaseId,
+      subject: productName,
+      detail,
+      reason: t("agentos.orderCancelled"),
+      atStep: 1
+    };
+  }
+  const paid = payment.state === "observed" && payment.status === "paid" || ORDER_SETTLED.has(order.status);
+  if (!paid) {
+    if (payment.state === "unavailable") {
+      return {
+        phase: "payment_unknown",
+        orderId: purchaseId,
+        subject: productName,
+        detail,
+        reason: payment.code ?? t("failedLoad")
+      };
+    }
+    return {
+      phase: "awaiting_payment",
+      orderId: purchaseId,
+      invoiceId: null,
+      subject: productName,
+      detail
+    };
+  }
+  const provisioning = status.provisioning;
+  if (provisioning.state === "unavailable") {
+    return {
+      phase: "provisioning_unknown",
+      orderId: purchaseId,
+      subject: productName,
+      detail,
+      reason: provisioning.code ?? t("failedLoad")
+    };
+  }
+  if (provisioning.state === "not-admitted") {
+    return {
+      phase: "accepted",
+      orderId: purchaseId,
+      subject: productName,
+      detail
+    };
+  }
+  const workspaceDetail = provisioning.workspaceName ?? provisioning.workspaceId;
+  if (provisioning.workspaceStatus === "failed") {
+    return {
+      phase: "failed",
+      orderId: purchaseId,
+      subject: productName,
+      detail: workspaceDetail,
+      reason: t("failedProvision"),
+      atStep: 2
+    };
+  }
   return {
-    phase: "accepted",
-    orderId,
+    phase: provisioning.workspaceStatus === "active" || provisioning.workspaceStatus === "ready" ? "ready" : "preparing",
+    orderId: purchaseId,
+    workspaceId: provisioning.workspaceId,
     subject: productName,
-    detail
+    detail: workspaceDetail
   };
 };
 
@@ -154,7 +270,7 @@ const realtimeTarget = (flow: AgentOSFlow): ProvisioningTarget | null => {
     kind: "workspace",
     id: flow.workspaceId
   };
-  if (flow.phase === "awaiting_payment" || flow.phase === "accepted") return {
+  if (flow.phase === "awaiting_payment" || flow.phase === "payment_unknown" || flow.phase === "accepted" || flow.phase === "provisioning_unknown") return {
     kind: "order",
     id: flow.orderId
   };
@@ -164,9 +280,8 @@ const realtimeTarget = (flow: AgentOSFlow): ProvisioningTarget | null => {
 /** Which of the four customer outcomes the flow is standing on. A failure keeps its outcome. */
 const phaseIndexOf = (flow: AgentOSFlow): number => {
   if (flow.phase === "catalog_loading" || flow.phase === "request" || flow.phase === "submitting") return 0;
-  if (flow.phase === "awaiting_payment") return 1;
-  if (flow.phase === "accepted") return 2;
-  if (flow.phase === "preparing") return 2;
+  if (flow.phase === "awaiting_payment" || flow.phase === "payment_unknown") return 1;
+  if (flow.phase === "accepted" || flow.phase === "preparing" || flow.phase === "provisioning_unknown") return 2;
   if (flow.phase === "failed") return flow.atStep;
   return 3;
 };
@@ -192,12 +307,13 @@ const walletTargetOf = (orderId: string, invoiceId: string | null, locale: strin
   return `/wallet?${query.toString()}`;
 };
 
-/** Own the real order → payment → workspace lifecycle and its matching Socket.IO target. */
+/** Own the real purchase → payment → workspace lifecycle and its matching Socket.IO target. */
 export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
   const {
     context
   }: AgentOSProvisioningProps = props;
   const t = useTranslations("console.provisioningFlows");
+  const tShared = useTranslations("console");
   const format = useFormatter();
   const locale = useLocale();
   const router = useRouter();
@@ -208,6 +324,9 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
     phase: "catalog_loading"
   });
   const [aiRetryPending, setAiRetryPending] = useState(false);
+  const [entryPending, setEntryPending] = useState(false);
+  const [entryRefusal, setEntryRefusal] = useState<string | null>(null);
+  const [reconciling, setReconciling] = useState(false);
   const orderAgentos = useMutateOrderAgentosSwr();
   const contextMode = context.mode;
   const resumeOrderId = context.mode === "resume" ? context.orderId : null;
@@ -220,28 +339,34 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
   const refreshInvoices = invoicesQuery.mutate;
   const refreshWorkspaces = workspacesQuery.mutate;
   const readyWorkspaceId = flow.phase === "ready" ? flow.workspaceId : undefined;
+  const issueWorkspaceLaunch = useMutateIssueAgentWorkspaceAppLaunchSwr(readyWorkspaceId ?? "");
   const aiReadinessQuery = useQueryMyAgentosAiKnowledgeReadinessSwr(readyWorkspaceId, aiRetryPending);
   const retryReadiness = useMutateRunAgentosAiReadinessTestSwr(readyWorkspaceId);
   const refreshAiReadiness = aiReadinessQuery.mutate;
   const aiReadiness = nivoQueryData(aiReadinessQuery.data);
   const reconcile = useCallback(async (orderId: string) => {
-    const [orders, invoices, workspaces] = await Promise.all([refreshOrders(), refreshInvoices(), refreshWorkspaces()]);
-    if (orders?.ok !== true || invoices?.ok !== true || workspaces?.ok !== true) {
-      setFlow({
-        phase: "failed",
+    setReconciling(true);
+    try {
+      const [orders, invoices, workspaces] = await Promise.all([refreshOrders(), refreshInvoices(), refreshWorkspaces()]);
+      const status = purchaseStatusOf(orderId, orders, invoices, workspaces);
+      setFlow(status.ok ? phaseFromStatus(status.data, t, productName) : {
+        phase: "payment_unknown",
         orderId,
         subject: productName,
         detail: orderId,
-        reason: t("failedLoad"),
-        atStep: 0
+        reason: status.reason
       });
-      return;
+    } catch {
+      setFlow({
+        phase: "payment_unknown",
+        orderId,
+        subject: productName,
+        detail: orderId,
+        reason: t("failedLoad")
+      });
+    } finally {
+      setReconciling(false);
     }
-    setFlow(settleOrder(orderId, {
-      orders: orders.data,
-      invoices: invoices.data,
-      workspaces: workspaces.data
-    }, t, productName));
   }, [productName, refreshInvoices, refreshOrders, refreshWorkspaces, t]);
   useEffect(() => {
     const catalogue = catalogQuery.data;
@@ -252,7 +377,7 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
         orderId: null,
         subject: productName,
         detail: "",
-        reason: t("failedLoad"),
+        reason: catalogue.ok ? t("failedLoad") : catalogue.reason,
         atStep: 0
       });
       return;
@@ -270,22 +395,14 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
   useEffect(() => {
     if (!isResume || accessToken === null || resumeOrderId === null) return;
     if (ordersQuery.data === undefined || invoicesQuery.data === undefined || workspacesQuery.data === undefined) return;
-    if (!ordersQuery.data.ok || !invoicesQuery.data.ok || !workspacesQuery.data.ok) {
-      setFlow({
-        phase: "failed",
-        orderId: resumeOrderId,
-        subject: productName,
-        detail: resumeOrderId,
-        reason: t("failedLoad"),
-        atStep: 0
-      });
-      return;
-    }
-    setFlow(settleOrder(resumeOrderId, {
-      orders: ordersQuery.data.data,
-      invoices: invoicesQuery.data.data,
-      workspaces: workspacesQuery.data.data
-    }, t, productName));
+    const status = purchaseStatusOf(resumeOrderId, ordersQuery.data, invoicesQuery.data, workspacesQuery.data);
+    setFlow(status.ok ? phaseFromStatus(status.data, t, productName) : {
+      phase: "payment_unknown",
+      orderId: resumeOrderId,
+      subject: productName,
+      detail: resumeOrderId,
+      reason: status.reason
+    });
   }, [accessToken, invoicesQuery.data, isResume, ordersQuery.data, productName, resumeOrderId, t, workspacesQuery.data]);
   const target = realtimeTarget(flow);
   const realtime = useProvisioningRealtime({
@@ -300,18 +417,19 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
     }
     if (realtime.event.kind !== "workspace") return;
     const event = realtime.event;
-    const phase = workspacePhase(event.status);
     setFlow(current => {
       if (current.phase !== "preparing" && current.phase !== "ready") return current;
-      if (phase === current.phase) return current;
-      if (phase === "failed") return {
+      if (current.workspaceId !== event.id) return current;
+      if (event.status === "failed") return {
         phase: "failed",
         orderId: current.orderId,
         subject: current.subject,
         detail: current.detail,
         reason: event.reason ?? t("failedProvision"),
-        atStep: 3
+        atStep: 2
       };
+      const phase = event.status === "active" || event.status === "ready" ? "ready" : "preparing";
+      if (phase === current.phase) return current;
       return {
         ...current,
         phase
@@ -319,16 +437,9 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
     });
   }, [realtime, reconcile, t]);
   useEffect(() => {
-    if (flow.phase !== "accepted") return;
-    const timer = window.setInterval(() => {
-      void reconcile(flow.orderId);
-    }, 4000);
-    return () => window.clearInterval(timer);
-  }, [flow, reconcile]);
-  useEffect(() => {
-    if (flow.phase !== "preparing") return;
-    // Socket.IO is the fast path, while the owner-scoped GraphQL snapshot is the recovery path
-    // for a tab that reconnects after a terminal Kafka event has already been relayed.
+    if (flow.phase !== "awaiting_payment" && flow.phase !== "accepted" && flow.phase !== "preparing") return;
+    // Socket.IO is the fast path, while the owner-scoped snapshot is the recovery path
+    // for a tab that reconnects after a terminal event has already been relayed.
     const timer = window.setInterval(() => {
       void reconcile(flow.orderId);
     }, 4000);
@@ -338,6 +449,9 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
     if (contextMode !== "resume" || resumeOrderId === null || realtime.status !== "connected") return;
     void reconcile(resumeOrderId);
   }, [contextMode, realtime.status, reconcile, resumeOrderId]);
+  useEffect(() => {
+    if (flow.phase !== "ready") setEntryRefusal(null);
+  }, [flow.phase]);
   const submit = async () => {
     if (flow.phase !== "request" || flow.item === null || (flow.item.tiers?.length ?? 0) > 0 && flow.tier === null) return;
     setFlow({
@@ -362,14 +476,13 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
         });
         return;
       }
-      const next = {
-        phase: "awaiting_payment" as const,
+      setFlow({
+        phase: "awaiting_payment",
         orderId: order.data.id,
         invoiceId: null,
         subject: productName,
         detail: order.data.catalogTier?.name ?? flow.tier?.name ?? order.data.id
-      };
-      setFlow(next);
+      });
       router.replace(`/agentos/orders/${order.data.id}`);
     } catch {
       setFlow({
@@ -392,6 +505,26 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
     const tier = current.item.tiers?.find(candidate => candidate.id === id) ?? null;
     return { ...current, tier };
   });
+  const enterWorkspace = async () => {
+    if (readyWorkspaceId === undefined || entryPending) return;
+    setEntryPending(true);
+    setEntryRefusal(null);
+    try {
+      const grant = await issueWorkspaceLaunch.trigger();
+      if (!grant.ok) {
+        setEntryRefusal(grant.reason);
+        return;
+      }
+      const destination = safeWorkspaceAppRedirect(grant.data.redirectUrl);
+      if (destination === null) {
+        setEntryRefusal(tShared("refusal.unknown"));
+        return;
+      }
+      followWorkspaceAppRedirect(destination);
+    } finally {
+      setEntryPending(false);
+    }
+  };
   const phaseIndex = phaseIndexOf(flow);
   const stepLabels = [t("steps.request"), t("steps.payment"), t("steps.createWorkspace"), t("steps.ready")];
   const stateLabels = {
@@ -498,11 +631,12 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
         subject: readyFlow.subject,
         detail: readyFlow.detail,
         statusTitle: t("readyTitle"),
-        statusText: t("agentos.aiReady"),
-        statusActionLabel: t("agentos.manage")
+        statusText: entryRefusal ?? t("agentos.aiReady"),
+        statusActionLabel: t("agentos.manage"),
+        isRequestPending: entryPending
       },
       on: {
-        statusAction: () => router.push(`/agentos/workspaces/${readyFlow.workspaceId}?view=ai-knowledge`)
+        statusAction: () => void enterWorkspace()
       }
     };
     const operationsSettled = aiReadiness?.readinessOperationId === null && aiReadiness.knowledgeRecoveryOperationId === null;
@@ -538,6 +672,24 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
       }
     };
   };
+  const unknownView = (unknownFlow: Extract<AgentOSFlow, {
+    readonly phase: "payment_unknown" | "provisioning_unknown";
+  }>): AgentOSProvisioningViewProps => ({
+    state: unknownFlow.phase,
+    props: {
+      ...viewLabels,
+      steps,
+      subject: unknownFlow.subject,
+      detail: unknownFlow.detail,
+      statusTitle: unknownFlow.phase === "payment_unknown" ? t("agentos.paymentTitle") : t("agentos.acceptedTitle"),
+      statusText: unknownFlow.reason,
+      statusActionLabel: tShared("agentos.retry"),
+      isRequestPending: reconciling
+    },
+    on: {
+      statusAction: () => void reconcile(unknownFlow.orderId)
+    }
+  });
   const view = (): AgentOSProvisioningViewProps => {
     switch (flow.phase) {
       case "catalog_loading":
@@ -591,6 +743,9 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
             }
           };
         }
+      case "payment_unknown":
+      case "provisioning_unknown":
+        return unknownView(flow);
       case "ready":
         return readyView(flow);
       case "accepted":
