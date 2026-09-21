@@ -47,3 +47,4 @@ export const LANDING_COPY = {
   },
   offer: { eyebrow: "NIVO Agentic OS", title: "NIVO Agentic OS", body: "Hệ điều hành trách nhiệm cho tổ chức AI-native.", plan: "NIVO START", price: "499.000", unit: " VND / tháng", benefits: ["Rõ ngữ cảnh, đúng trách nhiệm", "Bằng chứng tự động, kết quả được kiểm chứng", "Niềm tin được tạo ra, hiệu suất được nhân lên"], href: "mailto:hello@nivo.vn?subject=Đặt lịch demo NIVO", note: "Không cần thẻ. Dừng bất cứ lúc nào." }
 } as const;
+
