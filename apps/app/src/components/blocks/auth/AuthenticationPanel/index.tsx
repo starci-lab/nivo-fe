@@ -1,6 +1,6 @@
 import { useRef, useState, type SubmitEvent } from "react";
 import { Checkbox, nivoIconSource } from "@nivo/ui";
-import { Button, Divider, Heading, Icon, Input, Label, OtpInput, Progress, Text, TextAction } from "@starci/grammar/common";
+import { Button, Divider, Heading, Icon, Input, Label, OtpInput, Progress, Text, TextAction, type IconSourceProps } from "@starci/grammar/common";
 import {
   AUTH_PANEL_CLASS_NAME,
   AUTH_PANEL_DETAILS_CLASS_NAME,
@@ -200,6 +200,9 @@ export type AuthCodeCopy = AuthFrame & {
   readonly cooldownLabel: string;
   /** The way back to the first step. */
   readonly backLabel: string;
+  /** The last line: a question, and the answer that switches journey. Both name signing in here. */
+  readonly promptQuestion: string;
+  readonly promptAction: string;
 };
 
 /** Copy for the second-factor step: the same six slots, nothing mailed, no resend. */
@@ -317,6 +320,22 @@ const PROVIDERS: readonly {
   icon: "github"
 }];
 
+/**
+ * The refusal mark the direction draws ahead of a refused-code sentence: a circle carrying an
+ * exclamation, stroked in `currentColor` so the field's accent tone owns the paint. The shared
+ * name-to-glyph registry lives outside this block, so this glyph stays local and still crosses
+ * Grammar's `Icon` boundary like every other app-owned source.
+ */
+const RefusalGlyph = (props: IconSourceProps) => <svg
+  viewBox="0 0 16 16"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  {...props}>
+    <circle cx="8" cy="8" r="6.25" stroke="currentColor" strokeWidth={1.5} />
+    <path stroke="currentColor" strokeLinecap="round" strokeWidth={1.5} d="M8 4.75v3.5" />
+    <circle cx="8" cy="11.25" r="1" fill="currentColor" />
+  </svg>;
+
 /** What the labelled six-slot code field needs. */
 type OtpFieldProps = {
   /** The input's id. */
@@ -354,7 +373,17 @@ const OtpField = (props: OtpFieldProps) => <div className={AUTH_PANEL_OTP_FIELD_
       describedBy={`${props.labelId} ${props.statusId}`}
       onChange={props.onValue}
     />
-    <Text id={props.statusId} size="sm" tone="muted" live={props.isError ? "assertive" : "polite"}>{props.message}</Text>
+    {/*
+      * A refusal is not a hint: the accent tone and the leading mark make the line read as a
+      * refusal without relying on colour alone, and `assertive` keeps it announced.
+      */}
+    <Text
+      id={props.statusId}
+      size="sm"
+      tone={props.isError ? "accent" : "muted"}
+      live={props.isError ? "assertive" : "polite"}
+      startContent={props.isError ? <Icon source={RefusalGlyph} usage="chip" /> : undefined}
+    >{props.message}</Text>
   </div>;
 
 /**
@@ -471,8 +500,8 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
                                   label={copy.codeLabel}
                                   labelId={CODE_LABEL_ID}
                                   statusId={CODE_STATUS_ID}
-                                  message={fieldErrors.otp ?? copy.codeHint}
-                                  isError={fieldErrors.otp !== undefined}
+                                  message={fieldErrors.otp ?? (copy.isError && copy.statusMessage !== "" ? copy.statusMessage : copy.codeHint)}
+                                  isError={fieldErrors.otp !== undefined || copy.isError}
                                   isPending={copy.isPending}
                                   onValue={value => {
                 values.current.otp = value;
@@ -515,10 +544,11 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
                 values.current.confirmNewPassword = value;
                 clearFieldError("confirmNewPassword");
               }}
-            />]), ...(status === undefined ? [] : [status]), <Button
+            />]), ...(status === undefined || copy.isError ? [] : [status]), <Button
               key="submit"
               variant="primary"
               type="submit"
+              width="fill"
               isDisabled={copy.isPending}
               isPending={copy.pendingAction === "submit"}
             >{copy.submitLabel}</Button>]}</div>
@@ -533,7 +563,12 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
             {isCoolingDown ? copy.cooldownLabel : copy.resendLabel}
           </TextAction>
 
-          <TextAction size="sm" onPress={props.on?.back}>{copy.backLabel}</TextAction></div></></div>;
+          <TextAction size="sm" onPress={props.on?.back}>{copy.backLabel}</TextAction></div><div className={AUTH_PANEL_FOOTER_CLASS_NAME}>
+
+      <Text size="sm" tone="muted">{copy.promptQuestion}</Text>
+
+
+      <TextAction size="sm" onPress={() => props.on?.changeMode?.("signIn")}>{copy.promptAction}</TextAction></div></></div>;
   }
   const copy = props.props;
   const isSignUp = copy.mode === "signUp";

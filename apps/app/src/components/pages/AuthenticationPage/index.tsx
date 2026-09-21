@@ -576,7 +576,9 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
           cooldownLabel: cooldownSeconds === 0 ? "" : t("cooldownLabel", {
             seconds: cooldownSeconds
           }),
-          backLabel: t("backLabel")
+          backLabel: t("backLabel"),
+          promptQuestion: t(`${mode}.promptQuestion`),
+          promptAction: t(`${mode}.promptAction`)
         },
         on: actions
       };
