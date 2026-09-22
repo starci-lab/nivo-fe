@@ -10,6 +10,7 @@ import {
   orderAgentOs,
   payInvoice,
   type AgentWorkspaceAppLaunch,
+  type AgentWorkspaceRow,
   type CatalogCategory,
   type CatalogItemRow,
   type CatalogOrderStatus,
@@ -340,17 +341,22 @@ const WORKSPACE_PROVISIONING_SAGA_STEP = "{ id stepKey ordinal isCompensable for
 export const listWorkspacePurchaseOffers = (category: CatalogCategory): Promise<Result<ReadonlyArray<WorkspacePurchaseOffer>>> => catalogItems(category);
 
 /**
- * Admit one purchase of a selected offer (contract operation `start-checkout`).
- *
- * THE ORDER ROW THE BACKEND RETURNS IS THE PURCHASE: its id is the stable purchase identity and an
- * exact repeat of the same admitted checkout returns the same row rather than a second purchase.
- * No payment is claimed by this call - paying is a separate, explicitly reconciled action.
- *
- * @param offerSlug - The selected offer's address fragment.
- * @param tierId - The selected rung, when the offer is tiered.
- * @returns The admitted purchase, or why checkout was refused.
+ * Order statuses whose purchase is still the same admitted checkout. A repeat inside the reuse
+ * window resolves to that receipt rather than a second purchase; `cancelled` and `suspended` are
+ * absent on purpose - a terminal purchase admits a fresh checkout.
  */
-export const startWorkspaceCheckout = async (offerSlug: string, tierId?: string): Promise<Result<WorkspacePurchaseReceipt>> => {
+const REUSABLE_ORDER_STATUSES: ReadonlySet<CatalogOrderStatus> = new Set(["active", "completed", "in_progress", "pending_payment"]);
+
+/** How long an exact repeat of one admitted checkout resolves to the receipt it already earned. */
+const CHECKOUT_RECEIPT_TTL_MS = 10 * 60 * 1000;
+
+/** Checkouts still in flight, keyed by their canonical request meaning: offer slug plus rung. */
+const checkoutInFlight = new Map<string, Promise<Result<WorkspacePurchaseReceipt>>>();
+
+/** Receipts recent checkouts earned; a repeat re-reads the purchase before it may reuse one. */
+const checkoutReceipts = new Map<string, { readonly at: number; readonly receipt: WorkspacePurchaseReceipt }>();
+
+const admitWorkspaceCheckout = async (offerSlug: string, tierId?: string): Promise<Result<WorkspacePurchaseReceipt>> => {
   const order = await orderAgentOs(offerSlug, tierId);
   if (!order.ok) return order;
   return {
@@ -362,6 +368,52 @@ export const startWorkspaceCheckout = async (offerSlug: string, tierId?: string)
       tier: order.data.catalogTier
     }
   };
+};
+
+/**
+ * Admit one purchase of a selected offer (contract operation `start-checkout`).
+ *
+ * THE ORDER ROW THE BACKEND RETURNS IS THE PURCHASE: its id is the stable purchase identity and an
+ * exact repeat of the same admitted checkout returns the same row rather than a second purchase.
+ * No payment is claimed by this call - paying is a separate, explicitly reconciled action.
+ *
+ * DOUBLE-SUBMIT SAFETY IS BOUNDED, NOT INFINITE. A repeat while the first request is in flight
+ * joins that request, and a repeat inside the reuse window resolves to the recorded receipt only
+ * after re-reading the purchase and finding it still standing - a terminal purchase admits a
+ * fresh checkout and an unverifiable one refuses rather than creating a blind second charge. A
+ * repeat from another tab or device cannot be deduplicated here; the canonical order mutation
+ * accepts no caller idempotency key, so only the backend can make cross-session repeats safe.
+ *
+ * @param offerSlug - The selected offer's address fragment.
+ * @param tierId - The selected rung, when the offer is tiered.
+ * @returns The admitted purchase, or why checkout was refused.
+ */
+export const startWorkspaceCheckout = async (offerSlug: string, tierId?: string): Promise<Result<WorkspacePurchaseReceipt>> => {
+  const checkoutKey = `${offerSlug}:${tierId ?? ""}`;
+  const recorded = checkoutReceipts.get(checkoutKey);
+  if (recorded !== undefined && Date.now() - recorded.at < CHECKOUT_RECEIPT_TTL_MS) {
+    const status = await readWorkspacePurchaseStatus(recorded.receipt.purchaseId);
+    if (!status.ok) return status;
+    if (status.data.order.state === "observed") {
+      if (REUSABLE_ORDER_STATUSES.has(status.data.order.status)) return { ok: true, data: recorded.receipt };
+      checkoutReceipts.delete(checkoutKey);
+    } else if (status.data.order.state === "missing") {
+      checkoutReceipts.delete(checkoutKey);
+    } else {
+      return { ok: false, reason: status.data.order.code ?? "purchase source unavailable", code: status.data.order.code ?? undefined };
+    }
+  }
+  const pending = checkoutInFlight.get(checkoutKey);
+  if (pending !== undefined) return pending;
+  const admitted = admitWorkspaceCheckout(offerSlug, tierId);
+  checkoutInFlight.set(checkoutKey, admitted);
+  try {
+    const result = await admitted;
+    if (result.ok) checkoutReceipts.set(checkoutKey, { at: Date.now(), receipt: result.data });
+    return result;
+  } finally {
+    checkoutInFlight.delete(checkoutKey);
+  }
 };
 
 /**
@@ -504,3 +556,24 @@ export const cancelWorkspaceProvisioningSaga = (sagaId: string): Promise<Result<
  * @returns The launch grant, or why entry was refused.
  */
 export const resolvePurchasedWorkspaceEntry = (workspaceId: string): Promise<Result<PurchasedWorkspaceEntry>> => issueAgentWorkspaceAppLaunch(workspaceId);
+
+/**
+ * Ask the backend to re-drive provisioning of one failed workspace (the `retry-provisioning-order`
+ * action).
+ *
+ * THE WORKSPACE ROW IS THE FENCED RETRY IDENTITY. `manageAgentWorkspace` admits `retry_provision`
+ * only while the bound workspace stands in `failed`, lands it back in `provisioning`, and refuses
+ * every other lifecycle position - so a repeat can never admit a second workspace or resurrect a
+ * terminal one. The saga-level `retryProvisioningSaga` mutation remains for callers that already
+ * hold a saga identity; the purchase-status surface observes only the workspace row, and this is
+ * the owner-scoped recovery the backend published for exactly that observation.
+ *
+ * @param workspaceId - The failed workspace reported by {@link readWorkspacePurchaseStatus}.
+ * @returns The workspace row as it now stands, or why the retry was refused.
+ */
+export const retryWorkspaceProvisioningOrder = (workspaceId: string): Promise<Result<AgentWorkspaceRow>> => graphql(`mutation ManageAgentWorkspace($input: ManageAgentWorkspaceInput!) { manageAgentWorkspace(input: $input) { data { id name status catalogOrder { id } } message success error } }`, {
+  input: {
+    agentWorkspaceId: workspaceId,
+    action: "retry_provision"
+  }
+});
