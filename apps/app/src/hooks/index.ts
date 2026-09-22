@@ -100,5 +100,6 @@ export { useMutateStartAgentosCustomModuleIntakeSwr } from "./swr/mutations/cons
 export { useMutateBindChatbotChannelSwr } from "./swr/mutations/workspace-controlplane"
 export { useMutateReconcileChatbotDeliverySwr } from "./swr/mutations/workspace-controlplane"
 export { useMutateResolveChatbotHandoffSwr } from "./swr/mutations/workspace-controlplane"
+export { useMutateRetryWorkspaceProvisioningOrderSwr } from "./swr/mutations/workspace-controlplane"
 export { useMutateSetChatbotHandoffSwr } from "./swr/mutations/workspace-controlplane"
 export { useMutateStartChatbotZaloOauthSwr } from "./swr/mutations/workspace-controlplane"

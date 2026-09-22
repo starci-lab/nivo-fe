@@ -1,8 +1,9 @@
 "use client";
 
-import { bindChatbotChannel, reconcileChatbotDelivery, resolveChatbotHandoff, setChatbotHandoff, startChatbotZaloOauth } from "@/modules/api/workspace-controlplane";
+import { bindChatbotChannel, reconcileChatbotDelivery, resolveChatbotHandoff, retryWorkspaceProvisioningOrder, setChatbotHandoff, startChatbotZaloOauth } from "@/modules/api/workspace-controlplane";
 import { useSession } from "@/modules/auth/session";
 import { useNivoMutation } from "../useNivoMutation";
+import { agentWorkspacesQueryKey } from "../queries/console";
 import { chatbotWorkbenchQueryKey, type SupportQueryIdentity } from "../queries/useQueryChatbotWorkbenchSwr";
 type AcceptedAnswer = {
   readonly ok: boolean;
@@ -53,3 +54,8 @@ export const useMutateReconcileChatbotDeliverySwr = (identity: SupportQueryIdent
     invalidates: chatbotInvalidations(identity), shouldInvalidate: accepted
   });
 };
+
+/** Re-drive provisioning of one failed workspace; the workspace row is the fenced retry identity. */
+export const useMutateRetryWorkspaceProvisioningOrderSwr = (workspaceId: string) => useNivoMutation(["agentos", "workspace-provisioning-retry", workspaceId], () => retryWorkspaceProvisioningOrder(workspaceId), {
+  invalidates: [agentWorkspacesQueryKey], shouldInvalidate: accepted
+});
