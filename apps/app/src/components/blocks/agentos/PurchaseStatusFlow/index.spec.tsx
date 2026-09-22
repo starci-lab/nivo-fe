@@ -6,6 +6,7 @@ import enMessages from "../../../../messages/en.json"
 const mocks = vi.hoisted(() => {
     const api = {
         myAgentWorkspace: vi.fn(),
+        myAgentWorkspaceControlCenter: vi.fn(),
         myCatalogOrders: vi.fn(),
         myInvoices: vi.fn(),
         issueAgentWorkspaceAppLaunch: vi.fn(),
@@ -29,7 +30,7 @@ const translate = (key: string, params?: Record<string, unknown>) => {
     return text
 }
 
-type RailProbe = { label?: string, checks?: Array<{ id: string, word: string, mark?: unknown }>, action?: { label: string }, actionCaption?: string, notice?: string, refusalText?: string, outcome?: { title: string, detail?: string }, secondaryLink?: { label: string } }
+type RailProbe = { label?: string, fact?: string, facts?: Array<{ label: string, value: string }>, checks?: Array<{ id: string, word: string, mark?: unknown }>, action?: { label: string }, actionCaption?: string, notice?: string, refusalText?: string, outcome?: { title: string, detail?: string }, secondaryLink?: { label: string } }
 type PrimaryProbe = { label?: string, fact?: string, operation?: { name: string, word: string, progressValue?: number }, action?: { label: string } }
 type FlowProbeProps = {
     state: string
@@ -80,10 +81,24 @@ const flow = () => screen.getByTestId("flow").textContent ?? ""
 const resetQueryCache = () => {
     for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key)
 }
-const snapshot = (overrides: { orders?: unknown[], invoices?: unknown[], workspaces?: unknown[], ordersResult?: unknown, invoicesResult?: unknown, workspacesResult?: unknown } = {}) => {
+const recovery = (attemptCount: number) => ({
+    state: "running", phase: "configure", attemptCount,
+    lastAttemptAt: "2026-09-22T07:34:00.000Z", nextAttemptAt: null, failureCode: null,
+    targetGeneration: "gen-2", requiredSyncRevision: "rev-2", appliedSyncRevision: "rev-1",
+    syncCompletedAt: null, observedAt: "2026-09-22T07:35:00.000Z", recoverableDataScope: "core_retained",
+})
+const controlCenter = (recoveryView: unknown = null) => ({
+    ok: true,
+    data: {
+        workspace: { id: "workspace-1", name: "ops-room", status: "provisioning", externalWorkspaceRef: null },
+        instance: null, apps: [], runtime: null, recovery: recoveryView,
+    },
+})
+const snapshot = (overrides: { orders?: unknown[], invoices?: unknown[], workspaces?: unknown[], ordersResult?: unknown, invoicesResult?: unknown, workspacesResult?: unknown, controlCenterResult?: unknown } = {}) => {
     mocks.api.myCatalogOrders.mockResolvedValue(overrides.ordersResult ?? { ok: true, data: overrides.orders ?? [order] })
     mocks.api.myInvoices.mockResolvedValue(overrides.invoicesResult ?? { ok: true, data: overrides.invoices ?? [invoice] })
     mocks.api.myAgentWorkspace.mockResolvedValue(overrides.workspacesResult ?? { ok: true, data: overrides.workspaces ?? [] })
+    mocks.api.myAgentWorkspaceControlCenter.mockResolvedValue(overrides.controlCenterResult ?? controlCenter())
 }
 const paidInvoice = { ...invoice, status: "paid", paidAt: "2026-09-22T07:32:00.000Z" }
 const paidOrder = { ...order, status: "in_progress" }
@@ -176,7 +191,15 @@ describe("PurchaseStatusFlow connected flow", () => {
         expect(flow()).not.toContain("Enter workspace")
         fireEvent.click(screen.getByTestId("primary"))
         await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
+        expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/purchases/purchase-1/provisioning")
         expect(flow()).toContain("Admit provisioning order")
+    })
+
+    it("pins the provisioning surface when the declared route mounts it", async () => {
+        snapshot({ orders: [paidOrder], invoices: [paidInvoice], workspaces: [] })
+        render(<PurchaseStatusFlow purchaseId="purchase-1" surface="provisioning" />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
+        expect(flow()).toContain("Confirmed facts")
     })
 
     it("reports provisioning with the purchase-bound order facts once payment is verified", async () => {
@@ -190,6 +213,73 @@ describe("PurchaseStatusFlow connected flow", () => {
         expect(flow()).toContain("Refresh status")
         expect(flow()).toContain("Entry unavailable until readiness is confirmed")
         expect(flow()).toContain('{"id":"provisioning","label":"Provisioning","isCurrent":true}')
+    })
+
+    it("renders the owner identity row and withholds the unbound attempt value", async () => {
+        snapshot({ orders: [paidOrder], invoices: [paidInvoice], workspaces: [workspace] })
+        render(<PurchaseStatusFlow purchaseId="purchase-1" />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
+        expect(flow()).toContain('"facts":[{"label":"Owner","value":"—"},{"label":"Attempt","value":"—"}]')
+        expect(flow()).not.toContain('"secondaryLink"')
+        expect(flow()).toContain('"escapeLink":{"label":"Return to workspace list","href":"/agentos/workspaces"}')
+    })
+
+    it("binds the fenced attempt from the bound workspace's recovery read", async () => {
+        snapshot({ orders: [paidOrder], invoices: [paidInvoice], workspaces: [workspace], controlCenterResult: controlCenter(recovery(3)) })
+        render(<PurchaseStatusFlow purchaseId="purchase-1" />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
+        await waitFor(() => expect(flow()).toContain('"facts":[{"label":"Owner","value":"—"},{"label":"Attempt","value":"3"}]'))
+        expect(flow()).toContain('"fact":"Attempt 3"')
+        expect(mocks.api.myAgentWorkspaceControlCenter).toHaveBeenCalledWith("workspace-1")
+    })
+
+    it("keeps the attempt withheld when the bound workspace carries no recovery row", async () => {
+        snapshot({ orders: [paidOrder], invoices: [paidInvoice], workspaces: [workspace] })
+        render(<PurchaseStatusFlow purchaseId="purchase-1" />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
+        await waitFor(() => expect(mocks.api.myAgentWorkspaceControlCenter).toHaveBeenCalledWith("workspace-1"))
+        expect(flow()).toContain('"label":"Attempt","value":"—"')
+        expect(flow()).not.toContain('"fact":"Attempt')
+    })
+
+    it("keeps the attempt withheld when the control-center read is refused", async () => {
+        snapshot({ orders: [paidOrder], invoices: [paidInvoice], workspaces: [workspace], controlCenterResult: { ok: false, reason: "control center refused", code: "CONTROL_CENTER_REFUSED" } })
+        render(<PurchaseStatusFlow purchaseId="purchase-1" />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
+        await waitFor(() => expect(mocks.api.myAgentWorkspaceControlCenter).toHaveBeenCalledWith("workspace-1"))
+        expect(flow()).toContain('"label":"Attempt","value":"—"')
+    })
+
+    it("never issues the control-center read before a workspace row is bound", async () => {
+        snapshot({ orders: [paidOrder], invoices: [paidInvoice], workspaces: [] })
+        render(<PurchaseStatusFlow purchaseId="purchase-1" surface="provisioning" />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
+        expect(mocks.api.myAgentWorkspaceControlCenter).not.toHaveBeenCalled()
+    })
+
+    it("names the provisioning owner from the session token's claims", async () => {
+        const claims = globalThis.btoa(JSON.stringify({ sub: "user-an-nguyen", name: "An Nguyen", preferred_username: "an.nguyen", email: "an.nguyen@northstar.test" }))
+        mocks.session.state = { status: "signed-in", accessToken: `hdr.${claims}.sig` }
+        snapshot({ orders: [paidOrder], invoices: [paidInvoice], workspaces: [workspace] })
+        render(<PurchaseStatusFlow purchaseId="purchase-1" />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
+        expect(flow()).toContain('"label":"Owner","value":"An Nguyen · an.nguyen@northstar.test"')
+    })
+
+    it("keeps the escape action page-level on the failed provisioning state", async () => {
+        snapshot({ orders: [paidOrder], invoices: [paidInvoice], workspaces: [{ ...workspace, status: "failed" }] })
+        render(<PurchaseStatusFlow purchaseId="purchase-1" />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning-failed-retryable"'))
+        expect(flow()).toContain('"escapeLink"')
+        expect(flow()).not.toContain('"secondaryLink"')
+    })
+
+    it("keeps the escape action page-level on the unknown provisioning state", async () => {
+        snapshot({ orders: [paidOrder], invoices: [paidInvoice], workspacesResult: { ok: false, reason: "workspace read refused", code: "WORKSPACES_REFUSED" } })
+        render(<PurchaseStatusFlow purchaseId="purchase-1" />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning-unknown"'))
+        expect(flow()).toContain('"escapeLink"')
+        expect(flow()).not.toContain('"secondaryLink"')
     })
 
     it("keeps a refused workspace read as provisioning-unknown, withholding entry", async () => {

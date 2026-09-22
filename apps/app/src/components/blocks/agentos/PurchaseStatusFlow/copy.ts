@@ -104,6 +104,10 @@ export type PurchaseStatusCopy = {
     readonly enterWorkspaceAction: string;
     readonly returnToList: string;
     readonly backToWorkspaces: string;
+    /** Confirmed-facts row naming the provisioning owner identity. */
+    readonly ownerLabel: string;
+    /** Confirmed-facts row naming the fenced provisioning attempt. */
+    readonly attemptLabel: string;
     readonly changeOffer: string;
     readonly realtimeReconnect: string;
     readonly stateDone: string;
@@ -126,4 +130,6 @@ export type PurchaseStatusCopy = {
     readonly lastObservationSentence: (detail: string, at: string) => string;
     /** Lifecycle label for one workspace provisioning operation status. */
     readonly operationStatus: (status: string) => string;
+    /** Trailing rail fact "Attempt {attempt}" naming the fenced attempt the order stands on. */
+    readonly attemptFact: (attempt: number) => string;
 };

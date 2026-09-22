@@ -61,6 +61,15 @@ export const FACT_CELL_CLASS_NAME = cn(
   "gap-1"
 );
 
+/** One divided confirmed-fact row: muted label left, value right. */
+export const FACT_ROW_CLASS_NAME = cn(
+  "flex",
+  "min-w-0",
+  "items-baseline",
+  "justify-between",
+  "gap-3"
+);
+
 /** One evidence or confirmed-fact row: status badge beside a label/detail column. */
 export const ROW_CLASS_NAME = cn(
   "flex",

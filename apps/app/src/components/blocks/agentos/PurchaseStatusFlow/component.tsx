@@ -1,4 +1,4 @@
-import { BAND_CLASS_NAME, BANNER_CLASS_NAME, BREADCRUMB_LIST_CLASS_NAME, CAPTION_CLASS_NAME, ESCAPE_CLASS_NAME, FACT_CELL_CLASS_NAME, FACT_GRID_CLASS_NAME, NOTICE_CLASS_NAME, ROW_BODY_CLASS_NAME, ROW_CLASS_NAME, ROW_HEAD_CLASS_NAME, SECTIONS_CLASS_NAME } from "./classNames";
+import { BAND_CLASS_NAME, BANNER_CLASS_NAME, BREADCRUMB_LIST_CLASS_NAME, CAPTION_CLASS_NAME, ESCAPE_CLASS_NAME, FACT_CELL_CLASS_NAME, FACT_GRID_CLASS_NAME, FACT_ROW_CLASS_NAME, NOTICE_CLASS_NAME, ROW_BODY_CLASS_NAME, ROW_CLASS_NAME, ROW_HEAD_CLASS_NAME, SECTIONS_CLASS_NAME } from "./classNames";
 import { Badge, Button, EmptyNotice, IconTile, PageContainer, PrimaryRailLayout, Progress, SectionHeader, SurfaceCard, Text, TextAction, type BadgeTone, type IconSource } from "@starci/grammar/common";
 import type { PurchaseStatusCopy } from "./copy";
 
@@ -89,6 +89,8 @@ export type PurchaseStatusRail = {
     readonly fact?: string;
     readonly latestCheck?: string;
     readonly checks: ReadonlyArray<PurchaseStatusCheck>;
+    /** Confirmed identity rows (owner, fenced attempt); each renders as its own divided row. */
+    readonly facts?: ReadonlyArray<PurchaseStatusFact>;
     readonly notice?: string;
     readonly outcome?: {
         readonly title: string;
@@ -143,6 +145,11 @@ export type PurchaseStatusFlowProps = PurchaseStatusFlowViewProps;
 const factCell = (fact: PurchaseStatusFact) => <div key={fact.label} className={FACT_CELL_CLASS_NAME}>
     <Text size="xs" tone="muted">{fact.label}</Text>
     <Text size="sm" overflow="wrap">{fact.value}</Text>
+</div>;
+
+const factRow = (fact: PurchaseStatusFact) => <div className={FACT_ROW_CLASS_NAME}>
+    <Text size="sm" tone="muted">{fact.label}</Text>
+    <Text size="sm" weight="semibold" overflow="wrap">{fact.value}</Text>
 </div>;
 
 const checkRow = (check: PurchaseStatusCheck) => <div key={check.id} className={ROW_CLASS_NAME}>
@@ -214,6 +221,7 @@ const railCard = (rail: PurchaseStatusRail, on: PurchaseStatusActions) => <Surfa
         <Text size="sm" weight="semibold">{rail.latestCheck}</Text>
     </div>}
     {rail.checks.length === 0 ? null : <div className={BAND_CLASS_NAME}>{rail.checks.map(checkRow)}</div>}
+    {rail.facts?.map(fact => <div key={fact.label} className={BAND_CLASS_NAME}>{factRow(fact)}</div>)}
     {rail.notice === undefined ? null : <div className={BAND_CLASS_NAME}>
         <div className={NOTICE_CLASS_NAME}>
             <Badge tone="warning">!</Badge>

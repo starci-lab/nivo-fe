@@ -311,11 +311,44 @@ export type AgentWorkspaceRuntime = {
 };
 
 /**
+ * Owner-safe recovery projection for one workspace, as `AgentWorkspaceRecoveryView` publishes it.
+ * Credentials, target addresses and raw errors are intentionally absent from the wire shape, and
+ * every timestamp arrives serialized as an ISO string.
+ */
+export type AgentWorkspaceRecovery = {
+  /** Recovery lifecycle state; free-form `String!` on the wire, not an enum. */
+  readonly state: string;
+  /** The phase inside that state, when the backend is tracking one. NULLABLE on the wire. */
+  readonly phase: string | null;
+  /** The fenced attempt sequence the workspace's provisioning order has reached. */
+  readonly attemptCount: number;
+  /** When the most recent fenced attempt ran. NULLABLE on the wire. */
+  readonly lastAttemptAt: string | null;
+  /** When the next fenced attempt is scheduled, when one is. NULLABLE on the wire. */
+  readonly nextAttemptAt: string | null;
+  /** The refusal class of the last failed attempt, when it failed. NULLABLE on the wire. */
+  readonly failureCode: string | null;
+  /** The fencing generation the current recovery targets. NULLABLE on the wire. */
+  readonly targetGeneration: string | null;
+  /** The sync revision the workspace must reach. NULLABLE on the wire. */
+  readonly requiredSyncRevision: string | null;
+  /** The sync revision already applied. NULLABLE on the wire. */
+  readonly appliedSyncRevision: string | null;
+  /** When the required sync completed, when it did. NULLABLE on the wire. */
+  readonly syncCompletedAt: string | null;
+  /** When the backend last observed this recovery row. NULLABLE on the wire. */
+  readonly observedAt: string | null;
+  /** The data scope a recovery may restore. */
+  readonly recoverableDataScope: string;
+};
+
+/**
  * Owner-scoped aggregate used by the AgentOS workspace control center.
  *
  * `instance` is null for an owned workspace that has no AgentOS instance yet: the backend answers
  * the workspace and its status, reports both apps unavailable with reason `WORKSPACE_NOT_PROVISIONED`,
- * and carries no runtime. A workspace the account does not own is refused, never answered with a null.
+ * and carries no runtime. `recovery` is null while the workspace has no recovery order; a workspace
+ * the account does not own is refused, never answered with a null.
  */
 export type AgentWorkspaceControlCenter = {
   readonly workspace: {
@@ -338,6 +371,8 @@ export type AgentWorkspaceControlCenter = {
   } | null;
   readonly apps: ReadonlyArray<AgentWorkspaceAppCapability>;
   readonly runtime: AgentWorkspaceRuntime | null;
+  /** Present once the serving backend publishes the owner-safe recovery facet; null while the workspace has no recovery order. */
+  readonly recovery?: AgentWorkspaceRecovery | null;
 };
 
 /** Immutable AgentOS solution package offered by the Nivo catalog. */
@@ -1036,6 +1071,11 @@ export const myAgentWorkspaceControlCenter = (workspaceId: string): Promise<Resu
                             memoryUsageBytes memoryRequestBytes memoryLimitBytes
                             restartCount oomKilled throttled
                         }
+                    }
+                    recovery {
+                        state phase attemptCount lastAttemptAt nextAttemptAt failureCode
+                        targetGeneration requiredSyncRevision appliedSyncRevision
+                        syncCompletedAt observedAt recoverableDataScope
                     }
                 }
                 message success error

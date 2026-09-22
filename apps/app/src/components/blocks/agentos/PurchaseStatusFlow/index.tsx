@@ -4,8 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { getPathname, useRouter } from "@/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
-import { useMutateIssueAgentWorkspaceAppLaunchSwr, useMutateRetryWorkspaceProvisioningOrderSwr, useQueryMyAgentWorkspacesSwr, useQueryMyCatalogOrdersSwr, useQueryMyInvoicesSwr } from "@/hooks";
-import { type AgentWorkspaceRow, type CatalogOrderRow, type InvoiceRow } from "@/modules/api/console";
+import { useMutateIssueAgentWorkspaceAppLaunchSwr, useMutateRetryWorkspaceProvisioningOrderSwr, useQueryMyAgentWorkspaceControlCenterSwr, useQueryMyAgentWorkspacesSwr, useQueryMyCatalogOrdersSwr, useQueryMyInvoicesSwr } from "@/hooks";
+import { type AgentWorkspaceControlCenter, type AgentWorkspaceRow, type CatalogOrderRow, type InvoiceRow } from "@/modules/api/console";
 import { type Result } from "@/modules/api/graphql";
 import { type WorkspacePurchaseStatus } from "@/modules/api/workspace-controlplane";
 import useProvisioningRealtime, { type ProvisioningEvent, type ProvisioningTarget } from "@/modules/realtime/provisioning";
@@ -19,6 +19,8 @@ import { type PurchaseStatusCopy } from "./copy";
 /** Route identity owned by the purchase-status block: one stable purchase identity. */
 export type PurchaseStatusFlowProps = {
     readonly purchaseId: string;
+    /** The declared /provisioning route pins the provisioning surface directly; the payment journey still resolves underneath. */
+    readonly surface?: "provisioning";
 };
 
 /** The matched source rows beside their source-qualified verdicts. */
@@ -37,6 +39,49 @@ type PurchaseFlow = {
     readonly reason: string | null;
     /** The owner asked to see the provisioning surface while the read still stands at paid. */
     readonly surface?: "provisioning";
+};
+
+/** The owner-identity claims the signed-in session's access token may carry. */
+type PurchaserClaims = {
+    readonly name?: unknown;
+    readonly preferred_username?: unknown;
+    readonly email?: unknown;
+};
+/**
+ * Decode the owner claims inside the session's access token, the same claim surface the Keycloak
+ * guard verifies server-side (`name`, `preferred_username`, `email`). A malformed or claim-less
+ * token yields none, and the surface then withholds the named identity rather than inventing one.
+ */
+const purchaserClaimsOf = (accessToken: string): PurchaserClaims => {
+    const payload = accessToken.split(".")[1];
+    if (payload === undefined) return {};
+    try {
+        const normalised = payload.replaceAll("-", "+").replaceAll("_", "/");
+        const padded = normalised.padEnd(Math.ceil(normalised.length / 4) * 4, "=");
+        return JSON.parse(globalThis.atob(padded)) as PurchaserClaims;
+    } catch {
+        return {};
+    }
+};
+const claimText = (value: unknown): string | null => typeof value === "string" && value.trim().length > 0 ? value : null;
+/** The provisioning owner's bound display name: display name, then login handle, then contact. */
+const purchaserNameOf = (claims: PurchaserClaims): string | null => claimText(claims.name) ?? claimText(claims.preferred_username) ?? claimText(claims.email);
+/** The secondary identity the owner fact pairs beside the name, never repeating the name itself. */
+const purchaserDetailOf = (claims: PurchaserClaims, name: string | null): string | null => {
+    const detail = claimText(claims.email) ?? claimText(claims.preferred_username);
+    return detail !== null && detail !== name ? detail : null;
+};
+/**
+ * The fenced provisioning attempt is the workspace recovery view's owner-scoped attempt count,
+ * published on the `myAgentWorkspaceControlCenter` recovery facet for the bound workspace row.
+ * The realtime saga stream carries the sequence only as an ordering token and never surfaces it to
+ * a consumer, so this owner-scoped read is the facet the seam actually reaches. A refused or
+ * unanswered read, and a workspace carrying no recovery row, withhold the value marker.
+ */
+const provisioningAttemptOf = (controlCenter: Result<AgentWorkspaceControlCenter> | undefined): number | null => {
+    if (controlCenter?.ok !== true) return null;
+    const attempt = controlCenter.data.recovery?.attemptCount;
+    return typeof attempt === "number" && Number.isFinite(attempt) ? attempt : null;
 };
 
 /** Order lifecycle positions an order row can only reach after its payment settled. */
@@ -196,7 +241,7 @@ const check = (id: string, label: string, word: WordTone["word"], detail?: strin
 
 /** Connected purchase → payment → workspace status surface bound to one stable purchase identity. */
 const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
-    const { purchaseId } = props;
+    const { purchaseId, surface } = props;
     const format = useFormatter();
     const locale = useLocale();
     const t = useTranslations("console.agentos.purchaseStatus");
@@ -206,7 +251,7 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
     const ordersQuery = useQueryMyCatalogOrdersSwr(accessToken !== null);
     const invoicesQuery = useQueryMyInvoicesSwr(accessToken !== null);
     const workspacesQuery = useQueryMyAgentWorkspacesSwr(accessToken !== null);
-    const [flow, setFlow] = useState<PurchaseFlow>({ phase: "loading", snapshot: null, reason: null });
+    const [flow, setFlow] = useState<PurchaseFlow>({ phase: "loading", snapshot: null, reason: null, surface });
     const [reconciling, setReconciling] = useState(false);
     const [retryPending, setRetryPending] = useState(false);
     const [retryRefusal, setRetryRefusal] = useState<string | null>(null);
@@ -221,10 +266,17 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
     const boundWorkspaceId = flow.snapshot?.workspace?.id ?? "";
     const issueWorkspaceLaunch = useMutateIssueAgentWorkspaceAppLaunchSwr(boundWorkspaceId);
     const retryProvisioningOrder = useMutateRetryWorkspaceProvisioningOrderSwr(boundWorkspaceId);
+    /* The control-center read binds only once an owner-scoped workspace row exists to name. */
+    const controlCenterQuery = useQueryMyAgentWorkspaceControlCenterSwr(boundWorkspaceId, boundWorkspaceId !== "");
+    const refreshControlCenter = controlCenterQuery.mutate;
     const links = useMemo(() => ({
         workspaces: getPathname({ locale, href: "/agentos/workspaces" }),
         offerSelection: getPathname({ locale, href: "/agentos/workspaces/new" })
     }), [locale]);
+    const purchaserClaims = useMemo(() => accessToken === null ? {} : purchaserClaimsOf(accessToken), [accessToken]);
+    const purchaserName = purchaserNameOf(purchaserClaims);
+    const purchaserDetail = purchaserDetailOf(purchaserClaims, purchaserName);
+    const purchaserFact = purchaserName === null ? null : purchaserDetail === null ? purchaserName : `${purchaserName} · ${purchaserDetail}`;
 
     const copy = useMemo<PurchaseStatusCopy>(() => ({
         path: t("path"),
@@ -326,6 +378,9 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
         enterWorkspaceAction: t("enterWorkspaceAction"),
         returnToList: t("returnToList"),
         backToWorkspaces: t("backToWorkspaces"),
+        ownerLabel: t("ownerLabel"),
+        attemptLabel: t("attemptLabel"),
+        attemptFact: attempt => t("attemptFact", { attempt }),
         changeOffer: t("changeOffer"),
         realtimeReconnect: t("realtimeReconnect"),
         stateDone: t("stateDone"),
@@ -356,7 +411,7 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
         setReconciling(true);
         setEntryRefusal(null);
         try {
-            const [orders, invoices, workspaces] = await Promise.all([refreshOrders(), refreshInvoices(), refreshWorkspaces()]);
+            const [orders, invoices, workspaces] = await Promise.all([refreshOrders(), refreshInvoices(), refreshWorkspaces(), boundWorkspaceId === "" ? Promise.resolve(undefined) : refreshControlCenter()]);
             setReconciledAt(new Date().toISOString());
             const snapshot = purchaseStatusOf(purchaseId, orders, invoices, workspaces);
             if (snapshot.ok) {
@@ -369,7 +424,7 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
         } finally {
             setReconciling(false);
         }
-    }, [purchaseId, refreshInvoices, refreshOrders, refreshWorkspaces]);
+    }, [purchaseId, refreshInvoices, refreshOrders, refreshWorkspaces, boundWorkspaceId, refreshControlCenter]);
 
     /* Settle each freshly-read owner-scoped snapshot into the phase it proves. */
     useEffect(() => {
@@ -424,9 +479,15 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
         void reconcile();
     }, [realtime.status, flow.phase, reconcile]);
 
-    const returnToList = useCallback(() => router.push(links.workspaces), [links.workspaces, router]);
-    const changeOffer = useCallback(() => router.push(links.offerSelection), [links.offerSelection, router]);
-    const viewProvisioning = useCallback(() => setFlow(current => current.phase === "paid" ? { ...current, surface: "provisioning" } : current), []);
+    /* The intl router localizes the href itself, so pushes take the bare route — the getPathname
+       output is for anchor hrefs only. */
+    const returnToList = useCallback(() => router.push("/agentos/workspaces"), [router]);
+    const changeOffer = useCallback(() => router.push("/agentos/workspaces/new"), [router]);
+    /* The paid surface's onward action lands on the declared provisioning route; the surface flag keeps the render truthful while navigation settles. */
+    const viewProvisioning = useCallback(() => {
+        setFlow(current => current.phase === "paid" ? { ...current, surface: "provisioning" } : current);
+        router.push(`/agentos/workspaces/purchases/${purchaseId}/provisioning`);
+    }, [purchaseId, router]);
 
     const enterWorkspace = async () => {
         if (boundWorkspaceId === "" || entryPending) return;
@@ -641,9 +702,15 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
         const retryable = phase === "provisioning-failed-retryable";
         const terminal = phase === "provisioning-failed-terminal";
         const entryDenied = ready && entryRefusal !== null;
+        const attempt = provisioningAttemptOf(controlCenterQuery.data);
         return {
             label: copy.confirmedFactsLabel,
+            fact: attempt === null ? undefined : copy.attemptFact(attempt),
             checks: provisioningChecks(),
+            facts: [
+                { label: copy.ownerLabel, value: purchaserFact ?? "—" },
+                { label: copy.attemptLabel, value: attempt === null ? "—" : String(attempt) }
+            ],
             notice: phase === "provisioning-unknown" ? (flow.reason ?? copy.detailSourceRefused) : retryable || terminal ? (flow.reason ?? undefined) : undefined,
             outcome: {
                 title: `${copy.outcomeLabel}: ${workspace?.name ?? offerName ?? "—"}`,
@@ -653,8 +720,8 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
                 ? entryDenied ? { label: copy.refreshStatusAction, pending: reconciling } : { label: copy.enterWorkspaceAction, pending: entryPending }
                 : retryable ? { label: copy.retryProvisionAction, pending: retryPending } : undefined,
             actionCaption: retryable ? copy.retryProvisionCaption : undefined,
-            refusalText: entryRefusal ?? retryRefusal ?? undefined,
-            secondaryLink: ready ? undefined : { label: copy.backToWorkspaces, href: links.workspaces }
+            refusalText: entryRefusal ?? retryRefusal ?? undefined
+            /* The escape action is page-level below the rail card on every provisioning state. */
         };
     };
 
@@ -717,7 +784,7 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
                 ...heading,
                 primary: provisioningPrimary(phase),
                 rail: provisioningRail(phase),
-                escapeLink: phase === "ready" ? { label: copy.returnToList, href: links.workspaces } : undefined
+                escapeLink: { label: copy.returnToList, href: links.workspaces }
             },
             on: {
                 primary: entryDenied

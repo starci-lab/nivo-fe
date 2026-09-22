@@ -91,14 +91,20 @@ const provisioningView: PurchaseStatusFlowViewProps = {
         },
         rail: {
             label: "Confirmed facts",
+            fact: "Attempt 1",
             checks: [
                 { id: "payment", label: "Payment verified", word: "done", tone: "success", mark, at: "14:32" },
                 { id: "entitlement", label: "Entitlement reserved", word: "done", tone: "success", mark, at: "14:33" },
                 { id: "configure", label: "Configure workspace", word: "running", tone: "warning", mark, at: "14:34" },
                 { id: "readiness", label: "Readiness check", word: "queued", tone: "neutral", mark, detail: "Waiting for configuration" },
             ],
+            facts: [
+                { label: "Owner", value: "An Nguyen · an.nguyen@northstar.test" },
+                { label: "Attempt", value: "1" },
+            ],
             outcome: { title: "Workspace outcome: Nivo Operations Workspace", detail: "Entry unavailable until readiness is confirmed." },
         },
+        escapeLink: { label: "Return to workspace list", href: "/agentos/workspaces" },
     },
     on: { primary: vi.fn() },
 }
@@ -146,6 +152,16 @@ describe("PurchaseStatusFlow view", () => {
         expect(html).toContain("Readiness check")
         expect(html).toContain("Entry unavailable until readiness is confirmed.")
         expect(html).toContain("Refresh status")
+        expect(html).toContain("Attempt 1")
+        expect(html).toContain("An Nguyen · an.nguyen@northstar.test")
+    })
+
+    it("keeps the provisioning escape action page-level below the rail card", () => {
+        const { container } = render(<PurchaseStatusFlowBase {...provisioningView} />)
+        const link = screen.getByRole("link", { name: "Return to workspace list" })
+        const surfaces = container.querySelectorAll("[data-grammar-surface-card]")
+        for (const surface of surfaces) expect(surface.contains(link)).toBe(false)
+        expect(surfaces.length).toBeGreaterThanOrEqual(2)
     })
 
     it("keeps ready entry bound to the issued grant, not a route", () => {
