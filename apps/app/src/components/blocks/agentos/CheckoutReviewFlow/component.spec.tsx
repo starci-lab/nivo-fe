@@ -7,7 +7,7 @@ const copy: CheckoutReviewCopy = {
     newWorkspace: "New",
     checkout: "Checkout",
     title: "Review workspace purchase",
-    description: "Confirm the frozen offer terms before requesting payment.",
+    description: "Confirm the frozen draft terms before requesting payment.",
     offerLabel: "Frozen offer",
     offer: "Offer",
     offerVersion: "Offer version",
@@ -17,9 +17,10 @@ const copy: CheckoutReviewCopy = {
     includedOutcome: "Included outcome",
     eligibility: "Eligibility",
     seller: "Seller and invoice source",
+    purchaser: "Purchaser",
     admission: "Purchaser admission",
     railLabel: "Request payment",
-    railNote: "This request reuses the same purchase identity and opens the provider checkout. It does not mark payment as paid.",
+    railNote: "This request reuses the same purchase identity and opens the SePay checkout. It does not mark payment as paid.",
     stepRecheck: "Recheck admission and frozen terms",
     stepIdentity: "Create purchase identity",
     stepProvider: "Open payment action",
@@ -41,13 +42,14 @@ const facts: CheckoutReviewFacts = {
     billingTerm: "Monthly billing",
     renewal: "Re-authorization required each period",
     includedOutcome: "Run an agent workspace",
-    eligibility: "Vietnam · admitted purchaser",
+    eligibility: "Vietnam · admitted organization owner",
     seller: "Nivo · platform invoice",
+    purchaser: "An Nguyen · Northstar Co., Ltd.",
 }
 const steps = [
-    { title: "Recheck admission and frozen terms", detail: "Admitted purchaser · current offer terms" },
+    { title: "Recheck admission and frozen terms", detail: "An Nguyen · Vietnam eligibility" },
     { title: "Create purchase identity", detail: "PUR-0001" },
-    { title: "Open payment action", detail: "SePay · Online banking" },
+    { title: "Open payment action", detail: "SePay · Online Banking" },
 ]
 const reviewProps: CheckoutReviewFlowViewProps = {
     state: "review",
@@ -55,7 +57,7 @@ const reviewProps: CheckoutReviewFlowViewProps = {
         copy,
         links,
         facts,
-        admission: "Admitted",
+        admission: "An Nguyen · Admitted",
         steps,
         purchaseRef: "PUR-0001",
         notice: null,
@@ -76,9 +78,11 @@ describe("CheckoutReviewFlow drawing", () => {
         expect(screen.getByText("₫990,000")).toBeInTheDocument()
         expect(screen.getByText("Monthly billing")).toBeInTheDocument()
         expect(screen.getByText("Re-authorization required each period")).toBeInTheDocument()
-        expect(screen.getByText("Admitted")).toBeInTheDocument()
+        expect(screen.getByText("An Nguyen · Northstar Co., Ltd.")).toBeInTheDocument()
+        expect(screen.getByText("An Nguyen · Admitted")).toBeInTheDocument()
+        expect(screen.getByText("An Nguyen · Vietnam eligibility")).toBeInTheDocument()
         expect(screen.getByText("PUR-0001")).toBeInTheDocument()
-        expect(screen.getByText("SePay · Online banking")).toBeInTheDocument()
+        expect(screen.getByText("SePay · Online Banking")).toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Request payment" })).toBeInTheDocument()
         expect(screen.getByRole("link", { name: "Change offer" })).toHaveAttribute("href", "/agentos/workspaces/new")
         expect(screen.getByText("Browser return is navigation, not payment proof.")).toBeInTheDocument()
@@ -98,6 +102,11 @@ describe("CheckoutReviewFlow drawing", () => {
         expect(screen.getByText("No payment request was accepted.")).toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Retry payment request" })).toBeInTheDocument()
         expect(screen.getByRole("link", { name: "Return to offer selection" })).toBeInTheDocument()
+    })
+    it("withholds the purchaser fact row while no session identity is bound", () => {
+        render(<CheckoutReviewFlowBase {...reviewProps} props={{ ...reviewProps.props, facts: { ...facts, purchaser: null } }} />)
+        expect(screen.queryByText("An Nguyen · Northstar Co., Ltd.")).not.toBeInTheDocument()
+        expect(screen.queryByText("Purchaser")).not.toBeInTheDocument()
     })
     it("withholds the payment action entirely when checkout admission is refused", () => {
         render(<CheckoutReviewFlowBase state="refused" props={{ copy, links, facts, message: "The offer terms changed." }} on={{ returnToOffers: vi.fn() }} />)

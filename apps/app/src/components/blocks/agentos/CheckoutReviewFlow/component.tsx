@@ -19,6 +19,8 @@ export type CheckoutReviewCopy = {
     readonly includedOutcome: string;
     readonly eligibility: string;
     readonly seller: string;
+    /** External label of the purchaser-identity row. */
+    readonly purchaser: string;
     readonly admission: string;
     /** External label of the payment-request rail. */
     readonly railLabel: string;
@@ -45,6 +47,8 @@ export type CheckoutReviewFacts = {
     readonly includedOutcome: string;
     readonly eligibility: string;
     readonly seller: string;
+    /** The admitted purchaser's bound identity; null while the session carries no name claim. */
+    readonly purchaser: string | null;
 };
 /** One ordered rail step: the pre-payment checks in their literal order. */
 export type CheckoutReviewStep = {
@@ -111,6 +115,7 @@ const factBands = (copy: CheckoutReviewCopy, facts: CheckoutReviewFacts, admissi
     {factRow(copy.includedOutcome, facts.includedOutcome)}
     {factRow(copy.eligibility, facts.eligibility)}
     {factRow(copy.seller, facts.seller)}
+    {facts.purchaser === null ? null : factRow(copy.purchaser, facts.purchaser)}
     {admission === null ? null : admissionRow(copy.admission, admission)}
 </>;
 const skeletonBands = (copy: CheckoutReviewCopy) => <>

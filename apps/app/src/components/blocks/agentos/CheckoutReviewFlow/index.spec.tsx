@@ -10,15 +10,23 @@ const mocks = vi.hoisted(() => ({
     search: "",
     session: { state: { status: "signed-in", accessToken: "token" } },
 }))
-type PathnameRequest = { readonly href: string }
+type PathnameRequest = { readonly href: string; readonly locale: string }
+/* Production-shaped: getPathname prefixes non-default locales, so feeding its localized output to
+   the locale-aware router would double the prefix exactly like the live refused-return defect did. */
 vi.mock("@/i18n/navigation", () => ({
     useRouter: () => ({ push: mocks.push }),
-    getPathname: (request: PathnameRequest) => request.href,
+    getPathname: (request: PathnameRequest) => request.locale === "en" ? `/en${request.href}` : request.href,
 }))
-vi.mock("next-intl", () => ({
-    useLocale: () => "en",
-    useFormatter: () => ({ number: (value: number) => `VND ${value}` }),
-}))
+vi.mock("next-intl", async () => {
+    const copyEn = (await import("@/messages/en.json")).default.console.agentos.checkoutReview as Record<string, string>
+    const translate = (key: string, values?: Record<string, unknown>) =>
+        Object.entries(values ?? {}).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), copyEn[key] ?? key)
+    return {
+        useLocale: () => "en",
+        useFormatter: () => ({ number: (value: number) => `VND ${value}` }),
+        useTranslations: () => translate,
+    }
+})
 vi.mock("next/navigation", () => ({
     useSearchParams: () => new URLSearchParams(mocks.search),
 }))
@@ -72,6 +80,10 @@ const invoice = (status: string) => ({
     catalogOrder: { id: "PUR-0001", catalogItem: { name: "Nivo AI Agent" }, catalogTier: { name: "Pro" } },
 })
 const invoices = (rows: ReadonlyArray<unknown>) => ({ ok: true, data: rows })
+/** A Keycloak-shaped access token whose payload carries the purchaser claims the review binds. */
+const accessTokenWith = (claims: Record<string, unknown>) =>
+    `hdr.${Buffer.from(JSON.stringify(claims)).toString("base64url")}.sig`
+const PURCHASER_TOKEN = accessTokenWith({ sub: "user-an-nguyen", name: "An Nguyen", preferred_username: "an.nguyen", email: "an.nguyen@northstar.test" })
 const props = () => JSON.parse(screen.getByTestId("flow-props").textContent ?? "{}") as Record<string, unknown>
 describe("CheckoutReviewFlow connected orchestration", () => {
     beforeEach(() => {
@@ -79,7 +91,7 @@ describe("CheckoutReviewFlow connected orchestration", () => {
         captured.view = null
         mocks.catalog = { data: { ok: true, data: [item] } }
         mocks.search = "offer=nivo-ai-agent&tier=agent_pro"
-        mocks.session.state = { status: "signed-in", accessToken: "token" }
+        mocks.session.state = { status: "signed-in", accessToken: PURCHASER_TOKEN }
         mocks.order.trigger.mockResolvedValue({ ok: true, data: { id: "PUR-0001" } })
         mocks.invoices = { data: invoices([invoice("unpaid")]) }
         mocks.mutateInvoices.mockResolvedValue(invoices([invoice("unpaid")]))
@@ -96,6 +108,25 @@ describe("CheckoutReviewFlow connected orchestration", () => {
         expect(JSON.stringify(view.facts)).toContain("agent_pro")
         expect(JSON.stringify(view.facts)).toContain("VND 990000")
         expect(JSON.stringify(view.steps)).toContain("PUR-0001")
+        /* Anchors keep the localized href while router.push receives the raw path. */
+        expect((view.links as Record<string, string>).offerSelection).toBe("/en/agentos/workspaces/new")
+    })
+    it("binds the admitted purchaser's session identity into the fact, badge and first step", async () => {
+        render(<CheckoutReviewFlow />)
+        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("review"))
+        const view = props()
+        expect(view.admission).toBe("An Nguyen · Admitted")
+        expect(JSON.stringify(view.facts)).toContain("An Nguyen · an.nguyen@northstar.test")
+        expect(JSON.stringify(view.steps)).toContain("An Nguyen · Vietnam eligibility")
+    })
+    it("withholds the named identity when the session token carries no name claim", async () => {
+        mocks.session.state = { status: "signed-in", accessToken: accessTokenWith({ sub: "user-unnamed" }) }
+        render(<CheckoutReviewFlow />)
+        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("review"))
+        const view = props()
+        expect(view.admission).toBe("Admitted")
+        expect((view.facts as Record<string, unknown>).purchaser).toBeNull()
+        expect(JSON.stringify(view.steps)).toContain("Admitted purchaser · current offer terms")
     })
     it("prepares the purchase only once when the catalogue revalidates", async () => {
         const { rerender } = render(<CheckoutReviewFlow />)
@@ -122,8 +153,11 @@ describe("CheckoutReviewFlow connected orchestration", () => {
         render(<CheckoutReviewFlow />)
         await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("refused"))
         expect(props().message).toBe("Offer terms changed since selection")
+        /* The anchor stays localized; the button hands the locale-aware router the raw path. */
+        expect((props().links as Record<string, string>).offerSelection).toBe("/en/agentos/workspaces/new")
         fireEvent.click(screen.getByRole("button", { name: "return-to-offers" }))
         expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new")
+        expect(mocks.push).not.toHaveBeenCalledWith("/en/agentos/workspaces/new")
     })
     it("raises the provider action on the frozen invoice amount with the purchase's own return URL", async () => {
         render(<CheckoutReviewFlow />)
@@ -132,7 +166,7 @@ describe("CheckoutReviewFlow connected orchestration", () => {
         await waitFor(() => expect(mocks.payLink.trigger).toHaveBeenCalledTimes(1))
         const input = mocks.payLink.trigger.mock.calls[0]?.[0] as { amountVnd: number; returnUrl: string; cancelUrl: string }
         expect(input.amountVnd).toBe(990000)
-        expect(input.returnUrl).toContain("/agentos/workspaces/purchases/PUR-0001")
+        expect(input.returnUrl).toContain("/en/agentos/workspaces/purchases/PUR-0001")
         expect(input.cancelUrl).toContain("payment=cancelled")
         await waitFor(() => expect(HTMLFormElement.prototype.submit).toHaveBeenCalled())
     })
