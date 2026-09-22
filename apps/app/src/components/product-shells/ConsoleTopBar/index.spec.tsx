@@ -14,9 +14,6 @@ vi.mock("@/components/blocks/locale/LanguageMenu", () => ({
 vi.mock("@/components/blocks/auth/AccountMenu", () => ({
     AccountMenu: () => <button type="button">account</button>,
 }))
-vi.mock("@/components/product-shells/Sidebar", () => ({
-    Sidebar: () => <button type="button">drawer</button>,
-}))
 
 import { ConsoleTopBar } from "."
 
@@ -31,15 +28,23 @@ describe("ConsoleTopBar", () => {
         expect(screen.getByRole("img", { name: "brand" })).toBeInTheDocument()
         expect(screen.getByText("title")).toBeInTheDocument()
         expect(screen.getByRole("group", { name: "actionsLabel" })).toBeInTheDocument()
-        expect(screen.getByRole("group", { name: "openMenu" })).toContainElement(screen.getByText("drawer"))
         expect(screen.getByText("language")).toBeInTheDocument()
         expect(screen.getByText("account")).toBeInTheDocument()
-        expect(screen.getByText("drawer")).toBeInTheDocument()
         expect(screen.queryByText("search")).not.toBeInTheDocument()
         expect(screen.queryByText("cart")).not.toBeInTheDocument()
         expect(screen.queryByText("notifications")).not.toBeInTheDocument()
 
         fireEvent.click(screen.getByRole("switch", { name: "theme.dark" }))
         expect(setTheme).toHaveBeenCalledWith("dark")
+    })
+
+    it("mounts no compact drawer trigger - the shell's compactNavigation owns that band", () => {
+        render(<ConsoleTopBar />)
+
+        expect(screen.queryByText("drawer")).not.toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "openMenu" })).toBeNull()
+        const compact = document.querySelector("[data-grammar-navigation-feature-nav-compact-navigation]")
+        expect(compact).not.toBeNull()
+        expect(compact).toBeEmptyDOMElement()
     })
 })

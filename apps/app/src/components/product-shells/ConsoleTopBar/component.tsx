@@ -3,11 +3,10 @@ import type { ComponentType } from "react";
 import { NivoBrand, ThemeSwitch } from "@nivo/ui";
 
 /** Pure top-bar labels, controls, and theme command. */
-export type ConsoleTopBarProps<L extends object, A extends object, D extends object> = {
+export type ConsoleTopBarProps<L extends object, A extends object> = {
   readonly brandLabel: string;
   readonly contextLabel: string;
   readonly actionsLabel: string;
-  readonly compactNavigationTriggerLabel: string;
   readonly isDark: boolean;
   readonly lightThemeLabel: string;
   readonly darkThemeLabel: string;
@@ -15,8 +14,6 @@ export type ConsoleTopBarProps<L extends object, A extends object, D extends obj
   readonly localeControlProps: L;
   readonly accountControl: ComponentType<A>;
   readonly accountControlProps: A;
-  readonly drawerControl: ComponentType<D>;
-  readonly drawerControlProps: D;
   readonly onToggleTheme: () => void;
 };
 
@@ -27,13 +24,17 @@ export type ConsoleTopBarProps<L extends object, A extends object, D extends obj
  * persistent Sidebar rail - so the `navigation` slot is omitted entirely. The grammar renders no
  * `nav` element when it is absent, which is the point: an empty navigation landmark is still
  * announced, reached and counted by assistive technology while naming nothing.
+ *
+ * The compact trigger slot is empty for the same reason, now that `WorkspaceShell.compactNavigation`
+ * owns every viewport below 70rem: keeping a second trigger here would leave two compact navigation
+ * owners on screen at once below 48rem, and a named but empty group would announce a menu that is
+ * not there. The grammar emits the group wrapper regardless, so it is left unnamed.
  */
-export const ConsoleTopBarBase = <L extends object, A extends object, D extends object>(props: ConsoleTopBarProps<L, A, D>) => {
+export const ConsoleTopBarBase = <L extends object, A extends object>(props: ConsoleTopBarProps<L, A>) => {
   const {
     brandLabel,
     contextLabel,
     actionsLabel,
-    compactNavigationTriggerLabel,
     isDark,
     lightThemeLabel,
     darkThemeLabel,
@@ -41,10 +42,8 @@ export const ConsoleTopBarBase = <L extends object, A extends object, D extends 
     localeControlProps,
     accountControl: AccountControl,
     accountControlProps,
-    drawerControl: DrawerControl,
-    drawerControlProps,
     onToggleTheme
-  }: ConsoleTopBarProps<L, A, D> = props;
+  }: ConsoleTopBarProps<L, A> = props;
   return <NavigationFeatureNav
     identity={<>
       <NivoBrand props={{
@@ -54,8 +53,8 @@ export const ConsoleTopBarBase = <L extends object, A extends object, D extends 
         }} />
       <Text weight="semibold">{contextLabel}</Text>
     </>}
-    compactNavigationTrigger={<DrawerControl {...drawerControlProps} />}
-    compactNavigationTriggerLabel={compactNavigationTriggerLabel}
+    compactNavigationTrigger={null}
+    compactNavigationTriggerLabel=""
     actions={<>
       <LocaleControl {...localeControlProps} />
       <ThemeSwitch props={{

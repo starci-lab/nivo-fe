@@ -69,7 +69,7 @@ export const AgentOSWorkspaceList = (props: AgentOSWorkspaceListProps) => {
                     actionLabel: t("agentos.create")
                 },
                 on: {
-                    create: () => router.push("/agentos/create")
+                    create: () => router.push("/agentos/workspaces/new")
                 }
             };
         }

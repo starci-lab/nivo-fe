@@ -37,7 +37,7 @@ describe("AgentOSWorkspaceList", () => {
     it("owns the empty read and routes creation", async () => {
         renderList()
         fireEvent.click(await screen.findByRole("button", { name: viMessages.console.agentos.create }))
-        expect(mocks.push).toHaveBeenCalledWith("/agentos/create")
+        expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new")
     })
 
     it("maps rows to native locale-aware links without pushing", async () => {

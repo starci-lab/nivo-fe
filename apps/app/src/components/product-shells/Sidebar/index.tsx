@@ -22,7 +22,7 @@ type Destination = {
 const DESTINATIONS: ReadonlyArray<Destination> = [
     { key: "chat", route: "/chat", group: "workspace", icon: "community" },
     { key: "modules", route: "/agentos", group: "workspace", icon: "agentos" },
-    { key: "packages", route: "/agentos/create", group: "workspace", icon: "cart" },
+    { key: "packages", route: "/agentos/workspaces/new", group: "workspace", icon: "cart" },
     { key: "wallet", route: "/wallet", group: "account", icon: "wallet" },
     { key: "settings", route: null, group: "account", icon: "account" },
 ]

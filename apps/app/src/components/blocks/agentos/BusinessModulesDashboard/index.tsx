@@ -34,7 +34,7 @@ export const BusinessModulesDashboard = (props: BusinessModulesDashboardProps) =
     onRetry={() => void query.mutate()}
   />;
   const workspace = answer.data[0];
-  if (workspace === undefined) return <BusinessModulesDashboardBase state="empty" labels={labels} onCreate={() => router.push("/agentos/create")} />;
+  if (workspace === undefined) return <BusinessModulesDashboardBase state="empty" labels={labels} onCreate={() => router.push("/agentos/workspaces/new")} />;
   return <BusinessModulesDashboardBase
     state="ready"
     labels={labels}

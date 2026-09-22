@@ -5,7 +5,6 @@ import { ConsoleTopBarBase } from "./component"
 
 const LocaleControl = () => <button type="button">language</button>
 const AccountControl = () => <button type="button">account</button>
-const DrawerControl = () => <button type="button">drawer</button>
 
 describe("ConsoleTopBarBase", () => {
     afterEach(cleanup)
@@ -16,7 +15,6 @@ describe("ConsoleTopBarBase", () => {
             brandLabel="nivo"
             contextLabel="Console"
             actionsLabel="Console controls"
-            compactNavigationTriggerLabel="Menu"
             isDark={false}
             lightThemeLabel="Use light theme"
             darkThemeLabel="Use dark theme"
@@ -24,14 +22,11 @@ describe("ConsoleTopBarBase", () => {
             localeControlProps={{}}
             accountControl={AccountControl}
             accountControlProps={{}}
-            drawerControl={DrawerControl}
-            drawerControlProps={{}}
             onToggleTheme={onToggleTheme}
         />)
 
         expect(screen.getAllByRole("banner")).toHaveLength(1)
         expect(screen.queryAllByRole("navigation")).toHaveLength(0)
-        expect(screen.getByRole("group", { name: "Menu" })).toContainElement(screen.getByText("drawer"))
         expect(screen.getByRole("group", { name: "Console controls" })).toBeInTheDocument()
         expect(screen.getByRole("img", { name: "nivo" })).toBeInTheDocument()
         expect(screen.getByText("Console")).toBeInTheDocument()
@@ -42,12 +37,11 @@ describe("ConsoleTopBarBase", () => {
         expect(onToggleTheme).toHaveBeenCalledTimes(1)
     })
 
-    it("orders actions locale, then theme, then account", () => {
+    it("leaves the compact trigger slot empty and unnamed because the shell owns the compact band", () => {
         render(<ConsoleTopBarBase
             brandLabel="nivo"
             contextLabel="Console"
             actionsLabel="Console controls"
-            compactNavigationTriggerLabel="Menu"
             isDark={false}
             lightThemeLabel="Use light theme"
             darkThemeLabel="Use dark theme"
@@ -55,8 +49,28 @@ describe("ConsoleTopBarBase", () => {
             localeControlProps={{}}
             accountControl={AccountControl}
             accountControlProps={{}}
-            drawerControl={DrawerControl}
-            drawerControlProps={{}}
+            onToggleTheme={vi.fn()}
+        />)
+
+        const compact = document.querySelector("[data-grammar-navigation-feature-nav-compact-navigation]")
+        expect(compact).not.toBeNull()
+        expect(compact).toBeEmptyDOMElement()
+        expect(compact).toHaveAttribute("aria-label", "")
+        expect(screen.queryByRole("button", { name: "Menu" })).toBeNull()
+    })
+
+    it("orders actions locale, then theme, then account", () => {
+        render(<ConsoleTopBarBase
+            brandLabel="nivo"
+            contextLabel="Console"
+            actionsLabel="Console controls"
+            isDark={false}
+            lightThemeLabel="Use light theme"
+            darkThemeLabel="Use dark theme"
+            localeControl={LocaleControl}
+            localeControlProps={{}}
+            accountControl={AccountControl}
+            accountControlProps={{}}
             onToggleTheme={vi.fn()}
         />)
 

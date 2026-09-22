@@ -20,5 +20,5 @@ export const AgentOSPage = (props: AgentOSPageProps) => {
     dashboardEyebrow: t("agentos.dashboardEyebrow"),
     createEyebrow: t("agentos.createEyebrow"),
     orderEyebrow: t("agentos.orderEyebrow")
-  }} onOpenDashboard={() => router.push("/agentos")} onCreate={() => router.push("/agentos/create")} />;
+  }} onOpenDashboard={() => router.push("/agentos")} onCreate={() => router.push("/agentos/workspaces/new")} />;
 };

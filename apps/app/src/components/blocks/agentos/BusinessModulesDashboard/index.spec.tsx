@@ -39,6 +39,6 @@ describe("BusinessModulesDashboard", () => {
     mocks.query.data = { ok: true, data: [] };
     render(<BusinessModulesDashboard />);
     fireEvent.click(screen.getByRole("button", { name: "create" }));
-    expect(mocks.push).toHaveBeenCalledWith("/agentos/create");
+    expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new");
   });
 });

@@ -20,6 +20,12 @@ export type ConsoleLayoutBaseProps<P extends object> = {
  * The navigation band is mounted as a sibling above the shell, never in `WorkspaceShell.header`:
  * that slot is the page-level hero and wraps its content in its own `<header>`, so placing
  * `NavigationFeatureNav` (itself a `<header>`) there would expose two banner landmarks.
+ *
+ * Compact navigation has exactly one owner per viewport, and the shell owns the whole compact band:
+ * `compactNavigation` is the only Grammar mechanism that stays on screen below 70rem, because the
+ * top bar's own compact trigger is hidden from 48rem up. The slot holds the same `Sidebar` drawer
+ * the rail projects, so the trigger's destinations, labels and focus recovery are identical in
+ * every band.
  */
 const ConsoleFrame = <P extends object,>({
   body: Body,
@@ -30,6 +36,8 @@ const ConsoleFrame = <P extends object,>({
   <ConsoleTopBar />
   <WorkspaceShell
     align="stretch"
+    compactNavigation={<Sidebar mode="mobile" />}
+    compactNavigationLabel={navigationLabel}
     navigation={<Sidebar />}
     navigationLabel={navigationLabel}
     navigationTrack="intrinsic"

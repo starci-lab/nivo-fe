@@ -34,7 +34,7 @@ describe("AgentOSPage route owner", () => {
     it("routes dashboard creation without resolving child data", () => {
         render(<AgentOSPage mode="dashboard" />)
         fireEvent.click(screen.getByRole("button", { name: "agentos.create" }))
-        expect(mocks.push).toHaveBeenCalledWith("/agentos/create")
+        expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new")
     })
 
     it("preserves non-default locale navigation", () => {
