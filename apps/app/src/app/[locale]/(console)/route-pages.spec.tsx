@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { redirect } from "next/navigation"
 import AgentOSCreateRoute from "./agentos/create/page"
 import AgentOSRoute from "./agentos/page"
@@ -19,18 +19,35 @@ vi.mock("@/i18n/navigation", () => ({
 
 describe("console route entrypoints",
     () => {
-        it("mounts AgentOS dashboard and creation routes with their exact modes",
+        beforeEach(() => {
+            vi.clearAllMocks()
+        })
+
+        it("mounts the AgentOS dashboard route with its exact mode",
             () => {
                 expect(AgentOSRoute()).toEqual(expect.objectContaining({
                     props: expect.objectContaining({
                         mode: "dashboard",
                     }),
                 }))
-                expect(AgentOSCreateRoute()).toEqual(expect.objectContaining({
-                    props: expect.objectContaining({
-                        mode: "create",
+            })
+
+        it("redirects the retired creation route to the accepted purchase entry",
+            async () => {
+                await AgentOSCreateRoute({
+                    params: Promise.resolve({
+                        locale: "vi",
                     }),
-                }))
+                })
+                await AgentOSCreateRoute({
+                    params: Promise.resolve({
+                        locale: "en",
+                    }),
+                })
+                expect(redirect).toHaveBeenNthCalledWith(1,
+                    "/agentos/workspaces/new")
+                expect(redirect).toHaveBeenNthCalledWith(2,
+                    "/en/agentos/workspaces/new")
             })
 
         it("forwards workspace and module identities into the module pages",

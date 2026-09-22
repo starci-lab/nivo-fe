@@ -1,9 +1,14 @@
-import { AgentOSPage } from "@/components/pages/AgentOSPage"
+import { redirect } from "next/navigation"
 
-/** Purchase offers and admission state are owner-scoped live data. */
-export const dynamic = "force-dynamic"
+type AgentOSCreateRouteProps = {
+    readonly params: Promise<{ readonly locale: string }>
+}
 
-/** Mount the pre-persistence AgentOS creation flow. */
-const AgentOSCreateRoute = () => <AgentOSPage mode="create" />
+/** Preserve old bookmarks while keeping `/agentos/workspaces/new` canonical. */
+const AgentOSCreateRoute = async ({ params }: AgentOSCreateRouteProps) => {
+    const { locale } = await params
+    const localeSegment = locale === "vi" ? "" : `/${locale}`
+    redirect(`${localeSegment}/agentos/workspaces/new`)
+}
 
 export default AgentOSCreateRoute
