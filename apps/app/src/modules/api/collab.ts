@@ -783,15 +783,20 @@ export type CollabPostMessageOutcome = {
 };
 
 /**
- * `postMessage`: commit one message under its stable intent identity. The caller supplies
- * `intentId` - a resend MUST reuse the same identity, and a changed body under a reused
- * identity is a refusal, not an edit. `route` is the admission answer; `answer` carries
- * the bound question-answer when the message closed one.
+ * Claim fields `postMessage` never accepts from a caller: the ingress derives the asker
+ * grant from the verified member identity, so a transported role/member/phone/membership
+ * claim is refused before the request leaves the adapter.
  */
 const POST_MESSAGE_FORBIDDEN_CLAIMS = new Set([
     "askerGrantScope", "role", "member", "memberId", "phone", "membership", "membershipId", "membershipClaims",
 ]);
 
+/**
+ * `postMessage`: commit one message under its stable intent identity. The caller supplies
+ * `intentId` - a resend MUST reuse the same identity, and a changed body under a reused
+ * identity is a refusal, not an edit. `route` is the admission answer; `answer` carries
+ * the bound question-answer when the message closed one.
+ */
 export const postCollabMessage = (args: CollabPostMessageCall): Promise<CollabResult<CollabPostMessageOutcome>> => {
     const claim = Object.keys(args).find((key) => POST_MESSAGE_FORBIDDEN_CLAIMS.has(key));
     if (claim !== undefined) {
