@@ -709,7 +709,6 @@ export type CollabPostMessageCall = CollabCallScope & {
     readonly body: string;
     readonly moduleName?: string;
     readonly answersQuestionId?: string;
-    readonly askerGrantScope?: Record<string, unknown>;
 };
 
 /** `pressApprovalButton`: the exact card and the exact closed button value. */
@@ -789,8 +788,16 @@ export type CollabPostMessageOutcome = {
  * identity is a refusal, not an edit. `route` is the admission answer; `answer` carries
  * the bound question-answer when the message closed one.
  */
-export const postCollabMessage = (args: CollabPostMessageCall): Promise<CollabResult<CollabPostMessageOutcome>> =>
-    collabRequest(
+const POST_MESSAGE_FORBIDDEN_CLAIMS = new Set([
+    "askerGrantScope", "role", "member", "memberId", "phone", "membership", "membershipId", "membershipClaims",
+]);
+
+export const postCollabMessage = (args: CollabPostMessageCall): Promise<CollabResult<CollabPostMessageOutcome>> => {
+    const claim = Object.keys(args).find((key) => POST_MESSAGE_FORBIDDEN_CLAIMS.has(key));
+    if (claim !== undefined) {
+        return Promise.resolve(collabFailure("invalid", "COLLAB_INVALID", `postMessage does not accept ${claim}; membership-service supplies the asker grant.`, false));
+    }
+    return collabRequest(
         args.accessToken,
         args.workspaceId,
         "postMessage",
@@ -799,13 +806,13 @@ export const postCollabMessage = (args: CollabPostMessageCall): Promise<CollabRe
             body: args.body,
             ...(args.moduleName === undefined ? {} : { moduleName: args.moduleName }),
             ...(args.answersQuestionId === undefined ? {} : { answersQuestionId: args.answersQuestionId }),
-            ...(args.askerGrantScope === undefined ? {} : { askerGrantScope: args.askerGrantScope }),
         },
         (r) => ({
             route: r.route as CollabRouteOutcome,
             ...(r.answer === undefined ? {} : { answer: r.answer as CollabAnswerBinding }),
         }),
     );
+};
 
 /** `pressApprovalButton`: the exact card, the exact two-button control value. */
 export const pressCollabApprovalButton = (args: CollabPressApprovalCall): Promise<CollabResult<CollabPressApprovalButtonOutcome>> =>

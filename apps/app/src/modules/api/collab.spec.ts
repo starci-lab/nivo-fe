@@ -51,7 +51,6 @@ describe("collab member request adapter", () => {
             body: "@Sales draft the quote",
             moduleName: "Sales",
             answersQuestionId: "q-9",
-            askerGrantScope: { quote: true },
         });
         expect(answer.ok).toBe(true);
         expect(calls).toEqual([
@@ -65,11 +64,21 @@ describe("collab member request adapter", () => {
                         body: "@Sales draft the quote",
                         moduleName: "Sales",
                         answersQuestionId: "q-9",
-                        askerGrantScope: { quote: true },
                     },
                 },
             },
         ]);
+    });
+
+    it("rejects caller supplied membership and asker grant claims before transport", async () => {
+        const { spy } = transportSpy({ ok: true, op: "postMessage", result: { op: "postMessage", route: { kind: "not-addressed", message: { messageId: "m-1" } } } });
+        useCollabTransportFrom(spy);
+        const result = await postCollabMessage({
+            workspaceId: "ws-1", accessToken: "tok", intentId: "intent-1", body: "hello",
+            askerGrantScope: { quote: true }, role: "owner", member: { id: "m-1" }, phone: "+84900000000", membership: { active: true },
+        } as never);
+        expect(result).toMatchObject({ ok: false, kind: "invalid", code: "COLLAB_INVALID", retryable: false });
+        expect(spy).not.toHaveBeenCalled();
     });
 
     it("omits absent optional fields rather than serializing undefined", async () => {

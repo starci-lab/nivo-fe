@@ -59,7 +59,6 @@ export type CollabPostMessageInput = {
     readonly body: string;
     readonly moduleName?: string;
     readonly answersQuestionId?: string;
-    readonly askerGrantScope?: Record<string, unknown>;
 };
 
 /** One button press on one exact waiting approval card. */
