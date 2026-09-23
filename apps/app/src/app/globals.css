@@ -73,6 +73,19 @@
     flex: none;
 }
 
+/*
+ * The Grammar Button underneath is HeroUI's, and its base rule paints `outline-style: none`
+ * UNLAYERED - no layered utility can win that argument, which is why the purchase-status
+ * refresh action showed no keyboard-focus indicator. The surface's action band owns this
+ * descendant treatment instead: the family ring contract (2px solid var(--focus), 2px
+ * offset) on real keyboard focus or the family's own focus-visible flag, while the
+ * Grammar button anatomy stays installed.
+ */
+.purchase-status-action button:is(:focus-visible, [data-focus-visible="true"]) {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+}
+
 body {
     background: var(--background);
     color: var(--foreground);

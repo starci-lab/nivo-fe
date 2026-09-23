@@ -83,6 +83,17 @@ const provisioningAttemptOf = (controlCenter: Result<AgentWorkspaceControlCenter
     const attempt = controlCenter.data.recovery?.attemptCount;
     return typeof attempt === "number" && Number.isFinite(attempt) ? attempt : null;
 };
+/**
+ * The Provisioning order header binds the fulfillment-bound external reference the control-center
+ * seam publishes for the bound workspace row - the only order-bound identity an owner-scoped read
+ * reaches - and never the workspace id itself. An unanswered, refused or still-unpublished
+ * reference withholds the fact entirely rather than labelling a workspace as the order.
+ */
+const provisioningOrderRefOf = (controlCenter: Result<AgentWorkspaceControlCenter> | undefined): string | null => {
+    if (controlCenter?.ok !== true) return null;
+    const reference = controlCenter.data.workspace.externalWorkspaceRef;
+    return reference === null || reference.trim().length === 0 ? null : reference;
+};
 
 /** Order lifecycle positions an order row can only reach after its payment settled. */
 const ORDER_SETTLED: ReadonlySet<string> = new Set(["active", "completed", "in_progress", "paid"]);
@@ -692,7 +703,7 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
 
     const provisioningPrimary = (phase: PurchasePhase) => ({
         label: copy.provisioningOrderLabel,
-        fact: workspace?.id,
+        fact: provisioningOrderRefOf(controlCenterQuery.data) ?? undefined,
         facts: [
             { label: copy.offer, value: offerName ?? "—" },
             { label: copy.purchaseLabel, value: purchaseId },

@@ -1,4 +1,4 @@
-import { BAND_CLASS_NAME, BANNER_CLASS_NAME, BREADCRUMB_LIST_CLASS_NAME, CAPTION_CLASS_NAME, ESCAPE_CLASS_NAME, FACT_CELL_CLASS_NAME, FACT_GRID_CLASS_NAME, FACT_ROW_CLASS_NAME, NOTICE_CLASS_NAME, ROW_BODY_CLASS_NAME, ROW_CLASS_NAME, ROW_HEAD_CLASS_NAME, SECTIONS_CLASS_NAME } from "./classNames";
+import { ACTION_FOCUS_CLASS_NAME, BAND_CLASS_NAME, BANNER_CLASS_NAME, BREADCRUMB_LIST_CLASS_NAME, CAPTION_CLASS_NAME, ESCAPE_CLASS_NAME, FACT_CELL_CLASS_NAME, FACT_GRID_CLASS_NAME, FACT_ROW_CLASS_NAME, NOTICE_CLASS_NAME, ROW_BODY_CLASS_NAME, ROW_CLASS_NAME, ROW_HEAD_CLASS_NAME, SECTIONS_CLASS_NAME, SKELETON_BANNER_RESERVED_CLASS_NAME, SKELETON_FACT_ROW_RESERVED_CLASS_NAME, SKELETON_FOOTNOTE_RESERVED_CLASS_NAME } from "./classNames";
 import { Badge, Button, EmptyNotice, IconTile, PageContainer, PrimaryRailLayout, Progress, SectionHeader, SurfaceCard, Text, TextAction, type BadgeTone, type IconSource } from "@starci/grammar/common";
 import type { PurchaseStatusCopy } from "./copy";
 
@@ -218,7 +218,7 @@ const primaryCard = (primary: PurchaseStatusPrimary, on: PurchaseStatusActions) 
     {primary.timeline?.map(row => <div key={row.id} className={BAND_CLASS_NAME}>{timelineRow(row)}</div>)}
     {primary.footnote === undefined ? null : <div className={BAND_CLASS_NAME}><Text size="xs" tone="muted" overflow="wrap">{primary.footnote}</Text></div>}
     {primary.action === undefined ? null : <div className={BAND_CLASS_NAME}>
-        <div><Button variant="primary" type="button" isPending={primary.action.pending} onPress={on.primary}>{primary.action.label}</Button></div>
+        <div className={ACTION_FOCUS_CLASS_NAME}><Button variant="primary" type="button" isPending={primary.action.pending} onPress={on.primary}>{primary.action.label}</Button></div>
     </div>}
 </SurfaceCard>;
 
@@ -239,7 +239,7 @@ const railCard = (rail: PurchaseStatusRail, on: PurchaseStatusActions) => <Surfa
         {rail.outcome.detail === undefined ? null : <Text size="xs" tone="muted" overflow="wrap">{rail.outcome.detail}</Text>}
     </div>}
     {rail.action === undefined && rail.secondaryLink === undefined && rail.refusalText === undefined ? null : <div className={BAND_CLASS_NAME}>
-        {rail.action === undefined ? null : <Button variant="primary" size="lg" width="fill" type="button" isPending={rail.action.pending} onPress={on.primary}>{rail.action.label}</Button>}
+        {rail.action === undefined ? null : <div className={ACTION_FOCUS_CLASS_NAME}><Button variant="primary" size="lg" width="fill" type="button" isPending={rail.action.pending} onPress={on.primary}>{rail.action.label}</Button></div>}
         {rail.actionCaption === undefined ? null : <div className={CAPTION_CLASS_NAME}><Text size="xs" tone="muted" overflow="wrap">{rail.actionCaption}</Text></div>}
         {rail.refusalText === undefined ? null : <Text size="sm" live="polite" overflow="wrap">{rail.refusalText}</Text>}
         {rail.secondaryLink === undefined ? null : <TextAction href={rail.secondaryLink.href} size="sm" onFollow={on.returnToList}>{rail.secondaryLink.label}</TextAction>}
@@ -255,6 +255,10 @@ const skeletonMark: IconSource = () => null;
 
 const skeletonLine = (size: "xs" | "sm" | "md") => <Text size={size} isSkeleton>Loading</Text>;
 
+/* The resolved cards that publish a trailing fact keep a two-line external label row; the
+   skeleton stands a fact bar in the same slot so the label row holds its resolved height. */
+const skeletonLabelEnd = <Text size="md" isSkeleton>Loading</Text>;
+
 const skeletonFactCell = (key: string) => <div key={key} className={FACT_CELL_CLASS_NAME}>
     {skeletonLine("xs")}
     {skeletonLine("sm")}
@@ -264,13 +268,16 @@ const skeletonFactBand = (id: string, cells: number) => <div key={id} className=
     <div className={FACT_GRID_CLASS_NAME}>{Array.from({ length: cells }, (_, index) => skeletonFactCell(`${id}-${index}`))}</div>
 </div>;
 
-const skeletonCheckRow = (key: string) => <div key={key} className={ROW_CLASS_NAME}>
+/* The resolved row pairs an `at` line with its detail line on the checks that observe one;
+   `withAt` keeps that two-line rank on the row that resolves with a timestamp. */
+const skeletonCheckRow = (key: string, withAt = false) => <div key={key} className={ROW_CLASS_NAME}>
     <IconTile source={skeletonMark} tone="neutral" size="sm" isSkeleton />
     <div className={ROW_BODY_CLASS_NAME}>
         <div className={ROW_HEAD_CLASS_NAME}>
             {skeletonLine("sm")}
             <Badge isSkeleton>Loading</Badge>
         </div>
+        {withAt ? skeletonLine("xs") : null}
         {skeletonLine("xs")}
     </div>
 </div>;
@@ -283,13 +290,15 @@ const skeletonTimelineRow = (key: string) => <div key={key} className={BAND_CLAS
     </div>
 </div></div>;
 
-const skeletonFactRow = (key: string) => <div key={key} className={BAND_CLASS_NAME}>
+/* `reserved` marks the band whose resolved value wraps to two lines in the narrow rail or on a
+   phone card; the class reserves that band's resolved height where the wrap occurs. */
+const skeletonFactRow = (key: string, reserved = false) => <div key={key} className={reserved ? SKELETON_FACT_ROW_RESERVED_CLASS_NAME : BAND_CLASS_NAME}>
     <div className={FACT_ROW_CLASS_NAME}>{skeletonLine("sm")}{skeletonLine("sm")}</div>
 </div>;
 
 /** The payment surface's loading preview: the same bands at the same ranks as the resolved card. */
-const paymentLoadingPrimary = (copy: PurchaseStatusCopy) => <SurfaceCard label={copy.purchaseFactsLabel} composition="joined" height="fill">
-    <div className={BAND_CLASS_NAME}><div className={BANNER_CLASS_NAME}>
+const paymentLoadingPrimary = (copy: PurchaseStatusCopy) => <SurfaceCard label={copy.purchaseFactsLabel} labelEnd={skeletonLabelEnd} composition="joined" height="fill">
+    <div className={SKELETON_BANNER_RESERVED_CLASS_NAME}><div className={BANNER_CLASS_NAME}>
         {skeletonLine("md")}
         {skeletonLine("sm")}
         {skeletonLine("sm")}
@@ -300,8 +309,8 @@ const paymentLoadingPrimary = (copy: PurchaseStatusCopy) => <SurfaceCard label={
 
 const paymentLoadingRail = (copy: PurchaseStatusCopy) => <SurfaceCard label={copy.verificationLabel} composition="joined" height="fill">
     <div className={BAND_CLASS_NAME}>{skeletonLine("sm")}</div>
-    <div className={BAND_CLASS_NAME}>{["provider", "amount", "canonical", "admission"].map(skeletonCheckRow)}</div>
-    <div className={BAND_CLASS_NAME}><div className={NOTICE_CLASS_NAME}><Badge isSkeleton>!</Badge>{skeletonLine("sm")}</div></div>
+    <div className={BAND_CLASS_NAME}>{["provider", "amount", "canonical", "admission"].map(key => skeletonCheckRow(key, key === "provider"))}</div>
+    <div className={BAND_CLASS_NAME}><div className={NOTICE_CLASS_NAME}><Badge isSkeleton>!</Badge><div className={ROW_BODY_CLASS_NAME}>{skeletonLine("sm")}{skeletonLine("xs")}</div></div></div>
     <div className={BAND_CLASS_NAME}>
         <Button variant="primary" size="lg" width="fill" type="button" isSkeleton>Loading</Button>
         <div className={CAPTION_CLASS_NAME}>{skeletonLine("xs")}</div>
@@ -310,7 +319,7 @@ const paymentLoadingRail = (copy: PurchaseStatusCopy) => <SurfaceCard label={cop
 </SurfaceCard>;
 
 /** The provisioning surface's loading preview: identity, cadence, operation, footnote and action bands. */
-const provisioningLoadingPrimary = (copy: PurchaseStatusCopy) => <SurfaceCard label={copy.provisioningOrderLabel} composition="joined" height="fill">
+const provisioningLoadingPrimary = (copy: PurchaseStatusCopy) => <SurfaceCard label={copy.provisioningOrderLabel} labelEnd={skeletonLabelEnd} composition="joined" height="fill">
     {skeletonFactBand("identity", 6)}
     {skeletonFactBand("cadence", 2)}
     <div className={BAND_CLASS_NAME}>
@@ -318,15 +327,14 @@ const provisioningLoadingPrimary = (copy: PurchaseStatusCopy) => <SurfaceCard la
         <div className={ROW_HEAD_CLASS_NAME}>{skeletonLine("md")}<Badge isSkeleton>Loading</Badge></div>
         <Progress label={copy.loadingTitle} isSkeleton />
         {skeletonLine("xs")}
-        {skeletonLine("xs")}
     </div>
-    <div className={BAND_CLASS_NAME}>{skeletonLine("xs")}</div>
+    <div className={SKELETON_FOOTNOTE_RESERVED_CLASS_NAME}>{skeletonLine("xs")}</div>
     <div className={BAND_CLASS_NAME}><div><Button variant="primary" type="button" isSkeleton>Loading</Button></div></div>
 </SurfaceCard>;
 
-const provisioningLoadingRail = (copy: PurchaseStatusCopy) => <SurfaceCard label={copy.confirmedFactsLabel} composition="joined" height="fill">
-    <div className={BAND_CLASS_NAME}>{["payment", "entitlement", "configure", "readiness"].map(skeletonCheckRow)}</div>
-    {skeletonFactRow("owner")}
+const provisioningLoadingRail = (copy: PurchaseStatusCopy) => <SurfaceCard label={copy.confirmedFactsLabel} labelEnd={skeletonLabelEnd} composition="joined" height="fill">
+    <div className={BAND_CLASS_NAME}>{["payment", "entitlement", "configure", "readiness"].map(key => skeletonCheckRow(key, key === "configure"))}</div>
+    {skeletonFactRow("owner", true)}
     {skeletonFactRow("attempt")}
     <div className={BAND_CLASS_NAME}>{skeletonLine("sm")}{skeletonLine("xs")}</div>
 </SurfaceCard>;

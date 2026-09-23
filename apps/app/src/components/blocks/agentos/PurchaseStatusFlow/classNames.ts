@@ -113,6 +113,41 @@ export const NOTICE_CLASS_NAME = cn(
 /** Centred caption under a rail action. */
 export const CAPTION_CLASS_NAME = cn("text-center");
 
+/*
+ * Loading-preview geometry reserves: the skeleton draws a single-line bar where the resolved
+ * surface wraps to two, so the band that stands in for it reserves the resolved band's height at
+ * exactly the widths the resolved content wraps - a narrow stacked card, or the fixed-width rail
+ * once the PrimaryRailLayout container switches to side-by-side columns (>=56rem).
+ */
+
+/** The confirmed-fact row whose resolved value wraps to two lines in the narrow rail or phone card. */
+export const SKELETON_FACT_ROW_RESERVED_CLASS_NAME = cn(
+  BAND_CLASS_NAME,
+  "max-[390px]:min-h-[73px]",
+  "@[56rem]:min-h-[73px]"
+);
+
+/** The provisioning footnote band; the resolved order sentence wraps to three lines on a phone card. */
+export const SKELETON_FOOTNOTE_RESERVED_CLASS_NAME = cn(
+  BAND_CLASS_NAME,
+  "max-[620px]:min-h-[81px]"
+);
+
+/** The payment banner band; the resolved offer strip wraps to three lines on a phone card. */
+export const SKELETON_BANNER_RESERVED_CLASS_NAME = cn(
+  BAND_CLASS_NAME,
+  "max-[430px]:min-h-[105px]"
+);
+
+/**
+ * The consumed Grammar button paints no keyboard-focus treatment on this surface (measured:
+ * data-focus-visible=true with no outline, ring or colour delta). HeroUI's unlayered
+ * `outline-style: none` beats every layered utility, so the ring itself is the unlayered
+ * `.purchase-status-action` descendant rule in globals.css - the family's own contract
+ * (2px solid var(--focus), 2px offset) - while this hook keeps the treatment owned here.
+ */
+export const ACTION_FOCUS_CLASS_NAME = cn("purchase-status-action");
+
 /** Page-level escape link row, used where the rail band already holds the onward action. */
 export const ESCAPE_CLASS_NAME = cn(
   "flex",
