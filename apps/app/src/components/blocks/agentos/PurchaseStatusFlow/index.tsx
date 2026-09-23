@@ -84,16 +84,15 @@ const provisioningAttemptOf = (controlCenter: Result<AgentWorkspaceControlCenter
     return typeof attempt === "number" && Number.isFinite(attempt) ? attempt : null;
 };
 /**
- * The Provisioning order header binds the fulfillment-bound external reference the control-center
- * seam publishes for the bound workspace row - the only order-bound identity an owner-scoped read
- * reaches - and never the workspace id itself. An unanswered, refused or still-unpublished
- * reference withholds the fact entirely rather than labelling a workspace as the order.
+ * The Provisioning order header binds the durable purchase-bound order identity: the catalog
+ * order the provisioning order was admitted for. The owner-scoped order seam (`myCatalogOrders`)
+ * names it by the row id, and the invoice seam still names the same bound order when the order
+ * read itself is refused. It is never the workspace id and never `externalWorkspaceRef` - that
+ * field is the provisioned workspace's own external reference, not an order identity - and the
+ * fact withholds entirely when no order seam published a real order id.
  */
-const provisioningOrderRefOf = (controlCenter: Result<AgentWorkspaceControlCenter> | undefined): string | null => {
-    if (controlCenter?.ok !== true) return null;
-    const reference = controlCenter.data.workspace.externalWorkspaceRef;
-    return reference === null || reference.trim().length === 0 ? null : reference;
-};
+const provisioningOrderRefOf = (order: CatalogOrderRow | null, invoice: InvoiceRow | null): string | null =>
+    order?.id ?? invoice?.catalogOrder?.id ?? null;
 
 /** Order lifecycle positions an order row can only reach after its payment settled. */
 const ORDER_SETTLED: ReadonlySet<string> = new Set(["active", "completed", "in_progress", "paid"]);
@@ -703,7 +702,7 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
 
     const provisioningPrimary = (phase: PurchasePhase) => ({
         label: copy.provisioningOrderLabel,
-        fact: provisioningOrderRefOf(controlCenterQuery.data) ?? undefined,
+        fact: provisioningOrderRefOf(order, invoice) ?? undefined,
         facts: [
             { label: copy.offer, value: offerName ?? "—" },
             { label: copy.purchaseLabel, value: purchaseId },

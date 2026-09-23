@@ -215,21 +215,23 @@ describe("PurchaseStatusFlow connected flow", () => {
         expect(flow()).toContain('{"id":"provisioning","label":"Provisioning","isCurrent":true}')
     })
 
-    it("binds the provisioning-order header to the control-center fulfillment reference, never the workspace id", async () => {
+    it("binds the provisioning-order header to the purchase-bound order identity, never a workspace reference", async () => {
         snapshot({ orders: [paidOrder], invoices: [paidInvoice], workspaces: [workspace], controlCenterResult: controlCenter(null, "agent_a1b2c3d4") })
         render(<PurchaseStatusFlow purchaseId="purchase-1" />)
         await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
         await waitFor(() => expect(mocks.api.myAgentWorkspaceControlCenter).toHaveBeenCalledWith("workspace-1"))
-        expect(flow()).toContain('"label":"Provisioning order","fact":"agent_a1b2c3d4"')
+        expect(flow()).toContain('"label":"Provisioning order","fact":"purchase-1"')
+        expect(flow()).not.toContain('"fact":"agent_a1b2c3d4"')
         expect(flow()).not.toContain('"fact":"workspace-1"')
         expect(flow()).toContain('"label":"Workspace","value":"workspace-1"')
     })
 
-    it("withholds the provisioning-order header fact when the seam publishes no reference", async () => {
+    it("keeps the purchase-bound order identity when the control-center read publishes no reference", async () => {
         snapshot({ orders: [paidOrder], invoices: [paidInvoice], workspaces: [workspace] })
         render(<PurchaseStatusFlow purchaseId="purchase-1" />)
         await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
         await waitFor(() => expect(mocks.api.myAgentWorkspaceControlCenter).toHaveBeenCalledWith("workspace-1"))
+        expect(flow()).toContain('"label":"Provisioning order","fact":"purchase-1"')
         expect(flow()).not.toContain('"fact":"workspace-1"')
         expect(flow()).toContain('"label":"Workspace","value":"workspace-1"')
     })

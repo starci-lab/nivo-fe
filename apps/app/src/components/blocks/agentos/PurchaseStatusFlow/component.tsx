@@ -1,4 +1,4 @@
-import { ACTION_FOCUS_CLASS_NAME, BAND_CLASS_NAME, BANNER_CLASS_NAME, BREADCRUMB_LIST_CLASS_NAME, CAPTION_CLASS_NAME, ESCAPE_CLASS_NAME, FACT_CELL_CLASS_NAME, FACT_GRID_CLASS_NAME, FACT_ROW_CLASS_NAME, NOTICE_CLASS_NAME, ROW_BODY_CLASS_NAME, ROW_CLASS_NAME, ROW_HEAD_CLASS_NAME, SECTIONS_CLASS_NAME, SKELETON_BANNER_RESERVED_CLASS_NAME, SKELETON_FACT_ROW_RESERVED_CLASS_NAME, SKELETON_FOOTNOTE_RESERVED_CLASS_NAME } from "./classNames";
+import { ACTION_FOCUS_CLASS_NAME, BAND_CLASS_NAME, BANNER_CLASS_NAME, BREADCRUMB_LIST_CLASS_NAME, CAPTION_CLASS_NAME, ESCAPE_CLASS_NAME, FACT_CELL_CLASS_NAME, FACT_GRID_CLASS_NAME, FACT_ROW_CLASS_NAME, NOTICE_CLASS_NAME, ROW_BODY_CLASS_NAME, ROW_CLASS_NAME, ROW_HEAD_CLASS_NAME, SECTIONS_CLASS_NAME, SKELETON_BANNER_RESERVED_CLASS_NAME, SKELETON_FACT_ROW_RESERVED_CLASS_NAME, SKELETON_FOOTNOTE_RESERVED_CLASS_NAME, SKELETON_TITLE_RESERVED_CLASS_NAME } from "./classNames";
 import { Badge, Button, EmptyNotice, IconTile, PageContainer, PrimaryRailLayout, Progress, SectionHeader, SurfaceCard, Text, TextAction, type BadgeTone, type IconSource } from "@starci/grammar/common";
 import type { PurchaseStatusCopy } from "./copy";
 
@@ -177,7 +177,7 @@ const timelineRow = (row: PurchaseStatusTimelineRow) => <div key={row.id} classN
     </div>
 </div>;
 
-const head = (props: PurchaseStatusHeadProps) => <>
+const head = (props: PurchaseStatusHeadProps, reserveResolvedTitle = false) => <>
     <nav aria-label={props.copy.path}>
         <ol className={BREADCRUMB_LIST_CLASS_NAME}>
             {props.trail.map((step, index) => <li key={step.id} className={BREADCRUMB_LIST_CLASS_NAME} aria-current={step.isCurrent === true ? "page" : undefined}>
@@ -189,7 +189,7 @@ const head = (props: PurchaseStatusHeadProps) => <>
         </ol>
     </nav>
     <SectionHeader level={1}
-        title={<span>{props.title}{props.badge === undefined ? null : <>{" "}<Badge tone={props.badge.tone}>{props.badge.label}</Badge></>}</span>}
+        title={<span className={reserveResolvedTitle ? SKELETON_TITLE_RESERVED_CLASS_NAME : undefined}>{props.title}{props.badge === undefined ? null : <>{" "}<Badge tone={props.badge.tone}>{props.badge.label}</Badge></>}</span>}
         description={<Text size="md" tone="muted">{props.subtitle}</Text>} />
 </>;
 
@@ -346,7 +346,7 @@ export const PurchaseStatusFlowBase = (props: PurchaseStatusFlowProps) => {
         const copy = props.props.copy;
         const provisioning = props.props.surface === "provisioning";
         return <PageContainer measure="product"><div className={SECTIONS_CLASS_NAME} aria-busy="true" data-contract="GAP-5">
-            {head(props.props)}
+            {head(props.props, provisioning)}
             <PrimaryRailLayout railWidth="standard" collapsedOrder="primary-first" align="start"
                 primary={provisioning ? provisioningLoadingPrimary(copy) : paymentLoadingPrimary(copy)}
                 rail={provisioning ? provisioningLoadingRail(copy) : paymentLoadingRail(copy)} />

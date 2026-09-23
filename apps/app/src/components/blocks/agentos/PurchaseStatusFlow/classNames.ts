@@ -115,16 +115,28 @@ export const CAPTION_CLASS_NAME = cn("text-center");
 
 /*
  * Loading-preview geometry reserves: the skeleton draws a single-line bar where the resolved
- * surface wraps to two, so the band that stands in for it reserves the resolved band's height at
- * exactly the widths the resolved content wraps - a narrow stacked card, or the fixed-width rail
- * once the PrimaryRailLayout container switches to side-by-side columns (>=56rem).
+ * surface wraps to two, so the band or head line that stands in for it reserves the resolved
+ * rank at exactly the widths the resolved content wraps. The wrap is a function of the card's
+ * own width, so the fact-row reserve queries the `starci-core-surface` container - it answers
+ * for the stacked phone card and the fixed-width rail column alike, where a viewport query or
+ * an unnamed container query (which resolves against the surface card, not the rail layout)
+ * cannot describe the resolved wrap.
  */
 
-/** The confirmed-fact row whose resolved value wraps to two lines in the narrow rail or phone card. */
+/** The confirmed-fact row whose resolved value wraps to two lines once the card itself is narrow. */
 export const SKELETON_FACT_ROW_RESERVED_CLASS_NAME = cn(
   BAND_CLASS_NAME,
-  "max-[390px]:min-h-[73px]",
-  "@[56rem]:min-h-[73px]"
+  "@max-[400px]/starci-core-surface:min-h-[73px]"
+);
+
+/**
+ * The loading provisioning title's resolved rank: the resolved heading carries its badge inside
+ * the title and wraps to two lines on a narrow page, so the single-line skeleton title reserves
+ * that second line at the viewport where the resolved wrap occurs.
+ */
+export const SKELETON_TITLE_RESERVED_CLASS_NAME = cn(
+  "block",
+  "max-[540px]:min-h-[49px]"
 );
 
 /** The provisioning footnote band; the resolved order sentence wraps to three lines on a phone card. */
