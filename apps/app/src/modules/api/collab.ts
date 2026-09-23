@@ -4,25 +4,26 @@
  * `contract.collab.module-work`, `contract.collab.turn-notice`; mirrored from
  * `impl.collab.nivo-backend.gateway`).
  *
- * WHAT IS SETTLED. The backend ships one transport-agnostic entry,
- * `CollabGatewayService.handle(actor, {op, input})`, which authenticates the member,
- * re-checks current membership on every call, dispatches exactly one named operation and
- * returns a typed `CollabGatewayOutcome` - never throws. This module mirrors that closed
- * operation set and its projections one-for-one; it owns no second task authority, keeps
- * no optimistic copies, and never attests a role, grant or phone it was not given.
+ * WHAT IS SETTLED. The backend ships one served ingress,
+ * `CollabGatewayResolver` on the shared authenticated core GraphQL endpoint: the query
+ * field `collabGatewayRead` carries the closed read ops and the mutation field
+ * `collabGatewayCommand` the closed command ops (`contract.collab.chat` rev 4,
+ * `sds.collab.chat-gateway` rev 4, `impl.collab.nivo-backend.gateway`). Each takes one
+ * `CollabGatewayRequest {workspaceId, op, input}` and returns one typed
+ * `CollabGatewayOutcome` - never throws. The verified-bearer guard derives the actor
+ * (Login principal plus its `email_verified` email); the request carries only the
+ * workspace scope, the operation name and the domain input. This module mirrors that
+ * closed operation set and its projections one-for-one; it owns no second task
+ * authority, keeps no optimistic copies, and never attests a role, grant, principal,
+ * email or phone it was not given.
  *
- * WHAT IS DELIBERATELY NOT SETTLED. The accepted design records transport as "Not chosen"
- * (`contract.collab.chat` live-delivery, `architecture.collab.overview`), and the backend
- * publishes no Collab ingress yet: the gateway is an internal service, not a resolver.
- * So the WIRE BINDING below is the one movable part of this file. It follows the door the
- * codebase already opened for the same gateway shape - `chatbotWorkspaceGateway`
- * (`chatbotWorkspaceWorkbench`/`chatbotWorkspaceCommand`): one tagged-request field per
- * direction, a GraphQLJSON result carrying the service's own typed outcome, and a request
- * argument of `{workspaceId, op, input}`. The resolver supplies the verified member
- * identity; the request carries only the workspace scope, the operation name and the
- * domain input. When the real Collab resolver ships under its chosen names, only the two
- * field constants and the document below move - the exported operation vocabulary and the
- * result contract stay.
+ * MEMBER COMMANDS AND INVITATION IDENTITY. This round invites by email
+ * (`decision.collab.invite-identity-this-round`, `contract.collab.member-invite` rev 4):
+ * `inviteByEmail` carries the invitee's email and one role as domain input, and
+ * `acceptInvitation` carries only the invitation identity - the accepting email is the
+ * bearer's Login-verified email, never an input field. No phone field exists anywhere
+ * in this layer. The four member ops answer under the result record's `membership`
+ * field, whose `outcome` is the membership service's decided domain result.
  *
  * WHY NOT `graphql()`. The shared transport unwraps the `GraphQLTransformInterceptor`
  * envelope `{success, message, error, data}`; a gateway outcome is itself the typed
@@ -42,17 +43,17 @@ import type { Result } from "./graphql"
 /** Where the core API answers; same endpoint the shared transport uses. */
 const COLLAB_ENDPOINT = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql";
 
-/** The read direction field; moves when the real Collab resolver names itself. */
+/** The served query field the closed read ops travel on (`CollabGatewayResolver`). */
 export const COLLAB_GATEWAY_READ_FIELD = "collabGatewayRead";
 
-/** The command direction field; moves when the real Collab resolver names itself. */
+/** The served mutation field the closed command ops travel on (`CollabGatewayResolver`). */
 export const COLLAB_GATEWAY_COMMAND_FIELD = "collabGatewayCommand";
 
 /**
- * The closed named-operation set one member request resolves to. The first ten are
- * `CollabGatewayOperation` verbatim; the four membership operations belong to the
- * member-invite contract and the ingress dispatches them to the membership boundary -
- * the FE names the operation and never decides which service answers it.
+ * The closed named-operation set one member request resolves to
+ * (`contract.collab.chat` rev 4): the eight read ops travel on `collabGatewayRead`, the
+ * six command ops on `collabGatewayCommand`; an op on the wrong field or outside this
+ * set is refused as invalid before any Collab operation runs.
  */
 export type CollabOperation =
     | "openOffice"
@@ -65,7 +66,7 @@ export type CollabOperation =
     | "readNotices"
     | "openNotice"
     | "reconcileRequest"
-    | "inviteByPhone"
+    | "inviteByEmail"
     | "acceptInvitation"
     | "withdrawInvitation"
     | "changeMemberRole";
@@ -148,7 +149,7 @@ export type CollabGroupView = {
     readonly isDefaultOffice: boolean;
 };
 
-/** One participant row of the current Office roster; never carries a phone number. */
+/** One participant row of the current Office roster; never carries an email, phone or principal. */
 export type CollabOfficeParticipant = {
     readonly memberId: string;
     readonly kind: "human" | "module";
@@ -452,7 +453,7 @@ export type CollabOpenTurnNoticeOutcome = {
     readonly target?: CollabNoticeTarget;
 };
 
-/** Public projection of one member row; never carries a phone number. */
+/** Public projection of one member row; never carries an email, phone or principal. */
 export type CollabMemberView = {
     readonly memberId: string;
     readonly workspaceId: string;
@@ -462,27 +463,39 @@ export type CollabMemberView = {
     readonly status: string;
 };
 
-/** Outcome of `inviteByPhone`; `existing` covers duplicate and raced submissions. */
+/**
+ * The membership record every member command answers under the result record's
+ * `membership` field: the decided domain result plus the invitation or member row
+ * after the decision, when one exists. `notAuthorized`/`notEntitled` come back as
+ * non-disclosing `denied` failures, `invalidInput` as `invalid` and `lostRace` as
+ * `conflict` - they never reach this shape (`contract.collab.member-invite` rev 4).
+ */
+export type CollabMembershipResult = {
+    readonly outcome: "created" | "existing" | "accepted" | "withdrawn" | "roleChanged";
+    readonly member?: CollabMemberView;
+};
+
+/** Outcome of `inviteByEmail`; `existing` covers duplicate and raced submissions. */
 export type CollabInviteOutcome = {
-    readonly outcome: "invited" | "existing";
-    readonly member: CollabMemberView;
+    readonly outcome: "created" | "existing";
+    readonly member?: CollabMemberView;
 };
 
 /** Outcome of `acceptInvitation`; `existing` replays the first committed acceptance. */
 export type CollabAcceptOutcome = {
     readonly outcome: "accepted" | "existing";
-    readonly member: CollabMemberView;
+    readonly member?: CollabMemberView;
 };
 
 /** Outcome of `withdrawInvitation`; acceptance and withdrawal have one winner. */
 export type CollabWithdrawOutcome = {
-    readonly outcome: "withdrawn" | "accepted" | "unavailable";
+    readonly outcome: "withdrawn" | "existing";
     readonly member?: CollabMemberView;
 };
 
-/** Outcome of `changeMemberRole`; `unchanged` is the idempotent same-role replay. */
+/** Outcome of `changeMemberRole`; `existing` is the idempotent same-role replay. */
 export type CollabChangeMemberRoleOutcome = {
-    readonly outcome: "changed" | "unchanged" | "unavailable";
+    readonly outcome: "roleChanged" | "existing";
     readonly member?: CollabMemberView;
 };
 
@@ -590,9 +603,10 @@ const readOutcome = (value: unknown): CollabGatewayOutcome | null => {
 
 /**
  * The default binding: one tagged-request document to the shared core GraphQL endpoint,
- * `collabGatewayRead` for reads and `collabGatewayCommand` for writes - the same door
- * shape `chatbotWorkspaceGateway` opened for its closed-op gateway. The Collab resolver
- * is not published yet; when it ships, this is the only function whose constants move.
+ * `collabGatewayRead` for reads and `collabGatewayCommand` for writes - the door
+ * `CollabGatewayResolver` serves (`sds.collab.chat-gateway` rev 4). The request argument
+ * is exactly `{workspaceId, op, input}`; the field's GraphQLJSON payload is the typed
+ * outcome itself, read bare rather than through the shared envelope unwrap.
  */
 export const collabGatewayTransport: CollabTransport = async ({ accessToken, request }) => {
     const field = COLLAB_READ_OPERATIONS.has(request.op)
@@ -683,7 +697,31 @@ const collabRequest = async <T>(
         const code = `COLLAB_${outcome.failure.kind.toUpperCase().replace(/-/g, "_")}`;
         return collabFailure(outcome.failure.kind, code, outcome.failure.reason, outcome.failure.retryable);
     }
-    return { ok: true, data: pick(outcome.result) };
+    try {
+        return { ok: true, data: pick(outcome.result) };
+    } catch {
+        // An ok outcome whose result record is not the op's own shape is
+        // untrusted wire data, not a crash: a retryable unknown, never success.
+        return collabFailure("unknown", "COLLAB_UNKNOWN", "malformed result", true);
+    }
+};
+
+/** One named field of an ok result record, or a thrown malformed marker. */
+const readResultField = (result: Record<string, unknown>, field: string): Record<string, unknown> => {
+    const value = result[field];
+    if (!isRecord(value)) {
+        throw new Error(`${field} result missing`);
+    }
+    return value;
+};
+
+/** The `membership` result record of a member command, or a thrown malformed marker. */
+const readMembershipResult = (result: Record<string, unknown>): CollabMembershipResult => {
+    const membership = readResultField(result, "membership");
+    if (typeof membership.outcome !== "string") {
+        throw new Error("membership outcome missing");
+    }
+    return membership as CollabMembershipResult;
 };
 
 /* ------------------------------------------------------------------ */
@@ -741,13 +779,21 @@ export type CollabReconcileCall = CollabCallScope & { readonly intentId: string 
 /** The three human roles a V1 invitation or role change may name. */
 export type CollabHumanRole = "owner" | "manager" | "staff";
 
-/** `inviteByPhone`: the invited phone and its one role. */
+/**
+ * `inviteByEmail`: the invitee's email and its one role. The email is domain input
+ * naming the invited person, never the actor - normalization (trim, case) is the
+ * boundary's job, not this adapter's.
+ */
 export type CollabInviteCall = CollabCallScope & {
-    readonly phone: string;
+    readonly email: string;
     readonly role: CollabHumanRole;
 };
 
-/** `acceptInvitation`: the invitation identity and optional display name. */
+/**
+ * `acceptInvitation`: the invitation identity and optional display name. The accepting
+ * email is the bearer's Login-verified email derived by the ingress - this call can
+ * never carry an accepter email, phone, role, grant or principal.
+ */
 export type CollabAcceptInvitationCall = CollabCallScope & {
     readonly invitationId: string;
     readonly displayName?: string;
@@ -764,7 +810,7 @@ export type CollabChangeRoleCall = CollabCallScope & {
 
 /** `openOffice`: a current member lands in the one Office group with its roster. */
 export const openCollabOffice = (args: CollabCallScope): Promise<CollabResult<CollabOfficeView>> =>
-    collabRequest(args.accessToken, args.workspaceId, "openOffice", {}, (r) => r.office as CollabOfficeView);
+    collabRequest(args.accessToken, args.workspaceId, "openOffice", {}, (r) => readResultField(r, "office") as CollabOfficeView);
 
 /** `readGroup`: the authorized conversation page under a resumable cursor. */
 export const readCollabGroup = (args: CollabPageCall): Promise<CollabResult<CollabGroupRead>> =>
@@ -773,7 +819,7 @@ export const readCollabGroup = (args: CollabPageCall): Promise<CollabResult<Coll
         args.workspaceId,
         "readGroup",
         { ...(args.cursor === undefined ? {} : { cursor: args.cursor }), ...(args.limit === undefined ? {} : { limit: args.limit }) },
-        (r) => r.page as CollabGroupRead,
+        (r) => readResultField(r, "page") as CollabGroupRead,
     );
 
 /** The `postMessage` answer: the admission disposition plus any bound question-answer. */
@@ -783,13 +829,33 @@ export type CollabPostMessageOutcome = {
 };
 
 /**
- * Claim fields `postMessage` never accepts from a caller: the ingress derives the asker
- * grant from the verified member identity, so a transported role/member/phone/membership
- * claim is refused before the request leaves the adapter.
+ * Claim fields no Collab command ever accepts from a caller, mirrored from the ingress
+ * (`sds.collab.chat-gateway` rev 4 Asker grant derivation): the actor comes only from
+ * the verified bearer, so a transported grant, role, member identity, principal,
+ * verified-email claim, phone or membership claim is refused before the request leaves
+ * the adapter. `inviteByEmail`'s own domain fields (`email`, `role`) and
+ * `changeMemberRole`'s (`memberId`, `role`) name the invitee or target, never the actor.
  */
-const POST_MESSAGE_FORBIDDEN_CLAIMS = new Set([
-    "askerGrantScope", "role", "member", "memberId", "phone", "membership", "membershipId", "membershipClaims",
+const FORBIDDEN_AUTHORITY_CLAIMS = new Set([
+    "askerGrantScope", "askerGrant", "grant", "grantScope", "role", "actorRole",
+    "memberId", "member", "membership", "membershipId", "membershipClaims", "isMember",
+    "principal", "loginPrincipal", "sub", "email", "verifiedEmail", "emailVerified", "email_verified",
+    "phone", "verifiedPhone", "actor",
 ]);
+
+/**
+ * Refuse a call that smuggles an authority or identity claim the ingress must never
+ * read from input, before the request leaves the adapter. The op's own domain fields
+ * that happen to share a claim name (`inviteByEmail`'s `email`/`role`,
+ * `changeMemberRole`'s `memberId`/`role`) are passed in `allowed` - they name the
+ * invitee or target, never the actor.
+ */
+const rejectAuthorityClaims = (op: string, args: Readonly<Record<string, unknown>>, allowed: ReadonlyArray<string>): CollabResult<never> | null => {
+    const claim = Object.keys(args).find((key) => FORBIDDEN_AUTHORITY_CLAIMS.has(key) && !allowed.includes(key));
+    return claim === undefined
+        ? null
+        : collabFailure("invalid", "COLLAB_INVALID", `${op} does not accept ${claim}; the ingress derives actor identity from the verified bearer.`, false);
+};
 
 /**
  * `postMessage`: commit one message under its stable intent identity. The caller supplies
@@ -798,9 +864,9 @@ const POST_MESSAGE_FORBIDDEN_CLAIMS = new Set([
  * the bound question-answer when the message closed one.
  */
 export const postCollabMessage = (args: CollabPostMessageCall): Promise<CollabResult<CollabPostMessageOutcome>> => {
-    const claim = Object.keys(args).find((key) => POST_MESSAGE_FORBIDDEN_CLAIMS.has(key));
-    if (claim !== undefined) {
-        return Promise.resolve(collabFailure("invalid", "COLLAB_INVALID", `postMessage does not accept ${claim}; membership-service supplies the asker grant.`, false));
+    const refused = rejectAuthorityClaims("postMessage", args, []);
+    if (refused !== null) {
+        return Promise.resolve(refused);
     }
     return collabRequest(
         args.accessToken,
@@ -813,21 +879,26 @@ export const postCollabMessage = (args: CollabPostMessageCall): Promise<CollabRe
             ...(args.answersQuestionId === undefined ? {} : { answersQuestionId: args.answersQuestionId }),
         },
         (r) => ({
-            route: r.route as CollabRouteOutcome,
+            route: readResultField(r, "route") as CollabRouteOutcome,
             ...(r.answer === undefined ? {} : { answer: r.answer as CollabAnswerBinding }),
         }),
     );
 };
 
 /** `pressApprovalButton`: the exact card, the exact two-button control value. */
-export const pressCollabApprovalButton = (args: CollabPressApprovalCall): Promise<CollabResult<CollabPressApprovalButtonOutcome>> =>
-    collabRequest(
+export const pressCollabApprovalButton = (args: CollabPressApprovalCall): Promise<CollabResult<CollabPressApprovalButtonOutcome>> => {
+    const refused = rejectAuthorityClaims("pressApprovalButton", args, []);
+    if (refused !== null) {
+        return Promise.resolve(refused);
+    }
+    return collabRequest(
         args.accessToken,
         args.workspaceId,
         "pressApprovalButton",
         { approvalId: args.approvalId, button: args.button },
-        (r) => r.press as CollabPressApprovalButtonOutcome,
+        (r) => readResultField(r, "press") as CollabPressApprovalButtonOutcome,
     );
+};
 
 /** `listTasks`: the authorized Tasks page; every filter is presentation only. */
 export const listCollabTasks = (args: CollabListTasksCall): Promise<CollabResult<CollabTaskList>> =>
@@ -842,7 +913,7 @@ export const listCollabTasks = (args: CollabListTasksCall): Promise<CollabResult
             ...(args.cursor === undefined ? {} : { cursor: args.cursor }),
             ...(args.limit === undefined ? {} : { limit: args.limit }),
         },
-        (r) => r.page as CollabTaskList,
+        (r) => readResultField(r, "page") as CollabTaskList,
     );
 
 /** `readTask`: the same authoritative task the Office card reads, plus its card target. */
@@ -852,7 +923,7 @@ export const readCollabTask = (args: CollabReadTaskCall): Promise<CollabResult<C
         args.workspaceId,
         "readTask",
         { taskId: args.taskId },
-        (r) => r.read as CollabReadTaskOutcome,
+        (r) => readResultField(r, "read") as CollabReadTaskOutcome,
     );
 
 /** `availableCommands`: resolve one typed `@` name to its published command set. */
@@ -862,7 +933,7 @@ export const readCollabAvailableCommands = (args: CollabCommandsCall): Promise<C
         args.workspaceId,
         "availableCommands",
         { moduleName: args.moduleName },
-        (r) => r.offer as CollabAvailableCommandsOutcome,
+        (r) => readResultField(r, "offer") as CollabAvailableCommandsOutcome,
     );
 
 /** `readNotices`: the member's outstanding turn notices under a resumable cursor. */
@@ -872,7 +943,7 @@ export const readCollabNotices = (args: CollabPageCall): Promise<CollabResult<Co
         args.workspaceId,
         "readNotices",
         { ...(args.cursor === undefined ? {} : { cursor: args.cursor }), ...(args.limit === undefined ? {} : { limit: args.limit }) },
-        (r) => r.page as CollabTurnNoticePage,
+        (r) => readResultField(r, "page") as CollabTurnNoticePage,
     );
 
 /** `openNotice`: follow one named notice to its live authoritative target. */
@@ -882,7 +953,7 @@ export const openCollabNotice = (args: CollabOpenNoticeCall): Promise<CollabResu
         args.workspaceId,
         "openNotice",
         { noticeId: args.noticeId },
-        (r) => r.notice as CollabOpenTurnNoticeOutcome,
+        (r) => readResultField(r, "notice") as CollabOpenTurnNoticeOutcome,
     );
 
 /**
@@ -896,60 +967,102 @@ export const reconcileCollabRequest = (args: CollabReconcileCall): Promise<Colla
         args.workspaceId,
         "reconcileRequest",
         { intentId: args.intentId },
-        (r) => r.reconcile as CollabReconcileOutcome,
+        (r) => readResultField(r, "reconcile") as CollabReconcileOutcome,
     );
 
 /* ------------------------------------------------------------------ */
 /* Membership operations - the member-invite contract ops. The ingress */
-/* dispatches them to the membership boundary rather than the gateway, */
-/* and its result fields ride the tagged result record directly.      */
+/* orchestrates them into the membership boundary and answers them     */
+/* under the result record's `membership` field.                       */
 /* ------------------------------------------------------------------ */
 
-/** `inviteByPhone`: one invitation naming exactly one V1 human role. */
-export const inviteCollabMemberByPhone = (args: CollabInviteCall): Promise<CollabResult<CollabInviteOutcome>> =>
-    collabRequest(
+/** `inviteByEmail`: one invitation naming exactly one V1 human role. */
+export const inviteCollabMemberByEmail = (args: CollabInviteCall): Promise<CollabResult<CollabInviteOutcome>> => {
+    const refused = rejectAuthorityClaims("inviteByEmail", args, ["email", "role"]);
+    if (refused !== null) {
+        return Promise.resolve(refused);
+    }
+    return collabRequest(
         args.accessToken,
         args.workspaceId,
-        "inviteByPhone",
-        { phone: args.phone, role: args.role },
-        (r) => ({ outcome: r.outcome as CollabInviteOutcome["outcome"], member: r.member as CollabMemberView }),
+        "inviteByEmail",
+        { email: args.email, role: args.role },
+        (r) => {
+            const membership = readMembershipResult(r);
+            return {
+                outcome: membership.outcome as CollabInviteOutcome["outcome"],
+                ...(membership.member === undefined ? {} : { member: membership.member }),
+            };
+        },
     );
+};
 
-/** `acceptInvitation`: the invited person's verified phone consumes one invitation. */
-export const acceptCollabInvitation = (args: CollabAcceptInvitationCall): Promise<CollabResult<CollabAcceptOutcome>> =>
-    collabRequest(
+/**
+ * `acceptInvitation`: the bearer's Login-verified email consumes one invitation. The
+ * call carries only the invitation identity and an optional display name - never an
+ * accepter email, phone, role, grant or principal, which the guard above refuses.
+ */
+export const acceptCollabInvitation = (args: CollabAcceptInvitationCall): Promise<CollabResult<CollabAcceptOutcome>> => {
+    const refused = rejectAuthorityClaims("acceptInvitation", args, []);
+    if (refused !== null) {
+        return Promise.resolve(refused);
+    }
+    return collabRequest(
         args.accessToken,
         args.workspaceId,
         "acceptInvitation",
         { invitationId: args.invitationId, ...(args.displayName === undefined ? {} : { displayName: args.displayName }) },
-        (r) => ({ outcome: r.outcome as CollabAcceptOutcome["outcome"], member: r.member as CollabMemberView }),
+        (r) => {
+            const membership = readMembershipResult(r);
+            return {
+                outcome: membership.outcome as CollabAcceptOutcome["outcome"],
+                ...(membership.member === undefined ? {} : { member: membership.member }),
+            };
+        },
     );
+};
 
 /** `withdrawInvitation`: a current Owner closes one pending invitation. */
-export const withdrawCollabInvitation = (args: CollabWithdrawInvitationCall): Promise<CollabResult<CollabWithdrawOutcome>> =>
-    collabRequest(
+export const withdrawCollabInvitation = (args: CollabWithdrawInvitationCall): Promise<CollabResult<CollabWithdrawOutcome>> => {
+    const refused = rejectAuthorityClaims("withdrawInvitation", args, []);
+    if (refused !== null) {
+        return Promise.resolve(refused);
+    }
+    return collabRequest(
         args.accessToken,
         args.workspaceId,
         "withdrawInvitation",
         { invitationId: args.invitationId },
-        (r) => ({
-            outcome: r.outcome as CollabWithdrawOutcome["outcome"],
-            ...(r.member === undefined ? {} : { member: r.member as CollabMemberView }),
-        }),
+        (r) => {
+            const membership = readMembershipResult(r);
+            return {
+                outcome: membership.outcome as CollabWithdrawOutcome["outcome"],
+                ...(membership.member === undefined ? {} : { member: membership.member }),
+            };
+        },
     );
+};
 
 /** `changeMemberRole`: a current Owner replaces one member's role. */
-export const changeCollabMemberRole = (args: CollabChangeRoleCall): Promise<CollabResult<CollabChangeMemberRoleOutcome>> =>
-    collabRequest(
+export const changeCollabMemberRole = (args: CollabChangeRoleCall): Promise<CollabResult<CollabChangeMemberRoleOutcome>> => {
+    const refused = rejectAuthorityClaims("changeMemberRole", args, ["memberId", "role"]);
+    if (refused !== null) {
+        return Promise.resolve(refused);
+    }
+    return collabRequest(
         args.accessToken,
         args.workspaceId,
         "changeMemberRole",
         { memberId: args.memberId, role: args.role },
-        (r) => ({
-            outcome: r.outcome as CollabChangeMemberRoleOutcome["outcome"],
-            ...(r.member === undefined ? {} : { member: r.member as CollabMemberView }),
-        }),
+        (r) => {
+            const membership = readMembershipResult(r);
+            return {
+                outcome: membership.outcome as CollabChangeMemberRoleOutcome["outcome"],
+                ...(membership.member === undefined ? {} : { member: membership.member }),
+            };
+        },
     );
+};
 
 /** Result re-export so consumers can test `ok` without importing the transport module. */
 export type { Result };

@@ -11,22 +11,24 @@ vi.mock("swr", () => ({ useSWRConfig: () => ({ mutate }) }));
 vi.mock("@/modules/api/collab", () => ({
     acceptCollabInvitation: vi.fn(),
     changeCollabMemberRole: vi.fn(),
-    inviteCollabMemberByPhone: vi.fn(),
+    inviteCollabMemberByEmail: vi.fn(),
     postCollabMessage: vi.fn(),
     pressCollabApprovalButton: vi.fn(),
     withdrawCollabInvitation: vi.fn(),
 }));
 
+import * as collabMutations from "./collab";
 import {
     useMutateCollabAcceptInvitationSwr,
     useMutateCollabChangeMemberRoleSwr,
-    useMutateCollabInviteByPhoneSwr,
+    useMutateCollabInviteByEmailSwr,
     useMutateCollabPostMessageSwr,
     useMutateCollabPressApprovalSwr,
     useMutateCollabWithdrawInvitationSwr,
 } from "./collab";
 import {
-    inviteCollabMemberByPhone,
+    acceptCollabInvitation,
+    inviteCollabMemberByEmail,
     postCollabMessage,
     pressCollabApprovalButton,
     withdrawCollabInvitation,
@@ -40,7 +42,7 @@ describe("Collab mutation ownership", () => {
     it("keeps each command on its own press-local workspace-scoped identity", () => {
         const post = useMutateCollabPostMessageSwr("ws-1") as unknown as HookShape<unknown>;
         const press = useMutateCollabPressApprovalSwr("ws-1") as unknown as HookShape<unknown>;
-        const invite = useMutateCollabInviteByPhoneSwr("ws-1") as unknown as HookShape<unknown>;
+        const invite = useMutateCollabInviteByEmailSwr("ws-1") as unknown as HookShape<unknown>;
         expect(post.key).toEqual(["collab", "post", "ws-1"]);
         expect(press.key).toEqual(["collab", "press", "ws-1"]);
         expect(invite.key).toEqual(["collab", "invite", "ws-1"]);
@@ -94,18 +96,29 @@ describe("Collab mutation ownership", () => {
         expect(mutate).not.toHaveBeenCalled();
     });
 
-    it("invites, withdraws and re-roles through the membership operations scoped to the workspace", async () => {
-        vi.mocked(inviteCollabMemberByPhone).mockResolvedValue({ ok: true, data: { outcome: "invited" } } as never);
-        const invite = useMutateCollabInviteByPhoneSwr("ws-1") as unknown as HookShape<{ readonly phone: string; readonly role: "staff" }>;
-        await invite.mutation({ phone: "+84900000000", role: "staff" });
-        expect(inviteCollabMemberByPhone).toHaveBeenCalledWith({ workspaceId: "ws-1", accessToken: "tok", phone: "+84900000000", role: "staff" });
+    it("invites by email, accepts, withdraws and re-roles through the membership operations scoped to the workspace", async () => {
+        vi.mocked(inviteCollabMemberByEmail).mockResolvedValue({ ok: true, data: { outcome: "created" } } as never);
+        const invite = useMutateCollabInviteByEmailSwr("ws-1") as unknown as HookShape<{ readonly email: string; readonly role: "staff" }>;
+        await invite.mutation({ email: "person@example.com", role: "staff" });
+        expect(inviteCollabMemberByEmail).toHaveBeenCalledWith({ workspaceId: "ws-1", accessToken: "tok", email: "person@example.com", role: "staff" });
         const inviteFilter = (mutate.mock.calls as ReadonlyArray<readonly unknown[]>)[0][0] as (key: unknown) => boolean;
         expect(inviteFilter(["NIVO_QUERY", "viewer", "collab", "office", "ws-1"])).toBe(true);
         expect(inviteFilter(["NIVO_QUERY", "viewer", "collab", "group", "ws-1", null])).toBe(false);
+
+        vi.mocked(acceptCollabInvitation).mockResolvedValue({ ok: true, data: { outcome: "accepted" } } as never);
+        const accept = useMutateCollabAcceptInvitationSwr("ws-1") as unknown as HookShape<{ readonly invitationId: string; readonly displayName?: string }>;
+        await accept.mutation({ invitationId: "inv-1", displayName: "An" });
+        expect(acceptCollabInvitation).toHaveBeenCalledWith({ workspaceId: "ws-1", accessToken: "tok", invitationId: "inv-1", displayName: "An" });
 
         vi.mocked(withdrawCollabInvitation).mockResolvedValue({ ok: true, data: { outcome: "withdrawn" } } as never);
         const withdraw = useMutateCollabWithdrawInvitationSwr("ws-1") as unknown as HookShape<{ readonly invitationId: string }>;
         await withdraw.mutation({ invitationId: "inv-1" });
         expect(withdrawCollabInvitation).toHaveBeenCalledWith({ workspaceId: "ws-1", accessToken: "tok", invitationId: "inv-1" });
+    });
+
+    it("exposes no phone invitation hook or input type", () => {
+        const exported = Object.keys(collabMutations).filter((name) => name.toLowerCase().includes("phone"));
+        expect(exported).toEqual([]);
+        expect(typeof collabMutations.useMutateCollabInviteByEmailSwr).toBe("function");
     });
 });

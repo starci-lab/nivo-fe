@@ -24,11 +24,12 @@ import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
  * caching only, never a second grant.
  *
  * LIVE CONVERGENCE. The accepted design keeps push delivery a hint and the
- * authoritative read the truth (`contract.collab.chat` live-delivery,
- * `decision.collab.reconnect-authority`). Until the live channel is published the
- * conversation and notice reads poll at a conservative interval and every query
- * revalidates on focus, so a push that never arrives still converges the view and a
- * push that does arrive is confirmed against the same authoritative reads.
+ * authoritative read the truth (`contract.collab.chat` rev 4,
+ * `decision.collab.live-delivery` rev 2). The `/collab` live namespace emits only
+ * content-free `{workspaceId, kind, cursor}` hints; `hooks/collab-live` subscribes and
+ * answers each hint by revalidating these keys, and a reconnect re-reads every domain.
+ * The conversation and notice reads still poll at a conservative interval and every
+ * query revalidates on focus, so a hint that never arrives still converges the view.
  */
 
 /** Cache identity for the one Office landing bundle of a workspace. */

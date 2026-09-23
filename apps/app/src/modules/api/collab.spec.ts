@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import * as collabApi from "./collab";
 import {
     COLLAB_GATEWAY_COMMAND_FIELD,
     COLLAB_GATEWAY_READ_FIELD,
+    acceptCollabInvitation,
     collabGatewayTransport,
-    inviteCollabMemberByPhone,
+    inviteCollabMemberByEmail,
     listCollabTasks,
     openCollabNotice,
     openCollabOffice,
@@ -105,7 +107,7 @@ describe("collab member request adapter", () => {
         await openCollabNotice({ workspaceId: "ws-1", accessToken: "tok", noticeId: "n-1" });
         await reconcileCollabRequest({ workspaceId: "ws-1", accessToken: "tok", intentId: "i-1" });
         await pressCollabApprovalButton({ workspaceId: "ws-1", accessToken: "tok", approvalId: "a-1", button: "approve" });
-        await inviteCollabMemberByPhone({ workspaceId: "ws-1", accessToken: "tok", phone: "+84900000000", role: "staff" });
+        await inviteCollabMemberByEmail({ workspaceId: "ws-1", accessToken: "tok", email: "person@example.com", role: "staff" });
         expect(calls.map((c) => c.request.op)).toEqual([
             "openOffice",
             "readGroup",
@@ -115,11 +117,94 @@ describe("collab member request adapter", () => {
             "openNotice",
             "reconcileRequest",
             "pressApprovalButton",
-            "inviteByPhone",
+            "inviteByEmail",
         ]);
         expect(calls[1].request.input).toEqual({ cursor: "c" });
         expect(calls[7].request.input).toEqual({ approvalId: "a-1", button: "approve" });
-        expect(calls[8].request.input).toEqual({ phone: "+84900000000", role: "staff" });
+        expect(calls[8].request.input).toEqual({ email: "person@example.com", role: "staff" });
+    });
+
+    it("invites exactly one email into one role and never serializes a phone", async () => {
+        const { calls, spy } = transportSpy({
+            ok: true,
+            op: "inviteByEmail",
+            result: { op: "inviteByEmail", membership: { outcome: "created", member: { memberId: "mem-1" } } },
+        });
+        useCollabTransportFrom(spy);
+        const answer = await inviteCollabMemberByEmail({ workspaceId: "ws-1", accessToken: "tok", email: "person@example.com", role: "manager" });
+        expect(calls[0].request.op).toBe("inviteByEmail");
+        expect(calls[0].request.input).toEqual({ email: "person@example.com", role: "manager" });
+        expect(JSON.stringify(calls[0].request)).not.toContain("phone");
+        expect(answer).toEqual({ ok: true, data: { outcome: "created", member: { memberId: "mem-1" } } });
+    });
+
+    it("reads the membership result record for accept, withdraw and role change", async () => {
+        const { calls, spy } = transportSpy({
+            ok: true,
+            op: "acceptInvitation",
+            result: { op: "acceptInvitation", membership: { outcome: "accepted", member: { memberId: "mem-2", role: "staff" } } },
+        });
+        useCollabTransportFrom(spy);
+        const accepted = await acceptCollabInvitation({ workspaceId: "ws-1", accessToken: "tok", invitationId: "inv-1", displayName: "An" });
+        expect(calls[0].request.op).toBe("acceptInvitation");
+        expect(accepted).toEqual({ ok: true, data: { outcome: "accepted", member: { memberId: "mem-2", role: "staff" } } });
+    });
+
+    it("sends only the invitation identity on acceptance - never an accepter email, phone, role or principal", async () => {
+        const { calls, spy } = transportSpy({
+            ok: true,
+            op: "acceptInvitation",
+            result: { op: "acceptInvitation", membership: { outcome: "accepted" } },
+        });
+        useCollabTransportFrom(spy);
+        await acceptCollabInvitation({ workspaceId: "ws-1", accessToken: "tok", invitationId: "inv-1" });
+        expect(calls[0].request.input).toEqual({ invitationId: "inv-1" });
+        await acceptCollabInvitation({ workspaceId: "ws-1", accessToken: "tok", invitationId: "inv-2", displayName: "Binh" });
+        expect(calls[1].request.input).toEqual({ invitationId: "inv-2", displayName: "Binh" });
+        expect(JSON.stringify(calls[1].request.input)).not.toMatch(/email|phone|principal|role|grant/i);
+    });
+
+    it("refuses smuggled accepter identity claims on acceptance before transport", async () => {
+        const { spy } = transportSpy({
+            ok: true,
+            op: "acceptInvitation",
+            result: { op: "acceptInvitation", membership: { outcome: "accepted" } },
+        });
+        useCollabTransportFrom(spy);
+        for (const claim of [
+            { email: "a@b.c" },
+            { verifiedEmail: "a@b.c" },
+            { email_verified: true },
+            { phone: "+8490" },
+            { role: "owner" },
+            { memberId: "m-1" },
+            { principal: "p" },
+            { actor: { sub: "s" } },
+        ]) {
+            const result = await acceptCollabInvitation({ workspaceId: "ws-1", accessToken: "tok", invitationId: "inv-1", ...claim } as never);
+            expect(result).toMatchObject({ ok: false, kind: "invalid", retryable: false });
+        }
+        expect(spy).not.toHaveBeenCalled();
+    });
+
+    it("refuses smuggled claims on invite and role change while permitting their own domain fields", async () => {
+        const { calls, spy } = transportSpy({
+            ok: true,
+            op: "inviteByEmail",
+            result: { op: "inviteByEmail", membership: { outcome: "existing" } },
+        });
+        useCollabTransportFrom(spy);
+        const smuggled = await inviteCollabMemberByEmail({ workspaceId: "ws-1", accessToken: "tok", email: "p@x.y", role: "staff", principal: "p" } as never);
+        expect(smuggled).toMatchObject({ ok: false, kind: "invalid" });
+        const legit = await inviteCollabMemberByEmail({ workspaceId: "ws-1", accessToken: "tok", email: "p@x.y", role: "staff" });
+        expect(legit).toEqual({ ok: true, data: { outcome: "existing" } });
+        expect(calls).toHaveLength(1);
+    });
+
+    it("exposes no phone invitation entry point", () => {
+        const phoneExports = Object.keys(collabApi).filter((name) => name.toLowerCase().includes("phone"));
+        expect(phoneExports).toEqual([]);
+        expect(typeof collabApi.inviteCollabMemberByEmail).toBe("function");
     });
 
     it("unwraps the tagged result fields into the operation's own payload", async () => {

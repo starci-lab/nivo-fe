@@ -4,7 +4,7 @@ import { useSWRConfig } from "swr";
 import {
     acceptCollabInvitation,
     changeCollabMemberRole,
-    inviteCollabMemberByPhone,
+    inviteCollabMemberByEmail,
     postCollabMessage,
     pressCollabApprovalButton,
     withdrawCollabInvitation,
@@ -67,9 +67,13 @@ export type CollabPressApprovalInput = {
     readonly button: CollabApprovalDecision;
 };
 
-/** One phone invitation into exactly one V1 human role. */
-export type CollabInviteByPhoneInput = {
-    readonly phone: string;
+/**
+ * One email invitation into exactly one V1 human role (`fr.collab.roles-invite` rev 2,
+ * `contract.collab.member-invite` rev 4). The email names the invitee only; no phone
+ * exists in this layer and the actor's identity never rides the input.
+ */
+export type CollabInviteByEmailInput = {
+    readonly email: string;
     readonly role: CollabHumanRole;
 };
 
@@ -114,16 +118,24 @@ export const useMutateCollabPressApprovalSwr = (workspaceId: string | null) => {
         pressCollabApprovalButton({ workspaceId: workspaceId ?? "", accessToken: accessToken ?? "", ...input }).then(revalidate));
 };
 
-/** Invite one person by phone into exactly one V1 human role. */
-export const useMutateCollabInviteByPhoneSwr = (workspaceId: string | null) => {
+/**
+ * Invite one person by email into exactly one V1 human role. Only a current Owner or
+ * Manager's invite records; the boundary normalizes the email and answers `created`
+ * or `existing` under the `membership` result field.
+ */
+export const useMutateCollabInviteByEmailSwr = (workspaceId: string | null) => {
     const accessToken = useCollabAccessToken();
     const revalidate = useCollabRevalidate(workspaceId, ["office"]);
     const key: NivoMutationKey | null = workspaceId === null ? null : ["collab", "invite", workspaceId];
-    return useNivoMutation(key, (input: CollabInviteByPhoneInput) =>
-        inviteCollabMemberByPhone({ workspaceId: workspaceId ?? "", accessToken: accessToken ?? "", ...input }).then(revalidate));
+    return useNivoMutation(key, (input: CollabInviteByEmailInput) =>
+        inviteCollabMemberByEmail({ workspaceId: workspaceId ?? "", accessToken: accessToken ?? "", ...input }).then(revalidate));
 };
 
-/** Consume one invitation with the invited person's verified session. */
+/**
+ * Consume one invitation with the invited person's authenticated session. The input
+ * carries only the invitation identity (plus an optional display name) - the matching
+ * Login-verified email comes from the bearer, never from this call.
+ */
 export const useMutateCollabAcceptInvitationSwr = (workspaceId: string | null) => {
     const accessToken = useCollabAccessToken();
     const revalidate = useCollabRevalidate(workspaceId, ["office"]);
