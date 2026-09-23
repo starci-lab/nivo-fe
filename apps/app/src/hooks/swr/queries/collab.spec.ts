@@ -108,6 +108,14 @@ describe("Collab query cache identities", () => {
         const reconcile = useQueryCollabReconcileSwr("ws-1", "i-1") as unknown as { query: () => Promise<unknown> };
         await reconcile.query();
         expect(reconcileCollabRequest).toHaveBeenCalledWith({ workspaceId: "ws-1", accessToken: "tok", intentId: "i-1" });
+
+        vi.mocked(openCollabOffice).mockResolvedValue({
+            ok: true,
+            data: { group: { groupId: "g-1" }, participants: [{ memberId: "mem-1", moduleInstallationId: null }], viewer: { memberId: "mem-1", role: "staff" } },
+        } as never);
+        const office = useQueryCollabOfficeSwr("ws-1") as unknown as { query: () => Promise<unknown> };
+        await office.query();
+        expect(openCollabOffice).toHaveBeenCalledWith({ workspaceId: "ws-1", accessToken: "tok" });
     });
 
     it("mounts no read for a missing workspace, task, notice, intent, module name or session", () => {

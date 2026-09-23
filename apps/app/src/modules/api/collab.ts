@@ -7,7 +7,7 @@
  * WHAT IS SETTLED. The backend ships one served ingress,
  * `CollabGatewayResolver` on the shared authenticated core GraphQL endpoint: the query
  * field `collabGatewayRead` carries the closed read ops and the mutation field
- * `collabGatewayCommand` the closed command ops (`contract.collab.chat` rev 4,
+ * `collabGatewayCommand` the closed command ops (`contract.collab.chat` rev 5,
  * `sds.collab.chat-gateway` rev 4, `impl.collab.nivo-backend.gateway`). Each takes one
  * `CollabGatewayRequest {workspaceId, op, input}` and returns one typed
  * `CollabGatewayOutcome` - never throws. The verified-bearer guard derives the actor
@@ -24,6 +24,15 @@
  * bearer's Login-verified email, never an input field. No phone field exists anywhere
  * in this layer. The four member ops answer under the result record's `membership`
  * field, whose `outcome` is the membership service's decided domain result.
+ *
+ * VIEWER AND ROSTER IDENTITY. The `openOffice` result carries the requesting member's own
+ * `viewer {memberId, role}` and each roster entry's stable identity - `memberId` for a
+ * human, `moduleInstallationId` for a hired module - resolved by the server from current
+ * membership in the same authorized read (`contract.collab.chat` rev 5,
+ * `sds.collab.workspace-chat` rev 2, `contract.collab.task-read` rev 3). The viewer is a
+ * presentation hint for the approved role-gated invite and approval controls, never a
+ * grant and never inferred client-side from the session token, roster order or a display
+ * name; the roster identities are what a Tasks person or module filter matches.
  *
  * WHY NOT `graphql()`. The shared transport unwraps the `GraphQLTransformInterceptor`
  * envelope `{success, message, error, data}`; a gateway outcome is itself the typed
@@ -51,7 +60,7 @@ export const COLLAB_GATEWAY_COMMAND_FIELD = "collabGatewayCommand";
 
 /**
  * The closed named-operation set one member request resolves to
- * (`contract.collab.chat` rev 4): the eight read ops travel on `collabGatewayRead`, the
+ * (`contract.collab.chat` rev 5): the eight read ops travel on `collabGatewayRead`, the
  * six command ops on `collabGatewayCommand`; an op on the wrong field or outside this
  * set is refused as invalid before any Collab operation runs.
  */
@@ -151,17 +160,42 @@ export type CollabGroupView = {
 
 /** One participant row of the current Office roster; never carries an email, phone or principal. */
 export type CollabOfficeParticipant = {
+    /** Durable identity of the member row - the identity a task's asker and assignee reference. */
     readonly memberId: string;
     readonly kind: "human" | "module";
     readonly displayName: string;
     readonly role: string;
     readonly status: string;
+    /**
+     * The hired module's installation identity on a module entry - the same identity a
+     * task's owning module reference and a Tasks module filter use (`contract.collab.chat`
+     * rev 5, `contract.collab.task-read` rev 3); null on a human entry.
+     */
+    readonly moduleInstallationId: string | null;
 };
 
-/** The Office landing bundle: the one group plus its current roster. */
+/**
+ * The requesting member's own active membership identity and its one current role
+ * (`contract.collab.chat` rev 5, `sds.collab.workspace-chat` rev 2): resolved by
+ * `sds.collab.membership-service` for the derived Login principal in the same authorized
+ * read, never from request input and never returned to a non-member. A presentation hint
+ * for the approved role-gated controls (the invite action only for a current Owner or
+ * Manager, active approval buttons only for a current Manager or Owner); every command
+ * still rechecks the actor's current authority at commit.
+ */
+export type CollabOfficeViewer = {
+    /** The viewer's own active member identity. */
+    readonly memberId: string;
+    /** The viewer's one current Owner, Manager or Staff role. */
+    readonly role: CollabHumanRole;
+};
+
+/** The Office landing bundle: the one group, its current roster and the requesting viewer. */
 export type CollabOfficeView = {
     readonly group: CollabGroupView;
     readonly participants: ReadonlyArray<CollabOfficeParticipant>;
+    /** The requesting member's own member identity and current role. */
+    readonly viewer: CollabOfficeViewer;
 };
 
 /** Public projection of one durable group message. */
@@ -808,7 +842,7 @@ export type CollabChangeRoleCall = CollabCallScope & {
     readonly role: CollabHumanRole;
 };
 
-/** `openOffice`: a current member lands in the one Office group with its roster. */
+/** `openOffice`: a current member lands in the one Office group with its roster and viewer identity. */
 export const openCollabOffice = (args: CollabCallScope): Promise<CollabResult<CollabOfficeView>> =>
     collabRequest(args.accessToken, args.workspaceId, "openOffice", {}, (r) => readResultField(r, "office") as CollabOfficeView);
 

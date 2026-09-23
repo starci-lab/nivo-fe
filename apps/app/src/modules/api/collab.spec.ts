@@ -20,6 +20,7 @@ import {
     useCollabTransportFrom,
     type CollabGatewayOutcome,
     type CollabGatewayRequest,
+    type CollabOfficeView,
 } from "./collab";
 
 type SeenCall = { readonly accessToken: string; readonly request: CollabGatewayRequest };
@@ -122,6 +123,27 @@ describe("collab member request adapter", () => {
         expect(calls[1].request.input).toEqual({ cursor: "c" });
         expect(calls[7].request.input).toEqual({ approvalId: "a-1", button: "approve" });
         expect(calls[8].request.input).toEqual({ email: "person@example.com", role: "staff" });
+    });
+
+    it("projects the rev5 office bundle with the viewer identity and each roster entry's own identity", async () => {
+        const office: CollabOfficeView = {
+            group: { groupId: "g-1", workspaceId: "ws-1", name: "Office", isDefaultOffice: true },
+            participants: [
+                { memberId: "mem-lan", kind: "human", displayName: "Lan", role: "owner", status: "active", moduleInstallationId: null },
+                { memberId: "mem-sales", kind: "module", displayName: "Sales", role: "module", status: "active", moduleInstallationId: "inst-sales" },
+            ],
+            viewer: { memberId: "mem-lan", role: "owner" },
+        };
+        const { spy } = transportSpy({ ok: true, op: "openOffice", result: { op: "openOffice", office } });
+        useCollabTransportFrom(spy);
+        const answer = await openCollabOffice({ workspaceId: "ws-1", accessToken: "tok" });
+        expect(answer).toEqual({ ok: true, data: office });
+        if (!answer.ok) throw new Error("expected an ok office result");
+        const human = answer.data.participants.find((participant) => participant.kind === "human");
+        const hired = answer.data.participants.find((participant) => participant.kind === "module");
+        expect(human?.memberId).toBe(answer.data.viewer.memberId);
+        expect(human?.moduleInstallationId).toBeNull();
+        expect(hired?.moduleInstallationId).toBe("inst-sales");
     });
 
     it("invites exactly one email into one role and never serializes a phone", async () => {
