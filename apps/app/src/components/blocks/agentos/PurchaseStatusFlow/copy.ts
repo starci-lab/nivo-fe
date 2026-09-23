@@ -54,6 +54,25 @@ export type PurchaseStatusCopy = {
     readonly invoicePaidAt: string;
     readonly workspaceLabel: string;
     readonly workspacePending: string;
+    /** Second fact band on the provisioning surface: billing cadence and renewal behavior. */
+    readonly cadenceLabel: string;
+    readonly renewalLabel: string;
+    /** Cadence value for a one-time (never recurring) item. */
+    readonly cadenceOneTime: string;
+    /** Cadence value for an item billed every cycle. */
+    readonly cadenceRecurring: string;
+    /** Cadence value for a one-time setup followed by recurring billing. */
+    readonly cadenceSetupRecurring: string;
+    /** Renewal value when the order auto-renews but publishes no date. */
+    readonly renewalAuto: string;
+    /** Renewal value when the order auto-renews: "Auto-renews {date}". */
+    readonly renewalAutoAt: (date: string) => string;
+    /** Renewal value when the owner re-authorizes manually by the published date. */
+    readonly renewalManualAt: (date: string) => string;
+    /** Renewal value when re-authorization is manual and no date is published. */
+    readonly renewalManual: string;
+    /** Renewal value for a one-time order that never renews. */
+    readonly renewalNone: string;
     readonly purchaseRow: string;
     readonly invoiceRow: string;
     readonly paidAmount: string;

@@ -328,6 +328,16 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
         invoicePaidAt: t("invoicePaidAt"),
         workspaceLabel: t("workspaceLabel"),
         workspacePending: t("workspacePending"),
+        cadenceLabel: t("cadenceLabel"),
+        renewalLabel: t("renewalLabel"),
+        cadenceOneTime: t("cadenceOneTime"),
+        cadenceRecurring: t("cadenceRecurring"),
+        cadenceSetupRecurring: t("cadenceSetupRecurring"),
+        renewalAuto: t("renewalAuto"),
+        renewalAutoAt: date => t("renewalAutoAt", { date }),
+        renewalManualAt: date => t("renewalManualAt", { date }),
+        renewalManual: t("renewalManual"),
+        renewalNone: t("renewalNone"),
         purchaseRow: t("purchaseRow"),
         invoiceRow: t("invoiceRow"),
         paidAmount: t("paidAmount"),
@@ -534,6 +544,22 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
     const workspace = snapshot?.workspace ?? null;
     const offerName = order?.catalogItem?.name ?? invoice?.catalogOrder?.catalogItem?.name ?? null;
     const tierName = order?.catalogTier?.name ?? invoice?.catalogOrder?.catalogTier?.name ?? null;
+    /* The cadence/renewal band reads only what the order seam publishes; a pre-billing schema or
+       an unsettled order withholds the value rather than inventing commercial terms. */
+    const billingModel = order?.catalogItem?.billingModel ?? invoice?.catalogOrder?.catalogItem?.billingModel ?? null;
+    const renewsAt = order?.renewsAt ?? invoice?.catalogOrder?.renewsAt ?? null;
+    const autoRenew = order?.autoRenew ?? invoice?.catalogOrder?.autoRenew ?? null;
+    const dayOf = (iso: string) => format.dateTime(new Date(iso), { dateStyle: "medium" });
+    const cadenceText = billingModel === "recurring"
+        ? copy.cadenceRecurring
+        : billingModel === "setup_plus_recurring"
+            ? copy.cadenceSetupRecurring
+            : billingModel === "one_time" ? copy.cadenceOneTime : "—";
+    const renewalText = renewsAt !== null
+        ? (autoRenew === true ? copy.renewalAutoAt(dayOf(renewsAt)) : copy.renewalManualAt(dayOf(renewsAt)))
+        : autoRenew === true ? copy.renewalAuto
+            : billingModel === "one_time" ? copy.renewalNone
+                : billingModel === null ? "—" : copy.renewalManual;
     const amountText = invoice === null ? null : amountOf(invoice.amountVnd);
     const observedAt = snapshot?.status.observedAt ?? null;
     const workspaceStatus = lastWorkspaceEvent?.status ?? workspace?.status ?? null;
@@ -675,6 +701,10 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
             { label: copy.offerPlan, value: tierName ?? "—" },
             { label: invoice?.paidAt == null ? copy.invoiceDue : copy.invoicePaidAt, value: invoice === null ? "—" : stampOf(invoice.paidAt ?? invoice.dueAt) }
         ],
+        cadenceFacts: [
+            { label: copy.cadenceLabel, value: cadenceText },
+            { label: copy.renewalLabel, value: renewalText }
+        ],
         operation: provisioningOperation(),
         footnote: `Order ${purchaseId} ${copy.reconcileNote}`,
         action: phase === "provisioning" || phase === "provisioning-unknown" ? { label: phase === "provisioning" ? copy.refreshStatusAction : copy.reconcileOrderAction, pending: reconciling } : undefined
@@ -738,7 +768,7 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
         if (flow.phase === "loading") {
             return {
                 state: "loading",
-                props: headFor(copy.loadingTitle, copy.loadingText)
+                props: { ...headFor(copy.loadingTitle, copy.loadingText), surface: flow.surface }
             };
         }
         if (flow.phase === "denied") {

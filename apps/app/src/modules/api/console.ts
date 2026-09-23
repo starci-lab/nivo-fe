@@ -149,12 +149,17 @@ export type WalletTopUpPayLink = {
   readonly chargedAmountVnd: number;
 };
 
+/** How a catalog item bills its buyer; additive seam field, absent on a pre-billing schema. */
+export type CatalogBillingModel = "one_time" | "recurring" | "setup_plus_recurring";
+
 /** What an order bought, as the two relations an order carries. */
 export type OrderProduct = {
   /** The product. Nullable: the relation is `ON DELETE SET NULL`. */
   readonly catalogItem: {
     readonly id: string;
     readonly name: string;
+    /** How this item generates invoices. Optional: the field is additive. */
+    readonly billingModel?: CatalogBillingModel | null;
   } | null;
   /** The rung of that product. Nullable for the same reason. */
   readonly catalogTier: {
@@ -181,6 +186,10 @@ export type InvoiceRow = {
   /** What it was raised for, when the order still exists. */
   readonly catalogOrder: ({
     readonly id: string;
+    /** When the order next renews; additive seam field. */
+    readonly renewsAt?: string | null;
+    /** Whether the order auto-renews; additive seam field. */
+    readonly autoRenew?: boolean;
   } & OrderProduct) | null;
 };
 
@@ -193,6 +202,10 @@ export type CatalogOrderRow = {
   readonly id: string;
   /** How far it has got. */
   readonly status: CatalogOrderStatus;
+  /** When the order next renews/expires (set when its invoice settles); additive seam field. */
+  readonly renewsAt?: string | null;
+  /** Whether the order auto-renews at cycle end; additive seam field. */
+  readonly autoRenew?: boolean;
 } & OrderProduct;
 
 /** One rung of a buyable product. */
@@ -921,13 +934,13 @@ const WALLET_TOP_UP_PAY_LINK = "{ paymentId gateway referenceId checkoutUrl qrCo
  * before it - `id { catalogItem ... }` - and the server refuses that with "Field `id` must not have a
  * selection", which is a document error rather than anything a caller could see coming.
  */
-const ORDER_PRODUCT = "catalogItem { id name } catalogTier { id name }";
+const ORDER_PRODUCT = "catalogItem { id name billingModel } catalogTier { id name }";
 
 /** One invoice, with the order it was raised for. */
-const INVOICE = `{ id amountVnd status dueAt paidAt catalogOrder { id ${ORDER_PRODUCT} } }`;
+const INVOICE = `{ id amountVnd status dueAt paidAt catalogOrder { id renewsAt autoRenew ${ORDER_PRODUCT} } }`;
 
-/** One order. */
-const CATALOG_ORDER = `{ id status ${ORDER_PRODUCT} }`;
+/** One order, with the billing-cycle fields the purchase-status surface reports. */
+const CATALOG_ORDER = `{ id status renewsAt autoRenew ${ORDER_PRODUCT} }`;
 
 /** One buyable product and its rungs. */
 const CATALOG_ITEM = "{ id slug name tagline templateKey tiers { id tierKey name priceMonthlyVnd orderIndex } }";

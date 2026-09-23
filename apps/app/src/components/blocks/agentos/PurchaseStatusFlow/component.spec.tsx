@@ -76,6 +76,10 @@ const provisioningView: PurchaseStatusFlowViewProps = {
                 { label: "Purchase", value: "NVP-2026-0922-1847" },
                 { label: "Workspace", value: "ws-1" },
             ],
+            cadenceFacts: [
+                { label: "Billing cadence", value: "Monthly billing cycle" },
+                { label: "Renewal", value: "Manual re-authorization by Sep 22, 2027" },
+            ],
             operation: {
                 heading: "Current operation",
                 name: "Configure workspace",
@@ -145,6 +149,9 @@ describe("PurchaseStatusFlow view", () => {
         const html = renderToStaticMarkup(<PurchaseStatusFlowBase {...provisioningView} />)
         expect(html).toContain("Preparing Nivo Operations Workspace")
         expect(html).toContain("Provisioning order")
+        expect(html).toContain("Billing cadence")
+        expect(html).toContain("Monthly billing cycle")
+        expect(html).toContain("Manual re-authorization by Sep 22, 2027")
         expect(html).toContain("Configure workspace")
         expect(html).toContain("running")
         expect(html).toContain("62")
@@ -205,6 +212,16 @@ describe("PurchaseStatusFlow view", () => {
         expect(html).toContain('aria-busy="true"')
         expect(html).toContain("data-loading")
         expect(html).not.toContain("Check payment status")
+    })
+
+    it("previews the resolved surface anatomy on the loading cards", () => {
+        const payment = renderToStaticMarkup(<PurchaseStatusFlowBase state="loading" props={head} />)
+        expect(payment).toContain("Purchase facts")
+        expect(payment).toContain("Current verification")
+        const provisioning = renderToStaticMarkup(<PurchaseStatusFlowBase state="loading" props={{ ...head, surface: "provisioning" }} />)
+        expect(provisioning).toContain("Provisioning order")
+        expect(provisioning).toContain("Confirmed facts")
+        expect(provisioning).toContain('aria-busy="true"')
     })
 
     it("discloses no purchase facts on the denied empty notice", () => {

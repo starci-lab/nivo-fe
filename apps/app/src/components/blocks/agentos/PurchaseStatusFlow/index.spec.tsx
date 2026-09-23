@@ -215,6 +215,24 @@ describe("PurchaseStatusFlow connected flow", () => {
         expect(flow()).toContain('{"id":"provisioning","label":"Provisioning","isCurrent":true}')
     })
 
+    it("renders the cadence and renewal band from the order's billing seam", async () => {
+        snapshot({
+            orders: [{ ...paidOrder, renewsAt: "2026-10-22T07:32:00.000Z", autoRenew: false, catalogItem: { id: "item-1", name: "Nivo Operations Workspace", billingModel: "recurring" } }],
+            invoices: [paidInvoice],
+            workspaces: [workspace],
+        })
+        render(<PurchaseStatusFlow purchaseId="purchase-1" />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
+        expect(flow()).toContain('"cadenceFacts":[{"label":"Billing cadence","value":"Monthly billing cycle"},{"label":"Renewal","value":"Manual re-authorization by t-2026-10-22T07:32:00.000Z"}]')
+    })
+
+    it("withholds cadence and renewal values the order seam does not publish", async () => {
+        snapshot({ orders: [paidOrder], invoices: [paidInvoice], workspaces: [workspace] })
+        render(<PurchaseStatusFlow purchaseId="purchase-1" />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
+        expect(flow()).toContain('"cadenceFacts":[{"label":"Billing cadence","value":"—"},{"label":"Renewal","value":"—"}]')
+    })
+
     it("renders the owner identity row and withholds the unbound attempt value", async () => {
         snapshot({ orders: [paidOrder], invoices: [paidInvoice], workspaces: [workspace] })
         render(<PurchaseStatusFlow purchaseId="purchase-1" />)
