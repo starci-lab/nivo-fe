@@ -84,15 +84,16 @@ const provisioningAttemptOf = (controlCenter: Result<AgentWorkspaceControlCenter
     return typeof attempt === "number" && Number.isFinite(attempt) ? attempt : null;
 };
 /**
- * The Provisioning order header binds the durable purchase-bound order identity: the catalog
- * order the provisioning order was admitted for. The owner-scoped order seam (`myCatalogOrders`)
- * names it by the row id, and the invoice seam still names the same bound order when the order
- * read itself is refused. It is never the workspace id and never `externalWorkspaceRef` - that
- * field is the provisioned workspace's own external reference, not an order identity - and the
- * fact withholds entirely when no order seam published a real order id.
+ * The Provisioning order header binds only the durable provisioning-order identity the
+ * owner-scoped seam publishes as `provisioningOrderRef` - a reference distinct from the
+ * purchase identity. It is never the catalog order id (that id IS the purchase, already
+ * rendered under the Purchase fact), never the workspace id and never `externalWorkspaceRef`.
+ * No owner-scoped read publishes the reference yet (the seam gap is declared on the impl
+ * record as a blockedBy edge), so the fact stays withheld until the order seam carries a real
+ * value - or the invoice's nested order does when the order row omits it.
  */
 const provisioningOrderRefOf = (order: CatalogOrderRow | null, invoice: InvoiceRow | null): string | null =>
-    order?.id ?? invoice?.catalogOrder?.id ?? null;
+    order?.provisioningOrderRef ?? invoice?.catalogOrder?.provisioningOrderRef ?? null;
 
 /** Order lifecycle positions an order row can only reach after its payment settled. */
 const ORDER_SETTLED: ReadonlySet<string> = new Set(["active", "completed", "in_progress", "paid"]);
@@ -700,6 +701,9 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
         timeline: paymentTimeline()
     });
 
+    /* The order fact withholds entirely while no seam publishes a distinct provisioning-order
+       reference: the card keeps its external label with no trailing value - the same withheld
+       convention the rail's unbound attempt fact uses - and never a fabricated id. */
     const provisioningPrimary = (phase: PurchasePhase) => ({
         label: copy.provisioningOrderLabel,
         fact: provisioningOrderRefOf(order, invoice) ?? undefined,

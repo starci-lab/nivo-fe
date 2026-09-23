@@ -215,25 +215,46 @@ describe("PurchaseStatusFlow connected flow", () => {
         expect(flow()).toContain('{"id":"provisioning","label":"Provisioning","isCurrent":true}')
     })
 
-    it("binds the provisioning-order header to the purchase-bound order identity, never a workspace reference", async () => {
+    it("withholds the provisioning-order header fact while no seam publishes a distinct order reference", async () => {
         snapshot({ orders: [paidOrder], invoices: [paidInvoice], workspaces: [workspace], controlCenterResult: controlCenter(null, "agent_a1b2c3d4") })
         render(<PurchaseStatusFlow purchaseId="purchase-1" />)
         await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
         await waitFor(() => expect(mocks.api.myAgentWorkspaceControlCenter).toHaveBeenCalledWith("workspace-1"))
-        expect(flow()).toContain('"label":"Provisioning order","fact":"purchase-1"')
+        expect(flow()).toContain('"label":"Provisioning order","facts"')
+        expect(flow()).not.toContain('"fact":"purchase-1"')
         expect(flow()).not.toContain('"fact":"agent_a1b2c3d4"')
         expect(flow()).not.toContain('"fact":"workspace-1"')
+        expect(flow()).toContain('"label":"Purchase","value":"purchase-1"')
         expect(flow()).toContain('"label":"Workspace","value":"workspace-1"')
     })
 
-    it("keeps the purchase-bound order identity when the control-center read publishes no reference", async () => {
+    it("keeps the order fact withheld and the purchase fact distinct when the control-center read publishes no reference", async () => {
         snapshot({ orders: [paidOrder], invoices: [paidInvoice], workspaces: [workspace] })
         render(<PurchaseStatusFlow purchaseId="purchase-1" />)
         await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
         await waitFor(() => expect(mocks.api.myAgentWorkspaceControlCenter).toHaveBeenCalledWith("workspace-1"))
-        expect(flow()).toContain('"label":"Provisioning order","fact":"purchase-1"')
+        expect(flow()).toContain('"label":"Provisioning order","facts"')
+        expect(flow()).not.toContain('"fact":"purchase-1"')
         expect(flow()).not.toContain('"fact":"workspace-1"')
+        expect(flow()).toContain('"label":"Purchase","value":"purchase-1"')
         expect(flow()).toContain('"label":"Workspace","value":"workspace-1"')
+    })
+
+    it("binds the provisioning-order header fact when the order seam publishes a distinct order reference", async () => {
+        snapshot({ orders: [{ ...paidOrder, provisioningOrderRef: "PRV-2026-0922-0418" }], invoices: [paidInvoice], workspaces: [workspace] })
+        render(<PurchaseStatusFlow purchaseId="purchase-1" />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
+        expect(flow()).toContain('"label":"Provisioning order","fact":"PRV-2026-0922-0418"')
+        expect(flow()).not.toContain('"fact":"purchase-1"')
+        expect(flow()).toContain('"label":"Purchase","value":"purchase-1"')
+    })
+
+    it("binds the order reference from the invoice seam when the order row omits it", async () => {
+        snapshot({ orders: [paidOrder], invoices: [{ ...paidInvoice, catalogOrder: { ...paidInvoice.catalogOrder, provisioningOrderRef: "PRV-2026-0922-0418" } }], workspaces: [workspace] })
+        render(<PurchaseStatusFlow purchaseId="purchase-1" />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
+        expect(flow()).toContain('"label":"Provisioning order","fact":"PRV-2026-0922-0418"')
+        expect(flow()).not.toContain('"fact":"purchase-1"')
     })
 
     it("renders the cadence and renewal band from the order's billing seam", async () => {

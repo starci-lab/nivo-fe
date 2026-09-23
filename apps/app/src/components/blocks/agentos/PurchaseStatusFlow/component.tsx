@@ -318,8 +318,10 @@ const paymentLoadingRail = (copy: PurchaseStatusCopy) => <SurfaceCard label={cop
     </div>
 </SurfaceCard>;
 
-/** The provisioning surface's loading preview: identity, cadence, operation, footnote and action bands. */
-const provisioningLoadingPrimary = (copy: PurchaseStatusCopy) => <SurfaceCard label={copy.provisioningOrderLabel} labelEnd={skeletonLabelEnd} composition="joined" height="fill">
+/** The provisioning surface's loading preview: identity, cadence, operation, footnote and action bands.
+    The resolved card withholds its trailing order fact while the provisioning-order reference seam is
+    unpublished, so the label row stands label-only and the preview reserves no fact bar. */
+const provisioningLoadingPrimary = (copy: PurchaseStatusCopy) => <SurfaceCard label={copy.provisioningOrderLabel} composition="joined" height="fill">
     {skeletonFactBand("identity", 6)}
     {skeletonFactBand("cadence", 2)}
     <div className={BAND_CLASS_NAME}>

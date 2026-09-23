@@ -190,6 +190,8 @@ export type InvoiceRow = {
     readonly renewsAt?: string | null;
     /** Whether the order auto-renews; additive seam field. */
     readonly autoRenew?: boolean;
+    /** The durable provisioning order this purchase admitted, distinct from the order id; additive seam field - not yet published. */
+    readonly provisioningOrderRef?: string | null;
   } & OrderProduct) | null;
 };
 
@@ -206,6 +208,9 @@ export type CatalogOrderRow = {
   readonly renewsAt?: string | null;
   /** Whether the order auto-renews at cycle end; additive seam field. */
   readonly autoRenew?: boolean;
+  /** The durable provisioning order this purchase admitted, distinct from the purchase/order id;
+      additive seam field - not yet published, so the Provisioning order fact stays withheld. */
+  readonly provisioningOrderRef?: string | null;
 } & OrderProduct;
 
 /** One rung of a buyable product. */
