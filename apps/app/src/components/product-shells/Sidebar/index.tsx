@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
-import { Sidebar as GrammarSidebar, Text } from "@starci/grammar/common"
+import { Sidebar as GrammarSidebar } from "@starci/grammar/common"
 import { DrawerBranch, nivoIconSource } from "@nivo/ui"
 import { usePathname, useRouter } from "@/i18n/navigation"
 
@@ -11,20 +11,20 @@ export type SidebarMode = "desktop" | "mobile"
 
 /** What a caller states about the navigation - the surface it belongs to, and nothing else. */
 export type SidebarProps = { readonly mode?: SidebarMode }
-type DestinationKey = "chat" | "modules" | "packages" | "wallet" | "settings"
+type DestinationKey = "overview" | "chat" | "agentos" | "apps" | "wallet"
 type Destination = {
     readonly key: DestinationKey
-    readonly route: string | null
+    readonly route: string
     readonly group: "workspace" | "account"
-    readonly icon: "community" | "agentos" | "cart" | "wallet" | "account"
+    readonly icon: "overview" | "community" | "agentos" | "apps" | "wallet"
 }
 
 const DESTINATIONS: ReadonlyArray<Destination> = [
+    { key: "overview", route: "/overview", group: "workspace", icon: "overview" },
     { key: "chat", route: "/chat", group: "workspace", icon: "community" },
-    { key: "modules", route: "/agentos", group: "workspace", icon: "agentos" },
-    { key: "packages", route: "/agentos/workspaces/new", group: "workspace", icon: "cart" },
+    { key: "agentos", route: "/agentos", group: "workspace", icon: "agentos" },
+    { key: "apps", route: "/apps", group: "workspace", icon: "apps" },
     { key: "wallet", route: "/wallet", group: "account", icon: "wallet" },
-    { key: "settings", route: null, group: "account", icon: "account" },
 ]
 const STORAGE_KEY = "nivo-console-navigation-collapsed"
 
@@ -36,8 +36,8 @@ export const Sidebar = (props: SidebarProps) => {
     const pathname = usePathname()
     const [isCollapsed, setIsCollapsed] = useState(false)
     const selectedKey = [...DESTINATIONS]
-        .filter((destination) => destination.route !== null && pathname.startsWith(destination.route))
-        .sort((left, right) => (right.route?.length ?? 0) - (left.route?.length ?? 0))[0]?.key ?? "modules"
+        .filter((destination) => pathname.startsWith(destination.route))
+        .sort((left, right) => right.route.length - left.route.length)[0]?.key ?? "overview"
 
     useEffect(() => {
         try { setIsCollapsed(globalThis.localStorage?.getItem(STORAGE_KEY) === "true") } catch { /* persistence is optional */ }
@@ -49,7 +49,7 @@ export const Sidebar = (props: SidebarProps) => {
     }
     const activate = (id: string) => {
         const destination = DESTINATIONS.find((candidate) => candidate.key === id)
-        if (destination?.route === null || destination?.route === undefined) return false
+        if (destination === undefined) return false
         router.push(destination.route)
         return true
     }
@@ -57,7 +57,6 @@ export const Sidebar = (props: SidebarProps) => {
         id: destination.key,
         label: t(`nav.${destination.key}`),
         source: nivoIconSource(destination.icon, "leading"),
-        ...(destination.route === null ? { isDisabled: true, trailing: <Text size="xs" tone="muted">{t("unavailable")}</Text> } : {}),
     })
     const groups = (["workspace", "account"] as const).map((group) => ({
         id: group,

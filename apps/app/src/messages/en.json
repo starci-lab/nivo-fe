@@ -138,7 +138,6 @@
     "breadcrumbLabel": "You are here",
     "openMenu": "Menu",
     "closeMenu": "Close",
-    "unavailable": "Unavailable",
     "locale": {
       "label": "Language",
       "options": {
@@ -155,11 +154,11 @@
       "signOut": "Sign out"
     },
     "nav": {
+      "overview": "Overview",
       "chat": "Chat",
-      "modules": "Modules",
-      "packages": "Packages",
-      "wallet": "Wallet",
-      "settings": "Settings"
+      "agentos": "AgentOS",
+      "apps": "Apps",
+      "wallet": "Wallet"
     },
     "groupChat": {
       "title": "Group chat",
@@ -502,6 +501,7 @@
         "tabsLabel": "Workspace management sections",
         "tabs": {
           "overview": "Overview",
+          "modules": "Modules",
           "solutions": "Solutions",
           "ai-knowledge": "AI & Knowledge",
           "applications": "Applications",
@@ -956,6 +956,7 @@
           "kind": {
             "generic-agent": "Generic agent",
             "customer-support": "Customer support",
+            "chatbot": "Chatbot",
             "accounting": "Accounting",
             "scheduling": "Scheduling",
             "research": "Research"

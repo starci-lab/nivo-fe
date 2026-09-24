@@ -138,7 +138,6 @@
     "breadcrumbLabel": "Vị trí hiện tại",
     "openMenu": "Menu",
     "closeMenu": "Đóng",
-    "unavailable": "Chưa sẵn sàng",
     "locale": {
       "label": "Ngôn ngữ",
       "options": {
@@ -155,11 +154,11 @@
       "signOut": "Đăng xuất"
     },
     "nav": {
+      "overview": "Tổng quan",
       "chat": "Trò chuyện",
-      "modules": "Modules",
-      "packages": "Gói dịch vụ",
-      "wallet": "Ví",
-      "settings": "Cài đặt"
+      "agentos": "AgentOS",
+      "apps": "Ứng dụng",
+      "wallet": "Ví"
     },
     "groupChat": {
       "title": "Trò chuyện nhóm",
@@ -502,6 +501,7 @@
         "tabsLabel": "Các phần quản lý không gian làm việc",
         "tabs": {
           "overview": "Tổng quan",
+          "modules": "Modules",
           "solutions": "Giải pháp",
           "ai-knowledge": "AI & Tri thức",
           "applications": "Ứng dụng",
@@ -956,6 +956,7 @@
           "kind": {
             "generic-agent": "Trợ lý đa năng",
             "customer-support": "Hỗ trợ khách hàng",
+            "chatbot": "Chatbot",
             "accounting": "Kế toán",
             "scheduling": "Lập lịch",
             "research": "Nghiên cứu"
