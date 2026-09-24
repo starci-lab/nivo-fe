@@ -3,11 +3,11 @@
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useMutateForgotPasswordInitSwr, useMutateForgotPasswordResendSwr, useMutateForgotPasswordVerifyOtpSwr, useMutateSignInSwr, useMutateSignUpInitSwr, useMutateSignUpResendSwr, useMutateSignUpVerifyOtpSwr, useMutateVerifyTwoFactorSwr, useOauthReturnExchange } from "@/hooks";
+import { useMutateContinueBrokeredSignInSwr, useMutateForgotPasswordInitSwr, useMutateForgotPasswordResendSwr, useMutateForgotPasswordVerifyOtpSwr, useMutateSignInSwr, useMutateSignUpInitSwr, useMutateSignUpResendSwr, useMutateSignUpVerifyOtpSwr, useMutateVerifyTwoFactorSwr, useOauthReturnExchange } from "@/hooks";
 import { DEFAULT_AUTHENTICATED_LANDING, authenticationOauthRedirectUrl, rememberOauthProvider, validatedReturnTo } from "@/modules/auth";
 import { AuthenticationPageBase as AuthenticationPageView, type AuthenticationPageExit } from "./component";
 import type { AuthActions, AuthCode, AuthDetails, AuthFactor, AuthMode, AuthNoticeCopy, AuthPendingAction, AuthProvider, AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";
-import type { OtpChallenge } from "@/modules/api/auth";
+import type { AuthPayload, OtpChallenge } from "@/modules/api/auth";
 import { useSession } from "@/modules/auth/session";
 
 /**
@@ -63,10 +63,13 @@ import { useSession } from "@/modules/auth/session";
  * `/callback` screen would be a second surface that could only ever say "please wait" and then
  * repeat this page's own refusal and two-factor endings in its own words.
  *
- * A CALLBACK IS SPENT ONCE AND NEVER RESENT. A brokered result that came back undecided carries a
- * one-time continuation reference for `continueBrokeredSignIn` - not a callback - and this page
- * cannot yet ask for that continuation, so it says so and leaves fresh provider attempts available.
- * Resending the spent callback is the one thing that would be a replay, and it is not offered.
+ * A CALLBACK IS SPENT ONCE AND NEVER RESENT. A brokered result that came back undecided is retried
+ * through `continueBrokeredSignIn` under the one-time reference it carries - the handle to the proof
+ * the backend is holding for this attempt and this browser, never a callback - so the attempt
+ * continues without the code being redeemed a second time. A reference of null says the token
+ * exchange itself never answered and nothing could be held, so the fresh provider shortcuts above are
+ * the way on. Resending the spent callback is the one thing that would be a replay, and it is not
+ * offered.
  *
  * THE VERIFIER IS NEVER HERE. It is generated and held by the backend for the whole round trip, so
  * the worst a script that can read this page can steal is an authorization code it cannot spend.
@@ -89,6 +92,33 @@ type AuthPhase = "details" | "code" | "done" | "twoFactor" | "notice";
  * no session, and a requested destination the backend folded onto the default landing surface.
  */
 type AuthNoticeKind = "heldAddress" | "createdNoSession" | "unavailableReturn";
+
+/**
+ * What a brokered answer says, whichever door produced it: the callback's exchange, or the
+ * continuation that exchange led to.
+ *
+ * THE TWO PAYLOADS DIFFER IN ONE FIELD, AND ITS DIRECTION IS THE WHOLE RETRY RULE. An exchange's
+ * undecided may carry the handle to a proof the backend is holding for this attempt and this browser;
+ * a continuation's own undecided has no such field at all, because a hold that lapsed released
+ * nothing and a continuation never hands back another continuation. Reading both through one shape is
+ * what lets the ordered branches below be written once instead of copied for the second door.
+ */
+type BrokeredAnswer = AuthPayload & {
+  /** Present only for an unbound subject with no provider-verified email; no identity link, no session. */
+  readonly providerEmailRefused: boolean | null;
+  /**
+   * Present only when the authority did not answer, and each door says it in its own words:
+   * `continuationReference` is the handle to a held proof, and only the CALLBACK's undecided can carry
+   * one - a continuation repeats the identity read, so its undecided is the same try-again with no
+   * further reference at all.
+   */
+  readonly undecided: null | {
+    /** The single-use handle a held proof is continued under; a continuation's undecided carries none. */
+    readonly continuationReference?: string | null;
+    /** The continuation's own shape of the same answer: nothing to hold, try again. */
+    readonly retryWithSameRequest?: boolean;
+  };
+};
 
 /** How long the resend refuses, in seconds. Mirrors `OTP_RESEND_COOLDOWN_MS` on the backend. */
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -140,6 +170,13 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
   const forgotPasswordResendMutation = useMutateForgotPasswordResendSwr();
   const forgotPasswordVerifyMutation = useMutateForgotPasswordVerifyOtpSwr();
   const oauthReturn = useOauthReturnExchange();
+  /*
+   * THE CONTINUATION'S OWN DOOR, taken as its trigger rather than as the mutation object: the trigger
+   * is stable across renders, which is what an effect that continues an attempt needs, and the
+   * object's `data` / `isMutating` getters are state this page never reads - the wait is owned by the
+   * pending action below, in the same shape every other request on this page wears.
+   */
+  const { trigger: continueBrokeredSignIn } = useMutateContinueBrokeredSignInSwr();
   const [mode, setMode] = useState<AuthMode>("signIn");
   const [phase, setPhase] = useState<AuthPhase>("details");
   const [noticeKind, setNoticeKind] = useState<AuthNoticeKind | null>(null);
@@ -282,14 +319,19 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     return () => window.removeEventListener("pageshow", releaseRestoredAction);
   }, []);
 
-  const runPending = async <Answer,>(action: AuthPendingAction, request: () => Promise<Answer>): Promise<Answer> => {
+  /*
+   * Memoized because it is not only a press handler any more: the provider return's effect continues
+   * a brokered attempt through it, so its identity has to hold still for that effect's own
+   * dependency list. Its body touches nothing but the pending setters, which are stable.
+   */
+  const runPending = useCallback(async <Answer,>(action: AuthPendingAction, request: () => Promise<Answer>): Promise<Answer> => {
     setPendingAction(action);
     try {
       return await request();
     } finally {
       setPendingAction(null);
     }
-  };
+  }, []);
 
   /** Put the screen back to a clean first step, keeping only the journey. */
   const clear = () => {
@@ -381,15 +423,67 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
    * their sign-in failed when it did not - and the code would sit in the address bar, in history,
    * and in whatever the reader pastes into a support ticket.
    *
-   * THREE ENDINGS ARE READ IN ORDER, AND NONE OF THEM IS A SESSION. A challenge is read before a
+   * FOUR ANSWERS ARE READ IN ORDER, AND NONE OF THEM IS A SESSION YET. A challenge is read before a
    * token because `session.adopt` ignores a payload that still owes a second factor. An unbound
    * subject with no provider-verified email is a RECOVERABLE refusal - no identity was linked, so
    * both provider shortcuts and the password path stay fresh, and the exits below the surface
    * already offer registration and sign-in. A brokered undecided result says the authority did not
-   * answer; it is NOT a refusal, the callback is NOT resent, and the continuation it may carry
-   * belongs to a door this page does not yet have.
+   * answer; it is NOT a refusal, the callback is NOT resent, and the reference it carries is spent
+   * here as a CONTINUATION of the same attempt instead.
    */
   useEffect(() => {
+    /**
+     * Settle one brokered answer - the callback's exchange, or the continuation it led to.
+     *
+     * THE ORDER IS THE CONTRACT'S AND IT IS NOT NEGOTIABLE. A second factor and an unverified
+     * provider email are ANSWERS rather than failures, so they are read before any token; and
+     * `undecided` is read before `accessToken`, because a null token beside it says nobody decided
+     * rather than "wrong".
+     *
+     * AN UNDECIDED RESULT IS CONTINUED, NEVER RESENT. The callback has been spent, so sending it
+     * again would be the replay the journey refuses; the reference it carries addresses the proof the
+     * backend is holding for this attempt and this browser instead, and asking under it repeats the
+     * identity read alone. A continuation's own undecided carries no further reference - its payload
+     * has no field for one - so this walk of the outcomes ends, and with no reference at all the
+     * fresh provider shortcuts above are the way on.
+     *
+     * @param first - The brokered payload, from the callback or from its continuation.
+     */
+    const settleBrokered = async (first: BrokeredAnswer): Promise<void> => {
+      if (first.requiresTwoFactor) {
+        twoFactorToken.current = first.twoFactorToken ?? "";
+        setStatusMessage("");
+        setPhase("twoFactor");
+        return;
+      }
+      if (first.providerEmailRefused === true) {
+        refuse(t("signIn.oauthEmailRefused"));
+        return;
+      }
+      if (first.undecided !== null) {
+        const reference = first.undecided.continuationReference ?? null;
+        if (reference === null) {
+          hesitate(t("signIn.oauthUndecided"));
+          return;
+        }
+        const continued = await runPending("provider", () => continueBrokeredSignIn({
+          continuationReference: reference
+        }));
+        if (!continued.ok) {
+          if (isUnanswered(continued.code)) hesitate(t("signIn.oauthUndecided"));
+          else refuse(t("signIn.oauthRefused"));
+          return;
+        }
+        await settleBrokered(continued.data);
+        return;
+      }
+      if (first.accessToken === null) {
+        refuse(t("signIn.oauthRefused"));
+        return;
+      }
+      session.adopt(first);
+      landOnReturnTo();
+    };
     const result = oauthReturn.answer;
     if (result === undefined || hasAdoptedOauth.current) return;
     hasAdoptedOauth.current = true;
@@ -398,27 +492,8 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
       else refuse(t("signIn.oauthRefused"));
       return;
     }
-    if (result.data.requiresTwoFactor) {
-      twoFactorToken.current = result.data.twoFactorToken ?? "";
-      setStatusMessage("");
-      setPhase("twoFactor");
-      return;
-    }
-    if (result.data.providerEmailRefused === true) {
-      refuse(t("signIn.oauthEmailRefused"));
-      return;
-    }
-    if (result.data.undecided !== null) {
-      hesitate(t("signIn.oauthUndecided"));
-      return;
-    }
-    if (result.data.accessToken === null) {
-      refuse(t("signIn.oauthRefused"));
-      return;
-    }
-    session.adopt(result.data);
-    landOnReturnTo();
-  }, [hesitate, landOnReturnTo, oauthReturn.answer, refuse, session, t]);
+    void settleBrokered(result.data);
+  }, [continueBrokeredSignIn, hesitate, landOnReturnTo, oauthReturn.answer, refuse, runPending, session, t]);
 
   /**
    * Submit the first step of whichever journey is running.

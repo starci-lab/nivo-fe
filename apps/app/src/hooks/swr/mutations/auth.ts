@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import useSWRMutation from "swr/mutation";
-import { exchangeOauthCode, forgotPasswordInit, forgotPasswordResend, forgotPasswordVerifyOtp, signIn, signUpInit, signUpResend, signUpVerifyOtp, verifyTwoFactor } from "@/modules/api/auth";
+import { continueBrokeredSignIn, exchangeOauthCode, forgotPasswordInit, forgotPasswordResend, forgotPasswordVerifyOtp, signIn, signOut, signUpInit, signUpResend, signUpVerifyOtp, verifyTwoFactor } from "@/modules/api/auth";
 import { takeOauthProvider } from "@/modules/auth";
 type AuthMutationTrigger<TInput> = {
   readonly arg: TInput;
@@ -29,6 +29,25 @@ export const useMutateForgotPasswordInitSwr = () => useAuthMutation("forgot-pass
 export const useMutateForgotPasswordResendSwr = () => useAuthMutation("forgot-password-resend", forgotPasswordResend);
 /** Own the password-recovery code exchange. */
 export const useMutateForgotPasswordVerifyOtpSwr = () => useAuthMutation("forgot-password-verify", forgotPasswordVerifyOtp);
+/**
+ * Own the continuation of a brokered sign-in whose verified proof the authority has not mapped yet.
+ *
+ * THIS IS NOT A SECOND CALLBACK. The callback that produced the undecided result was spent when its
+ * code was redeemed, so it can never be sent twice; what this spends is the single-use reference
+ * that result carried to the proof the backend is holding for this attempt and this browser.
+ */
+export const useMutateContinueBrokeredSignInSwr = () => useAuthMutation("continue-brokered-sign-in", continueBrokeredSignIn);
+/**
+ * Own ending a session, and carry the answers the ending states BESIDE its payload.
+ *
+ * IT IS THE ENVELOPE DOOR, NOT THE PAYLOAD DOOR. `signOut`'s `data` reports only that the request
+ * completed - the resolver clears this browser's refresh cookie whether or not the provider's
+ * best-effort revoke did anything - while whether that revocation was observed, and whether an
+ * everywhere scope's own ending was confirmed by the identity authority, arrive as SIBLINGS of the
+ * payload. Unwrapping `data` here would leave every caller to guess both, so the whole envelope
+ * travels through `useAuthMutation` unchanged.
+ */
+export const useMutateSignOutSwr = () => useAuthMutation("sign-out", signOut);
 type OauthReturnAnswer = Awaited<ReturnType<typeof exchangeOauthCode>>;
 
 /**

@@ -14,6 +14,8 @@ const mocks = vi.hoisted(() => ({
     forgotPasswordVerifyOtp: vi.fn(),
     verifyTwoFactor: vi.fn(),
     exchangeOauthCode: vi.fn(),
+    continueBrokeredSignIn: vi.fn(),
+    signOut: vi.fn(),
     oauthRedirectUrl: vi.fn(() => "https://auth.test"),
 }))
 
@@ -31,6 +33,13 @@ const fillSignIn = () => {
     fireEvent.change(screen.getByLabelText("emailLabel"), { target: { value: "reader@example.test" } })
     fireEvent.change(screen.getByLabelText("passwordLabel"), { target: { value: "correct-horse" } })
 }
+
+/** A brokered completion the authority did not answer: the handle to a held proof, or none to hold. */
+const brokeredUndecided = (continuationReference: string | null) => ({ ok: true, data: { accessToken: null, ...answered, providerEmailRefused: null, undecided: { continuationReference } } })
+/** What repeating the held proof answers with once the identity read finally runs. */
+const brokeredContinued = (accessToken: string) => ({ ok: true, data: { accessToken, ...answered, providerEmailRefused: null, undecided: null } })
+/** The callback leg: a spent `state` handle and the code the broker returned. */
+const arriveFromProvider = () => window.history.replaceState(null, "", "/authentication?code=authorization-code&state=opaque-handle")
 
 describe("AuthenticationPage interactions", () => {
     afterEach(() => cleanup())
@@ -139,5 +148,43 @@ describe("AuthenticationPage interactions", () => {
         fireEvent.click(screen.getByRole("button", { name: "signIn.submitLabel" }))
         expect(await screen.findByText("signIn.refused")).toBeInTheDocument()
         expect(container.querySelector("aside")).toBeNull()
+    })
+
+    it("continues a brokered undecided result under the reference it returned, never resending the callback", async () => {
+        mocks.exchangeOauthCode.mockResolvedValue(brokeredUndecided("hold-1"))
+        mocks.continueBrokeredSignIn.mockResolvedValue(brokeredContinued("continued"))
+        arriveFromProvider()
+        render(<AuthenticationPage />)
+
+        await waitFor(() => expect(mocks.continueBrokeredSignIn).toHaveBeenCalledTimes(1))
+        expect(mocks.continueBrokeredSignIn).toHaveBeenCalledWith({ continuationReference: "hold-1" })
+        expect(mocks.exchangeOauthCode).toHaveBeenCalledTimes(1)
+        await waitFor(() => expect(mocks.adopt).toHaveBeenCalledWith(expect.objectContaining({ accessToken: "continued" })))
+        expect(mocks.push).toHaveBeenCalledWith("/overview")
+    })
+
+    it("places a continued brokered sign-in on the validated return-to, not on the default landing", async () => {
+        window.sessionStorage.setItem("nivo.auth.return-to", "/console/orders")
+        mocks.exchangeOauthCode.mockResolvedValue(brokeredUndecided("hold-2"))
+        mocks.continueBrokeredSignIn.mockResolvedValue(brokeredContinued("continued"))
+        arriveFromProvider()
+        render(<AuthenticationPage />)
+
+        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/console/orders"))
+        expect(mocks.adopt).toHaveBeenCalledWith(expect.objectContaining({ accessToken: "continued" }))
+        expect(mocks.continueBrokeredSignIn).toHaveBeenCalledWith({ continuationReference: "hold-2" })
+    })
+
+    it("leaves fresh provider starts as the way on when the undecided result carried no reference", async () => {
+        mocks.exchangeOauthCode.mockResolvedValue(brokeredUndecided(null))
+        arriveFromProvider()
+        render(<AuthenticationPage />)
+
+        expect(await screen.findByText("signIn.oauthUndecided")).toBeInTheDocument()
+        expect(screen.queryByText("signIn.oauthRefused")).not.toBeInTheDocument()
+        expect(mocks.continueBrokeredSignIn).not.toHaveBeenCalled()
+        expect(mocks.exchangeOauthCode).toHaveBeenCalledTimes(1)
+        await waitFor(() => expect(screen.getByRole("button", { name: "googleLabel" })).toBeEnabled())
+        expect(screen.getByRole("button", { name: "githubLabel" })).toBeEnabled()
     })
 })

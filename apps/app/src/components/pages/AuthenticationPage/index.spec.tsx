@@ -5,11 +5,13 @@ import type { AuthActions, AuthCode, AuthDetails } from "@/components/blocks/aut
 const mocks = vi.hoisted(() => {
     const api = {
         exchangeOauthCode: vi.fn(),
+        continueBrokeredSignIn: vi.fn(),
         forgotPasswordInit: vi.fn(),
         forgotPasswordResend: vi.fn(),
         forgotPasswordVerifyOtp: vi.fn(),
         oauthRedirectUrl: vi.fn(() => "https://auth.test/redirect"),
         signIn: vi.fn(),
+        signOut: vi.fn(),
         verifyTwoFactor: vi.fn(),
         signUpInit: vi.fn(),
         signUpResend: vi.fn(),
@@ -80,6 +82,7 @@ describe("AuthenticationPage connected journeys", () => {
         mocks.api.forgotPasswordVerifyOtp.mockResolvedValue({ ok: true, data: true })
         mocks.api.forgotPasswordResend.mockResolvedValue({ ok: true, data: { challengeId: "reset-2", expiresInSeconds: 180 } })
         mocks.api.exchangeOauthCode.mockResolvedValue({ ok: false, reason: "oauth-failed" })
+        mocks.api.continueBrokeredSignIn.mockResolvedValue({ ok: false, reason: "oauth-failed" })
         window.history.replaceState(null, "", "/authentication")
         window.sessionStorage.clear()
     })
@@ -334,15 +337,42 @@ describe("AuthenticationPage connected journeys", () => {
         expect(mocks.session.adopt).not.toHaveBeenCalled()
     })
 
-    it("reports a brokered undecided result as a try-again and never resends the spent callback", async () => {
+    it("continues a brokered undecided result under its reference and never resends the spent callback", async () => {
         window.sessionStorage.setItem("nivo.oauth.provider", "google")
         window.history.replaceState(null, "", "/authentication?code=abc&state=xyz")
         mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: { continuationReference: "hold-1" } } })
+        mocks.api.continueBrokeredSignIn.mockResolvedValue({ ok: true, data: { accessToken: "continued-access", requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: null } })
+        render(<AuthenticationPage />)
+        await waitFor(() => expect(mocks.api.continueBrokeredSignIn).toHaveBeenCalledWith({ continuationReference: "hold-1" }))
+        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/overview"))
+        expect(mocks.session.adopt).toHaveBeenCalledWith({ accessToken: "continued-access", requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: null })
+        expect(mocks.api.exchangeOauthCode).toHaveBeenCalledTimes(1)
+        expect(mocks.api.continueBrokeredSignIn).toHaveBeenCalledTimes(1)
+        expect(panel()).not.toContain("signIn.oauthUndecided")
+    })
+
+    it("reports a brokered undecided result as a try-again when nothing could be held", async () => {
+        window.sessionStorage.setItem("nivo.oauth.provider", "google")
+        window.history.replaceState(null, "", "/authentication?code=abc&state=xyz")
+        mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: { continuationReference: null } } })
         render(<AuthenticationPage />)
         await waitFor(() => expect(panel()).toContain("signIn.oauthUndecided"))
         expect(panel()).not.toContain("signIn.oauthRefused")
         expect(panel()).toContain('"isError":false')
         expect(mocks.api.exchangeOauthCode).toHaveBeenCalledTimes(1)
+        expect(mocks.api.continueBrokeredSignIn).not.toHaveBeenCalled()
+    })
+
+    it("asks for nothing further when the continuation itself comes back undecided", async () => {
+        window.sessionStorage.setItem("nivo.oauth.provider", "google")
+        window.history.replaceState(null, "", "/authentication?code=abc&state=xyz")
+        mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: { continuationReference: "hold-lapsed" } } })
+        mocks.api.continueBrokeredSignIn.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: { retryWithSameRequest: true } } })
+        render(<AuthenticationPage />)
+        await waitFor(() => expect(panel()).toContain("signIn.oauthUndecided"))
+        expect(panel()).not.toContain("signIn.oauthRefused")
+        expect(mocks.api.continueBrokeredSignIn).toHaveBeenCalledTimes(1)
+        expect(mocks.session.adopt).not.toHaveBeenCalled()
     })
 
     it("says plainly that the place asked for is out of reach, without echoing it", async () => {
