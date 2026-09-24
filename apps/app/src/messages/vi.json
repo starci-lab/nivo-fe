@@ -441,7 +441,7 @@
           "suspended": "Cấp phát tạm dừng"
         }
       },
-      "title": "Modules",
+      "title": "AgentOS",
       "description": "Theo dõi modules của doanh nghiệp, trạng thái kích hoạt và hành động tiếp theo.",
       "dashboardEyebrow": "Một doanh nghiệp · một workspace",
       "createEyebrow": "Không gian làm việc mới",
@@ -502,7 +502,7 @@
         "tabsLabel": "Các phần quản lý không gian làm việc",
         "tabs": {
           "overview": "Tổng quan",
-          "modules": "Modules",
+          "modules": "Module",
           "solutions": "Giải pháp",
           "ai-knowledge": "AI & Tri thức",
           "applications": "Ứng dụng",

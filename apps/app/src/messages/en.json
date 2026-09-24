@@ -441,7 +441,7 @@
           "suspended": "Provisioning suspended"
         }
       },
-      "title": "Modules",
+      "title": "AgentOS",
       "description": "Monitor the business modules, activation state, and the next available action.",
       "dashboardEyebrow": "One business · one workspace",
       "createEyebrow": "New workspace",
