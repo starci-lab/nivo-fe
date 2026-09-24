@@ -15,7 +15,7 @@ type SectionsOutputProps = {
 vi.mock("./component", () => ({ AcademySectionsBase: (props: SectionsOutputProps) => <output>{props.sections.map((section) => `${section.kind}:${section.id}`).join("|")}<span>{props.leadStatus}</span><span>{[...props.failedImageSources].join("|")}</span><button onClick={() => { void props.on.submitLead({ name: "Reader", contact: "0123" }) }}>submit</button><button onClick={() => props.on.failImage("broken.jpg")}>fail image</button></output> }))
 import { AcademySectionsBase } from "./component"
 import { AcademySections } from "./index"
-describe("academy sections connected orchestration", () => {
+describe("AcademySections", () => {
     it("settles the configured visible sections into the pure twin", () => {
         const html = renderToStaticMarkup(<AcademySections courses={[]} />)
         expect(html).toContain("hero:hero")
