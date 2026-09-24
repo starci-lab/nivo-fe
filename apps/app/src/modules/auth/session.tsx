@@ -36,24 +36,43 @@ export type SessionState = /** The refresh cookie is being traded for a token; n
 };
 
 /**
- * What ending a session actually observed, told apart the way the custody contract demands.
+ * What ending a session actually observed, told apart the way the ending contract demands.
  *
- * `signOut` on the wire answers only that the request completed: the resolver clears the refresh
- * cookie and returns `true` whether or not the provider's revocation was observed - its revoke is
- * best-effort and swallows failures. Reading that as "revoked remotely" would describe a
- * revocation nobody saw, so honesty is `unknown` until the API reports the outcome separately.
+ * `signOut` answers a completed request and states its two remote answers beside it: whether the
+ * provider confirmed revoking this browser's refresh lineage, and - for an everywhere scope - whether
+ * the identity authority confirmed ending its side. Reading a completed request as "revoked
+ * remotely" would describe a revocation nobody saw, so `remoteRevocation` is `observed` only when
+ * the envelope says so.
  *
- * ASKING FOR AN EVERYWHERE SCOPE DOES NOT CHANGE THAT YET. The backend does state, beside `data`,
- * whether the provider confirmed revocation and whether the identity authority confirmed the
- * principal-wide ending - but the shared transport in `api/graphql.ts` returns only `data`, so
- * neither answer can be read here and both stay out of this report rather than being guessed at. A
- * caller must not present an everywhere sign-out as confirmed until the transport carries them.
+ * A THIS-BROWSER SIGN-OUT CLAIMS NOTHING PRINCIPAL-WIDE, so its authority answer is `notAsked`: the
+ * identity authority was never asked anything. An everywhere scope that WAS asked and stayed silent
+ * is `unconfirmed` - never `confirmed`, and never `notAsked`, which would deny that the ask was
+ * made. A request that never answered observed nothing, so each answer keeps its unobserved value
+ * rather than being inferred from the failure.
  */
 export type SessionEndReport = {
   /** Local access state and the browser's refresh custody are gone either way. */
   readonly localCleared: true;
   /** Whether provider revocation was observed; never inflated from a merely completed request. */
   readonly remoteRevocation: "observed" | "unknown";
+  /** Whether the identity authority confirmed ending its side of an everywhere scope. */
+  readonly authorityEnding: "confirmed" | "unconfirmed" | "notAsked";
+};
+
+/** How far the identity authority's own ending was confirmed, or that it was never asked. */
+type AuthorityEnding = SessionEndReport["authorityEnding"];
+
+/**
+ * Read the envelope's authority flag into the report's answer.
+ *
+ * @param confirmed - What the sign-out envelope stated: null when no everywhere scope was asked.
+ * @returns The report's authority-side answer.
+ */
+const authorityEndingFrom = (confirmed: boolean | null): AuthorityEnding => {
+  if (confirmed === null) {
+    return "notAsked";
+  }
+  return confirmed ? "confirmed" : "unconfirmed";
 };
 
 /** What a caller may do with the session. */
@@ -142,18 +161,26 @@ export const SessionProvider = (props: SessionProviderProps) => {
       status: "anonymous"
     });
     /*
-     * The mutation's `data` reports a completed request, not an observed revocation: the resolver
-     * answers `true` whether the provider revoke succeeded, failed or never ran, and the two
-     * answers that would tell them apart ride on the envelope beside `data`, where the transport
-     * does not read them. So the report below can only ever be `unknown`, for this-browser and
-     * everywhere scopes alike, until the transport carries the envelope's siblings.
+     * The mutation's `data` reports a completed request, not an observed revocation, so the report
+     * is built from the answers the envelope states BESIDE `data`. A request that never answered
+     * confirmed nothing: an unasked authority stays `notAsked`, an asked-but-silent one stays
+     * `unconfirmed` rather than being reported as ended, and an unobserved revocation stays
+     * `unknown`. Nothing here is inferred from the failure, only read from what was observed.
      */
-    await signOutMutation(scope === undefined ? undefined : {
+    const answer = await signOutMutation(scope === undefined ? undefined : {
       scope
     });
+    if (!answer.ok) {
+      return {
+        localCleared: true,
+        remoteRevocation: "unknown",
+        authorityEnding: scope === "everywhere" ? "unconfirmed" : "notAsked"
+      };
+    }
     return {
       localCleared: true,
-      remoteRevocation: "unknown"
+      remoteRevocation: answer.data.remoteRevocationObserved ? "observed" : "unknown",
+      authorityEnding: authorityEndingFrom(answer.data.authorityEndingConfirmed)
     };
   }, []);
   useEffect(() => {

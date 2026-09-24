@@ -1,4 +1,4 @@
-import { graphql, type Result } from "./graphql";
+import { graphql, graphqlEnvelope, type EnvelopeAnswer, type Result } from "./graphql";
 
 /**
  * Every authentication operation nivo-core publishes, typed once.
@@ -237,6 +237,26 @@ export type SignOutScope =
 export interface SignOutInput {
   /** The ending scope; omitted means this browser. The requester is never named here. */
   readonly scope?: SignOutScope;
+}
+
+/**
+ * What the sign-out envelope states beside its payload.
+ *
+ * `data` ALONE IS NOT THE ANSWER. It says the request completed - the resolver clears the local
+ * refresh cookie whether or not the provider's best-effort revoke did anything - and the two answers
+ * that tell completion apart from a revocation are built into the envelope itself, because the
+ * transform interceptor can only fill `data` and reporting either inside it would misstate it.
+ *
+ * BOTH ARE READ AS WRITTEN, never improved. `remoteRevocationObserved` is `false` while the provider's
+ * outcome is unobserved, which is the common case; `authorityEndingConfirmed` is `null` for a
+ * this-browser scope, which never reaches the identity authority at all, and on an everywhere scope
+ * it is `true` only once that authority confirmed ending its side.
+ */
+export interface SignOutOutcome {
+  /** Whether the provider confirmed revoking this browser's refresh lineage. */
+  readonly remoteRevocationObserved: boolean;
+  /** Whether the identity authority confirmed an everywhere scope's own ending; null when none was asked. */
+  readonly authorityEndingConfirmed: boolean | null;
 }
 
 /** What ending another principal's sessions asks for. */
@@ -566,17 +586,18 @@ export const refreshSession = (): Promise<Result<AuthPayload>> => graphql(`mutat
 /**
  * End this browser's session, or every session of the signed-in principal.
  *
- * `data` MEANS THE REQUEST COMPLETED, NOT THAT REVOCATION WAS OBSERVED - and that gap is real here
- * rather than philosophical. The resolver answers `true` whatever the provider's best-effort revoke
- * did, and it states whether revocation was observed and whether an everywhere scope was confirmed
- * by the identity authority as SIBLINGS of `data`; the transport in `graphql.ts` unwraps `data` and
- * carries neither, so this adapter can only answer that the request completed. A caller must
- * therefore report local completion and an unknown remote outcome, never a revocation everywhere.
+ * `data` MEANS THE REQUEST COMPLETED, NOT THAT REVOCATION WAS OBSERVED, and this adapter no longer
+ * loses the answers that tell the two apart. The resolver states them as siblings of `data` - whether
+ * the provider's best-effort revoke was observed, and whether an everywhere scope was confirmed by
+ * the identity authority - so the request goes through the envelope-stating transport
+ * ({@link graphqlEnvelope}) and the caller reads both instead of guessing them from a completed
+ * request. A caller must still never present a completed this-browser sign-out as a revocation
+ * everywhere: `authorityEndingConfirmed` is null there because nothing principal-wide was asked.
  *
  * @param input - The ending scope; omitted means this browser.
- * @returns Whether the server completed the request.
+ * @returns The completed request and the two answers stated beside it, or why there is none.
  */
-export const signOut = (input?: SignOutInput): Promise<Result<boolean>> => graphql("mutation SignOut($input: SignOutInput) { signOut(input: $input) { data message success error } }", input === undefined ? undefined : { input });
+export const signOut = (input?: SignOutInput): Promise<Result<EnvelopeAnswer<boolean, SignOutOutcome>>> => graphqlEnvelope<boolean, SignOutOutcome>("mutation SignOut($input: SignOutInput) { signOut(input: $input) { data remoteRevocationObserved authorityEndingConfirmed message success error } }", input === undefined ? undefined : { input });
 
 /**
  * End a named principal's Login sessions, once the owner of the stated authority context confirms

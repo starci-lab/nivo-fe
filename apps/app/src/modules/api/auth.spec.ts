@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-vi.mock("./graphql", () => ({ graphql: vi.fn() }))
+vi.mock("./graphql", () => ({ graphql: vi.fn(), graphqlEnvelope: vi.fn() }))
 
-import { graphql } from "./graphql"
+import { graphql, graphqlEnvelope } from "./graphql"
 import {
     continueBrokeredSignIn,
     endPrincipalSessions,
@@ -26,11 +26,16 @@ import {
 const lastDocument = () => vi.mocked(graphql).mock.calls.at(-1)?.[0] ?? ""
 /** The variables of the one call the operation under test just made. */
 const lastVariables = () => vi.mocked(graphql).mock.calls.at(-1)?.[1]
+/** The document of the one envelope-stating call the operation under test just made. */
+const lastEnvelopeDocument = () => vi.mocked(graphqlEnvelope).mock.calls.at(-1)?.[0] ?? ""
+/** The variables of the one envelope-stating call the operation under test just made. */
+const lastEnvelopeVariables = () => vi.mocked(graphqlEnvelope).mock.calls.at(-1)?.[1]
 
 describe("authentication API operations", () => {
     beforeEach(() => {
         vi.clearAllMocks()
         vi.mocked(graphql).mockResolvedValue({ ok: true, data: {} } as never)
+        vi.mocked(graphqlEnvelope).mockResolvedValue({ ok: true, data: {} } as never)
     })
 
     it("builds the provider redirect URL without nesting under graphql", () => {
@@ -104,18 +109,26 @@ describe("authentication API operations", () => {
         expect(lastVariables()).toEqual({ input: { continuationReference: "hold-1" } })
     })
 
-    it("signs out of this browser without sending a scope", async () => {
+    it("signs out of this browser without sending a scope, through the envelope-stating door", async () => {
         await signOut()
 
-        expect(lastDocument()).toContain("mutation SignOut")
+        /*
+         * The two answers that tell a completed request apart from an observed revocation ride
+         * BESIDE `data`, so the payload-only door would drop them. This one selects them and goes
+         * through the transport that carries the whole envelope.
+         */
+        expect(lastEnvelopeDocument()).toContain("mutation SignOut")
+        expect(lastEnvelopeDocument()).toContain("remoteRevocationObserved")
+        expect(lastEnvelopeDocument()).toContain("authorityEndingConfirmed")
         // the scope input is nullable, so returning to this browser sends no variable at all
-        expect(lastVariables()).toBeUndefined()
+        expect(lastEnvelopeVariables()).toBeUndefined()
+        expect(vi.mocked(graphql)).not.toHaveBeenCalled()
     })
 
     it("signs out everywhere by sending the scope the door reads", async () => {
         await signOut({ scope: "everywhere" })
 
-        expect(lastVariables()).toEqual({ input: { scope: "everywhere" } })
+        expect(lastEnvelopeVariables()).toEqual({ input: { scope: "everywhere" } })
     })
 
     it("ends a named principal's sessions under the authority context it was given", async () => {

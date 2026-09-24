@@ -34,7 +34,7 @@ const ENDPOINT = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/
  * tell apart - the request never arrived, GraphQL refused the document, and the operation ran and
  * was refused - and conflating them is how a wrong password gets reported as "network problem".
  */
-interface Envelope<T> {
+export interface Envelope<T> {
   /** The operation's payload, or null when there is none. */
   readonly data: T | null;
   /** A machine-readable refusal code, when the backend supplies one. */
@@ -44,6 +44,20 @@ interface Envelope<T> {
   /** Whether the operation itself succeeded. */
   readonly success: boolean;
 }
+
+/**
+ * The whole envelope of one successful operation: its payload together with every answer the
+ * operation states beside it.
+ *
+ * WHY AN OPERATION WOULD NEED THIS. Nearly every operation's answer is its `data` and nothing else,
+ * and {@link graphql} hands back exactly that. Sign-out is the exception: its `data` says only that
+ * the request completed, while whether the provider confirmed revoking this browser's lineage - and,
+ * for an everywhere scope, whether the identity authority confirmed ending its side - are answers
+ * the backend states BESIDE `data`, because folding either into a completed request would report a
+ * revocation nobody observed. `TExtra` is how a caller names those siblings; `data` is narrowed to
+ * the payload itself, since the classification below only succeeds with one.
+ */
+export type EnvelopeAnswer<T, TExtra extends object> = Envelope<T> & TExtra & { readonly data: T };
 
 /** What a caller gets back: the payload, or the reason there is none. */
 export type Result<T> = {
@@ -101,17 +115,24 @@ export const useLocaleFrom = (reader: LocaleReader) => {
 };
 
 /**
- * Run one GraphQL operation.
+ * Run one GraphQL operation and hand back its whole envelope.
  *
  * NEVER THROWS. Every call site is a submit handler or a page render, and both have something better
  * to show than a stack trace: the API's own refusal sentence. A thrown error inside a submit would
  * leave the form in its pending state forever.
  *
+ * THE ENVELOPE-STATING DOOR. {@link graphql} is the door for every operation whose answer is `data`
+ * and nothing else, which is nearly all of them; this one exists for the operation that states
+ * answers beside it, and carries them unchanged. Both classify the same three failures the same way.
+ *
  * @param query - The operation document.
  * @param variables - Its variables, if any.
- * @returns The unwrapped payload, or why there is none.
+ * @returns The whole envelope, or why there is none.
  */
-export const graphql = async <T,>(query: string, variables?: Readonly<Record<string, unknown>>): Promise<Result<T>> => {
+export const graphqlEnvelope = async <T, TExtra extends object = Record<string, unknown>>(
+  query: string,
+  variables?: Readonly<Record<string, unknown>>,
+): Promise<Result<EnvelopeAnswer<T, TExtra>>> => {
   const token = readToken();
   let response: Response;
   try {
@@ -145,7 +166,7 @@ export const graphql = async <T,>(query: string, variables?: Readonly<Record<str
     };
   }
   let body: {
-    data?: Record<string, Envelope<T>>;
+    data?: Record<string, Envelope<T> & TExtra>;
     errors?: ReadonlyArray<{
       message: string;
     }>;
@@ -180,7 +201,8 @@ export const graphql = async <T,>(query: string, variables?: Readonly<Record<str
       code: "EMPTY"
     };
   }
-  if (!envelope.success || envelope.data === null) {
+  const { data } = envelope;
+  if (!envelope.success || data === null) {
     return {
       ok: false,
       reason: envelope.message,
@@ -189,6 +211,31 @@ export const graphql = async <T,>(query: string, variables?: Readonly<Record<str
   }
   return {
     ok: true,
-    data: envelope.data
+    data: {
+      ...envelope,
+      data
+    }
+  };
+};
+
+/**
+ * Run one GraphQL operation and hand back only its payload.
+ *
+ * THE DOOR FOR EVERY ORDINARY OPERATION, and its contract is unchanged: the console, accounting and
+ * collaboration clients keep reading the payload or the reason there is none, and answers an
+ * operation states beside its payload are dropped here rather than changing what they read.
+ *
+ * @param query - The operation document.
+ * @param variables - Its variables, if any.
+ * @returns The unwrapped payload, or why there is none.
+ */
+export const graphql = async <T,>(query: string, variables?: Readonly<Record<string, unknown>>): Promise<Result<T>> => {
+  const answer = await graphqlEnvelope<T, Record<string, unknown>>(query, variables);
+  if (!answer.ok) {
+    return answer;
+  }
+  return {
+    ok: true,
+    data: answer.data.data
   };
 };

@@ -49,7 +49,10 @@ describe("SessionProvider", () => {
     beforeEach(() => {
         vi.clearAllMocks()
         mocks.api.refreshSession.mockResolvedValue({ ok: false, reason: "no-cookie", code: "EMPTY" })
-        mocks.api.signOut.mockResolvedValue({ ok: true, data: true })
+        mocks.api.signOut.mockResolvedValue({
+            ok: true,
+            data: { data: true, remoteRevocationObserved: false, authorityEndingConfirmed: null },
+        })
     })
 
     it("restores a signed-in session from the refresh cookie", async () => {
@@ -121,7 +124,7 @@ describe("SessionProvider", () => {
         expect(result.current.state.status).toBe("anonymous")
     })
 
-    it("ends locally and reports remote revocation honestly", async () => {
+    it("ends locally and reports what the sign-out envelope stated", async () => {
         mocks.api.refreshSession.mockResolvedValue({ ok: true, data: payload() })
         const { result } = renderSession()
         await waitFor(() => expect(result.current.state.status).toBe("signed-in"))
@@ -136,10 +139,51 @@ describe("SessionProvider", () => {
         expect(mocks.api.signOut).toHaveBeenCalledWith(undefined)
         expect(result.current.state.status).toBe("anonymous")
         /*
-         * `signOut` answered a completed request - nothing more. Remote revocation was never
-         * observed, so the report cannot claim it.
+         * The envelope stated an unobserved revocation and a null authority answer - null because a
+         * this-browser sign-out never reaches the identity authority at all. Neither is inflated:
+         * the remote outcome stays unknown and the principal-wide ending was never asked.
          */
-        expect(report).toEqual({ localCleared: true, remoteRevocation: "unknown" })
+        expect(report).toEqual({ localCleared: true, remoteRevocation: "unknown", authorityEnding: "notAsked" })
+    })
+
+    it("reports an observed revocation and a confirmed everywhere ending as stated", async () => {
+        mocks.api.refreshSession.mockResolvedValue({ ok: true, data: payload() })
+        mocks.api.signOut.mockResolvedValue({
+            ok: true,
+            data: { data: true, remoteRevocationObserved: true, authorityEndingConfirmed: true },
+        })
+        const { result } = renderSession()
+        await waitFor(() => expect(result.current.state.status).toBe("signed-in"))
+
+        let report: Awaited<ReturnType<typeof result.current.end>> | undefined
+        await act(async () => {
+            report = await result.current.end("everywhere")
+        })
+
+        expect(mocks.api.signOut).toHaveBeenCalledWith({ scope: "everywhere" })
+        expect(report).toEqual({ localCleared: true, remoteRevocation: "observed", authorityEnding: "confirmed" })
+    })
+
+    it("keeps an asked but unconfirmed everywhere ending unconfirmed", async () => {
+        /*
+         * contract.login.session-ending: reporting an unconfirmed authority-side ending as confirmed
+         * breaks the consumer. The ask was made, so this is unconfirmed - never `notAsked`, which
+         * would deny the ask, and never `confirmed`, which nobody said.
+         */
+        mocks.api.refreshSession.mockResolvedValue({ ok: true, data: payload() })
+        mocks.api.signOut.mockResolvedValue({
+            ok: true,
+            data: { data: true, remoteRevocationObserved: false, authorityEndingConfirmed: false },
+        })
+        const { result } = renderSession()
+        await waitFor(() => expect(result.current.state.status).toBe("signed-in"))
+
+        let report: Awaited<ReturnType<typeof result.current.end>> | undefined
+        await act(async () => {
+            report = await result.current.end("everywhere")
+        })
+
+        expect(report).toEqual({ localCleared: true, remoteRevocation: "unknown", authorityEnding: "unconfirmed" })
     })
 
     it("still clears locally and stays honest when the sign-out call fails", async () => {
@@ -154,28 +198,15 @@ describe("SessionProvider", () => {
         })
 
         expect(result.current.state.status).toBe("anonymous")
-        expect(report).toEqual({ localCleared: true, remoteRevocation: "unknown" })
-    })
+        // nothing answered, so nothing was observed and no authority was asked
+        expect(report).toEqual({ localCleared: true, remoteRevocation: "unknown", authorityEnding: "notAsked" })
 
-    it("asks for an everywhere scope without claiming its remote outcome", async () => {
-        /*
-         * The door does take `everywhere`, and its envelope states beside `data` whether the
-         * identity authority confirmed the wider ending - but the shared transport unwraps `data`
-         * only, so this report may not present the scope as confirmed. Asking is honest; confirming
-         * would be a claim nobody made.
-         */
-        mocks.api.refreshSession.mockResolvedValue({ ok: true, data: payload() })
-        const { result } = renderSession()
-        await waitFor(() => expect(result.current.state.status).toBe("signed-in"))
-
-        let report: Awaited<ReturnType<typeof result.current.end>> | undefined
         await act(async () => {
             report = await result.current.end("everywhere")
         })
 
-        expect(mocks.api.signOut).toHaveBeenCalledWith({ scope: "everywhere" })
-        expect(result.current.state.status).toBe("anonymous")
-        expect(report).toEqual({ localCleared: true, remoteRevocation: "unknown" })
+        // the wider ending WAS asked; an unanswered request confirms no part of it
+        expect(report).toEqual({ localCleared: true, remoteRevocation: "unknown", authorityEnding: "unconfirmed" })
     })
 
     it("throws outside the provider", () => {
