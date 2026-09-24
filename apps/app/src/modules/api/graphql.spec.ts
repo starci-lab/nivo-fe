@@ -1,17 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { graphql, graphqlEnvelope, useAccessTokenFrom, useLocaleFrom } from "./graphql"
+import { graphql, graphqlEnvelope, setAccessTokenReader, setLocaleReader } from "./graphql"
 
 describe("graphql", () => {
     beforeEach(() => {
         vi.unstubAllGlobals()
-        useAccessTokenFrom(() => null)
-        useLocaleFrom(() => "vi")
+        setAccessTokenReader(() => null)
+        setLocaleReader(() => "vi")
         vi.restoreAllMocks()
     })
 
     it("sends credentials, locale, token and variables", async () => {
-        useAccessTokenFrom(() => "access-1")
-        useLocaleFrom(() => "en")
+        setAccessTokenReader(() => "access-1")
+        setLocaleReader(() => "en")
         const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
             data: { operation: { success: true, data: { id: "row-1" }, message: "ok" } },
         }), { status: 200, headers: { "content-type": "application/json" } }))
@@ -61,8 +61,8 @@ interface SignOutOutcome {
 describe("graphqlEnvelope", () => {
     beforeEach(() => {
         vi.unstubAllGlobals()
-        useAccessTokenFrom(() => null)
-        useLocaleFrom(() => "vi")
+        setAccessTokenReader(() => null)
+        setLocaleReader(() => "vi")
         vi.restoreAllMocks()
     })
 

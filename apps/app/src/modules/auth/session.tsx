@@ -3,7 +3,7 @@
 import { useLocale } from "next-intl";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ComponentProps } from "react";
 import { refreshSession, signOut as signOutMutation, type AuthPayload, type SignOutScope } from "../api/auth";
-import { useAccessTokenFrom, useLocaleFrom } from "../api/graphql";
+import { setAccessTokenReader, setLocaleReader } from "../api/graphql";
 
 /**
  * Who is signed in, for as long as this tab is open.
@@ -115,7 +115,7 @@ export const SessionProvider = (props: SessionProviderProps) => {
    * when the reader was installed - the one that expired.
    */
   const token = useRef<string | null>(null);
-  useAccessTokenFrom(useCallback(() => token.current, []));
+  setAccessTokenReader(useCallback(() => token.current, []));
 
   /*
    * A CUSTODY EPOCH BESIDE THE TOKEN, because a refresh answer can arrive after a newer custody
@@ -132,7 +132,7 @@ export const SessionProvider = (props: SessionProviderProps) => {
    * API has to be told which language to refuse in.
    */
   const locale = useLocale();
-  useLocaleFrom(useCallback(() => locale, [locale]));
+  setLocaleReader(useCallback(() => locale, [locale]));
   const adopt = useCallback((payload: AuthPayload) => {
     /*
      * A payload that still owes a second factor is NOT a session. Adopting it would put `null`

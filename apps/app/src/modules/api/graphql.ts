@@ -99,18 +99,26 @@ let readLocale: LocaleReader = (): string => "vi";
 /**
  * Tell the transport where the current access token lives.
  *
+ * THE MODULE-SIDE DOOR, and deliberately not a hook: the session store is a `modules/` owner, which
+ * may not import the hooks root, so it binds its reader here directly. A component binds through the
+ * `useAccessTokenFrom` hook (`@/hooks`), which calls this setter - the dependency runs one way, and
+ * both doors write the same reader.
+ *
  * @param reader - Answers with the token in force right now, or null when signed out.
  */
-export const useAccessTokenFrom = (reader: TokenReader) => {
+export const setAccessTokenReader = (reader: TokenReader) => {
   readToken = reader;
 };
 
 /**
  * Tell the transport which language the reader is in.
  *
+ * THE MODULE-SIDE DOOR, beside {@link setAccessTokenReader}: a component binds through the
+ * `useLocaleFrom` hook (`@/hooks`), while a `modules/` owner calls this setter directly.
+ *
  * @param reader - Answers with the active locale.
  */
-export const useLocaleFrom = (reader: LocaleReader) => {
+export const setLocaleReader = (reader: LocaleReader) => {
   readLocale = reader;
 };
 

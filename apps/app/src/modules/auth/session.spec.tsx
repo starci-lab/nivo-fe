@@ -8,8 +8,8 @@ const mocks = vi.hoisted(() => ({
         signOut: vi.fn(),
     },
     transport: {
-        useAccessTokenFrom: vi.fn(),
-        useLocaleFrom: vi.fn(),
+        setAccessTokenReader: vi.fn(),
+        setLocaleReader: vi.fn(),
     },
 }))
 
@@ -19,8 +19,8 @@ vi.mock("../api/auth", () => ({
     signOut: mocks.api.signOut,
 }))
 vi.mock("../api/graphql", () => ({
-    useAccessTokenFrom: mocks.transport.useAccessTokenFrom,
-    useLocaleFrom: mocks.transport.useLocaleFrom,
+    setAccessTokenReader: mocks.transport.setAccessTokenReader,
+    setLocaleReader: mocks.transport.setLocaleReader,
 }))
 
 import type { AuthPayload } from "../api/auth"

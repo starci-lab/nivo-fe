@@ -118,3 +118,6 @@ export { useMutateCollabPressApprovalSwr } from "./swr/mutations/collab"
 
 export { useCollabLive } from "./collab-live/useCollabLive"
 export { useCollabOfficeTransport } from "./collab-live/useCollabOfficeTransport"
+
+export { useAccessTokenFrom } from "./auth/useAccessTokenFrom"
+export { useLocaleFrom } from "./auth/useLocaleFrom"
