@@ -185,7 +185,7 @@ export const SessionProvider = (props: SessionProviderProps) => {
   }, []);
   useEffect(() => {
     let cancelled = false;
-    const restore = async () => {
+    const restore = async (): Promise<void> => {
       const epochAtStart = custodyEpoch.current;
       const result = await refreshSession();
       if (cancelled || custodyEpoch.current !== epochAtStart) {

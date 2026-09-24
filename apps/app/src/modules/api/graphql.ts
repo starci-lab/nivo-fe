@@ -94,7 +94,7 @@ let readToken: TokenReader = () => null;
  * unreachable. This header is the FE end of closing that; until the interceptor reads it, a refusal
  * still arrives in English and the screen shows the API's sentence as it was sent.
  */
-let readLocale: LocaleReader = () => "vi";
+let readLocale: LocaleReader = (): string => "vi";
 
 /**
  * Tell the transport where the current access token lives.

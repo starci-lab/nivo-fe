@@ -31,18 +31,20 @@ const lastEnvelopeDocument = () => vi.mocked(graphqlEnvelope).mock.calls.at(-1)?
 /** The variables of the one envelope-stating call the operation under test just made. */
 const lastEnvelopeVariables = () => vi.mocked(graphqlEnvelope).mock.calls.at(-1)?.[1]
 
-describe("authentication API operations", () => {
-    beforeEach(() => {
-        vi.clearAllMocks()
-        vi.mocked(graphql).mockResolvedValue({ ok: true, data: {} } as never)
-        vi.mocked(graphqlEnvelope).mockResolvedValue({ ok: true, data: {} } as never)
-    })
+beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(graphql).mockResolvedValue({ ok: true, data: {} } as never)
+    vi.mocked(graphqlEnvelope).mockResolvedValue({ ok: true, data: {} } as never)
+})
 
+describe("oauthRedirectUrl", () => {
     it("builds the provider redirect URL without nesting under graphql", () => {
         expect(oauthRedirectUrl("google", "http://localhost:3067/auth/callback?next=/app"))
             .toBe("http://localhost:3068/api/v1/keycloak/google/redirect?redirect_uri=http%3A%2F%2Flocalhost%3A3067%2Fauth%2Fcallback%3Fnext%3D%2Fapp")
     })
+})
 
+describe("signUpInit", () => {
     it("does not publish the withdrawn public signUp mutation", async () => {
         /*
          * NO DOOR CREATES AN IDENTITY BEFORE A CONSUMED PROOF. The bypass was removed from the
@@ -52,6 +54,18 @@ describe("authentication API operations", () => {
         expect("signUp" in published).toBe(false)
     })
 
+    it("forwards the registration start to its matching operation and variables", async () => {
+        const input = { email: "reader@example.test", password: "correct-horse" }
+
+        await signUpInit(input)
+        expect(lastDocument()).toContain("mutation SignUpInit")
+        expect(lastVariables()).toEqual({ input })
+        // one call per operation: the adapter never issues a second document for one submit
+        expect(vi.mocked(graphql)).toHaveBeenCalledTimes(1)
+    })
+})
+
+describe("signIn", () => {
     it("asks the sign-in for its destination and undecided result, and forwards the attempt identity", async () => {
         await signIn({
             email: "reader@example.test",
@@ -74,7 +88,9 @@ describe("authentication API operations", () => {
             },
         })
     })
+})
 
+describe("signUpVerifyOtp", () => {
     it("asks a registration completion for its conclusion and undecided result", async () => {
         await signUpVerifyOtp({ challengeId: "challenge-1", otp: "123456" })
 
@@ -84,7 +100,18 @@ describe("authentication API operations", () => {
         expect(lastDocument()).toContain("undecided { retryWithSameRequest }")
         expect(lastVariables()).toEqual({ input: { challengeId: "challenge-1", otp: "123456" } })
     })
+})
 
+describe("signUpResend", () => {
+    it("forwards the registration resend to its matching operation", async () => {
+        await signUpResend({ challengeId: "challenge-1" })
+
+        expect(lastDocument()).toContain("mutation SignUpResend")
+        expect(vi.mocked(graphql)).toHaveBeenCalledTimes(1)
+    })
+})
+
+describe("exchangeOauthCode", () => {
     it("asks a brokered completion for its continuation reference and the provider-email refusal", async () => {
         await exchangeOauthCode({ code: "code-1", provider: "google", state: "state-1" })
 
@@ -95,7 +122,9 @@ describe("authentication API operations", () => {
             input: { code: "code-1", provider: "google", state: "state-1" },
         })
     })
+})
 
+describe("continueBrokeredSignIn", () => {
     it("continues a held brokered proof under the reference it was given", async () => {
         await continueBrokeredSignIn({ continuationReference: "hold-1" })
 
@@ -108,7 +137,9 @@ describe("authentication API operations", () => {
         expect(lastDocument()).toContain("providerEmailRefused")
         expect(lastVariables()).toEqual({ input: { continuationReference: "hold-1" } })
     })
+})
 
+describe("signOut", () => {
     it("signs out of this browser without sending a scope, through the envelope-stating door", async () => {
         await signOut()
 
@@ -130,7 +161,9 @@ describe("authentication API operations", () => {
 
         expect(lastEnvelopeVariables()).toEqual({ input: { scope: "everywhere" } })
     })
+})
 
+describe("endPrincipalSessions", () => {
     it("ends a named principal's sessions under the authority context it was given", async () => {
         await endPrincipalSessions({
             requestId: "ending-1",
@@ -149,47 +182,75 @@ describe("authentication API operations", () => {
             },
         })
     })
+})
 
-    it("forwards every remaining credential journey to its matching operation and variables", async () => {
-        const input = { email: "reader@example.test", password: "correct-horse" }
-        const otp = { challengeId: "challenge-1", otp: "123456" }
+describe("forgotPasswordInit", () => {
+    it("forwards the recovery start to its matching operation", async () => {
+        await forgotPasswordInit({ email: "reader@example.test" })
 
-        await signUpInit(input)
-        expect(lastDocument()).toContain("mutation SignUpInit")
-        expect(lastVariables()).toEqual({ input })
-
-        await signUpResend({ challengeId: "challenge-1" })
-        expect(lastDocument()).toContain("mutation SignUpResend")
-
-        await forgotPasswordInit({ email: input.email })
         expect(lastDocument()).toContain("mutation ForgotPasswordInit")
+        expect(vi.mocked(graphql)).toHaveBeenCalledTimes(1)
+    })
+})
 
+describe("forgotPasswordResend", () => {
+    it("forwards the recovery resend to its matching operation", async () => {
         await forgotPasswordResend({ challengeId: "reset-1" })
-        expect(lastDocument()).toContain("mutation ForgotPasswordResend")
 
+        expect(lastDocument()).toContain("mutation ForgotPasswordResend")
+        expect(vi.mocked(graphql)).toHaveBeenCalledTimes(1)
+    })
+})
+
+describe("forgotPasswordVerifyOtp", () => {
+    it("sets the password through its matching operation and variables", async () => {
         // setting a password is not signing in, so this one answers a boolean and no session is read
-        await forgotPasswordVerifyOtp({ ...otp, newPassword: "new-correct-horse" })
+        await forgotPasswordVerifyOtp({ challengeId: "challenge-1", otp: "123456", newPassword: "new-correct-horse" })
+
         expect(lastDocument()).toContain("mutation ForgotPasswordVerifyOtp")
         expect(lastVariables()).toEqual({
             input: { challengeId: "challenge-1", otp: "123456", newPassword: "new-correct-horse" },
         })
+        expect(vi.mocked(graphql)).toHaveBeenCalledTimes(1)
+    })
+})
 
+describe("verifyTwoFactor", () => {
+    it("forwards the second factor to its matching operation and variables", async () => {
         await verifyTwoFactor({ twoFactorToken: "token-1", code: "123456" })
+
         expect(lastDocument()).toContain("mutation VerifyTwoFactor")
         expect(lastVariables()).toEqual({
             input: { twoFactorToken: "token-1", code: "123456" },
         })
+        expect(vi.mocked(graphql)).toHaveBeenCalledTimes(1)
+    })
+})
 
-        await requestPasswordReset({ email: input.email })
+describe("requestPasswordReset", () => {
+    it("forwards the recovery request to its matching operation", async () => {
+        await requestPasswordReset({ email: "reader@example.test" })
+
         expect(lastDocument()).toContain("mutation RequestPasswordReset")
+        expect(vi.mocked(graphql)).toHaveBeenCalledTimes(1)
+    })
+})
 
+describe("resetPassword", () => {
+    it("forwards the reset to its matching operation and variables", async () => {
         await resetPassword({ token: "reset-token", newPassword: "new-correct-horse" })
-        expect(lastDocument()).toContain("mutation ResetPassword")
 
+        expect(lastDocument()).toContain("mutation ResetPassword")
+        expect(vi.mocked(graphql)).toHaveBeenCalledTimes(1)
+    })
+})
+
+describe("refreshSession", () => {
+    it("refreshes without sending an argument", async () => {
         // the credential is the cookie, so a refresh carries no argument at all
         await refreshSession()
-        expect(lastDocument()).toContain("mutation RefreshSession")
 
-        expect(vi.mocked(graphql)).toHaveBeenCalledTimes(9)
+        expect(lastDocument()).toContain("mutation RefreshSession")
+        expect(vi.mocked(graphql)).toHaveBeenCalledTimes(1)
     })
 })

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { graphql, graphqlEnvelope, useAccessTokenFrom, useLocaleFrom } from "./graphql"
 
-describe("console graphql transport", () => {
+describe("graphql", () => {
     beforeEach(() => {
         vi.unstubAllGlobals()
         useAccessTokenFrom(() => null)
@@ -58,7 +58,7 @@ interface SignOutOutcome {
     readonly authorityEndingConfirmed: boolean | null
 }
 
-describe("console graphql envelope transport", () => {
+describe("graphqlEnvelope", () => {
     beforeEach(() => {
         vi.unstubAllGlobals()
         useAccessTokenFrom(() => null)

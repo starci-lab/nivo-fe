@@ -61,7 +61,7 @@ export const takeOauthProvider = (): OauthProvider => {
  * @param returnTo - The address the backend sends the reader back to, query and hash dropped.
  * @returns The absolute URL to navigate away to.
  */
-export const authenticationOauthRedirectUrl = (provider: OauthProvider, returnTo: string) => oauthRedirectUrl(provider, returnTo);
+export const authenticationOauthRedirectUrl = (provider: OauthProvider, returnTo: string): string => oauthRedirectUrl(provider, returnTo);
 
 /**
  * Where a signed-in reader lands when nothing better was asked for.

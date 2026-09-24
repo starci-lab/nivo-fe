@@ -6,7 +6,7 @@ vi.mock("@/modules/api/auth", () => ({
 
 import { DEFAULT_AUTHENTICATED_LANDING, authenticationOauthRedirectUrl, rememberOauthProvider, takeOauthProvider, validatedReturnTo } from "."
 
-describe("the OAuth provider hand-off", () => {
+describe("rememberOauthProvider", () => {
     beforeEach(() => window.sessionStorage.clear())
 
     it("remembers the chosen provider and spends it exactly once", () => {
@@ -17,6 +17,10 @@ describe("the OAuth provider hand-off", () => {
         expect(window.sessionStorage.getItem("nivo.oauth.provider")).toBeNull()
         expect(takeOauthProvider()).toBe("google")
     })
+})
+
+describe("takeOauthProvider", () => {
+    beforeEach(() => window.sessionStorage.clear())
 
     it("falls back to the default provider when storage refuses", () => {
         /*
@@ -40,7 +44,9 @@ describe("the OAuth provider hand-off", () => {
             else Object.defineProperty(window, "sessionStorage", real)
         }
     })
+})
 
+describe("authenticationOauthRedirectUrl", () => {
     it("builds the hand-off URL against the transport's own boundary", () => {
         expect(authenticationOauthRedirectUrl("google", "https://app.test/en/authentication")).toBe(
             "https://api.test/api/v1/keycloak/google/redirect?redirect_uri=https%3A%2F%2Fapp.test%2Fen%2Fauthentication",
@@ -48,7 +54,7 @@ describe("the OAuth provider hand-off", () => {
     })
 })
 
-describe("the return destination", () => {
+describe("validatedReturnTo", () => {
     it("accepts only an internal path of this app", () => {
         /*
          * The requested destination is untrusted: it arrives on a query a reader can type and a
@@ -72,7 +78,9 @@ describe("the return destination", () => {
         ]
         for (const hostile of refused) expect(validatedReturnTo(hostile)).toBeNull()
     })
+})
 
+describe("DEFAULT_AUTHENTICATED_LANDING", () => {
     it("names the default authenticated landing surface", () => {
         // data.login.login-return-destination: every missing or unsafe place resolves here
         expect(DEFAULT_AUTHENTICATED_LANDING).toBe("/overview")
