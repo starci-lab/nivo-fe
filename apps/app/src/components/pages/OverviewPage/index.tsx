@@ -12,17 +12,20 @@ export const OverviewPage = (props: OverviewPageProps) => {
   void props;
   const t = useTranslations("console");
   const router = useRouter();
-  const openApps = () => router.push("/apps");
+  const openWorkspacePurchase = () => router.push("/agentos/workspaces/new");
   return <OverviewDataProvider content={OverviewPageBase} contentProps={{
     title: t("overview.title"),
     lede: t("overview.lede"),
     pathLabel: t("breadcrumbLabel"),
     consoleLabel: t("title"),
-    buildAppLabel: t("overview.buildApp"),
+    // The one next step on this page is the same Mua workspace purchase action the AgentOS
+    // primary button opens, so it carries that action's label key. The prop keeps its former
+    // name because page-twins.spec.tsx constructs OverviewPageProps outside this slice.
+    buildAppLabel: t("agentos.create"),
     atAGlanceLabel: t("overview.atAGlance"),
     servicesLabel: t("servicesCaption"),
     accountLabel: t("accountCaption"),
-    onBuildApp: openApps
+    onBuildApp: openWorkspacePurchase
   }} />;
 };
 

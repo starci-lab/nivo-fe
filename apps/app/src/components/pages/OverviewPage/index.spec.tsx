@@ -48,14 +48,15 @@ describe("OverviewPage route", () => {
         for (const slice of slices()) slice.mockImplementation(answer)
     })
 
-    it("hands the page every resolved label and routes the one page command", () => {
+    it("hands the page every resolved label and routes the one next step to the workspace purchase route", () => {
         render(<OverviewPage />)
 
         expect(screen.getByText("breadcrumbLabel:title:overview.title")).toBeInTheDocument()
         expect(screen.getByText("overview.lede:overview.atAGlance:servicesCaption:accountCaption")).toBeInTheDocument()
 
-        fireEvent.click(screen.getByRole("button", { name: "overview.buildApp" }))
-        expect(mocks.push).toHaveBeenCalledWith("/apps")
+        fireEvent.click(screen.getByRole("button", { name: "agentos.create" }))
+        expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new")
+        expect(mocks.push).not.toHaveBeenCalledWith("/apps")
     })
 
     it("asks every overview slice exactly once for one render of the page", () => {

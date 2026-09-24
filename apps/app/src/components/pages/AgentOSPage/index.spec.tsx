@@ -21,7 +21,9 @@ vi.mock("./component", () => ({
         <div>
             <output>{props.mode}:{props.orderId}</output>
             <button type="button" onClick={props.onOpenDashboard}>dashboard</button>
-            <button type="button" onClick={props.onCreate}>{props.labels.createAction}</button>
+            {props.mode === "dashboard"
+                ? <button type="button" onClick={props.onCreate}>{props.labels.createAction}</button>
+                : null}
         </div>
     ),
 }))
@@ -35,6 +37,16 @@ describe("AgentOSPage route owner", () => {
         render(<AgentOSPage mode="dashboard" />)
         fireEvent.click(screen.getByRole("button", { name: "agentos.create" }))
         expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new")
+        expect(mocks.push).not.toHaveBeenCalledWith("/agentos/create")
+    })
+
+    it("keeps the primary Mua workspace purchase action on the dashboard entry", () => {
+        const dashboard = render(<AgentOSPage mode="dashboard" />)
+        expect(screen.getByRole("button", { name: "agentos.create" })).toBeInTheDocument()
+        dashboard.unmount()
+
+        render(<AgentOSPage mode="create" />)
+        expect(screen.queryByRole("button", { name: "agentos.create" })).not.toBeInTheDocument()
     })
 
     it("preserves non-default locale navigation", () => {
