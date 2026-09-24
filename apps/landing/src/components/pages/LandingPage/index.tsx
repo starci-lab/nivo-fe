@@ -110,13 +110,13 @@ export const LandingPage = (props: LandingPageProps) => {
 export type CanonicalRoute = "nivo-os" | "system-of-responsibility" | "applications" | "pricing" | "ideas" | "ecosystem" | "company" | "trust" | "contact";
  // vn-ok: approved visitor copy
 type Card = { readonly title: string; readonly body: string }; // vn-ok: approved visitor copy
-type RouteSection = { readonly label: string; readonly title: string; readonly body: string; readonly cards: readonly Card[] }; // vn-ok: approved visitor copy
-type RouteModel = { readonly eyebrow: string; readonly title: string; readonly lede: string; readonly sections: readonly RouteSection[] }; // vn-ok: approved visitor copy
+type RouteSection = { readonly label: string; readonly title: string; readonly body: string; readonly cards: ReadonlyArray<Card> }; // vn-ok: approved visitor copy
+type RouteModel = { readonly eyebrow: string; readonly title: string; readonly lede: string; readonly sections: ReadonlyArray<RouteSection> }; // vn-ok: approved visitor copy
 type CanonicalPageProps = { readonly route: CanonicalRoute; readonly selectedIntent?: string }; // vn-ok: approved visitor copy
 type ContactIntentFormProps = { readonly selectedIntent?: string }; // vn-ok: approved visitor copy
 const CONTACT_INTENTS = ["product-understanding", "commercial-evaluation", "implementation", "partnership", "press-and-research", "other"] as const; // vn-ok: approved visitor copy
 const routePath = (path: string) => path; // vn-ok: approved visitor copy
-const section = (label: string, title: string, body: string, cards: readonly Card[]): RouteSection => ({ label, title, body, cards }); // vn-ok: approved visitor copy
+const section = (label: string, title: string, body: string, cards: ReadonlyArray<Card>): RouteSection => ({ label, title, body, cards }); // vn-ok: approved visitor copy
 const card = (title: string, body: string): Card => ({ title, body }); // vn-ok: approved visitor copy
  // vn-ok: approved visitor copy
 const ROUTES: Record<CanonicalRoute, RouteModel> = { // vn-ok: approved visitor copy

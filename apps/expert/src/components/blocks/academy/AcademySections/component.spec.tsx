@@ -5,7 +5,7 @@ import type { AcademySection } from "./index"
 
 describe("academy section renderer", () => {
     it("renders courses, empty catalog and custom shape branches", () => {
-        const sections: AcademySection[] = [
+        const sections: Array<AcademySection> = [
             { kind: "courses", id: "courses", title: "Courses", emptyTitle: "No courses", emptyBody: "Come back soon", courses: [] },
             { kind: "custom", id: "quote", content: { variant: "quote", heading: "A promise", body: "Learn with confidence", attribution: "Teacher" } },
             { kind: "custom", id: "columns", content: { variant: "columns", heading: "Benefits", columns: [{ title: "Fast", text: "Start today" }] } },
