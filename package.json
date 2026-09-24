@@ -46,6 +46,14 @@
             "name": "CollabLive"
           },
           {
+            "root": "apps/app/src/modules/academy",
+            "name": "Academy"
+          },
+          {
+            "root": "apps/app/src/modules/collab",
+            "name": "Collab"
+          },
+          {
             "root": "apps/app/src/modules/realtime",
             "name": "ProvisioningRealtime"
           }
