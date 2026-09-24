@@ -1,71 +1,63 @@
 import { cn } from "@heroui/react";
 
-/** Full-viewport split between the product visual and the authentication task. */
+/**
+ * The quiet canvas that carries one authentication task, and the mascot beside it on wide screens.
+ *
+ * ONE SURFACE, ONE MEASURE, ONE TASK. The accepted direction draws the page slot as a centred
+ * external heading over one soft borderless form surface, with the exits below it rather than
+ * inside it - so this file owns the canvas, the column and the reserved area, and the width of the
+ * surface itself is Grammar's `formCompact` measure rather than a number written here. A second
+ * measure in this file would be a second thing that can disagree with the design system.
+ *
+ * THE ARTWORK COLUMN IS RESERVED, NOT DRAWN. It stays empty on every state but sign-in-ready, and
+ * it leaves the reading order entirely below `lg` (`hidden` + `lg:block`), so a narrow reader gets
+ * one column and one task.
+ */
 export const AUTH_PAGE_CLASS_NAME = cn(
   "grid",
   "min-h-dvh",
-  "overflow-hidden",
+  "content-center",
+  "justify-items-center",
+  "gap-10",
   "bg-background",
-  "text-foreground",
-  "lg:grid-cols-12"
-);
-
-/**
- * Desktop-only visual side of the authentication page.
- *
- * `col-span-7` of 12 approximates the intended 7:6 visual weighting without an arbitrary
- * `grid-template-columns` value, which the closed Tailwind scale does not publish.
- */
-export const AUTH_VISUAL_CLASS_NAME = cn(
-  "relative",
-  "hidden",
-  "min-h-dvh",
-  "overflow-hidden",
-  "bg-foreground",
-  "lg:col-span-7",
-  "lg:block"
-);
-
-/** Crop the product art to the available visual column. */
-export const AUTH_VISUAL_IMAGE_CLASS_NAME = cn("object-cover", "object-center");
-
-/** Preserve foreground readability over the product art. */
-export const AUTH_VISUAL_SCRIM_CLASS_NAME = cn(
-  "absolute",
-  "inset-0",
-  "bg-gradient-to-b",
-  "from-black/20",
-  "via-black/5",
-  "to-black/80"
-);
-
-/** Brand accent at the top edge of the visual column. */
-export const AUTH_VISUAL_ACCENT_CLASS_NAME = cn("absolute", "inset-x-0", "top-0", "h-1", "bg-accent");
-
-/**
- * Flat right-side surface that centers the form without a card.
- *
- * Inset stays on `COMMON_SPACING_SCALE` (PADDING-5 to PADDING-6, `p-6` to `p-8`): the scale has no
- * step past `p-8`, so the inset steps once at `sm` and holds rather than escalating further at
- * `lg`/`xl` with off-scale values.
- *
- * BOTH AXES STEP TOGETHER (PADDING-7 Case 2). The previous `px-6 py-8` held the two axes one step
- * apart with no reason that survived reading: the region is a centering surface for one column,
- * not a band whose vertical breathing room is owned separately from its gutter.
- */
-export const AUTH_FORM_REGION_CLASS_NAME = cn(
-  "flex",
-  "min-h-dvh",
-  "items-center",
-  "justify-center",
   "p-6",
+  "text-foreground",
   "sm:p-8",
-  "lg:col-span-5"
+  "lg:grid-cols-12",
+  "lg:gap-12",
+  "lg:px-16"
 );
 
+/** The one task column: heading, surface and exits, stacked and centred as one measure. */
+export const AUTH_TASK_COLUMN_CLASS_NAME = cn(
+  "flex",
+  "w-full",
+  "flex-col",
+  "items-center",
+  "gap-6",
+  "lg:col-span-6",
+  "lg:col-start-4"
+);
+
+/** Heading and the line under it, centred above the surface. */
+export const AUTH_HEADING_CLASS_NAME = cn("flex", "flex-col", "items-center", "gap-2", "text-center");
+
+/** The exits below the surface: what to do instead, and the way back from a challenge. */
+export const AUTH_EXITS_CLASS_NAME = cn("flex", "flex-wrap", "items-center", "justify-center", "gap-x-4", "gap-y-2", "text-center");
+
+/** One exit: an optional question, and the action that answers it. */
+export const AUTH_EXIT_CLASS_NAME = cn("flex", "flex-wrap", "items-center", "gap-2");
+
 /**
- * Readable form measure only. Grammar's leaves own their own size and width: the heading takes its
- * `scale` and the actions take `width="fill"` on the panel itself, so this file never reaches
- * through the boundary with a descendant selector.
+ * The reserved right-side area of the desktop direction, holding the canonical mascot band.
+ *
+ * `justify-self-stretch` is what gives the band a width at all: the mascot slot is a full-width
+ * band, and a centred grid item would otherwise shrink to the artwork's own 180 pixels.
  */
-export const AUTH_FORM_CONTENT_CLASS_NAME = cn("flex", "w-full", "max-w-md", "flex-col", "gap-6");
+export const AUTH_VIGNETTE_CLASS_NAME = cn(
+  "hidden",
+  "lg:col-span-3",
+  "lg:col-start-10",
+  "lg:block",
+  "lg:justify-self-stretch"
+);

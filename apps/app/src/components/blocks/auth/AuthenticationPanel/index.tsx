@@ -1,12 +1,10 @@
 import { useRef, useState, type SubmitEvent } from "react";
 import { Checkbox, nivoIconSource } from "@nivo/ui";
-import { Button, Divider, Heading, Icon, Input, Label, OtpInput, Progress, Text, TextAction, type IconSourceProps } from "@starci/grammar/common";
+import { Button, Divider, Heading, Icon, Input, OtpInput, Progress, Text, TextAction, type IconSourceProps } from "@starci/grammar/common";
 import {
   AUTH_PANEL_CLASS_NAME,
   AUTH_PANEL_DETAILS_CLASS_NAME,
-  AUTH_PANEL_FOOTER_CLASS_NAME,
   AUTH_PANEL_FORM_CLASS_NAME,
-  AUTH_PANEL_HEADER_CLASS_NAME,
   AUTH_PANEL_NOTICE_ACTIONS_CLASS_NAME,
   AUTH_PANEL_NOTICE_CLASS_NAME,
   AUTH_PANEL_OPTIONS_CLASS_NAME,
@@ -45,6 +43,13 @@ import {
  * follows; and the way to the other journey is the last line, phrased as a question and its
  * answer - which is what makes one road the main one and the rest alternatives.
  *
+ * WHAT THIS BLOCK DOES NOT DRAW: the page heading, the way to the other journey and the way back
+ * from a challenge. The accepted direction puts the heading ABOVE one surface and the exits BELOW
+ * it, on the page rather than inside the card, so those three travel to the host as copy (`title`,
+ * `subtitle`) and as `AuthActions` (`changeMode`, `back`) and the host draws them. Everything this
+ * block returns is surface content: the shortcuts, the fields, the code, the cooldown, the final
+ * action and the settled notices.
+ *
  * THE RESET JOURNEY MUST NEVER SAY WHETHER AN ADDRESS IS REGISTERED. `forgotPasswordInit` answers
  * an unknown address with the same flag, sentence, lifetime and mailed code as a known one, so the
  * code step's lead is phrased as a CONDITION for that mode and as a fact for the others, and one
@@ -67,7 +72,15 @@ export type AuthState = /** The shortcuts and the credential form. */
 /** The authenticator code, on the sign-in journey that owes one. */ | "secondFactor"
 /** The journey finished. */ | "done"
 /** A stored sign-in is being verified; no control is owed yet. */ | "restoring"
-/** The account holds a second factor this build cannot complete. Sign-in only. */ | "twoFactorUnsupported";
+/** The account holds a second factor this build cannot complete. Sign-in only. */ | "twoFactorUnsupported"
+/**
+ * Something was settled WITHOUT a session, and there is nothing left to type.
+ *
+ * The three endings that land here are the proven-holder notice, a provider identity with no
+ * verified email and a destination the reader asked for that could not be reached. Each offers up
+ * to two ways onward and none of them offers a field, which is why they share one tree rather than
+ * borrowing `details`: a form under any of them would invite an entry that cannot change anything.
+ */ | "notice";
 
 /** The exact control whose action is currently running. */
 export type AuthPendingAction = "provider" | "submit" | "resend";
@@ -98,7 +111,13 @@ export type AuthFactor = {
 
 /** Copy and situation shared by every tree here. Already resolved - a block never translates. */
 export type AuthFrame = {
-  /** What the surface is called while this journey is on screen. */
+  /**
+   * What the surface is called while this journey is on screen.
+   *
+   * DRAWN OUTSIDE THE PANEL, by the host page, because the direction puts the page heading above
+   * the surface rather than inside it. It travels through here anyway so every state answers what
+   * it is called, and the host never has to learn a journey to caption one.
+   */
   readonly title: string;
   /** The line under the title, saying what the reader is here to do. */
   readonly subtitle: string;
@@ -163,9 +182,6 @@ export type AuthDetailsCopy = AuthFrame & {
   readonly rememberMeLabel: string;
   /** Whether it is on. */
   readonly isRememberMe: boolean;
-  /** The last line: a question, and the answer that switches journey. */
-  readonly promptQuestion: string;
-  readonly promptAction: string;
 };
 
 /** Copy for the mailed-code step. */
@@ -198,11 +214,8 @@ export type AuthCodeCopy = AuthFrame & {
    * count: the page owns the clock, because the page is also what knows a code was just sent.
    */
   readonly cooldownLabel: string;
-  /** The way back to the first step. */
+  /** The way back to the first step. Drawn by the host page, below the surface. */
   readonly backLabel: string;
-  /** The last line: a question, and the answer that switches journey. Both name signing in here. */
-  readonly promptQuestion: string;
-  readonly promptAction: string;
 };
 
 /** Copy for the second-factor step: the same six slots, nothing mailed, no resend. */
@@ -211,7 +224,7 @@ export type AuthFactorCopy = AuthFrame & {
   readonly codeRequired: string;
   readonly codeInvalid: string;
   readonly submitLabel: string;
-  /** The way back to the first step. */
+  /** The way back to the first step. Drawn by the host page, below the surface. */
   readonly backLabel: string;
 };
 
@@ -223,11 +236,20 @@ export type AuthRestoringCopy = {
   readonly progressLabel: string;
 };
 
-/** Copy for a tree that says one thing and offers one way onward. */
+/**
+ * Copy for a tree that says one thing and offers up to two ways onward.
+ *
+ * THE SECOND WAY IS A LABEL, NOT A SECOND SUBTREE. The proven-holder notice offers signing in or
+ * resetting the password, and a provider identity with no verified email offers registering or
+ * signing in - so the shape needs two actions. Which journey each one starts is the host page's
+ * business, which is why the labels are here and the destinations are not.
+ */
 export type AuthNoticeCopy = AuthFrame & {
   readonly doneTitle: string;
   readonly doneHint: string;
   readonly onwardLabel: string;
+  /** The second way onward, or `""` when this ending offers only one. */
+  readonly secondaryLabel: string;
 };
 
 /** What the panel can do. */
@@ -250,6 +272,8 @@ export type AuthActions = {
   readonly changeRememberMe?: (isRemembered: boolean) => void;
   /** Go on to whatever the journey opened. */
   readonly onward?: () => void;
+  /** Take the second way out of a settled notice. */
+  readonly onwardSecondary?: () => void;
 };
 
 /**
@@ -276,6 +300,8 @@ export type AuthenticationPanelProps = (StateBlockProps<"details", AuthDetailsCo
   readonly on?: AuthActions;
 }) | (StateBlockProps<"twoFactorUnsupported", AuthNoticeCopy> & {
   readonly on?: AuthActions;
+}) | (StateBlockProps<"notice", AuthNoticeCopy> & {
+  readonly on?: AuthActions;
 });
 
 /** Field ids, so every label reaches the box it names. */
@@ -284,7 +310,6 @@ const PASSWORD_ID = "authentication-password";
 const CONFIRM_ID = "authentication-confirm-password";
 const NAME_ID = "authentication-name";
 const CODE_ID = "authentication-code";
-const CODE_LABEL_ID = "authentication-code-label";
 const CODE_STATUS_ID = "authentication-code-status";
 const NEW_PASSWORD_ID = "authentication-new-password";
 const CONFIRM_NEW_PASSWORD_ID = "authentication-confirm-new-password";
@@ -309,10 +334,10 @@ const EMPTY = {
 };
 
 /** The two provider shortcuts, in the order the direction draws them. */
-const PROVIDERS: readonly {
+const PROVIDERS: ReadonlyArray<{
   readonly provider: AuthProvider;
   readonly icon: "google" | "github";
-}[] = [{
+}> = [{
   provider: "google",
   icon: "google"
 }, {
@@ -340,10 +365,8 @@ const RefusalGlyph = (props: IconSourceProps) => <svg
 type OtpFieldProps = {
   /** The input's id. */
   readonly id: string;
-  /** The visible label, pointed at by the control's described-by. */
+  /** The visible label. `OtpInput` draws it and names the slot group and the real input with it. */
   readonly label: string;
-  /** The id the label element wears. */
-  readonly labelId: string;
   /** The id the hint-or-refusal line wears. */
   readonly statusId: string;
   /** The hint, or the refusal when the field is in error. */
@@ -357,20 +380,25 @@ type OtpFieldProps = {
 };
 
 /**
- * The six-slot code field: an {@link OtpInput} carries no label or message of its own, so the
- * visible name, the hint and the refusal live beside it and the control points at all of them.
+ * The six-slot code field: the digits, and the one line that explains or refuses them.
+ *
+ * THE VISIBLE NAME IS `OtpInput`'s OWN. Grammar 0.5.0 takes a `label` and draws it as the slots'
+ * `<label for>`, naming the group and the single real input - so the field is named ONCE, by the
+ * control that owns the slots, and a second `Label` beside it would announce the same words twice
+ * and leave the group unnamed. Only the status line is app-owned, and `describedBy` hands its id
+ * to the input so the refusal is read with the code it is about.
  *
  * @param props - {@link OtpFieldProps}
  * @returns The labelled code field.
  */
 const OtpField = (props: OtpFieldProps) => <div className={AUTH_PANEL_OTP_FIELD_CLASS_NAME}>
-    <Label id={props.labelId}>{props.label}</Label>
     <OtpInput
       id={props.id}
       name="otp"
+      label={props.label}
       disabled={props.isPending}
       invalid={props.isError}
-      describedBy={`${props.labelId} ${props.statusId}`}
+      describedBy={props.statusId}
       onChange={props.onValue}
     />
     {/*
@@ -404,33 +432,30 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
   };
 
   /*
-   * `mark` IS NAMED AND LEFT EMPTY, which is not the same as leaving it out. A concurrent change
-   * gave the title pair an optional glyph slot. Saying `undefined` states the design decision out
-   * loud: this surface has no glyph above its name.
+   * NO HEADING IS DRAWN HERE. The direction puts the page heading ABOVE the surface and outside
+   * it, so the host page owns both the title and the line under it - `props.props.title` and
+   * `.subtitle` travel with every state for exactly that host to read. A second Heading inside the
+   * surface would caption the card with the page's own words and skip the outline level.
    */
-  const header = <div className={AUTH_PANEL_HEADER_CLASS_NAME}>{undefined}
-
-    <Heading level={2} scale="display">{props.props.title}</Heading>
-
-
-    <Text size="sm" tone="muted">{props.props.subtitle}</Text></div>;
   if (props.state === "restoring") {
-    return <div className={AUTH_PANEL_CLASS_NAME}>{header}<div className={AUTH_PANEL_NOTICE_CLASS_NAME}>
+    return <div className={AUTH_PANEL_CLASS_NAME}><div className={AUTH_PANEL_NOTICE_CLASS_NAME}>
       <Progress label={props.props.progressLabel} isSkeleton />
       <Text size="sm" tone="muted" live="polite">{props.props.progressLabel}</Text></div></div>;
   }
-  if (props.state === "done" || props.state === "twoFactorUnsupported") {
-    return <div className={AUTH_PANEL_CLASS_NAME}>{header}<><div className={AUTH_PANEL_NOTICE_CLASS_NAME}>{undefined}
+  if (props.state === "done" || props.state === "twoFactorUnsupported" || props.state === "notice") {
+    return <div className={AUTH_PANEL_CLASS_NAME}><div className={AUTH_PANEL_NOTICE_CLASS_NAME}>{undefined}
 
-          <Heading level={3}>{props.props.doneTitle}</Heading>
+          {props.props.doneTitle === "" ? [] : [<Heading key="notice-title" level={2}>{props.props.doneTitle}</Heading>]}
 
 
-          <Text size="sm" tone="muted">{props.props.doneHint}</Text></div><div className={AUTH_PANEL_NOTICE_ACTIONS_CLASS_NAME}><>{props.props.statusMessage === "" ? [] : [<Text key="status" size="sm" tone="muted" live={props.props.isError ? "assertive" : "polite"}>{props.props.statusMessage}</Text>]}
+          <Text size="sm" tone="muted">{props.props.doneHint}</Text></div><div className={AUTH_PANEL_NOTICE_ACTIONS_CLASS_NAME}><>{props.props.statusMessage === "" ? [] : [<Text key="status" size="sm" tone={props.props.isError ? "accent" : "muted"} live={props.props.isError ? "assertive" : "polite"}>{props.props.statusMessage}</Text>]}
 
             <Button
               variant="primary"
+              width="fill"
               onPress={props.on?.onward}
-            >{props.props.onwardLabel}</Button></></div></></div>;
+            >{props.props.onwardLabel}</Button>
+            {props.props.secondaryLabel === "" ? [] : [<TextAction key="secondary" onPress={props.on?.onwardSecondary}>{props.props.secondaryLabel}</TextAction>]}</></div></div>;
   }
   if (props.state === "secondFactor") {
     const copy = props.props;
@@ -445,11 +470,10 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
         code: values.current.otp.trim()
       });
     };
-    return <div className={AUTH_PANEL_CLASS_NAME}>{header}<form onSubmit={submitFactor}>
+    return <div className={AUTH_PANEL_CLASS_NAME}><form onSubmit={submitFactor}>
       <div className={AUTH_PANEL_FORM_CLASS_NAME}><OtpField
         id={CODE_ID}
         label={copy.codeLabel}
-        labelId={CODE_LABEL_ID}
         statusId={CODE_STATUS_ID}
         message={fieldErrors.otp ?? (copy.statusMessage === "" ? "" : copy.statusMessage)}
         isError={fieldErrors.otp !== undefined || copy.isError}
@@ -464,8 +488,7 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
         width="fill"
         isDisabled={copy.isPending}
         isPending={copy.pendingAction === "submit"}
-      >{copy.submitLabel}</Button></div></form><div className={AUTH_PANEL_TEXT_ACTIONS_CLASS_NAME}>
-        <TextAction size="sm" onPress={props.on?.back}>{copy.backLabel}</TextAction></div></div>;
+      >{copy.submitLabel}</Button></div></form></div>;
   }
   /** The one sentence, announced when it is a refusal and merely shown when it is not. */
   const status = props.props.statusMessage === "" ? undefined : <Text key="status" size="sm" tone="muted" live={props.props.isError ? "assertive" : "polite"}>{props.props.statusMessage}</Text>;
@@ -491,14 +514,12 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
     // Only the reset journey spends its code and sets a password in one request, which is what
     // `forgotPasswordVerifyOtp` takes.
     const isCoolingDown = copy.cooldownLabel !== "";
-    return <div className={AUTH_PANEL_CLASS_NAME}>{header}<>
-
+    return <div className={AUTH_PANEL_CLASS_NAME}>
         <form onSubmit={submitCode}>
                                 <div className={AUTH_PANEL_FORM_CLASS_NAME}>{[<OtpField
                                   key="code"
                                   id={CODE_ID}
                                   label={copy.codeLabel}
-                                  labelId={CODE_LABEL_ID}
                                   statusId={CODE_STATUS_ID}
                                   message={fieldErrors.otp ?? (copy.isError && copy.statusMessage !== "" ? copy.statusMessage : copy.codeHint)}
                                   isError={fieldErrors.otp !== undefined || copy.isError}
@@ -544,7 +565,16 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
                 values.current.confirmNewPassword = value;
                 clearFieldError("confirmNewPassword");
               }}
-            />]), ...(status === undefined || copy.isError ? [] : [status]), <Button
+            />]), ...(status === undefined || copy.isError ? [] : [status]),
+          /*
+           * THE COOLDOWN IS DRAWN BEFORE THE FINAL ACTION, in the direction's own order: what the
+           * reader may do about the code, then the one action that spends it. `TextAction` renders
+           * `type="button"`, so asking for another code cannot submit the form it sits in.
+           */
+          <div key="resend" className={AUTH_PANEL_TEXT_ACTIONS_CLASS_NAME}>
+            <TextAction size="sm" onPress={isCoolingDown || copy.isPending ? undefined : props.on?.resend}>
+              {isCoolingDown ? copy.cooldownLabel : copy.resendLabel}
+            </TextAction></div>, <Button
               key="submit"
               variant="primary"
               type="submit"
@@ -557,18 +587,7 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
 
           
           
-                            </form><div className={AUTH_PANEL_TEXT_ACTIONS_CLASS_NAME}>
-
-          <TextAction size="sm" onPress={isCoolingDown || copy.isPending ? undefined : props.on?.resend}>
-            {isCoolingDown ? copy.cooldownLabel : copy.resendLabel}
-          </TextAction>
-
-          <TextAction size="sm" onPress={props.on?.back}>{copy.backLabel}</TextAction></div><div className={AUTH_PANEL_FOOTER_CLASS_NAME}>
-
-      <Text size="sm" tone="muted">{copy.promptQuestion}</Text>
-
-
-      <TextAction size="sm" onPress={() => props.on?.changeMode?.("signIn")}>{copy.promptAction}</TextAction></div></></div>;
+                            </form></div>;
   }
   const copy = props.props;
   const isSignUp = copy.mode === "signUp";
@@ -696,7 +715,7 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
       isDisabled={copy.isPending}
       isPending={copy.pendingAction === "submit"}
     >{copy.submitLabel}</Button>];
-  return <div className={AUTH_PANEL_CLASS_NAME}>{header}<><div className={AUTH_PANEL_DETAILS_CLASS_NAME}><div className={AUTH_PANEL_PROVIDER_CLASS_NAME}>{PROVIDERS.map(entry => <Button
+  return <div className={AUTH_PANEL_CLASS_NAME}><div className={AUTH_PANEL_DETAILS_CLASS_NAME}><div className={AUTH_PANEL_PROVIDER_CLASS_NAME}>{PROVIDERS.map(entry => <Button
             key={entry.provider}
             variant="outline"
             width="fill"
@@ -712,10 +731,5 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
         <form onSubmit={submitDetails}>
                                 <div className={AUTH_PANEL_FORM_CLASS_NAME}>{credentialFields}{credentialActions}</div>
           
-                            </form></div></><div className={AUTH_PANEL_FOOTER_CLASS_NAME}>
-
-      <Text size="sm" tone="muted">{copy.promptQuestion}</Text>
-
-
-      <TextAction size="sm" onPress={() => props.on?.changeMode?.(copy.mode === "signIn" ? "signUp" : "signIn")}>{copy.promptAction}</TextAction></div></div>;
+                            </form></div></div>;
 };

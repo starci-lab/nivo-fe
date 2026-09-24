@@ -2,12 +2,6 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import type { AuthDetailsCopy, AuthNoticeCopy } from "@/components/blocks/auth/AuthenticationPanel"
 
-type NextImageProbeProps = { readonly alt: string, readonly src: string }
-
-vi.mock("next/image", () => ({
-    default: (props: NextImageProbeProps) => <img alt={props.alt} src={props.src} />,
-}))
-
 import { AuthenticationPageBase } from "./component"
 
 const frame = { title: "Sign in", subtitle: "Welcome back", statusMessage: "", isError: false, isPending: false }
@@ -43,8 +37,6 @@ const details: AuthDetailsCopy = {
     forgotPasswordLabel: "Forgot password",
     rememberMeLabel: "Remember me",
     isRememberMe: false,
-    promptQuestion: "New here?",
-    promptAction: "Sign up",
 }
 
 const notice: AuthNoticeCopy = {
@@ -52,40 +44,72 @@ const notice: AuthNoticeCopy = {
     doneTitle: "You're in",
     doneHint: "Taking you to your dashboard.",
     onwardLabel: "Continue",
+    secondaryLabel: "",
 }
 
+const surfaceOf = (container: HTMLElement) => container.querySelector('[data-grammar-surface-card="true"]')
+
 describe("AuthenticationPageBase", () => {
-    it("composes the decorative visual and the details panel without owning journey behaviour", () => {
-        const { container } = render(<AuthenticationPageBase panel={{ state: "details", props: details, on: { submitDetails: vi.fn() } }} />)
-        expect(screen.getByRole("heading", { name: "Sign in" })).toBeInTheDocument()
+    it("puts one surface under an external heading, and the exits outside it", () => {
+        const { container } = render(<AuthenticationPageBase
+            panel={{ state: "details", props: details, on: { submitDetails: vi.fn() } }}
+            exits={[{ question: "No account yet?", action: "Create one", onPress: vi.fn() }]}
+        />)
+        expect(screen.getByRole("heading", { level: 1, name: "Sign in" })).toBeInTheDocument()
         expect(screen.getByRole("img", { name: "Nivo" })).toBeInTheDocument()
         expect(screen.getByLabelText("Email")).toBeInTheDocument()
         expect(screen.getByRole("region", { name: "Sign in" })).toBeInTheDocument()
+
         /*
-         * The product art is decorative, and the aside is what makes it so: `aria-hidden` takes
-         * the whole visual column out of the accessibility tree, so nothing inside it competes
-         * with the form. The assertion names that cause. It cannot be written through a role or
-         * label query - an element removed from the tree has neither - so the aside is read from
-         * the container, which is the only honest way to state the fact.
+         * ONE SURFACE, AND THE FORM IS INSIDE IT. The direction's single joined surface is the only
+         * card on the page; a second one would nest the task in a card-in-a-card.
          */
-        const decorativeAside = container.querySelector("aside")
-        expect(decorativeAside).not.toBeNull()
-        expect(decorativeAside).toHaveAttribute("aria-hidden", "true")
+        const surface = surfaceOf(container)
+        expect(surface).not.toBeNull()
+        expect(container.querySelectorAll('[data-grammar-surface-card="true"]')).toHaveLength(1)
+        expect(surface?.contains(screen.getByLabelText("Email"))).toBe(true)
+
+        /*
+         * THE EXITS ARE OUTSIDE THE SURFACE. That is the composition the direction draws: the way to
+         * the other journey sits below the card rather than in its last band, so the surface ends at
+         * the action it asks for.
+         */
+        expect(surface?.contains(screen.getByRole("button", { name: "Create one" }))).toBe(false)
     })
 
     it("keys the panel by step and journey so switching mode remounts uncontrolled fields", () => {
-        const { rerender } = render(<AuthenticationPageBase panel={{ state: "details", props: details, on: {} }} />)
+        const exits: [] = []
+        const { rerender } = render(<AuthenticationPageBase panel={{ state: "details", props: details, on: {} }} exits={exits} />)
         // Typed through the event path rather than assigned: an uncontrolled field only proves it
         // was remounted if the value it lost was one a reader could actually have put there.
         fireEvent.change(screen.getByLabelText("Email"), { target: { value: "reader@example.test" } })
         expect((screen.getByLabelText("Email") as HTMLInputElement).value).toBe("reader@example.test")
-        rerender(<AuthenticationPageBase panel={{ state: "details", props: { ...details, mode: "signUp" }, on: {} }} />)
+        rerender(<AuthenticationPageBase panel={{ state: "details", props: { ...details, mode: "signUp" }, on: {} }} exits={exits} />)
         expect((screen.getByLabelText("Email") as HTMLInputElement).value).toBe("")
     })
 
     it("draws the settled notice tree and labels its region from the resolved title", () => {
-        render(<AuthenticationPageBase panel={{ state: "done", props: notice, on: { onward: vi.fn() } }} />)
-        expect(screen.getByRole("heading", { name: "You're in" })).toBeInTheDocument()
+        render(<AuthenticationPageBase panel={{ state: "done", props: notice, on: { onward: vi.fn() } }} exits={[]} />)
+        expect(screen.getByRole("heading", { level: 2, name: "You're in" })).toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Continue" })).toBeInTheDocument()
+    })
+
+    it("reserves the mascot for sign-in-ready alone, and keeps it decorative", () => {
+        const { container, rerender } = render(<AuthenticationPageBase panel={{ state: "details", props: details, on: {} }} exits={[]} />)
+        const artwork = container.querySelector("aside")
+        expect(artwork).not.toBeNull()
+        expect(artwork).toHaveAttribute("aria-hidden", "true")
+        expect(artwork?.querySelector("img")).toHaveAttribute("src", "/images/nivo-unicorn-overview.png")
+
+        /*
+         * NOT ON A REFUSAL, AND NOT ON A SETTLED NOTICE. The brand forbids the mascot on a failure
+         * surface, and the record binds it to one state - so the assertion names the two that must
+         * not have it rather than trusting that a shared tree happened to hide it.
+         */
+        rerender(<AuthenticationPageBase panel={{ state: "details", props: { ...details, statusMessage: "That email or password is not right.", isError: true }, on: {} }} exits={[]} />)
+        expect(container.querySelector("aside")).toBeNull()
+
+        rerender(<AuthenticationPageBase panel={{ state: "notice", props: notice, on: {} }} exits={[]} />)
+        expect(container.querySelector("aside")).toBeNull()
     })
 })

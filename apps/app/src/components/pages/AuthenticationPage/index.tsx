@@ -4,9 +4,9 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutateForgotPasswordInitSwr, useMutateForgotPasswordResendSwr, useMutateForgotPasswordVerifyOtpSwr, useMutateSignInSwr, useMutateSignUpInitSwr, useMutateSignUpResendSwr, useMutateSignUpVerifyOtpSwr, useMutateVerifyTwoFactorSwr, useOauthReturnExchange } from "@/hooks";
-import { authenticationOauthRedirectUrl, rememberOauthProvider } from "@/modules/auth";
-import { AuthenticationPageBase as AuthenticationPageView } from "./component";
-import type { AuthActions, AuthCode, AuthDetails, AuthFactor, AuthMode, AuthPendingAction, AuthProvider, AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";
+import { DEFAULT_AUTHENTICATED_LANDING, authenticationOauthRedirectUrl, rememberOauthProvider, validatedReturnTo } from "@/modules/auth";
+import { AuthenticationPageBase as AuthenticationPageView, type AuthenticationPageExit } from "./component";
+import type { AuthActions, AuthCode, AuthDetails, AuthFactor, AuthMode, AuthNoticeCopy, AuthPendingAction, AuthProvider, AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";
 import type { OtpChallenge } from "@/modules/api/auth";
 import { useSession } from "@/modules/auth/session";
 
@@ -14,18 +14,34 @@ import { useSession } from "@/modules/auth/session";
  * PAGE - `/authentication`, connected half.
  *
  * IT RESOLVES THE WORLD AND RENDERS ONLY ITS TWIN. Seven mutations, one challenge, one cooldown
- * clock and the mode live here; `AuthenticationPageBase` receives finished values and draws them.
+ * clock, the mode and the ending live here; `AuthenticationPageBase` receives finished values and
+ * draws them.
  *
  * THREE JOURNEYS, THREE SHAPES, AND THEY ARE NOT INTERCHANGEABLE:
  *
- * - signIn exchanges a password for a SESSION in one request, and can answer with a two-factor
- *   challenge instead - which is neither a refusal nor a session, so `requiresTwoFactor` is read
- *   BEFORE `accessToken` or that challenge becomes a silent failure.
- * - signUp mails a code first and only creates the account when the code comes back. An address that
- *   is already registered is refused at VERIFY, after the code is spent, because that is where
- *   `createUser` throws. Nothing here can give the code back.
+ * - signIn exchanges a password for a SESSION in one request, and can answer instead with a
+ *   two-factor challenge, an UNDECIDED result, or a destination the reader is placed on. Neither
+ *   the challenge nor the undecided result is a refusal, so `requiresTwoFactor` and `undecided` are
+ *   read BEFORE `accessToken` - a null token is three different things and only one of them means
+ *   "wrong password".
+ * - signUp mails a code first and only creates the account when the code comes back. It ends three
+ *   ways that are not a session: the proven address is already held, the identity was created with
+ *   no session, or (after a reset) a password was set. Each is a CONCLUSION whose reason says what
+ *   to offer next, and reading `accessToken` alone would show a blank success to somebody who is
+ *   not signed in.
  * - forgotPassword mails a code and answers a BOOLEAN at the end. Setting a password is not signing
  *   in, so nothing is adopted and the reader is sent back to sign in.
+ *
+ * ONE REQUEST IDENTITY PER LOGICAL ATTEMPT. `signIn` takes an idempotency handle so a retry, a
+ * timeout and a lost response continue ONE attempt instead of deciding twice. It is minted once,
+ * kept while the answer is undecided, and dropped the moment the attempt settles - a new attempt
+ * after a refusal is a new request and gets a new identity.
+ *
+ * THE DESTINATION IS THE BACKEND'S ANSWER, NEVER THE READER'S REQUEST. What arrives on the query is
+ * untrusted input; it travels to the backend as `requestedDestination` and the session names the
+ * place to land. A requested place the backend could not resolve comes back as the default
+ * authenticated landing surface, and that - with a reasonless notice - is what this page shows
+ * rather than echoing a place the reader is not allowed into.
  *
  * THE RESET JOURNEY'S REFUSAL IS DELIBERATELY GENERIC. A wrong code and an address nobody has come
  * back as two different exceptions; printing them would let a caller who can read an inbox tell those
@@ -47,6 +63,11 @@ import { useSession } from "@/modules/auth/session";
  * `/callback` screen would be a second surface that could only ever say "please wait" and then
  * repeat this page's own refusal and two-factor endings in its own words.
  *
+ * A CALLBACK IS SPENT ONCE AND NEVER RESENT. A brokered result that came back undecided carries a
+ * one-time continuation reference for `continueBrokeredSignIn` - not a callback - and this page
+ * cannot yet ask for that continuation, so it says so and leaves fresh provider attempts available.
+ * Resending the spent callback is the one thing that would be a replay, and it is not offered.
+ *
  * THE VERIFIER IS NEVER HERE. It is generated and held by the backend for the whole round trip, so
  * the worst a script that can read this page can steal is an authorization code it cannot spend.
  */
@@ -59,16 +80,21 @@ import { useSession } from "@/modules/auth/session";
  * nothing about journeys. What it receives is a panel that has already been decided.
  */
 export type AuthenticationPageProps = Record<string, never>;
-type AuthPhase = "details" | "code" | "done" | "twoFactor";
+type AuthPhase = "details" | "code" | "done" | "twoFactor" | "notice";
+
+/**
+ * Which settled ending without a session is on screen.
+ *
+ * All three arrive with no form left to fill: the proven mailbox holder, an identity created with
+ * no session, and a requested destination the backend folded onto the default landing surface.
+ */
+type AuthNoticeKind = "heldAddress" | "createdNoSession" | "unavailableReturn";
 
 /** How long the resend refuses, in seconds. Mirrors `OTP_RESEND_COOLDOWN_MS` on the backend. */
 const RESEND_COOLDOWN_SECONDS = 60;
 
 /** Seconds per minute, so the code hint states a lifetime rather than a raw count. */
 const SECONDS_PER_MINUTE = 60;
-
-/** Where a finished sign-in lands when nothing interrupted the reader on their way here. */
-const HOME_ROUTE = "/overview";
 
 /**
  * Where the interrupted console route waits across the provider round trip. The provider leg drops
@@ -78,19 +104,22 @@ const HOME_ROUTE = "/overview";
 const RETURN_TO_STORAGE_KEY = "nivo.auth.return-to";
 
 /**
- * Accept only a route of this app as a place to return to.
+ * The transport codes that mean NOBODY DECIDED.
  *
- * A same-origin path starts with one slash: a protocol-relative address, an absolute URL, or
- * anything with whitespace or a backslash could carry a reader off this origin after they have just
- * typed a password, so none of those is ever honoured.
- *
- * @param value - What the address or the store carried.
- * @returns The path when it is one of ours, else null.
+ * A request that never arrived, could not be parsed, was refused before any resolver ran, or came
+ * back empty is not an answer about the reader's credential - and reporting one as a refusal would
+ * tell somebody their password was wrong during an outage. Every one of them is presented as the
+ * same non-refusal try-again sentence an undecided result wears.
  */
-const returnToOf = (value: string | null): string | null => {
-  if (value === null || !value.startsWith("/") || value.startsWith("//") || /[\s\\]/.test(value)) return null;
-  return value;
-};
+const UNANSWERED_CODES = new Set(["NETWORK", "MALFORMED", "GRAPHQL", "EMPTY"]);
+
+/**
+ * Whether a failed result means the control plane never decided.
+ *
+ * @param code - The transport's own code, when it published one.
+ * @returns Whether the failure is "no answer" rather than a refusal.
+ */
+const isUnanswered = (code: string | undefined): boolean => code !== undefined && UNANSWERED_CODES.has(code);
 
 /**
  * The authentication screen.
@@ -113,6 +142,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
   const oauthReturn = useOauthReturnExchange();
   const [mode, setMode] = useState<AuthMode>("signIn");
   const [phase, setPhase] = useState<AuthPhase>("details");
+  const [noticeKind, setNoticeKind] = useState<AuthNoticeKind | null>(null);
   const [email, setEmail] = useState("");
   const [ttlMinutes, setTtlMinutes] = useState(0);
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
@@ -163,6 +193,13 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
   /* The opaque second-factor challenge is held here until the authenticator code is submitted. */
   const twoFactorToken = useRef("");
   /*
+   * ONE REQUEST IDENTITY PER LOGICAL SIGN-IN ATTEMPT, held in a ref because nothing draws it and a
+   * re-render must not spend a new one. It survives an undecided answer - the same attempt is
+   * continued - and it is dropped as soon as the attempt settles, so retrying AFTER a refusal is a
+   * genuinely new request rather than a replay of the refused one.
+   */
+  const signInIdentity = useRef<string | null>(null);
+  /*
    * ONE HAND-OFF PER ARRIVAL, held in a ref because the guard has to outlive a re-render and must
    * not cause one. `state` is spent by the first exchange, so a second attempt is refused by
    * design - and development's deliberate double-mounting would otherwise turn a working sign-in
@@ -176,29 +213,63 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
    * a subscription to a query string that never changes under this page buys nothing. It is held in
    * a ref because nothing on screen shows it, and mirrored into the session store so the provider
    * journey, which drops this page's query on the way out, still finds it on the way back.
+   *
+   * IT IS UNTRUSTED AND IT IS VALIDATED BY THE SEAM'S OWN RULE, not by a second copy written here:
+   * `validatedReturnTo` accepts exactly one same-origin path and refuses everything else, and what
+   * it refuses is never echoed back to the reader.
    */
   const returnTo = useRef<string | null>(null);
   useEffect(() => {
-    const fromAddress = returnToOf(new URLSearchParams(window.location.search).get("returnTo"));
+    const fromAddress = validatedReturnTo(new URLSearchParams(window.location.search).get("returnTo"));
     try {
       if (fromAddress !== null) window.sessionStorage.setItem(RETURN_TO_STORAGE_KEY, fromAddress);
-      returnTo.current = fromAddress ?? returnToOf(window.sessionStorage.getItem(RETURN_TO_STORAGE_KEY));
+      returnTo.current = fromAddress ?? validatedReturnTo(window.sessionStorage.getItem(RETURN_TO_STORAGE_KEY));
     } catch {
       // A browser that refuses storage still gets the address it arrived with.
       returnTo.current = fromAddress;
     }
   }, []);
 
-  /** Leave for the console: the interrupted route when there was one, the home screen otherwise. */
-  const landInConsole = useCallback(() => {
-    const destination = returnTo.current ?? HOME_ROUTE;
+  /** Leave for the console, clearing the stored return intent as the reader lands. */
+  const arriveAt = useCallback((place: string) => {
     try {
       window.sessionStorage.removeItem(RETURN_TO_STORAGE_KEY);
     } catch {
       // Nothing was stored, so there is nothing to clear.
     }
-    router.push(destination);
+    router.push(place);
   }, [router]);
+
+  /**
+   * Place the reader where the BACKEND resolved the destination, or explain why it did not.
+   *
+   * The requested place travelled as untrusted input and the answer is the only thing that may be
+   * followed. When a place WAS asked for and the answer is a different valid place, the asked-for
+   * route was out of reach for this principal: that is said with one reasonless notice rather than
+   * with the route's name, and the way on is the default authenticated landing surface.
+   *
+   * @param resolved - The destination the session named, or null when it named none.
+   */
+  const landOnDestination = useCallback((resolved: string | null) => {
+    const asked = returnTo.current;
+    const answered = validatedReturnTo(resolved);
+    if (asked !== null && answered !== null && answered !== asked) {
+      setNoticeKind("unavailableReturn");
+      setPhase("notice");
+      return;
+    }
+    arriveAt(answered ?? asked ?? DEFAULT_AUTHENTICATED_LANDING);
+  }, [arriveAt]);
+
+  /**
+   * Place the reader where they asked to go, for the endings that name no destination.
+   *
+   * A provider hand-off and a second factor both answer a session and nothing else, so the place is
+   * the validated return intent or the default authenticated landing surface.
+   */
+  const landOnReturnTo = useCallback(() => {
+    arriveAt(returnTo.current ?? DEFAULT_AUTHENTICATED_LANDING);
+  }, [arriveAt]);
   useEffect(() => {
     if (cooldownSeconds === 0) return undefined;
     const timer = setTimeout(() => setCooldownSeconds(left => left - 1), 1000);
@@ -227,6 +298,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     setCooldownSeconds(0);
     setStatusMessage("");
     setIsError(false);
+    setNoticeKind(null);
     setPhase("details");
   };
 
@@ -251,6 +323,42 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     setStatusMessage(reason);
   }, []);
 
+  /**
+   * Report an UNDECIDED result the way it deserves: as "nivo did not find out", never as a refusal.
+   *
+   * @param reason - The try-again sentence for this step.
+   */
+  const hesitate = useCallback((reason: string) => {
+    setIsError(false);
+    setStatusMessage(reason);
+  }, []);
+
+  /**
+   * This logical sign-in attempt's stable identity, minted on first use.
+   *
+   * @returns The handle, or undefined when the environment cannot mint one.
+   */
+  const attemptIdentity = (): string | undefined => {
+    if (signInIdentity.current === null && typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      signInIdentity.current = crypto.randomUUID();
+    }
+    return signInIdentity.current ?? undefined;
+  };
+
+  /**
+   * The request identity this attempt must carry, spread into a mutation's input.
+   *
+   * @returns One property, or none when no handle could be minted.
+   */
+  const attemptIdentityInput = (): {
+    readonly requestIdentity?: string;
+  } => {
+    const identity = attemptIdentity();
+    return identity === undefined ? {} : {
+      requestIdentity: identity
+    };
+  };
+
   /*
    * THE PROVIDER'S OWN REFUSAL, shown on arrival rather than discovered. `?error` means the
    * hand-off died upstream - the exchange hook strips the query and settles nothing, so this
@@ -273,16 +381,21 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
    * their sign-in failed when it did not - and the code would sit in the address bar, in history,
    * and in whatever the reader pastes into a support ticket.
    *
-   * A CHALLENGE IS READ BEFORE A TOKEN, exactly as the password journey does. `session.adopt`
-   * ignores a payload that still owes a second factor, so a page that adopted first and routed on
-   * would send that reader to a console they are not signed in to, silently.
+   * THREE ENDINGS ARE READ IN ORDER, AND NONE OF THEM IS A SESSION. A challenge is read before a
+   * token because `session.adopt` ignores a payload that still owes a second factor. An unbound
+   * subject with no provider-verified email is a RECOVERABLE refusal - no identity was linked, so
+   * both provider shortcuts and the password path stay fresh, and the exits below the surface
+   * already offer registration and sign-in. A brokered undecided result says the authority did not
+   * answer; it is NOT a refusal, the callback is NOT resent, and the continuation it may carry
+   * belongs to a door this page does not yet have.
    */
   useEffect(() => {
     const result = oauthReturn.answer;
     if (result === undefined || hasAdoptedOauth.current) return;
     hasAdoptedOauth.current = true;
     if (!result.ok) {
-      refuse(t("signIn.oauthRefused"));
+      if (isUnanswered(result.code)) hesitate(t("signIn.oauthUndecided"));
+      else refuse(t("signIn.oauthRefused"));
       return;
     }
     if (result.data.requiresTwoFactor) {
@@ -291,9 +404,21 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
       setPhase("twoFactor");
       return;
     }
+    if (result.data.providerEmailRefused === true) {
+      refuse(t("signIn.oauthEmailRefused"));
+      return;
+    }
+    if (result.data.undecided !== null) {
+      hesitate(t("signIn.oauthUndecided"));
+      return;
+    }
+    if (result.data.accessToken === null) {
+      refuse(t("signIn.oauthRefused"));
+      return;
+    }
     session.adopt(result.data);
-    landInConsole();
-  }, [landInConsole, oauthReturn.answer, refuse, session, t]);
+    landOnReturnTo();
+  }, [hesitate, landOnReturnTo, oauthReturn.answer, refuse, session, t]);
 
   /**
    * Submit the first step of whichever journey is running.
@@ -306,31 +431,59 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     if (mode === "signIn") {
       const result = await runPending("submit", () => signInMutation.trigger({
         email: details.email,
-        password: details.password
+        password: details.password,
+        ...attemptIdentityInput(),
+        ...(returnTo.current === null ? {} : {
+          requestedDestination: returnTo.current
+        })
       }));
       if (!result.ok) {
+        // THE ATTEMPT IS STILL OPEN CONCEPTUALLY when nobody answered, so the identity stays.
+        if (isUnanswered(result.code)) {
+          hesitate(t("signIn.undecided"));
+          return;
+        }
+        signInIdentity.current = null;
         refuse(t("signIn.refused"));
         return;
       }
       if (result.data.requiresTwoFactor) {
+        signInIdentity.current = null;
         twoFactorToken.current = result.data.twoFactorToken ?? "";
         setStatusMessage("");
         setPhase("twoFactor");
         return;
       }
+      if (result.data.undecided !== null) {
+        hesitate(t("signIn.undecided"));
+        return;
+      }
+      if (result.data.accessToken === null) {
+        signInIdentity.current = null;
+        refuse(t("signIn.refused"));
+        return;
+      }
+      signInIdentity.current = null;
       session.adopt(result.data);
-      landInConsole();
+      landOnDestination(result.data.destination);
       return;
     }
     const result = await runPending("submit", () => mode === "signUp" ? signUpInitMutation.trigger({
       email: details.email,
       password: details.password,
-      ...(details.name === "" ? {} : { name: details.name })
+      ...(details.name === "" ? {} : {
+        name: details.name
+      })
     }) : forgotPasswordInitMutation.trigger({
       email: details.email
     }));
     if (!result.ok) {
-      refuse(t("requestRefused"));
+      /*
+       * THE MAIL-SIDE SENTENCE, not a generic one. Both journeys talk about a code that has NOT
+       * been sent, and the sentence says so - no delivery is claimed, and no account exists as a
+       * result of this request.
+       */
+      refuse(mode === "signUp" ? t("signUp.mailRefused") : t("forgotPassword.mailRefused"));
       return;
     }
     setEmail(details.email);
@@ -352,6 +505,44 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
         otp: code.otp
       }));
       if (!result.ok) {
+        if (isUnanswered(result.code)) {
+          hesitate(t("signUp.undecided"));
+          return;
+        }
+        refuse(t("signUp.codeRefused"));
+        return;
+      }
+      if (result.data.requiresTwoFactor) {
+        twoFactorToken.current = result.data.twoFactorToken ?? "";
+        setStatusMessage("");
+        setPhase("twoFactor");
+        return;
+      }
+      /*
+       * A CONCLUSION IS A DELIBERATE ENDING WITH NO SESSION. The proof was good and the mailbox was
+       * proved; what the authoritative check found afterwards is the whole instruction for what the
+       * screen offers next - signing in to the identity already there, or signing in with the
+       * password just set. Neither is a refusal and neither may be shown as one.
+       */
+      if (result.data.conclusion !== null) {
+        if (result.data.conclusion.reason === "heldAddress") {
+          setNoticeKind("heldAddress");
+          setPhase("notice");
+          return;
+        }
+        if (result.data.conclusion.reason === "registeredSignInRequired") {
+          setNoticeKind("createdNoSession");
+          setPhase("notice");
+          return;
+        }
+        setPhase("done");
+        return;
+      }
+      if (result.data.undecided !== null) {
+        hesitate(t("signUp.undecided"));
+        return;
+      }
+      if (result.data.accessToken === null) {
         refuse(t("signUp.codeRefused"));
         return;
       }
@@ -368,6 +559,10 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
       newPassword: code.newPassword
     }));
     if (!result.ok) {
+      if (isUnanswered(result.code)) {
+        hesitate(t("signUp.undecided"));
+        return;
+      }
       // ONE SENTENCE FOR BOTH REFUSALS. `result.reason` is deliberately not shown.
       refuse(t("forgotPassword.codeRefused"));
       return;
@@ -384,12 +579,20 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
       twoFactorToken: twoFactorToken.current,
       code: factor.code
     }));
-    if (!result.ok || result.data.requiresTwoFactor || result.data.accessToken === null) {
+    if (!result.ok) {
+      if (isUnanswered(result.code)) {
+        hesitate(t("signIn.undecided"));
+        return;
+      }
+      refuse(t("signIn.twoFactorRefused"));
+      return;
+    }
+    if (result.data.requiresTwoFactor || result.data.accessToken === null) {
       refuse(t("signIn.twoFactorRefused"));
       return;
     }
     session.adopt(result.data);
-    landInConsole();
+    landOnReturnTo();
   };
 
   /** Ask for another code. Refused inside the cooldown, which the control already says. */
@@ -408,11 +611,36 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     setStatusMessage(t("resentLabel"));
   };
 
+  /** Switch journey, which drops whatever challenge the previous one held. */
+  const changeMode = (next: AuthMode) => {
+    setMode(next);
+    clear();
+  };
+
+  /**
+   * The first way out of a settled notice, which is what the notice's primary action does.
+   *
+   * Only the unavailable-return notice keeps the session: the reader IS signed in there, and the
+   * action is the way onto the default landing surface.
+   */
+  const takeNoticePrimary = () => {
+    if (noticeKind === "unavailableReturn") {
+      arriveAt(DEFAULT_AUTHENTICATED_LANDING);
+      return;
+    }
+    changeMode("signIn");
+  };
+
+  /** The second way out, offered only where the record names two: sign in, or reset the password. */
+  const takeNoticeSecondary = () => {
+    if (noticeKind === "heldAddress") changeMode("forgotPassword");
+  };
+
   /**
    * Everything the panel can do, in one place so each state hands over the same set.
    *
-   * `onward` is the only one that reads the current journey: the reset journey finishes at a
-   * password rather than a session, so its way onward is back to signing in.
+   * `onward` is the only one that reads the current ending: a settled notice's own way on, the
+   * reset journey's return to signing in, and otherwise the console.
    */
   const actions: AuthActions = {
     submitDetails: details => {
@@ -429,10 +657,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     },
     back: clear,
     changeRememberMe: setIsRememberMe,
-    changeMode: next => {
-      setMode(next);
-      clear();
-    },
+    changeMode,
     chooseProvider: provider => {
       /*
        * A FULL-PAGE NAVIGATION RATHER THAN `router.push`. The destination is the backend, which
@@ -454,20 +679,26 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
       setStatusMessage("");
       setPendingAction("provider");
       setPendingProvider(provider);
-      const returnTo = `${window.location.origin}${window.location.pathname}`;
-      window.location.assign(authenticationOauthRedirectUrl(provider, returnTo));
+      const returnUrl = `${window.location.origin}${window.location.pathname}`;
+      window.location.assign(authenticationOauthRedirectUrl(provider, returnUrl));
     },
     onward: () => {
+      if (phase === "notice") {
+        takeNoticePrimary();
+        return;
+      }
       if (mode === "forgotPassword") {
-        setMode("signIn");
-        clear();
+        changeMode("signIn");
         return;
       }
       if (phase === "twoFactor") {
         clear();
         return;
       }
-      landInConsole();
+      landOnReturnTo();
+    },
+    onwardSecondary: () => {
+      if (phase === "notice") takeNoticeSecondary();
     }
   };
   /*
@@ -479,14 +710,88 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
   const isRestoring = session.state.status === "restoring";
   const isSignedInArrival = session.state.status === "signed-in" && phase === "details";
   useEffect(() => {
-    if (isSignedInArrival) landInConsole();
-  }, [isSignedInArrival, landInConsole]);
+    if (isSignedInArrival) landOnReturnTo();
+  }, [isSignedInArrival, landOnReturnTo]);
   const frame = {
     title: t(`${mode}.title`),
     subtitle: t(`${mode}.subtitle`),
     isPending: pendingAction !== null || oauthReturn.isMutating,
     pendingAction: oauthReturn.isMutating ? "provider" as const : pendingAction ?? undefined,
     pendingProvider: pendingProvider ?? oauthProviderOnArrival ?? undefined
+  };
+
+  /**
+   * The settled notice's whole copy, resolved from the ending that produced it.
+   *
+   * @returns The notice's slots.
+   */
+  const noticeCopy = (): AuthNoticeCopy => {
+    const base = {
+      ...frame,
+      statusMessage: "",
+      isError: false,
+      doneTitle: "",
+      doneHint: "",
+      onwardLabel: "",
+      secondaryLabel: ""
+    };
+    if (noticeKind === "heldAddress") {
+      return {
+        ...base,
+        doneTitle: t("signUp.heldAddressTitle"),
+        doneHint: t("signUp.emailTaken"),
+        onwardLabel: t("signUp.heldAddressSignInLabel"),
+        secondaryLabel: t("signUp.heldAddressRecoverLabel")
+      };
+    }
+    if (noticeKind === "createdNoSession") {
+      return {
+        ...base,
+        doneTitle: t("signUp.createdNoSessionTitle"),
+        doneHint: t("signUp.createdNoSessionNotice"),
+        onwardLabel: t("signUp.createdNoSessionSignInLabel")
+      };
+    }
+    /*
+     * REASONLESS, AND WITH NO HEADING OF ITS OWN. The notice says the place is unavailable and that
+     * the reader has been taken to the default page; naming the route they asked for, or why it was
+     * refused, would report what this principal may reach.
+     */
+    return {
+      ...base,
+      doneHint: t("unavailableReturnNotice"),
+      onwardLabel: t("signUp.onwardLabel")
+    };
+  };
+
+  /**
+   * What is offered below the surface: the other journey, and the way back from a challenge.
+   *
+   * @returns The exits in reading order.
+   */
+  const exits = (): ReadonlyArray<AuthenticationPageExit> => {
+    if (isRestoring || isSignedInArrival || phase === "done" || phase === "notice") return [];
+    const switchTo: AuthMode = mode === "signIn" ? "signUp" : "signIn";
+    const prompt = {
+      question: t(`${mode}.promptQuestion`),
+      action: t(`${mode}.promptAction`),
+      onPress: () => changeMode(switchTo)
+    };
+    if (phase === "twoFactor") {
+      return [{
+        question: "",
+        action: t("signIn.backLabel"),
+        onPress: clear
+      }];
+    }
+    if (phase === "code") {
+      return [{
+        question: "",
+        action: t("backLabel"),
+        onPress: clear
+      }, prompt];
+    }
+    return [prompt];
   };
 
   /*
@@ -496,8 +801,8 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
    *
    * FOUR SITUATIONS, SETTLED ONE AT A TIME. Each phase answers with the whole panel and leaves, so
    * a reader confirms the situation in front of them without holding the other three open while
-   * they read it. The order still matters and is the journey's own: a challenge outranks a
-   * finished journey, a finished journey outranks a code, and the details are where every journey
+   * they read it. The order still matters and is the journey's own: a settled ending outranks a
+   * challenge, a challenge outranks a finished journey, and the details are where every journey
    * starts.
    */
   const panelFor = (): AuthenticationPanelProps => {
@@ -509,6 +814,13 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
           subtitle: t("restoringSubtitle"),
           progressLabel: t("restoringLabel")
         },
+        on: actions
+      };
+    }
+    if (phase === "notice") {
+      return {
+        state: "notice",
+        props: noticeCopy(),
         on: actions
       };
     }
@@ -538,7 +850,8 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
           isError,
           doneTitle: t(`${mode}.doneTitle`),
           doneHint: t(`${mode}.doneHint`),
-          onwardLabel: t(`${mode}.onwardLabel`)
+          onwardLabel: t(`${mode}.onwardLabel`),
+          secondaryLabel: ""
         },
         on: actions
       };
@@ -576,9 +889,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
           cooldownLabel: cooldownSeconds === 0 ? "" : t("cooldownLabel", {
             seconds: cooldownSeconds
           }),
-          backLabel: t("backLabel"),
-          promptQuestion: t(`${mode}.promptQuestion`),
-          promptAction: t(`${mode}.promptAction`)
+          backLabel: t("backLabel")
         },
         on: actions
       };
@@ -617,13 +928,11 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
         githubLabel: t("githubLabel"),
         forgotPasswordLabel: t("forgotPasswordLabel"),
         rememberMeLabel: t("rememberMeLabel"),
-        isRememberMe,
-        promptQuestion: t(`${mode}.promptQuestion`),
-        promptAction: t(`${mode}.promptAction`)
+        isRememberMe
       },
       on: actions
     };
   };
   const panel = panelFor();
-  return <AuthenticationPageView panel={panel} />;
+  return <AuthenticationPageView panel={panel} exits={exits()} />;
 };
