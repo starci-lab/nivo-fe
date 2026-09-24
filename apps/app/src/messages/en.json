@@ -455,6 +455,7 @@
       "kindWorkspace": "Workspace",
       "emptyDescription": "Create your first AgentOS workspace.",
       "create": "Create AgentOS",
+      "purchase": "Buy workspace",
       "manageWorkspace": "Manage workspace",
       "retry": "Try again",
       "orderReference": "Order {id}",

@@ -455,6 +455,7 @@
       "kindWorkspace": "Không gian làm việc",
       "emptyDescription": "Tạo không gian làm việc AgentOS đầu tiên của bạn.",
       "create": "Tạo AgentOS",
+      "purchase": "Mua workspace",
       "manageWorkspace": "Quản lý workspace",
       "retry": "Thử lại",
       "orderReference": "Đơn hàng {id}",
