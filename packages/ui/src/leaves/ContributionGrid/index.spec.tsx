@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { ContributionGrid } from "./ContributionGrid"
+import { ContributionGrid } from "./"
 
 describe("ContributionGrid", () => {
     it("maps counts to shades and keeps outside-year cells inert", () => {

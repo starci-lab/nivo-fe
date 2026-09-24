@@ -1,17 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { SuggestedUserRow } from "./SuggestedUserRow"
-import { TrendingContentRow } from "./TrendingContentRow"
+import { SuggestedUserRow } from "./"
 
-describe("content rows", () => {
-    it("styles a top trending rank and opens its title", () => {
-        const open = vi.fn()
-        render(<TrendingContentRow props={{ id: "one", rank: "1", title: "Popular", isTopRank: true }} on={{ open }} />)
-        expect(screen.getByText("1")).toHaveAttribute("data-tone", "accent")
-        fireEvent.click(screen.getByRole("button", { name: "Popular" }))
-        expect(open).toHaveBeenCalledTimes(1)
-    })
-
+describe("SuggestedUserRow", () => {
     it("shows an optional work badge and follows a user", () => {
         const open = vi.fn()
         const follow = vi.fn()

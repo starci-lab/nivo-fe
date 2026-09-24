@@ -14,4 +14,9 @@ describe("LifecycleStep", () => {
         expect(screen.getByText("Create workspace")).toBeInTheDocument()
         expect(screen.getByText(stateLabel)).toBeInTheDocument()
     })
+
+    it.each([["done", "Done"], ["current", "Current"], ["upcoming", "Next"]] as const)("maps lifecycle state %s", (state, stateLabel) => {
+        render(<LifecycleStep props={{ ordinal: "1", label: "Build", state, stateLabel }} />)
+        expect(screen.getByText(stateLabel)).toBeInTheDocument()
+    })
 })

@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { DayCell } from "./DayCell"
+import { DayCell } from "./"
 
 describe("DayCell", () => {
     it("distinguishes active days and keeps the full date screen-reader only", () => {

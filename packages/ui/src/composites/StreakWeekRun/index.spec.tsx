@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { DualTabsToolbar } from "./DualTabsToolbar"
-import { StreakWeekRun } from "./StreakWeekRun"
+import { StreakWeekRun } from "./"
 
 describe("StreakWeekRun", () => {
     it("renders the supplied week", () => {
@@ -13,13 +12,5 @@ describe("StreakWeekRun", () => {
     it("renders seven loading placeholders when data is absent", () => {
         render(<StreakWeekRun props={{}} isLoading />)
         expect(document.querySelectorAll("li[data-loading='true']")).toHaveLength(7)
-    })
-})
-
-describe("DualTabsToolbar", () => {
-    it("renders both controlled axes", () => {
-        render(<DualTabsToolbar props={{ leading: { label: "Period", selectedKey: "week", tabs: [{ id: "week", label: "Week" }] }, trailing: { label: "Scope", selectedKey: "all", tabs: [{ id: "all", label: "All" }] } }} />)
-        expect(screen.getByRole("radiogroup", { name: "Period" })).toBeInTheDocument()
-        expect(screen.getByRole("radiogroup", { name: "Scope" })).toBeInTheDocument()
     })
 })
