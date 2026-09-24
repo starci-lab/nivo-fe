@@ -36,7 +36,7 @@ vi.mock("./component", () => ({
 
 import { AgentOSOpenClawLaunch } from "./"
 
-describe("AgentOSOpenClawLaunch connected orchestration", () => {
+describe("AgentOSOpenClawLaunch", () => {
     beforeEach(() => {
         vi.clearAllMocks()
         mocks.session.state = { status: "signed-in", accessToken: "token" }

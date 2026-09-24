@@ -113,7 +113,7 @@ const provisioningView: PurchaseStatusFlowViewProps = {
     on: { primary: vi.fn() },
 }
 
-describe("PurchaseStatusFlow view", () => {
+describe("PurchaseStatusFlowBase", () => {
     it("draws the payment-pending surface with purchase facts and a verification rail", () => {
         const html = renderToStaticMarkup(<PurchaseStatusFlowBase {...paymentView} />)
         expect(html).toContain("Payment is not confirmed")

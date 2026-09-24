@@ -30,7 +30,7 @@ const ledger = (over: Partial<AgentOSSolutionModuleLedgerProps> = {}): AgentOSSo
     ...over,
 })
 
-describe("AgentOS solution module center", () => {
+describe("AgentOSSolutionModuleCenterBase", () => {
     it("renders refusal and empty installed states in the tabs form", () => {
         const refused = renderToStaticMarkup(<AgentOSSolutionModuleCenterBase {...base} state="refused" mode="catalog" cards={[]} />)
         expect(refused).toContain("Unavailable")

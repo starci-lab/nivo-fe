@@ -43,7 +43,7 @@ const renderLayout = (locale: "en" | "vi" = "vi") =>
         </NextIntlClientProvider>
     )
 
-describe("module installation nested layout", () => {
+describe("AgentOSModuleInstallationLayout", () => {
     beforeEach(() => {
         mocks.installations = allInstallations
         mocks.pathname = "/agentos/workspaces/workspace-1/modules/installation-1"

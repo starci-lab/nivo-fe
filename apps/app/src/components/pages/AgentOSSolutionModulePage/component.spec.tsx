@@ -255,7 +255,6 @@ describe("AgentOSSolutionModulePageBase", () => {
         expect(exactTestSurfaceFor({ ...exact, run: { ...exact.run, draftDigest: "b".repeat(64) } } as never, draft)).toBeNull()
         expect(exactTestSurfaceFor(null, draft)).toBeNull()
     })
-})
 
 // Real catalog assertions for every route body and every controlled Setup pane.
 describe.each(["en", "vi"] as const)("Module page copy in %s", locale => {
@@ -425,5 +424,6 @@ describe.each(["en", "vi"] as const)("Page owner action forwarding %s", locale =
   expect(onSelectTarget).toHaveBeenCalledExactlyOnceWith(destination)
   view.unmount()
  })
+})
 })
 

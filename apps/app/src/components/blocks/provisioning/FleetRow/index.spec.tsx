@@ -1,8 +1,8 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { FleetRow } from "./FleetRow"
+import { FleetRow } from "."
 
-describe("fleet row lifecycle presentation", () => {
+describe("FleetRow", () => {
     it("renders the distinct DNS warning and action state", () => {
         const html = renderToStaticMarkup(<FleetRow props={{ id: "site-1", name: "Academy", detail: "site-1", kind: "site", kindLabel: "Site", status: "awaiting_dns", statusLabel: "Awaiting DNS", actionLabel: "Open", isActionPending: true }} on={{ open: vi.fn(), act: vi.fn() }} />)
         expect(html).toContain("Awaiting DNS")

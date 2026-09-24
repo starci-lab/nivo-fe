@@ -69,7 +69,7 @@ const snapshot = (overrides: { orders?: unknown[], invoices?: unknown[], workspa
     mocks.api.myAgentWorkspace.mockResolvedValue(overrides.workspacesResult ?? { ok: true, data: overrides.workspaces ?? [] })
 }
 
-describe("AgentOSProvisioning connected flow", () => {
+describe("AgentOSProvisioning", () => {
     afterEach(() => cleanup())
 
     beforeEach(() => {

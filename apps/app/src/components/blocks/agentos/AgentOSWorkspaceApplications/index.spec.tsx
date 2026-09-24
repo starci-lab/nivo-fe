@@ -5,7 +5,7 @@ import { AgentOSWorkspaceApplications } from "./index"
 
 const labels = { section: "Apps", openclaw: "OpenClaw", n8n: "n8n", openclawDescription: "Chat", n8nDescription: "Automate", available: "Available", unavailable: "Unavailable", manage: "Manage", unavailableAction: "Unavailable", securityUpgradeRequired: "Upgrade required", unavailableDetail: "Not available", opening: "Opening", openAgain: "Open again", blocked: "Blocked", expired: "Expired", disconnected: "Disconnected" }
 
-describe("AgentOS workspace applications", () => {
+describe("AgentOSWorkspaceApplications", () => {
     it("shows security refusal before launch state and disables unavailable apps", () => {
         const html = renderToStaticMarkup(<AgentOSWorkspaceApplications apps={[{ app: "OPENCLAW", accessMode: "UNAVAILABLE", available: false, reason: "SECURITY_UPGRADE_REQUIRED", observedVersion: null }, { app: "N8N", accessMode: "UNAVAILABLE", available: false, reason: null, observedVersion: null }]} labels={labels} launchState="blocked" openClawLaunchHref="/openclaw" onManageOpenClaw={vi.fn()} />)
         expect(html).toContain("Upgrade required")

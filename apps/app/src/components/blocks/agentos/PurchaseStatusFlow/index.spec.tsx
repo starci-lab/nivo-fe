@@ -103,7 +103,7 @@ const snapshot = (overrides: { orders?: unknown[], invoices?: unknown[], workspa
 const paidInvoice = { ...invoice, status: "paid", paidAt: "2026-09-22T07:32:00.000Z" }
 const paidOrder = { ...order, status: "in_progress" }
 
-describe("PurchaseStatusFlow connected flow", () => {
+describe("PurchaseStatusFlow", () => {
     afterEach(() => cleanup())
 
     beforeEach(() => {

@@ -6,7 +6,7 @@ import { accountingCorrectionAccess, accountingDocumentAction, accountingIntakeP
 const pending = { status: "pending", effectivePeriodKey: "2026-09-01", submittedByUserId: "owner-1", approverUserId: "approver-1" } as const;
 const periods = [{ periodKey: "2026-09-01", status: "open" }] as const;
 
-describe("AccountingWorkbenchBlock authority projection", () => {
+describe("AccountingWorkbenchBlockBase", () => {
   it("announces refusals assertively without interrupting successful confirmations", () => {
     expect(accountingNoticeLive("refused")).toBe("assertive");
     expect(accountingNoticeLive("success")).toBe("polite");

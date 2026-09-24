@@ -11,6 +11,13 @@ import { ContextVersionBlock as ActualContextVersionBlock, type ContextDraft } f
 
 const draft: ContextDraft = { contextId: "context-1", setupSessionId: "setup-1", revision: 1, status: "completed", version: 1, digest: "a".repeat(64), definitionDigest: "d".repeat(64), authorityGeneration: 1, sourceGeneration: 1, retrievalGeneration: 1, summary: "Support context", facts: ["24/7 support"], gates: [{ key: "identity", label: "Business identity", passed: true, ownerConfirmation: false, confirmed: false, citationPolicy: "none" }], exactTestPassed: true, isActive: false }
 
+type ContextVersionBlockFixtureProps = Omit<ComponentProps<typeof ActualContextVersionBlock>, "copy" | "onConfirmRequirement" | "onCreateVersion"> & { readonly locale?: "en" | "vi"; readonly onConfirmRequirement?: ComponentProps<typeof ActualContextVersionBlock>["onConfirmRequirement"]; readonly onCreateVersion?: ComponentProps<typeof ActualContextVersionBlock>["onCreateVersion"] }
+const ContextVersionBlockCopyFixture = (props: ContextVersionBlockFixtureProps) => {
+    const t = useTranslations("console.agentos.modules")
+    return <ActualContextVersionBlock {...props} onCreateVersion={props.onCreateVersion ?? (() => undefined)} onConfirmRequirement={props.onConfirmRequirement ?? (() => undefined)} copy={buildModulePageCopy(t)} />
+}
+const ContextVersionBlock = ({ locale = "en", ...props }: ContextVersionBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><ContextVersionBlockCopyFixture {...props} /></NextIntlClientProvider>
+
 describe("ContextVersionBlock", () => {
     it("keeps Apply disabled until the existing immutable guard is ready", () => {
         const onApply = vi.fn()
@@ -19,79 +26,70 @@ describe("ContextVersionBlock", () => {
         expect(html).toContain("disabled")
         expect(onApply).not.toHaveBeenCalled()
     })
+
+    describe.each(["en", "vi"] as const)("Context copy %s", locale => {
+        it("keeps completed context identity and distinguishes untested, active and missing versions", () => {
+            const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules" })).setup
+            const untested = renderToStaticMarkup(<ContextVersionBlock locale={locale} activeVersion={null} draft={{ ...draft, exactTestPassed: false }} pending={false} refused={false} onApply={vi.fn()} />)
+            expect(untested).toContain(copy.testRequired)
+            expect(untested).toContain("Support context")
+            expect(untested).toContain("disabled")
+            const missing = renderToStaticMarkup(<ContextVersionBlock locale={locale} activeVersion={null} draft={null} pending={false} refused onApply={vi.fn()} />)
+            expect(missing).toContain(copy.noGates)
+            expect(missing).toContain(copy.operationRefused)
+            const active = renderToStaticMarkup(<ContextVersionBlock locale={locale} activeVersion={1} draft={{ ...draft, isActive: true }} pending={false} refused={false} onApply={vi.fn()} />)
+            expect(active).toContain(copy.versionActive({ version: 1 }))
+            expect(active).toContain("disabled")
+        })
+    })
+
+    describe.each(["en", "vi"] as const)("Context pending copy %s", locale => {
+        it("keeps an otherwise applicable context disabled during its own command", () => {
+            const html = renderToStaticMarkup(<ContextVersionBlock locale={locale} activeVersion={null} draft={draft} pending ownPending refused={false} onApply={vi.fn()} />)
+            expect(html).toContain("disabled")
+            expect(html).toContain("Support context")
+        })
+    })
+
+    describe.each(["en", "vi"] as const)("Context actionable guards %s", locale => {
+        it("applies only a completed inactive version and keeps incomplete and peer work inert", () => {
+            const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
+            const onApply = vi.fn()
+            const props = { locale, activeVersion: null, pending: false, refused: false, onApply }
+            const view = render(<ContextVersionBlock {...props} draft={{ ...draft, status: "open", version: null, exactTestPassed: false, gates: [{ key: "raw-key", label: "Owner gate", passed: false, ownerConfirmation: false, confirmed: false, citationPolicy: "none" }] }} />)
+            expect(screen.getByText(copy.needsFollowUp)).toBeInTheDocument()
+            expect(screen.getByText("Owner gate")).toBeInTheDocument()
+            fireEvent.click(screen.getByRole("button", { name: copy.completeGates }))
+            expect(onApply).not.toHaveBeenCalled()
+            view.rerender(<ContextVersionBlock {...props} draft={draft} peerDisabled />)
+            expect(screen.getByRole("button", { name: copy.applyVersion({ version: 1 }) })).toBeDisabled()
+            fireEvent.click(screen.getByRole("button", { name: copy.applyVersion({ version: 1 }) }))
+            expect(onApply).not.toHaveBeenCalled()
+            view.rerender(<ContextVersionBlock {...props} draft={draft} />)
+            expect(screen.getByText("Support context")).toBeInTheDocument()
+            expect(screen.getByText("24/7 support")).toBeInTheDocument()
+            fireEvent.click(screen.getByRole("button", { name: copy.applyVersion({ version: 1 }) }))
+            expect(onApply).toHaveBeenCalledTimes(1)
+            view.rerender(<ContextVersionBlock {...props} activeVersion={1} draft={{ ...draft, isActive: true }} />)
+            expect(screen.getByRole("button", { name: copy.versionActive({ version: "1" }) })).toBeDisabled()
+            view.unmount()
+        })
+        it("requires and records an explicit owner confirmation action", () => {
+            const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
+            const onConfirmRequirement = vi.fn()
+            const gate = { ...draft.gates[0]!, ownerConfirmation: true }
+            const view = render(<ContextVersionBlock locale={locale} activeVersion={null} draft={{ ...draft, gates: [gate] }} pending={false} refused={false} onApply={vi.fn()} onConfirmRequirement={onConfirmRequirement} />)
+            fireEvent.click(screen.getByRole("button", { name: copy.confirmRequirement }))
+            expect(onConfirmRequirement).toHaveBeenCalledExactlyOnceWith(gate)
+            view.rerender(<ContextVersionBlock locale={locale} activeVersion={null} draft={{ ...draft, gates: [{ ...gate, confirmed: true }] }} pending={false} refused={false} onApply={vi.fn()} onConfirmRequirement={onConfirmRequirement} />)
+            expect(screen.getByText(copy.confirmed)).toBeInTheDocument()
+        })
+        it("creates an immutable version before Test and Apply", () => {
+            const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
+            const onCreateVersion = vi.fn()
+            render(<ContextVersionBlock locale={locale} activeVersion={null} draft={{ ...draft, status: "ready", version: null, exactTestPassed: false }} pending={false} refused={false} onApply={vi.fn()} onCreateVersion={onCreateVersion} />)
+            fireEvent.click(screen.getByRole("button", { name: copy.createVersion }))
+            expect(onCreateVersion).toHaveBeenCalledTimes(1)
+        })
+    })
 })
-
-type ContextVersionBlockFixtureProps = Omit<ComponentProps<typeof ActualContextVersionBlock>, "copy" | "onConfirmRequirement" | "onCreateVersion"> & { readonly locale?: "en" | "vi"; readonly onConfirmRequirement?: ComponentProps<typeof ActualContextVersionBlock>["onConfirmRequirement"]; readonly onCreateVersion?: ComponentProps<typeof ActualContextVersionBlock>["onCreateVersion"] }
-const ContextVersionBlockCopyFixture = (props: ContextVersionBlockFixtureProps) => {
-    const t = useTranslations("console.agentos.modules")
-    return <ActualContextVersionBlock {...props} onCreateVersion={props.onCreateVersion ?? (() => undefined)} onConfirmRequirement={props.onConfirmRequirement ?? (() => undefined)} copy={buildModulePageCopy(t)} />
-}
-const ContextVersionBlock = ({ locale = "en", ...props }: ContextVersionBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><ContextVersionBlockCopyFixture {...props} /></NextIntlClientProvider>
-
-describe.each(["en", "vi"] as const)("Context copy %s", locale => {
- it("keeps completed context identity and distinguishes untested, active and missing versions", () => {
-  const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules" })).setup
-  const untested = renderToStaticMarkup(<ContextVersionBlock locale={locale} activeVersion={null} draft={{ ...draft, exactTestPassed: false }} pending={false} refused={false} onApply={vi.fn()} />)
-  expect(untested).toContain(copy.testRequired)
-  expect(untested).toContain("Support context")
-  expect(untested).toContain("disabled")
-  const missing = renderToStaticMarkup(<ContextVersionBlock locale={locale} activeVersion={null} draft={null} pending={false} refused onApply={vi.fn()} />)
-  expect(missing).toContain(copy.noGates)
-  expect(missing).toContain(copy.operationRefused)
-  const active = renderToStaticMarkup(<ContextVersionBlock locale={locale} activeVersion={1} draft={{ ...draft, isActive: true }} pending={false} refused={false} onApply={vi.fn()} />)
-  expect(active).toContain(copy.versionActive({ version: 1 }))
-  expect(active).toContain("disabled")
- })
-})
-
-describe.each(["en", "vi"] as const)("Context pending copy %s", locale => {
- it("keeps an otherwise applicable context disabled during its own command", () => {
-  const html = renderToStaticMarkup(<ContextVersionBlock locale={locale} activeVersion={null} draft={draft} pending ownPending refused={false} onApply={vi.fn()} />)
-  expect(html).toContain("disabled")
-  expect(html).toContain("Support context")
- })
-})
-
-
-describe.each(["en", "vi"] as const)("Context actionable guards %s", locale => {
- it("applies only a completed inactive version and keeps incomplete and peer work inert", () => {
-  const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
-  const onApply = vi.fn()
-  const props = { locale, activeVersion: null, pending: false, refused: false, onApply }
-  const view = render(<ContextVersionBlock {...props} draft={{ ...draft, status: "open", version: null, exactTestPassed: false, gates: [{ key: "raw-key", label: "Owner gate", passed: false, ownerConfirmation: false, confirmed: false, citationPolicy: "none" }] }} />)
-  expect(screen.getByText(copy.needsFollowUp)).toBeInTheDocument()
-  expect(screen.getByText("Owner gate")).toBeInTheDocument()
-  fireEvent.click(screen.getByRole("button", { name: copy.completeGates }))
-  expect(onApply).not.toHaveBeenCalled()
-  view.rerender(<ContextVersionBlock {...props} draft={draft} peerDisabled />)
-  expect(screen.getByRole("button", { name: copy.applyVersion({ version: 1 }) })).toBeDisabled()
-  fireEvent.click(screen.getByRole("button", { name: copy.applyVersion({ version: 1 }) }))
-  expect(onApply).not.toHaveBeenCalled()
-  view.rerender(<ContextVersionBlock {...props} draft={draft} />)
-  expect(screen.getByText("Support context")).toBeInTheDocument()
-  expect(screen.getByText("24/7 support")).toBeInTheDocument()
-  fireEvent.click(screen.getByRole("button", { name: copy.applyVersion({ version: 1 }) }))
-  expect(onApply).toHaveBeenCalledTimes(1)
-  view.rerender(<ContextVersionBlock {...props} activeVersion={1} draft={{ ...draft, isActive: true }} />)
-  expect(screen.getByRole("button", { name: copy.versionActive({ version: "1" }) })).toBeDisabled()
-  view.unmount()
- })
- it("requires and records an explicit owner confirmation action", () => {
-  const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
-  const onConfirmRequirement = vi.fn()
-  const gate = { ...draft.gates[0]!, ownerConfirmation: true }
-  const view = render(<ContextVersionBlock locale={locale} activeVersion={null} draft={{ ...draft, gates: [gate] }} pending={false} refused={false} onApply={vi.fn()} onConfirmRequirement={onConfirmRequirement} />)
-  fireEvent.click(screen.getByRole("button", { name: copy.confirmRequirement }))
-  expect(onConfirmRequirement).toHaveBeenCalledExactlyOnceWith(gate)
-  view.rerender(<ContextVersionBlock locale={locale} activeVersion={null} draft={{ ...draft, gates: [{ ...gate, confirmed: true }] }} pending={false} refused={false} onApply={vi.fn()} onConfirmRequirement={onConfirmRequirement} />)
-  expect(screen.getByText(copy.confirmed)).toBeInTheDocument()
- })
- it("creates an immutable version before Test and Apply", () => {
-  const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
-  const onCreateVersion = vi.fn()
-  render(<ContextVersionBlock locale={locale} activeVersion={null} draft={{ ...draft, status: "ready", version: null, exactTestPassed: false }} pending={false} refused={false} onApply={vi.fn()} onCreateVersion={onCreateVersion} />)
-  fireEvent.click(screen.getByRole("button", { name: copy.createVersion }))
-  expect(onCreateVersion).toHaveBeenCalledTimes(1)
- })
-})
-

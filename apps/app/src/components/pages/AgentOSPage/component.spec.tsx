@@ -29,7 +29,7 @@ const labels: AgentOSPageViewProps["labels"] = {
     orderEyebrow: "Persisted order",
 }
 
-describe("AgentOSPage", () => {
+describe("AgentOSPageBase", () => {
     it("keeps the dashboard management-only", () => {
         const create = vi.fn()
         const { container } = render(<AgentOSPageBase

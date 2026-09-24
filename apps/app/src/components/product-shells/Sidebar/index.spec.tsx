@@ -19,7 +19,7 @@ const REGISTRY = [
     ["wallet", "/wallet"],
 ] as const
 
-describe("product Sidebar adapter", () => {
+describe("Sidebar", () => {
     beforeEach(() => push.mockClear())
     afterEach(cleanup)
 

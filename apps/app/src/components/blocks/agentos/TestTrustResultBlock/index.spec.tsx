@@ -33,6 +33,13 @@ const assertion = (component = "nivo.test-evidence"): AgentosModuleTestAssertion
     evidence: { component, version: "1.0.0", props: { status: "pass", summary: "Acknowledges", assertions: [] } },
 })
 
+type TestTrustResultBlockFixtureProps = Omit<ComponentProps<typeof ActualTestTrustResultBlock>, "copy"> & { readonly locale?: "en" | "vi" }
+const TestTrustResultBlockCopyFixture = (props: TestTrustResultBlockFixtureProps) => {
+    const t = useTranslations("console.agentos.modules")
+    return <ActualTestTrustResultBlock {...props} copy={buildModulePageCopy(t)} />
+}
+const TestTrustResultBlock = ({ locale = "en", ...props }: TestTrustResultBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><TestTrustResultBlockCopyFixture {...props} /></NextIntlClientProvider>
+
 describe("TestTrustResultBlock", () => {
     it("renders persisted assertion evidence through the trusted registration", () => {
         const html = renderToStaticMarkup(<TestTrustResultBlock contract={contract} run={run} assertions={[assertion()]} contextLabel="Context v2 · candidate" />)
@@ -47,43 +54,37 @@ describe("TestTrustResultBlock", () => {
         expect(html).toContain("Untrusted evidence rejected")
         expect(html).not.toContain("verify the contract")
     })
-})
-type TestTrustResultBlockFixtureProps = Omit<ComponentProps<typeof ActualTestTrustResultBlock>, "copy"> & { readonly locale?: "en" | "vi" }
-const TestTrustResultBlockCopyFixture = (props: TestTrustResultBlockFixtureProps) => {
-    const t = useTranslations("console.agentos.modules")
-    return <ActualTestTrustResultBlock {...props} copy={buildModulePageCopy(t)} />
-}
-const TestTrustResultBlock = ({ locale = "en", ...props }: TestTrustResultBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><TestTrustResultBlockCopyFixture {...props} /></NextIntlClientProvider>
 
-describe.each(["en", "vi"] as const)("Trust evidence copy %s", locale => {
- it.each(["running", "passed", "warning", "failed"] as const)("renders %s without changing assertions", status => {
-  const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime
-  const html = renderToStaticMarkup(<TestTrustResultBlock locale={locale} contract={contract} run={{ ...run, status }} assertions={[assertion()]} contextLabel="Raw context" />)
-  expect(html).toContain(copy.testStatus[status])
-  expect(html).toContain(copy.trust.verdictPass)
-  expect(html).toContain("verify the contract")
- })
-})
+    describe.each(["en", "vi"] as const)("Trust evidence copy %s", locale => {
+        it.each(["running", "passed", "warning", "failed"] as const)("renders %s without changing assertions", status => {
+            const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime
+            const html = renderToStaticMarkup(<TestTrustResultBlock locale={locale} contract={contract} run={{ ...run, status }} assertions={[assertion()]} contextLabel="Raw context" />)
+            expect(html).toContain(copy.testStatus[status])
+            expect(html).toContain(copy.trust.verdictPass)
+            expect(html).toContain("verify the contract")
+        })
+    })
 
-describe.each(["en", "vi"] as const)("Trust summary branches %s", locale => {
- it.each(["warning", "fail"] as const)("renders the persisted %s verdict and structured evidence", verdict => {
-  const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.trust
-  const html = renderToStaticMarkup(<TestTrustResultBlock locale={locale} contract={contract} run={{ ...run, summary: { total: 23, pass: "17", warning: null } }} assertions={[{ ...assertion(), verdict, expected: null, actual: [1, true] }]} contextLabel="Raw digest" />)
-  expect(html).toContain(verdict === "warning" ? copy.verdictWarning : copy.verdictFail)
-  expect(html).toContain("[1,true]")
-  expect(html).toContain("—")
-  expect(html).toMatch(/>23</u)
-  expect(html).toMatch(/>17</u)
-  expect(html.match(/>0</gu)).toHaveLength(2)
- })
- it("distinguishes no run from missing registered evidence", () => {
-  const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.trust
-  const empty = renderToStaticMarkup(<TestTrustResultBlock locale={locale} contract={contract} run={null} assertions={[]} contextLabel="Raw digest" />)
-  expect(empty).toContain(copy.notRun)
-  expect(empty).toContain(copy.collect)
-  expect(empty).toContain(copy.noRun)
-  const rejected = renderToStaticMarkup(<TestTrustResultBlock locale={locale} contract={contract} run={run} assertions={[assertion()]} contextLabel="Raw digest" registry={{}} />)
-  expect(rejected).toContain(copy.rejected)
-  expect(rejected).not.toContain("verify the contract")
- })
+    describe.each(["en", "vi"] as const)("Trust summary branches %s", locale => {
+        it.each(["warning", "fail"] as const)("renders the persisted %s verdict and structured evidence", verdict => {
+            const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.trust
+            const html = renderToStaticMarkup(<TestTrustResultBlock locale={locale} contract={contract} run={{ ...run, summary: { total: 23, pass: "17", warning: null } }} assertions={[{ ...assertion(), verdict, expected: null, actual: [1, true] }]} contextLabel="Raw digest" />)
+            expect(html).toContain(verdict === "warning" ? copy.verdictWarning : copy.verdictFail)
+            expect(html).toContain("[1,true]")
+            expect(html).toContain("—")
+            expect(html).toMatch(/>23</u)
+            expect(html).toMatch(/>17</u)
+            expect(html.match(/>0</gu)).toHaveLength(2)
+        })
+        it("distinguishes no run from missing registered evidence", () => {
+            const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.trust
+            const empty = renderToStaticMarkup(<TestTrustResultBlock locale={locale} contract={contract} run={null} assertions={[]} contextLabel="Raw digest" />)
+            expect(empty).toContain(copy.notRun)
+            expect(empty).toContain(copy.collect)
+            expect(empty).toContain(copy.noRun)
+            const rejected = renderToStaticMarkup(<TestTrustResultBlock locale={locale} contract={contract} run={run} assertions={[assertion()]} contextLabel="Raw digest" registry={{}} />)
+            expect(rejected).toContain(copy.rejected)
+            expect(rejected).not.toContain("verify the contract")
+        })
+    })
 })

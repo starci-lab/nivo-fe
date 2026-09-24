@@ -39,7 +39,7 @@ const installation = {
     failureCode: null,
 }
 
-describe("AgentOSSolutionModuleDetail connected orchestration", () => {
+describe("AgentOSSolutionModuleDetail", () => {
     beforeEach(() => {
         vi.clearAllMocks()
         mocks.session.state = { status: "signed-in", accessToken: "token" }

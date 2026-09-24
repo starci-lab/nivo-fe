@@ -44,7 +44,7 @@ import { OverviewPage } from "."
 
 const slices = () => [mocks.apps, mocks.workspaces, mocks.pod, mocks.domains, mocks.wallet, mocks.invoices]
 
-describe("OverviewPage route", () => {
+describe("OverviewPage", () => {
     beforeEach(() => {
         vi.clearAllMocks()
         for (const slice of slices()) slice.mockImplementation(answer)

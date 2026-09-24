@@ -105,7 +105,7 @@ type SetupProps = Extract<AgentOSSolutionModuleScreen, { view: "setup" }>["conte
 const setupProps = () => mocks.pageProps!.screen.contentProps as unknown as SetupProps
 type TestProps = Extract<AgentOSSolutionModuleScreen, { view: "test" }>["contentProps"]
 const testProps = () => mocks.pageProps!.screen.contentProps as unknown as TestProps
-describe("AgentOSSolutionModulePage projections", () => {
+describe("AgentOSSolutionModulePage", () => {
     afterEach(() => vi.useRealTimers())
     it("retains historical selection and revision drafts across Setup tabs", () => {
         const historical = { ...runtime.setupSession, id: "history", setupRevision: 0 }

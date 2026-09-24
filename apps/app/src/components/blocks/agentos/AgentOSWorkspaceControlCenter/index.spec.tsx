@@ -66,7 +66,7 @@ const data = {
 const state = () => screen.getByTestId("workspace-state").textContent ?? ""
 let viewerSequence = 0
 
-describe("AgentOSWorkspaceControlCenter connected owner", () => {
+describe("AgentOSWorkspaceControlCenter", () => {
     beforeEach(() => {
         vi.clearAllMocks()
         viewerSequence += 1

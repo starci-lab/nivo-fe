@@ -42,7 +42,7 @@ const props: Omit<AgentOSSolutionModuleDetailViewProps, "detailState"> = {
     onOpenAiKnowledge: vi.fn(),
 }
 
-describe("AgentOSSolutionModuleDetail drawing", () => {
+describe("AgentOSSolutionModuleDetailBase", () => {
     it("keeps one page anatomy while the detail block is loading", () => {
         const html = renderToStaticMarkup(<AgentOSSolutionModuleDetailBase {...props} detailState="loading" installation={undefined} />)
         expect(html).toContain("Loading module")

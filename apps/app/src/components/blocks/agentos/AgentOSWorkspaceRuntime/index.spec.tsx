@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { AgentOSWorkspaceRuntime } from "./index";
 const labels = { section: "Runtime", cpu: "CPU", memory: "Memory", requests: "Requests", limits: "Limits", restarts: "Restarts", health: "Health", fresh: "Fresh", stale: "Stale", unavailable: "Unavailable" };
 const base = { workspace: { id: "workspace-1", name: "Support", status: "active", externalWorkspaceRef: null }, instance: { id: "instance-1", name: "Support", hostname: "support.test", status: "active", chartVersion: "1", ramMb: 512, vcpu: 1, planCode: null, planRamGb: null, planVcpu: null }, apps: [] };
-describe("AgentOS workspace runtime metrics", () => {
+describe("AgentOSWorkspaceRuntime", () => {
     it("renders measured CPU, memory and stale freshness", () => {
         const data = { ...base, runtime: { instanceId: "instance-1", appKey: "agentos", status: "active", releaseName: null, chartName: null, chartVersion: null, components: [], storage: [], totals: { cpuUsageMillicores: 250, cpuRequestMillicores: 100, cpuLimitMillicores: 500, memoryUsageBytes: 4 * 1024 * 1024, memoryRequestBytes: 2 * 1024 * 1024, memoryLimitBytes: 8 * 1024 * 1024, restartCount: 2, oomKilled: false, throttled: false }, probeStatus: "available" as const, fingerprint: "fp", lastError: null, observedAt: "2026-01-01T00:00:00Z", stale: true } } as AgentWorkspaceControlCenter;
         const html = renderToStaticMarkup(<AgentOSWorkspaceRuntime data={data} labels={labels} formatDate={(value) => `date:${value}`}/>);

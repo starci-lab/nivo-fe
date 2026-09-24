@@ -10,7 +10,7 @@ const steps = [{
 }]
 const props = { steps, subject: "Template App", detail: "Ready", statusTitle: "Status", statusText: "Working", slugLabel: "Slug", slugPlaceholder: "academy", slugHint: "Lowercase", submitLabel: "Create", actionLabel: "Retry" }
 
-describe("template app provisioning lifecycle", () => {
+describe("TemplateAppProvisioningBase", () => {
     it("shows an editable request and pending submission", () => {
         expect(renderToStaticMarkup(<TemplateAppProvisioningBase state="request" props={props} on={{ changeSlug: vi.fn(), submit: vi.fn() }} />)).toContain("Create")
         expect(renderToStaticMarkup(<TemplateAppProvisioningBase state="submitting" props={props} on={{ submit: vi.fn() }} />)).toContain("Create")

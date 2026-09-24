@@ -39,7 +39,7 @@ vi.mock("./component", () => ({
 import OfferSelectionFlow from "./"
 const props = () => JSON.parse(screen.getByTestId("flow-props").textContent ?? "{}") as Record<string, unknown>
 const offersProp = () => (props().offers ?? []) as ReadonlyArray<ViewOffer>
-describe("OfferSelectionFlow connected orchestration", () => {
+describe("OfferSelectionFlow", () => {
     beforeEach(() => {
         vi.clearAllMocks()
         captured.view = null

@@ -14,7 +14,7 @@ vi.mock("./component", () => ({ ConsoleLayoutBase: ({ body: Body, bodyProps, nav
 
 import { ConsoleLayout } from "."
 
-describe("ConsoleLayout connected guard", () => {
+describe("ConsoleLayout", () => {
     const Workspace = () => <>workspace</>
     beforeEach(() => { mocks.locale = "vi"; mocks.session.state = { status: "signed-in" }; mocks.replace.mockClear() })
     it("keeps a signed-in routed page", () => { render(<ConsoleLayout body={Workspace} bodyProps={{}} />); expect(screen.getByText("workspace")).toBeInTheDocument(); expect(mocks.replace).not.toHaveBeenCalled() })

@@ -85,7 +85,7 @@ const accessTokenWith = (claims: Record<string, unknown>) =>
     `hdr.${Buffer.from(JSON.stringify(claims)).toString("base64url")}.sig`
 const PURCHASER_TOKEN = accessTokenWith({ sub: "user-an-nguyen", name: "An Nguyen", preferred_username: "an.nguyen", email: "an.nguyen@northstar.test" })
 const props = () => JSON.parse(screen.getByTestId("flow-props").textContent ?? "{}") as Record<string, unknown>
-describe("CheckoutReviewFlow connected orchestration", () => {
+describe("CheckoutReviewFlow", () => {
     beforeEach(() => {
         vi.clearAllMocks()
         captured.view = null

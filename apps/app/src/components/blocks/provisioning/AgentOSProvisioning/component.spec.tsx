@@ -20,7 +20,7 @@ const steps = [
     { ordinal: "4", label: "Ready", state: "upcoming" as const, stateLabel: "Upcoming" },
 ]
 
-describe("AgentOS provisioning lifecycle", () => {
+describe("AgentOSProvisioningBase", () => {
     it("keeps request pending inside the connected four-stage composition", () => {
         const { container } = render(<AgentOSProvisioningBase
             state="submitting"

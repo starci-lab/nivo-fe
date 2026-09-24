@@ -61,7 +61,7 @@ const offers: ReadonlyArray<OfferSelectionOffer> = [
 
 const links = { workspaces: "/agentos/workspaces" }
 
-describe("OfferSelectionFlow surface", () => {
+describe("OfferSelectionFlowBase", () => {
     it("renders all three concrete draft offers with exact amount/currency and provisional disclosure", () => {
         render(<OfferSelectionFlowBase
             state="selection"

@@ -64,7 +64,7 @@ const reviewProps: CheckoutReviewFlowViewProps = {
     },
     on: { requestPayment: vi.fn(), changeOffer: vi.fn() },
 }
-describe("CheckoutReviewFlow drawing", () => {
+describe("CheckoutReviewFlowBase", () => {
     it("holds the page anatomy as a skeleton while the offer recheck is in flight", () => {
         render(<CheckoutReviewFlowBase state="loading" props={{ copy, links }} />)
         expect(screen.getByRole("heading", { name: "Review workspace purchase" })).toBeInTheDocument()

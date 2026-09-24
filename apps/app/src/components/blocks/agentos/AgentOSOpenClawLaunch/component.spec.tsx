@@ -23,7 +23,7 @@ const props: Omit<AgentOSOpenClawLaunchViewProps, "launchState"> = {
     onReturn: vi.fn(),
 }
 
-describe("AgentOSOpenClawLaunch drawing", () => {
+describe("AgentOSOpenClawLaunchBase", () => {
     it("keeps the fixed page anatomy while the launch block is issuing", () => {
         render(<AgentOSOpenClawLaunchBase {...props} launchState="issuing" />)
         expect(screen.getByText("Issuing")).toBeInTheDocument()

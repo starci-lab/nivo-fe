@@ -32,7 +32,7 @@ vi.mock("./component", () => ({
 
 import { AgentOSPage } from "."
 
-describe("AgentOSPage route owner", () => {
+describe("AgentOSPage", () => {
     beforeEach(() => { mocks.locale = "vi"; mocks.push.mockClear() })
 
     it("routes dashboard creation without resolving child data", () => {

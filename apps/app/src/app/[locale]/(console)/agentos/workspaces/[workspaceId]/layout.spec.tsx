@@ -42,7 +42,7 @@ const renderLayout = (locale: "en" | "vi" = "vi") =>
         </NextIntlClientProvider>
     )
 
-describe("workspace nested layout", () => {
+describe("AgentOSWorkspaceNestedLayout", () => {
     beforeEach(() => {
         mocks.pathname = "/agentos/workspaces/workspace-1"
         mocks.workspaceName = "Support desk"
