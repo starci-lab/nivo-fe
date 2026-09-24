@@ -1,0 +1,7 @@
+{"schema": "starci/architecture-config@1", "kinds": ["frontend"],
+ "projects": ["apps/app/tsconfig.json","apps/expert/tsconfig.json","apps/landing/tsconfig.json","apps/landing-draft/tsconfig.json","packages/ui/tsconfig.json"],
+ "owners": [],
+ "frontend": {"grammar": {"package": "@starci/grammar", "entry": "@starci/grammar/common", "styleEntry": "@starci/grammar/common.css",
+   "styleSources": ["apps/app/src/app/globals.css","apps/expert/src/app/globals.css","apps/landing/src/app/globals.css","apps/landing-draft/src/app/globals.css"],
+   "consumerManifests": ["apps/app/package.json","apps/expert/package.json","apps/landing/package.json","apps/landing-draft/package.json","packages/ui/package.json"],
+   "peers": ["react", "@heroui/react"]}}}

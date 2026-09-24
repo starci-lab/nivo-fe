@@ -48,6 +48,7 @@
  */
 
 import type { Result } from "./graphql"
+import type { CollabTurnState } from "../collab"
 
 /** Where the core API answers; same endpoint the shared transport uses. */
 const COLLAB_ENDPOINT = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql";
@@ -456,14 +457,6 @@ export type CollabTurnNoticeView = {
     readonly deliveredAt: string | null;
     readonly resolvedAt: string | null;
     readonly retiredAt: string | null;
-};
-
-/** The current authoritative state of the turn a notice names, re-read at follow time. */
-export type CollabTurnState = {
-    readonly state: "open" | "handled" | "ended";
-    readonly handledByMemberId: string | null;
-    readonly decision: "answered" | "approve" | "reject" | null;
-    readonly handledAt: string | null;
 };
 
 /** One outstanding notice paired with the live authoritative state of its turn. */

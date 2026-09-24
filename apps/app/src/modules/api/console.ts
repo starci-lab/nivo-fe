@@ -1,4 +1,5 @@
 import { graphql, type Result } from "./graphql";
+import type { AcademyCustomDomainState } from "../academy";
 
 /**
  * Every console READ nivo-core publishes, typed once.
@@ -1672,15 +1673,6 @@ export type AcademyCredentialStatus = {
   readonly verification: string;
   readonly verificationReason: string | null;
   readonly verifiedAt: string | null;
-};
-
-/** Custom domain state, including the DNS target the customer must publish. */
-export type AcademyCustomDomainState = {
-  readonly domain: string | null;
-  readonly target: string;
-  readonly dnsReady: boolean;
-  readonly delivery: string;
-  readonly detail: string;
 };
 
 /** Safe provider status. Secret values are deliberately absent. */

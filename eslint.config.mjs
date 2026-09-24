@@ -133,6 +133,7 @@ export default defineConfig([
             },
         },
         rules: {
+            "@typescript-eslint/array-type": ["error", { default: "generic", readonly: "generic" }],
             "@typescript-eslint/consistent-type-imports": ["error", { prefer: "type-imports" }],
             "@typescript-eslint/no-floating-promises": "error",
             "@typescript-eslint/no-misused-promises": "error",

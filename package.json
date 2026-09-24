@@ -13,6 +13,114 @@
         "branches": 75,
         "patch": 90
       }
+    },
+    "codePatterns": {
+      "next": {
+        "schema": "starci/next-code-pattern-contract@1",
+        "projects": [
+          "apps/app/tsconfig.json",
+          "apps/expert/tsconfig.json",
+          "apps/landing/tsconfig.json",
+          "apps/landing-draft/tsconfig.json",
+          "packages/ui/tsconfig.json"
+        ],
+        "owners": [
+          {
+            "root": "apps/app/src/app/[locale]/(console)/agentos/workspaces/[workspaceId]",
+            "name": "AgentOSWorkspace"
+          },
+          {
+            "root": "apps/app/src/app/[locale]/(console)/agentos/workspaces/[workspaceId]/modules/[installationId]",
+            "name": "AgentOS"
+          },
+          {
+            "root": "apps/app/src/app/[locale]/(console)/apps/[siteId]",
+            "name": "AcademyControlCenter"
+          },
+          {
+            "root": "apps/app/src/app/[locale]/launch/agentos/[workspaceId]/openclaw",
+            "name": "AgentOSOpenClawLaunch"
+          },
+          {
+            "root": "apps/app/src/hooks/collab-live",
+            "name": "CollabLive"
+          },
+          {
+            "root": "apps/app/src/modules/realtime",
+            "name": "ProvisioningRealtime"
+          }
+        ],
+        "closedVocabularies": [
+          {
+            "path": "packages/ui/src/composites/LifecycleStep/index.tsx",
+            "type": "LifecycleStepState",
+            "inventory": "LIFECYCLE_STEP_STATES",
+            "role": "state"
+          }
+        ],
+        "grammarGuards": {
+          "schema": "starci/grammar-guard-contract@1",
+          "package": "@starci/grammar",
+          "entry": "./common",
+          "source": {
+            "kind": "installed"
+          },
+          "vectorProfile": "starci/grammar-guards-v1"
+        },
+        "errorState": {
+          "schema": "starci/next-error-state@1",
+          "sourceRoots": [
+            "apps/app/src",
+            "apps/expert/src",
+            "apps/landing/src",
+            "apps/landing-draft/src",
+            "packages/ui/src"
+          ],
+          "transports": [],
+          "worldMappings": [],
+          "envelopes": [],
+          "writes": [],
+          "boundaries": [],
+          "requiredValues": []
+        },
+        "dataLifecycle": {
+          "schema": "starci/next-data-lifecycle@1",
+          "swr": {
+            "package": "swr",
+            "major": 2
+          },
+          "hooks": [
+            {
+              "id": "nivo-query",
+              "path": "apps/app/src/hooks/swr/useNivoQuery.ts",
+              "export": "useNivoQuery",
+              "kind": "query",
+              "identities": [
+                {
+                  "id": "key",
+                  "binding": "key",
+                  "gatesRequest": false,
+                  "resource": true
+                }
+              ]
+            },
+            {
+              "id": "nivo-mutation",
+              "path": "apps/app/src/hooks/swr/useNivoMutation.ts",
+              "export": "useNivoMutation",
+              "kind": "mutation",
+              "identities": [
+                {
+                  "id": "key",
+                  "binding": "key",
+                  "gatesRequest": false,
+                  "resource": true
+                }
+              ]
+            }
+          ]
+        }
+      }
     }
   },
   "workspaces": [
