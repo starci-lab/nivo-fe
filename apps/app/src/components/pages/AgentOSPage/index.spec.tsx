@@ -1,5 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import enMessages from "@/messages/en.json"
+import viMessages from "@/messages/vi.json"
 
 const mocks = vi.hoisted(() => ({ locale: "vi", push: vi.fn() }))
 
@@ -35,18 +37,26 @@ describe("AgentOSPage route owner", () => {
 
     it("routes dashboard creation without resolving child data", () => {
         render(<AgentOSPage mode="dashboard" />)
-        fireEvent.click(screen.getByRole("button", { name: "agentos.create" }))
+        fireEvent.click(screen.getByRole("button", { name: "agentos.purchase" }))
         expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new")
         expect(mocks.push).not.toHaveBeenCalledWith("/agentos/create")
     })
 
     it("keeps the primary Mua workspace purchase action on the dashboard entry", () => {
         const dashboard = render(<AgentOSPage mode="dashboard" />)
-        expect(screen.getByRole("button", { name: "agentos.create" })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "agentos.purchase" })).toBeInTheDocument()
         dashboard.unmount()
 
         render(<AgentOSPage mode="create" />)
-        expect(screen.queryByRole("button", { name: "agentos.create" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "agentos.purchase" })).not.toBeInTheDocument()
+    })
+
+    it("carries the shell rev 17 purchaseAction label for the dashboard primary action", () => {
+        render(<AgentOSPage mode="dashboard" />)
+
+        expect(screen.getByRole("button", { name: "agentos.purchase" })).toBeInTheDocument()
+        expect(viMessages.console.agentos.purchase).toBe("Mua workspace")
+        expect(enMessages.console.agentos.purchase).toBe("Buy workspace")
     })
 
     it("preserves non-default locale navigation", () => {

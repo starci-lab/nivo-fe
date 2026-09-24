@@ -1,5 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import enMessages from "@/messages/en.json"
+import viMessages from "@/messages/vi.json"
 
 const answer = () => ({ data: undefined, error: undefined, isLoading: false, mutate: vi.fn() })
 const mocks = vi.hoisted(() => ({
@@ -54,9 +56,17 @@ describe("OverviewPage route", () => {
         expect(screen.getByText("breadcrumbLabel:title:overview.title")).toBeInTheDocument()
         expect(screen.getByText("overview.lede:overview.atAGlance:servicesCaption:accountCaption")).toBeInTheDocument()
 
-        fireEvent.click(screen.getByRole("button", { name: "agentos.create" }))
+        fireEvent.click(screen.getByRole("button", { name: "agentos.purchase" }))
         expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new")
         expect(mocks.push).not.toHaveBeenCalledWith("/apps")
+    })
+
+    it("carries the shell rev 17 purchaseAction label for the one next step", () => {
+        render(<OverviewPage />)
+
+        expect(screen.getByRole("button", { name: "agentos.purchase" })).toBeInTheDocument()
+        expect(viMessages.console.agentos.purchase).toBe("Mua workspace")
+        expect(enMessages.console.agentos.purchase).toBe("Buy workspace")
     })
 
     it("asks every overview slice exactly once for one render of the page", () => {

@@ -21,7 +21,7 @@ export const OverviewPage = (props: OverviewPageProps) => {
     // The one next step on this page is the same Mua workspace purchase action the AgentOS
     // primary button opens, so it carries that action's label key. The prop keeps its former
     // name because page-twins.spec.tsx constructs OverviewPageProps outside this slice.
-    buildAppLabel: t("agentos.create"),
+    buildAppLabel: t("agentos.purchase"),
     atAGlanceLabel: t("overview.atAGlance"),
     servicesLabel: t("servicesCaption"),
     accountLabel: t("accountCaption"),

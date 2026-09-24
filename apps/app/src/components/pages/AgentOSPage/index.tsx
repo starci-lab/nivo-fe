@@ -16,7 +16,7 @@ export const AgentOSPage = (props: AgentOSPageProps) => {
     createDescription: t("agentos.createDescription"),
     orderTitle: t("agentos.orderTitle"),
     orderDescription: t("agentos.orderDescription"),
-    createAction: t("agentos.create"),
+    createAction: t("agentos.purchase"),
     dashboardEyebrow: t("agentos.dashboardEyebrow"),
     createEyebrow: t("agentos.createEyebrow"),
     orderEyebrow: t("agentos.orderEyebrow")
