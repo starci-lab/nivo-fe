@@ -25,7 +25,7 @@ import type {
   CollabTaskView,
   CollabTurnNoticeItem,
 } from "@/modules/api/collab";
-import type { CollabTasksFilter } from "@/hooks/swr/queries/collab";
+import type { CollabTasksFilter } from "@/hooks";
 import {
   GROUP_CHAT_AVATAR_CLASS_NAME,
   GROUP_CHAT_BADGE_ROW_CLASS_NAME,

@@ -5,29 +5,26 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
-import {
-  reconcileCollabRequest,
-  useCollabLocaleFrom,
-  type CollabApprovalCardView,
-  type CollabApprovalDecision,
-  type CollabHumanRole,
+import type {
+  CollabApprovalCardView,
+  CollabApprovalDecision,
+  CollabHumanRole,
 } from "@/modules/api/collab";
-import { useQueryMyAgentWorkspacesSwr } from "@/hooks/swr/queries/console";
 import {
+  useCollabLive,
+  useCollabOfficeTransport,
+  useMutateCollabAcceptInvitationSwr,
+  useMutateCollabInviteByEmailSwr,
+  useMutateCollabPostMessageSwr,
+  useMutateCollabPressApprovalSwr,
   useQueryCollabGroupSwr,
   useQueryCollabNoticeSwr,
   useQueryCollabNoticesSwr,
   useQueryCollabOfficeSwr,
   useQueryCollabTasksSwr,
+  useQueryMyAgentWorkspacesSwr,
   type CollabTasksFilter,
-} from "@/hooks/swr/queries/collab";
-import {
-  useMutateCollabAcceptInvitationSwr,
-  useMutateCollabInviteByEmailSwr,
-  useMutateCollabPostMessageSwr,
-  useMutateCollabPressApprovalSwr,
-} from "@/hooks/swr/mutations/collab";
-import { useCollabLive } from "@/hooks/collab-live/useCollabLive";
+} from "@/hooks";
 import {
   buildConversationItems,
   GroupChatPageBase,
@@ -70,10 +67,10 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
   const router = useRouter();
 
   /*
-   * The Collab refusal language follows the page locale; bind the reader here the
-   * same way session.tsx binds the shared transport's.
+   * The Collab refusal language follows the page locale; the transport seam binds
+   * the reader here the same way session.tsx binds the shared transport's.
    */
-  useCollabLocaleFrom(useCallback(() => locale, [locale]));
+  const { reconcileRequest } = useCollabOfficeTransport(locale);
 
   /* ---------------- Route inputs ---------------- */
   const invitationId = searchParams.get("invitation");
@@ -224,7 +221,7 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
     if (workspaceId === null || accessToken === null) {
       return;
     }
-    const reconciliation = await reconcileCollabRequest({
+    const reconciliation = await reconcileRequest({
       workspaceId,
       accessToken,
       intentId: intentRef.current,
