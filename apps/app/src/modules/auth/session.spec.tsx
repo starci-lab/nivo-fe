@@ -132,6 +132,8 @@ describe("SessionProvider", () => {
         })
 
         expect(mocks.api.signOut).toHaveBeenCalledTimes(1)
+        // this browser only: no scope travels, and none is invented
+        expect(mocks.api.signOut).toHaveBeenCalledWith(undefined)
         expect(result.current.state.status).toBe("anonymous")
         /*
          * `signOut` answered a completed request - nothing more. Remote revocation was never
@@ -151,6 +153,27 @@ describe("SessionProvider", () => {
             report = await result.current.end()
         })
 
+        expect(result.current.state.status).toBe("anonymous")
+        expect(report).toEqual({ localCleared: true, remoteRevocation: "unknown" })
+    })
+
+    it("asks for an everywhere scope without claiming its remote outcome", async () => {
+        /*
+         * The door does take `everywhere`, and its envelope states beside `data` whether the
+         * identity authority confirmed the wider ending - but the shared transport unwraps `data`
+         * only, so this report may not present the scope as confirmed. Asking is honest; confirming
+         * would be a claim nobody made.
+         */
+        mocks.api.refreshSession.mockResolvedValue({ ok: true, data: payload() })
+        const { result } = renderSession()
+        await waitFor(() => expect(result.current.state.status).toBe("signed-in"))
+
+        let report: Awaited<ReturnType<typeof result.current.end>> | undefined
+        await act(async () => {
+            report = await result.current.end("everywhere")
+        })
+
+        expect(mocks.api.signOut).toHaveBeenCalledWith({ scope: "everywhere" })
         expect(result.current.state.status).toBe("anonymous")
         expect(report).toEqual({ localCleared: true, remoteRevocation: "unknown" })
     })

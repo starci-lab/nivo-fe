@@ -82,6 +82,7 @@
     "backLabel": "Use a different email",
     "requestRefused": "We could not complete that request. Check your details and try again.",
     "resendRefused": "We could not send another code. Please try again.",
+    "unavailableReturnNotice": "The place you were heading to is not available right now. nivo has taken you to the default page.",
     "signIn": {
       "title": "Sign in",
       "subtitle": "Manage the systems you run on nivo.",
@@ -94,7 +95,9 @@
       "twoFactorSubtitle": "Enter the 6-digit code from your authenticator app.",
       "twoFactorSubmitLabel": "Verify and sign in",
       "twoFactorRefused": "That code is not right. Check it and try again.",
-      "twoFactorHint": "This account has two-factor verification on. nivo does not support that step in this build — turn it off for now, or use another account.",
+      "undecided": "nivo could not complete this sign-in. Please try again.",
+      "oauthUndecided": "nivo could not finish verifying your provider identity. Please try again.",
+      "oauthEmailRefused": "That provider account has no verified email, so nivo cannot sign you in with it. Create an account with a password, or sign in with a password.",
       "backLabel": "Back to sign in"
     },
     "signUp": {
@@ -107,7 +110,15 @@
       "promptQuestion": "Already have an account?",
       "promptAction": "Sign in",
       "codeRefused": "That code is not right. Check it and try again — the old code still works.",
-      "emailTaken": "That email already has an account. The code has been used, so sign in instead, or start again with another email.",
+      "mailRefused": "We could not send the verification code. No account was created — try again, or start over.",
+      "undecided": "nivo could not complete this step. Please try again.",
+      "emailTaken": "That email already has an account. The code only proved you can read its inbox, so sign in with the existing password, or reset it.",
+      "heldAddressTitle": "That address already has an account",
+      "heldAddressSignInLabel": "Sign in",
+      "heldAddressRecoverLabel": "Reset password",
+      "createdNoSessionTitle": "Account created, not signed in",
+      "createdNoSessionNotice": "Your account was created but the session could not be set up. Sign in with the password you just set.",
+      "createdNoSessionSignInLabel": "Sign in",
       "doneTitle": "All set",
       "doneHint": "Your account is created and you are signed in.",
       "onwardLabel": "Go to the console"
@@ -121,9 +132,14 @@
       "promptQuestion": "Remembered it?",
       "promptAction": "Sign in",
       "codeRefused": "That code cannot be used. Check it, or start again from the beginning.",
+      "mailRefused": "We could not send the verification code. Your password is unchanged — try again, or start over.",
       "doneTitle": "Password changed",
       "doneHint": "Your new password is saved. Sign in with it.",
       "onwardLabel": "Sign in"
+    },
+    "signOut": {
+      "everywhereAppliedNotice": "Your sign-ins in every browser have been ended. Your account still signs in as usual.",
+      "unconfirmedNotice": "You are signed out in this browser. We could not confirm the end of your sign-ins elsewhere — you can still sign in again at any time."
     },
     "rememberMeLabel": "Remember me"
   },

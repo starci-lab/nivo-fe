@@ -82,6 +82,7 @@
     "backLabel": "Đổi email khác",
     "requestRefused": "Không thể hoàn tất yêu cầu. Kiểm tra thông tin rồi thử lại.",
     "resendRefused": "Không thể gửi mã mới. Vui lòng thử lại.",
+    "unavailableReturnNotice": "Chỗ bạn định tới hiện không mở được. nivo đã đưa bạn về trang mặc định.",
     "signIn": {
       "title": "Đăng nhập",
       "subtitle": "Quản lý các hệ thống bạn đang chạy trên nivo.",
@@ -94,7 +95,9 @@
       "twoFactorSubtitle": "Nhập mã gồm 6 chữ số từ ứng dụng xác thực của bạn.",
       "twoFactorSubmitLabel": "Xác minh và đăng nhập",
       "twoFactorRefused": "Mã không đúng. Kiểm tra lại rồi nhập tiếp.",
-      "twoFactorHint": "Tài khoản này bật xác minh hai lớp. nivo chưa hỗ trợ bước đó trên bản này — hãy tạm tắt xác minh hai lớp, hoặc dùng một tài khoản khác.",
+      "undecided": "nivo chưa hoàn tất được lần đăng nhập này. Vui lòng thử lại.",
+      "oauthUndecided": "nivo chưa xác minh xong danh tính từ nhà cung cấp. Vui lòng thử lại.",
+      "oauthEmailRefused": "Tài khoản nhà cung cấp này chưa có email đã xác minh, nên nivo chưa thể đăng nhập bằng nó. Hãy tạo tài khoản bằng mật khẩu, hoặc đăng nhập bằng mật khẩu.",
       "backLabel": "Quay lại đăng nhập"
     },
     "signUp": {
@@ -107,7 +110,15 @@
       "promptQuestion": "Đã có tài khoản?",
       "promptAction": "Đăng nhập",
       "codeRefused": "Mã không đúng. Kiểm tra lại rồi nhập tiếp — mã cũ vẫn còn hiệu lực.",
-      "emailTaken": "Email này đã có tài khoản. Mã vừa rồi đã được dùng, nên hãy đăng nhập, hoặc bắt đầu lại với email khác.",
+      "mailRefused": "Chưa gửi được mã xác minh. Không có tài khoản nào được tạo — hãy thử lại, hoặc bắt đầu lại.",
+      "undecided": "nivo chưa hoàn tất được bước này. Vui lòng thử lại.",
+      "emailTaken": "Email này đã có tài khoản. Mã vừa rồi chỉ xác minh hộp thư của bạn, nên hãy đăng nhập bằng mật khẩu hiện có, hoặc đặt lại mật khẩu.",
+      "heldAddressTitle": "Địa chỉ này đã có tài khoản",
+      "heldAddressSignInLabel": "Đăng nhập",
+      "heldAddressRecoverLabel": "Đặt lại mật khẩu",
+      "createdNoSessionTitle": "Tài khoản đã tạo, phiên chưa mở",
+      "createdNoSessionNotice": "Tài khoản đã được tạo nhưng phiên đăng nhập chưa thiết lập được. Hãy đăng nhập bằng mật khẩu bạn vừa đặt.",
+      "createdNoSessionSignInLabel": "Đăng nhập",
       "doneTitle": "Xong rồi",
       "doneHint": "Tài khoản đã được tạo và bạn đang đăng nhập.",
       "onwardLabel": "Vào bảng điều khiển"
@@ -121,9 +132,14 @@
       "promptQuestion": "Nhớ ra mật khẩu rồi?",
       "promptAction": "Đăng nhập",
       "codeRefused": "Mã không dùng được. Kiểm tra lại mã, hoặc bắt đầu lại từ đầu.",
+      "mailRefused": "Chưa gửi được mã xác minh. Mật khẩu chưa thay đổi — hãy thử lại, hoặc bắt đầu lại.",
       "doneTitle": "Đã đổi mật khẩu",
       "doneHint": "Mật khẩu mới đã được lưu. Hãy đăng nhập lại bằng mật khẩu đó.",
       "onwardLabel": "Đăng nhập"
+    },
+    "signOut": {
+      "everywhereAppliedNotice": "Đã kết thúc các phiên đăng nhập của bạn ở mọi trình duyệt. Tài khoản vẫn dùng để đăng nhập lại như thường.",
+      "unconfirmedNotice": "Bạn đã đăng xuất trên trình duyệt này. Chưa xác nhận được việc kết thúc phiên ở những nơi khác — bạn vẫn có thể đăng nhập lại bất cứ lúc nào."
     },
     "rememberMeLabel": "Ghi nhớ đăng nhập"
   },

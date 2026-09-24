@@ -2,7 +2,7 @@
 
 import { useLocale } from "next-intl";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ComponentProps } from "react";
-import { refreshSession, signOut as signOutMutation, type AuthPayload } from "../api/auth";
+import { refreshSession, signOut as signOutMutation, type AuthPayload, type SignOutScope } from "../api/auth";
 import { useAccessTokenFrom, useLocaleFrom } from "../api/graphql";
 
 /**
@@ -42,6 +42,12 @@ export type SessionState = /** The refresh cookie is being traded for a token; n
  * cookie and returns `true` whether or not the provider's revocation was observed - its revoke is
  * best-effort and swallows failures. Reading that as "revoked remotely" would describe a
  * revocation nobody saw, so honesty is `unknown` until the API reports the outcome separately.
+ *
+ * ASKING FOR AN EVERYWHERE SCOPE DOES NOT CHANGE THAT YET. The backend does state, beside `data`,
+ * whether the provider confirmed revocation and whether the identity authority confirmed the
+ * principal-wide ending - but the shared transport in `api/graphql.ts` returns only `data`, so
+ * neither answer can be read here and both stay out of this report rather than being guessed at. A
+ * caller must not present an everywhere sign-out as confirmed until the transport carries them.
  */
 export type SessionEndReport = {
   /** Local access state and the browser's refresh custody are gone either way. */
@@ -56,8 +62,13 @@ export type Session = {
   readonly state: SessionState;
   /** Adopt the payload an auth mutation just returned. Ignores a payload still owing a factor. */
   readonly adopt: (payload: AuthPayload) => void;
-  /** Drop the session here and on the server, and report what the server actually confirmed. */
-  readonly end: () => Promise<SessionEndReport>;
+  /**
+   * Drop the session here and on the server, and report what the server actually confirmed.
+   *
+   * @param scope - `everywhere` asks to end every current session of this principal; omitted ends
+   *                this browser alone. Either way the local state is cleared first.
+   */
+  readonly end: (scope?: SignOutScope) => Promise<SessionEndReport>;
 };
 const SessionContext = createContext<Session | null>(null);
 
@@ -118,7 +129,7 @@ export const SessionProvider = (props: SessionProviderProps) => {
       accessToken: payload.accessToken
     });
   }, []);
-  const end = useCallback(async (): Promise<SessionEndReport> => {
+  const end = useCallback(async (scope?: SignOutScope): Promise<SessionEndReport> => {
     /*
      * The local state is cleared FIRST. If the network call fails the reader is still signed out
      * of this tab, which is the outcome they asked for; the alternative leaves somebody staring
@@ -132,10 +143,14 @@ export const SessionProvider = (props: SessionProviderProps) => {
     });
     /*
      * The mutation's `data` reports a completed request, not an observed revocation: the resolver
-     * answers `true` whether the provider revoke succeeded, failed or never ran, so the report
-     * below can only ever be `unknown` until the API names the outcome.
+     * answers `true` whether the provider revoke succeeded, failed or never ran, and the two
+     * answers that would tell them apart ride on the envelope beside `data`, where the transport
+     * does not read them. So the report below can only ever be `unknown`, for this-browser and
+     * everywhere scopes alike, until the transport carries the envelope's siblings.
      */
-    await signOutMutation();
+    await signOutMutation(scope === undefined ? undefined : {
+      scope
+    });
     return {
       localCleared: true,
       remoteRevocation: "unknown"

@@ -4,7 +4,7 @@ vi.mock("@/modules/api/auth", () => ({
     oauthRedirectUrl: (provider: string, redirectUri: string) => `https://api.test/api/v1/keycloak/${provider}/redirect?redirect_uri=${encodeURIComponent(redirectUri)}`,
 }))
 
-import { authenticationOauthRedirectUrl, rememberOauthProvider, takeOauthProvider } from "."
+import { DEFAULT_AUTHENTICATED_LANDING, authenticationOauthRedirectUrl, rememberOauthProvider, takeOauthProvider, validatedReturnTo } from "."
 
 describe("the OAuth provider hand-off", () => {
     beforeEach(() => window.sessionStorage.clear())
@@ -45,5 +45,36 @@ describe("the OAuth provider hand-off", () => {
         expect(authenticationOauthRedirectUrl("google", "https://app.test/en/authentication")).toBe(
             "https://api.test/api/v1/keycloak/google/redirect?redirect_uri=https%3A%2F%2Fapp.test%2Fen%2Fauthentication",
         )
+    })
+})
+
+describe("the return destination", () => {
+    it("accepts only an internal path of this app", () => {
+        /*
+         * The requested destination is untrusted: it arrives on a query a reader can type and a
+         * referring page can set, and it is followed only AFTER a session exists - so it may never
+         * be what authorized one. Everything that could carry the reader off this origin folds onto
+         * the default landing surface instead, without being echoed.
+         */
+        expect(validatedReturnTo("/overview/apps")).toBe("/overview/apps")
+        expect(validatedReturnTo("/")).toBe("/")
+
+        const refused: Array<string | null | undefined> = [
+            null,
+            undefined,
+            "",
+            "overview",
+            "//evil.test/overview",
+            "https://evil.test/overview",
+            "/overview\\..\\evil",
+            "/overview evil",
+            "/overview\tevil",
+        ]
+        for (const hostile of refused) expect(validatedReturnTo(hostile)).toBeNull()
+    })
+
+    it("names the default authenticated landing surface", () => {
+        // data.login.login-return-destination: every missing or unsafe place resolves here
+        expect(DEFAULT_AUTHENTICATED_LANDING).toBe("/overview")
     })
 })

@@ -62,3 +62,33 @@ export const takeOauthProvider = (): OauthProvider => {
  * @returns The absolute URL to navigate away to.
  */
 export const authenticationOauthRedirectUrl = (provider: OauthProvider, returnTo: string) => oauthRedirectUrl(provider, returnTo);
+
+/**
+ * Where a signed-in reader lands when nothing better was asked for.
+ *
+ * The console's overview is the default authenticated landing surface
+ * (data.login.login-return-destination, shell `/overview`): every requested destination that is
+ * missing, unsafe, inaccessible or unavailable resolves here rather than to an error.
+ */
+export const DEFAULT_AUTHENTICATED_LANDING = "/overview";
+
+/**
+ * Accept only an internal path of this app as somewhere to come back to.
+ *
+ * THE REQUESTED DESTINATION IS UNTRUSTED. It arrives on the query a reader can type and a referring
+ * page can set, and it is followed only AFTER a session exists - so it may never be the thing that
+ * authorizes one, and it is never echoed back when it is refused. A same-origin path starts with
+ * exactly one slash: a protocol-relative address (`//host`), an absolute URL, and anything carrying
+ * whitespace or a backslash could take a reader off this origin moments after they typed a password,
+ * so all of those fold into {@link DEFAULT_AUTHENTICATED_LANDING} instead.
+ *
+ * THE RESOLUTION IS FOR PLACING ONE READER, NOT A RECORD. What this returns is not stored for a
+ * later visit, and a refused or undecided attempt resolves no destination at all.
+ *
+ * @param value - What the address bar or the session store carried.
+ * @returns The path when it is one of ours, else null.
+ */
+export const validatedReturnTo = (value: string | null | undefined): string | null => {
+  if (value === null || value === undefined || !value.startsWith("/") || value.startsWith("//") || /[\s\\]/.test(value)) return null;
+  return value;
+};
