@@ -12,19 +12,83 @@ export const GROUP_CHAT_CONVERSATION_CLASS_NAME = cn("flex", "min-w-0", "flex-co
 /**
  * The host height ChatWorkspace's contract demands ("the host supplies a height"), measured as the
  * viewport minus the chrome above the section: top bar, page padding, the peer tabs and the page
- * header. Below 48rem the compact navigation band and the rail-trigger boundary ride too; the
- * 70rem step matches WorkspaceShell dropping its compact navigation band. The bounded height is
- * what keeps the composer pinned at the region's bottom edge instead of the document's.
+ * header. Below 48rem the workspace header rides inside the conversation scroll region and the
+ * rail-trigger boundary is gone, but the shell's fixed destination nav still owns the bottom
+ * 65px of the viewport, so the compact chrome is the top bar, page padding, the tab/member-chip
+ * row and that nav; the 70rem step matches WorkspaceShell dropping its compact navigation band.
+ * The bounded height is what keeps the composer pinned at the region's bottom edge instead of the
+ * document's.
  */
 export const GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME = cn(
   "flex",
-  "h-[calc(100dvh-17.25rem)]",
+  "h-[calc(100dvh-17rem)]",
   "min-h-0",
   "min-w-0",
   "flex-col",
   "md:h-[calc(100dvh-13.5rem)]",
   "min-[70rem]:h-[calc(100dvh-13rem)]",
 );
+
+/** Compact chrome row: the peer tab strip on the left and the member chip on the right. */
+export const GROUP_CHAT_TAB_ROW_CLASS_NAME = cn("flex", "min-w-0", "items-center", "justify-between", "gap-3");
+
+/** The tab strip shrinks inside the compact row so the member chip keeps its count label. */
+export const GROUP_CHAT_TAB_STRIP_CLASS_NAME = cn("min-w-0", "flex-1");
+
+/** Compact member chip: a keyboard-sized pill that opens the member bottom sheet. */
+export const GROUP_CHAT_MEMBER_CHIP_CLASS_NAME = cn(
+  "inline-flex",
+  "h-10",
+  "shrink-0",
+  "items-center",
+  "gap-1.5",
+  "rounded-full",
+  "border",
+  "border-separator",
+  "bg-surface",
+  "px-3",
+  "text-sm",
+  "font-semibold",
+  "text-foreground",
+  "outline-none",
+  "data-[focus-visible=true]:ring-2",
+  "data-[focus-visible=true]:ring-accent",
+);
+
+/** The workspace header rides as the conversation scroll region's first item on compact widths. */
+export const GROUP_CHAT_SCROLL_HEADER_CLASS_NAME = cn("px-4", "pt-4", "pb-1");
+
+/** Compact member sheet dialog: flush bands replace the vendor padding; top corners stay rounded. */
+export const GROUP_CHAT_SHEET_DIALOG_CLASS_NAME = cn("p-0", "pt-1");
+
+/** Sheet title row under the drag handle; the end padding clears the absolute close control. */
+export const GROUP_CHAT_SHEET_HEAD_CLASS_NAME = cn("flex", "items-center", "justify-between", "gap-3", "px-4", "py-2", "pe-14");
+
+/** Sheet title reads at the same weight as the rail's card labels. */
+export const GROUP_CHAT_SHEET_TITLE_CLASS_NAME = cn("text-base", "font-semibold", "text-foreground");
+
+/** Sheet close control keeps a keyboard-sized target on the title row. */
+export const GROUP_CHAT_SHEET_CLOSE_CLASS_NAME = cn(
+  "inline-flex",
+  "h-10",
+  "w-10",
+  "items-center",
+  "justify-center",
+  "rounded-full",
+  "text-foreground",
+  "outline-none",
+  "data-[focus-visible=true]:ring-2",
+  "data-[focus-visible=true]:ring-accent",
+);
+
+/** The sheet body scrolls inside the 85vh bound instead of growing past the page edge. */
+export const GROUP_CHAT_SHEET_BODY_CLASS_NAME = cn("min-h-0", "overflow-y-auto", "px-4", "pb-6", "pt-1");
+
+/** Roster groups inside the member sheet when the viewer may not invite; rows stay edge-flush. */
+export const GROUP_CHAT_SHEET_ROSTER_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-4", "-mx-4");
+
+/** One roster group in the member sheet: a section label above plain member rows. */
+export const GROUP_CHAT_SHEET_SECTION_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-1");
 
 /** One conversation entry: avatar rail plus a message or card column. */
 export const GROUP_CHAT_ENTRY_CLASS_NAME = cn("flex", "min-w-0", "items-start", "gap-3", "px-4", "py-3");

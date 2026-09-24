@@ -30,6 +30,7 @@ import {
   GroupChatPageBase,
   parseAddressedModule,
   parseRoleHint,
+  useCompactMembers,
   type GroupChatPageLabels,
   type GroupChatTab,
   type GroupChatPageView,
@@ -335,6 +336,18 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
               : office.data.ok === false
                 ? "failed"
                 : "ready";
+
+  /*
+   * The compact member sheet exists only while the Office surface is ready at a
+   * compact width; a wider viewport or a dropped read closes it so a stale open
+   * flag never reopens it on the next compact pass.
+   */
+  const compactMembers = useCompactMembers();
+  useEffect(() => {
+    if (isRailOpen && (!compactMembers || officeState !== "ready")) {
+      setRailOpen(false);
+    }
+  }, [compactMembers, isRailOpen, officeState]);
 
   const tasksState: GroupChatPageView["tasks"]["state"] =
     tasks.data === undefined && tasks.error === undefined
