@@ -1,6 +1,7 @@
-import { ChatWorkspace, EmptyNotice, Input, PageContainer, SectionHeader, SurfaceCard, Text } from "@starci/grammar/common";
-import { Drawer } from "@heroui/react/drawer";
+import { ChatWorkspace, EmptyNotice, Icon, IconButton, Input, PageContainer, SectionHeader, SurfaceCard, Text } from "@starci/grammar/common";
 import { useRef } from "react";
+import { cn } from "@heroui/react";
+import { nivoIconSource } from "@nivo/ui";
 import { Badge, Button, SurfaceListCard, Tabs } from "@starci/grammar/common";
 import type {
   CollabApprovalCardView,
@@ -18,58 +19,78 @@ import type {
 } from "@/modules/api/collab";
 import type { CollabTasksFilter } from "@/hooks";
 import {
+  GROUP_CHAT_ACTION_PRIMARY_CLASS_NAME,
+  GROUP_CHAT_ACTION_SECONDARY_CLASS_NAME,
   GROUP_CHAT_AVATAR_CLASS_NAME,
+  GROUP_CHAT_AVATAR_COMPACT_CLASS_NAME,
+  GROUP_CHAT_AVATAR_PRESENCE_CLASS_NAME,
+  GROUP_CHAT_AVATAR_TINT_CLASS_NAMES,
   GROUP_CHAT_BADGE_ROW_CLASS_NAME,
+  GROUP_CHAT_BAND_ICON_CLASS_NAME,
   GROUP_CHAT_BUBBLE_CLASS_NAME,
   GROUP_CHAT_BUBBLE_OWN_CLASS_NAME,
   GROUP_CHAT_CARD_ACTIONS_CLASS_NAME,
   GROUP_CHAT_CARD_BAND_CLASS_NAME,
+  GROUP_CHAT_CARD_BAND_DIVIDED_CLASS_NAME,
   GROUP_CHAT_CARD_INSET_CLASS_NAME,
   GROUP_CHAT_COMPOSER_CLASS_NAME,
-  GROUP_CHAT_CONVERSATION_CLASS_NAME,
+  GROUP_CHAT_COMPOSER_COMPACT_CLASS_NAME,
   GROUP_CHAT_CONVERSATION_LIST_CLASS_NAME,
-  GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME,
-  GROUP_CHAT_WORKSPACE_HOST_SHEET_OPEN_CLASS_NAME,
+  GROUP_CHAT_CONVERSATION_LIST_COMPACT_CLASS_NAME,
+  GROUP_CHAT_DAY_SELECT_CLASS_NAME,
   GROUP_CHAT_ENTRY_CLASS_NAME,
+  GROUP_CHAT_ENTRY_COMPACT_CLASS_NAME,
   GROUP_CHAT_FIELD_BODY_CLASS_NAME,
   GROUP_CHAT_FILTERS_CLASS_NAME,
   GROUP_CHAT_FORM_STACK_CLASS_NAME,
+  GROUP_CHAT_FORM_STACK_COMPACT_CLASS_NAME,
   GROUP_CHAT_GROW_CLASS_NAME,
+  GROUP_CHAT_HEADER_ACTIONS_CLASS_NAME,
+  GROUP_CHAT_HEADER_BAND_CLASS_NAME,
+  GROUP_CHAT_HEADER_BAND_COMPACT_CLASS_NAME,
   GROUP_CHAT_LOADING_CLASS_NAME,
   GROUP_CHAT_MEMBER_CHIP_CHEVRON_CLASS_NAME,
   GROUP_CHAT_MEMBER_CHIP_CLASS_NAME,
   GROUP_CHAT_MEMBER_CHIP_ICON_CLASS_NAME,
   GROUP_CHAT_MEMBER_ROW_CLASS_NAME,
+  GROUP_CHAT_MEMBER_ROW_TRAILING_CLASS_NAME,
+  GROUP_CHAT_MENTION_CLASS_NAME,
+  GROUP_CHAT_MESSAGE_BODY_CLASS_NAME,
   GROUP_CHAT_NATIVE_CONTROL_CLASS_NAME,
   GROUP_CHAT_NATIVE_FIELD_CLASS_NAME,
   GROUP_CHAT_NOTICE_ROW_CLASS_NAME,
-  GROUP_CHAT_OFFICE_COLUMN_CLASS_NAME,
   GROUP_CHAT_PAGE_CLASS_NAME,
-  GROUP_CHAT_RAIL_CLASS_NAME,
+  GROUP_CHAT_RAIL_ASIDE_CLASS_NAME,
   GROUP_CHAT_RAIL_FORM_CLASS_NAME,
+  GROUP_CHAT_RAIL_HEAD_ROW_CLASS_NAME,
   GROUP_CHAT_RAIL_LABEL_CLASS_NAME,
+  GROUP_CHAT_RAIL_LABEL_ICON_CLASS_NAME,
+  GROUP_CHAT_RAIL_SCROLL_CLASS_NAME,
   GROUP_CHAT_RAIL_SECTION_CLASS_NAME,
   GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME,
   GROUP_CHAT_ROLE_CHOICE_CLASS_NAME,
   GROUP_CHAT_ROLE_CHOICES_CLASS_NAME,
-  GROUP_CHAT_SCROLL_HEADER_CLASS_NAME,
+  GROUP_CHAT_ROLE_RADIO_CLASS_NAME,
   GROUP_CHAT_SEND_STATE_CLASS_NAME,
   GROUP_CHAT_SHEET_BODY_CLASS_NAME,
-  GROUP_CHAT_SHEET_CLOSE_CLASS_NAME,
-  GROUP_CHAT_SHEET_CLOSE_ICON_CLASS_NAME,
-  GROUP_CHAT_SHEET_CONTENT_CLASS_NAME,
-  GROUP_CHAT_SHEET_DIALOG_CLASS_NAME,
+  GROUP_CHAT_SHEET_HANDLE_CLASS_NAME,
   GROUP_CHAT_SHEET_HEAD_CLASS_NAME,
+  GROUP_CHAT_SHEET_PANEL_CLASS_NAME,
   GROUP_CHAT_SHEET_ROSTER_CLASS_NAME,
   GROUP_CHAT_SHEET_SECTION_CLASS_NAME,
   GROUP_CHAT_SHEET_SECTION_LABEL_CLASS_NAME,
   GROUP_CHAT_SHEET_TITLE_CLASS_NAME,
   GROUP_CHAT_SR_ONLY_CLASS_NAME,
-  GROUP_CHAT_TAB_ROW_CLASS_NAME,
+  GROUP_CHAT_TAB_PANEL_SCROLL_CLASS_NAME,
+  GROUP_CHAT_TABS_BAND_CLASS_NAME,
   GROUP_CHAT_TAB_STRIP_CLASS_NAME,
   GROUP_CHAT_TASK_ROW_CLASS_NAME,
   GROUP_CHAT_TASK_STATEMENT_CLASS_NAME,
   GROUP_CHAT_TASKS_COLUMN_CLASS_NAME,
+  GROUP_CHAT_WAITING_LINE_CLASS_NAME,
+  GROUP_CHAT_WORKBENCH_CLASS_NAME,
+  GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME,
+  GROUP_CHAT_WORKSPACE_WRAP_CLASS_NAME,
 } from "./classNames";
 
 /**
@@ -133,6 +154,8 @@ export type ConversationItem =
       readonly kind: "message";
       readonly message: CollabMessageView;
       readonly authorName: string;
+      readonly authorKind: CollabOfficeParticipant["kind"] | null;
+      readonly addressedName: string | null;
       readonly isViewer: boolean;
     }
   | {
@@ -155,18 +178,22 @@ export type ConversationItem =
 /** A settled press answer indexed by approval identity, replacing the waiting card after a decision. */
 export type SettledApprovalMap = Readonly<Record<string, CollabApprovalCardView>>;
 
+const participantOf = (
+  participants: ReadonlyArray<CollabOfficeParticipant>,
+  memberId: string | null,
+  moduleInstallationId: string | null,
+): CollabOfficeParticipant | null =>
+  participants.find(
+    (participant): boolean =>
+      (memberId !== null && participant.kind === "human" && participant.memberId === memberId) ||
+      (moduleInstallationId !== null && participant.kind === "module" && participant.moduleInstallationId === moduleInstallationId),
+  ) ?? null;
+
 const participantName = (
   participants: ReadonlyArray<CollabOfficeParticipant>,
   memberId: string | null,
   moduleInstallationId: string | null,
-): string | null => {
-  const found = participants.find(
-    (participant): boolean =>
-      (memberId !== null && participant.kind === "human" && participant.memberId === memberId) ||
-      (moduleInstallationId !== null && participant.kind === "module" && participant.moduleInstallationId === moduleInstallationId),
-  );
-  return found?.displayName ?? null;
-};
+): string | null => participantOf(participants, memberId, moduleInstallationId)?.displayName ?? null;
 
 type AnchoredApproval = { readonly approval: CollabApprovalView; readonly task: CollabTaskView };
 type AnchoredQuestion = { readonly question: CollabTaskQuestionView; readonly task: CollabTaskView };
@@ -223,12 +250,15 @@ export const buildConversationItems = (args: ConversationBuildArgs): ReadonlyArr
   }
   const items: Array<ConversationItem> = [];
   for (const message of messages) {
-    const authorName =
-      participantName(participants, message.authorMemberId, message.authorModuleInstallationId) ?? unknownAuthor;
+    const author = participantOf(participants, message.authorMemberId, message.authorModuleInstallationId);
+    const addressed = participantOf(participants, null, message.addressedModuleInstallationId);
     items.push({
       kind: "message",
       message,
-      authorName,
+      authorName: author?.displayName ?? unknownAuthor,
+      authorKind: author?.kind ?? null,
+      /* The address token the composite prints is the module key (@sales), not the display name. */
+      addressedName: message.addressedModuleKey ?? addressed?.displayName ?? null,
       isViewer: viewerMemberId !== null && message.authorMemberId === viewerMemberId,
     });
     const binding = bindingByMessage.get(message.messageId);
@@ -505,32 +535,71 @@ const initialsOf = (displayName: string): string =>
     .join("")
     .slice(0, 2) || "?";
 
-/** Props for the initials avatar shared by message authors and roster rows. */
-type MessageAvatarProps = { readonly name: string };
+/** The name hash that keeps one member on one avatar tint across roster, messages and sheet. */
+const avatarTintClassName = (name: string): string => {
+  let hash = 0;
+  for (let index = 0; index < name.length; index += 1) {
+    hash = (hash * 31 + name.charCodeAt(index)) | 0;
+  }
+  return GROUP_CHAT_AVATAR_TINT_CLASS_NAMES[Math.abs(hash) % GROUP_CHAT_AVATAR_TINT_CLASS_NAMES.length] ?? "bg-accent-soft";
+};
 
-const MessageAvatar = ({ name }: MessageAvatarProps) => (
-  <span className={GROUP_CHAT_AVATAR_CLASS_NAME} aria-hidden="true">
-    {initialsOf(name)}
+/** The one-line capability summary the accepted direction writes under each hired module. */
+const MODULE_DESCRIPTIONS: Readonly<Record<string, string>> = {
+  Sales: "Hỗ trợ kinh doanh và chăm sóc khách hàng",
+  Accounting: "Hỗ trợ kế toán và tài chính",
+  Chatbot: "Hỗ trợ tự động hóa và trả lời khách hàng",
+};
+
+/** Props for the tinted member avatar shared by message authors and roster rows. */
+type MemberAvatarProps = {
+  readonly name: string;
+  readonly kind: CollabOfficeParticipant["kind"] | null;
+  readonly presence?: boolean;
+  /** The compact slot rows use the smaller avatar so two messages fit above the sheet. */
+  readonly compact?: boolean;
+};
+
+const MemberAvatar = ({ name, kind, presence = false, compact = false }: MemberAvatarProps) => (
+  <span className={cn(compact ? GROUP_CHAT_AVATAR_COMPACT_CLASS_NAME : GROUP_CHAT_AVATAR_CLASS_NAME, avatarTintClassName(name))} aria-hidden="true">
+    {kind === "module" ? <Icon source={nivoIconSource("agentos", "leading")} usage="leading" /> : initialsOf(name)}
+    {presence ? <span className={GROUP_CHAT_AVATAR_PRESENCE_CLASS_NAME} /> : null}
   </span>
 );
 
 /** Props for one roster row. */
-type MemberRowProps = { readonly participant: CollabOfficeParticipant; readonly labels: GroupChatPageLabels };
+type MemberRowProps = {
+  readonly participant: CollabOfficeParticipant;
+  readonly labels: GroupChatPageLabels;
+  /** The accepted growth rail draws the richer row: presence dot, module summary and trailing affordance. */
+  readonly detailed?: boolean;
+};
 
-const MemberRow = ({ participant, labels }: MemberRowProps) => (
+const MemberRow = ({ participant, labels, detailed = false }: MemberRowProps) => (
   <div className={GROUP_CHAT_MEMBER_ROW_CLASS_NAME} data-member-id={participant.memberId}>
-    <MessageAvatar name={participant.displayName} />
+    <MemberAvatar
+      name={participant.displayName}
+      kind={participant.kind}
+      presence={detailed && participant.kind === "human" && participant.status === "active"}
+    />
     <div className={GROUP_CHAT_GROW_CLASS_NAME}>
       <Text size="sm" weight="semibold" overflow="truncate">
         {participant.displayName}
       </Text>
       <Text size="xs" tone="muted">
         {participant.kind === "module"
-          ? labels.members.moduleRole
+          ? detailed
+            ? (MODULE_DESCRIPTIONS[participant.displayName] ?? labels.members.moduleRole)
+            : labels.members.moduleRole
           : (labels.roles[participant.role as CollabHumanRole] ?? participant.role)}
       </Text>
     </div>
     {participant.status === "invited" ? <Badge tone="warning">{labels.members.pending}</Badge> : null}
+    {detailed ? (
+      <span className={GROUP_CHAT_MEMBER_ROW_TRAILING_CLASS_NAME} aria-hidden="true">
+        ···
+      </span>
+    ) : null}
   </div>
 );
 
@@ -538,6 +607,13 @@ const MemberRow = ({ participant, labels }: MemberRowProps) => (
 type MessageEntryProps = {
   readonly item: Extract<ConversationItem, { kind: "message" }>;
   readonly labels: GroupChatPageLabels;
+  /**
+   * The accepted decision composite reads messages on restrained bubbles while
+   * the growth composite keeps them as plain lines on the card surface.
+   */
+  readonly decision: boolean;
+  /** The compact slot band reads the tighter row and smaller message body. */
+  readonly compact?: boolean;
 };
 
 /** The bubble body without the leading `@Name` the wire already marks as the address token. */
@@ -549,30 +625,34 @@ const displayMessageBody = (message: CollabMessageView): string => {
   return rest === "" ? message.body : rest;
 };
 
-const MessageEntry = ({ item, labels }: MessageEntryProps) => {
-  const { message, authorName, isViewer } = item;
-  const addressed = message.addressedModuleKey ?? null;
+const MessageEntry = ({ item, labels, decision, compact = false }: MessageEntryProps) => {
+  const { message, authorName, authorKind, addressedName, isViewer } = item;
   const body = displayMessageBody(message);
+  const bodyContent = (
+    <>
+      {addressedName !== null ? <span className={GROUP_CHAT_MENTION_CLASS_NAME}>{`@${addressedName}`}</span> : null}
+      {addressedName !== null ? " " : null}
+      <Text as="span" size={compact ? "xs" : "sm"}>
+        {body}
+      </Text>
+    </>
+  );
+  const messageBody = decision
+    ? isViewer
+      ? GROUP_CHAT_BUBBLE_OWN_CLASS_NAME
+      : GROUP_CHAT_BUBBLE_CLASS_NAME
+    : GROUP_CHAT_MESSAGE_BODY_CLASS_NAME;
   return (
-    <article className={GROUP_CHAT_ENTRY_CLASS_NAME} id={`collab-msg-${message.messageId}`}>
-      <MessageAvatar name={authorName} />
+    <article className={compact ? GROUP_CHAT_ENTRY_COMPACT_CLASS_NAME : GROUP_CHAT_ENTRY_CLASS_NAME} id={`collab-msg-${message.messageId}`}>
+      <MemberAvatar name={authorName} kind={authorKind} compact={compact} />
       <div className={GROUP_CHAT_GROW_CLASS_NAME}>
-        <Text size="sm" weight="semibold">
+        <Text size={compact ? "xs" : "sm"} weight="semibold">
           {authorName}{" "}
           <Text as="span" size="xs" tone="muted">
             {labels.formatTime(message.occurredAt)}
           </Text>
         </Text>
-        <div className={isViewer ? GROUP_CHAT_BUBBLE_OWN_CLASS_NAME : GROUP_CHAT_BUBBLE_CLASS_NAME}>
-          {addressed !== null ? (
-            <Text as="span" size="sm" weight="semibold" tone="accent">
-              {`@${addressed} `}
-            </Text>
-          ) : null}
-          <Text as="span" size="sm">
-            {body}
-          </Text>
-        </div>
+        <div className={messageBody}>{bodyContent}</div>
       </div>
     </article>
   );
@@ -582,9 +662,10 @@ const MessageEntry = ({ item, labels }: MessageEntryProps) => {
 type TaskReceiptCardProps = {
   readonly item: Extract<ConversationItem, { kind: "task-card" }>;
   readonly labels: GroupChatPageLabels;
+  readonly compact?: boolean;
 };
 
-const TaskReceiptCard = ({ item, labels }: TaskReceiptCardProps) => {
+const TaskReceiptCard = ({ item, labels, compact = false }: TaskReceiptCardProps) => {
   const { binding, task } = item;
   const status = task?.status ?? null;
   const receipt = binding.receipt;
@@ -597,9 +678,9 @@ const TaskReceiptCard = ({ item, labels }: TaskReceiptCardProps) => {
   const moduleName = task?.owningModuleDisplayName ?? binding.receiverModuleKey;
   const ref = task === null ? binding.commandName : shortTaskRef(task.taskId);
   return (
-    <div className={GROUP_CHAT_ENTRY_CLASS_NAME} id={task === null ? undefined : `collab-task-${task.taskId}`}>
+    <div className={compact ? GROUP_CHAT_ENTRY_COMPACT_CLASS_NAME : GROUP_CHAT_ENTRY_CLASS_NAME} id={task === null ? undefined : `collab-task-${task.taskId}`}>
       <div className={GROUP_CHAT_CARD_INSET_CLASS_NAME}>
-        <SurfaceCard composition="joined" ariaLabel={task?.statement ?? binding.commandName}>
+        <SurfaceCard composition="joined" depth="nested" ariaLabel={task?.statement ?? binding.commandName}>
           <div className={GROUP_CHAT_CARD_BAND_CLASS_NAME}>
             <Text size="sm" weight="semibold">
               {task?.statement ?? binding.commandName}
@@ -609,7 +690,7 @@ const TaskReceiptCard = ({ item, labels }: TaskReceiptCardProps) => {
               {receiptLabel}
             </Badge>
           </div>
-          <div className={GROUP_CHAT_CARD_BAND_CLASS_NAME}>
+          <div className={GROUP_CHAT_CARD_BAND_DIVIDED_CLASS_NAME}>
             <Text size="xs" tone="muted">
               {labels.card.reference(ref, moduleName)}
               {task?.askedByDisplayName ? ` • ${labels.card.requestedBy(task.askedByDisplayName)}` : ""}
@@ -628,9 +709,10 @@ type ApprovalCardProps = {
   readonly view: GroupChatPageView;
   readonly on: GroupChatPageActions;
   readonly labels: GroupChatPageLabels;
+  readonly compact?: boolean;
 };
 
-const ApprovalCard = ({ item, view, on, labels }: ApprovalCardProps) => {
+const ApprovalCard = ({ item, view, on, labels, compact = false }: ApprovalCardProps) => {
   const { approval, task } = item;
   const settled = view.settledApprovals[approval.approvalId];
   const effective: CollabApprovalView = settled ?? approval;
@@ -642,32 +724,50 @@ const ApprovalCard = ({ item, view, on, labels }: ApprovalCardProps) => {
   const decisionTone =
     effective.status === "approved" ? "success" : effective.status === "rejected" ? "danger" : effective.status === "withdrawn" ? "neutral" : "warning";
   return (
-    <div className={GROUP_CHAT_ENTRY_CLASS_NAME} id={`collab-approval-${approval.approvalId}`}>
+    <div className={compact ? GROUP_CHAT_ENTRY_COMPACT_CLASS_NAME : GROUP_CHAT_ENTRY_CLASS_NAME} id={`collab-approval-${approval.approvalId}`}>
       <div className={GROUP_CHAT_CARD_INSET_CLASS_NAME}>
         <div className={GROUP_CHAT_BADGE_ROW_CLASS_NAME}>
-          {isWaiting ? <Badge tone="danger">{labels.approval.needed}</Badge> : null}
-          <Badge tone={decisionTone}>
-            {isWaiting
-              ? labels.approval.waiting
-              : labels.statuses[effective.status === "approved" ? "done" : effective.status === "rejected" ? "rejected" : "cancelled"]}
-          </Badge>
+          {isWaiting ? (
+            <>
+              <Badge tone="danger">{labels.approval.needed}</Badge>
+              <span className={GROUP_CHAT_WAITING_LINE_CLASS_NAME}>
+                <Icon source={nivoIconSource("pending", "chip")} usage="chip" />
+                <Text as="span" size="sm" tone="muted">
+                  {labels.approval.waiting}
+                </Text>
+              </span>
+            </>
+          ) : (
+            <Badge tone={decisionTone}>
+              {labels.statuses[effective.status === "approved" ? "done" : effective.status === "rejected" ? "rejected" : "cancelled"]}
+            </Badge>
+          )}
         </div>
-        <SurfaceCard composition="joined" ariaLabel={effective.action}>
+        <SurfaceCard composition="joined" depth="nested" ariaLabel={effective.action}>
           <div className={GROUP_CHAT_CARD_BAND_CLASS_NAME}>
+            <span className={GROUP_CHAT_BAND_ICON_CLASS_NAME} aria-hidden="true">
+              <Icon source={nivoIconSource("review", "leading")} usage="leading" />
+            </span>
             <Text size="sm" weight="semibold">
               {effective.action}
             </Text>
           </div>
           {effective.consequence === null ? null : (
-            <div className={GROUP_CHAT_CARD_BAND_CLASS_NAME}>
+            <div className={GROUP_CHAT_CARD_BAND_DIVIDED_CLASS_NAME}>
+              <span className={GROUP_CHAT_BAND_ICON_CLASS_NAME} aria-hidden="true">
+                i
+              </span>
               <Text size="sm">{effective.consequence}</Text>
             </div>
           )}
-          <div className={GROUP_CHAT_CARD_BAND_CLASS_NAME}>
+          <div className={GROUP_CHAT_CARD_BAND_DIVIDED_CLASS_NAME}>
+            <span className={GROUP_CHAT_BAND_ICON_CLASS_NAME} aria-hidden="true">
+              <Icon source={nivoIconSource("account", "leading")} usage="leading" />
+            </span>
             <div className={GROUP_CHAT_FIELD_BODY_CLASS_NAME}>
-              <Text size="xs" weight="medium">
+              <Text size="sm" weight="medium">
                 {labels.card.reference(shortTaskRef(task.taskId), moduleName)}
-                {task.askedByDisplayName ? ` • ${labels.card.requestedBy(task.askedByDisplayName)}` : ""}
+                {task.askedByDisplayName ? ` · ${labels.card.requestedBy(task.askedByDisplayName)}` : ""}
               </Text>
               <Text size="xs" tone="muted">
                 {settled !== undefined && settled.decidedByDisplayName !== null && effective.decidedAt !== null
@@ -689,24 +789,28 @@ const ApprovalCard = ({ item, view, on, labels }: ApprovalCardProps) => {
           </div>
           {isWaiting ? (
             <div className={GROUP_CHAT_CARD_ACTIONS_CLASS_NAME}>
-              <Button
-                variant="primary"
-                width="fill"
-                isDisabled={!eligible || pending}
-                isPending={pending}
-                onPress={() => on.pressApproval(approval.approvalId, "approve")}
-              >
-                {labels.approval.approve}
-              </Button>
-              <Button
-                variant="outline"
-                width="fill"
-                isDisabled={!eligible || pending}
-                isPending={pending}
-                onPress={() => on.pressApproval(approval.approvalId, "reject")}
-              >
-                {labels.approval.reject}
-              </Button>
+              <div className={GROUP_CHAT_ACTION_PRIMARY_CLASS_NAME}>
+                <Button
+                  variant="primary"
+                  width="fill"
+                  isDisabled={!eligible || pending}
+                  isPending={pending}
+                  onPress={() => on.pressApproval(approval.approvalId, "approve")}
+                >
+                  {labels.approval.approve}
+                </Button>
+              </div>
+              <div className={GROUP_CHAT_ACTION_SECONDARY_CLASS_NAME}>
+                <Button
+                  variant="outline"
+                  width="fill"
+                  isDisabled={!eligible || pending}
+                  isPending={pending}
+                  onPress={() => on.pressApproval(approval.approvalId, "reject")}
+                >
+                  {labels.approval.reject}
+                </Button>
+              </div>
             </div>
           ) : null}
         </SurfaceCard>
@@ -721,18 +825,19 @@ type QuestionCardProps = {
   readonly view: GroupChatPageView;
   readonly on: GroupChatPageActions;
   readonly labels: GroupChatPageLabels;
+  readonly compact?: boolean;
 };
 
-const QuestionCard = ({ item, view, on, labels }: QuestionCardProps) => {
+const QuestionCard = ({ item, view, on, labels, compact = false }: QuestionCardProps) => {
   const { question, task } = item;
   const moduleName = task.owningModuleDisplayName ?? task.owningModuleKey;
   const waitingOn = task.assignedToDisplayName ?? "";
   const mayAnswer = view.viewer !== null && task.assignedToMemberId === view.viewer.memberId;
   const isAnswering = view.composer.answering?.questionId === question.questionId;
   return (
-    <div className={GROUP_CHAT_ENTRY_CLASS_NAME} id={`collab-question-${question.questionId}`}>
+    <div className={compact ? GROUP_CHAT_ENTRY_COMPACT_CLASS_NAME : GROUP_CHAT_ENTRY_CLASS_NAME} id={`collab-question-${question.questionId}`}>
       <div className={GROUP_CHAT_CARD_INSET_CLASS_NAME}>
-        <SurfaceCard composition="joined" ariaLabel={question.body}>
+        <SurfaceCard composition="joined" depth="nested" ariaLabel={question.body}>
           <div className={GROUP_CHAT_CARD_BAND_CLASS_NAME}>
             <div className={GROUP_CHAT_GROW_CLASS_NAME}>
               <Text size="xs" weight="medium" tone="muted">
@@ -743,7 +848,7 @@ const QuestionCard = ({ item, view, on, labels }: QuestionCardProps) => {
             <Badge tone="warning">{labels.question.waiting(waitingOn)}</Badge>
           </div>
           {mayAnswer ? (
-            <div className={GROUP_CHAT_CARD_BAND_CLASS_NAME}>
+            <div className={GROUP_CHAT_CARD_BAND_DIVIDED_CLASS_NAME}>
               <Button variant="secondary" size="sm" isDisabled={isAnswering} onPress={() => on.answerQuestion(task, question)}>
                 {labels.question.answer}
               </Button>
@@ -756,11 +861,17 @@ const QuestionCard = ({ item, view, on, labels }: QuestionCardProps) => {
 };
 
 /** Props for the role-gated invitation form shared by the member rail and the compact sheet. */
-type InviteFormProps = { readonly view: GroupChatPageView; readonly on: GroupChatPageActions; readonly labels: GroupChatPageLabels };
+type InviteFormProps = {
+  readonly view: GroupChatPageView;
+  readonly on: GroupChatPageActions;
+  readonly labels: GroupChatPageLabels;
+  /** The docked compact sheet keeps the email label off the surface - its a11y name stays. */
+  readonly compact?: boolean;
+};
 
-const InviteForm = ({ view, on, labels }: InviteFormProps) => (
+const InviteForm = ({ view, on, labels, compact = false }: InviteFormProps) => (
   <form
-    className={GROUP_CHAT_FORM_STACK_CLASS_NAME}
+    className={compact ? GROUP_CHAT_FORM_STACK_COMPACT_CLASS_NAME : GROUP_CHAT_FORM_STACK_CLASS_NAME}
     onSubmit={(event) => {
       event.preventDefault();
       on.submitInvite();
@@ -770,7 +881,7 @@ const InviteForm = ({ view, on, labels }: InviteFormProps) => (
       id="collab-invite-email"
       name="invite-email"
       kind="email"
-      label={labels.invite.email}
+      label={compact ? <span className={GROUP_CHAT_SR_ONLY_CLASS_NAME}>{labels.invite.email}</span> : labels.invite.email}
       placeholder={labels.invite.emailPlaceholder}
       value={view.invite.email}
       isDisabled={view.invite.pending}
@@ -788,6 +899,7 @@ const InviteForm = ({ view, on, labels }: InviteFormProps) => (
               type="radio"
               name="invite-role"
               value={role}
+              className={GROUP_CHAT_ROLE_RADIO_CLASS_NAME}
               checked={view.invite.role === role}
               disabled={view.invite.pending}
               onChange={() => on.changeInviteRole(role)}
@@ -833,53 +945,125 @@ type MembersRailProps = { readonly view: GroupChatPageView; readonly on: GroupCh
 
 const MembersRail = ({ view, on, labels }: MembersRailProps) => {
   const { humans, modules } = partitionParticipants(view.participants);
+  const mayInvite = mayPresentInvite(view.viewer);
+  const focusInviteEmail = () => {
+    document.getElementById("collab-invite-email")?.focus();
+  };
   return (
-    <div className={GROUP_CHAT_RAIL_CLASS_NAME}>
-      <SurfaceCard label={labels.members.title} composition="joined">
-        <div className={GROUP_CHAT_RAIL_SECTION_CLASS_NAME}>
-          <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
-            <Text size="sm" weight="semibold">
+    <SurfaceCard composition="joined" depth="nested" ariaLabel={labels.members.title}>
+      <div className={GROUP_CHAT_RAIL_SECTION_CLASS_NAME}>
+        <div className={GROUP_CHAT_RAIL_HEAD_ROW_CLASS_NAME}>
+          <span className={GROUP_CHAT_RAIL_LABEL_ICON_CLASS_NAME}>
+            <Icon source={nivoIconSource("community", "leading")} usage="leading" />
+            <Text as="span" size="sm" weight="semibold">
+              {`Thành viên (${humans.length})`}
+            </Text>
+          </span>
+          {mayInvite ? (
+            <IconButton source={nivoIconSource("signUp", "leading")} label={labels.invite.title} onPress={focusInviteEmail} />
+          ) : null}
+        </div>
+        {humans.length === 0 ? (
+          <EmptyNotice message={labels.members.empty} />
+        ) : (
+          <>
+            <Text size="xs" weight="semibold" tone="muted">
               {labels.members.humans(humans.length)}
             </Text>
-          </div>
-          {humans.length === 0 ? (
-            <EmptyNotice message={labels.members.empty} />
-          ) : (
-            humans.map((participant) => <MemberRow key={participant.memberId} participant={participant} labels={labels} />)
-          )}
+            {humans.map((participant) => (
+              <MemberRow key={participant.memberId} participant={participant} labels={labels} detailed />
+            ))}
+          </>
+        )}
+      </div>
+      <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
+        <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
+          <Icon source={nivoIconSource("agentos", "leading")} usage="leading" />
+          <Text size="sm" weight="semibold">
+            {labels.members.modules(modules.length)}
+          </Text>
         </div>
-        <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
-          <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
-            <Text size="sm" weight="semibold">
-              {labels.members.modules(modules.length)}
+        {modules.length === 0 ? (
+          <div className={GROUP_CHAT_MEMBER_ROW_CLASS_NAME}>
+            <Text size="sm" tone="muted">
+              {labels.members.noModules}
             </Text>
           </div>
-          {modules.length === 0 ? (
-            <div className={GROUP_CHAT_MEMBER_ROW_CLASS_NAME}>
-              <Text size="sm" tone="muted">
-                {labels.members.noModules}
-              </Text>
-            </div>
-          ) : (
-            modules.map((participant) => (
-              <MemberRow key={participant.moduleInstallationId ?? participant.memberId} participant={participant} labels={labels} />
-            ))
-          )}
-        </div>
-        {mayPresentInvite(view.viewer) ? (
-          <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
-            <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
-              <Text size="sm" weight="semibold">
-                {labels.invite.title}
-              </Text>
-            </div>
-            <div className={GROUP_CHAT_RAIL_FORM_CLASS_NAME}>
-              <InviteForm view={view} on={on} labels={labels} />
-            </div>
+        ) : (
+          modules.map((participant) => (
+            <MemberRow
+              key={participant.moduleInstallationId ?? participant.memberId}
+              participant={participant}
+              labels={labels}
+              detailed
+            />
+          ))
+        )}
+      </div>
+      {mayInvite ? (
+        <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
+          <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
+            <Icon source={nivoIconSource("signUp", "leading")} usage="leading" />
+            <Text size="sm" weight="semibold">
+              {labels.invite.title}
+            </Text>
           </div>
-        ) : null}
-      </SurfaceCard>
-    </div>
+          <div className={GROUP_CHAT_RAIL_FORM_CLASS_NAME}>
+            <InviteForm view={view} on={on} labels={labels} />
+          </div>
+        </div>
+      ) : null}
+    </SurfaceCard>
+  );
+};
+
+/**
+ * The roster-only rail the accepted decision composite draws while an approval
+ * is held: members grouped under Con người/Module, no invite section, no
+ * presence dots or row menus.
+ */
+const RosterRail = ({ view, labels }: { readonly view: GroupChatPageView; readonly labels: GroupChatPageLabels }) => {
+  const { humans, modules } = partitionParticipants(view.participants);
+  return (
+    <SurfaceCard composition="joined" depth="nested" ariaLabel={labels.members.title}>
+      <div className={GROUP_CHAT_RAIL_SECTION_CLASS_NAME}>
+        <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
+          <Text size="sm" weight="semibold">
+            {labels.members.title}
+          </Text>
+        </div>
+      </div>
+      <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
+        <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
+          <Text size="sm" weight="semibold">
+            {labels.members.humans(humans.length)}
+          </Text>
+        </div>
+        {humans.length === 0 ? (
+          <EmptyNotice message={labels.members.empty} />
+        ) : (
+          humans.map((participant) => <MemberRow key={participant.memberId} participant={participant} labels={labels} />)
+        )}
+      </div>
+      <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
+        <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
+          <Text size="sm" weight="semibold">
+            {`${labels.members.moduleRole} (${modules.length})`}
+          </Text>
+        </div>
+        {modules.length === 0 ? (
+          <div className={GROUP_CHAT_MEMBER_ROW_CLASS_NAME}>
+            <Text size="sm" tone="muted">
+              {labels.members.noModules}
+            </Text>
+          </div>
+        ) : (
+          modules.map((participant) => (
+            <MemberRow key={participant.moduleInstallationId ?? participant.memberId} participant={participant} labels={labels} />
+          ))
+        )}
+      </div>
+    </SurfaceCard>
   );
 };
 
@@ -928,40 +1112,49 @@ const MemberSheetRoster = ({ view, labels }: MemberSheetRosterProps) => {
   );
 };
 
-/** Props for the compact member bottom sheet under the conversation. */
-type MemberSheetProps = { readonly view: GroupChatPageView; readonly on: GroupChatPageActions; readonly labels: GroupChatPageLabels };
+/** Props for the compact member bottom sheet docked inside the workbench card. */
+type MemberSheetProps = {
+  readonly view: GroupChatPageView;
+  readonly on: GroupChatPageActions;
+  readonly labels: GroupChatPageLabels;
+  /** The invitation form docks while no decision is pending; otherwise the sheet carries the plain roster. */
+  readonly showInvite: boolean;
+};
 
 /**
- * The compact member overlay the accepted direction draws as a lower-page bottom
- * sheet: drag handle, title row with a close control, then the invitation form
- * for a viewer who may invite or the plain roster otherwise. The conversation,
- * header and menu stay above or behind it; no roster precedes the form.
+ * The compact member sheet the accepted direction draws as a docked lower band
+ * of the workbench card: handle bar, title row with a close control, then the
+ * invitation form for a viewer who may invite or the plain roster otherwise.
+ * It lives in normal flow below the pinned composer, so the conversation keeps
+ * a readable remainder instead of collapsing under an overlay.
  */
-const MemberSheet = ({ view, on, labels }: MemberSheetProps) => {
-  const mayInvite = mayPresentInvite(view.viewer);
-  return (
-    <Drawer.Backdrop variant="transparent" isDismissable>
-      <Drawer.Content placement="bottom" className={GROUP_CHAT_SHEET_CONTENT_CLASS_NAME}>
-        <Drawer.Dialog className={GROUP_CHAT_SHEET_DIALOG_CLASS_NAME}>
-          <Drawer.Handle />
-          <div className={GROUP_CHAT_SHEET_HEAD_CLASS_NAME}>
-            <Drawer.Heading className={GROUP_CHAT_SHEET_TITLE_CLASS_NAME}>
-              {mayInvite ? labels.invite.title : labels.members.title}
-            </Drawer.Heading>
-            <Drawer.CloseTrigger aria-label={labels.members.closeRail} className={GROUP_CHAT_SHEET_CLOSE_CLASS_NAME}>
-              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={GROUP_CHAT_SHEET_CLOSE_ICON_CLASS_NAME} aria-hidden="true">
-                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" />
-              </svg>
-            </Drawer.CloseTrigger>
-          </div>
-          <Drawer.Body className={GROUP_CHAT_SHEET_BODY_CLASS_NAME}>
-            {mayInvite ? <InviteForm view={view} on={on} labels={labels} /> : <MemberSheetRoster view={view} labels={labels} />}
-          </Drawer.Body>
-        </Drawer.Dialog>
-      </Drawer.Content>
-    </Drawer.Backdrop>
-  );
-};
+const MemberSheet = ({ view, on, labels, showInvite }: MemberSheetProps) => (
+  <div
+    className={GROUP_CHAT_SHEET_PANEL_CLASS_NAME}
+    role="region"
+    aria-label={showInvite ? labels.invite.title : labels.members.title}
+    data-grammar-member-sheet="open"
+  >
+    <span className={GROUP_CHAT_SHEET_HANDLE_CLASS_NAME} aria-hidden="true" />
+    <div className={GROUP_CHAT_SHEET_HEAD_CLASS_NAME}>
+      <Text size="md" weight="semibold">
+        {showInvite ? labels.invite.title : labels.members.title}
+      </Text>
+      <IconButton
+        source={nivoIconSource("close", "leading")}
+        label={labels.members.closeRail}
+        onPress={() => on.changeRailOpen(false)}
+      />
+    </div>
+    <div className={GROUP_CHAT_SHEET_BODY_CLASS_NAME}>
+      {showInvite ? (
+        <InviteForm view={view} on={on} labels={labels} compact />
+      ) : (
+        <MemberSheetRoster view={view} labels={labels} />
+      )}
+    </div>
+  </div>
+);
 
 /** Props for the outstanding turn-notice band above the conversation. */
 type NoticesBandProps = { readonly view: GroupChatPageView; readonly on: GroupChatPageActions; readonly labels: GroupChatPageLabels };
@@ -971,7 +1164,7 @@ const NoticesBand = ({ view, on, labels }: NoticesBandProps) => {
     return null;
   }
   return (
-    <SurfaceCard label={labels.notice.title} composition="joined">
+    <SurfaceCard label={labels.notice.title} composition="joined" depth="nested">
       {view.notices.map((item) => {
         const outcome = view.noticeOutcomes[item.notice.noticeId];
         const text = item.notice.turnKind === "approval" ? labels.notice.approval : labels.notice.taskAssign();
@@ -997,9 +1190,17 @@ const NoticesBand = ({ view, on, labels }: NoticesBandProps) => {
 };
 
 /** Props for the pinned composer: draft, send state and the answering banner. */
-type ComposerProps = { readonly view: GroupChatPageView; readonly on: GroupChatPageActions; readonly labels: GroupChatPageLabels };
+type ComposerProps = {
+  readonly view: GroupChatPageView;
+  readonly on: GroupChatPageActions;
+  readonly labels: GroupChatPageLabels;
+  /** The decision composite draws a glyph-only send control; the growth composite keeps the labelled one. */
+  readonly decision: boolean;
+  /** The compact composer keeps the same row on a shorter inset. */
+  readonly compact?: boolean;
+};
 
-const Composer = ({ view, on, labels }: ComposerProps) => (
+const Composer = ({ view, on, labels, decision, compact = false }: ComposerProps) => (
   <div className={GROUP_CHAT_FIELD_BODY_CLASS_NAME}>
     {view.composer.answering !== null ? (
       <div className={GROUP_CHAT_SEND_STATE_CLASS_NAME}>
@@ -1029,7 +1230,7 @@ const Composer = ({ view, on, labels }: ComposerProps) => (
       </div>
     ) : null}
     <form
-      className={GROUP_CHAT_COMPOSER_CLASS_NAME}
+      className={compact ? GROUP_CHAT_COMPOSER_COMPACT_CLASS_NAME : GROUP_CHAT_COMPOSER_CLASS_NAME}
       onSubmit={(event) => {
         event.preventDefault();
         on.sendMessage();
@@ -1046,9 +1247,23 @@ const Composer = ({ view, on, labels }: ComposerProps) => (
           onValueChange={on.changeComposer}
         />
       </div>
-      <Button type="submit" variant="primary" isPending={view.composer.pending} isDisabled={view.composer.value.trim().length === 0}>
-        {labels.composer.send}
-      </Button>
+      {decision ? (
+        <IconButton
+          source={nivoIconSource("send", "leading")}
+          label={labels.composer.send}
+          isDisabled={view.composer.value.trim().length === 0 || view.composer.pending}
+          onPress={on.sendMessage}
+        />
+      ) : (
+        <Button
+          type="submit"
+          variant="primary"
+          isPending={view.composer.pending}
+          isDisabled={view.composer.value.trim().length === 0}
+        >
+          <Icon source={nivoIconSource("send", "chip")} usage="chip" /> {labels.composer.send}
+        </Button>
+      )}
     </form>
   </div>
 );
@@ -1059,20 +1274,18 @@ type ConversationProps = {
   readonly on: GroupChatPageActions;
   readonly labels: GroupChatPageLabels;
   /**
-   * Compact presentation: the workspace header rides inside the scroll region
-   * as its first item instead of consuming chrome above the workspace, and the
-   * region pins to the latest entry so a waiting card's actions stay inside the
-   * viewport. Both are inert in tests and on the desktop rail presentation.
+   * Compact presentation pins the region to the latest entry whenever the item
+   * count changes; the callback ref fires on every commit, so the pinned count
+   * keeps user scrolls intact between arrivals.
    */
   readonly compact?: boolean;
+  /** The decision composite's restrained bubble treatment replaces plain lines. */
+  readonly decision: boolean;
 };
 
-const Conversation = ({ view, on, labels, compact = false }: ConversationProps) => {
+const Conversation = ({ view, on, labels, compact = false, decision }: ConversationProps) => {
   const itemCount = view.items.length;
   const pinnedCountRef = useRef(-1);
-  /* Compact presentation pins the region to the latest entry whenever the item
-     count changes; the callback ref fires on every commit, so the pinned count
-     keeps user scrolls intact between arrivals. */
   const pinToLatest = (el: HTMLDivElement | null) => {
     if (!compact || el === null || pinnedCountRef.current === itemCount) {
       return;
@@ -1084,28 +1297,21 @@ const Conversation = ({ view, on, labels, compact = false }: ConversationProps) 
     }
   };
   return (
-    <div ref={pinToLatest} className={GROUP_CHAT_CONVERSATION_LIST_CLASS_NAME}>
-      {compact && view.workspaceName !== null ? (
-        <SectionHeader
-          level={2}
-          title={view.workspaceName}
-          description={labels.description}
-          className={GROUP_CHAT_SCROLL_HEADER_CLASS_NAME}
-        />
-      ) : null}
+    <div ref={pinToLatest} className={compact ? GROUP_CHAT_CONVERSATION_LIST_COMPACT_CLASS_NAME : GROUP_CHAT_CONVERSATION_LIST_CLASS_NAME}>
+      <NoticesBand view={view} on={on} labels={labels} />
       {view.items.length === 0 ? (
         <EmptyNotice message={labels.conversation.empty} />
       ) : (
         view.items.map((item, index) => {
           switch (item.kind) {
             case "message":
-              return <MessageEntry key={item.message.messageId} item={item} labels={labels} />;
+              return <MessageEntry key={item.message.messageId} item={item} labels={labels} decision={decision} compact={compact} />;
             case "task-card":
-              return <TaskReceiptCard key={`${item.binding.bindingId}-${index}`} item={item} labels={labels} />;
+              return <TaskReceiptCard key={`${item.binding.bindingId}-${index}`} item={item} labels={labels} compact={compact} />;
             case "approval-card":
-              return <ApprovalCard key={item.approval.approvalId} item={item} view={view} on={on} labels={labels} />;
+              return <ApprovalCard key={item.approval.approvalId} item={item} view={view} on={on} labels={labels} compact={compact} />;
             case "question-card":
-              return <QuestionCard key={item.question.questionId} item={item} view={view} on={on} labels={labels} />;
+              return <QuestionCard key={item.question.questionId} item={item} view={view} on={on} labels={labels} compact={compact} />;
             default:
               return null;
           }
@@ -1293,7 +1499,7 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
     return (
       <PageContainer measure="reading">
         <SectionHeader level={1} title={labels.title} description={labels.description} />
-        <SurfaceCard label={labels.state.deniedTitle} composition="joined">
+        <SurfaceCard label={labels.state.deniedTitle} composition="joined" depth="nested">
           <div className={GROUP_CHAT_CARD_BAND_CLASS_NAME}>
             <div className={GROUP_CHAT_FORM_STACK_CLASS_NAME}>
               <Text size="sm">{labels.state.deniedBody}</Text>
@@ -1316,42 +1522,76 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
       </PageContainer>
     );
   }
+  /*
+   * The accepted composites draw two workbench modes: the growth composite
+   * (workspace header, plain message lines, tinted roster rail with the invite
+   * form) and the decision composite (no header, restrained bubbles, a roster
+   * rail and the glyph-only send control) while an approval card is held. The
+   * flag is a presentation reading of the authorized items, never an authority.
+   */
+  const decisionPending = view.items.some((item) => item.kind === "approval-card");
   const participantCount = view.participants.length;
   const railOpenLabel = labels.members.openRail(participantCount);
-  const tabRow = (
-    <div className={GROUP_CHAT_TAB_ROW_CLASS_NAME}>
-      <div className={GROUP_CHAT_TAB_STRIP_CLASS_NAME}>
-        <Tabs
-          label={labels.tabListLabel}
-          selectedKey={view.tab}
-          items={[
-            { id: "office", label: labels.tabs.office },
-            { id: "tasks", label: labels.tabs.tasks },
-          ]}
-          onSelect={(key) => on.selectTab(key === "tasks" ? "tasks" : "office")}
-          inset="none"
-          labelVisibility="always"
-        />
+  const showInviteSurface = mayPresentInvite(view.viewer) && !decisionPending;
+
+  const memberChip =
+    isCompact && view.officeState === "ready" ? (
+      <button
+        type="button"
+        className={GROUP_CHAT_MEMBER_CHIP_CLASS_NAME}
+        data-grammar-member-chip="true"
+        aria-expanded={isRailOpen}
+        onClick={() => on.changeRailOpen(!isRailOpen)}
+      >
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={GROUP_CHAT_MEMBER_CHIP_ICON_CLASS_NAME} aria-hidden="true">
+          <circle cx="6" cy="5" r="2.25" stroke="currentColor" strokeWidth={1.4} />
+          <path d="M2.5 13c.5-2 1.9-3 3.5-3s3 1 3.5 3" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" />
+          <path d="M10.2 3.4a2.25 2.25 0 1 1 .1 4.1M11.5 10.2c1 .4 1.7 1.3 2 2.8" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" />
+        </svg>
+        {railOpenLabel}
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={GROUP_CHAT_MEMBER_CHIP_CHEVRON_CLASS_NAME} aria-hidden="true">
+          <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+    ) : null;
+
+  const showHeaderBand = !decisionPending && view.officeState === "ready" && view.workspaceName !== null;
+  const headerBand = showHeaderBand ? (
+    isCompact ? (
+      /* The compact header row the mobile direction draws: the workspace title with
+         the member chip on its right, so the conversation keeps both accepted
+         messages above the docked invitation sheet. The subtitle stays on the wide
+         header; at 390x844 it costs the lines the two messages need. */
+      <div className={GROUP_CHAT_HEADER_BAND_COMPACT_CLASS_NAME}>
+        <div className={cn("flex", "min-w-0", "items-center", "justify-between", "gap-3")}>
+          <Text size="sm" weight="semibold" overflow="truncate">
+            <span>Workspace</span> <span>{view.workspaceName}</span>
+          </Text>
+          {memberChip}
+        </div>
       </div>
-      {isCompact && view.officeState === "ready" ? (
-        <Drawer isOpen={isRailOpen} onOpenChange={on.changeRailOpen}>
-          <Drawer.Trigger className={GROUP_CHAT_MEMBER_CHIP_CLASS_NAME} data-grammar-member-chip="true">
-            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={GROUP_CHAT_MEMBER_CHIP_ICON_CLASS_NAME} aria-hidden="true">
-              <circle cx="6" cy="5" r="2.25" stroke="currentColor" strokeWidth={1.4} />
-              <path d="M2.5 13c.5-2 1.9-3 3.5-3s3 1 3.5 3" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" />
-              <path d="M10.2 3.4a2.25 2.25 0 1 1 .1 4.1M11.5 10.2c1 .4 1.7 1.3 2 2.8" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" />
-            </svg>
-            {railOpenLabel}
-            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={GROUP_CHAT_MEMBER_CHIP_CHEVRON_CLASS_NAME} aria-hidden="true">
-              <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Drawer.Trigger>
-          <MemberSheet view={view} on={on} labels={labels} />
-        </Drawer>
-      ) : null}
-    </div>
-  );
-  const main =
+    ) : (
+      <SectionHeader
+        level={2}
+        title={
+          <>
+            <span>Workspace</span> <span>{view.workspaceName}</span>
+          </>
+        }
+        description={labels.description}
+        className={GROUP_CHAT_HEADER_BAND_CLASS_NAME}
+        action={
+          <div className={GROUP_CHAT_HEADER_ACTIONS_CLASS_NAME}>
+            <select className={GROUP_CHAT_DAY_SELECT_CLASS_NAME} aria-label="Hôm nay" defaultValue="today">
+              <option value="today">Hôm nay</option>
+            </select>
+          </div>
+        }
+      />
+    )
+  ) : null;
+
+  const body =
     view.officeState === "loading" ? (
       <div className={GROUP_CHAT_LOADING_CLASS_NAME} aria-busy="true">
         <Text size="sm" tone="muted" live="polite">
@@ -1359,52 +1599,61 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
         </Text>
       </div>
     ) : view.tab === "tasks" ? (
-      <TasksPanel view={view} on={on} labels={labels} />
-    ) : (
-      <div className={GROUP_CHAT_OFFICE_COLUMN_CLASS_NAME}>
-        <div className={GROUP_CHAT_CONVERSATION_CLASS_NAME}>
-          {!isCompact && view.workspaceName !== null ? (
-            <SectionHeader level={2} title={view.workspaceName} description={labels.description} />
-          ) : null}
-          <NoticesBand view={view} on={on} labels={labels} />
-          <div
-            className={
-              isCompact && isRailOpen
-                ? GROUP_CHAT_WORKSPACE_HOST_SHEET_OPEN_CLASS_NAME
-                : GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME
-            }
-          >
-            {isCompact ? (
-              <ChatWorkspace
-                label={labels.title}
-                conversationLabel={labels.conversation.label}
-                conversation={<Conversation view={view} on={on} labels={labels} compact />}
-                composer={<Composer view={view} on={on} labels={labels} />}
-              />
-            ) : (
-              <ChatWorkspace
-                label={labels.title}
-                conversationLabel={labels.conversation.label}
-                conversation={<Conversation view={view} on={on} labels={labels} />}
-                composer={<Composer view={view} on={on} labels={labels} />}
-                rail={<MembersRail view={view} on={on} labels={labels} />}
-                railLabel={labels.members.title}
-                railOpenLabel={railOpenLabel}
-                railCloseLabel={labels.members.closeRail}
-                isRailOpen={isRailOpen}
-                onRailOpenChange={on.changeRailOpen}
-                railWidth="standard"
-              />
-            )}
-          </div>
-        </div>
+      <div className={GROUP_CHAT_TAB_PANEL_SCROLL_CLASS_NAME}>
+        <TasksPanel view={view} on={on} labels={labels} />
       </div>
+    ) : (
+      <>
+        <div className={GROUP_CHAT_WORKSPACE_WRAP_CLASS_NAME}>
+          <ChatWorkspace
+            label={labels.title}
+            conversationLabel={labels.conversation.label}
+            conversation={<Conversation view={view} on={on} labels={labels} compact={isCompact} decision={decisionPending} />}
+            composer={<Composer view={view} on={on} labels={labels} decision={decisionPending} compact={isCompact} />}
+          />
+        </div>
+        {isCompact && isRailOpen ? (
+          <MemberSheet view={view} on={on} labels={labels} showInvite={showInviteSurface} />
+        ) : null}
+      </>
     );
+
   return (
     <PageContainer measure="full">
       <div className={GROUP_CHAT_PAGE_CLASS_NAME}>
-        {tabRow}
-        {main}
+        <div className={GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME}>
+          <div className={GROUP_CHAT_WORKBENCH_CLASS_NAME}>
+            <div className={GROUP_CHAT_TABS_BAND_CLASS_NAME}>
+              <div className={GROUP_CHAT_TAB_STRIP_CLASS_NAME}>
+                <Tabs
+                  label={labels.tabListLabel}
+                  selectedKey={view.tab}
+                  items={[
+                    { id: "office", label: labels.tabs.office },
+                    { id: "tasks", label: labels.tabs.tasks },
+                  ]}
+                  onSelect={(key) => on.selectTab(key === "tasks" ? "tasks" : "office")}
+                  inset="none"
+                  labelVisibility="always"
+                />
+              </div>
+              {!showHeaderBand ? memberChip : null}
+            </div>
+            {headerBand}
+            {body}
+          </div>
+          {!isCompact ? (
+            <aside className={GROUP_CHAT_RAIL_ASIDE_CLASS_NAME} aria-label={labels.members.title}>
+              <div className={GROUP_CHAT_RAIL_SCROLL_CLASS_NAME}>
+                {decisionPending ? (
+                  <RosterRail view={view} labels={labels} />
+                ) : (
+                  <MembersRail view={view} on={on} labels={labels} />
+                )}
+              </div>
+            </aside>
+          ) : null}
+        </div>
       </div>
     </PageContainer>
   );
