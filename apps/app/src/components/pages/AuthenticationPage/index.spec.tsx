@@ -39,6 +39,7 @@ const details = { email: "reader@example.test", password: "secret-password", nam
 const code = { otp: "123456", newPassword: "new-password" } satisfies AuthCode
 
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push, replace: mocks.replace }), usePathname: () => "/authentication" }))
+vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(window.location.search) }))
 vi.mock("next-intl", () => ({ useTranslations: () => mocks.t }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/auth", () => mocks.api)
@@ -419,5 +420,29 @@ describe("AuthenticationPage connected journeys", () => {
         await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith("/authentication"))
         expect(panel()).toContain('"state":"details"')
         expect(panel()).not.toContain("signOut.")
+    })
+
+    it("catches a session ending that lands after mount, announces it once, and drops the param", async () => {
+        /*
+         * The hand-off's own timing: the custody guard's bare redirect mounts this page first, and
+         * the confirmation's navigation appends the answer a moment later. A reader that only
+         * sampled the address at mount would miss it entirely - this one must still see it, once.
+         */
+        const { rerender } = render(<AuthenticationPage />)
+        await waitFor(() => expect(panel()).toContain('"state":"details"'))
+
+        // the confirmation's hand-off lands on the address a moment after the page mounted
+        window.history.replaceState(null, "", "/authentication?sessionEnding=unconfirmed")
+        rerender(<AuthenticationPage />)
+        await waitFor(() => expect(panel()).toContain('"state":"notice"'))
+        expect(panel()).toContain("signOut.unconfirmedNotice")
+        expect(mocks.replace).toHaveBeenCalledWith("/authentication")
+        expect(mocks.replace).toHaveBeenCalledTimes(1)
+
+        // the param still sits on the test's static address; a re-render must not re-announce it
+        rerender(<AuthenticationPage />)
+        expect(mocks.replace).toHaveBeenCalledTimes(1)
+        expect(panel()).toContain("signOut.unconfirmedNotice")
+        expect(mocks.session.adopt).not.toHaveBeenCalled()
     })
 })

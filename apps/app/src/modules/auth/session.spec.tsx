@@ -24,7 +24,7 @@ vi.mock("../api/graphql", () => ({
 }))
 
 import type { AuthPayload } from "../api/auth"
-import { SessionProvider, useSession } from "./session"
+import { SessionProvider, useSession, type SessionEndReport } from "./session"
 
 const payload = (overrides: Partial<AuthPayload> = {}): AuthPayload => ({
     accessToken: "token-1",
@@ -207,6 +207,87 @@ describe("SessionProvider", () => {
 
         // the wider ending WAS asked; an unanswered request confirms no part of it
         expect(report).toEqual({ localCleared: true, remoteRevocation: "unknown", authorityEnding: "unconfirmed" })
+    })
+
+    it("keeps custody while an everywhere ending is in flight, and clears it once the answer lands", async () => {
+        /*
+         * The whole reason the pending face can paint: the console stays mounted until the request
+         * has answered, so the confirmation riding it is still there to send the hand-off. Custody
+         * is still dropped the moment the answer is read - the epoch bump in the `finally` retires
+         * any refresh still in flight too.
+         */
+        mocks.api.refreshSession.mockResolvedValue({ ok: true, data: payload() })
+        const signOutRequest = deferred<Awaited<ReturnType<typeof mocks.api.signOut>>>()
+        mocks.api.signOut.mockReturnValue(signOutRequest.promise)
+        const { result } = renderSession()
+        await waitFor(() => expect(result.current.state.status).toBe("signed-in"))
+
+        let pending: Promise<SessionEndReport> | undefined
+        let report: SessionEndReport | undefined
+        act(() => {
+            pending = result.current.end("everywhere")
+        })
+        // the request is unanswered, so the console - and the confirmation on it - still stands
+        expect(result.current.state.status).toBe("signed-in")
+
+        await act(async () => {
+            signOutRequest.resolve({ ok: true, data: { data: true, remoteRevocationObserved: true, authorityEndingConfirmed: true } })
+            report = await pending
+        })
+        expect(result.current.state.status).toBe("anonymous")
+        expect(report).toEqual({ localCleared: true, remoteRevocation: "observed", authorityEnding: "confirmed" })
+    })
+
+    it("clears custody on every everywhere outcome - a refused answer and a thrown one alike", async () => {
+        mocks.api.refreshSession.mockResolvedValue({ ok: true, data: payload() })
+        const { result } = renderSession()
+        await waitFor(() => expect(result.current.state.status).toBe("signed-in"))
+
+        mocks.api.signOut.mockResolvedValue({ ok: false, reason: "network", code: "NETWORK" })
+        await act(async () => {
+            const report = await result.current.end("everywhere")
+            expect(report).toEqual({ localCleared: true, remoteRevocation: "unknown", authorityEnding: "unconfirmed" })
+        })
+        expect(result.current.state.status).toBe("anonymous")
+
+        // a thrown answer still drops this browser's custody through the same `finally`
+        act(() => result.current.adopt(payload({ accessToken: "adopted-token" })))
+        expect(result.current.state.status).toBe("signed-in")
+        mocks.api.signOut.mockRejectedValue(new Error("offline"))
+        let pending: Promise<SessionEndReport> | undefined
+        act(() => {
+            pending = result.current.end("everywhere")
+        })
+        await act(async () => {
+            await expect(pending).rejects.toThrow("offline")
+        })
+        expect(result.current.state.status).toBe("anonymous")
+    })
+
+    it("still clears first for a this-browser ending, before its request settles", async () => {
+        /*
+         * The clear-first order is unchanged here: this browser's custody is gone while the request
+         * is still unanswered, exactly as before, so a failed call cannot leave somebody staring at
+         * a console they tried to leave.
+         */
+        mocks.api.refreshSession.mockResolvedValue({ ok: true, data: payload() })
+        const signOutRequest = deferred<Awaited<ReturnType<typeof mocks.api.signOut>>>()
+        mocks.api.signOut.mockReturnValue(signOutRequest.promise)
+        const { result } = renderSession()
+        await waitFor(() => expect(result.current.state.status).toBe("signed-in"))
+
+        let pending: Promise<SessionEndReport> | undefined
+        let report: SessionEndReport | undefined
+        act(() => {
+            pending = result.current.end()
+        })
+        expect(result.current.state.status).toBe("anonymous")
+
+        await act(async () => {
+            signOutRequest.resolve({ ok: true, data: { data: true, remoteRevocationObserved: false, authorityEndingConfirmed: null } })
+            report = await pending
+        })
+        expect(report).toEqual({ localCleared: true, remoteRevocation: "unknown", authorityEnding: "notAsked" })
     })
 
     it("throws outside the provider", () => {

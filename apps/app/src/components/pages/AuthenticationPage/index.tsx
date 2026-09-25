@@ -1,8 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "@/i18n/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useMutateContinueBrokeredSignInSwr, useMutateForgotPasswordInitSwr, useMutateForgotPasswordResendSwr, useMutateForgotPasswordVerifyOtpSwr, useMutateSignInSwr, useMutateSignUpInitSwr, useMutateSignUpResendSwr, useMutateSignUpVerifyOtpSwr, useMutateVerifyTwoFactorSwr, useOauthReturnExchange } from "@/hooks";
 import { DEFAULT_AUTHENTICATED_LANDING, authenticationOauthRedirectUrl, rememberOauthProvider, validatedReturnTo } from "@/modules/auth";
 import { AuthenticationPageView, type AuthenticationPageExit } from "./component";
@@ -141,6 +142,61 @@ const RETURN_TO_STORAGE_KEY = "nivo.auth.return-to";
 const SESSION_ENDING_PARAM = "sessionEnding";
 
 /**
+ * What one read of the live address reports upward.
+ *
+ * `rest` is the query with the hand-off param already taken out, so the consumer can put the
+ * address back without re-deriving it - other params, like a return intent, are not this hand-off's
+ * to take and stay on it.
+ */
+type SessionEndingArrival = {
+  /** Whether the hand-off param is on the address at all, however it is valued. */
+  readonly handedOff: boolean;
+  /** The report's known value, or null for anything else. */
+  readonly kind: "applied" | "unconfirmed" | null;
+  /** The query string left once the param is consumed, empty when none remains. */
+  readonly rest: string;
+};
+
+/** Props for the hand-off's address reader. */
+type SessionEndingQueryProps = {
+  /** Receives every successive value the address carries. */
+  readonly onParam: (arrival: SessionEndingArrival) => void;
+};
+
+/**
+ * The hand-off's own reader, subscribing to the live address rather than sampling it.
+ *
+ * A `useSearchParams` read re-renders on every navigation, which is exactly the hand-off's timing:
+ * the custody guard's redirect mounts this page BEFORE the confirmation's navigation appends the
+ * answer, so a value that lands after mount is still seen. Prerendering requires the hook under a
+ * Suspense boundary, so this leaf reads nothing else and draws nothing.
+ *
+ * @param props - {@link SessionEndingQueryProps}
+ * @returns Nothing - it draws nothing.
+ */
+const SessionEndingQuery = (props: SessionEndingQueryProps) => {
+  const { onParam } = props;
+  const searchParams = useSearchParams();
+  /*
+   * The dependency is the query TEXT, not the read model: a fresh URLSearchParams object every
+   * render would refire the report on every render, while the text only changes when the address
+   * does - which is exactly when the next successive value is owed.
+   */
+  const search = searchParams.toString();
+  useEffect(() => {
+    const query = new URLSearchParams(search);
+    const raw = query.get(SESSION_ENDING_PARAM);
+    query.delete(SESSION_ENDING_PARAM);
+    onParam({
+      handedOff: raw !== null,
+      kind: raw === "applied" || raw === "unconfirmed" ? raw : null,
+      rest: query.toString()
+    });
+  }, [search, onParam]);
+  return null;
+};
+
+/**
  * The transport codes that mean NOBODY DECIDED.
  *
  * A request that never arrived, could not be parsed, was refused before any resolver ran, or came
@@ -158,13 +214,25 @@ const UNANSWERED_CODES = new Set(["NETWORK", "MALFORMED", "GRAPHQL", "EMPTY"]);
  */
 const isUnanswered = (code: string | undefined): boolean => code !== undefined && UNANSWERED_CODES.has(code);
 
+/** What the shell's address leaf reported off the live query; null until a hand-off lands. */
+type AuthenticationPageConnectedProps = {
+  readonly sessionEnding: SessionEndingArrival | null;
+};
+
 /**
- * The authentication screen.
+ * The connected half of the authentication screen.
  *
- * @returns The page.
+ * IT TAKES THE HAND-OFF AS A PROP, NOT AS A CHILD. A world-owning render hands every render path
+ * to a resolved pure view, so the `useSearchParams` read that must see a late-arriving ending
+ * cannot be drawn inside it - the read lives in `SessionEndingQuery`, a leaf that draws nothing,
+ * and what it reports arrives through `sessionEnding` like every other settled fact this page
+ * consumes.
+ *
+ * @param props - {@link AuthenticationPageConnectedProps}
+ * @returns The page's connected body.
  */
-export const AuthenticationPage = (props: AuthenticationPageProps) => {
-  void props;
+const AuthenticationPageConnected = (props: AuthenticationPageConnectedProps) => {
+  const { sessionEnding } = props;
   const t = useTranslations("authentication");
   const router = useRouter();
   const pathname = usePathname();
@@ -225,35 +293,18 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     }
   });
   /*
-   * THE EVERYWHERE-ENDING'S OWN REPORT, handed over on the address. The console that asked for the
-   * ending is gone by the time it could be reported - ending every session clears this browser's
-   * custody first - so SessionEndingDialog sends the authority-side answer here the same way the
-   * guard sends the interrupted route: one `sessionEnding` value, read once at mount rather than
-   * subscribed to. `applied` means the ending was confirmed in every browser; `unconfirmed` means
-   * this browser is signed out and the others could not be confirmed, which the notice states as
-   * exactly that - never as a completed ending. Any other value is not an answer at all, only a
-   * param to consume.
+   * THE EVERYWHERE-ENDING'S OWN REPORT, handed over on the address and read REACTIVELY. The console
+   * that asked for the ending is gone by the time it could be reported - ending every session
+   * clears this browser's custody once the answer arrives - so SessionEndingDialog sends the
+   * authority-side answer here the same way the guard sends the interrupted route: one
+   * `sessionEnding` value. It can land AFTER this page has already mounted - the guard's own
+   * redirect brings the sign-in surface up first and the confirmation's navigation carries the
+   * answer a moment later - so `SessionEndingQuery` reads the live address rather than the address
+   * at mount. `applied` means the ending was confirmed in every browser; `unconfirmed` means this
+   * browser is signed out and the others could not be confirmed, which the notice states as exactly
+   * that - never as a completed ending. Any other value is not an answer at all, only a param to
+   * consume.
    */
-  const [sessionEndingOnArrival] = useState<{
-    /** Whether the hand-off param was present at all, however it was valued. */
-    readonly handedOff: boolean;
-    /** The report's known value, or null for anything else. */
-    readonly kind: "applied" | "unconfirmed" | null;
-  }>(() => {
-    try {
-      const query = new URLSearchParams(window.location.search);
-      const ending = query.get(SESSION_ENDING_PARAM);
-      return {
-        handedOff: query.has(SESSION_ENDING_PARAM),
-        kind: ending === "applied" || ending === "unconfirmed" ? ending : null
-      };
-    } catch {
-      return {
-        handedOff: false,
-        kind: null
-      };
-    }
-  });
   /*
    * THE SWITCH IS REAL STATE AND IT CHANGES NOTHING SERVER-SIDE YET. The refresh cookie is written
    * with a fixed thirty-day `maxAge` and no per-request control, so a session lasts the same length
@@ -459,21 +510,27 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
    * THE HANDED-OFF ENDING IS REPORTED ONCE, THEN THE ADDRESS FORGETS IT. A consumed report left on
    * the query would be announced again on every reload and carried into every shared link, so the
    * param is dropped the moment it is read - whatever it held. A known value settles into the same
-   * notice phase the other sessionless endings wear; an unrecognised one is only consumed. Other
-   * params, like a return intent, are not this page's to take, so they stay.
+   * notice phase the other sessionless endings wear; an unrecognised one is only consumed. The
+   * `hasConsumedSessionEnding` ref is the "once": a param still on the address after consumption
+   * must not put the notice back on a re-render.
    */
-  useEffect(() => {
-    if (!sessionEndingOnArrival.handedOff || hasConsumedSessionEnding.current) return;
+  const consumeSessionEnding = useCallback((arrival: SessionEndingArrival) => {
+    if (!arrival.handedOff || hasConsumedSessionEnding.current) return;
     hasConsumedSessionEnding.current = true;
-    const remaining = new URLSearchParams(window.location.search);
-    remaining.delete(SESSION_ENDING_PARAM);
-    const search = remaining.toString();
-    router.replace(search === "" ? pathname : `${pathname}?${search}`);
-    if (sessionEndingOnArrival.kind !== null) {
-      setNoticeKind(sessionEndingOnArrival.kind === "applied" ? "sessionEndingApplied" : "sessionEndingUnconfirmed");
+    router.replace(arrival.rest === "" ? pathname : `${pathname}?${arrival.rest}`);
+    if (arrival.kind !== null) {
+      setNoticeKind(arrival.kind === "applied" ? "sessionEndingApplied" : "sessionEndingUnconfirmed");
       setPhase("notice");
     }
-  }, [pathname, router, sessionEndingOnArrival]);
+  }, [pathname, router]);
+  /*
+   * Each read the leaf reports is offered to the consumer once it lands; the ref inside keeps the
+   * first hand-off, so repeats of the same address and bare-query reads after it is stripped are
+   * spent by the guard rather than by another branch here.
+   */
+  useEffect(() => {
+    if (sessionEnding !== null) consumeSessionEnding(sessionEnding);
+  }, [sessionEnding, consumeSessionEnding]);
 
   /*
    * THE RETURN LEG OF A PROVIDER SIGN-IN.
@@ -1093,4 +1150,26 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
   };
   const panel = panelFor();
   return <AuthenticationPageView panel={panel} exits={exits()} />;
+};
+
+/**
+ * The authentication screen.
+ *
+ * A PURE SHELL HOLDS THE TWO HALVES APART. The connected body resolves the world and hands every
+ * render path to its pure twin, so the `useSearchParams` read cannot sit inside it; the read lives
+ * in `SessionEndingQuery` under this shell's own Suspense boundary, which is where prerendering
+ * wants the hook anyway. What the leaf reports is relayed down to the connected body as an
+ * ordinary prop - the leaf draws nothing, and the shell itself owns no world state.
+ *
+ * @returns The page.
+ */
+export const AuthenticationPage = (props: AuthenticationPageProps) => {
+  void props;
+  const [sessionEnding, setSessionEnding] = useState<SessionEndingArrival | null>(null);
+  return <>
+    <Suspense fallback={null}>
+      <SessionEndingQuery onParam={setSessionEnding} />
+    </Suspense>
+    <AuthenticationPageConnected sessionEnding={sessionEnding} />
+  </>;
 };

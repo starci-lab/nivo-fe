@@ -84,8 +84,9 @@ export type Session = {
   /**
    * Drop the session here and on the server, and report what the server actually confirmed.
    *
-   * @param scope - `everywhere` asks to end every current session of this principal; omitted ends
-   *                this browser alone. Either way the local state is cleared first.
+   * @param scope - `everywhere` asks to end every current session of this principal and keeps this
+   *                browser's custody until that answer arrives; omitted (or this browser alone)
+   *                clears the local state first. Either way the local state is always cleared.
    */
   readonly end: (scope?: SignOutScope) => Promise<SessionEndReport>;
 };
@@ -150,10 +151,45 @@ export const SessionProvider = (props: SessionProviderProps) => {
   }, []);
   const end = useCallback(async (scope?: SignOutScope): Promise<SessionEndReport> => {
     /*
-     * The local state is cleared FIRST. If the network call fails the reader is still signed out
-     * of this tab, which is the outcome they asked for; the alternative leaves somebody staring
-     * at a console they just tried to leave. Bumping the epoch also retires any refresh still in
-     * flight, so its answer cannot put a session back after this one was ended.
+     * AN EVERYWHERE ENDING WAITS FOR ITS ANSWER BEFORE DROPPING LOCAL CUSTODY. Clearing first
+     * would unmount the console - and the every-browser confirmation riding it - while the request
+     * is still in flight, so its pending face could never paint and the hand-off it navigates with
+     * on the answer would reach a sign-in surface that already mounted without it. Keeping custody
+     * until the answer arrives keeps the console and the confirmation alive through the request.
+     * The clear still runs on EVERY outcome in the `finally`: a failed or thrown request drops
+     * this browser's in-memory access and custody epoch exactly as a completed one does - the
+     * person lands on Login either way, as sds.login.session-custody requires.
+     */
+    if (scope === "everywhere") {
+      try {
+        const answer = await signOutMutation({
+          scope
+        });
+        if (!answer.ok) {
+          return {
+            localCleared: true,
+            remoteRevocation: "unknown",
+            authorityEnding: "unconfirmed"
+          };
+        }
+        return {
+          localCleared: true,
+          remoteRevocation: answer.data.remoteRevocationObserved ? "observed" : "unknown",
+          authorityEnding: authorityEndingFrom(answer.data.authorityEndingConfirmed)
+        };
+      } finally {
+        custodyEpoch.current += 1;
+        token.current = null;
+        setState({
+          status: "anonymous"
+        });
+      }
+    }
+    /*
+     * A THIS-BROWSER ENDING STILL CLEARS FIRST. If the network call fails the reader is still
+     * signed out of this tab, which is the outcome they asked for; the alternative leaves somebody
+     * staring at a console they just tried to leave. Bumping the epoch also retires any refresh
+     * still in flight, so its answer cannot put a session back after this one was ended.
      */
     custodyEpoch.current += 1;
     token.current = null;
@@ -174,7 +210,7 @@ export const SessionProvider = (props: SessionProviderProps) => {
       return {
         localCleared: true,
         remoteRevocation: "unknown",
-        authorityEnding: scope === "everywhere" ? "unconfirmed" : "notAsked"
+        authorityEnding: "notAsked"
       };
     }
     return {

@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push, replace: mocks.replace }), usePathname: () => "/authentication" }))
+vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(window.location.search) }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => ({ state: { status: "anonymous" }, adopt: mocks.adopt, end: vi.fn() }) }))
 vi.mock("@/modules/api/auth", () => mocks)
@@ -197,6 +198,30 @@ describe("AuthenticationPage interactions", () => {
         expect(screen.queryByText("signOut.everywhereAppliedNotice")).not.toBeInTheDocument()
         expect(mocks.replace).toHaveBeenCalledWith("/authentication")
         expect(mocks.adopt).not.toHaveBeenCalled()
+    })
+
+    it("announces an everywhere ending that lands after mount, once", async () => {
+        /*
+         * The hand-off's own timing on the real surface: the custody guard's bare redirect mounts
+         * the page first, and the confirmation's navigation appends the answer a moment later. A
+         * mount-only read would need a reload to see it; the live read sees it as it arrives.
+         */
+        const { rerender } = render(<AuthenticationPage />)
+        expect(await screen.findByLabelText("emailLabel")).toBeInTheDocument()
+        expect(mocks.replace).not.toHaveBeenCalled()
+
+        // the confirmation's hand-off lands on the address a moment after the page mounted
+        window.history.replaceState(null, "", "/authentication?sessionEnding=unconfirmed")
+        rerender(<AuthenticationPage />)
+
+        expect(await screen.findByText("signOut.unconfirmedNotice")).toBeInTheDocument()
+        expect(screen.queryByText("signOut.everywhereAppliedNotice")).not.toBeInTheDocument()
+        expect(mocks.replace).toHaveBeenCalledWith("/authentication")
+        expect(mocks.replace).toHaveBeenCalledTimes(1)
+
+        // the param still sits on the test's static address; a re-render must not re-announce it
+        rerender(<AuthenticationPage />)
+        expect(mocks.replace).toHaveBeenCalledTimes(1)
     })
 
     it("ignores an unrecognised session-ending value and still consumes the param", async () => {
