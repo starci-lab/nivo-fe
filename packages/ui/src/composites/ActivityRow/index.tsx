@@ -1,17 +1,16 @@
 import { Text, TextAction } from "@starci/grammar/common";
 import { Avatar } from "../../leaves/Avatar";
-import { ReactionPicker, type ReactionChoiceData } from "../../leaves/ReactionPicker";
+import { ReactionPicker, type ReactionPickerChoiceData } from "../../leaves/ReactionPicker";
 
-import type { ComponentProps } from "../component-props";
 import { BODY_CLASS_NAME, ROOT_CLASS_NAME, SENTENCE_CLASS_NAME } from "./classNames";
 import type { ReactionType } from "../../leaves/ReactionPicker/reaction-type";
 
 /** Public ActivityRowData declaration. */
-export type ActivityRowData = {readonly id: string;readonly actor?: string;readonly avatar?: string;readonly action?: string;readonly target?: string;readonly time?: string;readonly reactionLabel?: string;readonly reactionCount?: number;readonly selectedReaction?: ReactionType | null;readonly reactionChoices?: ReadonlyArray<ReactionChoiceData>;readonly isMine?: boolean;readonly isReacting?: boolean;};
+export type ActivityRowData = {readonly id: string;readonly actor?: string;readonly avatar?: string;readonly action?: string;readonly target?: string;readonly time?: string;readonly reactionLabel?: string;readonly reactionCount?: number;readonly selectedReaction?: ReactionType | null;readonly reactionChoices?: ReadonlyArray<ReactionPickerChoiceData>;readonly isMine?: boolean;readonly isReacting?: boolean;};
 /** Public ActivityRowActions declaration. */
 export type ActivityRowActions = {readonly openActor?: () => void;readonly openTarget?: () => void;readonly react?: (type: ReactionType | null) => void;};
 /** Public ActivityRowProps declaration. */
-export type ActivityRowProps = ComponentProps<ActivityRowData, ActivityRowActions>;
+export type ActivityRowProps = {readonly props: ActivityRowData;readonly on?: ActivityRowActions;readonly isLoading?: boolean;};
 
 /** Public ActivityRow declaration. */
 export const ActivityRow = (props: ActivityRowProps) => ActivityRowView(props);

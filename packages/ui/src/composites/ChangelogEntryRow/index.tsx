@@ -1,5 +1,4 @@
 import { Text, TextAction, Badge, type BadgeTone } from "@starci/grammar/common";
-import type { ComponentProps } from "../component-props";
 import { META_CLASS_NAME, ROOT_CLASS_NAME } from "./classNames";
 
 /** Public ChangelogEntryRowData declaration. */
@@ -7,7 +6,7 @@ export type ChangelogEntryRowData = {readonly id: string;readonly dateLabel?: st
 /** Public ChangelogEntryRowActions declaration. */
 export type ChangelogEntryRowActions = {readonly open?: () => void;};
 /** Public ChangelogEntryRowProps declaration. */
-export type ChangelogEntryRowProps = ComponentProps<ChangelogEntryRowData, ChangelogEntryRowActions>;
+export type ChangelogEntryRowProps = {readonly props: ChangelogEntryRowData;readonly on?: ChangelogEntryRowActions;readonly isLoading?: boolean;};
 
 /** Public ChangelogEntryRow declaration. */
 export const ChangelogEntryRow = (props: ChangelogEntryRowProps) => ChangelogEntryRowView(props);

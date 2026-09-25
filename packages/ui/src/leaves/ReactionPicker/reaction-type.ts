@@ -14,23 +14,17 @@
  * checked here: a wire value outside this union does not compile at the call site.
  */
 /** The positive acknowledgement reaction. */
-export const ReactionLike = "like" as const;
+export const REACTION_LIKE = "like" as const;
 /** The affection reaction. */
-export const ReactionLove = "love" as const;
+export const REACTION_LOVE = "love" as const;
 /** The laughter reaction. */
-export const ReactionHaha = "haha" as const;
+export const REACTION_HAHA = "haha" as const;
 /** The surprise reaction. */
-export const ReactionWow = "wow" as const;
+export const REACTION_WOW = "wow" as const;
 /** The sadness reaction. */
-export const ReactionSad = "sad" as const;
+export const REACTION_SAD = "sad" as const;
 /** The anger reaction. */
-export const ReactionAngry = "angry" as const;
+export const REACTION_ANGRY = "angry" as const;
 
 /** One value from the presentation vocabulary owned by this module. */
-export type ReactionType =
-    | typeof ReactionLike
-    | typeof ReactionLove
-    | typeof ReactionHaha
-    | typeof ReactionWow
-    | typeof ReactionSad
-    | typeof ReactionAngry;
+export type ReactionType = "like" | "love" | "haha" | "wow" | "sad" | "angry";

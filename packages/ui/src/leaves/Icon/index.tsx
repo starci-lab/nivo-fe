@@ -88,7 +88,7 @@ import {
 "@heroicons/react/16/solid";
 import type { IconUsage } from "@starci/grammar/common";
 import type { SVGProps } from "react";
-import { GithubMark, GoogleMark } from "../../iconography-brands";
+import { GithubMark, GoogleMark } from "./product-brands";
 
 /**
  * LEAF - `Icon`: the picture a word needs when the word alone is slower to find.
@@ -177,7 +177,7 @@ const cuts = (outline: GlyphComponent, chip: GlyphComponent): GlyphCuts => ({
  * The app's answer to "which glyph means this". Every Nivo semantic icon name resolves here to the
  * three cuts Grammar's `Icon` may ask for, so a screen names a MEANING and never a glyph library.
  */
-export const IconSources: Record<IconName, GlyphCuts> = {
+export const ICON_SOURCES: Record<IconName, GlyphCuts> = {
   brand: cuts(AcademicCapIcon, AcademicCapSolidIcon),
   streak: cuts(FireIcon, FireSolidIcon),
   credit: cuts(BoltIcon, BoltSolidIcon),
@@ -227,5 +227,5 @@ export const IconSources: Record<IconName, GlyphCuts> = {
 };
 
 /** Resolve an app-owned semantic name to the glyph cut required by Grammar's public role. */
-export const nivoIconSource = (name: IconName, usage: IconUsage = "chip") => IconSources[name][usage];
+export const nivoIconSource = (name: IconName, usage: IconUsage = "chip") => ICON_SOURCES[name][usage];
 

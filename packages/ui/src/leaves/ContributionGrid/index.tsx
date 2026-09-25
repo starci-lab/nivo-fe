@@ -54,7 +54,7 @@ const LEVEL_UPPER_BOUNDS = [0, 2, 5, 9] as const;
  * @returns An index into {@link CELL_CLASSES}.
  */
 const levelOf = (count: number): number => {
-  const level = LEVEL_UPPER_BOUNDS.findIndex((bound) => count <= bound);
+  const level = LEVEL_UPPER_BOUNDS.findIndex((bound): boolean => count <= bound);
   return level === -1 ? CELL_CLASSES.length - 1 : level;
 };
 

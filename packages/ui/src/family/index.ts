@@ -58,7 +58,7 @@ const NivoGrammarRootRenderer: GrammarComponentRenderer<GrammarRootProps> = (pro
     })
 
 /** The nivo family: every Common renderer, with Common's root replaced by the scoped one. */
-export const nivoGrammar: NivoGrammarFamily = {
+export const NIVO_GRAMMAR: NivoGrammarFamily = {
     id: NIVO_GRAMMAR_FAMILY_ID,
     familyId: NIVO_GRAMMAR_FAMILY_ID,
     styles: {
@@ -70,7 +70,7 @@ export const nivoGrammar: NivoGrammarFamily = {
 }
 
 /** Selects the nivo family for everything it wraps. One per app, at the provider boundary. */
-export const NivoGrammarRoot = nivoGrammar.components.GrammarRoot
+export const NivoGrammarRoot = NIVO_GRAMMAR.components.GrammarRoot
 
 /** nivo inherits every Common rule and publishes no family-specific evidence of its own yet. */
 export const nivoRuleConformance = defineGrammarRuleConformance({

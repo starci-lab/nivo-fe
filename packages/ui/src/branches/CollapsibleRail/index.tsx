@@ -22,7 +22,7 @@ export type CollapsibleRailProps<RailProps extends object, CompactProps extends 
     readonly collapseLabel: string
     readonly expandLabel: string
     readonly storageKey?: string
-    readonly defaultCollapsed?: boolean
+    readonly isDefaultCollapsed?: boolean
     readonly onCollapsedChange?: (collapsed: boolean) => void
 }
 
@@ -40,7 +40,7 @@ const readPersistedState = (key: string): boolean | undefined => {
 export const CollapsibleRail = <R extends object, C extends object, T extends object>(props: CollapsibleRailProps<R, C, T>) => {
     const reduceMotion = useReducedMotion()
     const headingId = useId()
-    const [collapsed, setCollapsed] = useState(props.defaultCollapsed ?? false)
+    const [collapsed, setCollapsed] = useState(props.isDefaultCollapsed ?? false)
     useEffect(() => {
         const persisted = readPersistedState(props.storageKey ?? DEFAULT_STORAGE_KEY)
         if (persisted !== undefined) setCollapsed(persisted)

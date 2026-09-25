@@ -1,5 +1,4 @@
 import { ChoiceTabs, type ChoiceTabsData } from "../../leaves/ChoiceTabs";
-import type { ComponentProps } from "../component-props";
 import { ROOT_CLASS_NAME } from "./classNames";
 
 /** Public DualTabsToolbarData declaration. */
@@ -7,7 +6,7 @@ export type DualTabsToolbarData = {readonly leading: ChoiceTabsData;readonly tra
 /** Public DualTabsToolbarActions declaration. */
 export type DualTabsToolbarActions = {readonly selectLeading?: (key: string) => void;readonly selectTrailing?: (key: string) => void;};
 /** Public DualTabsToolbarProps declaration. */
-export type DualTabsToolbarProps = ComponentProps<DualTabsToolbarData, DualTabsToolbarActions>;
+export type DualTabsToolbarProps = {readonly props: DualTabsToolbarData;readonly on?: DualTabsToolbarActions;readonly isLoading?: boolean;};
 
 /** Public DualTabsToolbar declaration. */
 export const DualTabsToolbar = (props: DualTabsToolbarProps) => DualTabsToolbarView(props);

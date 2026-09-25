@@ -4,6 +4,8 @@ import { Text, Badge } from "@starci/grammar/common";
 
 /** The settled lifecycle positions. */
 export type LifecycleStepState = "done" | "current" | "upcoming"
+/** Every settled lifecycle position, in the order a step renders. */
+export const LIFECYCLE_STEP_STATES: ReadonlyArray<LifecycleStepState> = ["done", "current", "upcoming"] as const
 /** Resolved copy and state for one lifecycle step. */
 export type LifecycleStepData = { readonly ordinal: string; readonly label: string; readonly state: LifecycleStepState; readonly stateLabel: string }
 /** Props for one lifecycle step. */

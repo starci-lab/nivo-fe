@@ -3,7 +3,6 @@ import { ChoiceTabs } from "../../leaves/ChoiceTabs";
 import { ContributionGrid } from "../../leaves/ContributionGrid";
 import { ContributionIntensityLegend } from "../../leaves/ContributionIntensityLegend";
 
-import type { ComponentProps } from "../component-props";
 import { ROOT_CLASS_NAME, ROW_CLASS_NAME } from "./classNames";
 
 /** Public ContributionCalendarDay declaration. */
@@ -13,7 +12,7 @@ export type ContributionCalendarData = {readonly year: number;readonly years: Re
 /** Public ContributionCalendarActions declaration. */
 export type ContributionCalendarActions = {readonly selectYear?: (year: number) => void;};
 /** Public ContributionCalendarProps declaration. */
-export type ContributionCalendarProps = ComponentProps<ContributionCalendarData, ContributionCalendarActions>;
+export type ContributionCalendarProps = {readonly props: ContributionCalendarData;readonly on?: ContributionCalendarActions;readonly isLoading?: boolean;};
 
 /** Public ContributionCalendar declaration. */
 export const ContributionCalendar = (props: ContributionCalendarProps) => ContributionCalendarView(props);

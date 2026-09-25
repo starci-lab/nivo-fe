@@ -5,13 +5,13 @@ import { cn } from "@heroui/react";
 import { ROUTE_INDICATOR_CLASS_NAME, ROUTE_TAB_CLASS_NAME, ROUTE_TAB_LIST_CLASS_NAME, ROUTE_TABS_CLASS_NAME } from "./classNames";
 
 /** One text-only destination in a routed or task-local navigation strip. */
-export type RouteTabData = {readonly id: string;readonly label: string;};
+export type RouteTabsItemData = {readonly id: string;readonly label: string;};
 
 /** Resolved copy and controlled destination for one underlined tab strip. */
 export type RouteTabsData = {
   readonly label: string;
   readonly selectedKey: string;
-  readonly tabs: ReadonlyArray<RouteTabData>;
+  readonly tabs: ReadonlyArray<RouteTabsItemData>;
 };
 
 /** The destination selected through the navigation strip. */

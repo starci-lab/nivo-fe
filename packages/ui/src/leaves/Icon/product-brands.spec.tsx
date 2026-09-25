@@ -1,8 +1,8 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { GithubMark, GoogleMark } from "./iconography-brands"
+import { GithubMark, GoogleMark } from "./product-brands"
 
-describe("provider marks", () => {
+describe("product-brands", () => {
     it("keeps Google multicolor paths and Github currentColor", () => {
         const { container } = render(<><GoogleMark /><GithubMark /></>)
         const paths = container.querySelectorAll("path")

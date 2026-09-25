@@ -3,9 +3,9 @@ import { relative, resolve } from "node:path"
 import { COMMON_GRAMMAR_COMPONENTS } from "@starci/grammar/common"
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { NIVO_GRAMMAR_FAMILY_ID, NivoGrammarRoot, nivoGrammar, nivoRuleConformance } from "."
+import { NIVO_GRAMMAR, NIVO_GRAMMAR_FAMILY_ID, NivoGrammarRoot, nivoRuleConformance } from "."
 
-describe("nivoGrammar", () => {
+describe("NIVO_GRAMMAR", () => {
     it("stamps the family attribute its stylesheet is scoped to", () => {
         const { container } = render(<NivoGrammarRoot>content</NivoGrammarRoot>)
 
@@ -26,22 +26,22 @@ describe("nivoGrammar", () => {
 
     it("names itself nivo, and says where its values live", () => {
         expect(NIVO_GRAMMAR_FAMILY_ID).toBe("nivo")
-        expect(nivoGrammar.id).toBe("nivo")
-        expect(nivoGrammar.familyId).toBe("nivo")
-        expect(nivoGrammar.scopeProps).toEqual({ "data-grammar-family": "nivo" })
-        expect(nivoGrammar.styles).toEqual({
+        expect(NIVO_GRAMMAR.id).toBe("nivo")
+        expect(NIVO_GRAMMAR.familyId).toBe("nivo")
+        expect(NIVO_GRAMMAR.scopeProps).toEqual({ "data-grammar-family": "nivo" })
+        expect(NIVO_GRAMMAR.styles).toEqual({
             entrypoint: "@nivo/ui/family.css",
             scope: { attribute: "data-grammar-family", value: "nivo" },
         })
     })
 
     it("replaces only the root, and inherits every other Common renderer unchanged", () => {
-        expect(Object.keys(nivoGrammar.components).sort()).toEqual(
+        expect(Object.keys(NIVO_GRAMMAR.components).sort()).toEqual(
             Object.keys(COMMON_GRAMMAR_COMPONENTS).sort(),
         )
-        expect(nivoGrammar.components.GrammarRoot).not.toBe(COMMON_GRAMMAR_COMPONENTS.GrammarRoot)
+        expect(NIVO_GRAMMAR.components.GrammarRoot).not.toBe(COMMON_GRAMMAR_COMPONENTS.GrammarRoot)
 
-        const inherited = Object.entries(nivoGrammar.components).filter(([name]) => name !== "GrammarRoot")
+        const inherited = Object.entries(NIVO_GRAMMAR.components).filter(([name]) => name !== "GrammarRoot")
         expect(inherited.length).toBeGreaterThan(0)
         for (const [name, renderer] of inherited) {
             expect(renderer).toBe(COMMON_GRAMMAR_COMPONENTS[name as keyof typeof COMMON_GRAMMAR_COMPONENTS])
@@ -78,7 +78,7 @@ const sources = SEARCHED.flatMap((dir) => filesUnder(resolve(ROOT, dir, "src")))
     .filter((path) => !/\.spec\.[a-z]+$/.test(path))
     .map((path) => ({ path: relative(ROOT, path).split("\\").join("/"), text: readFileSync(path, "utf8") }))
 
-describe("nivoGrammar", () => {
+describe("NIVO_GRAMMAR", () => {
     it("imports Grammar renderers from the Common entry, never from another family's", () => {
         // Only a real specifier counts; prose naming Core in a comment explains the boundary rather than crossing it.
         const forms = ['from "@starci/grammar/', 'import "@starci/grammar/'] as const
@@ -180,7 +180,7 @@ const sourcesUnder = (dir: string): ReadonlyArray<string> =>
         return /\.(?:ts|tsx|css|mjs|json)$/.test(entry.name) && !/\.spec\./.test(entry.name) ? [path] : []
     })
 
-describe("nivoGrammar", () => {
+describe("NIVO_GRAMMAR", () => {
     it("scopes every value it declares to the nivo family root", () => {
         const valued = rules.filter((rule) => /(?:^|\s)--[a-z]/m.test(rule.body))
 

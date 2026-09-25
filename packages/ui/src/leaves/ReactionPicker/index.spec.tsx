@@ -1,11 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { ReactionPicker } from "./"
-import { ReactionLike, ReactionLove } from "./reaction-type"
+import { REACTION_LIKE, REACTION_LOVE } from "./reaction-type"
 
 const choices = [
-    { id: ReactionLike, label: "Like" },
-    { id: ReactionLove, label: "Love" },
+    { id: REACTION_LIKE, label: "Like" },
+    { id: REACTION_LOVE, label: "Love" },
 ]
 
 describe("ReactionPicker", () => {
@@ -15,14 +15,14 @@ describe("ReactionPicker", () => {
     })
 
     it("renders a selected read-only summary with its count", () => {
-        render(<ReactionPicker props={{ label: "React", count: 3, selected: ReactionLove, choices }} />)
+        render(<ReactionPicker props={{ label: "React", count: 3, selected: REACTION_LOVE, choices }} />)
         expect(screen.getByText("3")).toBeInTheDocument()
         expect(document.querySelector("img")).toHaveAttribute("src", "/reactions/love.svg")
     })
 
     it("opens, toggles the selected reaction, and closes on selection", () => {
         const select = vi.fn()
-        render(<ReactionPicker props={{ label: "React", count: 1, selected: ReactionLike, choices }} on={{ select }} />)
+        render(<ReactionPicker props={{ label: "React", count: 1, selected: REACTION_LIKE, choices }} on={{ select }} />)
         const trigger = screen.getByRole("button", { name: "React" })
         fireEvent.click(trigger)
         expect(trigger).toHaveAttribute("aria-expanded", "true")

@@ -6,13 +6,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { ReactionType } from "./reaction-type";
 
 /** One product reaction offered by the picker. */
-export type ReactionChoiceData = {
+export type ReactionPickerChoiceData = {
   readonly id: ReactionType;
   readonly label: string;
 };
 
 /** Exact checked-in Fluent Emoji asset for one product reaction. */
-const reactionAsset = (type: ReactionType) => `/reactions/${type}.svg`;
+const reactionAsset = (type: ReactionType): string => `/reactions/${type}.svg`;
 
 /** Optical size for one reaction asset, owned by its placement. */
 type ReactionImageProps = {
@@ -36,7 +36,7 @@ export type ReactionPickerData = {
   readonly label: string;
   readonly count: number;
   readonly selected?: ReactionType | null;
-  readonly choices: ReadonlyArray<ReactionChoiceData>;
+  readonly choices: ReadonlyArray<ReactionPickerChoiceData>;
   readonly isPending?: boolean;
 };
 
@@ -60,7 +60,7 @@ export const ReactionPicker = (props: ReactionPickerProps) => ReactionPickerView
 const ReactionPickerView = ({ props, on }: ReactionPickerProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const selectedChoice = props.choices.find((choice) => choice.id === props.selected);
+  const selectedChoice = props.choices.find((choice): boolean => choice.id === props.selected);
 
   useEffect(() => {
     if (!isOpen) return;

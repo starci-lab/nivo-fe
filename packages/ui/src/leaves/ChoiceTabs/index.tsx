@@ -4,12 +4,12 @@ import { ToggleButton, ToggleButtonGroup } from "@heroui/react";
 import { PRIMARY_GROUP_CLASS_NAME, ROOT_CLASS_NAME, SECONDARY_GROUP_CLASS_NAME } from "./classNames";
 
 /** One text-only peer choice. */
-export type ChoiceTabData = {readonly id: string;readonly label: string;};
+export type ChoiceTabsItemData = {readonly id: string;readonly label: string;};
 /** Resolved copy and selection for one fixed peer-choice control. */
 export type ChoiceTabsData = {
   readonly label: string;
   readonly selectedKey: string;
-  readonly tabs: ReadonlyArray<ChoiceTabData>;
+  readonly tabs: ReadonlyArray<ChoiceTabsItemData>;
   readonly variant?: "primary" | "secondary";
 };
 /** Selection reported by the peer-choice control. */

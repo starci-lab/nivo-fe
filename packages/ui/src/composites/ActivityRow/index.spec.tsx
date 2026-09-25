@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { ReactionLike } from "../../leaves/ReactionPicker/reaction-type"
+import { REACTION_LIKE } from "../../leaves/ReactionPicker/reaction-type"
 import { ActivityRow } from "./"
 
 describe("ActivityRow", () => {
@@ -8,14 +8,14 @@ describe("ActivityRow", () => {
         const openActor = vi.fn()
         const openTarget = vi.fn()
         const react = vi.fn()
-        render(<ActivityRow props={{ id: "a", actor: "Ada", action: "completed", target: "Task", time: "today", reactionLabel: "React", reactionCount: 1, reactionChoices: [{ id: ReactionLike, label: "Like" }] }} on={{ openActor, openTarget, react }} />)
+        render(<ActivityRow props={{ id: "a", actor: "Ada", action: "completed", target: "Task", time: "today", reactionLabel: "React", reactionCount: 1, reactionChoices: [{ id: REACTION_LIKE, label: "Like" }] }} on={{ openActor, openTarget, react }} />)
         fireEvent.click(screen.getByRole("button", { name: "Ada" }))
         fireEvent.click(screen.getByRole("button", { name: "Task" }))
         fireEvent.click(screen.getByRole("button", { name: "React" }))
         fireEvent.click(screen.getByRole("button", { name: "Like" }))
         expect(openActor).toHaveBeenCalledTimes(1)
         expect(openTarget).toHaveBeenCalledTimes(1)
-        expect(react).toHaveBeenCalledWith(ReactionLike)
+        expect(react).toHaveBeenCalledWith(REACTION_LIKE)
     })
 
     it("keeps a mine reaction read-only and omits absent target/reaction", () => {
