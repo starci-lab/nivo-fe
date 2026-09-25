@@ -1,7 +1,8 @@
 /** Public React components and their ordinary TypeScript props. */
 
 /** The nivo visual family over the Common contract; its values ship as `@nivo/ui/family.css`. */
-export * from "./family"
+export { NIVO_GRAMMAR, NIVO_GRAMMAR_FAMILY_ID, NivoGrammarRoot, nivoRuleConformance } from "./leaves/NivoGrammar"
+export type { NivoGrammarFamily, NivoGrammarFamilyStyles } from "./leaves/NivoGrammar"
 
 export * from "./leaves/Avatar"
 export * from "./leaves/Breadcrumbs"

@@ -59,7 +59,7 @@ describe("NIVO_GRAMMAR", () => {
  * another family. Every rule here is about a boundary rather than a rendered pixel, so it is checked
  * against the source text of the whole repository and not against one component.
  */
-const ROOT = resolve(import.meta.dirname, "../../../..")
+const ROOT = resolve(import.meta.dirname, "../../../../..")
 const APPS = ["apps/app", "apps/landing", "apps/expert"] as const
 const SEARCHED = [...APPS, "packages/ui"] as const
 
@@ -212,7 +212,7 @@ describe("NIVO_GRAMMAR", () => {
     })
 
     it("keeps StarCi purple out of the family, and out of every app that mounts it", () => {
-        const root = resolve(import.meta.dirname, "../../../..")
+        const root = resolve(import.meta.dirname, "../../../../..")
         const searched = ["packages/ui/src", "apps/app/src", "apps/landing/src", "apps/expert/src"]
         const hits = searched.flatMap((dir) =>
             sourcesUnder(resolve(root, dir)).filter((file) =>

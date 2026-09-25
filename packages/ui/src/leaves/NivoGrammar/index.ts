@@ -30,7 +30,7 @@ import { createElement } from "react"
  * only difference from Core is the family id and the location of the stylesheet.
  */
 
-/** The one attribute value that scopes every nivo value in `family/nivo.css`. */
+/** The one attribute value that scopes every nivo value in the sibling `nivo.css`. */
 export const NIVO_GRAMMAR_FAMILY_ID = "nivo"
 
 /** Where the family's own values live, and the attribute that scopes them. */

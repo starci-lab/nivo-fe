@@ -6,7 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./styles.css": "./src/styles.css",
-    "./family.css": "./src/family/nivo.css",
+    "./family.css": "./src/leaves/NivoGrammar/nivo.css",
     "./leaves/*": "./src/leaves/*/index.tsx",
     "./composites/*": "./src/composites/*/index.tsx",
     "./branches/*": "./src/branches/*/index.tsx",
