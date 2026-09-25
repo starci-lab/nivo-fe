@@ -883,7 +883,7 @@ const InviteForm = ({ view, on, labels, compact = false }: InviteFormProps) => (
       id="collab-invite-email"
       name="invite-email"
       kind="email"
-      label={compact ? <span className={GROUP_CHAT_SR_ONLY_CLASS_NAME}>{labels.invite.email}</span> : labels.invite.email}
+      label={labels.invite.email}
       placeholder={labels.invite.emailPlaceholder}
       value={view.invite.email}
       isDisabled={view.invite.pending}
