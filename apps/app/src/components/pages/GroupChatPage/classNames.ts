@@ -384,6 +384,17 @@ export const GROUP_CHAT_COMPOSER_CLASS_NAME = cn("flex", "items-end", "gap-2", "
 /** The compact composer keeps the same row on a shorter inset. */
 export const GROUP_CHAT_COMPOSER_COMPACT_CLASS_NAME = cn("flex", "items-end", "gap-2", "p-1");
 
+/**
+ * The composer's leading glyph cluster. The accepted composite draws an
+ * attachment, an emoji and a mention affordance; the surface owns no such
+ * command, so the cluster is decorated and never a keyboard stop - the mention
+ * itself is the typed `@module` address the thread already renders.
+ */
+export const GROUP_CHAT_COMPOSER_GLYPHS_CLASS_NAME = cn("flex", "shrink-0", "items-center", "gap-1.5", "px-1", "text-muted-foreground");
+
+/** One inline glyph of the composer's decorative cluster. */
+export const GROUP_CHAT_COMPOSER_GLYPH_CLASS_NAME = cn("h-5", "w-5");
+
 /** The in-progress send keeps its draft visible and locked above the composer. */
 export const GROUP_CHAT_SEND_STATE_CLASS_NAME = cn("flex", "items-center", "justify-between", "gap-3", "px-3", "py-2");
 

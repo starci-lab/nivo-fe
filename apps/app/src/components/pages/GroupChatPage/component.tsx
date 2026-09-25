@@ -35,6 +35,8 @@ import {
   GROUP_CHAT_CARD_INSET_CLASS_NAME,
   GROUP_CHAT_COMPOSER_CLASS_NAME,
   GROUP_CHAT_COMPOSER_COMPACT_CLASS_NAME,
+  GROUP_CHAT_COMPOSER_GLYPH_CLASS_NAME,
+  GROUP_CHAT_COMPOSER_GLYPHS_CLASS_NAME,
   GROUP_CHAT_CONVERSATION_LIST_CLASS_NAME,
   GROUP_CHAT_CONVERSATION_LIST_COMPACT_CLASS_NAME,
   GROUP_CHAT_DAY_SELECT_CLASS_NAME,
@@ -1247,7 +1249,29 @@ const Composer = ({ view, on, labels, decision, compact = false }: ComposerProps
           onValueChange={on.changeComposer}
         />
       </div>
-      {decision ? (
+      <span className={GROUP_CHAT_COMPOSER_GLYPHS_CLASS_NAME} aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={GROUP_CHAT_COMPOSER_GLYPH_CLASS_NAME}>
+          <path
+            d="M13.6 6.3 7.2 12.7a1.7 1.7 0 0 0 2.4 2.4l6.6-6.6a3.3 3.3 0 0 0-4.7-4.7L4.6 10.7a4.9 4.9 0 0 0 6.9 6.9l5.3-5.3"
+            stroke="currentColor"
+            strokeWidth={1.4}
+            strokeLinecap="round"
+          />
+        </svg>
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={GROUP_CHAT_COMPOSER_GLYPH_CLASS_NAME}>
+          <circle cx="10" cy="10" r="7.2" stroke="currentColor" strokeWidth={1.4} />
+          <path d="M7.2 12c.7.9 1.6 1.4 2.8 1.4s2.1-.5 2.8-1.4" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" />
+          <circle cx="7.7" cy="8.3" r=".9" fill="currentColor" />
+          <circle cx="12.3" cy="8.3" r=".9" fill="currentColor" />
+        </svg>
+        <span className={GROUP_CHAT_COMPOSER_GLYPH_CLASS_NAME}>
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={GROUP_CHAT_COMPOSER_GLYPH_CLASS_NAME}>
+            <circle cx="10" cy="10" r="7.2" stroke="currentColor" strokeWidth={1.4} />
+            <path d="M12.6 11.6a2.9 2.9 0 1 1 .1-2.4v3.6a1.3 1.3 0 0 1-2.6 0V8.9" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" />
+          </svg>
+        </span>
+      </span>
+      {compact && decision ? (
         <IconButton
           source={nivoIconSource("send", "leading")}
           label={labels.composer.send}
