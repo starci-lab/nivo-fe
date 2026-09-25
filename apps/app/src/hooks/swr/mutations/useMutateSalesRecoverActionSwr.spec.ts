@@ -1,0 +1,46 @@
+import { describe, expect, it, vi } from "vitest";
+
+const mocks = vi.hoisted(() => ({
+  useNivoMutation: vi.fn((key: unknown, mutation: unknown, options: unknown) => ({ key, mutation, options })),
+  useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
+  api: { commandSalesRecoverAction: vi.fn(async () => ({ ok: true })) }
+}));
+vi.mock("../useNivoMutation", () => ({ useNivoMutation: mocks.useNivoMutation }));
+vi.mock("@/modules/auth/session", () => ({ useSession: mocks.useSession }));
+vi.mock("@/modules/api/sales", () => mocks.api);
+
+import { salesActionQueryKey } from "../queries/useQuerySalesActionSwr";
+import { useMutateSalesRecoverActionSwr } from "./useMutateSalesRecoverActionSwr";
+
+const SCOPE = { workspaceId: "workspace-1", instanceId: "instance-1", installationId: "installation-1" };
+const FINGERPRINT = "a".repeat(64);
+const FENCE = { claimTokenHash: FINGERPRINT, fencedAt: "2026-09-25T00:00:00.000Z" };
+const RETRY = { operation: "retryNoStart" as const, actionId: "action-1", attemptGeneration: 1, receiverIntentId: "receiver-intent-1", receiverAttemptId: "receiver-attempt-1", receiverNoStartProofRef: "proof-1", oldWriterFence: FENCE, fingerprint: FINGERPRINT, expectedRevision: 2 };
+const STOP = { operation: "cancelNoStart" as const, actionId: "action-1", attemptGeneration: 1, noStartProof: { proofRef: "proof-1" }, oldWriterFence: FENCE, expectedRevision: 2 };
+type MutationShape = {
+  readonly key: unknown;
+  readonly options: { readonly invalidates: (trigger: { readonly input: typeof RETRY | typeof STOP }, answer: unknown) => ReadonlyArray<unknown>; readonly shouldInvalidate: (answer: { readonly ok: boolean; readonly code?: string }) => boolean };
+  readonly mutation: (input: { readonly requestId: string; readonly input: typeof RETRY | typeof STOP }) => Promise<unknown>;
+};
+
+describe("useMutateSalesRecoverActionSwr", () => {
+  it("keeps the command on its installation-qualified identity and holds it while disabled", () => {
+    expect((useMutateSalesRecoverActionSwr(SCOPE) as unknown as MutationShape).key).toEqual(["sales", "recover-action", "workspace-1", "instance-1", "installation-1"]);
+    expect((useMutateSalesRecoverActionSwr(SCOPE, false) as unknown as MutationShape).key).toBeNull();
+  });
+
+  it("opens the retry door with the no-start proof and the stop door with the same fence", async () => {
+    const hook = useMutateSalesRecoverActionSwr(SCOPE) as unknown as MutationShape;
+    await hook.mutation({ requestId: "request-1", input: RETRY });
+    expect(mocks.api.commandSalesRecoverAction).toHaveBeenCalledWith("access-token", SCOPE, RETRY, "request-1");
+    await hook.mutation({ requestId: "request-2", input: STOP });
+    expect(mocks.api.commandSalesRecoverAction).toHaveBeenLastCalledWith("access-token", SCOPE, STOP, "request-2");
+  });
+
+  it("refreshes the action a retry or a stop named, and reads a refusal as needing no read", () => {
+    const hook = useMutateSalesRecoverActionSwr(SCOPE) as unknown as MutationShape;
+    expect(hook.options.invalidates({ input: RETRY }, { ok: true })).toEqual([salesActionQueryKey(SCOPE, { actionId: "action-1" })]);
+    expect(hook.options.shouldInvalidate({ ok: false, code: "outcome_unknown" })).toBe(true);
+    expect(hook.options.shouldInvalidate({ ok: false, code: "SALES_REFUSED_CONFLICT" })).toBe(false);
+  });
+});

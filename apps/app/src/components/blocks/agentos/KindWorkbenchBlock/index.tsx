@@ -71,6 +71,7 @@ import type { ComponentType } from "react";
 
 import type { AgentosRuntimeOperationEvent, AgentosRuntimeTask } from "@/modules/api/console";
 import { AccountingWorkbenchBlock } from "@/components/blocks/agentos/AccountingWorkbenchBlock";
+import { SalesWorkbenchBlock } from "@/components/blocks/agentos/SalesWorkbenchBlock";
 
 /** Runtime data every open-registry workbench receives from the shared shell. */
 export type WorkbenchProps = {
@@ -108,22 +109,7 @@ const WorkbenchContent = ({
     <Heading level={3}>{title}</Heading>
 
     <Text size="xs" tone="muted">{caption}</Text></div><div>{facts.map((fact, index) => <div key={index}>{<Text size="sm">{fact.label}</Text>}{<Text size="sm" weight="semibold">{fact.value}</Text>}</div>)}</div>{notice === undefined ? undefined : <Text size="sm" tone="muted">{notice}</Text>}</div>;
-const SalesPipelineWorkbench = (props: WorkbenchProps) => {
-  const { copy } = props;
-  return (<WorkbenchContent title={copy.workbench.sales} caption={copy.workbench.registered({ kind: props.kindKey, version: props.workbenchVersion })} facts={[{
-  id: "qualified",
-  label: copy.workbench.qualified,
-  value: "12"
-}, {
-  id: "review",
-  label: copy.workbench.needsReview,
-  value: "4"
-}, {
-  id: "module",
-  label: copy.workbench.module,
-  value: props.moduleId
-}]} />);
-};
+const SalesPipelineWorkbench = (props: WorkbenchProps) => <SalesWorkbenchBlock moduleId={props.moduleId} kindKey={props.kindKey} workbenchVersion={props.workbenchVersion} />;
 const ConversationInboxWorkbench = (props: WorkbenchProps) => {
   const { copy } = props;
   return (<WorkbenchContent title={copy.workbench.inbox} caption={copy.workbench.registered({ kind: props.kindKey, version: props.workbenchVersion })} facts={[{

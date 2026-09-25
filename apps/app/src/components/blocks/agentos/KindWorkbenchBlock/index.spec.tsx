@@ -8,6 +8,7 @@ import { buildModulePageCopy } from "@/components/pages/AgentOSSolutionModulePag
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 vi.mock("@/components/blocks/agentos/AccountingWorkbenchBlock", () => ({ AccountingWorkbenchBlock: () => <div>Accounting workbench</div> }))
+vi.mock("@/components/blocks/agentos/SalesWorkbenchBlock", () => ({ SalesWorkbenchBlock: () => <div>Sales workbench</div> }))
 import { DEFAULT_WORKBENCH_REGISTRY, KindWorkbenchBlock as ActualKindWorkbenchBlock } from "."
 
 type KindWorkbenchBlockFixtureProps = Omit<ComponentProps<typeof ActualKindWorkbenchBlock>, "copy"> & { readonly locale?: "en" | "vi" }
@@ -21,6 +22,7 @@ describe("KindWorkbenchBlock", () => {
     it.each([
         ["support-queue", "Support queue"],
         ["accounting-sheet", "Accounting workbench"],
+        ["sales-pipeline", "Sales workbench"],
         ["calendar-week", "Calendar week"],
         ["document-reader", "Document reader"],
     ])("resolves trusted workbench %s", (workbenchKey, expectedTitle) => {
@@ -35,6 +37,22 @@ describe("KindWorkbenchBlock", () => {
         )
         expect(html).toContain(expectedTitle)
         expect(html).not.toContain("No registered workbench")
+    })
+
+    it("mounts the Sales workbench on the sales-pipeline entry instead of asserting static counts", () => {
+        const html = renderToStaticMarkup(
+            <KindWorkbenchBlock
+                moduleId="installation-1"
+                kindKey="sales-copilot"
+                workbenchKey="sales-pipeline"
+                workbenchVersion="1.0.0"
+                registry={DEFAULT_WORKBENCH_REGISTRY}
+            />,
+        )
+        expect(html).toContain("Sales workbench")
+        expect(html).toContain("sales-pipeline@1.0.0")
+        expect(html).not.toMatch(/>12</u)
+        expect(html).not.toMatch(/>4</u)
     })
 
     it("projects durable tasks into the kind workbench instead of static queue claims", () => {
