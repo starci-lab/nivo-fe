@@ -167,7 +167,32 @@
     },
     "account": {
       "label": "Tài khoản",
-      "signOut": "Đăng xuất"
+      "signOut": "Đăng xuất",
+      "signOutEverywhere": "Đăng xuất khỏi mọi trình duyệt",
+      "endSessionsForPerson": "Kết thúc phiên đăng nhập của một người",
+      "sessionEnding": {
+        "title": "Đăng xuất khỏi mọi trình duyệt",
+        "description": "Kết thúc các phiên Nivo hiện tại trên mọi trình duyệt. Bạn vẫn có thể đăng nhập lại sau.",
+        "scopeNote": "Trình duyệt này cũng sẽ đăng xuất.",
+        "cancel": "Hủy",
+        "confirm": "Đăng xuất khỏi mọi trình duyệt",
+        "pending": "Đang kết thúc các phiên trên mọi trình duyệt…"
+      },
+      "administratorEnding": {
+        "title": "Kết thúc phiên đăng nhập của {target}?",
+        "description": "Thao tác này kết thúc mọi phiên Nivo hiện tại của người này trên mọi trình duyệt. Quyền của bạn được kiểm tra ngay khi bạn gửi yêu cầu.",
+        "targetLabel": "Người cần kết thúc phiên",
+        "contextLabel": "Phạm vi bạn thao tác",
+        "workspaceContext": "Workspace {workspace}",
+        "operationContext": "Vận hành Nivo",
+        "cancel": "Hủy",
+        "confirm": "Kết thúc các phiên",
+        "pending": "Đang kiểm tra quyền và kết thúc các phiên…",
+        "applied": "Đã kết thúc các phiên của người này trong phạm vi bạn thao tác.",
+        "refused": "Không thể thực hiện thao tác này.",
+        "undecided": "Chưa hoàn tất được thao tác này. Vui lòng thử lại.",
+        "retry": "Thử lại"
+      }
     },
     "nav": {
       "overview": "Tổng quan",

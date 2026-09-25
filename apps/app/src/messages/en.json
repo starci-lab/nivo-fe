@@ -167,7 +167,32 @@
     },
     "account": {
       "label": "Account",
-      "signOut": "Sign out"
+      "signOut": "Sign out",
+      "signOutEverywhere": "Sign out everywhere",
+      "endSessionsForPerson": "End the sign-ins of a person",
+      "sessionEnding": {
+        "title": "Sign out everywhere",
+        "description": "End your current Nivo sessions on every browser. Your login stays available for a fresh sign-in.",
+        "scopeNote": "This includes this browser.",
+        "cancel": "Cancel",
+        "confirm": "Sign out everywhere",
+        "pending": "Ending your sessions on every browser…"
+      },
+      "administratorEnding": {
+        "title": "End the sign-ins of {target}?",
+        "description": "This ends every current Nivo session of this person on every browser. Your authority is checked as you submit.",
+        "targetLabel": "Person to end sign-ins for",
+        "contextLabel": "Scope you act in",
+        "workspaceContext": "Workspace {workspace}",
+        "operationContext": "Nivo operation",
+        "cancel": "Cancel",
+        "confirm": "End sign-ins",
+        "pending": "Checking your authority and ending the sessions…",
+        "applied": "Sign-ins in the scope you act in have been ended for this person.",
+        "refused": "This action cannot be carried out.",
+        "undecided": "This action could not be completed. Please try again.",
+        "retry": "Try again"
+      }
     },
     "nav": {
       "overview": "Overview",
