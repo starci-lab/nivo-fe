@@ -40,8 +40,23 @@ const useSalesAccessToken = () => {
   return session.state.status === "signed-in" ? session.state.accessToken : null;
 };
 
+/** The pipeline's own status vocabulary, in the one order that canonicalises a status filter. */
+const SALES_STATUS_ORDER: ReadonlyArray<"open" | "won" | "lost"> = ["open", "won", "lost"];
+
 /** The stable identity one Sales read is addressed by: its registered name and its own selector. */
 const salesReadIdentity = (operation: string, ...parts: ReadonlyArray<string | null>): string => `${operation}/${parts.map(part => part ?? "-").join("/")}`;
+
+/**
+ * The one segment a status filter contributes.
+ *
+ * The three statuses are a closed vocabulary, so a selection is canonicalised into the vocabulary's
+ * own order: two spellings of one selection are one cache entry, and only a status the vocabulary
+ * declares can be selected at all.
+ */
+const salesStatusFilterSegment = (statusFilter: SalesPipelineRequest["statusFilter"]): string =>
+  statusFilter === null || statusFilter.length === 0
+    ? "all-statuses"
+    : SALES_STATUS_ORDER.filter(status => statusFilter.includes(status)).join("+");
 
 /** Cache identity for one installation's policy revision, current or the one a configure request stored. */
 export const salesPolicyQueryKey = (scope: SalesInstallationScope, input: SalesPolicyRequest): NivoQueryKey => ["sales", "policy", scope.workspaceId, scope.instanceId, scope.installationId, input.requestId ?? "current-revision"];
@@ -53,7 +68,7 @@ export const salesReadinessQueryKey = (scope: SalesInstallationScope, input: Sal
 export const salesOpportunityQueryKey = (scope: SalesInstallationScope, input: SalesOpportunityRequest): NivoQueryKey => ["sales", "opportunity", scope.workspaceId, scope.instanceId, scope.installationId, input.opportunityId];
 
 /** Cache identity for one pipeline page inside one installation. */
-export const salesPipelineQueryKey = (scope: SalesInstallationScope, input: SalesPipelineRequest): NivoQueryKey => ["sales", "pipeline", scope.workspaceId, scope.instanceId, scope.installationId, input.scopeFingerprint, input.statusFilter === null || input.statusFilter.length === 0 ? "all-statuses" : [...input.statusFilter].sort().join("+"), input.after?.lastOpportunityId ?? "first-page", input.limit];
+export const salesPipelineQueryKey = (scope: SalesInstallationScope, input: SalesPipelineRequest): NivoQueryKey => ["sales", "pipeline", scope.workspaceId, scope.instanceId, scope.installationId, input.scopeFingerprint, salesStatusFilterSegment(input.statusFilter), input.after?.lastOpportunityId ?? "first-page", input.limit];
 
 /** Cache identity for one command plan inside one installation. */
 export const salesCommandQueryKey = (scope: SalesInstallationScope, input: SalesCommandRequest): NivoQueryKey => ["sales", "command", scope.workspaceId, scope.instanceId, scope.installationId, input.commandId];

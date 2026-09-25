@@ -472,7 +472,7 @@ const MAXIMUM_REQUEST_ID_LENGTH = 512;
 const SALES_INVALID_VALUE_CODE = "SALES_POLICY_VALUE_INVALID";
 
 /** The three statuses a refused Sales request answers with; anything else is not a refusal here. */
-const SALES_REFUSAL_STATUSES: ReadonlyArray<string> = ["denied", "conflict", "unavailable"];
+const SALES_REFUSAL_STATUSES: ReadonlySet<string> = new Set(["denied", "conflict", "unavailable"]);
 
 /**
  * Every status a served Sales variant may carry; anything else fails closed.
@@ -482,7 +482,7 @@ const SALES_REFUSAL_STATUSES: ReadonlyArray<string> = ["denied", "conflict", "un
  * as an observed fact, and only a result carrying a code is a refusal. An undeclared status is
  * neither, and fails closed rather than being read as a Sales state.
  */
-const SALES_SERVED_STATUSES: ReadonlyArray<string> = [
+const SALES_SERVED_STATUSES: ReadonlySet<string> = new Set([
   "completed",
   "duplicate",
   "applied",
@@ -492,7 +492,7 @@ const SALES_SERVED_STATUSES: ReadonlyArray<string> = [
   "open",
   "won",
   "lost"
-];
+]);
 
 const isClosedRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -521,9 +521,30 @@ const isSalesRouteError = (value: unknown): value is SalesRouteError =>
 const reconcilesFor = (operation: SalesOperationName): SalesQueryName | null => SALES_RECONCILIATIONS[operation] ?? null;
 
 /** The failure code one refusal reason is reported under. */
-const refusalCodeFor = (reason: SalesRefusalReason): SalesRefusalCode => reason === "DENIED"
-  ? "SALES_REFUSED_DENIED"
-  : reason === "INVALID" ? "SALES_REFUSED_INVALID" : reason === "CONFLICT" ? "SALES_REFUSED_CONFLICT" : "SALES_REFUSED_UNAVAILABLE";
+const refusalCodeFor = (reason: SalesRefusalReason): SalesRefusalCode => {
+  if (reason === "DENIED") return "SALES_REFUSED_DENIED";
+  if (reason === "INVALID") return "SALES_REFUSED_INVALID";
+  if (reason === "CONFLICT") return "SALES_REFUSED_CONFLICT";
+  return "SALES_REFUSED_UNAVAILABLE";
+};
+
+/** The one refusal reason a refused status and its receiver code name, or null when they name none. */
+const refusalReasonOf = (status: string, code: string): SalesRefusalReason | null => {
+  if (status === "denied") return code === SALES_INVALID_VALUE_CODE ? "INVALID" : "DENIED";
+  if (status === "conflict") return "CONFLICT";
+  return SALES_REFUSAL_STATUSES.has(status) ? "UNAVAILABLE" : null;
+};
+
+/** The positive revision a refusal disclosed, whether it named it `currentRevision` or `revision`. */
+const disclosedRevision = (detail: Readonly<Record<string, unknown>> | null): number | null => {
+  if (detail === null) return null;
+  if (isDisclosedRevision(detail.currentRevision)) return detail.currentRevision;
+  return isDisclosedRevision(detail.revision) ? detail.revision : null;
+};
+
+/** The non-empty item a refusal disclosed, or null when it named none. */
+const disclosedItem = (detail: Readonly<Record<string, unknown>> | null): string | null =>
+  detail !== null && typeof detail.item === "string" && detail.item.length > 0 ? detail.item : null;
 
 const failure = (operation: SalesOperationName, code: SalesFailureCode, reason: string | null, requestId: string | null): SalesFailure => ({
   ok: false,
@@ -538,11 +559,24 @@ const failure = (operation: SalesOperationName, code: SalesFailureCode, reason: 
 /** Keep the receiver's own disclosure: the refusal reason, and the item or revision it named. */
 const salesRefusal = (reason: SalesRefusalReason, code: string, value: unknown): SalesRefusal => {
   const detail = isClosedRecord(value) ? value : null;
-  const item = detail !== null && typeof detail.item === "string" && detail.item.length > 0 ? detail.item : null;
-  const currentRevision = detail !== null && isDisclosedRevision(detail.currentRevision)
-    ? detail.currentRevision
-    : detail !== null && isDisclosedRevision(detail.revision) ? detail.revision : null;
-  return { reason, code, item, currentRevision };
+  return { reason, code, item: disclosedItem(detail), currentRevision: disclosedRevision(detail) };
+};
+
+/** One refused result, or the failure its own status and code are not a refusal under. */
+const narrowSalesRefusal = (operation: SalesOperationName, requestId: string, status: string, code: unknown, value: unknown): SalesFailure => {
+  if (typeof code !== "string" || code.length === 0) return failure(operation, "MALFORMED_ANSWER", "The refused result carries no refusal code.", requestId);
+  const reason = refusalReasonOf(status, code);
+  if (reason === null) return failure(operation, "UNEXPECTED_RESULT_STATUS", `The receiver refused with the undeclared status ${status}.`, requestId);
+  return { ...failure(operation, refusalCodeFor(reason), null, requestId), refusal: salesRefusal(reason, code, value) };
+};
+
+/** One served variant, or the failure its own status or missing value is a variant under. */
+const narrowSalesServed = <TValue,>(operation: SalesOperationName, requestId: string, status: string, value: unknown): SalesAnswer<TValue> => {
+  if (!SALES_SERVED_STATUSES.has(status)) return failure(operation, "UNEXPECTED_RESULT_STATUS", `The receiver answered the undeclared status ${status}.`, requestId);
+  if (!isClosedRecord(value)) return failure(operation, "MALFORMED_ANSWER", "The served variant carries no value object.", requestId);
+  // The receiver's field-level closure is its own guarantee, so the value enters as the variant type
+  // the caller asked for: there is no second shape here for a cast to erase.
+  return { ok: true, operation, variant: SALES_RESULT_TAGS[operation], value: value as TValue };
 };
 
 /**
@@ -559,38 +593,29 @@ const narrowSalesResult = <TValue,>(operation: SalesOperationName, requestId: st
   if (!isClosedRecord(result)) return failure(operation, "MALFORMED_ANSWER", "The served result is not a result object.", requestId);
   const status = result.status;
   if (typeof status !== "string" || status.length === 0) return failure(operation, "MALFORMED_ANSWER", "The served result carries no status.", requestId);
-  const code = result.code;
-  if (code !== undefined) {
-    if (typeof code !== "string" || code.length === 0) return failure(operation, "MALFORMED_ANSWER", "The refused result carries no refusal code.", requestId);
-    if (!SALES_REFUSAL_STATUSES.includes(status)) return failure(operation, "UNEXPECTED_RESULT_STATUS", `The receiver refused with the undeclared status ${status}.`, requestId);
-    const reason: SalesRefusalReason = status === "denied"
-      ? code === SALES_INVALID_VALUE_CODE ? "INVALID" : "DENIED"
-      : status === "conflict" ? "CONFLICT" : "UNAVAILABLE";
-    return {
-      ...failure(operation, refusalCodeFor(reason), null, requestId),
-      refusal: salesRefusal(reason, code, result.value)
-    };
-  }
-  if (!SALES_SERVED_STATUSES.includes(status)) return failure(operation, "UNEXPECTED_RESULT_STATUS", `The receiver answered the undeclared status ${status}.`, requestId);
-  if (!isClosedRecord(result.value)) return failure(operation, "MALFORMED_ANSWER", "The served variant carries no value object.", requestId);
-  // The receiver's field-level closure is its own guarantee, so the value enters as the variant type
-  // the caller asked for: there is no second shape here for a cast to erase.
-  return { ok: true, operation, variant: SALES_RESULT_TAGS[operation], value: result.value as TValue };
+  if (result.code !== undefined) return narrowSalesRefusal(operation, requestId, status, result.code, result.value);
+  return narrowSalesServed<TValue>(operation, requestId, status, result.value);
 };
+
+/** One served Sales result, accepted only under this call's own echoed identity. */
+const narrowSalesEnvelope = <TValue,>(operation: SalesOperationName, requestId: string, body: Readonly<Record<string, unknown>>): SalesAnswer<TValue> => {
+  if (body.operation !== operation) return failure(operation, "ECHOED_IDENTITY_MISMATCH", "The result echoes another operation name.", requestId);
+  if (body.requestId !== requestId) return failure(operation, "ECHOED_IDENTITY_MISMATCH", "The result echoes another stable identity.", requestId);
+  return narrowSalesResult<TValue>(operation, requestId, body.result);
+};
+
+/** One outcome nobody can attest, accepted only under this call's own echoed identity. */
+const narrowUnknownOutcome = (operation: SalesOperationName, requestId: string, body: Readonly<Record<string, unknown>>): SalesFailure =>
+  body.operation === operation && body.requestId === requestId
+    ? failure(operation, "outcome_unknown", null, requestId)
+    : failure(operation, "ECHOED_IDENTITY_MISMATCH", "The unknown outcome echoes an identity this call did not send.", requestId);
 
 /** Narrow the route's own closed reply, keeping every non-served outcome a refusal. */
 const narrowSalesAnswer = <TValue,>(operation: SalesOperationName, requestId: string, body: unknown): SalesAnswer<TValue> => {
   if (!isClosedRecord(body)) return failure(operation, "MALFORMED_ANSWER", "The route answer is not an envelope object.", requestId);
-  if (body.kind === "outcome_unknown") {
-    if (body.operation !== operation || body.requestId !== requestId) return failure(operation, "ECHOED_IDENTITY_MISMATCH", "The unknown outcome echoes an identity this call did not send.", requestId);
-    return failure(operation, "outcome_unknown", null, requestId);
-  }
+  if (body.kind === "outcome_unknown") return narrowUnknownOutcome(operation, requestId, body);
+  if (body.kind === "sales_result") return narrowSalesEnvelope<TValue>(operation, requestId, body);
   if (body.kind === "accounting_result") return failure(operation, "UNEXPECTED_RESULT_KIND", "The route answered the Accounting result kind for a Sales operation.", requestId);
-  if (body.kind === "sales_result") {
-    if (body.operation !== operation) return failure(operation, "ECHOED_IDENTITY_MISMATCH", "The result echoes another operation name.", requestId);
-    if (body.requestId !== requestId) return failure(operation, "ECHOED_IDENTITY_MISMATCH", "The result echoes another stable identity.", requestId);
-    return narrowSalesResult<TValue>(operation, requestId, body.result);
-  }
   if (body.kind === "DEADLINE_EXCEEDED") return failure(operation, "DEADLINE_EXCEEDED", typeof body.reason === "string" ? body.reason : null, requestId);
   if (isSalesRouteError(body.kind)) return failure(operation, body.kind, typeof body.reason === "string" ? body.reason : null, requestId);
   return failure(operation, "UNEXPECTED_RESULT_KIND", `The route answered the undeclared result kind ${String(body.kind)}.`, requestId);
