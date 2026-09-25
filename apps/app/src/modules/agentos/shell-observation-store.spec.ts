@@ -1,12 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
-    initialShellObservationState,
+    initialShellObservationSnapshot,
     isShellReadBlocked,
     reduceShellObservation,
     shellSelectionIdentities,
-    shellSourceObservation
+    shellSourceObservation,
+    type ShellObservationEvent,
+    type ShellObservationSnapshot,
+    type ShellSelection,
+    type ShellSourceOutcome
 } from "./shell-observation-store"
-import type { ShellObservationEvent, ShellObservationState, ShellSelection, ShellSourceOutcome } from "./shell-observation-store"
 import type { ShellSourceIdentity } from "@/modules/api/agentos-shell"
 
 const WORKSPACE = "11111111-1111-4111-8111-111111111111"
@@ -29,7 +32,7 @@ const available: Extract<ShellSourceOutcome, { readonly kind: "observation" }> =
     payload: { installations: [] }
 }
 
-const state = (): ShellObservationState => initialShellObservationState(selection, 1)
+const state = (): ShellObservationSnapshot => initialShellObservationSnapshot(selection, 1)
 
 /** Where a read claims to have come from; a case overrides it to simulate an obsolete answer. */
 interface ReadOrigin {
@@ -55,7 +58,7 @@ const settle = (identity: ShellSourceIdentity, readGeneration: number, outcome: 
 })
 
 /** Read one source and settle it, so a case can start from a store that already holds content. */
-const readSource = (current: ShellObservationState, identity: ShellSourceIdentity, generation: number, outcome: ShellSourceOutcome = available): ShellObservationState =>
+const readSource = (current: ShellObservationSnapshot, identity: ShellSourceIdentity, generation: number, outcome: ShellSourceOutcome = available): ShellObservationSnapshot =>
     reduceShellObservation(reduceShellObservation(current, begin(identity, generation)).state, settle(identity, generation, outcome)).state
 
 beforeEach(() => {

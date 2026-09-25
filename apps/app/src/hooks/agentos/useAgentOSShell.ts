@@ -22,35 +22,32 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { toLocale } from "@/i18n/config";
-import { useSession } from "@/modules/auth/session";
-import type { SessionState } from "@/modules/auth/session";
-import { readAgentosShellOverview, resolveAgentosShellNavigation } from "@/modules/api/agentos-shell";
-import type {
-    ShellGatewayOutcome,
-    ShellNavigationOutcome,
-    ShellOverviewAnswer,
-    ShellRead,
-    ShellRouteKey,
-    ShellSourceEnvelope,
-    ShellSourceIdentity
-} from "@/modules/api/agentos-shell";
-import { formatShellSourceIdentity } from "@/modules/api/agentos-shell";
+import { useSession, type SessionState } from "@/modules/auth/session";
 import {
-    initialShellObservationState,
+    formatShellSourceIdentity,
+    readAgentosShellOverview,
+    resolveAgentosShellNavigation,
+    type ShellGatewayOutcome,
+    type ShellNavigationOutcome,
+    type ShellOverviewAnswer,
+    type ShellRead,
+    type ShellRouteKey,
+    type ShellSourceEnvelope,
+    type ShellSourceIdentity
+} from "@/modules/api/agentos-shell";
+import {
+    initialShellObservationSnapshot,
     isShellReadBlocked,
     reduceShellObservation,
-    shellSelectionIdentities
+    shellSelectionIdentities,
+    type ShellObservationEvent,
+    type ShellObservationSnapshot,
+    type ShellSelection,
+    type ShellSessionStanding,
+    type ShellSourceObservation,
+    type ShellSourceOutcome
 } from "@/modules/agentos/shell-observation-store";
-import type {
-    ShellObservationEvent,
-    ShellObservationState,
-    ShellSelection,
-    ShellSessionState,
-    ShellSourceObservation,
-    ShellSourceOutcome
-} from "@/modules/agentos/shell-observation-store";
-import { shellNavigationDecision } from "@/modules/agentos/shell-navigation";
-import type { ShellNavigationDecision } from "@/modules/agentos/shell-navigation";
+import { shellNavigationDecision, type ShellNavigationDecision } from "@/modules/agentos/shell-navigation";
 
 /** Which AgentOS the shell is showing, and which installations its sources are scoped to. */
 export interface AgentOSShellOptions {
@@ -62,7 +59,7 @@ export interface AgentOSShellOptions {
 /** Everything a view of the connected shell needs, and nothing that could change a domain. */
 export interface AgentOSShellHandle {
     readonly selection: ShellSelection;
-    readonly session: ShellSessionState;
+    readonly session: ShellSessionStanding;
     readonly sessionStatus: SessionState["status"];
     readonly blocked: boolean;
     readonly sources: ReadonlyArray<ShellSourceObservation>;
@@ -104,7 +101,7 @@ const envelopeOutcome = (envelope: ShellSourceEnvelope): ShellSourceOutcome => {
 const outcomeForRead = (outcome: ShellGatewayOutcome<ShellOverviewAnswer>, read: ShellRead): ShellSourceOutcome => {
     if (outcome.state === "answered") {
         const canonical = formatShellSourceIdentity(read.identity);
-        const envelope = outcome.answer.sources.find(source => source.sourceIdentity === canonical);
+        const envelope = outcome.answer.sources.find((source): boolean => source.sourceIdentity === canonical);
         // The client already proved that every requested source answered; a missing one is a failure
         // of this read rather than an empty answer, and it is never presented as absence.
         return envelope === undefined ? { kind: "unavailable" } : envelopeOutcome(envelope);
@@ -121,9 +118,9 @@ const outcomeForRead = (outcome: ShellGatewayOutcome<ShellOverviewAnswer>, read:
  * @returns The connected shell handle. Reads are only ever issued while a session is signed in, and
  *   every read, retry, refresh and return allocates newer read generations for the sources it asks.
  */
-export const useAgentOSShell = (options: AgentOSShellOptions): AgentOSShellHandle => {
+export const useAgentOSShell = (options: AgentOSShellOptions) => {
     const { workspaceId, instanceId } = options;
-    const installationKey = [...options.installationIds].sort().join("|");
+    const installationKey = [...options.installationIds].sort((left, right): number => left.localeCompare(right)).join("|");
     const session = useSession();
     const sessionStatus = session.state.status;
     const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null;
@@ -132,7 +129,7 @@ export const useAgentOSShell = (options: AgentOSShellOptions): AgentOSShellHandl
     // different token and the same AgentOS keeps one across refreshes and returns.
     const selectionGeneration = `shell-${workspaceId}-${instanceId}`;
 
-    const [state, setState] = useState<ShellObservationState>(() => initialShellObservationState({ workspaceId, instanceId }, 1));
+    const [state, setState] = useState<ShellObservationSnapshot>(() => initialShellObservationSnapshot({ workspaceId, instanceId }, 1));
     const [readTrigger, setReadTrigger] = useState(0);
     // Generations are allocated here rather than derived from the store, so the set a request is sent
     // under is fixed before anything can be applied back to it.
@@ -141,7 +138,7 @@ export const useAgentOSShell = (options: AgentOSShellOptions): AgentOSShellHandl
     const blockedRef = useRef(false);
     blockedRef.current = isShellReadBlocked(state);
 
-    const dispatch = useCallback((build: (current: ShellObservationState) => ReadonlyArray<ShellObservationEvent>) => {
+    const dispatch = useCallback((build: (current: ShellObservationSnapshot) => ReadonlyArray<ShellObservationEvent>) => {
         setState(current => build(current).reduce((next, event) => reduceShellObservation(next, event).state, current));
     }, []);
 
@@ -213,7 +210,7 @@ export const useAgentOSShell = (options: AgentOSShellOptions): AgentOSShellHandl
 
     const navigationDecision = useCallback((outcome: ShellNavigationOutcome) => shellNavigationDecision(outcome, locale), [locale]);
 
-    return {
+    const handle: AgentOSShellHandle = {
         selection: { workspaceId, instanceId },
         session: state.session,
         sessionStatus,
@@ -224,4 +221,5 @@ export const useAgentOSShell = (options: AgentOSShellOptions): AgentOSShellHandl
         resolveEntry,
         navigationDecision
     };
+    return handle;
 };

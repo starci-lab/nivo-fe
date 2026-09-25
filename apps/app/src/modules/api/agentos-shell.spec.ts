@@ -59,7 +59,8 @@ const answerWith = (status: number, body: unknown): void => {
     fetchMock.mockResolvedValue({ status, json: async () => body })
 }
 
-const sentUrl = (index = 0): string => String(fetchMock.mock.calls[index]?.[0])
+const sentUrls = (): Array<string> => fetchMock.mock.calls.map(call => String(call[0]))
+const sentUrl = (index = 0): string => sentUrls()[index] ?? ""
 const sentInit = (index = 0): RequestInit => fetchMock.mock.calls[index]?.[1] as RequestInit
 
 beforeEach(() => {
@@ -94,9 +95,13 @@ describe("canonicalShellReads", () => {
         expect(canonicalShellReads([readOf({ kind: "runtime" }, 0)])).toBeNull()
         expect(canonicalShellReads(Array.from({ length: MAX_SHELL_READS_PER_REQUEST + 1 }, (_, index) => readOf({ kind: "attention", installationId: `installation-${index}` }, 1)))).toBeNull()
     })
+})
 
-    it("compares identities by code point, so a client reproduces the server's order", () => {
+describe("compareShellSourceIdentity", () => {
+    it("orders by code point, so a client reproduces the server's order", () => {
         expect(compareShellSourceIdentity("a", "B")).toBeGreaterThan(0)
+        expect(compareShellSourceIdentity("capability:{a}", "core_registry")).toBeLessThan(0)
+        expect(compareShellSourceIdentity("runtime", "runtime")).toBe(0)
     })
 })
 
@@ -122,7 +127,7 @@ describe("readAgentosShellOverview", () => {
 
         await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)
 
-        expect(sentInit().headers).toMatchObject({ Authorization: `Bearer ${TOKEN}` })
+        expect(new Headers(sentInit().headers).get("Authorization")).toBe(`Bearer ${TOKEN}`)
         expect(sentUrl()).not.toContain(TOKEN)
         expect(sentUrl()).not.toContain("token")
         expect(storageSet).not.toHaveBeenCalled()
@@ -191,6 +196,17 @@ describe("readAgentosShellOverview", () => {
         expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, [])).toEqual({ state: "unsupported" })
         expect(await readAgentosShellOverview(TOKEN, scope, "", [readOf({ kind: "runtime" }, 1)])).toEqual({ state: "unsupported" })
         expect(fetchMock).not.toHaveBeenCalled()
+    })
+
+    it("never reaches an operation, so no read can become a module command", async () => {
+        const reads = [readOf({ kind: "runtime" }, 1), readOf({ kind: "attention", installationId: INSTALLATION }, 2)]
+        answerWith(200, overviewBody(canonicalShellReads(reads) ?? []))
+
+        await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)
+
+        expect(sentUrls().filter(url => url.includes("/operations/"))).toEqual([])
+        expect(sentInit().method).toBe("GET")
+        expect(sentInit().body).toBeUndefined()
     })
 })
 
@@ -429,19 +445,18 @@ describe("resolveAgentosShellNavigation", () => {
     })
 })
 
-describe("the registered shell route", () => {
-    it("sends no request that could reach a module effect", async () => {
-        const reads = [readOf({ kind: "runtime" }, 1)]
-        answerWith(200, overviewBody(reads))
-        await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)
-        const operations = fetchMock.mock.calls.filter(call => String(call[0]).includes("/operations/"))
-        expect(operations).toHaveLength(0)
-    })
-
+describe("formatShellSourceIdentity", () => {
     it("formats each selection-scoped and receiver-scoped identity in its registered spelling", () => {
         expect(formatShellSourceIdentity({ kind: "core_registry" })).toBe("core_registry")
         expect(formatShellSourceIdentity({ kind: "attention", installationId: INSTALLATION })).toBe(`attention:{${INSTALLATION}}`)
         expect(formatShellSourceIdentity({ kind: "receiver", installationId: INSTALLATION, intentId: "intent-1" })).toBe(`receiver:{${INSTALLATION},intent-1}`)
+    })
+})
+
+describe("formatShellRead", () => {
+    it("spells one read as its percent-encoded identity and its generation", () => {
         expect(formatShellRead({ kind: "runtime" }, 9)).toBe("runtime:9")
+        expect(formatShellRead({ kind: "attention", installationId: INSTALLATION }, 3)).toBe(`attention%3A%7B${INSTALLATION}%7D:3`)
+        expect(formatShellRead({ kind: "receiver", installationId: INSTALLATION, intentId: "intent-1" }, 1)).toBe(`receiver%3A%7B${INSTALLATION}%2Cintent-1%7D:1`)
     })
 })

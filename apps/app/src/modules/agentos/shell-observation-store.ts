@@ -44,16 +44,16 @@ export interface ShellSelection {
  * whose source is known to lag is last-known content, which is a different answer from an answer
  * taken now, and neither of them is `available`.
  */
-export type ShellSourceState = "unresolved" | "loading" | "available" | "partial" | "stale" | "unavailable" | "unsupported" | "refused";
+export type ShellSourceStanding = "unresolved" | "loading" | "available" | "partial" | "stale" | "unavailable" | "unsupported" | "refused";
 
 /** The selection-wide session standing; only a fresh session check leaves a blocked one. */
-export type ShellSessionState = "established" | "sign-in-required" | "access-unestablished";
+export type ShellSessionStanding = "established" | "sign-in-required" | "access-unestablished";
 
 /** One source's record: its latest read identity and the state that read settled into. */
 export interface ShellSourceObservation {
     readonly identity: ShellSourceIdentity;
     readonly readGeneration: number;
-    readonly state: ShellSourceState;
+    readonly state: ShellSourceStanding;
     readonly availability: ShellWireAvailability | null;
     readonly freshness: ShellFreshness | null;
     readonly completeness: ShellCompleteness | null;
@@ -62,10 +62,10 @@ export interface ShellSourceObservation {
 }
 
 /** The whole store: the selection, the session standing and one record per known source. */
-export interface ShellObservationState {
+export interface ShellObservationSnapshot {
     readonly selection: ShellSelection;
     readonly sessionEpoch: number;
-    readonly session: ShellSessionState;
+    readonly session: ShellSessionStanding;
     readonly sources: ReadonlyArray<ShellSourceObservation>;
 }
 
@@ -110,7 +110,7 @@ export type ShellObservationEvent =
 
 /** The reducer's answer: the next state, and which published transition produced it. */
 export interface ShellObservationReduction {
-    readonly state: ShellObservationState;
+    readonly state: ShellObservationSnapshot;
     readonly transition: ShellObservationTransition;
 }
 
@@ -135,10 +135,10 @@ export const shellSelectionIdentities = (installationIds: ReadonlyArray<string>)
 };
 
 /** The store's initial state: nothing read, the session not yet classified for this selection. */
-export const initialShellObservationState = (selection: ShellSelection, sessionEpoch: number): ShellObservationState => ({ selection, sessionEpoch, session: "established", sources: [] });
+export const initialShellObservationSnapshot = (selection: ShellSelection, sessionEpoch: number): ShellObservationSnapshot => ({ selection, sessionEpoch, session: "established", sources: [] });
 
 /** The record for one source, or null when the store has never been told about it. */
-export const shellSourceObservation = (state: ShellObservationState, identity: ShellSourceIdentity): ShellSourceObservation | null => {
+export const shellSourceObservation = (state: ShellObservationSnapshot, identity: ShellSourceIdentity): ShellSourceObservation | null => {
     const canonical = formatShellSourceIdentity(identity);
     return state.sources.find(entry => formatShellSourceIdentity(entry.identity) === canonical) ?? null;
 };
@@ -149,25 +149,13 @@ export const shellSourceObservation = (state: ShellObservationState, identity: S
  * @param state - Current store state.
  * @returns True while the session is sign-in-required or access-cannot-be-established.
  */
-export const isShellReadBlocked = (state: ShellObservationState): boolean => state.session !== "established";
-
-/**
- * The next read generation for one source.
- *
- * Monotonic per source, so an outcome that arrives late can be compared against the generation the
- * store is actually waiting for rather than against whatever arrived last.
- *
- * @param state - Current store state.
- * @param identity - The source about to be read.
- * @returns One more than the highest generation this source has ever been read under.
- */
-export const nextShellReadGeneration = (state: ShellObservationState, identity: ShellSourceIdentity): number => (shellSourceObservation(state, identity)?.readGeneration ?? 0) + 1;
+export const isShellReadBlocked = (state: ShellObservationSnapshot): boolean => state.session !== "established";
 
 const sameSelection = (left: ShellSelection, right: ShellSelection): boolean => left.workspaceId === right.workspaceId && left.instanceId === right.instanceId;
 
-const withSource = (state: ShellObservationState, record: ShellSourceObservation): ShellObservationState => {
+const withSource = (state: ShellObservationSnapshot, record: ShellSourceObservation): ShellObservationSnapshot => {
     const canonical = formatShellSourceIdentity(record.identity);
-    const sources = state.sources.filter(entry => formatShellSourceIdentity(entry.identity) !== canonical);
+    const sources = state.sources.filter((entry): boolean => formatShellSourceIdentity(entry.identity) !== canonical);
     return { ...state, sources: [...sources, record] };
 };
 
@@ -181,7 +169,7 @@ const settledRecord = (identity: ShellSourceIdentity, readGeneration: number, ou
     if (outcome.kind === "unsupported") return { identity, readGeneration, state: "unsupported", availability: "unsupported", freshness: "unknown", completeness: "unknown", observedAt: null, payload: null };
     // Staleness is a state of its own: an available observation whose source is known to lag is
     // last-known content, and it is never rendered as an answer taken now.
-    const settled: ShellSourceState = outcome.availability === "available" && outcome.freshness === "stale" ? "stale" : outcome.availability;
+    const settled: ShellSourceStanding = outcome.availability === "available" && outcome.freshness === "stale" ? "stale" : outcome.availability;
     return {
         identity, readGeneration, state: settled, availability: outcome.availability, freshness: outcome.freshness,
         completeness: outcome.completeness, observedAt: outcome.observedAt,
@@ -192,8 +180,9 @@ const settledRecord = (identity: ShellSourceIdentity, readGeneration: number, ou
 
 const transitionFor = (outcome: ShellSourceOutcome): ShellObservationTransition => {
     if (outcome.kind === "refused") return "clear-denied";
-    if (outcome.kind === "unavailable" || outcome.kind === "unsupported") return "apply-unavailable";
-    return outcome.availability === "partial" ? "apply-limited" : outcome.availability === "available" ? "apply-current" : "apply-unavailable";
+    if (outcome.kind !== "observation") return "apply-unavailable";
+    if (outcome.availability === "partial") return "apply-limited";
+    return outcome.availability === "available" ? "apply-current" : "apply-unavailable";
 };
 
 /** The scope an arriving outcome claims: which session and which selection it belongs to. */
@@ -203,7 +192,40 @@ export interface ShellReadOrigin {
 }
 
 /** Whether a read event still belongs to the selection and session the store is currently holding. */
-const answersCurrentScope = (state: ShellObservationState, event: ShellReadOrigin): boolean => event.sessionEpoch === state.sessionEpoch && sameSelection(event.selection, state.selection);
+const answersCurrentScope = (state: ShellObservationSnapshot, event: ShellReadOrigin): boolean => event.sessionEpoch === state.sessionEpoch && sameSelection(event.selection, state.selection);
+
+/** One source begins a read, or the event is obsolete and changes nothing. */
+const beginRead = (state: ShellObservationSnapshot, event: Extract<ShellObservationEvent, { readonly type: "begin-read" }>): ShellObservationReduction => {
+    if (isShellReadBlocked(state) || !answersCurrentScope(state, event)) return { state, transition: "none" };
+    // Only a newer read may leave a recorded generation behind; a replay is not a new read.
+    if (event.readGeneration <= (shellSourceObservation(state, event.identity)?.readGeneration ?? 0)) return { state, transition: "none" };
+    return { state: withSource(state, loadingRecord(event.identity, event.readGeneration)), transition: "begin-read" };
+};
+
+/** One source's read settles, or the outcome answers a generation this store is not waiting for. */
+const applyOutcome = (state: ShellObservationSnapshot, event: Extract<ShellObservationEvent, { readonly type: "apply-outcome" }>): ShellObservationReduction => {
+    if (isShellReadBlocked(state) || !answersCurrentScope(state, event)) return { state, transition: "none" };
+    if (shellSourceObservation(state, event.identity)?.readGeneration !== event.readGeneration) return { state, transition: "none" };
+    return { state: withSource(state, settledRecord(event.identity, event.readGeneration, event.outcome)), transition: transitionFor(event.outcome) };
+};
+
+/** The selection is replaced, or the change is ignored while the whole selection is session-blocked. */
+const changeSelection = (state: ShellObservationSnapshot, selection: ShellSelection): ShellObservationReduction => {
+    if (isShellReadBlocked(state)) return { state, transition: "none" };
+    return { state: { selection, sessionEpoch: state.sessionEpoch, session: "established", sources: [] }, transition: "change-selection" };
+};
+
+/**
+ * The session standing is replaced for the whole selection.
+ *
+ * A session event advances the epoch, so one that does not move it forward is not a new session
+ * result and changes nothing. Every protected payload of the selection goes at once: a session
+ * outcome is never applied to one source, and a fresh establishment restores no prior payload.
+ */
+const sessionStanding = (state: ShellObservationSnapshot, sessionEpoch: number, session: ShellSessionStanding, transition: ShellObservationTransition): ShellObservationReduction => {
+    if (sessionEpoch <= state.sessionEpoch) return { state, transition: "none" };
+    return { state: { selection: state.selection, sessionEpoch, session, sources: [] }, transition };
+};
 
 /**
  * Apply one event to the store.
@@ -212,44 +234,14 @@ const answersCurrentScope = (state: ShellObservationState, event: ShellReadOrigi
  * @param event - The event, carrying the selection, session epoch and read generation it claims.
  * @returns The next state and the published transition performed, or the same state and `none` when
  *   the event is obsolete: an older read generation, a former selection, or an older session epoch.
- *   A selection change while the session is blocked is also ignored, because the block is
- *   selection-wide and only a fresh session check clears it.
  */
-export const reduceShellObservation = (state: ShellObservationState, event: ShellObservationEvent): ShellObservationReduction => {
+export const reduceShellObservation = (state: ShellObservationSnapshot, event: ShellObservationEvent): ShellObservationReduction => {
     switch (event.type) {
-        case "begin-read": {
-            if (isShellReadBlocked(state) || !answersCurrentScope(state, event)) return { state, transition: "none" };
-            const current = shellSourceObservation(state, event.identity);
-            // Only a newer read may leave a recorded generation behind; a replay is not a new read.
-            if (current !== null && event.readGeneration <= current.readGeneration) return { state, transition: "none" };
-            return { state: withSource(state, loadingRecord(event.identity, event.readGeneration)), transition: "begin-read" };
-        }
-        case "apply-outcome": {
-            if (isShellReadBlocked(state) || !answersCurrentScope(state, event)) return { state, transition: "none" };
-            const current = shellSourceObservation(state, event.identity);
-            // An outcome for a generation this store is not waiting for is ignored, not applied.
-            if (current === null || current.readGeneration !== event.readGeneration) return { state, transition: "none" };
-            return { state: withSource(state, settledRecord(event.identity, event.readGeneration, event.outcome)), transition: transitionFor(event.outcome) };
-        }
-        case "change-selection": {
-            if (isShellReadBlocked(state)) return { state, transition: "none" };
-            return { state: { selection: event.selection, sessionEpoch: state.sessionEpoch, session: "established", sources: [] }, transition: "change-selection" };
-        }
-        case "require-sign-in": {
-            // A session event advances the epoch; one that does not move it forward is not a new
-            // session result and changes nothing.
-            if (event.sessionEpoch <= state.sessionEpoch) return { state, transition: "none" };
-            // A session outcome is selection-wide: every protected payload of the selection goes at once.
-            return { state: { selection: state.selection, sessionEpoch: event.sessionEpoch, session: "sign-in-required", sources: [] }, transition: "require-sign-in" };
-        }
-        case "session-unestablished": {
-            if (event.sessionEpoch <= state.sessionEpoch) return { state, transition: "none" };
-            return { state: { selection: state.selection, sessionEpoch: event.sessionEpoch, session: "access-unestablished", sources: [] }, transition: "session-unestablished" };
-        }
-        case "session-reestablished": {
-            if (event.sessionEpoch <= state.sessionEpoch) return { state, transition: "none" };
-            // A fresh session check establishes new source identities; no prior payload is restored.
-            return { state: { selection: state.selection, sessionEpoch: event.sessionEpoch, session: "established", sources: [] }, transition: "session-reestablished" };
-        }
+        case "begin-read": return beginRead(state, event);
+        case "apply-outcome": return applyOutcome(state, event);
+        case "change-selection": return changeSelection(state, event.selection);
+        case "require-sign-in": return sessionStanding(state, event.sessionEpoch, "sign-in-required", "require-sign-in");
+        case "session-unestablished": return sessionStanding(state, event.sessionEpoch, "access-unestablished", "session-unestablished");
+        case "session-reestablished": return sessionStanding(state, event.sessionEpoch, "established", "session-reestablished");
     }
 };

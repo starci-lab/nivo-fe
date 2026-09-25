@@ -103,7 +103,8 @@ describe("useAgentOSShell", () => {
         expect(result.current.session).toBe("established")
         expect(result.current.sessionStatus).toBe("signed-in")
         expect(fetchMock).toHaveBeenCalledTimes(1)
-        expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({ method: "GET", credentials: "omit", headers: { Authorization: `Bearer ${TOKEN}` } })
+        expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({ method: "GET", credentials: "omit" })
+        expect(new Headers(fetchMock.mock.calls[0]?.[1]?.headers).get("Authorization")).toBe(`Bearer ${TOKEN}`)
         expect(sentUrls()[0]).toContain(`read=core_registry:1`)
         expect(sentUrls()[0]).toContain(`read=runtime:1`)
         expect(sentUrls()[0]).toContain(`read=attention%3A%7B${INSTALLATION}%7D:1`)
@@ -130,7 +131,7 @@ describe("useAgentOSShell", () => {
         const callsBefore = fetchMock.mock.calls.length
         act(() => result.current.readSelection())
         await waitFor(() => expect(result.current.blocked).toBe(true))
-        expect(fetchMock.mock.calls.length).toBe(callsBefore)
+        expect(fetchMock.mock.calls).toHaveLength(callsBefore)
     })
 
     it("discards the former selection's sources and reads only the new selection", async () => {
@@ -151,7 +152,7 @@ describe("useAgentOSShell", () => {
 
         act(() => result.current.retrySource({ kind: "runtime" }))
 
-        await waitFor(() => expect(fetchMock.mock.calls.length).toBe(callsBefore + 1))
+        await waitFor(() => expect(fetchMock.mock.calls).toHaveLength(callsBefore + 1))
         const retryUrl = sentUrls()[callsBefore]
         expect(retryUrl).toContain("read=runtime:2")
         expect(retryUrl).not.toContain("read=core_registry")

@@ -340,7 +340,10 @@ const isRecord = (value: unknown): value is Record<string, unknown> => value !==
 const isText = (value: unknown): value is string => typeof value === "string" && value.length > 0;
 const isCount = (value: unknown): value is number => typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 const isUuid = (value: unknown): value is string => typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(value);
-const nullableText = (value: unknown): string | null | undefined => value === null ? null : isText(value) ? value : undefined;
+const nullableText = (value: unknown): string | null | undefined => {
+    if (value === null) return null;
+    return isText(value) ? value : undefined;
+};
 /** Membership in the registered availability set, as a narrowing the compiler can follow. */
 const isWireAvailability = (value: unknown): value is ShellWireAvailability => typeof value === "string" && WIRE_AVAILABILITIES.has(value);
 /** Membership in the registered freshness set, as a narrowing the compiler can follow. */
@@ -385,7 +388,7 @@ export const formatShellRead = (identity: ShellSourceIdentity, readGeneration: n
  */
 export const canonicalShellReads = (reads: ReadonlyArray<ShellRead>): ReadonlyArray<ShellRead> | null => {
     if (reads.length === 0 || reads.length > MAX_SHELL_READS_PER_REQUEST) return null;
-    const ordered = [...reads].sort((left, right) => compareShellSourceIdentity(formatShellSourceIdentity(left.identity), formatShellSourceIdentity(right.identity)));
+    const ordered = [...reads].sort((left, right): number => compareShellSourceIdentity(formatShellSourceIdentity(left.identity), formatShellSourceIdentity(right.identity)));
     for (let index = 0; index < ordered.length; index += 1) {
         const read = ordered[index];
         if (!isCount(read.readGeneration) || read.readGeneration < 1 || read.readGeneration > MAX_SHELL_READ_GENERATION) return null;
@@ -414,11 +417,15 @@ type ShellTransportResult =
  */
 const sendShellRequest = async (url: URL, accessToken: string | null, init: RequestInit): Promise<ShellTransportResult> => {
     if (accessToken === null || accessToken.length === 0) return { state: "unauthenticated" };
+    // The Authorization header is added to whatever the caller already asked for, so a body-carrying
+    // request keeps its content type and no call site has to remember to re-send the token.
+    const headers = new Headers(init.headers);
+    headers.set("Authorization", `Bearer ${accessToken}`);
     let response: Response;
     try {
         // `credentials: "omit"` is load-bearing: the refresh cookie is renewal input for the Core
         // session boundary and is never authorization for this route.
-        response = await fetch(url.toString(), { ...init, credentials: "omit", headers: { ...(init.headers ?? {}), Authorization: `Bearer ${accessToken}` } });
+        response = await fetch(url.toString(), { ...init, credentials: "omit", headers });
     } catch {
         return { state: "unreachable" };
     }
@@ -699,7 +706,8 @@ export const readAgentosShellAuthorityStatus = async (accessToken: string | null
     if (!isRecord(sent.body) || sent.body.kind !== "authority_status") return { state: "unsupported" };
     const core = authoredCoreResult(sent.body.core);
     const authorityStatus = authoredAuthorityStatus(sent.body.authorityStatus);
-    if (core === null || authorityStatus === null || authorityStatus.installationId !== scope.installationId) return { state: "unsupported" };
+    if (core === null || authorityStatus === null) return { state: "unsupported" };
+    if (authorityStatus.installationId !== scope.installationId) return { state: "unsupported" };
     return { state: "answered", answer: { kind: "authority_status", core, authorityStatus } };
 };
 
@@ -723,6 +731,22 @@ export const readAgentosShellLifecycleObservation = async (accessToken: string |
     const appliedObservation = authoredAppliedObservation(sent.body.appliedObservation);
     if (core === null || lifecycleObservation === null || appliedObservation === null) return { state: "unsupported" };
     return { state: "answered", answer: { kind: "lifecycle_observation", core, lifecycleObservation, appliedObservation } };
+};
+
+/**
+ * The closed non-destination outcome of one navigation reply, or null when it is a destination.
+ *
+ * The three failure kinds are read from their own `kind`; none of them is ever read as a partial
+ * destination.
+ *
+ * @param body - The arrived, record-shaped reply.
+ * @returns The failure outcome, or null when the reply states a destination.
+ */
+const navigationFailure = (body: Record<string, unknown>): ShellNavigationOutcome | null => {
+    if (body.kind === "unavailable") return { state: "unavailable", reason: isText(body.reason) ? body.reason : "navigation-unavailable" };
+    if (body.kind === "unsupported") return { state: "unsupported", reason: isText(body.reason) ? body.reason : "navigation-unsupported" };
+    if (body.kind === "registered_destination") return null;
+    return { state: "unsupported", reason: "unreadable-navigation-answer" };
 };
 
 /**
@@ -758,13 +782,12 @@ export const resolveAgentosShellNavigation = async (accessToken: string | null, 
     const refusal = authoredRefusal(sent.body);
     if (refusal !== null) return { state: "refused", reason: refusal };
     if (!isRecord(sent.body)) return { state: "unsupported", reason: "unreadable-navigation-answer" };
-    // The three non-destination outcomes are stated by their own kind; none of them is a guess.
-    if (sent.body.kind === "unavailable") return { state: "unavailable", reason: isText(sent.body.reason) ? sent.body.reason : "navigation-unavailable" };
-    if (sent.body.kind === "unsupported") return { state: "unsupported", reason: isText(sent.body.reason) ? sent.body.reason : "navigation-unsupported" };
-    if (sent.body.kind !== "registered_destination") return { state: "unsupported", reason: "unreadable-navigation-answer" };
+    const failure = navigationFailure(sent.body);
+    if (failure !== null) return failure;
     // A destination resolved for a selection that is no longer displayed is never opened.
     if (sent.body.selectionGeneration !== scope.selectionGeneration) return { state: "obsolete" };
     const destination = authoredDestination(sent.body.destination, scope);
-    if (destination === null || destination.installationId !== scope.installationId) return { state: "unsupported", reason: "unregistered-destination" };
+    if (destination === null) return { state: "unsupported", reason: "unregistered-destination" };
+    if (destination.installationId !== scope.installationId) return { state: "unsupported", reason: "unregistered-destination" };
     return { state: "resolved", destination };
 };
