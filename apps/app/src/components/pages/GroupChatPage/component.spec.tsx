@@ -590,7 +590,7 @@ describe("GroupChatPageBase", () => {
   });
 });
 
-describe("GroupChatPage model", () => {
+describe("component", () => {
   it("parses a leading @address for routing without touching the body", () => {
     expect(parseAddressedModule("@Sales gửi báo cáo")).toBe("Sales");
     expect(parseAddressedModule("  @Accounting xong chưa")).toBe("Accounting");

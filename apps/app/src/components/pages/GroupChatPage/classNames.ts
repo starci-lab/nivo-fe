@@ -177,7 +177,7 @@ export const GROUP_CHAT_CARD_ACTIONS_CLASS_NAME = cn("grid", "grid-cols-2", "gap
 export const GROUP_CHAT_RAIL_CLASS_NAME = cn("flex", "min-w-0", "flex-col");
 
 /** One section band inside the joined rail card: a small label above edge-flush rows. */
-export const GROUP_CHAT_RAIL_SECTION_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-1", "py-2");
+export const GROUP_CHAT_RAIL_SECTION_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-1", "py-1.5");
 
 /** Rail sections after the first separate with a hairline. */
 export const GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME = cn(
@@ -187,7 +187,7 @@ export const GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME = cn(
   "gap-1",
   "border-t",
   "border-separator",
-  "py-2",
+  "py-1.5",
 );
 
 /** A rail section's label line sits on the card's horizontal rhythm. */
@@ -197,7 +197,7 @@ export const GROUP_CHAT_RAIL_LABEL_CLASS_NAME = cn("px-4");
 export const GROUP_CHAT_RAIL_FORM_CLASS_NAME = cn("px-4", "pt-1");
 
 /** One member row: avatar, name and role, presence kept textual. */
-export const GROUP_CHAT_MEMBER_ROW_CLASS_NAME = cn("flex", "min-w-0", "items-center", "gap-3", "px-4", "py-1.5");
+export const GROUP_CHAT_MEMBER_ROW_CLASS_NAME = cn("flex", "min-w-0", "items-center", "gap-3", "px-4", "py-1");
 
 /** Native role choices sit on one wrapping line. */
 export const GROUP_CHAT_ROLE_CHOICES_CLASS_NAME = cn("flex", "flex-wrap", "items-center", "gap-4");
