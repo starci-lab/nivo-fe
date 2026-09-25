@@ -42,7 +42,8 @@ const deliveryStates: Array<DeliveryStateRow> = [
   { state: "failed", failureCode: "CHATBOT_PROVIDER_REFUSED", label: copy.failedBeforeStart },
   { state: "failed", failureCode: null, label: copy.failedBeforeStart },
   { state: "failed-before-start", failureCode: null, label: copy.failedBeforeStart },
-  { state: "cancelled", failureCode: null, label: copy.cancelled }
+  { state: "cancelled", failureCode: null, label: copy.cancelled },
+  { state: "state-this-record-does-not-know", failureCode: null, label: copy.recorded }
 ];
 
 /** The four control states the direction poses, including the command still in flight. */
