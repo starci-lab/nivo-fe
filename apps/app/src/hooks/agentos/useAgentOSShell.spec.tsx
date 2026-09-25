@@ -211,4 +211,57 @@ describe("useAgentOSShell", () => {
         expect(storageSet).not.toHaveBeenCalled()
         expect(storageClear).not.toHaveBeenCalled()
     })
+
+    it("keeps a permission refusal distinct from an outage and from a broken request", async () => {
+        const cases: ReadonlyArray<readonly [number, string]> = [[403, "refused"], [404, "refused"], [503, "unavailable"], [400, "unsupported"]]
+        for (const [status, standing] of cases) {
+            fetchMock.mockResolvedValue({ status, json: async () => ({ kind: "refused", reason: "parent-mismatch", selectionGeneration: null }) })
+            const { result, unmount } = renderShell()
+            await waitFor(() => expect(result.current.sources).toHaveLength(6))
+            expect([status, result.current.sources.every(entry => entry.state === standing)]).toEqual([status, true])
+            expect(result.current.session).toBe("established")
+            unmount()
+        }
+    })
+
+    it("reports a source failure as unavailable without touching its siblings' answers", async () => {
+        fetchMock.mockRejectedValue(new Error("socket closed"))
+        const { result } = renderShell()
+        await waitFor(() => expect(result.current.sources).toHaveLength(6))
+        expect(result.current.sources.every(entry => entry.state === "unavailable")).toBe(true)
+        expect(result.current.blocked).toBe(false)
+    })
+
+    it("carries each source's own availability into its own standing", async () => {
+        const standings: ReadonlyArray<readonly [string, string]> = [["refused", "refused"], ["unavailable", "unavailable"], ["unsupported", "unsupported"], ["partial", "partial"]]
+        for (const [availability, standing] of standings) {
+            fetchMock.mockImplementation(async (input: string) => {
+                const url = new URL(String(input))
+                return {
+                    status: 200,
+                    json: async () => ({
+                        kind: "overview",
+                        selectionGeneration: url.searchParams.get("selectionGeneration"),
+                        core: null,
+                        sources: url.searchParams.getAll("read").map(read => {
+                            const separator = read.lastIndexOf(":")
+                            return {
+                                sourceIdentity: decodeURIComponent(read.slice(0, separator)),
+                                readGeneration: Number(read.slice(separator + 1)),
+                                availability,
+                                freshness: "unknown",
+                                completeness: "unknown",
+                                observedAt: null,
+                                payload: null
+                            }
+                        })
+                    })
+                }
+            })
+            const { result, unmount } = renderShell()
+            await waitFor(() => expect(result.current.sources).toHaveLength(6))
+            expect([availability, result.current.sources.every(entry => entry.state === standing)]).toEqual([availability, true])
+            unmount()
+        }
+    })
 })
