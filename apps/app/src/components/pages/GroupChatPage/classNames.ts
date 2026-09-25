@@ -442,6 +442,7 @@ export const GROUP_CHAT_COMPOSER_CLASS_NAME = cn(
 export const GROUP_CHAT_COMPOSER_DECISION_CLASS_NAME = cn(
   GROUP_CHAT_COMPOSER_CLASS_NAME,
   "min-[70rem]:h-[5.625rem]",
+  "min-[70rem]:pl-[1.375rem]",
   "min-[70rem]:[&_[data-slot=input]]:h-16",
 );
 
