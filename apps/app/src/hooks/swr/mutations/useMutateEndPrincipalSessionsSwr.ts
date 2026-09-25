@@ -23,7 +23,7 @@ const useAuthMutation = <TAnswer, TInput>(key: string, mutation: (input: TInput)
  * leave every caller to guess which of the three it received.
  *
  * THE REQUESTER IS NOT NAMED HERE. The transport takes the requester from the verified access grant,
- * so this hook carries only one logical request's identity, the named principal and the authority
- * context the caller acts under.
+ * so this hook carries only one logical request's identity, the selected roster member and the
+ * authority context the caller acts under.
  */
 export const useMutateEndPrincipalSessionsSwr = () => useAuthMutation("end-principal-sessions", endPrincipalSessions);

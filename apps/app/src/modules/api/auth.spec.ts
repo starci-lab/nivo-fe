@@ -164,23 +164,38 @@ describe("signOut", () => {
 })
 
 describe("endPrincipalSessions", () => {
-    it("ends a named principal's sessions under the authority context it was given", async () => {
+    it("ends the selected roster member's sessions under the workspace context, and never names a principal", async () => {
         await endPrincipalSessions({
             requestId: "ending-1",
-            targetPrincipal: "principal-1",
             workspaceId: "workspace-1",
+            memberId: "member-1",
         })
 
         expect(lastDocument()).toContain("mutation EndPrincipalSessions")
         // one shape carries all three answers, told apart by kind alone
         expect(lastDocument()).toContain("data { kind authorityEndingConfirmed }")
+        /*
+         * The workspace request names the workspace and the roster member the authority owner resolves
+         * a principal from; a Login principal or email never crosses this wire.
+         */
         expect(lastVariables()).toEqual({
             input: {
                 requestId: "ending-1",
-                targetPrincipal: "principal-1",
                 workspaceId: "workspace-1",
+                memberId: "member-1",
             },
         })
+        expect(lastVariables()?.input).not.toHaveProperty("targetPrincipal")
+    })
+
+    it("keeps the server-only Nivo-operation form able to name a principal, with no workspace context", async () => {
+        await endPrincipalSessions({ requestId: "ending-2", targetPrincipal: "principal-1" })
+
+        expect(lastVariables()).toEqual({
+            input: { requestId: "ending-2", targetPrincipal: "principal-1" },
+        })
+        expect(lastVariables()?.input).not.toHaveProperty("workspaceId")
+        expect(lastVariables()?.input).not.toHaveProperty("memberId")
     })
 })
 

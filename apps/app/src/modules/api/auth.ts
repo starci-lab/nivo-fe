@@ -259,15 +259,44 @@ export interface SignOutOutcome {
   readonly authorityEndingConfirmed: boolean | null;
 }
 
-/** What ending another principal's sessions asks for. */
-export interface EndPrincipalSessionsInput {
+/**
+ * Ending sessions under a workspace: the workspace's owner confirms the requester, and the target
+ * is the member the requester selected from that workspace's authorized Office roster.
+ *
+ * THE ROSTER MEMBER, NEVER A PRINCIPAL. This browser neither learns nor sends the member's Login
+ * principal or email - it holds a display name and a memberId, which is also why a stale or
+ * reassigned memberId can only ever come back as the generic refusal or as undecided.
+ */
+export interface EndPrincipalSessionsWorkspaceInput {
+  /** This one logical ending request's stable identity; resend it unchanged on retry. */
+  readonly requestId: string;
+  /** The workspace the requester administers, whose owner confirms the requester's authority. */
+  readonly workspaceId: string;
+  /** The roster member whose sessions would end; the authority owner resolves its principal. */
+  readonly memberId: string;
+}
+
+/**
+ * Ending sessions as a Nivo operation: Login itself checks the requester's platform-operator
+ * assignment, so this form names the target principal directly.
+ *
+ * SERVER-ONLY DESIGN. No accepted record establishes an operator control or an operator signal in
+ * this app, so the workspace surface never offers this form; it stays typed because the operation
+ * publishes it.
+ */
+export interface EndPrincipalSessionsOperationInput {
   /** This one logical ending request's stable identity; resend it unchanged on retry. */
   readonly requestId: string;
   /** The Login principal whose sessions would end. */
   readonly targetPrincipal: string;
-  /** The workspace the requester administers; omitted to ask as Nivo operation. */
-  readonly workspaceId?: string;
 }
+
+/**
+ * What ending another principal's sessions asks for: one request identity and exactly ONE authority
+ * context - a workspace with the roster member selected in it, or the server-only Nivo operation
+ * with the target principal. Never both, and never a principal on the workspace form.
+ */
+export type EndPrincipalSessionsInput = EndPrincipalSessionsWorkspaceInput | EndPrincipalSessionsOperationInput;
 
 /** Which of the three decided answers an ending request produced. */
 export type EndPrincipalSessionsKind =
@@ -605,8 +634,10 @@ export const signOut = (input?: SignOutInput): Promise<Result<EnvelopeAnswer<boo
  *
  * THE REQUESTER IS NEVER NAMED HERE. It is taken from the verified access grant, so a caller cannot
  * ask for somebody else's sessions by asserting who they are. `workspaceId` selects WHICH owner
- * confirms - a current Owner or Manager of that workspace, for a current member of it - while
- * omitting it asks as Nivo operation.
+ * confirms - a current Owner or Manager of that workspace, for a current member of it - and the
+ * workspace form then aims at the roster `memberId` the requester selected; the owner resolves that
+ * member's Login principal, so no principal or email crosses this wire. The server-only
+ * Nivo-operation form names the principal instead.
  *
  * ONE SHAPE FOR ALL THREE ANSWERS is the point of this door: `scopeApplied`, `undecided` and
  * `refused` differ only by `kind`, and nothing in the answer says whether the named principal
@@ -614,7 +645,7 @@ export const signOut = (input?: SignOutInput): Promise<Result<EnvelopeAnswer<boo
  * does. `undecided` is never a refusal: resend the same `requestId` and the same request continues
  * without a second effect.
  *
- * @param input - This request's identity, the named principal and the authority context.
+ * @param input - This request's identity and exactly one authority context with its target.
  * @returns The decided answer, or why there is none.
  */
 export const endPrincipalSessions = (input: EndPrincipalSessionsInput): Promise<Result<EndPrincipalSessionsAnswer>> => graphql(`mutation EndPrincipalSessions($input: EndPrincipalSessionsInput!) { endPrincipalSessions(input: $input) { data { kind authorityEndingConfirmed } message success error } }`, {

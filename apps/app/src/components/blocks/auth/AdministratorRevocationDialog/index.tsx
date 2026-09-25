@@ -51,7 +51,11 @@ export const AdministratorRevocationDialog = (props: AdministratorRevocationDial
     const identity = requestId.current ?? newRequestId();
     requestId.current = identity;
     setStage("pending");
-    void ending.trigger({ requestId: identity, targetPrincipal: target, workspaceId: workspace }).then((answer) => {
+    /*
+     * The named target travels as the workspace roster memberId, never as a Login principal: the
+     * workspace authority owner resolves the member's principal from this value alone.
+     */
+    void ending.trigger({ requestId: identity, workspaceId: workspace, memberId: target }).then((answer) => {
       if (answer.ok && answer.data.kind === "scopeApplied") {
         requestId.current = null;
         setStage("applied");

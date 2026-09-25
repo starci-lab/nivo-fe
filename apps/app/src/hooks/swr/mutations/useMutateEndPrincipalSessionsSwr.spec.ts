@@ -22,11 +22,11 @@ describe("useMutateEndPrincipalSessionsSwr", () => {
     expect(hook.key).toEqual(["NIVO_AUTH_MUTATION", "end-principal-sessions"]);
   });
 
-  it("hands the request identity, the named principal and the authority context to the transport and returns its answer unchanged", async () => {
+  it("hands the request identity, the roster member and the authority context to the transport and returns its answer unchanged", async () => {
     const answer = { ok: true, data: { kind: "undecided", authorityEndingConfirmed: null } };
     endPrincipalSessions.mockResolvedValue(answer);
     const hook = useMutateEndPrincipalSessionsSwr() as unknown as HookShape;
-    const trigger = { arg: { requestId: "ending-7", targetPrincipal: "linh@nivo.vn", workspaceId: "ws-support" } };
+    const trigger = { arg: { requestId: "ending-7", workspaceId: "ws-support", memberId: "linh-member-7" } };
     const settled = await hook.mutation(undefined, trigger);
     expect(endPrincipalSessions).toHaveBeenCalledTimes(1);
     expect(endPrincipalSessions).toHaveBeenCalledWith(trigger.arg);
