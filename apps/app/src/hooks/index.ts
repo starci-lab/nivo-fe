@@ -13,6 +13,8 @@ export { useNivoQuery } from "./swr/useNivoQuery"
 export { useNivoMutation } from "./swr/useNivoMutation"
 export { useAccountingWorkbench } from "./agentos/useAccountingWorkbench"
 export { useSalesWorkbench } from "./agentos/useSalesWorkbench"
+export { useSalesDecision } from "./agentos/useSalesDecision"
+export { useSalesHandoff } from "./agentos/useSalesHandoff"
 
 export { useQueryAccountingEvidenceSwr } from "./swr/queries/useQueryAccountingEvidenceSwr"
 export { useQueryAccountingResultDetailSwr } from "./swr/queries/useQueryAccountingResultDetailSwr"
