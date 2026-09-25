@@ -322,7 +322,19 @@
         "applied": "Đã kết thúc các phiên của người này trong phạm vi bạn thao tác.",
         "refused": "Không thể thực hiện thao tác này.",
         "undecided": "Chưa hoàn tất được thao tác này. Vui lòng thử lại.",
-        "retry": "Thử lại"
+        "retry": "Thử lại",
+        "chooseTitle": "Kết thúc phiên đăng nhập của thành viên",
+        "chooseDescription": "Chọn một thành viên trong workspace này. Quyền của bạn sẽ được kiểm tra khi gửi yêu cầu.",
+        "workspaceLabel": "Workspace",
+        "memberLabel": "Thành viên",
+        "memberPlaceholder": "Chọn thành viên",
+        "chooseConsequence": "Tất cả phiên đăng nhập của thành viên được chọn sẽ kết thúc nếu yêu cầu được chấp nhận.",
+        "continue": "Tiếp tục",
+        "confirmTitle": "Kết thúc phiên của {member}?",
+        "confirmConsequence": "Yêu cầu này sẽ kết thúc tất cả phiên đăng nhập của {member}, kể cả ở các workspace khác, nếu quyền của bạn được xác nhận.",
+        "confirmAll": "Kết thúc tất cả phiên",
+        "noMembers": "Workspace này chưa có thành viên nào khác để chọn.",
+        "rosterUnavailable": "Chưa tải được danh sách thành viên. Vui lòng thử lại."
       }
     },
     "nav": {
