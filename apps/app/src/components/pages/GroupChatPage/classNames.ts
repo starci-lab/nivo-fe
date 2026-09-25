@@ -209,6 +209,8 @@ export const GROUP_CHAT_RAIL_SCROLL_CLASS_NAME = cn("flex", "min-h-0", "flex-1",
 
 /** One section band inside the joined rail card: a small label above edge-flush rows. */
 export const GROUP_CHAT_RAIL_SECTION_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-1", "py-1.5", "min-[70rem]:py-2");
+export const GROUP_CHAT_RAIL_SECTION_INVITE_CLASS_NAME = cn(GROUP_CHAT_RAIL_SECTION_CLASS_NAME, "relative");
+export const GROUP_CHAT_RAIL_SECTION_ROSTER_HEAD_CLASS_NAME = cn(GROUP_CHAT_RAIL_SECTION_CLASS_NAME, "min-[70rem]:pt-5");
 
 /** Rail sections after the first separate with a hairline. */
 export const GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME = cn(
@@ -221,12 +223,17 @@ export const GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME = cn(
   "py-1.5",
   "min-[70rem]:py-2",
 );
+export const GROUP_CHAT_RAIL_SECTION_INVITE_MODULES_CLASS_NAME = cn(GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME, "min-[70rem]:mt-5");
+export const GROUP_CHAT_RAIL_SECTION_INVITE_FORM_CLASS_NAME = cn(GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME, "min-[70rem]:mt-4");
+export const GROUP_CHAT_RAIL_SECTION_ROSTER_PEOPLE_CLASS_NAME = cn(GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME, "min-[70rem]:pt-5");
+export const GROUP_CHAT_RAIL_SECTION_ROSTER_MODULES_CLASS_NAME = cn(GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME, "min-[70rem]:mt-6");
+export const GROUP_CHAT_RAIL_HUMANS_BADGE_CLASS_NAME = cn("min-[70rem]:absolute", "min-[70rem]:right-16", "min-[70rem]:top-6");
 
 /** A rail section's label line sits on the card's horizontal rhythm. */
 export const GROUP_CHAT_RAIL_LABEL_CLASS_NAME = cn("flex", "items-center", "gap-2", "px-4");
 
 /** A rail section's leading glyph inherits the muted rail tone. */
-export const GROUP_CHAT_RAIL_LABEL_ICON_CLASS_NAME = cn("text-muted-foreground");
+export const GROUP_CHAT_RAIL_LABEL_ICON_CLASS_NAME = cn("text-muted-foreground", "min-[70rem]:-translate-y-2");
 
 /** The rail section header row carries the label and an optional trailing control. */
 export const GROUP_CHAT_RAIL_HEAD_ROW_CLASS_NAME = cn(
@@ -243,6 +250,7 @@ export const GROUP_CHAT_RAIL_FORM_CLASS_NAME = cn("px-4", "pt-1", "pb-3");
 
 /** One member row: avatar, name and role, presence kept textual. */
 export const GROUP_CHAT_MEMBER_ROW_CLASS_NAME = cn("flex", "min-w-0", "items-center", "gap-3", "px-4", "py-1.5");
+export const GROUP_CHAT_MEMBER_ROW_ROOMY_CLASS_NAME = cn(GROUP_CHAT_MEMBER_ROW_CLASS_NAME, "min-[70rem]:py-2.5");
 
 /** The member row's trailing options glyph stays decorative until member actions exist. */
 export const GROUP_CHAT_MEMBER_ROW_TRAILING_CLASS_NAME = cn("ml-auto", "shrink-0", "text-muted-foreground");
@@ -387,7 +395,7 @@ export const GROUP_CHAT_ROLE_CHOICE_CLASS_NAME = cn("inline-flex", "items-center
 export const GROUP_CHAT_ROLE_RADIO_CLASS_NAME = cn("h-4", "w-4", "accent-current");
 
 /** Vertical stack shared by the invite and acceptance forms. */
-export const GROUP_CHAT_FORM_STACK_CLASS_NAME = cn("flex", "min-w-0", "flex-1", "flex-col", "gap-2");
+export const GROUP_CHAT_FORM_STACK_CLASS_NAME = cn("flex", "min-w-0", "flex-1", "flex-col", "gap-2", "min-[70rem]:[&>button]:mt-5");
 
 /**
  * The docked-sheet invite form compresses one step under the rail rhythm. Its email field draws

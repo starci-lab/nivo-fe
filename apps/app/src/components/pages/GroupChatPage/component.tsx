@@ -56,6 +56,7 @@ import {
   GROUP_CHAT_MEMBER_CHIP_CLASS_NAME,
   GROUP_CHAT_MEMBER_CHIP_ICON_CLASS_NAME,
   GROUP_CHAT_MEMBER_ROW_CLASS_NAME,
+  GROUP_CHAT_MEMBER_ROW_ROOMY_CLASS_NAME,
   GROUP_CHAT_MEMBER_ROW_TRAILING_CLASS_NAME,
   GROUP_CHAT_MENTION_CLASS_NAME,
   GROUP_CHAT_MESSAGE_BODY_CLASS_NAME,
@@ -67,11 +68,17 @@ import {
   GROUP_CHAT_RAIL_ASIDE_INVITE_CLASS_NAME,
   GROUP_CHAT_RAIL_FORM_CLASS_NAME,
   GROUP_CHAT_RAIL_HEAD_ROW_CLASS_NAME,
+  GROUP_CHAT_RAIL_HUMANS_BADGE_CLASS_NAME,
   GROUP_CHAT_RAIL_LABEL_CLASS_NAME,
   GROUP_CHAT_RAIL_LABEL_ICON_CLASS_NAME,
   GROUP_CHAT_RAIL_SCROLL_CLASS_NAME,
-  GROUP_CHAT_RAIL_SECTION_CLASS_NAME,
   GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME,
+  GROUP_CHAT_RAIL_SECTION_INVITE_CLASS_NAME,
+  GROUP_CHAT_RAIL_SECTION_INVITE_FORM_CLASS_NAME,
+  GROUP_CHAT_RAIL_SECTION_INVITE_MODULES_CLASS_NAME,
+  GROUP_CHAT_RAIL_SECTION_ROSTER_HEAD_CLASS_NAME,
+  GROUP_CHAT_RAIL_SECTION_ROSTER_MODULES_CLASS_NAME,
+  GROUP_CHAT_RAIL_SECTION_ROSTER_PEOPLE_CLASS_NAME,
   GROUP_CHAT_ROLE_CHOICE_CLASS_NAME,
   GROUP_CHAT_ROLE_CHOICES_CLASS_NAME,
   GROUP_CHAT_ROLE_RADIO_CLASS_NAME,
@@ -581,10 +588,11 @@ type MemberRowProps = {
   readonly detailed?: boolean;
   /** The compact member sheet keeps its existing type scale. */
   readonly compact?: boolean;
+  readonly roomy?: boolean;
 };
 
-const MemberRow = ({ participant, labels, detailed = false, compact = false }: MemberRowProps) => (
-  <div className={GROUP_CHAT_MEMBER_ROW_CLASS_NAME} data-member-id={participant.memberId}>
+const MemberRow = ({ participant, labels, detailed = false, compact = false, roomy = false }: MemberRowProps) => (
+  <div className={roomy ? GROUP_CHAT_MEMBER_ROW_ROOMY_CLASS_NAME : GROUP_CHAT_MEMBER_ROW_CLASS_NAME} data-member-id={participant.memberId}>
     <MemberAvatar
       name={participant.displayName}
       kind={participant.kind}
@@ -603,7 +611,7 @@ const MemberRow = ({ participant, labels, detailed = false, compact = false }: M
       </Text>
     </div>
     {participant.status === "invited" ? <Badge tone="warning">{labels.members.pending}</Badge> : null}
-    {detailed ? (
+    {detailed && participant.kind === "human" ? (
       <span className={GROUP_CHAT_MEMBER_ROW_TRAILING_CLASS_NAME} aria-hidden="true">
         ···
       </span>
@@ -959,7 +967,7 @@ const MembersRail = ({ view, on, labels }: MembersRailProps) => {
   };
   return (
     <SurfaceCard composition="joined" depth="nested" ariaLabel={labels.members.title}>
-      <div className={GROUP_CHAT_RAIL_SECTION_CLASS_NAME}>
+      <div className={GROUP_CHAT_RAIL_SECTION_INVITE_CLASS_NAME}>
         <div className={GROUP_CHAT_RAIL_HEAD_ROW_CLASS_NAME}>
           <span className={GROUP_CHAT_RAIL_LABEL_ICON_CLASS_NAME}>
             <Icon source={nivoIconSource("community", "leading")} usage="leading" />
@@ -975,16 +983,18 @@ const MembersRail = ({ view, on, labels }: MembersRailProps) => {
           <EmptyNotice message={labels.members.empty} />
         ) : (
           <>
-            <Text size="xs" weight="semibold" tone="muted">
-              {labels.members.humans(humans.length)}
-            </Text>
+            <span className={GROUP_CHAT_RAIL_HUMANS_BADGE_CLASS_NAME}>
+              <Text size="xs" weight="semibold" tone="muted">
+                {labels.members.humans(humans.length)}
+              </Text>
+            </span>
             {humans.map((participant) => (
               <MemberRow key={participant.memberId} participant={participant} labels={labels} detailed />
             ))}
           </>
         )}
       </div>
-      <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
+      <div className={GROUP_CHAT_RAIL_SECTION_INVITE_MODULES_CLASS_NAME}>
         <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
           <Icon source={nivoIconSource("agentos", "leading")} usage="leading" />
           <Text size="md" weight="semibold">
@@ -1009,7 +1019,7 @@ const MembersRail = ({ view, on, labels }: MembersRailProps) => {
         )}
       </div>
       {mayInvite ? (
-        <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
+        <div className={GROUP_CHAT_RAIL_SECTION_INVITE_FORM_CLASS_NAME}>
           <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
             <Icon source={nivoIconSource("signUp", "leading")} usage="leading" />
             <Text size="md" weight="semibold">
@@ -1034,14 +1044,14 @@ const RosterRail = ({ view, labels }: { readonly view: GroupChatPageView; readon
   const { humans, modules } = partitionParticipants(view.participants);
   return (
     <SurfaceCard composition="joined" depth="nested" ariaLabel={labels.members.title}>
-      <div className={GROUP_CHAT_RAIL_SECTION_CLASS_NAME}>
+      <div className={GROUP_CHAT_RAIL_SECTION_ROSTER_HEAD_CLASS_NAME}>
         <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
           <Text size="md" weight="semibold">
             {labels.members.title}
           </Text>
         </div>
       </div>
-      <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
+      <div className={GROUP_CHAT_RAIL_SECTION_ROSTER_PEOPLE_CLASS_NAME}>
         <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
           <Text size="md" weight="semibold">
             {labels.members.humans(humans.length)}
@@ -1050,10 +1060,10 @@ const RosterRail = ({ view, labels }: { readonly view: GroupChatPageView; readon
         {humans.length === 0 ? (
           <EmptyNotice message={labels.members.empty} />
         ) : (
-          humans.map((participant) => <MemberRow key={participant.memberId} participant={participant} labels={labels} />)
+          humans.map((participant) => <MemberRow key={participant.memberId} participant={participant} labels={labels} roomy />)
         )}
       </div>
-      <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
+      <div className={GROUP_CHAT_RAIL_SECTION_ROSTER_MODULES_CLASS_NAME}>
         <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
           <Text size="md" weight="semibold">
             {`${labels.members.moduleRole} (${modules.length})`}
@@ -1067,7 +1077,7 @@ const RosterRail = ({ view, labels }: { readonly view: GroupChatPageView; readon
           </div>
         ) : (
           modules.map((participant) => (
-            <MemberRow key={participant.moduleInstallationId ?? participant.memberId} participant={participant} labels={labels} />
+            <MemberRow key={participant.moduleInstallationId ?? participant.memberId} participant={participant} labels={labels} roomy />
           ))
         )}
       </div>
