@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { IdeasPage, normalizeIdeaType } from "@/components/pages/explore"
+import { IdeasPage, normalizeIdeaType } from "@/features/pages/explore"
 
 /** Search and sharing metadata for the canonical Ideas route. */
 export const metadata: Metadata = {

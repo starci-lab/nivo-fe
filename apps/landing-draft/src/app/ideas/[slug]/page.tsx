@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { IDEA_SLUGS, IdeaDetailPage, getIdeaBySlug } from "@/components/pages/explore"
+import { IDEA_SLUGS, IdeaDetailPage, getIdeaBySlug } from "@/features/pages/explore"
 
 type IdeaDetailRouteProps = {
     readonly params: Promise<{ readonly slug: string }>

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next"
-import { PUBLIC_SITE_URL } from "@/resources/site"
+import { PUBLIC_SITE_URL } from "@/features/layouts/SiteShell"
 
-const publicRoutes = [
+const PUBLIC_ROUTES = [
     "",
     "/nivo-os",
     "/system-of-responsibility",
@@ -18,7 +18,7 @@ const publicRoutes = [
 ] as const
 
 /** Canonical Wave 1 routes plus the three governed Idea objects published in this draft. */
-const sitemap = (): MetadataRoute.Sitemap => publicRoutes.map((route) => ({
+const sitemap = (): MetadataRoute.Sitemap => PUBLIC_ROUTES.map((route) => ({
     url: `${PUBLIC_SITE_URL}${route}`,
     changeFrequency: route === "" ? "weekly" : "monthly",
     priority: route === "" ? 1 : 0.7,

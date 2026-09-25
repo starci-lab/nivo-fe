@@ -1,38 +1,20 @@
-import type { Metadata, Viewport } from "next";
-import { NivoGrammarRoot } from "@nivo/ui";
+import type { Viewport } from "next";
 import "./globals.css";
-import { LANDING_DESCRIPTION } from "@/resources/copy";
-import type { ComponentProps } from "react";
 
-/** Browser-level metadata for every route under this shell. */
-export const metadata: Metadata = {
-  title: "NIVO Agentic OS — System of Responsibility",
-  description: LANDING_DESCRIPTION
-};
+/*
+ * The document shell, and the framework's own viewport slot.
+ *
+ * The viewport declaration is Next's own exported constant, so it stays in the route file; the
+ * shell and its browser-level metadata live in `features/layouts/LandingShell`, which is what this
+ * file names and mounts.
+ */
+export {
+    LandingShell as default,
+    LANDING_METADATA as metadata
+} from "@/features/layouts/LandingShell";
 
 /** Viewport behaviour for every route under this shell. */
 export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1
+    width: "device-width",
+    initialScale: 1
 };
-
-/** Props for {@link RootLayout}. */
-type RootLayoutProps = {
-  /** The rendered route. */
-  readonly children: ComponentProps<"div">["children"];
-};
-
-/**
- * The document shell.
- *
- * @param input - The rendered route.
- * @returns The html document.
- */
-const RootLayout = ({
-  children
-}: RootLayoutProps) => <html lang="vi" suppressHydrationWarning>
-        <body className="min-h-dvh antialiased">
-            <NivoGrammarRoot>{children}</NivoGrammarRoot>
-        </body>
-    </html>;
-export default RootLayout;

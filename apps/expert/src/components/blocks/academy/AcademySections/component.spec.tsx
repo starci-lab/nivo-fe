@@ -1,7 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
+import type { ComponentProps } from "react"
 import { describe, expect, it, vi } from "vitest"
-import { AcademySectionsBase, type AcademySectionsProps } from "./component"
+import { AcademySectionsBase } from "./component"
 import type { AcademySection } from "./index"
 
 const authoredSections: ReadonlyArray<AcademySection> = [
@@ -45,7 +46,7 @@ describe("AcademySectionsBase", () => {
     })
 
     it("draws the authored section switch cases in order", () => {
-        const props: AcademySectionsProps = { sections: authoredSections, failedImageSources: new Set(), leadStatus: "idle", on: { submitLead: vi.fn(), failImage: vi.fn() } }
+        const props: ComponentProps<typeof AcademySectionsBase> = { sections: authoredSections, failedImageSources: new Set(), leadStatus: "idle", on: { submitLead: vi.fn(), failImage: vi.fn() } }
         const html = renderToStaticMarkup(<AcademySectionsBase {...props} />)
         expect(html).toContain("Academy")
         expect(html).toContain("Busy")

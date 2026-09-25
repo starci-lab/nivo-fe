@@ -1,6 +1,7 @@
 "use client";
 
-import { useReducedMotion } from "framer-motion";
+import type { ReactNode } from "react";
+import { useResolvedReducedMotion } from "@/hooks";
 import {
   LandingMotionArtworkDriftBase,
   LandingMotionHeroRevealBase,
@@ -11,35 +12,23 @@ import {
   LandingMotionResponsibilityGraphBase,
   LandingMotionRoleLayerBase,
 } from "./component";
-import type {
-  LandingMotionArtworkDriftProps as LandingMotionArtworkDriftBaseProps,
-  LandingMotionHeroRevealProps as LandingMotionHeroRevealBaseProps,
-  LandingMotionInstanceCardProps as LandingMotionInstanceCardBaseProps,
-  LandingMotionLightSectionRevealProps as LandingMotionLightSectionRevealBaseProps,
-  LandingMotionLoopStepProps as LandingMotionLoopStepBaseProps,
-  LandingMotionLoopTrackProps as LandingMotionLoopTrackBaseProps,
-  LandingMotionResponsibilityGraphProps as LandingMotionResponsibilityGraphBaseProps,
-  LandingMotionRoleLayerProps as LandingMotionRoleLayerBaseProps,
-} from "./component";
 
 /** Connected hero reveal properties. */
-export type LandingMotionHeroRevealProps = Omit<LandingMotionHeroRevealBaseProps, "isReducedMotion">;
+export type LandingMotionHeroRevealProps = { readonly children: ReactNode };
 /** Connected light-section reveal properties. */
-export type LandingMotionLightSectionRevealProps = Omit<LandingMotionLightSectionRevealBaseProps, "isReducedMotion">;
+export type LandingMotionLightSectionRevealProps = { readonly children: ReactNode };
 /** Connected ambient-artwork properties. */
-export type LandingMotionArtworkDriftProps = Omit<LandingMotionArtworkDriftBaseProps, "isReducedMotion">;
+export type LandingMotionArtworkDriftProps = { readonly children: ReactNode };
 /** Connected operating-loop step properties. */
-export type LandingMotionLoopStepProps = Omit<LandingMotionLoopStepBaseProps, "isReducedMotion">;
+export type LandingMotionLoopStepProps = { readonly children: ReactNode; readonly index: number; readonly position: string };
 /** Connected responsibility-card properties. */
-export type LandingMotionInstanceCardProps = Omit<LandingMotionInstanceCardBaseProps, "isReducedMotion">;
+export type LandingMotionInstanceCardProps = { readonly children: ReactNode; readonly index: number };
 /** Connected responsibility graph properties. */
-export type LandingMotionResponsibilityGraphProps = Omit<LandingMotionResponsibilityGraphBaseProps, "isReducedMotion">;
+export type LandingMotionResponsibilityGraphProps = { readonly children: ReactNode };
 /** Connected operating-loop track properties. */
-export type LandingMotionLoopTrackProps = Omit<LandingMotionLoopTrackBaseProps, "isReducedMotion">;
+export type LandingMotionLoopTrackProps = { readonly children: ReactNode };
 /** Connected responsibility-layer properties. */
-export type LandingMotionRoleLayerProps = Omit<LandingMotionRoleLayerBaseProps, "isReducedMotion">;
-
-const useResolvedReducedMotion = (): boolean => useReducedMotion() === true;
+export type LandingMotionRoleLayerProps = { readonly children: ReactNode; readonly index: number };
 
 /** Resolves motion preference for the hero reveal. */
 export const LandingMotionHeroReveal = (props: LandingMotionHeroRevealProps) => (

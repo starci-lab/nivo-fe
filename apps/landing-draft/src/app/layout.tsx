@@ -1,8 +1,5 @@
-import { NivoGrammarRoot } from "@nivo/ui"
 import type { Metadata, Viewport } from "next"
-import type { ReactNode } from "react"
-import { SiteShell } from "@/components/site"
-import { PUBLIC_SITE_URL, SITE_DESCRIPTION, SITE_TITLE } from "@/resources/site"
+import { PUBLIC_SITE_URL, SITE_DESCRIPTION, SITE_TITLE } from "@/features/layouts/SiteShell"
 import "./globals.css"
 
 /** Browser-level metadata for every canonical public route. */
@@ -33,21 +30,11 @@ export const viewport: Viewport = {
     themeColor: "#ffffff",
 }
 
-/** Props for the document shell. */
-type RootLayoutProps = {
-    /** The rendered route. */
-    readonly children: ReactNode
-}
-
-/** The document shell selects the NIVO family once and mounts shared public chrome. */
-const RootLayout = ({ children }: RootLayoutProps) => (
-    <html lang="vi">
-        <body>
-            <NivoGrammarRoot theme="light">
-                <SiteShell>{children}</SiteShell>
-            </NivoGrammarRoot>
-        </body>
-    </html>
-)
-
-export default RootLayout
+/*
+ * The document shell, and the framework's own metadata slots.
+ *
+ * The metadata and the viewport stay in the route file because they are framework slots the routing
+ * tree owns, and they are built from the three constants `features/layouts/SiteShell` re-exports --
+ * the entry that also holds the shell which actually renders the document.
+ */
+export { SiteShellDocument as default } from "@/features/layouts/SiteShell"

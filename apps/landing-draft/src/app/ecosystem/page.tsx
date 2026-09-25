@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { EcosystemPage } from "@/components/pages/explore"
+import { EcosystemPage } from "@/features/pages/explore"
 
 /** Search and sharing metadata for the canonical Ecosystem route. */
 export const metadata: Metadata = {

@@ -3,32 +3,32 @@ import type { CSSProperties, ReactNode } from "react";
 import { CLASS_NAMES as C } from "./classNames";
 
 /** Content revealed as the landing hero enters the viewport. */
-export type LandingMotionHeroRevealProps = { readonly children: ReactNode; readonly isReducedMotion: boolean };
+type LandingMotionHeroRevealProps = { readonly children: ReactNode; readonly isReducedMotion: boolean };
 /** Light-section heading content revealed on entry. */
-export type LandingMotionLightSectionRevealProps = { readonly children: ReactNode; readonly isReducedMotion: boolean };
+type LandingMotionLightSectionRevealProps = { readonly children: ReactNode; readonly isReducedMotion: boolean };
 /** Decorative artwork content given restrained ambient movement. */
-export type LandingMotionArtworkDriftProps = { readonly children: ReactNode; readonly isReducedMotion: boolean };
+type LandingMotionArtworkDriftProps = { readonly children: ReactNode; readonly isReducedMotion: boolean };
 /** One ordered operating-loop step and its stagger position. */
-export type LandingMotionLoopStepProps = { readonly children: ReactNode; readonly index: number; readonly position: string; readonly isReducedMotion: boolean };
+type LandingMotionLoopStepProps = { readonly children: ReactNode; readonly index: number; readonly position: string; readonly isReducedMotion: boolean };
 /** One responsibility instance and its stagger position. */
-export type LandingMotionInstanceCardProps = { readonly children: ReactNode; readonly index: number; readonly isReducedMotion: boolean };
+type LandingMotionInstanceCardProps = { readonly children: ReactNode; readonly index: number; readonly isReducedMotion: boolean };
 /** The code-native responsibility constellation layered over the hero artwork. */
-export type LandingMotionResponsibilityGraphProps = { readonly children: ReactNode; readonly isReducedMotion: boolean };
+type LandingMotionResponsibilityGraphProps = { readonly children: ReactNode; readonly isReducedMotion: boolean };
 /** The operating loop track whose light travels from context to trust. */
-export type LandingMotionLoopTrackProps = { readonly children: ReactNode; readonly isReducedMotion: boolean };
+type LandingMotionLoopTrackProps = { readonly children: ReactNode; readonly isReducedMotion: boolean };
 /** One Human, AI or System layer in the responsibility handoff. */
-export type LandingMotionRoleLayerProps = { readonly children: ReactNode; readonly index: number; readonly isReducedMotion: boolean };
+type LandingMotionRoleLayerProps = { readonly children: ReactNode; readonly index: number; readonly isReducedMotion: boolean };
 
-const revealTransition = { duration: 0.58, ease: [0.22, 1, 0.36, 1] as const };
+const REVEAL_TRANSITION = { duration: 0.58, ease: [0.22, 1, 0.36, 1] as const };
 
 /** Progressively reveals the hero copy without hiding its server-rendered fallback. */
 export const LandingMotionHeroRevealBase = (props: LandingMotionHeroRevealProps) => {
-  return <motion.div className={C.heroCopy} initial={false} whileInView={props.isReducedMotion ? undefined : { opacity: [0.72, 1], y: [18, 0] }} viewport={{ once: true, amount: 0.18 }} transition={revealTransition}>{props.children}</motion.div>;
+  return <motion.div className={C.heroCopy} initial={false} whileInView={props.isReducedMotion ? undefined : { opacity: [0.72, 1], y: [18, 0] }} viewport={{ once: true, amount: 0.18 }} transition={REVEAL_TRANSITION}>{props.children}</motion.div>;
 };
 
 /** Progressively reveals the light-on-dark section heading. */
 export const LandingMotionLightSectionRevealBase = (props: LandingMotionLightSectionRevealProps) => {
-  return <motion.div className={C.sectionHeadingLight} initial={false} whileInView={props.isReducedMotion ? undefined : { opacity: [0.72, 1], y: [18, 0] }} viewport={{ once: true, amount: 0.18 }} transition={revealTransition}>{props.children}</motion.div>;
+  return <motion.div className={C.sectionHeadingLight} initial={false} whileInView={props.isReducedMotion ? undefined : { opacity: [0.72, 1], y: [18, 0] }} viewport={{ once: true, amount: 0.18 }} transition={REVEAL_TRANSITION}>{props.children}</motion.div>;
 };
 
 /** Applies ambient movement only to the decorative hero overlay. */

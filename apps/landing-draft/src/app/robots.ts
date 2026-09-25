@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next"
-import { PUBLIC_SITE_URL } from "@/resources/site"
+import { PUBLIC_SITE_URL } from "@/features/layouts/SiteShell"
 
 /** Public indexing policy and canonical sitemap discovery. */
 const robots = (): MetadataRoute.Robots => ({

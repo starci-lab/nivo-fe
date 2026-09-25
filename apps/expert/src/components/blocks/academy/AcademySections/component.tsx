@@ -192,7 +192,7 @@ export type LeadStatus = "idle" | "sending" | "sent" | "failed";
  * @param form - The submitted values.
  * @param field - Which control to read.
  */
-const leadField = (form: FormData, field: string) => {
+const leadField = (form: FormData, field: string): string => {
   const value = form.get(field);
   return typeof value === "string" ? value : "";
 };
@@ -564,7 +564,7 @@ export type AcademySectionsActions = {
   readonly failImage: (src: string) => void;
 };
 /** Settled public sections, transient feedback state, and connected commands drawn by the academy. */
-export type AcademySectionsProps = {
+type AcademySectionsProps = {
   readonly sections: ReadonlyArray<AcademySection>;
   readonly failedImageSources: ReadonlySet<string>;
   readonly leadStatus: LeadStatus;

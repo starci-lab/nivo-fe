@@ -16,7 +16,7 @@ vi.mock("next-intl/middleware", () => ({
 }))
 
 import middleware, { config } from "./middleware"
-import { routing } from "./i18n/routing"
+import { routing } from "./modules/i18n/routing"
 
 describe("expert locale middleware", () => {
     it("binds the declared routing and excludes API, build, verification, and file paths", () => {

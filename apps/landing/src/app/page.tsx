@@ -1,4 +1,4 @@
-import { LandingPage } from "@/components/pages/LandingPage"
+import { LandingPage } from "@/features/pages/LandingPage"
 
 /**
  * The `/` route. It mounts the page and nothing else.

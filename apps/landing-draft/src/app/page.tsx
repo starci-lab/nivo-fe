@@ -1,6 +1,6 @@
-import { HomePage } from "@/components/site"
+import { HomePage } from "@/features/pages/HomePage"
 import type { Metadata } from "next"
-import { SITE_DESCRIPTION, SITE_TITLE } from "@/resources/site"
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/features/layouts/SiteShell"
 
 /** Homepage-only discovery metadata; downstream routes can safely define their own canonical URL. */
 export const metadata: Metadata = {

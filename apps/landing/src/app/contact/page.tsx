@@ -1,5 +1,5 @@
-import { CanonicalPage } from "@/components/pages/LandingPage"
+import { CanonicalPage } from "@/features/pages/LandingPage"
 type ContactRouteProps = { readonly searchParams: Promise<{ intent?: string | ReadonlyArray<string> }> }
-/** Relationship-routing route adapter that validates query intent before rendering. */
-const ContactRoute = async ({ searchParams }: ContactRouteProps) => { const query = await searchParams; const value = Array.isArray(query.intent) ? query.intent[0] : query.intent; return <CanonicalPage route="contact" selectedIntent={value} /> }
+/** Relationship-routing route adapter that hands the query to the contact owner. */
+const ContactRoute = async (props: ContactRouteProps) => { const query = await props.searchParams; return <CanonicalPage route="contact" selectedIntent={query.intent} /> }
 export default ContactRoute

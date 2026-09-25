@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { useSubmitAcademyLead } from "@/hooks";
 import type { Course } from "@/modules/api/academy";
-import type { Locale } from "@/i18n/config";
+import type { Locale } from "@/modules/i18n/config";
 import { ACADEMY, CUSTOM_SECTION_PREFIX, inLocale, type CustomContent, type Faq, type GalleryItem, type Instructor, type Magnet, type Stat, type Testimonial } from "@/modules/academy/template";
 import { AcademySectionsBase } from "./component";
 
@@ -353,7 +353,7 @@ export const AcademySections = (props: AcademySectionsProps) => {
    * @param input - The name and contact the reader typed.
    * @returns Whether it landed.
    */
-  const submitLead: LeadSubmit = async input => {
+  const submitLead: LeadSubmit = async (input): Promise<boolean> => {
     if (leadStatus === "sending") return false;
     setLeadStatus("sending");
     const ok = await submitAcademyLead(input);

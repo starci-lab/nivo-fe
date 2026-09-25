@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { TrustPage } from "@/components/pages/explore"
+import { TrustPage } from "@/features/pages/explore"
 
 /** Search and sharing metadata for the canonical Trust route. */
 export const metadata: Metadata = {
