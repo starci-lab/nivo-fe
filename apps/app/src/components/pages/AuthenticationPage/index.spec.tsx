@@ -20,6 +20,7 @@ const mocks = vi.hoisted(() => {
     return {
         api,
         push: vi.fn(),
+        replace: vi.fn(),
         adopt: vi.fn(),
         session: { state: { status: "anonymous" as string }, adopt: vi.fn() },
         t: (key: string, values?: Record<string, unknown>) => values === undefined ? key : `${key}:${JSON.stringify(values)}`,
@@ -37,7 +38,7 @@ type AuthPageProbeInput = { panel: AuthProbePanel, exits: ReadonlyArray<{ questi
 const details = { email: "reader@example.test", password: "secret-password", name: "Reader" } satisfies AuthDetails
 const code = { otp: "123456", newPassword: "new-password" } satisfies AuthCode
 
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push, replace: mocks.replace }), usePathname: () => "/authentication" }))
 vi.mock("next-intl", () => ({ useTranslations: () => mocks.t }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/auth", () => mocks.api)
@@ -388,5 +389,35 @@ describe("AuthenticationPage connected journeys", () => {
 
         fireEvent.click(screen.getByTestId("onward"))
         await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/overview"))
+    })
+
+    it("reports the handed-off session ending once, drops the param and keeps sign-in one press away", async () => {
+        // APPLIED: the authority confirmed every browser, and the notice may say so.
+        window.history.replaceState(null, "", "/authentication?sessionEnding=applied")
+        render(<AuthenticationPage />)
+        await waitFor(() => expect(panel()).toContain('"state":"notice"'))
+        expect(panel()).toContain("signOut.everywhereAppliedNotice")
+        expect(mocks.replace).toHaveBeenCalledWith("/authentication")
+        expect(mocks.session.adopt).not.toHaveBeenCalled()
+        expect(mocks.push).not.toHaveBeenCalled()
+
+        fireEvent.click(screen.getByTestId("onward"))
+        await waitFor(() => expect(panel()).toContain("signIn.title"))
+
+        // UNCONFIRMED: this browser is out and the others were never confirmed - no completion claim.
+        cleanup()
+        window.history.replaceState(null, "", "/authentication?sessionEnding=unconfirmed")
+        render(<AuthenticationPage />)
+        await waitFor(() => expect(panel()).toContain('"state":"notice"'))
+        expect(panel()).toContain("signOut.unconfirmedNotice")
+        expect(panel()).not.toContain("everywhereAppliedNotice")
+
+        // AN UNRECOGNISED VALUE is not an answer: no notice, and the param is still consumed.
+        cleanup()
+        window.history.replaceState(null, "", "/authentication?sessionEnding=something-else")
+        render(<AuthenticationPage />)
+        await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith("/authentication"))
+        expect(panel()).toContain('"state":"details"')
+        expect(panel()).not.toContain("signOut.")
     })
 })

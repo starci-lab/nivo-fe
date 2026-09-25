@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutateContinueBrokeredSignInSwr, useMutateForgotPasswordInitSwr, useMutateForgotPasswordResendSwr, useMutateForgotPasswordVerifyOtpSwr, useMutateSignInSwr, useMutateSignUpInitSwr, useMutateSignUpResendSwr, useMutateSignUpVerifyOtpSwr, useMutateVerifyTwoFactorSwr, useOauthReturnExchange } from "@/hooks";
 import { DEFAULT_AUTHENTICATED_LANDING, authenticationOauthRedirectUrl, rememberOauthProvider, validatedReturnTo } from "@/modules/auth";
@@ -88,10 +88,11 @@ type AuthPhase = "details" | "code" | "done" | "twoFactor" | "notice";
 /**
  * Which settled ending without a session is on screen.
  *
- * All three arrive with no form left to fill: the proven mailbox holder, an identity created with
- * no session, and a requested destination the backend folded onto the default landing surface.
+ * All five arrive with no form left to fill: the proven mailbox holder, an identity created with
+ * no session, a requested destination the backend folded onto the default landing surface, and the
+ * two session-ending reports the console hands over on the query.
  */
-type AuthNoticeKind = "heldAddress" | "createdNoSession" | "unavailableReturn";
+type AuthNoticeKind = "heldAddress" | "createdNoSession" | "unavailableReturn" | "sessionEndingApplied" | "sessionEndingUnconfirmed";
 
 /**
  * What a brokered answer says, whichever door produced it: the callback's exchange, or the
@@ -134,6 +135,12 @@ const SECONDS_PER_MINUTE = 60;
 const RETURN_TO_STORAGE_KEY = "nivo.auth.return-to";
 
 /**
+ * The query key the session-ending hand-off arrives under. `SessionEndingDialog` owns the values
+ * it can send; this page only reads them.
+ */
+const SESSION_ENDING_PARAM = "sessionEnding";
+
+/**
  * The transport codes that mean NOBODY DECIDED.
  *
  * A request that never arrived, could not be parsed, was refused before any resolver ran, or came
@@ -160,6 +167,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
   void props;
   const t = useTranslations("authentication");
   const router = useRouter();
+  const pathname = usePathname();
   const session = useSession();
   const signInMutation = useMutateSignInSwr();
   const verifyTwoFactorMutation = useMutateVerifyTwoFactorSwr();
@@ -217,6 +225,36 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     }
   });
   /*
+   * THE EVERYWHERE-ENDING'S OWN REPORT, handed over on the address. The console that asked for the
+   * ending is gone by the time it could be reported - ending every session clears this browser's
+   * custody first - so SessionEndingDialog sends the authority-side answer here the same way the
+   * guard sends the interrupted route: one `sessionEnding` value, read once at mount rather than
+   * subscribed to. `applied` means the ending was confirmed in every browser; `unconfirmed` means
+   * this browser is signed out and the others could not be confirmed, which the notice states as
+   * exactly that - never as a completed ending. Any other value is not an answer at all, only a
+   * param to consume.
+   */
+  const [sessionEndingOnArrival] = useState<{
+    /** Whether the hand-off param was present at all, however it was valued. */
+    readonly handedOff: boolean;
+    /** The report's known value, or null for anything else. */
+    readonly kind: "applied" | "unconfirmed" | null;
+  }>(() => {
+    try {
+      const query = new URLSearchParams(window.location.search);
+      const ending = query.get(SESSION_ENDING_PARAM);
+      return {
+        handedOff: query.has(SESSION_ENDING_PARAM),
+        kind: ending === "applied" || ending === "unconfirmed" ? ending : null
+      };
+    } catch {
+      return {
+        handedOff: false,
+        kind: null
+      };
+    }
+  });
+  /*
    * THE SWITCH IS REAL STATE AND IT CHANGES NOTHING SERVER-SIDE YET. The refresh cookie is written
    * with a fixed thirty-day `maxAge` and no per-request control, so a session lasts the same length
    * either way. It is held here rather than dropped because making it mean something is one backend
@@ -243,6 +281,12 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
    * into a refusal that appears only on a developer's machine.
    */
   const hasAdoptedOauth = useRef(false);
+  /*
+   * ONE ENDING REPORT PER ARRIVAL, held in a ref for the same reason as the provider hand-off:
+   * the notice settles and the reader moves on, but the param was still on the address when this
+   * mount read it - without the guard a re-render would put the consumed report back on screen.
+   */
+  const hasConsumedSessionEnding = useRef(false);
   /*
    * WHERE THE READER WAS GOING. The console guard sends an anonymous reader here with the route it
    * interrupted on the query, so a sign-in from a deep link ends on that route and not on the home
@@ -410,6 +454,26 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     if (!oauthRefusedOnArrival) return;
     refuse(t("signIn.oauthRefused"));
   }, [oauthRefusedOnArrival, refuse, t]);
+
+  /*
+   * THE HANDED-OFF ENDING IS REPORTED ONCE, THEN THE ADDRESS FORGETS IT. A consumed report left on
+   * the query would be announced again on every reload and carried into every shared link, so the
+   * param is dropped the moment it is read - whatever it held. A known value settles into the same
+   * notice phase the other sessionless endings wear; an unrecognised one is only consumed. Other
+   * params, like a return intent, are not this page's to take, so they stay.
+   */
+  useEffect(() => {
+    if (!sessionEndingOnArrival.handedOff || hasConsumedSessionEnding.current) return;
+    hasConsumedSessionEnding.current = true;
+    const remaining = new URLSearchParams(window.location.search);
+    remaining.delete(SESSION_ENDING_PARAM);
+    const search = remaining.toString();
+    router.replace(search === "" ? pathname : `${pathname}?${search}`);
+    if (sessionEndingOnArrival.kind !== null) {
+      setNoticeKind(sessionEndingOnArrival.kind === "applied" ? "sessionEndingApplied" : "sessionEndingUnconfirmed");
+      setPhase("notice");
+    }
+  }, [pathname, router, sessionEndingOnArrival]);
 
   /*
    * THE RETURN LEG OF A PROVIDER SIGN-IN.
@@ -825,6 +889,25 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
         doneTitle: t("signUp.createdNoSessionTitle"),
         doneHint: t("signUp.createdNoSessionNotice"),
         onwardLabel: t("signUp.createdNoSessionSignInLabel")
+      };
+    }
+    /*
+     * THE EVERYWHERE-ENDING'S TWO REPORTS. `applied` may say the ending was confirmed in every
+     * browser; `unconfirmed` must not - this browser is signed out and the others were never
+     * confirmed, which is not a success. The way on is the same single action: the sign-in form.
+     */
+    if (noticeKind === "sessionEndingApplied") {
+      return {
+        ...base,
+        doneHint: t("signOut.everywhereAppliedNotice"),
+        onwardLabel: t("forgotPassword.onwardLabel")
+      };
+    }
+    if (noticeKind === "sessionEndingUnconfirmed") {
+      return {
+        ...base,
+        doneHint: t("signOut.unconfirmedNotice"),
+        onwardLabel: t("forgotPassword.onwardLabel")
       };
     }
     /*

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
     push: vi.fn(),
+    replace: vi.fn(),
     adopt: vi.fn(),
     signIn: vi.fn(),
     signUpInit: vi.fn(),
@@ -19,7 +20,7 @@ const mocks = vi.hoisted(() => ({
     oauthRedirectUrl: vi.fn(() => "https://auth.test"),
 }))
 
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push, replace: mocks.replace }), usePathname: () => "/authentication" }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => ({ state: { status: "anonymous" }, adopt: mocks.adopt, end: vi.fn() }) }))
 vi.mock("@/modules/api/auth", () => mocks)
@@ -173,6 +174,38 @@ describe("AuthenticationPage interactions", () => {
         await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/console/orders"))
         expect(mocks.adopt).toHaveBeenCalledWith(expect.objectContaining({ accessToken: "continued" }))
         expect(mocks.continueBrokeredSignIn).toHaveBeenCalledWith({ continuationReference: "hold-2" })
+    })
+
+    it("tells the reader their sign-ins ended everywhere once, then keeps sign-in one press away", async () => {
+        window.history.replaceState(null, "", "/authentication?sessionEnding=applied")
+        render(<AuthenticationPage />)
+
+        expect(await screen.findByText("signOut.everywhereAppliedNotice")).toBeInTheDocument()
+        expect(mocks.replace).toHaveBeenCalledWith("/authentication")
+        expect(mocks.adopt).not.toHaveBeenCalled()
+        expect(mocks.push).not.toHaveBeenCalled()
+
+        fireEvent.click(screen.getByRole("button", { name: "forgotPassword.onwardLabel" }))
+        expect(await screen.findByLabelText("emailLabel")).toBeInTheDocument()
+    })
+
+    it("reports an unconfirmed everywhere ending without claiming completion", async () => {
+        window.history.replaceState(null, "", "/authentication?sessionEnding=unconfirmed")
+        render(<AuthenticationPage />)
+
+        expect(await screen.findByText("signOut.unconfirmedNotice")).toBeInTheDocument()
+        expect(screen.queryByText("signOut.everywhereAppliedNotice")).not.toBeInTheDocument()
+        expect(mocks.replace).toHaveBeenCalledWith("/authentication")
+        expect(mocks.adopt).not.toHaveBeenCalled()
+    })
+
+    it("ignores an unrecognised session-ending value and still consumes the param", async () => {
+        window.history.replaceState(null, "", "/authentication?sessionEnding=something-else&returnTo=%2Fconsole%2Forders")
+        render(<AuthenticationPage />)
+
+        await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith("/authentication?returnTo=%2Fconsole%2Forders"))
+        expect(screen.queryByText("signOut.unconfirmedNotice")).not.toBeInTheDocument()
+        expect(await screen.findByLabelText("emailLabel")).toBeInTheDocument()
     })
 
     it("leaves fresh provider starts as the way on when the undecided result carried no reference", async () => {
