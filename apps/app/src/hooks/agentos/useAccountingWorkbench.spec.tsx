@@ -1,5 +1,4 @@
 import { act, renderHook } from "@testing-library/react";
-import type { FormEvent } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import en from "@/messages/en.json";
 
@@ -51,7 +50,6 @@ const messageFor = (key: string): string => {
 const translate = (key: string, values?: Readonly<Record<string, string | number | undefined>>): string =>
   Object.entries(values ?? {}).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), messageFor(key));
 const evidenceAnswer = (state: string) => ({ ok: true, data: { op: "evidence", payload: { evidenceId: "evidence-1", state, revision: 1, missingFacts: [] } } });
-const form = { preventDefault: () => undefined } as unknown as FormEvent;
 const render = () => renderHook(() => useAccountingWorkbench("installation-1", "en", translate));
 
 describe("useAccountingWorkbench settlement", () => {
@@ -99,7 +97,7 @@ describe("useAccountingWorkbench settlement", () => {
     mocks.admit.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: false, code: "stale-authority", reason: "moved on" })) };
     const { result } = render();
     act(() => { result.current.intake.setEvidenceId("evidence-1"); result.current.intake.setSourceKind("invoice"); result.current.intake.setSourceRef("ref-1"); result.current.intake.setSourceRevision("rev-1"); result.current.intake.setFingerprint("sha256:1"); });
-    await act(async () => { result.current.intake.onAdmit(form); });
+    await act(async () => { result.current.intake.onAdmit(); });
     expect(result.current.notice).toEqual({ kind: "refused", message: translate("refusal.staleAuthority") });
     expect(readback).not.toHaveBeenCalled();
   });
@@ -109,7 +107,7 @@ describe("useAccountingWorkbench settlement", () => {
     mocks.admit.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, data: { op: "admitEvidence", payload: { evidenceId: "evidence-1", state: "reading", revision: 1, missingFacts: [] } } })) };
     const { result } = render();
     act(() => { result.current.intake.setEvidenceId("evidence-1"); result.current.intake.setSourceKind("invoice"); result.current.intake.setSourceRef("ref-1"); result.current.intake.setSourceRevision("rev-1"); result.current.intake.setFingerprint("sha256:1"); });
-    await act(async () => { result.current.intake.onAdmit(form); });
+    await act(async () => { result.current.intake.onAdmit(); });
     expect(result.current.notice).toEqual({ kind: "success", message: translate("intake.settled", { state: translate("evidenceState.admitted") }) });
   });
 
@@ -118,7 +116,7 @@ describe("useAccountingWorkbench settlement", () => {
     mocks.admit.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, data: { op: "admitEvidence", payload: { evidenceId: "evidence-1", state: "admitted", revision: 1, missingFacts: [] } } })) };
     const { result } = render();
     act(() => { result.current.intake.setEvidenceId("evidence-1"); result.current.intake.setSourceKind("invoice"); result.current.intake.setSourceRef("ref-1"); result.current.intake.setSourceRevision("rev-1"); result.current.intake.setFingerprint("sha256:1"); });
-    await act(async () => { result.current.intake.onAdmit(form); });
+    await act(async () => { result.current.intake.onAdmit(); });
     expect(result.current.notice).toEqual({ kind: "refused", message: translate("refusal.unsettled") });
   });
 
@@ -131,11 +129,11 @@ describe("useAccountingWorkbench settlement", () => {
     mocks.evidenceRead.mockReturnValue(mocks.query(undefined, vi.fn(async () => evidenceAnswer("admitted"))).value);
     const { result } = render();
     act(() => { result.current.intake.setEvidenceId("evidence-1"); result.current.intake.setSourceKind("invoice"); result.current.intake.setSourceRef("ref-1"); result.current.intake.setSourceRevision("rev-1"); result.current.intake.setFingerprint("sha256:1"); });
-    await act(async () => { result.current.intake.onAdmit(form); });
+    await act(async () => { result.current.intake.onAdmit(); });
     const settled = trigger.mock.calls[0]?.[0];
     expect(typeof settled?.requestId).toBe("string");
     trigger.mockResolvedValueOnce({ ok: false, code: "UNREACHABLE" });
-    await act(async () => { result.current.intake.onAdmit(form); });
+    await act(async () => { result.current.intake.onAdmit(); });
     expect(trigger.mock.calls[1]?.[0].requestId).not.toBe(settled?.requestId);
   });
 });

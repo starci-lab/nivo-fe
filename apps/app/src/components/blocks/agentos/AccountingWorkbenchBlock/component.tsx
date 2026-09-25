@@ -1,4 +1,4 @@
-import type { FormEvent, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Badge, Button, EmptyNotice, Heading, Input, PrimaryRailLayout, SectionHeader, SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common";
 import type { AccountingSummaryItemPayload } from "@/modules/api/accounting";
 import type { useAccountingWorkbench } from "@/hooks";
@@ -20,13 +20,13 @@ import {
   formatAccountingMinor,
   formatAccountingPeriod,
   type AccountingNotice,
-  type AccountingSurfaceStanding
+  type AccountingSurfaceStanding,
+  type AccountingTranslation
 } from "@/modules/accounting/accounting-workbench";
 import { ACCOUNTING_ACTION_ROW_CLASS_NAME, ACCOUNTING_FIELD_STACK_CLASS_NAME, ACCOUNTING_FORM_FULL_SPAN_CLASS_NAME, ACCOUNTING_FORM_GRID_CLASS_NAME, ACCOUNTING_NATIVE_CONTROL_CLASS_NAME, ACCOUNTING_NATIVE_FIELD_CLASS_NAME, ACCOUNTING_OPERATIONS_GRID_CLASS_NAME, ACCOUNTING_ROW_CLASS_NAME, ACCOUNTING_SUMMARY_GRID_CLASS_NAME, ACCOUNTING_WORKBENCH_CLASS_NAME } from "./classNames";
 
 /** The settled view the render half draws; the connected owner resolves everything it shows. */
-export type AccountingWorkbenchBlockBaseProps = { readonly view: ReturnType<typeof useAccountingWorkbench> };
-type AccountingWorkbenchBlockProps = AccountingWorkbenchBlockBaseProps;
+type AccountingWorkbenchBlockProps = { readonly view: ReturnType<typeof useAccountingWorkbench> };
 type ChildrenProps = { readonly children: ReactNode };
 type StatusNoticeProps = { readonly notice: AccountingNotice | null };
 
@@ -51,12 +51,41 @@ const measureBand = (items: ReadonlyArray<AccountingSummaryItemPayload>, kind: s
 
 const StatusNotice = ({ notice }: StatusNoticeProps) => notice === null ? null : <Text live={accountingNoticeLive(notice.kind)} tone={notice.kind === "success" ? "accent" : "default"}>{notice.message}</Text>;
 
+type MeasureBandReading = { readonly amountMinor: number; readonly currency: string; readonly covered: number } | { readonly reasonCode: string };
+type MeasureValueProps = { readonly band: MeasureBandReading | null; readonly amount: (amountMinor: number, currency: string) => string; readonly t: AccountingTranslation };
+
+/** One measure band's value: the amount with its coverage, the withheld reason, or the absent note. */
+const MeasureValue = ({ band, amount, t }: MeasureValueProps) => {
+  if (band === null) return <Text size="sm" tone="muted">{t("overview.measureAbsent")}</Text>;
+  if ("reasonCode" in band) return <Text size="sm" tone="accent">{t("overview.measureUnknown", { reason: band.reasonCode })}</Text>;
+  return <><Heading level={3}>{amount(band.amountMinor, band.currency)}</Heading><Text size="xs" tone="muted">{t("overview.measureCovered", { count: band.covered })}</Text></>;
+};
+
+type BadgeTone = "success" | "warning" | "neutral";
+/** The tone one closed state's badge takes; a state this build does not know is neutral. */
+const toneFor = (tones: Readonly<Record<string, BadgeTone>>, state: string): BadgeTone => tones[state] ?? "neutral";
+const EVIDENCE_TONES: Readonly<Record<string, BadgeTone>> = { ready: "success", rejected: "warning", unreadable: "warning" };
+const ROUTINE_TONES: Readonly<Record<string, BadgeTone>> = { committed: "success", denied: "warning" };
+const CORRECTION_TONES: Readonly<Record<string, BadgeTone>> = { applied: "success", blocked: "warning" };
+
+type FormSubmit = { readonly preventDefault: () => void };
+type ScopeLineProps = { readonly scopeReady: boolean; readonly scopeStanding: AccountingSurfaceStanding; readonly t: AccountingTranslation };
+
+/** The rail's installation line: one sentence per scope standing. */
+const ScopeLine = ({ scopeReady, scopeStanding, t }: ScopeLineProps) => {
+  if (scopeReady) return <Text size="sm" tone="muted" live="polite">{t("rail.scopeReady")}</Text>;
+  if (scopeStanding === "denied") return <Text size="sm" tone="accent" live="assertive">{t("refusal.forbidden")}</Text>;
+  if (scopeStanding === "loading") return <Text size="sm" tone="muted" live="polite">{t("standing.loading")}</Text>;
+  return <Text size="sm" tone="accent" live="assertive">{t(`standing.${scopeStanding}`)}</Text>;
+};
+
 /** Render the complete responsive Accounting workbench from a settled controller view. */
 export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProps) => {
   const { view } = props;
   const { t, locale, scopeReady, scopeStanding, notice, currency, setCurrency, periodMonth, setPeriodMonth, asOf, asOfDraft, setAsOf, setAsOfDraft } = view;
   const amount = (amountMinor: number, rowCurrency: string): string => formatAccountingMinor(amountMinor, rowCurrency, locale);
-  const stop = (handler: (event: FormEvent) => void) => (event: FormEvent) => { event.preventDefault(); handler(event); };
+  const estimateCurrency = view.overview.model?.currency ?? null;
+  const stop = (handler: () => void) => (event: FormSubmit) => { event.preventDefault(); handler(); };
 
   /* One surface's standing around the content it settled to; a refusal to read is not an empty read. */
   const region = (standing: AccountingSurfaceStanding, empty: string, emptyHint: string, children: ReactNode) => {
@@ -88,10 +117,10 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
             const band = measureBand(view.overview.model?.items ?? [], kind);
             return <Row key={kind}>
               <Text size="sm" weight="semibold">{t(accountingMeasureKey(kind))}</Text>
-              {band === null ? <Text size="sm" tone="muted">{t("overview.measureAbsent")}</Text> : "reasonCode" in band ? <Text size="sm" tone="accent">{t("overview.measureUnknown", { reason: band.reasonCode })}</Text> : <><Heading level={3}>{amount(band.amountMinor, band.currency)}</Heading><Text size="xs" tone="muted">{t("overview.measureCovered", { count: band.covered })}</Text></>}
+              <MeasureValue band={band} amount={amount} t={t} />
             </Row>;
           })}
-          {view.overview.model === null || view.overview.model.currency === null ? null : <Text size="xs" tone="muted">{t("overview.estimate", { currency: view.overview.model.currency })}</Text>}
+          {estimateCurrency === null ? null : <Text size="xs" tone="muted">{t("overview.estimate", { currency: estimateCurrency })}</Text>}
         </>)}
       </FieldStack>
     </div>
@@ -108,7 +137,7 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
       <div className={ACCOUNTING_FORM_FULL_SPAN_CLASS_NAME}><ActionRow><Button size="lg" type="submit" variant="primary" isPending={view.intake.isAdmitting} isDisabled={!scopeReady || view.intake.evidenceId.length === 0 || view.intake.sourceKind.length === 0 || view.intake.sourceRef.length === 0 || view.intake.sourceRevision.length === 0 || view.intake.fingerprint.length === 0}>{t("intake.admit")}</Button><Button size="lg" type="button" variant="ghost" onPress={view.intake.reload}>{t("reload")}</Button></ActionRow></div>
     </div></form>
     {region(view.intake.standing, t("intake.empty"), t("intake.emptyHint"), view.intake.model === null ? null : <Row>
-      <ActionRow><Text weight="semibold">{view.intake.model.evidenceId}</Text><Badge tone={view.intake.model.state === "ready" ? "success" : view.intake.model.state === "rejected" || view.intake.model.state === "unreadable" ? "warning" : "neutral"}>{t(accountingEvidenceStateKey(view.intake.model.state))}</Badge><Badge tone="neutral">{t("revision", { value: view.intake.model.revision })}</Badge></ActionRow>
+      <ActionRow><Text weight="semibold">{view.intake.model.evidenceId}</Text><Badge tone={toneFor(EVIDENCE_TONES, view.intake.model.state)}>{t(accountingEvidenceStateKey(view.intake.model.state))}</Badge><Badge tone="neutral">{t("revision", { value: view.intake.model.revision })}</Badge></ActionRow>
       <Text size="sm">{view.intake.model.missingFacts.length === 0 ? t("intake.noMissingFacts") : t("intake.missingFacts", { facts: view.intake.model.missingFacts.join(", ") })}</Text>
       {view.intake.model.state === "likely_duplicate" ? <Text size="sm" tone="accent">{t("intake.duplicateNotice")}</Text> : null}
       {view.intake.model.state === "needs_information" ? <Text size="sm" tone="accent">{t("intake.conflictNotice")}</Text> : null}
@@ -125,7 +154,7 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
       <div className={ACCOUNTING_FORM_FULL_SPAN_CLASS_NAME}><ActionRow><Button size="lg" type="submit" variant="primary" isPending={view.routine.isCommitting} isDisabled={!scopeReady || view.routine.intentId.length === 0 || view.routine.itemId.length === 0 || view.routine.policyRevision.length === 0}>{t("routine.commit")}</Button><Button size="lg" type="button" variant="ghost" onPress={view.routine.reload}>{t("reload")}</Button></ActionRow></div>
     </div></form>
     {region(view.routine.standing, t("routine.empty"), t("routine.emptyHint"), view.routine.model === null ? null : <Row>
-      <ActionRow><Text weight="semibold">{view.routine.model.intentId}</Text><Badge tone={view.routine.model.state === "committed" ? "success" : view.routine.model.state === "denied" ? "warning" : "neutral"}>{t(accountingRoutineStateKey(view.routine.model.state))}</Badge>{view.routine.model.reasonCode === null ? null : <Badge tone="neutral">{view.routine.model.reasonCode}</Badge>}</ActionRow>
+      <ActionRow><Text weight="semibold">{view.routine.model.intentId}</Text><Badge tone={toneFor(ROUTINE_TONES, view.routine.model.state)}>{t(accountingRoutineStateKey(view.routine.model.state))}</Badge>{view.routine.model.reasonCode === null ? null : <Badge tone="neutral">{view.routine.model.reasonCode}</Badge>}</ActionRow>
       <Text size="sm">{t("routine.readback", { item: view.routine.model.itemId ?? t("none"), attempt: view.routine.model.attemptId ?? t("none") })}</Text>
       {view.routine.model.receiptId === null ? null : <Text size="xs" tone="muted">{t("routine.receipt", { receipt: view.routine.model.receiptId, result: view.routine.model.resultId ?? t("none") })}</Text>}
       {view.routine.model.state === "outcome-unknown" ? <Text size="sm" tone="accent" live="polite">{t("routine.unknownNotice")}</Text> : null}
@@ -216,7 +245,7 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
       </Row>}
       {view.correction.model === null ? null : <Row>
         <Text size="sm" weight="semibold">{view.correction.model.correctionId}</Text>
-        <ActionRow><Badge tone={view.correction.model.state === "applied" ? "success" : view.correction.model.state === "blocked" ? "warning" : "neutral"}>{t(accountingCorrectionStateKey(view.correction.model.state))}</Badge><Text size="sm">{t("correction.lineage", { predecessor: view.correction.model.predecessorResultId ?? t("none"), result: view.correction.model.resultId ?? t("none") })}</Text></ActionRow>
+        <ActionRow><Badge tone={toneFor(CORRECTION_TONES, view.correction.model.state)}>{t(accountingCorrectionStateKey(view.correction.model.state))}</Badge><Text size="sm">{t("correction.lineage", { predecessor: view.correction.model.predecessorResultId ?? t("none"), result: view.correction.model.resultId ?? t("none") })}</Text></ActionRow>
         {view.correction.model.state === "applied" && view.correction.model.resultId !== null ? <Text size="sm" tone="accent">{t("correction.appended", { result: view.correction.model.resultId })}</Text> : null}
         {view.correction.model.state === "outcome_unknown" || view.correction.model.state === "possible_start" ? <Text size="sm" tone="accent" live="polite">{t("correction.unknownNotice")}</Text> : null}
       </Row>}
@@ -224,7 +253,7 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
   </SurfaceCard>;
 
   const rail = <FieldStack>
-    <SurfaceCard label={t("rail.scope")}><Text size="sm" tone={scopeReady ? "muted" : scopeStanding === "loading" ? "muted" : "accent"} live={scopeStanding === "loading" ? "polite" : scopeReady ? "polite" : "assertive"}>{scopeReady ? t("rail.scopeReady") : scopeStanding === "denied" ? t("refusal.forbidden") : t(`standing.${scopeStanding}`)}</Text></SurfaceCard>
+    <SurfaceCard label={t("rail.scope")}><ScopeLine scopeReady={scopeReady} scopeStanding={scopeStanding} t={t} /></SurfaceCard>
     <SurfaceListCard label={t("rail.attention")} fact={t("overview.itemCount", { count: view.overview.attention.length })} isLoading={view.overview.standing === "loading"}>
       {view.overview.attention.length === 0 ? <EmptyNotice message={t("rail.attentionEmpty")} description={t("rail.attentionEmptyHint")} /> : view.overview.attention.map(code => <Row key={code}><Text size="sm">{accountingAttentionKey(code) === "attention.other" ? code : t(accountingAttentionKey(code))}</Text></Row>)}
     </SurfaceListCard>

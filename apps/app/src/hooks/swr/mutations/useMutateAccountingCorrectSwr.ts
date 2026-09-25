@@ -25,7 +25,8 @@ export const useMutateAccountingCorrectSwr = (scope: AccountingInstallationScope
   const accessToken = useAccountingAccessToken();
   return useNivoMutation(enabled ? accountingCommandMutationKey("correct", scope) : null, (trigger: AccountingCommandTrigger<AccountingCorrectInput>) => commandAccountingCorrect(accessToken, scope, trigger.input, trigger.requestId), {
     invalidates: (trigger, answer) => {
-      const resultId = answer.ok ? answer.data.payload.resultId : trigger.input.action === "propose" ? trigger.input.predecessorResultId : null;
+      const proposed = trigger.input.action === "propose" ? trigger.input.predecessorResultId : null;
+      const resultId = answer.ok ? answer.data.payload.resultId : proposed;
       return resultId === null ? [] : [accountingResultDetailQueryKey(scope, { action: "current", resultId })];
     },
     shouldInvalidate: accountingAnswerNeedsRead

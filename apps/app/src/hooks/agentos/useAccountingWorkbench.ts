@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import type {
   AccountingCorrectInput,
@@ -20,7 +20,7 @@ import { useMutateAccountingAdmitEvidenceSwr } from "@/hooks/swr/mutations/useMu
 import { useMutateAccountingCorrectSwr } from "@/hooks/swr/mutations/useMutateAccountingCorrectSwr";
 import { useMutateAccountingExceptionSwr } from "@/hooks/swr/mutations/useMutateAccountingExceptionSwr";
 import { useMutateAccountingRoutineSwr } from "@/hooks/swr/mutations/useMutateAccountingRoutineSwr";
-import { accountingMonthPeriod, accountingRefusalKey, accountingUtcMonth, accountingSurfaceStanding, type AccountingNotice, type AccountingTranslation } from "@/modules/accounting/accounting-workbench";
+import { accountingMonthPeriod, accountingRefusalKey, accountingUtcMonth, accountingSurfaceStanding, type AccountingAnswerStanding, type AccountingNotice, type AccountingSurfaceStanding, type AccountingTranslation } from "@/modules/accounting/accounting-workbench";
 
 /*
  * The connected Accounting workbench (impl.accounting.nivo-fe.workbench-view).
@@ -47,6 +47,22 @@ const PAGE_SIZE = 20;
 /** One command answer, as much of it as settlement depends on. */
 type CommandAnswer = { readonly ok: boolean; readonly code?: string; readonly reason?: string; readonly data?: unknown };
 
+/** What the installation line shows before an address exists: a held read, a refusal, or a true standing. */
+const scopeStandingFor = (answer: AccountingAnswerStanding | undefined, error: unknown, hasInstance: boolean): AccountingSurfaceStanding => {
+  if (answer === undefined && error === undefined) return "loading";
+  if (error !== undefined) return "unavailable";
+  const standing = accountingSurfaceStanding(answer, hasInstance);
+  return standing === "empty" ? "unavailable" : standing;
+};
+
+/** The receiver's own state spelling inside one settled payload. */
+type CommandPayloadState = { readonly state?: string; readonly resultId?: string | null };
+const payloadState = (answer: CommandAnswer): CommandPayloadState | undefined => (answer.data as { readonly payload?: CommandPayloadState } | undefined)?.payload;
+/** The three states whose catalogue key differs from the receiver's spelling. */
+const EVIDENCE_STATE_KEYS: Readonly<Record<string, string>> = { needs_information: "needsInformation", likely_duplicate: "likelyDuplicate" };
+const ROUTINE_STATE_KEYS: Readonly<Record<string, string>> = { "needs-decision": "needsDecision", "pending-authority": "pendingAuthority", "outcome-unknown": "outcomeUnknown" };
+const CORRECTION_STATE_KEYS: Readonly<Record<string, string>> = { possible_start: "possibleStart", proven_not_applied: "provenNotApplied", outcome_unknown: "outcomeUnknown" };
+
 /** One exact input's stable request identity, kept until that input is delivered. */
 type Intent = { readonly fingerprint: string; readonly token: string };
 
@@ -60,18 +76,12 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
   const scope: AccountingInstallationScope | null = routeWorkspaceId.length > 0 && instanceId.length > 0
     ? { workspaceId: routeWorkspaceId, instanceId, installationId: routeInstallationId }
     : null;
-  const scopeStanding = controlCenter.data === undefined && controlCenter.error === undefined
-    ? "loading"
-    : controlCenter.error !== undefined
-      ? "unavailable"
-      : accountingSurfaceStanding(controlCenter.data, instanceId.length > 0) === "empty"
-        ? "unavailable"
-        : accountingSurfaceStanding(controlCenter.data, instanceId.length > 0);
+  const scopeStanding = scopeStandingFor(controlCenter.data, controlCenter.error, instanceId.length > 0);
   const addressable = scope ?? { workspaceId: "", instanceId: "", installationId: routeInstallationId };
   const ready = scope !== null;
 
   const [notice, setNotice] = useState<AccountingNotice | null>(null);
-  const [periodMonth, setPeriodMonthState] = useState(() => accountingUtcMonth(new Date()));
+  const [periodMonth, setPeriodMonth] = useState(() => accountingUtcMonth(new Date()));
   const [currency, setCurrency] = useState<string | null>(null);
   const [cursor, setCursor] = useState<string | null>(null);
   const [asOfDraft, setAsOfDraft] = useState("");
@@ -108,7 +118,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
 
   /* An unusable month control keeps the last usable period rather than reading a period nobody chose. */
   const period = accountingMonthPeriod(periodMonth) ?? accountingMonthPeriod(accountingUtcMonth(new Date()));
-  const setPeriodMonth = (value: string) => { if (accountingMonthPeriod(value) !== null) { setPeriodMonthState(value); setCursor(null); } };
+  const chooseMonth = (value: string) => { if (accountingMonthPeriod(value) !== null) { setPeriodMonth(value); setCursor(null); } };
   const summaryInput: AccountingSummaryQueryInput = { periodStart: period!.periodStart, periodEndExclusive: period!.periodEndExclusive, currency, pageSize: PAGE_SIZE, cursor };
   const detailInput: AccountingResultDetailInput = asOf === null ? { action: "current", resultId } : { action: "asOf", itemId, asOf };
 
@@ -153,36 +163,29 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
     }
   };
   const evidenceStateText = (answer: CommandAnswer): string | null => {
-    const payload = (answer.data as { readonly payload?: { readonly state?: string } } | undefined)?.payload;
-    return payload?.state === undefined ? null : t("intake.settled", { state: t(`evidenceState.${payload.state === "needs_information" ? "needsInformation" : payload.state === "likely_duplicate" ? "likelyDuplicate" : payload.state}`) });
+    const state = payloadState(answer)?.state;
+    return state === undefined ? null : t("intake.settled", { state: t(`evidenceState.${EVIDENCE_STATE_KEYS[state] ?? state}`) });
   };
   const routineStateText = (answer: CommandAnswer): string | null => {
-    const payload = (answer.data as { readonly payload?: { readonly state?: string } } | undefined)?.payload;
-    if (payload?.state === undefined) return null;
-    const key = payload.state === "needs-decision" ? "needsDecision" : payload.state === "pending-authority" ? "pendingAuthority" : payload.state === "outcome-unknown" ? "outcomeUnknown" : payload.state;
-    return t("routine.settled", { state: t(`routineState.${key}`) });
+    const state = payloadState(answer)?.state;
+    return state === undefined ? null : t("routine.settled", { state: t(`routineState.${ROUTINE_STATE_KEYS[state] ?? state}`) });
   };
   const correctionStateText = (answer: CommandAnswer): string | null => {
-    const payload = (answer.data as { readonly payload?: { readonly state?: string; readonly resultId?: string | null } } | undefined)?.payload;
-    if (payload?.state === undefined) return null;
-    const key = payload.state === "possible_start" ? "possibleStart" : payload.state === "proven_not_applied" ? "provenNotApplied" : payload.state === "outcome_unknown" ? "outcomeUnknown" : payload.state;
-    return t("correction.settled", { state: t(`correctionState.${key}`), result: payload.resultId ?? t("none") });
+    const payload = payloadState(answer);
+    return payload?.state === undefined ? null : t("correction.settled", { state: t(`correctionState.${CORRECTION_STATE_KEYS[payload.state] ?? payload.state}`), result: payload.resultId ?? t("none") });
   };
 
-  const onAdmit = (event: FormEvent) => {
-    event.preventDefault();
+  const onAdmit = () => {
     if (!ready || evidenceId.length === 0 || sourceKind.length === 0 || sourceRef.length === 0 || sourceRevision.length === 0 || fingerprint.length === 0) return;
     const value = { evidenceId, sourceKind, sourceRef, sourceRevision, fingerprint, expectedRevision: Number(intakeRevision) };
     void settle(`admit-${evidenceId}`, () => admit.trigger({ requestId: intentFor(`admit-${evidenceId}`, value), input: value }) as Promise<CommandAnswer>, () => evidence.mutate() as Promise<CommandAnswer>, evidenceStateText);
   };
-  const onCommitRoutine = (event: FormEvent) => {
-    event.preventDefault();
+  const onCommitRoutine = () => {
     if (!ready || intentId.length === 0 || itemId.length === 0 || policyRevision.length === 0) return;
     const value = { action: "commit" as const, itemId, evidenceIds: evidenceIds.split(",").map(entry => entry.trim()).filter(entry => entry.length > 0), intentId, policyRevision, expectedItemRevision: Number(itemRevision) };
     void settle(`routine-${intentId}`, () => routineCommand.trigger({ requestId: intentFor(`routine-${intentId}`, value), input: value }) as Promise<CommandAnswer>, () => routine.mutate() as Promise<CommandAnswer>, routineStateText);
   };
-  const onRetryRoutine = (event: FormEvent) => {
-    event.preventDefault();
+  const onRetryRoutine = () => {
     if (!ready || intentId.length === 0 || oldAttemptId.length === 0 || notStartedProofRef.length === 0 || newAttemptId.length === 0) return;
     const value = { action: "retry" as const, intentId, oldAttemptId, notStartedProofRef, newAttemptId };
     void settle(`routine-retry-${intentId}`, () => routineCommand.trigger({ requestId: intentFor(`routine-retry-${intentId}`, value), input: value }) as Promise<CommandAnswer>, () => routine.mutate() as Promise<CommandAnswer>, routineStateText);
@@ -193,13 +196,12 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
     const value = { action, exceptionId, reason: questionReason, expectedRevision: Number(exceptionRevision) } as AccountingExceptionInput;
     void settle(`exception-${action}-${exceptionId}`, () => exceptionCommand.trigger({ requestId: intentFor(`exception-${action}-${exceptionId}`, value), input: value }) as Promise<CommandAnswer>, intentId.length > 0 ? () => routine.mutate() as Promise<CommandAnswer> : null, routineStateText);
   };
-  const onAnswerQuestion = (event: FormEvent) => {
-    event.preventDefault();
+  const onAnswerQuestion = () => {
     if (!ready || exceptionId.length === 0 || (choiceCode.length === 0 && questionReason.length === 0)) return;
     const value: AccountingExceptionInput = { action: "answer", exceptionId, answer: { choiceCode: choiceCode.length === 0 ? null : choiceCode, suppliedFacts: [], reason: questionReason.length === 0 ? null : questionReason }, answerEvidenceRefs: questionEvidence, expectedRevision: Number(exceptionRevision) };
     void settle(`exception-answer-${exceptionId}`, () => exceptionCommand.trigger({ requestId: intentFor(`exception-answer-${exceptionId}`, value), input: value }) as Promise<CommandAnswer>, intentId.length > 0 ? () => routine.mutate() as Promise<CommandAnswer> : null, routineStateText);
   };
-  const onLoadDetail = (event: FormEvent) => { event.preventDefault(); if (ready) void detail.mutate(); };
+  const onLoadDetail = () => { if (ready) void detail.mutate(); };
   const correctedFacts = (): ReadonlyArray<AccountingCorrectedFact> => {
     const facts: Array<AccountingCorrectedFact> = [];
     if (correctedAmount.trim().length > 0) {
@@ -212,15 +214,13 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
     }
     return facts;
   };
-  const onProposeCorrection = (event: FormEvent) => {
-    event.preventDefault();
+  const onProposeCorrection = () => {
     const facts = correctedFacts();
     if (!ready || correctionId.length === 0 || predecessorResultId.length === 0 || facts.length === 0 || correctionReason.length === 0) return;
     const value = { action: "propose" as const, correctionId, predecessorResultId, correctedFacts: facts, reason: correctionReason, evidenceRefs: correctionEvidenceRefs.split(",").map(entry => entry.trim()).filter(entry => entry.length > 0), expectedResultRevision: Number(correctionRevision) };
     void settle(`correct-${correctionId}`, () => correction.trigger({ requestId: intentFor(`correct-${correctionId}`, value), input: value }) as Promise<CommandAnswer>, () => detail.mutate() as Promise<CommandAnswer>, correctionStateText);
   };
-  const onAppendCorrection = (event: FormEvent) => {
-    event.preventDefault();
+  const onAppendCorrection = () => {
     if (!ready || correctionId.length === 0 || appendAttemptId.length === 0) return;
     const value = { action: "append" as const, correctionId, attemptId: appendAttemptId, expectedRevision: Number(correctionRevision) };
     void settle(`correct-append-${correctionId}`, () => correction.trigger({ requestId: intentFor(`correct-append-${correctionId}`, value), input: value as AccountingCorrectInput }) as Promise<CommandAnswer>, () => detail.mutate() as Promise<CommandAnswer>, correctionStateText);
@@ -230,7 +230,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
   return {
     t, locale,
     scopeStanding, scopeReady: ready,
-    periodMonth, setPeriodMonth, periodLabel: period!.periodStart, currency, setCurrency, asOfDraft, setAsOfDraft, asOf, setAsOf,
+    periodMonth, setPeriodMonth: chooseMonth, periodLabel: period!.periodStart, currency, setCurrency, asOfDraft, setAsOfDraft, asOf, setAsOf,
     notice,
     overview: {
       standing: ready ? accountingSurfaceStanding(summary.data, summaryModel !== null) : scopeStanding,
