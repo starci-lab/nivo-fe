@@ -19,6 +19,7 @@ import {
   parseAddressedModule,
   parseRoleHint,
   shortTaskRef,
+  taskStatusTone,
   type GroupChatPageActions,
   type GroupChatPageLabels,
   type GroupChatPageView,
@@ -682,5 +683,287 @@ describe("component", () => {
     expect(invalidTasksFilter({ personMemberId: "mem-gone" }, PARTICIPANTS)).toBe("person");
     expect(invalidTasksFilter({ moduleInstallationId: "mi-sales" }, PARTICIPANTS)).toBeNull();
     expect(invalidTasksFilter({ moduleInstallationId: "mi-gone" }, PARTICIPANTS)).toBe("module");
+  });
+});
+
+describe("GroupChatPageBase presentation states", () => {
+  beforeAll(() => {
+    window.matchMedia = vi.fn().mockReturnValue({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }) as unknown as typeof window.matchMedia;
+  });
+
+  const REPORTED_BINDING: CollabBindingView = { ...BINDING, bindingId: "bind-2", sourceMessageId: "msg-3", receipt: { disposition: "reported" } as CollabBindingView["receipt"] };
+  const REFUSED_BINDING: CollabBindingView = { ...BINDING, bindingId: "bind-3", sourceMessageId: "msg-4", receipt: { disposition: "refused" } as CollabBindingView["receipt"] };
+  const WORKING_TASK: CollabTaskView = {
+    ...TASK_WAITING_APPROVAL,
+    taskId: "task-w",
+    bindingId: "bind-2",
+    cardMessageId: "msg-3",
+    status: "working",
+    waiting: null,
+    askedByDisplayName: null,
+    assignedToDisplayName: null,
+    owningModuleDisplayName: null,
+  };
+  const messageAt = (messageId: string, patch: Partial<CollabMessageView> = {}): CollabMessageView => ({
+    ...MESSAGE,
+    messageId,
+    addressedModuleInstallationId: null,
+    addressedModuleKey: null,
+    body: `Tin ${messageId}`,
+    ...patch,
+  });
+
+  it("maps every task state to one badge tone", () => {
+    expect(taskStatusTone("done")).toBe("success");
+    expect(taskStatusTone("waiting-on-answer")).toBe("warning");
+    expect(taskStatusTone("waiting-on-approval")).toBe("warning");
+    expect(taskStatusTone("rejected")).toBe("danger");
+    expect(taskStatusTone("cancelled")).toBe("danger");
+    expect(taskStatusTone("working")).toBe("accent");
+    expect(taskStatusTone("created")).toBe("neutral");
+  });
+
+  it("assembles unknown authors, unbound cards and loose questions without dropping any", () => {
+    const loose: CollabTaskView = { ...TASK_WAITING_ANSWER, taskId: "task-loose", cardMessageId: null, bindingId: null };
+    const items = buildConversationItems({
+      messages: [messageAt("msg-9", { authorMemberId: "mem-gone" }), messageAt("msg-3", { addressedModuleInstallationId: "mi-sales" })],
+      cards: [{ ...BINDING, bindingId: "bind-x", sourceMessageId: "msg-9" }, REPORTED_BINDING],
+      tasks: [WORKING_TASK, loose],
+      participants: PARTICIPANTS,
+      viewerMemberId: null,
+      unknownAuthor: labels.conversation.unknownAuthor,
+    });
+    expect(items.map((item) => item.kind)).toEqual(["message", "task-card", "message", "task-card", "question-card"]);
+    const [first, unbound, second, bound] = items;
+    expect(first.kind === "message" && first.authorName === "Thành viên" && first.authorKind === null && !first.isViewer).toBe(true);
+    expect(unbound.kind === "task-card" && unbound.task === null).toBe(true);
+    expect(second.kind === "message" && second.addressedName === "Sales").toBe(true);
+    expect(bound.kind === "task-card" && bound.task?.taskId === "task-w").toBe(true);
+  });
+
+  it("renders task receipts for pending, reported and refused cards", () => {
+    const items = buildConversationItems({
+      messages: [MESSAGE, messageAt("msg-3"), messageAt("msg-4")],
+      cards: [BINDING, REPORTED_BINDING, REFUSED_BINDING],
+      tasks: [WORKING_TASK],
+      participants: PARTICIPANTS,
+      viewerMemberId: OWNER.memberId,
+      unknownAuthor: labels.conversation.unknownAuthor,
+    });
+    render(<GroupChatPageBase isRailOpen={false} view={baseView({ items })} on={actions()} labels={labels} />);
+    expect(screen.getByText(labels.card.receiptPending)).toBeInTheDocument();
+    expect(screen.getByText(labels.card.receiptReported)).toBeInTheDocument();
+    expect(screen.getByText(labels.card.receiptRefused)).toBeInTheDocument();
+    expect(screen.getByText(labels.statuses.working)).toBeInTheDocument();
+    expect(screen.getAllByText("build-sales-report").length).toBe(2);
+    expect(document.getElementById("collab-task-task-w")).not.toBeNull();
+  });
+
+  it("shows the settled decider, a withdrawn action and a rejected decision on compact cards", () => {
+    const rejected: CollabApprovalView = { ...WAITING_APPROVAL, approvalId: "appr-r", status: "rejected", consequence: null, cardMessageId: null };
+    const withdrawn: CollabApprovalView = { ...WAITING_APPROVAL, approvalId: "appr-w", status: "withdrawn", cardMessageId: null };
+    const approved = { ...WAITING_APPROVAL, status: "approved", decidedAt: "2026-09-24T10:30:00Z", decidedByDisplayName: "Minh" };
+    const task = (approval: CollabApprovalView): CollabTaskView => ({ ...TASK_WAITING_APPROVAL, taskId: `t-${approval.approvalId}`, cardMessageId: null, waiting: { kind: "approval", approval } });
+    const items = buildConversationItems({
+      messages: [MODULE_MESSAGE],
+      cards: [],
+      tasks: [TASK_WAITING_APPROVAL, task(rejected), task(withdrawn)],
+      participants: PARTICIPANTS,
+      viewerMemberId: OWNER.memberId,
+      unknownAuthor: labels.conversation.unknownAuthor,
+    });
+    render(
+      <GroupChatPageBase
+        isRailOpen={false}
+        isCompactMembers
+        view={baseView({ items, settledApprovals: { "appr-1": approved as never } })}
+        on={actions()}
+        labels={labels}
+      />,
+    );
+    expect(screen.getByText("Minh đã quyết định lúc 09:14")).toBeInTheDocument();
+    expect(screen.getByText(labels.approval.withdrawn)).toBeInTheDocument();
+    expect(screen.getByText(labels.statuses.rejected)).toBeInTheDocument();
+    expect(screen.getByText(labels.statuses.cancelled)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: labels.approval.approve })).toBeNull();
+  });
+
+  it("announces a denied and an uncertain press while the card keeps waiting", () => {
+    const second: CollabApprovalView = { ...WAITING_APPROVAL, approvalId: "appr-2", cardMessageId: null };
+    const items = buildConversationItems({
+      messages: [MODULE_MESSAGE],
+      cards: [],
+      tasks: [TASK_WAITING_APPROVAL, { ...TASK_WAITING_APPROVAL, taskId: "t-2", cardMessageId: null, askedByDisplayName: null, waiting: { kind: "approval", approval: second } }],
+      participants: PARTICIPANTS,
+      viewerMemberId: OWNER.memberId,
+      unknownAuthor: labels.conversation.unknownAuthor,
+    });
+    render(
+      <GroupChatPageBase
+        isRailOpen={false}
+        view={baseView({ items, pressingApprovalId: "appr-2", approvalNotices: { "appr-1": "denied", "appr-2": "uncertain" } })}
+        on={actions()}
+        labels={labels}
+      />,
+    );
+    expect(screen.getByText(labels.approval.denied)).toBeInTheDocument();
+    expect(screen.getByText(labels.approval.uncertain)).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: labels.approval.approve }).length).toBe(2);
+  });
+
+  it("marks the question being answered and cancels it from the composer banner", () => {
+    const on = actions();
+    const items = buildConversationItems({
+      messages: [MESSAGE],
+      cards: [],
+      tasks: [{ ...TASK_WAITING_ANSWER, assignedToMemberId: OWNER.memberId, owningModuleDisplayName: null, assignedToDisplayName: null }],
+      participants: PARTICIPANTS,
+      viewerMemberId: OWNER.memberId,
+      unknownAuthor: labels.conversation.unknownAuthor,
+    });
+    render(
+      <GroupChatPageBase
+        isRailOpen={false}
+        isCompactMembers
+        view={baseView({ items, composer: { value: "", pending: false, failure: "denied", answering: { questionId: "q-1", moduleName: "sales", excerpt: "Tuần hay tháng?" } } })}
+        on={on}
+        labels={labels}
+      />,
+    );
+    expect(screen.getByRole("button", { name: labels.question.answer })).toBeDisabled();
+    expect(screen.getByText("Đang trả lời sales: Tuần hay tháng?")).toBeInTheDocument();
+    expect(screen.getByText(labels.composer.denied)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: labels.composer.cancelAnswer }));
+    expect(on.cancelAnswer).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows notice outcomes for unavailable and ended turns and opens a task assignment", () => {
+    const on = actions();
+    const assign: CollabTurnNoticeItem = { ...NOTICE, notice: { ...NOTICE.notice, noticeId: "ntc-2", turnKind: "task-assign" as never } };
+    const ended: CollabTurnNoticeItem = { ...NOTICE, notice: { ...NOTICE.notice, noticeId: "ntc-3" } };
+    render(
+      <GroupChatPageBase
+        isRailOpen={false}
+        view={baseView({ notices: [NOTICE, assign, ended], noticeOutcomes: { "ntc-1": "unavailable", "ntc-3": "ended" } })}
+        on={on}
+        labels={labels}
+      />,
+    );
+    expect(screen.getByText(labels.notice.unavailable)).toBeInTheDocument();
+    expect(screen.getByText(labels.notice.handled)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: labels.notice.open }));
+    expect(on.openNotice).toHaveBeenCalledWith("ntc-2");
+  });
+
+  it("reports existing and refused invitations", () => {
+    const { rerender } = render(
+      <GroupChatPageBase isRailOpen={false} view={baseView({ invite: { email: "a@b.vn", role: "staff", pending: false, outcome: "existing", invitedEmail: null } })} on={actions()} labels={labels} />,
+    );
+    expect(screen.getByText(labels.invite.existing)).toBeInTheDocument();
+    rerender(
+      <GroupChatPageBase isRailOpen={false} view={baseView({ invite: { email: "", role: "staff", pending: false, outcome: "refused", invitedEmail: null } })} on={actions()} labels={labels} />,
+    );
+    expect(screen.getByText(labels.invite.refused)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: labels.invite.submit })).toBeDisabled();
+  });
+
+  it("presents empty rosters and a pending invitee on the rail", () => {
+    const invited: CollabOfficeParticipant = { ...PARTICIPANTS[2], memberId: "mem-new", displayName: "Lan", status: "invited" };
+    const { rerender } = render(<GroupChatPageBase isRailOpen={false} view={baseView({ participants: [] })} on={actions()} labels={labels} />);
+    expect(screen.getByText(labels.members.empty)).toBeInTheDocument();
+    rerender(<GroupChatPageBase isRailOpen={false} view={baseView({ participants: [invited] })} on={actions()} labels={labels} />);
+    expect(screen.getByText(labels.members.pending)).toBeInTheDocument();
+  });
+
+  it("lists an empty roster on the decision rail", () => {
+    const items = buildConversationItems({
+      messages: [MODULE_MESSAGE],
+      cards: [],
+      tasks: [TASK_WAITING_APPROVAL],
+      participants: [],
+      viewerMemberId: null,
+      unknownAuthor: labels.conversation.unknownAuthor,
+    });
+    render(<GroupChatPageBase isRailOpen={false} view={baseView({ items, participants: [] })} on={actions()} labels={labels} />);
+    expect(screen.getByText(labels.members.empty)).toBeInTheDocument();
+    expect(screen.getByText(labels.members.noModules)).toBeInTheDocument();
+  });
+
+  it("opens the compact roster sheet for a Staff viewer and toggles the member chip", () => {
+    const on = actions();
+    const humansOnly = PARTICIPANTS.filter((participant) => participant.kind === "human");
+    const { rerender } = render(
+      <GroupChatPageBase isRailOpen isCompactMembers view={baseView({ viewer: STAFF, participants: humansOnly })} on={on} labels={labels} />,
+    );
+    expect(screen.getByRole("region", { name: labels.members.title })).toBeInTheDocument();
+    expect(screen.getByText(labels.members.noModules)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: labels.members.openRail(humansOnly.length) }));
+    expect(on.changeRailOpen).toHaveBeenCalledWith(false);
+    rerender(<GroupChatPageBase isRailOpen isCompactMembers view={baseView({ viewer: STAFF, participants: [], workspaceName: null })} on={on} labels={labels} />);
+    expect(screen.getByText(labels.members.empty)).toBeInTheDocument();
+  });
+
+  it("shows the loading state inside the workbench", () => {
+    render(<GroupChatPageBase isRailOpen={false} view={baseView({ officeState: "loading" })} on={actions()} labels={labels} />);
+    expect(screen.getByText(labels.state.loading)).toBeInTheDocument();
+  });
+
+  it.each([
+    ["failed", labels.tasks.failed],
+    ["denied", labels.tasks.denied],
+    ["ready", labels.tasks.empty],
+  ] as const)("presents a %s Tasks list", (state, text) => {
+    render(<GroupChatPageBase isRailOpen={false} view={baseView({ tab: "tasks", tasks: { state, rows: [], filter: {} } })} on={actions()} labels={labels} />);
+    expect(screen.getAllByText(text).length).toBeGreaterThan(0);
+  });
+
+  it("holds the Tasks list and its count while the read is loading", () => {
+    render(<GroupChatPageBase isRailOpen={false} view={baseView({ tab: "tasks", tasks: { state: "loading", rows: [], filter: {} } })} on={actions()} labels={labels} />);
+    expect(screen.queryByText(labels.tasks.empty)).toBeNull();
+    expect(screen.queryByText(labels.tasks.count(0))).toBeNull();
+  });
+
+  it("clears each Tasks filter back to all and opens a sparse row in Office", () => {
+    const on = actions();
+    const row: CollabTaskView = { ...WORKING_TASK, owningModuleDisplayName: null };
+    render(
+      <GroupChatPageBase
+        isRailOpen={false}
+        view={baseView({ tab: "tasks", tasks: { state: "ready", rows: [row], filter: { personMemberId: "mem-an", moduleInstallationId: "mi-sales", status: "working" } } })}
+        on={on}
+        labels={labels}
+      />,
+    );
+    expect(screen.getByText("Mô-đun: sales")).toBeInTheDocument();
+    for (const name of [labels.tasks.filterPerson, labels.tasks.filterModule, labels.tasks.filterStatus]) {
+      fireEvent.change(screen.getByRole("combobox", { name }), { target: { value: "" } });
+    }
+    expect(on.changeTasksFilter).toHaveBeenCalledWith(expect.objectContaining({ personMemberId: undefined }));
+    expect(on.changeTasksFilter).toHaveBeenCalledWith(expect.objectContaining({ moduleInstallationId: undefined }));
+    expect(on.changeTasksFilter).toHaveBeenCalledWith(expect.objectContaining({ status: undefined }));
+    fireEvent.click(screen.getByRole("button", { name: labels.tasks.openInOffice }));
+    expect(on.openTaskCard).toHaveBeenCalledWith("task-w");
+  });
+
+  it("keeps a pending acceptance without a role hint", () => {
+    render(
+      <GroupChatPageBase
+        isRailOpen={false}
+        view={baseView({ screen: "acceptance", acceptance: { state: "pending", roleHint: null, invalidLink: false } })}
+        on={actions()}
+        labels={labels}
+      />,
+    );
+    expect(screen.getByText(labels.accept.body)).toBeInTheDocument();
+    expect(screen.queryByText(/Vai trò được mời/u)).toBeNull();
+  });
+
+  it("renders nothing for an acceptance screen without an acceptance view", () => {
+    render(<GroupChatPageBase isRailOpen={false} view={baseView({ screen: "acceptance", acceptance: null })} on={actions()} labels={labels} />);
+    expect(screen.queryByRole("button", { name: labels.accept.action })).toBeNull();
   });
 });
