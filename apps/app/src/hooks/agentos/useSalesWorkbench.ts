@@ -39,6 +39,7 @@ import {
   salesWording,
   salesWriterFence,
   type SalesCommandAnswer,
+  type SalesAnswerStanding,
   type SalesNotice,
   type SalesSurfaceStanding,
   type SalesTranslation
@@ -66,7 +67,13 @@ import {
  * no-start proof and the writer fence the action read itself disclosed.
  */
 
-const requestId = () => globalThis.crypto?.randomUUID?.() ?? `request-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+/*
+ * A press identity that is unique without inventing randomness: the platform's own UUID when the
+ * runtime has one, otherwise a monotonic fallback - an identity only has to be distinct, and a
+ * counter is distinct within this module's life.
+ */
+let pressSequence = 0;
+const requestId = () => globalThis.crypto?.randomUUID?.() ?? `request-${Date.now()}-${pressSequence += 1}`;
 const PAGE_SIZE = 20;
 
 /** The receiver's own state spelling inside one settled payload. */
@@ -253,13 +260,19 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
     void settle("policy", () => configurePolicy.trigger({ requestId: value.requestId, input: value }) as Promise<SalesCommandAnswer>, () => policy.mutate() as Promise<SalesCommandAnswer>, policySettled);
   };
 
+  /*
+   * One region's standing. Before an address exists the scope's own answer decides what the surface
+   * shows; after it, the read's answer does - and a held read is still 'loading', never empty.
+   */
+  const regionStanding = (answer: SalesAnswerStanding | undefined, hasContent: boolean): SalesSurfaceStanding => ready ? salesSurfaceStanding(answer, hasContent) : scopeStanding;
+  const bandStanding: SalesSurfaceStanding = ready ? "ready" : scopeStanding;
   const attentionRows = pipelineModel === null ? [] : pipelineModel.items.filter(item => item.workState !== "ready");
   return {
     t, locale,
     scopeStanding, scopeReady: ready, scopeInstallation: routeInstallationId,
     notice,
     attention: {
-      standing: ready ? salesSurfaceStanding(pipeline.data, attentionRows.length > 0) : scopeStanding,
+      standing: regionStanding(pipeline.data, attentionRows.length > 0),
       rows: attentionRows, total: pipelineModel?.items.length ?? 0,
       observedAt: pipelineModel?.observedAt ?? null, nextAfter: pipelineModel?.nextAfter?.lastOpportunityId ?? null,
       isLoading: pipeline.isLoading || pipeline.isValidating,
@@ -267,7 +280,7 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
       loadMore: () => setCursor(pipelineModel?.nextAfter?.lastOpportunityId ?? null)
     },
     command: {
-      standing: ready ? "ready" : scopeStanding,
+      standing: bandStanding,
       commandId, setCommandId, commandRevision, setCommandRevision,
       customerRefs, setCustomerRefs, opportunityIds, setOpportunityIds, offerRefs, setOfferRefs,
       requestedActions, setRequestedActions, actions: commandActions,
@@ -275,11 +288,11 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
       isSubmitting: submitCommand.isMutating, addressable: commandAddressable, onSubmit: onSubmitCommand
     },
     history: {
-      standing: ready ? salesSurfaceStanding(command.data, commandModel !== null) : scopeStanding,
+      standing: regionStanding(command.data, commandModel !== null),
       commandId, setCommandId, model: commandModel, isLoading: command.isLoading, retry: () => void command.mutate()
     },
     routine: {
-      standing: ready ? salesSurfaceStanding(action.data, actionModel !== null) : scopeStanding,
+      standing: regionStanding(action.data, actionModel !== null),
       actionId: salesActionIdentityOf(commandModel?.actionIds ?? [], actionId), setActionId,
       actionIds: commandModel?.actionIds ?? [],
       attemptGeneration, setAttemptGeneration, revision: actionRevision, setRevision: setActionRevision,
@@ -289,28 +302,28 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
       reload: () => void action.mutate(), onRetry: () => onRecover("retryNoStart"), onStop: () => onRecover("cancelNoStart")
     },
     wait: {
-      standing: ready ? salesSurfaceStanding(opportunity.data, opportunityModel !== null) : scopeStanding,
+      standing: regionStanding(opportunity.data, opportunityModel !== null),
       opportunityId, setOpportunityId, model: opportunityModel, isLoading: opportunity.isLoading, reload: () => void opportunity.mutate()
     },
     ambiguity: {
-      standing: ready ? salesSurfaceStanding(command.data, commandModel !== null && commandModel.clarification !== null) : scopeStanding,
+      standing: regionStanding(command.data, commandModel !== null && commandModel.clarification !== null),
       clarification: commandModel?.clarification ?? null,
       revision: clarificationRevision, setRevision: setClarificationRevision,
       factKind, setFactKind, factValue, setFactValue,
       isClarifying: clarifyCommand.isMutating, addressable: clarifyAddressable, onClarify
     },
     closure: {
-      standing: ready ? salesSurfaceStanding(opportunity.data, opportunityModel !== null) : scopeStanding,
+      standing: regionStanding(opportunity.data, opportunityModel !== null),
       intentId: closeIntentId, setIntentId: setCloseIntentId, outcome: closeOutcome, setOutcome: setCloseOutcome,
       evidenceRefs: closeEvidenceRefs, setEvidenceRefs: setCloseEvidenceRefs, orderId: closeOrderId, setOrderId: setCloseOrderId, revision: closeRevision, setRevision: setCloseRevision,
       model: opportunityModel, isClosing: closeOpportunity.isMutating, addressable: closeAddressable, onClose
     },
     installation: {
-      standing: ready ? salesSurfaceStanding(readiness.data, readinessModel !== null) : scopeStanding,
+      standing: regionStanding(readiness.data, readinessModel !== null),
       model: readinessModel, isLoading: readiness.isLoading, reload: () => void readiness.mutate()
     },
     policy: {
-      standing: ready ? salesSurfaceStanding(policy.data, policyModel !== null) : scopeStanding,
+      standing: regionStanding(policy.data, policyModel !== null),
       model: policyModel, revision: policyRevision, setRevision: setPolicyRevision, cadence: policyCadence, setCadence: setPolicyCadence,
       isConfiguring: configurePolicy.isMutating, onConfigure: onConfigurePolicy
     }

@@ -4,8 +4,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { useSalesWorkbench } from "@/hooks";
 import { SalesWorkbenchBlockBase } from "./component";
 
-/** The installed Sales workbench's open-registry entry: kind identity only, no caller wiring. */
-export type SalesWorkbenchBlockProps = { readonly moduleId: string; readonly kindKey: string; readonly workbenchVersion: string };
+/** The installed Sales workbench's open-registry entry: the one prop it addresses its installation by. */
+export type SalesWorkbenchBlockProps = { readonly moduleId: string };
 
 /** Connect the Sales workbench to its resolved installation scope and render the settled view. */
 export const SalesWorkbenchBlock = (props: SalesWorkbenchBlockProps) => {

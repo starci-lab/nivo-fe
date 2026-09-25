@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Badge, Button, EmptyNotice, Input, PrimaryRailLayout, SectionHeader, SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common";
-import type { SalesActionValue, SalesPipelineItem } from "@/modules/api/sales";
+import type { SalesActionValue, SalesCloseRequest, SalesPipelineItem } from "@/modules/api/sales";
 import type { useSalesWorkbench } from "@/hooks";
 import {
   formatSalesInstant,
@@ -39,6 +39,10 @@ const WORK_STATE_TONES: Readonly<Record<string, BadgeTone>> = { ready: "success"
 const COMMAND_TONES: Readonly<Record<string, BadgeTone>> = { accepted: "success", "awaiting-clarification": "warning", rejected: "warning", withdrawn: "neutral" };
 const ACTION_TONES: Readonly<Record<string, BadgeTone>> = { delivered: "success", stopped: "warning", "outcome-unknown": "warning" };
 const LIFECYCLE_TONES: Readonly<Record<string, BadgeTone>> = { open: "neutral", won: "success", lost: "warning" };
+/** The closed closure-outcome vocabulary, in the order the closure control offers it. */
+const CLOSE_OUTCOMES: ReadonlyArray<SalesCloseRequest["outcome"]> = ["won", "lost", "attention"];
+/** The outcome one control value selects; an undeclared value keeps the outcome the control opened on. */
+const closeOutcomeOf = (value: string): SalesCloseRequest["outcome"] => CLOSE_OUTCOMES.find(outcome => outcome === value) ?? "won";
 
 /** The rail's installation line: one sentence per scope standing. */
 const ScopeLine = ({ scopeReady, scopeStanding, t }: ScopeLineProps) => {
@@ -77,7 +81,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
     <Text size="xs" tone="muted">{t("revision", { value: row.revision })}</Text>
   </Row>;
 
-  const commandBand = <SurfaceCard label={t("command.label")} fact={t("attention.covered", { count: view.attention.total })}>
+  const commandBand = () => <SurfaceCard label={t("command.label")} fact={t("attention.covered", { count: view.attention.total })}>
     <form onSubmit={stop(view.command.onSubmit)}><div className={SALES_FORM_GRID_CLASS_NAME}>
       <Input id="sales-command-id" name="sales-command-id" label={t("command.commandId")} hint={t("command.commandIdHint")} value={view.command.commandId} onValueChange={view.command.setCommandId} isRequired />
       <Input id="sales-command-outcome" name="sales-command-outcome" label={t("command.outcome")} hint={t("command.outcomeHint")} value={view.command.requestedActions} onValueChange={view.command.setRequestedActions} isRequired />
@@ -95,7 +99,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
     </div></form>
   </SurfaceCard>;
 
-  const attention = <SurfaceListCard label={t("attention.list")} fact={t("attention.covered", { count: view.attention.rows.length })} isLoading={view.attention.standing === "loading"}>
+  const attention = () => <SurfaceListCard label={t("attention.list")} fact={t("attention.covered", { count: view.attention.rows.length })} isLoading={view.attention.standing === "loading"}>
     {region(view.attention.standing, t("attention.empty"), t("attention.emptyHint"), <FieldStack>
       {view.attention.rows.map(attentionRow)}
       {view.attention.observedAt === null ? null : <Text size="xs" tone="muted">{t("attention.observedAt", { at: formatSalesInstant(view.attention.observedAt, locale) })}</Text>}
@@ -104,7 +108,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
     <ActionRow><Button size="lg" variant="ghost" onPress={view.attention.retry}>{t("reload")}</Button></ActionRow>
   </SurfaceListCard>;
 
-  const history = <SurfaceCard label={t("history.label")} fact={view.history.model === null ? undefined : salesWording(salesCommandStatusKey(view.history.model.status), view.history.model.status, t)}>
+  const history = () => <SurfaceCard label={t("history.label")} fact={view.history.model === null ? undefined : salesWording(salesCommandStatusKey(view.history.model.status), view.history.model.status, t)}>
     <ActionRow><Button size="lg" variant="ghost" onPress={view.history.retry}>{t("reload")}</Button></ActionRow>
     {region(view.history.standing, t("history.empty"), t("history.emptyHint"), view.history.model === null ? null : <FieldStack>
       <ActionRow>
@@ -118,7 +122,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
     </FieldStack>)}
   </SurfaceCard>;
 
-  const ambiguity = <SurfaceCard label={t("ambiguity.label")}>
+  const ambiguity = () => <SurfaceCard label={t("ambiguity.label")}>
     <form onSubmit={stop(view.ambiguity.onClarify)}><FieldStack>
       <Text size="sm" weight="semibold">{t("ambiguity.question")}</Text>
       <Text size="sm">{view.ambiguity.clarification === null ? t("ambiguity.noQuestion") : JSON.stringify(view.ambiguity.clarification)}</Text>
@@ -140,12 +144,12 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
     {model.observationGap ? <Text size="sm" tone="accent" live="polite">{t("routine.gap")}</Text> : null}
   </FieldStack>;
 
-  const routine = <SurfaceCard label={t("routine.label")} fact={view.routine.model === null ? undefined : actionText(view.routine.model.status)}>
+  const routine = () => <SurfaceCard label={t("routine.label")} fact={view.routine.model === null ? undefined : actionText(view.routine.model.status)}>
     {region(view.routine.standing, t("routine.empty"), t("routine.emptyHint"), view.routine.model === null ? null : actionFacts(view.routine.model))}
     <ActionRow><Button size="lg" variant="ghost" onPress={view.routine.reload}>{t("reload")}</Button></ActionRow>
   </SurfaceCard>;
 
-  const recovery = <SurfaceCard label={t("recovery.label")} fact={view.routine.door === "hold" ? t("recovery.hold") : t("recovery.door", { door: t(`recovery.${view.routine.door}`) })}>
+  const recovery = () => <SurfaceCard label={t("recovery.label")} fact={view.routine.door === "hold" ? t("recovery.hold") : t("recovery.door", { door: t(`recovery.${view.routine.door}`) })}>
     <form onSubmit={stop(view.routine.onRetry)}><FieldStack>
       <ActionRow>
         <Input id="sales-action-id" name="sales-action-id" label={t("routine.actionId")} hint={t("routine.actionIdsHint", { actions: view.routine.actionIds.length === 0 ? t("none") : view.routine.actionIds.join(", ") })} value={view.routine.actionId} onValueChange={view.routine.setActionId} isRequired />
@@ -153,7 +157,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
       </ActionRow>
       <Input id="sales-action-revision" name="sales-action-revision" label={t("routine.expectedRevision")} value={view.routine.revision} onValueChange={view.routine.setRevision} isRequired />
       <Text size="sm" weight="semibold">{t("recovery.proof")}</Text>
-      <Text size="sm">{view.routine.attestedProof === null ? t("recovery.noProof") : view.routine.attestedProof}</Text>
+      <Text size="sm">{view.routine.attestedProof ?? t("recovery.noProof")}</Text>
       <Text size="xs" tone="muted">{t("recovery.fence", { fence: view.routine.attestedFence === null ? t("none") : view.routine.attestedFence.claimTokenHash })}</Text>
       <Input id="sales-receiver-intent" name="sales-receiver-intent" label={t("recovery.receiverIntent")} value={view.routine.receiverIntentId} onValueChange={view.routine.setReceiverIntentId} />
       <Input id="sales-receiver-attempt" name="sales-receiver-attempt" label={t("recovery.receiverAttempt")} value={view.routine.receiverAttemptId} onValueChange={view.routine.setReceiverAttemptId} />
@@ -166,7 +170,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
     </FieldStack></form>
   </SurfaceCard>;
 
-  const wait = <SurfaceCard label={t("wait.label")} fact={view.wait.model === null ? undefined : view.wait.model.customerRef}>
+  const wait = () => <SurfaceCard label={t("wait.label")} fact={view.wait.model === null ? undefined : view.wait.model.customerRef}>
     {region(view.wait.standing, t("wait.empty"), t("wait.emptyHint"), view.wait.model === null ? null : <FieldStack>
       <ActionRow>
         <Text weight="semibold">{view.wait.model.purpose}</Text>
@@ -187,11 +191,11 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
     </ActionRow></form>
   </SurfaceCard>;
 
-  const closure = <SurfaceCard label={t("closure.label")} fact={view.closure.model === null ? undefined : lifecycleText(view.closure.model.status)}>
+  const closure = () => <SurfaceCard label={t("closure.label")} fact={view.closure.model === null ? undefined : lifecycleText(view.closure.model.status)}>
     <form onSubmit={stop(view.closure.onClose)}><div className={SALES_FORM_GRID_CLASS_NAME}>
       <Input id="sales-close-intent" name="sales-close-intent" label={t("closure.intentId")} hint={t("closure.intentIdHint")} value={view.closure.intentId} onValueChange={view.closure.setIntentId} isRequired />
       <Input id="sales-close-opportunity" name="sales-close-opportunity" label={t("closure.opportunityId")} value={view.wait.opportunityId} onValueChange={view.wait.setOpportunityId} isRequired />
-      <label className={SALES_NATIVE_FIELD_CLASS_NAME} htmlFor="sales-close-outcome"><Text size="sm" weight="semibold">{t("closure.outcome")}</Text><select className={SALES_NATIVE_CONTROL_CLASS_NAME} id="sales-close-outcome" name="sales-close-outcome" value={view.closure.outcome} onChange={event => view.closure.setOutcome(event.currentTarget.value === "lost" ? "lost" : event.currentTarget.value === "attention" ? "attention" : "won")}><option value="won">{t(salesOutcomeKey("won"))}</option><option value="lost">{t(salesOutcomeKey("lost"))}</option><option value="attention">{t(salesOutcomeKey("attention"))}</option></select></label>
+      <label className={SALES_NATIVE_FIELD_CLASS_NAME} htmlFor="sales-close-outcome"><Text size="sm" weight="semibold">{t("closure.outcome")}</Text><select className={SALES_NATIVE_CONTROL_CLASS_NAME} id="sales-close-outcome" name="sales-close-outcome" value={view.closure.outcome} onChange={event => view.closure.setOutcome(closeOutcomeOf(event.currentTarget.value))}><option value="won">{t(salesOutcomeKey("won"))}</option><option value="lost">{t(salesOutcomeKey("lost"))}</option><option value="attention">{t(salesOutcomeKey("attention"))}</option></select></label>
       <Input id="sales-close-evidence" name="sales-close-evidence" label={t("closure.evidence")} hint={t("evidenceRefsHint")} value={view.closure.evidenceRefs} onValueChange={view.closure.setEvidenceRefs} />
       <Input id="sales-close-order" name="sales-close-order" label={t("closure.order")} hint={t("closure.orderHint")} value={view.closure.orderId} onValueChange={view.closure.setOrderId} />
       <Input id="sales-close-revision" name="sales-close-revision" label={t("closure.revision")} hint={t("closure.revisionHint")} value={view.closure.revision} onValueChange={view.closure.setRevision} isRequired />
@@ -209,7 +213,14 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
     </FieldStack>)}
   </SurfaceCard>;
 
-  const installation = <SurfaceCard label={t("installation.label")} fact={view.installation.model === null ? undefined : (view.installation.model.ready ? t("installation.ready") : t("installation.notReady"))}>
+  /* The readiness fact, or nothing at all when the read disclosed no installation state. */
+  const installationFact = (): string | undefined => {
+    const model = view.installation.model;
+    if (model === null) return undefined;
+    return model.ready ? t("installation.ready") : t("installation.notReady");
+  };
+
+  const installation = () => <SurfaceCard label={t("installation.label")} fact={installationFact()}>
     {region(view.installation.standing, t("installation.empty"), t("installation.emptyHint"), view.installation.model === null ? null : <FieldStack>
       <ActionRow>
         <Badge tone={view.installation.model.ready ? "success" : "warning"}>{view.installation.model.ready ? t("installation.ready") : t("installation.notReady")}</Badge>
@@ -221,7 +232,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
     <ActionRow><Button size="lg" variant="ghost" onPress={view.installation.reload}>{t("reload")}</Button></ActionRow>
   </SurfaceCard>;
 
-  const policy = <SurfaceCard label={t("policy.label")} fact={view.policy.model === null ? undefined : t("policy.revisionFact", { revision: view.policy.model.revision })}>
+  const policy = () => <SurfaceCard label={t("policy.label")} fact={view.policy.model === null ? undefined : t("policy.revisionFact", { revision: view.policy.model.revision })}>
     <form onSubmit={stop(view.policy.onConfigure)}><FieldStack>
       <Input id="sales-policy-revision" name="sales-policy-revision" label={t("policy.expectedRevision")} hint={t("policy.expectedRevisionHint")} value={view.policy.revision} onValueChange={view.policy.setRevision} />
       <Input id="sales-policy-cadence" name="sales-policy-cadence" label={t("policy.cadence")} hint={t("policy.cadenceHint")} value={view.policy.cadence} onValueChange={view.policy.setCadence} />
@@ -233,22 +244,22 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
     </FieldStack>}
   </SurfaceCard>;
 
-  const rail = <FieldStack>
+  const rail = () => <FieldStack>
     <SurfaceCard label={t("rail.scope")}><ScopeLine scopeReady={scopeReady} scopeStanding={scopeStanding} t={t} /></SurfaceCard>
-    {wait}
+    {wait()}
     <SurfaceCard label={t("rail.notice")}>{notice === null ? <Text size="xs" tone="muted">{t("rail.noticeEmpty")}</Text> : <StatusNotice notice={notice} />}</SurfaceCard>
-    {installation}
-    {policy}
+    {installation()}
+    {policy()}
   </FieldStack>;
 
-  const primary = <FieldStack>
+  const primary = () => <FieldStack>
     <SectionHeader level={2} title={t("attention.title")} description={t("attention.description")} />
-    {commandBand}
-    {attention}
-    <div className={SALES_OPERATIONS_GRID_CLASS_NAME}>{history}{routine}</div>
-    <div className={SALES_OPERATIONS_GRID_CLASS_NAME}>{ambiguity}{recovery}</div>
-    {closure}
+    {commandBand()}
+    {attention()}
+    <div className={SALES_OPERATIONS_GRID_CLASS_NAME}>{history()}{routine()}</div>
+    <div className={SALES_OPERATIONS_GRID_CLASS_NAME}>{ambiguity()}{recovery()}</div>
+    {closure()}
   </FieldStack>;
 
-  return <div className={SALES_WORKBENCH_CLASS_NAME} data-contract="GAP-5 MEASURE-2" aria-busy={view.attention.standing === "loading" ? true : undefined}><PrimaryRailLayout primary={primary} rail={rail} railWidth="standard" align="start" collapsedOrder="primary-first" /></div>;
+  return <div className={SALES_WORKBENCH_CLASS_NAME} data-contract="GAP-5 MEASURE-2" aria-busy={view.attention.standing === "loading" ? true : undefined}><PrimaryRailLayout primary={primary()} rail={rail()} railWidth="standard" align="start" collapsedOrder="primary-first" /></div>;
 };

@@ -109,7 +109,7 @@ const WorkbenchContent = ({
     <Heading level={3}>{title}</Heading>
 
     <Text size="xs" tone="muted">{caption}</Text></div><div>{facts.map((fact, index) => <div key={index}>{<Text size="sm">{fact.label}</Text>}{<Text size="sm" weight="semibold">{fact.value}</Text>}</div>)}</div>{notice === undefined ? undefined : <Text size="sm" tone="muted">{notice}</Text>}</div>;
-const SalesPipelineWorkbench = (props: WorkbenchProps) => <SalesWorkbenchBlock moduleId={props.moduleId} kindKey={props.kindKey} workbenchVersion={props.workbenchVersion} />;
+const SalesPipelineWorkbench = (props: WorkbenchProps) => <SalesWorkbenchBlock moduleId={props.moduleId} />;
 const ConversationInboxWorkbench = (props: WorkbenchProps) => {
   const { copy } = props;
   return (<WorkbenchContent title={copy.workbench.inbox} caption={copy.workbench.registered({ kind: props.kindKey, version: props.workbenchVersion })} facts={[{
