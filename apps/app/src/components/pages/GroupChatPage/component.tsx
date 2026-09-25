@@ -1,6 +1,5 @@
 import { ChatWorkspace, EmptyNotice, Icon, IconButton, Input, PageContainer, SectionHeader, SurfaceCard, Text } from "@starci/grammar/common";
 import { useRef } from "react";
-import { cn } from "@heroui/react";
 import { nivoIconSource } from "@nivo/ui";
 import { Badge, Button, SurfaceListCard, Tabs } from "@starci/grammar/common";
 import type {
@@ -21,14 +20,11 @@ import type { CollabTasksFilter } from "@/hooks";
 import {
   GROUP_CHAT_ACTION_PRIMARY_CLASS_NAME,
   GROUP_CHAT_ACTION_SECONDARY_CLASS_NAME,
-  GROUP_CHAT_AVATAR_CLASS_NAME,
-  GROUP_CHAT_AVATAR_COMPACT_CLASS_NAME,
   GROUP_CHAT_AVATAR_PRESENCE_CLASS_NAME,
   GROUP_CHAT_AVATAR_TINT_CLASS_NAMES,
+  getGroupChatAvatarClassName,
   GROUP_CHAT_BADGE_ROW_CLASS_NAME,
   GROUP_CHAT_BAND_ICON_CLASS_NAME,
-  GROUP_CHAT_BUBBLE_CLASS_NAME,
-  GROUP_CHAT_BUBBLE_OWN_CLASS_NAME,
   GROUP_CHAT_CARD_ACTIONS_CLASS_NAME,
   GROUP_CHAT_CARD_BAND_CLASS_NAME,
   GROUP_CHAT_CARD_BAND_DIVIDED_CLASS_NAME,
@@ -36,6 +32,9 @@ import {
   getGroupChatComposerClassName,
   GROUP_CHAT_COMPOSER_GLYPH_CLASS_NAME,
   GROUP_CHAT_COMPOSER_GLYPHS_CLASS_NAME,
+  GROUP_CHAT_COMPOSER_ACTIONS_CLASS_NAME,
+  GROUP_CHAT_COMPOSER_INPUT_CLASS_NAME,
+  GROUP_CHAT_COMPOSER_SEND_CLASS_NAME,
   getGroupChatConversationListClassName,
   GROUP_CHAT_DAY_SELECT_CLASS_NAME,
   GROUP_CHAT_ENTRY_CLASS_NAME,
@@ -48,6 +47,7 @@ import {
   GROUP_CHAT_HEADER_ACTIONS_CLASS_NAME,
   GROUP_CHAT_HEADER_BAND_CLASS_NAME,
   GROUP_CHAT_HEADER_BAND_COMPACT_CLASS_NAME,
+  GROUP_CHAT_HEADER_COMPACT_ROW_CLASS_NAME,
   GROUP_CHAT_LOADING_CLASS_NAME,
   GROUP_CHAT_MEMBER_CHIP_CHEVRON_CLASS_NAME,
   GROUP_CHAT_MEMBER_CHIP_CLASS_NAME,
@@ -56,7 +56,7 @@ import {
   GROUP_CHAT_MEMBER_ROW_ROOMY_CLASS_NAME,
   GROUP_CHAT_MEMBER_ROW_TRAILING_CLASS_NAME,
   GROUP_CHAT_MENTION_CLASS_NAME,
-  GROUP_CHAT_MESSAGE_BODY_CLASS_NAME,
+  getGroupChatMessageBodyClassName,
   GROUP_CHAT_NATIVE_CONTROL_CLASS_NAME,
   GROUP_CHAT_NATIVE_FIELD_CLASS_NAME,
   GROUP_CHAT_NOTICE_ROW_CLASS_NAME,
@@ -69,7 +69,6 @@ import {
   GROUP_CHAT_RAIL_LABEL_CLASS_NAME,
   GROUP_CHAT_RAIL_LABEL_ICON_CLASS_NAME,
   GROUP_CHAT_RAIL_SCROLL_CLASS_NAME,
-  GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME,
   GROUP_CHAT_RAIL_SECTION_INVITE_CLASS_NAME,
   GROUP_CHAT_RAIL_SECTION_INVITE_FORM_CLASS_NAME,
   GROUP_CHAT_RAIL_SECTION_INVITE_MODULES_CLASS_NAME,
@@ -87,7 +86,6 @@ import {
   GROUP_CHAT_SHEET_ROSTER_CLASS_NAME,
   GROUP_CHAT_SHEET_SECTION_CLASS_NAME,
   GROUP_CHAT_SHEET_SECTION_LABEL_CLASS_NAME,
-  GROUP_CHAT_SHEET_TITLE_CLASS_NAME,
   GROUP_CHAT_SR_ONLY_CLASS_NAME,
   GROUP_CHAT_TAB_PANEL_SCROLL_CLASS_NAME,
   GROUP_CHAT_TABS_BAND_CLASS_NAME,
@@ -198,12 +196,6 @@ const participantOf = (
       (memberId !== null && participant.kind === "human" && participant.memberId === memberId) ||
       (moduleInstallationId !== null && participant.kind === "module" && participant.moduleInstallationId === moduleInstallationId),
   ) ?? null;
-
-const participantName = (
-  participants: ReadonlyArray<CollabOfficeParticipant>,
-  memberId: string | null,
-  moduleInstallationId: string | null,
-): string | null => participantOf(participants, memberId, moduleInstallationId)?.displayName ?? null;
 
 type AnchoredApproval = { readonly approval: CollabApprovalView; readonly task: CollabTaskView };
 type AnchoredQuestion = { readonly question: CollabTaskQuestionView; readonly task: CollabTaskView };
@@ -358,6 +350,7 @@ export const parseRoleHint = (raw: string | null): CollabHumanRole | null =>
 export type GroupChatPageLabels = {
   readonly title: string;
   readonly description: string;
+  readonly today: string;
   readonly tabListLabel: string;
   readonly tabs: { readonly office: string; readonly tasks: string };
   readonly roles: Readonly<Record<CollabHumanRole, string>>;
@@ -374,6 +367,8 @@ export type GroupChatPageLabels = {
     readonly title: string;
     readonly humans: (count: number) => string;
     readonly modules: (count: number) => string;
+    readonly countLabel: (count: number) => string;
+    readonly moduleDescriptions: Readonly<Record<string, string>>;
     readonly empty: string;
     readonly pending: string;
     readonly noModules: string;
@@ -554,13 +549,6 @@ const avatarTintClassName = (name: string): string => {
   return GROUP_CHAT_AVATAR_TINT_CLASS_NAMES[Math.abs(hash) % GROUP_CHAT_AVATAR_TINT_CLASS_NAMES.length] ?? "bg-accent-soft";
 };
 
-/** The one-line capability summary the accepted direction writes under each hired module. */
-const MODULE_DESCRIPTIONS: Readonly<Record<string, string>> = {
-  Sales: "Hỗ trợ kinh doanh và chăm sóc khách hàng",
-  Accounting: "Hỗ trợ kế toán và tài chính",
-  Chatbot: "Hỗ trợ tự động hóa và trả lời khách hàng",
-};
-
 /** Props for the tinted member avatar shared by message authors and roster rows. */
 type MemberAvatarProps = {
   readonly name: string;
@@ -571,7 +559,7 @@ type MemberAvatarProps = {
 };
 
 const MemberAvatar = ({ name, kind, presence = false, compact = false }: MemberAvatarProps) => (
-  <span className={cn(compact ? GROUP_CHAT_AVATAR_COMPACT_CLASS_NAME : GROUP_CHAT_AVATAR_CLASS_NAME, avatarTintClassName(name))} aria-hidden="true">
+  <span className={getGroupChatAvatarClassName(compact, avatarTintClassName(name))} aria-hidden="true">
     {kind === "module" ? <Icon source={nivoIconSource("agentos", "leading")} usage="leading" /> : initialsOf(name)}
     {presence ? <span className={GROUP_CHAT_AVATAR_PRESENCE_CLASS_NAME} /> : null}
   </span>
@@ -602,7 +590,7 @@ const MemberRow = ({ participant, labels, detailed = false, compact = false, roo
       <Text size={compact ? "xs" : "sm"} tone="muted">
         {participant.kind === "module"
           ? detailed
-            ? (MODULE_DESCRIPTIONS[participant.displayName] ?? labels.members.moduleRole)
+            ? (labels.members.moduleDescriptions[participant.displayName] ?? labels.members.moduleRole)
             : labels.members.moduleRole
           : (labels.roles[participant.role as CollabHumanRole] ?? participant.role)}
       </Text>
@@ -650,11 +638,6 @@ const MessageEntry = ({ item, labels, decision, compact = false }: MessageEntryP
       </Text>
     </>
   );
-  const messageBody = decision
-    ? isViewer
-      ? GROUP_CHAT_BUBBLE_OWN_CLASS_NAME
-      : GROUP_CHAT_BUBBLE_CLASS_NAME
-    : GROUP_CHAT_MESSAGE_BODY_CLASS_NAME;
   return (
     <article className={compact ? GROUP_CHAT_ENTRY_COMPACT_CLASS_NAME : GROUP_CHAT_ENTRY_CLASS_NAME} id={`collab-msg-${message.messageId}`}>
       <MemberAvatar name={authorName} kind={authorKind} compact={compact} />
@@ -665,7 +648,7 @@ const MessageEntry = ({ item, labels, decision, compact = false }: MessageEntryP
             {labels.formatTime(message.occurredAt)}
           </Text>
         </Text>
-        <div className={messageBody}>{bodyContent}</div>
+        <div className={getGroupChatMessageBodyClassName(decision, isViewer)}>{bodyContent}</div>
       </div>
     </article>
   );
@@ -969,7 +952,7 @@ const MembersRail = ({ view, on, labels }: MembersRailProps) => {
           <span className={GROUP_CHAT_RAIL_LABEL_ICON_CLASS_NAME}>
             <Icon source={nivoIconSource("community", "leading")} usage="leading" />
             <Text as="span" size="md" weight="semibold">
-              {`Thành viên (${humans.length})`}
+              {labels.members.countLabel(humans.length)}
             </Text>
           </span>
           {mayInvite ? (
@@ -1034,10 +1017,12 @@ const MembersRail = ({ view, on, labels }: MembersRailProps) => {
 
 /**
  * The roster-only rail the accepted decision composite draws while an approval
- * is held: members grouped under Con người/Module, no invite section, no
+ * is held: members grouped by person or module, no invite section, no
  * presence dots or row menus.
  */
-const RosterRail = ({ view, labels }: { readonly view: GroupChatPageView; readonly labels: GroupChatPageLabels }) => {
+type RosterRailProps = { readonly view: GroupChatPageView; readonly labels: GroupChatPageLabels };
+
+const RosterRail = ({ view, labels }: RosterRailProps) => {
   const { humans, modules } = partitionParticipants(view.participants);
   return (
     <SurfaceCard composition="joined" depth="nested" ariaLabel={labels.members.title}>
@@ -1251,7 +1236,7 @@ const Composer = ({ view, on, labels, decision, compact = false }: ComposerProps
         on.sendMessage();
       }}
     >
-      <div className={GROUP_CHAT_GROW_CLASS_NAME}>
+      <div className={GROUP_CHAT_COMPOSER_INPUT_CLASS_NAME}>
         <Input
           id="collab-composer"
           name="message"
@@ -1262,6 +1247,7 @@ const Composer = ({ view, on, labels, decision, compact = false }: ComposerProps
           onValueChange={on.changeComposer}
         />
       </div>
+      <div className={GROUP_CHAT_COMPOSER_ACTIONS_CLASS_NAME}>
       <span className={GROUP_CHAT_COMPOSER_GLYPHS_CLASS_NAME} aria-hidden="true">
         <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={GROUP_CHAT_COMPOSER_GLYPH_CLASS_NAME}>
           <path
@@ -1298,9 +1284,10 @@ const Composer = ({ view, on, labels, decision, compact = false }: ComposerProps
           isPending={view.composer.pending}
           isDisabled={view.composer.value.trim().length === 0}
         >
-          <Icon source={nivoIconSource("send", "chip")} usage="chip" /> {labels.composer.send}
+          <span className={GROUP_CHAT_COMPOSER_SEND_CLASS_NAME}><Icon source={nivoIconSource("send", "chip")} usage="chip" /> {labels.composer.send}</span>
         </Button>
       )}
+      </div>
     </form>
   </div>
 );
@@ -1566,7 +1553,7 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
    * rail and the glyph-only send control) while an approval card is held. The
    * flag is a presentation reading of the authorized items, never an authority.
    */
-  const decisionPending = view.items.some((item) => item.kind === "approval-card");
+  const decisionPending = view.items.some((item): boolean => item.kind === "approval-card");
   const participantCount = view.participants.length;
   const railOpenLabel = labels.members.openRail(participantCount);
   const showInviteSurface = mayPresentInvite(view.viewer) && !decisionPending;
@@ -1600,7 +1587,7 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
          messages above the docked invitation sheet. The subtitle stays on the wide
          header; at 390x844 it costs the lines the two messages need. */
       <div className={GROUP_CHAT_HEADER_BAND_COMPACT_CLASS_NAME}>
-        <div className={cn("flex", "min-w-0", "items-center", "justify-between", "gap-3")}>
+        <div className={GROUP_CHAT_HEADER_COMPACT_ROW_CLASS_NAME}>
           <Text size="sm" weight="semibold" overflow="truncate">
             <span>Workspace</span> <span>{view.workspaceName}</span>
           </Text>
@@ -1619,8 +1606,8 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
         className={GROUP_CHAT_HEADER_BAND_CLASS_NAME}
         action={
           <div className={GROUP_CHAT_HEADER_ACTIONS_CLASS_NAME}>
-            <select className={GROUP_CHAT_DAY_SELECT_CLASS_NAME} aria-label="Hôm nay" defaultValue="today">
-              <option value="today">Hôm nay</option>
+            <select className={GROUP_CHAT_DAY_SELECT_CLASS_NAME} aria-label={labels.today} defaultValue="today">
+              <option value="today">{labels.today}</option>
             </select>
           </div>
         }

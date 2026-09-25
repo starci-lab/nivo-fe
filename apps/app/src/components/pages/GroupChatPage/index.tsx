@@ -416,6 +416,7 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
     () => ({
       title: t("title"),
       description: t("description"),
+      today: t("today"),
       tabListLabel: t("tabs.label"),
       tabs: { office: t("tabs.office"), tasks: t("tabs.tasks") },
       roles: {
@@ -444,6 +445,12 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
         title: t("members.title"),
         humans: (count) => t("members.humans", { count }),
         modules: (count) => t("members.modules", { count }),
+        countLabel: (count) => t("members.countLabel", { count }),
+        moduleDescriptions: {
+          Sales: t("members.moduleDescriptions.Sales"),
+          Accounting: t("members.moduleDescriptions.Accounting"),
+          Chatbot: t("members.moduleDescriptions.Chatbot"),
+        },
         empty: t("members.empty"),
         pending: t("members.pending"),
         noModules: t("members.noModules"),

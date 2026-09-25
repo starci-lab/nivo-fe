@@ -335,6 +335,7 @@
     "groupChat": {
       "title": "Office",
       "description": "Collaborate, coordinate and update the Workspace's work.",
+      "today": "Today",
       "tabs": {
         "label": "Office or Tasks",
         "office": "Office",
@@ -370,6 +371,12 @@
         "pending": "Pending invitation",
         "noModules": "No module is hired yet.",
         "moduleRole": "Module",
+        "countLabel": "Members ({count})",
+        "moduleDescriptions": {
+          "Sales": "Helps with sales and customer care",
+          "Accounting": "Helps with accounting and finance",
+          "Chatbot": "Helps automate customer replies"
+        },
         "openRail": "{count} members",
         "closeRail": "Close the member list"
       },

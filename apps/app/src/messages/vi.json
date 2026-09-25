@@ -335,6 +335,7 @@
     "groupChat": {
       "title": "Office",
       "description": "Trao đổi, phối hợp và cập nhật công việc của Workspace.",
+      "today": "Hôm nay",
       "tabs": {
         "label": "Office hoặc Tasks",
         "office": "Office",
@@ -370,6 +371,12 @@
         "pending": "Lời mời đang chờ",
         "noModules": "Chưa có module nào được thuê.",
         "moduleRole": "Module",
+        "countLabel": "Thành viên ({count})",
+        "moduleDescriptions": {
+          "Sales": "Hỗ trợ kinh doanh và chăm sóc khách hàng",
+          "Accounting": "Hỗ trợ kế toán và tài chính",
+          "Chatbot": "Hỗ trợ tự động hóa và trả lời khách hàng"
+        },
         "openRail": "{count} thành viên",
         "closeRail": "Đóng danh sách thành viên"
       },

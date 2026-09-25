@@ -17,6 +17,7 @@ import {
   mayPresentDecision,
   mayPresentInvite,
   parseAddressedModule,
+  parseRoleHint,
   shortTaskRef,
   type GroupChatPageActions,
   type GroupChatPageLabels,
@@ -163,6 +164,7 @@ const NOTICE: CollabTurnNoticeItem = {
 
 const labels: GroupChatPageLabels = {
   title: "Office",
+  today: "Hôm nay",
   description: "Trao đổi, phối hợp và cập nhật công việc của Workspace.",
   tabListLabel: "Chuyển giữa Office và Tasks",
   tabs: { office: "Office", tasks: "Tasks" },
@@ -192,6 +194,12 @@ const labels: GroupChatPageLabels = {
     pending: "Lời mời đang chờ",
     noModules: "Chưa có module nào được thuê.",
     moduleRole: "Module",
+    countLabel: (count) => `Thành viên (${count})`,
+    moduleDescriptions: {
+      Sales: "Hỗ trợ kinh doanh và chăm sóc khách hàng",
+      Accounting: "Hỗ trợ kế toán và tài chính",
+      Chatbot: "Hỗ trợ tự động hóa và trả lời khách hàng",
+    },
     openRail: (count) => `${count} thành viên`,
     closeRail: "Đóng danh sách thành viên",
   },
@@ -356,6 +364,40 @@ describe("GroupChatPageBase", () => {
     expect(composer).toBeEnabled();
     fireEvent.change(composer, { target: { value: "Chào cả nhóm" } });
     expect(on.changeComposer).toHaveBeenCalledWith("Chào cả nhóm");
+  });
+
+  it("keeps a drafted message in the composer and submits it once through the form", () => {
+    const on = actions();
+    render(<GroupChatPageBase isRailOpen={false} view={baseView({ composer: { value: "Xin chào", pending: false, failure: null, answering: null } })} on={on} labels={labels} />);
+    const draft = screen.getByRole("textbox", { name: labels.composer.label });
+    const form = draft.closest("form");
+    expect(form).not.toBeNull();
+    if (form === null) throw new Error("Composer form is missing");
+    expect(draft).toHaveValue("Xin chào");
+    expect(screen.getByRole("button", { name: labels.composer.send })).toBeEnabled();
+    fireEvent.submit(form);
+    expect(on.sendMessage).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the compact roster below the composer and closes it without leaving Office", () => {
+    const on = actions();
+    render(<GroupChatPageBase isRailOpen isCompactMembers view={baseView()} on={on} labels={labels} />);
+    expect(screen.getByRole("textbox", { name: labels.composer.label })).toBeEnabled();
+    expect(screen.getByRole("button", { name: labels.members.closeRail })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: labels.members.closeRail }));
+    expect(on.changeRailOpen).toHaveBeenCalledWith(false);
+  });
+
+  it("focuses the invite email from the rail and submits the selected role", () => {
+    const on = actions();
+    render(<GroupChatPageBase isRailOpen={false} view={baseView({ invite: { email: "mai@congty.vn", role: "manager", pending: false, outcome: null, invitedEmail: null } })} on={on} labels={labels} />);
+    const email = screen.getByRole("textbox", { name: labels.invite.email });
+    fireEvent.click(screen.getByRole("button", { name: labels.invite.title }));
+    expect(email).toHaveFocus();
+    const inviteForm = email.closest("form");
+    if (inviteForm === null) throw new Error("Invitation form is missing");
+    fireEvent.submit(inviteForm);
+    expect(on.submitInvite).toHaveBeenCalledTimes(1);
   });
 
   it("gates the invite form on the server-derived viewer role", () => {
@@ -591,6 +633,12 @@ describe("GroupChatPageBase", () => {
 });
 
 describe("component", () => {
+  it("accepts only the closed invitation role hints", () => {
+    expect(parseRoleHint("manager")).toBe("manager");
+    expect(parseRoleHint("staff")).toBe("staff");
+    expect(parseRoleHint("auditor")).toBeNull();
+    expect(parseRoleHint(null)).toBeNull();
+  });
   it("parses a leading @address for routing without touching the body", () => {
     expect(parseAddressedModule("@Sales gửi báo cáo")).toBe("Sales");
     expect(parseAddressedModule("  @Accounting xong chưa")).toBe("Accounting");

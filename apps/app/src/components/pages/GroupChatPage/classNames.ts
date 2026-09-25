@@ -96,6 +96,9 @@ export const GROUP_CHAT_HEADER_BAND_COMPACT_CLASS_NAME = cn(
   "py-2",
 );
 
+/** Align the compact workspace name with its member control. */
+export const GROUP_CHAT_HEADER_COMPACT_ROW_CLASS_NAME = cn("flex", "min-w-0", "items-center", "justify-between", "gap-3");
+
 /** The compact header's flexible text column; the chip keeps its intrinsic width. */
 export const GROUP_CHAT_HEADER_TEXT_COMPACT_CLASS_NAME = cn("min-w-0", "flex-1");
 
@@ -289,6 +292,10 @@ export const GROUP_CHAT_AVATAR_CLASS_NAME = cn(GROUP_CHAT_AVATAR_BASE_CLASS_NAME
 /** The compact avatar the mobile direction's tighter message rows use. */
 export const GROUP_CHAT_AVATAR_COMPACT_CLASS_NAME = cn(GROUP_CHAT_AVATAR_BASE_CLASS_NAME, "h-8", "w-8", "text-xs");
 
+/** Keep each member's tint while selecting the compact avatar size. */
+export const getGroupChatAvatarClassName = (compact: boolean, tint: string): ReturnType<typeof cn> =>
+  cn(compact ? GROUP_CHAT_AVATAR_COMPACT_CLASS_NAME : GROUP_CHAT_AVATAR_CLASS_NAME, tint);
+
 /** The presence dot docked at a member avatar's lower edge. */
 export const GROUP_CHAT_AVATAR_PRESENCE_CLASS_NAME = cn(
   "absolute",
@@ -341,6 +348,10 @@ export const GROUP_CHAT_BUBBLE_OWN_CLASS_NAME = cn(
 
 /** A plain message body in the growth presentation - text on the card, not a bubble. */
 export const GROUP_CHAT_MESSAGE_BODY_CLASS_NAME = cn("max-w-[42rem]");
+
+/** Select plain conversation text or the approval state bubble treatment. */
+export const getGroupChatMessageBodyClassName = (decision: boolean, isViewer: boolean): ReturnType<typeof cn> =>
+  decision ? (isViewer ? GROUP_CHAT_BUBBLE_OWN_CLASS_NAME : GROUP_CHAT_BUBBLE_CLASS_NAME) : GROUP_CHAT_MESSAGE_BODY_CLASS_NAME;
 
 /** An addressed module mention reads as a soft accent chip inside the body line. */
 export const GROUP_CHAT_MENTION_CLASS_NAME = cn(
@@ -439,25 +450,19 @@ export const GROUP_CHAT_COMPOSER_CLASS_NAME = cn(
   "items-end",
   "gap-2",
   "p-3",
-  "min-[70rem]:relative",
   "min-[70rem]:h-[7.125rem]",
-  "min-[70rem]:items-start",
-  "min-[70rem]:[&_[data-slot=input]]:h-[5.25rem]",
-  "min-[70rem]:[&_[data-slot=input]]:pt-3",
-  "min-[70rem]:[&_[data-slot=input]]:pb-10",
-  "min-[70rem]:[&>button]:absolute",
-  "min-[70rem]:[&>button]:bottom-7",
-  "min-[70rem]:[&>button]:right-7",
-  "min-[70rem]:[&>button]:h-10",
-  "min-[70rem]:[&>button]:w-20",
+  "min-[70rem]:flex-col",
+  "min-[70rem]:items-stretch",
+  "min-[70rem]:gap-1",
+  "min-[70rem]:[&_[data-slot=input]]:h-10",
 );
 
 /** The decision composer keeps its input inside the lower card band. */
 export const GROUP_CHAT_COMPOSER_DECISION_CLASS_NAME = cn(
   GROUP_CHAT_COMPOSER_CLASS_NAME,
   "min-[70rem]:h-[5.625rem]",
-  "min-[70rem]:pl-[1.375rem]",
-  "min-[70rem]:[&_[data-slot=input]]:h-16",
+  "min-[70rem]:p-2",
+  "min-[70rem]:[&_[data-slot=input]]:h-8",
 );
 
 /** The compact composer keeps the same row on a shorter inset. */
@@ -476,7 +481,17 @@ export const getGroupChatComposerClassName = (compact: boolean, decision: boolea
  * command, so the cluster is decorated and never a keyboard stop - the mention
  * itself is the typed `@module` address the thread already renders.
  */
-export const GROUP_CHAT_COMPOSER_GLYPHS_CLASS_NAME = cn("flex", "shrink-0", "items-center", "gap-1.5", "px-1", "text-muted-foreground", "min-[70rem]:absolute", "min-[70rem]:bottom-7", "min-[70rem]:left-8");
+/** Let the draft take the mobile row and the full desktop first row. */
+export const GROUP_CHAT_COMPOSER_INPUT_CLASS_NAME = cn("min-w-0", "flex-1", "min-[70rem]:w-full", "min-[70rem]:flex-none");
+
+/** Place decorative glyphs and the send control in their own composer row. */
+export const GROUP_CHAT_COMPOSER_ACTIONS_CLASS_NAME = cn("flex", "shrink-0", "items-center", "gap-2", "min-[70rem]:w-full", "min-[70rem]:justify-between");
+
+/** Keep decorative controls together without covering the draft placeholder. */
+export const GROUP_CHAT_COMPOSER_GLYPHS_CLASS_NAME = cn("flex", "shrink-0", "items-center", "gap-1.5", "px-1", "text-muted-foreground");
+
+/** Keep the send icon and visible action label on one line. */
+export const GROUP_CHAT_COMPOSER_SEND_CLASS_NAME = cn("inline-flex", "items-center", "justify-center", "gap-1", "whitespace-nowrap");
 
 /** One inline glyph of the composer's decorative cluster. */
 export const GROUP_CHAT_COMPOSER_GLYPH_CLASS_NAME = cn("h-5", "w-5");
