@@ -45,6 +45,6 @@ const unconnected = (props: SalesHandoffBlockProps, t: SalesTranslation): SalesH
 /** Draw the handoff surface reached at its own route for its own installation. */
 export const SalesHandoffBlock = (props: SalesHandoffBlockProps) => {
   const translate = useTranslations("agentos.sales.handoff");
-  const t: SalesTranslation = (key, values) => translate(key as never, values as never);
+  const t: SalesTranslation = (key, values): string => translate(key as never, values as never);
   return <SalesHandoffBlockBase view={unconnected(props, t)} />;
 };
