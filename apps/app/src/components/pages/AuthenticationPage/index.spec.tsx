@@ -377,19 +377,21 @@ describe("AuthenticationPage connected journeys", () => {
         expect(mocks.session.adopt).not.toHaveBeenCalled()
     })
 
-    it("says plainly that the place asked for is out of reach, without echoing it", async () => {
+    it("hands an unavailable requested place to the landing instead of parking it on the auth surface", async () => {
         mocks.api.signIn.mockResolvedValue({ ok: true, data: { accessToken: "access", requiresTwoFactor: false, twoFactorToken: null, destination: "/overview", undecided: null } })
         window.history.replaceState(null, "", "/authentication?returnTo=%2Fagentos%2Fsecret")
         render(<AuthenticationPage />)
         fireEvent.click(screen.getByTestId("submit-details"))
-        await waitFor(() => expect(panel()).toContain('"state":"notice"'))
-        expect(panel()).toContain("unavailableReturnNotice")
+        /*
+         * THE SESSION IS KEPT AND THE SIGN-IN SURFACE IS LEFT. The asked-for route is never echoed -
+         * not in the address and not into a notice here - and the reasonless notice belongs to the
+         * default landing, which reads the marker once and drops it from its own address.
+         */
+        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/overview?returnNotice=unavailable"))
+        expect(mocks.session.adopt).toHaveBeenCalled()
+        expect(panel()).toContain('"state":"details"')
+        expect(panel()).not.toContain("unavailableReturnNotice")
         expect(panel()).not.toContain("agentos")
-        expect(exits()).toBe("[]")
-        expect(mocks.push).not.toHaveBeenCalled()
-
-        fireEvent.click(screen.getByTestId("onward"))
-        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/overview"))
     })
 
     it("reports the handed-off session ending once, drops the param and keeps sign-in one press away", async () => {

@@ -41,8 +41,9 @@ import { useSession } from "@/modules/auth/session";
  * THE DESTINATION IS THE BACKEND'S ANSWER, NEVER THE READER'S REQUEST. What arrives on the query is
  * untrusted input; it travels to the backend as `requestedDestination` and the session names the
  * place to land. A requested place the backend could not resolve comes back as the default
- * authenticated landing surface, and that - with a reasonless notice - is what this page shows
- * rather than echoing a place the reader is not allowed into.
+ * authenticated landing surface - and so does the reader, signed in and never parked here: this page
+ * hands the landing the reasonless notice to show through `returnNotice=unavailable` rather than
+ * echoing a place the reader is not allowed into on the sign-in surface.
  *
  * THE RESET JOURNEY'S REFUSAL IS DELIBERATELY GENERIC. A wrong code and an address nobody has come
  * back as two different exceptions; printing them would let a caller who can read an inbox tell those
@@ -89,11 +90,24 @@ type AuthPhase = "details" | "code" | "done" | "twoFactor" | "notice";
 /**
  * Which settled ending without a session is on screen.
  *
- * All five arrive with no form left to fill: the proven mailbox holder, an identity created with
- * no session, a requested destination the backend folded onto the default landing surface, and the
- * two session-ending reports the console hands over on the query.
+ * All four arrive with no form left to fill: the proven mailbox holder, an identity created with
+ * no session, and the two session-ending reports the console hands over on the query.
+ *
+ * A requested destination the backend could not resolve is NOT one of them: the reader is signed
+ * in, so this page sends them on to the authenticated landing with the notice marker instead of
+ * settling a notice here.
  */
-type AuthNoticeKind = "heldAddress" | "createdNoSession" | "unavailableReturn" | "sessionEndingApplied" | "sessionEndingUnconfirmed";
+type AuthNoticeKind = "heldAddress" | "createdNoSession" | "sessionEndingApplied" | "sessionEndingUnconfirmed";
+
+/**
+ * Where an unavailable requested destination lands, and the marker that says why.
+ *
+ * THE DEFAULT LANDING IS THE SURFACE, AND IT OWNS THE NOTICE. A reader who asked for a place the
+ * backend could not resolve keeps their session and arrives at the authenticated landing - never on
+ * this sign-in surface. The landing reads this one marker once, shows the reasonless notice and
+ * drops it from the address, so the reason travels with the reader rather than being parked here.
+ */
+const UNAVAILABLE_RETURN_LANDING = `${DEFAULT_AUTHENTICATED_LANDING}?returnNotice=unavailable`;
 
 /**
  * What a brokered answer says, whichever door produced it: the callback's exchange, or the
@@ -377,8 +391,9 @@ const AuthenticationPageConnected = (props: AuthenticationPageConnectedProps) =>
    *
    * The requested place travelled as untrusted input and the answer is the only thing that may be
    * followed. When a place WAS asked for and the answer is a different valid place, the asked-for
-   * route was out of reach for this principal: that is said with one reasonless notice rather than
-   * with the route's name, and the way on is the default authenticated landing surface.
+   * route was out of reach for this principal: the reader keeps the session they just earned and
+   * goes to the default authenticated landing carrying the reasonless notice marker, so the landing
+   * - not this sign-in surface - says the place could not be opened, without ever naming the route.
    *
    * @param resolved - The destination the session named, or null when it named none.
    */
@@ -386,8 +401,7 @@ const AuthenticationPageConnected = (props: AuthenticationPageConnectedProps) =>
     const asked = returnTo.current;
     const answered = validatedReturnTo(resolved);
     if (asked !== null && answered !== null && answered !== asked) {
-      setNoticeKind("unavailableReturn");
-      setPhase("notice");
+      arriveAt(UNAVAILABLE_RETURN_LANDING);
       return;
     }
     arriveAt(answered ?? asked ?? DEFAULT_AUTHENTICATED_LANDING);
@@ -816,14 +830,10 @@ const AuthenticationPageConnected = (props: AuthenticationPageConnectedProps) =>
   /**
    * The first way out of a settled notice, which is what the notice's primary action does.
    *
-   * Only the unavailable-return notice keeps the session: the reader IS signed in there, and the
-   * action is the way onto the default landing surface.
+   * Every notice that reaches this page is one the reader must leave by choosing a journey: the
+   * unavailable-return ending never settles here, so the action is always the sign-in form.
    */
   const takeNoticePrimary = () => {
-    if (noticeKind === "unavailableReturn") {
-      arriveAt(DEFAULT_AUTHENTICATED_LANDING);
-      return;
-    }
     changeMode("signIn");
   };
 
@@ -960,22 +970,15 @@ const AuthenticationPageConnected = (props: AuthenticationPageConnectedProps) =>
         onwardLabel: t("forgotPassword.onwardLabel")
       };
     }
-    if (noticeKind === "sessionEndingUnconfirmed") {
-      return {
-        ...base,
-        doneHint: t("signOut.unconfirmedNotice"),
-        onwardLabel: t("forgotPassword.onwardLabel")
-      };
-    }
     /*
-     * REASONLESS, AND WITH NO HEADING OF ITS OWN. The notice says the place is unavailable and that
-     * the reader has been taken to the default page; naming the route they asked for, or why it was
-     * refused, would report what this principal may reach.
+     * THE LAST REPORT IS THE UNCONFIRMED ONE, and it is reached rather than named: every other
+     * ending returned above, so what is left is the everywhere-ending this browser could not have
+     * confirmed. It says so without a success claim and offers the same sign-in form.
      */
     return {
       ...base,
-      doneHint: t("unavailableReturnNotice"),
-      onwardLabel: t("signUp.onwardLabel")
+      doneHint: t("signOut.unconfirmedNotice"),
+      onwardLabel: t("forgotPassword.onwardLabel")
     };
   };
 

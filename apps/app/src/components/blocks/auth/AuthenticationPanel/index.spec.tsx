@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import { AuthenticationPanel, type AuthDetailsCopy, type AuthCodeCopy, type AuthFactorCopy, type AuthNoticeCopy, type AuthRestoringCopy } from "./"
 
 const frame = { title: "Sign in", subtitle: "Welcome", statusMessage: "", isError: false, isPending: false }
-const details: AuthDetailsCopy = { ...frame, mode: "signIn", emailLabel: "Email", emailPlaceholder: "you@example.com", emailRequired: "Email required", emailInvalid: "Email invalid", emailHint: "Use your account email", passwordLabel: "Password", passwordPlaceholder: "Password", passwordRequired: "Password required", passwordTooShort: "Password too short", passwordHint: "At least 8 characters", confirmPasswordLabel: "Confirm", confirmPasswordPlaceholder: "Confirm password", confirmPasswordRequired: "Confirmation required", confirmPasswordMismatch: "Passwords differ", nameLabel: "Display name", namePlaceholder: "What we call you", nameHint: "Optional", nameTooLong: "Name too long", authorityHint: "An account grants no purchase rights", revealLabel: "Show", hideLabel: "Hide", submitLabel: "Continue", orLabel: "or", googleLabel: "Google", githubLabel: "GitHub", forgotPasswordLabel: "Forgot password", rememberMeLabel: "Remember me", isRememberMe: false }
+const details: AuthDetailsCopy = { ...frame, mode: "signIn", emailLabel: "Email", emailPlaceholder: "you@example.com", emailRequired: "Email required", emailInvalid: "Email invalid", emailHint: "Use your account email", passwordLabel: "Password", passwordPlaceholder: "Password", passwordRequired: "Password required", passwordTooShort: "Password too short", passwordHint: "At least 8 characters", confirmPasswordLabel: "Confirm", confirmPasswordPlaceholder: "Confirm password", confirmPasswordRequired: "Confirmation required", confirmPasswordMismatch: "Passwords differ", nameLabel: "Display name", namePlaceholder: "What we call you", nameHint: "Optional", nameTooLong: "Name too long", authorityHint: "An account grants no purchase rights", revealLabel: "Show", hideLabel: "Hide", submitLabel: "Continue", orLabel: "HOẶC", googleLabel: "Google", githubLabel: "GitHub", forgotPasswordLabel: "Forgot password", rememberMeLabel: "Remember me", isRememberMe: false }
 const code: AuthCodeCopy = { ...frame, mode: "forgotPassword", codeLabel: "Code", codeRequired: "Code required", codeInvalid: "Code invalid", codeHint: "Check your inbox", newPasswordLabel: "New password", newPasswordPlaceholder: "New password", newPasswordRequired: "New password required", newPasswordTooShort: "New password too short", newPasswordHint: "Choose a new password", confirmNewPasswordLabel: "Repeat new password", confirmNewPasswordPlaceholder: "Repeat it", confirmNewPasswordRequired: "Repeat required", confirmNewPasswordMismatch: "Passwords differ", revealLabel: "Show", hideLabel: "Hide", submitLabel: "Reset", resendLabel: "Resend", cooldownLabel: "Wait", backLabel: "Back" }
 const factor: AuthFactorCopy = { ...frame, codeLabel: "Authenticator code", codeRequired: "Code required", codeInvalid: "Six digits", submitLabel: "Verify", backLabel: "Back" }
 const restoring: AuthRestoringCopy = { title: "Checking your session", subtitle: "One moment", progressLabel: "Restoring your session" }
@@ -24,6 +24,33 @@ describe("AuthenticationPanel", () => {
         const markup = renderToStaticMarkup(<AuthenticationPanel state="details" props={details} on={{ chooseProvider: vi.fn(), submitDetails: vi.fn() }} />)
         expect(markup).toContain("Google")
         expect(markup).toContain("GitHub")
+        expect(markup).toContain("HOẶC")
+    })
+
+    it("keeps the provider shortcuts on sign-in and leaves them off registration and recovery", () => {
+        const register = renderToStaticMarkup(<AuthenticationPanel state="details" props={{ ...details, mode: "signUp" }} on={{ chooseProvider: vi.fn(), submitDetails: vi.fn() }} />)
+        const recovery = renderToStaticMarkup(<AuthenticationPanel state="details" props={{ ...details, mode: "forgotPassword" }} on={{ chooseProvider: vi.fn(), submitDetails: vi.fn() }} />)
+        /*
+         * THE ROW BELONGS TO SIGN-IN ALONE, DIVIDER INCLUDED. The accepted direction draws the two
+         * entry surfaces as the form only; a surviving shortcut row would advertise a path those
+         * surfaces do not offer, and a surviving divider would name a choice that is not there.
+         */
+        for (const markup of [register, recovery]) {
+            expect(markup).not.toContain("Google")
+            expect(markup).not.toContain("GitHub")
+            expect(markup).not.toContain("HOẶC")
+        }
+    })
+
+    it("leads the registration fields with the display name", () => {
+        const markup = renderToStaticMarkup(<AuthenticationPanel state="details" props={{ ...details, mode: "signUp" }} on={{ submitDetails: vi.fn() }} />)
+        /*
+         * THE ORDER IS THE FINDING, so it is asserted as an order rather than as a set of labels:
+         * display name, address, password, confirmation - which is what the direction draws.
+         */
+        const order = ["Display name", "Email", "Password", "Confirm"].map(label => markup.indexOf(label))
+        expect(order.every(index => index >= 0)).toBe(true)
+        expect(order).toEqual([...order].sort((left, right) => left - right))
     })
 
     it("draws the display name and the authority sentence on the registration journey", () => {

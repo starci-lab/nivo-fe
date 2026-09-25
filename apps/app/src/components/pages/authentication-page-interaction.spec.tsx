@@ -245,4 +245,52 @@ describe("AuthenticationPage interactions", () => {
         await waitFor(() => expect(screen.getByRole("button", { name: "googleLabel" })).toBeEnabled())
         expect(screen.getByRole("button", { name: "githubLabel" })).toBeEnabled()
     })
+
+    it("keeps the provider shortcuts on sign-in and leads registration with the display name", async () => {
+        render(<AuthenticationPage />)
+        expect(await screen.findByRole("button", { name: "googleLabel" })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "githubLabel" })).toBeInTheDocument()
+
+        /*
+         * THE OTHER JOURNEY IS THE FORM ALONE. The accepted direction omits both shortcuts and their
+         * divider on registration, so the draw here is the order of the fields and nothing above them.
+         */
+        fireEvent.click(screen.getByRole("button", { name: "signIn.promptAction" }))
+        expect(await screen.findByLabelText("nameLabel")).toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "googleLabel" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "githubLabel" })).not.toBeInTheDocument()
+        expect(screen.queryByText("orLabel")).not.toBeInTheDocument()
+
+        const fields = Array.from(document.querySelectorAll("input[name]")).map(input => input.getAttribute("name"))
+        expect(fields).toEqual(["name", "email", "password", "confirmPassword"])
+    })
+
+    it("asks recovery for the address alone, with no shortcut row above it", async () => {
+        render(<AuthenticationPage />)
+        fireEvent.click(await screen.findByRole("button", { name: "forgotPasswordLabel" }))
+        expect(await screen.findByLabelText("emailLabel")).toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "googleLabel" })).not.toBeInTheDocument()
+        expect(screen.queryByText("orLabel")).not.toBeInTheDocument()
+        const fields = Array.from(document.querySelectorAll("input[name]")).map(input => input.getAttribute("name"))
+        expect(fields).toEqual(["email"])
+    })
+
+    it("sends a signed-in reader whose asked-for place is unavailable to the landing that shows the notice", async () => {
+        mocks.signIn.mockResolvedValue({ ok: true, data: { accessToken: "access", destination: "/overview", undecided: null, ...answered } })
+        window.history.replaceState(null, "", "/authentication?returnTo=%2Fagentos%2Fsecret")
+        render(<AuthenticationPage />)
+        fillSignIn()
+        fireEvent.click(screen.getByRole("button", { name: "signIn.submitLabel" }))
+
+        /*
+         * THE SESSION IS KEPT, THE SIGN-IN SURFACE IS LEFT, AND THE ROUTE IS NEVER ECHOED. The reason
+         * travels as a marker after the default landing rather than as a notice here, because the
+         * reader is signed in and this surface would only offer them the form again.
+         */
+        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/overview?returnNotice=unavailable"))
+        expect(mocks.adopt).toHaveBeenCalled()
+        expect(mocks.push).toHaveBeenCalledTimes(1)
+        expect(screen.queryByText("unavailableReturnNotice")).not.toBeInTheDocument()
+        expect(document.body.textContent).not.toContain("agentos")
+    })
 })

@@ -38,10 +38,12 @@ import {
  * `twoFactorUnsupported` remains in the union so a build whose session layer cannot complete the
  * challenge can still say so honestly rather than dead-ending on a form that cannot submit.
  *
- * THE ORDER IS THE DESIGN. The shortcuts come FIRST because many readers take one and never reach
- * the form; the divider NAMES the choice between them rather than merely separating them; the form
- * follows; and the way to the other journey is the last line, phrased as a question and its
- * answer - which is what makes one road the main one and the rest alternatives.
+ * THE ORDER IS THE DESIGN, AND THE SHORTCUTS ARE SIGN-IN'S. On sign-in the shortcuts come FIRST
+ * because many readers take one and never reach the form; the divider NAMES the choice between them
+ * rather than merely separating them; the form follows; and the way to the other journey is the last
+ * line, phrased as a question and its answer - which is what makes one road the main one and the rest
+ * alternatives. Registration and recovery are the form alone: the accepted direction draws no
+ * provider row there, and the field order on registration starts with the display name.
  *
  * WHAT THIS BLOCK DOES NOT DRAW: the page heading, the way to the other journey and the way back
  * from a challenge. The accepted direction puts the heading ABOVE one surface and the exits BELOW
@@ -76,10 +78,10 @@ export type AuthState = /** The shortcuts and the credential form. */
 /**
  * Something was settled WITHOUT a session, and there is nothing left to type.
  *
- * The three endings that land here are the proven-holder notice, a provider identity with no
- * verified email and a destination the reader asked for that could not be reached. Each offers up
- * to two ways onward and none of them offers a field, which is why they share one tree rather than
- * borrowing `details`: a form under any of them would invite an entry that cannot change anything.
+ * The endings that land here are the proven-holder notice, an identity created with no session, and
+ * the two session-ending reports the console hands over. Each offers up to two ways onward and none
+ * of them offers a field, which is why they share one tree rather than borrowing `details`: a form
+ * under any of them would invite an entry that cannot change anything.
  */ | "notice";
 
 /** The exact control whose action is currently running. */
@@ -612,7 +614,30 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
       name
     });
   };
-  const credentialFields = [<Input
+  const credentialFields = [
+  /*
+   * THE DISPLAY NAME IS THE FIRST FIELD ON REGISTRATION, in the order the accepted direction draws
+   * its one joined surface: name, email, password, confirmation. It is the only optional field, so
+   * it is also the only one whose hint says so - and it is composed here rather than inside the
+   * registration group below for exactly that order.
+   */
+  ...(!isSignUp ? [] : [<Input
+    key="name"
+    id={NAME_ID}
+    name="name"
+    variant="primary"
+    kind="text"
+    label={copy.nameLabel}
+    placeholder={copy.namePlaceholder}
+    isDisabled={copy.isPending}
+    hint={fieldErrors.name !== undefined ? undefined : fieldErrors.name ?? copy.nameHint}
+    errorMessage={fieldErrors.name !== undefined ? fieldErrors.name ?? copy.nameHint : undefined}
+    isError={fieldErrors.name !== undefined}
+    onValueChange={value => {
+      values.current.name = value;
+      clearFieldError("name");
+    }}
+  />]), <Input
     key="email"
     id={EMAIL_ID}
     name="email"
@@ -667,22 +692,6 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
       values.current.confirmPassword = value;
       clearFieldError("confirmPassword");
     }}
-  />, <Input
-    key="name"
-    id={NAME_ID}
-    name="name"
-    variant="primary"
-    kind="text"
-    label={copy.nameLabel}
-    placeholder={copy.namePlaceholder}
-    isDisabled={copy.isPending}
-    hint={fieldErrors.name !== undefined ? undefined : fieldErrors.name ?? copy.nameHint}
-    errorMessage={fieldErrors.name !== undefined ? fieldErrors.name ?? copy.nameHint : undefined}
-    isError={fieldErrors.name !== undefined}
-    onValueChange={value => {
-      values.current.name = value;
-      clearFieldError("name");
-    }}
   />, <Text key="authority-hint" size="sm" tone="muted">{copy.authorityHint}</Text>])];
   const credentialActions = [
   /*
@@ -715,7 +724,14 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
       isDisabled={copy.isPending}
       isPending={copy.pendingAction === "submit"}
     >{copy.submitLabel}</Button>];
-  return <div className={AUTH_PANEL_CLASS_NAME}><div className={AUTH_PANEL_DETAILS_CLASS_NAME}><div className={AUTH_PANEL_PROVIDER_CLASS_NAME}>{PROVIDERS.map(entry => <Button
+  /*
+   * THE PROVIDER SHORTCUTS ARE THE SIGN-IN SURFACE'S ALONE. The accepted direction draws the
+   * Google/GitHub row and its divider on sign-in, where many readers take a shortcut and never reach
+   * the form - and omits both on registration and recovery, whose single task is the form itself.
+   * Composing the row per mode is what keeps the two entry surfaces from advertising a path they do
+   * not offer; the labels still travel with every state, so nothing else has to learn a journey.
+   */
+  const providerRow = copy.mode !== "signIn" ? [] : [<div key="providers" className={AUTH_PANEL_PROVIDER_CLASS_NAME}>{PROVIDERS.map(entry => <Button
             key={entry.provider}
             variant="outline"
             width="fill"
@@ -725,7 +741,8 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
             startContent={<Icon source={nivoIconSource(entry.icon, "chip")} usage="chip" />}
           >{entry.provider === "google" ? copy.googleLabel : copy.githubLabel}</Button>)}
 
-          <Divider label={copy.orLabel} /></div>
+          <Divider label={copy.orLabel} /></div>];
+  return <div className={AUTH_PANEL_CLASS_NAME}><div className={AUTH_PANEL_DETAILS_CLASS_NAME}>{providerRow}
 
 
         <form onSubmit={submitDetails}>
