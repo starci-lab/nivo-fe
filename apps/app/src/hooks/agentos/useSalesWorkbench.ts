@@ -9,7 +9,11 @@ import type {
   SalesCommandValue,
   SalesInstallationScope,
   SalesOpportunityValue,
-  SalesPipelineRequest
+  SalesPipelineItem,
+  SalesPipelineRequest,
+  SalesPipelineValue,
+  SalesPolicyValue,
+  SalesReadinessValue
 } from "@/modules/api/sales";
 import { nivoQueryData } from "@/modules/query";
 import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/console";
@@ -73,12 +77,81 @@ import {
  * counter is distinct within this module's life.
  */
 let pressSequence = 0;
-const requestId = () => globalThis.crypto?.randomUUID?.() ?? `request-${Date.now()}-${pressSequence += 1}`;
+const requestId = (): string => {
+  const uuid = globalThis.crypto?.randomUUID?.();
+  if (uuid !== undefined) return uuid;
+  pressSequence += 1;
+  return `request-${Date.now()}-${pressSequence}`;
+};
 const PAGE_SIZE = 20;
 
 /** The receiver's own state spelling inside one settled payload. */
 type CommandPayloadState = { readonly state?: string; readonly status?: string; readonly revision?: number; readonly opportunityId?: string; readonly actionId?: string };
 const payloadValue = (answer: SalesCommandAnswer): CommandPayloadState | undefined => answer.value as CommandPayloadState | undefined;
+
+/** One read's served value, or null when it has not answered with one. */
+const answered = <TValue>(answer: { readonly ok?: boolean; readonly value?: unknown } | undefined): TValue | null => answer?.ok === true ? (answer.value as TValue) : null;
+
+/** One route parameter as a usable string. */
+const stringOr = (value: unknown, fallback: string): string => typeof value === "string" ? value : fallback;
+
+/** The resolved installation address, or null while the instance coordinate is not known. */
+const scopeOf = (workspaceId: string, instanceId: string, installationId: string): SalesInstallationScope | null => workspaceId.length > 0 && instanceId.length > 0 ? { workspaceId, instanceId, installationId } : null;
+
+/** The pipeline's fingerprint of one resolved scope; no scope means no page to address. */
+const scopeFingerprintOf = (scope: SalesInstallationScope | null): string => scope === null ? "" : `${scope.workspaceId}~${scope.instanceId}~${scope.installationId}`;
+
+/** The pipeline page a surface opens on, or advances to. */
+const pipelinePageOf = (scopeFingerprint: string, cursor: string | null): SalesPipelineRequest => ({ scopeFingerprint, statusFilter: null, after: cursor === null ? null : { lastOpportunityId: cursor }, limit: PAGE_SIZE });
+
+/** Whether one named selector may be addressed at all. */
+const named = (ready: boolean, identity: string): boolean => ready && identity.length > 0;
+
+/** One integer control as a usable revision, or null while it holds none. */
+const integerOrNull = (value: string): number | null => Number.isSafeInteger(Number(value)) ? Number(value) : null;
+
+/** Whether one command press carries everything its registered input requires. */
+const commandPressable = (ready: boolean, commandId: string, revision: number | null, fingerprint: string): boolean => ready && commandId.length > 0 && revision !== null && fingerprint.length > 0;
+
+/** Whether one clarification carries its pending revision and its one permitted fact. */
+const clarifyPressable = (ready: boolean, commandId: string, fact: string, revision: number | null): boolean => ready && commandId.length > 0 && fact.length > 0 && revision !== null;
+
+/** Whether one closure carries the intent, the opportunity and the revision it is guarded at. */
+const closePressable = (ready: boolean, intentId: string, opportunityId: string, revision: number | null): boolean => ready && intentId.length > 0 && opportunityId.length > 0 && revision !== null;
+
+/** One recovery press, as the read and the controls settled it. */
+type RecoveryPress = {
+  readonly ready: boolean;
+  readonly actionId: string;
+  readonly attempt: number | null;
+  readonly revision: number | null;
+  readonly door: "retry" | "stop" | "hold";
+  readonly proof: string | null;
+  readonly fence: unknown;
+  readonly receiverIntentId: string;
+  readonly receiverAttemptId: string;
+  readonly fingerprint: string;
+};
+
+/** Whether one recovery press may leave: only the read's own no-start proof and fence open a door. */
+const recoveryPressable = (press: RecoveryPress): boolean =>
+  press.ready && press.actionId.length > 0 && press.attempt !== null && press.revision !== null && press.door === "retry"
+  && press.proof !== null && press.fence !== null && press.receiverIntentId.length > 0 && press.receiverAttemptId.length > 0 && press.fingerprint.length > 0;
+
+/** The permitted fact one clarification names. */
+const permittedFactOf = (kind: "customerRef" | "opportunityId", value: string): SalesClarificationFact => kind === "opportunityId" ? { opportunityId: value } : { customerRef: value };
+
+/** The confirmed order a closure claims, or none at all. */
+const confirmedOrderOf = (orderId: string): SalesCloseRequest["confirmedOrder"] => orderId.length === 0 ? null : { orderId };
+
+/** The fact one command band shows before and after an address exists. */
+const bandStandingOf = (ready: boolean, scopeStanding: SalesSurfaceStanding): SalesSurfaceStanding => ready ? "ready" : scopeStanding;
+
+/** The attention rows of one pipeline page: only the rows whose work state is not ready need handling. */
+const attentionRowsOf = (model: SalesPipelineValue | null): ReadonlyArray<SalesPipelineItem> => model === null ? [] : model.items.filter(item => item.workState !== "ready");
+
+/** Whether one read is still being re-read. */
+const loadingOf = (isLoading: boolean, isValidating: boolean): boolean => isLoading || isValidating;
 
 /** What the installation line shows before an address exists: a held read, a refusal, or a true standing. */
 const scopeStandingFor = (answer: { readonly ok: boolean; readonly code?: string } | undefined, error: unknown, hasInstance: boolean): SalesSurfaceStanding => {
@@ -94,17 +167,15 @@ type Intent = { readonly fingerprint: string; readonly token: string };
 /** Own Sales form state, the resolved installation scope, idempotent intents and readback-settled feedback. */
 export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTranslation) => {
   const params = useParams<{ readonly workspaceId?: string; readonly installationId?: string }>() as { readonly workspaceId?: string; readonly installationId?: string } | null;
-  const routeWorkspaceId = typeof params?.workspaceId === "string" ? params.workspaceId : "";
-  const routeInstallationId = typeof params?.installationId === "string" ? params.installationId : moduleId;
+  const routeWorkspaceId = stringOr(params?.workspaceId, "");
+  const routeInstallationId = stringOr(params?.installationId, moduleId);
   const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(routeWorkspaceId, routeWorkspaceId.length > 0);
   const instanceId = nivoQueryData(controlCenter.data)?.instance?.id ?? "";
-  const scope: SalesInstallationScope | null = routeWorkspaceId.length > 0 && instanceId.length > 0
-    ? { workspaceId: routeWorkspaceId, instanceId, installationId: routeInstallationId }
-    : null;
+  const scope = scopeOf(routeWorkspaceId, instanceId, routeInstallationId);
   const scopeStanding = scopeStandingFor(controlCenter.data, controlCenter.error, instanceId.length > 0);
   const addressable = scope ?? { workspaceId: "", instanceId: "", installationId: routeInstallationId };
   const ready = scope !== null;
-  const scopeFingerprint = scope === null ? "" : `${scope.workspaceId}~${scope.instanceId}~${scope.installationId}`;
+  const scopeFingerprint = scopeFingerprintOf(scope);
 
   const [notice, setNotice] = useState<SalesNotice | null>(null);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -135,13 +206,13 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
   const [policyCadence, setPolicyCadence] = useState("");
   const intents = useRef<Record<string, Intent>>({});
 
-  const pipelineInput: SalesPipelineRequest = { scopeFingerprint, statusFilter: null, after: cursor === null ? null : { lastOpportunityId: cursor }, limit: PAGE_SIZE };
+  const pipelineInput = pipelinePageOf(scopeFingerprint, cursor);
   const pipeline = useQuerySalesPipelineSwr(addressable, pipelineInput, ready);
   const readiness = useQuerySalesReadinessSwr(addressable, { salesInstallationId: routeInstallationId }, ready);
   const policy = useQuerySalesPolicySwr(addressable, { salesInstallationId: routeInstallationId, requestId: null }, ready);
-  const opportunity = useQuerySalesOpportunitySwr(addressable, { opportunityId }, ready && opportunityId.length > 0);
-  const command = useQuerySalesCommandSwr(addressable, { commandId }, ready && commandId.length > 0);
-  const action = useQuerySalesActionSwr(addressable, { actionId }, ready && actionId.length > 0);
+  const opportunity = useQuerySalesOpportunitySwr(addressable, { opportunityId }, named(ready, opportunityId));
+  const command = useQuerySalesCommandSwr(addressable, { commandId }, named(ready, commandId));
+  const action = useQuerySalesActionSwr(addressable, { actionId }, named(ready, actionId));
 
   const configurePolicy = useMutateSalesConfigurePolicySwr(addressable, ready);
   const submitCommand = useMutateSalesSubmitCommandSwr(addressable, ready);
@@ -149,12 +220,12 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
   const closeOpportunity = useMutateSalesCloseSwr(addressable, ready);
   const recoverAction = useMutateSalesRecoverActionSwr(addressable, ready);
 
-  const pipelineModel = pipeline.data?.ok === true ? pipeline.data.value : null;
-  const readinessModel = readiness.data?.ok === true ? readiness.data.value : null;
-  const policyModel = policy.data?.ok === true ? policy.data.value : null;
-  const opportunityModel: SalesOpportunityValue | null = opportunity.data?.ok === true ? opportunity.data.value : null;
-  const commandModel: SalesCommandValue | null = command.data?.ok === true ? command.data.value : null;
-  const actionModel: SalesActionValue | null = action.data?.ok === true ? action.data.value : null;
+  const pipelineModel = answered<SalesPipelineValue>(pipeline.data);
+  const readinessModel = answered<SalesReadinessValue>(readiness.data);
+  const policyModel = answered<SalesPolicyValue>(policy.data);
+  const opportunityModel = answered<SalesOpportunityValue>(opportunity.data);
+  const commandModel = answered<SalesCommandValue>(command.data);
+  const actionModel = answered<SalesActionValue>(action.data);
 
   const intentFor = (key: string, value: unknown): string => {
     const valueFingerprint = JSON.stringify(value);
@@ -191,23 +262,23 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
     fingerprint: commandFingerprint,
     expectedOpportunityRevisions: salesExpectedRevisions(expectedRevisions)
   };
-  const commandAddressable = ready && commandId.length > 0 && Number.isSafeInteger(Number(commandRevision)) && commandFingerprint.length > 0;
-  const permittedFact: SalesClarificationFact = factKind === "opportunityId" ? { opportunityId: factValue } : { customerRef: factValue };
+  const commandAddressable = commandPressable(ready, commandId, integerOrNull(commandRevision), commandFingerprint);
+  const permittedFact = permittedFactOf(factKind, factValue);
   const clarifyInput = { commandId, clarificationRevision: Number(clarificationRevision), permittedFact };
-  const clarifyAddressable = ready && commandId.length > 0 && factValue.length > 0 && Number.isSafeInteger(Number(clarificationRevision));
+  const clarifyAddressable = clarifyPressable(ready, commandId, factValue, integerOrNull(clarificationRevision));
   const recoveryDoor = salesRecoveryDoor(actionModel);
   const attestedProof = salesNoStartProof(actionModel);
   const attestedFence = salesWriterFence(actionModel);
-  const recoveryAddressable = ready && actionId.length > 0 && Number.isSafeInteger(Number(attemptGeneration)) && Number.isSafeInteger(Number(actionRevision)) && recoveryDoor === "retry" && attestedFence !== null && attestedProof !== null && receiverIntentId.length > 0 && receiverAttemptId.length > 0 && recoveryFingerprint.length > 0;
+  const recoveryAddressable = recoveryPressable({ ready, actionId, attempt: integerOrNull(attemptGeneration), revision: integerOrNull(actionRevision), door: recoveryDoor, proof: attestedProof, fence: attestedFence, receiverIntentId, receiverAttemptId, fingerprint: recoveryFingerprint });
   const closeInput = {
     intentId: closeIntentId,
     opportunityId,
     outcome: closeOutcome,
     evidenceRefs: salesIdentityList(closeEvidenceRefs),
-    confirmedOrder: closeOrderId.length > 0 ? { orderId: closeOrderId } : null,
+    confirmedOrder: confirmedOrderOf(closeOrderId),
     expectedRevision: Number(closeRevision)
   };
-  const closeAddressable = ready && closeIntentId.length > 0 && opportunityId.length > 0 && Number.isSafeInteger(Number(closeRevision));
+  const closeAddressable = closePressable(ready, closeIntentId, opportunityId, integerOrNull(closeRevision));
 
   const planSettled = (answer: SalesCommandAnswer): string | null => {
     const state = payloadValue(answer);
@@ -265,8 +336,8 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
    * shows; after it, the read's answer does - and a held read is still 'loading', never empty.
    */
   const regionStanding = (answer: SalesAnswerStanding | undefined, hasContent: boolean): SalesSurfaceStanding => ready ? salesSurfaceStanding(answer, hasContent) : scopeStanding;
-  const bandStanding: SalesSurfaceStanding = ready ? "ready" : scopeStanding;
-  const attentionRows = pipelineModel === null ? [] : pipelineModel.items.filter(item => item.workState !== "ready");
+  const bandStanding = bandStandingOf(ready, scopeStanding);
+  const attentionRows = attentionRowsOf(pipelineModel);
   return {
     t, locale,
     scopeStanding, scopeReady: ready, scopeInstallation: routeInstallationId,
@@ -275,7 +346,7 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
       standing: regionStanding(pipeline.data, attentionRows.length > 0),
       rows: attentionRows, total: pipelineModel?.items.length ?? 0,
       observedAt: pipelineModel?.observedAt ?? null, nextAfter: pipelineModel?.nextAfter?.lastOpportunityId ?? null,
-      isLoading: pipeline.isLoading || pipeline.isValidating,
+      isLoading: loadingOf(pipeline.isLoading, pipeline.isValidating),
       retry: () => void pipeline.mutate(),
       loadMore: () => setCursor(pipelineModel?.nextAfter?.lastOpportunityId ?? null)
     },
