@@ -37,7 +37,7 @@ const installationGroups = (
     labelFor: (kind: "chatbot" | "accounting") => string,
     unknownLabelFor: (moduleKey: string) => string
 ): ReadonlyArray<SelectionListGroup> => {
-    const groupsById = new Map<string, { readonly label: string; readonly items: SelectionListItem[] }>();
+    const groupsById = new Map<string, { readonly label: string; readonly items: Array<SelectionListItem> }>();
     for (const installation of installations) {
         const kind = MODULE_KIND_BY_KEY[installation.moduleKey];
         const groupId = kind ?? `module-${installation.moduleKey}`;
@@ -71,7 +71,11 @@ const AgentOSModuleInstallationLayout = ({ children }: AgentOSModuleInstallation
     const installationsQuery = useQueryMyAgentosModuleInstallationsSwr(workspaceId);
     const installations = nivoQueryData(installationsQuery.data) ?? [];
     const moduleRoot = `/agentos/workspaces/${workspaceId}/modules/${installationId}`;
-    const groups = installationGroups(installations, kind => t(`kind.${kind}`), moduleKey => t("unknownKind", { kind: moduleKey }));
+    const groups = installationGroups(
+        installations,
+        (kind): string => t(`kind.${kind}`),
+        (moduleKey): string => t("unknownKind", { kind: moduleKey })
+    );
     const listedIds = new Set(groups.flatMap(group => group.items.map(item => item.id)));
     const navigationGroups: ReadonlyArray<SelectionListGroup> = listedIds.has(installationId) ? groups : [...groups, {
         id: "current",
