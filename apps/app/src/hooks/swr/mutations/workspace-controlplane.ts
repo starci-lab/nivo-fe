@@ -1,6 +1,6 @@
 "use client";
 
-import { bindChatbotChannel, reconcileChatbotDelivery, recoverWorkspacePurchase, resolveChatbotHandoff, retryWorkspaceProvisioningOrder, setChatbotHandoff, startChatbotZaloOauth, startWorkspaceCheckoutPurchase, type WorkspaceCheckoutRecoverRequest, type WorkspaceCheckoutStartRequest } from "@/modules/api/workspace-controlplane";
+import { bindChatbotChannel, reconcileChatbotDelivery, resolveChatbotHandoff, retryWorkspaceProvisioningOrder, setChatbotHandoff, startChatbotZaloOauth } from "@/modules/api/workspace-controlplane";
 import { useSession } from "@/modules/auth/session";
 import { useNivoMutation } from "../useNivoMutation";
 import { agentWorkspacesQueryKey } from "../queries/console";
@@ -59,16 +59,3 @@ export const useMutateReconcileChatbotDeliverySwr = (identity: SupportQueryIdent
 export const useMutateRetryWorkspaceProvisioningOrderSwr = (workspaceId: string) => useNivoMutation(["agentos", "workspace-provisioning-retry", workspaceId], () => retryWorkspaceProvisioningOrder(workspaceId), {
   invalidates: [agentWorkspacesQueryKey], shouldInvalidate: accepted
 });
-
-/** Admit one workspace purchase under its own retry identity, on the rail the purchaser chose. */
-export const useMutateStartWorkspaceCheckoutPurchaseSwr = (offerId: string, offerVersion: string) => useNivoMutation(["agentos", "workspace-checkout-start", offerId, offerVersion], (request: WorkspaceCheckoutStartRequest) => startWorkspaceCheckoutPurchase(request));
-
-/**
- * Reconcile and advance one owned purchase through the identities the caller observed.
- *
- * NEITHER COMMAND INVALIDATES A READ. The boundary answers both with the
- * composed purchase view itself, so the screen that pressed renders that
- * answer; the purchase-status read owns its own cache key and a mutation under
- * this slice may not invent a second identity for it.
- */
-export const useMutateRecoverWorkspacePurchaseSwr = (purchaseId: string) => useNivoMutation(["agentos", "workspace-purchase-recover", purchaseId], (request: WorkspaceCheckoutRecoverRequest) => recoverWorkspacePurchase(request));
