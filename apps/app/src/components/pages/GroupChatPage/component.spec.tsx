@@ -686,7 +686,7 @@ describe("component", () => {
   });
 });
 
-describe("GroupChatPageBase presentation states", () => {
+describe("component", () => {
   beforeAll(() => {
     window.matchMedia = vi.fn().mockReturnValue({
       matches: false,
