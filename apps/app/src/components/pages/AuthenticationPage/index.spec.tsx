@@ -43,7 +43,7 @@ vi.mock("next-intl", () => ({ useTranslations: () => mocks.t }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/auth", () => mocks.api)
 vi.mock("./component", () => ({
-    AuthenticationPageBase: (input: AuthPageProbeInput) => (
+    AuthenticationPageView: (input: AuthPageProbeInput) => (
         <div>
             <output data-testid="auth-panel">{JSON.stringify({ state: input.panel.state, props: input.panel.props })}</output>
             <output data-testid="auth-exits">{JSON.stringify(input.exits)}</output>

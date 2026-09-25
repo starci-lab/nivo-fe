@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutateContinueBrokeredSignInSwr, useMutateForgotPasswordInitSwr, useMutateForgotPasswordResendSwr, useMutateForgotPasswordVerifyOtpSwr, useMutateSignInSwr, useMutateSignUpInitSwr, useMutateSignUpResendSwr, useMutateSignUpVerifyOtpSwr, useMutateVerifyTwoFactorSwr, useOauthReturnExchange } from "@/hooks";
 import { DEFAULT_AUTHENTICATED_LANDING, authenticationOauthRedirectUrl, rememberOauthProvider, validatedReturnTo } from "@/modules/auth";
-import { AuthenticationPageBase as AuthenticationPageView, type AuthenticationPageExit } from "./component";
+import { AuthenticationPageView, type AuthenticationPageExit } from "./component";
 import type { AuthActions, AuthCode, AuthDetails, AuthFactor, AuthMode, AuthNoticeCopy, AuthPendingAction, AuthProvider, AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";
 import type { AuthPayload, OtpChallenge } from "@/modules/api/auth";
 import { useSession } from "@/modules/auth/session";
@@ -14,7 +14,7 @@ import { useSession } from "@/modules/auth/session";
  * PAGE - `/authentication`, connected half.
  *
  * IT RESOLVES THE WORLD AND RENDERS ONLY ITS TWIN. Seven mutations, one challenge, one cooldown
- * clock, the mode and the ending live here; `AuthenticationPageBase` receives finished values and
+ * clock, the mode and the ending live here; `AuthenticationPageView` receives finished values and
  * draws them.
  *
  * THREE JOURNEYS, THREE SHAPES, AND THEY ARE NOT INTERCHANGEABLE:
@@ -564,7 +564,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
    *
    * @param details - The email, and the password on the journeys that ask for one.
    */
-  const submitDetails = async (details: AuthDetails) => {
+  const submitDetails = async (details: AuthDetails): Promise<void> => {
     setIsError(false);
     setStatusMessage("");
     if (mode === "signIn") {
@@ -635,7 +635,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
    *
    * @param code - The code, and the new password on the journey that sets one.
    */
-  const submitCode = async (code: AuthCode) => {
+  const submitCode = async (code: AuthCode): Promise<void> => {
     setIsError(false);
     setStatusMessage("");
     if (mode === "signUp") {
@@ -711,7 +711,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
   };
 
   /** Spend the authenticator challenge and adopt the resulting session. */
-  const submitFactor = async (factor: AuthFactor) => {
+  const submitFactor = async (factor: AuthFactor): Promise<void> => {
     setIsError(false);
     setStatusMessage("");
     const result = await runPending("submit", () => verifyTwoFactorMutation.trigger({
@@ -735,7 +735,7 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
   };
 
   /** Ask for another code. Refused inside the cooldown, which the control already says. */
-  const resend = async () => {
+  const resend = async (): Promise<void> => {
     const result = await runPending("resend", () => mode === "signUp" ? signUpResendMutation.trigger({
       challengeId: challengeId.current
     }) : forgotPasswordResendMutation.trigger({

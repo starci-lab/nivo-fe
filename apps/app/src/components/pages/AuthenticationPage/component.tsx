@@ -42,12 +42,11 @@ export type AuthenticationPageExit = {
 };
 
 /**
- * Props for {@link AuthenticationPageBase}.
+ * Props for {@link AuthenticationPageView}.
  *
- * Named `…ViewProps` with a `…Props` alias, the same pattern the connected `index.tsx` uses for
- * its own empty `AuthenticationPageProps`: the two files each own a type of that name for a
- * different role, and aliasing the pure half's real shape keeps the two from reading as one
- * shared contract.
+ * The connected `index.tsx` owns the unit's one public `AuthenticationPageProps`, so the render
+ * half's own contract is named after the export it serves and the two files never carry one name
+ * for two shapes.
  */
 export type AuthenticationPageViewProps = {
   /** The panel's complete translated state and actions. */
@@ -55,8 +54,6 @@ export type AuthenticationPageViewProps = {
   /** Everything offered below the surface, in reading order. */
   readonly exits: ReadonlyArray<AuthenticationPageExit>;
 };
-/** Public API role for {@link AuthenticationPageViewProps}. */
-export type AuthenticationPageProps = AuthenticationPageViewProps;
 
 /**
  * Whether this panel is the state the direction reserves the mascot for.
@@ -77,14 +74,14 @@ const showsMascot = (panel: AuthenticationPanelProps): boolean => {
 /**
  * Draw the authentication screen.
  *
- * @param props - {@link AuthenticationPageProps}
+ * @param props - {@link AuthenticationPageViewProps}
  * @returns The page node.
  */
-export const AuthenticationPageBase = (props: AuthenticationPageProps) => {
+export const AuthenticationPageView = (props: AuthenticationPageViewProps) => {
   const {
     panel,
     exits
-  }: AuthenticationPageProps = props;
+  }: AuthenticationPageViewProps = props;
   const panelIdentity = panel.state === "details" || panel.state === "code" ? `${panel.state}:${panel.props.mode}` : panel.state;
 
   return <main className={AUTH_PAGE_CLASS_NAME}>
