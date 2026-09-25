@@ -759,7 +759,7 @@ describe("GroupChatPageBase presentation states", () => {
     expect(screen.getByText(labels.card.receiptReported)).toBeInTheDocument();
     expect(screen.getByText(labels.card.receiptRefused)).toBeInTheDocument();
     expect(screen.getByText(labels.statuses.working)).toBeInTheDocument();
-    expect(screen.getAllByText("build-sales-report").length).toBe(2);
+    expect(screen.getAllByText("build-sales-report")).toHaveLength(2);
     expect(document.getElementById("collab-task-task-w")).not.toBeNull();
   });
 
@@ -812,7 +812,7 @@ describe("GroupChatPageBase presentation states", () => {
     );
     expect(screen.getByText(labels.approval.denied)).toBeInTheDocument();
     expect(screen.getByText(labels.approval.uncertain)).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: labels.approval.approve }).length).toBe(2);
+    expect(screen.getAllByRole("button", { name: labels.approval.approve })).toHaveLength(2);
   });
 
   it("marks the question being answered and cancels it from the composer banner", () => {
