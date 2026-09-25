@@ -33,14 +33,10 @@ import {
   GROUP_CHAT_CARD_BAND_CLASS_NAME,
   GROUP_CHAT_CARD_BAND_DIVIDED_CLASS_NAME,
   GROUP_CHAT_CARD_INSET_CLASS_NAME,
-  GROUP_CHAT_COMPOSER_CLASS_NAME,
-  GROUP_CHAT_COMPOSER_COMPACT_CLASS_NAME,
-  GROUP_CHAT_COMPOSER_DECISION_CLASS_NAME,
+  getGroupChatComposerClassName,
   GROUP_CHAT_COMPOSER_GLYPH_CLASS_NAME,
   GROUP_CHAT_COMPOSER_GLYPHS_CLASS_NAME,
-  GROUP_CHAT_CONVERSATION_LIST_CLASS_NAME,
-  GROUP_CHAT_CONVERSATION_LIST_INVITE_CLASS_NAME,
-  GROUP_CHAT_CONVERSATION_LIST_COMPACT_CLASS_NAME,
+  getGroupChatConversationListClassName,
   GROUP_CHAT_DAY_SELECT_CLASS_NAME,
   GROUP_CHAT_ENTRY_CLASS_NAME,
   GROUP_CHAT_ENTRY_COMPACT_CLASS_NAME,
@@ -1249,7 +1245,7 @@ const Composer = ({ view, on, labels, decision, compact = false }: ComposerProps
       </div>
     ) : null}
     <form
-      className={compact ? GROUP_CHAT_COMPOSER_COMPACT_CLASS_NAME : decision ? GROUP_CHAT_COMPOSER_DECISION_CLASS_NAME : GROUP_CHAT_COMPOSER_CLASS_NAME}
+      className={getGroupChatComposerClassName(compact, decision)}
       onSubmit={(event) => {
         event.preventDefault();
         on.sendMessage();
@@ -1338,7 +1334,7 @@ const Conversation = ({ view, on, labels, compact = false, decision }: Conversat
     }
   };
   return (
-    <div ref={pinToLatest} className={compact ? GROUP_CHAT_CONVERSATION_LIST_COMPACT_CLASS_NAME : decision ? GROUP_CHAT_CONVERSATION_LIST_CLASS_NAME : GROUP_CHAT_CONVERSATION_LIST_INVITE_CLASS_NAME}>
+    <div ref={pinToLatest} className={getGroupChatConversationListClassName(compact, decision)}>
       <NoticesBand view={view} on={on} labels={labels} />
       {view.items.length === 0 ? (
         <EmptyNotice message={labels.conversation.empty} />

@@ -23,7 +23,9 @@ export const GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME = cn(
   "min-[70rem]:mt-2",
 );
 
+/** The decision state leaves a narrow gutter before its roster panel. */
 export const GROUP_CHAT_WORKSPACE_HOST_DECISION_CLASS_NAME = cn(GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME, "min-[70rem]:gap-3");
+/** The invitation state joins the workbench and rail edges. */
 export const GROUP_CHAT_WORKSPACE_HOST_INVITE_CLASS_NAME = cn(GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME, "min-[70rem]:gap-0");
 
 /**
@@ -60,6 +62,7 @@ export const GROUP_CHAT_TABS_BAND_CLASS_NAME = cn(
   "min-[70rem]:px-4",
 );
 
+/** The decision tab band uses the taller desktop direction rhythm. */
 export const GROUP_CHAT_TABS_BAND_DECISION_CLASS_NAME = cn(GROUP_CHAT_TABS_BAND_CLASS_NAME, "min-[70rem]:min-h-[3.875rem]");
 
 /** The tab strip shrinks inside the band so the member chip keeps its count label. */
@@ -201,7 +204,9 @@ export const GROUP_CHAT_RAIL_ASIDE_CLASS_NAME = cn(
   "min-[48rem]:flex",
 );
 
+/** The decision roster rail matches the narrower accepted panel. */
 export const GROUP_CHAT_RAIL_ASIDE_DECISION_CLASS_NAME = cn(GROUP_CHAT_RAIL_ASIDE_CLASS_NAME, "min-[70rem]:w-[19.7rem]");
+/** The invitation rail has room for single-line module descriptions. */
 export const GROUP_CHAT_RAIL_ASIDE_INVITE_CLASS_NAME = cn(GROUP_CHAT_RAIL_ASIDE_CLASS_NAME, "min-[70rem]:w-[23.125rem]");
 
 /** The rail's own scroll owner when the roster is taller than the workbench. */
@@ -209,7 +214,9 @@ export const GROUP_CHAT_RAIL_SCROLL_CLASS_NAME = cn("flex", "min-h-0", "flex-1",
 
 /** One section band inside the joined rail card: a small label above edge-flush rows. */
 export const GROUP_CHAT_RAIL_SECTION_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-1", "py-1.5", "min-[70rem]:py-2");
+/** The invitation title anchors its accepted extra people heading. */
 export const GROUP_CHAT_RAIL_SECTION_INVITE_CLASS_NAME = cn(GROUP_CHAT_RAIL_SECTION_CLASS_NAME, "relative");
+/** The roster title begins lower inside the full-height panel. */
 export const GROUP_CHAT_RAIL_SECTION_ROSTER_HEAD_CLASS_NAME = cn(GROUP_CHAT_RAIL_SECTION_CLASS_NAME, "min-[70rem]:pt-5");
 
 /** Rail sections after the first separate with a hairline. */
@@ -223,10 +230,15 @@ export const GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME = cn(
   "py-1.5",
   "min-[70rem]:py-2",
 );
+/** The hired-module group starts below the human rows at the direction's position. */
 export const GROUP_CHAT_RAIL_SECTION_INVITE_MODULES_CLASS_NAME = cn(GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME, "min-[70rem]:mt-5", "min-[70rem]:pt-4");
+/** The invitation fields retain their measured lower rail position. */
 export const GROUP_CHAT_RAIL_SECTION_INVITE_FORM_CLASS_NAME = cn(GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME, "min-[70rem]:mt-4");
+/** The decision roster's people heading has its own top inset. */
 export const GROUP_CHAT_RAIL_SECTION_ROSTER_PEOPLE_CLASS_NAME = cn(GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME, "min-[70rem]:pt-5");
+/** The decision roster's module group follows the taller people rows. */
 export const GROUP_CHAT_RAIL_SECTION_ROSTER_MODULES_CLASS_NAME = cn(GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME, "min-[70rem]:mt-6");
+/** The accepted extra people heading shares the invitation title row. */
 export const GROUP_CHAT_RAIL_HUMANS_BADGE_CLASS_NAME = cn("min-[70rem]:absolute", "min-[70rem]:right-16", "min-[70rem]:top-6");
 
 /** A rail section's label line sits on the card's horizontal rhythm. */
@@ -250,6 +262,7 @@ export const GROUP_CHAT_RAIL_FORM_CLASS_NAME = cn("px-4", "pt-1", "pb-3");
 
 /** One member row: avatar, name and role, presence kept textual. */
 export const GROUP_CHAT_MEMBER_ROW_CLASS_NAME = cn("flex", "min-w-0", "items-center", "gap-3", "px-4", "py-1.5");
+/** Decision roster rows use the taller desktop rhythm. */
 export const GROUP_CHAT_MEMBER_ROW_ROOMY_CLASS_NAME = cn(GROUP_CHAT_MEMBER_ROW_CLASS_NAME, "min-[70rem]:py-2.5");
 
 /** The member row's trailing options glyph stays decorative until member actions exist. */
@@ -439,6 +452,7 @@ export const GROUP_CHAT_COMPOSER_CLASS_NAME = cn(
   "min-[70rem]:[&>button]:w-20",
 );
 
+/** The decision composer keeps its input inside the lower card band. */
 export const GROUP_CHAT_COMPOSER_DECISION_CLASS_NAME = cn(
   GROUP_CHAT_COMPOSER_CLASS_NAME,
   "min-[70rem]:h-[5.625rem]",
@@ -448,6 +462,13 @@ export const GROUP_CHAT_COMPOSER_DECISION_CLASS_NAME = cn(
 
 /** The compact composer keeps the same row on a shorter inset. */
 export const GROUP_CHAT_COMPOSER_COMPACT_CLASS_NAME = cn("flex", "items-end", "gap-2", "p-1");
+
+/** Pick the composer spacing for the active viewport and Office state. */
+export const getGroupChatComposerClassName = (compact: boolean, decision: boolean): ReturnType<typeof cn> => {
+  if (compact) return GROUP_CHAT_COMPOSER_COMPACT_CLASS_NAME;
+  if (decision) return GROUP_CHAT_COMPOSER_DECISION_CLASS_NAME;
+  return GROUP_CHAT_COMPOSER_CLASS_NAME;
+};
 
 /**
  * The composer's leading glyph cluster. The accepted composite draws an
@@ -489,10 +510,18 @@ export const GROUP_CHAT_TASK_STATEMENT_CLASS_NAME = cn("min-w-0");
 
 /** The ordered conversation list inside the workspace's scroll region. */
 export const GROUP_CHAT_CONVERSATION_LIST_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "py-1");
+/** Invite messages keep the vertical interval shown in the desktop direction. */
 export const GROUP_CHAT_CONVERSATION_LIST_INVITE_CLASS_NAME = cn(GROUP_CHAT_CONVERSATION_LIST_CLASS_NAME, "min-[70rem]:gap-3");
 
 /** The compact conversation list trims the slot band's outer padding. */
 export const GROUP_CHAT_CONVERSATION_LIST_COMPACT_CLASS_NAME = cn("flex", "min-w-0", "flex-col");
+
+/** Pick the conversation spacing for the active viewport and Office state. */
+export const getGroupChatConversationListClassName = (compact: boolean, decision: boolean): ReturnType<typeof cn> => {
+  if (compact) return GROUP_CHAT_CONVERSATION_LIST_COMPACT_CLASS_NAME;
+  if (decision) return GROUP_CHAT_CONVERSATION_LIST_CLASS_NAME;
+  return GROUP_CHAT_CONVERSATION_LIST_INVITE_CLASS_NAME;
+};
 
 /** Narrow column for a notice row's follow action. */
 export const GROUP_CHAT_NOTICE_ROW_CLASS_NAME = cn("flex", "min-w-0", "items-center", "justify-between", "gap-3", "px-4", "py-2");
