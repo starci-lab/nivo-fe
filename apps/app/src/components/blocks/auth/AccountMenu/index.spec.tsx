@@ -198,10 +198,15 @@ describe("AccountMenu", () => {
         expect(dialog).toHaveAccessibleName("account.administratorEnding.title(target=linh@nivo.vn)")
         await user.click(screen.getByRole("button", { name: "account.administratorEnding.confirm" }))
         await waitFor(() => expect(endPrincipalSessions).toHaveBeenCalledOnce())
+        /*
+         * The named target travels as the workspace roster memberId; a Login principal or email
+         * never crosses this wire - the authority owner resolves the member's principal from it.
+         */
         expect(endPrincipalSessions.mock.calls[0][0]).toMatchObject({
-            targetPrincipal: "linh@nivo.vn",
+            memberId: "linh@nivo.vn",
             workspaceId: "workspace-1",
         })
+        expect(endPrincipalSessions.mock.calls[0][0]).not.toHaveProperty("targetPrincipal")
         expect(typeof endPrincipalSessions.mock.calls[0][0].requestId).toBe("string")
 
         const applied = await screen.findByText("account.administratorEnding.applied")
