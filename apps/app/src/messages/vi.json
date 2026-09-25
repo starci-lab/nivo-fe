@@ -203,7 +203,7 @@
     },
     "groupChat": {
       "title": "Office",
-      "description": "Trao đổi, phối hợp và theo dõi công việc với con người và các module đã thuê trong workspace.",
+      "description": "Trao đổi, phối hợp và cập nhật công việc của Workspace.",
       "tabs": {
         "label": "Office hoặc Tasks",
         "office": "Office",
@@ -232,7 +232,7 @@
         "backOverview": "Về Tổng quan"
       },
       "members": {
-        "title": "Thành viên workspace",
+        "title": "Thành viên trong Workspace",
         "humans": "Con người ({count})",
         "modules": "Module đã thuê ({count})",
         "empty": "Chưa có thành viên nào.",

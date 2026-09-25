@@ -18,8 +18,13 @@ export const GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME = cn(
   "min-w-0",
   "gap-6",
   "md:h-[calc(100dvh-10rem)]",
-  "min-[70rem]:h-[calc(100dvh-9.5rem)]",
+  "min-[70rem]:h-[calc(100dvh-6.375rem)]",
+  "min-[70rem]:-mx-5",
+  "min-[70rem]:mt-2",
 );
+
+export const GROUP_CHAT_WORKSPACE_HOST_DECISION_CLASS_NAME = cn(GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME, "min-[70rem]:gap-3");
+export const GROUP_CHAT_WORKSPACE_HOST_INVITE_CLASS_NAME = cn(GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME, "min-[70rem]:gap-0");
 
 /**
  * The workbench card: one bounded surface carrying the peer tabs, the workspace
@@ -51,10 +56,14 @@ export const GROUP_CHAT_TABS_BAND_CLASS_NAME = cn(
   "border-b",
   "border-separator",
   "px-2",
+  "min-[70rem]:min-h-[3.375rem]",
+  "min-[70rem]:px-4",
 );
 
+export const GROUP_CHAT_TABS_BAND_DECISION_CLASS_NAME = cn(GROUP_CHAT_TABS_BAND_CLASS_NAME, "min-[70rem]:min-h-[3.875rem]");
+
 /** The tab strip shrinks inside the band so the member chip keeps its count label. */
-export const GROUP_CHAT_TAB_STRIP_CLASS_NAME = cn("min-w-0", "flex-1");
+export const GROUP_CHAT_TAB_STRIP_CLASS_NAME = cn("min-w-0", "flex-1", "min-[70rem]:[&_[role=tab]]:text-xl");
 
 /**
  * The workspace header band between the tabs and the conversation: title and
@@ -67,6 +76,7 @@ export const GROUP_CHAT_HEADER_BAND_CLASS_NAME = cn(
   "border-separator",
   "px-4",
   "py-2.5",
+  "min-[70rem]:py-3",
 );
 
 /**
@@ -191,11 +201,14 @@ export const GROUP_CHAT_RAIL_ASIDE_CLASS_NAME = cn(
   "min-[48rem]:flex",
 );
 
+export const GROUP_CHAT_RAIL_ASIDE_DECISION_CLASS_NAME = cn(GROUP_CHAT_RAIL_ASIDE_CLASS_NAME, "min-[70rem]:w-[19.7rem]");
+export const GROUP_CHAT_RAIL_ASIDE_INVITE_CLASS_NAME = cn(GROUP_CHAT_RAIL_ASIDE_CLASS_NAME, "min-[70rem]:w-[23.125rem]");
+
 /** The rail's own scroll owner when the roster is taller than the workbench. */
-export const GROUP_CHAT_RAIL_SCROLL_CLASS_NAME = cn("flex", "min-h-0", "flex-1", "flex-col", "overflow-y-auto");
+export const GROUP_CHAT_RAIL_SCROLL_CLASS_NAME = cn("flex", "min-h-0", "flex-1", "flex-col", "overflow-y-auto", "min-[70rem]:[&_[data-grammar-surface-card]]:min-h-full");
 
 /** One section band inside the joined rail card: a small label above edge-flush rows. */
-export const GROUP_CHAT_RAIL_SECTION_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-1", "py-1.5");
+export const GROUP_CHAT_RAIL_SECTION_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-1", "py-1.5", "min-[70rem]:py-2");
 
 /** Rail sections after the first separate with a hairline. */
 export const GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME = cn(
@@ -206,6 +219,7 @@ export const GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME = cn(
   "border-t",
   "border-separator",
   "py-1.5",
+  "min-[70rem]:py-2",
 );
 
 /** A rail section's label line sits on the card's horizontal rhythm. */
@@ -234,7 +248,7 @@ export const GROUP_CHAT_MEMBER_ROW_CLASS_NAME = cn("flex", "min-w-0", "items-cen
 export const GROUP_CHAT_MEMBER_ROW_TRAILING_CLASS_NAME = cn("ml-auto", "shrink-0", "text-muted-foreground");
 
 /** The avatar frame both the wide and compact member avatars build on. */
-const GROUP_CHAT_AVATAR_BASE_CLASS_NAME = cn(
+export const GROUP_CHAT_AVATAR_BASE_CLASS_NAME = cn(
   "relative",
   "flex",
   "shrink-0",
@@ -276,7 +290,7 @@ export const GROUP_CHAT_AVATAR_TINT_CLASS_NAMES = [
 ] as const;
 
 /** One conversation entry: avatar rail plus a message or card column. */
-export const GROUP_CHAT_ENTRY_CLASS_NAME = cn("flex", "min-w-0", "items-start", "gap-3", "px-4", "py-2.5");
+export const GROUP_CHAT_ENTRY_CLASS_NAME = cn("flex", "min-w-0", "items-start", "gap-3", "px-6", "py-4");
 
 /**
  * The compact conversation entry the mobile direction draws: a shorter avatar
@@ -286,7 +300,7 @@ export const GROUP_CHAT_ENTRY_CLASS_NAME = cn("flex", "min-w-0", "items-start", 
 export const GROUP_CHAT_ENTRY_COMPACT_CLASS_NAME = cn("flex", "min-w-0", "items-start", "gap-2.5", "px-3", "py-0.5");
 
 /** A card entry indents under the author column on wide screens so the card reads attached to its message. */
-export const GROUP_CHAT_CARD_INSET_CLASS_NAME = cn("min-w-0", "flex-1");
+export const GROUP_CHAT_CARD_INSET_CLASS_NAME = cn("min-w-0", "flex-1", "min-[70rem]:ml-20");
 
 /** Flexible content column inside one entry or band. */
 export const GROUP_CHAT_GROW_CLASS_NAME = cn("min-w-0", "flex-1");
@@ -295,10 +309,14 @@ export const GROUP_CHAT_GROW_CLASS_NAME = cn("min-w-0", "flex-1");
 export const GROUP_CHAT_FIELD_BODY_CLASS_NAME = cn("min-w-0");
 
 /** A peer message bubble in decision presentation reads on the secondary surface. */
-export const GROUP_CHAT_BUBBLE_CLASS_NAME = cn("inline-block", "max-w-[38rem]", "rounded-xl", "px-3.5", "py-2", "bg-surface-secondary");
+export const GROUP_CHAT_BUBBLE_CLASS_NAME = cn("inline-block", "max-w-[38rem]", "rounded-xl", "px-3.5", "py-2", "min-[70rem]:ml-7", "min-[70rem]:py-3.5", "bg-surface-secondary");
 
 /** The viewer's own message bubble reads on the soft accent surface. */
-export const GROUP_CHAT_BUBBLE_OWN_CLASS_NAME = cn("inline-block", "max-w-[38rem]", "rounded-xl", "px-3.5", "py-2", "bg-accent-soft");
+export const GROUP_CHAT_BUBBLE_OWN_CLASS_NAME = cn(
+  "inline-block", "max-w-[38rem]", "rounded-xl", "px-3.5", "py-2", "bg-accent-soft",
+  "min-[70rem]:ml-7", "min-[70rem]:w-[38.375rem]", "min-[70rem]:py-3.5",
+  "min-[70rem]:[&_.starci-core-text]:inline-block", "min-[70rem]:[&_.starci-core-text]:max-w-[31rem]",
+);
 
 /** A plain message body in the growth presentation - text on the card, not a bubble. */
 export const GROUP_CHAT_MESSAGE_BODY_CLASS_NAME = cn("max-w-[42rem]");
@@ -315,7 +333,7 @@ export const GROUP_CHAT_MENTION_CLASS_NAME = cn(
 );
 
 /** Card bands inside one joined surface: action, consequence, attribution, decision row. */
-export const GROUP_CHAT_CARD_BAND_CLASS_NAME = cn("flex", "items-start", "gap-3", "px-4", "py-2.5");
+export const GROUP_CHAT_CARD_BAND_CLASS_NAME = cn("flex", "items-start", "gap-3", "px-4", "py-2.5", "min-[70rem]:py-[1.125rem]");
 
 /** Card bands after the first separate with an edge-to-edge hairline. */
 export const GROUP_CHAT_CARD_BAND_DIVIDED_CLASS_NAME = cn(
@@ -326,10 +344,11 @@ export const GROUP_CHAT_CARD_BAND_DIVIDED_CLASS_NAME = cn(
   "border-separator",
   "px-4",
   "py-2.5",
+  "min-[70rem]:py-[1.125rem]",
 );
 
 /** Status badges float above a card's joined surface, inside the entry's own inset. */
-export const GROUP_CHAT_BADGE_ROW_CLASS_NAME = cn("flex", "flex-wrap", "items-center", "gap-2", "pb-1.5");
+export const GROUP_CHAT_BADGE_ROW_CLASS_NAME = cn("flex", "flex-wrap", "items-center", "gap-2", "pb-1.5", "min-[70rem]:pb-4");
 
 /** The waiting status line pairs the pending glyph with the muted copy. */
 export const GROUP_CHAT_WAITING_LINE_CLASS_NAME = cn("inline-flex", "items-center", "gap-1.5", "text-muted-foreground");
@@ -346,13 +365,14 @@ export const GROUP_CHAT_BAND_ICON_CLASS_NAME = cn(
   "border",
   "border-separator",
   "text-muted-foreground",
+  "min-[70rem]:[&_.starci-core-icon]:size-5",
 );
 
 /** Actions sit side by side inside the card's final band; the decision keeps the wider share. */
-export const GROUP_CHAT_CARD_ACTIONS_CLASS_NAME = cn("flex", "gap-3", "border-t", "border-separator", "px-4", "py-3");
+export const GROUP_CHAT_CARD_ACTIONS_CLASS_NAME = cn("flex", "gap-3", "border-t", "border-separator", "px-4", "py-3", "min-[70rem]:py-4");
 
 /** The affirmative decision takes the wider share of the action band. */
-export const GROUP_CHAT_ACTION_PRIMARY_CLASS_NAME = cn("min-w-0", "flex-[2]");
+export const GROUP_CHAT_ACTION_PRIMARY_CLASS_NAME = cn("min-w-0", "flex-[2]", "min-[70rem]:flex-1");
 
 /** The negative decision keeps the smaller share of the action band. */
 export const GROUP_CHAT_ACTION_SECONDARY_CLASS_NAME = cn("min-w-0", "flex-1");
@@ -393,7 +413,29 @@ export const GROUP_CHAT_NATIVE_FIELD_CLASS_NAME = cn("flex", "min-w-0", "flex-co
 export const GROUP_CHAT_NATIVE_CONTROL_CLASS_NAME = cn("min-h-11", "w-full", "px-4", "py-3");
 
 /** Composer row pinned below the conversation scroll region. */
-export const GROUP_CHAT_COMPOSER_CLASS_NAME = cn("flex", "items-end", "gap-2", "p-3");
+export const GROUP_CHAT_COMPOSER_CLASS_NAME = cn(
+  "flex",
+  "items-end",
+  "gap-2",
+  "p-3",
+  "min-[70rem]:relative",
+  "min-[70rem]:h-[7.125rem]",
+  "min-[70rem]:items-start",
+  "min-[70rem]:[&_[data-slot=input]]:h-[5.25rem]",
+  "min-[70rem]:[&_[data-slot=input]]:pt-3",
+  "min-[70rem]:[&_[data-slot=input]]:pb-10",
+  "min-[70rem]:[&>button]:absolute",
+  "min-[70rem]:[&>button]:bottom-7",
+  "min-[70rem]:[&>button]:right-7",
+  "min-[70rem]:[&>button]:h-10",
+  "min-[70rem]:[&>button]:w-20",
+);
+
+export const GROUP_CHAT_COMPOSER_DECISION_CLASS_NAME = cn(
+  GROUP_CHAT_COMPOSER_CLASS_NAME,
+  "min-[70rem]:h-[5.625rem]",
+  "min-[70rem]:[&_[data-slot=input]]:h-16",
+);
 
 /** The compact composer keeps the same row on a shorter inset. */
 export const GROUP_CHAT_COMPOSER_COMPACT_CLASS_NAME = cn("flex", "items-end", "gap-2", "p-1");
@@ -404,7 +446,7 @@ export const GROUP_CHAT_COMPOSER_COMPACT_CLASS_NAME = cn("flex", "items-end", "g
  * command, so the cluster is decorated and never a keyboard stop - the mention
  * itself is the typed `@module` address the thread already renders.
  */
-export const GROUP_CHAT_COMPOSER_GLYPHS_CLASS_NAME = cn("flex", "shrink-0", "items-center", "gap-1.5", "px-1", "text-muted-foreground");
+export const GROUP_CHAT_COMPOSER_GLYPHS_CLASS_NAME = cn("flex", "shrink-0", "items-center", "gap-1.5", "px-1", "text-muted-foreground", "min-[70rem]:absolute", "min-[70rem]:bottom-7", "min-[70rem]:left-8");
 
 /** One inline glyph of the composer's decorative cluster. */
 export const GROUP_CHAT_COMPOSER_GLYPH_CLASS_NAME = cn("h-5", "w-5");

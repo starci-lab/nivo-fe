@@ -203,7 +203,7 @@
     },
     "groupChat": {
       "title": "Office",
-      "description": "Chat, coordinate and track work with the people and hired modules of this workspace.",
+      "description": "Collaborate, coordinate and update the Workspace's work.",
       "tabs": {
         "label": "Office or Tasks",
         "office": "Office",

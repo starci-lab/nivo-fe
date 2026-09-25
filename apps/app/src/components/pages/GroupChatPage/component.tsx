@@ -35,6 +35,7 @@ import {
   GROUP_CHAT_CARD_INSET_CLASS_NAME,
   GROUP_CHAT_COMPOSER_CLASS_NAME,
   GROUP_CHAT_COMPOSER_COMPACT_CLASS_NAME,
+  GROUP_CHAT_COMPOSER_DECISION_CLASS_NAME,
   GROUP_CHAT_COMPOSER_GLYPH_CLASS_NAME,
   GROUP_CHAT_COMPOSER_GLYPHS_CLASS_NAME,
   GROUP_CHAT_CONVERSATION_LIST_CLASS_NAME,
@@ -62,7 +63,8 @@ import {
   GROUP_CHAT_NATIVE_FIELD_CLASS_NAME,
   GROUP_CHAT_NOTICE_ROW_CLASS_NAME,
   GROUP_CHAT_PAGE_CLASS_NAME,
-  GROUP_CHAT_RAIL_ASIDE_CLASS_NAME,
+  GROUP_CHAT_RAIL_ASIDE_DECISION_CLASS_NAME,
+  GROUP_CHAT_RAIL_ASIDE_INVITE_CLASS_NAME,
   GROUP_CHAT_RAIL_FORM_CLASS_NAME,
   GROUP_CHAT_RAIL_HEAD_ROW_CLASS_NAME,
   GROUP_CHAT_RAIL_LABEL_CLASS_NAME,
@@ -85,13 +87,15 @@ import {
   GROUP_CHAT_SR_ONLY_CLASS_NAME,
   GROUP_CHAT_TAB_PANEL_SCROLL_CLASS_NAME,
   GROUP_CHAT_TABS_BAND_CLASS_NAME,
+  GROUP_CHAT_TABS_BAND_DECISION_CLASS_NAME,
   GROUP_CHAT_TAB_STRIP_CLASS_NAME,
   GROUP_CHAT_TASK_ROW_CLASS_NAME,
   GROUP_CHAT_TASK_STATEMENT_CLASS_NAME,
   GROUP_CHAT_TASKS_COLUMN_CLASS_NAME,
   GROUP_CHAT_WAITING_LINE_CLASS_NAME,
   GROUP_CHAT_WORKBENCH_CLASS_NAME,
-  GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME,
+  GROUP_CHAT_WORKSPACE_HOST_DECISION_CLASS_NAME,
+  GROUP_CHAT_WORKSPACE_HOST_INVITE_CLASS_NAME,
   GROUP_CHAT_WORKSPACE_WRAP_CLASS_NAME,
 } from "./classNames";
 
@@ -575,9 +579,11 @@ type MemberRowProps = {
   readonly labels: GroupChatPageLabels;
   /** The accepted growth rail draws the richer row: presence dot, module summary and trailing affordance. */
   readonly detailed?: boolean;
+  /** The compact member sheet keeps its existing type scale. */
+  readonly compact?: boolean;
 };
 
-const MemberRow = ({ participant, labels, detailed = false }: MemberRowProps) => (
+const MemberRow = ({ participant, labels, detailed = false, compact = false }: MemberRowProps) => (
   <div className={GROUP_CHAT_MEMBER_ROW_CLASS_NAME} data-member-id={participant.memberId}>
     <MemberAvatar
       name={participant.displayName}
@@ -585,10 +591,10 @@ const MemberRow = ({ participant, labels, detailed = false }: MemberRowProps) =>
       presence={detailed && participant.kind === "human" && participant.status === "active"}
     />
     <div className={GROUP_CHAT_GROW_CLASS_NAME}>
-      <Text size="sm" weight="semibold" overflow="truncate">
+      <Text size={compact ? "sm" : "md"} weight="semibold" overflow="truncate">
         {participant.displayName}
       </Text>
-      <Text size="xs" tone="muted">
+      <Text size={compact ? "xs" : "sm"} tone="muted">
         {participant.kind === "module"
           ? detailed
             ? (MODULE_DESCRIPTIONS[participant.displayName] ?? labels.members.moduleRole)
@@ -634,7 +640,7 @@ const MessageEntry = ({ item, labels, decision, compact = false }: MessageEntryP
     <>
       {addressedName !== null ? <span className={GROUP_CHAT_MENTION_CLASS_NAME}>{`@${addressedName}`}</span> : null}
       {addressedName !== null ? " " : null}
-      <Text as="span" size={compact ? "xs" : "sm"}>
+      <Text as="span" size={compact ? "xs" : "md"}>
         {body}
       </Text>
     </>
@@ -648,7 +654,7 @@ const MessageEntry = ({ item, labels, decision, compact = false }: MessageEntryP
     <article className={compact ? GROUP_CHAT_ENTRY_COMPACT_CLASS_NAME : GROUP_CHAT_ENTRY_CLASS_NAME} id={`collab-msg-${message.messageId}`}>
       <MemberAvatar name={authorName} kind={authorKind} compact={compact} />
       <div className={GROUP_CHAT_GROW_CLASS_NAME}>
-        <Text size={compact ? "xs" : "sm"} weight="semibold">
+        <Text size={compact ? "xs" : "md"} weight="semibold">
           {authorName}{" "}
           <Text as="span" size="xs" tone="muted">
             {labels.formatTime(message.occurredAt)}
@@ -684,7 +690,7 @@ const TaskReceiptCard = ({ item, labels, compact = false }: TaskReceiptCardProps
       <div className={GROUP_CHAT_CARD_INSET_CLASS_NAME}>
         <SurfaceCard composition="joined" depth="nested" ariaLabel={task?.statement ?? binding.commandName}>
           <div className={GROUP_CHAT_CARD_BAND_CLASS_NAME}>
-            <Text size="sm" weight="semibold">
+            <Text size={compact ? "sm" : "md"} weight="semibold">
               {task?.statement ?? binding.commandName}
             </Text>
             {status !== null ? <Badge tone={taskStatusTone(status)}>{labels.statuses[status]}</Badge> : null}
@@ -750,7 +756,7 @@ const ApprovalCard = ({ item, view, on, labels, compact = false }: ApprovalCardP
             <span className={GROUP_CHAT_BAND_ICON_CLASS_NAME} aria-hidden="true">
               <Icon source={nivoIconSource("review", "leading")} usage="leading" />
             </span>
-            <Text size="sm" weight="semibold">
+            <Text size={compact ? "sm" : "md"} weight="semibold">
               {effective.action}
             </Text>
           </div>
@@ -759,7 +765,7 @@ const ApprovalCard = ({ item, view, on, labels, compact = false }: ApprovalCardP
               <span className={GROUP_CHAT_BAND_ICON_CLASS_NAME} aria-hidden="true">
                 i
               </span>
-              <Text size="sm">{effective.consequence}</Text>
+              <Text size={compact ? "sm" : "md"}>{effective.consequence}</Text>
             </div>
           )}
           <div className={GROUP_CHAT_CARD_BAND_DIVIDED_CLASS_NAME}>
@@ -767,7 +773,7 @@ const ApprovalCard = ({ item, view, on, labels, compact = false }: ApprovalCardP
               <Icon source={nivoIconSource("account", "leading")} usage="leading" />
             </span>
             <div className={GROUP_CHAT_FIELD_BODY_CLASS_NAME}>
-              <Text size="sm" weight="medium">
+              <Text size={compact ? "sm" : "md"} weight="medium">
                 {labels.card.reference(shortTaskRef(task.taskId), moduleName)}
                 {task.askedByDisplayName ? ` · ${labels.card.requestedBy(task.askedByDisplayName)}` : ""}
               </Text>
@@ -957,7 +963,7 @@ const MembersRail = ({ view, on, labels }: MembersRailProps) => {
         <div className={GROUP_CHAT_RAIL_HEAD_ROW_CLASS_NAME}>
           <span className={GROUP_CHAT_RAIL_LABEL_ICON_CLASS_NAME}>
             <Icon source={nivoIconSource("community", "leading")} usage="leading" />
-            <Text as="span" size="sm" weight="semibold">
+            <Text as="span" size="md" weight="semibold">
               {`Thành viên (${humans.length})`}
             </Text>
           </span>
@@ -981,7 +987,7 @@ const MembersRail = ({ view, on, labels }: MembersRailProps) => {
       <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
         <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
           <Icon source={nivoIconSource("agentos", "leading")} usage="leading" />
-          <Text size="sm" weight="semibold">
+          <Text size="md" weight="semibold">
             {labels.members.modules(modules.length)}
           </Text>
         </div>
@@ -1006,7 +1012,7 @@ const MembersRail = ({ view, on, labels }: MembersRailProps) => {
         <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
           <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
             <Icon source={nivoIconSource("signUp", "leading")} usage="leading" />
-            <Text size="sm" weight="semibold">
+            <Text size="md" weight="semibold">
               {labels.invite.title}
             </Text>
           </div>
@@ -1030,14 +1036,14 @@ const RosterRail = ({ view, labels }: { readonly view: GroupChatPageView; readon
     <SurfaceCard composition="joined" depth="nested" ariaLabel={labels.members.title}>
       <div className={GROUP_CHAT_RAIL_SECTION_CLASS_NAME}>
         <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
-          <Text size="sm" weight="semibold">
+          <Text size="md" weight="semibold">
             {labels.members.title}
           </Text>
         </div>
       </div>
       <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
         <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
-          <Text size="sm" weight="semibold">
+          <Text size="md" weight="semibold">
             {labels.members.humans(humans.length)}
           </Text>
         </div>
@@ -1049,7 +1055,7 @@ const RosterRail = ({ view, labels }: { readonly view: GroupChatPageView; readon
       </div>
       <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
         <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
-          <Text size="sm" weight="semibold">
+          <Text size="md" weight="semibold">
             {`${labels.members.moduleRole} (${modules.length})`}
           </Text>
         </div>
@@ -1089,7 +1095,7 @@ const MemberSheetRoster = ({ view, labels }: MemberSheetRosterProps) => {
             </Text>
           </div>
         ) : (
-          humans.map((participant) => <MemberRow key={participant.memberId} participant={participant} labels={labels} />)
+          humans.map((participant) => <MemberRow key={participant.memberId} participant={participant} labels={labels} compact />)
         )}
       </div>
       <div className={GROUP_CHAT_SHEET_SECTION_CLASS_NAME}>
@@ -1106,7 +1112,7 @@ const MemberSheetRoster = ({ view, labels }: MemberSheetRosterProps) => {
           </div>
         ) : (
           modules.map((participant) => (
-            <MemberRow key={participant.moduleInstallationId ?? participant.memberId} participant={participant} labels={labels} />
+            <MemberRow key={participant.moduleInstallationId ?? participant.memberId} participant={participant} labels={labels} compact />
           ))
         )}
       </div>
@@ -1232,7 +1238,7 @@ const Composer = ({ view, on, labels, decision, compact = false }: ComposerProps
       </div>
     ) : null}
     <form
-      className={compact ? GROUP_CHAT_COMPOSER_COMPACT_CLASS_NAME : GROUP_CHAT_COMPOSER_CLASS_NAME}
+      className={compact ? GROUP_CHAT_COMPOSER_COMPACT_CLASS_NAME : decision ? GROUP_CHAT_COMPOSER_DECISION_CLASS_NAME : GROUP_CHAT_COMPOSER_CLASS_NAME}
       onSubmit={(event) => {
         event.preventDefault();
         on.sendMessage();
@@ -1645,9 +1651,9 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
   return (
     <PageContainer measure="full">
       <div className={GROUP_CHAT_PAGE_CLASS_NAME}>
-        <div className={GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME}>
+        <div className={decisionPending ? GROUP_CHAT_WORKSPACE_HOST_DECISION_CLASS_NAME : GROUP_CHAT_WORKSPACE_HOST_INVITE_CLASS_NAME}>
           <div className={GROUP_CHAT_WORKBENCH_CLASS_NAME}>
-            <div className={GROUP_CHAT_TABS_BAND_CLASS_NAME}>
+            <div className={decisionPending ? GROUP_CHAT_TABS_BAND_DECISION_CLASS_NAME : GROUP_CHAT_TABS_BAND_CLASS_NAME}>
               <div className={GROUP_CHAT_TAB_STRIP_CLASS_NAME}>
                 <Tabs
                   label={labels.tabListLabel}
@@ -1667,7 +1673,7 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
             {body}
           </div>
           {!isCompact ? (
-            <aside className={GROUP_CHAT_RAIL_ASIDE_CLASS_NAME} aria-label={labels.members.title}>
+            <aside className={decisionPending ? GROUP_CHAT_RAIL_ASIDE_DECISION_CLASS_NAME : GROUP_CHAT_RAIL_ASIDE_INVITE_CLASS_NAME} aria-label={labels.members.title}>
               <div className={GROUP_CHAT_RAIL_SCROLL_CLASS_NAME}>
                 {decisionPending ? (
                   <RosterRail view={view} labels={labels} />
