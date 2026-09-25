@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react"
 import { ACTIVATION_LINK, SITE_COPY, SITE_LINKS, SITE_NAVIGATION, type SiteNavigationItem } from "@/resources/site"
 import { SITE_CLASS_NAMES } from "./classNames"
 
-const isNavigationGroup = (item: SiteNavigationItem): item is Extract<SiteNavigationItem, { readonly children: readonly unknown[] }> => "children" in item
+const isNavigationGroup = (item: SiteNavigationItem): item is Extract<SiteNavigationItem, { readonly children: ReadonlyArray<unknown> }> => "children" in item
 
 type NavigationListProps = {
     readonly variant: "desktop" | "mobile"

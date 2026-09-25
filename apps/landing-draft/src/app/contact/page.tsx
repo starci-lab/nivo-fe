@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 }
 
 type ContactRouteProps = {
-    readonly searchParams: Promise<{ readonly intent?: string | readonly string[] }>
+    readonly searchParams: Promise<{ readonly intent?: string | ReadonlyArray<string> }>
 }
 
 type ContactIntent = {
@@ -21,10 +21,10 @@ type ContactIntent = {
     readonly label: string
     readonly userJob: string
     readonly expectation: string
-    readonly directPaths: readonly { readonly label: string; readonly href: string }[]
+    readonly directPaths: ReadonlyArray<{ readonly label: string; readonly href: string }>
 }
 
-const CONTACT_INTENTS: readonly ContactIntent[] = [
+const CONTACT_INTENTS: ReadonlyArray<ContactIntent> = [
     { id: "product", label: "Product Assistance", userJob: "Tìm hiểu, đánh giá hoặc cần hỗ trợ liên quan đến NIVO OS.", expectation: "Ưu tiên đường tự phục vụ trước một trao đổi trực tiếp.", directPaths: [{ label: "Tìm hiểu NIVO OS", href: "/nivo-os" }, { label: "Khám phá Giải pháp", href: "/applications" }, { label: "Xem Mức giá", href: "/pricing" }] }, // vn-ok: Canonical Vietnamese public copy.
     { id: "partnership", label: "Partnership", userJob: "Cùng NIVO mở rộng expertise, implementation hoặc market capability.", expectation: "Hiểu hệ sinh thái trước; kênh tiếp nhận đang chờ xác minh.", directPaths: [{ label: "Khám phá Hệ sinh thái", href: "/ecosystem" }] }, // vn-ok: Canonical Vietnamese public copy.
     { id: "institution", label: "Institution", userJob: "Trao đổi về chương trình, tổ chức hoặc ecosystem collaboration.", expectation: "Kênh tiếp nhận đang chờ owner và privacy path được xác minh.", directPaths: [{ label: "Tìm hiểu Trust", href: "/trust" }] }, // vn-ok: Canonical Vietnamese public copy.

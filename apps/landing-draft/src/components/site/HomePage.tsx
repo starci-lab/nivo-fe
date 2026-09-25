@@ -11,7 +11,7 @@ import { HomeMotionHeroParallax, HomeMotionHeroReveal, HomeMotionRoleCard, HomeM
 
 const COMMERCIAL_ROUTE_ICONS = ["search", "code", "complete"] as const
 
-type InlineRouteProps = { readonly parts: readonly string[] }
+type InlineRouteProps = { readonly parts: ReadonlyArray<string> }
 
 /** A semantic path whose separators are real product icons, never text glyphs. */
 const InlineRoute = ({ parts }: InlineRouteProps) => (

@@ -8,7 +8,7 @@ export type SiteLink = {
 /** A first-level navigation item with at most one discovery layer. */
 export type SiteNavigationItem = SiteLink | {
     readonly label: string
-    readonly children: readonly SiteLink[]
+    readonly children: ReadonlyArray<SiteLink>
 }
 
 /** The canonical public origin used by metadata, robots, and sitemap adapters. */
@@ -59,7 +59,7 @@ export const SITE_LINKS = {
 export const ACTIVATION_LINK: SiteLink | null = null
 
 /** The final two-level primary navigation defined by the Master IA. */
-export const SITE_NAVIGATION: readonly SiteNavigationItem[] = [
+export const SITE_NAVIGATION: ReadonlyArray<SiteNavigationItem> = [
     { href: SITE_LINKS.nivoOs, label: "NIVO OS" },
     { href: SITE_LINKS.applications, label: "Giải pháp" },
     {

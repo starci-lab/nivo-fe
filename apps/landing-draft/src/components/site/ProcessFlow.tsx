@@ -5,7 +5,7 @@ import { SITE_CLASS_NAMES } from "./classNames"
 /** Props for a code-native explanatory flow with an equivalent text sequence. */
 export type ProcessFlowProps = {
     readonly label: string
-    readonly steps: readonly PublicFlowStep[]
+    readonly steps: ReadonlyArray<PublicFlowStep>
     readonly emphasisId?: string
     readonly inverse?: boolean
 }

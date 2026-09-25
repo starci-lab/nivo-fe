@@ -41,7 +41,7 @@ export const HOMEPAGE_COPY = {
             { id: "responsibility", label: "Responsibility", description: "Trách nhiệm và giới hạn được xác định rõ." },
             { id: "execution", label: "Human + AI execution", description: "Con người dẫn dắt, AI vận hành trong giới hạn." },
             { id: "evidence", label: "Evidence", description: "Kết quả được đối chiếu bằng bằng chứng." },
-        ] satisfies readonly PublicFlowStep[],
+        ] satisfies ReadonlyArray<PublicFlowStep>,
         flowLabel: "Từ nhu cầu kinh doanh đến bằng chứng",
         action: "Khám phá Giải pháp",
     },
@@ -63,7 +63,7 @@ export const HOMEPAGE_COPY = {
             { id: "responsibility", label: "Responsibility", description: "Trách nhiệm, ranh giới và nguyên tắc." },
             { id: "execution", label: "Governed execution", description: "Thực thi có kiểm soát và giám sát." },
             { id: "outcome", label: "Verified outcome", description: "Kết quả được đối chiếu bằng bằng chứng." },
-        ] satisfies readonly PublicFlowStep[],
+        ] satisfies ReadonlyArray<PublicFlowStep>,
         roleVisuals: [
             {
                 src: "/images/operating/human-leads-v2.png",

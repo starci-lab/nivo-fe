@@ -9,7 +9,7 @@ import { CLASS_NAMES as C, SECTION_CLASS_NAMES } from "./classNames"
 export type IdeaContentType = "Góc nhìn" | "Framework" | "NIVO đang xây" // vn-ok: Canonical Vietnamese public labels.
 
 /** One governed section inside a public Idea. */
-export type IdeaSection = { readonly title: string; readonly paragraphs: readonly string[] }
+export type IdeaSection = { readonly title: string; readonly paragraphs: ReadonlyArray<string> }
 
 /** Public view model for an approved knowledge object. */
 export type IdeaArticle = {
@@ -18,17 +18,17 @@ export type IdeaArticle = {
     readonly title: string
     readonly thesis: string
     readonly summary: string
-    readonly topics: readonly string[]
+    readonly topics: ReadonlyArray<string>
     readonly author: string
     readonly publisher: string
     readonly lifecycle: "Published"
     readonly sourceVersion: string
     readonly dateNote: string
     readonly truthContext: string
-    readonly sections: readonly IdeaSection[]
+    readonly sections: ReadonlyArray<IdeaSection>
     readonly canonicalReference: ExploreAction
     readonly primaryNextPath: ExploreAction
-    readonly relatedSlugs: readonly string[]
+    readonly relatedSlugs: ReadonlyArray<string>
 }
 
 /** One canonical relationship-routing intent. */
@@ -44,7 +44,7 @@ type HeroProps = {
     readonly primary: ExploreAction
     readonly secondary?: ExploreAction
     readonly modelLabel: string
-    readonly modelSteps: readonly string[]
+    readonly modelSteps: ReadonlyArray<string>
     readonly visual?: "trust" | "ecosystem" | "ideas"
 }
 type SectionProps = {
@@ -56,15 +56,15 @@ type SectionProps = {
     readonly children: ReactNode
 }
 type FlowStep = { readonly title: string; readonly description: string }
-type FlowProps = { readonly label: string; readonly steps: readonly FlowStep[] }
+type FlowProps = { readonly label: string; readonly steps: ReadonlyArray<FlowStep> }
 type NoticeProps = { readonly title: string; readonly children: ReactNode }
-type PathGridProps = { readonly label: string; readonly paths: readonly ExploreAction[] }
+type PathGridProps = { readonly label: string; readonly paths: ReadonlyArray<ExploreAction> }
 type ContactIntent = {
     readonly id: ContactIntentId
     readonly label: string
     readonly userJob: string
     readonly expectation: string
-    readonly directPaths: readonly ExploreAction[]
+    readonly directPaths: ReadonlyArray<ExploreAction>
 }
 
 const COPY = {
@@ -123,7 +123,7 @@ const COPY = {
     },
 } as const
 
-const IDEA_ARTICLES: readonly IdeaArticle[] = [
+const IDEA_ARTICLES: ReadonlyArray<IdeaArticle> = [
     {
         slug: "responsibility-before-agent",
         contentType: "Góc nhìn", // vn-ok: Canonical Vietnamese public label.
@@ -179,7 +179,7 @@ const IDEA_ARTICLES: readonly IdeaArticle[] = [
     },
 ]
 
-const CONTACT_INTENTS: readonly ContactIntent[] = [
+const CONTACT_INTENTS: ReadonlyArray<ContactIntent> = [
     { id: "product", label: "Product Assistance", userJob: "Tìm hiểu, đánh giá hoặc cần hỗ trợ liên quan đến NIVO OS.", expectation: "Ưu tiên đường tự phục vụ trước một trao đổi trực tiếp.", directPaths: [{ label: "Tìm hiểu NIVO OS", href: "/nivo-os" }, { label: "Khám phá Giải pháp", href: "/applications" }, { label: "Xem Mức giá", href: "/pricing" }] }, // vn-ok: Canonical Vietnamese public copy.
     { id: "partnership", label: "Partnership", userJob: "Cùng NIVO mở rộng expertise, implementation hoặc market capability.", expectation: "Hiểu hệ sinh thái trước; kênh tiếp nhận đang chờ xác minh.", directPaths: [{ label: "Khám phá Hệ sinh thái", href: "/ecosystem" }] }, // vn-ok: Canonical Vietnamese public copy.
     { id: "institution", label: "Institution", userJob: "Trao đổi về chương trình, tổ chức hoặc ecosystem collaboration.", expectation: "Kênh tiếp nhận đang chờ owner và privacy path được xác minh.", directPaths: [{ label: "Tìm hiểu Trust", href: "/trust" }] }, // vn-ok: Canonical Vietnamese public copy.
@@ -334,7 +334,7 @@ export const getIdeaBySlug = (slug: string) => IDEA_ARTICLES.find((idea) => idea
 export const IDEA_SLUGS = IDEA_ARTICLES.map(({ slug }) => ({ slug }))
 
 /** Resolves a public Ideas query without changing truth state or lifecycle. */
-export const normalizeIdeaType = (value: string | readonly string[] | undefined): IdeaContentType | null => {
+export const normalizeIdeaType = (value: string | ReadonlyArray<string> | undefined): IdeaContentType | null => {
     const candidate = Array.isArray(value) ? value[0] : value
     if (candidate === "goc-nhin") return "Góc nhìn" // vn-ok: Canonical Vietnamese public label.
     if (candidate === "framework") return "Framework"
@@ -343,7 +343,7 @@ export const normalizeIdeaType = (value: string | readonly string[] | undefined)
 }
 
 /** Accepts only the six public Contact query values. */
-export const normalizeContactIntent = (value: string | readonly string[] | undefined): ContactIntentId | null => {
+export const normalizeContactIntent = (value: string | ReadonlyArray<string> | undefined): ContactIntentId | null => {
     const candidate = Array.isArray(value) ? value[0] : value
     return CONTACT_INTENTS.some(({ id }) => id === candidate) ? candidate as ContactIntentId : null
 }

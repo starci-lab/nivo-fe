@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 }
 
 type IdeasRouteProps = {
-    readonly searchParams: Promise<{ readonly type?: string | readonly string[] }>
+    readonly searchParams: Promise<{ readonly type?: string | ReadonlyArray<string> }>
 }
 
 /** The `/ideas` framework adapter resolves optional filter state and mounts one page owner. */
