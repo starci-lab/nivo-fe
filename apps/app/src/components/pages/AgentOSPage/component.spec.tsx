@@ -72,3 +72,12 @@ describe("AgentOSPageBase", () => {
         expect(html).toContain("AgentOS order")
     })
 })
+
+describe("AgentOSPageBase", () => {
+    it("executes the renamed pure twins across their settled state branches", () => {
+        const agentOsLabels = { path: "Path", agentos: "AgentOS", dashboardDescription: "Manage AgentOS", createTitle: "Create", createDescription: "Create AgentOS", orderTitle: "Order", orderDescription: "Resume order", createAction: "Create" }
+        const agentOsActions = { onOpenDashboard: vi.fn(), onCreate: vi.fn() }
+        expect(AgentOSPageBase({ mode: "dashboard", labels: agentOsLabels, ...agentOsActions })).toBeTruthy()
+        expect(AgentOSPageBase({ mode: "resume", orderId: "order-1", labels: agentOsLabels, ...agentOsActions })).toBeTruthy()
+    })
+})

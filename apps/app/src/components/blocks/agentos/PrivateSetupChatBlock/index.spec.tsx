@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import type { ComponentProps } from "react"
-import { NextIntlClientProvider, useTranslations } from "next-intl"
+import { NextIntlClientProvider, createTranslator, useTranslations } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/i18n/config"
@@ -24,6 +24,37 @@ describe("PrivateSetupChatBlock", () => {
     beforeAll(() => {
         window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() }) as unknown as typeof window.matchMedia
     })
+
+    describe.each(["en", "vi"] as const)("Support Desk Setup journey %s", locale => {
+        const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
+        it("keeps completed Setup history private and starts a separate revision", () => {
+            const selectRevision = vi.fn()
+            const startRevision = vi.fn()
+            const openVersions = vi.fn()
+            render(<PrivateSetupChatBlock locale={locale}
+                messages={[{ id: "message-1", role: "assistant", content: "What SLA should I follow?" }]}
+                revisions={[
+                    { id: "revision-1", revision: 1, status: "completed" },
+                    { id: "revision-2", revision: 2, status: "completed" },
+                ]}
+                selectedRevisionId="revision-2"
+                canSend={false}
+                canStartRevision
+                onSelectRevision={selectRevision}
+                onStartRevision={startRevision}
+                onSend={vi.fn()}
+                onOpenVersions={openVersions}
+            />)
+
+            expect(screen.queryByLabelText(copy.messageLabel)).toBeNull()
+            expect(screen.queryByRole("button", { name: copy.send })).toBeNull()
+            fireEvent.click(screen.getByRole("button", { name: copy.openVersions }))
+            expect(openVersions).toHaveBeenCalledTimes(1)
+            expect(selectRevision).not.toHaveBeenCalled()
+            expect(startRevision).not.toHaveBeenCalled()
+        })
+    })
+
     it("retains a controlled draft when the append is refused", () => {
         const onSend = vi.fn()
         const { rerender } = render(<PrivateSetupChatBlock messages={[]} revisions={revisions} selectedRevisionId="setup-1" canSend canStartRevision={false} draft="Keep this policy" onDraft={vi.fn()} onSend={onSend} onSelectRevision={vi.fn()} onStartRevision={vi.fn()} />)

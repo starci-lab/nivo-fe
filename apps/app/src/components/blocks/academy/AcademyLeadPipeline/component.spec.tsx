@@ -1,3 +1,4 @@
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import { AcademyLeadPipelineBase } from "./component"
@@ -5,7 +6,7 @@ import { AcademyLeadPipelineBase } from "./component"
 const labels = { section: "Leads", empty: "No leads", refused: "Unavailable", open: "Open", detail: "Detail", advance: "Advance", draft: "Draft", saved: "Saved", actionFailed: "Failed" }
 const lead = { id: "lead-1", name: "Reader", contact: "reader@example.test", message: "Interested", status: "new", note: null }
 
-describe("academy lead pipeline states", () => {
+describe("AcademyLeadPipelineBase", () => {
     it("renders empty and refusal notes distinctly", () => {
         expect(renderToStaticMarkup(<AcademyLeadPipelineBase state="empty" leads={[]} labels={labels} onOpenLead={vi.fn()} onAdvance={vi.fn()} onDraftReply={vi.fn()} />)).toContain("No leads")
         expect(renderToStaticMarkup(<AcademyLeadPipelineBase state="refused" leads={[]} labels={labels} onOpenLead={vi.fn()} onAdvance={vi.fn()} onDraftReply={vi.fn()} />)).toContain("Unavailable")
@@ -15,5 +16,25 @@ describe("academy lead pipeline states", () => {
         const base = { state: "answered" as const, leads: [lead], selected: lead, labels, onOpenLead: vi.fn(), onAdvance: vi.fn(), onDraftReply: vi.fn() }
         expect(renderToStaticMarkup(<AcademyLeadPipelineBase {...base} />)).toContain("Interested")
         expect(renderToStaticMarkup(<AcademyLeadPipelineBase {...base} draft="Prepared reply" />)).toContain("Advance")
+    })
+})
+
+describe("AcademyLeadPipelineBase", () => {
+    it("fires integration, lead, student, and solution actions", () => {
+        const openLead = vi.fn()
+        const advance = vi.fn()
+        const draftReply = vi.fn()
+        const lead = { id: "lead-1", name: "Reader", contact: "reader@example.test", message: "Interested", status: "new", note: null }
+        render(<AcademyLeadPipelineBase state="answered" leads={[lead]} selected={lead} labels={labels} onOpenLead={openLead} onAdvance={advance} onDraftReply={draftReply} />)
+        fireEvent.click(screen.getAllByRole("button", { name: "Open" }).at(-1)!)
+        fireEvent.click(screen.getByRole("button", { name: "Draft" }))
+        render(<AcademyLeadPipelineBase state="answered" leads={[lead]} selected={lead} draft="Prepared" labels={labels} onOpenLead={openLead} onAdvance={advance} onDraftReply={draftReply} />)
+        fireEvent.click(screen.getByRole("button", { name: "Advance" }))
+        expect(openLead).toHaveBeenCalled()
+        expect(draftReply).toHaveBeenCalled()
+        expect(advance).toHaveBeenCalled()
+        cleanup()
+        renderToStaticMarkup(<AcademyLeadPipelineBase state="resting" leads={[]} labels={labels} onOpenLead={openLead} onAdvance={advance} onDraftReply={draftReply} />)
+        renderToStaticMarkup(<AcademyLeadPipelineBase state="answered" leads={[{ ...lead, status: "converted" }]} selected={lead} message="Saved" pendingAction="advance" labels={labels} onOpenLead={openLead} onAdvance={advance} onDraftReply={draftReply} />)
     })
 })

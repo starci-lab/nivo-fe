@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import { AgentOSSolutionModuleCenterBase, type AgentOSSolutionModuleLedgerProps } from "./component"
@@ -110,5 +110,19 @@ describe("AgentOSSolutionModuleCenterBase", () => {
         render(<AgentOSSolutionModuleCenterBase {...base} layout="ledger" ledger={ledger({ catalogueState: "refused" })} state="refused" mode="catalog" cards={[]} />)
         expect(screen.getByRole("link", { name: "Knowledge Hub" })).toBeTruthy()
         expect(screen.getByText("The catalogue could not be read")).toBeTruthy()
+    })
+})
+
+describe("AgentOSSolutionModuleCenterBase", () => {
+    it("fires integration, lead, student, and solution actions", () => {
+        const selectMode = vi.fn()
+        const pressCard = vi.fn()
+        render(<AgentOSSolutionModuleCenterBase state="answered" mode="catalog" sectionLabel="Solutions" modesLabel="Mode" modes={[{ id: "catalog", label: "Catalog" }, { id: "installed", label: "Installed" }]} refusedLabel="Unavailable" emptyLabel="Empty" emptyActionLabel="Browse" cards={[{ id: "sales", title: "Sales", description: "Assist", statusLabel: "Ready", statusTone: "success", actionLabel: "Install" }]} onSelectMode={selectMode} onPressCard={pressCard} />)
+        fireEvent.click(screen.getByRole("button", { name: "Install" }))
+        fireEvent.click(screen.getByRole("radio", { name: "Installed" }))
+        expect(pressCard).toHaveBeenCalledWith("sales")
+        expect(selectMode).toHaveBeenCalledWith("installed")
+        cleanup()
+        renderToStaticMarkup(<AgentOSSolutionModuleCenterBase state="resting" mode="installed" sectionLabel="Solutions" modesLabel="Mode" modes={[{ id: "catalog", label: "Catalog" }, { id: "installed", label: "Installed" }]} refusedLabel="Unavailable" emptyLabel="Empty" emptyActionLabel="Browse" cards={[]} onSelectMode={selectMode} onPressCard={pressCard} />)
     })
 })

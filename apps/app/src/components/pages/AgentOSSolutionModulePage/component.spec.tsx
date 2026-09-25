@@ -427,3 +427,158 @@ describe.each(["en", "vi"] as const)("Page owner action forwarding %s", locale =
 })
 })
 
+describe("exactTestSurfaceFor", () => {
+  const gates = [
+    "Business identity", "Products and services", "Support scope", "Customer segments", "Channels", "Hours and SLA",
+    "Escalation and handoff", "Prohibited commitments", "Privacy and sensitive data", "Tone and language",
+    "Automation policy", "Readiness ownership",
+  ].map((label, index) => ({ key: `gate-${index}`, label, passed: true, ownerConfirmation: false, confirmed: false, citationPolicy: "none" as const }))
+
+  const testedDraft: ContextDraft = {
+    contextId: "22222222-2222-4222-8222-222222222222",
+    setupSessionId: "11111111-1111-4111-8111-111111111111",
+    revision: 2,
+    status: "completed",
+    version: 2,
+    digest: "a".repeat(64),
+    definitionDigest: "d".repeat(64),
+    authorityGeneration: 1,
+    sourceGeneration: 1,
+    retrievalGeneration: 1,
+    summary: "A Vietnamese real-estate Support Desk",
+    facts: ["Escalate qualified leads to the sales team"],
+    gates,
+    exactTestPassed: true,
+    isActive: false,
+  }
+
+  it("does not attach stale Test evidence to a different Setup draft", () => {
+    const stale = {
+      run: {
+        setupSessionId: "33333333-3333-4333-8333-333333333333",
+        draftDigest: "b".repeat(64),
+      },
+      assertions: [{ id: "assertion-1" }],
+    } as never
+    const exact = {
+      run: {
+        setupSessionId: testedDraft.setupSessionId,
+        draftDigest: testedDraft.digest,
+        definitionDigest: testedDraft.definitionDigest,
+        targetDigest: testedDraft.digest,
+        authorityGeneration: 1,
+        sourceGeneration: 1,
+        retrievalGeneration: 1,
+      },
+      assertions: [{ id: "assertion-2" }],
+    } as never
+
+    expect(exactTestSurfaceFor(stale, testedDraft)).toBeNull()
+    expect(exactTestSurfaceFor(exact, testedDraft)).toBe(exact)
+    expect(exactTestSurfaceFor(exact, { ...testedDraft, digest: null })).toBeNull()
+  })
+})
+
+describe("AgentOSSolutionModulePageBase", () => {
+  describe.each(["en", "vi"] as const)("AgentOS SPLIT-6 page owner chains %s", locale => {
+    const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules
+
+    it("projects one backend-owned module runtime through the pure routed shell", () => {
+      const html = renderToStaticMarkup(
+        <PageFixture locale={locale}
+          shell={{
+            workspaceLabel: "Workspace workspac",
+            moduleName: "Sales Copilot",
+            moduleKind: "sales",
+            lifecycleLabel: "ready",
+            contextVersion: "not applied",
+            channelLabel: "Channel not connected",
+            controllerLabel: "Controller healthy",
+            activeView: "diagnostics",
+            onBackToModules: vi.fn(),
+            onNavigate: vi.fn(),
+          }}
+          screen={{
+            view: "diagnostics",
+            contentProps: {
+              installationId: "installation-1",
+              kindKey: "sales",
+              workbenchKey: "sales-pipeline",
+              diagnostics: { available: true },
+              events: [],
+              selectedSignal: "all",
+              compactPane: "readiness",
+              onSelectSignal: vi.fn(),
+              onSelectPane: vi.fn(),
+            },
+          }}
+        />,
+      )
+      expect(html).toContain(copy.shell.modules)
+      expect(html).toContain("Sales Copilot")
+      expect(html).toContain("installation-1")
+      expect(html).toContain(copy.runtime.diagnostics.signals)
+      expect(html).toContain(copy.runtime.diagnostics.health)
+      expect(html).toContain(copy.runtime.diagnostics.trace)
+      expect(html).toContain("Controller healthy")
+    })
+
+    it("renders only a masked credential status and a password input in Settings", () => {
+      const html = renderToStaticMarkup(
+        <PageFixture locale={locale}
+          shell={{
+            workspaceLabel: "Workspace workspac",
+            moduleName: "Support Desk",
+            moduleKind: "customer-support",
+            lifecycleLabel: "ready",
+            contextVersion: "not applied",
+            channelLabel: "Channel not connected",
+            controllerLabel: "Controller healthy",
+            activeView: "settings",
+            onBackToModules: vi.fn(),
+            onNavigate: vi.fn(),
+          }}
+          screen={{
+            view: "settings",
+            contentProps: {
+              currentDisplayName: "Support Desk",
+              currentModelProfile: "nivo-default",
+              currentConfirmation: true,
+              currentOperatingMode: "assist",
+              currentChannelAccountRef: "",
+              displayName: "Support Desk",
+              modelProfile: "nivo-default",
+              requireConfirmation: true,
+              operatingMode: "assist",
+              channelAccountRef: "",
+              credentialValues: {},
+              liveEnabled: false,
+              canEnableLive: false,
+              pending: false,
+              refused: false,
+              credentialSlots: [{ key: "telegram-bot-token", label: "Telegram bot token", provider: "telegram" }],
+              credentialStatuses: [{ providerKey: "telegram-bot-token", maskedHint: "•••• 1234", status: "configured" }],
+              activeVersion: null,
+              on: {
+                save: vi.fn(),
+                setLiveEnabled: vi.fn(),
+                saveCredential: vi.fn(),
+                removeCredential: vi.fn(),
+                changeDisplayName: vi.fn(),
+                changeModelProfile: vi.fn(),
+                changeConfirmation: vi.fn(),
+                changeOperatingMode: vi.fn(),
+                changeChannelAccountRef: vi.fn(),
+                changeCredential: vi.fn(),
+              },
+            },
+          }}
+        />,
+      )
+      expect(html).toContain("Telegram bot token")
+      expect(html).toContain("•••• 1234")
+      expect(html).toContain('type="password"')
+    })
+  })
+})
+

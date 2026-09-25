@@ -1,3 +1,4 @@
+import viMessages from "@/messages/vi.json"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
@@ -60,5 +61,54 @@ describe("AgentOSCustomModuleCollectionBase", () => {
     it("carries the pending of a retry on the action that started it", () => {
         const html = renderToStaticMarkup(<AgentOSCustomModuleCollectionBase {...base} state="refused" rows={[]} retrying={true} />)
         expect(html).toContain("aria-busy=\"true\"")
+    })
+})
+
+describe("AgentOSCustomModuleCollectionBase", () => {
+    it("draws the custom-module collection rows and their owned actions", () => {
+        const html = renderToStaticMarkup(<AgentOSCustomModuleCollectionBase
+            state="ready"
+            loadingKind="Custom"
+            loadingStatus="Draft"
+            title="Custom modules"
+            emptyTitle="No custom module yet"
+            refusedTitle="Custom modules could not be read"
+            retry="Try again"
+            retrying={false}
+            onRetry={vi.fn()}
+            refused="Unavailable"
+            empty="No modules"
+            rows={[{ id: "module-1", name: "Lead intake", detail: "80% complete", kind: "Custom", status: "Active", active: true, action: "Inspect", href: "/en/agentos/workspaces/w/modules/install-1" }]}
+        />)
+        expect(html).toContain("Lead intake")
+        expect(html).toContain("80% complete")
+        expect(html).toContain("Inspect")
+    })
+
+    it("reports collection and upload actions", () => {
+        const collection = render(<AgentOSCustomModuleCollectionBase
+            state="ready"
+            loadingKind="Custom"
+            loadingStatus="Draft"
+            title="Custom modules"
+            emptyTitle="No custom module yet"
+            refusedTitle="Custom modules could not be read"
+            retry="Try again"
+            retrying={false}
+            onRetry={vi.fn()}
+            refused="Unavailable"
+            empty="No modules"
+            rows={[{ id: "module-1", name: "Lead intake", detail: "Ready", kind: "Custom", status: "Active", active: true, action: "Inspect", href: "/en/agentos/workspaces/w/modules/install-1" }]}
+        />)
+        expect(screen.getByRole("link", { name: "Lead intake" }).getAttribute("href")).toBe("/en/agentos/workspaces/w/modules/install-1")
+        expect(screen.getByRole("link", { name: "Inspect" }).getAttribute("href")).toBe("/en/agentos/workspaces/w/modules/install-1")
+        collection.unmount()
+    })
+
+    it("keeps the actual Vietnamese active Badge success tone from its raw key", () => {
+        const copy = viMessages.console.agentos.modules
+        const view = render(<AgentOSCustomModuleCollectionBase state="ready" loadingKind={copy.collection.custom} loadingStatus={copy.status.draft} title={copy.collection.title} refused={copy.collection.refused} empty={copy.collection.empty} emptyTitle={copy.collection.emptyTitle} refusedTitle={copy.collection.refusedTitle} retry={copy.collection.retry} retrying={false} onRetry={vi.fn()} rows={[{ id: "module/raw", name: "Owner module", detail: "Raw detail", kind: copy.collection.custom, status: copy.status.active, active: true, href: "/vi/agentos/workspaces/w/modules/module/raw", action: copy.collection.inspect }]} />)
+        expect(screen.getByText(copy.status.active).closest('[data-component="Badge"]')).toHaveAttribute("data-tone", "success")
+        view.unmount()
     })
 })

@@ -43,7 +43,7 @@ const result: PaymentResultView = {
 const on: WalletControlCenterActions = { topUp: vi.fn(), payInvoice: vi.fn(), returnToOrder: vi.fn() }
 const shared = { title: "Wallet", balance, transactions, invoices, topUp, result, on }
 
-describe("WalletControlCenter drawing", () => {
+describe("WalletControlCenterBase", () => {
     it("uses the ordinary page architecture without a linked invoice section", () => {
         const props: WalletControlCenterViewProps = { state: "ordinary", ...shared }
         const html = renderToStaticMarkup(<WalletControlCenterBase {...props} />)
@@ -175,5 +175,34 @@ describe("WalletControlCenter drawing", () => {
         expect(returnToOrder).toHaveBeenCalledTimes(1)
         expect(closeTopUp).toHaveBeenCalledTimes(1)
         expect(closeResult).toHaveBeenCalledTimes(1)
+    })
+})
+
+describe("WalletControlCenterBase", () => {
+    it("renders wallet resting, empty, and refused ledger branches", () => {
+        const html = renderToStaticMarkup(<WalletControlCenterBase
+            state="ordinary"
+            title="Wallet"
+            balance={{ phase: "answered", label: "Balance", actionLabel: "Top up", facts: [{ id: "b", label: "Balance", value: "100 VND" }] }}
+            transactions={{ phase: "empty", label: "Transactions", note: "No transactions" }}
+            invoices={{ phase: "refused", label: "Invoices", note: "Invoices unavailable" }}
+            topUp={{ overlayState: "closed", title: "Top up", closeLabel: "Close", amountLabel: "Amount", amountPlaceholder: "10000", hint: "IPN", submitLabel: "Continue", amount: "", pending: false }}
+            result={{ overlayState: "closed", title: "Result", closeLabel: "Close", state: "Pending", tone: "warning", amount: "100 VND", note: "Waiting", actionLabel: "Back" }}
+            on={{ topUp: vi.fn(), payInvoice: vi.fn() }}
+        />)
+        expect(html).toContain("Wallet")
+        expect(html).toContain("100 VND")
+        expect(html).toContain("No transactions")
+        expect(html).toContain("Invoices unavailable")
+        expect(renderToStaticMarkup(<WalletControlCenterBase
+            state="ordinary"
+            title="Wallet"
+            balance={{ phase: "resting", label: "Balance", actionLabel: "Top up" }}
+            transactions={{ phase: "refused", label: "Transactions", note: "Transactions unavailable" }}
+            invoices={{ phase: "answered", label: "Invoices", rows: [{ id: "invoice-1", title: "Starter", caption: "Today", amount: "100 VND", state: "Unpaid", tone: "warning", detailLabel: "Details", detailFacts: [] }], actionLabel: "Pay" }}
+            topUp={{ overlayState: "closed", title: "Top up", closeLabel: "Close", amountLabel: "Amount", amountPlaceholder: "10000", hint: "IPN", submitLabel: "Continue", amount: "", pending: false }}
+            result={{ overlayState: "closed", title: "Result", closeLabel: "Close", state: "Pending", tone: "warning", amount: "100 VND", note: "Waiting", actionLabel: "Back" }}
+            on={{ topUp: vi.fn(), payInvoice: vi.fn() }}
+        />)).toContain("Transactions unavailable")
     })
 })

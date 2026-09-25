@@ -24,7 +24,7 @@ const rawWorkbench = {
   reconciliations: [{ id: "reconciliation-1", ledger_version_h: "7", currency: "VND", source_amount_minor: "0", ledger_amount_minor: "-100", difference_minor: "100", created_at: "2026-09-06T00:00:00Z" }]
 };
 
-describe("Accounting GraphQL API", () => {
+describe("modules/api/accounting", () => {
   beforeEach(() => graphql.mockReset());
 
   it("uses one-root reads and narrows snake-case JSON rows", async () => {

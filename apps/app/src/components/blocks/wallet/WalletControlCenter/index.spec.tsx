@@ -59,7 +59,7 @@ const output = () => screen.getByTestId("wallet").textContent ?? ""
 const renderWallet = () => render(<WalletControlCenter pageState={mocks.navigation.search === "" ? "ordinary" : "waypoint"} />)
 const resetQueryCache = () => { for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key) }
 
-describe("WalletControlCenter connected states", () => {
+describe("WalletControlCenter", () => {
     afterEach(() => cleanup())
     beforeEach(() => {
         vi.clearAllMocks()

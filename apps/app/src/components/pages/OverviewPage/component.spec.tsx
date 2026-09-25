@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react"
+import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 
 /** Whether the first node is reached before the second in reading order. */
@@ -58,5 +59,28 @@ describe("OverviewPageBase", () => {
         const trail = screen.getByRole("list", { name: "You are here" })
         expect(within(trail).getByText("Console")).toBeInTheDocument()
         expect(within(trail).getByText("Overview")).toBeInTheDocument()
+    })
+})
+
+describe("OverviewPageBase", () => {
+    it("renders the overview anatomy around its five connected regions", () => {
+        const overviewProps: OverviewPageProps = {
+            title: "Overview",
+            lede: "Everything this account runs, and the one thing to do next.",
+            pathLabel: "You are here",
+            consoleLabel: "Console",
+            buildAppLabel: "Build an app",
+            atAGlanceLabel: "At a glance",
+            servicesLabel: "Services",
+            accountLabel: "Account",
+            onBuildApp: vi.fn(),
+        }
+        const html = renderToStaticMarkup(<OverviewPageBase {...overviewProps} />)
+        expect(html).toContain("Overview")
+        expect(html).toContain("overview-signals")
+        expect(html).toContain("overview-services")
+        expect(html).toContain("overview-runtime")
+        expect(html).toContain("overview-account")
+        expect(html).toContain("overview-addresses")
     })
 })

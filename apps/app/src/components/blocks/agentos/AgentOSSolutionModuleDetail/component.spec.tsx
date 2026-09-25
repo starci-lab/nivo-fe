@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { AgentOSSolutionModuleDetailBase, type AgentOSSolutionModuleDetailViewProps } from "./component"
+import { AgentOSSolutionModuleDetailBase, type AgentOSSolutionModuleDetailLabels, type AgentOSSolutionModuleDetailViewProps } from "./component"
 
 const installation = {
     id: "installation-1",
@@ -61,5 +61,25 @@ describe("AgentOSSolutionModuleDetailBase", () => {
         expect(html).toContain("agent-1")
         expect(html).toContain("Back to workspace")
         expect(html).toContain("Open AI &amp; Knowledge")
+    })
+})
+
+describe("AgentOSSolutionModuleDetailBase", () => {
+    it("renders module loading and refused projections", () => {
+        const labels = {
+            title: "Module",
+            backToWorkspace: "Back to workspace",
+            loading: "Loading module",
+            refused: "Module unavailable",
+            summary: { section: "Summary", module: "Module", version: "Version", status: "Status", failure: "Failure", modelProfile: "Model profile", manifest: "Manifest", empty: "None" },
+            bindings: { section: "Bindings", agents: "Agents", channels: "Channels", sharedKnowledge: "Knowledge", knowledgeVersions: "Versions", artifact: "Artifact", currentness: "Currentness", embedding: "Embedding", retrievalScope: "Retrieval scope", empty: "None" },
+        } satisfies AgentOSSolutionModuleDetailLabels
+        const loading = renderToStaticMarkup(<AgentOSSolutionModuleDetailBase detailState="loading" labels={labels} onBack={vi.fn()} />)
+        const refused = renderToStaticMarkup(<AgentOSSolutionModuleDetailBase detailState="refused" labels={labels} onBack={vi.fn()} />)
+        expect(loading).toContain("Loading module")
+        expect(loading).toContain("Agents")
+        expect(loading).toContain("Versions")
+        expect(refused).toContain("Module unavailable")
+        expect(refused).not.toContain("Agents")
     })
 })

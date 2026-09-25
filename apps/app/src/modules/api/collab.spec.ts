@@ -34,7 +34,7 @@ const transportSpy = (outcome: CollabGatewayOutcome) => {
     return { calls, spy };
 };
 
-describe("collab member request adapter", () => {
+describe("modules/api/collab", () => {
     afterEach(() => {
         useCollabTransportFrom(collabGatewayTransport);
         vi.unstubAllGlobals();
@@ -282,7 +282,7 @@ describe("collab member request adapter", () => {
     });
 });
 
-describe("collabGatewayTransport - the default tagged-request GraphQL binding", () => {
+describe("collabGatewayTransport", () => {
     const fetchStub = vi.fn();
     beforeEach(() => {
         fetchStub.mockReset();

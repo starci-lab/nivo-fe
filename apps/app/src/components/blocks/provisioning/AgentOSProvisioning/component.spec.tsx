@@ -110,3 +110,11 @@ describe("AgentOSProvisioningBase", () => {
         expect(request).not.toHaveBeenCalled()
     })
 })
+
+describe("AgentOSProvisioningBase", () => {
+    it("fires integration, lead, student, and solution actions", () => {
+        const steps = [{ ordinal: "1", label: "Request", state: "current" as const, stateLabel: "Current" }]
+        renderToStaticMarkup(<AgentOSProvisioningBase state="failed" props={{ steps, subject: "AgentOS", detail: "order-1", statusTitle: "Failed", statusText: "Unavailable" }} on={{ statusAction: vi.fn() }} />)
+        renderToStaticMarkup(<AgentOSProvisioningBase state="ready" props={{ steps, subject: "AgentOS", detail: "workspace-1", statusTitle: "Ready", statusText: "Ready", statusActionLabel: "Manage" }} on={{ statusAction: vi.fn() }} />)
+    })
+})

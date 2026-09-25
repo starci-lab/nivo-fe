@@ -4,7 +4,7 @@ import { AcademyGrowthSummaryBase } from "./component"
 
 const labels = { section: "Growth", health: "Health", loading: "Loading", refused: "Unavailable", revenue: "Revenue", orders: "Orders", members: "Members", completions: "Completions", activeRate: "Active rate" }
 
-describe("academy growth summary states", () => {
+describe("AcademyGrowthSummaryBase", () => {
     it("renders aggregate facts and calculates the active percentage", () => {
         const html = renderToStaticMarkup(<AcademyGrowthSummaryBase state="answered" revenue="₫1,000" labels={labels} data={{ revenueVnd: 1000, paidOrders: 4, totalMembers: 8, activeMembers: 6, totalCompletions: 12 }} />)
         expect(html).toContain("₫1,000")

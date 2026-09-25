@@ -6,7 +6,7 @@ vi.mock("next/root-params", () => ({ locale: mocks.rootLocale }))
 
 import requestConfig from "./request"
 
-describe("app request locale config", () => {
+describe("request", () => {
     beforeEach(() => { vi.clearAllMocks() })
 
     it("loads Vietnamese messages for a routed Vietnamese request", async () => {

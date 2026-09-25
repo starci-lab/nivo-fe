@@ -22,7 +22,7 @@ import {
     runAgentosModuleTest,
 } from "./console"
 
-describe("console API operations", () => {
+describe("modules/api/console", () => {
     beforeEach(() => vi.clearAllMocks())
 
     it("keeps operation variables and documents aligned for high-risk mutations and paged reads", async () => {
@@ -62,7 +62,7 @@ describe("console API operations", () => {
     })
 })
 
-describe("console API interaction wrappers", () => {
+describe("console", () => {
     it("dispatches owner-scoped reads and lifecycle mutations to GraphQL", async () => {
         await Promise.all([
             myExpertSites(), myAgentWorkspace(), myInstances(), myDomains(), myWallet(), myWalletTransactions(),

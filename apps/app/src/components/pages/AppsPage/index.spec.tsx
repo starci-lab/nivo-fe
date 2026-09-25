@@ -1,12 +1,142 @@
-import { render, screen } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { SWRConfig } from "swr"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+const push = vi.fn()
+const replace = vi.fn()
+const signedIn = { state: { status: "signed-in", accessToken: "token" } }
+const localeState = { value: "en" }
+const t = (key: string) => key
+const resetQueryCache = () => { for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key) }
+let viewerSequence = 0
+if (!Element.prototype.getAnimations) Element.prototype.getAnimations = () => []
 
 vi.mock("./component", () => ({ AppsPageBase: () => <div>apps page</div> }))
+vi.mock("@/modules/auth/session", () => ({ useSession: () => signedIn }))
+vi.mock("@/modules/realtime/provisioning", () => ({ default: () => ({ status: "disconnected", reason: null }) }))
+vi.mock("@/modules/api/console", () => ({
+    myExpertSites: vi.fn().mockResolvedValue({ ok: true, data: [] }),
+    myInstances: vi.fn().mockResolvedValue({ ok: true, data: [] }),
+    myCatalogOrders: vi.fn().mockResolvedValue({ ok: true, data: [] }),
+    catalogItems: vi.fn().mockResolvedValue({ ok: true, data: [] }),
+    myWallet: vi.fn().mockResolvedValue({ ok: true, data: { balanceVnd: 0 } }),
+    myTransactions: vi.fn().mockResolvedValue({ ok: true, data: [] }),
+    myWalletTransactions: vi.fn().mockResolvedValue({ ok: true, data: [] }),
+    myInvoices: vi.fn().mockResolvedValue({ ok: true, data: [] }),
+    createWalletTopUpPayLink: vi.fn().mockResolvedValue({ ok: false, reason: "not used" }),
+    payInvoice: vi.fn().mockResolvedValue({ ok: false, reason: "not used" }),
+    myAgentWorkspace: vi.fn().mockResolvedValue({ ok: true, data: [] }),
+    myAgentWorkspaces: vi.fn().mockResolvedValue({ ok: true, data: [] }),
+    myAgentosWorkspaceApplications: vi.fn().mockResolvedValue({ ok: true, data: [] }),
+    myAgentosWorkspaceRuntime: vi.fn().mockResolvedValue({ ok: true, data: undefined }),
+    myAgentWorkspaceControlCenter: vi.fn().mockResolvedValue({ ok: false, reason: "unavailable" }),
+    myAgentosModuleInstallation: vi.fn().mockResolvedValue({ ok: false, reason: "unavailable" }),
+    myAgentosModuleRuntime: vi.fn().mockResolvedValue({ ok: false, reason: "unavailable" }),
+    myAgentosModuleTestSurface: vi.fn().mockResolvedValue({ ok: false, reason: "unavailable" }),
+    manageAgentosModuleRuntime: vi.fn().mockResolvedValue({ ok: false, reason: "unavailable" }),
+    myAgentosSolutionModules: vi.fn().mockResolvedValue({ ok: true, data: [] }),
+    myAgentosModuleInstallations: vi.fn().mockResolvedValue({ ok: true, data: [] }),
+    myAgentosCustomModules: vi.fn().mockResolvedValue({ ok: true, data: [] }),
+    installAgentosSolutionModule: vi.fn().mockResolvedValue({ ok: false, reason: "unavailable" }),
+    myAcademyGrowthSnapshot: vi.fn().mockResolvedValue({ ok: true, data: { revenueVnd: 1000, paidOrders: 1, totalMembers: 2, activeMembers: 1, totalCompletions: 3 } }),
+}))
+
 import { AppsPage } from "."
+import type { AgentOSPage } from "../AgentOSPage"
+import { myAgentWorkspace, myExpertSites, myInstances, myCatalogOrders, catalogItems } from "@/modules/api/console"
 
 describe("AppsPage", () => {
     it("mounts the dashboard compositor", () => {
         render(<AppsPage />)
         expect(screen.getByText("apps page")).toBeInTheDocument()
+    })
+
+    // The connected composition needs the real dashboard and the real intl runtime, so this
+    // block re-registers both for its own module registry instead of the probe above.
+    describe("connected orchestration", () => {
+        let ConnectedAppsPage: typeof AppsPage
+        let ConnectedAgentOSPage: typeof AgentOSPage
+        beforeEach(async () => {
+            vi.resetModules()
+            vi.doMock("./component", async () => await vi.importActual("./component"))
+            vi.doMock("next-intl", () => ({
+                useTranslations: () => t,
+                useLocale: () => localeState.value,
+                useFormatter: () => ({ number: (value: number) => String(value), dateTime: (value: string) => value }),
+            }))
+            ConnectedAppsPage = (await import(".")).AppsPage
+            ConnectedAgentOSPage = (await import("../AgentOSPage")).AgentOSPage
+            window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })
+            viewerSequence += 1
+            signedIn.state = { status: "signed-in", accessToken: `orchestration-pages-${viewerSequence}` }
+            push.mockClear()
+            replace.mockClear()
+        }, 60000)
+        afterEach(() => {
+            vi.doUnmock("./component")
+            vi.doUnmock("next-intl")
+            localeState.value = "en"
+            cleanup()
+            resetQueryCache()
+        })
+
+        it("settles AppsPage into its empty catalogue state", async () => {
+            render(<ConnectedAppsPage />)
+            expect(screen.getByText("apps.title")).toBeInTheDocument()
+        })
+
+        it("renders owned apps, an in-progress order, and catalogue offers", async () => {
+            vi.mocked(myExpertSites).mockResolvedValue({ ok: true, data: [{ id: "site-1", slug: "academy", customDomain: null, provisionStatus: "ready", status: "active" }, { id: "site-2", slug: "unknown", customDomain: "unknown.test", provisionStatus: "awaiting_dns", status: "active" }] } as never)
+            vi.mocked(myInstances).mockResolvedValue({ ok: true, data: [{ id: "instance-1", appKey: "ai_academy", detailId: "site-1", name: null, plan: null, ram: null, vcpu: null, status: "ready" }] } as never)
+            vi.mocked(myCatalogOrders).mockResolvedValue({ ok: true, data: [{ id: "order-1", status: "in_progress", catalogItem: { id: "item-1", name: "Academy" }, catalogTier: { id: "tier-1", name: "Starter" } }, { id: "order-2", status: "in_progress", catalogItem: null, catalogTier: null }] } as never)
+            vi.mocked(catalogItems).mockResolvedValue({ ok: true, data: [{ id: "item-1", slug: "academy", name: "Academy", tagline: "Learn", templateKey: "ai_academy", tiers: [{ id: "tier-1", tierKey: "starter", name: "Starter", priceMonthlyVnd: null, orderIndex: 0 }, { id: "tier-2", tierKey: "basic", name: "Basic", priceMonthlyVnd: 100, orderIndex: 1 }, { id: "tier-3", tierKey: "pro", name: "Pro", priceMonthlyVnd: 200, orderIndex: 2 }] }, { id: "item-2", slug: "custom", name: "Custom", tagline: null, templateKey: "custom", tiers: null }, { id: "item-3", slug: "ignored", name: "Ignored", tagline: null, templateKey: null, tiers: null }] } as never)
+            render(<ConnectedAppsPage />)
+            await waitFor(() => expect(screen.getAllByText("Academy").length).toBeGreaterThan(0))
+            for (const button of screen.getAllByRole("button")) {
+                if (!button.hasAttribute("disabled")) fireEvent.click(button)
+            }
+        })
+
+        it("covers AppsPage refusal and empty catalogue answers", async () => {
+            cleanup()
+            resetQueryCache()
+            vi.mocked(myExpertSites).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
+            vi.mocked(myInstances).mockResolvedValue({ ok: true, data: [] } as never)
+            vi.mocked(myCatalogOrders).mockResolvedValue({ ok: true, data: [] } as never)
+            vi.mocked(catalogItems).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
+            render(<ConnectedAppsPage />)
+            await waitFor(() => expect(screen.getAllByText("refusal.unknown").length).toBeGreaterThan(0))
+            cleanup()
+            resetQueryCache()
+            vi.mocked(myExpertSites).mockResolvedValue({ ok: true, data: [] } as never)
+            vi.mocked(catalogItems).mockResolvedValue({ ok: true, data: [] } as never)
+            render(<ConnectedAppsPage />)
+            await waitFor(() => expect(screen.getAllByText("apps.emptyDescription").length).toBeGreaterThan(0))
+        })
+
+        it("covers signed-out and non-default AppsPage routing plus missing joins", async () => {
+            cleanup()
+            resetQueryCache()
+            signedIn.state = { status: "signed-out", accessToken: "" }
+            render(<ConnectedAppsPage />)
+            expect(screen.getByText("apps.title")).toBeInTheDocument()
+            cleanup()
+            resetQueryCache()
+            signedIn.state = { status: "signed-in", accessToken: `orchestration-pages-${viewerSequence}-apps` }
+            localeState.value = "vi"
+            vi.mocked(myExpertSites).mockResolvedValue({ ok: true, data: [{ id: "site-1", slug: "academy", customDomain: null, provisionStatus: "unknown", status: "active" }] } as never)
+            vi.mocked(myInstances).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
+            vi.mocked(myCatalogOrders).mockResolvedValue({ ok: true, data: [] } as never)
+            vi.mocked(catalogItems).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
+            render(<ConnectedAppsPage />)
+            expect(await screen.findByText("academy")).toBeInTheDocument()
+            cleanup()
+            resetQueryCache()
+            localeState.value = "vi"
+            vi.mocked(myAgentWorkspace).mockResolvedValue({ ok: true, data: [{ id: "workspace-1", name: null, status: "unknown", catalogOrder: null }] } as never)
+            render(<ConnectedAgentOSPage mode="dashboard" />)
+            await waitFor(() => expect(screen.getAllByText("workspaceFallback").length).toBeGreaterThan(0))
+            expect(screen.queryByRole("link", { name: "workspaceFallback" })).toBeNull()
+        })
     })
 })

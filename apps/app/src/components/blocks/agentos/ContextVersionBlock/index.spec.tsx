@@ -18,6 +18,30 @@ const ContextVersionBlockCopyFixture = (props: ContextVersionBlockFixtureProps) 
 }
 const ContextVersionBlock = ({ locale = "en", ...props }: ContextVersionBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><ContextVersionBlockCopyFixture {...props} /></NextIntlClientProvider>
 
+const gates = [
+    "Business identity", "Products and services", "Support scope", "Customer segments", "Channels", "Hours and SLA",
+    "Escalation and handoff", "Prohibited commitments", "Privacy and sensitive data", "Tone and language",
+    "Automation policy", "Readiness ownership",
+].map((label, index) => ({ key: `gate-${index}`, label, passed: true, ownerConfirmation: false, confirmed: false, citationPolicy: "none" as const }))
+
+const testedDraft: ContextDraft = {
+    contextId: "22222222-2222-4222-8222-222222222222",
+    setupSessionId: "11111111-1111-4111-8111-111111111111",
+    revision: 2,
+    status: "completed",
+    version: 2,
+    digest: "a".repeat(64),
+    definitionDigest: "d".repeat(64),
+    authorityGeneration: 1,
+    sourceGeneration: 1,
+    retrievalGeneration: 1,
+    summary: "A Vietnamese real-estate Support Desk",
+    facts: ["Escalate qualified leads to the sales team"],
+    gates,
+    exactTestPassed: true,
+    isActive: false,
+}
+
 describe("ContextVersionBlock", () => {
     it("keeps Apply disabled until the existing immutable guard is ready", () => {
         const onApply = vi.fn()
@@ -25,6 +49,33 @@ describe("ContextVersionBlock", () => {
         expect(html).toContain("Required before Apply")
         expect(html).toContain("disabled")
         expect(onApply).not.toHaveBeenCalled()
+    })
+
+    describe.each(["en", "vi"] as const)("Support Desk Setup journey %s", locale => {
+        const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
+        it("permits Apply only after the exact Setup digest has trusted Test evidence", () => {
+            const apply = vi.fn()
+            const view = render(<ContextVersionBlock locale={locale}
+                activeVersion={1}
+                draft={testedDraft}
+                pending={false}
+                refused={false}
+                onApply={apply}
+            />)
+
+            expect(screen.getByText(copy.completeCount({ passed: 12, total: 12 }))).toBeTruthy()
+            fireEvent.click(screen.getByRole("button", { name: copy.applyVersion({ version: 2 }) }))
+            expect(apply).toHaveBeenCalledTimes(1)
+
+            view.rerender(<ContextVersionBlock locale={locale}
+                activeVersion={1}
+                draft={{ ...testedDraft, exactTestPassed: false }}
+                pending={false}
+                refused={false}
+                onApply={apply}
+            />)
+            expect(screen.getByRole("button", { name: copy.passTestFirst })).toBeDisabled()
+        })
     })
 
     describe.each(["en", "vi"] as const)("Context copy %s", locale => {

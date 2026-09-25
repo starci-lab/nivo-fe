@@ -15,7 +15,7 @@ vi.unmock("@/i18n/navigation")
 import { Link, getPathname, redirect, usePathname, useRouter } from "./navigation"
 import { routing } from "./routing"
 
-describe("locale navigation exports", () => {
+describe("navigation", () => {
     it("creates one navigation family from the routed locale authority", () => {
         expect(createNavigation).toHaveBeenCalledWith(routing)
         expect({ Link, redirect, usePathname, useRouter, getPathname }).toEqual(navigation)

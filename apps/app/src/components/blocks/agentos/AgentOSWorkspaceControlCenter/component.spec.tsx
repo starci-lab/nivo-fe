@@ -96,3 +96,31 @@ describe("AgentOSWorkspaceControlCenterBase", () => {
         expect(select).toHaveBeenCalledWith("applications")
     })
 })
+
+describe("AgentOSWorkspaceControlCenterBase", () => {
+    it("renders the workspace loading projection without requiring workspace data", () => {
+        const labels = {
+            titleFallback: "Workspace",
+            loading: "Loading workspace",
+            accessUnavailable: "Access unavailable",
+            tabsLabel: "Sections",
+            tabs: [],
+            summary: {} as AgentOSWorkspaceControlCenterLabels["summary"],
+            applications: {} as AgentOSWorkspaceControlCenterLabels["applications"],
+            runtime: {} as AgentOSWorkspaceControlCenterLabels["runtime"],
+            stack: {} as AgentOSWorkspaceControlCenterLabels["stack"],
+            operations: {} as AgentOSWorkspaceControlCenterLabels["operations"],
+        } satisfies AgentOSWorkspaceControlCenterLabels
+        render(<AgentOSWorkspaceControlCenterBase
+            pageState="overview"
+            controlCenterState="loading"
+            labels={labels}
+            launchState="idle"
+            openClawLaunchHref="#"
+            onSelectPageState={vi.fn()}
+            onOpenAgentConsole={vi.fn()}
+            formatDate={(value) => value}
+        />)
+        expect(screen.getByRole("status")).toHaveTextContent("Loading workspace")
+    })
+})

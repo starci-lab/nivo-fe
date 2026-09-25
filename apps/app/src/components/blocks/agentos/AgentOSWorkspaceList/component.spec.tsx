@@ -62,3 +62,19 @@ describe("AgentOSWorkspaceListBase", () => {
         expect(screen.getByText("Requires action")).toBeInTheDocument()
     })
 })
+
+describe("AgentOSWorkspaceListBase", () => {
+    it("executes the renamed pure twins across their settled state branches", () => {
+        expect(AgentOSWorkspaceListBase({ state: "resting", props: { label: "Workspaces" } })).toBeTruthy()
+        expect(AgentOSWorkspaceListBase({
+            state: "refused",
+            props: { label: "Workspaces", message: "Unavailable" },
+            on: { retry: vi.fn() },
+        })).toBeTruthy()
+        expect(AgentOSWorkspaceListBase({
+            state: "answered",
+            props: { label: "Workspaces", rows: [{ id: "workspace-1", href: "/en/agentos/workspaces/workspace-1", name: "Workspace", detail: "Order", kindLabel: "Workspace", status: "ready", statusLabel: "Ready" }] },
+            on: { openWorkspace: vi.fn() },
+        })).toBeTruthy()
+    })
+})

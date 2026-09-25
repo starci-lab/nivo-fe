@@ -1,3 +1,4 @@
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import { AcademyStudentCrmBase } from "./component"
@@ -6,7 +7,7 @@ const labels = { section: "Students", empty: "No students", refused: "Unavailabl
 const student = { id: "member-1", name: "Reader", email: "reader@example.test", role: "student", status: "active", xp: 10 }
 const handlers = { openStudent: vi.fn(), changeName: vi.fn(), changeEmail: vi.fn(), changePassword: vi.fn(), createStudent: vi.fn(), changeCourseSlug: vi.fn(), setStatus: vi.fn(), grantAccess: vi.fn(), revokeAccess: vi.fn() }
 
-describe("academy student CRM states", () => {
+describe("AcademyStudentCrmBase", () => {
     it("renders list empty/refused states and student identity", () => {
         expect(renderToStaticMarkup(<AcademyStudentCrmBase state="empty" students={[]} detailState="idle" labels={labels} on={handlers} />)).toContain("No students")
         expect(renderToStaticMarkup(<AcademyStudentCrmBase state="refused" students={[]} detailState="idle" labels={labels} on={handlers} />)).toContain("Unavailable")
@@ -20,5 +21,27 @@ describe("academy student CRM states", () => {
         expect(html).toContain("2/4")
         const empty = renderToStaticMarkup(<AcademyStudentCrmBase state="answered" students={[student]} detailState="answered" detail={{ ...detail, courses: [] }} labels={labels} on={handlers} />)
         expect(empty).toContain("Course")
+    })
+})
+
+describe("AcademyStudentCrmBase", () => {
+    it("fires integration, lead, student, and solution actions", () => {
+        const actions = { openStudent: vi.fn(), changeName: vi.fn(), changeEmail: vi.fn(), changePassword: vi.fn(), createStudent: vi.fn(), changeCourseSlug: vi.fn(), setStatus: vi.fn(), grantAccess: vi.fn(), revokeAccess: vi.fn() }
+        const student = { id: "member-1", name: "Student", email: "student@example.test", role: "student", status: "active", xp: 1 }
+        const detail = { member: student, orders: [], courses: [{ slug: "intro", title: "Intro", completed: 1, total: 2 }] }
+        render(<AcademyStudentCrmBase state="answered" students={[student]} detailState="answered" detail={detail} labels={labels} on={actions} />)
+        fireEvent.click(screen.getAllByRole("button", { name: "Open" }).at(-1)!)
+        fireEvent.change(screen.getByLabelText("Name"), { target: { value: "New" } })
+        fireEvent.change(screen.getByLabelText("Email"), { target: { value: "new@example.test" } })
+        fireEvent.change(screen.getByLabelText("Password"), { target: { value: "secret" } })
+        fireEvent.change(screen.getByLabelText("Course"), { target: { value: "advanced" } })
+        fireEvent.click(screen.getByRole("button", { name: "Save" }))
+        fireEvent.click(screen.getByRole("button", { name: "Grant" }))
+        expect(actions.openStudent).toHaveBeenCalled()
+        expect(actions.createStudent).toHaveBeenCalled()
+        expect(actions.grantAccess).toHaveBeenCalled()
+        cleanup()
+        renderToStaticMarkup(<AcademyStudentCrmBase state="resting" students={[]} detailState="resting" labels={labels} on={actions} />)
+        renderToStaticMarkup(<AcademyStudentCrmBase state="answered" students={[{ ...student, status: "banned" }]} detailState="refused" actionMessage="Failed" detail={{ member: student, orders: [], courses: [{ slug: "zero", title: "Zero", completed: 0, total: 0 }] }} labels={labels} on={actions} />)
     })
 })

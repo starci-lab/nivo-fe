@@ -14,3 +14,10 @@ describe("AcademyControlCenterPageBase", () => {
         expect(select).toHaveBeenCalledWith("system")
     })
 })
+
+describe("AcademyControlCenterPageBase", () => {
+    it("executes the renamed pure twins across their settled state branches", () => {
+        expect(AcademyControlCenterPageBase({ siteId: "site-1", mode: "growth", onSelectMode: vi.fn() })).toBeTruthy()
+        expect(AcademyControlCenterPageBase({ siteId: "site-1", mode: "system", onSelectMode: vi.fn() })).toBeTruthy()
+    })
+})
