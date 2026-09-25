@@ -1,4 +1,135 @@
 {
+  "agentos": {
+    "sales": {
+      "decision": {
+        "title": "Commercial decision request",
+        "description": "Review the proposal exactly as the read discloses it, then record one answer.",
+        "rail": {
+          "scope": "Installation scope",
+          "scopeReady": "Installation address resolved.",
+          "installation": "Workspace {workspace}, installation {installation}",
+          "notice": "Last answer",
+          "noticeEmpty": "No answer has been sent from this screen."
+        },
+        "standing": {
+          "loading": "Reading the decision request…",
+          "empty": "No decision request at this identity",
+          "emptyHint": "The read answered with no proposal. Check the identity you addressed.",
+          "safeToRetry": "The decision request could not be read",
+          "nothingChanged": "Nothing was answered. Reading again is safe."
+        },
+        "refusal": {
+          "forbidden": "This installation's decision requests are not disclosed to you.",
+          "signIn": "Your session ended. Sign in again to answer.",
+          "validation": "The answer does not match what the proposal requires.",
+          "conflict": "The proposal moved on since you opened it.",
+          "unavailable": "Sales is not answering this decision request right now.",
+          "unattested": "The answer may not have been recorded. Read the request again before answering.",
+          "unreachable": "Sales could not be reached.",
+          "malformed": "Sales answered with something this screen cannot read.",
+          "unsettled": "The answer did not settle: the request still reads as unanswered."
+        },
+        "proposal": {
+          "label": "Proposal under decision",
+          "reload": "Read again",
+          "requestId": "Decision request",
+          "requestIdHint": "The Sales-owned identity of the request to read",
+          "identity": "Request {request}, opportunity {opportunity}",
+          "version": "Proposal version {version}",
+          "fingerprint": "Fingerprint {fingerprint}",
+          "revision": "Revision {revision}",
+          "notAnEffect": "A decision is not an order: any later customer or Accounting effect is recorded under its own identity.",
+          "empty": "This request holds no proposal to answer",
+          "emptyHint": "Only the request the read disclosed can be answered here."
+        },
+        "status": {
+          "pending": "Awaiting one answer",
+          "approved": "Approved",
+          "rejected": "Rejected",
+          "superseded": "Superseded by a newer proposal"
+        },
+        "answer": {
+          "label": "Your answer",
+          "question": "Answer this proposal exactly once.",
+          "approve": "Approve",
+          "reject": "Reject",
+          "expectedRevision": "Expected revision",
+          "expectedRevisionHint": "The revision this answer is guarded at",
+          "submit": "Record the answer",
+          "answering": "Sending the answer…",
+          "pendingNote": "The answer is recorded only when the request reads back with it.",
+          "settled": "This request has been answered; only the read's own decision is shown.",
+          "recorded": "The request reads back with your answer: {status}.",
+          "stale": "The proposal changed since you opened it. Read it again before answering."
+        }
+      },
+      "handoff": {
+        "title": "Accounting handoff",
+        "description": "Submit the prepared handoff, and show only what the Accounting receipt discloses.",
+        "rail": {
+          "scope": "Installation scope",
+          "scopeReady": "Installation address resolved.",
+          "installation": "Workspace {workspace}, installation {installation}",
+          "notice": "Last submission",
+          "noticeEmpty": "No handoff has been submitted from this screen."
+        },
+        "standing": {
+          "loading": "Reading the handoff…",
+          "empty": "No handoff at this identity",
+          "emptyHint": "The read answered with no handoff. Check the identity you addressed.",
+          "safeToRetry": "The handoff could not be read",
+          "nothingChanged": "Nothing was submitted. Reading again is safe."
+        },
+        "refusal": {
+          "forbidden": "This installation's handoffs are not disclosed to you.",
+          "signIn": "Your session ended. Sign in again to submit.",
+          "validation": "The submission does not match what the prepared handoff requires.",
+          "conflict": "The handoff moved on since you opened it.",
+          "unavailable": "Sales is not answering this handoff right now.",
+          "unattested": "The submission may not have been recorded. Look this handoff up again before resubmitting.",
+          "unreachable": "Sales could not be reached.",
+          "malformed": "Sales answered with something this screen cannot read.",
+          "unsettled": "The submission did not settle: the handoff still reads as prepared."
+        },
+        "status": {
+          "prepared": "Prepared, not submitted",
+          "queued": "Queued for Accounting",
+          "possibleStart": "May have started",
+          "accountingAdmitted": "Admitted by Accounting",
+          "accountingRefused": "Refused by Accounting",
+          "accountingCancelled": "Cancelled by Accounting",
+          "preflightUnavailable": "Accounting unreachable before the attempt",
+          "outcomeUnknown": "Outcome unknown"
+        },
+        "handoff": {
+          "label": "Prepared handoff",
+          "reload": "Read again",
+          "handoffId": "Handoff",
+          "handoffIdHint": "The Sales-owned identity of the handoff to read",
+          "identity": "Handoff {handoff}, order revision {order}",
+          "action": "Sales action {action}",
+          "actionNone": "No Sales action yet",
+          "revision": "Revision {revision}",
+          "intakeOnly": "An admission is a receipt of intake only: Accounting decides everything after it.",
+          "empty": "This identity holds no prepared handoff",
+          "emptyHint": "Only a prepared handoff can be submitted."
+        },
+        "submission": {
+          "label": "Submit to Accounting",
+          "fingerprint": "Fingerprint",
+          "fingerprintHint": "The exact content this submission claims",
+          "expectedRevision": "Expected handoff revision",
+          "expectedRevisionHint": "The revision this submission is guarded at",
+          "submit": "Submit handoff",
+          "submitting": "Submitting the handoff…",
+          "held": "The handoff can leave only from prepared.",
+          "lookupOnly": "The attempt may have started: only a lookup of this same handoff identity is safe, never a new submission.",
+          "note": "The submission is shown only when the handoff reads back with it.",
+          "settled": "The handoff reads back with the submission: {status}."
+        }
+      }
+    }
+  },
   "app": {
     "description": "Provisioning and operations console."
   },

@@ -1,4 +1,135 @@
 {
+  "agentos": {
+    "sales": {
+      "decision": {
+        "title": "Yêu cầu quyết định thương mại",
+        "description": "Xem xét đề xuất đúng như bản đọc công bố, rồi ghi lại một câu trả lời.",
+        "rail": {
+          "scope": "Phạm vi bản cài đặt",
+          "scopeReady": "Đã xác định địa chỉ bản cài đặt.",
+          "installation": "Không gian làm việc {workspace}, bản cài đặt {installation}",
+          "notice": "Câu trả lời gần nhất",
+          "noticeEmpty": "Chưa gửi câu trả lời nào từ màn hình này."
+        },
+        "standing": {
+          "loading": "Đang đọc yêu cầu quyết định…",
+          "empty": "Không có yêu cầu quyết định ở định danh này",
+          "emptyHint": "Bản đọc không công bố đề xuất nào. Kiểm tra lại định danh đã gửi.",
+          "safeToRetry": "Không đọc được yêu cầu quyết định",
+          "nothingChanged": "Chưa trả lời gì. Đọc lại là an toàn."
+        },
+        "refusal": {
+          "forbidden": "Bạn không được xem yêu cầu quyết định của bản cài đặt này.",
+          "signIn": "Phiên đăng nhập đã kết thúc. Đăng nhập lại để trả lời.",
+          "validation": "Câu trả lời không khớp với điều đề xuất yêu cầu.",
+          "conflict": "Đề xuất đã thay đổi kể từ khi bạn mở.",
+          "unavailable": "Sales hiện không trả lời yêu cầu quyết định này.",
+          "unattested": "Câu trả lời có thể chưa được ghi. Đọc lại yêu cầu trước khi trả lời.",
+          "unreachable": "Không kết nối được tới Sales.",
+          "malformed": "Sales trả lời bằng dữ liệu màn hình này không đọc được.",
+          "unsettled": "Câu trả lời chưa chốt: yêu cầu vẫn đọc là chưa trả lời."
+        },
+        "proposal": {
+          "label": "Đề xuất đang chờ quyết định",
+          "reload": "Đọc lại",
+          "requestId": "Yêu cầu quyết định",
+          "requestIdHint": "Định danh do Sales sở hữu của yêu cầu cần đọc",
+          "identity": "Yêu cầu {request}, cơ hội {opportunity}",
+          "version": "Phiên bản đề xuất {version}",
+          "fingerprint": "Dấu vân tay {fingerprint}",
+          "revision": "Bản sửa {revision}",
+          "notAnEffect": "Quyết định không phải là đơn hàng: mọi hệ quả về sau cho khách hàng hoặc Kế toán được ghi dưới định danh riêng.",
+          "empty": "Yêu cầu này không có đề xuất nào để trả lời",
+          "emptyHint": "Chỉ trả lời được yêu cầu mà bản đọc đã công bố."
+        },
+        "status": {
+          "pending": "Đang chờ một câu trả lời",
+          "approved": "Đã chấp thuận",
+          "rejected": "Đã từ chối",
+          "superseded": "Đã bị đề xuất mới thay thế"
+        },
+        "answer": {
+          "label": "Câu trả lời của bạn",
+          "question": "Trả lời đề xuất này đúng một lần.",
+          "approve": "Chấp thuận",
+          "reject": "Từ chối",
+          "expectedRevision": "Bản sửa mong đợi",
+          "expectedRevisionHint": "Bản sửa mà câu trả lời này được bảo vệ theo",
+          "submit": "Ghi câu trả lời",
+          "answering": "Đang gửi câu trả lời…",
+          "pendingNote": "Câu trả lời chỉ được ghi khi yêu cầu đọc lại có nó.",
+          "settled": "Yêu cầu này đã được trả lời; chỉ hiện quyết định mà bản đọc công bố.",
+          "recorded": "Yêu cầu đọc lại có câu trả lời của bạn: {status}.",
+          "stale": "Đề xuất đã đổi từ khi bạn mở. Đọc lại trước khi trả lời."
+        }
+      },
+      "handoff": {
+        "title": "Bàn giao cho Kế toán",
+        "description": "Gửi bàn giao đã chuẩn bị, và chỉ hiện đúng những gì biên nhận Kế toán công bố.",
+        "rail": {
+          "scope": "Phạm vi bản cài đặt",
+          "scopeReady": "Đã xác định địa chỉ bản cài đặt.",
+          "installation": "Không gian làm việc {workspace}, bản cài đặt {installation}",
+          "notice": "Lần gửi gần nhất",
+          "noticeEmpty": "Chưa gửi bàn giao nào từ màn hình này."
+        },
+        "standing": {
+          "loading": "Đang đọc bàn giao…",
+          "empty": "Không có bàn giao ở định danh này",
+          "emptyHint": "Bản đọc không công bố bàn giao nào. Kiểm tra lại định danh đã gửi.",
+          "safeToRetry": "Không đọc được bàn giao",
+          "nothingChanged": "Chưa gửi gì. Đọc lại là an toàn."
+        },
+        "refusal": {
+          "forbidden": "Bạn không được xem bàn giao của bản cài đặt này.",
+          "signIn": "Phiên đăng nhập đã kết thúc. Đăng nhập lại để gửi.",
+          "validation": "Nội dung gửi không khớp với điều bàn giao đã chuẩn bị yêu cầu.",
+          "conflict": "Bàn giao đã thay đổi kể từ khi bạn mở.",
+          "unavailable": "Sales hiện không trả lời bàn giao này.",
+          "unattested": "Việc gửi có thể chưa được ghi. Hãy tra lại chính bàn giao này trước khi gửi lại.",
+          "unreachable": "Không kết nối được tới Sales.",
+          "malformed": "Sales trả lời bằng dữ liệu màn hình này không đọc được.",
+          "unsettled": "Việc gửi chưa chốt: bàn giao vẫn đọc là đã chuẩn bị."
+        },
+        "status": {
+          "prepared": "Đã chuẩn bị, chưa gửi",
+          "queued": "Đã vào hàng đợi cho Kế toán",
+          "possibleStart": "Có thể đã bắt đầu",
+          "accountingAdmitted": "Kế toán đã tiếp nhận",
+          "accountingRefused": "Kế toán đã từ chối",
+          "accountingCancelled": "Kế toán đã hủy",
+          "preflightUnavailable": "Chưa liên hệ được Kế toán trước khi thử",
+          "outcomeUnknown": "Chưa rõ kết quả"
+        },
+        "handoff": {
+          "label": "Bàn giao đã chuẩn bị",
+          "reload": "Đọc lại",
+          "handoffId": "Bàn giao",
+          "handoffIdHint": "Định danh do Sales sở hữu của bàn giao cần đọc",
+          "identity": "Bàn giao {handoff}, bản sửa đơn hàng {order}",
+          "action": "Hành động Sales {action}",
+          "actionNone": "Chưa có hành động Sales",
+          "revision": "Bản sửa {revision}",
+          "intakeOnly": "Tiếp nhận chỉ là biên nhận lúc vào: mọi việc sau đó do Kế toán quyết định.",
+          "empty": "Định danh này không có bàn giao đã chuẩn bị nào",
+          "emptyHint": "Chỉ bàn giao đã chuẩn bị mới được gửi."
+        },
+        "submission": {
+          "label": "Gửi cho Kế toán",
+          "fingerprint": "Dấu vân tay",
+          "fingerprintHint": "Đúng nội dung mà lần gửi này nhận",
+          "expectedRevision": "Bản sửa bàn giao mong đợi",
+          "expectedRevisionHint": "Bản sửa mà lần gửi này được bảo vệ theo",
+          "submit": "Gửi bàn giao",
+          "submitting": "Đang gửi bàn giao…",
+          "held": "Bàn giao chỉ rời đi được khi đang ở trạng thái đã chuẩn bị.",
+          "lookupOnly": "Lần thử có thể đã bắt đầu: chỉ tra lại chính định danh bàn giao này là an toàn, không gửi mới.",
+          "note": "Lần gửi chỉ được hiện khi bàn giao đọc lại có nó.",
+          "settled": "Bàn giao đọc lại có lần gửi: {status}."
+        }
+      }
+    }
+  },
   "app": {
     "description": "Bảng điều khiển cấp phát và vận hành."
   },
