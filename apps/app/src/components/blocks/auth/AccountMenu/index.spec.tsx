@@ -37,9 +37,9 @@ const scope = vi.hoisted(() => ({
 }))
 vi.mock("next/navigation", () => ({ useParams: () => scope.params }))
 vi.mock("@/hooks", async () => {
-    const { useNivoMutation } = await import("@/hooks/swr/useNivoMutation")
+    const { useMutateEndPrincipalSessionsSwr } = await import("@/hooks/swr/mutations/useMutateEndPrincipalSessionsSwr")
     return {
-        useNivoMutation,
+        useMutateEndPrincipalSessionsSwr,
         useQueryCollabOfficeSwr: (workspaceId: string | null) =>
             workspaceId === null || scope.role === null
                 ? { data: undefined }

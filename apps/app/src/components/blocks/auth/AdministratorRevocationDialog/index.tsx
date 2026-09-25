@@ -3,9 +3,7 @@
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
-import { useNivoMutation } from "@/hooks";
-import { endPrincipalSessions, type EndPrincipalSessionsAnswer, type EndPrincipalSessionsInput } from "@/modules/api/auth";
-import type { Result } from "@/modules/api/graphql";
+import { useMutateEndPrincipalSessionsSwr } from "@/hooks";
 import { AdministratorRevocationDialogBase, type AdministratorRevocationStage } from "./component";
 
 /** Props for the console's scoped administrator session ending. */
@@ -45,10 +43,7 @@ export const AdministratorRevocationDialog = (props: AdministratorRevocationDial
   const [target, setTarget] = useState("");
   const [stage, setStage] = useState<AdministratorRevocationStage>("ready");
   const requestId = useRef<string | null>(null);
-  const ending = useNivoMutation<Result<EndPrincipalSessionsAnswer>, EndPrincipalSessionsInput>(
-    ["auth", "end-principal-sessions", workspace ?? "no-workspace"],
-    endPrincipalSessions
-  );
+  const ending = useMutateEndPrincipalSessionsSwr();
   const submit = (): void => {
     if (stage === "pending" || workspace === null) {
       return;
