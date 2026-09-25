@@ -1,200 +1,141 @@
-import { act, cleanup, render, renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
+import type { FormEvent } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import en from "@/messages/en.json";
 
-const { accountingQuery, contextQuery, runtimeQuery, mutationHooks } = vi.hoisted(() => ({
-  accountingQuery: vi.fn(),
-  contextQuery: vi.fn(),
-  runtimeQuery: vi.fn(),
-  mutationHooks: Array.from({ length: 9 }, () => vi.fn()),
-}));
+/*
+ * The connected controller's load-bearing behaviours: no operation address exists before the
+ * installation scope resolves, and no press reports an effect the readback has not disclosed.
+ */
 
-vi.mock("@/hooks/swr/queries/accounting", () => ({
-  useQueryAccountingWorkbenchSwr: accountingQuery,
-  useQueryAppliedAccountingContextSwr: contextQuery,
-}));
-vi.mock("@/hooks/swr/queries/console", () => ({ useQueryMyAgentosModuleRuntimeSwr: runtimeQuery }));
-vi.mock("@/hooks/swr/mutations/accounting", () => ({
-  useMutateInitializeAccountingSwr: mutationHooks[0],
-  useMutateIngestAccountingDocumentSwr: mutationHooks[1],
-  useMutateSubmitAccountingDocumentSwr: mutationHooks[2],
-  useMutateApproveAccountingDocumentSwr: mutationHooks[3],
-  useMutatePostAccountingDocumentSwr: mutationHooks[4],
-  useMutateReconcileAccountingSwr: mutationHooks[5],
-  useMutateCloseAccountingPeriodSwr: mutationHooks[6],
-  useMutateSubmitAccountingCorrectionSwr: mutationHooks[7],
-  useMutateApproveAccountingCorrectionSwr: mutationHooks[8],
-}));
-vi.mock("next-intl", () => ({
-  useLocale: () => "en",
-  useTranslations: () => (key: string) => key,
-}));
+const mocks = vi.hoisted(() => {
+  const query = (data?: unknown, mutate?: unknown) => ({ value: { data, error: undefined, isLoading: false, isValidating: false, mutate: mutate ?? vi.fn(async () => undefined) } });
+  return {
+    params: { value: { workspaceId: "workspace-1", installationId: "installation-1" } },
+    controlCenter: { value: {} as unknown },
+    summaryRead: vi.fn(),
+    evidenceRead: vi.fn(),
+    routineRead: vi.fn(),
+    detailRead: vi.fn(),
+    admit: { value: { isMutating: false, trigger: vi.fn() } },
+    routineCommand: { value: { isMutating: false, trigger: vi.fn() } },
+    exceptionCommand: { value: { isMutating: false, trigger: vi.fn() } },
+    correct: { value: { isMutating: false, trigger: vi.fn() } },
+    query
+  };
+});
+
+vi.mock("next/navigation", () => ({ useParams: () => mocks.params.value }));
+vi.mock("@/hooks/swr/queries/console", () => ({ useQueryMyAgentWorkspaceControlCenterSwr: () => mocks.controlCenter.value }));
+vi.mock("@/modules/query", () => ({ nivoQueryData: (answer: { readonly ok?: boolean; readonly data?: unknown } | undefined) => answer?.ok === true ? answer.data : null }));
+vi.mock("@/hooks/swr/queries/useQueryAccountingSummarySwr", () => ({ useQueryAccountingSummarySwr: (...args: ReadonlyArray<unknown>) => mocks.summaryRead(...args) }));
+vi.mock("@/hooks/swr/queries/useQueryAccountingEvidenceSwr", () => ({ useQueryAccountingEvidenceSwr: (...args: ReadonlyArray<unknown>) => mocks.evidenceRead(...args) }));
+vi.mock("@/hooks/swr/queries/useQueryAccountingRoutineResultSwr", () => ({ useQueryAccountingRoutineResultSwr: (...args: ReadonlyArray<unknown>) => mocks.routineRead(...args) }));
+vi.mock("@/hooks/swr/queries/useQueryAccountingResultDetailSwr", () => ({ useQueryAccountingResultDetailSwr: (...args: ReadonlyArray<unknown>) => mocks.detailRead(...args) }));
+vi.mock("@/hooks/swr/mutations/useMutateAccountingAdmitEvidenceSwr", () => ({ useMutateAccountingAdmitEvidenceSwr: () => mocks.admit.value }));
+vi.mock("@/hooks/swr/mutations/useMutateAccountingRoutineSwr", () => ({ useMutateAccountingRoutineSwr: () => mocks.routineCommand.value }));
+vi.mock("@/hooks/swr/mutations/useMutateAccountingExceptionSwr", () => ({ useMutateAccountingExceptionSwr: () => mocks.exceptionCommand.value }));
+vi.mock("@/hooks/swr/mutations/useMutateAccountingCorrectSwr", () => ({ useMutateAccountingCorrectSwr: () => mocks.correct.value }));
 
 import { useAccountingWorkbench } from "./useAccountingWorkbench";
-import { AccountingWorkbenchBlock } from "@/components/blocks/agentos/AccountingWorkbenchBlock";
 
-const accepted = { ok: true, data: { operation: "submit-document" } } as const;
-const readback = { ok: true, data: { capabilities: {}, ledger: [], documents: [], reconciliations: [], periods: [], corrections: [] } } as const;
-const contextReadback = { ok: true, data: { versionId: "context-2", digest: "digest-2", snapshot: { accountingScope: { classifications: ["income", "expense"] }, currencyAndLocale: { functionalCurrency: "USD" } } } } as const;
-const translate = (key: string, values?: Readonly<Record<string, string | number | undefined>>) => `${key}${values?.reason === undefined ? "" : `:${values.reason}`}`;
-const event = { preventDefault: vi.fn() } as never;
-
-const deferred = <T,>() => {
-  let resolve!: (value: T) => void;
-  const promise = new Promise<T>(done => { resolve = done; });
-  return { promise, resolve };
+const catalog = en.console.agentos.modules.runtime.workbench.accountingWorkbench as Readonly<Record<string, unknown>>;
+const messageFor = (key: string): string => {
+  let node: unknown = catalog;
+  for (const part of key.split(".")) {
+    if (node === null || typeof node !== "object") return key;
+    node = (node as Record<string, unknown>)[part];
+  }
+  return typeof node === "string" ? node : key;
 };
+const translate = (key: string, values?: Readonly<Record<string, string | number | undefined>>): string =>
+  Object.entries(values ?? {}).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), messageFor(key));
+const evidenceAnswer = (state: string) => ({ ok: true, data: { op: "evidence", payload: { evidenceId: "evidence-1", state, revision: 1, missingFacts: [] } } });
+const form = { preventDefault: () => undefined } as unknown as FormEvent;
+const render = () => renderHook(() => useAccountingWorkbench("installation-1", "en", translate));
 
 describe("useAccountingWorkbench settlement", () => {
-  let trigger: ReturnType<typeof vi.fn>;
-  let mutateWorkbench: ReturnType<typeof vi.fn>;
-  let mutateContext: ReturnType<typeof vi.fn>;
-
   beforeEach(() => {
-    cleanup();
-    vi.clearAllMocks();
-    trigger = vi.fn().mockResolvedValue(accepted);
-    mutateWorkbench = vi.fn().mockResolvedValue(readback);
-    mutateContext = vi.fn().mockResolvedValue(contextReadback);
-    accountingQuery.mockReturnValue({ data: readback, error: undefined, mutate: mutateWorkbench });
-    contextQuery.mockReturnValue({ data: contextReadback, error: undefined, mutate: mutateContext });
-    runtimeQuery.mockReturnValue({ data: { ok: true, data: { participants: [{ userId: "approver-1" }, { userId: "approver-1" }] } }, error: undefined, mutate: vi.fn() });
-    mutationHooks.forEach(hook => hook.mockReturnValue({ isMutating: false, trigger }));
+    mocks.summaryRead.mockClear();
+    mocks.evidenceRead.mockClear();
+    mocks.routineRead.mockClear();
+    mocks.detailRead.mockClear();
+    mocks.summaryRead.mockReturnValue(mocks.query().value);
+    mocks.evidenceRead.mockReturnValue(mocks.query().value);
+    mocks.routineRead.mockReturnValue(mocks.query().value);
+    mocks.detailRead.mockReturnValue(mocks.query().value);
+    mocks.params.value = { workspaceId: "workspace-1", installationId: "installation-1" };
+    mocks.controlCenter.value = { data: { ok: true, data: { instance: { id: "instance-1" } } }, error: undefined };
   });
 
-  it("does not announce success until both owning readbacks settle", async () => {
-    const workbench = deferred<typeof readback>();
-    const context = deferred<typeof contextReadback>();
-    mutateWorkbench.mockReturnValue(workbench.promise);
-    mutateContext.mockReturnValue(context.promise);
-    const { result } = renderHook(() => useAccountingWorkbench("module-1", "en", translate));
-
-    act(() => result.current.documentCommand("submit", "document-1"));
-    await waitFor(() => expect(trigger).toHaveBeenCalledOnce());
-    expect(result.current.notice).toBeNull();
-    await act(async () => { workbench.resolve(readback); await Promise.resolve(); });
-    expect(result.current.notice).toBeNull();
-    await act(async () => { context.resolve(contextReadback); await context.promise; });
-    await waitFor(() => expect(result.current.notice).toEqual({ kind: "success", message: "operationAccepted" }));
-    expect(mutateWorkbench).toHaveBeenCalledOnce();
-    expect(mutateContext).toHaveBeenCalledOnce();
+  it("addresses no operation until the installation scope is resolved", () => {
+    mocks.controlCenter.value = { data: { ok: true, data: { instance: null } }, error: undefined };
+    const { result } = render();
+    expect(result.current.scopeReady).toBe(false);
+    expect(mocks.summaryRead.mock.calls[0]?.[2]).toBe(false);
+    expect(mocks.evidenceRead.mock.calls[0]?.[2]).toBe(false);
+    expect(mocks.routineRead.mock.calls[0]?.[2]).toBe(false);
+    expect(result.current.overview.standing).toBe("unavailable");
   });
 
-  it("keeps command refusal distinct and performs no readback", async () => {
-    trigger.mockResolvedValue({ ok: false, reason: "forbidden" });
-    const { result } = renderHook(() => useAccountingWorkbench("module-1", "en", translate));
-    act(() => result.current.documentCommand("approve", "document-1"));
-    await waitFor(() => expect(result.current.notice).toEqual({ kind: "refused", message: "operationRefused:forbidden" }));
-    expect(mutateWorkbench).not.toHaveBeenCalled();
-    expect(mutateContext).not.toHaveBeenCalled();
+  it("addresses the operation route with the route's workspace, the workspace's instance and the installation", () => {
+    const { result } = render();
+    expect(result.current.scopeReady).toBe(true);
+    expect(mocks.summaryRead.mock.calls[0]?.[0]).toEqual({ workspaceId: "workspace-1", instanceId: "instance-1", installationId: "installation-1" });
+    expect(mocks.summaryRead.mock.calls[0]?.[2]).toBe(true);
+    expect(mocks.summaryRead.mock.calls[0]?.[1]).toMatchObject({ periodStart: result.current.periodLabel });
   });
 
-  it.each([
-    ["workbench", undefined, contextReadback],
-    ["context", readback, { ok: false, reason: "context-denied" }],
-  ])("refuses success when the %s readback is not accepted", async (_name, workbenchAnswer, contextAnswer) => {
-    mutateWorkbench.mockResolvedValue(workbenchAnswer);
-    mutateContext.mockResolvedValue(contextAnswer);
-    const { result } = renderHook(() => useAccountingWorkbench("module-1", "en", translate));
-    act(() => result.current.approvePendingCorrection("correction-1"));
-    await waitFor(() => expect(result.current.notice).toEqual({ kind: "refused", message: "transportError" }));
-    expect(mutateWorkbench).toHaveBeenCalledOnce();
-    expect(mutateContext).toHaveBeenCalledOnce();
+  it("holds the evidence read until an evidence identity is named", () => {
+    const { result } = render();
+    expect(mocks.evidenceRead.mock.calls[0]?.[2]).toBe(false);
+    act(() => result.current.intake.setEvidenceId("evidence-1"));
+    expect(mocks.evidenceRead.mock.calls.at(-1)?.[2]).toBe(true);
   });
 
-  it("turns a command transport exception into a recoverable refusal", async () => {
-    trigger.mockRejectedValue(new Error("offline"));
-    const { result } = renderHook(() => useAccountingWorkbench("module-1", "en", translate));
-    act(() => result.current.documentCommand("post", "document-1"));
-    await waitFor(() => expect(result.current.notice).toEqual({ kind: "refused", message: "transportError" }));
+  it("reports a refusal as a refusal and never reads it back", async () => {
+    const readback = vi.fn(async () => evidenceAnswer("admitted"));
+    mocks.evidenceRead.mockReturnValue(mocks.query(undefined, readback).value);
+    mocks.admit.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: false, code: "stale-authority", reason: "moved on" })) };
+    const { result } = render();
+    act(() => { result.current.intake.setEvidenceId("evidence-1"); result.current.intake.setSourceKind("invoice"); result.current.intake.setSourceRef("ref-1"); result.current.intake.setSourceRevision("rev-1"); result.current.intake.setFingerprint("sha256:1"); });
+    await act(async () => { result.current.intake.onAdmit(form); });
+    expect(result.current.notice).toEqual({ kind: "refused", message: translate("refusal.staleAuthority") });
+    expect(readback).not.toHaveBeenCalled();
   });
 
-  it("reuses an idempotency token while the same refused command is retried", async () => {
-    trigger.mockResolvedValue({ ok: false, reason: "temporarily-blocked" });
-    const { result } = renderHook(() => useAccountingWorkbench("module-1", "en", translate));
-    act(() => result.current.documentCommand("submit", "document-1"));
-    await waitFor(() => expect(trigger).toHaveBeenCalledTimes(1));
-    const firstToken = trigger.mock.calls[0][0].requestToken;
-    act(() => result.current.documentCommand("submit", "document-1"));
-    await waitFor(() => expect(trigger).toHaveBeenCalledTimes(2));
-    expect(trigger.mock.calls[1][0].requestToken).toBe(firstToken);
+  it("takes the success it shows from the readback payload, not from the press", async () => {
+    mocks.evidenceRead.mockReturnValue(mocks.query(undefined, vi.fn(async () => evidenceAnswer("admitted"))).value);
+    mocks.admit.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, data: { op: "admitEvidence", payload: { evidenceId: "evidence-1", state: "reading", revision: 1, missingFacts: [] } } })) };
+    const { result } = render();
+    act(() => { result.current.intake.setEvidenceId("evidence-1"); result.current.intake.setSourceKind("invoice"); result.current.intake.setSourceRef("ref-1"); result.current.intake.setSourceRevision("rev-1"); result.current.intake.setFingerprint("sha256:1"); });
+    await act(async () => { result.current.intake.onAdmit(form); });
+    expect(result.current.notice).toEqual({ kind: "success", message: translate("intake.settled", { state: translate("evidenceState.admitted") }) });
   });
 
-  it("exercises each public command route with valid business inputs", async () => {
-    const { result } = renderHook(() => useAccountingWorkbench("module-1", "en", translate));
-    act(() => {
-      result.current.setApproverId("approver-1");
-      result.current.setSourceAmount("100");
-      result.current.setCloseMonth("2026-09");
-    });
-    act(() => result.current.onInitialize(event));
-    act(() => result.current.onReconcile(event));
-    act(() => result.current.onClose(event));
-    act(() => result.current.documentCommand("submit", "document-1"));
-    act(() => result.current.documentCommand("approve", "document-1"));
-    act(() => result.current.documentCommand("post", "document-1"));
-    act(() => result.current.approvePendingCorrection("correction-1"));
-    await waitFor(() => expect(trigger.mock.calls.length).toBeGreaterThanOrEqual(7));
+  it("says a command did not settle when the readback discloses no new state", async () => {
+    mocks.evidenceRead.mockReturnValue(mocks.query(undefined, vi.fn(async () => ({ ok: true, data: { op: "evidence", payload: undefined } }))).value);
+    mocks.admit.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, data: { op: "admitEvidence", payload: { evidenceId: "evidence-1", state: "admitted", revision: 1, missingFacts: [] } } })) };
+    const { result } = render();
+    act(() => { result.current.intake.setEvidenceId("evidence-1"); result.current.intake.setSourceKind("invoice"); result.current.intake.setSourceRef("ref-1"); result.current.intake.setSourceRevision("rev-1"); result.current.intake.setFingerprint("sha256:1"); });
+    await act(async () => { result.current.intake.onAdmit(form); });
+    expect(result.current.notice).toEqual({ kind: "refused", message: translate("refusal.unsettled") });
   });
 
-  it("reports evidence-file read failure without retaining stale file facts", async () => {
-    const { result } = renderHook(() => useAccountingWorkbench("module-1", "en", translate));
-    const file = { name: "invoice.pdf", type: "application/pdf", size: 10, arrayBuffer: vi.fn().mockRejectedValue(new Error("unreadable")) } as unknown as File;
-    await act(async () => result.current.onFileSelected(file));
-    expect(result.current.notice).toEqual({ kind: "refused", message: "fileReadFailed" });
-    expect(result.current.fileName).toBe("");
-    expect(result.current.fileSize).toBe(0);
-  });
-
-  it("defaults an evidence file without a MIME type and ignores incomplete forms", async () => {
-    const { result } = renderHook(() => useAccountingWorkbench("module-1", "en", translate));
-    const file = { name: "evidence", type: "", size: 1, arrayBuffer: vi.fn().mockResolvedValue(new Uint8Array([1]).buffer) } as unknown as File;
-    await act(async () => result.current.onFileSelected(file));
-    act(() => {
-      result.current.onIngest(event);
-      result.current.onCorrection(event);
-    });
-    expect(trigger).not.toHaveBeenCalled();
-    expect(result.current.fileName).toBe("evidence");
-  });
-
-  it("submits valid evidence and correction forms through their command paths", async () => {
-    const modelWithLedger = {
-      ...readback.data,
-      capabilities: { viewerRole: "owner", canSubmitCorrection: true, canApproveCorrection: false },
-      ledger: [{ id: "ledger-1", correctionOfId: null, documentId: "document-1", ledgerVersion: "1", periodKey: "2026-09-01", signedAmountMinor: "100", currency: "VND", kind: "document", reason: null, createdAt: "2026-09-06T00:00:00Z" }],
-    };
-    accountingQuery.mockReturnValue({ data: { ok: true, data: modelWithLedger }, error: undefined, mutate: mutateWorkbench });
-    const { result } = renderHook(() => useAccountingWorkbench("module-1", "en", translate));
-    const file = { name: "invoice.pdf", type: "application/pdf", size: 4, arrayBuffer: vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3, 4]).buffer) } as unknown as File;
-    await act(async () => result.current.onFileSelected(file));
-    act(() => {
-      result.current.setDocumentAmount("100");
-      result.current.setDocumentMonth("2026-09");
-      result.current.setSourceEntryId("ledger-1");
-      result.current.setEffectiveMonth("2026-10");
-      result.current.setDeltaAmount("-50");
-      result.current.setCorrectionReason("late evidence");
-    });
-    act(() => result.current.onIngest(event));
-    act(() => result.current.onCorrection(event));
-    await waitFor(() => expect(trigger.mock.calls.length).toBeGreaterThanOrEqual(2));
-    expect(trigger.mock.calls.find(call => call[0].fileName === "invoice.pdf")?.[0]).toMatchObject({ currency: "USD", classification: "expense" });
-    expect(result.current.correctionAccess({ status: "pending", effectivePeriodKey: "2026-10-01", submittedByUserId: "owner-1", approverUserId: "approver-1" } as never).approvalReason).toBe("not-owner");
-  });
-
-  it("does not send document intake when the applied Setup intake policy is invalid", async () => {
-    contextQuery.mockReturnValue({ data: { ok: true, data: { versionId: "context-2", digest: "digest-2", snapshot: {} } }, error: undefined, mutate: mutateContext });
-    const { result } = renderHook(() => useAccountingWorkbench("module-1", "en", translate));
-    const file = { name: "invoice.pdf", type: "application/pdf", size: 1, arrayBuffer: vi.fn().mockResolvedValue(new Uint8Array([1]).buffer) } as unknown as File;
-    await act(async () => result.current.onFileSelected(file));
-    act(() => { result.current.setDocumentAmount("100"); result.current.setDocumentMonth("2026-09"); });
-    act(() => result.current.onIngest(event));
-    expect(result.current.intakeReady).toBe(false);
-    expect(trigger).not.toHaveBeenCalled();
-  });
-
-  it("connects the installed block through locale and translation owners", () => {
-    const { container } = render(<AccountingWorkbenchBlock moduleId="module-1" kindKey="accounting" workbenchVersion="1" />);
-    expect(container.querySelector('[data-contract="GAP-5 MEASURE-2"]')).not.toBeNull();
+  it("replays one request identity for one unchanged press and mints a new one after it settles", async () => {
+    type Press = { readonly requestId: string; readonly input: unknown };
+    type Answer = { readonly ok: boolean; readonly code?: string; readonly data?: unknown };
+    const trigger = vi.fn<(press: Press) => Promise<Answer>>();
+    trigger.mockResolvedValue({ ok: true, data: { op: "admitEvidence", payload: { evidenceId: "evidence-1", state: "admitted", revision: 1, missingFacts: [] } } });
+    mocks.admit.value = { isMutating: false, trigger };
+    mocks.evidenceRead.mockReturnValue(mocks.query(undefined, vi.fn(async () => evidenceAnswer("admitted"))).value);
+    const { result } = render();
+    act(() => { result.current.intake.setEvidenceId("evidence-1"); result.current.intake.setSourceKind("invoice"); result.current.intake.setSourceRef("ref-1"); result.current.intake.setSourceRevision("rev-1"); result.current.intake.setFingerprint("sha256:1"); });
+    await act(async () => { result.current.intake.onAdmit(form); });
+    const settled = trigger.mock.calls[0]?.[0];
+    expect(typeof settled?.requestId).toBe("string");
+    trigger.mockResolvedValueOnce({ ok: false, code: "UNREACHABLE" });
+    await act(async () => { result.current.intake.onAdmit(form); });
+    expect(trigger.mock.calls[1]?.[0].requestId).not.toBe(settled?.requestId);
   });
 });

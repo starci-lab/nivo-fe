@@ -1,246 +1,254 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
+import { render } from "@testing-library/react";
+import type { ReactElement } from "react";
+import { AccountingWorkbenchBlockBase } from "./component";
+import type { useAccountingWorkbench } from "@/hooks";
 import en from "@/messages/en.json";
 import viMessages from "@/messages/vi.json";
-import { accountingCorrectionAccess, accountingDocumentAction, accountingIntakePolicy, accountingNoticeLive, bytesToBase64, canonicalMonthKey, currencyAmountToMinor, eligibleCorrectionSourceEntries, formatMinorCurrency, maskParticipantId } from ".";
-import { AccountingWorkbenchBlockBase } from "./component";
 
-const pending = { status: "pending", effectivePeriodKey: "2026-09-01", submittedByUserId: "owner-1", approverUserId: "approver-1" } as const;
-const periods = [{ periodKey: "2026-09-01", status: "open" }] as const;
+/*
+ * The rendering assertions the accepted ui.accounting.workbench direction pins, one per state that
+ * changes what an operator sees: the six measures of a period with its partial coverage, an intake
+ * readback in every admission state, one material question with its evidence, alternatives and
+ * consequence, a result detail with its evidence, reason, receipt and lineage, and a correction that
+ * shows the appended linked result beside the unchanged original. The copy asserted here is the real
+ * catalog, so a renamed key fails this spec rather than silently rendering a key path.
+ */
 
-const noop = vi.fn();
-const idle = { isMutating: false };
-const documentRow = (status: string, id = status) => ({ id, fileName: `${status}.pdf`, classification: "expense", amountMinor: "1250000", currency: "VND", periodKey: "2026-09-01", status, contextVersionId: "context-1", contextDigest: "digest-1" });
-const ledgerRow = { id: "ledger-1", documentId: "posted", correctionOfId: null, ledgerVersion: "7", periodKey: "2026-09-01", signedAmountMinor: "1250000", currency: "VND", kind: "document", reason: "posted", createdAt: "2026-09-06T00:00:00Z" };
-const correction = { id: "correction-1", sourceEntryId: "ledger-1", effectivePeriodKey: "2026-10-01", signedDeltaMinor: "-50000", currency: "VND", reason: "late adjustment", status: "pending", submittedByUserId: "owner-1", approverUserId: "approver-1", approvedByUserId: null, version: "1", approvedLedgerId: null, createdAt: "2026-09-06T00:00:00Z", approvedAt: null };
-const model = {
-  installationId: "module-1", currency: "VND", ledgerVersion: "7", ledgerAmountMinor: "1250000",
-  capabilities: { viewerRole: "owner", canSubmitCorrection: true, canApproveCorrection: false, reason: "allowed" },
-  documents: [documentRow("draft"), documentRow("submitted"), documentRow("approved"), documentRow("posted")], ledger: [ledgerRow],
-  periods: [{ periodKey: "2026-10-01", status: "open", version: "1", closedAt: null }],
-  reconciliations: [{ id: "reconciliation-1", ledgerVersionH: "7", currency: "VND", sourceAmountMinor: "1200000", ledgerAmountMinor: "1250000", differenceMinor: "-50000", createdAt: "2026-09-06T00:00:00Z" }],
-  corrections: [correction], events: [],
+type Catalog = Readonly<Record<string, unknown>>;
+const catalog = en.console.agentos.modules.runtime.workbench.accountingWorkbench as Catalog;
+const vietnamese = viMessages.console.agentos.modules.runtime.workbench.accountingWorkbench as Catalog;
+const messageFor = (source: Catalog, key: string): string => {
+  let node: unknown = source;
+  for (const part of key.split(".")) {
+    if (node === null || typeof node !== "object") return key;
+    node = (node as Record<string, unknown>)[part];
+  }
+  return typeof node === "string" ? node : key;
 };
-const answer = { ok: true, data: model } as const;
-const contextAnswer = { ok: true, data: { installationId: "module-1", versionId: "context-1", digest: "digest-1", snapshot: {} } } as const;
-const translate = (key: string, values?: Readonly<Record<string, string | number | undefined>>) => `${key}${values === undefined ? "" : ` ${Object.values(values).join(" ")}`}`;
+const translate = (key: string, values?: Readonly<Record<string, string | number | undefined>>): string =>
+  Object.entries(values ?? {}).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), messageFor(catalog, key));
+const keyPaths = (source: unknown, prefix = ""): ReadonlyArray<string> => source !== null && typeof source === "object"
+  ? Object.entries(source as Record<string, unknown>).flatMap(([name, value]) => keyPaths(value, prefix.length === 0 ? name : `${prefix}.${name}`))
+  : [prefix];
 
-const view = (overrides: Record<string, unknown> = {}) => ({
-  t: translate, locale: "en", currency: "VND", classifications: ["income", "expense", "receivable", "payable"], intakeReady: true, intakeLoading: false, asOfDraft: "", setAsOfDraft: noop, ledgerVersion: undefined, setLedgerVersion: noop,
-  notice: null, approverId: "", setApproverId: noop, fileName: "", fileSize: 0, classification: "expense", setClassification: noop,
-  documentAmount: "", setDocumentAmount: noop, documentMonth: "", setDocumentMonth: noop, sourceAmount: "", setSourceAmount: noop,
-  closeMonth: "", setCloseMonth: noop, sourceEntryId: "", setSourceEntryId: noop, effectiveMonth: "", setEffectiveMonth: noop,
-  deltaAmount: "", setDeltaAmount: noop, correctionReason: "", setCorrectionReason: noop,
-  workbench: { data: answer, error: undefined, mutate: vi.fn() }, context: { data: contextAnswer, error: undefined, mutate: vi.fn() },
-  runtime: { data: undefined, error: undefined, mutate: vi.fn() }, participantUserIds: [], initialize: idle, ingest: idle,
-  submitDocument: idle, approveDocument: idle, postDocument: idle, reconcile: idle, close: idle, submitCorrection: idle, approveCorrection: idle,
-  answer, model, role: "owner", isAsOf: false, correctionSubmitAllowed: true, pendingCorrections: [correction], eligibleSourceEntries: [ledgerRow],
-  sourceEntryEligible: false, documentAmountMinor: null, sourceAmountMinor: null, deltaAmountMinor: null,
-  onFileSelected: noop, onInitialize: noop, onIngest: noop, onReconcile: noop, onClose: noop, onCorrection: noop,
-  documentCommand: vi.fn(), correctionAccess: vi.fn(() => ({ submit: true, approve: false, approvalReason: "not-owner" })), approvePendingCorrection: vi.fn(),
-  ...overrides,
-}) as never;
+const GROUPS = ["overview", "intake", "routine", "question", "detail", "correction"] as const;
 
-afterEach(() => { cleanup(); vi.clearAllMocks(); });
+/** A complete settled view with one readable result, overridden per state under test. */
+const view = (overrides: Record<string, unknown> = {}) => {
+  const settled: Record<string, unknown> = {
+    t: translate,
+    locale: "en",
+    scopeStanding: "ready",
+    scopeReady: true,
+    periodMonth: "2026-09",
+    setPeriodMonth: () => undefined,
+    periodLabel: "2026-09-01",
+    currency: null,
+    setCurrency: () => undefined,
+    asOfDraft: "",
+    setAsOfDraft: () => undefined,
+    asOf: null as string | null,
+    setAsOf: () => undefined,
+    notice: null,
+    overview: {
+      standing: "ready",
+      model: { periodStart: "2026-09-01", periodEndExclusive: "2026-10-01", currency: "VND", items: [{ itemId: "item-1", resultId: "result-1", version: 3, effectiveAt: "2026-09-18T00:00:00Z", occurredOn: "2026-09-17", currency: "VND", measures: [{ kind: "cash-in", status: "known", amountMinor: 421000000, currency: "VND" }, { kind: "cash-out", status: "known", amountMinor: 120000000, currency: "VND" }, { kind: "recognized-revenue", status: "known", amountMinor: 380000000, currency: "VND" }, { kind: "recognized-cost", status: "known", amountMinor: 95000000, currency: "VND" }, { kind: "unpaid", status: "known", amountMinor: 17000000, currency: "VND" }, { kind: "estimated-tax", status: "known", amountMinor: 8000000, currency: "VND" }], paymentStatus: "unmatched", attentionCodes: ["unmatched-payment"], availability: "partial", sourceEvidenceRefs: ["evidence-1"], policyRevision: "policy-7", receiptId: "receipt-1" }], partialReasons: [], nextCursor: null },
+      attention: ["unmatched-payment"],
+      nextCursor: null as string | null,
+      isFetching: false,
+      retry: () => undefined,
+      loadMore: () => undefined
+    },
+    intake: {
+      standing: "ready",
+      evidenceId: "evidence-1",
+      setEvidenceId: () => undefined,
+      sourceKind: "invoice",
+      setSourceKind: () => undefined,
+      sourceRef: "ref-1",
+      setSourceRef: () => undefined,
+      sourceRevision: "rev-1",
+      setSourceRevision: () => undefined,
+      fingerprint: "sha256:1",
+      setFingerprint: () => undefined,
+      intakeRevision: "0",
+      setIntakeRevision: () => undefined,
+      model: { evidenceId: "evidence-1", state: "admitted", revision: 2, missingFacts: [] },
+      admit: { isMutating: false },
+      isAdmitting: false,
+      onAdmit: () => undefined,
+      reload: () => undefined
+    },
+    routine: {
+      standing: "ready",
+      intentId: "intent-1",
+      setIntentId: () => undefined,
+      itemId: "item-1",
+      setItemId: () => undefined,
+      policyRevision: "policy-7",
+      setPolicyRevision: () => undefined,
+      evidenceIds: "evidence-1",
+      setEvidenceIds: () => undefined,
+      itemRevision: "3",
+      setItemRevision: () => undefined,
+      oldAttemptId: "",
+      setOldAttemptId: () => undefined,
+      notStartedProofRef: "",
+      setNotStartedProofRef: () => undefined,
+      newAttemptId: "",
+      setNewAttemptId: () => undefined,
+      model: { intentId: "intent-1", itemId: "item-1", attemptId: "attempt-1", state: "committed", receiptId: "receipt-1", resultId: "result-1", reasonCode: null },
+      isCommitting: false,
+      onCommitRoutine: () => undefined,
+      onRetryRoutine: () => undefined,
+      reload: () => undefined
+    },
+    question: {
+      standing: "ready",
+      exceptionId: "exception-1",
+      setExceptionId: () => undefined,
+      choiceCode: "recognize-now",
+      setChoiceCode: () => undefined,
+      reason: "supplier confirmed",
+      setReason: () => undefined,
+      evidenceRefs: "evidence-1",
+      setEvidenceRefs: () => undefined,
+      exceptionRevision: "4",
+      setExceptionRevision: () => undefined,
+      answerState: { exceptionId: "exception-1", state: "open", revision: 4 } as { readonly exceptionId: string; readonly state: string; readonly revision: number } | null,
+      isAnswering: false,
+      onAnswer: () => undefined,
+      onDefer: () => undefined,
+      onReopen: () => undefined,
+      onEscalate: () => undefined,
+      onDismiss: () => undefined,
+      routineState: "needs-decision",
+      routineReason: "policy-ambiguous",
+      attention: ["unmatched-payment"],
+      itemEvidenceRefs: ["evidence-1"],
+      reload: () => undefined
+    },
+    detail: {
+      standing: "ready",
+      resultId: "result-1",
+      setResultId: () => undefined,
+      itemId: "item-1",
+      setItemId: () => undefined,
+      asOfInstant: "",
+      setAsOfInstant: () => undefined,
+      model: { resultId: "result-1", itemId: "item-1", version: 3, effectiveAt: "2026-09-18T00:00:00Z", state: "current", facts: { amountMinor: 421000000, currency: "VND", occurredOn: "2026-09-17", counterpartyRef: "supplier-a", matchStatus: "unmatched", treatment: { kind: "supported", code: "revenue" } }, sourceEvidenceRefs: ["evidence-1"], policyRevision: "policy-7", receiptId: "receipt-1", predecessorResultId: null, successorResultId: null },
+      isFetching: false,
+      onLoad: () => undefined,
+      retry: () => undefined
+    },
+    correction: {
+      standing: "ready",
+      correctionId: "correction-1",
+      setCorrectionId: () => undefined,
+      predecessorResultId: "result-1",
+      setPredecessorResultId: () => undefined,
+      correctedAmount: "420000000",
+      setCorrectedAmount: () => undefined,
+      correctedCounterparty: "supplier-b",
+      setCorrectedCounterparty: () => undefined,
+      reason: "late invoice",
+      setReason: () => undefined,
+      evidenceRefs: "evidence-2",
+      setEvidenceRefs: () => undefined,
+      correctionRevision: "3",
+      setCorrectionRevision: () => undefined,
+      appendAttemptId: "",
+      setAppendAttemptId: () => undefined,
+      model: null as { readonly correctionId: string; readonly attemptId: string; readonly state: string; readonly resultId: string | null; readonly predecessorResultId: string | null } | null,
+      predecessor: null as unknown,
+      isCorrecting: false,
+      onPropose: () => undefined,
+      onAppend: () => undefined,
+      reload: () => undefined
+    }
+  };
+  const merged: Record<string, unknown> = { ...settled, ...overrides };
+  for (const group of GROUPS) merged[group] = { ...(settled[group] as Record<string, unknown>), ...((overrides[group] as Record<string, unknown> | undefined) ?? {}) };
+  return merged as unknown as ReturnType<typeof useAccountingWorkbench>;
+};
+const renderBlock = (input: Record<string, unknown> = {}): string => {
+  const rendered: ReactElement = <AccountingWorkbenchBlockBase view={view(input)} />;
+  return render(rendered).container.textContent ?? "";
+};
 
 describe("AccountingWorkbenchBlockBase", () => {
-  it("announces refusals assertively without interrupting successful confirmations", () => {
-    expect(accountingNoticeLive("refused")).toBe("assertive");
-    expect(accountingNoticeLive("success")).toBe("polite");
+  it("keeps every Accounting workbench copy key in both catalogues", () => {
+    expect([...keyPaths(vietnamese)].sort()).toEqual([...keyPaths(catalog)].sort());
   });
 
-  it("uses the backend-exact closed document statuses", () => {
-    expect(accountingDocumentAction("draft", "owner")).toBe("submit");
-    expect(accountingDocumentAction("submitted", "approver")).toBe("approve");
-    expect(accountingDocumentAction("approved", "owner")).toBe("post");
-    expect(accountingDocumentAction("posted", "owner")).toBeNull();
-    expect(accountingDocumentAction("submitted", "owner")).toBeNull();
+  it("shows every available measure of a period, its partial coverage and its attention codes", () => {
+    const text = renderBlock();
+    for (const measure of ["Cash in", "Cash out", "Recognized revenue", "Recognized cost", "Unpaid", "Estimated tax"]) expect(text).toContain(measure);
+    expect(text).toContain(translate("overview.measureCovered", { count: 1 }));
+    expect(text).toContain(translate("overview.attention", { codes: translate("attention.unmatchedPayment") }));
+    expect(text).toContain(translate("overview.sourceCoverage", { count: 1 }));
   });
 
-  it("never offers owner self-approval even when a stale flag is optimistic", () => {
-    expect(accountingCorrectionAccess({ explicitLedgerVersion: false, role: "owner", canApproveCorrection: true, correction: pending, periods })).toMatchObject({ submit: false, approve: false, approvalReason: "not-owner" });
+  it("withholds a period total and names the reason when one covered measure is unknown", () => {
+    const text = renderBlock({ overview: { model: { periodStart: "2026-09-01", periodEndExclusive: "2026-10-01", currency: "VND", partialReasons: ["stale-source"], items: [{ itemId: "item-1", resultId: "result-1", version: 1, effectiveAt: "2026-09-18T00:00:00Z", occurredOn: null, currency: "VND", measures: [{ kind: "cash-in", status: "unknown", reasonCode: "source-unreadable" }], paymentStatus: "unmatched", attentionCodes: [], availability: "stale", sourceEvidenceRefs: [], policyRevision: "policy-7", receiptId: null }] } } });
+    expect(text).toContain(translate("overview.measureUnknown", { reason: "source-unreadable" }));
+    expect(text).toContain(translate("overview.partial", { reasons: translate("partialReason.staleSource") }));
+    expect(text).not.toContain(translate("overview.measureCovered", { count: 1 }));
   });
 
-  it("disables both correction mutations for every explicit historical view", () => {
-    expect(accountingCorrectionAccess({ explicitLedgerVersion: true, role: "owner", canSubmitCorrection: true, canApproveCorrection: true, correction: pending, periods })).toEqual({ submit: false, approve: false, approvalReason: "historical" });
-    expect(accountingCorrectionAccess({ explicitLedgerVersion: true, role: "approver", canApproveCorrection: true, correction: pending, periods })).toEqual({ submit: false, approve: false, approvalReason: "historical" });
+  it("shows an admitted item, a likely duplicate and an item that still needs information", () => {
+    expect(renderBlock()).toContain(translate("evidenceState.admitted"));
+    expect(renderBlock({ intake: { model: { evidenceId: "evidence-1", state: "likely_duplicate", revision: 2, missingFacts: [] } } })).toContain(translate("intake.duplicateNotice"));
+    expect(renderBlock({ intake: { model: { evidenceId: "evidence-1", state: "needs_information", revision: 2, missingFacts: ["occurredOn"] } } })).toContain(translate("intake.missingFacts", { facts: "occurredOn" }));
   });
 
-  it("evaluates approval for each pending row against assignment distinction and open period", () => {
-    expect(accountingCorrectionAccess({ explicitLedgerVersion: false, role: "approver", canApproveCorrection: true, correction: pending, periods })).toEqual({ submit: false, approve: true, approvalReason: "allowed" });
-    expect(accountingCorrectionAccess({ explicitLedgerVersion: false, role: "approver", canApproveCorrection: true, correction: pending, periods: [{ periodKey: "2026-09-01", status: "closed" }] })).toMatchObject({ approve: false, approvalReason: "period-not-open" });
-    expect(accountingCorrectionAccess({ explicitLedgerVersion: false, role: "approver", canApproveCorrection: true, correction: { ...pending, approverUserId: "owner-1" }, periods })).toMatchObject({ approve: false, approvalReason: "self-assigned" });
-    expect(accountingCorrectionAccess({ explicitLedgerVersion: false, role: "approver", canApproveCorrection: false, correction: pending, periods })).toMatchObject({ approve: false, approvalReason: "advisory-denied" });
+  it("shows one material question with its evidence, alternatives and consequence, and holds the effect until the readback returns", () => {
+    const open = renderBlock();
+    expect(open).toContain(translate("question.evidence"));
+    expect(open).toContain("evidence-1");
+    expect(open).toContain(translate("question.alternatives"));
+    expect(open).toContain(translate("question.consequence"));
+    expect(open).not.toContain(translate("question.consequenceHeld"));
+    const answered = renderBlock({ question: { answerState: { exceptionId: "exception-1", state: "answered", revision: 5 } } });
+    expect(answered).toContain(translate("question.settled"));
+    expect(answered).toContain(translate("question.consequenceHeld"));
   });
 
-  it("offers only ledger tips without an existing correction proposal", () => {
-    const entry = (id: string, correctionOfId: string | null) => ({ id, correctionOfId, documentId: null, ledgerVersion: "1", periodKey: "2026-09-01", signedAmountMinor: "100", currency: "VND", kind: "document", reason: null, createdAt: "2026-09-06T00:00:00Z" }) as const;
-    const ledger = [entry("original", null), entry("corrected", "original"), entry("already-proposed", null), entry("eligible", null)];
-    expect(eligibleCorrectionSourceEntries(ledger, [{ sourceEntryId: "already-proposed" }]).map(item => item.id)).toEqual(["corrected", "eligible"]);
+  it("shows a result detail with its evidence, treatment, receipt and lineage", () => {
+    const text = renderBlock({ detail: { model: { resultId: "result-1", itemId: "item-1", version: 3, effectiveAt: "2026-09-18T00:00:00Z", state: "historical", facts: { amountMinor: 421000000, currency: "VND", occurredOn: "2026-09-17", counterpartyRef: "supplier-a", matchStatus: "ambiguous", treatment: { kind: "unsupported", reasonCode: "no-policy" } }, sourceEvidenceRefs: ["evidence-1"], policyRevision: "policy-7", receiptId: "receipt-1", predecessorResultId: "result-0", successorResultId: "result-2" } } });
+    expect(text).toContain(translate("detail.historical"));
+    expect(text).toContain(translate("detail.evidenceRefs", { refs: "evidence-1" }));
+    expect(text).toContain(translate("treatment.unsupported"));
+    expect(text).toContain(translate("detail.receipt", { receipt: "receipt-1", policy: "policy-7" }));
+    expect(text).toContain(translate("detail.lineage", { predecessor: "result-0", successor: "result-2" }));
   });
 
-  it("adapts business month, currency and file values to the backend primitives", () => {
-    expect(canonicalMonthKey("2026-09")).toBe("2026-09-01");
-    expect(canonicalMonthKey("2026-13")).toBeNull();
-    expect(currencyAmountToMinor("1,234.56", "USD", "en")).toBe("123456");
-    expect(currencyAmountToMinor("-1.234", "VND", "vi")).toBe("-1234");
-    expect(currencyAmountToMinor("0", "VND", "vi")).toBe("0");
-    expect(formatMinorCurrency("1234567", "VND", "vi")).toContain("1.234.567");
-    expect(bytesToBase64(new Uint8Array([100, 97, 116, 97]))).toBe("ZGF0YQ==");
-    expect(maskParticipantId("participant-user-1234")).toBe("part…1234");
+  it("shows a correction's appended linked result beside the original it never rewrites", () => {
+    const text = renderBlock({
+      correction: {
+        model: { correctionId: "correction-1", attemptId: "attempt-2", state: "applied", resultId: "result-2", predecessorResultId: "result-1" },
+        predecessor: { resultId: "result-1", facts: { amountMinor: 421000000, currency: "VND", counterpartyRef: "supplier-a" } }
+      }
+    });
+    expect(text).toContain(translate("correction.originalUnchanged"));
+    expect(text).toContain(translate("correction.appended", { result: "result-2" }));
+    expect(text).toContain(translate("correction.lineage", { predecessor: "result-1", result: "result-2" }));
   });
 
-  it("narrows document intake to the applied Setup currency and classifications", () => {
-    expect(accountingIntakePolicy({ accountingScope: { classifications: ["income", "receivable"] }, currencyAndLocale: { functionalCurrency: "USD" } })).toEqual({ currency: "USD", classifications: ["income", "receivable"] });
-    expect(accountingIntakePolicy({ accountingScope: { classifications: ["income", "income"] }, currencyAndLocale: { functionalCurrency: "USD" } })).toBeNull();
-    expect(accountingIntakePolicy({ accountingScope: { classifications: ["expense"] }, currencyAndLocale: { functionalCurrency: "XXX" } })).toBeNull();
-    expect(accountingIntakePolicy({})).toBeNull();
+  it("distinguishes loading, refused, unavailable and empty readings instead of showing one as another", () => {
+    const loading = renderBlock({ overview: { standing: "loading" } });
+    expect(loading).not.toContain(translate("overview.measureCovered", { count: 1 }));
+    expect(renderBlock({ overview: { standing: "denied" } })).toContain(translate("refusal.forbidden"));
+    expect(renderBlock({ overview: { standing: "unavailable" } })).toContain(translate("surfaceUnavailable"));
+    const empty = renderBlock({ overview: { standing: "empty", model: null } });
+    expect(empty).toContain(translate("overview.empty"));
+    expect(empty).not.toContain(translate("overview.measureCovered", { count: 1 }));
   });
 
-  it("keeps Accounting message keys in English and Vietnamese in exact parity", () => {
-    const english = en.console.agentos.modules.runtime.workbench.accountingWorkbench;
-    const vietnamese = viMessages.console.agentos.modules.runtime.workbench.accountingWorkbench;
-    expect(Object.keys(vietnamese).sort()).toEqual(Object.keys(english).sort());
-    expect(Object.keys(vietnamese.role).sort()).toEqual(Object.keys(english.role).sort());
-  });
-
-  describe("AccountingWorkbenchBlock adverse states", () => {
-    it("keeps the complete tree mounted and marks loading as busy", () => {
-      const loading = view({ answer: undefined, model: undefined, role: undefined, pendingCorrections: [], eligibleSourceEntries: [], workbench: { data: undefined, error: undefined, mutate: vi.fn() }, context: { data: undefined, error: undefined, mutate: vi.fn() } });
-      const { container } = render(<AccountingWorkbenchBlockBase view={loading} />);
-      expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
-      expect(screen.getByText("statementSnapshot")).toBeTruthy();
-    });
-
-    it("announces a command refusal assertively", () => {
-      const { container } = render(<AccountingWorkbenchBlockBase view={view({ notice: { kind: "refused", message: "permission denied" } })} />);
-      expect(container.querySelector('[aria-live="assertive"]')?.textContent).toContain("permission denied");
-    });
-
-    it("wraps workbench transport failure in an alert and retries the owning read", () => {
-      const mutate = vi.fn();
-      render(<AccountingWorkbenchBlockBase view={view({ workbench: { data: undefined, error: new Error("offline"), mutate }, answer: undefined, model: undefined })} />);
-      expect(screen.getByRole("alert")).toBeTruthy();
-      fireEvent.click(screen.getByText("retry"));
-      expect(mutate).toHaveBeenCalledOnce();
-    });
-
-    it("wraps refused workbench reads in an alert and retries", () => {
-      const mutate = vi.fn();
-      render(<AccountingWorkbenchBlockBase view={view({ workbench: { data: { ok: false, reason: "forbidden" }, error: undefined, mutate }, answer: { ok: false, reason: "forbidden" }, model: undefined })} />);
-      expect(screen.getByRole("alert").textContent).toContain("readRefused forbidden");
-      fireEvent.click(screen.getByText("retry"));
-      expect(mutate).toHaveBeenCalledOnce();
-    });
-
-    it("gives applied-context transport failure its own alert and retry", () => {
-      const mutate = vi.fn();
-      render(<AccountingWorkbenchBlockBase view={view({ context: { data: undefined, error: new Error("offline"), mutate } })} />);
-      expect(screen.getByRole("alert")).toBeTruthy();
-      fireEvent.click(screen.getByText("retry"));
-      expect(mutate).toHaveBeenCalledOnce();
-    });
-
-    it("announces an applied-context permission refusal assertively", () => {
-      const { container } = render(<AccountingWorkbenchBlockBase view={view({ context: { data: { ok: false, reason: "forbidden" }, error: undefined, mutate: vi.fn() } })} />);
-      expect(container.querySelector('[aria-live="assertive"]')?.textContent).toContain("readRefused forbidden");
-    });
-
-    it("renders loaded business facts and dispatches owner document actions", () => {
-      const documentCommand = vi.fn();
-      const { container } = render(<AccountingWorkbenchBlockBase view={view({ documentCommand })} />);
-      expect(screen.getByText("appliedSetup")).toBeTruthy();
-      expect(screen.getByText("ledgerBalance")).toBeTruthy();
-      expect(container.querySelector("#accounting-classification")?.className).toContain("min-h-11");
-      expect(container.querySelector("#accounting-document-month")?.className).toContain("min-h-11");
-      expect(screen.getByRole("button", { name: "chooseEvidenceFile" }).className).toContain("button--lg");
-      expect(screen.getByRole("button", { name: "addDocument" }).className).toContain("button--lg");
-      expect(screen.getByRole("button", { name: "closePeriodAction" }).className).toContain("button--lg");
-      expect(screen.getByRole("button", { name: "submitCorrection" }).className).toContain("button--lg");
-      expect(screen.getByText("draft.pdf")).toBeTruthy();
-      expect(screen.getByText("late adjustment")).toBeTruthy();
-      expect(screen.getByText(/reconciliationDifference/)).toBeTruthy();
-      fireEvent.click(screen.getByText("submitDocument"));
-      fireEvent.click(screen.getByText("postDocument"));
-      expect(documentCommand).toHaveBeenCalledWith("submit", "draft");
-      expect(documentCommand).toHaveBeenCalledWith("post", "approved");
-    });
-
-    it("dispatches approver document and correction actions", () => {
-      const documentCommand = vi.fn();
-      const approvePendingCorrection = vi.fn();
-      const approverModel = { ...model, capabilities: { ...model.capabilities, viewerRole: "approver", canSubmitCorrection: false, canApproveCorrection: true } };
-      render(<AccountingWorkbenchBlockBase view={view({ answer: { ok: true, data: approverModel }, model: approverModel, role: "approver", correctionSubmitAllowed: false, documentCommand, correctionAccess: vi.fn(() => ({ submit: false, approve: true, approvalReason: "allowed" })), approvePendingCorrection })} />);
-      fireEvent.click(screen.getByText("approveDocument"));
-      fireEvent.click(screen.getByText("approveCorrection"));
-      expect(documentCommand).toHaveBeenCalledWith("approve", "submitted");
-      expect(approvePendingCorrection).toHaveBeenCalledWith("correction-1");
-    });
-
-    it("keeps valid amounts native-valid and forwards native form submissions", () => {
-      const onReconcile = vi.fn(event => event.preventDefault());
-      const onCorrection = vi.fn(event => event.preventDefault());
-      const { container } = render(<AccountingWorkbenchBlockBase view={view({ documentAmount: "1,250,000", documentAmountMinor: "1250000", sourceAmount: "-1,250,000", sourceAmountMinor: "-1250000", sourceEntryId: "ledger-1", sourceEntryEligible: true, effectiveMonth: "2026-10", deltaAmount: "-50,000", deltaAmountMinor: "-50000", correctionReason: "late adjustment", onReconcile, onCorrection })} />);
-      const documentAmountInput = container.querySelector("#accounting-document-amount")!;
-      const sourceAmountInput = container.querySelector("#accounting-source-amount")!;
-      const deltaAmountInput = container.querySelector("#accounting-delta")!;
-      expect(documentAmountInput).not.toHaveAttribute("aria-invalid", "true");
-      expect(sourceAmountInput).not.toHaveAttribute("aria-invalid", "true");
-      expect(deltaAmountInput).not.toHaveAttribute("aria-invalid", "true");
-      fireEvent.submit(sourceAmountInput.closest("form")!);
-      fireEvent.submit(deltaAmountInput.closest("form")!);
-      expect(onReconcile).toHaveBeenCalledOnce();
-      expect(onCorrection).toHaveBeenCalledOnce();
-    });
-
-    it("keeps invalid amounts marked invalid and their mutation actions disabled", () => {
-      const { container } = render(<AccountingWorkbenchBlockBase view={view({ documentAmount: "0", documentAmountMinor: "0", sourceAmount: "not-money", sourceAmountMinor: null, sourceEntryId: "ledger-1", sourceEntryEligible: true, effectiveMonth: "2026-10", deltaAmount: "0", deltaAmountMinor: "0", correctionReason: "late adjustment" })} />);
-      expect(container.querySelector("#accounting-document-amount")).toHaveAttribute("aria-invalid", "true");
-      expect(container.querySelector("#accounting-source-amount")).toHaveAttribute("aria-invalid", "true");
-      expect(container.querySelector("#accounting-delta")).toHaveAttribute("aria-invalid", "true");
-      expect(screen.getByRole("button", { name: "reconcile" })).toBeDisabled();
-      expect(screen.getByRole("button", { name: "submitCorrection" })).toBeDisabled();
-    });
-
-    it("forwards native controls, historical navigation, file choice and setup recovery", () => {
-      const setLedgerVersion = vi.fn();
-      const setAsOfDraft = vi.fn();
-      const setClassification = vi.fn();
-      const setDocumentMonth = vi.fn();
-      const setCloseMonth = vi.fn();
-      const setSourceEntryId = vi.fn();
-      const setEffectiveMonth = vi.fn();
-      const onFileSelected = vi.fn();
-      const first = render(<AccountingWorkbenchBlockBase view={view({ asOfDraft: "7", setLedgerVersion, setAsOfDraft, setClassification, setDocumentMonth, setCloseMonth, setSourceEntryId, setEffectiveMonth, onFileSelected })} />);
-      fireEvent.click(screen.getByText("viewAsOf"));
-      fireEvent.change(first.container.querySelector("#accounting-classification")!, { target: { value: "income" } });
-      fireEvent.change(first.container.querySelector("#accounting-document-month")!, { target: { value: "2026-09" } });
-      fireEvent.change(first.container.querySelector("#accounting-close-month")!, { target: { value: "2026-10" } });
-      fireEvent.change(first.container.querySelector("#accounting-source-entry")!, { target: { value: "ledger-1" } });
-      fireEvent.change(first.container.querySelector("#accounting-effective-month")!, { target: { value: "2026-10" } });
-      fireEvent.change(first.container.querySelector('input[type="file"]')!, { target: { files: [new File(["evidence"], "invoice.pdf", { type: "application/pdf" })] } });
-      expect(setLedgerVersion).toHaveBeenCalledWith("7");
-      expect(onFileSelected).toHaveBeenCalledOnce();
-      expect(setClassification).toHaveBeenCalledWith("income");
-      first.unmount();
-
-      render(<AccountingWorkbenchBlockBase view={view({ ledgerVersion: "7", isAsOf: true, setLedgerVersion, setAsOfDraft })} />);
-      fireEvent.click(screen.getByText("returnCurrent"));
-      expect(setLedgerVersion).toHaveBeenCalledWith(undefined);
-      expect(setAsOfDraft).toHaveBeenCalledWith("");
-      cleanup();
-
-      const mutateRuntime = vi.fn();
-      render(<AccountingWorkbenchBlockBase view={view({ answer: undefined, model: undefined, role: undefined, participantUserIds: [], workbench: { data: undefined, error: undefined, mutate: vi.fn() }, runtime: { data: undefined, error: new Error("offline"), mutate: mutateRuntime } })} />);
-      fireEvent.click(screen.getByText("retry"));
-      expect(mutateRuntime).toHaveBeenCalledOnce();
-      cleanup();
-
-      const setApproverId = vi.fn();
-      const participantRuntime = { ok: true, data: { participants: [{ userId: "approver-1" }] } };
-      const last = render(<AccountingWorkbenchBlockBase view={view({ answer: undefined, model: undefined, role: undefined, participantUserIds: ["approver-1"], workbench: { data: undefined, error: undefined, mutate: vi.fn() }, runtime: { data: participantRuntime, error: undefined, mutate: vi.fn() }, setApproverId })} />);
-      fireEvent.change(last.container.querySelector("#accounting-approver")!, { target: { value: "approver-1" } });
-      expect(setApproverId).toHaveBeenCalledWith("approver-1");
-    });
+  it("says the installation scope is unresolved before any operation address exists", () => {
+    const text = renderBlock({ scopeReady: false, scopeStanding: "loading" });
+    expect(text).toContain(translate("standing.loading"));
+    expect(text).toContain(translate("rail.noticeEmpty"));
   });
 });

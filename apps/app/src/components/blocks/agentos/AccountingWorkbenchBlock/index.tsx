@@ -2,12 +2,12 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useAccountingWorkbench } from "@/hooks";
-export { accountingCorrectionAccess, accountingDocumentAction, accountingIntakePolicy, accountingNoticeLive, bytesToBase64, canonicalMonthKey, currencyAmountToMinor, eligibleCorrectionSourceEntries, formatMinorCurrency, maskParticipantId, type CorrectionAccessInput } from "@/modules/accounting/accounting-workbench";
 import { AccountingWorkbenchBlockBase } from "./component";
 
-/** Registry input identifying the installed Accounting workbench. */
+/** The installed Accounting workbench's open-registry entry: kind identity only, no caller wiring. */
 export type AccountingWorkbenchBlockProps = { readonly moduleId: string; readonly kindKey: string; readonly workbenchVersion: string };
-/** Connect one installed Accounting module to its responsive operational workbench. */
+
+/** Connect the Accounting workbench to its resolved installation scope and render the settled view. */
 export const AccountingWorkbenchBlock = (props: AccountingWorkbenchBlockProps) => {
   const translate = useTranslations("console.agentos.modules.runtime.workbench.accountingWorkbench");
   const locale = useLocale();

@@ -1,4 +1,24 @@
-import type { AccountingClassification, AccountingCorrection, AccountingLedgerEntry, AccountingPeriod, AccountingViewerRole } from "@/modules/api/accounting";
+/*
+ * The pure Accounting workbench projection.
+ *
+ * TWO HALVES, ONE OWNER. The lower half is the pre-3/9 vocabulary the legacy document workbench
+ * used; its six asserted helpers stay exactly as they were, because the module spec that pins them
+ * is owned by another ordinal and deleting them would red a file this slice may not edit. The upper
+ * half is the accepted `ui.accounting.workbench` vocabulary the eight `accounting.*@1` operations
+ * are projected through: every label, every closed state and every period this surface can render is
+ * a pure function of a wire value here, so the block holds no formatting rule of its own.
+ */
+
+/** A closed Accounting intake classification, as the Setup snapshot words it. */
+type AccountingClassification = "income" | "expense" | "receivable" | "payable";
+/** The two distinguishable Accounting viewer roles. */
+type AccountingViewerRole = "owner" | "approver";
+/** The ledger row facts the correction tips are chosen from. */
+type AccountingLedgerEntry = { readonly id: string; readonly correctionOfId: string | null };
+/** The correction proposal facts the advisory controls are chosen from. */
+type AccountingCorrection = { readonly status: string; readonly effectivePeriodKey: string; readonly submittedByUserId: string; readonly approverUserId: string; readonly sourceEntryId: string };
+/** One canonical period's key and state. */
+type AccountingPeriod = { readonly periodKey: string; readonly status: string };
 
 type TranslationValues = Readonly<Record<string, string | number | undefined>>;
 /** Accounting classifications accepted by the setup projection and intake controller. */
@@ -115,3 +135,213 @@ export const eligibleCorrectionSourceEntries = (ledger: ReadonlyArray<Accounting
   const proposedIds = new Set(corrections.map(correction => correction.sourceEntryId));
   return ledger.filter(entry => !supersededIds.has(entry.id) && !proposedIds.has(entry.id));
 };
+
+/*
+ * THE ACCEPTED ui.accounting.workbench VOCABULARY.
+ *
+ * The six surfaces below are the accepted regions of the Accounting workbench. Each renders one
+ * standing of its read: loading while the read is in flight, denied when the receiver refused
+ * access, unavailable when it could not answer, empty when it answered nothing to show, and ready
+ * when it answered content. Nothing here decides a domain fact; a value arrives already measured or
+ * already named unknown, and a state arrives already closed.
+ */
+
+/** The accepted Accounting workbench surfaces, in the order the page reads them. */
+export const ACCOUNTING_SURFACES = ["overview", "source-intake", "routine-progress", "material-question", "result-detail", "forward-correction"] as const;
+/** One accepted Accounting workbench surface. */
+export type AccountingSurface = (typeof ACCOUNTING_SURFACES)[number];
+/** What one surface's read settled into, in the terms the block renders. */
+export type AccountingSurfaceStanding = "loading" | "denied" | "unavailable" | "empty" | "ready";
+/** One Accounting read's answer, as much of it as a standing depends on. */
+export type AccountingAnswerStanding = { readonly ok: boolean; readonly code?: string };
+
+/*
+ * A refusal is not one thing. `forbidden`, `REFUSED` and `UNAUTHENTICATED` hide protected content
+ * and are the only ones the surface calls denied; a stale authority, a conflict, a malformed answer
+ * or an unreachable route is an outage the operator can retry, and telling them they lost access
+ * would be a lie. An absent answer is a read in flight, never an empty one.
+ */
+const ACCOUNTING_DENIED_CODES: ReadonlySet<string> = new Set(["forbidden", "REFUSED", "UNAUTHENTICATED"]);
+
+/**
+ * Project one read's standing from its answer.
+ *
+ * @param answer - The read's answer, or undefined while it is still in flight.
+ * @param hasContent - Whether the answered payload carries anything to show.
+ * @returns The standing the surface renders.
+ */
+export const accountingSurfaceStanding = (answer: AccountingAnswerStanding | undefined, hasContent: boolean): AccountingSurfaceStanding => {
+  if (answer === undefined) return "loading";
+  if (!answer.ok) return ACCOUNTING_DENIED_CODES.has(answer.code ?? "") ? "denied" : "unavailable";
+  return hasContent ? "ready" : "empty";
+};
+
+/** A whole minor-unit amount, formatted exactly as the business currency is written. */
+export const formatAccountingMinor = (amountMinor: number, currency: string, locale: string): string => formatMinorCurrency(String(amountMinor), currency, locale);
+
+/** The canonical half-open period one business month control selects, or null for an unusable value. */
+export const accountingMonthPeriod = (month: string): { readonly periodStart: string; readonly periodEndExclusive: string } | null => {
+  const periodStart = canonicalMonthKey(month);
+  if (periodStart === null) return null;
+  const year = Number(periodStart.slice(0, 4));
+  const monthIndex = Number(periodStart.slice(5, 7));
+  const next = monthIndex === 12 ? { year: year + 1, month: 1 } : { year, month: monthIndex + 1 };
+  return { periodStart, periodEndExclusive: `${next.year}-${String(next.month).padStart(2, "0")}-01` };
+};
+
+/** The UTC month a fresh workbench opens on, as the month control words it. */
+export const accountingUtcMonth = (now: Date): string => `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+
+/** One instant as the operator reads it, always at the zone the period is measured in. */
+export const formatAccountingInstant = (value: string, locale: string): string => {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return new Intl.DateTimeFormat(locale, { dateStyle: "short", timeStyle: "short", timeZone: "UTC" }).format(parsed);
+};
+
+/** One canonical period start as the operator reads it. */
+export const formatAccountingPeriod = (periodStart: string, locale: string): string => {
+  const parsed = new Date(`${periodStart}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) return periodStart;
+  return new Intl.DateTimeFormat(locale, { month: "short", year: "numeric", timeZone: "UTC" }).format(parsed);
+};
+
+/** A closed measure kind's label key. */
+export const accountingMeasureKey = (kind: string): string => ({
+  "cash-in": "measure.cashIn",
+  "cash-out": "measure.cashOut",
+  "recognized-revenue": "measure.revenue",
+  "recognized-cost": "measure.cost",
+  unpaid: "measure.unpaid",
+  "estimated-tax": "measure.estimatedTax"
+} as Readonly<Record<string, string>>)[kind] ?? "measure.other";
+
+/** A measured amount or the reason it is not shown; never a zero standing in for an unknown. */
+export type AccountingMeasureReading = { readonly amountMinor: number; readonly currency: string } | { readonly reasonCode: string };
+/** One measure payload, as much of it as a reading depends on. */
+export type AccountingMeasureSource = { readonly status: string; readonly amountMinor?: number | null; readonly currency?: string | null; readonly reasonCode?: string | null };
+
+/** The amount one measure may show, or the closed reason it shows instead. */
+export const accountingMeasureReading = (measure: AccountingMeasureSource): AccountingMeasureReading => measure.status === "known" && typeof measure.amountMinor === "number" && typeof measure.currency === "string"
+  ? { amountMinor: measure.amountMinor, currency: measure.currency }
+  : { reasonCode: typeof measure.reasonCode === "string" && measure.reasonCode.length > 0 ? measure.reasonCode : "unknown" };
+
+/** A closed availability label's message key. */
+export const accountingAvailabilityKey = (availability: string): string => ({
+  current: "availability.current",
+  partial: "availability.partial",
+  stale: "availability.stale",
+  unavailable: "availability.unavailable"
+} as Readonly<Record<string, string>>)[availability] ?? "availability.unavailable";
+
+/** A closed partial-coverage reason's message key. */
+export const accountingPartialReasonKey = (reason: string): string => ({
+  "missing-occurred-on": "partialReason.missingOccurredOn",
+  "missing-measure-coverage": "partialReason.missingMeasureCoverage",
+  "stale-source": "partialReason.staleSource",
+  "unavailable-source": "partialReason.unavailableSource"
+} as Readonly<Record<string, string>>)[reason] ?? "partialReason.unavailableSource";
+
+const ACCOUNTING_ATTENTION_KEYS: Readonly<Record<string, string>> = {
+  "missing-receipt": "attention.missingReceipt",
+  "unmatched-payment": "attention.unmatchedPayment",
+  "missing-occurred-on": "attention.missingOccurredOn",
+  "stale-source": "attention.staleSource"
+};
+
+/** One attention code's message key; a code this build does not know keeps its own text as the value. */
+export const accountingAttentionKey = (code: string): string => ACCOUNTING_ATTENTION_KEYS[code] ?? "attention.other";
+
+/** A closed evidence state's message key. */
+export const accountingEvidenceStateKey = (state: string): string => ({
+  admitted: "evidenceState.admitted",
+  reading: "evidenceState.reading",
+  ready: "evidenceState.ready",
+  needs_information: "evidenceState.needsInformation",
+  likely_duplicate: "evidenceState.likelyDuplicate",
+  unreadable: "evidenceState.unreadable",
+  rejected: "evidenceState.rejected"
+} as Readonly<Record<string, string>>)[state] ?? "evidenceState.rejected";
+
+/** A closed routine state's message key. */
+export const accountingRoutineStateKey = (state: string): string => ({
+  admitted: "routineState.admitted",
+  committed: "routineState.committed",
+  "needs-decision": "routineState.needsDecision",
+  "pending-authority": "routineState.pendingAuthority",
+  denied: "routineState.denied",
+  "outcome-unknown": "routineState.outcomeUnknown"
+} as Readonly<Record<string, string>>)[state] ?? "routineState.outcomeUnknown";
+
+/** A closed material-exception state's message key. */
+export const accountingExceptionStateKey = (state: string): string => ({
+  open: "exceptionState.open",
+  deferred: "exceptionState.deferred",
+  escalated: "exceptionState.escalated",
+  answered: "exceptionState.answered",
+  resolved: "exceptionState.resolved",
+  dismissed: "exceptionState.dismissed"
+} as Readonly<Record<string, string>>)[state] ?? "exceptionState.open";
+
+/** A closed correction state's message key. */
+export const accountingCorrectionStateKey = (state: string): string => ({
+  proposed: "correctionState.proposed",
+  blocked: "correctionState.blocked",
+  possible_start: "correctionState.possibleStart",
+  applied: "correctionState.applied",
+  proven_not_applied: "correctionState.provenNotApplied",
+  outcome_unknown: "correctionState.outcomeUnknown"
+} as Readonly<Record<string, string>>)[state] ?? "correctionState.outcomeUnknown";
+
+/** A closed payment-match status's message key. */
+export const accountingMatchStatusKey = (status: string): string => ({
+  unpaid: "matchStatus.unpaid",
+  unmatched: "matchStatus.unmatched",
+  matched: "matchStatus.matched",
+  ambiguous: "matchStatus.ambiguous"
+} as Readonly<Record<string, string>>)[status] ?? "matchStatus.unmatched";
+
+/** A closed treatment outcome's message key. */
+export const accountingTreatmentKey = (kind: string): string => ({
+  supported: "treatment.supported",
+  unsupported: "treatment.unsupported",
+  unknown: "treatment.unknown"
+} as Readonly<Record<string, string>>)[kind] ?? "treatment.unknown";
+
+/** A closed corrected-fact field's message key. */
+export const accountingFactFieldKey = (field: string): string => ({
+  amountMinor: "fact.amount",
+  currency: "fact.currency",
+  occurredOn: "fact.occurredOn",
+  counterpartyRef: "fact.counterparty",
+  matchStatus: "fact.matchStatus",
+  treatment: "fact.treatment"
+} as Readonly<Record<string, string>>)[field] ?? "fact.other";
+
+/** One tagged fact value as the operator reads it; a money value keeps its own currency. */
+export const accountingFactValueText = (value: { readonly kind: string; readonly value?: string | number | boolean; readonly amountMinor?: number; readonly currency?: string } | null, locale: string): string => {
+  if (value === null) return "—";
+  if (value.kind === "money") return formatAccountingMinor(value.amountMinor ?? 0, value.currency ?? "", locale);
+  if (value.kind === "boolean") return value.value === true ? "true" : "false";
+  return value.value === undefined ? "—" : String(value.value);
+};
+
+/** Whether an answer left the effect unattested, which only a read of the same identity resolves. */
+export const accountingEffectUnattested = (answer: AccountingAnswerStanding | undefined): boolean => answer !== undefined && !answer.ok && answer.code === "outcome_unknown";
+
+/** One command input's refusal message key. */
+export const accountingRefusalKey = (code: string): string => ({
+  forbidden: "refusal.forbidden",
+  REFUSED: "refusal.forbidden",
+  UNAUTHENTICATED: "refusal.signIn",
+  "stale-authority": "refusal.staleAuthority",
+  validation: "refusal.validation",
+  conflict: "refusal.conflict",
+  "outcome-unknown": "refusal.unattested",
+  outcome_unknown: "refusal.unattested",
+  UNREACHABLE: "refusal.unreachable",
+  MALFORMED_ANSWER: "refusal.malformed",
+  UNEXPECTED_RESULT_KIND: "refusal.malformed",
+  UNEXPECTED_RESULT_TAG: "refusal.malformed",
+  ECHOED_IDENTITY_MISMATCH: "refusal.malformed"
+} as Readonly<Record<string, string>>)[code] ?? "refusal.unreachable";
