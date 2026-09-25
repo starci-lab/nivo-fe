@@ -145,10 +145,11 @@ export const useSalesDecision = (workspaceId: string, installationId: string, t:
         }
         const settled = await decision.mutate() as SalesCommandAnswer;
         const state = payloadState(settled);
-        if (state === undefined || state.status === undefined) { setNotice({ kind: "refused", message: t("refusal.unsettled") }); return; }
-        if (state.proposalVersion !== claim.version || state.proposalFingerprint !== claim.fingerprint) { setNotice({ kind: "refused", message: t("refusal.conflict") }); return; }
+        const settledStatus = state?.status;
+        if (settledStatus === undefined) { setNotice({ kind: "refused", message: t("refusal.unsettled") }); return; }
+        if (state?.proposalVersion !== claim.version || state?.proposalFingerprint !== claim.fingerprint) { setNotice({ kind: "refused", message: t("refusal.conflict") }); return; }
         delete intents.current["answer"];
-        setNotice({ kind: "success", message: t("answer.recorded", { status: state.status }) });
+        setNotice({ kind: "success", message: t("answer.recorded", { status: settledStatus }) });
       } catch {
         setNotice({ kind: "refused", message: t("refusal.unreachable") });
       }

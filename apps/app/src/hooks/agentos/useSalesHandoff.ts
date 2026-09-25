@@ -130,10 +130,10 @@ export const useSalesHandoff = (workspaceId: string, installationId: string, t: 
           return;
         }
         const settled = await handoff.mutate() as SalesCommandAnswer;
-        const state = payloadState(settled);
-        if (state === undefined || state.status === undefined || state.status === "prepared") { setNotice({ kind: "refused", message: t("refusal.unsettled") }); return; }
+        const settledStatus = payloadState(settled)?.status;
+        if (settledStatus === undefined || settledStatus === "prepared") { setNotice({ kind: "refused", message: t("refusal.unsettled") }); return; }
         delete intents.current["submission"];
-        setNotice({ kind: "success", message: t("submission.settled", { status: state.status }) });
+        setNotice({ kind: "success", message: t("submission.settled", { status: settledStatus }) });
       } catch {
         setNotice({ kind: "refused", message: t("refusal.unreachable") });
       }
