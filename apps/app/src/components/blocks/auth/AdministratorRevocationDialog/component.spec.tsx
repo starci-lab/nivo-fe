@@ -56,6 +56,13 @@ const ENDING_COPY: ReadonlyArray<string> = [
 /** A session inventory, a device, a place or a count, named in either product locale. */
 const INVENTORY_OR_PLACE = /thiết bị|\bnơi\b|danh sách phiên|\d|\bdevices?\b|\blocations?\b|\bplaces?\b|session list|principal|membership/i
 
+/** The overlay's own backdrop, which owns the press-outside way out of the confirmation. */
+const backdrop = (): Element => {
+    const element = document.querySelector('[data-grammar-overlay-backdrop="Dialog"]')
+    if (element === null) throw new Error("the confirmation's backdrop is not mounted")
+    return element
+}
+
 /** What the harness reports up to the case that opened the confirmation. */
 type AdministratorRevocationHarnessProps = {
     readonly props?: Partial<AdministratorRevocationDialogBaseProps["props"]>
@@ -189,6 +196,35 @@ describe("AdministratorRevocationDialogBase", () => {
 
         await user.click(screen.getByRole("button", { name: VIEW.cancelLabel }))
         expect(confirm).not.toHaveBeenCalled()
+        await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
+        await waitFor(() => expect(document.activeElement).toBe(opener))
+    })
+
+    it("refuses cancel, Escape and an outside press while the authority answer is outstanding", async () => {
+        const confirm = vi.fn()
+        const user = userEvent.setup()
+        render(<AdministratorRevocationHarness props={{ stage: "pending" }} onConfirm={confirm} />)
+        await user.click(screen.getByRole("button", { name: OPEN_LABEL }))
+        await screen.findByRole("dialog")
+
+        expect(screen.getByRole("button", { name: VIEW.cancelLabel })).toBeDisabled()
+        await user.click(screen.getByRole("button", { name: VIEW.cancelLabel }))
+        await user.keyboard("{Escape}")
+        await user.click(backdrop())
+
+        expect(confirm).not.toHaveBeenCalled()
+        expect(screen.getByRole("dialog")).toBeInTheDocument()
+    })
+
+    it("gives the way out back once an authority has answered", async () => {
+        const user = userEvent.setup()
+        render(<AdministratorRevocationHarness props={{ stage: "refused" }} />)
+        const opener = screen.getByRole("button", { name: OPEN_LABEL })
+        await user.click(opener)
+        await screen.findByRole("dialog")
+
+        expect(screen.getByRole("button", { name: VIEW.cancelLabel })).not.toBeDisabled()
+        await user.keyboard("{Escape}")
         await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
         await waitFor(() => expect(document.activeElement).toBe(opener))
     })

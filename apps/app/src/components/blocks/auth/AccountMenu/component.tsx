@@ -1,9 +1,10 @@
 import { nivoIconSource } from "@nivo/ui";
 import { Icon } from "@starci/grammar/common";
-import type { ComponentType } from "react";
+import { Suspense, type ComponentType } from "react";
 
 import { DropdownBranch, type DropdownBranchItemData } from "@nivo/ui/components/branches/DropdownBranch";
 import type { AdministratorRevocationDialogProps } from "@/components/blocks/auth/AdministratorRevocationDialog";
+import type { ReturnNoticeProps } from "@/components/blocks/auth/ReturnNotice";
 import type { SessionEndingDialogProps } from "@/components/blocks/auth/SessionEndingDialog";
 
 /** Resolved signed-in account actions shown in the global navbar. */
@@ -30,6 +31,13 @@ export type AccountMenuBaseProps = {
      */
     readonly administratorRevocationControl: ComponentType<AdministratorRevocationDialogProps>;
     readonly administratorRevocationControlProps: AdministratorRevocationDialogProps;
+    /**
+     * The landing's unavailable-return notice. Handed in beside the two Dialogs above for the same
+     * reason: the address that decides whether it has anything to say, and the words it says, are
+     * the connected half's to resolve.
+     */
+    readonly returnNoticeControl: ComponentType<ReturnNoticeProps>;
+    readonly returnNoticeControlProps: ReturnNoticeProps;
   };
   readonly on?: {
     readonly signOut?: () => void;
@@ -53,8 +61,9 @@ const accountTrigger = <Icon source={nivoIconSource("account", "leading")} usage
 /**
  * Pure account menu: vendor mechanics stay in DropdownBranch, session behavior stays above.
  *
- * The menu owns no state of its own, including the two Dialogs it opens - each is handed in as a
- * resolved control, so every visible word and every effect stays in the connected half.
+ * The menu owns no state of its own, including the two Dialogs it opens and the landing's notice
+ * that rides beside them - each is handed in as a resolved control, so every visible word and every
+ * effect stays in the connected half.
  */
 export const AccountMenuBase = (props: AccountMenuProps) => {
   const {
@@ -66,7 +75,9 @@ export const AccountMenuBase = (props: AccountMenuProps) => {
     sessionEndingControl: SessionEndingControl,
     sessionEndingControlProps,
     administratorRevocationControl: AdministratorRevocationControl,
-    administratorRevocationControlProps
+    administratorRevocationControlProps,
+    returnNoticeControl: ReturnNoticeControl,
+    returnNoticeControlProps
   }: AccountMenuBaseProps["props"] = props.props;
   const items: ReadonlyArray<DropdownBranchItemData<AccountMenuAction>> = [
     {
@@ -108,5 +119,16 @@ export const AccountMenuBase = (props: AccountMenuProps) => {
     }} trigger={accountTrigger} />
     <SessionEndingControl {...sessionEndingControlProps} />
     <AdministratorRevocationControl {...administratorRevocationControlProps} />
+    {/*
+      THE NOTICE READS THE ADDRESS, SO IT NEEDS A BOUNDARY ABOVE IT. Next refuses to render a route
+      statically when a component reads the query without a Suspense boundary over it, and the
+      account control is the only Login-owned mount point the landing has - the chrome around it
+      belongs to the shell. The boundary is drawn here, in the pure half, because it must be an
+      ancestor of the read rather than a child of it; it draws nothing of its own, and the notice is
+      the only thing inside it.
+    */}
+    <Suspense fallback={null}>
+      <ReturnNoticeControl {...returnNoticeControlProps} />
+    </Suspense>
   </>;
 };

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useQueryCollabOfficeSwr } from "@/hooks";
 import { useSession } from "@/modules/auth/session";
 import { AdministratorRevocationDialog } from "@/components/blocks/auth/AdministratorRevocationDialog";
+import { ReturnNotice } from "@/components/blocks/auth/ReturnNotice";
 import { SessionEndingDialog } from "@/components/blocks/auth/SessionEndingDialog";
 import { AccountMenuBase } from "./component";
 
@@ -24,6 +25,11 @@ export type AccountMenuProps = {
  *
  * NO OPERATOR CONTEXT IS OFFERED HERE. A platform-operator scope would need a signal no accepted
  * record names, and inventing one would put a control in the chrome that nothing authorizes.
+ *
+ * THE LANDING'S NOTICE IS MOUNTED HERE because this control is the only Login-owned mount point the
+ * authenticated console has: the chrome, the shell and the landing page all belong to other owners,
+ * so a notice that has to appear on the landing has to ride along with the session controls that are
+ * already there.
  */
 export const AccountMenu = (props: AccountMenuProps) => {
   void props;
@@ -56,7 +62,9 @@ export const AccountMenu = (props: AccountMenuProps) => {
     administratorRevocationControlProps: {
       isOpen: isAdministratorEndingOpen,
       onOpenChange: setIsAdministratorEndingOpen
-    }
+    },
+    returnNoticeControl: ReturnNotice,
+    returnNoticeControlProps: {}
   }} on={{
     signOut: () => {
       setIsSigningOut(true);

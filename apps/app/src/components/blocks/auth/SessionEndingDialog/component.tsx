@@ -33,6 +33,14 @@ type SessionEndingDialogProps = SessionEndingDialogBaseProps;
  * The body carries the scope note and, while the request is in flight, one sentence saying so -
  * never a claim that anything was ended. The confirming control wears the pending state, which is
  * also what forbids a second submission while the first is unanswered.
+ *
+ * NOTHING MAY LEAVE WHILE THE ANSWER IS OUTSTANDING. A destructive request that has already reached
+ * the backend cannot be taken back by closing the confirmation: the sessions end anyway, and a
+ * reader who dismissed the dialog would have been told they stopped it. So while `isPending` holds,
+ * the footer's cancel is disabled and the two ways out the overlay owns - Escape and a press outside
+ * - are refused as well, which is what keeps the confirmation on screen until the request settles.
+ * Every one of them returns the moment the answer does, because the answer is what re-enables this
+ * half's state or closes the dialog outright.
  */
 export const SessionEndingDialogBase = (props: SessionEndingDialogProps) => {
   const {
@@ -49,8 +57,10 @@ export const SessionEndingDialogBase = (props: SessionEndingDialogProps) => {
     description={description}
     isOpen={props.isOpen}
     onOpenChange={props.onOpenChange}
+    isDismissable={!isPending}
+    isKeyboardDismissDisabled={isPending}
     footer={(close: () => void) => <>
-      <Button variant="outline" onPress={close}>{cancelLabel}</Button>
+      <Button variant="outline" isDisabled={isPending} onPress={close}>{cancelLabel}</Button>
       <Button variant="primary" isPending={isPending} isDisabled={isPending} onPress={() => props.on?.confirm?.()}>{confirmLabel}</Button>
     </>}
   >

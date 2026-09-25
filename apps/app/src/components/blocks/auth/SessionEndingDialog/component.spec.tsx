@@ -39,6 +39,13 @@ const ENDING_COPY: ReadonlyArray<string> = [
 /** A session inventory, a device or a place, named in either product locale. */
 const INVENTORY_OR_PLACE = /thiết bị|\bnơi\b|danh sách phiên|\bdevices?\b|\blocations?\b|\bplaces?\b|session list/i
 
+/** The overlay's own backdrop, which owns the press-outside way out of the confirmation. */
+const backdrop = (): Element => {
+    const element = document.querySelector('[data-grammar-overlay-backdrop="Dialog"]')
+    if (element === null) throw new Error("the confirmation's backdrop is not mounted")
+    return element
+}
+
 /** What the harness reports up to the case that opened the confirmation. */
 type SessionEndingHarnessProps = { readonly onConfirm: () => void }
 
@@ -124,5 +131,34 @@ describe("SessionEndingDialogBase", () => {
         expect(confirm).not.toHaveBeenCalled()
         await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
         await waitFor(() => expect(document.activeElement).toBe(opener))
+    })
+
+    it("refuses cancel, Escape and an outside press while the ending is in flight", async () => {
+        const confirm = vi.fn()
+        const onOpenChange = vi.fn()
+        const user = userEvent.setup()
+        render(<SessionEndingDialogBase props={{ ...VIEW, isPending: true }} on={{ confirm }} isOpen onOpenChange={onOpenChange} />)
+        await screen.findByRole("dialog")
+
+        expect(screen.getByRole("button", { name: VIEW.cancelLabel })).toBeDisabled()
+        await user.click(screen.getByRole("button", { name: VIEW.cancelLabel }))
+        await user.keyboard("{Escape}")
+        await user.click(backdrop())
+
+        expect(onOpenChange).not.toHaveBeenCalled()
+        expect(screen.getByRole("dialog")).toBeInTheDocument()
+    })
+
+    it("gives cancel and Escape back as soon as the answer settles", async () => {
+        const onOpenChange = vi.fn()
+        const user = userEvent.setup()
+        const { rerender } = render(<SessionEndingDialogBase props={{ ...VIEW, isPending: true }} on={{ confirm: vi.fn() }} isOpen onOpenChange={onOpenChange} />)
+        await screen.findByRole("dialog")
+
+        rerender(<SessionEndingDialogBase props={VIEW} on={{ confirm: vi.fn() }} isOpen onOpenChange={onOpenChange} />)
+        expect(screen.getByRole("button", { name: VIEW.cancelLabel })).not.toBeDisabled()
+
+        await user.keyboard("{Escape}")
+        expect(onOpenChange).toHaveBeenLastCalledWith(false)
     })
 })

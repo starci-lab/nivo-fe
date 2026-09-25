@@ -57,6 +57,14 @@ type AdministratorRevocationDialogProps = AdministratorRevocationDialogBaseProps
  * The target field exists only while nothing has been sent. Once a target is named, the dialog's own
  * name carries it and the body stops offering an edit - the retry in the undecided state belongs to
  * the request identity already sent, not to a second, differently aimed one.
+ *
+ * NOTHING MAY LEAVE WHILE THE ANSWER IS OUTSTANDING. An ending that has already reached the server
+ * is not recalled by closing the confirmation: it applies anyway, and a reader who dismissed the
+ * dialog would have been told they stopped it. So in the pending stage the footer's cancel is
+ * disabled and the overlay's two ways out - Escape and a press outside - are refused, which keeps
+ * the dialog on screen until an authority answers. The settled stages take them all back: an applied
+ * or refused scope, and the undecided retry, are answers rather than a request in flight, so each
+ * dismisses as before.
  */
 export const AdministratorRevocationDialogBase = (props: AdministratorRevocationDialogProps) => {
   const {
@@ -83,6 +91,8 @@ export const AdministratorRevocationDialogBase = (props: AdministratorRevocation
     description={description}
     isOpen={props.isOpen}
     onOpenChange={props.onOpenChange}
+    isDismissable={!isPending}
+    isKeyboardDismissDisabled={isPending}
     footer={(close: () => void) => {
       if (stage === "undecided") {
         return <Button variant="primary" onPress={() => props.on?.retry?.()}>{retryLabel}</Button>;
@@ -91,7 +101,7 @@ export const AdministratorRevocationDialogBase = (props: AdministratorRevocation
         return <Button variant="outline" onPress={close}>{cancelLabel}</Button>;
       }
       return <>
-        <Button variant="outline" onPress={close}>{cancelLabel}</Button>
+        <Button variant="outline" isDisabled={isPending} onPress={close}>{cancelLabel}</Button>
         <Button variant="primary" isPending={isPending} isDisabled={isPending || target.length === 0} onPress={() => props.on?.confirm?.()}>{confirmLabel}</Button>
       </>;
     }}

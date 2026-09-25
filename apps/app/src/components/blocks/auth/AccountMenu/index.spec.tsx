@@ -34,8 +34,13 @@ vi.mock("@/i18n/navigation", () => ({
 const scope = vi.hoisted(() => ({
     params: { locale: "vi", workspaceId: "workspace-1" } as Record<string, string>,
     role: "owner" as string | null,
+    /** The address the landing's notice reads; empty on every ordinary landing. */
+    search: "",
 }))
-vi.mock("next/navigation", () => ({ useParams: () => scope.params }))
+vi.mock("next/navigation", () => ({
+    useParams: () => scope.params,
+    useSearchParams: () => new URLSearchParams(scope.search),
+}))
 vi.mock("@/hooks", async () => {
     const { useMutateEndPrincipalSessionsSwr } = await import("@/hooks/swr/mutations/useMutateEndPrincipalSessionsSwr")
     return {
