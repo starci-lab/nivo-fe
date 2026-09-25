@@ -589,7 +589,23 @@
         "checkoutUnavailable": "Không thể xác nhận đơn mua này. Ưu đãi có thể đã thay đổi.",
         "paymentNotStarted": "Chưa có yêu cầu thanh toán nào được chấp nhận. Cùng một định danh đơn mua vẫn sẵn sàng để thử lại an toàn.",
         "paymentRefused": "Hóa đơn của đơn mua này đã bị hủy. Quay lại chọn ưu đãi để bắt đầu một đơn mua hiện hành.",
-        "checkoutInvalid": "Nhà cung cấp thanh toán trả về trường không đọc được."
+        "checkoutInvalid": "Nhà cung cấp thanh toán trả về trường không đọc được.",
+        "railChoice": "Phương thức thanh toán",
+        "railVnpay": "VNPAY",
+        "railVnpayDetail": "Thẻ và tài khoản ngân hàng nội địa qua VNPAY",
+        "railMomo": "MoMo",
+        "railMomoDetail": "Ví MoMo",
+        "railRequired": "Chọn một phương thức thanh toán trước khi yêu cầu thanh toán.",
+        "railCredentialPending": "Cổng thanh toán vẫn đang chờ thông tin xác thực của chủ sở hữu. Yêu cầu thanh toán dùng thông tin tạm và không bị chặn.",
+        "purchaseIdentityReused": "Yêu cầu này dùng lại định danh mua hàng đã có của tài khoản và mở trang thanh toán của cổng đã chọn. Nó không đánh dấu khoản thanh toán là đã trả.",
+        "sellerLedger": "Nivo · hoá đơn ghi trên sổ thanh toán nền tảng",
+        "purchaserVerifiedLogin": "Người mua · tài khoản đăng nhập đã xác minh",
+        "refusedNotAdmitted": "Tài khoản đang đăng nhập chưa phải người mua được thừa nhận.",
+        "nextActionVerifyEmail": "Xác minh email của tài khoản rồi thử lại.",
+        "nextActionSignIn": "Đăng nhập bằng tài khoản người mua đã được thừa nhận rồi thử lại.",
+        "nextActionRegister": "Tạo tài khoản người mua rồi quay lại bước này.",
+        "outcomeUnknownNotice": "Kết quả của yêu cầu trước chưa rõ. Hệ thống đối soát trước khi tạo yêu cầu mới và không tạo phí thứ hai.",
+        "conflictNotice": "Yêu cầu này mang nghĩa khác với giao dịch đã ghi. Mở lại giao dịch đã có thay vì gửi yêu cầu mới."
       },
       "purchaseStatus": {
         "path": "Đường dẫn đơn mua",
@@ -689,6 +705,110 @@
         "outcomeEntryWithheld": "Chưa thể vào workspace cho đến khi xác nhận sẵn sàng.",
         "outcomeEntryReady": "Đã xác nhận quyền vào workspace liên kết.",
         "outcomeEntryDenied": "Cơ quan cấp quyền khởi chạy workspace đã từ chối vào.",
+        "stateLabel": {
+          "selected": "Đã chọn gói",
+          "paymentNotStarted": "Chưa bắt đầu thanh toán",
+          "paymentPending": "Đang chờ thanh toán",
+          "paymentOutcomeUnknown": "Chưa rõ kết quả thanh toán",
+          "paymentRefused": "Thanh toán bị từ chối",
+          "paymentFailed": "Thanh toán không hoàn tất",
+          "paid": "Đã quyết toán",
+          "provisioning": "Đang cấp phát",
+          "provisioningRefused": "Cấp phát bị từ chối",
+          "ready": "Workspace đã sẵn sàng",
+          "renewed": "Đã gia hạn",
+          "paymentCancelled": "Thanh toán đã huỷ"
+        },
+        "sourceLabel": {
+          "payment": "Đối soát thanh toán",
+          "billing": "Sổ thanh toán nền tảng",
+          "provisioning": "Cấp phát workspace",
+          "readiness": "Sẵn sàng workspace"
+        },
+        "sourceStateLabel": {
+          "none": "Chưa có",
+          "unavailable": "Chưa đọc được nguồn này",
+          "observed": "Đã quan sát"
+        },
+        "provisioningDispositionLabel": {
+          "admitted": "Đã thừa nhận đơn cấp phát",
+          "running": "Đang dựng workspace",
+          "outcome-unknown": "Chưa rõ kết quả dựng",
+          "refused": "Đã từ chối cấp phát",
+          "failed-retryable": "Dựng thất bại, có thể thử lại",
+          "failed-terminal": "Dựng thất bại, đã kết thúc",
+          "ready": "Workspace đã sẵn sàng"
+        },
+        "ledgerLabel": "Sổ nền tảng",
+        "ledgerStateLabel": {
+          "open": "Đang mở",
+          "pending": "Chờ xác nhận",
+          "paid": "Đã thanh toán",
+          "refused": "Bị từ chối",
+          "failed": "Thất bại",
+          "cancelled": "Đã huỷ",
+          "unmatched-receipt": "Khoản thu chưa khớp",
+          "disputed": "Đang tranh chấp",
+          "refund-pending": "Đang chờ hoàn",
+          "refund-unresolved": "Hoàn tiền chưa xong"
+        },
+        "ledgerEntryKindLabel": {
+          "payment": "Ghi thu tiền",
+          "dispute": "Ghi tranh chấp",
+          "refund-intent": "Ý định hoàn tiền",
+          "refund": "Ghi hoàn tiền",
+          "correction": "Ghi điều chỉnh sai sót",
+          "adjustment": "Ghi điều chỉnh",
+          "unmatched-receipt": "Khoản thu chưa khớp"
+        },
+        "refundStateLabel": {
+          "refund-started": "Đã bắt đầu hoàn tiền",
+          "refunded": "Đã hoàn tiền",
+          "refund-pending-reconciliation": "Hoàn tiền đang chờ đối soát",
+          "unavailable": "Chưa đọc được kết quả hoàn tiền"
+        },
+        "holdStateLabel": {
+          "eligible": "Đang đủ điều kiện sử dụng",
+          "held": "Đang bị giữ",
+          "none": "Chưa có quyền sử dụng",
+          "unavailable": "Chưa đọc được quyền sử dụng"
+        },
+        "holdReasonLabel": {
+          "non-payment": "Chưa thanh toán",
+          "expiry": "Đã hết kỳ đã trả",
+          "cancellation": "Đã huỷ"
+        },
+        "renewalEvidenceLabel": {
+          "none": "Không chờ gia hạn nào",
+          "pending": "Đang chờ đối soát gia hạn",
+          "unknown": "Chưa rõ kết quả gia hạn"
+        },
+        "paidThroughLabel": "Đã trả đến {date}",
+        "heldSinceLabel": "Bị giữ từ {date}",
+        "renewAction": "Gia hạn bằng chính gói đã mua",
+        "entryStateLabel": {
+          "entry": "Đã mở được lối vào workspace",
+          "not-ready": "Workspace chưa sẵn sàng",
+          "refused": "Bị từ chối vào workspace",
+          "unavailable": "Chưa xác nhận được lối vào",
+          "conflict": "Danh tính lối vào không khớp"
+        },
+        "entryRefusalLabel": {
+          "unauthenticated": "Cần đăng nhập để vào workspace.",
+          "purchaser-not-admitted": "Tài khoản này chưa phải người mua được thừa nhận.",
+          "purchase-not-found-non-disclosing": "Không tìm thấy đơn mua này cho tài khoản đang đăng nhập.",
+          "request-invalid": "Yêu cầu vào workspace không hợp lệ.",
+          "owner-mismatch": "Workspace này thuộc chủ sở hữu khác.",
+          "workspace-not-found-non-disclosing": "Không tìm thấy workspace này cho tài khoản đang đăng nhập.",
+          "workspace-not-ready": "Workspace chưa ở trạng thái sẵn sàng.",
+          "readiness-observation-stale": "Lần quan sát sẵn sàng đã cũ; đọc lại trạng thái rồi thử lại.",
+          "entry-unsupported": "Lối vào này chưa được hỗ trợ.",
+          "source-unavailable": "Chưa đọc được nguồn xác nhận lối vào.",
+          "entry-owner-unavailable": "Cơ quan cấp lối vào chưa trả lời."
+        },
+        "entryNotReadyNotice": "Chưa vào được workspace. Trạng thái dưới đây là trạng thái thật của đơn mua.",
+        "entryConflictNotice": "Danh tính đã quan sát không khớp với bản ghi đã xác nhận. Đọc lại trạng thái trước khi thử lại.",
+        "unavailableNotice": "Một nguồn chưa trả lời. Phần chưa đọc được hiển thị là chưa đọc được, không phải kết quả cuối cùng.",
         "outcomeProvisioningRetryable": "Có thể thử lại cấp phát — cùng một đơn tiếp tục; không tạo workspace thứ hai.",
         "outcomeProvisioningTerminal": "Cấp phát đã kết thúc mà không có workspace. Đơn mua đã thanh toán vẫn được ghi nhận; không thể vào workspace.",
         "checkPaymentAction": "Kiểm tra trạng thái thanh toán",

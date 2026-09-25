@@ -5,11 +5,16 @@ import {
     createWorkspacePurchasePayLink,
     listWorkspacePurchaseOffers,
     payWorkspacePurchaseInvoice,
+    readWorkspaceCheckoutOffers,
+    readWorkspaceCheckoutStatus,
     readWorkspacePurchaseStatus,
     reconcileChatbotDelivery,
+    recoverWorkspacePurchase,
     resolvePurchasedWorkspaceEntry,
+    resolveWorkspaceCheckoutEntry,
     retryWorkspaceProvisioningSaga,
     startWorkspaceCheckout,
+    startWorkspaceCheckoutPurchase,
     workspaceControlplaneTesting,
     workspaceProvisioningSaga,
 } from "./workspace-controlplane"
@@ -345,5 +350,218 @@ describe("resolvePurchasedWorkspaceEntry", () => {
         const body = requestBody(fetchMock, 0)
         expect(body.query).toContain("issueAgentWorkspaceAppLaunch(input: $input)")
         expect(body.variables.input).toEqual({ workspaceId: "ws-1", app: "Openclaw" })
+    })
+})
+
+// The workspace-checkout boundary is reached through the same `<field>(request: $request)` shape the
+// rest of the transport uses, so these specs read the `request` variable rather than `input`.
+const requestVariables = (fetchMock: ReturnType<typeof vi.fn>, call: number) => requestBody(fetchMock, call).variables as unknown as { request: Record<string, unknown> }
+
+const checkoutOffer = { offerId: "offer-team", offerVersion: "v1", displayName: "Team Workspace", includedOutcome: "One ready agent workspace", amount: "499000", currency: "VND", billingCadence: "monthly", renewalMode: "explicit-reauthorization", eligibility: "market:VN" }
+const checkoutStatus = {
+    purchaseId: "purchase-1",
+    state: "paid",
+    offer: checkoutOffer,
+    payment: { source: "payment-reconciliation", state: "verified-success", reference: "attempt-1", observedAt: "2026-01-01T00:09:00.000Z" },
+    billing: { source: "platform-billing-ledger", state: "settled", reference: "receipt-1", observedAt: "2026-01-01T00:10:00.000Z" },
+    provisioning: { source: "workspace-provisioning", state: "admitted", reference: "order-1", observedAt: "2026-01-01T00:11:00.000Z", disposition: "provisioning", reason: null },
+    readiness: { source: "workspace-provisioning", state: "pending", reference: null, observedAt: "2026-01-01T00:11:00.000Z" },
+    serviceEligibility: { source: "workspace-provisioning", state: "none", reference: null, observedAt: null, reason: null, heldSince: null, paidThrough: null, renewalEvidence: "none", renewalAction: null },
+    ledger: {
+        source: "platform-billing-ledger",
+        state: "observed",
+        ledgerState: "settled",
+        observedAt: "2026-01-01T00:10:00.000Z",
+        entries: [{ entryId: "entry-1", purchaseId: "purchase-1", billingReceiptId: "receipt-1", kind: "charge", amount: "499000", currency: "VND", linkedEntryId: null, observationId: "obs-1", actorPrincipal: null, reason: null, paymentRail: "vnpay", providerTransactionRef: "vnpay-tx-1", accountingCopyState: "pending", postedAt: "2026-01-01T00:10:00.000Z" }],
+    },
+    refund: null,
+    refundStatus: null,
+    lastConfirmedAt: "2026-01-01T00:11:00.000Z",
+}
+
+describe("readWorkspaceCheckoutOffers", () => {
+    afterEach(() => vi.unstubAllGlobals())
+
+    it("selects the exact offer version and answers the current approved offers", async () => {
+        const fetchMock = vi.fn().mockResolvedValueOnce(envelope("workspaceCheckoutOffers", { status: "offers", offers: [checkoutOffer], selection: { offerId: "offer-team", offerVersion: "v1", state: "current" } }))
+        vi.stubGlobal("fetch", fetchMock)
+
+        const result = await readWorkspaceCheckoutOffers("offer-team", "v1")
+
+        expect(result.ok).toBe(true)
+        if (!result.ok) return
+        expect(result.data.status).toBe("offers")
+        expect(result.data.status === "offers" && result.data.offers).toEqual([checkoutOffer])
+        expect(result.data.status === "offers" && result.data.selection.state).toBe("current")
+        const body = requestBody(fetchMock, 0)
+        expect(body.query).toContain("workspaceCheckoutOffers(request: $request)")
+        expect(requestVariables(fetchMock, 0).request).toEqual({ offerId: "offer-team", offerVersion: "v1" })
+    })
+
+    it("keeps a stale selection verdict and the approved list in the same answer", async () => {
+        const fetchMock = vi.fn().mockResolvedValueOnce(envelope("workspaceCheckoutOffers", { status: "offers", offers: [checkoutOffer], selection: { offerId: "offer-team", offerVersion: "v0", state: "stale" } }))
+        vi.stubGlobal("fetch", fetchMock)
+
+        const result = await readWorkspaceCheckoutOffers("offer-team", "v0")
+
+        expect(result.ok).toBe(true)
+        if (!result.ok) return
+        expect(result.data.status === "offers" && result.data.selection.state).toBe("stale")
+        expect(result.data.status === "offers" && result.data.offers).toHaveLength(1)
+    })
+
+    it("carries an admission refusal with the verified-Login door it points at", async () => {
+        const fetchMock = vi.fn().mockResolvedValueOnce(envelope("workspaceCheckoutOffers", { status: "refused", code: "purchaser-not-admitted", nextAction: "login-verify-email", offers: [checkoutOffer] }))
+        vi.stubGlobal("fetch", fetchMock)
+
+        const result = await readWorkspaceCheckoutOffers("offer-team", "v1")
+
+        expect(result.ok).toBe(true)
+        if (!result.ok) return
+        expect(result.data.status).toBe("refused")
+        expect(result.data.status === "refused" && result.data.code).toBe("purchaser-not-admitted")
+        expect(result.data.status === "refused" && result.data.nextAction).toBe("login-verify-email")
+        expect(result.data.status === "refused" && result.data.offers).toHaveLength(1)
+    })
+})
+
+describe("startWorkspaceCheckoutPurchase", () => {
+    afterEach(() => vi.unstubAllGlobals())
+
+    it("admits the purchase under its retry key on the chosen rail and returns the provider action", async () => {
+        const fetchMock = vi.fn().mockResolvedValueOnce(envelope("workspaceCheckoutStart", { status: "prepared", purchaseId: "purchase-1", purchase: checkoutStatus, paymentAction: { paymentAttemptId: "attempt-1", provider: "vnpay", kind: "redirect", payload: { url: "https://sandbox.vnpayment.example/pay" } } }))
+        vi.stubGlobal("fetch", fetchMock)
+
+        const result = await startWorkspaceCheckoutPurchase({ retryKey: "start-purchase-1", offerId: "offer-team", offerVersion: "v1", paymentRail: "vnpay" })
+
+        expect(result.ok).toBe(true)
+        if (!result.ok) return
+        expect(result.data.status).toBe("prepared")
+        expect(result.data.status === "prepared" && result.data.paymentAction?.provider).toBe("vnpay")
+        expect(result.data.status === "prepared" && result.data.purchase.state).toBe("paid")
+        const body = requestBody(fetchMock, 0)
+        expect(body.query).toContain("workspaceCheckoutStart(request: $request)")
+        expect(requestVariables(fetchMock, 0).request).toEqual({ retryKey: "start-purchase-1", offerId: "offer-team", offerVersion: "v1", paymentRail: "vnpay" })
+    })
+
+    it("carries the existing entitlement when the purchase is an explicit renewal", async () => {
+        const fetchMock = vi.fn().mockResolvedValueOnce(envelope("workspaceCheckoutStart", { status: "prepared", purchaseId: "purchase-2", purchase: { ...checkoutStatus, purchaseId: "purchase-2" }, paymentAction: null }))
+        vi.stubGlobal("fetch", fetchMock)
+
+        await startWorkspaceCheckoutPurchase({ retryKey: "renew-1", offerId: "offer-team", offerVersion: "v1", paymentRail: "momo", renewalEntitlementId: "entitlement-1" })
+
+        expect(requestVariables(fetchMock, 0).request).toEqual({ retryKey: "renew-1", offerId: "offer-team", offerVersion: "v1", paymentRail: "momo", renewalEntitlementId: "entitlement-1" })
+    })
+
+    it("reports a refused admission as a refusal and never as a prepared purchase", async () => {
+        const fetchMock = vi.fn().mockResolvedValueOnce(refusal("workspaceCheckoutStart", "PURCHASER_NOT_ADMITTED"))
+        vi.stubGlobal("fetch", fetchMock)
+
+        const result = await startWorkspaceCheckoutPurchase({ retryKey: "start-purchase-1", offerId: "offer-team", offerVersion: "v1", paymentRail: "vnpay" })
+
+        expect(result).toEqual({ ok: false, reason: "refused", code: "PURCHASER_NOT_ADMITTED" })
+    })
+})
+
+describe("readWorkspaceCheckoutStatus", () => {
+    afterEach(() => vi.unstubAllGlobals())
+
+    it("reads each facet from its owning source and never promotes settlement into readiness", async () => {
+        const fetchMock = vi.fn().mockResolvedValueOnce(envelope("workspacePurchaseStatus", { status: "status", purchaseId: "purchase-1", purchase: checkoutStatus }))
+        vi.stubGlobal("fetch", fetchMock)
+
+        const result = await readWorkspaceCheckoutStatus("purchase-1")
+
+        expect(result.ok).toBe(true)
+        if (!result.ok) return
+        expect(result.data.status === "status" && result.data.purchase.billing.source).toBe("platform-billing-ledger")
+        expect(result.data.status === "status" && result.data.purchase.provisioning.disposition).toBe("provisioning")
+        expect(result.data.status === "status" && result.data.purchase.readiness.state).toBe("pending")
+        expect(result.data.status === "status" && result.data.purchase.serviceEligibility?.renewalEvidence).toBe("none")
+        expect(result.data.status === "status" && result.data.purchase.ledger?.entries[0]?.paymentRail).toBe("vnpay")
+        const body = requestBody(fetchMock, 0)
+        expect(body.query).toContain("workspacePurchaseStatus(request: $request)")
+        expect(requestVariables(fetchMock, 0).request).toEqual({ purchaseId: "purchase-1" })
+    })
+
+    it("keeps an unavailable source an unavailable facet rather than a terminal claim", async () => {
+        const fetchMock = vi.fn().mockResolvedValueOnce(envelope("workspacePurchaseStatus", { status: "unavailable", code: "source-unavailable", source: "platform-billing-ledger", purchaseId: "purchase-1" }))
+        vi.stubGlobal("fetch", fetchMock)
+
+        const result = await readWorkspaceCheckoutStatus("purchase-1")
+
+        expect(result.ok).toBe(true)
+        if (!result.ok) return
+        expect(result.data.status).toBe("unavailable")
+        expect(result.data.status === "unavailable" && result.data.source).toBe("platform-billing-ledger")
+    })
+})
+
+describe("recoverWorkspacePurchase", () => {
+    afterEach(() => vi.unstubAllGlobals())
+
+    it("reconciles through the identities the caller observed", async () => {
+        const fetchMock = vi.fn().mockResolvedValueOnce(envelope("workspacePurchaseRecover", { status: "status", purchaseId: "purchase-1", purchase: checkoutStatus }))
+        vi.stubGlobal("fetch", fetchMock)
+
+        const result = await recoverWorkspacePurchase({ purchaseId: "purchase-1", lastObserved: { paymentAttemptId: "attempt-1", providerReference: "vnpay-tx-1" } })
+
+        expect(result.ok).toBe(true)
+        expect(result.ok && result.data.status).toBe("status")
+        const body = requestBody(fetchMock, 0)
+        expect(body.query).toContain("workspacePurchaseRecover(request: $request)")
+        expect(requestVariables(fetchMock, 0).request).toEqual({ purchaseId: "purchase-1", lastObserved: { paymentAttemptId: "attempt-1", providerReference: "vnpay-tx-1" } })
+    })
+
+    it("sends no last-observed identities when the caller observed none", async () => {
+        const fetchMock = vi.fn().mockResolvedValueOnce(envelope("workspacePurchaseRecover", { status: "status", purchaseId: "purchase-1", purchase: checkoutStatus }))
+        vi.stubGlobal("fetch", fetchMock)
+
+        await recoverWorkspacePurchase({ purchaseId: "purchase-1" })
+
+        expect(requestVariables(fetchMock, 0).request).toEqual({ purchaseId: "purchase-1" })
+    })
+
+    it("surfaces a conflicting reuse as a closed conflict answer", async () => {
+        const fetchMock = vi.fn().mockResolvedValueOnce(envelope("workspacePurchaseRecover", { status: "conflict", code: "observed-identity-mismatch", purchaseId: "purchase-1" }))
+        vi.stubGlobal("fetch", fetchMock)
+
+        const result = await recoverWorkspacePurchase({ purchaseId: "purchase-1", lastObserved: { paymentAttemptId: "attempt-stale" } })
+
+        expect(result.ok).toBe(true)
+        if (!result.ok) return
+        expect(result.data.status).toBe("conflict")
+        expect(result.data.status === "conflict" && result.data.code).toBe("observed-identity-mismatch")
+    })
+})
+
+describe("resolveWorkspaceCheckoutEntry", () => {
+    afterEach(() => vi.unstubAllGlobals())
+
+    it("returns the registered destination for the exact readiness-confirmed workspace", async () => {
+        const destination = { workspaceId: "ws-1", ownerId: "owner-1", routeName: "workspace-dashboard", routeVersion: "1", context: { tab: "overview" } }
+        const fetchMock = vi.fn().mockResolvedValueOnce(envelope("workspacePurchaseEntry", { status: "entry", purchaseId: "purchase-1", workspaceId: "ws-1", destination }))
+        vi.stubGlobal("fetch", fetchMock)
+
+        const result = await resolveWorkspaceCheckoutEntry({ purchaseId: "purchase-1", workspaceId: "ws-1", readinessObservationId: "obs-1", returnContext: { name: "workspace-dashboard", version: "1" } })
+
+        expect(result.ok).toBe(true)
+        if (!result.ok) return
+        expect(result.data.status === "entry" && result.data.destination).toEqual(destination)
+        const body = requestBody(fetchMock, 0)
+        expect(body.query).toContain("workspacePurchaseEntry(request: $request)")
+        expect(requestVariables(fetchMock, 0).request).toEqual({ purchaseId: "purchase-1", workspaceId: "ws-1", readinessObservationId: "obs-1", returnContext: { name: "workspace-dashboard", version: "1" } })
+    })
+
+    it("returns the composed status instead of a destination while readiness is unconfirmed", async () => {
+        const fetchMock = vi.fn().mockResolvedValueOnce(envelope("workspacePurchaseEntry", { status: "not-ready", purchaseId: "purchase-1", purchase: checkoutStatus }))
+        vi.stubGlobal("fetch", fetchMock)
+
+        const result = await resolveWorkspaceCheckoutEntry({ purchaseId: "purchase-1", workspaceId: "ws-1", readinessObservationId: "obs-1" })
+
+        expect(result.ok).toBe(true)
+        if (!result.ok) return
+        expect(result.data.status).toBe("not-ready")
+        expect(result.data.status === "not-ready" && result.data.purchase.readiness.state).toBe("pending")
     })
 })

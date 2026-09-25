@@ -577,3 +577,468 @@ export const retryWorkspaceProvisioningOrder = (workspaceId: string): Promise<Re
     action: "retry_provision"
   }
 });
+
+/*
+ * ---------------------------------------------------------------------------
+ * THE WORKSPACE-CHECKOUT BOUNDARY.
+ *
+ * EVERY PURCHASE FUNCTION ABOVE IS BOUND TO THE CONSOLE'S GENERIC SURFACE - `catalogItems`, `orderAgentOs`, `myCatalogOrders`, `myInvoices`, `myAgentWorkspace`, `payInvoice`, `createWalletTopUpPayLink` - and that binding is why a purchase screen could only ever describe a generic order: whatever provider name the wallet top-up happened to carry, whatever the invoice row happened to say, and no rail for the purchaser to choose, because the generic order surface has no rail. The workspace-provision feature now publishes its own boundary over the real purchase process (`src/features/workspace-provision/transport/graphql`), and this section binds to it.
+ *
+ * NOTHING ABOVE IS REMOVED. The chatbot workbench and the console screens that still read the generic surface keep every export they had, so both surfaces are reachable at once and a screen can move one call at a time.
+ *
+ * THE ANSWER IS A CLOSED OUTCOME, NOT AN ERROR. `offers`, `prepared` and `status` carry payloads; `refused`, `unavailable`, `conflict` and `outcome-unknown` are terminal answers that never claim a paid, provisioning or ready fact - so a caller must read `status` before it reads any fact, and `ok` alone never means the purchase advanced.
+ * ---------------------------------------------------------------------------
+ */
+
+/** The two owner-approved domestic payment rails a checkout may select; a missing choice never starts an attempt. */
+export type WorkspaceCheckoutPaymentRail = "vnpay" | "momo";
+
+/**
+ * Lifecycle cursor of one purchase.
+ *
+ * THE CURSOR IS THE PROCESS, NOT THE BROWSER: only a confirmed transition
+ * moves it, so a provider return or an elapsed timer can never advance it.
+ */
+export type WorkspaceCheckoutPurchaseState =
+  | "selected"
+  | "payment-not-started"
+  | "payment-pending"
+  | "payment-outcome-unknown"
+  | "payment-refused"
+  | "payment-failed"
+  | "paid"
+  | "provisioning"
+  | "provisioning-refused"
+  | "ready"
+  | "renewed"
+  | "payment-cancelled";
+
+/** Closed refusal and failure codes of the checkout contract. */
+export type WorkspaceCheckoutRefusalCode =
+  | "unauthenticated"
+  | "purchaser-not-admitted"
+  | "offer-unavailable"
+  | "offer-version-stale"
+  | "retry-identity-conflict"
+  | "purchase-not-found-non-disclosing"
+  | "source-unavailable"
+  | "outcome-unknown"
+  | "request-invalid"
+  | "payment-refused"
+  | "payment-failed"
+  | "observed-identity-mismatch";
+
+/** Verified-Login door an admission refusal points at, when the caller must become an admitted purchaser. */
+export type WorkspaceCheckoutNextAction = "login-sign-in" | "login-register" | "login-verify-email";
+
+/** Verdict on the requested offer identity and version against the current catalog. */
+export type WorkspaceCheckoutSelectionState = "current" | "stale" | "unavailable";
+
+/** One currently approved offer as the purchaser may see it. */
+export type WorkspaceCheckoutOffer = {
+  readonly offerId: string;
+  readonly offerVersion: string;
+  readonly displayName: string;
+  readonly includedOutcome: string;
+  readonly amount: string;
+  readonly currency: string;
+  readonly billingCadence: string;
+  readonly renewalMode: string;
+  readonly eligibility: string;
+};
+
+/** Verdict on the selected offer identity and version. */
+export type WorkspaceCheckoutSelection = {
+  readonly offerId: string;
+  readonly offerVersion: string;
+  readonly state: WorkspaceCheckoutSelectionState;
+};
+
+/** One source-qualified fact facet; `state` uses the owning source's own vocabulary, and `unavailable` is never a stronger claim. */
+export type WorkspaceCheckoutSourceFact = {
+  readonly source: string;
+  readonly state: string;
+  readonly reference: string | null;
+  readonly observedAt: string | null;
+};
+
+/** Provisioning owner's exact disposition and caller-safe reason, beside the shared order state. */
+export type WorkspaceCheckoutProvisioningFact = WorkspaceCheckoutSourceFact & {
+  readonly disposition: string | null;
+  readonly reason: string | null;
+};
+
+/** Explicit next-period payment offered only to an entitled owner; never a new operation. */
+export type WorkspaceCheckoutRenewalAction = {
+  readonly operation: string;
+  readonly offerId: string;
+  readonly offerVersion: string;
+  readonly amount: string;
+  readonly currency: string;
+};
+
+/** Current entitlement and hold facts; `renewalEvidence` never lifts a hold by itself. */
+export type WorkspaceCheckoutEligibilityFact = WorkspaceCheckoutSourceFact & {
+  readonly reason: string | null;
+  readonly heldSince: string | null;
+  readonly paidThrough: string | null;
+  readonly renewalAction: WorkspaceCheckoutRenewalAction | null;
+  readonly renewalEvidence: string;
+};
+
+/** One immutable posted billing entry with its adjustment link. */
+export type WorkspaceCheckoutBillingEntry = {
+  readonly entryId: string;
+  readonly purchaseId: string;
+  readonly billingReceiptId: string;
+  readonly kind: string;
+  readonly amount: string;
+  readonly currency: string;
+  readonly linkedEntryId: string | null;
+  readonly observationId: string | null;
+  readonly actorPrincipal: string | null;
+  readonly reason: string | null;
+  readonly paymentRail: string | null;
+  readonly providerTransactionRef: string | null;
+  readonly accountingCopyState: string;
+  readonly postedAt: string;
+};
+
+/** Purchaser-scoped ledger facts of one purchase, in posting order. */
+export type WorkspaceCheckoutLedgerFact = {
+  readonly source: string;
+  readonly state: string;
+  readonly ledgerState: string | null;
+  readonly entries: ReadonlyArray<WorkspaceCheckoutBillingEntry>;
+  readonly observedAt: string | null;
+};
+
+/** Refund facet of a definitively refused paid order, with the source markers that qualify it. */
+export type WorkspaceCheckoutRefundFact = WorkspaceCheckoutSourceFact & {
+  readonly projection: string;
+  readonly refundEntryId: string | null;
+};
+
+/**
+ * Composed purchase truth: the process cursor plus distinct source-qualified facets.
+ *
+ * ADMISSION IS NOT READINESS, AND A SETTLED PAYMENT IS NOT A READY WORKSPACE:
+ * every facet names its owning source, so a screen shows exactly the one fact
+ * that source confirmed and nothing wider.
+ */
+export type WorkspaceCheckoutStatusView = {
+  readonly purchaseId: string;
+  readonly state: WorkspaceCheckoutPurchaseState;
+  readonly offer: WorkspaceCheckoutOffer;
+  readonly payment: WorkspaceCheckoutSourceFact;
+  readonly billing: WorkspaceCheckoutSourceFact;
+  readonly provisioning: WorkspaceCheckoutProvisioningFact;
+  readonly readiness: WorkspaceCheckoutSourceFact;
+  readonly serviceEligibility: WorkspaceCheckoutEligibilityFact | null;
+  readonly ledger: WorkspaceCheckoutLedgerFact | null;
+  readonly refund: WorkspaceCheckoutRefundFact | null;
+  readonly refundStatus: WorkspaceCheckoutSourceFact | null;
+  readonly lastConfirmedAt: string;
+};
+
+/** Provider action the purchaser must complete; the payload carries no purchase authority. */
+export type WorkspaceCheckoutPaymentAction = {
+  readonly paymentAttemptId: string;
+  readonly provider: string;
+  readonly kind: string;
+  readonly payload: Readonly<Record<string, unknown>>;
+};
+
+/**
+ * Closed result union of the workspace-checkout boundary.
+ *
+ * `prepared` and `status` always carry the composed purchase view: the
+ * boundary's own contract declares it for those two arms, so a caller switches
+ * on `status` and then reads the fact it asked for.
+ */
+export type WorkspaceCheckoutOutcome =
+  | {
+    readonly status: "offers";
+    readonly offers: ReadonlyArray<WorkspaceCheckoutOffer>;
+    readonly selection: WorkspaceCheckoutSelection;
+  }
+  | {
+    readonly status: "prepared";
+    readonly purchaseId: string | null;
+    readonly purchase: WorkspaceCheckoutStatusView;
+    readonly paymentAction: WorkspaceCheckoutPaymentAction | null;
+  }
+  | {
+    readonly status: "status";
+    readonly purchaseId: string | null;
+    readonly purchase: WorkspaceCheckoutStatusView;
+  }
+  | {
+    readonly status: "refused";
+    readonly code: WorkspaceCheckoutRefusalCode;
+    readonly nextAction?: WorkspaceCheckoutNextAction;
+    readonly purchaseId?: string;
+    readonly offers?: ReadonlyArray<WorkspaceCheckoutOffer>;
+    readonly purchase?: WorkspaceCheckoutStatusView;
+  }
+  | {
+    readonly status: "unavailable";
+    readonly code: "source-unavailable";
+    readonly source: string;
+    readonly purchaseId?: string;
+  }
+  | {
+    readonly status: "conflict";
+    readonly code: "retry-identity-conflict" | "observed-identity-mismatch";
+    readonly purchaseId?: string;
+  }
+  | {
+    readonly status: "outcome-unknown";
+    readonly code: "outcome-unknown";
+    readonly purchaseId?: string;
+  };
+
+/** Versioned return context naming the purchaser-scoped surface a resolved entry returns to. */
+export type WorkspaceCheckoutEntryReturnContext = {
+  readonly name: string;
+  readonly version: string;
+};
+
+/** Registered entry destination: structured owner data, never a caller-selected URL. */
+export type WorkspaceCheckoutEntryDestination = {
+  readonly workspaceId: string;
+  readonly ownerId: string;
+  readonly routeName: string;
+  readonly routeVersion: string;
+  readonly context: Readonly<Record<string, unknown>>;
+};
+
+/** Closed refusal codes of the purchased-workspace entry contract. */
+export type WorkspaceCheckoutEntryRefusalCode =
+  | "unauthenticated"
+  | "purchaser-not-admitted"
+  | "purchase-not-found-non-disclosing"
+  | "request-invalid"
+  | "owner-mismatch"
+  | "workspace-not-found-non-disclosing"
+  | "workspace-not-ready"
+  | "readiness-observation-stale"
+  | "entry-unsupported";
+
+/** Closed result union of the purchased-workspace entry boundary. */
+export type WorkspaceCheckoutEntryOutcome =
+  | {
+    readonly status: "entry";
+    readonly purchaseId: string | null;
+    readonly workspaceId: string;
+    readonly destination: WorkspaceCheckoutEntryDestination;
+  }
+  | {
+    readonly status: "not-ready";
+    readonly purchaseId: string | null;
+    readonly purchase: WorkspaceCheckoutStatusView;
+  }
+  | {
+    readonly status: "refused";
+    readonly code: WorkspaceCheckoutEntryRefusalCode;
+    readonly purchaseId?: string;
+  }
+  | {
+    readonly status: "unavailable";
+    readonly code: "source-unavailable" | "entry-owner-unavailable";
+    readonly source: string;
+    readonly purchaseId?: string;
+  }
+  | {
+    readonly status: "conflict";
+    readonly code: "observed-identity-mismatch";
+    readonly purchaseId?: string;
+  };
+
+/** Last source identities the caller observed; each is compared against the confirmed record. */
+export type WorkspaceCheckoutObservedIdentities = {
+  readonly paymentAttemptId?: string;
+  readonly providerReference?: string;
+  readonly billingReceiptId?: string;
+  readonly provisioningOrderId?: string;
+  readonly workspaceId?: string;
+};
+
+/**
+ * `start-checkout` request.
+ *
+ * `retryKey` IS THE RETRY IDENTITY, NOT A CACHE KEY: identical reuse replays
+ * the same purchase and changed meaning conflicts, so a caller derives it from
+ * the purchase it intends rather than from the moment it pressed.
+ */
+export type WorkspaceCheckoutStartRequest = {
+  readonly retryKey: string;
+  readonly offerId: string;
+  readonly offerVersion: string;
+  readonly paymentRail: WorkspaceCheckoutPaymentRail;
+  readonly renewalEntitlementId?: string;
+};
+
+/** `request-safe-recovery` request: the purchase plus the identities the caller last observed. */
+export type WorkspaceCheckoutRecoverRequest = {
+  readonly purchaseId: string;
+  readonly lastObserved?: WorkspaceCheckoutObservedIdentities;
+};
+
+/** `resolve-purchased-workspace-entry` request: the purchase plus the claimed ready identities. */
+export type WorkspaceCheckoutEntryRequest = {
+  readonly purchaseId: string;
+  readonly workspaceId: string;
+  readonly readinessObservationId: string;
+  readonly returnContext?: WorkspaceCheckoutEntryReturnContext;
+};
+
+/** Offer selection reused by every outcome selection that answers offers. */
+const WORKSPACE_CHECKOUT_OFFER_FIELDS = `offerId offerVersion displayName includedOutcome amount currency billingCadence renewalMode eligibility`;
+
+/** Source-qualified facet selection reused by every facet that carries no extra field. */
+const WORKSPACE_CHECKOUT_SOURCE_FIELDS = `source state reference observedAt`;
+
+/** Composed purchase view selection, including the facets only purchase-status composes. */
+const WORKSPACE_CHECKOUT_STATUS_FIELDS = `
+  purchaseId
+  state
+  offer { ${WORKSPACE_CHECKOUT_OFFER_FIELDS} }
+  payment { ${WORKSPACE_CHECKOUT_SOURCE_FIELDS} }
+  billing { ${WORKSPACE_CHECKOUT_SOURCE_FIELDS} }
+  provisioning { ${WORKSPACE_CHECKOUT_SOURCE_FIELDS} disposition reason }
+  readiness { ${WORKSPACE_CHECKOUT_SOURCE_FIELDS} }
+  serviceEligibility { ${WORKSPACE_CHECKOUT_SOURCE_FIELDS} reason heldSince paidThrough renewalEvidence renewalAction { operation offerId offerVersion amount currency } }
+  ledger {
+    source
+    state
+    ledgerState
+    observedAt
+    entries { entryId purchaseId billingReceiptId kind amount currency linkedEntryId observationId actorPrincipal reason paymentRail providerTransactionRef accountingCopyState postedAt }
+  }
+  refund { ${WORKSPACE_CHECKOUT_SOURCE_FIELDS} projection refundEntryId }
+  refundStatus { ${WORKSPACE_CHECKOUT_SOURCE_FIELDS} }
+  lastConfirmedAt
+`;
+
+/** Selection covering the whole closed checkout outcome union. */
+const WORKSPACE_CHECKOUT_OUTCOME_FIELDS = `
+  status
+  code
+  nextAction
+  source
+  purchaseId
+  offers { ${WORKSPACE_CHECKOUT_OFFER_FIELDS} }
+  selection { offerId offerVersion state }
+  purchase { ${WORKSPACE_CHECKOUT_STATUS_FIELDS} }
+  paymentAction { paymentAttemptId provider kind payload }
+`;
+
+/** Selection covering the whole closed purchase-entry outcome union. */
+const WORKSPACE_CHECKOUT_ENTRY_FIELDS = `
+  status
+  code
+  source
+  purchaseId
+  workspaceId
+  destination { workspaceId ownerId routeName routeVersion context }
+  purchase { ${WORKSPACE_CHECKOUT_STATUS_FIELDS} }
+`;
+
+/**
+ * Select an offer and read the current approved ones (contract operation
+ * `select-offer`).
+ *
+ * THE SELECTION IS DATA, NOT AUTHORITY: the backend decides whether this
+ * purchaser may buy this exact offer version now and answers `current`,
+ * `stale` or `unavailable` with the same list either way.
+ *
+ * @param offerId - The offer identity the screen is presenting.
+ * @param offerVersion - The exact version presented, never a floating "latest".
+ * @returns The closed outcome, or why no answer arrived.
+ */
+export const readWorkspaceCheckoutOffers = (offerId: string, offerVersion: string): Promise<Result<WorkspaceCheckoutOutcome>> => graphql(`query WorkspaceCheckoutOffers($request: WorkspaceCheckoutOffersInput!) { workspaceCheckoutOffers(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`, {
+  request: {
+    offerId,
+    offerVersion
+  }
+});
+
+/**
+ * Admit one purchase and request its provider attempt (contract operation
+ * `start-checkout`).
+ *
+ * THE RAIL IS THE PURCHASER'S EXPLICIT CHOICE: an absent rail never starts an
+ * attempt, and the frozen snapshot - not the browser - is what billing,
+ * provisioning and status are measured against. A returned payment action is
+ * an instruction to complete, never a receipt.
+ *
+ * @param request - The retry identity, the frozen selection and the chosen rail.
+ * @returns The closed outcome carrying the payment action, or why none was admitted.
+ */
+export const startWorkspaceCheckoutPurchase = (request: WorkspaceCheckoutStartRequest): Promise<Result<WorkspaceCheckoutOutcome>> => graphql(`mutation WorkspaceCheckoutStart($request: WorkspaceCheckoutStartInput!) { workspaceCheckoutStart(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`, {
+  request: {
+    retryKey: request.retryKey,
+    offerId: request.offerId,
+    offerVersion: request.offerVersion,
+    paymentRail: request.paymentRail,
+    renewalEntitlementId: request.renewalEntitlementId
+  }
+});
+
+/**
+ * Read one owned purchase's composed truth (contract operation
+ * `read-purchase-status`).
+ *
+ * EACH FACET NAMES ITS OWN SOURCE, so this read is also the honest answer to
+ * "is the workspace ready": `paid` is a settlement fact, `provisioning` an
+ * admission fact and `readiness` the only fact that may say `ready`.
+ *
+ * @param purchaseId - The purchase identity to read; ownership resolves from the session, never from this value.
+ * @returns The closed outcome, or why the read was refused.
+ */
+export const readWorkspaceCheckoutStatus = (purchaseId: string): Promise<Result<WorkspaceCheckoutOutcome>> => graphql(`query WorkspacePurchaseStatus($request: WorkspacePurchaseStatusInput!) { workspacePurchaseStatus(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`, {
+  request: {
+    purchaseId
+  }
+});
+
+/**
+ * Reconcile and advance one owned purchase through its original identities
+ * only (contract operation `request-safe-recovery`).
+ *
+ * THIS IS THE SAFE RETRY: it reconciles an uncertain attempt, advances a
+ * canonically settled purchase into provisioning and confirms exact
+ * owned-workspace readiness, and a caller whose last observed identity
+ * contradicts the confirmed record is refused rather than overwriting it.
+ *
+ * @param request - The purchase identity plus the identities the caller last observed.
+ * @returns The closed outcome, or why the recovery was refused.
+ */
+export const recoverWorkspacePurchase = (request: WorkspaceCheckoutRecoverRequest): Promise<Result<WorkspaceCheckoutOutcome>> => graphql(`mutation WorkspacePurchaseRecover($request: WorkspacePurchaseRecoverInput!) { workspacePurchaseRecover(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`, {
+  request: {
+    purchaseId: request.purchaseId,
+    lastObserved: request.lastObserved
+  }
+});
+
+/**
+ * Resolve the entry destination for one owned, readiness-confirmed workspace
+ * (contract operation `resolve-purchased-workspace-entry`).
+ *
+ * THE DESTINATION IS REGISTERED, NEVER CHOSEN: the returned destination is
+ * structured owner data for the exact workspace the provisioning owner
+ * confirmed ready, and an unready, unowned or stale identity is answered
+ * without disclosing sibling workspaces.
+ *
+ * @param request - The purchase, workspace and readiness-observation identities the caller observed.
+ * @returns The closed entry outcome, or why navigation stays withheld.
+ */
+export const resolveWorkspaceCheckoutEntry = (request: WorkspaceCheckoutEntryRequest): Promise<Result<WorkspaceCheckoutEntryOutcome>> => graphql(`query WorkspacePurchaseEntry($request: WorkspacePurchaseEntryInput!) { workspacePurchaseEntry(request: $request) { data { ${WORKSPACE_CHECKOUT_ENTRY_FIELDS} } message success error } }`, {
+  request: {
+    purchaseId: request.purchaseId,
+    workspaceId: request.workspaceId,
+    readinessObservationId: request.readinessObservationId,
+    returnContext: request.returnContext
+  }
+});

@@ -589,7 +589,23 @@
         "checkoutUnavailable": "Checkout could not confirm this purchase. The offer may have changed.",
         "paymentNotStarted": "No payment request was accepted. The same purchase identity remains available for a safe retry.",
         "paymentRefused": "This purchase's invoice was cancelled. Return to offer selection to start a current purchase.",
-        "checkoutInvalid": "The provider returned unreadable checkout fields."
+        "checkoutInvalid": "The provider returned unreadable checkout fields.",
+        "railChoice": "Payment method",
+        "railVnpay": "VNPAY",
+        "railVnpayDetail": "Domestic cards and bank accounts through VNPAY",
+        "railMomo": "MoMo",
+        "railMomoDetail": "MoMo wallet",
+        "railRequired": "Choose a payment method before requesting payment.",
+        "railCredentialPending": "The payment gateway is still waiting on the owner's credentials. The payment request uses placeholder credentials and is not blocked.",
+        "purchaseIdentityReused": "This request reuses the account's existing purchase identity and opens the chosen gateway's payment page. It does not mark the payment as paid.",
+        "sellerLedger": "Nivo · invoice posted on the platform billing ledger",
+        "purchaserVerifiedLogin": "Purchaser · verified Login account",
+        "refusedNotAdmitted": "The signed-in account is not an admitted purchaser yet.",
+        "nextActionVerifyEmail": "Verify the account's email, then try again.",
+        "nextActionSignIn": "Sign in with an admitted purchaser account, then try again.",
+        "nextActionRegister": "Create a purchaser account, then come back to this step.",
+        "outcomeUnknownNotice": "The previous request's result is not known yet. Nivo reconciles before starting another one and never creates a second charge.",
+        "conflictNotice": "This request means something different from the recorded transaction. Reopen the existing transaction instead of sending a new one."
       },
       "purchaseStatus": {
         "path": "Purchase path",
@@ -689,6 +705,110 @@
         "outcomeEntryWithheld": "Entry unavailable until readiness is confirmed.",
         "outcomeEntryReady": "Entry confirmed for the bound workspace.",
         "outcomeEntryDenied": "Entry refused by the workspace launch authority.",
+        "stateLabel": {
+          "selected": "Offer selected",
+          "paymentNotStarted": "Payment not started",
+          "paymentPending": "Payment pending",
+          "paymentOutcomeUnknown": "Payment outcome unknown",
+          "paymentRefused": "Payment refused",
+          "paymentFailed": "Payment failed",
+          "paid": "Settled",
+          "provisioning": "Provisioning",
+          "provisioningRefused": "Provisioning refused",
+          "ready": "Workspace ready",
+          "renewed": "Renewed",
+          "paymentCancelled": "Payment cancelled"
+        },
+        "sourceLabel": {
+          "payment": "Payment reconciliation",
+          "billing": "Platform billing ledger",
+          "provisioning": "Workspace provisioning",
+          "readiness": "Workspace readiness"
+        },
+        "sourceStateLabel": {
+          "none": "None",
+          "unavailable": "This source could not be read",
+          "observed": "Observed"
+        },
+        "provisioningDispositionLabel": {
+          "admitted": "Provisioning order admitted",
+          "running": "Building the workspace",
+          "outcome-unknown": "Build outcome unknown",
+          "refused": "Provisioning refused",
+          "failed-retryable": "Build failed, retryable",
+          "failed-terminal": "Build failed, ended",
+          "ready": "Workspace ready"
+        },
+        "ledgerLabel": "Platform ledger",
+        "ledgerStateLabel": {
+          "open": "Open",
+          "pending": "Awaiting confirmation",
+          "paid": "Paid",
+          "refused": "Refused",
+          "failed": "Failed",
+          "cancelled": "Cancelled",
+          "unmatched-receipt": "Unmatched receipt",
+          "disputed": "Disputed",
+          "refund-pending": "Refund pending",
+          "refund-unresolved": "Refund unresolved"
+        },
+        "ledgerEntryKindLabel": {
+          "payment": "Payment entry",
+          "dispute": "Dispute entry",
+          "refund-intent": "Refund intent",
+          "refund": "Refund entry",
+          "correction": "Correction entry",
+          "adjustment": "Adjustment entry",
+          "unmatched-receipt": "Unmatched receipt"
+        },
+        "refundStateLabel": {
+          "refund-started": "Refund started",
+          "refunded": "Refunded",
+          "refund-pending-reconciliation": "Refund awaiting reconciliation",
+          "unavailable": "Refund result could not be read"
+        },
+        "holdStateLabel": {
+          "eligible": "Eligible to use",
+          "held": "On hold",
+          "none": "No entitlement yet",
+          "unavailable": "Entitlement could not be read"
+        },
+        "holdReasonLabel": {
+          "non-payment": "Not paid",
+          "expiry": "Paid period ended",
+          "cancellation": "Cancelled"
+        },
+        "renewalEvidenceLabel": {
+          "none": "No renewal awaited",
+          "pending": "Renewal awaiting reconciliation",
+          "unknown": "Renewal outcome unknown"
+        },
+        "paidThroughLabel": "Paid through {date}",
+        "heldSinceLabel": "On hold since {date}",
+        "renewAction": "Renew by re-paying the same offer",
+        "entryStateLabel": {
+          "entry": "Workspace entry resolved",
+          "not-ready": "Workspace not ready",
+          "refused": "Workspace entry refused",
+          "unavailable": "Entry could not be confirmed",
+          "conflict": "Entry identities did not match"
+        },
+        "entryRefusalLabel": {
+          "unauthenticated": "Sign in to enter the workspace.",
+          "purchaser-not-admitted": "This account is not an admitted purchaser yet.",
+          "purchase-not-found-non-disclosing": "No purchase of this identity is visible to the signed-in account.",
+          "request-invalid": "The workspace entry request is not valid.",
+          "owner-mismatch": "This workspace belongs to another owner.",
+          "workspace-not-found-non-disclosing": "No such workspace is visible to the signed-in account.",
+          "workspace-not-ready": "The workspace is not ready yet.",
+          "readiness-observation-stale": "The readiness observation is stale; re-read the status and try again.",
+          "entry-unsupported": "This entry destination is not supported.",
+          "source-unavailable": "The source confirming entry could not be read.",
+          "entry-owner-unavailable": "The entry owner did not answer."
+        },
+        "entryNotReadyNotice": "The workspace cannot be entered yet. The state below is the purchase's real state.",
+        "entryConflictNotice": "The identities observed do not match the confirmed record. Re-read the status before trying again.",
+        "unavailableNotice": "One source did not answer. What could not be read is shown as unread, never as a final result.",
         "outcomeProvisioningRetryable": "Provisioning can be retried — the same order resumes; no second workspace is created.",
         "outcomeProvisioningTerminal": "Provisioning ended without a workspace. The paid purchase remains recorded; no workspace entry is possible.",
         "checkPaymentAction": "Check payment status",
