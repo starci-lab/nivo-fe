@@ -317,7 +317,7 @@ export const GROUP_CHAT_GROW_CLASS_NAME = cn("min-w-0", "flex-1");
 export const GROUP_CHAT_FIELD_BODY_CLASS_NAME = cn("min-w-0");
 
 /** A peer message bubble in decision presentation reads on the secondary surface. */
-export const GROUP_CHAT_BUBBLE_CLASS_NAME = cn("inline-block", "max-w-[38rem]", "rounded-xl", "px-3.5", "py-2", "min-[70rem]:ml-7", "min-[70rem]:py-3.5", "bg-surface-secondary");
+export const GROUP_CHAT_BUBBLE_CLASS_NAME = cn("inline-block", "max-w-[38rem]", "rounded-xl", "px-3.5", "py-2", "min-[70rem]:ml-7", "min-[70rem]:py-3.5", "min-[70rem]:translate-y-4", "bg-surface-secondary");
 
 /** The viewer's own message bubble reads on the soft accent surface. */
 export const GROUP_CHAT_BUBBLE_OWN_CLASS_NAME = cn(
