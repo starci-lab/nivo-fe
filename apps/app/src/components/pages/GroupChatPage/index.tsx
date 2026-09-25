@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
 import type {
@@ -30,7 +30,6 @@ import {
   GroupChatPageBase,
   parseAddressedModule,
   parseRoleHint,
-  useCompactMembers,
   type GroupChatPageLabels,
   type GroupChatTab,
   type GroupChatPageView,
@@ -38,6 +37,26 @@ import {
 
 /** This page resolves its workspace from the session, the route query, or an invitation link. */
 export type GroupChatPageProps = Record<string, never>;
+
+/**
+ * The same 48rem edge ChatWorkspace's installed compact rail presentation reads
+ * (`compactRailQuery` in @starci/grammar). Below it the surface keeps the peer
+ * tabs and the member chip on one chrome row and presents the member content as
+ * a bottom sheet instead of the right-edge drawer.
+ */
+const COMPACT_MEMBER_QUERY = "(max-width: 47.999rem)";
+
+const subscribeToCompactMember = (onStoreChange: () => void): (() => void) => {
+  if (typeof window === "undefined") {
+    return () => undefined;
+  }
+  const query = window.matchMedia(COMPACT_MEMBER_QUERY);
+  query.addEventListener("change", onStoreChange);
+  return () => query.removeEventListener("change", onStoreChange);
+};
+const getCompactMemberSnapshot = (): boolean =>
+  typeof window !== "undefined" && window.matchMedia(COMPACT_MEMBER_QUERY).matches;
+const getCompactMemberServerSnapshot = (): boolean => false;
 
 const newIntentId = (): string =>
   typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
@@ -342,7 +361,11 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
    * compact width; a wider viewport or a dropped read closes it so a stale open
    * flag never reopens it on the next compact pass.
    */
-  const compactMembers = useCompactMembers();
+  const compactMembers = useSyncExternalStore(
+    subscribeToCompactMember,
+    getCompactMemberSnapshot,
+    getCompactMemberServerSnapshot,
+  );
   useEffect(() => {
     if (isRailOpen && (!compactMembers || officeState !== "ready")) {
       setRailOpen(false);
@@ -558,6 +581,7 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
   return (
     <GroupChatPageBase
       isRailOpen={isRailOpen}
+      isCompactMembers={compactMembers}
       view={view}
       labels={labels}
       on={{

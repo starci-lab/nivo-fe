@@ -29,6 +29,23 @@ export const GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME = cn(
   "min-[70rem]:h-[calc(100dvh-13rem)]",
 );
 
+/**
+ * Compact host while the member sheet is open: the sheet claims a fixed 20rem
+ * band raised 5.5rem above the viewport bottom (clear of the shell's bottom
+ * destination nav), so the host keeps its compact height - the nav follows it
+ * in flow at the page bottom - and gives the workspace the sheet's footprint
+ * plus a seam gap as bottom padding instead. The composer slides up to sit just
+ * above the sheet rather than under it; only ever applied below 48rem.
+ */
+export const GROUP_CHAT_WORKSPACE_HOST_SHEET_OPEN_CLASS_NAME = cn(
+  "flex",
+  "h-[calc(100dvh-17rem)]",
+  "min-h-0",
+  "min-w-0",
+  "flex-col",
+  "pb-[21rem]",
+);
+
 /** Compact chrome row: the peer tab strip on the left and the member chip on the right. */
 export const GROUP_CHAT_TAB_ROW_CLASS_NAME = cn("flex", "min-w-0", "items-center", "justify-between", "gap-3");
 
@@ -58,8 +75,20 @@ export const GROUP_CHAT_MEMBER_CHIP_CLASS_NAME = cn(
 /** The workspace header rides as the conversation scroll region's first item on compact widths. */
 export const GROUP_CHAT_SCROLL_HEADER_CLASS_NAME = cn("px-4", "pt-4", "pb-1");
 
-/** Compact member sheet dialog: flush bands replace the vendor padding; top corners stay rounded. */
-export const GROUP_CHAT_SHEET_DIALOG_CLASS_NAME = cn("p-0", "pt-1");
+/**
+ * Compact member sheet positioning wrapper: the bottom padding lifts the sheet
+ * clear of the shell's fixed destination nav (65px plus its safe band), so the
+ * overlay sits between the composer above and the menu below - never over them.
+ */
+export const GROUP_CHAT_SHEET_CONTENT_CLASS_NAME = cn("pb-[5.5rem]");
+
+/**
+ * Compact member sheet dialog: flush bands replace the vendor padding; top
+ * corners stay rounded. The fixed 20rem height is the footprint the workspace
+ * host reserves while the sheet is open, so the composer lands just above it;
+ * the body scrolls inside the bound when the roster is taller than the band.
+ */
+export const GROUP_CHAT_SHEET_DIALOG_CLASS_NAME = cn("h-[20rem]", "p-0", "pt-1");
 
 /** Sheet title row under the drag handle; the end padding clears the absolute close control. */
 export const GROUP_CHAT_SHEET_HEAD_CLASS_NAME = cn("flex", "items-center", "justify-between", "gap-3", "px-4", "py-2", "pe-14");
@@ -90,8 +119,20 @@ export const GROUP_CHAT_SHEET_ROSTER_CLASS_NAME = cn("flex", "min-w-0", "flex-co
 /** One roster group in the member sheet: a section label above plain member rows. */
 export const GROUP_CHAT_SHEET_SECTION_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-1");
 
+/** A sheet section's label or note line keeps the body's horizontal inset. */
+export const GROUP_CHAT_SHEET_SECTION_LABEL_CLASS_NAME = cn("px-4");
+
+/** The member chip's leading roster icon. */
+export const GROUP_CHAT_MEMBER_CHIP_ICON_CLASS_NAME = cn("h-4", "w-4");
+
+/** The member chip's trailing disclosure chevron. */
+export const GROUP_CHAT_MEMBER_CHIP_CHEVRON_CLASS_NAME = cn("h-3.5", "w-3.5");
+
+/** The member sheet close control's cross icon. */
+export const GROUP_CHAT_SHEET_CLOSE_ICON_CLASS_NAME = cn("h-4", "w-4");
+
 /** One conversation entry: avatar rail plus a message or card column. */
-export const GROUP_CHAT_ENTRY_CLASS_NAME = cn("flex", "min-w-0", "items-start", "gap-3", "px-4", "py-3");
+export const GROUP_CHAT_ENTRY_CLASS_NAME = cn("flex", "min-w-0", "items-start", "gap-3", "px-4", "py-2");
 
 /** A card entry indents under the author column on wide screens so the card reads attached to its message. */
 export const GROUP_CHAT_CARD_INSET_CLASS_NAME = cn("min-w-0", "flex-1", "xl:pl-12");
@@ -118,25 +159,45 @@ export const GROUP_CHAT_AVATAR_CLASS_NAME = cn(
 );
 
 /** A peer message bubble reads on the secondary surface. */
-export const GROUP_CHAT_BUBBLE_CLASS_NAME = cn("max-w-[42rem]", "rounded-2xl", "px-4", "py-3", "bg-surface-secondary");
+export const GROUP_CHAT_BUBBLE_CLASS_NAME = cn("max-w-[42rem]", "rounded-2xl", "px-4", "py-2.5", "bg-surface-secondary");
 
 /** The viewer's own message bubble reads on the soft accent surface. */
-export const GROUP_CHAT_BUBBLE_OWN_CLASS_NAME = cn("max-w-[42rem]", "rounded-2xl", "px-4", "py-3", "bg-accent-soft");
+export const GROUP_CHAT_BUBBLE_OWN_CLASS_NAME = cn("max-w-[42rem]", "rounded-2xl", "px-4", "py-2.5", "bg-accent-soft");
 
 /** Card bands inside one joined surface: action, consequence, attribution, decision row. */
-export const GROUP_CHAT_CARD_BAND_CLASS_NAME = cn("flex", "items-start", "gap-3", "px-4", "py-3");
+export const GROUP_CHAT_CARD_BAND_CLASS_NAME = cn("flex", "items-start", "gap-3", "px-4", "py-2.5");
 
 /** Status badges float above a card's joined surface. */
-export const GROUP_CHAT_BADGE_ROW_CLASS_NAME = cn("flex", "flex-wrap", "items-center", "gap-2", "pb-2");
+export const GROUP_CHAT_BADGE_ROW_CLASS_NAME = cn("flex", "flex-wrap", "items-center", "gap-2", "pb-1.5");
 
 /** Actions sit side by side inside the card's final band. */
-export const GROUP_CHAT_CARD_ACTIONS_CLASS_NAME = cn("grid", "grid-cols-2", "gap-3", "px-4", "py-3");
+export const GROUP_CHAT_CARD_ACTIONS_CLASS_NAME = cn("grid", "grid-cols-2", "gap-3", "px-4", "py-2.5");
 
-/** Member rail stack: roster card, hired-module card, invite card. */
-export const GROUP_CHAT_RAIL_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-4");
+/** Member rail: one joined card carrying the roster, hired modules and the invite section. */
+export const GROUP_CHAT_RAIL_CLASS_NAME = cn("flex", "min-w-0", "flex-col");
+
+/** One section band inside the joined rail card: a small label above edge-flush rows. */
+export const GROUP_CHAT_RAIL_SECTION_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-1", "py-2");
+
+/** Rail sections after the first separate with a hairline. */
+export const GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME = cn(
+  "flex",
+  "min-w-0",
+  "flex-col",
+  "gap-1",
+  "border-t",
+  "border-separator",
+  "py-2",
+);
+
+/** A rail section's label line sits on the card's horizontal rhythm. */
+export const GROUP_CHAT_RAIL_LABEL_CLASS_NAME = cn("px-4");
+
+/** The invite form band keeps the card's horizontal inset. */
+export const GROUP_CHAT_RAIL_FORM_CLASS_NAME = cn("px-4", "pt-1");
 
 /** One member row: avatar, name and role, presence kept textual. */
-export const GROUP_CHAT_MEMBER_ROW_CLASS_NAME = cn("flex", "min-w-0", "items-center", "gap-3", "px-4", "py-2");
+export const GROUP_CHAT_MEMBER_ROW_CLASS_NAME = cn("flex", "min-w-0", "items-center", "gap-3", "px-4", "py-1.5");
 
 /** Native role choices sit on one wrapping line. */
 export const GROUP_CHAT_ROLE_CHOICES_CLASS_NAME = cn("flex", "flex-wrap", "items-center", "gap-4");
@@ -145,7 +206,7 @@ export const GROUP_CHAT_ROLE_CHOICES_CLASS_NAME = cn("flex", "flex-wrap", "items
 export const GROUP_CHAT_ROLE_CHOICE_CLASS_NAME = cn("inline-flex", "items-center", "gap-2");
 
 /** Vertical stack shared by the invite and acceptance forms. */
-export const GROUP_CHAT_FORM_STACK_CLASS_NAME = cn("flex", "min-w-0", "flex-1", "flex-col", "gap-3");
+export const GROUP_CHAT_FORM_STACK_CLASS_NAME = cn("flex", "min-w-0", "flex-1", "flex-col", "gap-2");
 
 /** Native labelled select, shared by the role and Tasks filters. */
 export const GROUP_CHAT_NATIVE_FIELD_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-2");

@@ -1,18 +1,7 @@
-import { Drawer } from "@heroui/react";
-import { useRef, useSyncExternalStore } from "react";
-import {
-  Badge,
-  Button,
-  ChatWorkspace,
-  EmptyNotice,
-  Input,
-  PageContainer,
-  SectionHeader,
-  SurfaceCard,
-  SurfaceListCard,
-  Tabs,
-  Text,
-} from "@starci/grammar/common";
+import { ChatWorkspace, EmptyNotice, Input, PageContainer, SectionHeader, SurfaceCard, Text } from "@starci/grammar/common";
+import { Drawer } from "@heroui/react/drawer";
+import { useRef } from "react";
+import { Badge, Button, SurfaceListCard, Tabs } from "@starci/grammar/common";
 import type {
   CollabApprovalCardView,
   CollabApprovalDecision,
@@ -40,13 +29,16 @@ import {
   GROUP_CHAT_CONVERSATION_CLASS_NAME,
   GROUP_CHAT_CONVERSATION_LIST_CLASS_NAME,
   GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME,
+  GROUP_CHAT_WORKSPACE_HOST_SHEET_OPEN_CLASS_NAME,
   GROUP_CHAT_ENTRY_CLASS_NAME,
   GROUP_CHAT_FIELD_BODY_CLASS_NAME,
   GROUP_CHAT_FILTERS_CLASS_NAME,
   GROUP_CHAT_FORM_STACK_CLASS_NAME,
   GROUP_CHAT_GROW_CLASS_NAME,
   GROUP_CHAT_LOADING_CLASS_NAME,
+  GROUP_CHAT_MEMBER_CHIP_CHEVRON_CLASS_NAME,
   GROUP_CHAT_MEMBER_CHIP_CLASS_NAME,
+  GROUP_CHAT_MEMBER_CHIP_ICON_CLASS_NAME,
   GROUP_CHAT_MEMBER_ROW_CLASS_NAME,
   GROUP_CHAT_NATIVE_CONTROL_CLASS_NAME,
   GROUP_CHAT_NATIVE_FIELD_CLASS_NAME,
@@ -54,16 +46,23 @@ import {
   GROUP_CHAT_OFFICE_COLUMN_CLASS_NAME,
   GROUP_CHAT_PAGE_CLASS_NAME,
   GROUP_CHAT_RAIL_CLASS_NAME,
+  GROUP_CHAT_RAIL_FORM_CLASS_NAME,
+  GROUP_CHAT_RAIL_LABEL_CLASS_NAME,
+  GROUP_CHAT_RAIL_SECTION_CLASS_NAME,
+  GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME,
   GROUP_CHAT_ROLE_CHOICE_CLASS_NAME,
   GROUP_CHAT_ROLE_CHOICES_CLASS_NAME,
   GROUP_CHAT_SCROLL_HEADER_CLASS_NAME,
   GROUP_CHAT_SEND_STATE_CLASS_NAME,
   GROUP_CHAT_SHEET_BODY_CLASS_NAME,
   GROUP_CHAT_SHEET_CLOSE_CLASS_NAME,
+  GROUP_CHAT_SHEET_CLOSE_ICON_CLASS_NAME,
+  GROUP_CHAT_SHEET_CONTENT_CLASS_NAME,
   GROUP_CHAT_SHEET_DIALOG_CLASS_NAME,
   GROUP_CHAT_SHEET_HEAD_CLASS_NAME,
   GROUP_CHAT_SHEET_ROSTER_CLASS_NAME,
   GROUP_CHAT_SHEET_SECTION_CLASS_NAME,
+  GROUP_CHAT_SHEET_SECTION_LABEL_CLASS_NAME,
   GROUP_CHAT_SHEET_TITLE_CLASS_NAME,
   GROUP_CHAT_SR_ONLY_CLASS_NAME,
   GROUP_CHAT_TAB_ROW_CLASS_NAME,
@@ -86,28 +85,13 @@ import {
 export type GroupChatTab = "office" | "tasks";
 
 /**
- * The same 48rem edge ChatWorkspace's installed compact rail presentation reads
- * (`compactRailQuery` in @starci/grammar). Below it the surface keeps the peer
- * tabs and the member chip on one chrome row and presents the member content as
- * a bottom sheet instead of the right-edge drawer.
+ * The compact member-sheet presentation follows the same 48rem edge
+ * ChatWorkspace's installed compact rail presentation reads (`compactRailQuery`
+ * in @starci/grammar). The connected layer measures it and settles the answer
+ * into `compactMembers`; below it the surface keeps the peer tabs and the
+ * member chip on one chrome row and presents the member content as a bottom
+ * sheet instead of the right-edge drawer.
  */
-const COMPACT_MEMBER_QUERY = "(max-width: 47.999rem)";
-
-const subscribeToCompactMember = (onStoreChange: () => void) => {
-  if (typeof window === "undefined") {
-    return () => undefined;
-  }
-  const query = window.matchMedia(COMPACT_MEMBER_QUERY);
-  query.addEventListener("change", onStoreChange);
-  return () => query.removeEventListener("change", onStoreChange);
-};
-const getCompactMemberSnapshot = () =>
-  typeof window !== "undefined" && window.matchMedia(COMPACT_MEMBER_QUERY).matches;
-const getCompactMemberServerSnapshot = () => false;
-
-/** True while the viewport uses the compact member-sheet presentation. */
-export const useCompactMembers = () =>
-  useSyncExternalStore(subscribeToCompactMember, getCompactMemberSnapshot, getCompactMemberServerSnapshot);
 
 /** Roles an invitation or role change may name - the closed V1 set. */
 export const GROUP_CHAT_HUMAN_ROLES: ReadonlyArray<CollabHumanRole> = ["owner", "manager", "staff"];
@@ -504,8 +488,10 @@ export type GroupChatPageView = {
 };
 
 /** Settled state and copy rendered by the pure Office/Tasks page. */
-export type GroupChatPageProps = {
+type GroupChatPageProps = {
   readonly isRailOpen: boolean;
+  /** Settled by the connected layer: the viewport is in the compact member-sheet presentation. */
+  readonly isCompactMembers?: boolean;
   readonly view: GroupChatPageView;
   readonly on: GroupChatPageActions;
   readonly labels: GroupChatPageLabels;
@@ -837,45 +823,62 @@ const InviteForm = ({ view, on, labels }: InviteFormProps) => (
   </form>
 );
 
-/** Props for the rail card wrapping the invitation form on the persistent rail. */
-type InvitePanelProps = { readonly view: GroupChatPageView; readonly on: GroupChatPageActions; readonly labels: GroupChatPageLabels };
-
-const InvitePanel = ({ view, on, labels }: InvitePanelProps) => (
-  <SurfaceCard label={labels.invite.title} composition="joined">
-    <div className={GROUP_CHAT_CARD_BAND_CLASS_NAME}>
-      <InviteForm view={view} on={on} labels={labels} />
-    </div>
-  </SurfaceCard>
-);
-
-/** Props for the member rail: roster, hired modules and the invite card. */
+/**
+ * Props for the member rail: one joined card carrying the human roster, the
+ * hired modules and the invite section the accepted direction draws as a
+ * single right rail - separate member cards pushed the invite control past the
+ * 1440x900 fold, so the sections share one surface with hairline dividers.
+ */
 type MembersRailProps = { readonly view: GroupChatPageView; readonly on: GroupChatPageActions; readonly labels: GroupChatPageLabels };
 
 const MembersRail = ({ view, on, labels }: MembersRailProps) => {
   const { humans, modules } = partitionParticipants(view.participants);
   return (
     <div className={GROUP_CHAT_RAIL_CLASS_NAME}>
-      <SurfaceCard label={labels.members.humans(humans.length)} composition="joined">
-        {humans.length === 0 ? (
-          <EmptyNotice message={labels.members.empty} />
-        ) : (
-          humans.map((participant) => <MemberRow key={participant.memberId} participant={participant} labels={labels} />)
-        )}
-      </SurfaceCard>
-      <SurfaceCard label={labels.members.modules(modules.length)} composition="joined">
-        {modules.length === 0 ? (
-          <div className={GROUP_CHAT_MEMBER_ROW_CLASS_NAME}>
-            <Text size="sm" tone="muted">
-              {labels.members.noModules}
+      <SurfaceCard label={labels.members.title} composition="joined">
+        <div className={GROUP_CHAT_RAIL_SECTION_CLASS_NAME}>
+          <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
+            <Text size="sm" weight="semibold">
+              {labels.members.humans(humans.length)}
             </Text>
           </div>
-        ) : (
-          modules.map((participant) => (
-            <MemberRow key={participant.moduleInstallationId ?? participant.memberId} participant={participant} labels={labels} />
-          ))
-        )}
+          {humans.length === 0 ? (
+            <EmptyNotice message={labels.members.empty} />
+          ) : (
+            humans.map((participant) => <MemberRow key={participant.memberId} participant={participant} labels={labels} />)
+          )}
+        </div>
+        <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
+          <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
+            <Text size="sm" weight="semibold">
+              {labels.members.modules(modules.length)}
+            </Text>
+          </div>
+          {modules.length === 0 ? (
+            <div className={GROUP_CHAT_MEMBER_ROW_CLASS_NAME}>
+              <Text size="sm" tone="muted">
+                {labels.members.noModules}
+              </Text>
+            </div>
+          ) : (
+            modules.map((participant) => (
+              <MemberRow key={participant.moduleInstallationId ?? participant.memberId} participant={participant} labels={labels} />
+            ))
+          )}
+        </div>
+        {mayPresentInvite(view.viewer) ? (
+          <div className={GROUP_CHAT_RAIL_SECTION_DIVIDED_CLASS_NAME}>
+            <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
+              <Text size="sm" weight="semibold">
+                {labels.invite.title}
+              </Text>
+            </div>
+            <div className={GROUP_CHAT_RAIL_FORM_CLASS_NAME}>
+              <InviteForm view={view} on={on} labels={labels} />
+            </div>
+          </div>
+        ) : null}
       </SurfaceCard>
-      {mayPresentInvite(view.viewer) ? <InvitePanel view={view} on={on} labels={labels} /> : null}
     </div>
   );
 };
@@ -888,13 +891,13 @@ const MemberSheetRoster = ({ view, labels }: MemberSheetRosterProps) => {
   return (
     <div className={GROUP_CHAT_SHEET_ROSTER_CLASS_NAME}>
       <div className={GROUP_CHAT_SHEET_SECTION_CLASS_NAME}>
-        <div className="px-4">
+        <div className={GROUP_CHAT_SHEET_SECTION_LABEL_CLASS_NAME}>
           <Text size="xs" weight="semibold" tone="muted">
             {labels.members.humans(humans.length)}
           </Text>
         </div>
         {humans.length === 0 ? (
-          <div className="px-4">
+          <div className={GROUP_CHAT_SHEET_SECTION_LABEL_CLASS_NAME}>
             <Text size="sm" tone="muted">
               {labels.members.empty}
             </Text>
@@ -904,13 +907,13 @@ const MemberSheetRoster = ({ view, labels }: MemberSheetRosterProps) => {
         )}
       </div>
       <div className={GROUP_CHAT_SHEET_SECTION_CLASS_NAME}>
-        <div className="px-4">
+        <div className={GROUP_CHAT_SHEET_SECTION_LABEL_CLASS_NAME}>
           <Text size="xs" weight="semibold" tone="muted">
             {labels.members.modules(modules.length)}
           </Text>
         </div>
         {modules.length === 0 ? (
-          <div className="px-4">
+          <div className={GROUP_CHAT_SHEET_SECTION_LABEL_CLASS_NAME}>
             <Text size="sm" tone="muted">
               {labels.members.noModules}
             </Text>
@@ -938,7 +941,7 @@ const MemberSheet = ({ view, on, labels }: MemberSheetProps) => {
   const mayInvite = mayPresentInvite(view.viewer);
   return (
     <Drawer.Backdrop variant="transparent" isDismissable>
-      <Drawer.Content placement="bottom">
+      <Drawer.Content placement="bottom" className={GROUP_CHAT_SHEET_CONTENT_CLASS_NAME}>
         <Drawer.Dialog className={GROUP_CHAT_SHEET_DIALOG_CLASS_NAME}>
           <Drawer.Handle />
           <div className={GROUP_CHAT_SHEET_HEAD_CLASS_NAME}>
@@ -946,7 +949,7 @@ const MemberSheet = ({ view, on, labels }: MemberSheetProps) => {
               {mayInvite ? labels.invite.title : labels.members.title}
             </Drawer.Heading>
             <Drawer.CloseTrigger aria-label={labels.members.closeRail} className={GROUP_CHAT_SHEET_CLOSE_CLASS_NAME}>
-              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={GROUP_CHAT_SHEET_CLOSE_ICON_CLASS_NAME} aria-hidden="true">
                 <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" />
               </svg>
             </Drawer.CloseTrigger>
@@ -1277,7 +1280,7 @@ const AcceptanceSurface = ({ view, on, labels }: AcceptanceSurfaceProps) => {
 /** Render the connected Office/Tasks surface for the current workspace. */
 export const GroupChatPageBase = (props: GroupChatPageProps) => {
   const { isRailOpen, labels, on, view } = props;
-  const isCompact = useCompactMembers();
+  const isCompact = props.isCompactMembers === true;
   if (view.screen === "acceptance") {
     return (
       <PageContainer measure="reading">
@@ -1333,13 +1336,13 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
       {isCompact && view.officeState === "ready" ? (
         <Drawer isOpen={isRailOpen} onOpenChange={on.changeRailOpen}>
           <Drawer.Trigger className={GROUP_CHAT_MEMBER_CHIP_CLASS_NAME} data-grammar-member-chip="true">
-            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={GROUP_CHAT_MEMBER_CHIP_ICON_CLASS_NAME} aria-hidden="true">
               <circle cx="6" cy="5" r="2.25" stroke="currentColor" strokeWidth={1.4} />
               <path d="M2.5 13c.5-2 1.9-3 3.5-3s3 1 3.5 3" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" />
               <path d="M10.2 3.4a2.25 2.25 0 1 1 .1 4.1M11.5 10.2c1 .4 1.7 1.3 2 2.8" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" />
             </svg>
             {railOpenLabel}
-            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={GROUP_CHAT_MEMBER_CHIP_CHEVRON_CLASS_NAME} aria-hidden="true">
               <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </Drawer.Trigger>
@@ -1364,7 +1367,13 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
             <SectionHeader level={2} title={view.workspaceName} description={labels.description} />
           ) : null}
           <NoticesBand view={view} on={on} labels={labels} />
-          <div className={GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME}>
+          <div
+            className={
+              isCompact && isRailOpen
+                ? GROUP_CHAT_WORKSPACE_HOST_SHEET_OPEN_CLASS_NAME
+                : GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME
+            }
+          >
             {isCompact ? (
               <ChatWorkspace
                 label={labels.title}
