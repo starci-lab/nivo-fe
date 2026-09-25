@@ -1106,7 +1106,9 @@
             "selectConversation": "Chọn một hội thoại",
             "selected": "Đang chọn",
             "automated": "Tự động",
-            "humanHandoff": "Nhân viên đang tiếp quản",
+            "handoffPending": "Đang chờ nhân viên tiếp nhận",
+            "humanOwned": "Nhân viên đang tiếp quản",
+            "returnPending": "Đang chờ xác nhận trả lại tự động",
             "requestHandoff": "Tiếp quản",
             "resolveHandoff": "Trả lại tự động",
             "messages": "Tin nhắn",
@@ -1119,8 +1121,15 @@
             "markDelivered": "Đánh dấu đã gửi",
             "markFailed": "Đánh dấu thất bại",
             "recorded": "Chỉ ghi nhận",
+            "deliveryQueued": "Đã xếp hàng gửi, chưa bắt đầu gửi tới nhà cung cấp",
+            "deliveryPossibleStart": "Có thể đã bắt đầu gửi ra ngoài, chưa xác nhận",
+            "providerAccepted": "Nhà cung cấp đã tiếp nhận, chưa xác nhận đã nhận",
             "delivered": "Đã gửi",
-            "failed": "Thất bại"
+            "read": "Người nhận đã đọc",
+            "deliveryUnknown": "Chưa rõ kết quả gửi tới nhà cung cấp",
+            "terminalNotDelivered": "Bằng chứng nhà cung cấp xác nhận không gửi được",
+            "failedBeforeStart": "Thất bại trước khi có thể bắt đầu gửi",
+            "cancelled": "Đã huỷ trước khi bắt đầu gửi"
           },
           "pageTest": {
             "mode": "Chế độ kiểm thử",

@@ -1106,7 +1106,9 @@
             "selectConversation": "Select a conversation",
             "selected": "Selected",
             "automated": "Automated",
-            "humanHandoff": "Human handoff",
+            "handoffPending": "Waiting for a person to accept",
+            "humanOwned": "Human-owned",
+            "returnPending": "Waiting for the return to be confirmed",
             "requestHandoff": "Take over",
             "resolveHandoff": "Return to automation",
             "messages": "Messages",
@@ -1119,8 +1121,15 @@
             "markDelivered": "Mark delivered",
             "markFailed": "Mark failed",
             "recorded": "Recorded only",
+            "deliveryQueued": "Queued; the provider attempt has not started",
+            "deliveryPossibleStart": "The provider attempt may have started; not confirmed",
+            "providerAccepted": "Accepted by the provider; receipt not confirmed",
             "delivered": "Delivered",
-            "failed": "Failed"
+            "read": "Read by the recipient",
+            "deliveryUnknown": "The provider outcome is unknown",
+            "terminalNotDelivered": "Provider evidence proves it was not delivered",
+            "failedBeforeStart": "Failed before any provider start",
+            "cancelled": "Cancelled before the provider start"
           },
           "pageTest": {
             "mode": "Test mode",

@@ -26,8 +26,12 @@ export type ModulePageMessageKey =
   | "runtime.chatbot.openConversations"
   | "runtime.chatbot.closeConversations"
   | "runtime.chatbot.delivered"
-  | "runtime.chatbot.failed"
-  | "runtime.chatbot.humanHandoff"
+  | "runtime.chatbot.deliveryPossibleStart"
+  | "runtime.chatbot.deliveryQueued"
+  | "runtime.chatbot.deliveryUnknown"
+  | "runtime.chatbot.failedBeforeStart"
+  | "runtime.chatbot.handoffPending"
+  | "runtime.chatbot.humanOwned"
   | "runtime.chatbot.installation"
   | "runtime.chatbot.markDelivered"
   | "runtime.chatbot.markFailed"
@@ -38,13 +42,18 @@ export type ModulePageMessageKey =
   | "runtime.chatbot.noMessages"
   | "runtime.chatbot.pending"
   | "runtime.chatbot.permissionDenied"
+  | "runtime.chatbot.providerAccepted"
+  | "runtime.chatbot.read"
   | "runtime.chatbot.recorded"
   | "runtime.chatbot.refused"
   | "runtime.chatbot.requestHandoff"
   | "runtime.chatbot.resolveHandoff"
+  | "runtime.chatbot.returnPending"
   | "runtime.chatbot.selectConversation"
   | "runtime.chatbot.selected"
+  | "runtime.chatbot.terminalNotDelivered"
   | "runtime.chatbot.title"
+  | "runtime.chatbot.cancelled"
   | "runtime.conversations.synced"
   | "runtime.conversations.syncing"
   | "runtime.conversations.takeover"
@@ -539,14 +548,19 @@ export const buildModulePageCopy = (t: ModulePageTranslator) => ({
     "actionRefused": t("runtime.chatbot.actionRefused"),
     "approvedVersion": (version: string) => t("runtime.chatbot.approvedVersion", { version }),
     "automated": t("runtime.chatbot.automated"),
+    "cancelled": t("runtime.chatbot.cancelled"),
     "channels": t("runtime.chatbot.channels"),
     "connectZalo": t("runtime.chatbot.connectZalo"),
     "conversations": t("runtime.chatbot.conversations"),
     "openConversations": t("runtime.chatbot.openConversations"),
     "closeConversations": t("runtime.chatbot.closeConversations"),
     "delivered": t("runtime.chatbot.delivered"),
-    "failed": t("runtime.chatbot.failed"),
-    "humanHandoff": t("runtime.chatbot.humanHandoff"),
+    "deliveryPossibleStart": t("runtime.chatbot.deliveryPossibleStart"),
+    "deliveryQueued": t("runtime.chatbot.deliveryQueued"),
+    "deliveryUnknown": t("runtime.chatbot.deliveryUnknown"),
+    "failedBeforeStart": t("runtime.chatbot.failedBeforeStart"),
+    "handoffPending": t("runtime.chatbot.handoffPending"),
+    "humanOwned": t("runtime.chatbot.humanOwned"),
     "installation": t("runtime.chatbot.installation"),
     "markDelivered": t("runtime.chatbot.markDelivered"),
     "markFailed": t("runtime.chatbot.markFailed"),
@@ -557,12 +571,16 @@ export const buildModulePageCopy = (t: ModulePageTranslator) => ({
     "noMessages": t("runtime.chatbot.noMessages"),
     "pending": t("runtime.chatbot.pending"),
     "permissionDenied": t("runtime.chatbot.permissionDenied"),
+    "providerAccepted": t("runtime.chatbot.providerAccepted"),
+    "read": t("runtime.chatbot.read"),
     "recorded": t("runtime.chatbot.recorded"),
     "refused": t("runtime.chatbot.refused"),
     "requestHandoff": t("runtime.chatbot.requestHandoff"),
     "resolveHandoff": t("runtime.chatbot.resolveHandoff"),
+    "returnPending": t("runtime.chatbot.returnPending"),
     "selectConversation": t("runtime.chatbot.selectConversation"),
     "selected": t("runtime.chatbot.selected"),
+    "terminalNotDelivered": t("runtime.chatbot.terminalNotDelivered"),
     "title": t("runtime.chatbot.title"),
   },
   "conversations": {

@@ -33,7 +33,9 @@ export type ChatbotWorkbenchBlockCopy = {
   readonly selectConversation: string;
   readonly selected: string;
   readonly automated: string;
-  readonly humanHandoff: string;
+  readonly handoffPending: string;
+  readonly humanOwned: string;
+  readonly returnPending: string;
   readonly requestHandoff: string;
   readonly resolveHandoff: string;
   readonly messages: string;
@@ -46,8 +48,15 @@ export type ChatbotWorkbenchBlockCopy = {
   readonly markDelivered: string;
   readonly markFailed: string;
   readonly recorded: string;
+  readonly deliveryQueued: string;
+  readonly deliveryPossibleStart: string;
+  readonly providerAccepted: string;
   readonly delivered: string;
-  readonly failed: string;
+  readonly read: string;
+  readonly deliveryUnknown: string;
+  readonly terminalNotDelivered: string;
+  readonly failedBeforeStart: string;
+  readonly cancelled: string;
 };
 
 /** Pure, installation-qualified state and actions for the workbench surface. */
@@ -65,15 +74,48 @@ export type ChatbotWorkbenchBlockProps = {
   readonly onReconcile: (providerOutboxId: string, delivered: boolean) => void;
 };
 
-const deliveryLabel = (message: ChatbotMessage, copy: ChatbotWorkbenchBlockCopy): string => {
-  if (message.deliveryState === "ambiguous") return copy.ambiguous;
-  if (message.deliveryState === "sent" || message.deliveryState === "delivered") return copy.delivered;
-  if (message.deliveryState === "failed" || message.deliveryState === "cancelled") return copy.failed;
-  if (message.deliveryState === "queued" || message.deliveryState === "sending") return copy.pending;
-  return copy.recorded;
+/** State-label copy keys: plain strings only, never an interpolating field. */
+type ChatbotStateLabelKey =
+  | "recorded" | "deliveryQueued" | "deliveryPossibleStart" | "providerAccepted" | "delivered"
+  | "read" | "deliveryUnknown" | "terminalNotDelivered" | "failedBeforeStart" | "cancelled"
+  | "automated" | "handoffPending" | "humanOwned" | "returnPending";
+
+/** Terminal provider evidence that the original attempt never reached the recipient. */
+const PROVIDER_TERMINAL_NOT_DELIVERED = "PROVIDER_TERMINAL_NOT_DELIVERED";
+
+/**
+ * One label per delivery state the read model can carry, so no state is folded into another.
+ * `sent` is the durable state Core writes for an accepted attempt; the finer provider
+ * observations (`provider-accepted`, `delivered`, `read`) are labelled directly when the read
+ * model carries them.
+ */
+const DELIVERY_STATE_LABELS: Readonly<Record<string, ChatbotStateLabelKey>> = {
+  queued: "deliveryQueued",
+  sending: "deliveryPossibleStart",
+  "provider-accepted": "providerAccepted",
+  sent: "providerAccepted",
+  delivered: "delivered",
+  read: "read",
+  ambiguous: "deliveryUnknown",
+  "delivery-unknown": "deliveryUnknown",
+  "terminal-not-delivered": "terminalNotDelivered",
+  "failed-before-start": "failedBeforeStart",
+  cancelled: "cancelled"
 };
 
-const conversationLabel = (conversation: ChatbotConversation, copy: ChatbotWorkbenchBlockCopy): string => conversation.handoffState === "human" ? copy.humanHandoff : copy.automated;
+const deliveryLabel = (message: ChatbotMessage, copy: ChatbotWorkbenchBlockCopy): string => {
+  if (message.deliveryState === "failed") return message.failureCode === PROVIDER_TERMINAL_NOT_DELIVERED ? copy.terminalNotDelivered : copy.failedBeforeStart;
+  const label = DELIVERY_STATE_LABELS[message.deliveryState];
+  return label === undefined ? copy.recorded : copy[label];
+};
+
+const conversationLabel = (conversation: ChatbotConversation, copy: ChatbotWorkbenchBlockCopy): string => conversation.handoffState === "human" ? copy.humanOwned : copy.automated;
+
+/** Control axis of the selected conversation, including the command still in flight. */
+const controlLabel = (conversation: ChatbotConversation, copy: ChatbotWorkbenchBlockCopy, pending: boolean): string => {
+  if (conversation.handoffState === "human") return pending ? copy.returnPending : copy.humanOwned;
+  return pending ? copy.handoffPending : copy.automated;
+};
 
 type WorkbenchRegionProps = { readonly props: ChatbotWorkbenchBlockProps };
 
@@ -139,7 +181,7 @@ export const ChatbotWorkbenchBlock = (props: ChatbotWorkbenchBlockProps) => {
         conversationLabel={props.copy.messages}
         header={<div className={CHATBOT_HEADER_CLASS_NAME}>
           <Heading level={3}>{selected?.participantRef ?? props.copy.selectConversation}</Heading>
-          {selected === null ? null : <Badge tone={selected.handoffState === "human" ? "warning" : "success"}>{conversationLabel(selected, props.copy)}</Badge>}
+          {selected === null ? null : <Badge tone={selected.handoffState === "human" ? "warning" : "success"}>{controlLabel(selected, props.copy, props.pending)}</Badge>}
         </div>}
         conversation={<>{conversationRegion}{props.pending ? <Text size="sm" live="polite">{props.copy.pending}</Text> : null}{props.refusedCode === null ? null : <Text size="sm" live="assertive">{props.refusedCode === "WORKSPACE_CONTROLLER_REFUSED" ? props.copy.permissionDenied : props.refusedCode === "CHATBOT_ACTION_REFUSED" ? props.copy.actionRefused : props.copy.refused}</Text>}</>}
         composer={actionRegion}
