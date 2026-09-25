@@ -376,8 +376,21 @@ const AuthenticationPageConnected = (props: AuthenticationPageConnectedProps) =>
     }
   }, []);
 
+  /*
+   * WHETHER THIS MOUNT ALREADY PLACED THE READER. Every landing funnels through `arriveAt`, and a
+   * landing is final: once a submit has adopted its session and chosen a destination, the arrival
+   * effect below must not put a destination of its own behind it. Both pushes happen inside one turn
+   * - the submit lands synchronously and the re-render that turns `isSignedInArrival` true follows
+   * it - and the later push supersedes the earlier one, which is how the reasonless notice marker
+   * of an unavailable requested place was being replaced by the raw asked-for route. A genuine
+   * arrival (a restored session, a provider return) has not landed yet, so it still lands exactly
+   * once on the validated return intent or the default landing.
+   */
+  const hasLanded = useRef(false);
+
   /** Leave for the console, clearing the stored return intent as the reader lands. */
   const arriveAt = useCallback((place: string) => {
+    hasLanded.current = true;
     try {
       window.sessionStorage.removeItem(RETURN_TO_STORAGE_KEY);
     } catch {
@@ -912,11 +925,16 @@ const AuthenticationPageConnected = (props: AuthenticationPageConnectedProps) =>
    * page lifting a finger, so an already-adopted session lands on the route it interrupted rather
    * than staring at credentials it does not need. While custody is still being verified the
    * surface owes only a wait - the form would offer controls that cannot be honoured yet.
+   *
+   * AND IT LEAVES A LANDING ALONE. A submit that adopted its own session in the same turn is
+   * already on its way with the destination it chose - which is the backend's answer, and carries
+   * the unavailable-return marker when that answer was not the asked-for place. This effect is for
+   * the arrivals nobody landed for.
    */
   const isRestoring = session.state.status === "restoring";
   const isSignedInArrival = session.state.status === "signed-in" && phase === "details";
   useEffect(() => {
-    if (isSignedInArrival) landOnReturnTo();
+    if (isSignedInArrival && !hasLanded.current) landOnReturnTo();
   }, [isSignedInArrival, landOnReturnTo]);
   const frame = {
     title: t(`${mode}.title`),

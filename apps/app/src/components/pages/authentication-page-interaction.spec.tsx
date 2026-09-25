@@ -1,6 +1,36 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { useSyncExternalStore } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+/**
+ * A session a test can actually move, not a frozen word.
+ *
+ * `adopt` on the real provider flips the session to signed-in for the rest of the tab, which is what
+ * makes the page re-render with `isSignedInArrival` true and run its arrival effect. A mock that
+ * only records the call would never reach that effect, and the landing race it can cause would be
+ * invisible to every test here.
+ */
+const session = vi.hoisted(() => {
+    let state: { status: string, accessToken?: string } = { status: "anonymous" }
+    const listeners = new Set<() => void>()
+    return {
+        read: () => state,
+        subscribe: (listener: () => void) => {
+            listeners.add(listener)
+            return () => {
+                listeners.delete(listener)
+            }
+        },
+        signedIn: (accessToken: string) => {
+            state = { status: "signed-in", accessToken }
+            listeners.forEach(listener => listener())
+        },
+        reset: () => {
+            state = { status: "anonymous" }
+        }
+    }
+})
 
 const mocks = vi.hoisted(() => ({
     push: vi.fn(),
@@ -23,7 +53,12 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push, replace: mocks.replace }), usePathname: () => "/authentication" }))
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(window.location.search) }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
-vi.mock("@/modules/auth/session", () => ({ useSession: () => ({ state: { status: "anonymous" }, adopt: mocks.adopt, end: vi.fn() }) }))
+vi.mock("@/modules/auth/session", () => ({
+    useSession: () => {
+        const state = useSyncExternalStore(session.subscribe, session.read)
+        return { state, adopt: mocks.adopt, end: vi.fn() }
+    }
+}))
 vi.mock("@/modules/api/auth", () => mocks)
 
 import { AuthenticationPage } from "./AuthenticationPage"
@@ -48,6 +83,12 @@ describe("AuthenticationPage interactions", () => {
 
     beforeEach(() => {
         vi.clearAllMocks()
+        session.reset()
+        /*
+         * ADOPTING IS THE TRANSITION, not a recording of it: the real provider keeps the token for
+         * the tab and re-renders every reader, so the mock flips the store and notifies.
+         */
+        mocks.adopt.mockImplementation(() => session.signedIn("access"))
         mocks.signIn.mockResolvedValue({ ok: false, reason: "Invalid credentials", code: "INVALID_CREDENTIALS" })
         mocks.signUpInit.mockResolvedValue({ ok: true, data: { challengeId: "challenge", expiresInSeconds: 300 } })
         mocks.signUpVerifyOtp.mockResolvedValue({ ok: true, data: { accessToken: "access", conclusion: null, undecided: null, ...answered } })
@@ -291,6 +332,31 @@ describe("AuthenticationPage interactions", () => {
         expect(mocks.adopt).toHaveBeenCalled()
         expect(mocks.push).toHaveBeenCalledTimes(1)
         expect(screen.queryByText("unavailableReturnNotice")).not.toBeInTheDocument()
+        expect(document.body.textContent).not.toContain("agentos")
+    })
+
+    it("lets the answer's own landing stand when the session arrives in the same turn", async () => {
+        /*
+         * THE DEFECT'S REAL SHAPE, AND WHY THE TEST ABOVE COULD NOT SEE IT. `session.adopt` and the
+         * landing happen inside one turn, so the page re-renders signed-in while the phase is still
+         * `details` and the arrival effect runs - the raw asked-for route used to be pushed behind
+         * the marker, and the later push won, so the landing never read `returnNotice` and the
+         * notice never rendered on a real recapture. The act below is the whole turn: the submit's
+         * continuation, the adoption, the re-render and the effect it fires.
+         */
+        mocks.signIn.mockResolvedValue({ ok: true, data: { accessToken: "access", destination: "/overview", undecided: null, ...answered } })
+        window.history.replaceState(null, "", "/authentication?returnTo=%2Fagentos%2Fsecret")
+        render(<AuthenticationPage />)
+        fillSignIn()
+        await act(async () => {
+            fireEvent.click(screen.getByRole("button", { name: "signIn.submitLabel" }))
+        })
+
+        // ONE navigation, and it is the answer's: the marker reaches the landing, the asked-for path
+        // is never pushed, and nothing on this surface names it.
+        expect(session.read().status).toBe("signed-in")
+        expect(mocks.adopt).toHaveBeenCalled()
+        expect(mocks.push.mock.calls).toEqual([["/overview?returnNotice=unavailable"]])
         expect(document.body.textContent).not.toContain("agentos")
     })
 })
