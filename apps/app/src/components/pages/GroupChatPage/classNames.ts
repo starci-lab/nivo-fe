@@ -350,8 +350,10 @@ export const GROUP_CHAT_BUBBLE_OWN_CLASS_NAME = cn(
 export const GROUP_CHAT_MESSAGE_BODY_CLASS_NAME = cn("max-w-[42rem]");
 
 /** Select plain conversation text or the approval state bubble treatment. */
-export const getGroupChatMessageBodyClassName = (decision: boolean, isViewer: boolean): ReturnType<typeof cn> =>
-  decision ? (isViewer ? GROUP_CHAT_BUBBLE_OWN_CLASS_NAME : GROUP_CHAT_BUBBLE_CLASS_NAME) : GROUP_CHAT_MESSAGE_BODY_CLASS_NAME;
+export const getGroupChatMessageBodyClassName = (decision: boolean, isViewer: boolean): ReturnType<typeof cn> => {
+  if (!decision) return GROUP_CHAT_MESSAGE_BODY_CLASS_NAME;
+  return isViewer ? GROUP_CHAT_BUBBLE_OWN_CLASS_NAME : GROUP_CHAT_BUBBLE_CLASS_NAME;
+};
 
 /** An addressed module mention reads as a soft accent chip inside the body line. */
 export const GROUP_CHAT_MENTION_CLASS_NAME = cn(

@@ -1,5 +1,5 @@
 import { ChatWorkspace, EmptyNotice, Icon, IconButton, Input, PageContainer, SectionHeader, SurfaceCard, Text } from "@starci/grammar/common";
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 import { nivoIconSource } from "@nivo/ui";
 import { Badge, Button, SurfaceListCard, Tabs } from "@starci/grammar/common";
 import type {
@@ -576,7 +576,14 @@ type MemberRowProps = {
   readonly roomy?: boolean;
 };
 
-const MemberRow = ({ participant, labels, detailed = false, compact = false, roomy = false }: MemberRowProps) => (
+const MemberRow = ({ participant, labels, detailed = false, compact = false, roomy = false }: MemberRowProps) => {
+  let subtitle: string;
+  if (participant.kind === "module") {
+    subtitle = detailed ? (labels.members.moduleDescriptions[participant.displayName] ?? labels.members.moduleRole) : labels.members.moduleRole;
+  } else {
+    subtitle = labels.roles[participant.role as CollabHumanRole] ?? participant.role;
+  }
+  return (
   <div className={roomy ? GROUP_CHAT_MEMBER_ROW_ROOMY_CLASS_NAME : GROUP_CHAT_MEMBER_ROW_CLASS_NAME} data-member-id={participant.memberId}>
     <MemberAvatar
       name={participant.displayName}
@@ -588,11 +595,7 @@ const MemberRow = ({ participant, labels, detailed = false, compact = false, roo
         {participant.displayName}
       </Text>
       <Text size={compact ? "xs" : "sm"} tone="muted">
-        {participant.kind === "module"
-          ? detailed
-            ? (labels.members.moduleDescriptions[participant.displayName] ?? labels.members.moduleRole)
-            : labels.members.moduleRole
-          : (labels.roles[participant.role as CollabHumanRole] ?? participant.role)}
+        {subtitle}
       </Text>
     </div>
     {participant.status === "invited" ? <Badge tone="warning">{labels.members.pending}</Badge> : null}
@@ -602,7 +605,8 @@ const MemberRow = ({ participant, labels, detailed = false, compact = false, roo
       </span>
     ) : null}
   </div>
-);
+  );
+};
 
 /** Props for one durable message entry. */
 type MessageEntryProps = {
@@ -1580,12 +1584,10 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
     ) : null;
 
   const showHeaderBand = !decisionPending && view.officeState === "ready" && view.workspaceName !== null;
-  const headerBand = showHeaderBand ? (
-    isCompact ? (
-      /* The compact header row the mobile direction draws: the workspace title with
-         the member chip on its right, so the conversation keeps both accepted
-         messages above the docked invitation sheet. The subtitle stays on the wide
-         header; at 390x844 it costs the lines the two messages need. */
+  let headerBand: ReactNode = null;
+  if (showHeaderBand && isCompact) {
+    /* The compact header keeps both accepted messages above the docked member sheet. */
+    headerBand = (
       <div className={GROUP_CHAT_HEADER_BAND_COMPACT_CLASS_NAME}>
         <div className={GROUP_CHAT_HEADER_COMPACT_ROW_CLASS_NAME}>
           <Text size="sm" weight="semibold" overflow="truncate">
@@ -1594,7 +1596,9 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
           {memberChip}
         </div>
       </div>
-    ) : (
+    );
+  } else if (showHeaderBand) {
+    headerBand = (
       <SectionHeader
         level={2}
         title={
@@ -1612,8 +1616,8 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
           </div>
         }
       />
-    )
-  ) : null;
+    );
+  }
 
   const body =
     view.officeState === "loading" ? (
