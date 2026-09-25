@@ -63,7 +63,7 @@ const resetQueryCache = () => {
     for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key)
 }
 
-const snapshot = (overrides: { orders?: unknown[], invoices?: unknown[], workspaces?: unknown[], ordersResult?: unknown, invoicesResult?: unknown, workspacesResult?: unknown } = {}) => {
+const snapshot = (overrides: { orders?: Array<unknown>, invoices?: Array<unknown>, workspaces?: Array<unknown>, ordersResult?: unknown, invoicesResult?: unknown, workspacesResult?: unknown } = {}) => {
     mocks.api.myCatalogOrders.mockResolvedValue(overrides.ordersResult ?? { ok: true, data: overrides.orders ?? [order] })
     mocks.api.myInvoices.mockResolvedValue(overrides.invoicesResult ?? { ok: true, data: overrides.invoices ?? [] })
     mocks.api.myAgentWorkspace.mockResolvedValue(overrides.workspacesResult ?? { ok: true, data: overrides.workspaces ?? [] })

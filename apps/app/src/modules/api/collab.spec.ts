@@ -26,7 +26,7 @@ import {
 type SeenCall = { readonly accessToken: string; readonly request: CollabGatewayRequest };
 
 const transportSpy = (outcome: CollabGatewayOutcome) => {
-    const calls: SeenCall[] = [];
+    const calls: Array<SeenCall> = [];
     const spy = vi.fn(async (call: SeenCall) => {
         calls.push(call);
         return outcome;

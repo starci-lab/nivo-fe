@@ -1,4 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 
 vi.mock("@/components/blocks/agentos/AgentOSWorkspaceSummary", () => ({ AgentOSWorkspaceSummary: () => <div>summary</div> }))
@@ -27,6 +29,17 @@ const labels = {
 } as AgentOSWorkspaceControlCenterLabels
 const data = { workspace: { id: "workspace-1", name: "Support" }, apps: [], runtime: {} } as never
 
+const pureSectionLabels = {
+    titleFallback: "Workspace", loading: "Loading", tabsLabel: "Sections",
+    tabs: ["overview", "solutions", "applications", "infrastructure", "operations", "access"].map((id) => ({ id, label: id })),
+    summary: {}, applications: {}, runtime: {}, stack: {}, operations: {},
+} as unknown as AgentOSWorkspaceControlCenterLabels
+const pureSectionData = {
+    workspace: { id: "workspace", name: "Agent workspace", status: "ready", externalWorkspaceRef: null },
+    instance: { id: "instance", name: "Instance", hostname: "agent.test", status: "ready", chartVersion: "1", ramMb: 512, vcpu: 1, planCode: null, planRamGb: null, planVcpu: null },
+    apps: [], runtime: null,
+}
+
 describe("AgentOSWorkspaceControlCenterBase", () => {
     it("renders unsettled lifecycle notices", () => {
         const retry = vi.fn()
@@ -46,5 +59,40 @@ describe("AgentOSWorkspaceControlCenterBase", () => {
         await waitFor(() => expect(screen.getByRole("tab", { name: "infrastructure", selected: true })).toHaveAttribute("aria-controls", "workspace-panel-infrastructure"))
         fireEvent.click(screen.getByRole("tab", { name: "operations" }))
         expect(select).toHaveBeenCalledWith("operations")
+    })
+
+    it("draws every ready section and the refused fallback", () => {
+        const pageStates: ReadonlyArray<AgentOSWorkspaceControlCenterLabels["tabs"][number]["id"]> = ["overview", "solutions", "applications", "access", "infrastructure", "operations"]
+        for (const pageState of pageStates) {
+            const html = renderToStaticMarkup(<AgentOSWorkspaceControlCenterBase
+                pageState={pageState} controlCenterState="ready" data={pureSectionData} labels={pureSectionLabels} launchState="idle" openClawLaunchHref="#"
+                onSelectPageState={vi.fn()} onOpenAgentConsole={vi.fn()} formatDate={(value) => value}
+            />)
+            expect(html).toContain("Agent workspace")
+            if (pageState === "overview") {
+                expect(html).toContain("summary")
+                expect(html).toContain("runtime")
+            }
+        }
+        const refused = renderToStaticMarkup(<AgentOSWorkspaceControlCenterBase
+            pageState="overview" controlCenterState="refused" message="Unavailable" labels={pureSectionLabels} launchState="idle" openClawLaunchHref="#"
+            onSelectPageState={vi.fn()} onOpenAgentConsole={vi.fn()} formatDate={(value) => value}
+        />)
+        expect(refused).toContain("Unavailable")
+        expect(refused).not.toContain("Return to workspace list")
+        expect(refused).not.toContain("Retry reading solutions")
+    })
+
+    it("reports the next selected workspace section", async () => {
+        const select = vi.fn()
+        const user = userEvent.setup()
+        render(<AgentOSWorkspaceControlCenterBase
+            pageState="overview" controlCenterState="ready" data={pureSectionData} labels={pureSectionLabels} launchState="idle" openClawLaunchHref="#"
+            onSelectPageState={select} onOpenAgentConsole={vi.fn()} formatDate={(value) => value}
+        />)
+
+        await user.click(screen.getByRole("tab", { name: "applications" }))
+
+        expect(select).toHaveBeenCalledWith("applications")
     })
 })

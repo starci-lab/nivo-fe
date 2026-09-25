@@ -1,0 +1,246 @@
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import en from "@/messages/en.json";
+import viMessages from "@/messages/vi.json";
+import { accountingCorrectionAccess, accountingDocumentAction, accountingIntakePolicy, accountingNoticeLive, bytesToBase64, canonicalMonthKey, currencyAmountToMinor, eligibleCorrectionSourceEntries, formatMinorCurrency, maskParticipantId } from ".";
+import { AccountingWorkbenchBlockBase } from "./component";
+
+const pending = { status: "pending", effectivePeriodKey: "2026-09-01", submittedByUserId: "owner-1", approverUserId: "approver-1" } as const;
+const periods = [{ periodKey: "2026-09-01", status: "open" }] as const;
+
+const noop = vi.fn();
+const idle = { isMutating: false };
+const documentRow = (status: string, id = status) => ({ id, fileName: `${status}.pdf`, classification: "expense", amountMinor: "1250000", currency: "VND", periodKey: "2026-09-01", status, contextVersionId: "context-1", contextDigest: "digest-1" });
+const ledgerRow = { id: "ledger-1", documentId: "posted", correctionOfId: null, ledgerVersion: "7", periodKey: "2026-09-01", signedAmountMinor: "1250000", currency: "VND", kind: "document", reason: "posted", createdAt: "2026-09-06T00:00:00Z" };
+const correction = { id: "correction-1", sourceEntryId: "ledger-1", effectivePeriodKey: "2026-10-01", signedDeltaMinor: "-50000", currency: "VND", reason: "late adjustment", status: "pending", submittedByUserId: "owner-1", approverUserId: "approver-1", approvedByUserId: null, version: "1", approvedLedgerId: null, createdAt: "2026-09-06T00:00:00Z", approvedAt: null };
+const model = {
+  installationId: "module-1", currency: "VND", ledgerVersion: "7", ledgerAmountMinor: "1250000",
+  capabilities: { viewerRole: "owner", canSubmitCorrection: true, canApproveCorrection: false, reason: "allowed" },
+  documents: [documentRow("draft"), documentRow("submitted"), documentRow("approved"), documentRow("posted")], ledger: [ledgerRow],
+  periods: [{ periodKey: "2026-10-01", status: "open", version: "1", closedAt: null }],
+  reconciliations: [{ id: "reconciliation-1", ledgerVersionH: "7", currency: "VND", sourceAmountMinor: "1200000", ledgerAmountMinor: "1250000", differenceMinor: "-50000", createdAt: "2026-09-06T00:00:00Z" }],
+  corrections: [correction], events: [],
+};
+const answer = { ok: true, data: model } as const;
+const contextAnswer = { ok: true, data: { installationId: "module-1", versionId: "context-1", digest: "digest-1", snapshot: {} } } as const;
+const translate = (key: string, values?: Readonly<Record<string, string | number | undefined>>) => `${key}${values === undefined ? "" : ` ${Object.values(values).join(" ")}`}`;
+
+const view = (overrides: Record<string, unknown> = {}) => ({
+  t: translate, locale: "en", currency: "VND", classifications: ["income", "expense", "receivable", "payable"], intakeReady: true, intakeLoading: false, asOfDraft: "", setAsOfDraft: noop, ledgerVersion: undefined, setLedgerVersion: noop,
+  notice: null, approverId: "", setApproverId: noop, fileName: "", fileSize: 0, classification: "expense", setClassification: noop,
+  documentAmount: "", setDocumentAmount: noop, documentMonth: "", setDocumentMonth: noop, sourceAmount: "", setSourceAmount: noop,
+  closeMonth: "", setCloseMonth: noop, sourceEntryId: "", setSourceEntryId: noop, effectiveMonth: "", setEffectiveMonth: noop,
+  deltaAmount: "", setDeltaAmount: noop, correctionReason: "", setCorrectionReason: noop,
+  workbench: { data: answer, error: undefined, mutate: vi.fn() }, context: { data: contextAnswer, error: undefined, mutate: vi.fn() },
+  runtime: { data: undefined, error: undefined, mutate: vi.fn() }, participantUserIds: [], initialize: idle, ingest: idle,
+  submitDocument: idle, approveDocument: idle, postDocument: idle, reconcile: idle, close: idle, submitCorrection: idle, approveCorrection: idle,
+  answer, model, role: "owner", isAsOf: false, correctionSubmitAllowed: true, pendingCorrections: [correction], eligibleSourceEntries: [ledgerRow],
+  sourceEntryEligible: false, documentAmountMinor: null, sourceAmountMinor: null, deltaAmountMinor: null,
+  onFileSelected: noop, onInitialize: noop, onIngest: noop, onReconcile: noop, onClose: noop, onCorrection: noop,
+  documentCommand: vi.fn(), correctionAccess: vi.fn(() => ({ submit: true, approve: false, approvalReason: "not-owner" })), approvePendingCorrection: vi.fn(),
+  ...overrides,
+}) as never;
+
+afterEach(() => { cleanup(); vi.clearAllMocks(); });
+
+describe("AccountingWorkbenchBlockBase", () => {
+  it("announces refusals assertively without interrupting successful confirmations", () => {
+    expect(accountingNoticeLive("refused")).toBe("assertive");
+    expect(accountingNoticeLive("success")).toBe("polite");
+  });
+
+  it("uses the backend-exact closed document statuses", () => {
+    expect(accountingDocumentAction("draft", "owner")).toBe("submit");
+    expect(accountingDocumentAction("submitted", "approver")).toBe("approve");
+    expect(accountingDocumentAction("approved", "owner")).toBe("post");
+    expect(accountingDocumentAction("posted", "owner")).toBeNull();
+    expect(accountingDocumentAction("submitted", "owner")).toBeNull();
+  });
+
+  it("never offers owner self-approval even when a stale flag is optimistic", () => {
+    expect(accountingCorrectionAccess({ explicitLedgerVersion: false, role: "owner", canApproveCorrection: true, correction: pending, periods })).toMatchObject({ submit: false, approve: false, approvalReason: "not-owner" });
+  });
+
+  it("disables both correction mutations for every explicit historical view", () => {
+    expect(accountingCorrectionAccess({ explicitLedgerVersion: true, role: "owner", canSubmitCorrection: true, canApproveCorrection: true, correction: pending, periods })).toEqual({ submit: false, approve: false, approvalReason: "historical" });
+    expect(accountingCorrectionAccess({ explicitLedgerVersion: true, role: "approver", canApproveCorrection: true, correction: pending, periods })).toEqual({ submit: false, approve: false, approvalReason: "historical" });
+  });
+
+  it("evaluates approval for each pending row against assignment distinction and open period", () => {
+    expect(accountingCorrectionAccess({ explicitLedgerVersion: false, role: "approver", canApproveCorrection: true, correction: pending, periods })).toEqual({ submit: false, approve: true, approvalReason: "allowed" });
+    expect(accountingCorrectionAccess({ explicitLedgerVersion: false, role: "approver", canApproveCorrection: true, correction: pending, periods: [{ periodKey: "2026-09-01", status: "closed" }] })).toMatchObject({ approve: false, approvalReason: "period-not-open" });
+    expect(accountingCorrectionAccess({ explicitLedgerVersion: false, role: "approver", canApproveCorrection: true, correction: { ...pending, approverUserId: "owner-1" }, periods })).toMatchObject({ approve: false, approvalReason: "self-assigned" });
+    expect(accountingCorrectionAccess({ explicitLedgerVersion: false, role: "approver", canApproveCorrection: false, correction: pending, periods })).toMatchObject({ approve: false, approvalReason: "advisory-denied" });
+  });
+
+  it("offers only ledger tips without an existing correction proposal", () => {
+    const entry = (id: string, correctionOfId: string | null) => ({ id, correctionOfId, documentId: null, ledgerVersion: "1", periodKey: "2026-09-01", signedAmountMinor: "100", currency: "VND", kind: "document", reason: null, createdAt: "2026-09-06T00:00:00Z" }) as const;
+    const ledger = [entry("original", null), entry("corrected", "original"), entry("already-proposed", null), entry("eligible", null)];
+    expect(eligibleCorrectionSourceEntries(ledger, [{ sourceEntryId: "already-proposed" }]).map(item => item.id)).toEqual(["corrected", "eligible"]);
+  });
+
+  it("adapts business month, currency and file values to the backend primitives", () => {
+    expect(canonicalMonthKey("2026-09")).toBe("2026-09-01");
+    expect(canonicalMonthKey("2026-13")).toBeNull();
+    expect(currencyAmountToMinor("1,234.56", "USD", "en")).toBe("123456");
+    expect(currencyAmountToMinor("-1.234", "VND", "vi")).toBe("-1234");
+    expect(currencyAmountToMinor("0", "VND", "vi")).toBe("0");
+    expect(formatMinorCurrency("1234567", "VND", "vi")).toContain("1.234.567");
+    expect(bytesToBase64(new Uint8Array([100, 97, 116, 97]))).toBe("ZGF0YQ==");
+    expect(maskParticipantId("participant-user-1234")).toBe("part…1234");
+  });
+
+  it("narrows document intake to the applied Setup currency and classifications", () => {
+    expect(accountingIntakePolicy({ accountingScope: { classifications: ["income", "receivable"] }, currencyAndLocale: { functionalCurrency: "USD" } })).toEqual({ currency: "USD", classifications: ["income", "receivable"] });
+    expect(accountingIntakePolicy({ accountingScope: { classifications: ["income", "income"] }, currencyAndLocale: { functionalCurrency: "USD" } })).toBeNull();
+    expect(accountingIntakePolicy({ accountingScope: { classifications: ["expense"] }, currencyAndLocale: { functionalCurrency: "XXX" } })).toBeNull();
+    expect(accountingIntakePolicy({})).toBeNull();
+  });
+
+  it("keeps Accounting message keys in English and Vietnamese in exact parity", () => {
+    const english = en.console.agentos.modules.runtime.workbench.accountingWorkbench;
+    const vietnamese = viMessages.console.agentos.modules.runtime.workbench.accountingWorkbench;
+    expect(Object.keys(vietnamese).sort()).toEqual(Object.keys(english).sort());
+    expect(Object.keys(vietnamese.role).sort()).toEqual(Object.keys(english.role).sort());
+  });
+
+  describe("AccountingWorkbenchBlock adverse states", () => {
+    it("keeps the complete tree mounted and marks loading as busy", () => {
+      const loading = view({ answer: undefined, model: undefined, role: undefined, pendingCorrections: [], eligibleSourceEntries: [], workbench: { data: undefined, error: undefined, mutate: vi.fn() }, context: { data: undefined, error: undefined, mutate: vi.fn() } });
+      const { container } = render(<AccountingWorkbenchBlockBase view={loading} />);
+      expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
+      expect(screen.getByText("statementSnapshot")).toBeTruthy();
+    });
+
+    it("announces a command refusal assertively", () => {
+      const { container } = render(<AccountingWorkbenchBlockBase view={view({ notice: { kind: "refused", message: "permission denied" } })} />);
+      expect(container.querySelector('[aria-live="assertive"]')?.textContent).toContain("permission denied");
+    });
+
+    it("wraps workbench transport failure in an alert and retries the owning read", () => {
+      const mutate = vi.fn();
+      render(<AccountingWorkbenchBlockBase view={view({ workbench: { data: undefined, error: new Error("offline"), mutate }, answer: undefined, model: undefined })} />);
+      expect(screen.getByRole("alert")).toBeTruthy();
+      fireEvent.click(screen.getByText("retry"));
+      expect(mutate).toHaveBeenCalledOnce();
+    });
+
+    it("wraps refused workbench reads in an alert and retries", () => {
+      const mutate = vi.fn();
+      render(<AccountingWorkbenchBlockBase view={view({ workbench: { data: { ok: false, reason: "forbidden" }, error: undefined, mutate }, answer: { ok: false, reason: "forbidden" }, model: undefined })} />);
+      expect(screen.getByRole("alert").textContent).toContain("readRefused forbidden");
+      fireEvent.click(screen.getByText("retry"));
+      expect(mutate).toHaveBeenCalledOnce();
+    });
+
+    it("gives applied-context transport failure its own alert and retry", () => {
+      const mutate = vi.fn();
+      render(<AccountingWorkbenchBlockBase view={view({ context: { data: undefined, error: new Error("offline"), mutate } })} />);
+      expect(screen.getByRole("alert")).toBeTruthy();
+      fireEvent.click(screen.getByText("retry"));
+      expect(mutate).toHaveBeenCalledOnce();
+    });
+
+    it("announces an applied-context permission refusal assertively", () => {
+      const { container } = render(<AccountingWorkbenchBlockBase view={view({ context: { data: { ok: false, reason: "forbidden" }, error: undefined, mutate: vi.fn() } })} />);
+      expect(container.querySelector('[aria-live="assertive"]')?.textContent).toContain("readRefused forbidden");
+    });
+
+    it("renders loaded business facts and dispatches owner document actions", () => {
+      const documentCommand = vi.fn();
+      const { container } = render(<AccountingWorkbenchBlockBase view={view({ documentCommand })} />);
+      expect(screen.getByText("appliedSetup")).toBeTruthy();
+      expect(screen.getByText("ledgerBalance")).toBeTruthy();
+      expect(container.querySelector("#accounting-classification")?.className).toContain("min-h-11");
+      expect(container.querySelector("#accounting-document-month")?.className).toContain("min-h-11");
+      expect(screen.getByRole("button", { name: "chooseEvidenceFile" }).className).toContain("button--lg");
+      expect(screen.getByRole("button", { name: "addDocument" }).className).toContain("button--lg");
+      expect(screen.getByRole("button", { name: "closePeriodAction" }).className).toContain("button--lg");
+      expect(screen.getByRole("button", { name: "submitCorrection" }).className).toContain("button--lg");
+      expect(screen.getByText("draft.pdf")).toBeTruthy();
+      expect(screen.getByText("late adjustment")).toBeTruthy();
+      expect(screen.getByText(/reconciliationDifference/)).toBeTruthy();
+      fireEvent.click(screen.getByText("submitDocument"));
+      fireEvent.click(screen.getByText("postDocument"));
+      expect(documentCommand).toHaveBeenCalledWith("submit", "draft");
+      expect(documentCommand).toHaveBeenCalledWith("post", "approved");
+    });
+
+    it("dispatches approver document and correction actions", () => {
+      const documentCommand = vi.fn();
+      const approvePendingCorrection = vi.fn();
+      const approverModel = { ...model, capabilities: { ...model.capabilities, viewerRole: "approver", canSubmitCorrection: false, canApproveCorrection: true } };
+      render(<AccountingWorkbenchBlockBase view={view({ answer: { ok: true, data: approverModel }, model: approverModel, role: "approver", correctionSubmitAllowed: false, documentCommand, correctionAccess: vi.fn(() => ({ submit: false, approve: true, approvalReason: "allowed" })), approvePendingCorrection })} />);
+      fireEvent.click(screen.getByText("approveDocument"));
+      fireEvent.click(screen.getByText("approveCorrection"));
+      expect(documentCommand).toHaveBeenCalledWith("approve", "submitted");
+      expect(approvePendingCorrection).toHaveBeenCalledWith("correction-1");
+    });
+
+    it("keeps valid amounts native-valid and forwards native form submissions", () => {
+      const onReconcile = vi.fn(event => event.preventDefault());
+      const onCorrection = vi.fn(event => event.preventDefault());
+      const { container } = render(<AccountingWorkbenchBlockBase view={view({ documentAmount: "1,250,000", documentAmountMinor: "1250000", sourceAmount: "-1,250,000", sourceAmountMinor: "-1250000", sourceEntryId: "ledger-1", sourceEntryEligible: true, effectiveMonth: "2026-10", deltaAmount: "-50,000", deltaAmountMinor: "-50000", correctionReason: "late adjustment", onReconcile, onCorrection })} />);
+      const documentAmountInput = container.querySelector("#accounting-document-amount")!;
+      const sourceAmountInput = container.querySelector("#accounting-source-amount")!;
+      const deltaAmountInput = container.querySelector("#accounting-delta")!;
+      expect(documentAmountInput).not.toHaveAttribute("aria-invalid", "true");
+      expect(sourceAmountInput).not.toHaveAttribute("aria-invalid", "true");
+      expect(deltaAmountInput).not.toHaveAttribute("aria-invalid", "true");
+      fireEvent.submit(sourceAmountInput.closest("form")!);
+      fireEvent.submit(deltaAmountInput.closest("form")!);
+      expect(onReconcile).toHaveBeenCalledOnce();
+      expect(onCorrection).toHaveBeenCalledOnce();
+    });
+
+    it("keeps invalid amounts marked invalid and their mutation actions disabled", () => {
+      const { container } = render(<AccountingWorkbenchBlockBase view={view({ documentAmount: "0", documentAmountMinor: "0", sourceAmount: "not-money", sourceAmountMinor: null, sourceEntryId: "ledger-1", sourceEntryEligible: true, effectiveMonth: "2026-10", deltaAmount: "0", deltaAmountMinor: "0", correctionReason: "late adjustment" })} />);
+      expect(container.querySelector("#accounting-document-amount")).toHaveAttribute("aria-invalid", "true");
+      expect(container.querySelector("#accounting-source-amount")).toHaveAttribute("aria-invalid", "true");
+      expect(container.querySelector("#accounting-delta")).toHaveAttribute("aria-invalid", "true");
+      expect(screen.getByRole("button", { name: "reconcile" })).toBeDisabled();
+      expect(screen.getByRole("button", { name: "submitCorrection" })).toBeDisabled();
+    });
+
+    it("forwards native controls, historical navigation, file choice and setup recovery", () => {
+      const setLedgerVersion = vi.fn();
+      const setAsOfDraft = vi.fn();
+      const setClassification = vi.fn();
+      const setDocumentMonth = vi.fn();
+      const setCloseMonth = vi.fn();
+      const setSourceEntryId = vi.fn();
+      const setEffectiveMonth = vi.fn();
+      const onFileSelected = vi.fn();
+      const first = render(<AccountingWorkbenchBlockBase view={view({ asOfDraft: "7", setLedgerVersion, setAsOfDraft, setClassification, setDocumentMonth, setCloseMonth, setSourceEntryId, setEffectiveMonth, onFileSelected })} />);
+      fireEvent.click(screen.getByText("viewAsOf"));
+      fireEvent.change(first.container.querySelector("#accounting-classification")!, { target: { value: "income" } });
+      fireEvent.change(first.container.querySelector("#accounting-document-month")!, { target: { value: "2026-09" } });
+      fireEvent.change(first.container.querySelector("#accounting-close-month")!, { target: { value: "2026-10" } });
+      fireEvent.change(first.container.querySelector("#accounting-source-entry")!, { target: { value: "ledger-1" } });
+      fireEvent.change(first.container.querySelector("#accounting-effective-month")!, { target: { value: "2026-10" } });
+      fireEvent.change(first.container.querySelector('input[type="file"]')!, { target: { files: [new File(["evidence"], "invoice.pdf", { type: "application/pdf" })] } });
+      expect(setLedgerVersion).toHaveBeenCalledWith("7");
+      expect(onFileSelected).toHaveBeenCalledOnce();
+      expect(setClassification).toHaveBeenCalledWith("income");
+      first.unmount();
+
+      render(<AccountingWorkbenchBlockBase view={view({ ledgerVersion: "7", isAsOf: true, setLedgerVersion, setAsOfDraft })} />);
+      fireEvent.click(screen.getByText("returnCurrent"));
+      expect(setLedgerVersion).toHaveBeenCalledWith(undefined);
+      expect(setAsOfDraft).toHaveBeenCalledWith("");
+      cleanup();
+
+      const mutateRuntime = vi.fn();
+      render(<AccountingWorkbenchBlockBase view={view({ answer: undefined, model: undefined, role: undefined, participantUserIds: [], workbench: { data: undefined, error: undefined, mutate: vi.fn() }, runtime: { data: undefined, error: new Error("offline"), mutate: mutateRuntime } })} />);
+      fireEvent.click(screen.getByText("retry"));
+      expect(mutateRuntime).toHaveBeenCalledOnce();
+      cleanup();
+
+      const setApproverId = vi.fn();
+      const participantRuntime = { ok: true, data: { participants: [{ userId: "approver-1" }] } };
+      const last = render(<AccountingWorkbenchBlockBase view={view({ answer: undefined, model: undefined, role: undefined, participantUserIds: ["approver-1"], workbench: { data: undefined, error: undefined, mutate: vi.fn() }, runtime: { data: participantRuntime, error: undefined, mutate: vi.fn() }, setApproverId })} />);
+      fireEvent.change(last.container.querySelector("#accounting-approver")!, { target: { value: "approver-1" } });
+      expect(setApproverId).toHaveBeenCalledWith("approver-1");
+    });
+  });
+});
