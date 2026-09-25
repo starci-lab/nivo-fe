@@ -5,10 +5,10 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
-import { SessionEndingDialogBase, type SessionEndingDialogViewProps } from "./component"
+import { SessionEndingDialogBase, type SessionEndingDialogBaseProps } from "./component"
 
 /** The words the connected half resolves out of `console.account`, as the pure twin receives them. */
-const VIEW: SessionEndingDialogViewProps["props"] = {
+const VIEW: SessionEndingDialogBaseProps["props"] = {
     title: "Sign out everywhere",
     description: "End your current Nivo sessions on every browser. Your login stays available for a fresh sign-in.",
     scopeNote: "This includes this browser.",

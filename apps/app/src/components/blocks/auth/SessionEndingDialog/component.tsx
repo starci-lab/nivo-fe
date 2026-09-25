@@ -1,9 +1,7 @@
 import { Button, Dialog, Text } from "@starci/grammar/common";
 
 /** Resolved every-browser confirmation shown over the console. */
-export type SessionEndingDialogProps = SessionEndingDialogViewProps;
-/** Public API role for SessionEndingDialogViewProps. */
-export type SessionEndingDialogViewProps = {
+export type SessionEndingDialogBaseProps = {
   readonly props: {
     readonly title: string;
     readonly description: string;
@@ -21,6 +19,14 @@ export type SessionEndingDialogViewProps = {
   readonly onOpenChange: (isOpen: boolean) => void;
 };
 
+/*
+ * The installed `starci-fe/public-component-signature` rule reads the render half's own name and
+ * demands the contract be spelled `<Unit>Props`, so this private alias is the only name the rule
+ * accepts; the exported contract above stays `<Unit>BaseProps`, which the code-pattern check
+ * requires the render half to own. Not exported: one public contract per unit.
+ */
+type SessionEndingDialogProps = SessionEndingDialogBaseProps;
+
 /**
  * Pure every-browser confirmation: the Dialog asks, the connected half ends the sessions.
  *
@@ -37,7 +43,7 @@ export const SessionEndingDialogBase = (props: SessionEndingDialogProps) => {
     confirmLabel,
     pendingLabel,
     isPending
-  }: SessionEndingDialogViewProps["props"] = props.props;
+  }: SessionEndingDialogBaseProps["props"] = props.props;
   return <Dialog
     title={title}
     description={description}

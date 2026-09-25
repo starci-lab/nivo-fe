@@ -1,23 +1,30 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
+import type { AdministratorRevocationDialogProps } from "@/components/blocks/auth/AdministratorRevocationDialog"
 import type { SessionEndingDialogProps } from "@/components/blocks/auth/SessionEndingDialog"
-import { AccountMenuBase, type AccountMenuViewProps } from "./component"
+import { AccountMenuBase, type AccountMenuBaseProps } from "./component"
 
 const ADMIN_LABEL = "End the sign-ins of a person"
 const SESSION_ENDING_COPY = "every-browser confirmation"
+const ADMINISTRATOR_ENDING_COPY = "scoped administrator ending"
 
 /** The confirmation the connected half hands in: drawn here only when it was told to be open. */
 const SessionEndingStub = ({ isOpen }: SessionEndingDialogProps) => isOpen ? <span>{SESSION_ENDING_COPY}</span> : null
 
+/** The scoped administrator ending the connected half hands in, drawn on the same terms. */
+const AdministratorRevocationStub = ({ isOpen }: AdministratorRevocationDialogProps) => isOpen ? <span>{ADMINISTRATOR_ENDING_COPY}</span> : null
+
 /** The resolved words the account menu draws, as the connected half resolves them. */
-const viewProps = (overrides: Partial<AccountMenuViewProps["props"]> = {}): AccountMenuViewProps => ({
+const viewProps = (overrides: Partial<AccountMenuBaseProps["props"]> = {}): AccountMenuBaseProps => ({
     props: {
         label: "Account",
         signOutLabel: "Sign out",
         signOutEverywhereLabel: "Sign out everywhere",
         sessionEndingControl: SessionEndingStub,
         sessionEndingControlProps: { isOpen: false, onOpenChange: () => {} },
+        administratorRevocationControl: AdministratorRevocationStub,
+        administratorRevocationControlProps: { isOpen: false, onOpenChange: () => {} },
         ...overrides
     }
 })
@@ -59,6 +66,16 @@ describe("AccountMenuBase", () => {
             {...viewProps({ sessionEndingControlProps: { isOpen: true, onOpenChange: () => {} } })}
         />)
         expect(screen.getByText(SESSION_ENDING_COPY)).toBeInTheDocument()
+    })
+
+    it("draws the scoped administrator ending it was handed, in the state it was told", async () => {
+        const { rerender } = render(<AccountMenuBase {...viewProps()} />)
+        expect(screen.queryByText(ADMINISTRATOR_ENDING_COPY)).not.toBeInTheDocument()
+
+        rerender(<AccountMenuBase
+            {...viewProps({ administratorRevocationControlProps: { isOpen: true, onOpenChange: () => {} } })}
+        />)
+        expect(screen.getByText(ADMINISTRATOR_ENDING_COPY)).toBeInTheDocument()
     })
 
     it("keeps the administrator ending entry out of the menu until an eligibility answer supplies it", async () => {
