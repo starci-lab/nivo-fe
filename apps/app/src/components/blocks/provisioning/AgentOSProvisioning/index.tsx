@@ -1,18 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { useQueryCatalogItemsSwr, useQueryMyAgentosAiKnowledgeReadinessSwr, useQueryMyAgentWorkspacesSwr, useQueryMyCatalogOrdersSwr, useQueryMyInvoicesSwr, useMutateIssueAgentWorkspaceAppLaunchSwr, useMutateOrderAgentosSwr, useMutateRunAgentosAiReadinessTestSwr } from "@/hooks";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useFormatter, useTranslations } from "next-intl";
+import { useQueryMyAgentosAiKnowledgeReadinessSwr, useMutateRunAgentosAiReadinessTestSwr, useMutateRecoverWorkspacePurchaseSwr, useQueryWorkspaceCheckoutEntrySwr, useQueryWorkspaceCheckoutOffersSwr, useQueryWorkspaceCheckoutStatusSwr } from "@/hooks";
 import { useRouter } from "@/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
-import { type AgentWorkspaceRow, type CatalogItemRow, type CatalogOrderRow, type CatalogTierRow, type InvoiceRow } from "@/modules/api/console";
-import { type Result } from "@/modules/api/graphql";
-import { type WorkspacePurchaseStatus } from "@/modules/api/workspace-controlplane";
+import { type WorkspaceCheckoutEntryDestination, type WorkspaceCheckoutEntryRequest, type WorkspaceCheckoutObservedIdentities, type WorkspaceCheckoutOffer, type WorkspaceCheckoutOutcome, type WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane";
 import { nivoQueryData } from "@/modules/query";
 import useProvisioningRealtime, { type ProvisioningTarget } from "@/modules/realtime/provisioning";
-import { followWorkspaceAppRedirect, safeWorkspaceAppRedirect } from "@/modules/window/workspace-app-launch";
-import { BILLING_CURRENCY } from "@/modules/config";
-import { DEFAULT_LOCALE } from "@/i18n/config";
 import { AgentOSProvisioningBase, type AgentOSProvisioningViewProps } from "./component";
 
 /** Route identity owned by the AgentOS provisioning block. */
@@ -28,18 +23,12 @@ type AgentOSFlow = {
   readonly phase: "catalog_loading";
 } | {
   readonly phase: "request";
-  readonly catalogue: ReadonlyArray<CatalogItemRow>;
-  readonly item: CatalogItemRow | null;
-  readonly tier: CatalogTierRow | null;
-} | {
-  readonly phase: "submitting";
-  readonly catalogue: ReadonlyArray<CatalogItemRow>;
-  readonly item: CatalogItemRow;
-  readonly tier: CatalogTierRow | null;
+  readonly catalogue: ReadonlyArray<WorkspaceCheckoutOffer>;
+  readonly offer: WorkspaceCheckoutOffer | null;
+  readonly verdict: string;
 } | {
   readonly phase: "awaiting_payment";
   readonly orderId: string;
-  readonly invoiceId: string | null;
   readonly subject: string;
   readonly detail: string;
 } | {
@@ -56,7 +45,7 @@ type AgentOSFlow = {
 } | {
   readonly phase: "preparing";
   readonly orderId: string;
-  readonly workspaceId: string;
+  readonly workspaceId: string | null;
   readonly subject: string;
   readonly detail: string;
 } | {
@@ -83,194 +72,93 @@ type AgentOSFlow = {
 /** The namespaced copy reader, so the settlement below can read the same strings off the surface. */
 type ProvisioningCopy = ReturnType<typeof useTranslations>;
 
-/** Order lifecycle positions an order row can only reach after its payment settled. */
-const ORDER_SETTLED: ReadonlySet<string> = new Set(["active", "completed", "in_progress", "paid"]);
+/** The offer identity this surface presents first; the boundary decides whether it may still be bought. */
+const PRESENTED_OFFER_ID = "nivo-workspace-growth";
+const PRESENTED_OFFER_VERSION = "draft-2026-09-22";
+/** The registered workspace-shell destination the entry owner may return. */
+const ENTRY_ROUTE_NAME = "instance-management.workspace-shell";
+
+/** The purchase view one checkout outcome carries, when the arm carries one at all. */
+const purchaseOf = (outcome: WorkspaceCheckoutOutcome | null): WorkspaceCheckoutStatusView | null =>
+  outcome !== null && "purchase" in outcome && outcome.purchase !== undefined ? outcome.purchase : null;
 
 /**
- * Assemble one source-qualified purchase status out of the three owner-scoped snapshots.
- *
- * This mirrors `readWorkspacePurchaseStatus` in the workspace-controlplane seam fact for fact:
- * each source keeps its own name, a refused source reports "unavailable" rather than a verdict,
- * a missing invoice is "not-raised", a missing workspace is "not-admitted", and only a persisted
- * invoice status of "paid" reports paid. When no source answered at all the read fails closed.
+ * The exact source identities the screen actually observed, sent on the safe-recovery call so the
+ * backend can refuse a caller whose last view contradicts the confirmed record. `payment.reference`
+ * is never forwarded: the reconciliation owner returns the provider reference or the attempt id in
+ * the same slot, and claiming it as either could raise a false identity conflict.
  */
-const purchaseStatusOf = (orderId: string, orders: Result<ReadonlyArray<CatalogOrderRow>> | undefined, invoices: Result<ReadonlyArray<InvoiceRow>> | undefined, workspaces: Result<ReadonlyArray<AgentWorkspaceRow>> | undefined): Result<WorkspacePurchaseStatus> => {
-  if (orders?.ok !== true && invoices?.ok !== true && workspaces?.ok !== true) {
-    return {
-      ok: false,
-      reason: orders?.ok === false ? orders.reason : invoices?.ok === false ? invoices.reason : workspaces?.ok === false ? workspaces.reason : "unavailable"
-    };
-  }
-  const order = orders?.ok === true ? orders.data.find(candidate => candidate.id === orderId) : undefined;
-  const invoice = invoices?.ok === true ? invoices.data.find(candidate => candidate.catalogOrder?.id === orderId) : undefined;
-  const workspace = workspaces?.ok === true ? workspaces.data.find(candidate => candidate.catalogOrder?.id === orderId) : undefined;
-  return {
-    ok: true,
-    data: {
-      purchaseId: orderId,
-      observedAt: new Date().toISOString(),
-      order: orders?.ok !== true ? {
-        state: "unavailable",
-        code: orders?.ok === false ? orders.code ?? null : null
-      } : order === undefined ? {
-        state: "missing"
-      } : {
-        state: "observed",
-        status: order.status,
-        offerName: order.catalogItem?.name ?? null,
-        tierName: order.catalogTier?.name ?? null
-      },
-      payment: invoices?.ok !== true ? {
-        state: "unavailable",
-        code: invoices?.ok === false ? invoices.code ?? null : null
-      } : invoice === undefined ? {
-        state: "not-raised"
-      } : {
-        state: "observed",
-        invoiceId: invoice.id,
-        status: invoice.status,
-        amountVnd: invoice.amountVnd,
-        paidAt: invoice.paidAt
-      },
-      provisioning: workspaces?.ok !== true ? {
-        state: "unavailable",
-        code: workspaces?.ok === false ? workspaces.code ?? null : null
-      } : workspace === undefined ? {
-        state: "not-admitted"
-      } : {
-        state: "observed",
-        workspaceId: workspace.id,
-        workspaceName: workspace.name,
-        workspaceStatus: workspace.status
+const observedIdentitiesOf = (purchase: WorkspaceCheckoutStatusView): WorkspaceCheckoutObservedIdentities => ({
+  ...(purchase.billing.reference !== null ? { billingReceiptId: purchase.billing.reference } : {}),
+  ...(purchase.provisioning.reference !== null ? { provisioningOrderId: purchase.provisioning.reference } : {}),
+  ...(purchase.readiness.state === "ready" && purchase.readiness.reference !== null ? { workspaceId: purchase.readiness.reference } : {})
+});
+
+/** The registered entry destination is a named route; only the workspace shell maps onto this app. */
+const entryPathOf = (destination: WorkspaceCheckoutEntryDestination): string | null =>
+  destination.routeName === ENTRY_ROUTE_NAME ? `/agentos/workspaces/${destination.workspaceId}` : null;
+
+/**
+ * Settle one composed purchase view into the phase the flow is standing on.
+ *
+ * The purchase cursor is the process: only `paid` from the billing facet and `ready` from the
+ * readiness facet are stronger claims, a `refused` or `unavailable` outcome answers without a
+ * verdict, and an unsettled purchase continues on its own phase rather than inventing a workspace.
+ */
+const phaseFromPurchase = (purchase: WorkspaceCheckoutStatusView, t: ProvisioningCopy, tShared: ProvisioningCopy, productName: string): AgentOSFlow => {
+  const purchaseId = purchase.purchaseId;
+  const detail = purchase.offer.displayName;
+  const stateLabel = (state: string): string => {
+    const key = state.replace(/-([a-z])/g, (_match, letter: string) => letter.toUpperCase());
+    return tShared.has(`agentos.purchaseStatus.stateLabel.${key}`) ? tShared(`agentos.purchaseStatus.stateLabel.${key}`) : state;
+  };
+  switch (purchase.state) {
+    case "selected":
+    case "payment-not-started":
+    case "payment-pending":
+      return { phase: "awaiting_payment", orderId: purchaseId, subject: productName, detail };
+    case "payment-outcome-unknown":
+      return { phase: "payment_unknown", orderId: purchaseId, subject: productName, detail, reason: tShared("agentos.purchaseStatus.paymentUnknownSubtitle") };
+    case "payment-refused":
+    case "payment-failed":
+    case "payment-cancelled":
+      return { phase: "failed", orderId: purchaseId, subject: productName, detail, reason: stateLabel(purchase.state), atStep: 1 };
+    case "paid":
+      return { phase: "accepted", orderId: purchaseId, subject: productName, detail };
+    case "provisioning": {
+      const disposition = purchase.provisioning.state;
+      if (disposition === "unavailable" || disposition === "outcome-unknown") {
+        return { phase: "provisioning_unknown", orderId: purchaseId, subject: productName, detail, reason: purchase.provisioning.reason ?? t("failedLoad") };
       }
+      if (disposition === "refused" || disposition === "failed-retryable" || disposition === "failed-terminal") {
+        return { phase: "failed", orderId: purchaseId, subject: productName, detail, reason: purchase.provisioning.reason ?? t("failedProvision"), atStep: 2 };
+      }
+      const readyWorkspace = purchase.readiness.state === "ready" && purchase.readiness.reference !== null ? purchase.readiness.reference : null;
+      if (disposition === "ready" && readyWorkspace !== null) {
+        return { phase: "ready", orderId: purchaseId, workspaceId: readyWorkspace, subject: productName, detail: readyWorkspace };
+      }
+      return { phase: "preparing", orderId: purchaseId, workspaceId: readyWorkspace, subject: productName, detail };
     }
-  };
-};
-
-/**
- * Settle one source-qualified purchase status into the phase the flow is standing on.
- *
- * A refused read is an unknown phase with a safe reconcile action, never a terminal verdict; only
- * a persisted `paid` invoice or an order already past payment reports payment settled; and only a
- * bound ready workspace exposes the ready phase.
- */
-const phaseFromStatus = (status: WorkspacePurchaseStatus, t: ProvisioningCopy, productName: string): AgentOSFlow => {
-  const purchaseId = status.purchaseId;
-  const order = status.order;
-  if (order.state === "unavailable") {
-    return {
-      phase: "payment_unknown",
-      orderId: purchaseId,
-      subject: productName,
-      detail: purchaseId,
-      reason: order.code ?? t("failedLoad")
-    };
+    case "provisioning-refused":
+      return { phase: "failed", orderId: purchaseId, subject: productName, detail, reason: purchase.provisioning.reason ?? stateLabel("provisioning-refused"), atStep: 2 };
+    case "ready":
+    case "renewed":
+      if (purchase.readiness.state === "ready" && purchase.readiness.reference !== null) {
+        return { phase: "ready", orderId: purchaseId, workspaceId: purchase.readiness.reference, subject: productName, detail: purchase.readiness.reference };
+      }
+      return purchase.readiness.state === "unavailable"
+        ? { phase: "provisioning_unknown", orderId: purchaseId, subject: productName, detail, reason: t("failedLoad") }
+        : { phase: "preparing", orderId: purchaseId, workspaceId: null, subject: productName, detail };
   }
-  if (order.state === "missing") {
-    return {
-      phase: "failed",
-      orderId: purchaseId,
-      subject: productName,
-      detail: purchaseId,
-      reason: t("agentos.orderMissing"),
-      atStep: 0
-    };
-  }
-  const detail = order.tierName ?? order.offerName ?? purchaseId;
-  if (order.status === "cancelled" || order.status === "suspended") {
-    return {
-      phase: "failed",
-      orderId: purchaseId,
-      subject: productName,
-      detail,
-      reason: t("agentos.orderCancelled"),
-      atStep: 1
-    };
-  }
-  const payment = status.payment;
-  if (payment.state === "observed" && payment.status === "unpaid") {
-    return {
-      phase: "awaiting_payment",
-      orderId: purchaseId,
-      invoiceId: payment.invoiceId,
-      subject: productName,
-      detail
-    };
-  }
-  if (payment.state === "observed" && payment.status === "cancelled") {
-    return {
-      phase: "failed",
-      orderId: purchaseId,
-      subject: productName,
-      detail,
-      reason: t("agentos.orderCancelled"),
-      atStep: 1
-    };
-  }
-  const paid = payment.state === "observed" && payment.status === "paid" || ORDER_SETTLED.has(order.status);
-  if (!paid) {
-    if (payment.state === "unavailable") {
-      return {
-        phase: "payment_unknown",
-        orderId: purchaseId,
-        subject: productName,
-        detail,
-        reason: payment.code ?? t("failedLoad")
-      };
-    }
-    return {
-      phase: "awaiting_payment",
-      orderId: purchaseId,
-      invoiceId: null,
-      subject: productName,
-      detail
-    };
-  }
-  const provisioning = status.provisioning;
-  if (provisioning.state === "unavailable") {
-    return {
-      phase: "provisioning_unknown",
-      orderId: purchaseId,
-      subject: productName,
-      detail,
-      reason: provisioning.code ?? t("failedLoad")
-    };
-  }
-  if (provisioning.state === "not-admitted") {
-    return {
-      phase: "accepted",
-      orderId: purchaseId,
-      subject: productName,
-      detail
-    };
-  }
-  const workspaceDetail = provisioning.workspaceName ?? provisioning.workspaceId;
-  if (provisioning.workspaceStatus === "failed") {
-    return {
-      phase: "failed",
-      orderId: purchaseId,
-      subject: productName,
-      detail: workspaceDetail,
-      reason: t("failedProvision"),
-      atStep: 2
-    };
-  }
-  return {
-    phase: provisioning.workspaceStatus === "active" || provisioning.workspaceStatus === "ready" ? "ready" : "preparing",
-    orderId: purchaseId,
-    workspaceId: provisioning.workspaceId,
-    subject: productName,
-    detail: workspaceDetail
-  };
 };
 
 /** The one realtime subject a phase is waiting on, or nothing when it waits on no one. */
 const realtimeTarget = (flow: AgentOSFlow): ProvisioningTarget | null => {
-  if (flow.phase === "preparing" || flow.phase === "ready") return {
+  if (flow.phase === "ready") return {
     kind: "workspace",
     id: flow.workspaceId
   };
-  if (flow.phase === "awaiting_payment" || flow.phase === "payment_unknown" || flow.phase === "accepted" || flow.phase === "provisioning_unknown") return {
+  if (flow.phase === "awaiting_payment" || flow.phase === "payment_unknown" || flow.phase === "accepted" || flow.phase === "provisioning_unknown" || flow.phase === "preparing" && flow.workspaceId === null) return {
     kind: "order",
     id: flow.orderId
   };
@@ -279,7 +167,7 @@ const realtimeTarget = (flow: AgentOSFlow): ProvisioningTarget | null => {
 
 /** Which of the four customer outcomes the flow is standing on. A failure keeps its outcome. */
 const phaseIndexOf = (flow: AgentOSFlow): number => {
-  if (flow.phase === "catalog_loading" || flow.phase === "request" || flow.phase === "submitting") return 0;
+  if (flow.phase === "catalog_loading" || flow.phase === "request") return 0;
   if (flow.phase === "awaiting_payment" || flow.phase === "payment_unknown") return 1;
   if (flow.phase === "accepted" || flow.phase === "preparing" || flow.phase === "provisioning_unknown") return 2;
   if (flow.phase === "failed") return flow.atStep;
@@ -296,16 +184,6 @@ const readinessMilestoneState = (index: number, current: number): "done" | "curr
   if (current === -1) return index < 4 ? "done" : "current";
   return stepState(index, current);
 };
-const walletTargetOf = (orderId: string, invoiceId: string | null, locale: string): string | undefined => {
-  if (invoiceId === null) return undefined;
-  const returnTo = `${locale === DEFAULT_LOCALE ? "" : `/${locale}`}/agentos/orders/${orderId}`;
-  const query = new URLSearchParams({
-    orderId,
-    invoiceId,
-    returnTo
-  });
-  return `/wallet?${query.toString()}`;
-};
 
 /** Own the real purchase → payment → workspace lifecycle and its matching Socket.IO target. */
 export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
@@ -315,7 +193,6 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
   const t = useTranslations("console.provisioningFlows");
   const tShared = useTranslations("console");
   const format = useFormatter();
-  const locale = useLocale();
   const router = useRouter();
   const session = useSession();
   const productName = t("agentos.productName");
@@ -324,206 +201,216 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
     phase: "catalog_loading"
   });
   const [aiRetryPending, setAiRetryPending] = useState(false);
-  const [entryPending, setEntryPending] = useState(false);
+  const [entryAsked, setEntryAsked] = useState(false);
   const [entryRefusal, setEntryRefusal] = useState<string | null>(null);
   const [reconciling, setReconciling] = useState(false);
-  const orderAgentos = useMutateOrderAgentosSwr();
   const contextMode = context.mode;
   const resumeOrderId = context.mode === "resume" ? context.orderId : null;
   const isResume = contextMode === "resume";
-  const catalogQuery = useQueryCatalogItemsSwr("ai_agent", !isResume);
-  const ordersQuery = useQueryMyCatalogOrdersSwr(isResume);
-  const invoicesQuery = useQueryMyInvoicesSwr(isResume);
-  const workspacesQuery = useQueryMyAgentWorkspacesSwr(isResume);
-  const refreshOrders = ordersQuery.mutate;
-  const refreshInvoices = invoicesQuery.mutate;
-  const refreshWorkspaces = workspacesQuery.mutate;
-  const readyWorkspaceId = flow.phase === "ready" ? flow.workspaceId : undefined;
-  const issueWorkspaceLaunch = useMutateIssueAgentWorkspaceAppLaunchSwr(readyWorkspaceId ?? "");
-  const aiReadinessQuery = useQueryMyAgentosAiKnowledgeReadinessSwr(readyWorkspaceId, aiRetryPending);
-  const retryReadiness = useMutateRunAgentosAiReadinessTestSwr(readyWorkspaceId);
+  const [presented, setPresented] = useState({ offerId: PRESENTED_OFFER_ID, offerVersion: PRESENTED_OFFER_VERSION });
+  const offersQuery = useQueryWorkspaceCheckoutOffersSwr(presented.offerId, presented.offerVersion, !isResume && accessToken !== null);
+  const statusQuery = useQueryWorkspaceCheckoutStatusSwr(resumeOrderId ?? "", isResume && accessToken !== null);
+  const recoverPurchase = useMutateRecoverWorkspacePurchaseSwr();
+  const consumedEntry = useRef<unknown>(null);
+  const readyWorkspaceId = flow.phase === "ready" ? flow.workspaceId : null;
+  const aiReadinessQuery = useQueryMyAgentosAiKnowledgeReadinessSwr(readyWorkspaceId ?? undefined, aiRetryPending);
+  const retryReadiness = useMutateRunAgentosAiReadinessTestSwr(readyWorkspaceId ?? undefined);
   const refreshAiReadiness = aiReadinessQuery.mutate;
   const aiReadiness = nivoQueryData(aiReadinessQuery.data);
-  const reconcile = useCallback(async (orderId: string) => {
+  /* The entry request names the purchase and the exact workspace the readiness facet confirmed;
+     the readiness observation itself is the backend's to derive, never a caller claim. */
+  const entryRequest = useMemo<WorkspaceCheckoutEntryRequest>(() => ({
+    purchaseId: resumeOrderId ?? "",
+    workspaceId: readyWorkspaceId ?? "",
+    returnContext: { name: "workspace-dashboard", version: "1" }
+  }), [resumeOrderId, readyWorkspaceId]);
+  const entryQuery = useQueryWorkspaceCheckoutEntrySwr(entryRequest, entryAsked && readyWorkspaceId !== null);
+  const entryAnswer = entryQuery.data;
+  const refreshStatus = statusQuery.mutate;
+  const reconcile = useCallback(async () => {
+    if (!isResume) return;
     setReconciling(true);
     try {
-      const [orders, invoices, workspaces] = await Promise.all([refreshOrders(), refreshInvoices(), refreshWorkspaces()]);
-      const status = purchaseStatusOf(orderId, orders, invoices, workspaces);
-      setFlow(status.ok ? phaseFromStatus(status.data, t, productName) : {
-        phase: "payment_unknown",
-        orderId,
-        subject: productName,
-        detail: orderId,
-        reason: status.reason
-      });
+      await refreshStatus();
     } catch {
-      setFlow({
-        phase: "payment_unknown",
-        orderId,
-        subject: productName,
-        detail: orderId,
-        reason: t("failedLoad")
-      });
+      /* A thrown re-read keeps the last confirmed truth on screen. */
     } finally {
       setReconciling(false);
     }
-  }, [productName, refreshInvoices, refreshOrders, refreshWorkspaces, t]);
+  }, [isResume, refreshStatus]);
+  /* The safe-recovery command reconciles the same purchase through the identities already observed. */
+  const recover = useCallback(async (purchase: WorkspaceCheckoutStatusView, fallback: AgentOSFlow) => {
+    if (recoverPurchase.isMutating) return;
+    setReconciling(true);
+    try {
+      const response = await recoverPurchase.trigger({ purchaseId: purchase.purchaseId, lastObserved: observedIdentitiesOf(purchase) });
+      if (response.ok) {
+        const recovered = purchaseOf(response.data);
+        if (recovered !== null) {
+          setFlow(phaseFromPurchase(recovered, t, tShared, productName));
+          return;
+        }
+      }
+      setFlow(fallback);
+    } finally {
+      setReconciling(false);
+    }
+  }, [productName, recoverPurchase, t, tShared]);
+  /* A fresh offers answer opens the request step on the approved list; the owner-selected offer
+     identity re-presents itself so the boundary's verdict follows the selection. */
   useEffect(() => {
-    const catalogue = catalogQuery.data;
-    if (isResume || catalogue === undefined) return;
-    if (!catalogue.ok || catalogue.data.length === 0) {
-      setFlow({
+    if (isResume || offersQuery.data === undefined) return;
+    const answer = offersQuery.data;
+    if (!answer.ok || answer.data.status !== "offers" || answer.data.offers.length === 0) {
+      setFlow(current => current.phase === "catalog_loading" || current.phase === "request" ? {
         phase: "failed",
         orderId: null,
         subject: productName,
         detail: "",
-        reason: catalogue.ok ? t("failedLoad") : catalogue.reason,
+        reason: !answer.ok ? answer.reason : answer.data.status === "refused" ? answer.data.code : t("failedLoad"),
+        atStep: 0
+      } : current);
+      return;
+    }
+    const outcome = answer.data;
+    setFlow(current => {
+      if (current.phase !== "catalog_loading" && current.phase !== "request") return current;
+      return {
+        phase: "request",
+        catalogue: outcome.offers,
+        offer: outcome.offers.find(candidate => candidate.offerId === presented.offerId && candidate.offerVersion === presented.offerVersion) ?? null,
+        verdict: outcome.selection.state
+      };
+    });
+  }, [isResume, offersQuery.data, presented, productName, t]);
+  /* A fresh status answer settles the resumed purchase into the phase its facets prove. */
+  useEffect(() => {
+    if (!isResume || resumeOrderId === null || statusQuery.data === undefined) return;
+    const answer = statusQuery.data;
+    if (!answer.ok) {
+      setFlow({
+        phase: "payment_unknown",
+        orderId: resumeOrderId,
+        subject: productName,
+        detail: resumeOrderId,
+        reason: answer.reason
+      });
+      return;
+    }
+    const outcome = answer.data;
+    const purchase = purchaseOf(outcome);
+    if (purchase !== null) {
+      if (purchase.purchaseId !== resumeOrderId) {
+        setFlow({
+          phase: "failed",
+          orderId: resumeOrderId,
+          subject: productName,
+          detail: resumeOrderId,
+          reason: t("agentos.orderMissing"),
+          atStep: 0
+        });
+        return;
+      }
+      setFlow(phaseFromPurchase(purchase, t, tShared, productName));
+      return;
+    }
+    if (outcome.status === "refused") {
+      setFlow({
+        phase: "failed",
+        orderId: resumeOrderId,
+        subject: productName,
+        detail: resumeOrderId,
+        reason: outcome.code === "purchase-not-found-non-disclosing" ? t("agentos.orderMissing") : outcome.code,
         atStep: 0
       });
       return;
     }
-    setFlow(current => {
-      if (current.phase !== "catalog_loading") return current;
-      return {
-        phase: "request",
-        catalogue: catalogue.data,
-        item: null,
-        tier: null
-      };
-    });
-  }, [catalogQuery.data, isResume, productName, t]);
-  useEffect(() => {
-    if (!isResume || accessToken === null || resumeOrderId === null) return;
-    if (ordersQuery.data === undefined || invoicesQuery.data === undefined || workspacesQuery.data === undefined) return;
-    const status = purchaseStatusOf(resumeOrderId, ordersQuery.data, invoicesQuery.data, workspacesQuery.data);
-    setFlow(status.ok ? phaseFromStatus(status.data, t, productName) : {
+    setFlow({
       phase: "payment_unknown",
       orderId: resumeOrderId,
       subject: productName,
       detail: resumeOrderId,
-      reason: status.reason
+      reason: outcome.status === "unavailable" || outcome.status === "conflict" || outcome.status === "outcome-unknown" ? outcome.code : t("failedLoad")
     });
-  }, [accessToken, invoicesQuery.data, isResume, ordersQuery.data, productName, resumeOrderId, t, workspacesQuery.data]);
+  }, [isResume, productName, resumeOrderId, statusQuery.data, t, tShared]);
+  /* The entry answer decides the route: a registered destination to the bound workspace, otherwise
+     the refusal the boundary returned - an unavailable owner never becomes an entered workspace. */
+  useEffect(() => {
+    if (!entryAsked || entryAnswer === undefined || consumedEntry.current === entryAnswer) return;
+    consumedEntry.current = entryAnswer;
+    setEntryAsked(false);
+    if (!entryAnswer.ok) {
+      setEntryRefusal(entryAnswer.reason);
+      return;
+    }
+    const entry = entryAnswer.data;
+    if (entry.status === "entry") {
+      const path = entry.workspaceId === readyWorkspaceId && entry.destination.workspaceId === readyWorkspaceId ? entryPathOf(entry.destination) : null;
+      if (path === null) {
+        setEntryRefusal(tShared("refusal.unknown"));
+        return;
+      }
+      router.push(path);
+      return;
+    }
+    if (entry.status === "not-ready") {
+      setFlow(current => current.phase === "ready" ? phaseFromPurchase(entry.purchase, t, tShared, productName) : current);
+      setEntryRefusal(tShared("agentos.purchaseStatus.entryNotReadyNotice"));
+      return;
+    }
+    setEntryRefusal(tShared(`agentos.purchaseStatus.entryRefusalLabel.${entry.code}`));
+  }, [entryAnswer, entryAsked, productName, readyWorkspaceId, router, t, tShared]);
   const target = realtimeTarget(flow);
   const realtime = useProvisioningRealtime({
     accessToken,
     target
   });
+  /* A realtime event only re-reads the same purchase; it never settles the surface by itself. */
+  const seenEventKey = useRef<string | null>(null);
   useEffect(() => {
-    if (realtime.status !== "event") return;
-    if (realtime.event.kind === "order") {
-      void reconcile(realtime.event.id);
-      return;
-    }
-    if (realtime.event.kind !== "workspace") return;
+    if (realtime.status !== "event" || !isResume) return;
     const event = realtime.event;
-    setFlow(current => {
-      if (current.phase !== "preparing" && current.phase !== "ready") return current;
-      if (current.workspaceId !== event.id) return current;
-      if (event.status === "failed") return {
-        phase: "failed",
-        orderId: current.orderId,
-        subject: current.subject,
-        detail: current.detail,
-        reason: event.reason ?? t("failedProvision"),
-        atStep: 2
-      };
-      const phase = event.status === "active" || event.status === "ready" ? "ready" : "preparing";
-      if (phase === current.phase) return current;
-      return {
-        ...current,
-        phase
-      };
-    });
-  }, [realtime, reconcile, t]);
+    const eventKey = "updatedAt" in event ? `${event.kind}:${event.id}:${event.updatedAt}` : `${event.kind}:${event.id}:${event.status}`;
+    if (seenEventKey.current === eventKey) return;
+    seenEventKey.current = eventKey;
+    if (event.kind === "order" && event.id === resumeOrderId) void reconcile();
+    if (event.kind === "workspace" && readyWorkspaceId !== null && event.id === readyWorkspaceId) void reconcile();
+  }, [isResume, readyWorkspaceId, realtime, reconcile, resumeOrderId]);
   useEffect(() => {
-    if (flow.phase !== "awaiting_payment" && flow.phase !== "accepted" && flow.phase !== "preparing") return;
+    if (flow.phase !== "awaiting_payment" && flow.phase !== "accepted" && flow.phase !== "preparing" && flow.phase !== "payment_unknown" && flow.phase !== "provisioning_unknown") return;
     // Socket.IO is the fast path, while the owner-scoped snapshot is the recovery path
     // for a tab that reconnects after a terminal event has already been relayed.
     const timer = window.setInterval(() => {
-      void reconcile(flow.orderId);
+      void reconcile();
     }, 4000);
     return () => window.clearInterval(timer);
-  }, [flow, reconcile]);
+  }, [flow.phase, reconcile]);
   useEffect(() => {
-    if (contextMode !== "resume" || resumeOrderId === null || realtime.status !== "connected") return;
-    void reconcile(resumeOrderId);
-  }, [contextMode, realtime.status, reconcile, resumeOrderId]);
+    if (!isResume || realtime.status !== "connected" || flow.phase === "catalog_loading") return;
+    void reconcile();
+  }, [flow.phase, isResume, realtime.status, reconcile]);
   useEffect(() => {
     if (flow.phase !== "ready") setEntryRefusal(null);
   }, [flow.phase]);
-  const submit = async () => {
-    if (flow.phase !== "request" || flow.item === null || (flow.item.tiers?.length ?? 0) > 0 && flow.tier === null) return;
-    setFlow({
-      phase: "submitting",
-      catalogue: flow.catalogue,
-      item: flow.item,
-      tier: flow.tier
-    });
-    try {
-      const order = await orderAgentos.trigger({
-        catalogItemSlug: flow.item.slug,
-        catalogTierId: flow.tier?.id
-      });
-      if (!order.ok) {
-        setFlow({
-          phase: "failed",
-          orderId: null,
-          subject: productName,
-          detail: flow.tier?.name ?? flow.item.slug,
-          reason: order.reason,
-          atStep: 0
-        });
-        return;
-      }
-      setFlow({
-        phase: "awaiting_payment",
-        orderId: order.data.id,
-        invoiceId: null,
-        subject: productName,
-        detail: order.data.catalogTier?.name ?? flow.tier?.name ?? order.data.id
-      });
-      router.replace(`/agentos/orders/${order.data.id}`);
-    } catch {
-      setFlow({
-        phase: "failed",
-        orderId: null,
-        subject: productName,
-        detail: flow.tier?.name ?? flow.item.slug,
-        reason: t("failedLoad"),
-        atStep: 0
-      });
-    }
+  /* The owner's chosen offer routes to the checkout review, which alone admits the purchase - the
+     rail choice and the retry identity stay with that surface rather than being invented here. */
+  const submit = () => {
+    if (flow.phase !== "request" || flow.offer === null || flow.verdict !== "current") return;
+    const query = new URLSearchParams({ offer: flow.offer.offerId, offerVersion: flow.offer.offerVersion });
+    router.push(`/agentos/workspaces/new/checkout?${query.toString()}`);
   };
-  const selectOffer = (id: string) => setFlow(current => {
-    if (current.phase !== "request") return current;
-    const item = current.catalogue.find(candidate => candidate.id === id) ?? null;
-    return { ...current, item, tier: null };
-  });
-  const selectTier = (id: string) => setFlow(current => {
-    if (current.phase !== "request" || current.item === null) return current;
-    const tier = current.item.tiers?.find(candidate => candidate.id === id) ?? null;
-    return { ...current, tier };
-  });
-  const enterWorkspace = async () => {
-    if (readyWorkspaceId === undefined || entryPending) return;
-    setEntryPending(true);
+  const selectOffer = (id: string) => {
+    if (flow.phase !== "request") return;
+    const chosen = flow.catalogue.find(candidate => candidate.offerId === id) ?? null;
+    if (chosen === null) return;
+    setPresented({ offerId: chosen.offerId, offerVersion: chosen.offerVersion });
+    setFlow(current => current.phase === "request" ? { ...current, offer: chosen } : current);
+  };
+  const enterWorkspace = () => {
+    if (readyWorkspaceId === null || entryAsked) return;
+    consumedEntry.current = null;
     setEntryRefusal(null);
-    try {
-      const grant = await issueWorkspaceLaunch.trigger();
-      if (!grant.ok) {
-        setEntryRefusal(grant.reason);
-        return;
-      }
-      const destination = safeWorkspaceAppRedirect(grant.data.redirectUrl);
-      if (destination === null) {
-        setEntryRefusal(tShared("refusal.unknown"));
-        return;
-      }
-      followWorkspaceAppRedirect(destination);
-    } finally {
-      setEntryPending(false);
-    }
+    setEntryAsked(true);
   };
   const phaseIndex = phaseIndexOf(flow);
   const stepLabels = [t("steps.request"), t("steps.payment"), t("steps.createWorkspace"), t("steps.ready")];
@@ -565,58 +452,42 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
     progressLabel: t("agentos.progressLabel"),
     continuationLabel: t("agentos.continuationLabel")
   };
+  const amountOf = (offer: WorkspaceCheckoutOffer): string => {
+    const value = Number(offer.amount);
+    return Number.isFinite(value) ? format.number(value, { style: "currency", currency: offer.currency, maximumFractionDigits: 0 }) : `${offer.amount} ${offer.currency}`;
+  };
   const requestView = (requestFlow: Extract<AgentOSFlow, {
-    readonly phase: "request" | "submitting";
+    readonly phase: "request";
   }>): AgentOSProvisioningViewProps => {
-    const price = requestFlow.tier?.priceMonthlyVnd;
-    let detail = requestFlow.item === null ? t("agentos.chooseOffer") : requestFlow.tier?.name ?? requestFlow.item.name;
-    if (price !== null && price !== undefined) {
-      const priceLabel = format.number(price, {
-        style: "currency",
-        currency: BILLING_CURRENCY,
-        maximumFractionDigits: 0
-      });
-      detail = `${requestFlow.tier?.name ?? ""} · ${priceLabel}`;
-    }
+    const detail = requestFlow.offer === null ? t("agentos.chooseOffer") : `${requestFlow.offer.displayName} · ${amountOf(requestFlow.offer)}`;
     return {
       state: requestFlow.phase,
       props: {
         ...viewLabels,
         steps,
-        subject: requestFlow.item?.name ?? productName,
+        subject: requestFlow.offer?.displayName ?? productName,
         detail,
         statusTitle: t("agentos.requestTitle"),
         statusText: t("agentos.requestText"),
         requestActionLabel: t("agentos.submit"),
-        requestActionDisabled: requestFlow.item === null || (requestFlow.item.tiers?.length ?? 0) > 0 && requestFlow.tier === null,
-        isRequestPending: requestFlow.phase === "submitting",
+        requestActionDisabled: requestFlow.offer === null || requestFlow.verdict !== "current",
         selection: {
           label: t("agentos.selectionLabel"),
           chooseOffer: t("agentos.chooseOffer"),
           chooseTier: t("agentos.chooseTier"),
           selected: t("agentos.selected"),
-          offers: requestFlow.catalogue.map(item => ({
-            id: item.id,
-            label: item.name,
-            description: item.tagline ?? undefined,
-            tiers: [...(item.tiers ?? [])].sort((left, right) => left.orderIndex - right.orderIndex).map(tier => ({
-              id: tier.id,
-              label: tier.name,
-              detail: tier.priceMonthlyVnd === null ? undefined : format.number(tier.priceMonthlyVnd, {
-                style: "currency",
-                currency: BILLING_CURRENCY,
-                maximumFractionDigits: 0
-              })
-            }))
+          offers: requestFlow.catalogue.map(offer => ({
+            id: offer.offerId,
+            label: offer.displayName,
+            description: `${amountOf(offer)} · ${offer.includedOutcome}`,
+            tiers: []
           })),
-          selectedOfferId: requestFlow.item?.id,
-          selectedTierId: requestFlow.tier?.id
+          selectedOfferId: requestFlow.offer?.offerId
         }
       },
       on: {
-        request: () => void submit(),
-        selectOffer,
-        selectTier
+        request: () => submit(),
+        selectOffer
       }
     };
   };
@@ -633,10 +504,10 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
         statusTitle: t("readyTitle"),
         statusText: entryRefusal ?? t("agentos.aiReady"),
         statusActionLabel: t("agentos.manage"),
-        isRequestPending: entryPending
+        isRequestPending: entryAsked
       },
       on: {
-        statusAction: () => void enterWorkspace()
+        statusAction: () => enterWorkspace()
       }
     };
     const operationsSettled = aiReadiness?.readinessOperationId === null && aiReadiness.knowledgeRecoveryOperationId === null;
@@ -687,7 +558,15 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
       isRequestPending: reconciling
     },
     on: {
-      statusAction: () => void reconcile(unknownFlow.orderId)
+      statusAction: () => {
+        const answer = statusQuery.data;
+        const purchase = answer !== undefined && answer.ok ? purchaseOf(answer.data) : null;
+        if (purchase !== null) {
+          void recover(purchase, unknownFlow);
+          return;
+        }
+        void reconcile();
+      }
     }
   });
   const view = (): AgentOSProvisioningViewProps => {
@@ -705,7 +584,6 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
           }
         };
       case "request":
-      case "submitting":
         return requestView(flow);
       case "failed":
         return {
@@ -724,25 +602,21 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
           }
         };
       case "awaiting_payment":
-        {
-          const walletTarget = walletTargetOf(flow.orderId, flow.invoiceId, locale);
-          return {
-            state: flow.phase,
-            props: {
-              ...viewLabels,
-              steps,
-              subject: flow.subject,
-              detail: flow.detail,
-              statusTitle: t("agentos.paymentTitle"),
-              statusText: t("agentos.paymentText"),
-              statusActionLabel: t("agentos.openWallet"),
-              statusActionDisabled: walletTarget === undefined
-            },
-            on: {
-              statusAction: walletTarget === undefined ? undefined : () => router.push(walletTarget)
-            }
-          };
-        }
+        return {
+          state: flow.phase,
+          props: {
+            ...viewLabels,
+            steps,
+            subject: flow.subject,
+            detail: flow.detail,
+            statusTitle: t("agentos.paymentTitle"),
+            statusText: t("agentos.paymentText"),
+            statusActionLabel: tShared("agentos.purchaseStatus.checkPaymentAction")
+          },
+          on: {
+            statusAction: () => router.push(`/agentos/workspaces/purchases/${flow.orderId}`)
+          }
+        };
       case "payment_unknown":
       case "provisioning_unknown":
         return unknownView(flow);
@@ -772,3 +646,4 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
   };
   return <AgentOSProvisioningBase {...view()} />;
 };
+export default AgentOSProvisioning;

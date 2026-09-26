@@ -151,4 +151,42 @@ export type PurchaseStatusCopy = {
     readonly operationStatus: (status: string) => string;
     /** Trailing rail fact "Attempt {attempt}" naming the fenced attempt the order stands on. */
     readonly attemptFact: (attempt: number) => string;
+    /** The platform billing ledger's own label. */
+    readonly ledgerLabel: string;
+    /** Notice shown where a source outage keeps one facet from answering. */
+    readonly unavailableNotice: string;
+    /** The held-entitlement renewal action offered to the current owner. */
+    readonly renewAction: string;
+    /** "On hold since {date}" for a held entitlement. */
+    readonly heldSinceLabel: (date: string) => string;
+    /** "Paid through {date}" for a held entitlement. */
+    readonly paidThroughLabel: (date: string) => string;
+    /** Notice shown when the entry boundary answers not-ready beside the purchase's real state. */
+    readonly entryNotReadyNotice: string;
+    /** Notice shown when the observed identities disagree with the confirmed record. */
+    readonly entryConflictNotice: string;
+    /** Lifecycle label of one purchase cursor state (`stateLabel.<state>`). */
+    readonly purchaseStateLabel: (state: string) => string;
+    /** Display name of the source owning a facet (`sourceLabel.<source>`). */
+    readonly sourceLabel: (source: string) => string;
+    /** Label of one source-read state (`sourceStateLabel.<state>`). */
+    readonly sourceStateLabel: (state: string) => string;
+    /** Label of one ledger settlement state (`ledgerStateLabel.<state>`). */
+    readonly ledgerStateLabel: (state: string) => string;
+    /** Label of one posted ledger entry kind (`ledgerEntryKindLabel.<kind>`). */
+    readonly ledgerEntryKindLabel: (kind: string) => string;
+    /** Label of one refund projection state (`refundStateLabel.<state>`). */
+    readonly refundStateLabel: (state: string) => string;
+    /** Label of one service-eligibility state (`holdStateLabel.<state>`). */
+    readonly holdStateLabel: (state: string) => string;
+    /** Label of one attributable hold reason (`holdReasonLabel.<reason>`). */
+    readonly holdReasonLabel: (reason: string) => string;
+    /** Label of one renewal-evidence value (`renewalEvidenceLabel.<evidence>`). */
+    readonly renewalEvidenceLabel: (evidence: string) => string;
+    /** Label of one entry outcome status (`entryStateLabel.<status>`). */
+    readonly entryStateLabel: (status: string) => string;
+    /** Label of one entry refusal code (`entryRefusalLabel.<code>`). */
+    readonly entryRefusalLabel: (code: string) => string;
+    /** Label of one provisioning-owner disposition (`provisioningDispositionLabel.<disposition>`). */
+    readonly provisioningDispositionLabel: (disposition: string) => string;
 };

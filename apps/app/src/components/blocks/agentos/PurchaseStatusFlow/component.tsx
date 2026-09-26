@@ -131,7 +131,7 @@ export type PurchaseStatusFlowViewProps = {
     };
     readonly on: PurchaseStatusActions;
 } | {
-    readonly state: "payment-pending" | "payment-unknown" | "payment-failed" | "paid" | "provisioning" | "provisioning-unknown" | "provisioning-failed-retryable" | "provisioning-failed-terminal" | "ready";
+    readonly state: "payment-pending" | "payment-unknown" | "payment-refused" | "payment-failed" | "payment-cancelled" | "paid" | "queued" | "provisioning" | "provisioning-unknown" | "provisioning-refused" | "provisioning-failed-retryable" | "provisioning-failed-terminal" | "refund-started" | "refunded" | "refund-pending-reconciliation" | "service-eligibility-hold" | "ready";
     readonly props: PurchaseStatusHeadProps & {
         readonly primary: PurchaseStatusPrimary;
         readonly rail: PurchaseStatusRail;
