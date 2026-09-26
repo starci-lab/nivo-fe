@@ -178,8 +178,27 @@ export const GROUP_CHAT_SHEET_PANEL_CLASS_NAME = cn(
 /** The sheet's drag-handle suggestion rests centered at its top edge. */
 export const GROUP_CHAT_SHEET_HANDLE_CLASS_NAME = cn("mx-auto", "my-0.5", "h-1", "w-9", "rounded-full", "bg-separator");
 
-/** Sheet title row under the handle; the close control sits at the end. */
-export const GROUP_CHAT_SHEET_HEAD_CLASS_NAME = cn("flex", "flex-none", "items-center", "justify-between", "gap-3", "px-4", "py-0.5");
+/**
+ * Sheet title row under the handle; the close control sits at the end. A11Y-4 repair
+ * (office-r7-rail-control-hit-area, owner decision office-hit-area-decision-r1): the close
+ * IconButton's operable box grows to the 44x44 CSS px minimum while the approved round glyph
+ * visual stays - size-11 takes the border box to 44, p-0.5 plus background-clip: content-box
+ * keeps the painted circle at the accepted 40px, and -m-0.5 keeps the row's layout footprint
+ * unchanged so nothing else moves.
+ */
+export const GROUP_CHAT_SHEET_HEAD_CLASS_NAME = cn(
+  "flex",
+  "flex-none",
+  "items-center",
+  "justify-between",
+  "gap-3",
+  "px-4",
+  "py-0.5",
+  "[&_.starci-core-icon-button]:size-11",
+  "[&_.starci-core-icon-button]:-m-0.5",
+  "[&_.starci-core-icon-button]:p-0.5",
+  "[&_.starci-core-icon-button]:bg-clip-content",
+);
 
 /** Sheet title reads at the same weight as the rail's card labels. */
 export const GROUP_CHAT_SHEET_TITLE_CLASS_NAME = cn("text-base", "font-semibold", "text-foreground");
@@ -250,7 +269,15 @@ export const GROUP_CHAT_RAIL_LABEL_CLASS_NAME = cn("flex", "items-center", "gap-
 /** A rail section's leading glyph inherits the muted rail tone. */
 export const GROUP_CHAT_RAIL_LABEL_ICON_CLASS_NAME = cn("text-muted-foreground", "min-[70rem]:-translate-y-2");
 
-/** The rail section header row carries the label and an optional trailing control. */
+/**
+ * The rail section header row carries the label and an optional trailing control. A11Y-4
+ * repair (office-r7-rail-control-hit-area, owner decision office-hit-area-decision-r1): the
+ * invite IconButton's operable box grows to the 44x44 CSS px minimum while the approved round
+ * glyph visual stays - size-11 takes the border box to 44, p-1 plus background-clip:
+ * content-box keeps the painted circle at the accepted 36px (the rail only renders at
+ * >=48rem, where the icon-only button is 36px), and -m-1 keeps the row's layout footprint
+ * unchanged so the roster position is identical.
+ */
 export const GROUP_CHAT_RAIL_HEAD_ROW_CLASS_NAME = cn(
   "flex",
   "min-w-0",
@@ -258,6 +285,10 @@ export const GROUP_CHAT_RAIL_HEAD_ROW_CLASS_NAME = cn(
   "justify-between",
   "gap-2",
   "px-4",
+  "[&_.starci-core-icon-button]:size-11",
+  "[&_.starci-core-icon-button]:-m-1",
+  "[&_.starci-core-icon-button]:p-1",
+  "[&_.starci-core-icon-button]:bg-clip-content",
 );
 
 /** The invite form band keeps the card's horizontal inset. */
