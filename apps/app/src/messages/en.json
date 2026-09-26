@@ -907,6 +907,54 @@
       "podReachable": "Pod is answering",
       "podUnreachable": "Pod is not answering",
       "checkedAt": "checked at {time}",
+      "shell": {
+        "headingFallback": "AgentOS workspace",
+        "eyebrow": "AgentOS",
+        "description": "The actual installed modules of this workspace.",
+        "signInRequired": "Sign in to view this workspace.",
+        "signInAction": "Sign in",
+        "accessDenied": "Current access is not permitted for this workspace.",
+        "accessUnverified": "Current access could not be verified. Try again.",
+        "retry": "Retry",
+        "loading": "Reading the latest status.",
+        "sourceTime": "Observed at",
+        "identityInstance": "instance",
+        "lastKnown": "Last known",
+        "retrying": "Retrying",
+        "installEntry": "Install module",
+        "inventory": {
+          "section": "Installed modules",
+          "empty": "No module is installed.",
+          "emptyDescription": "The current observation is complete and authorized, and no module is installed.",
+          "limitPartial": "The module list was only observed in part.",
+          "limitStale": "The module list is a last-known observation, not a current one.",
+          "limitUnavailable": "The module list source is not answering.",
+          "limitUnsupported": "This source does not support the module list yet.",
+          "limitRefused": "The module list source refused to answer.",
+          "limitLoading": "Reading the module list."
+        },
+        "runtime": {
+          "section": "Runtime",
+          "provisioned": "Runtime is provisioned.",
+          "notProvisioned": "Runtime is not provisioned.",
+          "unavailable": "Runtime is currently unavailable.",
+          "unknown": "The runtime standing could not be established."
+        },
+        "configuration": {
+          "section": "Configuration",
+          "current": "desired {desired} · tested {tested} · applied {applied}",
+          "absent": "No configuration observation exists for this module.",
+          "unsupported": "This source does not support configuration yet."
+        },
+        "attention": {
+          "section": "Needs attention",
+          "unsupported": "This source does not support attention yet."
+        },
+        "result": {
+          "section": "Latest result",
+          "unavailable": "No result has been observed for this scope."
+        }
+      },
       "workspace": {
         "titleFallback": "AgentOS workspace",
         "eyebrow": "Workspace control center",

@@ -1,5 +1,8 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import type * as componentModule from "./component"
+import type * as hooksModule from "@/hooks"
+import type { ShellSourceObservation } from "@/modules/agentos/shell-observation-store"
 
 const mocks = vi.hoisted(() => ({
     api: {
@@ -7,6 +10,7 @@ const mocks = vi.hoisted(() => ({
         renew: vi.fn(),
         revoke: vi.fn(),
         refresh: vi.fn(),
+        installations: vi.fn(),
     },
     adopt: vi.fn(),
     select: vi.fn(),
@@ -14,6 +18,9 @@ const mocks = vi.hoisted(() => ({
     realtime: { status: "idle" } as { status: string, event?: { kind: string, fingerprint?: string } },
     message: undefined as ((event: MessageEvent) => void) | undefined,
     close: vi.fn(),
+    readSelection: vi.fn(),
+    retrySource: vi.fn(),
+    sources: [] as ReadonlyArray<ShellSourceObservation>,
 }))
 
 vi.mock("next-intl", () => ({
@@ -23,8 +30,15 @@ vi.mock("next-intl", () => ({
 }))
 vi.mock("@/modules/api/console", () => ({
     myAgentWorkspaceControlCenter: mocks.api.load,
+    myAgentosModuleInstallations: mocks.api.installations,
     renewAgentWorkspaceAppLaunch: mocks.api.renew,
     revokeAgentWorkspaceAppLaunch: mocks.api.revoke,
+}))
+// The SWR half stays real; only the connected shell handle is settled here, because the exact
+// selection it reads is the projection's input and nothing else in this file decides it.
+vi.mock("@/hooks", async (importOriginal) => ({
+    ...await importOriginal<typeof hooksModule>(),
+    useAgentOSShell: () => ({ session: "established", sessionStatus: "signed-in", blocked: false, sources: mocks.sources, readSelection: mocks.readSelection, retrySource: mocks.retrySource }),
 }))
 vi.mock("@/modules/api/auth", () => ({ refreshSession: mocks.api.refresh }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => ({ ...mocks.session, adopt: mocks.adopt }) }))
@@ -38,17 +52,23 @@ type ProbeProps = {
     readonly message?: string
     readonly launchState: string
     readonly openClawLaunchHref: string
+    readonly shell: { readonly state: string, readonly installations: ReadonlyArray<{ readonly installationId: string }> }
+    readonly shellRetrying?: boolean
     readonly onSelectPageState: (state: "applications") => void
     readonly onOpenAgentConsole: () => void
+    readonly onRetryShell?: () => void
     readonly formatDate: (value: string) => string
 }
 
-vi.mock("./component", () => ({
+vi.mock("./component", async (importOriginal) => ({
+    ...await importOriginal<typeof componentModule>(),
     AgentOSWorkspaceControlCenterBase: (props: ProbeProps) => (
         <div>
             <output data-testid="workspace-state">{JSON.stringify({ state: props.controlCenterState, message: props.message, launchState: props.launchState, href: props.openClawLaunchHref })}</output>
+            <output data-testid="shell-state">{JSON.stringify({ state: props.shell.state, retrying: props.shellRetrying, installations: props.shell.installations.map(installation => installation.installationId) })}</output>
             <button type="button" onClick={() => props.onSelectPageState("applications")}>select</button>
             <button type="button" onClick={props.onOpenAgentConsole}>open</button>
+            <button type="button" onClick={props.onRetryShell}>retry-shell</button>
             <button type="button" onClick={() => props.formatDate("2026-08-22T10:00:00.000Z")}>format</button>
         </div>
     ),
@@ -64,6 +84,7 @@ const data = {
 }
 
 const state = () => screen.getByTestId("workspace-state").textContent ?? ""
+const shellState = () => screen.getByTestId("shell-state").textContent ?? ""
 let viewerSequence = 0
 
 describe("AgentOSWorkspaceControlCenter", () => {
@@ -74,6 +95,14 @@ describe("AgentOSWorkspaceControlCenter", () => {
         mocks.realtime = { status: "idle" }
         mocks.message = undefined
         mocks.api.load.mockResolvedValue({ ok: true, data })
+        mocks.api.installations.mockResolvedValue({ ok: true, data: [{ id: "installation-1" }, { id: "installation-2" }] })
+        mocks.sources = [
+            { identity: { kind: "core_registry" }, readGeneration: 1, state: "available", availability: "available", freshness: "current", completeness: "complete", observedAt: "2026-09-26T03:00:00.000Z", payload: { workspaceId: "workspace-1", instanceId: "instance-1", name: "Acme AgentOS", runtimeAvailability: "provisioned" } },
+            { identity: { kind: "installation_inventory" }, readGeneration: 1, state: "available", availability: "available", freshness: "current", completeness: "complete", observedAt: "2026-09-26T03:00:00.000Z", payload: { installations: [{ installationId: "installation-1", moduleKey: "sales-copilot", displayName: "Sales Copilot", status: "installed" }, { installationId: "installation-2", moduleKey: "sales-copilot", displayName: "Sales Copilot EU", status: "installed" }] } },
+            { identity: { kind: "runtime" }, readGeneration: 1, state: "available", availability: "available", freshness: "current", completeness: "complete", observedAt: "2026-09-26T03:00:00.000Z", payload: { runtimeGeneration: "gen-1", runtimeAvailability: "provisioned" } },
+            { identity: { kind: "attention", installationId: "installation-1" }, readGeneration: 1, state: "unsupported", availability: null, freshness: null, completeness: null, observedAt: "2026-09-26T03:00:00.000Z", payload: null },
+            { identity: { kind: "attention", installationId: "installation-2" }, readGeneration: 1, state: "unsupported", availability: null, freshness: null, completeness: null, observedAt: "2026-09-26T03:00:00.000Z", payload: null }
+        ]
         mocks.api.renew.mockResolvedValue({ ok: true })
         mocks.api.refresh.mockResolvedValue({ ok: true, data: { accessToken: "fresh", requiresTwoFactor: false } })
         vi.stubGlobal("BroadcastChannel", class {
@@ -94,6 +123,25 @@ describe("AgentOSWorkspaceControlCenter", () => {
 
         await waitFor(() => expect(state()).toContain('"state":"loading"'))
         expect(mocks.api.load).not.toHaveBeenCalled()
+    })
+
+    it("projects the connected shell onto the pure page with each installation of one package apart", async () => {
+        render(<AgentOSWorkspaceControlCenter workspaceId="workspace-1" pageState="overview" onSelectPageState={mocks.select} />)
+
+        await waitFor(() => expect(shellState()).toContain('"state":"installed-current"'))
+        expect(shellState()).toContain('"installations":["installation-1","installation-2"]')
+        expect(state()).toContain('"state":"ready"')
+    })
+
+    it("retries exactly the facet that did not answer with a current observation", async () => {
+        mocks.sources = mocks.sources.filter((source: ShellSourceObservation) => source.identity.kind === "core_registry").concat([{ identity: { kind: "installation_inventory" }, readGeneration: 1, state: "unavailable", availability: null, freshness: null, completeness: null, observedAt: null, payload: null }])
+        render(<AgentOSWorkspaceControlCenter workspaceId="workspace-1" pageState="overview" onSelectPageState={mocks.select} />)
+
+        await waitFor(() => expect(shellState()).toContain('"state":"retrying"'))
+        expect(shellState()).toContain('"retrying":true')
+        fireEvent.click(screen.getByRole("button", { name: "retry-shell" }))
+        expect(mocks.retrySource).toHaveBeenCalledWith({ kind: "installation_inventory" })
+        expect(mocks.readSelection).not.toHaveBeenCalled()
     })
 
     it("settles a workspace and exposes only page-owned interactions", async () => {

@@ -907,6 +907,54 @@
       "podReachable": "Pod đang trả lời",
       "podUnreachable": "Pod chưa trả lời",
       "checkedAt": "kiểm tra lúc {time}",
+      "shell": {
+        "headingFallback": "Không gian làm việc AgentOS",
+        "eyebrow": "AgentOS",
+        "description": "Danh sách module đã cài thật của không gian làm việc này.",
+        "signInRequired": "Cần đăng nhập để xem không gian làm việc này.",
+        "signInAction": "Đăng nhập",
+        "accessDenied": "Truy cập hiện tại không được phép cho không gian làm việc này.",
+        "accessUnverified": "Chưa xác minh được quyền truy cập hiện tại. Hãy thử lại.",
+        "retry": "Thử lại",
+        "loading": "Đang đọc trạng thái mới nhất.",
+        "sourceTime": "Thời điểm ghi nhận",
+        "identityInstance": "instance",
+        "lastKnown": "Ghi nhận gần nhất",
+        "retrying": "Đang thử lại",
+        "installEntry": "Cài module",
+        "inventory": {
+          "section": "Module đã cài",
+          "empty": "Không có module nào được cài.",
+          "emptyDescription": "Quan sát hiện tại đã đầy đủ và được phép, và không có module nào được cài.",
+          "limitPartial": "Danh sách module mới chỉ được quan sát một phần.",
+          "limitStale": "Danh sách module là thông tin ghi nhận gần nhất, không phải hiện tại.",
+          "limitUnavailable": "Nguồn danh sách module hiện không trả lời.",
+          "limitUnsupported": "Nguồn này chưa hỗ trợ danh sách module.",
+          "limitRefused": "Nguồn danh sách module từ chối trả lời.",
+          "limitLoading": "Đang đọc danh sách module."
+        },
+        "runtime": {
+          "section": "Runtime",
+          "provisioned": "Runtime đã được cấp.",
+          "notProvisioned": "Runtime chưa được cấp.",
+          "unavailable": "Runtime hiện không khả dụng.",
+          "unknown": "Chưa xác định được trạng thái runtime."
+        },
+        "configuration": {
+          "section": "Cấu hình",
+          "current": "mong muốn {desired} · đã kiểm thử {tested} · đã áp dụng {applied}",
+          "absent": "Chưa có quan sát cấu hình cho module này.",
+          "unsupported": "Nguồn này chưa hỗ trợ cấu hình."
+        },
+        "attention": {
+          "section": "Cần chú ý",
+          "unsupported": "Nguồn này chưa hỗ trợ thông tin cần chú ý."
+        },
+        "result": {
+          "section": "Kết quả gần nhất",
+          "unavailable": "Chưa có kết quả nào được ghi nhận cho phạm vi này."
+        }
+      },
       "workspace": {
         "titleFallback": "Không gian làm việc AgentOS",
         "eyebrow": "Trung tâm điều khiển không gian làm việc",

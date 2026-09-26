@@ -1,17 +1,19 @@
 import { Breadcrumbs, TileIcon } from "@nivo/ui";
-import { Button, PageContainer, SectionHeader } from "@starci/grammar/common";
-import { AgentOSCustomModuleCollection } from "@/components/blocks/agentos/AgentOSCustomModuleCollection";
-import { AgentOSSolutionModuleCenter } from "@/components/blocks/agentos/AgentOSSolutionModuleCenter";
+import { Badge, Button, PageContainer, SectionHeader, Text } from "@starci/grammar/common";
+import { AgentOSShellAccessNotice, AgentOSShellRegions, type AgentOSShellView, type AgentOSShellViewLabels } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter/component";
 import {
   MODULE_COLLECTION_GRID_CLASS_NAME,
   MODULE_COLLECTION_INTRO_CLASS_NAME,
-  MODULE_COLLECTION_PAGE_CLASS_NAME
+  MODULE_COLLECTION_PAGE_CLASS_NAME,
+  MODULE_COLLECTION_SOURCE_TIME_CLASS_NAME
 } from "./classNames";
 
 /** Public API role for AgentOSModuleCollectionPageProps. */
 export type AgentOSModuleCollectionPageProps = AgentOSModuleCollectionPageViewProps;
 type AgentOSModuleCollectionPageViewProps = {
   readonly workspaceId: string;
+  readonly shell: AgentOSShellView;
+  readonly shellLabels: AgentOSShellViewLabels;
   readonly labels: {
     readonly path: string;
     readonly workspace: string;
@@ -20,22 +22,38 @@ type AgentOSModuleCollectionPageViewProps = {
     readonly eyebrow: string;
     readonly create: string;
   };
+  readonly formatDate: (value: string) => string;
   readonly createHref: string;
   readonly onBack: () => void;
+  readonly onRetryShell?: () => void;
+  readonly shellRetrying?: boolean;
 };
 
 /**
  * Compose the module ledger under one route identity: orientation, the one creation door, then the
- * custom, installed and catalogue sections as one column. The shell already owns the main landmark,
- * so the page body is a plain column rather than a second `main`.
+ * connected shell's own regions as one column. The shell already owns the main landmark, so the page
+ * body is a plain column rather than a second `main` - and a sign-in-required or refused access state
+ * replaces the ledger instead of qualifying it, so no installation is ever hinted at without access.
  */
 export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPageProps) => {
   const {
-    workspaceId,
+    shell,
+    shellLabels,
     labels,
+    formatDate,
     createHref,
-    onBack
+    onBack,
+    onRetryShell,
+    shellRetrying
   }: AgentOSModuleCollectionPageViewProps = props;
+  const accessState = shell.state === "sign-in-required" || shell.state === "access-unverified" || shell.state === "access-denied";
+  const title = accessState ? labels.title : shell.name ?? labels.title;
+  const sourceTime = shell.identityObservedAt === null || accessState ? null : (
+    <div className={MODULE_COLLECTION_SOURCE_TIME_CLASS_NAME} data-region="module-source-time" data-contract="GAP-6">
+      <Badge tone="neutral">{shellLabels.sourceTime}</Badge>
+      <Text size="sm" tone="muted">{formatDate(shell.identityObservedAt)}{shell.instanceId === null ? "" : " · " + shellLabels.identityInstance + " " + shell.instanceId}</Text>
+    </div>
+  );
   return (
     <PageContainer measure="product">
       <div className={MODULE_COLLECTION_PAGE_CLASS_NAME} data-region="page" data-contract="GAP-5">
@@ -70,19 +88,21 @@ export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPa
             composition="context-intro"
             level={1}
             eyebrow={labels.eyebrow}
-            title={labels.title}
+            title={title}
             description={labels.description}
             action={<Button size="lg" variant="primary" href={createHref}>{labels.create}</Button>}
           />
         </div>
+        {sourceTime}
         <section
           className={MODULE_COLLECTION_GRID_CLASS_NAME}
           aria-label={labels.title}
           data-region="module-collection"
           data-contract="GAP-4"
         >
-          <AgentOSCustomModuleCollection workspaceId={workspaceId} />
-          <AgentOSSolutionModuleCenter workspaceId={workspaceId} layout="ledger" />
+          {accessState
+            ? <AgentOSShellAccessNotice state={shell.state} labels={shellLabels} onRetry={onRetryShell} retrying={shellRetrying}/>
+            : <AgentOSShellRegions view={shell} labels={shellLabels} formatDate={formatDate} onRetry={onRetryShell} retrying={shellRetrying}/>}
         </section>
       </div>
     </PageContainer>
