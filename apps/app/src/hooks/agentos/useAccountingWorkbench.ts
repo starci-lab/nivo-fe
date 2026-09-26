@@ -250,7 +250,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
       model: routineModel, isCommitting: routineCommand.isMutating, onCommitRoutine, onRetryRoutine, reload: () => void routine.mutate()
     },
     question: {
-      standing: ready ? accountingSurfaceStanding(exceptionCommand.data, exceptionId.length > 0) : scopeStanding,
+      standing: ready ? accountingSurfaceStanding(routine.data, routineModel !== null && routineModel.state === "needs-decision") : scopeStanding,
       exceptionId, setExceptionId, choiceCode, setChoiceCode, reason: questionReason, setReason: setQuestionReason, evidenceRefs: questionEvidenceRefs, setEvidenceRefs: setQuestionEvidenceRefs, exceptionRevision, setExceptionRevision,
       answerState: exceptionCommand.data?.ok === true ? exceptionCommand.data.data.payload : null,
       isAnswering: exceptionCommand.isMutating, onAnswer: onAnswerQuestion, onDefer: () => exceptionAction("defer"), onReopen: () => exceptionAction("reopen"), onEscalate: () => exceptionAction("escalate"), onDismiss: () => exceptionAction("dismiss"),
