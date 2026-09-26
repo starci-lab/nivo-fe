@@ -142,6 +142,7 @@ export const AdministratorRevocationDialogBase = (props: AdministratorRevocation
             </>;
         }}
     >
+        {isConfirming ? <Text>{consequence}</Text> : null}
         <Text tone="muted">{contextLabel}</Text>
         <Text>{context}</Text>
         {isChoosing ? <Select
@@ -154,6 +155,6 @@ export const AdministratorRevocationDialogBase = (props: AdministratorRevocation
             onValueChange={(next: string | null) => props.on?.memberChange?.(next)}
         /> : null}
         {isChoosing && memberNotice !== null ? <Text live="polite">{memberNotice}</Text> : null}
-        {outcome === null ? <Text>{consequence}</Text> : <Text live="polite">{outcome}</Text>}
+        {isConfirming ? null : outcome === null ? <Text>{consequence}</Text> : <Text live="polite">{outcome}</Text>}
     </Dialog>;
 };

@@ -164,8 +164,9 @@ describe("AdministratorRevocationDialogBase", () => {
         const dialog = await screen.findByRole("dialog")
 
         expect(picker(dialog)).toBeInTheDocument()
-        expect(within(dialog).getByText(VIEW.contextLabel)).toBeInTheDocument()
+        const contextLabel = within(dialog).getByText(VIEW.contextLabel)
         expect(within(dialog).getByText(VIEW.context)).toBeInTheDocument()
+        expect(contextLabel.compareDocumentPosition(within(dialog).getByText(CHOOSING.consequence as string)) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
         const continueButton = screen.getByRole("button", { name: VIEW.continueLabel })
         expect(continueButton).toBeDisabled()
         await user.click(continueButton)
@@ -195,8 +196,10 @@ describe("AdministratorRevocationDialogBase", () => {
         const dialog = await openAt(user, { stage: "confirm" })
 
         expect(dialog).toHaveAccessibleName(VIEW.title)
+        const consequence = within(dialog).getByText(VIEW.consequence)
+        const contextLabel = within(dialog).getByText(VIEW.contextLabel)
         expect(within(dialog).getByText(VIEW.context)).toBeInTheDocument()
-        expect(within(dialog).getByText(VIEW.consequence)).toBeInTheDocument()
+        expect(consequence.compareDocumentPosition(contextLabel) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
         expect(within(dialog).queryByRole("button", { name: /Member/ })).not.toBeInTheDocument()
     })
 
