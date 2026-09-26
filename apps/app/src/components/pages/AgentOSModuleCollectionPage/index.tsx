@@ -1,7 +1,7 @@
 "use client";
 
 import { AgentOSModuleCollectionPageBase } from "./component";
-import { projectAgentOSShellView, type AgentOSShellView, type AgentOSShellViewLabels } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter/component";
+import { projectAgentOSShellView, type AgentOSShellRegionsLabels, type AgentOSShellView } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter/component";
 import { useAgentOSShell, useQueryMyAgentosModuleInstallationsSwr, useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useCallback } from "react";
@@ -29,7 +29,7 @@ export const AgentOSModuleCollectionPage = (props: AgentOSModuleCollectionPagePr
   const shell = useAgentOSShell({ workspaceId, instanceId: instanceId ?? "", installationIds });
   /** Retry exactly the facets that did not answer with a current observation. */
   const retryShell = useCallback(() => {
-    const limited = shell.sources.filter(source => source.state !== "available" || source.freshness === "stale");
+    const limited = shell.sources.filter((source): boolean => source.state !== "available" || source.freshness === "stale");
     if (limited.length === 0) {
       shell.readSelection();
       return;
@@ -37,7 +37,7 @@ export const AgentOSModuleCollectionPage = (props: AgentOSModuleCollectionPagePr
     for (const source of limited)
       shell.retrySource(source.identity);
   }, [shell]);
-  const shellLabels: AgentOSShellViewLabels = {
+  const shellLabels: AgentOSShellRegionsLabels = {
     headingFallback: s("headingFallback"),
     eyebrow: s("eyebrow"),
     description: s("description"),
@@ -86,5 +86,5 @@ export const AgentOSModuleCollectionPage = (props: AgentOSModuleCollectionPagePr
   }} formatDate={value => format.dateTime(new Date(value), {
     dateStyle: "medium",
     timeStyle: "short"
-  })} createHref={`/${locale}/agentos/workspaces/${workspaceId}/modules/create`} onBack={() => router.push(`/agentos/workspaces/${workspaceId}`)} onRetryShell={retryShell} shellRetrying={shellView.state === "retrying"}/>;
+  })} createHref={`/${locale}/agentos/workspaces/${workspaceId}/modules/create`} onBack={() => router.push(`/agentos/workspaces/${workspaceId}`)} onRetryShell={retryShell} isShellRetrying={shellView.state === "retrying"}/>;
 };

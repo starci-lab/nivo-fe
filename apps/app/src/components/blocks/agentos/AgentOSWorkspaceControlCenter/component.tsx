@@ -21,7 +21,7 @@ export const AGENT_OS_SIGN_IN_HREF = "/authentication";
  * decides which one the current observations have earned. Nothing here is inferred from a sibling
  * facet - a state is entered from the source that owns the fact.
  */
-export type AgentOSShellViewState = "loading" | "sign-in-required" | "access-unverified" | "access-denied" | "no-runtime" | "installed-current" | "installed-empty" | "evidence-limited" | "last-known" | "retrying";
+type AgentOSShellViewState = "loading" | "sign-in-required" | "access-unverified" | "access-denied" | "no-runtime" | "installed-current" | "installed-empty" | "evidence-limited" | "last-known" | "retrying";
 
 /** How one source-qualified facet stands, kept apart from every sibling facet. */
 export type AgentOSShellFacetStanding = "current" | "partial" | "stale" | "unavailable" | "unsupported" | "refused" | "loading" | "unresolved";
@@ -68,7 +68,7 @@ export interface AgentOSShellReading {
 }
 
 /** Bilingual copy the settled shell view is rendered from, resolved before the drawing half runs. */
-export interface AgentOSShellViewLabels {
+export interface AgentOSShellRegionsLabels {
     readonly headingFallback: string;
     readonly eyebrow: string;
     readonly description: string;
@@ -168,7 +168,7 @@ const isSettling = (standing: ShellSourceStanding): boolean => standing === "unr
  * for itself: an owner may see a current inventory beside an unavailable runtime, and only this
  * projection decides that is an evidence limit rather than an empty or all-ready workspace.
  */
-export const projectAgentOSShellView = (reading: AgentOSShellReading, labels: AgentOSShellViewLabels): AgentOSShellView => {
+export const projectAgentOSShellView = (reading: AgentOSShellReading, labels: AgentOSShellRegionsLabels): AgentOSShellView => {
     const identity = observationOf(reading.sources, "core_registry");
     const inventory = observationOf(reading.sources, "installation_inventory");
     const runtime = observationOf(reading.sources, "runtime");
@@ -221,7 +221,7 @@ export const projectAgentOSShellView = (reading: AgentOSShellReading, labels: Ag
     // 3. A signed-in owner whose access cannot be established: retryable, and it asks for no sign-in.
     if (reading.session === "access-unestablished") return { ...base, state: "access-unverified", retrying: false };
     const settled = [identity, inventory, runtime].filter(observation => observation !== null && !isSettling(observation.state)).length;
-    const settling = [identity, inventory, runtime].some(observation => observation === null || isSettling(observation.state));
+    const settling = [identity, inventory, runtime].some((observation): boolean => observation === null || isSettling(observation.state));
     if (settled === 0) return { ...base, state: "loading", name: null, identityObservedAt: null, installations: [], retrying: false };
     // 4. Nothing but an outage: every whole-selection source answered the same way, so this is a
     //    verification failure to retry rather than a permission decision to accept.
@@ -246,7 +246,7 @@ export const projectAgentOSShellView = (reading: AgentOSShellReading, labels: Ag
 };
 
 /** The one sentence a limited facet owes its reader, chosen by that source's own standing. */
-const facetLimitOf = (standing: AgentOSShellFacetStanding, labels: AgentOSShellViewLabels): string => {
+const facetLimitOf = (standing: AgentOSShellFacetStanding, labels: AgentOSShellRegionsLabels): string => {
     if (standing === "stale") return labels.inventoryLimitStale;
     if (standing === "unavailable") return labels.inventoryLimitUnavailable;
     if (standing === "unsupported") return labels.inventoryLimitUnsupported;
@@ -256,7 +256,7 @@ const facetLimitOf = (standing: AgentOSShellFacetStanding, labels: AgentOSShellV
 };
 
 /** The runtime facet's own value: what the runtime source said, never what a neighbour implied. */
-const runtimeValueOf = (view: AgentOSShellView, labels: AgentOSShellViewLabels): string => {
+const runtimeValueOf = (view: AgentOSShellView, labels: AgentOSShellRegionsLabels): string => {
     if (view.runtimeStanding === "unsupported" || view.runtimeStanding === "refused") return facetLimitOf(view.runtimeStanding, labels);
     if (view.runtimeAvailability === "provisioned") return labels.runtimeProvisioned;
     if (view.runtimeAvailability === "not_provisioned") return labels.runtimeNotProvisioned;
@@ -278,7 +278,7 @@ const ShellFacet = (props: ShellFacetProps) => <SurfaceCard label={props.label} 
  */
 type AgentOSShellRegionsProps = {
     readonly view: AgentOSShellView;
-    readonly labels: AgentOSShellViewLabels;
+    readonly labels: AgentOSShellRegionsLabels;
     readonly formatDate: (value: string) => string;
     readonly onRetry?: () => void;
     readonly retrying?: boolean;
@@ -309,7 +309,7 @@ export const AgentOSShellRegions = (props: AgentOSShellRegionsProps) => {
 /** One settled access state: a retryable verification failure, a refusal, or a sign-in affordance. */
 type AgentOSShellAccessNoticeProps = {
     readonly state: AgentOSShellViewState;
-    readonly labels: AgentOSShellViewLabels;
+    readonly labels: AgentOSShellRegionsLabels;
     readonly onRetry?: () => void;
     readonly retrying?: boolean;
 };
@@ -339,7 +339,7 @@ export type AgentOSWorkspaceControlCenterLabels = {
     readonly loading: string;
     readonly accessUnavailable: string;
     readonly tabsLabel: string;
-    readonly shell: AgentOSShellViewLabels;
+    readonly shell: AgentOSShellRegionsLabels;
     readonly tabs: ReadonlyArray<{
         readonly id: AgentOSWorkspacePageState;
         readonly label: string;
@@ -364,14 +364,14 @@ export type AgentOSWorkspaceControlCenterViewProps = {
     readonly onRetry?: () => void;
     readonly onRetryShell?: () => void;
     readonly retryPending?: boolean;
-    readonly shellRetrying?: boolean;
+    readonly isShellRetrying?: boolean;
     readonly openClawLaunchHref: string;
     readonly launchState: Parameters<typeof AgentOSWorkspaceApplications>[0]["launchState"];
     readonly formatDate: (value: string) => string;
 };
 /** Compose one AgentOS workspace from domain blocks; the page owns no API or operational JSX. */
 export const AgentOSWorkspaceControlCenterBase = (props: AgentOSWorkspaceControlCenterProps) => {
-    const { workspaceId, pageState, controlCenterState, message, data, shell, labels, launchState, openClawLaunchHref, onSelectPageState, onOpenAgentConsole, onRetry, onRetryShell, retryPending, shellRetrying, formatDate }: AgentOSWorkspaceControlCenterViewProps = props;
+    const { workspaceId, pageState, controlCenterState, message, data, shell, labels, launchState, openClawLaunchHref, onSelectPageState, onOpenAgentConsole, onRetry, onRetryShell, retryPending, isShellRetrying, formatDate }: AgentOSWorkspaceControlCenterViewProps = props;
     // The connected shell owns the identity scope, so an unsettled or refused access state decides
     // the page before any tab is offered - and a sign-in-required state discloses no scope at all.
     const accessState = shell.state === "sign-in-required" || shell.state === "access-unverified" || shell.state === "access-denied";
@@ -387,7 +387,7 @@ export const AgentOSWorkspaceControlCenterBase = (props: AgentOSWorkspaceControl
     /** The one tab list; a settling page still shows its chrome, an unsettled access state shows none. */
     const tabs = <DirectionTabs label={labels.tabsLabel} selectedKey={pageState} items={labels.tabs} onSelect={key => onSelectPageState(key as AgentOSWorkspacePageState)} panelId={key => "workspace-panel-" + key} labelVisibility="always" inset="none"/>;
     const sourceTime = shell.identityObservedAt === null || accessState ? null : <div className={SHELL_SOURCE_TIME_CLASS_NAME}><Badge tone="neutral">{labels.shell.sourceTime}</Badge><Text size="sm" tone="muted">{formatDate(shell.identityObservedAt)}{shell.instanceId === null ? "" : " · " + labels.shell.identityInstance + " " + shell.instanceId}</Text></div>;
-    if (accessState) return <DirectionPage measure="product"><div className={CONTENT_CLASS_NAME} data-contract="GAP-2"><DirectionHeader level={1} eyebrow={pageCopy.eyebrow} title={title} description={<Text size="md" tone="muted">{pageCopy.description}</Text>}/><AgentOSShellAccessNotice state={shell.state} labels={labels.shell} onRetry={onRetryShell} retrying={shellRetrying}/></div></DirectionPage>;
+    if (accessState) return <DirectionPage measure="product"><div className={CONTENT_CLASS_NAME} data-contract="GAP-2"><DirectionHeader level={1} eyebrow={pageCopy.eyebrow} title={title} description={<Text size="md" tone="muted">{pageCopy.description}</Text>}/><AgentOSShellAccessNotice state={shell.state} labels={labels.shell} onRetry={onRetryShell} retrying={isShellRetrying}/></div></DirectionPage>;
     /** One tab decides one list of projections; the overview belongs to the connected shell. */
     const sectionsOf = () => {
         if (controlCenterState !== "ready" || data === undefined) {
@@ -411,7 +411,7 @@ export const AgentOSWorkspaceControlCenterBase = (props: AgentOSWorkspaceControl
         }
         return [<AgentOSWorkspaceOperations key="item-0" labels={labels.operations}/>];
     };
-    const overview = [<AgentOSShellRegions key="shell" view={shell} labels={labels.shell} formatDate={formatDate} onRetry={onRetryShell} retrying={shellRetrying}/>, data === undefined ? null : <AgentOSWorkspaceSummary key="summary" data={data} labels={labels.summary}/>, data === undefined ? null : <AgentOSSolutionModuleCenter key="solutions" workspaceId={data.workspace.id}/>];
+    const overview = [<AgentOSShellRegions key="shell" view={shell} labels={labels.shell} formatDate={formatDate} onRetry={onRetryShell} retrying={isShellRetrying}/>, data === undefined ? null : <AgentOSWorkspaceSummary key="summary" data={data} labels={labels.summary}/>, data === undefined ? null : <AgentOSSolutionModuleCenter key="solutions" workspaceId={data.workspace.id}/>];
     const sections = pageState === "overview" ? overview : sectionsOf();
     return <DirectionPage measure="product"><div className={CONTENT_CLASS_NAME} data-contract="GAP-2"><DirectionHeader level={1} eyebrow={pageCopy.eyebrow} title={title} description={<Text size="md" tone="muted">{pageCopy.description}</Text>}/>{sourceTime}{tabs}<section role="tabpanel" id={"workspace-panel-" + pageState} aria-label={labels.tabs.find(tab => tab.id === pageState)?.label}><div className={SECTIONS_CLASS_NAME} data-contract="GAP-5">{sections}</div></section></div></DirectionPage>;
 };

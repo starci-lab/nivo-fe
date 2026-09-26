@@ -5,7 +5,7 @@ import useProvisioningRealtime from "@/modules/realtime/provisioning";
 import { workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@/modules/window/workspace-app-launch";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AgentOSWorkspaceControlCenterBase, projectAgentOSShellView, type AgentOSShellViewLabels, type AgentOSWorkspaceControlCenterLabels, type AgentOSWorkspaceControlCenterState, type AgentOSWorkspacePageState } from "./component";
+import { AgentOSWorkspaceControlCenterBase, projectAgentOSShellView, type AgentOSShellRegionsLabels, type AgentOSWorkspaceControlCenterLabels, type AgentOSWorkspaceControlCenterState, type AgentOSWorkspacePageState } from "./component";
 /** Exact workspace identity supplied by the detail route. */
 export type AgentOSWorkspaceControlCenterProps = {
     readonly workspaceId: string;
@@ -100,7 +100,7 @@ export const AgentOSWorkspaceControlCenter = (props: AgentOSWorkspaceControlCent
     }, []);
     /** Retry exactly the facets that did not answer with a current observation, then re-read the selection. */
     const retryShell = useCallback(() => {
-        const limited = shell.sources.filter(source => source.state !== "available" || source.freshness === "stale");
+        const limited = shell.sources.filter((source): boolean => source.state !== "available" || source.freshness === "stale");
         if (limited.length === 0) {
             shell.readSelection();
             return;
@@ -110,7 +110,7 @@ export const AgentOSWorkspaceControlCenter = (props: AgentOSWorkspaceControlCent
     }, [shell]);
     if (!mounted)
         return null;
-    const shellLabels: AgentOSShellViewLabels = {
+    const shellLabels: AgentOSShellRegionsLabels = {
         headingFallback: s("headingFallback"),
         eyebrow: s("eyebrow"),
         description: s("description"),
@@ -230,7 +230,7 @@ export const AgentOSWorkspaceControlCenter = (props: AgentOSWorkspaceControlCent
     return <AgentOSWorkspaceControlCenterBase workspaceId={workspaceId} pageState={pageState} controlCenterState={controlCenterState} message={answer !== undefined && !answer.ok ? t("refused") : undefined} data={answer?.ok === true ? answer.data : undefined} shell={shellView} labels={labels} launchState={launchState} openClawLaunchHref={`/${locale}/launch/agentos/${workspaceId}/openclaw`} onSelectPageState={onSelectPageState} onOpenAgentConsole={openOpenClaw} retryPending={retryPending} onRetry={() => {
             setRetryPending(true);
             void refreshControlCenter().finally(() => setRetryPending(false));
-        }} onRetryShell={retryShell} shellRetrying={shellView.state === "retrying"} formatDate={value => format.dateTime(new Date(value), {
+        }} onRetryShell={retryShell} isShellRetrying={shellView.state === "retrying"} formatDate={value => format.dateTime(new Date(value), {
             dateStyle: "medium",
             timeStyle: "short"
         })}/>;

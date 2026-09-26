@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { projectAgentOSShellView, type AgentOSShellReading, type AgentOSShellViewLabels } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter/component"
+import { projectAgentOSShellView, type AgentOSShellReading, type AgentOSShellRegionsLabels } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter/component"
 import type { ShellSourceIdentity } from "@/modules/api/agentos-shell"
 import type { ShellSourceObservation, ShellSourceStanding } from "@/modules/agentos/shell-observation-store"
 import { AgentOSModuleCollectionPageBase } from "./component"
@@ -15,7 +15,7 @@ const labels = {
     create: "Create module"
 }
 
-const shellLabels: AgentOSShellViewLabels = {
+const shellLabels: AgentOSShellRegionsLabels = {
     headingFallback: "AgentOS workspace",
     eyebrow: "AgentOS",
     description: "The actual installed modules.",

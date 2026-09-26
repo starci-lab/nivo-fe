@@ -1,6 +1,6 @@
 import { Breadcrumbs, TileIcon } from "@nivo/ui";
 import { Badge, Button, PageContainer, SectionHeader, Text } from "@starci/grammar/common";
-import { AgentOSShellAccessNotice, AgentOSShellRegions, type AgentOSShellView, type AgentOSShellViewLabels } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter/component";
+import { AgentOSShellAccessNotice, AgentOSShellRegions, type AgentOSShellRegionsLabels, type AgentOSShellView } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter/component";
 import {
   MODULE_COLLECTION_GRID_CLASS_NAME,
   MODULE_COLLECTION_INTRO_CLASS_NAME,
@@ -13,7 +13,7 @@ export type AgentOSModuleCollectionPageProps = AgentOSModuleCollectionPageViewPr
 type AgentOSModuleCollectionPageViewProps = {
   readonly workspaceId: string;
   readonly shell: AgentOSShellView;
-  readonly shellLabels: AgentOSShellViewLabels;
+  readonly shellLabels: AgentOSShellRegionsLabels;
   readonly labels: {
     readonly path: string;
     readonly workspace: string;
@@ -26,7 +26,7 @@ type AgentOSModuleCollectionPageViewProps = {
   readonly createHref: string;
   readonly onBack: () => void;
   readonly onRetryShell?: () => void;
-  readonly shellRetrying?: boolean;
+  readonly isShellRetrying?: boolean;
 };
 
 /**
@@ -44,7 +44,7 @@ export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPa
     createHref,
     onBack,
     onRetryShell,
-    shellRetrying
+    isShellRetrying
   }: AgentOSModuleCollectionPageViewProps = props;
   const accessState = shell.state === "sign-in-required" || shell.state === "access-unverified" || shell.state === "access-denied";
   const title = accessState ? labels.title : shell.name ?? labels.title;
@@ -101,8 +101,8 @@ export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPa
           data-contract="GAP-4"
         >
           {accessState
-            ? <AgentOSShellAccessNotice state={shell.state} labels={shellLabels} onRetry={onRetryShell} retrying={shellRetrying}/>
-            : <AgentOSShellRegions view={shell} labels={shellLabels} formatDate={formatDate} onRetry={onRetryShell} retrying={shellRetrying}/>}
+            ? <AgentOSShellAccessNotice state={shell.state} labels={shellLabels} onRetry={onRetryShell} retrying={isShellRetrying}/>
+            : <AgentOSShellRegions view={shell} labels={shellLabels} formatDate={formatDate} onRetry={onRetryShell} retrying={isShellRetrying}/>}
         </section>
       </div>
     </PageContainer>

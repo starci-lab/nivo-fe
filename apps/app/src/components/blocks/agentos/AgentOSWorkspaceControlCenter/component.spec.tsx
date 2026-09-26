@@ -30,9 +30,9 @@ vi.mock("@/components/blocks/operations/HelmStackSnapshot", () => ({
     HelmStackSnapshot: () => <div data-testid="stack"/>,
 }))
 
-import { AgentOSWorkspaceControlCenterBase, projectAgentOSShellView, type AgentOSShellReading, type AgentOSShellViewLabels } from "./component"
+import { AgentOSWorkspaceControlCenterBase, projectAgentOSShellView, type AgentOSShellReading, type AgentOSShellRegionsLabels } from "./component"
 
-const labels: AgentOSShellViewLabels = {
+const labels: AgentOSShellRegionsLabels = {
     headingFallback: "AgentOS workspace",
     eyebrow: "AgentOS",
     description: "The actual installed modules.",

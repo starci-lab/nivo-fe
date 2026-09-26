@@ -53,7 +53,7 @@ type ProbeProps = {
     readonly launchState: string
     readonly openClawLaunchHref: string
     readonly shell: { readonly state: string, readonly installations: ReadonlyArray<{ readonly installationId: string }> }
-    readonly shellRetrying?: boolean
+    readonly isShellRetrying?: boolean
     readonly onSelectPageState: (state: "applications") => void
     readonly onOpenAgentConsole: () => void
     readonly onRetryShell?: () => void
@@ -65,7 +65,7 @@ vi.mock("./component", async (importOriginal) => ({
     AgentOSWorkspaceControlCenterBase: (props: ProbeProps) => (
         <div>
             <output data-testid="workspace-state">{JSON.stringify({ state: props.controlCenterState, message: props.message, launchState: props.launchState, href: props.openClawLaunchHref })}</output>
-            <output data-testid="shell-state">{JSON.stringify({ state: props.shell.state, retrying: props.shellRetrying, installations: props.shell.installations.map(installation => installation.installationId) })}</output>
+            <output data-testid="shell-state">{JSON.stringify({ state: props.shell.state, retrying: props.isShellRetrying, installations: props.shell.installations.map(installation => installation.installationId) })}</output>
             <button type="button" onClick={() => props.onSelectPageState("applications")}>select</button>
             <button type="button" onClick={props.onOpenAgentConsole}>open</button>
             <button type="button" onClick={props.onRetryShell}>retry-shell</button>
