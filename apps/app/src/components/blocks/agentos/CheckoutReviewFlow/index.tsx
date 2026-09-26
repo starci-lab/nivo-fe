@@ -7,7 +7,7 @@ import { getPathname, useRouter } from "@/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
 import { useMutateWorkspaceCheckoutStartSwr, useQueryWorkspaceCheckoutOffersSwr } from "@/hooks";
 import type { WorkspaceCheckoutOffer, WorkspaceCheckoutOutcome, WorkspaceCheckoutPaymentRail, WorkspaceCheckoutStartRequest } from "@/modules/api/workspace-controlplane";
-import { CheckoutReviewFlowBase, type CheckoutReviewCopy, type CheckoutReviewFacts, type CheckoutReviewFlowViewProps, type CheckoutReviewRailOption } from "./component";
+import { CheckoutReviewFlowBase, type CheckoutReviewCopy, type CheckoutReviewFacts, type CheckoutReviewFlowBaseProps, type CheckoutReviewRailOption } from "./component";
 
 /** What the route hands the connected checkout owner: which frozen offer and entitlement to review. */
 export type CheckoutReviewFlowProps = {
@@ -29,7 +29,7 @@ type StartOutcome =
 const OFFER_SELECTION_PATH = "/agentos/workspaces/new";
 const WORKSPACES_PATH = "/agentos/workspaces";
 /** Route path (unlocalized) of one purchase's status surface. */
-const purchaseStatusPath = (purchaseId: string) => `/agentos/workspaces/purchases/${purchaseId}`;
+const purchaseStatusPath = (purchaseId: string): string => `/agentos/workspaces/purchases/${purchaseId}`;
 
 /**
  * The purchaser-scoped retry identity of one selection.
@@ -37,7 +37,7 @@ const purchaseStatusPath = (purchaseId: string) => `/agentos/workspaces/purchase
  * THE RETRY KEY IS THE PURCHASE IDENTITY, NOT A CACHE KEY: an identical press replays the same
  * purchase, so it is derived from the frozen selection rather than from the moment of the press.
  */
-const retryKeyFor = (offer: WorkspaceCheckoutOffer) => `start-checkout:${offer.offerId}@${offer.offerVersion}`;
+const retryKeyFor = (offer: WorkspaceCheckoutOffer): string => `start-checkout:${offer.offerId}@${offer.offerVersion}`;
 
 /** The provider action's own redirect destination, when the action carries one. */
 const redirectDestination = (outcome: WorkspaceCheckoutOutcome): string | null => {
@@ -65,7 +65,7 @@ const CheckoutReviewFlow = (props: CheckoutReviewFlowProps) => {
     const [start, setStart] = useState<StartOutcome>({ kind: "none" });
     const [paymentPending, setPaymentPending] = useState(false);
     const pendingRef = useRef(false);
-    const route = (href: string) => getPathname({ locale, href });
+    const route = (href: string): string => getPathname({ locale, href });
     /* Anchors carry the localized href; the locale-aware router owns the prefix for pushes. */
     const links = {
         workspaces: route(WORKSPACES_PATH),
@@ -121,7 +121,7 @@ const CheckoutReviewFlow = (props: CheckoutReviewFlowProps) => {
         { rail: "momo", label: t("railMomo"), detail: t("railMomoDetail") },
     ];
     const chosenRail = rails.find(candidate => candidate.rail === rail) ?? null;
-    const formatAmount = (offer: WorkspaceCheckoutOffer) => {
+    const formatAmount = (offer: WorkspaceCheckoutOffer): string => {
         const amount = Number(offer.amount);
         return Number.isFinite(amount)
             ? format.number(amount, { style: "currency", currency: offer.currency, currencyDisplay: "narrowSymbol" })
@@ -202,7 +202,7 @@ const CheckoutReviewFlow = (props: CheckoutReviewFlowProps) => {
         }
         setStart({ kind: "notice", notice: t("checkoutUnavailable") });
     };
-    const requestPayment = async () => {
+    const requestPayment = async (): Promise<void> => {
         /* A synchronous ref guards the in-flight press; a re-render cannot arrive before a second press. */
         if (frozen === null || rail === null || pendingRef.current) return;
         const request: WorkspaceCheckoutStartRequest = {
@@ -236,8 +236,8 @@ const CheckoutReviewFlow = (props: CheckoutReviewFlowProps) => {
     const changeOffer = () => {
         /* The TextAction carries the real href; this handler stays for action tracing. */
     };
-    const view = (): CheckoutReviewFlowViewProps => {
-        const refused = (message: string, nextAction: string | null, offer: WorkspaceCheckoutOffer | null): CheckoutReviewFlowViewProps => ({ state: "refused", props: { copy, links, facts: offer === null ? null : factsOf(offer), message, nextAction }, on: { returnToOffers } });
+    const view = (): CheckoutReviewFlowBaseProps => {
+        const refused = (message: string, nextAction: string | null, offer: WorkspaceCheckoutOffer | null): CheckoutReviewFlowBaseProps => ({ state: "refused", props: { copy, links, facts: offer === null ? null : factsOf(offer), message, nextAction }, on: { returnToOffers } });
         if (session.state.status === "restoring") {
             return { state: "loading", props: { copy, links } };
         }

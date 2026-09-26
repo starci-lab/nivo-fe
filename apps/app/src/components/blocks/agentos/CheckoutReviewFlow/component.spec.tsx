@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { CheckoutReviewFlowBase, type CheckoutReviewCopy, type CheckoutReviewFacts, type CheckoutReviewFlowViewProps, type CheckoutReviewRailOption } from "./component"
+import { CheckoutReviewFlowBase, type CheckoutReviewCopy, type CheckoutReviewFacts, type CheckoutReviewFlowBaseProps, type CheckoutReviewRailOption } from "./component"
 const copy: CheckoutReviewCopy = {
     path: "Purchase path",
     workspaces: "Workspaces",
@@ -58,7 +58,7 @@ const steps = [
     { title: "Create purchase identity", detail: "start-checkout:nivo-workspace-growth@draft-2026-09-22" },
     { title: "Open payment action", detail: "Domestic cards and bank accounts through VNPAY" },
 ]
-const reviewProps: CheckoutReviewFlowViewProps = {
+const reviewProps: CheckoutReviewFlowBaseProps = {
     state: "review",
     props: {
         copy,

@@ -82,10 +82,10 @@ const OfferSelectionFlow = () => {
     }));
     const offersQuery = useQueryWorkspaceCheckoutOffersSwr(presented.offerId, presented.offerVersion, accessToken !== null);
     const answer = offersQuery.data;
-    const route = (href: string) => getPathname({ locale, href });
+    const route = (href: string): string => getPathname({ locale, href });
     const links = { workspaces: route(WORKSPACES_PATH) };
     const loginHref = `${route(LOGIN_PATH)}?returnTo=${encodeURIComponent(route(OFFER_SELECTION_PATH))}`;
-    const formatAmount = (offer: WorkspaceCheckoutOffer) => {
+    const formatAmount = (offer: WorkspaceCheckoutOffer): string => {
         const amount = Number(offer.amount);
         return Number.isFinite(amount)
             ? format.number(amount, { style: "currency", currency: offer.currency, currencyDisplay: "narrowSymbol" })

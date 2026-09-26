@@ -71,7 +71,7 @@ export type CheckoutReviewLinks = {
     readonly offerSelection: string;
 };
 /** The rail's owned behaviors: raise the canonical request, choose the rail, or leave for offer selection. */
-export type CheckoutReviewActions = {
+export type CheckoutReviewFlowActions = {
     readonly requestPayment: () => void;
     readonly selectRail: (rail: string) => void;
     readonly changeOffer: () => void;
@@ -92,14 +92,14 @@ type CheckoutReviewDecisionProps = CheckoutReviewHeadProps & {
     readonly notice: string | null;
     readonly isPaymentPending?: boolean;
 };
-/** Complete state/data/action contract for the checkout-review surface. */
-export type CheckoutReviewFlowViewProps = {
+/** Complete state/data/action contract of the render half; the unit's public props live in the connected half. */
+export type CheckoutReviewFlowBaseProps = {
     readonly state: "loading";
     readonly props: CheckoutReviewHeadProps;
 } | {
     readonly state: "review" | "not-started";
     readonly props: CheckoutReviewDecisionProps;
-    readonly on: CheckoutReviewActions;
+    readonly on: CheckoutReviewFlowActions;
 } | {
     readonly state: "refused";
     readonly props: CheckoutReviewHeadProps & {
@@ -112,8 +112,13 @@ export type CheckoutReviewFlowViewProps = {
         readonly returnToOffers: () => void;
     };
 };
-/** Public props contract of {@link CheckoutReviewFlowBase}; aliased so consumers see the component's own name. */
-export type CheckoutReviewFlowProps = CheckoutReviewFlowViewProps;
+/*
+ * The installed `starci-fe/public-component-signature` rule reads the render half's own name and
+ * demands the contract be spelled `<Unit>Props`, so this private alias is the only name the rule
+ * accepts; the exported contract above stays `<Unit>BaseProps`, which the code-pattern check
+ * requires the render half to own. Not exported: one public contract per unit.
+ */
+type CheckoutReviewFlowProps = CheckoutReviewFlowBaseProps;
 const factRow = (label: string, value: string, isSkeleton = false) => <div key={label} className={FACT_ROW_CLASS_NAME}>
     <Text size="sm" weight="semibold" isSkeleton={isSkeleton}>{label}</Text>
     <div className={FACT_VALUE_CLASS_NAME}><Text size="sm" tone="muted" overflow="wrap" isSkeleton={isSkeleton}>{value}</Text></div>
@@ -160,7 +165,7 @@ const head = (copy: CheckoutReviewCopy, links: CheckoutReviewLinks) => <>
     </nav>
     <SectionHeader level={1} title={copy.title} description={<Text size="md" tone="muted">{copy.description}</Text>} />
 </>;
-const railChoiceBand = (props: CheckoutReviewDecisionProps, on: CheckoutReviewActions) => <div className={RAIL_BAND_CLASS_NAME}>
+const railChoiceBand = (props: CheckoutReviewDecisionProps, on: CheckoutReviewFlowActions) => <div className={RAIL_BAND_CLASS_NAME}>
     <Text size="sm" weight="semibold">{props.copy.railChoice}</Text>
     <div role="radiogroup" aria-label={props.copy.railChoice} className={RAIL_OPTIONS_CLASS_NAME}>
         {props.rails.map(rail => <label key={rail.rail} data-rail={rail.rail} className={rail.rail === props.selectedRail ? SELECTED_RAIL_OPTION_CLASS_NAME : RAIL_OPTION_CLASS_NAME}>
@@ -174,7 +179,7 @@ const railChoiceBand = (props: CheckoutReviewDecisionProps, on: CheckoutReviewAc
     {props.selectedRail === null ? <Text size="xs" tone="muted" overflow="wrap">{props.copy.railRequired}</Text> : null}
     <Text size="xs" tone="muted" overflow="wrap">{props.copy.railCredentialPending}</Text>
 </div>;
-const reviewRail = (props: CheckoutReviewDecisionProps, state: "review" | "not-started", on: CheckoutReviewActions) => {
+const reviewRail = (props: CheckoutReviewDecisionProps, state: "review" | "not-started", on: CheckoutReviewFlowActions) => {
     const copy = props.copy;
     const notStarted = state === "not-started";
     return <SurfaceCard label={copy.railLabel} composition="joined" height="fill">
