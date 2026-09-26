@@ -321,7 +321,7 @@ const AgentOSShellAccessNotice = (props: AgentOSShellAccessNoticeProps) => {
 };
 
 /** Page-level compositions available inside one workspace control center. */
-export type AgentOSWorkspaceControlCenterProps = AgentOSWorkspaceControlCenterViewProps;
+type AgentOSWorkspaceControlCenterProps = AgentOSWorkspaceControlCenterViewProps;
 /** Public API role for AgentOSWorkspacePageState. */
 export type AgentOSWorkspacePageState = "overview" | "solutions" | "ai-knowledge" | "applications" | "infrastructure" | "operations" | "access";
 /** Request-owned situations for the workspace control-center aggregate. */
