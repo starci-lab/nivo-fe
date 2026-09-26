@@ -68,7 +68,7 @@ export interface AgentOSShellReading {
 }
 
 /** Bilingual copy the settled shell view is rendered from, resolved before the drawing half runs. */
-export interface AgentOSShellRegionsLabels {
+export interface AgentOSWorkspaceControlCenterShellLabels {
     readonly headingFallback: string;
     readonly eyebrow: string;
     readonly description: string;
@@ -168,7 +168,7 @@ const isSettling = (standing: ShellSourceStanding): boolean => standing === "unr
  * for itself: an owner may see a current inventory beside an unavailable runtime, and only this
  * projection decides that is an evidence limit rather than an empty or all-ready workspace.
  */
-export const projectAgentOSShellView = (reading: AgentOSShellReading, labels: AgentOSShellRegionsLabels): AgentOSShellView => {
+export const projectAgentOSShellView = (reading: AgentOSShellReading, labels: AgentOSWorkspaceControlCenterShellLabels): AgentOSShellView => {
     const identity = observationOf(reading.sources, "core_registry");
     const inventory = observationOf(reading.sources, "installation_inventory");
     const runtime = observationOf(reading.sources, "runtime");
@@ -246,7 +246,7 @@ export const projectAgentOSShellView = (reading: AgentOSShellReading, labels: Ag
 };
 
 /** The one sentence a limited facet owes its reader, chosen by that source's own standing. */
-const facetLimitOf = (standing: AgentOSShellFacetStanding, labels: AgentOSShellRegionsLabels): string => {
+const facetLimitOf = (standing: AgentOSShellFacetStanding, labels: AgentOSWorkspaceControlCenterShellLabels): string => {
     if (standing === "stale") return labels.inventoryLimitStale;
     if (standing === "unavailable") return labels.inventoryLimitUnavailable;
     if (standing === "unsupported") return labels.inventoryLimitUnsupported;
@@ -256,7 +256,7 @@ const facetLimitOf = (standing: AgentOSShellFacetStanding, labels: AgentOSShellR
 };
 
 /** The runtime facet's own value: what the runtime source said, never what a neighbour implied. */
-const runtimeValueOf = (view: AgentOSShellView, labels: AgentOSShellRegionsLabels): string => {
+const runtimeValueOf = (view: AgentOSShellView, labels: AgentOSWorkspaceControlCenterShellLabels): string => {
     if (view.runtimeStanding === "unsupported" || view.runtimeStanding === "refused") return facetLimitOf(view.runtimeStanding, labels);
     if (view.runtimeAvailability === "provisioned") return labels.runtimeProvisioned;
     if (view.runtimeAvailability === "not_provisioned") return labels.runtimeNotProvisioned;
@@ -278,13 +278,13 @@ const ShellFacet = (props: ShellFacetProps) => <SurfaceCard label={props.label} 
  */
 type AgentOSShellRegionsProps = {
     readonly view: AgentOSShellView;
-    readonly labels: AgentOSShellRegionsLabels;
+    readonly labels: AgentOSWorkspaceControlCenterShellLabels;
     readonly formatDate: (value: string) => string;
     readonly onRetry?: () => void;
     readonly retrying?: boolean;
 };
 /** The connected shell's own regions: the installation peer list, the permitted empty notice and the separate source-qualified facets; it draws only what the projection settled. */
-export const AgentOSShellRegions = (props: AgentOSShellRegionsProps) => {
+const AgentOSShellRegions = (props: AgentOSShellRegionsProps) => {
     const { view, labels, formatDate, onRetry, retrying }: AgentOSShellRegionsProps = props;
     const inventoryFact = view.inventoryStanding === "current" && view.inventoryObservedAt !== null ? formatDate(view.inventoryObservedAt) : undefined;
     return <>
@@ -309,12 +309,12 @@ export const AgentOSShellRegions = (props: AgentOSShellRegionsProps) => {
 /** One settled access state: a retryable verification failure, a refusal, or a sign-in affordance. */
 type AgentOSShellAccessNoticeProps = {
     readonly state: AgentOSShellViewState;
-    readonly labels: AgentOSShellRegionsLabels;
+    readonly labels: AgentOSWorkspaceControlCenterShellLabels;
     readonly onRetry?: () => void;
     readonly retrying?: boolean;
 };
 /** One settled access state: a retryable verification failure, a refusal, or a sign-in affordance that discloses no scope. */
-export const AgentOSShellAccessNotice = (props: AgentOSShellAccessNoticeProps) => {
+const AgentOSShellAccessNotice = (props: AgentOSShellAccessNoticeProps) => {
     const { state, labels, onRetry, retrying }: AgentOSShellAccessNoticeProps = props;
     if (state === "sign-in-required") return <div className={SHELL_NOTICE_CLASS_NAME}><Text size="md" tone="muted">{labels.signInRequired}</Text><TextAction href={AGENT_OS_SIGN_IN_HREF}>{labels.signInAction}</TextAction></div>;
     return <EmptyNotice message={state === "access-denied" ? labels.accessDenied : labels.accessUnverified} actionLabel={onRetry === undefined ? undefined : labels.retry} isActionPending={retrying === true} onAction={onRetry}/>;
@@ -339,7 +339,7 @@ export type AgentOSWorkspaceControlCenterLabels = {
     readonly loading: string;
     readonly accessUnavailable: string;
     readonly tabsLabel: string;
-    readonly shell: AgentOSShellRegionsLabels;
+    readonly shell: AgentOSWorkspaceControlCenterShellLabels;
     readonly tabs: ReadonlyArray<{
         readonly id: AgentOSWorkspacePageState;
         readonly label: string;

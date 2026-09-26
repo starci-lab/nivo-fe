@@ -1,7 +1,7 @@
 "use client";
 
 import { AgentOSModuleCollectionPageBase } from "./component";
-import { projectAgentOSShellView, type AgentOSShellRegionsLabels, type AgentOSShellView } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter/component";
+import { projectAgentOSShellView, type AgentOSShellView, type AgentOSWorkspaceControlCenterShellLabels } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter/component";
 import { useAgentOSShell, useQueryMyAgentosModuleInstallationsSwr, useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useCallback } from "react";
@@ -37,7 +37,7 @@ export const AgentOSModuleCollectionPage = (props: AgentOSModuleCollectionPagePr
     for (const source of limited)
       shell.retrySource(source.identity);
   }, [shell]);
-  const shellLabels: AgentOSShellRegionsLabels = {
+  const shellLabels: AgentOSWorkspaceControlCenterShellLabels = {
     headingFallback: s("headingFallback"),
     eyebrow: s("eyebrow"),
     description: s("description"),

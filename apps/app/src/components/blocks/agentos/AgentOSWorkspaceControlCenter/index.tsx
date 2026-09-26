@@ -5,7 +5,7 @@ import useProvisioningRealtime from "@/modules/realtime/provisioning";
 import { workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@/modules/window/workspace-app-launch";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AgentOSWorkspaceControlCenterBase, projectAgentOSShellView, type AgentOSShellRegionsLabels, type AgentOSWorkspaceControlCenterLabels, type AgentOSWorkspaceControlCenterState, type AgentOSWorkspacePageState } from "./component";
+import { AgentOSWorkspaceControlCenterBase, projectAgentOSShellView, type AgentOSWorkspaceControlCenterShellLabels, type AgentOSWorkspaceControlCenterLabels, type AgentOSWorkspaceControlCenterState, type AgentOSWorkspacePageState } from "./component";
 /** Exact workspace identity supplied by the detail route. */
 export type AgentOSWorkspaceControlCenterProps = {
     readonly workspaceId: string;
@@ -110,7 +110,7 @@ export const AgentOSWorkspaceControlCenter = (props: AgentOSWorkspaceControlCent
     }, [shell]);
     if (!mounted)
         return null;
-    const shellLabels: AgentOSShellRegionsLabels = {
+    const shellLabels: AgentOSWorkspaceControlCenterShellLabels = {
         headingFallback: s("headingFallback"),
         eyebrow: s("eyebrow"),
         description: s("description"),
