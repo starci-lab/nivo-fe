@@ -502,4 +502,47 @@ describe("PurchaseStatusFlow", () => {
         await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
         expect(flow()).toContain('"label":"Owner","value":"—"')
     })
+    it("keeps unsupported checkout amounts readable and covers the cadence fallbacks", async () => {
+        mocks.status.data = statusAnswer(purchase({ offer: { ...offer, amount: "not-a-number", currency: "VND" } }))
+        render(<PurchaseStatusFlow purchaseId="purchase-1" />)
+        await waitFor(() => expect(flow()).toContain('"state":"payment-pending"'))
+        expect(flow()).toContain('"value":"not-a-number VND"')
+    })
+
+    it.each([
+        ["one-time", "One-time purchase"],
+        ["once", "One-time purchase"],
+        ["setup-recurring", "One-time setup, then monthly"],
+        ["annual", "annual"],
+    ])("preserves the published %s billing cadence", async (billingCadence, expected) => {
+        mocks.status.data = statusAnswer(purchase({ ...paidFacets, state: "provisioning", provisioning: provisioningOrder("running"), offer: { ...offer, billingCadence } }))
+        render(<PurchaseStatusFlow purchaseId="purchase-1" surface="provisioning" />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
+        expect(flow()).toContain(`"label":"Billing cadence","value":"${expected}"`)
+    })
+
+    it.each([
+        { status: "refused", code: "workspace-not-ready", purchaseId: "purchase-1" },
+        { status: "unavailable", code: "entry-source-unavailable", purchaseId: "purchase-1" },
+    ])("keeps the ready purchase mounted when entry returns %s", async (entry) => {
+        mocks.entry.data = { ok: true, data: entry }
+        mocks.status.data = statusAnswer(purchase(readyFacets))
+        render(<PurchaseStatusFlow purchaseId="purchase-1" />)
+        await waitFor(() => expect(flow()).toContain('"state":"ready"'))
+        fireEvent.click(screen.getByTestId("primary"))
+        await waitFor(() => expect(flow()).toContain(entry.status === "refused" ? "The workspace is not ready yet." : "entry-source-unavailable"))
+        expect(flow()).toContain('"state":"ready"')
+        expect(mocks.push).not.toHaveBeenCalledWith("/agentos/workspaces/workspace-1")
+    })
+
+    it("ignores a realtime event for a workspace other than the ready purchase workspace", async () => {
+        mocks.status.data = statusAnswer(purchase(readyFacets))
+        const view = render(<PurchaseStatusFlow purchaseId="purchase-1" />)
+        await waitFor(() => expect(flow()).toContain('"state":"ready"'))
+        mocks.status.mutate.mockClear()
+        mocks.realtime = { status: "event", event: { kind: "workspace", id: "workspace-9", status: "suspended" } }
+        view.rerender(<PurchaseStatusFlow purchaseId="purchase-1" />)
+        expect(mocks.status.mutate).not.toHaveBeenCalled()
+        expect(flow()).toContain('"state":"ready"')
+    })
 })
