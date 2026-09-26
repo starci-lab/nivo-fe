@@ -1,4 +1,4 @@
-import { BREADCRUMB_LIST_CLASS_NAME, FACT_ROW_CLASS_NAME, FACT_VALUE_CLASS_NAME, ORDINAL_CLASS_NAME, RAIL_BAND_CLASS_NAME, SECTIONS_CLASS_NAME, STEP_BODY_CLASS_NAME, STEP_ROW_CLASS_NAME } from "./classNames";
+import { BREADCRUMB_LIST_CLASS_NAME, FACT_ROW_CLASS_NAME, FACT_VALUE_CLASS_NAME, ORDINAL_CLASS_NAME, RAIL_BAND_CLASS_NAME, RAIL_OPTION_CLASS_NAME, RAIL_OPTIONS_CLASS_NAME, RAIL_RADIO_CLASS_NAME, SELECTED_RAIL_OPTION_CLASS_NAME, SECTIONS_CLASS_NAME, STEP_BODY_CLASS_NAME, STEP_ROW_CLASS_NAME } from "./classNames";
 import { Badge, Button, PageContainer, PrimaryRailLayout, SectionHeader, SurfaceCard, Text, TextAction } from "@starci/grammar/common";
 /** Resolved copy the connected owner supplies; no translation or transport lives here. */
 export type CheckoutReviewCopy = {
@@ -26,6 +26,10 @@ export type CheckoutReviewCopy = {
     readonly railLabel: string;
     /** The truth note: what the request does and does not settle. */
     readonly railNote: string;
+    /** The rail choice the boundary requires before any attempt may start. */
+    readonly railChoice: string;
+    readonly railRequired: string;
+    readonly railCredentialPending: string;
     /** Ordered rail step titles. */
     readonly stepRecheck: string;
     readonly stepIdentity: string;
@@ -37,6 +41,12 @@ export type CheckoutReviewCopy = {
     readonly footnote: string;
     readonly refusedTitle: string;
 };
+/** One selectable payment rail: the purchaser's explicit choice, never an inferred default. */
+export type CheckoutReviewRailOption = {
+    readonly rail: string;
+    readonly label: string;
+    readonly detail: string;
+};
 /** Frozen offer and admission facts bound to source data, never fixture prose. */
 export type CheckoutReviewFacts = {
     readonly offer: string;
@@ -47,7 +57,7 @@ export type CheckoutReviewFacts = {
     readonly includedOutcome: string;
     readonly eligibility: string;
     readonly seller: string;
-    /** The admitted purchaser's bound identity; null while the session carries no name claim. */
+    /** The admitted purchaser's bound identity; null while no published source names one. */
     readonly purchaser: string | null;
 };
 /** One ordered rail step: the pre-payment checks in their literal order. */
@@ -60,9 +70,10 @@ export type CheckoutReviewLinks = {
     readonly workspaces: string;
     readonly offerSelection: string;
 };
-/** The rail's two owned behaviors: raise the canonical request, or leave for offer selection. */
+/** The rail's owned behaviors: raise the canonical request, choose the rail, or leave for offer selection. */
 export type CheckoutReviewActions = {
     readonly requestPayment: () => void;
+    readonly selectRail: (rail: string) => void;
     readonly changeOffer: () => void;
 };
 type CheckoutReviewHeadProps = {
@@ -74,6 +85,9 @@ type CheckoutReviewDecisionProps = CheckoutReviewHeadProps & {
     readonly admission: string;
     readonly steps: ReadonlyArray<CheckoutReviewStep>;
     readonly purchaseRef: string;
+    readonly rails: ReadonlyArray<CheckoutReviewRailOption>;
+    /** The chosen rail, or null while the purchaser has chosen none. */
+    readonly selectedRail: string | null;
     /** Present only on the not-started rail: the definitive no-start reason. */
     readonly notice: string | null;
     readonly isPaymentPending?: boolean;
@@ -91,6 +105,8 @@ export type CheckoutReviewFlowViewProps = {
     readonly props: CheckoutReviewHeadProps & {
         readonly facts: CheckoutReviewFacts | null;
         readonly message: string;
+        /** The verified-Login door the refusal points at, when the surface owes one. */
+        readonly nextAction: string | null;
     };
     readonly on: {
         readonly returnToOffers: () => void;
@@ -144,6 +160,20 @@ const head = (copy: CheckoutReviewCopy, links: CheckoutReviewLinks) => <>
     </nav>
     <SectionHeader level={1} title={copy.title} description={<Text size="md" tone="muted">{copy.description}</Text>} />
 </>;
+const railChoiceBand = (props: CheckoutReviewDecisionProps, on: CheckoutReviewActions) => <div className={RAIL_BAND_CLASS_NAME}>
+    <Text size="sm" weight="semibold">{props.copy.railChoice}</Text>
+    <div role="radiogroup" aria-label={props.copy.railChoice} className={RAIL_OPTIONS_CLASS_NAME}>
+        {props.rails.map(rail => <label key={rail.rail} data-rail={rail.rail} className={rail.rail === props.selectedRail ? SELECTED_RAIL_OPTION_CLASS_NAME : RAIL_OPTION_CLASS_NAME}>
+            <input type="radio" name="payment-rail" value={rail.rail} aria-label={rail.label} checked={rail.rail === props.selectedRail} onChange={() => on.selectRail(rail.rail)} className={RAIL_RADIO_CLASS_NAME} />
+            <span className={STEP_BODY_CLASS_NAME}>
+                <Text size="sm" weight="semibold">{rail.label}</Text>
+                <Text size="xs" tone="muted" overflow="wrap">{rail.detail}</Text>
+            </span>
+        </label>)}
+    </div>
+    {props.selectedRail === null ? <Text size="xs" tone="muted" overflow="wrap">{props.copy.railRequired}</Text> : null}
+    <Text size="xs" tone="muted" overflow="wrap">{props.copy.railCredentialPending}</Text>
+</div>;
 const reviewRail = (props: CheckoutReviewDecisionProps, state: "review" | "not-started", on: CheckoutReviewActions) => {
     const copy = props.copy;
     const notStarted = state === "not-started";
@@ -151,6 +181,7 @@ const reviewRail = (props: CheckoutReviewDecisionProps, state: "review" | "not-s
         <div className={RAIL_BAND_CLASS_NAME}>
             <Text size="sm" tone="muted" overflow="wrap">{copy.railNote}</Text>
         </div>
+        {railChoiceBand(props, on)}
         <div className={RAIL_BAND_CLASS_NAME}>
             <ol className={STEP_BODY_CLASS_NAME}>
                 {props.steps.map((step, index) => stepRow(step, index + 1))}
@@ -160,7 +191,7 @@ const reviewRail = (props: CheckoutReviewDecisionProps, state: "review" | "not-s
             <Text size="sm" tone="muted" overflow="wrap">{props.notice}</Text>
         </div> : null}
         <div className={RAIL_BAND_CLASS_NAME}>
-            <Button variant="primary" size="lg" width="fill" type="button" isPending={props.isPaymentPending === true} onPress={on.requestPayment}>{notStarted ? copy.retryPayment : copy.requestPayment}</Button>
+            <Button variant="primary" size="lg" width="fill" type="button" isDisabled={props.selectedRail === null} isPending={props.isPaymentPending === true} onPress={on.requestPayment}>{notStarted ? copy.retryPayment : copy.requestPayment}</Button>
             <TextAction href={props.links.offerSelection} size="sm" onFollow={on.changeOffer}>{notStarted ? copy.returnToOffers : copy.changeOffer}</TextAction>
         </div>
         <div className={RAIL_BAND_CLASS_NAME}>
@@ -187,6 +218,7 @@ export const CheckoutReviewFlowBase = (props: CheckoutReviewFlowProps) => {
                 <div className={RAIL_BAND_CLASS_NAME}>
                     <Text size="sm" weight="semibold">{copy.refusedTitle}</Text>
                     <Text size="sm" tone="muted" overflow="wrap">{props.props.message}</Text>
+                    {props.props.nextAction === null ? null : <Text size="sm" tone="muted" overflow="wrap">{props.props.nextAction}</Text>}
                     <div><Button variant="secondary" size="md" type="button" onPress={props.on.returnToOffers}>{copy.returnToOffers}</Button></div>
                 </div>
             </SurfaceCard>

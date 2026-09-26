@@ -3,6 +3,7 @@ import {
     ACTION_TARGET_CLASS_NAME,
     BREADCRUMB_LIST_CLASS_NAME,
     NOTICE_BAND_CLASS_NAME,
+    NO_SESSION_BAND_CLASS_NAME,
     OFFER_FACT_CLASS_NAME,
     OFFER_IDENTITY_CLASS_NAME,
     OFFER_RADIO_CLASS_NAME,
@@ -34,34 +35,32 @@ export type OfferSelectionCopy = {
     readonly includedOutcome: string;
     readonly eligibility: string;
     readonly selectedBadge: string;
-    /** The summary band's own external label and provisional disclosure. */
-    readonly selectedDraft: string;
-    readonly provisionalNote: string;
+    /** The summary band's own external label. */
+    readonly selectedOffer: string;
     readonly reviewAction: string;
     /** The pre-effect disclosure: this surface never requests payment. */
     readonly noPaymentNote: string;
     readonly backToWorkspaces: string;
     readonly unavailableTitle: string;
     readonly refreshOffers: string;
+    /** The no-session band: no private offer terms may be disclosed on this path. */
+    readonly noSessionTitle: string;
+    readonly signIn: string;
+    readonly signUp: string;
 };
 
-/** One offer bound to data.workspace-offer's field vocabulary, provisional or current. */
+/** One offer bound to the boundary's own field vocabulary. */
 export type OfferSelectionOffer = {
     /** Stable identity preserved as the checkout candidate when selected. */
     readonly offerId: string;
     /** Immutable version the checkout recheck compares against. */
     readonly offerVersion: string;
     readonly displayName: string;
-    /** Exact charge amount and currency; rendered inseparably, never split or recomputed. */
+    /** Exact charge amount carrying its currency inseparably; never split or recomputed. */
     readonly amount: string;
-    readonly currency: string;
-    /** Cadence unit the amount belongs to, e.g. "year" for "1,490,000 VND / year". */
-    readonly amountCadence: string;
     readonly billingCadence: string;
     readonly renewalMode: string;
     readonly includedOutcome: string;
-    /** Short capacity fact repeated in the selected-draft summary band. */
-    readonly capacity: string;
     readonly eligibility: string;
 };
 
@@ -103,9 +102,20 @@ export type OfferSelectionFlowProps = {
     readonly on: {
         readonly refresh: () => void;
     };
+} | {
+    readonly state: "no-session";
+    readonly props: OfferSelectionHeadProps & {
+        /** The scoped source's own refusal sentence for the missing or unadmitted session. */
+        readonly message: string;
+        /** Registered Login address, carrying this route as the return destination. */
+        readonly signInHref: string;
+        /** The same registered Login surface's self-service registration door. */
+        readonly signUpHref: string;
+    };
+    readonly on: {
+        readonly signIn: () => void;
+    };
 };
-
-const amountText = (offer: OfferSelectionOffer) => `${offer.amount} ${offer.currency} / ${offer.amountCadence}`;
 
 const factCell = (label: string, value: string, isSkeleton = false) => <span key={label} className={OFFER_FACT_CLASS_NAME}>
     <Text size="xs" tone="muted" isSkeleton={isSkeleton}>{label}</Text>
@@ -123,16 +133,20 @@ const head = (copy: OfferSelectionCopy, links: OfferSelectionLinks) => <>
     <SectionHeader level={1} title={copy.title} description={<Text size="md" tone="muted">{copy.description}</Text>} />
 </>;
 
+const offerFacts = (offer: OfferSelectionOffer, copy: OfferSelectionCopy, isSkeleton = false) => <>
+    {factCell(copy.billingCadence, isSkeleton ? copy.billingCadence : offer.billingCadence, isSkeleton)}
+    {factCell(copy.renewalBehavior, isSkeleton ? copy.renewalBehavior : offer.renewalMode, isSkeleton)}
+    {factCell(copy.includedOutcome, isSkeleton ? copy.includedOutcome : offer.includedOutcome, isSkeleton)}
+    {factCell(copy.eligibility, isSkeleton ? copy.eligibility : offer.eligibility, isSkeleton)}
+</>;
+
 const selectableRow = (offer: OfferSelectionOffer, copy: OfferSelectionCopy, selected: boolean, onSelect: (offerId: string) => void) => <label key={offer.offerId} className={selected ? SELECTED_OFFER_ROW_CLASS_NAME : SELECTABLE_OFFER_ROW_CLASS_NAME} data-offer={offer.offerId}>
     <input type="radio" name="workspace-offer" value={offer.offerId} checked={selected} onChange={() => onSelect(offer.offerId)} className={OFFER_RADIO_CLASS_NAME} />
     <span className={OFFER_IDENTITY_CLASS_NAME}>
         <Text size="sm" weight="semibold">{offer.displayName}</Text>
-        <Text size="sm" tone="muted">{amountText(offer)}</Text>
+        <Text size="sm" tone="muted">{offer.amount}</Text>
     </span>
-    {factCell(copy.billingCadence, offer.billingCadence)}
-    {factCell(copy.renewalBehavior, offer.renewalMode)}
-    {factCell(copy.includedOutcome, offer.includedOutcome)}
-    {factCell(copy.eligibility, offer.eligibility)}
+    {offerFacts(offer, copy)}
     {selected ? <Badge tone="accent">{copy.selectedBadge}</Badge> : <span aria-hidden="true" />}
 </label>;
 
@@ -140,12 +154,9 @@ const readOnlyRow = (offer: OfferSelectionOffer, copy: OfferSelectionCopy) => <d
     <span aria-hidden="true" className={OFFER_RADIO_CLASS_NAME} />
     <span className={OFFER_IDENTITY_CLASS_NAME}>
         <Text size="sm" weight="semibold">{offer.displayName}</Text>
-        <Text size="sm" tone="muted">{amountText(offer)}</Text>
+        <Text size="sm" tone="muted">{offer.amount}</Text>
     </span>
-    {factCell(copy.billingCadence, offer.billingCadence)}
-    {factCell(copy.renewalBehavior, offer.renewalMode)}
-    {factCell(copy.includedOutcome, offer.includedOutcome)}
-    {factCell(copy.eligibility, offer.eligibility)}
+    {offerFacts(offer, copy)}
     <span aria-hidden="true" />
 </div>;
 
@@ -164,16 +175,14 @@ const skeletonRow = (key: string, copy: OfferSelectionCopy) => <div key={key} cl
 
 const summaryBand = (copy: OfferSelectionCopy, selected: OfferSelectionOffer) => <div className={SUMMARY_BAND_CLASS_NAME}>
     <span className={OFFER_IDENTITY_CLASS_NAME}>
-        <Text size="xs" tone="muted">{copy.selectedDraft}</Text>
+        <Text size="xs" tone="muted">{copy.selectedOffer}</Text>
         <Text size="sm" weight="semibold">{selected.displayName}</Text>
-        <Text size="xs" tone="muted" overflow="wrap">{copy.provisionalNote}</Text>
     </span>
     <span aria-hidden="true" className={SUMMARY_BAND_DIVIDER_CLASS_NAME} />
     <span className={SUMMARY_FACTS_CLASS_NAME}>
-        <Text size="sm">{amountText(selected)}</Text>
+        <Text size="sm">{selected.amount}</Text>
         <Text size="sm">{selected.billingCadence}</Text>
         <Text size="sm">{selected.renewalMode}</Text>
-        <Text size="sm">{selected.capacity}</Text>
     </span>
 </div>;
 
@@ -193,6 +202,22 @@ export const OfferSelectionFlowBase = (props: OfferSelectionFlowProps) => {
                     <Text size="xs" tone="muted" isSkeleton>{copy.noPaymentNote}</Text>
                 </div>
             </SurfaceCard>
+        </div></PageContainer>;
+    }
+    if (state === "no-session") {
+        return <PageContainer measure="product"><div className={SECTIONS_CLASS_NAME} data-contract="GAP-5">
+            {head(copy, links)}
+            <SurfaceCard label={copy.offersLabel} fact={copy.offersFact} composition="joined">
+                <div className={NO_SESSION_BAND_CLASS_NAME}>
+                    <Text size="sm" weight="semibold">{copy.noSessionTitle}</Text>
+                    <Text size="sm" tone="muted" overflow="wrap">{props.props.message}</Text>
+                    <span className={ACTION_TARGET_CLASS_NAME}>
+                        <Button variant="primary" size="lg" width="fill" href={props.props.signInHref} onFollow={props.on.signIn}>{copy.signIn}</Button>
+                    </span>
+                    <TextAction href={props.props.signUpHref} size="sm">{copy.signUp}</TextAction>
+                </div>
+            </SurfaceCard>
+            <TextAction href={links.workspaces} size="sm">{copy.backToWorkspaces}</TextAction>
         </div></PageContainer>;
     }
     if (state === "unavailable") {

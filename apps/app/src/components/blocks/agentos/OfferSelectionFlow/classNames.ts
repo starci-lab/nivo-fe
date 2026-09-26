@@ -152,3 +152,16 @@ export const NOTICE_BAND_CLASS_NAME = cn(
   "py-4",
   "last:border-b-0"
 );
+
+/**
+ * The no-session band keeps its refusal sentence and the Login doors in one readable column, and
+ * carries no offer row: this path may disclose no private offer terms at all.
+ */
+export const NO_SESSION_BAND_CLASS_NAME = cn(
+  NOTICE_BAND_CLASS_NAME,
+  "flex",
+  "min-w-0",
+  "flex-col",
+  "items-stretch",
+  "gap-3"
+);

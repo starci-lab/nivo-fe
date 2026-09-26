@@ -84,3 +84,41 @@ export const STEP_BODY_CLASS_NAME = cn(
   "flex-col",
   "gap-0.5"
 );
+
+/** The rail choice stacks one option per row so each label and its detail stay readable. */
+export const RAIL_OPTIONS_CLASS_NAME = cn(
+  "flex",
+  "min-w-0",
+  "flex-col",
+  "gap-2"
+);
+
+/** One selectable rail option: a real radio, its label and its own detail. */
+export const RAIL_OPTION_CLASS_NAME = cn(
+  "border",
+  "border-separator",
+  "flex",
+  "min-w-0",
+  "cursor-pointer",
+  "items-start",
+  "gap-3",
+  "rounded-md",
+  "px-3",
+  "py-2"
+);
+
+/** The chosen rail wears the family accent; selection is stated by the control itself. */
+export const SELECTED_RAIL_OPTION_CLASS_NAME = cn(
+  RAIL_OPTION_CLASS_NAME,
+  "border-accent",
+  "bg-accent-soft"
+);
+
+/** The native radio stays the real control and the family accent marks it. */
+export const RAIL_RADIO_CLASS_NAME = cn(
+  "mt-1",
+  "h-4",
+  "w-4",
+  "shrink-0",
+  "accent-accent"
+);

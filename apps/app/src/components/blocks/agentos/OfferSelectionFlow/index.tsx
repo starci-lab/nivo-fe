@@ -1,142 +1,126 @@
 "use client";
 
 import { useState } from "react";
-import { useLocale } from "next-intl";
+import { useFormatter, useLocale } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { getPathname } from "@/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
-import { useQueryCatalogItemsSwr } from "@/hooks";
+import { useQueryWorkspaceCheckoutOffersSwr } from "@/hooks";
+import type { WorkspaceCheckoutOffer } from "@/modules/api/workspace-controlplane";
 import { OfferSelectionFlowBase, type OfferSelectionCopy, type OfferSelectionFlowProps, type OfferSelectionOffer } from "./component";
 
+/** Route path (unlocalized) of the surfaces this screen hands off to. */
+const OFFER_SELECTION_PATH = "/agentos/workspaces/new";
+const CHECKOUT_PATH = "/agentos/workspaces/new/checkout";
+const WORKSPACES_PATH = "/agentos/workspaces";
+/** The registered Login address; it carries both sign-in and the surface's self-service registration. */
+const LOGIN_PATH = "/authentication";
+
 /**
- * Copy mirroring the owner-accepted offer-selection direction while owner-visible message keys
- * land; every phrase is copy — all offer values bind to the accepted provisional draft catalog.
+ * The offer identity this surface presents first.
+ *
+ * THE SELECTION IS DATA, NOT AUTHORITY: the boundary decides whether this exact version may still be
+ * bought and answers current, stale or unavailable beside the same approved list, so presenting a
+ * candidate identity here never asserts that it is purchasable.
  */
+const PRESENTED_OFFER_ID = "nivo-workspace-growth";
+const PRESENTED_OFFER_VERSION = "draft-2026-09-22";
+
+/** Resolved copy of this surface. Offer-selection copy stays block-local: the message catalog files are outside this cut's owned paths. */
 const COPY: OfferSelectionCopy = {
     path: "Purchase path",
     workspaces: "Workspaces",
     newWorkspace: "New",
     title: "Choose a workspace offer",
-    description: "Compare provisional Vietnamese launch terms before checkout.",
-    offersLabel: "Available offers",
-    offersFact: "Draft recommendation • VND",
-    offerGroupLabel: "Workspace offers",
+    description: "Compare the offers that currently apply before any payment.",
+    offersLabel: "Current offers",
+    offersFact: "Read from the Workspace Provision checkout boundary",
+    offerGroupLabel: "Available offers",
     billingCadence: "Billing cadence",
-    renewalBehavior: "Renewal behavior",
-    includedOutcome: "Included workspace outcome",
+    renewalBehavior: "Renewal",
+    includedOutcome: "Included outcome",
     eligibility: "Eligibility",
     selectedBadge: "Selected",
-    selectedDraft: "Selected draft",
-    provisionalNote: "Terms are provisional until owner approval.",
+    selectedOffer: "Selected offer",
     reviewAction: "Review selected offer",
-    noPaymentNote: "No payment is requested on this screen.",
+    noPaymentNote: "No payment is requested at this step.",
     backToWorkspaces: "Back to workspaces",
-    unavailableTitle: "Offers cannot be read right now",
+    unavailableTitle: "No current offer can be presented",
     refreshOffers: "Refresh offers",
+    noSessionTitle: "Sign in to see offers",
+    signIn: "Sign in",
+    signUp: "Create an account",
 };
 
-/*
- * The owner-accepted provisional offer set from the round-3 offer-selection evidence
- * (ui/purchase-flow/evidence/round-3/offer-selection/manifest.yaml). The payment-provider
- * decision is still open, so no live catalog publishes these offers yet: they render as the
- * draft recommendation under explicit provisional disclosure, and checkout's own recheck stays
- * the authority on whether a selected identity is current before any purchase effect.
- */
-const DRAFT_OFFER_VERSION = "draft-2026-09-22";
-/**
- * The provisional draft catalog this screen compares until an approved offer source ships.
- * Exported so colocated specs assert the accepted values rather than redeclaring them.
- */
-export const OFFER_SELECTION_DRAFT_OFFERS: ReadonlyArray<OfferSelectionOffer> = [
-    {
-        offerId: "nivo-workspace-starter",
-        offerVersion: DRAFT_OFFER_VERSION,
-        displayName: "Nivo Workspace Starter",
-        amount: "1,490,000",
-        currency: "VND",
-        amountCadence: "year",
-        billingCadence: "Annual billing",
-        renewalMode: "Manual reauthorization each year",
-        includedOutcome: "1 managed AI workspace • up to 5 members",
-        capacity: "Up to 5 members",
-        eligibility: "Eligible: verified businesses in Vietnam",
-    },
-    {
-        offerId: "nivo-workspace-growth",
-        offerVersion: DRAFT_OFFER_VERSION,
-        displayName: "Nivo Workspace Growth",
-        amount: "2,990,000",
-        currency: "VND",
-        amountCadence: "year",
-        billingCadence: "Annual billing",
-        renewalMode: "Manual reauthorization each year",
-        includedOutcome: "1 managed AI workspace • up to 15 members",
-        capacity: "Up to 15 members",
-        eligibility: "Eligible: verified businesses in Vietnam",
-    },
-    {
-        offerId: "nivo-workspace-scale",
-        offerVersion: DRAFT_OFFER_VERSION,
-        displayName: "Nivo Workspace Scale",
-        amount: "5,990,000",
-        currency: "VND",
-        amountCadence: "year",
-        billingCadence: "Annual billing",
-        renewalMode: "Manual reauthorization each year",
-        includedOutcome: "1 managed AI workspace • up to 40 members",
-        capacity: "Up to 40 members",
-        eligibility: "Eligible: verified businesses in Vietnam",
-    },
-];
+/** The boundary's own refusal code read as the sentence this surface shows. */
+const refusalSentence = (code: string): string => code === "purchaser-not-admitted"
+    ? "The signed-in account is not an admitted purchaser yet. Verify its email, or create a purchaser account, then return to this step."
+    : "No valid Login session was found. Sign in, or create an account, then return to this step.";
 
-/** The accepted direction opens with the Growth draft selected. */
-const DEFAULT_SELECTED_OFFER_ID = "nivo-workspace-growth";
+/** One boundary offer read into the view's field vocabulary; the amount keeps its currency inseparably. */
+const toViewOffer = (offer: WorkspaceCheckoutOffer, formatAmount: (offer: WorkspaceCheckoutOffer) => string): OfferSelectionOffer => ({
+    offerId: offer.offerId,
+    offerVersion: offer.offerVersion,
+    displayName: offer.displayName,
+    amount: formatAmount(offer),
+    billingCadence: offer.billingCadence,
+    renewalMode: offer.renewalMode,
+    includedOutcome: offer.includedOutcome,
+    eligibility: offer.eligibility,
+});
 
-/** Offer-selection owner: live offer-source read → accepted draft comparison → review hand-off. */
+/** Offer-selection owner: the boundary's current-offer read → the review handoff carrying identity only. */
 const OfferSelectionFlow = () => {
     const locale = useLocale();
+    const format = useFormatter();
+    const searchParams = useSearchParams();
     const session = useSession();
     const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null;
-    const catalogQuery = useQueryCatalogItemsSwr("ai_agent", accessToken !== null);
-    const [selectedOfferId, setSelectedOfferId] = useState(DEFAULT_SELECTED_OFFER_ID);
-    const links = {
-        workspaces: getPathname({ locale, href: "/agentos/workspaces" }),
+    const [presented, setPresented] = useState(() => ({
+        offerId: searchParams.get("offer") ?? PRESENTED_OFFER_ID,
+        offerVersion: searchParams.get("offerVersion") ?? PRESENTED_OFFER_VERSION,
+    }));
+    const offersQuery = useQueryWorkspaceCheckoutOffersSwr(presented.offerId, presented.offerVersion, accessToken !== null);
+    const answer = offersQuery.data;
+    const route = (href: string) => getPathname({ locale, href });
+    const links = { workspaces: route(WORKSPACES_PATH) };
+    const loginHref = `${route(LOGIN_PATH)}?returnTo=${encodeURIComponent(route(OFFER_SELECTION_PATH))}`;
+    const formatAmount = (offer: WorkspaceCheckoutOffer) => {
+        const amount = Number(offer.amount);
+        return Number.isFinite(amount)
+            ? format.number(amount, { style: "currency", currency: offer.currency, currencyDisplay: "narrowSymbol" })
+            : `${offer.amount} ${offer.currency}`;
     };
-    const selected = OFFER_SELECTION_DRAFT_OFFERS.find(offer => offer.offerId === selectedOfferId) ?? OFFER_SELECTION_DRAFT_OFFERS[0];
-    /* Selection carries offerId and offerVersion verbatim; continuing is navigation, never a purchase. */
-    const checkoutHref = `${getPathname({ locale, href: "/agentos/workspaces/new/checkout" })}?offer=${encodeURIComponent(selected.offerId)}&offerVersion=${encodeURIComponent(selected.offerVersion)}`;
+    const offers = answer?.ok === true && answer.data.status === "offers" ? answer.data.offers.map(offer => toViewOffer(offer, formatAmount)) : [];
+    const select = (offerId: string) => {
+        const chosen = answer?.ok === true && answer.data.status === "offers" ? answer.data.offers.find(offer => offer.offerId === offerId) : undefined;
+        if (chosen === undefined) return;
+        setPresented({ offerId: chosen.offerId, offerVersion: chosen.offerVersion });
+    };
     const view = (): OfferSelectionFlowProps => {
-        const catalogue = catalogQuery.data;
-        if (accessToken === null || catalogue === undefined) {
+        const unavailable = (message: string, isRefreshPending = false): OfferSelectionFlowProps => ({ state: "unavailable", props: { copy: COPY, links, offers, message, isRefreshPending }, on: { refresh: () => void offersQuery.mutate() } });
+        const noSession = (message: string): OfferSelectionFlowProps => ({ state: "no-session", props: { copy: COPY, links, message, signInHref: loginHref, signUpHref: loginHref }, on: { signIn: () => undefined } });
+        if (session.state.status === "restoring") {
             return { state: "loading", props: { copy: COPY, links } };
         }
-        if (!catalogue.ok) {
-            return {
-                state: "unavailable",
-                props: {
-                    copy: COPY,
-                    links,
-                    offers: OFFER_SELECTION_DRAFT_OFFERS,
-                    message: catalogue.reason,
-                    isRefreshPending: catalogQuery.isValidating,
-                },
-                on: {
-                    refresh: () => void catalogQuery.mutate(),
-                },
-            };
+        if (accessToken === null) {
+            return noSession(refusalSentence("unauthenticated"));
         }
-        return {
-            state: "selection",
-            props: {
-                copy: COPY,
-                links,
-                offers: OFFER_SELECTION_DRAFT_OFFERS,
-                selectedOfferId: selected.offerId,
-                checkoutHref,
-            },
-            on: {
-                select: setSelectedOfferId,
-            },
-        };
+        if (answer === undefined) {
+            return offersQuery.error === undefined ? { state: "loading", props: { copy: COPY, links } } : unavailable(COPY.unavailableTitle, true);
+        }
+        if (!answer.ok) {
+            return unavailable(answer.reason);
+        }
+        const outcome = answer.data;
+        if (outcome.status === "refused") {
+            return outcome.code === "unauthenticated" || outcome.code === "purchaser-not-admitted" ? noSession(refusalSentence(outcome.code)) : unavailable(COPY.unavailableTitle);
+        }
+        if (outcome.status !== "offers" || outcome.selection.state !== "current" || offers.length === 0) {
+            return unavailable(COPY.unavailableTitle, offersQuery.isValidating);
+        }
+        const checkoutHref = `${route(CHECKOUT_PATH)}?offer=${encodeURIComponent(presented.offerId)}&offerVersion=${encodeURIComponent(presented.offerVersion)}`;
+        return { state: "selection", props: { copy: COPY, links, offers, selectedOfferId: presented.offerId, checkoutHref }, on: { select } };
     };
     return <OfferSelectionFlowBase {...view()} />;
 };

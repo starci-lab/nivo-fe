@@ -1,91 +1,52 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { getPathname, useRouter } from "@/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
-import { useMutateCreateWalletTopUpPayLinkSwr, useMutateOrderAgentosSwr, useQueryCatalogItemsSwr, useQueryMyInvoicesSwr } from "@/hooks";
-import { BILLING_CURRENCY } from "@/modules/config";
-import type { CatalogItemRow, CatalogTierRow, InvoiceRow } from "@/modules/api/console";
-import type { WorkspacePurchasePayLink } from "@/modules/api/workspace-controlplane";
-import { CheckoutReviewFlowBase, type CheckoutReviewCopy, type CheckoutReviewFlowViewProps } from "./component";
-/** What the route hands the connected checkout owner: which selected offer and rung to review. */
+import { useMutateWorkspaceCheckoutStartSwr, useQueryWorkspaceCheckoutOffersSwr } from "@/hooks";
+import type { WorkspaceCheckoutOffer, WorkspaceCheckoutOutcome, WorkspaceCheckoutPaymentRail, WorkspaceCheckoutStartRequest } from "@/modules/api/workspace-controlplane";
+import { CheckoutReviewFlowBase, type CheckoutReviewCopy, type CheckoutReviewFacts, type CheckoutReviewFlowViewProps, type CheckoutReviewRailOption } from "./component";
+
+/** What the route hands the connected checkout owner: which frozen offer and entitlement to review. */
 export type CheckoutReviewFlowProps = {
-    /** Catalog slug of the selected offer; falls back to the `offer` search parameter. */
-    readonly offerSlug?: string;
-    /** Catalog tier identity (`id` or `tierKey`); falls back to the `tier` search parameter. */
-    readonly tierId?: string;
+    /** Offer identity of the selected offer; falls back to the `offer` search parameter. */
+    readonly offerId?: string;
+    /** Exact frozen offer version; falls back to the `offerVersion` search parameter. */
+    readonly offerVersion?: string;
+    /** The existing entitlement a renewal binds; falls back to the `entitlement` search parameter. */
+    readonly renewalEntitlementId?: string;
 };
-type CheckoutOffer = {
-    readonly item: CatalogItemRow;
-    readonly tier: CatalogTierRow | null;
-};
-type CheckoutFlow = {
-    readonly phase: "loading";
-} | {
-    readonly phase: "review" | "not-started";
-    readonly purchaseId: string;
-    readonly offer: CheckoutOffer;
-    /** Definitive no-start reason; rendered only on the not-started rail. */
-    readonly notice: string | null;
-} | {
-    readonly phase: "refused";
-    readonly offer: CheckoutOffer | null;
-    readonly message: string;
-};
-/** The purchaser-identity claims the signed-in session's access token may carry. */
-type PurchaserClaims = {
-    readonly name?: unknown;
-    readonly preferred_username?: unknown;
-    readonly email?: unknown;
-};
-/**
- * Decode the purchaser claims inside the session's access token, the same claim surface the
- * Keycloak guard verifies server-side (`name`, `preferred_username`, `email`). A malformed or
- * claim-less token yields none, and the surface then withholds the named identity rather than
- * inventing one.
- */
-const purchaserClaimsOf = (accessToken: string): PurchaserClaims => {
-    const payload = accessToken.split(".")[1];
-    if (payload === undefined) return {};
-    try {
-        const normalised = payload.replaceAll("-", "+").replaceAll("_", "/");
-        const padded = normalised.padEnd(Math.ceil(normalised.length / 4) * 4, "=");
-        return JSON.parse(globalThis.atob(padded)) as PurchaserClaims;
-    } catch {
-        return {};
-    }
-};
-const claimText = (value: unknown): string | null => typeof value === "string" && value.trim().length > 0 ? value : null;
-/** The admitted purchaser's bound display name: display name, then login handle, then contact. */
-const purchaserNameOf = (claims: PurchaserClaims): string | null => claimText(claims.name) ?? claimText(claims.preferred_username) ?? claimText(claims.email);
-/** The secondary identity the purchaser fact pairs beside the name, never repeating the name itself. */
-const purchaserDetailOf = (claims: PurchaserClaims, name: string | null): string | null => {
-    const detail = claimText(claims.email) ?? claimText(claims.preferred_username);
-    return detail !== null && detail !== name ? detail : null;
-};
-/** Submit the provider form exactly like the existing wallet seam: POST hidden fields, then navigate. */
-const postProviderCheckout = (link: WorkspacePurchasePayLink) => {
-    const fields: Record<string, string> = link.checkoutFields === null ? {} : JSON.parse(link.checkoutFields);
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = link.checkoutUrl;
-    Object.entries(fields).forEach(([key, value]) => {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = key;
-        input.value = value;
-        form.appendChild(input);
-    });
-    document.body.appendChild(form);
-    form.submit();
-};
-/** Route path (unlocalized) of the offer-selection surface the flow returns to. */
+
+/** What the last payment request answered, when it answered nothing admissible. */
+type StartOutcome =
+    | { readonly kind: "none" }
+    | { readonly kind: "notice"; readonly notice: string }
+    | { readonly kind: "refused"; readonly message: string; readonly nextAction: string | null };
+
+/** Route path (unlocalized) of the surfaces this screen hands off to. */
 const OFFER_SELECTION_PATH = "/agentos/workspaces/new";
+const WORKSPACES_PATH = "/agentos/workspaces";
 /** Route path (unlocalized) of one purchase's status surface. */
 const purchaseStatusPath = (purchaseId: string) => `/agentos/workspaces/purchases/${purchaseId}`;
-/** Checkout-review owner: catalogue recheck → idempotent purchase → provider checkout hand-off. */
+
+/**
+ * The purchaser-scoped retry identity of one selection.
+ *
+ * THE RETRY KEY IS THE PURCHASE IDENTITY, NOT A CACHE KEY: an identical press replays the same
+ * purchase, so it is derived from the frozen selection rather than from the moment of the press.
+ */
+const retryKeyFor = (offer: WorkspaceCheckoutOffer) => `start-checkout:${offer.offerId}@${offer.offerVersion}`;
+
+/** The provider action's own redirect destination, when the action carries one. */
+const redirectDestination = (outcome: WorkspaceCheckoutOutcome): string | null => {
+    if (outcome.status !== "prepared" || outcome.paymentAction === null) return null;
+    const destination = outcome.paymentAction.payload["url"];
+    return typeof destination === "string" && destination.length > 0 ? destination : null;
+};
+
+/** Checkout-review owner: frozen-offer recheck → one admitted purchase → the provider action. */
 const CheckoutReviewFlow = (props: CheckoutReviewFlowProps) => {
     const locale = useLocale();
     const format = useFormatter();
@@ -94,38 +55,35 @@ const CheckoutReviewFlow = (props: CheckoutReviewFlowProps) => {
     const searchParams = useSearchParams();
     const session = useSession();
     const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null;
-    const offerSlug = props.offerSlug ?? searchParams.get("offer") ?? "";
-    const tierId = props.tierId ?? searchParams.get("tier") ?? undefined;
-    const catalogQuery = useQueryCatalogItemsSwr("ai_agent", accessToken !== null);
-    const invoicesQuery = useQueryMyInvoicesSwr(accessToken !== null);
-    const orderAgentos = useMutateOrderAgentosSwr();
-    const payLink = useMutateCreateWalletTopUpPayLinkSwr();
-    const orderAgentosRef = useRef(orderAgentos);
-    orderAgentosRef.current = orderAgentos;
-    const [flow, setFlow] = useState<CheckoutFlow>({ phase: "loading" });
+    const offerId = props.offerId ?? searchParams.get("offer") ?? "";
+    const offerVersion = props.offerVersion ?? searchParams.get("offerVersion") ?? "";
+    const renewalEntitlementId = props.renewalEntitlementId ?? searchParams.get("entitlement") ?? undefined;
+    const offersQuery = useQueryWorkspaceCheckoutOffersSwr(offerId, offerVersion, accessToken !== null && offerId !== "" && offerVersion !== "");
+    const startCheckout = useMutateWorkspaceCheckoutStartSwr();
+    const [rail, setRail] = useState<string | null>(null);
+    const [purchaseRef, setPurchaseRef] = useState<string | null>(null);
+    const [start, setStart] = useState<StartOutcome>({ kind: "none" });
     const [paymentPending, setPaymentPending] = useState(false);
     const pendingRef = useRef(false);
-    const flowRef = useRef<CheckoutFlow>(flow);
-    flowRef.current = flow;
-    const preparedRef = useRef<string | null>(null);
     const route = (href: string) => getPathname({ locale, href });
     /* Anchors carry the localized href; the locale-aware router owns the prefix for pushes. */
     const links = {
-        workspaces: route("/agentos"),
+        workspaces: route(WORKSPACES_PATH),
         offerSelection: route(OFFER_SELECTION_PATH),
     };
     const returnToOffers = () => router.push(OFFER_SELECTION_PATH);
-    const invoiceFor = (purchaseId: string, invoices: InvoiceRow[] | ReadonlyArray<InvoiceRow> | undefined) => invoices?.find(row => row.catalogOrder?.id === purchaseId);
-    const currentInvoices = invoicesQuery.data?.ok === true ? invoicesQuery.data.data : undefined;
-    const amountText = (offer: CheckoutOffer, invoice: InvoiceRow | undefined) => {
-        const amountVnd = invoice?.amountVnd ?? offer.tier?.priceMonthlyVnd ?? null;
-        return amountVnd === null ? null : format.number(amountVnd, { style: "currency", currency: BILLING_CURRENCY, currencyDisplay: "narrowSymbol" });
-    };
-    const purchaserClaims = useMemo(() => accessToken === null ? {} : purchaserClaimsOf(accessToken), [accessToken]);
-    const purchaserName = purchaserNameOf(purchaserClaims);
-    const purchaserDetail = purchaserDetailOf(purchaserClaims, purchaserName);
-    const purchaserFact = purchaserName === null ? null : purchaserDetail === null ? purchaserName : `${purchaserName} · ${purchaserDetail}`;
-    const copy = useMemo<CheckoutReviewCopy>(() => ({
+    const nextActionSentence = (nextAction: string | null | undefined): string | null => nextAction === "login-verify-email"
+        ? t("nextActionVerifyEmail")
+        : nextAction === "login-register"
+            ? t("nextActionRegister")
+            : nextAction === "login-sign-in"
+                ? t("nextActionSignIn")
+                : null;
+    const answer = offersQuery.data;
+    const frozen = answer?.ok === true && answer.data.status === "offers" && answer.data.selection.state === "current"
+        ? answer.data.offers.find(offer => offer.offerId === offerId && offer.offerVersion === offerVersion) ?? null
+        : null;
+    const copy: CheckoutReviewCopy = {
         path: t("path"),
         workspaces: t("workspaces"),
         newWorkspace: t("newWorkspace"),
@@ -144,7 +102,10 @@ const CheckoutReviewFlow = (props: CheckoutReviewFlowProps) => {
         purchaser: t("purchaser"),
         admission: t("admission"),
         railLabel: t("railLabel"),
-        railNote: t("railNote"),
+        railNote: t("purchaseIdentityReused"),
+        railChoice: t("railChoice"),
+        railRequired: t("railRequired"),
+        railCredentialPending: t("railCredentialPending"),
         stepRecheck: t("stepRecheck"),
         stepIdentity: t("stepIdentity"),
         stepProvider: t("stepProvider"),
@@ -154,98 +115,119 @@ const CheckoutReviewFlow = (props: CheckoutReviewFlowProps) => {
         returnToOffers: t("returnToOffers"),
         footnote: t("footnote"),
         refusedTitle: t("refusedTitle"),
-    }), [t]);
-    useEffect(() => {
-        if (accessToken === null) {
-            return;
-        }
-        const catalogue = catalogQuery.data;
-        if (catalogue === undefined) {
-            return;
-        }
-        const refuse = (message: string, offer: CheckoutOffer | null = null) => setFlow({ phase: "refused", offer, message });
-        if (!catalogue.ok) {
-            refuse(t("checkoutUnavailable"));
-            return;
-        }
-        if (offerSlug === "") {
-            refuse(t("staleOffer"));
-            return;
-        }
-        const item = catalogue.data.find(candidate => candidate.slug === offerSlug) ?? null;
-        if (item === null) {
-            refuse(t("staleOffer"));
-            return;
-        }
-        const tiers = item.tiers ?? [];
-        const tier = tierId === undefined ? null : tiers.find(candidate => candidate.id === tierId || candidate.tierKey === tierId) ?? null;
-        if ((tierId !== undefined && tier === null) || (tiers.length > 0 && tier === null)) {
-            refuse(t("staleOffer"), { item, tier: null });
-            return;
-        }
-        const offer: CheckoutOffer = { item, tier };
-        const key = `${item.slug}:${tier?.id ?? ""}`;
-        if (preparedRef.current === key) {
-            return;
-        }
-        preparedRef.current = key;
-        const prepare = async () => {
-            try {
-                const order = await orderAgentosRef.current.trigger({ catalogItemSlug: item.slug, catalogTierId: tier?.id });
-                if (!order.ok) {
-                    refuse(order.reason, offer);
-                    return;
-                }
-                setFlow({ phase: "review", purchaseId: order.data.id, offer, notice: null });
-            } catch {
-                refuse(t("checkoutUnavailable"), offer);
+    };
+    const rails: ReadonlyArray<CheckoutReviewRailOption> = [
+        { rail: "vnpay", label: t("railVnpay"), detail: t("railVnpayDetail") },
+        { rail: "momo", label: t("railMomo"), detail: t("railMomoDetail") },
+    ];
+    const chosenRail = rails.find(candidate => candidate.rail === rail) ?? null;
+    const formatAmount = (offer: WorkspaceCheckoutOffer) => {
+        const amount = Number(offer.amount);
+        return Number.isFinite(amount)
+            ? format.number(amount, { style: "currency", currency: offer.currency, currencyDisplay: "narrowSymbol" })
+            : `${offer.amount} ${offer.currency}`;
+    };
+    const factsOf = (offer: WorkspaceCheckoutOffer): CheckoutReviewFacts => ({
+        offer: offer.displayName,
+        offerVersion: offer.offerVersion,
+        amount: formatAmount(offer),
+        billingTerm: offer.billingCadence,
+        renewal: offer.renewalMode,
+        includedOutcome: offer.includedOutcome,
+        eligibility: offer.eligibility,
+        seller: t("sellerLedger"),
+        purchaser: null,
+    });
+    /** Route an answer that named a purchase which already left the checkout cursor to its status surface. */
+    const routeAdvancedPurchase = (outcome: WorkspaceCheckoutOutcome): boolean => {
+        const named = "purchaseId" in outcome && typeof outcome.purchaseId === "string" ? outcome.purchaseId : null;
+        if (named !== null) setPurchaseRef(named);
+        const state = outcome.status === "prepared" || outcome.status === "status" ? outcome.purchase.state : null;
+        if (named === null || state === null || state === "selected" || state === "payment-not-started") return false;
+        router.push(purchaseStatusPath(named));
+        return true;
+    };
+    const settleStartAnswer = (outcome: WorkspaceCheckoutOutcome) => {
+        if (outcome.status === "prepared") {
+            if (outcome.purchaseId !== null) setPurchaseRef(outcome.purchaseId);
+            if (routeAdvancedPurchase(outcome)) return;
+            const destination = redirectDestination(outcome);
+            if (outcome.paymentAction === null) {
+                setStart({ kind: "notice", notice: t("paymentNotStarted") });
+                return;
             }
-        };
-        void prepare();
-    }, [accessToken, catalogQuery.data, offerSlug, tierId, t]);
-    const requestPayment = async () => {
-        const current = flowRef.current;
-        /* A synchronous ref guards the in-flight press; a re-render cannot arrive before a second press. */
-        if ((current.phase !== "review" && current.phase !== "not-started") || pendingRef.current) {
+            if (destination === null) {
+                setStart({ kind: "notice", notice: t("checkoutUnavailable") });
+                return;
+            }
+            window.location.assign(destination);
             return;
         }
-        const notStarted = (notice: string) => setFlow({ ...current, phase: "not-started", notice });
+        if (routeAdvancedPurchase(outcome)) return;
+        if (outcome.status === "refused") {
+            if (outcome.code === "offer-version-stale" || outcome.code === "offer-unavailable") {
+                setStart({ kind: "refused", message: t("staleOffer"), nextAction: null });
+                return;
+            }
+            if (outcome.code === "payment-refused" || outcome.code === "payment-failed") {
+                setStart({ kind: "refused", message: t("paymentRefused"), nextAction: null });
+                return;
+            }
+            if (outcome.code === "retry-identity-conflict" || outcome.code === "observed-identity-mismatch") {
+                setStart({ kind: "refused", message: t("conflictNotice"), nextAction: null });
+                return;
+            }
+            if (outcome.code === "unauthenticated" || outcome.code === "purchaser-not-admitted") {
+                setStart({ kind: "refused", message: t("refusedNotAdmitted"), nextAction: nextActionSentence(outcome.nextAction) ?? t("nextActionSignIn") });
+                return;
+            }
+            if (outcome.code === "outcome-unknown" || outcome.code === "source-unavailable") {
+                setStart({ kind: "notice", notice: t("outcomeUnknownNotice") });
+                return;
+            }
+            setStart({ kind: "refused", message: t("checkoutUnavailable"), nextAction: null });
+            return;
+        }
+        if (outcome.status === "outcome-unknown") {
+            setStart({ kind: "notice", notice: t("outcomeUnknownNotice") });
+            return;
+        }
+        if (outcome.status === "conflict") {
+            setStart({ kind: "refused", message: t("conflictNotice"), nextAction: null });
+            return;
+        }
+        if (outcome.status === "unavailable") {
+            setStart({ kind: "notice", notice: t("paymentNotStarted") });
+            return;
+        }
+        setStart({ kind: "notice", notice: t("checkoutUnavailable") });
+    };
+    const requestPayment = async () => {
+        /* A synchronous ref guards the in-flight press; a re-render cannot arrive before a second press. */
+        if (frozen === null || rail === null || pendingRef.current) return;
+        const request: WorkspaceCheckoutStartRequest = {
+            retryKey: retryKeyFor(frozen),
+            offerId: frozen.offerId,
+            offerVersion: frozen.offerVersion,
+            paymentRail: rail as WorkspaceCheckoutPaymentRail,
+            renewalEntitlementId,
+        };
         pendingRef.current = true;
         setPaymentPending(true);
         try {
-            /* Re-read the owner's invoices through the query lifecycle before raising the action. */
-            const fresh = await invoicesQuery.mutate().catch(() => undefined);
-            const invoice = invoiceFor(current.purchaseId, fresh?.ok === true ? fresh.data : undefined);
-            if (invoice === undefined) {
-                notStarted(t("paymentNotStarted"));
+            const response = await startCheckout.trigger(request);
+            if (!response.ok) {
+                setStart({ kind: "notice", notice: t("checkoutUnavailable") });
                 return;
             }
-            if (invoice.status === "paid") {
-                router.push(purchaseStatusPath(current.purchaseId));
+            settleStartAnswer(response.data);
+        } catch {
+            /* A thrown transport failure decided nothing; reconcile the purchase it may have created. */
+            if (purchaseRef !== null) {
+                router.push(purchaseStatusPath(purchaseRef));
                 return;
             }
-            if (invoice.status === "cancelled") {
-                setFlow({ phase: "refused", offer: current.offer, message: t("paymentRefused") });
-                return;
-            }
-            /* The provider needs an absolute, already-localized return address; router.push does not. */
-            const destination = `${window.location.origin}${route(purchaseStatusPath(current.purchaseId))}`;
-            let link;
-            try {
-                link = await payLink.trigger({ amountVnd: invoice.amountVnd, returnUrl: destination, cancelUrl: `${destination}?payment=cancelled` });
-            } catch {
-                router.push(purchaseStatusPath(current.purchaseId));
-                return;
-            }
-            if (!link.ok) {
-                notStarted(link.reason);
-                return;
-            }
-            try {
-                postProviderCheckout(link.data);
-            } catch {
-                notStarted(t("checkoutInvalid"));
-            }
+            setStart({ kind: "notice", notice: t("outcomeUnknownNotice") });
         } finally {
             pendingRef.current = false;
             setPaymentPending(false);
@@ -255,54 +237,58 @@ const CheckoutReviewFlow = (props: CheckoutReviewFlowProps) => {
         /* The TextAction carries the real href; this handler stays for action tracing. */
     };
     const view = (): CheckoutReviewFlowViewProps => {
-        if (flow.phase === "loading") {
+        const refused = (message: string, nextAction: string | null, offer: WorkspaceCheckoutOffer | null): CheckoutReviewFlowViewProps => ({ state: "refused", props: { copy, links, facts: offer === null ? null : factsOf(offer), message, nextAction }, on: { returnToOffers } });
+        if (session.state.status === "restoring") {
             return { state: "loading", props: { copy, links } };
         }
-        if (flow.phase === "refused") {
-            const offer = flow.offer;
-            const facts = offer === null ? null : {
-                offer: `${offer.item.name}${offer.tier === null ? "" : ` · ${offer.tier.name}`}`,
-                offerVersion: `${offer.item.slug}${offer.tier === null ? "" : ` · ${offer.tier.tierKey}`}`,
-                amount: amountText(offer, undefined) ?? "—",
-                billingTerm: offer.tier?.priceMonthlyVnd == null ? t("oneTimeBilling") : t("monthlyBilling"),
-                renewal: offer.tier?.priceMonthlyVnd == null ? t("noRenewal") : t("renewalManual"),
-                includedOutcome: offer.item.tagline ?? offer.item.name,
-                eligibility: t("eligibilityValue"),
-                seller: t("sellerValue"),
-                purchaser: purchaserFact,
-            };
-            return { state: "refused", props: { copy, links, facts, message: flow.message }, on: { returnToOffers } };
+        if (accessToken === null) {
+            return refused(t("refusedNotAdmitted"), t("nextActionSignIn"), null);
         }
-        const { offer, purchaseId } = flow;
-        const amount = amountText(offer, invoiceFor(purchaseId, currentInvoices));
-        const facts = {
-            offer: `${offer.item.name}${offer.tier === null ? "" : ` · ${offer.tier.name}`}`,
-            offerVersion: `${offer.item.slug}${offer.tier === null ? "" : ` · ${offer.tier.tierKey}`}`,
-            amount: amount ?? t("checkoutUnavailable"),
-            billingTerm: offer.tier?.priceMonthlyVnd == null ? t("oneTimeBilling") : t("monthlyBilling"),
-            renewal: offer.tier?.priceMonthlyVnd == null ? t("noRenewal") : t("renewalManual"),
-            includedOutcome: offer.item.tagline ?? offer.item.name,
-            eligibility: t("eligibilityValue"),
-            seller: t("sellerValue"),
-            purchaser: purchaserFact,
-        };
+        if (answer === undefined) {
+            return offersQuery.error === undefined ? { state: "loading", props: { copy, links } } : refused(t("checkoutUnavailable"), null, null);
+        }
+        if (!answer.ok) {
+            return refused(t("checkoutUnavailable"), null, null);
+        }
+        const outcome = answer.data;
+        if (outcome.status === "refused") {
+            const nextAction = nextActionSentence(outcome.nextAction);
+            return outcome.code === "offer-version-stale" || outcome.code === "offer-unavailable"
+                ? refused(t("staleOffer"), null, null)
+                : refused(t("refusedNotAdmitted"), nextAction ?? t("nextActionSignIn"), null);
+        }
+        if (outcome.status === "unavailable") {
+            return refused(t("checkoutUnavailable"), null, null);
+        }
+        if (outcome.status !== "offers" || outcome.selection.state !== "current") {
+            return refused(t("staleOffer"), null, null);
+        }
+        if (frozen === null) {
+            return refused(t("staleOffer"), null, null);
+        }
+        if (start.kind === "refused") {
+            return refused(start.message, start.nextAction, frozen);
+        }
+        const notice = start.kind === "notice" ? start.notice : null;
         return {
-            state: flow.phase,
+            state: notice === null ? "review" : "not-started",
             props: {
                 copy,
                 links,
-                facts,
-                admission: purchaserName === null ? t("admitted") : t("admissionNamed", { name: purchaserName }),
+                facts: factsOf(frozen),
+                admission: t("admitted"),
                 steps: [
-                    { title: copy.stepRecheck, detail: purchaserName === null ? t("recheckDetail") : t("recheckDetailNamed", { name: purchaserName }) },
-                    { title: copy.stepIdentity, detail: purchaseId },
-                    { title: copy.stepProvider, detail: t("providerRail") },
+                    { title: copy.stepRecheck, detail: t("recheckDetail") },
+                    { title: copy.stepIdentity, detail: purchaseRef ?? retryKeyFor(frozen) },
+                    { title: copy.stepProvider, detail: chosenRail === null ? copy.railRequired : chosenRail.detail },
                 ],
-                purchaseRef: purchaseId,
-                notice: flow.notice,
+                purchaseRef: purchaseRef ?? retryKeyFor(frozen),
+                rails,
+                selectedRail: rail,
+                notice,
                 isPaymentPending: paymentPending,
             },
-            on: { requestPayment: () => void requestPayment(), changeOffer },
+            on: { requestPayment: () => void requestPayment(), selectRail: setRail, changeOffer },
         };
     };
     return <CheckoutReviewFlowBase {...view()} />;

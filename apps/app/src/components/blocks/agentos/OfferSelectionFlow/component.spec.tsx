@@ -8,36 +8,35 @@ const copy: OfferSelectionCopy = {
     workspaces: "Workspaces",
     newWorkspace: "New",
     title: "Choose a workspace offer",
-    description: "Compare provisional Vietnamese launch terms before checkout.",
-    offersLabel: "Available offers",
-    offersFact: "Draft recommendation • VND",
-    offerGroupLabel: "Workspace offers",
+    description: "Compare the offers that currently apply before any payment.",
+    offersLabel: "Current offers",
+    offersFact: "Read from the Workspace Provision checkout boundary",
+    offerGroupLabel: "Available offers",
     billingCadence: "Billing cadence",
-    renewalBehavior: "Renewal behavior",
-    includedOutcome: "Included workspace outcome",
+    renewalBehavior: "Renewal",
+    includedOutcome: "Included outcome",
     eligibility: "Eligibility",
     selectedBadge: "Selected",
-    selectedDraft: "Selected draft",
-    provisionalNote: "Terms are provisional until owner approval.",
+    selectedOffer: "Selected offer",
     reviewAction: "Review selected offer",
-    noPaymentNote: "No payment is requested on this screen.",
+    noPaymentNote: "No payment is requested at this step.",
     backToWorkspaces: "Back to workspaces",
-    unavailableTitle: "Offers cannot be read right now",
+    unavailableTitle: "No current offer can be presented",
     refreshOffers: "Refresh offers",
+    noSessionTitle: "Sign in to see offers",
+    signIn: "Sign in",
+    signUp: "Create an account",
 }
 
 const offer = (over: Partial<OfferSelectionOffer>): OfferSelectionOffer => ({
     offerId: "nivo-workspace-starter",
     offerVersion: "draft-2026-09-22",
     displayName: "Nivo Workspace Starter",
-    amount: "1,490,000",
-    currency: "VND",
-    amountCadence: "year",
-    billingCadence: "Annual billing",
-    renewalMode: "Manual reauthorization each year",
-    includedOutcome: "1 managed AI workspace • up to 5 members",
-    capacity: "Up to 5 members",
-    eligibility: "Eligible: verified businesses in Vietnam",
+    amount: "1,490,000 VND",
+    billingCadence: "yearly",
+    renewalMode: "explicit-reauthorization",
+    includedOutcome: "One managed agent workspace",
+    eligibility: "market:VN",
     ...over,
 })
 
@@ -46,46 +45,36 @@ const offers: ReadonlyArray<OfferSelectionOffer> = [
     offer({
         offerId: "nivo-workspace-growth",
         displayName: "Nivo Workspace Growth",
-        amount: "2,990,000",
-        includedOutcome: "1 managed AI workspace • up to 15 members",
-        capacity: "Up to 15 members",
+        amount: "2,990,000 VND",
     }),
     offer({
         offerId: "nivo-workspace-scale",
         displayName: "Nivo Workspace Scale",
-        amount: "5,990,000",
-        includedOutcome: "1 managed AI workspace • up to 40 members",
-        capacity: "Up to 40 members",
+        amount: "5,990,000 VND",
     }),
 ]
 
 const links = { workspaces: "/agentos/workspaces" }
 
 describe("OfferSelectionFlowBase", () => {
-    it("renders all three concrete draft offers with exact amount/currency and provisional disclosure", () => {
+    it("renders every current offer with its inseparable amount and published facts", () => {
         render(<OfferSelectionFlowBase
             state="selection"
             props={{ copy, links, offers, selectedOfferId: "nivo-workspace-growth", checkoutHref: "/agentos/workspaces/new/checkout?offer=nivo-workspace-growth&offerVersion=draft-2026-09-22" }}
             on={{ select: vi.fn() }}
         />)
-        expect(screen.getByRole("radiogroup", { name: "Workspace offers" })).toBeInTheDocument()
+        expect(screen.getByRole("radiogroup", { name: "Available offers" })).toBeInTheDocument()
         const radios = screen.getAllByRole("radio")
         expect(radios).toHaveLength(3)
         expect(screen.getByText("Nivo Workspace Starter")).toBeInTheDocument()
         expect(screen.getAllByText("Nivo Workspace Growth").length).toBeGreaterThan(0)
-        expect(screen.getByText("Nivo Workspace Scale")).toBeInTheDocument()
-        expect(screen.getByText("1,490,000 VND / year")).toBeInTheDocument()
-        expect(screen.getAllByText("2,990,000 VND / year").length).toBeGreaterThan(0)
-        expect(screen.getByText("5,990,000 VND / year")).toBeInTheDocument()
-        expect(screen.getAllByText("Annual billing").length).toBeGreaterThanOrEqual(3)
-        expect(screen.getAllByText("Manual reauthorization each year").length).toBeGreaterThanOrEqual(3)
-        expect(screen.getByText("1 managed AI workspace • up to 5 members")).toBeInTheDocument()
-        expect(screen.getByText("1 managed AI workspace • up to 15 members")).toBeInTheDocument()
-        expect(screen.getByText("1 managed AI workspace • up to 40 members")).toBeInTheDocument()
-        expect(screen.getAllByText("Eligible: verified businesses in Vietnam")).toHaveLength(3)
-        expect(screen.getByText("Draft recommendation • VND")).toBeInTheDocument()
-        expect(screen.getByText("Terms are provisional until owner approval.")).toBeInTheDocument()
-        expect(screen.getByText("No payment is requested on this screen.")).toBeInTheDocument()
+        expect(screen.getAllByText("2,990,000 VND").length).toBeGreaterThan(0)
+        expect(screen.getByText("5,990,000 VND")).toBeInTheDocument()
+        expect(screen.getAllByText("explicit-reauthorization").length).toBeGreaterThanOrEqual(3)
+        expect(screen.getAllByText("One managed agent workspace").length).toBeGreaterThanOrEqual(3)
+        expect(screen.getAllByText("market:VN")).toHaveLength(3)
+        expect(screen.getByText("Read from the Workspace Provision checkout boundary")).toBeInTheDocument()
+        expect(screen.getByText("No payment is requested at this step.")).toBeInTheDocument()
     })
 
     it("marks the selected offer through checked state and a visible text badge, not color alone", () => {
@@ -97,13 +86,12 @@ describe("OfferSelectionFlowBase", () => {
         const growth = screen.getByRole("radio", { name: /Nivo Workspace Growth/ })
         expect(growth).toBeChecked()
         expect(screen.getByText("Selected")).toBeInTheDocument()
-        expect(screen.getByText("Selected draft")).toBeInTheDocument()
-        const summary = screen.getByText("Selected draft").parentElement?.parentElement
-        expect(summary).toHaveTextContent("2,990,000 VND / year")
-        expect(summary).toHaveTextContent("Up to 15 members")
+        expect(screen.getByText("Selected offer")).toBeInTheDocument()
+        const summary = screen.getByText("Selected offer").parentElement?.parentElement
+        expect(summary).toHaveTextContent("2,990,000 VND")
     })
 
-    it("fires select with the offer identity and preserves it as the review destination", () => {
+    it("fires select with the offer identity and preserves the frozen version as the review destination", () => {
         const select = vi.fn()
         render(<OfferSelectionFlowBase
             state="selection"
@@ -123,8 +111,8 @@ describe("OfferSelectionFlowBase", () => {
             on={{ select: vi.fn() }}
         />)
         const html = container.innerHTML
-        expect(html).toContain("Available offers")
-        expect(html).toContain("Draft recommendation • VND")
+        expect(html).toContain("Current offers")
+        expect(html).toContain("Read from the Workspace Provision checkout boundary")
         const rows = container.querySelectorAll("[data-offer]")
         expect(rows).toHaveLength(3)
         rows.forEach(row => {
@@ -160,13 +148,13 @@ describe("OfferSelectionFlowBase", () => {
         const refresh = vi.fn()
         render(<OfferSelectionFlowBase
             state="unavailable"
-            props={{ copy, links, offers, message: "catalog read refused", isRefreshPending: false }}
+            props={{ copy, links, offers, message: "boundary read refused", isRefreshPending: false }}
             on={{ refresh }}
         />)
         expect(screen.queryAllByRole("radio")).toHaveLength(0)
         expect(screen.getByText("Nivo Workspace Growth")).toBeInTheDocument()
-        expect(screen.getByText("Offers cannot be read right now")).toBeInTheDocument()
-        expect(screen.getByText("catalog read refused")).toBeInTheDocument()
+        expect(screen.getByText("No current offer can be presented")).toBeInTheDocument()
+        expect(screen.getByText("boundary read refused")).toBeInTheDocument()
         expect(screen.getByRole("link", { name: "Back to workspaces" })).toHaveAttribute("href", "/agentos/workspaces")
         fireEvent.click(screen.getByRole("button", { name: "Refresh offers" }))
         expect(refresh).toHaveBeenCalledOnce()
@@ -180,5 +168,23 @@ describe("OfferSelectionFlowBase", () => {
         />)
         expect(html).not.toContain("Review selected offer")
         expect(html).not.toContain('type="radio"')
+    })
+
+    it("discloses no private offer terms and offers only the Login doors in the no-session state", () => {
+        const signIn = vi.fn()
+        const { container } = render(<OfferSelectionFlowBase
+            state="no-session"
+            props={{ copy, links, message: "No valid Login session was found.", signInHref: "/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fnew", signUpHref: "/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fnew" }}
+            on={{ signIn }}
+        />)
+        expect(screen.queryAllByRole("radio")).toHaveLength(0)
+        expect(container.querySelectorAll("[data-offer]")).toHaveLength(0)
+        expect(screen.queryByText("Review selected offer")).not.toBeInTheDocument()
+        expect(screen.getByText("Sign in to see offers")).toBeInTheDocument()
+        expect(screen.getByText("No valid Login session was found.")).toBeInTheDocument()
+        const login = screen.getByRole("link", { name: "Sign in" })
+        expect(login).toHaveAttribute("href", "/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fnew")
+        const signUp = screen.getByRole("link", { name: "Create an account" })
+        expect(signUp).toHaveAttribute("href", "/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fnew")
     })
 })

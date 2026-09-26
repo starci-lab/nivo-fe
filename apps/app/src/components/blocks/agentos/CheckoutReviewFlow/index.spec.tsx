@@ -2,15 +2,14 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 const mocks = vi.hoisted(() => ({
     push: vi.fn(),
-    order: { trigger: vi.fn() },
-    payLink: { trigger: vi.fn() },
-    mutateInvoices: vi.fn(),
-    catalog: { data: undefined as unknown },
-    invoices: { data: undefined as unknown },
+    start: { trigger: vi.fn() },
+    offers: { data: undefined as unknown, isValidating: false, error: undefined as unknown, mutate: vi.fn() },
     search: "",
-    session: { state: { status: "signed-in", accessToken: "token" } },
+    session: { state: { status: "signed-in", accessToken: "token" } as unknown },
 }))
 type PathnameRequest = { readonly href: string; readonly locale: string }
+/** The currency-formatting call the surface makes, named so the mocked API stays reusable. */
+type CurrencyFormatOptions = { readonly currency: string }
 /* Production-shaped: getPathname prefixes non-default locales, so feeding its localized output to
    the locale-aware router would double the prefix exactly like the live refused-return defect did. */
 vi.mock("@/i18n/navigation", () => ({
@@ -23,7 +22,7 @@ vi.mock("next-intl", async () => {
         Object.entries(values ?? {}).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), copyEn[key] ?? key)
     return {
         useLocale: () => "en",
-        useFormatter: () => ({ number: (value: number) => `VND ${value}` }),
+        useFormatter: () => ({ number: (value: number, options: CurrencyFormatOptions) => `${options.currency} ${value}` }),
         useTranslations: () => translate,
     }
 })
@@ -32,17 +31,15 @@ vi.mock("next/navigation", () => ({
 }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/hooks", () => ({
-    useQueryCatalogItemsSwr: () => mocks.catalog,
-    useQueryMyInvoicesSwr: () => ({ data: mocks.invoices.data, mutate: mocks.mutateInvoices }),
-    useMutateOrderAgentosSwr: () => mocks.order,
-    useMutateCreateWalletTopUpPayLinkSwr: () => mocks.payLink,
+    useQueryWorkspaceCheckoutOffersSwr: () => mocks.offers,
+    useMutateWorkspaceCheckoutStartSwr: () => mocks.start,
 }))
-vi.mock("@/modules/config", () => ({ BILLING_CURRENCY: "VND" }))
 type ViewInput = {
     readonly state: string
     readonly props: Record<string, unknown>
     readonly on?: {
         readonly requestPayment?: () => void
+        readonly selectRail?: (rail: string) => void
         readonly changeOffer?: () => void
         readonly returnToOffers?: () => void
     }
@@ -55,167 +52,132 @@ vi.mock("./component", () => ({
             <output data-testid="flow-state">{input.state}</output>
             <output data-testid="flow-props">{JSON.stringify(input.props)}</output>
             {input.on?.requestPayment === undefined ? null : <button onClick={input.on.requestPayment}>request-payment</button>}
+            {input.on?.selectRail === undefined ? null : <button onClick={() => input.on?.selectRail?.("vnpay")}>choose-vnpay</button>}
             {input.on?.returnToOffers === undefined ? null : <button onClick={input.on.returnToOffers}>return-to-offers</button>}
         </>
     },
 }))
 import CheckoutReviewFlow from "./"
-const item = {
-    id: "item-1",
-    slug: "nivo-ai-agent",
-    name: "Nivo AI Agent",
-    tagline: "Run an agent workspace",
-    templateKey: null,
-    tiers: [
-        { id: "tier-basic", tierKey: "agent_basic", name: "Basic", priceMonthlyVnd: 490000, orderIndex: 0 },
-        { id: "tier-pro", tierKey: "agent_pro", name: "Pro", priceMonthlyVnd: 990000, orderIndex: 1 },
-    ],
+const growth = {
+    offerId: "nivo-workspace-growth",
+    offerVersion: "draft-2026-09-22",
+    displayName: "Nivo Workspace Growth",
+    includedOutcome: "One managed agent workspace",
+    amount: "2990000",
+    currency: "VND",
+    billingCadence: "yearly",
+    renewalMode: "explicit-reauthorization",
+    eligibility: "market:VN",
 }
-const invoice = (status: string) => ({
-    id: "INV-1",
-    amountVnd: 990000,
-    status,
-    dueAt: "2026-08-29T10:00:00.000Z",
-    paidAt: status === "paid" ? "2026-08-22T09:00:00.000Z" : null,
-    catalogOrder: { id: "PUR-0001", catalogItem: { name: "Nivo AI Agent" }, catalogTier: { name: "Pro" } },
+const offersAnswer = (selectionState: string) => ({
+    ok: true,
+    data: { status: "offers", offers: [growth], selection: { offerId: growth.offerId, offerVersion: growth.offerVersion, state: selectionState } },
 })
-const invoices = (rows: ReadonlyArray<unknown>) => ({ ok: true, data: rows })
-/** A Keycloak-shaped access token whose payload carries the purchaser claims the review binds. */
-const accessTokenWith = (claims: Record<string, unknown>) =>
-    `hdr.${Buffer.from(JSON.stringify(claims)).toString("base64url")}.sig`
-const PURCHASER_TOKEN = accessTokenWith({ sub: "user-an-nguyen", name: "An Nguyen", preferred_username: "an.nguyen", email: "an.nguyen@northstar.test" })
+const prepared = (paymentAction: unknown, state = "selected", purchaseId: string | null = "PUR-1") => ({
+    ok: true,
+    data: {
+        status: "prepared",
+        purchaseId,
+        paymentAction,
+        purchase: { purchaseId: purchaseId ?? "PUR-1", state, offer: growth, lastConfirmedAt: "2026-09-22T10:00:00.000Z" },
+    },
+})
 const props = () => JSON.parse(screen.getByTestId("flow-props").textContent ?? "{}") as Record<string, unknown>
+const steps = () => (props().steps ?? []) as ReadonlyArray<{ readonly title: string; readonly detail: string }>
+const request = (call: number) => mocks.start.trigger.mock.calls[call]?.[0] as Record<string, unknown>
 describe("CheckoutReviewFlow", () => {
     beforeEach(() => {
         vi.clearAllMocks()
         captured.view = null
-        mocks.catalog = { data: { ok: true, data: [item] } }
-        mocks.search = "offer=nivo-ai-agent&tier=agent_pro"
-        mocks.session.state = { status: "signed-in", accessToken: PURCHASER_TOKEN }
-        mocks.order.trigger.mockResolvedValue({ ok: true, data: { id: "PUR-0001" } })
-        mocks.invoices = { data: invoices([invoice("unpaid")]) }
-        mocks.mutateInvoices.mockResolvedValue(invoices([invoice("unpaid")]))
-        mocks.payLink.trigger.mockResolvedValue({ ok: true, data: { paymentId: "PAY-1", checkoutUrl: "https://pay.sepay.test/checkout", checkoutFields: JSON.stringify({ orderCode: "PUR-0001" }) } })
-        vi.spyOn(HTMLFormElement.prototype, "submit").mockImplementation(() => undefined)
+        mocks.search = "offer=nivo-workspace-growth&offerVersion=draft-2026-09-22"
+        mocks.session = { state: { status: "signed-in", accessToken: "token" } }
+        mocks.offers = { data: offersAnswer("current"), isValidating: false, error: undefined, mutate: vi.fn() }
+        mocks.start.trigger.mockResolvedValue(prepared(null))
     })
-    it("prepares one purchase identity from the admitted offer before review", async () => {
+    it("frees the frozen offer from the boundary's current-offer recheck without inventing a purchaser name", () => {
         render(<CheckoutReviewFlow />)
-        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("review"))
-        expect(mocks.order.trigger).toHaveBeenCalledTimes(1)
-        expect(mocks.order.trigger).toHaveBeenCalledWith({ catalogItemSlug: "nivo-ai-agent", catalogTierId: "tier-pro" })
+        expect(screen.getByTestId("flow-state")).toHaveTextContent("review")
         const view = props()
-        expect(view.purchaseRef).toBe("PUR-0001")
-        expect(JSON.stringify(view.facts)).toContain("agent_pro")
-        expect(JSON.stringify(view.facts)).toContain("VND 990000")
-        expect(JSON.stringify(view.steps)).toContain("PUR-0001")
+        expect(JSON.stringify(view.facts)).toContain("Nivo Workspace Growth")
+        expect(JSON.stringify(view.facts)).toContain("draft-2026-09-22")
+        expect(JSON.stringify(view.facts)).toContain("VND 2990000")
+        expect(JSON.stringify(view.facts)).toContain("yearly")
+        expect((view.facts as Record<string, unknown>).purchaser).toBeNull()
+        expect(view.admission).toBe("Admitted")
+        expect(steps()[1]?.detail).toBe("start-checkout:nivo-workspace-growth@draft-2026-09-22")
         /* Anchors keep the localized href while router.push receives the raw path. */
         expect((view.links as Record<string, string>).offerSelection).toBe("/en/agentos/workspaces/new")
     })
-    it("binds the admitted purchaser's session identity into the fact, badge and first step", async () => {
+    it("offers only the boundary's two domestic rails and starts nothing before one is chosen", () => {
         render(<CheckoutReviewFlow />)
-        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("review"))
-        const view = props()
-        expect(view.admission).toBe("An Nguyen · Admitted")
-        expect(JSON.stringify(view.facts)).toContain("An Nguyen · an.nguyen@northstar.test")
-        expect(JSON.stringify(view.steps)).toContain("An Nguyen · Vietnam eligibility")
-    })
-    it("withholds the named identity when the session token carries no name claim", async () => {
-        mocks.session.state = { status: "signed-in", accessToken: accessTokenWith({ sub: "user-unnamed" }) }
-        render(<CheckoutReviewFlow />)
-        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("review"))
-        const view = props()
-        expect(view.admission).toBe("Admitted")
-        expect((view.facts as Record<string, unknown>).purchaser).toBeNull()
-        expect(JSON.stringify(view.steps)).toContain("Admitted purchaser · current offer terms")
-    })
-    it("prepares the purchase only once when the catalogue revalidates", async () => {
-        const { rerender } = render(<CheckoutReviewFlow />)
-        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("review"))
-        mocks.catalog = { data: { ok: true, data: [item] } }
-        rerender(<CheckoutReviewFlow />)
-        await waitFor(() => expect(mocks.order.trigger).toHaveBeenCalledTimes(1))
-    })
-    it("refuses without preparing a purchase when the selected offer is no longer current", async () => {
-        mocks.search = "offer=retired-offer&tier=agent_pro"
-        render(<CheckoutReviewFlow />)
-        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("refused"))
-        expect(mocks.order.trigger).not.toHaveBeenCalled()
-        expect(props().message).toContain("no longer current")
-    })
-    it("refuses a tiered offer whose selected rung no longer exists", async () => {
-        mocks.search = "offer=nivo-ai-agent&tier=agent_enterprise"
-        render(<CheckoutReviewFlow />)
-        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("refused"))
-        expect(mocks.order.trigger).not.toHaveBeenCalled()
-    })
-    it("surfaces the seller's refusal when the purchase command is refused", async () => {
-        mocks.order.trigger.mockResolvedValue({ ok: false, reason: "Offer terms changed since selection" })
-        render(<CheckoutReviewFlow />)
-        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("refused"))
-        expect(props().message).toBe("Offer terms changed since selection")
-        /* The anchor stays localized; the button hands the locale-aware router the raw path. */
-        expect((props().links as Record<string, string>).offerSelection).toBe("/en/agentos/workspaces/new")
-        fireEvent.click(screen.getByRole("button", { name: "return-to-offers" }))
-        expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new")
-        expect(mocks.push).not.toHaveBeenCalledWith("/en/agentos/workspaces/new")
-    })
-    it("raises the provider action on the frozen invoice amount with the purchase's own return URL", async () => {
-        render(<CheckoutReviewFlow />)
-        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("review"))
+        const rails = props().rails as ReadonlyArray<{ readonly rail: string }>
+        expect(rails.map(rail => rail.rail)).toEqual(["vnpay", "momo"])
+        expect(props().selectedRail).toBeNull()
         fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
-        await waitFor(() => expect(mocks.payLink.trigger).toHaveBeenCalledTimes(1))
-        const input = mocks.payLink.trigger.mock.calls[0]?.[0] as { amountVnd: number; returnUrl: string; cancelUrl: string }
-        expect(input.amountVnd).toBe(990000)
-        expect(input.returnUrl).toContain("/en/agentos/workspaces/purchases/PUR-0001")
-        expect(input.cancelUrl).toContain("payment=cancelled")
-        await waitFor(() => expect(HTMLFormElement.prototype.submit).toHaveBeenCalled())
+        expect(mocks.start.trigger).not.toHaveBeenCalled()
+    })
+    it("sends only the frozen identity, the purchaser-scoped retry key and the chosen rail", async () => {
+        render(<CheckoutReviewFlow />)
+        fireEvent.click(screen.getByRole("button", { name: "choose-vnpay" }))
+        expect(props().selectedRail).toBe("vnpay")
+        fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
+        await waitFor(() => expect(mocks.start.trigger).toHaveBeenCalledTimes(1))
+        expect(request(0)).toEqual({ retryKey: "start-checkout:nivo-workspace-growth@draft-2026-09-22", offerId: "nivo-workspace-growth", offerVersion: "draft-2026-09-22", paymentRail: "vnpay" })
+    })
+    it("reuses the same retry key on an identical retry", async () => {
+        render(<CheckoutReviewFlow />)
+        fireEvent.click(screen.getByRole("button", { name: "choose-vnpay" }))
+        fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
+        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("not-started"))
+        fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
+        await waitFor(() => expect(mocks.start.trigger).toHaveBeenCalledTimes(2))
+        expect(request(0)).toEqual(request(1))
+    })
+    it("lands payment-not-started when the rail definitively accepted no initiation", async () => {
+        render(<CheckoutReviewFlow />)
+        fireEvent.click(screen.getByRole("button", { name: "choose-vnpay" }))
+        fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
+        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("not-started"))
+        expect(props().notice).toBe("No payment request was accepted. The same purchase identity remains available for a safe retry.")
+        expect(props().selectedRail).toBe("vnpay")
     })
     it("keeps one in-flight payment request across repeated presses", async () => {
         let release: (answer: unknown) => void = () => undefined
-        mocks.payLink.trigger.mockReturnValue(new Promise(resolve => { release = resolve }))
+        mocks.start.trigger.mockReturnValue(new Promise(resolve => { release = resolve }))
         render(<CheckoutReviewFlow />)
-        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("review"))
+        fireEvent.click(screen.getByRole("button", { name: "choose-vnpay" }))
         fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
         fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
         fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
-        release({ ok: true, data: { paymentId: "PAY-1", checkoutUrl: "https://pay.sepay.test/checkout", checkoutFields: "{}" } })
-        await waitFor(() => expect(mocks.payLink.trigger).toHaveBeenCalledTimes(1))
+        release(prepared(null))
+        await waitFor(() => expect(mocks.start.trigger).toHaveBeenCalledTimes(1))
     })
-    it("lands on payment-not-started when the provider refuses the request", async () => {
-        mocks.payLink.trigger.mockResolvedValue({ ok: false, reason: "provider unavailable" })
+    it("routes a purchase that already left the cursor to its status surface instead of charging again", async () => {
+        mocks.start.trigger.mockResolvedValue(prepared(null, "paid", "PUR-1"))
         render(<CheckoutReviewFlow />)
-        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("review"))
+        fireEvent.click(screen.getByRole("button", { name: "choose-vnpay" }))
         fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
-        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("not-started"))
-        expect(props().notice).toBe("provider unavailable")
+        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/purchases/PUR-1"))
+        expect(mocks.push).not.toHaveBeenCalledWith("/en/agentos/workspaces/purchases/PUR-1")
     })
-    it("lands on payment-not-started when no invoice exists to charge", async () => {
-        mocks.mutateInvoices.mockResolvedValue(invoices([]))
+    it("withholds payment and names the verified-Login door when the boundary refuses admission", () => {
+        mocks.offers = { data: { ok: true, data: { status: "refused", code: "purchaser-not-admitted", nextAction: "login-verify-email" } }, isValidating: false, error: undefined, mutate: vi.fn() }
         render(<CheckoutReviewFlow />)
-        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("review"))
-        fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
-        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("not-started"))
-        expect(mocks.payLink.trigger).not.toHaveBeenCalled()
+        expect(screen.getByTestId("flow-state")).toHaveTextContent("refused")
+        expect(props().message).toBe("The signed-in account is not an admitted purchaser yet.")
+        expect(props().nextAction).toBe("Verify the account's email, then try again.")
     })
-    it("routes an already-paid purchase to its status surface instead of re-raising payment", async () => {
-        mocks.mutateInvoices.mockResolvedValue(invoices([invoice("paid")]))
+    it("withholds payment when the frozen offer version is no longer current", () => {
+        mocks.offers = { data: offersAnswer("stale"), isValidating: false, error: undefined, mutate: vi.fn() }
         render(<CheckoutReviewFlow />)
-        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("review"))
-        fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
-        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/purchases/PUR-0001"))
-        expect(mocks.payLink.trigger).not.toHaveBeenCalled()
+        expect(screen.getByTestId("flow-state")).toHaveTextContent("refused")
+        expect(props().message).toContain("no longer current")
+        expect(props().facts).toBeNull()
     })
-    it("routes to the status surface when the payment request outcome is unknown", async () => {
-        mocks.payLink.trigger.mockRejectedValue(new Error("network"))
-        render(<CheckoutReviewFlow />)
-        await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("review"))
-        fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
-        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/purchases/PUR-0001"))
-    })
-    it("waits for a signed-in session without preparing a purchase", async () => {
-        mocks.session.state = { status: "restoring" } as never
+    it("waits for a signed-in session without requesting payment", async () => {
+        mocks.session = { state: { status: "restoring" } }
         render(<CheckoutReviewFlow />)
         expect(screen.getByTestId("flow-state")).toHaveTextContent("loading")
-        await waitFor(() => expect(mocks.order.trigger).not.toHaveBeenCalled())
+        await waitFor(() => expect(mocks.start.trigger).not.toHaveBeenCalled())
     })
 })
