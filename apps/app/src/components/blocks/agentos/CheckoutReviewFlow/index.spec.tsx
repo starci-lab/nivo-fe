@@ -124,6 +124,20 @@ describe("CheckoutReviewFlow", () => {
         await waitFor(() => expect(mocks.start.trigger).toHaveBeenCalledTimes(1))
         expect(request(0)).toEqual({ retryKey: "start-checkout:nivo-workspace-growth@draft-2026-09-22", offerId: "nivo-workspace-growth", offerVersion: "draft-2026-09-22", paymentRail: "vnpay" })
     })
+    it("binds an existing entitlement on a renewal and still requires a fresh payment", async () => {
+        mocks.search = "offer=nivo-workspace-growth&offerVersion=draft-2026-09-22&entitlement=ENT-2026-0007"
+        render(<CheckoutReviewFlow />)
+        fireEvent.click(screen.getByRole("button", { name: "choose-vnpay" }))
+        fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
+        await waitFor(() => expect(mocks.start.trigger).toHaveBeenCalledTimes(1))
+        expect(request(0)).toEqual({
+            retryKey: "start-checkout:nivo-workspace-growth@draft-2026-09-22",
+            offerId: "nivo-workspace-growth",
+            offerVersion: "draft-2026-09-22",
+            paymentRail: "vnpay",
+            renewalEntitlementId: "ENT-2026-0007",
+        })
+    })
     it("reuses the same retry key on an identical retry", async () => {
         render(<CheckoutReviewFlow />)
         fireEvent.click(screen.getByRole("button", { name: "choose-vnpay" }))
