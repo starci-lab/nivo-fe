@@ -446,7 +446,12 @@ export const GROUP_CHAT_NATIVE_FIELD_CLASS_NAME = cn("flex", "min-w-0", "flex-co
 /** The native select/input control keeps the app's control rhythm. */
 export const GROUP_CHAT_NATIVE_CONTROL_CLASS_NAME = cn("min-h-11", "w-full", "px-4", "py-3");
 
-/** Composer row pinned below the conversation scroll region. */
+/**
+ * Composer row pinned below the conversation scroll region. At desktop width the band
+ * centers the single outlined editor frame the accepted composites draw; the accepted
+ * grouping keeps the draft, the glyph cluster and the send inside that one frame, so the
+ * earlier desktop-only split into an input row above a separate tool row is gone.
+ */
 export const GROUP_CHAT_COMPOSER_CLASS_NAME = cn(
   "flex",
   "items-end",
@@ -455,16 +460,15 @@ export const GROUP_CHAT_COMPOSER_CLASS_NAME = cn(
   "min-[70rem]:h-[7.125rem]",
   "min-[70rem]:flex-col",
   "min-[70rem]:items-stretch",
-  "min-[70rem]:gap-1",
-  "min-[70rem]:[&_[data-slot=input]]:h-10",
+  "min-[70rem]:justify-center",
 );
 
-/** The decision composer keeps its input inside the lower card band. */
+/** The decision composer keeps the approval band's shorter inset and seats the frame at its lower edge. */
 export const GROUP_CHAT_COMPOSER_DECISION_CLASS_NAME = cn(
   GROUP_CHAT_COMPOSER_CLASS_NAME,
   "min-[70rem]:h-[5.625rem]",
   "min-[70rem]:p-2",
-  "min-[70rem]:[&_[data-slot=input]]:h-8",
+  "min-[70rem]:justify-end",
 );
 
 /** The compact composer keeps the same row on a shorter inset. */
@@ -478,16 +482,77 @@ export const getGroupChatComposerClassName = (compact: boolean, decision: boolea
 };
 
 /**
+ * The single outlined editor frame of the accepted desktop composites: the draft field,
+ * the decorative glyph cluster and the send control sit inside one bordered group. Below
+ * desktop width the wrapper contributes no box, so the accepted compact row is unchanged.
+ */
+export const GROUP_CHAT_COMPOSER_FRAME_CLASS_NAME = cn(
+  "contents",
+  "min-[70rem]:flex",
+  "min-[70rem]:h-[5.375rem]",
+  "min-[70rem]:w-full",
+  "min-[70rem]:flex-col",
+  "min-[70rem]:rounded-xl",
+  "min-[70rem]:border",
+  "min-[70rem]:border-separator",
+  "min-[70rem]:bg-surface",
+  "min-[70rem]:px-3",
+  "min-[70rem]:py-1.5",
+);
+
+/** The decision frame keeps the draft, the glyph cluster and the round send on one line. */
+export const GROUP_CHAT_COMPOSER_FRAME_DECISION_CLASS_NAME = cn(
+  "contents",
+  "min-[70rem]:flex",
+  "min-[70rem]:h-16",
+  "min-[70rem]:w-full",
+  "min-[70rem]:items-center",
+  "min-[70rem]:gap-2",
+  "min-[70rem]:rounded-xl",
+  "min-[70rem]:border",
+  "min-[70rem]:border-separator",
+  "min-[70rem]:bg-surface",
+  "min-[70rem]:px-3",
+);
+
+/** Pick the editor frame for the active Office state; the compact row keeps no frame box. */
+export const getGroupChatComposerFrameClassName = (decision: boolean): ReturnType<typeof cn> =>
+  decision ? GROUP_CHAT_COMPOSER_FRAME_DECISION_CLASS_NAME : GROUP_CHAT_COMPOSER_FRAME_CLASS_NAME;
+
+/**
  * The composer's leading glyph cluster. The accepted composite draws an
  * attachment, an emoji and a mention affordance; the surface owns no such
  * command, so the cluster is decorated and never a keyboard stop - the mention
  * itself is the typed `@module` address the thread already renders.
  */
-/** Let the draft take the mobile row and the full desktop first row. */
-export const GROUP_CHAT_COMPOSER_INPUT_CLASS_NAME = cn("min-w-0", "flex-1", "min-[70rem]:w-full", "min-[70rem]:flex-none");
+/**
+ * Let the draft take the mobile row, grow across the invite frame's first line and take
+ * the flexible share of the decision frame's single line. Inside the accepted desktop
+ * frame the field draws no box of its own - its border, fill and shadow move out to the
+ * frame so the group reads as one editor instead of a field above a tool row.
+ */
+export const GROUP_CHAT_COMPOSER_INPUT_CLASS_NAME = cn(
+  "min-w-0",
+  "flex-1",
+  "min-[70rem]:[&_[data-slot=input]]:h-8",
+  "min-[70rem]:[&_[data-slot=input]]:border-0",
+  "min-[70rem]:[&_[data-slot=input]]:bg-transparent",
+  "min-[70rem]:[&_[data-slot=input]]:px-1",
+  "min-[70rem]:[&_[data-slot=input]]:shadow-none",
+);
 
-/** Place decorative glyphs and the send control in their own composer row. */
+/**
+ * On compact the glyph cluster and the send share the composer row as before; on the
+ * invite desktop they take the frame's lower line and face each other across it.
+ */
 export const GROUP_CHAT_COMPOSER_ACTIONS_CLASS_NAME = cn("flex", "shrink-0", "items-center", "gap-2", "min-[70rem]:w-full", "min-[70rem]:justify-between");
+
+/** On the decision frame's single line the cluster and the round send stay one trailing group. */
+export const GROUP_CHAT_COMPOSER_ACTIONS_DECISION_CLASS_NAME = cn("flex", "shrink-0", "items-center", "gap-2");
+
+/** Pick the action-row spread for the active Office state; compact keeps the shared row. */
+export const getGroupChatComposerActionsClassName = (decision: boolean): ReturnType<typeof cn> =>
+  decision ? GROUP_CHAT_COMPOSER_ACTIONS_DECISION_CLASS_NAME : GROUP_CHAT_COMPOSER_ACTIONS_CLASS_NAME;
 
 /** Keep decorative controls together without covering the draft placeholder. */
 export const GROUP_CHAT_COMPOSER_GLYPHS_CLASS_NAME = cn("flex", "shrink-0", "items-center", "gap-1.5", "px-1", "text-muted-foreground");

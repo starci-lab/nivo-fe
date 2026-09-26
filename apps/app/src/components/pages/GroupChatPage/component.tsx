@@ -29,10 +29,11 @@ import {
   GROUP_CHAT_CARD_BAND_CLASS_NAME,
   GROUP_CHAT_CARD_BAND_DIVIDED_CLASS_NAME,
   GROUP_CHAT_CARD_INSET_CLASS_NAME,
+  getGroupChatComposerActionsClassName,
   getGroupChatComposerClassName,
+  getGroupChatComposerFrameClassName,
   GROUP_CHAT_COMPOSER_GLYPH_CLASS_NAME,
   GROUP_CHAT_COMPOSER_GLYPHS_CLASS_NAME,
-  GROUP_CHAT_COMPOSER_ACTIONS_CLASS_NAME,
   GROUP_CHAT_COMPOSER_INPUT_CLASS_NAME,
   GROUP_CHAT_COMPOSER_SEND_CLASS_NAME,
   getGroupChatConversationListClassName,
@@ -1240,18 +1241,19 @@ const Composer = ({ view, on, labels, decision, compact = false }: ComposerProps
         on.sendMessage();
       }}
     >
-      <div className={GROUP_CHAT_COMPOSER_INPUT_CLASS_NAME}>
-        <Input
-          id="collab-composer"
-          name="message"
-          label={<span className={GROUP_CHAT_SR_ONLY_CLASS_NAME}>{labels.composer.label}</span>}
-          placeholder={labels.composer.placeholder}
-          value={view.composer.value}
-          isDisabled={view.composer.pending}
-          onValueChange={on.changeComposer}
-        />
-      </div>
-      <div className={GROUP_CHAT_COMPOSER_ACTIONS_CLASS_NAME}>
+      <div className={getGroupChatComposerFrameClassName(decision)}>
+        <div className={GROUP_CHAT_COMPOSER_INPUT_CLASS_NAME}>
+          <Input
+            id="collab-composer"
+            name="message"
+            label={<span className={GROUP_CHAT_SR_ONLY_CLASS_NAME}>{labels.composer.label}</span>}
+            placeholder={labels.composer.placeholder}
+            value={view.composer.value}
+            isDisabled={view.composer.pending}
+            onValueChange={on.changeComposer}
+          />
+        </div>
+        <div className={getGroupChatComposerActionsClassName(decision)}>
       <span className={GROUP_CHAT_COMPOSER_GLYPHS_CLASS_NAME} aria-hidden="true">
         <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={GROUP_CHAT_COMPOSER_GLYPH_CLASS_NAME}>
           <path
@@ -1274,7 +1276,7 @@ const Composer = ({ view, on, labels, decision, compact = false }: ComposerProps
           </svg>
         </span>
       </span>
-      {compact && decision ? (
+      {decision ? (
         <IconButton
           source={nivoIconSource("send", "leading")}
           label={labels.composer.send}
@@ -1291,6 +1293,7 @@ const Composer = ({ view, on, labels, decision, compact = false }: ComposerProps
           <span className={GROUP_CHAT_COMPOSER_SEND_CLASS_NAME}><Icon source={nivoIconSource("send", "chip")} usage="chip" /> {labels.composer.send}</span>
         </Button>
       )}
+        </div>
       </div>
     </form>
   </div>
