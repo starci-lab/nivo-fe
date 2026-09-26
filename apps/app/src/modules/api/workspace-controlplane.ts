@@ -885,11 +885,18 @@ export type WorkspaceCheckoutRecoverRequest = {
   readonly lastObserved?: WorkspaceCheckoutObservedIdentities;
 };
 
-/** `resolve-purchased-workspace-entry` request: the purchase plus the claimed ready identities. */
+/**
+ * `resolve-purchased-workspace-entry` request: the purchase plus the claimed
+ * ready workspace.
+ *
+ * THE READINESS OBSERVATION IS NOT A CALLER CLAIM. The entry owner derives the
+ * authoritative observation from its own confirmed record, so the caller
+ * supplies only the purchase it owns, the workspace it claims is ready, and
+ * where the resolved destination returns to.
+ */
 export type WorkspaceCheckoutEntryRequest = {
   readonly purchaseId: string;
   readonly workspaceId: string;
-  readonly readinessObservationId: string;
   readonly returnContext?: WorkspaceCheckoutEntryReturnContext;
 };
 
@@ -1031,14 +1038,13 @@ export const recoverWorkspacePurchase = (request: WorkspaceCheckoutRecoverReques
  * confirmed ready, and an unready, unowned or stale identity is answered
  * without disclosing sibling workspaces.
  *
- * @param request - The purchase, workspace and readiness-observation identities the caller observed.
+ * @param request - The purchase and workspace identities the caller claims, plus its return context.
  * @returns The closed entry outcome, or why navigation stays withheld.
  */
 export const resolveWorkspaceCheckoutEntry = (request: WorkspaceCheckoutEntryRequest): Promise<Result<WorkspaceCheckoutEntryOutcome>> => graphql(`query WorkspacePurchaseEntry($request: WorkspacePurchaseEntryInput!) { workspacePurchaseEntry(request: $request) { data { ${WORKSPACE_CHECKOUT_ENTRY_FIELDS} } message success error } }`, {
   request: {
     purchaseId: request.purchaseId,
     workspaceId: request.workspaceId,
-    readinessObservationId: request.readinessObservationId,
     returnContext: request.returnContext
   }
 });

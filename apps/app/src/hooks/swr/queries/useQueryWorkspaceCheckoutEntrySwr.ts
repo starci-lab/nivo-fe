@@ -6,11 +6,11 @@ import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
 /*
  * One hook per file, one registered read per hook: the file's basename is the hook it exports, which
  * is what the repository's source-name rule requires of a `use*` export. The entry key carries the
- * three identities the entry contract compares, so a read of one workspace never answers another's.
+ * purchase and the workspace the read claims, so a read of one workspace never answers another's.
  */
 
-/** Cache identity of one entry resolution: the purchase, workspace and readiness observation claimed. */
-export const workspaceCheckoutEntryQueryKey = (request: WorkspaceCheckoutEntryRequest): NivoQueryKey => ["workspace-checkout", "entry", request.purchaseId, request.workspaceId, request.readinessObservationId];
+/** Cache identity of one entry resolution: the purchase and the workspace the caller claims ready. */
+export const workspaceCheckoutEntryQueryKey = (request: WorkspaceCheckoutEntryRequest): NivoQueryKey => ["workspace-checkout", "entry", request.purchaseId, request.workspaceId];
 
 /**
  * Resolve the registered entry destination for one readiness-confirmed workspace.

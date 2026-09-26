@@ -535,6 +535,8 @@ describe("recoverWorkspacePurchase", () => {
     })
 })
 
+// The caller claims only the purchase it owns and the workspace it says is ready; the backend derives
+// the readiness observation from its own confirmed record, so the wire request carries no readiness identity.
 describe("resolveWorkspaceCheckoutEntry", () => {
     afterEach(() => vi.unstubAllGlobals())
 
@@ -543,21 +545,21 @@ describe("resolveWorkspaceCheckoutEntry", () => {
         const fetchMock = vi.fn().mockResolvedValueOnce(envelope("workspacePurchaseEntry", { status: "entry", purchaseId: "purchase-1", workspaceId: "ws-1", destination }))
         vi.stubGlobal("fetch", fetchMock)
 
-        const result = await resolveWorkspaceCheckoutEntry({ purchaseId: "purchase-1", workspaceId: "ws-1", readinessObservationId: "obs-1", returnContext: { name: "workspace-dashboard", version: "1" } })
+        const result = await resolveWorkspaceCheckoutEntry({ purchaseId: "purchase-1", workspaceId: "ws-1", returnContext: { name: "workspace-dashboard", version: "1" } })
 
         expect(result.ok).toBe(true)
         if (!result.ok) return
         expect(result.data.status === "entry" && result.data.destination).toEqual(destination)
         const body = requestBody(fetchMock, 0)
         expect(body.query).toContain("workspacePurchaseEntry(request: $request)")
-        expect(requestVariables(fetchMock, 0).request).toEqual({ purchaseId: "purchase-1", workspaceId: "ws-1", readinessObservationId: "obs-1", returnContext: { name: "workspace-dashboard", version: "1" } })
+        expect(requestVariables(fetchMock, 0).request).toEqual({ purchaseId: "purchase-1", workspaceId: "ws-1", returnContext: { name: "workspace-dashboard", version: "1" } })
     })
 
     it("returns the composed status instead of a destination while readiness is unconfirmed", async () => {
         const fetchMock = vi.fn().mockResolvedValueOnce(envelope("workspacePurchaseEntry", { status: "not-ready", purchaseId: "purchase-1", purchase: checkoutStatus }))
         vi.stubGlobal("fetch", fetchMock)
 
-        const result = await resolveWorkspaceCheckoutEntry({ purchaseId: "purchase-1", workspaceId: "ws-1", readinessObservationId: "obs-1" })
+        const result = await resolveWorkspaceCheckoutEntry({ purchaseId: "purchase-1", workspaceId: "ws-1" })
 
         expect(result.ok).toBe(true)
         if (!result.ok) return

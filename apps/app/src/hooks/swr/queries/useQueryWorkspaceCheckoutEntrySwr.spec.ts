@@ -9,12 +9,12 @@ vi.mock("@/modules/api/workspace-controlplane", () => mocks.api);
 
 import { useQueryWorkspaceCheckoutEntrySwr, workspaceCheckoutEntryQueryKey } from "./useQueryWorkspaceCheckoutEntrySwr";
 
-const ENTRY = { purchaseId: "purchase-1", workspaceId: "ws-1", readinessObservationId: "obs-1" } as const;
+const ENTRY = { purchaseId: "purchase-1", workspaceId: "ws-1" } as const;
 type ReadShape = { readonly key: unknown; readonly query: () => Promise<unknown> };
 
 describe("useQueryWorkspaceCheckoutEntrySwr", () => {
-  it("keys one entry resolution by the three identities the entry contract compares", () => {
-    expect(workspaceCheckoutEntryQueryKey(ENTRY)).toEqual(["workspace-checkout", "entry", "purchase-1", "ws-1", "obs-1"]);
+  it("keys one entry resolution by the purchase and workspace the entry contract compares", () => {
+    expect(workspaceCheckoutEntryQueryKey(ENTRY)).toEqual(["workspace-checkout", "entry", "purchase-1", "ws-1"]);
     expect(workspaceCheckoutEntryQueryKey(ENTRY)).not.toEqual(workspaceCheckoutEntryQueryKey({ ...ENTRY, workspaceId: "ws-2" }));
   });
 
