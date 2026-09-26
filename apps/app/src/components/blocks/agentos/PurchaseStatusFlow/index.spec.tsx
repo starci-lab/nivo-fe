@@ -35,7 +35,7 @@ type RailProbe = { label?: string, fact?: string, facts?: Array<{ label: string,
 type PrimaryProbe = { label?: string, fact?: string, facts?: Array<{ label: string, value: string }>, operation?: { name: string, word: string, progressValue?: number }, action?: { label: string }, cadenceFacts?: Array<{ label: string, value: string }> }
 type FlowProbeProps = {
     state: string
-    props: { title?: string, subtitle?: string, badge?: { label: string, tone: string }, trail?: Array<{ id: string, label: string, isCurrent?: boolean }>, message?: string, description?: string, primary?: PrimaryProbe, rail?: RailProbe, escapeLink?: { label: string, href: string } }
+    props: { title?: string, subtitle?: string, badge?: { label: string, tone: string }, trail?: Array<{ id: string, label: string, isCurrent?: boolean }>, message?: string, description?: string, primary?: PrimaryProbe, rail?: RailProbe, escapeLink?: { label: string, href: string }, copy?: { renewalAutoAt: (date: string) => string, renewalManualAt: (date: string) => string, attemptFact: (attempt: number) => string, orderReports: (status: string) => string, invoiceReports: (status: string) => string, operationStatus: (status: string) => string, sourceLabel: (source: string) => string } }
     on?: { primary?: () => void, returnToList?: () => void }
 }
 
@@ -75,6 +75,15 @@ vi.mock("./component", () => ({
             <output data-testid="flow">{JSON.stringify({ state: props.state, title: props.props.title, subtitle: props.props.subtitle, badge: props.props.badge, trail: props.props.trail, message: props.props.message, description: props.props.description, primary: props.props.primary, rail: props.props.rail, escapeLink: props.props.escapeLink })}</output>
             <button data-testid="primary" onClick={props.on?.primary}>primary</button>
             <button data-testid="return" onClick={props.on?.returnToList}>return</button>
+            {props.props.copy !== undefined && <output data-testid="copy-probes">{JSON.stringify([
+                props.props.copy.renewalAutoAt("2026-10-01"),
+                props.props.copy.renewalManualAt("2026-10-01"),
+                props.props.copy.attemptFact(2),
+                props.props.copy.orderReports("completed"),
+                props.props.copy.invoiceReports("paid"),
+                props.props.copy.operationStatus("future-state"),
+                props.props.copy.sourceLabel("custom-ledger")
+            ])}</output>}
         </div>
     ),
 }))
@@ -150,6 +159,8 @@ describe("PurchaseStatusFlow", () => {
     it("keeps an unsettled payment as payment-pending with a check action that creates no charge", async () => {
         render(<PurchaseStatusFlow purchaseId="purchase-1" />)
         await waitFor(() => expect(flow()).toContain('"state":"payment-pending"'))
+        expect(screen.getByTestId("copy-probes").textContent).toContain("future-state")
+        expect(screen.getByTestId("copy-probes").textContent).toContain("custom-ledger")
         expect(flow()).toContain("Payment is not confirmed")
         expect(flow()).toContain("Check payment status")
         expect(flow()).toContain("Provisioning remains locked until exact settlement is accepted")

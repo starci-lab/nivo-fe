@@ -169,6 +169,23 @@ describe("AgentOSProvisioning", () => {
         expect(mocks.push).not.toHaveBeenCalled()
     })
 
+    it("lets the purchaser change the selected offer", async () => {
+        render(<AgentOSProvisioning context={{ mode: "new" }} />)
+        await waitFor(() => expect(flow()).toContain('"state":"request"'))
+        fireEvent.click(screen.getByTestId("select-offer"))
+        await waitFor(() => expect(flow()).toContain('"selectedOfferId":"offer-1"'))
+    })
+
+    it("retries a failed AI readiness check", async () => {
+        mocks.status.data = statusAnswer(readyPurchase())
+        mocks.aiReadiness = { ...aiReadySnapshot, data: { ...aiReadySnapshot.data, aiReady: false, failureCode: "probe-failed", readinessOperationId: null, knowledgeRecoveryOperationId: null } }
+        render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
+        await waitFor(() => expect(flow()).toContain('"state":"failed"'))
+        fireEvent.click(screen.getByTestId("status"))
+        await waitFor(() => expect(mocks.aiTrigger).toHaveBeenCalled())
+        expect(mocks.aiMutate).toHaveBeenCalled()
+    })
+
     it("reports a refused or unavailable offers read as failed without inventing a catalogue", async () => {
         mocks.offers.data = { ok: false, reason: "catalog-down" }
         render(<AgentOSProvisioning context={{ mode: "new" }} />)
