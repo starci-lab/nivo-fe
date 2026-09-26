@@ -4,6 +4,7 @@ import { AgentOSModuleCollectionPageBase } from "./component";
 import { projectAgentOSShellView, type AgentOSShellView, type AgentOSWorkspaceControlCenterShellLabels } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter/component";
 import { useAgentOSShell, useQueryMyAgentosModuleInstallationsSwr, useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { useRouter } from "@/i18n/navigation";
 type AgentOSModuleCollectionPageProps = {
@@ -20,13 +21,23 @@ export const AgentOSModuleCollectionPage = (props: AgentOSModuleCollectionPagePr
   const format = useFormatter();
   const locale = useLocale();
   const router = useRouter();
+  const searchParams = useSearchParams();
   // The connected shell reads one exact selection; the console aggregate names the instance and the
   // installation inventory names the siblings, so the page opens no path the shell does not own.
   const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId);
   const installations = useQueryMyAgentosModuleInstallationsSwr(workspaceId);
   const instanceId = controlCenter.data?.ok === true ? controlCenter.data.data.runtime?.instanceId ?? controlCenter.data.data.instance?.id ?? null : null;
   const installationIds = installations.data?.ok === true ? installations.data.data.map(installation => installation.id) : [];
-  const shell = useAgentOSShell({ workspaceId, instanceId: instanceId ?? "", installationIds });
+  // A return from a receiver-owned module route carries one stable command identity: the receiver
+  // source is read only when the route brought all three fields, and a partial identity is never
+  // completed by guessing.
+  const returnedInstallation = searchParams.get("installation");
+  const returnedIntent = searchParams.get("intent");
+  const returnedCommand = searchParams.get("command");
+  const operations = returnedInstallation !== null && returnedIntent !== null && returnedCommand !== null
+    ? [{ installationId: returnedInstallation, intentId: returnedIntent, commandId: returnedCommand }]
+    : [];
+  const shell = useAgentOSShell({ workspaceId, instanceId: instanceId ?? "", installationIds, operations });
   /** Retry exactly the facets that did not answer with a current observation. */
   const retryShell = useCallback(() => {
     const limited = shell.sources.filter((source): boolean => source.state !== "available" || source.freshness === "stale");
@@ -36,6 +47,10 @@ export const AgentOSModuleCollectionPage = (props: AgentOSModuleCollectionPagePr
     }
     for (const source of limited)
       shell.retrySource(source.identity);
+  }, [shell]);
+  /** Re-read one receiver source: a status read of its own receipt, never a new effect. */
+  const retryOperation = useCallback((installationId: string, intentId: string) => {
+    shell.retrySource({ kind: "receiver", installationId, intentId });
   }, [shell]);
   const shellLabels: AgentOSWorkspaceControlCenterShellLabels = {
     headingFallback: s("headingFallback"),
@@ -73,6 +88,10 @@ export const AgentOSModuleCollectionPage = (props: AgentOSModuleCollectionPagePr
     attentionUnsupported: s("attention.unsupported"),
     resultSection: s("result.section"),
     resultUnavailable: s("result.unavailable"),
+    resultPending: s("result.pending"),
+    resultConfirmed: s("result.confirmed"),
+    resultUncertain: s("result.uncertain"),
+    resultRecheck: s("result.recheck"),
     installEntry: s("installEntry")
   };
   const shellView: AgentOSShellView = projectAgentOSShellView(shell, shellLabels);
@@ -80,11 +99,17 @@ export const AgentOSModuleCollectionPage = (props: AgentOSModuleCollectionPagePr
     path: t("path"),
     workspace: t("workspace"),
     title: t("title"),
-    description: t("description"),
-    eyebrow: t("eyebrow"),
-    create: t("create")
+    checkedAt: t("checkedAt"),
+    installedIn: t("installedIn"),
+    browseCatalog: t("browseCatalog"),
+    installFlow: t("installFlow"),
+    runtimeLine: t("runtimeLine"),
+    runtimeProvisioned: t("runtimeProvisioned"),
+    runtimeNotProvisioned: t("runtimeNotProvisioned"),
+    runtimeUnavailable: t("runtimeUnavailable"),
+    runtimeUnknown: t("runtimeUnknown")
   }} formatDate={value => format.dateTime(new Date(value), {
     dateStyle: "medium",
     timeStyle: "short"
-  })} createHref={`/${locale}/agentos/workspaces/${workspaceId}/modules/create`} onBack={() => router.push(`/agentos/workspaces/${workspaceId}`)} onRetryShell={retryShell} isShellRetrying={shellView.state === "retrying"}/>;
+  })} createHref={`/${locale}/agentos/workspaces/${workspaceId}/modules/create`} onBack={() => router.push(`/agentos/workspaces/${workspaceId}`)} onRetryShell={retryShell} onRetryOperation={retryOperation} isShellRetrying={shellView.state === "retrying"}/>;
 };

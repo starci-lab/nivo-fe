@@ -30,6 +30,10 @@ export const AgentOSWorkspaceControlCenter = (props: AgentOSWorkspaceControlCent
     const instanceId = controlCenter.data?.ok === true ? controlCenter.data.data.runtime?.instanceId ?? controlCenter.data.data.instance?.id ?? null : null;
     const installationIds = installations.data?.ok === true ? installations.data.data.map(installation => installation.id) : [];
     const shell = useAgentOSShell({ workspaceId, instanceId: instanceId ?? "", installationIds });
+    /** Re-read one receiver source: a status read of its own receipt, never a new effect. */
+    const recheckOperation = useCallback((installationId: string, intentId: string) => {
+        shell.retrySource({ kind: "receiver", installationId, intentId });
+    }, [shell]);
     const { trigger: renewLaunch } = useMutateRenewAgentWorkspaceAppLaunchSwr(workspaceId);
     const { trigger: revokeLaunch } = useMutateRevokeAgentWorkspaceAppLaunchSwr(workspaceId);
     const answer = controlCenter.data;
@@ -146,6 +150,10 @@ export const AgentOSWorkspaceControlCenter = (props: AgentOSWorkspaceControlCent
         attentionUnsupported: s("attention.unsupported"),
         resultSection: s("result.section"),
         resultUnavailable: s("result.unavailable"),
+        resultPending: s("result.pending"),
+        resultConfirmed: s("result.confirmed"),
+        resultUncertain: s("result.uncertain"),
+        resultRecheck: s("result.recheck"),
         installEntry: s("installEntry")
     };
     const labels: AgentOSWorkspaceControlCenterLabels = {
@@ -230,7 +238,7 @@ export const AgentOSWorkspaceControlCenter = (props: AgentOSWorkspaceControlCent
     return <AgentOSWorkspaceControlCenterBase workspaceId={workspaceId} pageState={pageState} controlCenterState={controlCenterState} message={answer !== undefined && !answer.ok ? t("refused") : undefined} data={answer?.ok === true ? answer.data : undefined} shell={shellView} labels={labels} launchState={launchState} openClawLaunchHref={`/${locale}/launch/agentos/${workspaceId}/openclaw`} onSelectPageState={onSelectPageState} onOpenAgentConsole={openOpenClaw} retryPending={retryPending} onRetry={() => {
             setRetryPending(true);
             void refreshControlCenter().finally(() => setRetryPending(false));
-        }} onRetryShell={retryShell} isShellRetrying={shellView.state === "retrying"} formatDate={value => format.dateTime(new Date(value), {
+        }} onRetryShell={retryShell} onRetryOperation={recheckOperation} isShellRetrying={shellView.state === "retrying"} formatDate={value => format.dateTime(new Date(value), {
             dateStyle: "medium",
             timeStyle: "short"
         })}/>;

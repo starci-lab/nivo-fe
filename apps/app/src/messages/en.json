@@ -921,11 +921,11 @@
         "identityInstance": "instance",
         "lastKnown": "Last known",
         "retrying": "Retrying",
-        "installEntry": "Install module",
+        "installEntry": "Go to the dedicated install flow",
         "inventory": {
           "section": "Installed modules",
-          "empty": "No module is installed.",
-          "emptyDescription": "The current observation is complete and authorized, and no module is installed.",
+          "empty": "No module is installed yet",
+          "emptyDescription": "The current list was checked and no installation exists.",
           "limitPartial": "The module list was only observed in part.",
           "limitStale": "The module list is a last-known observation, not a current one.",
           "limitUnavailable": "The module list source is not answering.",
@@ -952,7 +952,11 @@
         },
         "result": {
           "section": "Latest result",
-          "unavailable": "No result has been observed for this scope."
+          "unavailable": "No result has been observed for this scope.",
+          "pending": "The receiver accepted the operation and its result is still pending.",
+          "confirmed": "The receiver confirmed the operation result.",
+          "uncertain": "The receiver has not clearly confirmed the operation result.",
+          "recheck": "Read the result again"
         }
       },
       "workspace": {
@@ -1172,7 +1176,16 @@
           "title": "Modules",
           "description": "Create a custom module through guided questions or install an immutable Nivo solution for this workspace.",
           "eyebrow": "AgentOS module studio",
-          "create": "Create module"
+          "create": "Create module",
+          "checkedAt": "The list was checked at {time}",
+          "installedIn": "Installed in {name}",
+          "browseCatalog": "View available modules",
+          "installFlow": "Go to the dedicated install flow",
+          "runtimeLine": "Runtime: {value}",
+          "runtimeProvisioned": "Provisioned",
+          "runtimeNotProvisioned": "Not provisioned",
+          "runtimeUnavailable": "Unavailable",
+          "runtimeUnknown": "Not established"
         },
         "createPage": {
           "path": "Module creation path",

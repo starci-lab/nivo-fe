@@ -4,15 +4,21 @@ import { projectAgentOSShellView, type AgentOSShellReading, type AgentOSWorkspac
 import type { ShellSourceIdentity } from "@/modules/api/agentos-shell"
 import type { ShellSourceObservation, ShellSourceStanding } from "@/modules/agentos/shell-observation-store"
 import { AgentOSModuleCollectionPageBase } from "./component"
-import { MODULE_COLLECTION_GRID_CLASS_NAME, MODULE_COLLECTION_INTRO_CLASS_NAME, MODULE_COLLECTION_PAGE_CLASS_NAME } from "./classNames"
+import { MODULE_COLLECTION_GRID_CLASS_NAME, MODULE_COLLECTION_PAGE_CLASS_NAME } from "./classNames"
 
 const labels = {
     path: "Breadcrumb",
     workspace: "Acme workspace",
     title: "Modules",
-    description: "Manage the modules of this workspace",
-    eyebrow: "AgentOS",
-    create: "Create module"
+    checkedAt: "List checked at {time}",
+    installedIn: "Installed in {name}",
+    browseCatalog: "View available modules",
+    installFlow: "Go to the dedicated install flow",
+    runtimeLine: "Runtime: {value}",
+    runtimeProvisioned: "Provisioned",
+    runtimeNotProvisioned: "Not provisioned",
+    runtimeUnavailable: "Unavailable",
+    runtimeUnknown: "Not established"
 }
 
 const shellLabels: AgentOSWorkspaceControlCenterShellLabels = {
@@ -51,6 +57,10 @@ const shellLabels: AgentOSWorkspaceControlCenterShellLabels = {
     attentionUnsupported: "This source does not support attention.",
     resultSection: "Latest result",
     resultUnavailable: "No result has been observed.",
+    resultPending: "The receiver accepted the operation and its result is still pending.",
+    resultConfirmed: "The receiver confirmed the operation result.",
+    resultUncertain: "The receiver has not clearly confirmed the operation result.",
+    resultRecheck: "Read the result again",
     installEntry: "Install module"
 }
 
@@ -72,8 +82,14 @@ const reading = (sources: ReadonlyArray<ShellSourceObservation>): AgentOSShellRe
 
 const identity = sourceObservation({ kind: "core_registry" }, "available", { workspaceId: "workspace-1", instanceId: "instance-1", name: "Acme AgentOS", runtimeAvailability: "provisioned" })
 const runtime = sourceObservation({ kind: "runtime" }, "available", { runtimeGeneration: "gen-1", runtimeAvailability: "provisioned" })
+const runtimeAbsent = sourceObservation({ kind: "runtime" }, "available", { runtimeGeneration: null, runtimeAvailability: "not_provisioned" })
 const attention = sourceObservation({ kind: "attention", installationId: "installation-1" }, "unsupported")
 const inventory = (installations: ReadonlyArray<Readonly<Record<string, unknown>>>, extra: Partial<ShellSourceObservation> = {}) => sourceObservation({ kind: "installation_inventory" }, "available", { installations }, extra)
+const receipt = (queueState: string, kinds: ReadonlyArray<string> = []) => sourceObservation(
+    { kind: "receiver", installationId: "installation-1", intentId: "intent-1" },
+    "available",
+    { commandId: "c-1", receiverInstallationId: "installation-1", queueState, attempt: 1, possibleStartAt: null, observations: kinds.map((kind, index) => ({ observationId: `o-${index}`, kind, observedAt: `2026-09-26T03:0${index}:00.000Z` })), localTransportGaps: [] }
+)
 
 const renderPage = (shell: ReturnType<typeof projectAgentOSShellView>, onRetryShell = vi.fn()) => {
     const back = vi.fn()
@@ -92,14 +108,12 @@ describe("AgentOSModuleCollectionPageBase", () => {
         expect(screen.getByText(/sales-copilot · installed · installation-2/)).toBeInTheDocument()
     })
 
-    it("carries the exact owned identity, the source time and the single creation door as an anchor", () => {
+    it("keeps the compact module heading and the inventory's own checked-at statement above the regions", () => {
         const shell = projectAgentOSShellView(reading([identity, runtime, attention, inventory([row("installation-1", "sales-copilot", "Sales Copilot", "installed")])]), shellLabels)
         renderPage(shell)
-        expect(screen.getByRole("heading", { level: 1, name: "Acme AgentOS" })).toBeTruthy()
-        expect(screen.getByText(/instance-1/)).toBeInTheDocument()
-        expect(screen.getByText(shellLabels.sourceTime)).toBeInTheDocument()
-        const create = screen.getByRole("link", { name: labels.create })
-        expect(create.getAttribute("href")).toBe("/en/agentos/workspaces/workspace-1/modules/create")
+        expect(screen.getByRole("heading", { level: 1, name: "Modules" })).toBeTruthy()
+        expect(screen.getByText("List checked at 2026-09-26T03:00:00.000Z")).toBeInTheDocument()
+        expect(screen.queryByRole("link", { name: /create/i })).toBeNull()
     })
 
     it("discloses no workspace, installation or count while no session is signed in", () => {
@@ -107,7 +121,7 @@ describe("AgentOSModuleCollectionPageBase", () => {
         renderPage(shell)
         expect(screen.queryByText("Sales Copilot")).toBeNull()
         expect(screen.queryByText(/installation-1/)).toBeNull()
-        expect(screen.queryByRole("heading", { level: 1, name: "Acme AgentOS" })).toBeNull()
+        expect(screen.queryByText("Acme AgentOS")).toBeNull()
         expect(screen.getByRole("link", { name: shellLabels.signInAction }).getAttribute("href")).toBe("/authentication")
     })
 
@@ -120,14 +134,51 @@ describe("AgentOSModuleCollectionPageBase", () => {
         expect(retry).toHaveBeenCalled()
     })
 
-    it("keeps the resolved rhythm on the page, intro and collection owners without a second main landmark", () => {
+    it("centres one dominant card carrying the empty notice and its install entry in the same surface", () => {
+        const shell = projectAgentOSShellView(reading([identity, runtimeAbsent, attention, inventory([])]), shellLabels)
+        expect(shell.state).toBe("no-runtime")
+        expect(shell.inventoryEmpty).toBe(true)
+        const { view } = renderPage(shell)
+        const inventoryRegion = view.container.querySelector("[data-region='module-inventory']")
+        const card = inventoryRegion?.querySelector("[data-grammar-surface-composition='joined']")
+        expect(card).not.toBeNull()
+        // The empty notice and the next step live inside the same joined surface, message first.
+        const notice = card?.querySelector("[data-component='EmptyNotice']")
+        const entry = card?.querySelector("[data-region='install-entry']")
+        expect(notice).not.toBeNull()
+        expect(entry).not.toBeNull()
+        expect((notice?.compareDocumentPosition(entry ?? notice) ?? 0) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+        expect(screen.getByText(shellLabels.inventoryEmpty)).toBeInTheDocument()
+        expect(screen.getByText("Installed in Acme AgentOS")).toBeInTheDocument()
+        const browse = screen.getByRole("link", { name: labels.browseCatalog })
+        expect(browse.getAttribute("href")).toBe("/en/agentos/workspaces/workspace-1/modules/create")
+        expect(screen.getByRole("link", { name: labels.installFlow }).getAttribute("href")).toBe("/en/agentos/workspaces/workspace-1/modules/create")
+        expect(screen.getByText("Runtime: Not provisioned")).toBeInTheDocument()
+    })
+
+    it("never shows the joined empty card or its entry affordance when the inventory carries rows", () => {
+        const shell = projectAgentOSShellView(reading([identity, runtime, attention, inventory([row("installation-1", "sales-copilot", "Sales Copilot", "installed")])]), shellLabels)
+        renderPage(shell)
+        expect(screen.queryByText(shellLabels.inventoryEmpty)).toBeNull()
+        expect(screen.queryByRole("link", { name: labels.browseCatalog })).toBeNull()
+    })
+
+    it("shows a returned operation's own receipt beside the ledger without claiming a result early", () => {
+        const shell = projectAgentOSShellView(reading([identity, runtime, attention, inventory([row("installation-1", "sales-copilot", "Sales Copilot", "installed")]), receipt("claimed", ["progress"])]), shellLabels)
+        expect(shell.state).toBe("operation-pending")
+        renderPage(shell)
+        expect(screen.getByText(shellLabels.resultPending)).toBeInTheDocument()
+        expect(screen.getByText(/installation-1 · intent-1 · c-1/)).toBeInTheDocument()
+        expect(screen.queryByText(shellLabels.resultConfirmed)).toBeNull()
+        expect(screen.getByText("Sales Copilot")).toBeInTheDocument()
+    })
+
+    it("keeps the resolved rhythm on the page and collection owners without a second main landmark", () => {
         const shell = projectAgentOSShellView(reading([identity, runtime, attention, inventory([])]), shellLabels)
         const { view } = renderPage(shell)
         const page = view.container.querySelector("[data-contract='GAP-5']")
-        const intro = view.container.querySelector("[data-contract='GAP-3']")
         const collection = view.container.querySelector("[data-contract='GAP-4']")
         expect(page?.className).toBe(MODULE_COLLECTION_PAGE_CLASS_NAME)
-        expect(intro?.className).toBe(MODULE_COLLECTION_INTRO_CLASS_NAME)
         expect(collection?.className).toBe(MODULE_COLLECTION_GRID_CLASS_NAME)
         expect(view.container.querySelector("main")).toBeNull()
     })

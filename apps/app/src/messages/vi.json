@@ -921,11 +921,11 @@
         "identityInstance": "instance",
         "lastKnown": "Ghi nhận gần nhất",
         "retrying": "Đang thử lại",
-        "installEntry": "Cài module",
+        "installEntry": "Đi đến quy trình cài đặt riêng",
         "inventory": {
           "section": "Module đã cài",
-          "empty": "Không có module nào được cài.",
-          "emptyDescription": "Quan sát hiện tại đã đầy đủ và được phép, và không có module nào được cài.",
+          "empty": "Chưa có mô-đun nào được cài",
+          "emptyDescription": "Danh sách hiện tại đã được kiểm tra và không có cài đặt nào.",
           "limitPartial": "Danh sách module mới chỉ được quan sát một phần.",
           "limitStale": "Danh sách module là thông tin ghi nhận gần nhất, không phải hiện tại.",
           "limitUnavailable": "Nguồn danh sách module hiện không trả lời.",
@@ -952,7 +952,11 @@
         },
         "result": {
           "section": "Kết quả gần nhất",
-          "unavailable": "Chưa có kết quả nào được ghi nhận cho phạm vi này."
+          "unavailable": "Chưa có kết quả nào được ghi nhận cho phạm vi này.",
+          "pending": "Receiver đã tiếp nhận thao tác và đang chờ kết quả.",
+          "confirmed": "Receiver đã xác nhận kết quả thao tác.",
+          "uncertain": "Receiver chưa xác nhận rõ kết quả thao tác.",
+          "recheck": "Đọc lại kết quả"
         }
       },
       "workspace": {
@@ -1169,10 +1173,19 @@
         "page": {
           "path": "Đường dẫn module",
           "workspace": "Không gian làm việc",
-          "title": "Module",
+          "title": "Mô-đun",
           "description": "Tạo module tùy chỉnh qua câu hỏi gợi mở hoặc cài giải pháp Nivo bất biến cho không gian làm việc này.",
           "eyebrow": "Trình tạo module AgentOS",
-          "create": "Tạo module"
+          "create": "Tạo module",
+          "checkedAt": "Danh sách được kiểm tra lúc {time}",
+          "installedIn": "Đã cài trong {name}",
+          "browseCatalog": "Xem mô-đun khả dụng",
+          "installFlow": "Đi đến quy trình cài đặt riêng",
+          "runtimeLine": "Runtime: {value}",
+          "runtimeProvisioned": "Đã được cấp",
+          "runtimeNotProvisioned": "Chưa được cấp",
+          "runtimeUnavailable": "Hiện không khả dụng",
+          "runtimeUnknown": "Chưa xác định"
         },
         "createPage": {
           "path": "Đường dẫn tạo module",

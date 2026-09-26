@@ -68,6 +68,10 @@ const labels: AgentOSWorkspaceControlCenterShellLabels = {
     attentionUnsupported: "This source does not support attention.",
     resultSection: "Latest result",
     resultUnavailable: "No result has been observed.",
+    resultPending: "The receiver accepted the operation and its result is still pending.",
+    resultConfirmed: "The receiver confirmed the operation result.",
+    resultUncertain: "The receiver has not clearly confirmed the operation result.",
+    resultRecheck: "Read the result again",
     installEntry: "Install module"
 }
 
@@ -152,6 +156,52 @@ describe("projectAgentOSShellView", () => {
         const view = projectAgentOSShellView(reading([identity, runtime, sourceObservation({ kind: "installation_inventory" }, "loading")]), labels)
         expect(view.state).toBe("retrying")
         expect(view.retrying).toBe(true)
+    })
+
+    const receipt = (queueState: string, kinds: ReadonlyArray<string> = []) => sourceObservation(
+        { kind: "receiver", installationId: "installation-1", intentId: "intent-1" },
+        "available",
+        { payload: { commandId: "c-1", receiverInstallationId: "installation-1", queueState, attempt: 1, possibleStartAt: null, observations: kinds.map((kind, index) => ({ observationId: `o-${index}`, observationVersion: 1, receiverReceiptId: null, kind, schemaId: "s", payloadDigest: null, observedAt: "2026-09-26T03:0" + index + ":00.000Z" })), localTransportGaps: [] } }
+    )
+
+    it("shows an accepted but unfinished receiver command as pending, never as confirmed", () => {
+        const pending = projectAgentOSShellView(reading([identity, runtime, attention, inventoryOf([row("installation-1", "sales-copilot", "Sales Copilot", "installed")]), receipt("claimed", ["progress"])]), labels)
+        expect(pending.state).toBe("operation-pending")
+        expect(pending.operations).toHaveLength(1)
+        expect(pending.operations[0]).toMatchObject({ installationId: "installation-1", intentId: "intent-1", commandId: "c-1", receiverName: "Sales Copilot", standing: "pending" })
+        // The separate installation and runtime state stays its own answer beside the receipt.
+        expect(pending.installations).toHaveLength(1)
+        expect(pending.runtimeAvailability).toBe("provisioned")
+    })
+
+    it("shows a receiver's final observation on a settled queue as confirmed with its source time", () => {
+        const confirmed = projectAgentOSShellView(reading([identity, runtime, attention, inventoryOf([row("installation-1", "sales-copilot", "Sales Copilot", "installed")]), receipt("settled", ["progress", "final"])]), labels)
+        expect(confirmed.state).toBe("operation-confirmed")
+        expect(confirmed.operations[0]?.standing).toBe("confirmed")
+        expect(confirmed.operations[0]?.observedAt).toBe("2026-09-26T03:00:00.000Z")
+    })
+
+    it("never reads an ambiguous queue state or the receiver's own unknown as a confirmed result", () => {
+        for (const queueState of ["possible_start", "quarantined", "cancelled_before_start", "settled"]) {
+            const view = projectAgentOSShellView(reading([identity, runtime, attention, inventoryOf([row("installation-1", "sales-copilot", "Sales Copilot", "installed")]), receipt(queueState, queueState === "settled" ? ["outcome_unknown"] : [])]), labels)
+            expect([queueState, view.state]).toEqual([queueState, "operation-uncertain"])
+        }
+    })
+
+    it("keeps an unread or refused receipt as its own source standing rather than an operation state", () => {
+        const reading2 = reading([identity, runtime, attention, inventoryOf([row("installation-1", "sales-copilot", "Sales Copilot", "installed")]), sourceObservation({ kind: "receiver", installationId: "installation-1", intentId: "intent-1" }, "loading")])
+        const pendingRead = projectAgentOSShellView(reading2, labels)
+        expect(pendingRead.state).toBe("installed-current")
+        expect(pendingRead.operations[0]?.standing).toBe("loading")
+        const refusedReceipt = projectAgentOSShellView(reading([identity, runtime, attention, inventoryOf([row("installation-1", "sales-copilot", "Sales Copilot", "installed")]), sourceObservation({ kind: "receiver", installationId: "installation-1", intentId: "intent-1" }, "refused")]), labels)
+        expect(refusedReceipt.state).toBe("installed-current")
+        expect(refusedReceipt.operations[0]?.standing).toBe("refused")
+    })
+
+    it("clears operation identities together with the rest of the scope on a refused access", () => {
+        const denied = projectAgentOSShellView(reading([identity, sourceObservation({ kind: "installation_inventory" }, "refused"), receipt("claimed", ["progress"])]), labels)
+        expect(denied.state).toBe("access-denied")
+        expect(denied.operations).toEqual([])
     })
 })
 

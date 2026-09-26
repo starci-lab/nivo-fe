@@ -25,8 +25,10 @@ import { toLocale } from "@/i18n/config";
 import { useSession, type SessionState } from "@/modules/auth/session";
 import {
     formatShellSourceIdentity,
+    readAgentosShellCommandReceipt,
     readAgentosShellOverview,
     resolveAgentosShellNavigation,
+    type ShellCommandReceiptAnswer,
     type ShellGatewayOutcome,
     type ShellNavigationOutcome,
     type ShellOverviewAnswer,
@@ -39,9 +41,11 @@ import {
     initialShellObservationSnapshot,
     isShellReadBlocked,
     reduceShellObservation,
+    shellOperationIdentities,
     shellSelectionIdentities,
     type ShellObservationEvent,
     type ShellObservationSnapshot,
+    type ShellOperationIntent,
     type ShellSelection,
     type ShellSessionStanding,
     type ShellSourceObservation,
@@ -54,6 +58,11 @@ export interface AgentOSShellOptions {
     readonly workspaceId: string;
     readonly instanceId: string;
     readonly installationIds: ReadonlyArray<string>;
+    /**
+     * The receiver-owned operations the owner returned with: each carries the stable command
+     * identity its receipt is read under. Absent identities are never guessed from another source.
+     */
+    readonly operations?: ReadonlyArray<ShellOperationIntent>;
 }
 
 /** Everything a view of the connected shell needs, and nothing that could change a domain. */
@@ -112,6 +121,53 @@ const outcomeForRead = (outcome: ShellGatewayOutcome<ShellOverviewAnswer>, read:
 };
 
 /**
+ * One receiver source's outcome from its command-receipt answer.
+ *
+ * The receipt carries a queue state and receiver observations, none of which is a promise of
+ * completion: the payload is preserved verbatim so the view decides pending, confirmed or uncertain
+ * from the receiver's own words. A receipt that never arrives cannot become a result.
+ */
+const outcomeForReceipt = (outcome: ShellGatewayOutcome<ShellCommandReceiptAnswer>): ShellSourceOutcome => {
+    if (outcome.state === "answered") {
+        const projection = outcome.answer.commandObservation;
+        if (projection.availability === "refused") return { kind: "refused" };
+        if (projection.availability === "unavailable") return { kind: "unavailable" };
+        if (projection.availability === "unsupported") return { kind: "unsupported" };
+        const observation = projection.projection;
+        // A partial projection carries no command observation at all: it is a limit, not a receipt.
+        if (observation === null) return { kind: "observation", availability: "partial", freshness: "current", completeness: "partial", observedAt: null, payload: null };
+        const observedAts = observation.observations.map(entry => entry.observedAt).filter((value): value is string => value !== null).sort();
+        return {
+            kind: "observation",
+            availability: projection.availability,
+            freshness: "current",
+            completeness: projection.availability === "available" ? "complete" : "partial",
+            observedAt: observedAts.at(-1) ?? observation.possibleStartAt,
+            payload: {
+                commandId: observation.commandId,
+                receiverInstallationId: observation.receiverInstallationId,
+                queueState: observation.queueState,
+                attempt: observation.attempt,
+                possibleStartAt: observation.possibleStartAt,
+                observations: [...observation.observations],
+                localTransportGaps: [...observation.localTransportGaps]
+            }
+        };
+    }
+    if (outcome.state === "refused") return requestRefusalOutcome(outcome.status);
+    if (outcome.state === "unsupported") return { kind: "unsupported" };
+    return { kind: "unavailable" };
+};
+
+/** The command identity an operation carries for one receiver source, or null when none matches. */
+const commandIdFor = (operations: ReadonlyArray<ShellOperationIntent>, installationId: string, intentId: string): string | null => {
+    for (const operation of operations) {
+        if (operation.installationId === installationId && operation.intentId === intentId) return operation.commandId;
+    }
+    return null;
+};
+
+/**
  * Own one AgentOS shell selection: its sources, its session standing and its navigation.
  *
  * @param options - The selected workspace and instance, and the installations its sources cover.
@@ -121,6 +177,8 @@ const outcomeForRead = (outcome: ShellGatewayOutcome<ShellOverviewAnswer>, read:
 export const useAgentOSShell = (options: AgentOSShellOptions) => {
     const { workspaceId, instanceId } = options;
     const installationKey = [...options.installationIds].sort((left, right): number => left.localeCompare(right)).join("|");
+    const operations = options.operations ?? [];
+    const operationKey = operations.map(operation => `${operation.installationId} ${operation.intentId} ${operation.commandId}`).sort().join("|");
     const session = useSession();
     const sessionStatus = session.state.status;
     const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null;
@@ -137,6 +195,10 @@ export const useAgentOSShell = (options: AgentOSShellOptions) => {
     // The latest store standing, for the one decision that must be made before a request is sent.
     const blockedRef = useRef(false);
     blockedRef.current = isShellReadBlocked(state);
+    // The operations list is rebuilt by callers each render; the reads it feeds change only with
+    // `operationKey`, so the current contents live behind a ref rather than a callback identity.
+    const operationsRef = useRef<ReadonlyArray<ShellOperationIntent>>(operations);
+    operationsRef.current = operations;
 
     const dispatch = useCallback((build: (current: ShellObservationSnapshot) => ReadonlyArray<ShellObservationEvent>) => {
         setState(current => build(current).reduce((next, event) => reduceShellObservation(next, event).state, current));
@@ -158,21 +220,51 @@ export const useAgentOSShell = (options: AgentOSShellOptions) => {
             readGeneration: read.readGeneration
         })));
         void (async () => {
-            const outcome = await readAgentosShellOverview(accessToken, { workspaceId, instanceId }, selectionGeneration, reads);
-            if (outcome.state === "unauthenticated") {
+            // A receiver source is read through its own command-receipt route, never through the
+            // overview: the receipt carries the queue state the overview does not know. Every other
+            // identity keeps the one registered selection read.
+            const overviewReads = reads.filter(read => read.identity.kind !== "receiver");
+            const receiptReads = reads.filter(read => read.identity.kind === "receiver");
+            const overviewOutcome = overviewReads.length === 0 ? null : await readAgentosShellOverview(accessToken, { workspaceId, instanceId }, selectionGeneration, overviewReads);
+            if (overviewOutcome !== null && overviewOutcome.state === "unauthenticated") {
                 // A session outcome belongs to the whole selection: it clears every protected payload
                 // at once and blocks reads until a fresh session check succeeds.
                 dispatch(current => [{ type: "require-sign-in", sessionEpoch: current.sessionEpoch + 1 }]);
                 return;
             }
-            dispatch(current => reads.map(read => ({
-                type: "apply-outcome",
-                sessionEpoch: current.sessionEpoch,
-                selection: current.selection,
-                identity: read.identity,
-                readGeneration: read.readGeneration,
-                outcome: outcomeForRead(outcome, read)
-            })));
+            const receiptOutcomes = await Promise.all(receiptReads.map(async read => {
+                if (read.identity.kind !== "receiver") return { read, outcome: { kind: "unsupported" } as ShellSourceOutcome };
+                const commandId = commandIdFor(operationsRef.current, read.identity.installationId, read.identity.intentId);
+                if (commandId === null || instanceId.length === 0) return { read, outcome: { kind: "unsupported" } as ShellSourceOutcome };
+                const outcome = await readAgentosShellCommandReceipt(accessToken, {
+                    workspaceId,
+                    instanceId,
+                    commandId,
+                    sourceIdentity: formatShellSourceIdentity(read.identity),
+                    readGeneration: read.readGeneration,
+                    selectionGeneration
+                });
+                if (outcome.state === "unauthenticated") return { read, outcome: null };
+                return { read, outcome: outcomeForReceipt(outcome) };
+            }));
+            if (receiptOutcomes.some(entry => entry.outcome === null)) {
+                dispatch(current => [{ type: "require-sign-in", sessionEpoch: current.sessionEpoch + 1 }]);
+                return;
+            }
+            const outcomes = new Map<string, ShellSourceOutcome>();
+            if (overviewOutcome !== null) for (const read of overviewReads) outcomes.set(formatShellSourceIdentity(read.identity), outcomeForRead(overviewOutcome, read));
+            for (const entry of receiptOutcomes) outcomes.set(formatShellSourceIdentity(entry.read.identity), entry.outcome as ShellSourceOutcome);
+            dispatch(current => reads.flatMap(read => {
+                const outcome = outcomes.get(formatShellSourceIdentity(read.identity));
+                return outcome === undefined ? [] : [{
+                    type: "apply-outcome" as const,
+                    sessionEpoch: current.sessionEpoch,
+                    selection: current.selection,
+                    identity: read.identity,
+                    readGeneration: read.readGeneration,
+                    outcome
+                }];
+            }));
         })();
     }, [accessToken, dispatch, instanceId, selectionGeneration, workspaceId]);
 
@@ -197,8 +289,11 @@ export const useAgentOSShell = (options: AgentOSShellOptions) => {
     /** Read the whole selection: on a session, on a selection change, and on a refresh or return. */
     useEffect(() => {
         if (sessionStatus !== "signed-in") return;
-        runReads(shellSelectionIdentities(installationKey.length === 0 ? [] : installationKey.split("|")));
-    }, [installationKey, readTrigger, runReads, sessionStatus]);
+        runReads([
+            ...shellSelectionIdentities(installationKey.length === 0 ? [] : installationKey.split("|")),
+            ...shellOperationIdentities(operationsRef.current)
+        ]);
+    }, [installationKey, operationKey, readTrigger, runReads, sessionStatus]);
 
     const readSelection = useCallback(() => setReadTrigger(current => current + 1), []);
     const retrySource = useCallback((identity: ShellSourceIdentity) => runReads([identity]), [runReads]);

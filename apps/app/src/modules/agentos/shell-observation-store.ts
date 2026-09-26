@@ -134,6 +134,34 @@ export const shellSelectionIdentities = (installationIds: ReadonlyArray<string>)
     return identities.sort((left, right) => compareShellSourceIdentity(formatShellSourceIdentity(left), formatShellSourceIdentity(right)));
 };
 
+/**
+ * One receiver-owned operation the owner returned with.
+ *
+ * `installationId` and `intentId` name the receiver source the receipt read answers under; `commandId`
+ * is the stable command identity the command-receipt route is asked for. All three come from the
+ * caller's own return context - the store never derives one from another source's payload.
+ */
+export interface ShellOperationIntent {
+    readonly installationId: string;
+    readonly intentId: string;
+    readonly commandId: string;
+}
+
+/**
+ * The receiver observation sources a selection reads for the operations it returned with.
+ *
+ * @param operations - The receiver-owned intents the caller holds a command identity for.
+ * @returns One `receiver:{installationId,intentId}` identity per distinct receiver intent.
+ */
+export const shellOperationIdentities = (operations: ReadonlyArray<ShellOperationIntent>): ReadonlyArray<ShellSourceIdentity> => {
+    const identities: Array<ShellSourceIdentity> = [];
+    for (const operation of operations) {
+        const identity: ShellSourceIdentity = { kind: "receiver", installationId: operation.installationId, intentId: operation.intentId };
+        if (identities.every(known => formatShellSourceIdentity(known) !== formatShellSourceIdentity(identity))) identities.push(identity);
+    }
+    return identities.sort((left, right) => compareShellSourceIdentity(formatShellSourceIdentity(left), formatShellSourceIdentity(right)));
+};
+
 /** The store's initial state: nothing read, the session not yet classified for this selection. */
 export const initialShellObservationSnapshot = (selection: ShellSelection, sessionEpoch: number): ShellObservationSnapshot => ({ selection, sessionEpoch, session: "established", sources: [] });
 

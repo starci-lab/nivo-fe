@@ -31,6 +31,7 @@ const WORKSPACE = "11111111-1111-4111-8111-111111111111"
 const INSTANCE = "22222222-2222-4222-8222-222222222222"
 const OTHER_WORKSPACE = "99999999-9999-4999-8999-999999999999"
 const INSTALLATION = "33333333-3333-4333-8333-333333333333"
+const COMMAND = "44444444-4444-4444-8444-444444444444"
 const TOKEN = "token-1"
 
 const options: AgentOSShellOptions = { workspaceId: WORKSPACE, instanceId: INSTANCE, installationIds: [INSTALLATION] }
@@ -109,6 +110,64 @@ describe("useAgentOSShell", () => {
         expect(sentUrls()[0]).toContain(`read=runtime:1`)
         expect(sentUrls()[0]).toContain(`read=attention%3A%7B${INSTALLATION}%7D:1`)
         expect(sentUrls()[0]).toContain("selectionGeneration=shell-")
+    })
+
+    it("reads a returned operation's receipt through its own receiver source, never through the overview", async () => {
+        fetchMock.mockImplementation(async (input: string) => {
+            const url = new URL(String(input))
+            if (url.pathname.includes("/command-receipts/")) {
+                return {
+                    status: 200,
+                    json: async () => ({
+                        kind: "command_observation",
+                        selectionGeneration: url.searchParams.get("selectionGeneration"),
+                        sourceIdentity: url.searchParams.get("sourceIdentity"),
+                        readGeneration: Number(url.searchParams.get("readGeneration")),
+                        core: { availability: "available", reason: null, workspaceId: WORKSPACE, instanceId: INSTANCE, name: "Support", runtimeGeneration: "generation-1", runtimeAvailability: "provisioned", inventory: null },
+                        commandObservation: {
+                            availability: "available",
+                            reason: null,
+                            projection: {
+                                commandId: COMMAND,
+                                receiverInstallationId: INSTALLATION,
+                                queueState: "claimed",
+                                attempt: 1,
+                                possibleStartAt: null,
+                                observations: [{ observationId: "o-1", observationVersion: 1, receiverReceiptId: null, kind: "progress", schemaId: "s", payloadDigest: null, observedAt: "2026-09-26T03:00:00.000Z" }],
+                                localTransportGaps: []
+                            }
+                        }
+                    })
+                }
+            }
+            const reads = url.searchParams.getAll("read")
+            return {
+                status: 200,
+                json: async () => ({
+                    kind: "overview",
+                    selectionGeneration: url.searchParams.get("selectionGeneration"),
+                    core: null,
+                    sources: reads.map(read => {
+                        const separator = read.lastIndexOf(":")
+                        return { sourceIdentity: decodeURIComponent(read.slice(0, separator)), readGeneration: Number(read.slice(separator + 1)), availability: "available", freshness: "current", completeness: "complete", observedAt: "2026-09-25T03:00:00.000Z", payload: {} }
+                    })
+                })
+            }
+        })
+        const { result } = renderShell({ ...options, operations: [{ installationId: INSTALLATION, intentId: "intent-1", commandId: COMMAND }] })
+
+        await waitFor(() => expect(result.current.sources).toHaveLength(7))
+
+        const receiptUrl = sentUrls().find(url => url.includes(`/command-receipts/${COMMAND}`))
+        expect(receiptUrl).toBeDefined()
+        expect(receiptUrl).toContain(`sourceIdentity=${encodeURIComponent(`receiver:{${INSTALLATION},intent-1}`)}`)
+        // No operation identity ever joins the overview's read set.
+        const overviewUrls = sentUrls().filter(url => !url.includes("/command-receipts/"))
+        expect(overviewUrls.length).toBeGreaterThan(0)
+        expect(overviewUrls.every(url => !url.includes("receiver%3A"))).toBe(true)
+        const receiver = result.current.sources.find(entry => entry.identity.kind === "receiver")
+        expect(receiver?.state).toBe("available")
+        expect(receiver?.payload).toMatchObject({ commandId: COMMAND, queueState: "claimed" })
     })
 
     it("asks for nothing at all while the session is still anonymous", async () => {

@@ -3,6 +3,7 @@ import {
     initialShellObservationSnapshot,
     isShellReadBlocked,
     reduceShellObservation,
+    shellOperationIdentities,
     shellSelectionIdentities,
     shellSourceObservation,
     type ShellObservationEvent,
@@ -73,6 +74,38 @@ describe("shellSelectionIdentities", () => {
             "core_registry", "installation_inventory", "runtime"
         ])
         expect(shellSelectionIdentities([])).toHaveLength(3)
+    })
+})
+
+describe("shellOperationIdentities", () => {
+    it("gives each returned operation its own receiver source and never duplicates one", () => {
+        const operations = [
+            { installationId: INSTALLATION, intentId: "intent-1", commandId: "command-1" },
+            { installationId: INSTALLATION, intentId: "intent-2", commandId: "command-2" },
+            { installationId: OTHER_INSTANCE, intentId: "intent-1", commandId: "command-3" },
+            { installationId: INSTALLATION, intentId: "intent-1", commandId: "command-4" }
+        ]
+        const identities = shellOperationIdentities(operations)
+        expect(identities).toEqual([
+            { kind: "receiver", installationId: INSTALLATION, intentId: "intent-1" },
+            { kind: "receiver", installationId: INSTALLATION, intentId: "intent-2" },
+            { kind: "receiver", installationId: OTHER_INSTANCE, intentId: "intent-1" }
+        ])
+        expect(shellOperationIdentities([])).toEqual([])
+    })
+
+    it("lets a receiver source run through the same identity-bound begin/apply cycle", () => {
+        const receiver: ShellSourceIdentity = { kind: "receiver", installationId: INSTALLATION, intentId: "intent-1" }
+        const current = readSource(state(), registry, 1)
+        const begun = reduceShellObservation(current, begin(receiver, 1))
+        expect(begun.transition).toBe("begin-read")
+        const settled = reduceShellObservation(begun.state, settle(receiver, 1, { ...available, payload: { queueState: "claimed" } }))
+        expect(settled.transition).toBe("apply-current")
+        expect(shellSourceObservation(settled.state, receiver)?.state).toBe("available")
+        // An answer from an ended session of the same receiver source changes nothing.
+        const late = reduceShellObservation(settled.state, settle(receiver, 1, { kind: "unavailable" }, { sessionEpoch: 0 }))
+        expect(late.transition).toBe("none")
+        expect(shellSourceObservation(late.state, receiver)?.state).toBe("available")
     })
 })
 
