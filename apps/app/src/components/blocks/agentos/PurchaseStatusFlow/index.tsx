@@ -152,7 +152,7 @@ const phaseOf = (purchase: WorkspaceCheckoutStatusView): PurchasePhase => {
             return "paid";
         case "ready":
         case "renewed":
-            return purchase.readiness.state === "ready" ? "ready" : purchase.readiness.state === "unavailable" ? "provisioning-unknown" : "provisioning";
+            return readinessPhaseOf(purchase.readiness.state);
         case "provisioning-refused":
             return refundPhaseOf(purchase);
         case "provisioning":
@@ -172,11 +172,17 @@ const phaseOf = (purchase: WorkspaceCheckoutStatusView): PurchasePhase => {
                 case "failed-terminal":
                     return "provisioning-failed-terminal";
                 case "ready":
-                    return purchase.readiness.state === "ready" ? "ready" : purchase.readiness.state === "unavailable" ? "provisioning-unknown" : "provisioning";
+                    return readinessPhaseOf(purchase.readiness.state);
                 default:
                     return "provisioning";
             }
     }
+};
+
+const readinessPhaseOf = (state: WorkspaceCheckoutStatusView["readiness"]["state"]): PurchasePhase => {
+    if (state === "ready") return "ready";
+    if (state === "unavailable") return "provisioning-unknown";
+    return "provisioning";
 };
 
 /** The registered entry destination is a named route; only the workspace shell maps onto this app. */
@@ -243,7 +249,10 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
     const purchaserClaims = useMemo(() => accessToken === null ? {} : purchaserClaimsOf(accessToken), [accessToken]);
     const purchaserName = purchaserNameOf(purchaserClaims);
     const purchaserDetail = purchaserDetailOf(purchaserClaims, purchaserName);
-    const purchaserFact = purchaserName === null ? null : purchaserDetail === null ? purchaserName : `${purchaserName} · ${purchaserDetail}`;
+    let purchaserFact: string | null = null;
+    if (purchaserName !== null) {
+        purchaserFact = purchaserDetail === null ? purchaserName : `${purchaserName} · ${purchaserDetail}`;
+    }
 
     const copy = useMemo<PurchaseStatusCopy>(() => {
         const kebab = (value: string): string => value.replace(/-([a-z])/g, (_match, letter: string) => letter.toUpperCase());
@@ -385,7 +394,12 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
             entryConflictNotice: t("entryConflictNotice"),
             purchaseStateLabel: state => t.has(`stateLabel.${kebab(state)}`) ? t(`stateLabel.${kebab(state)}`) : state,
             sourceLabel: source => {
-                const name = source === "payment-reconciliation" ? "payment" : source === "platform-billing-ledger" ? "billing" : source === "workspace-provisioning" ? "provisioning" : source;
+                const sourceNames: Readonly<Record<string, string>> = {
+                    "payment-reconciliation": "payment",
+                    "platform-billing-ledger": "billing",
+                    "workspace-provisioning": "provisioning"
+                };
+                const name = sourceNames[source] ?? source;
                 return t.has(`sourceLabel.${name}`) ? t(`sourceLabel.${name}`) : source;
             },
             sourceStateLabel: keyed("sourceStateLabel"),
