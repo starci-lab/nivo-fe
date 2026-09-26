@@ -182,9 +182,10 @@ export const GROUP_CHAT_SHEET_HANDLE_CLASS_NAME = cn("mx-auto", "my-0.5", "h-1",
  * Sheet title row under the handle; the close control sits at the end. A11Y-4 repair
  * (office-r7-rail-control-hit-area, owner decision office-hit-area-decision-r1): the close
  * IconButton's operable box grows to the 44x44 CSS px minimum while the approved round glyph
- * visual stays - size-11 takes the border box to 44, p-0.5 plus background-clip: content-box
- * keeps the painted circle at the accepted 40px, and -m-0.5 keeps the row's layout footprint
- * unchanged so nothing else moves.
+ * visual stays - size-11 takes the border box to 44, p-0.5! plus background-clip: content-box
+ * keeps the painted circle at the accepted 40px (the unlayered icon-only padding reset in
+ * globals.css otherwise wins a plain layered padding utility), and -m-0.5 keeps the row's
+ * layout footprint unchanged so nothing else moves.
  */
 export const GROUP_CHAT_SHEET_HEAD_CLASS_NAME = cn(
   "flex",
@@ -196,7 +197,7 @@ export const GROUP_CHAT_SHEET_HEAD_CLASS_NAME = cn(
   "py-0.5",
   "[&_.starci-core-icon-button]:size-11",
   "[&_.starci-core-icon-button]:-m-0.5",
-  "[&_.starci-core-icon-button]:p-0.5",
+  "[&_.starci-core-icon-button]:p-0.5!",
   "[&_.starci-core-icon-button]:bg-clip-content",
 );
 
@@ -273,10 +274,11 @@ export const GROUP_CHAT_RAIL_LABEL_ICON_CLASS_NAME = cn("text-muted-foreground",
  * The rail section header row carries the label and an optional trailing control. A11Y-4
  * repair (office-r7-rail-control-hit-area, owner decision office-hit-area-decision-r1): the
  * invite IconButton's operable box grows to the 44x44 CSS px minimum while the approved round
- * glyph visual stays - size-11 takes the border box to 44, p-1 plus background-clip:
+ * glyph visual stays - size-11 takes the border box to 44, p-1! plus background-clip:
  * content-box keeps the painted circle at the accepted 36px (the rail only renders at
- * >=48rem, where the icon-only button is 36px), and -m-1 keeps the row's layout footprint
- * unchanged so the roster position is identical.
+ * >=48rem, where the icon-only button is 36px; the unlayered icon-only padding reset in
+ * globals.css otherwise wins a plain layered padding utility), and -m-1 keeps the row's
+ * layout footprint unchanged so the roster position is identical.
  */
 export const GROUP_CHAT_RAIL_HEAD_ROW_CLASS_NAME = cn(
   "flex",
@@ -287,7 +289,7 @@ export const GROUP_CHAT_RAIL_HEAD_ROW_CLASS_NAME = cn(
   "px-4",
   "[&_.starci-core-icon-button]:size-11",
   "[&_.starci-core-icon-button]:-m-1",
-  "[&_.starci-core-icon-button]:p-1",
+  "[&_.starci-core-icon-button]:p-1!",
   "[&_.starci-core-icon-button]:bg-clip-content",
 );
 
