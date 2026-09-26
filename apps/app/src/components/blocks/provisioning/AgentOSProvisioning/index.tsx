@@ -109,7 +109,7 @@ const phaseFromPurchase = (purchase: WorkspaceCheckoutStatusView, t: Provisionin
   const purchaseId = purchase.purchaseId;
   const detail = purchase.offer.displayName;
   const stateLabel = (state: string): string => {
-    const key = state.replace(/-([a-z])/g, (_match, letter: string) => letter.toUpperCase());
+    const key = state.replace(/-([a-z])/g, (_match, letter: string): string => letter.toUpperCase());
     return tShared.has(`agentos.purchaseStatus.stateLabel.${key}`) ? tShared(`agentos.purchaseStatus.stateLabel.${key}`) : state;
   };
   switch (purchase.state) {
@@ -227,7 +227,7 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
   const entryQuery = useQueryWorkspaceCheckoutEntrySwr(entryRequest, entryAsked && readyWorkspaceId !== null);
   const entryAnswer = entryQuery.data;
   const refreshStatus = statusQuery.mutate;
-  const reconcile = useCallback(async () => {
+  const reconcile = useCallback(async (): Promise<void> => {
     if (!isResume) return;
     setReconciling(true);
     try {
@@ -239,7 +239,7 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
     }
   }, [isResume, refreshStatus]);
   /* The safe-recovery command reconciles the same purchase through the identities already observed. */
-  const recover = useCallback(async (purchase: WorkspaceCheckoutStatusView, fallback: AgentOSFlow) => {
+  const recover = useCallback(async (purchase: WorkspaceCheckoutStatusView, fallback: AgentOSFlow): Promise<void> => {
     if (recoverPurchase.isMutating) return;
     setReconciling(true);
     try {

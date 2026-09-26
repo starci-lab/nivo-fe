@@ -246,7 +246,7 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
     const purchaserFact = purchaserName === null ? null : purchaserDetail === null ? purchaserName : `${purchaserName} · ${purchaserDetail}`;
 
     const copy = useMemo<PurchaseStatusCopy>(() => {
-        const kebab = (value: string) => value.replace(/-([a-z])/g, (_match, letter: string) => letter.toUpperCase());
+        const kebab = (value: string): string => value.replace(/-([a-z])/g, (_match, letter: string) => letter.toUpperCase());
         const keyed = (prefix: string) => (value: string) => t.has(`${prefix}.${value}`) ? t(`${prefix}.${value}`) : value;
         return {
             path: t("path"),
@@ -403,14 +403,14 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
 
     const timeOf = (iso: string) => format.dateTime(new Date(iso), { hour: "2-digit", minute: "2-digit" });
     const stampOf = (iso: string) => format.dateTime(new Date(iso), { dateStyle: "medium", timeStyle: "short" });
-    const dayOf = (iso: string) => format.dateTime(new Date(iso), { dateStyle: "medium" });
+    const dayOf = (iso: string): string => format.dateTime(new Date(iso), { dateStyle: "medium" });
     /* The amount keeps its currency inseparable and formats under the offer's own currency. */
-    const amountOf = (amount: string, currency: string) => {
+    const amountOf = (amount: string, currency: string): string => {
         const value = Number(amount);
         return Number.isFinite(value) ? format.number(value, { style: "currency", currency, maximumFractionDigits: 0 }) : `${amount} ${currency}`;
     };
     /* Elapsed is measured against the last authoritative read, never a render-time clock. */
-    const elapsedOf = (iso: string, now: string) => `${Math.max(1, Math.round((Date.parse(now) - Date.parse(iso)) / 60000))}m`;
+    const elapsedOf = (iso: string, now: string): string => `${Math.max(1, Math.round((Date.parse(now) - Date.parse(iso)) / 60000))}m`;
 
     const answer = statusQuery.data;
     /* A fresh authoritative read supersedes every locally kept refusal and every entry-carried view. */
@@ -473,7 +473,7 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
 
     const refreshStatus = statusQuery.mutate;
     /* Re-read the same purchase's status; the recover command refreshes the same keyed read itself. */
-    const reconcile = useCallback(async () => {
+    const reconcile = useCallback(async (): Promise<void> => {
         try {
             await refreshStatus();
         } catch {
@@ -484,7 +484,7 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
 
     /* The safe-recovery command reconciles the same purchase through the identities already
        observed; it never starts a second purchase or workspace. */
-    const recover = useCallback(async () => {
+    const recover = useCallback(async (): Promise<void> => {
         if (purchase === null || recoverPurchase.isMutating) return;
         setRecoverRefusal(null);
         setEntryRefusal(null);
