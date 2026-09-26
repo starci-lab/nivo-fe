@@ -522,6 +522,21 @@ describe("PurchaseStatusFlow", () => {
     })
 
     it.each([
+        ["automatic", "Renews automatically"],
+        ["auto", "Renews automatically"],
+        ["explicit", "Manual re-authorization"],
+        ["manual", "Manual re-authorization"],
+        ["none", "No renewal — one-time purchase"],
+        ["never", "No renewal — one-time purchase"],
+        ["future-policy", "future-policy"],
+    ])("preserves the published %s renewal mode", async (renewalMode, expected) => {
+        mocks.status.data = statusAnswer(purchase({ ...paidFacets, state: "provisioning", provisioning: provisioningOrder("running"), offer: { ...offer, renewalMode } }))
+        render(<PurchaseStatusFlow purchaseId="purchase-1" surface="provisioning" />)
+        await waitFor(() => expect(flow()).toContain('"state":"provisioning"'))
+        expect(flow()).toContain(`"label":"Renewal","value":"${expected}"`)
+    })
+
+    it.each([
         { status: "refused", code: "workspace-not-ready", purchaseId: "purchase-1" },
         { status: "unavailable", code: "entry-source-unavailable", purchaseId: "purchase-1" },
     ])("keeps the ready purchase mounted when entry returns %s", async (entry) => {
