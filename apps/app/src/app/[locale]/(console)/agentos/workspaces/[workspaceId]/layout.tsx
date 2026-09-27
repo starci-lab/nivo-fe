@@ -23,7 +23,7 @@ const workspaceTabFor = (pathname: string, modulesRoute: string): "overview" | "
  * route tabs above every nested workspace and installed-module route. Sibling purchase and
  * creation routes live outside this segment, so they never enter this header.
  */
-const AgentOSWorkspaceNestedLayout = ({ children }: AgentOSWorkspaceNestedLayoutProps) => {
+const Layout = ({ children }: AgentOSWorkspaceNestedLayoutProps) => {
     const { workspaceId } = useParams<{ readonly workspaceId: string }>();
     const t = useTranslations("console.agentos");
     const pathname = usePathname();
@@ -55,4 +55,4 @@ const AgentOSWorkspaceNestedLayout = ({ children }: AgentOSWorkspaceNestedLayout
     </div>;
 };
 
-export default AgentOSWorkspaceNestedLayout;
+export default Layout;

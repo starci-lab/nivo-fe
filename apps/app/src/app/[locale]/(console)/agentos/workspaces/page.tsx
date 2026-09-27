@@ -14,7 +14,7 @@ const SECTIONS_CLASS_NAME = "flex min-w-0 flex-col gap-6"
 type AgentOSWorkspacesRouteProps = { readonly params: Promise<{ readonly locale: string }> }
 
 /** Mount the workspaces list and the new-workspace purchase entry. */
-const AgentOSWorkspacesRoute = async ({ params }: AgentOSWorkspacesRouteProps) => {
+const Page = async ({ params }: AgentOSWorkspacesRouteProps) => {
     const { locale } = await params
     const t = await getTranslations("console.agentos")
     return <PageContainer measure="product"><div className={SECTIONS_CLASS_NAME} data-contract="GAP-5">
@@ -23,4 +23,4 @@ const AgentOSWorkspacesRoute = async ({ params }: AgentOSWorkspacesRouteProps) =
     </div></PageContainer>
 }
 
-export default AgentOSWorkspacesRoute
+export default Page

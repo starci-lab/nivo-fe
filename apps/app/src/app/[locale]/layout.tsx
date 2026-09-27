@@ -33,7 +33,7 @@ export const viewport: Viewport = {
   initialScale: 1
 };
 
-/** Props for {@link RootLayout}. */
+/** Props for {@link Layout}. */
 type RootLayoutProps = {
   /** The rendered route. */
   readonly children: ComponentProps<"div">["children"];
@@ -82,7 +82,7 @@ export const generateStaticParams = () => routing.locales.map(locale => ({
  * @param input - The rendered route.
  * @returns The html document.
  */
-const RootLayout = async ({
+const Layout = async ({
   children,
   params
 }: RootLayoutProps) => {
@@ -107,4 +107,4 @@ const RootLayout = async ({
             </body>
         </html>;
 };
-export default RootLayout;
+export default Layout;

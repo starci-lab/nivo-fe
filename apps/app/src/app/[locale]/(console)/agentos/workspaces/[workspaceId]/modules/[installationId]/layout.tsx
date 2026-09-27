@@ -63,7 +63,7 @@ const installationGroups = (
  * Add the module subnavigation of this workspace's installations and the setup/operate/test/
  * settings/diagnostics route tabs, all bound to the exact workspace and installation segments.
  */
-const AgentOSModuleInstallationLayout = ({ children }: AgentOSModuleInstallationLayoutProps) => {
+const Layout = ({ children }: AgentOSModuleInstallationLayoutProps) => {
     const { workspaceId, installationId } = useParams<{ readonly workspaceId: string; readonly installationId: string }>();
     const t = useTranslations("console.agentos.modules.shell");
     const pathname = usePathname();
@@ -111,4 +111,4 @@ const AgentOSModuleInstallationLayout = ({ children }: AgentOSModuleInstallation
     </div>;
 };
 
-export default AgentOSModuleInstallationLayout;
+export default Layout;
