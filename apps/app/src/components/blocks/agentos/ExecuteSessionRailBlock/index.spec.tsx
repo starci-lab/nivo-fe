@@ -3,15 +3,28 @@ import { NextIntlClientProvider, useTranslations } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/i18n/config"
-import { buildModulePageCopy } from "@/components/pages/AgentOSSolutionModulePage/component"
 import { fireEvent, render, screen, cleanup } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { ExecuteSessionRailBlock as ActualExecuteSessionRailBlock } from "./index"
+import { ExecuteSessionRailBlock as ActualExecuteSessionRailBlock, type ExecuteSessionRailBlockCopy } from "./index"
+
+type CopyTranslator = (key: string, values?: Readonly<Record<string, string | number>>) => string
+
+/** The settled copy this block draws, resolved from the same module catalog the connected owner reads. */
+const copyFor = (t: CopyTranslator): ExecuteSessionRailBlockCopy => ({
+    "sessions": {
+        "archived": t("runtime.sessions.archived"),
+        "collapse": t("runtime.sessions.collapse"),
+        "expand": t("runtime.sessions.expand"),
+        "label": t("runtime.sessions.label"),
+        "new": t("runtime.sessions.new"),
+        "title": t("runtime.sessions.title"),
+    },
+})
 
 type ExecuteSessionRailBlockFixtureProps = Omit<ComponentProps<typeof ActualExecuteSessionRailBlock>, "copy"> & { readonly locale?: "en" | "vi" }
 const ExecuteSessionRailBlockCopyFixture = (props: ExecuteSessionRailBlockFixtureProps) => {
     const t = useTranslations("console.agentos.modules")
-    return <ActualExecuteSessionRailBlock {...props} copy={buildModulePageCopy(t)} />
+    return <ActualExecuteSessionRailBlock {...props} copy={copyFor(t)} />
 }
 const ExecuteSessionRailBlock = ({ locale = "en", ...props }: ExecuteSessionRailBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><ExecuteSessionRailBlockCopyFixture {...props} /></NextIntlClientProvider>
 

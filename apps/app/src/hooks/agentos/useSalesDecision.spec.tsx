@@ -1,7 +1,8 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import en from "@/messages/en.json";
-import type { SalesDecisionBlockView } from "@/components/blocks/agentos/SalesDecisionBlock/component";
+import type { SalesDecideProposalRequest, SalesDecisionValue } from "@/modules/api/sales";
+import type { SalesNotice, SalesSurfaceStanding, SalesTranslation } from "@/modules/sales/sales-workbench";
 
 /*
  * The connected decision controller's load-bearing behaviours: no operation address exists before the
@@ -48,8 +49,39 @@ const render = () => renderHook(() => useSalesDecision("workspace-1", "installat
 
 /** The rendered controller one answer is driven through. */
 type RenderedController = { readonly current: ReturnType<typeof useSalesDecision> };
+/*
+ * The settled view the render half draws, mirrored structurally: the drawing file's own contract is
+ * private to its surface, so this spec restates the members it draws rather than importing them.
+ */
+type DrawableView = {
+    readonly t: SalesTranslation;
+    readonly scopeWorkspace: string;
+    readonly scopeInstallation: string;
+    readonly scopeReady: boolean;
+    readonly scopeStanding: SalesSurfaceStanding;
+    readonly notice: SalesNotice | null;
+    readonly proposal: {
+        readonly standing: SalesSurfaceStanding;
+        readonly model: SalesDecisionValue | null;
+        readonly decisionRequestId: string;
+        readonly setDecisionRequestId: (value: string) => void;
+        readonly isLoading: boolean;
+        readonly reload: () => void;
+    };
+    readonly answer: {
+        readonly standing: SalesSurfaceStanding;
+        readonly choice: SalesDecideProposalRequest["answer"];
+        readonly setChoice: (choice: SalesDecideProposalRequest["answer"]) => void;
+        readonly expectedRevision: string;
+        readonly setExpectedRevision: (value: string) => void;
+        readonly isAnswering: boolean;
+        readonly addressable: boolean;
+        readonly stale: boolean;
+        readonly onSubmit: () => void;
+    };
+};
 /** The view its render half draws; asking for it here is what keeps the two halves in step. */
-const drawable = (view: SalesDecisionBlockView): SalesDecisionBlockView => view;
+const drawable = (view: DrawableView): DrawableView => view;
 
 const nameRequest = (result: RenderedController) => {
   act(() => { result.current.proposal.setDecisionRequestId("decision-request-1"); });

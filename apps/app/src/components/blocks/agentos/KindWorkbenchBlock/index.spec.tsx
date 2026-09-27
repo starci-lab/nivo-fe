@@ -4,17 +4,74 @@ import { NextIntlClientProvider, useTranslations } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/i18n/config"
-import { buildModulePageCopy } from "@/components/pages/AgentOSSolutionModulePage/component"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 vi.mock("@/components/blocks/agentos/AccountingWorkbenchBlock", () => ({ AccountingWorkbenchBlock: () => <div>Accounting workbench</div> }))
 vi.mock("@/components/blocks/agentos/SalesWorkbenchBlock", () => ({ SalesWorkbenchBlock: () => <div>Sales workbench</div> }))
-import { DEFAULT_WORKBENCH_REGISTRY, KindWorkbenchBlock as ActualKindWorkbenchBlock } from "."
+import { DEFAULT_WORKBENCH_REGISTRY, KindWorkbenchBlock as ActualKindWorkbenchBlock, type KindWorkbenchBlockCopy } from "."
+
+type CopyTranslator = (key: string, values?: Readonly<Record<string, string | number>>) => string
+
+/** The settled copy this block draws, resolved from the same module catalog the connected owner reads. */
+const copyFor = (t: CopyTranslator): KindWorkbenchBlockCopy => ({
+    "workbench": {
+        "acceptedEvents": t("runtime.workbench.acceptedEvents"),
+        "accounting": t("runtime.workbench.accounting"),
+        "accountingNotice": t("runtime.workbench.accountingNotice"),
+        "blocked": t("runtime.workbench.blocked"),
+        "calendar": t("runtime.workbench.calendar"),
+        "calendarMutation": t("runtime.workbench.calendarMutation"),
+        "calendarNotice": t("runtime.workbench.calendarNotice"),
+        "channel": t("runtime.workbench.channel"),
+        "citations": t("runtime.workbench.citations"),
+        "clear": t("runtime.workbench.clear"),
+        "confirmation": t("runtime.workbench.confirmation"),
+        "due": t("runtime.workbench.due"),
+        "evidencePack": t("runtime.workbench.evidencePack"),
+        "evidenceTasks": t("runtime.workbench.evidenceTasks"),
+        "execution": t("runtime.workbench.execution"),
+        "generic": t("runtime.workbench.generic"),
+        "genericCaption": (values) => t("runtime.workbench.genericCaption", values),
+        "genericNotice": t("runtime.workbench.genericNotice"),
+        "groundedAnswer": t("runtime.workbench.groundedAnswer"),
+        "highUrgent": t("runtime.workbench.highUrgent"),
+        "inbox": t("runtime.workbench.inbox"),
+        "kind": t("runtime.workbench.kind"),
+        "knowledgeCaption": (values) => t("runtime.workbench.knowledgeCaption", values),
+        "module": t("runtime.workbench.module"),
+        "needsReview": t("runtime.workbench.needsReview"),
+        "next": t("runtime.workbench.next"),
+        "noAnswer": t("runtime.workbench.noAnswer"),
+        "noApprovals": t("runtime.workbench.noApprovals"),
+        "noMeeting": t("runtime.workbench.noMeeting"),
+        "notScheduled": t("runtime.workbench.notScheduled"),
+        "open": t("runtime.workbench.open"),
+        "ownerReview": t("runtime.workbench.ownerReview"),
+        "payableCaption": (values) => t("runtime.workbench.payableCaption", values),
+        "policy": t("runtime.workbench.policy"),
+        "proposals": t("runtime.workbench.proposals"),
+        "qualified": t("runtime.workbench.qualified"),
+        "reader": t("runtime.workbench.reader"),
+        "readerNotice": t("runtime.workbench.readerNotice"),
+        "registered": (values) => t("runtime.workbench.registered", values),
+        "reviewOnly": t("runtime.workbench.reviewOnly"),
+        "sales": t("runtime.workbench.sales"),
+        "scheduleCaption": (values) => t("runtime.workbench.scheduleCaption", values),
+        "slaCaption": (values) => t("runtime.workbench.slaCaption", values),
+        "support": t("runtime.workbench.support"),
+        "supportNotice": t("runtime.workbench.supportNotice"),
+        "title": t("runtime.workbench.title"),
+        "unavailable": t("runtime.workbench.unavailable"),
+        "unavailableNotice": t("runtime.workbench.unavailableNotice"),
+        "waitChannel": t("runtime.workbench.waitChannel"),
+        "waiting": t("runtime.workbench.waiting"),
+    },
+})
 
 type KindWorkbenchBlockFixtureProps = Omit<ComponentProps<typeof ActualKindWorkbenchBlock>, "copy"> & { readonly locale?: "en" | "vi" }
 const KindWorkbenchBlockCopyFixture = (props: KindWorkbenchBlockFixtureProps) => {
     const t = useTranslations("console.agentos.modules")
-    return <ActualKindWorkbenchBlock {...props} copy={buildModulePageCopy(t)} />
+    return <ActualKindWorkbenchBlock {...props} copy={copyFor(t)} />
 }
 const KindWorkbenchBlock = ({ locale = "en", ...props }: KindWorkbenchBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><KindWorkbenchBlockCopyFixture {...props} /></NextIntlClientProvider>
 

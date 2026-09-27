@@ -4,19 +4,52 @@ import { NextIntlClientProvider, createTranslator, useTranslations } from "next-
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/i18n/config"
-import { buildModulePageCopy } from "@/components/pages/AgentOSSolutionModulePage/component"
 /** @vitest-environment jsdom */
 
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeAll, describe, expect, it, vi } from "vitest"
-import { PrivateSetupChatBlock as ActualPrivateSetupChatBlock, type SetupRevision } from "./index"
+import { PrivateSetupChatBlock as ActualPrivateSetupChatBlock, type PrivateSetupChatBlockCopy, type SetupRevision } from "./index"
+
+type CopyTranslator = ReturnType<typeof createTranslator<typeof enMessages, "console.agentos.modules">>
+
+/** The settled copy this block draws, resolved from the same module catalog the connected owner reads. */
+const copyFor = (t: CopyTranslator): PrivateSetupChatBlockCopy => ({
+    "setup": {
+        "actor": {
+            "assistant": t("setup.actor.assistant"),
+            "system": t("setup.actor.system"),
+            "user": t("setup.actor.user"),
+        },
+        "emptyDescription": t("setup.emptyDescription"),
+        "emptyTitle": t("setup.emptyTitle"),
+        "messageHint": t("setup.messageHint"),
+        "messageLabel": t("setup.messageLabel"),
+        "messagePlaceholder": t("setup.messagePlaceholder"),
+        "messageRefused": t("setup.messageRefused"),
+        "messageUnconfirmed": t("setup.messageUnconfirmed"),
+        "messages": t("setup.messages"),
+        "openVersions": t("setup.openVersions"),
+        "private": t("setup.private"),
+        "privateChat": t("setup.privateChat"),
+        "revision": (values) => t("setup.revision", values),
+        "revisionComplete": t("setup.revisionComplete"),
+        "revisionStatus": {
+            "completed": t("setup.revisionStatus.completed"),
+            "open": t("setup.revisionStatus.open"),
+            "ready": t("setup.revisionStatus.ready"),
+            "superseded": t("setup.revisionStatus.superseded"),
+            "unavailable": t("setup.revisionStatus.unavailable"),
+        },
+        "send": t("setup.send"),
+    },
+})
 
 const revisions: ReadonlyArray<SetupRevision> = [{ id: "setup-1", revision: 1, status: "open" }]
 
 type PrivateSetupChatBlockFixtureProps = Omit<ComponentProps<typeof ActualPrivateSetupChatBlock>, "copy"> & { readonly locale?: "en" | "vi" }
 const PrivateSetupChatBlockCopyFixture = (props: PrivateSetupChatBlockFixtureProps) => {
     const t = useTranslations("console.agentos.modules")
-    return <ActualPrivateSetupChatBlock {...props} copy={buildModulePageCopy(t)} />
+    return <ActualPrivateSetupChatBlock {...props} copy={copyFor(t)} />
 }
 const PrivateSetupChatBlock = ({ locale = "en", ...props }: PrivateSetupChatBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><PrivateSetupChatBlockCopyFixture {...props} /></NextIntlClientProvider>
 
@@ -26,7 +59,7 @@ describe("PrivateSetupChatBlock", () => {
     })
 
     describe.each(["en", "vi"] as const)("Support Desk Setup journey %s", locale => {
-        const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
+        const copy = copyFor(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
         it("keeps completed Setup history private and starts a separate revision", () => {
             const selectRevision = vi.fn()
             const startRevision = vi.fn()

@@ -1,10 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react"
+import type { ComponentProps } from "react"
 import { describe, expect, it, vi } from "vitest"
-import { projectAgentOSShellView, type AgentOSShellReading, type AgentOSWorkspaceControlCenterShellLabels } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter/component"
-import type { ShellSourceIdentity } from "@/modules/api/agentos-shell"
-import type { ShellSourceObservation, ShellSourceStanding } from "@/modules/agentos/shell-observation-store"
 import { AgentOSModuleCollectionPageBase } from "./component"
 import { MODULE_COLLECTION_GRID_CLASS_NAME, MODULE_COLLECTION_PAGE_CLASS_NAME } from "./classNames"
+
+type PageProps = ComponentProps<typeof AgentOSModuleCollectionPageBase>
+type ShellView = PageProps["shell"]
+type ShellLabels = PageProps["shellLabels"]
 
 const labels = {
     path: "Breadcrumb",
@@ -21,7 +23,7 @@ const labels = {
     runtimeUnknown: "Not established"
 }
 
-const shellLabels: AgentOSWorkspaceControlCenterShellLabels = {
+const shellLabels: ShellLabels = {
     headingFallback: "AgentOS workspace",
     eyebrow: "AgentOS",
     description: "The actual installed modules.",
@@ -64,34 +66,33 @@ const shellLabels: AgentOSWorkspaceControlCenterShellLabels = {
     installEntry: "Install module"
 }
 
-const sourceObservation = (identity: ShellSourceIdentity, state: ShellSourceStanding, payload: Readonly<Record<string, unknown>> | null = null, extra: Partial<ShellSourceObservation> = {}): ShellSourceObservation => ({
-    identity,
-    readGeneration: 1,
-    state,
-    availability: state === "available" || state === "partial" ? "available" : null,
-    freshness: state === "available" || state === "partial" ? "current" : null,
-    completeness: state === "available" || state === "partial" ? "complete" : null,
-    observedAt: "2026-09-26T03:00:00.000Z",
-    payload,
-    ...extra
+const OBSERVED_AT = "2026-09-26T03:00:00.000Z"
+
+const installation = (installationId: string, moduleKey: string, displayName: string, status: string): ShellView["installations"][number] => ({ installationId, moduleKey, displayName, status, configuration: null })
+
+/** The settled shell view the connected owner already produced, overridden per state under test. */
+const shellView = (overrides: Partial<ShellView> = {}): ShellView => ({
+    state: "installed-current",
+    workspaceId: "workspace-1",
+    instanceId: "instance-1",
+    name: "Acme AgentOS",
+    identityObservedAt: OBSERVED_AT,
+    inventoryStanding: "current",
+    inventoryObservedAt: OBSERVED_AT,
+    inventoryEmpty: false,
+    runtimeStanding: "current",
+    runtimeAvailability: "provisioned",
+    runtimeGeneration: "gen-1",
+    runtimeObservedAt: OBSERVED_AT,
+    installations: [],
+    attentionStanding: "unsupported",
+    attentionObservedAt: OBSERVED_AT,
+    operations: [],
+    retrying: false,
+    ...overrides
 })
 
-const row = (installationId: string, moduleKey: string, displayName: string, status: string) => ({ installationId, moduleKey, displayName, status })
-
-const reading = (sources: ReadonlyArray<ShellSourceObservation>): AgentOSShellReading => ({ session: "established", sessionStatus: "signed-in", sources })
-
-const identity = sourceObservation({ kind: "core_registry" }, "available", { workspaceId: "workspace-1", instanceId: "instance-1", name: "Acme AgentOS", runtimeAvailability: "provisioned" })
-const runtime = sourceObservation({ kind: "runtime" }, "available", { runtimeGeneration: "gen-1", runtimeAvailability: "provisioned" })
-const runtimeAbsent = sourceObservation({ kind: "runtime" }, "available", { runtimeGeneration: null, runtimeAvailability: "not_provisioned" })
-const attention = sourceObservation({ kind: "attention", installationId: "installation-1" }, "unsupported")
-const inventory = (installations: ReadonlyArray<Readonly<Record<string, unknown>>>, extra: Partial<ShellSourceObservation> = {}) => sourceObservation({ kind: "installation_inventory" }, "available", { installations }, extra)
-const receipt = (queueState: string, kinds: ReadonlyArray<string> = []) => sourceObservation(
-    { kind: "receiver", installationId: "installation-1", intentId: "intent-1" },
-    "available",
-    { commandId: "c-1", receiverInstallationId: "installation-1", queueState, attempt: 1, possibleStartAt: null, observations: kinds.map((kind, index) => ({ observationId: `o-${index}`, kind, observedAt: `2026-09-26T03:0${index}:00.000Z` })), localTransportGaps: [] }
-)
-
-const renderPage = (shell: ReturnType<typeof projectAgentOSShellView>, onRetryShell = vi.fn()) => {
+const renderPage = (shell: ShellView, onRetryShell = vi.fn()) => {
     const back = vi.fn()
     const view = render(<AgentOSModuleCollectionPageBase workspaceId="workspace-1" shell={shell} shellLabels={shellLabels} labels={labels} formatDate={value => value} createHref="/en/agentos/workspaces/workspace-1/modules/create" onBack={back} onRetryShell={onRetryShell}/>)
     return { back, view, onRetryShell }
@@ -99,7 +100,7 @@ const renderPage = (shell: ReturnType<typeof projectAgentOSShellView>, onRetrySh
 
 describe("AgentOSModuleCollectionPageBase", () => {
     it("names the collection region and shows every actual installation of one package as its own entry", () => {
-        const shell = projectAgentOSShellView(reading([identity, runtime, attention, inventory([row("installation-1", "sales-copilot", "Sales Copilot", "installed"), row("installation-2", "sales-copilot", "Sales Copilot EU", "installed")])]), shellLabels)
+        const shell = shellView({ installations: [installation("installation-1", "sales-copilot", "Sales Copilot", "installed"), installation("installation-2", "sales-copilot", "Sales Copilot EU", "installed")] })
         renderPage(shell)
         expect(screen.getByRole("region", { name: labels.title })).toBeTruthy()
         expect(screen.getByText("Sales Copilot")).toBeInTheDocument()
@@ -109,7 +110,7 @@ describe("AgentOSModuleCollectionPageBase", () => {
     })
 
     it("keeps the compact module heading and the inventory's own checked-at statement above the regions", () => {
-        const shell = projectAgentOSShellView(reading([identity, runtime, attention, inventory([row("installation-1", "sales-copilot", "Sales Copilot", "installed")])]), shellLabels)
+        const shell = shellView({ installations: [installation("installation-1", "sales-copilot", "Sales Copilot", "installed")] })
         renderPage(shell)
         expect(screen.getByRole("heading", { level: 1, name: "Modules" })).toBeTruthy()
         expect(screen.getByText("List checked at 2026-09-26T03:00:00.000Z")).toBeInTheDocument()
@@ -117,7 +118,7 @@ describe("AgentOSModuleCollectionPageBase", () => {
     })
 
     it("discloses no workspace, installation or count while no session is signed in", () => {
-        const shell = projectAgentOSShellView({ session: "sign-in-required", sessionStatus: "anonymous", sources: [identity, inventory([row("installation-1", "sales-copilot", "Sales Copilot", "installed")])] }, shellLabels)
+        const shell = shellView({ state: "sign-in-required", workspaceId: null, instanceId: null, name: null, identityObservedAt: null, runtimeStanding: "unresolved", runtimeAvailability: null, runtimeGeneration: null, runtimeObservedAt: null, attentionStanding: "unresolved", attentionObservedAt: null })
         renderPage(shell)
         expect(screen.queryByText("Sales Copilot")).toBeNull()
         expect(screen.queryByText(/installation-1/)).toBeNull()
@@ -126,7 +127,7 @@ describe("AgentOSModuleCollectionPageBase", () => {
     })
 
     it("renders a limitation instead of an empty or all-ready list when the observation is partial", () => {
-        const shell = projectAgentOSShellView(reading([identity, runtime, attention, inventory([], { state: "partial", completeness: "partial" })]), shellLabels)
+        const shell = shellView({ state: "evidence-limited", inventoryStanding: "partial" })
         const retry = renderPage(shell).onRetryShell
         expect(screen.queryByText(shellLabels.inventoryEmpty)).toBeNull()
         expect(screen.getByText(shellLabels.inventoryLimitPartial)).toBeInTheDocument()
@@ -135,9 +136,7 @@ describe("AgentOSModuleCollectionPageBase", () => {
     })
 
     it("centres one dominant card carrying the empty notice and its install entry in the same surface", () => {
-        const shell = projectAgentOSShellView(reading([identity, runtimeAbsent, attention, inventory([])]), shellLabels)
-        expect(shell.state).toBe("no-runtime")
-        expect(shell.inventoryEmpty).toBe(true)
+        const shell = shellView({ state: "no-runtime", inventoryEmpty: true, runtimeAvailability: "not_provisioned", runtimeGeneration: null })
         const { view } = renderPage(shell)
         const inventoryRegion = view.container.querySelector("[data-region='module-inventory']")
         const card = inventoryRegion?.querySelector("[data-grammar-surface-composition='joined']")
@@ -157,15 +156,14 @@ describe("AgentOSModuleCollectionPageBase", () => {
     })
 
     it("never shows the joined empty card or its entry affordance when the inventory carries rows", () => {
-        const shell = projectAgentOSShellView(reading([identity, runtime, attention, inventory([row("installation-1", "sales-copilot", "Sales Copilot", "installed")])]), shellLabels)
+        const shell = shellView({ installations: [installation("installation-1", "sales-copilot", "Sales Copilot", "installed")] })
         renderPage(shell)
         expect(screen.queryByText(shellLabels.inventoryEmpty)).toBeNull()
         expect(screen.queryByRole("link", { name: labels.browseCatalog })).toBeNull()
     })
 
     it("shows a returned operation's own receipt beside the ledger without claiming a result early", () => {
-        const shell = projectAgentOSShellView(reading([identity, runtime, attention, inventory([row("installation-1", "sales-copilot", "Sales Copilot", "installed")]), receipt("claimed", ["progress"])]), shellLabels)
-        expect(shell.state).toBe("operation-pending")
+        const shell = shellView({ state: "operation-pending", installations: [installation("installation-1", "sales-copilot", "Sales Copilot", "installed")], operations: [{ installationId: "installation-1", intentId: "intent-1", commandId: "c-1", receiverName: "Sales Copilot", standing: "pending", observedAt: OBSERVED_AT }] })
         renderPage(shell)
         expect(screen.getByText(shellLabels.resultPending)).toBeInTheDocument()
         expect(screen.getByText(/installation-1 · intent-1 · c-1/)).toBeInTheDocument()
@@ -174,7 +172,7 @@ describe("AgentOSModuleCollectionPageBase", () => {
     })
 
     it("keeps the resolved rhythm on the page and collection owners without a second main landmark", () => {
-        const shell = projectAgentOSShellView(reading([identity, runtime, attention, inventory([])]), shellLabels)
+        const shell = shellView({ state: "installed-empty", inventoryEmpty: true })
         const { view } = renderPage(shell)
         const page = view.container.querySelector("[data-contract='GAP-5']")
         const collection = view.container.querySelector("[data-contract='GAP-4']")

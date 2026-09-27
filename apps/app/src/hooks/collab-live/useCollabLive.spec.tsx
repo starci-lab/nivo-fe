@@ -73,7 +73,7 @@ describe("collab live subscription", () => {
         });
     };
     const state = () => JSON.parse(host.querySelector("output")?.textContent ?? "{}") as CollabLiveState;
-    const lastMutateFilter = () => (mutate.mock.calls as ReadonlyArray<readonly unknown[]>).at(-1)?.[0] as (key: unknown) => boolean;
+    const lastMutateFilter = () => (mutate.mock.calls as ReadonlyArray<ReadonlyArray<unknown>>).at(-1)?.[0] as (key: unknown) => boolean;
 
     it("mounts no socket while signed out or without a workspace", () => {
         useSession.mockImplementation(() => ({ state: { status: "signed-out" } }) as never);

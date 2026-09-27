@@ -1,7 +1,8 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import en from "@/messages/en.json";
-import type { SalesHandoffBlockView } from "@/components/blocks/agentos/SalesHandoffBlock/component";
+import type { SalesHandoffValue } from "@/modules/api/sales";
+import type { SalesNotice, SalesSurfaceStanding, SalesTranslation } from "@/modules/sales/sales-workbench";
 
 /*
  * The connected handoff controller's load-bearing behaviours: no operation address exists before the
@@ -47,8 +48,39 @@ const render = () => renderHook(() => useSalesHandoff("workspace-1", "installati
 
 /** The rendered controller one submission is driven through. */
 type RenderedController = { readonly current: ReturnType<typeof useSalesHandoff> };
+/*
+ * The settled view the render half draws, mirrored structurally: the drawing file's own contract is
+ * private to its surface, so this spec restates the members it draws rather than importing them.
+ */
+type DrawableView = {
+    readonly t: SalesTranslation;
+    readonly scopeWorkspace: string;
+    readonly scopeInstallation: string;
+    readonly scopeReady: boolean;
+    readonly scopeStanding: SalesSurfaceStanding;
+    readonly notice: SalesNotice | null;
+    readonly handoff: {
+        readonly standing: SalesSurfaceStanding;
+        readonly model: SalesHandoffValue | null;
+        readonly handoffId: string;
+        readonly setHandoffId: (value: string) => void;
+        readonly isLoading: boolean;
+        readonly reload: () => void;
+    };
+    readonly submission: {
+        readonly standing: SalesSurfaceStanding;
+        readonly fingerprint: string;
+        readonly setFingerprint: (value: string) => void;
+        readonly expectedRevision: string;
+        readonly setExpectedRevision: (value: string) => void;
+        readonly isSubmitting: boolean;
+        readonly addressable: boolean;
+        readonly lookupOnly: boolean;
+        readonly onSubmit: () => void;
+    };
+};
 /** The view its render half draws; asking for it here is what keeps the two halves in step. */
-const drawable = (view: SalesHandoffBlockView): SalesHandoffBlockView => view;
+const drawable = (view: DrawableView): DrawableView => view;
 
 const nameHandoff = (result: RenderedController) => {
   act(() => { result.current.handoff.setHandoffId("handoff-1"); });

@@ -4,17 +4,50 @@ import { NextIntlClientProvider, useTranslations, createTranslator } from "next-
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/i18n/config"
-import { buildModulePageCopy } from "@/components/pages/AgentOSSolutionModulePage/component"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { ContextVersionBlock as ActualContextVersionBlock, type ContextDraft } from "./index"
+import { ContextVersionBlock as ActualContextVersionBlock, type ContextDraft, type ContextVersionBlockCopy } from "./index"
+
+type CopyTranslator = ReturnType<typeof createTranslator<typeof enMessages, "console.agentos.modules">>
+
+/** The settled copy this block draws, resolved from the same module catalog the connected owner reads. */
+const copyFor = (t: CopyTranslator): ContextVersionBlockCopy => ({
+    "setup": {
+        "applyHint": t("setup.applyHint"),
+        "applyVersion": (values) => t("setup.applyVersion", values),
+        "complete": t("setup.complete"),
+        "completeCount": (values) => t("setup.completeCount", values),
+        "completeGates": t("setup.completeGates"),
+        "confirmRequirement": t("setup.confirmRequirement"),
+        "confirmed": t("setup.confirmed"),
+        "evidenceRequired": t("setup.evidenceRequired"),
+        "continueChat": t("setup.continueChat"),
+        "createVersion": t("setup.createVersion"),
+        "draftRevision": (values) => t("setup.draftRevision", values),
+        "exactTest": t("setup.exactTest"),
+        "gatesReview": t("setup.gatesReview"),
+        "needsFollowUp": t("setup.needsFollowUp"),
+        "noCandidate": t("setup.noCandidate"),
+        "noDraft": t("setup.noDraft"),
+        "noGates": t("setup.noGates"),
+        "notApplied": t("setup.notApplied"),
+        "operationRefused": t("setup.operationRefused"),
+        "passTestFirst": t("setup.passTestFirst"),
+        "reviewContext": t("setup.reviewContext"),
+        "reviewSummary": (values) => t("setup.reviewSummary", values),
+        "setupGates": t("setup.setupGates"),
+        "testPassed": t("setup.testPassed"),
+        "testRequired": t("setup.testRequired"),
+        "versionActive": (values) => t("setup.versionActive", values),
+    },
+})
 
 const draft: ContextDraft = { contextId: "context-1", setupSessionId: "setup-1", revision: 1, status: "completed", version: 1, digest: "a".repeat(64), definitionDigest: "d".repeat(64), authorityGeneration: 1, sourceGeneration: 1, retrievalGeneration: 1, summary: "Support context", facts: ["24/7 support"], gates: [{ key: "identity", label: "Business identity", passed: true, ownerConfirmation: false, confirmed: false, citationPolicy: "none" }], exactTestPassed: true, isActive: false }
 
 type ContextVersionBlockFixtureProps = Omit<ComponentProps<typeof ActualContextVersionBlock>, "copy" | "onConfirmRequirement" | "onCreateVersion"> & { readonly locale?: "en" | "vi"; readonly onConfirmRequirement?: ComponentProps<typeof ActualContextVersionBlock>["onConfirmRequirement"]; readonly onCreateVersion?: ComponentProps<typeof ActualContextVersionBlock>["onCreateVersion"] }
 const ContextVersionBlockCopyFixture = (props: ContextVersionBlockFixtureProps) => {
     const t = useTranslations("console.agentos.modules")
-    return <ActualContextVersionBlock {...props} onCreateVersion={props.onCreateVersion ?? (() => undefined)} onConfirmRequirement={props.onConfirmRequirement ?? (() => undefined)} copy={buildModulePageCopy(t)} />
+    return <ActualContextVersionBlock {...props} onCreateVersion={props.onCreateVersion ?? (() => undefined)} onConfirmRequirement={props.onConfirmRequirement ?? (() => undefined)} copy={copyFor(t)} />
 }
 const ContextVersionBlock = ({ locale = "en", ...props }: ContextVersionBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><ContextVersionBlockCopyFixture {...props} /></NextIntlClientProvider>
 
@@ -52,7 +85,7 @@ describe("ContextVersionBlock", () => {
     })
 
     describe.each(["en", "vi"] as const)("Support Desk Setup journey %s", locale => {
-        const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
+        const copy = copyFor(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
         it("permits Apply only after the exact Setup digest has trusted Test evidence", () => {
             const apply = vi.fn()
             const view = render(<ContextVersionBlock locale={locale}
@@ -80,7 +113,7 @@ describe("ContextVersionBlock", () => {
 
     describe.each(["en", "vi"] as const)("Context copy %s", locale => {
         it("keeps completed context identity and distinguishes untested, active and missing versions", () => {
-            const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules" })).setup
+            const copy = copyFor(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules" })).setup
             const untested = renderToStaticMarkup(<ContextVersionBlock locale={locale} activeVersion={null} draft={{ ...draft, exactTestPassed: false }} pending={false} refused={false} onApply={vi.fn()} />)
             expect(untested).toContain(copy.testRequired)
             expect(untested).toContain("Support context")
@@ -104,7 +137,7 @@ describe("ContextVersionBlock", () => {
 
     describe.each(["en", "vi"] as const)("Context actionable guards %s", locale => {
         it("applies only a completed inactive version and keeps incomplete and peer work inert", () => {
-            const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
+            const copy = copyFor(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
             const onApply = vi.fn()
             const props = { locale, activeVersion: null, pending: false, refused: false, onApply }
             const view = render(<ContextVersionBlock {...props} draft={{ ...draft, status: "open", version: null, exactTestPassed: false, gates: [{ key: "raw-key", label: "Owner gate", passed: false, ownerConfirmation: false, confirmed: false, citationPolicy: "none" }] }} />)
@@ -126,7 +159,7 @@ describe("ContextVersionBlock", () => {
             view.unmount()
         })
         it("requires and records an explicit owner confirmation action", () => {
-            const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
+            const copy = copyFor(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
             const onConfirmRequirement = vi.fn()
             const gate = { ...draft.gates[0]!, ownerConfirmation: true }
             const view = render(<ContextVersionBlock locale={locale} activeVersion={null} draft={{ ...draft, gates: [gate] }} pending={false} refused={false} onApply={vi.fn()} onConfirmRequirement={onConfirmRequirement} />)
@@ -136,7 +169,7 @@ describe("ContextVersionBlock", () => {
             expect(screen.getByText(copy.confirmed)).toBeInTheDocument()
         })
         it("creates an immutable version before Test and Apply", () => {
-            const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
+            const copy = copyFor(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } })).setup
             const onCreateVersion = vi.fn()
             render(<ContextVersionBlock locale={locale} activeVersion={null} draft={{ ...draft, status: "ready", version: null, exactTestPassed: false }} pending={false} refused={false} onApply={vi.fn()} onCreateVersion={onCreateVersion} />)
             fireEvent.click(screen.getByRole("button", { name: copy.createVersion }))

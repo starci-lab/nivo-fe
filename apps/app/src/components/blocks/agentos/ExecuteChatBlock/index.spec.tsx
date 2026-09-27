@@ -4,10 +4,65 @@ import { NextIntlClientProvider, useTranslations, createTranslator } from "next-
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/i18n/config"
-import { buildModulePageCopy } from "@/components/pages/AgentOSSolutionModulePage/component"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { ExecuteChatBlock as ActualExecuteChatBlock, type ExecuteMessage } from "."
+import { ExecuteChatBlock as ActualExecuteChatBlock, type ExecuteChatBlockCopy, type ExecuteMessage } from "."
+
+type CopyTranslator = ReturnType<typeof createTranslator<typeof enMessages, "console.agentos.modules">>
+
+/** The settled copy this block draws, resolved from the same module catalog the connected owner reads. */
+const copyFor = (t: CopyTranslator): ExecuteChatBlockCopy => ({
+    "executeChat": {
+        "acceptTask": t("runtime.executeChat.acceptTask"),
+        "ai": t("runtime.executeChat.ai"),
+        "attachment": (values) => t("runtime.executeChat.attachment", values),
+        "messageLabel": t("runtime.executeChat.messageLabel"),
+        "openWorkbench": t("runtime.executeChat.openWorkbench"),
+        "placeholder": t("runtime.executeChat.placeholder"),
+        "refused": t("runtime.executeChat.refused"),
+        "schema": (values) => t("runtime.executeChat.schema", values),
+        "send": t("runtime.executeChat.send"),
+        "system": t("runtime.executeChat.system"),
+        "title": t("runtime.executeChat.title"),
+        "typedInput": t("runtime.executeChat.typedInput"),
+        "widgetRefused": t("runtime.executeChat.widgetRefused"),
+        "you": t("runtime.executeChat.you"),
+    },
+    "fields": {
+        "amount": t("runtime.fields.amount"),
+        "approvalState": t("runtime.fields.approvalState"),
+        "citations": t("runtime.fields.citations"),
+        "confidence": t("runtime.fields.confidence"),
+        "conflicts": t("runtime.fields.conflicts"),
+        "currency": t("runtime.fields.currency"),
+        "dateTime": t("runtime.fields.dateTime"),
+        "options": t("runtime.fields.options"),
+        "priority": t("runtime.fields.priority"),
+        "sla": t("runtime.fields.sla"),
+        "status": t("runtime.fields.status"),
+        "summary": t("runtime.fields.summary"),
+        "timeZone": t("runtime.fields.timeZone"),
+        "title": t("runtime.fields.title"),
+    },
+    "labels": {
+        "action": (values) => t("runtime.labels.action", values),
+        "field": (values) => t("runtime.labels.field", values),
+    },
+    "widgets": {
+        "calendarCaption": t("runtime.widgets.calendarCaption"),
+        "calendarNotice": t("runtime.widgets.calendarNotice"),
+        "calendarTitle": t("runtime.widgets.calendarTitle"),
+        "financeCaption": t("runtime.widgets.financeCaption"),
+        "financeNotice": t("runtime.widgets.financeNotice"),
+        "financeTitle": t("runtime.widgets.financeTitle"),
+        "knowledgeCaption": t("runtime.widgets.knowledgeCaption"),
+        "knowledgeNotice": t("runtime.widgets.knowledgeNotice"),
+        "knowledgeTitle": t("runtime.widgets.knowledgeTitle"),
+        "supportCaption": t("runtime.widgets.supportCaption"),
+        "supportNotice": t("runtime.widgets.supportNotice"),
+        "supportTitle": t("runtime.widgets.supportTitle"),
+    },
+})
 
 const message = (component: string, props: Readonly<Record<string, string | number>>): ExecuteMessage => ({
     id: component,
@@ -34,7 +89,7 @@ const message = (component: string, props: Readonly<Record<string, string | numb
 type ExecuteChatBlockFixtureProps = Omit<ComponentProps<typeof ActualExecuteChatBlock>, "copy"> & { readonly locale?: "en" | "vi" }
 const ExecuteChatBlockCopyFixture = (props: ExecuteChatBlockFixtureProps) => {
     const t = useTranslations("console.agentos.modules")
-    return <ActualExecuteChatBlock {...props} copy={buildModulePageCopy(t)} />
+    return <ActualExecuteChatBlock {...props} copy={copyFor(t)} />
 }
 const ExecuteChatBlock = ({ locale = "en", ...props }: ExecuteChatBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><ExecuteChatBlockCopyFixture {...props} /></NextIntlClientProvider>
 
@@ -77,7 +132,7 @@ describe("ExecuteChatBlock", () => {
     })
 
     describe.each(["en", "vi"] as const)("Execute action boundaries %s", locale => {
-        const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } }))
+        const copy = copyFor(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } }))
         it.each(["nivo.support-task", "nivo.finance-approval", "nivo.calendar-options", "nivo.knowledge-evidence"])("sends exact %s widget actions", component => {
             const onWidgetAction = vi.fn()
             const view = render(<ExecuteChatBlock locale={locale} sessionTitle="Raw session" messages={[message(component, { taskId: "task/raw", expectedVersion: 17, title: "Raw task" })]} onSend={vi.fn()} onWidgetAction={onWidgetAction} />)
@@ -122,7 +177,7 @@ describe("ExecuteChatBlock", () => {
 
     describe.each(["en", "vi"] as const)("Execute attachment and closed admission %s", locale => {
         it("renders attachment copy beside Markdown and never substitutes fallback content", () => {
-            const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } }))
+            const copy = copyFor(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } }))
             const attachment: ExecuteMessage = { id: "message/raw", role: "system", content: "Unused fallback", contextLabel: "Raw binding", messageTree: { schemaVersion: 1, nodes: [{ type: "attachment", attachmentId: "attachment/raw", label: "Owner.pdf", mediaType: "application/pdf" }, { type: "markdown", markdown: "**Raw markdown**" }] } }
             const view = render(<ExecuteChatBlock locale={locale} sessionTitle="Owner session" messages={[attachment]} onSend={vi.fn()} />)
             expect(screen.getByText(copy.executeChat.attachment({ label: "Owner.pdf", mediaType: "application/pdf" }))).toBeInTheDocument()
@@ -139,7 +194,7 @@ describe("ExecuteChatBlock", () => {
 
     describe.each(["en", "vi"] as const)("Structured widget evidence shapes %s", locale => {
         it("preserves null, boolean and structured values and keeps an action-free widget inert", () => {
-            const copy = buildModulePageCopy(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } }))
+            const copy = copyFor(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules", timeZone: TIME_ZONE, onError: error => { throw error } }))
             const base = message("nivo.metric", {})
             const valueMessage: ExecuteMessage = { ...base, widget: { ...base.widget!, actions: [], node: { ...base.widget!.node, props: { absent: null, approved: true, count: 17, rows: ["raw", 2], detail: { raw: "value" } } } } }
             const view = render(<ExecuteChatBlock locale={locale} sessionTitle="Owner evidence" messages={[valueMessage]} onSend={vi.fn()} />)

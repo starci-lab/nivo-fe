@@ -3,11 +3,41 @@ import { NextIntlClientProvider, useTranslations } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/i18n/config"
-import { buildModulePageCopy } from "@/components/pages/AgentOSSolutionModulePage/component"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 import type { AgentosModuleTestAssertionResult, AgentosModuleTestContract, AgentosModuleTestRun } from "@/modules/api/console"
-import { TestTrustResultBlock as ActualTestTrustResultBlock } from "."
+import { TestTrustResultBlock as ActualTestTrustResultBlock, type TestTrustResultBlockCopy } from "."
+
+type CopyTranslator = (key: string, values?: Readonly<Record<string, string | number>>) => string
+
+/** The settled copy this block draws, resolved from the same module catalog the connected owner reads. */
+const copyFor = (t: CopyTranslator): TestTrustResultBlockCopy => ({
+    "testStatus": {
+        "failed": t("runtime.testStatus.failed"),
+        "passed": t("runtime.testStatus.passed"),
+        "running": t("runtime.testStatus.running"),
+        "warning": t("runtime.testStatus.warning"),
+    },
+    "trust": {
+        "collect": t("runtime.trust.collect"),
+        "evidence": t("runtime.trust.evidence"),
+        "expected": t("runtime.trust.expected"),
+        "fail": t("runtime.trust.fail"),
+        "noRun": t("runtime.trust.noRun"),
+        "notRun": t("runtime.trust.notRun"),
+        "notice": t("runtime.trust.notice"),
+        "observed": t("runtime.trust.observed"),
+        "pass": t("runtime.trust.pass"),
+        "rejected": t("runtime.trust.rejected"),
+        "result": (values) => t("runtime.trust.result", values),
+        "title": t("runtime.trust.title"),
+        "total": t("runtime.trust.total"),
+        "verdictFail": t("runtime.trust.verdictFail"),
+        "verdictPass": t("runtime.trust.verdictPass"),
+        "verdictWarning": t("runtime.trust.verdictWarning"),
+        "warning": t("runtime.trust.warning"),
+    },
+})
 
 const contract: AgentosModuleTestContract = {
     workbench: { key: "conversation-sandbox", version: "1.0.0" },
@@ -36,7 +66,7 @@ const assertion = (component = "nivo.test-evidence"): AgentosModuleTestAssertion
 type TestTrustResultBlockFixtureProps = Omit<ComponentProps<typeof ActualTestTrustResultBlock>, "copy"> & { readonly locale?: "en" | "vi" }
 const TestTrustResultBlockCopyFixture = (props: TestTrustResultBlockFixtureProps) => {
     const t = useTranslations("console.agentos.modules")
-    return <ActualTestTrustResultBlock {...props} copy={buildModulePageCopy(t)} />
+    return <ActualTestTrustResultBlock {...props} copy={copyFor(t)} />
 }
 const TestTrustResultBlock = ({ locale = "en", ...props }: TestTrustResultBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><TestTrustResultBlockCopyFixture {...props} /></NextIntlClientProvider>
 

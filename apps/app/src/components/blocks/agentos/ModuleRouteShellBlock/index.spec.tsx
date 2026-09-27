@@ -4,15 +4,57 @@ import { NextIntlClientProvider, useTranslations } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/i18n/config"
-import { buildModulePageCopy } from "@/components/pages/AgentOSSolutionModulePage/component"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { ModuleRouteShellBlock as ActualModuleRouteShellBlock } from "./index"
+import { ModuleRouteShellBlock as ActualModuleRouteShellBlock, type ModuleRouteShellBlockCopy } from "./index"
+
+type CopyTranslator = (key: string, values?: Readonly<Record<string, string | number>>) => string
+
+/** The settled copy this block draws, resolved from the same module catalog the connected owner reads. */
+const copyFor = (t: CopyTranslator): ModuleRouteShellBlockCopy => ({
+    "shell": {
+        "activeContext": (values) => t("shell.activeContext", values),
+        "boundContext": (values) => t("shell.boundContext", values),
+        "channelConnected": t("shell.channelConnected"),
+        "channelDisconnected": t("shell.channelDisconnected"),
+        "controllerAttention": t("shell.controllerAttention"),
+        "controllerHealthy": t("shell.controllerHealthy"),
+        "conversation": (values) => t("shell.conversation", values),
+        "diagnostics": t("shell.diagnostics"),
+        "genericAgent": t("shell.genericAgent"),
+        "kind": {
+            "accounting": t("shell.kind.accounting"),
+            "customer-support": t("shell.kind.customer-support"),
+            "generic-agent": t("shell.kind.generic-agent"),
+            "research": t("shell.kind.research"),
+            "scheduling": t("shell.kind.scheduling"),
+        },
+        "live": t("shell.live"),
+        "loading": t("shell.loading"),
+        "modules": t("shell.modules"),
+        "noContextApplied": t("shell.noContextApplied"),
+        "noExecuteSession": t("shell.noExecuteSession"),
+        "operate": t("shell.operate"),
+        "path": t("shell.path"),
+        "primaryOperations": t("shell.primaryOperations"),
+        "reading": t("shell.reading"),
+        "refused": t("shell.refused"),
+        "sections": t("shell.sections"),
+        "settings": t("shell.settings"),
+        "setup": t("shell.setup"),
+        "telegramConnected": t("shell.telegramConnected"),
+        "test": t("shell.test"),
+        "unavailable": t("shell.unavailable"),
+        "unknownKind": (values) => t("shell.unknownKind", values),
+        "unknownStatus": (values) => t("shell.unknownStatus", values),
+        "workspace": (values) => t("shell.workspace", values),
+    },
+})
 
 type ModuleRouteShellBlockFixtureProps = Omit<ComponentProps<typeof ActualModuleRouteShellBlock>, "copy"> & { readonly locale?: "en" | "vi" }
 const ModuleRouteShellBlockCopyFixture = (props: ModuleRouteShellBlockFixtureProps) => {
     const t = useTranslations("console.agentos.modules")
-    return <ActualModuleRouteShellBlock {...props} copy={buildModulePageCopy(t)} />
+    return <ActualModuleRouteShellBlock {...props} copy={copyFor(t)} />
 }
 const ModuleRouteShellBlock = ({ locale = "en", ...props }: ModuleRouteShellBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><ModuleRouteShellBlockCopyFixture {...props} /></NextIntlClientProvider>
 
