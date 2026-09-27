@@ -47,7 +47,7 @@ const DOCUMENTED_SECTIONS = [
 ] as const
 
 const EVIDENCE_ROOT = resolve(
-    "D:/Repositories/nivo-backend/.starciworkdraft/evidence/review.verify/renders",
+    "D:/Repositories/nivo-backend/.starciwork/evidence/wf-nivo-fe-debt-mug06w7h.e2e/renders",
 )
 
 mkdirSync(EVIDENCE_ROOT, { recursive: true })
