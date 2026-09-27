@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
+import { NextRequest, NextResponse } from "next/server"
 
 const mocks = vi.hoisted(() => {
     const handler = vi.fn((request: unknown) => ({ request }))
@@ -18,7 +19,7 @@ vi.mock("next-intl/middleware", () => ({
 import middleware, { config } from "./middleware"
 import { routing } from "./modules/i18n/routing"
 
-describe("expert locale middleware", () => {
+describe("middleware", () => {
     it("binds the declared routing and excludes API, build, verification, and file paths", () => {
         expect(mocks.createMiddleware).toHaveBeenCalledWith(routing)
         expect(config.matcher).toEqual([
@@ -32,6 +33,24 @@ describe("expert locale middleware", () => {
         expect(middleware(request as never)).toEqual({
             request,
         })
+        expect(mocks.handler).toHaveBeenCalledWith(request)
+    })
+
+    it("stands aside for a request that already looped through the self-proxy", () => {
+        const request = new NextRequest("https://expert.test/en", {
+            headers: { "x-forwarded-host": "expert.test" },
+        })
+
+        expect(middleware(request)).toBeInstanceOf(NextResponse)
+        expect(mocks.handler).not.toHaveBeenCalledWith(request)
+    })
+
+    it("resolves a forwarded request outside the default-locale prefix", () => {
+        const request = new NextRequest("https://expert.test/vi", {
+            headers: { "x-forwarded-host": "expert.test" },
+        })
+
+        expect(middleware(request)).toEqual({ request })
         expect(mocks.handler).toHaveBeenCalledWith(request)
     })
 })
