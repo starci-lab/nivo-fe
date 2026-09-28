@@ -24,10 +24,10 @@ type ContactRouteProps = {
  * @param props - The routed search parameters.
  * @returns The route.
  */
-const ContactRoute = async (props: ContactRouteProps) => {
+const Page = async (props: ContactRouteProps) => {
     const query = await props.searchParams
 
     return <ContactPage initialIntent={normalizeContactIntent(query.intent)} />
 }
 
-export default ContactRoute
+export default Page

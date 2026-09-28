@@ -6,6 +6,6 @@ import { PricingPage } from "@/features/pages/PricingPage"
 export const metadata: Metadata = PRODUCT_PAGE_METADATA.pricing
 
 /** The `/pricing` adapter mounts one commercial-decision owner. */
-const PricingRoute = () => <PricingPage />
+const Page = () => <PricingPage />
 
-export default PricingRoute
+export default Page

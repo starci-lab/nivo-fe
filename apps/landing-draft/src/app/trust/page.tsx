@@ -9,6 +9,6 @@ export const metadata: Metadata = {
 }
 
 /** The `/trust` framework adapter. */
-const TrustRoute = () => <TrustPage />
+const Page = () => <TrustPage />
 
-export default TrustRoute
+export default Page
