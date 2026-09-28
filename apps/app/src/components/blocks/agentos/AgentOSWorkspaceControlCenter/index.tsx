@@ -6,6 +6,8 @@ import { workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AgentOSWorkspaceControlCenterBase, projectAgentOSShellView, type AgentOSWorkspaceControlCenterShellLabels, type AgentOSWorkspaceControlCenterLabels, type AgentOSWorkspaceControlCenterStatus, type AgentOSWorkspacePageState } from "./component";
+export { AGENT_OS_SIGN_IN_HREF, AgentOSShellOperationRegion, projectAgentOSShellView } from "./component";
+export type { AgentOSShellView, AgentOSWorkspaceControlCenterShellLabels } from "./component";
 /** Exact workspace identity supplied by the detail route. */
 export type AgentOSWorkspaceControlCenterProps = {
     readonly workspaceId: string;

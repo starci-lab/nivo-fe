@@ -56,7 +56,7 @@ vi.mock("@/modules/api/console", () => ({
 
 import { AgentOSSolutionModuleCenter } from "."
 import { AgentOSCustomModuleCollection } from "../AgentOSCustomModuleCollection"
-import { AgentOSPage } from "../../../pages/AgentOSPage"
+import { AgentOSPage } from "@/features/pages/AgentOSPage"
 import { myAgentosSolutionModules, myAgentosModuleInstallations, myAgentosCustomModules, installAgentosSolutionModule } from "@/modules/api/console"
 
 describe("AgentOSSolutionModuleCenter", () => {
