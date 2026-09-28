@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { useOverviewData } from "@/modules/overview/context";
+import { useOverviewData } from "@/hooks";
 import { OverviewAddressesBase, type OverviewAddressesState } from "./component";
 /** Public API role for OverviewAddressesProps. */
 export type OverviewAddressesProps = Record<string, never>;
@@ -43,7 +43,7 @@ export const OverviewAddresses = (props: OverviewAddressesProps) => {
       };
     })
   };
-  return <OverviewAddressesBase label={t("overview.addressesLabel")} state={state} />;
+  return <OverviewAddressesBase state={state} props={{ label: t("overview.addressesLabel") }} />;
 };
 
 /** Registry identity for the connected overview addresses twin. */

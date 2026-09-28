@@ -167,7 +167,7 @@ const ledgerRow = (row: WalletLedgerRow | undefined, isLoading: boolean, closeLa
 const walletLedgerContent = (ledger: LedgerSectionView, closeLabel: string) => {
   const isLoading = ledger.phase === "resting";
   const rows: ReadonlyArray<WalletLedgerRow> = ledger.phase === "answered" ? ledger.rows : [];
-  const entries: ReadonlyArray<WalletLedgerRow | undefined> = isLoading ? [undefined, undefined, undefined] : rows;
+  const entries: ReadonlyArray<WalletLedgerRow | undefined> = ledger.phase === "resting" ? [undefined, undefined, undefined] : rows;
   return <div>{entries.map((row, index) => <div key={row?.id ?? `resting-${index}`}>{ledgerRow(row, isLoading, closeLabel)}</div>)}</div>;
 };
 type TopUpContentProps = {
@@ -243,7 +243,7 @@ const WalletControlCenterContent = (view: WalletControlCenterViewProps) => {
     const isLoading = ledger.phase === "resting";
     return <SurfaceListCard
       label={ledger.label}
-      footer={actionLabel !== undefined && (isLoading || action !== undefined) ? <Button variant="primary" size="sm" isSkeleton={isLoading} onPress={action}>{actionLabel}</Button> : undefined}
+      footer={actionLabel !== undefined && (ledger.phase === "resting" || action !== undefined) ? <Button variant="primary" size="sm" isSkeleton={isLoading} onPress={action}>{actionLabel}</Button> : undefined}
       isLoading={isLoading}
     >{content}</SurfaceListCard>;
   };

@@ -109,6 +109,109 @@ describe("AgentOSProvisioningBase", () => {
         expect(selectTier).toHaveBeenCalledWith("tier")
         expect(request).not.toHaveBeenCalled()
     })
+
+    it("keeps an unmatched tier unselected on an unknown payment card", () => {
+        const html = renderToStaticMarkup(<AgentOSProvisioningBase
+            state="payment_unknown"
+            props={{
+                steps,
+                subject: "AgentOS",
+                detail: "Payment is still being checked",
+                statusTitle: "Payment unknown",
+                statusText: "Reconcile the same attempt",
+                selection: {
+                    label: "Packages",
+                    chooseOffer: "Choose product",
+                    chooseTier: "Choose tier",
+                    selected: "Selected",
+                    selectedOfferId: "item",
+                    selectedTierId: "tier-current",
+                    offers: [{ id: "item", label: "AgentOS", tiers: [{ id: "tier-next", label: "Next tier" }] }],
+                },
+            }}
+            on={{}}
+        />)
+        expect(html).toContain("Payment unknown")
+        expect(html).toContain("Next tier")
+        expect(html).not.toContain("Selected")
+    })
+
+    it("draws a whole catalogue with item descriptions and the bound tier marked", () => {
+        const html = renderToStaticMarkup(<AgentOSProvisioningBase
+            state="request"
+            props={{
+                steps,
+                subject: "AgentOS",
+                detail: "Choose a package",
+                statusTitle: "Request",
+                statusText: "Select from the catalogue",
+                selection: {
+                    label: "Packages",
+                    chooseOffer: "Choose product",
+                    chooseTier: "Choose tier",
+                    selected: "Selected",
+                    offers: [
+                        { id: "alpha", label: "Alpha", description: "Fast lane", tiers: [] },
+                        { id: "beta", label: "Beta", tiers: [{ id: "tier-current", label: "Current tier", detail: "₫1,000" }, { id: "tier-next", label: "Next tier" }] },
+                    ],
+                    selectedOfferId: "beta",
+                    selectedTierId: "tier-current"
+                }
+            }}
+        />)
+        expect(html).toContain("Alpha")
+        expect(html).toContain("Fast lane")
+        expect(html).toContain("Current tier · ₫1,000")
+        expect(html).toContain("Next tier")
+        expect(html).toContain("Selected")
+    })
+
+    it("keeps tier choices off an item the buyer has not selected", () => {
+        const html = renderToStaticMarkup(<AgentOSProvisioningBase
+            state="request"
+            props={{
+                steps,
+                subject: "AgentOS",
+                detail: "Choose a package",
+                statusTitle: "Request",
+                statusText: "Select from the catalogue",
+                selection: {
+                    label: "Packages",
+                    chooseOffer: "Choose product",
+                    chooseTier: "Choose tier",
+                    selected: "Selected",
+                    offers: [{ id: "alpha", label: "Alpha", tiers: [{ id: "tier-one", label: "Tier one" }] }]
+                }
+            }}
+        />)
+        expect(html).toContain("Alpha")
+        expect(html).not.toContain("Tier one")
+        expect(html).not.toContain("Selected")
+    })
+
+    it("hides the tier band on a selected item that offers no tier", () => {
+        const html = renderToStaticMarkup(<AgentOSProvisioningBase
+            state="request"
+            props={{
+                steps,
+                subject: "AgentOS",
+                detail: "Choose a package",
+                statusTitle: "Request",
+                statusText: "Select from the catalogue",
+                selection: {
+                    label: "Packages",
+                    chooseOffer: "Choose product",
+                    chooseTier: "Choose tier",
+                    selected: "Selected",
+                    offers: [{ id: "alpha", label: "Alpha", tiers: [] }],
+                    selectedOfferId: "alpha"
+                }
+            }}
+        />)
+        expect(html).toContain("Alpha")
+        expect(html).not.toContain("Choose tier")
+        expect(html).not.toContain("Selected")
+    })
 })
 
 describe("AgentOSProvisioningBase", () => {

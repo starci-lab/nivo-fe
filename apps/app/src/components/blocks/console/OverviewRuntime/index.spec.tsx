@@ -8,7 +8,7 @@ vi.mock("next-intl", () => ({
     useTranslations: () => (key: string, values?: Record<string, unknown>) => values === undefined ? key : `${key}:${JSON.stringify(values)}`,
     useFormatter: () => ({ dateTime: (value: Date) => `time-${value.toISOString()}` }),
 }))
-vi.mock("@/modules/overview/context", () => ({ useOverviewData: () => mocks.data }))
+vi.mock("@/hooks", () => ({ useOverviewData: () => mocks.data }))
 
 import { OverviewRuntime } from "."
 

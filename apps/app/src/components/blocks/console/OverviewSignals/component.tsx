@@ -13,18 +13,22 @@ export type OverviewSignalsCell = {
   readonly isSkeleton?: boolean;
 };
 /** Resolved signal cells and the card's own label and fact. */
-export type OverviewSignalsProps = {
-  readonly label: string;
-  readonly fact?: string;
-  readonly cells: ReadonlyArray<OverviewSignalsCell>;
+export type OverviewSignalsViewProps = {
+  readonly props: {
+    readonly label: string;
+    readonly fact?: string;
+    readonly cells: ReadonlyArray<OverviewSignalsCell>;
+  };
 };
+type OverviewSignalsProps = OverviewSignalsViewProps;
 const status = (cell: OverviewSignalsCell) => cell.badgeTone === undefined
   ? <Text size="xs" tone="muted" isSkeleton={cell.isSkeleton}>{cell.status}</Text>
   : <Badge tone={cell.badgeTone} isSkeleton={cell.isSkeleton}>{cell.status}</Badge>;
 
 /** Draw the account's four answers as one full-measure band of peer cells. */
 export const OverviewSignalsBase = (props: OverviewSignalsProps) => {
-  const { label, fact, cells }: OverviewSignalsProps = props;
+  const { props: view } = props;
+  const { label, fact, cells } = view;
   return <SurfaceCard label={label} fact={fact} composition="joined">
     <div
       className={OVERVIEW_SIGNALS_BAND_CLASS_NAME}

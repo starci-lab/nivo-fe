@@ -10,16 +10,20 @@ export type OverviewRuntimeFact = {
   readonly isSkeleton?: boolean;
 };
 /** Resolved pod facts and the card's own label and fact. */
-export type OverviewRuntimeProps = {
-  readonly label: string;
-  readonly fact?: string;
+export type OverviewRuntimeViewProps = {
   readonly state?: PresentationState;
-  readonly facts: ReadonlyArray<OverviewRuntimeFact>;
+  readonly props: {
+    readonly label: string;
+    readonly fact?: string;
+    readonly facts: ReadonlyArray<OverviewRuntimeFact>;
+  };
 };
+type OverviewRuntimeProps = OverviewRuntimeViewProps;
 
 /** Draw the workspace pod's own status read as its own labelled surface, never a caption. */
 export const OverviewRuntimeBase = (props: OverviewRuntimeProps) => {
-  const { label, fact, state, facts }: OverviewRuntimeProps = props;
+  const { state, props: view } = props;
+  const { label, fact, facts } = view;
   return <SurfaceCard label={label} fact={fact} state={state} composition="joined">
     <div
       className={OVERVIEW_RUNTIME_FACTS_CLASS_NAME}

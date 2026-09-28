@@ -3,8 +3,6 @@ import { Badge, SectionHeader as DirectionHeader, PrimaryRailLayout as Direction
 import { LifecycleStep, type LifecycleStepData } from "@nivo/ui";
 /** Block-owned conditions of the AgentOS order and provisioning continuation. */
 export type AgentOSProvisioningProps = AgentOSProvisioningViewProps;
-/** Public API role for AgentOSProvisioningBlockState. */
-export type AgentOSProvisioningBlockState = "catalog_loading" | "request" | "submitting" | "awaiting_payment" | "payment_unknown" | "accepted" | "preparing" | "provisioning_unknown" | "ready" | "failed";
 /** One actual catalogue tier available to the buyer. */
 export type AgentOSProvisioningTierView = {
     readonly id: string;
@@ -20,7 +18,7 @@ export type AgentOSProvisioningOfferView = {
 };
 /** Every settled tree the AgentOS provisioning block can draw. */
 export type AgentOSProvisioningViewProps = {
-    readonly state: AgentOSProvisioningBlockState;
+    readonly state: "catalog_loading" | "request" | "submitting" | "awaiting_payment" | "payment_unknown" | "accepted" | "preparing" | "provisioning_unknown" | "ready" | "failed";
     readonly props: {
         readonly progressLabel?: string;
         readonly continuationLabel?: string;

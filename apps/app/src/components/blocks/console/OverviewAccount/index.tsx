@@ -1,8 +1,7 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { useOverviewData } from "@/modules/overview/context";
+import { useOverviewData, useRouter } from "@/hooks";
 import { BILLING_CURRENCY } from "@/modules/config";
 import { OverviewAccountBase, type OverviewAccountFact, type OverviewAccountInvoiceRow } from "./component";
 /** Public API role for OverviewAccountProps. */
@@ -22,7 +21,6 @@ const SKELETON_INVOICE_ROW: OverviewAccountInvoiceRow = {
   statusLabel: "",
   badgeTone: "neutral",
   actionLabel: "",
-  onTopUp: () => undefined,
   isSkeleton: true
 };
 
@@ -45,15 +43,12 @@ export const OverviewAccount = (props: OverviewAccountProps) => {
     year: "numeric"
   });
   if (wallet === null || invoices === null) return <OverviewAccountBase
-    label={label}
-    facts={SKELETON_FACTS}
-    invoiceRow={SKELETON_INVOICE_ROW}
+    props={{ label, facts: SKELETON_FACTS, invoiceRow: SKELETON_INVOICE_ROW }}
   />;
   const onOpenWallet = () => open("/wallet");
   if (!wallet.ok) return <OverviewAccountBase
-    label={label}
     state="unavailable"
-    facts={[]}
+    props={{ label, facts: [] }}
   />;
   const unpaidCount = invoices.ok ? invoices.data.filter(invoice => invoice.status === "unpaid").length : 0;
   const totalCount = invoices.ok ? invoices.data.length : 0;
@@ -75,17 +70,18 @@ export const OverviewAccount = (props: OverviewAccountProps) => {
     }),
     statusLabel: isOverdue ? t("overview.account.overdue") : t("overview.account.dueSoon"),
     badgeTone: isOverdue ? "danger" : "warning",
-    actionLabel: t("overview.account.topUpWallet"),
-    onTopUp: () => open("/wallet/top-up")
+    actionLabel: t("overview.account.topUpWallet")
   };
   return <OverviewAccountBase
-    label={label}
-    actionLabel={t("wallet.viewTransactions")}
-    onOpenWallet={onOpenWallet}
-    isHighlight={invoiceRow !== undefined}
     state={invoices.ok ? undefined : "cautionary"}
-    facts={facts}
-    invoiceRow={invoiceRow}
+    props={{
+      label,
+      actionLabel: t("wallet.viewTransactions"),
+      isHighlight: invoiceRow !== undefined,
+      facts,
+      invoiceRow
+    }}
+    on={{ openWallet: onOpenWallet, topUp: () => open("/wallet/top-up") }}
   />;
 };
 

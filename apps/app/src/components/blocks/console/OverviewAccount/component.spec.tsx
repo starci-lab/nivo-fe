@@ -12,12 +12,11 @@ const invoiceRow: OverviewAccountInvoiceRow = {
     statusLabel: "Due soon",
     badgeTone: "warning",
     actionLabel: "Top up wallet",
-    onTopUp: vi.fn(),
 }
 
 describe("OverviewAccountBase", () => {
     it("draws the two-cell facts band and the one invoice row that owes the next step", () => {
-        render(<OverviewAccountBase label="Account" facts={facts} invoiceRow={invoiceRow} />)
+        render(<OverviewAccountBase props={{ label: "Account", facts, invoiceRow }} />)
 
         expect(screen.getByText("150,000 ₫")).toBeInTheDocument()
         expect(screen.getByText("1 of 1")).toBeInTheDocument()
@@ -26,29 +25,29 @@ describe("OverviewAccountBase", () => {
     })
 
     it("routes the invoice's own top-up action", () => {
-        const onTopUp = vi.fn()
-        render(<OverviewAccountBase label="Account" facts={facts} invoiceRow={{ ...invoiceRow, onTopUp }} />)
+        const topUp = vi.fn()
+        render(<OverviewAccountBase props={{ label: "Account", facts, invoiceRow }} on={{ topUp }} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Top up wallet" }))
-        expect(onTopUp).toHaveBeenCalledTimes(1)
+        expect(topUp).toHaveBeenCalledTimes(1)
     })
 
     it("draws no invoice row when the account owes nothing", () => {
-        render(<OverviewAccountBase label="Account" facts={facts} />)
+        render(<OverviewAccountBase props={{ label: "Account", facts }} />)
 
         expect(screen.queryByRole("button", { name: "Top up wallet" })).not.toBeInTheDocument()
     })
 
     it("routes the label row's own transactions action", () => {
-        const onOpenWallet = vi.fn()
-        render(<OverviewAccountBase label="Account" actionLabel="See transactions" onOpenWallet={onOpenWallet} facts={facts} />)
+        const openWallet = vi.fn()
+        render(<OverviewAccountBase props={{ label: "Account", actionLabel: "See transactions", facts }} on={{ openWallet }} />)
 
         fireEvent.click(screen.getByRole("button", { name: "See transactions" }))
-        expect(onOpenWallet).toHaveBeenCalledTimes(1)
+        expect(openWallet).toHaveBeenCalledTimes(1)
     })
 
     it("marks the account unavailable when its own read was refused", () => {
-        const { container } = render(<OverviewAccountBase label="Account" state="unavailable" facts={[]} />)
+        const { container } = render(<OverviewAccountBase state="unavailable" props={{ label: "Account", facts: [] }} />)
 
         expect(container.querySelector('[data-grammar-surface-card="true"]')).toBeInTheDocument()
         expect(container.querySelector('[data-grammar-state="unavailable"]')).toBeInTheDocument()

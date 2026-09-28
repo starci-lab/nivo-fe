@@ -11,7 +11,7 @@ const facts: ReadonlyArray<OverviewRuntimeFact> = [
 
 describe("OverviewRuntimeBase", () => {
     it("draws the pod's own fields as their own labelled surface", () => {
-        render(<OverviewRuntimeBase label="Runtime" fact="The workspace pod, as it answered" facts={facts} />)
+        render(<OverviewRuntimeBase props={{ label: "Runtime", fact: "The workspace pod, as it answered", facts }} />)
 
         expect(screen.getByText("Pod answered")).toBeInTheDocument()
         expect(screen.getByText("Yes")).toBeInTheDocument()
@@ -20,13 +20,13 @@ describe("OverviewRuntimeBase", () => {
     })
 
     it("shows the unresolved carrier as the same tree at rest", () => {
-        const { container } = render(<OverviewRuntimeBase label="Runtime" facts={[{ id: "pending", label: "", value: "", isSkeleton: true }]} />)
+        const { container } = render(<OverviewRuntimeBase props={{ label: "Runtime", facts: [{ id: "pending", label: "", value: "", isSkeleton: true }] }} />)
 
         expect(container.querySelectorAll('[data-loading="true"]').length).toBeGreaterThan(0)
     })
 
     it("marks the runtime unavailable when its own pod read was refused", () => {
-        const { container } = render(<OverviewRuntimeBase label="Runtime" state="unavailable" facts={[{ id: "refusal", label: "Pod unavailable", value: "Pod registration is missing" }]} />)
+        const { container } = render(<OverviewRuntimeBase state="unavailable" props={{ label: "Runtime", facts: [{ id: "refusal", label: "Pod unavailable", value: "Pod registration is missing" }] }} />)
 
         expect(container.querySelector('[data-grammar-surface-card="true"]')).toBeInTheDocument()
         expect(container.querySelector('[data-grammar-state="unavailable"]')).toBeInTheDocument()

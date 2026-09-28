@@ -33,7 +33,10 @@ type WalletProbeProps = {
 
 vi.mock("next-intl", () => ({ useLocale: () => "en", useTranslations: () => mocks.t, useFormatter: () => ({ number: (value: number) => `money-${value}`, dateTime: (value: Date) => `date-${value.toISOString().slice(0, 10)}` }) }))
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(mocks.navigation.search) }))
-vi.mock("@/i18n/navigation", () => ({ usePathname: () => mocks.navigation.pathname }))
+vi.mock("@/hooks", async (importOriginal) => ({
+    ...await importOriginal<object>(),
+    usePathname: () => mocks.navigation.pathname,
+}))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => mocks.api)
 vi.mock("./component", () => ({
