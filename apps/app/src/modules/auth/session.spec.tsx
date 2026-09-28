@@ -24,7 +24,8 @@ vi.mock("../api/graphql", () => ({
 }))
 
 import type { AuthPayload } from "../api/auth"
-import { SessionProvider, useSession, type SessionEndReport } from "./session"
+import { useSession } from "@/hooks"
+import { SessionProvider, type SessionEndReport } from "./session"
 
 const payload = (overrides: Partial<AuthPayload> = {}): AuthPayload => ({
     accessToken: "token-1",
@@ -83,10 +84,10 @@ describe("SessionProvider", () => {
         const { result } = renderSession()
         await waitFor(() => expect(result.current.state.status).toBe("anonymous"))
 
-        act(() => result.current.adopt(payload({ accessToken: null, requiresTwoFactor: true, twoFactorToken: "challenge-1" })))
+        act(() => { result.current.adopt(payload({ accessToken: null, requiresTwoFactor: true, twoFactorToken: "challenge-1" })) })
         expect(result.current.state.status).toBe("anonymous")
 
-        act(() => result.current.adopt(payload({ accessToken: "adopted-token" })))
+        act(() => { result.current.adopt(payload({ accessToken: "adopted-token" })) })
         expect(result.current.state).toEqual({ status: "signed-in", accessToken: "adopted-token" })
     })
 
@@ -99,7 +100,7 @@ describe("SessionProvider", () => {
         mocks.api.refreshSession.mockReturnValue(refresh.promise)
         const { result } = renderSession()
 
-        act(() => result.current.adopt(payload({ accessToken: "adopted-token" })))
+        act(() => { result.current.adopt(payload({ accessToken: "adopted-token" })) })
         expect(result.current.state.status).toBe("signed-in")
 
         await act(async () => refresh.resolve({ ok: false, reason: "lineage-lost", code: "REFUSED" }))
@@ -251,7 +252,7 @@ describe("SessionProvider", () => {
         expect(result.current.state.status).toBe("anonymous")
 
         // a thrown answer still drops this browser's custody through the same `finally`
-        act(() => result.current.adopt(payload({ accessToken: "adopted-token" })))
+        act(() => { result.current.adopt(payload({ accessToken: "adopted-token" })) })
         expect(result.current.state.status).toBe("signed-in")
         mocks.api.signOut.mockRejectedValue(new Error("offline"))
         let pending: Promise<SessionEndReport> | undefined
