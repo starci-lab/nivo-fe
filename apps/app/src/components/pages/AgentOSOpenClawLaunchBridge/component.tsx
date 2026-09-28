@@ -1,17 +1,27 @@
 import { AgentOSOpenClawLaunch } from "@/components/blocks/agentos/AgentOSOpenClawLaunch";
 
-/** Fixed page input; the child block owns the complete launch lifecycle. */
-export type AgentOSOpenClawLaunchBridgeProps = AgentOSOpenClawLaunchBridgeViewProps;
-/** Public API role for AgentOSOpenClawLaunchBridgeViewProps. */
-export type AgentOSOpenClawLaunchBridgeViewProps = {
+/** Every atom the bridge needs: the exact workspace route identity and nothing else. */
+export type AgentOSOpenClawLaunchBridgeBaseData = {
   readonly workspaceId: string;
 };
+
+/** Complete input of {@link AgentOSOpenClawLaunchBridgeBase}: resolved atoms only, no launch state crosses in. */
+export type AgentOSOpenClawLaunchBridgeBaseProps = {
+  readonly props: AgentOSOpenClawLaunchBridgeBaseData;
+};
+
+/*
+ * The installed `starci-fe/public-component-signature` rule reads the render half's own name and
+ * demands the contract be spelled `<Unit>Props`, so this private alias is the only name the rule
+ * accepts; the exported contract above stays `<Unit>BaseProps`, which the code-pattern check
+ * requires the render half to own. Not exported: one public contract per unit.
+ */
+type AgentOSOpenClawLaunchBridgeProps = AgentOSOpenClawLaunchBridgeBaseProps;
 
 /** Compose the connected launch block without proxying launch state through PageProps. */
 export const AgentOSOpenClawLaunchBridgeBase = (props: AgentOSOpenClawLaunchBridgeProps) => {
   const {
-    workspaceId
-  }: AgentOSOpenClawLaunchBridgeViewProps = props;
-  return <AgentOSOpenClawLaunch workspaceId={workspaceId} />;
+    props: data
+  }: AgentOSOpenClawLaunchBridgeProps = props;
+  return <AgentOSOpenClawLaunch workspaceId={data.workspaceId} />;
 };
-

@@ -4,9 +4,9 @@ import { AgentOSOpenClawLaunchBridge } from "@/components/pages/AgentOSOpenClawL
 export type AgentOSOpenClawLaunchRouteProps = { readonly params: Promise<{ readonly workspaceId: string }> }
 
 /** Mount the credential-free bridge in the browser-created tab. */
-const AgentOSOpenClawLaunchRoute = async ({ params }: AgentOSOpenClawLaunchRouteProps) => {
+const Page = async ({ params }: AgentOSOpenClawLaunchRouteProps) => {
     const { workspaceId } = await params
     return <AgentOSOpenClawLaunchBridge workspaceId={workspaceId} />
 }
 
-export default AgentOSOpenClawLaunchRoute
+export default Page

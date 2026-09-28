@@ -1,10 +1,8 @@
-import { Heading, Text } from "@starci/grammar/common";
-import { NivoIcon } from "@nivo/ui";
 import { useTranslations } from "next-intl";
-import { CONTENT_CLASS_NAME, ROOT_CLASS_NAME } from "./classNames";
+import { HomePageBase } from "./component";
 
-/** Props for the static home page. */
-export type HomePageProps = Record<string, never>;
+/** Public API role for HomePageProps. */
+export type HomePageProps = { readonly [key: string]: never };
 
 /**
  * PAGE - the control plane's landing screen.
@@ -26,11 +24,5 @@ export type HomePageProps = Record<string, never>;
 export const HomePage = (props: HomePageProps) => {
   void props;
   const t = useTranslations("app");
-  return <main className={ROOT_CLASS_NAME}>
-            <div className={CONTENT_CLASS_NAME}>
-                <NivoIcon props={{ name: "brand", usage: "heading" }} />
-                <Heading level={1}>{"nivo app"}</Heading>
-                <Text size="sm">{t("description")}</Text>
-            </div>
-        </main>;
+  return <HomePageBase props={{ description: t("description") }} />;
 };

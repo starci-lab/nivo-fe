@@ -5,6 +5,6 @@ import { HomePage } from "@/components/pages/HomePage"
  *
  * @returns The route.
  */
-const HomeRoute = () => <HomePage />
+const Page = () => <HomePage />
 
-export default HomeRoute
+export default Page

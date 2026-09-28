@@ -11,6 +11,6 @@ import { AgentOSOpenClawLaunchBridgeBase } from "./component"
 
 describe("AgentOSOpenClawLaunchBridgeBase", () => {
     it("passes route identity, never launch state, into the connected OpenClaw block", () => {
-        expect(renderToStaticMarkup(<AgentOSOpenClawLaunchBridgeBase workspaceId="workspace-1" />)).toContain("workspace-1")
+        expect(renderToStaticMarkup(<AgentOSOpenClawLaunchBridgeBase props={{ workspaceId: "workspace-1" }} />)).toContain("workspace-1")
     })
 })

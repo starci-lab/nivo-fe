@@ -2,9 +2,10 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 
 type LaunchBridgeProbeProps = { readonly workspaceId: string }
+type LaunchBridgeProbeBaseProps = { readonly props: LaunchBridgeProbeProps }
 
 vi.mock("./component", () => ({
-    AgentOSOpenClawLaunchBridgeBase: ({ workspaceId }: LaunchBridgeProbeProps) => <div>{workspaceId}</div>,
+    AgentOSOpenClawLaunchBridgeBase: ({ props }: LaunchBridgeProbeBaseProps) => <div>{props.workspaceId}</div>,
 }))
 
 import { AgentOSOpenClawLaunchBridge } from "."

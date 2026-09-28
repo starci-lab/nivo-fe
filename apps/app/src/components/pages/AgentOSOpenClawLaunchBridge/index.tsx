@@ -10,5 +10,5 @@ export const AgentOSOpenClawLaunchBridge = (props: AgentOSOpenClawLaunchBridgePr
   const {
     workspaceId
   }: AgentOSOpenClawLaunchBridgeProps = props;
-  return <AgentOSOpenClawLaunchBridgeBase workspaceId={workspaceId} />;
+  return <AgentOSOpenClawLaunchBridgeBase props={{ workspaceId }} />;
 };
