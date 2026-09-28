@@ -224,7 +224,7 @@ export const AppsDashboard = (props: AppsDashboardProps) => {
   const openOwnedApp = (siteId: string) => {
     router.push(fleetResourceHref("site", siteId));
   };
-  return <AppsDashboardBase state="overview" props={{
+  return <AppsDashboardBase props={{
     title: t("apps.title"),
     lede: t("apps.lede"),
     buildAppLabel: t("apps.buildApp"),

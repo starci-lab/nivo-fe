@@ -93,7 +93,11 @@ const view = (overrides: Record<string, unknown> = {}) => {
   return merged as unknown as ReturnType<typeof useSalesWorkbench>;
 };
 const renderBlock = (input: Record<string, unknown> = {}) => {
-  const rendered: ReactElement = <SalesWorkbenchBlockBase view={view(input)} />;
+  const rendered: ReactElement = <SalesWorkbenchBlockBase props={{ view: view(input) }} on={{
+    selectOpportunity: () => undefined,
+    setFactKind: () => undefined,
+    setOutcome: () => undefined
+  }} />;
   return render(rendered);
 };
 

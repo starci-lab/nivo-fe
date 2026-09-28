@@ -20,7 +20,14 @@ import {
 import { SALES_ACTION_ROW_CLASS_NAME, SALES_FIELD_STACK_CLASS_NAME, SALES_FORM_FULL_SPAN_CLASS_NAME, SALES_FORM_GRID_CLASS_NAME, SALES_NATIVE_CONTROL_CLASS_NAME, SALES_NATIVE_FIELD_CLASS_NAME, SALES_OPERATIONS_GRID_CLASS_NAME, SALES_ROW_CLASS_NAME, SALES_WORKBENCH_CLASS_NAME } from "./classNames";
 
 /** The settled view the render half draws; the connected owner resolves everything it shows. */
-type SalesWorkbenchBlockProps = { readonly view: ReturnType<typeof useSalesWorkbench> };
+type SalesWorkbenchBlockData = { readonly view: ReturnType<typeof useSalesWorkbench> };
+/** The view's three direct-call mutations; every other member crosses as a value prop. */
+type SalesWorkbenchBlockActions = {
+  readonly selectOpportunity: (opportunityId: string) => void;
+  readonly setFactKind: (kind: "customerRef" | "opportunityId") => void;
+  readonly setOutcome: (outcome: SalesCloseRequest["outcome"]) => void;
+};
+type SalesWorkbenchBlockProps = { readonly props: SalesWorkbenchBlockData; readonly on: SalesWorkbenchBlockActions };
 type ChildrenProps = { readonly children: ReactNode };
 type StatusNoticeProps = { readonly notice: SalesNotice | null };
 type FormSubmit = { readonly preventDefault: () => void };
@@ -54,7 +61,8 @@ const ScopeLine = ({ scopeReady, scopeStanding, t }: ScopeLineProps) => {
 
 /** Render the complete responsive Sales workbench from a settled controller view. */
 export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
-  const { view } = props;
+  const { view } = props.props;
+  const { selectOpportunity, setFactKind, setOutcome } = props.on;
   const { t, locale, scopeReady, scopeStanding, notice } = view;
   const stop = (handler: () => void) => (event: FormSubmit) => { event.preventDefault(); handler(); };
   const workStateText = (workState: string): string => salesWording(salesWorkStateKey(workState), workState, t);
@@ -73,7 +81,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
 
   const attentionRow = (row: SalesPipelineItem) => <Row key={row.opportunityId}>
     <ActionRow>
-      <Button size="lg" variant="ghost" isDisabled={!scopeReady} onPress={() => view.wait.setOpportunityId(row.opportunityId)}>{row.customerRef}</Button>
+      <Button size="lg" variant="ghost" isDisabled={!scopeReady} onPress={() => selectOpportunity(row.opportunityId)}>{row.customerRef}</Button>
       <Badge tone={toneFor(WORK_STATE_TONES, row.workState)}>{workStateText(row.workState)}</Badge>
       <Badge tone={toneFor(LIFECYCLE_TONES, row.status)}>{lifecycleText(row.status)}</Badge>
     </ActionRow>
@@ -126,7 +134,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
     <form onSubmit={stop(view.ambiguity.onClarify)}><FieldStack>
       <Text size="sm" weight="semibold">{t("ambiguity.question")}</Text>
       <Text size="sm">{view.ambiguity.clarification === null ? t("ambiguity.noQuestion") : JSON.stringify(view.ambiguity.clarification)}</Text>
-      <label className={SALES_NATIVE_FIELD_CLASS_NAME} htmlFor="sales-fact-kind"><Text size="sm" weight="semibold">{t("ambiguity.fact")}</Text><select className={SALES_NATIVE_CONTROL_CLASS_NAME} id="sales-fact-kind" name="sales-fact-kind" value={view.ambiguity.factKind} onChange={event => view.ambiguity.setFactKind(event.currentTarget.value === "customerRef" ? "customerRef" : "opportunityId")}><option value="opportunityId">{t(salesClarificationFactKey({ opportunityId: "x" }))}</option><option value="customerRef">{t(salesClarificationFactKey({ customerRef: "x" }))}</option></select></label>
+      <label className={SALES_NATIVE_FIELD_CLASS_NAME} htmlFor="sales-fact-kind"><Text size="sm" weight="semibold">{t("ambiguity.fact")}</Text><select className={SALES_NATIVE_CONTROL_CLASS_NAME} id="sales-fact-kind" name="sales-fact-kind" value={view.ambiguity.factKind} onChange={event => setFactKind(event.currentTarget.value === "customerRef" ? "customerRef" : "opportunityId")}><option value="opportunityId">{t(salesClarificationFactKey({ opportunityId: "x" }))}</option><option value="customerRef">{t(salesClarificationFactKey({ customerRef: "x" }))}</option></select></label>
       <Input id="sales-fact-value" name="sales-fact-value" label={t("ambiguity.factValue")} hint={t("ambiguity.factValueHint")} value={view.ambiguity.factValue} onValueChange={view.ambiguity.setFactValue} isRequired />
       <Input id="sales-clarification-revision" name="sales-clarification-revision" label={t("ambiguity.revision")} hint={t("ambiguity.revisionHint")} value={view.ambiguity.revision} onValueChange={view.ambiguity.setRevision} isRequired />
       <ActionRow><Button size="lg" type="submit" variant="primary" isPending={view.ambiguity.isClarifying} isDisabled={!scopeReady || !view.ambiguity.addressable}>{t("ambiguity.answer")}</Button></ActionRow>
@@ -195,7 +203,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
     <form onSubmit={stop(view.closure.onClose)}><div className={SALES_FORM_GRID_CLASS_NAME}>
       <Input id="sales-close-intent" name="sales-close-intent" label={t("closure.intentId")} hint={t("closure.intentIdHint")} value={view.closure.intentId} onValueChange={view.closure.setIntentId} isRequired />
       <Input id="sales-close-opportunity" name="sales-close-opportunity" label={t("closure.opportunityId")} value={view.wait.opportunityId} onValueChange={view.wait.setOpportunityId} isRequired />
-      <label className={SALES_NATIVE_FIELD_CLASS_NAME} htmlFor="sales-close-outcome"><Text size="sm" weight="semibold">{t("closure.outcome")}</Text><select className={SALES_NATIVE_CONTROL_CLASS_NAME} id="sales-close-outcome" name="sales-close-outcome" value={view.closure.outcome} onChange={event => view.closure.setOutcome(closeOutcomeOf(event.currentTarget.value))}><option value="won">{t(salesOutcomeKey("won"))}</option><option value="lost">{t(salesOutcomeKey("lost"))}</option><option value="attention">{t(salesOutcomeKey("attention"))}</option></select></label>
+      <label className={SALES_NATIVE_FIELD_CLASS_NAME} htmlFor="sales-close-outcome"><Text size="sm" weight="semibold">{t("closure.outcome")}</Text><select className={SALES_NATIVE_CONTROL_CLASS_NAME} id="sales-close-outcome" name="sales-close-outcome" value={view.closure.outcome} onChange={event => setOutcome(closeOutcomeOf(event.currentTarget.value))}><option value="won">{t(salesOutcomeKey("won"))}</option><option value="lost">{t(salesOutcomeKey("lost"))}</option><option value="attention">{t(salesOutcomeKey("attention"))}</option></select></label>
       <Input id="sales-close-evidence" name="sales-close-evidence" label={t("closure.evidence")} hint={t("evidenceRefsHint")} value={view.closure.evidenceRefs} onValueChange={view.closure.setEvidenceRefs} />
       <Input id="sales-close-order" name="sales-close-order" label={t("closure.order")} hint={t("closure.orderHint")} value={view.closure.orderId} onValueChange={view.closure.setOrderId} />
       <Input id="sales-close-revision" name="sales-close-revision" label={t("closure.revision")} hint={t("closure.revisionHint")} value={view.closure.revision} onValueChange={view.closure.setRevision} isRequired />

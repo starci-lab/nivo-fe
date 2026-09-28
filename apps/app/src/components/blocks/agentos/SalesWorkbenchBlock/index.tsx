@@ -12,5 +12,9 @@ export const SalesWorkbenchBlock = (props: SalesWorkbenchBlockProps) => {
   const translate = useTranslations("console.agentos.modules.runtime.workbench.salesWorkbench");
   const locale = useLocale();
   const view = useSalesWorkbench(props.moduleId, locale, (key, values) => translate(key as never, values as never));
-  return <SalesWorkbenchBlockBase view={view} />;
+  return <SalesWorkbenchBlockBase props={{ view }} on={{
+    selectOpportunity: view.wait.setOpportunityId,
+    setFactKind: view.ambiguity.setFactKind,
+    setOutcome: view.closure.setOutcome
+  }} />;
 };

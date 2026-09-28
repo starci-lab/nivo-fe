@@ -128,29 +128,8 @@ export type AppsDashboardActions = {
   readonly onOpenOwnedApp: (siteId: string) => void;
 };
 
-/** One approved drawing; section loading and refusal states stay in the section data. */
-export type AppsDashboardState = "overview";
-
-/** Complete input of the pure dashboard. */
-export type AppsDashboardBaseProps = {
-  readonly state: AppsDashboardState;
-  readonly props: AppsDashboardData;
-  readonly on: AppsDashboardActions;
-};
-
-/** Pure renderer input; section status remains inside the settled data atoms. */
-export type AppsDashboardViewBaseProps = AppsDashboardBaseProps;
-
-/** Legacy view fixture shape retained for existing callers while the connected entry adopts BaseProps. */
-export type AppsDashboardViewProps = AppsDashboardData & { readonly [key: string]: unknown };
-
-/** Public entry accepts the canonical contract and legacy fixture shape during migration. */
-export type AppsDashboardProps = AppsDashboardBaseProps | AppsDashboardViewProps;
-
-const isAppsDashboardBaseProps = (input: AppsDashboardProps): input is AppsDashboardBaseProps =>
-  "state" in input && "props" in input && "on" in input;
-
-const isStringAction = (candidate: unknown): candidate is (value: string) => void => typeof candidate === "function";
+/** The atom contract the pure half draws from: settled data plus the actions it can emit. */
+type AppsDashboardProps = { readonly props: AppsDashboardData; readonly on: AppsDashboardActions };
 
 /**
  * One resting row, which is the real row asked to rest as itself.
@@ -249,10 +228,10 @@ const groupedOwnedList = (rows: ReadonlyArray<OwnedAppRow>, attentionGroupLabel:
 /**
  * The app set, and how a new one is started.
  *
- * @param input - {@link AppsPageViewProps}
+ * @param input - {@link AppsDashboardData} and the actions it may emit.
  * @returns The page node.
  */
-export const AppsDashboardViewBase = (props: AppsDashboardViewBaseProps) => {
+export const AppsDashboardBase = (props: AppsDashboardProps) => {
   const {
     title,
     lede,
@@ -337,25 +316,4 @@ export const AppsDashboardViewBase = (props: AppsDashboardViewBaseProps) => {
 
 
     <Text size="md" tone="muted">{lede}</Text><div><div><>{ownedSection()}</></div><div><>{catalogueSection()}</></div></div></div>;
-};
-
-/** Preserve the former fixture call shape while production uses the typed state/props/on contract. */
-export const AppsDashboardBase = (props: AppsDashboardProps) => {
-  if (isAppsDashboardBaseProps(props)) return <AppsDashboardViewBase {...props} />;
-  const onBuildTemplate = props.onBuildTemplate;
-  const onOpenOwnedApp = props.onOpenOwnedApp;
-  const on = {
-    onBuildTemplate: isStringAction(onBuildTemplate) ? onBuildTemplate : () => undefined,
-    onOpenOwnedApp: isStringAction(onOpenOwnedApp) ? onOpenOwnedApp : () => undefined
-  };
-  const data: AppsDashboardData = {
-    title: props.title,
-    lede: props.lede,
-    buildAppLabel: props.buildAppLabel,
-    attentionGroupLabel: props.attentionGroupLabel,
-    steadyGroupLabel: props.steadyGroupLabel,
-    owned: props.owned,
-    catalogue: props.catalogue
-  };
-  return <AppsDashboardViewBase state="overview" props={data} on={on} />;
 };
