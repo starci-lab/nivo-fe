@@ -1,4 +1,4 @@
-import PurchaseStatusFlow from "@/components/blocks/agentos/PurchaseStatusFlow"
+import { AgentOSWorkspacePurchaseProvisioningPage } from "@/features/pages/AgentOSWorkspacePurchaseProvisioningPage"
 
 /** Provisioning status must be read from the authoritative owner-scoped snapshot. */
 export const dynamic = "force-dynamic"
@@ -7,9 +7,6 @@ export const dynamic = "force-dynamic"
 type AgentOSWorkspacePurchaseProvisioningRouteProps = { readonly params: Promise<{ readonly purchaseId: string }> }
 
 /** Mount the declared provisioning surface of one purchase identity. */
-const Page = async ({ params }: AgentOSWorkspacePurchaseProvisioningRouteProps) => {
-    const { purchaseId } = await params
-    return <PurchaseStatusFlow purchaseId={purchaseId} surface="provisioning" />
-}
+const Page = (props: AgentOSWorkspacePurchaseProvisioningRouteProps) => <AgentOSWorkspacePurchaseProvisioningPage params={props.params} />
 
 export default Page
