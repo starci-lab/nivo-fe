@@ -83,26 +83,33 @@ export const AcademyStudentCrm = (props: AcademyStudentCrmProps) => {
     setActionMessage(result.ok ? t("saved") : t("actionFailed"));
     setPendingAction(undefined);
   };
-  return <AcademyStudentCrmBase state={listStateOf(students)} students={students ?? []} detailState={detailStateOf(detailLoading, detail)} detail={detail ?? undefined} pendingAction={pendingAction} actionMessage={actionMessage} labels={{
-    section: t("section"),
-    empty: t("empty"),
-    refused: t("refused"),
-    open: t("open"),
-    active: t("active"),
-    banned: t("banned"),
-    detail: t("detail"),
-    create: t("create"),
-    name: t("name"),
-    email: t("email"),
-    password: t("password"),
-    saveStudent: t("saveStudent"),
-    courseSlug: t("courseSlug"),
-    grant: t("grant"),
-    revoke: t("revoke"),
-    ban: t("ban"),
-    activate: t("activate"),
-    loadingDetail: t("loadingDetail"),
-    actionFailed: t("actionFailed")
+  return <AcademyStudentCrmBase state={listStateOf(students)} props={{
+    students: students ?? [],
+    detailState: detailStateOf(detailLoading, detail),
+    detail: detail ?? undefined,
+    pendingAction,
+    actionMessage,
+    labels: {
+      section: t("section"),
+      empty: t("empty"),
+      refused: t("refused"),
+      open: t("open"),
+      active: t("active"),
+      banned: t("banned"),
+      detail: t("detail"),
+      create: t("create"),
+      name: t("name"),
+      email: t("email"),
+      password: t("password"),
+      saveStudent: t("saveStudent"),
+      courseSlug: t("courseSlug"),
+      grant: t("grant"),
+      revoke: t("revoke"),
+      ban: t("ban"),
+      activate: t("activate"),
+      loadingDetail: t("loadingDetail"),
+      actionFailed: t("actionFailed")
+    }
   }} on={{
     openStudent: memberId => {
       setSelectedMemberId(memberId);

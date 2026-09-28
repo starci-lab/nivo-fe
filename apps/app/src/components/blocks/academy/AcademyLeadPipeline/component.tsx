@@ -17,33 +17,48 @@ export type AcademyLeadPipelineLabels = {
   readonly actionFailed: string;
 };
 
-/** Pure lead pipeline state. */
-export type AcademyLeadPipelineViewProps = {
-  readonly state: "resting" | "empty" | "refused" | "answered";
+/** Atoms the pure lead pipeline draws; the connected half owns the lead request. */
+export type AcademyLeadPipelineData = {
   readonly leads: ReadonlyArray<ExpertSiteLead>;
   readonly selected?: ExpertSiteLead;
   readonly draft?: string;
   readonly pendingAction?: "advance" | "draft";
   readonly message?: string;
   readonly labels: AcademyLeadPipelineLabels;
-  readonly onOpenLead: (leadId: string) => void;
-  readonly onAdvance: () => void;
-  readonly onDraftReply: () => void;
+};
+
+/** Actions the pure lead pipeline emits; every argument is an atom. */
+export type AcademyLeadPipelineActions = {
+  readonly openLead: (leadId: string) => void;
+  readonly advance: () => void;
+  readonly draftReply: () => void;
+};
+
+/** Pure lead pipeline state. */
+export type AcademyLeadPipelineViewProps = {
+  readonly state: "resting" | "empty" | "refused" | "answered";
+  readonly props: AcademyLeadPipelineData;
+  readonly on: AcademyLeadPipelineActions;
 };
 
 /** Render leads as a joined identity scan with one selected follow-up. */
-const AcademyLeadPipelineContent = ({
-  state,
-  leads,
-  selected,
-  draft,
-  pendingAction,
-  message,
-  labels,
-  onOpenLead,
-  onAdvance,
-  onDraftReply
-}: AcademyLeadPipelineViewProps) => {
+const AcademyLeadPipelineContent = (input: AcademyLeadPipelineViewProps) => {
+  const {
+    state
+  } = input;
+  const {
+    leads,
+    selected,
+    draft,
+    pendingAction,
+    message,
+    labels
+  } = input.props;
+  const {
+    openLead,
+    advance,
+    draftReply
+  } = input.on;
   const rows = state === "resting" ? [0, 1, 2].map((item, index) => <div key={index}>
     <Avatar props={{
       size: "md"
@@ -58,13 +73,13 @@ const AcademyLeadPipelineContent = ({
       size: "md"
     }} /><div>
 
-      <TextAction size="sm" onPress={() => onOpenLead(lead.id)}>{lead.name}</TextAction>
+      <TextAction size="sm" onPress={() => openLead(lead.id)}>{lead.name}</TextAction>
       <Text size="xs" tone="muted">{lead.contact}</Text></div>
 
     <Badge tone={lead.status === "converted" ? "success" : "neutral"}>{lead.status}</Badge>
     <CoreButton
       size="sm"
-      onPress={() => onOpenLead(lead.id)}
+      onPress={() => openLead(lead.id)}
     >{labels.open}</CoreButton></div>);
   const refusalNote = state === "refused" ? labels.refused : undefined;
   const note = state === "empty" ? labels.empty : refusalNote;
@@ -86,7 +101,7 @@ const AcademyLeadPipelineContent = ({
           <CoreButton
             variant="primary"
             isPending={pendingAction !== undefined}
-            onPress={draft === undefined ? onDraftReply : onAdvance}
+            onPress={draft === undefined ? draftReply : advance}
           >{draft === undefined ? labels.draft : labels.advance}</CoreButton></div></SurfaceCard>}
             {message === undefined ? null : <Text size="sm" tone="muted">{message}</Text>}
         </>;

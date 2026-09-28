@@ -17,21 +17,29 @@ export type AcademyGrowthSummaryLabels = {
   readonly activeRate: string;
 };
 
-/** Pure growth block state. */
-export type AcademyGrowthSummaryViewProps = {
-  readonly state: "resting" | "refused" | "answered";
+/** Atoms the pure growth block draws; the connected half owns the snapshot request. */
+export type AcademyGrowthSummaryData = {
   readonly data?: AcademyGrowthSnapshot;
   readonly labels: AcademyGrowthSummaryLabels;
   readonly revenue: string;
 };
 
+/** Pure growth block state. */
+export type AcademyGrowthSummaryViewProps = {
+  readonly state: "resting" | "refused" | "answered";
+  readonly props: AcademyGrowthSummaryData;
+};
+
 /** Render aggregate facts without fetching or formatting. */
-const AcademyGrowthSummaryContent = ({
-  state,
-  data,
-  labels,
-  revenue
-}: AcademyGrowthSummaryViewProps) => {
+const AcademyGrowthSummaryContent = (input: AcademyGrowthSummaryViewProps) => {
+  const {
+    state
+  } = input;
+  const {
+    data,
+    labels,
+    revenue
+  } = input.props;
   const facts = [{
     id: "revenue",
     subject: revenue,

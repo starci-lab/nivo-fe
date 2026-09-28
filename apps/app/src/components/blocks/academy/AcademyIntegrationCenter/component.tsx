@@ -23,9 +23,8 @@ export type AcademyIntegrationFormField = {
   readonly hint?: string;
 };
 
-/** Resolved pure Integration Center state. */
-export type AcademyIntegrationCenterViewProps = {
-  readonly state: "resting" | "refused" | "answered";
+/** Atoms the pure Integration Center draws; the connected half owns provider requests. */
+export type AcademyIntegrationCenterData = {
   readonly sectionLabel: string;
   readonly refusedLabel: string;
   readonly cards: ReadonlyArray<AcademyIntegrationCard>;
@@ -37,24 +36,41 @@ export type AcademyIntegrationCenterViewProps = {
   };
   readonly pendingId?: string;
   readonly outcome?: string;
-  readonly onSelect: (id: string) => void;
-  readonly onChangeField: (name: string, value: string) => void;
-  readonly onSubmit: () => void;
+};
+
+/** Actions the pure Integration Center emits; every argument is an atom. */
+export type AcademyIntegrationCenterActions = {
+  readonly select: (id: string) => void;
+  readonly changeField: (name: string, value: string) => void;
+  readonly submit: () => void;
+};
+
+/** Resolved pure Integration Center state. */
+export type AcademyIntegrationCenterViewProps = {
+  readonly state: "resting" | "refused" | "answered";
+  readonly props: AcademyIntegrationCenterData;
+  readonly on: AcademyIntegrationCenterActions;
 };
 
 /** Render provider status and one selected write-only setup form. */
-const AcademyIntegrationCenterContent = ({
-  state,
-  sectionLabel,
-  refusedLabel,
-  cards,
-  selected,
-  pendingId,
-  outcome,
-  onSelect,
-  onChangeField,
-  onSubmit
-}: AcademyIntegrationCenterViewProps) => <>
+const AcademyIntegrationCenterContent = (input: AcademyIntegrationCenterViewProps) => {
+  const {
+    state
+  } = input;
+  const {
+    sectionLabel,
+    refusedLabel,
+    cards,
+    selected,
+    pendingId,
+    outcome
+  } = input.props;
+  const {
+    select,
+    changeField,
+    submit
+  } = input.on;
+  return <>
         {state === "refused" ? <SurfaceCard
           label={sectionLabel}
         ><div>
@@ -67,7 +83,7 @@ const AcademyIntegrationCenterContent = ({
         isPending: pendingId === card.id,
         disabled: pendingId !== undefined
       }} on={{
-        press: () => onSelect(card.id)
+        press: () => select(card.id)
       }} isLoading={state === "resting"} />)}</div></SurfaceCard>}
         {selected === undefined ? null : <SurfaceCard
           label={selected.label}
@@ -78,15 +94,16 @@ const AcademyIntegrationCenterContent = ({
     revealLabel={field.kind === "password" ? "Show" : undefined}
     hideLabel={field.kind === "password" ? "Hide" : undefined}
     variant="secondary"
-    onValueChange={value => onChangeField(field.name, value)}
+    onValueChange={value => changeField(field.name, value)}
   />)}
       <Button
         variant="primary"
         isPending={pendingId === selected.id}
-        onPress={onSubmit}
+        onPress={submit}
       >{selected.submitLabel}</Button></div></SurfaceCard>}
         {outcome === undefined ? null : <Text size="sm" tone="muted" live="polite">{outcome}</Text>}
     </>;
+};
 
 /** Stable typed root for the Academy integration block. */
 export const AcademyIntegrationCenterBase = (props: AcademyIntegrationCenterProps) => <AcademyIntegrationCenterContent {...props} />;

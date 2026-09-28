@@ -12,5 +12,5 @@ export const AccountingWorkbenchBlock = (props: AccountingWorkbenchBlockProps) =
   const translate = useTranslations("console.agentos.modules.runtime.workbench.accountingWorkbench");
   const locale = useLocale();
   const view = useAccountingWorkbench(props.moduleId, locale, (key, values) => translate(key as never, values as never));
-  return <AccountingWorkbenchBlockBase view={view} />;
+  return <AccountingWorkbenchBlockBase props={{ view }} />;
 };

@@ -6,8 +6,8 @@ const m = vi.hoisted(() => ({ session: { state: { status: "signed-in", accessTok
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => m.session }))
 vi.mock("@/modules/api/console", () => ({ myExpertSites: m.list }))
-type PageView = { state: string; mode: string; onSelectMode: (mode: string) => void; onOpenPublicSite: () => void }
-vi.mock("./component", () => ({ AcademyControlCenterBase: (input: PageView) => <><output data-testid="state">{input.state}:{input.mode}</output><button onClick={() => input.onSelectMode("system")}>system</button><button onClick={input.onOpenPublicSite}>open</button></> }))
+type PageView = { state: string; props: { mode: string }; on: { selectMode: (mode: string) => void; openPublicSite: () => void } }
+vi.mock("./component", () => ({ AcademyControlCenterBase: (input: PageView) => <><output data-testid="state">{input.state}:{input.props.mode}</output><button onClick={() => input.on.selectMode("system")}>system</button><button onClick={input.on.openPublicSite}>open</button></> }))
 
 beforeEach(() => { vi.clearAllMocks(); m.session.state.status = "signed-in"; m.sites = { ok: true, data: [{ id: "site-1", slug: "academy", customDomain: null }] }; m.list.mockResolvedValue(m.sites); window.open = vi.fn() })
 

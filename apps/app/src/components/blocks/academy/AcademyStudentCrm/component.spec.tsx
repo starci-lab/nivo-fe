@@ -9,17 +9,17 @@ const handlers = { openStudent: vi.fn(), changeName: vi.fn(), changeEmail: vi.fn
 
 describe("AcademyStudentCrmBase", () => {
     it("renders list empty/refused states and student identity", () => {
-        expect(renderToStaticMarkup(<AcademyStudentCrmBase state="empty" students={[]} detailState="idle" labels={labels} on={handlers} />)).toContain("No students")
-        expect(renderToStaticMarkup(<AcademyStudentCrmBase state="refused" students={[]} detailState="idle" labels={labels} on={handlers} />)).toContain("Unavailable")
-        expect(renderToStaticMarkup(<AcademyStudentCrmBase state="answered" students={[student]} detailState="idle" labels={labels} on={handlers} />)).toContain("Reader")
+        expect(renderToStaticMarkup(<AcademyStudentCrmBase state="empty" props={{ students: [], detailState: "idle", labels }} on={handlers} />)).toContain("No students")
+        expect(renderToStaticMarkup(<AcademyStudentCrmBase state="refused" props={{ students: [], detailState: "idle", labels }} on={handlers} />)).toContain("Unavailable")
+        expect(renderToStaticMarkup(<AcademyStudentCrmBase state="answered" props={{ students: [student], detailState: "idle", labels }} on={handlers} />)).toContain("Reader")
     })
 
     it("renders detail progress and zero-course fallback", () => {
         const detail = { member: student, orders: [], courses: [{ slug: "intro", title: "Intro", completed: 2, total: 4 }] }
-        const html = renderToStaticMarkup(<AcademyStudentCrmBase state="answered" students={[student]} detailState="answered" detail={detail} labels={labels} on={handlers} />)
+        const html = renderToStaticMarkup(<AcademyStudentCrmBase state="answered" props={{ students: [student], detailState: "answered", detail, labels }} on={handlers} />)
         expect(html).toContain("Intro")
         expect(html).toContain("2/4")
-        const empty = renderToStaticMarkup(<AcademyStudentCrmBase state="answered" students={[student]} detailState="answered" detail={{ ...detail, courses: [] }} labels={labels} on={handlers} />)
+        const empty = renderToStaticMarkup(<AcademyStudentCrmBase state="answered" props={{ students: [student], detailState: "answered", detail: { ...detail, courses: [] }, labels }} on={handlers} />)
         expect(empty).toContain("Course")
     })
 })
@@ -29,7 +29,7 @@ describe("AcademyStudentCrmBase", () => {
         const actions = { openStudent: vi.fn(), changeName: vi.fn(), changeEmail: vi.fn(), changePassword: vi.fn(), createStudent: vi.fn(), changeCourseSlug: vi.fn(), setStatus: vi.fn(), grantAccess: vi.fn(), revokeAccess: vi.fn() }
         const student = { id: "member-1", name: "Student", email: "student@example.test", role: "student", status: "active", xp: 1 }
         const detail = { member: student, orders: [], courses: [{ slug: "intro", title: "Intro", completed: 1, total: 2 }] }
-        render(<AcademyStudentCrmBase state="answered" students={[student]} detailState="answered" detail={detail} labels={labels} on={actions} />)
+        render(<AcademyStudentCrmBase state="answered" props={{ students: [student], detailState: "answered", detail, labels }} on={actions} />)
         fireEvent.click(screen.getAllByRole("button", { name: "Open" }).at(-1)!)
         fireEvent.change(screen.getByLabelText("Name"), { target: { value: "New" } })
         fireEvent.change(screen.getByLabelText("Email"), { target: { value: "new@example.test" } })
@@ -41,7 +41,7 @@ describe("AcademyStudentCrmBase", () => {
         expect(actions.createStudent).toHaveBeenCalled()
         expect(actions.grantAccess).toHaveBeenCalled()
         cleanup()
-        renderToStaticMarkup(<AcademyStudentCrmBase state="resting" students={[]} detailState="resting" labels={labels} on={actions} />)
-        renderToStaticMarkup(<AcademyStudentCrmBase state="answered" students={[{ ...student, status: "banned" }]} detailState="refused" actionMessage="Failed" detail={{ member: student, orders: [], courses: [{ slug: "zero", title: "Zero", completed: 0, total: 0 }] }} labels={labels} on={actions} />)
+        renderToStaticMarkup(<AcademyStudentCrmBase state="resting" props={{ students: [], detailState: "resting", labels }} on={actions} />)
+        renderToStaticMarkup(<AcademyStudentCrmBase state="answered" props={{ students: [{ ...student, status: "banned" }], detailState: "refused", actionMessage: "Failed", detail: { member: student, orders: [], courses: [{ slug: "zero", title: "Zero", completed: 0, total: 0 }] }, labels }} on={actions} />)
     })
 })

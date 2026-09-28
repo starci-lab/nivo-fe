@@ -26,7 +26,8 @@ import {
 import { ACCOUNTING_ACTION_ROW_CLASS_NAME, ACCOUNTING_FIELD_STACK_CLASS_NAME, ACCOUNTING_FORM_FULL_SPAN_CLASS_NAME, ACCOUNTING_FORM_GRID_CLASS_NAME, ACCOUNTING_NATIVE_CONTROL_CLASS_NAME, ACCOUNTING_NATIVE_FIELD_CLASS_NAME, ACCOUNTING_OPERATIONS_GRID_CLASS_NAME, ACCOUNTING_ROW_CLASS_NAME, ACCOUNTING_SUMMARY_GRID_CLASS_NAME, ACCOUNTING_WORKBENCH_CLASS_NAME } from "./classNames";
 
 /** The settled view the render half draws; the connected owner resolves everything it shows. */
-type AccountingWorkbenchBlockProps = { readonly view: ReturnType<typeof useAccountingWorkbench> };
+type AccountingWorkbenchBlockData = { readonly view: ReturnType<typeof useAccountingWorkbench> };
+type AccountingWorkbenchBlockProps = { readonly props: AccountingWorkbenchBlockData };
 type ChildrenProps = { readonly children: ReactNode };
 type StatusNoticeProps = { readonly notice: AccountingNotice | null };
 
@@ -81,7 +82,7 @@ const ScopeLine = ({ scopeReady, scopeStanding, t }: ScopeLineProps) => {
 
 /** Render the complete responsive Accounting workbench from a settled controller view. */
 export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProps) => {
-  const { view } = props;
+  const { view } = props.props;
   const { t, locale, scopeReady, scopeStanding, notice, currency, setCurrency, periodMonth, setPeriodMonth, asOf, asOfDraft, setAsOf, setAsOfDraft } = view;
   const amount = (amountMinor: number, rowCurrency: string): string => formatAccountingMinor(amountMinor, rowCurrency, locale);
   const estimateCurrency = view.overview.model?.currency ?? null;

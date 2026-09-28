@@ -20,19 +20,23 @@ export const AcademyGrowthSummary = (props: AcademyGrowthSummaryProps) => {
   const answer = useQueryMyAcademyGrowthSnapshotSwr(siteId).data;
   const data = answer?.ok === true ? answer.data : undefined;
   const settledState = answer?.ok === true ? "answered" : "refused";
-  return <AcademyGrowthSummaryBase state={answer === undefined ? "resting" : settledState} data={data} revenue={format.number(data?.revenueVnd ?? 0, {
-    style: "currency",
-    currency: BILLING_CURRENCY,
-    maximumFractionDigits: 0
-  })} labels={{
-    section: t("section"),
-    health: t("health"),
-    loading: t("loading"),
-    refused: t("refused"),
-    revenue: t("revenue"),
-    orders: t("orders"),
-    members: t("members"),
-    completions: t("completions"),
-    activeRate: t("activeRate")
+  return <AcademyGrowthSummaryBase state={answer === undefined ? "resting" : settledState} props={{
+    data,
+    revenue: format.number(data?.revenueVnd ?? 0, {
+      style: "currency",
+      currency: BILLING_CURRENCY,
+      maximumFractionDigits: 0
+    }),
+    labels: {
+      section: t("section"),
+      health: t("health"),
+      loading: t("loading"),
+      refused: t("refused"),
+      revenue: t("revenue"),
+      orders: t("orders"),
+      members: t("members"),
+      completions: t("completions"),
+      activeRate: t("activeRate")
+    }
   }} />;
 };

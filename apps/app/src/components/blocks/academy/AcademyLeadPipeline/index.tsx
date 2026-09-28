@@ -71,19 +71,30 @@ export const AcademyLeadPipeline = (props: AcademyLeadPipelineProps) => {
     setMessage(result.ok ? t("saved") : t("actionFailed"));
     setPendingAction(undefined);
   };
-  return <AcademyLeadPipelineBase state={pipelineState(leads)} leads={leads ?? []} selected={selected} draft={draft} pendingAction={pendingAction} message={message} labels={{
-    section: t("section"),
-    empty: t("empty"),
-    refused: t("refused"),
-    open: t("open"),
-    detail: t("detail"),
-    advance: t("advance"),
-    draft: t("draft"),
-    saved: t("saved"),
-    actionFailed: t("actionFailed")
-  }} onOpenLead={leadId => {
-    setSelectedId(leadId);
-    setDraft(undefined);
-    setMessage(undefined);
-  }} onAdvance={() => void advance()} onDraftReply={() => void draftReply()} />;
+  return <AcademyLeadPipelineBase state={pipelineState(leads)} props={{
+    leads: leads ?? [],
+    selected,
+    draft,
+    pendingAction,
+    message,
+    labels: {
+      section: t("section"),
+      empty: t("empty"),
+      refused: t("refused"),
+      open: t("open"),
+      detail: t("detail"),
+      advance: t("advance"),
+      draft: t("draft"),
+      saved: t("saved"),
+      actionFailed: t("actionFailed")
+    }
+  }} on={{
+    openLead: leadId => {
+      setSelectedId(leadId);
+      setDraft(undefined);
+      setMessage(undefined);
+    },
+    advance: () => void advance(),
+    draftReply: () => void draftReply()
+  }} />;
 };

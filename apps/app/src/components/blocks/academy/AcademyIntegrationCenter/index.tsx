@@ -213,17 +213,28 @@ export const AcademyIntegrationCenter = (props: AcademyIntegrationCenterProps) =
     setPendingId(undefined);
   };
   const settledState = answer === null ? "refused" : "answered";
-  return <AcademyIntegrationCenterBase state={answer === undefined ? "resting" : settledState} sectionLabel={t("section")} refusedLabel={t("refused")} cards={cards} selected={selectedId === undefined ? undefined : {
-    id: selectedId,
-    label: t(`providers.${selectedId}.formLabel`),
-    fields: fieldsOf(selectedId),
-    submitLabel: selectedId === "zalo" ? t("authorize") : t("save")
-  }} pendingId={pendingId} outcome={outcome} onSelect={id => {
-    setSelectedId(id as ProviderId);
-    setValues({});
-    setOutcome(undefined);
-  }} onChangeField={(name, value) => setValues(current => ({
-    ...current,
-    [name]: value
-  }))} onSubmit={() => void submit()} />;
+  return <AcademyIntegrationCenterBase state={answer === undefined ? "resting" : settledState} props={{
+    sectionLabel: t("section"),
+    refusedLabel: t("refused"),
+    cards,
+    selected: selectedId === undefined ? undefined : {
+      id: selectedId,
+      label: t(`providers.${selectedId}.formLabel`),
+      fields: fieldsOf(selectedId),
+      submitLabel: selectedId === "zalo" ? t("authorize") : t("save")
+    },
+    pendingId,
+    outcome
+  }} on={{
+    select: id => {
+      setSelectedId(id as ProviderId);
+      setValues({});
+      setOutcome(undefined);
+    },
+    changeField: (name, value) => setValues(current => ({
+      ...current,
+      [name]: value
+    })),
+    submit: () => void submit()
+  }} />;
 };

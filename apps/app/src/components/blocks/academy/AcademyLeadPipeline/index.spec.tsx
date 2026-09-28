@@ -7,8 +7,8 @@ const m = vi.hoisted(() => ({ locale: "vi", session: { state: { status: "signed-
 vi.mock("next-intl", () => ({ useLocale: () => m.locale, useTranslations: () => (key: string) => key }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => m.session }))
 vi.mock("@/modules/api/console", () => ({ myExpertSiteLeads: m.calls.list, updateExpertSiteLead: m.calls.update, draftLeadReply: m.calls.draft }))
-type LeadView = { state: string; onOpenLead: (id: string) => void; onAdvance: () => void; onDraftReply: () => void }
-vi.mock("./component", () => ({ AcademyLeadPipelineBase: (input: LeadView) => <><output data-testid="state">{input.state}</output><button onClick={() => input.onOpenLead("lead-1")}>open</button><button onClick={input.onDraftReply}>draft</button><button onClick={input.onAdvance}>advance</button></> }))
+type LeadView = { state: string; on: { openLead: (id: string) => void; advance: () => void; draftReply: () => void } }
+vi.mock("./component", () => ({ AcademyLeadPipelineBase: (input: LeadView) => <><output data-testid="state">{input.state}</output><button onClick={() => input.on.openLead("lead-1")}>open</button><button onClick={input.on.draftReply}>draft</button><button onClick={input.on.advance}>advance</button></> }))
 
 let viewerSequence = 0
 const resetQueryCache = () => { for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key) }

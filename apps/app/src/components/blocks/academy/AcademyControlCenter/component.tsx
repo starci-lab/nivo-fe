@@ -22,36 +22,50 @@ export type AcademyControlCenterLabels = {
   }>;
 };
 
-/** Pure page state; domain blocks own their own requests and failures. */
-export type AcademyControlCenterViewProps = {
-  readonly state: "restoring" | "refused" | "ready";
+/** Atoms the pure Academy page draws; domain blocks own their own requests and failures. */
+export type AcademyControlCenterData = {
   readonly title: string;
   readonly siteId: string;
   readonly publicHost?: string;
   readonly mode: AcademyControlCenterMode;
   readonly labels: AcademyControlCenterLabels;
-  readonly onSelectMode: (mode: AcademyControlCenterMode) => void;
-  readonly onOpenPublicSite: () => void;
+};
+
+/** Actions the pure Academy page emits; every argument is an atom. */
+export type AcademyControlCenterActions = {
+  readonly selectMode: (mode: AcademyControlCenterMode) => void;
+  readonly openPublicSite: () => void;
+};
+
+/** Pure page state; domain blocks own their own requests and failures. */
+export type AcademyControlCenterViewProps = {
+  readonly state: "restoring" | "refused" | "ready";
+  readonly props: AcademyControlCenterData;
+  readonly on: AcademyControlCenterActions;
 };
 
 /** Compose one Academy destination without taking ownership of block requests. */
 export const AcademyControlCenterBase = (props: AcademyControlCenterProps) => {
   const {
-    state,
+    state
+  } = props;
+  const {
     title,
     siteId,
     publicHost,
     mode,
-    labels,
-    onSelectMode,
-    onOpenPublicSite
-  }: AcademyControlCenterViewProps = props;
+    labels
+  } = props.props;
+  const {
+    selectMode,
+    openPublicSite
+  } = props.on;
   const settledSections = mode === "growth" ? [<AcademyGrowthSummary key="item-0" siteId={siteId} />, <AcademyStudentCrm key="item-1" siteId={siteId} />, <AcademyLeadPipeline key="item-2" siteId={siteId} />] : [<AcademyIntegrationCenter key="item-0" siteId={siteId} />];
   const sections = state !== "ready" ? [<EmptyNotice key="item-0" message={state === "restoring" ? labels.loading : labels.refused} />] : settledSections;
   const publicSite = publicHost === undefined ? undefined : <Button
     variant="secondary"
     size="sm"
-    onPress={onOpenPublicSite}
+    onPress={openPublicSite}
   >{labels.openSite}</Button>;
   return <div><div>
 
@@ -70,7 +84,7 @@ export const AcademyControlCenterBase = (props: AcademyControlCenterProps) => {
       tabs: labels.tabs,
       variant: "primary"
     }} on={{
-      select: key => onSelectMode(key as AcademyControlCenterMode)
+      select: key => selectMode(key as AcademyControlCenterMode)
     }} />{sections}</div>;
 };
 

@@ -173,7 +173,7 @@ const view = (overrides: Record<string, unknown> = {}) => {
   return merged as unknown as ReturnType<typeof useAccountingWorkbench>;
 };
 const renderBlock = (input: Record<string, unknown> = {}): string => {
-  const rendered: ReactElement = <AccountingWorkbenchBlockBase view={view(input)} />;
+  const rendered: ReactElement = <AccountingWorkbenchBlockBase props={{ view: view(input) }} />;
   return render(rendered).container.textContent ?? "";
 };
 

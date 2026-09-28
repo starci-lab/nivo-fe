@@ -27,33 +27,41 @@ export type AcademyStudentCrmLabels = {
   readonly actionFailed: string;
 };
 
-/** Pure state for the student list, selected detail and targeted actions. */
-export type AcademyStudentCrmViewProps = {
-  readonly state: "resting" | "empty" | "refused" | "answered";
+/** Atoms the pure student CRM draws; the connected half owns the student requests. */
+export type AcademyStudentCrmData = {
   readonly students: ReadonlyArray<AcademyStudent>;
   readonly detailState: "idle" | "resting" | "refused" | "answered";
   readonly detail?: AcademyStudentDetail;
   readonly pendingAction?: string;
   readonly actionMessage?: string;
   readonly labels: AcademyStudentCrmLabels;
-  readonly on: {
-    readonly openStudent: (memberId: string) => void;
-    readonly changeName: (value: string) => void;
-    readonly changeEmail: (value: string) => void;
-    readonly changePassword: (value: string) => void;
-    readonly createStudent: () => void;
-    readonly changeCourseSlug: (value: string) => void;
-    readonly setStatus: (status: "active" | "banned") => void;
-    readonly grantAccess: () => void;
-    readonly revokeAccess: () => void;
-  };
+};
+
+/** Actions the pure student CRM emits; every argument is an atom. */
+export type AcademyStudentCrmActions = {
+  readonly openStudent: (memberId: string) => void;
+  readonly changeName: (value: string) => void;
+  readonly changeEmail: (value: string) => void;
+  readonly changePassword: (value: string) => void;
+  readonly createStudent: () => void;
+  readonly changeCourseSlug: (value: string) => void;
+  readonly setStatus: (status: "active" | "banned") => void;
+  readonly grantAccess: () => void;
+  readonly revokeAccess: () => void;
+};
+
+/** Pure state for the student list, selected detail and targeted actions. */
+export type AcademyStudentCrmViewProps = {
+  readonly state: "resting" | "empty" | "refused" | "answered";
+  readonly props: AcademyStudentCrmData;
+  readonly on: AcademyStudentCrmActions;
 };
 
 /** Which situation the list itself is in. */
 type ListState = AcademyStudentCrmViewProps["state"];
 
 /** Which situation the selected student's detail is in. */
-type DetailState = AcademyStudentCrmViewProps["detailState"];
+type DetailState = AcademyStudentCrmViewProps["props"]["detailState"];
 
 /** The handlers this block hands down, kept apart from the data it draws. */
 type CrmActions = AcademyStudentCrmViewProps["on"];
@@ -262,16 +270,19 @@ const statusCard = (detailState: DetailState, detail: AcademyStudentDetail | und
 };
 
 /** Render student CRM state without owning requests or secrets. */
-const AcademyStudentCrmContent = ({
-  state,
-  students,
-  detailState,
-  detail,
-  pendingAction,
-  actionMessage,
-  labels,
-  on
-}: AcademyStudentCrmViewProps) => {
+const AcademyStudentCrmContent = (input: AcademyStudentCrmViewProps) => {
+  const {
+    state,
+    on
+  } = input;
+  const {
+    students,
+    detailState,
+    detail,
+    pendingAction,
+    actionMessage,
+    labels
+  } = input.props;
   const rows = state === "resting" ? restingRows(labels) : studentRows(students, labels, on);
   const note = noteFor(state, labels);
   return <>

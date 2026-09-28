@@ -8,14 +8,14 @@ const lead = { id: "lead-1", name: "Reader", contact: "reader@example.test", mes
 
 describe("AcademyLeadPipelineBase", () => {
     it("renders empty and refusal notes distinctly", () => {
-        expect(renderToStaticMarkup(<AcademyLeadPipelineBase state="empty" leads={[]} labels={labels} onOpenLead={vi.fn()} onAdvance={vi.fn()} onDraftReply={vi.fn()} />)).toContain("No leads")
-        expect(renderToStaticMarkup(<AcademyLeadPipelineBase state="refused" leads={[]} labels={labels} onOpenLead={vi.fn()} onAdvance={vi.fn()} onDraftReply={vi.fn()} />)).toContain("Unavailable")
+        expect(renderToStaticMarkup(<AcademyLeadPipelineBase state="empty" props={{ leads: [], labels }} on={{ openLead: vi.fn(), advance: vi.fn(), draftReply: vi.fn() }} />)).toContain("No leads")
+        expect(renderToStaticMarkup(<AcademyLeadPipelineBase state="refused" props={{ leads: [], labels }} on={{ openLead: vi.fn(), advance: vi.fn(), draftReply: vi.fn() }} />)).toContain("Unavailable")
     })
 
     it("renders selected lead content and switches action from draft to advance", () => {
-        const base = { state: "answered" as const, leads: [lead], selected: lead, labels, onOpenLead: vi.fn(), onAdvance: vi.fn(), onDraftReply: vi.fn() }
+        const base = { state: "answered" as const, props: { leads: [lead], selected: lead, labels }, on: { openLead: vi.fn(), advance: vi.fn(), draftReply: vi.fn() } }
         expect(renderToStaticMarkup(<AcademyLeadPipelineBase {...base} />)).toContain("Interested")
-        expect(renderToStaticMarkup(<AcademyLeadPipelineBase {...base} draft="Prepared reply" />)).toContain("Advance")
+        expect(renderToStaticMarkup(<AcademyLeadPipelineBase {...base} props={{ ...base.props, draft: "Prepared reply" }} />)).toContain("Advance")
     })
 })
 
@@ -25,16 +25,17 @@ describe("AcademyLeadPipelineBase", () => {
         const advance = vi.fn()
         const draftReply = vi.fn()
         const lead = { id: "lead-1", name: "Reader", contact: "reader@example.test", message: "Interested", status: "new", note: null }
-        render(<AcademyLeadPipelineBase state="answered" leads={[lead]} selected={lead} labels={labels} onOpenLead={openLead} onAdvance={advance} onDraftReply={draftReply} />)
+        const on = { openLead, advance, draftReply }
+        render(<AcademyLeadPipelineBase state="answered" props={{ leads: [lead], selected: lead, labels }} on={on} />)
         fireEvent.click(screen.getAllByRole("button", { name: "Open" }).at(-1)!)
         fireEvent.click(screen.getByRole("button", { name: "Draft" }))
-        render(<AcademyLeadPipelineBase state="answered" leads={[lead]} selected={lead} draft="Prepared" labels={labels} onOpenLead={openLead} onAdvance={advance} onDraftReply={draftReply} />)
+        render(<AcademyLeadPipelineBase state="answered" props={{ leads: [lead], selected: lead, draft: "Prepared", labels }} on={on} />)
         fireEvent.click(screen.getByRole("button", { name: "Advance" }))
         expect(openLead).toHaveBeenCalled()
         expect(draftReply).toHaveBeenCalled()
         expect(advance).toHaveBeenCalled()
         cleanup()
-        renderToStaticMarkup(<AcademyLeadPipelineBase state="resting" leads={[]} labels={labels} onOpenLead={openLead} onAdvance={advance} onDraftReply={draftReply} />)
-        renderToStaticMarkup(<AcademyLeadPipelineBase state="answered" leads={[{ ...lead, status: "converted" }]} selected={lead} message="Saved" pendingAction="advance" labels={labels} onOpenLead={openLead} onAdvance={advance} onDraftReply={draftReply} />)
+        renderToStaticMarkup(<AcademyLeadPipelineBase state="resting" props={{ leads: [], labels }} on={on} />)
+        renderToStaticMarkup(<AcademyLeadPipelineBase state="answered" props={{ leads: [{ ...lead, status: "converted" }], selected: lead, message: "Saved", pendingAction: "advance", labels }} on={on} />)
     })
 })

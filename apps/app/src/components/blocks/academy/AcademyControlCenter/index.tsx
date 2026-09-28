@@ -32,16 +32,25 @@ export const AcademyControlCenter = (props: AcademyControlCenterProps) => {
   const publicHost = site === null || site === undefined ? undefined : site.customDomain ?? `${site.slug}${ACADEMY_HOST_SUFFIX}`;
   if (!mounted) return null;
   const settledState = site === null ? "refused" : "ready";
-  return <AcademyControlCenterBase state={site === undefined ? "restoring" : settledState} title={site?.slug ?? t("title")} siteId={siteId} publicHost={publicHost} mode={mode} labels={{
-    loading: t("loading"),
-    refused: t("refused"),
-    openSite: t("openSite"),
-    tabsLabel: t("tabsLabel"),
-    tabs: (["growth", "system"] as const).map(id => ({
-      id,
-      label: t(`tabs.${id}`)
-    }))
-  }} onSelectMode={onSelectMode} onOpenPublicSite={() => {
-    if (publicHost !== undefined) window.open(`https://${publicHost}`, "_blank", "noopener,noreferrer");
+  return <AcademyControlCenterBase state={site === undefined ? "restoring" : settledState} props={{
+    title: site?.slug ?? t("title"),
+    siteId,
+    publicHost,
+    mode,
+    labels: {
+      loading: t("loading"),
+      refused: t("refused"),
+      openSite: t("openSite"),
+      tabsLabel: t("tabsLabel"),
+      tabs: (["growth", "system"] as const).map(id => ({
+        id,
+        label: t(`tabs.${id}`)
+      }))
+    }
+  }} on={{
+    selectMode: onSelectMode,
+    openPublicSite: () => {
+      if (publicHost !== undefined) window.open(`https://${publicHost}`, "_blank", "noopener,noreferrer");
+    }
   }} />;
 };
