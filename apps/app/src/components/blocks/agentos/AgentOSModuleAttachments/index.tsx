@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useMutateAgentosModuleAttachmentUploadSwr, useMutateFinalizeAgentosModuleAttachmentSwr, useMutateRemoveAgentosModuleAttachmentSwr } from "@/hooks";
-import { useAgentOSModuleStudioProjection } from "@/modules/agentos/module-studio-projection";
+import { useAgentOSModuleStudioProjection } from "@/hooks/agentos";
 import { AgentOSModuleAttachmentsBase } from "./component";
 type AgentOSModuleAttachmentsProps = {
   readonly workspaceId: string;

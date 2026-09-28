@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, type ReactNode } from "react";
 import type { AgentosModuleStudio } from "@/modules/api/console";
 
 /** One page-owned studio read shared by sibling connected blocks. */
@@ -15,7 +15,8 @@ export type AgentOSModuleStudioProjectionProviderProps = {
   readonly children: ReactNode;
 };
 
-const AgentOSModuleStudioProjectionContext = createContext<AgentOSModuleStudioProjection | null>(null);
+/** The page-scoped studio projection context consumed by its hook under `src/hooks/agentos`. */
+export const AgentOSModuleStudioProjectionContext = createContext<AgentOSModuleStudioProjection | null>(null);
 
 /** Provide one studio query result without coupling lower blocks to a page module. */
 export const AgentOSModuleStudioProjectionProvider = (props: AgentOSModuleStudioProjectionProviderProps) => (
@@ -23,10 +24,3 @@ export const AgentOSModuleStudioProjectionProvider = (props: AgentOSModuleStudio
     {props.children}
   </AgentOSModuleStudioProjectionContext.Provider>
 );
-
-/** Read the shared studio projection or fail when its owning page boundary is absent. */
-export const useAgentOSModuleStudioProjection = () => {
-  const projection = useContext(AgentOSModuleStudioProjectionContext);
-  if (projection === null) throw new Error("AgentOSModuleStudioProjectionProvider is required");
-  return projection;
-};

@@ -21,7 +21,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
-import { toLocale } from "@/i18n/config";
+import { toLocale } from "@/modules/i18n/config";
 import { useSession, type SessionState } from "@/modules/auth/session";
 import {
     formatShellSourceIdentity,

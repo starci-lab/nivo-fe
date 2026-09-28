@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import {
     reconcileCollabRequest,
-    useCollabLocaleFrom,
+    setCollabLocaleReader,
     type CollabReconcileCall,
     type CollabReconcileOutcome,
     type CollabResult,
@@ -29,7 +29,7 @@ export type CollabOfficeTransport = {
  */
 export const useCollabOfficeTransport = (locale: string): CollabOfficeTransport => {
     const readLocale = useCallback(() => locale, [locale]);
-    useCollabLocaleFrom(readLocale);
+    setCollabLocaleReader(readLocale);
     const reconcileRequest = useCallback(
         (call: CollabReconcileCall): Promise<CollabResult<CollabReconcileOutcome>> => reconcileCollabRequest(call),
         [],

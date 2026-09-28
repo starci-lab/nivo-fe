@@ -25,10 +25,10 @@
 
 import {
     getPathname
-} from "@/i18n/navigation";
+} from "@/modules/i18n/navigation";
 import type {
     Locale
-} from "@/i18n/config";
+} from "@/modules/i18n/config";
 import type {
     ShellNavigationOutcome,
     ShellReadScope,

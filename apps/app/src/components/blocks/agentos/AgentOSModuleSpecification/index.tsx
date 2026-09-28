@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { useMutatePublishAgentosCustomModuleSwr } from "@/hooks";
-import { useAgentOSModuleStudioProjection } from "@/modules/agentos/module-studio-projection";
+import { useRouter, useMutatePublishAgentosCustomModuleSwr } from "@/hooks";
+import { useAgentOSModuleStudioProjection } from "@/hooks/agentos";
 import { AgentOSModuleSpecificationBase } from "./component";
 type AgentOSModuleSpecificationProps = {
   readonly workspaceId: string;
