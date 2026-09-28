@@ -3,9 +3,9 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { NextIntlClientProvider } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
-import { TIME_ZONE } from "@/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n/config"
 const mocks = vi.hoisted(() => ({ push: vi.fn(), mutate: vi.fn().mockResolvedValue(undefined), answer: undefined as unknown }))
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/modules/i18n/navigation", () => ({ navigation: { useRouter: () => ({ push: mocks.push }) } }))
 vi.mock("@/hooks", () => ({ useQueryMyAgentosCustomModulesSwr: () => ({ data: mocks.answer, mutate: mocks.mutate }) }))
 import { AgentOSCustomModuleCollection } from "./index"
 afterEach(cleanup)

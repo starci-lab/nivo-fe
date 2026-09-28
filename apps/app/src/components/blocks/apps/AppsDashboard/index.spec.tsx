@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
     session: { state: { status: "signed-in", accessToken: "apps-dashboard-0" } },
 }))
 vi.mock("next-intl", () => ({ useLocale: () => mocks.locale, useTranslations: () => (key: string) => key, useFormatter: () => ({ number: (value: number) => String(value) }) }))
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/modules/i18n/navigation", () => ({ navigation: { useRouter: () => ({ push: mocks.push }) } }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => ({ myExpertSites: mocks.sites, myInstances: mocks.instances, myCatalogOrders: mocks.orders, catalogItems: mocks.catalogue }))
 

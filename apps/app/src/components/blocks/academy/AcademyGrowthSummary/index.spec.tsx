@@ -15,17 +15,18 @@ vi.mock("next/navigation", async () => ({
     ...await vi.importActual("next/navigation"),
     useSearchParams: () => new URLSearchParams(),
 }))
-vi.mock("@/i18n/navigation", async () => ({
-    ...await vi.importActual("@/i18n/navigation"),
-    useRouter: () => ({ push, replace }),
-    usePathname: () => "/wallet",
-}))
+vi.mock("@/modules/i18n/navigation", async () => {
+    const actual = await vi.importActual("@/modules/i18n/navigation") as Record<string, unknown>
+    const navigation = { ...(actual.navigation as Record<string, unknown>), useRouter: () => ({ push, replace }), usePathname: () => "/wallet" }
+    return { ...actual, navigation }
+})
 vi.mock("next-intl", () => ({
     useTranslations: () => t,
     useLocale: () => localeState.value,
     useFormatter: () => ({ number: (value: number) => String(value), dateTime: (value: string) => value }),
 }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => signedIn }))
+vi.mock("@/hooks", async () => ({ ...(await vi.importActual("@/hooks") as Record<string, unknown>), useSession: () => signedIn }))
 vi.mock("@/hooks/realtime", () => ({ default: () => ({ status: "disconnected", reason: null }) }))
 vi.mock("@/modules/api/console", () => ({
     myExpertSites: vi.fn().mockResolvedValue({ ok: true, data: [] }),

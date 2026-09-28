@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useFormatter, useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { getPathname } from "@/modules/i18n/navigation";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "@/hooks";
 import { useQueryWorkspaceCheckoutOffersSwr } from "@/hooks";
 import type { WorkspaceCheckoutOffer } from "@/modules/api/workspace-controlplane";
 import { OfferSelectionFlowBase, type OfferSelectionCopy, type OfferSelectionFlowProps, type OfferSelectionOffer } from "./component";

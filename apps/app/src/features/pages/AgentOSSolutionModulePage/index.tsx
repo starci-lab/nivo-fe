@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/hooks";
 import type { ContextDraft } from "@/components/blocks/agentos/ContextVersionBlock";
 import type { ExecuteMessage } from "@/components/blocks/agentos/ExecuteChatBlock";
 import type { ExecuteSession } from "@/components/blocks/agentos/ExecuteSessionRailBlock";

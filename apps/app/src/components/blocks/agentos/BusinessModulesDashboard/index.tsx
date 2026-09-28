@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useQueryMyAgentWorkspacesSwr } from "@/hooks";
-import { useRouter } from "@/modules/i18n/navigation";
+import { useRouter } from "@/hooks";
 import { BusinessModulesDashboardBase, BusinessModulesDashboardModuleCenter, type BusinessModulesDashboardLabels } from "./component";
 
 /** Public props for the dashboard, which has no caller-controlled values. */

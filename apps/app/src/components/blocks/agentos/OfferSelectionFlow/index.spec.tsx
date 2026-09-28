@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
 type PathnameRequest = { readonly href: string }
 /** The currency-formatting call the surface makes, named so the mocked API stays reusable. */
 type CurrencyFormatOptions = { readonly currency: string }
-vi.mock("@/i18n/navigation", () => ({
+vi.mock("@/modules/i18n/navigation", () => ({
     getPathname: (request: PathnameRequest) => request.href,
 }))
 vi.mock("next-intl", () => ({
@@ -20,6 +20,7 @@ vi.mock("next/navigation", () => ({
 }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/hooks", () => ({
+    useSession: () => mocks.session,
     useQueryWorkspaceCheckoutOffersSwr: () => mocks.offers,
 }))
 type ViewOffer = { readonly offerId: string; readonly offerVersion: string; readonly displayName: string; readonly amount: string }

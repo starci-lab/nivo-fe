@@ -41,8 +41,7 @@ type FlowProbeProps = {
 
 type PathnameRequest = { readonly href: string }
 
-vi.mock("@/i18n/navigation", () => ({
-    useRouter: () => ({ push: mocks.push, replace: mocks.push }),
+vi.mock("@/modules/i18n/navigation", () => ({
     getPathname: ({ href }: PathnameRequest) => href,
 }))
 vi.mock("next-intl", () => ({
@@ -66,6 +65,8 @@ vi.mock("@/hooks", () => ({
         return { data: enabled ? mocks.entry.data : undefined, error: undefined, isValidating: false, mutate: vi.fn() }
     },
     useMutateRecoverWorkspacePurchaseSwr: () => ({ trigger: mocks.recover.trigger, isMutating: mocks.recover.isMutating }),
+    useRouter: () => ({ push: mocks.push, replace: mocks.push }),
+    useSession: () => mocks.session,
 }))
 vi.mock("@/hooks/realtime", () => ({ default: () => mocks.realtime }))
 vi.mock("@nivo/ui", () => ({ nivoIconSource: (name: string) => () => name }))

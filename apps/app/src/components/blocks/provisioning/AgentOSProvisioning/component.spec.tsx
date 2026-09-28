@@ -55,7 +55,7 @@ describe("AgentOSProvisioningBase", () => {
     })
 
     it("keeps failure copy and actions visible", () => {
-        const html = renderToStaticMarkup(<AgentOSProvisioningBase state="failed" props={{ steps, subject: "AgentOS", detail: "Workspace plan", statusTitle: "Failed", statusText: "Could not provision", statusActionLabel: "Retry" }} on={{ statusAction: vi.fn() }} />)
+        const html = renderToStaticMarkup(<AgentOSProvisioningBase state="failure" props={{ steps, subject: "AgentOS", detail: "Workspace plan", statusTitle: "Failed", statusText: "Could not provision", statusActionLabel: "Retry" }} on={{ statusAction: vi.fn() }} />)
         expect(html).toContain("Could not provision")
         expect(html).toContain("Retry")
     })
@@ -217,7 +217,7 @@ describe("AgentOSProvisioningBase", () => {
 describe("AgentOSProvisioningBase", () => {
     it("fires integration, lead, student, and solution actions", () => {
         const steps = [{ ordinal: "1", label: "Request", state: "current" as const, stateLabel: "Current" }]
-        renderToStaticMarkup(<AgentOSProvisioningBase state="failed" props={{ steps, subject: "AgentOS", detail: "order-1", statusTitle: "Failed", statusText: "Unavailable" }} on={{ statusAction: vi.fn() }} />)
+        renderToStaticMarkup(<AgentOSProvisioningBase state="failure" props={{ steps, subject: "AgentOS", detail: "order-1", statusTitle: "Failed", statusText: "Unavailable" }} on={{ statusAction: vi.fn() }} />)
         renderToStaticMarkup(<AgentOSProvisioningBase state="ready" props={{ steps, subject: "AgentOS", detail: "workspace-1", statusTitle: "Ready", statusText: "Ready", statusActionLabel: "Manage" }} on={{ statusAction: vi.fn() }} />)
     })
 })

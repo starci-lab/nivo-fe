@@ -25,9 +25,9 @@ const nextConfig: NextConfig = {
 }
 
 /*
- * The plugin is what makes `src/i18n/request.ts` run at all: without it `getTranslations` and the
- * client provider resolve against nothing and every key renders as its own name. It is wired here
- * rather than left to a convention because a missing catalogue does not fail the build - it ships a
- * screen whose every label is a dotted path.
+ * The plugin is what makes `src/modules/i18n/request.ts` run at all: without it `getTranslations`
+ * and the client provider resolve against nothing and every key renders as its own name. It is
+ * wired here rather than left to a convention because a missing catalogue does not fail the build -
+ * it ships a screen whose every label is a dotted path.
  */
-export default createNextIntlPlugin()(nextConfig)
+export default createNextIntlPlugin("./src/modules/i18n/request.ts")(nextConfig)

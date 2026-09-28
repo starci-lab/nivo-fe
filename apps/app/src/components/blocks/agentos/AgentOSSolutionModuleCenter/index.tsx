@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useMutateInstallAgentosSolutionModuleSwr, useQueryMyAgentosModuleInstallationsSwr, useQueryMyAgentosSolutionModulesSwr } from "@/hooks";
 import type { AgentosSolutionModule } from "@/modules/api/console";
 import { nivoQueryData } from "@/modules/query";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "@/hooks";
 import useProvisioningRealtime from "@/hooks/realtime";
 import { AgentOSSolutionModuleCenterBase, type AgentOSSolutionLedgerRow, type AgentOSSolutionLedgerSectionStatus, type AgentOSSolutionModuleCard } from "./component";
 

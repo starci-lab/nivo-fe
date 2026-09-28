@@ -15,11 +15,12 @@ type EndingCall = (scope?: "thisBrowser" | "everywhere") => Promise<SessionEndRe
 const end = vi.fn<EndingCall>(() => Promise.resolve(APPLIED))
 const replace = vi.fn()
 const openChange = vi.fn()
-vi.mock("@/modules/auth/session", () => ({
+vi.mock("@/hooks", () => ({
     useSession: () => ({ state: { status: "signed-in", accessToken: "token" }, end }),
+    useRouter: () => ({ replace }),
 }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ replace }) }))
+vi.mock("@/modules/i18n/navigation", () => ({ navigation: { useRouter: () => ({ replace }) } }))
 
 import { SessionEndingDialog } from "."
 

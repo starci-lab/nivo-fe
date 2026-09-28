@@ -11,8 +11,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string, values?: TranslationValues) => values?.id === undefined ? key : `${key}:${values.id}` }));
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }));
-vi.mock("@/hooks", () => ({ useQueryMyAgentWorkspacesSwr: () => ({ ...mocks.query, mutate: mocks.mutate }) }));
+vi.mock("@/hooks", () => ({ useQueryMyAgentWorkspacesSwr: () => ({ ...mocks.query, mutate: mocks.mutate }), useRouter: () => ({ push: mocks.push }) }));
 vi.mock("@/components/blocks/agentos/AgentOSSolutionModuleCenter", () => ({ AgentOSSolutionModuleCenter: (props: MockModuleProps) => <div>modules:{props.workspaceId}</div> }));
 
 import { BusinessModulesDashboard } from ".";

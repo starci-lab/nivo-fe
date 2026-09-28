@@ -1,6 +1,6 @@
 "use client";
 import { useAgentOSShell, useMutateRenewAgentWorkspaceAppLaunchSwr, useMutateRevokeAgentWorkspaceAppLaunchSwr, useQueryMyAgentosModuleInstallationsSwr, useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "@/hooks";
 import useProvisioningRealtime from "@/hooks/realtime";
 import { workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@/modules/window/workspace-app-launch";
 import { useFormatter, useLocale, useTranslations } from "next-intl";

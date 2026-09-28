@@ -8,17 +8,17 @@ const mocks = vi.hoisted(() => ({
     session: { state: { status: "signed-in", accessToken: "token" } },
 }))
 
-vi.mock("@/hooks", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/hooks", async () => ({ ...(await vi.importActual("@/hooks") as Record<string, unknown>), useRouter: () => ({ push: mocks.push }), useSession: () => mocks.session }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key, useLocale: () => "en" }))
 vi.mock("@/modules/api/console", () => ({ myAgentosModuleInstallation: mocks.installation }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/hooks/realtime", () => ({ default: () => mocks.realtime }))
 
-type ModuleDetailViewInput = { detailState: string; installation?: { id: string }; onBack: () => void }
+type ModuleDetailViewInput = { state: string; props: { installation?: { id: string } }; on: { onBack: () => void } }
 
 vi.mock("./component", () => ({
     AgentOSSolutionModuleDetailBase: (input: ModuleDetailViewInput) => (
-        <><output data-testid="module-detail">{input.detailState}:{input.installation?.id ?? "none"}</output><button onClick={input.onBack}>back</button></>
+        <><output data-testid="module-detail">{input.state}:{input.props.installation?.id ?? "none"}</output><button onClick={input.on.onBack}>back</button></>
     ),
 }))
 

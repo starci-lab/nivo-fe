@@ -6,7 +6,7 @@ import { useRouter } from "@/hooks";
 import { useQueryMyAgentosModuleInstallationSwr } from "@/hooks";
 import type { AgentosModuleInstallationDetail } from "@/modules/api/console";
 import { nivoQueryData } from "@/modules/query";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "@/hooks";
 import useProvisioningRealtime from "@/hooks/realtime";
 import { AgentOSSolutionModuleDetailBase, type AgentOSSolutionModuleDetailStatus, type AgentOSSolutionModuleDetailLabels } from "./component";
 

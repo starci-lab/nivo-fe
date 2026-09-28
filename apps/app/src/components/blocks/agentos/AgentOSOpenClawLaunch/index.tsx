@@ -1,7 +1,7 @@
 "use client";
 import { useMutateIssueAgentWorkspaceAppLaunchSwr, useMutateRevokeAgentWorkspaceAppLaunchSwr } from "@/hooks";
 import { useRouter } from "@/hooks";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "@/hooks";
 import { followWorkspaceAppRedirect, safeWorkspaceAppRedirect, workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@/modules/window/workspace-app-launch";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";

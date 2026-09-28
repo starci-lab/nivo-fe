@@ -17,18 +17,17 @@ type EndingCall = (scope?: "thisBrowser" | "everywhere") => Promise<SessionEndRe
 
 const end = vi.fn<EndingCall>(() => Promise.resolve(APPLIED))
 const replace = vi.fn()
-vi.mock("@/modules/auth/session", () => ({
-    useSession: () => ({ state: { status: "signed-in", accessToken: "token" }, end }),
-}))
 vi.mock("next-intl", () => ({
     useTranslations: () => (key: string, values?: Readonly<Record<string, unknown>>) =>
         values === undefined ? key : `${key}(${Object.entries(values).map(([name, value]) => `${name}=${String(value)}`).join(",")})`,
 }))
-vi.mock("@/i18n/navigation", () => ({
+vi.mock("@/modules/i18n/navigation", () => ({
     Link: "a",
     redirect: vi.fn(),
-    usePathname: () => "/",
-    useRouter: () => ({ push: vi.fn(), replace }),
+    navigation: {
+        usePathname: () => "/",
+        useRouter: () => ({ push: vi.fn(), replace }),
+    },
 }))
 
 /** The route, the membership answer and the roster the connected half reads; each test sets what it needs. */
@@ -55,6 +54,9 @@ vi.mock("@/hooks", async () => {
     const { useMutateEndPrincipalSessionsSwr } = await import("@/hooks/swr/mutations/useMutateEndPrincipalSessionsSwr")
     return {
         useMutateEndPrincipalSessionsSwr,
+        useSession: () => ({ state: { status: "signed-in", accessToken: "token" }, end }),
+        useRouter: () => ({ push: vi.fn(), replace }),
+        usePathname: () => "/",
         useQueryMyAgentWorkspaceControlCenterSwr: (workspaceId: string, enabled = true) =>
             enabled ? { data: { ok: true, data: { workspace: { id: workspaceId, name: scope.workspaceName } } } } : { data: undefined },
         useQueryCollabOfficeSwr: (workspaceId: string | null) => {

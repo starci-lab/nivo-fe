@@ -12,8 +12,7 @@ type PathnameRequest = { readonly href: string; readonly locale: string }
 type CurrencyFormatOptions = { readonly currency: string }
 /* Production-shaped: getPathname prefixes non-default locales, so feeding its localized output to
    the locale-aware router would double the prefix exactly like the live refused-return defect did. */
-vi.mock("@/i18n/navigation", () => ({
-    useRouter: () => ({ push: mocks.push }),
+vi.mock("@/modules/i18n/navigation", () => ({
     getPathname: (request: PathnameRequest) => request.locale === "en" ? `/en${request.href}` : request.href,
 }))
 vi.mock("next-intl", async () => {
@@ -33,6 +32,8 @@ vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/hooks", () => ({
     useQueryWorkspaceCheckoutOffersSwr: () => mocks.offers,
     useMutateWorkspaceCheckoutStartSwr: () => mocks.start,
+    useRouter: () => ({ push: mocks.push }),
+    useSession: () => mocks.session,
 }))
 type ViewInput = {
     readonly state: string

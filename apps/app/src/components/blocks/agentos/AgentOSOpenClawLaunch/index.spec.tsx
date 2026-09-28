@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
     session: { state: { status: "signed-in", accessToken: "token" } },
 }))
 
-vi.mock("@/hooks", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/hooks", async () => ({ ...(await vi.importActual("@/hooks") as Record<string, unknown>), useRouter: () => ({ push: mocks.push }), useSession: () => mocks.session }))
 vi.mock("next-intl", () => ({
     useTranslations: () => (key: string, values?: Record<string, unknown>) => values === undefined ? key : `${key}:${JSON.stringify(values)}`,
     useLocale: () => "en",
@@ -26,11 +26,11 @@ vi.mock("@/modules/window/workspace-app-launch", () => ({
     workspaceAppLaunchChannelName: (workspaceId: string) => `launch:${workspaceId}`,
 }))
 
-type LaunchBridgeViewInput = { launchState: string; onRetry: () => void; onReturn: () => void }
+type LaunchBridgeViewInput = { state: string; on: { onRetry: () => void; onReturn: () => void } }
 
 vi.mock("./component", () => ({
     AgentOSOpenClawLaunchBase: (input: LaunchBridgeViewInput) => (
-        <><output data-testid="launch-state">{input.launchState}</output><button onClick={input.onRetry}>retry</button><button onClick={input.onReturn}>return</button></>
+        <><output data-testid="launch-state">{input.state}</output><button onClick={input.on.onRetry}>retry</button><button onClick={input.on.onReturn}>return</button></>
     ),
 }))
 

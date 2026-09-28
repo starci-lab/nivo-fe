@@ -3,7 +3,7 @@ import type { ComponentProps } from "react"
 import { NextIntlClientProvider, createTranslator, useTranslations } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
-import { TIME_ZONE } from "@/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n/config"
 /** @vitest-environment jsdom */
 
 import { fireEvent, render, screen } from "@testing-library/react"

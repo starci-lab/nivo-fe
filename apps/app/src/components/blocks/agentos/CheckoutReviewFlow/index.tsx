@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { getPathname } from "@/modules/i18n/navigation";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "@/hooks";
 import { useMutateWorkspaceCheckoutStartSwr, useQueryWorkspaceCheckoutOffersSwr, useRouter } from "@/hooks";
 import type { WorkspaceCheckoutOffer, WorkspaceCheckoutOutcome, WorkspaceCheckoutPaymentRail, WorkspaceCheckoutStartRequest } from "@/modules/api/workspace-controlplane";
 import { CheckoutReviewFlowBase, type CheckoutReviewCopy, type CheckoutReviewFacts, type CheckoutReviewFlowBaseProps, type CheckoutReviewRailOption } from "./component";

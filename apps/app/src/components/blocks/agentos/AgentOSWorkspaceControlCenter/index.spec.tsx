@@ -39,6 +39,7 @@ vi.mock("@/modules/api/console", () => ({
 vi.mock("@/hooks", async (importOriginal) => ({
     ...await importOriginal<typeof hooksModule>(),
     useAgentOSShell: () => ({ session: "established", sessionStatus: "signed-in", blocked: false, sources: mocks.sources, readSelection: mocks.readSelection, retrySource: mocks.retrySource }),
+    useSession: () => ({ ...mocks.session, adopt: mocks.adopt }),
 }))
 vi.mock("@/modules/api/auth", () => ({ refreshSession: mocks.api.refresh }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => ({ ...mocks.session, adopt: mocks.adopt }) }))
@@ -48,28 +49,33 @@ vi.mock("@/modules/window/workspace-app-launch", () => ({
 }))
 
 type ProbeProps = {
-    readonly controlCenterState: string
-    readonly message?: string
-    readonly launchState: string
-    readonly openClawLaunchHref: string
-    readonly shell: { readonly state: string, readonly installations: ReadonlyArray<{ readonly installationId: string }> }
-    readonly isShellRetrying?: boolean
-    readonly onSelectPageState: (state: "applications") => void
-    readonly onOpenAgentConsole: () => void
-    readonly onRetryShell?: () => void
-    readonly formatDate: (value: string) => string
+    readonly state: unknown
+    readonly props: {
+        readonly controlCenterState: string
+        readonly message?: string
+        readonly launchState: string
+        readonly openClawLaunchHref: string
+        readonly shell: { readonly state: string, readonly installations: ReadonlyArray<{ readonly installationId: string }> }
+        readonly isShellRetrying?: boolean
+    }
+    readonly on: {
+        readonly onSelectPageState: (state: "applications") => void
+        readonly onOpenAgentConsole: () => void
+        readonly onRetryShell?: () => void
+        readonly formatDate: (value: string) => string
+    }
 }
 
 vi.mock("./component", async (importOriginal) => ({
     ...await importOriginal<typeof componentModule>(),
-    AgentOSWorkspaceControlCenterBase: (props: ProbeProps) => (
+    AgentOSWorkspaceControlCenterBase: (contract: ProbeProps) => (
         <div>
-            <output data-testid="workspace-state">{JSON.stringify({ state: props.controlCenterState, message: props.message, launchState: props.launchState, href: props.openClawLaunchHref })}</output>
-            <output data-testid="shell-state">{JSON.stringify({ state: props.shell.state, retrying: props.isShellRetrying, installations: props.shell.installations.map(installation => installation.installationId) })}</output>
-            <button type="button" onClick={() => props.onSelectPageState("applications")}>select</button>
-            <button type="button" onClick={props.onOpenAgentConsole}>open</button>
-            <button type="button" onClick={props.onRetryShell}>retry-shell</button>
-            <button type="button" onClick={() => props.formatDate("2026-08-22T10:00:00.000Z")}>format</button>
+            <output data-testid="workspace-state">{JSON.stringify({ state: contract.props.controlCenterState, message: contract.props.message, launchState: contract.props.launchState, href: contract.props.openClawLaunchHref })}</output>
+            <output data-testid="shell-state">{JSON.stringify({ state: contract.props.shell.state, retrying: contract.props.isShellRetrying, installations: contract.props.shell.installations.map(installation => installation.installationId) })}</output>
+            <button type="button" onClick={() => contract.on.onSelectPageState("applications")}>select</button>
+            <button type="button" onClick={contract.on.onOpenAgentConsole}>open</button>
+            <button type="button" onClick={contract.on.onRetryShell}>retry-shell</button>
+            <button type="button" onClick={() => contract.on.formatDate("2026-08-22T10:00:00.000Z")}>format</button>
         </div>
     ),
 }))
