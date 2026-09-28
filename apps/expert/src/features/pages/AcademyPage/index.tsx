@@ -28,5 +28,5 @@ export const AcademyPage = async () => {
   const {
     courses
   } = await queryAcademyCourses();
-  return <AcademyPageView courses={courses} />;
+  return <AcademyPageView props={{ courses }} />;
 };

@@ -4,15 +4,17 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 vi.mock("next-intl", () => ({ useLocale: () => "en", useTranslations: () => (key: string) => key }))
 vi.mock("@/modules/api/academy", () => ({ submitLead: vi.fn().mockResolvedValue({ ok: true }) }))
 type SectionsOutputProps = {
-    readonly sections: ReadonlyArray<{ readonly kind: string; readonly id: string }>
-    readonly leadStatus: string
+    readonly props: {
+        readonly sections: ReadonlyArray<{ readonly kind: string; readonly id: string }>
+        readonly leadStatus: string
+        readonly failedImageSources: ReadonlySet<string>
+    }
     readonly on: {
         readonly submitLead: (input: { readonly name: string; readonly contact: string }) => Promise<boolean>
         readonly failImage: (src: string) => void
     }
-    readonly failedImageSources: ReadonlySet<string>
 }
-vi.mock("./component", () => ({ AcademySectionsBase: (props: SectionsOutputProps) => <output>{props.sections.map((section) => `${section.kind}:${section.id}`).join("|")}<span>{props.leadStatus}</span><span>{[...props.failedImageSources].join("|")}</span><button onClick={() => { void props.on.submitLead({ name: "Reader", contact: "0123" }) }}>submit</button><button onClick={() => props.on.failImage("broken.jpg")}>fail image</button></output> }))
+vi.mock("./component", () => ({ AcademySectionsBase: (props: SectionsOutputProps) => <output>{props.props.sections.map((section) => `${section.kind}:${section.id}`).join("|")}<span>{props.props.leadStatus}</span><span>{[...props.props.failedImageSources].join("|")}</span><button onClick={() => { void props.on.submitLead({ name: "Reader", contact: "0123" }) }}>submit</button><button onClick={() => props.on.failImage("broken.jpg")}>fail image</button></output> }))
 import { AcademySectionsBase } from "./component"
 import { AcademySections } from "./index"
 describe("AcademySections", () => {

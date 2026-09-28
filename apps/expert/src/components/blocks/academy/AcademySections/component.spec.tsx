@@ -31,7 +31,7 @@ describe("AcademySectionsBase", () => {
             { kind: "custom", id: "quote", content: { variant: "quote", heading: "A promise", body: "Learn with confidence", attribution: "Teacher" } },
             { kind: "custom", id: "columns", content: { variant: "columns", heading: "Benefits", columns: [{ title: "Fast", text: "Start today" }] } },
         ]
-        const html = renderToStaticMarkup(<AcademySectionsBase sections={sections} failedImageSources={new Set()} leadStatus="idle" on={{ submitLead: vi.fn(), failImage: vi.fn() }} />)
+        const html = renderToStaticMarkup(<AcademySectionsBase props={{ sections, failedImageSources: new Set(), leadStatus: "idle" }} on={{ submitLead: vi.fn(), failImage: vi.fn() }} />)
         expect(html).toContain("No courses")
         expect(html).toContain("Learn with confidence")
         expect(html).toContain("Start today")
@@ -39,14 +39,14 @@ describe("AcademySectionsBase", () => {
 
     it("renders the lead form fields and authored copy", () => {
         const section: AcademySection = { kind: "lead", id: "lead", title: "Contact", body: "Tell us about you", nameLabel: "Name", phoneLabel: "Phone", submitLabel: "Send", sendingLabel: "Sending", sentMessage: "Sent", errorMessage: "Failed" }
-        const html = renderToStaticMarkup(<AcademySectionsBase sections={[section]} failedImageSources={new Set()} leadStatus="idle" on={{ submitLead: vi.fn(), failImage: vi.fn() }} />)
+        const html = renderToStaticMarkup(<AcademySectionsBase props={{ sections: [section], failedImageSources: new Set(), leadStatus: "idle" }} on={{ submitLead: vi.fn(), failImage: vi.fn() }} />)
         expect(html).toContain("Tell us about you")
         expect(html).toContain("lead-name")
         expect(html).toContain("lead-phone")
     })
 
     it("draws the authored section switch cases in order", () => {
-        const props: ComponentProps<typeof AcademySectionsBase> = { sections: authoredSections, failedImageSources: new Set(), leadStatus: "idle", on: { submitLead: vi.fn(), failImage: vi.fn() } }
+        const props: ComponentProps<typeof AcademySectionsBase> = { props: { sections: authoredSections, failedImageSources: new Set(), leadStatus: "idle" }, on: { submitLead: vi.fn(), failImage: vi.fn() } }
         const html = renderToStaticMarkup(<AcademySectionsBase {...props} />)
         expect(html).toContain("Academy")
         expect(html).toContain("Busy")
@@ -57,16 +57,16 @@ describe("AcademySectionsBase", () => {
     it("forwards image failures and lead submissions to the connected owner", () => {
         const onSubmitLead = vi.fn().mockResolvedValue(true)
         const failImage = vi.fn()
-        render(<AcademySectionsBase sections={authoredSections} failedImageSources={new Set()} leadStatus="idle" on={{ submitLead: onSubmitLead, failImage }} />)
+        render(<AcademySectionsBase props={{ sections: authoredSections, failedImageSources: new Set(), leadStatus: "idle" }} on={{ submitLead: onSubmitLead, failImage }} />)
         fireEvent.error(screen.getAllByRole("img")[0])
         expect(failImage).toHaveBeenCalledWith("https://img.test/teacher.jpg")
         const lead: AcademySection = { kind: "lead", id: "lead", title: "Contact", body: "Tell us", nameLabel: "Name", phoneLabel: "Phone", submitLabel: "Send", sendingLabel: "Sending", sentMessage: "Sent", errorMessage: "Failed" }
-        const view = render(<AcademySectionsBase sections={[lead]} failedImageSources={new Set()} leadStatus="idle" on={{ submitLead: onSubmitLead, failImage }} />)
+        const view = render(<AcademySectionsBase props={{ sections: [lead], failedImageSources: new Set(), leadStatus: "idle" }} on={{ submitLead: onSubmitLead, failImage }} />)
         fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Reader" } })
         fireEvent.change(screen.getByLabelText("Phone"), { target: { value: "0123" } })
         fireEvent.click(screen.getByRole("button", { name: "Send" }))
         expect(onSubmitLead).toHaveBeenCalledWith({ name: "Reader", contact: "0123" })
-        view.rerender(<AcademySectionsBase sections={[lead]} failedImageSources={new Set()} leadStatus="sent" on={{ submitLead: onSubmitLead, failImage }} />)
+        view.rerender(<AcademySectionsBase props={{ sections: [lead], failedImageSources: new Set(), leadStatus: "sent" }} on={{ submitLead: onSubmitLead, failImage }} />)
         expect(screen.getByText("Sent")).toBeInTheDocument()
     })
 })

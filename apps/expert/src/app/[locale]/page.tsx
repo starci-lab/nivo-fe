@@ -11,6 +11,6 @@ import { AcademyPage } from "@/features/pages/AcademyPage"
  *
  * @returns The route.
  */
-const AcademyRoute = () => <AcademyPage />
+const Page = () => <AcademyPage />
 
-export default AcademyRoute
+export default Page

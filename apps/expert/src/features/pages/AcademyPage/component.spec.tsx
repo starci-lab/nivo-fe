@@ -6,6 +6,6 @@ vi.mock("@/features/layouts/AcademyChrome", () => ({ AcademyChrome: ({ content }
 vi.mock("@/components/blocks/academy/AcademySections", () => ({ AcademySections: ({ courses }: SectionsProps) => <div>{courses.map((course) => <span key={course.title}>{course.title}</span>)}</div> }))
 import { AcademyPageBase } from "./component"
 describe("academy page presentation", () => {
-    it.each([[[]], [[{ title: "Starter" }]], [[{ title: "A" }, { title: "B" }]]])("passes catalog fixture unchanged", (courses) => { expect(renderToStaticMarkup(<AcademyPageBase courses={courses.map((course) => ({ id: course.title, slug: course.title.toLowerCase(), title: course.title, summary: null, priceText: null, sortIndex: 0 }))} />)).toContain("chrome") })
-    it("renders a course title through the sections projection", () => { expect(renderToStaticMarkup(<AcademyPageBase courses={[{ id: "1", slug: "starter", title: "Starter", summary: null, priceText: null, sortIndex: 0 }]} />)).toContain("Starter") })
+    it.each([[[]], [[{ title: "Starter" }]], [[{ title: "A" }, { title: "B" }]]])("passes catalog fixture unchanged", (courses) => { expect(renderToStaticMarkup(<AcademyPageBase props={{ courses: courses.map((course) => ({ id: course.title, slug: course.title.toLowerCase(), title: course.title, summary: null, priceText: null, sortIndex: 0 })) }} />)).toContain("chrome") })
+    it("renders a course title through the sections projection", () => { expect(renderToStaticMarkup(<AcademyPageBase props={{ courses: [{ id: "1", slug: "starter", title: "Starter", summary: null, priceText: null, sortIndex: 0 }] }} />)).toContain("Starter") })
 })

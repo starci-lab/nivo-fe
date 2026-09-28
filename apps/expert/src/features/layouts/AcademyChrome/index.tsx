@@ -173,5 +173,5 @@ type AcademyChromeProps = {
 export const AcademyChrome = (props: AcademyChromeProps) => {
   const locale = useLocale() as Locale;
   const theme = themeCss(inLocale(ACADEMY.identity.name, locale));
-  return <AcademyChromeBase themeCss={theme} customCss={ACADEMY.customCss ?? null} content={props.content} />;
+  return <AcademyChromeBase state={{ content: props.content }} props={{ themeCss: theme, customCss: ACADEMY.customCss ?? null }} />;
 };

@@ -361,5 +361,5 @@ export const AcademySections = (props: AcademySectionsProps) => {
     return ok;
   };
   const failImage = (src: string) => setFailedImageSources(current => current.has(src) ? current : new Set([...current, src]));
-  return <AcademySectionsBase sections={sections} failedImageSources={failedImageSources} leadStatus={leadStatus} on={{ submitLead, failImage }} />;
+  return <AcademySectionsBase props={{ sections, failedImageSources, leadStatus }} on={{ submitLead, failImage }} />;
 };
