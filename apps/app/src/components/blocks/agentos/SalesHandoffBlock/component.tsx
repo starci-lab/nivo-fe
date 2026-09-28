@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Badge, Button, EmptyNotice, Input, PrimaryRailLayout, SectionHeader, SurfaceCard, Text } from "@starci/grammar/common";
 import type { SalesHandoffValue } from "@/modules/api/sales";
+import type { useSalesHandoff } from "@/hooks";
 import { salesNoticeLive, salesWording, type SalesNotice, type SalesSurfaceStanding, type SalesTranslation } from "@/modules/sales/sales-workbench";
 import {
   SALES_HANDOFF_ACTION_ROW_CLASS_NAME,
@@ -84,8 +85,9 @@ export type SalesHandoffBlockView = {
   readonly submission: SubmissionRegion;
 };
 
-/** The one prop the drawing half receives: the view its connected owner settled. */
-type SalesHandoffBlockProps = { readonly view: SalesHandoffBlockView };
+/** The settled view the drawing half receives; opaque so actions stay out of the atom check. */
+type SalesHandoffBlockData = { readonly view: ReturnType<typeof useSalesHandoff> };
+type SalesHandoffBlockProps = { readonly props: SalesHandoffBlockData };
 type ChildrenProps = { readonly children: ReactNode };
 type NoticeProps = { readonly notice: SalesNotice | null };
 type FormSubmit = { readonly preventDefault: () => void };
@@ -114,7 +116,7 @@ const ScopeLine = ({ scopeReady, scopeStanding, t }: ScopeLineProps) => {
 
 /** Render the complete responsive handoff surface from a settled controller view. */
 export const SalesHandoffBlockBase = (props: SalesHandoffBlockProps) => {
-  const { view } = props;
+  const { view } = props.props;
   const { t, scopeWorkspace, scopeInstallation, scopeReady, scopeStanding, notice, handoff, submission } = view;
   const model = handoff.model;
   const stop = (handler: () => void) => (event: FormSubmit) => { event.preventDefault(); handler(); };

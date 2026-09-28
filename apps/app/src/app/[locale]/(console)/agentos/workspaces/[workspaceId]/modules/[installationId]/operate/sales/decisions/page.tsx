@@ -1,10 +1,14 @@
-import { SalesDecisionBlock } from "@/components/blocks/agentos/SalesDecisionBlock";
-import type { AgentOSSolutionModuleRouteProps } from "../../../page";
+import { SalesDecisionBlock } from "@/features/pages/agentos";
+
+/** Dynamic route identities for one exact AgentOS module installation. */
+type AgentOSSolutionModuleRouteProps = {
+  readonly params: Promise<{ readonly workspaceId: string; readonly installationId: string }>;
+};
 
 /** The decision surface's own route: it mounts the surface for the installation the route names. */
-const AgentOSModuleOperateSalesDecisionsRoute = async ({ params }: AgentOSSolutionModuleRouteProps) => {
+const Page = async ({ params }: AgentOSSolutionModuleRouteProps) => {
   const { workspaceId, installationId } = await params;
   return <SalesDecisionBlock workspaceId={workspaceId} installationId={installationId} />;
 };
 
-export default AgentOSModuleOperateSalesDecisionsRoute;
+export default Page;

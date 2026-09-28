@@ -1656,7 +1656,7 @@ export const exactTestSurfaceFor = (testSurface: AgentosModuleTestSurface | null
     && run.authorityGeneration === draft.authorityGeneration && run.sourceGeneration === draft.sourceGeneration
     && run.retrievalGeneration === draft.retrievalGeneration ? testSurface : null;
 };
-type AgentOSSolutionModuleShellProps = {
+type AgentOSSolutionModuleShellData = {
   readonly workspaceLabel: string;
   readonly moduleName: string;
   readonly moduleKind: string;
@@ -1665,6 +1665,8 @@ type AgentOSSolutionModuleShellProps = {
   readonly channelLabel: string;
   readonly controllerLabel: string;
   readonly activeView: AgentOSModuleView;
+};
+type AgentOSSolutionModuleShellProps = AgentOSSolutionModuleShellData & {
   readonly onBackToModules: () => void;
   readonly onNavigate: (view: AgentOSModuleView) => void;
 };
@@ -1689,20 +1691,36 @@ export type AgentOSSolutionModuleScreen = {
   readonly contentProps: DiagnosticsSurfaceProps;
 };
 
-/** Complete world-free contract for the persistent module shell and selected screen. */
-export type AgentOSSolutionModulePageViewProps = {
+/** Settled page state handed to the pure half; the shape-slot contract leaves it uninspected. */
+export type AgentOSSolutionModulePageState = {
   readonly copy: ModulePageCopy;
-  readonly shell: AgentOSSolutionModuleShellProps;
   readonly screen: AgentOSSolutionModuleScreen;
 };
 
+/** Shell data the pure half draws; actions are split out so props stay pure data. */
+export type AgentOSSolutionModulePageData = AgentOSSolutionModuleShellData;
+
+/** Shell actions the connected half resolves and the pure half fires. */
+export type AgentOSSolutionModulePageActions = {
+  readonly backToModules: () => void;
+  readonly navigate: (view: AgentOSModuleView) => void;
+};
+
+/** Complete world-free contract for the persistent module shell and selected screen. */
+export type AgentOSSolutionModulePageViewProps = {
+  readonly state: AgentOSSolutionModulePageState;
+  readonly props: AgentOSSolutionModulePageData;
+  readonly on: AgentOSSolutionModulePageActions;
+};
+
 /** Draw the selected Module Studio surface from resolved state, data and actions only. */
-export const AgentOSSolutionModulePageBase = (props: AgentOSSolutionModulePageProps) => {
-  const {
-    shell,
-    screen,
-    copy
-  }: AgentOSSolutionModulePageViewProps = props;
+export const AgentOSSolutionModulePageBase = (view: AgentOSSolutionModulePageViewProps) => {
+  const { copy, screen } = view.state;
+  const shell: AgentOSSolutionModuleShellProps = {
+    ...view.props,
+    onBackToModules: view.on.backToModules,
+    onNavigate: view.on.navigate
+  };
   if (screen.view === "setup") return <ModuleRouteShellBlock copy={copy} {...shell} content={SetupSurface} contentProps={{ ...screen.contentProps, copy }} />;
   if (screen.view === "operate") return <ModuleRouteShellBlock copy={copy} {...shell} content={OperateSurface} contentProps={{ ...screen.contentProps, copy }} />;
   if (screen.view === "test-unavailable") return <ModuleRouteShellBlock copy={copy} {...shell} content={TestUnavailableSurface} contentProps={{ copy }} />;

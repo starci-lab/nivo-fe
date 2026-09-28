@@ -13,5 +13,5 @@ export const SalesHandoffBlock = (props: SalesHandoffBlockProps) => {
   const translate = useTranslations("agentos.sales.handoff");
   const t: SalesTranslation = (key, values): string => translate(key as never, values as never);
   const view = useSalesHandoff(props.workspaceId, props.installationId, t);
-  return <SalesHandoffBlockBase view={view} />;
+  return <SalesHandoffBlockBase props={{ view }} />;
 };

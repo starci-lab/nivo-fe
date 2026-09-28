@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
 import type { ReactElement } from "react";
-import { SalesDecisionBlockBase, type SalesDecisionBlockView } from "./component";
+import { SalesDecisionBlockBase } from "./component";
+import type { useSalesDecision } from "@/hooks";
 import en from "@/messages/en.json";
 import viMessages from "@/messages/vi.json";
 
@@ -44,7 +45,7 @@ const PENDING_PROPOSAL = {
 const ANSWERED_PROPOSAL = { ...PENDING_PROPOSAL, status: "approved", revision: 8 };
 
 /** The full settled view the direction's pending state draws, overridden per state under test. */
-const view = (overrides: Record<string, unknown> = {}): SalesDecisionBlockView => {
+const view = (overrides: Record<string, unknown> = {}): ReturnType<typeof useSalesDecision> => {
   const settled: Record<string, unknown> = {
     t: translate,
     scopeWorkspace: "workspace-1",
@@ -74,10 +75,10 @@ const view = (overrides: Record<string, unknown> = {}): SalesDecisionBlockView =
   };
   const merged: Record<string, unknown> = { ...settled, ...overrides };
   for (const group of ["proposal", "answer"]) merged[group] = { ...(settled[group] as Record<string, unknown>), ...((overrides[group] as Record<string, unknown> | undefined) ?? {}) };
-  return merged as unknown as SalesDecisionBlockView;
+  return merged as unknown as ReturnType<typeof useSalesDecision>;
 };
 const renderBlock = (input: Record<string, unknown> = {}) => {
-  const rendered: ReactElement = <SalesDecisionBlockBase view={view(input)} />;
+  const rendered: ReactElement = <SalesDecisionBlockBase props={{ view: view(input) }} on={{ selectChoice: () => undefined }} />;
   return render(rendered);
 };
 

@@ -1,9 +1,14 @@
-import { AgentOSSolutionModulePage } from "@/components/pages/AgentOSSolutionModulePage"
-import type { AgentOSSolutionModuleRouteProps } from "../page"
+import { AgentOSSolutionModulePage } from "@/features/pages/AgentOSSolutionModulePage"
 
-const AgentOSModuleOperateRoute = async ({ params }: AgentOSSolutionModuleRouteProps) => {
+/** Dynamic route identities for one exact AgentOS module installation. */
+type AgentOSSolutionModuleRouteProps = {
+    readonly params: Promise<{ readonly workspaceId: string; readonly installationId: string }>
+}
+
+/** Mount the installation's operate surface. */
+const Page = async ({ params }: AgentOSSolutionModuleRouteProps) => {
     const { workspaceId, installationId } = await params
     return <AgentOSSolutionModulePage workspaceId={workspaceId} installationId={installationId} view="operate" />
 }
 
-export default AgentOSModuleOperateRoute
+export default Page

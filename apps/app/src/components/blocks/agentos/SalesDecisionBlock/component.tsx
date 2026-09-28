@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Badge, Button, EmptyNotice, Input, PrimaryRailLayout, SectionHeader, SurfaceCard, Text } from "@starci/grammar/common";
 import { ChoiceTabs } from "@nivo/ui";
 import type { SalesDecideProposalRequest, SalesDecisionValue } from "@/modules/api/sales";
+import type { useSalesDecision } from "@/hooks";
 import { salesNoticeLive, salesWording, type SalesNotice, type SalesSurfaceStanding, type SalesTranslation } from "@/modules/sales/sales-workbench";
 import {
   SALES_DECISION_ACTION_ROW_CLASS_NAME,
@@ -73,8 +74,12 @@ export type SalesDecisionBlockView = {
   readonly answer: AnswerRegion;
 };
 
-/** The one prop the drawing half receives: the view its connected owner settled. */
-type SalesDecisionBlockProps = { readonly view: SalesDecisionBlockView };
+/** The settled view the drawing half receives; opaque so actions stay out of the atom check. */
+type SalesDecisionBlockData = { readonly view: ReturnType<typeof useSalesDecision> };
+
+/** The surface's outbound actions; the connected half wires them to the settled view. */
+type SalesDecisionBlockActions = { readonly selectChoice: (key: string) => void };
+type SalesDecisionBlockProps = { readonly props: SalesDecisionBlockData; readonly on: SalesDecisionBlockActions };
 type ChildrenProps = { readonly children: ReactNode };
 type NoticeProps = { readonly notice: SalesNotice | null };
 type FormSubmit = { readonly preventDefault: () => void };
@@ -91,7 +96,7 @@ const StatusNotice = ({ notice }: NoticeProps) => notice === null ? null : <Text
 const toneFor = (state: string): "success" | "warning" | "neutral" => DECISION_STATUS_TONES[state] ?? "neutral";
 
 /** The answer one peer choice names; an undeclared word keeps the choice the control opened on. */
-const answerOf = (key: string): SalesDecideProposalRequest["answer"] => DECISION_ANSWERS.find(answer => answer === key) ?? "approve";
+export const answerOf = (key: string): SalesDecideProposalRequest["answer"] => DECISION_ANSWERS.find(answer => answer === key) ?? "approve";
 
 /** The rail's line about the installation address: nothing here is worded before the read answers. */
 const ScopeLine = ({ scopeReady, scopeStanding, t }: ScopeLineProps) => {
@@ -103,7 +108,7 @@ const ScopeLine = ({ scopeReady, scopeStanding, t }: ScopeLineProps) => {
 
 /** Render the complete responsive decision surface from a settled controller view. */
 export const SalesDecisionBlockBase = (props: SalesDecisionBlockProps) => {
-  const { view } = props;
+  const { view } = props.props;
   const { t, scopeWorkspace, scopeInstallation, scopeReady, scopeStanding, notice, proposal, answer } = view;
   const model = proposal.model;
   const stop = (handler: () => void) => (event: FormSubmit) => { event.preventDefault(); handler(); };
@@ -149,7 +154,7 @@ export const SalesDecisionBlockBase = (props: SalesDecisionBlockProps) => {
           selectedKey: answer.choice,
           tabs: [{ id: "approve", label: t("answer.approve") }, { id: "reject", label: t("answer.reject") }],
           variant: "primary"
-        }} on={{ select: key => answer.setChoice(answerOf(key)) }} />
+        }} on={{ select: props.on.selectChoice }} />
       </FieldStack></div>
       <Input id="sales-decision-revision" name="sales-decision-revision" label={t("answer.expectedRevision")} hint={t("answer.expectedRevisionHint")} value={answer.expectedRevision} onValueChange={answer.setExpectedRevision} isRequired />
       <div className={SALES_DECISION_FORM_FULL_SPAN_CLASS_NAME}><FieldStack>

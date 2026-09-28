@@ -18,7 +18,7 @@ import {
 } from "./component"
 
 const action = vi.fn()
-const shell: AgentOSSolutionModulePageViewProps["shell"] = {
+const shell: AgentOSSolutionModulePageViewProps["props"] = {
     workspaceLabel: "Acme workspace",
     moduleName: "Support Desk",
     moduleKind: "customer-support",
@@ -27,8 +27,10 @@ const shell: AgentOSSolutionModulePageViewProps["shell"] = {
     channelLabel: "Telegram 12345",
     controllerLabel: "controller ready",
     activeView: "setup",
-    onBackToModules: action,
-    onNavigate: action,
+}
+const shellOn: AgentOSSolutionModulePageViewProps["on"] = {
+    backToModules: action,
+    navigate: action,
 }
 
 const contract: AgentosModuleTestContract = {
@@ -45,9 +47,9 @@ const contract: AgentosModuleTestContract = {
     }],
 }
 
-type CopyFixtureProps = Omit<AgentOSSolutionModulePageViewProps, "copy">
+type CopyFixtureProps = { readonly shell: AgentOSSolutionModulePageViewProps["props"]; readonly screen: AgentOSSolutionModuleScreen }
 type PageFixtureProps = CopyFixtureProps & { readonly locale: "en" | "vi" }
-const CopyFixture = ({ shell, screen }: CopyFixtureProps) => { const t = useTranslations("console.agentos.modules"); return <AgentOSSolutionModulePageBase shell={shell} screen={screen} copy={buildModulePageCopy(t)} /> }
+const CopyFixture = ({ shell, screen }: CopyFixtureProps) => { const t = useTranslations("console.agentos.modules"); return <AgentOSSolutionModulePageBase state={{ copy: buildModulePageCopy(t), screen }} props={shell} on={shellOn} /> }
 const PageFixture = ({ shell, screen, locale }: PageFixtureProps) => <NextIntlClientProvider locale={locale} timeZone={TIME_ZONE} messages={locale === "en" ? enMessages : viMessages} onError={error => { throw error }}><SessionProvider><CopyFixture shell={shell} screen={screen} /></SessionProvider></NextIntlClientProvider>
 type SettingsContentProps = Extract<AgentOSSolutionModuleScreen, { readonly view: "settings" }>["contentProps"]
 type SettingsInteractionFixtureProps = { readonly locale: "en" | "vi"; readonly contentProps: SettingsContentProps }
@@ -495,8 +497,6 @@ describe("AgentOSSolutionModulePageBase", () => {
             channelLabel: "Channel not connected",
             controllerLabel: "Controller healthy",
             activeView: "diagnostics",
-            onBackToModules: vi.fn(),
-            onNavigate: vi.fn(),
           }}
           screen={{
             view: "diagnostics",
@@ -535,8 +535,6 @@ describe("AgentOSSolutionModulePageBase", () => {
             channelLabel: "Channel not connected",
             controllerLabel: "Controller healthy",
             activeView: "settings",
-            onBackToModules: vi.fn(),
-            onNavigate: vi.fn(),
           }}
           screen={{
             view: "settings",

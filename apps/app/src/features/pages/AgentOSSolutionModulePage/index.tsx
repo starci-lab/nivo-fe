@@ -714,7 +714,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     pending: supportPending
   };
   const operationTarget = selectedOperationTarget ?? "internal-chat";
-  const shell: AgentOSSolutionModulePageViewProps["shell"] = {
+  const shell: AgentOSSolutionModulePageViewProps["props"] = {
     workspaceLabel: copy.shell.workspace({ id: workspaceId.slice(0, 8) }),
     moduleName: displayName,
     moduleKind: runtime.installation.kindKey,
@@ -722,9 +722,11 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     contextVersion: activeVersion === null ? copy.setup.notApplied : `v${activeVersion}`,
     channelLabel: channelLabelFor(channelAccountRef, copy),
     controllerLabel: runtime.diagnostics.controllerHealthy === false || runtime.diagnostics.controllerStatus === "degraded" ? copy.shell.controllerAttention : copy.shell.controllerHealthy,
-    activeView: view,
-    onBackToModules: () => router.push(`/agentos/workspaces/${workspaceId}/modules`),
-    onNavigate: nextView => router.push(`${moduleRoot}/${nextView}`)
+    activeView: view
+  };
+  const shellOn: AgentOSSolutionModulePageViewProps["on"] = {
+    backToModules: () => router.push(`/agentos/workspaces/${workspaceId}/modules`),
+    navigate: nextView => router.push(`${moduleRoot}/${nextView}`)
   };
   const screen = ((): AgentOSSolutionModuleScreen => {
     let resolvedScreen: AgentOSSolutionModuleScreen;
@@ -887,5 +889,5 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     }
     return resolvedScreen;
   })();
-  return <AgentOSSolutionModulePageBase shell={shell} screen={screen} copy={copy} />;
+  return <AgentOSSolutionModulePageBase state={{ copy, screen }} props={shell} on={shellOn} />;
 };

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
 import type { ReactElement } from "react";
-import { SalesHandoffBlockBase, type SalesHandoffBlockView } from "./component";
+import { SalesHandoffBlockBase } from "./component";
+import type { useSalesHandoff } from "@/hooks";
 import en from "@/messages/en.json";
 import viMessages from "@/messages/vi.json";
 
@@ -36,7 +37,7 @@ const buttonLabelled = (container: HTMLElement, label: string): Element | null =
 const PREPARED = { handoffId: "handoff-1", status: "prepared", orderRevision: 4, actionId: null as string | null, revision: 2 };
 
 /** The full settled view the direction's prepared state draws, overridden per state under test. */
-const view = (overrides: Record<string, unknown> = {}): SalesHandoffBlockView => {
+const view = (overrides: Record<string, unknown> = {}): ReturnType<typeof useSalesHandoff> => {
   const settled: Record<string, unknown> = {
     t: translate,
     scopeWorkspace: "workspace-1",
@@ -66,10 +67,10 @@ const view = (overrides: Record<string, unknown> = {}): SalesHandoffBlockView =>
   };
   const merged: Record<string, unknown> = { ...settled, ...overrides };
   for (const group of ["handoff", "submission"]) merged[group] = { ...(settled[group] as Record<string, unknown>), ...((overrides[group] as Record<string, unknown> | undefined) ?? {}) };
-  return merged as unknown as SalesHandoffBlockView;
+  return merged as unknown as ReturnType<typeof useSalesHandoff>;
 };
 const renderBlock = (input: Record<string, unknown> = {}) => {
-  const rendered: ReactElement = <SalesHandoffBlockBase view={view(input)} />;
+  const rendered: ReactElement = <SalesHandoffBlockBase props={{ view: view(input) }} />;
   return render(rendered);
 };
 
