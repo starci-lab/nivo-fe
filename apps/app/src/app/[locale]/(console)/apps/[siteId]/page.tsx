@@ -4,9 +4,9 @@ import { AcademyControlCenterPage } from "@/components/pages/AcademyControlCente
 export type AcademyControlCenterRouteProps = { readonly params: Promise<{ readonly siteId: string }> }
 
 /** Mount one exact owner-scoped Academy control center. */
-const AcademyControlCenterRoute = async ({ params }: AcademyControlCenterRouteProps) => {
+const Page = async ({ params }: AcademyControlCenterRouteProps) => {
     const { siteId } = await params
     return <AcademyControlCenterPage siteId={siteId} />
 }
 
-export default AcademyControlCenterRoute
+export default Page

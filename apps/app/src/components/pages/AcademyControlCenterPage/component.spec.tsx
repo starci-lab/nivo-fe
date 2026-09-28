@@ -9,7 +9,7 @@ import { AcademyControlCenterPageBase } from "./component"
 describe("AcademyControlCenterPageBase", () => {
     it("passes only identity and page-owned mode", () => {
         const select = vi.fn()
-        render(<AcademyControlCenterPageBase siteId="site-1" mode="growth" onSelectMode={select} />)
+        render(<AcademyControlCenterPageBase props={{ siteId: "site-1", mode: "growth" }} on={{ selectMode: select }} />)
         fireEvent.click(screen.getByRole("button", { name: "site-1:growth" }))
         expect(select).toHaveBeenCalledWith("system")
     })
@@ -17,7 +17,7 @@ describe("AcademyControlCenterPageBase", () => {
 
 describe("AcademyControlCenterPageBase", () => {
     it("executes the renamed pure twins across their settled state branches", () => {
-        expect(AcademyControlCenterPageBase({ siteId: "site-1", mode: "growth", onSelectMode: vi.fn() })).toBeTruthy()
-        expect(AcademyControlCenterPageBase({ siteId: "site-1", mode: "system", onSelectMode: vi.fn() })).toBeTruthy()
+        expect(AcademyControlCenterPageBase({ props: { siteId: "site-1", mode: "growth" }, on: { selectMode: vi.fn() } })).toBeTruthy()
+        expect(AcademyControlCenterPageBase({ props: { siteId: "site-1", mode: "system" }, on: { selectMode: vi.fn() } })).toBeTruthy()
     })
 })

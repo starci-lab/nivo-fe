@@ -14,5 +14,5 @@ export const AcademyControlCenterPage = (props: AcademyControlCenterPageProps) =
     siteId
   }: AcademyControlCenterPageProps = props;
   const [mode, setMode] = useState<AcademyControlCenterMode>("growth");
-  return <AcademyControlCenterPageBase siteId={siteId} mode={mode} onSelectMode={setMode} />;
+  return <AcademyControlCenterPageBase props={{ siteId, mode }} on={{ selectMode: setMode }} />;
 };

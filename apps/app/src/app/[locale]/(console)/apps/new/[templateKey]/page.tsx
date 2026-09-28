@@ -5,10 +5,10 @@ type LegacyTemplateRouteProps = {
 }
 
 /** Preserve old bookmarks while keeping `/apps/create/:templateKey` canonical. */
-const LegacyTemplateRoute = async ({ params }: LegacyTemplateRouteProps) => {
+const Page = async ({ params }: LegacyTemplateRouteProps) => {
     const { locale, templateKey } = await params
     const localeSegment = locale === "vi" ? "" : `/${locale}`
     redirect(`${localeSegment}/apps/create/${encodeURIComponent(templateKey)}`)
 }
 
-export default LegacyTemplateRoute
+export default Page

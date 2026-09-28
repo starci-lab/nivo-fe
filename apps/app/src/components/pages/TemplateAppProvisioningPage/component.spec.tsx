@@ -12,12 +12,12 @@ const labels: TemplateAppProvisioningPageViewProps["labels"] = { path: "Path", a
 
 describe("TemplateAppProvisioningPageBase", () => {
     it("passes only the template identity before persistence", () => {
-        render(<TemplateAppProvisioningPageBase mode="new" templateKey="ai_academy" labels={labels} onOpenApps={vi.fn()} />)
+        render(<TemplateAppProvisioningPageBase props={{ mode: "new", templateKey: "ai_academy", labels }} on={{ openApps: vi.fn() }} />)
         expect(screen.getByText('{"mode":"new","templateKey":"ai_academy"}')).toBeInTheDocument()
     })
 
     it("passes only the site identity after persistence", () => {
-        render(<TemplateAppProvisioningPageBase mode="resume" siteId="site-1" labels={labels} onOpenApps={vi.fn()} />)
+        render(<TemplateAppProvisioningPageBase props={{ mode: "resume", siteId: "site-1", labels }} on={{ openApps: vi.fn() }} />)
         expect(screen.getByText('{"mode":"resume","siteId":"site-1"}')).toBeInTheDocument()
     })
 })
@@ -25,7 +25,7 @@ describe("TemplateAppProvisioningPageBase", () => {
 describe("TemplateAppProvisioningPageBase", () => {
     it("executes the renamed pure twins across their settled state branches", () => {
         const templateLabels = { path: "Path", apps: "Apps", createTitle: "Create", createDescription: "Configure", provisioningTitle: "Provisioning", provisioningDescription: "Resume" }
-        expect(TemplateAppProvisioningPageBase({ mode: "new", templateKey: "ai_academy", labels: templateLabels, onOpenApps: vi.fn() })).toBeTruthy()
-        expect(TemplateAppProvisioningPageBase({ mode: "resume", siteId: "site-1", labels: templateLabels, onOpenApps: vi.fn() })).toBeTruthy()
+        expect(TemplateAppProvisioningPageBase({ props: { mode: "new", templateKey: "ai_academy", labels: templateLabels }, on: { openApps: vi.fn() } })).toBeTruthy()
+        expect(TemplateAppProvisioningPageBase({ props: { mode: "resume", siteId: "site-1", labels: templateLabels }, on: { openApps: vi.fn() } })).toBeTruthy()
     })
 })

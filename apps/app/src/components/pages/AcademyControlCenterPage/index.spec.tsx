@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
-type AcademyPageProbeProps = { readonly siteId: string, readonly mode: string, readonly onSelectMode: (mode: "system") => void }
+type AcademyPageProbeProps = { readonly props: { readonly siteId: string, readonly mode: string }, readonly on: { readonly selectMode: (mode: "system") => void } }
 
-vi.mock("./component", () => ({ AcademyControlCenterPageBase: ({ siteId, mode, onSelectMode }: AcademyPageProbeProps) => <button type="button" onClick={() => onSelectMode("system")}>{siteId}:{mode}</button> }))
+vi.mock("./component", () => ({ AcademyControlCenterPageBase: ({ props, on }: AcademyPageProbeProps) => <button type="button" onClick={() => on.selectMode("system")}>{props.siteId}:{props.mode}</button> }))
 import { AcademyControlCenterPage } from "."
 
 describe("AcademyControlCenterPage", () => {

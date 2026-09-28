@@ -4,9 +4,9 @@ import { TemplateAppProvisioningPage } from "@/components/pages/TemplateAppProvi
 type TemplateAppCreateRouteProps = { readonly params: Promise<{ readonly templateKey: string }> }
 
 /** Mount the template-app provisioning page in new-request mode. */
-const TemplateAppCreateRoute = async ({ params }: TemplateAppCreateRouteProps) => {
+const Page = async ({ params }: TemplateAppCreateRouteProps) => {
     const { templateKey } = await params
     return <TemplateAppProvisioningPage mode="new" templateKey={templateKey} />
 }
 
-export default TemplateAppCreateRoute
+export default Page

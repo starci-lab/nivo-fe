@@ -1,16 +1,27 @@
-import { AcademyControlCenter } from "@/components/blocks/academy/AcademyControlCenter";
-import type { AcademyControlCenterMode } from "@/components/blocks/academy/AcademyControlCenter/component";
+import { AcademyControlCenter, type AcademyControlCenterProps } from "@/components/blocks/academy/AcademyControlCenter";
 
-/** Page-owned route identity and tab composition. */
-export type AcademyControlCenterPageProps = AcademyControlCenterPageViewProps;
-/** Public API role for AcademyControlCenterPageViewProps. */
-export type AcademyControlCenterPageViewProps = {
+/** The two jobs performed inside one Academy resource. */
+export type AcademyControlCenterMode = AcademyControlCenterProps["mode"];
+
+/** Resolved identity and tab the pure page draws. */
+export type AcademyControlCenterPageBaseData = {
   readonly siteId: string;
   readonly mode: AcademyControlCenterMode;
-  readonly onSelectMode: (mode: AcademyControlCenterMode) => void;
+};
+
+/** Actions the connected page wires into the pure half. */
+export type AcademyControlCenterPageBaseOn = {
+  readonly selectMode: (mode: AcademyControlCenterMode) => void;
+};
+
+/** Props for {@link AcademyControlCenterPageBase}: atom data plus action commands. */
+export type AcademyControlCenterPageProps = {
+  readonly props: AcademyControlCenterPageBaseData;
+  readonly on: AcademyControlCenterPageBaseOn;
 };
 
 /** Compose the connected site block while retaining page-level tab state. */
-export const AcademyControlCenterPageBase = (props: AcademyControlCenterPageProps) => <AcademyControlCenter siteId={props.siteId} mode={props.mode} onSelectMode={props.onSelectMode} />;
-export type { AcademyControlCenterMode };
-
+export const AcademyControlCenterPageBase = (props: AcademyControlCenterPageProps) => {
+  const { props: view, on } = props;
+  return <AcademyControlCenter siteId={view.siteId} mode={view.mode} onSelectMode={on.selectMode} />;
+};

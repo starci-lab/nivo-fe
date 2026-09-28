@@ -5,6 +5,6 @@ import { AppsPage } from "@/components/pages/AppsPage"
  *
  * @returns The route.
  */
-const AppsRoute = () => <AppsPage />
+const Page = () => <AppsPage />
 
-export default AppsRoute
+export default Page

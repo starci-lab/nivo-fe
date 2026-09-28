@@ -11,12 +11,8 @@ export type TemplateAppProvisioningRouteProps = {
   readonly siteId: string;
 };
 
-/** Page-owned copy and navigation around the connected provisioning block. */
-export type TemplateAppProvisioningPageProps = TemplateAppProvisioningRouteProps & {
-  readonly labels?: TemplateAppProvisioningPageLabels;
-  readonly onOpenApps?: () => void;
-};
-type TemplateAppProvisioningPageLabels = {
+/** Page-owned copy around the connected provisioning block. */
+export type TemplateAppProvisioningPageLabels = {
   readonly path: string;
   readonly apps: string;
   readonly createTitle: string;
@@ -24,15 +20,26 @@ type TemplateAppProvisioningPageLabels = {
   readonly provisioningTitle: string;
   readonly provisioningDescription: string;
 };
-/** Full resolved content passed from the connected route to the page renderer. */
+
+/** Full resolved content the connected page hands the pure half. */
 export type TemplateAppProvisioningPageViewProps = TemplateAppProvisioningRouteProps & {
   readonly labels: TemplateAppProvisioningPageLabels;
-  readonly onOpenApps: () => void;
+};
+
+/** Actions the connected page wires into the pure half. */
+export type TemplateAppProvisioningPageBaseOn = {
+  readonly openApps: () => void;
+};
+
+/** Props for {@link TemplateAppProvisioningPageBase}: atom data plus action commands. */
+export type TemplateAppProvisioningPageProps = {
+  readonly props: TemplateAppProvisioningPageViewProps;
+  readonly on: TemplateAppProvisioningPageBaseOn;
 };
 
 /** Compose the create or persisted-site lifecycle without proxying block state. */
 export const TemplateAppProvisioningPageBase = (props: TemplateAppProvisioningPageProps) => {
-  const view = props as TemplateAppProvisioningPageViewProps;
+  const { props: view, on } = props;
   const title = view.mode === "new" ? view.labels.createTitle : view.labels.provisioningTitle;
   const description = view.mode === "new" ? view.labels.createDescription : view.labels.provisioningDescription;
   return <div>
@@ -53,7 +60,7 @@ export const TemplateAppProvisioningPageBase = (props: TemplateAppProvisioningPa
       }]
     }} on={{
       activate: id => {
-        if (id === "apps") view.onOpenApps();
+        if (id === "apps") on.openApps();
       }
     }} /><div>
 
