@@ -85,8 +85,8 @@ describe("listWorkspacePurchaseOffers", () => {
 
         expect(result).toEqual({ ok: true, data: [{ id: "item-1", slug: "agentos-workspace", name: "AgentOS Workspace", tagline: null, templateKey: "agentos", tiers: [] }] })
         const body = requestBody(fetchMock, 0)
-        expect(body.query).toContain("catalogItems(category: $category)")
-        expect(body.variables).toEqual({ category: "ai_agent" })
+        expect(body.query).toContain("catalogItems(request: $request)")
+        expect(body.variables).toEqual({ request: { category: "ai_agent" } })
     })
 })
 
@@ -101,7 +101,7 @@ describe("startWorkspaceCheckout", () => {
 
         expect(result).toEqual({ ok: true, data: { purchaseId: "order-1", status: "pending_payment", offer: { id: "item-1", name: "AgentOS Workspace" }, tier: { id: "tier-1", name: "Solo" } } })
         const body = requestBody(fetchMock, 0)
-        expect(body.query).toContain("orderCatalogItem(input: $input)")
+        expect(body.query).toContain("orderCatalogItem(request: $input)")
         expect(body.variables.input).toEqual({ catalogItemSlug: "agentos-workspace", catalogTierId: "tier-1" })
     })
 
@@ -315,7 +315,7 @@ describe("payWorkspacePurchaseInvoice", () => {
 
         expect(result).toMatchObject({ ok: true, data: { id: "inv-1", status: "paid" } })
         const body = requestBody(fetchMock, 0)
-        expect(body.query).toContain("payInvoice(input: $input)")
+        expect(body.query).toContain("payInvoice(request: $input)")
         expect(body.variables.input).toEqual({ invoiceId: "inv-1" })
     })
 })

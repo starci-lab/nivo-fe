@@ -1031,7 +1031,7 @@ export const myInvoices = (): Promise<Result<ReadonlyArray<InvoiceRow>>> => grap
  * @param invoiceId - The unpaid invoice to settle from wallet balance.
  * @returns The canonical paid invoice, or why settlement was refused.
  */
-export const payInvoice = (invoiceId: string): Promise<Result<InvoiceRow>> => graphql(`mutation PayInvoice($input: PayInvoiceInput!) { payInvoice(input: $input) { data ${INVOICE} message success error } }`, {
+export const payInvoice = (invoiceId: string): Promise<Result<InvoiceRow>> => graphql(`mutation PayInvoice($input: PayInvoiceInput!) { payInvoice(request: $input) { data ${INVOICE} message success error } }`, {
   input: {
     invoiceId
   }
@@ -1053,8 +1053,8 @@ export const myCatalogOrders = (): Promise<Result<ReadonlyArray<CatalogOrderRow>
  * @param category - Which slice to read.
  * @returns The products, or why there are none.
  */
-export const catalogItems = (category: CatalogCategory): Promise<Result<ReadonlyArray<CatalogItemRow>>> => graphql(`query CatalogItems($category: CatalogCategory) { catalogItems(category: $category) { data ${CATALOG_ITEM} message success error } }`, {
-  category
+export const catalogItems = (category: CatalogCategory): Promise<Result<ReadonlyArray<CatalogItemRow>>> => graphql(`query CatalogItems($request: CatalogItemsRequest!) { catalogItems(request: $request) { data ${CATALOG_ITEM} message success error } }`, {
+  request: { category }
 });
 
 /**
@@ -1385,7 +1385,7 @@ export const myAgentosCustomModuleStudio = (agentWorkspaceId: string, moduleId: 
   request: { agentWorkspaceId, moduleId }
 });
 const studioMutation = (name: string, inputType: string, input: Readonly<Record<string, unknown>>): Promise<Result<AgentosModuleStudio>> => graphql(`mutation ${name}($input: ${inputType}!) {
-            ${name[0]?.toLowerCase()}${name.slice(1)}(input: $input) {
+            ${name[0]?.toLowerCase()}${name.slice(1)}(request: $input) {
                 data { ${MODULE_STUDIO_FIELDS} }
                 message success error
             }
@@ -1561,7 +1561,7 @@ export interface ProvisionedExpertSite {
 
 /** Create a draft expert academy site owned by the signed-in viewer. */
 export const createExpertSite = (slug: string): Promise<Result<CreatedExpertSite>> => graphql(`mutation CreateExpertSite($input: CreateExpertSiteInput!) {
-            createExpertSite(input: $input) { data { id slug } message success error }
+            createExpertSite(request: $input) { data { id slug } message success error }
         }`, {
   input: {
     slug
@@ -1570,7 +1570,7 @@ export const createExpertSite = (slug: string): Promise<Result<CreatedExpertSite
 
 /** Publish the academy and dispatch its deployment through the live academy owner. */
 export const publishExpertSite = (siteId: string): Promise<Result<PublishedExpertSite>> => graphql(`mutation PublishExpertSite($input: PublishExpertSiteInput!) {
-            publishExpertSite(input: $input) { data { id slug status } message success error }
+            publishExpertSite(request: $input) { data { id slug status } message success error }
         }`, {
   input: {
     siteId,
@@ -1580,7 +1580,7 @@ export const publishExpertSite = (siteId: string): Promise<Result<PublishedExper
 
 /** Queue expert academy provisioning; readiness arrives through the deployment stream/read model. */
 export const provisionExpertSite = (siteId: string): Promise<Result<ProvisionedExpertSite>> => graphql(`mutation ProvisionExpertSite($input: ProvisionExpertSiteInput!) {
-            provisionExpertSite(input: $input) { data { jobId expertDeploymentId publicHost } message success error }
+            provisionExpertSite(request: $input) { data { jobId expertDeploymentId publicHost } message success error }
         }`, {
   input: {
     siteId
@@ -1589,7 +1589,7 @@ export const provisionExpertSite = (siteId: string): Promise<Result<ProvisionedE
 
 /** Request a new AgentOS order; fulfillment/provisioning is asynchronous. */
 export const orderAgentOs = (catalogItemSlug: string, catalogTierId?: string): Promise<Result<CatalogOrderRow>> => graphql(`mutation OrderAgentOs($input: OrderCatalogItemInput!) {
-            orderCatalogItem(input: $input) { data { id status ${ORDER_PRODUCT} } message success error }
+            orderCatalogItem(request: $input) { data { id status ${ORDER_PRODUCT} } message success error }
         }`, {
   input: {
     catalogItemSlug,
@@ -1607,10 +1607,10 @@ export interface ExpertDeploymentSnapshot {
 }
 
 /** Read the latest deployment snapshot for one owned expert site so a resumed flow starts from persisted truth. */
-export const myExpertSiteDeployment = (siteId: string): Promise<Result<ExpertDeploymentSnapshot | null>> => graphql(`query MyExpertSiteDeployment($siteId: ID!) {
-            myExpertSiteDeployment(siteId: $siteId) { data { id status publicHost } message success error }
+export const myExpertSiteDeployment = (siteId: string): Promise<Result<ExpertDeploymentSnapshot | null>> => graphql(`query MyExpertSiteDeployment($request: MyExpertSiteDeploymentRequest!) {
+            myExpertSiteDeployment(request: $request) { data { id status publicHost } message success error }
         }`, {
-  siteId
+  request: { siteId }
 });
 
 /** Aggregate growth facts projected from one Academy owned by the viewer. */
@@ -1838,33 +1838,32 @@ export type AcademyZaloAuthorization = {
 };
 
 /** Read Academy growth through the owner-scoped Nivo bridge. */
-export const myAcademyGrowthSnapshot = (siteId: string): Promise<Result<AcademyGrowthSnapshot>> => graphql(`query MyAcademyGrowthSnapshot($siteId: String!) {
-            myAcademyGrowthSnapshot(siteId: $siteId) { data { revenueVnd paidOrders totalMembers activeMembers totalCompletions } message success error }
+export const myAcademyGrowthSnapshot = (siteId: string): Promise<Result<AcademyGrowthSnapshot>> => graphql(`query MyAcademyGrowthSnapshot($request: MyAcademyGrowthSnapshotRequest!) {
+            myAcademyGrowthSnapshot(request: $request) { data { revenueVnd paidOrders totalMembers activeMembers totalCompletions } message success error }
         }`, {
-  siteId
+  request: { siteId }
 });
 
 /** Read one bounded student page through the owner-scoped Nivo bridge. */
 export const myAcademyStudents = (input: MyAcademyStudentsInput): Promise<Result<AcademyStudentsPage>> => graphql(`query MyAcademyStudents($input: MyAcademyStudentsInput!) {
-            myAcademyStudents(input: $input) { data { items { id name email role status xp } total } message success error }
+            myAcademyStudents(request: $input) { data { items { id name email role status xp } total } message success error }
         }`, {
   input
 });
 
 /** Read one student detail after ownership is checked by Core. */
-export const myAcademyStudentDetail = (siteId: string, memberId: string): Promise<Result<AcademyStudentDetail>> => graphql(`query MyAcademyStudentDetail($siteId: String!, $memberId: String!) {
-            myAcademyStudentDetail(siteId: $siteId, memberId: $memberId) {
+export const myAcademyStudentDetail = (siteId: string, memberId: string): Promise<Result<AcademyStudentDetail>> => graphql(`query MyAcademyStudentDetail($request: MyAcademyStudentDetailRequest!) {
+            myAcademyStudentDetail(request: $request) {
                 data { member { id name email role status } orders { id courseSlug status amountVnd } courses { slug title completed total } }
                 message success error
             }
         }`, {
-  siteId,
-  memberId
+  request: { siteId, memberId }
 });
 
 /** Read all safe provider states for one owned Academy. */
-export const myAcademyIntegrations = (siteId: string): Promise<Result<AcademyIntegrations>> => graphql(`query MyAcademyIntegrations($siteId: String!) {
-            myAcademyIntegrations(siteId: $siteId) {
+export const myAcademyIntegrations = (siteId: string): Promise<Result<AcademyIntegrations>> => graphql(`query MyAcademyIntegrations($request: MyAcademyIntegrationsRequest!) {
+            myAcademyIntegrations(request: $request) {
                 data {
                     credentials { key configured hint syncedAt verification verificationReason verifiedAt }
                     customDomain { domain target dnsReady delivery detail }
@@ -1876,100 +1875,96 @@ export const myAcademyIntegrations = (siteId: string): Promise<Result<AcademyInt
                 message success error
             }
         }`, {
-  siteId
+  request: { siteId }
 });
 
 /** Read leads received by one owned Academy. */
-export const myExpertSiteLeads = (siteId: string, limit = 20, offset = 0): Promise<Result<ReadonlyArray<ExpertSiteLead>>> => graphql(`query MyExpertSiteLeads($siteId: ID!, $limit: Int, $offset: Int) {
-            myExpertSiteLeads(siteId: $siteId, limit: $limit, offset: $offset) { data { id name contact message status note } message success error }
+export const myExpertSiteLeads = (siteId: string, limit = 20, offset = 0): Promise<Result<ReadonlyArray<ExpertSiteLead>>> => graphql(`query MyExpertSiteLeads($request: MyExpertSiteLeadsRequest!) {
+            myExpertSiteLeads(request: $request) { data { id name contact message status note } message success error }
         }`, {
-  siteId,
-  limit,
-  offset
+  request: { siteId, limit, offset }
 });
 
 /** Create a student in one owned Academy. */
 export const createAcademyStudent = (input: CreateAcademyStudentInput): Promise<Result<AcademyStudent>> => graphql(`mutation CreateAcademyStudent($input: CreateAcademyStudentInput!) {
-            createAcademyStudent(input: $input) { data { id name email role status xp } message success error }
+            createAcademyStudent(request: $input) { data { id name email role status xp } message success error }
         }`, {
   input
 });
 
 /** Update one student's identity fields. */
 export const updateAcademyStudent = (input: UpdateAcademyStudentInput): Promise<Result<AcademyStudent>> => graphql(`mutation UpdateAcademyStudent($input: UpdateAcademyStudentInput!) {
-            updateAcademyStudent(input: $input) { data { id name email role status xp } message success error }
+            updateAcademyStudent(request: $input) { data { id name email role status xp } message success error }
         }`, {
   input
 });
 
 /** Change one student's active/banned state. */
 export const setAcademyStudentStatus = (input: SetAcademyStudentStatusInput): Promise<Result<AcademyStudent>> => graphql(`mutation SetAcademyStudentStatus($input: SetAcademyStudentStatusInput!) {
-            setAcademyStudentStatus(input: $input) { data { id name email role status xp } message success error }
+            setAcademyStudentStatus(request: $input) { data { id name email role status xp } message success error }
         }`, {
   input
 });
 
 /** Grant one course to a student. */
 export const grantAcademyCourseAccess = (input: AcademyCourseAccessInput): Promise<Result<AcademyCourseAccess>> => graphql(`mutation GrantAcademyCourseAccess($input: GrantAcademyCourseAccessInput!) {
-            grantAcademyCourseAccess(input: $input) { data { id email courseSlug status } message success error }
+            grantAcademyCourseAccess(request: $input) { data { id email courseSlug status } message success error }
         }`, {
   input
 });
 
 /** Revoke gifted course access from a student. */
 export const revokeAcademyCourseAccess = (input: RevokeAcademyCourseAccessInput): Promise<Result<RevokedAcademyCourseAccess>> => graphql(`mutation RevokeAcademyCourseAccess($input: RevokeAcademyCourseAccessInput!) {
-            revokeAcademyCourseAccess(input: $input) { data { revoked keptPaidPurchase } message success error }
+            revokeAcademyCourseAccess(request: $input) { data { revoked keptPaidPurchase } message success error }
         }`, {
   input
 });
 
 /** Update the follow-up state of one Academy lead. */
 export const updateExpertSiteLead = (input: UpdateExpertSiteLeadInput): Promise<Result<ExpertSiteLead>> => graphql(`mutation UpdateExpertSiteLead($input: UpdateExpertSiteLeadInput!) {
-            updateExpertSiteLead(input: $input) { data { id name contact message status note } message success error }
+            updateExpertSiteLead(request: $input) { data { id name contact message status note } message success error }
         }`, {
   input
 });
 
 /** Draft a reply for one Academy lead without sending it. */
 export const draftLeadReply = (input: DraftLeadReplyInput): Promise<Result<DraftedLeadReply>> => graphql(`mutation DraftLeadReply($input: DraftLeadReplyInput!) {
-            draftLeadReply(input: $input) { data { reply } message success error }
+            draftLeadReply(request: $input) { data { reply } message success error }
         }`, {
   input
 });
 
 /** Store one Academy credential and return delivery status, never its value. */
 export const saveAcademyCredential = (input: SaveAcademyCredentialInput): Promise<Result<AcademyCredentialSaveResult>> => graphql(`mutation SaveAcademyCredential($input: SaveAcademyCredentialInput!) {
-            saveAcademyCredential(input: $input) { data { credential { key configured hint syncedAt verification verificationReason verifiedAt } delivery detail } message success error }
+            saveAcademyCredential(request: $input) { data { credential { key configured hint syncedAt verification verificationReason verifiedAt } delivery detail } message success error }
         }`, {
   input
 });
 
 /** Store or clear one Academy custom domain. */
 export const setAcademyCustomDomain = (input: SetAcademyCustomDomainInput): Promise<Result<AcademyCustomDomainState>> => graphql(`mutation SetAcademyCustomDomain($input: SetAcademyCustomDomainInput!) {
-            setAcademyCustomDomain(input: $input) { data { domain target dnsReady delivery detail } message success error }
+            setAcademyCustomDomain(request: $input) { data { domain target dnsReady delivery detail } message success error }
         }`, {
   input
 });
 
 /** Save write-only Google OAuth credentials. */
 export const saveAcademyGoogleOAuth = (input: SaveAcademyGoogleOAuthInput): Promise<Result<AcademyProviderStatus>> => graphql(`mutation SaveAcademyGoogleOAuth($input: SaveAcademyGoogleOAuthInput!) {
-            saveAcademyGoogleOAuth(input: $input) { data { provider status clientId identifier consentMode reason deliveredAt verifiedAt } message success error }
+            saveAcademyGoogleOAuth(request: $input) { data { provider status clientId identifier consentMode reason deliveredAt verifiedAt } message success error }
         }`, {
   input
 });
 
 /** Disconnect the Academy Google login provider. */
-export const disconnectAcademyGoogleOAuth = (siteId: string): Promise<Result<AcademyProviderStatus>> => graphql(`mutation DisconnectAcademyGoogleOAuth($input: DisconnectAcademyGoogleOAuthInput!) {
-            disconnectAcademyGoogleOAuth(input: $input) { data { provider status clientId identifier consentMode reason deliveredAt verifiedAt } message success error }
+export const disconnectAcademyGoogleOAuth = (siteId: string): Promise<Result<AcademyProviderStatus>> => graphql(`mutation DisconnectAcademyGoogleOAuth($request: DisconnectAcademyGoogleOAuthRequest!) {
+            disconnectAcademyGoogleOAuth(request: $request) { data { provider status clientId identifier consentMode reason deliveredAt verifiedAt } message success error }
         }`, {
-  input: {
-    siteId
-  }
+  request: { siteId }
 });
 
 /** Begin a short-lived Zalo OA authorization flow. */
 export const beginAcademyZaloAuthorization = (siteId: string): Promise<Result<AcademyZaloAuthorization>> => graphql(`mutation BeginAcademyZaloAuthorization($input: BeginAcademyZaloAuthorizationInput!) {
-            beginAcademyZaloAuthorization(input: $input) { data { authorizationUrl expiresAt } message success error }
+            beginAcademyZaloAuthorization(request: $input) { data { authorizationUrl expiresAt } message success error }
         }`, {
   input: {
     siteId
@@ -1978,28 +1973,28 @@ export const beginAcademyZaloAuthorization = (siteId: string): Promise<Result<Ac
 
 /** Save one analytics identifier and consent mode. */
 export const saveAcademyAnalytics = (input: SaveAcademyAnalyticsInput): Promise<Result<AcademyProviderStatus>> => graphql(`mutation SaveAcademyAnalytics($input: SaveAcademyAnalyticsInput!) {
-            saveAcademyAnalytics(input: $input) { data { provider status clientId identifier consentMode reason deliveredAt verifiedAt } message success error }
+            saveAcademyAnalytics(request: $input) { data { provider status clientId identifier consentMode reason deliveredAt verifiedAt } message success error }
         }`, {
   input
 });
 
 /** Create a signed Academy webhook and reveal its signing secret once. */
 export const createAcademyWebhook = (input: CreateAcademyWebhookInput): Promise<Result<AcademyWebhookSecretResult>> => graphql(`mutation CreateAcademyWebhook($input: CreateAcademyWebhookInput!) {
-            createAcademyWebhook(input: $input) { data { id endpoint events enabled version lastDeliveryStatus lastDeliveredAt signingSecret } message success error }
+            createAcademyWebhook(request: $input) { data { id endpoint events enabled version lastDeliveryStatus lastDeliveredAt signingSecret } message success error }
         }`, {
   input
 });
 
 /** Rotate a webhook secret with optimistic version fencing. */
 export const rotateAcademyWebhookSecret = (input: RotateAcademyWebhookSecretInput): Promise<Result<AcademyWebhookSecretResult>> => graphql(`mutation RotateAcademyWebhookSecret($input: RotateAcademyWebhookSecretInput!) {
-            rotateAcademyWebhookSecret(input: $input) { data { id endpoint events enabled version lastDeliveryStatus lastDeliveredAt signingSecret } message success error }
+            rotateAcademyWebhookSecret(request: $input) { data { id endpoint events enabled version lastDeliveryStatus lastDeliveredAt signingSecret } message success error }
         }`, {
   input
 });
 
 /** Disable one Academy webhook. */
 export const disableAcademyWebhook = (siteId: string, webhookId: string): Promise<Result<AcademyWebhookStatus>> => graphql(`mutation DisableAcademyWebhook($input: DisableAcademyWebhookInput!) {
-            disableAcademyWebhook(input: $input) { data { id endpoint events enabled version lastDeliveryStatus lastDeliveredAt } message success error }
+            disableAcademyWebhook(request: $input) { data { id endpoint events enabled version lastDeliveryStatus lastDeliveredAt } message success error }
         }`, {
   input: {
     siteId,

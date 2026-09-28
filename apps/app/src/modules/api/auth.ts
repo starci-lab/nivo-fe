@@ -441,7 +441,7 @@ const OTP_CHALLENGE = "{ challengeId expiresInSeconds }";
  * @param input - The email, the password and an optional display name.
  * @returns The challenge, or why there is none.
  */
-export const signUpInit = (input: SignUpInitInput): Promise<Result<OtpChallenge>> => graphql(`mutation SignUpInit($input: SignUpInitInput!) { signUpInit(input: $input) { data ${OTP_CHALLENGE} message success error } }`, {
+export const signUpInit = (input: SignUpInitInput): Promise<Result<OtpChallenge>> => graphql(`mutation SignUpInit($input: SignUpInitInput!) { signUpInit(request: $input) { data ${OTP_CHALLENGE} message success error } }`, {
   input
 });
 
@@ -454,7 +454,7 @@ export const signUpInit = (input: SignUpInitInput): Promise<Result<OtpChallenge>
  * @param input - The challenge to renew.
  * @returns The renewed challenge, or why it was refused.
  */
-export const signUpResend = (input: OtpResendInput): Promise<Result<OtpChallenge>> => graphql(`mutation SignUpResend($input: SignUpResendInput!) { signUpResend(input: $input) { data ${OTP_CHALLENGE} message success error } }`, {
+export const signUpResend = (input: OtpResendInput): Promise<Result<OtpChallenge>> => graphql(`mutation SignUpResend($input: SignUpResendInput!) { signUpResend(request: $input) { data ${OTP_CHALLENGE} message success error } }`, {
   input
 });
 
@@ -469,7 +469,7 @@ export const signUpResend = (input: OtpResendInput): Promise<Result<OtpChallenge
  * @param input - The challenge and the code.
  * @returns The session, the conclusion, the undecided result, or why the code was refused.
  */
-export const signUpVerifyOtp = (input: SignUpVerifyOtpInput): Promise<Result<SignUpVerifyOtpPayload>> => graphql(`mutation SignUpVerifyOtp($input: SignUpVerifyOtpInput!) { signUpVerifyOtp(input: $input) { data ${SIGN_UP_VERIFY_PAYLOAD} message success error } }`, {
+export const signUpVerifyOtp = (input: SignUpVerifyOtpInput): Promise<Result<SignUpVerifyOtpPayload>> => graphql(`mutation SignUpVerifyOtp($input: SignUpVerifyOtpInput!) { signUpVerifyOtp(request: $input) { data ${SIGN_UP_VERIFY_PAYLOAD} message success error } }`, {
   input
 });
 
@@ -484,7 +484,7 @@ export const signUpVerifyOtp = (input: SignUpVerifyOtpInput): Promise<Result<Sig
  * @param input - The address as typed.
  * @returns The challenge.
  */
-export const forgotPasswordInit = (input: ForgotPasswordInitInput): Promise<Result<OtpChallenge>> => graphql(`mutation ForgotPasswordInit($input: ForgotPasswordInitInput!) { forgotPasswordInit(input: $input) { data ${OTP_CHALLENGE} message success error } }`, {
+export const forgotPasswordInit = (input: ForgotPasswordInitInput): Promise<Result<OtpChallenge>> => graphql(`mutation ForgotPasswordInit($input: ForgotPasswordInitInput!) { forgotPasswordInit(request: $input) { data ${OTP_CHALLENGE} message success error } }`, {
   input
 });
 
@@ -494,7 +494,7 @@ export const forgotPasswordInit = (input: ForgotPasswordInitInput): Promise<Resu
  * @param input - The challenge to renew.
  * @returns The renewed challenge, or why it was refused.
  */
-export const forgotPasswordResend = (input: OtpResendInput): Promise<Result<OtpChallenge>> => graphql(`mutation ForgotPasswordResend($input: ForgotPasswordResendInput!) { forgotPasswordResend(input: $input) { data ${OTP_CHALLENGE} message success error } }`, {
+export const forgotPasswordResend = (input: OtpResendInput): Promise<Result<OtpChallenge>> => graphql(`mutation ForgotPasswordResend($input: ForgotPasswordResendInput!) { forgotPasswordResend(request: $input) { data ${OTP_CHALLENGE} message success error } }`, {
   input
 });
 
@@ -510,7 +510,7 @@ export const forgotPasswordResend = (input: OtpResendInput): Promise<Result<OtpC
  * @param input - The challenge, the code and the password to set.
  * @returns Whether the password was set.
  */
-export const forgotPasswordVerifyOtp = (input: ForgotPasswordVerifyOtpInput): Promise<Result<boolean>> => graphql(`mutation ForgotPasswordVerifyOtp($input: ForgotPasswordVerifyOtpInput!) { forgotPasswordVerifyOtp(input: $input) { data message success error } }`, {
+export const forgotPasswordVerifyOtp = (input: ForgotPasswordVerifyOtpInput): Promise<Result<boolean>> => graphql(`mutation ForgotPasswordVerifyOtp($input: ForgotPasswordVerifyOtpInput!) { forgotPasswordVerifyOtp(request: $input) { data message success error } }`, {
   input
 });
 
@@ -526,7 +526,7 @@ export const forgotPasswordVerifyOtp = (input: ForgotPasswordVerifyOtpInput): Pr
  * @returns The session and where it lands, a two-factor challenge, the undecided result, or why
  *          there is neither.
  */
-export const signIn = (input: SignInInput): Promise<Result<SignInPayload>> => graphql(`mutation SignIn($input: SignInInput!) { signIn(input: $input) { data ${SIGN_IN_PAYLOAD} message success error } }`, {
+export const signIn = (input: SignInInput): Promise<Result<SignInPayload>> => graphql(`mutation SignIn($input: SignInInput!) { signIn(request: $input) { data ${SIGN_IN_PAYLOAD} message success error } }`, {
   input
 });
 
@@ -536,7 +536,7 @@ export const signIn = (input: SignInInput): Promise<Result<SignInPayload>> => gr
  * @param input - The challenge token from the first step, and the code the reader typed.
  * @returns The session, or why the code was refused.
  */
-export const verifyTwoFactor = (input: VerifyTwoFactorInput): Promise<Result<AuthPayload>> => graphql(`mutation VerifyTwoFactor($input: VerifyTwoFactorInput!) { verifyTwoFactor(input: $input) { data ${AUTH_PAYLOAD} message success error } }`, {
+export const verifyTwoFactor = (input: VerifyTwoFactorInput): Promise<Result<AuthPayload>> => graphql(`mutation VerifyTwoFactor($input: VerifyTwoFactorInput!) { verifyTwoFactor(request: $input) { data ${AUTH_PAYLOAD} message success error } }`, {
   input
 });
 
@@ -556,7 +556,7 @@ export const verifyTwoFactor = (input: VerifyTwoFactorInput): Promise<Result<Aut
  * @returns The session, a two-factor challenge, the brokered undecided result, the recoverable
  *          provider-email refusal, or why there is none.
  */
-export const exchangeOauthCode = (input: ExchangeOauthCodeInput): Promise<Result<ExchangeOauthCodePayload>> => graphql(`mutation ExchangeOauthCode($input: ExchangeOauthCodeInput!) { exchangeOauthCode(input: $input) { data ${BROKERED_PAYLOAD} message success error } }`, {
+export const exchangeOauthCode = (input: ExchangeOauthCodeInput): Promise<Result<ExchangeOauthCodePayload>> => graphql(`mutation ExchangeOauthCode($input: ExchangeOauthCodeInput!) { exchangeOauthCode(request: $input) { data ${BROKERED_PAYLOAD} message success error } }`, {
   input
 });
 
@@ -573,7 +573,7 @@ export const exchangeOauthCode = (input: ExchangeOauthCodeInput): Promise<Result
  * @returns The session, a two-factor challenge, the undecided result, the provider-email refusal,
  *          or why there is none.
  */
-export const continueBrokeredSignIn = (input: ContinueBrokeredSignInInput): Promise<Result<ContinueBrokeredSignInPayload>> => graphql(`mutation ContinueBrokeredSignIn($input: ContinueBrokeredSignInInput!) { continueBrokeredSignIn(input: $input) { data ${BROKERED_PAYLOAD} message success error } }`, {
+export const continueBrokeredSignIn = (input: ContinueBrokeredSignInInput): Promise<Result<ContinueBrokeredSignInPayload>> => graphql(`mutation ContinueBrokeredSignIn($input: ContinueBrokeredSignInInput!) { continueBrokeredSignIn(request: $input) { data ${BROKERED_PAYLOAD} message success error } }`, {
   input
 });
 
@@ -587,7 +587,7 @@ export const continueBrokeredSignIn = (input: ContinueBrokeredSignInInput): Prom
  * @param input - The email to send to.
  * @returns Whether the request was accepted.
  */
-export const requestPasswordReset = (input: RequestPasswordResetInput): Promise<Result<boolean>> => graphql(`mutation RequestPasswordReset($input: RequestPasswordResetInput!) { requestPasswordReset(input: $input) { data message success error } }`, {
+export const requestPasswordReset = (input: RequestPasswordResetInput): Promise<Result<boolean>> => graphql(`mutation RequestPasswordReset($input: RequestPasswordResetInput!) { requestPasswordReset(request: $input) { data message success error } }`, {
   input
 });
 
@@ -597,7 +597,7 @@ export const requestPasswordReset = (input: RequestPasswordResetInput): Promise<
  * @param input - The token out of the link, and the new password.
  * @returns Whether it was accepted.
  */
-export const resetPassword = (input: ResetPasswordInput): Promise<Result<boolean>> => graphql(`mutation ResetPassword($input: ResetPasswordInput!) { resetPassword(input: $input) { data message success error } }`, {
+export const resetPassword = (input: ResetPasswordInput): Promise<Result<boolean>> => graphql(`mutation ResetPassword($input: ResetPasswordInput!) { resetPassword(request: $input) { data message success error } }`, {
   input
 });
 
@@ -626,7 +626,7 @@ export const refreshSession = (): Promise<Result<AuthPayload>> => graphql(`mutat
  * @param input - The ending scope; omitted means this browser.
  * @returns The completed request and the two answers stated beside it, or why there is none.
  */
-export const signOut = (input?: SignOutInput): Promise<Result<EnvelopeAnswer<boolean, SignOutOutcome>>> => graphqlEnvelope<boolean, SignOutOutcome>("mutation SignOut($input: SignOutInput) { signOut(input: $input) { data remoteRevocationObserved authorityEndingConfirmed message success error } }", input === undefined ? undefined : { input });
+export const signOut = (input?: SignOutInput): Promise<Result<EnvelopeAnswer<boolean, SignOutOutcome>>> => graphqlEnvelope<boolean, SignOutOutcome>("mutation SignOut($input: SignOutInput) { signOut(request: $input) { data remoteRevocationObserved authorityEndingConfirmed message success error } }", input === undefined ? undefined : { input });
 
 /**
  * End a named principal's Login sessions, once the owner of the stated authority context confirms
@@ -648,6 +648,6 @@ export const signOut = (input?: SignOutInput): Promise<Result<EnvelopeAnswer<boo
  * @param input - This request's identity and exactly one authority context with its target.
  * @returns The decided answer, or why there is none.
  */
-export const endPrincipalSessions = (input: EndPrincipalSessionsInput): Promise<Result<EndPrincipalSessionsAnswer>> => graphql(`mutation EndPrincipalSessions($input: EndPrincipalSessionsInput!) { endPrincipalSessions(input: $input) { data { kind authorityEndingConfirmed } message success error } }`, {
+export const endPrincipalSessions = (input: EndPrincipalSessionsInput): Promise<Result<EndPrincipalSessionsAnswer>> => graphql(`mutation EndPrincipalSessions($input: EndPrincipalSessionsInput!) { endPrincipalSessions(request: $input) { data { kind authorityEndingConfirmed } message success error } }`, {
   input
 });
