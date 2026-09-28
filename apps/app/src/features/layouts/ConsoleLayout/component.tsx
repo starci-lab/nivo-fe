@@ -1,11 +1,29 @@
 import type { ComponentType, ReactNode } from "react";
 import { StarCiDashboardThemeBoundary } from "@nivo/ui";
 import { WorkspaceShell } from "@starci/grammar/common";
-import { Sidebar } from "@/components/product-shells/Sidebar";
-import { ConsoleTopBar } from "@/components/product-shells/ConsoleTopBar";
+import { Sidebar } from "@/features/layouts/Sidebar";
+import { ConsoleTopBar } from "@/features/layouts/ConsoleTopBar";
 
 /** The routed page this frame is closed over: opaque children the route has already rendered. */
 export type ConsoleLayoutBodyProps = { readonly children?: ReactNode };
+
+/**
+ * The frame's approved drawing: which routed body fills the primary slot, and the atoms it takes.
+ *
+ * The body arrives as a component plus its props because no world-reading half may build the
+ * element - instantiating it here keeps every render path on resolved pure targets.
+ */
+export type ConsoleLayoutBaseState = {
+  readonly body: ComponentType<ConsoleLayoutBodyProps>;
+  readonly bodyProps: ConsoleLayoutBodyProps;
+};
+
+/** The atoms the frame's landmarks are named with. */
+export type ConsoleLayoutBaseData = {
+  readonly navigationLabel: string;
+  readonly primaryLabel: string;
+};
+
 /*
  * The installed `starci-fe/public-component-signature` rule reads the render half's own name and
  * demands the contract be spelled `<Unit>Props`, so this private alias is the only name the rule
@@ -15,10 +33,8 @@ export type ConsoleLayoutBodyProps = { readonly children?: ReactNode };
 type ConsoleLayoutProps = ConsoleLayoutBaseProps;
 /** Public API role for ConsoleLayoutBaseProps. */
 export type ConsoleLayoutBaseProps = {
-  readonly body: ComponentType<ConsoleLayoutBodyProps>;
-  readonly bodyProps: ConsoleLayoutBodyProps;
-  readonly navigationLabel: string;
-  readonly primaryLabel: string;
+  readonly state: ConsoleLayoutBaseState;
+  readonly props: ConsoleLayoutBaseData;
 };
 
 /**
@@ -35,10 +51,8 @@ export type ConsoleLayoutBaseProps = {
  * every band.
  */
 const ConsoleFrame = ({
-  body: Body,
-  bodyProps,
-  navigationLabel,
-  primaryLabel
+  state: { body: Body, bodyProps },
+  props: { navigationLabel, primaryLabel }
 }: ConsoleLayoutBaseProps) => <>
   <ConsoleTopBar />
   <WorkspaceShell
@@ -57,16 +71,13 @@ const ConsoleFrame = ({
 /** Draw stable authenticated chrome around one opaque routed page. */
 export const ConsoleLayoutBase = (props: ConsoleLayoutProps) => {
   const {
-    body,
-    bodyProps,
-    navigationLabel,
-    primaryLabel
+    state,
+    props: data
   }: ConsoleLayoutBaseProps = props;
   return <StarCiDashboardThemeBoundary content={ConsoleFrame} contentProps={{
-    body,
-    bodyProps,
-    navigationLabel,
-    primaryLabel
+    state,
+    props: data
   }} />;
 };
 
+/** Registry identity for the pure console layout twin. */

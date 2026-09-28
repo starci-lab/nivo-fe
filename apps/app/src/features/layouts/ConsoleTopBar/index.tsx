@@ -40,6 +40,22 @@ export const ConsoleTopBar = (props: ConsoleTopBarProps) => {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
   const isDark = isMounted && resolvedTheme === "dark";
-  return <ConsoleTopBarBase brandLabel={t("brand")} contextLabel={t("title")} actionsLabel={t("actionsLabel")} isDark={isDark} lightThemeLabel={t("theme.light")} darkThemeLabel={t("theme.dark")} localeControl={renderLocaleControl} localeControlProps={{}} accountControl={renderAccountControl} accountControlProps={{}} onToggleTheme={() => setTheme(isDark ? "light" : "dark")} />;
+  return <ConsoleTopBarBase
+    state={{
+      localeControl: renderLocaleControl,
+      localeControlProps: {},
+      accountControl: renderAccountControl,
+      accountControlProps: {}
+    }}
+    props={{
+      brandLabel: t("brand"),
+      contextLabel: t("title"),
+      actionsLabel: t("actionsLabel"),
+      isDark,
+      lightThemeLabel: t("theme.light"),
+      darkThemeLabel: t("theme.dark")
+    }}
+    on={{ toggleTheme: () => setTheme(isDark ? "light" : "dark") }}
+  />;
 };
 

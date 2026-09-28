@@ -9,8 +9,8 @@ vi.mock("next-intl", () => ({
 }))
 vi.mock("@/hooks", () => ({ useRouter: () => ({ replace: mocks.replace }), usePathname: () => mocks.pathname }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
-interface MockBaseProps { readonly body: ComponentType; readonly bodyProps: object; readonly navigationLabel: string; readonly primaryLabel: string }
-vi.mock("./component", () => ({ ConsoleLayoutBase: ({ body: Body, bodyProps, navigationLabel, primaryLabel }: MockBaseProps) => { mocks.labels = { navigationLabel, primaryLabel }; return <div><Body {...bodyProps} /></div> } }))
+interface MockBaseProps { readonly state: { readonly body: ComponentType; readonly bodyProps: object }; readonly props: { readonly navigationLabel: string; readonly primaryLabel: string } }
+vi.mock("./component", () => ({ ConsoleLayoutBase: ({ state, props: data }: MockBaseProps) => { mocks.labels = { navigationLabel: data.navigationLabel, primaryLabel: data.primaryLabel }; const Body = state.body; return <div><Body {...state.bodyProps} /></div> } }))
 
 import { ConsoleLayout } from "."
 

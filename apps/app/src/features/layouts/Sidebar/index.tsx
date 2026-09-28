@@ -10,6 +10,9 @@ import { SidebarBase } from "./component"
 /** Which console surface the navigation is drawn on: the persistent rail, or the mobile drawer. */
 export type SidebarMode = "desktop" | "mobile"
 
+/** Every SidebarMode member, beside its union per the closed-vocabulary law. */
+export const SIDEBAR_MODES: ReadonlyArray<SidebarMode> = ["desktop", "mobile"] as const
+
 /** What a caller states about the navigation - the surface it belongs to, and nothing else. */
 export type SidebarProps = { readonly mode?: SidebarMode }
 type DestinationKey = "overview" | "chat" | "agentos" | "apps" | "wallet"
@@ -48,8 +51,8 @@ export const Sidebar = (props: SidebarProps) => {
         setIsCollapsed(collapsed)
         try { globalThis.localStorage?.setItem(STORAGE_KEY, String(collapsed)) } catch { /* persistence is optional */ }
     }
-    const activate = (id: string) => {
-        const destination = DESTINATIONS.find((candidate) => candidate.key === id)
+    const activate = (id: string): boolean => {
+        const destination = DESTINATIONS.find((candidate): boolean => candidate.key === id)
         if (destination === undefined) return false
         router.push(destination.route)
         return true
@@ -66,15 +69,19 @@ export const Sidebar = (props: SidebarProps) => {
     }))
 
     return <SidebarBase
-        mode={mode}
-        groups={groups}
-        selectedKey={selectedKey}
-        isCollapsed={isCollapsed}
-        navigationLabel={t("navigationLabel")}
-        openMenuLabel={t("openMenu")}
-        closeMenuLabel={t("closeMenu")}
-        titleLabel={t("title")}
-        onAction={activate}
-        onCollapsedChange={setCollapsed}
+        state={mode}
+        props={{
+            groups,
+            selectedKey,
+            isCollapsed,
+            navigationLabel: t("navigationLabel"),
+            openMenuLabel: t("openMenu"),
+            closeMenuLabel: t("closeMenu"),
+            titleLabel: t("title"),
+        }}
+        on={{
+            action: activate,
+            collapsedChange: setCollapsed
+        }}
     />
 }

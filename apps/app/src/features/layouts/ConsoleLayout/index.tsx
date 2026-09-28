@@ -42,10 +42,11 @@ export const ConsoleLayout = (props: ConsoleLayoutProps) => {
   }, [status, router, pathname]);
   if (status !== "signed-in") return null;
   return <ConsoleLayoutBase
-    body={body}
-    bodyProps={bodyProps}
-    navigationLabel={t("navigationLabel")}
-    primaryLabel={t("workspaceLabel")}
+    state={{ body, bodyProps }}
+    props={{
+      navigationLabel: t("navigationLabel"),
+      primaryLabel: t("workspaceLabel")
+    }}
   />;
 };
 

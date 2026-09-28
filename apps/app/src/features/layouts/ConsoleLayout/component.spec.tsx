@@ -2,10 +2,10 @@ import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
 type MockSidebarProps = { readonly mode?: string }
-vi.mock("@/components/product-shells/Sidebar", () => ({
+vi.mock("@/features/layouts/Sidebar", () => ({
     Sidebar: ({ mode }: MockSidebarProps) => <span data-sidebar-mode={mode ?? "desktop"}>Overview</span>,
 }))
-vi.mock("@/components/product-shells/ConsoleTopBar", () => ({
+vi.mock("@/features/layouts/ConsoleTopBar", () => ({
     ConsoleTopBar: () => <header>Nivo</header>,
 }))
 
@@ -18,10 +18,8 @@ describe("ConsoleLayoutBase", () => {
         const RoutedBody = () => <p>Workspace body</p>
 
         render(<ConsoleLayoutBase
-            body={RoutedBody}
-            bodyProps={{}}
-            navigationLabel="Console destinations"
-            primaryLabel="Console workspace"
+            state={{ body: RoutedBody, bodyProps: {} }}
+            props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace" }}
         />)
 
         expect(screen.getByRole("banner")).toHaveTextContent("Nivo")
@@ -38,10 +36,8 @@ describe("ConsoleLayoutBase", () => {
         const RoutedBody = () => <p>Workspace body</p>
 
         render(<ConsoleLayoutBase
-            body={RoutedBody}
-            bodyProps={{}}
-            navigationLabel="Console destinations"
-            primaryLabel="Console workspace"
+            state={{ body: RoutedBody, bodyProps: {} }}
+            props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace" }}
         />)
 
         const rail = document.querySelector("[data-grammar-workspace-navigation-region]")
@@ -60,10 +56,8 @@ describe("ConsoleLayoutBase", () => {
         const RoutedBody = () => <p>Workspace body</p>
 
         render(<ConsoleLayoutBase
-            body={RoutedBody}
-            bodyProps={{}}
-            navigationLabel="Console destinations"
-            primaryLabel="Console workspace"
+            state={{ body: RoutedBody, bodyProps: {} }}
+            props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace" }}
         />)
 
         const banners = screen.getAllByRole("banner")

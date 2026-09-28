@@ -12,17 +12,9 @@ describe("ConsoleTopBarBase", () => {
     it("draws one global navbar landmark carrying only capability-backed tools", () => {
         const onToggleTheme = vi.fn()
         render(<ConsoleTopBarBase
-            brandLabel="nivo"
-            contextLabel="Console"
-            actionsLabel="Console controls"
-            isDark={false}
-            lightThemeLabel="Use light theme"
-            darkThemeLabel="Use dark theme"
-            localeControl={LocaleControl}
-            localeControlProps={{}}
-            accountControl={AccountControl}
-            accountControlProps={{}}
-            onToggleTheme={onToggleTheme}
+            state={{ localeControl: LocaleControl, localeControlProps: {}, accountControl: AccountControl, accountControlProps: {} }}
+            props={{ brandLabel: "nivo", contextLabel: "Console", actionsLabel: "Console controls", isDark: false, lightThemeLabel: "Use light theme", darkThemeLabel: "Use dark theme" }}
+            on={{ toggleTheme: onToggleTheme }}
         />)
 
         expect(screen.getAllByRole("banner")).toHaveLength(1)
@@ -39,17 +31,9 @@ describe("ConsoleTopBarBase", () => {
 
     it("leaves the compact trigger slot empty and unnamed because the shell owns the compact band", () => {
         render(<ConsoleTopBarBase
-            brandLabel="nivo"
-            contextLabel="Console"
-            actionsLabel="Console controls"
-            isDark={false}
-            lightThemeLabel="Use light theme"
-            darkThemeLabel="Use dark theme"
-            localeControl={LocaleControl}
-            localeControlProps={{}}
-            accountControl={AccountControl}
-            accountControlProps={{}}
-            onToggleTheme={vi.fn()}
+            state={{ localeControl: LocaleControl, localeControlProps: {}, accountControl: AccountControl, accountControlProps: {} }}
+            props={{ brandLabel: "nivo", contextLabel: "Console", actionsLabel: "Console controls", isDark: false, lightThemeLabel: "Use light theme", darkThemeLabel: "Use dark theme" }}
+            on={{ toggleTheme: vi.fn() }}
         />)
 
         const compact = document.querySelector("[data-grammar-navigation-feature-nav-compact-navigation]")
@@ -61,17 +45,9 @@ describe("ConsoleTopBarBase", () => {
 
     it("orders actions locale, then theme, then account", () => {
         render(<ConsoleTopBarBase
-            brandLabel="nivo"
-            contextLabel="Console"
-            actionsLabel="Console controls"
-            isDark={false}
-            lightThemeLabel="Use light theme"
-            darkThemeLabel="Use dark theme"
-            localeControl={LocaleControl}
-            localeControlProps={{}}
-            accountControl={AccountControl}
-            accountControlProps={{}}
-            onToggleTheme={vi.fn()}
+            state={{ localeControl: LocaleControl, localeControlProps: {}, accountControl: AccountControl, accountControlProps: {} }}
+            props={{ brandLabel: "nivo", contextLabel: "Console", actionsLabel: "Console controls", isDark: false, lightThemeLabel: "Use light theme", darkThemeLabel: "Use dark theme" }}
+            on={{ toggleTheme: vi.fn() }}
         />)
 
         const locale = screen.getByText("language")
