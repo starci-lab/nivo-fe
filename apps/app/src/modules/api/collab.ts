@@ -571,7 +571,7 @@ export type CollabLocaleReader = () => string;
  * `graphql.ts`. The backend interceptor currently answers English regardless - the
  * header rides anyway so the day per-request locale lands, Collab is already honest.
  */
-let readCollabLocale: CollabLocaleReader = () => "vi";
+let readCollabLocale: CollabLocaleReader = (): string => "vi";
 
 /**
  * Tell the Collab transport which language the reader is in.
@@ -643,7 +643,7 @@ const readOutcome = (value: unknown): CollabGatewayOutcome | null => {
  * is exactly `{workspaceId, op, input}`; the field's GraphQLJSON payload is the typed
  * outcome itself, read bare rather than through the shared envelope unwrap.
  */
-export const collabGatewayTransport: CollabTransport = async ({ accessToken, request }) => {
+export const collabGatewayTransport: CollabTransport = async ({ accessToken, request }): Promise<CollabGatewayOutcome> => {
     const field = COLLAB_READ_OPERATIONS.has(request.op)
         ? COLLAB_GATEWAY_READ_FIELD
         : COLLAB_GATEWAY_COMMAND_FIELD;
@@ -894,7 +894,7 @@ const FORBIDDEN_AUTHORITY_CLAIMS = new Set([
  * invitee or target, never the actor.
  */
 const rejectAuthorityClaims = (op: string, args: Readonly<Record<string, unknown>>, allowed: ReadonlyArray<string>): CollabResult<never> | null => {
-    const claim = Object.keys(args).find((key) => FORBIDDEN_AUTHORITY_CLAIMS.has(key) && !allowed.includes(key));
+    const claim = Object.keys(args).find((key): boolean => FORBIDDEN_AUTHORITY_CLAIMS.has(key) && !allowed.includes(key));
     return claim === undefined
         ? null
         : collabFailure("invalid", "COLLAB_INVALID", `${op} does not accept ${claim}; the ingress derives actor identity from the verified bearer.`, false);

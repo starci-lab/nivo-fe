@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import type { ReactNode } from "react";
 import { RouteTabs } from "@nivo/ui";
 import { Heading, Text } from "@starci/grammar/common";
 
@@ -22,7 +22,7 @@ export type AgentOSWorkspaceChromeBaseActions = {
 export type AgentOSWorkspaceChromeBaseProps = {
     readonly props: AgentOSWorkspaceChromeBaseData;
     readonly on: AgentOSWorkspaceChromeBaseActions;
-    readonly children: ComponentProps<"div">["children"];
+    readonly children: ReactNode;
 };
 
 /** The workspace header and overview/modules route tabs, drawn with no world reads of its own. */

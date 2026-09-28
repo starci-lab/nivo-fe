@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentProps } from "react";
+import type { ReactNode } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { usePathname, useQueryMyAgentWorkspaceControlCenterSwr, useRouter } from "@/hooks";
@@ -9,7 +9,7 @@ import { AgentOSWorkspaceChromeBase, type AgentOSWorkspaceChromeBaseProps } from
 
 /** The nested route body rendered under this workspace's shared header and tabs. */
 export type AgentOSWorkspaceChromeProps = {
-    readonly children: ComponentProps<"div">["children"];
+    readonly children: ReactNode;
 };
 
 /** The rev-17 workspace destination answering one nested pathname. */

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentProps } from "react";
+import type { ReactNode } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { usePathname, useQueryMyAgentosModuleInstallationsSwr, useRouter } from "@/hooks";
@@ -11,7 +11,7 @@ import { AgentOSInstallationChromeBase, type AgentOSInstallationChromeBaseProps 
 
 /** The nested route body rendered under this installation's shared subnavigation and tabs. */
 export type AgentOSInstallationChromeProps = {
-    readonly children: ComponentProps<"div">["children"];
+    readonly children: ReactNode;
 };
 
 /** The routed module sections in shell rev-17 order. */

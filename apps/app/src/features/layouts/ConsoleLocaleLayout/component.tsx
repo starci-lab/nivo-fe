@@ -4,7 +4,7 @@ import { I18nProvider } from "@heroui/react";
 import { NivoGrammarRoot } from "@nivo/ui";
 import { NextIntlClientProvider, type Messages } from "next-intl";
 import { ThemeProvider, useTheme } from "next-themes";
-import { useEffect, useState, type ComponentProps } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { SessionProvider } from "@/modules/auth/session";
 
 /** The resolved request facts the provider stack needs, resolved by its connected index. */
@@ -17,13 +17,18 @@ export type ConsoleLocaleLayoutBaseData = {
 /** Props for {@link ConsoleLocaleLayoutBase}: resolved data and the routed stream. */
 export type ConsoleLocaleLayoutBaseProps = {
     readonly props: ConsoleLocaleLayoutBaseData;
-    readonly children: ComponentProps<"div">["children"];
+    readonly children: ReactNode;
+};
+
+/** Props for the palette bridge around the routed stream. */
+type ResolvedNivoGrammarRootProps = {
+    readonly children: ReactNode;
 };
 
 /** Keep the nivo family palette on the same resolved theme as the console shell. */
 const ResolvedNivoGrammarRoot = ({
     children
-}: Pick<ConsoleLocaleLayoutBaseProps, "children">) => {
+}: ResolvedNivoGrammarRootProps) => {
     const { resolvedTheme } = useTheme();
     const [isHydrated, setHydrated] = useState(false);
     useEffect(() => {

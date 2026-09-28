@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import type { ReactNode } from "react";
 import { RouteTabs, SelectionList, type SelectionListGroup } from "@nivo/ui";
 
 /** Every sentence, grouping and selection the installation chrome renders, resolved by its connected index. */
@@ -21,7 +21,7 @@ export type AgentOSInstallationChromeBaseActions = {
 export type AgentOSInstallationChromeBaseProps = {
     readonly props: AgentOSInstallationChromeBaseData;
     readonly on: AgentOSInstallationChromeBaseActions;
-    readonly children: ComponentProps<"div">["children"];
+    readonly children: ReactNode;
 };
 
 /** The installation subnavigation and module section tabs, drawn with no world reads of its own. */
