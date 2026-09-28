@@ -1,8 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { useQueryMyAgentosCustomModuleStudioSwr } from "@/hooks";
+import { useQueryMyAgentosCustomModuleStudioSwr, useRouter } from "@/hooks";
 import { AgentOSModuleStudioProjectionProvider } from "@/modules/agentos/module-studio-projection";
 import { nivoQueryData } from "@/modules/query";
 import { AgentOSModuleStudioPageBase } from "./component";
@@ -20,20 +19,22 @@ export const AgentOSModuleStudioPage = (props: AgentOSModuleStudioPageProps) => 
   const router = useRouter();
   const query = useQueryMyAgentosCustomModuleStudioSwr(workspaceId, moduleId);
   const studio = nivoQueryData(query.data);
-  const refresh = async () => {
+  const refresh = async (): Promise<void> => {
     await query.mutate();
   };
   return <AgentOSModuleStudioProjectionProvider value={{ studio, refresh }}>
     <AgentOSModuleStudioPageBase
-      workspaceId={workspaceId}
-      moduleId={moduleId}
-      labels={{
-        path: t("path"),
-        modules: t("modules"),
-        title: studio?.module.name ?? t("title"),
-        description: t("description"),
-        eyebrow: t("eyebrow"),
-        sections: t("sections")
+      props={{
+        workspaceId: workspaceId,
+        moduleId: moduleId,
+        labels: {
+          path: t("path"),
+          modules: t("modules"),
+          title: studio?.module.name ?? t("title"),
+          description: t("description"),
+          eyebrow: t("eyebrow"),
+          sections: t("sections")
+        }
       }}
       on={{ back: () => router.push(`/agentos/workspaces/${workspaceId}/modules`) }}
     />

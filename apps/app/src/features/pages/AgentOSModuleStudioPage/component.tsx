@@ -4,8 +4,11 @@ import { AgentOSModuleAttachments } from "@/components/blocks/agentos/AgentOSMod
 import { AgentOSModuleInterview } from "@/components/blocks/agentos/AgentOSModuleInterview";
 import { AgentOSModuleProfile } from "@/components/blocks/agentos/AgentOSModuleProfile";
 import { AgentOSModuleSpecification } from "@/components/blocks/agentos/AgentOSModuleSpecification";
-/** Public API role for AgentOSModuleStudioPageProps. */
-export type AgentOSModuleStudioPageProps = AgentOSModuleStudioPageViewProps;
+/** Public API role for AgentOSModuleStudioPageBaseProps. */
+export type AgentOSModuleStudioPageBaseProps = {
+  readonly props: AgentOSModuleStudioPageViewProps;
+  readonly on: AgentOSModuleStudioPageActions;
+};
 /** Navigation commands the connected Studio page exposes to its pure drawing half. */
 export type AgentOSModuleStudioPageActions = { readonly back: () => void };
 type AgentOSModuleStudioPageViewProps = {
@@ -19,16 +22,17 @@ type AgentOSModuleStudioPageViewProps = {
     readonly eyebrow: string;
     readonly sections: string;
   };
-  readonly on: AgentOSModuleStudioPageActions;
 };
 /** Compose independently-owned interview, profile, file, integration and review sections. */
-export const AgentOSModuleStudioPageBase = (props: AgentOSModuleStudioPageProps) => {
+export const AgentOSModuleStudioPageBase = (props: AgentOSModuleStudioPageBaseProps) => {
   const {
     workspaceId,
     moduleId,
-    labels,
-    on
-  }: AgentOSModuleStudioPageViewProps = props;
+    labels
+  }: AgentOSModuleStudioPageViewProps = props.props;
+  const {
+    back
+  }: AgentOSModuleStudioPageActions = props.on;
   return <div>
 
   <Breadcrumbs props={{
@@ -36,7 +40,7 @@ export const AgentOSModuleStudioPageBase = (props: AgentOSModuleStudioPageProps)
       label: labels.path,
       backLabel: labels.modules
     }} on={{
-      back: on.back
+      back: back
     }} /><div><div>
 
       <TileIcon props={{

@@ -15,7 +15,7 @@ import { AgentOSWorkspacePageBase } from "./component"
 describe("AgentOSWorkspacePageBase", () => {
     it("passes only route identity and the page-owned tab axis", () => {
         const select = vi.fn()
-        render(<AgentOSWorkspacePageBase workspaceId="workspace-1" pageState="overview" onSelectPageState={select} />)
+        render(<AgentOSWorkspacePageBase props={{ workspaceId: "workspace-1", pageState: "overview" }} on={{ onSelectPageState: select }} />)
         fireEvent.click(screen.getByRole("button", { name: "workspace-1:overview" }))
         expect(select).toHaveBeenCalledWith("infrastructure")
     })
@@ -23,7 +23,7 @@ describe("AgentOSWorkspacePageBase", () => {
 
 describe("AgentOSWorkspacePageBase", () => {
     it("keeps only workspace route identity and tab state above the connected aggregate block", () => {
-        const html = renderToStaticMarkup(<AgentOSWorkspacePageBase workspaceId="workspace-1" pageState="applications" onSelectPageState={vi.fn()} />)
+        const html = renderToStaticMarkup(<AgentOSWorkspacePageBase props={{ workspaceId: "workspace-1", pageState: "applications" }} on={{ onSelectPageState: vi.fn() }} />)
         expect(html).toContain("workspace-1:applications")
     })
 })

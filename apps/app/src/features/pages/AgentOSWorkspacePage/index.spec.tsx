@@ -2,11 +2,14 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-type WorkspacePageProbeProps = { readonly workspaceId: string, readonly pageState: string, readonly onSelectPageState: (state: "infrastructure") => void }
+type WorkspacePageProbeProps = {
+    readonly props: { readonly workspaceId: string, readonly pageState: string },
+    readonly on: { readonly onSelectPageState: (state: "infrastructure") => void },
+}
 
 vi.mock("./component", () => ({
-    AgentOSWorkspacePageBase: ({ workspaceId, pageState, onSelectPageState }: WorkspacePageProbeProps) => (
-        <button type="button" onClick={() => onSelectPageState("infrastructure")}>{workspaceId}:{pageState}</button>
+    AgentOSWorkspacePageBase: ({ props, on }: WorkspacePageProbeProps) => (
+        <button type="button" onClick={() => on.onSelectPageState("infrastructure")}>{props.workspaceId}:{props.pageState}</button>
     ),
 }))
 
@@ -14,7 +17,8 @@ const navigation = vi.hoisted(() => ({ push: vi.fn(), view: "" }))
 vi.mock("next/navigation", () => ({
     useSearchParams: () => new URLSearchParams(navigation.view),
 }))
-vi.mock("@/i18n/navigation", () => ({
+vi.mock("@/hooks", async () => ({
+    ...await vi.importActual("@/hooks"),
     usePathname: () => "/agentos/workspaces/workspace-1",
     useRouter: () => ({ push: navigation.push }),
 }))
