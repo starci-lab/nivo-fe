@@ -1,4 +1,4 @@
-import { HomePage } from "@/components/pages/HomePage"
+import { HomePage } from "@/features/pages/HomePage"
 
 /**
  * The `/` route. It mounts the page and nothing else.

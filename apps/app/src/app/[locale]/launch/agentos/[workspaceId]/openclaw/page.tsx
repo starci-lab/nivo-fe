@@ -1,4 +1,4 @@
-import { AgentOSOpenClawLaunchBridge } from "@/components/pages/AgentOSOpenClawLaunchBridge"
+import { AgentOSOpenClawLaunchBridge } from "@/features/pages/AgentOSOpenClawLaunchBridge"
 
 /** Dynamic identity supplied by the native OpenClaw launch bridge route. */
 export type AgentOSOpenClawLaunchRouteProps = { readonly params: Promise<{ readonly workspaceId: string }> }
