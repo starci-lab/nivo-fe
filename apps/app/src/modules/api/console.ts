@@ -1005,7 +1005,7 @@ export const myWalletTransactions = (): Promise<Result<ReadonlyArray<WalletTrans
 
 /** Create one real gateway checkout. Settlement remains owned by the provider IPN. */
 export const createWalletTopUpPayLink = (amountVnd: number, returnUrl: string, cancelUrl: string): Promise<Result<WalletTopUpPayLink>> => graphql(`mutation CreateWalletTopUpPayLink($input: CreateWalletTopUpPayLinkInput!) {
-            createWalletTopUpPayLink(input: $input) { data ${WALLET_TOP_UP_PAY_LINK} message success error }
+            createWalletTopUpPayLink(request: $input) { data ${WALLET_TOP_UP_PAY_LINK} message success error }
         }`, {
   input: {
     amountVnd,

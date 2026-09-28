@@ -511,7 +511,7 @@ export const createWorkspacePurchasePayLink = (input: WorkspacePurchasePayLinkIn
  * @param sagaId - The provisioning order identity observed through the realtime stream.
  * @returns The saga and its steps, or why the read was refused.
  */
-export const workspaceProvisioningSaga = (sagaId: string): Promise<Result<WorkspaceProvisioningSagaView>> => graphql(`query WorkspaceProvisioningSaga($input: MyProvisioningSagaInput!) { myProvisioningSaga(input: $input) { data { saga ${WORKSPACE_PROVISIONING_SAGA} steps ${WORKSPACE_PROVISIONING_SAGA_STEP} } message success error } }`, {
+export const workspaceProvisioningSaga = (sagaId: string): Promise<Result<WorkspaceProvisioningSagaView>> => graphql(`query WorkspaceProvisioningSaga($input: MyProvisioningSagaInput!) { myProvisioningSaga(request: $input) { data { saga ${WORKSPACE_PROVISIONING_SAGA} steps ${WORKSPACE_PROVISIONING_SAGA_STEP} } message success error } }`, {
   input: {
     sagaId
   }
@@ -526,7 +526,7 @@ export const workspaceProvisioningSaga = (sagaId: string): Promise<Result<Worksp
  * @param sagaId - The provisioning order identity.
  * @returns The saga row as it now stands, or why the retry was refused.
  */
-export const retryWorkspaceProvisioningSaga = (sagaId: string): Promise<Result<WorkspaceProvisioningSaga>> => graphql(`mutation RetryWorkspaceProvisioningSaga($input: RetryProvisioningSagaInput!) { retryProvisioningSaga(input: $input) { data ${WORKSPACE_PROVISIONING_SAGA} message success error } }`, {
+export const retryWorkspaceProvisioningSaga = (sagaId: string): Promise<Result<WorkspaceProvisioningSaga>> => graphql(`mutation RetryWorkspaceProvisioningSaga($input: RetryProvisioningSagaInput!) { retryProvisioningSaga(request: $input) { data ${WORKSPACE_PROVISIONING_SAGA} message success error } }`, {
   input: {
     sagaId
   }
@@ -538,7 +538,7 @@ export const retryWorkspaceProvisioningSaga = (sagaId: string): Promise<Result<W
  * @param sagaId - The provisioning order identity.
  * @returns The saga row as it now stands, or why the cancellation was refused.
  */
-export const cancelWorkspaceProvisioningSaga = (sagaId: string): Promise<Result<WorkspaceProvisioningSaga>> => graphql(`mutation CancelWorkspaceProvisioningSaga($input: CancelProvisioningSagaInput!) { cancelProvisioningSaga(input: $input) { data ${WORKSPACE_PROVISIONING_SAGA} message success error } }`, {
+export const cancelWorkspaceProvisioningSaga = (sagaId: string): Promise<Result<WorkspaceProvisioningSaga>> => graphql(`mutation CancelWorkspaceProvisioningSaga($input: CancelProvisioningSagaInput!) { cancelProvisioningSaga(request: $input) { data ${WORKSPACE_PROVISIONING_SAGA} message success error } }`, {
   input: {
     sagaId
   }
