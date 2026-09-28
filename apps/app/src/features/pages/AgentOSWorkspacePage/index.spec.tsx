@@ -16,11 +16,19 @@ vi.mock("./component", () => ({
 const navigation = vi.hoisted(() => ({ push: vi.fn(), view: "" }))
 vi.mock("next/navigation", () => ({
     useSearchParams: () => new URLSearchParams(navigation.view),
+    redirect: vi.fn(),
+    permanentRedirect: vi.fn(),
+}))
+vi.mock("next-intl", () => ({
+    useTranslations: () => (key: string) => key,
+    useLocale: () => localeState.value,
+    useFormatter: () => ({ number: (value: number) => String(value), dateTime: (value: string) => value }),
 }))
 vi.mock("@/hooks", async () => ({
     ...await vi.importActual("@/hooks"),
     usePathname: () => "/agentos/workspaces/workspace-1",
     useRouter: () => ({ push: navigation.push }),
+    useProvisioningRealtime: () => ({ status: "disconnected", reason: null }),
 }))
 
 const push = vi.fn()
@@ -33,7 +41,6 @@ let viewerSequence = 0
 if (!Element.prototype.getAnimations) Element.prototype.getAnimations = () => []
 
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => signedIn }))
-vi.mock("@/hooks/realtime", () => ({ default: () => ({ status: "disconnected", reason: null }) }))
 vi.mock("@/modules/api/console", () => ({
     myExpertSites: vi.fn().mockResolvedValue({ ok: true, data: [] }),
     myInstances: vi.fn().mockResolvedValue({ ok: true, data: [] }),

@@ -24,7 +24,12 @@ vi.mock("next-intl", () => ({
     useLocale: () => mocks.locale,
     useTranslations: () => (key: string) => key,
 }))
-vi.mock("@/hooks", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/hooks", async () => ({
+    ...(await vi.importActual("@/hooks") as Record<string, unknown>),
+    useRouter: () => ({ push: mocks.push }),
+    useSession: () => signedIn,
+    useProvisioningRealtime: () => ({ status: "disconnected", reason: null }),
+}))
 vi.mock("./component", () => ({
     AgentOSPageBase: (props: AgentOSPageProbeProps) => (
         <div>
@@ -47,7 +52,6 @@ let viewerSequence = 0
 if (!Element.prototype.getAnimations) Element.prototype.getAnimations = () => []
 
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => signedIn }))
-vi.mock("@/hooks/realtime", () => ({ default: () => ({ status: "disconnected", reason: null }) }))
 vi.mock("@/modules/api/console", () => ({
     myExpertSites: vi.fn().mockResolvedValue({ ok: true, data: [] }),
     myInstances: vi.fn().mockResolvedValue({ ok: true, data: [] }),

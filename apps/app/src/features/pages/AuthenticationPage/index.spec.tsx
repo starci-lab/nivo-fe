@@ -38,10 +38,11 @@ type AuthPageProbeInput = { panel: AuthProbePanel, exits: ReadonlyArray<{ questi
 const details = { email: "reader@example.test", password: "secret-password", name: "Reader" } satisfies AuthDetails
 const code = { otp: "123456", newPassword: "new-password" } satisfies AuthCode
 
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push, replace: mocks.replace }), usePathname: () => "/authentication" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(window.location.search) }))
+vi.mock("@/hooks/i18n/useRouter", () => ({ useRouter: () => ({ push: mocks.push, replace: mocks.replace }) }))
+vi.mock("@/hooks/i18n/usePathname", () => ({ usePathname: () => "/authentication" }))
+vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(window.location.search), redirect: vi.fn(), permanentRedirect: vi.fn() }))
 vi.mock("next-intl", () => ({ useTranslations: () => mocks.t }))
-vi.mock("@/hooks", async (importOriginal) => ({ ...await importOriginal(), useSession: () => mocks.session }))
+vi.mock("@/hooks", async (importOriginal) => ({ ...await importOriginal(), useSession: () => mocks.session, useRouter: () => ({ push: mocks.push, replace: mocks.replace }), usePathname: () => "/authentication" }))
 vi.mock("@/modules/api/auth", () => mocks.api)
 vi.mock("./component", () => ({
     AuthenticationPageView: (input: AuthPageProbeInput) => (
