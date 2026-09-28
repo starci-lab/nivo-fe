@@ -1,6 +1,6 @@
 "use client";
 import { useMutateIssueAgentWorkspaceAppLaunchSwr, useMutateRevokeAgentWorkspaceAppLaunchSwr } from "@/hooks";
-import { useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/hooks";
 import { useSession } from "@/modules/auth/session";
 import { followWorkspaceAppRedirect, safeWorkspaceAppRedirect, workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@/modules/window/workspace-app-launch";
 import { useFormatter, useTranslations } from "next-intl";
@@ -108,9 +108,9 @@ export const AgentOSOpenClawLaunch = (props: AgentOSOpenClawLaunchProps) => {
             timeStyle: "medium"
         })
     }) : undefined;
-    return <AgentOSOpenClawLaunchBase launchState={launchState} workspaceId={workspaceId} detail={detail} labels={labels} isRetryPending={retry > 0 && launchState === "issuing"} onRetry={() => {
+    return <AgentOSOpenClawLaunchBase state={launchState} props={{ workspaceId, detail, labels, isRetryPending: retry > 0 && launchState === "issuing" }} on={{ onRetry: () => {
             started.current = false;
             setLaunchState("issuing");
             setRetry(value => value + 1);
-        }} onReturn={() => router.push(`/agentos/workspaces/${workspaceId}`)}/>;
+        }, onReturn: () => router.push(`/agentos/workspaces/${workspaceId}`) }}/>;
 };

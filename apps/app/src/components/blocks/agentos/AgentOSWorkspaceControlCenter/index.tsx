@@ -5,7 +5,7 @@ import useProvisioningRealtime from "@/hooks/realtime";
 import { workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@/modules/window/workspace-app-launch";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AgentOSWorkspaceControlCenterBase, projectAgentOSShellView, type AgentOSWorkspaceControlCenterShellLabels, type AgentOSWorkspaceControlCenterLabels, type AgentOSWorkspaceControlCenterState, type AgentOSWorkspacePageState } from "./component";
+import { AgentOSWorkspaceControlCenterBase, projectAgentOSShellView, type AgentOSWorkspaceControlCenterShellLabels, type AgentOSWorkspaceControlCenterLabels, type AgentOSWorkspaceControlCenterStatus, type AgentOSWorkspacePageState } from "./component";
 /** Exact workspace identity supplied by the detail route. */
 export type AgentOSWorkspaceControlCenterProps = {
     readonly workspaceId: string;
@@ -229,17 +229,17 @@ export const AgentOSWorkspaceControlCenter = (props: AgentOSWorkspaceControlCent
             rebuild: t("operations.rebuild")
         }
     };
-    let controlCenterState: AgentOSWorkspaceControlCenterState = "refused";
+    let controlCenterState: AgentOSWorkspaceControlCenterStatus = "refused";
     if (answer === undefined)
         controlCenterState = "loading";
     else if (answer.ok)
         controlCenterState = "ready";
     const shellView = projectAgentOSShellView(shell, shellLabels);
-    return <AgentOSWorkspaceControlCenterBase workspaceId={workspaceId} pageState={pageState} controlCenterState={controlCenterState} message={answer !== undefined && !answer.ok ? t("refused") : undefined} data={answer?.ok === true ? answer.data : undefined} shell={shellView} labels={labels} launchState={launchState} openClawLaunchHref={`/${locale}/launch/agentos/${workspaceId}/openclaw`} onSelectPageState={onSelectPageState} onOpenAgentConsole={openOpenClaw} retryPending={retryPending} onRetry={() => {
+    return <AgentOSWorkspaceControlCenterBase state={pageState} props={{ workspaceId, controlCenterState, message: answer !== undefined && !answer.ok ? t("refused") : undefined, data: answer?.ok === true ? answer.data : undefined, shell: shellView, labels, launchState, openClawLaunchHref: `/${locale}/launch/agentos/${workspaceId}/openclaw`, retryPending, isShellRetrying: shellView.retrying }} on={{ onSelectPageState, onOpenAgentConsole: openOpenClaw, onRetry: () => {
             setRetryPending(true);
             void refreshControlCenter().finally(() => setRetryPending(false));
-        }} onRetryShell={retryShell} onRetryOperation={recheckOperation} isShellRetrying={shellView.state === "retrying"} formatDate={value => format.dateTime(new Date(value), {
+        }, onRetryShell: retryShell, onRetryOperation: recheckOperation, formatDate: value => format.dateTime(new Date(value), {
             dateStyle: "medium",
             timeStyle: "short"
-        })}/>;
+        }) }} />;
 };

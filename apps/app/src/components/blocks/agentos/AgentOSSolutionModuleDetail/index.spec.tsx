@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+﻿import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
     session: { state: { status: "signed-in", accessToken: "token" } },
 }))
 
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/hooks", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key, useLocale: () => "en" }))
 vi.mock("@/modules/api/console", () => ({ myAgentosModuleInstallation: mocks.installation }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))

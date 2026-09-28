@@ -1,8 +1,14 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { AgentOSSolutionModuleCenterBase, type AgentOSSolutionModuleLedgerProps } from "./component"
+import { AgentOSSolutionModuleCenterBase as AgentOSSolutionModuleCenterBaseView, type AgentOSSolutionModuleCenterViewProps, type AgentOSSolutionModuleLedgerProps } from "./component"
 import { SOLUTION_CATALOG_GRID_CLASS_NAME, SOLUTION_LEDGER_ROWS_CLASS_NAME } from "./classNames"
+
+const AgentOSSolutionModuleCenterBase = (view: AgentOSSolutionModuleCenterViewProps) => {
+  const { state, onSelectMode, onPressCard, ledger, ...data } = view;
+  const { onRetryInstalled, onRetryCatalogue, ...ledgerData } = ledger ?? {} as AgentOSSolutionModuleLedgerProps;
+  return <AgentOSSolutionModuleCenterBaseView state={state} props={{ ...data, ledger: ledger === undefined ? undefined : ledgerData }} on={{ onSelectMode, onPressCard, onRetryInstalled: onRetryInstalled ?? (() => undefined), onRetryCatalogue: onRetryCatalogue ?? (() => undefined) }} />;
+};
 
 const base = { sectionLabel: "Solutions", modesLabel: "Mode", modes: [{ id: "catalog" as const, label: "Catalog" }, { id: "installed" as const, label: "Installed" }], refusedLabel: "Unavailable", emptyLabel: "No modules", emptyActionLabel: "Browse catalog", onSelectMode: vi.fn(), onPressCard: vi.fn() }
 const card = { id: "sales", title: "Sales Copilot", description: "Assist sales", statusLabel: "Ready", statusTone: "success" as const, actionLabel: "Install" }

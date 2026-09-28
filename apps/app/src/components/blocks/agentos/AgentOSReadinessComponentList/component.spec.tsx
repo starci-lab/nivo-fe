@@ -1,6 +1,8 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
-import { AgentOSReadinessComponentListBase } from "./component"
+import { AgentOSReadinessComponentListBase as AgentOSReadinessComponentListBaseView, type AgentOSReadinessComponentListViewProps } from "./component"
+
+const AgentOSReadinessComponentListBase = (props: AgentOSReadinessComponentListViewProps) => <AgentOSReadinessComponentListBaseView state={props.loading ? "loading" : "ready"} props={{ components: props.components, labels: props.labels }} />
 
 describe("AgentOSReadinessComponentListBase", () => {
     it("keeps healthy and refused component verdicts independently visible", () => {

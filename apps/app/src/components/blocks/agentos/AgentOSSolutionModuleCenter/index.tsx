@@ -7,7 +7,7 @@ import type { AgentosSolutionModule } from "@/modules/api/console";
 import { nivoQueryData } from "@/modules/query";
 import { useSession } from "@/modules/auth/session";
 import useProvisioningRealtime from "@/hooks/realtime";
-import { AgentOSSolutionModuleCenterBase, type AgentOSSolutionLedgerRow, type AgentOSSolutionLedgerSectionState, type AgentOSSolutionModuleCard } from "./component";
+import { AgentOSSolutionModuleCenterBase, type AgentOSSolutionLedgerRow, type AgentOSSolutionLedgerSectionStatus, type AgentOSSolutionModuleCard } from "./component";
 
 /** Exact owner workspace scope consumed by the connected module center. */
 export type AgentOSSolutionModuleCenterProps = {
@@ -21,7 +21,7 @@ const toneOf = (status: string): "neutral" | "success" | "warning" | "danger" =>
   if (status === "provisioning" || status === "degraded") return "warning";
   return "neutral";
 };
-const sectionState = (answer: ReadonlyArray<unknown> | null | undefined): AgentOSSolutionLedgerSectionState => {
+const sectionState = (answer: ReadonlyArray<unknown> | null | undefined): AgentOSSolutionLedgerSectionStatus => {
   if (answer === undefined) return "resting";
   if (answer === null) return "refused";
   return answer.length === 0 ? "empty" : "ready";
@@ -151,15 +151,13 @@ export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterPr
   const refused = catalog === null || installations === null;
   const settledState = refused ? "refused" : "answered";
   const ledger = layout === "ledger";
-  return <AgentOSSolutionModuleCenterBase layout={layout} state={catalog === undefined || installations === undefined ? "resting" : settledState} mode={mode} sectionLabel={mode === "catalog" ? t("catalogSection") : t("installedSection")} modesLabel={t("modesLabel")} modes={[{
+  return <AgentOSSolutionModuleCenterBase state={catalog === undefined || installations === undefined ? "resting" : settledState} props={{ layout, mode, sectionLabel: mode === "catalog" ? t("catalogSection") : t("installedSection"), modesLabel: t("modesLabel"), modes: [{
     id: "catalog",
     label: t("modes.catalog")
   }, {
     id: "installed",
     label: t("modes.installed")
-  }]} refusedLabel={t("refused")} emptyLabel={t("empty")} emptyActionLabel={t("browse")} cards={ledger || mode === "catalog" ? catalogCards : installedCards} pendingId={pendingKey} outcome={outcome} onSelectMode={setMode} onPressCard={id => {
-    if (ledger || mode === "catalog") void install(id as AgentosSolutionModule["key"]);
-  }} ledger={{
+  }], refusedLabel: t("refused"), emptyLabel: t("empty"), emptyActionLabel: t("browse"), cards: ledger || mode === "catalog" ? catalogCards : installedCards, pendingId: pendingKey, outcome, ledger: {
     installedLabel: t("installedSection"),
     catalogLabel: t("catalogSection"),
     installedState: sectionState(installations),
@@ -176,8 +174,8 @@ export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterPr
     retry: t("retry"),
     installedEmptyAction: t("emptyAction"),
     retryingInstalled,
-    retryingCatalogue,
-    onRetryInstalled,
-    onRetryCatalogue
-  }} />;
+    retryingCatalogue
+  } }} on={{ onSelectMode: setMode, onPressCard: id => {
+    if (ledger || mode === "catalog") void install(id as AgentosSolutionModule["key"]);
+  }, onRetryInstalled, onRetryCatalogue }} />;
 };

@@ -76,17 +76,19 @@ export const AgentOSSolutionModuleAttachments = (props: AgentOSSolutionModuleAtt
     }
   };
   const pending = upload.isMutating || finalize.isMutating || remove.isMutating;
-  return <AgentOSSolutionModuleAttachmentsBase
-    studio={studio ?? undefined}
-    state={refused ? "refused" : query.data === undefined ? "loading" : "ready"}
-    pending={pending}
-    labels={{
-      title: t("title"), upload: t("upload"), retry: t("retry"), remove: t("remove"), refused: t("refused"), empty: t("empty"),
+  return <AgentOSSolutionModuleAttachmentsBase state="attachments" props={{
+    studio: studio ?? undefined,
+    status: refused ? "refused" : query.data === undefined ? "loading" : "ready",
+    pending,
+    labels: {
+      title: t("title"), upload: t("upload"), retry: t("retry"), remove: t("remove"), refused: t("refused"),
       uploaded: t("uploaded"), scanning: t("scanning"), extracting: t("extracting"), embedding: t("embedding"), indexing: t("indexing"), indexed: t("indexed"),
-      complete: t("complete"), current: t("current"), upcoming: t("upcoming"), chunks: count => t("chunks", { count }), refusedStatus: t("refusedStatus"), removed: t("removed")
-    }}
-    onChoose={file => void choose(file)}
-    onRetry={attachmentId => void retry(attachmentId)}
-    onRemove={attachmentId => void removeAttachment(attachmentId)}
-  />;
+      complete: t("complete"), current: t("current"), upcoming: t("upcoming"), refusedStatus: t("refusedStatus"), removed: t("removed")
+    }
+  }} on={{
+    onChoose: file => void choose(file),
+    onRetry: attachmentId => void retry(attachmentId),
+    onRemove: attachmentId => void removeAttachment(attachmentId),
+    chunks: count => t("chunks", { count })
+  }} />;
 };

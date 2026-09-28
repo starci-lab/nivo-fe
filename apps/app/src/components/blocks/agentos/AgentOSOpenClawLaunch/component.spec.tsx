@@ -1,7 +1,9 @@
 import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { AgentOSOpenClawLaunchBase, type AgentOSOpenClawLaunchViewProps } from "./component"
+import { AgentOSOpenClawLaunchBase as AgentOSOpenClawLaunchBaseView, type AgentOSOpenClawLaunchViewProps } from "./component"
+
+const AgentOSOpenClawLaunchBase = (props: AgentOSOpenClawLaunchViewProps) => <AgentOSOpenClawLaunchBaseView state={props.launchState} props={{ workspaceId: props.workspaceId, detail: props.detail, labels: props.labels, isRetryPending: props.isRetryPending }} on={{ onRetry: props.onRetry, onReturn: props.onReturn }} />
 
 const props: Omit<AgentOSOpenClawLaunchViewProps, "launchState"> = {
     workspaceId: "workspace-1",

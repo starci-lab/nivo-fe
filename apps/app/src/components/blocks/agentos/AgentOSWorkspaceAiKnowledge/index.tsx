@@ -137,5 +137,5 @@ export const AgentOSWorkspaceAiKnowledge = (props: AgentOSWorkspaceAiKnowledgePr
             timeStyle: "short"
         }).format(new Date(value))
     };
-    return <AgentOSWorkspaceAiKnowledgeBase state={state} readiness={readiness ?? undefined} labels={labels} pendingAction={visibleAction?.kind === "testing" || visibleAction?.kind === "recovering" ? visibleAction.kind : undefined} recoveryFromRefused={visibleAction?.kind === "recovering" && recoveryFromRefused} onTest={() => void run()} onRecover={() => void recover()}/>;
+    return <AgentOSWorkspaceAiKnowledgeBase state={state} props={{ readiness: readiness ?? undefined, labels, pendingAction: visibleAction?.kind === "testing" || visibleAction?.kind === "recovering" ? visibleAction.kind : undefined, recoveryFromRefused: visibleAction?.kind === "recovering" && recoveryFromRefused }} on={{ onTest: () => void run(), onRecover: () => void recover(), documents: labels.documents, formatTestedAt: labels.formatTestedAt }}/>;
 };

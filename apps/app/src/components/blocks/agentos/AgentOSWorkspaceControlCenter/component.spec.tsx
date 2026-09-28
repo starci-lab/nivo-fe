@@ -30,7 +30,12 @@ vi.mock("@/components/blocks/operations/HelmStackSnapshot", () => ({
     HelmStackSnapshot: () => <div data-testid="stack"/>,
 }))
 
-import { AgentOSWorkspaceControlCenterBase, projectAgentOSShellView, type AgentOSShellReading, type AgentOSWorkspaceControlCenterShellLabels } from "./component"
+import { AgentOSWorkspaceControlCenterBase as AgentOSWorkspaceControlCenterBaseView, projectAgentOSShellView, type AgentOSShellReading, type AgentOSWorkspaceControlCenterShellLabels, type AgentOSWorkspaceControlCenterViewProps } from "./component"
+
+const AgentOSWorkspaceControlCenterBase = (view: AgentOSWorkspaceControlCenterViewProps) => {
+    const { pageState, onSelectPageState, onOpenAgentConsole, onRetry, onRetryShell, onRetryOperation, formatDate, ...data } = view;
+    return <AgentOSWorkspaceControlCenterBaseView state={pageState} props={data} on={{ onSelectPageState, onOpenAgentConsole, onRetry, onRetryShell, onRetryOperation, formatDate }} />;
+};
 
 const labels: AgentOSWorkspaceControlCenterShellLabels = {
     headingFallback: "AgentOS workspace",

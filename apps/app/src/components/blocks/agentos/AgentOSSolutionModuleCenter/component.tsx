@@ -10,7 +10,47 @@ import {
 } from "./classNames";
 
 /** One resolved catalog or installation card visible in the module center. */
-export type AgentOSSolutionModuleCenterProps = AgentOSSolutionModuleCenterViewProps;
+export type AgentOSSolutionModuleCenterProps = {
+  readonly state: "resting" | "refused" | "answered";
+  readonly props: {
+    readonly layout?: "tabs" | "ledger";
+    readonly mode: "catalog" | "installed";
+    readonly sectionLabel: string;
+    readonly modesLabel: string;
+    readonly modes: ReadonlyArray<{ readonly id: "catalog" | "installed"; readonly label: string }>;
+    readonly refusedLabel: string;
+    readonly emptyLabel: string;
+    readonly emptyActionLabel: string;
+    readonly cards: ReadonlyArray<AgentOSSolutionModuleCard>;
+    readonly pendingId?: string;
+    readonly outcome?: string;
+    readonly ledger?: {
+      readonly installedLabel: string;
+      readonly catalogLabel: string;
+      readonly installedState: AgentOSSolutionLedgerSectionStatus;
+      readonly catalogueState: AgentOSSolutionLedgerSectionStatus;
+      readonly installedRows: ReadonlyArray<AgentOSSolutionLedgerRow>;
+      readonly installedEmptyTitle: string;
+      readonly installedEmpty: string;
+      readonly installedRefusedTitle: string;
+      readonly installedRefused: string;
+      readonly catalogueEmptyTitle: string;
+      readonly catalogueEmpty: string;
+      readonly catalogueRefusedTitle: string;
+      readonly catalogueRefused: string;
+      readonly retry: string;
+      readonly installedEmptyAction: string;
+      readonly retryingInstalled: boolean;
+      readonly retryingCatalogue: boolean;
+    };
+  };
+  readonly on: {
+    readonly onSelectMode: (mode: "catalog" | "installed") => void;
+    readonly onPressCard: (id: string) => void;
+    readonly onRetryInstalled: () => void;
+    readonly onRetryCatalogue: () => void;
+  };
+};
 /** Public API role for AgentOSSolutionModuleCard. */
 export type AgentOSSolutionModuleCard = {
   readonly id: string;
@@ -37,7 +77,7 @@ export type AgentOSSolutionLedgerRow = {
 };
 
 /** What one ledger section holds: nothing yet, a refused read, resting content, or rows. */
-export type AgentOSSolutionLedgerSectionState = "resting" | "refused" | "empty" | "ready";
+export type AgentOSSolutionLedgerSectionStatus = "resting" | "refused" | "empty" | "ready";
 
 /** Everything the ledger form draws: its own section props plus the catalogue projection it shares with the tabs form. */
 type AgentOSSolutionModuleLedgerViewProps = {
@@ -52,8 +92,8 @@ type AgentOSSolutionModuleLedgerViewProps = {
 export type AgentOSSolutionModuleLedgerProps = {
   readonly installedLabel: string;
   readonly catalogLabel: string;
-  readonly installedState: AgentOSSolutionLedgerSectionState;
-  readonly catalogueState: AgentOSSolutionLedgerSectionState;
+  readonly installedState: AgentOSSolutionLedgerSectionStatus;
+  readonly catalogueState: AgentOSSolutionLedgerSectionStatus;
   readonly installedRows: ReadonlyArray<AgentOSSolutionLedgerRow>;
   readonly installedEmptyTitle: string;
   readonly installedEmpty: string;
@@ -254,6 +294,21 @@ const AgentOSSolutionModuleCenterContent = ({
 };
 
 /** Stable typed root for the module-center block: the tabs form by default, the ledger on the module route. */
-export const AgentOSSolutionModuleCenterBase = (props: AgentOSSolutionModuleCenterProps) => props.layout === "ledger" && props.ledger !== undefined
-  ? <AgentOSSolutionModuleLedger ledger={props.ledger} cards={props.cards} pendingId={props.pendingId} outcome={props.outcome} onPressCard={props.onPressCard} />
-  : <AgentOSSolutionModuleCenterContent {...props} />;
+export const AgentOSSolutionModuleCenterBase = (props: AgentOSSolutionModuleCenterProps) => {
+  const view: AgentOSSolutionModuleCenterViewProps = {
+    ...props.props,
+    state: props.state,
+    onSelectMode: props.on.onSelectMode,
+    onPressCard: props.on.onPressCard,
+    ...(props.props.ledger === undefined ? {} : {
+      ledger: {
+        ...props.props.ledger,
+        onRetryInstalled: props.on.onRetryInstalled,
+        onRetryCatalogue: props.on.onRetryCatalogue
+      }
+    })
+  };
+  return view.layout === "ledger" && view.ledger !== undefined
+    ? <AgentOSSolutionModuleLedger ledger={view.ledger} cards={view.cards} pendingId={view.pendingId} outcome={view.outcome} onPressCard={view.onPressCard} />
+    : <AgentOSSolutionModuleCenterContent {...view} />;
+};

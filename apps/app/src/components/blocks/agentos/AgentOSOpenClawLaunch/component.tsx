@@ -1,7 +1,16 @@
 import { CONTENT_CLASS_NAME } from "./classNames";
 import { SectionHeader as DirectionHeader, PageContainer as DirectionPage, Badge, Button, SurfaceCard, Text, type BadgeTone } from "@starci/grammar/common";
 /** Source-owned launch phases rendered independently from workspace readiness. */
-export type AgentOSOpenClawLaunchProps = AgentOSOpenClawLaunchViewProps;
+export type AgentOSOpenClawLaunchProps = {
+    readonly state: OpenClawLaunchBlockState;
+    readonly props: {
+        readonly workspaceId: string;
+        readonly detail?: string;
+        readonly labels: AgentOSOpenClawLaunchLabels;
+        readonly isRetryPending?: boolean;
+    };
+    readonly on: { readonly onRetry: () => void; readonly onReturn: () => void };
+};
 /** Public API role for OpenClawLaunchBlockState. */
 export type OpenClawLaunchBlockState = "issuing" | "connected" | "blocked" | "expired" | "disconnected";
 /** Resolved copy for the credential-free launch bridge. */
@@ -35,8 +44,9 @@ const toneOf: Readonly<Record<OpenClawLaunchBlockState, BadgeTone>> = {
 };
 /** Draw every launch-axis state without accepting a launch URL, token or credential-shaped value. */
 export const AgentOSOpenClawLaunchBase = (props: AgentOSOpenClawLaunchProps) => {
-    const { launchState, workspaceId, detail, labels, onRetry, onReturn, isRetryPending = false } = props;
+    const { workspaceId, detail, labels, isRetryPending = false } = props.props;
+    const launchState = props.state;
     const settled = labels.states[launchState];
-    const action = launchState === "issuing" && !isRetryPending ? null : <Button variant="primary" type="button" isPending={isRetryPending} onPress={launchState === "connected" ? onReturn : onRetry}>{launchState === "connected" ? labels.returnToWorkspace : labels.retry}</Button>;
+    const action = launchState === "issuing" && !isRetryPending ? null : <Button variant="primary" type="button" isPending={isRetryPending} onPress={launchState === "connected" ? props.on.onReturn : props.on.onRetry}>{launchState === "connected" ? labels.returnToWorkspace : labels.retry}</Button>;
     return <DirectionPage measure="product"><div className={CONTENT_CLASS_NAME} data-contract="GAP-2"><DirectionHeader level={1} title={labels.title}/><SurfaceCard><div className={CONTENT_CLASS_NAME} data-contract="GAP-2"><Text weight="semibold">{labels.workspaceLabel}: {workspaceId}</Text><Badge tone={toneOf[launchState]}>{settled.label}</Badge><Text size="sm" tone="muted" live="polite">{detail ?? settled.detail}</Text>{action}</div></SurfaceCard><Text size="sm" tone="muted">{labels.securityNote}</Text></div></DirectionPage>;
 };

@@ -1,6 +1,8 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { AgentOSSolutionModuleDetailBase, type AgentOSSolutionModuleDetailLabels, type AgentOSSolutionModuleDetailViewProps } from "./component"
+import { AgentOSSolutionModuleDetailBase as AgentOSSolutionModuleDetailBaseView, type AgentOSSolutionModuleDetailLabels, type AgentOSSolutionModuleDetailViewProps } from "./component"
+
+const AgentOSSolutionModuleDetailBase = (props: AgentOSSolutionModuleDetailViewProps) => <AgentOSSolutionModuleDetailBaseView state={props.detailState} props={{ installation: props.installation, labels: props.labels }} on={{ onBack: props.onBack, onOpenAiKnowledge: props.onOpenAiKnowledge }} />
 
 const installation = {
     id: "installation-1",

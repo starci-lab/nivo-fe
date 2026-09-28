@@ -2,13 +2,13 @@
 
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/hooks";
 import { useQueryMyAgentosModuleInstallationSwr } from "@/hooks";
 import type { AgentosModuleInstallationDetail } from "@/modules/api/console";
 import { nivoQueryData } from "@/modules/query";
 import { useSession } from "@/modules/auth/session";
 import useProvisioningRealtime from "@/hooks/realtime";
-import { AgentOSSolutionModuleDetailBase, type AgentOSSolutionModuleDetailState, type AgentOSSolutionModuleDetailLabels } from "./component";
+import { AgentOSSolutionModuleDetailBase, type AgentOSSolutionModuleDetailStatus, type AgentOSSolutionModuleDetailLabels } from "./component";
 
 /** Exact route identities required to read one owner-scoped installation. */
 export type AgentOSSolutionModuleDetailProps = {
@@ -17,7 +17,7 @@ export type AgentOSSolutionModuleDetailProps = {
 };
 
 /** Settle the detail block state from what the snapshot returned. */
-const detailStateOf = (installation: AgentosModuleInstallationDetail | null | undefined): AgentOSSolutionModuleDetailState => {
+const detailStateOf = (installation: AgentosModuleInstallationDetail | null | undefined): AgentOSSolutionModuleDetailStatus => {
   if (installation === undefined) return "loading" as const;
   if (installation === null) return "refused" as const;
   if (installation.knowledgeState === "recovering") return "refreshing" as const;
@@ -87,5 +87,5 @@ export const AgentOSSolutionModuleDetail = (props: AgentOSSolutionModuleDetailPr
       empty: t("empty")
     }
   };
-  return <AgentOSSolutionModuleDetailBase detailState={detailStateOf(installation)} installation={installation ?? undefined} labels={labels} onBack={() => router.push(`/agentos/workspaces/${workspaceId}`)} onOpenAiKnowledge={() => router.push(`/agentos/workspaces/${workspaceId}?view=ai-knowledge`)} />;
+  return <AgentOSSolutionModuleDetailBase state={detailStateOf(installation)} props={{ installation: installation ?? undefined, labels }} on={{ onBack: () => router.push(`/agentos/workspaces/${workspaceId}`), onOpenAiKnowledge: () => router.push(`/agentos/workspaces/${workspaceId}?view=ai-knowledge`) }} />;
 };

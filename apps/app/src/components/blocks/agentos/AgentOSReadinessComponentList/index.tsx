@@ -3,5 +3,4 @@ import { AgentOSReadinessComponentListBase, type AgentOSReadinessComponentListVi
 /** Keep component verdict presentation independently reusable inside workspace AI surfaces. */
 export type AgentOSReadinessComponentListProps = AgentOSReadinessComponentListViewProps;
 /** Public API role for AgentOSReadinessComponentList. */
-export const AgentOSReadinessComponentList = (props: AgentOSReadinessComponentListProps) => <AgentOSReadinessComponentListBase {...props} />;
-
+export const AgentOSReadinessComponentList = (props: AgentOSReadinessComponentListProps) => <AgentOSReadinessComponentListBase state={props.loading ? "loading" : "ready"} props={{ components: props.components, labels: props.labels }} />;

@@ -5,9 +5,13 @@ import { AgentOSSolutionModuleSummary } from "@/components/blocks/agentos/AgentO
 import type { AgentosModuleInstallationDetail } from "@/modules/api/console";
 
 /** Detail-block states for one module installation snapshot. */
-export type AgentOSSolutionModuleDetailProps = AgentOSSolutionModuleDetailViewProps;
-/** Public API role for AgentOSSolutionModuleDetailState. */
-export type AgentOSSolutionModuleDetailState = "loading" | "refused" | "ready" | "refreshing" | "current" | "knowledge-refused";
+export type AgentOSSolutionModuleDetailProps = {
+  readonly state: AgentOSSolutionModuleDetailStatus;
+  readonly props: { readonly installation?: AgentosModuleInstallationDetail; readonly labels: AgentOSSolutionModuleDetailLabels };
+  readonly on: { readonly onBack: () => void; readonly onOpenAiKnowledge?: () => void };
+};
+/** Public API role for the installation detail status. */
+export type AgentOSSolutionModuleDetailStatus = "loading" | "refused" | "ready" | "refreshing" | "current" | "knowledge-refused";
 
 /** Resolved labels for one module installation detail route. */
 export type AgentOSSolutionModuleDetailLabels = {
@@ -25,13 +29,13 @@ export type AgentOSSolutionModuleDetailLabels = {
 
 /** Fixed module page anatomy with an independently settled detail block. */
 export type AgentOSSolutionModuleDetailViewProps = {
-  readonly detailState: AgentOSSolutionModuleDetailState;
+  readonly detailState: AgentOSSolutionModuleDetailStatus;
   readonly installation?: AgentosModuleInstallationDetail;
   readonly labels: AgentOSSolutionModuleDetailLabels;
   readonly onBack: () => void;
   readonly onOpenAiKnowledge?: () => void;
 };
-const ledeContent = (detailState: AgentOSSolutionModuleDetailState, installation: AgentosModuleInstallationDetail | undefined, labels: AgentOSSolutionModuleDetailLabels): string => {
+const ledeContent = (detailState: AgentOSSolutionModuleDetailStatus, installation: AgentosModuleInstallationDetail | undefined, labels: AgentOSSolutionModuleDetailLabels): string => {
   if (detailState === "loading") return labels.loading;
   if (detailState === "current") return labels.knowledgeCurrent ?? installation?.moduleKey ?? labels.title;
   if (detailState === "refreshing") return labels.knowledgeRefreshing ?? installation?.moduleKey ?? labels.title;
@@ -41,13 +45,9 @@ const ledeContent = (detailState: AgentOSSolutionModuleDetailState, installation
 
 /** Compose one exact installation snapshot without owning API or realtime mechanics. */
 export const AgentOSSolutionModuleDetailBase = (props: AgentOSSolutionModuleDetailProps) => {
-  const {
-    detailState,
-    installation,
-    labels,
-    onBack,
-    onOpenAiKnowledge
-  }: AgentOSSolutionModuleDetailViewProps = props;
+  const detailState = props.state;
+  const { installation, labels } = props.props;
+  const { onBack, onOpenAiKnowledge } = props.on;
   // A refusal and a missing installation are the same page: there is nothing to lay out, so the
   // stack carries the one notice rather than two empty cards.
   const settledSections = detailState === "refused" || installation === undefined ? [<EmptyNotice key="empty" message={labels.refused} />] : [<AgentOSSolutionModuleSummary key="summary" state="ready" installation={installation} labels={labels.summary} />, <AgentOSSolutionModuleBindings key="bindings" state="ready" installation={installation} labels={labels.bindings} />];
@@ -73,4 +73,3 @@ export const AgentOSSolutionModuleDetailBase = (props: AgentOSSolutionModuleDeta
 
     <Text size="sm" tone={detailState === "knowledge-refused" ? "accent" : "muted"}>{ledeContent(detailState, installation, labels)}</Text>{sections}</div>;
 };
-
