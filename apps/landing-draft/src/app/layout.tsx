@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { PUBLIC_SITE_URL, SITE_DESCRIPTION, SITE_TITLE } from "@/features/layouts/SiteShell"
+import { PUBLIC_SITE_URL, SITE_DESCRIPTION, SITE_TITLE, SiteShellDocument as Layout } from "@/features/layouts/SiteShell"
 import "./globals.css"
 
 /** Browser-level metadata for every canonical public route. */
@@ -37,4 +37,4 @@ export const viewport: Viewport = {
  * tree owns, and they are built from the three constants `features/layouts/SiteShell` re-exports --
  * the entry that also holds the shell which actually renders the document.
  */
-export { SiteShellDocument as default } from "@/features/layouts/SiteShell"
+export default Layout

@@ -1,6 +1,6 @@
 import { Text } from "@starci/grammar/common"
 import type { PublicFlowStep } from "@/modules/landing/homepage"
-import { SITE_CLASS_NAMES } from "./classNames"
+import { CLASS_NAMES } from "./classNames"
 
 /** Props for a code-native explanatory flow with an equivalent text sequence. */
 export type ProcessFlowProps = {
@@ -15,16 +15,16 @@ export const ProcessFlow = (props: ProcessFlowProps) => {
     const { label, steps, emphasisId, inverse = false } = props
 
     return (
-        <ol className={SITE_CLASS_NAMES.processFlow} aria-label={label} data-inverse={inverse ? "true" : undefined}>
+        <ol className={CLASS_NAMES.processFlow} aria-label={label} data-inverse={inverse ? "true" : undefined}>
             {steps.map((step, index) => (
                 <li
-                    className={SITE_CLASS_NAMES.processFlowStep}
+                    className={CLASS_NAMES.processFlowStep}
                     data-emphasis={step.id === emphasisId ? "true" : undefined}
                     key={step.id}
                 >
-                    <span className={SITE_CLASS_NAMES.processFlowIndex} aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-                    <span className={SITE_CLASS_NAMES.processFlowNode} aria-hidden="true" />
-                    <span className={SITE_CLASS_NAMES.processFlowCopy}>
+                    <span className={CLASS_NAMES.processFlowIndex} aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                    <span className={CLASS_NAMES.processFlowNode} aria-hidden="true" />
+                    <span className={CLASS_NAMES.processFlowCopy}>
                         <Text as="span" size="sm" weight="semibold">{step.label}</Text>
                         <Text as="span" size="xs" tone={inverse ? "default" : "muted"}>{step.description}</Text>
                     </span>
