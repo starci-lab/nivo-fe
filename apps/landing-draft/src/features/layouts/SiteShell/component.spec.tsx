@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
-import { SiteShell } from "./SiteShell"
+import { SiteShell } from "./component"
 
 describe("SiteShell", () => {
     it("mounts one shared skip-link, banner, routed content, and footer", () => {

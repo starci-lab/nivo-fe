@@ -1,8 +1,8 @@
 import type { ReactNode } from "react"
 import { SITE_COPY } from "@/modules/landing/site"
 import { SITE_CLASS_NAMES } from "./classNames"
-import { SiteFooter } from "./SiteFooter"
-import { SiteHeader } from "./SiteHeader"
+import { SiteFooter } from "../SiteFooter"
+import { SiteHeader } from "../SiteHeader"
 
 /** Props for the public-site shell shared by all route adapters. */
 export type SiteShellProps = {

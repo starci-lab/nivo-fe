@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { SITE_CLASS_NAMES } from "./classNames"
+import { SITE_CLASS_NAMES } from "../SiteShell/classNames"
 
 /** Props for the one main landmark mounted by each public route owner. */
 export type SiteMainProps = {

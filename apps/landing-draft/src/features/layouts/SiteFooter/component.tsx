@@ -1,7 +1,7 @@
 import { NivoBrand } from "@nivo/ui"
 import { PageContainer, Text, TextAction } from "@starci/grammar/common"
 import { SITE_COPY, SITE_FOOTER_GROUPS, SITE_LINKS } from "@/modules/landing/site"
-import { SITE_CLASS_NAMES } from "./classNames"
+import { SITE_CLASS_NAMES } from "../SiteShell/classNames"
 
 /** The compact footer shared by every canonical public route. */
 export const SiteFooter = () => {

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
-import { SiteHeader } from "./SiteHeader"
+import { SiteHeader } from "./component"
 
 describe("SiteHeader", () => {
     it("opens and closes the compact navigation with keyboard-safe state", async () => {
