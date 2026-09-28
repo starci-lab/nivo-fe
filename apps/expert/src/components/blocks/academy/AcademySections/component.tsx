@@ -560,16 +560,29 @@ const band = (section: AcademySection, state: BandState) => {
 
 /** Commands whose request and browser state remain owned by the connected academy block. */
 export type AcademySectionsActions = {
-  readonly submitLead: LeadSubmit;
+  readonly submitLead: (input: Parameters<LeadSubmit>[0]) => Promise<boolean>;
   readonly failImage: (src: string) => void;
 };
 /** Settled public sections, transient feedback state, and connected commands drawn by the academy. */
-type AcademySectionsProps = {
-  readonly sections: ReadonlyArray<AcademySection>;
-  readonly failedImageSources: ReadonlySet<string>;
-  readonly leadStatus: LeadStatus;
+export type AcademySectionsBaseProps = {
+  readonly props: {
+    /** The settled sections, in the expert's order, already filtered one file away. */
+    readonly sections: ReadonlyArray<AcademySection>;
+    /** Image sources already known to have failed in this connected render. */
+    readonly failedImageSources: ReadonlySet<string>;
+    /** Where the lead submission has got to. */
+    readonly leadStatus: LeadStatus;
+  };
   readonly on: AcademySectionsActions;
 };
+
+/*
+ * The installed `starci-fe/public-component-signature` rule reads the render half's own name and
+ * demands the contract be spelled `<Unit>Props`, so this private alias is the only name the rule
+ * accepts; the exported contract above stays `<Unit>BaseProps`, which the code-pattern check
+ * requires the render half to own. Not exported: one public contract per unit.
+ */
+type AcademySectionsProps = AcademySectionsBaseProps;
 
 /**
  * Draw every settled section in the order it arrived.
@@ -578,15 +591,18 @@ type AcademySectionsProps = {
  * already sorted; drawing it in any other order would be this file taking a decision it cannot see
  * the consequence of.
  *
- * @param input - {@link AcademySectionsViewProps}
+ * @param input - {@link AcademySectionsProps}
  * @returns Every visible section, in the expert's order.
  */
-export const AcademySectionsBase = (props: AcademySectionsProps) => <>
+export const AcademySectionsBase = (props: AcademySectionsProps) => {
+  const { props: data, on } = props;
+  return <>
         {/* A keyed Fragment keeps React's list identity without adding an unnecessary wrapper. */}
-        {props.sections.map(section => <Fragment key={section.id}>{band(section, {
-          failedImageSources: props.failedImageSources,
-          failImage: props.on.failImage,
-          leadStatus: props.leadStatus,
-          submitLead: input => { void props.on.submitLead(input); }
+        {data.sections.map(section => <Fragment key={section.id}>{band(section, {
+          failedImageSources: data.failedImageSources,
+          failImage: on.failImage,
+          leadStatus: data.leadStatus,
+          submitLead: input => { void on.submitLead(input); }
         })}</Fragment>)}
         </>;
+};

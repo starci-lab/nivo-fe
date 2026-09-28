@@ -15,14 +15,19 @@ import type { Course } from "@/modules/api/academy";
  * connected half never has to describe a failure this file would then have to interpret.
  */
 
-/** Props for {@link AcademyPageBase}. */
-export type AcademyPageBaseProps = {
+/** The atoms the landing screen draws. */
+export type AcademyPageBaseData = {
   /** The catalog this academy sells, already resolved. */
   readonly courses: ReadonlyArray<Course>;
 };
+
+/** Props for {@link AcademyPageBase}. */
+export type AcademyPageBaseProps = {
+  readonly props: AcademyPageBaseData;
+};
 const AcademyRoutedContent = ({
   courses
-}: AcademyPageBaseProps) => <div>
+}: AcademyPageBaseData) => <div>
 
   <AcademySections courses={[...courses]} /></div>;
 
@@ -32,7 +37,7 @@ const AcademyRoutedContent = ({
  * @param props - {@link AcademyPageBaseProps}
  * @returns The page.
  */
-export const AcademyPageBase = (props: AcademyPageBaseProps) => <AcademyChrome
+export const AcademyPageBase = ({ props }: AcademyPageBaseProps) => <AcademyChrome
 /*
  * `content`, not `children`: the layout names the one routed interior it takes, so nothing
  * else can arrive beside it unannounced. Only the three closed vendor shells may take the
