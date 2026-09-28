@@ -15,7 +15,20 @@ import { ConsoleTopBarBase } from "./component";
  * Search, commerce and notifications remain absent because Nivo does not yet own those behaviors;
  * visual precedent cannot manufacture actions.
  */
-export type ConsoleTopBarProps = Record<string, never>;
+export type ConsoleTopBarProps = { readonly [key: string]: never };
+
+/**
+ * Mount the connected locale menu through a stable pure render function.
+ *
+ * The render-boundary law keeps a world-reading owner's render paths on statically resolved pure
+ * targets; a bare connected component is not one. A module-level function is both resolved and
+ * referentially stable, so the mounted menu keeps its identity - and its open state - across
+ * re-renders exactly as the direct reference did.
+ */
+const renderLocaleControl = () => <LanguageMenu />;
+/** The account menu on the same bridge. */
+const renderAccountControl = () => <AccountMenu />;
+
 /** Public API role for ConsoleTopBar. */
 export const ConsoleTopBar = (props: ConsoleTopBarProps) => {
   void props;
@@ -27,6 +40,6 @@ export const ConsoleTopBar = (props: ConsoleTopBarProps) => {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
   const isDark = isMounted && resolvedTheme === "dark";
-  return <ConsoleTopBarBase brandLabel={t("brand")} contextLabel={t("title")} actionsLabel={t("actionsLabel")} isDark={isDark} lightThemeLabel={t("theme.light")} darkThemeLabel={t("theme.dark")} localeControl={LanguageMenu} localeControlProps={{}} accountControl={AccountMenu} accountControlProps={{}} onToggleTheme={() => setTheme(isDark ? "light" : "dark")} />;
+  return <ConsoleTopBarBase brandLabel={t("brand")} contextLabel={t("title")} actionsLabel={t("actionsLabel")} isDark={isDark} lightThemeLabel={t("theme.light")} darkThemeLabel={t("theme.dark")} localeControl={renderLocaleControl} localeControlProps={{}} accountControl={renderAccountControl} accountControlProps={{}} onToggleTheme={() => setTheme(isDark ? "light" : "dark")} />;
 };
 

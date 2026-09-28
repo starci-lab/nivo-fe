@@ -3,14 +3,14 @@
 import { useEffect } from "react";
 import type { ComponentType } from "react";
 import { useTranslations } from "next-intl";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/hooks";
 import { useSession } from "@/modules/auth/session";
-import { ConsoleLayoutBase } from "./component";
+import { ConsoleLayoutBase, type ConsoleLayoutBodyProps } from "./component";
 
 /** Connected console frame input already projected by the framework route boundary. */
-export type ConsoleLayoutProps<P extends object> = {
-  readonly body: ComponentType<P>;
-  readonly bodyProps: P;
+export type ConsoleLayoutProps = {
+  readonly body: ComponentType<ConsoleLayoutBodyProps>;
+  readonly bodyProps: ConsoleLayoutBodyProps;
 };
 
 /**
@@ -28,11 +28,11 @@ const signInHrefFor = (pathname: string | null): string =>
   pathname === null || pathname === "" || pathname === "/" ? "/authentication" : `/authentication?returnTo=${encodeURIComponent(pathname)}`;
 
 /** Guard the authenticated console and hand drawing to its pure layout twin. */
-export const ConsoleLayout = <P extends object,>(props: ConsoleLayoutProps<P>) => {
+export const ConsoleLayout = (props: ConsoleLayoutProps) => {
   const {
     body,
     bodyProps
-  }: ConsoleLayoutProps<P> = props;
+  }: ConsoleLayoutProps = props;
   const t = useTranslations("console");
   const router = useRouter();
   const pathname = usePathname();

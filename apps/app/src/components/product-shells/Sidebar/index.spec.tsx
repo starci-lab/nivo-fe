@@ -6,7 +6,7 @@ import viMessages from "@/messages/vi.json"
 
 const push = vi.fn()
 const location = { pathname: "/overview" }
-vi.mock("@/i18n/navigation", () => ({ usePathname: () => location.pathname, useRouter: () => ({ push }) }))
+vi.mock("@/hooks", () => ({ usePathname: () => location.pathname, useRouter: () => ({ push }) }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 import { Sidebar } from "."
 

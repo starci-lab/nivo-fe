@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
-import { Sidebar as GrammarSidebar } from "@starci/grammar/common"
-import { DrawerBranch, nivoIconSource } from "@nivo/ui"
-import { usePathname, useRouter } from "@/i18n/navigation"
+import type { SidebarGroup } from "@starci/grammar/common"
+import { nivoIconSource } from "@nivo/ui"
+import { usePathname, useRouter } from "@/hooks"
+import { SidebarBase } from "./component"
 
 /** Which console surface the navigation is drawn on: the persistent rail, or the mobile drawer. */
 export type SidebarMode = "desktop" | "mobile"
@@ -58,24 +59,22 @@ export const Sidebar = (props: SidebarProps) => {
         label: t(`nav.${destination.key}`),
         source: nivoIconSource(destination.icon, "leading"),
     })
-    const groups = (["workspace", "account"] as const).map((group) => ({
+    const groups: ReadonlyArray<SidebarGroup> = (["workspace", "account"] as const).map((group) => ({
         id: group,
         ...(group === "workspace" ? {} : { label: t("accountCaption") }),
         items: DESTINATIONS.filter((destination) => destination.group === group).map(item),
     }))
-    const content = (presentation: "rail" | "drawer", close?: () => void) => <GrammarSidebar
-        label={t("navigationLabel")}
+
+    return <SidebarBase
+        mode={mode}
         groups={groups}
         selectedKey={selectedKey}
-        presentation={presentation}
-        isCollapsed={presentation === "rail" && isCollapsed}
-        collapseLabel={t("closeMenu")}
-        expandLabel={t("openMenu")}
-        toggleSource={nivoIconSource("sidebar", "leading")}
-        onAction={(id) => { if (activate(id)) close?.() }}
+        isCollapsed={isCollapsed}
+        navigationLabel={t("navigationLabel")}
+        openMenuLabel={t("openMenu")}
+        closeMenuLabel={t("closeMenu")}
+        titleLabel={t("title")}
+        onAction={activate}
         onCollapsedChange={setCollapsed}
     />
-
-    if (mode === "mobile") return <DrawerBranch triggerLabel={t("openMenu")} title={t("title")} closeLabel={t("closeMenu")} renderContent={(close) => content("drawer", close)} />
-    return content("rail")
 }

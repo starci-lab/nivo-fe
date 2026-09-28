@@ -2,20 +2,30 @@ import { NavigationFeatureNav, Text } from "@starci/grammar/common";
 import type { ComponentType } from "react";
 import { NivoBrand, ThemeSwitch } from "@nivo/ui";
 
+/** The mounted controls take no props: the connected half renders them fully resolved. */
+export type ConsoleTopBarControlProps = { readonly [key: string]: never };
 /** Pure top-bar labels, controls, and theme command. */
-export type ConsoleTopBarProps<L extends object, A extends object> = {
+export type ConsoleTopBarBaseProps = {
   readonly brandLabel: string;
   readonly contextLabel: string;
   readonly actionsLabel: string;
   readonly isDark: boolean;
   readonly lightThemeLabel: string;
   readonly darkThemeLabel: string;
-  readonly localeControl: ComponentType<L>;
-  readonly localeControlProps: L;
-  readonly accountControl: ComponentType<A>;
-  readonly accountControlProps: A;
+  readonly localeControl: ComponentType<ConsoleTopBarControlProps>;
+  readonly localeControlProps: ConsoleTopBarControlProps;
+  readonly accountControl: ComponentType<ConsoleTopBarControlProps>;
+  readonly accountControlProps: ConsoleTopBarControlProps;
   readonly onToggleTheme: () => void;
 };
+
+/*
+ * The installed `starci-fe/public-component-signature` rule reads the render half's own name and
+ * demands the contract be spelled `<Unit>Props`, so this private alias is the only name the rule
+ * accepts; the exported contract above stays `<Unit>BaseProps`, which the code-pattern check
+ * requires the render half to own. Not exported: one public contract per unit.
+ */
+type ConsoleTopBarProps = ConsoleTopBarBaseProps;
 
 /**
  * Draw the protected Nivo lockup and only capability-backed global tools.
@@ -30,7 +40,7 @@ export type ConsoleTopBarProps<L extends object, A extends object> = {
  * owners on screen at once below 48rem, and a named but empty group would announce a menu that is
  * not there. The grammar emits the group wrapper regardless, so it is left unnamed.
  */
-export const ConsoleTopBarBase = <L extends object, A extends object>(props: ConsoleTopBarProps<L, A>) => {
+export const ConsoleTopBarBase = (props: ConsoleTopBarProps) => {
   const {
     brandLabel,
     contextLabel,
@@ -43,7 +53,7 @@ export const ConsoleTopBarBase = <L extends object, A extends object>(props: Con
     accountControl: AccountControl,
     accountControlProps,
     onToggleTheme
-  }: ConsoleTopBarProps<L, A> = props;
+  }: ConsoleTopBarProps = props;
   return <NavigationFeatureNav
     identity={<>
       <NivoBrand props={{

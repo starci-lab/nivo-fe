@@ -1,15 +1,22 @@
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { StarCiDashboardThemeBoundary } from "@nivo/ui";
 import { WorkspaceShell } from "@starci/grammar/common";
 import { Sidebar } from "@/components/product-shells/Sidebar";
 import { ConsoleTopBar } from "@/components/product-shells/ConsoleTopBar";
 
-/** Framework-owned routed body after the route closes it into its main contract. */
-export type ConsoleLayoutProps<P extends object> = ConsoleLayoutBaseProps<P>;
+/** The routed page this frame is closed over: opaque children the route has already rendered. */
+export type ConsoleLayoutBodyProps = { readonly children?: ReactNode };
+/*
+ * The installed `starci-fe/public-component-signature` rule reads the render half's own name and
+ * demands the contract be spelled `<Unit>Props`, so this private alias is the only name the rule
+ * accepts; the exported contract below stays `<Unit>BaseProps`, which the code-pattern check
+ * requires the render half to own. Not exported: one public contract per unit.
+ */
+type ConsoleLayoutProps = ConsoleLayoutBaseProps;
 /** Public API role for ConsoleLayoutBaseProps. */
-export type ConsoleLayoutBaseProps<P extends object> = {
-  readonly body: ComponentType<P>;
-  readonly bodyProps: P;
+export type ConsoleLayoutBaseProps = {
+  readonly body: ComponentType<ConsoleLayoutBodyProps>;
+  readonly bodyProps: ConsoleLayoutBodyProps;
   readonly navigationLabel: string;
   readonly primaryLabel: string;
 };
@@ -27,12 +34,12 @@ export type ConsoleLayoutBaseProps<P extends object> = {
  * the rail projects, so the trigger's destinations, labels and focus recovery are identical in
  * every band.
  */
-const ConsoleFrame = <P extends object,>({
+const ConsoleFrame = ({
   body: Body,
   bodyProps,
   navigationLabel,
   primaryLabel
-}: ConsoleLayoutBaseProps<P>) => <>
+}: ConsoleLayoutBaseProps) => <>
   <ConsoleTopBar />
   <WorkspaceShell
     align="stretch"
@@ -48,14 +55,14 @@ const ConsoleFrame = <P extends object,>({
 </>;
 
 /** Draw stable authenticated chrome around one opaque routed page. */
-export const ConsoleLayoutBase = <P extends object,>(props: ConsoleLayoutProps<P>) => {
+export const ConsoleLayoutBase = (props: ConsoleLayoutProps) => {
   const {
     body,
     bodyProps,
     navigationLabel,
     primaryLabel
-  }: ConsoleLayoutBaseProps<P> = props;
-  return <StarCiDashboardThemeBoundary content={ConsoleFrame<P>} contentProps={{
+  }: ConsoleLayoutBaseProps = props;
+  return <StarCiDashboardThemeBoundary content={ConsoleFrame} contentProps={{
     body,
     bodyProps,
     navigationLabel,

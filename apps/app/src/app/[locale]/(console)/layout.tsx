@@ -4,7 +4,7 @@ import type { ComponentProps } from "react";
 
 import { ConsoleLayout } from "@/components/product-shells/ConsoleLayout";
 
-type ConsoleRouteLayoutProps = {readonly children: ComponentProps<"div">["children"];};
+type ConsoleRouteLayoutProps = {readonly children?: ComponentProps<"div">["children"];};
 
 const ConsoleRoutedBody = ({ children }: ConsoleRouteLayoutProps) => <div>{
 
@@ -13,8 +13,8 @@ const ConsoleRoutedBody = ({ children }: ConsoleRouteLayoutProps) => <div>{
 
 
 /** Route-group entry for the authenticated Nivo console. */
-const ConsoleRouteLayout = ({ children }: ConsoleRouteLayoutProps) =>
+const Layout = ({ children }: ConsoleRouteLayoutProps) =>
 <ConsoleLayout body={ConsoleRoutedBody} bodyProps={{ children }} />;
 
 
-export default ConsoleRouteLayout;
+export default Layout;
