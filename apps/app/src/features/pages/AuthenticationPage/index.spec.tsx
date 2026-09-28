@@ -41,7 +41,7 @@ const code = { otp: "123456", newPassword: "new-password" } satisfies AuthCode
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push, replace: mocks.replace }), usePathname: () => "/authentication" }))
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(window.location.search) }))
 vi.mock("next-intl", () => ({ useTranslations: () => mocks.t }))
-vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
+vi.mock("@/hooks", async (importOriginal) => ({ ...await importOriginal(), useSession: () => mocks.session }))
 vi.mock("@/modules/api/auth", () => mocks.api)
 vi.mock("./component", () => ({
     AuthenticationPageView: (input: AuthPageProbeInput) => (

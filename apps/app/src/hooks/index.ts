@@ -149,6 +149,7 @@ export { useCollabOfficeTransport } from "./collab-live/useCollabOfficeTransport
 
 export { useAccessTokenFrom } from "./auth/useAccessTokenFrom"
 export { useLocaleFrom } from "./auth/useLocaleFrom"
+export { useSession } from "./auth/useSession"
 
 export { useSlotLabels } from "./slot/useSlotLabels"
 

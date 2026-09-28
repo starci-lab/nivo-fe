@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ComponentProps } from "react";
+import { createContext, useCallback, useEffect, useMemo, useRef, useState, type ComponentProps } from "react";
 import { refreshSession, signOut as signOutMutation, type AuthPayload, type SignOutScope } from "../api/auth";
 import { setAccessTokenReader, setLocaleReader } from "../api/graphql";
 
@@ -90,7 +90,8 @@ export type Session = {
    */
   readonly end: (scope?: SignOutScope) => Promise<SessionEndReport>;
 };
-const SessionContext = createContext<Session | null>(null);
+/** The slot the provider publishes and the `useSession` door reads; null says no provider is above. */
+export const SessionContext = createContext<Session | null>(null);
 
 /** Props for {@link SessionProvider}. */
 export type SessionProviderProps = {
@@ -257,15 +258,3 @@ export const SessionProvider = (props: SessionProviderProps) => {
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 };
 
-/**
- * Read the session.
- *
- * @returns The session held above this component.
- */
-export const useSession = (): Session => {
-  const session = useContext(SessionContext);
-  if (session === null) {
-    throw new Error("useSession was called outside SessionProvider");
-  }
-  return session;
-};
