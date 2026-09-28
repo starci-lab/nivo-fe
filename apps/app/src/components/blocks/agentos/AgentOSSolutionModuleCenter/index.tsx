@@ -6,7 +6,7 @@ import { useMutateInstallAgentosSolutionModuleSwr, useQueryMyAgentosModuleInstal
 import type { AgentosSolutionModule } from "@/modules/api/console";
 import { nivoQueryData } from "@/modules/query";
 import { useSession } from "@/modules/auth/session";
-import useProvisioningRealtime from "@/modules/realtime/provisioning";
+import useProvisioningRealtime from "@/hooks/realtime";
 import { AgentOSSolutionModuleCenterBase, type AgentOSSolutionLedgerRow, type AgentOSSolutionLedgerSectionState, type AgentOSSolutionModuleCard } from "./component";
 
 /** Exact owner workspace scope consumed by the connected module center. */

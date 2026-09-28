@@ -6,7 +6,7 @@ import { getPathname, useRouter } from "@/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
 import { useMutateRecoverWorkspacePurchaseSwr, useQueryWorkspaceCheckoutEntrySwr, useQueryWorkspaceCheckoutStatusSwr } from "@/hooks";
 import { type WorkspaceCheckoutEntryDestination, type WorkspaceCheckoutEntryRequest, type WorkspaceCheckoutObservedIdentities, type WorkspaceCheckoutOutcome, type WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane";
-import useProvisioningRealtime, { type ProvisioningTarget } from "@/modules/realtime/provisioning";
+import useProvisioningRealtime, { type ProvisioningTarget } from "@/hooks/realtime";
 import { nivoIconSource } from "@nivo/ui";
 import { type IconSource } from "@starci/grammar/common";
 import { PurchaseStatusFlowBase, type PurchaseStatusCheck, type PurchaseStatusFlowViewProps, type PurchaseStatusOperation, type PurchaseStatusRail } from "./component";

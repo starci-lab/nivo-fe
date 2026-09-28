@@ -19,7 +19,7 @@ const Probe = ({ token, target }: ProbeProps) => {
     return <output data-testid="state">{JSON.stringify(state)}</output>
 }
 
-describe("provisioning realtime boundaries", () => {
+describe("useProvisioningRealtime", () => {
     beforeAll(() => {
         ;(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
     })

@@ -7,7 +7,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
 import { type WorkspaceCheckoutEntryDestination, type WorkspaceCheckoutEntryRequest, type WorkspaceCheckoutObservedIdentities, type WorkspaceCheckoutOffer, type WorkspaceCheckoutOutcome, type WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane";
 import { nivoQueryData } from "@/modules/query";
-import useProvisioningRealtime, { type ProvisioningTarget } from "@/modules/realtime/provisioning";
+import useProvisioningRealtime, { type ProvisioningTarget } from "@/hooks/realtime";
 import { AgentOSProvisioningBase, type AgentOSProvisioningViewProps } from "./component";
 
 /** Route identity owned by the AgentOS provisioning block. */

@@ -7,7 +7,7 @@ import { useQueryMyAgentosModuleInstallationSwr } from "@/hooks";
 import type { AgentosModuleInstallationDetail } from "@/modules/api/console";
 import { nivoQueryData } from "@/modules/query";
 import { useSession } from "@/modules/auth/session";
-import useProvisioningRealtime from "@/modules/realtime/provisioning";
+import useProvisioningRealtime from "@/hooks/realtime";
 import { AgentOSSolutionModuleDetailBase, type AgentOSSolutionModuleDetailState, type AgentOSSolutionModuleDetailLabels } from "./component";
 
 /** Exact route identities required to read one owner-scoped installation. */

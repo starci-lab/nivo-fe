@@ -26,7 +26,7 @@ vi.mock("next-intl", () => ({
     useFormatter: () => ({ number: (value: number) => String(value), dateTime: (value: string) => value }),
 }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => signedIn }))
-vi.mock("@/modules/realtime/provisioning", () => ({ default: () => ({ status: "disconnected", reason: null }) }))
+vi.mock("@/hooks/realtime", () => ({ default: () => ({ status: "disconnected", reason: null }) }))
 vi.mock("@/modules/api/console", () => ({
     myExpertSites: vi.fn().mockResolvedValue({ ok: true, data: [] }),
     myInstances: vi.fn().mockResolvedValue({ ok: true, data: [] }),

@@ -29,7 +29,7 @@ vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ replace: mocks.replace
 vi.mock("next-intl", () => ({ useTranslations: () => mocks.t, useLocale: () => "en" }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => mocks.api)
-vi.mock("@/modules/realtime/provisioning", () => ({ default: () => mocks.realtime }))
+vi.mock("@/hooks/realtime", () => ({ default: () => mocks.realtime }))
 vi.mock("./component", () => ({
     TemplateAppProvisioningBase: (props: TemplateProbeProps) => (
         <div>

@@ -42,7 +42,7 @@ vi.mock("@/hooks", async (importOriginal) => ({
 }))
 vi.mock("@/modules/api/auth", () => ({ refreshSession: mocks.api.refresh }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => ({ ...mocks.session, adopt: mocks.adopt }) }))
-vi.mock("@/modules/realtime/provisioning", () => ({ default: () => mocks.realtime }))
+vi.mock("@/hooks/realtime", () => ({ default: () => mocks.realtime }))
 vi.mock("@/modules/window/workspace-app-launch", () => ({
     workspaceAppLaunchChannelName: (workspaceId: string) => `launch:${workspaceId}`,
 }))

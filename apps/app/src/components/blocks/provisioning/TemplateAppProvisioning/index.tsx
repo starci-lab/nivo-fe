@@ -6,7 +6,7 @@ import { useMutateCreateAndPublishExpertSiteSwr, useQueryCatalogItemsSwr, useQue
 import { useRouter } from "@/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
 import type { ExpertDeploymentSnapshot } from "@/modules/api/console";
-import useProvisioningRealtime, { type ProvisioningTarget } from "@/modules/realtime/provisioning";
+import useProvisioningRealtime, { type ProvisioningTarget } from "@/hooks/realtime";
 import { TemplateAppProvisioningBase, type TemplateAppProvisioningViewProps } from "./component";
 
 /** Route identity owned by the template-app provisioning block. */

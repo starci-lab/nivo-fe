@@ -12,7 +12,7 @@ vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) })
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key, useLocale: () => "en" }))
 vi.mock("@/modules/api/console", () => ({ myAgentosModuleInstallation: mocks.installation }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
-vi.mock("@/modules/realtime/provisioning", () => ({ default: () => mocks.realtime }))
+vi.mock("@/hooks/realtime", () => ({ default: () => mocks.realtime }))
 
 type ModuleDetailViewInput = { detailState: string; installation?: { id: string }; onBack: () => void }
 

@@ -2,9 +2,18 @@
 
 import { useEffect, useRef, useState } from "react"
 import { io, type Socket } from "socket.io-client"
-
-const API_ENDPOINT = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql"
-const SOCKET_ENDPOINT = API_ENDPOINT.replace(/\/graphql\/?$/, "")
+import {
+    SOCKET_ENDPOINT,
+    terminalSagaStatus,
+    unwrapMessage,
+    type DeploymentMessage,
+    type InstanceOperationMessage,
+    type OrderMessage,
+    type SagaMessage,
+    type SocketEnvelope,
+    type WorkspaceMessage,
+    type WorkspaceRuntimeMessage,
+} from "@/modules/realtime/provisioning"
 
 /** Exact resource identity one provisioning listener is allowed to advance. */
 export type ProvisioningTarget =
@@ -32,38 +41,6 @@ export type ProvisioningRealtimeState =
     | { readonly status: "connected"; readonly reason: null }
     | { readonly status: "event"; readonly reason: null; readonly event: ProvisioningEvent }
 
-type WorkspaceMessage = { readonly eventId?: string; readonly sequence?: number; readonly workspaceId: string; readonly status: string; readonly reason: string | null; readonly updatedAt: string }
-type WorkspaceRuntimeMessage = { readonly sequence: number; readonly workspaceId: string; readonly instanceId: string; readonly fingerprint: string; readonly probeStatus: string; readonly observedAt: string }
-type DeploymentMessage = { readonly eventId?: string; readonly sequence?: number; readonly deploymentId: string; readonly status: string; readonly reason: string | null; readonly updatedAt: string }
-type OrderMessage = { readonly orderId: string; readonly status: string }
-type SocketEnvelope<T> =
-    | { readonly success: true; readonly data: T }
-    | { readonly success: false; readonly error: string; readonly message: string }
-type SagaMessage = {
-    readonly eventId: string
-    readonly sequence: number
-    readonly sagaId: string
-    readonly resourceKind: string
-    readonly resourceId: string
-    readonly status: string
-    readonly direction: "forward" | "compensating"
-    readonly stepKey: string | null
-    readonly reason: string | null
-    readonly updatedAt: string
-}
-type InstanceOperationMessage = { readonly operationId: string; readonly instanceId: string; readonly phase: string; readonly componentKey?: string; readonly reason?: string | null; readonly observedAt: string }
-
-const unwrapMessage = <T,>(payload: T | SocketEnvelope<T>): T | null => {
-    if (typeof payload !== "object" || payload === null || !("success" in payload)) return payload
-    return payload.success ? payload.data : null
-}
-
-const terminalSagaStatus = (status: string, readyStatus: string): string => {
-    if (status === "completed") return readyStatus
-    if (status === "compensated" || status === "compensation_failed") return "failed"
-    return status
-}
-
 /** Inputs required to subscribe to exactly one provisioning subject. */
 export type UseProvisioningRealtimeInput = {
     readonly accessToken: string | null
@@ -81,7 +58,7 @@ export type UseProvisioningRealtimeInput = {
 const useProvisioningRealtime = ({
     accessToken,
     target,
-}: UseProvisioningRealtimeInput): ProvisioningRealtimeState => {
+}: UseProvisioningRealtimeInput) => {
     const [state, setState] = useState<ProvisioningRealtimeState>({ status: "disconnected", reason: null })
     const latestUpdatedAt = useRef<string | null>(null)
     const latestSequence = useRef<number | null>(null)
