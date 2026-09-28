@@ -26,3 +26,8 @@ coverage/
 # local run leftovers -- e2e/uat test-results/ output and the Windows `nul` device file, never reviewed as source
 test-results/
 /nul
+
+# the project-owned ledger, Work scratch and the local runtime config (repository-baseline common.gitignore)
+.starciwork/runtime.sqlite*
+.starciwork/_local/
+config.yaml
