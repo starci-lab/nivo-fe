@@ -4,38 +4,50 @@ import type { AgentosModuleStudio } from "@/modules/api/console";
 
 /** Durable conversation projection and the one current answer operation. */
 export type AgentOSModuleInterviewProps = AgentOSModuleInterviewViewProps;
-/** Public API role for AgentOSModuleInterviewViewProps. */
-export type AgentOSModuleInterviewViewProps = {
-  readonly state: "loading" | "refused" | "ready";
+/** Resolved copy for the interview block. */
+export type AgentOSModuleInterviewLabels = {
+  readonly title: string;
+  readonly saved: string;
+  readonly refused: string;
+  readonly field: string;
+  readonly placeholder: string;
+  readonly send: string;
+  readonly complete: string;
+  readonly agent: string;
+  readonly you: string;
+};
+/** Conversation projection, draft answer and copy the pure interview draws. */
+export type AgentOSModuleInterviewData = {
   readonly studio?: AgentosModuleStudio;
   readonly answer: string;
   readonly pending: boolean;
-  readonly labels: {
-    readonly title: string;
-    readonly saved: string;
-    readonly refused: string;
-    readonly field: string;
-    readonly placeholder: string;
-    readonly send: string;
-    readonly complete: string;
-    readonly agent: string;
-    readonly you: string;
-  };
+  readonly labels: AgentOSModuleInterviewLabels;
+};
+/** The bounded answer edit and send the interview emits. */
+export type AgentOSModuleInterviewActions = {
   readonly onAnswer: (value: string) => void;
   readonly onSend: () => void;
+};
+/** Public API role for AgentOSModuleInterviewViewProps. */
+export type AgentOSModuleInterviewViewProps = {
+  readonly state: "loading" | "refused" | "ready";
+  readonly props: AgentOSModuleInterviewData;
+  readonly on: AgentOSModuleInterviewActions;
 };
 
 /** Draw accepted turns before the single backend-selected follow-up composer. */
 export const AgentOSModuleInterviewBase = (props: AgentOSModuleInterviewProps) => {
+  const { state } = props;
   const {
-    state,
     studio,
     answer,
     pending,
-    labels,
+    labels
+  }: AgentOSModuleInterviewData = props.props;
+  const {
     onAnswer,
     onSend
-  }: AgentOSModuleInterviewViewProps = props;
+  }: AgentOSModuleInterviewActions = props.on;
   if (state === "refused") return <SurfaceCard
     label={labels.title}
   ><div><Text size="sm" tone="muted">{labels.refused}</Text></div></SurfaceCard>;
@@ -74,4 +86,3 @@ export const AgentOSModuleInterviewBase = (props: AgentOSModuleInterviewProps) =
     label={labels.title}
   ><div><div><Heading level={3} isSkeleton={loading}>{studio?.module.currentQuestion ?? labels.complete}</Heading><Text size="xs">{labels.saved}</Text></div>{messages.map((message, index) => <div key={index}><Text size="xs" weight="semibold" isSkeleton={loading}>{message.role === "assistant" ? labels.agent : labels.you}</Text><Text size="sm" isSkeleton={loading}>{message.content}</Text></div>)}{composer}</div></SurfaceCard>;
 };
-

@@ -5,55 +5,68 @@ import type { AgentosModuleStudio } from "@/modules/api/console";
 
 /** Attachment lifecycle rows and their bounded upload/removal actions. */
 export type AgentOSModuleAttachmentsProps = AgentOSModuleAttachmentsViewProps;
-/** Public API role for AgentOSModuleAttachmentsViewProps. */
-export type AgentOSModuleAttachmentsViewProps = {
+/** Resolved attachment copy; the chunk counter is a function, so it rides in `on`. */
+export type AgentOSModuleAttachmentsLabels = {
+  readonly title: string;
+  readonly upload: string;
+  readonly retry?: string;
+  readonly remove: string;
+  readonly refused: string;
+  readonly empty: string;
+  readonly uploaded: string;
+  readonly scanning: string;
+  readonly extracting: string;
+  readonly embedding: string;
+  readonly indexing: string;
+  readonly indexed: string;
+  readonly complete: string;
+  readonly current: string;
+  readonly upcoming: string;
+  readonly refusedStatus: string;
+  readonly removed: string;
+};
+/** Data the pure attachments surface draws. */
+export type AgentOSModuleAttachmentsData = {
   readonly studio?: Pick<AgentosModuleStudio, "attachments">;
-  readonly state: "loading" | "refused" | "ready";
   readonly pending: boolean;
-  readonly labels: {
-    readonly title: string;
-    readonly upload: string;
-    readonly retry?: string;
-    readonly remove: string;
-    readonly refused: string;
-    readonly empty: string;
-    readonly uploaded: string;
-    readonly scanning: string;
-    readonly extracting: string;
-    readonly embedding: string;
-    readonly indexing: string;
-    readonly indexed: string;
-    readonly complete: string;
-    readonly current: string;
-    readonly upcoming: string;
-    readonly chunks: (count: number) => string;
-    readonly refusedStatus: string;
-    readonly removed: string;
-  };
+  readonly labels: AgentOSModuleAttachmentsLabels;
+};
+/** Bounded upload/removal actions plus the chunk-count renderer. */
+export type AgentOSModuleAttachmentsActions = {
   readonly onChoose: (file: File) => void;
   readonly onRetry?: (id: string) => void;
   readonly onRemove: (id: string) => void;
+  readonly chunks: (count: number) => string;
+};
+/** Public API role for AgentOSModuleAttachmentsViewProps. */
+export type AgentOSModuleAttachmentsViewProps = {
+  readonly state: "loading" | "refused" | "ready";
+  readonly props: AgentOSModuleAttachmentsData;
+  readonly on: AgentOSModuleAttachmentsActions;
 };
 const lifecycleState = (index: number, active: number): LifecycleStepData["state"] => {
   if (index < active) return "done";
   return index === active ? "current" : "upcoming";
 };
-const lifecycleStateLabel = (index: number, active: number, labels: AgentOSModuleAttachmentsViewProps["labels"]): string => {
+const lifecycleStateLabel = (index: number, active: number, labels: AgentOSModuleAttachmentsLabels): string => {
   if (index < active) return labels.complete;
   return index === active ? labels.current : labels.upcoming;
 };
 
 /** Draw quarantined file evidence with explicit scan outcomes. */
 export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProps) => {
+  const { state } = props;
   const {
     studio,
-    state,
     pending,
-    labels,
+    labels
+  }: AgentOSModuleAttachmentsData = props.props;
+  const {
     onChoose,
     onRetry,
-    onRemove
-  }: AgentOSModuleAttachmentsViewProps = props;
+    onRemove,
+    chunks
+  }: AgentOSModuleAttachmentsActions = props.on;
   const fileInput = useRef<HTMLInputElement>(null);
   if (state === "refused") return <SurfaceCard
     label={labels.title}
@@ -91,7 +104,7 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProp
         }));
         const ingestionStatus = "ingestionStatus" in file ? file.ingestionStatus : file.status;
         const refused = ingestionStatus === "refused";
-        const chunkLabel = "chunkCount" in file && file.chunkCount > 0 ? labels.chunks(file.chunkCount) : "";
+        const chunkLabel = "chunkCount" in file && file.chunkCount > 0 ? chunks(file.chunkCount) : "";
         const caption = [file.mediaType || "—", chunkLabel].filter(Boolean).join(" · ");
         return <div key={file.id}><div><div>
 
@@ -111,12 +124,12 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProp
           if (file !== undefined) onChoose(file);
           event.currentTarget.value = "";
         }} />
-        
+
                 <CoreButton
                   variant="secondary"
                   isPending={pending}
                   onPress={() => fileInput.current?.click()}
                 >{labels.upload}</CoreButton>
-        
+
             </></div></SurfaceCard>;
 };

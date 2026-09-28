@@ -6,11 +6,12 @@ describe("AgentOSModuleSpecificationBase", () => {
     it("draws interview, profile, and specification states", () => {
         renderToStaticMarkup(<AgentOSModuleSpecificationBase
             state="loading"
-            acknowledged={false}
-            pending={false}
-            labels={{ title: "Specification", refused: "Unavailable", incomplete: "Finish the interview", version: "Version {version}", acknowledge: "I approve version {version}", publish: "Publish", publishing: "Publishing", published: "Published" }}
-            onAcknowledge={vi.fn()}
-            onPublish={vi.fn()}
+            props={{
+                acknowledged: false,
+                pending: false,
+                labels: { title: "Specification", refused: "Unavailable", incomplete: "Finish the interview", version: "Version {version}", acknowledge: "I approve version {version}", publish: "Publish", publishing: "Publishing", published: "Published" }
+            }}
+            on={{ onAcknowledge: vi.fn(), onPublish: vi.fn() }}
         />)
     })
 })

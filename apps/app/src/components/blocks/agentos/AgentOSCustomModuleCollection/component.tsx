@@ -20,9 +20,8 @@ export type CustomModuleCollectionRow = {
   readonly href: string;
 };
 
-/** Settled collection state, the copy each state carries, and the recovery of a refused read. */
-export type AgentOSCustomModuleCollectionViewProps = {
-  readonly state: "loading" | "refused" | "empty" | "ready";
+/** Resolved copy and ledger rows the pure collection draws. */
+export type AgentOSCustomModuleCollectionData = {
   readonly title: string;
   readonly emptyTitle: string;
   readonly empty: string;
@@ -33,7 +32,18 @@ export type AgentOSCustomModuleCollectionViewProps = {
   readonly loadingStatus: string;
   readonly rows: ReadonlyArray<CustomModuleCollectionRow>;
   readonly retrying: boolean;
+};
+
+/** The recovery action a refused collection emits. */
+export type AgentOSCustomModuleCollectionActions = {
   readonly onRetry: () => void;
+};
+
+/** Settled collection state, the copy each state carries, and the recovery of a refused read. */
+export type AgentOSCustomModuleCollectionViewProps = {
+  readonly state: "loading" | "refused" | "empty" | "ready";
+  readonly props: AgentOSCustomModuleCollectionData;
+  readonly on: AgentOSCustomModuleCollectionActions;
 };
 
 /** Three skeleton rows keep the resolved list shape while the read is unresolved. */
@@ -67,8 +77,8 @@ const rowView = (row: CustomModuleCollectionRow, loading: boolean) => <div key={
  * that ends it is a destination, and EmptyNotice publishes no anchor form for its action.
  */
 export const AgentOSCustomModuleCollectionBase = (props: AgentOSCustomModuleCollectionProps) => {
+  const { state } = props;
   const {
-    state,
     title,
     emptyTitle,
     empty,
@@ -78,9 +88,9 @@ export const AgentOSCustomModuleCollectionBase = (props: AgentOSCustomModuleColl
     rows,
     loadingKind,
     loadingStatus,
-    retrying,
-    onRetry
-  }: AgentOSCustomModuleCollectionViewProps = props;
+    retrying
+  }: AgentOSCustomModuleCollectionData = props.props;
+  const { onRetry }: AgentOSCustomModuleCollectionActions = props.on;
   if (state === "refused") return <SurfaceCard label={title}>
     <EmptyNotice
       message={refusedTitle}

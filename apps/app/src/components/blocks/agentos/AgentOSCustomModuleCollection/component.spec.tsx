@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 import { AgentOSCustomModuleCollectionBase } from "./component"
 import { MODULE_LEDGER_ROW_CLASS_NAME, MODULE_LEDGER_ROWS_CLASS_NAME } from "./classNames"
 
-const base = {
+const baseProps = {
     loadingKind: "Custom",
     loadingStatus: "Draft",
     title: "Custom modules",
@@ -15,6 +15,8 @@ const base = {
     refused: "The catalogue below remains available.",
     retry: "Try again",
     retrying: false,
+}
+const baseOn = {
     onRetry: vi.fn(),
 }
 const rows = [
@@ -24,7 +26,7 @@ const rows = [
 
 describe("AgentOSCustomModuleCollectionBase", () => {
     it("renders every row as a ledger line whose name and action are anchors to the same destination", () => {
-        const { container } = render(<AgentOSCustomModuleCollectionBase {...base} state="ready" rows={rows} />)
+        const { container } = render(<AgentOSCustomModuleCollectionBase state="ready" props={{ ...baseProps, rows }} on={baseOn} />)
         expect(screen.getByRole("link", { name: "Partner guide" }).getAttribute("href")).toBe(rows[0].href)
         expect(screen.getByRole("link", { name: "Resume interview" }).getAttribute("href")).toBe(rows[0].href)
         expect(screen.getByRole("link", { name: "View module" }).getAttribute("href")).toBe(rows[1].href)
@@ -35,15 +37,15 @@ describe("AgentOSCustomModuleCollectionBase", () => {
     })
 
     it("keeps the same list shape while the read is unresolved, with three resting rows", () => {
-        const html = renderToStaticMarkup(<AgentOSCustomModuleCollectionBase {...base} state="loading" rows={[]} />)
+        const html = renderToStaticMarkup(<AgentOSCustomModuleCollectionBase state="loading" props={{ ...baseProps, rows: [] }} on={baseOn} />)
         expect(html.split("data-contract=\"GAP-1\"").length - 1).toBe(3)
         expect(html).toContain("Custom modules")
     })
 
     it("states absence as a title and one line whose copy names the way forward, and offers no control", () => {
-        render(<AgentOSCustomModuleCollectionBase {...base} state="empty" rows={[]} />)
-        expect(screen.getByText(base.emptyTitle)).toBeTruthy()
-        expect(screen.getByText(base.empty)).toBeTruthy()
+        render(<AgentOSCustomModuleCollectionBase state="empty" props={{ ...baseProps, rows: [] }} on={baseOn} />)
+        expect(screen.getByText(baseProps.emptyTitle)).toBeTruthy()
+        expect(screen.getByText(baseProps.empty)).toBeTruthy()
         // The action that ends this emptiness is a destination, and EmptyNotice publishes no anchor
         // form for its action, so the section names it in copy rather than rendering it as a button.
         expect(screen.queryByRole("button")).toBeNull()
@@ -51,15 +53,15 @@ describe("AgentOSCustomModuleCollectionBase", () => {
 
     it("states a refusal as a title and one line, and recovers that read from its own section", () => {
         const onRetry = vi.fn()
-        render(<AgentOSCustomModuleCollectionBase {...base} state="refused" rows={[]} onRetry={onRetry} />)
-        expect(screen.getByText(base.refusedTitle)).toBeTruthy()
-        expect(screen.getByText(base.refused)).toBeTruthy()
-        fireEvent.click(screen.getByRole("button", { name: base.retry }))
+        render(<AgentOSCustomModuleCollectionBase state="refused" props={{ ...baseProps, rows: [] }} on={{ onRetry }} />)
+        expect(screen.getByText(baseProps.refusedTitle)).toBeTruthy()
+        expect(screen.getByText(baseProps.refused)).toBeTruthy()
+        fireEvent.click(screen.getByRole("button", { name: baseProps.retry }))
         expect(onRetry).toHaveBeenCalledTimes(1)
     })
 
     it("carries the pending of a retry on the action that started it", () => {
-        const html = renderToStaticMarkup(<AgentOSCustomModuleCollectionBase {...base} state="refused" rows={[]} retrying={true} />)
+        const html = renderToStaticMarkup(<AgentOSCustomModuleCollectionBase state="refused" props={{ ...baseProps, retrying: true, rows: [] }} on={baseOn} />)
         expect(html).toContain("aria-busy=\"true\"")
     })
 })
@@ -68,17 +70,19 @@ describe("AgentOSCustomModuleCollectionBase", () => {
     it("draws the custom-module collection rows and their owned actions", () => {
         const html = renderToStaticMarkup(<AgentOSCustomModuleCollectionBase
             state="ready"
-            loadingKind="Custom"
-            loadingStatus="Draft"
-            title="Custom modules"
-            emptyTitle="No custom module yet"
-            refusedTitle="Custom modules could not be read"
-            retry="Try again"
-            retrying={false}
-            onRetry={vi.fn()}
-            refused="Unavailable"
-            empty="No modules"
-            rows={[{ id: "module-1", name: "Lead intake", detail: "80% complete", kind: "Custom", status: "Active", active: true, action: "Inspect", href: "/en/agentos/workspaces/w/modules/install-1" }]}
+            props={{
+                loadingKind: "Custom",
+                loadingStatus: "Draft",
+                title: "Custom modules",
+                emptyTitle: "No custom module yet",
+                refusedTitle: "Custom modules could not be read",
+                retry: "Try again",
+                retrying: false,
+                refused: "Unavailable",
+                empty: "No modules",
+                rows: [{ id: "module-1", name: "Lead intake", detail: "80% complete", kind: "Custom", status: "Active", active: true, action: "Inspect", href: "/en/agentos/workspaces/w/modules/install-1" }]
+            }}
+            on={{ onRetry: vi.fn() }}
         />)
         expect(html).toContain("Lead intake")
         expect(html).toContain("80% complete")
@@ -88,17 +92,19 @@ describe("AgentOSCustomModuleCollectionBase", () => {
     it("reports collection and upload actions", () => {
         const collection = render(<AgentOSCustomModuleCollectionBase
             state="ready"
-            loadingKind="Custom"
-            loadingStatus="Draft"
-            title="Custom modules"
-            emptyTitle="No custom module yet"
-            refusedTitle="Custom modules could not be read"
-            retry="Try again"
-            retrying={false}
-            onRetry={vi.fn()}
-            refused="Unavailable"
-            empty="No modules"
-            rows={[{ id: "module-1", name: "Lead intake", detail: "Ready", kind: "Custom", status: "Active", active: true, action: "Inspect", href: "/en/agentos/workspaces/w/modules/install-1" }]}
+            props={{
+                loadingKind: "Custom",
+                loadingStatus: "Draft",
+                title: "Custom modules",
+                emptyTitle: "No custom module yet",
+                refusedTitle: "Custom modules could not be read",
+                retry: "Try again",
+                retrying: false,
+                refused: "Unavailable",
+                empty: "No modules",
+                rows: [{ id: "module-1", name: "Lead intake", detail: "Ready", kind: "Custom", status: "Active", active: true, action: "Inspect", href: "/en/agentos/workspaces/w/modules/install-1" }]
+            }}
+            on={{ onRetry: vi.fn() }}
         />)
         expect(screen.getByRole("link", { name: "Lead intake" }).getAttribute("href")).toBe("/en/agentos/workspaces/w/modules/install-1")
         expect(screen.getByRole("link", { name: "Inspect" }).getAttribute("href")).toBe("/en/agentos/workspaces/w/modules/install-1")
@@ -107,7 +113,7 @@ describe("AgentOSCustomModuleCollectionBase", () => {
 
     it("keeps the actual Vietnamese active Badge success tone from its raw key", () => {
         const copy = viMessages.console.agentos.modules
-        const view = render(<AgentOSCustomModuleCollectionBase state="ready" loadingKind={copy.collection.custom} loadingStatus={copy.status.draft} title={copy.collection.title} refused={copy.collection.refused} empty={copy.collection.empty} emptyTitle={copy.collection.emptyTitle} refusedTitle={copy.collection.refusedTitle} retry={copy.collection.retry} retrying={false} onRetry={vi.fn()} rows={[{ id: "module/raw", name: "Owner module", detail: "Raw detail", kind: copy.collection.custom, status: copy.status.active, active: true, href: "/vi/agentos/workspaces/w/modules/module/raw", action: copy.collection.inspect }]} />)
+        const view = render(<AgentOSCustomModuleCollectionBase state="ready" props={{ loadingKind: copy.collection.custom, loadingStatus: copy.status.draft, title: copy.collection.title, refused: copy.collection.refused, empty: copy.collection.empty, emptyTitle: copy.collection.emptyTitle, refusedTitle: copy.collection.refusedTitle, retry: copy.collection.retry, retrying: false, rows: [{ id: "module/raw", name: "Owner module", detail: "Raw detail", kind: copy.collection.custom, status: copy.status.active, active: true, href: "/vi/agentos/workspaces/w/modules/module/raw", action: copy.collection.inspect }] }} on={{ onRetry: vi.fn() }} />)
         expect(screen.getByText(copy.status.active).closest('[data-component="Badge"]')).toHaveAttribute("data-tone", "success")
         view.unmount()
     })

@@ -5,9 +5,11 @@ import { AgentOSModuleProfileBase } from "./component"
 describe("AgentOSModuleProfileBase", () => {
     it("draws interview, profile, and specification states", () => {
         renderToStaticMarkup(<AgentOSModuleProfileBase
-            loading
-            refused={false}
-            labels={{ title: "Profile", progress: "Completeness", missing: "Missing: {fields}", refused: "Unavailable" }}
+            props={{
+                loading: true,
+                refused: false,
+                labels: { title: "Profile", progress: "Completeness", missing: "Missing: {fields}", refused: "Unavailable" }
+            }}
         />)
     })
 })

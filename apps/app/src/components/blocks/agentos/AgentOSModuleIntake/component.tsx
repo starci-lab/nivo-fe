@@ -3,8 +3,8 @@ import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/commo
 
 /** Opening-goal form copy, local state and persistence action. */
 export type AgentOSModuleIntakeProps = AgentOSModuleIntakeViewProps;
-/** Public API role for AgentOSModuleIntakeViewProps. */
-export type AgentOSModuleIntakeViewProps = {
+/** Form data and resolved copy the pure intake draws. */
+export type AgentOSModuleIntakeData = {
   readonly goal: string;
   readonly pending: boolean;
   readonly error?: string;
@@ -17,8 +17,16 @@ export type AgentOSModuleIntakeViewProps = {
   readonly guideTitle: string;
   readonly guideSteps: ReadonlyArray<string>;
   readonly guideNote: string;
+};
+/** The bounded edits and submit the intake emits. */
+export type AgentOSModuleIntakeActions = {
   readonly onGoal: (value: string) => void;
   readonly onSubmit: () => void;
+};
+/** Public API role for AgentOSModuleIntakeViewProps. */
+export type AgentOSModuleIntakeViewProps = {
+  readonly props: AgentOSModuleIntakeData;
+  readonly on: AgentOSModuleIntakeActions;
 };
 
 /** Draw the bounded first-goal form beside its adaptive interview explanation. */
@@ -35,10 +43,12 @@ export const AgentOSModuleIntakeBase = (props: AgentOSModuleIntakeProps) => {
     action,
     guideTitle,
     guideSteps,
-    guideNote,
+    guideNote
+  }: AgentOSModuleIntakeData = props.props;
+  const {
     onGoal,
     onSubmit
-  }: AgentOSModuleIntakeViewProps = props;
+  }: AgentOSModuleIntakeActions = props.on;
   return <div><div><><div>
 
 
@@ -74,4 +84,3 @@ export const AgentOSModuleIntakeBase = (props: AgentOSModuleIntakeProps) => {
             <Text size="sm" tone="muted">{guideNote}</Text></div></SurfaceCard>
       </div></></div></div>;
 };
-

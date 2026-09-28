@@ -6,11 +6,12 @@ describe("AgentOSModuleInterviewBase", () => {
     it("draws interview, profile, and specification states", () => {
         const interview = renderToStaticMarkup(<AgentOSModuleInterviewBase
             state="loading"
-            answer=""
-            pending={false}
-            labels={{ title: "Interview", saved: "Answers are saved", refused: "Unavailable", field: "Answer", placeholder: "Type an answer", send: "Send", complete: "Complete", agent: "Agent", you: "You" }}
-            onAnswer={vi.fn()}
-            onSend={vi.fn()}
+            props={{
+                answer: "",
+                pending: false,
+                labels: { title: "Interview", saved: "Answers are saved", refused: "Unavailable", field: "Answer", placeholder: "Type an answer", send: "Send", complete: "Complete", agent: "Agent", you: "You" }
+            }}
+            on={{ onAnswer: vi.fn(), onSend: vi.fn() }}
         />)
         expect(interview).toContain("Interview")
     })

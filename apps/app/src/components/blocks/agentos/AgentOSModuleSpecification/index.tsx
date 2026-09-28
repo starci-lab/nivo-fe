@@ -49,14 +49,19 @@ export const AgentOSModuleSpecification = (props: AgentOSModuleSpecificationProp
     }
   };
   const state = specificationState(refused, studio);
-  return <AgentOSModuleSpecificationBase studio={studio ?? undefined} state={state} acknowledged={acknowledged} pending={publishModule.isMutating} labels={{
-    title: t("title"),
-    refused: t("refused"),
-    incomplete: t("incomplete"),
-    version: t.raw("version") as string,
-    acknowledge: t.raw("acknowledge") as string,
-    publish: t("publish"),
-    publishing: t("publishing"),
-    published: t("published")
-  }} onAcknowledge={setAcknowledged} onPublish={() => void publish()} />;
+  return <AgentOSModuleSpecificationBase state={state} props={{
+    studio: studio ?? undefined,
+    acknowledged,
+    pending: publishModule.isMutating,
+    labels: {
+      title: t("title"),
+      refused: t("refused"),
+      incomplete: t("incomplete"),
+      version: t.raw("version") as string,
+      acknowledge: t.raw("acknowledge") as string,
+      publish: t("publish"),
+      publishing: t("publishing"),
+      published: t("published")
+    }
+  }} on={{ onAcknowledge: setAcknowledged, onPublish: () => void publish() }} />;
 };

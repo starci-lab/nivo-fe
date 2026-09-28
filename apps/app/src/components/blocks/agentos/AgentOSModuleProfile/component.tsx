@@ -3,16 +3,22 @@ import { SurfaceCard, Text } from "@starci/grammar/common";
 import type { AgentosModuleStudio } from "@/modules/api/console";
 /** Public API role for AgentOSModuleProfileProps. */
 export type AgentOSModuleProfileProps = AgentOSModuleProfileViewProps;
-type AgentOSModuleProfileViewProps = {
+/** Resolved copy for the profile block. */
+export type AgentOSModuleProfileLabels = {
+  readonly title: string;
+  readonly progress: string;
+  readonly missing: string;
+  readonly refused: string;
+};
+/** Profile projection, slot flags and copy the pure profile draws. */
+export type AgentOSModuleProfileData = {
   readonly studio?: AgentosModuleStudio;
   readonly loading: boolean;
   readonly refused: boolean;
-  readonly labels: {
-    readonly title: string;
-    readonly progress: string;
-    readonly missing: string;
-    readonly refused: string;
-  };
+  readonly labels: AgentOSModuleProfileLabels;
+};
+type AgentOSModuleProfileViewProps = {
+  readonly props: AgentOSModuleProfileData;
 };
 
 /** Draw backend-owned completeness, accepted facts and unresolved profile fields. */
@@ -22,7 +28,7 @@ export const AgentOSModuleProfileBase = (props: AgentOSModuleProfileProps) => {
     loading,
     refused,
     labels
-  }: AgentOSModuleProfileViewProps = props;
+  }: AgentOSModuleProfileData = props.props;
   if (refused) return <SurfaceCard
     label={labels.title}
   ><div><Text size="sm" tone="muted">{labels.refused}</Text></div></SurfaceCard>;
@@ -40,4 +46,3 @@ export const AgentOSModuleProfileBase = (props: AgentOSModuleProfileProps) => {
         percentText: `${studio?.module.progress ?? 0}%`
       }} isLoading={loading} /><div>{facts.map((fact, index) => <div key={index}><Text size="sm" isSkeleton={loading}>{fact.key}</Text><Text size="sm" weight="semibold" isSkeleton={loading}>{fact.value}</Text></div>)}</div></div></SurfaceCard>;
 };
-

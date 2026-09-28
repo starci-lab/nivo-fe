@@ -42,15 +42,20 @@ export const AgentOSModuleInterview = (props: AgentOSModuleInterviewProps) => {
       setRefused(true);
     }
   };
-  return <AgentOSModuleInterviewBase state={projectionState(refused, studio)} studio={studio ?? undefined} answer={answer} pending={answerIntake.isMutating} labels={{
-    title: t("title"),
-    saved: t("saved"),
-    refused: t("refused"),
-    field: t("field"),
-    placeholder: t("placeholder"),
-    send: t("send"),
-    complete: t("complete"),
-    agent: t("agent"),
-    you: t("you")
-  }} onAnswer={setAnswer} onSend={() => void send()} />;
+  return <AgentOSModuleInterviewBase state={projectionState(refused, studio)} props={{
+    studio: studio ?? undefined,
+    answer,
+    pending: answerIntake.isMutating,
+    labels: {
+      title: t("title"),
+      saved: t("saved"),
+      refused: t("refused"),
+      field: t("field"),
+      placeholder: t("placeholder"),
+      send: t("send"),
+      complete: t("complete"),
+      agent: t("agent"),
+      you: t("you")
+    }
+  }} on={{ onAnswer: setAnswer, onSend: () => void send() }} />;
 };

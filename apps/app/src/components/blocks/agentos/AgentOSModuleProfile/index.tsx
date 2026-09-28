@@ -19,10 +19,15 @@ export const AgentOSModuleProfile = (props: AgentOSModuleProfileProps) => {
     studio
   } = useAgentOSModuleStudioProjection();
   const routeMismatch = studio !== undefined && studio !== null && (studio.module.id !== moduleId || studio.module.agentWorkspaceId !== workspaceId);
-  return <AgentOSModuleProfileBase studio={studio ?? undefined} loading={studio === undefined} refused={studio === null || routeMismatch} labels={{
-    title: t("title"),
-    progress: t("progress"),
-    missing: t.raw("missing") as string,
-    refused: t("refused")
+  return <AgentOSModuleProfileBase props={{
+    studio: studio ?? undefined,
+    loading: studio === undefined,
+    refused: studio === null || routeMismatch,
+    labels: {
+      title: t("title"),
+      progress: t("progress"),
+      missing: t.raw("missing") as string,
+      refused: t("refused")
+    }
   }} />;
 };

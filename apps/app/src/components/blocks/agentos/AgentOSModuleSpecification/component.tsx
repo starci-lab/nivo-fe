@@ -4,37 +4,49 @@ import type { AgentosModuleStudio } from "@/modules/api/console";
 
 /** Exact versioned specification state and acknowledgement action. */
 export type AgentOSModuleSpecificationProps = AgentOSModuleSpecificationViewProps;
-/** Public API role for AgentOSModuleSpecificationViewProps. */
-export type AgentOSModuleSpecificationViewProps = {
+/** Resolved copy for the specification block. */
+export type AgentOSModuleSpecificationLabels = {
+  readonly title: string;
+  readonly refused: string;
+  readonly incomplete: string;
+  readonly version: string;
+  readonly acknowledge: string;
+  readonly publish: string;
+  readonly publishing: string;
+  readonly published: string;
+};
+/** Specification projection, acknowledgement flag and copy the pure block draws. */
+export type AgentOSModuleSpecificationData = {
   readonly studio?: AgentosModuleStudio;
-  readonly state: "loading" | "refused" | "incomplete" | "ready" | "publishing";
   readonly acknowledged: boolean;
   readonly pending: boolean;
-  readonly labels: {
-    readonly title: string;
-    readonly refused: string;
-    readonly incomplete: string;
-    readonly version: string;
-    readonly acknowledge: string;
-    readonly publish: string;
-    readonly publishing: string;
-    readonly published: string;
-  };
+  readonly labels: AgentOSModuleSpecificationLabels;
+};
+/** The acknowledgement toggle and publish the specification emits. */
+export type AgentOSModuleSpecificationActions = {
   readonly onAcknowledge: (value: boolean) => void;
   readonly onPublish: () => void;
+};
+/** Public API role for AgentOSModuleSpecificationViewProps. */
+export type AgentOSModuleSpecificationViewProps = {
+  readonly state: "loading" | "refused" | "incomplete" | "ready" | "publishing";
+  readonly props: AgentOSModuleSpecificationData;
+  readonly on: AgentOSModuleSpecificationActions;
 };
 
 /** Draw immutable review evidence and gate publishing on exact-version acknowledgement. */
 export const AgentOSModuleSpecificationBase = (props: AgentOSModuleSpecificationProps) => {
+  const { state } = props;
   const {
     studio,
-    state,
     acknowledged,
     pending,
-    labels,
+    labels
+  }: AgentOSModuleSpecificationData = props.props;
+  const {
     onAcknowledge,
     onPublish
-  }: AgentOSModuleSpecificationViewProps = props;
+  }: AgentOSModuleSpecificationActions = props.on;
   if (state === "refused") return <SurfaceCard
     label={labels.title}
   ><div><Text size="sm" tone="muted">{labels.refused}</Text></div></SurfaceCard>;
@@ -59,4 +71,3 @@ export const AgentOSModuleSpecificationBase = (props: AgentOSModuleSpecification
         onPress={onPublish}
       >{state === "publishing" ? labels.publishing : labels.publish}</Button></div></SurfaceCard>;
 };
-

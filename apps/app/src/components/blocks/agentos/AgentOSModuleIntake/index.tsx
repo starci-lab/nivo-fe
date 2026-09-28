@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { useMutateStartAgentosCustomModuleIntakeSwr } from "@/hooks";
+import { useRouter, useMutateStartAgentosCustomModuleIntakeSwr } from "@/hooks";
 import { AgentOSModuleIntakeBase } from "./component";
 type AgentOSModuleIntakeProps = {
   readonly workspaceId: string;
@@ -35,5 +34,18 @@ export const AgentOSModuleIntake = (props: AgentOSModuleIntakeProps) => {
       setError(t("refused"));
     }
   };
-  return <AgentOSModuleIntakeBase goal={goal} pending={startIntake.isMutating} error={error} title={t("title")} description={t("description")} fieldLabel={t("fieldLabel")} placeholder={t("placeholder")} note={t("note")} action={t("action")} guideTitle={t("guideTitle")} guideSteps={[t("steps.goal"), t("steps.followUp"), t("steps.review")]} guideNote={t("guideNote")} onGoal={setGoal} onSubmit={() => void submit()} />;
+  return <AgentOSModuleIntakeBase props={{
+    goal,
+    pending: startIntake.isMutating,
+    error,
+    title: t("title"),
+    description: t("description"),
+    fieldLabel: t("fieldLabel"),
+    placeholder: t("placeholder"),
+    note: t("note"),
+    action: t("action"),
+    guideTitle: t("guideTitle"),
+    guideSteps: [t("steps.goal"), t("steps.followUp"), t("steps.review")],
+    guideNote: t("guideNote")
+  }} on={{ onGoal: setGoal, onSubmit: () => void submit() }} />;
 };

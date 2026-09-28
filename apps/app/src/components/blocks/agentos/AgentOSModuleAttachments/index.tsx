@@ -76,26 +76,34 @@ export const AgentOSModuleAttachments = (props: AgentOSModuleAttachmentsProps) =
     }
   };
   const pending = uploadAttachment.isMutating || finalizeAttachment.isMutating || removeAttachment.isMutating;
-  return <AgentOSModuleAttachmentsBase studio={studio ?? undefined} state={projectionState(refused, studio)} pending={pending} labels={{
-    title: t("title"),
-    upload: t("upload"),
-    retry: t("retry"),
-    remove: t("remove"),
-    refused: t("refused"),
-    empty: t("empty"),
-    uploaded: t("uploaded"),
-    scanning: t("scanning"),
-    extracting: t("extracting"),
-    embedding: t("embedding"),
-    indexing: t("indexing"),
-    indexed: t("indexed"),
-    complete: t("complete"),
-    current: t("current"),
-    upcoming: t("upcoming"),
+  return <AgentOSModuleAttachmentsBase state={projectionState(refused, studio)} props={{
+    studio: studio ?? undefined,
+    pending,
+    labels: {
+      title: t("title"),
+      upload: t("upload"),
+      retry: t("retry"),
+      remove: t("remove"),
+      refused: t("refused"),
+      empty: t("empty"),
+      uploaded: t("uploaded"),
+      scanning: t("scanning"),
+      extracting: t("extracting"),
+      embedding: t("embedding"),
+      indexing: t("indexing"),
+      indexed: t("indexed"),
+      complete: t("complete"),
+      current: t("current"),
+      upcoming: t("upcoming"),
+      refusedStatus: t("refusedStatus"),
+      removed: t("removed")
+    }
+  }} on={{
+    onChoose: file => void choose(file),
+    onRetry: id => void retry(id),
+    onRemove: id => void remove(id),
     chunks: count => t("chunks", {
       count
-    }),
-    refusedStatus: t("refusedStatus"),
-    removed: t("removed")
-  }} onChoose={file => void choose(file)} onRetry={id => void retry(id)} onRemove={id => void remove(id)} />;
+    })
+  }} />;
 };
