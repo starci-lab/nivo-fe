@@ -3,11 +3,10 @@
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/hooks";
-import { useQueryMyAgentosModuleInstallationSwr } from "@/hooks";
+import { useProvisioningRealtime, useQueryMyAgentosModuleInstallationSwr } from "@/hooks";
 import type { AgentosModuleInstallationDetail } from "@/modules/api/console";
 import { nivoQueryData } from "@/modules/query";
 import { useSession } from "@/hooks";
-import useProvisioningRealtime from "@/hooks/realtime";
 import { AgentOSSolutionModuleDetailBase, type AgentOSSolutionModuleDetailStatus, type AgentOSSolutionModuleDetailLabels } from "./component";
 
 /** Exact route identities required to read one owner-scoped installation. */

@@ -40,10 +40,10 @@ vi.mock("@/hooks", async (importOriginal) => ({
     ...await importOriginal<typeof hooksModule>(),
     useAgentOSShell: () => ({ session: "established", sessionStatus: "signed-in", blocked: false, sources: mocks.sources, readSelection: mocks.readSelection, retrySource: mocks.retrySource }),
     useSession: () => ({ ...mocks.session, adopt: mocks.adopt }),
+    useProvisioningRealtime: () => mocks.realtime,
 }))
 vi.mock("@/modules/api/auth", () => ({ refreshSession: mocks.api.refresh }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => ({ ...mocks.session, adopt: mocks.adopt }) }))
-vi.mock("@/hooks/realtime", () => ({ default: () => mocks.realtime }))
 vi.mock("@/modules/window/workspace-app-launch", () => ({
     workspaceAppLaunchChannelName: (workspaceId: string) => `launch:${workspaceId}`,
 }))

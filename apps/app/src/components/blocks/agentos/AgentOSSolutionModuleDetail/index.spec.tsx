@@ -8,11 +8,10 @@ const mocks = vi.hoisted(() => ({
     session: { state: { status: "signed-in", accessToken: "token" } },
 }))
 
-vi.mock("@/hooks", async () => ({ ...(await vi.importActual("@/hooks") as Record<string, unknown>), useRouter: () => ({ push: mocks.push }), useSession: () => mocks.session }))
+vi.mock("@/hooks", async () => ({ ...(await vi.importActual("@/hooks") as Record<string, unknown>), useRouter: () => ({ push: mocks.push }), useSession: () => mocks.session, useProvisioningRealtime: () => mocks.realtime }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key, useLocale: () => "en" }))
 vi.mock("@/modules/api/console", () => ({ myAgentosModuleInstallation: mocks.installation }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
-vi.mock("@/hooks/realtime", () => ({ default: () => mocks.realtime }))
 
 type ModuleDetailViewInput = { state: string; props: { installation?: { id: string } }; on: { onBack: () => void } }
 

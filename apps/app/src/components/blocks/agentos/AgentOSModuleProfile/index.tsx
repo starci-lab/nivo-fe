@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useAgentOSModuleStudioProjection } from "@/hooks/agentos";
+import { useAgentOSModuleStudioProjection } from "@/hooks";
 import { AgentOSModuleProfileBase } from "./component";
 type AgentOSModuleProfileProps = {
   readonly workspaceId: string;

@@ -79,8 +79,9 @@ vi.mock("@/hooks", () => ({
     useQueryMyAgentosAiKnowledgeReadinessSwr: () => ({ data: mocks.aiReadiness, error: undefined, isValidating: false, mutate: mocks.aiMutate }),
     useMutateRunAgentosAiReadinessTestSwr: () => ({ trigger: mocks.aiTrigger, isMutating: false }),
     useRouter: () => ({ replace: mocks.replace, push: mocks.push }),
+    useSession: () => mocks.session,
+    useProvisioningRealtime: () => mocks.realtime,
 }))
-vi.mock("@/hooks/realtime", () => ({ default: () => mocks.realtime }))
 vi.mock("./component", () => ({
     AgentOSProvisioningBase: (props: AgentProbeProps) => (
         <div>

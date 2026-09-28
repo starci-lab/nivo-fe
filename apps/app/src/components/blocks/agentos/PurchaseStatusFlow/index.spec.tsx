@@ -67,8 +67,8 @@ vi.mock("@/hooks", () => ({
     useMutateRecoverWorkspacePurchaseSwr: () => ({ trigger: mocks.recover.trigger, isMutating: mocks.recover.isMutating }),
     useRouter: () => ({ push: mocks.push, replace: mocks.push }),
     useSession: () => mocks.session,
+    useProvisioningRealtime: () => mocks.realtime,
 }))
-vi.mock("@/hooks/realtime", () => ({ default: () => mocks.realtime }))
 vi.mock("@nivo/ui", () => ({ nivoIconSource: (name: string) => () => name }))
 vi.mock("./component", () => ({
     PurchaseStatusFlowBase: (props: FlowProbeProps) => (

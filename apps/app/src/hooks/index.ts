@@ -16,6 +16,7 @@ export { useSalesWorkbench } from "./agentos/useSalesWorkbench"
 export { useSalesDecision } from "./agentos/useSalesDecision"
 export { useSalesHandoff } from "./agentos/useSalesHandoff"
 export { useAgentOSShell } from "./agentos/useAgentOSShell"
+export { useAgentOSModuleStudioProjection } from "./agentos/useAgentOSModuleStudioProjection"
 
 export { useQueryAccountingEvidenceSwr } from "./swr/queries/useQueryAccountingEvidenceSwr"
 export { useQueryAccountingResultDetailSwr } from "./swr/queries/useQueryAccountingResultDetailSwr"
@@ -146,6 +147,9 @@ export { useMutateCollabPressApprovalSwr } from "./swr/mutations/collab"
 
 export { useCollabLive } from "./collab-live/useCollabLive"
 export { useCollabOfficeTransport } from "./collab-live/useCollabOfficeTransport"
+
+export { default as useProvisioningRealtime } from "./realtime/useProvisioningRealtime"
+export type { ProvisioningTarget } from "./realtime/useProvisioningRealtime"
 
 export { useAccessTokenFrom } from "./auth/useAccessTokenFrom"
 export { useLocaleFrom } from "./auth/useLocaleFrom"

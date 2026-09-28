@@ -28,11 +28,11 @@ type TemplateProbeProps = {
 vi.mock("@/hooks", async (importOriginal) => ({
     ...await importOriginal<object>(),
     useRouter: () => ({ replace: mocks.replace, push: mocks.push }),
+    useProvisioningRealtime: () => mocks.realtime,
 }))
 vi.mock("next-intl", () => ({ useTranslations: () => mocks.t, useLocale: () => "en" }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => mocks.api)
-vi.mock("@/hooks/realtime", () => ({ default: () => mocks.realtime }))
 vi.mock("./component", () => ({
     TemplateAppProvisioningBase: (props: TemplateProbeProps) => (
         <div>

@@ -2,11 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useMutateInstallAgentosSolutionModuleSwr, useQueryMyAgentosModuleInstallationsSwr, useQueryMyAgentosSolutionModulesSwr } from "@/hooks";
+import { useMutateInstallAgentosSolutionModuleSwr, useProvisioningRealtime, useQueryMyAgentosModuleInstallationsSwr, useQueryMyAgentosSolutionModulesSwr } from "@/hooks";
 import type { AgentosSolutionModule } from "@/modules/api/console";
 import { nivoQueryData } from "@/modules/query";
 import { useSession } from "@/hooks";
-import useProvisioningRealtime from "@/hooks/realtime";
 import { AgentOSSolutionModuleCenterBase, type AgentOSSolutionLedgerRow, type AgentOSSolutionLedgerSectionStatus, type AgentOSSolutionModuleCard } from "./component";
 
 /** Exact owner workspace scope consumed by the connected module center. */

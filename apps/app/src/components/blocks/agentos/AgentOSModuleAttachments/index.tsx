@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useMutateAgentosModuleAttachmentUploadSwr, useMutateFinalizeAgentosModuleAttachmentSwr, useMutateRemoveAgentosModuleAttachmentSwr } from "@/hooks";
-import { useAgentOSModuleStudioProjection } from "@/hooks/agentos";
+import { useAgentOSModuleStudioProjection, useMutateAgentosModuleAttachmentUploadSwr, useMutateFinalizeAgentosModuleAttachmentSwr, useMutateRemoveAgentosModuleAttachmentSwr } from "@/hooks";
 import { AgentOSModuleAttachmentsBase } from "./component";
 type AgentOSModuleAttachmentsProps = {
   readonly workspaceId: string;
