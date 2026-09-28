@@ -2,12 +2,11 @@
 
 import { useTranslations } from "next-intl";
 import { useQueryMyAgentWorkspacesSwr } from "@/hooks";
-import { useRouter } from "@/i18n/navigation";
-import { AgentOSSolutionModuleCenter } from "@/components/blocks/agentos/AgentOSSolutionModuleCenter";
-import { BusinessModulesDashboardBase, type BusinessModulesDashboardLabels } from "./component";
+import { useRouter } from "@/modules/i18n/navigation";
+import { BusinessModulesDashboardBase, BusinessModulesDashboardModuleCenter, type BusinessModulesDashboardLabels } from "./component";
 
-/** This dashboard has no caller-controlled state. */
-export type BusinessModulesDashboardProps = Record<string, never>;
+/** Public props for the dashboard, which has no caller-controlled values. */
+export type BusinessModulesDashboardProps = { readonly children?: never };
 
 /** Resolve exactly one workspace; zero and ambiguity remain explicit product states. */
 export const BusinessModulesDashboard = (props: BusinessModulesDashboardProps) => {
@@ -39,6 +38,6 @@ export const BusinessModulesDashboard = (props: BusinessModulesDashboardProps) =
     state="ready"
     labels={labels}
     workspace={{ id: workspace.id, name: workspace.name ?? t("workspaceFallback"), status: workspace.status }}
-    moduleCenter={AgentOSSolutionModuleCenter}
+    moduleCenter={BusinessModulesDashboardModuleCenter}
   />;
 };

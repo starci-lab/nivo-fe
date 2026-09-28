@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import { Badge, EmptyNotice, SurfaceCard, Text } from "@starci/grammar/common";
+import { AgentOSSolutionModuleCenter } from "@/components/blocks/agentos/AgentOSSolutionModuleCenter";
 import { BUSINESS_MODULES_CLASS_NAME, WORKSPACE_IDENTITY_CLASS_NAME } from "./classNames";
 
 /** Copy shared by every settled single-business dashboard state. */
@@ -15,13 +16,21 @@ export type BusinessModulesDashboardLabels = {
 };
 
 /** Existing module center contract used after the business workspace has been resolved. */
-export type BusinessModuleCenter = ComponentType<{
+/** Inputs required to render the settled AgentOS module center. */
+type BusinessModulesDashboardModuleCenterProps = {
   readonly workspaceId: string;
   readonly layout: "ledger";
-}>;
+};
+
+/** Render contract accepted by the dashboard's settled state. */
+type BusinessModuleCenter = ComponentType<BusinessModulesDashboardModuleCenterProps>;
+
+/** Keep the connected module center behind a render function owned by this block's pure half. */
+export const BusinessModulesDashboardModuleCenter = (props: BusinessModulesDashboardModuleCenterProps) =>
+  <AgentOSSolutionModuleCenter workspaceId={props.workspaceId} layout={props.layout} />;
 
 /** Closed presentation states; ambiguity never falls through to an arbitrary workspace. */
-export type BusinessModulesDashboardProps = {
+export type BusinessModulesDashboardBaseProps = {
   readonly state: "resting";
   readonly labels: BusinessModulesDashboardLabels;
 } | {
@@ -45,7 +54,7 @@ export type BusinessModulesDashboardProps = {
 };
 
 /** Draw one business's module dashboard without exposing multi-workspace management. */
-export const BusinessModulesDashboardBase = (props: BusinessModulesDashboardProps) => {
+const BusinessModulesDashboardView = (props: BusinessModulesDashboardBaseProps) => {
   if (props.state === "resting") return <SurfaceCard label={props.labels.workspaceLabel}>
     <Text isSkeleton>{props.labels.loading}</Text>
   </SurfaceCard>;
@@ -73,3 +82,6 @@ export const BusinessModulesDashboardBase = (props: BusinessModulesDashboardProp
     <ModuleCenter workspaceId={props.workspace.id} layout="ledger" />
   </div>;
 };
+
+/** Export the established base name for callers and specs. */
+export { BusinessModulesDashboardView as BusinessModulesDashboardBase };
