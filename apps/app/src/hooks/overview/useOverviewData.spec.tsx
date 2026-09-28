@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
     },
 }))
 
-vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
+vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => mocks.api)
 
 import { OverviewDataProvider, useOverviewData } from "./useOverviewData"

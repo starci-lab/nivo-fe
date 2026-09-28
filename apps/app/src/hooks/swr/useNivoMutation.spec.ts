@@ -17,7 +17,7 @@ vi.mock("swr", async (importOriginal) => ({
     useSWRConfig: () => ({ mutate: mocks.mutateCache }),
 }))
 
-vi.mock("@/modules/auth/session", () => ({
+vi.mock("@/hooks/auth/useSession", () => ({
     useSession: () => ({ state: mocks.state }),
 }))
 

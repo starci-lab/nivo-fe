@@ -3,7 +3,7 @@
 import { answerAgentosCustomModuleIntake, configureAgentWorkspaceChannel, createExpertSite, finalizeAgentosModuleAttachment, installAgentosSolutionModule, issueAgentWorkspaceAppLaunch, manageAgentosModuleRuntime, orderAgentOs, prepareAgentosModuleAttachmentUpload, publishAgentosCustomModule, publishExpertSite, reindexAgentWorkspaceKnowledge, removeAgentosModuleIntegrationSecret, removeAgentosModuleAttachment, renewAgentWorkspaceAppLaunch, revokeAgentWorkspaceAppLaunch, runAgentosModuleTest, runAgentosAiReadinessTest, saveAgentosModuleIntegrationSecret, startAgentosCustomModuleIntake, uploadAgentosModuleAttachment, type ConfigureAgentWorkspaceChannelInput, type ManageAgentosModuleRuntimeInput, type RenewedAgentWorkspaceAppLaunch, type RunAgentosModuleTestInput } from "@/modules/api/console";
 import { refreshSession } from "@/modules/api/auth";
 import type { Result } from "@/modules/api/graphql";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../../auth/useSession";
 import { useNivoMutation } from "../useNivoMutation";
 import { agentosAiKnowledgeQueryKey, agentosCustomModulesQueryKey, agentosModuleInstallationsQueryKey, agentosModuleStudioQueryKey, agentWorkspaceControlCenterQueryKey, agentWorkspacesQueryKey, catalogOrdersQueryKey, expertSiteDeploymentQueryKey, expertSitesQueryKey, invoicesQueryKey } from "../queries/console";
 type AgentosModuleAttachmentUploadCommand = {

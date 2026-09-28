@@ -31,7 +31,7 @@ const mocks = vi.hoisted(() => ({
     adoptSession: vi.fn(),
 }))
 
-vi.mock("@/modules/auth/session", () => ({
+vi.mock("@/hooks/auth/useSession", () => ({
     useSession: () => ({ state: { status: "signed-in", accessToken: "hook-viewer" }, adopt: mocks.adoptSession }),
 }))
 vi.mock("@/modules/api/console", () => ({

@@ -1,7 +1,7 @@
 "use client";
 
 import { readSalesPipeline, type SalesInstallationScope, type SalesPipelineRequest } from "@/modules/api/sales";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../../auth/useSession";
 import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
 
 /*

@@ -25,7 +25,7 @@ vi.mock("next-intl", () => ({
     useLocale: () => localeState.value,
     useFormatter: () => ({ number: (value: number) => String(value), dateTime: (value: string) => value }),
 }))
-vi.mock("@/modules/auth/session", () => ({ useSession: () => signedIn }))
+vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => signedIn }))
 vi.mock("@/hooks", async () => ({ ...(await vi.importActual("@/hooks") as Record<string, unknown>), useSession: () => signedIn }))
 vi.mock("@/hooks/realtime", () => ({ default: () => ({ status: "disconnected", reason: null }) }))
 vi.mock("@/modules/api/console", () => ({

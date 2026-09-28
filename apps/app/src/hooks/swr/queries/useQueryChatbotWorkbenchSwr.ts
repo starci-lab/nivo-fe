@@ -1,7 +1,7 @@
 "use client";
 
 import { chatbotWorkbench } from "@/modules/api/workspace-controlplane";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../../auth/useSession";
 import { useNivoQuery } from "../useNivoQuery";
 
 /** Exact workspace/module controller identity required by support projections. */

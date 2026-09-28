@@ -12,7 +12,7 @@ import {
     type CollabHumanRole,
     type CollabResult,
 } from "@/modules/api/collab";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../../auth/useSession";
 import { useNivoMutation, type NivoMutationKey } from "../useNivoMutation";
 
 /**

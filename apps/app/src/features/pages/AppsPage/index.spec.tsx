@@ -12,7 +12,7 @@ let viewerSequence = 0
 if (!Element.prototype.getAnimations) Element.prototype.getAnimations = () => []
 
 vi.mock("./component", () => ({ AppsPageBase: () => <div>apps page</div> }))
-vi.mock("@/modules/auth/session", () => ({ useSession: () => signedIn }))
+vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => signedIn }))
 vi.mock("@/hooks/realtime", () => ({ default: () => ({ status: "disconnected", reason: null }) }))
 vi.mock("@/modules/api/console", () => ({
     myExpertSites: vi.fn().mockResolvedValue({ ok: true, data: [] }),

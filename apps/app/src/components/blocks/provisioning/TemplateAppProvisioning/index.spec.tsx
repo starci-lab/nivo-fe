@@ -30,7 +30,7 @@ vi.mock("@/hooks", async (importOriginal) => ({
     useRouter: () => ({ replace: mocks.replace, push: mocks.push }),
 }))
 vi.mock("next-intl", () => ({ useTranslations: () => mocks.t, useLocale: () => "en" }))
-vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
+vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => mocks.api)
 vi.mock("@/hooks/realtime", () => ({ default: () => mocks.realtime }))
 vi.mock("./component", () => ({

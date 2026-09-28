@@ -29,7 +29,7 @@ const { useSession, mutate } = vi.hoisted(() => ({
     mutate: vi.fn(async () => undefined),
 }));
 vi.mock("swr", () => ({ useSWRConfig: () => ({ mutate }) }));
-vi.mock("@/modules/auth/session", () => ({ useSession }));
+vi.mock("@/hooks/auth/useSession", () => ({ useSession }));
 
 import { useCollabLive, type CollabLiveState } from "./useCollabLive";
 

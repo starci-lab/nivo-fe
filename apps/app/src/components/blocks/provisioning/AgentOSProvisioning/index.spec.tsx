@@ -67,7 +67,7 @@ vi.mock("next-intl", () => {
         useFormatter: () => ({ number: (value: number) => `money-${value}`, dateTime: (value: Date) => `t-${value.toISOString()}` }),
     }
 })
-vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
+vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/hooks", () => ({
     useQueryWorkspaceCheckoutOffersSwr: () => ({ data: mocks.offers.data, error: mocks.offers.error, isValidating: false, mutate: vi.fn() }),
     useQueryWorkspaceCheckoutStatusSwr: () => ({ data: mocks.status.data, error: mocks.status.error, isValidating: false, mutate: mocks.status.mutate }),

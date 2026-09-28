@@ -1,7 +1,7 @@
 "use client";
 
 import { commandAccountingAdmitEvidence, type AccountingAdmitEvidenceInput, type AccountingInstallationScope, type AccountingOperationAnswer, type AccountingResult } from "@/modules/api/accounting";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../../auth/useSession";
 import { useNivoMutation, type NivoMutationKey } from "../useNivoMutation";
 import { accountingEvidenceQueryKey } from "../queries/useQueryAccountingEvidenceSwr";
 

@@ -8,7 +8,7 @@ vi.mock("next-intl", () => ({
     useTranslations: () => (key: string) => key,
 }))
 vi.mock("@/hooks", () => ({ useRouter: () => ({ replace: mocks.replace }), usePathname: () => mocks.pathname }))
-vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
+vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 interface MockBaseProps { readonly state: { readonly body: ComponentType; readonly bodyProps: object }; readonly props: { readonly navigationLabel: string; readonly primaryLabel: string } }
 vi.mock("./component", () => ({ ConsoleLayoutBase: ({ state, props: data }: MockBaseProps) => { mocks.labels = { navigationLabel: data.navigationLabel, primaryLabel: data.primaryLabel }; const Body = state.body; return <div><Body {...state.bodyProps} /></div> } }))
 

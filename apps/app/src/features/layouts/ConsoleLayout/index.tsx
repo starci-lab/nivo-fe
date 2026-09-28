@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 import type { ComponentType } from "react";
 import { useTranslations } from "next-intl";
-import { usePathname, useRouter } from "@/hooks";
-import { useSession } from "@/modules/auth/session";
+import { usePathname, useRouter, useSession } from "@/hooks";
+
 import { ConsoleLayoutBase, type ConsoleLayoutBodyProps } from "./component";
 
 /** Connected console frame input already projected by the framework route boundary. */

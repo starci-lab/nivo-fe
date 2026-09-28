@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
         | { readonly status: "signed-in"; readonly accessToken: string },
 }))
 
-vi.mock("@/modules/auth/session", () => ({
+vi.mock("@/hooks/auth/useSession", () => ({
     useSession: () => ({ state: mocks.state }),
 }))
 

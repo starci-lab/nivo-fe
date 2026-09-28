@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   api: { commandAccountingRoutine: vi.fn(async () => ({ ok: true })) }
 }));
 vi.mock("../useNivoMutation", () => ({ useNivoMutation: mocks.useNivoMutation }));
-vi.mock("@/modules/auth/session", () => ({ useSession: mocks.useSession }));
+vi.mock("@/hooks/auth/useSession", () => ({ useSession: mocks.useSession }));
 vi.mock("@/modules/api/accounting", () => mocks.api);
 
 import { accountingRoutineResultQueryKey } from "../queries/useQueryAccountingRoutineResultSwr";

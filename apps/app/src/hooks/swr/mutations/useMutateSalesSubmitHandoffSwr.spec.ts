@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   api: { commandSalesSubmitHandoff: vi.fn(async () => ({ ok: true })) }
 }));
 vi.mock("../useNivoMutation", () => ({ useNivoMutation: mocks.useNivoMutation }));
-vi.mock("@/modules/auth/session", () => ({ useSession: mocks.useSession }));
+vi.mock("@/hooks/auth/useSession", () => ({ useSession: mocks.useSession }));
 vi.mock("@/modules/api/sales", () => mocks.api);
 
 import { salesHandoffQueryKey } from "../queries/useQuerySalesHandoffSwr";

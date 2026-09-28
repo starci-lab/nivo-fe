@@ -1,7 +1,7 @@
 "use client";
 
 import { commandAccountingException, type AccountingExceptionInput, type AccountingInstallationScope } from "@/modules/api/accounting";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../../auth/useSession";
 import { useNivoMutation, type NivoMutationKey } from "../useNivoMutation";
 
 /* One hook per file: the token reader and the press-local identity are private here. */

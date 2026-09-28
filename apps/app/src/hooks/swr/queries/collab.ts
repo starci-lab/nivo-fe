@@ -11,7 +11,7 @@ import {
     reconcileCollabRequest,
     type CollabTaskStatus,
 } from "@/modules/api/collab";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../../auth/useSession";
 import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
 
 /**

@@ -1,7 +1,7 @@
 "use client";
 
 import { readAccountingEvidence, type AccountingEvidenceInput, type AccountingInstallationScope } from "@/modules/api/accounting";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../../auth/useSession";
 import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
 
 /*

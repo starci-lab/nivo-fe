@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import { useQueryMyAgentosAiKnowledgeReadinessSwr, useMutateRunAgentosAiReadinessTestSwr, useMutateRecoverWorkspacePurchaseSwr, useQueryWorkspaceCheckoutEntrySwr, useQueryWorkspaceCheckoutOffersSwr, useQueryWorkspaceCheckoutStatusSwr, useRouter } from "@/hooks";
-import { useSession } from "@/modules/auth/session";
+import { useQueryMyAgentosAiKnowledgeReadinessSwr, useMutateRunAgentosAiReadinessTestSwr, useMutateRecoverWorkspacePurchaseSwr, useQueryWorkspaceCheckoutEntrySwr, useQueryWorkspaceCheckoutOffersSwr, useQueryWorkspaceCheckoutStatusSwr, useRouter, useSession } from "@/hooks";
+
 import { type WorkspaceCheckoutEntryDestination, type WorkspaceCheckoutEntryRequest, type WorkspaceCheckoutObservedIdentities, type WorkspaceCheckoutOffer, type WorkspaceCheckoutOutcome, type WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane";
 import { nivoQueryData } from "@/modules/query";
 import useProvisioningRealtime, { type ProvisioningTarget } from "@/hooks/realtime";

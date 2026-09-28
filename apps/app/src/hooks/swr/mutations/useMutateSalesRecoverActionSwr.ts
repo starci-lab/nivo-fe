@@ -1,7 +1,7 @@
 "use client";
 
 import { commandSalesRecoverAction, type SalesAnswer, type SalesInstallationScope, type SalesRecoverActionRequest } from "@/modules/api/sales";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../../auth/useSession";
 import { useNivoMutation, type NivoMutationKey } from "../useNivoMutation";
 import { salesActionQueryKey } from "../queries/useQuerySalesActionSwr";
 

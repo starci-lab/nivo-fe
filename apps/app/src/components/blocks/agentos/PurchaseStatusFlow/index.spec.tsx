@@ -52,7 +52,7 @@ vi.mock("next-intl", () => ({
     }),
     useTranslations: () => Object.assign(translate, { has: (key: string) => translate(key) !== key }),
 }))
-vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
+vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/hooks", () => ({
     useQueryWorkspaceCheckoutStatusSwr: () => ({
         data: mocks.status.data,

@@ -6,7 +6,7 @@ const { useNivoMutation, useSession, mutate } = vi.hoisted(() => ({
     mutate: vi.fn(async () => undefined),
 }));
 vi.mock("../useNivoMutation", () => ({ useNivoMutation }));
-vi.mock("@/modules/auth/session", () => ({ useSession }));
+vi.mock("@/hooks/auth/useSession", () => ({ useSession }));
 vi.mock("swr", () => ({ useSWRConfig: () => ({ mutate }) }));
 vi.mock("@/modules/api/collab", () => ({
     acceptCollabInvitation: vi.fn(),

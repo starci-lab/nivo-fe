@@ -1,7 +1,7 @@
 "use client";
 
 import { readSalesAction, type SalesActionRequest, type SalesInstallationScope } from "@/modules/api/sales";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../../auth/useSession";
 import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
 
 /*

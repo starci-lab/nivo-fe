@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";
 import { io, type Socket } from "socket.io-client";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../auth/useSession";
 
 /**
  * The Collab live door (`decision.collab.live-delivery` rev 2,

@@ -5,7 +5,7 @@ import { AcademyLeadPipeline } from "./index"
 
 const m = vi.hoisted(() => ({ locale: "vi", session: { state: { status: "signed-in", accessToken: "test-token" } }, leads: { ok: true, data: [] as Array<unknown> }, calls: { list: vi.fn(), update: vi.fn(), draft: vi.fn() } }))
 vi.mock("next-intl", () => ({ useLocale: () => m.locale, useTranslations: () => (key: string) => key }))
-vi.mock("@/modules/auth/session", () => ({ useSession: () => m.session }))
+vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => m.session }))
 vi.mock("@/modules/api/console", () => ({ myExpertSiteLeads: m.calls.list, updateExpertSiteLead: m.calls.update, draftLeadReply: m.calls.draft }))
 type LeadView = { state: string; on: { openLead: (id: string) => void; advance: () => void; draftReply: () => void } }
 vi.mock("./component", () => ({ AcademyLeadPipelineBase: (input: LeadView) => <><output data-testid="state">{input.state}</output><button onClick={() => input.on.openLead("lead-1")}>open</button><button onClick={input.on.draftReply}>draft</button><button onClick={input.on.advance}>advance</button></> }))

@@ -19,7 +19,7 @@ vi.mock("next-intl", () => ({
     useFormatter: () => ({ dateTime: (value: Date) => value.toISOString() }),
 }))
 vi.mock("@/modules/api/console", () => ({ issueAgentWorkspaceAppLaunch: mocks.issue, revokeAgentWorkspaceAppLaunch: mocks.revoke }))
-vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
+vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/window/workspace-app-launch", () => ({
     followWorkspaceAppRedirect: mocks.followRedirect,
     safeWorkspaceAppRedirect: mocks.safeRedirect,

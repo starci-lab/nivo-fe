@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/hooks", async () => ({ ...(await vi.importActual("@/hooks") as Record<string, unknown>), useRouter: () => ({ push: mocks.push }), useSession: () => mocks.session }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key, useLocale: () => "en" }))
 vi.mock("@/modules/api/console", () => ({ myAgentosModuleInstallation: mocks.installation }))
-vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
+vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/hooks/realtime", () => ({ default: () => mocks.realtime }))
 
 type ModuleDetailViewInput = { state: string; props: { installation?: { id: string } }; on: { onBack: () => void } }

@@ -18,7 +18,7 @@ vi.mock("next-intl", () => ({
 vi.mock("next/navigation", () => ({
     useSearchParams: () => new URLSearchParams(mocks.search),
 }))
-vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
+vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/hooks", () => ({
     useSession: () => mocks.session,
     useQueryWorkspaceCheckoutOffersSwr: () => mocks.offers,

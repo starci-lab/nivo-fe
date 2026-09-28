@@ -2,7 +2,7 @@
 
 import useSWRMutation from "swr/mutation";
 import { useSWRConfig } from "swr";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../auth/useSession";
 import { nivoViewerQueryKeyFor, viewerCacheKeyFor, type NivoQueryKey } from "./useNivoQuery";
 
 /** Product mutation identity before the signed-in viewer scope is attached. */

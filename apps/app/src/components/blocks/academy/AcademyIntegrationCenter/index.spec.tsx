@@ -5,7 +5,7 @@ import { AcademyIntegrationCenter } from "./index"
 
 const m = vi.hoisted(() => ({ session: { state: { status: "signed-in", accessToken: "test-token" } }, integrations: { ok: true, data: undefined as unknown }, calls: { domain: vi.fn(), google: vi.fn(), credential: vi.fn(), zalo: vi.fn(), analytics: vi.fn(), webhook: vi.fn() }, view: undefined as unknown }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
-vi.mock("@/modules/auth/session", () => ({ useSession: () => m.session }))
+vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => m.session }))
 vi.mock("@/modules/api/console", () => ({ myAcademyIntegrations: () => Promise.resolve(m.integrations), setAcademyCustomDomain: m.calls.domain, saveAcademyGoogleOAuth: m.calls.google, saveAcademyCredential: m.calls.credential, beginAcademyZaloAuthorization: m.calls.zalo, saveAcademyAnalytics: m.calls.analytics, createAcademyWebhook: m.calls.webhook }))
 type IntegrationView = { state: string; on: { select: (id: string) => void; changeField: (name: string, value: string) => void; submit: () => void } }
 vi.mock("./component", () => ({

@@ -1,7 +1,7 @@
 "use client";
 
 import useSWR, { type SWRConfiguration, type SWRResponse } from "swr";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../auth/useSession";
 
 /** A product query key before the signed-in viewer identity is attached. */
 export type NivoQueryKey = readonly [name: string, ...parts: ReadonlyArray<string | number | boolean | null>];

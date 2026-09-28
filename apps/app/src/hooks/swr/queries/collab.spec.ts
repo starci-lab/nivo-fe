@@ -5,7 +5,7 @@ const { useNivoQuery, useSession } = vi.hoisted(() => ({
     useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "tok" } })),
 }));
 vi.mock("../useNivoQuery", () => ({ useNivoQuery }));
-vi.mock("@/modules/auth/session", () => ({ useSession }));
+vi.mock("@/hooks/auth/useSession", () => ({ useSession }));
 vi.mock("@/modules/api/collab", () => ({
     listCollabTasks: vi.fn(),
     openCollabNotice: vi.fn(),

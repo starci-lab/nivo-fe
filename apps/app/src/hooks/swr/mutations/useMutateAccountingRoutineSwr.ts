@@ -1,7 +1,7 @@
 "use client";
 
 import { commandAccountingRoutine, type AccountingInstallationScope, type AccountingOperationAnswer, type AccountingResult, type AccountingRoutineInput } from "@/modules/api/accounting";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../../auth/useSession";
 import { useNivoMutation, type NivoMutationKey } from "../useNivoMutation";
 import { accountingRoutineResultQueryKey } from "../queries/useQueryAccountingRoutineResultSwr";
 

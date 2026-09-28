@@ -1,7 +1,7 @@
 "use client";
 
 import { bindChatbotChannel, reconcileChatbotDelivery, resolveChatbotHandoff, retryWorkspaceProvisioningOrder, setChatbotHandoff, startChatbotZaloOauth } from "@/modules/api/workspace-controlplane";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../../auth/useSession";
 import { useNivoMutation } from "../useNivoMutation";
 import { agentWorkspacesQueryKey } from "../queries/console";
 import { chatbotWorkbenchQueryKey, type SupportQueryIdentity } from "../queries/useQueryChatbotWorkbenchSwr";

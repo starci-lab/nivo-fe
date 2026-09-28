@@ -1,7 +1,7 @@
 "use client";
 
 import { readAccountingSummary, type AccountingInstallationScope, type AccountingSummaryQueryInput } from "@/modules/api/accounting";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../../auth/useSession";
 import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
 
 /* One hook per file: the token reader and the stable read identity are private here, never shared. */

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useMutateCreateAndPublishExpertSiteSwr, useQueryCatalogItemsSwr, useQueryMyExpertSiteDeploymentSwr, useRouter } from "@/hooks";
-import { useSession } from "@/modules/auth/session";
+import { useMutateCreateAndPublishExpertSiteSwr, useQueryCatalogItemsSwr, useQueryMyExpertSiteDeploymentSwr, useRouter, useSession } from "@/hooks";
+
 import type { ExpertDeploymentSnapshot } from "@/modules/api/console";
 import useProvisioningRealtime, { type ProvisioningTarget } from "@/hooks/realtime";
 import { TemplateAppProvisioningBase, type TemplateAppProvisioningViewProps } from "./component";

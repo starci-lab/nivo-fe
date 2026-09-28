@@ -1,7 +1,7 @@
 "use client";
 
 import { commandSalesPrepareHandoff, type SalesAnswer, type SalesInstallationScope, type SalesPrepareHandoffRequest } from "@/modules/api/sales";
-import { useSession } from "@/modules/auth/session";
+import { useSession } from "../../auth/useSession";
 import { useNivoMutation, type NivoMutationKey } from "../useNivoMutation";
 import { salesHandoffQueryKey } from "../queries/useQuerySalesHandoffSwr";
 
