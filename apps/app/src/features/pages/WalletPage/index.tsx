@@ -18,7 +18,6 @@ const WalletPageSearchState = () => {
 export const WalletPage = (props: WalletPageProps) => {
   void props;
   return <Suspense fallback={null}>
-        <WalletPageSearchState />
-    </Suspense>;
+    <WalletPageSearchState />
+  </Suspense>;
 };
-
