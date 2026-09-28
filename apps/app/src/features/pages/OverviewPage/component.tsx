@@ -12,10 +12,8 @@ import { OverviewServices } from "@/components/blocks/console/OverviewServices";
 import { OverviewSignals } from "@/components/blocks/console/OverviewSignals";
 import { OVERVIEW_FRAME_CLASS_NAME, OVERVIEW_TRACK_CLASS_NAME } from "./classNames";
 
-/** Resolved copy and the one page-level command of the operations overview. */
-export type OverviewPageProps = OverviewPageViewProps;
-/** Public API role for OverviewPageViewProps. */
-export type OverviewPageViewProps = {
+/** Resolved copy of the operations overview, handed in as data. */
+export type OverviewPageBaseData = {
   readonly title: string;
   readonly lede: string;
   readonly pathLabel: string;
@@ -24,7 +22,24 @@ export type OverviewPageViewProps = {
   readonly atAGlanceLabel: string;
   readonly servicesLabel: string;
   readonly accountLabel: string;
-  readonly onBuildApp: () => void;
+};
+
+/** The commands the overview offers: the one page-level decision. */
+export type OverviewPageBaseActions = {
+  readonly buildApp: () => void;
+};
+
+/*
+ * The `starci-fe/public-component-signature` convention reads the render half's own name and
+ * demands the contract be spelled `<Unit>Props`, so this private alias is the only name that rule
+ * accepts; the exported contract below stays `<Unit>BaseProps`, which the shape-slot law requires
+ * the render half to own. Not exported: one public contract per unit.
+ */
+type OverviewPageProps = OverviewPageBaseProps;
+/** Public API role for OverviewPageBaseProps. */
+export type OverviewPageBaseProps = {
+  readonly props: OverviewPageBaseData;
+  readonly on: OverviewPageBaseActions;
 };
 
 /**
@@ -34,16 +49,18 @@ export type OverviewPageViewProps = {
  */
 export const OverviewPageBase = (props: OverviewPageProps) => {
   const {
-    title,
-    lede,
-    pathLabel,
-    consoleLabel,
-    buildAppLabel,
-    atAGlanceLabel,
-    servicesLabel,
-    accountLabel,
-    onBuildApp
-  }: OverviewPageViewProps = props;
+    props: {
+      title,
+      lede,
+      pathLabel,
+      consoleLabel,
+      buildAppLabel,
+      atAGlanceLabel,
+      servicesLabel,
+      accountLabel
+    },
+    on: { buildApp }
+  }: OverviewPageBaseProps = props;
   return <PageContainer measure="product">
     <div
       className={OVERVIEW_FRAME_CLASS_NAME}
@@ -69,7 +86,7 @@ export const OverviewPageBase = (props: OverviewPageProps) => {
         action={<Button
           size="lg"
           variant="primary"
-          onPress={onBuildApp}
+          onPress={buildApp}
         >{buildAppLabel}</Button>}
       />
       <OverviewSignals label={atAGlanceLabel} />

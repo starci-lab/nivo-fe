@@ -12,31 +12,33 @@ vi.mock("@/components/blocks/console/OverviewRuntime", () => ({ OverviewRuntime:
 vi.mock("@/components/blocks/console/OverviewAccount", () => ({ OverviewAccount: () => <div data-testid="overview-account" /> }))
 vi.mock("@/components/blocks/console/OverviewAddresses", () => ({ OverviewAddresses: () => <div data-testid="overview-addresses" /> }))
 
-import { OverviewPageBase, type OverviewPageProps } from "./component"
+import { OverviewPageBase, type OverviewPageBaseProps } from "./component"
 
-const props: OverviewPageProps = {
-    title: "Overview",
-    lede: "Everything this account runs, and the one thing to do next.",
-    pathLabel: "You are here",
-    consoleLabel: "Console",
-    buildAppLabel: "Build an app",
-    atAGlanceLabel: "At a glance",
-    servicesLabel: "Services",
-    accountLabel: "Account",
-    onBuildApp: vi.fn(),
+const props: OverviewPageBaseProps = {
+    props: {
+        title: "Overview",
+        lede: "Everything this account runs, and the one thing to do next.",
+        pathLabel: "You are here",
+        consoleLabel: "Console",
+        buildAppLabel: "Build an app",
+        atAGlanceLabel: "At a glance",
+        servicesLabel: "Services",
+        accountLabel: "Account",
+    },
+    on: { buildApp: vi.fn() },
 }
 
 describe("OverviewPageBase", () => {
     it("names the page once and holds its one page-level command", () => {
-        const onBuildApp = vi.fn()
-        render(<OverviewPageBase {...props} onBuildApp={onBuildApp} />)
+        const buildApp = vi.fn()
+        render(<OverviewPageBase {...props} on={{ buildApp }} />)
 
         expect(screen.getByRole("heading", { level: 1, name: "Overview" })).toBeInTheDocument()
         expect(screen.getByText("Everything this account runs, and the one thing to do next.")).toBeInTheDocument()
         expect(screen.queryByRole("heading", { level: 2 })).not.toBeInTheDocument()
 
         fireEvent.click(screen.getByRole("button", { name: "Build an app" }))
-        expect(onBuildApp).toHaveBeenCalledTimes(1)
+        expect(buildApp).toHaveBeenCalledTimes(1)
     })
 
     it("composes the five connected regions without owning their data", () => {
@@ -64,16 +66,18 @@ describe("OverviewPageBase", () => {
 
 describe("OverviewPageBase", () => {
     it("renders the overview anatomy around its five connected regions", () => {
-        const overviewProps: OverviewPageProps = {
-            title: "Overview",
-            lede: "Everything this account runs, and the one thing to do next.",
-            pathLabel: "You are here",
-            consoleLabel: "Console",
-            buildAppLabel: "Build an app",
-            atAGlanceLabel: "At a glance",
-            servicesLabel: "Services",
-            accountLabel: "Account",
-            onBuildApp: vi.fn(),
+        const overviewProps: OverviewPageBaseProps = {
+            props: {
+                title: "Overview",
+                lede: "Everything this account runs, and the one thing to do next.",
+                pathLabel: "You are here",
+                consoleLabel: "Console",
+                buildAppLabel: "Build an app",
+                atAGlanceLabel: "At a glance",
+                servicesLabel: "Services",
+                accountLabel: "Account",
+            },
+            on: { buildApp: vi.fn() },
         }
         const html = renderToStaticMarkup(<OverviewPageBase {...overviewProps} />)
         expect(html).toContain("Overview")

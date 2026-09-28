@@ -1,10 +1,10 @@
-import { OverviewPage } from "@/components/pages/OverviewPage"
+import { OverviewPage } from "@/features/pages/OverviewPage"
 
 /**
  * The `/overview` route. It mounts one page and makes no drawing decision - LAYOUT-6.
  *
  * @returns The route.
  */
-const OverviewRoute = () => <OverviewPage />
+const Page = () => <OverviewPage />
 
-export default OverviewRoute
+export default Page

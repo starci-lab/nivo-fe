@@ -13,9 +13,7 @@ const mocks = vi.hoisted(() => ({
     wallet: vi.fn(),
     invoices: vi.fn(),
 }))
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
-vi.mock("next-intl", () => ({ useLocale: () => "en", useTranslations: () => (key: string) => key }))
-vi.mock("@/hooks", () => ({
+vi.mock("@/hooks/swr/queries/console", () => ({
     useQueryMyExpertSitesSwr: mocks.apps,
     useQueryMyAgentWorkspacesSwr: mocks.workspaces,
     useQueryMyPodOpenclawStatusSwr: mocks.pod,
@@ -23,21 +21,25 @@ vi.mock("@/hooks", () => ({
     useQueryMyWalletSwr: mocks.wallet,
     useQueryMyInvoicesSwr: mocks.invoices,
 }))
-interface MockPageProps {
-    readonly title: string
-    readonly lede: string
-    readonly pathLabel: string
-    readonly consoleLabel: string
-    readonly buildAppLabel: string
-    readonly atAGlanceLabel: string
-    readonly servicesLabel: string
-    readonly accountLabel: string
-    readonly onBuildApp: () => void
+vi.mock("@/hooks", async (importOriginal) => ({ ...await importOriginal<object>(), useRouter: () => ({ push: mocks.push }) }))
+vi.mock("next-intl", () => ({ useLocale: () => "en", useTranslations: () => (key: string) => key }))
+interface MockBaseProps {
+    readonly props: {
+        readonly title: string
+        readonly lede: string
+        readonly pathLabel: string
+        readonly consoleLabel: string
+        readonly buildAppLabel: string
+        readonly atAGlanceLabel: string
+        readonly servicesLabel: string
+        readonly accountLabel: string
+    }
+    readonly on: { readonly buildApp: () => void }
 }
-vi.mock("./component", () => ({ OverviewPageBase: (props: MockPageProps) => <div>
-    <span>{props.pathLabel}:{props.consoleLabel}:{props.title}</span>
-    <span>{props.lede}:{props.atAGlanceLabel}:{props.servicesLabel}:{props.accountLabel}</span>
-    <button type="button" onClick={props.onBuildApp}>{props.buildAppLabel}</button>
+vi.mock("./component", () => ({ OverviewPageBase: (input: MockBaseProps) => <div>
+    <span>{input.props.pathLabel}:{input.props.consoleLabel}:{input.props.title}</span>
+    <span>{input.props.lede}:{input.props.atAGlanceLabel}:{input.props.servicesLabel}:{input.props.accountLabel}</span>
+    <button type="button" onClick={input.on.buildApp}>{input.props.buildAppLabel}</button>
 </div> }))
 
 import { OverviewPage } from "."
