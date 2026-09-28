@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useMutateCreateAndPublishExpertSiteSwr, useQueryCatalogItemsSwr, useQueryMyExpertSiteDeploymentSwr } from "@/hooks";
-import { useRouter } from "@/i18n/navigation";
+import { useMutateCreateAndPublishExpertSiteSwr, useQueryCatalogItemsSwr, useQueryMyExpertSiteDeploymentSwr, useRouter } from "@/hooks";
 import { useSession } from "@/modules/auth/session";
 import type { ExpertDeploymentSnapshot } from "@/modules/api/console";
 import useProvisioningRealtime, { type ProvisioningTarget } from "@/hooks/realtime";

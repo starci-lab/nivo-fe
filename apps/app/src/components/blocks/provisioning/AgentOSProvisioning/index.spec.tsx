@@ -50,7 +50,6 @@ type AgentProbeProps = {
     on?: { request?: () => void, statusAction?: () => void, selectOffer?: (id: string) => void, selectTier?: (id: string) => void }
 }
 
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ replace: mocks.replace, push: mocks.push }) }))
 vi.mock("next-intl", () => {
     /* Translators must be stable per namespace: a new function identity each render would
        re-fire the settlement effects, which set a fresh flow object and loop. */
@@ -79,6 +78,7 @@ vi.mock("@/hooks", () => ({
     useMutateRecoverWorkspacePurchaseSwr: () => ({ trigger: mocks.recover.trigger, isMutating: mocks.recover.isMutating }),
     useQueryMyAgentosAiKnowledgeReadinessSwr: () => ({ data: mocks.aiReadiness, error: undefined, isValidating: false, mutate: mocks.aiMutate }),
     useMutateRunAgentosAiReadinessTestSwr: () => ({ trigger: mocks.aiTrigger, isMutating: false }),
+    useRouter: () => ({ replace: mocks.replace, push: mocks.push }),
 }))
 vi.mock("@/hooks/realtime", () => ({ default: () => mocks.realtime }))
 vi.mock("./component", () => ({

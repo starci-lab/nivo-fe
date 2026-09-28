@@ -6,8 +6,7 @@ const mocks = vi.hoisted(() => ({
     data: { apps: null, workspaces: null } as Record<string, unknown>,
 }))
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string, values?: Record<string, unknown>) => values === undefined ? key : `${key}:${JSON.stringify(values)}` }))
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
-vi.mock("@/modules/overview/context", () => ({ useOverviewData: () => mocks.data }))
+vi.mock("@/hooks", () => ({ useRouter: () => ({ push: mocks.push }), useOverviewData: () => mocks.data }))
 
 import { OverviewServices } from "."
 

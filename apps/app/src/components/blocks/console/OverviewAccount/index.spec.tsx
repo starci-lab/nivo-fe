@@ -12,8 +12,7 @@ vi.mock("next-intl", () => ({
         dateTime: (value: Date) => `date-${value.toISOString().slice(0, 10)}`,
     }),
 }))
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }))
-vi.mock("@/modules/overview/context", () => ({ useOverviewData: () => mocks.data }))
+vi.mock("@/hooks", () => ({ useRouter: () => ({ push: mocks.push }), useOverviewData: () => mocks.data }))
 
 import { OverviewAccount } from "."
 

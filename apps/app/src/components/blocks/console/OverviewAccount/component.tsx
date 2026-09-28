@@ -24,29 +24,36 @@ export type OverviewAccountInvoiceRow = {
   readonly statusLabel: string;
   readonly badgeTone: BadgeTone;
   readonly actionLabel: string;
-  readonly onTopUp: () => void;
   readonly isSkeleton?: boolean;
 };
 /** Resolved account facts, its one invoice row, and its legal commands. */
-export type OverviewAccountProps = {
-  readonly label: string;
-  readonly actionLabel?: string;
-  readonly onOpenWallet?: () => void;
-  readonly isHighlight?: boolean;
+export type OverviewAccountViewProps = {
   readonly state?: PresentationState;
-  readonly facts: ReadonlyArray<OverviewAccountFact>;
-  readonly invoiceRow?: OverviewAccountInvoiceRow;
+  readonly props: {
+    readonly label: string;
+    readonly actionLabel?: string;
+    readonly isHighlight?: boolean;
+    readonly facts: ReadonlyArray<OverviewAccountFact>;
+    readonly invoiceRow?: OverviewAccountInvoiceRow;
+  };
+  readonly on?: {
+    readonly openWallet?: () => void;
+    readonly topUp?: () => void;
+  };
 };
+type OverviewAccountProps = OverviewAccountViewProps;
 
 /** Draw money held and owed as a two-cell band, closing on the one invoice row that owes the next step. */
 export const OverviewAccountBase = (props: OverviewAccountProps) => {
-  const { label, actionLabel, onOpenWallet, isHighlight, state, facts, invoiceRow }: OverviewAccountProps = props;
+  const { state, props: view, on } = props;
+  const { label, actionLabel, isHighlight, facts, invoiceRow } = view;
+  const { openWallet, topUp } = on ?? {};
   return <SurfaceCard
     label={label}
     composition="joined"
     state={state}
     isHighlight={isHighlight}
-    labelEnd={actionLabel === undefined || onOpenWallet === undefined ? undefined : <TextAction appearance="disclosure" size="sm" endContent={<Icon source={nivoIconSource("next")} />} onPress={onOpenWallet}>{actionLabel}</TextAction>}
+    labelEnd={actionLabel === undefined || openWallet === undefined ? undefined : <TextAction appearance="disclosure" size="sm" endContent={<Icon source={nivoIconSource("next")} />} onPress={openWallet}>{actionLabel}</TextAction>}
   >
     <div
       className={OVERVIEW_ACCOUNT_FACTS_CLASS_NAME}
@@ -75,7 +82,7 @@ export const OverviewAccountBase = (props: OverviewAccountProps) => {
         </div>
         <div className={OVERVIEW_ACCOUNT_END_CLASS_NAME} data-contract="GAP-3" data-end="true">
           <Badge tone={invoiceRow.badgeTone} isSkeleton={invoiceRow.isSkeleton}>{invoiceRow.statusLabel}</Badge>
-          <Button size="sm" onPress={invoiceRow.onTopUp} isSkeleton={invoiceRow.isSkeleton}>{invoiceRow.actionLabel}</Button>
+          <Button size="sm" onPress={topUp} isSkeleton={invoiceRow.isSkeleton}>{invoiceRow.actionLabel}</Button>
         </div>
       </div>
     </div>}

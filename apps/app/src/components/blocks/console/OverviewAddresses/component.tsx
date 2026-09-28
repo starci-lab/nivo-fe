@@ -22,10 +22,13 @@ export type OverviewAddressesState = {
   readonly message: string;
 };
 /** Pure addresses input: the domains that back the services, stating their own absence. */
-export type OverviewAddressesProps = {
-  readonly label: string;
+export type OverviewAddressesViewProps = {
   readonly state: OverviewAddressesState;
+  readonly props: {
+    readonly label: string;
+  };
 };
+type OverviewAddressesProps = OverviewAddressesViewProps;
 const PENDING_ROWS: ReadonlyArray<OverviewAddressesFact> = [
   { id: "pending-1", label: "", value: "" },
   { id: "pending-2", label: "", value: "" }
@@ -46,10 +49,11 @@ const row = (item: OverviewAddressesFact, isSkeleton: boolean) => <div
 
 /** Draw the domains that back the services, stating their own absence rather than disappearing. */
 export const OverviewAddressesBase = (props: OverviewAddressesProps) => {
-  const { label, state }: OverviewAddressesProps = props;
+  const { state, props: view } = props;
+  const { label } = view;
   if (state.phase === "populated" || state.phase === "pending") {
     const isLoading = state.phase === "pending";
-    const facts = isLoading ? PENDING_ROWS : state.facts;
+    const facts = state.phase === "pending" ? PENDING_ROWS : state.facts;
     return <SurfaceListCard label={label} isLoading={isLoading}>
       <div className={OVERVIEW_ADDRESSES_ROWS_CLASS_NAME} data-contract="BOUNDARY-3" data-overview-addresses-rows="true">
         {facts.map(item => row(item, isLoading))}

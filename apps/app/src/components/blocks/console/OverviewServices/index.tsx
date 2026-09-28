@@ -1,9 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import type { BadgeTone } from "@starci/grammar/common";
-import { useOverviewData } from "@/modules/overview/context";
+import { useOverviewData, useRouter } from "@/hooks";
 import { ACADEMY_HOST_SUFFIX } from "@/modules/config";
 import { OverviewServicesBase, type OverviewServicesRow } from "./component";
 /** Public API role for OverviewServicesProps. */
@@ -67,7 +66,7 @@ export const OverviewServices = (props: OverviewServicesProps) => {
       statusTone: APPS_STATUS_TONE[site.provisionStatus] ?? "neutral",
       actionLabel: isUnavailable ? t("apps.unavailable") : site.provisionStatus === "awaiting_dns" ? t("apps.viewDns") : t("apps.open"),
       isDisabled: isUnavailable,
-      onOpen: () => open(`/apps/${site.id}`)
+      route: `/apps/${site.id}`
     };
   }) : [];
   const workspace = workspaces !== null && workspaces.ok ? workspaces.data[0] : undefined;
@@ -80,7 +79,7 @@ export const OverviewServices = (props: OverviewServicesProps) => {
     statusLabel: WORKSPACE_STATUS_KEY[workspace.status] === undefined ? t("status.unknown") : t(WORKSPACE_STATUS_KEY[workspace.status]!),
     statusTone: WORKSPACE_STATUS_TONE[workspace.status] ?? "neutral",
     actionLabel: t("overview.services.openWorkspace"),
-    onOpen: () => open(`/agentos/workspaces/${workspace.id}`)
+    route: `/agentos/workspaces/${workspace.id}`
   }];
   const rows: ReadonlyArray<OverviewServicesRow> = isLoading ? [{
     id: "pending-1",
@@ -89,7 +88,6 @@ export const OverviewServices = (props: OverviewServicesProps) => {
     statusLabel: "",
     statusTone: "neutral",
     actionLabel: "",
-    onOpen: () => undefined,
     isSkeleton: true
   }, {
     id: "pending-2",
@@ -98,7 +96,6 @@ export const OverviewServices = (props: OverviewServicesProps) => {
     statusLabel: "",
     statusTone: "neutral",
     actionLabel: "",
-    onOpen: () => undefined,
     isSkeleton: true
   }] : [...appRows, ...workspaceRows];
   const degraded = isLoading ? 0 : rows.filter(item => DEGRADED_TONES.has(item.statusTone)).length;
@@ -107,7 +104,7 @@ export const OverviewServices = (props: OverviewServicesProps) => {
   })} · ${degraded === 0 ? t("overview.services.factDegradedNone") : t("overview.services.factDegraded", {
     count: degraded
   })}`;
-  return <OverviewServicesBase label={label} fact={fact} isLoading={isLoading} rows={rows} />;
+  return <OverviewServicesBase props={{ label, fact, isLoading, rows }} on={{ open }} />;
 };
 
 /** Registry identity for the connected overview services twin. */

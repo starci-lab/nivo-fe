@@ -3,13 +3,13 @@ import { describe, expect, it, vi } from "vitest"
 import { OverviewServicesBase, type OverviewServicesRow } from "./component"
 
 const rows: ReadonlyArray<OverviewServicesRow> = [
-    { id: "app-1", name: "reader-app", detail: "reader-app.nivo.dev", statusLabel: "Running", statusTone: "success", actionLabel: "Open", onOpen: vi.fn() },
-    { id: "workspace-1", name: "reader workspace", detail: "Agent workspace", statusLabel: "Ready", statusTone: "success", actionLabel: "Open workspace", onOpen: vi.fn() },
+    { id: "app-1", name: "reader-app", detail: "reader-app.nivo.dev", statusLabel: "Running", statusTone: "success", actionLabel: "Open", route: "/apps/app-1" },
+    { id: "workspace-1", name: "reader workspace", detail: "Agent workspace", statusLabel: "Ready", statusTone: "success", actionLabel: "Open workspace", route: "/agentos/workspaces/workspace-1" },
 ]
 
 describe("OverviewServicesBase", () => {
     it("draws one row per owned service, each closing on its own action", () => {
-        render(<OverviewServicesBase label="Services" fact="2 answered · nothing degraded" rows={rows} />)
+        render(<OverviewServicesBase props={{ label: "Services", fact: "2 answered · nothing degraded", rows }} />)
 
         expect(screen.getByText("reader-app")).toBeInTheDocument()
         expect(screen.getByText("reader-app.nivo.dev")).toBeInTheDocument()
@@ -18,15 +18,15 @@ describe("OverviewServicesBase", () => {
     })
 
     it("routes the row's own open command from either the name or the action", () => {
-        const onOpen = vi.fn()
-        render(<OverviewServicesBase label="Services" rows={[{ ...rows[0]!, onOpen }]} />)
+        const open = vi.fn()
+        render(<OverviewServicesBase props={{ label: "Services", rows: [rows[0]!] }} on={{ open }} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Open" }))
-        expect(onOpen).toHaveBeenCalledTimes(1)
+        expect(open).toHaveBeenCalledWith("/apps/app-1")
     })
 
     it("disables the row's own control when there is nothing to open yet", () => {
-        render(<OverviewServicesBase label="Services" rows={[{ id: "app-2", name: "new-app", detail: "—", statusLabel: "Not provisioned", statusTone: "neutral", actionLabel: "Not available yet", isDisabled: true, onOpen: vi.fn() }]} />)
+        render(<OverviewServicesBase props={{ label: "Services", rows: [{ id: "app-2", name: "new-app", detail: "—", statusLabel: "Not provisioned", statusTone: "neutral", actionLabel: "Not available yet", isDisabled: true, route: "/apps/app-2" }] }} />)
 
         expect(screen.getByRole("button", { name: "Not available yet" })).toBeDisabled()
     })

@@ -15,39 +15,50 @@ export type OverviewServicesRow = {
   readonly statusTone: BadgeTone;
   readonly actionLabel: string;
   readonly isDisabled?: boolean;
-  readonly onOpen: () => void;
+  readonly route?: string;
   /** Unresolved carrier: the same row shape at rest, each leaf shown loading. */
   readonly isSkeleton?: boolean;
 };
 /** Resolved service rows and the card's own label and fact. */
-export type OverviewServicesProps = {
-  readonly label: string;
-  readonly fact?: string;
-  readonly isLoading?: boolean;
-  readonly rows: ReadonlyArray<OverviewServicesRow>;
+export type OverviewServicesViewProps = {
+  readonly props: {
+    readonly label: string;
+    readonly fact?: string;
+    readonly isLoading?: boolean;
+    readonly rows: ReadonlyArray<OverviewServicesRow>;
+  };
+  readonly on?: {
+    readonly open?: (route: string) => void;
+  };
 };
-const row = (item: OverviewServicesRow) => <div
-  key={item.id}
-  className={OVERVIEW_SERVICES_ROW_CLASS_NAME}
-  data-contract="GAP-3 PADDING-4 PADDING-3"
-  data-row="true"
->
-  <div className={OVERVIEW_SERVICES_COPY_CLASS_NAME} data-contract="GAP-1 FLOW-3" data-copy="true">
-    <TextAction size="sm" onPress={item.onOpen} isSkeleton={item.isSkeleton}>{item.name}</TextAction>
-    <Text size="xs" tone="muted" isSkeleton={item.isSkeleton}>{item.detail}</Text>
-  </div>
-  <div className={OVERVIEW_SERVICES_END_CLASS_NAME} data-contract="GAP-3" data-end="true">
-    <Badge tone={item.statusTone} isSkeleton={item.isSkeleton}>{item.statusLabel}</Badge>
-    <Button size="sm" onPress={item.onOpen} isDisabled={item.isDisabled} isSkeleton={item.isSkeleton}>{item.actionLabel}</Button>
-  </div>
-</div>;
+type OverviewServicesProps = OverviewServicesViewProps;
+const row = (item: OverviewServicesRow, open?: (route: string) => void) => {
+  const route = item.route;
+  const onPress = route === undefined ? undefined : () => open?.(route);
+  return <div
+    key={item.id}
+    className={OVERVIEW_SERVICES_ROW_CLASS_NAME}
+    data-contract="GAP-3 PADDING-4 PADDING-3"
+    data-row="true"
+  >
+    <div className={OVERVIEW_SERVICES_COPY_CLASS_NAME} data-contract="GAP-1 FLOW-3" data-copy="true">
+      <TextAction size="sm" onPress={onPress} isSkeleton={item.isSkeleton}>{item.name}</TextAction>
+      <Text size="xs" tone="muted" isSkeleton={item.isSkeleton}>{item.detail}</Text>
+    </div>
+    <div className={OVERVIEW_SERVICES_END_CLASS_NAME} data-contract="GAP-3" data-end="true">
+      <Badge tone={item.statusTone} isSkeleton={item.isSkeleton}>{item.statusLabel}</Badge>
+      <Button size="sm" onPress={onPress} isDisabled={item.isDisabled} isSkeleton={item.isSkeleton}>{item.actionLabel}</Button>
+    </div>
+  </div>;
+};
 
 /** Draw the things this account runs, one row each, every row closing on its own onward action. */
 export const OverviewServicesBase = (props: OverviewServicesProps) => {
-  const { label, fact, rows, isLoading }: OverviewServicesProps = props;
+  const { props: view, on } = props;
+  const { label, fact, rows, isLoading } = view;
   return <SurfaceListCard label={label} fact={fact} isLoading={isLoading}>
     <div className={OVERVIEW_SERVICES_ROWS_CLASS_NAME} data-contract="BOUNDARY-3" data-overview-services-rows="true">
-      {rows.map(row)}
+      {rows.map(item => row(item, on?.open))}
     </div>
   </SurfaceListCard>;
 };

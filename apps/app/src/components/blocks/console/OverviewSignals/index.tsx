@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { useOverviewData } from "@/modules/overview/context";
+import { useOverviewData } from "@/hooks";
 import type { DomainRow } from "@/modules/api/console";
 import { BILLING_CURRENCY } from "@/modules/config";
 import { OverviewSignalsBase, type OverviewSignalsCell } from "./component";
@@ -149,7 +149,7 @@ export const OverviewSignals = (props: OverviewSignalsProps) => {
   const fact = cells.some(cell => cell.isSkeleton === true) ? undefined : attention === 0 ? t("overview.signals.factNone") : t("overview.signals.fact", {
     count: attention
   });
-  return <OverviewSignalsBase label={label} fact={fact} cells={cells} />;
+  return <OverviewSignalsBase props={{ label, fact, cells }} />;
 };
 
 /** Registry identity for the connected overview signals twin. */

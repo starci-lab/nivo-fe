@@ -12,7 +12,7 @@ vi.mock("next-intl", () => ({
         dateTime: (value: Date) => `date-${value.toISOString().slice(0, 10)}`,
     }),
 }))
-vi.mock("@/modules/overview/context", () => ({ useOverviewData: () => mocks.data }))
+vi.mock("@/hooks", () => ({ useOverviewData: () => mocks.data }))
 
 import { OverviewSignals } from "."
 
