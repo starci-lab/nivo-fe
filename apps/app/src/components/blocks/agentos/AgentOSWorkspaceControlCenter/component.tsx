@@ -363,9 +363,9 @@ export type AgentOSShellOperationRegionProps = {
 export const AgentOSShellOperationRegion = (props: AgentOSShellOperationRegionProps) => {
     const { operations, labels, formatDate, onRecheck, recheckPending }: AgentOSShellOperationRegionProps = props;
     return <>
-        {operations.map(operation => <SurfaceCard key={`receiver:{${operation.installationId},${operation.intentId}}`} label={`${labels.resultSection} Â· ${operation.receiverName}`} fact={operation.observedAt === null ? undefined : formatDate(operation.observedAt)}>
+        {operations.map(operation => <SurfaceCard key={`receiver:{${operation.installationId},${operation.intentId}}`} label={`${labels.resultSection} · ${operation.receiverName}`} fact={operation.observedAt === null ? undefined : formatDate(operation.observedAt)}>
             <Text size="md">{operationValueOf(operation, labels)}</Text>
-            <Text size="sm" tone="muted">{[operation.installationId, operation.intentId, operation.commandId].filter((part): part is string => part !== null).join(" Â· ")}</Text>
+            <Text size="sm" tone="muted">{[operation.installationId, operation.intentId, operation.commandId].filter((part): part is string => part !== null).join(" · ")}</Text>
             {onRecheck === undefined || operation.standing === "confirmed" ? null : <TextAction onPress={() => onRecheck(operation.installationId, operation.intentId)} isPending={recheckPending === true}>{labels.resultRecheck}</TextAction>}
         </SurfaceCard>)}
     </>;
@@ -392,7 +392,7 @@ const AgentOSShellRegions = (props: AgentOSShellRegionsProps) => {
             {view.installations.map(installation => <StaticStateRow key={installation.installationId} item={{
                 id: installation.installationId,
                 label: installation.displayName,
-                description: [installation.moduleKey, installation.status, installation.installationId].filter((part): part is string => part !== null).join(" Â· ")
+                description: [installation.moduleKey, installation.status, installation.installationId].filter((part): part is string => part !== null).join(" · ")
             }}/>)}
         </SurfaceListCard>
         {view.state === "installed-empty" ? <EmptyNotice message={labels.inventoryEmpty} description={labels.inventoryEmptyDescription}/> : null}
@@ -400,7 +400,7 @@ const AgentOSShellRegions = (props: AgentOSShellRegionsProps) => {
         <AgentOSShellOperationRegion operations={view.operations} labels={labels} formatDate={formatDate} onRecheck={onRecheckOperation} recheckPending={retrying}/>
         <div className={SHELL_FACETS_CLASS_NAME}>
             <ShellFacet label={labels.runtimeSection} fact={view.runtimeObservedAt === null ? undefined : formatDate(view.runtimeObservedAt)} value={runtimeValueOf(view, labels)}/>
-            {view.installations.map(installation => <ShellFacet key={"configuration-" + installation.installationId} label={labels.configurationSection + " Â· " + installation.displayName} fact={installation.configuration?.observedAt === null || installation.configuration === null ? undefined : formatDate(installation.configuration.observedAt)} value={installation.configuration === null ? labels.configurationUnsupported : installation.configuration.standing === "current" ? labels.configurationCurrent.replace("{desired}", installation.configuration.desiredDigest ?? "-").replace("{tested}", installation.configuration.testedDigest ?? "-").replace("{applied}", installation.configuration.appliedDigest ?? "-") : installation.configuration.standing === "unsupported" ? labels.configurationUnsupported : labels.configurationAbsent}/>)}
+            {view.installations.map(installation => <ShellFacet key={"configuration-" + installation.installationId} label={labels.configurationSection + " · " + installation.displayName} fact={installation.configuration?.observedAt === null || installation.configuration === null ? undefined : formatDate(installation.configuration.observedAt)} value={installation.configuration === null ? labels.configurationUnsupported : installation.configuration.standing === "current" ? labels.configurationCurrent.replace("{desired}", installation.configuration.desiredDigest ?? "-").replace("{tested}", installation.configuration.testedDigest ?? "-").replace("{applied}", installation.configuration.appliedDigest ?? "-") : installation.configuration.standing === "unsupported" ? labels.configurationUnsupported : labels.configurationAbsent}/>)}
             <ShellFacet label={labels.attentionSection} fact={view.attentionObservedAt === null ? undefined : formatDate(view.attentionObservedAt)} value={view.attentionStanding === "unsupported" || view.attentionStanding === "unresolved" ? labels.attentionUnsupported : facetLimitOf(view.attentionStanding, labels)}/>
             {view.operations.length === 0 ? <ShellFacet label={labels.resultSection} value={labels.resultUnavailable}/> : null}
         </div>
@@ -513,7 +513,7 @@ export const AgentOSWorkspaceControlCenterBase = (props: AgentOSWorkspaceControl
     };
     /** The one tab list; a settling page still shows its chrome, an unsettled access state shows none. */
     const tabs = <DirectionTabs label={labels.tabsLabel} selectedKey={pageState} items={labels.tabs} onSelect={key => onSelectPageState(key as AgentOSWorkspacePageState)} panelId={key => "workspace-panel-" + key} labelVisibility="always" inset="none"/>;
-    const sourceTime = shell.identityObservedAt === null || accessState ? null : <div className={SHELL_SOURCE_TIME_CLASS_NAME}><Badge tone="neutral">{labels.shell.sourceTime}</Badge><Text size="sm" tone="muted">{formatDate(shell.identityObservedAt)}{shell.instanceId === null ? "" : " Â· " + labels.shell.identityInstance + " " + shell.instanceId}</Text></div>;
+    const sourceTime = shell.identityObservedAt === null || accessState ? null : <div className={SHELL_SOURCE_TIME_CLASS_NAME}><Badge tone="neutral">{labels.shell.sourceTime}</Badge><Text size="sm" tone="muted">{formatDate(shell.identityObservedAt)}{shell.instanceId === null ? "" : " · " + labels.shell.identityInstance + " " + shell.instanceId}</Text></div>;
     if (accessState) return <DirectionPage measure="product"><div className={CONTENT_CLASS_NAME} data-contract="GAP-2"><DirectionHeader level={1} eyebrow={pageCopy.eyebrow} title={title} description={<Text size="md" tone="muted">{pageCopy.description}</Text>}/><AgentOSShellAccessNotice state={shell.state} labels={labels.shell} onRetry={onRetryShell} retrying={isShellRetrying}/></div></DirectionPage>;
     /** One tab decides one list of projections; the overview belongs to the connected shell. */
     const sectionsOf = () => {

@@ -295,14 +295,15 @@ const AgentOSSolutionModuleCenterContent = ({
 
 /** Stable typed root for the module-center block: the tabs form by default, the ledger on the module route. */
 export const AgentOSSolutionModuleCenterBase = (props: AgentOSSolutionModuleCenterProps) => {
+  const { ledger, ...rest } = props.props;
   const view: AgentOSSolutionModuleCenterViewProps = {
-    ...props.props,
+    ...rest,
     state: props.state,
     onSelectMode: props.on.onSelectMode,
     onPressCard: props.on.onPressCard,
-    ...(props.props.ledger === undefined ? {} : {
+    ...(ledger === undefined ? {} : {
       ledger: {
-        ...props.props.ledger,
+        ...ledger,
         onRetryInstalled: props.on.onRetryInstalled,
         onRetryCatalogue: props.on.onRetryCatalogue
       }
