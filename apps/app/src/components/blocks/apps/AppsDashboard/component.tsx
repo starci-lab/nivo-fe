@@ -28,8 +28,6 @@ import { FleetRow, type FleetStatus } from "@/components/blocks/provisioning/Fle
  * `presentational-purity` refuses the translation runtime and the formatter alike in this half.
  */
 
-/** One app the account owns, with every word already chosen. */
-export type AppsDashboardProps = AppsDashboardViewProps;
 /** Public API role for OwnedAppRow. */
 export type OwnedAppRow = {
   /** The row's identity, and its React key. */
@@ -106,8 +104,8 @@ export type CatalogueSectionView = {
   readonly note: string;
 };
 
-/** Props for the pure Apps dashboard block. */
-export type AppsDashboardViewProps = {
+/** Plain values already resolved by the connected owner. */
+export type AppsDashboardData = {
   /** The page's own name. */
   readonly title: string;
   /** The sentence under the title, saying what an app is and why the set is open. */
@@ -122,11 +120,37 @@ export type AppsDashboardViewProps = {
   readonly owned: OwnedSectionView;
   /** The catalogue section's settled situation. */
   readonly catalogue: CatalogueSectionView;
-  /** Start a new app from the selected template catalogue row. */
+};
+
+/** Actions emitted by the pure dashboard. */
+export type AppsDashboardActions = {
   readonly onBuildTemplate: (templateKey: string) => void;
-  /** Open one already provisioned Academy resource. */
   readonly onOpenOwnedApp: (siteId: string) => void;
 };
+
+/** One approved drawing; section loading and refusal states stay in the section data. */
+export type AppsDashboardState = "overview";
+
+/** Complete input of the pure dashboard. */
+export type AppsDashboardBaseProps = {
+  readonly state: AppsDashboardState;
+  readonly props: AppsDashboardData;
+  readonly on: AppsDashboardActions;
+};
+
+/** Pure renderer input; section status remains inside the settled data atoms. */
+export type AppsDashboardViewBaseProps = AppsDashboardBaseProps;
+
+/** Legacy view fixture shape retained for existing callers while the connected entry adopts BaseProps. */
+export type AppsDashboardViewProps = AppsDashboardData & { readonly [key: string]: unknown };
+
+/** Public entry accepts the canonical contract and legacy fixture shape during migration. */
+export type AppsDashboardProps = AppsDashboardBaseProps | AppsDashboardViewProps;
+
+const isAppsDashboardBaseProps = (input: AppsDashboardProps): input is AppsDashboardBaseProps =>
+  "state" in input && "props" in input && "on" in input;
+
+const isStringAction = (candidate: unknown): candidate is (value: string) => void => typeof candidate === "function";
 
 /**
  * One resting row, which is the real row asked to rest as itself.
@@ -228,7 +252,7 @@ const groupedOwnedList = (rows: ReadonlyArray<OwnedAppRow>, attentionGroupLabel:
  * @param input - {@link AppsPageViewProps}
  * @returns The page node.
  */
-export const AppsDashboardBase = (props: AppsDashboardProps) => {
+export const AppsDashboardViewBase = (props: AppsDashboardViewBaseProps) => {
   const {
     title,
     lede,
@@ -237,9 +261,8 @@ export const AppsDashboardBase = (props: AppsDashboardProps) => {
     steadyGroupLabel,
     owned,
     catalogue,
-    onBuildTemplate,
-    onOpenOwnedApp
-  }: AppsDashboardViewProps = props;
+  }: AppsDashboardData = props.props;
+  const { onBuildTemplate, onOpenOwnedApp } = props.on;
   const supportedOffer = catalogue.phase === "answered" ? catalogue.offers.find(offer => !offer.actionDisabled) : undefined;
   /*
    * SECTION 1 - the apps this account owns, in every situation the set can be in.
@@ -314,4 +337,25 @@ export const AppsDashboardBase = (props: AppsDashboardProps) => {
 
 
     <Text size="md" tone="muted">{lede}</Text><div><div><>{ownedSection()}</></div><div><>{catalogueSection()}</></div></div></div>;
+};
+
+/** Preserve the former fixture call shape while production uses the typed state/props/on contract. */
+export const AppsDashboardBase = (props: AppsDashboardProps) => {
+  if (isAppsDashboardBaseProps(props)) return <AppsDashboardViewBase {...props} />;
+  const onBuildTemplate = props.onBuildTemplate;
+  const onOpenOwnedApp = props.onOpenOwnedApp;
+  const on = {
+    onBuildTemplate: isStringAction(onBuildTemplate) ? onBuildTemplate : () => undefined,
+    onOpenOwnedApp: isStringAction(onOpenOwnedApp) ? onOpenOwnedApp : () => undefined
+  };
+  const data: AppsDashboardData = {
+    title: props.title,
+    lede: props.lede,
+    buildAppLabel: props.buildAppLabel,
+    attentionGroupLabel: props.attentionGroupLabel,
+    steadyGroupLabel: props.steadyGroupLabel,
+    owned: props.owned,
+    catalogue: props.catalogue
+  };
+  return <AppsDashboardViewBase state="overview" props={data} on={on} />;
 };
