@@ -27,6 +27,10 @@ coverage/
 test-results/
 /nul
 
+# agent output scratch -- draw-lab/preview output is archived out of the repo, never tracked
+.artifacts/
+design-plans/
+
 # the project-owned ledger, Work scratch and the local runtime config (repository-baseline common.gitignore)
 .starciwork/runtime.sqlite*
 .starciwork/_local/

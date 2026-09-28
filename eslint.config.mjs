@@ -67,12 +67,6 @@ export default defineConfig([
             // only teach the next author to move real work into the harness to escape them.
             "**/.artifacts/**/candidate/app/**",
             "**/.artifacts/**/candidate/*.{ts,mjs,js}",
-            // This workspace files its direction labs under `design-plans/` rather than
-            // `.artifacts/`. Same content, same reason: a directional `cases.js` is a comparison
-            // instrument, not product source.
-            "design-plans/**/cases*.js",
-            "design-plans/**/review*.js",
-            "design-plans/**/*.{html,css,log}",
         ],
     },
     {

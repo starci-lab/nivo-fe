@@ -8,6 +8,5 @@
 **/.next
 **/node_modules
 coverage
-design-plans
 e2e
 *.log
