@@ -256,4 +256,58 @@ describe("PurchaseStatusFlowBase", () => {
         expect(html).toContain("This source could not be read.")
         expect(html).not.toContain('"state":"paid"')
     })
+
+    it("keeps optional timeline, operation, outcome, badge and action rows absent", () => {
+        const sparse: PurchaseStatusFlowViewProps = {
+            state: "provisioning",
+            props: {
+                ...head,
+                badge: undefined,
+                primary: {
+                    label: "Provisioning order",
+                    facts: [],
+                    timeline: [{ id: "order", title: "Purchase order observed", mark }],
+                    operation: {
+                        heading: "Current operation",
+                        name: "Admit order",
+                        word: "queued",
+                        tone: "neutral",
+                        progressLabel: "Admit order",
+                        progressValue: 0,
+                    },
+                },
+                rail: {
+                    label: "Confirmed facts",
+                    checks: [],
+                    outcome: { title: "Workspace outcome" },
+                },
+            },
+            on: {},
+        }
+        const html = renderToStaticMarkup(<PurchaseStatusFlowBase {...sparse} />)
+        expect(html).toContain("Purchase order observed")
+        expect(html).toContain("Admit order")
+        expect(html).toContain("Workspace outcome")
+        expect(html).not.toContain("Pending reconciliation")
+    })
+
+    it("keeps a refusal or secondary band without a primary rail action", () => {
+        const withoutPrimaryAction: PurchaseStatusFlowViewProps = {
+            state: "ready",
+            props: {
+                ...provisioningView.props,
+                rail: {
+                    label: "Confirmed facts",
+                    checks: [],
+                    refusalText: "workspace not launchable",
+                    secondaryLink: { label: "Return to workspace list", href: "/agentos/workspaces" }
+                },
+            },
+            on: {},
+        }
+        const html = renderToStaticMarkup(<PurchaseStatusFlowBase {...withoutPrimaryAction} />)
+        expect(html).toContain("workspace not launchable")
+        expect(html).toContain("Return to workspace list")
+        expect(html).not.toContain("Enter workspace")
+    })
 })
