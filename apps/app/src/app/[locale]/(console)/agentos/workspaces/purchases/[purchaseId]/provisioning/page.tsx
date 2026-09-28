@@ -7,9 +7,9 @@ export const dynamic = "force-dynamic"
 type AgentOSWorkspacePurchaseProvisioningRouteProps = { readonly params: Promise<{ readonly purchaseId: string }> }
 
 /** Mount the declared provisioning surface of one purchase identity. */
-const AgentOSWorkspacePurchaseProvisioningRoute = async ({ params }: AgentOSWorkspacePurchaseProvisioningRouteProps) => {
+const Page = async ({ params }: AgentOSWorkspacePurchaseProvisioningRouteProps) => {
     const { purchaseId } = await params
     return <PurchaseStatusFlow purchaseId={purchaseId} surface="provisioning" />
 }
 
-export default AgentOSWorkspacePurchaseProvisioningRoute
+export default Page

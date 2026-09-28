@@ -4,6 +4,6 @@ import OfferSelectionFlow from "@/components/blocks/agentos/OfferSelectionFlow"
 export const dynamic = "force-dynamic"
 
 /** Mount the offer-selection surface of the workspace purchase flow. */
-const AgentOSWorkspaceNewRoute = () => <OfferSelectionFlow />
+const Page = () => <OfferSelectionFlow />
 
-export default AgentOSWorkspaceNewRoute
+export default Page
