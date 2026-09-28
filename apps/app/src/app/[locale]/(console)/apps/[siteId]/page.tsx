@@ -1,4 +1,4 @@
-import { AcademyControlCenterPage } from "@/components/pages/AcademyControlCenterPage"
+import { AcademyControlCenterPage } from "@/features/pages/AcademyControlCenterPage"
 
 /** Dynamic identity supplied by the locale-aware Academy route. */
 export type AcademyControlCenterRouteProps = { readonly params: Promise<{ readonly siteId: string }> }

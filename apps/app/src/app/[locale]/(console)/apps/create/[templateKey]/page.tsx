@@ -1,4 +1,4 @@
-import { TemplateAppProvisioningPage } from "@/components/pages/TemplateAppProvisioningPage"
+import { TemplateAppProvisioningPage } from "@/features/pages/TemplateAppProvisioningPage"
 
 /** Dynamic route values for starting one catalogue template. */
 type TemplateAppCreateRouteProps = { readonly params: Promise<{ readonly templateKey: string }> }

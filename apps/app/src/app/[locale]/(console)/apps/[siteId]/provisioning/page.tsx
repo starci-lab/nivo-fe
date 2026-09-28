@@ -1,4 +1,4 @@
-import { TemplateAppProvisioningPage } from "@/components/pages/TemplateAppProvisioningPage"
+import { TemplateAppProvisioningPage } from "@/features/pages/TemplateAppProvisioningPage"
 
 /** Dynamic route values for resuming one site deployment. */
 type TemplateAppResumeRouteProps = { readonly params: Promise<{ readonly siteId: string }> }

@@ -1,4 +1,4 @@
-import { AppsPage } from "@/components/pages/AppsPage"
+import { AppsPage } from "@/features/pages/AppsPage"
 
 /**
  * The `/apps` route. It mounts one page and makes no drawing decision - LAYOUT-6.
