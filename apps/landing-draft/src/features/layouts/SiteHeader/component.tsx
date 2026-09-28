@@ -1,8 +1,5 @@
-"use client"
-
 import { NivoBrand } from "@nivo/ui"
 import { Button, PageContainer, TextAction } from "@starci/grammar/common"
-import { useEffect, useRef, useState } from "react"
 import { ACTIVATION_LINK, SITE_COPY, SITE_LINKS, SITE_NAVIGATION, type SiteNavigationItem } from "@/modules/landing/site"
 import { SITE_CLASS_NAMES } from "../SiteShell"
 
@@ -40,24 +37,36 @@ const NavigationList = ({ variant, onFollow }: NavigationListProps) => (
     </ul>
 )
 
+/** The disclosure's settled situation: whether the compact navigation is open. */
+export type SiteHeaderBaseData = {
+    readonly open: boolean
+}
+
+/** The disclosure's commands back into the connected half. */
+export type SiteHeaderBaseActions = {
+    readonly toggle: () => void
+    readonly follow: () => void
+    readonly menuTrigger: (element: HTMLButtonElement | null) => void
+}
+
+/** Public API role for SiteHeaderBaseProps. */
+export type SiteHeaderBaseProps = {
+    readonly props: SiteHeaderBaseData
+    readonly on: SiteHeaderBaseActions
+}
+
+/*
+ * The installed `starci-fe/public-component-signature` rule reads the render half's own name and
+ * demands the contract be spelled `<Unit>Props`, so this private alias is the only name the rule
+ * accepts; the exported contract above stays `<Unit>BaseProps`, which the code-pattern check
+ * requires the render half to own. Not exported: one public contract per unit.
+ */
+type SiteHeaderProps = SiteHeaderBaseProps
+
 /** Accessible global navigation with one compact disclosure layer on small screens. */
-export const SiteHeader = () => {
-    const [isOpen, setIsOpen] = useState(false)
-    const triggerRef = useRef<HTMLButtonElement>(null)
+export const SiteHeaderBase = (props: SiteHeaderProps) => {
+    const { props: data, on } = props
     const panelId = "site-mobile-navigation"
-
-    useEffect(() => {
-        if (!isOpen) return undefined
-
-        const closeOnEscape = (event: KeyboardEvent) => {
-            if (event.key !== "Escape") return
-            setIsOpen(false)
-            triggerRef.current?.focus()
-        }
-
-        window.addEventListener("keydown", closeOnEscape)
-        return () => window.removeEventListener("keydown", closeOnEscape)
-    }, [isOpen])
 
     return (
         <header className={SITE_CLASS_NAMES.header}>
@@ -80,13 +89,13 @@ export const SiteHeader = () => {
                 </div>
 
                 <button
-                    ref={triggerRef}
+                    ref={on.menuTrigger}
                     className={SITE_CLASS_NAMES.headerMenuTrigger}
                     type="button"
                     aria-controls={panelId}
-                    aria-expanded={isOpen}
-                    aria-label={isOpen ? SITE_COPY.closeNavigationLabel : SITE_COPY.openNavigationLabel}
-                    onClick={() => setIsOpen((value) => !value)}
+                    aria-expanded={data.open}
+                    aria-label={data.open ? SITE_COPY.closeNavigationLabel : SITE_COPY.openNavigationLabel}
+                    onClick={on.toggle}
                 >
                     <span aria-hidden="true" />
                     <span aria-hidden="true" />
@@ -94,14 +103,14 @@ export const SiteHeader = () => {
                 </button>
             </PageContainer>
 
-            {isOpen ? (
+            {data.open ? (
                 <nav id={panelId} className={SITE_CLASS_NAMES.headerMobileNavigation} aria-label={SITE_COPY.mobileNavigationLabel}>
-                    <NavigationList variant="mobile" onFollow={() => setIsOpen(false)} />
+                    <NavigationList variant="mobile" onFollow={on.follow} />
                     <div className={SITE_CLASS_NAMES.headerMobileActions}>
-                        <TextAction href={SITE_LINKS.login} appearance="section" size="sm" onFollow={() => setIsOpen(false)}>
+                        <TextAction href={SITE_LINKS.login} appearance="section" size="sm" onFollow={on.follow}>
                             {SITE_COPY.login}
                         </TextAction>
-                        <Button href={SITE_LINKS.contact} variant="primary" width="fill" onFollow={() => setIsOpen(false)}>
+                        <Button href={SITE_LINKS.contact} variant="primary" width="fill" onFollow={on.follow}>
                             {SITE_COPY.contact}
                         </Button>
                     </div>
