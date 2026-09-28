@@ -13,9 +13,9 @@ vi.mock("@/components/blocks/provisioning/AgentOSProvisioning", () => ({
     ),
 }))
 
-import { AgentOSPageBase, type AgentOSPageViewProps } from "./component"
+import { AgentOSPageBase, type AgentOSPageLabels } from "./component"
 
-const labels: AgentOSPageViewProps["labels"] = {
+const labels: AgentOSPageLabels = {
     path: "Console path",
     agentos: "AgentOS",
     dashboardDescription: "Manage AgentOS workspaces.",
@@ -33,10 +33,9 @@ describe("AgentOSPageBase", () => {
     it("keeps the dashboard management-only", () => {
         const create = vi.fn()
         const { container } = render(<AgentOSPageBase
-            mode="dashboard"
-            labels={labels}
-            onOpenDashboard={vi.fn()}
-            onCreate={create}
+            state={{ mode: "dashboard" }}
+            props={{ labels }}
+            on={{ openDashboard: vi.fn(), create }}
         />)
         const html = container.innerHTML
         expect(html).toContain("Business modules dashboard")
@@ -50,10 +49,9 @@ describe("AgentOSPageBase", () => {
 
     it("keeps pre-persistence creation on its own page", () => {
         const html = renderToStaticMarkup(<AgentOSPageBase
-            mode="create"
-            labels={labels}
-            onOpenDashboard={vi.fn()}
-            onCreate={vi.fn()}
+            state={{ mode: "create" }}
+            props={{ labels }}
+            on={{ openDashboard: vi.fn(), create: vi.fn() }}
         />)
         expect(html).toContain("Create workspace")
         expect(html).toContain("new:")
@@ -62,11 +60,9 @@ describe("AgentOSPageBase", () => {
 
     it("passes the persisted order id only to resume mode", () => {
         const html = renderToStaticMarkup(<AgentOSPageBase
-            mode="resume"
-            orderId="order-1"
-            labels={labels}
-            onOpenDashboard={vi.fn()}
-            onCreate={vi.fn()}
+            state={{ mode: "resume", orderId: "order-1" }}
+            props={{ labels }}
+            on={{ openDashboard: vi.fn(), create: vi.fn() }}
         />)
         expect(html).toContain("resume:order-1")
         expect(html).toContain("AgentOS order")
@@ -75,9 +71,9 @@ describe("AgentOSPageBase", () => {
 
 describe("AgentOSPageBase", () => {
     it("executes the renamed pure twins across their settled state branches", () => {
-        const agentOsLabels = { path: "Path", agentos: "AgentOS", dashboardDescription: "Manage AgentOS", createTitle: "Create", createDescription: "Create AgentOS", orderTitle: "Order", orderDescription: "Resume order", createAction: "Create" }
-        const agentOsActions = { onOpenDashboard: vi.fn(), onCreate: vi.fn() }
-        expect(AgentOSPageBase({ mode: "dashboard", labels: agentOsLabels, ...agentOsActions })).toBeTruthy()
-        expect(AgentOSPageBase({ mode: "resume", orderId: "order-1", labels: agentOsLabels, ...agentOsActions })).toBeTruthy()
+        const agentOsLabels: AgentOSPageLabels = { path: "Path", agentos: "AgentOS", dashboardDescription: "Manage AgentOS", createTitle: "Create", createDescription: "Create AgentOS", orderTitle: "Order", orderDescription: "Resume order", createAction: "Create" }
+        const agentOsCommands = { openDashboard: vi.fn(), create: vi.fn() }
+        expect(AgentOSPageBase({ state: { mode: "dashboard" }, props: { labels: agentOsLabels }, on: agentOsCommands })).toBeTruthy()
+        expect(AgentOSPageBase({ state: { mode: "resume", orderId: "order-1" }, props: { labels: agentOsLabels }, on: agentOsCommands })).toBeTruthy()
     })
 })

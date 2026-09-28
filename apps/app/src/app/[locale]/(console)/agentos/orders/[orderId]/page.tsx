@@ -1,4 +1,4 @@
-import { AgentOSPage } from "@/components/pages/AgentOSPage"
+import { AgentOSPage } from "@/features/pages/AgentOSPage"
 
 /** Payment and provisioning status must be read from the current owner-scoped snapshot. */
 export const dynamic = "force-dynamic"
@@ -7,9 +7,9 @@ export const dynamic = "force-dynamic"
 type AgentOSOrderRouteProps = { readonly params: Promise<{ readonly orderId: string }> }
 
 /** Mount the AgentOS product surface for one existing order. */
-const AgentOSOrderRoute = async ({ params }: AgentOSOrderRouteProps) => {
+const Page = async ({ params }: AgentOSOrderRouteProps) => {
     const { orderId } = await params
     return <AgentOSPage mode="resume" orderId={orderId} />
 }
 
-export default AgentOSOrderRoute
+export default Page
