@@ -1,6 +1,6 @@
 import { WalletPage } from "@/components/pages/WalletPage"
 
 /** Provider return route; the connected wallet reconciles persisted balance evidence. */
-const WalletTopUpReturnPage = () => <WalletPage />
+const Page = () => <WalletPage />
 
-export default WalletTopUpReturnPage
+export default Page

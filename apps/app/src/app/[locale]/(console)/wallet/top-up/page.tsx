@@ -1,6 +1,6 @@
 import { WalletPage } from "@/components/pages/WalletPage"
 
 /** Deep link that opens the wallet's accepted top-up modal. */
-const WalletTopUpPage = () => <WalletPage />
+const Page = () => <WalletPage />
 
-export default WalletTopUpPage
+export default Page

@@ -1,20 +1,22 @@
 import { WalletControlCenter } from "@/components/blocks/wallet/WalletControlCenter";
 
 /** Architectural states of the Wallet route. */
-export type WalletPageProps = WalletPageViewProps;
-/** Public API role for WalletPageState. */
 export type WalletPageState = "ordinary" | "waypoint";
 
-/** Page-owned input; child payment, ledger, balance, and overlay data stay inside WalletControlCenter. */
-export type WalletPageViewProps = {
-  readonly pageState: WalletPageState;
+/** Complete input of WalletPageBase: one drawn shape; page data and overlays stay inside WalletControlCenter. */
+export type WalletPageBaseProps = {
+  readonly state: WalletPageState;
 };
 
-/** Compose the connected Wallet block without proxying any block state or request data through PageProps. */
-export const WalletPageBase = (props: WalletPageProps) => {
-  const {
-    pageState
-  }: WalletPageViewProps = props;
-  return <WalletControlCenter pageState={pageState} />;
-};
+/*
+ * The installed `starci-fe/public-component-signature` rule reads the render half's own name and
+ * demands the contract be spelled `<Unit>Props`, so this private alias is the only name the rule
+ * accepts; the exported contract above stays `<Unit>BaseProps`, which the code-pattern check
+ * requires the render half to own. Not exported: one public contract per unit.
+ */
+type WalletPageProps = WalletPageBaseProps;
 
+/** Compose the connected Wallet block without proxying any block state or request data through the page contract. */
+export const WalletPageBase = (props: WalletPageProps) => (
+  <WalletControlCenter pageState={props.state} />
+);

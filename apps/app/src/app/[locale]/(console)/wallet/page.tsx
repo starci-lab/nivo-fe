@@ -5,6 +5,6 @@ import { WalletPage } from "@/components/pages/WalletPage"
  *
  * @returns The route.
  */
-const WalletRoute = () => <WalletPage />
+const Page = () => <WalletPage />
 
-export default WalletRoute
+export default Page

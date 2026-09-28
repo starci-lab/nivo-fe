@@ -11,7 +11,7 @@ import { WalletPageBase } from "./component"
 
 describe("WalletPageBase", () => {
     it("keeps only the Wallet page architecture axis above the connected Wallet block", () => {
-        expect(renderToStaticMarkup(<WalletPageBase pageState="ordinary" />)).toContain("ordinary")
-        expect(renderToStaticMarkup(<WalletPageBase pageState="waypoint" />)).toContain("waypoint")
+        expect(renderToStaticMarkup(<WalletPageBase state="ordinary" />)).toContain("ordinary")
+        expect(renderToStaticMarkup(<WalletPageBase state="waypoint" />)).toContain("waypoint")
     })
 })
