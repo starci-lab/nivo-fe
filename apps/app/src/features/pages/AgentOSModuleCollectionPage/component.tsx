@@ -13,7 +13,10 @@ import {
 } from "./classNames";
 
 /** Public API role for AgentOSModuleCollectionPageProps. */
-export type AgentOSModuleCollectionPageProps = AgentOSModuleCollectionPageViewProps;
+export type AgentOSModuleCollectionPageProps = {
+  readonly props: AgentOSModuleCollectionPageViewProps;
+  readonly on: AgentOSModuleCollectionPageViewActions;
+};
 type AgentOSModuleCollectionPageViewProps = {
   readonly workspaceId: string;
   readonly shell: AgentOSShellView;
@@ -32,12 +35,14 @@ type AgentOSModuleCollectionPageViewProps = {
     readonly runtimeUnavailable: string;
     readonly runtimeUnknown: string;
   };
-  readonly formatDate: (value: string) => string;
   readonly createHref: string;
+  readonly isShellRetrying?: boolean;
+};
+type AgentOSModuleCollectionPageViewActions = {
   readonly onBack: () => void;
   readonly onRetryShell?: () => void;
   readonly onRetryOperation?: (installationId: string, intentId: string) => void;
-  readonly isShellRetrying?: boolean;
+  readonly formatDate: (value: string) => string;
 };
 
 /** The one sentence a limited facet owes its reader, chosen by that source's own standing. */
@@ -171,13 +176,15 @@ export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPa
     shell,
     shellLabels,
     labels,
-    formatDate,
     createHref,
+    isShellRetrying
+  }: AgentOSModuleCollectionPageViewProps = props.props;
+  const {
     onBack,
     onRetryShell,
     onRetryOperation,
-    isShellRetrying
-  }: AgentOSModuleCollectionPageViewProps = props;
+    formatDate
+  }: AgentOSModuleCollectionPageViewActions = props.on;
   const accessState = shell.state === "sign-in-required" || shell.state === "access-unverified" || shell.state === "access-denied";
   const sourceStatement = accessState || shell.inventoryObservedAt === null ? null : labels.checkedAt.replace("{time}", formatDate(shell.inventoryObservedAt));
   return (

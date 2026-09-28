@@ -2,11 +2,10 @@
 
 import { AgentOSModuleCollectionPageBase } from "./component";
 import { projectAgentOSShellView, type AgentOSShellView, type AgentOSWorkspaceControlCenterShellLabels } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter/component";
-import { useAgentOSShell, useQueryMyAgentosModuleInstallationsSwr, useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks";
+import { useAgentOSShell, useQueryMyAgentosModuleInstallationsSwr, useQueryMyAgentWorkspaceControlCenterSwr, useRouter } from "@/hooks";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import { useRouter } from "@/i18n/navigation";
 type AgentOSModuleCollectionPageProps = {
   readonly workspaceId: string;
 };
@@ -95,21 +94,33 @@ export const AgentOSModuleCollectionPage = (props: AgentOSModuleCollectionPagePr
     installEntry: s("installEntry")
   };
   const shellView: AgentOSShellView = projectAgentOSShellView(shell, shellLabels);
-  return <AgentOSModuleCollectionPageBase workspaceId={workspaceId} shell={shellView} shellLabels={shellLabels} labels={{
-    path: t("path"),
-    workspace: t("workspace"),
-    title: t("title"),
-    checkedAt: t("checkedAt"),
-    installedIn: t("installedIn"),
-    browseCatalog: t("browseCatalog"),
-    installFlow: t("installFlow"),
-    runtimeLine: t("runtimeLine"),
-    runtimeProvisioned: t("runtimeProvisioned"),
-    runtimeNotProvisioned: t("runtimeNotProvisioned"),
-    runtimeUnavailable: t("runtimeUnavailable"),
-    runtimeUnknown: t("runtimeUnknown")
-  }} formatDate={value => format.dateTime(new Date(value), {
-    dateStyle: "medium",
-    timeStyle: "short"
-  })} createHref={`/${locale}/agentos/workspaces/${workspaceId}/modules/create`} onBack={() => router.push(`/agentos/workspaces/${workspaceId}`)} onRetryShell={retryShell} onRetryOperation={retryOperation} isShellRetrying={shellView.state === "retrying"}/>;
+  return <AgentOSModuleCollectionPageBase props={{
+    workspaceId,
+    shell: shellView,
+    shellLabels,
+    labels: {
+      path: t("path"),
+      workspace: t("workspace"),
+      title: t("title"),
+      checkedAt: t("checkedAt"),
+      installedIn: t("installedIn"),
+      browseCatalog: t("browseCatalog"),
+      installFlow: t("installFlow"),
+      runtimeLine: t("runtimeLine"),
+      runtimeProvisioned: t("runtimeProvisioned"),
+      runtimeNotProvisioned: t("runtimeNotProvisioned"),
+      runtimeUnavailable: t("runtimeUnavailable"),
+      runtimeUnknown: t("runtimeUnknown")
+    },
+    createHref: `/${locale}/agentos/workspaces/${workspaceId}/modules/create`,
+    isShellRetrying: shellView.state === "retrying"
+  }} on={{
+    onBack: () => router.push(`/agentos/workspaces/${workspaceId}`),
+    onRetryShell: retryShell,
+    onRetryOperation: retryOperation,
+    formatDate: value => format.dateTime(new Date(value), {
+      dateStyle: "medium",
+      timeStyle: "short"
+    })
+  }}/>;
 };

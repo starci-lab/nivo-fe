@@ -5,8 +5,8 @@ import { AgentOSModuleCollectionPageBase } from "./component"
 import { MODULE_COLLECTION_GRID_CLASS_NAME, MODULE_COLLECTION_PAGE_CLASS_NAME } from "./classNames"
 
 type PageProps = ComponentProps<typeof AgentOSModuleCollectionPageBase>
-type ShellView = PageProps["shell"]
-type ShellLabels = PageProps["shellLabels"]
+type ShellView = PageProps["props"]["shell"]
+type ShellLabels = PageProps["props"]["shellLabels"]
 
 const labels = {
     path: "Breadcrumb",
@@ -94,7 +94,7 @@ const shellView = (overrides: Partial<ShellView> = {}): ShellView => ({
 
 const renderPage = (shell: ShellView, onRetryShell = vi.fn()) => {
     const back = vi.fn()
-    const view = render(<AgentOSModuleCollectionPageBase workspaceId="workspace-1" shell={shell} shellLabels={shellLabels} labels={labels} formatDate={value => value} createHref="/en/agentos/workspaces/workspace-1/modules/create" onBack={back} onRetryShell={onRetryShell}/>)
+    const view = render(<AgentOSModuleCollectionPageBase props={{ workspaceId: "workspace-1", shell, shellLabels, labels, createHref: "/en/agentos/workspaces/workspace-1/modules/create" }} on={{ onBack: back, onRetryShell, formatDate: value => value }}/>)
     return { back, view, onRetryShell }
 }
 
