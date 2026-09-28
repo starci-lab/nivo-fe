@@ -30,7 +30,8 @@ const VIEW: AdministratorRevocationDialogBaseProps["props"] = {
     refusedLabel: "This action cannot be carried out.",
     undecidedLabel: "This action could not be completed. Please try again.",
     retryLabel: "Try again",
-    stage: "confirm"
+    stage: "confirm",
+    isOpen: false
 }
 
 /** The asking face, before any member has been chosen. */
@@ -117,17 +118,16 @@ const AdministratorRevocationHarness = ({ props, onConfirm, onMemberChange, onRe
     return <>
         <button type="button" onClick={() => setIsOpen(true)}>{OPEN_LABEL}</button>
         <AdministratorRevocationDialogBase
-            props={{ ...VIEW, ...props, memberId }}
+            props={{ ...VIEW, ...props, memberId, isOpen }}
             on={{
                 confirm: onConfirm,
                 memberChange: (next: string | null) => {
                     setMemberId(next)
                     onMemberChange?.(next)
                 },
-                retry: onRetry
+                retry: onRetry,
+                onOpenChange: setIsOpen
             }}
-            isOpen={isOpen}
-            onOpenChange={setIsOpen}
         />
     </>
 }
