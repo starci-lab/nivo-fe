@@ -4,7 +4,7 @@ import { NivoBrand } from "@nivo/ui"
 import { Button, PageContainer, TextAction } from "@starci/grammar/common"
 import { useEffect, useRef, useState } from "react"
 import { ACTIVATION_LINK, SITE_COPY, SITE_LINKS, SITE_NAVIGATION, type SiteNavigationItem } from "@/modules/landing/site"
-import { SITE_CLASS_NAMES } from "../SiteShell/classNames"
+import { SITE_CLASS_NAMES } from "../SiteShell"
 
 const isNavigationGroup = (item: SiteNavigationItem): item is Extract<SiteNavigationItem, { readonly children: ReadonlyArray<unknown> }> => "children" in item
 

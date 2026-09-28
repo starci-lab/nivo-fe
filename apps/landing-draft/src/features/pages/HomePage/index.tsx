@@ -4,7 +4,7 @@ import { Button, Heading, PageContainer, Text, TextAction } from "@starci/gramma
 import { HOMEPAGE_COPY, HOMEPAGE_NEXT_PATHS, HOMEPAGE_STRUCTURED_DATA } from "@/modules/landing/homepage"
 import { SITE_LINKS } from "@/modules/landing/site"
 import { ProcessFlow, SectionIntro, SITE_CLASS_NAMES, SiteMain } from "@/features/layouts/SiteShell"
-import { HomeMotionHeroParallax, HomeMotionHeroReveal, HomeMotionRoleCard, HomeMotionSectionReveal } from "@/features/layouts/SiteShell/HomeMotion"
+import { HomeMotionHeroParallax, HomeMotionHeroReveal, HomeMotionRoleCard, HomeMotionSectionReveal } from "@/components/blocks/landing/HomeMotion"
 
 const COMMERCIAL_ROUTE_ICONS = ["search", "code", "complete"] as const
 
