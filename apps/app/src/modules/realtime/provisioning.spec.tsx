@@ -1,4 +1,4 @@
-import { act } from "react"
+﻿import { act } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest"
 
@@ -10,7 +10,7 @@ vi.mock("socket.io-client", () => ({ io: vi.fn(() => {
     return { on: (event: string, handler: Handler) => { socket.handlers.set(event, handler) }, removeAllListeners: vi.fn(), disconnect: socket.disconnect, emit: socket.emit }
 }) }))
 
-import useProvisioningRealtime from "./provisioning"
+import useProvisioningRealtime from "@/hooks/realtime/useProvisioningRealtime"
 
 type ProbeProps = { readonly token: string | null; readonly target: Parameters<typeof useProvisioningRealtime>[0]["target"] }
 
