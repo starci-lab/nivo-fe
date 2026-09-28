@@ -3,7 +3,6 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { useSession } from "@/modules/auth/session";
 import type {
   CollabApprovalCardView,
   CollabApprovalDecision,
@@ -24,6 +23,7 @@ import {
   useQueryCollabTasksSwr,
   useQueryMyAgentWorkspacesSwr,
   useRouter,
+  useSession,
   type CollabTasksFilter,
 } from "@/hooks";
 import {

@@ -73,11 +73,9 @@ vi.mock("next-intl", () => ({
 vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(world.search),
 }));
-vi.mock("@/modules/auth/session", () => ({
-  useSession: () => ({ state: world.session }),
-}));
 vi.mock("@/hooks", () => ({
   useCollabLive: hooks.live,
+  useSession: () => ({ state: world.session }),
   useCollabOfficeTransport: () => ({ reconcileRequest: hooks.reconcile }),
   useMutateCollabAcceptInvitationSwr: hooks.accept,
   useMutateCollabInviteByEmailSwr: hooks.invite,
