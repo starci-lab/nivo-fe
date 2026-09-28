@@ -5,6 +5,6 @@ import { LandingPage } from "@/features/pages/LandingPage"
  *
  * @returns The route.
  */
-const LandingRoute = () => <LandingPage />
+const Page = () => <LandingPage />
 
-export default LandingRoute
+export default Page

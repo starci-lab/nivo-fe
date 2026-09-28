@@ -9,6 +9,6 @@ import { CanonicalIdeaUnavailable } from "@/features/pages/LandingPage"
  *
  * @returns The route.
  */
-const IdeaDetailRoute = () => <CanonicalIdeaUnavailable />
+const Page = () => <CanonicalIdeaUnavailable />
 
-export default IdeaDetailRoute
+export default Page
