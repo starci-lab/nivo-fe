@@ -1,4 +1,4 @@
-import { WalletPage } from "@/components/pages/WalletPage"
+import { WalletPage } from "@/features/pages/WalletPage"
 
 /** Deep link that opens the wallet's accepted top-up modal. */
 const Page = () => <WalletPage />
