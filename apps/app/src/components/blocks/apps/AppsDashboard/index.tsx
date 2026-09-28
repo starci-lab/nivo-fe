@@ -2,8 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { fleetResourceHref, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
-import { useQueryCatalogItemsSwr, useQueryMyCatalogOrdersSwr, useQueryMyExpertSitesSwr, useQueryMyInstancesSwr } from "@/hooks";
-import { useRouter } from "@/i18n/navigation";
+import { useQueryCatalogItemsSwr, useQueryMyCatalogOrdersSwr, useQueryMyExpertSitesSwr, useQueryMyInstancesSwr, useRouter } from "@/hooks";
 import type { CatalogItemRow } from "@/modules/api/console";
 import { ACADEMY_HOST_SUFFIX, BILLING_CURRENCY } from "@/modules/config";
 import { AppsDashboardBase, type CatalogueSectionView, type OwnedAppRow, type OwnedSectionView } from "./component";
@@ -225,5 +224,13 @@ export const AppsDashboard = (props: AppsDashboardProps) => {
   const openOwnedApp = (siteId: string) => {
     router.push(fleetResourceHref("site", siteId));
   };
-  return <AppsDashboardBase title={t("apps.title")} lede={t("apps.lede")} buildAppLabel={t("apps.buildApp")} attentionGroupLabel={t("apps.attentionGroup")} steadyGroupLabel={t("apps.steadyGroup")} owned={ownedView()} catalogue={catalogueView()} onBuildTemplate={buildTemplate} onOpenOwnedApp={openOwnedApp} />;
+  return <AppsDashboardBase state="overview" props={{
+    title: t("apps.title"),
+    lede: t("apps.lede"),
+    buildAppLabel: t("apps.buildApp"),
+    attentionGroupLabel: t("apps.attentionGroup"),
+    steadyGroupLabel: t("apps.steadyGroup"),
+    owned: ownedView(),
+    catalogue: catalogueView()
+  }} on={{ onBuildTemplate: buildTemplate, onOpenOwnedApp: openOwnedApp }} />;
 };
