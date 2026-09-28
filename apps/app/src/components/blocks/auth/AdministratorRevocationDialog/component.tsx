@@ -48,14 +48,14 @@ export type AdministratorRevocationDialogBaseProps = {
         readonly undecidedLabel: string;
         readonly retryLabel: string;
         readonly stage: AdministratorRevocationStage;
+        readonly isOpen: boolean;
     };
-    readonly on?: {
+    readonly on: {
+        readonly onOpenChange: (isOpen: boolean) => void;
         readonly memberChange?: (memberId: string | null) => void;
         readonly confirm?: () => void;
         readonly retry?: () => void;
     };
-    readonly isOpen: boolean;
-    readonly onOpenChange: (isOpen: boolean) => void;
 };
 
 /*
@@ -115,20 +115,20 @@ export const AdministratorRevocationDialogBase = (props: AdministratorRevocation
         refusedLabel,
         undecidedLabel,
         retryLabel,
-        stage
+        stage,
+        isOpen
     }: AdministratorRevocationDialogBaseProps["props"] = props.props;
     const outcome = stage === "pending" ? pendingLabel : stage === "applied" ? appliedLabel : stage === "refused" ? refusedLabel : stage === "undecided" ? undecidedLabel : null;
     const isChoosing = stage === "ready";
     const isConfirming = stage === "confirm";
-    const isPending = stage === "pending";
     const canChoose = isChoosing && !isMemberPending && memberNotice === null;
     return <Dialog
         title={title}
         description={description}
-        isOpen={props.isOpen}
-        onOpenChange={props.onOpenChange}
-        isDismissable={!isPending}
-        isKeyboardDismissDisabled={isPending}
+        isOpen={isOpen}
+        onOpenChange={props.on.onOpenChange}
+        isDismissable={stage !== "pending"}
+        isKeyboardDismissDisabled={stage === "pending"}
         footer={(close: () => void) => {
             if (stage === "undecided") {
                 return <Button variant="primary" onPress={() => props.on?.retry?.()}>{retryLabel}</Button>;
@@ -137,8 +137,8 @@ export const AdministratorRevocationDialogBase = (props: AdministratorRevocation
                 return <Button variant="outline" onPress={close}>{cancelLabel}</Button>;
             }
             return <>
-                <Button variant="outline" isDisabled={isPending} onPress={close}>{cancelLabel}</Button>
-                <Button variant="primary" isPending={isPending} isDisabled={isPending || (isChoosing && (!canChoose || memberId === null))} onPress={() => props.on?.confirm?.()}>{isConfirming || isPending ? confirmLabel : continueLabel}</Button>
+                <Button variant="outline" isDisabled={stage === "pending"} onPress={close}>{cancelLabel}</Button>
+                <Button variant="primary" isPending={stage === "pending"} isDisabled={stage === "pending" || (isChoosing && (!canChoose || memberId === null))} onPress={() => props.on?.confirm?.()}>{isConfirming || stage === "pending" ? confirmLabel : continueLabel}</Button>
             </>;
         }}
     >

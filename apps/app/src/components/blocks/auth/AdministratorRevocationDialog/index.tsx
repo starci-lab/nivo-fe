@@ -119,7 +119,8 @@ export const AdministratorRevocationDialog = (props: AdministratorRevocationDial
     refusedLabel: t("account.administratorEnding.refused"),
     undecidedLabel: t("account.administratorEnding.undecided"),
     retryLabel: t("account.administratorEnding.retry"),
-    stage
+    stage,
+    isOpen
   }} on={{
     memberChange: (next: string | null) => {
       if (next !== (selected?.memberId ?? null)) {
@@ -134,8 +135,8 @@ export const AdministratorRevocationDialog = (props: AdministratorRevocationDial
       }
       submit();
     },
-    retry: submit
-  }} isOpen={isOpen} onOpenChange={(next: boolean) => {
+    retry: submit,
+    onOpenChange: (next: boolean) => {
     if (!next) {
       if (stage === "confirm") {
         setStage("ready");
@@ -145,5 +146,6 @@ export const AdministratorRevocationDialog = (props: AdministratorRevocationDial
       setSelected(null);
     }
     onOpenChange(next);
+    }
   }} />;
 };

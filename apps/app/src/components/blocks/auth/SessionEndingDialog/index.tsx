@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { useSession } from "@/modules/auth/session";
+import { useRouter, useSession } from "@/hooks";
 import { SessionEndingDialogBase } from "./component";
 
 /**
@@ -79,8 +78,10 @@ export const SessionEndingDialog = (props: SessionEndingDialogProps) => {
     cancelLabel: t("account.sessionEnding.cancel"),
     confirmLabel: t("account.sessionEnding.confirm"),
     pendingLabel: t("account.sessionEnding.pending"),
-    isPending
+    isPending,
+    isOpen
   }} on={{
-    confirm
-  }} isOpen={isOpen} onOpenChange={onOpenChange} />;
+    confirm,
+    onOpenChange
+  }} />;
 };

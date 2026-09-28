@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/hooks";
 import { ReturnNoticeBase } from "./component";
 
 /** The landing notice resolves everything it draws, so it takes no props of its own. */

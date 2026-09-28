@@ -1,4 +1,5 @@
 import { Button, Dialog, Text } from "@starci/grammar/common";
+import { SlotView } from "@nivo/ui";
 
 /** Resolved every-browser confirmation shown over the console. */
 export type SessionEndingDialogBaseProps = {
@@ -11,12 +12,12 @@ export type SessionEndingDialogBaseProps = {
     readonly pendingLabel: string;
     /** The ending request is in flight; the scope it was sent for is already fixed. */
     readonly isPending: boolean;
+    readonly isOpen: boolean;
   };
-  readonly on?: {
+  readonly on: {
     readonly confirm?: () => void;
+    readonly onOpenChange: (isOpen: boolean) => void;
   };
-  readonly isOpen: boolean;
-  readonly onOpenChange: (isOpen: boolean) => void;
 };
 
 /*
@@ -50,13 +51,14 @@ export const SessionEndingDialogBase = (props: SessionEndingDialogProps) => {
     cancelLabel,
     confirmLabel,
     pendingLabel,
-    isPending
+    isPending,
+    isOpen
   }: SessionEndingDialogBaseProps["props"] = props.props;
   return <Dialog
     title={title}
     description={description}
-    isOpen={props.isOpen}
-    onOpenChange={props.onOpenChange}
+    isOpen={isOpen}
+    onOpenChange={props.on.onOpenChange}
     isDismissable={!isPending}
     isKeyboardDismissDisabled={isPending}
     footer={(close: () => void) => <>
@@ -65,6 +67,12 @@ export const SessionEndingDialogBase = (props: SessionEndingDialogProps) => {
     </>}
   >
     <Text tone="muted">{scopeNote}</Text>
-    {isPending ? <Text live="polite">{pendingLabel}</Text> : null}
+    <SlotView
+      slot={{ items: isPending }}
+      placeholder={false}
+      labels={{ empty: pendingLabel, forbidden: pendingLabel, error: pendingLabel, retry: pendingLabel }}
+    >
+      {(requestIsPending) => requestIsPending ? <Text live="polite">{pendingLabel}</Text> : null}
+    </SlotView>
   </Dialog>;
 };

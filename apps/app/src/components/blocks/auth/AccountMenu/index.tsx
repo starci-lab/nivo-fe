@@ -3,8 +3,7 @@
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { useQueryCollabOfficeSwr } from "@/hooks";
-import { useSession } from "@/modules/auth/session";
+import { useQueryCollabOfficeSwr, useSession } from "@/hooks";
 import { AdministratorRevocationDialog } from "@/components/blocks/auth/AdministratorRevocationDialog";
 import { ReturnNotice } from "@/components/blocks/auth/ReturnNotice";
 import { SessionEndingDialog } from "@/components/blocks/auth/SessionEndingDialog";
@@ -43,16 +42,7 @@ export const AccountMenu = (props: AccountMenuProps) => {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isSessionEndingOpen, setIsSessionEndingOpen] = useState(false);
   const [isAdministratorEndingOpen, setIsAdministratorEndingOpen] = useState(false);
-  return <AccountMenuBase props={{
-    label: t("account.label"),
-    signOutLabel: t("account.signOut"),
-    signOutEverywhereLabel: t("account.signOutEverywhere"),
-    isSigningOut,
-    ...(mayEndPrincipalSessions ? {
-      administratorEnding: {
-        label: t("account.endSessionsForPerson")
-      }
-    } : {}),
+  return <AccountMenuBase state={{
     sessionEndingControl: SessionEndingDialog,
     sessionEndingControlProps: {
       isOpen: isSessionEndingOpen,
@@ -65,6 +55,16 @@ export const AccountMenu = (props: AccountMenuProps) => {
     },
     returnNoticeControl: ReturnNotice,
     returnNoticeControlProps: {}
+  }} props={{
+    label: t("account.label"),
+    signOutLabel: t("account.signOut"),
+    signOutEverywhereLabel: t("account.signOutEverywhere"),
+    isSigningOut,
+    ...(mayEndPrincipalSessions ? {
+      administratorEnding: {
+        label: t("account.endSessionsForPerson")
+      }
+    } : {}),
   }} on={{
     signOut: () => {
       setIsSigningOut(true);

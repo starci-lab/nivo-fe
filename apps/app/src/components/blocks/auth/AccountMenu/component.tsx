@@ -9,6 +9,15 @@ import type { SessionEndingDialogProps } from "@/components/blocks/auth/SessionE
 
 /** Resolved signed-in account actions shown in the global navbar. */
 export type AccountMenuBaseProps = {
+  readonly state: {
+    /** Child renderers and their resolved control atoms stay in the composition state. */
+    readonly sessionEndingControl: ComponentType<SessionEndingDialogProps>;
+    readonly sessionEndingControlProps: SessionEndingDialogProps;
+    readonly administratorRevocationControl: ComponentType<AdministratorRevocationDialogProps>;
+    readonly administratorRevocationControlProps: AdministratorRevocationDialogProps;
+    readonly returnNoticeControl: ComponentType<ReturnNoticeProps>;
+    readonly returnNoticeControlProps: ReturnNoticeProps;
+  };
   readonly props: {
     readonly label: string;
     readonly signOutLabel: string;
@@ -22,22 +31,6 @@ export type AccountMenuBaseProps = {
       readonly label: string;
       readonly isDisabled?: boolean;
     };
-    /** The every-browser confirmation this menu opens, resolved by the connected half. */
-    readonly sessionEndingControl: ComponentType<SessionEndingDialogProps>;
-    readonly sessionEndingControlProps: SessionEndingDialogProps;
-    /**
-     * The scoped administrator ending this menu opens. Handed in beside the entry above, because the
-     * route and the membership that decide the entry's words are the connected half's to resolve.
-     */
-    readonly administratorRevocationControl: ComponentType<AdministratorRevocationDialogProps>;
-    readonly administratorRevocationControlProps: AdministratorRevocationDialogProps;
-    /**
-     * The landing's unavailable-return notice. Handed in beside the two Dialogs above for the same
-     * reason: the address that decides whether it has anything to say, and the words it says, are
-     * the connected half's to resolve.
-     */
-    readonly returnNoticeControl: ComponentType<ReturnNoticeProps>;
-    readonly returnNoticeControlProps: ReturnNoticeProps;
   };
   readonly on?: {
     readonly signOut?: () => void;
@@ -72,13 +65,15 @@ export const AccountMenuBase = (props: AccountMenuProps) => {
     signOutEverywhereLabel,
     isSigningOut,
     administratorEnding,
+  }: AccountMenuBaseProps["props"] = props.props;
+  const {
     sessionEndingControl: SessionEndingControl,
     sessionEndingControlProps,
     administratorRevocationControl: AdministratorRevocationControl,
     administratorRevocationControlProps,
     returnNoticeControl: ReturnNoticeControl,
     returnNoticeControlProps
-  }: AccountMenuBaseProps["props"] = props.props;
+  } = props.state;
   const items: ReadonlyArray<DropdownBranchItemData<AccountMenuAction>> = [
     {
       id: "sign-out",
