@@ -1,6 +1,6 @@
 import { Breadcrumbs } from "@nivo/ui";
 import { Button, EmptyNotice, PageContainer, SectionHeader, StaticStateRow, SurfaceCard, SurfaceListCard, Text, TextAction } from "@starci/grammar/common";
-import { AGENT_OS_SIGN_IN_HREF, AgentOSShellOperationRegion, type AgentOSShellView, type AgentOSWorkspaceControlCenterShellLabels } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter/component";
+import { AGENT_OS_SIGN_IN_HREF, AgentOSShellOperationRegion, type AgentOSShellView, type AgentOSWorkspaceControlCenterShellLabels } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter";
 import {
   MODULE_COLLECTION_GRID_CLASS_NAME,
   MODULE_COLLECTION_PAGE_CLASS_NAME,
