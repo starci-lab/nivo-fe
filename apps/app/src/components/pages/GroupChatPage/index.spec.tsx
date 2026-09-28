@@ -10,10 +10,12 @@ import type { GroupChatPageActions, GroupChatPageLabels, GroupChatPageView } fro
  * (conversation assembly, @module and role parsing) stay real.
  */
 type ProbeProps = {
-  readonly isRailOpen: boolean;
-  readonly isCompactMembers: boolean;
-  readonly view: GroupChatPageView;
-  readonly labels: GroupChatPageLabels;
+  readonly state: {
+    readonly isRailOpen: boolean;
+    readonly isCompactMembers?: boolean;
+    readonly labels: GroupChatPageLabels;
+  };
+  readonly props: { readonly view: GroupChatPageView };
   readonly on: GroupChatPageActions;
 };
 
@@ -56,7 +58,7 @@ vi.mock("./component", async () => {
     ...actual,
     GroupChatPageBase: (props: ProbeProps) => {
       probe.last = props;
-      return <div data-testid="group-chat-probe">{props.view.officeState}</div>;
+      return <div data-testid="group-chat-probe">{props.props.view.officeState}</div>;
     },
   };
 });
@@ -71,10 +73,6 @@ vi.mock("next-intl", () => ({
 vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(world.search),
 }));
-vi.mock("@/i18n/navigation", () => ({
-  usePathname: () => "/chat",
-  useRouter: () => router,
-}));
 vi.mock("@/modules/auth/session", () => ({
   useSession: () => ({ state: world.session }),
 }));
@@ -85,12 +83,14 @@ vi.mock("@/hooks", () => ({
   useMutateCollabInviteByEmailSwr: hooks.invite,
   useMutateCollabPostMessageSwr: hooks.post,
   useMutateCollabPressApprovalSwr: hooks.press,
+  usePathname: () => "/chat",
   useQueryCollabGroupSwr: hooks.group,
   useQueryCollabNoticeSwr: hooks.notice,
   useQueryCollabNoticesSwr: hooks.notices,
   useQueryCollabOfficeSwr: hooks.office,
   useQueryCollabTasksSwr: hooks.tasks,
   useQueryMyAgentWorkspacesSwr: hooks.workspaces,
+  useRouter: () => router,
 }));
 
 import { GroupChatPage } from ".";
@@ -136,7 +136,16 @@ let state: {
   accept: Mutation;
 };
 
-const last = (): ProbeProps => probe.last as ProbeProps;
+const last = () => {
+  const props = probe.last as ProbeProps;
+  return {
+    view: props.props.view,
+    labels: props.state.labels,
+    isRailOpen: props.state.isRailOpen,
+    isCompactMembers: props.state.isCompactMembers === true,
+    on: props.on,
+  };
+};
 const flush = async (): Promise<void> => {
   await act(async () => {
     await Promise.resolve();

@@ -3,7 +3,6 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { usePathname, useRouter } from "@/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
 import type {
   CollabApprovalCardView,
@@ -17,12 +16,14 @@ import {
   useMutateCollabInviteByEmailSwr,
   useMutateCollabPostMessageSwr,
   useMutateCollabPressApprovalSwr,
+  usePathname,
   useQueryCollabGroupSwr,
   useQueryCollabNoticeSwr,
   useQueryCollabNoticesSwr,
   useQueryCollabOfficeSwr,
   useQueryCollabTasksSwr,
   useQueryMyAgentWorkspacesSwr,
+  useRouter,
   type CollabTasksFilter,
 } from "@/hooks";
 import {
@@ -587,10 +588,8 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
 
   return (
     <GroupChatPageBase
-      isRailOpen={isRailOpen}
-      isCompactMembers={compactMembers}
-      view={view}
-      labels={labels}
+      state={{ isRailOpen, isCompactMembers: compactMembers, labels }}
+      props={{ view }}
       on={{
         changeRailOpen: setRailOpen,
         selectTab,

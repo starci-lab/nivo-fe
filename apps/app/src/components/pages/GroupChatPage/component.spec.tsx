@@ -354,7 +354,7 @@ describe("GroupChatPageBase", () => {
         unknownAuthor: labels.conversation.unknownAuthor,
       }),
     });
-    render(<GroupChatPageBase isRailOpen={false} view={view} on={on} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view }} on={on}/>);
     expect(screen.getByRole("tab", { name: "Office" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Tasks" })).toBeInTheDocument();
     expect(screen.getAllByText("An Nguyen").length).toBeGreaterThan(0);
@@ -369,7 +369,7 @@ describe("GroupChatPageBase", () => {
 
   it("keeps a drafted message in the composer and submits it once through the form", () => {
     const on = actions();
-    render(<GroupChatPageBase isRailOpen={false} view={baseView({ composer: { value: "Xin chào", pending: false, failure: null, answering: null } })} on={on} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ composer: { value: "Xin chào", pending: false, failure: null, answering: null } }) }} on={on}/>);
     const draft = screen.getByRole("textbox", { name: labels.composer.label });
     const form = draft.closest("form");
     expect(form).not.toBeNull();
@@ -382,7 +382,7 @@ describe("GroupChatPageBase", () => {
 
   it("shows the compact roster below the composer and closes it without leaving Office", () => {
     const on = actions();
-    render(<GroupChatPageBase isRailOpen isCompactMembers view={baseView()} on={on} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: true, isCompactMembers: true, labels }} props={{ view: baseView() }} on={on}/>);
     expect(screen.getByRole("textbox", { name: labels.composer.label })).toBeEnabled();
     expect(screen.getByRole("button", { name: labels.members.closeRail })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: labels.members.closeRail }));
@@ -391,7 +391,7 @@ describe("GroupChatPageBase", () => {
 
   it("focuses the invite email from the rail and submits the selected role", () => {
     const on = actions();
-    render(<GroupChatPageBase isRailOpen={false} view={baseView({ invite: { email: "mai@congty.vn", role: "manager", pending: false, outcome: null, invitedEmail: null } })} on={on} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ invite: { email: "mai@congty.vn", role: "manager", pending: false, outcome: null, invitedEmail: null } }) }} on={on}/>);
     const email = screen.getByRole("textbox", { name: labels.invite.email });
     fireEvent.click(screen.getByRole("button", { name: labels.invite.title }));
     expect(email).toHaveFocus();
@@ -404,14 +404,14 @@ describe("GroupChatPageBase", () => {
   it("gates the invite form on the server-derived viewer role", () => {
     const on = actions();
     const ownerView = baseView();
-    const { rerender } = render(<GroupChatPageBase isRailOpen={false} view={ownerView} on={on} labels={labels} />);
+    const { rerender } = render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: ownerView }} on={on}/>);
     const email = screen.getByRole("textbox", { name: "Email" });
     fireEvent.change(email, { target: { value: "mai@congty.vn" } });
     expect(on.changeInviteEmail).toHaveBeenCalledWith("mai@congty.vn");
     fireEvent.click(screen.getByRole("radio", { name: "Manager" }));
     expect(on.changeInviteRole).toHaveBeenCalledWith("manager");
 
-    rerender(<GroupChatPageBase isRailOpen={false} view={baseView({ viewer: STAFF })} on={on} labels={labels} />);
+    rerender(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ viewer: STAFF }) }} on={on}/>);
     expect(screen.queryByRole("textbox", { name: "Email" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Gửi lời mời" })).toBeNull();
   });
@@ -420,10 +420,9 @@ describe("GroupChatPageBase", () => {
     const on = actions();
     render(
       <GroupChatPageBase
-        isRailOpen={false}
-        view={baseView({ invite: { email: "", role: "staff", pending: false, outcome: "created", invitedEmail: "mai@congty.vn" } })}
+        state={{ isRailOpen: false, labels }}
+        props={{ view: baseView({ invite: { email: "", role: "staff", pending: false, outcome: "created", invitedEmail: "mai@congty.vn" } }) }}
         on={on}
-        labels={labels}
       />,
     );
     expect(screen.getByText("Đã ghi nhận lời mời tới mai@congty.vn.")).toBeInTheDocument();
@@ -441,7 +440,7 @@ describe("GroupChatPageBase", () => {
         unknownAuthor: labels.conversation.unknownAuthor,
       }),
     });
-    render(<GroupChatPageBase isRailOpen={false} view={view} on={on} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view }} on={on}/>);
     expect(screen.getByText("Cần phê duyệt")).toBeInTheDocument();
     expect(screen.getByText("Đang chờ quyết định")).toBeInTheDocument();
     expect(screen.getByText("Gửi báo cáo doanh số cho đối tác")).toBeInTheDocument();
@@ -466,7 +465,7 @@ describe("GroupChatPageBase", () => {
         unknownAuthor: labels.conversation.unknownAuthor,
       }),
     });
-    render(<GroupChatPageBase isRailOpen={false} view={view} on={on} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view }} on={on}/>);
     expect(screen.getByText("Chỉ Owner hoặc Manager được quyết định")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Phê duyệt" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Từ chối" })).toBeDisabled();
@@ -487,7 +486,7 @@ describe("GroupChatPageBase", () => {
         unknownAuthor: labels.conversation.unknownAuthor,
       }),
     });
-    render(<GroupChatPageBase isRailOpen={false} view={view} on={on} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view }} on={on}/>);
     expect(screen.getByText("An Nguyen đã quyết định lúc 09:14")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Phê duyệt" })).toBeNull();
   });
@@ -502,13 +501,13 @@ describe("GroupChatPageBase", () => {
       viewerMemberId: OWNER.memberId,
       unknownAuthor: labels.conversation.unknownAuthor,
     });
-    const { rerender } = render(<GroupChatPageBase isRailOpen={false} view={baseView({ items })} on={on} labels={labels} />);
+    const { rerender } = render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ items }) }} on={on}/>);
     expect(screen.getByText("Bạn muốn báo cáo theo tuần hay theo tháng?")).toBeInTheDocument();
     expect(screen.getByText("Đang chờ Minh trả lời")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Trả lời" })).toBeNull();
 
     const managerViewer: CollabOfficeViewer = { memberId: "mem-minh", role: "manager" };
-    rerender(<GroupChatPageBase isRailOpen={false} view={baseView({ viewer: managerViewer, items })} on={on} labels={labels} />);
+    rerender(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ viewer: managerViewer, items }) }} on={on}/>);
     const answer = screen.getByRole("button", { name: "Trả lời" });
     fireEvent.click(answer);
     expect(on.answerQuestion).toHaveBeenCalledWith(TASK_WAITING_ANSWER, QUESTION);
@@ -516,7 +515,7 @@ describe("GroupChatPageBase", () => {
 
   it("lists outstanding notices and follows one to its card", () => {
     const on = actions();
-    render(<GroupChatPageBase isRailOpen={false} view={baseView({ notices: [NOTICE] })} on={on} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ notices: [NOTICE] }) }} on={on}/>);
     fireEvent.click(screen.getByRole("button", { name: "Mở" }));
     expect(on.openNotice).toHaveBeenCalledWith("ntc-1");
   });
@@ -525,10 +524,10 @@ describe("GroupChatPageBase", () => {
     const on = actions();
     render(
       <GroupChatPageBase
-        isRailOpen={false}
-        view={baseView({ notices: [NOTICE], noticeOutcomes: { "ntc-1": "handled" } })}
+        state={{ isRailOpen: false, labels }}
+        props={{ view: baseView({ notices: [NOTICE], noticeOutcomes: { "ntc-1": "handled" } }) }}
         on={on}
-        labels={labels} />,
+      />,
     );
     expect(screen.getByText("Đã xử lý")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Mở" })).toBeNull();
@@ -537,7 +536,7 @@ describe("GroupChatPageBase", () => {
   it("renders the Tasks tab with roster-keyed filters and Office-bound rows", () => {
     const on = actions();
     const view = baseView({ tab: "tasks", tasks: { state: "ready", rows: [TASK_WAITING_APPROVAL], filter: {} } });
-    render(<GroupChatPageBase isRailOpen={false} view={view} on={on} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view }} on={on}/>);
     const person = screen.getByRole("combobox", { name: "Người" });
     const moduleSelect = screen.getByRole("combobox", { name: "Mô-đun" });
     expect(person).toBeInTheDocument();
@@ -555,13 +554,13 @@ describe("GroupChatPageBase", () => {
   it("explains an invalid filter against the current roster instead of leaking another workspace", () => {
     const on = actions();
     const view = baseView({ tab: "tasks", tasks: { state: "ready", rows: [], filter: { personMemberId: "mem-gone" } } });
-    render(<GroupChatPageBase isRailOpen={false} view={view} on={on} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view }} on={on}/>);
     expect(screen.getByText("Giá trị lọc không còn hợp lệ trong Workspace này.")).toBeInTheDocument();
   });
 
   it("withholds every Office fact on denial and offers a safe return", () => {
     const on = actions();
-    render(<GroupChatPageBase isRailOpen={false} view={baseView({ officeState: "denied" })} on={on} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ officeState: "denied" }) }} on={on}/>);
     expect(screen.getByText("Office không khả dụng")).toBeInTheDocument();
     expect(screen.queryByRole("textbox", { name: "Tin nhắn" })).toBeNull();
     expect(screen.queryByText("An Nguyen")).toBeNull();
@@ -571,7 +570,7 @@ describe("GroupChatPageBase", () => {
 
   it("marks read failure as stale with an explicit retry", () => {
     const on = actions();
-    render(<GroupChatPageBase isRailOpen={false} view={baseView({ officeState: "failed" })} on={on} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ officeState: "failed" }) }} on={on}/>);
     fireEvent.click(screen.getByRole("button", { name: "Thử lại" }));
     expect(on.retryOffice).toHaveBeenCalled();
   });
@@ -580,10 +579,10 @@ describe("GroupChatPageBase", () => {
     const on = actions();
     render(
       <GroupChatPageBase
-        isRailOpen={false}
-        view={baseView({ composer: { value: "@Sales báo cáo", pending: false, failure: "retry", answering: null } })}
+        state={{ isRailOpen: false, labels }}
+        props={{ view: baseView({ composer: { value: "@Sales báo cáo", pending: false, failure: "retry", answering: null } }) }}
         on={on}
-        labels={labels} />,
+      />,
     );
     expect(screen.getByText("Tin nhắn chưa chắc đã được ghi. Kiểm tra rồi gửi lại.")).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Tin nhắn" })).toHaveValue("@Sales báo cáo");
@@ -597,7 +596,7 @@ describe("GroupChatPageBase", () => {
       screen: "acceptance",
       acceptance: { state: "ready", roleHint: "staff", invalidLink: false },
     });
-    render(<GroupChatPageBase isRailOpen={false} view={view} on={on} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view }} on={on}/>);
     expect(screen.getByText("Lời mời vào Workspace")).toBeInTheDocument();
     expect(screen.getByText("Vai trò được mời: Staff")).toBeInTheDocument();
     expect(screen.queryByRole("tab")).toBeNull();
@@ -610,10 +609,10 @@ describe("GroupChatPageBase", () => {
     const on = actions();
     render(
       <GroupChatPageBase
-        isRailOpen={false}
-        view={baseView({ screen: "acceptance", acceptance: { state: "refused", roleHint: null, invalidLink: false } })}
+        state={{ isRailOpen: false, labels }}
+        props={{ view: baseView({ screen: "acceptance", acceptance: { state: "refused", roleHint: null, invalidLink: false } }) }}
         on={on}
-        labels={labels} />,
+      />,
     );
     expect(screen.getByText("Lời mời không còn hiệu lực hoặc email đăng nhập chưa khớp.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Chấp nhận lời mời" })).toBeDisabled();
@@ -623,10 +622,10 @@ describe("GroupChatPageBase", () => {
     const on = actions();
     render(
       <GroupChatPageBase
-        isRailOpen={false}
-        view={baseView({ participants: PARTICIPANTS.filter((p) => p.kind === "human") })}
+        state={{ isRailOpen: false, labels }}
+        props={{ view: baseView({ participants: PARTICIPANTS.filter((p) => p.kind === "human") }) }}
         on={on}
-        labels={labels} />,
+      />,
     );
     expect(screen.getByText("Chưa có module nào được thuê.")).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Tin nhắn" })).toBeEnabled();
@@ -754,7 +753,7 @@ describe("component", () => {
       viewerMemberId: OWNER.memberId,
       unknownAuthor: labels.conversation.unknownAuthor,
     });
-    render(<GroupChatPageBase isRailOpen={false} view={baseView({ items })} on={actions()} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ items }) }} on={actions()}/>);
     expect(screen.getByText(labels.card.receiptPending)).toBeInTheDocument();
     expect(screen.getByText(labels.card.receiptReported)).toBeInTheDocument();
     expect(screen.getByText(labels.card.receiptRefused)).toBeInTheDocument();
@@ -778,11 +777,9 @@ describe("component", () => {
     });
     render(
       <GroupChatPageBase
-        isRailOpen={false}
-        isCompactMembers
-        view={baseView({ items, settledApprovals: { "appr-1": approved as never } })}
+        state={{ isRailOpen: false, isCompactMembers: true, labels }}
+        props={{ view: baseView({ items, settledApprovals: { "appr-1": approved as never } }) }}
         on={actions()}
-        labels={labels}
       />,
     );
     expect(screen.getByText("Minh đã quyết định lúc 09:14")).toBeInTheDocument();
@@ -804,10 +801,9 @@ describe("component", () => {
     });
     render(
       <GroupChatPageBase
-        isRailOpen={false}
-        view={baseView({ items, pressingApprovalId: "appr-2", approvalNotices: { "appr-1": "denied", "appr-2": "uncertain" } })}
+        state={{ isRailOpen: false, labels }}
+        props={{ view: baseView({ items, pressingApprovalId: "appr-2", approvalNotices: { "appr-1": "denied", "appr-2": "uncertain" } }) }}
         on={actions()}
-        labels={labels}
       />,
     );
     expect(screen.getByText(labels.approval.denied)).toBeInTheDocument();
@@ -827,11 +823,9 @@ describe("component", () => {
     });
     render(
       <GroupChatPageBase
-        isRailOpen={false}
-        isCompactMembers
-        view={baseView({ items, composer: { value: "", pending: false, failure: "denied", answering: { questionId: "q-1", moduleName: "sales", excerpt: "Tuần hay tháng?" } } })}
+        state={{ isRailOpen: false, isCompactMembers: true, labels }}
+        props={{ view: baseView({ items, composer: { value: "", pending: false, failure: "denied", answering: { questionId: "q-1", moduleName: "sales", excerpt: "Tuần hay tháng?" } } }) }}
         on={on}
-        labels={labels}
       />,
     );
     expect(screen.getByRole("button", { name: labels.question.answer })).toBeDisabled();
@@ -847,10 +841,9 @@ describe("component", () => {
     const ended: CollabTurnNoticeItem = { ...NOTICE, notice: { ...NOTICE.notice, noticeId: "ntc-3" } };
     render(
       <GroupChatPageBase
-        isRailOpen={false}
-        view={baseView({ notices: [NOTICE, assign, ended], noticeOutcomes: { "ntc-1": "unavailable", "ntc-3": "ended" } })}
+        state={{ isRailOpen: false, labels }}
+        props={{ view: baseView({ notices: [NOTICE, assign, ended], noticeOutcomes: { "ntc-1": "unavailable", "ntc-3": "ended" } }) }}
         on={on}
-        labels={labels}
       />,
     );
     expect(screen.getByText(labels.notice.unavailable)).toBeInTheDocument();
@@ -861,11 +854,11 @@ describe("component", () => {
 
   it("reports existing and refused invitations", () => {
     const { rerender } = render(
-      <GroupChatPageBase isRailOpen={false} view={baseView({ invite: { email: "a@b.vn", role: "staff", pending: false, outcome: "existing", invitedEmail: null } })} on={actions()} labels={labels} />,
+      <GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ invite: { email: "a@b.vn", role: "staff", pending: false, outcome: "existing", invitedEmail: null } }) }} on={actions()}/>,
     );
     expect(screen.getByText(labels.invite.existing)).toBeInTheDocument();
     rerender(
-      <GroupChatPageBase isRailOpen={false} view={baseView({ invite: { email: "", role: "staff", pending: false, outcome: "refused", invitedEmail: null } })} on={actions()} labels={labels} />,
+      <GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ invite: { email: "", role: "staff", pending: false, outcome: "refused", invitedEmail: null } }) }} on={actions()}/>,
     );
     expect(screen.getByText(labels.invite.refused)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: labels.invite.submit })).toBeDisabled();
@@ -873,9 +866,9 @@ describe("component", () => {
 
   it("presents empty rosters and a pending invitee on the rail", () => {
     const invited: CollabOfficeParticipant = { ...PARTICIPANTS[2], memberId: "mem-new", displayName: "Lan", status: "invited" };
-    const { rerender } = render(<GroupChatPageBase isRailOpen={false} view={baseView({ participants: [] })} on={actions()} labels={labels} />);
+    const { rerender } = render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ participants: [] }) }} on={actions()}/>);
     expect(screen.getByText(labels.members.empty)).toBeInTheDocument();
-    rerender(<GroupChatPageBase isRailOpen={false} view={baseView({ participants: [invited] })} on={actions()} labels={labels} />);
+    rerender(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ participants: [invited] }) }} on={actions()}/>);
     expect(screen.getByText(labels.members.pending)).toBeInTheDocument();
   });
 
@@ -888,7 +881,7 @@ describe("component", () => {
       viewerMemberId: null,
       unknownAuthor: labels.conversation.unknownAuthor,
     });
-    render(<GroupChatPageBase isRailOpen={false} view={baseView({ items, participants: [] })} on={actions()} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ items, participants: [] }) }} on={actions()}/>);
     expect(screen.getByText(labels.members.empty)).toBeInTheDocument();
     expect(screen.getByText(labels.members.noModules)).toBeInTheDocument();
   });
@@ -897,18 +890,18 @@ describe("component", () => {
     const on = actions();
     const humansOnly = PARTICIPANTS.filter((participant) => participant.kind === "human");
     const { rerender } = render(
-      <GroupChatPageBase isRailOpen isCompactMembers view={baseView({ viewer: STAFF, participants: humansOnly })} on={on} labels={labels} />,
+      <GroupChatPageBase state={{ isRailOpen: true, isCompactMembers: true, labels }} props={{ view: baseView({ viewer: STAFF, participants: humansOnly }) }} on={on}/>,
     );
     expect(screen.getByRole("region", { name: labels.members.title })).toBeInTheDocument();
     expect(screen.getByText(labels.members.noModules)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: labels.members.openRail(humansOnly.length) }));
     expect(on.changeRailOpen).toHaveBeenCalledWith(false);
-    rerender(<GroupChatPageBase isRailOpen isCompactMembers view={baseView({ viewer: STAFF, participants: [], workspaceName: null })} on={on} labels={labels} />);
+    rerender(<GroupChatPageBase state={{ isRailOpen: true, isCompactMembers: true, labels }} props={{ view: baseView({ viewer: STAFF, participants: [], workspaceName: null }) }} on={on}/>);
     expect(screen.getByText(labels.members.empty)).toBeInTheDocument();
   });
 
   it("shows the loading state inside the workbench", () => {
-    render(<GroupChatPageBase isRailOpen={false} view={baseView({ officeState: "loading" })} on={actions()} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ officeState: "loading" }) }} on={actions()}/>);
     expect(screen.getByText(labels.state.loading)).toBeInTheDocument();
   });
 
@@ -917,12 +910,12 @@ describe("component", () => {
     ["denied", labels.tasks.denied],
     ["ready", labels.tasks.empty],
   ] as const)("presents a %s Tasks list", (state, text) => {
-    render(<GroupChatPageBase isRailOpen={false} view={baseView({ tab: "tasks", tasks: { state, rows: [], filter: {} } })} on={actions()} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ tab: "tasks", tasks: { state, rows: [], filter: {} } }) }} on={actions()}/>);
     expect(screen.getAllByText(text).length).toBeGreaterThan(0);
   });
 
   it("holds the Tasks list and its count while the read is loading", () => {
-    render(<GroupChatPageBase isRailOpen={false} view={baseView({ tab: "tasks", tasks: { state: "loading", rows: [], filter: {} } })} on={actions()} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ tab: "tasks", tasks: { state: "loading", rows: [], filter: {} } }) }} on={actions()}/>);
     expect(screen.queryByText(labels.tasks.empty)).toBeNull();
     expect(screen.queryByText(labels.tasks.count(0))).toBeNull();
   });
@@ -932,10 +925,9 @@ describe("component", () => {
     const row: CollabTaskView = { ...WORKING_TASK, owningModuleDisplayName: null };
     render(
       <GroupChatPageBase
-        isRailOpen={false}
-        view={baseView({ tab: "tasks", tasks: { state: "ready", rows: [row], filter: { personMemberId: "mem-an", moduleInstallationId: "mi-sales", status: "working" } } })}
+        state={{ isRailOpen: false, labels }}
+        props={{ view: baseView({ tab: "tasks", tasks: { state: "ready", rows: [row], filter: { personMemberId: "mem-an", moduleInstallationId: "mi-sales", status: "working" } } }) }}
         on={on}
-        labels={labels}
       />,
     );
     expect(screen.getByText("Mô-đun: sales")).toBeInTheDocument();
@@ -952,10 +944,9 @@ describe("component", () => {
   it("keeps a pending acceptance without a role hint", () => {
     render(
       <GroupChatPageBase
-        isRailOpen={false}
-        view={baseView({ screen: "acceptance", acceptance: { state: "pending", roleHint: null, invalidLink: false } })}
+        state={{ isRailOpen: false, labels }}
+        props={{ view: baseView({ screen: "acceptance", acceptance: { state: "pending", roleHint: null, invalidLink: false } }) }}
         on={actions()}
-        labels={labels}
       />,
     );
     expect(screen.getByText(labels.accept.body)).toBeInTheDocument();
@@ -963,7 +954,7 @@ describe("component", () => {
   });
 
   it("renders nothing for an acceptance screen without an acceptance view", () => {
-    render(<GroupChatPageBase isRailOpen={false} view={baseView({ screen: "acceptance", acceptance: null })} on={actions()} labels={labels} />);
+    render(<GroupChatPageBase state={{ isRailOpen: false, labels }} props={{ view: baseView({ screen: "acceptance", acceptance: null }) }} on={actions()}/>);
     expect(screen.queryByRole("button", { name: labels.accept.action })).toBeNull();
   });
 });

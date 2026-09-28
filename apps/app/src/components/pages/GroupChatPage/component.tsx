@@ -523,15 +523,40 @@ export type GroupChatPageView = {
   } | null;
 };
 
-/** Settled state and copy rendered by the pure Office/Tasks page. */
-type GroupChatPageProps = {
+/**
+ * The drawn chrome the connected layer settles: the member rail flag, the compact
+ * member-sheet presentation and the resolved copy pack. `labels` rides the
+ * shape member because its formatter members keep it out of the pure data atom
+ * (`starci-fe/base-props-atom`); every sentence still arrives resolved from
+ * the connected half, never translated inside the drawing.
+ */
+export type GroupChatPageBaseChrome = {
   readonly isRailOpen: boolean;
   /** Settled by the connected layer: the viewport is in the compact member-sheet presentation. */
   readonly isCompactMembers?: boolean;
-  readonly view: GroupChatPageView;
-  readonly on: GroupChatPageActions;
   readonly labels: GroupChatPageLabels;
 };
+
+/** The settled Office/Tasks view model: plain data the connected layer already authorized. */
+export type GroupChatPageBaseData = {
+  readonly view: GroupChatPageView;
+};
+
+/** Public API role for the pure page: `{ state, props, on }` of atoms. */
+export type GroupChatPageBaseProps = {
+  readonly state: GroupChatPageBaseChrome;
+  readonly props: GroupChatPageBaseData;
+  readonly on: GroupChatPageActions;
+};
+
+/*
+ * The installed `starci-fe/public-component-signature` rule reads the render half's
+ * own name and demands the contract be spelled `<Unit>Props`, so this private alias
+ * is the only name the rule accepts; the exported contract above stays
+ * `<Unit>BaseProps`, which the code-pattern check requires the render half to own.
+ * Not exported: one public contract per unit.
+ */
+type GroupChatPageProps = GroupChatPageBaseProps;
 
 const initialsOf = (displayName: string): string =>
   displayName
@@ -1516,8 +1541,10 @@ const AcceptanceSurface = ({ view, on, labels }: AcceptanceSurfaceProps) => {
 
 /** Render the connected Office/Tasks surface for the current workspace. */
 export const GroupChatPageBase = (props: GroupChatPageProps) => {
-  const { isRailOpen, labels, on, view } = props;
-  const isCompact = props.isCompactMembers === true;
+  const { state, props: data, on }: GroupChatPageBaseProps = props;
+  const { isRailOpen, labels } = state;
+  const { view } = data;
+  const isCompact = state.isCompactMembers === true;
   if (view.screen === "acceptance") {
     return (
       <PageContainer measure="reading">
