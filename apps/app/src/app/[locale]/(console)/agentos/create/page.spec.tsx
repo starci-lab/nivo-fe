@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { redirect } from "next/navigation"
-import AgentOSCreateRoute from "./page"
+import Page from "./page"
 
 vi.mock("next/navigation",
     () => ({
         redirect: vi.fn(),
     }))
 
-describe("AgentOSCreateRoute",
+describe("Page",
     () => {
         beforeEach(() => {
             vi.clearAllMocks()
@@ -15,12 +15,12 @@ describe("AgentOSCreateRoute",
 
         it("redirects the retired creation route to the accepted purchase entry",
             async () => {
-                await AgentOSCreateRoute({
+                await Page({
                     params: Promise.resolve({
                         locale: "vi",
                     }),
                 })
-                await AgentOSCreateRoute({
+                await Page({
                     params: Promise.resolve({
                         locale: "en",
                     }),

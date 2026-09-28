@@ -1,4 +1,4 @@
-import { AuthenticationPage } from "@/components/pages/AuthenticationPage"
+import { AuthenticationPage } from "@/features/pages/AuthenticationPage"
 
 /**
  * The `/authentication` route. It mounts one page and makes no drawing decision - LAYOUT-6.
@@ -9,6 +9,6 @@ import { AuthenticationPage } from "@/components/pages/AuthenticationPage"
  *
  * @returns The route.
  */
-const AuthenticationRoute = () => <AuthenticationPage />
+const Page = () => <AuthenticationPage />
 
-export default AuthenticationRoute
+export default Page
