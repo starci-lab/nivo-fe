@@ -2,7 +2,7 @@
 /**
  * scripts/inject-academy-template.mjs -- mount one academy's template into the expert app.
  *
- *   npm run academy:inject                  from the default .stacks location
+ *   npm run academy:inject                  from the default .starcistacks location
  *   npm run academy:inject -- --from <path> from a JSON file you already have
  *   npm run academy:inject -- --reset       back to the unprovisioned default
  *
@@ -12,7 +12,7 @@
  * the developer-machine equivalent of that write: it replaces `template.data.json`, which is the
  * only file the app reads its appearance from.
  *
- * WHY IT READS FROM `.stacks` AND NOT FROM A BACKEND CALL. The template is a build-time input. A
+ * WHY IT READS FROM `.starcistacks` AND NOT FROM A BACKEND CALL. The template is a build-time input. A
  * fetch would need the API up before the front end could render, which is exactly the coupling an
  * instance-per-academy deployment exists to avoid.
  *
@@ -20,7 +20,7 @@
  * here carries one and `--reset` cannot destroy one. That separation is what makes re-applying a
  * template safe rather than a decision.
  *
- * THE SOURCE FILE IS ENCRYPTED AT REST. `.stacks/dev/runtime/config/academy-template.json.enc` is
+ * THE SOURCE FILE IS ENCRYPTED AT REST. `.starcistacks/dev/runtime/config/academy-template.json.enc` is
  * the committed twin; the plaintext beside it is produced on demand by the backend repo's
  * `npm run secret:show -- dev/runtime/config/academy-template.json` and deleted when done. This
  * script never decrypts anything itself -- it has no business holding a master key -- so it asks
@@ -41,7 +41,7 @@ const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const TARGET = join(REPO_ROOT, "apps/expert/src/academy/template.data.json")
 const DEFAULT_SOURCE = resolve(
     REPO_ROOT,
-    "../nivo-backend/.stacks/dev/runtime/config/academy-template.json",
+    "../nivo-backend/.starcistacks/dev/runtime/config/academy-template.json",
 )
 
 /**
@@ -161,7 +161,7 @@ if (argv.includes("--help") || argv.includes("-h")) {
     console.log(`
 academy:inject -- mount one academy's template into the expert app.
 
-  (no args)        read .stacks/dev/runtime/config/academy-template.json
+  (no args)        read .starcistacks/dev/runtime/config/academy-template.json
   --from <path>    read a JSON file you already have
   --reset          restore the unprovisioned default
 `)
