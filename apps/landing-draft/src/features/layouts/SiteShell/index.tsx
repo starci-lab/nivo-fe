@@ -1,15 +1,15 @@
 import { NivoGrammarRoot } from "@nivo/ui";
 import type { ReactNode } from "react";
-import { SiteShell } from "./SiteShell";
+import { SiteShell } from "./component";
 
 export { PUBLIC_SITE_URL, SITE_DESCRIPTION, SITE_TITLE } from "@/modules/landing/site";
 export { SITE_CLASS_NAMES } from "./classNames";
-export { ProcessFlow, type ProcessFlowProps } from "./ProcessFlow";
-export { SectionIntro, type SectionIntroProps } from "./SectionIntro";
-export { SiteFooter } from "./SiteFooter";
-export { SiteHeader } from "./SiteHeader";
-export { SiteMain, type SiteMainProps } from "./SiteMain";
-export { SiteShell, type SiteShellProps } from "./SiteShell";
+export { ProcessFlow, type ProcessFlowProps } from "../../../components/blocks/landing/ProcessFlow";
+export { SectionIntro, type SectionIntroProps } from "../../../components/blocks/landing/SectionIntro";
+export { SiteFooter } from "../SiteFooter";
+export { SiteHeader } from "../SiteHeader";
+export { SiteMain, type SiteMainProps } from "../SiteMain";
+export { SiteShell, type SiteShellProps } from "./component";
 
 /** Props for {@link SiteShellDocument}. */
 type SiteShellDocumentProps = {
