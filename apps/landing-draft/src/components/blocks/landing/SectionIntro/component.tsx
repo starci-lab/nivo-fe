@@ -1,6 +1,6 @@
 import { SectionHeader, Text } from "@starci/grammar/common"
 import type { ReactNode } from "react"
-import { SITE_CLASS_NAMES } from "./classNames"
+import { CLASS_NAMES } from "./classNames"
 
 /** Copy contract for a route-safe public-site section introduction. */
 export type SectionIntroProps = {
@@ -20,7 +20,7 @@ export const SectionIntro = (props: SectionIntroProps) => {
         <SectionHeader
             id={id}
             level={2}
-            className={inverse ? SITE_CLASS_NAMES.sectionIntroInverse : SITE_CLASS_NAMES.sectionIntro}
+            className={inverse ? CLASS_NAMES.inverse : CLASS_NAMES.standard}
             eyebrow={<Text as="span" size="xs" tone={inverse ? "default" : "accent"} weight="semibold">{eyebrow}</Text>}
             title={title}
             description={description === undefined ? undefined : (

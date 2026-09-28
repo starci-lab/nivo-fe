@@ -1,0 +1,1 @@
+export { SectionIntro, type SectionIntroProps } from "./component"
