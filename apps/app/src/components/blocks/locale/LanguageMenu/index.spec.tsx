@@ -1,14 +1,14 @@
-import type * as Navigation from "@/i18n/navigation"
+import type * as Hooks from "@/hooks"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { NextIntlClientProvider } from "next-intl"
 import viMessages from "@/messages/vi.json"
 import enMessages from "@/messages/en.json"
-import { TIME_ZONE } from "@/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n/config"
 
 const replace = vi.fn()
-vi.mock("@/i18n/navigation", async () => ({
-    ...(await vi.importActual<typeof Navigation>("@/i18n/navigation")),
+vi.mock("@/hooks", async () => ({
+    ...(await vi.importActual<typeof Hooks>("@/hooks")),
     usePathname: () => "/agentos",
     useRouter: () => ({ replace }),
 }))

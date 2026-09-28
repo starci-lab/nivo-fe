@@ -2,9 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { usePathname, useRouter } from "@/i18n/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { useMutateContinueBrokeredSignInSwr, useMutateForgotPasswordInitSwr, useMutateForgotPasswordResendSwr, useMutateForgotPasswordVerifyOtpSwr, useMutateSignInSwr, useMutateSignUpInitSwr, useMutateSignUpResendSwr, useMutateSignUpVerifyOtpSwr, useMutateVerifyTwoFactorSwr, useOauthReturnExchange } from "@/hooks";
+import { useMutateContinueBrokeredSignInSwr, useMutateForgotPasswordInitSwr, useMutateForgotPasswordResendSwr, useMutateForgotPasswordVerifyOtpSwr, useMutateSignInSwr, useMutateSignUpInitSwr, useMutateSignUpResendSwr, useMutateSignUpVerifyOtpSwr, useMutateVerifyTwoFactorSwr, useOauthReturnExchange, usePathname, useRouter } from "@/hooks";
 import { DEFAULT_AUTHENTICATED_LANDING, authenticationOauthRedirectUrl, rememberOauthProvider, validatedReturnTo } from "@/modules/auth";
 import { AuthenticationPageView, type AuthenticationPageExit } from "./component";
 import type { AuthActions, AuthCode, AuthDetails, AuthFactor, AuthMode, AuthNoticeCopy, AuthPendingAction, AuthProvider, AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";

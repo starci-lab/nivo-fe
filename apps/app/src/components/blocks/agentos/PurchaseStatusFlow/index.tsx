@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { getPathname, useRouter } from "@/i18n/navigation";
+import { getPathname } from "@/modules/i18n/navigation";
 import { useSession } from "@/modules/auth/session";
-import { useMutateRecoverWorkspacePurchaseSwr, useQueryWorkspaceCheckoutEntrySwr, useQueryWorkspaceCheckoutStatusSwr } from "@/hooks";
+import { useMutateRecoverWorkspacePurchaseSwr, useQueryWorkspaceCheckoutEntrySwr, useQueryWorkspaceCheckoutStatusSwr, useRouter } from "@/hooks";
 import { type WorkspaceCheckoutEntryDestination, type WorkspaceCheckoutEntryRequest, type WorkspaceCheckoutObservedIdentities, type WorkspaceCheckoutOutcome, type WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane";
 import useProvisioningRealtime, { type ProvisioningTarget } from "@/hooks/realtime";
 import { nivoIconSource } from "@nivo/ui";

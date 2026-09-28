@@ -1,8 +1,8 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { LOCALES, type Locale } from "@/i18n/config";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { LOCALES, type Locale } from "@/modules/i18n/config";
+import { usePathname, useRouter } from "@/hooks";
 import { LanguageMenuBase } from "./component";
 
 /** Connected locale owner for the global navbar. */

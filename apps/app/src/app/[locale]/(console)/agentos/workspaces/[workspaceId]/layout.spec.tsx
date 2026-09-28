@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
-import { TIME_ZONE } from "@/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n/config"
 import { existsSync } from "node:fs"
 import { join } from "node:path"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -16,11 +16,9 @@ const mocks = vi.hoisted(() => ({
 vi.mock("next/navigation", () => ({
     useParams: () => ({ locale: "vi", workspaceId: "workspace-1" }),
 }))
-vi.mock("@/i18n/navigation", () => ({
+vi.mock("@/hooks", () => ({
     useRouter: () => ({ push: mocks.push }),
     usePathname: () => mocks.pathname,
-}))
-vi.mock("@/hooks", () => ({
     useQueryMyAgentWorkspaceControlCenterSwr: () => ({
         data: {
             ok: true,

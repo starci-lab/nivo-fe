@@ -1,10 +1,10 @@
-import type * as Navigation from "@/i18n/navigation"
+import type * as Hooks from "@/hooks"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { NextIntlClientProvider } from "next-intl"
 import viMessages from "@/messages/vi.json"
 import enMessages from "@/messages/en.json"
-import { TIME_ZONE, type Locale } from "@/i18n/config"
+import { TIME_ZONE, type Locale } from "@/modules/i18n/config"
 
 const mocks = vi.hoisted(() => ({
     locale: "vi" as Locale,
@@ -13,8 +13,8 @@ const mocks = vi.hoisted(() => ({
     session: { state: { status: "signed-in", accessToken: "token" } },
 }))
 
-vi.mock("@/i18n/navigation", async () => ({
-    ...(await vi.importActual<typeof Navigation>("@/i18n/navigation")),
+vi.mock("@/hooks", async () => ({
+    ...(await vi.importActual<typeof Hooks>("@/hooks")),
     useRouter: () => ({ push: mocks.push }),
 }))
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))

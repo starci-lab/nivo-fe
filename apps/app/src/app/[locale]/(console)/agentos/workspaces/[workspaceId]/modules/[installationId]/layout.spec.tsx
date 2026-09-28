@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
-import { TIME_ZONE } from "@/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n/config"
 import { existsSync } from "node:fs"
 import { join } from "node:path"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -16,10 +16,6 @@ const mocks = vi.hoisted(() => ({
 vi.mock("next/navigation", () => ({
     useParams: () => ({ locale: "vi", workspaceId: "workspace-1", installationId: "installation-1" }),
 }))
-vi.mock("@/i18n/navigation", () => ({
-    useRouter: () => ({ push: mocks.push }),
-    usePathname: () => mocks.pathname,
-}))
 const allInstallations = [
     { id: "installation-1", moduleKey: "multichannel-chatbot", displayName: "Chatbot Sales" },
     { id: "installation-2", moduleKey: "finance-copilot", displayName: "Kế toán Q3" },
@@ -27,6 +23,8 @@ const allInstallations = [
 ]
 
 vi.mock("@/hooks", () => ({
+    useRouter: () => ({ push: mocks.push }),
+    usePathname: () => mocks.pathname,
     useQueryMyAgentosModuleInstallationsSwr: () => ({
         data: mocks.installations === null ? { ok: false } : { ok: true, data: mocks.installations },
     }),

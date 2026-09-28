@@ -1,8 +1,8 @@
 "use client";
 import { fleetResourceHref, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
-import { useQueryMyAgentWorkspacesSwr } from "@/hooks";
-import { getPathname, useRouter } from "@/i18n/navigation";
-import { toLocale } from "@/i18n/config";
+import { useQueryMyAgentWorkspacesSwr, useRouter } from "@/hooks";
+import { getPathname } from "@/modules/i18n/navigation";
+import { toLocale } from "@/modules/i18n/config";
 import { useLocale, useTranslations } from "next-intl";
 import { AgentOSWorkspaceListBase, type AgentOSWorkspaceListViewProps } from "./component";
 /** Public API role for AgentOSWorkspaceListProps. */
