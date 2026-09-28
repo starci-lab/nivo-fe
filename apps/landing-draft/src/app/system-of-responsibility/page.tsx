@@ -5,6 +5,6 @@ import { PRODUCT_PAGE_METADATA, ProductPage } from "@/features/pages/product"
 export const metadata: Metadata = PRODUCT_PAGE_METADATA["system-of-responsibility"]
 
 /** The conceptual route mounts one canonical page owner. */
-const SystemOfResponsibilityRoute = () => <ProductPage page="system-of-responsibility" />
+const Page = () => <ProductPage page="system-of-responsibility" />
 
-export default SystemOfResponsibilityRoute
+export default Page

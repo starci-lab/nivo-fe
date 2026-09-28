@@ -5,6 +5,6 @@ import { PRODUCT_PAGE_METADATA, ProductPage } from "@/features/pages/product"
 export const metadata: Metadata = PRODUCT_PAGE_METADATA["nivo-os"]
 
 /** The `/nivo-os` adapter mounts one canonical product page owner. */
-const NivoOsRoute = () => <ProductPage page="nivo-os" />
+const Page = () => <ProductPage page="nivo-os" />
 
-export default NivoOsRoute
+export default Page

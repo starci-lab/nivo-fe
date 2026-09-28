@@ -28,11 +28,11 @@ export const generateMetadata = async ({ params }: IdeaDetailRouteProps): Promis
 }
 
 /** The `/ideas/[slug]` adapter refuses unknown or non-public knowledge objects. */
-const IdeaDetailRoute = async ({ params }: IdeaDetailRouteProps) => {
+const Page = async ({ params }: IdeaDetailRouteProps) => {
     const { slug } = await params
     const idea = getIdeaBySlug(slug)
     if (idea === undefined) notFound()
     return <IdeaDetailPage idea={idea} />
 }
 
-export default IdeaDetailRoute
+export default Page

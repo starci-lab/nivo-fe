@@ -5,6 +5,6 @@ import { PRODUCT_PAGE_METADATA, ProductPage } from "@/features/pages/product"
 export const metadata: Metadata = PRODUCT_PAGE_METADATA.applications
 
 /** The `/applications` adapter mounts one business-relevance owner. */
-const ApplicationsRoute = () => <ProductPage page="applications" />
+const Page = () => <ProductPage page="applications" />
 
-export default ApplicationsRoute
+export default Page

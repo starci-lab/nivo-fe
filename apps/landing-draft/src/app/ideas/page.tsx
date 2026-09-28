@@ -13,9 +13,9 @@ type IdeasRouteProps = {
 }
 
 /** The `/ideas` framework adapter resolves optional filter state and mounts one page owner. */
-const IdeasRoute = async ({ searchParams }: IdeasRouteProps) => {
+const Page = async ({ searchParams }: IdeasRouteProps) => {
     const query = await searchParams
     return <IdeasPage selectedType={normalizeIdeaType(query.type)} />
 }
 
-export default IdeasRoute
+export default Page

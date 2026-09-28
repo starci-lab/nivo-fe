@@ -9,6 +9,6 @@ export const metadata: Metadata = {
 }
 
 /** The `/ecosystem` framework adapter. */
-const EcosystemRoute = () => <EcosystemPage />
+const Page = () => <EcosystemPage />
 
-export default EcosystemRoute
+export default Page

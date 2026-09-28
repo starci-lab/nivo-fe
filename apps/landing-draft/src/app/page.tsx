@@ -22,6 +22,6 @@ export const metadata: Metadata = {
  *
  * @returns The route.
  */
-const LandingRoute = () => <HomePage />
+const Page = () => <HomePage />
 
-export default LandingRoute
+export default Page

@@ -17,6 +17,6 @@ export const metadata: Metadata = {
  *
  * @returns The route.
  */
-const CompanyRoute = () => <CompanyPage />
+const Page = () => <CompanyPage />
 
-export default CompanyRoute
+export default Page
