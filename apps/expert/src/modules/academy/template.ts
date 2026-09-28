@@ -317,7 +317,7 @@ export type AcademyTemplate = {
  * showcase: the empty states are the ones a real academy hits on its first day, so they are the
  * ones worth having in front of us by default. An academy with no courses, no testimonials and no
  * photographs must still read as a finished page. `npm run academy:inject` replaces it with the
- * template held in `.stacks/dev/runtime/config/academy-template.json`.
+ * template held in `.starcistacks/dev/runtime/config/academy-template.json`.
  *
  * THE FILE IS STILL READ AT BUILD TIME, not fetched. `sections.tsx` is a client module and imports
  * this one, so nothing here may touch the filesystem at runtime; a static import is what keeps the
