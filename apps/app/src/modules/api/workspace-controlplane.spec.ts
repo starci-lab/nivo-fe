@@ -348,7 +348,7 @@ describe("resolvePurchasedWorkspaceEntry", () => {
 
         expect(result).toEqual({ ok: true, data: { launchId: "launch-1", redirectUrl: "https://pod.example/launch", expiresAt: "2026-01-01T01:00:00.000Z" } })
         const body = requestBody(fetchMock, 0)
-        expect(body.query).toContain("issueAgentWorkspaceAppLaunch(input: $input)")
+        expect(body.query).toContain("issueAgentWorkspaceAppLaunch(request: $input)")
         expect(body.variables.input).toEqual({ workspaceId: "ws-1", app: "Openclaw" })
     })
 })

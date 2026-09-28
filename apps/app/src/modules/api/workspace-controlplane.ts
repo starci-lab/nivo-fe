@@ -571,7 +571,7 @@ export const resolvePurchasedWorkspaceEntry = (workspaceId: string): Promise<Res
  * @param workspaceId - The failed workspace reported by {@link readWorkspacePurchaseStatus}.
  * @returns The workspace row as it now stands, or why the retry was refused.
  */
-export const retryWorkspaceProvisioningOrder = (workspaceId: string): Promise<Result<AgentWorkspaceRow>> => graphql(`mutation ManageAgentWorkspace($input: ManageAgentWorkspaceInput!) { manageAgentWorkspace(input: $input) { data { id name status catalogOrder { id } } message success error } }`, {
+export const retryWorkspaceProvisioningOrder = (workspaceId: string): Promise<Result<AgentWorkspaceRow>> => graphql(`mutation ManageAgentWorkspace($input: ManageAgentWorkspaceInput!) { manageAgentWorkspace(request: $input) { data { id name status catalogOrder { id } } message success error } }`, {
   input: {
     agentWorkspaceId: workspaceId,
     action: "retry_provision"

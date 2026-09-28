@@ -1070,8 +1070,8 @@ export const catalogItems = (category: CatalogCategory): Promise<Result<Readonly
 export const myPodOpenclawStatus = (): Promise<Result<PodStatusRow>> => graphql(`query MyPodOpenclawStatus { myPodOpenclawStatus { data ${POD_STATUS} message success error } }`);
 
 /** Fetch one exact workspace control center; the backend enforces viewer ownership. */
-export const myAgentWorkspaceControlCenter = (workspaceId: string): Promise<Result<AgentWorkspaceControlCenter>> => graphql(`query MyAgentWorkspaceControlCenter($workspaceId: ID!) {
-            myAgentWorkspaceControlCenter(workspaceId: $workspaceId) {
+export const myAgentWorkspaceControlCenter = (workspaceId: string): Promise<Result<AgentWorkspaceControlCenter>> => graphql(`query MyAgentWorkspaceControlCenter($request: MyAgentWorkspaceControlCenterRequest!) {
+            myAgentWorkspaceControlCenter(request: $request) {
                 data {
                     workspace { id name status externalWorkspaceRef }
                     instance { id name hostname status chartVersion ramMb vcpu planCode planRamGb planVcpu }
@@ -1100,7 +1100,7 @@ export const myAgentWorkspaceControlCenter = (workspaceId: string): Promise<Resu
                 message success error
             }
         }`, {
-  workspaceId
+  request: { workspaceId }
 });
 
 /** Read the immutable AgentOS solution-module catalog. */
@@ -1112,18 +1112,18 @@ export const myAgentosSolutionModules = (): Promise<Result<ReadonlyArray<Agentos
     }`);
 
 /** Read installations belonging to one exact owner-scoped AgentOS workspace. */
-export const myAgentosModuleInstallations = (agentWorkspaceId: string): Promise<Result<ReadonlyArray<AgentosModuleInstallation>>> => graphql(`query MyAgentosModuleInstallations($agentWorkspaceId: ID!) {
-            myAgentosModuleInstallations(agentWorkspaceId: $agentWorkspaceId) {
+export const myAgentosModuleInstallations = (agentWorkspaceId: string): Promise<Result<ReadonlyArray<AgentosModuleInstallation>>> => graphql(`query MyAgentosModuleInstallations($request: MyAgentosModuleInstallationsRequest!) {
+            myAgentosModuleInstallations(request: $request) {
                 data { id agentWorkspaceId moduleKey moduleVersion displayName status failureCode createdAt updatedAt }
                 message success error
             }
         }`, {
-  agentWorkspaceId
+  request: { agentWorkspaceId }
 });
 
 /** Read the canonical owner-scoped snapshot for one module installation. */
-export const myAgentosModuleInstallation = (installationId: string): Promise<Result<AgentosModuleInstallationDetail>> => graphql(`query MyAgentosModuleInstallation($installationId: ID!) {
-            myAgentosModuleInstallation(installationId: $installationId) {
+export const myAgentosModuleInstallation = (installationId: string): Promise<Result<AgentosModuleInstallationDetail>> => graphql(`query MyAgentosModuleInstallation($request: MyAgentosModuleInstallationRequest!) {
+            myAgentosModuleInstallation(request: $request) {
                 data {
                     id agentWorkspaceId moduleKey moduleVersion status sagaId failureCode
                     generatedAgentIds sharedKnowledgeSourceIds channelAccountRefs
@@ -1135,7 +1135,7 @@ export const myAgentosModuleInstallation = (installationId: string): Promise<Res
                 message success error
             }
         }`, {
-  installationId
+  request: { installationId }
 });
 const MODULE_RUNTIME_FIELDS = `
     installation {
@@ -1172,19 +1172,18 @@ const MODULE_RUNTIME_FIELDS = `
 `;
 
 /** Read one shared Module Studio runtime with progressive diagnostics disclosure. */
-export const myAgentosModuleRuntime = (installationId: string, includeDiagnostics = false): Promise<Result<AgentosModuleRuntime>> => graphql(`query MyAgentosModuleRuntime($installationId: ID!, $includeDiagnostics: Boolean!) {
-            myAgentosModuleRuntime(installationId: $installationId, includeDiagnostics: $includeDiagnostics) {
+export const myAgentosModuleRuntime = (installationId: string, includeDiagnostics = false): Promise<Result<AgentosModuleRuntime>> => graphql(`query MyAgentosModuleRuntime($request: MyAgentosModuleRuntimeRequest!) {
+            myAgentosModuleRuntime(request: $request) {
                 data { ${MODULE_RUNTIME_FIELDS} }
                 message success error
             }
         }`, {
-  installationId,
-  includeDiagnostics
+  request: { installationId, includeDiagnostics }
 });
 
 /** Apply one explicit Setup, Execute, widget, or settings command and return the settled runtime. */
 export const manageAgentosModuleRuntime = (input: ManageAgentosModuleRuntimeInput): Promise<Result<AgentosModuleRuntime>> => graphql(`mutation ManageAgentosModuleRuntime($input: ManageAgentosModuleRuntimeInput!) {
-            manageAgentosModuleRuntime(input: $input) {
+            manageAgentosModuleRuntime(request: $input) {
                 data { ${MODULE_RUNTIME_FIELDS} }
                 message success error
             }
@@ -1194,7 +1193,7 @@ export const manageAgentosModuleRuntime = (input: ManageAgentosModuleRuntimeInpu
 
 /** Deliver one write-only Telegram credential set to the owning Agent Workspace controller. */
 export const configureAgentWorkspaceChannel = (input: ConfigureAgentWorkspaceChannelInput): Promise<Result<AgentWorkspaceChannelSetting>> => graphql(`mutation ConfigureAgentWorkspaceChannel($input: ConfigureAgentWorkspaceChannelInput!) {
-        configureAgentWorkspaceChannel(input: $input) {
+        configureAgentWorkspaceChannel(request: $input) {
             data {
                 provider accountId state displayName
                 credentials { key required configured hint syncedAt }
@@ -1218,29 +1217,28 @@ const MODULE_TEST_FIELDS = `
 `;
 
 /** Read the kind-owned Test contract and recent persisted runs for one installation. */
-export const myAgentosModuleTestSurface = (installationId: string): Promise<Result<AgentosModuleTestSurface>> => graphql(`query MyAgentosModuleTestSurface($installationId: ID!) {
-            myAgentosModuleTestSurface(installationId: $installationId) {
+export const myAgentosModuleTestSurface = (installationId: string): Promise<Result<AgentosModuleTestSurface>> => graphql(`query MyAgentosModuleTestSurface($request: MyAgentosModuleTestSurfaceRequest!) {
+            myAgentosModuleTestSurface(request: $request) {
                 data { ${MODULE_TEST_FIELDS} }
                 message success error
             }
         }`, {
-  installationId
+  request: { installationId }
 });
 
 /** Read one exact persisted Test result without inferring it from Execute history. */
-export const myAgentosModuleTestRun = (installationId: string, runId: string): Promise<Result<AgentosModuleTestSurface>> => graphql(`query MyAgentosModuleTestRun($installationId: ID!, $runId: ID!) {
-            myAgentosModuleTestRun(installationId: $installationId, runId: $runId) {
+export const myAgentosModuleTestRun = (installationId: string, runId: string): Promise<Result<AgentosModuleTestSurface>> => graphql(`query MyAgentosModuleTestRun($request: MyAgentosModuleTestRunRequest!) {
+            myAgentosModuleTestRun(request: $request) {
                 data { ${MODULE_TEST_FIELDS} }
                 message success error
             }
         }`, {
-  installationId,
-  runId
+  request: { installationId, runId }
 });
 
 /** Run one side-effect-free scenario against one explicit immutable context version. */
 export const runAgentosModuleTest = (input: RunAgentosModuleTestInput): Promise<Result<AgentosModuleTestSurface>> => graphql(`mutation RunAgentosModuleTest($input: RunAgentosModuleTestInput!) {
-            runAgentosModuleTest(input: $input) {
+            runAgentosModuleTest(request: $input) {
                 data { ${MODULE_TEST_FIELDS} }
                 message success error
             }
@@ -1250,7 +1248,7 @@ export const runAgentosModuleTest = (input: RunAgentosModuleTestInput): Promise<
 
 /** Install one immutable solution package using one browser-generated idempotency identity. */
 export const installAgentosSolutionModule = (input: InstallAgentosSolutionModuleInput): Promise<Result<AgentosModuleInstallation>> => graphql(`mutation InstallAgentosSolutionModule($input: InstallAgentosSolutionModuleInput!) {
-            installAgentosSolutionModule(input: $input) {
+            installAgentosSolutionModule(request: $input) {
                 data { id agentWorkspaceId moduleKey moduleVersion displayName status failureCode createdAt updatedAt }
                 message success error
             }
@@ -1265,7 +1263,7 @@ export const installAgentosSolutionModule = (input: InstallAgentosSolutionModule
 
 /** Issue one owner-scoped OpenClaw launch without exposing a gateway credential. */
 export const issueAgentWorkspaceAppLaunch = (workspaceId: string): Promise<Result<AgentWorkspaceAppLaunch>> => graphql(`mutation IssueAgentWorkspaceAppLaunch($input: IssueAgentWorkspaceAppLaunchInput!) {
-            issueAgentWorkspaceAppLaunch(input: $input) {
+            issueAgentWorkspaceAppLaunch(request: $input) {
                 data { launchId redirectUrl expiresAt } message success error
             }
         }`, {
@@ -1277,7 +1275,7 @@ export const issueAgentWorkspaceAppLaunch = (workspaceId: string): Promise<Resul
 
 /** Keep one redeemed workspace launch alive while the Nivo owner remains present. */
 export const renewAgentWorkspaceAppLaunch = (launchId: string): Promise<Result<RenewedAgentWorkspaceAppLaunch>> => graphql(`mutation RenewAgentWorkspaceAppLaunch($input: RenewAgentWorkspaceAppLaunchInput!) {
-            renewAgentWorkspaceAppLaunch(input: $input) {
+            renewAgentWorkspaceAppLaunch(request: $input) {
                 data { launchId expiresAt } message success error
             }
         }`, {
@@ -1291,7 +1289,7 @@ export const revokeAgentWorkspaceAppLaunch = (launchId: string): Promise<Result<
   readonly launchId: string;
   readonly revoked: boolean;
 }>> => graphql(`mutation RevokeAgentWorkspaceAppLaunch($input: RevokeAgentWorkspaceAppLaunchInput!) {
-            revokeAgentWorkspaceAppLaunch(input: $input) {
+            revokeAgentWorkspaceAppLaunch(request: $input) {
                 data { launchId revoked } message success error
             }
         }`, {
@@ -1368,24 +1366,23 @@ const MODULE_STUDIO_FIELDS = `
 `;
 
 /** Read custom drafts and active custom modules belonging to one exact workspace. */
-export const myAgentosCustomModules = (agentWorkspaceId: string): Promise<Result<ReadonlyArray<AgentosCustomModule>>> => graphql(`query MyAgentosCustomModules($agentWorkspaceId: ID!) {
-            myAgentosCustomModules(agentWorkspaceId: $agentWorkspaceId) {
+export const myAgentosCustomModules = (agentWorkspaceId: string): Promise<Result<ReadonlyArray<AgentosCustomModule>>> => graphql(`query MyAgentosCustomModules($request: MyAgentosCustomModulesRequest!) {
+            myAgentosCustomModules(request: $request) {
                 data { id agentWorkspaceId name status progress missingFields currentQuestion specificationVersion installationId failureCode }
                 message success error
             }
         }`, {
-  agentWorkspaceId
+  request: { agentWorkspaceId }
 });
 
 /** Resume the durable module studio for one owner-scoped module. */
-export const myAgentosCustomModuleStudio = (agentWorkspaceId: string, moduleId: string): Promise<Result<AgentosModuleStudio>> => graphql(`query MyAgentosCustomModuleStudio($agentWorkspaceId: ID!, $moduleId: ID!) {
-            myAgentosCustomModuleStudio(agentWorkspaceId: $agentWorkspaceId, moduleId: $moduleId) {
+export const myAgentosCustomModuleStudio = (agentWorkspaceId: string, moduleId: string): Promise<Result<AgentosModuleStudio>> => graphql(`query MyAgentosCustomModuleStudio($request: MyAgentosCustomModuleStudioRequest!) {
+            myAgentosCustomModuleStudio(request: $request) {
                 data { ${MODULE_STUDIO_FIELDS} }
                 message success error
             }
         }`, {
-  agentWorkspaceId,
-  moduleId
+  request: { agentWorkspaceId, moduleId }
 });
 const studioMutation = (name: string, inputType: string, input: Readonly<Record<string, unknown>>): Promise<Result<AgentosModuleStudio>> => graphql(`mutation ${name}($input: ${inputType}!) {
             ${name[0]?.toLowerCase()}${name.slice(1)}(input: $input) {
@@ -1460,7 +1457,7 @@ export const resolveCoreApiCapabilityUrl = (capabilityUrl: string): string => {
 
 /** Register one quarantined file identity and return its bounded byte-transfer capability. */
 export const prepareAgentosModuleAttachmentUpload = (input: PrepareAgentosModuleAttachmentUploadInput): Promise<Result<AgentosModuleUploadCapability>> => graphql(`mutation PrepareAgentosModuleAttachmentUpload($input: PrepareAgentosModuleAttachmentUploadInput!) {
-            prepareAgentosModuleAttachmentUpload(input: $input) {
+            prepareAgentosModuleAttachmentUpload(request: $input) {
                 data { ${MODULE_STUDIO_FIELDS} attachmentId uploadUrl uploadMethod uploadExpiresAt }
                 message success error
             }
@@ -1496,8 +1493,8 @@ export const uploadAgentosModuleAttachment = async (capability: Pick<AgentosModu
 };
 
 /** Read current per-workspace provider, model, global-Qdrant recovery and readiness evidence. */
-export const myAgentosAiKnowledgeReadiness = (workspaceId: string): Promise<Result<AgentosAiKnowledgeReadiness>> => graphql(`query MyAgentosAiKnowledgeReadiness($workspaceId: ID!) {
-            myAgentosAiKnowledgeReadiness(workspaceId: $workspaceId) {
+export const myAgentosAiKnowledgeReadiness = (workspaceId: string): Promise<Result<AgentosAiKnowledgeReadiness>> => graphql(`query MyAgentosAiKnowledgeReadiness($request: MyAgentosAiKnowledgeReadinessRequest!) {
+            myAgentosAiKnowledgeReadiness(request: $request) {
                 data {
                     provider chatModel embeddingProfile embeddingDimension
                     credentialStatus credentialMaskedHint qdrantHealth readinessStatus aiReady
@@ -1508,19 +1505,19 @@ export const myAgentosAiKnowledgeReadiness = (workspaceId: string): Promise<Resu
                 message success error
             }
         }`, {
-  workspaceId
+  request: { workspaceId }
 });
 
 /** Ask the backend to run one bounded provider, Qdrant and retrieval readiness test. */
 export const runAgentosAiReadinessTest = (input: AgentosAiOperationInput): Promise<Result<AgentosAiOperationReceipt>> => graphql(`mutation RunAgentosAiReadinessTest($input: RunAgentosAiReadinessTestInput!) {
-            runAgentosAiReadinessTest(input: $input) { data { operationId status } message success error }
+            runAgentosAiReadinessTest(request: $input) { data { operationId status } message success error }
         }`, {
   input
 });
 
 /** Recover the workspace-private Qdrant collection from pinned Nivo/module knowledge snapshots. */
 export const reindexAgentWorkspaceKnowledge = (input: AgentosAiOperationInput): Promise<Result<AgentosAiOperationReceipt>> => graphql(`mutation ReindexAgentWorkspaceKnowledge($input: ReindexAgentWorkspaceKnowledgeInput!) {
-            reindexAgentWorkspaceKnowledge(input: $input) { data { operationId status } message success error }
+            reindexAgentWorkspaceKnowledge(request: $input) { data { operationId status } message success error }
         }`, {
   input
 });
@@ -1535,12 +1532,12 @@ export const saveAgentosModuleIntegrationSecret = (input: SaveAgentosModuleInteg
 export const publishAgentosCustomModule = (input: PublishAgentosCustomModuleInput) => studioMutation("PublishAgentosCustomModule", "PublishAgentosCustomModuleInput", input);
 
 /** Remove one owner-scoped attachment from the current module draft. */
-export const removeAgentosModuleAttachment = (input: AgentosModuleAttachmentIdentityInput): Promise<Result<boolean>> => graphql(`mutation RemoveAgentosModuleAttachment($input: RemoveAgentosModuleAttachmentInput!) { removeAgentosModuleAttachment(input: $input) { data message success error } }`, {
+export const removeAgentosModuleAttachment = (input: AgentosModuleAttachmentIdentityInput): Promise<Result<boolean>> => graphql(`mutation RemoveAgentosModuleAttachment($input: RemoveAgentosModuleAttachmentInput!) { removeAgentosModuleAttachment(request: $input) { data message success error } }`, {
   input
 });
 
 /** Remove one configured provider without ever reading its encrypted secret back. */
-export const removeAgentosModuleIntegrationSecret = (input: AgentosModuleIntegrationIdentityInput): Promise<Result<boolean>> => graphql(`mutation RemoveAgentosModuleIntegrationSecret($input: RemoveAgentosModuleIntegrationSecretInput!) { removeAgentosModuleIntegrationSecret(input: $input) { data message success error } }`, {
+export const removeAgentosModuleIntegrationSecret = (input: AgentosModuleIntegrationIdentityInput): Promise<Result<boolean>> => graphql(`mutation RemoveAgentosModuleIntegrationSecret($input: RemoveAgentosModuleIntegrationSecretInput!) { removeAgentosModuleIntegrationSecret(request: $input) { data message success error } }`, {
   input
 });
 

@@ -55,7 +55,7 @@ describe("modules/api/console", () => {
             sharedKnowledgeSourceIds: [],
             modelProfileRef: "nivo-default",
         } })
-        expect(calls[3][1]).toEqual({ workspaceId: "workspace-1" })
+        expect(calls[3][1]).toEqual({ request: { workspaceId: "workspace-1" } })
         expect(calls[5][1]).toEqual({ category: "ai_agent" })
         expect(calls[6][1]).toEqual({ input: { siteId: "site-1", limit: 25, offset: 50 } })
         expect(calls[7][1]).toEqual({ siteId: "site-1", limit: 10, offset: 20 })

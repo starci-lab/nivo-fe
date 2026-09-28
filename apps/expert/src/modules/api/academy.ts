@@ -87,7 +87,7 @@ export const submitLead = async (input: LeadSubmission): Promise<{
   const result = await graphql<{
     id: string;
   }>(`mutation SubmitLead($input: SubmitLeadInput!) {
-            submitLead(input: $input) {
+            submitLead(request: $input) {
                 success
                 message
                 error
