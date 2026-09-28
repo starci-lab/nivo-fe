@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest"
-import AgentOSModuleCreateRoute from "./page"
+import Page from "./page"
 
-describe("AgentOSModuleCreateRoute",
+describe("Page",
     () => {
         it("forwards workspace and module identities into the module pages",
             async () => {
-                await expect(AgentOSModuleCreateRoute({
+                await expect(Page({
                     params: Promise.resolve({
                         workspaceId: "workspace-1",
                     }),
