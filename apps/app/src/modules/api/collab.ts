@@ -567,14 +567,22 @@ export type CollabTransport = (call: CollabTransportCall) => Promise<CollabGatew
 export type CollabLocaleReader = () => string;
 
 /**
- * The language every Collab refusal should come back in; mirrors `useLocaleFrom` in
+ * The language every Collab refusal should come back in; mirrors `readLocale` in
  * `graphql.ts`. The backend interceptor currently answers English regardless - the
  * header rides anyway so the day per-request locale lands, Collab is already honest.
  */
 let readCollabLocale: CollabLocaleReader = () => "vi";
 
-/** Tell the Collab transport which language the reader is in. */
-export const useCollabLocaleFrom = (reader: CollabLocaleReader) => {
+/**
+ * Tell the Collab transport which language the reader is in.
+ *
+ * THE MODULE-SIDE DOOR, deliberately not a hook: a `modules/` owner binds its reader here
+ * directly, while a component binds through the `useCollabLocaleFrom` hook (`@/hooks`),
+ * which calls this setter - the dependency runs one way.
+ *
+ * @param reader - Answers with the active locale.
+ */
+export const setCollabLocaleReader = (reader: CollabLocaleReader) => {
     readCollabLocale = reader;
 };
 
@@ -690,13 +698,21 @@ export const collabGatewayTransport: CollabTransport = async ({ accessToken, req
 
 /**
  * The transport in force. Defaults to the GraphQL tagged-request binding; the session
- * root or a future live channel swaps it through `useCollabTransportFrom` without the
+ * root or a future live channel swaps it through `setCollabTransport` without the
  * operation vocabulary or the hooks changing.
  */
 let transport: CollabTransport = collabGatewayTransport;
 
-/** Bind the transport every Collab call travels on. */
-export const useCollabTransportFrom = (next: CollabTransport) => {
+/**
+ * Bind the transport every Collab call travels on.
+ *
+ * THE MODULE-SIDE DOOR, beside {@link setCollabLocaleReader}: a component binds through the
+ * `useCollabTransportFrom` hook (`@/hooks`), while a `modules/` owner calls this setter
+ * directly.
+ *
+ * @param next - The transport in force from here on.
+ */
+export const setCollabTransport = (next: CollabTransport) => {
     transport = next;
 };
 

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo } from "react";
 import type { ComponentType } from "react";
-import { useQueryMyAgentWorkspacesSwr, useQueryMyDomainsSwr, useQueryMyExpertSitesSwr, useQueryMyInvoicesSwr, useQueryMyPodOpenclawStatusSwr, useQueryMyWalletSwr } from "@/hooks";
+import { useQueryMyAgentWorkspacesSwr, useQueryMyDomainsSwr, useQueryMyExpertSitesSwr, useQueryMyInvoicesSwr, useQueryMyPodOpenclawStatusSwr, useQueryMyWalletSwr } from "../swr/queries/console";
 import { type AgentWorkspaceRow, type DomainRow, type ExpertSiteRow, type InvoiceRow, type PodStatusRow, type WalletRow } from "@/modules/api/console";
 import type { Result } from "@/modules/api/graphql";
 
@@ -10,7 +10,7 @@ import type { Result } from "@/modules/api/graphql";
 export type OverviewAnswer<T> = Result<T> | null;
 
 /** Source-owned answers shared by the connected overview blocks. */
-export type OverviewData = {
+export type OverviewDataProviderData = {
   readonly apps: OverviewAnswer<ReadonlyArray<ExpertSiteRow>>;
   readonly workspaces: OverviewAnswer<ReadonlyArray<AgentWorkspaceRow>>;
   readonly pod: OverviewAnswer<PodStatusRow>;
@@ -18,7 +18,7 @@ export type OverviewData = {
   readonly wallet: OverviewAnswer<WalletRow>;
   readonly invoices: OverviewAnswer<ReadonlyArray<InvoiceRow>>;
 };
-const EMPTY_OVERVIEW: OverviewData = {
+const EMPTY_OVERVIEW: OverviewDataProviderData = {
   apps: null,
   workspaces: null,
   pod: null,
@@ -26,7 +26,7 @@ const EMPTY_OVERVIEW: OverviewData = {
   wallet: null,
   invoices: null
 };
-const OverviewDataContext = createContext<OverviewData | null>(null);
+const OverviewDataContext = createContext<OverviewDataProviderData | null>(null);
 
 /** Props for the one owner of overview network settlement. */
 export type OverviewDataProviderProps<P extends object> = {
@@ -45,7 +45,7 @@ export const OverviewDataProvider = <P extends object,>({
   const domains = useQueryMyDomainsSwr();
   const wallet = useQueryMyWalletSwr();
   const invoices = useQueryMyInvoicesSwr();
-  const value = useMemo<OverviewData>(() => ({
+  const value = useMemo<OverviewDataProviderData>(() => ({
     apps: apps.data ?? EMPTY_OVERVIEW.apps,
     workspaces: workspaces.data ?? EMPTY_OVERVIEW.workspaces,
     pod: pod.data ?? EMPTY_OVERVIEW.pod,
@@ -57,7 +57,7 @@ export const OverviewDataProvider = <P extends object,>({
 };
 
 /** Read the shared account answers from a connected overview block. */
-export const useOverviewData = (): OverviewData => {
+export const useOverviewData = () => {
   const value = useContext(OverviewDataContext);
   if (value === null) throw new Error("useOverviewData must be used inside OverviewDataProvider");
   return value;

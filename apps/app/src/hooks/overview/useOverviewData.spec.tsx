@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/modules/auth/session", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => mocks.api)
 
-import { OverviewDataProvider, useOverviewData } from "./context"
+import { OverviewDataProvider, useOverviewData } from "./useOverviewData"
 
 const Probe = () => <output>{JSON.stringify(useOverviewData())}</output>
 
