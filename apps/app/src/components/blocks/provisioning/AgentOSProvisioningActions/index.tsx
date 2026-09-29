@@ -54,7 +54,9 @@ export const AgentOSProvisioningActions = (props: AgentOSProvisioningActionsProp
                                         >
                                             {tier.label}
                                             {tier.detail === undefined ? null : ` · ${tier.detail}`}
-                                            {tier.id === selection.selectedTierId ? <Badge tone="success">{selection.selected}</Badge> : null}
+                                            {tier.id === selection.selectedTierId ? (
+                                                <Badge tone="success">{selection.selected}</Badge>
+                                            ) : null}
                                         </Button>
                                     ))}
                                 </div>

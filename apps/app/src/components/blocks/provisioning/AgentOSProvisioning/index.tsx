@@ -1,9 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useAgentOSProvisioningActions } from "@/hooks/provisioning/useAgentOSProvisioningActions"
-import { useAgentOSProvisioningFlow } from "@/hooks/provisioning/useAgentOSProvisioningFlow"
-import { useAgentOSProvisioningPhase } from "@/hooks/provisioning/useAgentOSProvisioningPhase"
+import { useAgentOSProvisioningActions, useAgentOSProvisioningFlow, useAgentOSProvisioningPhase } from "@/hooks"
 import {
     INITIAL_AGENTOS_OFFER,
     type AgentOSContext,

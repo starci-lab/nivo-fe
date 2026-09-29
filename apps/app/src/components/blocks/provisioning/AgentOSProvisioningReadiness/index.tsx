@@ -8,6 +8,8 @@ export type AgentOSProvisioningReadinessProps = { readonly title: string; readon
 export const AgentOSProvisioningReadiness = (props: AgentOSProvisioningReadinessProps) => (
     <div className={CONTENT_CLASS_NAME}>
         <Text weight="medium">{props.title}</Text>
-        <Text size="sm" live="polite">{props.text}</Text>
+        <Text size="sm" live="polite">
+            {props.text}
+        </Text>
     </div>
 )

@@ -3,17 +3,10 @@
 import { useMemo } from "react"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { getPathname } from "@/modules/i18n/navigation"
-import {
-    purchaserClaimsOf,
-    purchaserDetailOf,
-    purchaserNameOf,
-    purchaseOf,
-} from "@/modules/agentos/purchase-status"
+import { purchaserClaimsOf, purchaserDetailOf, purchaserNameOf, purchaseOf } from "@/modules/agentos/purchase-status"
 import { createPurchaseStatusCopy } from "@/modules/agentos/purchase-status/copy"
 import { purchaseStatusViewOf } from "@/modules/agentos/purchase-status/view"
-import { usePurchaseStatusActions } from "@/hooks/agentos/usePurchaseStatusActions"
-import { usePurchaseStatusPhase } from "@/hooks/agentos/usePurchaseStatusPhase"
-import { usePurchaseStatusQueries } from "@/hooks/agentos/usePurchaseStatusQueries"
+import { usePurchaseStatusActions, usePurchaseStatusPhase, usePurchaseStatusQueries } from "@/hooks"
 import { PurchaseStatusFlowBase } from "./component"
 
 /** Route identity owned by the purchase-status block: one stable purchase identity. */
@@ -74,7 +67,11 @@ const PurchaseStatusFlow = ({ purchaseId, surface }: PurchaseStatusFlowProps) =>
     const purchaserName = purchaserNameOf(claims)
     const purchaserDetail = purchaserDetailOf(claims, purchaserName)
     const purchaserFact =
-        purchaserName === null ? null : purchaserDetail === null ? purchaserName : `${purchaserName} · ${purchaserDetail}`
+        purchaserName === null
+            ? null
+            : purchaserDetail === null
+              ? purchaserName
+              : `${purchaserName} · ${purchaserDetail}`
     const timeOf = (iso: string) => format.dateTime(new Date(iso), { hour: "2-digit", minute: "2-digit" })
     const stampOf = (iso: string) => format.dateTime(new Date(iso), { dateStyle: "medium", timeStyle: "short" })
     const dayOf = (iso: string): string => format.dateTime(new Date(iso), { dateStyle: "medium" })

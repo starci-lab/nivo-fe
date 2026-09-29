@@ -1,6 +1,6 @@
 "use client"
 
-import { useTemplateAppProvisioning, type TemplateAppProvisioningContext } from "@/hooks/provisioning/useTemplateAppProvisioning"
+import { useTemplateAppProvisioning, type TemplateAppProvisioningContext } from "@/hooks"
 import { templateStepState, TEMPLATE_PHASE_INDEX } from "@/modules/provisioning/template-app"
 import { templateAppProvisioningView } from "@/modules/provisioning/template-app/view"
 import { TemplateAppProvisioningBase } from "./component"
@@ -11,7 +11,12 @@ export type TemplateAppProvisioningProps = { readonly context: TemplateAppProvis
 /** Compose the connected Template App flow into its localized presentation. */
 export const TemplateAppProvisioning = (props: TemplateAppProvisioningProps) => {
     const state = useTemplateAppProvisioning(props.context)
-    const labels = [state.t("steps.request"), state.t("steps.createApp"), state.t("steps.infrastructure"), state.t("steps.manage")]
+    const labels = [
+        state.t("steps.request"),
+        state.t("steps.createApp"),
+        state.t("steps.infrastructure"),
+        state.t("steps.manage"),
+    ]
     const stateLabels = {
         done: state.t("stepState.done"),
         current: state.t("stepState.current"),
