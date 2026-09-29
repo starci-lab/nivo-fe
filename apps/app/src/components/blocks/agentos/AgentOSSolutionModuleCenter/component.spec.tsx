@@ -3,12 +3,17 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import {
     AgentOSSolutionModuleCenterBase as AgentOSSolutionModuleCenterBaseView,
+    type AgentOSSolutionModuleCenterProps,
     type AgentOSSolutionModuleCenterViewProps,
     type AgentOSSolutionModuleLedgerProps,
 } from "./component"
-import { SOLUTION_CATALOG_GRID_CLASS_NAME, SOLUTION_LEDGER_ROWS_CLASS_NAME } from "./classNames"
+import { SOLUTION_CATALOG_GRID_CLASS_NAME } from "../AgentOSSolutionModuleCatalogGrid/classNames"
+import { SOLUTION_LEDGER_ROWS_CLASS_NAME } from "../AgentOSSolutionModuleLedger/classNames"
 
-const AgentOSSolutionModuleCenterBase = (view: AgentOSSolutionModuleCenterViewProps) => {
+type AgentOSSolutionModuleCenterFixtureProps = AgentOSSolutionModuleCenterViewProps &
+    Pick<AgentOSSolutionModuleCenterProps["on"], "onSelectMode" | "onPressCard">
+
+const AgentOSSolutionModuleCenterBase = (view: AgentOSSolutionModuleCenterFixtureProps) => {
     const { state, onSelectMode, onPressCard, ...data } = view
     return (
         <AgentOSSolutionModuleCenterBaseView
