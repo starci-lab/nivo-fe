@@ -1,3 +1,9 @@
+import type {
+    AgentosModuleRuntime,
+    AgentosRuntimeContextVersion,
+    AgentosRuntimeMessage,
+    AgentosRuntimeSession,
+} from "@/modules/api/agentos-module-runtime"
 import type { AgentosModuleTestRun, AgentosModuleTestSurface } from "@/modules/api/agentos-module-tests"
 import type {
     CollabBindingView,
@@ -225,5 +231,132 @@ export const moduleTestSurfaceFixture = (
         runs: [],
         run,
         assertions: [],
+    }
+}
+
+/** One module runtime projection as a spec fixture. */
+export type { AgentosModuleRuntime }
+/** One module runtime session row as a spec fixture. */
+export type { AgentosRuntimeSession }
+/** One module runtime message row as a spec fixture. */
+export type { AgentosRuntimeMessage }
+/** One module runtime context version as a spec fixture. */
+export type { AgentosRuntimeContextVersion }
+
+/** One applied context version with a frozen digest and generations. */
+export const runtimeContextFixture = (
+    overrides: Partial<AgentosRuntimeContextVersion> = {},
+): AgentosRuntimeContextVersion => ({
+    id: "context-fixture",
+    installationId: "installation-fixture",
+    createdByUserId: "user-fixture",
+    version: 1,
+    snapshot: {},
+    digest: "digest-fixture",
+    definitionDigest: "definition-fixture",
+    authorityGeneration: 1,
+    sourceGeneration: 1,
+    retrievalGeneration: 1,
+    sourceSetupSessionId: null,
+    createdAt: "2026-09-01T00:00:00.000Z",
+    ...overrides,
+})
+
+/** One setup or execute session row; the durable fields default to empty, not null-y noise. */
+export const runtimeSessionFixture = (
+    overrides: Partial<AgentosRuntimeSession> = {},
+): AgentosRuntimeSession => ({
+    id: "session-fixture",
+    installationId: "installation-fixture",
+    createdByUserId: "user-fixture",
+    mode: "setup",
+    title: "Session fixture",
+    isArchived: false,
+    setupRevision: null,
+    setupStatus: null,
+    draftSnapshot: null,
+    draftDigest: null,
+    gateEvidence: null,
+    basedOnContextVersionId: null,
+    completedAt: null,
+    createdAt: "2026-09-01T00:00:00.000Z",
+    updatedAt: "2026-09-01T00:00:00.000Z",
+    ...overrides,
+})
+
+/** One conversation row bound to a session. */
+export const runtimeMessageFixture = (
+    overrides: Partial<AgentosRuntimeMessage> = {},
+): AgentosRuntimeMessage => ({
+    id: "message-fixture",
+    sessionId: "session-fixture",
+    actorUserId: "user-fixture",
+    contextVersionId: null,
+    role: "user",
+    content: "fixture",
+    messageTree: null,
+    operationEventId: null,
+    taskId: null,
+    sequence: 1,
+    createdAt: "2026-09-01T00:00:00.000Z",
+    ...overrides,
+})
+
+/**
+ * One settled module runtime projection. `installation` takes partial overrides; every other
+ * collection defaults to empty so a spec only states the rows it cares about.
+ */
+export const moduleRuntimeFixture = (
+    overrides: Partial<Omit<AgentosModuleRuntime, "installation">> & {
+        readonly installation?: Partial<AgentosModuleRuntime["installation"]>
+    } = {},
+): AgentosModuleRuntime => {
+    const { installation, ...rest } = overrides
+    return {
+        installation: {
+            id: "installation-fixture",
+            agentWorkspaceId: "workspace-fixture",
+            moduleKey: "fixture-module",
+            moduleVersion: "1",
+            displayName: "Fixture module",
+            status: "ready",
+            failureCode: null,
+            createdAt: "2026-09-01T00:00:00.000Z",
+            updatedAt: "2026-09-01T00:00:00.000Z",
+            kindKey: "fixture-kind",
+            kindVersion: "1",
+            workbenchKey: "fixture-workbench",
+            workbenchVersion: "1",
+            runtimeManifest: {
+                schemaVersion: 1,
+                kind: { key: "fixture-kind", version: "1" },
+                workbench: { key: "fixture-workbench", version: "1" },
+                widgets: [],
+                config: {},
+            },
+            settingsVersion: 1,
+            setupAuthorityGeneration: 1,
+            setupSourceGeneration: 1,
+            setupRetrievalGeneration: 1,
+            activeContextVersionId: null,
+            liveEnabled: false,
+            operatingMode: "assist",
+            channelAccountRef: null,
+            primaryOpsSessionId: null,
+            ...installation,
+        },
+        setupSession: null,
+        setupSessions: [],
+        executeSessions: [],
+        participants: [],
+        messages: [],
+        contextVersions: [],
+        widgets: [],
+        operationEvents: [],
+        tasks: [],
+        credentials: [],
+        settings: null,
+        diagnostics: {},
+        ...rest,
     }
 }
