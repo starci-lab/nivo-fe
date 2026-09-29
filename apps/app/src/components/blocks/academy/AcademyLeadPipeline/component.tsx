@@ -1,4 +1,4 @@
-import { Avatar } from "@nivo/ui"
+import { Avatar, type AvatarData } from "@nivo/ui"
 import { SurfaceCard, Button, Button as CoreButton, Heading, Text, TextAction, Badge } from "@starci/grammar/common"
 import type { ExpertSiteLead } from "@/modules/api/academy"
 
@@ -41,21 +41,23 @@ export type AcademyLeadPipelineViewProps = {
     readonly on: AcademyLeadPipelineActions
 }
 
+/** The resting avatar draws one fixed face, so its atoms are module-level. */
+const RESTING_AVATAR_PROPS: AvatarData = { size: "md" }
+
 /** Render leads as a joined identity scan with one selected follow-up. */
 const AcademyLeadPipelineContent = (input: AcademyLeadPipelineViewProps) => {
     const { state } = input
     const { leads, selected, draft, pendingAction, message, labels } = input.props
     const { openLead, advance, draftReply } = input.on
+    const leadRows: ReadonlyArray<{ lead: ExpertSiteLead; avatar: AvatarData }> = leads.map((lead) => ({
+        lead,
+        avatar: { name: lead.name, size: "md" },
+    }))
     const rows =
         state === "resting"
-            ? [0, 1, 2].map((item, index) => (
+            ? [0, 1, 2].map((_, index) => (
                   <div key={index}>
-                      <Avatar
-                          props={{
-                              size: "md",
-                          }}
-                          isLoading
-                      />
+                      <Avatar props={RESTING_AVATAR_PROPS} isLoading />
                       <div>
                           <TextAction size="sm" isSkeleton>
                               {""}
@@ -66,14 +68,9 @@ const AcademyLeadPipelineContent = (input: AcademyLeadPipelineViewProps) => {
                       <Button isSkeleton>{labels.open}</Button>
                   </div>
               ))
-            : leads.map((lead, index) => (
-                  <div key={index}>
-                      <Avatar
-                          props={{
-                              name: lead.name,
-                              size: "md",
-                          }}
-                      />
+            : leadRows.map(({ lead, avatar }) => (
+                  <div key={lead.id}>
+                      <Avatar props={avatar} />
                       <div>
                           <TextAction size="sm" onPress={() => openLead(lead.id)}>
                               {lead.name}

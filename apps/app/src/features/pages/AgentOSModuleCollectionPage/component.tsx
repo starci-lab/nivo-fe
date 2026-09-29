@@ -9,6 +9,7 @@ import {
     SurfaceListCard,
     Text,
     TextAction,
+    type StaticStateRowData,
 } from "@starci/grammar/common"
 import {
     AGENT_OS_SIGN_IN_HREF,
@@ -188,6 +189,18 @@ const ModuleLedgerRegions = (props: ModuleLedgerRegionsProps) => {
         shell.inventoryStanding === "current" && shell.inventoryObservedAt !== null
             ? formatDate(shell.inventoryObservedAt)
             : undefined
+    const inventoryRows: ReadonlyArray<{ id: string; item: StaticStateRowData }> = shell.installations.map(
+        (installation) => ({
+            id: installation.installationId,
+            item: {
+                id: installation.installationId,
+                label: installation.displayName,
+                description: [installation.moduleKey, installation.status, installation.installationId]
+                    .filter((part): part is string => part !== null)
+                    .join(" · "),
+            },
+        }),
+    )
     return (
         <>
             <div data-region="module-inventory">
@@ -195,17 +208,8 @@ const ModuleLedgerRegions = (props: ModuleLedgerRegionsProps) => {
                     label={labels.inventorySection}
                     {...(inventoryFact === undefined ? {} : { fact: inventoryFact })}
                 >
-                    {shell.installations.map((installation) => (
-                        <StaticStateRow
-                            key={installation.installationId}
-                            item={{
-                                id: installation.installationId,
-                                label: installation.displayName,
-                                description: [installation.moduleKey, installation.status, installation.installationId]
-                                    .filter((part): part is string => part !== null)
-                                    .join(" · "),
-                            }}
-                        />
+                    {inventoryRows.map((row) => (
+                        <StaticStateRow key={row.id} item={row.item} />
                     ))}
                 </SurfaceListCard>
             </div>
