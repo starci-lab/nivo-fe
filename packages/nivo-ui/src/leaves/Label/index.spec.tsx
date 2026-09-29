@@ -10,7 +10,8 @@ describe("Label", () => {
                 <input id="email" />
             </>,
         )
-        expect(screen.getByText("Email")).toHaveAttribute("for", "email")
+        expect(screen.getByRole("textbox", { name: "Email" })).toBeInTheDocument()
+        expect(screen.getByText("Email").closest("label")).toHaveAttribute("for", "email")
         expect(document.querySelector("label svg")).toBeInTheDocument()
     })
 })

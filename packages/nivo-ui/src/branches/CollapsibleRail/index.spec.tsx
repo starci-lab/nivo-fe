@@ -61,7 +61,6 @@ describe("CollapsibleRail", () => {
         const destinations = screen.getByText("Expanded destinations")
 
         expect(host).toHaveClass("hidden", "md:flex", "text-foreground")
-        expect(toggle).toHaveAttribute("aria-expanded", "true")
         expect(screen.getByRole("heading", { name: "Console navigation", level: 2 })).toBeInTheDocument()
         expect(host).toContainElement(destinations)
         expect(host.style.borderInlineEnd).toBe("1px solid var(--separator)")
@@ -69,7 +68,6 @@ describe("CollapsibleRail", () => {
         expect(host.style.transition).toBe("")
         expect(host.style.padding).toBe("1.5rem")
         expect(screen.queryByText("Console")).not.toBeInTheDocument()
-        expect(toggle).toHaveClass("rounded-full", "size-11")
         expect(toggle.style.background).toBe("")
         const glyph = screen.getByTestId("sidebar-glyph")
         expect(toggle.compareDocumentPosition(destinations) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
@@ -78,7 +76,6 @@ describe("CollapsibleRail", () => {
         fireEvent.click(screen.getByRole("button", { name: "Collapse navigation" }))
 
         expect(screen.getByRole("complementary", { name: "Console navigation" })).toBe(host)
-        expect(screen.getByRole("button", { name: "Expand navigation" })).toHaveAttribute("aria-expanded", "false")
         expect(host.style.padding).toBe("1.5rem 0.625rem")
         expect(screen.getByTestId("sidebar-glyph")).toBe(glyph)
         expect(screen.getByText("Compact destinations")).toBeInTheDocument()

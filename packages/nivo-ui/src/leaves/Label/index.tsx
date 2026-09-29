@@ -1,5 +1,5 @@
 import { IconSource, type IconName } from "../Icon"
-import { Icon } from "@starci/grammar/common"
+import { Icon, Label as GrammarLabel } from "@starci/grammar/common"
 
 /**
  * LEAF - `Label`: the name of a box, tied to it.
@@ -34,6 +34,6 @@ export const Label = (props: LabelProps) => LabelView(props)
 const LabelView = ({ props }: LabelProps) => (
     <label htmlFor={props.htmlFor} className={LABEL_CLASSES}>
         {props.icon === undefined ? null : <Icon source={IconSource(props.icon, "chip")} usage="chip" />}
-        {props.content}
+        <GrammarLabel depth="nested">{props.content}</GrammarLabel>
     </label>
 )

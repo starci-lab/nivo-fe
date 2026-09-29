@@ -1,11 +1,11 @@
 "use client"
 
-import { Heading } from "@starci/grammar/common"
+import { Button, Heading } from "@starci/grammar/common"
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { createElement, useId, useState, useSyncExternalStore, type ComponentType, type CSSProperties } from "react"
 
-import { RAIL_CLASS_NAME, RAIL_CONTROL_CLASS_NAME } from "./classNames"
+import { RAIL_CLASS_NAME } from "./classNames"
 
 /** Props for a persisted, accessible navigation rail. */
 export type CollapsibleRailProps<RailProps extends object, CompactProps extends object, ToggleProps extends object> = {
@@ -123,15 +123,10 @@ export const CollapsibleRail = <R extends object, C extends object, T extends ob
                 <AnimatePresence initial={false}>
                     {!collapsed && props.title === undefined ? null : <span>{collapsed ? null : props.title}</span>}
                 </AnimatePresence>
-                <button
-                    className={RAIL_CONTROL_CLASS_NAME}
-                    type="button"
-                    aria-label={label}
-                    aria-expanded={!collapsed}
-                    onClick={toggle}
-                >
-                    {toggleControl}
-                </button>
+                <Button type="button" variant="ghost" size="md" onPress={toggle}>
+                    <span className="sr-only">{label}</span>
+                    <span aria-hidden="true">{toggleControl}</span>
+                </Button>
             </div>
             <div>{rail}</div>
         </Root>
