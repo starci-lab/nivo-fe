@@ -1,4 +1,8 @@
+"use client"
+
 import { ChoiceTabs } from "@nivo/ui"
+import { useFormatter } from "next-intl"
+import type { Formatter } from "../../../../modules/i18n/formatter"
 import { ModuleCockpitRailBlock } from "../ModuleCockpitRailBlock"
 import type { DiagnosticsSurfaceProps as DiagnosticsSurfaceDataProps } from "../../../../modules/agentos/module-page/surface-types"
 import type { WithModulePageCopy } from "../../../../modules/agentos/module-page-copy"
@@ -6,11 +10,16 @@ import { cockpitPane } from "../cockpitPane"
 import { cockpitSidecarPane } from "../cockpitSidecarPane"
 import { DiagnosticsHealthCard } from "../DiagnosticsHealthCard"
 import { DiagnosticsTraceCard } from "../DiagnosticsTraceCard"
+import {
+    isDiagnosticSignal,
+    isDiagnosticsCompactPane,
+} from "../../../../modules/agentos/module-page/surface-types.guards"
 
 type DiagnosticsSurfaceProps = WithModulePageCopy<DiagnosticsSurfaceDataProps>
 
 /** Diagnostic signal filters, runtime health and persisted trace evidence. */
 export const DiagnosticsSurface = (props: DiagnosticsSurfaceProps) => {
+    const format: Formatter = useFormatter()
     const {
         copy,
         installationId,
@@ -46,7 +55,7 @@ export const DiagnosticsSurface = (props: DiagnosticsSurfaceProps) => {
                         ],
                     }}
                     on={{
-                        select: (key) => onSelectPane(key as DiagnosticsSurfaceDataProps["compactPane"]),
+                        select: (key) => onSelectPane(isDiagnosticsCompactPane(key) ? key : compactPane),
                     }}
                 />
             </div>
@@ -76,7 +85,7 @@ export const DiagnosticsSurface = (props: DiagnosticsSurfaceProps) => {
                     },
                 ],
                 selectedId: selectedSignal,
-                onSelect: (key: string) => onSelectSignal(key as DiagnosticsSurfaceDataProps["selectedSignal"]),
+                onSelect: (key: string) => onSelectSignal(isDiagnosticSignal(key) ? key : selectedSignal),
             })}
             {cockpitPane(compactPane !== "readiness", DiagnosticsHealthCard, {
                 copy,
@@ -89,6 +98,7 @@ export const DiagnosticsSurface = (props: DiagnosticsSurfaceProps) => {
                 kindKey,
                 workbenchKey,
                 events,
+                format,
             })}
         </div>
     )

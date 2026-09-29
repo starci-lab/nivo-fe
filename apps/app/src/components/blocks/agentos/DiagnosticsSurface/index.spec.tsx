@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react"
-import { createTranslator } from "next-intl"
+import { createTranslator, NextIntlClientProvider } from "next-intl"
 import { describe, expect, it, vi } from "vitest"
 import enMessages from "../../../../messages/en.json"
 import { DiagnosticsSurface } from "."
@@ -53,13 +53,15 @@ describe("DiagnosticsSurface", () => {
         const onSelectSignal = vi.fn()
         const onSelectPane = vi.fn()
         render(
-            <DiagnosticsSurface
-                copy={copy}
-                {...props}
-                events={[event]}
-                onSelectSignal={onSelectSignal}
-                onSelectPane={onSelectPane}
-            />,
+            <NextIntlClientProvider locale="en" messages={enMessages} timeZone={TIME_ZONE}>
+                <DiagnosticsSurface
+                    copy={copy}
+                    {...props}
+                    events={[event]}
+                    onSelectSignal={onSelectSignal}
+                    onSelectPane={onSelectPane}
+                />
+            </NextIntlClientProvider>,
         )
 
         fireEvent.click(screen.getByText(copy.diagnostics.channel))

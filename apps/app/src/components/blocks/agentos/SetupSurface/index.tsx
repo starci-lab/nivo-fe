@@ -4,6 +4,7 @@ import { PrivateSetupChatBlock } from "../PrivateSetupChatBlock"
 import { AGENTOS_SETUP_SURFACE_CLASS_NAME, CONTEXT_BAND_CLASS_NAME, CONTEXT_RAISED_BAND_CLASS_NAME } from "./classNames"
 import type { SetupSurfaceProps as SetupSurfaceDataProps } from "../../../../modules/agentos/module-page/surface-types"
 import type { WithModulePageCopy } from "../../../../modules/agentos/module-page-copy"
+import { isSetupCompactPane } from "../../../../modules/agentos/module-page/surface-types.guards"
 
 type SetupSurfaceProps = WithModulePageCopy<SetupSurfaceDataProps>
 
@@ -157,7 +158,7 @@ export const SetupSurface = (props: SetupSurfaceProps) => {
                     { id: "context", label: copy.setup.gates },
                     { id: "versions", label: copy.setup.versions },
                 ]}
-                onSelect={(key) => props.onSelectPane(key as SetupSurfaceProps["compactPane"])}
+                onSelect={(key) => props.onSelectPane(isSetupCompactPane(key) ? key : compactPane)}
                 panelId={(key) => `setup-panel-${key}`}
             />
             {compactPane === "conversation" ? (

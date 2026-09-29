@@ -5,6 +5,7 @@ import { ExecuteSessionRailBlock } from "../ExecuteSessionRailBlock"
 import { DEFAULT_WORKBENCH_REGISTRY, KindWorkbenchBlock } from "../KindWorkbenchBlock"
 import type { OperateSurfaceProps as OperateSurfaceDataProps } from "../../../../modules/agentos/module-page/surface-types"
 import type { WithModulePageCopy } from "../../../../modules/agentos/module-page-copy"
+import { isOperationTarget } from "../../../../modules/agentos/module-page/surface-types.guards"
 
 type OperateSurfaceProps = WithModulePageCopy<OperateSurfaceDataProps>
 
@@ -76,7 +77,7 @@ export const OperateSurface = (props: OperateSurfaceProps) => {
                         ],
                     }}
                     on={{
-                        select: (key) => props.onSelectTarget(key as OperateSurfaceProps["operationTarget"]),
+                        select: (key) => props.onSelectTarget(isOperationTarget(key) ? key : props.operationTarget),
                     }}
                 />
             </div>

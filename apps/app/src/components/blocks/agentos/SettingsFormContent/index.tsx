@@ -2,6 +2,7 @@ import { Checkbox, ChoiceTabs } from "@nivo/ui"
 import { Button, Input, Text } from "@starci/grammar/common"
 import type { SettingsFormContentProps as SettingsFormDataProps } from "../../../../modules/agentos/module-page/surface-types"
 import type { WithModulePageCopy, ModulePageCopy } from "../../../../modules/agentos/module-page-copy"
+import { isOperatingMode } from "../../../../modules/agentos/module-page/surface-types.guards"
 
 const credentialStatusLabel = (status: string, copy: ModulePageCopy): string =>
     status === "configured" || status === "invalid"
@@ -87,7 +88,7 @@ export const SettingsFormContent = (props: SettingsFormContentProps) => {
                     ],
                 }}
                 on={{
-                    select: (key) => props.on.changeOperatingMode(key as "assist" | "autopilot"),
+                    select: (key) => props.on.changeOperatingMode(isOperatingMode(key) ? key : operatingMode),
                 }}
             />
 

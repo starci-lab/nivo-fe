@@ -1,14 +1,12 @@
 import { ChoiceTabs } from "@nivo/ui"
-import {
-    DEFAULT_TEST_WORKBENCH_REGISTRY,
-    KindTestWorkbenchBlock,
-} from "../KindTestWorkbenchBlock"
+import { DEFAULT_TEST_WORKBENCH_REGISTRY, KindTestWorkbenchBlock } from "../KindTestWorkbenchBlock"
 import { ModuleCockpitRailBlock } from "../ModuleCockpitRailBlock"
 import { TestTrustResultBlock } from "../TestTrustResultBlock"
 import type { TestSurfaceProps as TestSurfaceDataProps } from "../../../../modules/agentos/module-page/surface-types"
 import type { WithModulePageCopy, ModulePageCopy } from "../../../../modules/agentos/module-page-copy"
 import { cockpitPane } from "../cockpitPane"
 import { cockpitSidecarPane } from "../cockpitSidecarPane"
+import { isTestCompactPane, isTestMode } from "../../../../modules/agentos/module-page/surface-types.guards"
 
 const testRunStatusLabel = (status: keyof ModulePageCopy["testStatus"] | undefined, copy: ModulePageCopy): string =>
     status === undefined ? copy.pageTest.notRun : copy.testStatus[status]
@@ -55,7 +53,7 @@ export const TestSurface = (props: TestSurfaceProps) => {
                         ],
                     }}
                     on={{
-                        select: (key) => onSelectPane(key as TestSurfaceProps["compactPane"]),
+                        select: (key) => onSelectPane(isTestCompactPane(key) ? key : compactPane),
                     }}
                 />
                 <ChoiceTabs
@@ -67,7 +65,7 @@ export const TestSurface = (props: TestSurfaceProps) => {
                             { id: "acceptance", label: copy.pageTest.acceptance },
                         ],
                     }}
-                    on={{ select: (key) => onSelectMode(key as "exploratory" | "acceptance") }}
+                    on={{ select: (key) => onSelectMode(isTestMode(key) ? key : mode) }}
                 />
             </div>
             {cockpitPane(compactPane !== "scenarios", ModuleCockpitRailBlock, {
