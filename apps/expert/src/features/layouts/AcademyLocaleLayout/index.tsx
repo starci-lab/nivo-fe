@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { NextIntlClientProvider, hasLocale } from "next-intl"
+import { hasLocale } from "next-intl"
+import { I18nProvider } from "@nivo/i18n/provider"
 import { getMessages } from "next-intl/server"
 import { ThemeProvider } from "next-themes"
 import { ThemeToggle } from "@/components/blocks/theme/ThemeToggle"
@@ -101,12 +102,12 @@ export const AcademyLocaleLayout = async ({ children, params }: LocaleLayoutProp
             <body className="min-h-dvh bg-background text-foreground antialiased">
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                     <NivoGrammarTheme>
-                        <NextIntlClientProvider locale={locale} messages={messages}>
+                        <I18nProvider locale={locale} messages={messages}>
                             <div className="flex justify-end px-4 py-2">
                                 <ThemeToggle />
                             </div>
                             {children}
-                        </NextIntlClientProvider>
+                        </I18nProvider>
                     </NivoGrammarTheme>
                 </ThemeProvider>
             </body>

@@ -5,7 +5,7 @@ import { resolve } from "node:path"
 /**
  * ONE run, ONE report.
  *
- * Vitest `projects` keeps four workspaces isolated -- their own roots, their own aliases -- while
+ * Vitest `projects` keeps five workspaces isolated -- their own roots, their own aliases -- while
  * still being a single invocation that writes a single `coverage/lcov.info`. The alternative
  * shape, `turbo run test` fanning out to four independent Vitest runs, produces four coverage
  * files that Codecov and SonarQube then have to be told how to merge; two dashboards reading two
@@ -23,6 +23,17 @@ export default defineConfig({
             reportsDirectory: resolve(import.meta.dirname, "coverage"),
             include: ["packages/*/src/**/*.{ts,tsx}", "apps/*/src/**/*.{ts,tsx}"],
             exclude: ["**/*.d.ts", "**/*.spec.{ts,tsx}", "**/src/messages/**"],
+        },
+    },
+    resolve: {
+        alias: {
+            "@nivo/i18n/config": resolve(import.meta.dirname, "packages/i18n/src/config.ts"),
+            "@nivo/i18n/navigation": resolve(import.meta.dirname, "packages/i18n/src/navigation.ts"),
+            "@nivo/i18n/provider": resolve(import.meta.dirname, "packages/i18n/src/provider.tsx"),
+            "@nivo/i18n/request": resolve(import.meta.dirname, "packages/i18n/src/request.ts"),
+            "@nivo/i18n/routing": resolve(import.meta.dirname, "packages/i18n/src/routing.ts"),
+            "@nivo/i18n/messages": resolve(import.meta.dirname, "packages/i18n/src/messages.ts"),
+            "@nivo/i18n": resolve(import.meta.dirname, "packages/i18n/src/index.ts"),
         },
     },
     plugins: [react()],

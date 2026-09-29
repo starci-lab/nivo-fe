@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { NextIntlClientProvider } from "next-intl"
+import { I18nProvider } from "@nivo/i18n/provider"
 import { getMessages } from "next-intl/server"
 import { MESSAGE_SCOPES, pickMessages, type MessageScopeName } from "@/modules/i18n/messages"
 
@@ -21,11 +21,7 @@ export type MessageScopeProps = {
  */
 export const MessageScope = async ({ scope, children }: MessageScopeProps) => {
     const messages = await getMessages()
-    return (
-        <NextIntlClientProvider messages={pickMessages(messages, MESSAGE_SCOPES[scope])}>
-            {children}
-        </NextIntlClientProvider>
-    )
+    return <I18nProvider messages={pickMessages(messages, MESSAGE_SCOPES[scope])}>{children}</I18nProvider>
 }
 
 export default MessageScope

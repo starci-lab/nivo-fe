@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
-import { NextIntlClientProvider, hasLocale } from "next-intl"
+import { hasLocale } from "next-intl"
+import { I18nProvider } from "@nivo/i18n/provider"
 import { getMessages, getTranslations } from "next-intl/server"
 import { ThemeProvider } from "next-themes"
 import type { ReactNode } from "react"
@@ -61,9 +62,9 @@ export const SiteShellDocument = async ({ children, params }: SiteShellDocumentP
             <body>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                     <NivoGrammarTheme>
-                        <NextIntlClientProvider locale={locale} messages={messages}>
+                        <I18nProvider locale={locale} messages={messages}>
                             <SiteShell skipLabel={t("skipToContent")}>{children}</SiteShell>
-                        </NextIntlClientProvider>
+                        </I18nProvider>
                     </NivoGrammarTheme>
                 </ThemeProvider>
             </body>

@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@nivo/i18n": "*",
     "@heroui/react": "3.2.6",
     "@heroui/styles": "3.2.6",
     "@nivo/ui": "*",

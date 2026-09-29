@@ -1,0 +1,56 @@
+{
+  "name": "@nivo/i18n",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./config": {
+      "types": "./src/config.ts",
+      "default": "./dist/config.js"
+    },
+    "./navigation": {
+      "types": "./src/navigation.ts",
+      "default": "./dist/navigation.js"
+    },
+    "./provider": {
+      "types": "./src/provider.tsx",
+      "default": "./dist/provider.js"
+    },
+    "./request": {
+      "types": "./src/request.ts",
+      "default": "./dist/request.js"
+    },
+    "./routing": {
+      "types": "./src/routing.ts",
+      "default": "./dist/routing.js"
+    },
+    "./messages": {
+      "types": "./src/messages.ts",
+      "default": "./dist/messages.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "next": "16.1.6",
+    "next-intl": "4.13.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@vitejs/plugin-react": "^5.2.0",
+    "jsdom": "^29.1.1",
+    "typescript": "^5",
+    "vitest": "^3.2.7"
+  }
+}

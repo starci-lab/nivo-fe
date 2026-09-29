@@ -24,14 +24,12 @@ export const legacyRedirects = async () =>
     ])
 
 /**
- * `@nivo/ui` ships TypeScript source rather than a build output, so Next must compile it the same
- * way it compiles this app. That is the price of one shared copy, and it is cheaper than the drift
- * a per-app copy caused.
+ * `@nivo/ui` ships TypeScript source, so Next compiles it with this app.
  */
 const nextConfig: NextConfig = {
     output: "standalone",
     outputFileTracingRoot: resolve(import.meta.dirname, "../.."),
-    transpilePackages: ["@nivo/ui", "@starci/grammar"],
+    transpilePackages: ["@nivo/i18n", "@nivo/ui", "@starci/grammar"],
     turbopack: {
         root: resolve(import.meta.dirname, "../.."),
     },

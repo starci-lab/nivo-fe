@@ -1,4 +1,4 @@
-import type { Messages } from "next-intl"
+export { pickMessages } from "@nivo/i18n/messages"
 
 /**
  * Which top-level catalogue namespaces each route group ships to the browser.
@@ -19,15 +19,3 @@ export const MESSAGE_SCOPES = {
 
 /** One route group message scope. */
 export type MessageScopeName = keyof typeof MESSAGE_SCOPES
-
-/**
- * Keep only the named top-level namespaces of a catalogue.
- *
- * @param messages - The whole catalogue of the request locale.
- * @param namespaces - The top-level namespaces to keep; one the catalogue lacks is skipped.
- * @returns The catalogue reduced to those namespaces.
- */
-export const pickMessages = (messages: Messages, namespaces: ReadonlyArray<string>): Messages =>
-    Object.fromEntries(
-        namespaces.filter((namespace) => namespace in messages).map((namespace) => [namespace, messages[namespace]]),
-    ) as Messages

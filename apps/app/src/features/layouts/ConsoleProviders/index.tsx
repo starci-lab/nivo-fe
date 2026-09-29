@@ -1,7 +1,8 @@
 "use client"
 
 import { I18nProvider } from "@heroui/react"
-import { NextIntlClientProvider, type Messages } from "next-intl"
+import type { Messages } from "next-intl"
+import { I18nProvider as NextI18nProvider } from "@nivo/i18n/provider"
 import { ThemeProvider } from "next-themes"
 import type { ReactNode } from "react"
 import { SessionProvider } from "@/modules/auth/session"
@@ -30,7 +31,7 @@ export type ConsoleProvidersProps = {
 export const ConsoleProviders = ({ props, children }: ConsoleProvidersProps) => {
     const { locale, messages, timeZone } = props
     return (
-        <NextIntlClientProvider locale={locale} messages={messages} timeZone={timeZone}>
+        <NextI18nProvider locale={locale} messages={messages} timeZone={timeZone}>
             <I18nProvider locale={locale}>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                     <NivoGrammarTheme>
@@ -38,7 +39,7 @@ export const ConsoleProviders = ({ props, children }: ConsoleProvidersProps) => 
                     </NivoGrammarTheme>
                 </ThemeProvider>
             </I18nProvider>
-        </NextIntlClientProvider>
+        </NextI18nProvider>
     )
 }
 

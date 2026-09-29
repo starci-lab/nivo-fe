@@ -8,7 +8,7 @@ import createNextIntlPlugin from "next-intl/plugin"
  * a per-app copy caused.
  */
 const nextConfig: NextConfig = {
-    transpilePackages: ["@nivo/ui", "@starci/grammar"],
+    transpilePackages: ["@nivo/i18n", "@nivo/ui", "@starci/grammar"],
     turbopack: {
         root: resolve(import.meta.dirname, "../.."),
     },

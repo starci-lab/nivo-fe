@@ -1,6 +1,5 @@
 import type { NextRequest } from "next/server"
-
-import { DEFAULT_LOCALE } from "./config"
+import { DEFAULT_LOCALE } from "../i18n/config"
 
 /**
  * Detect the standalone router's self-proxy hop and stand aside.

@@ -13,7 +13,7 @@ import type { NextConfig } from "next"
  * and a request config nothing loads is a locale that silently stops resolving.
  */
 const nextConfig: NextConfig = {
-    transpilePackages: ["@nivo/ui", "@starci/grammar"],
+    transpilePackages: ["@nivo/i18n", "@nivo/ui", "@starci/grammar"],
     turbopack: {
         root: resolve(import.meta.dirname, "../.."),
     },
