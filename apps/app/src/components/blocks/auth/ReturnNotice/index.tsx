@@ -48,11 +48,13 @@ export const ReturnNotice = (props: ReturnNoticeProps) => {
     const search = searchParams.toString()
     const isMarked = new URLSearchParams(search).get(RETURN_NOTICE_PARAM) === UNAVAILABLE_VALUE
     const [landedOn, setLandedOn] = useState<string | null>(isMarked ? pathname : null)
+    if (isMarked && landedOn !== pathname) {
+        setLandedOn(pathname)
+    }
     useEffect(() => {
         if (!isMarked) {
             return
         }
-        setLandedOn(pathname)
         const rest = new URLSearchParams(search)
         rest.delete(RETURN_NOTICE_PARAM)
         const query = rest.toString()
