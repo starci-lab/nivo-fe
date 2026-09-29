@@ -8,7 +8,7 @@ import { ThemeToggle } from "@/components/blocks/theme/ThemeToggle"
 import { NivoGrammarTheme } from "@/features/layouts/NivoGrammarTheme"
 import { ACADEMY, inLocale } from "@/modules/academy/template"
 import { routing } from "@/modules/i18n/routing"
-import type { Locale } from "@/modules/i18n/config"
+import { toLocale } from "@/modules/i18n/config"
 import type { ComponentProps } from "react"
 
 /** The routed locale segment, awaited by every handler in this file. */
@@ -60,7 +60,7 @@ export const generateStaticParams = () =>
  */
 export const generateMetadata = async ({ params }: LocaleSegment): Promise<Metadata> => {
     const { locale } = await params
-    const resolved = (hasLocale(routing.locales, locale) ? locale : routing.defaultLocale) as Locale
+    const resolved = toLocale(locale)
     return {
         title: inLocale(ACADEMY.identity.name, resolved),
         description: inLocale(ACADEMY.identity.tagline, resolved),
