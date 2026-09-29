@@ -13,7 +13,13 @@ type ProductCardsProps = {
     readonly context: ProductBlockContext
 }
 
-const CARD_ICONS = ["complete", "agentos", "review", "apps"] as const
+const CARD_ICON_NAMES = ["complete", "agentos", "review", "apps"] as const
+const CARD_ICON_PROPS = {
+    complete: { name: "complete", usage: "heading" },
+    agentos: { name: "agentos", usage: "heading" },
+    review: { name: "review", usage: "heading" },
+    apps: { name: "apps", usage: "heading" },
+} as const
 
 /** Product cards present a responsive set of linked or explanatory product capabilities. */
 export const ProductCards = (props: ProductCardsProps) => {
@@ -28,7 +34,7 @@ export const ProductCards = (props: ProductCardsProps) => {
                 >
                     <span className={productCardIconClassName(context)} aria-hidden="true">
                         <NivoIcon
-                            props={{ name: CARD_ICONS[index % CARD_ICONS.length] ?? "complete", usage: "heading" }}
+                            props={CARD_ICON_PROPS[CARD_ICON_NAMES[index % CARD_ICON_NAMES.length] ?? "complete"]}
                         />
                     </span>
                     {item.labelled === true ? (

@@ -19,6 +19,8 @@ type ContactIntentFormProps = {
     readonly submitLabel: string
 }
 
+const CHECK_CHIP_ICON_PROPS = { name: "complete", usage: "chip" } as const
+
 const ArrowIcon = () => <NivoIcon props={{ name: "next", usage: "chip" }} />
 
 /** Accessible renderer-backed intent choices for the relationship router. */
@@ -42,7 +44,7 @@ export const ContactIntentForm = (props: ContactIntentFormProps) => (
                                 data-contact-intent-check="true"
                                 aria-hidden="true"
                             >
-                                <NivoIcon props={{ name: "complete", usage: "chip" }} />
+                                <NivoIcon props={CHECK_CHIP_ICON_PROPS} />
                             </span>
                         </span>
                     ),

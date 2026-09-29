@@ -23,6 +23,7 @@ const CONTINUE_PATHS = [
     ["trust", SITE_LINKS.trust],
     ["company", SITE_LINKS.company],
 ] as const
+const NEXT_CHIP_ICON_PROPS = { name: "next", usage: "chip" } as const
 
 type ExplorePageProps = { readonly selectedType?: IdeaContentType | null }
 
@@ -82,7 +83,7 @@ const ExplorePage = ({ selectedType }: ExplorePageProps) => {
                                     <TextAction
                                         href={href(`${SITE_LINKS.ideas}/${idea.slug}`)}
                                         appearance="route"
-                                        endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}
+                                        endContent={<NivoIcon props={NEXT_CHIP_ICON_PROPS} />}
                                     >
                                         {ideas("featured.read")}
                                     </TextAction>
@@ -107,7 +108,7 @@ const ExplorePage = ({ selectedType }: ExplorePageProps) => {
                                 <TextAction
                                     href={href(`${SITE_LINKS.ideas}?type=${id}#featured`)}
                                     appearance="route"
-                                    endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}
+                                    endContent={<NivoIcon props={NEXT_CHIP_ICON_PROPS} />}
                                 >
                                     {ideas("byType.explore")}
                                 </TextAction>

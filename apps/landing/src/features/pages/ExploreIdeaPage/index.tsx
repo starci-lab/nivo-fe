@@ -18,6 +18,7 @@ import { SITE_LINKS } from "../../../modules/landing/site"
 
 type ExploreIdeaPageProps = { readonly idea: IdeaArticle }
 const LINK_HREFS = { nivoOs: SITE_LINKS.nivoOs, sor: SITE_LINKS.responsibility, trust: SITE_LINKS.trust } as const
+const NEXT_CHIP_ICON_PROPS = { name: "next", usage: "chip" } as const
 
 /** Editorial owner for one approved Idea and its evidence, references and related paths. */
 const ExploreIdeaPage = ({ idea }: ExploreIdeaPageProps) => {
@@ -103,7 +104,7 @@ const ExploreIdeaPage = ({ idea }: ExploreIdeaPageProps) => {
                                 <TextAction
                                     href={href(`${SITE_LINKS.ideas}/${item.slug}`)}
                                     appearance="route"
-                                    endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}
+                                    endContent={<NivoIcon props={NEXT_CHIP_ICON_PROPS} />}
                                 >
                                     {detail("next.read")}
                                 </TextAction>

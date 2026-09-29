@@ -11,6 +11,8 @@ import {
 import type { PublicFlowStep } from "../../../modules/landing/homepage"
 import { CLASS_NAMES, homeRoleImageClassName } from "./classNames"
 
+const NEXT_CHIP_ICON_PROPS = { name: "next", usage: "chip" } as const
+
 type InlineRouteProps = { readonly parts: ReadonlyArray<string>; readonly joiner: string }
 type HomeHeroProps = {
     readonly copy: {
@@ -73,7 +75,7 @@ export const InlineRoute = ({ parts, joiner }: InlineRouteProps) => (
             <span key={part}>
                 {index > 0 ? (
                     <span aria-hidden="true">
-                        <NivoIcon props={{ name: "next", usage: "chip" }} />
+                        <NivoIcon props={NEXT_CHIP_ICON_PROPS} />
                     </span>
                 ) : null}
                 <span>{part}</span>

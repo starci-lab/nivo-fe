@@ -19,7 +19,14 @@ import { SITE_LINKS } from "../../../modules/landing/site"
 import { CLASS_NAMES, homeCommercialRouteMarkerClassName, homeCommercialRouteStepClassName } from "./classNames"
 import { HomeHero, HomeOperatingModel, HomeRelevance, InlineRoute } from "./component"
 
-const ROUTE_ICONS = ["search", "code", "complete"] as const
+const NEXT_CHIP_ICON_PROPS = { name: "next", usage: "chip" } as const
+const ROUTE_ICON_NAMES = ["search", "code", "complete"] as const
+const ROUTE_ICON_PROPS = {
+    search: { name: "search", usage: "heading" },
+    code: { name: "code", usage: "heading" },
+    complete: { name: "complete", usage: "heading" },
+    next: { name: "next", usage: "heading" },
+} as const
 
 /** Render the guided route from discovery through supported delivery. */
 const HomeCommercial = () => {
@@ -71,12 +78,14 @@ const HomeCommercial = () => {
                                     className={homeCommercialRouteMarkerClassName(index)}
                                     aria-hidden="true"
                                 >
-                                    <NivoIcon props={{ name: ROUTE_ICONS[index] ?? "next", usage: "heading" }} />
+                                    <NivoIcon
+                                        props={ROUTE_ICON_PROPS[ROUTE_ICON_NAMES[index] ?? "next"]}
+                                    />
                                 </span>
                                 <strong className={CLASS_NAMES.commercial.routeCopy}>{step}</strong>
                                 {index < route.length - 1 ? (
                                     <span className={CLASS_NAMES.commercial.routeArrow} aria-hidden="true">
-                                        <NivoIcon props={{ name: "next", usage: "chip" }} />
+                                        <NivoIcon props={NEXT_CHIP_ICON_PROPS} />
                                     </span>
                                 ) : null}
                             </div>
@@ -184,7 +193,7 @@ const HomeNextPath = () => {
                                         <TextAction
                                             href={href(link.href)}
                                             appearance="route"
-                                            endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}
+                                            endContent={<NivoIcon props={NEXT_CHIP_ICON_PROPS} />}
                                         >
                                             {t(`nextPaths.links.${link.id}`)}
                                         </TextAction>

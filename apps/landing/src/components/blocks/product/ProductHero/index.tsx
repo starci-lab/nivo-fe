@@ -25,10 +25,10 @@ type ProductHeroProps = {
 }
 
 const OPERATING_NODES = [
-    { key: "businessIntent", icon: "overview" },
-    { key: "humanLeads", icon: "account" },
-    { key: "aiOperates", icon: "agentos" },
-    { key: "outcomeVerified", icon: "complete" },
+    { key: "businessIntent", iconProps: { name: "overview", usage: "chip" } },
+    { key: "humanLeads", iconProps: { name: "account", usage: "chip" } },
+    { key: "aiOperates", iconProps: { name: "agentos", usage: "chip" } },
+    { key: "outcomeVerified", iconProps: { name: "complete", usage: "chip" } },
 ] as const
 
 const ASSURANCE_STEPS = [
@@ -76,7 +76,7 @@ const ProductHeroVisual = ({ page, t }: Pick<ProductHeroProps, "page" | "t">) =>
                         {OPERATING_NODES.map((node, index) => (
                             <li className={productHeroNodeClassName(index)} key={node.key}>
                                 <span className={styles.nodeIcon}>
-                                    <NivoIcon props={{ name: node.icon, usage: "chip" }} />
+                                    <NivoIcon props={node.iconProps} />
                                 </span>
                                 <span>{t("nivoOs.hero.visual.nodes." + node.key)}</span>
                             </li>

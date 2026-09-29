@@ -14,9 +14,9 @@ const PROVENANCE_IDS = ["delivery", "systems", "operations", "today"] as const
 const MISSION_STEP_IDS = ["context", "responsibility", "outcome", "capacity"] as const
 const VISION_STEP_IDS = ["native", "autonomy", "selfSustaining"] as const
 const PHILOSOPHY = [
-    { id: "human", icon: "account" },
-    { id: "ai", icon: "agentos" },
-    { id: "system", icon: "complete" },
+    { id: "human", iconProps: { name: "account", usage: "heading" } },
+    { id: "ai", iconProps: { name: "agentos", usage: "heading" } },
+    { id: "system", iconProps: { name: "complete", usage: "heading" } },
 ] as const
 const NEXT_LINKS = [
     { id: "nivoOs", href: SITE_LINKS.nivoOs },
@@ -221,7 +221,7 @@ export const CompanyPage = () => {
                                 {PHILOSOPHY.map((item, index) => (
                                     <article key={item.id}>
                                         <span className={CLASS_NAMES.philosophyIcon}>
-                                            <NivoIcon props={{ name: item.icon, usage: "heading" }} />
+                                            <NivoIcon props={item.iconProps} />
                                         </span>
                                         <span className={CLASS_NAMES.cardIndex}>{String(index + 1).padStart(2, "0")}</span>
                                         <Heading level={3}><span className={CLASS_NAMES.inverseHeadingText}>{t(`philosophy.items.${item.id}.title`)}</span></Heading>
