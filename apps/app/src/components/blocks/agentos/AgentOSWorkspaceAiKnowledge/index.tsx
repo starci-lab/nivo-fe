@@ -7,7 +7,7 @@ import {
 import { type AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge"
 import { nivoQueryData } from "@/modules/query"
 import { useLocale, useTranslations } from "next-intl"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { AgentOSWorkspaceAiKnowledgeBase, type AgentOSWorkspaceAiKnowledgeViewProps } from "./component"
 /** Exact workspace identity whose AI and knowledge readiness is owned by this block. */
 export type AgentOSWorkspaceAiKnowledgeProps = {
@@ -81,10 +81,7 @@ export const AgentOSWorkspaceAiKnowledge = (props: AgentOSWorkspaceAiKnowledgePr
     )
     const readiness = nivoQueryData(query.data)
     const visibleAction = resolveAgentOSWorkspaceAiKnowledgeAction(action, readiness)
-    useEffect(() => {
-        if (visibleAction === action) return
-        setAction(visibleAction)
-    }, [action, visibleAction])
+    if (visibleAction !== action) setAction(visibleAction)
     const run = async () => {
         setRecoveryFromRefused(false)
         setActionRefused(false)
