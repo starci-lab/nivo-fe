@@ -27,9 +27,6 @@ import {
     accountingPartialReasonKey,
     accountingRoutineStateKey,
     accountingTreatmentKey,
-    formatAccountingInstant,
-    formatAccountingMinor,
-    formatAccountingPeriod,
     type AccountingNotice,
     type AccountingSurfaceStanding,
     type AccountingTranslation,
@@ -184,7 +181,6 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
     const { view } = props.props
     const {
         t,
-        locale,
         scopeReady,
         scopeStanding,
         notice,
@@ -197,8 +193,7 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
         setAsOf,
         setAsOfDraft,
     } = view
-    const amount = (amountMinor: number, rowCurrency: string): string =>
-        formatAccountingMinor(amountMinor, rowCurrency, locale)
+    const amount = view.format.amount
     const estimateCurrency = view.overview.model?.currency ?? null
     const stop = (handler: () => void) => (event: FormSubmit) => {
         event.preventDefault()
@@ -279,7 +274,7 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
                             </Badge>
                         )}
                         <Badge tone="neutral">
-                            {t("overview.periodBadge", { period: formatAccountingPeriod(view.periodLabel, locale) })}
+                            {t("overview.periodBadge", { period: view.format.period(view.periodLabel) })}
                         </Badge>
                         <Badge tone="neutral">
                             {t("overview.itemCount", { count: view.overview.model?.items.length ?? 0 })}
@@ -863,7 +858,7 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
                             <Badge tone="neutral">{t("revision", { value: view.detail.model.version })}</Badge>
                             <Text size="xs" tone="muted">
                                 {t("detail.effectiveAt", {
-                                    at: formatAccountingInstant(view.detail.model.effectiveAt, locale),
+                                    at: view.format.instant(view.detail.model.effectiveAt),
                                 })}
                             </Text>
                         </ActionRow>

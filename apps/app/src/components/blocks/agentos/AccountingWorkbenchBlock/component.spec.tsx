@@ -38,9 +38,8 @@ const keyPaths = (source: unknown, prefix = ""): ReadonlyArray<string> =>
           )
         : [prefix]
 
-const GROUPS = ["overview", "intake", "routine", "question", "detail", "correction"] as const
+type AccountingWorkbenchGroup = "overview" | "intake" | "routine" | "question" | "detail" | "correction"
 type AccountingWorkbenchView = ReturnType<typeof useAccountingWorkbench>
-type AccountingWorkbenchGroup = (typeof GROUPS)[number]
 type AccountingWorkbenchViewOverrides = Omit<Partial<AccountingWorkbenchView>, AccountingWorkbenchGroup> & {
     readonly [Key in AccountingWorkbenchGroup]?: Partial<AccountingWorkbenchView[Key]>
 }
@@ -50,6 +49,11 @@ const view = (overrides: AccountingWorkbenchViewOverrides = {}): AccountingWorkb
     const settled: AccountingWorkbenchView = {
         t: translate,
         locale: "en",
+        format: {
+            amount: (amountMinor, amountCurrency) => `${amountMinor} ${amountCurrency}`,
+            instant: (value) => value,
+            period: (value) => value,
+        },
         scopeStanding: "ready",
         scopeReady: true,
         periodMonth: "2026-09",
