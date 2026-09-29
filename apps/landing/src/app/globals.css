@@ -7,333 +7,41 @@
 @source "../../../../packages/nivo-ui/src";
 @source "../../../../packages/nivo-ui/dist";
 
-:root {
-    --nivo-core-crimson: var(--nivo-accent);
-    --nivo-deep-burgundy: color-mix(in oklab, var(--nivo-accent) 58%, var(--nivo-brand-ink));
-    --nivo-signal-coral: color-mix(in oklab, var(--nivo-accent) 64%, white);
-    --nivo-warm-rose: color-mix(in oklab, var(--nivo-accent) 82%, white);
-    --nivo-ember-orange: color-mix(in oklab, var(--nivo-accent) 72%, #f59e0b);
-    --nivo-soft-blush: color-mix(in oklab, var(--nivo-accent) 8%, var(--nivo-surface));
-    --nivo-cloud-white: var(--nivo-surface);
-    --nivo-ink: var(--nivo-brand-ink);
-    --nivo-slate-gray: color-mix(in oklab, var(--nivo-brand-ink) 82%, white);
-    --nivo-border-gray: var(--nivo-border);
-    --nivo-night: #071224;
-    --nivo-night-raised: #101e34;
-    --nivo-night-muted: #aebacf;
-    --nivo-night-line: rgb(174 186 207 / 22%);
-    --nivo-page-font: "Satoshi", "Avenir Next", Inter, ui-sans-serif, system-ui, sans-serif;
-    --site-header-height: 5rem;
-    scroll-behavior: smooth;
+@custom-variant forced-colors (@media (forced-colors: active));
+
+/*
+ * TOKEN BINDINGS ONLY: the names the landing utilities resolve through. Every literal value lives
+ * in modules/brand/brand.css; this sheet wires the family's and the app's tokens into the utility
+ * namespace and scans the component sources. The home-area rules below the fold belong to the home
+ * block and leave with it.
+ */
+@theme inline {
+    --font-landing-page: var(--landing-font-page);
+    --color-landing-accent-ink: var(--landing-accent-ink);
+    --color-landing-accent-bright: var(--landing-accent-bright);
+    --color-landing-ink-soft: var(--landing-ink-soft);
+    --color-landing-surface-tint: var(--landing-surface-tint);
+    --color-landing-inverse: var(--landing-inverse);
+    --color-landing-inverse-muted: var(--landing-inverse-muted);
+    --color-landing-inverse-line: var(--landing-inverse-line);
+    --color-landing-header-line: var(--landing-header-line);
+    --color-landing-header-canvas: var(--landing-header-canvas);
+    --shadow-landing-popover: var(--landing-shadow-popover);
+    --shadow-landing-sheet: var(--landing-shadow-sheet);
 }
 
-* {
-    box-sizing: border-box;
-}
-
-html,
-body {
-    min-width: 20rem;
-    max-width: 100%;
-    margin: 0;
-    overflow-x: clip;
-}
-
-body {
-    background: var(--nivo-cloud-white);
-    color: var(--nivo-ink);
-    font-family: var(--nivo-page-font);
-    text-rendering: optimizeLegibility;
-}
-
-a {
-    text-decoration-thickness: 0.08em;
-    text-underline-offset: 0.18em;
-    touch-action: manipulation;
-}
-
-a:focus-visible,
-button:focus-visible,
-summary:focus-visible {
-    outline: 3px solid var(--focus);
-    outline-offset: 4px;
-    box-shadow: 0 0 0 2px currentColor;
-}
-
-.grammar-common-root[data-grammar-family="nivo"] {
-    min-height: 100dvh;
-    background: var(--nivo-cloud-white);
-    color: var(--nivo-ink);
-    font-family: var(--nivo-page-font);
-}
-
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-}
-
-.skip-link {
-    position: fixed;
-    top: 0.75rem;
-    left: 1rem;
-    z-index: 100;
-    min-height: 2.75rem;
-    padding: 0.75rem 1rem;
-    transform: translateY(-180%);
-    border-radius: 0.5rem;
-    background: var(--nivo-ink);
-    color: var(--nivo-cloud-white);
-    font-weight: 700;
-}
-
-.skip-link:focus {
-    transform: translateY(0);
-}
-
-.site-shell {
-    min-height: 100dvh;
-}
-
-.site-main:focus {
-    outline: none;
-}
-
-.site-header {
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    border-bottom: 1px solid color-mix(in srgb, var(--nivo-border-gray) 82%, transparent);
-    background: color-mix(in srgb, var(--nivo-cloud-white) 94%, transparent);
-    backdrop-filter: blur(16px);
-}
-
-.site-header__bar {
-    min-height: var(--site-header-height);
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 2rem;
-}
-
-.site-header__brand {
-    display: inline-flex;
-    min-width: 6.5rem;
-    min-height: 2.75rem;
-    align-items: center;
-}
-
-.site-header__desktop-nav {
-    min-width: 0;
-}
-
-.site-nav__list,
-.site-nav__mobile-list,
-.site-nav__group ul,
-.site-footer__directory ul,
+/* The home block's own rules begin here; the two remnants below were shared rows in the deleted
+ * shell section (`.site-*` + `.home-*` in one selector list) -- they stay until the home block
+ * lands. */
 .home-next-path__routes ul {
     padding: 0;
     margin: 0;
     list-style: none;
 }
 
-.site-nav__list {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(0.35rem, 1.5vw, 1.5rem);
-}
-
-.site-nav__group {
-    position: relative;
-}
-
-.site-nav__group > summary {
-    min-height: 2.75rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding-inline: 0.5rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-    font-weight: 600;
-    list-style: none;
-}
-
-.site-nav__group > summary::-webkit-details-marker {
-    display: none;
-}
-
-.site-nav__group > summary::after {
-    content: "";
-    width: 0.4rem;
-    height: 0.4rem;
-    transform: rotate(45deg) translateY(-0.12rem);
-    border-right: 1.5px solid currentColor;
-    border-bottom: 1.5px solid currentColor;
-}
-
-.site-nav__group[open] > summary::after {
-    transform: rotate(225deg) translate(-0.1rem, -0.1rem);
-}
-
-.site-nav__list .site-nav__group > ul {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    left: 50%;
-    z-index: 4;
-    min-width: 14rem;
-    padding: 0.5rem;
-    transform: translateX(-50%);
-    border: 1px solid var(--nivo-border-gray);
-    border-radius: 0.75rem;
-    background: var(--nivo-cloud-white);
-    box-shadow: 0 1rem 2rem rgb(15 23 42 / 10%);
-}
-
-.site-nav__list .site-nav__group > ul a {
-    width: 100%;
-    justify-content: flex-start;
-}
-
-.site-header__actions {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.site-header__actions > a {
-    min-height: 2.75rem;
-}
-
-.site-header__menu-trigger,
-.site-header__mobile-nav {
-    display: none;
-}
-
-.site-footer {
-    --foreground: var(--nivo-cloud-white);
-    --muted: var(--nivo-night-muted);
-    --starci-core-foreground: var(--nivo-cloud-white);
-    --starci-core-muted: var(--nivo-night-muted);
-    --nivo-brand-ink: var(--nivo-cloud-white);
-    --nivo-brand-accent: var(--nivo-core-crimson);
-    padding-block: 4rem 2rem;
-    border-top: 1px solid var(--nivo-night-line);
-    background: var(--nivo-night);
-    color: var(--nivo-cloud-white);
-}
-
-.site-footer__inner {
-    display: grid;
-    grid-template-columns: minmax(13rem, 0.75fr) minmax(0, 1.5fr);
-    gap: 4rem;
-}
-
-.site-footer__identity {
-    max-width: 20rem;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-}
-
-.site-footer__identity > a {
-    display: inline-flex;
-    min-height: 2.75rem;
-    align-items: center;
-}
-
-.site-footer__identity p:last-child,
-.site-footer__legal {
-    color: var(--nivo-night-muted);
-}
-
-.site-footer__directory {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 2rem;
-}
-
-.site-footer__directory nav > p {
-    margin-bottom: 1rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.site-footer__directory ul {
-    display: grid;
-    gap: 0.5rem;
-}
-
-.site-footer__directory a,
-.site-footer__legal a {
-    color: var(--nivo-cloud-white);
-}
-
-.site-footer__legal {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--nivo-night-line);
-}
-
-.site-section-intro {
-    max-width: 50rem;
-}
-
-.site-section-intro--inverse {
-    color: var(--nivo-cloud-white);
-}
-
-.site-action-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.site-action-row > a,
-.site-action-row > button,
 .home-trust__links > a,
 .home-next-path__routes a {
     min-height: 2.75rem;
-}
-
-.text-accent {
-    color: var(--nivo-core-crimson);
-}
-
-.site-inline-route {
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.3em;
-}
-
-.site-inline-route > span {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3em;
-}
-
-.site-inline-route > span > span[aria-hidden="true"] {
-    display: inline-flex;
-    color: var(--nivo-signal-coral);
-}
-
-.site-inline-route svg {
-    width: 0.82em;
-    height: 0.82em;
 }
 
 .home-hero {
@@ -341,7 +49,7 @@ summary:focus-visible {
     isolation: isolate;
     overflow: clip;
     border-bottom: 1px solid var(--nivo-separator);
-    background: var(--nivo-cloud-white);
+    background: var(--surface);
 }
 
 .home-hero::before {
@@ -352,12 +60,12 @@ summary:focus-visible {
     right: 0;
     left: 58%;
     opacity: 0.7;
-    background: var(--nivo-soft-blush);
+    background: var(--landing-surface-tint);
     clip-path: ellipse(64% 78% at 100% 24%);
 }
 
 .home-hero__container {
-    min-height: min(50rem, calc(100dvh - var(--site-header-height)));
+    min-height: min(50rem, calc(100dvh - var(--landing-header-height)));
     display: grid;
     grid-template-columns: minmax(0, 0.92fr) minmax(30rem, 1.08fr);
     align-items: center;
@@ -385,7 +93,7 @@ summary:focus-visible {
 }
 
 .home-hero__copy > p:nth-of-type(2) {
-    color: var(--nivo-deep-burgundy);
+    color: var(--landing-accent-ink);
 }
 
 .home-hero__copy > p:nth-of-type(3) {
@@ -457,7 +165,7 @@ summary:focus-visible {
     padding: 0.6rem 0.9rem;
     border-radius: 999px;
     background: rgb(255 255 255 / 88%);
-    color: var(--nivo-deep-burgundy);
+    color: var(--landing-accent-ink);
     font-size: 0.6875rem;
     font-weight: 700;
     letter-spacing: 0.12em;
@@ -472,7 +180,7 @@ summary:focus-visible {
     width: 0.45rem;
     aspect-ratio: 1;
     border-radius: 50%;
-    background: var(--nivo-core-crimson);
+    background: var(--accent);
     box-shadow: 0 0 0 0.35rem rgb(225 29 72 / 10%);
 }
 
@@ -492,7 +200,7 @@ summary:focus-visible {
     width: 0.75rem;
     aspect-ratio: 1;
     border-radius: 50%;
-    background: var(--nivo-core-crimson);
+    background: var(--accent);
     box-shadow: 0 0 0 0.6rem rgb(225 29 72 / 10%);
 }
 
@@ -526,18 +234,18 @@ summary:focus-visible {
 }
 
 .home-relevance {
-    --foreground: var(--nivo-cloud-white);
-    --muted: var(--nivo-night-muted);
-    --starci-core-foreground: var(--nivo-cloud-white);
-    --starci-core-muted: var(--nivo-night-muted);
+    --foreground: var(--surface);
+    --muted: var(--landing-inverse-muted);
+    --starci-core-foreground: var(--surface);
+    --starci-core-muted: var(--landing-inverse-muted);
     position: relative;
     isolation: isolate;
     overflow: clip;
     background:
         linear-gradient(90deg, rgb(5 14 29 / 98%) 0%, rgb(5 14 29 / 91%) 48%, rgb(5 14 29 / 24%) 100%),
         url("/images/backgrounds/nivo-blue-planet-v1.png") center / cover no-repeat,
-        var(--nivo-night);
-    color: var(--nivo-cloud-white);
+        var(--landing-inverse);
+    color: var(--surface);
 }
 
 .home-relevance::before {
@@ -578,7 +286,7 @@ summary:focus-visible {
 .home-today__identity > p,
 .home-today__focus > p:first-child,
 .home-today__principle > p {
-    color: var(--nivo-signal-coral);
+    color: var(--landing-accent-bright);
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
@@ -595,11 +303,11 @@ summary:focus-visible {
     align-items: flex-start;
     gap: 1rem;
     padding-left: 1.5rem;
-    border-left: 2px solid var(--nivo-core-crimson);
+    border-left: 2px solid var(--accent);
 }
 
 .home-relevance__example > p:last-of-type {
-    color: var(--nivo-night-muted);
+    color: var(--landing-inverse-muted);
     line-height: 1.7;
 }
 
@@ -608,7 +316,7 @@ summary:focus-visible {
 }
 
 .process-flow {
-    --flow-line: var(--nivo-border-gray);
+    --flow-line: var(--border);
     display: grid;
     grid-template-columns: repeat(var(--flow-count, 5), minmax(0, 1fr));
     padding: 0;
@@ -617,13 +325,13 @@ summary:focus-visible {
 }
 
 .process-flow[data-inverse="true"] {
-    --flow-line: var(--nivo-night-line);
-    color: var(--nivo-cloud-white);
+    --flow-line: var(--landing-inverse-line);
+    color: var(--surface);
 }
 
 .process-flow[data-inverse="true"] .process-flow__index,
 .process-flow[data-inverse="true"] .process-flow__copy > span:last-child {
-    color: var(--nivo-night-muted);
+    color: var(--landing-inverse-muted);
 }
 
 .process-flow__step {
@@ -662,10 +370,10 @@ summary:focus-visible {
     width: 1rem;
     align-self: center;
     aspect-ratio: 1;
-    border: 3px solid var(--nivo-cloud-white);
+    border: 3px solid var(--surface);
     border-radius: 50%;
-    background: var(--nivo-core-crimson);
-    box-shadow: 0 0 0 1px var(--nivo-core-crimson);
+    background: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
 }
 
 .process-flow__step[data-emphasis="true"] .process-flow__node {
@@ -696,7 +404,7 @@ summary:focus-visible {
 
 .home-operating-model {
     border-bottom: 1px solid var(--nivo-separator);
-    background: var(--nivo-cloud-white);
+    background: var(--surface);
 }
 
 .home-operating-model .process-flow {
@@ -758,7 +466,7 @@ summary:focus-visible {
     padding: 0.65rem 0.65rem 0;
     overflow: hidden;
     border-radius: var(--nivo-surface-radius);
-    background: var(--nivo-soft-blush);
+    background: var(--landing-surface-tint);
 }
 
 .home-operating-model__visual-media::after {
@@ -832,7 +540,7 @@ summary:focus-visible {
     align-items: baseline;
     gap: 1rem;
     padding-right: 2rem;
-    border-right: 1px solid var(--nivo-border-gray);
+    border-right: 1px solid var(--border);
 }
 
 .home-operating-model__footer {
@@ -843,7 +551,7 @@ summary:focus-visible {
     padding: 1.35rem 1.5rem;
     margin-top: 3rem;
     border-radius: 1.25rem;
-    background: var(--nivo-soft-blush);
+    background: var(--landing-surface-tint);
     box-shadow: var(--nivo-surface-shadow);
 }
 
@@ -855,7 +563,7 @@ summary:focus-visible {
     position: relative;
     isolation: isolate;
     overflow: clip;
-    background: var(--nivo-soft-blush);
+    background: var(--landing-surface-tint);
 }
 
 .home-commercial::before {
@@ -935,7 +643,7 @@ summary:focus-visible {
 
 .home-commercial__route-index {
     display: block;
-    color: var(--nivo-core-crimson);
+    color: var(--accent);
     font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.12em;
@@ -948,18 +656,18 @@ summary:focus-visible {
     align-items: center;
     justify-content: center;
     border-radius: 1.25rem;
-    background: color-mix(in srgb, var(--nivo-core-crimson) 9%, white);
-    color: var(--nivo-core-crimson);
+    background: color-mix(in srgb, var(--accent) 9%, white);
+    color: var(--accent);
 }
 
 .home-commercial__route-step:nth-child(2) .home-commercial__route-marker {
-    background: color-mix(in srgb, var(--nivo-core-crimson) 62%, white);
-    color: var(--nivo-cloud-white);
+    background: color-mix(in srgb, var(--accent) 62%, white);
+    color: var(--surface);
 }
 
 .home-commercial__route-step:nth-child(3) .home-commercial__route-marker {
-    background: color-mix(in srgb, var(--nivo-night) 58%, white);
-    color: var(--nivo-cloud-white);
+    background: color-mix(in srgb, var(--landing-inverse) 58%, white);
+    color: var(--surface);
 }
 
 .home-commercial__route-marker svg {
@@ -986,7 +694,7 @@ summary:focus-visible {
     justify-content: center;
     border-radius: 999px;
     background: rgb(255 255 255 / 92%);
-    color: var(--nivo-core-crimson);
+    color: var(--accent);
     box-shadow: 0 0.7rem 1.6rem rgb(117 60 69 / 13%);
     transform: translate(50%, -50%);
 }
@@ -997,19 +705,19 @@ summary:focus-visible {
 }
 
 .home-trust {
-    --foreground: var(--nivo-cloud-white);
-    --muted: var(--nivo-night-muted);
-    --starci-core-foreground: var(--nivo-cloud-white);
-    --starci-core-muted: var(--nivo-night-muted);
+    --foreground: var(--surface);
+    --muted: var(--landing-inverse-muted);
+    --starci-core-foreground: var(--surface);
+    --starci-core-muted: var(--landing-inverse-muted);
     position: relative;
     isolation: isolate;
     overflow: clip;
-    border-block: 1px solid var(--nivo-night-line);
+    border-block: 1px solid var(--landing-inverse-line);
     background:
         linear-gradient(90deg, rgb(5 14 29 / 90%), rgb(5 14 29 / 70%)),
         url("/images/backgrounds/nivo-trust-mountains-v1.png") center bottom / cover no-repeat,
-        var(--nivo-night);
-    color: var(--nivo-cloud-white);
+        var(--landing-inverse);
+    color: var(--surface);
 }
 
 .home-trust::before,
@@ -1036,24 +744,24 @@ summary:focus-visible {
     flex-direction: column;
     gap: 1rem;
     padding: 2rem 0 2rem 2rem;
-    border-left: 1px solid var(--nivo-night-line);
+    border-left: 1px solid var(--landing-inverse-line);
 }
 
 .home-trust__future > p:first-child {
-    color: var(--nivo-signal-coral);
+    color: var(--landing-accent-bright);
 }
 
 .home-trust__future > p:last-child {
-    color: var(--nivo-night-muted);
+    color: var(--landing-inverse-muted);
     line-height: 1.7;
 }
 
 .home-trust__links a {
-    color: var(--nivo-cloud-white);
+    color: var(--surface);
 }
 
 .home-next-path {
-    background: var(--nivo-cloud-white);
+    background: var(--surface);
 }
 
 .home-next-path__ideas {
@@ -1075,7 +783,7 @@ summary:focus-visible {
 }
 
 .home-next-path__routes section > p:first-child {
-    color: var(--nivo-core-crimson);
+    color: var(--accent);
 }
 
 .home-next-path__routes ul {
@@ -1084,86 +792,6 @@ summary:focus-visible {
 }
 
 @media (max-width: 64rem) {
-    .site-header__bar {
-        grid-template-columns: 1fr auto;
-    }
-
-    .site-header__desktop-nav,
-    .site-header__actions {
-        display: none;
-    }
-
-    .site-header__menu-trigger {
-        width: 3rem;
-        height: 3rem;
-        display: grid;
-        align-content: center;
-        justify-items: center;
-        gap: 0.3rem;
-        padding: 0;
-        border: 1px solid var(--nivo-border-gray);
-        border-radius: 50%;
-        background: var(--nivo-cloud-white);
-        color: var(--nivo-ink);
-        cursor: pointer;
-    }
-
-    .site-header__menu-trigger > span {
-        width: 1.15rem;
-        height: 2px;
-        background: currentColor;
-    }
-
-    .site-header__mobile-nav {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        left: 0;
-        max-height: calc(100dvh - var(--site-header-height));
-        display: grid;
-        gap: 1.5rem;
-        padding: 1rem max(1rem, calc((100vw - 80rem) / 2 + 2rem)) 2rem;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        border-bottom: 1px solid var(--nivo-border-gray);
-        background: var(--nivo-cloud-white);
-        box-shadow: 0 1.5rem 3rem rgb(15 23 42 / 12%);
-    }
-
-    .site-nav__mobile-list {
-        display: grid;
-        gap: 0.25rem;
-    }
-
-    .site-nav__mobile-list > li > a,
-    .site-nav__mobile-list > li > details > summary {
-        width: 100%;
-        min-height: 3rem;
-        justify-content: space-between;
-        padding-inline: 0;
-        border-bottom: 1px solid var(--nivo-border-gray);
-    }
-
-    .site-nav__mobile-list .site-nav__group > ul {
-        display: grid;
-        gap: 0.25rem;
-        padding: 0.5rem 0 0.75rem 1rem;
-        border-left: 1px solid var(--nivo-core-crimson);
-    }
-
-    .site-header__mobile-actions {
-        display: grid;
-        gap: 0.75rem;
-    }
-
-    .site-footer__inner {
-        grid-template-columns: 1fr;
-    }
-
-    .site-footer__directory {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
     .home-hero__container {
         grid-template-columns: minmax(0, 1fr);
         gap: 2rem;
@@ -1207,7 +835,7 @@ summary:focus-visible {
         padding-right: 0;
         padding-bottom: 1.25rem;
         border-right: 0;
-        border-bottom: 1px solid var(--nivo-border-gray);
+        border-bottom: 1px solid var(--border);
     }
 
     .home-operating-model__footer .site-action-row {
@@ -1216,31 +844,8 @@ summary:focus-visible {
 }
 
 @media (max-width: 48rem) {
-    .site-footer__directory,
     .home-next-path__routes {
         grid-template-columns: 1fr 1fr;
-    }
-
-    .site-footer__legal {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .site-section-intro {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .site-action-row {
-        width: 100%;
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .site-action-row > a,
-    .site-action-row > button {
-        width: 100%;
-        justify-content: center;
     }
 
     .home-hero__container {
@@ -1444,10 +1049,6 @@ summary:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    :root {
-        scroll-behavior: auto;
-    }
-
     *,
     *::before,
     *::after {
@@ -1470,13 +1071,11 @@ summary:focus-visible {
     .home-hero,
     .home-relevance,
     .home-commercial,
-    .home-trust,
-    .site-footer {
+    .home-trust {
         background: Canvas;
         color: CanvasText;
     }
 
-    .text-accent,
     .home-trust__future > p:first-child,
     .home-next-path__routes section > p:first-child {
         color: Highlight;

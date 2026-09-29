@@ -40,7 +40,7 @@ export const SiteFooterBase = ({ homeHref, contactHref, groups, copy }: SiteFoot
                     <Text as="p" size="sm">
                         {copy.philosophy}
                     </Text>
-                    <Text as="p" size="xs">
+                    <Text as="p" size="xs" tone="muted">
                         {copy.distinction}
                     </Text>
                 </div>

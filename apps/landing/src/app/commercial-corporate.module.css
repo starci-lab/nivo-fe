@@ -1,9 +1,9 @@
 .routeFrame {
-    --commercial-ink: var(--nivo-ink);
+    --commercial-ink: var(--background-inverse);
     --commercial-night: #071224;
     --commercial-paper: #fbfaf8;
-    --commercial-line: color-mix(in srgb, var(--nivo-border-gray) 74%, transparent);
-    --commercial-glow: color-mix(in srgb, var(--nivo-core-crimson) 13%, transparent);
+    --commercial-line: color-mix(in srgb, var(--border) 74%, transparent);
+    --commercial-glow: color-mix(in srgb, var(--accent) 13%, transparent);
     min-width: 0;
     overflow: clip;
     background: var(--commercial-paper);
@@ -25,7 +25,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.55rem;
-    color: var(--nivo-core-crimson);
+    color: var(--accent);
     font-size: 0.72rem;
     font-weight: 800;
     letter-spacing: 0.15em;
@@ -61,7 +61,7 @@
 }
 
 .heroCopy h1 em {
-    color: var(--nivo-core-crimson);
+    color: var(--accent);
     font-family: Georgia, "Times New Roman", serif;
     font-weight: 500;
 }
@@ -107,7 +107,7 @@
 }
 
 .sectionHeadingInverse .eyebrow {
-    color: var(--nivo-signal-coral);
+    color: var(--landing-accent-bright);
 }
 
 .actionRow {
@@ -118,7 +118,7 @@
 }
 
 .cardIndex {
-    color: var(--nivo-core-crimson);
+    color: var(--accent);
     font-size: 0.7rem;
     font-weight: 800;
     letter-spacing: 0.14em;
@@ -184,7 +184,7 @@
 }
 
 .pricingRoute :global([data-product-section="faq"]) details:hover {
-    border-color: var(--nivo-core-crimson);
+    border-color: var(--accent);
     transform: translateX(0.25rem);
 }
 
@@ -192,7 +192,7 @@
 .companyHero {
     position: relative;
     isolation: isolate;
-    min-height: calc(100dvh - var(--site-header-height));
+    min-height: calc(100dvh - var(--landing-header-height));
     display: grid;
     align-items: center;
     overflow: hidden;
@@ -208,7 +208,7 @@
     inset: 8% -12% auto 56%;
     z-index: -1;
     height: 1px;
-    background: var(--nivo-core-crimson);
+    background: var(--accent);
     box-shadow:
         0 8rem 0 rgb(225 29 72 / 20%),
         0 16rem 0 rgb(225 29 72 / 14%),
@@ -270,7 +270,7 @@
 }
 
 .visualCore span {
-    color: var(--nivo-signal-coral);
+    color: var(--landing-accent-bright);
     font-size: 1.65rem;
     font-weight: 850;
     letter-spacing: 0.08em;
@@ -296,7 +296,7 @@
 }
 
 .orbitCard span {
-    color: var(--nivo-core-crimson);
+    color: var(--accent);
     font-size: 0.68rem;
     font-weight: 800;
 }
@@ -379,7 +379,7 @@
     right: 0;
     left: 0;
     height: 1px;
-    background: linear-gradient(90deg, var(--nivo-core-crimson), rgb(225 29 72 / 12%));
+    background: linear-gradient(90deg, var(--accent), rgb(225 29 72 / 12%));
 }
 
 .provenanceLine li {
@@ -396,7 +396,7 @@
     display: grid;
     place-items: center;
     border-radius: 50%;
-    background: var(--nivo-core-crimson);
+    background: var(--accent);
     box-shadow: 0 0 0 0.55rem #fff;
     color: white;
     font-size: 0.65rem;
@@ -412,7 +412,7 @@
 }
 .provenanceLine small {
     max-width: 24ch;
-    color: var(--nivo-slate-gray);
+    color: var(--landing-ink-soft);
     font-size: 0.85rem;
     line-height: 1.55;
 }
@@ -421,7 +421,7 @@
     position: relative;
     overflow: hidden;
     padding-block: clamp(5rem, 10vw, 9rem);
-    background: var(--nivo-core-crimson);
+    background: var(--accent);
     color: white;
 }
 
@@ -503,7 +503,7 @@
     border-bottom: 1px solid var(--commercial-line);
 }
 .visionSteps li > span {
-    color: var(--nivo-core-crimson);
+    color: var(--accent);
     font-weight: 800;
 }
 .visionSteps div {
@@ -514,7 +514,7 @@
     font-size: 1.2rem;
 }
 .visionSteps small {
-    color: var(--nivo-slate-gray);
+    color: var(--landing-ink-soft);
     font-size: 0.92rem;
 }
 
@@ -545,7 +545,7 @@
     background: rgb(225 29 72 / 16%);
 }
 .philosophyGrid p {
-    color: var(--nivo-night-muted);
+    color: var(--landing-inverse-muted);
     line-height: 1.6;
 }
 .philosophyIcon {
@@ -555,7 +555,7 @@
     place-items: center;
     margin-bottom: auto;
     border-radius: 1rem;
-    background: var(--nivo-core-crimson);
+    background: var(--accent);
 }
 .philosophyIcon svg {
     width: 1.5rem;
@@ -620,7 +620,7 @@
     display: grid;
     gap: 1rem;
     padding: 1.5rem;
-    border-left: 3px solid var(--nivo-core-crimson);
+    border-left: 3px solid var(--accent);
     background: white;
 }
 .truthNotice > span {
@@ -677,7 +677,7 @@
 .contactHeroGrid {
     position: relative;
     z-index: 1;
-    min-height: min(48rem, calc(100dvh - var(--site-header-height)));
+    min-height: min(48rem, calc(100dvh - var(--landing-header-height)));
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.68fr);
     align-items: center;
@@ -735,10 +735,10 @@
     aspect-ratio: 1;
     display: grid;
     place-items: center;
-    border: 1px solid var(--nivo-core-crimson);
+    border: 1px solid var(--accent);
     border-radius: 50%;
     background: white;
-    color: var(--nivo-core-crimson);
+    color: var(--accent);
     font-size: 0.68rem;
     font-weight: 800;
 }
@@ -746,7 +746,7 @@
 .intentSection {
     padding-block: clamp(5rem, 9vw, 8rem);
     background: var(--commercial-paper);
-    scroll-margin-top: var(--site-header-height);
+    scroll-margin-top: var(--landing-header-height);
 }
 .intentLayout {
     display: grid;
@@ -802,14 +802,14 @@
 }
 .intentOption:hover,
 .intentOption:focus-within {
-    border-color: var(--nivo-core-crimson);
+    border-color: var(--accent);
     transform: translateY(-0.2rem);
     box-shadow: 0 1rem 2.5rem rgb(7 18 36 / 8%);
 }
 .intentOption[data-selected="true"] {
-    border-color: var(--nivo-core-crimson);
+    border-color: var(--accent);
     background: #fff5f3;
-    box-shadow: inset 0 0 0 1px var(--nivo-core-crimson);
+    box-shadow: inset 0 0 0 1px var(--accent);
 }
 .intentOption input {
     position: absolute;
@@ -826,7 +826,7 @@
 }
 .intentOption small {
     max-width: 33rem;
-    color: var(--nivo-slate-gray);
+    color: var(--landing-ink-soft);
     font-size: 0.88rem;
     line-height: 1.5;
 }
@@ -840,14 +840,14 @@
     color: transparent;
 }
 .intentOption[data-selected="true"] .intentCheck {
-    border-color: var(--nivo-core-crimson);
-    background: var(--nivo-core-crimson);
+    border-color: var(--accent);
+    background: var(--accent);
     color: white;
 }
 
 .routeResult {
     position: sticky;
-    top: calc(var(--site-header-height) + 1.5rem);
+    top: calc(var(--landing-header-height) + 1.5rem);
     min-height: 24rem;
     display: grid;
     align-content: start;
@@ -859,7 +859,7 @@
     box-shadow: 0 2rem 5rem rgb(7 18 36 / 20%);
 }
 .routeResult .eyebrow {
-    color: var(--nivo-signal-coral);
+    color: var(--landing-accent-bright);
 }
 .routeResult h3 {
     color: white;
@@ -879,7 +879,7 @@
     margin-top: auto;
     border-radius: 1.1rem;
     background: rgb(255 255 255 / 8%);
-    color: var(--nivo-signal-coral);
+    color: var(--landing-accent-bright);
 }
 .resultLinks {
     display: grid;
@@ -892,7 +892,7 @@
 
 .contactTruthSection {
     padding-block: clamp(5rem, 9vw, 8rem);
-    background: var(--nivo-core-crimson);
+    background: var(--accent);
     color: white;
 }
 .contactTruthGrid {
@@ -937,7 +937,7 @@
     place-items: center;
     border-radius: 1rem;
     background: #fff0ed;
-    color: var(--nivo-core-crimson);
+    color: var(--accent);
 }
 .noSubmission {
     grid-column: 1 / -1;
@@ -985,7 +985,7 @@
 }
 .directLinks small {
     margin-right: 0.75rem;
-    color: var(--nivo-signal-coral);
+    color: var(--landing-accent-bright);
     font-size: 0.65rem;
 }
 

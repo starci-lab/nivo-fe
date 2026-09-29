@@ -1,3 +1,4 @@
+import { cn } from "@heroui/react"
 import { NivoBrand } from "@nivo/ui"
 import type { ReactNode } from "react"
 import { Button, PageContainer, TextAction } from "@starci/grammar/common"
@@ -54,8 +55,21 @@ const NavigationList = ({ navigation, variant, onFollow }: NavigationListProps) 
             <li key={item.id}>
                 {isNavigationGroup(item) ? (
                     <details className={SITE_CLASS_NAMES.navigationGroup}>
-                        <summary>{item.label}</summary>
-                        <ul>
+                        <summary
+                            className={cn(
+                                SITE_CLASS_NAMES.navigationSummary,
+                                variant === "mobile" && SITE_CLASS_NAMES.navigationSummaryMobile,
+                            )}
+                        >
+                            {item.label}
+                        </summary>
+                        <ul
+                            className={
+                                variant === "desktop"
+                                    ? SITE_CLASS_NAMES.navigationPanel
+                                    : SITE_CLASS_NAMES.navigationPanelMobile
+                            }
+                        >
                             {item.children.map((child) => (
                                 <li key={child.href}>
                                     <TextAction href={child.href} appearance="section" size="sm" onFollow={onFollow}>

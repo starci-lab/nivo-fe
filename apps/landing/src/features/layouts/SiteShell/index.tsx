@@ -1,3 +1,4 @@
+import { cn } from "@heroui/react"
 import { notFound } from "next/navigation"
 import { hasLocale } from "next-intl"
 import { I18nProvider } from "@nivo/i18n/provider"
@@ -58,8 +59,22 @@ export const SiteShellDocument = async ({ children, params }: SiteShellDocumentP
     const t = await getTranslations({ locale, namespace: "site" })
 
     return (
-        <html lang={locale} suppressHydrationWarning>
-            <body>
+        <html
+            lang={locale}
+            suppressHydrationWarning
+            className="min-w-80 max-w-full overflow-x-clip scroll-smooth motion-reduce:scroll-auto"
+        >
+            <body
+                className={cn(
+                    "min-w-80",
+                    "max-w-full",
+                    "overflow-x-clip",
+                    "bg-surface",
+                    "text-background-inverse",
+                    "font-landing-page",
+                    "[text-rendering:optimizeLegibility]",
+                )}
+            >
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                     <NivoGrammarTheme>
                         <I18nProvider locale={locale} messages={messages}>
