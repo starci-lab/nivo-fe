@@ -1,5 +1,6 @@
 import { graphql } from "../graphql"
 import type { Outcome } from "../outcome"
+import { parseDraftedLeadReply, parseExpertSiteLead } from "./payload.guards"
 import type {
     DraftLeadReplyInput,
     DraftedLeadReply,
@@ -27,6 +28,7 @@ export const updateExpertSiteLead = (input: UpdateExpertSiteLeadInput): Promise<
                 }
             }
         `,
+        parseExpertSiteLead,
         {
             input,
         },
@@ -47,6 +49,7 @@ export const draftLeadReply = (input: DraftLeadReplyInput): Promise<Outcome<Draf
                 }
             }
         `,
+        parseDraftedLeadReply,
         {
             input,
         },

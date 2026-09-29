@@ -1,5 +1,12 @@
 import { graphql } from "../graphql"
 import type { Outcome } from "../outcome"
+import {
+    parseAcademyGrowthSnapshot,
+    parseAcademyIntegrations,
+    parseAcademyStudentDetail,
+    parseAcademyStudentsPage,
+    parseExpertSiteLeads,
+} from "./payload.guards"
 import type {
     AcademyGrowthSnapshot,
     AcademyIntegrations,
@@ -28,6 +35,7 @@ export const myAcademyGrowthSnapshot = (siteId: string): Promise<Outcome<Academy
                 }
             }
         `,
+        parseAcademyGrowthSnapshot,
         {
             request: { siteId },
         },
@@ -56,6 +64,7 @@ export const myAcademyStudents = (input: MyAcademyStudentsInput): Promise<Outcom
                 }
             }
         `,
+        parseAcademyStudentsPage,
         {
             input,
         },
@@ -94,6 +103,7 @@ export const myAcademyStudentDetail = (siteId: string, memberId: string): Promis
                 }
             }
         `,
+        parseAcademyStudentDetail,
         {
             request: { siteId, memberId },
         },
@@ -168,6 +178,7 @@ export const myAcademyIntegrations = (siteId: string): Promise<Outcome<AcademyIn
                 }
             }
         `,
+        parseAcademyIntegrations,
         {
             request: { siteId },
         },
@@ -197,6 +208,7 @@ export const myExpertSiteLeads = (
                 }
             }
         `,
+        parseExpertSiteLeads,
         {
             request: { siteId, limit, offset },
         },

@@ -1,6 +1,14 @@
 import { graphql } from "../graphql"
 import type { Outcome } from "../outcome"
 import type { AcademyCustomDomainState } from "../../academy"
+import {
+    parseAcademyCredentialSaveResult,
+    parseAcademyCustomDomainState,
+    parseAcademyProviderStatus,
+    parseAcademyWebhookSecretResult,
+    parseAcademyWebhookStatus,
+    parseAcademyZaloAuthorization,
+} from "./payload.guards"
 import type {
     AcademyCredentialSaveResult,
     AcademyProviderStatus,
@@ -42,6 +50,7 @@ export const saveAcademyCredential = (
                 }
             }
         `,
+        parseAcademyCredentialSaveResult,
         {
             input,
         },
@@ -68,6 +77,7 @@ export const setAcademyCustomDomain = (
                 }
             }
         `,
+        parseAcademyCustomDomainState,
         {
             input,
         },
@@ -95,6 +105,7 @@ export const saveAcademyGoogleOAuth = (input: SaveAcademyGoogleOAuthInput): Prom
                 }
             }
         `,
+        parseAcademyProviderStatus,
         {
             input,
         },
@@ -122,6 +133,7 @@ export const disconnectAcademyGoogleOAuth = (siteId: string): Promise<Outcome<Ac
                 }
             }
         `,
+        parseAcademyProviderStatus,
         {
             request: { siteId },
         },
@@ -143,6 +155,7 @@ export const beginAcademyZaloAuthorization = (siteId: string): Promise<Outcome<A
                 }
             }
         `,
+        parseAcademyZaloAuthorization,
         {
             input: {
                 siteId,
@@ -172,6 +185,7 @@ export const saveAcademyAnalytics = (input: SaveAcademyAnalyticsInput): Promise<
                 }
             }
         `,
+        parseAcademyProviderStatus,
         {
             input,
         },
@@ -199,6 +213,7 @@ export const createAcademyWebhook = (input: CreateAcademyWebhookInput): Promise<
                 }
             }
         `,
+        parseAcademyWebhookSecretResult,
         {
             input,
         },
@@ -228,6 +243,7 @@ export const rotateAcademyWebhookSecret = (
                 }
             }
         `,
+        parseAcademyWebhookSecretResult,
         {
             input,
         },
@@ -254,6 +270,7 @@ export const disableAcademyWebhook = (siteId: string, webhookId: string): Promis
                 }
             }
         `,
+        parseAcademyWebhookStatus,
         {
             input: {
                 siteId,

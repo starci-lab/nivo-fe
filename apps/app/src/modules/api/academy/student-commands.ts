@@ -1,5 +1,10 @@
 import { graphql } from "../graphql"
 import type { Outcome } from "../outcome"
+import {
+    parseAcademyCourseAccess,
+    parseAcademyStudent,
+    parseRevokedAcademyCourseAccess,
+} from "./payload.guards"
 import type {
     AcademyCourseAccess,
     AcademyCourseAccessInput,
@@ -31,6 +36,7 @@ export const createAcademyStudent = (input: CreateAcademyStudentInput): Promise<
                 }
             }
         `,
+        parseAcademyStudent,
         {
             input,
         },
@@ -56,6 +62,7 @@ export const updateAcademyStudent = (input: UpdateAcademyStudentInput): Promise<
                 }
             }
         `,
+        parseAcademyStudent,
         {
             input,
         },
@@ -81,6 +88,7 @@ export const setAcademyStudentStatus = (input: SetAcademyStudentStatusInput): Pr
                 }
             }
         `,
+        parseAcademyStudent,
         {
             input,
         },
@@ -104,6 +112,7 @@ export const grantAcademyCourseAccess = (input: AcademyCourseAccessInput): Promi
                 }
             }
         `,
+        parseAcademyCourseAccess,
         {
             input,
         },
@@ -127,6 +136,7 @@ export const revokeAcademyCourseAccess = (
                 }
             }
         `,
+        parseRevokedAcademyCourseAccess,
         {
             input,
         },
