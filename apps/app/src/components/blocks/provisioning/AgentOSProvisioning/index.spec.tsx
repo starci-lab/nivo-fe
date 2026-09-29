@@ -13,8 +13,7 @@ const mocks = vi.hoisted(() => ({
         mutate: vi.fn(() => Promise.resolve(undefined)),
     },
     entry: {
-        data: undefined as unknown,
-        lastRequest: null as unknown,
+        resolve: vi.fn(),
     },
     recover: {
         trigger: vi.fn(),
@@ -53,6 +52,10 @@ type AgentProbeProps = {
 }
 
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
+vi.mock("@/modules/api/workspace-controlplane", async (importOriginal) => ({
+    ...(await importOriginal<object>()),
+    resolveWorkspaceCheckoutEntry: mocks.entry.resolve,
+}))
 vi.mock("@/hooks", () => ({
     useQueryWorkspaceCheckoutOffersSwr: () => ({
         data: mocks.offers.data,
@@ -66,10 +69,6 @@ vi.mock("@/hooks", () => ({
         isValidating: false,
         mutate: mocks.status.mutate,
     }),
-    useQueryWorkspaceCheckoutEntrySwr: (request: unknown, enabled: boolean) => {
-        if (enabled) mocks.entry.lastRequest = request
-        return { data: enabled ? mocks.entry.data : undefined, error: undefined, isValidating: false, mutate: vi.fn() }
-    },
     useMutateRecoverWorkspacePurchaseSwr: () => ({
         trigger: mocks.recover.trigger,
         isMutating: mocks.recover.isMutating,
@@ -215,8 +214,7 @@ describe("AgentOSProvisioning", () => {
         mocks.status.data = undefined
         mocks.status.error = undefined
         mocks.status.mutate.mockResolvedValue(undefined)
-        mocks.entry.data = undefined
-        mocks.entry.lastRequest = null
+        mocks.entry.resolve.mockResolvedValue({ ok: false, kind: "unavailable", code: "ENTRY_DOWN", reason: "entry unavailable" })
         mocks.recover.isMutating = false
         mocks.recover.trigger.mockResolvedValue({
             ok: true,
@@ -430,7 +428,7 @@ describe("AgentOSProvisioning", () => {
     })
 
     it("enters the ready workspace only through the entry boundary's registered destination", async () => {
-        mocks.entry.data = {
+        mocks.entry.resolve.mockResolvedValue({
             ok: true,
             data: {
                 status: "entry",
@@ -444,13 +442,13 @@ describe("AgentOSProvisioning", () => {
                     context: {},
                 },
             },
-        }
+        })
         mocks.status.data = statusAnswer(readyPurchase())
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"ready"'))
         fireEvent.click(screen.getByTestId("status"))
         await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/workspace-1"))
-        const request = mocks.entry.lastRequest as Record<string, unknown>
+        const request = mocks.entry.resolve.mock.calls[0]![0] as Record<string, unknown>
         expect(request).toEqual({
             purchaseId: "order",
             workspaceId: "workspace-1",
@@ -460,7 +458,10 @@ describe("AgentOSProvisioning", () => {
     })
 
     it("keeps the ready surface mounted and shows the refusal when entry is refused", async () => {
-        mocks.entry.data = { ok: true, data: { status: "refused", code: "workspace-not-ready", purchaseId: "order" } }
+        mocks.entry.resolve.mockResolvedValue({
+            ok: true,
+            data: { status: "refused", code: "workspace-not-ready", purchaseId: "order" },
+        })
         mocks.status.data = statusAnswer(readyPurchase())
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"ready"'))
@@ -471,7 +472,7 @@ describe("AgentOSProvisioning", () => {
     })
 
     it("refuses to enter when the registered destination names another workspace", async () => {
-        mocks.entry.data = {
+        mocks.entry.resolve.mockResolvedValue({
             ok: true,
             data: {
                 status: "entry",
@@ -485,7 +486,7 @@ describe("AgentOSProvisioning", () => {
                     context: {},
                 },
             },
-        }
+        })
         mocks.status.data = statusAnswer(readyPurchase())
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"ready"'))
