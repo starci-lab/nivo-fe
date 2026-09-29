@@ -1,0 +1,16 @@
+/** Closed operation vocabulary accepted by the Collab gateway. */
+export type CollabOperation =
+    | "openOffice"
+    | "readGroup"
+    | "postMessage"
+    | "pressApprovalButton"
+    | "listTasks"
+    | "readTask"
+    | "availableCommands"
+    | "readNotices"
+    | "openNotice"
+    | "reconcileRequest"
+    | "inviteByEmail"
+    | "acceptInvitation"
+    | "withdrawInvitation"
+    | "changeMemberRole"
