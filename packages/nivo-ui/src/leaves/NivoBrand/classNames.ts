@@ -1,4 +1,4 @@
-import { cn } from "@heroui/react"
+import { cn } from "@heroui/styles"
 import type { NivoBrandScale } from "./index"
 
 /** Stable classes for the Nivo brand wrapper and artwork. */

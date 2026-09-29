@@ -1,6 +1,6 @@
 import { IconSource, type IconName } from "../Icon"
 import { Icon } from "@starci/grammar/common"
-import { cn, skeletonVariants } from "@heroui/react"
+import { cn, skeletonVariants } from "@heroui/styles"
 
 import {
     TILE_ICON_CLASS_NAME,

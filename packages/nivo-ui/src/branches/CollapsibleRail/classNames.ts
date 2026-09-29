@@ -1,4 +1,4 @@
-import { cn } from "@heroui/react"
+import { cn } from "@heroui/styles"
 
 /** Visually hides the rail heading while retaining its landmark semantics. */
 export const RAIL_HEADING_CLASS_NAME = cn("sr-only")

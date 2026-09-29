@@ -1,4 +1,4 @@
-import { cn } from "@heroui/react"
+import { cn } from "@heroui/styles"
 
 /** Stable classes for the decorative unicorn artwork. */
 export const UNICORN_ARTWORK_CLASS_NAME = cn(

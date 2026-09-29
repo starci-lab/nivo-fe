@@ -1,4 +1,4 @@
-import { cn } from "@heroui/react"
+import { cn } from "@heroui/styles"
 
 /** Classes for the routed tab strip viewport. */
 export const ROUTE_TABS_CLASS_NAME = cn(

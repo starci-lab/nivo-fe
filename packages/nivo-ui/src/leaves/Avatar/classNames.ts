@@ -1,4 +1,4 @@
-import { cn } from "@heroui/react"
+import { cn } from "@heroui/styles"
 
 /** Public LOADING_CLASS_NAME declaration. */
 export const LOADING_CLASS_NAME = cn("select-none", "text-transparent")

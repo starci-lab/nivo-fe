@@ -1,4 +1,4 @@
-import { cn } from "@heroui/react"
+import { cn } from "@heroui/styles"
 
 /** Layout classes for the centred settled-state region a route boundary draws. */
 export const ROOT_CLASS_NAME = cn(

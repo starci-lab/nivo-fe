@@ -1,4 +1,4 @@
-import { cn } from "@heroui/react"
+import { cn } from "@heroui/styles"
 
 /** Stable classes for the tile mark and its state signal. */
 export const TILE_ICON_CLASS_NAME = cn(

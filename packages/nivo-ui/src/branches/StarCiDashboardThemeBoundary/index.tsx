@@ -1,3 +1,5 @@
+"use client"
+
 import { motion } from "framer-motion"
 import type { ComponentType } from "react"
 import { DASHBOARD_THEME_CLASS_NAME } from "./classNames"

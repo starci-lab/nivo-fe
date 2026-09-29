@@ -1,6 +1,9 @@
+"use client"
+
 import { Avatar as DiceAvatar, Style } from "@dicebear/core"
 import lorelei from "@dicebear/styles/lorelei.json" with { type: "json" }
-import { Avatar as HeroAvatar, skeletonVariants } from "@heroui/react"
+import { Avatar as HeroAvatar } from "@heroui/react"
+import { skeletonVariants } from "@heroui/styles"
 import { FALLBACK_IMAGE_CLASS_NAME, LOADING_CLASS_NAME } from "./classNames"
 
 /**

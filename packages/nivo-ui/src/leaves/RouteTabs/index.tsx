@@ -1,7 +1,7 @@
 "use client"
 
 import { Tabs } from "@heroui/react"
-import { cn } from "@heroui/react"
+import { cn } from "@heroui/styles"
 import {
     ROUTE_INDICATOR_CLASS_NAME,
     ROUTE_TAB_CLASS_NAME,

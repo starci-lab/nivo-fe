@@ -1,4 +1,4 @@
-import { cn, skeletonVariants } from "@heroui/react"
+import { cn, skeletonVariants } from "@heroui/styles"
 import {
     NIVO_BRAND_ACCENT_CLASS_NAME,
     NIVO_BRAND_ARTWORK_CLASS_NAME,

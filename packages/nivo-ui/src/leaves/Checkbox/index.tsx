@@ -1,3 +1,5 @@
+"use client"
+
 import { Checkbox as HeroCheckbox } from "@heroui/react"
 import { TextAction } from "@starci/grammar/common"
 

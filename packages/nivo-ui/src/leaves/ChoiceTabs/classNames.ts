@@ -1,4 +1,4 @@
-import { cn } from "@heroui/react"
+import { cn } from "@heroui/styles"
 
 /** Public ROOT_CLASS_NAME declaration. */
 export const ROOT_CLASS_NAME = cn("w-full", "overflow-x-auto")

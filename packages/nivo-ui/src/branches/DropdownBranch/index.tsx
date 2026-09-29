@@ -1,3 +1,5 @@
+"use client"
+
 import { IconSource, type IconName } from "../../leaves/Icon"
 import { Icon } from "@starci/grammar/common"
 import { Dropdown, Header } from "@heroui/react"

@@ -1,4 +1,4 @@
-import { cn } from "@heroui/react"
+import { cn } from "@heroui/styles"
 
 /**
  * Root classes for the authenticated dashboard theme boundary: a full-height canvas on the family

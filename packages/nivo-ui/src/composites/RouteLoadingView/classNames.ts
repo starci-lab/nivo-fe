@@ -1,4 +1,4 @@
-import { cn } from "@heroui/react"
+import { cn } from "@heroui/styles"
 
 /** Layout classes for the busy region a route's loading answer draws. */
 export const ROOT_CLASS_NAME = cn(

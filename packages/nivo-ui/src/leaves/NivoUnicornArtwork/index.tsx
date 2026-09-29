@@ -1,4 +1,4 @@
-import { cn, skeletonVariants } from "@heroui/react"
+import { cn, skeletonVariants } from "@heroui/styles"
 import { UNICORN_ARTWORK_CLASS_NAME, UNICORN_ARTWORK_IMAGE_CLASS_NAME } from "./classNames"
 
 /** Data owned by the Nivo dashboard mascot artwork. */
