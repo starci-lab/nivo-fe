@@ -1,6 +1,7 @@
 "use client"
 
 import { motion, useMotionTemplate, useMotionValue, useReducedMotion, useScroll, useTransform } from "framer-motion"
+import { useFormatter } from "next-intl"
 import { useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react"
 import { CLASS_NAMES, homeSpotlightClassName } from "./classNames"
 
@@ -58,6 +59,7 @@ export const HomeMotionSectionReveal = (props: HomeMotionSectionRevealProps) => 
 /** Ties the hero artwork to scroll without taking over native scrolling. */
 export const HomeMotionHeroParallax = (props: HomeMotionHeroParallaxProps) => {
     const target = useRef<HTMLDivElement>(null)
+    const formatter = useFormatter()
     const reduceMotion = useReducedMotion() === true
     const { scrollYProgress } = useScroll({ target, offset: ["start end", "end start"] })
     const distance = props.distance ?? 34
@@ -71,8 +73,10 @@ export const HomeMotionHeroParallax = (props: HomeMotionHeroParallaxProps) => {
         if (reduceMotion || event.pointerType === "touch") return
 
         const bounds = event.currentTarget.getBoundingClientRect()
-        glowX.set(`${(((event.clientX - bounds.left) / bounds.width) * 100).toFixed(2)}%`)
-        glowY.set(`${(((event.clientY - bounds.top) / bounds.height) * 100).toFixed(2)}%`)
+        const xPosition = ((event.clientX - bounds.left) / bounds.width) * 100
+        const yPosition = ((event.clientY - bounds.top) / bounds.height) * 100
+        glowX.set(`${formatter.number(xPosition, { maximumFractionDigits: 2 })}%`)
+        glowY.set(`${formatter.number(yPosition, { maximumFractionDigits: 2 })}%`)
         setSpotlightActive(true)
     }
 
