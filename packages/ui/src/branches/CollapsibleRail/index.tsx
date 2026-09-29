@@ -3,7 +3,7 @@
 import { Heading } from "@starci/grammar/common"
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
-import { createElement, useEffect, useId, useState, type ComponentType, type CSSProperties } from "react"
+import { createElement, useId, useState, useSyncExternalStore, type ComponentType, type CSSProperties } from "react"
 
 import { RAIL_CLASS_NAME, RAIL_CONTROL_CLASS_NAME } from "./classNames"
 
@@ -27,13 +27,47 @@ export type CollapsibleRailProps<RailProps extends object, CompactProps extends 
 }
 
 const DEFAULT_STORAGE_KEY = "nivo:console-rail-collapsed"
-const readPersistedState = (key: string): boolean | undefined => {
+
+/*
+ * The persisted preference is external state: it lives in browser storage, not in React. The
+ * `storage` event keeps other tabs in step, while `railListeners` carries same-tab writes the
+ * event never fires for. `railMemory` is the fallback for an environment whose storage throws, so
+ * the toggle still answers the click instead of reading the failure as "never stored".
+ */
+const railListeners = new Set<() => void>()
+const railMemory = new Map<string, boolean>()
+
+const subscribeRail = (onChange: () => void): (() => void) => {
+    if (typeof window === "undefined") {
+        return () => undefined
+    }
+    railListeners.add(onChange)
+    window.addEventListener("storage", onChange)
+    return () => {
+        railListeners.delete(onChange)
+        window.removeEventListener("storage", onChange)
+    }
+}
+
+const readPersistedCollapsed = (key: string, fallback: boolean): boolean => {
     try {
         const value = globalThis.localStorage?.getItem(key)
-        return value === "true" ? true : value === "false" ? false : undefined
+        if (value === "true") return true
+        if (value === "false") return false
     } catch {
-        return undefined
+        /* storage is optional */
     }
+    return railMemory.get(key) ?? fallback
+}
+
+const writePersistedCollapsed = (key: string, collapsed: boolean): void => {
+    railMemory.set(key, collapsed)
+    try {
+        globalThis.localStorage?.setItem(key, String(collapsed))
+    } catch {
+        /* storage is optional */
+    }
+    for (const listener of railListeners) listener()
 }
 
 /** Render a responsive navigation rail with persisted collapse state. */
@@ -42,22 +76,19 @@ export const CollapsibleRail = <R extends object, C extends object, T extends ob
 ) => {
     const reduceMotion = useReducedMotion()
     const headingId = useId()
-    const [collapsed, setCollapsed] = useState(props.isDefaultCollapsed ?? false)
-    useEffect(() => {
-        const persisted = readPersistedState(props.storageKey ?? DEFAULT_STORAGE_KEY)
-        if (persisted !== undefined) setCollapsed(persisted)
-    }, [props.storageKey])
+    const storageKey = props.storageKey ?? DEFAULT_STORAGE_KEY
+    // The default answers only until storage says otherwise; it is the server snapshot as well, so
+    // hydration and a mounted restore draw the same rail.
+    const [defaultCollapsed] = useState(() => props.isDefaultCollapsed ?? false)
+    const collapsed = useSyncExternalStore(
+        subscribeRail,
+        () => readPersistedCollapsed(storageKey, defaultCollapsed),
+        () => defaultCollapsed,
+    )
     const toggle = () => {
-        setCollapsed((value) => {
-            const next = !value
-            try {
-                globalThis.localStorage?.setItem(props.storageKey ?? DEFAULT_STORAGE_KEY, String(next))
-            } catch {
-                /* storage is optional */
-            }
-            props.onCollapsedChange?.(next)
-            return next
-        })
+        const next = !collapsed
+        writePersistedCollapsed(storageKey, next)
+        props.onCollapsedChange?.(next)
     }
     const label = collapsed ? props.expandLabel : props.collapseLabel
     const railStyle: CSSProperties = {
