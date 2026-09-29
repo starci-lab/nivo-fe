@@ -44,7 +44,7 @@ export const Conversation = (props: ConversationProps) => {
             {view.items.length === 0 ? (
                 <EmptyNotice message={labels.conversation.empty} />
             ) : (
-                view.items.map((item, index) => {
+                view.items.map((item) => {
                     switch (item.kind) {
                         case "message":
                             return (
@@ -59,7 +59,7 @@ export const Conversation = (props: ConversationProps) => {
                         case "task-card":
                             return (
                                 <TaskReceiptCard
-                                    key={`${item.binding.bindingId}-${index}`}
+                                    key={item.binding.bindingId}
                                     item={item}
                                     labels={labels}
                                     compact={compact}

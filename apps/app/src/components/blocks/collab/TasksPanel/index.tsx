@@ -9,8 +9,8 @@ import {
 } from "./classNames"
 import { EmptyNotice, Text } from "@starci/grammar/common"
 import { Badge, Button, SurfaceListCard } from "@starci/grammar/common"
-import type { CollabTaskStatus } from "../../../../modules/api/collab"
 import type { CollabTasksFilter } from "../../../../hooks"
+import { COLLAB_TASK_STATUSES, isCollabTaskStatus } from "../../../../modules/collab/group-chat/model.guards"
 import {
     invalidTasksFilter,
     partitionParticipants,
@@ -94,19 +94,15 @@ export const TasksPanel = (props: TasksPanelProps) => {
                         id="collab-filter-status"
                         name="filter-status"
                         value={view.tasks.filter.status ?? ""}
-                        onChange={(event) =>
-                            selectFilter({
-                                status:
-                                    event.currentTarget.value === ""
-                                        ? undefined
-                                        : (event.currentTarget.value as CollabTaskStatus),
-                            })
-                        }
+                        onChange={(event) => {
+                            const next = event.currentTarget.value
+                            selectFilter({ status: isCollabTaskStatus(next) ? next : undefined })
+                        }}
                     >
                         <option value="">{labels.tasks.filterAll}</option>
-                        {Object.keys(labels.statuses).map((status) => (
+                        {COLLAB_TASK_STATUSES.map((status) => (
                             <option key={status} value={status}>
-                                {labels.statuses[status as CollabTaskStatus]}
+                                {labels.statuses[status]}
                             </option>
                         ))}
                     </select>

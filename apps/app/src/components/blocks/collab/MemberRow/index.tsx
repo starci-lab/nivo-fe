@@ -7,7 +7,8 @@ import {
 } from "./classNames"
 import { Text } from "@starci/grammar/common"
 import { Badge } from "@starci/grammar/common"
-import type { CollabHumanRole, CollabOfficeParticipant } from "../../../../modules/api/collab"
+import type { CollabOfficeParticipant } from "../../../../modules/api/collab"
+import { isCollabHumanRole } from "../../../../modules/collab/group-chat/model.guards"
 import { MemberAvatar } from "../MemberAvatar"
 
 /** Props for one roster row. */
@@ -30,7 +31,9 @@ export const MemberRow = (props: MemberRowProps) => {
             ? (labels.members.moduleDescriptions[participant.displayName] ?? labels.members.moduleRole)
             : labels.members.moduleRole
     } else {
-        subtitle = labels.roles[participant.role as CollabHumanRole] ?? participant.role
+        subtitle = isCollabHumanRole(participant.role)
+            ? (labels.roles[participant.role] ?? participant.role)
+            : participant.role
     }
     return (
         <div
