@@ -29,7 +29,12 @@ describe("AgentOSSolutionModuleAttachmentsBase", () => {
             <AgentOSSolutionModuleAttachmentsBase
                 state="attachments"
                 props={{ status: "ready", pending: false, labels }}
-                on={{ onChoose: choose, onRemove: vi.fn(), chunks: (count) => `${count} chunks` }}
+                on={{
+                    onChoose: choose,
+                    onRemove: vi.fn(),
+                    onRetryNotice: vi.fn(),
+                    chunks: (count) => `${count} chunks`,
+                }}
             />,
         )
 
@@ -50,7 +55,12 @@ describe("AgentOSSolutionModuleAttachmentsBase", () => {
                     pending: false,
                     labels: { ...labels, upload: viMessages.console.agentos.modules.studio.attachments.upload },
                 }}
-                on={{ onChoose: vi.fn(), onRemove: vi.fn(), chunks: (count) => `${count} chunks` }}
+                on={{
+                    onChoose: vi.fn(),
+                    onRemove: vi.fn(),
+                    onRetryNotice: vi.fn(),
+                    chunks: (count) => `${count} chunks`,
+                }}
             />,
         )
         expect(
