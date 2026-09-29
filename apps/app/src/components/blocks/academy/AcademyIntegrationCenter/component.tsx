@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import { StatusActionCard } from "@nivo/ui"
 import { SurfaceCard, Button, Input, Text } from "@starci/grammar/common"
 import { QueryNotice } from "../../query/QueryNotice"
@@ -20,6 +21,21 @@ const AcademyIntegrationCenterContent = (input: AcademyIntegrationCenterViewProp
     const { state } = input
     const { sectionLabel, failure, cards, selected, pendingId, outcome } = input.props
     const { select, changeField, submit, retry } = input.on
+    const statusCards = useMemo(
+        () =>
+            cards.map((card) => ({
+                id: card.id,
+                props: {
+                    ...card,
+                    isPending: pendingId === card.id,
+                    disabled: pendingId !== undefined,
+                },
+                on: {
+                    press: () => select(card.id),
+                },
+            })),
+        [cards, pendingId, select],
+    )
     return (
         <>
             {state === "failed" ? (
@@ -29,17 +45,11 @@ const AcademyIntegrationCenterContent = (input: AcademyIntegrationCenterViewProp
             ) : (
                 <SurfaceCard label={sectionLabel}>
                     <div>
-                        {cards.map((card) => (
+                        {statusCards.map((card) => (
                             <StatusActionCard
                                 key={card.id}
-                                props={{
-                                    ...card,
-                                    isPending: pendingId === card.id,
-                                    disabled: pendingId !== undefined,
-                                }}
-                                on={{
-                                    press: () => select(card.id),
-                                }}
+                                props={card.props}
+                                on={card.on}
                                 isLoading={state === "resting"}
                             />
                         ))}
