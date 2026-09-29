@@ -92,7 +92,7 @@ describe("sendOperation", () => {
     it("posts the identity and the request under the bearer token and never carries the cookie", async () => {
         fetchMock.mockResolvedValue({ status: 200, json: async () => ({ kind: "x" }) })
         expect(await sendOperation("tok", ADDRESS, "id", { a: 1 })).toEqual({ arrived: true, body: { kind: "x" } })
-        const init = fetchMock.mock.calls[0][1] as RequestInit
+        const init = fetchMock.mock.calls[0]![1] as RequestInit
         expect(init.credentials).toBe("omit")
         expect(init.headers).toMatchObject({ authorization: "Bearer tok" })
         expect(JSON.parse(String(init.body))).toEqual({ requestId: "id", input: { a: 1 } })

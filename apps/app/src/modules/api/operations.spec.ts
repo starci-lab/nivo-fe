@@ -86,12 +86,12 @@ describe("modules/api operation documents", () => {
 
         const calls = vi.mocked(graphql).mock.calls
         expect(calls).toHaveLength(8)
-        expect(calls[0][0]).toContain("mutation PayInvoice")
-        expect(calls[0][1]).toEqual({ input: { invoiceId: "invoice-1" } })
-        expect(calls[1][0]).toContain("mutation OrderAgentOs")
-        expect(calls[1][1]).toEqual({ input: { catalogItemSlug: "agent-os", catalogTierId: "tier-pro" } })
-        expect(calls[2][0]).toContain("mutation InstallAgentosSolutionModule")
-        expect(calls[2][1]).toEqual({
+        expect(calls[0]![0]).toContain("mutation PayInvoice")
+        expect(calls[0]![1]).toEqual({ input: { invoiceId: "invoice-1" } })
+        expect(calls[1]![0]).toContain("mutation OrderAgentOs")
+        expect(calls[1]![1]).toEqual({ input: { catalogItemSlug: "agent-os", catalogTierId: "tier-pro" } })
+        expect(calls[2]![0]).toContain("mutation InstallAgentosSolutionModule")
+        expect(calls[2]![1]).toEqual({
             input: {
                 agentWorkspaceId: "workspace-1",
                 moduleKey: "sales-copilot",
@@ -101,10 +101,10 @@ describe("modules/api operation documents", () => {
                 modelProfileRef: "nivo-default",
             },
         })
-        expect(calls[3][1]).toEqual({ request: { workspaceId: "workspace-1" } })
-        expect(calls[5][1]).toEqual({ request: { category: "ai_agent" } })
-        expect(calls[6][1]).toEqual({ input: { siteId: "site-1", limit: 25, offset: 50 } })
-        expect(calls[7][1]).toEqual({ request: { siteId: "site-1", limit: 10, offset: 20 } })
+        expect(calls[3]![1]).toEqual({ request: { workspaceId: "workspace-1" } })
+        expect(calls[5]![1]).toEqual({ request: { category: "ai_agent" } })
+        expect(calls[6]![1]).toEqual({ input: { siteId: "site-1", limit: 25, offset: 50 } })
+        expect(calls[7]![1]).toEqual({ request: { siteId: "site-1", limit: 10, offset: 20 } })
     })
 })
 

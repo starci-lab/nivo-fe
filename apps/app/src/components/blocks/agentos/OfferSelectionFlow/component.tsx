@@ -359,7 +359,7 @@ export const OfferSelectionFlowBase = (props: OfferSelectionFlowProps) => {
         )
     }
     const selected =
-        props.props.offers.find((offer) => offer.offerId === props.props.selectedOfferId) ?? props.props.offers[0]
+        props.props.offers.find((offer) => offer.offerId === props.props.selectedOfferId) ?? props.props.offers[0]!
     return (
         <PageContainer measure="product">
             <div className={SECTIONS_CLASS_NAME} data-contract="GAP-5">

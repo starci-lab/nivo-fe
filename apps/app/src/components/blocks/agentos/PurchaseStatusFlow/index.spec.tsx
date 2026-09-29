@@ -298,7 +298,7 @@ describe("PurchaseStatusFlow", () => {
         expect(flow()).not.toContain('"state":"payment-failed"')
         fireEvent.click(screen.getByTestId("primary"))
         await waitFor(() => expect(mocks.recover.trigger).toHaveBeenCalled())
-        const request = mocks.recover.trigger.mock.calls[0][0] as {
+        const request = mocks.recover.trigger.mock.calls[0]![0] as {
             purchaseId: string
             lastObserved: Record<string, string>
         }
@@ -443,7 +443,7 @@ describe("PurchaseStatusFlow", () => {
         expect(flow()).not.toContain("Enter workspace")
         fireEvent.click(screen.getByTestId("primary"))
         await waitFor(() => expect(mocks.recover.trigger).toHaveBeenCalled())
-        const request = mocks.recover.trigger.mock.calls[0][0] as {
+        const request = mocks.recover.trigger.mock.calls[0]![0] as {
             purchaseId: string
             lastObserved: Record<string, string>
         }

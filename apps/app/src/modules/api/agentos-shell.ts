@@ -408,7 +408,7 @@ export const compareShellSourceIdentity = (left: string, right: string): number 
     const leftPoints = [...left]
     const rightPoints = [...right]
     for (let index = 0; index < Math.min(leftPoints.length, rightPoints.length); index += 1) {
-        const difference = (leftPoints[index].codePointAt(0) ?? 0) - (rightPoints[index].codePointAt(0) ?? 0)
+        const difference = (leftPoints[index]!.codePointAt(0) ?? 0) - (rightPoints[index]!.codePointAt(0) ?? 0)
         if (difference !== 0) return difference
     }
     return leftPoints.length - rightPoints.length
@@ -433,11 +433,11 @@ export const canonicalShellReads = (reads: ReadonlyArray<ShellRead>): ReadonlyAr
     )
     for (let index = 0; index < ordered.length; index += 1) {
         const read = ordered[index]
-        if (!isCount(read.readGeneration) || read.readGeneration < 1 || read.readGeneration > MAX_SHELL_READ_GENERATION)
+        if (!isCount(read!.readGeneration) || read!.readGeneration < 1 || read!.readGeneration > MAX_SHELL_READ_GENERATION)
             return null
         if (
             index > 0 &&
-            formatShellSourceIdentity(ordered[index - 1].identity) === formatShellSourceIdentity(read.identity)
+            formatShellSourceIdentity(ordered[index - 1]!.identity) === formatShellSourceIdentity(read!.identity)
         )
             return null
     }
@@ -881,7 +881,7 @@ export const readAgentosShellOverview = async (
         return unreadableReply(sent.reply.status)
     const sources: Array<ShellSourceEnvelope> = []
     for (let index = 0; index < ordered.length; index += 1) {
-        const envelope = authoredEnvelope(sent.reply.body.sources[index], ordered[index])
+        const envelope = authoredEnvelope(sent.reply.body.sources[index]!, ordered[index]!)
         if (envelope === null) return unreadableReply(sent.reply.status)
         sources.push(envelope)
     }

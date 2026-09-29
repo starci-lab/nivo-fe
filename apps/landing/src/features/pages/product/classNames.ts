@@ -63,7 +63,7 @@ export const PRODUCT_CLASS_NAMES = {
 } as const
 
 /** Resolve the canonical section surface without leaking class composition into JSX. */
-export const productSectionClassName = (tone: string): string => {
+export const productSectionClassName = (tone: string): string | undefined => {
     if (tone === "soft") return PRODUCT_CLASS_NAMES.sectionSoft
     if (tone === "dark") return PRODUCT_CLASS_NAMES.sectionDark
     if (tone === "crimson") return PRODUCT_CLASS_NAMES.sectionCrimson
@@ -71,12 +71,12 @@ export const productSectionClassName = (tone: string): string => {
 }
 
 /** Resolve the bounded concept grid selected by canonical content. */
-export const productGridClassName = (columns: number): string => {
+export const productGridClassName = (columns: number): string | undefined => {
     if (columns === 4) return PRODUCT_CLASS_NAMES.gridFour
     if (columns === 3) return PRODUCT_CLASS_NAMES.gridThree
     return PRODUCT_CLASS_NAMES.gridTwo
 }
 
 /** Resolve a commercial offer surface while preserving one featured offer. */
-export const productOfferClassName = (featured: boolean): string =>
+export const productOfferClassName = (featured: boolean): string | undefined =>
     featured ? PRODUCT_CLASS_NAMES.offerFeatured : PRODUCT_CLASS_NAMES.offer

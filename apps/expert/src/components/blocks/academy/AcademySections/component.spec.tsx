@@ -154,7 +154,7 @@ describe("AcademySectionsBase", () => {
                 on={{ submitLead: onSubmitLead, failImage }}
             />,
         )
-        fireEvent.error(screen.getAllByRole("img")[0])
+        fireEvent.error(screen.getAllByRole("img")[0]!)
         expect(failImage).toHaveBeenCalledWith("https://img.test/teacher.jpg")
         const lead: AcademySection = {
             kind: "lead",

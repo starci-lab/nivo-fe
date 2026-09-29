@@ -99,10 +99,10 @@ describe("collab live subscription", () => {
         expect(sockets).toHaveLength(1)
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("connect")?.()
+            socket!.handlers.get("connect")?.()
         })
-        expect(socket.emit).toHaveBeenCalledWith("collab.subscribe", { workspaceId: "ws-1" }, expect.any(Function))
-        subscribeAck(socket, { ok: true, workspaceId: "ws-1" })
+        expect(socket!.emit).toHaveBeenCalledWith("collab.subscribe", { workspaceId: "ws-1" }, expect.any(Function))
+        subscribeAck(socket!, { ok: true, workspaceId: "ws-1" })
         expect(state()).toMatchObject({ status: "subscribed", reason: null })
     })
 
@@ -110,9 +110,9 @@ describe("collab live subscription", () => {
         mount("ws-1")
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("connect")?.()
+            socket!.handlers.get("connect")?.()
         })
-        subscribeAck(socket, { ok: true, workspaceId: "ws-1" })
+        subscribeAck(socket!, { ok: true, workspaceId: "ws-1" })
         const filter = lastMutateFilter()
         expect(filter(["NIVO_QUERY", "viewer", "collab", "group", "ws-1", null])).toBe(true)
         expect(filter(["NIVO_QUERY", "viewer", "collab", "office", "ws-1"])).toBe(true)
@@ -125,12 +125,12 @@ describe("collab live subscription", () => {
         mount("ws-1")
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("connect")?.()
+            socket!.handlers.get("connect")?.()
         })
-        subscribeAck(socket, { ok: true, workspaceId: "ws-1" })
+        subscribeAck(socket!, { ok: true, workspaceId: "ws-1" })
         mutate.mockClear()
         act(() => {
-            socket.handlers.get("collab.changed")?.({ workspaceId: "ws-1", kind: "message", cursor: "c-2" })
+            socket!.handlers.get("collab.changed")?.({ workspaceId: "ws-1", kind: "message", cursor: "c-2" })
         })
         expect(state()).toMatchObject({
             status: "subscribed",
@@ -147,11 +147,11 @@ describe("collab live subscription", () => {
         mount("ws-1")
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("connect")?.()
+            socket!.handlers.get("connect")?.()
         })
-        subscribeAck(socket, { ok: true, workspaceId: "ws-1" })
+        subscribeAck(socket!, { ok: true, workspaceId: "ws-1" })
         act(() => {
-            socket.handlers.get("collab.changed")?.({ workspaceId: "ws-1", kind: "task", cursor: null })
+            socket!.handlers.get("collab.changed")?.({ workspaceId: "ws-1", kind: "task", cursor: null })
         })
         const filter = lastMutateFilter()
         expect(filter(["NIVO_QUERY", "viewer", "collab", "tasks", "ws-1", null, null, null, null, null])).toBe(true)
@@ -164,17 +164,17 @@ describe("collab live subscription", () => {
         mount("ws-1")
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("connect")?.()
+            socket!.handlers.get("connect")?.()
         })
-        subscribeAck(socket, { ok: true, workspaceId: "ws-1" })
+        subscribeAck(socket!, { ok: true, workspaceId: "ws-1" })
         act(() => {
-            socket.handlers.get("collab.changed")?.({ workspaceId: "ws-1", kind: "membership", cursor: null })
+            socket!.handlers.get("collab.changed")?.({ workspaceId: "ws-1", kind: "membership", cursor: null })
         })
         let filter = lastMutateFilter()
         expect(filter(["NIVO_QUERY", "viewer", "collab", "office", "ws-1"])).toBe(true)
         expect(filter(["NIVO_QUERY", "viewer", "collab", "group", "ws-1", null])).toBe(false)
         act(() => {
-            socket.handlers.get("collab.changed")?.({ workspaceId: "ws-1", kind: "notice", cursor: null })
+            socket!.handlers.get("collab.changed")?.({ workspaceId: "ws-1", kind: "notice", cursor: null })
         })
         filter = lastMutateFilter()
         expect(filter(["NIVO_QUERY", "viewer", "collab", "notices", "ws-1", null])).toBe(true)
@@ -186,15 +186,15 @@ describe("collab live subscription", () => {
         mount("ws-1")
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("connect")?.()
+            socket!.handlers.get("connect")?.()
         })
-        subscribeAck(socket, { ok: true, workspaceId: "ws-1" })
+        subscribeAck(socket!, { ok: true, workspaceId: "ws-1" })
         mutate.mockClear()
         act(() => {
-            socket.handlers.get("collab.changed")?.({ workspaceId: "ws-2", kind: "message", cursor: null })
-            socket.handlers.get("collab.changed")?.({ workspaceId: "ws-1", kind: "smuggled", cursor: null })
-            socket.handlers.get("collab.changed")?.("not-a-hint")
-            socket.handlers.get("collab.changed")?.(null)
+            socket!.handlers.get("collab.changed")?.({ workspaceId: "ws-2", kind: "message", cursor: null })
+            socket!.handlers.get("collab.changed")?.({ workspaceId: "ws-1", kind: "smuggled", cursor: null })
+            socket!.handlers.get("collab.changed")?.("not-a-hint")
+            socket!.handlers.get("collab.changed")?.(null)
         })
         expect(mutate).not.toHaveBeenCalled()
         expect(state().lastHint).toBeNull()
@@ -204,9 +204,9 @@ describe("collab live subscription", () => {
         mount("ws-1")
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("connect")?.()
+            socket!.handlers.get("connect")?.()
         })
-        subscribeAck(socket, { ok: false, reason: "denied" })
+        subscribeAck(socket!, { ok: false, reason: "denied" })
         expect(state()).toMatchObject({ status: "disconnected", reason: "denied" })
     })
 
@@ -214,11 +214,11 @@ describe("collab live subscription", () => {
         mount("ws-1")
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("disconnect")?.("transport close")
+            socket!.handlers.get("disconnect")?.("transport close")
         })
         expect(state()).toMatchObject({ status: "disconnected", reason: "transport close" })
         act(() => {
-            socket.handlers.get("connect_error")?.(new Error("bad bearer"))
+            socket!.handlers.get("connect_error")?.(new Error("bad bearer"))
         })
         expect(state()).toMatchObject({ status: "disconnected", reason: "bad bearer" })
     })
@@ -227,15 +227,15 @@ describe("collab live subscription", () => {
         mount("ws-1")
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("connect")?.()
+            socket!.handlers.get("connect")?.()
         })
-        subscribeAck(socket, { ok: true, workspaceId: "ws-1" })
+        subscribeAck(socket!, { ok: true, workspaceId: "ws-1" })
         mutate.mockClear()
         act(() => {
-            socket.handlers.get("connect")?.()
+            socket!.handlers.get("connect")?.()
         })
-        expect(socket.emit.mock.calls.filter((args) => args[0] === "collab.subscribe")).toHaveLength(2)
-        subscribeAck(socket, { ok: true, workspaceId: "ws-1" })
+        expect(socket!.emit.mock.calls.filter((args) => args[0] === "collab.subscribe")).toHaveLength(2)
+        subscribeAck(socket!, { ok: true, workspaceId: "ws-1" })
         expect(mutate).toHaveBeenCalled()
         const filter = lastMutateFilter()
         expect(filter(["NIVO_QUERY", "viewer", "collab", "group", "ws-1", null])).toBe(true)
@@ -248,10 +248,10 @@ describe("collab live subscription", () => {
         act(() => {
             root?.render(<Probe workspaceId="ws-2" />)
         })
-        expect(first.removeAllListeners).toHaveBeenCalled()
-        expect(first.disconnect).toHaveBeenCalled()
+        expect(first!.removeAllListeners).toHaveBeenCalled()
+        expect(first!.disconnect).toHaveBeenCalled()
         expect(sockets).toHaveLength(2)
         act(() => root?.unmount())
-        expect(sockets[1].disconnect).toHaveBeenCalled()
+        expect(sockets[1]!.disconnect).toHaveBeenCalled()
     })
 })

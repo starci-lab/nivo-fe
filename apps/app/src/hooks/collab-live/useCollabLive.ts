@@ -108,7 +108,7 @@ const readSubscribeAck = (payload: unknown): { ok: true } | { ok: false; reason:
         typeof payload === "object" &&
         payload !== null &&
         typeof (payload as Record<string, unknown>).reason === "string"
-            ? (payload as Record<string, string>).reason
+            ? (payload as Record<string, string>).reason!
             : "unavailable"
     return { ok: false, reason }
 }

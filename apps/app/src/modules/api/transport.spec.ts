@@ -58,7 +58,7 @@ describe("send", () => {
         fetchMock.mockResolvedValue(reply(200, null))
         const bytes = new Blob(["abc"])
         await send({ ...request, method: "PUT", body: bytes, contentType: "application/pdf", reply: "none" })
-        const init = fetchMock.mock.calls[0][1] as RequestInit
+        const init = fetchMock.mock.calls[0]![1] as RequestInit
         expect(init.body).toBe(bytes)
         expect(init.headers).toEqual({ "content-type": "application/pdf" })
     })

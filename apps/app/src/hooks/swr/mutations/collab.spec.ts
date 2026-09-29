@@ -100,7 +100,7 @@ describe("Collab mutation ownership", () => {
         }>
         await hook.mutation({ intentId: "i-1", body: "go" })
         expect(mutate).toHaveBeenCalledTimes(1)
-        const filter = (mutate.mock.calls as ReadonlyArray<ReadonlyArray<unknown>>)[0][0] as (key: unknown) => boolean
+        const filter = (mutate.mock.calls as ReadonlyArray<ReadonlyArray<unknown>>)[0]![0] as (key: unknown) => boolean
         expect(filter(["NIVO_QUERY", "viewer", "collab", "group", "ws-1", null])).toBe(true)
         expect(filter(["NIVO_QUERY", "viewer", "collab", "tasks", "ws-1", "m-1", null, null, null, null])).toBe(true)
         expect(filter(["NIVO_QUERY", "viewer", "collab", "task", "ws-1", "t-1"])).toBe(true)
@@ -146,7 +146,7 @@ describe("Collab mutation ownership", () => {
             email: "person@example.com",
             role: "staff",
         })
-        const inviteFilter = (mutate.mock.calls as ReadonlyArray<ReadonlyArray<unknown>>)[0][0] as (
+        const inviteFilter = (mutate.mock.calls as ReadonlyArray<ReadonlyArray<unknown>>)[0]![0] as (
             key: unknown,
         ) => boolean
         expect(inviteFilter(["NIVO_QUERY", "viewer", "collab", "office", "ws-1"])).toBe(true)

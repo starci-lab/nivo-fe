@@ -72,11 +72,11 @@ describe("useProvisioningRealtime", () => {
         mount("token", { kind: "workspace", id: "w-1" })
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("connect")?.()
+            socket!.handlers.get("connect")?.()
         })
         expect(state()).toEqual({ status: "connected", reason: null })
         act(() => {
-            socket.handlers.get("workspace.status")?.({
+            socket!.handlers.get("workspace.status")?.({
                 workspaceId: "other",
                 status: "ready",
                 reason: null,
@@ -85,7 +85,7 @@ describe("useProvisioningRealtime", () => {
         })
         expect(state().status).toBe("connected")
         act(() => {
-            socket.handlers.get("workspace.status")?.({
+            socket!.handlers.get("workspace.status")?.({
                 workspaceId: "w-1",
                 status: "ready",
                 reason: null,
@@ -98,7 +98,7 @@ describe("useProvisioningRealtime", () => {
         mount("token", { kind: "workspace", id: "w-1" })
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("workspace.status")?.({
+            socket!.handlers.get("workspace.status")?.({
                 workspaceId: "w-1",
                 status: "ready",
                 reason: null,
@@ -107,7 +107,7 @@ describe("useProvisioningRealtime", () => {
             })
         })
         act(() => {
-            socket.handlers.get("workspace.status")?.({
+            socket!.handlers.get("workspace.status")?.({
                 workspaceId: "w-1",
                 status: "failed",
                 reason: "late",
@@ -121,7 +121,7 @@ describe("useProvisioningRealtime", () => {
         mount("token", { kind: "module-installation", id: "m-1" })
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("provisioning.saga.status")?.({
+            socket!.handlers.get("provisioning.saga.status")?.({
                 success: true,
                 data: {
                     eventId: "e",
@@ -146,7 +146,7 @@ describe("useProvisioningRealtime", () => {
         mount("token", { kind: "deployment", id: "d-1" })
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("deployment.status")?.({
+            socket!.handlers.get("deployment.status")?.({
                 deploymentId: "d-2",
                 status: "running",
                 reason: null,
@@ -155,7 +155,7 @@ describe("useProvisioningRealtime", () => {
         })
         expect(state().status).toBe("connecting")
         act(() => {
-            socket.handlers.get("deployment.status")?.({
+            socket!.handlers.get("deployment.status")?.({
                 deploymentId: "d-1",
                 status: "running",
                 reason: null,
@@ -168,7 +168,7 @@ describe("useProvisioningRealtime", () => {
         mount("token", { kind: "order", id: "o-1" })
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("order.fulfilling")?.({ success: true, data: { orderId: "o-1", status: "completed" } })
+            socket!.handlers.get("order.fulfilling")?.({ success: true, data: { orderId: "o-1", status: "completed" } })
         })
         expect(state()).toMatchObject({ event: { kind: "order", id: "o-1", status: "completed" } })
     })
@@ -176,11 +176,11 @@ describe("useProvisioningRealtime", () => {
         mount("token", { kind: "workspace", id: "w-1" })
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("disconnect")?.("transport close")
+            socket!.handlers.get("disconnect")?.("transport close")
         })
         expect(state()).toEqual({ status: "disconnected", reason: "transport close" })
         act(() => {
-            socket.handlers.get("connect_error")?.(new Error("offline"))
+            socket!.handlers.get("connect_error")?.(new Error("offline"))
         })
         expect(state()).toEqual({ status: "disconnected", reason: "offline" })
     })
@@ -188,7 +188,7 @@ describe("useProvisioningRealtime", () => {
         mount("token", { kind: "workspace", id: "w-1" })
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("workspace.runtime")?.({
+            socket!.handlers.get("workspace.runtime")?.({
                 workspaceId: "w-1",
                 instanceId: "i-1",
                 fingerprint: "fp",
@@ -205,7 +205,7 @@ describe("useProvisioningRealtime", () => {
         mount("token", { kind: "instance", id: "i-1" })
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("instance.operation")?.({
+            socket!.handlers.get("instance.operation")?.({
                 operationId: "op-1",
                 instanceId: "i-2",
                 phase: "running",
@@ -214,7 +214,7 @@ describe("useProvisioningRealtime", () => {
         })
         expect(state().status).toBe("connecting")
         act(() => {
-            socket.handlers.get("instance.operation")?.({
+            socket!.handlers.get("instance.operation")?.({
                 success: true,
                 data: {
                     operationId: "op-2",
@@ -235,7 +235,7 @@ describe("useProvisioningRealtime", () => {
         mount("token", { kind: "saga", id: "s-1" })
         const socket = sockets[0]
         act(() => {
-            socket.handlers.get("provisioning.saga.status")?.({
+            socket!.handlers.get("provisioning.saga.status")?.({
                 eventId: "e-1",
                 sequence: 1,
                 sagaId: "s-9",
@@ -250,7 +250,7 @@ describe("useProvisioningRealtime", () => {
         })
         expect(state().status).toBe("connecting")
         act(() => {
-            socket.handlers.get("provisioning.saga.status")?.({
+            socket!.handlers.get("provisioning.saga.status")?.({
                 eventId: "e-2",
                 sequence: 2,
                 sagaId: "s-1",
@@ -275,7 +275,7 @@ describe("useProvisioningRealtime", () => {
             },
         })
         act(() => {
-            socket.handlers.get("provisioning.saga.status")?.({
+            socket!.handlers.get("provisioning.saga.status")?.({
                 eventId: "e-3",
                 sequence: 1,
                 sagaId: "s-1",
@@ -296,6 +296,6 @@ describe("useProvisioningRealtime", () => {
         act(() => {
             root?.render(<Probe token="token" target={null} />)
         })
-        expect(socket.disconnect).toHaveBeenCalled()
+        expect(socket!.disconnect).toHaveBeenCalled()
     })
 })

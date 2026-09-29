@@ -104,7 +104,7 @@ describe("modules/api/collab", () => {
         })
         setCollabTransport(spy)
         await listCollabTasks({ workspaceId: "ws-1", accessToken: "tok" })
-        expect(calls[0].request.input).toEqual({})
+        expect(calls[0]!.request.input).toEqual({})
         await listCollabTasks({
             workspaceId: "ws-1",
             accessToken: "tok",
@@ -113,7 +113,7 @@ describe("modules/api/collab", () => {
             cursor: "c-1",
             limit: 10,
         })
-        expect(calls[1].request.input).toEqual({ personMemberId: "m-1", status: "working", cursor: "c-1", limit: 10 })
+        expect(calls[1]!.request.input).toEqual({ personMemberId: "m-1", status: "working", cursor: "c-1", limit: 10 })
     })
 
     it("names each closed operation exactly once per call", async () => {
@@ -153,9 +153,9 @@ describe("modules/api/collab", () => {
             "pressApprovalButton",
             "inviteByEmail",
         ])
-        expect(calls[1].request.input).toEqual({ cursor: "c" })
-        expect(calls[7].request.input).toEqual({ approvalId: "a-1", button: "approve" })
-        expect(calls[8].request.input).toEqual({ email: "person@example.com", role: "staff" })
+        expect(calls[1]!.request.input).toEqual({ cursor: "c" })
+        expect(calls[7]!.request.input).toEqual({ approvalId: "a-1", button: "approve" })
+        expect(calls[8]!.request.input).toEqual({ email: "person@example.com", role: "staff" })
     })
 
     it("projects the rev5 office bundle with the viewer identity and each roster entry's own identity", async () => {
@@ -206,9 +206,9 @@ describe("modules/api/collab", () => {
             email: "person@example.com",
             role: "manager",
         })
-        expect(calls[0].request.op).toBe("inviteByEmail")
-        expect(calls[0].request.input).toEqual({ email: "person@example.com", role: "manager" })
-        expect(JSON.stringify(calls[0].request)).not.toContain("phone")
+        expect(calls[0]!.request.op).toBe("inviteByEmail")
+        expect(calls[0]!.request.input).toEqual({ email: "person@example.com", role: "manager" })
+        expect(JSON.stringify(calls[0]!.request)).not.toContain("phone")
         expect(answer).toEqual({ ok: true, data: { outcome: "created", member: { memberId: "mem-1" } } })
     })
 
@@ -228,7 +228,7 @@ describe("modules/api/collab", () => {
             invitationId: "inv-1",
             displayName: "An",
         })
-        expect(calls[0].request.op).toBe("acceptInvitation")
+        expect(calls[0]!.request.op).toBe("acceptInvitation")
         expect(accepted).toEqual({
             ok: true,
             data: { outcome: "accepted", member: { memberId: "mem-2", role: "staff" } },
@@ -243,15 +243,15 @@ describe("modules/api/collab", () => {
         })
         setCollabTransport(spy)
         await acceptCollabInvitation({ workspaceId: "ws-1", accessToken: "tok", invitationId: "inv-1" })
-        expect(calls[0].request.input).toEqual({ invitationId: "inv-1" })
+        expect(calls[0]!.request.input).toEqual({ invitationId: "inv-1" })
         await acceptCollabInvitation({
             workspaceId: "ws-1",
             accessToken: "tok",
             invitationId: "inv-2",
             displayName: "Binh",
         })
-        expect(calls[1].request.input).toEqual({ invitationId: "inv-2", displayName: "Binh" })
-        expect(JSON.stringify(calls[1].request.input)).not.toMatch(/email|phone|principal|role|grant/i)
+        expect(calls[1]!.request.input).toEqual({ invitationId: "inv-2", displayName: "Binh" })
+        expect(JSON.stringify(calls[1]!.request.input)).not.toMatch(/email|phone|principal|role|grant/i)
     })
 
     it("refuses smuggled accepter identity claims on acceptance before transport", async () => {
@@ -452,7 +452,7 @@ describe("collabGatewayTransport", () => {
             accessToken: "tok-1",
             request: { workspaceId: "ws-1", op: "openOffice", input: {} },
         })
-        const init = fetchStub.mock.calls[0][1] as RequestInit
+        const init = fetchStub.mock.calls[0]![1] as RequestInit
         expect(init.credentials).toBe("include")
         expect((init.headers as Record<string, string>).authorization).toBe("Bearer tok-1")
     })

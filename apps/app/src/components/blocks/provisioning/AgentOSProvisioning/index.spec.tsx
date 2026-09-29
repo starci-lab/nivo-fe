@@ -359,7 +359,7 @@ describe("AgentOSProvisioning", () => {
         await waitFor(() => expect(flow()).toContain('"state":"provisioning_unknown"'))
         fireEvent.click(screen.getByTestId("status"))
         await waitFor(() => expect(mocks.recover.trigger).toHaveBeenCalled())
-        const request = mocks.recover.trigger.mock.calls[0][0] as {
+        const request = mocks.recover.trigger.mock.calls[0]![0] as {
             purchaseId: string
             lastObserved: Record<string, string>
         }

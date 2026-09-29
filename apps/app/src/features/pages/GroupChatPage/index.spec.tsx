@@ -443,7 +443,7 @@ describe("GroupChatPage", () => {
             act(() => last().on.changeComposer("@Sales tháng 9"))
             last().on.sendMessage()
             await waitFor(() => expect(last().view.composer.value).toBe(""))
-            const sent = state.post.trigger.mock.calls[0][0]
+            const sent = state.post.trigger.mock.calls[0]![0]
             expect(sent).toMatchObject({ body: "@Sales tháng 9", moduleName: "Sales", answersQuestionId: "q-1" })
             expect(typeof sent.intentId).toBe("string")
             expect(last().view.composer.answering).toBeNull()
@@ -482,7 +482,7 @@ describe("GroupChatPage", () => {
             act(() => last().on.changeComposer("Chào"))
             last().on.sendMessage()
             await waitFor(() => expect(last().view.composer.failure).toBe("retry"))
-            const intentId = state.post.trigger.mock.calls[0][0].intentId
+            const intentId = state.post.trigger.mock.calls[0]![0].intentId
             hooks.reconcile.mockResolvedValueOnce(ok({ outcome: "matched" }))
             last().on.retrySend()
             await waitFor(() => expect(last().view.composer.failure).toBeNull())
@@ -495,7 +495,7 @@ describe("GroupChatPage", () => {
             act(() => last().on.changeComposer("Lần nữa"))
             last().on.retrySend()
             await waitFor(() => expect(state.post.trigger).toHaveBeenCalledTimes(1))
-            expect(state.post.trigger.mock.calls[0][0].body).toBe("Lần nữa")
+            expect(state.post.trigger.mock.calls[0]![0].body).toBe("Lần nữa")
         })
 
         it("does not reconcile without a session token", async () => {
@@ -526,7 +526,7 @@ describe("GroupChatPage", () => {
             act(() => last().on.changeComposer("Chào"))
             last().on.sendMessage()
             await waitFor(() => expect(state.post.trigger).toHaveBeenCalled())
-            expect(state.post.trigger.mock.calls[0][0].intentId).toMatch(/^intent-\d+-/)
+            expect(state.post.trigger.mock.calls[0]![0].intentId).toMatch(/^intent-\d+-/)
             vi.unstubAllGlobals()
         })
     })

@@ -160,8 +160,8 @@ export const formatMinorCurrency = (value: string, currency: string, locale: str
     try {
         const match = /^(-?)(\d+)$/.exec(value)
         if (match === null) throw new Error("amount")
-        const negative = match[1] === "-" && !/^0+$/.test(match[2])
-        const absolute = match[2].replace(/^0+(?=\d)/, "") || "0"
+        const negative = match[1] === "-" && !/^0+$/.test(match[2]!)
+        const absolute = match[2]!.replace(/^0+(?=\d)/, "") || "0"
         const digits = fractionDigits(currency, locale)
         const padded = absolute.padStart(digits + 1, "0")
         const whole = digits === 0 ? padded : padded.slice(0, -digits)
@@ -176,7 +176,7 @@ export const formatMinorCurrency = (value: string, currency: string, locale: str
         const numeric = new Set(["integer", "group", "decimal", "fraction"])
         const first = template.findIndex((part) => numeric.has(part.type))
         let last = first
-        for (let index = first; index < template.length; index += 1) if (numeric.has(template[index].type)) last = index
+        for (let index = first; index < template.length; index += 1) if (numeric.has(template[index]!.type)) last = index
         const prefix = template
             .slice(0, first)
             .map((part) => part.value)

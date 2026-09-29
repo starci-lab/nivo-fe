@@ -160,7 +160,7 @@ describe("readAgentosShellOverview", () => {
 
         answerWith(200, {
             ...overviewBody(ordered),
-            sources: [envelopeFor(ordered[0], { sourceIdentity: "runtime" }), envelopeFor(ordered[1])],
+            sources: [envelopeFor(ordered[0]!, { sourceIdentity: "runtime" }), envelopeFor(ordered[1]!)],
         })
         expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({
             ok: false,
@@ -182,7 +182,7 @@ describe("readAgentosShellOverview", () => {
             code: expect.stringMatching(/^UNSUPPORTED/),
         })
 
-        answerWith(200, { ...overviewBody(reads), sources: [envelopeFor(reads[0], { availability: "ready" })] })
+        answerWith(200, { ...overviewBody(reads), sources: [envelopeFor(reads[0]!, { availability: "ready" })] })
         expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({
             ok: false,
             code: expect.stringMatching(/^UNSUPPORTED/),
@@ -190,7 +190,7 @@ describe("readAgentosShellOverview", () => {
 
         answerWith(200, {
             ...overviewBody(reads),
-            sources: [envelopeFor(reads[0], { availability: "refused", payload: { secret: true } })],
+            sources: [envelopeFor(reads[0]!, { availability: "refused", payload: { secret: true } })],
         })
         expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({
             ok: false,
@@ -330,7 +330,7 @@ describe("readAgentosShellOverview", () => {
             { payload: 7 },
         ]
         for (const variant of variants) {
-            answerWith(200, { ...overviewBody(reads), sources: [envelopeFor(reads[0], variant)] })
+            answerWith(200, { ...overviewBody(reads), sources: [envelopeFor(reads[0]!, variant)] })
             expect([variant, await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)]).toEqual([
                 variant,
                 expect.objectContaining({ ok: false, code: "UNSUPPORTED_REPLY" }),
@@ -346,7 +346,7 @@ describe("readAgentosShellOverview", () => {
         // A source with nothing to show is an answer with no payload, not an empty object.
         answerWith(200, {
             ...overviewBody(reads),
-            sources: [envelopeFor(reads[0], { availability: "unavailable", payload: null })],
+            sources: [envelopeFor(reads[0]!, { availability: "unavailable", payload: null })],
         })
         const answered = await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)
         expect(answered.ok).toBe(true)

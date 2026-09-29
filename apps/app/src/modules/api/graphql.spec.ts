@@ -222,8 +222,8 @@ describe("graphql failure kinds", () => {
         const fetchMock = answerOnce(200, { data: { q: { success: true, data: 1, message: "" } } })
         await graphql("query Q { q }", undefined, { accessToken: "own" })
         await graphql("query Q { q }", undefined, { accessToken: "" })
-        expect((fetchMock.mock.calls[0][1] as RequestInit).headers).toMatchObject({ authorization: "Bearer own" })
-        expect((fetchMock.mock.calls[1][1] as RequestInit).headers).not.toHaveProperty("authorization")
+        expect((fetchMock.mock.calls[0]![1] as RequestInit).headers).toMatchObject({ authorization: "Bearer own" })
+        expect((fetchMock.mock.calls[1]![1] as RequestInit).headers).not.toHaveProperty("authorization")
     })
 
     it("stops a call whose signal aborts and reports it as aborted", async () => {

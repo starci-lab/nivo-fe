@@ -819,7 +819,7 @@ describe("component", () => {
         const kinds = items.map((item) => item.kind)
         expect(kinds).toEqual(["message", "task-card", "message", "approval-card", "approval-card"])
         const last = items[items.length - 1]
-        expect(last.kind === "approval-card" && last.approval.approvalId === "appr-loose").toBe(true)
+        expect(last!.kind === "approval-card" && last!.approval.approvalId === "appr-loose").toBe(true)
     })
 
     it("flags only filters whose identity left the current roster", () => {
@@ -909,14 +909,14 @@ describe("component", () => {
         ])
         const [first, unbound, second, bound] = items
         expect(
-            first.kind === "message" &&
-                first.authorName === "Thành viên" &&
-                first.authorKind === null &&
-                !first.isViewer,
+            first!.kind === "message" &&
+                first!.authorName === "Thành viên" &&
+                first!.authorKind === null &&
+                !first!.isViewer,
         ).toBe(true)
-        expect(unbound.kind === "task-card" && unbound.task === null).toBe(true)
-        expect(second.kind === "message" && second.addressedName === "Sales").toBe(true)
-        expect(bound.kind === "task-card" && bound.task?.taskId === "task-w").toBe(true)
+        expect(unbound!.kind === "task-card" && unbound!.task === null).toBe(true)
+        expect(second!.kind === "message" && second!.addressedName === "Sales").toBe(true)
+        expect(bound!.kind === "task-card" && bound!.task?.taskId === "task-w").toBe(true)
     })
 
     it("renders task receipts for pending, reported and refused cards", () => {
@@ -1130,7 +1130,7 @@ describe("component", () => {
 
     it("presents empty rosters and a pending invitee on the rail", () => {
         const invited: CollabOfficeParticipant = {
-            ...PARTICIPANTS[2],
+            ...PARTICIPANTS[2]!,
             memberId: "mem-new",
             displayName: "Lan",
             status: "invited",
