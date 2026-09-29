@@ -39,7 +39,7 @@ describe("QuestionCard", () => {
                 ))}
             </>,
         )
-        expect(screen.getByText("Bạn muốn báo cáo theo tuần hay theo tháng?")).toBeInTheDocument()
+        expect(screen.getByText("Do you want the report weekly or monthly?")).toBeInTheDocument()
         expect(screen.getByText(labels.question.waiting("Minh"))).toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Trả lời" })).toBeNull()
 

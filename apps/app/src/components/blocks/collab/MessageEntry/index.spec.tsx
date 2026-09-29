@@ -20,6 +20,6 @@ describe("MessageEntry", () => {
         render(<MessageEntry item={item} labels={labels} decision={false} />)
         expect(screen.getByText("An Nguyen")).toBeInTheDocument()
         expect(screen.getByText("@sales")).toBeInTheDocument()
-        expect(screen.getByText("Bạn có thể gửi giúp mình báo cáo doanh số tháng này không?")).toBeInTheDocument()
+        expect(screen.getByText("Can you send me this month's sales report?")).toBeInTheDocument()
     })
 })

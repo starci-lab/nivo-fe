@@ -1,6 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import type { PurchaseStatusActions as PurchaseStatusActionCallbacks, PurchaseStatusRail } from "@/modules/agentos/purchase-status/view-model"
+import type {
+    PurchaseStatusActions as PurchaseStatusActionCallbacks,
+    PurchaseStatusRail,
+} from "@/modules/agentos/purchase-status/view-model"
 import { PurchaseStatusActions } from "./index"
 
 describe("PurchaseStatusActions", () => {

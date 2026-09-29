@@ -1,12 +1,4 @@
-import {
-    Badge,
-    EmptyNotice,
-    IconTile,
-    PrimaryRailLayout,
-    Progress,
-    SurfaceCard,
-    Text,
-} from "@starci/grammar/common"
+import { Badge, EmptyNotice, IconTile, PrimaryRailLayout, Progress, SurfaceCard, Text } from "@starci/grammar/common"
 import type {
     PurchaseStatusFact,
     PurchaseStatusFlowViewProps,
@@ -120,7 +112,10 @@ const operationBand = (operation: PurchaseStatusOperation) => (
     </div>
 )
 
-const primaryCard = (primary: PurchaseStatusPrimary, view: Exclude<PurchaseStatusFlowViewProps, { state: "loading" } | { state: "denied" }>) => (
+const primaryCard = (
+    primary: PurchaseStatusPrimary,
+    view: Exclude<PurchaseStatusFlowViewProps, { state: "loading" } | { state: "denied" }>,
+) => (
     <SurfaceCard label={primary.label} fact={primary.fact} composition="joined" height="fill">
         {primary.banner === undefined ? null : (
             <div className={BAND_CLASS_NAME}>
@@ -168,7 +163,10 @@ const primaryCard = (primary: PurchaseStatusPrimary, view: Exclude<PurchaseStatu
     </SurfaceCard>
 )
 
-const railCard = (rail: PurchaseStatusRail, view: Exclude<PurchaseStatusFlowViewProps, { state: "loading" } | { state: "denied" }>) => (
+const railCard = (
+    rail: PurchaseStatusRail,
+    view: Exclude<PurchaseStatusFlowViewProps, { state: "loading" } | { state: "denied" }>,
+) => (
     <SurfaceCard label={rail.label} fact={rail.fact} composition="joined" height="fill">
         {rail.latestCheck === undefined ? null : (
             <div className={BAND_CLASS_NAME}>

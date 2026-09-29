@@ -40,7 +40,7 @@ describe("ApprovalCard", () => {
         )
         expect(screen.getByText("Cần phê duyệt")).toBeInTheDocument()
         expect(screen.getByText("Đang chờ quyết định")).toBeInTheDocument()
-        expect(screen.getByText("Gửi báo cáo doanh số cho đối tác")).toBeInTheDocument()
+        expect(screen.getByText("Send the sales report to the partner")).toBeInTheDocument()
         const approve = screen.getByRole("button", { name: "Phê duyệt" })
         const reject = screen.getByRole("button", { name: "Từ chối" })
         expect(approve).toBeEnabled()

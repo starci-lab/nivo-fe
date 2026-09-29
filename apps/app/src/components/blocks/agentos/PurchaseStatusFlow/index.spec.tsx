@@ -94,7 +94,7 @@ vi.mock("@/hooks", () => ({
     }),
     useRouter: () => ({ push: mocks.push, replace: mocks.push }),
     useSession: () => mocks.session,
-    useAccessToken: () => mocks.session.state.status === "signed-in" ? mocks.session.state.accessToken : null,
+    useAccessToken: () => (mocks.session.state.status === "signed-in" ? mocks.session.state.accessToken : null),
     useProvisioningRealtime: () => mocks.realtime,
 }))
 vi.mock("@nivo/ui", () => ({ IconSource: (name: string) => () => name }))

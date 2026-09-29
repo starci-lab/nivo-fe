@@ -1,5 +1,8 @@
 import { Button, Text, TextAction } from "@starci/grammar/common"
-import type { PurchaseStatusActions as PurchaseStatusActionCallbacks, PurchaseStatusRail } from "@/modules/agentos/purchase-status/view-model"
+import type {
+    PurchaseStatusActions as PurchaseStatusActionCallbacks,
+    PurchaseStatusRail,
+} from "@/modules/agentos/purchase-status/view-model"
 import { ACTION_FOCUS_CLASS_NAME, CAPTION_CLASS_NAME, ESCAPE_CLASS_NAME } from "./classNames"
 
 type PurchaseStatusActionsProps =

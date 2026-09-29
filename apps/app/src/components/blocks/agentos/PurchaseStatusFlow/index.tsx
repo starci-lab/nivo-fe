@@ -25,14 +25,7 @@ const PurchaseStatusFlow = ({ purchaseId, surface }: PurchaseStatusFlowProps) =>
     const answer = queries.data
     const statusOutcome = answer !== undefined && answer.ok ? answer.data : null
     const statusPurchase = purchaseOf(statusOutcome)
-    const copy = useMemo(
-        () =>
-            createPurchaseStatusCopy({
-                text: (key, values) => t(key as never, values as never),
-                has: (key) => t.has(key as never),
-            }),
-        [t],
-    )
+    const copy = useMemo(() => createPurchaseStatusCopy(t), [t])
     const links = useMemo(
         () => ({
             workspaces: getPathname({ locale, href: "/agentos/workspaces" }),

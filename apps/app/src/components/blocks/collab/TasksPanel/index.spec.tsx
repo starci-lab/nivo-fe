@@ -23,7 +23,7 @@ describe("TasksPanel", () => {
         fireEvent.change(moduleSelect, { target: { value: "mi-sales" } })
         expect(on.changeTasksFilter).toHaveBeenCalledWith({ moduleInstallationId: "mi-sales" })
         expect(screen.getByText("T-550E")).toBeInTheDocument()
-        expect(screen.getByText("Tổng hợp doanh số tuần này")).toBeInTheDocument()
+        expect(screen.getByText("Summarise this week's sales")).toBeInTheDocument()
         expect(screen.getAllByText("Chờ phê duyệt").length).toBeGreaterThan(0)
         fireEvent.click(screen.getByRole("button", { name: "Mở trong Office" }))
         expect(on.openTaskCard).toHaveBeenCalledWith(TASK_WAITING_APPROVAL.taskId)
@@ -35,7 +35,7 @@ describe("TasksPanel", () => {
             tasks: { state: "ready", rows: [], filter: { personMemberId: "mem-gone" } },
         })
         render(<TasksPanel view={view} labels={labels} on={on} />)
-        expect(screen.getByText("Giá trị lọc không còn hợp lệ trong Workspace này.")).toBeInTheDocument()
+        expect(screen.getByText("Giá trị lọc không còn hợp lệ trong workspace này.")).toBeInTheDocument()
     })
     it("holds the Tasks list and its count while the read is loading", () => {
         render(

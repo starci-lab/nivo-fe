@@ -1,11 +1,22 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 import type { IconSource } from "@starci/grammar/common"
+import { createTranslator } from "next-intl"
+import enMessages from "@/messages/en.json"
 import { createPurchaseStatusCopy } from "@/modules/agentos/purchase-status/copy"
 import type { PurchaseStatusFlowViewProps } from "@/modules/agentos/purchase-status/view-model"
 import { PurchaseStatusChecks } from "./index"
 
-const copy = createPurchaseStatusCopy({ text: (key) => key, has: () => false })
+const copy = createPurchaseStatusCopy(
+    createTranslator({
+        locale: "en",
+        messages: enMessages,
+        namespace: "console.agentos.purchaseStatus",
+        onError: (error) => {
+            throw error
+        },
+    }),
+)
 const mark: IconSource = () => null
 const head = {
     copy,
@@ -56,7 +67,11 @@ describe("PurchaseStatusChecks", () => {
     it("keeps the denied surface free of purchase facts", () => {
         const denied: PurchaseStatusFlowViewProps = {
             state: "denied",
-            props: { ...head, message: "This purchase is not visible.", description: "No purchase facts are disclosed." },
+            props: {
+                ...head,
+                message: "This purchase is not visible.",
+                description: "No purchase facts are disclosed.",
+            },
             on: {},
         }
         const html = renderToStaticMarkup(<PurchaseStatusChecks {...denied} />)

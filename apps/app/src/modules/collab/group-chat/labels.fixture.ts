@@ -1,129 +1,17 @@
+import { createTranslator } from "next-intl"
+import viMessages from "@/messages/vi.json"
+import { buildGroupChatLabels } from "./labels"
 import type { GroupChatPageLabels } from "./types"
 
-/** Resolved catalog copy used by pure block tests. */
-export const labels: GroupChatPageLabels = {
-    title: "Office",
-    today: "Hôm nay",
-    description: "Trao đổi, phối hợp và cập nhật công việc của Workspace.",
-    workspace: "Workspace",
-    tabListLabel: "Chuyển giữa Office và Tasks",
-    tabs: { office: "Office", tasks: "Tasks" },
-    roles: { owner: "Owner", manager: "Manager", staff: "Staff" },
-    statuses: {
-        created: "Mới tạo",
-        working: "Đang làm",
-        "waiting-on-answer": "Chờ thông tin",
-        "waiting-on-approval": "Chờ phê duyệt",
-        done: "Hoàn thành",
-        rejected: "Bị từ chối",
-        cancelled: "Đã hủy",
-    },
-    state: {
-        loading: "Đang tải Office…",
-        retry: "Thử lại",
-        readFailedTitle: "Không đọc được Office. Thử lại.",
-        deniedTitle: "Office không khả dụng",
-        deniedBody: "Bạn không phải thành viên hiện tại của Workspace này.",
-        backOverview: "Về Tổng quan",
-    },
-    members: {
-        title: "Thành viên trong Workspace",
-        humans: (count) => `Con người (${count})`,
-        modules: (count) => `Module đã thuê (${count})`,
-        empty: "Chưa có thành viên nào.",
-        pending: "Lời mời đang chờ",
-        noModules: "Chưa có module nào được thuê.",
-        moduleRole: "Module",
-        countLabel: (count) => `Thành viên (${count})`,
-        moduleDescriptions: {
-            Sales: "Hỗ trợ kinh doanh và chăm sóc khách hàng",
-            Accounting: "Hỗ trợ kế toán và tài chính",
-            Chatbot: "Hỗ trợ tự động hóa và trả lời khách hàng",
+/** Resolved Vietnamese catalog copy used by pure block tests: the page's own label builder over the real `vi` catalog. */
+export const labels: GroupChatPageLabels = buildGroupChatLabels(
+    createTranslator({
+        locale: "vi",
+        messages: viMessages,
+        namespace: "console.groupChat",
+        onError: (error) => {
+            throw error
         },
-        openRail: (count) => `${count} thành viên`,
-        closeRail: "Đóng danh sách thành viên",
-    },
-    invite: {
-        title: "Mời thành viên",
-        email: "Email",
-        emailPlaceholder: "ten@congty.vn",
-        role: "Vai trò",
-        hint: "Người được mời chỉ tham gia sau khi đăng nhập bằng email đã xác minh.",
-        submit: "Gửi lời mời",
-        sent: (email) => `Đã ghi nhận lời mời tới ${email}.`,
-        existing: "Email này đã có lời mời hoặc đã là thành viên.",
-        refused: "Không gửi được lời mời.",
-    },
-    conversation: {
-        label: "Nội dung cuộc trò chuyện",
-        empty: "Chưa có tin nhắn nào.",
-        unknownAuthor: "Thành viên",
-    },
-    composer: {
-        label: "Tin nhắn",
-        placeholder: "Nhập tin nhắn…",
-        send: "Gửi",
-        failed: "Tin nhắn chưa chắc đã được ghi. Kiểm tra rồi gửi lại.",
-        retry: "Kiểm tra và gửi lại",
-        denied: "Bạn không còn quyền gửi trong Office này.",
-        answering: (moduleName, excerpt) => `Đang trả lời ${moduleName}: ${excerpt}`,
-        cancelAnswer: "Hủy trả lời",
-    },
-    card: {
-        receiptReported: "Module đã báo cáo",
-        receiptPending: "Chưa có báo cáo",
-        receiptRefused: "Module từ chối",
-        reference: (ref, moduleName) => `${ref} • ${moduleName}`,
-        requestedBy: (name) => `Người yêu cầu: ${name}`,
-        assignedTo: (name) => `Người được giao: ${name}`,
-    },
-    approval: {
-        needed: "Cần phê duyệt",
-        waiting: "Đang chờ quyết định",
-        deciderHint: "Chỉ Owner hoặc Manager được quyết định",
-        approve: "Phê duyệt",
-        reject: "Từ chối",
-        decidedBy: (name, at) => `${name} đã quyết định lúc ${at}`,
-        withdrawn: "Hành động đã được rút lại",
-        uncertain: "Chưa xác nhận được quyết định — giữ nguyên trạng thái chờ.",
-        denied: "Quyết định này cần quyền Owner hoặc Manager.",
-    },
-    question: {
-        waiting: (name) => `Đang chờ ${name} trả lời`,
-        answer: "Trả lời",
-    },
-    notice: {
-        title: "Cần bạn xử lý",
-        taskAssign: () => "Một việc mới được giao cho bạn",
-        approval: "Một hành động đang chờ bạn quyết định",
-        open: "Mở",
-        handled: "Đã xử lý",
-        unavailable: "Không còn khả dụng",
-    },
-    tasks: {
-        title: "Công việc trong Office",
-        count: (count) => `${count} công việc`,
-        filterPerson: "Người",
-        filterModule: "Mô-đun",
-        filterStatus: "Trạng thái",
-        filterAll: "Tất cả",
-        filterHint: "Bộ lọc chỉ thay đổi danh sách hiển thị.",
-        empty: "Không có công việc nào khớp bộ lọc.",
-        invalidFilter: "Giá trị lọc không còn hợp lệ trong Workspace này.",
-        failed: "Chưa đọc được danh sách công việc.",
-        denied: "Bạn không còn quyền xem công việc của Workspace này.",
-        openInOffice: "Mở trong Office",
-        asker: (name) => `Người yêu cầu: ${name}`,
-        assignee: (name) => `Người được giao: ${name}`,
-        module: (name) => `Mô-đun: ${name}`,
-    },
-    accept: {
-        title: "Lời mời vào Workspace",
-        body: "Bạn được mời tham gia Office của Workspace này.",
-        roleLine: (role) => `Vai trò được mời: ${role}`,
-        action: "Chấp nhận lời mời",
-        refused: "Lời mời không còn hiệu lực hoặc email đăng nhập chưa khớp.",
-        invalidLink: "Liên kết lời mời thiếu thông tin workspace.",
-    },
-    formatTime: () => "09:14",
-}
+    }),
+    () => "09:14",
+)

@@ -1,3 +1,6 @@
+import type { createTranslator } from "next-intl"
+import type enMessages from "@/messages/en.json"
+
 /**
  * The copy contract the purchase-status view consumes. Every phrase resolves through the next-intl
  * catalog (`console.agentos.purchaseStatus` in src/messages/{en,vi}.json); this module owns only
@@ -193,161 +196,236 @@ export type PurchaseStatusCopy = {
     readonly provisioningDispositionLabel: (disposition: string) => string
 }
 
-/** The narrow translator adapter needed by this purchase-status catalog namespace. */
-export type PurchaseStatusTranslator = {
-    readonly text: (key: string, values?: Readonly<Record<string, string | number>>) => string
-    readonly has: (key: string) => boolean
-}
+/** The next-intl translator bound to `console.agentos.purchaseStatus`; its keys are checked against the catalog. */
+export type PurchaseStatusTranslator = ReturnType<
+    typeof createTranslator<typeof enMessages, "console.agentos.purchaseStatus">
+>
+
+/** Narrow a free-form value from a source to one of the values the catalog labels, or `undefined`. */
+const knownOf = <Known extends string>(known: ReadonlyArray<Known>, value: string): Known | undefined =>
+    known.find((candidate) => candidate === value)
+
+const OPERATION_STATUSES = [
+    "waiting_capacity",
+    "provisioning",
+    "installing",
+    "starting",
+    "active",
+    "ready",
+    "failed",
+    "suspended",
+] as const
+const PURCHASE_STATES = [
+    "selected",
+    "paymentNotStarted",
+    "paymentPending",
+    "paymentOutcomeUnknown",
+    "paymentRefused",
+    "paymentFailed",
+    "paid",
+    "provisioning",
+    "provisioningRefused",
+    "ready",
+    "renewed",
+    "paymentCancelled",
+] as const
+const SOURCE_NAMES = ["payment", "billing", "provisioning", "readiness"] as const
+const SOURCE_STATES = ["none", "unavailable", "observed"] as const
+const LEDGER_STATES = [
+    "open",
+    "pending",
+    "paid",
+    "refused",
+    "failed",
+    "cancelled",
+    "unmatched-receipt",
+    "disputed",
+    "refund-pending",
+    "refund-unresolved",
+] as const
+const LEDGER_ENTRY_KINDS = [
+    "payment",
+    "dispute",
+    "refund-intent",
+    "refund",
+    "correction",
+    "adjustment",
+    "unmatched-receipt",
+] as const
+const REFUND_STATES = ["refund-started", "refunded", "refund-pending-reconciliation", "unavailable"] as const
+const HOLD_STATES = ["eligible", "held", "none", "unavailable"] as const
+const HOLD_REASONS = ["non-payment", "expiry", "cancellation"] as const
+const RENEWAL_EVIDENCE = ["none", "pending", "unknown"] as const
+const ENTRY_STATES = ["entry", "not-ready", "refused", "unavailable", "conflict"] as const
+const ENTRY_REFUSALS = [
+    "unauthenticated",
+    "purchaser-not-admitted",
+    "purchase-not-found-non-disclosing",
+    "request-invalid",
+    "owner-mismatch",
+    "workspace-not-found-non-disclosing",
+    "workspace-not-ready",
+    "readiness-observation-stale",
+    "entry-unsupported",
+    "source-unavailable",
+    "entry-owner-unavailable",
+] as const
+const DISPOSITIONS = [
+    "admitted",
+    "running",
+    "outcome-unknown",
+    "refused",
+    "failed-retryable",
+    "failed-terminal",
+    "ready",
+] as const
 
 /** Resolve the purchase-status copy without letting the view name catalog keys. */
-export const createPurchaseStatusCopy = (translate: PurchaseStatusTranslator): PurchaseStatusCopy => {
-    const kebab = (value: string): string => value.replace(/-([a-z])/g, (_match, letter: string) => letter.toUpperCase())
-    const keyed = (prefix: string) => (value: string) => {
-        const key = `${prefix}.${value}`
-        return translate.has(key) ? translate.text(key) : value
-    }
+export const createPurchaseStatusCopy = (t: PurchaseStatusTranslator): PurchaseStatusCopy => {
+    const kebab = (value: string): string =>
+        value.replace(/-([a-z])/g, (_match, letter: string) => letter.toUpperCase())
     return {
-        path: translate.text("path"),
-        workspaces: translate.text("workspaces"),
-        purchases: translate.text("purchases"),
-        provisioning: translate.text("provisioning"),
-        loadingTitle: translate.text("loadingTitle"),
-        loadingText: translate.text("loadingText"),
-        loading: translate.text("loading"),
-        paymentPendingTitle: translate.text("paymentPendingTitle"),
-        paymentPendingBadge: translate.text("paymentPendingBadge"),
-        paymentPendingSubtitle: translate.text("paymentPendingSubtitle"),
-        paymentUnknownTitle: translate.text("paymentUnknownTitle"),
-        paymentUnknownBadge: translate.text("paymentUnknownBadge"),
-        paymentUnknownSubtitle: translate.text("paymentUnknownSubtitle"),
-        paymentFailedTitle: translate.text("paymentFailedTitle"),
-        paymentFailedBadge: translate.text("paymentFailedBadge"),
-        paymentFailedSubtitle: translate.text("paymentFailedSubtitle"),
-        paidTitle: translate.text("paidTitle"),
-        paidBadge: translate.text("paidBadge"),
-        paidSubtitle: translate.text("paidSubtitle"),
-        provisioningTitle: translate.text("provisioningTitle"),
-        provisioningBadge: translate.text("provisioningBadge"),
-        provisioningSubtitle: translate.text("provisioningSubtitle"),
-        provisioningUnknownTitle: translate.text("provisioningUnknownTitle"),
-        provisioningUnknownBadge: translate.text("provisioningUnknownBadge"),
-        provisioningFailedTitle: translate.text("provisioningFailedTitle"),
-        provisioningFailedBadge: translate.text("provisioningFailedBadge"),
-        provisioningFailedTerminalTitle: translate.text("provisioningFailedTerminalTitle"),
-        provisioningFailedTerminalBadge: translate.text("provisioningFailedTerminalBadge"),
-        readyTitle: translate.text("readyTitle"),
-        readyBadge: translate.text("readyBadge"),
-        readySubtitle: translate.text("readySubtitle"),
-        deniedTitle: translate.text("deniedTitle"),
-        deniedSubtitle: translate.text("deniedSubtitle"),
-        deniedNotice: translate.text("deniedNotice"),
-        deniedText: translate.text("deniedText"),
-        purchaseFactsLabel: translate.text("purchaseFactsLabel"),
-        verificationLabel: translate.text("verificationLabel"),
-        provisioningOrderLabel: translate.text("provisioningOrderLabel"),
-        confirmedFactsLabel: translate.text("confirmedFactsLabel"),
-        latestCheck: translate.text("latestCheck"),
-        offer: translate.text("offer"),
-        offerPlan: translate.text("offerPlan"),
-        purchaseRef: translate.text("purchaseRef"),
-        paymentAttempt: translate.text("paymentAttempt"),
-        paymentStatusLabel: translate.text("paymentStatusLabel"),
-        amountLabel: translate.text("amountLabel"),
-        invoiceDue: translate.text("invoiceDue"),
-        invoicePaidAt: translate.text("invoicePaidAt"),
-        workspaceLabel: translate.text("workspaceLabel"),
-        workspacePending: translate.text("workspacePending"),
-        cadenceLabel: translate.text("cadenceLabel"),
-        renewalLabel: translate.text("renewalLabel"),
-        cadenceOneTime: translate.text("cadenceOneTime"),
-        cadenceRecurring: translate.text("cadenceRecurring"),
-        cadenceSetupRecurring: translate.text("cadenceSetupRecurring"),
-        renewalAuto: translate.text("renewalAuto"),
-        renewalAutoAt: (date) => translate.text("renewalAutoAt", { date }),
-        renewalManualAt: (date) => translate.text("renewalManualAt", { date }),
-        renewalManual: translate.text("renewalManual"),
-        renewalNone: translate.text("renewalNone"),
-        purchaseRow: translate.text("purchaseRow"),
-        invoiceRow: translate.text("invoiceRow"),
-        paidAmount: translate.text("paidAmount"),
-        currentOperation: translate.text("currentOperation"),
-        operationAdmit: translate.text("operationAdmit"),
-        purchaseLabel: translate.text("purchaseLabel"),
-        timelineRead: translate.text("timelineRead"),
-        timelineReadDetail: translate.text("timelineReadDetail"),
-        detailPaymentSettled: translate.text("detailPaymentSettled"),
-        startedLabel: translate.text("startedLabel"),
-        lastObservation: translate.text("lastObservation"),
-        reconcileNote: translate.text("reconcileNote"),
-        checkProvider: translate.text("checkProvider"),
-        checkAmount: translate.text("checkAmount"),
-        checkCanonical: translate.text("checkCanonical"),
-        checkAdmission: translate.text("checkAdmission"),
-        checkPaymentVerified: translate.text("checkPaymentVerified"),
-        checkEntitlement: translate.text("checkEntitlement"),
-        checkConfigure: translate.text("checkConfigure"),
-        checkReadiness: translate.text("checkReadiness"),
-        detailAwaiting: translate.text("detailAwaiting"),
-        detailEvaluated: translate.text("detailEvaluated"),
-        detailNotEvaluated: translate.text("detailNotEvaluated"),
-        detailWithheld: translate.text("detailWithheld"),
-        detailConfirmed: translate.text("detailConfirmed"),
-        detailRefused: translate.text("detailRefused"),
-        detailSourceRefused: translate.text("detailSourceRefused"),
-        detailLocked: translate.text("detailLocked"),
-        detailAdmitted: translate.text("detailAdmitted"),
-        detailWaitingAdmission: translate.text("detailWaitingAdmission"),
-        detailWaitingConfiguration: translate.text("detailWaitingConfiguration"),
-        detailWaitingReadiness: translate.text("detailWaitingReadiness"),
-        detailOrderRecorded: translate.text("detailOrderRecorded"),
-        lockedNotice: translate.text("lockedNotice"),
-        outcomeLabel: translate.text("outcomeLabel"),
-        outcomeEntryWithheld: translate.text("outcomeEntryWithheld"),
-        outcomeEntryReady: translate.text("outcomeEntryReady"),
-        outcomeEntryDenied: translate.text("outcomeEntryDenied"),
-        outcomeProvisioningRetryable: translate.text("outcomeProvisioningRetryable"),
-        outcomeProvisioningTerminal: translate.text("outcomeProvisioningTerminal"),
-        checkPaymentAction: translate.text("checkPaymentAction"),
-        reconcilePaymentAction: translate.text("reconcilePaymentAction"),
-        refreshStatusAction: translate.text("refreshStatusAction"),
-        reconcileOrderAction: translate.text("reconcileOrderAction"),
-        retryProvisionAction: translate.text("retryProvisionAction"),
-        retryProvisionCaption: translate.text("retryProvisionCaption"),
-        viewProvisioningAction: translate.text("viewProvisioningAction"),
-        enterWorkspaceAction: translate.text("enterWorkspaceAction"),
-        returnToList: translate.text("returnToList"),
-        backToWorkspaces: translate.text("backToWorkspaces"),
-        ownerLabel: translate.text("ownerLabel"),
-        attemptLabel: translate.text("attemptLabel"),
-        changeOffer: translate.text("changeOffer"),
-        realtimeReconnect: translate.text("realtimeReconnect"),
-        stateDone: translate.text("stateDone"),
-        stateRunning: translate.text("stateRunning"),
-        stateQueued: translate.text("stateQueued"),
-        stateFailed: translate.text("stateFailed"),
-        stateUnknown: translate.text("stateUnknown"),
-        rechecksOnly: (attempt) => translate.text("rechecksOnly", { attempt }),
-        preparingOffer: (offer) => translate.text("preparingOffer", { offer }),
-        orderReports: (status) => translate.text("orderReports", { status }),
-        invoiceReports: (status) => translate.text("invoiceReports", { status }),
-        paidSentence: (amount) => translate.text("paidSentence", { amount }),
-        startedSentence: (at, elapsed) => translate.text("startedSentence", { at, elapsed }),
-        lastObservationSentence: (detail, at) => translate.text("lastObservationSentence", { detail, at }),
+        path: t("path"),
+        workspaces: t("workspaces"),
+        purchases: t("purchases"),
+        provisioning: t("provisioning"),
+        loadingTitle: t("loadingTitle"),
+        loadingText: t("loadingText"),
+        loading: t("loading"),
+        paymentPendingTitle: t("paymentPendingTitle"),
+        paymentPendingBadge: t("paymentPendingBadge"),
+        paymentPendingSubtitle: t("paymentPendingSubtitle"),
+        paymentUnknownTitle: t("paymentUnknownTitle"),
+        paymentUnknownBadge: t("paymentUnknownBadge"),
+        paymentUnknownSubtitle: t("paymentUnknownSubtitle"),
+        paymentFailedTitle: t("paymentFailedTitle"),
+        paymentFailedBadge: t("paymentFailedBadge"),
+        paymentFailedSubtitle: t("paymentFailedSubtitle"),
+        paidTitle: t("paidTitle"),
+        paidBadge: t("paidBadge"),
+        paidSubtitle: t("paidSubtitle"),
+        provisioningTitle: t("provisioningTitle"),
+        provisioningBadge: t("provisioningBadge"),
+        provisioningSubtitle: t("provisioningSubtitle"),
+        provisioningUnknownTitle: t("provisioningUnknownTitle"),
+        provisioningUnknownBadge: t("provisioningUnknownBadge"),
+        provisioningFailedTitle: t("provisioningFailedTitle"),
+        provisioningFailedBadge: t("provisioningFailedBadge"),
+        provisioningFailedTerminalTitle: t("provisioningFailedTerminalTitle"),
+        provisioningFailedTerminalBadge: t("provisioningFailedTerminalBadge"),
+        readyTitle: t("readyTitle"),
+        readyBadge: t("readyBadge"),
+        readySubtitle: t("readySubtitle"),
+        deniedTitle: t("deniedTitle"),
+        deniedSubtitle: t("deniedSubtitle"),
+        deniedNotice: t("deniedNotice"),
+        deniedText: t("deniedText"),
+        purchaseFactsLabel: t("purchaseFactsLabel"),
+        verificationLabel: t("verificationLabel"),
+        provisioningOrderLabel: t("provisioningOrderLabel"),
+        confirmedFactsLabel: t("confirmedFactsLabel"),
+        latestCheck: t("latestCheck"),
+        offer: t("offer"),
+        offerPlan: t("offerPlan"),
+        purchaseRef: t("purchaseRef"),
+        paymentAttempt: t("paymentAttempt"),
+        paymentStatusLabel: t("paymentStatusLabel"),
+        amountLabel: t("amountLabel"),
+        invoiceDue: t("invoiceDue"),
+        invoicePaidAt: t("invoicePaidAt"),
+        workspaceLabel: t("workspaceLabel"),
+        workspacePending: t("workspacePending"),
+        cadenceLabel: t("cadenceLabel"),
+        renewalLabel: t("renewalLabel"),
+        cadenceOneTime: t("cadenceOneTime"),
+        cadenceRecurring: t("cadenceRecurring"),
+        cadenceSetupRecurring: t("cadenceSetupRecurring"),
+        renewalAuto: t("renewalAuto"),
+        renewalAutoAt: (date) => t("renewalAutoAt", { date }),
+        renewalManualAt: (date) => t("renewalManualAt", { date }),
+        renewalManual: t("renewalManual"),
+        renewalNone: t("renewalNone"),
+        purchaseRow: t("purchaseRow"),
+        invoiceRow: t("invoiceRow"),
+        paidAmount: t("paidAmount"),
+        currentOperation: t("currentOperation"),
+        operationAdmit: t("operationAdmit"),
+        purchaseLabel: t("purchaseLabel"),
+        timelineRead: t("timelineRead"),
+        timelineReadDetail: t("timelineReadDetail"),
+        detailPaymentSettled: t("detailPaymentSettled"),
+        startedLabel: t("startedLabel"),
+        lastObservation: t("lastObservation"),
+        reconcileNote: t("reconcileNote"),
+        checkProvider: t("checkProvider"),
+        checkAmount: t("checkAmount"),
+        checkCanonical: t("checkCanonical"),
+        checkAdmission: t("checkAdmission"),
+        checkPaymentVerified: t("checkPaymentVerified"),
+        checkEntitlement: t("checkEntitlement"),
+        checkConfigure: t("checkConfigure"),
+        checkReadiness: t("checkReadiness"),
+        detailAwaiting: t("detailAwaiting"),
+        detailEvaluated: t("detailEvaluated"),
+        detailNotEvaluated: t("detailNotEvaluated"),
+        detailWithheld: t("detailWithheld"),
+        detailConfirmed: t("detailConfirmed"),
+        detailRefused: t("detailRefused"),
+        detailSourceRefused: t("detailSourceRefused"),
+        detailLocked: t("detailLocked"),
+        detailAdmitted: t("detailAdmitted"),
+        detailWaitingAdmission: t("detailWaitingAdmission"),
+        detailWaitingConfiguration: t("detailWaitingConfiguration"),
+        detailWaitingReadiness: t("detailWaitingReadiness"),
+        detailOrderRecorded: t("detailOrderRecorded"),
+        lockedNotice: t("lockedNotice"),
+        outcomeLabel: t("outcomeLabel"),
+        outcomeEntryWithheld: t("outcomeEntryWithheld"),
+        outcomeEntryReady: t("outcomeEntryReady"),
+        outcomeEntryDenied: t("outcomeEntryDenied"),
+        outcomeProvisioningRetryable: t("outcomeProvisioningRetryable"),
+        outcomeProvisioningTerminal: t("outcomeProvisioningTerminal"),
+        checkPaymentAction: t("checkPaymentAction"),
+        reconcilePaymentAction: t("reconcilePaymentAction"),
+        refreshStatusAction: t("refreshStatusAction"),
+        reconcileOrderAction: t("reconcileOrderAction"),
+        retryProvisionAction: t("retryProvisionAction"),
+        retryProvisionCaption: t("retryProvisionCaption"),
+        viewProvisioningAction: t("viewProvisioningAction"),
+        enterWorkspaceAction: t("enterWorkspaceAction"),
+        returnToList: t("returnToList"),
+        backToWorkspaces: t("backToWorkspaces"),
+        ownerLabel: t("ownerLabel"),
+        attemptLabel: t("attemptLabel"),
+        changeOffer: t("changeOffer"),
+        realtimeReconnect: t("realtimeReconnect"),
+        stateDone: t("stateDone"),
+        stateRunning: t("stateRunning"),
+        stateQueued: t("stateQueued"),
+        stateFailed: t("stateFailed"),
+        stateUnknown: t("stateUnknown"),
+        rechecksOnly: (attempt) => t("rechecksOnly", { attempt }),
+        preparingOffer: (offer) => t("preparingOffer", { offer }),
+        orderReports: (status) => t("orderReports", { status }),
+        invoiceReports: (status) => t("invoiceReports", { status }),
+        paidSentence: (amount) => t("paidSentence", { amount }),
+        startedSentence: (at, elapsed) => t("startedSentence", { at, elapsed }),
+        lastObservationSentence: (detail, at) => t("lastObservationSentence", { detail, at }),
         operationStatus: (status) => {
-            const key = `operation.${status}`
-            return translate.has(key) ? translate.text(key) : status
+            const known = knownOf(OPERATION_STATUSES, status)
+            return known === undefined ? status : t(`operation.${known}`)
         },
-        attemptFact: (attempt) => translate.text("attemptFact", { attempt }),
-        ledgerLabel: translate.text("ledgerLabel"),
-        unavailableNotice: translate.text("unavailableNotice"),
-        renewAction: translate.text("renewAction"),
-        heldSinceLabel: (date) => translate.text("heldSinceLabel", { date }),
-        paidThroughLabel: (date) => translate.text("paidThroughLabel", { date }),
-        entryNotReadyNotice: translate.text("entryNotReadyNotice"),
-        entryConflictNotice: translate.text("entryConflictNotice"),
+        attemptFact: (attempt) => t("attemptFact", { attempt }),
+        ledgerLabel: t("ledgerLabel"),
+        unavailableNotice: t("unavailableNotice"),
+        renewAction: t("renewAction"),
+        heldSinceLabel: (date) => t("heldSinceLabel", { date }),
+        paidThroughLabel: (date) => t("paidThroughLabel", { date }),
+        entryNotReadyNotice: t("entryNotReadyNotice"),
+        entryConflictNotice: t("entryConflictNotice"),
         purchaseStateLabel: (state) => {
-            const key = `stateLabel.${kebab(state)}`
-            return translate.has(key) ? translate.text(key) : state
+            const known = knownOf(PURCHASE_STATES, kebab(state))
+            return known === undefined ? state : t(`stateLabel.${known}`)
         },
         sourceLabel: (source) => {
             const sourceNames: Readonly<Record<string, string>> = {
@@ -355,19 +433,48 @@ export const createPurchaseStatusCopy = (translate: PurchaseStatusTranslator): P
                 "platform-billing-ledger": "billing",
                 "workspace-provisioning": "provisioning",
             }
-            const name = sourceNames[source] ?? source
-            const key = `sourceLabel.${name}`
-            return translate.has(key) ? translate.text(key) : source
+            const known = knownOf(SOURCE_NAMES, sourceNames[source] ?? source)
+            return known === undefined ? source : t(`sourceLabel.${known}`)
         },
-        sourceStateLabel: keyed("sourceStateLabel"),
-        ledgerStateLabel: keyed("ledgerStateLabel"),
-        ledgerEntryKindLabel: keyed("ledgerEntryKindLabel"),
-        refundStateLabel: keyed("refundStateLabel"),
-        holdStateLabel: keyed("holdStateLabel"),
-        holdReasonLabel: keyed("holdReasonLabel"),
-        renewalEvidenceLabel: keyed("renewalEvidenceLabel"),
-        entryStateLabel: keyed("entryStateLabel"),
-        entryRefusalLabel: keyed("entryRefusalLabel"),
-        provisioningDispositionLabel: keyed("provisioningDispositionLabel"),
+        sourceStateLabel: (value) => {
+            const known = knownOf(SOURCE_STATES, value)
+            return known === undefined ? value : t(`sourceStateLabel.${known}`)
+        },
+        ledgerStateLabel: (value) => {
+            const known = knownOf(LEDGER_STATES, value)
+            return known === undefined ? value : t(`ledgerStateLabel.${known}`)
+        },
+        ledgerEntryKindLabel: (value) => {
+            const known = knownOf(LEDGER_ENTRY_KINDS, value)
+            return known === undefined ? value : t(`ledgerEntryKindLabel.${known}`)
+        },
+        refundStateLabel: (value) => {
+            const known = knownOf(REFUND_STATES, value)
+            return known === undefined ? value : t(`refundStateLabel.${known}`)
+        },
+        holdStateLabel: (value) => {
+            const known = knownOf(HOLD_STATES, value)
+            return known === undefined ? value : t(`holdStateLabel.${known}`)
+        },
+        holdReasonLabel: (value) => {
+            const known = knownOf(HOLD_REASONS, value)
+            return known === undefined ? value : t(`holdReasonLabel.${known}`)
+        },
+        renewalEvidenceLabel: (value) => {
+            const known = knownOf(RENEWAL_EVIDENCE, value)
+            return known === undefined ? value : t(`renewalEvidenceLabel.${known}`)
+        },
+        entryStateLabel: (value) => {
+            const known = knownOf(ENTRY_STATES, value)
+            return known === undefined ? value : t(`entryStateLabel.${known}`)
+        },
+        entryRefusalLabel: (value) => {
+            const known = knownOf(ENTRY_REFUSALS, value)
+            return known === undefined ? value : t(`entryRefusalLabel.${known}`)
+        },
+        provisioningDispositionLabel: (value) => {
+            const known = knownOf(DISPOSITIONS, value)
+            return known === undefined ? value : t(`provisioningDispositionLabel.${known}`)
+        },
     }
 }

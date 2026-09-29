@@ -1,5 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { createTranslator } from "next-intl"
+import enMessages from "@/messages/en.json"
 import { createPurchaseStatusCopy } from "@/modules/agentos/purchase-status/copy"
 
 const mocks = vi.hoisted(() => ({
@@ -16,7 +18,16 @@ vi.mock("@/hooks", () => ({
 
 import { usePurchaseStatusActions } from "./usePurchaseStatusActions"
 
-const copy = createPurchaseStatusCopy({ text: (key) => key, has: () => false })
+const copy = createPurchaseStatusCopy(
+    createTranslator({
+        locale: "en",
+        messages: enMessages,
+        namespace: "console.agentos.purchaseStatus",
+        onError: (error) => {
+            throw error
+        },
+    }),
+)
 
 describe("usePurchaseStatusActions", () => {
     it("returns from the purchase surface through the app router", () => {

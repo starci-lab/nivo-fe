@@ -11,7 +11,7 @@ describe("AcceptanceSurface", () => {
             acceptance: { state: "ready", roleHint: "staff", invalidLink: false },
         })
         render(<AcceptanceSurface view={view} labels={labels} on={on} />)
-        expect(screen.getByText("Lời mời vào Workspace")).toBeInTheDocument()
+        expect(screen.getByText("Lời mời vào workspace")).toBeInTheDocument()
         expect(screen.getByText("Vai trò được mời: Staff")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Chấp nhận lời mời" }))
         expect(on.acceptInvitation).toHaveBeenCalled()
