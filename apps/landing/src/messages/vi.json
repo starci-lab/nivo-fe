@@ -2005,5 +2005,24 @@
         }
       }
     }
+  },
+  "boundary": {
+    "error": {
+      "unexpected": {
+        "message": "Đã xảy ra sự cố",
+        "description": "Không thể hiển thị trang này. Hãy thử lại, nếu vẫn lỗi vui lòng liên hệ hỗ trợ."
+      },
+      "staleBundle": {
+        "message": "Trang đã cũ",
+        "description": "Một phiên bản mới vừa được phát hành khi bạn đang xem. Hãy tải lại để tiếp tục."
+      },
+      "retry": "Thử lại",
+      "reload": "Tải lại"
+    },
+    "notFound": {
+      "message": "Không tìm thấy trang",
+      "description": "Địa chỉ này không tồn tại hoặc đã được chuyển.",
+      "home": "Về trang chủ"
+    }
   }
 }

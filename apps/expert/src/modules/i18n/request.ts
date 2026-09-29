@@ -49,12 +49,7 @@ export default getRequestConfig(async () => {
     return {
         locale,
         timeZone: TIME_ZONE,
-        messages: {
-            ...(await import(`../../messages/${locale}.json`)).default,
-            // The boundary copy is its own small file so the document-level error boundary can import it
-            // without pulling the whole catalogue into the client bundle; the provider still serves it.
-            boundary: (await import(`../../messages/boundary/${locale}.json`)).default,
-        },
+        messages: (await import(`../../messages/${locale}.json`)).default,
     }
 })
 

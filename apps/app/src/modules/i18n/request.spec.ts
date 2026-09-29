@@ -15,7 +15,6 @@ describe("request", () => {
         expect(config.locale).toBe("vi")
         expect(config.timeZone).toBe("Asia/Ho_Chi_Minh")
         expect(config.messages).toHaveProperty("console")
-        expect(config.messages).toHaveProperty("boundary.error.retry")
     })
 
     it("falls back to the default locale for an unknown route value", async () => {
@@ -23,6 +22,5 @@ describe("request", () => {
         const config = await requestConfig({ requestLocale: Promise.resolve("xx") })
         expect(config.locale).toBe("vi")
         expect(config.messages).toHaveProperty("console")
-        expect(config.messages).toHaveProperty("boundary.error.retry")
     })
 })

@@ -14,4 +14,6 @@ export type NotFoundPageBaseProps = { readonly props: NotFoundPageBaseData }
 type NotFoundPageProps = NotFoundPageBaseProps
 
 /** Draw an unknown address as one message with a way back. */
-export const NotFoundPageBase = ({ props }: NotFoundPageProps) => <RouteStateView props={{ role: "status", ...props }} />
+export const NotFoundPageBase = ({ props }: NotFoundPageProps) => (
+    <RouteStateView props={{ role: "status", ...props }} />
+)

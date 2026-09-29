@@ -124,8 +124,8 @@
             },
             {
               "role": "segment",
-              "routeRoot": "apps/landing/src/app",
-              "path": "apps/landing/src/app/error.tsx",
+              "routeRoot": "apps/landing/src/app/[locale]",
+              "path": "apps/landing/src/app/[locale]/error.tsx",
               "recoveryProp": "reset"
             }
           ],

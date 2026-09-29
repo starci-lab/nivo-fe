@@ -10,5 +10,14 @@ export const NotFoundPage = (props: NotFoundPageProps) => {
     void props
     const t = useTranslations("boundary.notFound")
     const locale = useLocale()
-    return <NotFoundPageBase props={{ message: t("message"), description: t("description"), actionLabel: t("home"), actionHref: getPathname({ href: "/", locale }) }} />
+    return (
+        <NotFoundPageBase
+            props={{
+                message: t("message"),
+                description: t("description"),
+                actionLabel: t("home"),
+                actionHref: getPathname({ href: "/", locale }),
+            }}
+        />
+    )
 }

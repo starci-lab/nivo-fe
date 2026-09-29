@@ -1,4 +1,5 @@
 import { NivoGrammarRoot, RouteStateView, type RouteStateViewData } from "@nivo/ui"
+import { Skeleton } from "@starci/grammar/common"
 
 /** The resolved copy of the document-level error answer. */
 export type GlobalErrorPageBaseData = Pick<RouteStateViewData, "message" | "description" | "actionLabel">
@@ -6,9 +7,9 @@ export type GlobalErrorPageBaseData = Pick<RouteStateViewData, "message" | "desc
 /** The one recovery the document-level answer offers. */
 export type GlobalErrorPageBaseActions = { readonly retry: () => void }
 
-/** Complete input of {@link GlobalErrorPageBase}: resolved atoms and the recovery callback. */
+/** Complete input of {@link GlobalErrorPageBase}: the copy once it has loaded, and the recovery callback. */
 export type GlobalErrorPageBaseProps = {
-    readonly props: GlobalErrorPageBaseData
+    readonly props: GlobalErrorPageBaseData | undefined
     readonly on: GlobalErrorPageBaseActions
 }
 
@@ -19,9 +20,16 @@ export type GlobalErrorPageBaseProps = {
  */
 type GlobalErrorPageProps = GlobalErrorPageBaseProps
 
-/** Draw the failure of the root layout itself: no provider sits above it, so it brings its own grammar root. */
+/**
+ * Draw the failure of the root layout itself: no provider sits above it, so it brings its own
+ * grammar root, and it holds skeleton geometry until its copy has arrived.
+ */
 export const GlobalErrorPageBase = ({ props, on }: GlobalErrorPageProps) => (
-    <NivoGrammarRoot theme="light">
-        <RouteStateView props={{ role: "alert", ...props }} on={{ action: on.retry }} />
+    <NivoGrammarRoot>
+        {props === undefined ? (
+            <Skeleton shape="text" lines={3} />
+        ) : (
+            <RouteStateView props={{ role: "alert", ...props }} on={{ action: on.retry }} />
+        )}
     </NivoGrammarRoot>
 )

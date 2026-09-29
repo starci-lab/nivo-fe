@@ -22,7 +22,25 @@ const reloadDocument = () => window.location.reload()
 export const ErrorPage = ({ error, onRetry }: ErrorPageProps) => {
     const t = useTranslations("boundary.error")
     if (readRouteFailureKind(error) === "stale-bundle") {
-        return <ErrorPageBase props={{ message: t("staleBundle.message"), description: t("staleBundle.description"), actionLabel: t("reload") }} on={{ retry: reloadDocument }} />
+        return (
+            <ErrorPageBase
+                props={{
+                    message: t("staleBundle.message"),
+                    description: t("staleBundle.description"),
+                    actionLabel: t("reload"),
+                }}
+                on={{ retry: reloadDocument }}
+            />
+        )
     }
-    return <ErrorPageBase props={{ message: t("unexpected.message"), description: t("unexpected.description"), actionLabel: t("retry") }} on={{ retry: onRetry }} />
+    return (
+        <ErrorPageBase
+            props={{
+                message: t("unexpected.message"),
+                description: t("unexpected.description"),
+                actionLabel: t("retry"),
+            }}
+            on={{ retry: onRetry }}
+        />
+    )
 }

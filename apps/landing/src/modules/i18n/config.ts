@@ -26,4 +26,15 @@ export const TIME_ZONE = "Asia/Ho_Chi_Minh"
  * @param value - The candidate locale, a string from outside (a segment, a header).
  * @returns A locale this site ships.
  */
-export const toLocale = (value: unknown): Locale => LOCALES.includes(value as Locale) ? value as Locale : DEFAULT_LOCALE
+export const toLocale = (value: unknown): Locale =>
+    LOCALES.includes(value as Locale) ? (value as Locale) : DEFAULT_LOCALE
+
+/**
+ * Read the locale out of an address for the one caller with no request config above it: the
+ * document-level error boundary, which renders when the layout that owns the provider has failed.
+ * An address without a prefix is the default locale, because routing is `as-needed`.
+ *
+ * @param pathname - The current pathname, or null when the router has none.
+ * @returns A locale this site ships.
+ */
+export const toLocaleFromPathname = (pathname: string | null): Locale => toLocale(pathname?.split("/")[1])

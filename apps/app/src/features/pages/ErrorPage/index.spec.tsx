@@ -1,8 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
+import en from "@/messages/en.json"
 import { ErrorPage } from "./"
-
-vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 
 const reload = vi.fn()
 
@@ -16,9 +15,9 @@ describe("ErrorPage", () => {
         const retry = vi.fn()
         render(<ErrorPage error={new Error("secret stack detail")} onRetry={retry} />)
         expect(screen.getByRole("alert")).toBeInTheDocument()
-        expect(screen.getByText("unexpected.message")).toBeInTheDocument()
+        expect(screen.getByText(en.boundary.error.unexpected.message)).toBeInTheDocument()
         expect(screen.queryByText(/secret stack detail/u)).toBeNull()
-        fireEvent.click(screen.getByRole("button", { name: "retry" }))
+        fireEvent.click(screen.getByRole("button", { name: en.boundary.error.retry }))
         expect(retry).toHaveBeenCalledTimes(1)
     })
 
@@ -26,8 +25,8 @@ describe("ErrorPage", () => {
         vi.stubGlobal("location", { reload })
         const retry = vi.fn()
         render(<ErrorPage error={Object.assign(new Error("chunk"), { name: "ChunkLoadError" })} onRetry={retry} />)
-        expect(screen.getByText("staleBundle.message")).toBeInTheDocument()
-        fireEvent.click(screen.getByRole("button", { name: "reload" }))
+        expect(screen.getByText(en.boundary.error.staleBundle.message)).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: en.boundary.error.reload }))
         expect(reload).toHaveBeenCalledTimes(1)
         expect(retry).not.toHaveBeenCalled()
     })
