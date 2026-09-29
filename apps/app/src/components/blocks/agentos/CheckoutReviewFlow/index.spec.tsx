@@ -23,8 +23,8 @@ vi.mock("@/hooks", () => ({
     useRouter: () => ({ push: mocks.push }),
     useSession: () => mocks.session,
     useAccessToken: () => {
-        const state = mocks.session.state as { readonly status: string; readonly accessToken?: string };
-        return state.status === "signed-in" ? state.accessToken ?? null : null;
+        const state = mocks.session.state as { readonly status: string; readonly accessToken?: string }
+        return state.status === "signed-in" ? (state.accessToken ?? null) : null
     },
 }))
 type ViewInput = {
