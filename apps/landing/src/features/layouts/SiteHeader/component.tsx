@@ -104,12 +104,12 @@ export type SiteHeaderBaseActions = {
     readonly menuTrigger: (element: HTMLButtonElement | null) => void
 }
 
-/** Public API role for SiteHeaderBaseProps. */
 /** The mounted control the header hosts but does not own. */
 export type SiteHeaderBaseState = {
     readonly themeControl: ReactNode
 }
 
+/** Props for {@link SiteHeaderBase}: the hosted control, the disclosure's situation and its commands. */
 export type SiteHeaderBaseProps = {
     readonly state: SiteHeaderBaseState
     readonly props: SiteHeaderBaseData

@@ -416,7 +416,6 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     const testSurfaceQuery = useQueryMyAgentosModuleTestSurfaceSwr(installationId, view === "test" || view === "setup")
     const testSurfaceReading = nivoQueryReading(testSurfaceQuery.data)
     const testSurface = testSurfaceReading.status === "ready" ? testSurfaceReading.data : null
-    const refused = actionRefused
     const isChatbotInstallation =
         runtime !== null &&
         ["chatbot", "agentos-chatbot", "multichannel-chatbot"].includes(runtime.installation.moduleKey)
@@ -966,9 +965,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
         workspaceId,
     ])
     if (runtimeReading.status === "failed")
-        return (
-            <QueryNotice props={{ failure: runtimeReading }} on={{ retry: () => void runtimeQuery.mutate() }} />
-        )
+        return <QueryNotice props={{ failure: runtimeReading }} on={{ retry: () => void runtimeQuery.mutate() }} />
     if (runtimeForeign)
         return (
             <QueryNotice
@@ -986,7 +983,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
         return (
             <QueryNotice props={{ failure: testSurfaceReading }} on={{ retry: () => void testSurfaceQuery.mutate() }} />
         )
-    if (runtime === null) return <AgentOSSolutionModuleState refused={refused} copy={copy} />
+    if (runtime === null) return <AgentOSSolutionModuleState refused={actionRefused} copy={copy} />
     const activeVersion = activeVersionFor(runtime)
     const selectedSetup =
         runtime.setupSessions.find((item) => item.id === selectedSetupSessionId) ?? runtime.setupSession
@@ -1127,7 +1124,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
                     setupApplyPending: ownsSetupAction && setupAction?.kind === "apply",
                     setupStartPending: setupAction?.kind === "start",
                     setupPeerDisabled: (pending || setupAction !== null) && !ownsSetupAction,
-                    refused,
+                    refused: actionRefused,
                     setupSendRefused: selectedSetupFeedback?.refused === "send",
                     setupApplyRefused: selectedSetupFeedback?.refused === "apply",
                     setupStartRefused,
@@ -1179,7 +1176,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
                     chatbotRefusedCode: chatbotRefusedCode ?? (supportActionRefused ? "CHATBOT_ACTION_REFUSED" : null),
                     supportInbox,
                     pending,
-                    refused,
+                    refused: actionRefused,
                     onSelectSession: setSelectedSessionId,
                     onSelectTarget: setSelectedOperationTarget,
                     onCreateSession: () => {
@@ -1254,7 +1251,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
                     credentialStatuses: runtime.credentials,
                     activeVersion,
                     pending,
-                    refused,
+                    refused: actionRefused,
                     on: {
                         save: saveSettings,
                         setLiveEnabled,

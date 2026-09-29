@@ -7,9 +7,9 @@ import {
     useMutateFinalizeAgentosModuleAttachmentSwr,
     useMutateRemoveAgentosModuleAttachmentSwr,
     useQueryMyAgentosCustomModuleStudioSwr,
+    useQueryNoticeData,
 } from "@/hooks"
 import { nivoQueryReading } from "@/modules/query"
-import { QueryNotice } from "@/components/blocks/query/QueryNotice"
 import { AgentOSSolutionModuleAttachmentsBase } from "./component"
 
 type IndexedAttachment = {
@@ -35,8 +35,11 @@ const mediaTypeFor = (file: File): string => {
 export const AgentOSSolutionModuleAttachments = (props: AgentOSSolutionModuleAttachmentsProps) => {
     const { workspaceId, installationId, onIndexedAttachmentsChange } = props
     const t = useTranslations("console.agentos.modules.studio.attachments")
+    const noticeOf = useQueryNoticeData()
     const query = useQueryMyAgentosCustomModuleStudioSwr(workspaceId, installationId)
     const reading = nivoQueryReading(query.data)
+    /* The notice phrases its own reading so the attachments memo below never shares an object with it. */
+    const failure = nivoQueryReading(query.data)
     const studio = reading.status === "ready" ? reading.data : undefined
     const upload = useMutateAgentosModuleAttachmentUploadSwr(workspaceId, installationId)
     const finalize = useMutateFinalizeAgentosModuleAttachmentSwr(workspaceId, installationId)
@@ -99,11 +102,14 @@ export const AgentOSSolutionModuleAttachments = (props: AgentOSSolutionModuleAtt
             state="attachments"
             props={{
                 studio: studio ?? undefined,
-                status: refused ? "refused" : reading.status === "failed" ? "failed" : reading.status === "resting" ? "loading" : "ready",
-                notice:
-                    reading.status === "failed" ? (
-                        <QueryNotice props={{ failure: reading }} on={{ retry: () => void query.mutate() }} />
-                    ) : undefined,
+                status: refused
+                    ? "refused"
+                    : reading.status === "failed"
+                      ? "failed"
+                      : reading.status === "resting"
+                        ? "loading"
+                        : "ready",
+                notice: failure.status === "failed" ? noticeOf(failure) : undefined,
                 pending,
                 labels: {
                     title: t("title"),
@@ -128,6 +134,7 @@ export const AgentOSSolutionModuleAttachments = (props: AgentOSSolutionModuleAtt
                 onChoose: (file) => void choose(file),
                 onRetry: (attachmentId) => void retry(attachmentId),
                 onRemove: (attachmentId) => void removeAttachment(attachmentId),
+                onRetryNotice: () => void query.mutate(),
                 chunks: (count) => t("chunks", { count }),
             }}
         />

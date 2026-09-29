@@ -27,7 +27,7 @@ const labels: AcademyControlCenterLabels = {
 }
 const base = {
     props: { title: "Academy", siteId: "site-1", mode: "growth" as const, labels },
-    on: { selectMode: vi.fn(), openPublicSite: vi.fn() },
+    on: { selectMode: vi.fn(), openPublicSite: vi.fn(), retryNotice: vi.fn() },
 }
 
 describe("AcademyControlCenterBase", () => {
@@ -35,7 +35,11 @@ describe("AcademyControlCenterBase", () => {
         expect(renderToStaticMarkup(<AcademyControlCenterBase {...base} state="restoring" />)).toContain("Loading")
         expect(
             renderToStaticMarkup(
-                <AcademyControlCenterBase {...base} state="failed" props={{ ...base.props, notice: <div>Refused</div> }} />,
+                <AcademyControlCenterBase
+                    {...base}
+                    state="failed"
+                    props={{ ...base.props, notice: { message: "Refused" } }}
+                />,
             ),
         ).toContain("Refused")
     })

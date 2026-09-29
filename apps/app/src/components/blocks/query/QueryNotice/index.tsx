@@ -1,21 +1,13 @@
 "use client"
 
-import { useTranslations } from "next-intl"
-import { Button, EmptyNotice } from "@starci/grammar/common"
+import { useQueryNoticeData } from "@/hooks"
 import type { NivoQueryFailure } from "@/modules/query"
-
-/** The sign-in route a refused read sends its reader through. */
-const SIGN_IN_HREF = "/authentication"
+import { QueryNoticeBase, type QueryNoticeActions } from "./component"
 
 /** The settled failure one query surface draws, and whether its retry is already running. */
 export type QueryNoticeData = {
     readonly failure: NivoQueryFailure
     readonly retryPending?: boolean
-}
-
-/** The re-read a retryable failure may take. Absent - or unasked by the answer - no retry is offered. */
-export type QueryNoticeActions = {
-    readonly retry?: () => void
 }
 
 /** Props for {@link QueryNotice}. */
@@ -31,37 +23,13 @@ export type QueryNoticeProps = {
  * redirect are what walks the reader through it.
  */
 export const QueryNotice = (props: QueryNoticeProps) => {
-    const { failure, retryPending } = props.props
-    const t = useTranslations("console.query")
-    const message =
-        failure.kind === "refused"
-            ? t("signInRequired")
-            : failure.kind === "forbidden"
-              ? t("forbidden")
-              : failure.kind === "not-found"
-                ? t("notFound")
-                : failure.kind === "invalid"
-                  ? t("invalid")
-                  : t("unavailable")
-    /* A machine word is a code, not a sentence; only a phrased reason is worth drawing. */
-    const description = failure.reason.includes(" ") ? failure.reason : undefined
-    if (failure.kind === "refused")
-        return (
-            <>
-                <EmptyNotice message={message} description={description} />
-                <Button href={SIGN_IN_HREF} variant="secondary">
-                    {t("signIn")}
-                </Button>
-            </>
-        )
+    const noticeOf = useQueryNoticeData()
+    const atoms = noticeOf(props.props.failure, props.props.retryPending)
+    /* No re-read to offer means no retry to draw, whatever the answer allows. */
     return (
-        <EmptyNotice
-            message={message}
-            description={description}
-            actionLabel={failure.retryable && props.on?.retry !== undefined ? t("retry") : undefined}
-            actionVariant="secondary"
-            isActionPending={retryPending}
-            onAction={props.on?.retry}
+        <QueryNoticeBase
+            props={props.on?.retry === undefined ? { ...atoms, retryLabel: undefined } : atoms}
+            on={props.on}
         />
     )
 }

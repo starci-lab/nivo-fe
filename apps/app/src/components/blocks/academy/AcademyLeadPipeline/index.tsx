@@ -2,10 +2,14 @@
 
 import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { useMutateDraftLeadReplySwr, useMutateUpdateExpertSiteLeadSwr, useQueryMyExpertSiteLeadsSwr } from "@/hooks"
+import {
+    useMutateDraftLeadReplySwr,
+    useMutateUpdateExpertSiteLeadSwr,
+    useQueryMyExpertSiteLeadsSwr,
+    useQueryNoticeData,
+} from "@/hooks"
 import type { ExpertSiteLead } from "@/modules/api/academy"
 import { nivoQueryReading, type NivoQueryReading } from "@/modules/query"
-import { QueryNotice } from "@/components/blocks/query/QueryNotice"
 import { AcademyLeadPipelineBase } from "./component"
 
 /** Owner-scoped identity consumed by the lead pipeline. */
@@ -36,6 +40,7 @@ const pipelineState = (reading: NivoQueryReading<ReadonlyArray<ExpertSiteLead>>)
 export const AcademyLeadPipeline = (props: AcademyLeadPipelineProps) => {
     const { siteId }: AcademyLeadPipelineProps = props
     const t = useTranslations("console.academyControlCenter.leads")
+    const noticeOf = useQueryNoticeData()
     const locale = useLocale()
     const query = useQueryMyExpertSiteLeadsSwr(siteId)
     const draftMutation = useMutateDraftLeadReplySwr(siteId)
@@ -83,10 +88,7 @@ export const AcademyLeadPipeline = (props: AcademyLeadPipelineProps) => {
                 draft,
                 pendingAction,
                 message,
-                notice:
-                    reading.status === "failed" ? (
-                        <QueryNotice props={{ failure: reading }} on={{ retry: () => void query.mutate() }} />
-                    ) : undefined,
+                notice: reading.status === "failed" ? noticeOf(reading) : undefined,
                 labels: {
                     section: t("section"),
                     empty: t("empty"),
@@ -106,6 +108,7 @@ export const AcademyLeadPipeline = (props: AcademyLeadPipelineProps) => {
                 },
                 advance: () => void advance(),
                 draftReply: () => void draftReply(),
+                retryNotice: () => void query.mutate(),
             }}
         />
     )

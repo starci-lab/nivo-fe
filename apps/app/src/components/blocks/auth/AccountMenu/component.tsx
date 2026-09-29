@@ -1,5 +1,5 @@
 import { DropdownBranch, IconSource, type DropdownBranchItemData } from "@nivo/ui"
-import { Icon, Skeleton } from "@starci/grammar/common"
+import { Icon } from "@starci/grammar/common"
 import { Suspense, type ComponentType } from "react"
 import type { AdministratorRevocationDialogProps } from "@/components/blocks/auth/AdministratorRevocationDialog"
 import type { ReturnNoticeProps } from "@/components/blocks/auth/ReturnNotice"
@@ -129,9 +129,10 @@ export const AccountMenuBase = (props: AccountMenuProps) => {
       account control is the only Login-owned mount point the landing has - the chrome around it
       belongs to the shell. The boundary is drawn here, in the pure half, because it must be an
       ancestor of the read rather than a child of it; it draws nothing of its own, and the notice is
-      the only thing inside it.
+      the only thing inside it. It rests as nothing: the notice is usually absent, so a placeholder
+      shape would flash a description of something that is not there.
     */}
-            <Suspense fallback={<Skeleton shape="text" />}>
+            <Suspense>
                 <ReturnNoticeControl {...returnNoticeControlProps} />
             </Suspense>
         </>

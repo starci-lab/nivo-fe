@@ -39,6 +39,7 @@ vi.mock("@/components/blocks/operations/HelmStackSnapshot", () => ({
 import {
     AgentOSWorkspaceControlCenterBase as AgentOSWorkspaceControlCenterBaseView,
     projectAgentOSShellView,
+    type AgentOSShellConfigurationDigests,
     type AgentOSShellReading,
     type AgentOSWorkspaceControlCenterShellLabels,
     type AgentOSWorkspaceControlCenterViewProps,
@@ -53,13 +54,22 @@ const AgentOSWorkspaceControlCenterBase = (view: AgentOSWorkspaceControlCenterVi
         onRetryShell,
         onRetryOperation,
         formatDate,
+        formatConfiguration,
         ...data
     } = view
     return (
         <AgentOSWorkspaceControlCenterBaseView
             state={pageState}
             props={data}
-            on={{ onSelectPageState, onOpenAgentConsole, onRetry, onRetryShell, onRetryOperation, formatDate }}
+            on={{
+                onSelectPageState,
+                onOpenAgentConsole,
+                onRetry,
+                onRetryShell,
+                onRetryOperation,
+                formatDate,
+                formatConfiguration,
+            }}
         />
     )
 }
@@ -93,8 +103,6 @@ const labels: AgentOSWorkspaceControlCenterShellLabels = {
     runtimeUnavailable: "Runtime is currently unavailable.",
     runtimeUnknown: "The runtime standing could not be established.",
     configurationSection: "Configuration",
-    configurationCurrent: ({ desired, tested, applied }) =>
-        `desired ${desired} · tested ${tested} · applied ${applied}`,
     configurationAbsent: "No configuration observation exists.",
     configurationUnsupported: "This source does not support configuration.",
     attentionSection: "Needs attention",
@@ -477,6 +485,8 @@ const baseProps = {
     openClawLaunchHref: "/en/launch",
     launchState: "idle" as const,
     formatDate: (value: string) => value,
+    formatConfiguration: ({ desired, tested, applied }: AgentOSShellConfigurationDigests) =>
+        `desired ${desired} · tested ${tested} · applied ${applied}`,
 }
 
 describe("AgentOSWorkspaceControlCenterBase", () => {

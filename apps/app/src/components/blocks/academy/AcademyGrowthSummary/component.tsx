@@ -1,5 +1,4 @@
-import type { ReactNode } from "react"
-import { LabelledProgressRow } from "@nivo/ui"
+import { LabelledProgressRow, QueryNoticeView, type QueryNoticeViewData } from "@nivo/ui"
 import { SurfaceCard, Text } from "@starci/grammar/common"
 import type { AcademyGrowthSnapshot } from "@/modules/api/academy"
 
@@ -21,21 +20,29 @@ export type AcademyGrowthSummaryLabels = {
 export type AcademyGrowthSummaryData = {
     readonly data?: AcademyGrowthSnapshot
     /** The failure the connected half composed for a settled failed read. */
-    readonly notice?: ReactNode
+    readonly notice?: QueryNoticeViewData
     readonly labels: AcademyGrowthSummaryLabels
     readonly revenue: string
+}
+
+/** Actions the pure growth block emits. */
+export type AcademyGrowthSummaryActions = {
+    /** Re-read the snapshot after a failed answer. */
+    readonly retryNotice?: () => void
 }
 
 /** Pure growth block state. */
 export type AcademyGrowthSummaryViewProps = {
     readonly state: "resting" | "failed" | "answered"
     readonly props: AcademyGrowthSummaryData
+    readonly on?: AcademyGrowthSummaryActions
 }
 
 /** Render aggregate facts without fetching or formatting. */
 const AcademyGrowthSummaryContent = (input: AcademyGrowthSummaryViewProps) => {
     const { state } = input
     const { data, notice, labels, revenue } = input.props
+    const retryNotice = input.on?.retryNotice
     const facts = [
         {
             id: "revenue",
@@ -63,7 +70,9 @@ const AcademyGrowthSummaryContent = (input: AcademyGrowthSummaryViewProps) => {
     if (state === "failed")
         return (
             <SurfaceCard label={labels.section}>
-                <div>{notice}</div>
+                <div>
+                    {notice === undefined ? null : <QueryNoticeView props={notice} on={{ retry: retryNotice }} />}
+                </div>
             </SurfaceCard>
         )
     return (

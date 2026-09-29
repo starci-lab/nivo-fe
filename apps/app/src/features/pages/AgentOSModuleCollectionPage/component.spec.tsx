@@ -12,11 +12,8 @@ const labels = {
     path: "Breadcrumb",
     workspace: "Acme workspace",
     title: "Modules",
-    checkedAt: (time: string) => `List checked at ${time}`,
-    installedIn: (name: string) => `Installed in ${name}`,
     browseCatalog: "View available modules",
     installFlow: "Go to the dedicated install flow",
-    runtimeLine: (value: string) => `Runtime: ${value}`,
     runtimeProvisioned: "Provisioned",
     runtimeNotProvisioned: "Not provisioned",
     runtimeUnavailable: "Unavailable",
@@ -52,8 +49,6 @@ const shellLabels: ShellLabels = {
     runtimeUnavailable: "Runtime is currently unavailable.",
     runtimeUnknown: "The runtime standing could not be established.",
     configurationSection: "Configuration",
-    configurationCurrent: ({ desired, tested, applied }) =>
-        `desired ${desired} · tested ${tested} · applied ${applied}`,
     configurationAbsent: "No configuration observation exists.",
     configurationUnsupported: "This source does not support configuration.",
     attentionSection: "Needs attention",
@@ -109,7 +104,16 @@ const renderPage = (shell: ShellView, onRetryShell = vi.fn()) => {
                 labels,
                 createHref: "/en/agentos/workspaces/workspace-1/modules/create",
             }}
-            on={{ onBack: back, onRetryShell, formatDate: (value) => value }}
+            on={{
+                onBack: back,
+                onRetryShell,
+                formatDate: (value) => value,
+                checkedAt: (time) => `List checked at ${time}`,
+                installedIn: (name) => `Installed in ${name}`,
+                runtimeLine: (value) => `Runtime: ${value}`,
+                formatConfiguration: ({ desired, tested, applied }) =>
+                    `desired ${desired} · tested ${tested} · applied ${applied}`,
+            }}
         />,
     )
     return { back, view, onRetryShell }

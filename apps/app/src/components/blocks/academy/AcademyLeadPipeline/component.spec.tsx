@@ -29,7 +29,7 @@ describe("AcademyLeadPipelineBase", () => {
                 <AcademyLeadPipelineBase
                     state="empty"
                     props={{ leads: [], labels }}
-                    on={{ openLead: vi.fn(), advance: vi.fn(), draftReply: vi.fn() }}
+                    on={{ openLead: vi.fn(), advance: vi.fn(), draftReply: vi.fn(), retryNotice: vi.fn() }}
                 />,
             ),
         ).toContain("No leads")
@@ -37,8 +37,8 @@ describe("AcademyLeadPipelineBase", () => {
             renderToStaticMarkup(
                 <AcademyLeadPipelineBase
                     state="failed"
-                    props={{ leads: [], notice: <div>Unavailable</div>, labels }}
-                    on={{ openLead: vi.fn(), advance: vi.fn(), draftReply: vi.fn() }}
+                    props={{ leads: [], notice: { message: "Unavailable" }, labels }}
+                    on={{ openLead: vi.fn(), advance: vi.fn(), draftReply: vi.fn(), retryNotice: vi.fn() }}
                 />,
             ),
         ).toContain("Unavailable")
@@ -48,7 +48,7 @@ describe("AcademyLeadPipelineBase", () => {
         const base = {
             state: "answered" as const,
             props: { leads: [lead], selected: lead, labels },
-            on: { openLead: vi.fn(), advance: vi.fn(), draftReply: vi.fn() },
+            on: { openLead: vi.fn(), advance: vi.fn(), draftReply: vi.fn(), retryNotice: vi.fn() },
         }
         expect(renderToStaticMarkup(<AcademyLeadPipelineBase {...base} />)).toContain("Interested")
         expect(
@@ -72,7 +72,7 @@ describe("AcademyLeadPipelineBase", () => {
             status: "new",
             note: null,
         }
-        const on = { openLead, advance, draftReply }
+        const on = { openLead, advance, draftReply, retryNotice: vi.fn() }
         render(<AcademyLeadPipelineBase state="answered" props={{ leads: [lead], selected: lead, labels }} on={on} />)
         fireEvent.click(screen.getAllByRole("button", { name: "Open" }).at(-1)!)
         fireEvent.click(screen.getByRole("button", { name: "Draft" }))

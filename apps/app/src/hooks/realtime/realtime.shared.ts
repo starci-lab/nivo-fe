@@ -101,6 +101,9 @@ export interface ProvisioningSink {
     readonly disconnected: (reason: string | null) => void
 }
 
+/** The exact kind and id a socket subscription attaches to. */
+export type ProvisioningSocketTarget = { readonly kind: ProvisioningTarget["kind"]; readonly id: string }
+
 /**
  * Attach every provisioning message handler of one target to one socket.
  *
@@ -110,7 +113,7 @@ export interface ProvisioningSink {
  */
 export const bindProvisioningSocket = (
     socket: Socket,
-    target: { readonly kind: ProvisioningTarget["kind"]; readonly id: string },
+    target: ProvisioningSocketTarget,
     sink: ProvisioningSink,
 ): void => {
     const { kind: targetKind, id: targetId } = target

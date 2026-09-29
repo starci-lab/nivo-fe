@@ -13,7 +13,7 @@ import {
     type BlockStructure,
     type ProductPageId,
     type SectionStructure,
-} from "./structure"
+} from "@/modules/landing/product-structure"
 
 type Translate = ReturnType<typeof useTranslations>
 type Href = (href: string) => string

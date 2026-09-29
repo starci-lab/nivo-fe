@@ -34,7 +34,7 @@ describe("AcademyGrowthSummaryBase", () => {
         const failed = renderToStaticMarkup(
             <AcademyGrowthSummaryBase
                 state="failed"
-                props={{ revenue: "₫1,000", notice: <div>Unavailable</div>, labels }}
+                props={{ revenue: "₫1,000", notice: { message: "Unavailable" }, labels }}
             />,
         )
         expect(failed).toContain("Unavailable")

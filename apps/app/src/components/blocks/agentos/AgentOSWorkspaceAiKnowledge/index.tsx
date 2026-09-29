@@ -3,10 +3,10 @@ import {
     useMutateReindexAgentWorkspaceKnowledgeSwr,
     useMutateRunAgentosAiReadinessTestSwr,
     useQueryMyAgentosAiKnowledgeReadinessSwr,
+    useQueryNoticeData,
 } from "@/hooks"
 import { type AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge"
 import { nivoQueryReading } from "@/modules/query"
-import { QueryNotice } from "@/components/blocks/query/QueryNotice"
 import { useLocale, useTranslations } from "next-intl"
 import { useState } from "react"
 import { AgentOSWorkspaceAiKnowledgeBase, type AgentOSWorkspaceAiKnowledgeViewProps } from "./component"
@@ -71,6 +71,7 @@ export const AgentOSWorkspaceAiKnowledge = (props: AgentOSWorkspaceAiKnowledgePr
     const { workspaceId }: AgentOSWorkspaceAiKnowledgeProps = props
     const t = useTranslations("console.agentos.workspace.aiKnowledge")
     const locale = useLocale()
+    const noticeOf = useQueryNoticeData()
     const [action, setAction] = useState<AgentOSWorkspaceAiKnowledgeAction>(null)
     const [actionRefused, setActionRefused] = useState(false)
     const [recoveryFromRefused, setRecoveryFromRefused] = useState(false)
@@ -122,10 +123,10 @@ export const AgentOSWorkspaceAiKnowledge = (props: AgentOSWorkspaceAiKnowledgePr
             operationId: result.data.operationId,
         })
     }
-    if (reading.status === "failed") {
-        return <QueryNotice props={{ failure: reading }} on={{ retry: () => void query.mutate() }} />
-    }
-    const state = resolveAgentOSWorkspaceAiKnowledgeState(readiness, visibleAction, actionRefused)
+    const state =
+        reading.status === "failed"
+            ? "failed"
+            : resolveAgentOSWorkspaceAiKnowledgeState(readiness, visibleAction, actionRefused)
     const labels = {
         sectionHeading: t("sectionHeading"),
         title: t("title"),
@@ -171,6 +172,7 @@ export const AgentOSWorkspaceAiKnowledge = (props: AgentOSWorkspaceAiKnowledgePr
             state={state}
             props={{
                 readiness: readiness ?? undefined,
+                notice: reading.status === "failed" ? noticeOf(reading) : undefined,
                 labels,
                 pendingAction:
                     visibleAction?.kind === "testing" || visibleAction?.kind === "recovering"
@@ -181,6 +183,7 @@ export const AgentOSWorkspaceAiKnowledge = (props: AgentOSWorkspaceAiKnowledgePr
             on={{
                 onTest: () => void run(),
                 onRecover: () => void recover(),
+                onRetryNotice: () => void query.mutate(),
                 documents: labels.documents,
                 formatTestedAt: labels.formatTestedAt,
             }}

@@ -1,6 +1,6 @@
-import { useRef, type ReactNode } from "react"
+import { useRef } from "react"
 import { SurfaceCard, Button, Button as CoreButton, Text } from "@starci/grammar/common"
-import { LifecycleStep, type LifecycleStepData } from "@nivo/ui"
+import { LifecycleStep, type LifecycleStepData, QueryNoticeView, type QueryNoticeViewData } from "@nivo/ui"
 import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
 
 /** Copy and settled evidence owned by the connected installation attachment surface. */
@@ -30,7 +30,7 @@ export type AgentOSSolutionModuleAttachmentsProps = {
         readonly studio?: Pick<AgentosModuleStudio, "attachments">
         readonly status: "loading" | "refused" | "failed" | "ready"
         /** The failure the connected half composed for a settled failed read. */
-        readonly notice?: ReactNode
+        readonly notice?: QueryNoticeViewData
         readonly pending: boolean
         readonly labels: AgentOSSolutionModuleAttachmentsLabels
     }
@@ -38,6 +38,8 @@ export type AgentOSSolutionModuleAttachmentsProps = {
         readonly onChoose: (file: File) => void
         readonly onRetry?: (id: string) => void
         readonly onRemove: (id: string) => void
+        /** Re-read the attachments after a failed answer. */
+        readonly onRetryNotice: () => void
         readonly chunks: (count: number) => string
     }
 }
@@ -53,12 +55,14 @@ const lifecycleStateLabel = (index: number, active: number, labels: AgentOSSolut
 /** Draw quarantined file evidence with explicit scan outcomes. */
 export const AgentOSSolutionModuleAttachmentsBase = (props: AgentOSSolutionModuleAttachmentsProps) => {
     const { studio, status, notice, pending, labels } = props.props
-    const { onChoose, onRetry, onRemove, chunks } = props.on
+    const { onChoose, onRetry, onRemove, onRetryNotice, chunks } = props.on
     const fileInput = useRef<HTMLInputElement>(null)
     if (status === "failed")
         return (
             <SurfaceCard label={labels.title}>
-                <div>{notice}</div>
+                <div>
+                    {notice === undefined ? null : <QueryNoticeView props={notice} on={{ retry: onRetryNotice }} />}
+                </div>
             </SurfaceCard>
         )
     if (status === "refused")

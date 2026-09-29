@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation"
 import { usePathname, useRouter } from "@/hooks"
-import { isAgentOSWorkspacePageState } from "./agent-os-workspace-page.guards"
+import { isAgentOSWorkspacePageState } from "@/modules/agentos/workspace-page-state"
 import { AgentOSWorkspacePageBase, type AgentOSWorkspacePageState } from "./component"
 
 /** Exact workspace route identity connected by the page. */

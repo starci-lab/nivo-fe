@@ -1,5 +1,4 @@
-import type { ReactNode } from "react"
-import { Avatar, type AvatarData } from "@nivo/ui"
+import { Avatar, type AvatarData, QueryNoticeView, type QueryNoticeViewData } from "@nivo/ui"
 import { SurfaceCard, Button, Button as CoreButton, Heading, Text, TextAction, Badge } from "@starci/grammar/common"
 import type { ExpertSiteLead } from "@/modules/api/academy"
 
@@ -25,7 +24,7 @@ export type AcademyLeadPipelineData = {
     readonly pendingAction?: "advance" | "draft"
     readonly message?: string
     /** The failure the connected half composed for a settled failed read. */
-    readonly notice?: ReactNode
+    readonly notice?: QueryNoticeViewData
     readonly labels: AcademyLeadPipelineLabels
 }
 
@@ -34,6 +33,8 @@ export type AcademyLeadPipelineActions = {
     readonly openLead: (leadId: string) => void
     readonly advance: () => void
     readonly draftReply: () => void
+    /** Re-read the leads after a failed answer. */
+    readonly retryNotice: () => void
 }
 
 /** Pure lead pipeline state. */
@@ -50,7 +51,7 @@ const RESTING_AVATAR_PROPS: AvatarData = { size: "md" }
 const AcademyLeadPipelineContent = (input: AcademyLeadPipelineViewProps) => {
     const { state } = input
     const { leads, selected, draft, pendingAction, message, notice, labels } = input.props
-    const { openLead, advance, draftReply } = input.on
+    const { openLead, advance, draftReply, retryNotice } = input.on
     const leadRows: ReadonlyArray<{ lead: ExpertSiteLead; avatar: AvatarData }> = leads.map((lead) => ({
         lead,
         avatar: { name: lead.name, size: "md" },
@@ -93,7 +94,9 @@ const AcademyLeadPipelineContent = (input: AcademyLeadPipelineViewProps) => {
         <>
             {state === "failed" ? (
                 <SurfaceCard label={labels.section}>
-                    <div>{notice}</div>
+                    <div>
+                        {notice === undefined ? null : <QueryNoticeView props={notice} on={{ retry: retryNotice }} />}
+                    </div>
                 </SurfaceCard>
             ) : note === undefined ? (
                 <SurfaceCard

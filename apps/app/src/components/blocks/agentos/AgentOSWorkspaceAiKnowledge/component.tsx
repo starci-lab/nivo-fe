@@ -14,12 +14,15 @@ import {
 import { AgentOSKnowledgeOriginList } from "@/components/blocks/agentos/AgentOSKnowledgeOriginList"
 import { AgentOSReadinessComponentList } from "@/components/blocks/agentos/AgentOSReadinessComponentList"
 import type { AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge"
-import { LifecycleStep, type LifecycleStepData } from "@nivo/ui"
+import { LifecycleStep, type LifecycleStepData, QueryNoticeView, type QueryNoticeViewData } from "@nivo/ui"
 /** Resolved bilingual copy for the workspace AI and knowledge operating surface. */
 export type AgentOSWorkspaceAiKnowledgeProps = {
-    readonly state: "loading" | "key-configuring" | "ready" | "refused" | "testing" | "recovering" | "success"
+    readonly state:
+        "loading" | "key-configuring" | "ready" | "refused" | "testing" | "recovering" | "success" | "failed"
     readonly props: {
         readonly readiness?: AgentosAiKnowledgeReadiness
+        /** The failure the connected half composed for a settled failed readiness read. */
+        readonly notice?: QueryNoticeViewData
         readonly labels: AgentOSWorkspaceAiKnowledgeCopy
         readonly pendingAction?: "testing" | "recovering"
         readonly recoveryFromRefused?: boolean
@@ -27,6 +30,8 @@ export type AgentOSWorkspaceAiKnowledgeProps = {
     readonly on: {
         readonly onTest: () => void
         readonly onRecover: () => void
+        /** Re-read the readiness after a failed answer. */
+        readonly onRetryNotice: () => void
         readonly documents: (count: number) => string
         readonly formatTestedAt: (value: string) => string
     }
@@ -87,7 +92,8 @@ export type AgentOSWorkspaceAiKnowledgeCopy = {
 }
 /** Closed readiness and action conditions consumed by the pure workspace renderer. */
 export type AgentOSWorkspaceAiKnowledgeViewProps = {
-    readonly state: "loading" | "key-configuring" | "ready" | "refused" | "testing" | "recovering" | "success"
+    readonly state:
+        "loading" | "key-configuring" | "ready" | "refused" | "testing" | "recovering" | "success" | "failed"
     readonly readiness?: AgentosAiKnowledgeReadiness
     readonly labels: AgentOSWorkspaceAiKnowledgeLabels
     readonly onTest: () => void
@@ -149,8 +155,10 @@ const readinessSteps = (
 /** Compose the complete workspace AI verdict, source provenance and bounded recovery controls. */
 export const AgentOSWorkspaceAiKnowledgeBase = (props: AgentOSWorkspaceAiKnowledgeProps) => {
     const { state } = props
-    const { readiness, labels, pendingAction, recoveryFromRefused } = props.props
-    const { onTest, onRecover } = props.on
+    const { readiness, notice, labels, pendingAction, recoveryFromRefused } = props.props
+    const { onTest, onRecover, onRetryNotice } = props.on
+    if (state === "failed")
+        return notice === undefined ? null : <QueryNoticeView props={notice} on={{ retry: onRetryNotice }} />
     const loading = state === "loading"
     const recoveryPrimary = state === "refused" || recoveryFromRefused === true
     const status =

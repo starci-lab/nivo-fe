@@ -15,7 +15,7 @@ export type SiteFooterGroup = {
 }
 
 /** What the footer draws, resolved by the connected half. */
-export type SiteFooterBaseProps = {
+export type SiteFooterBaseData = {
     readonly homeHref: string
     readonly contactHref: string
     readonly groups: ReadonlyArray<SiteFooterGroup>
@@ -28,8 +28,14 @@ export type SiteFooterBaseProps = {
     }
 }
 
+/** Props for {@link SiteFooterBase}: the resolved footer under `props`. */
+export type SiteFooterBaseProps = {
+    readonly props: SiteFooterBaseData
+}
+
 /** The compact footer shared by every canonical public route. */
-export const SiteFooterBase = ({ homeHref, contactHref, groups, copy }: SiteFooterBaseProps) => {
+export const SiteFooterBase = (props: SiteFooterBaseProps) => {
+    const { homeHref, contactHref, groups, copy }: SiteFooterBaseData = props.props
     return (
         <footer className={SITE_CLASS_NAMES.footer}>
             <PageContainer className={SITE_CLASS_NAMES.footerInner}>

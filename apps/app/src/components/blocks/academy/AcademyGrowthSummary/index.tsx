@@ -1,9 +1,8 @@
 "use client"
 
 import { useFormatter, useTranslations } from "next-intl"
-import { useQueryMyAcademyGrowthSnapshotSwr } from "@/hooks"
+import { useQueryMyAcademyGrowthSnapshotSwr, useQueryNoticeData } from "@/hooks"
 import { nivoQueryReading } from "@/modules/query"
-import { QueryNotice } from "@/components/blocks/query/QueryNotice"
 import { BILLING_CURRENCY } from "@/modules/config"
 import { AcademyGrowthSummaryBase } from "./component"
 
@@ -17,6 +16,7 @@ export const AcademyGrowthSummary = (props: AcademyGrowthSummaryProps) => {
     const { siteId }: AcademyGrowthSummaryProps = props
     const t = useTranslations("console.academyControlCenter.growth")
     const format = useFormatter()
+    const noticeOf = useQueryNoticeData()
     const query = useQueryMyAcademyGrowthSnapshotSwr(siteId)
     const reading = nivoQueryReading(query.data)
     const data = reading.status === "ready" ? reading.data : undefined
@@ -25,10 +25,7 @@ export const AcademyGrowthSummary = (props: AcademyGrowthSummaryProps) => {
             state={reading.status === "resting" ? "resting" : reading.status === "failed" ? "failed" : "answered"}
             props={{
                 data,
-                notice:
-                    reading.status === "failed" ? (
-                        <QueryNotice props={{ failure: reading }} on={{ retry: () => void query.mutate() }} />
-                    ) : undefined,
+                notice: reading.status === "failed" ? noticeOf(reading) : undefined,
                 revenue: format.number(data?.revenueVnd ?? 0, {
                     style: "currency",
                     currency: BILLING_CURRENCY,
@@ -45,6 +42,7 @@ export const AcademyGrowthSummary = (props: AcademyGrowthSummaryProps) => {
                     activeRate: t("activeRate"),
                 },
             }}
+            on={{ retryNotice: () => void query.mutate() }}
         />
     )
 }

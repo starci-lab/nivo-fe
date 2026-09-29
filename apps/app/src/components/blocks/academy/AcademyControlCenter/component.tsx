@@ -1,5 +1,4 @@
-import type { ReactNode } from "react"
-import { ChoiceTabs } from "@nivo/ui"
+import { ChoiceTabs, QueryNoticeView, type QueryNoticeViewData } from "@nivo/ui"
 import { Button, EmptyNotice, Heading } from "@starci/grammar/common"
 import { AcademyGrowthSummary } from "@/components/blocks/academy/AcademyGrowthSummary"
 import { AcademyStudentCrm } from "@/components/blocks/academy/AcademyStudentCrm"
@@ -29,7 +28,7 @@ export type AcademyControlCenterData = {
     readonly publicHost?: string
     readonly mode: AcademyControlCenterMode
     /** The failure the connected half composed for a settled failed read; drawn in place of the sections. */
-    readonly notice?: ReactNode
+    readonly notice?: QueryNoticeViewData
     readonly labels: AcademyControlCenterLabels
 }
 
@@ -37,6 +36,8 @@ export type AcademyControlCenterData = {
 export type AcademyControlCenterActions = {
     readonly selectMode: (mode: AcademyControlCenterMode) => void
     readonly openPublicSite: () => void
+    /** Re-read the site list after a failed answer. */
+    readonly retryNotice: () => void
 }
 
 /** Pure page state; domain blocks own their own requests and failures. */
@@ -50,6 +51,7 @@ export type AcademyControlCenterViewProps = {
 export const AcademyControlCenterBase = (props: AcademyControlCenterProps) => {
     const { state } = props
     const { title, siteId, publicHost, mode, notice, labels } = props.props
+    const { retryNotice } = props.on
     const { selectMode, openPublicSite } = props.on
     const settledSections =
         mode === "growth"
@@ -61,7 +63,11 @@ export const AcademyControlCenterBase = (props: AcademyControlCenterProps) => {
             : [<AcademyIntegrationCenter key="item-0" siteId={siteId} />]
     const sections =
         state === "failed"
-            ? [<div key="item-0">{notice}</div>]
+            ? [
+                  <div key="item-0">
+                      {notice === undefined ? null : <QueryNoticeView props={notice} on={{ retry: retryNotice }} />}
+                  </div>,
+              ]
             : state === "restoring"
               ? [<EmptyNotice key="item-0" message={labels.loading} />]
               : settledSections

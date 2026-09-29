@@ -3,13 +3,16 @@
 import { renderHook, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-type SessionState =
-    | { readonly status: "anonymous" }
-    | { readonly status: "signed-in"; readonly accessToken: string }
+type SessionState = { readonly status: "anonymous" } | { readonly status: "signed-in"; readonly accessToken: string }
 
 const mocks = vi.hoisted(() => ({
     useSWR: vi.fn(),
-    response: { value: { data: undefined as unknown, error: undefined as Error | undefined } },
+    response: {
+        value: { data: undefined as unknown, error: undefined as Error | undefined } as {
+            data: unknown
+            error?: Error | undefined
+        },
+    },
     session: {
         state: { status: "signed-in", accessToken: "token-1" } as SessionState,
         discard: vi.fn(),

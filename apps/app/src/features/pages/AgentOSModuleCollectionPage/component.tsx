@@ -14,6 +14,7 @@ import {
 import {
     AGENT_OS_SIGN_IN_HREF,
     AgentOSShellOperationRegion,
+    type AgentOSShellConfigurationDigests,
     type AgentOSShellView,
     type AgentOSWorkspaceControlCenterShellLabels,
 } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter"
@@ -41,11 +42,8 @@ type AgentOSModuleCollectionPageViewProps = {
         readonly path: string
         readonly workspace: string
         readonly title: string
-        readonly checkedAt: (time: string) => string
-        readonly installedIn: (name: string) => string
         readonly browseCatalog: string
         readonly installFlow: string
-        readonly runtimeLine: (value: string) => string
         readonly runtimeProvisioned: string
         readonly runtimeNotProvisioned: string
         readonly runtimeUnavailable: string
@@ -59,6 +57,14 @@ type AgentOSModuleCollectionPageViewActions = {
     readonly onRetryShell?: () => void
     readonly onRetryOperation?: (installationId: string, intentId: string) => void
     readonly formatDate: (value: string) => string
+    /** The sentence naming when the inventory read was checked. */
+    readonly checkedAt: (time: string) => string
+    /** The heading naming the workspace the installations live in. */
+    readonly installedIn: (name: string) => string
+    /** The compact runtime line of the ledger heading. */
+    readonly runtimeLine: (value: string) => string
+    /** The sentence phrasing a current configuration observation's three digests. */
+    readonly formatConfiguration: (digests: AgentOSShellConfigurationDigests) => string
 }
 
 /** The one sentence a limited facet owes its reader, chosen by that source's own standing. */
@@ -88,6 +94,7 @@ const ledgerRuntimeValueOf = (shell: AgentOSShellView, labels: AgentOSWorkspaceC
 const ledgerRuntimeLineOf = (
     shell: AgentOSShellView,
     labels: AgentOSModuleCollectionPageViewProps["labels"],
+    runtimeLine: (value: string) => string,
 ): string => {
     const value =
         shell.runtimeStanding === "current" || shell.runtimeStanding === "partial" || shell.runtimeStanding === "stale"
@@ -99,7 +106,7 @@ const ledgerRuntimeLineOf = (
                     ? labels.runtimeUnavailable
                     : labels.runtimeUnknown
             : labels.runtimeUnknown
-    return labels.runtimeLine(value)
+    return runtimeLine(value)
 }
 
 /** One source-qualified fact of the ledger: the label names its source, the value is its answer. */
@@ -125,21 +132,32 @@ type ModuleLedgerEmptyProps = {
     readonly labels: AgentOSModuleCollectionPageViewProps["labels"]
     readonly createHref: string
     readonly formatDate: (value: string) => string
+    readonly installedIn: (name: string) => string
+    readonly runtimeLine: (value: string) => string
     readonly onRetryOperation?: (installationId: string, intentId: string) => void
     readonly isRetrying?: boolean
 }
 const ModuleLedgerEmpty = (props: ModuleLedgerEmptyProps) => {
-    const { shell, shellLabels, labels, createHref, formatDate, onRetryOperation, isRetrying }: ModuleLedgerEmptyProps =
-        props
+    const {
+        shell,
+        shellLabels,
+        labels,
+        createHref,
+        formatDate,
+        installedIn,
+        runtimeLine,
+        onRetryOperation,
+        isRetrying,
+    }: ModuleLedgerEmptyProps = props
     return (
         <>
             <div className={MODULE_COLLECTION_SOURCE_TIME_CLASS_NAME} data-region="runtime">
                 <Text size="sm" tone="muted">
-                    {ledgerRuntimeLineOf(shell, labels)}
+                    {ledgerRuntimeLineOf(shell, labels, runtimeLine)}
                 </Text>
             </div>
             <div data-region="module-inventory">
-                <SurfaceCard label={labels.installedIn(shell.name ?? shell.workspaceId ?? "")} composition="joined">
+                <SurfaceCard label={installedIn(shell.name ?? shell.workspaceId ?? "")} composition="joined">
                     <div className={MODULE_LEDGER_BAND_CLASS_NAME}>
                         <EmptyNotice
                             message={shellLabels.inventoryEmpty}
@@ -179,12 +197,21 @@ type ModuleLedgerRegionsProps = {
     readonly shell: AgentOSShellView
     readonly labels: AgentOSWorkspaceControlCenterShellLabels
     readonly formatDate: (value: string) => string
+    readonly formatConfiguration: (digests: AgentOSShellConfigurationDigests) => string
     readonly onRetry?: () => void
     readonly onRetryOperation?: (installationId: string, intentId: string) => void
     readonly isRetrying?: boolean
 }
 const ModuleLedgerRegions = (props: ModuleLedgerRegionsProps) => {
-    const { shell, labels, formatDate, onRetry, onRetryOperation, isRetrying }: ModuleLedgerRegionsProps = props
+    const {
+        shell,
+        labels,
+        formatDate,
+        formatConfiguration,
+        onRetry,
+        onRetryOperation,
+        isRetrying,
+    }: ModuleLedgerRegionsProps = props
     const inventoryFact =
         shell.inventoryStanding === "current" && shell.inventoryObservedAt !== null
             ? formatDate(shell.inventoryObservedAt)
@@ -253,7 +280,7 @@ const ModuleLedgerRegions = (props: ModuleLedgerRegionsProps) => {
                             installation.configuration === null
                                 ? labels.configurationUnsupported
                                 : installation.configuration.standing === "current"
-                                  ? labels.configurationCurrent({
+                                  ? formatConfiguration({
                                         desired: installation.configuration.desiredDigest ?? "-",
                                         tested: installation.configuration.testedDigest ?? "-",
                                         applied: installation.configuration.appliedDigest ?? "-",
@@ -320,13 +347,20 @@ const ModuleLedgerAccessNotice = (props: ModuleLedgerAccessNoticeProps) => {
 export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPageProps) => {
     const { shell, shellLabels, labels, createHref, isShellRetrying }: AgentOSModuleCollectionPageViewProps =
         props.props
-    const { onBack, onRetryShell, onRetryOperation, formatDate }: AgentOSModuleCollectionPageViewActions = props.on
+    const {
+        onBack,
+        onRetryShell,
+        onRetryOperation,
+        formatDate,
+        checkedAt,
+        installedIn,
+        runtimeLine,
+        formatConfiguration,
+    }: AgentOSModuleCollectionPageViewActions = props.on
     const accessState =
         shell.state === "sign-in-required" || shell.state === "access-unverified" || shell.state === "access-denied"
     const sourceStatement =
-        accessState || shell.inventoryObservedAt === null
-            ? null
-            : labels.checkedAt(formatDate(shell.inventoryObservedAt))
+        accessState || shell.inventoryObservedAt === null ? null : checkedAt(formatDate(shell.inventoryObservedAt))
     return (
         <PageContainer measure="product">
             <div className={MODULE_COLLECTION_PAGE_CLASS_NAME} data-region="page" data-contract="GAP-5">
@@ -383,6 +417,8 @@ export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPa
                             labels={labels}
                             createHref={createHref}
                             formatDate={formatDate}
+                            installedIn={installedIn}
+                            runtimeLine={runtimeLine}
                             onRetryOperation={onRetryOperation}
                             isRetrying={isShellRetrying}
                         />
@@ -391,6 +427,7 @@ export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPa
                             shell={shell}
                             labels={shellLabels}
                             formatDate={formatDate}
+                            formatConfiguration={formatConfiguration}
                             onRetry={onRetryShell}
                             onRetryOperation={onRetryOperation}
                             isRetrying={isShellRetrying}

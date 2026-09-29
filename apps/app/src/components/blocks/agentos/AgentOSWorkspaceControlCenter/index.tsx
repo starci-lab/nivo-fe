@@ -20,7 +20,11 @@ import {
     type AgentOSWorkspacePageState,
 } from "./component"
 export { AGENT_OS_SIGN_IN_HREF, AgentOSShellOperationRegion, projectAgentOSShellView } from "./component"
-export type { AgentOSShellView, AgentOSWorkspaceControlCenterShellLabels } from "./component"
+export type {
+    AgentOSShellConfigurationDigests,
+    AgentOSShellView,
+    AgentOSWorkspaceControlCenterShellLabels,
+} from "./component"
 /** Exact workspace identity supplied by the detail route. */
 export type AgentOSWorkspaceControlCenterProps = {
     readonly workspaceId: string
@@ -166,7 +170,6 @@ export const AgentOSWorkspaceControlCenter = (props: AgentOSWorkspaceControlCent
         runtimeUnavailable: s("runtime.unavailable"),
         runtimeUnknown: s("runtime.unknown"),
         configurationSection: s("configuration.section"),
-        configurationCurrent: (digests) => s("configuration.current", digests),
         configurationAbsent: s("configuration.absent"),
         configurationUnsupported: s("configuration.unsupported"),
         attentionSection: s("attention.section"),
@@ -287,6 +290,7 @@ export const AgentOSWorkspaceControlCenter = (props: AgentOSWorkspaceControlCent
                         dateStyle: "medium",
                         timeStyle: "short",
                     }),
+                formatConfiguration: (digests) => s("configuration.current", digests),
             }}
         />
     )

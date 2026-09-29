@@ -12,7 +12,7 @@ const AgentOSWorkspaceAiKnowledgeBase = (props: AgentOSWorkspaceAiKnowledgeViewP
         <AgentOSWorkspaceAiKnowledgeBaseView
             state={state}
             props={{ readiness, labels, pendingAction, recoveryFromRefused }}
-            on={{ onTest, onRecover, documents, formatTestedAt }}
+            on={{ onTest, onRecover, onRetryNotice: vi.fn(), documents, formatTestedAt }}
         />
     )
 }

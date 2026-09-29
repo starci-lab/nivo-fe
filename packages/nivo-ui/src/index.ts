@@ -51,7 +51,15 @@ export type { LifecycleStepData, LifecycleStepProps, LifecycleStepState } from "
 export { RequestSummary } from "./composites/RequestSummary"
 export type { RequestSummaryActions, RequestSummaryData, RequestSummaryProps } from "./composites/RequestSummary"
 export { THEME_MODES, ThemeMenu } from "./composites/ThemeMenu"
-export type { ThemeMenuActions, ThemeMenuData, ThemeMenuOption, ThemeMenuProps, ThemeMode } from "./composites/ThemeMenu"
+export type {
+    ThemeMenuActions,
+    ThemeMenuData,
+    ThemeMenuOption,
+    ThemeMenuProps,
+    ThemeMode,
+} from "./composites/ThemeMenu"
+export { QueryNoticeView } from "./composites/QueryNoticeView"
+export type { QueryNoticeViewActions, QueryNoticeViewData, QueryNoticeViewProps } from "./composites/QueryNoticeView"
 export { RouteLoadingView } from "./composites/RouteLoadingView"
 export type { RouteLoadingViewData, RouteLoadingViewProps } from "./composites/RouteLoadingView"
 export { readRouteFailureKind, RouteStateView } from "./composites/RouteStateView"

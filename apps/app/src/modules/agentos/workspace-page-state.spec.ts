@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { isAgentOSWorkspacePageState } from "./agent-os-workspace-page.guards"
+import { isAgentOSWorkspacePageState } from "./workspace-page-state"
 
 describe("AgentOS workspace page state guard", () => {
     it("accepts the page's supported query values", () => {

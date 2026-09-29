@@ -1,9 +1,10 @@
 "use client"
 
-import { THEME_MODES, ThemeMenu, type ThemeMode } from "@nivo/ui"
+import { THEME_MODES, type ThemeMode } from "@nivo/ui"
 import { useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
+import { ThemeToggleBase } from "./component"
 
 /** The toggle reads the theme provider and the catalogue, so it takes no props. */
 export type ThemeToggleProps = Record<string, never>
@@ -25,7 +26,7 @@ export const ThemeToggle = (props: ThemeToggleProps) => {
     const [isMounted, setIsMounted] = useState(false)
     useEffect(() => setIsMounted(true), [])
     return (
-        <ThemeMenu
+        <ThemeToggleBase
             props={{
                 label: t("label"),
                 mode: isMounted ? asThemeMode(theme) : "system",

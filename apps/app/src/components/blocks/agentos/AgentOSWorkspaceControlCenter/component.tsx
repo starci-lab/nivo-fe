@@ -126,6 +126,13 @@ export interface AgentOSShellReading {
     readonly sources: ReadonlyArray<ShellSourceObservation>
 }
 
+/** The three digests a current configuration observation names; the connected half phrases them. */
+export type AgentOSShellConfigurationDigests = {
+    readonly desired: string
+    readonly tested: string
+    readonly applied: string
+}
+
 /** Bilingual copy the settled shell view is rendered from, resolved before the drawing half runs. */
 export interface AgentOSWorkspaceControlCenterShellLabels {
     readonly headingFallback: string
@@ -156,11 +163,6 @@ export interface AgentOSWorkspaceControlCenterShellLabels {
     readonly runtimeUnavailable: string
     readonly runtimeUnknown: string
     readonly configurationSection: string
-    readonly configurationCurrent: (digests: {
-        readonly desired: string
-        readonly tested: string
-        readonly applied: string
-    }) => string
     readonly configurationAbsent: string
     readonly configurationUnsupported: string
     readonly attentionSection: string
@@ -558,13 +560,22 @@ type AgentOSShellRegionsProps = {
     readonly view: AgentOSShellView
     readonly labels: AgentOSWorkspaceControlCenterShellLabels
     readonly formatDate: (value: string) => string
+    readonly formatConfiguration: (digests: AgentOSShellConfigurationDigests) => string
     readonly onRetry?: () => void
     readonly retrying?: boolean
     readonly onRecheckOperation?: (installationId: string, intentId: string) => void
 }
 /** The connected shell's own regions: the installation peer list, the permitted empty notice and the separate source-qualified facets; it draws only what the projection settled. */
 const AgentOSShellRegions = (props: AgentOSShellRegionsProps) => {
-    const { view, labels, formatDate, onRetry, retrying, onRecheckOperation }: AgentOSShellRegionsProps = props
+    const {
+        view,
+        labels,
+        formatDate,
+        formatConfiguration,
+        onRetry,
+        retrying,
+        onRecheckOperation,
+    }: AgentOSShellRegionsProps = props
     const inventoryFact =
         view.inventoryStanding === "current" && view.inventoryObservedAt !== null
             ? formatDate(view.inventoryObservedAt)
@@ -629,7 +640,7 @@ const AgentOSShellRegions = (props: AgentOSShellRegionsProps) => {
                             installation.configuration === null
                                 ? labels.configurationUnsupported
                                 : installation.configuration.standing === "current"
-                                  ? labels.configurationCurrent({
+                                  ? formatConfiguration({
                                         desired: installation.configuration.desiredDigest ?? "-",
                                         tested: installation.configuration.testedDigest ?? "-",
                                         applied: installation.configuration.appliedDigest ?? "-",
@@ -709,6 +720,7 @@ export type AgentOSWorkspaceControlCenterProps = {
         readonly onRetryShell?: () => void
         readonly onRetryOperation?: (installationId: string, intentId: string) => void
         readonly formatDate: (value: string) => string
+        readonly formatConfiguration: (digests: AgentOSShellConfigurationDigests) => string
     }
 }
 /** Public API role for AgentOSWorkspacePageState. */
@@ -759,6 +771,7 @@ export type AgentOSWorkspaceControlCenterViewProps = {
     readonly openClawLaunchHref: string
     readonly launchState: Parameters<typeof AgentOSWorkspaceApplications>[0]["launchState"]
     readonly formatDate: (value: string) => string
+    readonly formatConfiguration: (digests: AgentOSShellConfigurationDigests) => string
 }
 /** Compose one AgentOS workspace from domain blocks; the page owns no API or operational JSX. */
 export const AgentOSWorkspaceControlCenterBase = (props: AgentOSWorkspaceControlCenterProps) => {
@@ -775,7 +788,15 @@ export const AgentOSWorkspaceControlCenterBase = (props: AgentOSWorkspaceControl
         retryPending,
         isShellRetrying,
     } = props.props
-    const { onSelectPageState, onOpenAgentConsole, onRetry, onRetryShell, onRetryOperation, formatDate } = props.on
+    const {
+        onSelectPageState,
+        onOpenAgentConsole,
+        onRetry,
+        onRetryShell,
+        onRetryOperation,
+        formatDate,
+        formatConfiguration,
+    } = props.on
     // The connected shell owns the identity scope, so an unsettled or refused access state decides
     // the page before any tab is offered - and a sign-in-required state discloses no scope at all.
     const accessState =
@@ -897,6 +918,7 @@ export const AgentOSWorkspaceControlCenterBase = (props: AgentOSWorkspaceControl
             view={shell}
             labels={labels.shell}
             formatDate={formatDate}
+            formatConfiguration={formatConfiguration}
             onRetry={onRetryShell}
             onRecheckOperation={onRetryOperation}
             retrying={isShellRetrying}
