@@ -124,7 +124,8 @@ export const collabDomainKeys =
         key[0] === "NIVO_QUERY" &&
         key[2] === QUERY_COLLAB_SWR_KEY[0] &&
         key[4] === workspaceId &&
-        domains.includes(key[3] as string)
+        typeof key[3] === "string" &&
+        domains.includes(key[3])
 
 /** SWR mutation key of the academy integration action, scoped by site id. */
 export const MUTATION_ACADEMY_INTEGRATION_SWR_KEY = (siteId: string) => ["academy", "integration", siteId] as const

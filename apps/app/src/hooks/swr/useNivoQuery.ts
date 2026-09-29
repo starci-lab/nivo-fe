@@ -25,10 +25,10 @@ const decodeJwtSubject = (accessToken: string): string | null => {
     try {
         const normalised = payload.replaceAll("-", "+").replaceAll("_", "/")
         const padded = normalised.padEnd(Math.ceil(normalised.length / 4) * 4, "=")
-        const decoded = JSON.parse(globalThis.atob(padded)) as {
-            readonly sub?: unknown
-        }
-        return typeof decoded.sub === "string" && decoded.sub.length > 0 ? decoded.sub : null
+        const decoded: unknown = JSON.parse(globalThis.atob(padded))
+        if (typeof decoded !== "object" || decoded === null || !("sub" in decoded)) return null
+        const { sub } = decoded
+        return typeof sub === "string" && sub.length > 0 ? sub : null
     } catch {
         return null
     }
