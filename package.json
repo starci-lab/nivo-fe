@@ -143,8 +143,9 @@
     "format:check": "turbo run lint -- --max-warnings=0",
     "lint": "turbo run lint",
     "lint:check": "turbo run lint -- --max-warnings=0 && npm run lint:architecture && npm run lint:i18n",
-    "lint:architecture": "node scripts/check-fe-architecture.mjs",
+    "lint:architecture": "node scripts/check-fe-architecture.mjs && node scripts/check-dependency-alignment.mjs",
     "lint:i18n": "node scripts/check-i18n-catalog.mjs",
+    "preinstall": "node scripts/check-dependency-alignment.mjs",
     "prepare": "husky",
     "sonar:check": "sonar-scanner-npm -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=600",
     "sync:ports": "node scripts/sync-ports.mjs",
@@ -161,7 +162,8 @@
   "devDependencies": {
     "@playwright/test": "1.51.1",
     "@sonar/scan": "^5.0.0",
-    "@starci/eslint-canon-fe": "3.0.2",
+    "@starci/eslint-canon-fe": "4.0.0",
+    "@starci/grammar": "0.7.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
@@ -178,5 +180,12 @@
     "typescript-eslint": "^8.67.0",
     "vite": "^7.3.6",
     "vitest": "^3.2.7"
+  },
+  "overrides": {
+    "@starci/grammar": "0.7.0",
+    "@heroui/react": "3.2.6",
+    "@heroui/styles": "3.2.6",
+    "@starci/eslint-canon-fe": "4.0.0",
+    "react-aria": "3.52.1"
   }
 }

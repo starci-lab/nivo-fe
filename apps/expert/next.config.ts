@@ -15,7 +15,7 @@ import type { NextConfig } from "next"
 const nextConfig: NextConfig = {
     transpilePackages: ["@nivo/ui", "@starci/grammar"],
     turbopack: {
-        root: resolve(import.meta.dirname, "../../.."),
+        root: resolve(import.meta.dirname, "../.."),
     },
     experimental: {
         optimizePackageImports: ["@heroui/react"],

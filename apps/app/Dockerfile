@@ -4,6 +4,7 @@ FROM node:22-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
+COPY scripts/check-dependency-alignment.mjs scripts/check-dependency-alignment.mjs
 COPY apps/app/package.json apps/app/package.json
 COPY apps/expert/package.json apps/expert/package.json
 COPY apps/landing/package.json apps/landing/package.json
