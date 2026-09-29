@@ -18,18 +18,15 @@
  *                           default <backend>/.starciwork/features/login/uat/password-sign-in/runs/<runId>
  *   NIVO_UAT_RUN_ID         default run-<yyyymmdd>-uat-verify-attempt1
  */
-import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
 import { execFileSync } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import test from "node:test";
-import { fileURLToPath } from "node:url";
-import { chromium } from "playwright";
+import { chromium, expect, test } from "@playwright/test";
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
+const HERE = __dirname;
 const WEB = (process.env.NIVO_UAT_WEB_URL ?? "http://localhost:3067").replace(/\/$/, "");
 const API = (process.env.NIVO_UAT_API_URL ?? "http://localhost:3068").replace(/\/$/, "");
 const KC = (process.env.NIVO_UAT_KEYCLOAK_URL ?? "http://localhost:8147").replace(/\/$/, "");
@@ -284,20 +281,23 @@ const signInThroughUi = async (page, { returnTo = null, landing = "**/en/overvie
     await page.waitForURL(landing, { timeout: 20000 });
 };
 
-test("uat.login.password-sign-in — served journey", async (t) => {
-    fs.mkdirSync(SCREENS, { recursive: true });
-    fs.mkdirSync(VIDEOS, { recursive: true });
-    const browser = await chromium.launch({ headless: true });
+test.describe("uat.login.password-sign-in — served journey", () => {
+    let browser;
     const contexts = [];
     const videos = [];
+    let kcAdminToken = null;
+    let afterB, baselineSessions, ctxA, ctxB, ctxI, ctxN, ctxR, ctxU, opsA, opsI, opsR, pageA, pageB, pageI, pageN, pageR, pageU, refreshCapA, refreshCapI, verifyCapR;
     const newContext = async (name) => {
         const context = await browser.newContext({ recordVideo: { dir: VIDEOS, size: { width: 1280, height: 800 } } });
         contexts.push({ name, context });
         return context;
     };
 
-    let kcAdminToken = null;
-    try {
+    test.beforeAll(async () => {
+        test.setTimeout(300_000);
+        fs.mkdirSync(SCREENS, { recursive: true });
+        fs.mkdirSync(VIDEOS, { recursive: true });
+        browser = await chromium.launch({ headless: true });
         /* ---------- environment + revision proof ---------- */
         const webProbe = await fetch(`${WEB}/en/authentication`).then((r) => r.status).catch(() => 0);
         result.probes.push({ id: "web-ready", target: `${WEB}/en/authentication`, expect: 200, actual: webProbe });
@@ -322,15 +322,30 @@ test("uat.login.password-sign-in — served journey", async (t) => {
         kcAdminToken = await kcToken();
         await seedAccount(kcAdminToken);
         stepRecord(0, "provision", "done", [`seeded account-holder ${account.email} (kcSub ${account.kcSub}, users.id ${account.userId}) with password credential and enrolled TOTP`]);
-        const baselineSessions = (await kcSessions(kcAdminToken, account.kcSub)).map((s) => s.id);
+        baselineSessions = (await kcSessions(kcAdminToken, account.kcSub)).map((s) => s.id);
         note(`baseline keycloak sessions after provisioning: ${JSON.stringify(baselineSessions)}`);
 
         /* ---------- step 1 ---------- */
-        const ctxA = await newContext("a-main");
-        const opsA = attachOpCounter(ctxA);
-        const pageA = await ctxA.newPage();
+        ctxA = await newContext("a-main");
+        opsA = attachOpCounter(ctxA);
+        pageA = await ctxA.newPage();
         videos.push({ page: pageA, name: "a-main" });
-        await t.test("step-01 clean render, keyboard reachability, no session", () => guardStep(1, "clean render", async () => {
+    });
+    test.afterAll(async () => {
+        /* ---------- cleanup, always ---------- */
+        try { await cleanupAccount(); } catch (e) { result.cleanup.verified = false; result.cleanup.error = `cleanup failed: ${e.message}`; }
+        for (const { context } of contexts) await context.close().catch(() => {});
+        await browser.close().catch(() => {});
+        for (const v of videos) {
+            try {
+                const video = v.page.video();
+                if (video) { const p = await video.path(); const target = path.join(VIDEOS, `${v.name}.webm`); if (path.resolve(p) !== path.resolve(target)) fs.renameSync(p, target); result.media.videos.push(`videos/${v.name}.webm`); }
+            } catch (e) { note(`video for ${v.name}: ${e.message}`); }
+        }
+        result.finishedAt = new Date().toISOString();
+        fs.writeFileSync(path.join(RECORD_DIR, "run-result.json"), JSON.stringify(result, null, 2));
+    });
+        test("step-01 clean render, keyboard reachability, no session", () => guardStep(1, "clean render", async () => {
             await openLogin(pageA);
             // Tab-walk from the top of the document; the five choices and both credential
             // fields must appear in the real keyboard order, not merely be focusable by script.
@@ -347,250 +362,243 @@ test("uat.login.password-sign-in — served journey", async (t) => {
             }
             const walk = reached.join(" | ");
             for (const wanted of ["authentication-email", "authentication-password", COPY.google, COPY.github, COPY.forgot, COPY.register, COPY.submit]) {
-                assert.ok(walk.includes(wanted), `${wanted} is not in the keyboard order: ${walk}`);
+                expect(walk.includes(wanted), `${wanted} is not in the keyboard order: ${walk}`).toBeTruthy();
             }
-            assert.equal(await refreshCookie(ctxA), undefined, "refresh cookie present before any sign-in");
+            expect(await refreshCookie(ctxA), "refresh cookie present before any sign-in").toBe(undefined);
             const storage = await pageA.evaluate(() => ({ ls: Object.keys(localStorage).filter((k) => /nivo|session|token/i.test(k)), ss: Object.keys(sessionStorage).filter((k) => /nivo|session|token/i.test(k)) }));
-            assert.equal(storage.ls.length + storage.ss.length, 0, `session storage leaks auth state: ${JSON.stringify(storage)}`);
+            expect(storage.ls.length + storage.ss.length, `session storage leaks auth state: ${JSON.stringify(storage)}`).toBe(0);
             await shot(pageA, "step01-login");
             stepRecord(1, "clean render", "pass", ["password form + Google + GitHub + register + recovery all rendered and focusable", "no refresh cookie, no session storage keys"]);
         }));
-
-        /* ---------- step 2 precondition: second browser holds a session ---------- */
-        const ctxB = await newContext("b-other-browser");
-        const pageB = await ctxB.newPage();
-        videos.push({ page: pageB, name: "b-other-browser" });
-        await signInThroughUi(pageB);
-        const afterB = await kcSessions(kcAdminToken, account.kcSub);
-        await refreshCookie(ctxB);
-        note(`browser B signed in; sessions now ${JSON.stringify(afterB.map((s) => s.id))}`);
-        await shot(pageB, "step02-precondition-b-landed");
-
-        await t.test("step-02 malformed input then wrong credentials, other session untouched", () => guardStep(2, "malformed + refused", async () => {
-            await openLogin(pageA);
-            await fillCredentials(pageA, "not-an-email", "x");
-            await submitSignIn(pageA);
-            await pageA.waitForTimeout(1200);
-            // The email control is a native type=email: the correction lands on the field
-            // itself (validity state + focus), before any request leaves the page.
-            const emailState = await pageA.evaluate(() => {
-                const e = document.getElementById("authentication-email");
-                return { valid: e.checkValidity(), message: e.validationMessage, focused: document.activeElement === e };
+        test("step-02 malformed input then wrong credentials, other session untouched", async () => {
+            /* ---------- step 2 precondition: second browser holds a session ---------- */
+            ctxB = await newContext("b-other-browser");
+            pageB = await ctxB.newPage();
+            videos.push({ page: pageB, name: "b-other-browser" });
+            await signInThroughUi(pageB);
+            afterB = await kcSessions(kcAdminToken, account.kcSub);
+            await refreshCookie(ctxB);
+            note(`browser B signed in; sessions now ${JSON.stringify(afterB.map((s) => s.id))}`);
+            await shot(pageB, "step02-precondition-b-landed");
+            await guardStep(2, "malformed + refused", async () => {
+                await openLogin(pageA);
+                await fillCredentials(pageA, "not-an-email", "x");
+                await submitSignIn(pageA);
+                await pageA.waitForTimeout(1200);
+                // The email control is a native type=email: the correction lands on the field
+                // itself (validity state + focus), before any request leaves the page.
+                const emailState = await pageA.evaluate(() => {
+                    const e = document.getElementById("authentication-email");
+                    return { valid: e.checkValidity(), message: e.validationMessage, focused: document.activeElement === e };
+                });
+                expect(emailState.valid, "malformed email was accepted as valid").toBe(false);
+                expect(emailState.message, "the email field carried no correction").not.toBe("");
+                expect(opsA.SignIn ?? 0, "malformed submit issued a SignIn request").toBe(0);
+                await shot(pageA, "step02a-malformed-field-errors");
+    
+                await fillCredentials(pageA, account.email, "Wr0ng-Pass-9876");
+                await submitSignIn(pageA);
+                const refusal = pageA.getByText(COPY.refused);
+                await refusal.waitFor({ timeout: 15000 });
+                const bodyText = await pageA.evaluate(() => document.body.innerText);
+                for (const banned of ["attempt", "lock", "locked", "exist", "registered", "remaining", "throttle"]) {
+                    expect(new RegExp(`\\b${banned}`, "i").test(bodyText.replace(COPY.refused, "")), `refusal leaks '${banned}'`).toBe(false);
+                }
+                expect(await refreshCookie(ctxA), "refused attempt set a refresh cookie").toBe(undefined);
+                expect((await kcSessions(kcAdminToken, account.kcSub)).length, "refusal created a keycloak session").toBe(afterB.length);
+                await shot(pageA, "step02b-generic-refusal");
+    
+                // The other browser's session is held in this tab's memory; prove it was untouched
+                // without a reload (a reload goes through refreshSession, a different contract).
+                expect(pageB.url(), `other browser moved: ${pageB.url()}`).toMatch(/\/en\/overview/);
+                const bAuthForm = await pageB.locator("#authentication-email").count();
+                expect(bAuthForm, "other browser fell back to the sign-in form").toBe(0);
+                await shot(pageB, "step02c-other-browser-still-signed-in");
+                stepRecord(2, "malformed + refused", "pass", ["client-side field correction before any request", "one generic refusal, no account facts", "no session for A; B unaffected"]);
             });
-            assert.equal(emailState.valid, false, "malformed email was accepted as valid");
-            assert.notEqual(emailState.message, "", "the email field carried no correction");
-            assert.equal(opsA.SignIn ?? 0, 0, "malformed submit issued a SignIn request");
-            await shot(pageA, "step02a-malformed-field-errors");
-
-            await fillCredentials(pageA, account.email, "Wr0ng-Pass-9876");
-            await submitSignIn(pageA);
-            const refusal = pageA.getByText(COPY.refused);
-            await refusal.waitFor({ timeout: 15000 });
-            const bodyText = await pageA.evaluate(() => document.body.innerText);
-            for (const banned of ["attempt", "lock", "locked", "exist", "registered", "remaining", "throttle"]) {
-                assert.equal(new RegExp(`\\b${banned}`, "i").test(bodyText.replace(COPY.refused, "")), false, `refusal leaks '${banned}'`);
-            }
-            assert.equal(await refreshCookie(ctxA), undefined, "refused attempt set a refresh cookie");
-            assert.equal((await kcSessions(kcAdminToken, account.kcSub)).length, afterB.length, "refusal created a keycloak session");
-            await shot(pageA, "step02b-generic-refusal");
-
-            // The other browser's session is held in this tab's memory; prove it was untouched
-            // without a reload (a reload goes through refreshSession, a different contract).
-            assert.match(pageB.url(), /\/en\/overview/, `other browser moved: ${pageB.url()}`);
-            const bAuthForm = await pageB.locator("#authentication-email").count();
-            assert.equal(bAuthForm, 0, "other browser fell back to the sign-in form");
-            await shot(pageB, "step02c-other-browser-still-signed-in");
-            stepRecord(2, "malformed + refused", "pass", ["client-side field correction before any request", "one generic refusal, no account facts", "no session for A; B unaffected"]);
-        }));
-
-        /* ---------- step 3 ---------- */
-        await t.test("step-03 valid credentials + enrolled second factor", () => guardStep(3, "factor proof", async () => {
-            await fillCredentials(pageA, account.email, account.password);
-            await submitSignIn(pageA);
-            await pageA.locator("#authentication-code").waitFor({ timeout: 20000 });
-            assert.equal(await refreshCookie(ctxA), undefined, "session released before factor proof");
-            const midCount = (await kcSessions(kcAdminToken, account.kcSub)).length;
-            await shot(pageA, "step03a-factor-challenge");
-            await enterFactor(pageA);
-            await pageA.waitForURL("**/en/overview**", { timeout: 20000 });
-            const cookie = await refreshCookie(ctxA);
-            assert.ok(cookie, "no refresh custody after full proof");
-            const endCount = (await kcSessions(kcAdminToken, account.kcSub)).length;
-            await shot(pageA, "step03b-landed-default");
-            stepRecord(3, "factor proof", "pass", [`session withheld until factor (mid sessions=${midCount}, end=${endCount})`, `landed ${pageA.url()}`]);
-        }));
-
-        /* ---------- step 4 ---------- */
-        await t.test("step-04 exactly one usable session on the default landing", () => guardStep(4, "one session", async () => {
-            const cookie = await refreshCookie(ctxA);
-            const state = cookieSessionState(cookie);
-            const sessions = await kcSessions(kcAdminToken, account.kcSub);
-            assert.ok(state, "refresh cookie carries no session_state");
-            assert.ok(sessions.some((s) => s.id === state), `browser custody ${state} is not a live keycloak session`);
-            assert.match(pageA.url(), /\/en\/overview/, `did not land on the default surface: ${pageA.url()}`);
-            stepRecord(4, "one session", "pass", [`context A custody binds keycloak session ${state}`, `live sessions total ${sessions.length}`]);
-        }));
-
-        /* ---------- step 5 ---------- */
-        const ctxR = await newContext("r-race");
-        const opsR = attachOpCounter(ctxR);
-        const verifyCapR = armResponseCapture(ctxR, "VerifyTwoFactor");
-        const pageR = await ctxR.newPage();
-        videos.push({ page: pageR, name: "r-race" });
-        await t.test("step-05 raced submits cannot bypass factor or add a session", () => guardStep(5, "raced submit", async () => {
-            const before = (await kcSessions(kcAdminToken, account.kcSub)).length;
-            await openLogin(pageR);
-            await fillCredentials(pageR, account.email, account.password);
-            await Promise.allSettled([submitSignIn(pageR), pageR.keyboard.press("Enter"), submitSignIn(pageR)]);
-            await pageR.locator("#authentication-code").waitFor({ timeout: 20000 });
-            const custodyBeforeFactor = await refreshCookie(ctxR);
-            await pageR.locator("#authentication-code").fill(totp(account.totpSecret));
-            await Promise.allSettled([pageR.getByRole("button", { name: COPY.twoFactorSubmit }).click(), pageR.keyboard.press("Enter")]);
-            await pageR.waitForURL("**/en/overview**", { timeout: 20000 });
-            await pageR.waitForLoadState("networkidle").catch(() => {});
-            const after = (await kcSessions(kcAdminToken, account.kcSub)).length;
-            const verifyOutcomes = verifyCapR.all.map((r) => JSON.stringify(r?.data?.verifyTwoFactor).slice(0, 200));
-            const custody = await refreshCookie(ctxR);
-            await shot(pageR, "step05-raced-submit");
-            const obs = [
-                `raced credential submit issued SignIn=${opsR.SignIn ?? 0} request(s)`,
-                `custody before factor proof: ${custodyBeforeFactor ? "issued (BYPASS)" : "withheld"}`,
-                `raced factor submit issued VerifyTwoFactor=${opsR.VerifyTwoFactor ?? 0}; answers: ${JSON.stringify(verifyOutcomes)}`,
-                `keycloak sessions ${before} -> ${after}`,
-                `final custody: ${custody ? "one refresh credential bound to session_state " + cookieSessionState(custody) : "none"}`,
-            ];
-            const ok = (opsR.SignIn ?? 0) === 1
-                && custodyBeforeFactor === undefined
-                && custody !== undefined
-                && after - before <= 2;
-            stepRecord(5, "raced submit", ok ? "pass" : "fail", obs);
-            assert.ok(ok, "raced submits bypassed the factor gate or added an effective session");
-        }));
-
-        /* ---------- step 6 ---------- */
-        const refreshCapA = armResponseCapture(ctxA, "RefreshSession");
-        await t.test("step-06 revisit while signed in reuses session to valid destination", () => guardStep(6, "session reuse", async () => {
-            const before = (await kcSessions(kcAdminToken, account.kcSub)).length;
-            const signInsBefore = opsA.SignIn ?? 0;
-            await pageA.goto(`${WEB}/en/authentication?returnTo=${encodeURIComponent("/agentos/workspaces")}`, { waitUntil: "domcontentloaded" });
-            const landed = await pageA.waitForURL("**/en/agentos/workspaces**", { timeout: 25000 }).then(() => true).catch(() => false);
-            await shot(pageA, "step06-revisited-valid-return");
-            const refreshAnswer = refreshCapA.last?.data?.refreshSession?.data;
-            const sessionsAfter = (await kcSessions(kcAdminToken, account.kcSub)).length;
-            const obs = [
-                `revisit of /authentication?returnTo=/agentos/workspaces landed on the destination: ${landed} (final url ${pageA.url()})`,
-                `refreshSession answered: ${JSON.stringify(refreshAnswer).slice(0, 240)}`,
-                `new signIn calls during revisit: ${(opsA.SignIn ?? 0) - signInsBefore}, verifyTwoFactor: ${opsA.VerifyTwoFactor ?? 0}`,
-                `keycloak sessions ${before} -> ${sessionsAfter}`,
-            ];
-            const ok = landed === true && (opsA.SignIn ?? 0) === signInsBefore && (opsA.VerifyTwoFactor ?? 0) === 0 && sessionsAfter === before;
-            stepRecord(6, "session reuse", ok ? "pass" : "fail", obs);
-            assert.ok(ok, "the current session did not continue to the validated destination without another challenge");
-        }));
-
-        /* ---------- step 7 ---------- */
-        const ctxI = await newContext("i-interrupted");
-        const opsI = attachOpCounter(ctxI);
-        const refreshCapI = armResponseCapture(ctxI, "RefreshSession");
-        const pageI = await ctxI.newPage();
-        videos.push({ page: pageI, name: "i-interrupted" });
-        await t.test("step-07 interrupted result is recovered, not re-proved", () => guardStep(7, "interrupted recovery", async () => {
-            const before = (await kcSessions(kcAdminToken, account.kcSub)).length;
-            await openLogin(pageI);
-            await fillCredentials(pageI, account.email, account.password);
-            await submitSignIn(pageI);
-            await pageI.locator("#authentication-code").waitFor({ timeout: 20000 });
-            // Interrupt after the factor proof is answered but before the result is shown.
-            const verifyAnswered = pageI.waitForResponse(
-                (r) => r.url().startsWith(`${API}/graphql`) && (r.request().postData() ?? "").includes("VerifyTwoFactor"),
-                { timeout: 20000 });
-            await pageI.locator("#authentication-code").fill(totp(account.totpSecret));
-            await pageI.getByRole("button", { name: COPY.twoFactorSubmit }).click();
-            await verifyAnswered;
-            await pageI.reload({ waitUntil: "domcontentloaded" });
-            const cookieAfterInterrupt = await refreshCookie(ctxI);
-            await pageI.goto(`${WEB}/en/authentication`, { waitUntil: "domcontentloaded" });
-            const recovered = await pageI.waitForURL("**/en/overview**", { timeout: 25000 }).then(() => true).catch(() => false);
-            const sessionsAfter = (await kcSessions(kcAdminToken, account.kcSub)).length;
-            await shot(pageI, "step07-recovered-without-proof");
-            const obs = [
-                `custody after interrupt: ${cookieAfterInterrupt ? "kept" : "lost"}`,
-                `revisit landed without new proof: ${recovered} (final url ${pageI.url()})`,
-                `refreshSession answered: ${JSON.stringify(refreshCapI.last?.data?.refreshSession?.data).slice(0, 240)}`,
-                `signIn calls on this context: ${opsI.SignIn ?? 0}, keycloak sessions ${before} -> ${sessionsAfter}`,
-            ];
-            const ok = cookieAfterInterrupt !== undefined && recovered === true && (opsI.SignIn ?? 0) === 1 && sessionsAfter - before <= 2;
-            stepRecord(7, "interrupted recovery", ok ? "pass" : "fail", obs);
-            assert.ok(ok, "the established session was not recovered without a second proof");
-        }));
-
-        /* ---------- step 8 ---------- */
-        const ctxU = await newContext("u-undecided");
-        const pageU = await ctxU.newPage();
-        videos.push({ page: pageU, name: "u-undecided" });
-        await t.test("step-08 authority outage reports undecided and the same attempt resolves", () => guardStep(8, "authority unavailable", async () => {
-            execFileSync("docker", ["stop", KC_CONTAINER]);
-            await waitFor(async () => !(await fetch(`${KC}/realms/${REALM}`).then((r) => r.ok).catch(() => false)), 30000, "keycloak unreachable");
-            await pageU.goto(`${WEB}/en/authentication`, { waitUntil: "domcontentloaded" });
-            await pageU.getByRole("heading", { name: COPY.submit }).waitFor({ timeout: 45000 });
-            await fillCredentials(pageU, account.email, account.password);
-            await submitSignIn(pageU);
-            await pageU.getByText(COPY.undecided).waitFor({ timeout: 30000 });
-            const refused = await pageU.getByText(COPY.refused).count();
-            assert.equal(refused, 0, "authority outage was presented as a credential refusal");
-            assert.equal(await refreshCookie(ctxU), undefined, "undecided attempt issued custody");
-            await shot(pageU, "step08a-undecided-during-outage");
-
-            execFileSync("docker", ["start", KC_CONTAINER]);
-            // Realm 200 is not enough: the token endpoint itself must answer (any status but
-            // connection refused), else the retried grant sees a second undecided.
-            await waitFor(async () => fetch(`${KC}/realms/${REALM}/protocol/openid-connect/token`, { method: "POST", body: "grant_type=x", headers: { "content-type": "application/x-www-form-urlencoded" } }).then((r) => r.status > 0).catch(() => false), 180000, "keycloak token endpoint back");
-            kcAdminToken = await kcToken();
-            await submitSignIn(pageU);
-            await pageU.locator("#authentication-code").waitFor({ timeout: 30000 });
-            await shot(pageU, "step08b-same-attempt-resolved");
-            await enterFactor(pageU);
-            await pageU.waitForURL("**/en/overview**", { timeout: 20000 });
-            stepRecord(8, "authority unavailable", "pass", ["undecided message shown, no refusal text, no custody", "retry on the same mounted attempt reached the factor gate and completed"]);
-        }));
-
-        /* ---------- step 9 ---------- */
-        const ctxN = await newContext("n-unavailable-return");
-        const pageN = await ctxN.newPage();
-        videos.push({ page: pageN, name: "n-unavailable-return" });
-        await t.test("step-09 unavailable destination falls back to default with reasonless notice", () => guardStep(9, "unavailable destination", async () => {
-            const asked = "/agentos/../agentos/uat-missing-wing";
-            await openLogin(pageN, `?returnTo=${encodeURIComponent(asked)}`);
-            await fillCredentials(pageN, account.email, account.password);
-            await submitSignIn(pageN);
-            await enterFactor(pageN);
-            await pageN.waitForURL((u) => !u.pathname.includes("/authentication"), { timeout: 25000 });
-            const landed = pageN.url();
-            await pageN.waitForLoadState("networkidle").catch(() => {});
-            const notice = await pageN.getByText(COPY.unavailableReturn).count();
-            await shot(pageN, "step09-unavailable-destination-landing");
-            const landedOnDefault = new URL(landed).pathname.replace(/\/+$/, "") === "/en/overview";
-            const followed = landed.includes("uat-missing-wing");
-            stepRecord(9, "unavailable destination", landedOnDefault && notice > 0 && !followed ? "pass" : "fail", [
-                `asked ${asked}`, `landed ${landed}`, `reasonless notice rendered: ${notice > 0}`,
-                followed ? "the unavailable destination was followed" : "the unavailable destination was not followed",
-            ]);
-            assert.equal(followed, false, `the unavailable destination was followed: ${landed}`);
-            assert.equal(landedOnDefault, true, `session did not land on the default surface: ${landed}`);
-            assert.ok(notice > 0, "no reasonless unavailability notice on the landing");
-        }));
-    } finally {
-        /* ---------- cleanup, always ---------- */
-        try { await cleanupAccount(); } catch (e) { result.cleanup.verified = false; result.cleanup.error = `cleanup failed: ${e.message}`; }
-        for (const { context } of contexts) await context.close().catch(() => {});
-        await browser.close().catch(() => {});
-        for (const v of videos) {
-            try {
-                const video = v.page.video();
-                if (video) { const p = await video.path(); const target = path.join(VIDEOS, `${v.name}.webm`); if (path.resolve(p) !== path.resolve(target)) fs.renameSync(p, target); result.media.videos.push(`videos/${v.name}.webm`); }
-            } catch (e) { note(`video for ${v.name}: ${e.message}`); }
-        }
-        result.finishedAt = new Date().toISOString();
-        fs.writeFileSync(path.join(RECORD_DIR, "run-result.json"), JSON.stringify(result, null, 2));
-    }
+        });
+        test("step-03 valid credentials + enrolled second factor", async () => {
+            /* ---------- step 3 ---------- */
+            await guardStep(3, "factor proof", async () => {
+                await fillCredentials(pageA, account.email, account.password);
+                await submitSignIn(pageA);
+                await pageA.locator("#authentication-code").waitFor({ timeout: 20000 });
+                expect(await refreshCookie(ctxA), "session released before factor proof").toBe(undefined);
+                const midCount = (await kcSessions(kcAdminToken, account.kcSub)).length;
+                await shot(pageA, "step03a-factor-challenge");
+                await enterFactor(pageA);
+                await pageA.waitForURL("**/en/overview**", { timeout: 20000 });
+                const cookie = await refreshCookie(ctxA);
+                expect(cookie, "no refresh custody after full proof").toBeTruthy();
+                const endCount = (await kcSessions(kcAdminToken, account.kcSub)).length;
+                await shot(pageA, "step03b-landed-default");
+                stepRecord(3, "factor proof", "pass", [`session withheld until factor (mid sessions=${midCount}, end=${endCount})`, `landed ${pageA.url()}`]);
+            });
+        });
+        test("step-04 exactly one usable session on the default landing", async () => {
+            /* ---------- step 4 ---------- */
+            await guardStep(4, "one session", async () => {
+                const cookie = await refreshCookie(ctxA);
+                const state = cookieSessionState(cookie);
+                const sessions = await kcSessions(kcAdminToken, account.kcSub);
+                expect(state, "refresh cookie carries no session_state").toBeTruthy();
+                expect(sessions.some((s) => s.id === state), `browser custody ${state} is not a live keycloak session`).toBeTruthy();
+                expect(pageA.url(), `did not land on the default surface: ${pageA.url()}`).toMatch(/\/en\/overview/);
+                stepRecord(4, "one session", "pass", [`context A custody binds keycloak session ${state}`, `live sessions total ${sessions.length}`]);
+            });
+        });
+        test("step-05 raced submits cannot bypass factor or add a session", async () => {
+            /* ---------- step 5 ---------- */
+            ctxR = await newContext("r-race");
+            opsR = attachOpCounter(ctxR);
+            verifyCapR = armResponseCapture(ctxR, "VerifyTwoFactor");
+            pageR = await ctxR.newPage();
+            videos.push({ page: pageR, name: "r-race" });
+            await guardStep(5, "raced submit", async () => {
+                const before = (await kcSessions(kcAdminToken, account.kcSub)).length;
+                await openLogin(pageR);
+                await fillCredentials(pageR, account.email, account.password);
+                await Promise.allSettled([submitSignIn(pageR), pageR.keyboard.press("Enter"), submitSignIn(pageR)]);
+                await pageR.locator("#authentication-code").waitFor({ timeout: 20000 });
+                const custodyBeforeFactor = await refreshCookie(ctxR);
+                await pageR.locator("#authentication-code").fill(totp(account.totpSecret));
+                await Promise.allSettled([pageR.getByRole("button", { name: COPY.twoFactorSubmit }).click(), pageR.keyboard.press("Enter")]);
+                await pageR.waitForURL("**/en/overview**", { timeout: 20000 });
+                await pageR.waitForLoadState("networkidle").catch(() => {});
+                const after = (await kcSessions(kcAdminToken, account.kcSub)).length;
+                const verifyOutcomes = verifyCapR.all.map((r) => JSON.stringify(r?.data?.verifyTwoFactor).slice(0, 200));
+                const custody = await refreshCookie(ctxR);
+                await shot(pageR, "step05-raced-submit");
+                const obs = [
+                    `raced credential submit issued SignIn=${opsR.SignIn ?? 0} request(s)`,
+                    `custody before factor proof: ${custodyBeforeFactor ? "issued (BYPASS)" : "withheld"}`,
+                    `raced factor submit issued VerifyTwoFactor=${opsR.VerifyTwoFactor ?? 0}; answers: ${JSON.stringify(verifyOutcomes)}`,
+                    `keycloak sessions ${before} -> ${after}`,
+                    `final custody: ${custody ? "one refresh credential bound to session_state " + cookieSessionState(custody) : "none"}`,
+                ];
+                const ok = (opsR.SignIn ?? 0) === 1
+                    && custodyBeforeFactor === undefined
+                    && custody !== undefined
+                    && after - before <= 2;
+                stepRecord(5, "raced submit", ok ? "pass" : "fail", obs);
+                expect(ok, "raced submits bypassed the factor gate or added an effective session").toBeTruthy();
+            });
+        });
+        test("step-06 revisit while signed in reuses session to valid destination", async () => {
+            /* ---------- step 6 ---------- */
+            refreshCapA = armResponseCapture(ctxA, "RefreshSession");
+            await guardStep(6, "session reuse", async () => {
+                const before = (await kcSessions(kcAdminToken, account.kcSub)).length;
+                const signInsBefore = opsA.SignIn ?? 0;
+                await pageA.goto(`${WEB}/en/authentication?returnTo=${encodeURIComponent("/agentos/workspaces")}`, { waitUntil: "domcontentloaded" });
+                const landed = await pageA.waitForURL("**/en/agentos/workspaces**", { timeout: 25000 }).then(() => true).catch(() => false);
+                await shot(pageA, "step06-revisited-valid-return");
+                const refreshAnswer = refreshCapA.last?.data?.refreshSession?.data;
+                const sessionsAfter = (await kcSessions(kcAdminToken, account.kcSub)).length;
+                const obs = [
+                    `revisit of /authentication?returnTo=/agentos/workspaces landed on the destination: ${landed} (final url ${pageA.url()})`,
+                    `refreshSession answered: ${JSON.stringify(refreshAnswer).slice(0, 240)}`,
+                    `new signIn calls during revisit: ${(opsA.SignIn ?? 0) - signInsBefore}, verifyTwoFactor: ${opsA.VerifyTwoFactor ?? 0}`,
+                    `keycloak sessions ${before} -> ${sessionsAfter}`,
+                ];
+                const ok = landed === true && (opsA.SignIn ?? 0) === signInsBefore && (opsA.VerifyTwoFactor ?? 0) === 0 && sessionsAfter === before;
+                stepRecord(6, "session reuse", ok ? "pass" : "fail", obs);
+                expect(ok, "the current session did not continue to the validated destination without another challenge").toBeTruthy();
+            });
+        });
+        test("step-07 interrupted result is recovered, not re-proved", async () => {
+            /* ---------- step 7 ---------- */
+            ctxI = await newContext("i-interrupted");
+            opsI = attachOpCounter(ctxI);
+            refreshCapI = armResponseCapture(ctxI, "RefreshSession");
+            pageI = await ctxI.newPage();
+            videos.push({ page: pageI, name: "i-interrupted" });
+            await guardStep(7, "interrupted recovery", async () => {
+                const before = (await kcSessions(kcAdminToken, account.kcSub)).length;
+                await openLogin(pageI);
+                await fillCredentials(pageI, account.email, account.password);
+                await submitSignIn(pageI);
+                await pageI.locator("#authentication-code").waitFor({ timeout: 20000 });
+                // Interrupt after the factor proof is answered but before the result is shown.
+                const verifyAnswered = pageI.waitForResponse(
+                    (r) => r.url().startsWith(`${API}/graphql`) && (r.request().postData() ?? "").includes("VerifyTwoFactor"),
+                    { timeout: 20000 });
+                await pageI.locator("#authentication-code").fill(totp(account.totpSecret));
+                await pageI.getByRole("button", { name: COPY.twoFactorSubmit }).click();
+                await verifyAnswered;
+                await pageI.reload({ waitUntil: "domcontentloaded" });
+                const cookieAfterInterrupt = await refreshCookie(ctxI);
+                await pageI.goto(`${WEB}/en/authentication`, { waitUntil: "domcontentloaded" });
+                const recovered = await pageI.waitForURL("**/en/overview**", { timeout: 25000 }).then(() => true).catch(() => false);
+                const sessionsAfter = (await kcSessions(kcAdminToken, account.kcSub)).length;
+                await shot(pageI, "step07-recovered-without-proof");
+                const obs = [
+                    `custody after interrupt: ${cookieAfterInterrupt ? "kept" : "lost"}`,
+                    `revisit landed without new proof: ${recovered} (final url ${pageI.url()})`,
+                    `refreshSession answered: ${JSON.stringify(refreshCapI.last?.data?.refreshSession?.data).slice(0, 240)}`,
+                    `signIn calls on this context: ${opsI.SignIn ?? 0}, keycloak sessions ${before} -> ${sessionsAfter}`,
+                ];
+                const ok = cookieAfterInterrupt !== undefined && recovered === true && (opsI.SignIn ?? 0) === 1 && sessionsAfter - before <= 2;
+                stepRecord(7, "interrupted recovery", ok ? "pass" : "fail", obs);
+                expect(ok, "the established session was not recovered without a second proof").toBeTruthy();
+            });
+        });
+        test("step-08 authority outage reports undecided and the same attempt resolves", async () => {
+            /* ---------- step 8 ---------- */
+            ctxU = await newContext("u-undecided");
+            pageU = await ctxU.newPage();
+            videos.push({ page: pageU, name: "u-undecided" });
+            await guardStep(8, "authority unavailable", async () => {
+                execFileSync("docker", ["stop", KC_CONTAINER]);
+                await waitFor(async () => !(await fetch(`${KC}/realms/${REALM}`).then((r) => r.ok).catch(() => false)), 30000, "keycloak unreachable");
+                await pageU.goto(`${WEB}/en/authentication`, { waitUntil: "domcontentloaded" });
+                await pageU.getByRole("heading", { name: COPY.submit }).waitFor({ timeout: 45000 });
+                await fillCredentials(pageU, account.email, account.password);
+                await submitSignIn(pageU);
+                await pageU.getByText(COPY.undecided).waitFor({ timeout: 30000 });
+                const refused = await pageU.getByText(COPY.refused).count();
+                expect(refused, "authority outage was presented as a credential refusal").toBe(0);
+                expect(await refreshCookie(ctxU), "undecided attempt issued custody").toBe(undefined);
+                await shot(pageU, "step08a-undecided-during-outage");
+    
+                execFileSync("docker", ["start", KC_CONTAINER]);
+                // Realm 200 is not enough: the token endpoint itself must answer (any status but
+                // connection refused), else the retried grant sees a second undecided.
+                await waitFor(async () => fetch(`${KC}/realms/${REALM}/protocol/openid-connect/token`, { method: "POST", body: "grant_type=x", headers: { "content-type": "application/x-www-form-urlencoded" } }).then((r) => r.status > 0).catch(() => false), 180000, "keycloak token endpoint back");
+                kcAdminToken = await kcToken();
+                await submitSignIn(pageU);
+                await pageU.locator("#authentication-code").waitFor({ timeout: 30000 });
+                await shot(pageU, "step08b-same-attempt-resolved");
+                await enterFactor(pageU);
+                await pageU.waitForURL("**/en/overview**", { timeout: 20000 });
+                stepRecord(8, "authority unavailable", "pass", ["undecided message shown, no refusal text, no custody", "retry on the same mounted attempt reached the factor gate and completed"]);
+            });
+        });
+        test("step-09 unavailable destination falls back to default with reasonless notice", async () => {
+            /* ---------- step 9 ---------- */
+            ctxN = await newContext("n-unavailable-return");
+            pageN = await ctxN.newPage();
+            videos.push({ page: pageN, name: "n-unavailable-return" });
+            await guardStep(9, "unavailable destination", async () => {
+                const asked = "/agentos/../agentos/uat-missing-wing";
+                await openLogin(pageN, `?returnTo=${encodeURIComponent(asked)}`);
+                await fillCredentials(pageN, account.email, account.password);
+                await submitSignIn(pageN);
+                await enterFactor(pageN);
+                await pageN.waitForURL((u) => !u.pathname.includes("/authentication"), { timeout: 25000 });
+                const landed = pageN.url();
+                await pageN.waitForLoadState("networkidle").catch(() => {});
+                const notice = await pageN.getByText(COPY.unavailableReturn).count();
+                await shot(pageN, "step09-unavailable-destination-landing");
+                const landedOnDefault = new URL(landed).pathname.replace(/\/+$/, "") === "/en/overview";
+                const followed = landed.includes("uat-missing-wing");
+                stepRecord(9, "unavailable destination", landedOnDefault && notice > 0 && !followed ? "pass" : "fail", [
+                    `asked ${asked}`, `landed ${landed}`, `reasonless notice rendered: ${notice > 0}`,
+                    followed ? "the unavailable destination was followed" : "the unavailable destination was not followed",
+                ]);
+                expect(followed, `the unavailable destination was followed: ${landed}`).toBe(false);
+                expect(landedOnDefault, `session did not land on the default surface: ${landed}`).toBe(true);
+                expect(notice > 0, "no reasonless unavailability notice on the landing").toBeTruthy();
+            });
+        });
 });

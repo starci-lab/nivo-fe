@@ -154,7 +154,7 @@
     "test:unit": "npm test",
     "test:ci": "vitest run --coverage && node --test scripts/*.spec.mjs && node scripts/write-patch-coverage.mjs",
     "coverage:patch": "node scripts/write-patch-coverage.mjs",
-    "test:e2e": "npm run build && node --test e2e/smoke.e2e-spec.ts e2e/collab.e2e-spec.ts e2e/expert.e2e-spec.ts e2e/landing.e2e-spec.ts e2e/login-password-sign-in.e2e-spec.ts && playwright test",
+    "test:e2e": "npm run build && playwright test",
     "test:watch": "vitest",
     "typecheck": "turbo run typecheck"
   },

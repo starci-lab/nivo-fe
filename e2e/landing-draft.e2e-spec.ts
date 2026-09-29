@@ -1,6 +1,24 @@
 import { expect, test } from "@playwright/test"
 import { mkdirSync } from "node:fs"
 import { resolve } from "node:path"
+import { serveNextApp } from "./serve-next"
+
+/**
+ * The suite owns its server: the production landing-draft app on the port `playwright.config.ts` names
+ * as baseURL, started once per run (NIVO_FE_E2E_LANDING_DRAFT_URL drives a server the caller owns).
+ */
+const LANDING_DRAFT_PORT = 5070
+const EXTERNAL_URL = process.env.NIVO_FE_E2E_LANDING_DRAFT_URL
+let landingDraftServer: { stop: () => void } | undefined
+
+test.beforeAll(async () => {
+    if (EXTERNAL_URL) return
+    landingDraftServer = await serveNextApp({ appDir: "apps/landing-draft", port: LANDING_DRAFT_PORT })
+})
+
+test.afterAll(() => {
+    landingDraftServer?.stop()
+})
 
 type RouteContract = {
     readonly path: string

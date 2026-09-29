@@ -1,8 +1,8 @@
 import {spawn, spawnSync} from "node:child_process"
-import {fileURLToPath} from "node:url"
+import process from "node:process"
 import {resolve} from "node:path"
 
-const rootDir = fileURLToPath(new URL("..", import.meta.url))
+const rootDir = resolve(__dirname, "..")
 
 /** Exercise the production Next server, never an already-running development process. */
 export const runSmoke = async () => {
@@ -59,8 +59,4 @@ export const runSmoke = async () => {
     } finally {
         stop()
     }
-}
-
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-    await runSmoke()
 }

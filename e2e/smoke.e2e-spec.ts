@@ -1,10 +1,9 @@
-import assert from "node:assert/strict"
-import test from "node:test"
-import {runSmoke} from "./e2e-smoke.mjs"
+import {expect, test} from "@playwright/test"
+import {runSmoke} from "./e2e-smoke"
 
 test("the built customer app serves a complete localized document", async () => {
     const result = await runSmoke()
 
-    assert.equal(result.status, 200)
-    assert.equal(result.path, "/en")
+    expect(result.status).toBe(200)
+    expect(result.path).toBe("/en")
 })

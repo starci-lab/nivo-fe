@@ -2,7 +2,7 @@
  * Serve one built app for the run — the e2e lane's shared `next start` helper.
  *
  * THE SUITE OWNS THE SERVER. Each spec boots the production server the way
- * e2e/e2e-smoke.mjs established for @nivo/app: `next start` on a run-owned loopback port,
+ * e2e/e2e-smoke.ts established for @nivo/app: `next start` on a run-owned loopback port,
  * polled until the first sub-500 answer, then killed on the way out (taskkill on Windows, where
  * signal delivery does not reach the spawned process tree). Nothing here reuses a developer's
  * dev server: a spec that wants one names it through its own `*_URL` env and then stops nothing.
@@ -10,9 +10,8 @@
 import { spawn, spawnSync } from "node:child_process";
 import path from "node:path";
 import process from "node:process";
-import { fileURLToPath } from "node:url";
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const ROOT = path.resolve(__dirname, "..");
 
 export const serveNextApp = async ({ appDir, port, timeoutMs = 45_000 }) => {
     const baseUrl = `http://127.0.0.1:${port}`;
