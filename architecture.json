@@ -29,6 +29,7 @@
   {"id": "feature.pages.wallet", "root": "apps/app/src/features/pages/WalletPage", "entry": "apps/app/src/features/pages/WalletPage/index.tsx"},
   {"id": "feature.layouts.expert-academy-locale", "root": "apps/expert/src/features/layouts/AcademyLocaleLayout", "entry": "apps/expert/src/features/layouts/AcademyLocaleLayout/index.tsx"},
   {"id": "feature.pages.expert-academy", "root": "apps/expert/src/features/pages/AcademyPage", "entry": "apps/expert/src/features/pages/AcademyPage/index.tsx"},
+  {"id": "feature.pages.landing", "root": "apps/landing/src/features/pages/LandingPage", "entry": "apps/landing/src/features/pages/LandingPage/index.tsx"},
   {"id": "feature.layouts.landing-site-shell", "root": "apps/landing/src/features/layouts/SiteShell", "entry": "apps/landing/src/features/layouts/SiteShell/index.tsx"},
   {"id": "feature.pages.landing-company", "root": "apps/landing/src/features/pages/CompanyPage", "entry": "apps/landing/src/features/pages/CompanyPage/index.tsx"},
   {"id": "feature.pages.landing-contact", "root": "apps/landing/src/features/pages/ContactPage", "entry": "apps/landing/src/features/pages/ContactPage/index.tsx"},
