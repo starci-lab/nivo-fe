@@ -1,5 +1,6 @@
 import { failed, type FailureKind, type Outcome } from '../outcome'
-import type { CollabFailureKind, CollabGatewayReply, CollabOperation, CollabServed } from './types'
+import { isCollabFailureKind, parseCollabOperation } from './payload.guards'
+import type { CollabFailureKind, CollabGatewayReply, CollabServed } from './types'
 
 const COLLAB_FAILURE_KIND_MAP: Readonly<Record<CollabFailureKind, FailureKind>> = {
     unauthenticated: "refused",
@@ -18,39 +19,27 @@ export const collabFailure = (kind: CollabFailureKind, code: string, reason: str
 export const isRecord = (value: unknown): value is Record<string, unknown> =>
     typeof value === "object" && value !== null && !Array.isArray(value)
 
-const COLLAB_FAILURE_KINDS: ReadonlySet<string> = new Set([
-    "unauthenticated",
-    "denied",
-    "invalid",
-    "conflict",
-    "unavailable",
-    "unknown",
-])
-
-/** Reject anything that is not the boundary's own reply shape before trusting it. */
 /** Checks untrusted GraphQL JSON against the Collab gateway reply shape. */
 export const readReply = (value: unknown): CollabGatewayReply | null => {
     if (!isRecord(value) || typeof value.ok !== "boolean") {
         return null
     }
     if (value.ok === true) {
-        return typeof value.op === "string" && isRecord(value.result)
-            ? { ok: true, op: value.op as CollabOperation, result: value.result }
-            : null
+        const op = parseCollabOperation(value.op)
+        return op !== null && isRecord(value.result) ? { ok: true, op, result: value.result } : null
     }
     const failure = value.failure
     if (
         isRecord(failure) &&
-        typeof failure.kind === "string" &&
-        COLLAB_FAILURE_KINDS.has(failure.kind) &&
+        isCollabFailureKind(failure.kind) &&
         typeof failure.reason === "string" &&
         typeof failure.retryable === "boolean"
     ) {
         return {
             ok: false,
             failure: {
-                op: typeof failure.op === "string" ? (failure.op as CollabOperation) : null,
-                kind: failure.kind as CollabFailureKind,
+                op: parseCollabOperation(failure.op),
+                kind: failure.kind,
                 reason: failure.reason,
                 retryable: failure.retryable,
             },

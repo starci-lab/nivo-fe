@@ -1,5 +1,15 @@
 import type { Outcome } from "../outcome"
-import { collabRequest, readResultField } from "./transport"
+import { collabRequest } from "./transport"
+import {
+    parseCollabAvailableCommandsOutcome,
+    parseCollabGroupRead,
+    parseCollabOfficeView,
+    parseCollabOpenTurnNoticeOutcome,
+    parseCollabReadTaskOutcome,
+    parseCollabReconcileOutcome,
+    parseCollabTaskList,
+    parseCollabTurnNoticePage,
+} from "./payload.guards"
 import type {
     CollabAvailableCommandsOutcome,
     CollabCallScope,
@@ -25,7 +35,7 @@ export const openCollabOffice = (args: CollabCallScope): Promise<Outcome<CollabO
         args.workspaceId,
         "openOffice",
         {},
-        (r) => readResultField(r, "office") as CollabOfficeView,
+        (r) => parseCollabOfficeView(r.office),
     )
 
 /** `readGroup`: the authorized conversation page under a resumable cursor. */
@@ -38,7 +48,7 @@ export const readCollabGroup = (args: CollabPageCall): Promise<Outcome<CollabGro
             ...(args.cursor === undefined ? {} : { cursor: args.cursor }),
             ...(args.limit === undefined ? {} : { limit: args.limit }),
         },
-        (r) => readResultField(r, "page") as CollabGroupRead,
+        (r) => parseCollabGroupRead(r.page),
     )
 
 /** The `postMessage` answer: the admission disposition plus any bound question-answer. */
@@ -55,7 +65,7 @@ export const listCollabTasks = (args: CollabListTasksCall): Promise<Outcome<Coll
             ...(args.cursor === undefined ? {} : { cursor: args.cursor }),
             ...(args.limit === undefined ? {} : { limit: args.limit }),
         },
-        (r) => readResultField(r, "page") as CollabTaskList,
+        (r) => parseCollabTaskList(r.page),
     )
 
 /** `readTask`: the same authoritative task the Office card reads, plus its card target. */
@@ -65,7 +75,7 @@ export const readCollabTask = (args: CollabReadTaskCall): Promise<Outcome<Collab
         args.workspaceId,
         "readTask",
         { taskId: args.taskId },
-        (r) => readResultField(r, "read") as CollabReadTaskOutcome,
+        (r) => parseCollabReadTaskOutcome(r.read),
     )
 
 /** `availableCommands`: resolve one typed `@` name to its published command set. */
@@ -77,7 +87,7 @@ export const readCollabAvailableCommands = (
         args.workspaceId,
         "availableCommands",
         { moduleName: args.moduleName },
-        (r) => readResultField(r, "offer") as CollabAvailableCommandsOutcome,
+        (r) => parseCollabAvailableCommandsOutcome(r.offer),
     )
 
 /** `readNotices`: the member's outstanding turn notices under a resumable cursor. */
@@ -90,7 +100,7 @@ export const readCollabNotices = (args: CollabPageCall): Promise<Outcome<CollabT
             ...(args.cursor === undefined ? {} : { cursor: args.cursor }),
             ...(args.limit === undefined ? {} : { limit: args.limit }),
         },
-        (r) => readResultField(r, "page") as CollabTurnNoticePage,
+        (r) => parseCollabTurnNoticePage(r.page),
     )
 
 /** `openNotice`: follow one named notice to its live authoritative target. */
@@ -100,7 +110,7 @@ export const openCollabNotice = (args: CollabOpenNoticeCall): Promise<Outcome<Co
         args.workspaceId,
         "openNotice",
         { noticeId: args.noticeId },
-        (r) => readResultField(r, "notice") as CollabOpenTurnNoticeOutcome,
+        (r) => parseCollabOpenTurnNoticeOutcome(r.notice),
     )
 
 /**
@@ -114,7 +124,7 @@ export const reconcileCollabRequest = (args: CollabReconcileCall): Promise<Outco
         args.workspaceId,
         "reconcileRequest",
         { intentId: args.intentId },
-        (r) => readResultField(r, "reconcile") as CollabReconcileOutcome,
+        (r) => parseCollabReconcileOutcome(r.reconcile),
     )
 
 /* ------------------------------------------------------------------ */

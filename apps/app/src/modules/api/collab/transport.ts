@@ -2,6 +2,7 @@ import { graphqlFields } from "../graphql"
 import type { Outcome } from "../outcome"
 import { collabGatewayDocument } from "./documents"
 import { collabFailure, collabOutcomeOfReply, isRecord, readReply } from "./payload"
+import { parseCollabMembershipResult } from "./payload.guards"
 import type { CollabMembershipResult, CollabOperation, CollabServed, CollabTransport } from "./types"
 /**
  * The default binding: one tagged-request document to the shared core GraphQL endpoint,
@@ -43,7 +44,7 @@ export const collabRequest = async <T>(
     workspaceId: string,
     op: CollabOperation,
     input: Readonly<Record<string, unknown>>,
-    pick: (result: Record<string, unknown>) => T,
+    pick: (result: Record<string, unknown>) => T | null,
 ): Promise<Outcome<T>> => {
     if (accessToken === "") {
         return collabFailure("unauthenticated", "COLLAB_UNAUTHENTICATED", "sign-in required", false)
@@ -61,10 +62,14 @@ export const collabRequest = async <T>(
         return served
     }
     try {
-        return { ok: true, data: pick(served.data.result) }
-    } catch {
+        const data = pick(served.data.result)
         // An ok outcome whose result record is not the op's own shape is
         // untrusted wire data, not a crash: a retryable unknown, never success.
+        if (data === null) {
+            return collabFailure("unknown", "COLLAB_UNKNOWN", "malformed result", true)
+        }
+        return { ok: true, data }
+    } catch {
         return collabFailure("unknown", "COLLAB_UNKNOWN", "malformed result", true)
     }
 }
@@ -78,14 +83,9 @@ export const readResultField = (result: Record<string, unknown>, field: string):
     return value
 }
 
-/** The `membership` result record of a member command, or a thrown malformed marker. */
-export const readMembershipResult = (result: Record<string, unknown>): CollabMembershipResult => {
-    const membership = readResultField(result, "membership")
-    if (typeof membership.outcome !== "string") {
-        throw new Error("membership outcome missing")
-    }
-    return membership as CollabMembershipResult
-}
+/** The `membership` result record of a member command, or null when malformed. */
+export const readMembershipResult = (result: Record<string, unknown>): CollabMembershipResult | null =>
+    parseCollabMembershipResult(result.membership)
 
 /* ------------------------------------------------------------------ */
 /* Operation helpers - the exported vocabulary, one fn per named op.  */

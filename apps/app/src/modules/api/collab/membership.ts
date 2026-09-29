@@ -8,9 +8,27 @@ import type {
     CollabChangeRoleCall,
     CollabInviteCall,
     CollabInviteOutcome,
+    CollabMembershipResult,
     CollabWithdrawInvitationCall,
     CollabWithdrawOutcome,
 } from "./types"
+
+/** The decided outcome plus the post-decision member row, under this command's own closed vocabulary. */
+const memberOutcome = <OutcomeName extends CollabMembershipResult["outcome"]>(
+    membership: CollabMembershipResult | null,
+    outcomes: ReadonlyArray<OutcomeName>,
+): { readonly outcome: OutcomeName; readonly member?: CollabMembershipResult["member"] } | null => {
+    if (membership === null || !isOneOfOutcome(membership.outcome, outcomes)) return null
+    return {
+        outcome: membership.outcome,
+        ...(membership.member === undefined ? {} : { member: membership.member }),
+    }
+}
+
+const isOneOfOutcome = <OutcomeName extends CollabMembershipResult["outcome"]>(
+    value: CollabMembershipResult["outcome"],
+    outcomes: ReadonlyArray<OutcomeName>,
+): value is OutcomeName => outcomes.some((outcome) => outcome === value)
 
 /** Invites one email address to the workspace with the requested member role. */
 export const inviteCollabMemberByEmail = (args: CollabInviteCall): Promise<Outcome<CollabInviteOutcome>> => {
@@ -23,13 +41,7 @@ export const inviteCollabMemberByEmail = (args: CollabInviteCall): Promise<Outco
         args.workspaceId,
         "inviteByEmail",
         { email: args.email, role: args.role },
-        (r) => {
-            const membership = readMembershipResult(r)
-            return {
-                outcome: membership.outcome as CollabInviteOutcome["outcome"],
-                ...(membership.member === undefined ? {} : { member: membership.member }),
-            }
-        },
+        (r) => memberOutcome<CollabInviteOutcome["outcome"]>(readMembershipResult(r), ["created", "existing"]),
     )
 }
 
@@ -51,13 +63,7 @@ export const acceptCollabInvitation = (args: CollabAcceptInvitationCall): Promis
             invitationId: args.invitationId,
             ...(args.displayName === undefined ? {} : { displayName: args.displayName }),
         },
-        (r) => {
-            const membership = readMembershipResult(r)
-            return {
-                outcome: membership.outcome as CollabAcceptOutcome["outcome"],
-                ...(membership.member === undefined ? {} : { member: membership.member }),
-            }
-        },
+        (r) => memberOutcome<CollabAcceptOutcome["outcome"]>(readMembershipResult(r), ["accepted", "existing"]),
     )
 }
 
@@ -74,13 +80,7 @@ export const withdrawCollabInvitation = (
         args.workspaceId,
         "withdrawInvitation",
         { invitationId: args.invitationId },
-        (r) => {
-            const membership = readMembershipResult(r)
-            return {
-                outcome: membership.outcome as CollabWithdrawOutcome["outcome"],
-                ...(membership.member === undefined ? {} : { member: membership.member }),
-            }
-        },
+        (r) => memberOutcome<CollabWithdrawOutcome["outcome"]>(readMembershipResult(r), ["withdrawn", "existing"]),
     )
 }
 
@@ -95,12 +95,7 @@ export const changeCollabMemberRole = (args: CollabChangeRoleCall): Promise<Outc
         args.workspaceId,
         "changeMemberRole",
         { memberId: args.memberId, role: args.role },
-        (r) => {
-            const membership = readMembershipResult(r)
-            return {
-                outcome: membership.outcome as CollabChangeMemberRoleOutcome["outcome"],
-                ...(membership.member === undefined ? {} : { member: membership.member }),
-            }
-        },
+        (r) =>
+            memberOutcome<CollabChangeMemberRoleOutcome["outcome"]>(readMembershipResult(r), ["roleChanged", "existing"]),
     )
 }

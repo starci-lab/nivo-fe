@@ -1,5 +1,6 @@
 import type { Outcome } from "../outcome"
-import { collabRequest, readResultField } from "./transport"
+import { collabRequest } from "./transport"
+import { parseCollabAnswerBinding, parseCollabPressApprovalButtonOutcome, parseCollabRouteOutcome } from "./payload.guards"
 import { rejectAuthorityClaims } from "./commands.validation"
 import type {
     CollabAnswerBinding,
@@ -35,10 +36,13 @@ export const postCollabMessage = (args: CollabPostMessageCall): Promise<Outcome<
             ...(args.moduleName === undefined ? {} : { moduleName: args.moduleName }),
             ...(args.answersQuestionId === undefined ? {} : { answersQuestionId: args.answersQuestionId }),
         },
-        (r) => ({
-            route: readResultField(r, "route") as CollabRouteOutcome,
-            ...(r.answer === undefined ? {} : { answer: r.answer as CollabAnswerBinding }),
-        }),
+        (r) => {
+            const route = parseCollabRouteOutcome(r.route)
+            if (route === null) return null
+            if (r.answer === undefined) return { route }
+            const answer = parseCollabAnswerBinding(r.answer)
+            return answer === null ? null : { route, answer }
+        },
     )
 }
 
@@ -55,7 +59,7 @@ export const pressCollabApprovalButton = (
         args.workspaceId,
         "pressApprovalButton",
         { approvalId: args.approvalId, button: args.button },
-        (r) => readResultField(r, "press") as CollabPressApprovalButtonOutcome,
+        (r) => parseCollabPressApprovalButtonOutcome(r.press),
     )
 }
 
