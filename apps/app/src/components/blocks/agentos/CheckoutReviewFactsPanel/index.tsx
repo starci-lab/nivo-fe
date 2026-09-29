@@ -2,6 +2,7 @@ import { Badge, Text } from "@starci/grammar/common"
 import type { CheckoutReviewCopy, CheckoutReviewFacts } from "../../../../modules/agentos/checkout-review"
 import { FACT_ROW_CLASS_NAME, FACT_VALUE_CLASS_NAME } from "./classNames"
 
+/** Props for {@link CheckoutReviewFactsPanel}. */
 export type CheckoutReviewFactsPanelProps = {
     readonly copy: CheckoutReviewCopy
     readonly facts?: CheckoutReviewFacts | null
@@ -36,12 +37,8 @@ const admissionRow = (label: string, admission: string, isSkeleton: boolean) => 
 )
 
 /** Draw the frozen offer facts or their matching loading shape. */
-export const CheckoutReviewFactsPanel = ({
-    copy,
-    facts,
-    admission = null,
-    skeleton = false,
-}: CheckoutReviewFactsPanelProps) => {
+export const CheckoutReviewFactsPanel = (props: CheckoutReviewFactsPanelProps) => {
+    const { copy, facts, admission = null, skeleton = false }: CheckoutReviewFactsPanelProps = props
     if (skeleton)
         return (
             <>

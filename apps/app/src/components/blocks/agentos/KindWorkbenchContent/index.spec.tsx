@@ -3,10 +3,13 @@ import { describe, expect, it } from "vitest"
 import type { KindWorkbenchBlockCopy, WorkbenchProps } from "../../../../modules/agentos/kind-workbench"
 import { KindWorkbenchContent } from "."
 
+/** The two values an SLA caption is phrased from. */
+type SlaCaptionValues = { readonly kind: string; readonly version: string }
+
 const copy = {
     workbench: {
         support: "Support queue",
-        slaCaption: ({ kind, version }: { kind: string; version: string }) => `${kind}@${version}`,
+        slaCaption: ({ kind, version }: SlaCaptionValues) => `${kind}@${version}`,
         open: "Open",
         highUrgent: "Urgent",
         next: "Next task",

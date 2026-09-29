@@ -4,6 +4,7 @@ import { SalesWorkbenchBlock } from "../SalesWorkbenchBlock"
 import { activeTasks, nextTask, type WorkbenchProps } from "../../../../modules/agentos/kind-workbench"
 import { KIND_WORKBENCH_CONTENT_CLASS_NAME } from "./classNames"
 
+/** Props for {@link KindWorkbenchContent}. */
 export type KindWorkbenchContentProps = {
     readonly props: WorkbenchProps
     readonly mode:
@@ -52,26 +53,27 @@ const WorkbenchContentView = ({ title, caption, facts, notice }: WorkbenchConten
 )
 
 /** Draw one registered AgentOS workbench without request or shell ownership. */
-export const KindWorkbenchContent = ({ props, mode }: KindWorkbenchContentProps) => {
-    const { copy } = props
-    if (mode === "sales-pipeline") return <SalesWorkbenchBlock moduleId={props.moduleId} />
+export const KindWorkbenchContent = (props: KindWorkbenchContentProps) => {
+    const { props: workbench, mode }: KindWorkbenchContentProps = props
+    const { copy } = workbench
+    if (mode === "sales-pipeline") return <SalesWorkbenchBlock moduleId={workbench.moduleId} />
     if (mode === "accounting-sheet")
         return (
             <AccountingWorkbenchBlock
-                moduleId={props.moduleId}
-                kindKey={props.kindKey}
-                workbenchVersion={props.workbenchVersion}
+                moduleId={workbench.moduleId}
+                kindKey={workbench.kindKey}
+                workbenchVersion={workbench.workbenchVersion}
             />
         )
     if (mode === "conversation-inbox")
         return (
             <WorkbenchContentView
                 title={copy.workbench.inbox}
-                caption={copy.workbench.registered({ kind: props.kindKey, version: props.workbenchVersion })}
+                caption={copy.workbench.registered({ kind: workbench.kindKey, version: workbench.workbenchVersion })}
                 facts={[
                     { id: "open", label: copy.workbench.open, value: "8" },
                     { id: "waiting", label: copy.workbench.waiting, value: "3" },
-                    { id: "module", label: copy.workbench.module, value: props.moduleId },
+                    { id: "module", label: copy.workbench.module, value: workbench.moduleId },
                 ]}
             />
         )
@@ -79,22 +81,27 @@ export const KindWorkbenchContent = ({ props, mode }: KindWorkbenchContentProps)
         return (
             <WorkbenchContentView
                 title={copy.workbench.support}
-                caption={copy.workbench.slaCaption({ kind: props.kindKey, version: props.workbenchVersion })}
+                caption={copy.workbench.slaCaption({ kind: workbench.kindKey, version: workbench.workbenchVersion })}
                 facts={[
-                    { id: "open", label: copy.workbench.open, value: String(activeTasks(props).length) },
+                    { id: "open", label: copy.workbench.open, value: String(activeTasks(workbench).length) },
                     {
                         id: "risk",
                         label: copy.workbench.highUrgent,
                         value: String(
-                            activeTasks(props).filter((task) => task.priority === "high" || task.priority === "urgent")
-                                .length,
+                            activeTasks(workbench).filter(
+                                (task) => task.priority === "high" || task.priority === "urgent",
+                            ).length,
                         ),
                     },
-                    { id: "next", label: copy.workbench.next, value: nextTask(props)?.title ?? copy.workbench.clear },
+                    {
+                        id: "next",
+                        label: copy.workbench.next,
+                        value: nextTask(workbench)?.title ?? copy.workbench.clear,
+                    },
                     {
                         id: "source",
                         label: copy.workbench.channel,
-                        value: props.events?.[0]?.source ?? copy.workbench.waitChannel,
+                        value: workbench.events?.[0]?.source ?? copy.workbench.waitChannel,
                     },
                 ]}
                 notice={copy.workbench.supportNotice}
@@ -104,21 +111,24 @@ export const KindWorkbenchContent = ({ props, mode }: KindWorkbenchContentProps)
         return (
             <WorkbenchContentView
                 title={copy.workbench.calendar}
-                caption={copy.workbench.scheduleCaption({ kind: props.kindKey, version: props.workbenchVersion })}
+                caption={copy.workbench.scheduleCaption({
+                    kind: workbench.kindKey,
+                    version: workbench.workbenchVersion,
+                })}
                 facts={[
-                    { id: "proposals", label: copy.workbench.proposals, value: String(activeTasks(props).length) },
+                    { id: "proposals", label: copy.workbench.proposals, value: String(activeTasks(workbench).length) },
                     {
                         id: "next",
                         label: copy.workbench.confirmation,
-                        value: nextTask(props)?.title ?? copy.workbench.noMeeting,
+                        value: nextTask(workbench)?.title ?? copy.workbench.noMeeting,
                     },
                     {
                         id: "due",
                         label: copy.workbench.due,
                         value:
-                            nextTask(props)?.dueAt === null || nextTask(props) === undefined
+                            nextTask(workbench)?.dueAt === null || nextTask(workbench) === undefined
                                 ? copy.workbench.notScheduled
-                                : new Date(nextTask(props)?.dueAt ?? "").toLocaleString(),
+                                : new Date(nextTask(workbench)?.dueAt ?? "").toLocaleString(),
                     },
                     { id: "state", label: copy.workbench.calendarMutation, value: copy.workbench.blocked },
                 ]}
@@ -129,15 +139,26 @@ export const KindWorkbenchContent = ({ props, mode }: KindWorkbenchContentProps)
         return (
             <WorkbenchContentView
                 title={copy.workbench.reader}
-                caption={copy.workbench.knowledgeCaption({ kind: props.kindKey, version: props.workbenchVersion })}
+                caption={copy.workbench.knowledgeCaption({
+                    kind: workbench.kindKey,
+                    version: workbench.workbenchVersion,
+                })}
                 facts={[
-                    { id: "answers", label: copy.workbench.evidenceTasks, value: String(activeTasks(props).length) },
+                    {
+                        id: "answers",
+                        label: copy.workbench.evidenceTasks,
+                        value: String(activeTasks(workbench).length),
+                    },
                     {
                         id: "next",
                         label: copy.workbench.groundedAnswer,
-                        value: nextTask(props)?.title ?? copy.workbench.noAnswer,
+                        value: nextTask(workbench)?.title ?? copy.workbench.noAnswer,
                     },
-                    { id: "events", label: copy.workbench.acceptedEvents, value: String(props.events?.length ?? 0) },
+                    {
+                        id: "events",
+                        label: copy.workbench.acceptedEvents,
+                        value: String(workbench.events?.length ?? 0),
+                    },
                     { id: "policy", label: copy.workbench.policy, value: copy.workbench.citations },
                 ]}
                 notice={copy.workbench.readerNotice}
@@ -147,10 +168,10 @@ export const KindWorkbenchContent = ({ props, mode }: KindWorkbenchContentProps)
         return (
             <WorkbenchContentView
                 title={copy.workbench.generic}
-                caption={copy.workbench.genericCaption({ version: props.workbenchVersion })}
+                caption={copy.workbench.genericCaption({ version: workbench.workbenchVersion })}
                 facts={[
-                    { id: "kind", label: copy.workbench.kind, value: props.kindKey },
-                    { id: "module", label: copy.workbench.module, value: props.moduleId },
+                    { id: "kind", label: copy.workbench.kind, value: workbench.kindKey },
+                    { id: "module", label: copy.workbench.module, value: workbench.moduleId },
                 ]}
                 notice={copy.workbench.genericNotice}
             />
@@ -158,8 +179,8 @@ export const KindWorkbenchContent = ({ props, mode }: KindWorkbenchContentProps)
     return (
         <WorkbenchContentView
             title={copy.workbench.unavailable}
-            caption={`${props.kindKey}@${props.workbenchVersion}`}
-            facts={[{ id: "module", label: copy.workbench.module, value: props.moduleId }]}
+            caption={`${workbench.kindKey}@${workbench.workbenchVersion}`}
+            facts={[{ id: "module", label: copy.workbench.module, value: workbench.moduleId }]}
             notice={copy.workbench.unavailableNotice}
         />
     )

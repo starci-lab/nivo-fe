@@ -13,9 +13,8 @@ import type {
     CheckoutReviewLinks,
 } from "../../../../modules/agentos/checkout-review"
 import { CheckoutReviewFactsPanel } from "../CheckoutReviewFactsPanel"
-import { RAIL_BAND_CLASS_NAME } from "../CheckoutReviewPaymentRail/classNames"
 import { CheckoutReviewPaymentRail } from "../CheckoutReviewPaymentRail"
-import { BREADCRUMB_LIST_CLASS_NAME, SECTIONS_CLASS_NAME } from "./classNames"
+import { BREADCRUMB_LIST_CLASS_NAME, RAIL_BAND_CLASS_NAME, SECTIONS_CLASS_NAME } from "./classNames"
 
 export type {
     CheckoutReviewCopy,

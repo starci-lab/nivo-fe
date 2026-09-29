@@ -12,7 +12,9 @@ export const RAIL_BAND_CLASS_NAME = cn(
     "py-4",
     "last:border-b-0",
 )
+/** Class names of the step row. */
 export const STEP_ROW_CLASS_NAME = cn("flex", "min-w-0", "items-start", "gap-3")
+/** Class names of the ordinal. */
 export const ORDINAL_CLASS_NAME = cn(
     "flex",
     "h-6",
@@ -26,8 +28,11 @@ export const ORDINAL_CLASS_NAME = cn(
     "font-medium",
     "text-foreground",
 )
+/** Class names of the step body. */
 export const STEP_BODY_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-0.5")
+/** Class names of the rail options. */
 export const RAIL_OPTIONS_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-2")
+/** Class names of the rail option. */
 export const RAIL_OPTION_CLASS_NAME = cn(
     "border",
     "border-separator",
@@ -40,5 +45,7 @@ export const RAIL_OPTION_CLASS_NAME = cn(
     "px-3",
     "py-2",
 )
+/** Class names of the selected rail option. */
 export const SELECTED_RAIL_OPTION_CLASS_NAME = cn(RAIL_OPTION_CLASS_NAME, "border-accent", "bg-accent-soft")
+/** Class names of the rail radio. */
 export const RAIL_RADIO_CLASS_NAME = cn("mt-1", "h-4", "w-4", "shrink-0", "accent-accent")

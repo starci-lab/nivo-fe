@@ -184,8 +184,11 @@ const OperationWidget = ({ copy, payload, onAction }: TrustedWidgetComponentProp
     )
 }
 
+/** The props of one trusted runtime widget: its validated payload and the actions it may take. */
+export type ExecuteChatWidgetProps = TrustedWidgetComponentProps
+
 /** Render one trusted runtime widget while admitting only the actions in its payload. */
-export const ExecuteChatWidget = (props: TrustedWidgetComponentProps) =>
+export const ExecuteChatWidget = (props: ExecuteChatWidgetProps) =>
     props.payload.node.component === "nivo.metric" ||
     props.payload.node.component === "nivo.data-table" ||
     props.payload.node.component === "nivo.timeline" ||

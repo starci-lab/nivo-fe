@@ -1,16 +1,7 @@
 "use client"
 
 import { SurfaceCard } from "@starci/grammar/common"
-import {
-    type ChatWidgetAction,
-    type ChatWidgetPayload,
-    type ExecuteChatBlockCopy,
-    type ExecuteChatBlockProps,
-    type ExecuteMessage,
-    type TrustedWidgetActionHandler,
-    type TrustedWidgetComponentProps,
-    type TrustedWidgetRegistry,
-} from "../../../../modules/agentos/execute-chat"
+import { type ExecuteChatBlockProps, type TrustedWidgetRegistry } from "../../../../modules/agentos/execute-chat"
 import { useExecuteChatComposer } from "../../../../hooks/agentos/useExecuteChatComposer"
 import { ExecuteChatComposer } from "../ExecuteChatComposer"
 import { ExecuteChatTranscript } from "../ExecuteChatTranscript"

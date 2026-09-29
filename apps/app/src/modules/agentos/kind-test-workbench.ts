@@ -72,6 +72,7 @@ export type KindTestWorkbenchBlockProps = {
     readonly onRun: (scenarioKey: string, scenarioInput: Readonly<Record<string, AgentosRuntimeValue>>) => void
 }
 
+/** One editable input of a scenario fixture: its dotted path and current value. */
 export type ScenarioField = {
     readonly path: string
     readonly value: AgentosRuntimeValue

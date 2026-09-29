@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import type { AgentosModuleInstallation, AgentosSolutionModule } from "../api/agentos-modules"
 import type { NivoQueryReading } from "../query"
 
+/** The badge tone a solution module card or ledger row is drawn in. */
 export type AgentOSSolutionTone = "neutral" | "success" | "warning" | "danger"
 
 /** One resolved catalog or installation card visible in the module center. */

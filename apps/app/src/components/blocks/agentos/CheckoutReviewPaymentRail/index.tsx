@@ -15,6 +15,7 @@ import {
     STEP_ROW_CLASS_NAME,
 } from "./classNames"
 
+/** Props for {@link CheckoutReviewPaymentRail}. */
 export type CheckoutReviewPaymentRailProps = {
     readonly props: CheckoutReviewDecisionProps
     readonly state: "review" | "not-started"
@@ -83,23 +84,26 @@ const railChoiceBand = (props: CheckoutReviewDecisionProps, on: CheckoutReviewFl
 )
 
 /** Draw the payment rail, ordered recheck steps, and the same-identity retry action. */
-export const CheckoutReviewPaymentRail = ({ props, state, on }: CheckoutReviewPaymentRailProps) => {
+export const CheckoutReviewPaymentRail = (props: CheckoutReviewPaymentRailProps) => {
+    const { props: decision, state, on }: CheckoutReviewPaymentRailProps = props
     const notStarted = state === "not-started"
     return (
-        <SurfaceCard label={props.copy.railLabel} composition="joined" height="fill">
+        <SurfaceCard label={decision.copy.railLabel} composition="joined" height="fill">
             <div className={RAIL_BAND_CLASS_NAME}>
                 <Text size="sm" tone="muted" overflow="wrap">
-                    {props.copy.railNote}
+                    {decision.copy.railNote}
                 </Text>
             </div>
-            {railChoiceBand(props, on)}
+            {railChoiceBand(decision, on)}
             <div className={RAIL_BAND_CLASS_NAME}>
-                <ol className={STEP_BODY_CLASS_NAME}>{props.steps.map((step, index) => stepRow(step, index + 1))}</ol>
+                <ol className={STEP_BODY_CLASS_NAME}>
+                    {decision.steps.map((step, index) => stepRow(step, index + 1))}
+                </ol>
             </div>
-            {notStarted && props.notice !== null ? (
+            {notStarted && decision.notice !== null ? (
                 <div className={RAIL_BAND_CLASS_NAME}>
                     <Text size="sm" tone="muted" overflow="wrap">
-                        {props.notice}
+                        {decision.notice}
                     </Text>
                 </div>
             ) : null}
@@ -109,19 +113,19 @@ export const CheckoutReviewPaymentRail = ({ props, state, on }: CheckoutReviewPa
                     size="lg"
                     width="fill"
                     type="button"
-                    isDisabled={props.selectedRail === null}
-                    isPending={props.isPaymentPending === true}
+                    isDisabled={decision.selectedRail === null}
+                    isPending={decision.isPaymentPending === true}
                     onPress={on.requestPayment}
                 >
-                    {notStarted ? props.copy.retryPayment : props.copy.requestPayment}
+                    {notStarted ? decision.copy.retryPayment : decision.copy.requestPayment}
                 </Button>
-                <TextAction href={props.links.offerSelection} size="sm" onFollow={on.changeOffer}>
-                    {notStarted ? props.copy.returnToOffers : props.copy.changeOffer}
+                <TextAction href={decision.links.offerSelection} size="sm" onFollow={on.changeOffer}>
+                    {notStarted ? decision.copy.returnToOffers : decision.copy.changeOffer}
                 </TextAction>
             </div>
             <div className={RAIL_BAND_CLASS_NAME}>
                 <Text size="xs" tone="muted" overflow="wrap">
-                    {props.copy.footnote}
+                    {decision.copy.footnote}
                 </Text>
             </div>
         </SurfaceCard>

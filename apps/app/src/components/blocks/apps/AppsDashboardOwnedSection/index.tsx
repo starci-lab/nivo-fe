@@ -1,5 +1,5 @@
 import { IconSource } from "@nivo/ui"
-import { Button, EmptyNotice, Icon, SurfaceCard, Text } from "@starci/grammar/common"
+import { EmptyNotice, Icon, SurfaceCard, Text } from "@starci/grammar/common"
 import { FleetRow } from "../../provisioning/FleetRow"
 import {
     supportedTemplateOffer,
@@ -11,6 +11,7 @@ import { AppsDashboardRefusedSection } from "../AppsDashboardRefusedSection"
 import { AppsDashboardRestingRows } from "../AppsDashboardRestingRows"
 import { APPS_DASHBOARD_OWNED_LIST_CLASS_NAME } from "./classNames"
 
+/** Props for {@link AppsDashboardOwnedSection}. */
 export type AppsDashboardOwnedSectionProps = {
     readonly owned: OwnedSectionView
     readonly catalogue: CatalogueSectionView

@@ -84,6 +84,7 @@ type CheckoutReviewHeadProps = {
     readonly links: CheckoutReviewLinks
 }
 
+/** Props for {@link CheckoutReviewDecision}. */
 export type CheckoutReviewDecisionProps = CheckoutReviewHeadProps & {
     readonly facts: CheckoutReviewFacts
     readonly admission: string

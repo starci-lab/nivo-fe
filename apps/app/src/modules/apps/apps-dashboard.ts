@@ -27,12 +27,14 @@ export type TemplateOfferRowView = {
     readonly actionDisabled: boolean
 }
 
+/** The settled view of the owned apps section of the apps dashboard. */
 export type OwnedSectionView =
     | { readonly phase: "resting"; readonly label: string }
     | { readonly phase: "empty"; readonly label: string; readonly note: string }
     | { readonly phase: "answered"; readonly label: string; readonly rows: ReadonlyArray<OwnedAppRow> }
     | { readonly phase: "refused"; readonly label: string; readonly note: string }
 
+/** The settled view of the template catalogue section of the apps dashboard. */
 export type CatalogueSectionView =
     | { readonly phase: "resting"; readonly label: string; readonly fact: string }
     | { readonly phase: "empty"; readonly label: string; readonly note: string }

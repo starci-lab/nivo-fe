@@ -19,39 +19,40 @@ export type {
 type AppsDashboardProps = { readonly props: AppsDashboardData; readonly on: AppsDashboardActions }
 
 /** Draw the app set, its catalogue, and the one supported build action. */
-export const AppsDashboardBase = ({ props, on }: AppsDashboardProps) => {
-    const supportedOffer = supportedTemplateOffer(props.catalogue)
+export const AppsDashboardBase = (props: AppsDashboardProps) => {
+    const { props: data, on }: AppsDashboardProps = props
+    const supportedOffer = supportedTemplateOffer(data.catalogue)
     const headingAction =
-        supportedOffer === undefined || props.buildAppLabel === undefined ? null : (
+        supportedOffer === undefined || data.buildAppLabel === undefined ? null : (
             <Button size="lg" variant="primary" onPress={() => on.onBuildTemplate(supportedOffer.templateKey)}>
-                {props.buildAppLabel}
+                {data.buildAppLabel}
             </Button>
         )
     return (
         <div>
             <div>
                 <Heading level={1} scale="display">
-                    {props.title}
+                    {data.title}
                 </Heading>
                 {headingAction}
             </div>
             <Text size="md" tone="muted">
-                {props.lede}
+                {data.lede}
             </Text>
             <div>
                 <div>
                     <AppsDashboardOwnedSection
-                        owned={props.owned}
-                        catalogue={props.catalogue}
-                        buildAppLabel={props.buildAppLabel}
-                        attentionGroupLabel={props.attentionGroupLabel}
-                        steadyGroupLabel={props.steadyGroupLabel}
+                        owned={data.owned}
+                        catalogue={data.catalogue}
+                        buildAppLabel={data.buildAppLabel}
+                        attentionGroupLabel={data.attentionGroupLabel}
+                        steadyGroupLabel={data.steadyGroupLabel}
                         onBuildTemplate={on.onBuildTemplate}
                         onOpenOwnedApp={on.onOpenOwnedApp}
                     />
                 </div>
                 <div>
-                    <AppsDashboardCatalogueSection catalogue={props.catalogue} onBuildTemplate={on.onBuildTemplate} />
+                    <AppsDashboardCatalogueSection catalogue={data.catalogue} onBuildTemplate={on.onBuildTemplate} />
                 </div>
             </div>
         </div>

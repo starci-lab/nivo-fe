@@ -4,6 +4,7 @@ import { AppsDashboardRefusedSection } from "../AppsDashboardRefusedSection"
 import { AppsDashboardRestingRows } from "../AppsDashboardRestingRows"
 import { APPS_DASHBOARD_CATALOGUE_CONTENT_CLASS_NAME } from "./classNames"
 
+/** Props for {@link AppsDashboardCatalogueSection}. */
 export type AppsDashboardCatalogueSectionProps = {
     readonly catalogue: CatalogueSectionView
     readonly onBuildTemplate: (templateKey: string) => void
@@ -42,7 +43,8 @@ const sentenceSection = (label: string, note: string) => (
 )
 
 /** Draw the available template catalogue, with one list identity across states. */
-export const AppsDashboardCatalogueSection = ({ catalogue, onBuildTemplate }: AppsDashboardCatalogueSectionProps) => {
+export const AppsDashboardCatalogueSection = (props: AppsDashboardCatalogueSectionProps) => {
+    const { catalogue, onBuildTemplate }: AppsDashboardCatalogueSectionProps = props
     if (catalogue.phase === "empty") return sentenceSection(catalogue.label, catalogue.note)
     if (catalogue.phase === "refused")
         return <AppsDashboardRefusedSection label={catalogue.label} note={catalogue.note} />

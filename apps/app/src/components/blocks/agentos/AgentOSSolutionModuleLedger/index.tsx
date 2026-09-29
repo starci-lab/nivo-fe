@@ -12,7 +12,8 @@ import {
     SOLUTION_LEDGER_TRAILING_CLASS_NAME,
 } from "./classNames"
 
-export type AgentOSSolutionModuleLedgerViewProps = {
+/** Props for {@link AgentOSSolutionModuleLedgerView}. */
+export type AgentOSSolutionModuleLedgerProps = {
     readonly ledger: LedgerProps
     readonly cards: ReadonlyArray<AgentOSSolutionModuleCard>
     readonly pendingId?: string
@@ -49,13 +50,8 @@ const ledgerRow = (row: AgentOSSolutionLedgerRow, loading: boolean) => (
 )
 
 /** List installed solutions above the catalogue, keeping each section's state in place. */
-export const AgentOSSolutionModuleLedger = ({
-    ledger,
-    cards,
-    pendingId,
-    outcome,
-    onPressCard,
-}: AgentOSSolutionModuleLedgerViewProps) => {
+export const AgentOSSolutionModuleLedger = (props: AgentOSSolutionModuleLedgerProps) => {
+    const { ledger, cards, pendingId, outcome, onPressCard }: AgentOSSolutionModuleLedgerProps = props
     const browseCatalogue = () => {
         const node = document.querySelector<HTMLElement>("[data-region='module-catalogue']")
         if (node === null) return
