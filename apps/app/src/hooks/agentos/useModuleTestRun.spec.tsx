@@ -1,8 +1,8 @@
 import { act, renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import type { AgentosModuleTestSurface } from "@/modules/api/agentos-module-tests"
-import type { Outcome } from "@/modules/api/outcome"
-import { moduleTestSurfaceFixture } from "@/test-support/mock-result"
+import type { AgentosModuleTestSurface } from "../../modules/api/agentos-module-tests"
+import type { Outcome } from "../../modules/api/outcome"
+import { moduleTestSurfaceFixture } from "../../test-support/mock-result"
 import { MODULE_SETTLE_INTERVAL_MS } from "./agentos.shared"
 
 /*

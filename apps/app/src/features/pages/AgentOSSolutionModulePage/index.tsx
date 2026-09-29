@@ -9,17 +9,17 @@ import {
     useModuleSetupSession,
     useModuleTestRun,
     useRouter,
-} from "@/hooks"
-import type { AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteShellBlock"
-import { AgentOSSolutionModuleAttachments } from "@/components/blocks/agentos/AgentOSSolutionModuleAttachments"
+} from "../../../hooks"
+import type { AgentOSModuleView } from "../../../components/blocks/agentos/ModuleRouteShellBlock"
+import { AgentOSSolutionModuleAttachments } from "../../../components/blocks/agentos/AgentOSSolutionModuleAttachments"
 import type {
     DiagnosticsSurfaceProps,
     SetupSurfaceProps,
-} from "@/modules/agentos/module-page/surface-types"
-import { contextDraftFor } from "@/modules/agentos/module-page/setup-draft"
-import { moduleScreenFor, moduleShellPropsFor } from "@/modules/agentos/module-page/screens"
-import { activeVersionFor } from "@/modules/agentos/module-page/sessions"
-import { QueryNotice } from "@/components/blocks/query/QueryNotice"
+} from "../../../modules/agentos/module-page/surface-types"
+import { contextDraftFor } from "../../../modules/agentos/module-page/setup-draft"
+import { moduleScreenFor, moduleShellPropsFor } from "../../../modules/agentos/module-page/screens"
+import { activeVersionFor } from "../../../modules/agentos/module-page/sessions"
+import { QueryNotice } from "../../../components/blocks/query/QueryNotice"
 import {
     AgentOSSolutionModulePageBase,
     AgentOSSolutionModuleState,

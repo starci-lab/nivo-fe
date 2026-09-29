@@ -3,7 +3,7 @@ import type {
     AgentosRuntimeContextVersion,
     AgentosRuntimeMessage,
     AgentosRuntimeSession,
-} from "@/modules/api/agentos-module-runtime"
+} from "../modules/api/agentos-module-runtime"
 import type { AgentosModuleTestRun, AgentosModuleTestSurface } from "@/modules/api/agentos-module-tests"
 import type {
     CollabBindingView,

@@ -25,7 +25,7 @@ import type {
     AgentWorkspaceChannelSetting,
     ConfigureAgentWorkspaceChannelInput,
     ManageAgentosModuleRuntimeInput,
-} from "@/modules/api/agentos-module-runtime"
+} from "../../modules/api/agentos-module-runtime"
 import type { Failure, Outcome } from "@/modules/api/outcome"
 import {
     initialShellObservationSnapshot,

@@ -8,12 +8,12 @@ import {
     useMutateStartChatbotZaloOauthSwr,
 } from "../swr/mutations/workspace-controlplane"
 import { useQueryChatbotWorkbenchSwr, type SupportQueryIdentity } from "../swr/queries/useQueryChatbotWorkbenchSwr"
-import type { AgentosModuleRuntime } from "@/modules/api/agentos-module-runtime"
-import type { AgentosRuntimeValue } from "@/modules/api/agentos-runtime-tree"
-import { nivoQueryPayload } from "@/modules/query"
-import type { OperateSurfaceProps } from "@/modules/agentos/module-page/surface-types"
-import { executeSessionIdFor } from "@/modules/agentos/module-page/sessions"
-import { selectedIdentity } from "@/modules/agentos/module-page/runtime-values"
+import type { AgentosModuleRuntime } from "../../modules/api/agentos-module-runtime"
+import type { AgentosRuntimeValue } from "../../modules/api/agentos-runtime-tree"
+import { nivoQueryPayload } from "../../modules/query"
+import type { OperateSurfaceProps } from "../../modules/agentos/module-page/surface-types"
+import { executeSessionIdFor } from "../../modules/agentos/module-page/sessions"
+import { selectedIdentity } from "../../modules/agentos/module-page/runtime-values"
 import { idempotencyKey, type ModuleRuntimeControls } from "./agentos.shared"
 
 /** The runtime, the chatbot identity and the shared commands the operate surface connects. */

@@ -8,12 +8,12 @@ import { useQueryMyAgentosModuleTestSurfaceSwr } from "../swr/queries/useQueryMy
 import type {
     AgentosModuleRuntime,
     ManageAgentosModuleRuntimeInput,
-} from "@/modules/api/agentos-module-runtime"
-import type { Outcome } from "@/modules/api/outcome"
-import type { AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteShellBlock"
-import { nivoQueryReading } from "@/modules/query"
-import { controllerHostnameForWorkspace } from "@/modules/agentos/module-page/channel-identity"
-import { foreignRuntimeFor, runtimeForWorkspace } from "@/modules/agentos/module-page/runtime-values"
+} from "../../modules/api/agentos-module-runtime"
+import type { Outcome } from "../../modules/api/outcome"
+import type { AgentOSModuleView } from "../../components/blocks/agentos/ModuleRouteShellBlock"
+import { nivoQueryReading } from "../../modules/query"
+import { controllerHostnameForWorkspace } from "../../modules/agentos/module-page/channel-identity"
+import { foreignRuntimeFor, runtimeForWorkspace } from "../../modules/agentos/module-page/runtime-values"
 import {
     MODULE_SETTLE_ATTEMPTS,
     MODULE_SETTLE_INTERVAL_MS,

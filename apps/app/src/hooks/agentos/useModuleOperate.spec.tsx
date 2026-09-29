@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import type { AgentosModuleRuntime } from "@/modules/api/agentos-module-runtime"
-import { moduleRuntimeFixture, runtimeSessionFixture } from "@/test-support/mock-result"
+import type { AgentosModuleRuntime } from "../../modules/api/agentos-module-runtime"
+import { moduleRuntimeFixture, runtimeSessionFixture } from "../../test-support/mock-result"
 import type { ModuleRuntimeControls } from "./agentos.shared"
 import type { SupportQueryIdentity } from "../swr/queries/useQueryChatbotWorkbenchSwr"
 

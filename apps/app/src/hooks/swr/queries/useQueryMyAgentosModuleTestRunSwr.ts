@@ -1,7 +1,7 @@
 "use client"
 import type { SWRConfiguration } from "swr"
-import { myAgentosModuleTestRun, type AgentosModuleTestSurface } from "@/modules/api/agentos-module-tests"
-import type { Outcome } from "@/modules/api/outcome"
+import { myAgentosModuleTestRun, type AgentosModuleTestSurface } from "../../../modules/api/agentos-module-tests"
+import type { Outcome } from "../../../modules/api/outcome"
 import { useNivoQuery } from "../useNivoQuery"
 import { QUERY_AGENTOS_MODULE_TEST_RUN_SWR_KEY } from "../swr.shared"
 

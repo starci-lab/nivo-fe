@@ -1,8 +1,8 @@
 import { act, renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import type { AgentosModuleRuntime } from "@/modules/api/agentos-module-runtime"
-import type { AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteShellBlock"
-import { moduleRuntimeFixture, runtimeContextFixture } from "@/test-support/mock-result"
+import type { AgentosModuleRuntime } from "../../modules/api/agentos-module-runtime"
+import type { AgentOSModuleView } from "../../components/blocks/agentos/ModuleRouteShellBlock"
+import { moduleRuntimeFixture, runtimeContextFixture } from "../../test-support/mock-result"
 import type { ModuleRuntimeControls } from "./agentos.shared"
 
 /*

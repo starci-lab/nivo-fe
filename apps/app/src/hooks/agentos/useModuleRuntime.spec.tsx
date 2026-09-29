@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import type { AgentosModuleRuntime } from "@/modules/api/agentos-module-runtime"
-import type { Outcome } from "@/modules/api/outcome"
+import type { AgentosModuleRuntime } from "../../modules/api/agentos-module-runtime"
+import type { Outcome } from "../../modules/api/outcome"
 import { MODULE_SETTLE_INTERVAL_MS } from "./agentos.shared"
 
 /*
@@ -46,7 +46,7 @@ vi.mock("@/hooks/swr/mutations/console", () => ({
     useMutateManageAgentosModuleRuntimeSwr: () => ({ trigger: mocks.trigger }),
 }))
 
-import { moduleRuntimeFixture } from "@/test-support/mock-result"
+import { moduleRuntimeFixture } from "../../test-support/mock-result"
 import { useModuleRuntime } from "./useModuleRuntime"
 
 const input = { workspaceId: "ws-own", installationId: "inst-1", view: "operate" as const }

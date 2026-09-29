@@ -1,8 +1,8 @@
 "use client"
 
 import { useCallback, useRef, useState } from "react"
-import type { AgentosModuleRuntime } from "@/modules/api/agentos-module-runtime"
-import { setupSessionFor } from "@/modules/agentos/module-page/setup-draft"
+import type { AgentosModuleRuntime } from "../../modules/api/agentos-module-runtime"
+import { setupSessionFor } from "../../modules/agentos/module-page/setup-draft"
 import {
     confirmationEvidence,
     idempotencyKey,

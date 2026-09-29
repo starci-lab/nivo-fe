@@ -2,12 +2,12 @@
 
 import { useCallback, useState } from "react"
 import { useMutateConfigureAgentWorkspaceChannelSwr } from "../swr/mutations/console"
-import type { AgentosModuleRuntime } from "@/modules/api/agentos-module-runtime"
-import type { AgentosRuntimeValue } from "@/modules/api/agentos-runtime-tree"
-import type { AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteShellBlock"
-import type { SettingsFormContentProps } from "@/modules/agentos/module-page/surface-types"
-import { activeVersionFor } from "@/modules/agentos/module-page/sessions"
-import { stringSetting } from "@/modules/agentos/module-page/runtime-values"
+import type { AgentosModuleRuntime } from "../../modules/api/agentos-module-runtime"
+import type { AgentosRuntimeValue } from "../../modules/api/agentos-runtime-tree"
+import type { AgentOSModuleView } from "../../components/blocks/agentos/ModuleRouteShellBlock"
+import type { SettingsFormContentProps } from "../../modules/agentos/module-page/surface-types"
+import { activeVersionFor } from "../../modules/agentos/module-page/sessions"
+import { stringSetting } from "../../modules/agentos/module-page/runtime-values"
 import { idempotencyKey, saveModuleCredential, type ModuleRuntimeControls } from "./agentos.shared"
 
 type ModuleSettingsValues = {
