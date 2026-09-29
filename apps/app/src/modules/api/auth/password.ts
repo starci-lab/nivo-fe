@@ -1,6 +1,8 @@
 import { graphql } from "../graphql"
+import { parseBooleanAnswer } from "../wire"
 import type { Outcome } from "../outcome"
 import { OTP_CHALLENGE } from "./documents"
+import { parseOtpChallenge } from "./guards"
 import type { ForgotPasswordInitInput, ForgotPasswordVerifyOtpInput, OtpChallenge, OtpResendInput, RequestPasswordResetInput, ResetPasswordInput } from "./types"
 
 /**
@@ -17,6 +19,7 @@ import type { ForgotPasswordInitInput, ForgotPasswordVerifyOtpInput, OtpChalleng
 export const forgotPasswordInit = (input: ForgotPasswordInitInput): Promise<Outcome<OtpChallenge>> =>
     graphql(
         `mutation ForgotPasswordInit($input: ForgotPasswordInitInput!) { forgotPasswordInit(request: $input) { data ${OTP_CHALLENGE} message success error } }`,
+        parseOtpChallenge,
         {
             input,
         },
@@ -31,6 +34,7 @@ export const forgotPasswordInit = (input: ForgotPasswordInitInput): Promise<Outc
 export const forgotPasswordResend = (input: OtpResendInput): Promise<Outcome<OtpChallenge>> =>
     graphql(
         `mutation ForgotPasswordResend($input: ForgotPasswordResendInput!) { forgotPasswordResend(request: $input) { data ${OTP_CHALLENGE} message success error } }`,
+        parseOtpChallenge,
         {
             input,
         },
@@ -60,6 +64,7 @@ export const forgotPasswordVerifyOtp = (input: ForgotPasswordVerifyOtpInput): Pr
                 }
             }
         `,
+        parseBooleanAnswer,
         {
             input,
         },
@@ -99,6 +104,7 @@ export const requestPasswordReset = (input: RequestPasswordResetInput): Promise<
                 }
             }
         `,
+        parseBooleanAnswer,
         {
             input,
         },
@@ -122,6 +128,7 @@ export const resetPassword = (input: ResetPasswordInput): Promise<Outcome<boolea
                 }
             }
         `,
+        parseBooleanAnswer,
         {
             input,
         },

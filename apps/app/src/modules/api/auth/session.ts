@@ -1,6 +1,7 @@
 import { graphql, graphqlEnvelope, type EnvelopeAnswer } from "../graphql"
 import type { Outcome } from "../outcome"
 import { AUTH_PAYLOAD } from "./documents"
+import { parseAuthPayload, parseEndPrincipalSessionsAnswer, parseSignOutEnvelope } from "./guards"
 import type { AuthPayload, EndPrincipalSessionsAnswer, EndPrincipalSessionsInput, SignOutInput, SignOutOutcome } from "./types"
 
 /**
@@ -13,7 +14,7 @@ import type { AuthPayload, EndPrincipalSessionsAnswer, EndPrincipalSessionsInput
  * @returns A fresh session, or why there is none.
  */
 export const refreshSession = (): Promise<Outcome<AuthPayload>> =>
-    graphql(`mutation RefreshSession { refreshSession { data ${AUTH_PAYLOAD} message success error } }`)
+    graphql(`mutation RefreshSession { refreshSession { data ${AUTH_PAYLOAD} message success error } }`, parseAuthPayload)
 
 /**
  * End this browser's session, or every session of the signed-in principal.
@@ -32,6 +33,7 @@ export const refreshSession = (): Promise<Outcome<AuthPayload>> =>
 export const signOut = (input?: SignOutInput): Promise<Outcome<EnvelopeAnswer<boolean, SignOutOutcome>>> =>
     graphqlEnvelope<boolean, SignOutOutcome>(
         "mutation SignOut($input: SignOutInput) { signOut(request: $input) { data remoteRevocationObserved authorityEndingConfirmed message success error } }",
+        parseSignOutEnvelope,
         input === undefined ? undefined : { input },
     )
 
@@ -70,6 +72,7 @@ export const endPrincipalSessions = (input: EndPrincipalSessionsInput): Promise<
                 }
             }
         `,
+        parseEndPrincipalSessionsAnswer,
         {
             input,
         },

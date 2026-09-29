@@ -1,6 +1,12 @@
 import { graphql } from "../graphql"
 import type { Outcome } from "../outcome"
 import { AUTH_PAYLOAD, BROKERED_PAYLOAD, SIGN_IN_PAYLOAD } from "./documents"
+import {
+    parseAuthPayload,
+    parseContinueBrokeredSignInPayload,
+    parseExchangeOauthCodePayload,
+    parseSignInPayload,
+} from "./guards"
 import type { AuthPayload, ContinueBrokeredSignInInput, ContinueBrokeredSignInPayload, ExchangeOauthCodeInput, ExchangeOauthCodePayload, SignInInput, SignInPayload, VerifyTwoFactorInput } from "./types"
 
 /**
@@ -18,6 +24,7 @@ import type { AuthPayload, ContinueBrokeredSignInInput, ContinueBrokeredSignInPa
 export const signIn = (input: SignInInput): Promise<Outcome<SignInPayload>> =>
     graphql(
         `mutation SignIn($input: SignInInput!) { signIn(request: $input) { data ${SIGN_IN_PAYLOAD} message success error } }`,
+        parseSignInPayload,
         {
             input,
         },
@@ -32,6 +39,7 @@ export const signIn = (input: SignInInput): Promise<Outcome<SignInPayload>> =>
 export const verifyTwoFactor = (input: VerifyTwoFactorInput): Promise<Outcome<AuthPayload>> =>
     graphql(
         `mutation VerifyTwoFactor($input: VerifyTwoFactorInput!) { verifyTwoFactor(request: $input) { data ${AUTH_PAYLOAD} message success error } }`,
+        parseAuthPayload,
         {
             input,
         },
@@ -56,6 +64,7 @@ export const verifyTwoFactor = (input: VerifyTwoFactorInput): Promise<Outcome<Au
 export const exchangeOauthCode = (input: ExchangeOauthCodeInput): Promise<Outcome<ExchangeOauthCodePayload>> =>
     graphql(
         `mutation ExchangeOauthCode($input: ExchangeOauthCodeInput!) { exchangeOauthCode(request: $input) { data ${BROKERED_PAYLOAD} message success error } }`,
+        parseExchangeOauthCodePayload,
         {
             input,
         },
@@ -79,6 +88,7 @@ export const continueBrokeredSignIn = (
 ): Promise<Outcome<ContinueBrokeredSignInPayload>> =>
     graphql(
         `mutation ContinueBrokeredSignIn($input: ContinueBrokeredSignInInput!) { continueBrokeredSignIn(request: $input) { data ${BROKERED_PAYLOAD} message success error } }`,
+        parseContinueBrokeredSignInPayload,
         {
             input,
         },

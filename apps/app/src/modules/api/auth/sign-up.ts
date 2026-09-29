@@ -1,6 +1,7 @@
 import { graphql } from "../graphql"
 import type { Outcome } from "../outcome"
 import { OTP_CHALLENGE, SIGN_UP_VERIFY_PAYLOAD } from "./documents"
+import { parseOtpChallenge, parseSignUpVerifyOtpPayload } from "./guards"
 import type { OtpChallenge, OtpResendInput, SignUpInitInput, SignUpVerifyOtpInput, SignUpVerifyOtpPayload } from "./types"
 
 /**
@@ -16,6 +17,7 @@ import type { OtpChallenge, OtpResendInput, SignUpInitInput, SignUpVerifyOtpInpu
 export const signUpInit = (input: SignUpInitInput): Promise<Outcome<OtpChallenge>> =>
     graphql(
         `mutation SignUpInit($input: SignUpInitInput!) { signUpInit(request: $input) { data ${OTP_CHALLENGE} message success error } }`,
+        parseOtpChallenge,
         {
             input,
         },
@@ -33,6 +35,7 @@ export const signUpInit = (input: SignUpInitInput): Promise<Outcome<OtpChallenge
 export const signUpResend = (input: OtpResendInput): Promise<Outcome<OtpChallenge>> =>
     graphql(
         `mutation SignUpResend($input: SignUpResendInput!) { signUpResend(request: $input) { data ${OTP_CHALLENGE} message success error } }`,
+        parseOtpChallenge,
         {
             input,
         },
@@ -52,6 +55,7 @@ export const signUpResend = (input: OtpResendInput): Promise<Outcome<OtpChalleng
 export const signUpVerifyOtp = (input: SignUpVerifyOtpInput): Promise<Outcome<SignUpVerifyOtpPayload>> =>
     graphql(
         `mutation SignUpVerifyOtp($input: SignUpVerifyOtpInput!) { signUpVerifyOtp(request: $input) { data ${SIGN_UP_VERIFY_PAYLOAD} message success error } }`,
+        parseSignUpVerifyOtpPayload,
         {
             input,
         },
