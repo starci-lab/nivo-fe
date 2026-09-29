@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "@heroui/styles/css";
 @import "@starci/grammar/common.css";
-@import "@nivo/ui/styles.css";
 @import "@nivo/ui/family.css";
 @import "../modules/brand/brand.css";
 @source "../../../../packages/nivo-ui/src";
