@@ -15,6 +15,19 @@ import {
     updateExpertSiteLead,
 } from "@/modules/api/academy"
 import { useNivoMutation } from "../useNivoMutation"
+import {
+    MUTATION_ACADEMY_COURSE_ACCESS_GRANT_SWR_KEY,
+    MUTATION_ACADEMY_COURSE_ACCESS_REVOKE_SWR_KEY,
+    MUTATION_ACADEMY_INTEGRATION_SWR_KEY,
+    MUTATION_ACADEMY_LEAD_DRAFT_SWR_KEY,
+    MUTATION_ACADEMY_LEAD_UPDATE_SWR_KEY,
+    MUTATION_ACADEMY_STUDENT_CREATE_SWR_KEY,
+    MUTATION_ACADEMY_STUDENT_STATUS_SWR_KEY,
+    QUERY_ACADEMY_INTEGRATIONS_SWR_KEY,
+    QUERY_ACADEMY_STUDENT_DETAIL_SWR_KEY,
+    QUERY_ACADEMY_STUDENTS_SWR_KEY,
+    QUERY_EXPERT_SITE_LEADS_SWR_KEY,
+} from "../swr.shared"
 type AcademyIntegrationCommand =
     | {
           readonly kind: "domain"
@@ -132,67 +145,67 @@ const executeAcademyIntegrationCommand = async (
 /** Own every Academy integration transport while preserving the provider-specific UI command. */
 export const useMutateAcademyIntegrationSwr = (siteId: string) =>
     useNivoMutation<AcademyIntegrationAnswer, AcademyIntegrationCommand>(
-        ["academy", "integration", siteId],
+        MUTATION_ACADEMY_INTEGRATION_SWR_KEY(siteId),
         (command) => executeAcademyIntegrationCommand(siteId, command),
         {
-            invalidates: [["academy", "integrations", siteId]],
+            invalidates: [QUERY_ACADEMY_INTEGRATIONS_SWR_KEY(siteId)],
             shouldInvalidate: (answer) => answer.ok,
         },
     )
 
 /** Create an Academy student and refresh the owner-scoped collection. */
 export const useMutateCreateAcademyStudentSwr = (siteId: string) =>
-    useNivoMutation(["academy", "student-create", siteId], createAcademyStudent, {
-        invalidates: [["academy", "students", siteId]],
+    useNivoMutation(MUTATION_ACADEMY_STUDENT_CREATE_SWR_KEY(siteId), createAcademyStudent, {
+        invalidates: [QUERY_ACADEMY_STUDENTS_SWR_KEY(siteId)],
         shouldInvalidate: (answer) => answer.ok,
     })
 
 /** Change one Academy student's status and refresh its collection and detail projections. */
 export const useMutateSetAcademyStudentStatusSwr = (siteId: string, memberId?: string) =>
-    useNivoMutation(["academy", "student-status", siteId], setAcademyStudentStatus, {
+    useNivoMutation(MUTATION_ACADEMY_STUDENT_STATUS_SWR_KEY(siteId), setAcademyStudentStatus, {
         invalidates:
             memberId === undefined
-                ? [["academy", "students", siteId]]
+                ? [QUERY_ACADEMY_STUDENTS_SWR_KEY(siteId)]
                 : [
-                      ["academy", "students", siteId],
-                      ["academy", "student", siteId, memberId],
+                      QUERY_ACADEMY_STUDENTS_SWR_KEY(siteId),
+                      QUERY_ACADEMY_STUDENT_DETAIL_SWR_KEY(siteId, memberId),
                   ],
         shouldInvalidate: (answer) => answer.ok,
     })
 
 /** Grant course access and refresh the affected student projection. */
 export const useMutateGrantAcademyCourseAccessSwr = (siteId: string, memberId?: string) =>
-    useNivoMutation(["academy", "course-access-grant", siteId], grantAcademyCourseAccess, {
+    useNivoMutation(MUTATION_ACADEMY_COURSE_ACCESS_GRANT_SWR_KEY(siteId), grantAcademyCourseAccess, {
         invalidates:
             memberId === undefined
-                ? [["academy", "students", siteId]]
+                ? [QUERY_ACADEMY_STUDENTS_SWR_KEY(siteId)]
                 : [
-                      ["academy", "students", siteId],
-                      ["academy", "student", siteId, memberId],
+                      QUERY_ACADEMY_STUDENTS_SWR_KEY(siteId),
+                      QUERY_ACADEMY_STUDENT_DETAIL_SWR_KEY(siteId, memberId),
                   ],
         shouldInvalidate: (answer) => answer.ok,
     })
 
 /** Revoke course access and refresh the affected student projection. */
 export const useMutateRevokeAcademyCourseAccessSwr = (siteId: string, memberId?: string) =>
-    useNivoMutation(["academy", "course-access-revoke", siteId], revokeAcademyCourseAccess, {
+    useNivoMutation(MUTATION_ACADEMY_COURSE_ACCESS_REVOKE_SWR_KEY(siteId), revokeAcademyCourseAccess, {
         invalidates:
             memberId === undefined
-                ? [["academy", "students", siteId]]
+                ? [QUERY_ACADEMY_STUDENTS_SWR_KEY(siteId)]
                 : [
-                      ["academy", "students", siteId],
-                      ["academy", "student", siteId, memberId],
+                      QUERY_ACADEMY_STUDENTS_SWR_KEY(siteId),
+                      QUERY_ACADEMY_STUDENT_DETAIL_SWR_KEY(siteId, memberId),
                   ],
         shouldInvalidate: (answer) => answer.ok,
     })
 
 /** Generate a reply draft without changing the durable lead collection. */
 export const useMutateDraftLeadReplySwr = (siteId: string) =>
-    useNivoMutation(["academy", "lead-draft", siteId], draftLeadReply)
+    useNivoMutation(MUTATION_ACADEMY_LEAD_DRAFT_SWR_KEY(siteId), draftLeadReply)
 
 /** Advance or annotate a lead and refresh its owner-scoped collection. */
 export const useMutateUpdateExpertSiteLeadSwr = (siteId: string) =>
-    useNivoMutation(["academy", "lead-update", siteId], updateExpertSiteLead, {
-        invalidates: [["academy", "leads", siteId]],
+    useNivoMutation(MUTATION_ACADEMY_LEAD_UPDATE_SWR_KEY(siteId), updateExpertSiteLead, {
+        invalidates: [QUERY_EXPERT_SITE_LEADS_SWR_KEY(siteId)],
         shouldInvalidate: (answer) => answer.ok,
     })

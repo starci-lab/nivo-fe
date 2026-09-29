@@ -2,14 +2,12 @@
 
 import { createContext, useContext, useMemo } from "react"
 import type { ComponentType } from "react"
-import {
-    useQueryMyAgentWorkspacesSwr,
-    useQueryMyDomainsSwr,
-    useQueryMyExpertSitesSwr,
-    useQueryMyInvoicesSwr,
-    useQueryMyPodOpenclawStatusSwr,
-    useQueryMyWalletSwr,
-} from "../swr/queries/console"
+import { useQueryMyAgentWorkspacesSwr } from "../swr/queries/useQueryMyAgentWorkspacesSwr"
+import { useQueryMyDomainsSwr } from "../swr/queries/useQueryMyDomainsSwr"
+import { useQueryMyExpertSitesSwr } from "../swr/queries/useQueryMyExpertSitesSwr"
+import { useQueryMyInvoicesSwr } from "../swr/queries/useQueryMyInvoicesSwr"
+import { useQueryMyPodOpenclawStatusSwr } from "../swr/queries/useQueryMyPodOpenclawStatusSwr"
+import { useQueryMyWalletSwr } from "../swr/queries/useQueryMyWalletSwr"
 import { type AgentWorkspaceRow } from "@/modules/api/agentos-workspaces"
 import { type DomainRow, type InvoiceRow, type WalletRow } from "@/modules/api/commerce"
 import { type ExpertSiteRow } from "@/modules/api/expert-sites"

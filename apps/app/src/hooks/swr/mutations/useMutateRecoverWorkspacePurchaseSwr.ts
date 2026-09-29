@@ -2,6 +2,7 @@
 
 import { recoverWorkspacePurchase, type WorkspaceCheckoutRecoverRequest } from "@/modules/api/workspace-controlplane"
 import { useNivoMutation } from "../useNivoMutation"
+import { MUTATION_WORKSPACE_CHECKOUT_RECOVER_SWR_KEY } from "../swr.shared"
 import { workspaceCheckoutStatusQueryKey } from "../queries/useQueryWorkspaceCheckoutStatusSwr"
 
 /*
@@ -18,7 +19,7 @@ import { workspaceCheckoutStatusQueryKey } from "../queries/useQueryWorkspaceChe
  */
 export const useMutateRecoverWorkspacePurchaseSwr = () =>
     useNivoMutation(
-        ["workspace-checkout", "recover"],
+        MUTATION_WORKSPACE_CHECKOUT_RECOVER_SWR_KEY,
         (request: WorkspaceCheckoutRecoverRequest) => recoverWorkspacePurchase(request),
         {
             invalidates: (request) => [workspaceCheckoutStatusQueryKey(request.purchaseId)],

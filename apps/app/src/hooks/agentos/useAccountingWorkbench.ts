@@ -11,7 +11,7 @@ import type {
     AccountingSummaryQueryInput,
 } from "@/modules/api/accounting"
 import { nivoQueryData } from "@/modules/query"
-import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/console"
+import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
 import { useQueryAccountingEvidenceSwr } from "@/hooks/swr/queries/useQueryAccountingEvidenceSwr"
 import { useQueryAccountingResultDetailSwr } from "@/hooks/swr/queries/useQueryAccountingResultDetailSwr"
 import { useQueryAccountingRoutineResultSwr } from "@/hooks/swr/queries/useQueryAccountingRoutineResultSwr"

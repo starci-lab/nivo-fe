@@ -14,6 +14,7 @@ import {
 import type { Outcome } from "@/modules/api/outcome"
 import { useAccessToken } from "../../auth/useAccessToken"
 import { useNivoMutation, type NivoMutationKey } from "../useNivoMutation"
+import { collabDomainKeys } from "../swr.shared"
 
 /**
  * Collab Office mutation ownership (`contract.collab.chat` press/post,
@@ -32,16 +33,6 @@ import { useNivoMutation, type NivoMutationKey } from "../useNivoMutation"
  * affected domains through SWR's filter form, only after the boundary answered `ok`.
  * A refused or uncertain answer revalidates nothing the read didn't already prove.
  */
-
-/** Every cached collab query key of one workspace inside these domains. */
-const collabDomainKeys =
-    (workspaceId: string, domains: ReadonlyArray<string>) =>
-    (key: unknown): boolean =>
-        Array.isArray(key) &&
-        key[0] === "NIVO_QUERY" &&
-        key[2] === "collab" &&
-        key[4] === workspaceId &&
-        domains.includes(key[3] as string)
 
 /** Revalidate the workspace's cached projections in `domains` after an accepted answer. */
 const useCollabRevalidate = (workspaceId: string | null, domains: ReadonlyArray<string>) => {

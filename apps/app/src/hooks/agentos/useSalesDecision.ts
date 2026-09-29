@@ -3,7 +3,7 @@
 import { useRef, useState } from "react"
 import type { SalesDecideProposalRequest, SalesDecisionValue, SalesInstallationScope } from "@/modules/api/sales"
 import { nivoQueryData } from "@/modules/query"
-import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/console"
+import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
 import { useQuerySalesDecisionRequestSwr } from "@/hooks/swr/queries/useQuerySalesDecisionRequestSwr"
 import { useMutateSalesDecideProposalSwr } from "@/hooks/swr/mutations/useMutateSalesDecideProposalSwr"
 import {

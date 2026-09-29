@@ -10,7 +10,15 @@ import {
 } from "@/modules/api/workspace-controlplane"
 import { useAccessToken } from "../../auth/useAccessToken"
 import { useNivoMutation } from "../useNivoMutation"
-import { agentWorkspacesQueryKey } from "../queries/console"
+import {
+    MUTATION_AGENTOS_WORKSPACE_PROVISIONING_RETRY_SWR_KEY,
+    MUTATION_CHATBOT_BIND_CHANNEL_SWR_KEY,
+    MUTATION_CHATBOT_HANDOFF_SWR_KEY,
+    MUTATION_CHATBOT_RECONCILE_DELIVERY_SWR_KEY,
+    MUTATION_CHATBOT_RESOLVE_HANDOFF_SWR_KEY,
+    MUTATION_CHATBOT_ZALO_OAUTH_SWR_KEY,
+    QUERY_AGENT_WORKSPACES_SWR_KEY,
+} from "../swr.shared"
 import { chatbotWorkbenchQueryKey, type SupportQueryIdentity } from "../queries/useQueryChatbotWorkbenchSwr"
 type AcceptedAnswer = {
     readonly ok: boolean
@@ -23,7 +31,7 @@ export const useMutateBindChatbotChannelSwr = (identity: SupportQueryIdentity) =
     const accessToken = useAccessToken()
     return useNivoMutation(
         identity.enabled && identity.hostname !== null && accessToken !== null
-            ? ["chatbot", "bind-channel", identity.workspaceId, identity.installationId]
+            ? MUTATION_CHATBOT_BIND_CHANNEL_SWR_KEY(identity.workspaceId, identity.installationId)
             : null,
         (input: Readonly<Record<string, unknown>>) =>
             bindChatbotChannel(identity.hostname ?? "", identity.workspaceId, accessToken ?? "", input),
@@ -39,7 +47,7 @@ export const useMutateStartChatbotZaloOauthSwr = (identity: SupportQueryIdentity
     const accessToken = useAccessToken()
     return useNivoMutation(
         identity.enabled && identity.hostname !== null && accessToken !== null
-            ? ["chatbot", "zalo-oauth", identity.workspaceId, identity.installationId]
+            ? MUTATION_CHATBOT_ZALO_OAUTH_SWR_KEY(identity.workspaceId, identity.installationId)
             : null,
         (input: Readonly<Record<string, unknown>>) =>
             startChatbotZaloOauth(identity.hostname ?? "", identity.workspaceId, accessToken ?? "", input),
@@ -55,7 +63,7 @@ export const useMutateSetChatbotHandoffSwr = (identity: SupportQueryIdentity) =>
     const accessToken = useAccessToken()
     return useNivoMutation(
         identity.enabled && identity.hostname !== null && accessToken !== null
-            ? ["chatbot", "handoff", identity.workspaceId, identity.installationId]
+            ? MUTATION_CHATBOT_HANDOFF_SWR_KEY(identity.workspaceId, identity.installationId)
             : null,
         (input: Readonly<Record<string, unknown>>) =>
             setChatbotHandoff(identity.hostname ?? "", identity.workspaceId, accessToken ?? "", input),
@@ -71,7 +79,7 @@ export const useMutateResolveChatbotHandoffSwr = (identity: SupportQueryIdentity
     const accessToken = useAccessToken()
     return useNivoMutation(
         identity.enabled && identity.hostname !== null && accessToken !== null
-            ? ["chatbot", "resolve-handoff", identity.workspaceId, identity.installationId]
+            ? MUTATION_CHATBOT_RESOLVE_HANDOFF_SWR_KEY(identity.workspaceId, identity.installationId)
             : null,
         (input: Readonly<Record<string, unknown>>) =>
             resolveChatbotHandoff(identity.hostname ?? "", identity.workspaceId, accessToken ?? "", input),
@@ -87,7 +95,7 @@ export const useMutateReconcileChatbotDeliverySwr = (identity: SupportQueryIdent
     const accessToken = useAccessToken()
     return useNivoMutation(
         identity.enabled && identity.hostname !== null && accessToken !== null
-            ? ["chatbot", "reconcile-delivery", identity.workspaceId, identity.installationId]
+            ? MUTATION_CHATBOT_RECONCILE_DELIVERY_SWR_KEY(identity.workspaceId, identity.installationId)
             : null,
         (input: Readonly<Record<string, unknown>>) =>
             reconcileChatbotDelivery(identity.hostname ?? "", identity.workspaceId, accessToken ?? "", input),
@@ -101,10 +109,10 @@ export const useMutateReconcileChatbotDeliverySwr = (identity: SupportQueryIdent
 /** Re-drive provisioning of one failed workspace; the workspace row is the fenced retry identity. */
 export const useMutateRetryWorkspaceProvisioningOrderSwr = (workspaceId: string) =>
     useNivoMutation(
-        ["agentos", "workspace-provisioning-retry", workspaceId],
+        MUTATION_AGENTOS_WORKSPACE_PROVISIONING_RETRY_SWR_KEY(workspaceId),
         () => retryWorkspaceProvisioningOrder(workspaceId),
         {
-            invalidates: [agentWorkspacesQueryKey],
+            invalidates: [QUERY_AGENT_WORKSPACES_SWR_KEY],
             shouldInvalidate: accepted,
         },
     )

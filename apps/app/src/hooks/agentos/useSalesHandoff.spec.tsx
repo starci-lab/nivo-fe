@@ -29,7 +29,7 @@ const mocks = vi.hoisted(() => {
     }
 })
 
-vi.mock("@/hooks/swr/queries/console", () => ({
+vi.mock("@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr", () => ({
     useQueryMyAgentWorkspaceControlCenterSwr: () => mocks.controlCenter.value,
 }))
 

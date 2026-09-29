@@ -33,7 +33,7 @@ const mocks = vi.hoisted(() => {
 })
 
 vi.mock("next/navigation", () => ({ useParams: () => mocks.params.value }))
-vi.mock("@/hooks/swr/queries/console", () => ({
+vi.mock("@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr", () => ({
     useQueryMyAgentWorkspaceControlCenterSwr: () => mocks.controlCenter.value,
 }))
 vi.mock("@/modules/query", () => ({

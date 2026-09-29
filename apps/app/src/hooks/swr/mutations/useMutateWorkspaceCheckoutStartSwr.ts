@@ -7,6 +7,7 @@ import {
     type WorkspaceCheckoutStartRequest,
 } from "@/modules/api/workspace-controlplane"
 import { useNivoMutation } from "../useNivoMutation"
+import { MUTATION_WORKSPACE_CHECKOUT_START_SWR_KEY } from "../swr.shared"
 import { workspaceCheckoutStatusQueryKey } from "../queries/useQueryWorkspaceCheckoutStatusSwr"
 
 /*
@@ -30,7 +31,7 @@ const admittedPurchaseId = (answer: Outcome<WorkspaceCheckoutAnswer>): string | 
  */
 export const useMutateWorkspaceCheckoutStartSwr = () =>
     useNivoMutation(
-        ["workspace-checkout", "start"],
+        MUTATION_WORKSPACE_CHECKOUT_START_SWR_KEY,
         (request: WorkspaceCheckoutStartRequest) => startWorkspaceCheckoutPurchase(request),
         {
             invalidates: (_request, answer) => {

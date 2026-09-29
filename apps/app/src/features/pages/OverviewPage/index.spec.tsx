@@ -13,14 +13,14 @@ const mocks = vi.hoisted(() => ({
     wallet: vi.fn(),
     invoices: vi.fn(),
 }))
-vi.mock("@/hooks/swr/queries/console", () => ({
-    useQueryMyExpertSitesSwr: mocks.apps,
-    useQueryMyAgentWorkspacesSwr: mocks.workspaces,
+vi.mock("@/hooks/swr/queries/useQueryMyExpertSitesSwr", () => ({ useQueryMyExpertSitesSwr: mocks.apps }))
+vi.mock("@/hooks/swr/queries/useQueryMyAgentWorkspacesSwr", () => ({ useQueryMyAgentWorkspacesSwr: mocks.workspaces }))
+vi.mock("@/hooks/swr/queries/useQueryMyPodOpenclawStatusSwr", () => ({
     useQueryMyPodOpenclawStatusSwr: mocks.pod,
-    useQueryMyDomainsSwr: mocks.domains,
-    useQueryMyWalletSwr: mocks.wallet,
-    useQueryMyInvoicesSwr: mocks.invoices,
 }))
+vi.mock("@/hooks/swr/queries/useQueryMyDomainsSwr", () => ({ useQueryMyDomainsSwr: mocks.domains }))
+vi.mock("@/hooks/swr/queries/useQueryMyWalletSwr", () => ({ useQueryMyWalletSwr: mocks.wallet }))
+vi.mock("@/hooks/swr/queries/useQueryMyInvoicesSwr", () => ({ useQueryMyInvoicesSwr: mocks.invoices }))
 vi.mock("@/hooks", async (importOriginal) => ({
     ...(await importOriginal<object>()),
     useRouter: () => ({ push: mocks.push }),
