@@ -13,6 +13,7 @@ import { useQueryChatbotWorkbenchSwr, useQueryMyAgentosModuleRuntimeSwr, useQuer
 import { type AgentosModuleRuntime, type AgentosRuntimeManifest, type ManageAgentosModuleRuntimeInput } from "@/modules/api/agentos-module-runtime";
 import type { AgentosRuntimeValue } from "@/modules/api/agentos-runtime-tree";
 import { nivoQueryData, type NivoQueryAnswer } from "@/modules/query";
+import { abortableWait } from "@/modules/window/abortable-wait";
 import { AgentOSSolutionModulePageBase, AgentOSSolutionModuleState, buildModulePageCopy, exactTestSurfaceFor, type ModulePageCopy, type AgentOSSolutionModulePageViewProps, type AgentOSSolutionModuleScreen } from "./component";
 
 /** Exact workspace and installation route identities connected by the page. */
@@ -25,7 +26,6 @@ const idempotencyKey = (): string => globalThis.crypto.randomUUID();
 const POLL_INTERVAL_MS = 1000;
 // Controller AI turns may legitimately use the 75-second provider budget.
 const POLL_ATTEMPTS = 90;
-const wait = (duration: number): Promise<void> => new Promise(resolve => globalThis.setTimeout(resolve, duration));
 const sha256 = async (value: string): Promise<string> => Array.from(new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)))).map(byte => byte.toString(16).padStart(2, "0")).join("");
 const telegramAccountIdFromToken = (token: string): string | null => {
   const separator = token.indexOf(":");
@@ -240,6 +240,15 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     setIndexedSourceAttachments(current => JSON.stringify(current) === JSON.stringify(attachments) ? current : attachments);
   }, []);
   const setupLock = useRef(false);
+  // One settle-poll at a time: the page's unmount and a newer poll both abandon the one in flight.
+  const pollAbort = useRef<AbortController | null>(null);
+  const beginPoll = useCallback((): AbortSignal => {
+    pollAbort.current?.abort();
+    const controller = new AbortController();
+    pollAbort.current = controller;
+    return controller.signal;
+  }, []);
+  useEffect(() => () => pollAbort.current?.abort(), []);
 
   const [selectedOperationTarget, setSelectedOperationTarget] = useState<OperationTarget | null>(null);
   const [setupPane, setSetupPane] = useState<SetupPane>("conversation");
@@ -322,10 +331,13 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     return result.data;
   }, [mutateRuntime, runtimeQuery, workspaceId]);
   const pollRuntimeUntil = useCallback(async (settled: (candidate: AgentosModuleRuntime) => boolean, markRefused = true): Promise<AgentosModuleRuntime | null> => {
+    const signal = beginPoll();
     setPending(true);
     for (let attempt = 0; attempt < POLL_ATTEMPTS; attempt += 1) {
-      await wait(POLL_INTERVAL_MS);
+      // An abandoned poll settles nothing and touches no state: the page it belonged to is gone.
+      if (!await abortableWait(POLL_INTERVAL_MS, signal)) return null;
       const result = await runtimeQuery.mutate();
+      if (signal.aborted) return null;
       if (result === undefined) {
         setPending(false);
         if (markRefused) setActionRefused(true);
@@ -344,7 +356,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     setPending(false);
     if (markRefused) setActionRefused(true);
     return null;
-  }, [runtimeQuery, workspaceId]);
+  }, [beginPoll, runtimeQuery, workspaceId]);
   const startSetupRevision = useCallback(() => {
     if (setupLock.current || pending) return;
     setupLock.current = true;
@@ -605,9 +617,11 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
       setPending(false);
       return;
     }
+    const signal = beginPoll();
     for (let attempt = 0; attempt < POLL_ATTEMPTS; attempt += 1) {
-      await wait(POLL_INTERVAL_MS);
+      if (!await abortableWait(POLL_INTERVAL_MS, signal)) return;
       const next = await readTestRun(runId);
+      if (signal.aborted) return;
       if (!next.ok) {
         setPending(false);
         setActionRefused(true);
@@ -623,7 +637,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     }
     setPending(false);
     setActionRefused(true);
-  }, [installationId, mutateTest, readTestRun, testSurfaceQuery]);
+  }, [beginPoll, installationId, mutateTest, readTestRun, testSurfaceQuery]);
   const settings = runtime?.settings ?? {};
   const displayName = runtime === null ? "" : stringSetting(settings.displayName, stringSetting(runtime.installation.displayName, runtime.installation.moduleKey)).trim();
   const modelProfile = stringSetting(settings.modelProfile, "nivo-default");
