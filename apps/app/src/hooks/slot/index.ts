@@ -1,1 +1,0 @@
-export { useSlotLabels } from "./useSlotLabels";
