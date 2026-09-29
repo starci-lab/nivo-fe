@@ -7,7 +7,7 @@ describe("NivoBrand", () => {
         const { container } = render(<NivoBrand props={{ label: "nivo", variant: "lockup", scale: "navbar" }} />)
 
         expect(screen.getByRole("img", { name: "nivo" })).toBeInTheDocument()
-        expect(container.querySelector("[data-part='wordmark']")).toHaveClass("nivo-brand__ink")
+        expect(container.querySelector("[data-part='wordmark']")).toHaveClass("fill-[var(--nivo-brand-ink)]")
         expect(container.querySelectorAll("[data-part='orbit'] path")).toHaveLength(4)
         expect(container.innerHTML).not.toMatch(/#[0-9a-f]{3,8}/i)
     })

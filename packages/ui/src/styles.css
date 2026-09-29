@@ -1,40 +1,5 @@
-@layer nivo-ui {
-    .nivo-brand__ink {
-        fill: var(--nivo-brand-ink);
-    }
-
-    .nivo-brand__accent {
-        fill: none;
-        stroke: var(--nivo-brand-accent);
-        stroke-linecap: butt;
-        stroke-width: 18;
-    }
-
-    .collapsible-rail {
-        display: none;
-        color: var(--foreground);
-    }
-
-    .collapsible-rail-control {
-        cursor: pointer;
-        border: 0;
-        border-radius: 9999px;
-        background: transparent;
-        color: var(--foreground);
-    }
-
-    .collapsible-rail-control:hover {
-        background: var(--default);
-    }
-
-    .collapsible-rail-control:focus-visible {
-        outline: 2px solid var(--focus);
-        outline-offset: 2px;
-    }
-
-    @media (min-width: 768px) {
-        .collapsible-rail {
-            display: flex;
-        }
-    }
-}
+/*
+ * Every rule that lived here is now a utility in the owning unit's classNames.ts. The layer name
+ * stays registered for the app stylesheet that still imports this file while its lane lands.
+ */
+@layer nivo-ui;

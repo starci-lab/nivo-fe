@@ -9,6 +9,6 @@ describe("StarCiDashboardThemeBoundary", () => {
         render(<StarCiDashboardThemeBoundary content={Dashboard} contentProps={{}} />)
 
         const boundary = screen.getByText("Dashboard").parentElement
-        expect(boundary).toHaveClass("starci-dashboard-theme")
+        expect(boundary).toHaveClass("min-h-dvh", "bg-background", "text-foreground")
     })
 })

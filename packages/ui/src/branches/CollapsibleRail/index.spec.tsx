@@ -60,7 +60,7 @@ describe("CollapsibleRail", () => {
         const toggle = screen.getByRole("button", { name: "Collapse navigation" })
         const destinations = screen.getByText("Expanded destinations")
 
-        expect(host).toHaveClass("collapsible-rail")
+        expect(host).toHaveClass("hidden", "md:flex", "text-foreground")
         expect(toggle).toHaveAttribute("aria-expanded", "true")
         expect(screen.getByRole("heading", { name: "Console navigation", level: 2 })).toBeInTheDocument()
         expect(host).toContainElement(destinations)
@@ -113,7 +113,7 @@ describe("CollapsibleRail", () => {
         )
 
         expect(screen.queryByRole("complementary")).not.toBeInTheDocument()
-        expect(screen.getByText("Expanded destinations").closest(".collapsible-rail")).toBeInTheDocument()
+        expect(screen.getByText("Expanded destinations").closest('[class~="md:flex"]')).toBeInTheDocument()
     })
 
     it("restores a persisted collapsed preference after mounting", async () => {
