@@ -28,11 +28,10 @@ export const AgentOSOpenClawLaunch = (props: AgentOSOpenClawLaunchProps) => {
     const [retry, setRetry] = useState(0)
     const [launchState, setLaunchState] = useState<OpenClawLaunchBlockState>("issuing")
     const [expiresAt, setExpiresAt] = useState<string>()
+    if (session.state.status === "anonymous" && launchState !== "blocked") {
+        setLaunchState("blocked")
+    }
     useEffect(() => {
-        if (session.state.status === "anonymous") {
-            setLaunchState("blocked")
-            return
-        }
         if (session.state.status !== "signed-in" || started.current) return
         started.current = true
         const channel = new BroadcastChannel(workspaceAppLaunchChannelName(workspaceId))
