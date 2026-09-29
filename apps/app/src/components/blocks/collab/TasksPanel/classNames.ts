@@ -1,11 +1,5 @@
 ﻿import { cn } from "@heroui/react"
 
-/** Native labelled select, shared by the role and Tasks filters. */
-export const GROUP_CHAT_NATIVE_FIELD_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-2")
-
-/** The native select/input control keeps the app's control rhythm. */
-export const GROUP_CHAT_NATIVE_CONTROL_CLASS_NAME = cn("min-h-11", "w-full", "px-4", "py-3")
-
 /** Tasks filter row: three labelled selects in one reading line on wide screens. */
 export const GROUP_CHAT_FILTERS_CLASS_NAME = cn("grid", "grid-cols-1", "gap-3", "sm:grid-cols-3")
 

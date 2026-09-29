@@ -137,9 +137,6 @@ export const GROUP_CHAT_COMPOSER_SEND_CLASS_NAME = cn(
     "whitespace-nowrap",
 )
 
-/** One inline glyph of the composer's decorative cluster. */
-export const GROUP_CHAT_COMPOSER_GLYPH_CLASS_NAME = cn("h-5", "w-5")
-
 /** The in-progress send keeps its draft visible and locked above the composer. */
 export const GROUP_CHAT_SEND_STATE_CLASS_NAME = cn("flex", "items-center", "justify-between", "gap-3", "px-3", "py-2")
 

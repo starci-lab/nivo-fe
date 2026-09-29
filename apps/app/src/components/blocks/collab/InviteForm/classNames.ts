@@ -1,17 +1,5 @@
 ﻿import { cn } from "@heroui/react"
 
-/** Constrained column that may shrink but never claim extra width. */
-export const GROUP_CHAT_FIELD_BODY_CLASS_NAME = cn("min-w-0")
-
-/** Native role choices sit on one wrapping line. */
-export const GROUP_CHAT_ROLE_CHOICES_CLASS_NAME = cn("flex", "flex-wrap", "items-center", "gap-4")
-
-/** One radio-like role choice keeps the native input for focus and keyboard behaviour. */
-export const GROUP_CHAT_ROLE_CHOICE_CLASS_NAME = cn("inline-flex", "items-center", "gap-2")
-
-/** The role radio reads as a quiet circle until the accent fills the checked one. */
-export const GROUP_CHAT_ROLE_RADIO_CLASS_NAME = cn("h-4", "w-4", "accent-current")
-
 /** Vertical stack shared by the invite and acceptance forms. */
 export const GROUP_CHAT_FORM_STACK_CLASS_NAME = cn(
     "flex",

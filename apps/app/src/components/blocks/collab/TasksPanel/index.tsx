@@ -1,14 +1,16 @@
-﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "../../../../modules/collab/group-chat/types"
+﻿import type {
+    GroupChatPageLabels,
+    GroupChatPageView,
+    GroupChatPageActions,
+} from "../../../../modules/collab/group-chat/types"
 import {
-    GROUP_CHAT_NATIVE_FIELD_CLASS_NAME,
-    GROUP_CHAT_NATIVE_CONTROL_CLASS_NAME,
     GROUP_CHAT_FILTERS_CLASS_NAME,
     GROUP_CHAT_TASKS_COLUMN_CLASS_NAME,
     GROUP_CHAT_TASK_ROW_CLASS_NAME,
     GROUP_CHAT_TASK_STATEMENT_CLASS_NAME,
 } from "./classNames"
-import { EmptyNotice, Text } from "@starci/grammar/common"
-import { Badge, Button, SurfaceListCard } from "@starci/grammar/common"
+import { Badge, Button, EmptyNotice, Select, SurfaceListCard, Text } from "@starci/grammar/common"
+import type { CollabTaskStatus } from "../../../../modules/api/collab"
 import type { CollabTasksFilter } from "../../../../hooks"
 import { COLLAB_TASK_STATUSES, isCollabTaskStatus } from "../../../../modules/collab/group-chat/model.guards"
 import {
@@ -17,6 +19,8 @@ import {
     shortTaskRef,
     taskStatusTone,
 } from "../../../../modules/collab/group-chat/model"
+
+const ALL_FILTER_OPTION_ID = "__all__"
 
 /** Props for the Tasks tab: roster-keyed filters and Office-bound rows. */
 type TasksPanelProps = {
@@ -31,82 +35,66 @@ export const TasksPanel = (props: TasksPanelProps) => {
     const { humans, modules } = partitionParticipants(view.participants)
     const invalid = invalidTasksFilter(view.tasks.filter, view.participants)
     const selectFilter = (patch: Partial<CollabTasksFilter>) => on.changeTasksFilter({ ...view.tasks.filter, ...patch })
+    const personOptions = [
+        { id: ALL_FILTER_OPTION_ID, label: labels.tasks.filterAll },
+        ...humans.map((human) => ({ id: human.memberId, label: human.displayName })),
+    ]
+    const moduleOptions = [
+        { id: ALL_FILTER_OPTION_ID, label: labels.tasks.filterAll },
+        ...modules.flatMap((module) =>
+            module.moduleInstallationId === null
+                ? []
+                : [{ id: module.moduleInstallationId, label: module.displayName }],
+        ),
+    ]
+    const statusOptions = [
+        { id: ALL_FILTER_OPTION_ID, label: labels.tasks.filterAll },
+        ...COLLAB_TASK_STATUSES.map((status) => ({
+            id: status,
+            label: labels.statuses[status],
+        })),
+    ]
     return (
         <div className={GROUP_CHAT_TASKS_COLUMN_CLASS_NAME}>
             <div className={GROUP_CHAT_FILTERS_CLASS_NAME}>
-                <label className={GROUP_CHAT_NATIVE_FIELD_CLASS_NAME} htmlFor="collab-filter-person">
-                    <Text size="sm" weight="semibold">
-                        {labels.tasks.filterPerson}
-                    </Text>
-                    <select
-                        className={GROUP_CHAT_NATIVE_CONTROL_CLASS_NAME}
-                        id="collab-filter-person"
-                        name="filter-person"
-                        value={view.tasks.filter.personMemberId ?? ""}
-                        onChange={(event) =>
-                            selectFilter({
-                                personMemberId:
-                                    event.currentTarget.value === "" ? undefined : event.currentTarget.value,
-                            })
-                        }
-                    >
-                        <option value="">{labels.tasks.filterAll}</option>
-                        {humans.map((human) => (
-                            <option key={human.memberId} value={human.memberId}>
-                                {human.displayName}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-                <label className={GROUP_CHAT_NATIVE_FIELD_CLASS_NAME} htmlFor="collab-filter-module">
-                    <Text size="sm" weight="semibold">
-                        {labels.tasks.filterModule}
-                    </Text>
-                    <select
-                        className={GROUP_CHAT_NATIVE_CONTROL_CLASS_NAME}
-                        id="collab-filter-module"
-                        name="filter-module"
-                        value={view.tasks.filter.moduleInstallationId ?? ""}
-                        onChange={(event) =>
-                            selectFilter({
-                                moduleInstallationId:
-                                    event.currentTarget.value === "" ? undefined : event.currentTarget.value,
-                            })
-                        }
-                    >
-                        <option value="">{labels.tasks.filterAll}</option>
-                        {modules.map((module) => (
-                            <option
-                                key={module.moduleInstallationId ?? module.memberId}
-                                value={module.moduleInstallationId ?? ""}
-                            >
-                                {module.displayName}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-                <label className={GROUP_CHAT_NATIVE_FIELD_CLASS_NAME} htmlFor="collab-filter-status">
-                    <Text size="sm" weight="semibold">
-                        {labels.tasks.filterStatus}
-                    </Text>
-                    <select
-                        className={GROUP_CHAT_NATIVE_CONTROL_CLASS_NAME}
-                        id="collab-filter-status"
-                        name="filter-status"
-                        value={view.tasks.filter.status ?? ""}
-                        onChange={(event) => {
-                            const next = event.currentTarget.value
-                            selectFilter({ status: isCollabTaskStatus(next) ? next : undefined })
-                        }}
-                    >
-                        <option value="">{labels.tasks.filterAll}</option>
-                        {COLLAB_TASK_STATUSES.map((status) => (
-                            <option key={status} value={status}>
-                                {labels.statuses[status]}
-                            </option>
-                        ))}
-                    </select>
-                </label>
+                <Select
+                    name="filter-person"
+                    label={labels.tasks.filterPerson}
+                    options={personOptions}
+                    value={view.tasks.filter.personMemberId ?? ALL_FILTER_OPTION_ID}
+                    onValueChange={(personMemberId) =>
+                        selectFilter({
+                            personMemberId:
+                                personMemberId === ALL_FILTER_OPTION_ID ? undefined : (personMemberId ?? undefined),
+                        })
+                    }
+                />
+                <Select
+                    name="filter-module"
+                    label={labels.tasks.filterModule}
+                    options={moduleOptions}
+                    value={view.tasks.filter.moduleInstallationId ?? ALL_FILTER_OPTION_ID}
+                    onValueChange={(moduleInstallationId) =>
+                        selectFilter({
+                            moduleInstallationId:
+                                moduleInstallationId === ALL_FILTER_OPTION_ID
+                                    ? undefined
+                                    : (moduleInstallationId ?? undefined),
+                        })
+                    }
+                />
+                <Select
+                    name="filter-status"
+                    label={labels.tasks.filterStatus}
+                    options={statusOptions}
+                    value={view.tasks.filter.status ?? ALL_FILTER_OPTION_ID}
+                    onValueChange={(status) =>
+                        selectFilter({
+                            status:
+                                status !== null && isCollabTaskStatus(status) ? status : undefined,
+                        })
+                    }
+                />
             </div>
             <Text size="xs" tone="muted">
                 {labels.tasks.filterHint}

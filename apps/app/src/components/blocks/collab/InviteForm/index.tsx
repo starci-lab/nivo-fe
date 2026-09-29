@@ -1,15 +1,12 @@
-﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "../../../../modules/collab/group-chat/types"
-import {
-    GROUP_CHAT_FIELD_BODY_CLASS_NAME,
-    GROUP_CHAT_ROLE_CHOICES_CLASS_NAME,
-    GROUP_CHAT_ROLE_CHOICE_CLASS_NAME,
-    GROUP_CHAT_ROLE_RADIO_CLASS_NAME,
-    GROUP_CHAT_FORM_STACK_CLASS_NAME,
-    GROUP_CHAT_FORM_STACK_COMPACT_CLASS_NAME,
-} from "./classNames"
-import { Input, Text } from "@starci/grammar/common"
-import { Button } from "@starci/grammar/common"
+﻿import type {
+    GroupChatPageLabels,
+    GroupChatPageView,
+    GroupChatPageActions,
+} from "../../../../modules/collab/group-chat/types"
+import { GROUP_CHAT_FORM_STACK_CLASS_NAME, GROUP_CHAT_FORM_STACK_COMPACT_CLASS_NAME } from "./classNames"
+import { Button, Input, RadioGroup, Text } from "@starci/grammar/common"
 import { GROUP_CHAT_HUMAN_ROLES } from "../../../../modules/collab/group-chat/model"
+import type { CollabHumanRole } from "../../../../modules/api/collab"
 
 /** Props for the role-gated invitation form shared by the member rail and the compact sheet. */
 type InviteFormProps = {
@@ -42,29 +39,15 @@ export const InviteForm = (props: InviteFormProps) => {
                 isRequired
                 onValueChange={on.changeInviteEmail}
             />
-            <fieldset className={GROUP_CHAT_FIELD_BODY_CLASS_NAME}>
-                <Text as="span" size="sm" weight="semibold">
-                    {labels.invite.role}
-                </Text>
-                <div className={GROUP_CHAT_ROLE_CHOICES_CLASS_NAME} role="radiogroup" aria-label={labels.invite.role}>
-                    {GROUP_CHAT_HUMAN_ROLES.map((role) => (
-                        <label key={role} className={GROUP_CHAT_ROLE_CHOICE_CLASS_NAME}>
-                            <input
-                                type="radio"
-                                name="invite-role"
-                                value={role}
-                                className={GROUP_CHAT_ROLE_RADIO_CLASS_NAME}
-                                checked={view.invite.role === role}
-                                disabled={view.invite.pending}
-                                onChange={() => on.changeInviteRole(role)}
-                            />
-                            <Text as="span" size="sm">
-                                {labels.roles[role]}
-                            </Text>
-                        </label>
-                    ))}
-                </div>
-            </fieldset>
+            <RadioGroup
+                name="invite-role"
+                label={labels.invite.role}
+                options={GROUP_CHAT_HUMAN_ROLES.map((role) => ({ value: role, label: labels.roles[role] }))}
+                value={view.invite.role}
+                orientation="horizontal"
+                isDisabled={view.invite.pending}
+                onValueChange={(role) => on.changeInviteRole(role as CollabHumanRole)}
+            />
             <Text size="xs" tone="muted">
                 {labels.invite.hint}
             </Text>

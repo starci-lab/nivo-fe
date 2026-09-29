@@ -15,6 +15,7 @@ describe("Composer", () => {
             />,
         )
         const draft = screen.getByRole("textbox", { name: labels.composer.label })
+        expect(draft).toBeInTheDocument()
         const form = draft.closest("form")
         expect(form).not.toBeNull()
         if (form === null) throw new Error("Composer form is missing")

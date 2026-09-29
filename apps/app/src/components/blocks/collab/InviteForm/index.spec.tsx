@@ -22,6 +22,13 @@ describe("InviteForm", () => {
             />,
         )
         const email = screen.getByRole("textbox", { name: labels.invite.email })
+        const roleGroup = screen.getByRole("radiogroup", { name: labels.invite.role })
+        expect(email).toBeInTheDocument()
+        expect(roleGroup).toBeInTheDocument()
+        expect(screen.getByRole("radio", { name: labels.roles.owner })).toBeInTheDocument()
+        expect(screen.getByRole("radio", { name: labels.roles.manager })).toBeInTheDocument()
+        expect(screen.getByRole("radio", { name: labels.roles.staff })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: labels.invite.submit })).toBeInTheDocument()
         fireEvent.change(email, { target: { value: "mai@congty.vn" } })
         fireEvent.click(screen.getByRole("radio", { name: labels.roles.staff }))
         expect(on.changeInviteRole).toHaveBeenCalledWith("staff")
