@@ -1,8 +1,6 @@
-import { nivoIconSource } from "@nivo/ui";
+import { DropdownBranch, IconSource, type DropdownBranchItemData } from "@nivo/ui";
 import { Icon } from "@starci/grammar/common";
 import { Suspense, type ComponentType } from "react";
-
-import { DropdownBranch, type DropdownBranchItemData } from "@nivo/ui/components/branches/DropdownBranch";
 import type { AdministratorRevocationDialogProps } from "@/components/blocks/auth/AdministratorRevocationDialog";
 import type { ReturnNoticeProps } from "@/components/blocks/auth/ReturnNotice";
 import type { SessionEndingDialogProps } from "@/components/blocks/auth/SessionEndingDialog";
@@ -49,7 +47,7 @@ type AccountMenuProps = AccountMenuBaseProps;
 
 /** Every action this menu can report, so the reported id is one of a closed set. */
 type AccountMenuAction = "sign-out" | "sign-out-everywhere" | "administrator-ending";
-const accountTrigger = <Icon source={nivoIconSource("account", "leading")} usage="leading" />;
+const accountTrigger = <Icon source={IconSource("account", "leading")} usage="leading" />;
 
 /**
  * Pure account menu: vendor mechanics stay in DropdownBranch, session behavior stays above.

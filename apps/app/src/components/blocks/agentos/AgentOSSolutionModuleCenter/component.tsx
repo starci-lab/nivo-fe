@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import { ChoiceTabs, nivoIconSource, StatusActionCard } from "@nivo/ui";
+import { ChoiceTabs, IconSource, StatusActionCard } from "@nivo/ui";
 import { Badge, Button, EmptyNotice, Icon, SurfaceCard, SurfaceListCard, Text, TextAction, type BadgeTone } from "@starci/grammar/common";
 import {
   SOLUTION_CATALOG_GRID_CLASS_NAME,
@@ -264,7 +264,7 @@ const AgentOSSolutionModuleCenterContent = ({
       return <EmptyNotice
         message={emptyLabel}
         actionLabel={emptyActionLabel}
-        actionStartContent={<Icon source={nivoIconSource("retry", "chip")} usage="chip" />}
+        actionStartContent={<Icon source={IconSource("retry", "chip")} usage="chip" />}
         onAction={() => onSelectMode("catalog")}
       />;
     }

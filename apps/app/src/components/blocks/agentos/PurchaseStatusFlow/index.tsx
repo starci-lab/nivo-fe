@@ -6,8 +6,8 @@ import { getPathname } from "@/modules/i18n/navigation";
 import { useSession } from "@/hooks";
 import { useMutateRecoverWorkspacePurchaseSwr, useProvisioningRealtime, useQueryWorkspaceCheckoutEntrySwr, useQueryWorkspaceCheckoutStatusSwr, useRouter, type ProvisioningTarget } from "@/hooks";
 import { type WorkspaceCheckoutEntryDestination, type WorkspaceCheckoutEntryRequest, type WorkspaceCheckoutObservedIdentities, type WorkspaceCheckoutAnswer, type WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane";
-import { nivoIconSource } from "@nivo/ui";
-import { type IconSource } from "@starci/grammar/common";
+import { IconSource } from "@nivo/ui";
+import { type IconSource as GrammarIconSource } from "@starci/grammar/common";
 import { PurchaseStatusFlowBase, type PurchaseStatusCheck, type PurchaseStatusFlowViewProps, type PurchaseStatusOperation, type PurchaseStatusRail } from "./component";
 import { type PurchaseStatusCopy } from "./copy";
 
@@ -202,12 +202,12 @@ const CHECK_TONES: Readonly<Record<WordTone["word"], WordTone["tone"]>> = {
 };
 
 /** The circular mark each check word carries, resolved from the app icon registry. */
-const CHECK_MARKS: Readonly<Record<WordTone["word"], IconSource>> = {
-    done: nivoIconSource("complete"),
-    running: nivoIconSource("retry"),
-    queued: nivoIconSource("pending"),
-    failed: nivoIconSource("close"),
-    unknown: nivoIconSource("pending")
+const CHECK_MARKS: Readonly<Record<WordTone["word"], GrammarIconSource>> = {
+    done: IconSource("complete"),
+    running: IconSource("retry"),
+    queued: IconSource("pending"),
+    failed: IconSource("close"),
+    unknown: IconSource("pending")
 };
 
 const check = (id: string, label: string, word: WordTone["word"], detail?: string, at?: string): PurchaseStatusCheck => ({
@@ -703,7 +703,7 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
     const paymentTimeline = () => {
         if (purchase === null) return [];
         const rows = [];
-        const recorded = nivoIconSource("complete");
+        const recorded = IconSource("complete");
         rows.push({ id: "purchase", title: copy.purchaseRow, detail: copy.purchaseStateLabel(purchase.state), mark: recorded });
         if (purchase.payment.reference !== null || purchase.payment.observedAt !== null) {
             rows.push({ id: "payment", title: copy.paymentAttempt, detail: purchase.payment.state, at: purchase.payment.observedAt === null ? undefined : timeOf(purchase.payment.observedAt), mark: recorded });

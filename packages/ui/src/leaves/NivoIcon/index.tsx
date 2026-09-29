@@ -2,7 +2,7 @@
 
 import { Icon } from "@starci/grammar/common"
 import type { IconUsage } from "@starci/grammar/common"
-import { nivoIconSource, type IconName } from "../Icon"
+import { IconSource, type IconName } from "../Icon"
 
 /** What the client-resolved glyph draws. */
 export type NivoIconData = {
@@ -19,7 +19,7 @@ export type NivoIconProps = { readonly props: NivoIconData }
  *
  * WHY THIS EXISTS. `@starci/grammar/common` is a `"use client"` barrel, so Grammar's `Icon` is a Client
  * Component from Next's point of view even though its own file carries no directive. A Server
- * Component that resolves `nivoIconSource(name, usage)` to a glyph function and hands that function
+ * Component that resolves `IconSource(name, usage)` to a glyph function and hands that function
  * to `Icon` as `source` is passing a function across the server -> client boundary, which React
  * refuses to serialise - that is the exact shape of "Functions cannot be passed directly to Client
  * Components" that took `GET /` down.
@@ -31,5 +31,5 @@ export type NivoIconProps = { readonly props: NivoIconData }
  */
 export const NivoIcon = (props: NivoIconProps) => {
     const { name, usage, ariaLabel } = props.props
-    return <Icon source={nivoIconSource(name, usage)} usage={usage} ariaLabel={ariaLabel} />
+    return <Icon source={IconSource(name, usage)} usage={usage} ariaLabel={ariaLabel} />
 }

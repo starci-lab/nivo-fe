@@ -19,7 +19,7 @@ export type ExecuteSessionRailBlockCopy = {
 
 import { Button, Icon } from "@starci/grammar/common";
 
-import { ChoiceTabs, CollapsibleRail, SelectionList, type SelectionListGroup, nivoIconSource } from "@nivo/ui";
+import { ChoiceTabs, CollapsibleRail, SelectionList, type SelectionListGroup, IconSource } from "@nivo/ui";
 
 /** One collaborative Execute conversation listed outside the private Setup session. */
 export type ExecuteSession = {
@@ -82,7 +82,7 @@ const SessionRailBody = (props: ExecuteSessionRailBlockProps) => {
     onPress={props.onCreate}
   >{copy.sessions.new}</Button></div>);
 };
-const SessionRailToggle = () => <Icon source={nivoIconSource("sidebar", "leading")} usage="leading" />;
+const SessionRailToggle = () => <Icon source={IconSource("sidebar", "leading")} usage="leading" />;
 
 /** Navigate multiple Execute conversations through one selected identity at every breakpoint. */
 export const ExecuteSessionRailBlock = (props: ExecuteSessionRailBlockProps) => {

@@ -229,10 +229,3 @@ export const ICON_SOURCES: Record<IconName, GlyphCuts> = {
 /** Resolve an app-owned semantic name to the glyph cut required by Grammar's public role. */
 export const IconSource = (name: IconName, usage: IconUsage = "chip") => ICON_SOURCES[name][usage];
 
-/**
- * The leaf's earlier name for {@link IconSource}, kept exported because the app call sites that
- * import it from `@nivo/ui` live outside this package. `IconSource` is the family name the folder
- * and its entry point share; the alias retires when those call sites move.
- */
-export { IconSource as nivoIconSource };
-

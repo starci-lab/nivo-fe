@@ -1,4 +1,4 @@
-import { nivoIconSource } from "@nivo/ui";
+import { IconSource } from "@nivo/ui";
 import { SurfaceCard, Button, EmptyNotice, Heading, Icon, Text, TextAction, Badge } from "@starci/grammar/common";
 import { FleetRow, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
 
@@ -253,7 +253,7 @@ export const AppsDashboardBase = (props: AppsDashboardProps) => {
       ><div>{<EmptyNotice
             message={owned.note}
             actionLabel={supportedOffer === undefined ? undefined : buildAppLabel}
-            actionStartContent={supportedOffer === undefined || buildAppLabel === undefined ? undefined : <Icon source={nivoIconSource("retry", "chip")} usage="chip" />}
+            actionStartContent={supportedOffer === undefined || buildAppLabel === undefined ? undefined : <Icon source={IconSource("retry", "chip")} usage="chip" />}
             onAction={supportedOffer === undefined || buildAppLabel === undefined ? undefined : () => onBuildTemplate(supportedOffer.templateKey)}
           />}</div></SurfaceCard>;
     }

@@ -1,4 +1,4 @@
-import { nivoIconSource, type IconName } from "../../leaves/Icon";
+import { IconSource, type IconName } from "../../leaves/Icon";
 import { Icon } from "@starci/grammar/common";
 import { Dropdown, Header } from "@heroui/react"
 import type { ReactNode } from "react"
@@ -33,7 +33,7 @@ export const DropdownBranch = <I extends string>(props: DropdownBranchProps<I>) 
                         {section.items.map((item) => (
                             <Dropdown.Item key={item.id} id={item.id} textValue={item.label} isDisabled={item.isDisabled} onAction={() => props.on?.action?.(item.id)}>
                                 {item.showsIndicator === true ? <Dropdown.ItemIndicator /> : null}
-                                {item.icon === undefined ? null : <Icon source={nivoIconSource(item.icon, "leading")} usage="leading" />}
+                                {item.icon === undefined ? null : <Icon source={IconSource(item.icon, "leading")} usage="leading" />}
                                 {item.label}
                             </Dropdown.Item>
                         ))}

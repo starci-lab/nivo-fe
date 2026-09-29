@@ -1,4 +1,4 @@
-import { DrawerBranch, nivoIconSource } from "@nivo/ui"
+import { DrawerBranch, IconSource } from "@nivo/ui"
 import { Sidebar as GrammarSidebar, type SidebarGroup } from "@starci/grammar/common"
 import type { SidebarMode } from "./index"
 
@@ -61,7 +61,7 @@ export const SidebarBase = (props: SidebarProps) => {
         isCollapsed={presentation === "rail" && data.isCollapsed}
         collapseLabel={data.closeMenuLabel}
         expandLabel={data.openMenuLabel}
-        toggleSource={nivoIconSource("sidebar", "leading")}
+        toggleSource={IconSource("sidebar", "leading")}
         onAction={(id) => { if (on.action(id)) close?.() }}
         onCollapsedChange={on.collapsedChange}
     />

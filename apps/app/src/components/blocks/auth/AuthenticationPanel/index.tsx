@@ -1,5 +1,5 @@
 import { useRef, useState, type SubmitEvent } from "react";
-import { Checkbox, nivoIconSource } from "@nivo/ui";
+import { Checkbox, IconSource } from "@nivo/ui";
 import { Button, Divider, Heading, Icon, Input, OtpInput, Progress, Text, TextAction, type IconSourceProps } from "@starci/grammar/common";
 import {
   AUTH_PANEL_CLASS_NAME,
@@ -738,7 +738,7 @@ export const AuthenticationPanel = (props: AuthenticationPanelProps) => {
             isDisabled={copy.isPending}
             isPending={copy.pendingAction === "provider" && copy.pendingProvider === entry.provider}
             onPress={() => props.on?.chooseProvider?.(entry.provider)}
-            startContent={<Icon source={nivoIconSource(entry.icon, "chip")} usage="chip" />}
+            startContent={<Icon source={IconSource(entry.icon, "chip")} usage="chip" />}
           >{entry.provider === "google" ? copy.googleLabel : copy.githubLabel}</Button>)}
 
           <Divider label={copy.orLabel} /></div>];

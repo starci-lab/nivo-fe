@@ -1,4 +1,4 @@
-import { nivoIconSource } from "../Icon";
+import { IconSource } from "../Icon";
 import { Icon } from "@starci/grammar/common";
 import { Switch } from "@heroui/react";
 
@@ -33,7 +33,7 @@ export const ThemeSwitch = (props: ThemeSwitchProps) =>
                 <Switch.Control>
                     <Switch.Thumb>
                         <Switch.Icon>
-                            <Icon source={nivoIconSource(isSelected ? "dark" : "light", "leading")} usage="leading" />
+                            <Icon source={IconSource(isSelected ? "dark" : "light", "leading")} usage="leading" />
                         </Switch.Icon>
                     </Switch.Thumb>
                 </Switch.Control>

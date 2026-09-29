@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import type { SidebarGroup } from "@starci/grammar/common"
-import { nivoIconSource } from "@nivo/ui"
+import { IconSource } from "@nivo/ui"
 import { usePathname, useRouter } from "@/hooks"
 import { SidebarBase } from "./component"
 
@@ -60,7 +60,7 @@ export const Sidebar = (props: SidebarProps) => {
     const item = (destination: Destination) => ({
         id: destination.key,
         label: t(`nav.${destination.key}`),
-        source: nivoIconSource(destination.icon, "leading"),
+        source: IconSource(destination.icon, "leading"),
     })
     const groups: ReadonlyArray<SidebarGroup> = (["workspace", "account"] as const).map((group) => ({
         id: group,

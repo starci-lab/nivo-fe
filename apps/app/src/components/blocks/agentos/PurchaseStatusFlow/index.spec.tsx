@@ -52,7 +52,7 @@ vi.mock("@/hooks", () => ({
     useSession: () => mocks.session,
     useProvisioningRealtime: () => mocks.realtime,
 }))
-vi.mock("@nivo/ui", () => ({ nivoIconSource: (name: string) => () => name }))
+vi.mock("@nivo/ui", () => ({ IconSource: (name: string) => () => name }))
 vi.mock("./component", () => ({
     PurchaseStatusFlowBase: (props: FlowProbeProps) => (
         <div>

@@ -1,4 +1,4 @@
-import { nivoIconSource } from "@nivo/ui";
+import { IconSource } from "@nivo/ui";
 import { Badge, Button, Icon, SurfaceCard, Text, TextAction, type BadgeTone, type PresentationState } from "@starci/grammar/common";
 import {
   OVERVIEW_ACCOUNT_COPY_CLASS_NAME,
@@ -53,7 +53,7 @@ export const OverviewAccountBase = (props: OverviewAccountProps) => {
     composition="joined"
     state={state}
     isHighlight={isHighlight}
-    labelEnd={actionLabel === undefined || openWallet === undefined ? undefined : <TextAction appearance="disclosure" size="sm" endContent={<Icon source={nivoIconSource("next")} />} onPress={openWallet}>{actionLabel}</TextAction>}
+    labelEnd={actionLabel === undefined || openWallet === undefined ? undefined : <TextAction appearance="disclosure" size="sm" endContent={<Icon source={IconSource("next")} />} onPress={openWallet}>{actionLabel}</TextAction>}
   >
     <div
       className={OVERVIEW_ACCOUNT_FACTS_CLASS_NAME}

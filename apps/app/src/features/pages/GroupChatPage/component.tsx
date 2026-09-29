@@ -1,6 +1,6 @@
 import { ChatWorkspace, EmptyNotice, Icon, IconButton, Input, PageContainer, SectionHeader, SurfaceCard, Text } from "@starci/grammar/common";
 import { useRef, type ReactNode } from "react";
-import { nivoIconSource } from "@nivo/ui";
+import { IconSource } from "@nivo/ui";
 import { Badge, Button, SurfaceListCard, Tabs } from "@starci/grammar/common";
 import type {
   CollabApprovalCardView,
@@ -587,7 +587,7 @@ type MemberAvatarProps = {
 
 const MemberAvatar = ({ name, kind, presence = false, compact = false }: MemberAvatarProps) => (
   <span className={getGroupChatAvatarClassName(compact, avatarTintClassName(name))} aria-hidden="true">
-    {kind === "module" ? <Icon source={nivoIconSource("agentos", "leading")} usage="leading" /> : initialsOf(name)}
+    {kind === "module" ? <Icon source={IconSource("agentos", "leading")} usage="leading" /> : initialsOf(name)}
     {presence ? <span className={GROUP_CHAT_AVATAR_PRESENCE_CLASS_NAME} /> : null}
   </span>
 );
@@ -758,7 +758,7 @@ const ApprovalCard = ({ item, view, on, labels, compact = false }: ApprovalCardP
             <>
               <Badge tone="danger">{labels.approval.needed}</Badge>
               <span className={GROUP_CHAT_WAITING_LINE_CLASS_NAME}>
-                <Icon source={nivoIconSource("pending", "chip")} usage="chip" />
+                <Icon source={IconSource("pending", "chip")} usage="chip" />
                 <Text as="span" size="sm" tone="muted">
                   {labels.approval.waiting}
                 </Text>
@@ -773,7 +773,7 @@ const ApprovalCard = ({ item, view, on, labels, compact = false }: ApprovalCardP
         <SurfaceCard composition="joined" depth="nested" ariaLabel={effective.action}>
           <div className={GROUP_CHAT_CARD_BAND_CLASS_NAME}>
             <span className={GROUP_CHAT_BAND_ICON_CLASS_NAME} aria-hidden="true">
-              <Icon source={nivoIconSource("review", "leading")} usage="leading" />
+              <Icon source={IconSource("review", "leading")} usage="leading" />
             </span>
             <Text size={compact ? "sm" : "md"} weight="semibold">
               {effective.action}
@@ -789,7 +789,7 @@ const ApprovalCard = ({ item, view, on, labels, compact = false }: ApprovalCardP
           )}
           <div className={GROUP_CHAT_CARD_BAND_DIVIDED_CLASS_NAME}>
             <span className={GROUP_CHAT_BAND_ICON_CLASS_NAME} aria-hidden="true">
-              <Icon source={nivoIconSource("account", "leading")} usage="leading" />
+              <Icon source={IconSource("account", "leading")} usage="leading" />
             </span>
             <div className={GROUP_CHAT_FIELD_BODY_CLASS_NAME}>
               <Text size={compact ? "sm" : "md"} weight="medium">
@@ -981,13 +981,13 @@ const MembersRail = ({ view, on, labels }: MembersRailProps) => {
       <div className={GROUP_CHAT_RAIL_SECTION_INVITE_CLASS_NAME}>
         <div className={GROUP_CHAT_RAIL_HEAD_ROW_CLASS_NAME}>
           <span className={GROUP_CHAT_RAIL_LABEL_ICON_CLASS_NAME}>
-            <Icon source={nivoIconSource("community", "leading")} usage="leading" />
+            <Icon source={IconSource("community", "leading")} usage="leading" />
             <Text as="span" size="md" weight="semibold">
               {labels.members.countLabel(humans.length)}
             </Text>
           </span>
           {mayInvite ? (
-            <IconButton source={nivoIconSource("signUp", "leading")} label={labels.invite.title} onPress={focusInviteEmail} />
+            <IconButton source={IconSource("signUp", "leading")} label={labels.invite.title} onPress={focusInviteEmail} />
           ) : null}
         </div>
         {humans.length === 0 ? (
@@ -1007,7 +1007,7 @@ const MembersRail = ({ view, on, labels }: MembersRailProps) => {
       </div>
       <div className={GROUP_CHAT_RAIL_SECTION_INVITE_MODULES_CLASS_NAME}>
         <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
-          <Icon source={nivoIconSource("agentos", "leading")} usage="leading" />
+          <Icon source={IconSource("agentos", "leading")} usage="leading" />
           <Text size="md" weight="semibold">
             {labels.members.modules(modules.length)}
           </Text>
@@ -1032,7 +1032,7 @@ const MembersRail = ({ view, on, labels }: MembersRailProps) => {
       {mayInvite ? (
         <div className={GROUP_CHAT_RAIL_SECTION_INVITE_FORM_CLASS_NAME}>
           <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
-            <Icon source={nivoIconSource("signUp", "leading")} usage="leading" />
+            <Icon source={IconSource("signUp", "leading")} usage="leading" />
             <Text size="md" weight="semibold">
               {labels.invite.title}
             </Text>
@@ -1172,7 +1172,7 @@ const MemberSheet = ({ view, on, labels, showInvite }: MemberSheetProps) => (
         {showInvite ? labels.invite.title : labels.members.title}
       </Text>
       <IconButton
-        source={nivoIconSource("close", "leading")}
+        source={IconSource("close", "leading")}
         label={labels.members.closeRail}
         onPress={() => on.changeRailOpen(false)}
       />
@@ -1304,7 +1304,7 @@ const Composer = ({ view, on, labels, decision, compact = false }: ComposerProps
       </span>
       {decision ? (
         <IconButton
-          source={nivoIconSource("send", "leading")}
+          source={IconSource("send", "leading")}
           label={labels.composer.send}
           isDisabled={view.composer.value.trim().length === 0 || view.composer.pending}
           onPress={on.sendMessage}
@@ -1316,7 +1316,7 @@ const Composer = ({ view, on, labels, decision, compact = false }: ComposerProps
           isPending={view.composer.pending}
           isDisabled={view.composer.value.trim().length === 0}
         >
-          <span className={GROUP_CHAT_COMPOSER_SEND_CLASS_NAME}><Icon source={nivoIconSource("send", "chip")} usage="chip" /> {labels.composer.send}</span>
+          <span className={GROUP_CHAT_COMPOSER_SEND_CLASS_NAME}><Icon source={IconSource("send", "chip")} usage="chip" /> {labels.composer.send}</span>
         </Button>
       )}
         </div>

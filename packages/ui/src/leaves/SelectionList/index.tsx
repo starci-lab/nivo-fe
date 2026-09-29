@@ -1,6 +1,6 @@
 "use client";
 
-import { nivoIconSource, type IconName } from "../Icon";
+import { IconSource, type IconName } from "../Icon";
 import { Icon } from "@starci/grammar/common";
 
 import { Header, ListBox } from "@heroui/react";
@@ -97,11 +97,11 @@ const SelectionListView = ({ props, on }: SelectionListProps) => {
             title={item.label}
             className="flex size-10 items-center justify-center rounded-full group-data-[hovered=true]:bg-default group-data-[selected=true]:bg-accent-soft group-data-[selected=true]:text-accent">
             
-                                    <Icon source={nivoIconSource(item.icon, "leading")} usage="leading" />
+                                    <Icon source={IconSource(item.icon, "leading")} usage="leading" />
                                 </span> :
 
           <>
-                                    <Icon source={nivoIconSource(item.icon, "leading")} usage="leading" />
+                                    <Icon source={IconSource(item.icon, "leading")} usage="leading" />
                                     <span className="min-w-0 flex-1 truncate text-sm font-medium">{item.label}</span>
                                     {item.status === undefined ? null :
             <span className="shrink-0 text-xs text-muted">{item.status}</span>

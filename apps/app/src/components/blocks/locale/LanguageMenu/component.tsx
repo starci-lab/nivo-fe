@@ -1,5 +1,5 @@
 import { Icon } from "@starci/grammar/common";
-import { DropdownBranch, nivoIconSource } from "@nivo/ui";
+import { DropdownBranch, IconSource } from "@nivo/ui";
 import type { Locale } from "@/modules/i18n/config";
 
 /** One resolved locale choice. */
@@ -21,7 +21,7 @@ export type LanguageMenuViewProps = {
     readonly select?: (locale: Locale) => void;
   };
 };
-const languageTrigger = <Icon source={nivoIconSource("locale", "leading")} usage="leading" />;
+const languageTrigger = <Icon source={IconSource("locale", "leading")} usage="leading" />;
 
 /** Pure single-select locale menu over the shared dropdown mechanics owner. */
 export const LanguageMenuBase = (props: LanguageMenuProps) => <DropdownBranch props={{
