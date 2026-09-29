@@ -1,7 +1,7 @@
 ﻿import { MemberSheet } from "./index"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { STAFF, PARTICIPANTS, labels, baseView, actions } from "@/modules/collab/group-chat/test-fixtures.fixture"
+import { STAFF, PARTICIPANTS, labels, baseView, actions } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("MemberSheet", () => {
     it("renders and closes the compact member sheet", () => {

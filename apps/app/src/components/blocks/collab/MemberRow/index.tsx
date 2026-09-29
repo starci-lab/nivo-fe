@@ -1,4 +1,4 @@
-﻿import type { GroupChatPageLabels } from "@/modules/collab/group-chat/types"
+﻿import type { GroupChatPageLabels } from "../../../../modules/collab/group-chat/types"
 import {
     GROUP_CHAT_MEMBER_ROW_CLASS_NAME,
     GROUP_CHAT_MEMBER_ROW_ROOMY_CLASS_NAME,
@@ -7,7 +7,7 @@ import {
 } from "./classNames"
 import { Text } from "@starci/grammar/common"
 import { Badge } from "@starci/grammar/common"
-import type { CollabHumanRole, CollabOfficeParticipant } from "@/modules/api/collab"
+import type { CollabHumanRole, CollabOfficeParticipant } from "../../../../modules/api/collab"
 import { MemberAvatar } from "../MemberAvatar"
 
 /** Props for one roster row. */

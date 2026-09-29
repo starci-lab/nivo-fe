@@ -8,8 +8,8 @@
     CollabOfficeViewer,
     CollabTaskQuestionView,
     CollabTaskView,
-} from "@/modules/api/collab"
-import type { CollabTasksFilter } from "@/hooks"
+} from "../../api/collab"
+import type { CollabTasksFilter } from "../../../hooks"
 
 const GROUP_CHAT_AVATAR_TINT_CLASS_NAMES = [
     "bg-accent-soft",

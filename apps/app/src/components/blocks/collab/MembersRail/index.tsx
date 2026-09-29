@@ -1,4 +1,4 @@
-﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "@/modules/collab/group-chat/types"
+﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "../../../../modules/collab/group-chat/types"
 import {
     GROUP_CHAT_RAIL_SECTION_INVITE_CLASS_NAME,
     GROUP_CHAT_RAIL_SECTION_INVITE_MODULES_CLASS_NAME,
@@ -14,7 +14,7 @@ import { EmptyNotice, Icon, IconButton, SurfaceCard, Text } from "@starci/gramma
 import { IconSource } from "@nivo/ui"
 import { MemberRow } from "../MemberRow"
 import { InviteForm } from "../InviteForm"
-import { mayPresentInvite, partitionParticipants } from "@/modules/collab/group-chat/model"
+import { mayPresentInvite, partitionParticipants } from "../../../../modules/collab/group-chat/model"
 
 /**
  * Props for the member rail: one joined card carrying the human roster, the

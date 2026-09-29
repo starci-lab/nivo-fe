@@ -1,13 +1,13 @@
 ﻿import { RosterRail } from "./index"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { buildConversationItems } from "@/modules/collab/group-chat/model"
+import { buildConversationItems } from "../../../../modules/collab/group-chat/model"
 import {
     MODULE_MESSAGE,
     TASK_WAITING_APPROVAL,
     labels,
     baseView,
-} from "@/modules/collab/group-chat/test-fixtures.fixture"
+} from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("RosterRail", () => {
     it("lists an empty roster on the decision rail", () => {

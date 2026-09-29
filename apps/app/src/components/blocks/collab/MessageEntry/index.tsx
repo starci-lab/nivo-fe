@@ -1,4 +1,4 @@
-﻿import type { GroupChatPageLabels } from "@/modules/collab/group-chat/types"
+﻿import type { GroupChatPageLabels } from "../../../../modules/collab/group-chat/types"
 import {
     GROUP_CHAT_ENTRY_CLASS_NAME,
     GROUP_CHAT_ENTRY_COMPACT_CLASS_NAME,
@@ -7,8 +7,8 @@ import {
     GROUP_CHAT_MENTION_CLASS_NAME,
 } from "./classNames"
 import { Text } from "@starci/grammar/common"
-import type { ConversationItem } from "@/modules/collab/group-chat/model"
-import { displayMessageBody } from "@/modules/collab/group-chat/model"
+import type { ConversationItem } from "../../../../modules/collab/group-chat/model"
+import { displayMessageBody } from "../../../../modules/collab/group-chat/model"
 import { MemberAvatar } from "../MemberAvatar"
 
 /** Props for one durable message entry. */

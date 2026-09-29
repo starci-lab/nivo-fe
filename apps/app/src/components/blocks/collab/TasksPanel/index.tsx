@@ -1,4 +1,4 @@
-﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "@/modules/collab/group-chat/types"
+﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "../../../../modules/collab/group-chat/types"
 import {
     GROUP_CHAT_NATIVE_FIELD_CLASS_NAME,
     GROUP_CHAT_NATIVE_CONTROL_CLASS_NAME,
@@ -9,14 +9,14 @@ import {
 } from "./classNames"
 import { EmptyNotice, Text } from "@starci/grammar/common"
 import { Badge, Button, SurfaceListCard } from "@starci/grammar/common"
-import type { CollabTaskStatus } from "@/modules/api/collab"
-import type { CollabTasksFilter } from "@/hooks"
+import type { CollabTaskStatus } from "../../../../modules/api/collab"
+import type { CollabTasksFilter } from "../../../../hooks"
 import {
     invalidTasksFilter,
     partitionParticipants,
     shortTaskRef,
     taskStatusTone,
-} from "@/modules/collab/group-chat/model"
+} from "../../../../modules/collab/group-chat/model"
 
 /** Props for the Tasks tab: roster-keyed filters and Office-bound rows. */
 type TasksPanelProps = {

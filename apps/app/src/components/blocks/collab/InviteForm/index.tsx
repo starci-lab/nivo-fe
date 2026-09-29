@@ -1,4 +1,4 @@
-﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "@/modules/collab/group-chat/types"
+﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "../../../../modules/collab/group-chat/types"
 import {
     GROUP_CHAT_FIELD_BODY_CLASS_NAME,
     GROUP_CHAT_ROLE_CHOICES_CLASS_NAME,
@@ -9,7 +9,7 @@ import {
 } from "./classNames"
 import { Input, Text } from "@starci/grammar/common"
 import { Button } from "@starci/grammar/common"
-import { GROUP_CHAT_HUMAN_ROLES } from "@/modules/collab/group-chat/model"
+import { GROUP_CHAT_HUMAN_ROLES } from "../../../../modules/collab/group-chat/model"
 
 /** Props for the role-gated invitation form shared by the member rail and the compact sheet. */
 type InviteFormProps = {

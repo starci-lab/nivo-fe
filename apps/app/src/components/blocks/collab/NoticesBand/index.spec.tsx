@@ -1,8 +1,8 @@
 ﻿import { NoticesBand } from "./index"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import type { CollabTurnNoticeItem } from "@/modules/api/collab"
-import { NOTICE, labels, baseView, actions } from "@/modules/collab/group-chat/test-fixtures.fixture"
+import type { CollabTurnNoticeItem } from "../../../../modules/api/collab"
+import { NOTICE, labels, baseView, actions } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("NoticesBand", () => {
     it("lists outstanding notices and follows one to its card", () => {

@@ -1,5 +1,5 @@
 import { vi } from "vitest"
-export { labels } from "@/modules/collab/group-chat/labels.fixture"
+export { labels } from "./labels.fixture"
 import type {
     CollabApprovalView,
     CollabBindingView,
@@ -9,9 +9,9 @@ import type {
     CollabTaskQuestionView,
     CollabTaskView,
     CollabTurnNoticeItem,
-} from "@/modules/api/collab"
-import type { GroupChatPageActions, GroupChatPageView } from "@/modules/collab/group-chat/types"
-import type { ConversationItem } from "@/modules/collab/group-chat/model"
+} from "../../api/collab"
+import type { GroupChatPageActions, GroupChatPageView } from "./types"
+import type { ConversationItem } from "./model"
 
 /** The owner viewer fixture used for role-gated conversations. */
 export const OWNER: CollabOfficeViewer = { memberId: "mem-an", role: "owner" }

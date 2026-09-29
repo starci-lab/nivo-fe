@@ -1,5 +1,5 @@
 ﻿import { describe, expect, it } from "vitest"
-import type { CollabTaskView } from "@/modules/api/collab"
+import type { CollabTaskView } from "../../api/collab"
 import {
     buildConversationItems,
     invalidTasksFilter,
@@ -24,7 +24,7 @@ import {
     REPORTED_BINDING,
     WORKING_TASK,
     messageAt,
-} from "@/modules/collab/group-chat/test-fixtures.fixture"
+} from "./test-fixtures.fixture"
 
 describe("group chat conversation model", () => {
     it("accepts only the closed invitation role hints", () => {

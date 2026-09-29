@@ -1,7 +1,7 @@
 ﻿import { Conversation } from "./index"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { buildConversationItems } from "@/modules/collab/group-chat/model"
+import { buildConversationItems } from "../../../../modules/collab/group-chat/model"
 import {
     OWNER,
     PARTICIPANTS,
@@ -10,7 +10,7 @@ import {
     labels,
     baseView,
     actions,
-} from "@/modules/collab/group-chat/test-fixtures.fixture"
+} from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("Conversation", () => {
     it("renders the authorized Office snapshot: roster, modules, conversation and a working composer", () => {

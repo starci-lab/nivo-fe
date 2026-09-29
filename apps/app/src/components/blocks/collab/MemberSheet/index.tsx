@@ -1,4 +1,4 @@
-﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "@/modules/collab/group-chat/types"
+﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "../../../../modules/collab/group-chat/types"
 import {
     GROUP_CHAT_SHEET_PANEL_CLASS_NAME,
     GROUP_CHAT_SHEET_HANDLE_CLASS_NAME,

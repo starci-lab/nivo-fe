@@ -1,4 +1,4 @@
-﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "@/modules/collab/group-chat/types"
+﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "../../../../modules/collab/group-chat/types"
 import { getGroupChatConversationListClassName } from "./classNames"
 import { EmptyNotice } from "@starci/grammar/common"
 import { useRef } from "react"

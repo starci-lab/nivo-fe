@@ -1,4 +1,4 @@
-﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "@/modules/collab/group-chat/types"
+﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "../../../../modules/collab/group-chat/types"
 import { GROUP_CHAT_NOTICE_ROW_CLASS_NAME } from "./classNames"
 import { SurfaceCard, Text } from "@starci/grammar/common"
 import { Button } from "@starci/grammar/common"

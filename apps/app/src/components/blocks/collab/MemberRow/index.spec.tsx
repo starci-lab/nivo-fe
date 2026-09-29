@@ -1,7 +1,7 @@
 ﻿import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { MemberRow } from "./index"
-import { PARTICIPANTS, labels } from "@/modules/collab/group-chat/test-fixtures.fixture"
+import { PARTICIPANTS, labels } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("MemberRow", () => {
     it("renders the current member roster", () => {

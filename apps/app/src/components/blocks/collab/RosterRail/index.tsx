@@ -1,4 +1,4 @@
-﻿import type { GroupChatPageLabels, GroupChatPageView } from "@/modules/collab/group-chat/types"
+﻿import type { GroupChatPageLabels, GroupChatPageView } from "../../../../modules/collab/group-chat/types"
 import {
     GROUP_CHAT_RAIL_SECTION_ROSTER_HEAD_CLASS_NAME,
     GROUP_CHAT_RAIL_SECTION_ROSTER_PEOPLE_CLASS_NAME,
@@ -8,7 +8,7 @@ import {
 } from "./classNames"
 import { EmptyNotice, SurfaceCard, Text } from "@starci/grammar/common"
 import { MemberRow } from "../MemberRow"
-import { partitionParticipants } from "@/modules/collab/group-chat/model"
+import { partitionParticipants } from "../../../../modules/collab/group-chat/model"
 
 /**
  * The roster-only rail the accepted decision composite draws while an approval

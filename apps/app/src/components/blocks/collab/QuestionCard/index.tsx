@@ -1,4 +1,4 @@
-﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "@/modules/collab/group-chat/types"
+﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "../../../../modules/collab/group-chat/types"
 import {
     GROUP_CHAT_ENTRY_CLASS_NAME,
     GROUP_CHAT_ENTRY_COMPACT_CLASS_NAME,
@@ -9,8 +9,8 @@ import {
 } from "./classNames"
 import { SurfaceCard, Text } from "@starci/grammar/common"
 import { Badge, Button } from "@starci/grammar/common"
-import { shortTaskRef } from "@/modules/collab/group-chat/model"
-import type { ConversationItem } from "@/modules/collab/group-chat/model"
+import { shortTaskRef } from "../../../../modules/collab/group-chat/model"
+import type { ConversationItem } from "../../../../modules/collab/group-chat/model"
 
 /** Props for one module question card with the assignee's answer affordance. */
 type QuestionCardProps = {

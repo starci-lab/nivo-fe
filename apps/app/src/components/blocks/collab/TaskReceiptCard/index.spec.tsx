@@ -1,7 +1,7 @@
 ﻿import { TaskReceiptCard } from "./index"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { buildConversationItems } from "@/modules/collab/group-chat/model"
+import { buildConversationItems } from "../../../../modules/collab/group-chat/model"
 import {
     OWNER,
     PARTICIPANTS,
@@ -14,7 +14,7 @@ import {
     WORKING_TASK,
     messageAt,
     conversationItemsOfKind,
-} from "@/modules/collab/group-chat/test-fixtures.fixture"
+} from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("TaskReceiptCard", () => {
     it("renders task receipts for pending, reported and refused cards", () => {

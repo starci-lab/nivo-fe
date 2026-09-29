@@ -1,7 +1,7 @@
 ﻿import { Composer } from "./index"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { labels, baseView, actions } from "@/modules/collab/group-chat/test-fixtures.fixture"
+import { labels, baseView, actions } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("Composer", () => {
     it("keeps a drafted message in the composer and submits it once through the form", () => {

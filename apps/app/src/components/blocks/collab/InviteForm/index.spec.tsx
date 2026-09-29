@@ -1,7 +1,7 @@
 ﻿import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { InviteForm } from "./index"
-import { labels, baseView, actions } from "@/modules/collab/group-chat/test-fixtures.fixture"
+import { labels, baseView, actions } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("InviteForm", () => {
     it("submits the selected role through the invitation form", () => {

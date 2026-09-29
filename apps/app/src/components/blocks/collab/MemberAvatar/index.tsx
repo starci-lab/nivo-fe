@@ -1,8 +1,8 @@
 ﻿import { getGroupChatAvatarClassName, GROUP_CHAT_AVATAR_PRESENCE_CLASS_NAME } from "./classNames"
 import { Icon } from "@starci/grammar/common"
 import { IconSource } from "@nivo/ui"
-import type { CollabOfficeParticipant } from "@/modules/api/collab"
-import { initialsOf, avatarTintClassName } from "@/modules/collab/group-chat/model"
+import type { CollabOfficeParticipant } from "../../../../modules/api/collab"
+import { initialsOf, avatarTintClassName } from "../../../../modules/collab/group-chat/model"
 
 /** Props for the tinted member avatar shared by message authors and roster rows. */
 type MemberAvatarProps = {

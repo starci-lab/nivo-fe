@@ -1,7 +1,7 @@
 ﻿import { AcceptanceSurface } from "./index"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { labels, baseView, actions } from "@/modules/collab/group-chat/test-fixtures.fixture"
+import { labels, baseView, actions } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("AcceptanceSurface", () => {
     it("renders the invitation acceptance surface without Office content", () => {

@@ -1,4 +1,4 @@
-﻿import type { GroupChatPageLabels } from "@/modules/collab/group-chat/types"
+﻿import type { GroupChatPageLabels } from "../../../../modules/collab/group-chat/types"
 import {
     GROUP_CHAT_ENTRY_CLASS_NAME,
     GROUP_CHAT_ENTRY_COMPACT_CLASS_NAME,
@@ -8,8 +8,8 @@ import {
 } from "./classNames"
 import { SurfaceCard, Text } from "@starci/grammar/common"
 import { Badge } from "@starci/grammar/common"
-import { shortTaskRef, taskStatusTone } from "@/modules/collab/group-chat/model"
-import type { ConversationItem } from "@/modules/collab/group-chat/model"
+import { shortTaskRef, taskStatusTone } from "../../../../modules/collab/group-chat/model"
+import type { ConversationItem } from "../../../../modules/collab/group-chat/model"
 
 /** Props for one task receipt card bound to its source message. */
 type TaskReceiptCardProps = {

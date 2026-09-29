@@ -1,8 +1,8 @@
 ﻿import { QuestionCard } from "./index"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import type { CollabOfficeViewer } from "@/modules/api/collab"
-import { buildConversationItems } from "@/modules/collab/group-chat/model"
+import type { CollabOfficeViewer } from "../../../../modules/api/collab"
+import { buildConversationItems } from "../../../../modules/collab/group-chat/model"
 import {
     OWNER,
     PARTICIPANTS,
@@ -13,7 +13,7 @@ import {
     baseView,
     actions,
     conversationItemsOfKind,
-} from "@/modules/collab/group-chat/test-fixtures.fixture"
+} from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("QuestionCard", () => {
     it("shows a waiting question with the assignee's answer affordance only", () => {

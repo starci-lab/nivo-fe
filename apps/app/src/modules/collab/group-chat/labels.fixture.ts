@@ -1,4 +1,4 @@
-import type { GroupChatPageLabels } from "@/modules/collab/group-chat/types"
+import type { GroupChatPageLabels } from "./types"
 
 /** Resolved catalog copy used by pure block tests. */
 export const labels: GroupChatPageLabels = {

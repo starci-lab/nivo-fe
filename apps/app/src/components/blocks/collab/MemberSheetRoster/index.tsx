@@ -1,4 +1,4 @@
-﻿import type { GroupChatPageLabels, GroupChatPageView } from "@/modules/collab/group-chat/types"
+﻿import type { GroupChatPageLabels, GroupChatPageView } from "../../../../modules/collab/group-chat/types"
 import {
     GROUP_CHAT_SHEET_ROSTER_CLASS_NAME,
     GROUP_CHAT_SHEET_SECTION_CLASS_NAME,
@@ -6,7 +6,7 @@ import {
 } from "./classNames"
 import { Text } from "@starci/grammar/common"
 import { MemberRow } from "../MemberRow"
-import { partitionParticipants } from "@/modules/collab/group-chat/model"
+import { partitionParticipants } from "../../../../modules/collab/group-chat/model"
 
 /** Props for the roster the compact member sheet shows a viewer who may not invite. */
 type MemberSheetRosterProps = { readonly view: GroupChatPageView; readonly labels: GroupChatPageLabels }

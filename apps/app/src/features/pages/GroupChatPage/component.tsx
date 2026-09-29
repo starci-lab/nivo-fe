@@ -1,4 +1,4 @@
-﻿import type { GroupChatPageBaseProps } from "@/modules/collab/group-chat/types"
+﻿import type { GroupChatPageBaseProps } from "../../../modules/collab/group-chat/types"
 import {
     GROUP_CHAT_PAGE_CLASS_NAME,
     GROUP_CHAT_WORKSPACE_HOST_DECISION_CLASS_NAME,
@@ -35,14 +35,14 @@ export {
     partitionParticipants,
     shortTaskRef,
     taskStatusTone,
-} from "@/modules/collab/group-chat/model"
+} from "../../../modules/collab/group-chat/model"
 export type {
     ConversationBuildArgs,
     ConversationItem,
     GroupChatTab,
     ParticipantPartition,
     SettledApprovalMap,
-} from "@/modules/collab/group-chat/model"
+} from "../../../modules/collab/group-chat/model"
 export type {
     GroupChatPageActions,
     GroupChatPageBaseChrome,
@@ -50,7 +50,7 @@ export type {
     GroupChatPageBaseProps,
     GroupChatPageLabels,
     GroupChatPageView,
-} from "@/modules/collab/group-chat/types"
+} from "../../../modules/collab/group-chat/types"
 
 import {
     Button,
@@ -63,15 +63,15 @@ import {
     Text,
 } from "@starci/grammar/common"
 import { type ReactNode } from "react"
-import { mayPresentInvite } from "@/modules/collab/group-chat/model"
-import { AcceptanceSurface } from "@/components/blocks/collab/AcceptanceSurface"
-import { TasksPanel } from "@/components/blocks/collab/TasksPanel"
-import { Conversation } from "@/components/blocks/collab/Conversation"
-import { Composer } from "@/components/blocks/collab/Composer"
-import { MemberSheet } from "@/components/blocks/collab/MemberSheet"
-import { MemberRailToggle } from "@/components/blocks/collab/MemberRailToggle"
-import { RosterRail } from "@/components/blocks/collab/RosterRail"
-import { MembersRail } from "@/components/blocks/collab/MembersRail"
+import { mayPresentInvite } from "../../../modules/collab/group-chat/model"
+import { AcceptanceSurface } from "../../../components/blocks/collab/AcceptanceSurface"
+import { TasksPanel } from "../../../components/blocks/collab/TasksPanel"
+import { Conversation } from "../../../components/blocks/collab/Conversation"
+import { Composer } from "../../../components/blocks/collab/Composer"
+import { MemberSheet } from "../../../components/blocks/collab/MemberSheet"
+import { MemberRailToggle } from "../../../components/blocks/collab/MemberRailToggle"
+import { RosterRail } from "../../../components/blocks/collab/RosterRail"
+import { MembersRail } from "../../../components/blocks/collab/MembersRail"
 
 /** Render the connected Office/Tasks surface for the current workspace. */
 export const GroupChatPageBase = (props: GroupChatPageBaseProps) => {

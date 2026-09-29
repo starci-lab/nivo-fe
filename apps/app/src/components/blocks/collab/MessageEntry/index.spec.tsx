@@ -1,8 +1,8 @@
 ﻿import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { buildConversationItems } from "@/modules/collab/group-chat/model"
+import { buildConversationItems } from "../../../../modules/collab/group-chat/model"
 import { MessageEntry } from "./index"
-import { MESSAGE, OWNER, PARTICIPANTS, labels } from "@/modules/collab/group-chat/test-fixtures.fixture"
+import { MESSAGE, OWNER, PARTICIPANTS, labels } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("MessageEntry", () => {
     it("renders a message author, addressed module and body", () => {

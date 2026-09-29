@@ -1,8 +1,8 @@
 ﻿import { ApprovalCard } from "./index"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import type { CollabApprovalCardView, CollabApprovalView, CollabTaskView } from "@/modules/api/collab"
-import { buildConversationItems } from "@/modules/collab/group-chat/model"
+import type { CollabApprovalCardView, CollabApprovalView, CollabTaskView } from "../../../../modules/api/collab"
+import { buildConversationItems } from "../../../../modules/collab/group-chat/model"
 import {
     OWNER,
     STAFF,
@@ -16,7 +16,7 @@ import {
     baseView,
     actions,
     conversationItemsOfKind,
-} from "@/modules/collab/group-chat/test-fixtures.fixture"
+} from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("ApprovalCard", () => {
     it("renders a waiting approval card with exactly two eligible actions for an Owner", () => {

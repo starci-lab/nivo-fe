@@ -7,8 +7,8 @@
     CollabTaskStatus,
     CollabTaskView,
     CollabTurnNoticeItem,
-} from "@/modules/api/collab"
-import type { CollabTasksFilter } from "@/hooks"
+} from "../../api/collab"
+import type { CollabTasksFilter } from "../../../hooks"
 import type { ConversationItem, GroupChatTab, SettledApprovalMap } from "./model"
 
 /** Copy the connected layer resolves from the locale message files. */

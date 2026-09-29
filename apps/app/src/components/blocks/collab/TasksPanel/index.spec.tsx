@@ -1,14 +1,14 @@
 ﻿import { TasksPanel } from "./index"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import type { CollabTaskView } from "@/modules/api/collab"
+import type { CollabTaskView } from "../../../../modules/api/collab"
 import {
     TASK_WAITING_APPROVAL,
     labels,
     baseView,
     actions,
     WORKING_TASK,
-} from "@/modules/collab/group-chat/test-fixtures.fixture"
+} from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("TasksPanel", () => {
     it("renders the Tasks tab with roster-keyed filters and Office-bound rows", () => {

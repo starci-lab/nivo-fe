@@ -1,4 +1,4 @@
-﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "@/modules/collab/group-chat/types"
+﻿import type { GroupChatPageLabels, GroupChatPageView, GroupChatPageActions } from "../../../../modules/collab/group-chat/types"
 import {
     GROUP_CHAT_ENTRY_CLASS_NAME,
     GROUP_CHAT_ENTRY_COMPACT_CLASS_NAME,
@@ -16,9 +16,9 @@ import {
 import { Icon, SurfaceCard, Text } from "@starci/grammar/common"
 import { IconSource } from "@nivo/ui"
 import { Badge, Button } from "@starci/grammar/common"
-import type { CollabApprovalView } from "@/modules/api/collab"
-import { mayPresentDecision, shortTaskRef } from "@/modules/collab/group-chat/model"
-import type { ConversationItem } from "@/modules/collab/group-chat/model"
+import type { CollabApprovalView } from "../../../../modules/api/collab"
+import { mayPresentDecision, shortTaskRef } from "../../../../modules/collab/group-chat/model"
+import type { ConversationItem } from "../../../../modules/collab/group-chat/model"
 
 /** Props for one held-action card with its decision row. */
 type ApprovalCardProps = {
