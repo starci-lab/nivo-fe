@@ -47,7 +47,7 @@ vi.mock("@/hooks", async (importOriginal) => ({
 }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/commerce", () => mocks.api)
-vi.mock("./component", () => ({
+vi.mock("@/components/blocks/wallet/WalletControlCenter/component", () => ({
     WalletControlCenterBase: (props: WalletProbeProps) => (
         <div>
             <output data-testid="wallet">
@@ -93,7 +93,7 @@ vi.mock("./component", () => ({
     ),
 }))
 
-import { WalletControlCenter } from "./"
+import { WalletControlCenter } from "../../components/blocks/wallet/WalletControlCenter"
 
 const output = () => screen.getByTestId("wallet").textContent ?? ""
 const renderWallet = () =>
