@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { usePathname, useQueryMyAgentosModuleInstallationsSwr, useRouter } from "@/hooks"
 import { nivoQueryData } from "@/modules/query"
+import { installation } from "@/modules/routes"
 import type { AgentosModuleInstallation } from "@/modules/api/agentos-modules"
 import type { SelectionListGroup, SelectionListItem } from "@nivo/ui"
 import { AgentOSInstallationChromeBase, type AgentOSInstallationChromeBaseProps } from "./component"
@@ -73,7 +74,7 @@ export const AgentOSInstallationChrome = ({ children }: AgentOSInstallationChrom
     const router = useRouter()
     const installationsQuery = useQueryMyAgentosModuleInstallationsSwr(workspaceId)
     const installations = nivoQueryData(installationsQuery.data) ?? []
-    const moduleRoot = `/agentos/workspaces/${workspaceId}/modules/${installationId}`
+    const moduleRoot = installation(workspaceId, installationId)
     const groups = installationGroups(
         installations,
         (kind): string => t(`kind.${kind}`),
@@ -109,7 +110,7 @@ export const AgentOSInstallationChrome = ({ children }: AgentOSInstallationChrom
         },
         on: {
             activate: (id) => {
-                if (id !== installationId) router.push(`/agentos/workspaces/${workspaceId}/modules/${id}`)
+                if (id !== installationId) router.push(installation(workspaceId, id))
             },
             selectTab: (segment) => router.push(`${moduleRoot}/${segment}`),
         },

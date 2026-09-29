@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/hooks"
+import { agentosHome, newWorkspace } from "@/modules/routes"
 import { AgentOSPageBase } from "./component"
 import type { AgentOSPageBaseState, AgentOSPageLabels } from "./component"
 
@@ -39,8 +40,8 @@ export const AgentOSPage = (props: AgentOSPageProps) => {
                 },
             }}
             on={{
-                openDashboard: () => router.push("/agentos"),
-                create: () => router.push("/agentos/workspaces/new"),
+                openDashboard: () => router.push(agentosHome()),
+                create: () => router.push(newWorkspace()),
             }}
         />
     )

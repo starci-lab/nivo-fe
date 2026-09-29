@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/hooks"
+import { apps } from "@/modules/routes"
 import {
     TemplateAppProvisioningPageBase,
     type TemplateAppProvisioningPageLabels,
@@ -35,7 +36,7 @@ export const TemplateAppProvisioningPage = (props: TemplateAppProvisioningPagePr
                     provisioningDescription: t("apps.provisioningDescription"),
                 },
             }}
-            on={{ openApps: () => router.push("/apps") }}
+            on={{ openApps: () => router.push(apps()) }}
         />
     )
 }

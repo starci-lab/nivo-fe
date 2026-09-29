@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl"
 import { useQueryMyAgentWorkspacesSwr } from "@/hooks"
 import { useRouter } from "@/hooks"
+import { newWorkspace } from "@/modules/routes"
 import {
     BusinessModulesDashboardBase,
     BusinessModulesDashboardModuleCenter,
@@ -46,7 +47,7 @@ export const BusinessModulesDashboard = (props: BusinessModulesDashboardProps) =
             <BusinessModulesDashboardBase
                 state="empty"
                 labels={labels}
-                onCreate={() => router.push("/agentos/workspaces/new")}
+                onCreate={() => router.push(newWorkspace())}
             />
         )
     return (

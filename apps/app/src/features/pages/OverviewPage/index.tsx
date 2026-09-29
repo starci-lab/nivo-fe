@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { OverviewDataProvider, useRouter } from "@/hooks"
+import { newWorkspace } from "@/modules/routes"
 import { OverviewPageBase, type OverviewPageBaseProps } from "./component"
 /** Public API role for OverviewPageProps. */
 export type OverviewPageProps = { readonly [key: string]: never }
@@ -11,7 +12,7 @@ export const OverviewPage = (props: OverviewPageProps) => {
     void props
     const t = useTranslations("console")
     const router = useRouter()
-    const openWorkspacePurchase = () => router.push("/agentos/workspaces/new")
+    const openWorkspacePurchase = () => router.push(newWorkspace())
     const input: OverviewPageBaseProps = {
         props: {
             title: t("overview.title"),

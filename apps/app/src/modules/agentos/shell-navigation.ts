@@ -24,6 +24,7 @@
  */
 
 import { getPathname } from "@/modules/i18n/navigation"
+import { installation } from "@/modules/routes"
 import type { Locale } from "@/modules/i18n/config"
 import type { ShellReadScope, ShellRegisteredDestination } from "@/modules/api/agentos-shell"
 import type { FailureKind, Outcome } from "@/modules/api/outcome"
@@ -62,10 +63,10 @@ export type ShellNavigationDecision =
  * @returns The app-relative path of the surface the destination names.
  */
 export const shellNavigationPath = (destination: ShellRegisteredDestination): string => {
-    const installation = `/agentos/workspaces/${destination.workspaceId}/modules/${destination.installationId}`
-    if (destination.routeName === "module-home") return installation
-    if (destination.routeName === "module-diagnostics") return `${installation}/diagnostics`
-    return `${installation}/operate`
+    const root = installation(destination.workspaceId, destination.installationId)
+    if (destination.routeName === "module-home") return root
+    if (destination.routeName === "module-diagnostics") return `${root}/diagnostics`
+    return `${root}/operate`
 }
 
 /**

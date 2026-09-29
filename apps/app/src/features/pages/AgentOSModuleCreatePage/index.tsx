@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/hooks"
+import { workspaceModules } from "@/modules/routes"
 import { AgentOSModuleCreatePageBase } from "./component"
 
 /** Route identity supplied by the workspace modules segment. */
@@ -33,7 +34,7 @@ export const AgentOSModuleCreatePage = (props: AgentOSModuleCreatePageProps) => 
                 },
             }}
             on={{
-                back: () => router.push(`/agentos/workspaces/${workspaceId}/modules`),
+                back: () => router.push(workspaceModules(workspaceId)),
             }}
         />
     )

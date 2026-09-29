@@ -12,6 +12,9 @@ import {
     useQueryMyAgentWorkspaceControlCenterSwr,
     useRouter,
 } from "@/hooks"
+import { getPathname } from "@/modules/i18n/navigation"
+import { toLocale } from "@/modules/i18n/config"
+import { moduleCreate, workspace } from "@/modules/routes"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
 import { useCallback } from "react"
@@ -130,11 +133,11 @@ export const AgentOSModuleCollectionPage = (props: AgentOSModuleCollectionPagePr
                     runtimeUnavailable: t("runtimeUnavailable"),
                     runtimeUnknown: t("runtimeUnknown"),
                 },
-                createHref: `/${locale}/agentos/workspaces/${workspaceId}/modules/create`,
+                createHref: getPathname({ locale: toLocale(locale), href: moduleCreate(workspaceId) }),
                 isShellRetrying: shellView.state === "retrying",
             }}
             on={{
-                onBack: () => router.push(`/agentos/workspaces/${workspaceId}`),
+                onBack: () => router.push(workspace(workspaceId)),
                 onRetryShell: retryShell,
                 onRetryOperation: retryOperation,
                 formatDate: (value) =>

@@ -1,8 +1,9 @@
 "use client"
-import { fleetResourceHref, type FleetStatus } from "@/components/blocks/provisioning/FleetRow"
+import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow"
 import { useQueryMyAgentWorkspacesSwr, useRouter } from "@/hooks"
 import { getPathname } from "@/modules/i18n/navigation"
 import { toLocale } from "@/modules/i18n/config"
+import { newWorkspace, workspace as workspaceRoute } from "@/modules/routes"
 import { useLocale, useTranslations } from "next-intl"
 import { AgentOSWorkspaceListBase, type AgentOSWorkspaceListViewProps } from "./component"
 /** Public API role for AgentOSWorkspaceListProps. */
@@ -70,7 +71,7 @@ export const AgentOSWorkspaceList = (props: AgentOSWorkspaceListProps) => {
                     actionLabel: t("agentos.create"),
                 },
                 on: {
-                    create: () => router.push("/agentos/workspaces/new"),
+                    create: () => router.push(newWorkspace()),
                 },
             }
         }
@@ -86,7 +87,7 @@ export const AgentOSWorkspaceList = (props: AgentOSWorkspaceListProps) => {
                     const status = STATUS[workspace.status] ?? "not_provisioned"
                     return {
                         id: workspace.id,
-                        href: getPathname({ locale, href: fleetResourceHref("workspace", workspace.id) }),
+                        href: getPathname({ locale, href: workspaceRoute(workspace.id) }),
                         name: workspace.name ?? t("agentos.kindWorkspace"),
                         detail:
                             workspace.catalogOrder == null

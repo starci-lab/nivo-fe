@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl"
 import { useQueryMyAgentosCustomModuleStudioSwr, useRouter } from "@/hooks"
 import { AgentOSModuleStudioProjectionProvider } from "@/modules/agentos/module-studio-projection"
+import { workspaceModules } from "@/modules/routes"
 import { nivoQueryData } from "@/modules/query"
 import { AgentOSModuleStudioPageBase } from "./component"
 type AgentOSModuleStudioPageProps = {
@@ -34,7 +35,7 @@ export const AgentOSModuleStudioPage = (props: AgentOSModuleStudioPageProps) => 
                         sections: t("sections"),
                     },
                 }}
-                on={{ back: () => router.push(`/agentos/workspaces/${workspaceId}/modules`) }}
+                on={{ back: () => router.push(workspaceModules(workspaceId)) }}
             />
         </AgentOSModuleStudioProjectionProvider>
     )

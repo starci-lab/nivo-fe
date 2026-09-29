@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { useRouter, useMutateStartAgentosCustomModuleIntakeSwr } from "@/hooks"
+import { moduleStudio } from "@/modules/routes"
 import { AgentOSModuleIntakeBase } from "./component"
 type AgentOSModuleIntakeProps = {
     readonly workspaceId: string
@@ -27,7 +28,7 @@ export const AgentOSModuleIntake = (props: AgentOSModuleIntakeProps) => {
                 setError(t("refused"))
                 return
             }
-            router.push(`/agentos/workspaces/${workspaceId}/modules/studio/${result.data.module.id}`)
+            router.push(moduleStudio(workspaceId, result.data.module.id))
         } catch {
             setError(t("refused"))
         }
