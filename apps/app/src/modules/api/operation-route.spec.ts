@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { isPrintableIdentity, isRouteErrorName, operationAddress, routeFailureKind, sendOperation } from "./operation-route"
+import { isPrintableIdentity, isRouteErrorName, operationAddress, operationAnswerNeedsRead, operationMutationKey, operationReadIdentity, routeFailureKind, sendOperation } from "./operation-route"
+import { failed } from "./outcome"
 
 const SCOPE = { workspaceId: "w/1", instanceId: "i 1", installationId: "n?1" }
 const ADDRESS = "http://core.test/op"
@@ -77,5 +78,29 @@ describe("sendOperation", () => {
         expect(await sendOperation("tok", ADDRESS, "id", {})).toMatchObject({ arrived: false, code: "UNREACHABLE" })
         fetchMock.mockResolvedValueOnce({ status: 500, json: async () => { throw new Error("html") } })
         expect(await sendOperation("tok", ADDRESS, "id", {})).toMatchObject({ arrived: false, code: "MALFORMED_ANSWER" })
+    })
+})
+
+describe("operationReadIdentity", () => {
+    it("names a read by its registered name and selector, writing an absent part as a dash", () => {
+        expect(operationReadIdentity("sales.policy@1", "installation-1", null)).toBe("sales.policy@1/installation-1/-")
+        expect(operationReadIdentity("accounting.summary@1")).toBe("accounting.summary@1/")
+    })
+})
+
+describe("operationMutationKey", () => {
+    it("scopes a command to its module, its name and the installation it addresses", () => {
+        expect(operationMutationKey("sales", "close", { workspaceId: "w", instanceId: "i", installationId: "n" })).toEqual(["sales", "close", "w", "i", "n"])
+        expect(operationMutationKey("accounting", "routine", { workspaceId: "w", instanceId: "i", installationId: "n" })[0]).toBe("accounting")
+    })
+})
+
+describe("operationAnswerNeedsRead", () => {
+    it("owes a read after a served result and after an effect nobody attested, and after nothing else", () => {
+        expect(operationAnswerNeedsRead({ ok: true, data: 1 })).toBe(true)
+        expect(operationAnswerNeedsRead(failed("unavailable", { code: "outcome_unknown", reason: "" }))).toBe(true)
+        expect(operationAnswerNeedsRead(failed("unavailable", { code: "DEADLINE_EXCEEDED", reason: "" }))).toBe(true)
+        expect(operationAnswerNeedsRead(failed("forbidden", { code: "REFUSED", reason: "" }))).toBe(false)
+        expect(operationAnswerNeedsRead(failed("unavailable", { code: "UNREACHABLE", reason: "" }))).toBe(false)
     })
 })

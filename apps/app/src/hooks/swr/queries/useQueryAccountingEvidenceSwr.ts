@@ -1,21 +1,11 @@
 "use client";
 
 import { readAccountingEvidence, type AccountingEvidenceInput, type AccountingInstallationScope } from "@/modules/api/accounting";
-import { useSession } from "../../auth/useSession";
+import { operationReadIdentity } from "@/modules/api/operation-route";
+import { useAccessToken } from "../../auth/useAccessToken";
 import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
 
-/*
- * One hook per file. The token reader and the stable read identity are private here rather than
- * shared: checkSourceNames exempts only a file whose basename is the hook it exports, and no shared
- * non-hook helper path is in this slice's grant.
- */
-
-const useAccountingAccessToken = () => {
-  const session = useSession();
-  return session.state.status === "signed-in" ? session.state.accessToken : null;
-};
-
-const accountingReadIdentity = (operation: string, ...parts: ReadonlyArray<string | null>): string => `${operation}/${parts.map(part => part ?? "-").join("/")}`;
+/* One hook per file, one registered read per hook. */
 
 /** Cache identity for one evidence identity inside one installation. */
 export const accountingEvidenceQueryKey = (scope: AccountingInstallationScope, input: AccountingEvidenceInput): NivoQueryKey =>
@@ -28,6 +18,6 @@ export const accountingEvidenceQueryKey = (scope: AccountingInstallationScope, i
  *   addresses nothing rather than addressing a half-filled operation path.
  */
 export const useQueryAccountingEvidenceSwr = (scope: AccountingInstallationScope, input: AccountingEvidenceInput, enabled = true) => {
-  const accessToken = useAccountingAccessToken();
-  return useNivoQuery(enabled && accessToken !== null ? accountingEvidenceQueryKey(scope, input) : null, () => readAccountingEvidence(accessToken, scope, input, accountingReadIdentity("accounting.evidence@1", scope.installationId, input.evidenceId)));
+  const accessToken = useAccessToken();
+  return useNivoQuery(enabled && accessToken !== null ? accountingEvidenceQueryKey(scope, input) : null, () => readAccountingEvidence(accessToken, scope, input, operationReadIdentity("accounting.evidence@1", scope.installationId, input.evidenceId)));
 };

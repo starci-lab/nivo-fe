@@ -2,7 +2,7 @@
 
 import useSWRMutation from "swr/mutation";
 import { useSWRConfig } from "swr";
-import { useSession } from "../auth/useSession";
+import { useAccessToken } from "../auth/useAccessToken";
 import { nivoViewerQueryKeyFor, viewerCacheKeyFor, type NivoQueryKey } from "./useNivoQuery";
 
 /** Product mutation identity before the signed-in viewer scope is attached. */
@@ -27,8 +27,7 @@ const invalidateQueries = async <TAnswer, TInput>(accessToken: string | null, in
 
 /** Own one signed-in command and expose its press-local lifecycle without mixing it into query state. */
 export const useNivoMutation = <TAnswer, TInput>(mutationKey: NivoMutationKey | null, mutation: (input: TInput) => Promise<TAnswer>, options?: NivoMutationOptions<TAnswer, TInput>) => {
-  const session = useSession();
-  const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null;
+  const accessToken = useAccessToken();
   const {
     mutate: mutateCache
   } = useSWRConfig();

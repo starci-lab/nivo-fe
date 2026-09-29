@@ -11,7 +11,7 @@ import {
     reconcileCollabRequest,
     type CollabTaskStatus,
 } from "@/modules/api/collab";
-import { useSession } from "../../auth/useSession";
+import { useAccessToken } from "../../auth/useAccessToken";
 import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
 
 /**
@@ -74,17 +74,12 @@ export const collabNoticeQueryKey = (workspaceId: string, noticeId: string): Niv
 /** Cache identity for one same-intent reconciliation read. */
 export const collabReconcileQueryKey = (workspaceId: string, intentId: string): NivoQueryKey => ["collab", "reconcile", workspaceId, intentId];
 
-const useCollabAccessToken = (): string | null => {
-    const session = useSession();
-    return session.state.status === "signed-in" ? session.state.accessToken : null;
-};
-
 const scoped = (accessToken: string | null, workspaceId: string | null): { accessToken: string; workspaceId: string } | null =>
     accessToken !== null && workspaceId !== null && workspaceId !== "" ? { accessToken, workspaceId } : null;
 
 /** Read the one Office landing bundle: group plus current humans and hired modules. */
 export const useQueryCollabOfficeSwr = (workspaceId: string | null) => {
-    const accessToken = useCollabAccessToken();
+    const accessToken = useAccessToken();
     const scope = scoped(accessToken, workspaceId);
     return useNivoQuery(scope === null ? null : collabOfficeQueryKey(scope.workspaceId), () => openCollabOffice({ workspaceId: scope?.workspaceId ?? "", accessToken: accessToken ?? "" }));
 };
@@ -94,42 +89,42 @@ export const useQueryCollabOfficeSwr = (workspaceId: string | null) => {
  * channel is a hint, this authoritative page is the truth (`br.collab.reads-cheap`).
  */
 export const useQueryCollabGroupSwr = (workspaceId: string | null, cursor?: string | null, refreshInterval = 5_000) => {
-    const accessToken = useCollabAccessToken();
+    const accessToken = useAccessToken();
     const scope = scoped(accessToken, workspaceId);
     return useNivoQuery(scope === null ? null : collabGroupQueryKey(scope.workspaceId, cursor), () => readCollabGroup({ workspaceId: scope?.workspaceId ?? "", accessToken: accessToken ?? "", ...(cursor == null ? {} : { cursor }) }), { refreshInterval });
 };
 
 /** Read one authorized Tasks page; filters select presentation, never a second grant. */
 export const useQueryCollabTasksSwr = (workspaceId: string | null, filters?: CollabTasksFilter) => {
-    const accessToken = useCollabAccessToken();
+    const accessToken = useAccessToken();
     const scope = scoped(accessToken, workspaceId);
     return useNivoQuery(scope === null ? null : collabTasksQueryKey(scope.workspaceId, filters), () => listCollabTasks({ workspaceId: scope?.workspaceId ?? "", accessToken: accessToken ?? "", ...(filters ?? {}) }));
 };
 
 /** Read one task the Tasks row and the Office card share - the same authoritative row. */
 export const useQueryCollabTaskSwr = (workspaceId: string | null, taskId: string | null) => {
-    const accessToken = useCollabAccessToken();
+    const accessToken = useAccessToken();
     const scope = scoped(accessToken, workspaceId);
     return useNivoQuery(scope === null || taskId === null ? null : collabTaskQueryKey(scope.workspaceId, taskId), () => readCollabTask({ workspaceId: scope?.workspaceId ?? "", accessToken: accessToken ?? "", taskId: taskId ?? "" }));
 };
 
 /** Resolve one typed `@` name to its published commands; null name mounts no read. */
 export const useQueryCollabCommandsSwr = (workspaceId: string | null, moduleName: string | null) => {
-    const accessToken = useCollabAccessToken();
+    const accessToken = useAccessToken();
     const scope = scoped(accessToken, workspaceId);
     return useNivoQuery(scope === null || moduleName === null || moduleName === "" ? null : collabCommandsQueryKey(scope.workspaceId, moduleName), () => readCollabAvailableCommands({ workspaceId: scope?.workspaceId ?? "", accessToken: accessToken ?? "", moduleName: moduleName ?? "" }));
 };
 
 /** Read the member's outstanding turn notices; polls while outstanding turns may exist. */
 export const useQueryCollabNoticesSwr = (workspaceId: string | null, cursor?: string | null, refreshInterval = 15_000) => {
-    const accessToken = useCollabAccessToken();
+    const accessToken = useAccessToken();
     const scope = scoped(accessToken, workspaceId);
     return useNivoQuery(scope === null ? null : collabNoticesQueryKey(scope.workspaceId, cursor), () => readCollabNotices({ workspaceId: scope?.workspaceId ?? "", accessToken: accessToken ?? "", ...(cursor == null ? {} : { cursor }) }), { refreshInterval });
 };
 
 /** Follow one named notice to its live authoritative target; null notice mounts no read. */
 export const useQueryCollabNoticeSwr = (workspaceId: string | null, noticeId: string | null) => {
-    const accessToken = useCollabAccessToken();
+    const accessToken = useAccessToken();
     const scope = scoped(accessToken, workspaceId);
     return useNivoQuery(scope === null || noticeId === null ? null : collabNoticeQueryKey(scope.workspaceId, noticeId), () => openCollabNotice({ workspaceId: scope?.workspaceId ?? "", accessToken: accessToken ?? "", noticeId: noticeId ?? "" }));
 };
@@ -140,7 +135,7 @@ export const useQueryCollabNoticeSwr = (workspaceId: string | null, noticeId: st
  * mounts no read.
  */
 export const useQueryCollabReconcileSwr = (workspaceId: string | null, intentId: string | null) => {
-    const accessToken = useCollabAccessToken();
+    const accessToken = useAccessToken();
     const scope = scoped(accessToken, workspaceId);
     return useNivoQuery(scope === null || intentId === null ? null : collabReconcileQueryKey(scope.workspaceId, intentId), () => reconcileCollabRequest({ workspaceId: scope?.workspaceId ?? "", accessToken: accessToken ?? "", intentId: intentId ?? "" }));
 };

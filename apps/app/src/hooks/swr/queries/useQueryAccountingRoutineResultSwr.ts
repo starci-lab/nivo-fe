@@ -1,17 +1,11 @@
 "use client";
 
 import { readAccountingRoutineResult, type AccountingInstallationScope, type AccountingRoutineResultInput } from "@/modules/api/accounting";
-import { useSession } from "../../auth/useSession";
+import { operationReadIdentity } from "@/modules/api/operation-route";
+import { useAccessToken } from "../../auth/useAccessToken";
 import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
 
-/* One hook per file: the token reader and the stable read identity are private here, never shared. */
-
-const useAccountingAccessToken = () => {
-  const session = useSession();
-  return session.state.status === "signed-in" ? session.state.accessToken : null;
-};
-
-const accountingReadIdentity = (operation: string, ...parts: ReadonlyArray<string | null>): string => `${operation}/${parts.map(part => part ?? "-").join("/")}`;
+/* One hook per file, one registered read per hook. */
 
 /** Cache identity for one routine intent inside one installation. */
 export const accountingRoutineResultQueryKey = (scope: AccountingInstallationScope, input: AccountingRoutineResultInput): NivoQueryKey =>
@@ -23,6 +17,6 @@ export const accountingRoutineResultQueryKey = (scope: AccountingInstallationSco
  * @param enabled - False while the installation scope or the intent is not yet known.
  */
 export const useQueryAccountingRoutineResultSwr = (scope: AccountingInstallationScope, input: AccountingRoutineResultInput, enabled = true) => {
-  const accessToken = useAccountingAccessToken();
-  return useNivoQuery(enabled && accessToken !== null ? accountingRoutineResultQueryKey(scope, input) : null, () => readAccountingRoutineResult(accessToken, scope, input, accountingReadIdentity("accounting.routineResult@1", scope.installationId, input.intentId)));
+  const accessToken = useAccessToken();
+  return useNivoQuery(enabled && accessToken !== null ? accountingRoutineResultQueryKey(scope, input) : null, () => readAccountingRoutineResult(accessToken, scope, input, operationReadIdentity("accounting.routineResult@1", scope.installationId, input.intentId)));
 };

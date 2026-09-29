@@ -15,7 +15,7 @@
  * if it decides to try again, which is what keeps a replay one intent.
  */
 import { CORE_API_URL } from "@/modules/config";
-import type { FailureKind } from "./outcome";
+import type { FailureKind, Outcome } from "./outcome";
 import { send } from "./transport";
 
 /** The registered installation operation route prefix; an absolute path, so it replaces `/graphql`. */
@@ -141,3 +141,38 @@ export const sendOperation = async (accessToken: string | null, address: string,
   if (sent.body === null) return { arrived: false, code: "MALFORMED_ANSWER", reason: "The route answer is not JSON.", requestId };
   return { arrived: true, body: sent.body };
 };
+
+/** One press of an installation command: the receiver's own input plus the stable identity it replays under. */
+export type OperationTrigger<TInput> = { readonly requestId: string; readonly input: TInput };
+
+/**
+ * The stable identity one read of a registered operation is addressed by: its registered name and its
+ * own selector, so the same read replays as one intent.
+ *
+ * @param operation - The registered `name@version`.
+ * @param parts - The selector parts; an absent one is written `-`.
+ * @returns The read identity.
+ */
+export const operationReadIdentity = (operation: string, ...parts: ReadonlyArray<string | null>): string => `${operation}/${parts.map(part => part ?? "-").join("/")}`;
+
+/**
+ * The press-local identity of one command of one module inside one installation.
+ *
+ * @param module - The module the command belongs to.
+ * @param name - The command's short name.
+ * @param scope - The installation the command addresses.
+ * @returns The mutation key.
+ */
+export const operationMutationKey = (module: "sales" | "accounting", name: string, scope: InstallationScope): readonly [string, string, string, string, string] =>
+  [module, name, scope.workspaceId, scope.instanceId, scope.installationId];
+
+/**
+ * Whether an answer still owes a read.
+ *
+ * A served result confirms itself, and an unattested effect (`outcome_unknown`, `DEADLINE_EXCEEDED`)
+ * is resolved only by reading the same identity back, never by sending it again.
+ *
+ * @param answer - The answer of one command.
+ * @returns Whether the reconciling read must be refreshed.
+ */
+export const operationAnswerNeedsRead = (answer: Outcome<unknown>): boolean => answer.ok || answer.code === "outcome_unknown" || answer.code === "DEADLINE_EXCEEDED";

@@ -12,7 +12,7 @@ import {
     type CollabHumanRole,
 } from "@/modules/api/collab";
 import type { Outcome } from "@/modules/api/outcome";
-import { useSession } from "../../auth/useSession";
+import { useAccessToken } from "../../auth/useAccessToken";
 import { useNivoMutation, type NivoMutationKey } from "../useNivoMutation";
 
 /**
@@ -32,11 +32,6 @@ import { useNivoMutation, type NivoMutationKey } from "../useNivoMutation";
  * affected domains through SWR's filter form, only after the boundary answered `ok`.
  * A refused or uncertain answer revalidates nothing the read didn't already prove.
  */
-
-const useCollabAccessToken = (): string | null => {
-    const session = useSession();
-    return session.state.status === "signed-in" ? session.state.accessToken : null;
-};
 
 /** Every cached collab query key of one workspace inside these domains. */
 const collabDomainKeys = (workspaceId: string, domains: ReadonlyArray<string>) => (key: unknown): boolean =>
@@ -98,7 +93,7 @@ export type CollabChangeMemberRoleInput = {
  * move a task's turn and raise a notice in one commit.
  */
 export const useMutateCollabPostMessageSwr = (workspaceId: string | null) => {
-    const accessToken = useCollabAccessToken();
+    const accessToken = useAccessToken();
     const revalidate = useCollabRevalidate(workspaceId, ["group", "tasks", "task", "notices", "notice"]);
     const key: NivoMutationKey | null = workspaceId === null ? null : ["collab", "post", workspaceId];
     return useNivoMutation(key, (input: CollabPostMessageInput) =>
@@ -111,7 +106,7 @@ export const useMutateCollabPostMessageSwr = (workspaceId: string | null) => {
  * first recorded press on a repeated or competing press.
  */
 export const useMutateCollabPressApprovalSwr = (workspaceId: string | null) => {
-    const accessToken = useCollabAccessToken();
+    const accessToken = useAccessToken();
     const revalidate = useCollabRevalidate(workspaceId, ["group", "tasks", "task", "notices", "notice"]);
     const key: NivoMutationKey | null = workspaceId === null ? null : ["collab", "press", workspaceId];
     return useNivoMutation(key, (input: CollabPressApprovalInput) =>
@@ -124,7 +119,7 @@ export const useMutateCollabPressApprovalSwr = (workspaceId: string | null) => {
  * or `existing` under the `membership` result field.
  */
 export const useMutateCollabInviteByEmailSwr = (workspaceId: string | null) => {
-    const accessToken = useCollabAccessToken();
+    const accessToken = useAccessToken();
     const revalidate = useCollabRevalidate(workspaceId, ["office"]);
     const key: NivoMutationKey | null = workspaceId === null ? null : ["collab", "invite", workspaceId];
     return useNivoMutation(key, (input: CollabInviteByEmailInput) =>
@@ -137,7 +132,7 @@ export const useMutateCollabInviteByEmailSwr = (workspaceId: string | null) => {
  * Login-verified email comes from the bearer, never from this call.
  */
 export const useMutateCollabAcceptInvitationSwr = (workspaceId: string | null) => {
-    const accessToken = useCollabAccessToken();
+    const accessToken = useAccessToken();
     const revalidate = useCollabRevalidate(workspaceId, ["office"]);
     const key: NivoMutationKey | null = workspaceId === null ? null : ["collab", "invite-accept", workspaceId];
     return useNivoMutation(key, (input: CollabAcceptInvitationInput) =>
@@ -146,7 +141,7 @@ export const useMutateCollabAcceptInvitationSwr = (workspaceId: string | null) =
 
 /** Close one pending invitation; acceptance and withdrawal have one atomic winner. */
 export const useMutateCollabWithdrawInvitationSwr = (workspaceId: string | null) => {
-    const accessToken = useCollabAccessToken();
+    const accessToken = useAccessToken();
     const revalidate = useCollabRevalidate(workspaceId, ["office"]);
     const key: NivoMutationKey | null = workspaceId === null ? null : ["collab", "invite-withdraw", workspaceId];
     return useNivoMutation(key, (input: CollabWithdrawInvitationInput) =>
@@ -155,7 +150,7 @@ export const useMutateCollabWithdrawInvitationSwr = (workspaceId: string | null)
 
 /** Replace one current member's role under a current Owner. */
 export const useMutateCollabChangeMemberRoleSwr = (workspaceId: string | null) => {
-    const accessToken = useCollabAccessToken();
+    const accessToken = useAccessToken();
     const revalidate = useCollabRevalidate(workspaceId, ["office"]);
     const key: NivoMutationKey | null = workspaceId === null ? null : ["collab", "member-role", workspaceId];
     return useNivoMutation(key, (input: CollabChangeMemberRoleInput) =>

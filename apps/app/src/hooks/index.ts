@@ -151,6 +151,7 @@ export { useCollabOfficeTransport } from "./collab-live/useCollabOfficeTransport
 export { default as useProvisioningRealtime } from "./realtime/useProvisioningRealtime"
 export type { ProvisioningTarget } from "./realtime/useProvisioningRealtime"
 
+export { useAccessToken } from "./auth/useAccessToken"
 export { useAccessTokenFrom } from "./auth/useAccessTokenFrom"
 export { useLocaleFrom } from "./auth/useLocaleFrom"
 export { useSession } from "./auth/useSession"

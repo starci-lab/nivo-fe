@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";
 import { io, type Socket } from "socket.io-client";
 import { CORE_API_BASE } from "@/modules/config";
-import { useSession } from "../auth/useSession";
+import { useAccessToken } from "../auth/useAccessToken";
 
 /**
  * The Collab live door (`decision.collab.live-delivery` rev 2,
@@ -108,8 +108,7 @@ const readSubscribeAck = (payload: unknown): { ok: true } | { ok: false; reason:
  * A null workspace or signed-out session mounts no socket.
  */
 export const useCollabLive = (workspaceId: string | null): CollabLiveState => {
-    const session = useSession();
-    const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null;
+    const accessToken = useAccessToken();
     const { mutate } = useSWRConfig();
     const [state, setState] = useState<CollabLiveState>({ status: "idle", reason: null, lastHint: null });
 
