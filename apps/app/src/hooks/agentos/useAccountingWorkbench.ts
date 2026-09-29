@@ -2,11 +2,13 @@
 
 import { useRef, useState } from "react"
 import { useParams } from "next/navigation"
+import { useFormatter } from "next-intl"
 import type {
-    AccountingCorrectInput,
     AccountingCorrectedFact,
     AccountingExceptionInput,
     AccountingInstallationScope,
+    AccountingOperationAnswer,
+    AccountingResult,
     AccountingResultDetailInput,
     AccountingSummaryQueryInput,
 } from "@/modules/api/accounting"
@@ -25,11 +27,23 @@ import {
     accountingRefusalKey,
     accountingUtcMonth,
     accountingSurfaceStanding,
+    formatAccountingInstant,
+    formatAccountingMinor,
+    formatAccountingPeriod,
     type AccountingAnswerStanding,
     type AccountingNotice,
     type AccountingSurfaceStanding,
     type AccountingTranslation,
 } from "@/modules/accounting/accounting-workbench"
+import {
+    parseAccountingCorrectionReading,
+    parseAccountingEvidenceReading,
+    parseAccountingExceptionReading,
+    parseAccountingResultDetailReading,
+    parseAccountingRoutineReading,
+    parseAccountingSummaryReading,
+} from "@/modules/accounting/accounting-workbench.guards"
+import { isCommandPayloadState } from "./useAccountingWorkbench.guards"
 
 /*
  * The connected Accounting workbench (impl.accounting.nivo-fe.workbench-view).
@@ -54,8 +68,8 @@ const requestId = () =>
     globalThis.crypto?.randomUUID?.() ?? `request-${Date.now()}-${Math.random().toString(36).slice(2)}`
 const PAGE_SIZE = 20
 
-/** One command answer, as much of it as settlement depends on. */
-type CommandAnswer = { readonly ok: boolean; readonly code?: string; readonly reason?: string; readonly data?: unknown }
+/** The closed Accounting response the settlement flow receives from a command or readback. */
+type CommandAnswer = AccountingOperationAnswer<AccountingResult>
 
 /** What the installation line shows before an address exists: a held read, a refusal, or a true standing. */
 const scopeStandingFor = (
@@ -70,34 +84,34 @@ const scopeStandingFor = (
 }
 
 /** The receiver's own state spelling inside one settled payload. */
-type CommandPayloadState = { readonly state?: string; readonly resultId?: string | null }
+export type CommandPayloadState = { readonly state?: string; readonly resultId?: string | null }
 const payloadState = (answer: CommandAnswer): CommandPayloadState | undefined =>
-    (answer.data as { readonly payload?: CommandPayloadState } | undefined)?.payload
+    answer.ok && isCommandPayloadState(answer.data.payload) ? answer.data.payload : undefined
 /** The three states whose catalogue key differs from the receiver's spelling. */
-const EVIDENCE_STATE_KEYS: Readonly<Record<string, string>> = {
+const EVIDENCE_STATE_KEYS = {
     needs_information: "needsInformation",
     likely_duplicate: "likelyDuplicate",
-}
-const ROUTINE_STATE_KEYS: Readonly<Record<string, string>> = {
+} satisfies Readonly<Partial<Record<string, string>>>
+const ROUTINE_STATE_KEYS = {
     "needs-decision": "needsDecision",
     "pending-authority": "pendingAuthority",
     "outcome-unknown": "outcomeUnknown",
-}
-const CORRECTION_STATE_KEYS: Readonly<Record<string, string>> = {
+} satisfies Readonly<Partial<Record<string, string>>>
+const CORRECTION_STATE_KEYS = {
     possible_start: "possibleStart",
     proven_not_applied: "provenNotApplied",
     outcome_unknown: "outcomeUnknown",
-}
+} satisfies Readonly<Partial<Record<string, string>>>
+const mappedState = (mapping: Readonly<Partial<Record<string, string>>>, state: string): string | undefined =>
+    mapping[state]
 
 /** One exact input's stable request identity, kept until that input is delivered. */
 type Intent = { readonly fingerprint: string; readonly token: string }
 
 /** Own Accounting form state, the resolved installation scope, idempotent intents and readback-settled feedback. */
 export const useAccountingWorkbench = (moduleId: string, locale: string, t: AccountingTranslation) => {
-    const params = useParams<{ readonly workspaceId?: string; readonly installationId?: string }>() as {
-        readonly workspaceId?: string
-        readonly installationId?: string
-    } | null
+    const format = useFormatter()
+    const params = useParams<{ readonly workspaceId?: string; readonly installationId?: string }>()
     const routeWorkspaceId = typeof params?.workspaceId === "string" ? params.workspaceId : ""
     const routeInstallationId = typeof params?.installationId === "string" ? params.installationId : moduleId
     const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(routeWorkspaceId, routeWorkspaceId.length > 0)
@@ -177,11 +191,11 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
     const exceptionCommand = useMutateAccountingExceptionSwr(addressable, ready)
     const correction = useMutateAccountingCorrectSwr(addressable, ready)
 
-    const summaryModel = summary.data?.ok === true ? summary.data.data.payload : null
-    const evidenceModel = evidence.data?.ok === true ? evidence.data.data.payload : null
-    const routineModel = routine.data?.ok === true ? routine.data.data.payload : null
-    const detailModel = detail.data?.ok === true ? detail.data.data.payload : null
-    const correctionModel = correction.data?.ok === true ? correction.data.data.payload : null
+    const summaryModel = summary.data?.ok === true ? parseAccountingSummaryReading(summary.data.data.payload) : null
+    const evidenceModel = evidence.data?.ok === true ? parseAccountingEvidenceReading(evidence.data.data.payload) : null
+    const routineModel = routine.data?.ok === true ? parseAccountingRoutineReading(routine.data.data.payload) : null
+    const detailModel = detail.data?.ok === true ? parseAccountingResultDetailReading(detail.data.data.payload) : null
+    const correctionModel = correction.data?.ok === true ? parseAccountingCorrectionReading(correction.data.data.payload) : null
 
     const intentFor = (key: string, value: unknown): string => {
         const valueFingerprint = JSON.stringify(value)
@@ -194,7 +208,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
     const settle = async (
         key: string,
         command: () => Promise<CommandAnswer>,
-        readback: (() => Promise<CommandAnswer>) | null,
+        readback: (() => Promise<CommandAnswer | undefined>) | null,
         describe: (answer: CommandAnswer) => string | null,
     ): Promise<void> => {
         setNotice(null)
@@ -208,7 +222,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
                 return
             }
             const settled = readback === null ? answer : await readback()
-            const confirmed = settled.ok ? describe(settled) : null
+            const confirmed = settled?.ok ? describe(settled) : null
             if (confirmed === null) {
                 setNotice({ kind: "refused", message: t("refusal.unsettled") })
                 return
@@ -223,20 +237,20 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
         const state = payloadState(answer)?.state
         return state === undefined
             ? null
-            : t("intake.settled", { state: t(`evidenceState.${EVIDENCE_STATE_KEYS[state] ?? state}`) })
+            : t("intake.settled", { state: t(`evidenceState.${mappedState(EVIDENCE_STATE_KEYS, state) ?? state}`) })
     }
     const routineStateText = (answer: CommandAnswer): string | null => {
         const state = payloadState(answer)?.state
         return state === undefined
             ? null
-            : t("routine.settled", { state: t(`routineState.${ROUTINE_STATE_KEYS[state] ?? state}`) })
+            : t("routine.settled", { state: t(`routineState.${mappedState(ROUTINE_STATE_KEYS, state) ?? state}`) })
     }
     const correctionStateText = (answer: CommandAnswer): string | null => {
         const payload = payloadState(answer)
         return payload?.state === undefined
             ? null
             : t("correction.settled", {
-                  state: t(`correctionState.${CORRECTION_STATE_KEYS[payload.state] ?? payload.state}`),
+                  state: t(`correctionState.${mappedState(CORRECTION_STATE_KEYS, payload.state) ?? payload.state}`),
                   result: payload.resultId ?? t("none"),
               })
     }
@@ -265,8 +279,8 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
                 admit.trigger({
                     requestId: intentFor(`admit-${evidenceId}`, value),
                     input: value,
-                }) as Promise<CommandAnswer>,
-            () => evidence.mutate() as Promise<CommandAnswer>,
+                }),
+            () => evidence.mutate(),
             evidenceStateText,
         )
     }
@@ -289,8 +303,8 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
                 routineCommand.trigger({
                     requestId: intentFor(`routine-${intentId}`, value),
                     input: value,
-                }) as Promise<CommandAnswer>,
-            () => routine.mutate() as Promise<CommandAnswer>,
+                }),
+            () => routine.mutate(),
             routineStateText,
         )
     }
@@ -310,8 +324,8 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
                 routineCommand.trigger({
                     requestId: intentFor(`routine-retry-${intentId}`, value),
                     input: value,
-                }) as Promise<CommandAnswer>,
-            () => routine.mutate() as Promise<CommandAnswer>,
+                }),
+            () => routine.mutate(),
             routineStateText,
         )
     }
@@ -321,20 +335,20 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
         .filter((entry: string): boolean => entry.length > 0)
     const exceptionAction = (action: "defer" | "reopen" | "escalate" | "dismiss") => {
         if (!ready || exceptionId.length === 0) return
-        const value = {
+        const value: AccountingExceptionInput = {
             action,
             exceptionId,
             reason: questionReason,
             expectedRevision: Number(exceptionRevision),
-        } as AccountingExceptionInput
+        }
         void settle(
             `exception-${action}-${exceptionId}`,
             () =>
                 exceptionCommand.trigger({
                     requestId: intentFor(`exception-${action}-${exceptionId}`, value),
                     input: value,
-                }) as Promise<CommandAnswer>,
-            intentId.length > 0 ? () => routine.mutate() as Promise<CommandAnswer> : null,
+                }),
+            intentId.length > 0 ? () => routine.mutate() : null,
             routineStateText,
         )
     }
@@ -357,8 +371,8 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
                 exceptionCommand.trigger({
                     requestId: intentFor(`exception-answer-${exceptionId}`, value),
                     input: value,
-                }) as Promise<CommandAnswer>,
-            intentId.length > 0 ? () => routine.mutate() as Promise<CommandAnswer> : null,
+                }),
+            intentId.length > 0 ? () => routine.mutate() : null,
             routineStateText,
         )
     }
@@ -432,8 +446,8 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
                 correction.trigger({
                     requestId: intentFor(`correct-${correctionId}`, value),
                     input: value,
-                }) as Promise<CommandAnswer>,
-            () => detail.mutate() as Promise<CommandAnswer>,
+                }),
+            () => detail.mutate(),
             correctionStateText,
         )
     }
@@ -450,9 +464,9 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             () =>
                 correction.trigger({
                     requestId: intentFor(`correct-append-${correctionId}`, value),
-                    input: value as AccountingCorrectInput,
-                }) as Promise<CommandAnswer>,
-            () => detail.mutate() as Promise<CommandAnswer>,
+                    input: value,
+                }),
+            () => detail.mutate(),
             correctionStateText,
         )
     }
@@ -462,6 +476,12 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
     return {
         t,
         locale,
+        format: {
+            amount: (amountMinor: number, amountCurrency: string) =>
+                formatAccountingMinor(amountMinor, amountCurrency, format),
+            instant: (value: string) => formatAccountingInstant(value, format),
+            period: (value: string) => formatAccountingPeriod(value, format),
+        },
         scopeStanding,
         scopeReady: ready,
         periodMonth,
@@ -544,7 +564,10 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             setEvidenceRefs: setQuestionEvidenceRefs,
             exceptionRevision,
             setExceptionRevision,
-            answerState: exceptionCommand.data?.ok === true ? exceptionCommand.data.data.payload : null,
+            answerState:
+                exceptionCommand.data?.ok === true
+                    ? parseAccountingExceptionReading(exceptionCommand.data.data.payload)
+                    : null,
             isAnswering: exceptionCommand.isMutating,
             onAnswer: onAnswerQuestion,
             onDefer: () => exceptionAction("defer"),

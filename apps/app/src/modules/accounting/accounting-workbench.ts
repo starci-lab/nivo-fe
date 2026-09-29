@@ -1,17 +1,20 @@
 import type { Outcome } from "@/modules/api/outcome"
+import type { Formatter } from "@/modules/i18n/formatter"
+import {
+    isAccountingClassifications,
+    isAccountingIntakeSnapshot,
+    isAccountingRecord,
+} from "./accounting-workbench.guards"
 /*
  * The pure Accounting workbench projection.
  *
- * TWO HALVES, ONE OWNER. The lower half is the pre-3/9 vocabulary the legacy document workbench
- * used; its six asserted helpers stay exactly as they were, because the module spec that pins them
- * is owned by another ordinal and deleting them would red a file this slice may not edit. The upper
- * half is the accepted `ui.accounting.workbench` vocabulary the eight `accounting.*@1` operations
- * are projected through: every label, every closed state and every period this surface can render is
- * a pure function of a wire value here, so the block holds no formatting rule of its own.
+ * The accepted `ui.accounting.workbench` vocabulary the eight `accounting.*@1` operations are
+ * projected through: every label, every closed state and every period this surface can render is a
+ * pure function of a wire value here.
  */
 
 /** A closed Accounting intake classification, as the Setup snapshot words it. */
-type AccountingClassification = "income" | "expense" | "receivable" | "payable"
+export type AccountingClassification = "income" | "expense" | "receivable" | "payable"
 /** The two distinguishable Accounting viewer roles. */
 type AccountingViewerRole = "owner" | "approver"
 /** The ledger row facts the correction tips are chosen from. */
@@ -36,6 +39,11 @@ type AccountingIntakePolicy = {
 }
 /** Minimal message formatter accepted by the Accounting controller. */
 export type AccountingTranslation = (key: string, values?: TranslationValues) => string
+/** The untrusted portion of the Setup snapshot used to offer intake controls. */
+export type AccountingIntakeSnapshot = {
+    readonly accountingScope?: unknown
+    readonly currencyAndLocale?: unknown
+}
 /** Accessible settled command feedback projected into the pure view. */
 export type AccountingNotice = { readonly kind: "success" | "refused"; readonly message: string }
 /** Refusals interrupt the current task; confirmations remain non-disruptive. */
@@ -43,23 +51,19 @@ export const accountingNoticeLive = (kind: AccountingNotice["kind"]): "assertive
     kind === "refused" ? "assertive" : "polite"
 /** Narrow only the Setup facts that authorize document intake; every command remains server-authorized. */
 export const accountingIntakePolicy = (snapshot: unknown): AccountingIntakePolicy | null => {
-    if (snapshot === null || typeof snapshot !== "object" || Array.isArray(snapshot)) return null
-    const record = snapshot as Readonly<Record<string, unknown>>
+    if (!isAccountingIntakeSnapshot(snapshot)) return null
+    const record = snapshot
     const scope = record.accountingScope
     const currencyAndLocale = record.currencyAndLocale
     if (
-        scope === null ||
-        typeof scope !== "object" ||
-        Array.isArray(scope) ||
-        currencyAndLocale === null ||
-        typeof currencyAndLocale !== "object" ||
-        Array.isArray(currencyAndLocale)
+        !isAccountingRecord(scope) ||
+        !isAccountingRecord(currencyAndLocale)
     )
         return null
-    const rawClassifications = (scope as Readonly<Record<string, unknown>>).classifications
-    const currency = (currencyAndLocale as Readonly<Record<string, unknown>>).functionalCurrency
+    const rawClassifications = scope.classifications
+    const currency = currencyAndLocale.functionalCurrency
     if (
-        !Array.isArray(rawClassifications) ||
+        !isAccountingClassifications(rawClassifications) ||
         rawClassifications.length === 0 ||
         typeof currency !== "string" ||
         !/^[A-Z]{3}$/.test(currency) ||
@@ -67,14 +71,7 @@ export const accountingIntakePolicy = (snapshot: unknown): AccountingIntakePolic
         currency === "XTS"
     )
         return null
-    if (
-        !rawClassifications.every(
-            (value) =>
-                typeof value === "string" && ACCOUNTING_CLASSIFICATIONS.includes(value as AccountingClassification),
-        )
-    )
-        return null
-    const classifications = [...new Set(rawClassifications)] as Array<AccountingClassification>
+    const classifications = [...new Set(rawClassifications)]
     if (classifications.length !== rawClassifications.length) return null
     return { currency, classifications }
 }
@@ -136,65 +133,99 @@ export const accountingCorrectionAccess = ({
     return { submit, approve: true, approvalReason: "allowed" }
 }
 
-const fractionDigits = (currency: string, locale: string) =>
-    new Intl.NumberFormat(locale, { style: "currency", currency }).resolvedOptions().maximumFractionDigits ?? 2
+type LocalizedDigits = { readonly toAscii: ReadonlyMap<string, string>; readonly fromAscii: ReadonlyMap<string, string> }
+
+const localizedDigits = (format: Formatter): LocalizedDigits => {
+    const toAscii = new Map<string, string>()
+    const fromAscii = new Map<string, string>()
+    for (let digit = 0; digit <= 9; digit += 1) {
+        const ascii = String(digit)
+        const localized = format.number(digit, { useGrouping: false, maximumFractionDigits: 0 })
+        toAscii.set(localized, ascii)
+        fromAscii.set(ascii, localized)
+    }
+    return { toAscii, fromAscii }
+}
+
+const replaceDigits = (value: string, mapping: ReadonlyMap<string, string>): string =>
+    [...value].map((character) => mapping.get(character) ?? character).join("")
+
+const decimalSeparator = (format: Formatter, digits: LocalizedDigits): string => {
+    const sample = replaceDigits(
+        format.number(1.1, { useGrouping: false, minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+        digits.toAscii,
+    )
+    const firstDigit = sample.indexOf("1")
+    const lastDigit = sample.lastIndexOf("1")
+    return lastDigit > firstDigit ? sample.slice(firstDigit + 1, lastDigit) : "."
+}
+
+const groupingSeparator = (format: Formatter, digits: LocalizedDigits): string | undefined => {
+    const sample = replaceDigits(format.number(1000, { useGrouping: true, maximumFractionDigits: 0 }), digits.toAscii)
+    return /[0-9]([^0-9]+)[0-9]/u.exec(sample)?.[1]
+}
+
+const fractionDigits = (currency: string, format: Formatter, digits: LocalizedDigits): number => {
+    const sample = replaceDigits(format.number(1, { style: "currency", currency }), digits.toAscii)
+    const decimal = decimalSeparator(format, digits)
+    const decimalIndex = sample.indexOf(decimal)
+    if (decimalIndex === -1) return 0
+    return /^[0-9]*/u.exec(sample.slice(decimalIndex + decimal.length))?.[0].length ?? 0
+}
+
 /** Convert a locale-entered major-unit amount into the backend's exact signed minor-unit string. */
-export const currencyAmountToMinor = (value: string, currency: string, locale: string): string | null => {
-    const parts = new Intl.NumberFormat(locale).formatToParts(1000.1)
-    const group = parts.find((part) => part.type === "group")?.value
-    const decimal = parts.find((part) => part.type === "decimal")?.value ?? "."
+export const currencyAmountToMinor = (value: string, currency: string, format: Formatter): string | null => {
+    const digits = localizedDigits(format)
+    const group = groupingSeparator(format, digits)
+    const decimal = decimalSeparator(format, digits)
     let normalized = value.trim().replace(/[\s\u00a0\u202f]/g, "")
     if (group !== undefined) normalized = normalized.split(group).join("")
     normalized = normalized.split(decimal).join(".")
     const match = /^(-?)(\d+)(?:\.(\d+))?$/.exec(normalized)
     if (match === null) return null
-    const digits = fractionDigits(currency, locale)
+    const fractionDigitCount = fractionDigits(currency, format, digits)
     const fraction = match[3] ?? ""
-    if (fraction.length > digits) return null
-    const absolute = `${match[2]}${(fraction + "0".repeat(digits)).slice(0, digits)}`.replace(/^0+(?=\d)/, "") || "0"
+    if (fraction.length > fractionDigitCount) return null
+    const absolute =
+        `${match[2]}${(fraction + "0".repeat(fractionDigitCount)).slice(0, fractionDigitCount)}`.replace(/^0+(?=\d)/, "") ||
+        "0"
     if (absolute === "0") return "0"
     return `${match[1]}${absolute}`
 }
 /** Format a backend minor-unit string as exact localized business currency. */
-export const formatMinorCurrency = (value: string, currency: string, locale: string): string => {
+export const formatMinorCurrency = (value: string, currency: string, format: Formatter): string => {
     try {
         const match = /^(-?)(\d+)$/.exec(value)
         const rawDigits = match?.[2]
         if (match === null || rawDigits === undefined) throw new Error("amount")
         const negative = match[1] === "-" && !/^0+$/.test(rawDigits)
         const absolute = rawDigits.replace(/^0+(?=\d)/, "") || "0"
-        const digits = fractionDigits(currency, locale)
-        const padded = absolute.padStart(digits + 1, "0")
-        const whole = digits === 0 ? padded : padded.slice(0, -digits)
-        const fraction = digits === 0 ? "" : padded.slice(-digits)
-        const currencyFormat = new Intl.NumberFormat(locale, {
-            style: "currency",
-            currency,
-            minimumFractionDigits: digits,
-            maximumFractionDigits: digits,
-        })
-        const template = currencyFormat.formatToParts(negative ? -1 : 1)
-        const numeric = new Set(["integer", "group", "decimal", "fraction"])
-        const first = template.findIndex((part) => numeric.has(part.type))
-        if (first === -1) throw new Error("amount")
-        let last = first
-        for (let index = first; index < template.length; index += 1) {
-            const part = template[index]
-            if (part !== undefined && numeric.has(part.type)) last = index
-        }
-        const prefix = template
-            .slice(0, first)
-            .map((part) => part.value)
-            .join("")
-        const suffix = template
-            .slice(last + 1)
-            .map((part) => part.value)
-            .join("")
-        const group =
-            new Intl.NumberFormat(locale).formatToParts(1000).find((part) => part.type === "group")?.value ?? ","
+        const localized = localizedDigits(format)
+        const fractionDigitCount = fractionDigits(currency, format, localized)
+        const padded = absolute.padStart(fractionDigitCount + 1, "0")
+        const whole = fractionDigitCount === 0 ? padded : padded.slice(0, -fractionDigitCount)
+        const fraction = fractionDigitCount === 0 ? "" : padded.slice(-fractionDigitCount)
+        const template = replaceDigits(
+            format.number(negative ? -1 : 1, {
+                style: "currency",
+                currency,
+                minimumFractionDigits: fractionDigitCount,
+                maximumFractionDigits: fractionDigitCount,
+            }),
+            localized.toAscii,
+        )
+        const firstDigit = template.search(/[0-9]/u)
+        let lastDigit = template.length - 1
+        while (lastDigit >= 0 && !/[0-9]/u.test(template[lastDigit] ?? "")) lastDigit -= 1
+        if (firstDigit === -1 || lastDigit < firstDigit) throw new Error("amount")
+        const prefix = template.slice(0, firstDigit)
+        const suffix = template.slice(lastDigit + 1)
+        const group = groupingSeparator(format, localized) ?? ","
         const groupedWhole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, group)
-        const decimal = template.find((part) => part.type === "decimal")?.value ?? "."
-        return `${prefix}${groupedWhole}${digits === 0 ? "" : `${decimal}${fraction}`}${suffix}`
+        const decimal = decimalSeparator(format, localized)
+        const formattedWhole = replaceDigits(groupedWhole, localized.fromAscii)
+        const formattedFraction = replaceDigits(fraction, localized.fromAscii)
+        return `${prefix}${formattedWhole}${fractionDigitCount === 0 ? "" : `${decimal}${formattedFraction}`}${suffix}`
     } catch {
         return `${value} ${currency}`
     }
@@ -274,8 +305,8 @@ export const accountingSurfaceStanding = (
 }
 
 /** A whole minor-unit amount, formatted exactly as the business currency is written. */
-export const formatAccountingMinor = (amountMinor: number, currency: string, locale: string): string =>
-    formatMinorCurrency(String(amountMinor), currency, locale)
+export const formatAccountingMinor = (amountMinor: number, currency: string, format: Formatter): string =>
+    formatMinorCurrency(String(amountMinor), currency, format)
 
 /** The canonical half-open period one business month control selects, or null for an unusable value. */
 export const accountingMonthPeriod = (
@@ -294,31 +325,34 @@ export const accountingUtcMonth = (now: Date): string =>
     `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`
 
 /** One instant as the operator reads it, always at the zone the period is measured in. */
-export const formatAccountingInstant = (value: string, locale: string): string => {
+export const formatAccountingInstant = (value: string, format: Formatter): string => {
     const parsed = new Date(value)
     if (Number.isNaN(parsed.getTime())) return value
-    return new Intl.DateTimeFormat(locale, { dateStyle: "short", timeStyle: "short", timeZone: "UTC" }).format(parsed)
+    return format.dateTime(parsed, { dateStyle: "short", timeStyle: "short", timeZone: "UTC" })
 }
 
 /** One canonical period start as the operator reads it. */
-export const formatAccountingPeriod = (periodStart: string, locale: string): string => {
+export const formatAccountingPeriod = (periodStart: string, format: Formatter): string => {
     const parsed = new Date(`${periodStart}T00:00:00Z`)
     if (Number.isNaN(parsed.getTime())) return periodStart
-    return new Intl.DateTimeFormat(locale, { month: "short", year: "numeric", timeZone: "UTC" }).format(parsed)
+    return format.dateTime(parsed, { month: "short", year: "numeric", timeZone: "UTC" })
 }
 
 /** A closed measure kind's label key. */
+const mappedMessageKey = (mapping: Readonly<Partial<Record<string, string>>>, key: string): string | undefined =>
+    mapping[key]
+
+const ACCOUNTING_MEASURE_KEYS = {
+    "cash-in": "measure.cashIn",
+    "cash-out": "measure.cashOut",
+    "recognized-revenue": "measure.revenue",
+    "recognized-cost": "measure.cost",
+    unpaid: "measure.unpaid",
+    "estimated-tax": "measure.estimatedTax",
+} satisfies Readonly<Partial<Record<string, string>>>
+
 export const accountingMeasureKey = (kind: string): string =>
-    (
-        ({
-            "cash-in": "measure.cashIn",
-            "cash-out": "measure.cashOut",
-            "recognized-revenue": "measure.revenue",
-            "recognized-cost": "measure.cost",
-            unpaid: "measure.unpaid",
-            "estimated-tax": "measure.estimatedTax",
-        }) as Readonly<Record<string, string>>
-    )[kind] ?? "measure.other"
+    mappedMessageKey(ACCOUNTING_MEASURE_KEYS, kind) ?? "measure.other"
 
 /** A measured amount or the reason it is not shown; never a zero standing in for an unknown. */
 export type AccountingMeasureReading =
@@ -343,123 +377,124 @@ export const accountingMeasureReading = (measure: AccountingMeasureSource): Acco
           }
 
 /** A closed availability label's message key. */
+const ACCOUNTING_AVAILABILITY_KEYS = {
+    current: "availability.current",
+    partial: "availability.partial",
+    stale: "availability.stale",
+    unavailable: "availability.unavailable",
+} satisfies Readonly<Partial<Record<string, string>>>
+
 export const accountingAvailabilityKey = (availability: string): string =>
-    (
-        ({
-            current: "availability.current",
-            partial: "availability.partial",
-            stale: "availability.stale",
-            unavailable: "availability.unavailable",
-        }) as Readonly<Record<string, string>>
-    )[availability] ?? "availability.unavailable"
+    mappedMessageKey(ACCOUNTING_AVAILABILITY_KEYS, availability) ?? "availability.unavailable"
 
 /** A closed partial-coverage reason's message key. */
-export const accountingPartialReasonKey = (reason: string): string =>
-    (
-        ({
-            "missing-occurred-on": "partialReason.missingOccurredOn",
-            "missing-measure-coverage": "partialReason.missingMeasureCoverage",
-            "stale-source": "partialReason.staleSource",
-            "unavailable-source": "partialReason.unavailableSource",
-        }) as Readonly<Record<string, string>>
-    )[reason] ?? "partialReason.unavailableSource"
+const ACCOUNTING_PARTIAL_REASON_KEYS = {
+    "missing-occurred-on": "partialReason.missingOccurredOn",
+    "missing-measure-coverage": "partialReason.missingMeasureCoverage",
+    "stale-source": "partialReason.staleSource",
+    "unavailable-source": "partialReason.unavailableSource",
+} satisfies Readonly<Partial<Record<string, string>>>
 
-const ACCOUNTING_ATTENTION_KEYS: Readonly<Record<string, string>> = {
+export const accountingPartialReasonKey = (reason: string): string =>
+    mappedMessageKey(ACCOUNTING_PARTIAL_REASON_KEYS, reason) ?? "partialReason.unavailableSource"
+
+const ACCOUNTING_ATTENTION_KEYS = {
     "missing-receipt": "attention.missingReceipt",
     "unmatched-payment": "attention.unmatchedPayment",
     "missing-occurred-on": "attention.missingOccurredOn",
     "stale-source": "attention.staleSource",
-}
+} satisfies Readonly<Partial<Record<string, string>>>
 
 /** One attention code's message key; a code this build does not know keeps its own text as the value. */
-export const accountingAttentionKey = (code: string): string => ACCOUNTING_ATTENTION_KEYS[code] ?? "attention.other"
+export const accountingAttentionKey = (code: string): string =>
+    mappedMessageKey(ACCOUNTING_ATTENTION_KEYS, code) ?? "attention.other"
 
 /** A closed evidence state's message key. */
+const ACCOUNTING_EVIDENCE_STATE_KEYS = {
+    admitted: "evidenceState.admitted",
+    reading: "evidenceState.reading",
+    ready: "evidenceState.ready",
+    needs_information: "evidenceState.needsInformation",
+    likely_duplicate: "evidenceState.likelyDuplicate",
+    unreadable: "evidenceState.unreadable",
+    rejected: "evidenceState.rejected",
+} satisfies Readonly<Partial<Record<string, string>>>
+
 export const accountingEvidenceStateKey = (state: string): string =>
-    (
-        ({
-            admitted: "evidenceState.admitted",
-            reading: "evidenceState.reading",
-            ready: "evidenceState.ready",
-            needs_information: "evidenceState.needsInformation",
-            likely_duplicate: "evidenceState.likelyDuplicate",
-            unreadable: "evidenceState.unreadable",
-            rejected: "evidenceState.rejected",
-        }) as Readonly<Record<string, string>>
-    )[state] ?? "evidenceState.rejected"
+    mappedMessageKey(ACCOUNTING_EVIDENCE_STATE_KEYS, state) ?? "evidenceState.rejected"
 
 /** A closed routine state's message key. */
+const ACCOUNTING_ROUTINE_STATE_KEYS = {
+    admitted: "routineState.admitted",
+    committed: "routineState.committed",
+    "needs-decision": "routineState.needsDecision",
+    "pending-authority": "routineState.pendingAuthority",
+    denied: "routineState.denied",
+    "outcome-unknown": "routineState.outcomeUnknown",
+} satisfies Readonly<Partial<Record<string, string>>>
+
 export const accountingRoutineStateKey = (state: string): string =>
-    (
-        ({
-            admitted: "routineState.admitted",
-            committed: "routineState.committed",
-            "needs-decision": "routineState.needsDecision",
-            "pending-authority": "routineState.pendingAuthority",
-            denied: "routineState.denied",
-            "outcome-unknown": "routineState.outcomeUnknown",
-        }) as Readonly<Record<string, string>>
-    )[state] ?? "routineState.outcomeUnknown"
+    mappedMessageKey(ACCOUNTING_ROUTINE_STATE_KEYS, state) ?? "routineState.outcomeUnknown"
 
 /** A closed material-exception state's message key. */
+const ACCOUNTING_EXCEPTION_STATE_KEYS = {
+    open: "exceptionState.open",
+    deferred: "exceptionState.deferred",
+    escalated: "exceptionState.escalated",
+    answered: "exceptionState.answered",
+    resolved: "exceptionState.resolved",
+    dismissed: "exceptionState.dismissed",
+} satisfies Readonly<Partial<Record<string, string>>>
+
 export const accountingExceptionStateKey = (state: string): string =>
-    (
-        ({
-            open: "exceptionState.open",
-            deferred: "exceptionState.deferred",
-            escalated: "exceptionState.escalated",
-            answered: "exceptionState.answered",
-            resolved: "exceptionState.resolved",
-            dismissed: "exceptionState.dismissed",
-        }) as Readonly<Record<string, string>>
-    )[state] ?? "exceptionState.open"
+    mappedMessageKey(ACCOUNTING_EXCEPTION_STATE_KEYS, state) ?? "exceptionState.open"
 
 /** A closed correction state's message key. */
+const ACCOUNTING_CORRECTION_STATE_KEYS = {
+    proposed: "correctionState.proposed",
+    blocked: "correctionState.blocked",
+    possible_start: "correctionState.possibleStart",
+    applied: "correctionState.applied",
+    proven_not_applied: "correctionState.provenNotApplied",
+    outcome_unknown: "correctionState.outcomeUnknown",
+} satisfies Readonly<Partial<Record<string, string>>>
+
 export const accountingCorrectionStateKey = (state: string): string =>
-    (
-        ({
-            proposed: "correctionState.proposed",
-            blocked: "correctionState.blocked",
-            possible_start: "correctionState.possibleStart",
-            applied: "correctionState.applied",
-            proven_not_applied: "correctionState.provenNotApplied",
-            outcome_unknown: "correctionState.outcomeUnknown",
-        }) as Readonly<Record<string, string>>
-    )[state] ?? "correctionState.outcomeUnknown"
+    mappedMessageKey(ACCOUNTING_CORRECTION_STATE_KEYS, state) ?? "correctionState.outcomeUnknown"
 
 /** A closed payment-match status's message key. */
+const ACCOUNTING_MATCH_STATUS_KEYS = {
+    unpaid: "matchStatus.unpaid",
+    unmatched: "matchStatus.unmatched",
+    matched: "matchStatus.matched",
+    ambiguous: "matchStatus.ambiguous",
+} satisfies Readonly<Partial<Record<string, string>>>
+
 export const accountingMatchStatusKey = (status: string): string =>
-    (
-        ({
-            unpaid: "matchStatus.unpaid",
-            unmatched: "matchStatus.unmatched",
-            matched: "matchStatus.matched",
-            ambiguous: "matchStatus.ambiguous",
-        }) as Readonly<Record<string, string>>
-    )[status] ?? "matchStatus.unmatched"
+    mappedMessageKey(ACCOUNTING_MATCH_STATUS_KEYS, status) ?? "matchStatus.unmatched"
 
 /** A closed treatment outcome's message key. */
+const ACCOUNTING_TREATMENT_KEYS = {
+    supported: "treatment.supported",
+    unsupported: "treatment.unsupported",
+    unknown: "treatment.unknown",
+} satisfies Readonly<Partial<Record<string, string>>>
+
 export const accountingTreatmentKey = (kind: string): string =>
-    (
-        ({
-            supported: "treatment.supported",
-            unsupported: "treatment.unsupported",
-            unknown: "treatment.unknown",
-        }) as Readonly<Record<string, string>>
-    )[kind] ?? "treatment.unknown"
+    mappedMessageKey(ACCOUNTING_TREATMENT_KEYS, kind) ?? "treatment.unknown"
 
 /** A closed corrected-fact field's message key. */
+const ACCOUNTING_FACT_FIELD_KEYS = {
+    amountMinor: "fact.amount",
+    currency: "fact.currency",
+    occurredOn: "fact.occurredOn",
+    counterpartyRef: "fact.counterparty",
+    matchStatus: "fact.matchStatus",
+    treatment: "fact.treatment",
+} satisfies Readonly<Partial<Record<string, string>>>
+
 export const accountingFactFieldKey = (field: string): string =>
-    (
-        ({
-            amountMinor: "fact.amount",
-            currency: "fact.currency",
-            occurredOn: "fact.occurredOn",
-            counterpartyRef: "fact.counterparty",
-            matchStatus: "fact.matchStatus",
-            treatment: "fact.treatment",
-        }) as Readonly<Record<string, string>>
-    )[field] ?? "fact.other"
+    mappedMessageKey(ACCOUNTING_FACT_FIELD_KEYS, field) ?? "fact.other"
 
 /** One tagged fact value as the operator reads it; a money value keeps its own currency. */
 export const accountingFactValueText = (
@@ -469,11 +504,24 @@ export const accountingFactValueText = (
         readonly amountMinor?: number
         readonly currency?: string
     } | null,
-    locale: string,
+    format: Formatter,
 ): string => {
     if (value === null) return "—"
-    if (value.kind === "money") return formatAccountingMinor(value.amountMinor ?? 0, value.currency ?? "", locale)
+    if (value.kind === "money") return formatAccountingMinor(value.amountMinor ?? 0, value.currency ?? "", format)
     if (value.kind === "boolean") return value.value === true ? "true" : "false"
+    if (value.kind === "local-date" && typeof value.value === "string") {
+        const parsed = new Date(`${value.value}T00:00:00Z`)
+        return Number.isNaN(parsed.getTime())
+            ? value.value
+            : format.dateTime(parsed, { dateStyle: "short", timeZone: "UTC" })
+    }
+    if (value.kind === "timestamptz" && typeof value.value === "string") {
+        const parsed = new Date(value.value)
+        return Number.isNaN(parsed.getTime())
+            ? value.value
+            : format.dateTime(parsed, { dateStyle: "short", timeStyle: "short", timeZone: "UTC" })
+    }
+    if (typeof value.value === "number") return format.number(value.value)
     return value.value === undefined ? "—" : String(value.value)
 }
 
@@ -482,21 +530,21 @@ export const accountingEffectUnattested = (answer: AccountingAnswerStanding | un
     answer !== undefined && !answer.ok && answer.code === "outcome_unknown"
 
 /** One command input's refusal message key. */
+const ACCOUNTING_REFUSAL_KEYS = {
+    forbidden: "refusal.forbidden",
+    REFUSED: "refusal.forbidden",
+    UNAUTHENTICATED: "refusal.signIn",
+    "stale-authority": "refusal.staleAuthority",
+    validation: "refusal.validation",
+    conflict: "refusal.conflict",
+    "outcome-unknown": "refusal.unattested",
+    outcome_unknown: "refusal.unattested",
+    UNREACHABLE: "refusal.unreachable",
+    MALFORMED_ANSWER: "refusal.malformed",
+    UNEXPECTED_RESULT_KIND: "refusal.malformed",
+    UNEXPECTED_RESULT_TAG: "refusal.malformed",
+    ECHOED_IDENTITY_MISMATCH: "refusal.malformed",
+} satisfies Readonly<Partial<Record<string, string>>>
+
 export const accountingRefusalKey = (code: string): string =>
-    (
-        ({
-            forbidden: "refusal.forbidden",
-            REFUSED: "refusal.forbidden",
-            UNAUTHENTICATED: "refusal.signIn",
-            "stale-authority": "refusal.staleAuthority",
-            validation: "refusal.validation",
-            conflict: "refusal.conflict",
-            "outcome-unknown": "refusal.unattested",
-            outcome_unknown: "refusal.unattested",
-            UNREACHABLE: "refusal.unreachable",
-            MALFORMED_ANSWER: "refusal.malformed",
-            UNEXPECTED_RESULT_KIND: "refusal.malformed",
-            UNEXPECTED_RESULT_TAG: "refusal.malformed",
-            ECHOED_IDENTITY_MISMATCH: "refusal.malformed",
-        }) as Readonly<Record<string, string>>
-    )[code] ?? "refusal.unreachable"
+    mappedMessageKey(ACCOUNTING_REFUSAL_KEYS, code) ?? "refusal.unreachable"

@@ -33,12 +33,19 @@ const mocks = vi.hoisted(() => {
 })
 
 vi.mock("next/navigation", () => ({ useParams: () => mocks.params.value }))
-vi.mock("@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr", () => ({
+vi.mock("next-intl", () => ({
+    useFormatter: () => ({
+        number: (value: number | bigint) => String(value),
+        dateTime: (value: Date | number) => (value instanceof Date ? value.toISOString() : String(value)),
+        relativeTime: () => "",
+    }),
+}))
+vi.mock("@/hooks/swr/queries/console", () => ({
     useQueryMyAgentWorkspaceControlCenterSwr: () => mocks.controlCenter.value,
 }))
 vi.mock("@/modules/query", () => ({
-    nivoQueryPayload: (answer: { readonly ok?: boolean; readonly data?: unknown } | undefined) =>
-        answer?.ok === true ? answer.data : undefined,
+    nivoQueryData: (answer: { readonly ok?: boolean; readonly data?: unknown } | undefined) =>
+        answer?.ok === true ? answer.data : null,
 }))
 vi.mock("@/hooks/swr/queries/useQueryAccountingSummarySwr", () => ({
     useQueryAccountingSummarySwr: (...args: ReadonlyArray<unknown>) => mocks.summaryRead(...args),
