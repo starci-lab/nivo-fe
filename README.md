@@ -1,77 +1,56 @@
 # nivo-fe
 
+Nivo's Next.js frontend for hosting and VPS administration and customer experiences.
+
 [![Codecov](https://codecov.io/gh/starci-lab/nivo-fe/graph/badge.svg)](https://app.codecov.io/gh/starci-lab/nivo-fe)
-[![SonarQube Quality Gate](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=alert_status&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
-[![SonarQube Coverage](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=coverage&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
-[![SonarQube Bugs](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=bugs&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
-[![SonarQube Vulnerabilities](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=vulnerabilities&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
-[![SonarQube Code Smells](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=code_smells&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
-[![SonarQube Maintainability](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=sqale_rating&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
-[![SonarQube Reliability](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=reliability_rating&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
-[![SonarQube Security](https://sonar.starci.org/api/project_badges/measure?project=nivo-fe&metric=security_rating&token=sqb_00861dd6f09b4a16b455962e3e1e56c59dab8de5)](https://sonar.starci.org/dashboard?id=nivo-fe)
 
-Monorepo giao diện của nivo: ba ứng dụng dựng trên **một** bản canon dùng chung.
+## Overview
 
-```
-apps/app        @nivo/app       :3067   bảng điều khiển cấp phát và vận hành (core slot)
-apps/expert     @nivo/expert    :4067   học viện của một chuyên gia (academy slot +1000)
-apps/landing    @nivo/landing   :5067   trang giới thiệu (landing slot +2000)
-packages/ui     @nivo/ui                canon dùng chung
-```
+This monorepo contains the Nivo admin and customer panel, an expert experience, a public landing site, and a landing draft. The apps share UI through `@nivo/ui`.
 
-## Vì sao có `packages/ui`
+## Stack
 
-Repo trước cũng là monorepo, nhưng mỗi app giữ một cây `components/` riêng. Cái giá không nằm ở
-chuyện trùng lặp nói chung: **mười file tự khai lại cùng một kiểu**
-`ComponentType<SVGProps<SVGSVGElement>>`, nên nhà cung cấp icon đã rò ra mười chỗ và không một sửa
-đổi nào gỡ được nó. Gỡ tay bốn mươi file đã tốn một ngày và để lại 499 lỗi biên dịch.
+- Next.js App Router, React, and TypeScript
+- npm workspaces in `apps/` and `packages/`, with Turborepo for repository commands
+- Tailwind CSS and the shared `@nivo/ui` package
 
-Một tầng nằm ở đây thì không trôi được, vì không có chỗ nào để trôi tới.
-
-## Cái gì được ở trong `packages/ui`
-
-Mọi thứ **dưới** block: sổ đăng ký contract, leaf, composite, branch, shell.
-
-Một **block** mang nghĩa nghiệp vụ nên thuộc về app sở hữu tính năng đó. Đặt block vào đây là bắt
-gói dùng chung phải biết khoá học, hoá đơn hay hero của trang landing là gì — nó không được biết.
-
-Sổ đăng ký là ngoại lệ đáng gọi tên: **máy móc** dùng chung nhưng **các mục** là của riêng sản phẩm,
-nên bảng bắt đầu nhỏ và lớn lên từng mục một, mỗi mục có một `why` người đọc đối chiếu được với màn
-hình.
-
-## Nhà cung cấp icon
-
-Chỉ `@heroicons/react`, và **chỉ leaf `Icon` được gọi tên glyph của nhà cung cấp**. Người gọi đặt
-tên theo *nghĩa*: `refresh` sống sót qua một lần đổi gói icon, `ArrowClockwiseIcon` thì không.
-
-`@phosphor-icons/react` không có mặt trong repo này, có chủ đích.
-
-## Chạy
-
-Nivo dùng trực tiếp checkout nguồn `@starci/grammar`, không tải package này từ npm. Hai repo cần
-nằm cạnh nhau theo layout sau để dependency `file:` trong `packages/ui` giữ được tính tương đối và
-portable giữa các máy:
+## Repository layout
 
 ```text
-<workspace>/
-├── nivo-fe/
-└── starci-academy-fe/
+apps/
+  app/                  Admin and customer panel (@nivo/app)
+  expert/               Expert experience (@nivo/expert)
+  landing/              Public landing site (@nivo/landing)
+  landing-draft/        Landing draft (@nivo/landing-draft)
+  <app>/src/
+    app/                Next.js route adapters
+    features/           Page, layout, and overlay features
+    components/         Blocks and reusable UI components
+    hooks/              Domain hooks
+    modules/            App capabilities and integrations
+packages/ui/            Shared UI package
+scripts/                Repository tooling
+docs/                   Human documentation
+e2e/                    Repository-level end-to-end tests
 ```
 
-Grammar công bố contract qua `dist`, nên các lệnh dev, build, test và typecheck của Nivo đều build
-lại package nguồn trước khi chạy. App chỉ import adapter từ `@nivo/ui`; không import thẳng nội bộ
-`@starci/grammar` hay đường dẫn `src` của repo bên cạnh.
+## Development commands
+
+Run these from the repository root after `npm ci`:
 
 ```bash
-npm --prefix ../starci-academy-fe install
-npm install
 npm run dev:app
+npm run dev:expert
+npm run dev:landing
+npm run dev:landing-draft
+npm run typecheck
+npm run lint:check
+npm run build
+npm run test:unit
 ```
 
-`npm run build` · `npm run typecheck` · `npm run lint` chạy qua turbo cho cả bốn workspace.
+Each `dev:<app>` command starts one Next.js app. The quality commands run across the workspaces.
 
-## Trạng thái
+## Work note
 
-Khung đã dựng và đã kiểm chứng: 3/3 app build xanh, 4/4 workspace typecheck xanh, và một leaf từ
-`@nivo/ui` render ra đúng đường kính trong trình duyệt — tức là liên kết workspace, bước transpile
-của Next và dòng `@source` của Tailwind đều thông. Màn hình thật dựng tiếp trên khung này.
+The project's `.starciwork` tree lives in the sibling `nivo-backend` repository. This frontend consumes those product records and does not keep a second Work tree.
