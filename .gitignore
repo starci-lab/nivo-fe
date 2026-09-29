@@ -23,15 +23,22 @@ coverage/
 .scannerwork/
 .sonar/
 
-# local run leftovers -- e2e/uat test-results/ output and the Windows `nul` device file, never reviewed as source
+# local run leftovers -- e2e/uat test-results/ and playwright-report/ output and the Windows `nul` device file, never reviewed as source
 test-results/
+playwright-report/
 /nul
 
-# agent output scratch -- draw-lab/preview output is archived out of the repo, never tracked
+# agent output scratch -- draw-lab/preview output, draw-round evidence and local dumps are
+# archived out of the repo (blob store / agent scratchpad), never tracked
 .artifacts/
 design-plans/
+vi-flat.txt
+.qwen*
+*.prompt.txt
+*.initial.png
+*.intermediate.png
 
-# the project-owned ledger, Work scratch and the local runtime config (repository-baseline common.gitignore)
-.starciwork/runtime.sqlite*
-.starciwork/_local/
+# .starciwork is BE-only -- nothing under it is tracked here; agent worktrees and local scratch
+# stay out of the tree (repository-baseline common.gitignore)
+.starciwork/
 config.yaml
