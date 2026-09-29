@@ -55,12 +55,10 @@
 }
 
 .heroCopy,
-.stack,
 .card,
 .actor,
 .ideaCard,
 .articleBody,
-.routeResult,
 .truthNotice {
     display: flex;
     flex-direction: column;
@@ -79,14 +77,6 @@
 .heroCopy > p {
     max-width: 46rem;
     line-height: 1.75;
-}
-
-.eyebrow {
-    color: var(--nivo-core-crimson);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
 }
 
 .heroModel,
@@ -258,20 +248,8 @@
     gap: clamp(2.5rem, 7vw, 7rem);
 }
 
-.stack {
-    gap: 1.25rem;
-}
-
-.stack > p {
-    line-height: 1.75;
-}
-
 .flow,
-.stepList,
-.plainList,
-.linkList,
-.topicList,
-.intentGrid {
+.topicList {
     padding: 0;
     margin: 0;
     list-style: none;
@@ -351,7 +329,6 @@
 .card,
 .actor,
 .ideaCard,
-.routeResult,
 .truthNotice {
     --foreground: var(--nivo-ink);
     --muted: var(--nivo-slate-gray);
@@ -383,7 +360,6 @@
 .card > p,
 .actor > p,
 .ideaCard > p,
-.routeResult > p,
 .truthNotice > p {
     line-height: 1.65;
 }
@@ -439,77 +415,6 @@
 .articleMeta dd {
     margin: 0;
     line-height: 1.6;
-}
-
-.stepList {
-    counter-reset: step;
-    display: grid;
-    gap: 0;
-}
-
-.stepList > li {
-    counter-increment: step;
-    position: relative;
-    display: grid;
-    grid-template-columns: 3rem minmax(0, 1fr);
-    gap: 1rem;
-    padding-bottom: 2rem;
-}
-
-.stepList > li::before {
-    content: counter(step, decimal-leading-zero);
-    width: 2.5rem;
-    height: 2.5rem;
-    display: grid;
-    place-items: center;
-    border: 1px solid var(--nivo-core-crimson);
-    border-radius: 50%;
-    color: var(--nivo-core-crimson);
-    font-size: 0.72rem;
-    font-weight: 700;
-}
-
-.stepList > li:not(:last-child)::after {
-    content: "";
-    position: absolute;
-    top: 2.5rem;
-    bottom: 0;
-    left: 1.22rem;
-    width: 1px;
-    background: var(--nivo-border-gray);
-}
-
-.stepCopy {
-    display: grid;
-    gap: 0.35rem;
-}
-
-.stepCopy p {
-    color: var(--nivo-slate-gray);
-    line-height: 1.6;
-}
-
-.plainList,
-.linkList {
-    display: grid;
-    gap: 0.75rem;
-}
-
-.plainList > li {
-    position: relative;
-    padding-left: 1.1rem;
-    line-height: 1.65;
-}
-
-.plainList > li::before {
-    content: "";
-    position: absolute;
-    top: 0.68em;
-    left: 0;
-    width: 0.4rem;
-    height: 0.4rem;
-    border-radius: 50%;
-    background: var(--nivo-core-crimson);
 }
 
 .truthNotice {
@@ -598,14 +503,6 @@
 .ideaCard:not(.ideaCardFeatured) .editorialMark {
     right: 1.5rem;
     left: auto;
-}
-
-.ideaMetaLine {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem 1rem;
-    color: var(--nivo-slate-gray);
-    font-size: 0.8rem;
 }
 
 .articleHero {
@@ -796,72 +693,6 @@
     }
 }
 
-.intentForm {
-    display: grid;
-    gap: 2rem;
-}
-
-.intentForm fieldset {
-    padding: 0;
-    margin: 0;
-    border: 0;
-}
-
-.intentForm legend {
-    margin-bottom: 1.25rem;
-    font-size: clamp(1.15rem, 2vw, 1.5rem);
-    font-weight: 700;
-}
-
-.intentGrid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.75rem;
-}
-
-.intentOption {
-    position: relative;
-    min-height: 10rem;
-    display: grid;
-    align-content: start;
-    gap: 0.6rem;
-    padding: 1.25rem;
-    border: 1px solid var(--nivo-border-gray);
-    border-radius: 1rem;
-    background: var(--nivo-cloud-white);
-    cursor: pointer;
-}
-
-.intentOption:has(input:checked) {
-    border-color: var(--nivo-core-crimson);
-    box-shadow: 0 0 0 2px rgb(225 29 72 / 12%);
-}
-
-.intentOption input {
-    width: 1.25rem;
-    height: 1.25rem;
-    margin: 0;
-    accent-color: var(--nivo-core-crimson);
-}
-
-.intentOption strong {
-    font-size: 1rem;
-}
-
-.intentOption span:last-child {
-    color: var(--nivo-slate-gray);
-    font-size: 0.875rem;
-    line-height: 1.55;
-}
-
-.routeResult {
-    border-color: rgb(225 29 72 / 28%);
-}
-
-.routeResult h3 {
-    margin: 0;
-}
-
 .screenReaderOnly {
     position: absolute;
     width: 1px;
@@ -892,8 +723,7 @@
     .ideaGrid,
     .typeGrid,
     .pathGrid,
-    .definitionGrid,
-    .intentGrid {
+    .definitionGrid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -959,8 +789,7 @@
     .ideaGrid,
     .typeGrid,
     .pathGrid,
-    .definitionGrid,
-    .intentGrid {
+    .definitionGrid {
         grid-template-columns: minmax(0, 1fr);
     }
 
@@ -1007,14 +836,11 @@
     .card,
     .actor,
     .ideaCard,
-    .routeResult,
-    .truthNotice,
-    .intentOption {
+    .truthNotice {
         background: Canvas;
         color: CanvasText;
     }
 
-    .eyebrow,
     .flowIndex,
     .flow > li:not(:last-child)::after,
     .actor dt,

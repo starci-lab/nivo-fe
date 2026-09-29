@@ -1,7 +1,7 @@
-import { fireEvent, render, screen, within } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
-import { CompanyPage, ContactPage, EcosystemPage, IdeaDetailPage, IdeasPage, TrustPage, getIdeaBySlug } from "."
+import { EcosystemPage, IdeaDetailPage, IdeasPage, TrustPage, getIdeaBySlug, normalizeContactIntent } from "."
 
 describe("NIVO public exploration routes", () => {
     it("preserves the seven-stage Trust progression without invented security evidence", () => {
@@ -25,13 +25,6 @@ describe("NIVO public exploration routes", () => {
         expect(actors.getByText("Partners & Experts")).toBeInTheDocument()
         expect(actors.getByText("Institutions")).toBeInTheDocument()
         expect(actors.getByText("Future Builders")).toBeInTheDocument()
-    })
-
-    it("keeps unverified leadership and milestones out of Company", () => {
-        const html = renderToStaticMarkup(<CompanyPage />)
-        expect(html).toContain("NIVO · Organization")
-        expect(html).toContain("Leadership roster not published")
-        expect(html).not.toContain("Nguyễn Tuấn Nam")
     })
 
     it("exposes Ideas types and puts the direct thesis before reasoning", () => {
@@ -61,11 +54,10 @@ describe("NIVO public exploration routes", () => {
         expect(html).toContain("data-usage=\"chip\"")
     })
 
-    it("routes six Contact intents without collecting personal data", () => {
-        render(<ContactPage />)
-        expect(screen.getAllByRole("radio")).toHaveLength(6)
-        expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
-        fireEvent.click(screen.getByRole("radio", { name: /Partnership/i }))
-        expect(screen.getByRole("radio", { name: /Partnership/i })).toBeChecked()
+    it("accepts only the six public Contact intents, taking the first of a repeated query", () => {
+        expect(normalizeContactIntent("partnership")).toBe("partnership")
+        expect(normalizeContactIntent(["talent", "media"])).toBe("talent")
+        expect(normalizeContactIntent("unknown")).toBeNull()
+        expect(normalizeContactIntent(undefined)).toBeNull()
     })
 })
