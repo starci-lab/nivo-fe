@@ -1,5 +1,15 @@
 import { MAX_SHELL_READ_GENERATION, MAX_SHELL_READS_PER_REQUEST } from "./types"
-import type { ShellCompleteness, ShellFreshness, ShellRead, ShellSourceIdentity, ShellWireAvailability } from "./types"
+import type {
+    ShellCommandObservation,
+    ShellCompleteness,
+    ShellFreshness,
+    ShellLifecycleObservation,
+    ShellRead,
+    ShellReceiverObservation,
+    ShellRegisteredViewName,
+    ShellSourceIdentity,
+    ShellWireAvailability,
+} from "./types"
 
 /** Availability states that may cross the shell wire. */
 export const WIRE_AVAILABILITIES: ReadonlySet<string> = new Set([
@@ -79,6 +89,26 @@ export const isFreshness = (value: unknown): value is ShellFreshness => typeof v
 /** Membership in the registered completeness set, as a narrowing the compiler can follow. */
 export const isCompleteness = (value: unknown): value is ShellCompleteness =>
     typeof value === "string" && COMPLETENESSES.has(value)
+/** Membership in the registered observation-kind set, as a narrowing the compiler can follow. */
+export const isObservationKind = (value: unknown): value is ShellReceiverObservation["kind"] =>
+    typeof value === "string" && OBSERVATION_KINDS.has(value)
+/** Membership in the registered queue-state set, as a narrowing the compiler can follow. */
+export const isQueueState = (value: unknown): value is ShellCommandObservation["queueState"] =>
+    typeof value === "string" && QUEUE_STATES.has(value)
+/** Membership in the registered configuration-requirement set, as a narrowing the compiler can follow. */
+export const isConfigurationRequirement = (
+    value: unknown,
+): value is ShellLifecycleObservation["configurationRequirement"] =>
+    typeof value === "string" && CONFIGURATION_REQUIREMENTS.has(value)
+/** Membership in the registered test-state set, as a narrowing the compiler can follow. */
+export const isTestState = (value: unknown): value is ShellLifecycleObservation["testState"] =>
+    typeof value === "string" && TEST_STATES.has(value)
+/** Membership in the registered application-state set, as a narrowing the compiler can follow. */
+export const isApplicationState = (value: unknown): value is ShellLifecycleObservation["applicationState"] =>
+    typeof value === "string" && APPLICATION_STATES.has(value)
+/** Membership in the registered navigation-view set, as a narrowing the compiler can follow. */
+export const isRegisteredViewName = (value: unknown): value is ShellRegisteredViewName =>
+    typeof value === "string" && REGISTERED_VIEWS.has(value)
 
 /** Canonical wire spelling of one source identity; the inverse of the registry's own parser. */
 export const formatShellSourceIdentity = (identity: ShellSourceIdentity): string => {

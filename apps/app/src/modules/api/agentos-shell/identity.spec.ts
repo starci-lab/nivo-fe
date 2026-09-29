@@ -7,6 +7,14 @@ import {
     formatShellRead,
     formatShellSourceIdentity
 } from "./index"
+import {
+    isApplicationState,
+    isConfigurationRequirement,
+    isObservationKind,
+    isQueueState,
+    isRegisteredViewName,
+    isTestState,
+} from "./identity"
 import { shellSpec } from "./spec-helpers"
 const { INSTALLATION, readOf } = shellSpec
 
@@ -69,5 +77,43 @@ describe("formatShellRead", () => {
         expect(formatShellRead({ kind: "receiver", installationId: INSTALLATION, intentId: "intent-1" }, 1)).toBe(
             `receiver%3A%7B${INSTALLATION}%2Cintent-1%7D:1`,
         )
+    })
+})
+
+describe("closed-set wire guards", () => {
+    it("isObservationKind refuses a member the registry does not name, and a non-string", () => {
+        expect(isObservationKind("outcome_unknown")).toBe(true)
+        expect(isObservationKind("half-known")).toBe(false)
+        expect(isObservationKind(7)).toBe(false)
+    })
+
+    it("isQueueState refuses a member the registry does not name, and a non-string", () => {
+        expect(isQueueState("queued")).toBe(true)
+        expect(isQueueState("unspelled")).toBe(false)
+        expect(isQueueState(null)).toBe(false)
+    })
+
+    it("isConfigurationRequirement refuses a member the registry does not name, and a non-string", () => {
+        expect(isConfigurationRequirement("required")).toBe(true)
+        expect(isConfigurationRequirement("maybe")).toBe(false)
+        expect(isConfigurationRequirement(undefined)).toBe(false)
+    })
+
+    it("isTestState refuses a member the registry does not name, and a non-string", () => {
+        expect(isTestState("passed")).toBe(true)
+        expect(isTestState("green")).toBe(false)
+        expect(isTestState({})).toBe(false)
+    })
+
+    it("isApplicationState refuses a member the registry does not name, and a non-string", () => {
+        expect(isApplicationState("active")).toBe(true)
+        expect(isApplicationState("unspelled")).toBe(false)
+        expect(isApplicationState(0)).toBe(false)
+    })
+
+    it("isRegisteredViewName refuses a view the registry does not name, and a non-string", () => {
+        expect(isRegisteredViewName("module-home")).toBe(true)
+        expect(isRegisteredViewName("not-a-view")).toBe(false)
+        expect(isRegisteredViewName(null)).toBe(false)
     })
 })

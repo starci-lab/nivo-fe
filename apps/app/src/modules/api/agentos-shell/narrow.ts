@@ -1,18 +1,18 @@
 import { failed, failureKindOfStatus, type Failure } from "../outcome"
 import {
-    CONFIGURATION_REQUIREMENTS,
-    APPLICATION_STATES,
+    isApplicationState,
     isCompleteness,
+    isConfigurationRequirement,
     isCount,
     isFreshness,
+    isObservationKind,
+    isQueueState,
     isRecord,
+    isRegisteredViewName,
+    isTestState,
     isText,
     isUuid,
     nullableText,
-    OBSERVATION_KINDS,
-    QUEUE_STATES,
-    REGISTERED_VIEWS,
-    TEST_STATES,
     isWireAvailability,
     formatShellSourceIdentity,
 } from "./identity"
@@ -32,7 +32,6 @@ import type {
     ShellReadScope,
     ShellReceiverObservation,
     ShellRegisteredDestination,
-    ShellRegisteredViewName,
     ShellReturnContext,
     ShellSourceEnvelope,
 } from "./types"
@@ -118,7 +117,7 @@ export const authoredEnvelope = (value: unknown, expected: ShellRead): ShellSour
         freshness: value.freshness,
         completeness: value.completeness,
         observedAt,
-        payload: value.payload === null ? null : (value.payload as Readonly<Record<string, unknown>>),
+        payload: value.payload === null ? null : value.payload,
     }
 }
 
@@ -134,7 +133,7 @@ export const authoredReceiverObservations = (value: unknown): ReadonlyArray<Shel
             entry.observationVersion < 1
         )
             return null
-        if (typeof entry.kind !== "string" || !OBSERVATION_KINDS.has(entry.kind) || !isText(entry.schemaId)) return null
+        if (!isObservationKind(entry.kind) || !isText(entry.schemaId)) return null
         const receiverReceiptId = nullableText(entry.receiverReceiptId)
         const payloadDigest = nullableText(entry.payloadDigest)
         const observedAt = nullableText(entry.observedAt)
@@ -143,7 +142,7 @@ export const authoredReceiverObservations = (value: unknown): ReadonlyArray<Shel
             observationId: entry.observationId,
             observationVersion: entry.observationVersion,
             receiverReceiptId,
-            kind: entry.kind as ShellReceiverObservation["kind"],
+            kind: entry.kind,
             schemaId: entry.schemaId,
             payloadDigest,
             observedAt,
@@ -168,7 +167,7 @@ export const authoredTransportGaps = (value: unknown): ReadonlyArray<ShellLocalT
 /** Narrow the queue and receiver evidence for one command identity. */
 export const authoredCommandObservation = (value: unknown): ShellCommandObservation | null => {
     if (!isRecord(value) || !isText(value.commandId) || !isText(value.receiverInstallationId)) return null
-    if (typeof value.queueState !== "string" || !QUEUE_STATES.has(value.queueState) || !isCount(value.attempt))
+    if (!isQueueState(value.queueState) || !isCount(value.attempt))
         return null
     const possibleStartAt = nullableText(value.possibleStartAt)
     if (possibleStartAt === undefined) return null
@@ -178,7 +177,7 @@ export const authoredCommandObservation = (value: unknown): ShellCommandObservat
     return {
         commandId: value.commandId,
         receiverInstallationId: value.receiverInstallationId,
-        queueState: value.queueState as ShellCommandObservation["queueState"],
+        queueState: value.queueState,
         attempt: value.attempt,
         possibleStartAt,
         observations,
@@ -230,13 +229,9 @@ export const authoredLifecycleObservation = (value: unknown): ShellLifecycleObse
     )
         return null
     if (!isText(value.desiredCandidateGeneration)) return null
-    if (
-        typeof value.configurationRequirement !== "string" ||
-        !CONFIGURATION_REQUIREMENTS.has(value.configurationRequirement)
-    )
-        return null
-    if (typeof value.testState !== "string" || !TEST_STATES.has(value.testState)) return null
-    if (typeof value.applicationState !== "string" || !APPLICATION_STATES.has(value.applicationState)) return null
+    if (!isConfigurationRequirement(value.configurationRequirement)) return null
+    if (!isTestState(value.testState)) return null
+    if (!isApplicationState(value.applicationState)) return null
     if (!isCount(value.runtimeFenceGeneration)) return null
     const configurationRevisionId = nullableText(value.configurationRevisionId)
     const testEvidenceId = nullableText(value.testEvidenceId)
@@ -253,12 +248,11 @@ export const authoredLifecycleObservation = (value: unknown): ShellLifecycleObse
         installationId: value.installationId,
         lifecycleRevision: value.lifecycleRevision,
         desiredCandidateGeneration: value.desiredCandidateGeneration,
-        configurationRequirement:
-            value.configurationRequirement as ShellLifecycleObservation["configurationRequirement"],
+        configurationRequirement: value.configurationRequirement,
         configurationRevisionId,
-        testState: value.testState as ShellLifecycleObservation["testState"],
+        testState: value.testState,
         testEvidenceId,
-        applicationState: value.applicationState as ShellLifecycleObservation["applicationState"],
+        applicationState: value.applicationState,
         // A generation observed while the state was unknown is not evidence of what is running now.
         appliedGeneration: value.applicationState === "active" ? appliedGeneration : null,
         runtimeFenceGeneration: value.runtimeFenceGeneration,
@@ -334,7 +328,7 @@ export const authoredReturnContext = (value: unknown, scope: ShellReadScope): Sh
 /** Narrow a Core destination to the registered route name and current selection. */
 export const authoredDestination = (value: unknown, scope: ShellReadScope): ShellRegisteredDestination | null => {
     if (!isRecord(value) || value.grammarVersion !== SHELL_NAVIGATION_GRAMMAR_VERSION) return null
-    if (typeof value.routeName !== "string" || !REGISTERED_VIEWS.has(value.routeName)) return null
+    if (!isRegisteredViewName(value.routeName)) return null
     if (!isUuid(value.workspaceId) || !isUuid(value.instanceId) || !isUuid(value.installationId)) return null
     if (value.workspaceId !== scope.workspaceId || value.instanceId !== scope.instanceId) return null
     const opaqueItemId = nullableText(value.opaqueItemId)
@@ -343,7 +337,7 @@ export const authoredDestination = (value: unknown, scope: ShellReadScope): Shel
     if (returnContext === null) return null
     return {
         grammarVersion: SHELL_NAVIGATION_GRAMMAR_VERSION,
-        routeName: value.routeName as ShellRegisteredViewName,
+        routeName: value.routeName,
         workspaceId: scope.workspaceId,
         instanceId: scope.instanceId,
         installationId: value.installationId,
