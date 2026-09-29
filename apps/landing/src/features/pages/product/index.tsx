@@ -216,7 +216,9 @@ const renderCards = (block: Extract<BlockStructure, { kind: "cards" }>, ctx: Blo
                     key={item.key}
                 >
                     <span className={PRODUCT_CLASS_NAMES.conceptIcon} aria-hidden="true">
-                        <NivoIcon props={{ name: CARD_ICONS[index % CARD_ICONS.length]!, usage: "heading" }} />
+                        <NivoIcon
+                            props={{ name: CARD_ICONS[index % CARD_ICONS.length] ?? "complete", usage: "heading" }}
+                        />
                     </span>
                     {item.labelled === true ? (
                         <Text as="p" size="xs" tone="accent" weight="semibold">

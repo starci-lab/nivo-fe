@@ -314,7 +314,9 @@ export const HomePage = () => {
                                         {String(index + 1).padStart(2, "0")}
                                     </span>
                                     <span className={SITE_CLASS_NAMES.commercialRouteMarker} aria-hidden="true">
-                                        <NivoIcon props={{ name: COMMERCIAL_ROUTE_ICONS[index]!, usage: "heading" }} />
+                                        <NivoIcon
+                                            props={{ name: COMMERCIAL_ROUTE_ICONS[index] ?? "next", usage: "heading" }}
+                                        />
                                     </span>
                                     <strong className={SITE_CLASS_NAMES.commercialRouteCopy}>{step}</strong>
                                     {index < commercialRoute.length - 1 ? (
