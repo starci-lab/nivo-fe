@@ -91,11 +91,10 @@ const SALES_REFUSAL_KEYS = {
     BAD_REQUEST: "refusal.validation",
 } satisfies Readonly<Record<string, string>>
 
-const salesKey = (
-    mapping: Readonly<Partial<Record<string, string>>>,
-    value: string,
-): string | undefined => mapping[value]
+const salesKey = (mapping: Readonly<Partial<Record<string, string>>>, value: string): string | undefined =>
+    mapping[value]
 
+/** Message key explaining a refused sales request; an unknown code reads as the unreachable-source refusal. */
 export const salesRefusalKey = (code: string): string => salesKey(SALES_REFUSAL_KEYS, code) ?? "refusal.unreachable"
 
 /**
@@ -117,6 +116,7 @@ const SALES_WORK_STATE_KEYS = {
     attention: "workState.attention",
 } satisfies Readonly<Record<string, string>>
 
+/** Message key for the state of one unit of sales work. */
 export const salesWorkStateKey = (workState: string): string | null =>
     salesKey(SALES_WORK_STATE_KEYS, workState) ?? null
 
@@ -127,6 +127,7 @@ const SALES_LIFECYCLE_KEYS = {
     lost: "lifecycle.lost",
 } satisfies Readonly<Record<string, string>>
 
+/** Message key for the lifecycle stage of a sales opportunity. */
 export const salesLifecycleKey = (status: string): string | null => salesKey(SALES_LIFECYCLE_KEYS, status) ?? null
 
 /** One wait or attention reason's label key; a reason this build does not know stays its own word. */
@@ -140,6 +141,7 @@ const SALES_WORK_REASON_KEYS = {
     "outcome-unknown": "workReason.outcomeUnknown",
 } satisfies Readonly<Record<string, string>>
 
+/** Message key for why a unit of sales work is in its current state. */
 export const salesWorkReasonKey = (reason: string): string | null => salesKey(SALES_WORK_REASON_KEYS, reason) ?? null
 
 /** One command plan status's label key; an undeclared status stays its own word. */
@@ -151,6 +153,7 @@ const SALES_COMMAND_STATUS_KEYS = {
     withdrawn: "commandStatus.withdrawn",
 } satisfies Readonly<Record<string, string>>
 
+/** Message key for the status of one sales command. */
 export const salesCommandStatusKey = (status: string): string | null =>
     salesKey(SALES_COMMAND_STATUS_KEYS, status) ?? null
 
@@ -164,6 +167,7 @@ const SALES_ACTION_STATUS_KEYS = {
     "outcome-unknown": "actionStatus.outcomeUnknown",
 } satisfies Readonly<Record<string, string>>
 
+/** Message key for the status of one proposed sales action. */
 export const salesActionStatusKey = (status: string): string | null =>
     salesKey(SALES_ACTION_STATUS_KEYS, status) ?? null
 
@@ -174,6 +178,7 @@ const SALES_OUTCOME_KEYS = {
     attention: "outcome.attention",
 } satisfies Readonly<Record<string, string>>
 
+/** Message key for how a sales opportunity ended; an unknown outcome reads as needing attention. */
 export const salesOutcomeKey = (outcome: string): string => salesKey(SALES_OUTCOME_KEYS, outcome) ?? "outcome.attention"
 
 /** One clarification fact as the plan discloses it: exactly one of the two permitted kinds is named. */

@@ -52,14 +52,9 @@ export const accountingNoticeLive = (kind: AccountingNotice["kind"]): "assertive
 /** Narrow only the Setup facts that authorize document intake; every command remains server-authorized. */
 export const accountingIntakePolicy = (snapshot: unknown): AccountingIntakePolicy | null => {
     if (!isAccountingIntakeSnapshot(snapshot)) return null
-    const record = snapshot
-    const scope = record.accountingScope
-    const currencyAndLocale = record.currencyAndLocale
-    if (
-        !isAccountingRecord(scope) ||
-        !isAccountingRecord(currencyAndLocale)
-    )
-        return null
+    const scope = snapshot.accountingScope
+    const currencyAndLocale = snapshot.currencyAndLocale
+    if (!isAccountingRecord(scope) || !isAccountingRecord(currencyAndLocale)) return null
     const rawClassifications = scope.classifications
     const currency = currencyAndLocale.functionalCurrency
     if (
@@ -133,7 +128,10 @@ export const accountingCorrectionAccess = ({
     return { submit, approve: true, approvalReason: "allowed" }
 }
 
-type LocalizedDigits = { readonly toAscii: ReadonlyMap<string, string>; readonly fromAscii: ReadonlyMap<string, string> }
+type LocalizedDigits = {
+    readonly toAscii: ReadonlyMap<string, string>
+    readonly fromAscii: ReadonlyMap<string, string>
+}
 
 const localizedDigits = (format: Formatter): LocalizedDigits => {
     const toAscii = new Map<string, string>()
@@ -187,8 +185,10 @@ export const currencyAmountToMinor = (value: string, currency: string, format: F
     const fraction = match[3] ?? ""
     if (fraction.length > fractionDigitCount) return null
     const absolute =
-        `${match[2]}${(fraction + "0".repeat(fractionDigitCount)).slice(0, fractionDigitCount)}`.replace(/^0+(?=\d)/, "") ||
-        "0"
+        `${match[2]}${(fraction + "0".repeat(fractionDigitCount)).slice(0, fractionDigitCount)}`.replace(
+            /^0+(?=\d)/,
+            "",
+        ) || "0"
     if (absolute === "0") return "0"
     return `${match[1]}${absolute}`
 }
@@ -351,6 +351,7 @@ const ACCOUNTING_MEASURE_KEYS = {
     "estimated-tax": "measure.estimatedTax",
 } satisfies Readonly<Partial<Record<string, string>>>
 
+/** Message key naming one accounting measure kind, or the generic measure label for a kind the workbench does not know. */
 export const accountingMeasureKey = (kind: string): string =>
     mappedMessageKey(ACCOUNTING_MEASURE_KEYS, kind) ?? "measure.other"
 
@@ -384,6 +385,7 @@ const ACCOUNTING_AVAILABILITY_KEYS = {
     unavailable: "availability.unavailable",
 } satisfies Readonly<Partial<Record<string, string>>>
 
+/** Message key for how current a measure reading is; an unknown availability reads as unavailable. */
 export const accountingAvailabilityKey = (availability: string): string =>
     mappedMessageKey(ACCOUNTING_AVAILABILITY_KEYS, availability) ?? "availability.unavailable"
 
@@ -395,6 +397,7 @@ const ACCOUNTING_PARTIAL_REASON_KEYS = {
     "unavailable-source": "partialReason.unavailableSource",
 } satisfies Readonly<Partial<Record<string, string>>>
 
+/** Message key for why a measure covers only part of the ledger; an unknown reason reads as an unavailable source. */
 export const accountingPartialReasonKey = (reason: string): string =>
     mappedMessageKey(ACCOUNTING_PARTIAL_REASON_KEYS, reason) ?? "partialReason.unavailableSource"
 
@@ -420,6 +423,7 @@ const ACCOUNTING_EVIDENCE_STATE_KEYS = {
     rejected: "evidenceState.rejected",
 } satisfies Readonly<Partial<Record<string, string>>>
 
+/** Message key for the state of one piece of accounting evidence. */
 export const accountingEvidenceStateKey = (state: string): string =>
     mappedMessageKey(ACCOUNTING_EVIDENCE_STATE_KEYS, state) ?? "evidenceState.rejected"
 
@@ -433,6 +437,7 @@ const ACCOUNTING_ROUTINE_STATE_KEYS = {
     "outcome-unknown": "routineState.outcomeUnknown",
 } satisfies Readonly<Partial<Record<string, string>>>
 
+/** Message key for the run state of one accounting routine. */
 export const accountingRoutineStateKey = (state: string): string =>
     mappedMessageKey(ACCOUNTING_ROUTINE_STATE_KEYS, state) ?? "routineState.outcomeUnknown"
 
@@ -446,6 +451,7 @@ const ACCOUNTING_EXCEPTION_STATE_KEYS = {
     dismissed: "exceptionState.dismissed",
 } satisfies Readonly<Partial<Record<string, string>>>
 
+/** Message key for the review state of one accounting exception. */
 export const accountingExceptionStateKey = (state: string): string =>
     mappedMessageKey(ACCOUNTING_EXCEPTION_STATE_KEYS, state) ?? "exceptionState.open"
 
@@ -459,6 +465,7 @@ const ACCOUNTING_CORRECTION_STATE_KEYS = {
     outcome_unknown: "correctionState.outcomeUnknown",
 } satisfies Readonly<Partial<Record<string, string>>>
 
+/** Message key for the state of one proposed accounting correction. */
 export const accountingCorrectionStateKey = (state: string): string =>
     mappedMessageKey(ACCOUNTING_CORRECTION_STATE_KEYS, state) ?? "correctionState.outcomeUnknown"
 
@@ -470,6 +477,7 @@ const ACCOUNTING_MATCH_STATUS_KEYS = {
     ambiguous: "matchStatus.ambiguous",
 } satisfies Readonly<Partial<Record<string, string>>>
 
+/** Message key for how a ledger fact matched its counterpart record. */
 export const accountingMatchStatusKey = (status: string): string =>
     mappedMessageKey(ACCOUNTING_MATCH_STATUS_KEYS, status) ?? "matchStatus.unmatched"
 
@@ -480,6 +488,7 @@ const ACCOUNTING_TREATMENT_KEYS = {
     unknown: "treatment.unknown",
 } satisfies Readonly<Partial<Record<string, string>>>
 
+/** Message key for the accounting treatment applied to a ledger fact. */
 export const accountingTreatmentKey = (kind: string): string =>
     mappedMessageKey(ACCOUNTING_TREATMENT_KEYS, kind) ?? "treatment.unknown"
 
@@ -493,6 +502,7 @@ const ACCOUNTING_FACT_FIELD_KEYS = {
     treatment: "fact.treatment",
 } satisfies Readonly<Partial<Record<string, string>>>
 
+/** Message key naming one field of a ledger fact; an unknown field reads as the generic fact label. */
 export const accountingFactFieldKey = (field: string): string =>
     mappedMessageKey(ACCOUNTING_FACT_FIELD_KEYS, field) ?? "fact.other"
 
@@ -546,5 +556,6 @@ const ACCOUNTING_REFUSAL_KEYS = {
     ECHOED_IDENTITY_MISMATCH: "refusal.malformed",
 } satisfies Readonly<Partial<Record<string, string>>>
 
+/** Message key explaining a refused accounting request; an unknown code reads as the unreachable-source refusal. */
 export const accountingRefusalKey = (code: string): string =>
     mappedMessageKey(ACCOUNTING_REFUSAL_KEYS, code) ?? "refusal.unreachable"

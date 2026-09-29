@@ -1,3 +1,14 @@
+import type { AgentosModuleTestRun, AgentosModuleTestSurface } from "@/modules/api/agentos-module-tests"
+import type {
+    CollabBindingView,
+    CollabMessageView,
+    CollabRouteOutcome,
+    CollabTaskQuestionView,
+    CollabTaskView,
+} from "@/modules/api/collab"
+import type { Failure } from "@/modules/api/outcome"
+import type { Session, SessionState } from "@/modules/auth/session"
+
 /** Run an invocation that calls a mock, then read that mock's typed returned fixture. */
 type RecordedResult<T> =
     | { readonly type: "return"; readonly value: T }
@@ -6,6 +17,7 @@ type RecordedResult<T> =
 
 type MockWithResults<T> = { readonly mock: { readonly results: ReadonlyArray<RecordedResult<T>> } }
 
+/** Invoke code that calls a mock once, then return the value that mock produced, failing if it did not return. */
 export const runAndReadMock = <T>(invoke: () => unknown, mock: MockWithResults<T>): T => {
     invoke()
     const result = mock.mock.results.at(-1)
@@ -13,12 +25,15 @@ export const runAndReadMock = <T>(invoke: () => unknown, mock: MockWithResults<T
     return result.value
 }
 
+/** The loose call signature a mocked query hook records its arguments with. */
 export type QueryMockCallback = (...args: Array<unknown>) => unknown
 
+/** The options a mocked query hook accepts: how it decides when to poll again. */
 export type QueryMockOptions = {
     readonly refreshInterval?: (data: unknown, error?: unknown) => number
 }
 
+/** The options a mocked mutation hook accepts: what it invalidates and whether an answer should. */
 export type MutationMockOptions = {
     readonly invalidates?: (input: unknown, answer: unknown) => unknown
     readonly shouldInvalidate?: (answer: unknown) => boolean
@@ -30,8 +45,10 @@ export const apiAnswer = <TArgs extends Array<unknown>, TAnswer>(
     answer: TAnswer,
 ): TAnswer => answer
 
-export type ApiFailure = import("@/modules/api/outcome").Failure
+/** The failure branch of an API outcome, as spec fixtures build it. */
+export type ApiFailure = Failure
 
+/** Build a retryable "source unavailable" API failure for specs, with an overridable reason and code. */
 export const unavailableFailure = (reason = "unavailable", code = "UNAVAILABLE"): ApiFailure => ({
     ok: false,
     kind: "unavailable",
@@ -41,16 +58,26 @@ export const unavailableFailure = (reason = "unavailable", code = "UNAVAILABLE")
     retryable: true,
 })
 
-export type SessionState = import("@/modules/auth/session").SessionState
-export type Session = import("@/modules/auth/session").Session
-export type CollabTaskView = import("@/modules/api/collab").CollabTaskView
-export type CollabTaskQuestionView = import("@/modules/api/collab").CollabTaskQuestionView
-export type CollabMessageView = import("@/modules/api/collab").CollabMessageView
-export type CollabBindingView = import("@/modules/api/collab").CollabBindingView
-export type CollabRouteOutcome = import("@/modules/api/collab").CollabRouteOutcome
-export type AgentosModuleTestRun = import("@/modules/api/agentos-module-tests").AgentosModuleTestRun
-export type AgentosModuleTestSurface = import("@/modules/api/agentos-module-tests").AgentosModuleTestSurface
+/** The session state a fixture session is built over. */
+export type { SessionState }
+/** The session contract a fixture session satisfies. */
+export type { Session }
+/** A collab task view, as the fixtures build it. */
+export type { CollabTaskView }
+/** A collab task question view, as the fixtures build it. */
+export type { CollabTaskQuestionView }
+/** A collab message view, as the fixtures build it. */
+export type { CollabMessageView }
+/** A collab command binding view, as the fixtures build it. */
+export type { CollabBindingView }
+/** The routing outcome of a collab message, as the fixtures build it. */
+export type { CollabRouteOutcome }
+/** One module test run, as the fixtures build it. */
+export type { AgentosModuleTestRun }
+/** One module test surface, as the fixtures build it. */
+export type { AgentosModuleTestSurface }
 
+/** Build a session over a given state whose operations do nothing, for specs that only read the state. */
 export const sessionFixture = (state: SessionState): Session => ({
     state,
     adopt: () => undefined,
@@ -58,6 +85,7 @@ export const sessionFixture = (state: SessionState): Session => ({
     discard: () => undefined,
 })
 
+/** Build a `window.matchMedia` stand-in that answers every query with one fixed or computed match. */
 export const matchMediaFixture =
     (matches: boolean | ((media: string) => boolean)): typeof window.matchMedia =>
     (media) => {
@@ -74,6 +102,7 @@ export const matchMediaFixture =
         }
     }
 
+/** Build a collab task view with plain placeholder values, overridable field by field. */
 export const collabTaskFixture = (overrides: Partial<CollabTaskView> = {}): CollabTaskView => ({
     taskId: "task-fixture",
     workspaceId: "workspace-fixture",
@@ -99,6 +128,7 @@ export const collabTaskFixture = (overrides: Partial<CollabTaskView> = {}): Coll
     ...overrides,
 })
 
+/** Build an open collab task question with plain placeholder values, overridable field by field. */
 export const collabQuestionFixture = (overrides: Partial<CollabTaskQuestionView> = {}): CollabTaskQuestionView => ({
     questionId: overrides.questionId ?? "question-fixture",
     workspaceId: "workspace-fixture",
@@ -112,6 +142,7 @@ export const collabQuestionFixture = (overrides: Partial<CollabTaskQuestionView>
     ...overrides,
 })
 
+/** Build a human-authored collab message with plain placeholder values, overridable field by field. */
 export const collabMessageFixture = (overrides: Partial<CollabMessageView> = {}): CollabMessageView => ({
     messageId: "message-fixture",
     workspaceId: "workspace-fixture",
@@ -128,6 +159,7 @@ export const collabMessageFixture = (overrides: Partial<CollabMessageView> = {})
     ...overrides,
 })
 
+/** Build the routing outcome of a message: not addressed to a module, or admitted with its binding. */
 export const collabRouteFixture = (kind: "not-addressed" | "admitted"): CollabRouteOutcome =>
     kind === "not-addressed"
         ? { kind, message: collabMessageFixture() }
@@ -151,6 +183,7 @@ export const collabRouteFixture = (kind: "not-addressed" | "admitted"): CollabRo
               },
           }
 
+/** Build a module test surface around one run whose fields the spec overrides, with an empty scenario contract by default. */
 export const moduleTestSurfaceFixture = (
     runOverrides: Partial<AgentosModuleTestRun>,
     contract?: AgentosModuleTestSurface["contract"],
