@@ -1,0 +1,19 @@
+# generated, vendored or agent-owned: never reviewed as source
+node_modules/
+.next/
+.turbo/
+out/
+dist/
+build/
+coverage/
+test-results/
+.scannerwork/
+.sonar/
+.artifacts/
+.claude/
+.starciwork/
+design-plans/
+docs/visual-direction/
+package-lock.json
+next-env.d.ts
+*.tsbuildinfo
