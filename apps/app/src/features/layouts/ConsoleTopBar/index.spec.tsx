@@ -1,12 +1,11 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-const setTheme = vi.fn()
-vi.mock("next-themes", () => ({
-    useTheme: () => ({ resolvedTheme: "light", setTheme }),
-}))
 vi.mock("@/components/blocks/locale/LanguageMenu", () => ({
     LanguageMenu: () => <button type="button">language</button>,
+}))
+vi.mock("@/components/blocks/theme/ThemeToggle", () => ({
+    ThemeToggle: () => <button type="button">theme</button>,
 }))
 vi.mock("@/components/blocks/auth/AccountMenu", () => ({
     AccountMenu: () => <button type="button">account</button>,
@@ -31,9 +30,7 @@ describe("ConsoleTopBar", () => {
         expect(screen.queryByText("search")).not.toBeInTheDocument()
         expect(screen.queryByText("cart")).not.toBeInTheDocument()
         expect(screen.queryByText("notifications")).not.toBeInTheDocument()
-
-        fireEvent.click(screen.getByRole("switch", { name: en.console.theme.dark }))
-        expect(setTheme).toHaveBeenCalledWith("dark")
+        expect(screen.getByText("theme")).toBeInTheDocument()
     })
 
     it("mounts no compact drawer trigger - the shell's compactNavigation owns that band", () => {

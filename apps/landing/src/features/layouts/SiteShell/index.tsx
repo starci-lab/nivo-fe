@@ -1,8 +1,9 @@
-import { NivoGrammarRoot } from "@nivo/ui"
 import { notFound } from "next/navigation"
 import { NextIntlClientProvider, hasLocale } from "next-intl"
 import { getMessages, getTranslations } from "next-intl/server"
+import { ThemeProvider } from "next-themes"
 import type { ReactNode } from "react"
+import { NivoGrammarTheme } from "@/features/layouts/NivoGrammarTheme"
 import { routing } from "@/modules/i18n/routing"
 import { SiteShell } from "./component"
 
@@ -35,8 +36,9 @@ export const generateStaticParams = () => routing.locales.map((locale) => ({ loc
 /**
  * The document shell.
  *
- * It selects the NIVO family once, in its light register -- the one this public surface is drawn for
- * -- so no screen below has to remember a theme, and it declares the document's language from the routed
+ * It selects the NIVO family once, under a theme provider that follows the device until the visitor
+ * chooses (written onto `<html>` before first paint, hence the suppressed hydration warning on that
+ * element alone), so no screen below has to remember a theme, and it declares the document's language from the routed
  * segment, and hands the catalog of that language to every client section below it. AN UNKNOWN
  * SEGMENT IS A 404, not a fallback: `/fr` is a page nobody wrote.
  *
@@ -55,13 +57,15 @@ export const SiteShellDocument = async ({ children, params }: SiteShellDocumentP
     const t = await getTranslations({ locale, namespace: "site" })
 
     return (
-        <html lang={locale}>
+        <html lang={locale} suppressHydrationWarning>
             <body>
-                <NivoGrammarRoot theme="light">
-                    <NextIntlClientProvider locale={locale} messages={messages}>
-                        <SiteShell skipLabel={t("skipToContent")}>{children}</SiteShell>
-                    </NextIntlClientProvider>
-                </NivoGrammarRoot>
+                <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+                    <NivoGrammarTheme>
+                        <NextIntlClientProvider locale={locale} messages={messages}>
+                            <SiteShell skipLabel={t("skipToContent")}>{children}</SiteShell>
+                        </NextIntlClientProvider>
+                    </NivoGrammarTheme>
+                </ThemeProvider>
             </body>
         </html>
     )

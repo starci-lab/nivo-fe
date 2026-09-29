@@ -1,6 +1,6 @@
 import { NavigationFeatureNav, Text } from "@starci/grammar/common"
 import type { ComponentType } from "react"
-import { NivoBrand, ThemeSwitch } from "@nivo/ui"
+import { NivoBrand } from "@nivo/ui"
 
 /** The mounted controls take no props: the connected half renders them fully resolved. */
 export type ConsoleTopBarControlProps = { readonly [key: string]: never }
@@ -14,30 +14,23 @@ export type ConsoleTopBarControlProps = { readonly [key: string]: never }
 export type ConsoleTopBarBaseState = {
     readonly localeControl: ComponentType<ConsoleTopBarControlProps>
     readonly localeControlProps: ConsoleTopBarControlProps
+    readonly themeControl: ComponentType<ConsoleTopBarControlProps>
+    readonly themeControlProps: ConsoleTopBarControlProps
     readonly accountControl: ComponentType<ConsoleTopBarControlProps>
     readonly accountControlProps: ConsoleTopBarControlProps
 }
 
-/** Pure top-bar labels and theme facts. */
+/** Pure top-bar labels. */
 export type ConsoleTopBarBaseData = {
     readonly brandLabel: string
     readonly contextLabel: string
     readonly actionsLabel: string
-    readonly isDark: boolean
-    readonly lightThemeLabel: string
-    readonly darkThemeLabel: string
-}
-
-/** The bar's single command back into the world: switch the resolved theme. */
-export type ConsoleTopBarBaseActions = {
-    readonly toggleTheme: () => void
 }
 
 /** Public API role for ConsoleTopBarBaseProps. */
 export type ConsoleTopBarBaseProps = {
     readonly state: ConsoleTopBarBaseState
     readonly props: ConsoleTopBarBaseData
-    readonly on: ConsoleTopBarBaseActions
 }
 
 /*
@@ -66,11 +59,12 @@ export const ConsoleTopBarBase = (props: ConsoleTopBarProps) => {
         state: {
             localeControl: LocaleControl,
             localeControlProps,
+            themeControl: ThemeControl,
+            themeControlProps,
             accountControl: AccountControl,
             accountControlProps,
         },
-        props: { brandLabel, contextLabel, actionsLabel, isDark, lightThemeLabel, darkThemeLabel },
-        on: { toggleTheme },
+        props: { brandLabel, contextLabel, actionsLabel },
     }: ConsoleTopBarProps = props
     return (
         <NavigationFeatureNav
@@ -91,15 +85,7 @@ export const ConsoleTopBarBase = (props: ConsoleTopBarProps) => {
             actions={
                 <>
                     <LocaleControl {...localeControlProps} />
-                    <ThemeSwitch
-                        props={{
-                            isDark,
-                            label: isDark ? lightThemeLabel : darkThemeLabel,
-                        }}
-                        on={{
-                            change: toggleTheme,
-                        }}
-                    />
+                    <ThemeControl {...themeControlProps} />
                     <AccountControl {...accountControlProps} />
                 </>
             }

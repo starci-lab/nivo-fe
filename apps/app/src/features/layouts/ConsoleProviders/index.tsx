@@ -32,7 +32,7 @@ export const ConsoleProviders = ({ props, children }: ConsoleProvidersProps) => 
     return (
         <NextIntlClientProvider locale={locale} messages={messages} timeZone={timeZone}>
             <I18nProvider locale={locale}>
-                <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+                <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                     <NivoGrammarTheme>
                         <SessionProvider>{children}</SessionProvider>
                     </NivoGrammarTheme>

@@ -48,6 +48,14 @@
         "contact": "Liên hệ",
         "login": "Đăng nhập"
       }
+    },
+    "theme": {
+      "label": "Giao diện",
+      "options": {
+        "system": "Theo thiết bị",
+        "light": "Sáng",
+        "dark": "Tối"
+      }
     }
   },
   "home": {

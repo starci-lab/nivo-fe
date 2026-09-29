@@ -280,8 +280,12 @@
       }
     },
     "theme": {
-      "light": "Dùng giao diện sáng",
-      "dark": "Dùng giao diện tối"
+      "label": "Giao diện",
+      "options": {
+        "system": "Theo thiết bị",
+        "light": "Sáng",
+        "dark": "Tối"
+      }
     },
     "account": {
       "label": "Tài khoản",

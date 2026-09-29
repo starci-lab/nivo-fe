@@ -1,21 +1,23 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { cleanup, render, screen } from "@testing-library/react"
+import { afterEach, describe, expect, it } from "vitest"
 
 import { ConsoleTopBarBase } from "./component"
 
 const LocaleControl = () => <button type="button">language</button>
+const ThemeControl = () => <button type="button">theme</button>
 const AccountControl = () => <button type="button">account</button>
 
 describe("ConsoleTopBarBase", () => {
     afterEach(cleanup)
 
     it("draws one global navbar landmark carrying only capability-backed tools", () => {
-        const onToggleTheme = vi.fn()
         render(
             <ConsoleTopBarBase
                 state={{
                     localeControl: LocaleControl,
                     localeControlProps: {},
+                    themeControl: ThemeControl,
+                    themeControlProps: {},
                     accountControl: AccountControl,
                     accountControlProps: {},
                 }}
@@ -23,11 +25,7 @@ describe("ConsoleTopBarBase", () => {
                     brandLabel: "nivo",
                     contextLabel: "Console",
                     actionsLabel: "Console controls",
-                    isDark: false,
-                    lightThemeLabel: "Use light theme",
-                    darkThemeLabel: "Use dark theme",
                 }}
-                on={{ toggleTheme: onToggleTheme }}
             />,
         )
 
@@ -38,9 +36,7 @@ describe("ConsoleTopBarBase", () => {
         expect(screen.getByText("Console")).toBeInTheDocument()
         expect(screen.getByText("language")).toBeInTheDocument()
         expect(screen.getByText("account")).toBeInTheDocument()
-
-        fireEvent.click(screen.getByRole("switch", { name: "Use dark theme" }))
-        expect(onToggleTheme).toHaveBeenCalledTimes(1)
+        expect(screen.getByText("theme")).toBeInTheDocument()
     })
 
     it("leaves the compact trigger slot empty and unnamed because the shell owns the compact band", () => {
@@ -49,6 +45,8 @@ describe("ConsoleTopBarBase", () => {
                 state={{
                     localeControl: LocaleControl,
                     localeControlProps: {},
+                    themeControl: ThemeControl,
+                    themeControlProps: {},
                     accountControl: AccountControl,
                     accountControlProps: {},
                 }}
@@ -56,11 +54,7 @@ describe("ConsoleTopBarBase", () => {
                     brandLabel: "nivo",
                     contextLabel: "Console",
                     actionsLabel: "Console controls",
-                    isDark: false,
-                    lightThemeLabel: "Use light theme",
-                    darkThemeLabel: "Use dark theme",
                 }}
-                on={{ toggleTheme: vi.fn() }}
             />,
         )
 
@@ -77,6 +71,8 @@ describe("ConsoleTopBarBase", () => {
                 state={{
                     localeControl: LocaleControl,
                     localeControlProps: {},
+                    themeControl: ThemeControl,
+                    themeControlProps: {},
                     accountControl: AccountControl,
                     accountControlProps: {},
                 }}
@@ -84,16 +80,12 @@ describe("ConsoleTopBarBase", () => {
                     brandLabel: "nivo",
                     contextLabel: "Console",
                     actionsLabel: "Console controls",
-                    isDark: false,
-                    lightThemeLabel: "Use light theme",
-                    darkThemeLabel: "Use dark theme",
                 }}
-                on={{ toggleTheme: vi.fn() }}
             />,
         )
 
         const locale = screen.getByText("language")
-        const theme = screen.getByRole("switch", { name: "Use dark theme" })
+        const theme = screen.getByText("theme")
         const account = screen.getByText("account")
         const localeBeforeTheme = Boolean(locale.compareDocumentPosition(theme) & Node.DOCUMENT_POSITION_FOLLOWING)
         const themeBeforeAccount = Boolean(theme.compareDocumentPosition(account) & Node.DOCUMENT_POSITION_FOLLOWING)

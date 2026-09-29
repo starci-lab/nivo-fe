@@ -1,4 +1,5 @@
 import { NivoBrand } from "@nivo/ui"
+import type { ReactNode } from "react"
 import { Button, PageContainer, TextAction } from "@starci/grammar/common"
 import { SITE_CLASS_NAMES } from "../SiteShell"
 
@@ -90,7 +91,13 @@ export type SiteHeaderBaseActions = {
 }
 
 /** Public API role for SiteHeaderBaseProps. */
+/** The mounted control the header hosts but does not own. */
+export type SiteHeaderBaseState = {
+    readonly themeControl: ReactNode
+}
+
 export type SiteHeaderBaseProps = {
+    readonly state: SiteHeaderBaseState
     readonly props: SiteHeaderBaseData
     readonly on: SiteHeaderBaseActions
 }
@@ -105,7 +112,7 @@ type SiteHeaderProps = SiteHeaderBaseProps
 
 /** Accessible global navigation with one compact disclosure layer on small screens. */
 export const SiteHeaderBase = (props: SiteHeaderProps) => {
-    const { props: data, on } = props
+    const { state, props: data, on } = props
     const panelId = "site-mobile-navigation"
 
     return (
@@ -120,6 +127,7 @@ export const SiteHeaderBase = (props: SiteHeaderProps) => {
                 </nav>
 
                 <div className={SITE_CLASS_NAMES.headerActions} aria-label={data.copy.quickActionsLabel}>
+                    {state.themeControl}
                     <TextAction href={data.hrefs.login} appearance="section" size="sm">
                         {data.copy.login}
                     </TextAction>
@@ -152,6 +160,7 @@ export const SiteHeaderBase = (props: SiteHeaderProps) => {
                 >
                     <NavigationList navigation={data.navigation} variant="mobile" onFollow={on.follow} />
                     <div className={SITE_CLASS_NAMES.headerMobileActions}>
+                        {state.themeControl}
                         <TextAction href={data.hrefs.login} appearance="section" size="sm" onFollow={on.follow}>
                             {data.copy.login}
                         </TextAction>

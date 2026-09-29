@@ -49,6 +49,14 @@
       "sent": "Thank you — the academy will be in touch."
     }
   },
+  "theme": {
+    "label": "Theme",
+    "options": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    }
+  },
   "boundary": {
     "error": {
       "unexpected": {

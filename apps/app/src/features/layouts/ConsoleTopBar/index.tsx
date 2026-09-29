@@ -1,10 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
-import { useTheme } from "next-themes"
 import { AccountMenu } from "@/components/blocks/auth/AccountMenu"
 import { LanguageMenu } from "@/components/blocks/locale/LanguageMenu"
+import { ThemeToggle } from "@/components/blocks/theme/ThemeToggle"
 import { ConsoleTopBarBase } from "./component"
 
 /**
@@ -26,6 +25,8 @@ export type ConsoleTopBarProps = { readonly [key: string]: never }
  * re-renders exactly as the direct reference did.
  */
 const renderLocaleControl = () => <LanguageMenu />
+/** The theme menu on the same bridge. */
+const renderThemeControl = () => <ThemeToggle />
 /** The account menu on the same bridge. */
 const renderAccountControl = () => <AccountMenu />
 
@@ -33,15 +34,13 @@ const renderAccountControl = () => <AccountMenu />
 export const ConsoleTopBar = (props: ConsoleTopBarProps) => {
     void props
     const t = useTranslations("console")
-    const { resolvedTheme, setTheme } = useTheme()
-    const [isMounted, setIsMounted] = useState(false)
-    useEffect(() => setIsMounted(true), [])
-    const isDark = isMounted && resolvedTheme === "dark"
     return (
         <ConsoleTopBarBase
             state={{
                 localeControl: renderLocaleControl,
                 localeControlProps: {},
+                themeControl: renderThemeControl,
+                themeControlProps: {},
                 accountControl: renderAccountControl,
                 accountControlProps: {},
             }}
@@ -49,11 +48,7 @@ export const ConsoleTopBar = (props: ConsoleTopBarProps) => {
                 brandLabel: t("brand"),
                 contextLabel: t("title"),
                 actionsLabel: t("actionsLabel"),
-                isDark,
-                lightThemeLabel: t("theme.light"),
-                darkThemeLabel: t("theme.dark"),
             }}
-            on={{ toggleTheme: () => setTheme(isDark ? "light" : "dark") }}
         />
     )
 }

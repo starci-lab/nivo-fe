@@ -16,7 +16,6 @@ export { siteMetadata as generateMetadata, generateStaticParams } from "@/featur
 export const viewport: Viewport = {
     width: "device-width",
     initialScale: 1,
-    themeColor: "#ffffff",
 }
 
 export default Layout

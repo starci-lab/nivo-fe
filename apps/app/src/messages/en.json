@@ -280,8 +280,12 @@
       }
     },
     "theme": {
-      "light": "Use light theme",
-      "dark": "Use dark theme"
+      "label": "Theme",
+      "options": {
+        "system": "System",
+        "light": "Light",
+        "dark": "Dark"
+      }
     },
     "account": {
       "label": "Account",

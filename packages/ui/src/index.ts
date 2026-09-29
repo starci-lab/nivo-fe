@@ -35,8 +35,6 @@ export type {
     SelectionListPresentation,
     SelectionListProps,
 } from "./leaves/SelectionList"
-export { ThemeSwitch } from "./leaves/ThemeSwitch"
-export type { ThemeSwitchActions, ThemeSwitchData, ThemeSwitchProps } from "./leaves/ThemeSwitch"
 export { TileIcon } from "./leaves/TileIcon"
 export type { TileIconData, TileIconProps, TileIconSignal } from "./leaves/TileIcon"
 
@@ -52,6 +50,8 @@ export { LIFECYCLE_STEP_STATES, LifecycleStep } from "./composites/LifecycleStep
 export type { LifecycleStepData, LifecycleStepProps, LifecycleStepState } from "./composites/LifecycleStep"
 export { RequestSummary } from "./composites/RequestSummary"
 export type { RequestSummaryActions, RequestSummaryData, RequestSummaryProps } from "./composites/RequestSummary"
+export { THEME_MODES, ThemeMenu } from "./composites/ThemeMenu"
+export type { ThemeMenuActions, ThemeMenuData, ThemeMenuOption, ThemeMenuProps, ThemeMode } from "./composites/ThemeMenu"
 export { RouteLoadingView } from "./composites/RouteLoadingView"
 export type { RouteLoadingViewData, RouteLoadingViewProps } from "./composites/RouteLoadingView"
 export { readRouteFailureKind, RouteStateView } from "./composites/RouteStateView"

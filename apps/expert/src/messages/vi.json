@@ -49,6 +49,14 @@
       "sent": "Cảm ơn bạn — học viện sẽ liên hệ lại sớm."
     }
   },
+  "theme": {
+    "label": "Giao diện",
+    "options": {
+      "system": "Theo thiết bị",
+      "light": "Sáng",
+      "dark": "Tối"
+    }
+  },
   "boundary": {
     "error": {
       "unexpected": {

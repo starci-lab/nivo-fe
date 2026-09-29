@@ -10,34 +10,6 @@
         stroke-width: 18;
     }
 
-    .theme-switch .switch__control {
-        width: 4rem !important;
-        height: 2.25rem !important;
-        border-radius: 9999px !important;
-    }
-
-    .theme-switch .switch__thumb {
-        display: flex;
-        width: 1.75rem !important;
-        height: 1.75rem !important;
-        margin-inline-start: 0.25rem !important;
-        align-items: center;
-        justify-content: center;
-        border-radius: 9999px !important;
-    }
-
-    .theme-switch[data-selected="true"] .switch__thumb,
-    .theme-switch[aria-checked="true"] .switch__thumb {
-        margin-inline-start: calc(100% - 1.75rem - 0.25rem) !important;
-    }
-
-    .theme-switch .switch__thumb svg {
-        display: block;
-        width: 1rem;
-        height: 1rem;
-        flex: none;
-    }
-
     .collapsible-rail {
         display: none;
         color: var(--foreground);

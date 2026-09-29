@@ -1,8 +1,10 @@
 import type { Metadata } from "next"
-import { NivoGrammarRoot } from "@nivo/ui"
 import { notFound } from "next/navigation"
 import { NextIntlClientProvider, hasLocale } from "next-intl"
 import { getMessages } from "next-intl/server"
+import { ThemeProvider } from "next-themes"
+import { ThemeToggle } from "@/components/blocks/theme/ThemeToggle"
+import { NivoGrammarTheme } from "@/features/layouts/NivoGrammarTheme"
 import { ACADEMY, inLocale } from "@/modules/academy/template"
 import { routing } from "@/modules/i18n/routing"
 import type { Locale } from "@/modules/i18n/config"
@@ -67,6 +69,11 @@ export const generateMetadata = async ({ params }: LocaleSegment): Promise<Metad
 /**
  * The document shell.
  *
+ * THE THEME IS THE DEVICE'S UNTIL THE PERSON CHOOSES. The provider follows the system setting by
+ * default, keeps a choice made through the toggle, and writes its class onto `<html>` before first
+ * paint, which is why `<html>` suppresses the hydration warning: the class differs from the server's
+ * markup on purpose, and nothing else on the element may.
+ *
  * The locale travels two ways: onto `<html lang>`, so a screen reader pronounces the page
  * correctly, and into the provider, so a client section can ask for a string instead of holding a
  * sentence beside its markup.
@@ -91,12 +98,17 @@ export const AcademyLocaleLayout = async ({ children, params }: LocaleLayoutProp
     const messages = await getMessages()
     return (
         <html lang={locale} suppressHydrationWarning>
-            <body className="min-h-dvh antialiased">
-                <NivoGrammarRoot>
-                    <NextIntlClientProvider locale={locale} messages={messages}>
-                        {children}
-                    </NextIntlClientProvider>
-                </NivoGrammarRoot>
+            <body className="min-h-dvh bg-background text-foreground antialiased">
+                <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+                    <NivoGrammarTheme>
+                        <NextIntlClientProvider locale={locale} messages={messages}>
+                            <div className="flex justify-end px-4 py-2">
+                                <ThemeToggle />
+                            </div>
+                            {children}
+                        </NextIntlClientProvider>
+                    </NivoGrammarTheme>
+                </ThemeProvider>
             </body>
         </html>
     )

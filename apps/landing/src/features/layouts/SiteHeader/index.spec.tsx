@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
+import en from "@/messages/en.json"
 import { SiteHeader } from "./index"
 
 describe("SiteHeader", () => {
@@ -25,5 +26,11 @@ describe("SiteHeader", () => {
 
         expect(screen.getByRole("navigation", { name: "Main navigation" })).toBeInTheDocument()
         expect(screen.getAllByRole("link", { name: "Solutions" })[0]).toHaveAttribute("href", "/en/applications")
+    })
+
+    it("hosts the theme menu beside the sign-in action, named from the catalog", () => {
+        render(<SiteHeader />)
+
+        expect(screen.getByRole("button", { name: en.site.theme.label })).toBeInTheDocument()
     })
 })
