@@ -1,26 +1,37 @@
 import { SurfaceCard, Text } from "@starci/grammar/common"
 import type { DiagnosticsSurfaceProps as DiagnosticsSurfaceDataProps } from "../../../../modules/agentos/module-page/surface-types"
 import type { WithModulePageCopy } from "../../../../modules/agentos/module-page-copy"
+import type { Formatter } from "../../../../modules/i18n/formatter"
 
 type DiagnosticsTraceCardProps = WithModulePageCopy<
     Pick<DiagnosticsSurfaceDataProps, "installationId" | "kindKey" | "workbenchKey" | "events">
->
+> & { readonly format: Formatter }
 
-/** Recent persisted events and installation identity for diagnostic evidence. */
-export const DiagnosticsTraceCard = (props: DiagnosticsTraceCardProps) => {
+type DiagnosticTraceFact = { readonly key: string; readonly label: string; readonly value: string }
+
+const TRACE_DATE_TIME_OPTIONS = { dateStyle: "medium", timeStyle: "short" } as const
+
+const traceFactsFor = (props: DiagnosticsTraceCardProps, format: Formatter): ReadonlyArray<DiagnosticTraceFact> => {
     const { copy, installationId, kindKey, workbenchKey, events } = props
-    const facts: ReadonlyArray<readonly [string, string]> = [
-        [copy.diagnostics.installation, installationId],
-        [copy.diagnostics.kind, kindKey],
-        [copy.diagnostics.workbench, workbenchKey],
+    return [
+        { key: "installation", label: copy.diagnostics.installation, value: installationId },
+        { key: "kind", label: copy.diagnostics.kind, value: kindKey },
+        { key: "workbench", label: copy.diagnostics.workbench, value: workbenchKey },
         ...events
             .slice(-5)
             .reverse()
-            .map(
-                (event) =>
-                    [event.eventType, `${event.source} · ${new Date(event.observedAt).toLocaleString()}`] as const,
-            ),
+            .map((event) => ({
+                key: `event:${event.id}`,
+                label: event.eventType,
+                value: `${event.source} · ${format.dateTime(new Date(event.observedAt), TRACE_DATE_TIME_OPTIONS)}`,
+            })),
     ]
+}
+
+/** Recent persisted events and installation identity for diagnostic evidence. */
+export const DiagnosticsTraceCard = (props: DiagnosticsTraceCardProps) => {
+    const { copy, events } = props
+    const facts = traceFactsFor(props, props.format)
     return (
         <SurfaceCard
             label={copy.diagnostics.trace}
@@ -28,8 +39,8 @@ export const DiagnosticsTraceCard = (props: DiagnosticsTraceCardProps) => {
         >
             <div>
                 <div>
-                    {facts.map(([label, value], index) => (
-                        <div key={index}>
+                    {facts.map(({ key, label, value }) => (
+                        <div key={key}>
                             <Text size="sm">{label}</Text>
                             <Text size="sm" weight="semibold">
                                 {value}

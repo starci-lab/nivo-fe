@@ -29,8 +29,8 @@ const diagnosticEntries = (
 }
 
 const diagnosticFacts = (entries: ReadonlyArray<readonly [string, AgentosRuntimeValue]>, copy: ModulePageCopy) =>
-    entries.map(([key, value], index) => (
-        <div key={index}>
+    entries.map(([key, value]) => (
+        <div key={key}>
             <Text size="sm">{copy.labels.field({ key })}</Text>
             <Text size="sm" weight="semibold">
                 {safeValue(value)}

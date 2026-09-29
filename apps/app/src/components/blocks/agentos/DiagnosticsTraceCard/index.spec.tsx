@@ -6,6 +6,7 @@ import { DiagnosticsTraceCard } from "."
 import type { AgentosModuleRuntime } from "../../../../modules/api/agentos-module-runtime"
 import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
 import { TIME_ZONE } from "../../../../modules/i18n/config"
+import type { Formatter } from "../../../../modules/i18n/formatter"
 
 const copy = buildModulePageCopy(
     createTranslator({
@@ -35,6 +36,11 @@ const event: AgentosModuleRuntime["operationEvents"][number] = {
     evidence: {},
     createdAt: "2026-08-26T00:00:00.000Z",
 }
+const format = {
+    number: () => "",
+    dateTime: () => "Aug 26, 2026, 7:00 AM",
+    relativeTime: () => "",
+} satisfies Formatter
 
 describe("DiagnosticsTraceCard", () => {
     it("shows the persisted event and exact event count", () => {
@@ -45,11 +51,13 @@ describe("DiagnosticsTraceCard", () => {
                 kindKey="customer-support"
                 workbenchKey="support-queue"
                 events={[event]}
+                format={format}
             />,
         )
 
         expect(html).toContain(copy.diagnostics.accepted({ count: 1 }))
         expect(html).toContain("Delivery received")
         expect(html).toContain("installation-1")
+        expect(html).toContain("Aug 26, 2026")
     })
 })
