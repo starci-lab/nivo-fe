@@ -196,7 +196,7 @@
     "test:unit": "npm test",
     "test:ci": "vitest run --coverage && node --test scripts/*.spec.mjs && node scripts/write-patch-coverage.mjs",
     "coverage:patch": "node scripts/write-patch-coverage.mjs",
-    "test:e2e": "npm run build && playwright test",
+    "test:e2e": "npm run typecheck:e2e && playwright test",
     "test:watch": "vitest",
     "typecheck": "turbo run typecheck",
     "typecheck:e2e": "tsc -p tsconfig.e2e.json --pretty false",
