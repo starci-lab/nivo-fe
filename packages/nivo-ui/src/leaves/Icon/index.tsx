@@ -1,5 +1,6 @@
 import {
     AcademicCapIcon,
+    AtSymbolIcon,
     ArrowPathIcon,
     ArrowRightIcon,
     ArrowRightStartOnRectangleIcon,
@@ -16,6 +17,7 @@ import {
     EnvelopeIcon,
     EyeIcon,
     EyeSlashIcon,
+    FaceSmileIcon,
     FireIcon,
     GiftIcon,
     GlobeAltIcon,
@@ -28,6 +30,7 @@ import {
     NewspaperIcon,
     LifebuoyIcon,
     PaperAirplaneIcon,
+    PaperClipIcon,
     ShieldCheckIcon,
     ShoppingCartIcon,
     Squares2X2Icon,
@@ -44,6 +47,7 @@ import {
 } from "@heroicons/react/24/outline"
 import {
     AcademicCapIcon as AcademicCapSolidIcon,
+    AtSymbolIcon as AtSymbolSolidIcon,
     ArrowPathIcon as ArrowPathSolidIcon,
     ArrowRightIcon as ArrowRightSolidIcon,
     ArrowRightEndOnRectangleIcon as ArrowRightEndOnRectangleSolidIcon,
@@ -60,6 +64,7 @@ import {
     EnvelopeIcon as EnvelopeSolidIcon,
     EyeIcon as EyeSolidIcon,
     EyeSlashIcon as EyeSlashSolidIcon,
+    FaceSmileIcon as FaceSmileSolidIcon,
     FireIcon as FireSolidIcon,
     GiftIcon as GiftSolidIcon,
     GlobeAltIcon as GlobeAltSolidIcon,
@@ -72,6 +77,7 @@ import {
     NewspaperIcon as NewspaperSolidIcon,
     LifebuoyIcon as LifebuoySolidIcon,
     PaperAirplaneIcon as PaperAirplaneSolidIcon,
+    PaperClipIcon as PaperClipSolidIcon,
     ShieldCheckIcon as ShieldCheckSolidIcon,
     ShoppingCartIcon as ShoppingCartSolidIcon,
     Squares2X2Icon as Squares2X2SolidIcon,
@@ -115,6 +121,9 @@ export type IconName =
     | "reward"
     | "course"
     | "email"
+    | "attachment"
+    | "emoji"
+    | "mention"
     | "password"
     | "revealPassword"
     | "hidePassword"
@@ -219,6 +228,9 @@ export const ICON_SOURCES: Record<IconName, GlyphCuts> = {
     reward: cuts(GiftIcon, GiftSolidIcon),
     course: cuts(BookOpenIcon, BookOpenSolidIcon),
     email: cuts(EnvelopeIcon, EnvelopeSolidIcon),
+    attachment: cuts(PaperClipIcon, PaperClipSolidIcon),
+    emoji: cuts(FaceSmileIcon, FaceSmileSolidIcon),
+    mention: cuts(AtSymbolIcon, AtSymbolSolidIcon),
     password: cuts(LockClosedIcon, LockClosedSolidIcon),
     revealPassword: cuts(EyeIcon, EyeSolidIcon),
     hidePassword: cuts(EyeSlashIcon, EyeSlashSolidIcon),
