@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { pageMetadata } from "@/features/layouts/SiteShell"
-import ExploreIdeaPage from "@/features/pages/ExploreIdeaPage"
-import { IDEA_SLUGS, getIdeaBySlug } from "@/modules/landing/ideas"
+import ExploreIdeaPage from "../../../../features/pages/ExploreIdeaPage"
+import { IDEA_SLUGS, getIdeaBySlug } from "../../../../modules/landing/ideas"
 
 type IdeaDetailRouteProps = {
     readonly params: Promise<{ readonly locale: string; readonly slug: string }>

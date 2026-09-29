@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { pageMetadata, type LocaleParams } from "@/features/layouts/SiteShell"
-import TrustPage from "@/features/pages/TrustPage"
+import TrustPage from "../../../features/pages/TrustPage"
 
 /** Search and sharing metadata for the canonical Trust route, in the routed language. */
 export const generateMetadata = ({ params }: LocaleParams): Promise<Metadata> =>

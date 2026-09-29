@@ -1,6 +1,6 @@
 import { PageContainer } from "@starci/grammar/common"
 import type { ReactNode } from "react"
-import { SectionIntro } from "@/features/layouts/SiteShell"
+import { SectionIntro } from "../../../../features/layouts/SiteShell"
 import { CLASS_NAMES as C } from "./classNames"
 
 type ExploreSectionProps = {

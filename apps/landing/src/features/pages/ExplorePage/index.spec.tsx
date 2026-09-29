@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import EcosystemPage from "@/features/pages/EcosystemPage"
-import ExploreIdeaPage from "@/features/pages/ExploreIdeaPage"
-import TrustPage from "@/features/pages/TrustPage"
+import EcosystemPage from "../EcosystemPage"
+import ExploreIdeaPage from "../ExploreIdeaPage"
+import TrustPage from "../TrustPage"
 import ExplorePage from "."
-import { getIdeaBySlug, IDEA_TYPE_IDS, normalizeIdeaType } from "@/modules/landing/ideas"
+import { getIdeaBySlug, IDEA_TYPE_IDS, normalizeIdeaType } from "../../../modules/landing/ideas"
 
 describe("ExplorePage", () => {
     it("filters Ideas by the stable type id and rejects every other query value", () => {

@@ -1,6 +1,6 @@
 import { TextAction } from "@starci/grammar/common"
 import { NivoIcon } from "@nivo/ui"
-import { useLocalizedHref } from "@/hooks"
+import { useLocalizedHref } from "../../../../hooks"
 import { CLASS_NAMES as C } from "./classNames"
 
 type ExplorePath = { readonly label: string; readonly href: string }

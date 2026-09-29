@@ -1,8 +1,8 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import ExploreIdeaPage from "."
-import { getIdeaBySlug } from "@/modules/landing/ideas"
-import en from "@/messages/en.json"
+import { getIdeaBySlug } from "../../../modules/landing/ideas"
+import en from "../../../messages/en.json"
 
 describe("ExploreIdeaPage", () => {
     it("places the direct thesis before the reasoning sections and exposes one primary heading", () => {

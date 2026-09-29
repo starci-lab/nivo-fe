@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { pageMetadata, type LocaleParams } from "@/features/layouts/SiteShell"
-import ExplorePage from "@/features/pages/ExplorePage"
-import { normalizeIdeaType } from "@/modules/landing/ideas"
+import ExplorePage from "../../../features/pages/ExplorePage"
+import { normalizeIdeaType } from "../../../modules/landing/ideas"
 
 /** Search and sharing metadata for the canonical Ideas route, in the routed language. */
 export const generateMetadata = ({ params }: LocaleParams): Promise<Metadata> =>
