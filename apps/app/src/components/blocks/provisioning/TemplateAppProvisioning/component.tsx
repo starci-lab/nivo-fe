@@ -1,31 +1,10 @@
-import { LifecycleStep, RequestSummary, type LifecycleStepData } from "@nivo/ui"
+import { LifecycleStep, RequestSummary } from "@nivo/ui"
 import { Button, Input, Heading, Text } from "@starci/grammar/common"
+import type { TemplateAppProvisioningViewProps } from "@/modules/provisioning/template-app/view"
 
 /** The settled trees the template-app flow can draw. */
 export type TemplateAppProvisioningProps = TemplateAppProvisioningViewProps
-/** Public API role for TemplateAppProvisioningViewProps. */
-export type TemplateAppProvisioningViewProps = {
-    readonly state:
-        "catalog_loading" | "unsupported" | "request" | "submitting" | "accepted" | "preparing" | "ready" | "failed"
-    readonly props: {
-        readonly steps: ReadonlyArray<LifecycleStepData>
-        readonly subject: string
-        readonly detail: string
-        readonly statusTitle: string
-        readonly statusText: string
-        readonly slugLabel: string
-        readonly slugPlaceholder: string
-        readonly slugHint?: string
-        readonly submitLabel: string
-        readonly actionLabel?: string
-        readonly isActionPending?: boolean
-    }
-    readonly on?: {
-        readonly changeSlug?: (value: string) => void
-        readonly submit?: () => void
-        readonly act?: () => void
-    }
-}
+export type { TemplateAppProvisioningViewProps } from "@/modules/provisioning/template-app/view"
 
 /** Draw one Template App request and its deployment journey. */
 export const TemplateAppProvisioningBase = (props: TemplateAppProvisioningProps) => {
