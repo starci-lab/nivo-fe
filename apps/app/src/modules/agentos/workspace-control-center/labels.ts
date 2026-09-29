@@ -1,0 +1,128 @@
+import type { useTranslations } from "next-intl"
+import type { AgentOSWorkspaceControlCenterShellLabels } from "./shell-types"
+
+type WorkspaceTranslator = ReturnType<typeof useTranslations<"console.agentos.workspace">>
+type ShellTranslator = ReturnType<typeof useTranslations<"console.agentos.shell">>
+
+/** Resolve the workspace and shell messages before the pure page regions render. */
+export const createAgentOSWorkspaceControlCenterLabels = (t: WorkspaceTranslator, s: ShellTranslator) => {
+    const shell: AgentOSWorkspaceControlCenterShellLabels = {
+        headingFallback: s("headingFallback"),
+        eyebrow: s("eyebrow"),
+        description: s("description"),
+        signInRequired: s("signInRequired"),
+        signInAction: s("signInAction"),
+        accessDenied: s("accessDenied"),
+        accessUnverified: s("accessUnverified"),
+        retry: s("retry"),
+        loading: s("loading"),
+        sourceTime: s("sourceTime"),
+        identityInstance: s("identityInstance"),
+        inventorySection: s("inventory.section"),
+        inventoryEmpty: s("inventory.empty"),
+        inventoryEmptyDescription: s("inventory.emptyDescription"),
+        inventoryLimitPartial: s("inventory.limitPartial"),
+        inventoryLimitStale: s("inventory.limitStale"),
+        inventoryLimitUnavailable: s("inventory.limitUnavailable"),
+        inventoryLimitUnsupported: s("inventory.limitUnsupported"),
+        inventoryLimitRefused: s("inventory.limitRefused"),
+        inventoryLimitLoading: s("inventory.limitLoading"),
+        lastKnown: s("lastKnown"),
+        retrying: s("retrying"),
+        runtimeSection: s("runtime.section"),
+        runtimeProvisioned: s("runtime.provisioned"),
+        runtimeNotProvisioned: s("runtime.notProvisioned"),
+        runtimeUnavailable: s("runtime.unavailable"),
+        runtimeUnknown: s("runtime.unknown"),
+        configurationSection: s("configuration.section"),
+        configurationAbsent: s("configuration.absent"),
+        configurationUnsupported: s("configuration.unsupported"),
+        attentionSection: s("attention.section"),
+        attentionUnsupported: s("attention.unsupported"),
+        resultSection: s("result.section"),
+        resultUnavailable: s("result.unavailable"),
+        resultPending: s("result.pending"),
+        resultConfirmed: s("result.confirmed"),
+        resultUncertain: s("result.uncertain"),
+        resultRecheck: s("result.recheck"),
+        installEntry: s("installEntry"),
+    }
+    return {
+        titleFallback: t("titleFallback"),
+        eyebrow: t("eyebrow"),
+        description: t("description"),
+        stateSection: t("stateSection"),
+        readyStatus: t("readyStatus"),
+        loadingTitle: t("loadingTitle"),
+        refusedTitle: t("refusedTitle"),
+        retry: t("retry"),
+        loading: t("loading"),
+        accessUnavailable: t("accessUnavailable"),
+        tabsLabel: t("tabsLabel"),
+        shell,
+        tabs: (
+            ["overview", "solutions", "ai-knowledge", "applications", "infrastructure", "operations", "access"] as const
+        ).map((id) => ({
+            id,
+            label: t(`tabs.${id}`),
+        })),
+        summary: {
+            section: t("summary.section"),
+            status: t("summary.status"),
+            plan: t("summary.plan"),
+            allocation: t("summary.allocation"),
+            host: t("summary.host"),
+            chart: t("summary.chart"),
+            unprovisioned: t("summary.unprovisioned"),
+        },
+        applications: {
+            section: t("applications.section"),
+            openclaw: t("applications.openclaw"),
+            n8n: t("applications.n8n"),
+            openclawDescription: t("applications.openclawDescription"),
+            n8nDescription: t("applications.n8nDescription"),
+            available: t("applications.available"),
+            unavailable: t("applications.unavailable"),
+            manage: t("applications.manage"),
+            unavailableAction: t("applications.unavailableAction"),
+            securityUpgradeRequired: t("applications.securityUpgradeRequired"),
+            unavailableDetail: t("applications.unavailableDetail"),
+            opening: t("applications.opening"),
+            openAgain: t("applications.openAgain"),
+            blocked: t("applications.blocked"),
+            expired: t("applications.expired"),
+            disconnected: t("applications.disconnected"),
+        },
+        runtime: {
+            section: t("runtime.section"),
+            cpu: t("runtime.cpu"),
+            memory: t("runtime.memory"),
+            requests: t("runtime.requests"),
+            limits: t("runtime.limits"),
+            restarts: t("runtime.restarts"),
+            health: t("runtime.health"),
+            fresh: t("runtime.fresh"),
+            stale: t("runtime.stale"),
+            unavailable: t("runtime.unavailable"),
+        },
+        stack: {
+            section: t("stack.section"),
+            unavailable: t("stack.unavailable"),
+            release: t("stack.release"),
+            chart: t("stack.chart"),
+            storage: t("stack.storage"),
+        },
+        operations: {
+            section: t("operations.section"),
+            note: t("operations.note"),
+            update: t("operations.update"),
+            plan: t("operations.plan"),
+            backup: t("operations.backup"),
+            reset: t("operations.reset"),
+            rebuild: t("operations.rebuild"),
+        },
+    }
+}
+
+/** Fully resolved copy contract shared by the connected hook and pure workspace blocks. */
+export type AgentOSWorkspaceControlCenterLabels = ReturnType<typeof createAgentOSWorkspaceControlCenterLabels>

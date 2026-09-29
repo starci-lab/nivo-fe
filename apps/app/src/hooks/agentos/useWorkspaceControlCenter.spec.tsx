@@ -1,6 +1,5 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import type * as componentModule from "./component"
 import type * as hooksModule from "@/hooks"
 import type { ShellSourceObservation } from "@/modules/agentos/shell-observation-store"
 
@@ -68,11 +67,12 @@ type ProbeProps = {
         readonly onOpenAgentConsole: () => void
         readonly onRetryShell?: () => void
         readonly formatDate: (value: string) => string
+        readonly formatConfiguration: (digests: { readonly desired: string; readonly tested: string; readonly applied: string }) => string
     }
 }
 
-vi.mock("./component", async (importOriginal) => ({
-    ...(await importOriginal<typeof componentModule>()),
+vi.mock("@/components/blocks/agentos/AgentOSWorkspaceControlCenter/component", () => ({
+    AGENT_OS_SIGN_IN_HREF: "/authentication",
     AgentOSWorkspaceControlCenterBase: (contract: ProbeProps) => (
         <div>
             <output data-testid="workspace-state">
@@ -108,7 +108,7 @@ vi.mock("./component", async (importOriginal) => ({
     ),
 }))
 
-import { AgentOSWorkspaceControlCenter } from "."
+import { AgentOSWorkspaceControlCenter } from "../../components/blocks/agentos/AgentOSWorkspaceControlCenter"
 
 const data = {
     workspace: { id: "workspace-1", name: "Workspace" },
