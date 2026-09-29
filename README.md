@@ -6,7 +6,7 @@ Nivo's Next.js frontend for hosting and VPS administration and customer experien
 
 ## Overview
 
-This monorepo contains the Nivo admin and customer panel, an expert experience, a public landing site, and a landing draft. The apps share UI through `@nivo/ui`.
+This monorepo contains the Nivo admin and customer panel, an expert experience, and a public landing site. The apps share UI through `@nivo/ui`.
 
 ## Stack
 
@@ -21,7 +21,6 @@ apps/
   app/                  Admin and customer panel (@nivo/app)
   expert/               Expert experience (@nivo/expert)
   landing/              Public landing site (@nivo/landing)
-  landing-draft/        Landing draft (@nivo/landing-draft)
   <app>/src/
     app/                Next.js route adapters
     features/           Page, layout, and overlay features
@@ -42,7 +41,6 @@ Run these from the repository root after `npm ci`:
 npm run dev:app
 npm run dev:expert
 npm run dev:landing
-npm run dev:landing-draft
 npm run typecheck
 npm run lint:check
 npm run build

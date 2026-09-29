@@ -1,4 +1,4 @@
-import marks from "./marks.json"; // vn-ok: approved visitor copy
+import marks from "./marks.json";
 
 /** Search and social description for the public NIVO landing surface. */
 export const LANDING_DESCRIPTION = "NIVO Agentic OS — System of Responsibility cho doanh nghiệp vận hành cùng Human, AI và System."; // vn-ok: approved visitor copy
@@ -8,7 +8,7 @@ export const LANDING_COPY = {
   labels: {
     skip: "Bỏ qua đến nội dung chính", home: "NIVO — về đầu trang", nav: "Điều hướng chính", // vn-ok: approved visitor copy
     navItems: [{ href: "#intent-modules", label: "Sản phẩm" }, { href: "#responsibility", label: "Giải pháp" }, { href: "#operating-loop", label: "Tài liệu" }], // vn-ok: approved visitor copy
-    arrow: "→", operatingModel: "Responsibility handoff", operatingModelTitle: "Human Leads. AI Operates. System Learns.", operatingModelBody: "Trách nhiệm được chuyển giao mượt mà và có bằng chứng ở mỗi bước.", exploreOperating: "Tìm hiểu cách hoạt động", intentEyebrow: "Intent modules", intentTitle: "Bốn ý định cốt lõi. Một hệ điều hành thống nhất.", explore: "Khám phá intent", mantra: "Hệ điều hành trách nhiệm cho tổ chức AI-native.", footerNav: "Điều hướng cuối trang", footerItems: [{ href: "#intent-modules", label: "Sản phẩm" }, { href: "#responsibility", label: "Giải pháp" }, { href: "#operating-loop", label: "Tài liệu" }, { href: "#offer", label: "Đặt lịch demo" }], copyright: marks.copyright // vn-ok: approved visitor copy
+    operatingModel: "Responsibility handoff", operatingModelTitle: "Human Leads. AI Operates. System Learns.", operatingModelBody: "Trách nhiệm được chuyển giao mượt mà và có bằng chứng ở mỗi bước.", exploreOperating: "Tìm hiểu cách hoạt động", intentEyebrow: "Intent modules", intentTitle: "Bốn ý định cốt lõi. Một hệ điều hành thống nhất.", explore: "Khám phá intent", mantra: "Hệ điều hành trách nhiệm cho tổ chức AI-native.", footerNav: "Điều hướng cuối trang", footerItems: [{ href: "#intent-modules", label: "Sản phẩm" }, { href: "#responsibility", label: "Giải pháp" }, { href: "#operating-loop", label: "Tài liệu" }, { href: "#offer", label: "Đặt lịch demo" }], copyright: marks.copyright // vn-ok: approved visitor copy
   },
   hero: {
     eyebrow: "NIVO · Agentic OS", title: "Founder không còn phải tự mình làm Operating System của business.", lede: "NIVO Agentic OS là hệ điều hành trách nhiệm cho tổ chức AI-native. Mọi việc đều có ngữ cảnh, chủ thể, bằng chứng và kết quả được kiểm chứng.", primary: "Đặt lịch demo", secondary: "Khám phá NIVO", note: "Bắt đầu trong 7 ngày · Không cần thẻ", // vn-ok: approved visitor copy
@@ -24,10 +24,10 @@ export const LANDING_COPY = {
   loop: { eyebrow: "Operating loop", title: "Trách nhiệm vận hành theo một đường đi rõ ràng.", lede: "", steps: ["Context", "Responsibility", "Human + AI + System", "Evidence", "Verified outcome", "Trust"], stepBodies: ["Hiểu đúng bối cảnh và mục tiêu.", "Giao đúng việc cho đúng chủ thể.", "Phối hợp con người, AI và hệ thống.", "Tự động thu thập bằng chứng.", "Kết quả được đo lường và kiểm chứng.", "Tạo niềm tin để mở rộng liên tục."], caption: "Mỗi vòng lặp làm hệ thống hiểu business hơn — không phải bằng lời hứa, mà bằng evidence." }, // vn-ok: approved visitor copy
   roles: [{ label: "Human", title: "Human Leads.", body: "Đặt mục tiêu, quyết định và chịu trách nhiệm cuối cùng.", verb: "Lead" }, { label: "AI", title: "AI Operates.", body: "Lập kế hoạch, thực thi, đề xuất và tối ưu.", verb: "Operate" }, { label: "System", title: "System Learns.", body: "Ghi lại, kiểm chứng, học hỏi và cải thiện.", verb: "Learn" }], // vn-ok: approved visitor copy
   intents: [
-    { title: "Create", body: "Tạo nội dung, chiến dịch và tài sản có trách nhiệm.", art: "/images/intent/create-v1.png", artAlt: "Minh họa cửa sổ sáng tạo, nút phát và bút chì của module Create." }, // vn-ok: approved visitor copy
-    { title: "Operate", body: "Vận hành quy trình, dự án và đội nhóm hiệu quả.", art: "/images/intent/operate-v1.png", artAlt: "Minh họa checklist và bánh răng của module Operate." }, // vn-ok: approved visitor copy
-    { title: "Revenue", body: "Tối ưu tăng trưởng và hiệu suất doanh thu.", art: "/images/intent/revenue-v1.png", artAlt: "Minh họa biểu đồ tăng trưởng của module Revenue." }, // vn-ok: approved visitor copy
-    { title: "Money", body: "Quản trị chi phí, lợi nhuận và dòng tiền thông minh.", art: "/images/intent/money-v1.png", artAlt: "Minh họa các chồng tiền xu của module Money." } // vn-ok: approved visitor copy
+    { title: "Create", body: "Tạo nội dung, chiến dịch và tài sản có trách nhiệm.", art: "/images/intent/create-v2.png", artAlt: "Điêu khắc lăng kính biến tín hiệu thành một hình thái mới có thể kiểm chứng." }, // vn-ok: approved visitor copy
+    { title: "Operate", body: "Vận hành quy trình, dự án và đội nhóm hiệu quả.", art: "/images/intent/operate-v2.png", artAlt: "Điêu khắc lõi vận hành liên kết các handoff bằng một luồng tín hiệu có thể theo dõi." }, // vn-ok: approved visitor copy
+    { title: "Revenue", body: "Tối ưu tăng trưởng và hiệu suất doanh thu.", art: "/images/intent/revenue-v2.png", artAlt: "Điêu khắc tín hiệu tăng trưởng đi qua các vòng kiểm soát tới kết quả sáng rõ." }, // vn-ok: approved visitor copy
+    { title: "Money", body: "Quản trị chi phí, lợi nhuận và dòng tiền thông minh.", art: "/images/intent/money-v2.png", artAlt: "Điêu khắc dòng giá trị được đo lường và phân bổ giữa hai bể cân bằng." } // vn-ok: approved visitor copy
   ],
   instances: { eyebrow: "Module instances", title: "Mọi việc đều là Module. Mỗi Module là một trách nhiệm.", body: "", owner: "Owner", status: "Status", outcome: "Outcome", items: [ // vn-ok: approved visitor copy
     { intent: "Create", tone: "danger", name: "Content Campaign", owner: "Content Agent", status: "Completed", outcome: "+27% Engagement", evidence: "12 evidence items" },
@@ -49,4 +49,3 @@ export const LANDING_COPY = {
   },
   offer: { eyebrow: "NIVO Agentic OS", title: "NIVO Agentic OS", body: "Hệ điều hành trách nhiệm cho tổ chức AI-native.", plan: "NIVO START", price: "499.000", unit: " VND / tháng", benefits: ["Rõ ngữ cảnh, đúng trách nhiệm", "Bằng chứng tự động, kết quả được kiểm chứng", "Niềm tin được tạo ra, hiệu suất được nhân lên"], href: "mailto:hello@nivo.vn?subject=Đặt lịch demo NIVO", note: "Không cần thẻ. Dừng bất cứ lúc nào." } // vn-ok: approved visitor copy
 } as const;
-

@@ -1,1 +1,1 @@
-export { useSlotLabels } from "./useSlotLabels"
+export { useSlotLabels } from "./useSlotLabels";

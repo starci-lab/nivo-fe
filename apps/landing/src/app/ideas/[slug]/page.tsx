@@ -1,14 +1,38 @@
-import { CanonicalIdeaUnavailable } from "@/features/pages/LandingPage"
+import type { Metadata } from "next"
+import { notFound } from "next/navigation"
+import { IDEA_SLUGS, IdeaDetailPage, getIdeaBySlug } from "@/features/pages/explore"
 
-/**
- * The `/ideas/[slug]` route. It mounts the recovery surface and nothing else.
- *
- * THE SLUG IS DELIBERATELY NOT READ. This draft publishes no governed idea objects, so every slug
- * is unknown and the page owner's single unavailable state is the whole answer - picking over the
- * parameter here would only be a second place that could disagree with that state.
- *
- * @returns The route.
- */
-const Page = () => <CanonicalIdeaUnavailable />
+type IdeaDetailRouteProps = {
+    readonly params: Promise<{ readonly slug: string }>
+}
+
+/** Static identities for the approved public Idea inventory. */
+export const generateStaticParams = () => IDEA_SLUGS
+
+/** Article metadata follows the same governed Idea object as the rendered page. */
+export const generateMetadata = async ({ params }: IdeaDetailRouteProps): Promise<Metadata> => {
+    const { slug } = await params
+    const idea = getIdeaBySlug(slug)
+    if (idea === undefined) return { title: "Idea không khả dụng", robots: { index: false, follow: true } } // vn-ok: Canonical Vietnamese public fallback.
+    return {
+        title: idea.title,
+        description: idea.thesis,
+        alternates: { canonical: `/ideas/${idea.slug}` },
+        openGraph: {
+            type: "article",
+            title: idea.title,
+            description: idea.thesis,
+            url: `/ideas/${idea.slug}`,
+        },
+    }
+}
+
+/** The `/ideas/[slug]` adapter refuses unknown or non-public knowledge objects. */
+const Page = async ({ params }: IdeaDetailRouteProps) => {
+    const { slug } = await params
+    const idea = getIdeaBySlug(slug)
+    if (idea === undefined) notFound()
+    return <IdeaDetailPage idea={idea} />
+}
 
 export default Page

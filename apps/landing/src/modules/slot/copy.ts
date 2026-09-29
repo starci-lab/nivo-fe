@@ -1,6 +1,6 @@
 /**
  * The shared data-status sentences every slot renders, in this app's one served locale.
- * landing-draft keeps visitor copy in modules, not a translation runtime; when the published
+ * landing keeps visitor copy in modules, not a translation runtime; when the published
  * shape-slot seam lands a message namespace, this constant is the piece it replaces.
  */
 export const SLOT_STATUS_COPY = {

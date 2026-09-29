@@ -4,8 +4,6 @@ import { NivoBrand, NivoIcon } from "@nivo/ui";
 import { LANDING_COPY, LANDING_DESCRIPTION } from "@/modules/landing/copy";
 import { LandingMotionArtworkDrift, LandingMotionHeroReveal, LandingMotionInstanceCard, LandingMotionLightSectionReveal, LandingMotionLoopStep, LandingMotionLoopTrack, LandingMotionResponsibilityGraph, LandingMotionRoleLayer } from "@/components/blocks/landing/LandingMotion";
 import { CLASS_NAMES as C } from "./classNames";
-import { ROUTES, type CanonicalRoute } from "../canonicalPageContent";
-export type { CanonicalRoute } from "../canonicalPageContent";
 
 const INTENT_ICONS = ["apps", "overview", "agentos", "wallet"] as const;
 const LOOP_ICONS = ["community", "agentos", "servers", "search", "code", "talents"] as const;
@@ -19,7 +17,7 @@ export const LandingPage = () => {
   return <>
     <a className={C.skipLink} href="#main">{labels.skip}</a>
     <header className={C.siteHeader}>
-      <a href="#main" aria-label={labels.home}><NivoBrand props={{ label: "nivo", variant: "lockup", scale: "navbar" }} /><span className={C.brandMeta}>NIVO OS</span></a>
+      <a href="#main" aria-label={labels.home}><NivoBrand props={{ label: "nivo", variant: "lockup", scale: "navbar" }} /><span className={C.brandMeta}>Agentic OS</span></a>
       <nav aria-label={labels.nav}>{labels.navItems.map(item => <TextAction key={item.href} href={item.href} appearance="plain">{item.label}</TextAction>)}</nav>
       <div className={C.headerAction}><Button href="#responsibility-first" size="sm" variant="primary" endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}>{hero.primary}</Button></div>
     </header>
@@ -34,7 +32,7 @@ export const LandingPage = () => {
             <Button href="#responsibility-first" size="lg" variant="primary" endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}>{hero.primary}</Button>
             <Button href="#operating-loop" size="lg" variant="outline" endContent={<NivoIcon props={{ name: "disclosure", usage: "chip" }} />}>{hero.secondary}</Button>
           </div>
-          <p className={C.heroFlow}>{loop.steps.map((step, index) => <span key={step}>{step}{index < loop.steps.length - 1 && <i aria-hidden="true">→</i>}</span>)}</p>
+          <p className={C.heroFlow}>{loop.steps.map((step, index) => <span key={step}>{step}{index < loop.steps.length - 1 && <NivoIcon props={{ name: "next", usage: "chip" }} />}</span>)}</p>
           <span className={C.srOnly}>{LANDING_DESCRIPTION}</span>
         </LandingMotionHeroReveal>
 
@@ -96,29 +94,10 @@ export const LandingPage = () => {
     </main>
 
     <footer><div className={C.sectionShell_footerInner}>
-      <div className={C.footerBrand}><NivoBrand props={{ label: "nivo", variant: "lockup", scale: "hero" }} /><span>NIVO OS</span><p>{labels.mantra}</p></div>
+      <div className={C.footerBrand}><NivoBrand props={{ label: "nivo", variant: "lockup", scale: "hero" }} /><span>Agentic OS</span><p>{labels.mantra}</p></div>
       <div className={C.footerDirectory}>{footer.groups.map(group => <section key={group.title}><strong>{group.title}</strong><nav aria-label={group.title}>{group.items.map(item => <TextAction key={`${group.title}-${item.label}`} href={item.href} appearance="plain">{item.label}</TextAction>)}</nav></section>)}</div>
       <section className={C.footerNewsletter}><strong>{footer.newsletterTitle}</strong><p>{footer.newsletterBody}</p><TextAction href={footer.newsletterHref} appearance="route" endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}>{footer.newsletterAction}</TextAction></section>
       <small>{labels.copyright}</small>
     </div></footer>
   </>;
 };
-
-type CanonicalPageProps = { readonly route: CanonicalRoute; readonly selectedIntent?: string | ReadonlyArray<string> }; // vn-ok: approved visitor copy
-type ContactIntentFormProps = { readonly selectedIntent?: string | ReadonlyArray<string> }; // vn-ok: approved visitor copy
-const CONTACT_INTENTS = ["product-understanding", "commercial-evaluation", "implementation", "partnership", "press-and-research", "other"] as const; // vn-ok: approved visitor copy
-const routePath = (path: string): string => path; // vn-ok: approved visitor copy
-/** Renders the documented, route-owned public content projection. */ // vn-ok: approved visitor copy
-export const CanonicalPage = (props: CanonicalPageProps) => { // vn-ok: approved visitor copy
-  const model = ROUTES[props.route]; // vn-ok: approved visitor copy
-  return <main className={C.canonicalPage} aria-labelledby="canonical-title"><div className={C.canonicalShell}><TextAction href={routePath("/")} appearance="route">← NIVO</TextAction><p className={C.eyebrow}>{model.eyebrow}</p><Heading level={1}>{model.title}</Heading><p id="canonical-title" className={C.canonicalLede}>{model.lede}</p><div className={C.canonicalSections}>{model.sections.map((item) => <section className={C.canonicalSection} key={item.title}><p className={C.canonicalSectionLabel}>{item.label}</p><Heading level={2}>{item.title}</Heading><p>{item.body}</p><div className={C.canonicalGrid}>{item.cards.map((itemCard) => <article className={C.canonicalCard} key={itemCard.title}><Heading level={3}>{itemCard.title}</Heading><p>{itemCard.body}</p></article>)}</div></section>)}</div>{props.route === "contact" ? <ContactIntentForm selectedIntent={props.selectedIntent} /> : <div className={C.canonicalActions}><TextAction href={routePath("/contact?intent=product-understanding")} appearance="route">Choose a next step</TextAction><TextAction href={routePath("/ideas")} appearance="route">Explore Ideas</TextAction></div>}</div></main>; // vn-ok: approved visitor copy
-}; // vn-ok: approved visitor copy
- // vn-ok: approved visitor copy
-const ContactIntentForm = (props: ContactIntentFormProps) => { // vn-ok: approved visitor copy
-  const requested = Array.isArray(props.selectedIntent) ? props.selectedIntent[0] : props.selectedIntent; // vn-ok: approved visitor copy
-  return <form className={C.contactForm} action="/contact" method="get"><label htmlFor="intent">Contact intent</label><select id="intent" name="intent" defaultValue={CONTACT_INTENTS.includes(requested as typeof CONTACT_INTENTS[number]) ? requested : ""}><option value="" disabled>Choose an intent</option>{CONTACT_INTENTS.map((intent) => <option key={intent} value={intent}>{intent.replaceAll("-", " ")}</option>)}</select><label htmlFor="email">Email (optional)</label><input id="email" name="email" type="email" placeholder="you@example.com" /><button className={C.canonicalButton} type="submit">Continue safely</button></form>; // vn-ok: approved visitor copy
-}; // vn-ok: approved visitor copy
- // vn-ok: approved visitor copy
-/** Renders the recovery state an idea slug that nothing publishes lands on. */ // vn-ok: approved visitor copy
-export const CanonicalIdeaUnavailable = () => <main className={C.canonicalPage} aria-labelledby="idea-unavailable-title"><div className={C.canonicalShell}><TextAction href="/ideas" appearance="route">← Ideas</TextAction><p className={C.eyebrow}>Knowledge discovery · Unavailable</p><Heading level={1}>This idea is not ready for publication.</Heading><p id="idea-unavailable-title" className={C.canonicalLede}>The slug is unknown, draft, or awaiting review. Unverified metadata and claims are not shown.</p><div className={C.canonicalActions}><TextAction href="/ideas" appearance="route">Return to Ideas</TextAction><TextAction href="/contact?intent=press-and-research" appearance="route">Ask about content</TextAction></div></div></main>; // vn-ok: approved visitor copy
- // vn-ok: approved visitor copy

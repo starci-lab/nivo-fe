@@ -13,7 +13,7 @@ export default defineConfig({
     timeout: 120_000,
     reporter: "list",
     use: {
-        baseURL: "http://127.0.0.1:5070",
+        baseURL: "http://127.0.0.1:5067",
         colorScheme: "light",
         reducedMotion: "reduce",
         trace: "retain-on-failure",

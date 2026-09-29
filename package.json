@@ -21,7 +21,6 @@
           "apps/app/tsconfig.json",
           "apps/expert/tsconfig.json",
           "apps/landing/tsconfig.json",
-          "apps/landing-draft/tsconfig.json",
           "packages/ui/tsconfig.json"
         ],
         "owners": [
@@ -81,7 +80,6 @@
             "apps/app/src",
             "apps/expert/src",
             "apps/landing/src",
-            "apps/landing-draft/src",
             "packages/ui/src"
           ],
           "transports": [],
@@ -142,7 +140,6 @@
     "dev:app": "npm run dev -w @nivo/app",
     "dev:expert": "npm run dev -w @nivo/expert",
     "dev:landing": "npm run dev -w @nivo/landing",
-    "dev:landing-draft": "npm run dev -w @nivo/landing-draft",
     "format:check": "turbo run lint -- --max-warnings=0",
     "lint": "turbo run lint",
     "lint:check": "turbo run lint -- --max-warnings=0 && npm run lint:architecture",
