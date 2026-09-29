@@ -15,5 +15,10 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx"
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "e2e/**",
+    "playwright.config.ts"
+  ]
 }

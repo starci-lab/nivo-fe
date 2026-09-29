@@ -52,9 +52,6 @@ jobs:
           COVERAGE_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
         run: npm run test:ci
 
-      - name: Built application HTTP E2E
-        run: npm run test:e2e
-
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:

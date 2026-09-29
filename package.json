@@ -156,7 +156,9 @@
     "coverage:patch": "node scripts/write-patch-coverage.mjs",
     "test:e2e": "npm run build && playwright test",
     "test:watch": "vitest",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "typecheck:e2e": "tsc -p tsconfig.e2e.json --pretty false",
+    "lint:e2e": "eslint e2e playwright.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.51.1",
