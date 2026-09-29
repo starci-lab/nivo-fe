@@ -15,8 +15,8 @@
  * the app's reads are authoritative and each accepted command re-reads them, which is
  * exactly what this spec follows - a write is proven by the read that follows it.
  *
- * PORT OWNERSHIP. `node --test e2e/*.spec.mjs` runs the files in parallel and
- * `e2e/smoke.spec.mjs` already reserves `NIVO_FE_E2E_PORT` (default 13067), so this
+ * PORT OWNERSHIP. the `node --test` e2e specs run the files in parallel and
+ * `e2e/smoke.e2e-spec.ts` already reserves `NIVO_FE_E2E_PORT` (default 13067), so this
  * spec takes the next port and mirrors the smoke runner's env contract
  * (`NIVO_FE_E2E_COLLAB_PORT`, `NIVO_FE_E2E_COLLAB_URL` to drive an already-running
  * server).

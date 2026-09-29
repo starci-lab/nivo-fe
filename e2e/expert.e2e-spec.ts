@@ -7,8 +7,8 @@
  * production server is fetched as a client would: the bare path serves the default locale, /vi
  * serves Vietnamese, and a locale outside the vocabulary is refused 404.
  *
- * PORT OWNERSHIP. `node --test e2e/*.spec.mjs` runs the files in parallel: smoke.spec.mjs
- * reserves NIVO_FE_E2E_PORT (default 13067), collab.spec.mjs takes +1, landing.spec.mjs takes +2,
+ * PORT OWNERSHIP. the `node --test` e2e specs run the files in parallel: smoke.e2e-spec.ts
+ * reserves NIVO_FE_E2E_PORT (default 13067), collab.e2e-spec.ts takes +1, landing.e2e-spec.ts takes +2,
  * so this spec takes +3 (NIVO_FE_E2E_EXPERT_PORT overrides; NIVO_FE_E2E_EXPERT_URL drives a
  * server the caller owns).
  */

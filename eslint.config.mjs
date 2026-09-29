@@ -160,7 +160,7 @@ export default defineConfig([
         linterOptions: { noInlineConfig: true },
     },
     {
-        files: ["scripts/**/*.{js,mjs,cjs}"],
+        files: ["scripts/**/*.{js,mjs,cjs}", "e2e/**/*.{js,mjs,cjs}"],
         languageOptions: { globals: globals.node },
     },
 ])

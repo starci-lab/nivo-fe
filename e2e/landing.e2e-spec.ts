@@ -8,8 +8,8 @@
  * unknown-slug recovery surface, a malformed contact intent answered with the safe state, and a
  * route nothing publishes answering 404.
  *
- * PORT OWNERSHIP. `node --test e2e/*.spec.mjs` runs the files in parallel: smoke.spec.mjs
- * reserves NIVO_FE_E2E_PORT (default 13067) and collab.spec.mjs takes +1, so this spec takes +2
+ * PORT OWNERSHIP. the `node --test` e2e specs run the files in parallel: smoke.e2e-spec.ts
+ * reserves NIVO_FE_E2E_PORT (default 13067) and collab.e2e-spec.ts takes +1, so this spec takes +2
  * (NIVO_FE_E2E_LANDING_PORT overrides; NIVO_FE_E2E_LANDING_URL drives a server the caller owns).
  */
 import assert from "node:assert/strict";

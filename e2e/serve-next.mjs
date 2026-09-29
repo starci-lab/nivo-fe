@@ -2,7 +2,7 @@
  * Serve one built app for the run — the e2e lane's shared `next start` helper.
  *
  * THE SUITE OWNS THE SERVER. Each spec boots the production server the way
- * scripts/e2e-smoke.mjs established for @nivo/app: `next start` on a run-owned loopback port,
+ * e2e/e2e-smoke.mjs established for @nivo/app: `next start` on a run-owned loopback port,
  * polled until the first sub-500 answer, then killed on the way out (taskkill on Windows, where
  * signal delivery does not reach the spawned process tree). Nothing here reuses a developer's
  * dev server: a spec that wants one names it through its own `*_URL` env and then stops nothing.
