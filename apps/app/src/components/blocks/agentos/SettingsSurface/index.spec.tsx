@@ -2,11 +2,11 @@ import { createTranslator } from "next-intl"
 import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import enMessages from "@/messages/en.json"
-import { SettingsSurface } from "@/components/blocks/agentos/SettingsSurface"
-import type { SettingsSurfaceProps } from "@/modules/agentos/module-page/surface-types"
-import { buildModulePageCopy } from "@/modules/agentos/module-page-copy"
-import { TIME_ZONE } from "@/modules/i18n/config"
+import enMessages from "../../../../messages/en.json"
+import { SettingsSurface } from "."
+import type { SettingsSurfaceProps } from "../../../../modules/agentos/module-page/surface-types"
+import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
+import { TIME_ZONE } from "../../../../modules/i18n/config"
 
 const copy = buildModulePageCopy(
     createTranslator({

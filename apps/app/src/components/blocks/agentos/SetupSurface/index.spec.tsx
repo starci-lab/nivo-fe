@@ -2,11 +2,11 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { createTranslator } from "next-intl"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import enMessages from "@/messages/en.json"
-import { SetupSurface } from "@/components/blocks/agentos/SetupSurface"
-import { buildModulePageCopy } from "@/modules/agentos/module-page-copy"
-import type { SetupSurfaceProps } from "@/modules/agentos/module-page/surface-types"
-import { TIME_ZONE } from "@/modules/i18n/config"
+import enMessages from "../../../../messages/en.json"
+import { SetupSurface } from "."
+import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
+import type { SetupSurfaceProps } from "../../../../modules/agentos/module-page/surface-types"
+import { TIME_ZONE } from "../../../../modules/i18n/config"
 
 const copy = buildModulePageCopy(
     createTranslator({

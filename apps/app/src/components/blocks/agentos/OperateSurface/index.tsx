@@ -1,10 +1,10 @@
 import { RouteTabs } from "@nivo/ui"
-import { ChatbotWorkbenchBlock } from "@/components/blocks/agentos/ChatbotWorkbenchBlock"
-import { DEFAULT_WIDGET_REGISTRY, ExecuteChatBlock } from "@/components/blocks/agentos/ExecuteChatBlock"
-import { ExecuteSessionRailBlock } from "@/components/blocks/agentos/ExecuteSessionRailBlock"
-import { DEFAULT_WORKBENCH_REGISTRY, KindWorkbenchBlock } from "@/components/blocks/agentos/KindWorkbenchBlock"
-import type { OperateSurfaceProps as OperateSurfaceDataProps } from "@/modules/agentos/module-page/surface-types"
-import type { WithModulePageCopy } from "@/modules/agentos/module-page-copy"
+import { ChatbotWorkbenchBlock } from "../ChatbotWorkbenchBlock"
+import { DEFAULT_WIDGET_REGISTRY, ExecuteChatBlock } from "../ExecuteChatBlock"
+import { ExecuteSessionRailBlock } from "../ExecuteSessionRailBlock"
+import { DEFAULT_WORKBENCH_REGISTRY, KindWorkbenchBlock } from "../KindWorkbenchBlock"
+import type { OperateSurfaceProps as OperateSurfaceDataProps } from "../../../../modules/agentos/module-page/surface-types"
+import type { WithModulePageCopy } from "../../../../modules/agentos/module-page-copy"
 
 type OperateSurfaceProps = WithModulePageCopy<OperateSurfaceDataProps>
 

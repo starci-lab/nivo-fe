@@ -1,7 +1,7 @@
 import { Checkbox, ChoiceTabs } from "@nivo/ui"
 import { Button, Input, Text } from "@starci/grammar/common"
-import type { SettingsFormContentProps as SettingsFormDataProps } from "@/modules/agentos/module-page/surface-types"
-import type { WithModulePageCopy, ModulePageCopy } from "@/modules/agentos/module-page-copy"
+import type { SettingsFormContentProps as SettingsFormDataProps } from "../../../../modules/agentos/module-page/surface-types"
+import type { WithModulePageCopy, ModulePageCopy } from "../../../../modules/agentos/module-page-copy"
 
 const credentialStatusLabel = (status: string, copy: ModulePageCopy): string =>
     status === "configured" || status === "invalid"

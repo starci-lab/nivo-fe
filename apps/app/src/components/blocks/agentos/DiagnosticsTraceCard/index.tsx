@@ -1,6 +1,6 @@
 import { SurfaceCard, Text } from "@starci/grammar/common"
-import type { DiagnosticsSurfaceProps as DiagnosticsSurfaceDataProps } from "@/modules/agentos/module-page/surface-types"
-import type { WithModulePageCopy } from "@/modules/agentos/module-page-copy"
+import type { DiagnosticsSurfaceProps as DiagnosticsSurfaceDataProps } from "../../../../modules/agentos/module-page/surface-types"
+import type { WithModulePageCopy } from "../../../../modules/agentos/module-page-copy"
 
 type DiagnosticsTraceCardProps = WithModulePageCopy<
     Pick<DiagnosticsSurfaceDataProps, "installationId" | "kindKey" | "workbenchKey" | "events">

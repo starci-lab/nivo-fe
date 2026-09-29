@@ -1,11 +1,11 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { NextIntlClientProvider, useTranslations } from "next-intl"
-import enMessages from "@/messages/en.json"
-import viMessages from "@/messages/vi.json"
-import { TIME_ZONE } from "@/modules/i18n/config"
+import enMessages from "../../../messages/en.json"
+import viMessages from "../../../messages/vi.json"
+import { TIME_ZONE } from "../../../modules/i18n/config"
 import { describe, expect, it, vi } from "vitest"
-import type { AgentosModuleTestContract } from "@/modules/api/agentos-module-tests"
-import { SessionProvider } from "@/modules/auth/session"
+import type { AgentosModuleTestContract } from "../../../modules/api/agentos-module-tests"
+import { SessionProvider } from "../../../modules/auth/session"
 import {
     AgentOSSolutionModulePageBase,
     type AgentOSSolutionModulePageViewProps,

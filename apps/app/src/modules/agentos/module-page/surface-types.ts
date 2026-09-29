@@ -1,12 +1,12 @@
 import type { ReactNode } from "react"
-import type { ContextDraft } from "@/components/blocks/agentos/ContextVersionBlock"
-import type { ExecuteMessage, TrustedWidgetComponentProps } from "@/components/blocks/agentos/ExecuteChatBlock"
-import type { ExecuteSession } from "@/components/blocks/agentos/ExecuteSessionRailBlock"
-import type { SetupMessage, SetupRevision } from "@/components/blocks/agentos/PrivateSetupChatBlock"
-import type { AgentosModuleRuntime } from "@/modules/api/agentos-module-runtime"
-import type { AgentosRuntimeValue } from "@/modules/api/agentos-runtime-tree"
-import type { AgentosModuleTestContract, AgentosModuleTestSurface } from "@/modules/api/agentos-module-tests"
-import type { ChatbotWorkbench } from "@/modules/api/workspace-controlplane"
+import type { ContextDraft } from "../../../components/blocks/agentos/ContextVersionBlock"
+import type { ExecuteMessage, TrustedWidgetComponentProps } from "../../../components/blocks/agentos/ExecuteChatBlock"
+import type { ExecuteSession } from "../../../components/blocks/agentos/ExecuteSessionRailBlock"
+import type { SetupMessage, SetupRevision } from "../../../components/blocks/agentos/PrivateSetupChatBlock"
+import type { AgentosModuleRuntime } from "../../api/agentos-module-runtime"
+import type { AgentosRuntimeValue } from "../../api/agentos-runtime-tree"
+import type { AgentosModuleTestContract, AgentosModuleTestSurface } from "../../api/agentos-module-tests"
+import type { ChatbotWorkbench } from "../../api/workspace-controlplane"
 
 /** Settled inputs and actions for the controlled Setup panel. */
 export type SetupSurfaceProps = {

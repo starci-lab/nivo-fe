@@ -1,9 +1,9 @@
 import { SurfaceCard, Button, Heading, Text, Tabs, PrimaryRailLayout, TextAction } from "@starci/grammar/common"
-import { ContextVersionBlock } from "@/components/blocks/agentos/ContextVersionBlock"
-import { PrivateSetupChatBlock } from "@/components/blocks/agentos/PrivateSetupChatBlock"
+import { ContextVersionBlock } from "../ContextVersionBlock"
+import { PrivateSetupChatBlock } from "../PrivateSetupChatBlock"
 import { AGENTOS_SETUP_SURFACE_CLASS_NAME, CONTEXT_BAND_CLASS_NAME, CONTEXT_RAISED_BAND_CLASS_NAME } from "./classNames"
-import type { SetupSurfaceProps as SetupSurfaceDataProps } from "@/modules/agentos/module-page/surface-types"
-import type { WithModulePageCopy } from "@/modules/agentos/module-page-copy"
+import type { SetupSurfaceProps as SetupSurfaceDataProps } from "../../../../modules/agentos/module-page/surface-types"
+import type { WithModulePageCopy } from "../../../../modules/agentos/module-page-copy"
 
 type SetupSurfaceProps = WithModulePageCopy<SetupSurfaceDataProps>
 

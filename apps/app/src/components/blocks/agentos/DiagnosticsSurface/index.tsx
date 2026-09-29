@@ -1,11 +1,11 @@
 import { ChoiceTabs } from "@nivo/ui"
-import { ModuleCockpitRailBlock } from "@/components/blocks/agentos/ModuleCockpitRailBlock"
-import type { DiagnosticsSurfaceProps as DiagnosticsSurfaceDataProps } from "@/modules/agentos/module-page/surface-types"
-import type { WithModulePageCopy } from "@/modules/agentos/module-page-copy"
-import { cockpitPane } from "@/components/blocks/agentos/cockpitPane"
-import { cockpitSidecarPane } from "@/components/blocks/agentos/cockpitSidecarPane"
-import { DiagnosticsHealthCard } from "@/components/blocks/agentos/DiagnosticsHealthCard"
-import { DiagnosticsTraceCard } from "@/components/blocks/agentos/DiagnosticsTraceCard"
+import { ModuleCockpitRailBlock } from "../ModuleCockpitRailBlock"
+import type { DiagnosticsSurfaceProps as DiagnosticsSurfaceDataProps } from "../../../../modules/agentos/module-page/surface-types"
+import type { WithModulePageCopy } from "../../../../modules/agentos/module-page-copy"
+import { cockpitPane } from "../cockpitPane"
+import { cockpitSidecarPane } from "../cockpitSidecarPane"
+import { DiagnosticsHealthCard } from "../DiagnosticsHealthCard"
+import { DiagnosticsTraceCard } from "../DiagnosticsTraceCard"
 
 type DiagnosticsSurfaceProps = WithModulePageCopy<DiagnosticsSurfaceDataProps>
 

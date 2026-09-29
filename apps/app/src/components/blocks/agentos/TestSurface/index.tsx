@@ -2,13 +2,13 @@ import { ChoiceTabs } from "@nivo/ui"
 import {
     DEFAULT_TEST_WORKBENCH_REGISTRY,
     KindTestWorkbenchBlock,
-} from "@/components/blocks/agentos/KindTestWorkbenchBlock"
-import { ModuleCockpitRailBlock } from "@/components/blocks/agentos/ModuleCockpitRailBlock"
-import { TestTrustResultBlock } from "@/components/blocks/agentos/TestTrustResultBlock"
-import type { TestSurfaceProps as TestSurfaceDataProps } from "@/modules/agentos/module-page/surface-types"
-import type { WithModulePageCopy, ModulePageCopy } from "@/modules/agentos/module-page-copy"
-import { cockpitPane } from "@/components/blocks/agentos/cockpitPane"
-import { cockpitSidecarPane } from "@/components/blocks/agentos/cockpitSidecarPane"
+} from "../KindTestWorkbenchBlock"
+import { ModuleCockpitRailBlock } from "../ModuleCockpitRailBlock"
+import { TestTrustResultBlock } from "../TestTrustResultBlock"
+import type { TestSurfaceProps as TestSurfaceDataProps } from "../../../../modules/agentos/module-page/surface-types"
+import type { WithModulePageCopy, ModulePageCopy } from "../../../../modules/agentos/module-page-copy"
+import { cockpitPane } from "../cockpitPane"
+import { cockpitSidecarPane } from "../cockpitSidecarPane"
 
 const testRunStatusLabel = (status: keyof ModulePageCopy["testStatus"] | undefined, copy: ModulePageCopy): string =>
     status === undefined ? copy.pageTest.notRun : copy.testStatus[status]

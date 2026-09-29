@@ -1,29 +1,29 @@
 import { SurfaceCard, Heading, Text } from "@starci/grammar/common"
-import { ModuleRouteShellBlock, type AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteShellBlock"
-import { SetupSurface } from "@/components/blocks/agentos/SetupSurface"
-import { TestSurface } from "@/components/blocks/agentos/TestSurface"
-import { TestUnavailableSurface } from "@/components/blocks/agentos/TestUnavailableSurface"
-import { OperateSurface } from "@/components/blocks/agentos/OperateSurface"
-import { SettingsSurface } from "@/components/blocks/agentos/SettingsSurface"
-import { DiagnosticsSurface } from "@/components/blocks/agentos/DiagnosticsSurface"
+import { ModuleRouteShellBlock, type AgentOSModuleView } from "../../../components/blocks/agentos/ModuleRouteShellBlock"
+import { SetupSurface } from "../../../components/blocks/agentos/SetupSurface"
+import { TestSurface } from "../../../components/blocks/agentos/TestSurface"
+import { TestUnavailableSurface } from "../../../components/blocks/agentos/TestUnavailableSurface"
+import { OperateSurface } from "../../../components/blocks/agentos/OperateSurface"
+import { SettingsSurface } from "../../../components/blocks/agentos/SettingsSurface"
+import { DiagnosticsSurface } from "../../../components/blocks/agentos/DiagnosticsSurface"
 import type {
     SetupSurfaceProps,
     TestSurfaceProps,
     OperateSurfaceProps,
     SettingsSurfaceProps,
-} from "@/modules/agentos/module-page/surface-types"
-import type { DiagnosticsSurfaceProps } from "@/modules/agentos/module-page/surface-types"
-import type { ModulePageCopy } from "@/modules/agentos/module-page-copy"
+} from "../../../modules/agentos/module-page/surface-types"
+import type { DiagnosticsSurfaceProps } from "../../../modules/agentos/module-page/surface-types"
+import type { ModulePageCopy } from "../../../modules/agentos/module-page-copy"
 
-export { exactTestSurfaceFor } from "@/modules/agentos/module-page/exactTestSurfaceFor"
-export { buildModulePageCopy } from "@/modules/agentos/module-page-copy"
+export { exactTestSurfaceFor } from "../../../modules/agentos/module-page/exactTestSurfaceFor"
+export { buildModulePageCopy } from "../../../modules/agentos/module-page-copy"
 export type {
     ModulePageMessageKey,
     ModulePageTranslator,
     ModulePageCopy,
     ModulePageCopyProps,
     WithModulePageCopy,
-} from "@/modules/agentos/module-page-copy"
+} from "../../../modules/agentos/module-page-copy"
 
 /** Complete screen contract accepted by the connected module route. */
 export type AgentOSSolutionModulePageProps = AgentOSSolutionModulePageViewProps

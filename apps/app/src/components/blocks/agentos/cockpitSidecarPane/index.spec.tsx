@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
-import { cockpitSidecarPane } from "@/components/blocks/agentos/cockpitSidecarPane"
+import { cockpitSidecarPane } from "."
 
 type ContentProps = { readonly label: string }
 const Content = (props: ContentProps) => <span>{props.label}</span>

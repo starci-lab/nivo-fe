@@ -1,12 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { createTranslator } from "next-intl"
 import { describe, expect, it, vi } from "vitest"
-import enMessages from "@/messages/en.json"
-import { DiagnosticsSurface } from "@/components/blocks/agentos/DiagnosticsSurface"
-import type { AgentosModuleRuntime } from "@/modules/api/agentos-module-runtime"
-import type { DiagnosticsSurfaceProps } from "@/modules/agentos/module-page/surface-types"
-import { buildModulePageCopy } from "@/modules/agentos/module-page-copy"
-import { TIME_ZONE } from "@/modules/i18n/config"
+import enMessages from "../../../../messages/en.json"
+import { DiagnosticsSurface } from "."
+import type { AgentosModuleRuntime } from "../../../../modules/api/agentos-module-runtime"
+import type { DiagnosticsSurfaceProps } from "../../../../modules/agentos/module-page/surface-types"
+import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
+import { TIME_ZONE } from "../../../../modules/i18n/config"
 
 const copy = buildModulePageCopy(
     createTranslator({

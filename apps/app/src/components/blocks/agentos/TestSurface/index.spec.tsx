@@ -1,12 +1,12 @@
 import { createTranslator } from "next-intl"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import enMessages from "@/messages/en.json"
-import { TestSurface } from "@/components/blocks/agentos/TestSurface"
-import type { AgentosModuleTestContract } from "@/modules/api/agentos-module-tests"
-import { buildModulePageCopy } from "@/modules/agentos/module-page-copy"
-import type { TestSurfaceProps } from "@/modules/agentos/module-page/surface-types"
-import { TIME_ZONE } from "@/modules/i18n/config"
+import enMessages from "../../../../messages/en.json"
+import { TestSurface } from "."
+import type { AgentosModuleTestContract } from "../../../../modules/api/agentos-module-tests"
+import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
+import type { TestSurfaceProps } from "../../../../modules/agentos/module-page/surface-types"
+import { TIME_ZONE } from "../../../../modules/i18n/config"
 
 const copy = buildModulePageCopy(
     createTranslator({

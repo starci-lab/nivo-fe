@@ -1,7 +1,7 @@
 import { ChoiceTabs } from "@nivo/ui"
 import { SurfaceCard, Text } from "@starci/grammar/common"
-import { ModuleCockpitRailBlock } from "@/components/blocks/agentos/ModuleCockpitRailBlock"
-import type { ModulePageCopyProps } from "@/modules/agentos/module-page-copy"
+import { ModuleCockpitRailBlock } from "../ModuleCockpitRailBlock"
+import type { ModulePageCopyProps } from "../../../../modules/agentos/module-page-copy"
 
 type TestUnavailableSurfaceProps = ModulePageCopyProps
 

@@ -1,7 +1,7 @@
 import { SurfaceCard, Text } from "@starci/grammar/common"
-import type { AgentosRuntimeValue } from "@/modules/api/agentos-runtime-tree"
-import type { DiagnosticsSurfaceProps as DiagnosticsSurfaceDataProps } from "@/modules/agentos/module-page/surface-types"
-import type { WithModulePageCopy, ModulePageCopy } from "@/modules/agentos/module-page-copy"
+import type { AgentosRuntimeValue } from "../../../../modules/api/agentos-runtime-tree"
+import type { DiagnosticsSurfaceProps as DiagnosticsSurfaceDataProps } from "../../../../modules/agentos/module-page/surface-types"
+import type { WithModulePageCopy, ModulePageCopy } from "../../../../modules/agentos/module-page-copy"
 
 type DiagnosticsHealthCardProps = WithModulePageCopy<
     Pick<DiagnosticsSurfaceDataProps, "diagnostics" | "selectedSignal">

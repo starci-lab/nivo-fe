@@ -1,6 +1,6 @@
-import type { ContextDraft } from "@/components/blocks/agentos/ContextVersionBlock"
+import type { ContextDraft } from "../../../components/blocks/agentos/ContextVersionBlock"
 import { describe, expect, it } from "vitest"
-import { moduleTestSurfaceFixture } from "@/test-support/mock-result"
+import { moduleTestSurfaceFixture } from "../../../test-support/mock-result"
 import { exactTestSurfaceFor } from "./exactTestSurfaceFor"
 
 const testedDraftDigest = "a".repeat(64)

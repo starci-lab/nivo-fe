@@ -1,7 +1,7 @@
 import { SurfaceCard, Text } from "@starci/grammar/common"
-import { SettingsFormContent } from "@/components/blocks/agentos/SettingsFormContent"
-import type { SettingsSurfaceProps as SettingsSurfaceDataProps } from "@/modules/agentos/module-page/surface-types"
-import type { WithModulePageCopy } from "@/modules/agentos/module-page-copy"
+import { SettingsFormContent } from "../SettingsFormContent"
+import type { SettingsSurfaceProps as SettingsSurfaceDataProps } from "../../../../modules/agentos/module-page/surface-types"
+import type { WithModulePageCopy } from "../../../../modules/agentos/module-page-copy"
 
 type SettingsSurfaceProps = WithModulePageCopy<SettingsSurfaceDataProps>
 

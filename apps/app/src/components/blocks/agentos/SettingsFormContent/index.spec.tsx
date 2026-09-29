@@ -3,12 +3,12 @@ import { createTranslator } from "next-intl"
 import { renderToStaticMarkup } from "react-dom/server"
 import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
-import enMessages from "@/messages/en.json"
-import { SettingsFormContent } from "@/components/blocks/agentos/SettingsFormContent"
-import type { SettingsFormContentProps } from "@/modules/agentos/module-page/surface-types"
-import { buildModulePageCopy } from "@/modules/agentos/module-page-copy"
-import { SessionProvider } from "@/modules/auth/session"
-import { TIME_ZONE } from "@/modules/i18n/config"
+import enMessages from "../../../../messages/en.json"
+import { SettingsFormContent } from "."
+import type { SettingsFormContentProps } from "../../../../modules/agentos/module-page/surface-types"
+import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
+import { SessionProvider } from "../../../../modules/auth/session"
+import { TIME_ZONE } from "../../../../modules/i18n/config"
 
 const copy = buildModulePageCopy(
     createTranslator({

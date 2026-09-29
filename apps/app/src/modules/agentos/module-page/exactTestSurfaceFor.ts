@@ -1,5 +1,5 @@
-import type { ContextDraft } from "@/components/blocks/agentos/ContextVersionBlock"
-import type { AgentosModuleTestSurface } from "@/modules/api/agentos-module-tests"
+import type { ContextDraft } from "../../../components/blocks/agentos/ContextVersionBlock"
+import type { AgentosModuleTestSurface } from "../../api/agentos-module-tests"
 
 /** Return test evidence only while its context, draft digest and generations still match. */
 export const exactTestSurfaceFor = (
