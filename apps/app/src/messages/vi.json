@@ -988,13 +988,8 @@
           "emptyTitle": "Chưa cài solution nào",
           "emptyHint": "Cài một gói từ catalogue bên dưới thì nó sẽ hiện ở đây.",
           "emptyAction": "Xem catalogue",
-          "refusedTitle": "Chưa đọc được danh sách solution đã cài",
-          "refusedHint": "Catalogue bên dưới vẫn dùng được.",
           "catalogueEmptyTitle": "Chưa có gói solution nào",
           "catalogueEmptyHint": "Nivo xuất bản gói vào catalogue này; chưa có gói thì chưa cài được.",
-          "catalogueRefusedTitle": "Chưa đọc được catalogue",
-          "catalogueRefusedHint": "Các module của bạn ở trên không bị ảnh hưởng.",
-          "retry": "Thử lại",
           "modes": {
             "catalog": "Khám phá",
             "installed": "Đã cài"
@@ -1006,7 +1001,6 @@
           "viewDetails": "Xem chi tiết",
           "browse": "Khám phá giải pháp",
           "empty": "Không gian làm việc này chưa cài module giải pháp nào.",
-          "refused": "Nivo chưa đọc được danh mục giải pháp hoặc các module của không gian làm việc này.",
           "installAccepted": "Nivo đã nhận yêu cầu và bắt đầu cấp phát giải pháp.",
           "installFailed": "Nivo chưa thể bắt đầu cài giải pháp này.",
           "installedDescription": "Một giải pháp Nivo bất biến đã được cài vào không gian làm việc này.",
@@ -2230,7 +2224,6 @@
     "academyControlCenter": {
       "title": "Học viện chuyên gia",
       "loading": "Đang xác minh học viện và quyền quản lý.",
-      "refused": "Không tìm thấy học viện này hoặc tài khoản hiện tại không có quyền quản lý.",
       "openSite": "Mở trang học viện",
       "tabsLabel": "Chế độ quản lý học viện",
       "tabs": {
@@ -2241,7 +2234,6 @@
         "section": "Tổng quan tăng trưởng",
         "health": "Mức độ hoạt động",
         "loading": "Đang đọc số liệu học viện.",
-        "refused": "Chưa đọc được số liệu tăng trưởng của học viện này.",
         "revenue": "Doanh thu",
         "orders": "Đơn đã thanh toán",
         "members": "Học viên",
@@ -2251,7 +2243,6 @@
       "students": {
         "section": "Học viên",
         "empty": "Chưa có học viên nào.",
-        "refused": "Chưa đọc được danh sách học viên.",
         "open": "Xem",
         "active": "Đang hoạt động",
         "banned": "Đã khóa",
@@ -2273,7 +2264,6 @@
       "leads": {
         "section": "CRM khách hàng tiềm năng",
         "empty": "Chưa có khách hàng tiềm năng nào gửi thông tin.",
-        "refused": "Chưa đọc được CRM của học viện.",
         "open": "Mở",
         "detail": "Theo dõi liên hệ",
         "advance": "Lưu và chuyển bước",
@@ -2283,7 +2273,6 @@
       },
       "integrations": {
         "section": "Trung tâm tích hợp",
-        "refused": "Chưa đọc được trạng thái tích hợp của học viện.",
         "configure": "Thiết lập",
         "save": "Lưu cấu hình",
         "authorize": "Kết nối Zalo",
@@ -2527,6 +2516,15 @@
     },
     "kind": {
       "unknown": "Ứng dụng"
+    },
+    "query": {
+      "signInRequired": "Đăng nhập để tiếp tục.",
+      "signIn": "Đăng nhập",
+      "forbidden": "Bạn không có quyền truy cập mục này.",
+      "notFound": "Không tìm thấy nội dung này.",
+      "invalid": "Yêu cầu đã bị từ chối.",
+      "unavailable": "Không tải được nội dung này. Kiểm tra kết nối rồi thử lại.",
+      "retry": "Thử lại"
     }
   },
   "boundary": {

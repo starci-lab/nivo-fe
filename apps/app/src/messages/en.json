@@ -988,13 +988,8 @@
           "emptyTitle": "No solution installed yet",
           "emptyHint": "Installing a package from the catalogue below adds it here.",
           "emptyAction": "Browse the catalogue",
-          "refusedTitle": "Installed solutions could not be read",
-          "refusedHint": "The catalogue below remains available.",
           "catalogueEmptyTitle": "No solution package is available",
           "catalogueEmptyHint": "Nivo publishes packages to this catalogue; nothing can be installed until one appears.",
-          "catalogueRefusedTitle": "The catalogue could not be read",
-          "catalogueRefusedHint": "Your own modules above are unaffected.",
-          "retry": "Try again",
           "modes": {
             "catalog": "Discover",
             "installed": "Installed"
@@ -1006,7 +1001,6 @@
           "viewDetails": "View details",
           "browse": "Browse solutions",
           "empty": "This workspace has no solution modules installed.",
-          "refused": "Nivo could not read the solution catalog or this workspace's modules.",
           "installAccepted": "Nivo accepted the request and started provisioning the solution.",
           "installFailed": "Nivo could not start this solution installation.",
           "installedDescription": "An immutable Nivo solution is installed in this workspace.",
@@ -2230,7 +2224,6 @@
     "academyControlCenter": {
       "title": "Expert academy",
       "loading": "Checking the academy and management access.",
-      "refused": "This academy was not found or the current account cannot manage it.",
       "openSite": "Open academy site",
       "tabsLabel": "Academy management mode",
       "tabs": {
@@ -2241,7 +2234,6 @@
         "section": "Growth overview",
         "health": "Activity",
         "loading": "Reading academy metrics.",
-        "refused": "Growth metrics are unavailable for this academy.",
         "revenue": "Revenue",
         "orders": "Paid orders",
         "members": "Students",
@@ -2251,7 +2243,6 @@
       "students": {
         "section": "Students",
         "empty": "No students yet.",
-        "refused": "The student list is unavailable.",
         "open": "View",
         "active": "Active",
         "banned": "Blocked",
@@ -2273,7 +2264,6 @@
       "leads": {
         "section": "Lead CRM",
         "empty": "No leads have submitted their details yet.",
-        "refused": "The academy CRM is unavailable.",
         "open": "Open",
         "detail": "Lead follow-up",
         "advance": "Save and advance",
@@ -2283,7 +2273,6 @@
       },
       "integrations": {
         "section": "Integration center",
-        "refused": "Academy integration status is unavailable.",
         "configure": "Configure",
         "save": "Save configuration",
         "authorize": "Connect Zalo",
@@ -2527,6 +2516,15 @@
     },
     "kind": {
       "unknown": "App"
+    },
+    "query": {
+      "signInRequired": "Sign in to continue.",
+      "signIn": "Sign in",
+      "forbidden": "You don't have access to this.",
+      "notFound": "This could not be found.",
+      "invalid": "This request was declined.",
+      "unavailable": "This could not be loaded. Check your connection and try again.",
+      "retry": "Try again"
     }
   },
   "boundary": {
