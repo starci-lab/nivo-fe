@@ -16,6 +16,8 @@ import {
     type AgentWorkspaceRow,
 } from "../agentos-workspaces"
 import { failed, failureKindOfCode, type Outcome } from "../outcome"
+import { parseAgentWorkspaceRowAnswer } from "../agentos-workspaces.guards"
+import { parseProvisioningSaga, parseProvisioningSagaView } from "./payload.guards"
 import type {
     PurchasedWorkspaceEntry,
     WorkspacePurchaseOffer,
@@ -247,6 +249,7 @@ export const createWorkspacePurchasePayLink = (
 export const workspaceProvisioningSaga = (sagaId: string): Promise<Outcome<WorkspaceProvisioningSagaView>> =>
     graphql(
         `query WorkspaceProvisioningSaga($input: MyProvisioningSagaInput!) { myProvisioningSaga(request: $input) { data { saga ${WORKSPACE_PROVISIONING_SAGA} steps ${WORKSPACE_PROVISIONING_SAGA_STEP} } message success error } }`,
+        parseProvisioningSagaView,
         {
             input: {
                 sagaId,
@@ -266,6 +269,7 @@ export const workspaceProvisioningSaga = (sagaId: string): Promise<Outcome<Works
 export const retryWorkspaceProvisioningSaga = (sagaId: string): Promise<Outcome<WorkspaceProvisioningSaga>> =>
     graphql(
         `mutation RetryWorkspaceProvisioningSaga($input: RetryProvisioningSagaInput!) { retryProvisioningSaga(request: $input) { data ${WORKSPACE_PROVISIONING_SAGA} message success error } }`,
+        parseProvisioningSaga,
         {
             input: {
                 sagaId,
@@ -282,6 +286,7 @@ export const retryWorkspaceProvisioningSaga = (sagaId: string): Promise<Outcome<
 export const cancelWorkspaceProvisioningSaga = (sagaId: string): Promise<Outcome<WorkspaceProvisioningSaga>> =>
     graphql(
         `mutation CancelWorkspaceProvisioningSaga($input: CancelProvisioningSagaInput!) { cancelProvisioningSaga(request: $input) { data ${WORKSPACE_PROVISIONING_SAGA} message success error } }`,
+        parseProvisioningSaga,
         {
             input: {
                 sagaId,
@@ -336,6 +341,7 @@ export const retryWorkspaceProvisioningOrder = (workspaceId: string): Promise<Ou
                 }
             }
         `,
+        parseAgentWorkspaceRowAnswer,
         {
             input: {
                 agentWorkspaceId: workspaceId,

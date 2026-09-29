@@ -1,5 +1,7 @@
 import { graphqlFields } from "../graphql"
 import { failed, type Outcome } from "../outcome"
+import { isRecord } from "../wire"
+import { parseChatbotCommandResult, parseChatbotWorkbenchAnswer } from "./payload.guards"
 /** A channel binding safe to display without exposing provider credentials. */
 export type ChatbotChannelBinding = {
     readonly id: string
@@ -51,12 +53,6 @@ export type ChatbotCommandResult = {
     readonly state: string
     readonly authorizationUrl?: string | null
 }
-type ChatbotEnvelope<T> = {
-    readonly data?: T
-    readonly errors?: ReadonlyArray<{
-        readonly message?: string
-    }>
-}
 const WORKSPACE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu
 type ChatbotCoreOperation =
     "workbench" | "bind-channel" | "start-zalo-oauth" | "set-handoff" | "resolve-handoff" | "reconcile-delivery"
@@ -73,7 +69,8 @@ const chatbotCoreRequest = async <T>(
     accessToken: string,
     installationId: string,
     operation: ChatbotCoreOperation,
-    input?: Readonly<Record<string, unknown>>,
+    input: Readonly<Record<string, unknown>> | undefined,
+    parse: (payload: unknown) => T | null,
 ): Promise<Outcome<T>> => {
     if (!WORKSPACE_ID.test(workspaceId) || accessToken.length === 0)
         return CHATBOT_UNAVAILABLE("The workspace or the credential is not usable.")
@@ -93,13 +90,22 @@ const chatbotCoreRequest = async <T>(
                   : "WORKSPACE_CONTROLLER_FAILED"
         return failed(answered.kind, { status: answered.status, code, reason: answered.reason })
     }
-    const envelope = answered.data[field] as ChatbotEnvelope<T> | undefined
-    if (envelope?.data === undefined || (envelope.errors?.length ?? 0) > 0)
+    const envelope: unknown = answered.data[field]
+    const errors = isRecord(envelope) ? envelope.errors : undefined
+    if (!isRecord(envelope) || envelope.data === undefined || (Array.isArray(errors) && errors.length > 0)) {
         return failed("unavailable", {
             code: "WORKSPACE_CONTROLLER_FAILED",
             reason: "The controller answered without a payload.",
         })
-    return { ok: true, data: envelope.data }
+    }
+    const data = parse(envelope.data)
+    if (data === null) {
+        return failed("unavailable", {
+            code: "WORKSPACE_CONTROLLER_FAILED",
+            reason: "The controller answered without a payload.",
+        })
+    }
+    return { ok: true, data }
 }
 
 /** Read the accepted installation-qualified Chatbot workbench contract. */
@@ -109,13 +115,14 @@ export const chatbotWorkbench = async (
     accessToken: string,
     installationId: string,
 ): Promise<Outcome<ChatbotWorkbench>> => {
-    const result = await chatbotCoreRequest<{ readonly chatbotWorkbench: ChatbotWorkbench }>(
+    return chatbotCoreRequest<ChatbotWorkbench>(
         workspaceId,
         accessToken,
         installationId,
         "workbench",
+        undefined,
+        parseChatbotWorkbenchAnswer,
     )
-    return result.ok ? { ok: true, data: result.data.chatbotWorkbench } : result
 }
 
 const mutateChatbot = async (
@@ -126,21 +133,15 @@ const mutateChatbot = async (
     input: Readonly<Record<string, unknown>>,
     field: string,
 ): Promise<Outcome<ChatbotCommandResult>> => {
-    const result = await chatbotCoreRequest<Readonly<Record<string, ChatbotCommandResult>>>(
+    const result = await chatbotCoreRequest<ChatbotCommandResult>(
         workspaceId,
         accessToken,
         installationId,
         operation,
         input,
+        (payload) => (isRecord(payload) ? parseChatbotCommandResult(payload[field]) : null),
     )
-    if (!result.ok) return result
-    const action = result.data[field]
-    return action === undefined
-        ? failed("unavailable", {
-              code: "WORKSPACE_CONTROLLER_FAILED",
-              reason: "The controller answered without the requested action.",
-          })
-        : { ok: true, data: action }
+    return result
 }
 
 /** Bind an opaque, already-sealed channel reference to one installation. */

@@ -1,0 +1,663 @@
+/**
+ * The parsers of the workspace-controlplane documents' payloads.
+ *
+ * One parser per shape the chatbot, checkout and purchase-saga operations select. Each returns the
+ * freshly built value or null; the caller maps null to its `unavailable`/`FAILED` outcome, so a
+ * malformed payload is never a thrown error and never a domain value under a borrowed name.
+ *
+ * THE OUTCOME UNIONS ARE CLOSED: `WorkspaceCheckoutAnswer` and
+ * `WorkspaceCheckoutEntryOutcome` discriminate on `status`, and each arm checks only the fields it
+ * declares. An arm that fails to parse is null, never a best-effort reading.
+ */
+
+import {
+    isBoolean,
+    isNullableNumber,
+    isNullableString,
+    isNumber,
+    isOneOf,
+    isRecord,
+    isString,
+    parseEach,
+} from "../wire"
+import type {
+    ChatbotChannelBinding,
+    ChatbotCommandResult,
+    ChatbotConversation,
+    ChatbotMessage,
+    ChatbotWorkbench,
+} from "./chatbot"
+import type {
+    WorkspaceCheckoutAnswer,
+    WorkspaceCheckoutBillingEntry,
+    WorkspaceCheckoutEligibilityFact,
+    WorkspaceCheckoutEntryDestination,
+    WorkspaceCheckoutEntryOutcome,
+    WorkspaceCheckoutLedgerFact,
+    WorkspaceCheckoutOffer,
+    WorkspaceCheckoutPaymentAction,
+    WorkspaceCheckoutProvisioningFact,
+    WorkspaceCheckoutRefundFact,
+    WorkspaceCheckoutSelection,
+    WorkspaceCheckoutSourceFact,
+    WorkspaceCheckoutStatusView,
+} from "./checkout-types"
+import type {
+    WorkspaceProvisioningSaga,
+    WorkspaceProvisioningSagaStep,
+    WorkspaceProvisioningSagaView,
+} from "./purchase-types"
+
+const parseChatbotChannelBinding = (value: unknown): ChatbotChannelBinding | null =>
+    isRecord(value) &&
+    isString(value.id) &&
+    isString(value.installationId) &&
+    isString(value.provider) &&
+    isString(value.accountRef) &&
+    isString(value.state) &&
+    isNullableString(value.credentialRef)
+        ? {
+              id: value.id,
+              installationId: value.installationId,
+              provider: value.provider,
+              accountRef: value.accountRef,
+              state: value.state,
+              credentialRef: value.credentialRef,
+          }
+        : null
+
+const parseChatbotConversation = (value: unknown): ChatbotConversation | null =>
+    isRecord(value) &&
+    isString(value.id) &&
+    isString(value.installationId) &&
+    isString(value.participantRef) &&
+    isString(value.handoffState) &&
+    isNumber(value.authorityEpoch) &&
+    isNullableNumber(value.approvedVersion) &&
+    isString(value.lastMessageAt)
+        ? {
+              id: value.id,
+              installationId: value.installationId,
+              participantRef: value.participantRef,
+              handoffState: value.handoffState,
+              authorityEpoch: value.authorityEpoch,
+              approvedVersion: value.approvedVersion,
+              lastMessageAt: value.lastMessageAt,
+          }
+        : null
+
+const parseChatbotMessage = (value: unknown): ChatbotMessage | null =>
+    isRecord(value) &&
+    isString(value.id) &&
+    isString(value.conversationId) &&
+    isString(value.direction) &&
+    isString(value.sequence) &&
+    isString(value.body) &&
+    isString(value.deliveryState) &&
+    isNullableString(value.providerOutboxId) &&
+    isNullableString(value.failureCode) &&
+    isString(value.occurredAt)
+        ? {
+              id: value.id,
+              conversationId: value.conversationId,
+              direction: value.direction,
+              sequence: value.sequence,
+              body: value.body,
+              deliveryState: value.deliveryState,
+              providerOutboxId: value.providerOutboxId,
+              failureCode: value.failureCode,
+              occurredAt: value.occurredAt,
+          }
+        : null
+
+const parseChatbotWorkbench = (value: unknown): ChatbotWorkbench | null => {
+    if (!isRecord(value) || !isString(value.installationId) || !isString(value.lifecycleState)) return null
+    if (!isNullableNumber(value.approvedVersion)) return null
+    const channels = parseEach(value.channels, parseChatbotChannelBinding)
+    const conversations = parseEach(value.conversations, parseChatbotConversation)
+    const messages = parseEach(value.messages, parseChatbotMessage)
+    if (channels === null || conversations === null || messages === null) return null
+    return {
+        installationId: value.installationId,
+        lifecycleState: value.lifecycleState,
+        approvedVersion: value.approvedVersion,
+        channels,
+        conversations,
+        messages,
+    }
+}
+
+/** Parse the `data` of `chatbotWorkspaceWorkbench`: `{ chatbotWorkbench: ChatbotWorkbench }`. */
+export const parseChatbotWorkbenchAnswer = (input: unknown): ChatbotWorkbench | null =>
+    isRecord(input) ? parseChatbotWorkbench(input.chatbotWorkbench) : null
+
+/** Parse one command result record inside the `data` of `chatbotWorkspaceCommand`. */
+export const parseChatbotCommandResult = (input: unknown): ChatbotCommandResult | null => {
+    if (!isRecord(input) || !isString(input.id) || !isString(input.installationId) || !isString(input.state)) {
+        return null
+    }
+    const result: {
+        id: string
+        installationId: string
+        state: string
+        authorizationUrl?: string | null
+    } = { id: input.id, installationId: input.installationId, state: input.state }
+    if (input.authorizationUrl !== undefined) {
+        if (!isNullableString(input.authorizationUrl)) return null
+        result.authorizationUrl = input.authorizationUrl
+    }
+    return result
+}
+
+const CHECKOUT_STATES = [
+    "selected",
+    "payment-not-started",
+    "payment-pending",
+    "payment-outcome-unknown",
+    "payment-refused",
+    "payment-failed",
+    "paid",
+    "provisioning",
+    "provisioning-refused",
+    "ready",
+    "renewed",
+    "payment-cancelled",
+] as const
+
+const parseCheckoutOffer = (value: unknown): WorkspaceCheckoutOffer | null =>
+    isRecord(value) &&
+    isString(value.offerId) &&
+    isString(value.offerVersion) &&
+    isString(value.displayName) &&
+    isString(value.includedOutcome) &&
+    isString(value.amount) &&
+    isString(value.currency) &&
+    isString(value.billingCadence) &&
+    isString(value.renewalMode) &&
+    isString(value.eligibility)
+        ? {
+              offerId: value.offerId,
+              offerVersion: value.offerVersion,
+              displayName: value.displayName,
+              includedOutcome: value.includedOutcome,
+              amount: value.amount,
+              currency: value.currency,
+              billingCadence: value.billingCadence,
+              renewalMode: value.renewalMode,
+              eligibility: value.eligibility,
+          }
+        : null
+
+const parseCheckoutSelection = (value: unknown): WorkspaceCheckoutSelection | null =>
+    isRecord(value) &&
+    isString(value.offerId) &&
+    isString(value.offerVersion) &&
+    isOneOf(value.state, ["current", "stale", "unavailable"])
+        ? { offerId: value.offerId, offerVersion: value.offerVersion, state: value.state }
+        : null
+
+const parseSourceFact = (value: unknown): WorkspaceCheckoutSourceFact | null =>
+    isRecord(value) &&
+    isString(value.source) &&
+    isString(value.state) &&
+    isNullableString(value.reference) &&
+    isNullableString(value.observedAt)
+        ? {
+              source: value.source,
+              state: value.state,
+              reference: value.reference,
+              observedAt: value.observedAt,
+          }
+        : null
+
+const parseProvisioningFact = (value: unknown): WorkspaceCheckoutProvisioningFact | null => {
+    if (!isRecord(value) || !isNullableString(value.disposition) || !isNullableString(value.reason)) return null
+    const fact = parseSourceFact(value)
+    return fact === null ? null : { ...fact, disposition: value.disposition, reason: value.reason }
+}
+
+const parseRenewalAction = (
+    value: unknown,
+): NonNullable<WorkspaceCheckoutEligibilityFact["renewalAction"]> | null =>
+    isRecord(value) &&
+    isString(value.operation) &&
+    isString(value.offerId) &&
+    isString(value.offerVersion) &&
+    isString(value.amount) &&
+    isString(value.currency)
+        ? {
+              operation: value.operation,
+              offerId: value.offerId,
+              offerVersion: value.offerVersion,
+              amount: value.amount,
+              currency: value.currency,
+          }
+        : null
+
+const parseEligibilityFact = (value: unknown): WorkspaceCheckoutEligibilityFact | null => {
+    if (
+        !isRecord(value) ||
+        !isNullableString(value.reason) ||
+        !isNullableString(value.heldSince) ||
+        !isNullableString(value.paidThrough) ||
+        !isString(value.renewalEvidence)
+    ) {
+        return null
+    }
+    const fact = parseSourceFact(value)
+    if (fact === null) return null
+    const renewalAction =
+        value.renewalAction === null || value.renewalAction === undefined
+            ? null
+            : parseRenewalAction(value.renewalAction)
+    if (value.renewalAction !== null && value.renewalAction !== undefined && renewalAction === null) return null
+    return {
+        ...fact,
+        reason: value.reason,
+        heldSince: value.heldSince,
+        paidThrough: value.paidThrough,
+        renewalAction,
+        renewalEvidence: value.renewalEvidence,
+    }
+}
+
+const parseBillingEntry = (value: unknown): WorkspaceCheckoutBillingEntry | null =>
+    isRecord(value) &&
+    isString(value.entryId) &&
+    isString(value.purchaseId) &&
+    isString(value.billingReceiptId) &&
+    isString(value.kind) &&
+    isString(value.amount) &&
+    isString(value.currency) &&
+    isNullableString(value.linkedEntryId) &&
+    isNullableString(value.observationId) &&
+    isNullableString(value.actorPrincipal) &&
+    isNullableString(value.reason) &&
+    isNullableString(value.paymentRail) &&
+    isNullableString(value.providerTransactionRef) &&
+    isString(value.accountingCopyState) &&
+    isString(value.postedAt)
+        ? {
+              entryId: value.entryId,
+              purchaseId: value.purchaseId,
+              billingReceiptId: value.billingReceiptId,
+              kind: value.kind,
+              amount: value.amount,
+              currency: value.currency,
+              linkedEntryId: value.linkedEntryId,
+              observationId: value.observationId,
+              actorPrincipal: value.actorPrincipal,
+              reason: value.reason,
+              paymentRail: value.paymentRail,
+              providerTransactionRef: value.providerTransactionRef,
+              accountingCopyState: value.accountingCopyState,
+              postedAt: value.postedAt,
+          }
+        : null
+
+const parseLedgerFact = (value: unknown): WorkspaceCheckoutLedgerFact | null => {
+    if (
+        !isRecord(value) ||
+        !isString(value.source) ||
+        !isString(value.state) ||
+        !isNullableString(value.ledgerState) ||
+        !isNullableString(value.observedAt)
+    ) {
+        return null
+    }
+    const entries = parseEach(value.entries, parseBillingEntry)
+    if (entries === null) return null
+    return {
+        source: value.source,
+        state: value.state,
+        ledgerState: value.ledgerState,
+        entries,
+        observedAt: value.observedAt,
+    }
+}
+
+const parseRefundFact = (value: unknown): WorkspaceCheckoutRefundFact | null => {
+    if (!isRecord(value) || !isString(value.projection) || !isNullableString(value.refundEntryId)) return null
+    const fact = parseSourceFact(value)
+    return fact === null ? null : { ...fact, projection: value.projection, refundEntryId: value.refundEntryId }
+}
+
+const parseStatusView = (value: unknown): WorkspaceCheckoutStatusView | null => {
+    if (!isRecord(value) || !isString(value.purchaseId) || !isOneOf(value.state, CHECKOUT_STATES)) return null
+    const offer = parseCheckoutOffer(value.offer)
+    const payment = parseSourceFact(value.payment)
+    const billing = parseSourceFact(value.billing)
+    const provisioning = parseProvisioningFact(value.provisioning)
+    const readiness = parseSourceFact(value.readiness)
+    if (offer === null || payment === null || billing === null || provisioning === null || readiness === null) {
+        return null
+    }
+    const serviceEligibility =
+        value.serviceEligibility === null || value.serviceEligibility === undefined
+            ? null
+            : parseEligibilityFact(value.serviceEligibility)
+    const ledger =
+        value.ledger === null || value.ledger === undefined ? null : parseLedgerFact(value.ledger)
+    const refund = value.refund === null || value.refund === undefined ? null : parseRefundFact(value.refund)
+    const refundStatus =
+        value.refundStatus === null || value.refundStatus === undefined
+            ? null
+            : parseSourceFact(value.refundStatus)
+    if (
+        (value.serviceEligibility !== null && value.serviceEligibility !== undefined && serviceEligibility === null) ||
+        (value.ledger !== null && value.ledger !== undefined && ledger === null) ||
+        (value.refund !== null && value.refund !== undefined && refund === null) ||
+        (value.refundStatus !== null && value.refundStatus !== undefined && refundStatus === null) ||
+        !isString(value.lastConfirmedAt)
+    ) {
+        return null
+    }
+    return {
+        purchaseId: value.purchaseId,
+        state: value.state,
+        offer,
+        payment,
+        billing,
+        provisioning,
+        readiness,
+        serviceEligibility,
+        ledger,
+        refund,
+        refundStatus,
+        lastConfirmedAt: value.lastConfirmedAt,
+    }
+}
+
+const parsePaymentAction = (value: unknown): WorkspaceCheckoutPaymentAction | null =>
+    isRecord(value) &&
+    isString(value.paymentAttemptId) &&
+    isString(value.provider) &&
+    isString(value.kind) &&
+    isRecord(value.payload)
+        ? {
+              paymentAttemptId: value.paymentAttemptId,
+              provider: value.provider,
+              kind: value.kind,
+              payload: value.payload,
+          }
+        : null
+
+const CHECKOUT_REFUSAL_CODES = [
+    "unauthenticated",
+    "purchaser-not-admitted",
+    "offer-unavailable",
+    "offer-version-stale",
+    "retry-identity-conflict",
+    "purchase-not-found-non-disclosing",
+    "source-unavailable",
+    "outcome-unknown",
+    "request-invalid",
+    "payment-refused",
+    "payment-failed",
+    "observed-identity-mismatch",
+] as const
+
+type CheckoutRefused = Extract<WorkspaceCheckoutAnswer, { readonly status: "refused" }>
+
+const parseCheckoutRefused = (value: Record<string, unknown>): CheckoutRefused | null => {
+    if (!isOneOf(value.code, CHECKOUT_REFUSAL_CODES)) return null
+    const answer: {
+        status: "refused"
+        code: CheckoutRefused["code"]
+        nextAction?: "login-sign-in" | "login-register" | "login-verify-email"
+        purchaseId?: string
+        offers?: ReadonlyArray<WorkspaceCheckoutOffer>
+        purchase?: WorkspaceCheckoutStatusView
+    } = { status: "refused", code: value.code }
+    if (value.nextAction !== undefined) {
+        if (!isOneOf(value.nextAction, ["login-sign-in", "login-register", "login-verify-email"])) return null
+        answer.nextAction = value.nextAction
+    }
+    if (value.purchaseId !== undefined) {
+        if (!isString(value.purchaseId)) return null
+        answer.purchaseId = value.purchaseId
+    }
+    if (value.offers !== undefined) {
+        const offers = parseEach(value.offers, parseCheckoutOffer)
+        if (offers === null) return null
+        answer.offers = offers
+    }
+    if (value.purchase !== undefined) {
+        const purchase = parseStatusView(value.purchase)
+        if (purchase === null) return null
+        answer.purchase = purchase
+    }
+    return answer
+}
+
+/** Parse the `data` of the workspace-checkout documents: the whole closed outcome union. */
+export const parseWorkspaceCheckoutAnswer = (input: unknown): WorkspaceCheckoutAnswer | null => {
+    if (!isRecord(input) || !isString(input.status)) return null
+    switch (input.status) {
+        case "offers": {
+            const offers = parseEach(input.offers, parseCheckoutOffer)
+            const selection = parseCheckoutSelection(input.selection)
+            if (offers === null || selection === null) return null
+            return { status: "offers", offers, selection }
+        }
+        case "prepared": {
+            if (!isNullableString(input.purchaseId)) return null
+            const purchase = parseStatusView(input.purchase)
+            if (purchase === null) return null
+            const paymentAction =
+                input.paymentAction === null || input.paymentAction === undefined
+                    ? null
+                    : parsePaymentAction(input.paymentAction)
+            if (input.paymentAction !== null && input.paymentAction !== undefined && paymentAction === null) {
+                return null
+            }
+            return { status: "prepared", purchaseId: input.purchaseId, purchase, paymentAction }
+        }
+        case "status": {
+            if (!isNullableString(input.purchaseId)) return null
+            const purchase = parseStatusView(input.purchase)
+            return purchase === null ? null : { status: "status", purchaseId: input.purchaseId, purchase }
+        }
+        case "refused":
+            return parseCheckoutRefused(input)
+        case "unavailable": {
+            if (input.code !== "source-unavailable" || !isString(input.source)) return null
+            const purchaseId = input.purchaseId
+            if (purchaseId !== undefined && !isString(purchaseId)) return null
+            return purchaseId === undefined
+                ? { status: "unavailable", code: "source-unavailable", source: input.source }
+                : { status: "unavailable", code: "source-unavailable", source: input.source, purchaseId }
+        }
+        case "conflict": {
+            if (!isOneOf(input.code, ["retry-identity-conflict", "observed-identity-mismatch"])) return null
+            const purchaseId = input.purchaseId
+            if (purchaseId !== undefined && !isString(purchaseId)) return null
+            return purchaseId === undefined
+                ? { status: "conflict", code: input.code }
+                : { status: "conflict", code: input.code, purchaseId }
+        }
+        case "outcome-unknown": {
+            if (input.code !== "outcome-unknown") return null
+            const purchaseId = input.purchaseId
+            if (purchaseId !== undefined && !isString(purchaseId)) return null
+            return purchaseId === undefined
+                ? { status: "outcome-unknown", code: "outcome-unknown" }
+                : { status: "outcome-unknown", code: "outcome-unknown", purchaseId }
+        }
+        default:
+            return null
+    }
+}
+
+const parseEntryDestination = (value: unknown): WorkspaceCheckoutEntryDestination | null =>
+    isRecord(value) &&
+    isString(value.workspaceId) &&
+    isString(value.ownerId) &&
+    isString(value.routeName) &&
+    isString(value.routeVersion) &&
+    isRecord(value.context)
+        ? {
+              workspaceId: value.workspaceId,
+              ownerId: value.ownerId,
+              routeName: value.routeName,
+              routeVersion: value.routeVersion,
+              context: value.context,
+          }
+        : null
+
+const ENTRY_REFUSAL_CODES = [
+    "unauthenticated",
+    "purchaser-not-admitted",
+    "purchase-not-found-non-disclosing",
+    "request-invalid",
+    "owner-mismatch",
+    "workspace-not-found-non-disclosing",
+    "workspace-not-ready",
+    "readiness-observation-stale",
+    "entry-unsupported",
+] as const
+
+const optionalPurchaseId = (value: Record<string, unknown>): { purchaseId?: string } | null => {
+    if (value.purchaseId === undefined) return {}
+    if (!isString(value.purchaseId)) return null
+    return { purchaseId: value.purchaseId }
+}
+
+/** Parse the `data` of `workspacePurchaseEntry`: the whole closed entry-outcome union. */
+export const parseWorkspaceCheckoutEntryOutcome = (input: unknown): WorkspaceCheckoutEntryOutcome | null => {
+    if (!isRecord(input) || !isString(input.status)) return null
+    switch (input.status) {
+        case "entry": {
+            if (!isNullableString(input.purchaseId) || !isString(input.workspaceId)) return null
+            const destination = parseEntryDestination(input.destination)
+            return destination === null
+                ? null
+                : { status: "entry", purchaseId: input.purchaseId, workspaceId: input.workspaceId, destination }
+        }
+        case "not-ready": {
+            if (!isNullableString(input.purchaseId)) return null
+            const purchase = parseStatusView(input.purchase)
+            return purchase === null
+                ? null
+                : { status: "not-ready", purchaseId: input.purchaseId, purchase }
+        }
+        case "refused": {
+            if (!isOneOf(input.code, ENTRY_REFUSAL_CODES)) return null
+            const purchaseId = optionalPurchaseId(input)
+            return purchaseId === null ? null : { status: "refused", code: input.code, ...purchaseId }
+        }
+        case "unavailable": {
+            if (!isOneOf(input.code, ["source-unavailable", "entry-owner-unavailable"]) || !isString(input.source)) {
+                return null
+            }
+            const purchaseId = optionalPurchaseId(input)
+            return purchaseId === null
+                ? null
+                : { status: "unavailable", code: input.code, source: input.source, ...purchaseId }
+        }
+        case "conflict": {
+            if (input.code !== "observed-identity-mismatch") return null
+            const purchaseId = optionalPurchaseId(input)
+            return purchaseId === null
+                ? null
+                : { status: "conflict", code: "observed-identity-mismatch", ...purchaseId }
+        }
+        default:
+            return null
+    }
+}
+
+const parseSagaRow = (value: unknown): WorkspaceProvisioningSaga | null =>
+    isRecord(value) &&
+    isString(value.id) &&
+    isString(value.jobId) &&
+    isString(value.definitionKey) &&
+    isNumber(value.definitionVersion) &&
+    isString(value.resourceKind) &&
+    isString(value.resourceId) &&
+    isString(value.ownerId) &&
+    isOneOf(value.status, [
+        "queued",
+        "running_forward",
+        "waiting_retry",
+        "compensating",
+        "completed",
+        "compensated",
+        "compensation_failed",
+    ]) &&
+    isOneOf(value.direction, ["forward", "compensating"]) &&
+    isNumber(value.forwardCursor) &&
+    isNullableNumber(value.compensationCursor) &&
+    isNumber(value.sequence) &&
+    isNullableString(value.failureCode) &&
+    isNullableString(value.failureReason) &&
+    isNullableString(value.finishedAt) &&
+    isString(value.createdAt) &&
+    isString(value.updatedAt)
+        ? {
+              id: value.id,
+              jobId: value.jobId,
+              definitionKey: value.definitionKey,
+              definitionVersion: value.definitionVersion,
+              resourceKind: value.resourceKind,
+              resourceId: value.resourceId,
+              ownerId: value.ownerId,
+              status: value.status,
+              direction: value.direction,
+              forwardCursor: value.forwardCursor,
+              compensationCursor: value.compensationCursor,
+              sequence: value.sequence,
+              failureCode: value.failureCode,
+              failureReason: value.failureReason,
+              finishedAt: value.finishedAt,
+              createdAt: value.createdAt,
+              updatedAt: value.updatedAt,
+          }
+        : null
+
+/** Parse the `data` of `retryProvisioningSaga`/`cancelProvisioningSaga`: one saga row. */
+export const parseProvisioningSaga = (input: unknown): WorkspaceProvisioningSaga | null => parseSagaRow(input)
+
+const SAGA_STEP_STATUSES = [
+    "pending",
+    "running",
+    "completed",
+    "failed",
+    "compensating",
+    "compensated",
+    "compensation_failed",
+    "skipped",
+] as const
+
+const parseSagaStep = (value: unknown): WorkspaceProvisioningSagaStep | null =>
+    isRecord(value) &&
+    isString(value.id) &&
+    isString(value.stepKey) &&
+    isNumber(value.ordinal) &&
+    isBoolean(value.isCompensable) &&
+    isOneOf(value.forwardStatus, SAGA_STEP_STATUSES) &&
+    isOneOf(value.compensationStatus, SAGA_STEP_STATUSES) &&
+    isNullableString(value.lastError) &&
+    isString(value.createdAt) &&
+    isString(value.updatedAt)
+        ? {
+              id: value.id,
+              stepKey: value.stepKey,
+              ordinal: value.ordinal,
+              isCompensable: value.isCompensable,
+              forwardStatus: value.forwardStatus,
+              compensationStatus: value.compensationStatus,
+              lastError: value.lastError,
+              createdAt: value.createdAt,
+              updatedAt: value.updatedAt,
+          }
+        : null
+
+/** Parse the `data` of `myProvisioningSaga`: `{ saga, steps }`. */
+export const parseProvisioningSagaView = (input: unknown): WorkspaceProvisioningSagaView | null => {
+    if (!isRecord(input)) return null
+    const saga = parseSagaRow(input.saga)
+    const steps = parseEach(input.steps, parseSagaStep)
+    if (saga === null || steps === null) return null
+    return { saga, steps }
+}

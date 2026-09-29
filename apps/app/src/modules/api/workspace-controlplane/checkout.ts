@@ -4,6 +4,7 @@ import {
     WORKSPACE_CHECKOUT_ENTRY_FIELDS,
     WORKSPACE_CHECKOUT_OUTCOME_FIELDS,
 } from "./checkout-documents"
+import { parseWorkspaceCheckoutAnswer, parseWorkspaceCheckoutEntryOutcome } from "./payload.guards"
 import type {
     WorkspaceCheckoutAnswer,
     WorkspaceCheckoutEntryOutcome,
@@ -19,6 +20,7 @@ export const readWorkspaceCheckoutOffers = (
 ): Promise<Outcome<WorkspaceCheckoutAnswer>> =>
     graphql(
         `query WorkspaceCheckoutOffers($request: WorkspaceCheckoutOffersInput!) { workspaceCheckoutOffers(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`,
+        parseWorkspaceCheckoutAnswer,
         {
             request: {
                 offerId,
@@ -44,6 +46,7 @@ export const startWorkspaceCheckoutPurchase = (
 ): Promise<Outcome<WorkspaceCheckoutAnswer>> =>
     graphql(
         `mutation WorkspaceCheckoutStart($request: WorkspaceCheckoutStartInput!) { workspaceCheckoutStart(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`,
+        parseWorkspaceCheckoutAnswer,
         {
             request: {
                 retryKey: request.retryKey,
@@ -69,6 +72,7 @@ export const startWorkspaceCheckoutPurchase = (
 export const readWorkspaceCheckoutStatus = (purchaseId: string): Promise<Outcome<WorkspaceCheckoutAnswer>> =>
     graphql(
         `query WorkspacePurchaseStatus($request: WorkspacePurchaseStatusInput!) { workspacePurchaseStatus(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`,
+        parseWorkspaceCheckoutAnswer,
         {
             request: {
                 purchaseId,
@@ -93,6 +97,7 @@ export const recoverWorkspacePurchase = (
 ): Promise<Outcome<WorkspaceCheckoutAnswer>> =>
     graphql(
         `mutation WorkspacePurchaseRecover($request: WorkspacePurchaseRecoverInput!) { workspacePurchaseRecover(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`,
+        parseWorkspaceCheckoutAnswer,
         {
             request: {
                 purchaseId: request.purchaseId,
@@ -118,6 +123,7 @@ export const resolveWorkspaceCheckoutEntry = (
 ): Promise<Outcome<WorkspaceCheckoutEntryOutcome>> =>
     graphql(
         `query WorkspacePurchaseEntry($request: WorkspacePurchaseEntryInput!) { workspacePurchaseEntry(request: $request) { data { ${WORKSPACE_CHECKOUT_ENTRY_FIELDS} } message success error } }`,
+        parseWorkspaceCheckoutEntryOutcome,
         {
             request: {
                 purchaseId: request.purchaseId,
