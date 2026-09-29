@@ -1,15 +1,16 @@
 import { expect, test } from "@playwright/test"
 import { mkdirSync } from "node:fs"
 import { resolve } from "node:path"
-import { serveNextApp } from "./serve-next"
+import { serveNextApp, type ServedApp } from "./support/serve-next"
 
 /**
  * The suite owns its server: the production landing app on the port `playwright.config.ts` names
  * as baseURL, started once per run (NIVO_FE_E2E_LANDING_URL drives a server the caller owns).
+ * Each route test runs once per viewport project (see playwright.config.ts).
  */
 const LANDING_PORT = 5067
 const EXTERNAL_URL = process.env.NIVO_FE_E2E_LANDING_URL
-let landingServer: { stop: () => void } | undefined
+let landingServer: ServedApp | undefined
 
 test.beforeAll(async () => {
     if (EXTERNAL_URL) return
@@ -23,12 +24,6 @@ test.afterAll(() => {
 type RouteContract = {
     readonly path: string
     readonly artifactName: string
-}
-
-type ViewportContract = {
-    readonly name: string
-    readonly width: number
-    readonly height: number
 }
 
 const ROUTES: ReadonlyArray<RouteContract> = [
@@ -45,12 +40,6 @@ const ROUTES: ReadonlyArray<RouteContract> = [
     { path: "/contact", artifactName: "contact" },
 ]
 
-const VIEWPORTS: ReadonlyArray<ViewportContract> = [
-    { name: "desktop", width: 1440, height: 900 },
-    { name: "tablet", width: 834, height: 1112 },
-    { name: "mobile", width: 390, height: 844 },
-]
-
 const DOCUMENTED_SECTIONS = [
     { path: "/", selectors: ["#home-hero-title", "#home-today-title", "#home-relevance-title", "#home-operating-model-title", "#home-commercial-title", "#home-next-path-title"] },
     { path: "/nivo-os", selectors: ["#product-page-title", "#responsibility-center", "#operating-model", "#capability-model", "#nivo-os-today", "#trust-bridge", "#target-architecture", "#next-path"] },
@@ -64,36 +53,33 @@ const DOCUMENTED_SECTIONS = [
     { path: "/contact", selectors: ["#choose-intent", "#intent-router", "#adaptive-form", "#contact-next-step", "#direct-paths"] },
 ] as const
 
-const EVIDENCE_ROOT = resolve(
-    "D:/Repositories/nivo-backend/.starciwork/evidence/wf-nivo-fe-debt-mug06w7h.e2e/renders",
-)
+/* Render evidence stays inside the runner's own gitignored output dir; e2e never writes to a
+   sibling repository. The artifact name carries the viewport project the run sized the page to. */
+const EVIDENCE_ROOT = resolve("test-results", "renders")
 
 mkdirSync(EVIDENCE_ROOT, { recursive: true })
 
 test.describe("NIVO.VN delivery baselines", () => {
     for (const route of ROUTES) {
-        for (const viewport of VIEWPORTS) {
-            test(`${route.path} renders at ${viewport.name}`, async ({ page }) => {
-                await page.setViewportSize(viewport)
-                const response = await page.goto(route.path, { waitUntil: "networkidle" })
+        test(`${route.path} renders`, async ({ page }, testInfo) => {
+            const response = await page.goto(route.path, { waitUntil: "networkidle" })
 
-                expect(response?.status()).toBe(200)
-                await expect(page.locator("main")).toBeVisible()
-                await expect(page.locator("h1")).toHaveCount(1)
-                await expect(page.locator("footer")).toBeVisible()
+            expect(response?.status()).toBe(200)
+            await expect(page.locator("main")).toBeVisible()
+            await expect(page.locator("h1")).toHaveCount(1)
+            await expect(page.locator("footer")).toBeVisible()
 
-                const horizontalOverflow = await page.evaluate(() =>
-                    document.documentElement.scrollWidth > document.documentElement.clientWidth,
-                )
-                expect(horizontalOverflow).toBe(false)
+            const horizontalOverflow = await page.evaluate(() =>
+                document.documentElement.scrollWidth > document.documentElement.clientWidth,
+            )
+            expect(horizontalOverflow).toBe(false)
 
-                await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" })
-                await page.screenshot({
-                    fullPage: true,
-                    path: resolve(EVIDENCE_ROOT, `${route.artifactName}--${viewport.name}.png`),
-                })
+            await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" })
+            await page.screenshot({
+                fullPage: true,
+                path: resolve(EVIDENCE_ROOT, `${route.artifactName}--${testInfo.project.name}.png`),
             })
-        }
+        })
     }
 
     test("the homepage renders the approved art-direction v18 mascot", async ({ page }) => {
