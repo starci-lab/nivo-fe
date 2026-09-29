@@ -1,10 +1,10 @@
 import { StatusActionCard } from "@nivo/ui"
 import { SurfaceCard, Button, Input, Text } from "@starci/grammar/common"
-import { QueryNotice } from "@/components/blocks/query/QueryNotice"
+import { QueryNotice } from "../../query/QueryNotice"
 import type {
     AcademyIntegrationCenterProps,
     AcademyIntegrationCenterViewProps,
-} from "@/modules/academy/integration-center"
+} from "../../../../modules/academy/integration-center"
 
 export type {
     AcademyIntegrationCard,
@@ -13,7 +13,7 @@ export type {
     AcademyIntegrationCenterProps,
     AcademyIntegrationCenterViewProps,
     AcademyIntegrationFormField,
-} from "@/modules/academy/integration-center"
+} from "../../../../modules/academy/integration-center"
 
 /** Render provider status and one selected write-only setup form. */
 const AcademyIntegrationCenterContent = (input: AcademyIntegrationCenterViewProps) => {

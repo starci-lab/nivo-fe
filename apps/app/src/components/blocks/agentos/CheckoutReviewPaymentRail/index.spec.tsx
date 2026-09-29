@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import type { CheckoutReviewCopy, CheckoutReviewDecisionProps } from "@/modules/agentos/checkout-review"
+import type { CheckoutReviewCopy, CheckoutReviewDecisionProps } from "../../../../modules/agentos/checkout-review"
 import { CheckoutReviewPaymentRail } from "."
 
 const copy: CheckoutReviewCopy = {

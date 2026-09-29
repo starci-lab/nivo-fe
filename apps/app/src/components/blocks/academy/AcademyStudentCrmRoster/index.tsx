@@ -1,8 +1,8 @@
 import type { ReactNode } from "react"
 import { Avatar } from "@nivo/ui"
 import { SurfaceCard, Button, Button as CoreButton, Text, TextAction, Badge } from "@starci/grammar/common"
-import type { AcademyStudentCrmActions, AcademyStudentCrmLabels } from "@/modules/academy/student-crm"
-import type { AcademyStudent } from "@/modules/api/academy"
+import type { AcademyStudentCrmActions, AcademyStudentCrmLabels } from "../../../../modules/academy/student-crm"
+import type { AcademyStudent } from "../../../../modules/api/academy"
 import { ACADEMY_STUDENT_CRM_ROSTER_CLASS_NAME } from "./classNames"
 
 type AcademyStudentCrmRosterProps = {

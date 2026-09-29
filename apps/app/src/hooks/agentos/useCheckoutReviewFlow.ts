@@ -2,8 +2,8 @@
 
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
-import { useAccessToken, useQueryWorkspaceCheckoutOffersSwr, useRouter, useSession } from "@/hooks"
-import { getPathname } from "@/modules/i18n/navigation"
+import { useAccessToken, useQueryWorkspaceCheckoutOffersSwr, useRouter, useSession } from ".."
+import { getPathname } from "../../modules/i18n/navigation"
 import {
     checkoutFactsFor,
     frozenOfferFor,
@@ -12,7 +12,7 @@ import {
     type CheckoutReviewFlowBaseProps,
     type CheckoutReviewFlowProps,
     type CheckoutReviewRailOption,
-} from "@/modules/agentos/checkout-review"
+} from "../../modules/agentos/checkout-review"
 import { useCheckoutReviewPayment } from "./useCheckoutReviewPayment"
 
 const OFFER_SELECTION_PATH = "/agentos/workspaces/new"

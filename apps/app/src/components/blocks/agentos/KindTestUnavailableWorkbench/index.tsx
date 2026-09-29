@@ -1,5 +1,5 @@
 import { Button, Heading, Text } from "@starci/grammar/common"
-import type { TestWorkbenchComponentProps } from "@/modules/agentos/kind-test-workbench"
+import type { TestWorkbenchComponentProps } from "../../../../modules/agentos/kind-test-workbench"
 import { KIND_TEST_UNAVAILABLE_CLASS_NAME } from "./classNames"
 
 type KindTestUnavailableWorkbenchProps = TestWorkbenchComponentProps

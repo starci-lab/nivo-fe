@@ -1,15 +1,15 @@
 import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { useSubmitAcademyLead } from "@/hooks"
-import type { Course } from "@/modules/api/academy"
-import type { Locale } from "@/modules/i18n/config"
+import { useSubmitAcademyLead } from ".."
+import type { Course } from "../../modules/api/academy"
+import type { Locale } from "../../modules/i18n/config"
 import {
     academySectionsOf,
     type AcademySectionsBaseProps,
     type AcademySectionsCopy,
     type LeadStatus,
     type LeadSubmit,
-} from "@/modules/academy/academy-sections"
+} from "../../modules/academy/academy-sections"
 
 /** Own translations, authored-content projection and transient browser action state. */
 export const useAcademySections = (courses: ReadonlyArray<Course>): AcademySectionsBaseProps => {

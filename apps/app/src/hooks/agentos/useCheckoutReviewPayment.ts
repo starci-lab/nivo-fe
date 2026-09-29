@@ -1,19 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import { useMutateWorkspaceCheckoutStartSwr, useRouter } from "@/hooks"
+import { useMutateWorkspaceCheckoutStartSwr, useRouter } from ".."
 import type {
     WorkspaceCheckoutAnswer,
     WorkspaceCheckoutOffer,
     WorkspaceCheckoutPaymentRail,
     WorkspaceCheckoutStartRequest,
-} from "@/modules/api/workspace-controlplane"
+} from "../../modules/api/workspace-controlplane"
 import {
     purchaseStatusPath,
     redirectDestination,
     retryKeyFor,
     type CheckoutReviewStartOutcome,
-} from "@/modules/agentos/checkout-review"
+} from "../../modules/agentos/checkout-review"
 
 export type CheckoutReviewPaymentCopy = {
     readonly checkoutUnavailable: string

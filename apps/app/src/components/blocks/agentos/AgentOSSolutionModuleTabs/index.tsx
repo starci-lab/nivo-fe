@@ -3,7 +3,7 @@ import { EmptyNotice, Icon, SurfaceCard, Text } from "@starci/grammar/common"
 import type {
     AgentOSSolutionModuleCenterProps,
     AgentOSSolutionModuleCenterViewProps,
-} from "@/modules/agentos/solution-module-center"
+} from "../../../../modules/agentos/solution-module-center"
 import { SOLUTION_TABS_CARD_LIST_CLASS_NAME } from "./classNames"
 
 /** Settled tab view plus the two controls owned by its connected parent. */

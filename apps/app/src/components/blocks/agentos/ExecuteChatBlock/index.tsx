@@ -10,8 +10,8 @@ import {
     type TrustedWidgetActionHandler,
     type TrustedWidgetComponentProps,
     type TrustedWidgetRegistry,
-} from "@/modules/agentos/execute-chat"
-import { useExecuteChatComposer } from "@/hooks/agentos/useExecuteChatComposer"
+} from "../../../../modules/agentos/execute-chat"
+import { useExecuteChatComposer } from "../../../../hooks/agentos/useExecuteChatComposer"
 import { ExecuteChatComposer } from "../ExecuteChatComposer"
 import { ExecuteChatTranscript } from "../ExecuteChatTranscript"
 import { ExecuteChatWidget } from "../ExecuteChatWidget"
@@ -25,7 +25,7 @@ export type {
     TrustedWidgetActionHandler,
     TrustedWidgetComponentProps,
     TrustedWidgetRegistry,
-} from "@/modules/agentos/execute-chat"
+} from "../../../../modules/agentos/execute-chat"
 
 /** Built-in trusted widget ComponentTypes aligned with the backend registry. */
 export const DEFAULT_WIDGET_REGISTRY: TrustedWidgetRegistry = {

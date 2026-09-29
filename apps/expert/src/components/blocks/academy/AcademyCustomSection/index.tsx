@@ -1,6 +1,6 @@
 import { Fragment } from "react"
 import { Button, Heading, Text } from "@starci/grammar/common"
-import type { AcademySection, AcademySectionImageState } from "@/modules/academy/academy-sections"
+import type { AcademySection, AcademySectionImageState } from "../../../../modules/academy/academy-sections"
 import { AcademySectionBand } from "../AcademySectionBand"
 import { AcademySectionFigure } from "../AcademySectionFigure"
 import { CUSTOM_BODY_CLASS_NAME, PULL_QUOTE_CLASS_NAME } from "./classNames"

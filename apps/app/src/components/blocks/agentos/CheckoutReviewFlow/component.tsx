@@ -11,7 +11,7 @@ import type {
     CheckoutReviewCopy,
     CheckoutReviewFlowBaseProps,
     CheckoutReviewLinks,
-} from "@/modules/agentos/checkout-review"
+} from "../../../../modules/agentos/checkout-review"
 import { CheckoutReviewFactsPanel } from "../CheckoutReviewFactsPanel"
 import { RAIL_BAND_CLASS_NAME } from "../CheckoutReviewPaymentRail/classNames"
 import { CheckoutReviewPaymentRail } from "../CheckoutReviewPaymentRail"
@@ -22,7 +22,7 @@ export type {
     CheckoutReviewFacts,
     CheckoutReviewFlowBaseProps,
     CheckoutReviewRailOption,
-} from "@/modules/agentos/checkout-review"
+} from "../../../../modules/agentos/checkout-review"
 
 /* This alias is the name required by the render-half public signature rule. */
 type CheckoutReviewFlowProps = CheckoutReviewFlowBaseProps

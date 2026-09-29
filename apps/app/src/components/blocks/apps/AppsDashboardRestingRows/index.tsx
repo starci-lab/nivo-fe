@@ -1,4 +1,4 @@
-import { FleetRow } from "@/components/blocks/provisioning/FleetRow"
+import { FleetRow } from "../../provisioning/FleetRow"
 import { APPS_DASHBOARD_RESTING_ROWS_CLASS_NAME } from "./classNames"
 
 export type AppsDashboardRestingRowsProps = { readonly indexes: ReadonlyArray<number> }

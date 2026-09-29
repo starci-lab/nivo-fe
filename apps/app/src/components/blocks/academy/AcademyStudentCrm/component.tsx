@@ -1,4 +1,4 @@
-import type { AcademyStudentCrmProps } from "@/modules/academy/student-crm"
+import type { AcademyStudentCrmProps } from "../../../../modules/academy/student-crm"
 import { AcademyStudentCrmCreateStudent } from "../AcademyStudentCrmCreateStudent"
 import { AcademyStudentCrmDetail } from "../AcademyStudentCrmDetail"
 import { AcademyStudentCrmRoster } from "../AcademyStudentCrmRoster"
@@ -9,7 +9,7 @@ export type {
     AcademyStudentCrmLabels,
     AcademyStudentCrmProps,
     AcademyStudentCrmViewProps,
-} from "@/modules/academy/student-crm"
+} from "../../../../modules/academy/student-crm"
 
 type AcademyStudentCrmBaseProps = AcademyStudentCrmProps
 

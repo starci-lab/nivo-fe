@@ -1,12 +1,12 @@
 import { IconSource } from "@nivo/ui"
 import { Button, EmptyNotice, Icon, SurfaceCard, Text } from "@starci/grammar/common"
-import { FleetRow } from "@/components/blocks/provisioning/FleetRow"
+import { FleetRow } from "../../provisioning/FleetRow"
 import {
     supportedTemplateOffer,
     type CatalogueSectionView,
     type OwnedAppRow,
     type OwnedSectionView,
-} from "@/modules/apps/apps-dashboard"
+} from "../../../../modules/apps/apps-dashboard"
 import { AppsDashboardRefusedSection } from "../AppsDashboardRefusedSection"
 import { AppsDashboardRestingRows } from "../AppsDashboardRestingRows"
 import { APPS_DASHBOARD_OWNED_LIST_CLASS_NAME } from "./classNames"

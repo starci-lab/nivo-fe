@@ -5,7 +5,7 @@ import {
     parseOverride,
     titleByWorkbench,
     type TestWorkbenchComponentProps,
-} from "@/modules/agentos/kind-test-workbench"
+} from "../../../../modules/agentos/kind-test-workbench"
 import { KIND_TEST_SCENARIO_CLASS_NAME } from "./classNames"
 
 type KindTestScenarioWorkbenchProps = TestWorkbenchComponentProps

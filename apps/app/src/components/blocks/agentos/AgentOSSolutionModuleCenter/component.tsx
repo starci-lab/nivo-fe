@@ -1,7 +1,7 @@
 import type {
     AgentOSSolutionModuleCenterProps,
     AgentOSSolutionModuleCenterViewProps,
-} from "@/modules/agentos/solution-module-center"
+} from "../../../../modules/agentos/solution-module-center"
 import { AgentOSSolutionModuleLedger } from "../AgentOSSolutionModuleLedger"
 import { AgentOSSolutionModuleTabs } from "../AgentOSSolutionModuleTabs"
 
@@ -12,7 +12,7 @@ export type {
     AgentOSSolutionModuleCenterProps,
     AgentOSSolutionModuleLedgerProps,
     AgentOSSolutionModuleCenterViewProps,
-} from "@/modules/agentos/solution-module-center"
+} from "../../../../modules/agentos/solution-module-center"
 
 /** Stable typed root for the module center's tabs and ledger presentations. */
 export const AgentOSSolutionModuleCenterBase = (props: AgentOSSolutionModuleCenterProps) => {

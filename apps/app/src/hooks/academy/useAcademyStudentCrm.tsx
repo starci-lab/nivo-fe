@@ -7,11 +7,11 @@ import {
     useMutateSetAcademyStudentStatusSwr,
     useQueryMyAcademyStudentDetailSwr,
     useQueryMyAcademyStudentsSwr,
-} from "@/hooks"
-import { nivoQueryReading } from "@/modules/query"
-import { QueryNotice } from "@/components/blocks/query/QueryNotice"
-import type { AcademyStudentCrmViewProps } from "@/modules/academy/student-crm"
-import { academyStudentDetailStateOf, academyStudentListStateOf } from "@/modules/academy/student-crm-state"
+} from ".."
+import { nivoQueryReading } from "../../modules/query"
+import { QueryNotice } from "../../components/blocks/query/QueryNotice"
+import type { AcademyStudentCrmViewProps } from "../../modules/academy/student-crm"
+import { academyStudentDetailStateOf, academyStudentListStateOf } from "../../modules/academy/student-crm-state"
 
 /** Own the student CRM's requests and targeted actions. */
 export const useAcademyStudentCrm = (siteId: string): AcademyStudentCrmViewProps => {

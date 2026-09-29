@@ -5,7 +5,7 @@ import {
     supportedTemplateOffer,
     type AppsDashboardActions,
     type AppsDashboardData,
-} from "@/modules/apps/apps-dashboard"
+} from "../../../../modules/apps/apps-dashboard"
 
 export type {
     AppsDashboardActions,
@@ -14,7 +14,7 @@ export type {
     OwnedAppRow,
     OwnedSectionView,
     TemplateOfferRowView,
-} from "@/modules/apps/apps-dashboard"
+} from "../../../../modules/apps/apps-dashboard"
 
 type AppsDashboardProps = { readonly props: AppsDashboardData; readonly on: AppsDashboardActions }
 

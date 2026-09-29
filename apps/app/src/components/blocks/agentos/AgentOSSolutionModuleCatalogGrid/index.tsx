@@ -1,5 +1,5 @@
 import { StatusActionCard } from "@nivo/ui"
-import type { AgentOSSolutionModuleCard } from "@/modules/agentos/solution-module-center"
+import type { AgentOSSolutionModuleCard } from "../../../../modules/agentos/solution-module-center"
 import { SOLUTION_CATALOG_GRID_CLASS_NAME } from "./classNames"
 
 export type AgentOSSolutionModuleCatalogGridProps = {

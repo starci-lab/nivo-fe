@@ -1,13 +1,13 @@
 import { useState } from "react"
 import { useTranslations } from "next-intl"
-import { useMutateAcademyIntegrationSwr, useQueryMyAcademyIntegrationsSwr } from "@/hooks"
-import type { AcademyIntegrations } from "@/modules/api/academy"
-import { nivoQueryReading } from "@/modules/query"
+import { useMutateAcademyIntegrationSwr, useQueryMyAcademyIntegrationsSwr } from ".."
+import type { AcademyIntegrations } from "../../modules/api/academy"
+import { nivoQueryReading } from "../../modules/query"
 import type {
     AcademyIntegrationCard,
     AcademyIntegrationCenterViewProps,
     AcademyIntegrationFormField,
-} from "@/modules/academy/integration-center"
+} from "../../modules/academy/integration-center"
 import {
     academyIntegrationCardFactsOf,
     academyIntegrationCommandOf,
@@ -16,7 +16,7 @@ import {
     academyIntegrationStatusKeyOf,
     academyIntegrationToneOf,
     type AcademyIntegrationProviderId,
-} from "@/modules/academy/integration-center"
+} from "../../modules/academy/integration-center"
 
 /** Own provider queries, write-only forms, and post-save feedback. */
 export const useAcademyIntegrationCenter = (siteId: string): AcademyIntegrationCenterViewProps => {

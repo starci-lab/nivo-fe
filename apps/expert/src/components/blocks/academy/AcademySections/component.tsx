@@ -1,5 +1,5 @@
 import { Fragment } from "react"
-import type { AcademySectionsBaseProps } from "@/modules/academy/academy-sections"
+import type { AcademySectionsBaseProps } from "../../../../modules/academy/academy-sections"
 import { AcademySectionRenderer } from "../AcademySectionRenderer"
 
 export type {
@@ -8,7 +8,7 @@ export type {
     AcademySectionsBaseProps,
     LeadStatus,
     LeadSubmit,
-} from "@/modules/academy/academy-sections"
+} from "../../../../modules/academy/academy-sections"
 
 type AcademySectionsProps = AcademySectionsBaseProps
 

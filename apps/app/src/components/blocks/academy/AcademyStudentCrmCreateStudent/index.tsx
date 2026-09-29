@@ -1,5 +1,5 @@
 import { Button, Input, SurfaceCard } from "@starci/grammar/common"
-import type { AcademyStudentCrmActions, AcademyStudentCrmLabels } from "@/modules/academy/student-crm"
+import type { AcademyStudentCrmActions, AcademyStudentCrmLabels } from "../../../../modules/academy/student-crm"
 import { ACADEMY_STUDENT_CRM_CREATE_CLASS_NAME } from "./classNames"
 
 type AcademyStudentCrmCreateStudentProps = {

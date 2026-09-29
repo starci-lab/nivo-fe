@@ -1,6 +1,6 @@
-import type { AcademyIntegrations } from "@/modules/api/academy"
+import type { AcademyIntegrations } from "../api/academy"
 import type { BadgeTone, InputKind } from "@starci/grammar/common"
-import type { NivoQueryFailure } from "@/modules/query"
+import type { NivoQueryFailure } from "../query"
 
 /** Closed provider keys accepted by the Integration Center. */
 export type AcademyIntegrationProviderId =

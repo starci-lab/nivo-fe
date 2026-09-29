@@ -1,7 +1,7 @@
 import { Heading, Text } from "@starci/grammar/common"
-import { AccountingWorkbenchBlock } from "@/components/blocks/agentos/AccountingWorkbenchBlock"
-import { SalesWorkbenchBlock } from "@/components/blocks/agentos/SalesWorkbenchBlock"
-import { activeTasks, nextTask, type WorkbenchProps } from "@/modules/agentos/kind-workbench"
+import { AccountingWorkbenchBlock } from "../AccountingWorkbenchBlock"
+import { SalesWorkbenchBlock } from "../SalesWorkbenchBlock"
+import { activeTasks, nextTask, type WorkbenchProps } from "../../../../modules/agentos/kind-workbench"
 import { KIND_WORKBENCH_CONTENT_CLASS_NAME } from "./classNames"
 
 export type KindWorkbenchContentProps = {

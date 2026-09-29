@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import type { AgentosModuleTestContract } from "@/modules/api/agentos-module-tests"
-import type { KindTestWorkbenchBlockCopy, TestWorkbenchComponentProps } from "@/modules/agentos/kind-test-workbench"
+import type { AgentosModuleTestContract } from "../../../../modules/api/agentos-module-tests"
+import type { KindTestWorkbenchBlockCopy, TestWorkbenchComponentProps } from "../../../../modules/agentos/kind-test-workbench"
 import { KindTestScenarioWorkbench } from "."
 
 const copy: KindTestWorkbenchBlockCopy = {

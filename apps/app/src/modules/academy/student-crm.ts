@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import type { AcademyStudent, AcademyStudentDetail } from "@/modules/api/academy"
+import type { AcademyStudent, AcademyStudentDetail } from "../api/academy"
 
 /** Resolved copy for the student CRM block. */
 export type AcademyStudentCrmLabels = {

@@ -1,6 +1,6 @@
 import { Button } from "@starci/grammar/common"
 import { Label } from "@nivo/ui"
-import type { AcademySection, LeadStatus } from "@/modules/academy/academy-sections"
+import type { AcademySection, LeadStatus } from "../../../../modules/academy/academy-sections"
 import { AcademySectionBand } from "../AcademySectionBand"
 import { LEAD_INPUT_CLASS_NAME } from "./classNames"
 

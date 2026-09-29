@@ -1,21 +1,21 @@
 "use client"
 
 import { useFormatter, useTranslations } from "next-intl"
-import { fleetResourceHref } from "@/components/blocks/provisioning/FleetRow"
+import { fleetResourceHref } from "../../components/blocks/provisioning/FleetRow"
 import {
     useQueryCatalogItemsSwr,
     useQueryMyCatalogOrdersSwr,
     useQueryMyExpertSitesSwr,
     useQueryMyInstancesSwr,
     useRouter,
-} from "@/hooks"
+} from ".."
 import {
     catalogueSectionFor,
     ownedSectionFor,
     type AppsDashboardCopy,
     type AppsDashboardData,
-} from "@/modules/apps/apps-dashboard"
-import { ACADEMY_HOST_SUFFIX, BILLING_CURRENCY } from "@/modules/config"
+} from "../../modules/apps/apps-dashboard"
+import { ACADEMY_HOST_SUFFIX, BILLING_CURRENCY } from "../../modules/config"
 
 /** Read the account's apps and catalogue, then resolve their settled view values. */
 export const useAppsDashboard = () => {

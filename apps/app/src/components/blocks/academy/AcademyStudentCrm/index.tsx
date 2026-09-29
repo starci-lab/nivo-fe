@@ -1,6 +1,6 @@
 "use client"
 
-import { useAcademyStudentCrm } from "@/hooks/academy/useAcademyStudentCrm"
+import { useAcademyStudentCrm } from "../../../../hooks/academy/useAcademyStudentCrm"
 import { AcademyStudentCrmBase } from "./component"
 
 /** Owner-scoped identity consumed by the student CRM. */

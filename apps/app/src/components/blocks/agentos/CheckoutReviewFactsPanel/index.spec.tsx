@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import type { CheckoutReviewCopy, CheckoutReviewFacts } from "@/modules/agentos/checkout-review"
+import type { CheckoutReviewCopy, CheckoutReviewFacts } from "../../../../modules/agentos/checkout-review"
 import { CheckoutReviewFactsPanel } from "."
 
 const copy: CheckoutReviewCopy = {

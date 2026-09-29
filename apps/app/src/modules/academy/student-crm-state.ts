@@ -1,5 +1,5 @@
-import type { AcademyStudentDetail } from "@/modules/api/academy"
-import type { nivoQueryReading } from "@/modules/query"
+import type { AcademyStudentDetail } from "../api/academy"
+import type { nivoQueryReading } from "../query"
 
 /** Derive the student roster's presentation from its settled query and item count. */
 export const academyStudentListStateOf = (

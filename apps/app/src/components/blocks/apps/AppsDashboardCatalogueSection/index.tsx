@@ -1,5 +1,5 @@
 import { Badge, Button, Heading, SurfaceCard, Text, TextAction } from "@starci/grammar/common"
-import type { CatalogueSectionView, TemplateOfferRowView } from "@/modules/apps/apps-dashboard"
+import type { CatalogueSectionView, TemplateOfferRowView } from "../../../../modules/apps/apps-dashboard"
 import { AppsDashboardRefusedSection } from "../AppsDashboardRefusedSection"
 import { AppsDashboardRestingRows } from "../AppsDashboardRestingRows"
 import { APPS_DASHBOARD_CATALOGUE_CONTENT_CLASS_NAME } from "./classNames"

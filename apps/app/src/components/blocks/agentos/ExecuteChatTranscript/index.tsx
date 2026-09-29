@@ -8,7 +8,7 @@ import {
     type ExecuteMessage,
     type TrustedWidgetActionHandler,
     type TrustedWidgetRegistry,
-} from "@/modules/agentos/execute-chat"
+} from "../../../../modules/agentos/execute-chat"
 import { EXECUTE_CHAT_TRANSCRIPT_CLASS_NAME } from "./classNames"
 
 export type ExecuteChatTranscriptProps = {

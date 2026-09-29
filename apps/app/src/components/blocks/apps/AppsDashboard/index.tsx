@@ -1,6 +1,6 @@
 "use client"
 
-import { useAppsDashboard } from "@/hooks/apps/useAppsDashboard"
+import { useAppsDashboard } from "../../../../hooks/apps/useAppsDashboard"
 import { AppsDashboardBase } from "./component"
 
 /** This page has no route data; the viewer's own account is the address. */

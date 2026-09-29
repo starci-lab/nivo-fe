@@ -1,6 +1,6 @@
 import type { ComponentType } from "react"
-import type { AgentosRuntimeMessageTree } from "@/modules/api/agentos-module-runtime"
-import type { AgentosRuntimeValue, AgentosRuntimeWidgetNode } from "@/modules/api/agentos-runtime-tree"
+import type { AgentosRuntimeMessageTree } from "../api/agentos-module-runtime"
+import type { AgentosRuntimeValue, AgentosRuntimeWidgetNode } from "../api/agentos-runtime-tree"
 
 type RuntimeExecuteChatAttachmentValues = { readonly label: string; readonly mediaType: string }
 type RuntimeExecuteChatSchemaValues = { readonly version: string }

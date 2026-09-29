@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
-import type { AgentosModuleInstallation, AgentosSolutionModule } from "@/modules/api/agentos-modules"
-import type { NivoQueryReading } from "@/modules/query"
+import type { AgentosModuleInstallation, AgentosSolutionModule } from "../api/agentos-modules"
+import type { NivoQueryReading } from "../query"
 
 export type AgentOSSolutionTone = "neutral" | "success" | "warning" | "danger"
 

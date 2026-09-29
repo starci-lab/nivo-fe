@@ -1,6 +1,6 @@
 "use client"
 
-import { useAcademyIntegrationCenter } from "@/hooks/academy/useAcademyIntegrationCenter"
+import { useAcademyIntegrationCenter } from "../../../../hooks/academy/useAcademyIntegrationCenter"
 import { AcademyIntegrationCenterBase } from "./component"
 
 /** Owner-scoped identity consumed by Integration Center. */

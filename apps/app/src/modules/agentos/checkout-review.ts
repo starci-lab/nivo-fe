@@ -2,8 +2,8 @@ import type {
     WorkspaceCheckoutAnswer,
     WorkspaceCheckoutOffer,
     WorkspaceCheckoutPaymentRail,
-} from "@/modules/api/workspace-controlplane"
-import type { Outcome } from "@/modules/api/outcome"
+} from "../api/workspace-controlplane"
+import type { Outcome } from "../api/outcome"
 
 /** Resolved copy the connected owner supplies; no translation or transport lives here. */
 export type CheckoutReviewCopy = {

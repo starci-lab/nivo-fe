@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import type { CatalogueSectionView, OwnedSectionView } from "@/modules/apps/apps-dashboard"
+import type { CatalogueSectionView, OwnedSectionView } from "../../../../modules/apps/apps-dashboard"
 import { AppsDashboardOwnedSection } from "."
 
 const catalogue: CatalogueSectionView = {

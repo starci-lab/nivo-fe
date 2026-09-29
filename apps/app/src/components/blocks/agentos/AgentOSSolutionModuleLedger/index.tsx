@@ -3,7 +3,7 @@ import type {
     AgentOSSolutionLedgerRow,
     AgentOSSolutionModuleCard,
     AgentOSSolutionModuleLedgerProps as LedgerProps,
-} from "@/modules/agentos/solution-module-center"
+} from "../../../../modules/agentos/solution-module-center"
 import { AgentOSSolutionModuleCatalogGrid } from "../AgentOSSolutionModuleCatalogGrid"
 import {
     SOLUTION_LEDGER_COPY_CLASS_NAME,

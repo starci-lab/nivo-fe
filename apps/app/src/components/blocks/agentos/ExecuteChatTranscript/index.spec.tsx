@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import type { ExecuteChatBlockCopy, ExecuteMessage } from "@/modules/agentos/execute-chat"
+import type { ExecuteChatBlockCopy, ExecuteMessage } from "../../../../modules/agentos/execute-chat"
 import { ExecuteChatTranscript } from "."
 
 const copy: ExecuteChatBlockCopy = {

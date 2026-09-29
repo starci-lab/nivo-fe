@@ -8,16 +8,16 @@ import {
     useQueryMyAgentosModuleInstallationsSwr,
     useQueryMyAgentosSolutionModulesSwr,
     useAccessToken,
-} from "@/hooks"
-import type { AgentosSolutionModule } from "@/modules/api/agentos-modules"
-import { nivoQueryReading } from "@/modules/query"
+} from ".."
+import type { AgentosSolutionModule } from "../../modules/api/agentos-modules"
+import { nivoQueryReading } from "../../modules/query"
 import {
     solutionCatalogCards,
     solutionInstallationCards,
     solutionSectionState,
     type AgentOSSolutionModuleCenterCopy,
     type AgentOSSolutionModuleCenterRouteProps,
-} from "@/modules/agentos/solution-module-center"
+} from "../../modules/agentos/solution-module-center"
 
 /** Own solution reads, installation admission, and its selected Saga refresh. */
 export const useAgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterRouteProps) => {

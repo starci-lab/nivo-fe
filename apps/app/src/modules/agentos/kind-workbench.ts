@@ -1,5 +1,5 @@
 import type { ComponentType } from "react"
-import type { AgentosRuntimeOperationEvent, AgentosRuntimeTask } from "@/modules/api/agentos-module-runtime"
+import type { AgentosRuntimeOperationEvent, AgentosRuntimeTask } from "../api/agentos-module-runtime"
 
 type RuntimeWorkbenchGenericCaptionValues = { readonly version: string }
 type RuntimeWorkbenchKnowledgeCaptionValues = { readonly kind: string; readonly version: string }

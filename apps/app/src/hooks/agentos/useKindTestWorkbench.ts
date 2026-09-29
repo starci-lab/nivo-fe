@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import type { AgentosRuntimeValue } from "@/modules/api/agentos-runtime-tree"
+import type { AgentosRuntimeValue } from "../../modules/api/agentos-runtime-tree"
 import {
     setScenarioPath,
     type KindTestWorkbenchBlockProps,
     type TestWorkbenchComponentProps,
-} from "@/modules/agentos/kind-test-workbench"
+} from "../../modules/agentos/kind-test-workbench"
 
 type ScenarioOverrides = {
     readonly scenarioKey: string

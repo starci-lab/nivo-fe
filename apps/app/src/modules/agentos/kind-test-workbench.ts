@@ -1,6 +1,6 @@
 import type { ComponentType } from "react"
-import type { AgentosModuleTestContract, AgentosModuleTestScenarioContract } from "@/modules/api/agentos-module-tests"
-import type { AgentosRuntimeValue } from "@/modules/api/agentos-runtime-tree"
+import type { AgentosModuleTestContract, AgentosModuleTestScenarioContract } from "../api/agentos-module-tests"
+import type { AgentosRuntimeValue } from "../api/agentos-runtime-tree"
 
 type RuntimeKindTestBoundaryDetailValues = {
     readonly scenario: string

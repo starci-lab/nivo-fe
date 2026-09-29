@@ -1,5 +1,5 @@
 import { Badge, Text } from "@starci/grammar/common"
-import type { CheckoutReviewCopy, CheckoutReviewFacts } from "@/modules/agentos/checkout-review"
+import type { CheckoutReviewCopy, CheckoutReviewFacts } from "../../../../modules/agentos/checkout-review"
 import { FACT_ROW_CLASS_NAME, FACT_VALUE_CLASS_NAME } from "./classNames"
 
 export type CheckoutReviewFactsPanelProps = {

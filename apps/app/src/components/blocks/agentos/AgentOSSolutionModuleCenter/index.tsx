@@ -1,8 +1,8 @@
 "use client"
 
-import { useAgentOSSolutionModuleCenter } from "@/hooks/agentos/useAgentOSSolutionModuleCenter"
-import type { AgentOSSolutionModuleCenterRouteProps } from "@/modules/agentos/solution-module-center"
-import { QueryNotice } from "@/components/blocks/query/QueryNotice"
+import { useAgentOSSolutionModuleCenter } from "../../../../hooks/agentos/useAgentOSSolutionModuleCenter"
+import type { AgentOSSolutionModuleCenterRouteProps } from "../../../../modules/agentos/solution-module-center"
+import { QueryNotice } from "../../query/QueryNotice"
 import { AgentOSSolutionModuleCenterBase } from "./component"
 
 /** Exact workspace and layout scope for the connected module center. */

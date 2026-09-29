@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import type {
     AgentOSSolutionModuleCenterProps,
     AgentOSSolutionModuleCenterViewProps,
-} from "@/modules/agentos/solution-module-center"
+} from "../../../../modules/agentos/solution-module-center"
 import { AgentOSSolutionModuleTabs } from "."
 
 const view: AgentOSSolutionModuleCenterViewProps = {

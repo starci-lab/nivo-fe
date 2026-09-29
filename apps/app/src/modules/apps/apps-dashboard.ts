@@ -1,8 +1,8 @@
-import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow"
-import type { CatalogItemRow, CatalogOrderRow } from "@/modules/api/commerce"
-import type { ExpertSiteRow } from "@/modules/api/expert-sites"
-import type { InstanceRow } from "@/modules/api/instances"
-import type { Outcome } from "@/modules/api/outcome"
+import type { FleetStatus } from "../../components/blocks/provisioning/FleetRow"
+import type { CatalogItemRow, CatalogOrderRow } from "../api/commerce"
+import type { ExpertSiteRow } from "../api/expert-sites"
+import type { InstanceRow } from "../api/instances"
+import type { Outcome } from "../api/outcome"
 
 /** Public API role for one owned app or unbuilt order row. */
 export type OwnedAppRow = {

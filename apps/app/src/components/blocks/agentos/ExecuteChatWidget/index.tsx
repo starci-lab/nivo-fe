@@ -3,7 +3,7 @@ import type {
     ExecuteChatBlockCopy,
     TrustedWidgetActionHandler,
     TrustedWidgetComponentProps,
-} from "@/modules/agentos/execute-chat"
+} from "../../../../modules/agentos/execute-chat"
 import { EXECUTE_CHAT_WIDGET_CLASS_NAME } from "./classNames"
 
 type OperationKind = "support" | "finance" | "calendar" | "knowledge"

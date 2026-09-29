@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import type { KindWorkbenchBlockCopy, WorkbenchProps } from "@/modules/agentos/kind-workbench"
+import type { KindWorkbenchBlockCopy, WorkbenchProps } from "../../../../modules/agentos/kind-workbench"
 import { KindWorkbenchContent } from "."
 
 const copy = {

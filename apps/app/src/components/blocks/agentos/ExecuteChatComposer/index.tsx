@@ -1,5 +1,5 @@
 import { Button, Input, Text } from "@starci/grammar/common"
-import type { ExecuteChatBlockCopy } from "@/modules/agentos/execute-chat"
+import type { ExecuteChatBlockCopy } from "../../../../modules/agentos/execute-chat"
 import { EXECUTE_CHAT_COMPOSER_CLASS_NAME } from "./classNames"
 
 export type ExecuteChatComposerProps = {

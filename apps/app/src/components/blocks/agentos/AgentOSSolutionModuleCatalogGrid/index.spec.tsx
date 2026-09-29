@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import type { AgentOSSolutionModuleCard } from "@/modules/agentos/solution-module-center"
+import type { AgentOSSolutionModuleCard } from "../../../../modules/agentos/solution-module-center"
 import { AgentOSSolutionModuleCatalogGrid } from "."
 
 const card: AgentOSSolutionModuleCard = {

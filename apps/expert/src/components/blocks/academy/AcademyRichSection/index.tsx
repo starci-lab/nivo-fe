@@ -1,7 +1,7 @@
 import { Fragment } from "react"
 import { Badge, Heading, SurfaceCard, Text } from "@starci/grammar/common"
 import { Avatar } from "@nivo/ui"
-import type { AcademySection, AcademySectionImageState } from "@/modules/academy/academy-sections"
+import type { AcademySection, AcademySectionImageState } from "../../../../modules/academy/academy-sections"
 import { AcademySectionBand } from "../AcademySectionBand"
 import { AcademySectionFigure } from "../AcademySectionFigure"
 import { QUOTE_CLASS_NAME } from "./classNames"

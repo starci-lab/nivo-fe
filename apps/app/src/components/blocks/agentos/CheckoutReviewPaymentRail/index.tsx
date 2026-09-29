@@ -3,7 +3,7 @@ import type {
     CheckoutReviewDecisionProps,
     CheckoutReviewFlowActions,
     CheckoutReviewStep,
-} from "@/modules/agentos/checkout-review"
+} from "../../../../modules/agentos/checkout-review"
 import {
     ORDINAL_CLASS_NAME,
     RAIL_BAND_CLASS_NAME,

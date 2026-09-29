@@ -1,6 +1,6 @@
 import { Fragment } from "react"
 import { Text } from "@starci/grammar/common"
-import type { AcademySection } from "@/modules/academy/academy-sections"
+import type { AcademySection } from "../../../../modules/academy/academy-sections"
 import { AcademySectionBand } from "../AcademySectionBand"
 
 type SimpleSection = Extract<

@@ -1,8 +1,8 @@
 "use client"
 
 import { SurfaceCard } from "@starci/grammar/common"
-import { useKindTestWorkbench } from "@/hooks/agentos/useKindTestWorkbench"
-import type { KindTestWorkbenchBlockProps, TestWorkbenchRegistry } from "@/modules/agentos/kind-test-workbench"
+import { useKindTestWorkbench } from "../../../../hooks/agentos/useKindTestWorkbench"
+import type { KindTestWorkbenchBlockProps, TestWorkbenchRegistry } from "../../../../modules/agentos/kind-test-workbench"
 import { KindTestScenarioWorkbench } from "../KindTestScenarioWorkbench"
 import { KindTestUnavailableWorkbench } from "../KindTestUnavailableWorkbench"
 
@@ -11,7 +11,7 @@ export type {
     KindTestWorkbenchBlockProps,
     TestWorkbenchComponentProps,
     TestWorkbenchRegistry,
-} from "@/modules/agentos/kind-test-workbench"
+} from "../../../../modules/agentos/kind-test-workbench"
 
 /** Built-in registrations; adding a kind extends this table without editing the shell. */
 export const DEFAULT_TEST_WORKBENCH_REGISTRY: TestWorkbenchRegistry = {

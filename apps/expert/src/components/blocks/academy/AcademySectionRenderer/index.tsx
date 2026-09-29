@@ -1,4 +1,4 @@
-import type { AcademySection, AcademySectionRenderState } from "@/modules/academy/academy-sections"
+import type { AcademySection, AcademySectionRenderState } from "../../../../modules/academy/academy-sections"
 import { AcademyCustomSection } from "../AcademyCustomSection"
 import { AcademyLeadBand } from "../AcademyLeadBand"
 import { AcademyRichSection } from "../AcademyRichSection"

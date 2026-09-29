@@ -3,14 +3,14 @@
 import { SurfaceCard } from "@starci/grammar/common"
 import type { ComponentType } from "react"
 import { KindWorkbenchContent } from "../KindWorkbenchContent"
-import type { KindWorkbenchBlockProps, WorkbenchProps, WorkbenchRegistry } from "@/modules/agentos/kind-workbench"
+import type { KindWorkbenchBlockProps, WorkbenchProps, WorkbenchRegistry } from "../../../../modules/agentos/kind-workbench"
 
 export type {
     KindWorkbenchBlockCopy,
     KindWorkbenchBlockProps,
     WorkbenchProps,
     WorkbenchRegistry,
-} from "@/modules/agentos/kind-workbench"
+} from "../../../../modules/agentos/kind-workbench"
 
 const registeredWorkbench =
     (mode: Parameters<typeof KindWorkbenchContent>[0]["mode"]): ComponentType<WorkbenchProps> =>

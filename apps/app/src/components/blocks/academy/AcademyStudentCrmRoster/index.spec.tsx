@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import type { AcademyStudentCrmLabels } from "@/modules/academy/student-crm"
+import type { AcademyStudentCrmLabels } from "../../../../modules/academy/student-crm"
 import { AcademyStudentCrmRoster } from "./index"
 
 const labels: AcademyStudentCrmLabels = {

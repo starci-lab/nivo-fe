@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import type { AgentOSSolutionModuleLedgerProps } from "@/modules/agentos/solution-module-center"
+import type { AgentOSSolutionModuleLedgerProps } from "../../../../modules/agentos/solution-module-center"
 import { AgentOSSolutionModuleLedger } from "."
 
 const ledger: AgentOSSolutionModuleLedgerProps = {
