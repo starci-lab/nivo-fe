@@ -7,6 +7,7 @@
     { "id": "feature.layouts.agentos-workspace-chrome", "root": "apps/app/src/features/layouts/AgentOSWorkspaceChrome", "entry": "apps/app/src/features/layouts/AgentOSWorkspaceChrome/index.tsx" },
     { "id": "feature.layouts.agentos-installation-chrome", "root": "apps/app/src/features/layouts/AgentOSInstallationChrome", "entry": "apps/app/src/features/layouts/AgentOSInstallationChrome/index.tsx" },
     { "id": "feature.layouts.console-layout", "root": "apps/app/src/features/layouts/ConsoleLayout", "entry": "apps/app/src/features/layouts/ConsoleLayout/index.tsx" },
+    { "id": "feature.layouts.message-scope", "root": "apps/app/src/features/layouts/MessageScope", "entry": "apps/app/src/features/layouts/MessageScope/index.tsx" },
     { "id": "feature.layouts.console-top-bar", "root": "apps/app/src/features/layouts/ConsoleTopBar", "entry": "apps/app/src/features/layouts/ConsoleTopBar/index.tsx" },
     { "id": "feature.layouts.sidebar", "root": "apps/app/src/features/layouts/Sidebar", "entry": "apps/app/src/features/layouts/Sidebar/index.tsx" },
     { "id": "feature.pages.agentos", "root": "apps/app/src/features/pages/AgentOSPage", "entry": "apps/app/src/features/pages/AgentOSPage/index.tsx" },

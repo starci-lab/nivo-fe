@@ -1,20 +1,9 @@
-"use client";
-
-import type { ComponentProps } from "react";
+import type { ReactNode } from "react";
 
 import { ConsoleLayout } from "@/features/layouts/ConsoleLayout";
+import { MessageScope } from "@/features/layouts/MessageScope";
 
-type ConsoleRouteLayoutProps = {readonly children?: ComponentProps<"div">["children"];};
-
-const ConsoleRoutedBody = ({ children }: ConsoleRouteLayoutProps) => <div>{
-
-  children}</div>;
-
-
-
-/** Route-group entry for the authenticated Nivo console. */
-const Layout = ({ children }: ConsoleRouteLayoutProps) =>
-<ConsoleLayout body={ConsoleRoutedBody} bodyProps={{ children }} />;
-
+/** Route-group entry for the authenticated Nivo console: a server layout that ships the console copy and seats the routed page in the client frame. */
+const Layout = ({ children }: { readonly children: ReactNode }) => <MessageScope scope="console"><ConsoleLayout>{children}</ConsoleLayout></MessageScope>;
 
 export default Layout;

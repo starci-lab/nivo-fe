@@ -1,16 +1,15 @@
 "use client";
 
 import { useEffect } from "react";
-import type { ComponentType } from "react";
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSession } from "@/hooks";
 
-import { ConsoleLayoutBase, type ConsoleLayoutBodyProps } from "./component";
+import { ConsoleLayoutBase } from "./component";
 
-/** Connected console frame input already projected by the framework route boundary. */
+/** Connected console frame input: the routed page the server layout has already rendered. */
 export type ConsoleLayoutProps = {
-  readonly body: ComponentType<ConsoleLayoutBodyProps>;
-  readonly bodyProps: ConsoleLayoutBodyProps;
+  readonly children: ReactNode;
 };
 
 /**
@@ -30,8 +29,7 @@ const signInHrefFor = (pathname: string | null): string =>
 /** Guard the authenticated console and hand drawing to its pure layout twin. */
 export const ConsoleLayout = (props: ConsoleLayoutProps) => {
   const {
-    body,
-    bodyProps
+    children
   }: ConsoleLayoutProps = props;
   const t = useTranslations("console");
   const router = useRouter();
@@ -42,7 +40,7 @@ export const ConsoleLayout = (props: ConsoleLayoutProps) => {
   }, [status, router, pathname]);
   if (status !== "signed-in") return null;
   return <ConsoleLayoutBase
-    state={{ body, bodyProps }}
+    state={{ children }}
     props={{
       navigationLabel: t("navigationLabel"),
       primaryLabel: t("workspaceLabel")

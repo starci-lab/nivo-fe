@@ -1,21 +1,17 @@
-import type { ComponentType, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { StarCiDashboardThemeBoundary } from "@nivo/ui";
 import { WorkspaceShell } from "@starci/grammar/common";
 import { Sidebar } from "@/features/layouts/Sidebar";
 import { ConsoleTopBar } from "@/features/layouts/ConsoleTopBar";
 
-/** The routed page this frame is closed over: opaque children the route has already rendered. */
-export type ConsoleLayoutBodyProps = { readonly children?: ReactNode };
-
 /**
- * The frame's approved drawing: which routed body fills the primary slot, and the atoms it takes.
+ * The frame's approved drawing: the routed page that fills the primary slot.
  *
- * The body arrives as a component plus its props because no world-reading half may build the
- * element - instantiating it here keeps every render path on resolved pure targets.
+ * The page is the opaque element the route has already rendered on the server; the frame only seats
+ * it, so the route file stays a server layout and the client boundary is this frame alone.
  */
 export type ConsoleLayoutBaseState = {
-  readonly body: ComponentType<ConsoleLayoutBodyProps>;
-  readonly bodyProps: ConsoleLayoutBodyProps;
+  readonly children: ReactNode;
 };
 
 /** The atoms the frame's landmarks are named with. */
@@ -51,7 +47,7 @@ export type ConsoleLayoutBaseProps = {
  * every band.
  */
 const ConsoleFrame = ({
-  state: { body: Body, bodyProps },
+  state: { children },
   props: { navigationLabel, primaryLabel }
 }: ConsoleLayoutBaseProps) => <>
   <ConsoleTopBar />
@@ -63,7 +59,7 @@ const ConsoleFrame = ({
     navigationLabel={navigationLabel}
     navigationTrack="intrinsic"
     navigationVisibility="wide"
-    primary={<Body {...bodyProps} />}
+    primary={children}
     primaryLabel={primaryLabel}
   />
 </>;

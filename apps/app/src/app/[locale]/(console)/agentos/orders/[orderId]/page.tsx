@@ -1,8 +1,5 @@
 import { AgentOSPage } from "@/features/pages/AgentOSPage"
 
-/** Payment and provisioning status must be read from the current owner-scoped snapshot. */
-export const dynamic = "force-dynamic"
-
 /** Dynamic route values for resuming one AgentOS order. */
 type AgentOSOrderRouteProps = { readonly params: Promise<{ readonly orderId: string }> }
 

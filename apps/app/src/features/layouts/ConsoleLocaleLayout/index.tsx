@@ -4,6 +4,7 @@ import { hasLocale } from "next-intl";
 import { getMessages, getTimeZone, getTranslations } from "next-intl/server";
 import { Open_Sans } from "next/font/google";
 import type { ComponentProps, CSSProperties } from "react";
+import { MESSAGE_SCOPES, pickMessages } from "@/modules/i18n/messages";
 import { routing } from "@/modules/i18n/routing";
 import { ConsoleLocaleLayoutBase } from "./component";
 
@@ -70,6 +71,10 @@ export const generateStaticParams = () => routing.locales.map(locale => ({
  * right way - `/[locale]` was reported Dynamic before this change and is reported SSG after, because
  * the page under this layout never called `setRequestLocale` and so was never covered by it.
  *
+ * IT SHIPS ONLY THE SHELL COPY. The catalogue is one file per locale and the console alone is most
+ * of it, so each route group's own layout (`MessageScope`) adds the namespaces its pages read; the
+ * document shell carries `app` and nothing else.
+ *
  * IT LIVES IN `features/layouts` RATHER THAN BESIDE THE ROUTE, which is what makes the route a
  * route: `app/[locale]/layout.tsx` names which shell renders at which URL and hands the work here.
  * The viewport declaration and the stylesheet stay beside the route, because those are the route
@@ -102,7 +107,7 @@ export const ConsoleLocaleLayout = async ({
       "--font-open-sans": openSans.style.fontFamily
     } as CSSProperties}>
 
-                <ConsoleLocaleLayoutBase {...{ props: { locale, messages, timeZone }, children }} />
+                <ConsoleLocaleLayoutBase {...{ props: { locale, messages: pickMessages(messages, MESSAGE_SCOPES.root), timeZone }, children }} />
             </body>
         </html>;
 };

@@ -15,10 +15,8 @@ const precedes = (first: Element, second: Element) => Boolean(first.compareDocum
 
 describe("ConsoleLayoutBase", () => {
     it("projects Nivo chrome into the shared workspace landmarks", () => {
-        const RoutedBody = () => <p>Workspace body</p>
-
         render(<ConsoleLayoutBase
-            state={{ body: RoutedBody, bodyProps: {} }}
+            state={{ children: <p>Workspace body</p> }}
             props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace" }}
         />)
 
@@ -33,10 +31,8 @@ describe("ConsoleLayoutBase", () => {
     })
 
     it("gives every band exactly one navigation owner: rail for the shell, drawer for the compact band", () => {
-        const RoutedBody = () => <p>Workspace body</p>
-
         render(<ConsoleLayoutBase
-            state={{ body: RoutedBody, bodyProps: {} }}
+            state={{ children: <p>Workspace body</p> }}
             props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace" }}
         />)
 
@@ -53,10 +49,8 @@ describe("ConsoleLayoutBase", () => {
     })
 
     it("mounts the navigation band once, ahead of the workspace landmarks rather than inside them", () => {
-        const RoutedBody = () => <p>Workspace body</p>
-
         render(<ConsoleLayoutBase
-            state={{ body: RoutedBody, bodyProps: {} }}
+            state={{ children: <p>Workspace body</p> }}
             props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace" }}
         />)
 
