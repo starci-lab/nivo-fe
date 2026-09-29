@@ -2,6 +2,8 @@
 
 import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
+import { RouteLoadingView } from "@nivo/ui"
 import { WalletPageBase, type WalletPageState } from "./component"
 /** Public API role for WalletPageProps. */
 export type WalletPageProps = { readonly [key: string]: never }
@@ -17,8 +19,9 @@ const WalletPageSearchState = () => {
 /** Connect only the page architecture axis; WalletControlCenter owns every local block and overlay condition. */
 export const WalletPage = (props: WalletPageProps) => {
     void props
+    const t = useTranslations("boundary.loading")
     return (
-        <Suspense fallback={null}>
+        <Suspense fallback={<RouteLoadingView props={{ label: t("label") }} />}>
             <WalletPageSearchState />
         </Suspense>
     )

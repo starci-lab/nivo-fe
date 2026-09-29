@@ -1,5 +1,5 @@
 import { DropdownBranch, IconSource, type DropdownBranchItemData } from "@nivo/ui"
-import { Icon } from "@starci/grammar/common"
+import { Icon, Skeleton } from "@starci/grammar/common"
 import { Suspense, type ComponentType } from "react"
 import type { AdministratorRevocationDialogProps } from "@/components/blocks/auth/AdministratorRevocationDialog"
 import type { ReturnNoticeProps } from "@/components/blocks/auth/ReturnNotice"
@@ -131,7 +131,7 @@ export const AccountMenuBase = (props: AccountMenuProps) => {
       ancestor of the read rather than a child of it; it draws nothing of its own, and the notice is
       the only thing inside it.
     */}
-            <Suspense fallback={null}>
+            <Suspense fallback={<Skeleton shape="text" />}>
                 <ReturnNoticeControl {...returnNoticeControlProps} />
             </Suspense>
         </>
