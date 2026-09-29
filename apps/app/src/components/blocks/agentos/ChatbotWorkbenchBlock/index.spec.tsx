@@ -2,7 +2,7 @@ import { fireEvent, render as renderWithoutIntl, screen } from "@testing-library
 import { NextIntlClientProvider } from "next-intl"
 import type { ReactNode } from "react"
 import { matchMediaFixture } from "@/test-support/mock-result"
-import { TIME_ZONE } from "@/modules/i18n/config"
+import { TIME_ZONE } from "../../../../modules/i18n/config"
 import { beforeAll, describe, expect, it, vi } from "vitest"
 import { ChatbotWorkbenchBlock, type ChatbotWorkbenchBlockCopy } from "."
 

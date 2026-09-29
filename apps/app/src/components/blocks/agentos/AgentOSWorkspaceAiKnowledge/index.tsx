@@ -9,7 +9,7 @@ import { type AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledg
 import { nivoQueryReading } from "@/modules/query"
 import { useFormatter, useTranslations } from "next-intl"
 import { useState } from "react"
-import type { Formatter } from "@/modules/i18n/formatter"
+import type { Formatter } from "../../../../modules/i18n/formatter"
 import { AgentOSWorkspaceAiKnowledgeBase, type AgentOSWorkspaceAiKnowledgeViewProps } from "./component"
 /** Exact workspace identity whose AI and knowledge readiness is owned by this block. */
 export type AgentOSWorkspaceAiKnowledgeProps = {

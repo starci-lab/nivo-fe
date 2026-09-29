@@ -8,7 +8,7 @@ import {
     workspaceAppLaunchChannelName,
     type WorkspaceAppLaunchMessage,
 } from "@/modules/window/workspace-app-launch"
-import { workspace } from "@/modules/routes"
+import { workspace } from "../../../../modules/routes"
 import { useFormatter, useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
 import { AgentOSOpenClawLaunchBase, type AgentOSOpenClawLaunchLabels, type OpenClawLaunchBlockState } from "./component"

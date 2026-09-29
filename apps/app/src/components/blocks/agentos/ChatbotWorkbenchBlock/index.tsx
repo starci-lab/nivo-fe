@@ -13,7 +13,7 @@ import {
     Text,
 } from "@starci/grammar/common"
 import type { ChatbotConversation, ChatbotMessage, ChatbotWorkbench } from "@/modules/api/workspace-controlplane"
-import type { Formatter } from "@/modules/i18n/formatter"
+import type { Formatter } from "../../../../modules/i18n/formatter"
 import {
     CHATBOT_ACTIONS_CLASS_NAME,
     CHATBOT_CHANNEL_ROW_CLASS_NAME,
