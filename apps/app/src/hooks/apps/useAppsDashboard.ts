@@ -16,6 +16,7 @@ import {
     type AppsDashboardData,
 } from "../../modules/apps/apps-dashboard"
 import { ACADEMY_HOST_SUFFIX, BILLING_CURRENCY } from "../../modules/config"
+import { appFromTemplate } from "../../modules/routes"
 
 /** Read the account's apps and catalogue, then resolve their settled view values. */
 export const useAppsDashboard = () => {
@@ -62,7 +63,7 @@ export const useAppsDashboard = () => {
         owned: ownedSectionFor(sites.data, instances.data, orders.data, catalogue.data, ACADEMY_HOST_SUFFIX, copy),
         catalogue: catalogueSectionFor(catalogue.data, money, copy),
     }
-    const onBuildTemplate = (templateKey: string) => router.push(`/apps/create/${encodeURIComponent(templateKey)}`)
+    const onBuildTemplate = (templateKey: string) => router.push(appFromTemplate(templateKey))
     const onOpenOwnedApp = (siteId: string) => router.push(fleetResourceHref("site", siteId))
     return { props, on: { onBuildTemplate, onOpenOwnedApp } }
 }

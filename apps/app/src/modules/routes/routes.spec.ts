@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
     agentosHome,
     app,
+    appFromTemplate,
     appProvisioning,
     apps,
     installation,
@@ -35,6 +36,7 @@ describe("routes", () => {
         expect(purchaseProvisioning("purchase-1")).toBe("/agentos/workspaces/purchases/purchase-1/provisioning")
         expect(apps()).toBe("/apps")
         expect(app("site-1")).toBe("/apps/site-1")
+        expect(appFromTemplate("ai_academy")).toBe("/apps/create/ai_academy")
         expect(appProvisioning("site-1")).toBe("/apps/site-1/provisioning")
         expect(overview()).toBe("/overview")
     })
@@ -45,6 +47,7 @@ describe("routes", () => {
         expect(installation("w1", "i?x=1")).toBe("/agentos/workspaces/w1/modules/i%3Fx%3D1")
         expect(purchase("p#f")).toBe("/agentos/workspaces/purchases/p%23f")
         expect(app("s/s")).toBe("/apps/s%2Fs")
+        expect(appFromTemplate("ai/academy?draft")).toBe("/apps/create/ai%2Facademy%3Fdraft")
     })
 
     it("appends the checkout query only when one is given", () => {

@@ -8,6 +8,7 @@ import {
     workspaceAppLaunchChannelName,
     type WorkspaceAppLaunchMessage,
 } from "@/modules/window/workspace-app-launch"
+import { workspace } from "@/modules/routes"
 import { useFormatter, useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
 import { AgentOSOpenClawLaunchBase, type AgentOSOpenClawLaunchLabels, type OpenClawLaunchBlockState } from "./component"
@@ -124,7 +125,7 @@ export const AgentOSOpenClawLaunch = (props: AgentOSOpenClawLaunchProps) => {
                     setLaunchState("issuing")
                     setRetry((value) => value + 1)
                 },
-                onReturn: () => router.push(`/agentos/workspaces/${workspaceId}`),
+                onReturn: () => router.push(workspace(workspaceId)),
             }}
         />
     )

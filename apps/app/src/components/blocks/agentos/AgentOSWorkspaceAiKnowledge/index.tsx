@@ -7,8 +7,9 @@ import {
 } from "@/hooks"
 import { type AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge"
 import { nivoQueryReading } from "@/modules/query"
-import { useLocale, useTranslations } from "next-intl"
+import { useFormatter, useTranslations } from "next-intl"
 import { useState } from "react"
+import type { Formatter } from "@/modules/i18n/formatter"
 import { AgentOSWorkspaceAiKnowledgeBase, type AgentOSWorkspaceAiKnowledgeViewProps } from "./component"
 /** Exact workspace identity whose AI and knowledge readiness is owned by this block. */
 export type AgentOSWorkspaceAiKnowledgeProps = {
@@ -70,8 +71,8 @@ export const resolveAgentOSWorkspaceAiKnowledgeState = (
 export const AgentOSWorkspaceAiKnowledge = (props: AgentOSWorkspaceAiKnowledgeProps) => {
     const { workspaceId }: AgentOSWorkspaceAiKnowledgeProps = props
     const t = useTranslations("console.agentos.workspace.aiKnowledge")
-    const locale = useLocale()
     const noticeOf = useQueryNoticeData()
+    const format: Formatter = useFormatter()
     const [action, setAction] = useState<AgentOSWorkspaceAiKnowledgeAction>(null)
     const [actionRefused, setActionRefused] = useState(false)
     const [recoveryFromRefused, setRecoveryFromRefused] = useState(false)
@@ -162,10 +163,10 @@ export const AgentOSWorkspaceAiKnowledge = (props: AgentOSWorkspaceAiKnowledgePr
         upcoming: t("upcoming"),
         failureTitle: t("failureTitle"),
         formatTestedAt: (value: string) =>
-            new Intl.DateTimeFormat(locale, {
+            format.dateTime(new Date(value), {
                 dateStyle: "medium",
                 timeStyle: "short",
-            }).format(new Date(value)),
+            }),
     }
     return (
         <AgentOSWorkspaceAiKnowledgeBase

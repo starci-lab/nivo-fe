@@ -69,6 +69,9 @@ export const apps = (): string => "/apps"
 /** One provisioned site. */
 export const app = (siteId: string): string => `${apps()}/${segment(siteId)}`
 
+/** The template picker entry point for creating one app. */
+export const appFromTemplate = (templateKey: string): string => `${apps()}/create/${segment(templateKey)}`
+
 /** The provisioning progress of one site. */
 export const appProvisioning = (siteId: string): string => `${app(siteId)}/provisioning`
 

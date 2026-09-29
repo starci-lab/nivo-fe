@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useFormatter } from "next-intl"
 import {
     Badge,
     Button,
@@ -12,6 +13,7 @@ import {
     Text,
 } from "@starci/grammar/common"
 import type { ChatbotConversation, ChatbotMessage, ChatbotWorkbench } from "@/modules/api/workspace-controlplane"
+import type { Formatter } from "@/modules/i18n/formatter"
 import {
     CHATBOT_ACTIONS_CLASS_NAME,
     CHATBOT_CHANNEL_ROW_CLASS_NAME,
@@ -212,6 +214,7 @@ const ConversationRail = ({ props }: WorkbenchRegionProps) => {
 
 /** Responsive console composition whose rail collapse is owned by the published Grammar. */
 export const ChatbotWorkbenchBlock = (props: ChatbotWorkbenchBlockProps) => {
+    const format: Formatter = useFormatter()
     const [isRailOpen, setRailOpen] = useState(false)
     const selected =
         props.workbench?.conversations.find((conversation) => conversation.id === props.selectedConversationId) ?? null
@@ -242,7 +245,10 @@ export const ChatbotWorkbenchBlock = (props: ChatbotWorkbenchBlockProps) => {
                             <Text>{message.body}</Text>
                         </div>
                         <Text size="xs" tone="muted">
-                            {deliveryLabel(message, props.copy)} · {new Date(message.occurredAt).toLocaleString()}
+                            {deliveryLabel(message, props.copy)} · {format.dateTime(new Date(message.occurredAt), {
+                                dateStyle: "medium",
+                                timeStyle: "short",
+                            })}
                         </Text>
                         {message.deliveryState === "ambiguous" ? (
                             <div className={CHATBOT_DELIVERY_NOTICE_CLASS_NAME}>

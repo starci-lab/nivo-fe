@@ -1,7 +1,17 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render as renderWithoutIntl, screen } from "@testing-library/react"
+import { NextIntlClientProvider } from "next-intl"
+import type { ReactNode } from "react"
 import { matchMediaFixture } from "@/test-support/mock-result"
+import { TIME_ZONE } from "@/modules/i18n/config"
 import { beforeAll, describe, expect, it, vi } from "vitest"
 import { ChatbotWorkbenchBlock, type ChatbotWorkbenchBlockCopy } from "."
+
+const render = (element: ReactNode) =>
+    renderWithoutIntl(
+        <NextIntlClientProvider locale="en" messages={{}} timeZone={TIME_ZONE}>
+            {element}
+        </NextIntlClientProvider>,
+    )
 
 const copy: ChatbotWorkbenchBlockCopy = {
     title: "Chatbot workbench",
@@ -163,6 +173,25 @@ describe("ChatbotWorkbenchBlock", () => {
         fireEvent.click(screen.getByRole("button", { name: "Mark delivered" }))
         expect(resolve).toHaveBeenCalledWith("conversation-1")
         expect(reconcile).toHaveBeenCalledWith("outbox-1", true)
+    })
+
+    it("formats message timestamps through the configured app formatter", () => {
+        render(
+            <ChatbotWorkbenchBlock
+                installationId="chatbot-1"
+                workbench={workbench}
+                selectedConversationId="conversation-1"
+                pending={false}
+                refusedCode={null}
+                copy={copy}
+                onSelectConversation={action}
+                onConnectZalo={action}
+                onSetHandoff={action}
+                onResolveHandoff={action}
+                onReconcile={action}
+            />,
+        )
+        expect(printed("7:00 AM")).toBe(true)
     })
 
     it("renders empty and permission states with lawful recovery", () => {
