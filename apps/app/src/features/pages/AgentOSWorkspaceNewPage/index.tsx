@@ -1,4 +1,4 @@
-import OfferSelectionFlow from "@/components/blocks/agentos/OfferSelectionFlow";
+import OfferSelectionFlow from "@/components/blocks/agentos/OfferSelectionFlow"
 
 /**
  * The `/[locale]/agentos/workspaces/new` screen, connected half.
@@ -10,6 +10,6 @@ import OfferSelectionFlow from "@/components/blocks/agentos/OfferSelectionFlow";
  *
  * @returns The page.
  */
-export const AgentOSWorkspaceNewPage = () => <OfferSelectionFlow />;
+export const AgentOSWorkspaceNewPage = () => <OfferSelectionFlow />
 
-export default AgentOSWorkspaceNewPage;
+export default AgentOSWorkspaceNewPage

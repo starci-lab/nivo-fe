@@ -28,4 +28,6 @@ export type MessageScopeName = keyof typeof MESSAGE_SCOPES
  * @returns The catalogue reduced to those namespaces.
  */
 export const pickMessages = (messages: Messages, namespaces: ReadonlyArray<string>): Messages =>
-    Object.fromEntries(namespaces.filter(namespace => namespace in messages).map(namespace => [namespace, messages[namespace]])) as Messages
+    Object.fromEntries(
+        namespaces.filter((namespace) => namespace in messages).map((namespace) => [namespace, messages[namespace]]),
+    ) as Messages

@@ -3,7 +3,8 @@ import { pageMetadata, type LocaleParams } from "@/features/layouts/SiteShell"
 import { IdeasPage, normalizeIdeaType } from "@/features/pages/explore"
 
 /** Search and sharing metadata for the canonical Ideas route, in the routed language. */
-export const generateMetadata = ({ params }: LocaleParams): Promise<Metadata> => pageMetadata({ params, page: "explore.ideas", path: "/ideas" })
+export const generateMetadata = ({ params }: LocaleParams): Promise<Metadata> =>
+    pageMetadata({ params, page: "explore.ideas", path: "/ideas" })
 
 type IdeasRouteProps = {
     readonly searchParams: Promise<{ readonly type?: string | ReadonlyArray<string> }>

@@ -23,36 +23,29 @@
  *   here is a selection rather than a restored observation.
  */
 
-import {
-    getPathname
-} from "@/modules/i18n/navigation";
-import type {
-    Locale
-} from "@/modules/i18n/config";
-import type {
-    ShellReadScope,
-    ShellRegisteredDestination
-} from "@/modules/api/agentos-shell";
-import type { FailureKind, Outcome } from "@/modules/api/outcome";
+import { getPathname } from "@/modules/i18n/navigation"
+import type { Locale } from "@/modules/i18n/config"
+import type { ShellReadScope, ShellRegisteredDestination } from "@/modules/api/agentos-shell"
+import type { FailureKind, Outcome } from "@/modules/api/outcome"
 
 /** What the shell may do with one navigation answer. */
 export type ShellNavigationDecision =
     | {
-        readonly open: true;
-        readonly href: string;
-        readonly returnSelection: ShellReadScope;
-    }
+          readonly open: true
+          readonly href: string
+          readonly returnSelection: ShellReadScope
+      }
     | {
-        /**
-         * Why a destination was not opened: the failure kind and code that decided it, so the caller
-         * can label the outcome without re-deriving it. There is deliberately no `cancelled` case: an
-         * entry the owner abandons is the absence of a decision, not a decision, and giving it a value
-         * here would invite a caller to report a refusal it never received.
-         */
-        readonly open: false;
-        readonly kind: FailureKind;
-        readonly code: string;
-    };
+          /**
+           * Why a destination was not opened: the failure kind and code that decided it, so the caller
+           * can label the outcome without re-deriving it. There is deliberately no `cancelled` case: an
+           * entry the owner abandons is the absence of a decision, not a decision, and giving it a value
+           * here would invite a caller to report a refusal it never received.
+           */
+          readonly open: false
+          readonly kind: FailureKind
+          readonly code: string
+      }
 
 /**
  * The app-relative path of one installation surface.
@@ -69,11 +62,11 @@ export type ShellNavigationDecision =
  * @returns The app-relative path of the surface the destination names.
  */
 export const shellNavigationPath = (destination: ShellRegisteredDestination): string => {
-    const installation = `/agentos/workspaces/${destination.workspaceId}/modules/${destination.installationId}`;
-    if (destination.routeName === "module-home") return installation;
-    if (destination.routeName === "module-diagnostics") return `${installation}/diagnostics`;
-    return `${installation}/operate`;
-};
+    const installation = `/agentos/workspaces/${destination.workspaceId}/modules/${destination.installationId}`
+    if (destination.routeName === "module-home") return installation
+    if (destination.routeName === "module-diagnostics") return `${installation}/diagnostics`
+    return `${installation}/operate`
+}
 
 /**
  * The AgentOS selection a return restores as context.
@@ -84,8 +77,8 @@ export const shellNavigationPath = (destination: ShellRegisteredDestination): st
  */
 export const shellReturnSelection = (destination: ShellRegisteredDestination): ShellReadScope => ({
     workspaceId: destination.returnContext.workspaceId,
-    instanceId: destination.returnContext.instanceId
-});
+    instanceId: destination.returnContext.instanceId,
+})
 
 /**
  * Decide what to do with one navigation answer.
@@ -97,11 +90,14 @@ export const shellReturnSelection = (destination: ShellRegisteredDestination): S
  *   `obsolete` and is never opened, which is what keeps a late answer from replacing the context the
  *   owner is actually looking at.
  */
-export const shellNavigationDecision = (outcome: Outcome<ShellRegisteredDestination>, locale: Locale): ShellNavigationDecision => {
-    if (!outcome.ok) return { open: false, kind: outcome.kind, code: outcome.code };
+export const shellNavigationDecision = (
+    outcome: Outcome<ShellRegisteredDestination>,
+    locale: Locale,
+): ShellNavigationDecision => {
+    if (!outcome.ok) return { open: false, kind: outcome.kind, code: outcome.code }
     return {
         open: true,
         href: getPathname({ locale, href: shellNavigationPath(outcome.data) }),
-        returnSelection: shellReturnSelection(outcome.data)
-    };
-};
+        returnSelection: shellReturnSelection(outcome.data),
+    }
+}

@@ -2,7 +2,12 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import type { IconSource } from "@starci/grammar/common"
-import { PurchaseStatusFlowBase, type PurchaseStatusCheck, type PurchaseStatusFlowViewProps, type PurchaseStatusHeadProps } from "./component"
+import {
+    PurchaseStatusFlowBase,
+    type PurchaseStatusCheck,
+    type PurchaseStatusFlowViewProps,
+    type PurchaseStatusHeadProps,
+} from "./component"
 import type { PurchaseStatusCopy } from "./copy"
 import enMessages from "../../../../messages/en.json"
 
@@ -26,10 +31,38 @@ const head: PurchaseStatusHeadProps = {
     badge: { label: "Pending reconciliation", tone: "warning" },
 }
 const paymentChecks: ReadonlyArray<PurchaseStatusCheck> = [
-    { id: "provider", label: "Provider settlement", word: "running", tone: "warning", mark, detail: "Awaiting canonical confirmation." },
-    { id: "amount", label: "Amount and currency — 4,800,000 VND", word: "queued", tone: "neutral", mark, detail: "This check runs after confirmation arrives." },
-    { id: "canonical", label: "Canonical paid result", word: "queued", tone: "neutral", mark, detail: "Final confirmation is still pending." },
-    { id: "admission", label: "Provisioning admission", word: "queued", tone: "neutral", mark, detail: "Locked until exact settlement is accepted." },
+    {
+        id: "provider",
+        label: "Provider settlement",
+        word: "running",
+        tone: "warning",
+        mark,
+        detail: "Awaiting canonical confirmation.",
+    },
+    {
+        id: "amount",
+        label: "Amount and currency — 4,800,000 VND",
+        word: "queued",
+        tone: "neutral",
+        mark,
+        detail: "This check runs after confirmation arrives.",
+    },
+    {
+        id: "canonical",
+        label: "Canonical paid result",
+        word: "queued",
+        tone: "neutral",
+        mark,
+        detail: "Final confirmation is still pending.",
+    },
+    {
+        id: "admission",
+        label: "Provisioning admission",
+        word: "queued",
+        tone: "neutral",
+        mark,
+        detail: "Locked until exact settlement is accepted.",
+    },
 ]
 const paymentView: PurchaseStatusFlowViewProps = {
     state: "payment-pending",
@@ -90,7 +123,8 @@ const provisioningView: PurchaseStatusFlowViewProps = {
                 started: "Started 14:34 · 2m elapsed",
                 lastObservation: "Last observation: runtime configuration accepted at 14:35",
             },
-            footnote: "Order NVP-2026-0922-1847 is purchase-bound and safe to reconcile. A refresh never creates a second workspace.",
+            footnote:
+                "Order NVP-2026-0922-1847 is purchase-bound and safe to reconcile. A refresh never creates a second workspace.",
             action: { label: "Refresh status" },
         },
         rail: {
@@ -100,13 +134,23 @@ const provisioningView: PurchaseStatusFlowViewProps = {
                 { id: "payment", label: "Payment verified", word: "done", tone: "success", mark, at: "14:32" },
                 { id: "entitlement", label: "Entitlement reserved", word: "done", tone: "success", mark, at: "14:33" },
                 { id: "configure", label: "Configure workspace", word: "running", tone: "warning", mark, at: "14:34" },
-                { id: "readiness", label: "Readiness check", word: "queued", tone: "neutral", mark, detail: "Waiting for configuration" },
+                {
+                    id: "readiness",
+                    label: "Readiness check",
+                    word: "queued",
+                    tone: "neutral",
+                    mark,
+                    detail: "Waiting for configuration",
+                },
             ],
             facts: [
                 { label: "Owner", value: "An Nguyen · an.nguyen@northstar.test" },
                 { label: "Attempt", value: "1" },
             ],
-            outcome: { title: "Workspace outcome: Nivo Operations Workspace", detail: "Entry unavailable until readiness is confirmed." },
+            outcome: {
+                title: "Workspace outcome: Nivo Operations Workspace",
+                detail: "Entry unavailable until readiness is confirmed.",
+            },
         },
         escapeLink: { label: "Return to workspace list", href: "/agentos/workspaces" },
     },
@@ -182,7 +226,10 @@ describe("PurchaseStatusFlowBase", () => {
                 rail: {
                     ...provisioningView.props.rail,
                     action: { label: "Enter workspace" },
-                    outcome: { title: "Workspace outcome: ops-room", detail: "Entry confirmed for the bound workspace." },
+                    outcome: {
+                        title: "Workspace outcome: ops-room",
+                        detail: "Entry confirmed for the bound workspace.",
+                    },
                 },
                 escapeLink: { label: "Return to workspace list", href: "/agentos/workspaces" },
             },
@@ -199,7 +246,11 @@ describe("PurchaseStatusFlowBase", () => {
             state: "ready",
             props: {
                 ...provisioningView.props,
-                rail: { ...provisioningView.props.rail, action: { label: "Enter workspace" }, refusalText: "workspace not launchable" },
+                rail: {
+                    ...provisioningView.props.rail,
+                    action: { label: "Enter workspace" },
+                    refusalText: "workspace not launchable",
+                },
             },
             on: { primary: vi.fn() },
         }
@@ -219,14 +270,27 @@ describe("PurchaseStatusFlowBase", () => {
         const payment = renderToStaticMarkup(<PurchaseStatusFlowBase state="loading" props={head} />)
         expect(payment).toContain("Purchase facts")
         expect(payment).toContain("Current verification")
-        const provisioning = renderToStaticMarkup(<PurchaseStatusFlowBase state="loading" props={{ ...head, surface: "provisioning" }} />)
+        const provisioning = renderToStaticMarkup(
+            <PurchaseStatusFlowBase state="loading" props={{ ...head, surface: "provisioning" }} />,
+        )
         expect(provisioning).toContain("Provisioning order")
         expect(provisioning).toContain("Confirmed facts")
         expect(provisioning).toContain('aria-busy="true"')
     })
 
     it("discloses no purchase facts on the denied empty notice", () => {
-        const html = renderToStaticMarkup(<PurchaseStatusFlowBase state="denied" props={{ ...head, title: "Purchase is not available", message: "This purchase is not visible to the signed-in account.", description: "No purchase, payment or workspace facts are disclosed." }} on={{ returnToList: vi.fn() }} />)
+        const html = renderToStaticMarkup(
+            <PurchaseStatusFlowBase
+                state="denied"
+                props={{
+                    ...head,
+                    title: "Purchase is not available",
+                    message: "This purchase is not visible to the signed-in account.",
+                    description: "No purchase, payment or workspace facts are disclosed.",
+                }}
+                on={{ returnToList: vi.fn() }}
+            />,
+        )
         expect(html).toContain("Purchase is not available")
         expect(html).toContain("This purchase is not visible to the signed-in account.")
         expect(html).not.toContain("PAY-4M7K2")
@@ -235,7 +299,17 @@ describe("PurchaseStatusFlowBase", () => {
 
     it("binds the denied notice action to the owner return", () => {
         const returnToList = vi.fn()
-        render(<PurchaseStatusFlowBase state="denied" props={{ ...head, title: "Purchase is not available", message: "This purchase is not visible to the signed-in account." }} on={{ returnToList }} />)
+        render(
+            <PurchaseStatusFlowBase
+                state="denied"
+                props={{
+                    ...head,
+                    title: "Purchase is not available",
+                    message: "This purchase is not visible to the signed-in account.",
+                }}
+                on={{ returnToList }}
+            />,
+        )
         fireEvent.click(screen.getByRole("button", { name: "Return to workspace list" }))
         expect(returnToList).toHaveBeenCalledOnce()
     })
@@ -247,7 +321,16 @@ describe("PurchaseStatusFlowBase", () => {
                 ...paymentView.props,
                 rail: {
                     ...paymentView.props.rail,
-                    checks: [{ id: "provider", label: "Provider settlement", word: "unknown", tone: "warning", mark, detail: "This source could not be read." }],
+                    checks: [
+                        {
+                            id: "provider",
+                            label: "Provider settlement",
+                            word: "unknown",
+                            tone: "warning",
+                            mark,
+                            detail: "This source could not be read.",
+                        },
+                    ],
                 },
             },
             on: { primary: vi.fn() },
@@ -301,7 +384,7 @@ describe("PurchaseStatusFlowBase", () => {
                     label: "Confirmed facts",
                     checks: [],
                     refusalText: "workspace not launchable",
-                    secondaryLink: { label: "Return to workspace list", href: "/agentos/workspaces" }
+                    secondaryLink: { label: "Return to workspace list", href: "/agentos/workspaces" },
                 },
             },
             on: {},

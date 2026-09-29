@@ -1,10 +1,14 @@
-"use client";
+"use client"
 
-import { commandSalesRecoverAction, type SalesInstallationScope, type SalesRecoverActionRequest } from "@/modules/api/sales";
-import { operationMutationKey, operationAnswerNeedsRead, type OperationTrigger } from "@/modules/api/operation-route";
-import { useAccessToken } from "../../auth/useAccessToken";
-import { useNivoMutation } from "../useNivoMutation";
-import { salesActionQueryKey } from "../queries/useQuerySalesActionSwr";
+import {
+    commandSalesRecoverAction,
+    type SalesInstallationScope,
+    type SalesRecoverActionRequest,
+} from "@/modules/api/sales"
+import { operationMutationKey, operationAnswerNeedsRead, type OperationTrigger } from "@/modules/api/operation-route"
+import { useAccessToken } from "../../auth/useAccessToken"
+import { useNivoMutation } from "../useNivoMutation"
+import { salesActionQueryKey } from "../queries/useQuerySalesActionSwr"
 
 /*
  * One hook per file, one registered command per hook.
@@ -24,6 +28,14 @@ import { salesActionQueryKey } from "../queries/useQuerySalesActionSwr";
  *   nothing rather than addressing a half-filled operation path.
  */
 export const useMutateSalesRecoverActionSwr = (scope: SalesInstallationScope, enabled = true) => {
-  const accessToken = useAccessToken();
-  return useNivoMutation(enabled ? operationMutationKey("sales", "recover-action", scope) : null, (trigger: OperationTrigger<SalesRecoverActionRequest>) => commandSalesRecoverAction(accessToken, scope, trigger.input, trigger.requestId), { invalidates: trigger => [salesActionQueryKey(scope, { actionId: trigger.input.actionId })], shouldInvalidate: operationAnswerNeedsRead });
-};
+    const accessToken = useAccessToken()
+    return useNivoMutation(
+        enabled ? operationMutationKey("sales", "recover-action", scope) : null,
+        (trigger: OperationTrigger<SalesRecoverActionRequest>) =>
+            commandSalesRecoverAction(accessToken, scope, trigger.input, trigger.requestId),
+        {
+            invalidates: (trigger) => [salesActionQueryKey(scope, { actionId: trigger.input.actionId })],
+            shouldInvalidate: operationAnswerNeedsRead,
+        },
+    )
+}

@@ -33,11 +33,15 @@ import AgentOSWorkspaceNestedLayout from "./layout"
 
 const renderLayout = (locale: "en" | "vi" = "vi") =>
     render(
-        <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE}>
+        <NextIntlClientProvider
+            locale={locale}
+            messages={locale === "en" ? enMessages : viMessages}
+            timeZone={TIME_ZONE}
+        >
             <AgentOSWorkspaceNestedLayout>
                 <div data-testid="nested-route-body">workspace route body</div>
             </AgentOSWorkspaceNestedLayout>
-        </NextIntlClientProvider>
+        </NextIntlClientProvider>,
     )
 
 describe("AgentOSWorkspaceNestedLayout", () => {
@@ -52,7 +56,9 @@ describe("AgentOSWorkspaceNestedLayout", () => {
         const workspaceCopy = viMessages.console.agentos.workspace
         expect(screen.getByRole("heading", { level: 2, name: "Support desk" })).toBeInTheDocument()
         expect(screen.getByText(workspaceCopy.eyebrow)).toBeInTheDocument()
-        expect(screen.getByText(viMessages.console.agentos.workspaceReference.replace("{id}", "workspace-1"))).toBeInTheDocument()
+        expect(
+            screen.getByText(viMessages.console.agentos.workspaceReference.replace("{id}", "workspace-1")),
+        ).toBeInTheDocument()
         expect(screen.getByRole("tab", { name: workspaceCopy.tabs.overview })).toBeInTheDocument()
         expect(screen.getByRole("tab", { name: workspaceCopy.tabs.modules })).toBeInTheDocument()
         expect(screen.getByTestId("nested-route-body")).toBeInTheDocument()
@@ -72,14 +78,17 @@ describe("AgentOSWorkspaceNestedLayout", () => {
         expect(screen.getByRole("tab", { name: copy.tabs.modules })).not.toHaveAttribute("aria-selected", "true")
     })
 
-    it.each(["/agentos/workspaces/workspace-1/modules", "/agentos/workspaces/workspace-1/modules/installation-9/operate"] as const)(
-        "selects the modules tab on nested module route %s",
-        (pathname) => {
-            mocks.pathname = pathname
-            renderLayout()
-            expect(screen.getByRole("tab", { name: viMessages.console.agentos.workspace.tabs.modules })).toHaveAttribute("aria-selected", "true")
-        }
-    )
+    it.each([
+        "/agentos/workspaces/workspace-1/modules",
+        "/agentos/workspaces/workspace-1/modules/installation-9/operate",
+    ] as const)("selects the modules tab on nested module route %s", (pathname) => {
+        mocks.pathname = pathname
+        renderLayout()
+        expect(screen.getByRole("tab", { name: viMessages.console.agentos.workspace.tabs.modules })).toHaveAttribute(
+            "aria-selected",
+            "true",
+        )
+    })
 
     it("navigates to the exact workspace destinations on tab selection", () => {
         renderLayout()
@@ -93,7 +102,10 @@ describe("AgentOSWorkspaceNestedLayout", () => {
     })
 
     it("wraps only the exact workspace segment and never the purchase or creation siblings", () => {
-        const workspaceSegment = join(process.cwd(), "apps/app/src/app/[locale]/(console)/agentos/workspaces/[workspaceId]")
+        const workspaceSegment = join(
+            process.cwd(),
+            "apps/app/src/app/[locale]/(console)/agentos/workspaces/[workspaceId]",
+        )
         const workspacesSegment = join(workspaceSegment, "..")
         expect(existsSync(join(workspaceSegment, "layout.tsx"))).toBe(true)
         expect(existsSync(join(workspacesSegment, "layout.tsx"))).toBe(false)
@@ -101,7 +113,9 @@ describe("AgentOSWorkspaceNestedLayout", () => {
         expect(existsSync(join(workspacesSegment, "new", "checkout", "layout.tsx"))).toBe(false)
         expect(existsSync(join(workspacesSegment, "purchases", "layout.tsx"))).toBe(false)
         expect(existsSync(join(workspacesSegment, "purchases", "[purchaseId]", "layout.tsx"))).toBe(false)
-        expect(existsSync(join(workspacesSegment, "purchases", "[purchaseId]", "provisioning", "layout.tsx"))).toBe(false)
+        expect(existsSync(join(workspacesSegment, "purchases", "[purchaseId]", "provisioning", "layout.tsx"))).toBe(
+            false,
+        )
         expect(existsSync(join(workspaceSegment, "modules", "layout.tsx"))).toBe(false)
     })
 })

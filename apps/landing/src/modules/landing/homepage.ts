@@ -42,34 +42,35 @@ export type HomepageStructuredDataInput = {
  * @param input - The language of the page and the name of the homepage in that language.
  * @returns The JSON-LD document, with `<` escaped so it cannot close its own script element.
  */
-export const homepageStructuredData = ({ locale, name }: HomepageStructuredDataInput): string => JSON.stringify({
-    "@context": "https://schema.org",
-    "@graph": [
-        {
-            "@type": "Organization",
-            "@id": "https://nivo.vn/#organization",
-            name: "NIVO",
-            url: "https://nivo.vn/",
-        },
-        {
-            "@type": "WebSite",
-            "@id": "https://nivo.vn/#website",
-            name: "NIVO.VN",
-            url: "https://nivo.vn/",
-            inLanguage: locale,
-            publisher: { "@id": "https://nivo.vn/#organization" },
-        },
-        {
-            "@type": "WebPage",
-            "@id": "https://nivo.vn/#webpage",
-            name,
-            url: "https://nivo.vn/",
-            inLanguage: locale,
-            isPartOf: { "@id": "https://nivo.vn/#website" },
-            about: { "@id": "https://nivo.vn/#organization" },
-        },
-    ],
-}).replaceAll("<", String.raw`\u003c`)
+export const homepageStructuredData = ({ locale, name }: HomepageStructuredDataInput): string =>
+    JSON.stringify({
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Organization",
+                "@id": "https://nivo.vn/#organization",
+                name: "NIVO",
+                url: "https://nivo.vn/",
+            },
+            {
+                "@type": "WebSite",
+                "@id": "https://nivo.vn/#website",
+                name: "NIVO.VN",
+                url: "https://nivo.vn/",
+                inLanguage: locale,
+                publisher: { "@id": "https://nivo.vn/#organization" },
+            },
+            {
+                "@type": "WebPage",
+                "@id": "https://nivo.vn/#webpage",
+                name,
+                url: "https://nivo.vn/",
+                inLanguage: locale,
+                isPartOf: { "@id": "https://nivo.vn/#website" },
+                about: { "@id": "https://nivo.vn/#organization" },
+            },
+        ],
+    }).replaceAll("<", String.raw`\u003c`)
 
 /**
  * Final intent routes preserve the six architectural user jobs without a CTA wall. A group `id`
@@ -85,9 +86,7 @@ export const HOMEPAGE_NEXT_PATHS = [
     },
     {
         id: "start",
-        links: [
-            { id: "pricing", href: SITE_LINKS.pricing },
-        ],
+        links: [{ id: "pricing", href: SITE_LINKS.pricing }],
     },
     {
         id: "connect",

@@ -7,7 +7,10 @@ const manifest = (path, manifestBody) => ({ path, manifest: manifestBody })
 test("passes when every dependency has one spec and workspace links are ignored", () => {
     const manifests = [
         manifest("package.json", { devDependencies: { typescript: "^5" }, overrides: { "@starci/grammar": "0.7.0" } }),
-        manifest("apps/a/package.json", { dependencies: { "@starci/grammar": "0.7.0", "@nivo/ui": "*" }, devDependencies: { typescript: "^5" } }),
+        manifest("apps/a/package.json", {
+            dependencies: { "@starci/grammar": "0.7.0", "@nivo/ui": "*" },
+            devDependencies: { typescript: "^5" },
+        }),
         manifest("apps/b/package.json", { dependencies: { "@starci/grammar": "0.7.0", "@nivo/ui": "*" } }),
     ]
     assert.deepEqual(findDrift(manifests), [])

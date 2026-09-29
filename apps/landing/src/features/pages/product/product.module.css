@@ -158,10 +158,22 @@
     color: var(--nivo-core-crimson);
 }
 
-.heroNode:nth-child(1) { top: 9%; left: 10%; }
-.heroNode:nth-child(2) { top: 17%; right: 8%; }
-.heroNode:nth-child(3) { right: 8%; bottom: 14%; }
-.heroNode:nth-child(4) { bottom: 9%; left: 8%; }
+.heroNode:nth-child(1) {
+    top: 9%;
+    left: 10%;
+}
+.heroNode:nth-child(2) {
+    top: 17%;
+    right: 8%;
+}
+.heroNode:nth-child(3) {
+    right: 8%;
+    bottom: 14%;
+}
+.heroNode:nth-child(4) {
+    bottom: 9%;
+    left: 8%;
+}
 
 .heroArtwork {
     position: absolute;
@@ -204,8 +216,12 @@
     background: var(--nivo-core-crimson);
 }
 
-.heroResponsibility small { color: #cbd5e1; }
-.heroResponsibility strong { font-size: 1.15rem; }
+.heroResponsibility small {
+    color: #cbd5e1;
+}
+.heroResponsibility strong {
+    font-size: 1.15rem;
+}
 
 .heroSteps {
     position: absolute;
@@ -231,8 +247,14 @@
     backdrop-filter: blur(12px);
 }
 
-.heroSteps span { color: var(--nivo-core-crimson); font-size: 0.7rem; font-weight: 800; }
-.heroSteps strong { font-size: 0.78rem; }
+.heroSteps span {
+    color: var(--nivo-core-crimson);
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+.heroSteps strong {
+    font-size: 0.78rem;
+}
 
 .heroGallery {
     min-height: clamp(25rem, 45vw, 35rem);
@@ -260,7 +282,9 @@
 }
 
 .heroGalleryCard:nth-child(2),
-.heroGalleryCard:nth-child(4) { transform: translateY(1.75rem); }
+.heroGalleryCard:nth-child(4) {
+    transform: translateY(1.75rem);
+}
 
 .heroGalleryCard img {
     width: 100%;
@@ -283,7 +307,10 @@
     backdrop-filter: blur(10px);
 }
 
-.heroGalleryCard figcaption span { color: var(--nivo-core-crimson); font-size: 0.65rem; }
+.heroGalleryCard figcaption span {
+    color: var(--nivo-core-crimson);
+    font-size: 0.65rem;
+}
 
 .heroCopy > p:first-child,
 .heroSignalLabel {
@@ -350,18 +377,14 @@
 }
 
 .sectionSoft {
-    background:
-        radial-gradient(circle at 90% 10%, rgb(251 113 133 / 11%), transparent 22rem),
-        #fff7f8;
+    background: radial-gradient(circle at 90% 10%, rgb(251 113 133 / 11%), transparent 22rem), #fff7f8;
 }
 
 .sectionDark {
     --foreground: var(--nivo-cloud-white);
     --muted: #cbd5e1;
     border-color: rgb(255 255 255 / 16%);
-    background:
-        radial-gradient(circle at 78% 24%, rgb(225 29 72 / 24%), transparent 28rem),
-        var(--nivo-ink);
+    background: radial-gradient(circle at 78% 24%, rgb(225 29 72 / 24%), transparent 28rem), var(--nivo-ink);
     color: var(--nivo-cloud-white);
 }
 
@@ -417,7 +440,9 @@
     border-radius: 1.5rem;
     background: var(--nivo-cloud-white);
     box-shadow: 0 1rem 3rem rgb(15 23 42 / 7%);
-    transition: transform 180ms ease, box-shadow 180ms ease;
+    transition:
+        transform 180ms ease,
+        box-shadow 180ms ease;
 }
 
 .concept:hover,
@@ -442,7 +467,10 @@
     color: var(--nivo-core-crimson);
 }
 
-.conceptIcon svg { width: 1.35rem; height: 1.35rem; }
+.conceptIcon svg {
+    width: 1.35rem;
+    height: 1.35rem;
+}
 
 .sectionDark .concept,
 .sectionDark .path,
@@ -641,7 +669,9 @@
     line-height: 1;
 }
 
-.path > a { margin-top: auto; }
+.path > a {
+    margin-top: auto;
+}
 
 .offer {
     padding: clamp(1.5rem, 4vw, 2.5rem);
@@ -920,17 +950,38 @@
         min-height: 25rem;
     }
 
-    .heroNode { width: 7.5rem; }
-    .heroNode:nth-child(1) { top: 7%; left: 4%; }
-    .heroNode:nth-child(2) { top: 12%; right: 4%; }
-    .heroNode:nth-child(3) { right: 4%; bottom: 10%; }
-    .heroNode:nth-child(4) { bottom: 7%; left: 4%; }
+    .heroNode {
+        width: 7.5rem;
+    }
+    .heroNode:nth-child(1) {
+        top: 7%;
+        left: 4%;
+    }
+    .heroNode:nth-child(2) {
+        top: 12%;
+        right: 4%;
+    }
+    .heroNode:nth-child(3) {
+        right: 4%;
+        bottom: 10%;
+    }
+    .heroNode:nth-child(4) {
+        bottom: 7%;
+        left: 4%;
+    }
 
-    .heroArtwork { inset: 10% -10% 9% 17%; }
-    .heroResponsibility { top: 10%; left: 4%; }
+    .heroArtwork {
+        inset: 10% -10% 9% 17%;
+    }
+    .heroResponsibility {
+        top: 10%;
+        left: 4%;
+    }
 
     .heroGalleryCard:nth-child(2),
-    .heroGalleryCard:nth-child(4) { transform: none; }
+    .heroGalleryCard:nth-child(4) {
+        transform: none;
+    }
 
     .heroSignal {
         border-radius: 1rem;
@@ -974,7 +1025,9 @@
 
 @media (prefers-reduced-motion: reduce) {
     .concept,
-    .path { transition: none; }
+    .path {
+        transition: none;
+    }
 }
 
 @media (forced-colors: active) {

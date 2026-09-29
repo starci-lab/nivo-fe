@@ -16,6 +16,14 @@ describe("CompanyPage", () => {
         const nav = container.querySelector(`nav[aria-label="${en.company.next.label}"]`)
         const hrefs = Array.from(nav?.querySelectorAll("a") ?? []).map((anchor) => anchor.getAttribute("href"))
         expect(hrefs).toHaveLength(4)
-        expect(hrefs.every((href) => href?.endsWith("/nivo-os") || href?.endsWith("/ecosystem") || href?.endsWith("/contact") || href?.endsWith("/trust"))).toBe(true)
+        expect(
+            hrefs.every(
+                (href) =>
+                    href?.endsWith("/nivo-os") ||
+                    href?.endsWith("/ecosystem") ||
+                    href?.endsWith("/contact") ||
+                    href?.endsWith("/trust"),
+            ),
+        ).toBe(true)
     })
 })

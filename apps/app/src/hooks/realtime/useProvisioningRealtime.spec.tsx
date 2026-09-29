@@ -3,16 +3,32 @@ import { createRoot, type Root } from "react-dom/client"
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest"
 
 type Handler = (...args: Array<unknown>) => void
-const sockets: Array<{ handlers: Map<string, Handler>; emit: ReturnType<typeof vi.fn>; disconnect: ReturnType<typeof vi.fn> }> = []
-vi.mock("socket.io-client", () => ({ io: vi.fn(() => {
-    const socket = { handlers: new Map<string, Handler>(), emit: vi.fn(), disconnect: vi.fn() }
-    sockets.push(socket)
-    return { on: (event: string, handler: Handler) => { socket.handlers.set(event, handler) }, removeAllListeners: vi.fn(), disconnect: socket.disconnect, emit: socket.emit }
-}) }))
+const sockets: Array<{
+    handlers: Map<string, Handler>
+    emit: ReturnType<typeof vi.fn>
+    disconnect: ReturnType<typeof vi.fn>
+}> = []
+vi.mock("socket.io-client", () => ({
+    io: vi.fn(() => {
+        const socket = { handlers: new Map<string, Handler>(), emit: vi.fn(), disconnect: vi.fn() }
+        sockets.push(socket)
+        return {
+            on: (event: string, handler: Handler) => {
+                socket.handlers.set(event, handler)
+            },
+            removeAllListeners: vi.fn(),
+            disconnect: socket.disconnect,
+            emit: socket.emit,
+        }
+    }),
+}))
 
 import useProvisioningRealtime from "@/hooks/realtime/useProvisioningRealtime"
 
-type ProbeProps = { readonly token: string | null; readonly target: Parameters<typeof useProvisioningRealtime>[0]["target"] }
+type ProbeProps = {
+    readonly token: string | null
+    readonly target: Parameters<typeof useProvisioningRealtime>[0]["target"]
+}
 
 const Probe = ({ token, target }: ProbeProps) => {
     const state = useProvisioningRealtime({ accessToken: token, target })
@@ -28,11 +44,17 @@ describe("useProvisioningRealtime", () => {
     })
     let root: Root | undefined
     let host: HTMLDivElement
-    afterEach(() => { act(() => root?.unmount()); sockets.length = 0 })
+    afterEach(() => {
+        act(() => root?.unmount())
+        sockets.length = 0
+    })
     const mount = (token: string | null, target: Parameters<typeof useProvisioningRealtime>[0]["target"]) => {
         host = document.createElement("div")
         document.body.append(host)
-        act(() => { root = createRoot(host); root.render(<Probe token={token} target={target} />) })
+        act(() => {
+            root = createRoot(host)
+            root.render(<Probe token={token} target={target} />)
+        })
     }
     const state = () => JSON.parse(host.querySelector("output")?.textContent ?? "{}") as Record<string, unknown>
 
@@ -49,76 +71,231 @@ describe("useProvisioningRealtime", () => {
     it("connects and accepts only the matching workspace event", () => {
         mount("token", { kind: "workspace", id: "w-1" })
         const socket = sockets[0]
-        act(() => { socket.handlers.get("connect")?.() })
+        act(() => {
+            socket.handlers.get("connect")?.()
+        })
         expect(state()).toEqual({ status: "connected", reason: null })
-        act(() => { socket.handlers.get("workspace.status")?.({ workspaceId: "other", status: "ready", reason: null, updatedAt: "2" }) })
+        act(() => {
+            socket.handlers.get("workspace.status")?.({
+                workspaceId: "other",
+                status: "ready",
+                reason: null,
+                updatedAt: "2",
+            })
+        })
         expect(state().status).toBe("connected")
-        act(() => { socket.handlers.get("workspace.status")?.({ workspaceId: "w-1", status: "ready", reason: null, updatedAt: "2" }) })
+        act(() => {
+            socket.handlers.get("workspace.status")?.({
+                workspaceId: "w-1",
+                status: "ready",
+                reason: null,
+                updatedAt: "2",
+            })
+        })
         expect(state()).toMatchObject({ status: "event", event: { kind: "workspace", id: "w-1", status: "ready" } })
     })
     it("rejects out-of-order sequenced workspace events", () => {
         mount("token", { kind: "workspace", id: "w-1" })
         const socket = sockets[0]
-        act(() => { socket.handlers.get("workspace.status")?.({ workspaceId: "w-1", status: "ready", reason: null, updatedAt: "2", sequence: 4 }) })
-        act(() => { socket.handlers.get("workspace.status")?.({ workspaceId: "w-1", status: "failed", reason: "late", updatedAt: "3", sequence: 3 }) })
+        act(() => {
+            socket.handlers.get("workspace.status")?.({
+                workspaceId: "w-1",
+                status: "ready",
+                reason: null,
+                updatedAt: "2",
+                sequence: 4,
+            })
+        })
+        act(() => {
+            socket.handlers.get("workspace.status")?.({
+                workspaceId: "w-1",
+                status: "failed",
+                reason: "late",
+                updatedAt: "3",
+                sequence: 3,
+            })
+        })
         expect(state()).toMatchObject({ event: { status: "ready" } })
     })
     it("maps terminal saga statuses and envelopes", () => {
         mount("token", { kind: "module-installation", id: "m-1" })
         const socket = sockets[0]
-        act(() => { socket.handlers.get("provisioning.saga.status")?.({ success: true, data: { eventId: "e", sequence: 1, sagaId: "s", resourceKind: "agentos_module_installation", resourceId: "m-1", status: "completed", direction: "forward", stepKey: null, reason: null, updatedAt: "now" } }) })
-        expect(state()).toMatchObject({ status: "event", event: { kind: "module-installation", id: "m-1", status: "ready" } })
+        act(() => {
+            socket.handlers.get("provisioning.saga.status")?.({
+                success: true,
+                data: {
+                    eventId: "e",
+                    sequence: 1,
+                    sagaId: "s",
+                    resourceKind: "agentos_module_installation",
+                    resourceId: "m-1",
+                    status: "completed",
+                    direction: "forward",
+                    stepKey: null,
+                    reason: null,
+                    updatedAt: "now",
+                },
+            })
+        })
+        expect(state()).toMatchObject({
+            status: "event",
+            event: { kind: "module-installation", id: "m-1", status: "ready" },
+        })
     })
     it("handles deployment events only for the selected deployment", () => {
         mount("token", { kind: "deployment", id: "d-1" })
         const socket = sockets[0]
-        act(() => { socket.handlers.get("deployment.status")?.({ deploymentId: "d-2", status: "running", reason: null, updatedAt: "1" }) })
+        act(() => {
+            socket.handlers.get("deployment.status")?.({
+                deploymentId: "d-2",
+                status: "running",
+                reason: null,
+                updatedAt: "1",
+            })
+        })
         expect(state().status).toBe("connecting")
-        act(() => { socket.handlers.get("deployment.status")?.({ deploymentId: "d-1", status: "running", reason: null, updatedAt: "1" }) })
+        act(() => {
+            socket.handlers.get("deployment.status")?.({
+                deploymentId: "d-1",
+                status: "running",
+                reason: null,
+                updatedAt: "1",
+            })
+        })
         expect(state()).toMatchObject({ event: { kind: "deployment", id: "d-1", status: "running" } })
     })
     it("maps order fulfillment without requiring sequencing", () => {
         mount("token", { kind: "order", id: "o-1" })
         const socket = sockets[0]
-        act(() => { socket.handlers.get("order.fulfilling")?.({ success: true, data: { orderId: "o-1", status: "completed" } }) })
+        act(() => {
+            socket.handlers.get("order.fulfilling")?.({ success: true, data: { orderId: "o-1", status: "completed" } })
+        })
         expect(state()).toMatchObject({ event: { kind: "order", id: "o-1", status: "completed" } })
     })
     it("surfaces disconnect and connection errors", () => {
         mount("token", { kind: "workspace", id: "w-1" })
         const socket = sockets[0]
-        act(() => { socket.handlers.get("disconnect")?.("transport close") })
+        act(() => {
+            socket.handlers.get("disconnect")?.("transport close")
+        })
         expect(state()).toEqual({ status: "disconnected", reason: "transport close" })
-        act(() => { socket.handlers.get("connect_error")?.(new Error("offline")) })
+        act(() => {
+            socket.handlers.get("connect_error")?.(new Error("offline"))
+        })
         expect(state()).toEqual({ status: "disconnected", reason: "offline" })
     })
     it("maps workspace runtime probes to runtime events", () => {
         mount("token", { kind: "workspace", id: "w-1" })
         const socket = sockets[0]
-        act(() => { socket.handlers.get("workspace.runtime")?.({ workspaceId: "w-1", instanceId: "i-1", fingerprint: "fp", probeStatus: "partial", observedAt: "now", sequence: 2 }) })
-        expect(state()).toMatchObject({ event: { kind: "workspace-runtime", id: "w-1", instanceId: "i-1", probeStatus: "partial" } })
+        act(() => {
+            socket.handlers.get("workspace.runtime")?.({
+                workspaceId: "w-1",
+                instanceId: "i-1",
+                fingerprint: "fp",
+                probeStatus: "partial",
+                observedAt: "now",
+                sequence: 2,
+            })
+        })
+        expect(state()).toMatchObject({
+            event: { kind: "workspace-runtime", id: "w-1", instanceId: "i-1", probeStatus: "partial" },
+        })
     })
     it("accepts instance operations only for the selected instance", () => {
         mount("token", { kind: "instance", id: "i-1" })
         const socket = sockets[0]
-        act(() => { socket.handlers.get("instance.operation")?.({ operationId: "op-1", instanceId: "i-2", phase: "running", observedAt: "1" }) })
+        act(() => {
+            socket.handlers.get("instance.operation")?.({
+                operationId: "op-1",
+                instanceId: "i-2",
+                phase: "running",
+                observedAt: "1",
+            })
+        })
         expect(state().status).toBe("connecting")
-        act(() => { socket.handlers.get("instance.operation")?.({ success: true, data: { operationId: "op-2", instanceId: "i-1", phase: "running", componentKey: "pod", reason: null, observedAt: "2" } }) })
-        expect(state()).toMatchObject({ status: "event", event: { kind: "instance-operation", id: "op-2", instanceId: "i-1", phase: "running", componentKey: "pod" } })
+        act(() => {
+            socket.handlers.get("instance.operation")?.({
+                success: true,
+                data: {
+                    operationId: "op-2",
+                    instanceId: "i-1",
+                    phase: "running",
+                    componentKey: "pod",
+                    reason: null,
+                    observedAt: "2",
+                },
+            })
+        })
+        expect(state()).toMatchObject({
+            status: "event",
+            event: { kind: "instance-operation", id: "op-2", instanceId: "i-1", phase: "running", componentKey: "pod" },
+        })
     })
     it("follows one saga directly by its own identity", () => {
         mount("token", { kind: "saga", id: "s-1" })
         const socket = sockets[0]
-        act(() => { socket.handlers.get("provisioning.saga.status")?.({ eventId: "e-1", sequence: 1, sagaId: "s-9", resourceKind: "agent_workspace", resourceId: "w-9", status: "running_forward", direction: "forward", stepKey: null, reason: null, updatedAt: "1" }) })
+        act(() => {
+            socket.handlers.get("provisioning.saga.status")?.({
+                eventId: "e-1",
+                sequence: 1,
+                sagaId: "s-9",
+                resourceKind: "agent_workspace",
+                resourceId: "w-9",
+                status: "running_forward",
+                direction: "forward",
+                stepKey: null,
+                reason: null,
+                updatedAt: "1",
+            })
+        })
         expect(state().status).toBe("connecting")
-        act(() => { socket.handlers.get("provisioning.saga.status")?.({ eventId: "e-2", sequence: 2, sagaId: "s-1", resourceKind: "agent_workspace", resourceId: "w-1", status: "waiting_retry", direction: "forward", stepKey: "create-pod", reason: "timeout", updatedAt: "2" }) })
-        expect(state()).toMatchObject({ status: "event", event: { kind: "saga", id: "s-1", status: "waiting_retry", direction: "forward", stepKey: "create-pod", reason: "timeout" } })
-        act(() => { socket.handlers.get("provisioning.saga.status")?.({ eventId: "e-3", sequence: 1, sagaId: "s-1", resourceKind: "agent_workspace", resourceId: "w-1", status: "running_forward", direction: "forward", stepKey: null, reason: null, updatedAt: "3" }) })
+        act(() => {
+            socket.handlers.get("provisioning.saga.status")?.({
+                eventId: "e-2",
+                sequence: 2,
+                sagaId: "s-1",
+                resourceKind: "agent_workspace",
+                resourceId: "w-1",
+                status: "waiting_retry",
+                direction: "forward",
+                stepKey: "create-pod",
+                reason: "timeout",
+                updatedAt: "2",
+            })
+        })
+        expect(state()).toMatchObject({
+            status: "event",
+            event: {
+                kind: "saga",
+                id: "s-1",
+                status: "waiting_retry",
+                direction: "forward",
+                stepKey: "create-pod",
+                reason: "timeout",
+            },
+        })
+        act(() => {
+            socket.handlers.get("provisioning.saga.status")?.({
+                eventId: "e-3",
+                sequence: 1,
+                sagaId: "s-1",
+                resourceKind: "agent_workspace",
+                resourceId: "w-1",
+                status: "running_forward",
+                direction: "forward",
+                stepKey: null,
+                reason: null,
+                updatedAt: "3",
+            })
+        })
         expect(state()).toMatchObject({ event: { kind: "saga", status: "waiting_retry" } })
     })
     it("cleans up the socket when the target is removed", () => {
         mount("token", { kind: "workspace", id: "w-1" })
         const socket = sockets[0]
-        act(() => { root?.render(<Probe token="token" target={null} />) })
+        act(() => {
+            root?.render(<Probe token="token" target={null} />)
+        })
         expect(socket.disconnect).toHaveBeenCalled()
     })
 })

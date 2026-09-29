@@ -3,7 +3,14 @@ import { describe, expect, it } from "vitest"
 import { OverviewSignalsBase, type OverviewSignalsCell } from "./component"
 
 const cells: ReadonlyArray<OverviewSignalsCell> = [
-    { id: "apps", label: "Apps", value: "Needs attention", status: "Awaiting DNS", emphasis: "accent", badgeTone: "warning" },
+    {
+        id: "apps",
+        label: "Apps",
+        value: "Needs attention",
+        status: "Awaiting DNS",
+        emphasis: "accent",
+        badgeTone: "warning",
+    },
     { id: "agentos", label: "AgentOS", value: "sales-ops", status: "Pod is not answering", badgeTone: "danger" },
     { id: "domains", label: "Domains", value: "—", status: "Could not read domains" },
     { id: "wallet", label: "Wallet", value: "", status: "", isSkeleton: true },
@@ -11,7 +18,9 @@ const cells: ReadonlyArray<OverviewSignalsCell> = [
 
 describe("OverviewSignalsBase", () => {
     it("draws four peer cells as one full-measure band, without a collection total", () => {
-        const { container } = render(<OverviewSignalsBase props={{ label: "At a glance", fact: "2 signals need attention", cells }} />)
+        const { container } = render(
+            <OverviewSignalsBase props={{ label: "At a glance", fact: "2 signals need attention", cells }} />,
+        )
 
         expect(screen.getByText("Needs attention")).toBeInTheDocument()
         expect(screen.getByText("sales-ops")).toBeInTheDocument()
@@ -22,8 +31,12 @@ describe("OverviewSignalsBase", () => {
     it("raises a warning and a danger status out of a plain-text one", () => {
         const { container } = render(<OverviewSignalsBase props={{ label: "At a glance", cells }} />)
 
-        expect(container.querySelector('[data-component="Badge"][data-tone="warning"]')).toHaveTextContent("Awaiting DNS")
-        expect(container.querySelector('[data-component="Badge"][data-tone="danger"]')).toHaveTextContent("Pod is not answering")
+        expect(container.querySelector('[data-component="Badge"][data-tone="warning"]')).toHaveTextContent(
+            "Awaiting DNS",
+        )
+        expect(container.querySelector('[data-component="Badge"][data-tone="danger"]')).toHaveTextContent(
+            "Pod is not answering",
+        )
     })
 
     it("leaves an untoned status as plain muted copy, never a Badge", () => {

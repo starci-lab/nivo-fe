@@ -41,16 +41,116 @@ const ROUTES: ReadonlyArray<RouteContract> = [
 ]
 
 const DOCUMENTED_SECTIONS = [
-    { path: "/", selectors: ["#home-hero-title", "#home-today-title", "#home-relevance-title", "#home-operating-model-title", "#home-commercial-title", "#home-next-path-title"] },
-    { path: "/nivo-os", selectors: ["#product-page-title", "#responsibility-center", "#operating-model", "#capability-model", "#nivo-os-today", "#trust-bridge", "#target-architecture", "#next-path"] },
-    { path: "/system-of-responsibility", selectors: ["#product-page-title", "#definition", "#core-anatomy", "#task-vs-responsibility", "#evidence", "#nivo-os-current", "#trust-bridge", "#next-path"] },
-    { path: "/applications", selectors: ["#need-selector", "#current-focus", "#by-need", "#by-role", "#by-context", "#truth-evidence", "#next-path"] },
-    { path: "/pricing", selectors: ["#product-page-title", "#discover", "#available-now", "#pro-decision", "#comparison", "#what-you-buy", "#usage-resources", "#growth", "#service-support", "#faq", "#start-right"] },
-    { path: "/trust", selectors: ["#future-worth-earning", "#trust-starts-small", "#human-ai-governance", "#evidence-before-scale", "#transformation-journey", "#what-becomes-possible", "#truth-before-promise"] },
-    { path: "/ecosystem", selectors: ["#why-ecosystem", "#value-exchange", "#actors", "#relationship-growth", "#ecosystem-proof", "#choose-path"] },
-    { path: "/ideas", selectors: ["#knowledge-identity", "#featured", "#by-type", "#curated", "#by-topic", "#continue-learning"] },
-    { path: "/company", selectors: ["#nivo-is", "#nivo-today", "#provenance", "#mission", "#vision", "#philosophy", "#values", "#leadership", "#company-next-path"] },
-    { path: "/contact", selectors: ["#choose-intent", "#intent-router", "#adaptive-form", "#contact-next-step", "#direct-paths"] },
+    {
+        path: "/",
+        selectors: [
+            "#home-hero-title",
+            "#home-today-title",
+            "#home-relevance-title",
+            "#home-operating-model-title",
+            "#home-commercial-title",
+            "#home-next-path-title",
+        ],
+    },
+    {
+        path: "/nivo-os",
+        selectors: [
+            "#product-page-title",
+            "#responsibility-center",
+            "#operating-model",
+            "#capability-model",
+            "#nivo-os-today",
+            "#trust-bridge",
+            "#target-architecture",
+            "#next-path",
+        ],
+    },
+    {
+        path: "/system-of-responsibility",
+        selectors: [
+            "#product-page-title",
+            "#definition",
+            "#core-anatomy",
+            "#task-vs-responsibility",
+            "#evidence",
+            "#nivo-os-current",
+            "#trust-bridge",
+            "#next-path",
+        ],
+    },
+    {
+        path: "/applications",
+        selectors: [
+            "#need-selector",
+            "#current-focus",
+            "#by-need",
+            "#by-role",
+            "#by-context",
+            "#truth-evidence",
+            "#next-path",
+        ],
+    },
+    {
+        path: "/pricing",
+        selectors: [
+            "#product-page-title",
+            "#discover",
+            "#available-now",
+            "#pro-decision",
+            "#comparison",
+            "#what-you-buy",
+            "#usage-resources",
+            "#growth",
+            "#service-support",
+            "#faq",
+            "#start-right",
+        ],
+    },
+    {
+        path: "/trust",
+        selectors: [
+            "#future-worth-earning",
+            "#trust-starts-small",
+            "#human-ai-governance",
+            "#evidence-before-scale",
+            "#transformation-journey",
+            "#what-becomes-possible",
+            "#truth-before-promise",
+        ],
+    },
+    {
+        path: "/ecosystem",
+        selectors: [
+            "#why-ecosystem",
+            "#value-exchange",
+            "#actors",
+            "#relationship-growth",
+            "#ecosystem-proof",
+            "#choose-path",
+        ],
+    },
+    {
+        path: "/ideas",
+        selectors: ["#knowledge-identity", "#featured", "#by-type", "#curated", "#by-topic", "#continue-learning"],
+    },
+    {
+        path: "/company",
+        selectors: [
+            "#nivo-is",
+            "#nivo-today",
+            "#provenance",
+            "#mission",
+            "#vision",
+            "#philosophy",
+            "#values",
+            "#leadership",
+            "#company-next-path",
+        ],
+    },
+    {
+        path: "/contact",
+        selectors: ["#choose-intent", "#intent-router", "#adaptive-form", "#contact-next-step", "#direct-paths"],
+    },
 ] as const
 
 /* Render evidence stays inside the runner's own gitignored output dir; e2e never writes to a
@@ -69,8 +169,8 @@ test.describe("NIVO.VN delivery baselines", () => {
             await expect(page.locator("h1")).toHaveCount(1)
             await expect(page.locator("footer")).toBeVisible()
 
-            const horizontalOverflow = await page.evaluate(() =>
-                document.documentElement.scrollWidth > document.documentElement.clientWidth,
+            const horizontalOverflow = await page.evaluate(
+                () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
             )
             expect(horizontalOverflow).toBe(false)
 
@@ -84,17 +184,12 @@ test.describe("NIVO.VN delivery baselines", () => {
 
     test("the homepage renders the approved art-direction v18 mascot", async ({ page }) => {
         await page.goto("/")
-        await expect(
-            page.locator('img[src*="nivo-unicorn-responsibility-transparent-v18.png"]'),
-        ).toBeVisible()
+        await expect(page.locator('img[src*="nivo-unicorn-responsibility-transparent-v18.png"]')).toBeVisible()
 
         const heroStage = page.locator(".home-hero__stage")
         const heroBounds = await heroStage.boundingBox()
         expect(heroBounds).not.toBeNull()
-        await page.mouse.move(
-            heroBounds!.x + heroBounds!.width * 0.72,
-            heroBounds!.y + heroBounds!.height * 0.3,
-        )
+        await page.mouse.move(heroBounds!.x + heroBounds!.width * 0.72, heroBounds!.y + heroBounds!.height * 0.3)
         const spotlight = await heroStage.evaluate((element) => ({
             x: element.style.getPropertyValue("--hero-glow-x"),
             y: element.style.getPropertyValue("--hero-glow-y"),
@@ -144,9 +239,8 @@ test.describe("NIVO.VN delivery baselines", () => {
                 sectionOrder: Array.from(document.querySelectorAll<HTMLElement>("main > section")).map(
                     (section) => section.className,
                 ),
-                heroStageBackground: getComputedStyle(
-                    document.querySelector<HTMLElement>(".home-hero__stage")!,
-                ).backgroundImage,
+                heroStageBackground: getComputedStyle(document.querySelector<HTMLElement>(".home-hero__stage")!)
+                    .backgroundImage,
                 surfaceLightness: {
                     relevance: surfaceLightness(".home-relevance"),
                     operatingModel: surfaceLightness(".home-operating-model"),
@@ -227,7 +321,10 @@ test.describe("NIVO.VN customer journeys", () => {
 
     test("moves from ecosystem context to the relationship router", async ({ page }) => {
         await page.goto("/ecosystem")
-        await page.getByRole("link", { name: /Liên hệ|Trao đổi/i }).first().click()
+        await page
+            .getByRole("link", { name: /Liên hệ|Trao đổi/i })
+            .first()
+            .click()
         await expect(page).toHaveURL(/\/contact/)
     })
 

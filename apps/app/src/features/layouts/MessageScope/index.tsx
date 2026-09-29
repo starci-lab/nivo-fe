@@ -21,7 +21,11 @@ export type MessageScopeProps = {
  */
 export const MessageScope = async ({ scope, children }: MessageScopeProps) => {
     const messages = await getMessages()
-    return <NextIntlClientProvider messages={pickMessages(messages, MESSAGE_SCOPES[scope])}>{children}</NextIntlClientProvider>
+    return (
+        <NextIntlClientProvider messages={pickMessages(messages, MESSAGE_SCOPES[scope])}>
+            {children}
+        </NextIntlClientProvider>
+    )
 }
 
 export default MessageScope

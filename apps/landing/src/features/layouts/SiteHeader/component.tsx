@@ -10,11 +10,13 @@ export type SiteHeaderLink = {
 }
 
 /** A first-level navigation entry: a destination, or a group with one discovery layer. */
-export type SiteHeaderEntry = SiteHeaderLink | {
-    readonly id: string
-    readonly label: string
-    readonly children: ReadonlyArray<SiteHeaderLink>
-}
+export type SiteHeaderEntry =
+    | SiteHeaderLink
+    | {
+          readonly id: string
+          readonly label: string
+          readonly children: ReadonlyArray<SiteHeaderLink>
+      }
 
 /** The sentences the header draws, resolved from the catalog by the connected half. */
 export type SiteHeaderCopy = {
@@ -35,7 +37,9 @@ export type SiteHeaderHrefs = {
     readonly contact: string
 }
 
-const isNavigationGroup = (entry: SiteHeaderEntry): entry is Extract<SiteHeaderEntry, { readonly children: ReadonlyArray<unknown> }> => "children" in entry
+const isNavigationGroup = (
+    entry: SiteHeaderEntry,
+): entry is Extract<SiteHeaderEntry, { readonly children: ReadonlyArray<unknown> }> => "children" in entry
 
 type NavigationListProps = {
     readonly navigation: ReadonlyArray<SiteHeaderEntry>
@@ -116,9 +120,13 @@ export const SiteHeaderBase = (props: SiteHeaderProps) => {
                 </nav>
 
                 <div className={SITE_CLASS_NAMES.headerActions} aria-label={data.copy.quickActionsLabel}>
-                    <TextAction href={data.hrefs.login} appearance="section" size="sm">{data.copy.login}</TextAction>
+                    <TextAction href={data.hrefs.login} appearance="section" size="sm">
+                        {data.copy.login}
+                    </TextAction>
                     {/* Product activation has no published destination yet, so Contact is the one call to action. */}
-                    <Button href={data.hrefs.contact} variant="primary" size="sm">{data.copy.contact}</Button>
+                    <Button href={data.hrefs.contact} variant="primary" size="sm">
+                        {data.copy.contact}
+                    </Button>
                 </div>
 
                 <button
@@ -137,7 +145,11 @@ export const SiteHeaderBase = (props: SiteHeaderProps) => {
             </PageContainer>
 
             {data.open ? (
-                <nav id={panelId} className={SITE_CLASS_NAMES.headerMobileNavigation} aria-label={data.copy.mobileNavigationLabel}>
+                <nav
+                    id={panelId}
+                    className={SITE_CLASS_NAMES.headerMobileNavigation}
+                    aria-label={data.copy.mobileNavigationLabel}
+                >
                     <NavigationList navigation={data.navigation} variant="mobile" onFollow={on.follow} />
                     <div className={SITE_CLASS_NAMES.headerMobileActions}>
                         <TextAction href={data.hrefs.login} appearance="section" size="sm" onFollow={on.follow}>

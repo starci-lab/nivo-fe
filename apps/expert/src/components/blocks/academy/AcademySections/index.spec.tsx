@@ -12,7 +12,23 @@ type SectionsOutputProps = {
         readonly failImage: (src: string) => void
     }
 }
-vi.mock("./component", () => ({ AcademySectionsBase: (props: SectionsOutputProps) => <output>{props.props.sections.map((section) => `${section.kind}:${section.id}`).join("|")}<span>{props.props.leadStatus}</span><span>{[...props.props.failedImageSources].join("|")}</span><button onClick={() => { void props.on.submitLead({ name: "Reader", contact: "0123" }) }}>submit</button><button onClick={() => props.on.failImage("broken.jpg")}>fail image</button></output> }))
+vi.mock("./component", () => ({
+    AcademySectionsBase: (props: SectionsOutputProps) => (
+        <output>
+            {props.props.sections.map((section) => `${section.kind}:${section.id}`).join("|")}
+            <span>{props.props.leadStatus}</span>
+            <span>{[...props.props.failedImageSources].join("|")}</span>
+            <button
+                onClick={() => {
+                    void props.on.submitLead({ name: "Reader", contact: "0123" })
+                }}
+            >
+                submit
+            </button>
+            <button onClick={() => props.on.failImage("broken.jpg")}>fail image</button>
+        </output>
+    ),
+}))
 import { AcademySectionsBase } from "./component"
 import { AcademySections } from "./index"
 describe("AcademySections", () => {
@@ -21,8 +37,12 @@ describe("AcademySections", () => {
         expect(html).toContain("hero:hero")
         expect(html).toContain("courses:courses")
     })
-    it.each(["hero", "courses", "lead"])("recognizes the %s system branch in source", (key) => { expect(key).toMatch(/hero|courses|lead/) })
-    it("renders the presentational twin contract", () => { expect(AcademySectionsBase).toBeTypeOf("function") })
+    it.each(["hero", "courses", "lead"])("recognizes the %s system branch in source", (key) => {
+        expect(key).toMatch(/hero|courses|lead/)
+    })
+    it("renders the presentational twin contract", () => {
+        expect(AcademySectionsBase).toBeTypeOf("function")
+    })
     it("owns lead and image failure state before passing it to the pure twin", async () => {
         render(<AcademySections courses={[]} />)
         fireEvent.click(screen.getByRole("button", { name: "fail image" }))

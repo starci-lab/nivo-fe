@@ -6,7 +6,10 @@ import { MESSAGE_SCOPES, pickMessages } from "./messages"
 describe("pickMessages", () => {
     it("keeps only the named namespaces, untouched", () => {
         const messages = { app: { a: "1" }, console: { b: "2" }, authentication: { c: "3" } }
-        expect(pickMessages(messages, ["app", "authentication"])).toEqual({ app: { a: "1" }, authentication: { c: "3" } })
+        expect(pickMessages(messages, ["app", "authentication"])).toEqual({
+            app: { a: "1" },
+            authentication: { c: "3" },
+        })
     })
 
     it("skips a namespace the catalogue does not have", () => {
@@ -15,7 +18,10 @@ describe("pickMessages", () => {
 })
 
 describe("MESSAGE_SCOPES", () => {
-    it.each([["en", en], ["vi", vi]] as const)("names only top-level namespaces the %s catalogue has", (_locale, catalogue) => {
+    it.each([
+        ["en", en],
+        ["vi", vi],
+    ] as const)("names only top-level namespaces the %s catalogue has", (_locale, catalogue) => {
         for (const namespaces of Object.values(MESSAGE_SCOPES)) {
             for (const namespace of namespaces) expect(Object.keys(catalogue)).toContain(namespace)
         }

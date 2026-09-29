@@ -34,13 +34,36 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/hooks/auth/useSession", () => ({
     useSession: () => ({ state: { status: "signed-in", accessToken: "hook-viewer" }, adopt: mocks.adoptSession }),
 }))
-vi.mock("@/modules/api/agentos-module-studio", () => ({ answerAgentosCustomModuleIntake: mocks.api.answerIntake, finalizeAgentosModuleAttachment: mocks.api.finalize, prepareAgentosModuleAttachmentUpload: mocks.api.prepare, publishAgentosCustomModule: mocks.api.publishModule, removeAgentosModuleAttachment: mocks.api.remove, removeAgentosModuleIntegrationSecret: mocks.api.removeIntegration, saveAgentosModuleIntegrationSecret: mocks.api.saveIntegration, startAgentosCustomModuleIntake: mocks.api.startIntake, uploadAgentosModuleAttachment: mocks.api.upload }));
-vi.mock("@/modules/api/agentos-module-runtime", () => ({ configureAgentWorkspaceChannel: mocks.api.configureChannel, manageAgentosModuleRuntime: mocks.api.manageRuntime }));
-vi.mock("@/modules/api/expert-sites", () => ({ createExpertSite: mocks.api.createExpertSite, publishExpertSite: mocks.api.publishExpertSite }));
-vi.mock("@/modules/api/agentos-modules", () => ({ installAgentosSolutionModule: mocks.api.installSolution }));
-vi.mock("@/modules/api/agentos-workspaces", () => ({ issueAgentWorkspaceAppLaunch: mocks.api.issueLaunch, renewAgentWorkspaceAppLaunch: mocks.api.renewLaunch, revokeAgentWorkspaceAppLaunch: mocks.api.revokeLaunch }));
-vi.mock("@/modules/api/commerce", () => ({ orderAgentOs: mocks.api.orderAgentos }));
-vi.mock("@/modules/api/agentos-knowledge", () => ({ reindexAgentWorkspaceKnowledge: mocks.api.reindex, runAgentosAiReadinessTest: mocks.api.readiness }));
+vi.mock("@/modules/api/agentos-module-studio", () => ({
+    answerAgentosCustomModuleIntake: mocks.api.answerIntake,
+    finalizeAgentosModuleAttachment: mocks.api.finalize,
+    prepareAgentosModuleAttachmentUpload: mocks.api.prepare,
+    publishAgentosCustomModule: mocks.api.publishModule,
+    removeAgentosModuleAttachment: mocks.api.remove,
+    removeAgentosModuleIntegrationSecret: mocks.api.removeIntegration,
+    saveAgentosModuleIntegrationSecret: mocks.api.saveIntegration,
+    startAgentosCustomModuleIntake: mocks.api.startIntake,
+    uploadAgentosModuleAttachment: mocks.api.upload,
+}))
+vi.mock("@/modules/api/agentos-module-runtime", () => ({
+    configureAgentWorkspaceChannel: mocks.api.configureChannel,
+    manageAgentosModuleRuntime: mocks.api.manageRuntime,
+}))
+vi.mock("@/modules/api/expert-sites", () => ({
+    createExpertSite: mocks.api.createExpertSite,
+    publishExpertSite: mocks.api.publishExpertSite,
+}))
+vi.mock("@/modules/api/agentos-modules", () => ({ installAgentosSolutionModule: mocks.api.installSolution }))
+vi.mock("@/modules/api/agentos-workspaces", () => ({
+    issueAgentWorkspaceAppLaunch: mocks.api.issueLaunch,
+    renewAgentWorkspaceAppLaunch: mocks.api.renewLaunch,
+    revokeAgentWorkspaceAppLaunch: mocks.api.revokeLaunch,
+}))
+vi.mock("@/modules/api/commerce", () => ({ orderAgentOs: mocks.api.orderAgentos }))
+vi.mock("@/modules/api/agentos-knowledge", () => ({
+    reindexAgentWorkspaceKnowledge: mocks.api.reindex,
+    runAgentosAiReadinessTest: mocks.api.readiness,
+}))
 vi.mock("@/modules/api/agentos-module-tests", () => ({ runAgentosModuleTest: mocks.api.runModuleTest }))
 vi.mock("@/modules/api/auth", () => ({ refreshSession: mocks.api.refreshSession }))
 
@@ -79,14 +102,24 @@ describe("named console mutations", () => {
             })
         })
 
-        expect(mocks.api.prepare).toHaveBeenCalledWith(expect.objectContaining({
+        expect(mocks.api.prepare).toHaveBeenCalledWith(
+            expect.objectContaining({
+                agentWorkspaceId: "workspace-1",
+                moduleId: "module-1",
+                fileName: "support.md",
+                sizeBytes: file.size,
+            }),
+        )
+        expect(mocks.api.upload).toHaveBeenCalledWith(
+            expect.objectContaining({ attachmentId: "attachment-1" }),
+            "text/markdown",
+            file,
+        )
+        expect(mocks.api.finalize).toHaveBeenCalledWith({
             agentWorkspaceId: "workspace-1",
             moduleId: "module-1",
-            fileName: "support.md",
-            sizeBytes: file.size,
-        }))
-        expect(mocks.api.upload).toHaveBeenCalledWith(expect.objectContaining({ attachmentId: "attachment-1" }), "text/markdown", file)
-        expect(mocks.api.finalize).toHaveBeenCalledWith({ agentWorkspaceId: "workspace-1", moduleId: "module-1", attachmentId: "attachment-1" })
+            attachmentId: "attachment-1",
+        })
     })
 
     it("stops before byte transfer when capability preparation is refused", async () => {
@@ -95,7 +128,10 @@ describe("named console mutations", () => {
         const { result } = renderHook(() => useMutateAgentosModuleAttachmentUploadSwr("workspace-1", "module-1"))
 
         await act(async () => {
-            await expect(result.current.trigger({ file, mediaType: "text/markdown" })).resolves.toEqual({ ok: false, reason: "refused" })
+            await expect(result.current.trigger({ file, mediaType: "text/markdown" })).resolves.toEqual({
+                ok: false,
+                reason: "refused",
+            })
         })
 
         expect(mocks.api.upload).not.toHaveBeenCalled()

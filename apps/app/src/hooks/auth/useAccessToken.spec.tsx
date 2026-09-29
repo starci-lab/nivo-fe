@@ -12,7 +12,7 @@ describe("useAccessToken", () => {
         expect(renderHook(() => useAccessToken()).result.current).toBe("token-1")
     })
 
-    it.each(["restoring", "anonymous"])("answers null while the session is %s", status => {
+    it.each(["restoring", "anonymous"])("answers null while the session is %s", (status) => {
         mocks.session.state = { status }
         expect(renderHook(() => useAccessToken()).result.current).toBeNull()
     })

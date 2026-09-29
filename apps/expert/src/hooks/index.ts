@@ -1,1 +1,1 @@
-export { useSubmitAcademyLead } from "./academy/useSubmitAcademyLead";
+export { useSubmitAcademyLead } from "./academy/useSubmitAcademyLead"

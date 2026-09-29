@@ -11,11 +11,23 @@ import { OverviewServices } from "."
 
 describe("OverviewServices", () => {
     it("lists every owned app before the one agent workspace", () => {
-        mocks.data.apps = { ok: true, data: [
-            { id: "site-1", slug: "reader-app", customDomain: null, provisionStatus: "ready", status: "active" },
-            { id: "site-2", slug: "second-app", customDomain: "second.example.com", provisionStatus: "active", status: "active" },
-        ] }
-        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: { id: "order-1" } }] }
+        mocks.data.apps = {
+            ok: true,
+            data: [
+                { id: "site-1", slug: "reader-app", customDomain: null, provisionStatus: "ready", status: "active" },
+                {
+                    id: "site-2",
+                    slug: "second-app",
+                    customDomain: "second.example.com",
+                    provisionStatus: "active",
+                    status: "active",
+                },
+            ],
+        }
+        mocks.data.workspaces = {
+            ok: true,
+            data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: { id: "order-1" } }],
+        }
         render(<OverviewServices label="Services" />)
 
         expect(screen.getByText("reader-app")).toBeInTheDocument()
@@ -25,7 +37,12 @@ describe("OverviewServices", () => {
     })
 
     it("opens the row's own app from its own action", () => {
-        mocks.data.apps = { ok: true, data: [{ id: "site-1", slug: "reader-app", customDomain: null, provisionStatus: "ready", status: "active" }] }
+        mocks.data.apps = {
+            ok: true,
+            data: [
+                { id: "site-1", slug: "reader-app", customDomain: null, provisionStatus: "ready", status: "active" },
+            ],
+        }
         mocks.data.workspaces = { ok: true, data: [] }
         render(<OverviewServices label="Services" />)
 
@@ -34,7 +51,18 @@ describe("OverviewServices", () => {
     })
 
     it("disables an app row that has not been provisioned yet", () => {
-        mocks.data.apps = { ok: true, data: [{ id: "site-1", slug: "new-app", customDomain: null, provisionStatus: "not_provisioned", status: "draft" }] }
+        mocks.data.apps = {
+            ok: true,
+            data: [
+                {
+                    id: "site-1",
+                    slug: "new-app",
+                    customDomain: null,
+                    provisionStatus: "not_provisioned",
+                    status: "draft",
+                },
+            ],
+        }
         mocks.data.workspaces = { ok: true, data: [] }
         render(<OverviewServices label="Services" />)
 
@@ -50,7 +78,18 @@ describe("OverviewServices", () => {
     })
 
     it("names the DNS action for an app awaiting DNS and counts the row as degraded in the fact", () => {
-        mocks.data.apps = { ok: true, data: [{ id: "site-1", slug: "waiting-app", customDomain: null, provisionStatus: "awaiting_dns", status: "active" }] }
+        mocks.data.apps = {
+            ok: true,
+            data: [
+                {
+                    id: "site-1",
+                    slug: "waiting-app",
+                    customDomain: null,
+                    provisionStatus: "awaiting_dns",
+                    status: "active",
+                },
+            ],
+        }
         mocks.data.workspaces = { ok: true, data: [] }
         render(<OverviewServices label="Services" />)
 
@@ -60,7 +99,10 @@ describe("OverviewServices", () => {
 
     it("opens the one agent workspace row from its own action and names it with no catalog order", () => {
         mocks.data.apps = { ok: true, data: [] }
-        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: null, status: "waiting_capacity", catalogOrder: null }] }
+        mocks.data.workspaces = {
+            ok: true,
+            data: [{ id: "workspace-1", name: null, status: "waiting_capacity", catalogOrder: null }],
+        }
         render(<OverviewServices label="Services" />)
 
         expect(screen.getByText("Workspace")).toBeInTheDocument()
@@ -71,7 +113,10 @@ describe("OverviewServices", () => {
 
     it("falls back to an unknown status and a neutral tone once the workspace's own status carries no mapped key", () => {
         mocks.data.apps = { ok: true, data: [] }
-        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "reader workspace", status: "reticulating_splines", catalogOrder: null }] }
+        mocks.data.workspaces = {
+            ok: true,
+            data: [{ id: "workspace-1", name: "reader workspace", status: "reticulating_splines", catalogOrder: null }],
+        }
         render(<OverviewServices label="Services" />)
 
         expect(screen.getByText("Unknown")).toBeInTheDocument()

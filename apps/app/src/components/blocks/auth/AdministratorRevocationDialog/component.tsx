@@ -1,4 +1,4 @@
-import { Button, Dialog, Select, Text } from "@starci/grammar/common";
+import { Button, Dialog, Select, Text } from "@starci/grammar/common"
 
 /**
  * How far the request has got.
@@ -8,55 +8,55 @@ import { Button, Dialog, Select, Text } from "@starci/grammar/common";
  * a sent request has: it is still with an authority, the scope applied, the one generic refusal, or
  * an authority that did not answer.
  */
-export type AdministratorRevocationStage = "ready" | "confirm" | "pending" | "applied" | "refused" | "undecided";
+export type AdministratorRevocationStage = "ready" | "confirm" | "pending" | "applied" | "refused" | "undecided"
 
 /**
  * One roster member the picker may offer: the display name a reader reads, and the durable member
  * identity only the request carries and this surface never draws.
  */
 export type AdministratorRevocationMember = {
-    readonly memberId: string;
-    readonly displayName: string;
-};
+    readonly memberId: string
+    readonly displayName: string
+}
 
 /** Resolved scoped administrator session ending shown over the console. */
 export type AdministratorRevocationDialogBaseProps = {
     readonly props: {
-        readonly title: string;
+        readonly title: string
         /** The stage's own explanatory sentence; absent where the stage states one consequence line. */
-        readonly description?: string;
-        readonly contextLabel: string;
-        readonly context: string;
-        readonly memberLabel: string;
-        readonly memberPlaceholder: string;
-        readonly members: ReadonlyArray<AdministratorRevocationMember>;
-        readonly memberId: string | null;
+        readonly description?: string
+        readonly contextLabel: string
+        readonly context: string
+        readonly memberLabel: string
+        readonly memberPlaceholder: string
+        readonly members: ReadonlyArray<AdministratorRevocationMember>
+        readonly memberId: string | null
         /**
          * Why no member can be chosen right now - the authorized roster could not be read, or every
          * current member is ineligible. Null whenever the picker is the honest control.
          */
-        readonly memberNotice: string | null;
+        readonly memberNotice: string | null
         /** The authorized roster is still arriving; the picker announces the wait and cannot open. */
-        readonly isMemberPending: boolean;
-        readonly consequence: string;
-        readonly cancelLabel: string;
-        readonly continueLabel: string;
-        readonly confirmLabel: string;
-        readonly pendingLabel: string;
-        readonly appliedLabel: string;
-        readonly refusedLabel: string;
-        readonly undecidedLabel: string;
-        readonly retryLabel: string;
-        readonly stage: AdministratorRevocationStage;
-        readonly isOpen: boolean;
-    };
+        readonly isMemberPending: boolean
+        readonly consequence: string
+        readonly cancelLabel: string
+        readonly continueLabel: string
+        readonly confirmLabel: string
+        readonly pendingLabel: string
+        readonly appliedLabel: string
+        readonly refusedLabel: string
+        readonly undecidedLabel: string
+        readonly retryLabel: string
+        readonly stage: AdministratorRevocationStage
+        readonly isOpen: boolean
+    }
     readonly on: {
-        readonly onOpenChange: (isOpen: boolean) => void;
-        readonly memberChange?: (memberId: string | null) => void;
-        readonly confirm?: () => void;
-        readonly retry?: () => void;
-    };
-};
+        readonly onOpenChange: (isOpen: boolean) => void
+        readonly memberChange?: (memberId: string | null) => void
+        readonly confirm?: () => void
+        readonly retry?: () => void
+    }
+}
 
 /*
  * The installed `starci-fe/public-component-signature` rule reads the render half's own name and
@@ -64,7 +64,7 @@ export type AdministratorRevocationDialogBaseProps = {
  * accepts; the exported contract above stays `<Unit>BaseProps`, which the code-pattern check
  * requires the render half to own. Not exported: one public contract per unit.
  */
-type AdministratorRevocationDialogProps = AdministratorRevocationDialogBaseProps;
+type AdministratorRevocationDialogProps = AdministratorRevocationDialogBaseProps
 
 /**
  * Pure scoped administrator ending: the Dialog asks, the connected half reads and sends.
@@ -116,45 +116,80 @@ export const AdministratorRevocationDialogBase = (props: AdministratorRevocation
         undecidedLabel,
         retryLabel,
         stage,
-        isOpen
-    }: AdministratorRevocationDialogBaseProps["props"] = props.props;
-    const outcome = stage === "pending" ? pendingLabel : stage === "applied" ? appliedLabel : stage === "refused" ? refusedLabel : stage === "undecided" ? undecidedLabel : null;
-    const isChoosing = stage === "ready";
-    const isConfirming = stage === "confirm";
-    const canChoose = isChoosing && !isMemberPending && memberNotice === null;
-    return <Dialog
-        title={title}
-        description={description}
-        isOpen={isOpen}
-        onOpenChange={props.on.onOpenChange}
-        isDismissable={stage !== "pending"}
-        isKeyboardDismissDisabled={stage === "pending"}
-        footer={(close: () => void) => {
-            if (stage === "undecided") {
-                return <Button variant="primary" onPress={() => props.on?.retry?.()}>{retryLabel}</Button>;
-            }
-            if (stage === "applied" || stage === "refused") {
-                return <Button variant="outline" onPress={close}>{cancelLabel}</Button>;
-            }
-            return <>
-                <Button variant="outline" isDisabled={stage === "pending"} onPress={close}>{cancelLabel}</Button>
-                <Button variant="primary" isPending={stage === "pending"} isDisabled={stage === "pending" || (isChoosing && (!canChoose || memberId === null))} onPress={() => props.on?.confirm?.()}>{isConfirming || stage === "pending" ? confirmLabel : continueLabel}</Button>
-            </>;
-        }}
-    >
-        {isConfirming ? <Text>{consequence}</Text> : null}
-        <Text tone="muted">{contextLabel}</Text>
-        <Text>{context}</Text>
-        {isChoosing ? <Select
-            label={memberLabel}
-            placeholder={memberPlaceholder}
-            options={members.map((member: AdministratorRevocationMember) => ({ id: member.memberId, label: member.displayName }))}
-            value={memberId}
-            isPending={isMemberPending}
-            isDisabled={memberNotice !== null}
-            onValueChange={(next: string | null) => props.on?.memberChange?.(next)}
-        /> : null}
-        {isChoosing && memberNotice !== null ? <Text live="polite">{memberNotice}</Text> : null}
-        {isConfirming ? null : outcome === null ? <Text>{consequence}</Text> : <Text live="polite">{outcome}</Text>}
-    </Dialog>;
-};
+        isOpen,
+    }: AdministratorRevocationDialogBaseProps["props"] = props.props
+    const outcome =
+        stage === "pending"
+            ? pendingLabel
+            : stage === "applied"
+              ? appliedLabel
+              : stage === "refused"
+                ? refusedLabel
+                : stage === "undecided"
+                  ? undecidedLabel
+                  : null
+    const isChoosing = stage === "ready"
+    const isConfirming = stage === "confirm"
+    const canChoose = isChoosing && !isMemberPending && memberNotice === null
+    return (
+        <Dialog
+            title={title}
+            description={description}
+            isOpen={isOpen}
+            onOpenChange={props.on.onOpenChange}
+            isDismissable={stage !== "pending"}
+            isKeyboardDismissDisabled={stage === "pending"}
+            footer={(close: () => void) => {
+                if (stage === "undecided") {
+                    return (
+                        <Button variant="primary" onPress={() => props.on?.retry?.()}>
+                            {retryLabel}
+                        </Button>
+                    )
+                }
+                if (stage === "applied" || stage === "refused") {
+                    return (
+                        <Button variant="outline" onPress={close}>
+                            {cancelLabel}
+                        </Button>
+                    )
+                }
+                return (
+                    <>
+                        <Button variant="outline" isDisabled={stage === "pending"} onPress={close}>
+                            {cancelLabel}
+                        </Button>
+                        <Button
+                            variant="primary"
+                            isPending={stage === "pending"}
+                            isDisabled={stage === "pending" || (isChoosing && (!canChoose || memberId === null))}
+                            onPress={() => props.on?.confirm?.()}
+                        >
+                            {isConfirming || stage === "pending" ? confirmLabel : continueLabel}
+                        </Button>
+                    </>
+                )
+            }}
+        >
+            {isConfirming ? <Text>{consequence}</Text> : null}
+            <Text tone="muted">{contextLabel}</Text>
+            <Text>{context}</Text>
+            {isChoosing ? (
+                <Select
+                    label={memberLabel}
+                    placeholder={memberPlaceholder}
+                    options={members.map((member: AdministratorRevocationMember) => ({
+                        id: member.memberId,
+                        label: member.displayName,
+                    }))}
+                    value={memberId}
+                    isPending={isMemberPending}
+                    isDisabled={memberNotice !== null}
+                    onValueChange={(next: string | null) => props.on?.memberChange?.(next)}
+                />
+            ) : null}
+            {isChoosing && memberNotice !== null ? <Text live="polite">{memberNotice}</Text> : null}
+            {isConfirming ? null : outcome === null ? <Text>{consequence}</Text> : <Text live="polite">{outcome}</Text>}
+        </Dialog>
+    )
+}

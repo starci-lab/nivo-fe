@@ -22,11 +22,17 @@ export const ProcessFlow = (props: ProcessFlowProps) => {
                     data-emphasis={step.id === emphasisId ? "true" : undefined}
                     key={step.id}
                 >
-                    <span className={CLASS_NAMES.processFlowIndex} aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                    <span className={CLASS_NAMES.processFlowIndex} aria-hidden="true">
+                        {String(index + 1).padStart(2, "0")}
+                    </span>
                     <span className={CLASS_NAMES.processFlowNode} aria-hidden="true" />
                     <span className={CLASS_NAMES.processFlowCopy}>
-                        <Text as="span" size="sm" weight="semibold">{step.label}</Text>
-                        <Text as="span" size="xs" tone={inverse ? "default" : "muted"}>{step.description}</Text>
+                        <Text as="span" size="sm" weight="semibold">
+                            {step.label}
+                        </Text>
+                        <Text as="span" size="xs" tone={inverse ? "default" : "muted"}>
+                            {step.description}
+                        </Text>
                     </span>
                 </li>
             ))}

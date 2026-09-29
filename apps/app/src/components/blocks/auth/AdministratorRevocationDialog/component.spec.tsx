@@ -5,7 +5,11 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
-import { AdministratorRevocationDialogBase, type AdministratorRevocationDialogBaseProps, type AdministratorRevocationStage } from "./component"
+import {
+    AdministratorRevocationDialogBase,
+    type AdministratorRevocationDialogBaseProps,
+    type AdministratorRevocationStage,
+} from "./component"
 
 /** The words the connected half resolves out of `console.account`, as the pure twin receives them. */
 const VIEW: AdministratorRevocationDialogBaseProps["props"] = {
@@ -16,12 +20,13 @@ const VIEW: AdministratorRevocationDialogBaseProps["props"] = {
     memberPlaceholder: "Choose a member",
     members: [
         { memberId: "member-2", displayName: "Binh Tran" },
-        { memberId: "member-3", displayName: "Chi Le" }
+        { memberId: "member-3", displayName: "Chi Le" },
     ],
     memberId: "member-2",
     memberNotice: null,
     isMemberPending: false,
-    consequence: "This request ends all sign-ins of Binh Tran, including in other workspaces, if your authority is confirmed.",
+    consequence:
+        "This request ends all sign-ins of Binh Tran, including in other workspaces, if your authority is confirmed.",
     cancelLabel: "Cancel",
     continueLabel: "Continue",
     confirmLabel: "End all sign-ins",
@@ -31,7 +36,7 @@ const VIEW: AdministratorRevocationDialogBaseProps["props"] = {
     undecidedLabel: "This action could not be completed. Please try again.",
     retryLabel: "Try again",
     stage: "confirm",
-    isOpen: false
+    isOpen: false,
 }
 
 /** The asking face, before any member has been chosen. */
@@ -40,7 +45,7 @@ const CHOOSING: Partial<AdministratorRevocationDialogBaseProps["props"]> = {
     description: "Choose a member of this workspace. Your authority is checked when you submit the request.",
     consequence: "All sign-ins of the selected member will be ended if the request is accepted.",
     memberId: null,
-    stage: "ready"
+    stage: "ready",
 }
 
 const OPEN_LABEL = "open the scoped confirmation"
@@ -84,11 +89,12 @@ const ENDING_COPY: ReadonlyArray<string> = [
     VI_ENDING.undecided,
     VI_ENDING.retry,
     VI_ENDING.noMembers,
-    VI_ENDING.rosterUnavailable
+    VI_ENDING.rosterUnavailable,
 ]
 
 /** A session inventory, a device, a place or a count, named in either product locale. */
-const INVENTORY_OR_PLACE = /thiết bị|\bnơi\b|danh sách phiên|\d|\bdevices?\b|\blocations?\b|\bplaces?\b|session list|principal|membership/i
+const INVENTORY_OR_PLACE =
+    /thiết bị|\bnơi\b|danh sách phiên|\d|\bdevices?\b|\blocations?\b|\bplaces?\b|session list|principal|membership/i
 
 /** The overlay's own backdrop, which owns the press-outside way out of the confirmation. */
 const backdrop = (): Element => {
@@ -112,24 +118,35 @@ type AdministratorRevocationHarnessProps = {
  * The confirmation mounted the way the account menu mounts it: closed, with an opener that holds the
  * focus the dialog is expected to hand back.
  */
-const AdministratorRevocationHarness = ({ props, onConfirm, onMemberChange, onRetry }: AdministratorRevocationHarnessProps) => {
+const AdministratorRevocationHarness = ({
+    props,
+    onConfirm,
+    onMemberChange,
+    onRetry,
+}: AdministratorRevocationHarnessProps) => {
     const [isOpen, setIsOpen] = useState(false)
-    const [memberId, setMemberId] = useState<AdministratorRevocationDialogBaseProps["props"]["memberId"]>(props !== undefined && "memberId" in props ? props.memberId ?? null : VIEW.memberId)
-    return <>
-        <button type="button" onClick={() => setIsOpen(true)}>{OPEN_LABEL}</button>
-        <AdministratorRevocationDialogBase
-            props={{ ...VIEW, ...props, memberId, isOpen }}
-            on={{
-                confirm: onConfirm,
-                memberChange: (next: string | null) => {
-                    setMemberId(next)
-                    onMemberChange?.(next)
-                },
-                retry: onRetry,
-                onOpenChange: setIsOpen
-            }}
-        />
-    </>
+    const [memberId, setMemberId] = useState<AdministratorRevocationDialogBaseProps["props"]["memberId"]>(
+        props !== undefined && "memberId" in props ? (props.memberId ?? null) : VIEW.memberId,
+    )
+    return (
+        <>
+            <button type="button" onClick={() => setIsOpen(true)}>
+                {OPEN_LABEL}
+            </button>
+            <AdministratorRevocationDialogBase
+                props={{ ...VIEW, ...props, memberId, isOpen }}
+                on={{
+                    confirm: onConfirm,
+                    memberChange: (next: string | null) => {
+                        setMemberId(next)
+                        onMemberChange?.(next)
+                    },
+                    retry: onRetry,
+                    onOpenChange: setIsOpen,
+                }}
+            />
+        </>
+    )
 }
 
 /** One case's overrides: the resolved props it is about, and the stage it opens on. */
@@ -166,7 +183,10 @@ describe("AdministratorRevocationDialogBase", () => {
         expect(picker(dialog)).toBeInTheDocument()
         const contextLabel = within(dialog).getByText(VIEW.contextLabel)
         expect(within(dialog).getByText(VIEW.context)).toBeInTheDocument()
-        expect(contextLabel.compareDocumentPosition(within(dialog).getByText(CHOOSING.consequence as string)) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+        expect(
+            contextLabel.compareDocumentPosition(within(dialog).getByText(CHOOSING.consequence as string)) &
+                Node.DOCUMENT_POSITION_FOLLOWING,
+        ).not.toBe(0)
         const continueButton = screen.getByRole("button", { name: VIEW.continueLabel })
         expect(continueButton).toBeDisabled()
         await user.click(continueButton)
@@ -206,7 +226,12 @@ describe("AdministratorRevocationDialogBase", () => {
     it("says the roster could not be read instead of drawing an empty picker", async () => {
         const confirm = vi.fn()
         const user = userEvent.setup()
-        render(<AdministratorRevocationHarness props={{ ...CHOOSING, members: [], memberNotice: EN_ENDING.rosterUnavailable }} onConfirm={confirm} />)
+        render(
+            <AdministratorRevocationHarness
+                props={{ ...CHOOSING, members: [], memberNotice: EN_ENDING.rosterUnavailable }}
+                onConfirm={confirm}
+            />,
+        )
         await user.click(screen.getByRole("button", { name: OPEN_LABEL }))
         const dialog = await screen.findByRole("dialog")
 
@@ -218,7 +243,12 @@ describe("AdministratorRevocationDialogBase", () => {
     it("says nobody else can be chosen instead of drawing an empty picker", async () => {
         const confirm = vi.fn()
         const user = userEvent.setup()
-        render(<AdministratorRevocationHarness props={{ ...CHOOSING, members: [], memberNotice: EN_ENDING.noMembers }} onConfirm={confirm} />)
+        render(
+            <AdministratorRevocationHarness
+                props={{ ...CHOOSING, members: [], memberNotice: EN_ENDING.noMembers }}
+                onConfirm={confirm}
+            />,
+        )
         await user.click(screen.getByRole("button", { name: OPEN_LABEL }))
         const dialog = await screen.findByRole("dialog")
 
@@ -230,7 +260,12 @@ describe("AdministratorRevocationDialogBase", () => {
     it("withholds the continuation while the roster is still arriving", async () => {
         const confirm = vi.fn()
         const user = userEvent.setup()
-        render(<AdministratorRevocationHarness props={{ ...CHOOSING, members: [], isMemberPending: true }} onConfirm={confirm} />)
+        render(
+            <AdministratorRevocationHarness
+                props={{ ...CHOOSING, members: [], isMemberPending: true }}
+                onConfirm={confirm}
+            />,
+        )
         await user.click(screen.getByRole("button", { name: OPEN_LABEL }))
         await screen.findByRole("dialog")
 

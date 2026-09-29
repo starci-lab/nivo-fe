@@ -3,22 +3,187 @@ import { SWRConfig } from "swr"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { AcademyIntegrationCenter } from "./index"
 
-const m = vi.hoisted(() => ({ session: { state: { status: "signed-in", accessToken: "test-token" } }, integrations: { ok: true, data: undefined as unknown }, calls: { domain: vi.fn(), google: vi.fn(), credential: vi.fn(), zalo: vi.fn(), analytics: vi.fn(), webhook: vi.fn() }, view: undefined as unknown }))
+const m = vi.hoisted(() => ({
+    session: { state: { status: "signed-in", accessToken: "test-token" } },
+    integrations: { ok: true, data: undefined as unknown },
+    calls: {
+        domain: vi.fn(),
+        google: vi.fn(),
+        credential: vi.fn(),
+        zalo: vi.fn(),
+        analytics: vi.fn(),
+        webhook: vi.fn(),
+    },
+    view: undefined as unknown,
+}))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => m.session }))
-vi.mock("@/modules/api/academy", () => ({ myAcademyIntegrations: () => Promise.resolve(m.integrations), setAcademyCustomDomain: m.calls.domain, saveAcademyGoogleOAuth: m.calls.google, saveAcademyCredential: m.calls.credential, beginAcademyZaloAuthorization: m.calls.zalo, saveAcademyAnalytics: m.calls.analytics, createAcademyWebhook: m.calls.webhook }))
-type IntegrationView = { state: string; on: { select: (id: string) => void; changeField: (name: string, value: string) => void; submit: () => void } }
+vi.mock("@/modules/api/academy", () => ({
+    myAcademyIntegrations: () => Promise.resolve(m.integrations),
+    setAcademyCustomDomain: m.calls.domain,
+    saveAcademyGoogleOAuth: m.calls.google,
+    saveAcademyCredential: m.calls.credential,
+    beginAcademyZaloAuthorization: m.calls.zalo,
+    saveAcademyAnalytics: m.calls.analytics,
+    createAcademyWebhook: m.calls.webhook,
+}))
+type IntegrationView = {
+    state: string
+    on: { select: (id: string) => void; changeField: (name: string, value: string) => void; submit: () => void }
+}
 vi.mock("./component", () => ({
-    AcademyIntegrationCenterBase: (input: IntegrationView) => { m.view = input; return <><output data-testid="state">{input.state}</output><button onClick={() => input.on.select("domain")}>domain</button><button onClick={() => input.on.select("google")}>google</button><button onClick={() => input.on.select("smtp")}>smtp</button><button onClick={() => input.on.select("payment")}>payment</button><button onClick={() => input.on.select("zalo")}>zalo</button><button onClick={() => input.on.select("ga4")}>ga4</button><button onClick={() => input.on.select("meta_pixel")}>meta</button><button onClick={() => input.on.select("webhook")}>webhook</button><button onClick={() => input.on.changeField("domain", " academy.example ")}>field</button><button onClick={input.on.submit}>save</button></> }
+    AcademyIntegrationCenterBase: (input: IntegrationView) => {
+        m.view = input
+        return (
+            <>
+                <output data-testid="state">{input.state}</output>
+                <button onClick={() => input.on.select("domain")}>domain</button>
+                <button onClick={() => input.on.select("google")}>google</button>
+                <button onClick={() => input.on.select("smtp")}>smtp</button>
+                <button onClick={() => input.on.select("payment")}>payment</button>
+                <button onClick={() => input.on.select("zalo")}>zalo</button>
+                <button onClick={() => input.on.select("ga4")}>ga4</button>
+                <button onClick={() => input.on.select("meta_pixel")}>meta</button>
+                <button onClick={() => input.on.select("webhook")}>webhook</button>
+                <button onClick={() => input.on.changeField("domain", " academy.example ")}>field</button>
+                <button onClick={input.on.submit}>save</button>
+            </>
+        )
+    },
 }))
 
-const answered = { credentials: [{ key: "SMTP_HOST", configured: true, hint: "host", syncedAt: null, verification: "verified", verificationReason: null, verifiedAt: null }, { key: "PAYOS_KEY", configured: true, hint: null, syncedAt: null, verification: "verified", verificationReason: null, verifiedAt: null }], customDomain: { domain: "academy.example", target: "target.example", dnsReady: true, delivery: "live", detail: "ok" }, google: { provider: "google", status: "connected", clientId: "client", identifier: null, consentMode: null, reason: null, deliveredAt: null, verifiedAt: null }, zalo: { provider: "zalo", status: "pending", clientId: null, identifier: null, consentMode: null, reason: "pending", deliveredAt: null, verifiedAt: null }, analytics: [{ provider: "ga4", status: "verified", clientId: null, identifier: "G-1", consentMode: "granted", reason: null, deliveredAt: null, verifiedAt: null }, { provider: "meta_pixel", status: "failed", clientId: null, identifier: "M-1", consentMode: "denied", reason: "failed", deliveredAt: null, verifiedAt: null }], webhooks: [{ id: "hook", endpoint: "https://hook", events: ["student.created"], enabled: true, version: 1, lastDeliveryStatus: "ok", lastDeliveredAt: null }] }
+const answered = {
+    credentials: [
+        {
+            key: "SMTP_HOST",
+            configured: true,
+            hint: "host",
+            syncedAt: null,
+            verification: "verified",
+            verificationReason: null,
+            verifiedAt: null,
+        },
+        {
+            key: "PAYOS_KEY",
+            configured: true,
+            hint: null,
+            syncedAt: null,
+            verification: "verified",
+            verificationReason: null,
+            verifiedAt: null,
+        },
+    ],
+    customDomain: {
+        domain: "academy.example",
+        target: "target.example",
+        dnsReady: true,
+        delivery: "live",
+        detail: "ok",
+    },
+    google: {
+        provider: "google",
+        status: "connected",
+        clientId: "client",
+        identifier: null,
+        consentMode: null,
+        reason: null,
+        deliveredAt: null,
+        verifiedAt: null,
+    },
+    zalo: {
+        provider: "zalo",
+        status: "pending",
+        clientId: null,
+        identifier: null,
+        consentMode: null,
+        reason: "pending",
+        deliveredAt: null,
+        verifiedAt: null,
+    },
+    analytics: [
+        {
+            provider: "ga4",
+            status: "verified",
+            clientId: null,
+            identifier: "G-1",
+            consentMode: "granted",
+            reason: null,
+            deliveredAt: null,
+            verifiedAt: null,
+        },
+        {
+            provider: "meta_pixel",
+            status: "failed",
+            clientId: null,
+            identifier: "M-1",
+            consentMode: "denied",
+            reason: "failed",
+            deliveredAt: null,
+            verifiedAt: null,
+        },
+    ],
+    webhooks: [
+        {
+            id: "hook",
+            endpoint: "https://hook",
+            events: ["student.created"],
+            enabled: true,
+            version: 1,
+            lastDeliveryStatus: "ok",
+            lastDeliveredAt: null,
+        },
+    ],
+}
 
 let viewerSequence = 0
-const resetQueryCache = () => { for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key) }
-beforeEach(() => { vi.clearAllMocks(); viewerSequence += 1; m.session.state.accessToken = `integration-center-${viewerSequence}`; m.integrations = { ok: true, data: undefined }; m.calls.domain.mockResolvedValue({ ok: true, data: {} }); m.calls.google.mockResolvedValue({ ok: true, data: {} }); m.calls.credential.mockResolvedValue({ ok: true, data: {} }); m.calls.zalo.mockResolvedValue({ ok: true, data: { authorizationUrl: "https://zalo.example" } }); m.calls.analytics.mockResolvedValue({ ok: true, data: {} }); m.calls.webhook.mockResolvedValue({ ok: true, data: { signingSecret: "secret" } }) })
+const resetQueryCache = () => {
+    for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key)
+}
+beforeEach(() => {
+    vi.clearAllMocks()
+    viewerSequence += 1
+    m.session.state.accessToken = `integration-center-${viewerSequence}`
+    m.integrations = { ok: true, data: undefined }
+    m.calls.domain.mockResolvedValue({ ok: true, data: {} })
+    m.calls.google.mockResolvedValue({ ok: true, data: {} })
+    m.calls.credential.mockResolvedValue({ ok: true, data: {} })
+    m.calls.zalo.mockResolvedValue({ ok: true, data: { authorizationUrl: "https://zalo.example" } })
+    m.calls.analytics.mockResolvedValue({ ok: true, data: {} })
+    m.calls.webhook.mockResolvedValue({ ok: true, data: { signingSecret: "secret" } })
+})
 
 describe("AcademyIntegrationCenter", () => {
-    it("loads refusal and answered provider states", async () => { m.integrations = { ok: false, data: undefined }; render(<AcademyIntegrationCenter siteId="site-1" />); await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("refused")); cleanup(); resetQueryCache(); m.integrations = { ok: true, data: answered }; render(<AcademyIntegrationCenter siteId="site-1" />); await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("answered")) })
-    it("dispatches provider-specific saves across all forms", async () => { m.integrations = { ok: true, data: answered }; render(<AcademyIntegrationCenter siteId="site-1" />); await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("answered")); for (const id of ["domain", "google", "smtp", "payment", "zalo", "ga4", "meta", "webhook"]) { fireEvent.click(screen.getByText(id)); fireEvent.click(screen.getByText("field")); fireEvent.click(screen.getByText("save")) }; await waitFor(() => expect(m.calls.domain).toHaveBeenCalled()); expect(m.calls.google).toHaveBeenCalled(); expect(m.calls.credential).toHaveBeenCalled(); expect(m.calls.zalo).toHaveBeenCalled(); expect(m.calls.analytics).toHaveBeenCalled(); expect(m.calls.webhook).toHaveBeenCalled() })
-    it("keeps a claimed domain pending while DNS is not ready", async () => { m.integrations = { ok: true, data: { ...answered, customDomain: { ...answered.customDomain, dnsReady: false } } }; render(<AcademyIntegrationCenter siteId="site-1" />); await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("answered")) })
+    it("loads refusal and answered provider states", async () => {
+        m.integrations = { ok: false, data: undefined }
+        render(<AcademyIntegrationCenter siteId="site-1" />)
+        await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("refused"))
+        cleanup()
+        resetQueryCache()
+        m.integrations = { ok: true, data: answered }
+        render(<AcademyIntegrationCenter siteId="site-1" />)
+        await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("answered"))
+    })
+    it("dispatches provider-specific saves across all forms", async () => {
+        m.integrations = { ok: true, data: answered }
+        render(<AcademyIntegrationCenter siteId="site-1" />)
+        await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("answered"))
+        for (const id of ["domain", "google", "smtp", "payment", "zalo", "ga4", "meta", "webhook"]) {
+            fireEvent.click(screen.getByText(id))
+            fireEvent.click(screen.getByText("field"))
+            fireEvent.click(screen.getByText("save"))
+        }
+        await waitFor(() => expect(m.calls.domain).toHaveBeenCalled())
+        expect(m.calls.google).toHaveBeenCalled()
+        expect(m.calls.credential).toHaveBeenCalled()
+        expect(m.calls.zalo).toHaveBeenCalled()
+        expect(m.calls.analytics).toHaveBeenCalled()
+        expect(m.calls.webhook).toHaveBeenCalled()
+    })
+    it("keeps a claimed domain pending while DNS is not ready", async () => {
+        m.integrations = {
+            ok: true,
+            data: { ...answered, customDomain: { ...answered.customDomain, dnsReady: false } },
+        }
+        render(<AcademyIntegrationCenter siteId="site-1" />)
+        await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("answered"))
+    })
 })

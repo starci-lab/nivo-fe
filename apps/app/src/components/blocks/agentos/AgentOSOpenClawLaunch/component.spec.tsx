@@ -1,9 +1,23 @@
 import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import { AgentOSOpenClawLaunchBase as AgentOSOpenClawLaunchBaseView, type AgentOSOpenClawLaunchViewProps } from "./component"
+import {
+    AgentOSOpenClawLaunchBase as AgentOSOpenClawLaunchBaseView,
+    type AgentOSOpenClawLaunchViewProps,
+} from "./component"
 
-const AgentOSOpenClawLaunchBase = (props: AgentOSOpenClawLaunchViewProps) => <AgentOSOpenClawLaunchBaseView state={props.launchState} props={{ workspaceId: props.workspaceId, detail: props.detail, labels: props.labels, isRetryPending: props.isRetryPending }} on={{ onRetry: props.onRetry, onReturn: props.onReturn }} />
+const AgentOSOpenClawLaunchBase = (props: AgentOSOpenClawLaunchViewProps) => (
+    <AgentOSOpenClawLaunchBaseView
+        state={props.launchState}
+        props={{
+            workspaceId: props.workspaceId,
+            detail: props.detail,
+            labels: props.labels,
+            isRetryPending: props.isRetryPending,
+        }}
+        on={{ onRetry: props.onRetry, onReturn: props.onReturn }}
+    />
+)
 
 const props: Omit<AgentOSOpenClawLaunchViewProps, "launchState"> = {
     workspaceId: "workspace-1",
@@ -41,7 +55,9 @@ describe("AgentOSOpenClawLaunchBase", () => {
     })
 
     it("maps connected launch state to the return action", () => {
-        const html = renderToStaticMarkup(<AgentOSOpenClawLaunchBase {...props} launchState="connected" detail="Expires soon" />)
+        const html = renderToStaticMarkup(
+            <AgentOSOpenClawLaunchBase {...props} launchState="connected" detail="Expires soon" />,
+        )
         expect(html).toContain("Return to workspace")
         expect(html).toContain("Expires soon")
         expect(html).toContain('data-tone="success"')

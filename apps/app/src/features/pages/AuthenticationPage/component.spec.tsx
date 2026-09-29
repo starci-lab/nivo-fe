@@ -51,10 +51,12 @@ const surfaceOf = (container: HTMLElement) => container.querySelector('[data-gra
 
 describe("AuthenticationPageView", () => {
     it("puts one surface under an external heading, and the exits outside it", () => {
-        const { container } = render(<AuthenticationPageView
-            panel={{ state: "details", props: details, on: { submitDetails: vi.fn() } }}
-            exits={[{ question: "No account yet?", action: "Create one", onPress: vi.fn() }]}
-        />)
+        const { container } = render(
+            <AuthenticationPageView
+                panel={{ state: "details", props: details, on: { submitDetails: vi.fn() } }}
+                exits={[{ question: "No account yet?", action: "Create one", onPress: vi.fn() }]}
+            />,
+        )
         expect(screen.getByRole("heading", { level: 1, name: "Sign in" })).toBeInTheDocument()
         expect(screen.getByRole("img", { name: "Nivo" })).toBeInTheDocument()
         expect(screen.getByLabelText("Email")).toBeInTheDocument()
@@ -79,12 +81,19 @@ describe("AuthenticationPageView", () => {
 
     it("keys the panel by step and journey so switching mode remounts uncontrolled fields", () => {
         const exits: [] = []
-        const { rerender } = render(<AuthenticationPageView panel={{ state: "details", props: details, on: {} }} exits={exits} />)
+        const { rerender } = render(
+            <AuthenticationPageView panel={{ state: "details", props: details, on: {} }} exits={exits} />,
+        )
         // Typed through the event path rather than assigned: an uncontrolled field only proves it
         // was remounted if the value it lost was one a reader could actually have put there.
         fireEvent.change(screen.getByLabelText("Email"), { target: { value: "reader@example.test" } })
         expect((screen.getByLabelText("Email") as HTMLInputElement).value).toBe("reader@example.test")
-        rerender(<AuthenticationPageView panel={{ state: "details", props: { ...details, mode: "signUp" }, on: {} }} exits={exits} />)
+        rerender(
+            <AuthenticationPageView
+                panel={{ state: "details", props: { ...details, mode: "signUp" }, on: {} }}
+                exits={exits}
+            />,
+        )
         expect((screen.getByLabelText("Email") as HTMLInputElement).value).toBe("")
     })
 
@@ -95,7 +104,9 @@ describe("AuthenticationPageView", () => {
     })
 
     it("reserves the mascot for sign-in-ready alone, and keeps it decorative", () => {
-        const { container, rerender } = render(<AuthenticationPageView panel={{ state: "details", props: details, on: {} }} exits={[]} />)
+        const { container, rerender } = render(
+            <AuthenticationPageView panel={{ state: "details", props: details, on: {} }} exits={[]} />,
+        )
         const artwork = container.querySelector("aside")
         expect(artwork).not.toBeNull()
         expect(artwork).toHaveAttribute("aria-hidden", "true")
@@ -106,7 +117,16 @@ describe("AuthenticationPageView", () => {
          * surface, and the record binds it to one state - so the assertion names the two that must
          * not have it rather than trusting that a shared tree happened to hide it.
          */
-        rerender(<AuthenticationPageView panel={{ state: "details", props: { ...details, statusMessage: "That email or password is not right.", isError: true }, on: {} }} exits={[]} />)
+        rerender(
+            <AuthenticationPageView
+                panel={{
+                    state: "details",
+                    props: { ...details, statusMessage: "That email or password is not right.", isError: true },
+                    on: {},
+                }}
+                exits={[]}
+            />,
+        )
         expect(container.querySelector("aside")).toBeNull()
 
         rerender(<AuthenticationPageView panel={{ state: "notice", props: notice, on: {} }} exits={[]} />)

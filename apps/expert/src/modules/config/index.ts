@@ -19,7 +19,9 @@ const DEVELOPMENT_ACADEMY_API_URL = "http://localhost:4068/graphql"
 export const resolveAcademyApiUrl = (configured: string | undefined, nodeEnv: string | undefined): string => {
     if (configured !== undefined && configured.length > 0) return configured
     if (nodeEnv === "production") {
-        throw new Error("NEXT_PUBLIC_ACADEMY_API_URL is not set: a production build must name the academy API GraphQL endpoint.")
+        throw new Error(
+            "NEXT_PUBLIC_ACADEMY_API_URL is not set: a production build must name the academy API GraphQL endpoint.",
+        )
     }
     return DEVELOPMENT_ACADEMY_API_URL
 }

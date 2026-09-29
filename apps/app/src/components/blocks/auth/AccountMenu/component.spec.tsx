@@ -11,10 +11,11 @@ const ADMINISTRATOR_ENDING_COPY = "scoped administrator ending"
 const RETURN_NOTICE_COPY = "the landing's unavailable-return notice"
 
 /** The confirmation the connected half hands in: drawn here only when it was told to be open. */
-const SessionEndingStub = ({ isOpen }: SessionEndingDialogProps) => isOpen ? <span>{SESSION_ENDING_COPY}</span> : null
+const SessionEndingStub = ({ isOpen }: SessionEndingDialogProps) => (isOpen ? <span>{SESSION_ENDING_COPY}</span> : null)
 
 /** The scoped administrator ending the connected half hands in, drawn on the same terms. */
-const AdministratorRevocationStub = ({ isOpen }: AdministratorRevocationDialogProps) => isOpen ? <span>{ADMINISTRATOR_ENDING_COPY}</span> : null
+const AdministratorRevocationStub = ({ isOpen }: AdministratorRevocationDialogProps) =>
+    isOpen ? <span>{ADMINISTRATOR_ENDING_COPY}</span> : null
 
 /** The landing notice the connected half hands in; it reads the address itself, so it takes nothing. */
 const ReturnNoticeStub = () => <span>{RETURN_NOTICE_COPY}</span>
@@ -34,14 +35,14 @@ const viewProps = (overrides: AccountMenuCase = {}): AccountMenuBaseProps => ({
         administratorRevocationControlProps: { isOpen: false, onOpenChange: () => {} },
         returnNoticeControl: ReturnNoticeStub,
         returnNoticeControlProps: {},
-        ...overrides.state
+        ...overrides.state,
     },
     props: {
         label: "Account",
         signOutLabel: "Sign out",
         signOutEverywhereLabel: "Sign out everywhere",
-        ...overrides.props
-    }
+        ...overrides.props,
+    },
 })
 
 /** Open the account menu and answer with it. */
@@ -77,9 +78,11 @@ describe("AccountMenuBase", () => {
         const { rerender } = render(<AccountMenuBase {...viewProps()} />)
         expect(screen.queryByText(SESSION_ENDING_COPY)).not.toBeInTheDocument()
 
-        rerender(<AccountMenuBase
-            {...viewProps({ state: { sessionEndingControlProps: { isOpen: true, onOpenChange: () => {} } } })}
-        />)
+        rerender(
+            <AccountMenuBase
+                {...viewProps({ state: { sessionEndingControlProps: { isOpen: true, onOpenChange: () => {} } } })}
+            />,
+        )
         expect(screen.getByText(SESSION_ENDING_COPY)).toBeInTheDocument()
     })
 
@@ -87,9 +90,13 @@ describe("AccountMenuBase", () => {
         const { rerender } = render(<AccountMenuBase {...viewProps()} />)
         expect(screen.queryByText(ADMINISTRATOR_ENDING_COPY)).not.toBeInTheDocument()
 
-        rerender(<AccountMenuBase
-            {...viewProps({ state: { administratorRevocationControlProps: { isOpen: true, onOpenChange: () => {} } } })}
-        />)
+        rerender(
+            <AccountMenuBase
+                {...viewProps({
+                    state: { administratorRevocationControlProps: { isOpen: true, onOpenChange: () => {} } },
+                })}
+            />,
+        )
         expect(screen.getByText(ADMINISTRATOR_ENDING_COPY)).toBeInTheDocument()
     })
 
@@ -111,10 +118,12 @@ describe("AccountMenuBase", () => {
 
     it("reports the administrator ending entry the eligibility answer supplied", async () => {
         const administratorEnding = vi.fn()
-        render(<AccountMenuBase
-            {...viewProps({ props: { administratorEnding: { label: ADMIN_LABEL } } })}
-            on={{ administratorEnding }}
-        />)
+        render(
+            <AccountMenuBase
+                {...viewProps({ props: { administratorEnding: { label: ADMIN_LABEL } } })}
+                on={{ administratorEnding }}
+            />,
+        )
 
         await openMenu()
         expect(screen.getAllByRole("menuitem")).toHaveLength(3)

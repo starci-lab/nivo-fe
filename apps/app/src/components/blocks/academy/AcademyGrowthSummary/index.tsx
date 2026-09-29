@@ -1,42 +1,45 @@
-"use client";
+"use client"
 
-import { useFormatter, useTranslations } from "next-intl";
-import { useQueryMyAcademyGrowthSnapshotSwr } from "@/hooks";
-import { BILLING_CURRENCY } from "@/modules/config";
-import { AcademyGrowthSummaryBase } from "./component";
+import { useFormatter, useTranslations } from "next-intl"
+import { useQueryMyAcademyGrowthSnapshotSwr } from "@/hooks"
+import { BILLING_CURRENCY } from "@/modules/config"
+import { AcademyGrowthSummaryBase } from "./component"
 
 /** Owner-scoped identity consumed by the connected growth block. */
 export type AcademyGrowthSummaryProps = {
-  readonly siteId: string;
-};
+    readonly siteId: string
+}
 
 /** Load and format Academy growth independently from neighbouring blocks. */
 export const AcademyGrowthSummary = (props: AcademyGrowthSummaryProps) => {
-  const {
-    siteId
-  }: AcademyGrowthSummaryProps = props;
-  const t = useTranslations("console.academyControlCenter.growth");
-  const format = useFormatter();
-  const answer = useQueryMyAcademyGrowthSnapshotSwr(siteId).data;
-  const data = answer?.ok === true ? answer.data : undefined;
-  const settledState = answer?.ok === true ? "answered" : "refused";
-  return <AcademyGrowthSummaryBase state={answer === undefined ? "resting" : settledState} props={{
-    data,
-    revenue: format.number(data?.revenueVnd ?? 0, {
-      style: "currency",
-      currency: BILLING_CURRENCY,
-      maximumFractionDigits: 0
-    }),
-    labels: {
-      section: t("section"),
-      health: t("health"),
-      loading: t("loading"),
-      refused: t("refused"),
-      revenue: t("revenue"),
-      orders: t("orders"),
-      members: t("members"),
-      completions: t("completions"),
-      activeRate: t("activeRate")
-    }
-  }} />;
-};
+    const { siteId }: AcademyGrowthSummaryProps = props
+    const t = useTranslations("console.academyControlCenter.growth")
+    const format = useFormatter()
+    const answer = useQueryMyAcademyGrowthSnapshotSwr(siteId).data
+    const data = answer?.ok === true ? answer.data : undefined
+    const settledState = answer?.ok === true ? "answered" : "refused"
+    return (
+        <AcademyGrowthSummaryBase
+            state={answer === undefined ? "resting" : settledState}
+            props={{
+                data,
+                revenue: format.number(data?.revenueVnd ?? 0, {
+                    style: "currency",
+                    currency: BILLING_CURRENCY,
+                    maximumFractionDigits: 0,
+                }),
+                labels: {
+                    section: t("section"),
+                    health: t("health"),
+                    loading: t("loading"),
+                    refused: t("refused"),
+                    revenue: t("revenue"),
+                    orders: t("orders"),
+                    members: t("members"),
+                    completions: t("completions"),
+                    activeRate: t("activeRate"),
+                },
+            }}
+        />
+    )
+}

@@ -39,8 +39,9 @@ beforeEach(() => {
 
 describe("oauthRedirectUrl", () => {
     it("builds the provider redirect URL without nesting under graphql", () => {
-        expect(oauthRedirectUrl("google", "http://localhost:3067/auth/callback?next=/app"))
-            .toBe("http://localhost:3068/api/v1/keycloak/google/redirect?redirect_uri=http%3A%2F%2Flocalhost%3A3067%2Fauth%2Fcallback%3Fnext%3D%2Fapp")
+        expect(oauthRedirectUrl("google", "http://localhost:3067/auth/callback?next=/app")).toBe(
+            "http://localhost:3068/api/v1/keycloak/google/redirect?redirect_uri=http%3A%2F%2Flocalhost%3A3067%2Fauth%2Fcallback%3Fnext%3D%2Fapp",
+        )
     })
 })
 

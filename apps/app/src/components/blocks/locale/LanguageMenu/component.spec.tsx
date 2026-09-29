@@ -12,7 +12,10 @@ describe("LanguageMenuBase", () => {
                 props={{
                     label: "Language",
                     selectedLocale: "en",
-                    options: [{ id: "vi", label: "Vietnamese" }, { id: "en", label: "English" }],
+                    options: [
+                        { id: "vi", label: "Vietnamese" },
+                        { id: "en", label: "English" },
+                    ],
                 }}
                 on={{ select }}
             />,

@@ -4,6 +4,8 @@ import { AgentOSWorkspacePurchaseProvisioningPage } from "@/features/pages/Agent
 type AgentOSWorkspacePurchaseProvisioningRouteProps = { readonly params: Promise<{ readonly purchaseId: string }> }
 
 /** Mount the declared provisioning surface of one purchase identity. */
-const Page = (props: AgentOSWorkspacePurchaseProvisioningRouteProps) => <AgentOSWorkspacePurchaseProvisioningPage params={props.params} />
+const Page = (props: AgentOSWorkspacePurchaseProvisioningRouteProps) => (
+    <AgentOSWorkspacePurchaseProvisioningPage params={props.params} />
+)
 
 export default Page

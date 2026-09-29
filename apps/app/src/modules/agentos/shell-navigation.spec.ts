@@ -14,7 +14,12 @@ const destination = (routeName: ShellRegisteredViewName): ShellRegisteredDestina
     instanceId: INSTANCE,
     installationId: INSTALLATION,
     opaqueItemId: null,
-    returnContext: { routeName: "purchased_agentos", workspaceId: WORKSPACE, instanceId: INSTANCE, installationId: INSTALLATION }
+    returnContext: {
+        routeName: "purchased_agentos",
+        workspaceId: WORKSPACE,
+        instanceId: INSTANCE,
+        installationId: INSTALLATION,
+    },
 })
 
 describe("shellNavigationPath", () => {
@@ -39,8 +44,14 @@ describe("shellNavigationPath", () => {
 
 describe("shellReturnSelection", () => {
     it("keeps the AgentOS selector as context and carries no observation back", () => {
-        expect(shellReturnSelection(destination("module-home"))).toEqual({ workspaceId: WORKSPACE, instanceId: INSTANCE })
-        expect(Object.keys(shellReturnSelection(destination("module-home"))).sort()).toEqual(["instanceId", "workspaceId"])
+        expect(shellReturnSelection(destination("module-home"))).toEqual({
+            workspaceId: WORKSPACE,
+            instanceId: INSTANCE,
+        })
+        expect(Object.keys(shellReturnSelection(destination("module-home"))).sort()).toEqual([
+            "instanceId",
+            "workspaceId",
+        ])
     })
 })
 
@@ -50,13 +61,16 @@ describe("shellNavigationDecision", () => {
         expect(decision).toEqual({
             open: true,
             href: `/agentos/workspaces/${WORKSPACE}/modules/${INSTALLATION}/diagnostics`,
-            returnSelection: { workspaceId: WORKSPACE, instanceId: INSTANCE }
+            returnSelection: { workspaceId: WORKSPACE, instanceId: INSTANCE },
         })
     })
 
     it("opens the module-owned destination of an attention or result entry", () => {
         for (const routeName of ["sales-opportunity", "accounting-result", "chatbot-conversation"] as const) {
-            const decision = shellNavigationDecision({ ok: true, data: { ...destination(routeName), opaqueItemId: "item-1" } }, "vi")
+            const decision = shellNavigationDecision(
+                { ok: true, data: { ...destination(routeName), opaqueItemId: "item-1" } },
+                "vi",
+            )
             expect(decision.open).toBe(true)
         }
     })
@@ -68,7 +82,7 @@ describe("shellNavigationDecision", () => {
             failed("invalid", { code: "UNSUPPORTED", reason: "route-key-unsupported" }),
             failed("invalid", { code: "OBSOLETE_SELECTION", reason: "obsolete-selection" }),
             failed("refused", { code: "UNAUTHENTICATED", reason: "no token" }),
-            failed("unavailable", { code: "NETWORK", reason: "network" })
+            failed("unavailable", { code: "NETWORK", reason: "network" }),
         ]
         for (const outcome of outcomes) {
             const decision = shellNavigationDecision(outcome, "vi")
@@ -78,7 +92,15 @@ describe("shellNavigationDecision", () => {
     })
 
     it("opens on the resolved answer alone, whose destination names no authority the shell could use", () => {
-        expect(Object.keys(destination("module-home")).sort()).toEqual(["grammarVersion", "installationId", "instanceId", "opaqueItemId", "returnContext", "routeName", "workspaceId"])
+        expect(Object.keys(destination("module-home")).sort()).toEqual([
+            "grammarVersion",
+            "installationId",
+            "instanceId",
+            "opaqueItemId",
+            "returnContext",
+            "routeName",
+            "workspaceId",
+        ])
         expect(JSON.stringify(destination("module-home"))).not.toMatch(/grant|role|permission|authority/iu)
     })
 })

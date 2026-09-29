@@ -1,4 +1,4 @@
-import { oauthRedirectUrl, type OauthProvider } from "@/modules/api/auth";
+import { oauthRedirectUrl, type OauthProvider } from "@/modules/api/auth"
 
 /**
  * The provider hand-off: the address a reader leaves through, and the memory of who they left with.
@@ -21,10 +21,10 @@ import { oauthRedirectUrl, type OauthProvider } from "@/modules/api/auth";
  */
 
 /** Where the chosen provider is remembered. Session-scoped: it dies with the tab, like the trip. */
-const PROVIDER_KEY = "nivo.oauth.provider";
+const PROVIDER_KEY = "nivo.oauth.provider"
 
 /** The provider assumed when nothing was remembered, so a return leg is never left without one. */
-const DEFAULT_PROVIDER: OauthProvider = "google";
+const DEFAULT_PROVIDER: OauthProvider = "google"
 
 /**
  * Remember the OAuth provider for the return leg without placing it in the callback URL.
@@ -32,12 +32,12 @@ const DEFAULT_PROVIDER: OauthProvider = "google";
  * @param provider - The provider the reader chose.
  */
 export const rememberOauthProvider = (provider: OauthProvider) => {
-  try {
-    window.sessionStorage.setItem(PROVIDER_KEY, provider);
-  } catch {
-    // Storage can be unavailable; the return leg safely falls back to the default provider.
-  }
-};
+    try {
+        window.sessionStorage.setItem(PROVIDER_KEY, provider)
+    } catch {
+        // Storage can be unavailable; the return leg safely falls back to the default provider.
+    }
+}
 
 /**
  * Read the remembered provider once and forget it, so a reload cannot replay a spent trip.
@@ -45,14 +45,14 @@ export const rememberOauthProvider = (provider: OauthProvider) => {
  * @returns The remembered provider, or the default when nothing was kept.
  */
 export const takeOauthProvider = (): OauthProvider => {
-  try {
-    const remembered = window.sessionStorage.getItem(PROVIDER_KEY);
-    window.sessionStorage.removeItem(PROVIDER_KEY);
-    return remembered === "github" ? "github" : DEFAULT_PROVIDER;
-  } catch {
-    return DEFAULT_PROVIDER;
-  }
-};
+    try {
+        const remembered = window.sessionStorage.getItem(PROVIDER_KEY)
+        window.sessionStorage.removeItem(PROVIDER_KEY)
+        return remembered === "github" ? "github" : DEFAULT_PROVIDER
+    } catch {
+        return DEFAULT_PROVIDER
+    }
+}
 
 /**
  * Build the backend-owned provider hand-off URL from the authentication boundary.
@@ -61,7 +61,8 @@ export const takeOauthProvider = (): OauthProvider => {
  * @param returnTo - The address the backend sends the reader back to, query and hash dropped.
  * @returns The absolute URL to navigate away to.
  */
-export const authenticationOauthRedirectUrl = (provider: OauthProvider, returnTo: string): string => oauthRedirectUrl(provider, returnTo);
+export const authenticationOauthRedirectUrl = (provider: OauthProvider, returnTo: string): string =>
+    oauthRedirectUrl(provider, returnTo)
 
 /**
  * Where a signed-in reader lands when nothing better was asked for.
@@ -70,7 +71,7 @@ export const authenticationOauthRedirectUrl = (provider: OauthProvider, returnTo
  * (data.login.login-return-destination, shell `/overview`): every requested destination that is
  * missing, unsafe, inaccessible or unavailable resolves here rather than to an error.
  */
-export const DEFAULT_AUTHENTICATED_LANDING = "/overview";
+export const DEFAULT_AUTHENTICATED_LANDING = "/overview"
 
 /**
  * Accept only an internal path of this app as somewhere to come back to.
@@ -89,6 +90,13 @@ export const DEFAULT_AUTHENTICATED_LANDING = "/overview";
  * @returns The path when it is one of ours, else null.
  */
 export const validatedReturnTo = (value: string | null | undefined): string | null => {
-  if (value === null || value === undefined || !value.startsWith("/") || value.startsWith("//") || /[\s\\]/.test(value)) return null;
-  return value;
-};
+    if (
+        value === null ||
+        value === undefined ||
+        !value.startsWith("/") ||
+        value.startsWith("//") ||
+        /[\s\\]/.test(value)
+    )
+        return null
+    return value
+}

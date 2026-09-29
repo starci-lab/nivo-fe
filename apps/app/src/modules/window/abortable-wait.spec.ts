@@ -10,7 +10,9 @@ describe("abortableWait", () => {
         const waited = abortableWait(1000, controller.signal)
         await vi.advanceTimersByTimeAsync(999)
         let settled = false
-        void waited.then(() => { settled = true })
+        void waited.then(() => {
+            settled = true
+        })
         await vi.advanceTimersByTimeAsync(0)
         expect(settled).toBe(false)
         await vi.advanceTimersByTimeAsync(1)

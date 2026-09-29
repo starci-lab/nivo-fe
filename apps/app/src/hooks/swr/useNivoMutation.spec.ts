@@ -8,12 +8,11 @@ import { useNivoMutation } from "./useNivoMutation"
 const mocks = vi.hoisted(() => ({
     mutateCache: vi.fn(),
     state: { status: "anonymous" } as
-        | { readonly status: "anonymous" }
-        | { readonly status: "signed-in"; readonly accessToken: string },
+        { readonly status: "anonymous" } | { readonly status: "signed-in"; readonly accessToken: string },
 }))
 
 vi.mock("swr", async (importOriginal) => ({
-    ...await importOriginal<typeof SwrModule>(),
+    ...(await importOriginal<typeof SwrModule>()),
     useSWRConfig: () => ({ mutate: mocks.mutateCache }),
 }))
 
@@ -59,7 +58,11 @@ describe("useNivoMutation", () => {
     it("keeps mutation lifecycle local to its exact resource key", async () => {
         mocks.state = { status: "signed-in", accessToken: tokenFor("viewer-1") }
         let settle: (value: { readonly ok: true }) => void = () => undefined
-        const mutation = vi.fn().mockReturnValue(new Promise((resolve) => { settle = resolve }))
+        const mutation = vi.fn().mockReturnValue(
+            new Promise((resolve) => {
+                settle = resolve
+            }),
+        )
         const { result } = renderHook(() => ({
             first: useNivoMutation(["resource", "one"], mutation),
             second: useNivoMutation(["resource", "two"], mutation),
@@ -81,17 +84,16 @@ describe("useNivoMutation", () => {
     it("invalidates the accepted command's viewer-scoped resource keys", async () => {
         mocks.state = { status: "signed-in", accessToken: tokenFor("viewer-1") }
         const mutation = vi.fn().mockResolvedValue({ ok: true as const, data: { id: "module-1" } })
-        const { result } = renderHook(() => useNivoMutation<
-            { readonly ok: true, readonly data: { readonly id: string } },
-            { readonly value: string }
-        >(
-            ["command", "module-1"],
-            mutation,
-            {
-                invalidates: [["agentos", "module-studio", "workspace-1", "module-1"]],
-                shouldInvalidate: (answer) => answer.ok,
-            },
-        ))
+        const { result } = renderHook(() =>
+            useNivoMutation<{ readonly ok: true; readonly data: { readonly id: string } }, { readonly value: string }>(
+                ["command", "module-1"],
+                mutation,
+                {
+                    invalidates: [["agentos", "module-studio", "workspace-1", "module-1"]],
+                    shouldInvalidate: (answer) => answer.ok,
+                },
+            ),
+        )
 
         await act(async () => {
             await result.current.trigger({ value: "input" })
@@ -110,17 +112,16 @@ describe("useNivoMutation", () => {
     it("does not invalidate durable reads when the command is refused", async () => {
         mocks.state = { status: "signed-in", accessToken: tokenFor("viewer-1") }
         const mutation = vi.fn().mockResolvedValue({ ok: false as const, reason: "policy" })
-        const { result } = renderHook(() => useNivoMutation<
-            { readonly ok: false, readonly reason: string },
-            { readonly value: string }
-        >(
-            ["command", "module-1"],
-            mutation,
-            {
-                invalidates: [["agentos", "module-studio", "workspace-1", "module-1"]],
-                shouldInvalidate: (answer) => answer.ok,
-            },
-        ))
+        const { result } = renderHook(() =>
+            useNivoMutation<{ readonly ok: false; readonly reason: string }, { readonly value: string }>(
+                ["command", "module-1"],
+                mutation,
+                {
+                    invalidates: [["agentos", "module-studio", "workspace-1", "module-1"]],
+                    shouldInvalidate: (answer) => answer.ok,
+                },
+            ),
+        )
 
         await act(async () => {
             await result.current.trigger({ value: "input" })

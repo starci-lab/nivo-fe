@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { readSalesAction, type SalesActionRequest, type SalesInstallationScope } from "@/modules/api/sales";
-import { operationReadIdentity } from "@/modules/api/operation-route";
-import { useAccessToken } from "../../auth/useAccessToken";
-import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
+import { readSalesAction, type SalesActionRequest, type SalesInstallationScope } from "@/modules/api/sales"
+import { operationReadIdentity } from "@/modules/api/operation-route"
+import { useAccessToken } from "../../auth/useAccessToken"
+import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery"
 
 /*
  * One hook per file, one registered read per hook: this file names exactly one Sales operation, its
@@ -12,7 +12,14 @@ import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
  */
 
 /** Cache identity for one Sales action inside one installation. */
-export const salesActionQueryKey = (scope: SalesInstallationScope, input: SalesActionRequest): NivoQueryKey => ["sales", "action", scope.workspaceId, scope.instanceId, scope.installationId, input.actionId];
+export const salesActionQueryKey = (scope: SalesInstallationScope, input: SalesActionRequest): NivoQueryKey => [
+    "sales",
+    "action",
+    scope.workspaceId,
+    scope.instanceId,
+    scope.installationId,
+    input.actionId,
+]
 
 /**
  * Read one Sales action's stored state.
@@ -21,6 +28,13 @@ export const salesActionQueryKey = (scope: SalesInstallationScope, input: SalesA
  *   held read addresses nothing rather than addressing a half-filled operation path.
  */
 export const useQuerySalesActionSwr = (scope: SalesInstallationScope, input: SalesActionRequest, enabled = true) => {
-  const accessToken = useAccessToken();
-  return useNivoQuery(enabled && accessToken !== null ? salesActionQueryKey(scope, input) : null, () => readSalesAction(accessToken, scope, input, operationReadIdentity("sales.action@1", scope.installationId, input.actionId)));
-};
+    const accessToken = useAccessToken()
+    return useNivoQuery(enabled && accessToken !== null ? salesActionQueryKey(scope, input) : null, () =>
+        readSalesAction(
+            accessToken,
+            scope,
+            input,
+            operationReadIdentity("sales.action@1", scope.installationId, input.actionId),
+        ),
+    )
+}

@@ -23,9 +23,9 @@
  * credentials: `CORS_ORIGIN=http://localhost:3067` in `.env.override`.
  */
 
-import { CORE_API_URL } from "@/modules/config";
-import { failed, failureKindOfCode, type Failure, type Outcome } from "./outcome";
-import { send } from "./transport";
+import { CORE_API_URL } from "@/modules/config"
+import { failed, failureKindOfCode, type Failure, type Outcome } from "./outcome"
+import { send } from "./transport"
 
 /**
  * Every response this API sends, whatever the operation.
@@ -36,14 +36,14 @@ import { send } from "./transport";
  * was refused - and conflating them is how a wrong password gets reported as "network problem".
  */
 export interface Envelope<T> {
-  /** The operation's payload, or null when there is none. */
-  readonly data: T | null;
-  /** A machine-readable refusal code, when the backend supplies one. */
-  readonly error?: string | null;
-  /** The refusal or success sentence, already in the reader's language. */
-  readonly message: string;
-  /** Whether the operation itself succeeded. */
-  readonly success: boolean;
+    /** The operation's payload, or null when there is none. */
+    readonly data: T | null
+    /** A machine-readable refusal code, when the backend supplies one. */
+    readonly error?: string | null
+    /** The refusal or success sentence, already in the reader's language. */
+    readonly message: string
+    /** Whether the operation itself succeeded. */
+    readonly success: boolean
 }
 
 /**
@@ -58,13 +58,13 @@ export interface Envelope<T> {
  * revocation nobody observed. `TExtra` is how a caller names those siblings; `data` is narrowed to
  * the payload itself, since the classification below only succeeds with one.
  */
-export type EnvelopeAnswer<T, TExtra extends object> = Envelope<T> & TExtra & { readonly data: T };
+export type EnvelopeAnswer<T, TExtra extends object> = Envelope<T> & TExtra & { readonly data: T }
 
 /** How a caller supplies the credential without this module knowing where sessions are kept. */
-export type TokenReader = () => string | null;
+export type TokenReader = () => string | null
 
 /** How a caller supplies the reader's language without this module knowing how routing works. */
-export type LocaleReader = () => string;
+export type LocaleReader = () => string
 
 /**
  * The access token this transport puts on the wire.
@@ -74,7 +74,7 @@ export type LocaleReader = () => string;
  * the dependency runs one way: the session knows about the transport, and the transport knows only
  * how to ask for a string.
  */
-let readToken: TokenReader = () => null;
+let readToken: TokenReader = () => null
 
 /**
  * The language every refusal should come back in.
@@ -85,7 +85,7 @@ let readToken: TokenReader = () => null;
  * unreachable. This header is the FE end of closing that; until the interceptor reads it, a refusal
  * still arrives in English and the screen shows the API's sentence as it was sent.
  */
-let readLocale: LocaleReader = (): string => "vi";
+let readLocale: LocaleReader = (): string => "vi"
 
 /**
  * Tell the transport where the current access token lives.
@@ -98,8 +98,8 @@ let readLocale: LocaleReader = (): string => "vi";
  * @param reader - Answers with the token in force right now, or null when signed out.
  */
 export const setAccessTokenReader = (reader: TokenReader) => {
-  readToken = reader;
-};
+    readToken = reader
+}
 
 /**
  * Tell the transport which language the reader is in.
@@ -110,28 +110,29 @@ export const setAccessTokenReader = (reader: TokenReader) => {
  * @param reader - Answers with the active locale.
  */
 export const setLocaleReader = (reader: LocaleReader) => {
-  readLocale = reader;
-};
+    readLocale = reader
+}
 
 /** What a caller may pass beside the document: a credential of its own, or a signal that abandons the call. */
 export type GraphqlOptions = {
-  /** Overrides the bound token reader; an empty string sends no credential at all. */
-  readonly accessToken?: string | null;
-  /** Abandon the call when this signal aborts. */
-  readonly signal?: AbortSignal;
-};
+    /** Overrides the bound token reader; an empty string sends no credential at all. */
+    readonly accessToken?: string | null
+    /** Abandon the call when this signal aborts. */
+    readonly signal?: AbortSignal
+}
 
 type GraphqlBody = {
-  readonly data?: Readonly<Record<string, unknown>> | null;
-  readonly errors?: ReadonlyArray<{
-    readonly message?: string;
-    readonly extensions?: { readonly code?: string };
-  }>;
-};
+    readonly data?: Readonly<Record<string, unknown>> | null
+    readonly errors?: ReadonlyArray<{
+        readonly message?: string
+        readonly extensions?: { readonly code?: string }
+    }>
+}
 
-const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === "object" && value !== null && !Array.isArray(value)
 
-const bodyOf = (value: unknown): GraphqlBody => isRecord(value) ? value as GraphqlBody : {};
+const bodyOf = (value: unknown): GraphqlBody => (isRecord(value) ? (value as GraphqlBody) : {})
 
 /*
  * A GraphQL-level error is a different animal from a refused operation: the document was wrong, or
@@ -140,15 +141,15 @@ const bodyOf = (value: unknown): GraphqlBody => isRecord(value) ? value as Graph
  * decides the kind; an error that names none means the operation never ran, so it is unavailable.
  */
 const graphqlErrorFailure = (body: GraphqlBody, status: number | null): Failure | null => {
-  const first = body.errors?.[0];
-  if (first === undefined) return null;
-  const named = first.extensions?.code;
-  return failed(named === undefined ? "unavailable" : failureKindOfCode(named), {
-    status,
-    code: "GRAPHQL",
-    reason: first.message ?? "graphql"
-  });
-};
+    const first = body.errors?.[0]
+    if (first === undefined) return null
+    const named = first.extensions?.code
+    return failed(named === undefined ? "unavailable" : failureKindOfCode(named), {
+        status,
+        code: "GRAPHQL",
+        reason: first.message ?? "graphql",
+    })
+}
 
 /**
  * Run one GraphQL document and hand back the operation fields of its answer.
@@ -164,34 +165,38 @@ const graphqlErrorFailure = (body: GraphqlBody, status: number | null): Failure 
  * @param options - A credential of its own, or a signal that abandons the call.
  * @returns The `data` object of the response, or why there is none.
  */
-export const graphqlFields = async (query: string, variables?: Readonly<Record<string, unknown>>, options?: GraphqlOptions): Promise<Outcome<Readonly<Record<string, unknown>>>> => {
-  const sent = await send({
-    url: CORE_API_URL,
-    method: "POST",
-    // The refresh cookie rides on this. Without it `refreshSession` looks like a signed-out
-    // user rather than like a missing credential, which is a much harder failure to read.
-    credentials: "include",
-    accessToken: options?.accessToken === undefined ? readToken() : options.accessToken,
-    /*
-     * Standard `Accept-Language` rather than a private header, so the backend can read it
-     * with the same mechanism any other client would use and no bespoke contract has to
-     * be agreed for it.
-     */
-    locale: readLocale(),
-    json: { query, variables: variables ?? {} },
-    signal: options?.signal
-  });
-  if (!sent.ok) {
-    return graphqlErrorFailure(bodyOf(sent.body), sent.status) ?? sent;
-  }
-  const body = bodyOf(sent.data.body);
-  const refusal = graphqlErrorFailure(body, sent.data.status);
-  if (refusal !== null) return refusal;
-  if (body.data === undefined || body.data === null) {
-    return failed("unavailable", { status: sent.data.status, code: "EMPTY", reason: "empty" });
-  }
-  return { ok: true, data: body.data };
-};
+export const graphqlFields = async (
+    query: string,
+    variables?: Readonly<Record<string, unknown>>,
+    options?: GraphqlOptions,
+): Promise<Outcome<Readonly<Record<string, unknown>>>> => {
+    const sent = await send({
+        url: CORE_API_URL,
+        method: "POST",
+        // The refresh cookie rides on this. Without it `refreshSession` looks like a signed-out
+        // user rather than like a missing credential, which is a much harder failure to read.
+        credentials: "include",
+        accessToken: options?.accessToken === undefined ? readToken() : options.accessToken,
+        /*
+         * Standard `Accept-Language` rather than a private header, so the backend can read it
+         * with the same mechanism any other client would use and no bespoke contract has to
+         * be agreed for it.
+         */
+        locale: readLocale(),
+        json: { query, variables: variables ?? {} },
+        signal: options?.signal,
+    })
+    if (!sent.ok) {
+        return graphqlErrorFailure(bodyOf(sent.body), sent.status) ?? sent
+    }
+    const body = bodyOf(sent.data.body)
+    const refusal = graphqlErrorFailure(body, sent.data.status)
+    if (refusal !== null) return refusal
+    if (body.data === undefined || body.data === null) {
+        return failed("unavailable", { status: sent.data.status, code: "EMPTY", reason: "empty" })
+    }
+    return { ok: true, data: body.data }
+}
 
 /**
  * Run one GraphQL operation and hand back its whole envelope.
@@ -206,32 +211,32 @@ export const graphqlFields = async (query: string, variables?: Readonly<Record<s
  * @returns The whole envelope, or why there is none.
  */
 export const graphqlEnvelope = async <T, TExtra extends object = Record<string, unknown>>(
-  query: string,
-  variables?: Readonly<Record<string, unknown>>,
-  options?: GraphqlOptions,
+    query: string,
+    variables?: Readonly<Record<string, unknown>>,
+    options?: GraphqlOptions,
 ): Promise<Outcome<EnvelopeAnswer<T, TExtra>>> => {
-  const fields = await graphqlFields(query, variables, options);
-  if (!fields.ok) return fields;
-  const envelope = Object.values(fields.data)[0] as (Envelope<T> & TExtra) | undefined;
-  if (envelope === undefined) {
-    return failed("unavailable", { code: "EMPTY", reason: "empty" });
-  }
-  const { data } = envelope;
-  if (!envelope.success) {
-    const code = envelope.error ?? "REFUSED";
-    return failed(failureKindOfCode(code), { code, reason: envelope.message });
-  }
-  if (data === null) {
-    return failed("not-found", { code: envelope.error ?? "NO_DATA", reason: envelope.message });
-  }
-  return {
-    ok: true,
-    data: {
-      ...envelope,
-      data
+    const fields = await graphqlFields(query, variables, options)
+    if (!fields.ok) return fields
+    const envelope = Object.values(fields.data)[0] as (Envelope<T> & TExtra) | undefined
+    if (envelope === undefined) {
+        return failed("unavailable", { code: "EMPTY", reason: "empty" })
     }
-  };
-};
+    const { data } = envelope
+    if (!envelope.success) {
+        const code = envelope.error ?? "REFUSED"
+        return failed(failureKindOfCode(code), { code, reason: envelope.message })
+    }
+    if (data === null) {
+        return failed("not-found", { code: envelope.error ?? "NO_DATA", reason: envelope.message })
+    }
+    return {
+        ok: true,
+        data: {
+            ...envelope,
+            data,
+        },
+    }
+}
 
 /**
  * Run one GraphQL operation and hand back only its payload.
@@ -245,13 +250,17 @@ export const graphqlEnvelope = async <T, TExtra extends object = Record<string, 
  * @param options - A credential of its own, or a signal that abandons the call.
  * @returns The unwrapped payload, or why there is none.
  */
-export const graphql = async <T,>(query: string, variables?: Readonly<Record<string, unknown>>, options?: GraphqlOptions): Promise<Outcome<T>> => {
-  const answer = await graphqlEnvelope<T, Record<string, unknown>>(query, variables, options);
-  if (!answer.ok) {
-    return answer;
-  }
-  return {
-    ok: true,
-    data: answer.data.data
-  };
-};
+export const graphql = async <T>(
+    query: string,
+    variables?: Readonly<Record<string, unknown>>,
+    options?: GraphqlOptions,
+): Promise<Outcome<T>> => {
+    const answer = await graphqlEnvelope<T, Record<string, unknown>>(query, variables, options)
+    if (!answer.ok) {
+        return answer
+    }
+    return {
+        ok: true,
+        data: answer.data.data,
+    }
+}

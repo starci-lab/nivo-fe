@@ -23,7 +23,19 @@ vi.mock("@/modules/api/agentos-workspaces", () => ({ myAgentWorkspace: mocks.loa
 import { AgentOSWorkspaceList } from "."
 
 const messages = { vi: viMessages, en: enMessages }
-const renderList = () => render(<NextIntlClientProvider locale={mocks.locale} messages={messages[mocks.locale]} timeZone={TIME_ZONE} onError={error => { throw error }}><AgentOSWorkspaceList /></NextIntlClientProvider>)
+const renderList = () =>
+    render(
+        <NextIntlClientProvider
+            locale={mocks.locale}
+            messages={messages[mocks.locale]}
+            timeZone={TIME_ZONE}
+            onError={(error) => {
+                throw error
+            }}
+        >
+            <AgentOSWorkspaceList />
+        </NextIntlClientProvider>,
+    )
 
 describe("AgentOSWorkspaceList", () => {
     beforeEach(() => {
@@ -42,7 +54,10 @@ describe("AgentOSWorkspaceList", () => {
 
     it("maps rows to native locale-aware links without pushing", async () => {
         mocks.locale = "en"
-        mocks.load.mockResolvedValue({ ok: true, data: [{ id: "workspace/a?b#c", name: "Support", status: "ready", catalogOrder: { id: "order-1" } }] })
+        mocks.load.mockResolvedValue({
+            ok: true,
+            data: [{ id: "workspace/a?b#c", name: "Support", status: "ready", catalogOrder: { id: "order-1" } }],
+        })
         renderList()
         const link = await screen.findByRole("link", { name: "Support" })
         expect(link).toHaveAttribute("href", "/en/agentos/workspaces/workspace%2Fa%3Fb%23c")
@@ -53,7 +68,10 @@ describe("AgentOSWorkspaceList", () => {
     it("keeps the default locale bare in native links", async () => {
         mocks.load.mockResolvedValue({ ok: true, data: [{ id: "workspace-1", name: "Support", status: "ready" }] })
         renderList()
-        expect(await screen.findByRole("link", { name: "Support" })).toHaveAttribute("href", "/agentos/workspaces/workspace-1")
+        expect(await screen.findByRole("link", { name: "Support" })).toHaveAttribute(
+            "href",
+            "/agentos/workspaces/workspace-1",
+        )
     })
 
     it("settles refusal and waits while signed out", async () => {
@@ -66,4 +84,3 @@ describe("AgentOSWorkspaceList", () => {
         expect(mocks.load).toHaveBeenCalledTimes(1)
     })
 })
-

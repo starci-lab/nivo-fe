@@ -3,8 +3,24 @@ import { describe, expect, it, vi } from "vitest"
 import { OverviewServicesBase, type OverviewServicesRow } from "./component"
 
 const rows: ReadonlyArray<OverviewServicesRow> = [
-    { id: "app-1", name: "reader-app", detail: "reader-app.nivo.dev", statusLabel: "Running", statusTone: "success", actionLabel: "Open", route: "/apps/app-1" },
-    { id: "workspace-1", name: "reader workspace", detail: "Agent workspace", statusLabel: "Ready", statusTone: "success", actionLabel: "Open workspace", route: "/agentos/workspaces/workspace-1" },
+    {
+        id: "app-1",
+        name: "reader-app",
+        detail: "reader-app.nivo.dev",
+        statusLabel: "Running",
+        statusTone: "success",
+        actionLabel: "Open",
+        route: "/apps/app-1",
+    },
+    {
+        id: "workspace-1",
+        name: "reader workspace",
+        detail: "Agent workspace",
+        statusLabel: "Ready",
+        statusTone: "success",
+        actionLabel: "Open workspace",
+        route: "/agentos/workspaces/workspace-1",
+    },
 ]
 
 describe("OverviewServicesBase", () => {
@@ -26,7 +42,25 @@ describe("OverviewServicesBase", () => {
     })
 
     it("disables the row's own control when there is nothing to open yet", () => {
-        render(<OverviewServicesBase props={{ label: "Services", rows: [{ id: "app-2", name: "new-app", detail: "—", statusLabel: "Not provisioned", statusTone: "neutral", actionLabel: "Not available yet", isDisabled: true, route: "/apps/app-2" }] }} />)
+        render(
+            <OverviewServicesBase
+                props={{
+                    label: "Services",
+                    rows: [
+                        {
+                            id: "app-2",
+                            name: "new-app",
+                            detail: "—",
+                            statusLabel: "Not provisioned",
+                            statusTone: "neutral",
+                            actionLabel: "Not available yet",
+                            isDisabled: true,
+                            route: "/apps/app-2",
+                        },
+                    ],
+                }}
+            />,
+        )
 
         expect(screen.getByRole("button", { name: "Not available yet" })).toBeDisabled()
     })

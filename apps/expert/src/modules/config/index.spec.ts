@@ -3,7 +3,9 @@ import { resolveAcademyApiUrl } from "."
 
 describe("resolveAcademyApiUrl", () => {
     it("uses the configured endpoint", () => {
-        expect(resolveAcademyApiUrl("https://academy.nivo.vn/graphql", "production")).toBe("https://academy.nivo.vn/graphql")
+        expect(resolveAcademyApiUrl("https://academy.nivo.vn/graphql", "production")).toBe(
+            "https://academy.nivo.vn/graphql",
+        )
     })
 
     it("falls back to the local academy API outside production only", () => {

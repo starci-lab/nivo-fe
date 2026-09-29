@@ -1,30 +1,30 @@
-import type { Metadata } from "next";
-import { NivoGrammarRoot } from "@nivo/ui";
-import { notFound } from "next/navigation";
-import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { getMessages } from "next-intl/server";
-import { ACADEMY, inLocale } from "@/modules/academy/template";
-import { routing } from "@/modules/i18n/routing";
-import type { Locale } from "@/modules/i18n/config";
-import type { ComponentProps } from "react";
+import type { Metadata } from "next"
+import { NivoGrammarRoot } from "@nivo/ui"
+import { notFound } from "next/navigation"
+import { NextIntlClientProvider, hasLocale } from "next-intl"
+import { getMessages } from "next-intl/server"
+import { ACADEMY, inLocale } from "@/modules/academy/template"
+import { routing } from "@/modules/i18n/routing"
+import type { Locale } from "@/modules/i18n/config"
+import type { ComponentProps } from "react"
 
 /** The routed locale segment, awaited by every handler in this file. */
 export type LocaleSegment = {
-  /** Next hands the dynamic segment over as a promise. */
-  readonly params: Promise<{
-    readonly locale: string;
-  }>;
-};
+    /** Next hands the dynamic segment over as a promise. */
+    readonly params: Promise<{
+        readonly locale: string
+    }>
+}
 
 /** Props every route under this shell receives. */
 type LocaleLayoutProps = {
-  /** The rendered route. */
-  readonly children: ComponentProps<"div">["children"];
-  /** The locale segment, which Next hands over as a promise. */
-  readonly params: Promise<{
-    locale: string;
-  }>;
-};
+    /** The rendered route. */
+    readonly children: ComponentProps<"div">["children"]
+    /** The locale segment, which Next hands over as a promise. */
+    readonly params: Promise<{
+        locale: string
+    }>
+}
 
 /**
  * Which locales are built.
@@ -34,9 +34,10 @@ type LocaleLayoutProps = {
  *
  * @returns One entry per locale this app ships copy for.
  */
-export const generateStaticParams = () => routing.locales.map(locale => ({
-  locale
-}));
+export const generateStaticParams = () =>
+    routing.locales.map((locale) => ({
+        locale,
+    }))
 
 /**
  * The tab and the search result belong to the ACADEMY, not to nivo.
@@ -54,18 +55,14 @@ export const generateStaticParams = () => routing.locales.map(locale => ({
  * @param input - The locale segment.
  * @returns Title and description in the reader's language.
  */
-export const generateMetadata = async ({
-  params
-}: LocaleSegment): Promise<Metadata> => {
-  const {
-    locale
-  } = await params;
-  const resolved = (hasLocale(routing.locales, locale) ? locale : routing.defaultLocale) as Locale;
-  return {
-    title: inLocale(ACADEMY.identity.name, resolved),
-    description: inLocale(ACADEMY.identity.tagline, resolved)
-  };
-};
+export const generateMetadata = async ({ params }: LocaleSegment): Promise<Metadata> => {
+    const { locale } = await params
+    const resolved = (hasLocale(routing.locales, locale) ? locale : routing.defaultLocale) as Locale
+    return {
+        title: inLocale(ACADEMY.identity.name, resolved),
+        description: inLocale(ACADEMY.identity.tagline, resolved),
+    }
+}
 
 /**
  * The document shell.
@@ -86,18 +83,14 @@ export const generateMetadata = async ({
  * @param input - {@link LocaleLayoutProps}
  * @returns The html document.
  */
-export const AcademyLocaleLayout = async ({
-  children,
-  params
-}: LocaleLayoutProps) => {
-  const {
-    locale
-  } = await params;
-  if (!hasLocale(routing.locales, locale)) {
-    notFound();
-  }
-  const messages = await getMessages();
-  return <html lang={locale} suppressHydrationWarning>
+export const AcademyLocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
+    const { locale } = await params
+    if (!hasLocale(routing.locales, locale)) {
+        notFound()
+    }
+    const messages = await getMessages()
+    return (
+        <html lang={locale} suppressHydrationWarning>
             <body className="min-h-dvh antialiased">
                 <NivoGrammarRoot>
                     <NextIntlClientProvider locale={locale} messages={messages}>
@@ -105,7 +98,8 @@ export const AcademyLocaleLayout = async ({
                     </NextIntlClientProvider>
                 </NivoGrammarRoot>
             </body>
-        </html>;
-};
+        </html>
+    )
+}
 
-export default AcademyLocaleLayout;
+export default AcademyLocaleLayout

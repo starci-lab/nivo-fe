@@ -37,7 +37,9 @@ const readPersistedState = (key: string): boolean | undefined => {
 }
 
 /** Render a responsive navigation rail with persisted collapse state. */
-export const CollapsibleRail = <R extends object, C extends object, T extends object>(props: CollapsibleRailProps<R, C, T>) => {
+export const CollapsibleRail = <R extends object, C extends object, T extends object>(
+    props: CollapsibleRailProps<R, C, T>,
+) => {
     const reduceMotion = useReducedMotion()
     const headingId = useId()
     const [collapsed, setCollapsed] = useState(props.isDefaultCollapsed ?? false)
@@ -48,7 +50,11 @@ export const CollapsibleRail = <R extends object, C extends object, T extends ob
     const toggle = () => {
         setCollapsed((value) => {
             const next = !value
-            try { globalThis.localStorage?.setItem(props.storageKey ?? DEFAULT_STORAGE_KEY, String(next)) } catch { /* storage is optional */ }
+            try {
+                globalThis.localStorage?.setItem(props.storageKey ?? DEFAULT_STORAGE_KEY, String(next))
+            } catch {
+                /* storage is optional */
+            }
             props.onCollapsedChange?.(next)
             return next
         })
@@ -77,12 +83,22 @@ export const CollapsibleRail = <R extends object, C extends object, T extends ob
             transition={{ duration: reduceMotion === true ? 0 : 0.18, ease: "easeOut" }}
             style={railStyle}
         >
-            <div id={headingId}><Heading level={2} isVisuallyHidden>{props.ariaLabel}</Heading></div>
+            <div id={headingId}>
+                <Heading level={2} isVisuallyHidden>
+                    {props.ariaLabel}
+                </Heading>
+            </div>
             <div>
                 <AnimatePresence initial={false}>
                     {!collapsed && props.title === undefined ? null : <span>{collapsed ? null : props.title}</span>}
                 </AnimatePresence>
-                <button className={RAIL_CONTROL_CLASS_NAME} type="button" aria-label={label} aria-expanded={!collapsed} onClick={toggle}>
+                <button
+                    className={RAIL_CONTROL_CLASS_NAME}
+                    type="button"
+                    aria-label={label}
+                    aria-expanded={!collapsed}
+                    onClick={toggle}
+                >
                     {toggleControl}
                 </button>
             </div>

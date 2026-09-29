@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { setCollabTransport, type CollabTransport } from "@/modules/api/collab";
+import { setCollabTransport, type CollabTransport } from "@/modules/api/collab"
 
 /**
  * Bind the transport every Collab call travels on.
@@ -12,5 +12,5 @@ import { setCollabTransport, type CollabTransport } from "@/modules/api/collab";
  * @param next - The transport in force from here on.
  */
 export const useCollabTransportFrom = (next: CollabTransport) => {
-    setCollabTransport(next);
-};
+    setCollabTransport(next)
+}

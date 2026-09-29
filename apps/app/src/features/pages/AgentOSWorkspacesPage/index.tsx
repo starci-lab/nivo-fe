@@ -1,12 +1,12 @@
-import { getTranslations } from "next-intl/server";
-import { toLocale } from "@/modules/i18n/config";
-import { getPathname } from "@/modules/i18n/navigation";
-import { AgentOSWorkspacesPageBase } from "./component";
+import { getTranslations } from "next-intl/server"
+import { toLocale } from "@/modules/i18n/config"
+import { getPathname } from "@/modules/i18n/navigation"
+import { AgentOSWorkspacesPageBase } from "./component"
 
 /** Route identity supplied by the locale-aware workspaces segment. */
 export type AgentOSWorkspacesPageProps = {
-    readonly params: Promise<{ readonly locale: string }>;
-};
+    readonly params: Promise<{ readonly locale: string }>
+}
 
 /**
  * The `/[locale]/agentos/workspaces` screen, connected half.
@@ -20,16 +20,18 @@ export type AgentOSWorkspacesPageProps = {
  * @returns The page.
  */
 export const AgentOSWorkspacesPage = async ({ params }: AgentOSWorkspacesPageProps) => {
-    const { locale } = await params;
-    const t = await getTranslations("console.agentos");
-    return <AgentOSWorkspacesPageBase
-        props={{
-            title: t("workspacesLabel"),
-            description: t("workspaceDescription"),
-            createLabel: t("createEyebrow"),
-            createHref: getPathname({ locale: toLocale(locale), href: "/agentos/workspaces/new" })
-        }}
-    />;
-};
+    const { locale } = await params
+    const t = await getTranslations("console.agentos")
+    return (
+        <AgentOSWorkspacesPageBase
+            props={{
+                title: t("workspacesLabel"),
+                description: t("workspaceDescription"),
+                createLabel: t("createEyebrow"),
+                createHref: getPathname({ locale: toLocale(locale), href: "/agentos/workspaces/new" }),
+            }}
+        />
+    )
+}
 
-export default AgentOSWorkspacesPage;
+export default AgentOSWorkspacesPage

@@ -15,7 +15,19 @@ vi.mock("@/hooks", async () => ({
 
 import { LanguageMenu } from "."
 
-const renderMenu = (locale: "vi" | "en") => render(<NextIntlClientProvider locale={locale} messages={locale === "vi" ? viMessages : enMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><LanguageMenu /></NextIntlClientProvider>)
+const renderMenu = (locale: "vi" | "en") =>
+    render(
+        <NextIntlClientProvider
+            locale={locale}
+            messages={locale === "vi" ? viMessages : enMessages}
+            timeZone={TIME_ZONE}
+            onError={(error) => {
+                throw error
+            }}
+        >
+            <LanguageMenu />
+        </NextIntlClientProvider>,
+    )
 
 describe("LanguageMenu", () => {
     afterEach(() => {
@@ -51,4 +63,3 @@ describe("LanguageMenu", () => {
         expect(replace).toHaveBeenCalledWith("/agentos?workspace=one#details", { locale: "en" })
     })
 })
-

@@ -33,33 +33,68 @@ type AuthProbePanel = {
     on?: AuthActions
 }
 
-type AuthPageProbeInput = { panel: AuthProbePanel, exits: ReadonlyArray<{ question: string, action: string }> }
+type AuthPageProbeInput = { panel: AuthProbePanel; exits: ReadonlyArray<{ question: string; action: string }> }
 
 const details = { email: "reader@example.test", password: "secret-password", name: "Reader" } satisfies AuthDetails
 const code = { otp: "123456", newPassword: "new-password" } satisfies AuthCode
 
 vi.mock("@/hooks/i18n/useRouter", () => ({ useRouter: () => ({ push: mocks.push, replace: mocks.replace }) }))
 vi.mock("@/hooks/i18n/usePathname", () => ({ usePathname: () => "/authentication" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(window.location.search), redirect: vi.fn(), permanentRedirect: vi.fn() }))
-vi.mock("@/hooks", async (importOriginal) => ({ ...await importOriginal(), useSession: () => mocks.session, useRouter: () => ({ push: mocks.push, replace: mocks.replace }), usePathname: () => "/authentication" }))
+vi.mock("next/navigation", () => ({
+    useSearchParams: () => new URLSearchParams(window.location.search),
+    redirect: vi.fn(),
+    permanentRedirect: vi.fn(),
+}))
+vi.mock("@/hooks", async (importOriginal) => ({
+    ...(await importOriginal()),
+    useSession: () => mocks.session,
+    useRouter: () => ({ push: mocks.push, replace: mocks.replace }),
+    usePathname: () => "/authentication",
+}))
 vi.mock("@/modules/api/auth", () => mocks.api)
 vi.mock("./component", () => ({
     AuthenticationPageView: (input: AuthPageProbeInput) => (
         <div>
-            <output data-testid="auth-panel">{JSON.stringify({ state: input.panel.state, props: input.panel.props })}</output>
+            <output data-testid="auth-panel">
+                {JSON.stringify({ state: input.panel.state, props: input.panel.props })}
+            </output>
             <output data-testid="auth-exits">{JSON.stringify(input.exits)}</output>
-            <button data-testid="submit-details" onClick={() => input.panel.on?.submitDetails?.(details)}>details</button>
-            <button data-testid="submit-code" onClick={() => input.panel.on?.submitCode?.(code)}>code</button>
-            <button data-testid="submit-factor" onClick={() => input.panel.on?.submitFactor?.({ code: "123456" })}>factor</button>
-            <button data-testid="resend" onClick={() => input.panel.on?.resend?.()}>resend</button>
-            <button data-testid="back" onClick={() => input.panel.on?.back?.()}>back</button>
-            <button data-testid="sign-in" onClick={() => input.panel.on?.changeMode?.("signIn")}>sign in</button>
-            <button data-testid="sign-up" onClick={() => input.panel.on?.changeMode?.("signUp")}>sign up</button>
-            <button data-testid="forgot" onClick={() => input.panel.on?.changeMode?.("forgotPassword")}>forgot</button>
-            <button data-testid="remember" onClick={() => input.panel.on?.changeRememberMe?.(false)}>remember</button>
-            <button data-testid="google" onClick={() => input.panel.on?.chooseProvider?.("google")}>google</button>
-            <button data-testid="onward" onClick={() => input.panel.on?.onward?.()}>onward</button>
-            <button data-testid="onward-secondary" onClick={() => input.panel.on?.onwardSecondary?.()}>onward secondary</button>
+            <button data-testid="submit-details" onClick={() => input.panel.on?.submitDetails?.(details)}>
+                details
+            </button>
+            <button data-testid="submit-code" onClick={() => input.panel.on?.submitCode?.(code)}>
+                code
+            </button>
+            <button data-testid="submit-factor" onClick={() => input.panel.on?.submitFactor?.({ code: "123456" })}>
+                factor
+            </button>
+            <button data-testid="resend" onClick={() => input.panel.on?.resend?.()}>
+                resend
+            </button>
+            <button data-testid="back" onClick={() => input.panel.on?.back?.()}>
+                back
+            </button>
+            <button data-testid="sign-in" onClick={() => input.panel.on?.changeMode?.("signIn")}>
+                sign in
+            </button>
+            <button data-testid="sign-up" onClick={() => input.panel.on?.changeMode?.("signUp")}>
+                sign up
+            </button>
+            <button data-testid="forgot" onClick={() => input.panel.on?.changeMode?.("forgotPassword")}>
+                forgot
+            </button>
+            <button data-testid="remember" onClick={() => input.panel.on?.changeRememberMe?.(false)}>
+                remember
+            </button>
+            <button data-testid="google" onClick={() => input.panel.on?.chooseProvider?.("google")}>
+                google
+            </button>
+            <button data-testid="onward" onClick={() => input.panel.on?.onward?.()}>
+                onward
+            </button>
+            <button data-testid="onward-secondary" onClick={() => input.panel.on?.onwardSecondary?.()}>
+                onward secondary
+            </button>
         </div>
     ),
 }))
@@ -68,7 +103,9 @@ import { AuthenticationPage } from "./"
 
 /** The real English copy of the authentication namespace, escaped the way the probe serialises it into JSON. */
 const copy = (key: string): string => {
-    const text = key.split(".").reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], en.authentication)
+    const text = key
+        .split(".")
+        .reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], en.authentication)
     if (typeof text !== "string") throw new Error(`authentication.${key} is not a catalog message`)
     return JSON.stringify(text).slice(1, -1)
 }
@@ -82,13 +119,34 @@ describe("AuthenticationPage connected journeys", () => {
         vi.clearAllMocks()
         mocks.session.state = { status: "anonymous" }
         mocks.api.signIn.mockResolvedValue({ ok: false, reason: "invalid", code: "INVALID_CREDENTIALS" })
-        mocks.api.verifyTwoFactor.mockResolvedValue({ ok: true, data: { accessToken: "two-factor-access", requiresTwoFactor: false, twoFactorToken: null } })
+        mocks.api.verifyTwoFactor.mockResolvedValue({
+            ok: true,
+            data: { accessToken: "two-factor-access", requiresTwoFactor: false, twoFactorToken: null },
+        })
         mocks.api.signUpInit.mockResolvedValue({ ok: true, data: { challengeId: "challenge", expiresInSeconds: 300 } })
-        mocks.api.signUpVerifyOtp.mockResolvedValue({ ok: true, data: { accessToken: "access", requiresTwoFactor: false, twoFactorToken: null, conclusion: null, undecided: null } })
-        mocks.api.signUpResend.mockResolvedValue({ ok: true, data: { challengeId: "challenge-2", expiresInSeconds: 120 } })
-        mocks.api.forgotPasswordInit.mockResolvedValue({ ok: true, data: { challengeId: "reset", expiresInSeconds: 180 } })
+        mocks.api.signUpVerifyOtp.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: "access",
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                conclusion: null,
+                undecided: null,
+            },
+        })
+        mocks.api.signUpResend.mockResolvedValue({
+            ok: true,
+            data: { challengeId: "challenge-2", expiresInSeconds: 120 },
+        })
+        mocks.api.forgotPasswordInit.mockResolvedValue({
+            ok: true,
+            data: { challengeId: "reset", expiresInSeconds: 180 },
+        })
         mocks.api.forgotPasswordVerifyOtp.mockResolvedValue({ ok: true, data: true })
-        mocks.api.forgotPasswordResend.mockResolvedValue({ ok: true, data: { challengeId: "reset-2", expiresInSeconds: 180 } })
+        mocks.api.forgotPasswordResend.mockResolvedValue({
+            ok: true,
+            data: { challengeId: "reset-2", expiresInSeconds: 180 },
+        })
         mocks.api.exchangeOauthCode.mockResolvedValue({ ok: false, reason: "oauth-failed" })
         mocks.api.continueBrokeredSignIn.mockResolvedValue({ ok: false, reason: "oauth-failed" })
         window.history.replaceState(null, "", "/authentication")
@@ -107,14 +165,38 @@ describe("AuthenticationPage connected journeys", () => {
     })
 
     it("completes sign-in and handles a two-factor response", async () => {
-        mocks.api.signIn.mockResolvedValue({ ok: true, data: { accessToken: "access", requiresTwoFactor: false, twoFactorToken: null, destination: "/overview", undecided: null } })
+        mocks.api.signIn.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: "access",
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                destination: "/overview",
+                undecided: null,
+            },
+        })
         render(<AuthenticationPage />)
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/overview"))
-        expect(mocks.session.adopt).toHaveBeenCalledWith({ accessToken: "access", requiresTwoFactor: false, twoFactorToken: null, destination: "/overview", undecided: null })
+        expect(mocks.session.adopt).toHaveBeenCalledWith({
+            accessToken: "access",
+            requiresTwoFactor: false,
+            twoFactorToken: null,
+            destination: "/overview",
+            undecided: null,
+        })
 
         cleanup()
-        mocks.api.signIn.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: true, twoFactorToken: "two-factor-token", destination: null, undecided: null } })
+        mocks.api.signIn.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: null,
+                requiresTwoFactor: true,
+                twoFactorToken: "two-factor-token",
+                destination: null,
+                undecided: null,
+            },
+        })
         render(<AuthenticationPage />)
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(panel()).toContain('"state":"secondFactor"'))
@@ -132,10 +214,25 @@ describe("AuthenticationPage connected journeys", () => {
         mocks.api.signUpVerifyOtp.mockResolvedValue({ ok: false, reason: "used", code: "OTP_INVALID" })
         fireEvent.click(screen.getByTestId("submit-code"))
         await waitFor(() => expect(panel()).toContain(copy("signUp.codeRefused")))
-        mocks.api.signUpVerifyOtp.mockResolvedValue({ ok: true, data: { accessToken: "signup-access", requiresTwoFactor: false, twoFactorToken: null, conclusion: null, undecided: null } })
+        mocks.api.signUpVerifyOtp.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: "signup-access",
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                conclusion: null,
+                undecided: null,
+            },
+        })
         fireEvent.click(screen.getByTestId("submit-code"))
         await waitFor(() => expect(panel()).toContain('"state":"done"'))
-        expect(mocks.session.adopt).toHaveBeenCalledWith({ accessToken: "signup-access", requiresTwoFactor: false, twoFactorToken: null, conclusion: null, undecided: null })
+        expect(mocks.session.adopt).toHaveBeenCalledWith({
+            accessToken: "signup-access",
+            requiresTwoFactor: false,
+            twoFactorToken: null,
+            conclusion: null,
+            undecided: null,
+        })
         fireEvent.click(screen.getByTestId("onward"))
         await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/overview"))
     })
@@ -189,14 +286,32 @@ describe("AuthenticationPage connected journeys", () => {
         cleanup()
         window.sessionStorage.setItem("nivo.oauth.provider", "google")
         window.history.replaceState(null, "", "/authentication?code=abc&state=xyz")
-        mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: "oauth-access", requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: null } })
+        mocks.api.exchangeOauthCode.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: "oauth-access",
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                providerEmailRefused: null,
+                undecided: null,
+            },
+        })
         render(<AuthenticationPage />)
         await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/overview"))
         expect(mocks.api.exchangeOauthCode).toHaveBeenCalledWith({ code: "abc", provider: "google", state: "xyz" })
 
         cleanup()
         window.history.replaceState(null, "", "/authentication?code=two-factor&state=two-factor-state")
-        mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: true, twoFactorToken: "oauth-two-factor", providerEmailRefused: null, undecided: null } })
+        mocks.api.exchangeOauthCode.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: null,
+                requiresTwoFactor: true,
+                twoFactorToken: "oauth-two-factor",
+                providerEmailRefused: null,
+                undecided: null,
+            },
+        })
         render(<AuthenticationPage />)
         await waitFor(() => expect(panel()).toContain('"state":"secondFactor"'))
 
@@ -214,8 +329,21 @@ describe("AuthenticationPage connected journeys", () => {
     })
 
     it("returns a signed-in reader to the console route that interrupted them", async () => {
-        mocks.api.signIn.mockResolvedValue({ ok: true, data: { accessToken: "access", requiresTwoFactor: false, twoFactorToken: null, destination: null, undecided: null } })
-        window.history.replaceState(null, "", "/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fw1%2Fmodules%2Fm1%2Fsetup")
+        mocks.api.signIn.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: "access",
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                destination: null,
+                undecided: null,
+            },
+        })
+        window.history.replaceState(
+            null,
+            "",
+            "/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fw1%2Fmodules%2Fm1%2Fsetup",
+        )
         render(<AuthenticationPage />)
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/w1/modules/m1/setup"))
@@ -230,13 +358,31 @@ describe("AuthenticationPage connected journeys", () => {
         cleanup()
         window.sessionStorage.setItem("nivo.oauth.provider", "google")
         window.history.replaceState(null, "", "/authentication?code=abc&state=xyz")
-        mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: "oauth-access", requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: null } })
+        mocks.api.exchangeOauthCode.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: "oauth-access",
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                providerEmailRefused: null,
+                undecided: null,
+            },
+        })
         render(<AuthenticationPage />)
         await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/w1"))
     })
 
     it("never follows a return address off this origin", async () => {
-        mocks.api.signIn.mockResolvedValue({ ok: true, data: { accessToken: "access", requiresTwoFactor: false, twoFactorToken: null, destination: null, undecided: null } })
+        mocks.api.signIn.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: "access",
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                destination: null,
+                undecided: null,
+            },
+        })
         for (const bad of ["https%3A%2F%2Fevil.test%2F", "%2F%2Fevil.test", "%2Fagentos%20x"]) {
             cleanup()
             window.sessionStorage.clear()
@@ -262,7 +408,16 @@ describe("AuthenticationPage connected journeys", () => {
         expect(mocks.api.signIn.mock.calls[1][0].requestIdentity).toBe(unanswered.requestIdentity)
 
         // An UNDECIDED ANSWER is the same non-refusal, continued under the same identity.
-        mocks.api.signIn.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, destination: null, undecided: { retryWithSameRequest: true } } })
+        mocks.api.signIn.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: null,
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                destination: null,
+                undecided: { retryWithSameRequest: true },
+            },
+        })
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(mocks.api.signIn).toHaveBeenCalledTimes(3))
         expect(panel()).toContain(copy("signIn.undecided"))
@@ -293,7 +448,16 @@ describe("AuthenticationPage connected journeys", () => {
 
     it("shows the proven-holder notice with both ways out and creates no session", async () => {
         const arrivedAtHeldAddress = async () => {
-            mocks.api.signUpVerifyOtp.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, conclusion: { reason: "heldAddress" }, undecided: null } })
+            mocks.api.signUpVerifyOtp.mockResolvedValue({
+                ok: true,
+                data: {
+                    accessToken: null,
+                    requiresTwoFactor: false,
+                    twoFactorToken: null,
+                    conclusion: { reason: "heldAddress" },
+                    undecided: null,
+                },
+            })
             render(<AuthenticationPage />)
             fireEvent.click(screen.getByTestId("sign-up"))
             fireEvent.click(screen.getByTestId("submit-details"))
@@ -319,7 +483,16 @@ describe("AuthenticationPage connected journeys", () => {
     })
 
     it("explains an identity created with no session and offers the password just set", async () => {
-        mocks.api.signUpVerifyOtp.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, conclusion: { reason: "registeredSignInRequired" }, undecided: null } })
+        mocks.api.signUpVerifyOtp.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: null,
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                conclusion: { reason: "registeredSignInRequired" },
+                undecided: null,
+            },
+        })
         render(<AuthenticationPage />)
         fireEvent.click(screen.getByTestId("sign-up"))
         fireEvent.click(screen.getByTestId("submit-details"))
@@ -335,7 +508,16 @@ describe("AuthenticationPage connected journeys", () => {
     it("keeps both provider paths fresh after an unverified-email refusal", async () => {
         window.sessionStorage.setItem("nivo.oauth.provider", "google")
         window.history.replaceState(null, "", "/authentication?code=abc&state=xyz")
-        mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: true, undecided: null } })
+        mocks.api.exchangeOauthCode.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: null,
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                providerEmailRefused: true,
+                undecided: null,
+            },
+        })
         render(<AuthenticationPage />)
         await waitFor(() => expect(panel()).toContain(copy("signIn.oauthEmailRefused")))
         expect(panel()).toContain('"state":"details"')
@@ -347,12 +529,38 @@ describe("AuthenticationPage connected journeys", () => {
     it("continues a brokered undecided result under its reference and never resends the spent callback", async () => {
         window.sessionStorage.setItem("nivo.oauth.provider", "google")
         window.history.replaceState(null, "", "/authentication?code=abc&state=xyz")
-        mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: { continuationReference: "hold-1" } } })
-        mocks.api.continueBrokeredSignIn.mockResolvedValue({ ok: true, data: { accessToken: "continued-access", requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: null } })
+        mocks.api.exchangeOauthCode.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: null,
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                providerEmailRefused: null,
+                undecided: { continuationReference: "hold-1" },
+            },
+        })
+        mocks.api.continueBrokeredSignIn.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: "continued-access",
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                providerEmailRefused: null,
+                undecided: null,
+            },
+        })
         render(<AuthenticationPage />)
-        await waitFor(() => expect(mocks.api.continueBrokeredSignIn).toHaveBeenCalledWith({ continuationReference: "hold-1" }))
+        await waitFor(() =>
+            expect(mocks.api.continueBrokeredSignIn).toHaveBeenCalledWith({ continuationReference: "hold-1" }),
+        )
         await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/overview"))
-        expect(mocks.session.adopt).toHaveBeenCalledWith({ accessToken: "continued-access", requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: null })
+        expect(mocks.session.adopt).toHaveBeenCalledWith({
+            accessToken: "continued-access",
+            requiresTwoFactor: false,
+            twoFactorToken: null,
+            providerEmailRefused: null,
+            undecided: null,
+        })
         expect(mocks.api.exchangeOauthCode).toHaveBeenCalledTimes(1)
         expect(mocks.api.continueBrokeredSignIn).toHaveBeenCalledTimes(1)
         expect(panel()).not.toContain(copy("signIn.oauthUndecided"))
@@ -361,7 +569,16 @@ describe("AuthenticationPage connected journeys", () => {
     it("reports a brokered undecided result as a try-again when nothing could be held", async () => {
         window.sessionStorage.setItem("nivo.oauth.provider", "google")
         window.history.replaceState(null, "", "/authentication?code=abc&state=xyz")
-        mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: { continuationReference: null } } })
+        mocks.api.exchangeOauthCode.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: null,
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                providerEmailRefused: null,
+                undecided: { continuationReference: null },
+            },
+        })
         render(<AuthenticationPage />)
         await waitFor(() => expect(panel()).toContain(copy("signIn.oauthUndecided")))
         expect(panel()).not.toContain(copy("signIn.oauthRefused"))
@@ -373,8 +590,26 @@ describe("AuthenticationPage connected journeys", () => {
     it("asks for nothing further when the continuation itself comes back undecided", async () => {
         window.sessionStorage.setItem("nivo.oauth.provider", "google")
         window.history.replaceState(null, "", "/authentication?code=abc&state=xyz")
-        mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: { continuationReference: "hold-lapsed" } } })
-        mocks.api.continueBrokeredSignIn.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: { retryWithSameRequest: true } } })
+        mocks.api.exchangeOauthCode.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: null,
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                providerEmailRefused: null,
+                undecided: { continuationReference: "hold-lapsed" },
+            },
+        })
+        mocks.api.continueBrokeredSignIn.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: null,
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                providerEmailRefused: null,
+                undecided: { retryWithSameRequest: true },
+            },
+        })
         render(<AuthenticationPage />)
         await waitFor(() => expect(panel()).toContain(copy("signIn.oauthUndecided")))
         expect(panel()).not.toContain(copy("signIn.oauthRefused"))
@@ -383,7 +618,16 @@ describe("AuthenticationPage connected journeys", () => {
     })
 
     it("hands an unavailable requested place to the landing instead of parking it on the auth surface", async () => {
-        mocks.api.signIn.mockResolvedValue({ ok: true, data: { accessToken: "access", requiresTwoFactor: false, twoFactorToken: null, destination: "/overview", undecided: null } })
+        mocks.api.signIn.mockResolvedValue({
+            ok: true,
+            data: {
+                accessToken: "access",
+                requiresTwoFactor: false,
+                twoFactorToken: null,
+                destination: "/overview",
+                undecided: null,
+            },
+        })
         window.history.replaceState(null, "", "/authentication?returnTo=%2Fagentos%2Fsecret")
         render(<AuthenticationPage />)
         fireEvent.click(screen.getByTestId("submit-details"))

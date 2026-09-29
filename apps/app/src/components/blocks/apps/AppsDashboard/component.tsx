@@ -1,6 +1,6 @@
-import { IconSource } from "@nivo/ui";
-import { SurfaceCard, Button, EmptyNotice, Heading, Icon, Text, TextAction, Badge } from "@starci/grammar/common";
-import { FleetRow, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
+import { IconSource } from "@nivo/ui"
+import { SurfaceCard, Button, EmptyNotice, Heading, Icon, Text, TextAction, Badge } from "@starci/grammar/common"
+import { FleetRow, type FleetStatus } from "@/components/blocks/provisioning/FleetRow"
 
 /**
  * PAGE (drawing half) - the middle level, and the reason an academy is a ROW rather than a destination.
@@ -30,106 +30,114 @@ import { FleetRow, type FleetStatus } from "@/components/blocks/provisioning/Fle
 
 /** Public API role for OwnedAppRow. */
 export type OwnedAppRow = {
-  /** The row's identity, and its React key. */
-  readonly id: string;
-  /** What the app is called. */
-  readonly name: string;
-  /** The address a customer would type, or what an unbuilt order can say instead. */
-  readonly detail: string;
-  /** Which template it was built from, or the generic word when the join found nothing. */
-  readonly kindLabel: string;
-  /** How far it has got. Drives the tone `FleetRow` owns. */
-  readonly status: FleetStatus;
-  /** That state in the reader's words. */
-  readonly statusLabel: string;
-  /** The one thing this row's state permits, absent when it permits nothing. */
-  readonly actionLabel?: string;
-};
+    /** The row's identity, and its React key. */
+    readonly id: string
+    /** What the app is called. */
+    readonly name: string
+    /** The address a customer would type, or what an unbuilt order can say instead. */
+    readonly detail: string
+    /** Which template it was built from, or the generic word when the join found nothing. */
+    readonly kindLabel: string
+    /** How far it has got. Drives the tone `FleetRow` owns. */
+    readonly status: FleetStatus
+    /** That state in the reader's words. */
+    readonly statusLabel: string
+    /** The one thing this row's state permits, absent when it permits nothing. */
+    readonly actionLabel?: string
+}
 
 /** One buyable template, with every word and every figure already chosen. */
 export type TemplateOfferRowView = {
-  /** The row's identity, and its React key. */
-  readonly id: string;
-  /** Stable provisionable-app key carried by this catalogue item. */
-  readonly templateKey: string;
-  /** What the seller calls the template. */
-  readonly name: string;
-  /** The seller's own sentence about it. */
-  readonly tagline: string;
-  /** The word for what kind of thing this is. */
-  readonly kindLabel: string;
-  /** The cheapest rung, already formatted as money in the reader's locale. */
-  readonly priceLabel: string;
-  /** The words on the one press an offer carries. */
-  readonly actionLabel: string;
-  /** True when the catalogue can name the template but the backend cannot provision it yet. */
-  readonly actionDisabled: boolean;
-};
+    /** The row's identity, and its React key. */
+    readonly id: string
+    /** Stable provisionable-app key carried by this catalogue item. */
+    readonly templateKey: string
+    /** What the seller calls the template. */
+    readonly name: string
+    /** The seller's own sentence about it. */
+    readonly tagline: string
+    /** The word for what kind of thing this is. */
+    readonly kindLabel: string
+    /** The cheapest rung, already formatted as money in the reader's locale. */
+    readonly priceLabel: string
+    /** The words on the one press an offer carries. */
+    readonly actionLabel: string
+    /** True when the catalogue can name the template but the backend cannot provision it yet. */
+    readonly actionDisabled: boolean
+}
 
 /** The section holding the apps this account owns, in every situation the set can be in. */
-export type OwnedSectionView = {
-  readonly phase: "resting";
-  readonly label: string;
-} | {
-  readonly phase: "empty";
-  readonly label: string;
-  readonly note: string;
-} | {
-  readonly phase: "answered";
-  readonly label: string;
-  readonly rows: ReadonlyArray<OwnedAppRow>;
-} | {
-  readonly phase: "refused";
-  readonly label: string;
-  readonly note: string;
-};
+export type OwnedSectionView =
+    | {
+          readonly phase: "resting"
+          readonly label: string
+      }
+    | {
+          readonly phase: "empty"
+          readonly label: string
+          readonly note: string
+      }
+    | {
+          readonly phase: "answered"
+          readonly label: string
+          readonly rows: ReadonlyArray<OwnedAppRow>
+      }
+    | {
+          readonly phase: "refused"
+          readonly label: string
+          readonly note: string
+      }
 
 /** The section holding the catalogue, which is how a new app is started. */
-export type CatalogueSectionView = {
-  readonly phase: "resting";
-  readonly label: string;
-  readonly fact: string;
-} | {
-  readonly phase: "empty";
-  readonly label: string;
-  readonly note: string;
-} | {
-  readonly phase: "answered";
-  readonly label: string;
-  readonly fact: string;
-  readonly offers: ReadonlyArray<TemplateOfferRowView>;
-} | {
-  readonly phase: "refused";
-  readonly label: string;
-  readonly note: string;
-};
+export type CatalogueSectionView =
+    | {
+          readonly phase: "resting"
+          readonly label: string
+          readonly fact: string
+      }
+    | {
+          readonly phase: "empty"
+          readonly label: string
+          readonly note: string
+      }
+    | {
+          readonly phase: "answered"
+          readonly label: string
+          readonly fact: string
+          readonly offers: ReadonlyArray<TemplateOfferRowView>
+      }
+    | {
+          readonly phase: "refused"
+          readonly label: string
+          readonly note: string
+      }
 
 /** Plain values already resolved by the connected owner. */
 export type AppsDashboardData = {
-  /** The page's own name. */
-  readonly title: string;
-  /** The sentence under the title, saying what an app is and why the set is open. */
-  readonly lede: string;
-  /** The page-level continuation into the one supported template flow. */
-  readonly buildAppLabel?: string;
-  /** Plain-text partition for states that require owner attention. */
-  readonly attentionGroupLabel?: string;
-  /** Plain-text partition for healthy and in-progress resources. */
-  readonly steadyGroupLabel?: string;
-  /** The owned section's settled situation. */
-  readonly owned: OwnedSectionView;
-  /** The catalogue section's settled situation. */
-  readonly catalogue: CatalogueSectionView;
-};
+    /** The page's own name. */
+    readonly title: string
+    /** The sentence under the title, saying what an app is and why the set is open. */
+    readonly lede: string
+    /** The page-level continuation into the one supported template flow. */
+    readonly buildAppLabel?: string
+    /** Plain-text partition for states that require owner attention. */
+    readonly attentionGroupLabel?: string
+    /** Plain-text partition for healthy and in-progress resources. */
+    readonly steadyGroupLabel?: string
+    /** The owned section's settled situation. */
+    readonly owned: OwnedSectionView
+    /** The catalogue section's settled situation. */
+    readonly catalogue: CatalogueSectionView
+}
 
 /** Actions emitted by the pure dashboard. */
 export type AppsDashboardActions = {
-  readonly onBuildTemplate: (templateKey: string) => void;
-  readonly onOpenOwnedApp: (siteId: string) => void;
-};
+    readonly onBuildTemplate: (templateKey: string) => void
+    readonly onOpenOwnedApp: (siteId: string) => void
+}
 
 /** The atom contract the pure half draws from: settled data plus the actions it can emit. */
-type AppsDashboardProps = { readonly props: AppsDashboardData; readonly on: AppsDashboardActions };
+type AppsDashboardProps = { readonly props: AppsDashboardData; readonly on: AppsDashboardActions }
 
 /**
  * One resting row, which is the real row asked to rest as itself.
@@ -137,12 +145,18 @@ type AppsDashboardProps = { readonly props: AppsDashboardData; readonly on: Apps
  * @param index - Which resting row this is, so the run has stable keys.
  * @returns The resting row, bound to the slot's composite identity.
  */
-const restingRow = (index: number) => <FleetRow key={`resting-${index}`} props={{
-  id: `resting-${index}`,
-  kind: "site",
-  kindLabel: "",
-  status: "provisioning"
-}} isLoading />;
+const restingRow = (index: number) => (
+    <FleetRow
+        key={`resting-${index}`}
+        props={{
+            id: `resting-${index}`,
+            kind: "site",
+            kindLabel: "",
+            status: "provisioning",
+        }}
+        isLoading
+    />
+)
 
 /**
  * One app the account owns, or one order that has been paid for and is still being built.
@@ -150,19 +164,25 @@ const restingRow = (index: number) => <FleetRow key={`resting-${index}`} props={
  * @param row - The already-worded row.
  * @returns The row, bound to the slot's composite identity.
  */
-const ownedRow = (row: OwnedAppRow, onOpenOwnedApp: (siteId: string) => void) => <FleetRow key={row.id} props={{
-  id: row.id,
-  name: row.name,
-  detail: row.detail,
-  kind: "site",
-  kindLabel: row.kindLabel,
-  status: row.status,
-  statusLabel: row.statusLabel,
-  actionLabel: row.actionLabel
-}} on={{
-  open: () => onOpenOwnedApp(row.id),
-  act: () => onOpenOwnedApp(row.id)
-}} />;
+const ownedRow = (row: OwnedAppRow, onOpenOwnedApp: (siteId: string) => void) => (
+    <FleetRow
+        key={row.id}
+        props={{
+            id: row.id,
+            name: row.name,
+            detail: row.detail,
+            kind: "site",
+            kindLabel: row.kindLabel,
+            status: row.status,
+            statusLabel: row.statusLabel,
+            actionLabel: row.actionLabel,
+        }}
+        on={{
+            open: () => onOpenOwnedApp(row.id),
+            act: () => onOpenOwnedApp(row.id),
+        }}
+    />
+)
 
 /**
  * One buyable template.
@@ -180,12 +200,32 @@ const ownedRow = (row: OwnedAppRow, onOpenOwnedApp: (siteId: string) => void) =>
  * @param row - The already-worded offer.
  * @returns The row, bound to the slot's composite identity.
  */
-const offerRow = (row: TemplateOfferRowView, onBuildTemplate: (templateKey: string) => void) => <div key={row.id}>{<div>{<TextAction size="sm">{row.name}</TextAction>}{<Text size="xs" tone="muted">{row.tagline}</Text>}</div>}{<Badge tone="neutral">{row.kindLabel}</Badge>}{<Text size="sm">{row.priceLabel}</Text>}{<Button
-    size="sm"
-    variant="primary"
-    isDisabled={row.actionDisabled}
-    onPress={() => onBuildTemplate(row.templateKey)}
-  >{row.actionLabel}</Button>}</div>;
+const offerRow = (row: TemplateOfferRowView, onBuildTemplate: (templateKey: string) => void) => (
+    <div key={row.id}>
+        {
+            <div>
+                {<TextAction size="sm">{row.name}</TextAction>}
+                {
+                    <Text size="xs" tone="muted">
+                        {row.tagline}
+                    </Text>
+                }
+            </div>
+        }
+        {<Badge tone="neutral">{row.kindLabel}</Badge>}
+        {<Text size="sm">{row.priceLabel}</Text>}
+        {
+            <Button
+                size="sm"
+                variant="primary"
+                isDisabled={row.actionDisabled}
+                onPress={() => onBuildTemplate(row.templateKey)}
+            >
+                {row.actionLabel}
+            </Button>
+        }
+    </div>
+)
 
 /**
  * A section that says one sentence in the column its rows would have used.
@@ -198,12 +238,17 @@ const offerRow = (row: TemplateOfferRowView, onBuildTemplate: (templateKey: stri
  * @param note - The sentence.
  * @returns The section, bound to its contract identity.
  */
-const sentenceSection = (label: string, note: string) => <div><div>
+const sentenceSection = (label: string, note: string) => (
+    <div>
+        <div>
+            <Heading level={3}>{label}</Heading>
+        </div>
 
-    <Heading level={3}>{label}</Heading></div>
-
-
-  <Text size="sm" tone="muted">{note}</Text></div>;
+        <Text size="sm" tone="muted">
+            {note}
+        </Text>
+    </div>
+)
 
 /**
  * A section whose subject was REFUSED rather than empty.
@@ -212,18 +257,43 @@ const sentenceSection = (label: string, note: string) => <div><div>
  * @param note - The refusal, in the reader's words.
  * @returns The section, bound to its contract identity.
  */
-const refusedSection = (label: string, note: string) => <SurfaceCard
-  label={label}
-><div>{<Text size="sm" tone="muted">{note}</Text>}</div></SurfaceCard>;
-const ATTENTION_STATUSES: ReadonlySet<FleetStatus> = new Set(["awaiting_dns", "failed", "suspended"]);
-const groupedOwnedList = (rows: ReadonlyArray<OwnedAppRow>, attentionGroupLabel: string, steadyGroupLabel: string, onOpenOwnedApp: (siteId: string) => void) => {
-  const attention = rows.filter(row => ATTENTION_STATUSES.has(row.status));
-  const steady = rows.filter(row => !ATTENTION_STATUSES.has(row.status));
-  const group = (label: string, members: ReadonlyArray<OwnedAppRow>) => <div key={label}>
-
-    <Text size="sm" tone="muted">{label}</Text><div>{members.map(row => ownedRow(row, onOpenOwnedApp))}</div></div>;
-  return <div><>{attention.length === 0 ? [] : [group(attentionGroupLabel, attention)]}{steady.length === 0 ? [] : [group(steadyGroupLabel, steady)]}</></div>;
-};
+const refusedSection = (label: string, note: string) => (
+    <SurfaceCard label={label}>
+        <div>
+            {
+                <Text size="sm" tone="muted">
+                    {note}
+                </Text>
+            }
+        </div>
+    </SurfaceCard>
+)
+const ATTENTION_STATUSES: ReadonlySet<FleetStatus> = new Set(["awaiting_dns", "failed", "suspended"])
+const groupedOwnedList = (
+    rows: ReadonlyArray<OwnedAppRow>,
+    attentionGroupLabel: string,
+    steadyGroupLabel: string,
+    onOpenOwnedApp: (siteId: string) => void,
+) => {
+    const attention = rows.filter((row) => ATTENTION_STATUSES.has(row.status))
+    const steady = rows.filter((row) => !ATTENTION_STATUSES.has(row.status))
+    const group = (label: string, members: ReadonlyArray<OwnedAppRow>) => (
+        <div key={label}>
+            <Text size="sm" tone="muted">
+                {label}
+            </Text>
+            <div>{members.map((row) => ownedRow(row, onOpenOwnedApp))}</div>
+        </div>
+    )
+    return (
+        <div>
+            <>
+                {attention.length === 0 ? [] : [group(attentionGroupLabel, attention)]}
+                {steady.length === 0 ? [] : [group(steadyGroupLabel, steady)]}
+            </>
+        </div>
+    )
+}
 
 /**
  * The app set, and how a new one is started.
@@ -232,88 +302,122 @@ const groupedOwnedList = (rows: ReadonlyArray<OwnedAppRow>, attentionGroupLabel:
  * @returns The page node.
  */
 export const AppsDashboardBase = (props: AppsDashboardProps) => {
-  const {
-    title,
-    lede,
-    buildAppLabel,
-    attentionGroupLabel,
-    steadyGroupLabel,
-    owned,
-    catalogue,
-  }: AppsDashboardData = props.props;
-  const { onBuildTemplate, onOpenOwnedApp } = props.on;
-  const supportedOffer = catalogue.phase === "answered" ? catalogue.offers.find(offer => !offer.actionDisabled) : undefined;
-  /*
-   * SECTION 1 - the apps this account owns, in every situation the set can be in.
-   */
-  const ownedSection = () => {
-    if (owned.phase === "empty") {
-      return <SurfaceCard
-        label={owned.label}
-      ><div>{<EmptyNotice
-            message={owned.note}
-            actionLabel={supportedOffer === undefined ? undefined : buildAppLabel}
-            actionStartContent={supportedOffer === undefined || buildAppLabel === undefined ? undefined : <Icon source={IconSource("retry", "chip")} usage="chip" />}
-            onAction={supportedOffer === undefined || buildAppLabel === undefined ? undefined : () => onBuildTemplate(supportedOffer.templateKey)}
-          />}</div></SurfaceCard>;
+    const { title, lede, buildAppLabel, attentionGroupLabel, steadyGroupLabel, owned, catalogue }: AppsDashboardData =
+        props.props
+    const { onBuildTemplate, onOpenOwnedApp } = props.on
+    const supportedOffer =
+        catalogue.phase === "answered" ? catalogue.offers.find((offer) => !offer.actionDisabled) : undefined
+    /*
+     * SECTION 1 - the apps this account owns, in every situation the set can be in.
+     */
+    const ownedSection = () => {
+        if (owned.phase === "empty") {
+            return (
+                <SurfaceCard label={owned.label}>
+                    <div>
+                        {
+                            <EmptyNotice
+                                message={owned.note}
+                                actionLabel={supportedOffer === undefined ? undefined : buildAppLabel}
+                                actionStartContent={
+                                    supportedOffer === undefined || buildAppLabel === undefined ? undefined : (
+                                        <Icon source={IconSource("retry", "chip")} usage="chip" />
+                                    )
+                                }
+                                onAction={
+                                    supportedOffer === undefined || buildAppLabel === undefined
+                                        ? undefined
+                                        : () => onBuildTemplate(supportedOffer.templateKey)
+                                }
+                            />
+                        }
+                    </div>
+                </SurfaceCard>
+            )
+        }
+        if (owned.phase === "refused") {
+            return refusedSection(owned.label, owned.note)
+        }
+        if (owned.phase === "answered" && attentionGroupLabel !== undefined && steadyGroupLabel !== undefined) {
+            return (
+                <SurfaceCard label={owned.label}>
+                    {groupedOwnedList(owned.rows, attentionGroupLabel, steadyGroupLabel, onOpenOwnedApp)}
+                </SurfaceCard>
+            )
+        }
+        if (owned.phase === "answered") {
+            return (
+                <SurfaceCard label={owned.label}>
+                    <div>{owned.rows.map((row) => ownedRow(row, onOpenOwnedApp))}</div>
+                </SurfaceCard>
+            )
+        }
+        return (
+            <SurfaceCard label={owned.label}>
+                <div>{[restingRow(1), restingRow(2), restingRow(3)]}</div>
+            </SurfaceCard>
+        )
     }
-    if (owned.phase === "refused") {
-      return refusedSection(owned.label, owned.note);
+
+    /*
+     * SECTION 2 - the catalogue. It is a LIST because `catalogItems` returns one, filtered to
+     * `site_from_template` - not because a second template has been promised. Today the filter yields
+     * exactly one, and template #2 appears here with no new screen, no new route and no change to the
+     * rail.
+     */
+    const catalogueSection = () => {
+        if (catalogue.phase === "empty") {
+            return sentenceSection(catalogue.label, catalogue.note)
+        }
+        if (catalogue.phase === "refused") {
+            return refusedSection(catalogue.label, catalogue.note)
+        }
+        const isResting = catalogue.phase === "resting"
+        return (
+            <SurfaceCard
+                label={catalogue.label}
+                labelEnd={
+                    catalogue.fact === undefined ? null : (
+                        <Text size="sm" tone="muted" isSkeleton={isResting}>
+                            {catalogue.fact}
+                        </Text>
+                    )
+                }
+            >
+                <div>
+                    {catalogue.phase === "answered"
+                        ? catalogue.offers.map((offer) => offerRow(offer, onBuildTemplate))
+                        : [restingRow(4)]}
+                </div>
+            </SurfaceCard>
+        )
     }
-    if (owned.phase === "answered" && attentionGroupLabel !== undefined && steadyGroupLabel !== undefined) {
-      return <SurfaceCard
-        label={owned.label}
-      >
+    const headingAction =
+        supportedOffer === undefined || buildAppLabel === undefined ? null : (
+            <Button size="lg" variant="primary" onPress={() => onBuildTemplate(supportedOffer.templateKey)}>
+                {buildAppLabel}
+            </Button>
+        )
+    return (
+        <div>
+            <div>
+                <Heading level={1} scale="display">
+                    {title}
+                </Heading>
+                {headingAction}
+            </div>
 
-          {groupedOwnedList(owned.rows, attentionGroupLabel, steadyGroupLabel, onOpenOwnedApp)}</SurfaceCard>;
-    }
-    if (owned.phase === "answered") {
-      return <SurfaceCard
-        label={owned.label}
-      ><div>{owned.rows.map(row => ownedRow(row, onOpenOwnedApp))}</div></SurfaceCard>;
-    }
-    return <SurfaceCard
-      label={owned.label}
-    ><div>{[restingRow(1), restingRow(2), restingRow(3)]}</div></SurfaceCard>;
-  };
-
-  /*
-   * SECTION 2 - the catalogue. It is a LIST because `catalogItems` returns one, filtered to
-   * `site_from_template` - not because a second template has been promised. Today the filter yields
-   * exactly one, and template #2 appears here with no new screen, no new route and no change to the
-   * rail.
-   */
-  const catalogueSection = () => {
-    if (catalogue.phase === "empty") {
-      return sentenceSection(catalogue.label, catalogue.note);
-    }
-    if (catalogue.phase === "refused") {
-      return refusedSection(catalogue.label, catalogue.note);
-    }
-    const isResting = catalogue.phase === "resting";
-    return <SurfaceCard
-      label={catalogue.label}
-      labelEnd={catalogue.fact === undefined ? null : <Text size="sm" tone="muted" isSkeleton={isResting}>{catalogue.fact}</Text>}
-    ><div>{catalogue.phase === "answered" ? catalogue.offers.map(offer => offerRow(offer, onBuildTemplate)) : [restingRow(4)]}</div></SurfaceCard>;
-  };
-  const headingAction = supportedOffer === undefined || buildAppLabel === undefined ? null : <Button
-    size="lg"
-    variant="primary"
-    onPress={() => onBuildTemplate(supportedOffer.templateKey)}
-  >{buildAppLabel}</Button>;
-  return <div><div>
-
-
-
-
-
-      <Heading level={1} scale="display">{title}</Heading>{headingAction}</div>
-
-
-
-
-
-
-
-    <Text size="md" tone="muted">{lede}</Text><div><div><>{ownedSection()}</></div><div><>{catalogueSection()}</></div></div></div>;
-};
+            <Text size="md" tone="muted">
+                {lede}
+            </Text>
+            <div>
+                <div>
+                    <>{ownedSection()}</>
+                </div>
+                <div>
+                    <>{catalogueSection()}</>
+                </div>
+            </div>
+        </div>
+    )
+}

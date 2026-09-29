@@ -9,7 +9,15 @@ describe("NIVO public exploration routes", () => {
     it("preserves the seven-stage Trust progression without invented security evidence", () => {
         const { container } = render(<TrustPage />)
         const html = container.innerHTML
-        const anchors = ["future-worth-earning", "trust-starts-small", "human-ai-governance", "evidence-before-scale", "transformation-journey", "what-becomes-possible", "truth-before-promise"]
+        const anchors = [
+            "future-worth-earning",
+            "trust-starts-small",
+            "human-ai-governance",
+            "evidence-before-scale",
+            "transformation-journey",
+            "what-becomes-possible",
+            "truth-before-promise",
+        ]
         let previousIndex = -1
         for (const anchor of anchors) {
             const currentIndex = html.indexOf(`id="${anchor}"`)
@@ -55,7 +63,9 @@ describe("NIVO public exploration routes", () => {
         expect(normalizeIdeaType("unknown")).toBeNull()
         expect(normalizeIdeaType(undefined)).toBeNull()
         render(<IdeasPage selectedType="framework" />)
-        expect(screen.getByRole("heading", { level: 3, name: "Context · Responsibility · Outcome" })).toBeInTheDocument()
+        expect(
+            screen.getByRole("heading", { level: 3, name: "Context · Responsibility · Outcome" }),
+        ).toBeInTheDocument()
         expect(screen.queryByRole("heading", { level: 3, name: "Responsibility before Agent" })).not.toBeInTheDocument()
     })
 
@@ -64,7 +74,12 @@ describe("NIVO public exploration routes", () => {
         expect(idea).toBeDefined()
         if (idea === undefined) return
 
-        const html = [<TrustPage key="trust" />, <EcosystemPage key="ecosystem" />, <IdeasPage key="ideas" />, <IdeaDetailPage idea={idea} key="detail" />]
+        const html = [
+            <TrustPage key="trust" />,
+            <EcosystemPage key="ecosystem" />,
+            <IdeasPage key="ideas" />,
+            <IdeaDetailPage idea={idea} key="detail" />,
+        ]
             .map((page) => {
                 const view = render(page)
                 const markup = view.container.innerHTML
@@ -74,7 +89,7 @@ describe("NIVO public exploration routes", () => {
             .join("")
 
         expect(html).not.toMatch(new RegExp("[\u2192\u2193]", "u"))
-        expect(html).toContain("data-component=\"Icon\"")
-        expect(html).toContain("data-usage=\"chip\"")
+        expect(html).toContain('data-component="Icon"')
+        expect(html).toContain('data-usage="chip"')
     })
 })

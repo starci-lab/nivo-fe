@@ -1,30 +1,30 @@
-"use client";
-import { fleetResourceHref, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
-import { useQueryMyAgentWorkspacesSwr, useRouter } from "@/hooks";
-import { getPathname } from "@/modules/i18n/navigation";
-import { toLocale } from "@/modules/i18n/config";
-import { useLocale, useTranslations } from "next-intl";
-import { AgentOSWorkspaceListBase, type AgentOSWorkspaceListViewProps } from "./component";
+"use client"
+import { fleetResourceHref, type FleetStatus } from "@/components/blocks/provisioning/FleetRow"
+import { useQueryMyAgentWorkspacesSwr, useRouter } from "@/hooks"
+import { getPathname } from "@/modules/i18n/navigation"
+import { toLocale } from "@/modules/i18n/config"
+import { useLocale, useTranslations } from "next-intl"
+import { AgentOSWorkspaceListBase, type AgentOSWorkspaceListViewProps } from "./component"
 /** Public API role for AgentOSWorkspaceListProps. */
-export type AgentOSWorkspaceListProps = object;
+export type AgentOSWorkspaceListProps = object
 const STATUS: Readonly<Record<string, FleetStatus | undefined>> = {
     active: "active",
     ready: "ready",
     provisioning: "provisioning",
     starting: "provisioning",
     failed: "failed",
-    suspended: "suspended"
-};
+    suspended: "suspended",
+}
 /** Own the workspace query and dashboard continuations for the AgentOS collection. */
 export const AgentOSWorkspaceList = (props: AgentOSWorkspaceListProps) => {
-    void props;
-    const t = useTranslations("console");
-    const locale = toLocale(useLocale());
-    const router = useRouter();
-    const query = useQueryMyAgentWorkspacesSwr();
-    const answer = query.data;
+    void props
+    const t = useTranslations("console")
+    const locale = toLocale(useLocale())
+    const router = useRouter()
+    const query = useQueryMyAgentWorkspacesSwr()
+    const answer = query.data
     const view = (): AgentOSWorkspaceListViewProps => {
-        const label = t("agentos.workspacesLabel");
+        const label = t("agentos.workspacesLabel")
         const summary = {
             overview: t("agentos.summary.overview"),
             workspaces: t("agentos.summary.workspaces"),
@@ -37,29 +37,29 @@ export const AgentOSWorkspaceList = (props: AgentOSWorkspaceListProps) => {
             steadyGroup: t("agentos.summary.steadyGroup"),
             status: t("agentos.summary.status"),
             manage: t("agentos.manageWorkspace"),
-            retry: t("agentos.retry")
-        };
+            retry: t("agentos.retry"),
+        }
         if (answer === undefined && query.error === undefined)
             return {
                 state: "resting",
                 props: {
                     label,
-                    summary
-                }
-            };
+                    summary,
+                },
+            }
         if (query.error !== undefined || answer?.ok !== true)
             return {
                 state: "refused",
                 props: {
                     label,
                     summary,
-                    message: t("refusal.unknown")
+                    message: t("refusal.unknown"),
                 },
                 on: {
                     retry: () => void query.mutate(),
-                    isRetrying: query.isValidating
-                }
-            };
+                    isRetrying: query.isValidating,
+                },
+            }
         if (answer.data.length === 0) {
             return {
                 state: "empty",
@@ -67,35 +67,38 @@ export const AgentOSWorkspaceList = (props: AgentOSWorkspaceListProps) => {
                     label,
                     summary,
                     message: t("agentos.emptyDescription"),
-                    actionLabel: t("agentos.create")
+                    actionLabel: t("agentos.create"),
                 },
                 on: {
-                    create: () => router.push("/agentos/workspaces/new")
-                }
-            };
+                    create: () => router.push("/agentos/workspaces/new"),
+                },
+            }
         }
         return {
             state: "answered",
             on: {
-                openWorkspace: () => undefined
+                openWorkspace: () => undefined,
             },
             props: {
                 label,
                 summary,
-                rows: answer.data.map(workspace => {
-                    const status = STATUS[workspace.status] ?? "not_provisioned";
+                rows: answer.data.map((workspace) => {
+                    const status = STATUS[workspace.status] ?? "not_provisioned"
                     return {
                         id: workspace.id,
                         href: getPathname({ locale, href: fleetResourceHref("workspace", workspace.id) }),
                         name: workspace.name ?? t("agentos.kindWorkspace"),
-                        detail: workspace.catalogOrder == null ? t("agentos.workspaceReference", { id: workspace.id }) : t("agentos.orderReference", { id: workspace.catalogOrder.id }),
+                        detail:
+                            workspace.catalogOrder == null
+                                ? t("agentos.workspaceReference", { id: workspace.id })
+                                : t("agentos.orderReference", { id: workspace.catalogOrder.id }),
                         kindLabel: t("agentos.kindWorkspace"),
                         status,
-                        statusLabel: t(`status.${status === "not_provisioned" ? "notProvisioned" : status}`)
-                    };
-                })
-            }
-        };
-    };
-    return <AgentOSWorkspaceListBase {...view()}/>;
-};
+                        statusLabel: t(`status.${status === "not_provisioned" ? "notProvisioned" : status}`),
+                    }
+                }),
+            },
+        }
+    }
+    return <AgentOSWorkspaceListBase {...view()} />
+}

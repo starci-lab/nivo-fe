@@ -4,11 +4,17 @@ import { DEFAULT_TIMEOUT_MS, send } from "./transport"
 let fetchMock: ReturnType<typeof vi.fn>
 
 const reply = (status: number, body: unknown) => ({ status, json: async () => body })
-const notJson = (status: number) => ({ status, json: async () => { throw new Error("not json") } })
-const request = { url: "http://core.test/x", method: "POST", credentials: "omit" } as const
-const abortWhenSignalled = (_url: string, init: RequestInit) => new Promise((_resolve, reject) => {
-    init.signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")))
+const notJson = (status: number) => ({
+    status,
+    json: async () => {
+        throw new Error("not json")
+    },
 })
+const request = { url: "http://core.test/x", method: "POST", credentials: "omit" } as const
+const abortWhenSignalled = (_url: string, init: RequestInit) =>
+    new Promise((_resolve, reject) => {
+        init.signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")))
+    })
 
 beforeEach(() => {
     fetchMock = vi.fn()
@@ -33,7 +39,11 @@ describe("send", () => {
         expect(url).toBe("http://core.test/x")
         expect(init.method).toBe("POST")
         expect(init.credentials).toBe("include")
-        expect(init.headers).toEqual({ "content-type": "application/json", "accept-language": "vi", authorization: "Bearer tok" })
+        expect(init.headers).toEqual({
+            "content-type": "application/json",
+            "accept-language": "vi",
+            authorization: "Bearer tok",
+        })
         expect(init.body).toBe(JSON.stringify({ q: 1 }))
     })
 
@@ -68,7 +78,13 @@ describe("send", () => {
         [503, "unavailable"],
     ] as const)("keeps HTTP %i as the %s kind and hands back the body it carried", async (status, kind) => {
         fetchMock.mockResolvedValue(reply(status, { kind: "named" }))
-        expect(await send(request)).toMatchObject({ ok: false, kind, status, code: `HTTP_${status}`, body: { kind: "named" } })
+        expect(await send(request)).toMatchObject({
+            ok: false,
+            kind,
+            status,
+            code: `HTTP_${status}`,
+            body: { kind: "named" },
+        })
     })
 
     it("keeps a non-JSON failure a failure of its own status, with no body", async () => {
@@ -78,12 +94,24 @@ describe("send", () => {
 
     it("reports a 2xx answer that is not JSON as malformed, never as an answer", async () => {
         fetchMock.mockResolvedValue(notJson(200))
-        expect(await send(request)).toMatchObject({ ok: false, kind: "unavailable", code: "MALFORMED", status: 200, retryable: true })
+        expect(await send(request)).toMatchObject({
+            ok: false,
+            kind: "unavailable",
+            code: "MALFORMED",
+            status: 200,
+            retryable: true,
+        })
     })
 
     it("reports a request that never arrived as a network failure without a status", async () => {
         fetchMock.mockRejectedValue(new Error("offline"))
-        expect(await send(request)).toMatchObject({ ok: false, kind: "unavailable", code: "NETWORK", status: null, retryable: true })
+        expect(await send(request)).toMatchObject({
+            ok: false,
+            kind: "unavailable",
+            code: "NETWORK",
+            status: null,
+            retryable: true,
+        })
     })
 
     it("abandons a request that outlasts its deadline", async () => {
@@ -109,7 +137,11 @@ describe("send", () => {
     it("does not let a request whose signal is already aborted through", async () => {
         const controller = new AbortController()
         controller.abort()
-        fetchMock.mockImplementation((_url: string, init: RequestInit) => init.signal?.aborted === true ? Promise.reject(new DOMException("aborted", "AbortError")) : Promise.resolve(reply(200, {})))
+        fetchMock.mockImplementation((_url: string, init: RequestInit) =>
+            init.signal?.aborted === true
+                ? Promise.reject(new DOMException("aborted", "AbortError"))
+                : Promise.resolve(reply(200, {})),
+        )
         expect(await send({ ...request, signal: controller.signal })).toMatchObject({ ok: false, code: "ABORTED" })
     })
 })

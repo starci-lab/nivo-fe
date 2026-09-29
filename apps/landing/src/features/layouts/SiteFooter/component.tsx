@@ -6,7 +6,12 @@ import { SITE_CLASS_NAMES } from "../SiteShell"
 export type SiteFooterGroup = {
     readonly id: string
     readonly title: string
-    readonly links: ReadonlyArray<{ readonly id: string; readonly label: string; readonly href: string; readonly external: boolean }>
+    readonly links: ReadonlyArray<{
+        readonly id: string
+        readonly label: string
+        readonly href: string
+        readonly external: boolean
+    }>
 }
 
 /** What the footer draws, resolved by the connected half. */
@@ -25,16 +30,19 @@ export type SiteFooterBaseProps = {
 
 /** The compact footer shared by every canonical public route. */
 export const SiteFooterBase = ({ homeHref, contactHref, groups, copy }: SiteFooterBaseProps) => {
-
     return (
         <footer className={SITE_CLASS_NAMES.footer}>
             <PageContainer className={SITE_CLASS_NAMES.footerInner}>
                 <div className={SITE_CLASS_NAMES.footerIdentity}>
                     <a href={homeHref} aria-label={copy.homeLabel}>
-                    <NivoBrand props={{ label: "NIVO", variant: "lockup", scale: "navbar" }} />
+                        <NivoBrand props={{ label: "NIVO", variant: "lockup", scale: "navbar" }} />
                     </a>
-                    <Text as="p" size="sm">{copy.philosophy}</Text>
-                    <Text as="p" size="xs">{copy.distinction}</Text>
+                    <Text as="p" size="sm">
+                        {copy.philosophy}
+                    </Text>
+                    <Text as="p" size="xs">
+                        {copy.distinction}
+                    </Text>
                 </div>
 
                 <div className={SITE_CLASS_NAMES.footerDirectory}>
@@ -42,7 +50,9 @@ export const SiteFooterBase = ({ homeHref, contactHref, groups, copy }: SiteFoot
                         const labelId = `footer-group-${groupIndex}`
                         return (
                             <nav aria-labelledby={labelId} key={group.id}>
-                                <Text as="p" id={labelId} size="xs" weight="semibold">{group.title}</Text>
+                                <Text as="p" id={labelId} size="xs" weight="semibold">
+                                    {group.title}
+                                </Text>
                                 <ul>
                                     {group.links.map((link) => (
                                         <li key={link.id}>
@@ -63,8 +73,12 @@ export const SiteFooterBase = ({ homeHref, contactHref, groups, copy }: SiteFoot
                 </div>
 
                 <div className={SITE_CLASS_NAMES.footerLegal}>
-                    <Text as="span" size="xs">{copy.copyright}</Text>
-                    <TextAction href={contactHref} appearance="section" size="sm">{copy.contactNivo}</TextAction>
+                    <Text as="span" size="xs">
+                        {copy.copyright}
+                    </Text>
+                    <TextAction href={contactHref} appearance="section" size="sm">
+                        {copy.contactNivo}
+                    </TextAction>
                 </div>
             </PageContainer>
         </footer>

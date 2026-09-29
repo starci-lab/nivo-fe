@@ -16,7 +16,9 @@ export const SiteShell = (props: SiteShellProps) => {
 
     return (
         <div className={SITE_CLASS_NAMES.shell}>
-            <a className={SITE_CLASS_NAMES.skipLink} href="#main-content">{skipLabel}</a>
+            <a className={SITE_CLASS_NAMES.skipLink} href="#main-content">
+                {skipLabel}
+            </a>
             <SiteHeader />
             {children}
             <SiteFooter />

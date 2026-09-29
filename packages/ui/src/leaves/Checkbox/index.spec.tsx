@@ -13,7 +13,19 @@ describe("Checkbox", () => {
     it("reports a changed selection and link follow", () => {
         const change = vi.fn()
         const follow = vi.fn()
-        render(<Checkbox props={{ label: "Terms", isSelected: false, labelParts: [{ kind: "text", content: "Read " }, { kind: "link", id: "terms", label: "terms" }] }} on={{ change, follow }} />)
+        render(
+            <Checkbox
+                props={{
+                    label: "Terms",
+                    isSelected: false,
+                    labelParts: [
+                        { kind: "text", content: "Read " },
+                        { kind: "link", id: "terms", label: "terms" },
+                    ],
+                }}
+                on={{ change, follow }}
+            />,
+        )
         fireEvent.click(screen.getByRole("checkbox"))
         fireEvent.click(screen.getByRole("button", { name: "terms" }))
         expect(change).toHaveBeenCalledWith(true)

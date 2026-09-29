@@ -7,15 +7,31 @@ describe("SelectionList", () => {
     it("keeps one selected destination and refuses disabled activation", async () => {
         const activate = vi.fn()
         const user = userEvent.setup()
-        render(<SelectionList props={{
-            label: "Console navigation",
-            selectedKey: "overview",
-            groups: [{ id: "main", items: [
-                { id: "overview", label: "Overview", icon: "overview" },
-                { id: "apps", label: "Apps", icon: "apps" },
-                { id: "servers", label: "Servers", icon: "servers", status: "Unavailable", isDisabled: true },
-            ] }],
-        }} on={{ activate }} />)
+        render(
+            <SelectionList
+                props={{
+                    label: "Console navigation",
+                    selectedKey: "overview",
+                    groups: [
+                        {
+                            id: "main",
+                            items: [
+                                { id: "overview", label: "Overview", icon: "overview" },
+                                { id: "apps", label: "Apps", icon: "apps" },
+                                {
+                                    id: "servers",
+                                    label: "Servers",
+                                    icon: "servers",
+                                    status: "Unavailable",
+                                    isDisabled: true,
+                                },
+                            ],
+                        },
+                    ],
+                }}
+                on={{ activate }}
+            />,
+        )
 
         expect(screen.getByRole("group")).toHaveClass("first:sticky", "first:top-0")
         expect(screen.getByRole("option", { name: "Overview" })).toHaveAttribute("aria-selected", "true")
@@ -26,19 +42,25 @@ describe("SelectionList", () => {
     })
 
     it("keeps compact destinations labelled while the circular glyph surface owns state paint", () => {
-        render(<SelectionList props={{
-            label: "Console navigation",
-            selectedKey: "agentos",
-            presentation: "compact",
-            groups: [{
-                id: "services",
-                label: "Services",
-                items: [
-                    { id: "apps", label: "Apps", icon: "apps" },
-                    { id: "agentos", label: "AgentOS", icon: "agentos" },
-                ],
-            }],
-        }} />)
+        render(
+            <SelectionList
+                props={{
+                    label: "Console navigation",
+                    selectedKey: "agentos",
+                    presentation: "compact",
+                    groups: [
+                        {
+                            id: "services",
+                            label: "Services",
+                            items: [
+                                { id: "apps", label: "Apps", icon: "apps" },
+                                { id: "agentos", label: "AgentOS", icon: "agentos" },
+                            ],
+                        },
+                    ],
+                }}
+            />,
+        )
 
         const list = screen.getByRole("listbox", { name: "Console navigation" })
         const selected = screen.getByRole("option", { name: "AgentOS" })
@@ -55,15 +77,25 @@ describe("SelectionList", () => {
     it("preserves HeroUI keyboard traversal and activation in compact presentation", async () => {
         const activate = vi.fn()
         const user = userEvent.setup()
-        render(<SelectionList props={{
-            label: "Console navigation",
-            selectedKey: "overview",
-            presentation: "compact",
-            groups: [{ id: "main", items: [
-                { id: "overview", label: "Overview", icon: "overview" },
-                { id: "apps", label: "Apps", icon: "apps" },
-            ] }],
-        }} on={{ activate }} />)
+        render(
+            <SelectionList
+                props={{
+                    label: "Console navigation",
+                    selectedKey: "overview",
+                    presentation: "compact",
+                    groups: [
+                        {
+                            id: "main",
+                            items: [
+                                { id: "overview", label: "Overview", icon: "overview" },
+                                { id: "apps", label: "Apps", icon: "apps" },
+                            ],
+                        },
+                    ],
+                }}
+                on={{ activate }}
+            />,
+        )
 
         await user.tab()
         await user.keyboard("{ArrowDown}{Enter}")

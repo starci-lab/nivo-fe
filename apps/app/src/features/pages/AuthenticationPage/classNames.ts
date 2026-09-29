@@ -1,4 +1,4 @@
-import { cn } from "@heroui/react";
+import { cn } from "@heroui/react"
 
 /**
  * The quiet canvas that carries one authentication task, and the mascot beside it on wide screens.
@@ -14,39 +14,47 @@ import { cn } from "@heroui/react";
  * one column and one task.
  */
 export const AUTH_PAGE_CLASS_NAME = cn(
-  "grid",
-  "min-h-dvh",
-  "content-center",
-  "justify-items-center",
-  "gap-10",
-  "bg-background",
-  "p-6",
-  "text-foreground",
-  "sm:p-8",
-  "lg:grid-cols-12",
-  "lg:gap-12",
-  "lg:px-16"
-);
+    "grid",
+    "min-h-dvh",
+    "content-center",
+    "justify-items-center",
+    "gap-10",
+    "bg-background",
+    "p-6",
+    "text-foreground",
+    "sm:p-8",
+    "lg:grid-cols-12",
+    "lg:gap-12",
+    "lg:px-16",
+)
 
 /** The one task column: heading, surface and exits, stacked and centred as one measure. */
 export const AUTH_TASK_COLUMN_CLASS_NAME = cn(
-  "flex",
-  "w-full",
-  "flex-col",
-  "items-center",
-  "gap-6",
-  "lg:col-span-6",
-  "lg:col-start-4"
-);
+    "flex",
+    "w-full",
+    "flex-col",
+    "items-center",
+    "gap-6",
+    "lg:col-span-6",
+    "lg:col-start-4",
+)
 
 /** Heading and the line under it, centred above the surface. */
-export const AUTH_HEADING_CLASS_NAME = cn("flex", "flex-col", "items-center", "gap-2", "text-center");
+export const AUTH_HEADING_CLASS_NAME = cn("flex", "flex-col", "items-center", "gap-2", "text-center")
 
 /** The exits below the surface: what to do instead, and the way back from a challenge. */
-export const AUTH_EXITS_CLASS_NAME = cn("flex", "flex-wrap", "items-center", "justify-center", "gap-x-4", "gap-y-2", "text-center");
+export const AUTH_EXITS_CLASS_NAME = cn(
+    "flex",
+    "flex-wrap",
+    "items-center",
+    "justify-center",
+    "gap-x-4",
+    "gap-y-2",
+    "text-center",
+)
 
 /** One exit: an optional question, and the action that answers it. */
-export const AUTH_EXIT_CLASS_NAME = cn("flex", "flex-wrap", "items-center", "gap-2");
+export const AUTH_EXIT_CLASS_NAME = cn("flex", "flex-wrap", "items-center", "gap-2")
 
 /**
  * The reserved right-side area of the desktop direction, holding the canonical mascot band.
@@ -55,9 +63,9 @@ export const AUTH_EXIT_CLASS_NAME = cn("flex", "flex-wrap", "items-center", "gap
  * band, and a centred grid item would otherwise shrink to the artwork's own 180 pixels.
  */
 export const AUTH_VIGNETTE_CLASS_NAME = cn(
-  "hidden",
-  "lg:col-span-3",
-  "lg:col-start-10",
-  "lg:block",
-  "lg:justify-self-stretch"
-);
+    "hidden",
+    "lg:col-span-3",
+    "lg:col-start-10",
+    "lg:block",
+    "lg:justify-self-stretch",
+)

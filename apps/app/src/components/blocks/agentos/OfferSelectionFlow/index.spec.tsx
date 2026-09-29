@@ -17,7 +17,12 @@ vi.mock("@/hooks", () => ({
     useSession: () => mocks.session,
     useQueryWorkspaceCheckoutOffersSwr: () => mocks.offers,
 }))
-type ViewOffer = { readonly offerId: string; readonly offerVersion: string; readonly displayName: string; readonly amount: string }
+type ViewOffer = {
+    readonly offerId: string
+    readonly offerVersion: string
+    readonly displayName: string
+    readonly amount: string
+}
 type ViewInput = {
     readonly state: string
     readonly props: Record<string, unknown>
@@ -31,12 +36,16 @@ const captured: { view: ViewInput | null } = { view: null }
 vi.mock("./component", () => ({
     OfferSelectionFlowBase: (input: ViewInput) => {
         captured.view = input
-        return <>
-            <output data-testid="flow-state">{input.state}</output>
-            <output data-testid="flow-props">{JSON.stringify(input.props)}</output>
-            {input.on?.select === undefined ? null : <button onClick={() => input.on?.select?.("nivo-workspace-scale")}>select-offer</button>}
-            {input.on?.refresh === undefined ? null : <button onClick={input.on.refresh}>refresh</button>}
-        </>
+        return (
+            <>
+                <output data-testid="flow-state">{input.state}</output>
+                <output data-testid="flow-props">{JSON.stringify(input.props)}</output>
+                {input.on?.select === undefined ? null : (
+                    <button onClick={() => input.on?.select?.("nivo-workspace-scale")}>select-offer</button>
+                )}
+                {input.on?.refresh === undefined ? null : <button onClick={input.on.refresh}>refresh</button>}
+            </>
+        )
     },
 }))
 import OfferSelectionFlow from "./"
@@ -64,7 +73,10 @@ const offersAnswer = (selectionState: string) => ({
         selection: { offerId: "nivo-workspace-growth", offerVersion: "draft-2026-09-22", state: selectionState },
     },
 })
-const refusedAnswer = (code: string, nextAction?: string) => ({ ok: true, data: { status: "refused", code, nextAction } })
+const refusedAnswer = (code: string, nextAction?: string) => ({
+    ok: true,
+    data: { status: "refused", code, nextAction },
+})
 const props = () => JSON.parse(screen.getByTestId("flow-props").textContent ?? "{}") as Record<string, unknown>
 const offersProp = () => (props().offers ?? []) as ReadonlyArray<ViewOffer>
 describe("OfferSelectionFlow", () => {
@@ -90,13 +102,19 @@ describe("OfferSelectionFlow", () => {
         render(<OfferSelectionFlow />)
         expect(screen.getByTestId("flow-state")).toHaveTextContent("selection")
         const offers = offersProp()
-        expect(offers.map(offer => offer.displayName)).toEqual(["Nivo Workspace Starter", "Nivo Workspace Growth", "Nivo Workspace Scale"])
-        expect(offers.map(offer => offer.amount)).toEqual(["₫1,490,000", "₫2,990,000", "₫5,990,000"])
+        expect(offers.map((offer) => offer.displayName)).toEqual([
+            "Nivo Workspace Starter",
+            "Nivo Workspace Growth",
+            "Nivo Workspace Scale",
+        ])
+        expect(offers.map((offer) => offer.amount)).toEqual(["₫1,490,000", "₫2,990,000", "₫5,990,000"])
         expect(props().selectedOfferId).toBe("nivo-workspace-growth")
     })
     it("hands the selected offer identity and version to the checkout route as navigation", () => {
         render(<OfferSelectionFlow />)
-        expect(props().checkoutHref).toBe("/agentos/workspaces/new/checkout?offer=nivo-workspace-growth&offerVersion=draft-2026-09-22")
+        expect(props().checkoutHref).toBe(
+            "/agentos/workspaces/new/checkout?offer=nivo-workspace-growth&offerVersion=draft-2026-09-22",
+        )
     })
     it("recomputes the review destination when the purchaser selects another current offer", () => {
         render(<OfferSelectionFlow />)
@@ -106,7 +124,12 @@ describe("OfferSelectionFlow", () => {
     })
     it("shows the transport's refusal sentence with the last list and a safe refresh", () => {
         const mutate = vi.fn()
-        mocks.offers = { data: { ok: false, reason: "boundary read refused" }, isValidating: true, error: undefined, mutate }
+        mocks.offers = {
+            data: { ok: false, reason: "boundary read refused" },
+            isValidating: true,
+            error: undefined,
+            mutate,
+        }
         render(<OfferSelectionFlow />)
         expect(screen.getByTestId("flow-state")).toHaveTextContent("unavailable")
         expect(props().message).toBe("boundary read refused")
@@ -120,7 +143,12 @@ describe("OfferSelectionFlow", () => {
         expect(props().checkoutHref).toBeUndefined()
     })
     it("shows no private offer terms and routes to Login when the boundary refuses the purchaser", () => {
-        mocks.offers = { data: refusedAnswer("purchaser-not-admitted", "login-verify-email"), isValidating: false, error: undefined, mutate: vi.fn() }
+        mocks.offers = {
+            data: refusedAnswer("purchaser-not-admitted", "login-verify-email"),
+            isValidating: false,
+            error: undefined,
+            mutate: vi.fn(),
+        }
         render(<OfferSelectionFlow />)
         expect(screen.getByTestId("flow-state")).toHaveTextContent("no-session")
         expect(props().offers).toBeUndefined()

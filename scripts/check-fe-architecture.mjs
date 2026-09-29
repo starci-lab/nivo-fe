@@ -39,9 +39,11 @@ const isRawFetchCall = (node) => {
     if (ts.isIdentifier(node.expression)) return node.expression.text === "fetch"
     if (!ts.isPropertyAccessExpression(node.expression)) return false
     const owner = node.expression.expression
-    return node.expression.name.text === "fetch"
-        && ts.isIdentifier(owner)
-        && (owner.text === "globalThis" || owner.text === "window")
+    return (
+        node.expression.name.text === "fetch" &&
+        ts.isIdentifier(owner) &&
+        (owner.text === "globalThis" || owner.text === "window")
+    )
 }
 
 const runtimeImportBindings = (sourceFile) => {
@@ -87,16 +89,19 @@ const isEffectCall = (node, imports) => {
     if (!ts.isCallExpression(node)) return false
     if (ts.isIdentifier(node.expression)) return imports.effectBindings.has(node.expression.text)
     if (!ts.isPropertyAccessExpression(node.expression) || node.expression.name.text !== "useEffect") return false
-    return ts.isIdentifier(node.expression.expression)
-        && imports.reactNamespaces.has(node.expression.expression.text)
+    return ts.isIdentifier(node.expression.expression) && imports.reactNamespaces.has(node.expression.expression.text)
 }
 
 const localFunctions = (sourceFile) => {
     const functions = new Map()
     const visit = (node) => {
         if (ts.isFunctionDeclaration(node) && node.name) functions.set(node.name.text, node)
-        if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)
-            && node.initializer && (ts.isArrowFunction(node.initializer) || ts.isFunctionExpression(node.initializer))) {
+        if (
+            ts.isVariableDeclaration(node) &&
+            ts.isIdentifier(node.name) &&
+            node.initializer &&
+            (ts.isArrowFunction(node.initializer) || ts.isFunctionExpression(node.initializer))
+        ) {
             functions.set(node.name.text, node.initializer)
         }
         ts.forEachChild(node, visit)
@@ -126,9 +131,12 @@ const networkCallIn = (root, transportBindings, functions, visitedFunctions = ne
                 if (match) return
             }
         }
-        if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)
-            && ts.isIdentifier(node.expression.expression)
-            && transportBindings.has(node.expression.expression.text)) {
+        if (
+            ts.isCallExpression(node) &&
+            ts.isPropertyAccessExpression(node.expression) &&
+            ts.isIdentifier(node.expression.expression) &&
+            transportBindings.has(node.expression.expression.text)
+        ) {
             match = { node, description: node.expression.getText() }
             return
         }
@@ -141,13 +149,7 @@ const networkCallIn = (root, transportBindings, functions, visitedFunctions = ne
 /** Analyze one source file without reading the repository. Exported for deterministic rule tests. */
 export const analyzeSource = (sourceText, filePath) => {
     if (isTestFile(filePath)) return []
-    const sourceFile = ts.createSourceFile(
-        filePath,
-        sourceText,
-        ts.ScriptTarget.Latest,
-        true,
-        scriptKindFor(filePath),
-    )
+    const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, scriptKindFor(filePath))
     const findings = []
     const component = isComponentFile(filePath)
     const transport = isApiTransportFile(filePath)
@@ -160,29 +162,58 @@ export const analyzeSource = (sourceText, filePath) => {
             if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue
             const source = statement.moduleSpecifier.text
             if (source.startsWith("@/hooks/")) {
-                findings.push(finding(sourceFile, filePath, statement, "component-deep-hook-import", `Component source imports ${source}; use the published @/hooks barrel.`))
+                findings.push(
+                    finding(
+                        sourceFile,
+                        filePath,
+                        statement,
+                        "component-deep-hook-import",
+                        `Component source imports ${source}; use the published @/hooks barrel.`,
+                    ),
+                )
             }
             if (isBlockFile(filePath) && source.startsWith("@/components/pages/")) {
-                findings.push(finding(sourceFile, filePath, statement, "block-imports-page", `Block source imports upward from ${source}; move the shared contract to a module or hook owner.`))
+                findings.push(
+                    finding(
+                        sourceFile,
+                        filePath,
+                        statement,
+                        "block-imports-page",
+                        `Block source imports upward from ${source}; move the shared contract to a module or hook owner.`,
+                    ),
+                )
             }
         }
         for (const declaration of imports.declarations) {
-            findings.push(finding(
-                sourceFile,
-                filePath,
-                declaration.node,
-                "component-runtime-transport-import",
-                `Component source imports runtime transport ${declaration.names.join(", ")} from ${declaration.source}; expose a named hook instead.`,
-            ))
+            findings.push(
+                finding(
+                    sourceFile,
+                    filePath,
+                    declaration.node,
+                    "component-runtime-transport-import",
+                    `Component source imports runtime transport ${declaration.names.join(", ")} from ${declaration.source}; expose a named hook instead.`,
+                ),
+            )
         }
     }
 
     if (pureComponent) {
-        const clientDirective = sourceFile.statements.find((statement) => ts.isExpressionStatement(statement)
-            && ts.isStringLiteral(statement.expression)
-            && statement.expression.text === "use client")
+        const clientDirective = sourceFile.statements.find(
+            (statement) =>
+                ts.isExpressionStatement(statement) &&
+                ts.isStringLiteral(statement.expression) &&
+                statement.expression.text === "use client",
+        )
         if (clientDirective) {
-            findings.push(finding(sourceFile, filePath, clientDirective, "pure-component-client-directive", "Pure component.tsx must stay server-safe; the connected index.tsx owns the client boundary."))
+            findings.push(
+                finding(
+                    sourceFile,
+                    filePath,
+                    clientDirective,
+                    "pure-component-client-directive",
+                    "Pure component.tsx must stay server-safe; the connected index.tsx owns the client boundary.",
+                ),
+            )
         }
         const worldHooks = new Set(["createContext", "useContext", "useEffect", "useState"])
         for (const statement of sourceFile.statements) {
@@ -192,8 +223,19 @@ export const analyzeSource = (sourceText, filePath) => {
             if (!named || !ts.isNamedImports(named)) continue
             for (const specifier of named.elements) {
                 const imported = specifier.propertyName?.text ?? specifier.name.text
-                if ((source === "react" && worldHooks.has(imported)) || (source === "framer-motion" && imported === "useReducedMotion")) {
-                    findings.push(finding(sourceFile, filePath, specifier, "pure-component-world-hook", `Pure component.tsx imports ${imported}; resolve state and world context in index.tsx and pass explicit props.`))
+                if (
+                    (source === "react" && worldHooks.has(imported)) ||
+                    (source === "framer-motion" && imported === "useReducedMotion")
+                ) {
+                    findings.push(
+                        finding(
+                            sourceFile,
+                            filePath,
+                            specifier,
+                            "pure-component-world-hook",
+                            `Pure component.tsx imports ${imported}; resolve state and world context in index.tsx and pass explicit props.`,
+                        ),
+                    )
                 }
             }
         }
@@ -201,26 +243,30 @@ export const analyzeSource = (sourceText, filePath) => {
 
     const visit = (node) => {
         if (!transport && isRawFetchCall(node)) {
-            findings.push(finding(
-                sourceFile,
-                filePath,
-                node,
-                "fetch-outside-api-transport",
-                "Raw fetch belongs under src/modules/api so credentials, locale, refusal and tracing stay in one transport boundary.",
-            ))
+            findings.push(
+                finding(
+                    sourceFile,
+                    filePath,
+                    node,
+                    "fetch-outside-api-transport",
+                    "Raw fetch belongs under src/modules/api so credentials, locale, refusal and tracing stay in one transport boundary.",
+                ),
+            )
         }
         if (component && isEffectCall(node, imports)) {
             const callback = node.arguments[0]
             if (callback && (ts.isArrowFunction(callback) || ts.isFunctionExpression(callback))) {
                 const network = networkCallIn(callback, imports.bindings, functions)
                 if (network) {
-                    findings.push(finding(
-                        sourceFile,
-                        filePath,
-                        network.node,
-                        "network-request-in-component-effect",
-                        `Component useEffect performs network work through ${network.description}; query/mutation hooks own request lifecycle while effects remain for external synchronization.`,
-                    ))
+                    findings.push(
+                        finding(
+                            sourceFile,
+                            filePath,
+                            network.node,
+                            "network-request-in-component-effect",
+                            `Component useEffect performs network work through ${network.description}; query/mutation hooks own request lifecycle while effects remain for external synchronization.`,
+                        ),
+                    )
                 }
             }
         }
@@ -261,10 +307,9 @@ const productionFiles = (repositoryRoot) => {
 export const scanRepository = (repositoryRoot) => {
     const root = resolve(repositoryRoot)
     const files = productionFiles(root)
-    const findings = files.flatMap((filePath) => analyzeSource(
-        readFileSync(filePath, "utf8"),
-        `/${normalizePath(relative(root, filePath))}`,
-    ))
+    const findings = files.flatMap((filePath) =>
+        analyzeSource(readFileSync(filePath, "utf8"), `/${normalizePath(relative(root, filePath))}`),
+    )
     return { files: files.length, findings }
 }
 

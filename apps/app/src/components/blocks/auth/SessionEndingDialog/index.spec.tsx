@@ -7,7 +7,11 @@ import type { SessionEndReport } from "@/modules/auth/session"
 /** An everywhere ending the identity authority confirmed. */
 const APPLIED: SessionEndReport = { localCleared: true, remoteRevocation: "observed", authorityEnding: "confirmed" }
 /** An everywhere ending nobody confirmed, which is never an applied scope. */
-const UNCONFIRMED: SessionEndReport = { localCleared: true, remoteRevocation: "unknown", authorityEnding: "unconfirmed" }
+const UNCONFIRMED: SessionEndReport = {
+    localCleared: true,
+    remoteRevocation: "unknown",
+    authorityEnding: "unconfirmed",
+}
 
 /** The scope the connected half may ask an ending for, held here so the spy is typed as the session's. */
 type EndingCall = (scope?: "thisBrowser" | "everywhere") => Promise<SessionEndReport>
@@ -26,7 +30,9 @@ import { SessionEndingDialog } from "."
 /** An ending request that stays unanswered until the test releases it. */
 const unansweredEnding = () => {
     let release: (report: SessionEndReport) => void = () => {}
-    const promise = new Promise<SessionEndReport>((resolve) => { release = resolve })
+    const promise = new Promise<SessionEndReport>((resolve) => {
+        release = resolve
+    })
     return { promise, release }
 }
 
@@ -62,7 +68,9 @@ describe("SessionEndingDialog", () => {
         await user.click(confirm)
         expect(end).toHaveBeenCalledOnce()
 
-        await act(async () => { release(APPLIED) })
+        await act(async () => {
+            release(APPLIED)
+        })
         await waitFor(() => expect(replace).toHaveBeenCalledWith("/authentication?sessionEnding=applied"))
         expect(openChange).toHaveBeenCalledWith(false)
     })

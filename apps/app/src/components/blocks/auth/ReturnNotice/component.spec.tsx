@@ -9,7 +9,7 @@ import { ReturnNoticeBase } from "./component"
 /** The one reasonless sentence, in both product locales. */
 const NOTICE: ReadonlyArray<string> = [
     viMessages.authentication.unavailableReturnNotice,
-    enMessages.authentication.unavailableReturnNotice
+    enMessages.authentication.unavailableReturnNotice,
 ]
 
 /** A route, a link or a cause behind the refusal, in either product locale. */

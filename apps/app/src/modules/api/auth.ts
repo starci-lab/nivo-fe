@@ -1,6 +1,6 @@
-import { CORE_API_URL } from "@/modules/config";
-import { graphql, graphqlEnvelope, type EnvelopeAnswer } from "./graphql";
-import type { Outcome } from "./outcome";
+import { CORE_API_URL } from "@/modules/config"
+import { graphql, graphqlEnvelope, type EnvelopeAnswer } from "./graphql"
+import type { Outcome } from "./outcome"
 
 /**
  * Every authentication operation nivo-core publishes, typed once.
@@ -32,12 +32,12 @@ import type { Outcome } from "./outcome";
 
 /** What the backend answers to every credential exchange. */
 export interface AuthPayload {
-  /** The Bearer credential, or null while a second factor is still owed. */
-  readonly accessToken: string | null;
-  /** Whether a TOTP code is required to finish this sign-in. */
-  readonly requiresTwoFactor: boolean;
-  /** The opaque challenge to hand back to `verifyTwoFactor`; present only with the flag above. */
-  readonly twoFactorToken: string | null;
+    /** The Bearer credential, or null while a second factor is still owed. */
+    readonly accessToken: string | null
+    /** Whether a TOTP code is required to finish this sign-in. */
+    readonly requiresTwoFactor: boolean
+    /** The opaque challenge to hand back to `verifyTwoFactor`; present only with the flag above. */
+    readonly twoFactorToken: string | null
 }
 
 /**
@@ -50,8 +50,8 @@ export interface AuthPayload {
  * second one.
  */
 export interface AuthUndecided {
-  /** Always true: the same request identity continues the same request. */
-  readonly retryWithSameRequest: boolean;
+    /** Always true: the same request identity continues the same request. */
+    readonly retryWithSameRequest: boolean
 }
 
 /**
@@ -64,23 +64,23 @@ export interface AuthUndecided {
  * provider hand-off is the way on. A callback must never be resent instead: it was consumed.
  */
 export interface AuthBrokeredUndecided {
-  /** The handle for `continueBrokeredSignIn` from this browser, or null for a fresh provider start. */
-  readonly continuationReference: string | null;
+    /** The handle for `continueBrokeredSignIn` from this browser, or null for a fresh provider start. */
+    readonly continuationReference: string | null
 }
 
 /** Why a Login operation finished on purpose without issuing a session. */
 export type AuthConclusionReason =
-  /** The proven address already has an identity: sign in, or reset the password. */
-  | "heldAddress"
-  /** The identity was created but no session followed: sign in with the password just set. */
-  | "registeredSignInRequired"
-  /** The password changed and no session follows a reset: sign in with the new password. */
-  | "passwordResetConfirmed";
+    /** The proven address already has an identity: sign in, or reset the password. */
+    | "heldAddress"
+    /** The identity was created but no session followed: sign in with the password just set. */
+    | "registeredSignInRequired"
+    /** The password changed and no session follows a reset: sign in with the new password. */
+    | "passwordResetConfirmed"
 
 /** A deliberate ending with no session, whose reason is what the screen offers next. */
 export interface AuthConclusion {
-  /** Why no session was issued. */
-  readonly reason: AuthConclusionReason;
+    /** Why no session was issued. */
+    readonly reason: AuthConclusionReason
 }
 
 /**
@@ -93,10 +93,10 @@ export interface AuthConclusion {
  * destination is resolved for an attempt that established nothing.
  */
 export interface SignInPayload extends AuthPayload {
-  /** Where to place the reader, resolved server-side; null when no session was established. */
-  readonly destination: string | null;
-  /** Present only when an authority did not answer; never a refusal. */
-  readonly undecided: AuthUndecided | null;
+    /** Where to place the reader, resolved server-side; null when no session was established. */
+    readonly destination: string | null
+    /** Present only when an authority did not answer; never a refusal. */
+    readonly undecided: AuthUndecided | null
 }
 
 /**
@@ -108,10 +108,10 @@ export interface SignInPayload extends AuthPayload {
  * blank success to somebody who is not signed in.
  */
 export interface SignUpVerifyOtpPayload extends AuthPayload {
-  /** Present only when registration ended without a session; its reason says what to offer next. */
-  readonly conclusion: AuthConclusion | null;
-  /** Present only when an authority did not answer; never a refusal. */
-  readonly undecided: AuthUndecided | null;
+    /** Present only when registration ended without a session; its reason says what to offer next. */
+    readonly conclusion: AuthConclusion | null
+    /** Present only when an authority did not answer; never a refusal. */
+    readonly undecided: AuthUndecided | null
 }
 
 /**
@@ -123,10 +123,10 @@ export interface SignUpVerifyOtpPayload extends AuthPayload {
  * and no identity was linked - the person is then offered password registration or sign-in.
  */
 export interface ExchangeOauthCodePayload extends AuthPayload {
-  /** Present only when an authority did not answer; continue under its reference, or start fresh. */
-  readonly undecided: AuthBrokeredUndecided | null;
-  /** Present only for an unbound subject with no verified email; no identity link, no session. */
-  readonly providerEmailRefused: boolean | null;
+    /** Present only when an authority did not answer; continue under its reference, or start fresh. */
+    readonly undecided: AuthBrokeredUndecided | null
+    /** Present only for an unbound subject with no verified email; no identity link, no session. */
+    readonly providerEmailRefused: boolean | null
 }
 
 /**
@@ -136,10 +136,10 @@ export interface ExchangeOauthCodePayload extends AuthPayload {
  * continuation never hands back another continuation - the person starts a fresh provider sign-in.
  */
 export interface ContinueBrokeredSignInPayload extends AuthPayload {
-  /** Present only when the authority still did not answer or the hold lapsed; never a refusal. */
-  readonly undecided: AuthUndecided | null;
-  /** Present only for a held subject with no verified email; no identity link, no session. */
-  readonly providerEmailRefused: boolean | null;
+    /** Present only when the authority still did not answer or the hold lapsed; never a refusal. */
+    readonly undecided: AuthUndecided | null
+    /** Present only for a held subject with no verified email; no identity link, no session. */
+    readonly providerEmailRefused: boolean | null
 }
 
 /**
@@ -150,95 +150,95 @@ export interface ContinueBrokeredSignInPayload extends AuthPayload {
  * must start over rather than guess.
  */
 export interface OtpChallenge {
-  /** The opaque handle to spend at the second step. */
-  readonly challengeId: string;
-  /** How long the code lasts, in seconds, as the backend reports it. */
-  readonly expiresInSeconds: number;
+    /** The opaque handle to spend at the second step. */
+    readonly challengeId: string
+    /** How long the code lasts, in seconds, as the backend reports it. */
+    readonly expiresInSeconds: number
 }
 
 /** What opening a code-gated account asks for. */
 export interface SignUpInitInput {
-  /** The address the account is keyed on, and where the code is sent. */
-  readonly email: string;
-  /** The password as typed. `@MinLength(8)` refuses anything shorter BEFORE a code is sent. */
-  readonly password: string;
-  /** A display name, when the reader gave one. */
-  readonly name?: string;
+    /** The address the account is keyed on, and where the code is sent. */
+    readonly email: string
+    /** The password as typed. `@MinLength(8)` refuses anything shorter BEFORE a code is sent. */
+    readonly password: string
+    /** A display name, when the reader gave one. */
+    readonly name?: string
 }
 
 /** What spending a sign-up code asks for. */
 export interface SignUpVerifyOtpInput {
-  /** The challenge from the first step. */
-  readonly challengeId: string;
-  /** The code out of the inbox. */
-  readonly otp: string;
+    /** The challenge from the first step. */
+    readonly challengeId: string
+    /** The code out of the inbox. */
+    readonly otp: string
 }
 
 /** What asking for a reset code needs. */
 export interface ForgotPasswordInitInput {
-  /** The address as typed. */
-  readonly email: string;
+    /** The address as typed. */
+    readonly email: string
 }
 
 /** What spending a reset code needs. */
 export interface ForgotPasswordVerifyOtpInput {
-  /** The challenge from the first step. */
-  readonly challengeId: string;
-  /** The code out of the inbox. */
-  readonly otp: string;
-  /** The password to set. Spent and set in ONE request, which is why they travel together. */
-  readonly newPassword: string;
+    /** The challenge from the first step. */
+    readonly challengeId: string
+    /** The code out of the inbox. */
+    readonly otp: string
+    /** The password to set. Spent and set in ONE request, which is why they travel together. */
+    readonly newPassword: string
 }
 
 /** What renewing a code needs, on either journey. */
 export interface OtpResendInput {
-  /** The challenge to renew. */
-  readonly challengeId: string;
+    /** The challenge to renew. */
+    readonly challengeId: string
 }
 
 /** What exchanging credentials asks for. */
 export interface SignInInput {
-  /** The address. */
-  readonly email: string;
-  /** The password as typed. */
-  readonly password: string;
-  /**
-   * This ONE logical attempt's stable identity.
-   *
-   * A RETRY, A TIMEOUT AND A LOST RESPONSE MUST RESEND THE SAME VALUE. The backend answers a repeat
-   * from the first result rather than deciding again, which is what stops a slow sign-in from
-   * becoming two attempts - so the caller mints it once per submit and keeps it until the outcome
-   * is settled. Omitted, the backend mints a fresh single-use one per request.
-   */
-  readonly requestIdentity?: string;
-  /**
-   * Where the reader asked to be placed, taken from the query and NEVER trusted.
-   *
-   * It travels to the backend rather than being followed here, because a destination may only be
-   * resolved after a session is current: the answer says where to land, and an absent, malformed,
-   * protocol-relative, external or unreachable value is folded onto the default authenticated
-   * landing surface without being echoed. It is discarded for a refused or undecided attempt.
-   */
-  readonly requestedDestination?: string;
+    /** The address. */
+    readonly email: string
+    /** The password as typed. */
+    readonly password: string
+    /**
+     * This ONE logical attempt's stable identity.
+     *
+     * A RETRY, A TIMEOUT AND A LOST RESPONSE MUST RESEND THE SAME VALUE. The backend answers a repeat
+     * from the first result rather than deciding again, which is what stops a slow sign-in from
+     * becoming two attempts - so the caller mints it once per submit and keeps it until the outcome
+     * is settled. Omitted, the backend mints a fresh single-use one per request.
+     */
+    readonly requestIdentity?: string
+    /**
+     * Where the reader asked to be placed, taken from the query and NEVER trusted.
+     *
+     * It travels to the backend rather than being followed here, because a destination may only be
+     * resolved after a session is current: the answer says where to land, and an absent, malformed,
+     * protocol-relative, external or unreachable value is folded onto the default authenticated
+     * landing surface without being echoed. It is discarded for a refused or undecided attempt.
+     */
+    readonly requestedDestination?: string
 }
 
 /** What repeating a held brokered proof asks for. */
 export interface ContinueBrokeredSignInInput {
-  /** The single-use reference the undecided brokered result carried. */
-  readonly continuationReference: string;
+    /** The single-use reference the undecided brokered result carried. */
+    readonly continuationReference: string
 }
 
 /** How wide one sign-out reaches. */
 export type SignOutScope =
-  /** This browser's custody and in-memory access only. */
-  | "thisBrowser"
-  /** Every current session of the signed-in principal, in every browser. */
-  | "everywhere";
+    /** This browser's custody and in-memory access only. */
+    | "thisBrowser"
+    /** Every current session of the signed-in principal, in every browser. */
+    | "everywhere"
 
 /** What ending a session asks for. */
 export interface SignOutInput {
-  /** The ending scope; omitted means this browser. The requester is never named here. */
-  readonly scope?: SignOutScope;
+    /** The ending scope; omitted means this browser. The requester is never named here. */
+    readonly scope?: SignOutScope
 }
 
 /**
@@ -255,10 +255,10 @@ export interface SignOutInput {
  * it is `true` only once that authority confirmed ending its side.
  */
 export interface SignOutOutcome {
-  /** Whether the provider confirmed revoking this browser's refresh lineage. */
-  readonly remoteRevocationObserved: boolean;
-  /** Whether the identity authority confirmed an everywhere scope's own ending; null when none was asked. */
-  readonly authorityEndingConfirmed: boolean | null;
+    /** Whether the provider confirmed revoking this browser's refresh lineage. */
+    readonly remoteRevocationObserved: boolean
+    /** Whether the identity authority confirmed an everywhere scope's own ending; null when none was asked. */
+    readonly authorityEndingConfirmed: boolean | null
 }
 
 /**
@@ -270,12 +270,12 @@ export interface SignOutOutcome {
  * reassigned memberId can only ever come back as the generic refusal or as undecided.
  */
 export interface EndPrincipalSessionsWorkspaceInput {
-  /** This one logical ending request's stable identity; resend it unchanged on retry. */
-  readonly requestId: string;
-  /** The workspace the requester administers, whose owner confirms the requester's authority. */
-  readonly workspaceId: string;
-  /** The roster member whose sessions would end; the authority owner resolves its principal. */
-  readonly memberId: string;
+    /** This one logical ending request's stable identity; resend it unchanged on retry. */
+    readonly requestId: string
+    /** The workspace the requester administers, whose owner confirms the requester's authority. */
+    readonly workspaceId: string
+    /** The roster member whose sessions would end; the authority owner resolves its principal. */
+    readonly memberId: string
 }
 
 /**
@@ -287,10 +287,10 @@ export interface EndPrincipalSessionsWorkspaceInput {
  * publishes it.
  */
 export interface EndPrincipalSessionsOperationInput {
-  /** This one logical ending request's stable identity; resend it unchanged on retry. */
-  readonly requestId: string;
-  /** The Login principal whose sessions would end. */
-  readonly targetPrincipal: string;
+    /** This one logical ending request's stable identity; resend it unchanged on retry. */
+    readonly requestId: string
+    /** The Login principal whose sessions would end. */
+    readonly targetPrincipal: string
 }
 
 /**
@@ -298,16 +298,16 @@ export interface EndPrincipalSessionsOperationInput {
  * context - a workspace with the roster member selected in it, or the server-only Nivo operation
  * with the target principal. Never both, and never a principal on the workspace form.
  */
-export type EndPrincipalSessionsInput = EndPrincipalSessionsWorkspaceInput | EndPrincipalSessionsOperationInput;
+export type EndPrincipalSessionsInput = EndPrincipalSessionsWorkspaceInput | EndPrincipalSessionsOperationInput
 
 /** Which of the three decided answers an ending request produced. */
 export type EndPrincipalSessionsKind =
-  /** The asked scope was applied. */
-  | "scopeApplied"
-  /** An authority did not answer; the same request identity continues it. Never a refusal. */
-  | "undecided"
-  /** The generic refusal, in the same terms every refusal uses. */
-  | "refused";
+    /** The asked scope was applied. */
+    | "scopeApplied"
+    /** An authority did not answer; the same request identity continues it. Never a refusal. */
+    | "undecided"
+    /** The generic refusal, in the same terms every refusal uses. */
+    | "refused"
 
 /**
  * One decided administrator session-ending answer.
@@ -318,18 +318,18 @@ export type EndPrincipalSessionsKind =
  * `authorityEndingConfirmed` speaks only for the applied scope and is null for the other two.
  */
 export interface EndPrincipalSessionsAnswer {
-  /** Which answer this is. */
-  readonly kind: EndPrincipalSessionsKind;
-  /** For the applied scope, whether the identity authority confirmed its own side; else null. */
-  readonly authorityEndingConfirmed: boolean | null;
+    /** Which answer this is. */
+    readonly kind: EndPrincipalSessionsKind
+    /** For the applied scope, whether the identity authority confirmed its own side; else null. */
+    readonly authorityEndingConfirmed: boolean | null
 }
 
 /** What finishing a two-factor sign-in asks for. */
 export interface VerifyTwoFactorInput {
-  /** The challenge handed back by the first step. */
-  readonly twoFactorToken: string;
-  /** The code the reader read off their authenticator. */
-  readonly code: string;
+    /** The challenge handed back by the first step. */
+    readonly twoFactorToken: string
+    /** The code the reader read off their authenticator. */
+    readonly code: string
 }
 
 /**
@@ -338,7 +338,7 @@ export interface VerifyTwoFactorInput {
  * The value travels exactly as spelled here: it is the Keycloak identity-provider alias, and the
  * backend puts it straight on the authorization URL as `kc_idp_hint`.
  */
-export type OauthProvider = "google" | "github";
+export type OauthProvider = "google" | "github"
 
 /**
  * What trading an OAuth authorization code asks for.
@@ -350,26 +350,26 @@ export type OauthProvider = "google" | "github";
  * wire is an opaque handle that the backend spends once.
  */
 export interface ExchangeOauthCodeInput {
-  /** The code Keycloak put on the callback URL. */
-  readonly code: string;
-  /** Which door the hand-off went through; the backend refuses a bundle cached for another one. */
-  readonly provider: OauthProvider;
-  /** The opaque handle the redirect endpoint issued, and the only state this browser carries. */
-  readonly state: string;
+    /** The code Keycloak put on the callback URL. */
+    readonly code: string
+    /** Which door the hand-off went through; the backend refuses a bundle cached for another one. */
+    readonly provider: OauthProvider
+    /** The opaque handle the redirect endpoint issued, and the only state this browser carries. */
+    readonly state: string
 }
 
 /** What asking for a reset link needs. */
 export interface RequestPasswordResetInput {
-  /** Where to send it. */
-  readonly email: string;
+    /** Where to send it. */
+    readonly email: string
 }
 
 /** What spending a reset link needs. */
 export interface ResetPasswordInput {
-  /** The token out of the link. */
-  readonly token: string;
-  /** The password to set. */
-  readonly newPassword: string;
+    /** The token out of the link. */
+    readonly token: string
+    /** The password to set. */
+    readonly newPassword: string
 }
 
 /**
@@ -388,18 +388,18 @@ export interface ResetPasswordInput {
  * @returns The absolute URL to navigate to.
  */
 export const oauthRedirectUrl = (provider: OauthProvider, redirectUri: string): string => {
-  /*
-   * An ABSOLUTE path against the endpoint, so the whole path is replaced rather than appended.
-   * `CORE_API_URL` ends in `/graphql`, and concatenating would aim the hand-off at
-   * `/graphql/api/v1/...` - a 404 that looks like a broken provider rather than a broken URL.
-   */
-  const url = new URL(`/api/v1/keycloak/${provider}/redirect`, CORE_API_URL);
-  url.searchParams.set("redirect_uri", redirectUri);
-  return url.toString();
-};
+    /*
+     * An ABSOLUTE path against the endpoint, so the whole path is replaced rather than appended.
+     * `CORE_API_URL` ends in `/graphql`, and concatenating would aim the hand-off at
+     * `/graphql/api/v1/...` - a 404 that looks like a broken provider rather than a broken URL.
+     */
+    const url = new URL(`/api/v1/keycloak/${provider}/redirect`, CORE_API_URL)
+    url.searchParams.set("redirect_uri", redirectUri)
+    return url.toString()
+}
 
 /** The fields every payload-returning operation selects. */
-const AUTH_PAYLOAD = "{ accessToken requiresTwoFactor twoFactorToken }";
+const AUTH_PAYLOAD = "{ accessToken requiresTwoFactor twoFactorToken }"
 
 /**
  * A sign-in's session, plus the one place it lands and the undecided result.
@@ -408,16 +408,19 @@ const AUTH_PAYLOAD = "{ accessToken requiresTwoFactor twoFactorToken }";
  * answers null for the whole object when there is nothing to say, which is exactly the shape
  * {@link SignInPayload} types.
  */
-const SIGN_IN_PAYLOAD = "{ accessToken requiresTwoFactor twoFactorToken destination undecided { retryWithSameRequest } }";
+const SIGN_IN_PAYLOAD =
+    "{ accessToken requiresTwoFactor twoFactorToken destination undecided { retryWithSameRequest } }"
 
 /** A brokered completion or continuation: a session, its undecided result and the email refusal. */
-const BROKERED_PAYLOAD = "{ accessToken requiresTwoFactor twoFactorToken providerEmailRefused undecided { continuationReference } }";
+const BROKERED_PAYLOAD =
+    "{ accessToken requiresTwoFactor twoFactorToken providerEmailRefused undecided { continuationReference } }"
 
 /** A registration completion: a session, its deliberate conclusion and the undecided result. */
-const SIGN_UP_VERIFY_PAYLOAD = "{ accessToken requiresTwoFactor twoFactorToken conclusion { reason } undecided { retryWithSameRequest } }";
+const SIGN_UP_VERIFY_PAYLOAD =
+    "{ accessToken requiresTwoFactor twoFactorToken conclusion { reason } undecided { retryWithSameRequest } }"
 
 /** The fields every challenge-returning operation selects. */
-const OTP_CHALLENGE = "{ challengeId expiresInSeconds }";
+const OTP_CHALLENGE = "{ challengeId expiresInSeconds }"
 
 /**
  * Open an account behind a mailed code.
@@ -429,9 +432,13 @@ const OTP_CHALLENGE = "{ challengeId expiresInSeconds }";
  * @param input - The email, the password and an optional display name.
  * @returns The challenge, or why there is none.
  */
-export const signUpInit = (input: SignUpInitInput): Promise<Outcome<OtpChallenge>> => graphql(`mutation SignUpInit($input: SignUpInitInput!) { signUpInit(request: $input) { data ${OTP_CHALLENGE} message success error } }`, {
-  input
-});
+export const signUpInit = (input: SignUpInitInput): Promise<Outcome<OtpChallenge>> =>
+    graphql(
+        `mutation SignUpInit($input: SignUpInitInput!) { signUpInit(request: $input) { data ${OTP_CHALLENGE} message success error } }`,
+        {
+            input,
+        },
+    )
 
 /**
  * Send another sign-up code.
@@ -442,9 +449,13 @@ export const signUpInit = (input: SignUpInitInput): Promise<Outcome<OtpChallenge
  * @param input - The challenge to renew.
  * @returns The renewed challenge, or why it was refused.
  */
-export const signUpResend = (input: OtpResendInput): Promise<Outcome<OtpChallenge>> => graphql(`mutation SignUpResend($input: SignUpResendInput!) { signUpResend(request: $input) { data ${OTP_CHALLENGE} message success error } }`, {
-  input
-});
+export const signUpResend = (input: OtpResendInput): Promise<Outcome<OtpChallenge>> =>
+    graphql(
+        `mutation SignUpResend($input: SignUpResendInput!) { signUpResend(request: $input) { data ${OTP_CHALLENGE} message success error } }`,
+        {
+            input,
+        },
+    )
 
 /**
  * Spend a sign-up code, which is what actually creates the account.
@@ -457,9 +468,13 @@ export const signUpResend = (input: OtpResendInput): Promise<Outcome<OtpChalleng
  * @param input - The challenge and the code.
  * @returns The session, the conclusion, the undecided result, or why the code was refused.
  */
-export const signUpVerifyOtp = (input: SignUpVerifyOtpInput): Promise<Outcome<SignUpVerifyOtpPayload>> => graphql(`mutation SignUpVerifyOtp($input: SignUpVerifyOtpInput!) { signUpVerifyOtp(request: $input) { data ${SIGN_UP_VERIFY_PAYLOAD} message success error } }`, {
-  input
-});
+export const signUpVerifyOtp = (input: SignUpVerifyOtpInput): Promise<Outcome<SignUpVerifyOtpPayload>> =>
+    graphql(
+        `mutation SignUpVerifyOtp($input: SignUpVerifyOtpInput!) { signUpVerifyOtp(request: $input) { data ${SIGN_UP_VERIFY_PAYLOAD} message success error } }`,
+        {
+            input,
+        },
+    )
 
 /**
  * Ask for a reset code.
@@ -472,9 +487,13 @@ export const signUpVerifyOtp = (input: SignUpVerifyOtpInput): Promise<Outcome<Si
  * @param input - The address as typed.
  * @returns The challenge.
  */
-export const forgotPasswordInit = (input: ForgotPasswordInitInput): Promise<Outcome<OtpChallenge>> => graphql(`mutation ForgotPasswordInit($input: ForgotPasswordInitInput!) { forgotPasswordInit(request: $input) { data ${OTP_CHALLENGE} message success error } }`, {
-  input
-});
+export const forgotPasswordInit = (input: ForgotPasswordInitInput): Promise<Outcome<OtpChallenge>> =>
+    graphql(
+        `mutation ForgotPasswordInit($input: ForgotPasswordInitInput!) { forgotPasswordInit(request: $input) { data ${OTP_CHALLENGE} message success error } }`,
+        {
+            input,
+        },
+    )
 
 /**
  * Send another reset code.
@@ -482,9 +501,13 @@ export const forgotPasswordInit = (input: ForgotPasswordInitInput): Promise<Outc
  * @param input - The challenge to renew.
  * @returns The renewed challenge, or why it was refused.
  */
-export const forgotPasswordResend = (input: OtpResendInput): Promise<Outcome<OtpChallenge>> => graphql(`mutation ForgotPasswordResend($input: ForgotPasswordResendInput!) { forgotPasswordResend(request: $input) { data ${OTP_CHALLENGE} message success error } }`, {
-  input
-});
+export const forgotPasswordResend = (input: OtpResendInput): Promise<Outcome<OtpChallenge>> =>
+    graphql(
+        `mutation ForgotPasswordResend($input: ForgotPasswordResendInput!) { forgotPasswordResend(request: $input) { data ${OTP_CHALLENGE} message success error } }`,
+        {
+            input,
+        },
+    )
 
 /**
  * Spend a reset code and set the password, in one request.
@@ -498,9 +521,22 @@ export const forgotPasswordResend = (input: OtpResendInput): Promise<Outcome<Otp
  * @param input - The challenge, the code and the password to set.
  * @returns Whether the password was set.
  */
-export const forgotPasswordVerifyOtp = (input: ForgotPasswordVerifyOtpInput): Promise<Outcome<boolean>> => graphql(`mutation ForgotPasswordVerifyOtp($input: ForgotPasswordVerifyOtpInput!) { forgotPasswordVerifyOtp(request: $input) { data message success error } }`, {
-  input
-});
+export const forgotPasswordVerifyOtp = (input: ForgotPasswordVerifyOtpInput): Promise<Outcome<boolean>> =>
+    graphql(
+        `
+            mutation ForgotPasswordVerifyOtp($input: ForgotPasswordVerifyOtpInput!) {
+                forgotPasswordVerifyOtp(request: $input) {
+                    data
+                    message
+                    success
+                    error
+                }
+            }
+        `,
+        {
+            input,
+        },
+    )
 
 /**
  * Exchange an email and password for a session.
@@ -514,9 +550,13 @@ export const forgotPasswordVerifyOtp = (input: ForgotPasswordVerifyOtpInput): Pr
  * @returns The session and where it lands, a two-factor challenge, the undecided result, or why
  *          there is neither.
  */
-export const signIn = (input: SignInInput): Promise<Outcome<SignInPayload>> => graphql(`mutation SignIn($input: SignInInput!) { signIn(request: $input) { data ${SIGN_IN_PAYLOAD} message success error } }`, {
-  input
-});
+export const signIn = (input: SignInInput): Promise<Outcome<SignInPayload>> =>
+    graphql(
+        `mutation SignIn($input: SignInInput!) { signIn(request: $input) { data ${SIGN_IN_PAYLOAD} message success error } }`,
+        {
+            input,
+        },
+    )
 
 /**
  * Finish a sign-in that owed a second factor.
@@ -524,9 +564,13 @@ export const signIn = (input: SignInInput): Promise<Outcome<SignInPayload>> => g
  * @param input - The challenge token from the first step, and the code the reader typed.
  * @returns The session, or why the code was refused.
  */
-export const verifyTwoFactor = (input: VerifyTwoFactorInput): Promise<Outcome<AuthPayload>> => graphql(`mutation VerifyTwoFactor($input: VerifyTwoFactorInput!) { verifyTwoFactor(request: $input) { data ${AUTH_PAYLOAD} message success error } }`, {
-  input
-});
+export const verifyTwoFactor = (input: VerifyTwoFactorInput): Promise<Outcome<AuthPayload>> =>
+    graphql(
+        `mutation VerifyTwoFactor($input: VerifyTwoFactorInput!) { verifyTwoFactor(request: $input) { data ${AUTH_PAYLOAD} message success error } }`,
+        {
+            input,
+        },
+    )
 
 /**
  * Trade an OAuth authorization code for a session.
@@ -544,9 +588,13 @@ export const verifyTwoFactor = (input: VerifyTwoFactorInput): Promise<Outcome<Au
  * @returns The session, a two-factor challenge, the brokered undecided result, the recoverable
  *          provider-email refusal, or why there is none.
  */
-export const exchangeOauthCode = (input: ExchangeOauthCodeInput): Promise<Outcome<ExchangeOauthCodePayload>> => graphql(`mutation ExchangeOauthCode($input: ExchangeOauthCodeInput!) { exchangeOauthCode(request: $input) { data ${BROKERED_PAYLOAD} message success error } }`, {
-  input
-});
+export const exchangeOauthCode = (input: ExchangeOauthCodeInput): Promise<Outcome<ExchangeOauthCodePayload>> =>
+    graphql(
+        `mutation ExchangeOauthCode($input: ExchangeOauthCodeInput!) { exchangeOauthCode(request: $input) { data ${BROKERED_PAYLOAD} message success error } }`,
+        {
+            input,
+        },
+    )
 
 /**
  * Repeat only the identity-mapping read of a brokered proof the coordinator is holding.
@@ -561,9 +609,15 @@ export const exchangeOauthCode = (input: ExchangeOauthCodeInput): Promise<Outcom
  * @returns The session, a two-factor challenge, the undecided result, the provider-email refusal,
  *          or why there is none.
  */
-export const continueBrokeredSignIn = (input: ContinueBrokeredSignInInput): Promise<Outcome<ContinueBrokeredSignInPayload>> => graphql(`mutation ContinueBrokeredSignIn($input: ContinueBrokeredSignInInput!) { continueBrokeredSignIn(request: $input) { data ${BROKERED_PAYLOAD} message success error } }`, {
-  input
-});
+export const continueBrokeredSignIn = (
+    input: ContinueBrokeredSignInInput,
+): Promise<Outcome<ContinueBrokeredSignInPayload>> =>
+    graphql(
+        `mutation ContinueBrokeredSignIn($input: ContinueBrokeredSignInInput!) { continueBrokeredSignIn(request: $input) { data ${BROKERED_PAYLOAD} message success error } }`,
+        {
+            input,
+        },
+    )
 
 /**
  * Ask for a password reset link.
@@ -575,9 +629,22 @@ export const continueBrokeredSignIn = (input: ContinueBrokeredSignInInput): Prom
  * @param input - The email to send to.
  * @returns Whether the request was accepted.
  */
-export const requestPasswordReset = (input: RequestPasswordResetInput): Promise<Outcome<boolean>> => graphql(`mutation RequestPasswordReset($input: RequestPasswordResetInput!) { requestPasswordReset(request: $input) { data message success error } }`, {
-  input
-});
+export const requestPasswordReset = (input: RequestPasswordResetInput): Promise<Outcome<boolean>> =>
+    graphql(
+        `
+            mutation RequestPasswordReset($input: RequestPasswordResetInput!) {
+                requestPasswordReset(request: $input) {
+                    data
+                    message
+                    success
+                    error
+                }
+            }
+        `,
+        {
+            input,
+        },
+    )
 
 /**
  * Set a new password from a reset link.
@@ -585,9 +652,22 @@ export const requestPasswordReset = (input: RequestPasswordResetInput): Promise<
  * @param input - The token out of the link, and the new password.
  * @returns Whether it was accepted.
  */
-export const resetPassword = (input: ResetPasswordInput): Promise<Outcome<boolean>> => graphql(`mutation ResetPassword($input: ResetPasswordInput!) { resetPassword(request: $input) { data message success error } }`, {
-  input
-});
+export const resetPassword = (input: ResetPasswordInput): Promise<Outcome<boolean>> =>
+    graphql(
+        `
+            mutation ResetPassword($input: ResetPasswordInput!) {
+                resetPassword(request: $input) {
+                    data
+                    message
+                    success
+                    error
+                }
+            }
+        `,
+        {
+            input,
+        },
+    )
 
 /**
  * Trade the HttpOnly refresh cookie for a fresh access token.
@@ -598,7 +678,8 @@ export const resetPassword = (input: ResetPasswordInput): Promise<Outcome<boolea
  *
  * @returns A fresh session, or why there is none.
  */
-export const refreshSession = (): Promise<Outcome<AuthPayload>> => graphql(`mutation RefreshSession { refreshSession { data ${AUTH_PAYLOAD} message success error } }`);
+export const refreshSession = (): Promise<Outcome<AuthPayload>> =>
+    graphql(`mutation RefreshSession { refreshSession { data ${AUTH_PAYLOAD} message success error } }`)
 
 /**
  * End this browser's session, or every session of the signed-in principal.
@@ -614,7 +695,11 @@ export const refreshSession = (): Promise<Outcome<AuthPayload>> => graphql(`muta
  * @param input - The ending scope; omitted means this browser.
  * @returns The completed request and the two answers stated beside it, or why there is none.
  */
-export const signOut = (input?: SignOutInput): Promise<Outcome<EnvelopeAnswer<boolean, SignOutOutcome>>> => graphqlEnvelope<boolean, SignOutOutcome>("mutation SignOut($input: SignOutInput) { signOut(request: $input) { data remoteRevocationObserved authorityEndingConfirmed message success error } }", input === undefined ? undefined : { input });
+export const signOut = (input?: SignOutInput): Promise<Outcome<EnvelopeAnswer<boolean, SignOutOutcome>>> =>
+    graphqlEnvelope<boolean, SignOutOutcome>(
+        "mutation SignOut($input: SignOutInput) { signOut(request: $input) { data remoteRevocationObserved authorityEndingConfirmed message success error } }",
+        input === undefined ? undefined : { input },
+    )
 
 /**
  * End a named principal's Login sessions, once the owner of the stated authority context confirms
@@ -636,6 +721,22 @@ export const signOut = (input?: SignOutInput): Promise<Outcome<EnvelopeAnswer<bo
  * @param input - This request's identity and exactly one authority context with its target.
  * @returns The decided answer, or why there is none.
  */
-export const endPrincipalSessions = (input: EndPrincipalSessionsInput): Promise<Outcome<EndPrincipalSessionsAnswer>> => graphql(`mutation EndPrincipalSessions($input: EndPrincipalSessionsInput!) { endPrincipalSessions(request: $input) { data { kind authorityEndingConfirmed } message success error } }`, {
-  input
-});
+export const endPrincipalSessions = (input: EndPrincipalSessionsInput): Promise<Outcome<EndPrincipalSessionsAnswer>> =>
+    graphql(
+        `
+            mutation EndPrincipalSessions($input: EndPrincipalSessionsInput!) {
+                endPrincipalSessions(request: $input) {
+                    data {
+                        kind
+                        authorityEndingConfirmed
+                    }
+                    message
+                    success
+                    error
+                }
+            }
+        `,
+        {
+            input,
+        },
+    )

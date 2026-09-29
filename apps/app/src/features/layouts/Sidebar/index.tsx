@@ -39,17 +39,26 @@ export const Sidebar = (props: SidebarProps) => {
     const router = useRouter()
     const pathname = usePathname()
     const [isCollapsed, setIsCollapsed] = useState(false)
-    const selectedKey = [...DESTINATIONS]
-        .filter((destination) => pathname.startsWith(destination.route))
-        .sort((left, right) => right.route.length - left.route.length)[0]?.key ?? "overview"
+    const selectedKey =
+        [...DESTINATIONS]
+            .filter((destination) => pathname.startsWith(destination.route))
+            .sort((left, right) => right.route.length - left.route.length)[0]?.key ?? "overview"
 
     useEffect(() => {
-        try { setIsCollapsed(globalThis.localStorage?.getItem(STORAGE_KEY) === "true") } catch { /* persistence is optional */ }
+        try {
+            setIsCollapsed(globalThis.localStorage?.getItem(STORAGE_KEY) === "true")
+        } catch {
+            /* persistence is optional */
+        }
     }, [])
 
     const setCollapsed = (collapsed: boolean) => {
         setIsCollapsed(collapsed)
-        try { globalThis.localStorage?.setItem(STORAGE_KEY, String(collapsed)) } catch { /* persistence is optional */ }
+        try {
+            globalThis.localStorage?.setItem(STORAGE_KEY, String(collapsed))
+        } catch {
+            /* persistence is optional */
+        }
     }
     const activate = (id: string): boolean => {
         const destination = DESTINATIONS.find((candidate): boolean => candidate.key === id)
@@ -68,20 +77,22 @@ export const Sidebar = (props: SidebarProps) => {
         items: DESTINATIONS.filter((destination) => destination.group === group).map(item),
     }))
 
-    return <SidebarBase
-        state={mode}
-        props={{
-            groups,
-            selectedKey,
-            isCollapsed,
-            navigationLabel: t("navigationLabel"),
-            openMenuLabel: t("openMenu"),
-            closeMenuLabel: t("closeMenu"),
-            titleLabel: t("title"),
-        }}
-        on={{
-            action: activate,
-            collapsedChange: setCollapsed
-        }}
-    />
+    return (
+        <SidebarBase
+            state={mode}
+            props={{
+                groups,
+                selectedKey,
+                isCollapsed,
+                navigationLabel: t("navigationLabel"),
+                openMenuLabel: t("openMenu"),
+                closeMenuLabel: t("closeMenu"),
+                titleLabel: t("title"),
+            }}
+            on={{
+                action: activate,
+                collapsedChange: setCollapsed,
+            }}
+        />
+    )
 }

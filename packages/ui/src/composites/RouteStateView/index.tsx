@@ -49,6 +49,10 @@ export const RouteStateView = ({ props, on }: RouteStateViewProps) => (
             actionVariant="secondary"
             onAction={on?.action}
         />
-        {props.actionHref === undefined ? null : <Button href={props.actionHref} variant="secondary">{props.actionLabel}</Button>}
+        {props.actionHref === undefined ? null : (
+            <Button href={props.actionHref} variant="secondary">
+                {props.actionLabel}
+            </Button>
+        )}
     </div>
 )

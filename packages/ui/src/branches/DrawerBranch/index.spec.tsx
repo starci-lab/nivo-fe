@@ -6,7 +6,15 @@ const Destinations = () => <p>Destinations</p>
 
 describe("DrawerBranch", () => {
     it("opens and closes the right-edge drawer through its product controls", async () => {
-        render(<DrawerBranch triggerLabel="Menu" title="Console" closeLabel="Close" content={Destinations} contentProps={{}} />)
+        render(
+            <DrawerBranch
+                triggerLabel="Menu"
+                title="Console"
+                closeLabel="Close"
+                content={Destinations}
+                contentProps={{}}
+            />,
+        )
         fireEvent.click(screen.getByRole("button", { name: "Menu" }))
         expect(await screen.findByRole("dialog")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Close" }))
@@ -14,12 +22,18 @@ describe("DrawerBranch", () => {
     })
 
     it("lets action-aware content close only after its successful command", async () => {
-        render(<DrawerBranch
-            triggerLabel="Menu"
-            title="Console"
-            closeLabel="Close"
-            renderContent={(close) => <button type="button" onClick={close}>Open destination</button>}
-        />)
+        render(
+            <DrawerBranch
+                triggerLabel="Menu"
+                title="Console"
+                closeLabel="Close"
+                renderContent={(close) => (
+                    <button type="button" onClick={close}>
+                        Open destination
+                    </button>
+                )}
+            />,
+        )
 
         fireEvent.click(screen.getByRole("button", { name: "Menu" }))
         expect(await screen.findByRole("dialog")).toBeInTheDocument()

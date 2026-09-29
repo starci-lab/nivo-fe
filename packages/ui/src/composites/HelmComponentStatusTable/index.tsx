@@ -1,6 +1,4 @@
-import { Text, Badge, type BadgeTone } from "@starci/grammar/common";
-
-
+import { Text, Badge, type BadgeTone } from "@starci/grammar/common"
 
 /** One public-safe component row returned by a Helm status view. */
 export type HelmComponentStatusRow = {
@@ -17,7 +15,10 @@ export type HelmComponentStatusRow = {
 export type HelmComponentStatusTableData = { readonly id: string; readonly rows: ReadonlyArray<HelmComponentStatusRow> }
 
 /** Props for the Helm component status table. */
-export type HelmComponentStatusTableProps = { readonly props: HelmComponentStatusTableData; readonly isLoading?: boolean }
+export type HelmComponentStatusTableProps = {
+    readonly props: HelmComponentStatusTableData
+    readonly isLoading?: boolean
+}
 
 /** Render safe component status rows, including stable loading placeholders. */
 export const HelmComponentStatusTable = (props: HelmComponentStatusTableProps) => {
@@ -27,12 +28,22 @@ export const HelmComponentStatusTable = (props: HelmComponentStatusTableProps) =
             {rows.map((row, index) => (
                 <div key={row?.id ?? `loading-${index}`}>
                     <div>
-                        <Text weight="semibold" isSkeleton={props.isLoading}>{row?.name}</Text>
-                        <Text size="xs" tone="muted" isSkeleton={props.isLoading}>{row?.detail}</Text>
+                        <Text weight="semibold" isSkeleton={props.isLoading}>
+                            {row?.name}
+                        </Text>
+                        <Text size="xs" tone="muted" isSkeleton={props.isLoading}>
+                            {row?.detail}
+                        </Text>
                     </div>
-                    <Badge tone="neutral" isSkeleton={props.isLoading}>{row?.kind}</Badge>
-                    <Badge tone={row?.statusTone} isSkeleton={props.isLoading}>{row?.status}</Badge>
-                    <Text size="xs" tone="muted" isSkeleton={props.isLoading}>{row?.resources}</Text>
+                    <Badge tone="neutral" isSkeleton={props.isLoading}>
+                        {row?.kind}
+                    </Badge>
+                    <Badge tone={row?.statusTone} isSkeleton={props.isLoading}>
+                        {row?.status}
+                    </Badge>
+                    <Text size="xs" tone="muted" isSkeleton={props.isLoading}>
+                        {row?.resources}
+                    </Text>
                 </div>
             ))}
         </div>

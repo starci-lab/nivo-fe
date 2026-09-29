@@ -1,13 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({ rootLocale: vi.fn() }))
-vi.mock("next-intl/server", () => ({ getRequestConfig: (callback: (request: unknown) => Promise<unknown>) => callback }))
+vi.mock("next-intl/server", () => ({
+    getRequestConfig: (callback: (request: unknown) => Promise<unknown>) => callback,
+}))
 vi.mock("next/root-params", () => ({ locale: mocks.rootLocale }))
 
 import requestConfig from "./request"
 
 describe("request", () => {
-    beforeEach(() => { vi.clearAllMocks() })
+    beforeEach(() => {
+        vi.clearAllMocks()
+    })
 
     it("loads Vietnamese messages for a routed Vietnamese request", async () => {
         mocks.rootLocale.mockResolvedValue("vi")

@@ -5,21 +5,21 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 const mocks = vi.hoisted(() => ({
     api: {
         refreshSession: vi.fn(),
-        signOut: vi.fn()
+        signOut: vi.fn(),
     },
     transport: {
         setAccessTokenReader: vi.fn(),
-        setLocaleReader: vi.fn()
-    }
+        setLocaleReader: vi.fn(),
+    },
 }))
 
 vi.mock("@/modules/api/auth", () => ({
     refreshSession: mocks.api.refreshSession,
-    signOut: mocks.api.signOut
+    signOut: mocks.api.signOut,
 }))
 vi.mock("@/modules/api/graphql", () => ({
     setAccessTokenReader: mocks.transport.setAccessTokenReader,
-    setLocaleReader: mocks.transport.setLocaleReader
+    setLocaleReader: mocks.transport.setLocaleReader,
 }))
 
 import { failed } from "@/modules/api/outcome"
@@ -58,9 +58,9 @@ const answerOverview = () => {
                     name: "Support",
                     runtimeGeneration: "generation-1",
                     runtimeAvailability: "provisioned",
-                    inventory: null
+                    inventory: null,
                 },
-                sources: reads.map(read => {
+                sources: reads.map((read) => {
                     const separator = read.lastIndexOf(":")
                     return {
                         sourceIdentity: decodeURIComponent(read.slice(0, separator)),
@@ -69,21 +69,25 @@ const answerOverview = () => {
                         freshness: "current",
                         completeness: "complete",
                         observedAt: "2026-09-25T03:00:00.000Z",
-                        payload: {}
+                        payload: {},
                     }
-                })
-            })
+                }),
+            }),
         }
     })
 }
 
-const sentUrls = (): Array<string> => fetchMock.mock.calls.map(call => String(call[0]))
+const sentUrls = (): Array<string> => fetchMock.mock.calls.map((call) => String(call[0]))
 
-const renderShell = (props: AgentOSShellOptions = options) => renderHook((input: AgentOSShellOptions) => useAgentOSShell(input), { wrapper, initialProps: props })
+const renderShell = (props: AgentOSShellOptions = options) =>
+    renderHook((input: AgentOSShellOptions) => useAgentOSShell(input), { wrapper, initialProps: props })
 
 beforeEach(() => {
     vi.clearAllMocks()
-    mocks.api.refreshSession.mockResolvedValue({ ok: true, data: { accessToken: TOKEN, requiresTwoFactor: false, twoFactorToken: null } })
+    mocks.api.refreshSession.mockResolvedValue({
+        ok: true,
+        data: { accessToken: TOKEN, requiresTwoFactor: false, twoFactorToken: null },
+    })
     fetchMock = vi.fn()
     vi.stubGlobal("fetch", fetchMock)
     answerOverview()
@@ -99,8 +103,15 @@ describe("useAgentOSShell", () => {
 
         await waitFor(() => expect(result.current.sources).toHaveLength(6))
 
-        expect(result.current.sources.every(entry => entry.state === "available")).toBe(true)
-        expect(result.current.sources.map(entry => entry.identity.kind).sort()).toEqual(["attention", "capability", "configuration", "core_registry", "installation_inventory", "runtime"])
+        expect(result.current.sources.every((entry) => entry.state === "available")).toBe(true)
+        expect(result.current.sources.map((entry) => entry.identity.kind).sort()).toEqual([
+            "attention",
+            "capability",
+            "configuration",
+            "core_registry",
+            "installation_inventory",
+            "runtime",
+        ])
         expect(result.current.session).toBe("established")
         expect(result.current.sessionStatus).toBe("signed-in")
         expect(fetchMock).toHaveBeenCalledTimes(1)
@@ -123,7 +134,16 @@ describe("useAgentOSShell", () => {
                         selectionGeneration: url.searchParams.get("selectionGeneration"),
                         sourceIdentity: url.searchParams.get("sourceIdentity"),
                         readGeneration: Number(url.searchParams.get("readGeneration")),
-                        core: { availability: "available", reason: null, workspaceId: WORKSPACE, instanceId: INSTANCE, name: "Support", runtimeGeneration: "generation-1", runtimeAvailability: "provisioned", inventory: null },
+                        core: {
+                            availability: "available",
+                            reason: null,
+                            workspaceId: WORKSPACE,
+                            instanceId: INSTANCE,
+                            name: "Support",
+                            runtimeGeneration: "generation-1",
+                            runtimeAvailability: "provisioned",
+                            inventory: null,
+                        },
                         commandObservation: {
                             availability: "available",
                             reason: null,
@@ -133,11 +153,21 @@ describe("useAgentOSShell", () => {
                                 queueState: "claimed",
                                 attempt: 1,
                                 possibleStartAt: null,
-                                observations: [{ observationId: "o-1", observationVersion: 1, receiverReceiptId: null, kind: "progress", schemaId: "s", payloadDigest: null, observedAt: "2026-09-26T03:00:00.000Z" }],
-                                localTransportGaps: []
-                            }
-                        }
-                    })
+                                observations: [
+                                    {
+                                        observationId: "o-1",
+                                        observationVersion: 1,
+                                        receiverReceiptId: null,
+                                        kind: "progress",
+                                        schemaId: "s",
+                                        payloadDigest: null,
+                                        observedAt: "2026-09-26T03:00:00.000Z",
+                                    },
+                                ],
+                                localTransportGaps: [],
+                            },
+                        },
+                    }),
                 }
             }
             const reads = url.searchParams.getAll("read")
@@ -147,25 +177,36 @@ describe("useAgentOSShell", () => {
                     kind: "overview",
                     selectionGeneration: url.searchParams.get("selectionGeneration"),
                     core: null,
-                    sources: reads.map(read => {
+                    sources: reads.map((read) => {
                         const separator = read.lastIndexOf(":")
-                        return { sourceIdentity: decodeURIComponent(read.slice(0, separator)), readGeneration: Number(read.slice(separator + 1)), availability: "available", freshness: "current", completeness: "complete", observedAt: "2026-09-25T03:00:00.000Z", payload: {} }
-                    })
-                })
+                        return {
+                            sourceIdentity: decodeURIComponent(read.slice(0, separator)),
+                            readGeneration: Number(read.slice(separator + 1)),
+                            availability: "available",
+                            freshness: "current",
+                            completeness: "complete",
+                            observedAt: "2026-09-25T03:00:00.000Z",
+                            payload: {},
+                        }
+                    }),
+                }),
             }
         })
-        const { result } = renderShell({ ...options, operations: [{ installationId: INSTALLATION, intentId: "intent-1", commandId: COMMAND }] })
+        const { result } = renderShell({
+            ...options,
+            operations: [{ installationId: INSTALLATION, intentId: "intent-1", commandId: COMMAND }],
+        })
 
         await waitFor(() => expect(result.current.sources).toHaveLength(7))
 
-        const receiptUrl = sentUrls().find(url => url.includes(`/command-receipts/${COMMAND}`))
+        const receiptUrl = sentUrls().find((url) => url.includes(`/command-receipts/${COMMAND}`))
         expect(receiptUrl).toBeDefined()
         expect(receiptUrl).toContain(`sourceIdentity=${encodeURIComponent(`receiver:{${INSTALLATION},intent-1}`)}`)
         // No operation identity ever joins the overview's read set.
-        const overviewUrls = sentUrls().filter(url => !url.includes("/command-receipts/"))
+        const overviewUrls = sentUrls().filter((url) => !url.includes("/command-receipts/"))
         expect(overviewUrls.length).toBeGreaterThan(0)
-        expect(overviewUrls.every(url => !url.includes("receiver%3A"))).toBe(true)
-        const receiver = result.current.sources.find(entry => entry.identity.kind === "receiver")
+        expect(overviewUrls.every((url) => !url.includes("receiver%3A"))).toBe(true)
+        const receiver = result.current.sources.find((entry) => entry.identity.kind === "receiver")
         expect(receiver?.state).toBe("available")
         expect(receiver?.payload).toMatchObject({ commandId: COMMAND, queueState: "claimed" })
     })
@@ -199,7 +240,9 @@ describe("useAgentOSShell", () => {
 
         rerender({ ...options, workspaceId: OTHER_WORKSPACE })
 
-        await waitFor(() => expect(sentUrls().some(url => url.includes(`/workspaces/${OTHER_WORKSPACE}/`))).toBe(true))
+        await waitFor(() =>
+            expect(sentUrls().some((url) => url.includes(`/workspaces/${OTHER_WORKSPACE}/`))).toBe(true),
+        )
         expect(result.current.selection).toEqual({ workspaceId: OTHER_WORKSPACE, instanceId: INSTANCE })
         expect(result.current.sources).toHaveLength(6)
     })
@@ -217,7 +260,7 @@ describe("useAgentOSShell", () => {
         expect(retryUrl).not.toContain("read=core_registry")
         expect(retryUrl).not.toContain("read=attention")
         expect(fetchMock.mock.calls[callsBefore]?.[1]).toMatchObject({ method: "GET" })
-        expect(sentUrls().filter(url => url.includes("/operations/"))).toEqual([])
+        expect(sentUrls().filter((url) => url.includes("/operations/"))).toEqual([])
     })
 
     it("refreshes the whole selection under newer generations on a return", async () => {
@@ -226,7 +269,7 @@ describe("useAgentOSShell", () => {
 
         act(() => result.current.readSelection())
 
-        await waitFor(() => expect(sentUrls().some(url => url.includes("read=runtime:2"))).toBe(true))
+        await waitFor(() => expect(sentUrls().some((url) => url.includes("read=runtime:2"))).toBe(true))
         expect(sentUrls().at(-1)).toContain("read=runtime:2")
     })
 
@@ -245,10 +288,15 @@ describe("useAgentOSShell", () => {
                     instanceId: INSTANCE,
                     installationId: INSTALLATION,
                     opaqueItemId: null,
-                    returnContext: { routeName: "purchased_agentos", workspaceId: WORKSPACE, instanceId: INSTANCE, installationId: INSTALLATION }
+                    returnContext: {
+                        routeName: "purchased_agentos",
+                        workspaceId: WORKSPACE,
+                        instanceId: INSTANCE,
+                        installationId: INSTALLATION,
+                    },
                 },
-                selectionGeneration: `shell-${WORKSPACE}-${INSTANCE}`
-            })
+                selectionGeneration: `shell-${WORKSPACE}-${INSTANCE}`,
+            }),
         })
 
         const outcome = await act(async () => result.current.resolveEntry(INSTALLATION, "module_home", null))
@@ -258,7 +306,11 @@ describe("useAgentOSShell", () => {
         expect(navigationUrl).toContain("/operations/navigation.resolve%401")
         expect(fetchMock.mock.calls.at(-1)?.[1]).toMatchObject({ method: "POST" })
         expect(result.current.navigationDecision(outcome)).toMatchObject({ open: true })
-        expect(result.current.navigationDecision(failed("invalid", { code: "OBSOLETE_SELECTION", reason: "obsolete-selection" }))).toEqual({ open: false, kind: "invalid", code: "OBSOLETE_SELECTION" })
+        expect(
+            result.current.navigationDecision(
+                failed("invalid", { code: "OBSOLETE_SELECTION", reason: "obsolete-selection" }),
+            ),
+        ).toEqual({ open: false, kind: "invalid", code: "OBSOLETE_SELECTION" })
     })
 
     it("holds every observation in memory and writes nothing to browser storage", async () => {
@@ -272,12 +324,20 @@ describe("useAgentOSShell", () => {
     })
 
     it("keeps a permission refusal distinct from an outage and from a broken request", async () => {
-        const cases: ReadonlyArray<readonly [number, string]> = [[403, "refused"], [404, "refused"], [503, "unavailable"], [400, "unsupported"]]
+        const cases: ReadonlyArray<readonly [number, string]> = [
+            [403, "refused"],
+            [404, "refused"],
+            [503, "unavailable"],
+            [400, "unsupported"],
+        ]
         for (const [status, standing] of cases) {
-            fetchMock.mockResolvedValue({ status, json: async () => ({ kind: "refused", reason: "parent-mismatch", selectionGeneration: null }) })
+            fetchMock.mockResolvedValue({
+                status,
+                json: async () => ({ kind: "refused", reason: "parent-mismatch", selectionGeneration: null }),
+            })
             const { result, unmount } = renderShell()
             await waitFor(() => expect(result.current.sources).toHaveLength(6))
-            expect([status, result.current.sources.every(entry => entry.state === standing)]).toEqual([status, true])
+            expect([status, result.current.sources.every((entry) => entry.state === standing)]).toEqual([status, true])
             expect(result.current.session).toBe("established")
             unmount()
         }
@@ -287,12 +347,17 @@ describe("useAgentOSShell", () => {
         fetchMock.mockRejectedValue(new Error("socket closed"))
         const { result } = renderShell()
         await waitFor(() => expect(result.current.sources).toHaveLength(6))
-        expect(result.current.sources.every(entry => entry.state === "unavailable")).toBe(true)
+        expect(result.current.sources.every((entry) => entry.state === "unavailable")).toBe(true)
         expect(result.current.blocked).toBe(false)
     })
 
     it("carries each source's own availability into its own standing", async () => {
-        const standings: ReadonlyArray<readonly [string, string]> = [["refused", "refused"], ["unavailable", "unavailable"], ["unsupported", "unsupported"], ["partial", "partial"]]
+        const standings: ReadonlyArray<readonly [string, string]> = [
+            ["refused", "refused"],
+            ["unavailable", "unavailable"],
+            ["unsupported", "unsupported"],
+            ["partial", "partial"],
+        ]
         for (const [availability, standing] of standings) {
             fetchMock.mockImplementation(async (input: string) => {
                 const url = new URL(String(input))
@@ -302,7 +367,7 @@ describe("useAgentOSShell", () => {
                         kind: "overview",
                         selectionGeneration: url.searchParams.get("selectionGeneration"),
                         core: null,
-                        sources: url.searchParams.getAll("read").map(read => {
+                        sources: url.searchParams.getAll("read").map((read) => {
                             const separator = read.lastIndexOf(":")
                             return {
                                 sourceIdentity: decodeURIComponent(read.slice(0, separator)),
@@ -311,15 +376,18 @@ describe("useAgentOSShell", () => {
                                 freshness: "unknown",
                                 completeness: "unknown",
                                 observedAt: null,
-                                payload: null
+                                payload: null,
                             }
-                        })
-                    })
+                        }),
+                    }),
                 }
             })
             const { result, unmount } = renderShell()
             await waitFor(() => expect(result.current.sources).toHaveLength(6))
-            expect([availability, result.current.sources.every(entry => entry.state === standing)]).toEqual([availability, true])
+            expect([availability, result.current.sources.every((entry) => entry.state === standing)]).toEqual([
+                availability,
+                true,
+            ])
             unmount()
         }
     })

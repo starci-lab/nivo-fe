@@ -10,8 +10,20 @@ import { OverviewRuntime } from "."
 
 describe("OverviewRuntime", () => {
     it("draws the pod's own five fields once the workspace and the pod have settled", () => {
-        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }] }
-        mocks.data.pod = { ok: true, data: { reachable: true, httpStatus: 200, tokenConfigured: true, tokenHint: "4f21", checkedAt: "2026-09-03T22:31:00.000Z" } }
+        mocks.data.workspaces = {
+            ok: true,
+            data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }],
+        }
+        mocks.data.pod = {
+            ok: true,
+            data: {
+                reachable: true,
+                httpStatus: 200,
+                tokenConfigured: true,
+                tokenHint: "4f21",
+                checkedAt: "2026-09-03T22:31:00.000Z",
+            },
+        }
         render(<OverviewRuntime />)
 
         expect(screen.getByText("Yes")).toBeInTheDocument()
@@ -20,11 +32,16 @@ describe("OverviewRuntime", () => {
     })
 
     it("names which part could not be read when the pod refuses", () => {
-        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }] }
+        mocks.data.workspaces = {
+            ok: true,
+            data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }],
+        }
         mocks.data.pod = { ok: false, code: "POD_REGISTRATION_MISSING_EXCEPTION" }
         const { container } = render(<OverviewRuntime />)
 
-        expect(screen.getByText("This workspace has no pod registered yet. Everything above is still correct.")).toBeInTheDocument()
+        expect(
+            screen.getByText("This workspace has no pod registered yet. Everything above is still correct."),
+        ).toBeInTheDocument()
         expect(screen.getByText("Pod unavailable")).toBeInTheDocument()
         expect(screen.queryByText("Pod answered")).not.toBeInTheDocument()
         expect(container.querySelector('[data-grammar-state="unavailable"]')).toBeInTheDocument()
@@ -47,8 +64,20 @@ describe("OverviewRuntime", () => {
     })
 
     it("names the pod as unreachable and its status as unread once httpStatus never arrived", () => {
-        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }] }
-        mocks.data.pod = { ok: true, data: { reachable: false, httpStatus: null, tokenConfigured: true, tokenHint: "4f21", checkedAt: "2026-09-03T22:31:00.000Z" } }
+        mocks.data.workspaces = {
+            ok: true,
+            data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }],
+        }
+        mocks.data.pod = {
+            ok: true,
+            data: {
+                reachable: false,
+                httpStatus: null,
+                tokenConfigured: true,
+                tokenHint: "4f21",
+                checkedAt: "2026-09-03T22:31:00.000Z",
+            },
+        }
         render(<OverviewRuntime />)
 
         expect(screen.getByText("No")).toBeInTheDocument()
@@ -56,26 +85,55 @@ describe("OverviewRuntime", () => {
     })
 
     it("names the token as not configured when the pod itself carries none", () => {
-        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }] }
-        mocks.data.pod = { ok: true, data: { reachable: true, httpStatus: 200, tokenConfigured: false, tokenHint: null, checkedAt: "2026-09-03T22:31:00.000Z" } }
+        mocks.data.workspaces = {
+            ok: true,
+            data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }],
+        }
+        mocks.data.pod = {
+            ok: true,
+            data: {
+                reachable: true,
+                httpStatus: 200,
+                tokenConfigured: false,
+                tokenHint: null,
+                checkedAt: "2026-09-03T22:31:00.000Z",
+            },
+        }
         render(<OverviewRuntime />)
 
         expect(screen.getByText("Not configured")).toBeInTheDocument()
     })
 
     it("names the token as configured with no hint when the pod carries a configured token but no hint", () => {
-        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }] }
-        mocks.data.pod = { ok: true, data: { reachable: true, httpStatus: 200, tokenConfigured: true, tokenHint: null, checkedAt: "2026-09-03T22:31:00.000Z" } }
+        mocks.data.workspaces = {
+            ok: true,
+            data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }],
+        }
+        mocks.data.pod = {
+            ok: true,
+            data: {
+                reachable: true,
+                httpStatus: 200,
+                tokenConfigured: true,
+                tokenHint: null,
+                checkedAt: "2026-09-03T22:31:00.000Z",
+            },
+        }
         render(<OverviewRuntime />)
 
         expect(screen.getByText("Configured")).toBeInTheDocument()
     })
 
     it("names the refusal as unknown once the pod's own code carries no named refusal", () => {
-        mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }] }
+        mocks.data.workspaces = {
+            ok: true,
+            data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }],
+        }
         mocks.data.pod = { ok: false, code: "SOME_UNNAMED_EXCEPTION" }
         render(<OverviewRuntime />)
 
-        expect(screen.getByText("This part could not be read. The rest of the screen is still correct.")).toBeInTheDocument()
+        expect(
+            screen.getByText("This part could not be read. The rest of the screen is still correct."),
+        ).toBeInTheDocument()
     })
 })

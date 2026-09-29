@@ -5,37 +5,41 @@ import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n/config"
 import { describe, expect, it } from "vitest"
-import type { AgentosModuleTestAssertionResult, AgentosModuleTestContract, AgentosModuleTestRun } from "@/modules/api/agentos-module-tests"
+import type {
+    AgentosModuleTestAssertionResult,
+    AgentosModuleTestContract,
+    AgentosModuleTestRun,
+} from "@/modules/api/agentos-module-tests"
 import { TestTrustResultBlock as ActualTestTrustResultBlock, type TestTrustResultBlockCopy } from "."
 
 type CopyTranslator = (key: string, values?: Readonly<Record<string, string | number>>) => string
 
 /** The settled copy this block draws, resolved from the same module catalog the connected owner reads. */
 const copyFor = (t: CopyTranslator): TestTrustResultBlockCopy => ({
-    "testStatus": {
-        "failed": t("runtime.testStatus.failed"),
-        "passed": t("runtime.testStatus.passed"),
-        "running": t("runtime.testStatus.running"),
-        "warning": t("runtime.testStatus.warning"),
+    testStatus: {
+        failed: t("runtime.testStatus.failed"),
+        passed: t("runtime.testStatus.passed"),
+        running: t("runtime.testStatus.running"),
+        warning: t("runtime.testStatus.warning"),
     },
-    "trust": {
-        "collect": t("runtime.trust.collect"),
-        "evidence": t("runtime.trust.evidence"),
-        "expected": t("runtime.trust.expected"),
-        "fail": t("runtime.trust.fail"),
-        "noRun": t("runtime.trust.noRun"),
-        "notRun": t("runtime.trust.notRun"),
-        "notice": t("runtime.trust.notice"),
-        "observed": t("runtime.trust.observed"),
-        "pass": t("runtime.trust.pass"),
-        "rejected": t("runtime.trust.rejected"),
-        "result": (values) => t("runtime.trust.result", values),
-        "title": t("runtime.trust.title"),
-        "total": t("runtime.trust.total"),
-        "verdictFail": t("runtime.trust.verdictFail"),
-        "verdictPass": t("runtime.trust.verdictPass"),
-        "verdictWarning": t("runtime.trust.verdictWarning"),
-        "warning": t("runtime.trust.warning"),
+    trust: {
+        collect: t("runtime.trust.collect"),
+        evidence: t("runtime.trust.evidence"),
+        expected: t("runtime.trust.expected"),
+        fail: t("runtime.trust.fail"),
+        noRun: t("runtime.trust.noRun"),
+        notRun: t("runtime.trust.notRun"),
+        notice: t("runtime.trust.notice"),
+        observed: t("runtime.trust.observed"),
+        pass: t("runtime.trust.pass"),
+        rejected: t("runtime.trust.rejected"),
+        result: (values) => t("runtime.trust.result", values),
+        title: t("runtime.trust.title"),
+        total: t("runtime.trust.total"),
+        verdictFail: t("runtime.trust.verdictFail"),
+        verdictPass: t("runtime.trust.verdictPass"),
+        verdictWarning: t("runtime.trust.verdictWarning"),
+        warning: t("runtime.trust.warning"),
     },
 })
 
@@ -48,31 +52,74 @@ const contract: AgentosModuleTestContract = {
 }
 
 const run: AgentosModuleTestRun = {
-    id: "run-1", installationId: "installation-1", moduleDefinitionId: "definition-1", contextVersionId: "context-2",
-    setupSessionId: null, draftDigest: null,
-    requestedByUserId: "owner-1", kindKey: "customer-support", kindVersion: "1.0.0",
-    testContractKey: "conversation-test", testContractVersion: "1.0.0", scenarioKey: "support-conversation",
-    mode: "acceptance", definitionDigest: "d".repeat(64), targetDigest: "c".repeat(64), authorityGeneration: 1, sourceGeneration: 1, retrievalGeneration: 1,
-    status: "passed", scenarioInput: {}, summary: { total: 1, pass: 1, warning: 0, fail: 0 },
-    completedAt: "2026-08-25T00:00:01.000Z", createdAt: "2026-08-25T00:00:00.000Z",
+    id: "run-1",
+    installationId: "installation-1",
+    moduleDefinitionId: "definition-1",
+    contextVersionId: "context-2",
+    setupSessionId: null,
+    draftDigest: null,
+    requestedByUserId: "owner-1",
+    kindKey: "customer-support",
+    kindVersion: "1.0.0",
+    testContractKey: "conversation-test",
+    testContractVersion: "1.0.0",
+    scenarioKey: "support-conversation",
+    mode: "acceptance",
+    definitionDigest: "d".repeat(64),
+    targetDigest: "c".repeat(64),
+    authorityGeneration: 1,
+    sourceGeneration: 1,
+    retrievalGeneration: 1,
+    status: "passed",
+    scenarioInput: {},
+    summary: { total: 1, pass: 1, warning: 0, fail: 0 },
+    completedAt: "2026-08-25T00:00:01.000Z",
+    createdAt: "2026-08-25T00:00:00.000Z",
 }
 
 const assertion = (component = "nivo.test-evidence"): AgentosModuleTestAssertionResult => ({
-    id: "assertion-1", runId: "run-1", ordinal: 1, assertionKey: "acknowledges", label: "Acknowledges before acting",
-    verdict: "pass", expected: "verify", actual: "verify the contract", createdAt: "2026-08-25T00:00:01.000Z",
+    id: "assertion-1",
+    runId: "run-1",
+    ordinal: 1,
+    assertionKey: "acknowledges",
+    label: "Acknowledges before acting",
+    verdict: "pass",
+    expected: "verify",
+    actual: "verify the contract",
+    createdAt: "2026-08-25T00:00:01.000Z",
     evidence: { component, version: "1.0.0", props: { status: "pass", summary: "Acknowledges", assertions: [] } },
 })
 
-type TestTrustResultBlockFixtureProps = Omit<ComponentProps<typeof ActualTestTrustResultBlock>, "copy"> & { readonly locale?: "en" | "vi" }
+type TestTrustResultBlockFixtureProps = Omit<ComponentProps<typeof ActualTestTrustResultBlock>, "copy"> & {
+    readonly locale?: "en" | "vi"
+}
 const TestTrustResultBlockCopyFixture = (props: TestTrustResultBlockFixtureProps) => {
     const t = useTranslations("console.agentos.modules")
     return <ActualTestTrustResultBlock {...props} copy={copyFor(t)} />
 }
-const TestTrustResultBlock = ({ locale = "en", ...props }: TestTrustResultBlockFixtureProps) => <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE} onError={error => { throw error }}><TestTrustResultBlockCopyFixture {...props} /></NextIntlClientProvider>
+const TestTrustResultBlock = ({ locale = "en", ...props }: TestTrustResultBlockFixtureProps) => (
+    <NextIntlClientProvider
+        locale={locale}
+        messages={locale === "en" ? enMessages : viMessages}
+        timeZone={TIME_ZONE}
+        onError={(error) => {
+            throw error
+        }}
+    >
+        <TestTrustResultBlockCopyFixture {...props} />
+    </NextIntlClientProvider>
+)
 
 describe("TestTrustResultBlock", () => {
     it("renders persisted assertion evidence through the trusted registration", () => {
-        const html = render(<TestTrustResultBlock contract={contract} run={run} assertions={[assertion()]} contextLabel="Context v2 · candidate" />).container.innerHTML
+        const html = render(
+            <TestTrustResultBlock
+                contract={contract}
+                run={run}
+                assertions={[assertion()]}
+                contextLabel="Context v2 · candidate"
+            />,
+        ).container.innerHTML
         expect(html).toContain("Result: Passed")
         expect(html).toContain("Acknowledges before acting")
         expect(html).toContain("verify the contract")
@@ -80,25 +127,51 @@ describe("TestTrustResultBlock", () => {
     })
 
     it("rejects a component identity outside the trusted evidence contract", () => {
-        const html = render(<TestTrustResultBlock contract={contract} run={run} assertions={[assertion("arbitrary.html")]} contextLabel="Context v2" />).container.innerHTML
+        const html = render(
+            <TestTrustResultBlock
+                contract={contract}
+                run={run}
+                assertions={[assertion("arbitrary.html")]}
+                contextLabel="Context v2"
+            />,
+        ).container.innerHTML
         expect(html).toContain("Untrusted evidence rejected")
         expect(html).not.toContain("verify the contract")
     })
 
-    describe.each(["en", "vi"] as const)("Trust evidence copy %s", locale => {
-        it.each(["running", "passed", "warning", "failed"] as const)("renders %s without changing assertions", status => {
-            const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime
-            const html = render(<TestTrustResultBlock locale={locale} contract={contract} run={{ ...run, status }} assertions={[assertion()]} contextLabel="Raw context" />).container.innerHTML
-            expect(html).toContain(copy.testStatus[status])
-            expect(html).toContain(copy.trust.verdictPass)
-            expect(html).toContain("verify the contract")
-        })
+    describe.each(["en", "vi"] as const)("Trust evidence copy %s", (locale) => {
+        it.each(["running", "passed", "warning", "failed"] as const)(
+            "renders %s without changing assertions",
+            (status) => {
+                const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime
+                const html = render(
+                    <TestTrustResultBlock
+                        locale={locale}
+                        contract={contract}
+                        run={{ ...run, status }}
+                        assertions={[assertion()]}
+                        contextLabel="Raw context"
+                    />,
+                ).container.innerHTML
+                expect(html).toContain(copy.testStatus[status])
+                expect(html).toContain(copy.trust.verdictPass)
+                expect(html).toContain("verify the contract")
+            },
+        )
     })
 
-    describe.each(["en", "vi"] as const)("Trust summary branches %s", locale => {
-        it.each(["warning", "fail"] as const)("renders the persisted %s verdict and structured evidence", verdict => {
+    describe.each(["en", "vi"] as const)("Trust summary branches %s", (locale) => {
+        it.each(["warning", "fail"] as const)("renders the persisted %s verdict and structured evidence", (verdict) => {
             const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.trust
-            const html = render(<TestTrustResultBlock locale={locale} contract={contract} run={{ ...run, summary: { total: 23, pass: "17", warning: null } }} assertions={[{ ...assertion(), verdict, expected: null, actual: [1, true] }]} contextLabel="Raw digest" />).container.innerHTML
+            const html = render(
+                <TestTrustResultBlock
+                    locale={locale}
+                    contract={contract}
+                    run={{ ...run, summary: { total: 23, pass: "17", warning: null } }}
+                    assertions={[{ ...assertion(), verdict, expected: null, actual: [1, true] }]}
+                    contextLabel="Raw digest"
+                />,
+            ).container.innerHTML
             expect(html).toContain(verdict === "warning" ? copy.verdictWarning : copy.verdictFail)
             expect(html).toContain("[1,true]")
             expect(html).toContain("—")
@@ -108,11 +181,28 @@ describe("TestTrustResultBlock", () => {
         })
         it("distinguishes no run from missing registered evidence", () => {
             const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.trust
-            const empty = render(<TestTrustResultBlock locale={locale} contract={contract} run={null} assertions={[]} contextLabel="Raw digest" />).container.innerHTML
+            const empty = render(
+                <TestTrustResultBlock
+                    locale={locale}
+                    contract={contract}
+                    run={null}
+                    assertions={[]}
+                    contextLabel="Raw digest"
+                />,
+            ).container.innerHTML
             expect(empty).toContain(copy.notRun)
             expect(empty).toContain(copy.collect)
             expect(empty).toContain(copy.noRun)
-            const rejected = render(<TestTrustResultBlock locale={locale} contract={contract} run={run} assertions={[assertion()]} contextLabel="Raw digest" registry={{}} />).container.innerHTML
+            const rejected = render(
+                <TestTrustResultBlock
+                    locale={locale}
+                    contract={contract}
+                    run={run}
+                    assertions={[assertion()]}
+                    contextLabel="Raw digest"
+                    registry={{}}
+                />,
+            ).container.innerHTML
             expect(rejected).toContain(copy.rejected)
             expect(rejected).not.toContain("verify the contract")
         })

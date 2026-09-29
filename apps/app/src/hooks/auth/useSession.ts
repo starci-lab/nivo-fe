@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import { useContext } from "react";
-import { SessionContext, type Session } from "@/modules/auth/session";
+import { useContext } from "react"
+import { SessionContext, type Session } from "@/modules/auth/session"
 
 /**
  * Read the session.
@@ -14,9 +14,9 @@ import { SessionContext, type Session } from "@/modules/auth/session";
  * @returns The session held above this component.
  */
 export const useSession = (): Session => {
-    const session = useContext(SessionContext);
+    const session = useContext(SessionContext)
     if (session === null) {
-        throw new Error("useSession was called outside SessionProvider");
+        throw new Error("useSession was called outside SessionProvider")
     }
-    return session;
-};
+    return session
+}

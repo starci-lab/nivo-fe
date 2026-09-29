@@ -1,16 +1,16 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { hasLocale } from "next-intl";
-import { getMessages, getTimeZone, getTranslations } from "next-intl/server";
-import { Open_Sans } from "next/font/google";
-import type { ComponentProps, CSSProperties } from "react";
-import { MESSAGE_SCOPES, pickMessages } from "@/modules/i18n/messages";
-import { routing } from "@/modules/i18n/routing";
-import { ConsoleLocaleLayoutBase } from "./component";
+import type { Metadata } from "next"
+import { notFound } from "next/navigation"
+import { hasLocale } from "next-intl"
+import { getMessages, getTimeZone, getTranslations } from "next-intl/server"
+import { Open_Sans } from "next/font/google"
+import type { ComponentProps, CSSProperties } from "react"
+import { MESSAGE_SCOPES, pickMessages } from "@/modules/i18n/messages"
+import { routing } from "@/modules/i18n/routing"
+import { ConsoleLocaleLayoutBase } from "./component"
 
 const openSans = Open_Sans({
-  subsets: ["latin", "vietnamese"]
-});
+    subsets: ["latin", "vietnamese"],
+})
 
 /**
  * Browser-level metadata for every route under this shell.
@@ -21,22 +21,22 @@ const openSans = Open_Sans({
  * @returns The document metadata.
  */
 export const generateMetadata = async (): Promise<Metadata> => {
-  const t = await getTranslations("app");
-  return {
-    title: "nivo Console",
-    description: t("description")
-  };
-};
+    const t = await getTranslations("app")
+    return {
+        title: "nivo Console",
+        description: t("description"),
+    }
+}
 
 /** Props for {@link ConsoleLocaleLayout}. */
 type ConsoleLocaleLayoutProps = {
-  /** The rendered route. */
-  readonly children: ComponentProps<"div">["children"];
-  /** The routed locale segment, which Next hands over as a promise. */
-  readonly params: Promise<{
-    readonly locale: string;
-  }>;
-};
+    /** The rendered route. */
+    readonly children: ComponentProps<"div">["children"]
+    /** The routed locale segment, which Next hands over as a promise. */
+    readonly params: Promise<{
+        readonly locale: string
+    }>
+}
 
 /**
  * Which locales are built.
@@ -46,9 +46,10 @@ type ConsoleLocaleLayoutProps = {
  *
  * @returns One entry per locale this app ships copy for.
  */
-export const generateStaticParams = () => routing.locales.map(locale => ({
-  locale
-}));
+export const generateStaticParams = () =>
+    routing.locales.map((locale) => ({
+        locale,
+    }))
 
 /**
  * The document shell.
@@ -86,30 +87,36 @@ export const generateStaticParams = () => routing.locales.map(locale => ({
  * @param input - The rendered route.
  * @returns The html document.
  */
-export const ConsoleLocaleLayout = async ({
-  children,
-  params
-}: ConsoleLocaleLayoutProps) => {
-  /*
-   * THE SEGMENT IS VALIDATED BEFORE ANYTHING ELSE. `/xx/provisioning` is a path a reader can type,
-   * and an unrecognised locale reaching the message loader throws on a file that is not there -
-   * a 500 where a 404 is the truthful answer.
-   */
-  const {
-    locale
-  } = await params;
-  if (!hasLocale(routing.locales, locale)) {
-    notFound();
-  }
-  const [messages, timeZone] = await Promise.all([getMessages(), getTimeZone()]);
-  return <html lang={locale} suppressHydrationWarning>
-            <body className="min-h-dvh bg-background text-foreground antialiased" style={{
-      "--font-open-sans": openSans.style.fontFamily
-    } as CSSProperties}>
-
-                <ConsoleLocaleLayoutBase {...{ props: { locale, messages: pickMessages(messages, MESSAGE_SCOPES.root), timeZone }, children }} />
+export const ConsoleLocaleLayout = async ({ children, params }: ConsoleLocaleLayoutProps) => {
+    /*
+     * THE SEGMENT IS VALIDATED BEFORE ANYTHING ELSE. `/xx/provisioning` is a path a reader can type,
+     * and an unrecognised locale reaching the message loader throws on a file that is not there -
+     * a 500 where a 404 is the truthful answer.
+     */
+    const { locale } = await params
+    if (!hasLocale(routing.locales, locale)) {
+        notFound()
+    }
+    const [messages, timeZone] = await Promise.all([getMessages(), getTimeZone()])
+    return (
+        <html lang={locale} suppressHydrationWarning>
+            <body
+                className="min-h-dvh bg-background text-foreground antialiased"
+                style={
+                    {
+                        "--font-open-sans": openSans.style.fontFamily,
+                    } as CSSProperties
+                }
+            >
+                <ConsoleLocaleLayoutBase
+                    {...{
+                        props: { locale, messages: pickMessages(messages, MESSAGE_SCOPES.root), timeZone },
+                        children,
+                    }}
+                />
             </body>
-        </html>;
-};
+        </html>
+    )
+}
 
-export default ConsoleLocaleLayout;
+export default ConsoleLocaleLayout

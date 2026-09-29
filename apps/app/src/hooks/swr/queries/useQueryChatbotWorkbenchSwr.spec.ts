@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest"
-import {
-    chatbotWorkbenchQueryKey,
-    type SupportQueryIdentity,
-} from "./useQueryChatbotWorkbenchSwr"
+import { chatbotWorkbenchQueryKey, type SupportQueryIdentity } from "./useQueryChatbotWorkbenchSwr"
 
 const identity: SupportQueryIdentity = {
     hostname: "agent-workspace.nivo.vn",
@@ -14,8 +11,14 @@ const identity: SupportQueryIdentity = {
 describe("workspace control-plane cache identities", () => {
     it("keeps each Chatbot workbench on its installation-qualified cache key", () => {
         expect(chatbotWorkbenchQueryKey(identity)).toEqual([
-            "chatbot", "workbench", "agent-workspace.nivo.vn", "workspace-1", "installation-1",
+            "chatbot",
+            "workbench",
+            "agent-workspace.nivo.vn",
+            "workspace-1",
+            "installation-1",
         ])
-        expect(chatbotWorkbenchQueryKey(identity)).not.toEqual(chatbotWorkbenchQueryKey({ ...identity, installationId: "installation-2" }))
+        expect(chatbotWorkbenchQueryKey(identity)).not.toEqual(
+            chatbotWorkbenchQueryKey({ ...identity, installationId: "installation-2" }),
+        )
     })
 })

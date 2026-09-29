@@ -2,11 +2,17 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 
-type WorkspaceControlProbeProps = { readonly workspaceId: string, readonly pageState: string, readonly onSelectPageState: (state: "infrastructure") => void }
+type WorkspaceControlProbeProps = {
+    readonly workspaceId: string
+    readonly pageState: string
+    readonly onSelectPageState: (state: "infrastructure") => void
+}
 
 vi.mock("@/components/blocks/agentos/AgentOSWorkspaceControlCenter", () => ({
     AgentOSWorkspaceControlCenter: ({ workspaceId, pageState, onSelectPageState }: WorkspaceControlProbeProps) => (
-        <button type="button" onClick={() => onSelectPageState("infrastructure")}>{workspaceId}:{pageState}</button>
+        <button type="button" onClick={() => onSelectPageState("infrastructure")}>
+            {workspaceId}:{pageState}
+        </button>
     ),
 }))
 
@@ -15,7 +21,12 @@ import { AgentOSWorkspacePageBase } from "./component"
 describe("AgentOSWorkspacePageBase", () => {
     it("passes only route identity and the page-owned tab axis", () => {
         const select = vi.fn()
-        render(<AgentOSWorkspacePageBase props={{ workspaceId: "workspace-1", pageState: "overview" }} on={{ onSelectPageState: select }} />)
+        render(
+            <AgentOSWorkspacePageBase
+                props={{ workspaceId: "workspace-1", pageState: "overview" }}
+                on={{ onSelectPageState: select }}
+            />,
+        )
         fireEvent.click(screen.getByRole("button", { name: "workspace-1:overview" }))
         expect(select).toHaveBeenCalledWith("infrastructure")
     })
@@ -23,7 +34,12 @@ describe("AgentOSWorkspacePageBase", () => {
 
 describe("AgentOSWorkspacePageBase", () => {
     it("keeps only workspace route identity and tab state above the connected aggregate block", () => {
-        const html = renderToStaticMarkup(<AgentOSWorkspacePageBase props={{ workspaceId: "workspace-1", pageState: "applications" }} on={{ onSelectPageState: vi.fn() }} />)
+        const html = renderToStaticMarkup(
+            <AgentOSWorkspacePageBase
+                props={{ workspaceId: "workspace-1", pageState: "applications" }}
+                on={{ onSelectPageState: vi.fn() }}
+            />,
+        )
         expect(html).toContain("workspace-1:applications")
     })
 })

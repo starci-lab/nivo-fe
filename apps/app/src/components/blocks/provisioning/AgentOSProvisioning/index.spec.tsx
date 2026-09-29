@@ -26,25 +26,60 @@ const mocks = vi.hoisted(() => ({
     push: vi.fn(),
     replace: vi.fn(),
     session: { state: { status: "signed-in", accessToken: "token" } },
-    realtime: { status: "disconnected" as string, event: undefined as { kind: string, id: string, status?: string, reason?: string } | undefined },
+    realtime: {
+        status: "disconnected" as string,
+        event: undefined as { kind: string; id: string; status?: string; reason?: string } | undefined,
+    },
 }))
 
 type AgentProbeProps = {
     state: string
-    props: { subject: string, detail: string, statusText: string, statusActionLabel?: string, statusActionDisabled?: boolean, requestActionDisabled?: boolean, isRequestPending?: boolean, selection?: { offers: Array<{ id: string, label: string }>, selectedOfferId?: string } }
-    on?: { request?: () => void, statusAction?: () => void, selectOffer?: (id: string) => void, selectTier?: (id: string) => void }
+    props: {
+        subject: string
+        detail: string
+        statusText: string
+        statusActionLabel?: string
+        statusActionDisabled?: boolean
+        requestActionDisabled?: boolean
+        isRequestPending?: boolean
+        selection?: { offers: Array<{ id: string; label: string }>; selectedOfferId?: string }
+    }
+    on?: {
+        request?: () => void
+        statusAction?: () => void
+        selectOffer?: (id: string) => void
+        selectTier?: (id: string) => void
+    }
 }
 
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/hooks", () => ({
-    useQueryWorkspaceCheckoutOffersSwr: () => ({ data: mocks.offers.data, error: mocks.offers.error, isValidating: false, mutate: vi.fn() }),
-    useQueryWorkspaceCheckoutStatusSwr: () => ({ data: mocks.status.data, error: mocks.status.error, isValidating: false, mutate: mocks.status.mutate }),
+    useQueryWorkspaceCheckoutOffersSwr: () => ({
+        data: mocks.offers.data,
+        error: mocks.offers.error,
+        isValidating: false,
+        mutate: vi.fn(),
+    }),
+    useQueryWorkspaceCheckoutStatusSwr: () => ({
+        data: mocks.status.data,
+        error: mocks.status.error,
+        isValidating: false,
+        mutate: mocks.status.mutate,
+    }),
     useQueryWorkspaceCheckoutEntrySwr: (request: unknown, enabled: boolean) => {
         if (enabled) mocks.entry.lastRequest = request
         return { data: enabled ? mocks.entry.data : undefined, error: undefined, isValidating: false, mutate: vi.fn() }
     },
-    useMutateRecoverWorkspacePurchaseSwr: () => ({ trigger: mocks.recover.trigger, isMutating: mocks.recover.isMutating }),
-    useQueryMyAgentosAiKnowledgeReadinessSwr: () => ({ data: mocks.aiReadiness, error: undefined, isValidating: false, mutate: mocks.aiMutate }),
+    useMutateRecoverWorkspacePurchaseSwr: () => ({
+        trigger: mocks.recover.trigger,
+        isMutating: mocks.recover.isMutating,
+    }),
+    useQueryMyAgentosAiKnowledgeReadinessSwr: () => ({
+        data: mocks.aiReadiness,
+        error: undefined,
+        isValidating: false,
+        mutate: mocks.aiMutate,
+    }),
     useMutateRunAgentosAiReadinessTestSwr: () => ({ trigger: mocks.aiTrigger, isMutating: false }),
     useRouter: () => ({ replace: mocks.replace, push: mocks.push }),
     useSession: () => mocks.session,
@@ -53,19 +88,53 @@ vi.mock("@/hooks", () => ({
 vi.mock("./component", () => ({
     AgentOSProvisioningBase: (props: AgentProbeProps) => (
         <div>
-            <output data-testid="agent-flow">{JSON.stringify({ state: props.state, subject: props.props.subject, detail: props.props.detail, text: props.props.statusText, pending: props.props.isRequestPending, action: props.props.statusActionLabel, disabled: props.props.statusActionDisabled, requestDisabled: props.props.requestActionDisabled, offers: props.props.selection?.offers, selectedOfferId: props.props.selection?.selectedOfferId })}</output>
-            <button data-testid="request" onClick={props.on?.request}>request</button>
-            <button data-testid="select-offer" onClick={() => props.on?.selectOffer?.("offer-1")}>select offer</button>
-            <button data-testid="status" onClick={props.on?.statusAction}>status</button>
+            <output data-testid="agent-flow">
+                {JSON.stringify({
+                    state: props.state,
+                    subject: props.props.subject,
+                    detail: props.props.detail,
+                    text: props.props.statusText,
+                    pending: props.props.isRequestPending,
+                    action: props.props.statusActionLabel,
+                    disabled: props.props.statusActionDisabled,
+                    requestDisabled: props.props.requestActionDisabled,
+                    offers: props.props.selection?.offers,
+                    selectedOfferId: props.props.selection?.selectedOfferId,
+                })}
+            </output>
+            <button data-testid="request" onClick={props.on?.request}>
+                request
+            </button>
+            <button data-testid="select-offer" onClick={() => props.on?.selectOffer?.("offer-1")}>
+                select offer
+            </button>
+            <button data-testid="status" onClick={props.on?.statusAction}>
+                status
+            </button>
         </div>
     ),
 }))
 
 import { AgentOSProvisioning } from "./"
 
-const offer = (id = "offer-1", version = "v1") => ({ offerId: id, offerVersion: version, displayName: "Nivo Operations Workspace", includedOutcome: "Run operations", amount: "4800000", currency: "VND", billingCadence: "monthly", renewalMode: "manual", eligibility: "vn" })
+const offer = (id = "offer-1", version = "v1") => ({
+    offerId: id,
+    offerVersion: version,
+    displayName: "Nivo Operations Workspace",
+    includedOutcome: "Run operations",
+    amount: "4800000",
+    currency: "VND",
+    billingCadence: "monthly",
+    renewalMode: "manual",
+    eligibility: "vn",
+})
 const presentedOffer = offer("nivo-workspace-growth", "draft-2026-09-22")
-const sourceFact = (state: string, reference: string | null = null, observedAt: string | null = null, source = "test-source") => ({ source, state, reference, observedAt })
+const sourceFact = (
+    state: string,
+    reference: string | null = null,
+    observedAt: string | null = null,
+    source = "test-source",
+) => ({ source, state, reference, observedAt })
 const purchase = (overrides: Record<string, unknown> = {}) => ({
     purchaseId: "order",
     state: "payment-pending",
@@ -81,16 +150,50 @@ const purchase = (overrides: Record<string, unknown> = {}) => ({
     lastConfirmedAt: "2026-09-22T07:35:00.000Z",
     ...overrides,
 })
-const statusAnswer = (record: ReturnType<typeof purchase>) => ({ ok: true, data: { status: "status", purchaseId: record.purchaseId, purchase: record } })
-const offersAnswer = (selectionState = "current") => ({ ok: true, data: { status: "offers", offers: [presentedOffer, offer()], selection: { offerId: "nivo-workspace-growth", offerVersion: "draft-2026-09-22", state: selectionState } } })
-const readyPurchase = () => purchase({
-    state: "ready",
-    payment: sourceFact("verified-success", "attempt-1", "2026-09-22T07:32:00.000Z", "payment-reconciliation"),
-    billing: sourceFact("paid", "receipt-1", "2026-09-22T07:32:30.000Z", "platform-billing-ledger"),
-    provisioning: { ...sourceFact("ready", "PRV-1", "2026-09-22T07:34:00.000Z", "workspace-provisioning"), disposition: "ready", reason: null },
-    readiness: sourceFact("ready", "workspace-1", "2026-09-22T07:34:30.000Z", "workspace-provisioning"),
+const statusAnswer = (record: ReturnType<typeof purchase>) => ({
+    ok: true,
+    data: { status: "status", purchaseId: record.purchaseId, purchase: record },
 })
-const aiReadySnapshot = { ok: true, data: { provider: "OpenRouter", chatModel: "deepseek/deepseek-chat", embeddingProfile: "nivo", embeddingDimension: 1024, credentialStatus: "configured", credentialMaskedHint: "or-…", qdrantHealth: "healthy", readinessStatus: "ready", aiReady: true, readinessOperationId: null, knowledgeRecoveryOperationId: null, components: [], origins: [{ origin: "nivo", version: "v1", digest: "digest", documentCount: 1, lastUpdatedAt: null }], failureCode: null, testedAt: null } }
+const offersAnswer = (selectionState = "current") => ({
+    ok: true,
+    data: {
+        status: "offers",
+        offers: [presentedOffer, offer()],
+        selection: { offerId: "nivo-workspace-growth", offerVersion: "draft-2026-09-22", state: selectionState },
+    },
+})
+const readyPurchase = () =>
+    purchase({
+        state: "ready",
+        payment: sourceFact("verified-success", "attempt-1", "2026-09-22T07:32:00.000Z", "payment-reconciliation"),
+        billing: sourceFact("paid", "receipt-1", "2026-09-22T07:32:30.000Z", "platform-billing-ledger"),
+        provisioning: {
+            ...sourceFact("ready", "PRV-1", "2026-09-22T07:34:00.000Z", "workspace-provisioning"),
+            disposition: "ready",
+            reason: null,
+        },
+        readiness: sourceFact("ready", "workspace-1", "2026-09-22T07:34:30.000Z", "workspace-provisioning"),
+    })
+const aiReadySnapshot = {
+    ok: true,
+    data: {
+        provider: "OpenRouter",
+        chatModel: "deepseek/deepseek-chat",
+        embeddingProfile: "nivo",
+        embeddingDimension: 1024,
+        credentialStatus: "configured",
+        credentialMaskedHint: "or-…",
+        qdrantHealth: "healthy",
+        readinessStatus: "ready",
+        aiReady: true,
+        readinessOperationId: null,
+        knowledgeRecoveryOperationId: null,
+        components: [],
+        origins: [{ origin: "nivo", version: "v1", digest: "digest", documentCount: 1, lastUpdatedAt: null }],
+        failureCode: null,
+        testedAt: null,
+    },
+}
 
 const flow = () => screen.getByTestId("agent-flow").textContent ?? ""
 const resetQueryCache = () => {
@@ -114,7 +217,10 @@ describe("AgentOSProvisioning", () => {
         mocks.entry.data = undefined
         mocks.entry.lastRequest = null
         mocks.recover.isMutating = false
-        mocks.recover.trigger.mockResolvedValue({ ok: true, data: { status: "status", purchaseId: "order", purchase: purchase({ state: "paid" }) } })
+        mocks.recover.trigger.mockResolvedValue({
+            ok: true,
+            data: { status: "status", purchaseId: "order", purchase: purchase({ state: "paid" }) },
+        })
         mocks.aiReadiness = aiReadySnapshot
         mocks.aiTrigger.mockResolvedValue({ ok: true, data: {} })
     })
@@ -126,7 +232,9 @@ describe("AgentOSProvisioning", () => {
         expect(flow()).toContain('"offers":[{"id":"nivo-workspace-growth"')
         expect(flow()).toContain('"selectedOfferId":"nivo-workspace-growth"')
         fireEvent.click(screen.getByTestId("request"))
-        expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new/checkout?offer=nivo-workspace-growth&offerVersion=draft-2026-09-22")
+        expect(mocks.push).toHaveBeenCalledWith(
+            "/agentos/workspaces/new/checkout?offer=nivo-workspace-growth&offerVersion=draft-2026-09-22",
+        )
     })
 
     it("keeps the submit action disabled when the boundary verdict is not current", async () => {
@@ -147,7 +255,16 @@ describe("AgentOSProvisioning", () => {
 
     it("retries a failed AI readiness check", async () => {
         mocks.status.data = statusAnswer(readyPurchase())
-        mocks.aiReadiness = { ...aiReadySnapshot, data: { ...aiReadySnapshot.data, aiReady: false, failureCode: "probe-failed", readinessOperationId: null, knowledgeRecoveryOperationId: null } }
+        mocks.aiReadiness = {
+            ...aiReadySnapshot,
+            data: {
+                ...aiReadySnapshot.data,
+                aiReady: false,
+                failureCode: "probe-failed",
+                readinessOperationId: null,
+                knowledgeRecoveryOperationId: null,
+            },
+        }
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"failed"'))
         fireEvent.click(screen.getByTestId("status"))
@@ -173,7 +290,12 @@ describe("AgentOSProvisioning", () => {
         payment.unmount()
         resetQueryCache()
 
-        mocks.status.data = statusAnswer(purchase({ state: "payment-outcome-unknown", payment: sourceFact("outcome-unknown", "attempt-1", null, "payment-reconciliation") }))
+        mocks.status.data = statusAnswer(
+            purchase({
+                state: "payment-outcome-unknown",
+                payment: sourceFact("outcome-unknown", "attempt-1", null, "payment-reconciliation"),
+            }),
+        )
         const unknown = render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"payment_unknown"'))
         expect(flow()).toContain('"action":"Try again"')
@@ -188,7 +310,16 @@ describe("AgentOSProvisioning", () => {
         accepted.unmount()
         resetQueryCache()
 
-        mocks.status.data = statusAnswer(purchase({ state: "provisioning", provisioning: { ...sourceFact("running", "PRV-1", null, "workspace-provisioning"), disposition: "running", reason: null } }))
+        mocks.status.data = statusAnswer(
+            purchase({
+                state: "provisioning",
+                provisioning: {
+                    ...sourceFact("running", "PRV-1", null, "workspace-provisioning"),
+                    disposition: "running",
+                    reason: null,
+                },
+            }),
+        )
         const preparing = render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"preparing"'))
         preparing.unmount()
@@ -211,17 +342,26 @@ describe("AgentOSProvisioning", () => {
     })
 
     it("keeps an unanswered provisioning facet as provisioning-unknown and recovers with observed identities", async () => {
-        mocks.status.data = statusAnswer(purchase({
-            state: "provisioning",
-            payment: sourceFact("verified-success", "attempt-1", null, "payment-reconciliation"),
-            billing: sourceFact("paid", "receipt-1", null, "platform-billing-ledger"),
-            provisioning: { ...sourceFact("unavailable", "PRV-1", null, "workspace-provisioning"), disposition: null, reason: null },
-        }))
+        mocks.status.data = statusAnswer(
+            purchase({
+                state: "provisioning",
+                payment: sourceFact("verified-success", "attempt-1", null, "payment-reconciliation"),
+                billing: sourceFact("paid", "receipt-1", null, "platform-billing-ledger"),
+                provisioning: {
+                    ...sourceFact("unavailable", "PRV-1", null, "workspace-provisioning"),
+                    disposition: null,
+                    reason: null,
+                },
+            }),
+        )
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"provisioning_unknown"'))
         fireEvent.click(screen.getByTestId("status"))
         await waitFor(() => expect(mocks.recover.trigger).toHaveBeenCalled())
-        const request = mocks.recover.trigger.mock.calls[0][0] as { purchaseId: string, lastObserved: Record<string, string> }
+        const request = mocks.recover.trigger.mock.calls[0][0] as {
+            purchaseId: string
+            lastObserved: Record<string, string>
+        }
         expect(request.purchaseId).toBe("order")
         expect(request.lastObserved).toEqual({ billingReceiptId: "receipt-1", provisioningOrderId: "PRV-1" })
         expect(request.lastObserved).not.toHaveProperty("paymentAttemptId")
@@ -243,31 +383,58 @@ describe("AgentOSProvisioning", () => {
         refused.unmount()
         resetQueryCache()
 
-        mocks.status.data = { ok: true, data: { status: "unavailable", code: "source-unavailable", source: "workspace-provisioning" } }
+        mocks.status.data = {
+            ok: true,
+            data: { status: "unavailable", code: "source-unavailable", source: "workspace-provisioning" },
+        }
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"payment_unknown"'))
         expect(flow()).toContain("source-unavailable")
     })
 
     it("reports a refused provisioning order as failed at the workspace step", async () => {
-        mocks.status.data = statusAnswer(purchase({
-            state: "provisioning",
-            provisioning: { ...sourceFact("refused", "PRV-1", null, "workspace-provisioning"), disposition: "refused", reason: "entitlement refused" },
-        }))
+        mocks.status.data = statusAnswer(
+            purchase({
+                state: "provisioning",
+                provisioning: {
+                    ...sourceFact("refused", "PRV-1", null, "workspace-provisioning"),
+                    disposition: "refused",
+                    reason: "entitlement refused",
+                },
+            }),
+        )
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"failed"'))
         expect(flow()).toContain("entitlement refused")
     })
 
     it("enters the ready workspace only through the entry boundary's registered destination", async () => {
-        mocks.entry.data = { ok: true, data: { status: "entry", purchaseId: "order", workspaceId: "workspace-1", destination: { workspaceId: "workspace-1", ownerId: "owner-1", routeName: "instance-management.workspace-shell", routeVersion: "1", context: {} } } }
+        mocks.entry.data = {
+            ok: true,
+            data: {
+                status: "entry",
+                purchaseId: "order",
+                workspaceId: "workspace-1",
+                destination: {
+                    workspaceId: "workspace-1",
+                    ownerId: "owner-1",
+                    routeName: "instance-management.workspace-shell",
+                    routeVersion: "1",
+                    context: {},
+                },
+            },
+        }
         mocks.status.data = statusAnswer(readyPurchase())
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"ready"'))
         fireEvent.click(screen.getByTestId("status"))
         await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/workspace-1"))
         const request = mocks.entry.lastRequest as Record<string, unknown>
-        expect(request).toEqual({ purchaseId: "order", workspaceId: "workspace-1", returnContext: { name: "workspace-dashboard", version: "1" } })
+        expect(request).toEqual({
+            purchaseId: "order",
+            workspaceId: "workspace-1",
+            returnContext: { name: "workspace-dashboard", version: "1" },
+        })
         expect(request).not.toHaveProperty("readinessObservationId")
     })
 
@@ -283,7 +450,21 @@ describe("AgentOSProvisioning", () => {
     })
 
     it("refuses to enter when the registered destination names another workspace", async () => {
-        mocks.entry.data = { ok: true, data: { status: "entry", purchaseId: "order", workspaceId: "workspace-9", destination: { workspaceId: "workspace-9", ownerId: "owner-9", routeName: "instance-management.workspace-shell", routeVersion: "1", context: {} } } }
+        mocks.entry.data = {
+            ok: true,
+            data: {
+                status: "entry",
+                purchaseId: "order",
+                workspaceId: "workspace-9",
+                destination: {
+                    workspaceId: "workspace-9",
+                    ownerId: "owner-9",
+                    routeName: "instance-management.workspace-shell",
+                    routeVersion: "1",
+                    context: {},
+                },
+            },
+        }
         mocks.status.data = statusAnswer(readyPurchase())
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"ready"'))
@@ -293,7 +474,16 @@ describe("AgentOSProvisioning", () => {
     })
 
     it("turns a realtime order event into a re-read of the same purchase", async () => {
-        mocks.status.data = statusAnswer(purchase({ state: "provisioning", provisioning: { ...sourceFact("running", "PRV-1", null, "workspace-provisioning"), disposition: "running", reason: null } }))
+        mocks.status.data = statusAnswer(
+            purchase({
+                state: "provisioning",
+                provisioning: {
+                    ...sourceFact("running", "PRV-1", null, "workspace-provisioning"),
+                    disposition: "running",
+                    reason: null,
+                },
+            }),
+        )
         mocks.status.mutate.mockImplementation(async () => {
             mocks.status.data = statusAnswer(readyPurchase())
             return undefined

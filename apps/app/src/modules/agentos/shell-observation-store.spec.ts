@@ -9,7 +9,7 @@ import {
     type ShellObservationEvent,
     type ShellObservationSnapshot,
     type ShellSelection,
-    type ShellSourceOutcome
+    type ShellSourceOutcome,
 } from "./shell-observation-store"
 import type { ShellSourceIdentity } from "@/modules/api/agentos-shell"
 
@@ -30,37 +30,54 @@ const available: Extract<ShellSourceOutcome, { readonly kind: "observation" }> =
     freshness: "current",
     completeness: "complete",
     observedAt: "2026-09-25T03:00:00.000Z",
-    payload: { installations: [] }
+    payload: { installations: [] },
 }
 
 const state = (): ShellObservationSnapshot => initialShellObservationSnapshot(selection, 1)
 
 /** Where a read claims to have come from; a case overrides it to simulate an obsolete answer. */
 interface ReadOrigin {
-    readonly sessionEpoch?: number;
-    readonly selection?: ShellSelection;
+    readonly sessionEpoch?: number
+    readonly selection?: ShellSelection
 }
 
-const begin = (identity: ShellSourceIdentity, readGeneration: number, origin: ReadOrigin = {}): ShellObservationEvent => ({
+const begin = (
+    identity: ShellSourceIdentity,
+    readGeneration: number,
+    origin: ReadOrigin = {},
+): ShellObservationEvent => ({
     type: "begin-read",
     sessionEpoch: origin.sessionEpoch ?? 1,
     selection: origin.selection ?? selection,
     identity,
-    readGeneration
+    readGeneration,
 })
 
-const settle = (identity: ShellSourceIdentity, readGeneration: number, outcome: ShellSourceOutcome, origin: ReadOrigin = {}): ShellObservationEvent => ({
+const settle = (
+    identity: ShellSourceIdentity,
+    readGeneration: number,
+    outcome: ShellSourceOutcome,
+    origin: ReadOrigin = {},
+): ShellObservationEvent => ({
     type: "apply-outcome",
     sessionEpoch: origin.sessionEpoch ?? 1,
     selection: origin.selection ?? selection,
     identity,
     readGeneration,
-    outcome
+    outcome,
 })
 
 /** Read one source and settle it, so a case can start from a store that already holds content. */
-const readSource = (current: ShellObservationSnapshot, identity: ShellSourceIdentity, generation: number, outcome: ShellSourceOutcome = available): ShellObservationSnapshot =>
-    reduceShellObservation(reduceShellObservation(current, begin(identity, generation)).state, settle(identity, generation, outcome)).state
+const readSource = (
+    current: ShellObservationSnapshot,
+    identity: ShellSourceIdentity,
+    generation: number,
+    outcome: ShellSourceOutcome = available,
+): ShellObservationSnapshot =>
+    reduceShellObservation(
+        reduceShellObservation(current, begin(identity, generation)).state,
+        settle(identity, generation, outcome),
+    ).state
 
 beforeEach(() => {
     vi.restoreAllMocks()
@@ -68,10 +85,17 @@ beforeEach(() => {
 
 describe("shellSelectionIdentities", () => {
     it("gives every known installation its own capability, attention and configuration sources", () => {
-        const identities = shellSelectionIdentities([INSTALLATION, OTHER_INSTANCE]).map(identity => identity.kind)
+        const identities = shellSelectionIdentities([INSTALLATION, OTHER_INSTANCE]).map((identity) => identity.kind)
         expect(identities).toEqual([
-            "attention", "attention", "capability", "capability", "configuration", "configuration",
-            "core_registry", "installation_inventory", "runtime"
+            "attention",
+            "attention",
+            "capability",
+            "capability",
+            "configuration",
+            "configuration",
+            "core_registry",
+            "installation_inventory",
+            "runtime",
         ])
         expect(shellSelectionIdentities([])).toHaveLength(3)
     })
@@ -83,13 +107,13 @@ describe("shellOperationIdentities", () => {
             { installationId: INSTALLATION, intentId: "intent-1", commandId: "command-1" },
             { installationId: INSTALLATION, intentId: "intent-2", commandId: "command-2" },
             { installationId: OTHER_INSTANCE, intentId: "intent-1", commandId: "command-3" },
-            { installationId: INSTALLATION, intentId: "intent-1", commandId: "command-4" }
+            { installationId: INSTALLATION, intentId: "intent-1", commandId: "command-4" },
         ]
         const identities = shellOperationIdentities(operations)
         expect(identities).toEqual([
             { kind: "receiver", installationId: INSTALLATION, intentId: "intent-1" },
             { kind: "receiver", installationId: INSTALLATION, intentId: "intent-2" },
-            { kind: "receiver", installationId: OTHER_INSTANCE, intentId: "intent-1" }
+            { kind: "receiver", installationId: OTHER_INSTANCE, intentId: "intent-1" },
         ])
         expect(shellOperationIdentities([])).toEqual([])
     })
@@ -99,11 +123,17 @@ describe("shellOperationIdentities", () => {
         const current = readSource(state(), registry, 1)
         const begun = reduceShellObservation(current, begin(receiver, 1))
         expect(begun.transition).toBe("begin-read")
-        const settled = reduceShellObservation(begun.state, settle(receiver, 1, { ...available, payload: { queueState: "claimed" } }))
+        const settled = reduceShellObservation(
+            begun.state,
+            settle(receiver, 1, { ...available, payload: { queueState: "claimed" } }),
+        )
         expect(settled.transition).toBe("apply-current")
         expect(shellSourceObservation(settled.state, receiver)?.state).toBe("available")
         // An answer from an ended session of the same receiver source changes nothing.
-        const late = reduceShellObservation(settled.state, settle(receiver, 1, { kind: "unavailable" }, { sessionEpoch: 0 }))
+        const late = reduceShellObservation(
+            settled.state,
+            settle(receiver, 1, { kind: "unavailable" }, { sessionEpoch: 0 }),
+        )
         expect(late.transition).toBe("none")
         expect(shellSourceObservation(late.state, receiver)?.state).toBe("available")
     })
@@ -124,16 +154,41 @@ describe("reduceShellObservation", () => {
         const cases: ReadonlyArray<readonly [ShellSourceOutcome, string, string]> = [
             [available, "apply-current", "available"],
             [{ ...available, availability: "partial", completeness: "partial" }, "apply-limited", "partial"],
-            [{ ...available, availability: "unavailable", freshness: "unknown", completeness: "unknown", observedAt: null, payload: null }, "apply-unavailable", "unavailable"],
-            [{ ...available, availability: "unsupported", freshness: "unknown", completeness: "unknown", observedAt: null, payload: null }, "apply-unavailable", "unsupported"],
+            [
+                {
+                    ...available,
+                    availability: "unavailable",
+                    freshness: "unknown",
+                    completeness: "unknown",
+                    observedAt: null,
+                    payload: null,
+                },
+                "apply-unavailable",
+                "unavailable",
+            ],
+            [
+                {
+                    ...available,
+                    availability: "unsupported",
+                    freshness: "unknown",
+                    completeness: "unknown",
+                    observedAt: null,
+                    payload: null,
+                },
+                "apply-unavailable",
+                "unsupported",
+            ],
             [{ kind: "unavailable" }, "apply-unavailable", "unavailable"],
             [{ kind: "unsupported" }, "apply-unavailable", "unsupported"],
-            [{ kind: "refused" }, "clear-denied", "refused"]
+            [{ kind: "refused" }, "clear-denied", "refused"],
         ]
         for (const [outcome, transition, settled] of cases) {
             const begun = reduceShellObservation(state(), begin(registry, 1)).state
             const applied = reduceShellObservation(begun, settle(registry, 1, outcome))
-            expect([applied.transition, shellSourceObservation(applied.state, registry)?.state]).toEqual([transition, settled])
+            expect([applied.transition, shellSourceObservation(applied.state, registry)?.state]).toEqual([
+                transition,
+                settled,
+            ])
         }
     })
 
@@ -163,7 +218,10 @@ describe("reduceShellObservation", () => {
 
     it("keeps an outcome from a former selection and an older session epoch at zero transition", () => {
         const current = readSource(state(), registry, 1)
-        const former = reduceShellObservation(current, settle(registry, 2, { kind: "unavailable" }, { selection: otherSelection }))
+        const former = reduceShellObservation(
+            current,
+            settle(registry, 2, { kind: "unavailable" }, { selection: otherSelection }),
+        )
         expect(former.transition).toBe("none")
         expect(former.state).toBe(current)
 
@@ -219,9 +277,14 @@ describe("reduceShellObservation", () => {
         expect(unreachable.transition).toBe("session-unestablished")
         expect(unreachable.state.session).toBe("access-unestablished")
         expect(unreachable.state.sources).toEqual([])
-        expect(reduceShellObservation(unreachable.state, begin(runtime, 1, { sessionEpoch: 2 })).transition).toBe("none")
+        expect(reduceShellObservation(unreachable.state, begin(runtime, 1, { sessionEpoch: 2 })).transition).toBe(
+            "none",
+        )
 
-        const reestablished = reduceShellObservation(unreachable.state, { type: "session-reestablished", sessionEpoch: 3 })
+        const reestablished = reduceShellObservation(unreachable.state, {
+            type: "session-reestablished",
+            sessionEpoch: 3,
+        })
         expect(reestablished.transition).toBe("session-reestablished")
         expect(reestablished.state.session).toBe("established")
         expect(reestablished.state.sources).toEqual([])
@@ -236,7 +299,10 @@ describe("reduceShellObservation", () => {
     })
 
     it("ignores a selection change while the session is blocked", () => {
-        const blocked = reduceShellObservation(readSource(state(), registry, 1), { type: "require-sign-in", sessionEpoch: 2 }).state
+        const blocked = reduceShellObservation(readSource(state(), registry, 1), {
+            type: "require-sign-in",
+            sessionEpoch: 2,
+        }).state
         const changed = reduceShellObservation(blocked, { type: "change-selection", selection: otherSelection })
         expect(changed.transition).toBe("none")
         expect(changed.state).toBe(blocked)

@@ -1,10 +1,14 @@
-"use client";
+"use client"
 
-import { commandSalesDecideProposal, type SalesDecideProposalRequest, type SalesInstallationScope } from "@/modules/api/sales";
-import { operationMutationKey, operationAnswerNeedsRead, type OperationTrigger } from "@/modules/api/operation-route";
-import { useAccessToken } from "../../auth/useAccessToken";
-import { useNivoMutation } from "../useNivoMutation";
-import { salesDecisionRequestQueryKey } from "../queries/useQuerySalesDecisionRequestSwr";
+import {
+    commandSalesDecideProposal,
+    type SalesDecideProposalRequest,
+    type SalesInstallationScope,
+} from "@/modules/api/sales"
+import { operationMutationKey, operationAnswerNeedsRead, type OperationTrigger } from "@/modules/api/operation-route"
+import { useAccessToken } from "../../auth/useAccessToken"
+import { useNivoMutation } from "../useNivoMutation"
+import { salesDecisionRequestQueryKey } from "../queries/useQuerySalesDecisionRequestSwr"
 
 /*
  * One hook per file, one registered command per hook.
@@ -20,6 +24,16 @@ import { salesDecisionRequestQueryKey } from "../queries/useQuerySalesDecisionRe
  *   nothing rather than addressing a half-filled operation path.
  */
 export const useMutateSalesDecideProposalSwr = (scope: SalesInstallationScope, enabled = true) => {
-  const accessToken = useAccessToken();
-  return useNivoMutation(enabled ? operationMutationKey("sales", "decide-proposal", scope) : null, (trigger: OperationTrigger<SalesDecideProposalRequest>) => commandSalesDecideProposal(accessToken, scope, trigger.input, trigger.requestId), { invalidates: trigger => [salesDecisionRequestQueryKey(scope, { decisionRequestId: trigger.input.decisionRequestId })], shouldInvalidate: operationAnswerNeedsRead });
-};
+    const accessToken = useAccessToken()
+    return useNivoMutation(
+        enabled ? operationMutationKey("sales", "decide-proposal", scope) : null,
+        (trigger: OperationTrigger<SalesDecideProposalRequest>) =>
+            commandSalesDecideProposal(accessToken, scope, trigger.input, trigger.requestId),
+        {
+            invalidates: (trigger) => [
+                salesDecisionRequestQueryKey(scope, { decisionRequestId: trigger.input.decisionRequestId }),
+            ],
+            shouldInvalidate: operationAnswerNeedsRead,
+        },
+    )
+}

@@ -25,7 +25,9 @@ describe("Sidebar", () => {
     it("projects exactly the shell rev 17 destinations through Grammar Sidebar", () => {
         render(<Sidebar />)
         const options = screen.getAllByRole("option")
-        expect(options.map((option) => option.textContent)).toEqual(REGISTRY.map(([key]) => enMessages.console.nav[key]))
+        expect(options.map((option) => option.textContent)).toEqual(
+            REGISTRY.map(([key]) => enMessages.console.nav[key]),
+        )
         expect(screen.queryByText("Packages")).not.toBeInTheDocument()
         expect(screen.queryByText("Settings")).not.toBeInTheDocument()
         expect(screen.queryByRole("option", { name: "Packages" })).not.toBeInTheDocument()
@@ -34,7 +36,10 @@ describe("Sidebar", () => {
 
     it("routes every destination to its shell rev 17 target", () => {
         render(<Sidebar />)
-        expect(screen.getByRole("option", { name: enMessages.console.nav.overview })).toHaveAttribute("aria-selected", "true")
+        expect(screen.getByRole("option", { name: enMessages.console.nav.overview })).toHaveAttribute(
+            "aria-selected",
+            "true",
+        )
         for (const [key, route] of REGISTRY.filter(([key]) => key !== "overview")) {
             push.mockClear()
             fireEvent.click(screen.getByText(enMessages.console.nav[key]))

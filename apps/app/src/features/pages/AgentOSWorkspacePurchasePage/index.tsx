@@ -1,9 +1,9 @@
-import PurchaseStatusFlow from "@/components/blocks/agentos/PurchaseStatusFlow";
+import PurchaseStatusFlow from "@/components/blocks/agentos/PurchaseStatusFlow"
 
 /** Route identity supplied by the purchase segment. */
 export type AgentOSWorkspacePurchasePageProps = {
-    readonly params: Promise<{ readonly purchaseId: string }>;
-};
+    readonly params: Promise<{ readonly purchaseId: string }>
+}
 
 /**
  * The `/[locale]/agentos/workspaces/purchases/[purchaseId]` screen, connected half.
@@ -16,8 +16,8 @@ export type AgentOSWorkspacePurchasePageProps = {
  * @returns The page.
  */
 export const AgentOSWorkspacePurchasePage = async ({ params }: AgentOSWorkspacePurchasePageProps) => {
-    const { purchaseId } = await params;
-    return <PurchaseStatusFlow purchaseId={purchaseId} />;
-};
+    const { purchaseId } = await params
+    return <PurchaseStatusFlow purchaseId={purchaseId} />
+}
 
-export default AgentOSWorkspacePurchasePage;
+export default AgentOSWorkspacePurchasePage

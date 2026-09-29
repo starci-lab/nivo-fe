@@ -1,13 +1,13 @@
-"use client";
+"use client"
 
-import { useTheme } from "next-themes";
-import { useEffect, useState, type ReactNode } from "react";
-import { NivoGrammarThemeBase } from "./component";
+import { useTheme } from "next-themes"
+import { useEffect, useState, type ReactNode } from "react"
+import { NivoGrammarThemeBase } from "./component"
 
 /** Props for {@link NivoGrammarTheme}: the routed stream the palette scopes. */
 export type NivoGrammarThemeProps = {
-    readonly children: ReactNode;
-};
+    readonly children: ReactNode
+}
 
 /**
  * Keep the nivo family palette on the same resolved theme as the console shell.
@@ -18,16 +18,14 @@ export type NivoGrammarThemeProps = {
  * server sent and break hydration.
  */
 export const NivoGrammarTheme = ({ children }: NivoGrammarThemeProps) => {
-    const { resolvedTheme } = useTheme();
-    const [isHydrated, setHydrated] = useState(false);
+    const { resolvedTheme } = useTheme()
+    const [isHydrated, setHydrated] = useState(false)
     useEffect(() => {
-        setHydrated(true);
-    }, []);
-    const theme = isHydrated && (resolvedTheme === "dark" || resolvedTheme === "light")
-        ? resolvedTheme
-        : "system";
+        setHydrated(true)
+    }, [])
+    const theme = isHydrated && (resolvedTheme === "dark" || resolvedTheme === "light") ? resolvedTheme : "system"
 
-    return <NivoGrammarThemeBase props={{ theme }}>{children}</NivoGrammarThemeBase>;
-};
+    return <NivoGrammarThemeBase props={{ theme }}>{children}</NivoGrammarThemeBase>
+}
 
-export default NivoGrammarTheme;
+export default NivoGrammarTheme

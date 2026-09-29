@@ -1,22 +1,25 @@
-import {execFileSync} from "node:child_process"
-import {existsSync, readFileSync, writeFileSync} from "node:fs"
-import {relative, resolve} from "node:path"
-import {fileURLToPath} from "node:url"
+import { execFileSync } from "node:child_process"
+import { existsSync, readFileSync, writeFileSync } from "node:fs"
+import { relative, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
 
 const normalize = (file, cwd) => relative(cwd, file).replaceAll("\\", "/")
-const production = (file) => /^(?:apps|packages)\/.+\.(?:ts|tsx|js|jsx)$/.test(file)
-    && !/\.(?:test|spec|e2e-spec)\.[cm]?[jt]sx?$/.test(file)
-    && !/(?:^|\/)(?:vitest|vite|jest|eslint|next|playwright)\.config\.[cm]?[jt]s$/.test(file)
-export const resolveBase = (env, args) => env.COVERAGE_BASE_SHA ?? (args.includes("--base") ? args[args.indexOf("--base") + 1] : undefined)
+const production = (file) =>
+    /^(?:apps|packages)\/.+\.(?:ts|tsx|js|jsx)$/.test(file) &&
+    !/\.(?:test|spec|e2e-spec)\.[cm]?[jt]sx?$/.test(file) &&
+    !/(?:^|\/)(?:vitest|vite|jest|eslint|next|playwright)\.config\.[cm]?[jt]s$/.test(file)
+export const resolveBase = (env, args) =>
+    env.COVERAGE_BASE_SHA ?? (args.includes("--base") ? args[args.indexOf("--base") + 1] : undefined)
 
 // git diff --name-status prefixes each line with a status code (A/M/D/R100/...) then one or more
 // tab-separated paths. A deleted path can never carry a coverage-final.json entry, so it is excluded
 // here rather than left for buildPatchSummary to reject; a rename's resulting path is its last field.
-export const changedPaths = (nameStatusOutput) => nameStatusOutput
-    .split(/\r?\n/)
-    .filter(Boolean)
-    .filter((line) => !line.startsWith("D\t"))
-    .map((line) => line.split("\t").pop())
+export const changedPaths = (nameStatusOutput) =>
+    nameStatusOutput
+        .split(/\r?\n/)
+        .filter(Boolean)
+        .filter((line) => !line.startsWith("D\t"))
+        .map((line) => line.split("\t").pop())
 
 export const lineCounts = (data) => {
     const lines = new Map()
@@ -30,28 +33,32 @@ export const lineCounts = (data) => {
 const metric = (values) => ({
     total: values.length,
     covered: values.filter((value) => value > 0).length,
-    pct: values.length ? values.filter((value) => value > 0).length / values.length * 100 : null,
+    pct: values.length ? (values.filter((value) => value > 0).length / values.length) * 100 : null,
 })
 
 export const buildPatchSummary = (report, changedFiles, cwd = process.cwd()) => {
     const changed = [...new Set(changedFiles.map((file) => normalize(resolve(cwd, file), cwd)).filter(production))]
-    if (changed.length === 0) return {notApplicable: true, reason: "no changed production files"}
+    if (changed.length === 0) return { notApplicable: true, reason: "no changed production files" }
     const entries = new Map(Object.entries(report).map(([file, data]) => [normalize(file, cwd), data]))
     const missing = changed.filter((file) => !entries.has(file))
-    if (missing.length) throw new Error(`Changed production files missing from coverage-final.json: ${missing.join(", ")}`)
+    if (missing.length)
+        throw new Error(`Changed production files missing from coverage-final.json: ${missing.join(", ")}`)
     const files = changed.map((file) => entries.get(file))
-    return {total: {
-        statements: metric(files.flatMap((data) => Object.values(data.s ?? {}))),
-        lines: metric(files.flatMap(lineCounts)),
-        functions: metric(files.flatMap((data) => Object.values(data.f ?? {}))),
-        branches: metric(files.flatMap((data) => Object.values(data.b ?? {}).flat())),
-    }}
+    return {
+        total: {
+            statements: metric(files.flatMap((data) => Object.values(data.s ?? {}))),
+            lines: metric(files.flatMap(lineCounts)),
+            functions: metric(files.flatMap((data) => Object.values(data.f ?? {}))),
+            branches: metric(files.flatMap((data) => Object.values(data.b ?? {}).flat())),
+        },
+    }
 }
 
 export const assertPatchThresholds = (summary, threshold = 90) => {
     if (summary.notApplicable) return summary
     const failures = Object.entries(summary.total).filter(([, value]) => value.pct === null || value.pct < threshold)
-    if (failures.length) throw new Error(`Patch coverage below ${threshold}%: ${JSON.stringify(Object.fromEntries(failures))}`)
+    if (failures.length)
+        throw new Error(`Patch coverage below ${threshold}%: ${JSON.stringify(Object.fromEntries(failures))}`)
     return summary
 }
 
@@ -61,7 +68,7 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
     const report = JSON.parse(readFileSync(reportPath, "utf8"))
     const base = resolveBase(process.env, process.argv)
     if (!base) throw new Error("Set COVERAGE_BASE_SHA or pass --base <merge-base-sha> to measure committed PR changes")
-    const tracked = changedPaths(execFileSync("git", ["diff", "--name-status", base, "HEAD"], {encoding: "utf8"}))
+    const tracked = changedPaths(execFileSync("git", ["diff", "--name-status", base, "HEAD"], { encoding: "utf8" }))
     const summary = buildPatchSummary(report, tracked)
     writeFileSync("coverage/patch-summary.json", JSON.stringify(summary, null, 2) + "\n")
     assertPatchThresholds(summary)

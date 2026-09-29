@@ -6,10 +6,12 @@ export type SiteLink = {
 }
 
 /** A first-level navigation item with at most one discovery layer. */
-export type SiteNavigationItem = SiteLink | {
-    readonly id: string
-    readonly children: ReadonlyArray<SiteLink>
-}
+export type SiteNavigationItem =
+    | SiteLink
+    | {
+          readonly id: string
+          readonly children: ReadonlyArray<SiteLink>
+      }
 
 /** The canonical public origin used by metadata, robots, and sitemap adapters. */
 export const PUBLIC_SITE_URL = "https://nivo.vn"

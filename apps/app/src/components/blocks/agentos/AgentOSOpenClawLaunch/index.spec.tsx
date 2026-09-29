@@ -12,8 +12,15 @@ const mocks = vi.hoisted(() => ({
     session: { state: { status: "signed-in", accessToken: "token" } },
 }))
 
-vi.mock("@/hooks", async () => ({ ...(await vi.importActual("@/hooks") as Record<string, unknown>), useRouter: () => ({ push: mocks.push }), useSession: () => mocks.session }))
-vi.mock("@/modules/api/agentos-workspaces", () => ({ issueAgentWorkspaceAppLaunch: mocks.issue, revokeAgentWorkspaceAppLaunch: mocks.revoke }))
+vi.mock("@/hooks", async () => ({
+    ...((await vi.importActual("@/hooks")) as Record<string, unknown>),
+    useRouter: () => ({ push: mocks.push }),
+    useSession: () => mocks.session,
+}))
+vi.mock("@/modules/api/agentos-workspaces", () => ({
+    issueAgentWorkspaceAppLaunch: mocks.issue,
+    revokeAgentWorkspaceAppLaunch: mocks.revoke,
+}))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/window/workspace-app-launch", () => ({
     followWorkspaceAppRedirect: mocks.followRedirect,
@@ -25,7 +32,11 @@ type LaunchBridgeViewInput = { state: string; on: { onRetry: () => void; onRetur
 
 vi.mock("./component", () => ({
     AgentOSOpenClawLaunchBase: (input: LaunchBridgeViewInput) => (
-        <><output data-testid="launch-state">{input.state}</output><button onClick={input.on.onRetry}>retry</button><button onClick={input.on.onReturn}>return</button></>
+        <>
+            <output data-testid="launch-state">{input.state}</output>
+            <button onClick={input.on.onRetry}>retry</button>
+            <button onClick={input.on.onReturn}>return</button>
+        </>
     ),
 }))
 
@@ -38,10 +49,20 @@ describe("AgentOSOpenClawLaunch", () => {
         mocks.safeRedirect.mockReturnValue("https://openclaw.test/launch")
         mocks.issue.mockResolvedValue({
             ok: true,
-            data: { launchId: "launch-1", redirectUrl: "https://openclaw.test/launch", expiresAt: "2026-08-22T10:00:00.000Z" },
+            data: {
+                launchId: "launch-1",
+                redirectUrl: "https://openclaw.test/launch",
+                expiresAt: "2026-08-22T10:00:00.000Z",
+            },
         })
-        vi.stubGlobal("BroadcastChannel", vi.fn(() => ({ postMessage: mocks.postMessage, close: mocks.close })))
-        vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => { callback(0); return 1 })
+        vi.stubGlobal(
+            "BroadcastChannel",
+            vi.fn(() => ({ postMessage: mocks.postMessage, close: mocks.close })),
+        )
+        vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+            callback(0)
+            return 1
+        })
     })
 
     it("advances only the launch block from issuing to connected", async () => {
@@ -77,12 +98,14 @@ describe("AgentOSOpenClawLaunch", () => {
     })
 
     it("retries a refused launch from a fresh issuing state", async () => {
-        mocks.issue
-            .mockResolvedValueOnce({ ok: false, code: "LAUNCH_BLOCKED" })
-            .mockResolvedValueOnce({
-                ok: true,
-                data: { launchId: "launch-2", redirectUrl: "https://openclaw.test/launch", expiresAt: "2026-08-22T10:00:00.000Z" },
-            })
+        mocks.issue.mockResolvedValueOnce({ ok: false, code: "LAUNCH_BLOCKED" }).mockResolvedValueOnce({
+            ok: true,
+            data: {
+                launchId: "launch-2",
+                redirectUrl: "https://openclaw.test/launch",
+                expiresAt: "2026-08-22T10:00:00.000Z",
+            },
+        })
         render(<AgentOSOpenClawLaunch workspaceId="workspace-1" />)
         await waitFor(() => expect(screen.getByTestId("launch-state")).toHaveTextContent("blocked"))
 

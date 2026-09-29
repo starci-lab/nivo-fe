@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { useRouter, useSession } from "@/hooks";
-import { SessionEndingDialogBase } from "./component";
+import { useState } from "react"
+import { useTranslations } from "next-intl"
+import { useRouter, useSession } from "@/hooks"
+import { SessionEndingDialogBase } from "./component"
 
 /**
  * Where a person is left once their sessions have been ended.
@@ -16,16 +16,16 @@ import { SessionEndingDialogBase } from "./component";
  * an unconfirmed one therefore land on different addresses, and neither address claims more than
  * the sign-out envelope actually stated.
  */
-const SIGN_IN_HREF = "/authentication";
-const ENDING_PARAM = "sessionEnding";
-const APPLIED_VALUE = "applied";
-const UNCONFIRMED_VALUE = "unconfirmed";
+const SIGN_IN_HREF = "/authentication"
+const ENDING_PARAM = "sessionEnding"
+const APPLIED_VALUE = "applied"
+const UNCONFIRMED_VALUE = "unconfirmed"
 
 /** Connected owner of the every-browser confirmation over the console. */
 export type SessionEndingDialogProps = {
-  readonly isOpen: boolean;
-  readonly onOpenChange: (isOpen: boolean) => void;
-};
+    readonly isOpen: boolean
+    readonly onOpenChange: (isOpen: boolean) => void
+}
 
 /**
  * Ask for every-browser scope, end the sessions once, and leave for the sign-in surface.
@@ -51,37 +51,45 @@ export type SessionEndingDialogProps = {
  * @returns The every-browser confirmation over the console.
  */
 export const SessionEndingDialog = (props: SessionEndingDialogProps) => {
-  const {
-    isOpen,
-    onOpenChange
-  }: SessionEndingDialogProps = props;
-  const t = useTranslations("console");
-  const router = useRouter();
-  const session = useSession();
-  const [isPending, setIsPending] = useState(false);
-  const confirm = (): void => {
-    if (isPending) {
-      return;
+    const { isOpen, onOpenChange }: SessionEndingDialogProps = props
+    const t = useTranslations("console")
+    const router = useRouter()
+    const session = useSession()
+    const [isPending, setIsPending] = useState(false)
+    const confirm = (): void => {
+        if (isPending) {
+            return
+        }
+        setIsPending(true)
+        void session
+            .end("everywhere")
+            .then(
+                (report) => (report.authorityEnding === "unconfirmed" ? UNCONFIRMED_VALUE : APPLIED_VALUE),
+                () => UNCONFIRMED_VALUE,
+            )
+            .then((ending) => {
+                onOpenChange(false)
+                setTimeout(() => {
+                    router.replace(`${SIGN_IN_HREF}?${ENDING_PARAM}=${ending}`)
+                }, 0)
+            })
     }
-    setIsPending(true);
-    void session.end("everywhere").then((report) => report.authorityEnding === "unconfirmed" ? UNCONFIRMED_VALUE : APPLIED_VALUE, () => UNCONFIRMED_VALUE).then((ending) => {
-      onOpenChange(false);
-      setTimeout(() => {
-        router.replace(`${SIGN_IN_HREF}?${ENDING_PARAM}=${ending}`);
-      }, 0);
-    });
-  };
-  return <SessionEndingDialogBase props={{
-    title: t("account.sessionEnding.title"),
-    description: t("account.sessionEnding.description"),
-    scopeNote: t("account.sessionEnding.scopeNote"),
-    cancelLabel: t("account.sessionEnding.cancel"),
-    confirmLabel: t("account.sessionEnding.confirm"),
-    pendingLabel: t("account.sessionEnding.pending"),
-    isPending,
-    isOpen
-  }} on={{
-    confirm,
-    onOpenChange
-  }} />;
-};
+    return (
+        <SessionEndingDialogBase
+            props={{
+                title: t("account.sessionEnding.title"),
+                description: t("account.sessionEnding.description"),
+                scopeNote: t("account.sessionEnding.scopeNote"),
+                cancelLabel: t("account.sessionEnding.cancel"),
+                confirmLabel: t("account.sessionEnding.confirm"),
+                pendingLabel: t("account.sessionEnding.pending"),
+                isPending,
+                isOpen,
+            }}
+            on={{
+                confirm,
+                onOpenChange,
+            }}
+        />
+    )
+}

@@ -3,7 +3,14 @@ import { describe, expect, it, vi } from "vitest"
 import { StatusActionCard } from "./"
 
 describe("StatusActionCard", () => {
-    const base = { id: "sync", title: "Sync", description: "Keeps data current", statusLabel: "Ready", statusTone: "success" as const, actionLabel: "Run" }
+    const base = {
+        id: "sync",
+        title: "Sync",
+        description: "Keeps data current",
+        statusLabel: "Ready",
+        statusTone: "success" as const,
+        actionLabel: "Run",
+    }
 
     it("renders an in-page action and optional detail", () => {
         const press = vi.fn()
@@ -14,7 +21,9 @@ describe("StatusActionCard", () => {
     })
 
     it("uses an external action link only when enabled", () => {
-        const { rerender } = render(<StatusActionCard props={{ ...base, actionHref: "https://example.com", actionTarget: "_blank" }} />)
+        const { rerender } = render(
+            <StatusActionCard props={{ ...base, actionHref: "https://example.com", actionTarget: "_blank" }} />,
+        )
         expect(screen.getByRole("link", { name: "Run" })).toHaveAttribute("href", "https://example.com")
         rerender(<StatusActionCard props={{ ...base, actionHref: "https://example.com", disabled: true }} />)
         expect(screen.getByRole("button", { name: "Run" })).toBeDisabled()

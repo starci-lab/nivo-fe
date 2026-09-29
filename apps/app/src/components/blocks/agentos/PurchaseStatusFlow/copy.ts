@@ -5,190 +5,190 @@
  */
 export type PurchaseStatusCopy = {
     /** Accessible name of the breadcrumb trail. */
-    readonly path: string;
-    readonly workspaces: string;
-    readonly purchases: string;
-    readonly provisioning: string;
-    readonly loadingTitle: string;
-    readonly loadingText: string;
+    readonly path: string
+    readonly workspaces: string
+    readonly purchases: string
+    readonly provisioning: string
+    readonly loadingTitle: string
+    readonly loadingText: string
     /** Spoken name of a skeleton placeholder while the read is in flight. */
-    readonly loading: string;
-    readonly paymentPendingTitle: string;
-    readonly paymentPendingBadge: string;
-    readonly paymentPendingSubtitle: string;
-    readonly paymentUnknownTitle: string;
-    readonly paymentUnknownBadge: string;
-    readonly paymentUnknownSubtitle: string;
-    readonly paymentFailedTitle: string;
-    readonly paymentFailedBadge: string;
-    readonly paymentFailedSubtitle: string;
-    readonly paidTitle: string;
-    readonly paidBadge: string;
-    readonly paidSubtitle: string;
-    readonly provisioningTitle: string;
-    readonly provisioningBadge: string;
-    readonly provisioningSubtitle: string;
-    readonly provisioningUnknownTitle: string;
-    readonly provisioningUnknownBadge: string;
-    readonly provisioningFailedTitle: string;
-    readonly provisioningFailedBadge: string;
-    readonly provisioningFailedTerminalTitle: string;
-    readonly provisioningFailedTerminalBadge: string;
-    readonly readyTitle: string;
-    readonly readyBadge: string;
-    readonly readySubtitle: string;
-    readonly deniedTitle: string;
-    readonly deniedSubtitle: string;
-    readonly deniedNotice: string;
-    readonly deniedText: string;
-    readonly purchaseFactsLabel: string;
-    readonly verificationLabel: string;
-    readonly provisioningOrderLabel: string;
-    readonly confirmedFactsLabel: string;
-    readonly latestCheck: string;
-    readonly offer: string;
-    readonly offerPlan: string;
-    readonly purchaseRef: string;
-    readonly paymentAttempt: string;
-    readonly paymentStatusLabel: string;
-    readonly amountLabel: string;
-    readonly invoiceDue: string;
-    readonly invoicePaidAt: string;
-    readonly workspaceLabel: string;
-    readonly workspacePending: string;
+    readonly loading: string
+    readonly paymentPendingTitle: string
+    readonly paymentPendingBadge: string
+    readonly paymentPendingSubtitle: string
+    readonly paymentUnknownTitle: string
+    readonly paymentUnknownBadge: string
+    readonly paymentUnknownSubtitle: string
+    readonly paymentFailedTitle: string
+    readonly paymentFailedBadge: string
+    readonly paymentFailedSubtitle: string
+    readonly paidTitle: string
+    readonly paidBadge: string
+    readonly paidSubtitle: string
+    readonly provisioningTitle: string
+    readonly provisioningBadge: string
+    readonly provisioningSubtitle: string
+    readonly provisioningUnknownTitle: string
+    readonly provisioningUnknownBadge: string
+    readonly provisioningFailedTitle: string
+    readonly provisioningFailedBadge: string
+    readonly provisioningFailedTerminalTitle: string
+    readonly provisioningFailedTerminalBadge: string
+    readonly readyTitle: string
+    readonly readyBadge: string
+    readonly readySubtitle: string
+    readonly deniedTitle: string
+    readonly deniedSubtitle: string
+    readonly deniedNotice: string
+    readonly deniedText: string
+    readonly purchaseFactsLabel: string
+    readonly verificationLabel: string
+    readonly provisioningOrderLabel: string
+    readonly confirmedFactsLabel: string
+    readonly latestCheck: string
+    readonly offer: string
+    readonly offerPlan: string
+    readonly purchaseRef: string
+    readonly paymentAttempt: string
+    readonly paymentStatusLabel: string
+    readonly amountLabel: string
+    readonly invoiceDue: string
+    readonly invoicePaidAt: string
+    readonly workspaceLabel: string
+    readonly workspacePending: string
     /** Second fact band on the provisioning surface: billing cadence and renewal behavior. */
-    readonly cadenceLabel: string;
-    readonly renewalLabel: string;
+    readonly cadenceLabel: string
+    readonly renewalLabel: string
     /** Cadence value for a one-time (never recurring) item. */
-    readonly cadenceOneTime: string;
+    readonly cadenceOneTime: string
     /** Cadence value for an item billed every cycle. */
-    readonly cadenceRecurring: string;
+    readonly cadenceRecurring: string
     /** Cadence value for a one-time setup followed by recurring billing. */
-    readonly cadenceSetupRecurring: string;
+    readonly cadenceSetupRecurring: string
     /** Renewal value when the order auto-renews but publishes no date. */
-    readonly renewalAuto: string;
+    readonly renewalAuto: string
     /** Renewal value when the order auto-renews: "Auto-renews {date}". */
-    readonly renewalAutoAt: (date: string) => string;
+    readonly renewalAutoAt: (date: string) => string
     /** Renewal value when the owner re-authorizes manually by the published date. */
-    readonly renewalManualAt: (date: string) => string;
+    readonly renewalManualAt: (date: string) => string
     /** Renewal value when re-authorization is manual and no date is published. */
-    readonly renewalManual: string;
+    readonly renewalManual: string
     /** Renewal value for a one-time order that never renews. */
-    readonly renewalNone: string;
-    readonly purchaseRow: string;
-    readonly invoiceRow: string;
-    readonly paidAmount: string;
-    readonly currentOperation: string;
-    readonly operationAdmit: string;
-    readonly purchaseLabel: string;
-    readonly timelineRead: string;
-    readonly timelineReadDetail: string;
-    readonly detailPaymentSettled: string;
-    readonly startedLabel: string;
-    readonly lastObservation: string;
-    readonly reconcileNote: string;
-    readonly checkProvider: string;
-    readonly checkAmount: string;
-    readonly checkCanonical: string;
-    readonly checkAdmission: string;
-    readonly checkPaymentVerified: string;
-    readonly checkEntitlement: string;
-    readonly checkConfigure: string;
-    readonly checkReadiness: string;
-    readonly detailAwaiting: string;
-    readonly detailEvaluated: string;
-    readonly detailNotEvaluated: string;
-    readonly detailWithheld: string;
-    readonly detailConfirmed: string;
-    readonly detailRefused: string;
-    readonly detailSourceRefused: string;
-    readonly detailLocked: string;
-    readonly detailAdmitted: string;
-    readonly detailWaitingAdmission: string;
-    readonly detailWaitingConfiguration: string;
-    readonly detailWaitingReadiness: string;
-    readonly detailOrderRecorded: string;
-    readonly lockedNotice: string;
-    readonly outcomeLabel: string;
-    readonly outcomeEntryWithheld: string;
-    readonly outcomeEntryReady: string;
-    readonly outcomeEntryDenied: string;
-    readonly outcomeProvisioningRetryable: string;
-    readonly outcomeProvisioningTerminal: string;
-    readonly checkPaymentAction: string;
-    readonly reconcilePaymentAction: string;
-    readonly refreshStatusAction: string;
-    readonly reconcileOrderAction: string;
-    readonly retryProvisionAction: string;
-    readonly retryProvisionCaption: string;
-    readonly viewProvisioningAction: string;
-    readonly enterWorkspaceAction: string;
-    readonly returnToList: string;
-    readonly backToWorkspaces: string;
+    readonly renewalNone: string
+    readonly purchaseRow: string
+    readonly invoiceRow: string
+    readonly paidAmount: string
+    readonly currentOperation: string
+    readonly operationAdmit: string
+    readonly purchaseLabel: string
+    readonly timelineRead: string
+    readonly timelineReadDetail: string
+    readonly detailPaymentSettled: string
+    readonly startedLabel: string
+    readonly lastObservation: string
+    readonly reconcileNote: string
+    readonly checkProvider: string
+    readonly checkAmount: string
+    readonly checkCanonical: string
+    readonly checkAdmission: string
+    readonly checkPaymentVerified: string
+    readonly checkEntitlement: string
+    readonly checkConfigure: string
+    readonly checkReadiness: string
+    readonly detailAwaiting: string
+    readonly detailEvaluated: string
+    readonly detailNotEvaluated: string
+    readonly detailWithheld: string
+    readonly detailConfirmed: string
+    readonly detailRefused: string
+    readonly detailSourceRefused: string
+    readonly detailLocked: string
+    readonly detailAdmitted: string
+    readonly detailWaitingAdmission: string
+    readonly detailWaitingConfiguration: string
+    readonly detailWaitingReadiness: string
+    readonly detailOrderRecorded: string
+    readonly lockedNotice: string
+    readonly outcomeLabel: string
+    readonly outcomeEntryWithheld: string
+    readonly outcomeEntryReady: string
+    readonly outcomeEntryDenied: string
+    readonly outcomeProvisioningRetryable: string
+    readonly outcomeProvisioningTerminal: string
+    readonly checkPaymentAction: string
+    readonly reconcilePaymentAction: string
+    readonly refreshStatusAction: string
+    readonly reconcileOrderAction: string
+    readonly retryProvisionAction: string
+    readonly retryProvisionCaption: string
+    readonly viewProvisioningAction: string
+    readonly enterWorkspaceAction: string
+    readonly returnToList: string
+    readonly backToWorkspaces: string
     /** Confirmed-facts row naming the provisioning owner identity. */
-    readonly ownerLabel: string;
+    readonly ownerLabel: string
     /** Confirmed-facts row naming the fenced provisioning attempt. */
-    readonly attemptLabel: string;
-    readonly changeOffer: string;
-    readonly realtimeReconnect: string;
-    readonly stateDone: string;
-    readonly stateRunning: string;
-    readonly stateQueued: string;
-    readonly stateFailed: string;
-    readonly stateUnknown: string;
+    readonly attemptLabel: string
+    readonly changeOffer: string
+    readonly realtimeReconnect: string
+    readonly stateDone: string
+    readonly stateRunning: string
+    readonly stateQueued: string
+    readonly stateFailed: string
+    readonly stateUnknown: string
     /** Recheck caption naming the exact attempt identity the action reconciles. */
-    readonly rechecksOnly: (attempt: string) => string;
+    readonly rechecksOnly: (attempt: string) => string
     /** The provisioning heading naming the offer being prepared. */
-    readonly preparingOffer: (offer: string) => string;
+    readonly preparingOffer: (offer: string) => string
     /** Timeline sentences reporting each source's own verbatim status. */
-    readonly orderReports: (status: string) => string;
-    readonly invoiceReports: (status: string) => string;
+    readonly orderReports: (status: string) => string
+    readonly invoiceReports: (status: string) => string
     /** The fact-strip sentence naming the settled amount. */
-    readonly paidSentence: (amount: string) => string;
+    readonly paidSentence: (amount: string) => string
     /** "Started {at} · {n} elapsed" for the running operation. */
-    readonly startedSentence: (at: string, elapsed: string) => string;
+    readonly startedSentence: (at: string, elapsed: string) => string
     /** "Last observation: {detail} at {at}" for the running operation. */
-    readonly lastObservationSentence: (detail: string, at: string) => string;
+    readonly lastObservationSentence: (detail: string, at: string) => string
     /** Lifecycle label for one workspace provisioning operation status. */
-    readonly operationStatus: (status: string) => string;
+    readonly operationStatus: (status: string) => string
     /** Trailing rail fact "Attempt {attempt}" naming the fenced attempt the order stands on. */
-    readonly attemptFact: (attempt: number) => string;
+    readonly attemptFact: (attempt: number) => string
     /** The platform billing ledger's own label. */
-    readonly ledgerLabel: string;
+    readonly ledgerLabel: string
     /** Notice shown where a source outage keeps one facet from answering. */
-    readonly unavailableNotice: string;
+    readonly unavailableNotice: string
     /** The held-entitlement renewal action offered to the current owner. */
-    readonly renewAction: string;
+    readonly renewAction: string
     /** "On hold since {date}" for a held entitlement. */
-    readonly heldSinceLabel: (date: string) => string;
+    readonly heldSinceLabel: (date: string) => string
     /** "Paid through {date}" for a held entitlement. */
-    readonly paidThroughLabel: (date: string) => string;
+    readonly paidThroughLabel: (date: string) => string
     /** Notice shown when the entry boundary answers not-ready beside the purchase's real state. */
-    readonly entryNotReadyNotice: string;
+    readonly entryNotReadyNotice: string
     /** Notice shown when the observed identities disagree with the confirmed record. */
-    readonly entryConflictNotice: string;
+    readonly entryConflictNotice: string
     /** Lifecycle label of one purchase cursor state (`stateLabel.<state>`). */
-    readonly purchaseStateLabel: (state: string) => string;
+    readonly purchaseStateLabel: (state: string) => string
     /** Display name of the source owning a facet (`sourceLabel.<source>`). */
-    readonly sourceLabel: (source: string) => string;
+    readonly sourceLabel: (source: string) => string
     /** Label of one source-read state (`sourceStateLabel.<state>`). */
-    readonly sourceStateLabel: (state: string) => string;
+    readonly sourceStateLabel: (state: string) => string
     /** Label of one ledger settlement state (`ledgerStateLabel.<state>`). */
-    readonly ledgerStateLabel: (state: string) => string;
+    readonly ledgerStateLabel: (state: string) => string
     /** Label of one posted ledger entry kind (`ledgerEntryKindLabel.<kind>`). */
-    readonly ledgerEntryKindLabel: (kind: string) => string;
+    readonly ledgerEntryKindLabel: (kind: string) => string
     /** Label of one refund projection state (`refundStateLabel.<state>`). */
-    readonly refundStateLabel: (state: string) => string;
+    readonly refundStateLabel: (state: string) => string
     /** Label of one service-eligibility state (`holdStateLabel.<state>`). */
-    readonly holdStateLabel: (state: string) => string;
+    readonly holdStateLabel: (state: string) => string
     /** Label of one attributable hold reason (`holdReasonLabel.<reason>`). */
-    readonly holdReasonLabel: (reason: string) => string;
+    readonly holdReasonLabel: (reason: string) => string
     /** Label of one renewal-evidence value (`renewalEvidenceLabel.<evidence>`). */
-    readonly renewalEvidenceLabel: (evidence: string) => string;
+    readonly renewalEvidenceLabel: (evidence: string) => string
     /** Label of one entry outcome status (`entryStateLabel.<status>`). */
-    readonly entryStateLabel: (status: string) => string;
+    readonly entryStateLabel: (status: string) => string
     /** Label of one entry refusal code (`entryRefusalLabel.<code>`). */
-    readonly entryRefusalLabel: (code: string) => string;
+    readonly entryRefusalLabel: (code: string) => string
     /** Label of one provisioning-owner disposition (`provisioningDispositionLabel.<disposition>`). */
-    readonly provisioningDispositionLabel: (disposition: string) => string;
-};
+    readonly provisioningDispositionLabel: (disposition: string) => string
+}

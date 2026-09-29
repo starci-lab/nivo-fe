@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import { readWorkspaceCheckoutOffers } from "@/modules/api/workspace-controlplane";
-import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
+import { readWorkspaceCheckoutOffers } from "@/modules/api/workspace-controlplane"
+import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery"
 
 /*
  * One hook per file, one registered read per hook: the file's basename is the hook it exports, which
@@ -10,7 +10,12 @@ import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
  */
 
 /** Cache identity of one offer selection: the exact offer identity and version the screen presents. */
-export const workspaceCheckoutOffersQueryKey = (offerId: string, offerVersion: string): NivoQueryKey => ["workspace-checkout", "offers", offerId, offerVersion];
+export const workspaceCheckoutOffersQueryKey = (offerId: string, offerVersion: string): NivoQueryKey => [
+    "workspace-checkout",
+    "offers",
+    offerId,
+    offerVersion,
+]
 
 /**
  * Select one exact offer version and read the currently approved offers.
@@ -19,4 +24,6 @@ export const workspaceCheckoutOffersQueryKey = (offerId: string, offerVersion: s
  *   rather than addressing a half-filled offer identity.
  */
 export const useQueryWorkspaceCheckoutOffersSwr = (offerId: string, offerVersion: string, enabled = true) =>
-  useNivoQuery(enabled ? workspaceCheckoutOffersQueryKey(offerId, offerVersion) : null, () => readWorkspaceCheckoutOffers(offerId, offerVersion));
+    useNivoQuery(enabled ? workspaceCheckoutOffersQueryKey(offerId, offerVersion) : null, () =>
+        readWorkspaceCheckoutOffers(offerId, offerVersion),
+    )

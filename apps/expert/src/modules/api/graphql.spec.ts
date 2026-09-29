@@ -8,17 +8,27 @@ describe("expert graphql transport", () => {
     })
 
     it("posts variables and merges caller fetch options", async () => {
-        const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
-            data: { courses: { success: true, data: [{ id: "course-1" }], message: "ok" } },
-        }), { status: 200 }))
+        const fetchMock = vi.fn().mockResolvedValue(
+            new Response(
+                JSON.stringify({
+                    data: { courses: { success: true, data: [{ id: "course-1" }], message: "ok" } },
+                }),
+                { status: 200 },
+            ),
+        )
         vi.stubGlobal("fetch", fetchMock)
-        await expect(graphql("query Courses", { limit: 10 }, { next: { revalidate: 60 } }))
-            .resolves.toEqual({ ok: true, data: [{ id: "course-1" }] })
-        expect(fetchMock).toHaveBeenCalledWith("http://localhost:4068/graphql", expect.objectContaining({
-            method: "POST",
-            next: { revalidate: 60 },
-            body: JSON.stringify({ query: "query Courses", variables: { limit: 10 } }),
-        }))
+        await expect(graphql("query Courses", { limit: 10 }, { next: { revalidate: 60 } })).resolves.toEqual({
+            ok: true,
+            data: [{ id: "course-1" }],
+        })
+        expect(fetchMock).toHaveBeenCalledWith(
+            "http://localhost:4068/graphql",
+            expect.objectContaining({
+                method: "POST",
+                next: { revalidate: 60 },
+                body: JSON.stringify({ query: "query Courses", variables: { limit: 10 } }),
+            }),
+        )
     })
 
     it("returns network failures", async () => {
@@ -46,9 +56,13 @@ describe("expert graphql transport", () => {
         await expect(graphql("query Broken")).resolves.toEqual({ ok: false, reason: "invalid" })
         fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ data: {} })))
         await expect(graphql("query Empty")).resolves.toEqual({ ok: false, reason: "empty response" })
-        fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({
-            data: { operation: { success: false, data: null, message: "denied", error: "NO_ACCESS" } },
-        })))
+        fetchMock.mockResolvedValueOnce(
+            new Response(
+                JSON.stringify({
+                    data: { operation: { success: false, data: null, message: "denied", error: "NO_ACCESS" } },
+                }),
+            ),
+        )
         await expect(graphql("query Refused")).resolves.toEqual({ ok: false, reason: "NO_ACCESS" })
     })
 })

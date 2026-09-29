@@ -58,11 +58,20 @@ const links = { workspaces: "/agentos/workspaces" }
 
 describe("OfferSelectionFlowBase", () => {
     it("renders every current offer with its inseparable amount and published facts", () => {
-        render(<OfferSelectionFlowBase
-            state="selection"
-            props={{ copy, links, offers, selectedOfferId: "nivo-workspace-growth", checkoutHref: "/agentos/workspaces/new/checkout?offer=nivo-workspace-growth&offerVersion=draft-2026-09-22" }}
-            on={{ select: vi.fn() }}
-        />)
+        render(
+            <OfferSelectionFlowBase
+                state="selection"
+                props={{
+                    copy,
+                    links,
+                    offers,
+                    selectedOfferId: "nivo-workspace-growth",
+                    checkoutHref:
+                        "/agentos/workspaces/new/checkout?offer=nivo-workspace-growth&offerVersion=draft-2026-09-22",
+                }}
+                on={{ select: vi.fn() }}
+            />,
+        )
         expect(screen.getByRole("radiogroup", { name: "Available offers" })).toBeInTheDocument()
         const radios = screen.getAllByRole("radio")
         expect(radios).toHaveLength(3)
@@ -78,11 +87,19 @@ describe("OfferSelectionFlowBase", () => {
     })
 
     it("marks the selected offer through checked state and a visible text badge, not color alone", () => {
-        render(<OfferSelectionFlowBase
-            state="selection"
-            props={{ copy, links, offers, selectedOfferId: "nivo-workspace-growth", checkoutHref: "/checkout?offer=nivo-workspace-growth&offerVersion=draft-2026-09-22" }}
-            on={{ select: vi.fn() }}
-        />)
+        render(
+            <OfferSelectionFlowBase
+                state="selection"
+                props={{
+                    copy,
+                    links,
+                    offers,
+                    selectedOfferId: "nivo-workspace-growth",
+                    checkoutHref: "/checkout?offer=nivo-workspace-growth&offerVersion=draft-2026-09-22",
+                }}
+                on={{ select: vi.fn() }}
+            />,
+        )
         const growth = screen.getByRole("radio", { name: /Nivo Workspace Growth/ })
         expect(growth).toBeChecked()
         expect(screen.getByText("Selected")).toBeInTheDocument()
@@ -93,11 +110,19 @@ describe("OfferSelectionFlowBase", () => {
 
     it("fires select with the offer identity and preserves the frozen version as the review destination", () => {
         const select = vi.fn()
-        render(<OfferSelectionFlowBase
-            state="selection"
-            props={{ copy, links, offers, selectedOfferId: "nivo-workspace-starter", checkoutHref: "/checkout?offer=nivo-workspace-starter&offerVersion=draft-2026-09-22" }}
-            on={{ select }}
-        />)
+        render(
+            <OfferSelectionFlowBase
+                state="selection"
+                props={{
+                    copy,
+                    links,
+                    offers,
+                    selectedOfferId: "nivo-workspace-starter",
+                    checkoutHref: "/checkout?offer=nivo-workspace-starter&offerVersion=draft-2026-09-22",
+                }}
+                on={{ select }}
+            />,
+        )
         fireEvent.click(screen.getByRole("radio", { name: /Nivo Workspace Scale/ }))
         expect(select).toHaveBeenCalledWith("nivo-workspace-scale")
         const review = screen.getByRole("link", { name: "Review selected offer" })
@@ -105,17 +130,19 @@ describe("OfferSelectionFlowBase", () => {
     })
 
     it("draws the joined surface with one external label row and hairline-separated flush bands", () => {
-        const { container } = render(<OfferSelectionFlowBase
-            state="selection"
-            props={{ copy, links, offers, selectedOfferId: "nivo-workspace-growth", checkoutHref: "/checkout" }}
-            on={{ select: vi.fn() }}
-        />)
+        const { container } = render(
+            <OfferSelectionFlowBase
+                state="selection"
+                props={{ copy, links, offers, selectedOfferId: "nivo-workspace-growth", checkoutHref: "/checkout" }}
+                on={{ select: vi.fn() }}
+            />,
+        )
         const html = container.innerHTML
         expect(html).toContain("Current offers")
         expect(html).toContain("Read from the Workspace Provision checkout boundary")
         const rows = container.querySelectorAll("[data-offer]")
         expect(rows).toHaveLength(3)
-        rows.forEach(row => {
+        rows.forEach((row) => {
             expect(row.className).toContain("border-separator")
             expect(row.className).toContain("px-4")
         })
@@ -124,19 +151,18 @@ describe("OfferSelectionFlowBase", () => {
     })
 
     it("keeps the workspace return path below the surface", () => {
-        render(<OfferSelectionFlowBase
-            state="selection"
-            props={{ copy, links, offers, selectedOfferId: "nivo-workspace-growth", checkoutHref: "/checkout" }}
-            on={{ select: vi.fn() }}
-        />)
+        render(
+            <OfferSelectionFlowBase
+                state="selection"
+                props={{ copy, links, offers, selectedOfferId: "nivo-workspace-growth", checkoutHref: "/checkout" }}
+                on={{ select: vi.fn() }}
+            />,
+        )
         expect(screen.getByRole("link", { name: "Back to workspaces" })).toHaveAttribute("href", "/agentos/workspaces")
     })
 
     it("renders the loading state only as skeleton geometry inside a busy surface", () => {
-        const { container } = render(<OfferSelectionFlowBase
-            state="loading"
-            props={{ copy, links }}
-        />)
+        const { container } = render(<OfferSelectionFlowBase state="loading" props={{ copy, links }} />)
         const busy = container.querySelector("[aria-busy='true']")
         expect(busy).not.toBeNull()
         expect(screen.queryAllByRole("radio")).toHaveLength(0)
@@ -146,11 +172,13 @@ describe("OfferSelectionFlowBase", () => {
 
     it("keeps the offer hierarchy readable in the unavailable state without selection controls", () => {
         const refresh = vi.fn()
-        render(<OfferSelectionFlowBase
-            state="unavailable"
-            props={{ copy, links, offers, message: "boundary read refused", isRefreshPending: false }}
-            on={{ refresh }}
-        />)
+        render(
+            <OfferSelectionFlowBase
+                state="unavailable"
+                props={{ copy, links, offers, message: "boundary read refused", isRefreshPending: false }}
+                on={{ refresh }}
+            />,
+        )
         expect(screen.queryAllByRole("radio")).toHaveLength(0)
         expect(screen.getByText("Nivo Workspace Growth")).toBeInTheDocument()
         expect(screen.getByText("No current offer can be presented")).toBeInTheDocument()
@@ -161,22 +189,32 @@ describe("OfferSelectionFlowBase", () => {
     })
 
     it("shows no payment or selection claim while unavailable", () => {
-        const html = renderToStaticMarkup(<OfferSelectionFlowBase
-            state="unavailable"
-            props={{ copy, links, offers, message: "unavailable", isRefreshPending: true }}
-            on={{ refresh: vi.fn() }}
-        />)
+        const html = renderToStaticMarkup(
+            <OfferSelectionFlowBase
+                state="unavailable"
+                props={{ copy, links, offers, message: "unavailable", isRefreshPending: true }}
+                on={{ refresh: vi.fn() }}
+            />,
+        )
         expect(html).not.toContain("Review selected offer")
         expect(html).not.toContain('type="radio"')
     })
 
     it("discloses no private offer terms and offers only the Login doors in the no-session state", () => {
         const signIn = vi.fn()
-        const { container } = render(<OfferSelectionFlowBase
-            state="no-session"
-            props={{ copy, links, message: "No valid Login session was found.", signInHref: "/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fnew", signUpHref: "/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fnew" }}
-            on={{ signIn }}
-        />)
+        const { container } = render(
+            <OfferSelectionFlowBase
+                state="no-session"
+                props={{
+                    copy,
+                    links,
+                    message: "No valid Login session was found.",
+                    signInHref: "/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fnew",
+                    signUpHref: "/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fnew",
+                }}
+                on={{ signIn }}
+            />,
+        )
         expect(screen.queryAllByRole("radio")).toHaveLength(0)
         expect(container.querySelectorAll("[data-offer]")).toHaveLength(0)
         expect(screen.queryByText("Review selected offer")).not.toBeInTheDocument()

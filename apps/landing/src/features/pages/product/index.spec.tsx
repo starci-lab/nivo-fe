@@ -17,20 +17,40 @@ describe("ProductPage", () => {
         const html = container.innerHTML
 
         expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1)
-        expect(screen.getByRole("heading", { level: 1, name: "THE AI-NATIVE BUSINESS OPERATING SYSTEM" })).toBeInTheDocument()
-        expectSectionOrder(html, ["responsibility-center", "operating-model", "capability-model", "nivo-os-today", "trust-bridge", "target-architecture", "next-path"])
+        expect(
+            screen.getByRole("heading", { level: 1, name: "THE AI-NATIVE BUSINESS OPERATING SYSTEM" }),
+        ).toBeInTheDocument()
+        expectSectionOrder(html, [
+            "responsibility-center",
+            "operating-model",
+            "capability-model",
+            "nivo-os-today",
+            "trust-bridge",
+            "target-architecture",
+            "next-path",
+        ])
         expect(html).toContain("CURRENT FOCUS · BUILDING &amp; VERIFYING")
         expect(html).toContain("Target Architecture")
-        expect(html).toContain("data-product-page=\"nivo-os\"")
+        expect(html).toContain('data-product-page="nivo-os"')
         expect(screen.getByRole("list", { name: "NIVO OS operating model" })).toBeInTheDocument()
-        expect(screen.getAllByRole("link", { name: "Explore Solutions" }).map((link) => link.getAttribute("href"))).toEqual(["/en/applications", "/en/applications", "/en/applications"])
-        expect(html).not.toContain("href=\"/activation\"")
+        expect(
+            screen.getAllByRole("link", { name: "Explore Solutions" }).map((link) => link.getAttribute("href")),
+        ).toEqual(["/en/applications", "/en/applications", "/en/applications"])
+        expect(html).not.toContain('href="/activation"')
         expect(html).not.toContain("→")
     })
 
     it("renders semantic comparisons and ordered evidence on the Responsibility page", () => {
         const { container } = render(<ProductPage page="systemOfResponsibility" />)
-        expectSectionOrder(container.innerHTML, ["definition", "core-anatomy", "task-vs-responsibility", "evidence", "nivo-os-current", "trust-bridge", "next-path"])
+        expectSectionOrder(container.innerHTML, [
+            "definition",
+            "core-anatomy",
+            "task-vs-responsibility",
+            "evidence",
+            "nivo-os-current",
+            "trust-bridge",
+            "next-path",
+        ])
 
         expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1)
         const comparison = screen.getByRole("table", { name: "Task versus Responsibility comparison" })
@@ -44,13 +64,23 @@ describe("ProductPage", () => {
     it("distinguishes one current application from four directional need areas", () => {
         const { container } = render(<ProductPage page="applications" />)
         const html = container.innerHTML
-        expectSectionOrder(html, ["need-selector", "current-focus", "by-need", "by-role", "by-context", "truth-evidence", "next-path"])
+        expectSectionOrder(html, [
+            "need-selector",
+            "current-focus",
+            "by-need",
+            "by-role",
+            "by-context",
+            "truth-evidence",
+            "next-path",
+        ])
 
         expect(screen.getAllByText("CURRENT FOCUS · BUILDING & VERIFYING").length).toBeGreaterThan(0)
         expect(screen.getAllByText("DIRECTIONAL · VERIFY")).toHaveLength(4)
         expect(screen.getByRole("navigation", { name: "Explore Solutions by need" })).toBeInTheDocument()
         expect(screen.getByRole("list", { name: "The four evidence levels of Applications" })).toBeInTheDocument()
-        expect(screen.getByRole("heading", { level: 1, name: "What does your business need guaranteed to happen?" })).toBeInTheDocument()
+        expect(
+            screen.getByRole("heading", { level: 1, name: "What does your business need guaranteed to happen?" }),
+        ).toBeInTheDocument()
         expect(screen.getByText("Create growth")).toBeInTheDocument()
         expect(html).toContain("revenue-v2.png")
         expect(html).toContain("operate-v2.png")
@@ -61,7 +91,18 @@ describe("ProductPage", () => {
 
     it("separates current offers from future growth directions and unresolved policies", () => {
         const { container } = render(<ProductPage page="pricing" />)
-        expectSectionOrder(container.innerHTML, ["discover", "available-now", "pro-decision", "comparison", "what-you-buy", "usage-resources", "growth", "service-support", "faq", "start-right"])
+        expectSectionOrder(container.innerHTML, [
+            "discover",
+            "available-now",
+            "pro-decision",
+            "comparison",
+            "what-you-buy",
+            "usage-resources",
+            "growth",
+            "service-support",
+            "faq",
+            "start-right",
+        ])
 
         const comparison = screen.getByRole("table", { name: "NIVO Start versus NIVO Pro comparison" })
         expect(within(comparison).getAllByRole("row")).toHaveLength(8)
@@ -74,7 +115,9 @@ describe("ProductPage", () => {
 
     it("emits page structured data in the language and on the localized path of the request", () => {
         const { container } = render(<ProductPage page="pricing" />)
-        const english = JSON.parse(container.querySelector("script[type='application/ld+json']")?.textContent ?? "{}") as Record<string, string>
+        const english = JSON.parse(
+            container.querySelector("script[type='application/ld+json']")?.textContent ?? "{}",
+        ) as Record<string, string>
         expect(english.name).toBe("NIVO OS Pricing — Start and Pro")
         expect(english.inLanguage).toBe("en")
         expect(english.url).toBe("https://nivo.vn/en/pricing")
@@ -88,8 +131,14 @@ describe("ProductPage", () => {
         )
 
         expect(screen.getByRole("heading", { level: 1, name: "HỆ ĐIỀU HÀNH KINH DOANH AI-NATIVE" })).toBeInTheDocument()
-        expect(screen.getAllByRole("link", { name: "Khám phá Giải pháp" }).every((link) => link.getAttribute("href") === "/applications")).toBe(true)
-        const data = JSON.parse(container.querySelector("script[type='application/ld+json']")?.textContent ?? "{}") as Record<string, string>
+        expect(
+            screen
+                .getAllByRole("link", { name: "Khám phá Giải pháp" })
+                .every((link) => link.getAttribute("href") === "/applications"),
+        ).toBe(true)
+        const data = JSON.parse(
+            container.querySelector("script[type='application/ld+json']")?.textContent ?? "{}",
+        ) as Record<string, string>
         expect(data.inLanguage).toBe("vi")
         expect(data.url).toBe("https://nivo.vn/nivo-os")
         expect(en.product.nivoOs.hero.title).not.toBe(vi.product.nivoOs.hero.title)

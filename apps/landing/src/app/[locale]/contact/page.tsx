@@ -3,7 +3,8 @@ import { pageMetadata, type LocaleParams } from "@/features/layouts/SiteShell"
 import { ContactPage, normalizeContactIntent } from "@/features/pages/ContactPage"
 
 /** Search and sharing metadata for the canonical Contact route, in the routed language. */
-export const generateMetadata = ({ params }: LocaleParams): Promise<Metadata> => pageMetadata({ params, page: "contact", path: "/contact" })
+export const generateMetadata = ({ params }: LocaleParams): Promise<Metadata> =>
+    pageMetadata({ params, page: "contact", path: "/contact" })
 
 type ContactRouteProps = {
     readonly searchParams: Promise<{ readonly intent?: string | ReadonlyArray<string> }>

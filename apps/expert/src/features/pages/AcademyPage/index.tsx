@@ -1,5 +1,5 @@
-import { queryAcademyCourses } from "@/modules/academy/query-academy-courses";
-import { AcademyPageBase as AcademyPageView } from "./component";
+import { queryAcademyCourses } from "@/modules/academy/query-academy-courses"
+import { AcademyPageBase as AcademyPageView } from "./component"
 
 /**
  * PAGE - the academy's landing screen, connected half.
@@ -25,8 +25,6 @@ import { AcademyPageBase as AcademyPageView } from "./component";
  * @returns The page.
  */
 export const AcademyPage = async () => {
-  const {
-    courses
-  } = await queryAcademyCourses();
-  return <AcademyPageView props={{ courses }} />;
-};
+    const { courses } = await queryAcademyCourses()
+    return <AcademyPageView props={{ courses }} />
+}

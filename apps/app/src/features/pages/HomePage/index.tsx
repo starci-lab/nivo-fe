@@ -1,8 +1,8 @@
-import { useTranslations } from "next-intl";
-import { HomePageBase } from "./component";
+import { useTranslations } from "next-intl"
+import { HomePageBase } from "./component"
 
 /** Public API role for HomePageProps. */
-export type HomePageProps = { readonly [key: string]: never };
+export type HomePageProps = { readonly [key: string]: never }
 
 /**
  * PAGE - the control plane's landing screen.
@@ -22,7 +22,7 @@ export type HomePageProps = { readonly [key: string]: never };
  * @returns The page.
  */
 export const HomePage = (props: HomePageProps) => {
-  void props;
-  const t = useTranslations("app");
-  return <HomePageBase props={{ description: t("description") }} />;
-};
+    void props
+    const t = useTranslations("app")
+    return <HomePageBase props={{ description: t("description") }} />
+}

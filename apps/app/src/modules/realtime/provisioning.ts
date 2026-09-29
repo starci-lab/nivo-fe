@@ -5,13 +5,34 @@
  */
 
 /** One `workspace.status` wire message from the provisioning room. */
-export type WorkspaceMessage = { readonly eventId?: string; readonly sequence?: number; readonly workspaceId: string; readonly status: string; readonly reason: string | null; readonly updatedAt: string }
+export type WorkspaceMessage = {
+    readonly eventId?: string
+    readonly sequence?: number
+    readonly workspaceId: string
+    readonly status: string
+    readonly reason: string | null
+    readonly updatedAt: string
+}
 
 /** One `workspace.runtime` wire message carrying an instance runtime probe. */
-export type WorkspaceRuntimeMessage = { readonly sequence: number; readonly workspaceId: string; readonly instanceId: string; readonly fingerprint: string; readonly probeStatus: string; readonly observedAt: string }
+export type WorkspaceRuntimeMessage = {
+    readonly sequence: number
+    readonly workspaceId: string
+    readonly instanceId: string
+    readonly fingerprint: string
+    readonly probeStatus: string
+    readonly observedAt: string
+}
 
 /** One `deployment.status` wire message from the provisioning room. */
-export type DeploymentMessage = { readonly eventId?: string; readonly sequence?: number; readonly deploymentId: string; readonly status: string; readonly reason: string | null; readonly updatedAt: string }
+export type DeploymentMessage = {
+    readonly eventId?: string
+    readonly sequence?: number
+    readonly deploymentId: string
+    readonly status: string
+    readonly reason: string | null
+    readonly updatedAt: string
+}
 
 /** One `order.fulfilling` wire message from the provisioning room. */
 export type OrderMessage = { readonly orderId: string; readonly status: string }
@@ -36,10 +57,17 @@ export type SagaMessage = {
 }
 
 /** One `instance.operation` wire message from the provisioning room. */
-export type InstanceOperationMessage = { readonly operationId: string; readonly instanceId: string; readonly phase: string; readonly componentKey?: string; readonly reason?: string | null; readonly observedAt: string }
+export type InstanceOperationMessage = {
+    readonly operationId: string
+    readonly instanceId: string
+    readonly phase: string
+    readonly componentKey?: string
+    readonly reason?: string | null
+    readonly observedAt: string
+}
 
 /** Unwraps a socket payload that may arrive bare or inside a `SocketEnvelope`. */
-export const unwrapMessage = <T,>(payload: T | SocketEnvelope<T>): T | null => {
+export const unwrapMessage = <T>(payload: T | SocketEnvelope<T>): T | null => {
     if (typeof payload !== "object" || payload === null || !("success" in payload)) return payload
     return payload.success ? payload.data : null
 }

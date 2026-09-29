@@ -4,7 +4,9 @@ import { describe, expect, it, vi } from "vitest"
 type WalletOwnerProbeProps = { readonly pageState: string }
 
 vi.mock("@/components/blocks/wallet/WalletControlCenter", () => ({
-    WalletControlCenter: ({ pageState }: WalletOwnerProbeProps) => <div data-owner="wallet-control-center">{pageState}</div>,
+    WalletControlCenter: ({ pageState }: WalletOwnerProbeProps) => (
+        <div data-owner="wallet-control-center">{pageState}</div>
+    ),
 }))
 
 import { WalletPageBase } from "./component"

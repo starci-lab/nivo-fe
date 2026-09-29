@@ -36,9 +36,7 @@ describe("NIVO_GRAMMAR", () => {
     })
 
     it("replaces only the root, and inherits every other Common renderer unchanged", () => {
-        expect(Object.keys(NIVO_GRAMMAR.components).sort()).toEqual(
-            Object.keys(COMMON_GRAMMAR_COMPONENTS).sort(),
-        )
+        expect(Object.keys(NIVO_GRAMMAR.components).sort()).toEqual(Object.keys(COMMON_GRAMMAR_COMPONENTS).sort())
         expect(NIVO_GRAMMAR.components.GrammarRoot).not.toBe(COMMON_GRAMMAR_COMPONENTS.GrammarRoot)
 
         const inherited = Object.entries(NIVO_GRAMMAR.components).filter(([name]) => name !== "GrammarRoot")
@@ -84,7 +82,12 @@ describe("NIVO_GRAMMAR", () => {
         const forms = ['from "@starci/grammar/', 'import "@starci/grammar/'] as const
         const foreign = sources
             .filter((file) =>
-                forms.some((form) => file.text.split(form).slice(1).some((rest) => !rest.startsWith("common"))),
+                forms.some((form) =>
+                    file.text
+                        .split(form)
+                        .slice(1)
+                        .some((rest) => !rest.startsWith("common")),
+                ),
             )
             .map((file) => file.path)
 
@@ -92,7 +95,9 @@ describe("NIVO_GRAMMAR", () => {
     })
 
     it("loads Common's stylesheet and no other family's", () => {
-        const stylesheets = sources.filter((file) => file.text.includes("@starci/grammar") && file.path.endsWith(".css"))
+        const stylesheets = sources.filter(
+            (file) => file.text.includes("@starci/grammar") && file.path.endsWith(".css"),
+        )
 
         expect(stylesheets.map((file) => file.path).sort()).toEqual(
             APPS.map((app) => `${app}/src/app/globals.css`).sort(),
@@ -104,7 +109,8 @@ describe("NIVO_GRAMMAR", () => {
     })
 
     it("leaves no Core-only name behind", () => {
-        const coreNames = /\b(?:CoreGrammarRoot|coreGrammar|CORE_GRAMMAR_COMPONENTS|CoreGrammarComponentName|STARCI_CORE_[A-Z_]+|coreRuleConformance)\b/
+        const coreNames =
+            /\b(?:CoreGrammarRoot|coreGrammar|CORE_GRAMMAR_COMPONENTS|CoreGrammarComponentName|STARCI_CORE_[A-Z_]+|coreRuleConformance)\b/
         const survivors = sources.filter((file) => coreNames.test(file.text)).map((file) => file.path)
 
         expect(survivors).toEqual([])
@@ -112,7 +118,9 @@ describe("NIVO_GRAMMAR", () => {
 
     it("mounts exactly one family root per app, and it is the nivo one", () => {
         for (const app of APPS) {
-            const mounting = sources.filter((file) => file.path.startsWith(`${app}/`) && file.text.includes("GrammarRoot"))
+            const mounting = sources.filter(
+                (file) => file.path.startsWith(`${app}/`) && file.text.includes("GrammarRoot"),
+            )
 
             expect(mounting).toHaveLength(1)
             expect(mounting[0]?.text).toContain("NivoGrammarRoot")

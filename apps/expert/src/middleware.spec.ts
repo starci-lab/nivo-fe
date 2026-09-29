@@ -22,9 +22,7 @@ import { routing } from "./modules/i18n/routing"
 describe("middleware", () => {
     it("binds the declared routing and excludes API, build, verification, and file paths", () => {
         expect(mocks.createMiddleware).toHaveBeenCalledWith(routing)
-        expect(config.matcher).toEqual([
-            "/((?!api|_next|_vercel|.*[.].*).*)",
-        ])
+        expect(config.matcher).toEqual(["/((?!api|_next|_vercel|.*[.].*).*)"])
     })
 
     it("passes a page request through the next-intl handler", () => {

@@ -40,7 +40,15 @@ const CONTACT_INTENTS: ReadonlyArray<ContactIntent> = [
     { id: "general", directPaths: ["home"] },
 ]
 
-const DIRECT_PATHS: ReadonlyArray<PathId> = ["nivoOs", "applications", "pricing", "ecosystem", "trust", "company", "login"]
+const DIRECT_PATHS: ReadonlyArray<PathId> = [
+    "nivoOs",
+    "applications",
+    "pricing",
+    "ecosystem",
+    "trust",
+    "company",
+    "login",
+]
 const ROUTE_STEP_IDS = ["orient", "resolveIntent", "route", "confirmNextState"] as const
 
 const ArrowIcon = () => <NivoIcon props={{ name: "next", usage: "chip" }} />
@@ -74,9 +82,15 @@ export const ContactPage = (props: ContactPageProps) => {
                         <PageContainer className={styles.contactHeroGrid}>
                             <div className={styles.heroCopy}>
                                 <span className={styles.eyebrow}>{t("hero.eyebrow")}</span>
-                                <Heading level={1} scale="display"><span id="contact-title">{t("hero.title")}</span></Heading>
-                                <Text as="p" size="md" tone="muted">{t("hero.body")}</Text>
-                                <Button href="#intent-router" variant="primary" size="lg" endContent={<ArrowIcon />}>{t("hero.primary")}</Button>
+                                <Heading level={1} scale="display">
+                                    <span id="contact-title">{t("hero.title")}</span>
+                                </Heading>
+                                <Text as="p" size="md" tone="muted">
+                                    {t("hero.body")}
+                                </Text>
+                                <Button href="#intent-router" variant="primary" size="lg" endContent={<ArrowIcon />}>
+                                    {t("hero.primary")}
+                                </Button>
                             </div>
                             <ol className={styles.contactRouteMap} aria-label={t("hero.routeLabel")}>
                                 {ROUTE_STEP_IDS.map((step, index) => (
@@ -94,43 +108,96 @@ export const ContactPage = (props: ContactPageProps) => {
                             <div className={styles.intentMain}>
                                 <div className={styles.sectionHeading}>
                                     <span className={styles.eyebrow}>{t("router.eyebrow")}</span>
-                                    <Heading level={2}><span id="intent-title">{t("router.title")}</span></Heading>
-                                    <Text as="p" size="md" tone="muted">{t("router.description")}</Text>
+                                    <Heading level={2}>
+                                        <span id="intent-title">{t("router.title")}</span>
+                                    </Heading>
+                                    <Text as="p" size="md" tone="muted">
+                                        {t("router.description")}
+                                    </Text>
                                 </div>
-                                <form id="adaptive-form" className={styles.intentForm} action={href(`${SITE_LINKS.contact}#intent-router`)} method="get">
+                                <form
+                                    id="adaptive-form"
+                                    className={styles.intentForm}
+                                    action={href(`${SITE_LINKS.contact}#intent-router`)}
+                                    method="get"
+                                >
                                     <fieldset>
                                         <legend>{t("router.legend")}</legend>
                                         <div className={styles.intentGrid}>
                                             {CONTACT_INTENTS.map((intent, index) => (
-                                                <label className={styles.intentOption} key={intent.id} data-selected={selected?.id === intent.id ? "true" : undefined}>
-                                                    <input type="radio" name="intent" value={intent.id} defaultChecked={selected?.id === intent.id} />
-                                                    <span className={styles.cardIndex}>{String(index + 1).padStart(2, "0")}</span>
+                                                <label
+                                                    className={styles.intentOption}
+                                                    key={intent.id}
+                                                    data-selected={selected?.id === intent.id ? "true" : undefined}
+                                                >
+                                                    <input
+                                                        type="radio"
+                                                        name="intent"
+                                                        value={intent.id}
+                                                        defaultChecked={selected?.id === intent.id}
+                                                    />
+                                                    <span className={styles.cardIndex}>
+                                                        {String(index + 1).padStart(2, "0")}
+                                                    </span>
                                                     <strong>{t(`intents.${intent.id}.label`)}</strong>
                                                     <small>{t(`intents.${intent.id}.userJob`)}</small>
-                                                    <span className={styles.intentCheck} aria-hidden="true"><NivoIcon props={{ name: "complete", usage: "chip" }} /></span>
+                                                    <span className={styles.intentCheck} aria-hidden="true">
+                                                        <NivoIcon props={{ name: "complete", usage: "chip" }} />
+                                                    </span>
                                                 </label>
                                             ))}
                                         </div>
                                     </fieldset>
-                                    <Button type="submit" variant="primary" size="lg" endContent={<ArrowIcon />}>{t("router.submit")}</Button>
+                                    <Button type="submit" variant="primary" size="lg" endContent={<ArrowIcon />}>
+                                        {t("router.submit")}
+                                    </Button>
                                 </form>
                             </div>
 
-                            <aside id="contact-next-step" className={styles.routeResult} aria-live="polite" aria-labelledby="route-result-title">
+                            <aside
+                                id="contact-next-step"
+                                className={styles.routeResult}
+                                aria-live="polite"
+                                aria-labelledby="route-result-title"
+                            >
                                 <span className={styles.eyebrow}>{t("result.eyebrow")}</span>
                                 {selected === undefined ? (
                                     <>
-                                        <span className={styles.resultIcon}><NivoIcon props={{ name: "overview", usage: "heading" }} /></span>
-                                        <Heading level={3}><span id="route-result-title">{t("result.emptyTitle")}</span></Heading>
-                                        <Text as="p" size="sm">{t("result.emptyBody")}</Text>
+                                        <span className={styles.resultIcon}>
+                                            <NivoIcon props={{ name: "overview", usage: "heading" }} />
+                                        </span>
+                                        <Heading level={3}>
+                                            <span id="route-result-title">{t("result.emptyTitle")}</span>
+                                        </Heading>
+                                        <Text as="p" size="sm">
+                                            {t("result.emptyBody")}
+                                        </Text>
                                     </>
                                 ) : (
                                     <>
                                         <Badge tone="success">{t("result.resolved")}</Badge>
-                                        <Heading level={3}><span id="route-result-title">{t(`intents.${selected.id}.label`)}</span></Heading>
-                                        <Text as="p" size="sm">{t(`intents.${selected.id}.expectation`)}</Text>
-                                        <nav className={styles.resultLinks} aria-label={t("result.pathsLabel", { intent: t(`intents.${selected.id}.label`) })}>
-                                            {selected.directPaths.map((path) => <TextAction href={href(PATH_HREFS[path])} appearance="route" endContent={<ArrowIcon />} key={path}>{t(`paths.${path}`)}</TextAction>)}
+                                        <Heading level={3}>
+                                            <span id="route-result-title">{t(`intents.${selected.id}.label`)}</span>
+                                        </Heading>
+                                        <Text as="p" size="sm">
+                                            {t(`intents.${selected.id}.expectation`)}
+                                        </Text>
+                                        <nav
+                                            className={styles.resultLinks}
+                                            aria-label={t("result.pathsLabel", {
+                                                intent: t(`intents.${selected.id}.label`),
+                                            })}
+                                        >
+                                            {selected.directPaths.map((path) => (
+                                                <TextAction
+                                                    href={href(PATH_HREFS[path])}
+                                                    appearance="route"
+                                                    endContent={<ArrowIcon />}
+                                                    key={path}
+                                                >
+                                                    {t(`paths.${path}`)}
+                                                </TextAction>
+                                            ))}
                                         </nav>
                                     </>
                                 )}
@@ -142,13 +209,21 @@ export const ContactPage = (props: ContactPageProps) => {
                         <PageContainer className={styles.contactTruthGrid}>
                             <div>
                                 <span className={styles.eyebrow}>{t("truth.eyebrow")}</span>
-                                <Heading level={2}><span id="contact-truth-title">{t("truth.title")}</span></Heading>
-                                <Text as="p" size="md">{t("truth.description")}</Text>
+                                <Heading level={2}>
+                                    <span id="contact-truth-title">{t("truth.title")}</span>
+                                </Heading>
+                                <Text as="p" size="md">
+                                    {t("truth.description")}
+                                </Text>
                             </div>
                             <div className={styles.privacyCard}>
-                                <span className={styles.privacyIcon}><NivoIcon props={{ name: "complete", usage: "heading" }} /></span>
+                                <span className={styles.privacyIcon}>
+                                    <NivoIcon props={{ name: "complete", usage: "heading" }} />
+                                </span>
                                 <Badge tone="warning">{t("truth.badge")}</Badge>
-                                <Text as="p" size="sm">{t("truth.body")}</Text>
+                                <Text as="p" size="sm">
+                                    {t("truth.body")}
+                                </Text>
                             </div>
                             <div className={styles.noSubmission}>
                                 <span>{t("truth.submittedLabel")}</span>
@@ -161,13 +236,25 @@ export const ContactPage = (props: ContactPageProps) => {
                         <PageContainer className={styles.directGrid}>
                             <div className={styles.sectionHeadingInverse}>
                                 <span className={styles.eyebrow}>{t("direct.eyebrow")}</span>
-                                <Heading level={2}><span id="direct-title">{t("direct.title")}</span></Heading>
-                                <Text as="p" size="md">{t("direct.description")}</Text>
+                                <Heading level={2}>
+                                    <span id="direct-title">{t("direct.title")}</span>
+                                </Heading>
+                                <Text as="p" size="md">
+                                    {t("direct.description")}
+                                </Text>
                             </div>
                             <nav className={styles.directLinks} aria-label={t("direct.label")}>
                                 {DIRECT_PATHS.map((path, index) => (
-                                    <TextAction href={href(PATH_HREFS[path])} appearance="route" endContent={<ArrowIcon />} key={path}>
-                                        <span><small>{String(index + 1).padStart(2, "0")}</small>{t(`paths.${path}`)}</span>
+                                    <TextAction
+                                        href={href(PATH_HREFS[path])}
+                                        appearance="route"
+                                        endContent={<ArrowIcon />}
+                                        key={path}
+                                    >
+                                        <span>
+                                            <small>{String(index + 1).padStart(2, "0")}</small>
+                                            {t(`paths.${path}`)}
+                                        </span>
                                     </TextAction>
                                 ))}
                             </nav>

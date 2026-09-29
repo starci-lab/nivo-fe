@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { setAccessTokenReader, type TokenReader } from "@/modules/api/graphql";
+import { setAccessTokenReader, type TokenReader } from "@/modules/api/graphql"
 
 /**
  * Point the GraphQL transport at the reader that answers with the access token in force.
@@ -18,5 +18,5 @@ import { setAccessTokenReader, type TokenReader } from "@/modules/api/graphql";
  * @param reader - Answers with the token in force right now, or null when signed out.
  */
 export const useAccessTokenFrom = (reader: TokenReader) => {
-    setAccessTokenReader(reader);
-};
+    setAccessTokenReader(reader)
+}

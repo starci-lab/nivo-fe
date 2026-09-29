@@ -10,7 +10,7 @@ import {
     readAgentosShellCommandReceipt,
     readAgentosShellLifecycleObservation,
     readAgentosShellOverview,
-    resolveAgentosShellNavigation
+    resolveAgentosShellNavigation,
 } from "./agentos-shell"
 import type { ShellRead, ShellSourceIdentity } from "./agentos-shell"
 
@@ -32,7 +32,7 @@ const envelopeFor = (read: ShellRead, overrides: Record<string, unknown> = {}) =
     completeness: "complete",
     observedAt: "2026-09-25T03:00:00.000Z",
     payload: { installations: [] },
-    ...overrides
+    ...overrides,
 })
 
 const coreResult = () => ({
@@ -43,14 +43,19 @@ const coreResult = () => ({
     name: "Support",
     runtimeGeneration: "generation-1",
     runtimeAvailability: "provisioned",
-    inventory: { availability: "available", completeness: "complete", observedAt: "2026-09-25T03:00:00.000Z", installations: [] }
+    inventory: {
+        availability: "available",
+        completeness: "complete",
+        observedAt: "2026-09-25T03:00:00.000Z",
+        installations: [],
+    },
 })
 
 const overviewBody = (reads: ReadonlyArray<ShellRead>) => ({
     kind: "overview",
     selectionGeneration: SELECTION,
     core: coreResult(),
-    sources: reads.map(read => envelopeFor(read))
+    sources: reads.map((read) => envelopeFor(read)),
 })
 
 let fetchMock: ReturnType<typeof vi.fn>
@@ -59,7 +64,7 @@ const answerWith = (status: number, body: unknown): void => {
     fetchMock.mockResolvedValue({ status, json: async () => body })
 }
 
-const sentUrls = (): Array<string> => fetchMock.mock.calls.map(call => String(call[0]))
+const sentUrls = (): Array<string> => fetchMock.mock.calls.map((call) => String(call[0]))
 const sentUrl = (index = 0): string => sentUrls()[index] ?? ""
 const sentInit = (index = 0): RequestInit => fetchMock.mock.calls[index]?.[1] as RequestInit
 
@@ -78,12 +83,12 @@ describe("canonicalShellReads", () => {
         const ordered = canonicalShellReads([
             readOf({ kind: "runtime" }, 1),
             readOf({ kind: "core_registry" }, 2),
-            readOf({ kind: "attention", installationId: INSTALLATION }, 3)
+            readOf({ kind: "attention", installationId: INSTALLATION }, 3),
         ])
-        expect(ordered?.map(read => formatShellSourceIdentity(read.identity))).toEqual([
+        expect(ordered?.map((read) => formatShellSourceIdentity(read.identity))).toEqual([
             `attention:{${INSTALLATION}}`,
             "core_registry",
-            "runtime"
+            "runtime",
         ])
     })
 
@@ -93,7 +98,13 @@ describe("canonicalShellReads", () => {
 
     it("refuses an unallocated generation and an unbounded set", () => {
         expect(canonicalShellReads([readOf({ kind: "runtime" }, 0)])).toBeNull()
-        expect(canonicalShellReads(Array.from({ length: MAX_SHELL_READS_PER_REQUEST + 1 }, (_, index) => readOf({ kind: "attention", installationId: `installation-${index}` }, 1)))).toBeNull()
+        expect(
+            canonicalShellReads(
+                Array.from({ length: MAX_SHELL_READS_PER_REQUEST + 1 }, (_, index) =>
+                    readOf({ kind: "attention", installationId: `installation-${index}` }, 1),
+                ),
+            ),
+        ).toBeNull()
     })
 })
 
@@ -110,13 +121,15 @@ describe("readAgentosShellOverview", () => {
         const reads = [
             readOf({ kind: "runtime" }, 5),
             readOf({ kind: "core_registry" }, 3),
-            readOf({ kind: "attention", installationId: INSTALLATION }, 1)
+            readOf({ kind: "attention", installationId: INSTALLATION }, 1),
         ]
         answerWith(200, overviewBody(canonicalShellReads(reads) ?? []))
 
         await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)
 
-        expect(sentUrl()).toBe(`http://localhost:3068/api/v1/agentos/workspaces/${WORKSPACE}/instances/${INSTANCE}?read=attention%3A%7B${INSTALLATION}%7D:1&read=core_registry:3&read=runtime:5&selectionGeneration=${SELECTION}`)
+        expect(sentUrl()).toBe(
+            `http://localhost:3068/api/v1/agentos/workspaces/${WORKSPACE}/instances/${INSTANCE}?read=attention%3A%7B${INSTALLATION}%7D:1&read=core_registry:3&read=runtime:5&selectionGeneration=${SELECTION}`,
+        )
         expect(sentInit().method).toBe("GET")
     })
 
@@ -142,59 +155,113 @@ describe("readAgentosShellOverview", () => {
 
         expect(asked.ok).toBe(true)
         if (!asked.ok) return
-        expect(asked.data.sources.map(source => source.sourceIdentity)).toEqual(["core_registry", "runtime"])
+        expect(asked.data.sources.map((source) => source.sourceIdentity)).toEqual(["core_registry", "runtime"])
         expect(asked.data.core?.name).toBe("Support")
 
-        answerWith(200, { ...overviewBody(ordered), sources: [envelopeFor(ordered[0], { sourceIdentity: "runtime" }), envelopeFor(ordered[1])] })
-        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        answerWith(200, {
+            ...overviewBody(ordered),
+            sources: [envelopeFor(ordered[0], { sourceIdentity: "runtime" }), envelopeFor(ordered[1])],
+        })
+        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
     })
 
     it("fails closed on an unknown kind, an unknown version, a malformed envelope and a re-encoded selection", async () => {
         const reads = [readOf({ kind: "runtime" }, 1)]
         answerWith(200, { ...overviewBody(reads), kind: "overview_v2" })
-        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
 
         answerWith(200, { ...overviewBody(reads), selectionGeneration: "another-selection" })
-        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
 
         answerWith(200, { ...overviewBody(reads), sources: [envelopeFor(reads[0], { availability: "ready" })] })
-        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
 
-        answerWith(200, { ...overviewBody(reads), sources: [envelopeFor(reads[0], { availability: "refused", payload: { secret: true } })] })
-        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        answerWith(200, {
+            ...overviewBody(reads),
+            sources: [envelopeFor(reads[0], { availability: "refused", payload: { secret: true } })],
+        })
+        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
 
         answerWith(200, "not an envelope")
-        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
     })
 
     it("maps an unauthenticated answer to a session outcome and a refusal to an exact-source refusal", async () => {
         const reads = [readOf({ kind: "runtime" }, 1)]
         answerWith(401, { message: "Authentication required" })
-        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({ ok: false, kind: "refused", code: "UNAUTHENTICATED" })
+        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({
+            ok: false,
+            kind: "refused",
+            code: "UNAUTHENTICATED",
+        })
 
         answerWith(403, { kind: "refused", reason: "parent-mismatch", selectionGeneration: null })
-        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({ ok: false, kind: "forbidden", code: "parent-mismatch", status: 403 })
+        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({
+            ok: false,
+            kind: "forbidden",
+            code: "parent-mismatch",
+            status: 403,
+        })
 
         answerWith(503, { kind: "refused", reason: "current-authority-unavailable" })
-        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({ ok: false, kind: "unavailable", code: "current-authority-unavailable", status: 503 })
+        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({
+            ok: false,
+            kind: "unavailable",
+            code: "current-authority-unavailable",
+            status: 503,
+        })
     })
 
     it("reports a session outcome without asking when the session minted no token", async () => {
         const reads = [readOf({ kind: "runtime" }, 1)]
-        expect(await readAgentosShellOverview(null, scope, SELECTION, reads)).toMatchObject({ ok: false, kind: "refused", code: "UNAUTHENTICATED" })
+        expect(await readAgentosShellOverview(null, scope, SELECTION, reads)).toMatchObject({
+            ok: false,
+            kind: "refused",
+            code: "UNAUTHENTICATED",
+        })
         expect(fetchMock).not.toHaveBeenCalled()
     })
 
     it("never retries a read that did not answer", async () => {
         const reads = [readOf({ kind: "runtime" }, 1)]
         fetchMock.mockRejectedValue(new Error("socket closed"))
-        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({ ok: false, kind: "unavailable", code: "NETWORK" })
+        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({
+            ok: false,
+            kind: "unavailable",
+            code: "NETWORK",
+        })
         expect(fetchMock).toHaveBeenCalledTimes(1)
     })
 
     it("refuses to send a read set the registered grammar cannot express", async () => {
-        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, [])).toMatchObject({ ok: false, kind: "invalid", code: "UNSUPPORTED" })
-        expect(await readAgentosShellOverview(TOKEN, scope, "", [readOf({ kind: "runtime" }, 1)])).toMatchObject({ ok: false, kind: "invalid", code: "UNSUPPORTED" })
+        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, [])).toMatchObject({
+            ok: false,
+            kind: "invalid",
+            code: "UNSUPPORTED",
+        })
+        expect(await readAgentosShellOverview(TOKEN, scope, "", [readOf({ kind: "runtime" }, 1)])).toMatchObject({
+            ok: false,
+            kind: "invalid",
+            code: "UNSUPPORTED",
+        })
         expect(fetchMock).not.toHaveBeenCalled()
     })
 
@@ -204,14 +271,21 @@ describe("readAgentosShellOverview", () => {
 
         await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)
 
-        expect(sentUrls().filter(url => url.includes("/operations/"))).toEqual([])
+        expect(sentUrls().filter((url) => url.includes("/operations/"))).toEqual([])
         expect(sentInit().method).toBe("GET")
         expect(sentInit().body).toBeUndefined()
     })
 
     it("fails closed when the answer cannot even be read as JSON", async () => {
-        fetchMock.mockResolvedValue({ status: 200, json: async () => { throw new Error("this is not json") } })
-        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, [readOf({ kind: "runtime" }, 1)])).toMatchObject({ ok: false, kind: "unavailable", code: "MALFORMED" })
+        fetchMock.mockResolvedValue({
+            status: 200,
+            json: async () => {
+                throw new Error("this is not json")
+            },
+        })
+        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, [readOf({ kind: "runtime" }, 1)])).toMatchObject(
+            { ok: false, kind: "unavailable", code: "MALFORMED" },
+        )
     })
 
     it("fails closed on a core standing it cannot read and on a source list that does not match", async () => {
@@ -228,11 +302,14 @@ describe("readAgentosShellOverview", () => {
             { core: { ...coreResult(), inventory: { ...inventory, observedAt: null } } },
             { core: { ...coreResult(), inventory: { ...inventory, installations: null } } },
             { sources: "not-an-array" },
-            { sources: [] }
+            { sources: [] },
         ]
         for (const variant of variants) {
             answerWith(200, { ...overviewBody(reads), ...variant })
-            expect([variant, await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)]).toEqual([variant, expect.objectContaining({ ok: false, code: "UNSUPPORTED_REPLY" })])
+            expect([variant, await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)]).toEqual([
+                variant,
+                expect.objectContaining({ ok: false, code: "UNSUPPORTED_REPLY" }),
+            ])
         }
 
         // A refused or unavailable Core registry is still an answer: the source envelopes stand beside it.
@@ -250,18 +327,27 @@ describe("readAgentosShellOverview", () => {
             { observedAt: 7 },
             { freshness: "recent" },
             { completeness: "whole" },
-            { payload: 7 }
+            { payload: 7 },
         ]
         for (const variant of variants) {
             answerWith(200, { ...overviewBody(reads), sources: [envelopeFor(reads[0], variant)] })
-            expect([variant, await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)]).toEqual([variant, expect.objectContaining({ ok: false, code: "UNSUPPORTED_REPLY" })])
+            expect([variant, await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)]).toEqual([
+                variant,
+                expect.objectContaining({ ok: false, code: "UNSUPPORTED_REPLY" }),
+            ])
         }
 
         answerWith(200, { ...overviewBody(reads), sources: ["not-an-envelope"] })
-        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        expect(await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
 
         // A source with nothing to show is an answer with no payload, not an empty object.
-        answerWith(200, { ...overviewBody(reads), sources: [envelopeFor(reads[0], { availability: "unavailable", payload: null })] })
+        answerWith(200, {
+            ...overviewBody(reads),
+            sources: [envelopeFor(reads[0], { availability: "unavailable", payload: null })],
+        })
         const answered = await readAgentosShellOverview(TOKEN, scope, SELECTION, reads)
         expect(answered.ok).toBe(true)
         if (!answered.ok) return
@@ -270,7 +356,13 @@ describe("readAgentosShellOverview", () => {
 })
 
 describe("readAgentosShellCommandReceipt", () => {
-    const commandScope = { ...scope, commandId: COMMAND, sourceIdentity: `receiver:{${INSTALLATION},intent-1}`, readGeneration: 7, selectionGeneration: SELECTION }
+    const commandScope = {
+        ...scope,
+        commandId: COMMAND,
+        sourceIdentity: `receiver:{${INSTALLATION},intent-1}`,
+        readGeneration: 7,
+        selectionGeneration: SELECTION,
+    }
     const receiptProjection = {
         commandId: COMMAND,
         receiverInstallationId: INSTALLATION,
@@ -278,7 +370,7 @@ describe("readAgentosShellCommandReceipt", () => {
         attempt: 1,
         possibleStartAt: null,
         observations: [],
-        localTransportGaps: []
+        localTransportGaps: [],
     }
     const receiptBody = (overrides: Record<string, unknown> = {}, availability = "available") => ({
         kind: "command_observation",
@@ -286,9 +378,10 @@ describe("readAgentosShellCommandReceipt", () => {
         sourceIdentity: commandScope.sourceIdentity,
         readGeneration: 7,
         core: coreResult(),
-        commandObservation: availability === "available"
-            ? { availability, reason: null, projection: { ...receiptProjection, ...overrides } }
-            : { availability, reason: "command-observation-unavailable", projection: null }
+        commandObservation:
+            availability === "available"
+                ? { availability, reason: null, projection: { ...receiptProjection, ...overrides } }
+                : { availability, reason: "command-observation-unavailable", projection: null },
     })
 
     it("preserves every receiver queue meaning instead of promoting one to completion", async () => {
@@ -303,10 +396,23 @@ describe("readAgentosShellCommandReceipt", () => {
     })
 
     it("keeps each observation's own version and each gap's own attempt", async () => {
-        answerWith(200, receiptBody({
-            observations: [{ observationId: "obs-1", observationVersion: 2, receiverReceiptId: "receipt-1", kind: "progress", schemaId: "shell.progress@1", payloadDigest: "sha256:abc", observedAt: null }],
-            localTransportGaps: [{ attempt: 3, kind: "connection-reset", observedAt: "2026-09-25T03:00:00.000Z" }]
-        }))
+        answerWith(
+            200,
+            receiptBody({
+                observations: [
+                    {
+                        observationId: "obs-1",
+                        observationVersion: 2,
+                        receiverReceiptId: "receipt-1",
+                        kind: "progress",
+                        schemaId: "shell.progress@1",
+                        payloadDigest: "sha256:abc",
+                        observedAt: null,
+                    },
+                ],
+                localTransportGaps: [{ attempt: 3, kind: "connection-reset", observedAt: "2026-09-25T03:00:00.000Z" }],
+            }),
+        )
         const answer = await readAgentosShellCommandReceipt(TOKEN, commandScope)
         expect(answer.ok).toBe(true)
         if (!answer.ok) return
@@ -319,11 +425,33 @@ describe("readAgentosShellCommandReceipt", () => {
             { observations: null },
             { observations: [null] },
             { observations: [{ observationVersion: 1, kind: "progress", schemaId: "shell.progress@1" }] },
-            { observations: [{ observationId: "obs-1", observationVersion: 0, kind: "progress", schemaId: "shell.progress@1" }] },
-            { observations: [{ observationId: "obs-1", observationVersion: 1, kind: "chatter", schemaId: "shell.progress@1" }] },
+            {
+                observations: [
+                    { observationId: "obs-1", observationVersion: 0, kind: "progress", schemaId: "shell.progress@1" },
+                ],
+            },
+            {
+                observations: [
+                    { observationId: "obs-1", observationVersion: 1, kind: "chatter", schemaId: "shell.progress@1" },
+                ],
+            },
             { observations: [{ observationId: "obs-1", observationVersion: 1, kind: "progress", schemaId: "" }] },
-            { observations: [{ observationId: "obs-1", observationVersion: 1, kind: "progress", schemaId: "s", payloadDigest: 7 }] },
-            { observations: [{ observationId: "obs-1", observationVersion: 1, kind: "progress", schemaId: "s", observedAt: 7 }] },
+            {
+                observations: [
+                    {
+                        observationId: "obs-1",
+                        observationVersion: 1,
+                        kind: "progress",
+                        schemaId: "s",
+                        payloadDigest: 7,
+                    },
+                ],
+            },
+            {
+                observations: [
+                    { observationId: "obs-1", observationVersion: 1, kind: "progress", schemaId: "s", observedAt: 7 },
+                ],
+            },
             { localTransportGaps: null },
             { localTransportGaps: [null] },
             { localTransportGaps: [{ attempt: "3", kind: "connection-reset" }] },
@@ -332,11 +460,14 @@ describe("readAgentosShellCommandReceipt", () => {
             { queueState: "finished" },
             { attempt: -1 },
             { possibleStartAt: 7 },
-            { receiverInstallationId: "" }
+            { receiverInstallationId: "" },
         ]
         for (const variant of variants) {
             answerWith(200, receiptBody(variant))
-            expect([variant, await readAgentosShellCommandReceipt(TOKEN, commandScope)]).toEqual([variant, expect.objectContaining({ ok: false, code: "UNSUPPORTED_REPLY" })])
+            expect([variant, await readAgentosShellCommandReceipt(TOKEN, commandScope)]).toEqual([
+                variant,
+                expect.objectContaining({ ok: false, code: "UNSUPPORTED_REPLY" }),
+            ])
         }
     })
 
@@ -345,12 +476,19 @@ describe("readAgentosShellCommandReceipt", () => {
         const answer = await readAgentosShellCommandReceipt(TOKEN, commandScope)
         expect(answer).toMatchObject({ ok: true })
         if (!answer.ok) return
-        expect(answer.data.commandObservation).toEqual({ availability: "refused", reason: "command-observation-unavailable", projection: null })
+        expect(answer.data.commandObservation).toEqual({
+            availability: "refused",
+            reason: "command-observation-unavailable",
+            projection: null,
+        })
     })
 
     it("fails closed when the receipt echoes another read's identity", async () => {
         answerWith(200, { ...receiptBody(), readGeneration: 8 })
-        expect(await readAgentosShellCommandReceipt(TOKEN, commandScope)).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        expect(await readAgentosShellCommandReceipt(TOKEN, commandScope)).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
     })
 
     it("reports a session outcome, a refusal, a wrong kind and an unreadable core without inventing a state", async () => {
@@ -358,21 +496,42 @@ describe("readAgentosShellCommandReceipt", () => {
         expect(await readAgentosShellCommandReceipt(TOKEN, commandScope)).toMatchObject({ ok: false, kind: "refused" })
 
         answerWith(403, { kind: "refused", reason: "parent-mismatch", selectionGeneration: null })
-        expect(await readAgentosShellCommandReceipt(TOKEN, commandScope)).toMatchObject({ ok: false, kind: "forbidden", code: "parent-mismatch", status: 403 })
+        expect(await readAgentosShellCommandReceipt(TOKEN, commandScope)).toMatchObject({
+            ok: false,
+            kind: "forbidden",
+            code: "parent-mismatch",
+            status: 403,
+        })
 
         answerWith(200, overviewBody([readOf({ kind: "runtime" }, 1)]))
-        expect(await readAgentosShellCommandReceipt(TOKEN, commandScope)).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        expect(await readAgentosShellCommandReceipt(TOKEN, commandScope)).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
 
         answerWith(200, { ...receiptBody({}, "unavailable"), core: "not-a-record" })
-        expect(await readAgentosShellCommandReceipt(TOKEN, commandScope)).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        expect(await readAgentosShellCommandReceipt(TOKEN, commandScope)).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
 
-        expect(await readAgentosShellCommandReceipt(TOKEN, { ...commandScope, commandId: "not-a-uuid" })).toMatchObject({ ok: false, kind: "invalid", code: "UNSUPPORTED" })
-        expect(await readAgentosShellCommandReceipt(TOKEN, { ...commandScope, readGeneration: 0 })).toMatchObject({ ok: false, kind: "invalid", code: "UNSUPPORTED" })
+        expect(await readAgentosShellCommandReceipt(TOKEN, { ...commandScope, commandId: "not-a-uuid" })).toMatchObject(
+            { ok: false, kind: "invalid", code: "UNSUPPORTED" },
+        )
+        expect(await readAgentosShellCommandReceipt(TOKEN, { ...commandScope, readGeneration: 0 })).toMatchObject({
+            ok: false,
+            kind: "invalid",
+            code: "UNSUPPORTED",
+        })
     })
 
     it("never retries a receipt read that did not answer", async () => {
         fetchMock.mockRejectedValue(new Error("socket closed"))
-        expect(await readAgentosShellCommandReceipt(TOKEN, commandScope)).toMatchObject({ ok: false, kind: "unavailable", code: "NETWORK" })
+        expect(await readAgentosShellCommandReceipt(TOKEN, commandScope)).toMatchObject({
+            ok: false,
+            kind: "unavailable",
+            code: "NETWORK",
+        })
         expect(fetchMock).toHaveBeenCalledTimes(1)
     })
 
@@ -394,9 +553,13 @@ describe("readAgentosShellAuthorityStatus", () => {
         config: { availability: "available", reason: null, current: { revision: 2 } },
         setup: { availability: "partial", reason: "setup-incomplete", current: null },
         runtime: { availability: "available", reason: null, current: { generation: "generation-1" } },
-        ...overrides
+        ...overrides,
     })
-    const authorityBody = (status: unknown) => ({ kind: "authority_status", core: coreResult(), authorityStatus: status })
+    const authorityBody = (status: unknown) => ({
+        kind: "authority_status",
+        core: coreResult(),
+        authorityStatus: status,
+    })
 
     it("keeps each authority source self-qualified", async () => {
         answerWith(200, authorityBody(authorityStatusOf()))
@@ -409,7 +572,10 @@ describe("readAgentosShellAuthorityStatus", () => {
 
     it("fails closed on an authority answer for another installation", async () => {
         answerWith(200, authorityBody(authorityStatusOf({ installationId: COMMAND })))
-        expect(await readAgentosShellAuthorityStatus(TOKEN, { ...scope, installationId: INSTALLATION })).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        expect(await readAgentosShellAuthorityStatus(TOKEN, { ...scope, installationId: INSTALLATION })).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
     })
 
     it("fails closed on an authority status it cannot read field by field", async () => {
@@ -418,28 +584,47 @@ describe("readAgentosShellAuthorityStatus", () => {
             authorityStatusOf({ grant: null }),
             authorityStatusOf({ grant: { ...authoritySource, availability: "ready" } }),
             authorityStatusOf({ grant: { ...authoritySource, reason: 7 } }),
-            authorityStatusOf({ runtime: { ...authoritySource, availability: "ready" } })
+            authorityStatusOf({ runtime: { ...authoritySource, availability: "ready" } }),
         ]
         for (const variant of variants) {
             answerWith(200, authorityBody(variant))
-            expect([variant, await readAgentosShellAuthorityStatus(TOKEN, { ...scope, installationId: INSTALLATION })]).toEqual([variant, expect.objectContaining({ ok: false, code: "UNSUPPORTED_REPLY" })])
+            expect([
+                variant,
+                await readAgentosShellAuthorityStatus(TOKEN, { ...scope, installationId: INSTALLATION }),
+            ]).toEqual([variant, expect.objectContaining({ ok: false, code: "UNSUPPORTED_REPLY" })])
         }
     })
 
     it("reports a session outcome, a refusal and a wrong kind, and refuses a scope that is not an installation", async () => {
         answerWith(401, { message: "Authentication required" })
-        expect(await readAgentosShellAuthorityStatus(TOKEN, { ...scope, installationId: INSTALLATION })).toMatchObject({ ok: false, kind: "refused" })
+        expect(await readAgentosShellAuthorityStatus(TOKEN, { ...scope, installationId: INSTALLATION })).toMatchObject({
+            ok: false,
+            kind: "refused",
+        })
 
         answerWith(403, { kind: "refused", reason: "parent-mismatch", selectionGeneration: null })
-        expect(await readAgentosShellAuthorityStatus(TOKEN, { ...scope, installationId: INSTALLATION })).toMatchObject({ ok: false, kind: "forbidden" })
+        expect(await readAgentosShellAuthorityStatus(TOKEN, { ...scope, installationId: INSTALLATION })).toMatchObject({
+            ok: false,
+            kind: "forbidden",
+        })
 
         answerWith(200, overviewBody([readOf({ kind: "runtime" }, 1)]))
-        expect(await readAgentosShellAuthorityStatus(TOKEN, { ...scope, installationId: INSTALLATION })).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        expect(await readAgentosShellAuthorityStatus(TOKEN, { ...scope, installationId: INSTALLATION })).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
 
         answerWith(200, { ...authorityBody(authorityStatusOf()), core: "not-a-record" })
-        expect(await readAgentosShellAuthorityStatus(TOKEN, { ...scope, installationId: INSTALLATION })).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        expect(await readAgentosShellAuthorityStatus(TOKEN, { ...scope, installationId: INSTALLATION })).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
 
-        expect(await readAgentosShellAuthorityStatus(TOKEN, { ...scope, installationId: "not-a-uuid" })).toMatchObject({ ok: false, kind: "invalid", code: "UNSUPPORTED" })
+        expect(await readAgentosShellAuthorityStatus(TOKEN, { ...scope, installationId: "not-a-uuid" })).toMatchObject({
+            ok: false,
+            kind: "invalid",
+            code: "UNSUPPORTED",
+        })
     })
 })
 
@@ -455,16 +640,34 @@ describe("readAgentosShellLifecycleObservation", () => {
         applicationState: "applying",
         appliedGeneration: "candidate-1",
         runtimeFenceGeneration: 4,
-        lastObservationAt: "2026-09-25T03:00:00.000Z"
+        lastObservationAt: "2026-09-25T03:00:00.000Z",
     }
-    const lifecycleBody = (overrides: Record<string, unknown> = {}, applied: unknown = { status: "refused", reason: "no-observation" }) => ({
+    const lifecycleBody = (
+        overrides: Record<string, unknown> = {},
+        applied: unknown = { status: "refused", reason: "no-observation" },
+    ) => ({
         kind: "lifecycle_observation",
         core: coreResult(),
-        lifecycleObservation: { availability: "available", reason: null, projection: { ...lifecycleProjection, ...overrides } },
-        appliedObservation: applied
+        lifecycleObservation: {
+            availability: "available",
+            reason: null,
+            projection: { ...lifecycleProjection, ...overrides },
+        },
+        appliedObservation: applied,
     })
-    const heldRecord = { installationId: INSTALLATION, currentCandidate: "candidate-2", appliedGeneration: "candidate-1", runtimeFenceGeneration: 4, observedAt: null, configurationIdentity: null }
-    const heldMismatch = { currentCandidate: "candidate-2", appliedGeneration: "candidate-1", reason: "candidate-drift" }
+    const heldRecord = {
+        installationId: INSTALLATION,
+        currentCandidate: "candidate-2",
+        appliedGeneration: "candidate-1",
+        runtimeFenceGeneration: 4,
+        observedAt: null,
+        configurationIdentity: null,
+    }
+    const heldMismatch = {
+        currentCandidate: "candidate-2",
+        appliedGeneration: "candidate-1",
+        reason: "candidate-drift",
+    }
 
     it("reports applied truth apart from the lifecycle the instance claims", async () => {
         answerWith(200, lifecycleBody())
@@ -501,7 +704,9 @@ describe("readAgentosShellLifecycleObservation", () => {
 
     it("fails closed on an application state the grammar does not register", async () => {
         answerWith(200, lifecycleBody({ applicationState: "running" }))
-        expect(await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: INSTALLATION })).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        expect(
+            await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: INSTALLATION }),
+        ).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
     })
 
     it("fails closed on a lifecycle it cannot read field by field", async () => {
@@ -511,14 +716,19 @@ describe("readAgentosShellLifecycleObservation", () => {
             { configurationRequirement: "optional" },
             { testState: "unknown" },
             { runtimeFenceGeneration: -1 },
-            { testEvidenceId: 7 }
+            { testEvidenceId: 7 },
         ]
         for (const variant of variants) {
             answerWith(200, lifecycleBody(variant))
-            expect([variant, await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: INSTALLATION })]).toEqual([variant, expect.objectContaining({ ok: false, code: "UNSUPPORTED_REPLY" })])
+            expect([
+                variant,
+                await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: INSTALLATION }),
+            ]).toEqual([variant, expect.objectContaining({ ok: false, code: "UNSUPPORTED_REPLY" })])
         }
         answerWith(200, { ...lifecycleBody(), lifecycleObservation: "not-a-projection" })
-        expect(await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: INSTALLATION })).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        expect(
+            await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: INSTALLATION }),
+        ).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
     })
 
     it("fails closed on an applied observation it cannot read field by field", async () => {
@@ -529,32 +739,61 @@ describe("readAgentosShellLifecycleObservation", () => {
             { status: "applied", record: heldRecord, mismatch: heldMismatch },
             { status: "held", record: { ...heldRecord, runtimeFenceGeneration: -1 }, mismatch: heldMismatch },
             { status: "held", record: { ...heldRecord, observedAt: 7 }, mismatch: heldMismatch },
-            { status: "held", record: heldRecord, mismatch: { currentCandidate: "", appliedGeneration: null, reason: "candidate-drift" } },
-            { status: "held", record: heldRecord, mismatch: { currentCandidate: "candidate-2", appliedGeneration: null, reason: "drifted" } },
-            { status: "held", record: heldRecord, mismatch: { currentCandidate: "candidate-2", appliedGeneration: 7, reason: "candidate-drift" } }
+            {
+                status: "held",
+                record: heldRecord,
+                mismatch: { currentCandidate: "", appliedGeneration: null, reason: "candidate-drift" },
+            },
+            {
+                status: "held",
+                record: heldRecord,
+                mismatch: { currentCandidate: "candidate-2", appliedGeneration: null, reason: "drifted" },
+            },
+            {
+                status: "held",
+                record: heldRecord,
+                mismatch: { currentCandidate: "candidate-2", appliedGeneration: 7, reason: "candidate-drift" },
+            },
         ]
         for (const variant of variants) {
             answerWith(200, lifecycleBody({}, variant))
-            expect([variant, await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: INSTALLATION })]).toEqual([variant, expect.objectContaining({ ok: false, code: "UNSUPPORTED_REPLY" })])
+            expect([
+                variant,
+                await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: INSTALLATION }),
+            ]).toEqual([variant, expect.objectContaining({ ok: false, code: "UNSUPPORTED_REPLY" })])
         }
     })
 
     it("reports a session outcome, a refusal, a wrong kind and a scope that is not an installation", async () => {
         answerWith(401, { message: "Authentication required" })
-        expect(await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: INSTALLATION })).toMatchObject({ ok: false, kind: "refused" })
+        expect(
+            await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: INSTALLATION }),
+        ).toMatchObject({ ok: false, kind: "refused" })
 
         answerWith(403, { kind: "refused", reason: "parent-mismatch", selectionGeneration: null })
-        expect(await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: INSTALLATION })).toMatchObject({ ok: false, kind: "forbidden" })
+        expect(
+            await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: INSTALLATION }),
+        ).toMatchObject({ ok: false, kind: "forbidden" })
 
         answerWith(200, overviewBody([readOf({ kind: "runtime" }, 1)]))
-        expect(await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: INSTALLATION })).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        expect(
+            await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: INSTALLATION }),
+        ).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
 
-        expect(await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: "not-a-uuid" })).toMatchObject({ ok: false, kind: "invalid", code: "UNSUPPORTED" })
+        expect(
+            await readAgentosShellLifecycleObservation(TOKEN, { ...scope, installationId: "not-a-uuid" }),
+        ).toMatchObject({ ok: false, kind: "invalid", code: "UNSUPPORTED" })
     })
 })
 
 describe("resolveAgentosShellNavigation", () => {
-    const navigationScope = { ...scope, installationId: INSTALLATION, routeKey: "module_home" as const, opaqueItemId: null, selectionGeneration: SELECTION }
+    const navigationScope = {
+        ...scope,
+        installationId: INSTALLATION,
+        routeKey: "module_home" as const,
+        opaqueItemId: null,
+        selectionGeneration: SELECTION,
+    }
     const destination = {
         grammarVersion: 1,
         routeName: "module-home",
@@ -562,7 +801,12 @@ describe("resolveAgentosShellNavigation", () => {
         instanceId: INSTANCE,
         installationId: INSTALLATION,
         opaqueItemId: null,
-        returnContext: { routeName: "purchased_agentos", workspaceId: WORKSPACE, instanceId: INSTANCE, installationId: INSTALLATION }
+        returnContext: {
+            routeName: "purchased_agentos",
+            workspaceId: WORKSPACE,
+            instanceId: INSTANCE,
+            installationId: INSTALLATION,
+        },
     }
 
     it("resolves a registered destination and carries no command or url", async () => {
@@ -571,78 +815,183 @@ describe("resolveAgentosShellNavigation", () => {
 
         expect(outcome).toEqual({ ok: true, data: destination })
         expect(sentInit().method).toBe("POST")
-        expect(sentUrl()).toBe(`http://localhost:3068/api/v1/agentos/workspaces/${WORKSPACE}/instances/${INSTANCE}/operations/${encodeURIComponent(AGENTOS_SHELL_NAVIGATION_OPERATION)}`)
+        expect(sentUrl()).toBe(
+            `http://localhost:3068/api/v1/agentos/workspaces/${WORKSPACE}/instances/${INSTANCE}/operations/${encodeURIComponent(AGENTOS_SHELL_NAVIGATION_OPERATION)}`,
+        )
         const body = JSON.parse(String(sentInit().body)) as Record<string, unknown>
-        expect(Object.keys(body).sort()).toEqual(["installationId", "instanceId", "opaqueItemId", "returnContext", "routeKey", "selectionGeneration", "workspaceId"])
+        expect(Object.keys(body).sort()).toEqual([
+            "installationId",
+            "instanceId",
+            "opaqueItemId",
+            "returnContext",
+            "routeKey",
+            "selectionGeneration",
+            "workspaceId",
+        ])
         expect(JSON.stringify(body)).not.toContain("command")
     })
 
     it("reports a destination resolved for another selection as obsolete", async () => {
         answerWith(200, { kind: "registered_destination", destination, selectionGeneration: "showing-something-else" })
-        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({ ok: false, kind: "invalid", code: "OBSOLETE_SELECTION" })
+        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({
+            ok: false,
+            kind: "invalid",
+            code: "OBSOLETE_SELECTION",
+        })
     })
 
     it("fails closed on an unknown grammar version, an unregistered view and another installation", async () => {
-        answerWith(200, { kind: "registered_destination", destination: { ...destination, grammarVersion: 2 }, selectionGeneration: SELECTION })
-        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        answerWith(200, {
+            kind: "registered_destination",
+            destination: { ...destination, grammarVersion: 2 },
+            selectionGeneration: SELECTION,
+        })
+        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
 
-        answerWith(200, { kind: "registered_destination", destination: { ...destination, routeName: "sales-dashboard" }, selectionGeneration: SELECTION })
-        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        answerWith(200, {
+            kind: "registered_destination",
+            destination: { ...destination, routeName: "sales-dashboard" },
+            selectionGeneration: SELECTION,
+        })
+        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
 
-        answerWith(200, { kind: "registered_destination", destination: { ...destination, installationId: COMMAND }, selectionGeneration: SELECTION })
-        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({ ok: false, code: expect.stringMatching(/^UNSUPPORTED/) })
+        answerWith(200, {
+            kind: "registered_destination",
+            destination: { ...destination, installationId: COMMAND },
+            selectionGeneration: SELECTION,
+        })
+        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({
+            ok: false,
+            code: expect.stringMatching(/^UNSUPPORTED/),
+        })
     })
 
     it("keeps a refusal, an unavailability and an unsupported grammar apart", async () => {
         answerWith(403, { kind: "refused", reason: "parent-mismatch", selectionGeneration: SELECTION })
-        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({ ok: false, code: "parent-mismatch", reason: "parent-mismatch" })
+        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({
+            ok: false,
+            code: "parent-mismatch",
+            reason: "parent-mismatch",
+        })
 
         answerWith(503, { kind: "unavailable", reason: "deadline-exceeded", selectionGeneration: SELECTION })
-        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({ ok: false, kind: "unavailable", code: "NAVIGATION_UNAVAILABLE", reason: "deadline-exceeded" })
+        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({
+            ok: false,
+            kind: "unavailable",
+            code: "NAVIGATION_UNAVAILABLE",
+            reason: "deadline-exceeded",
+        })
 
         answerWith(400, { kind: "unsupported", reason: "route-key-unsupported", selectionGeneration: SELECTION })
-        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({ ok: false, kind: "invalid", code: "NAVIGATION_UNSUPPORTED", reason: "route-key-unsupported" })
+        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({
+            ok: false,
+            kind: "invalid",
+            code: "NAVIGATION_UNSUPPORTED",
+            reason: "route-key-unsupported",
+        })
 
         answerWith(400, { kind: "refused", reason: "unsupported-operation-version", selectionGeneration: null })
-        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({ ok: false, code: "unsupported-operation-version", reason: "unsupported-operation-version" })
+        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({
+            ok: false,
+            code: "unsupported-operation-version",
+            reason: "unsupported-operation-version",
+        })
     })
 
     it("refuses an item entry without its opaque item and a plain entry carrying one", async () => {
-        expect(await resolveAgentosShellNavigation(TOKEN, { ...navigationScope, routeKey: "attention_item" })).toMatchObject({ ok: false, kind: "invalid", code: "UNSUPPORTED", reason: "invalid-navigation-intent" })
-        expect(await resolveAgentosShellNavigation(TOKEN, { ...navigationScope, opaqueItemId: "item-1" })).toMatchObject({ ok: false, kind: "invalid", code: "UNSUPPORTED", reason: "invalid-navigation-intent" })
-        expect(await resolveAgentosShellNavigation(TOKEN, { ...navigationScope, routeKey: "sales_entry" as "module_home" })).toMatchObject({ ok: false, kind: "invalid", code: "UNSUPPORTED", reason: "route-key-unsupported" })
+        expect(
+            await resolveAgentosShellNavigation(TOKEN, { ...navigationScope, routeKey: "attention_item" }),
+        ).toMatchObject({ ok: false, kind: "invalid", code: "UNSUPPORTED", reason: "invalid-navigation-intent" })
+        expect(
+            await resolveAgentosShellNavigation(TOKEN, { ...navigationScope, opaqueItemId: "item-1" }),
+        ).toMatchObject({ ok: false, kind: "invalid", code: "UNSUPPORTED", reason: "invalid-navigation-intent" })
+        expect(
+            await resolveAgentosShellNavigation(TOKEN, {
+                ...navigationScope,
+                routeKey: "sales_entry" as "module_home",
+            }),
+        ).toMatchObject({ ok: false, kind: "invalid", code: "UNSUPPORTED", reason: "route-key-unsupported" })
         expect(fetchMock).not.toHaveBeenCalled()
     })
 
     it("reports a session outcome rather than resolving for an ended session", async () => {
-        expect(await resolveAgentosShellNavigation(null, navigationScope)).toMatchObject({ ok: false, kind: "refused", code: "UNAUTHENTICATED" })
+        expect(await resolveAgentosShellNavigation(null, navigationScope)).toMatchObject({
+            ok: false,
+            kind: "refused",
+            code: "UNAUTHENTICATED",
+        })
         answerWith(401, { message: "Authentication required" })
-        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({ ok: false, kind: "refused", code: "UNAUTHENTICATED" })
+        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({
+            ok: false,
+            kind: "refused",
+            code: "UNAUTHENTICATED",
+        })
     })
 
     it("opens nothing when the reply cannot be read at all", async () => {
-        fetchMock.mockResolvedValue({ status: 200, json: async () => { throw new Error("this is not json") } })
-        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({ ok: false, kind: "unavailable", code: "MALFORMED" })
+        fetchMock.mockResolvedValue({
+            status: 200,
+            json: async () => {
+                throw new Error("this is not json")
+            },
+        })
+        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({
+            ok: false,
+            kind: "unavailable",
+            code: "MALFORMED",
+        })
 
         answerWith(200, "not-an-envelope")
-        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({ ok: false, kind: "unavailable", code: "UNSUPPORTED_REPLY", reason: "unreadable-navigation-answer" })
+        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({
+            ok: false,
+            kind: "unavailable",
+            code: "UNSUPPORTED_REPLY",
+            reason: "unreadable-navigation-answer",
+        })
 
         // An answer of another kind is not a destination this shell may open either.
         answerWith(200, { kind: "overview" })
-        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({ ok: false, kind: "unavailable", code: "UNSUPPORTED_REPLY", reason: "unreadable-navigation-answer" })
+        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({
+            ok: false,
+            kind: "unavailable",
+            code: "UNSUPPORTED_REPLY",
+            reason: "unreadable-navigation-answer",
+        })
 
         // Core states an unavailability and an unsupported grammar by kind; both keep a reason even
         // when Core sent none, so a caller always has something to show.
         answerWith(503, { kind: "unavailable" })
-        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({ ok: false, kind: "unavailable", code: "NAVIGATION_UNAVAILABLE", reason: "navigation-unavailable" })
+        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({
+            ok: false,
+            kind: "unavailable",
+            code: "NAVIGATION_UNAVAILABLE",
+            reason: "navigation-unavailable",
+        })
 
         answerWith(400, { kind: "unsupported" })
-        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({ ok: false, kind: "invalid", code: "NAVIGATION_UNSUPPORTED", reason: "navigation-unsupported" })
+        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({
+            ok: false,
+            kind: "invalid",
+            code: "NAVIGATION_UNSUPPORTED",
+            reason: "navigation-unsupported",
+        })
 
         fetchMock.mockRejectedValue(new Error("socket closed"))
-        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({ ok: false, kind: "unavailable", code: "NETWORK" })
+        expect(await resolveAgentosShellNavigation(TOKEN, navigationScope)).toMatchObject({
+            ok: false,
+            kind: "unavailable",
+            code: "NETWORK",
+        })
 
-        expect(await resolveAgentosShellNavigation(TOKEN, { ...navigationScope, installationId: "not-a-uuid" })).toMatchObject({ ok: false, kind: "invalid", code: "UNSUPPORTED", reason: "invalid-navigation-intent" })
+        expect(
+            await resolveAgentosShellNavigation(TOKEN, { ...navigationScope, installationId: "not-a-uuid" }),
+        ).toMatchObject({ ok: false, kind: "invalid", code: "UNSUPPORTED", reason: "invalid-navigation-intent" })
     })
 
     it("fails closed on a destination it cannot read field by field", async () => {
@@ -654,11 +1003,14 @@ describe("resolveAgentosShellNavigation", () => {
             { ...destination, returnContext: { ...destination.returnContext, installationId: 7 } },
             { ...destination, workspaceId: "not-a-uuid" },
             { ...destination, workspaceId: COMMAND },
-            { ...destination, opaqueItemId: 7 }
+            { ...destination, opaqueItemId: 7 },
         ]
         for (const variant of variants) {
             answerWith(200, { kind: "registered_destination", destination: variant, selectionGeneration: SELECTION })
-            expect([variant, await resolveAgentosShellNavigation(TOKEN, navigationScope)]).toEqual([variant, expect.objectContaining({ ok: false, code: "UNSUPPORTED_REPLY", reason: "unregistered-destination" })])
+            expect([variant, await resolveAgentosShellNavigation(TOKEN, navigationScope)]).toEqual([
+                variant,
+                expect.objectContaining({ ok: false, code: "UNSUPPORTED_REPLY", reason: "unregistered-destination" }),
+            ])
         }
     })
 })
@@ -666,15 +1018,23 @@ describe("resolveAgentosShellNavigation", () => {
 describe("formatShellSourceIdentity", () => {
     it("formats each selection-scoped and receiver-scoped identity in its registered spelling", () => {
         expect(formatShellSourceIdentity({ kind: "core_registry" })).toBe("core_registry")
-        expect(formatShellSourceIdentity({ kind: "attention", installationId: INSTALLATION })).toBe(`attention:{${INSTALLATION}}`)
-        expect(formatShellSourceIdentity({ kind: "receiver", installationId: INSTALLATION, intentId: "intent-1" })).toBe(`receiver:{${INSTALLATION},intent-1}`)
+        expect(formatShellSourceIdentity({ kind: "attention", installationId: INSTALLATION })).toBe(
+            `attention:{${INSTALLATION}}`,
+        )
+        expect(
+            formatShellSourceIdentity({ kind: "receiver", installationId: INSTALLATION, intentId: "intent-1" }),
+        ).toBe(`receiver:{${INSTALLATION},intent-1}`)
     })
 })
 
 describe("formatShellRead", () => {
     it("spells one read as its percent-encoded identity and its generation", () => {
         expect(formatShellRead({ kind: "runtime" }, 9)).toBe("runtime:9")
-        expect(formatShellRead({ kind: "attention", installationId: INSTALLATION }, 3)).toBe(`attention%3A%7B${INSTALLATION}%7D:3`)
-        expect(formatShellRead({ kind: "receiver", installationId: INSTALLATION, intentId: "intent-1" }, 1)).toBe(`receiver%3A%7B${INSTALLATION}%2Cintent-1%7D:1`)
+        expect(formatShellRead({ kind: "attention", installationId: INSTALLATION }, 3)).toBe(
+            `attention%3A%7B${INSTALLATION}%7D:3`,
+        )
+        expect(formatShellRead({ kind: "receiver", installationId: INSTALLATION, intentId: "intent-1" }, 1)).toBe(
+            `receiver%3A%7B${INSTALLATION}%2Cintent-1%7D:1`,
+        )
     })
 })

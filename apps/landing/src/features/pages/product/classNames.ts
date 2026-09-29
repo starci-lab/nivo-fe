@@ -78,6 +78,5 @@ export const productGridClassName = (columns: number): string => {
 }
 
 /** Resolve a commercial offer surface while preserving one featured offer. */
-export const productOfferClassName = (featured: boolean): string => (
+export const productOfferClassName = (featured: boolean): string =>
     featured ? PRODUCT_CLASS_NAMES.offerFeatured : PRODUCT_CLASS_NAMES.offer
-)

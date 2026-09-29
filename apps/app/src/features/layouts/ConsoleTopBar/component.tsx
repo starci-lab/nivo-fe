@@ -1,9 +1,9 @@
-import { NavigationFeatureNav, Text } from "@starci/grammar/common";
-import type { ComponentType } from "react";
-import { NivoBrand, ThemeSwitch } from "@nivo/ui";
+import { NavigationFeatureNav, Text } from "@starci/grammar/common"
+import type { ComponentType } from "react"
+import { NivoBrand, ThemeSwitch } from "@nivo/ui"
 
 /** The mounted controls take no props: the connected half renders them fully resolved. */
-export type ConsoleTopBarControlProps = { readonly [key: string]: never };
+export type ConsoleTopBarControlProps = { readonly [key: string]: never }
 
 /**
  * The bar's approved drawing: which resolved controls mount in its actions band.
@@ -12,33 +12,33 @@ export type ConsoleTopBarControlProps = { readonly [key: string]: never };
  * connected half resolves them, and instantiating them here keeps every render path pure.
  */
 export type ConsoleTopBarBaseState = {
-  readonly localeControl: ComponentType<ConsoleTopBarControlProps>;
-  readonly localeControlProps: ConsoleTopBarControlProps;
-  readonly accountControl: ComponentType<ConsoleTopBarControlProps>;
-  readonly accountControlProps: ConsoleTopBarControlProps;
-};
+    readonly localeControl: ComponentType<ConsoleTopBarControlProps>
+    readonly localeControlProps: ConsoleTopBarControlProps
+    readonly accountControl: ComponentType<ConsoleTopBarControlProps>
+    readonly accountControlProps: ConsoleTopBarControlProps
+}
 
 /** Pure top-bar labels and theme facts. */
 export type ConsoleTopBarBaseData = {
-  readonly brandLabel: string;
-  readonly contextLabel: string;
-  readonly actionsLabel: string;
-  readonly isDark: boolean;
-  readonly lightThemeLabel: string;
-  readonly darkThemeLabel: string;
-};
+    readonly brandLabel: string
+    readonly contextLabel: string
+    readonly actionsLabel: string
+    readonly isDark: boolean
+    readonly lightThemeLabel: string
+    readonly darkThemeLabel: string
+}
 
 /** The bar's single command back into the world: switch the resolved theme. */
 export type ConsoleTopBarBaseActions = {
-  readonly toggleTheme: () => void;
-};
+    readonly toggleTheme: () => void
+}
 
 /** Public API role for ConsoleTopBarBaseProps. */
 export type ConsoleTopBarBaseProps = {
-  readonly state: ConsoleTopBarBaseState;
-  readonly props: ConsoleTopBarBaseData;
-  readonly on: ConsoleTopBarBaseActions;
-};
+    readonly state: ConsoleTopBarBaseState
+    readonly props: ConsoleTopBarBaseData
+    readonly on: ConsoleTopBarBaseActions
+}
 
 /*
  * The installed `starci-fe/public-component-signature` rule reads the render half's own name and
@@ -46,7 +46,7 @@ export type ConsoleTopBarBaseProps = {
  * accepts; the exported contract above stays `<Unit>BaseProps`, which the code-pattern check
  * requires the render half to own. Not exported: one public contract per unit.
  */
-type ConsoleTopBarProps = ConsoleTopBarBaseProps;
+type ConsoleTopBarProps = ConsoleTopBarBaseProps
 
 /**
  * Draw the protected Nivo lockup and only capability-backed global tools.
@@ -62,46 +62,50 @@ type ConsoleTopBarProps = ConsoleTopBarBaseProps;
  * not there. The grammar emits the group wrapper regardless, so it is left unnamed.
  */
 export const ConsoleTopBarBase = (props: ConsoleTopBarProps) => {
-  const {
-    state: {
-      localeControl: LocaleControl,
-      localeControlProps,
-      accountControl: AccountControl,
-      accountControlProps
-    },
-    props: {
-      brandLabel,
-      contextLabel,
-      actionsLabel,
-      isDark,
-      lightThemeLabel,
-      darkThemeLabel
-    },
-    on: { toggleTheme }
-  }: ConsoleTopBarProps = props;
-  return <NavigationFeatureNav
-    identity={<>
-      <NivoBrand props={{
-          label: brandLabel,
-          variant: "lockup",
-          scale: "navbar"
-        }} />
-      <Text weight="semibold">{contextLabel}</Text>
-    </>}
-    compactNavigationTrigger={null}
-    compactNavigationTriggerLabel=""
-    actions={<>
-      <LocaleControl {...localeControlProps} />
-      <ThemeSwitch props={{
-          isDark,
-          label: isDark ? lightThemeLabel : darkThemeLabel
-        }} on={{
-          change: toggleTheme
-        }} />
-      <AccountControl {...accountControlProps} />
-    </>}
-    actionsLabel={actionsLabel}
-  />;
-};
+    const {
+        state: {
+            localeControl: LocaleControl,
+            localeControlProps,
+            accountControl: AccountControl,
+            accountControlProps,
+        },
+        props: { brandLabel, contextLabel, actionsLabel, isDark, lightThemeLabel, darkThemeLabel },
+        on: { toggleTheme },
+    }: ConsoleTopBarProps = props
+    return (
+        <NavigationFeatureNav
+            identity={
+                <>
+                    <NivoBrand
+                        props={{
+                            label: brandLabel,
+                            variant: "lockup",
+                            scale: "navbar",
+                        }}
+                    />
+                    <Text weight="semibold">{contextLabel}</Text>
+                </>
+            }
+            compactNavigationTrigger={null}
+            compactNavigationTriggerLabel=""
+            actions={
+                <>
+                    <LocaleControl {...localeControlProps} />
+                    <ThemeSwitch
+                        props={{
+                            isDark,
+                            label: isDark ? lightThemeLabel : darkThemeLabel,
+                        }}
+                        on={{
+                            change: toggleTheme,
+                        }}
+                    />
+                    <AccountControl {...accountControlProps} />
+                </>
+            }
+            actionsLabel={actionsLabel}
+        />
+    )
+}
 
 /** Registry identity for the pure console top-bar twin. */

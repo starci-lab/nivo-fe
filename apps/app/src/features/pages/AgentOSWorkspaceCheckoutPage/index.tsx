@@ -1,4 +1,4 @@
-import CheckoutReviewFlow from "@/components/blocks/agentos/CheckoutReviewFlow";
+import CheckoutReviewFlow from "@/components/blocks/agentos/CheckoutReviewFlow"
 
 /**
  * The `/[locale]/agentos/workspaces/new/checkout` screen, connected half.
@@ -10,6 +10,6 @@ import CheckoutReviewFlow from "@/components/blocks/agentos/CheckoutReviewFlow";
  *
  * @returns The page.
  */
-export const AgentOSWorkspaceCheckoutPage = () => <CheckoutReviewFlow />;
+export const AgentOSWorkspaceCheckoutPage = () => <CheckoutReviewFlow />
 
-export default AgentOSWorkspaceCheckoutPage;
+export default AgentOSWorkspaceCheckoutPage

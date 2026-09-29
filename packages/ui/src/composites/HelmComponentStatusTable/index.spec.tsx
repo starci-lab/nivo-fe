@@ -3,7 +3,15 @@ import { describe, expect, it } from "vitest"
 import { HelmComponentStatusTable } from "./"
 
 describe("HelmComponentStatusTable", () => {
-    const row = { id: "api", name: "API", detail: "Healthy", kind: "service", status: "Ready", statusTone: "success" as const, resources: "2 pods" }
+    const row = {
+        id: "api",
+        name: "API",
+        detail: "Healthy",
+        kind: "service",
+        status: "Ready",
+        statusTone: "success" as const,
+        resources: "2 pods",
+    }
 
     it("renders each component's public status fields", () => {
         render(<HelmComponentStatusTable props={{ id: "release", rows: [row] }} />)

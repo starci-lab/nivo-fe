@@ -1,6 +1,6 @@
-import { AcademyChrome } from "@/features/layouts/AcademyChrome";
-import { AcademySections } from "@/components/blocks/academy/AcademySections";
-import type { Course } from "@/modules/api/academy";
+import { AcademyChrome } from "@/features/layouts/AcademyChrome"
+import { AcademySections } from "@/components/blocks/academy/AcademySections"
+import type { Course } from "@/modules/api/academy"
 
 /**
  * PAGE - the academy's landing screen, drawing half.
@@ -17,19 +17,19 @@ import type { Course } from "@/modules/api/academy";
 
 /** The atoms the landing screen draws. */
 export type AcademyPageBaseData = {
-  /** The catalog this academy sells, already resolved. */
-  readonly courses: ReadonlyArray<Course>;
-};
+    /** The catalog this academy sells, already resolved. */
+    readonly courses: ReadonlyArray<Course>
+}
 
 /** Props for {@link AcademyPageBase}. */
 export type AcademyPageBaseProps = {
-  readonly props: AcademyPageBaseData;
-};
-const AcademyRoutedContent = ({
-  courses
-}: AcademyPageBaseData) => <div>
-
-  <AcademySections courses={[...courses]} /></div>;
+    readonly props: AcademyPageBaseData
+}
+const AcademyRoutedContent = ({ courses }: AcademyPageBaseData) => (
+    <div>
+        <AcademySections courses={[...courses]} />
+    </div>
+)
 
 /**
  * Draw the academy landing screen.
@@ -37,12 +37,15 @@ const AcademyRoutedContent = ({
  * @param props - {@link AcademyPageBaseProps}
  * @returns The page.
  */
-export const AcademyPageBase = ({ props }: AcademyPageBaseProps) => <AcademyChrome
-/*
- * `content`, not `children`: the layout names the one routed interior it takes, so nothing
- * else can arrive beside it unannounced. Only the three closed vendor shells may take the
- * anonymous slot.
- *
- * The interior is a semantic main landmark so a reader can skip the chrome above it. The page
- * keeps the section block responsible for its own internal structure.
- */ content={<AcademyRoutedContent courses={[...props.courses]} />} />;
+export const AcademyPageBase = ({ props }: AcademyPageBaseProps) => (
+    <AcademyChrome
+        /*
+         * `content`, not `children`: the layout names the one routed interior it takes, so nothing
+         * else can arrive beside it unannounced. Only the three closed vendor shells may take the
+         * anonymous slot.
+         *
+         * The interior is a semantic main landmark so a reader can skip the chrome above it. The page
+         * keeps the section block responsible for its own internal structure.
+         */ content={<AcademyRoutedContent courses={[...props.courses]} />}
+    />
+)

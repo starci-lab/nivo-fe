@@ -1,16 +1,16 @@
-"use client";
+"use client"
 
-import { useEffect } from "react";
-import type { ReactNode } from "react";
-import { useTranslations } from "next-intl";
-import { usePathname, useRouter, useSession } from "@/hooks";
+import { useEffect } from "react"
+import type { ReactNode } from "react"
+import { useTranslations } from "next-intl"
+import { usePathname, useRouter, useSession } from "@/hooks"
 
-import { ConsoleLayoutBase } from "./component";
+import { ConsoleLayoutBase } from "./component"
 
 /** Connected console frame input: the routed page the server layout has already rendered. */
 export type ConsoleLayoutProps = {
-  readonly children: ReactNode;
-};
+    readonly children: ReactNode
+}
 
 /**
  * Where an anonymous reader is sent, carrying the console route that interrupted them.
@@ -24,28 +24,30 @@ export type ConsoleLayoutProps = {
  * @returns The sign-in address, with the route to return to when there is one worth returning to.
  */
 const signInHrefFor = (pathname: string | null): string =>
-  pathname === null || pathname === "" || pathname === "/" ? "/authentication" : `/authentication?returnTo=${encodeURIComponent(pathname)}`;
+    pathname === null || pathname === "" || pathname === "/"
+        ? "/authentication"
+        : `/authentication?returnTo=${encodeURIComponent(pathname)}`
 
 /** Guard the authenticated console and hand drawing to its pure layout twin. */
 export const ConsoleLayout = (props: ConsoleLayoutProps) => {
-  const {
-    children
-  }: ConsoleLayoutProps = props;
-  const t = useTranslations("console");
-  const router = useRouter();
-  const pathname = usePathname();
-  const status = useSession().state.status;
-  useEffect(() => {
-    if (status === "anonymous") router.replace(signInHrefFor(pathname));
-  }, [status, router, pathname]);
-  if (status !== "signed-in") return null;
-  return <ConsoleLayoutBase
-    state={{ children }}
-    props={{
-      navigationLabel: t("navigationLabel"),
-      primaryLabel: t("workspaceLabel")
-    }}
-  />;
-};
+    const { children }: ConsoleLayoutProps = props
+    const t = useTranslations("console")
+    const router = useRouter()
+    const pathname = usePathname()
+    const status = useSession().state.status
+    useEffect(() => {
+        if (status === "anonymous") router.replace(signInHrefFor(pathname))
+    }, [status, router, pathname])
+    if (status !== "signed-in") return null
+    return (
+        <ConsoleLayoutBase
+            state={{ children }}
+            props={{
+                navigationLabel: t("navigationLabel"),
+                primaryLabel: t("workspaceLabel"),
+            }}
+        />
+    )
+}
 
 /** Registry identity for the connected console layout twin. */

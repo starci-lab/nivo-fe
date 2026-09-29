@@ -2,11 +2,12 @@ import assert from "node:assert/strict"
 import { test } from "node:test"
 import { checkApp, flattenCatalog, scanSource } from "./check-i18n-catalog.mjs"
 
-const run = ({ en, vi = en, files }) => checkApp({
-    appName: "fixture",
-    catalogs: { en, vi },
-    sources: Object.entries(files).map(([name, text]) => scanSource(name, text)),
-})
+const run = ({ en, vi = en, files }) =>
+    checkApp({
+        appName: "fixture",
+        catalogs: { en, vi },
+        sources: Object.entries(files).map(([name, text]) => scanSource(name, text)),
+    })
 const codes = (findings) => findings.map((finding) => finding.code)
 
 test("flattenCatalog lists every leaf path", () => {
@@ -16,30 +17,52 @@ test("flattenCatalog lists every leaf path", () => {
 test("a used key in parity is clean", () => {
     const findings = run({
         en: { home: { title: "Title" } },
-        files: { "a.tsx": 'import { useTranslations } from "next-intl"\nexport const A = () => { const t = useTranslations("home"); return <h1>{t("title")}</h1> }' },
+        files: {
+            "a.tsx":
+                'import { useTranslations } from "next-intl"\nexport const A = () => { const t = useTranslations("home"); return <h1>{t("title")}</h1> }',
+        },
     })
     assert.deepEqual(findings, [])
 })
 
 test("a key present in one language only is drift", () => {
-    const findings = run({ en: { a: "x" }, vi: { a: "x", b: "y" }, files: { "a.ts": 'const t = useTranslations(""); t("a"); t("b")' } })
+    const findings = run({
+        en: { a: "x" },
+        vi: { a: "x", b: "y" },
+        files: { "a.ts": 'const t = useTranslations(""); t("a"); t("b")' },
+    })
     assert.ok(codes(findings).includes("I18N_PARITY"))
 })
 
 test("a key the catalog does not hold fails, whichever way it is spelled", () => {
-    const literal = run({ en: { home: { title: "T" } }, files: { "a.ts": 'const t = useTranslations("home"); t("title"); t("missing")' } })
+    const literal = run({
+        en: { home: { title: "T" } },
+        files: { "a.ts": 'const t = useTranslations("home"); t("title"); t("missing")' },
+    })
     assert.ok(codes(literal).includes("I18N_MISSING_KEY"))
-    const computed = run({ en: { home: { steps: { a: "A" } } }, files: { "a.ts": 'const t = useTranslations("home"); t(`steps.${id}`); t(`nothing.${id}`)' } })
+    const computed = run({
+        en: { home: { steps: { a: "A" } } },
+        files: { "a.ts": 'const t = useTranslations("home"); t(`steps.${id}`); t(`nothing.${id}`)' },
+    })
     assert.equal(codes(computed).filter((code) => code === "I18N_MISSING_KEY").length, 1)
 })
 
 test("a computed key reads only the leaves it can match", () => {
-    const findings = run({ en: { home: { steps: { a: { label: "A" }, b: { label: "B" } }, other: "O" } }, files: { "a.ts": 'const t = useTranslations("home"); t(`steps.${id}.label`)' } })
-    assert.deepEqual(findings.map((finding) => finding.message), ['fixture: key "home.other" is never read'])
+    const findings = run({
+        en: { home: { steps: { a: { label: "A" }, b: { label: "B" } }, other: "O" } },
+        files: { "a.ts": 'const t = useTranslations("home"); t(`steps.${id}.label`)' },
+    })
+    assert.deepEqual(
+        findings.map((finding) => finding.message),
+        ['fixture: key "home.other" is never read'],
+    )
 })
 
 test("a leaf nothing reads is dead", () => {
-    const findings = run({ en: { home: { title: "T", unused: "U" } }, files: { "a.ts": 'const t = useTranslations("home"); t("title")' } })
+    const findings = run({
+        en: { home: { title: "T", unused: "U" } },
+        files: { "a.ts": 'const t = useTranslations("home"); t("title")' },
+    })
     assert.deepEqual(codes(findings), ["I18N_UNUSED_KEY"])
 })
 
@@ -47,7 +70,8 @@ test("copy in a source file fails, in any language, with no marker to excuse it"
     const findings = run({
         en: { a: "x" },
         files: {
-            "a.tsx": 'const t = useTranslations(""); t("a"); export const A = () => <p aria-label="Close menu">Hello there</p>',
+            "a.tsx":
+                'const t = useTranslations(""); t("a"); export const A = () => <p aria-label="Close menu">Hello there</p>',
             "b.ts": '// vn-ok: reason\nexport const S = "Đã huỷ"',
         },
     })

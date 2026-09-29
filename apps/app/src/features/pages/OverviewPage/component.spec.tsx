@@ -6,11 +6,21 @@ import { describe, expect, it, vi } from "vitest"
 const precedes = (first: HTMLElement, second: HTMLElement) =>
     Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING)
 
-vi.mock("@/components/blocks/console/OverviewSignals", () => ({ OverviewSignals: () => <div data-testid="overview-signals" /> }))
-vi.mock("@/components/blocks/console/OverviewServices", () => ({ OverviewServices: () => <div data-testid="overview-services" /> }))
-vi.mock("@/components/blocks/console/OverviewRuntime", () => ({ OverviewRuntime: () => <div data-testid="overview-runtime" /> }))
-vi.mock("@/components/blocks/console/OverviewAccount", () => ({ OverviewAccount: () => <div data-testid="overview-account" /> }))
-vi.mock("@/components/blocks/console/OverviewAddresses", () => ({ OverviewAddresses: () => <div data-testid="overview-addresses" /> }))
+vi.mock("@/components/blocks/console/OverviewSignals", () => ({
+    OverviewSignals: () => <div data-testid="overview-signals" />,
+}))
+vi.mock("@/components/blocks/console/OverviewServices", () => ({
+    OverviewServices: () => <div data-testid="overview-services" />,
+}))
+vi.mock("@/components/blocks/console/OverviewRuntime", () => ({
+    OverviewRuntime: () => <div data-testid="overview-runtime" />,
+}))
+vi.mock("@/components/blocks/console/OverviewAccount", () => ({
+    OverviewAccount: () => <div data-testid="overview-account" />,
+}))
+vi.mock("@/components/blocks/console/OverviewAddresses", () => ({
+    OverviewAddresses: () => <div data-testid="overview-addresses" />,
+}))
 
 import { OverviewPageBase, type OverviewPageBaseProps } from "./component"
 

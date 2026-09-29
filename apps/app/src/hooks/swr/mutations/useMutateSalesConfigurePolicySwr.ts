@@ -1,10 +1,14 @@
-"use client";
+"use client"
 
-import { commandSalesConfigurePolicy, type SalesConfigurePolicyRequest, type SalesInstallationScope } from "@/modules/api/sales";
-import { operationMutationKey, operationAnswerNeedsRead, type OperationTrigger } from "@/modules/api/operation-route";
-import { useAccessToken } from "../../auth/useAccessToken";
-import { useNivoMutation } from "../useNivoMutation";
-import { salesPolicyQueryKey } from "../queries/useQuerySalesPolicySwr";
+import {
+    commandSalesConfigurePolicy,
+    type SalesConfigurePolicyRequest,
+    type SalesInstallationScope,
+} from "@/modules/api/sales"
+import { operationMutationKey, operationAnswerNeedsRead, type OperationTrigger } from "@/modules/api/operation-route"
+import { useAccessToken } from "../../auth/useAccessToken"
+import { useNivoMutation } from "../useNivoMutation"
+import { salesPolicyQueryKey } from "../queries/useQuerySalesPolicySwr"
 
 /*
  * One hook per file, one registered command per hook.
@@ -22,6 +26,19 @@ import { salesPolicyQueryKey } from "../queries/useQuerySalesPolicySwr";
  *   nothing rather than addressing a half-filled operation path.
  */
 export const useMutateSalesConfigurePolicySwr = (scope: SalesInstallationScope, enabled = true) => {
-  const accessToken = useAccessToken();
-  return useNivoMutation(enabled ? operationMutationKey("sales", "configure-policy", scope) : null, (trigger: OperationTrigger<SalesConfigurePolicyRequest>) => commandSalesConfigurePolicy(accessToken, scope, trigger.input, trigger.requestId), { invalidates: trigger => [salesPolicyQueryKey(scope, { salesInstallationId: trigger.input.salesInstallationId, requestId: trigger.input.requestId })], shouldInvalidate: operationAnswerNeedsRead });
-};
+    const accessToken = useAccessToken()
+    return useNivoMutation(
+        enabled ? operationMutationKey("sales", "configure-policy", scope) : null,
+        (trigger: OperationTrigger<SalesConfigurePolicyRequest>) =>
+            commandSalesConfigurePolicy(accessToken, scope, trigger.input, trigger.requestId),
+        {
+            invalidates: (trigger) => [
+                salesPolicyQueryKey(scope, {
+                    salesInstallationId: trigger.input.salesInstallationId,
+                    requestId: trigger.input.requestId,
+                }),
+            ],
+            shouldInvalidate: operationAnswerNeedsRead,
+        },
+    )
+}

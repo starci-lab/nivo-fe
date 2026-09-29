@@ -10,7 +10,11 @@ import type { SessionEndReport } from "@/modules/auth/session"
 /** An everywhere ending the identity authority confirmed. */
 const APPLIED: SessionEndReport = { localCleared: true, remoteRevocation: "observed", authorityEnding: "confirmed" }
 /** An everywhere ending nobody confirmed, which is never an applied scope. */
-const UNCONFIRMED: SessionEndReport = { localCleared: true, remoteRevocation: "unknown", authorityEnding: "unconfirmed" }
+const UNCONFIRMED: SessionEndReport = {
+    localCleared: true,
+    remoteRevocation: "unknown",
+    authorityEnding: "unconfirmed",
+}
 
 /** The scope the connected half may ask an ending for, held here so the spy is typed as the session's. */
 type EndingCall = (scope?: "thisBrowser" | "everywhere") => Promise<SessionEndReport>
@@ -54,7 +58,9 @@ vi.mock("@/hooks", async () => {
         useRouter: () => ({ push: vi.fn(), replace }),
         usePathname: () => "/",
         useQueryMyAgentWorkspaceControlCenterSwr: (workspaceId: string, enabled = true) =>
-            enabled ? { data: { ok: true, data: { workspace: { id: workspaceId, name: scope.workspaceName } } } } : { data: undefined },
+            enabled
+                ? { data: { ok: true, data: { workspace: { id: workspaceId, name: scope.workspaceName } } } }
+                : { data: undefined },
         useQueryCollabOfficeSwr: (workspaceId: string | null) => {
             if (workspaceId === null || scope.role === null || scope.roster === "loading") return { data: undefined }
             if (scope.roster === "unavailable") return { data: { ok: false, kind: "denied" } }
@@ -64,9 +70,29 @@ vi.mock("@/hooks", async () => {
                     data: {
                         viewer: { memberId: "member-1", role: scope.role },
                         participants: [
-                            { memberId: "member-1", kind: "human", displayName: "An Nguyen", role: "owner", status: "active", moduleInstallationId: null },
-                            ...(scope.roster === "empty" ? [] : scope.members).map((member) => ({ ...member, kind: "human", role: "staff", status: "active", moduleInstallationId: null })),
-                            { memberId: "module-1", kind: "module", displayName: "Agent", role: "module", status: "active", moduleInstallationId: "inst-1" },
+                            {
+                                memberId: "member-1",
+                                kind: "human",
+                                displayName: "An Nguyen",
+                                role: "owner",
+                                status: "active",
+                                moduleInstallationId: null,
+                            },
+                            ...(scope.roster === "empty" ? [] : scope.members).map((member) => ({
+                                ...member,
+                                kind: "human",
+                                role: "staff",
+                                status: "active",
+                                moduleInstallationId: null,
+                            })),
+                            {
+                                memberId: "module-1",
+                                kind: "module",
+                                displayName: "Agent",
+                                role: "module",
+                                status: "active",
+                                moduleInstallationId: "inst-1",
+                            },
                         ],
                     },
                 },
@@ -88,7 +114,9 @@ import { AccountMenu } from "."
 /** An ending request that stays unanswered until the test releases it. */
 const unansweredEnding = () => {
     let release: (report: SessionEndReport) => void = () => {}
-    const promise = new Promise<SessionEndReport>((resolve) => { release = resolve })
+    const promise = new Promise<SessionEndReport>((resolve) => {
+        release = resolve
+    })
     return { promise, release }
 }
 
@@ -109,8 +137,7 @@ const openMemberEndingDialog = async (user: ReturnType<typeof userEvent.setup>) 
 }
 
 /** The picker's trigger inside the drawn dialog, named by the field label the connected half resolved. */
-const memberPicker = (dialog: HTMLElement): HTMLElement =>
-    within(dialog).getByRole("button", { name: /Member/ })
+const memberPicker = (dialog: HTMLElement): HTMLElement => within(dialog).getByRole("button", { name: /Member/ })
 
 /** Open the administrator ending, choose a roster member by display name and continue, answering with the confirmation. */
 const openMemberEnding = async (user: ReturnType<typeof userEvent.setup>) => {
@@ -165,7 +192,11 @@ describe("AccountMenu", () => {
         const dialog = await openEveryBrowserConfirmation(user)
 
         expect(dialog).toHaveAccessibleName("Sign out everywhere")
-        expect(within(dialog).getByText("End your current Nivo sessions on every browser. Your login stays available for a fresh sign-in.")).toBeInTheDocument()
+        expect(
+            within(dialog).getByText(
+                "End your current Nivo sessions on every browser. Your login stays available for a fresh sign-in.",
+            ),
+        ).toBeInTheDocument()
         expect(within(dialog).getByText("This includes this browser.")).toBeInTheDocument()
 
         await user.click(screen.getByRole("button", { name: "Sign out everywhere" }))
@@ -205,7 +236,9 @@ describe("AccountMenu", () => {
         await user.click(confirm)
         expect(end).toHaveBeenCalledOnce()
 
-        await act(async () => { release(APPLIED) })
+        await act(async () => {
+            release(APPLIED)
+        })
         await waitFor(() => expect(replace).toHaveBeenCalledOnce())
     })
 
@@ -306,10 +339,12 @@ describe("AccountMenu", () => {
         expect(confirmed).toBeInTheDocument()
 
         cleanup()
-        endPrincipalSessions.mockImplementation(() => Promise.resolve({
-            ok: true,
-            data: { kind: "scopeApplied", authorityEndingConfirmed: null },
-        }))
+        endPrincipalSessions.mockImplementation(() =>
+            Promise.resolve({
+                ok: true,
+                data: { kind: "scopeApplied", authorityEndingConfirmed: null },
+            }),
+        )
         await openMemberEnding(user)
         await user.click(screen.getByRole("button", { name: "End all sign-ins" }))
         const silent = await screen.findByText("Sign-ins in the scope you act in have been ended for this person.")
@@ -327,18 +362,31 @@ describe("AccountMenu", () => {
         await user.click(screen.getByRole("button", { name: "End all sign-ins" }))
         const refused = await within(dialog).findByText("This action cannot be carried out.")
         expect(refused).toBeInTheDocument()
-        expect(within(dialog).queryByText("Sign-ins in the scope you act in have been ended for this person.")).not.toBeInTheDocument()
-        expect(within(dialog).queryByText("This action could not be completed. Please try again.")).not.toBeInTheDocument()
+        expect(
+            within(dialog).queryByText("Sign-ins in the scope you act in have been ended for this person."),
+        ).not.toBeInTheDocument()
+        expect(
+            within(dialog).queryByText("This action could not be completed. Please try again."),
+        ).not.toBeInTheDocument()
         expect(within(dialog).queryByRole("button", { name: "Try again" })).not.toBeInTheDocument()
     })
 
     it("reports an authority that never answered as undecided and resends the same request identity on retry", async () => {
         const user = userEvent.setup()
-        endPrincipalSessions.mockResolvedValueOnce({ ok: false, kind: "unavailable", status: null, reason: "network", code: "NETWORK", retryable: true })
+        endPrincipalSessions.mockResolvedValueOnce({
+            ok: false,
+            kind: "unavailable",
+            status: null,
+            reason: "network",
+            code: "NETWORK",
+            retryable: true,
+        })
         const dialog = await openMemberEnding(user)
 
         await user.click(screen.getByRole("button", { name: "End all sign-ins" }))
-        expect(await within(dialog).findByText("This action could not be completed. Please try again.")).toBeInTheDocument()
+        expect(
+            await within(dialog).findByText("This action could not be completed. Please try again."),
+        ).toBeInTheDocument()
         expect(within(dialog).queryByText("This action cannot be carried out.")).not.toBeInTheDocument()
 
         await user.click(screen.getByRole("button", { name: "Try again" }))

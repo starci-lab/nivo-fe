@@ -1,9 +1,9 @@
-import createMiddleware from "next-intl/middleware";
-import { NextResponse, type NextRequest } from "next/server";
-import { DEFAULT_LOCALE } from "./modules/i18n/config";
-import { routing } from "./modules/i18n/routing";
+import createMiddleware from "next-intl/middleware"
+import { NextResponse, type NextRequest } from "next/server"
+import { DEFAULT_LOCALE } from "./modules/i18n/config"
+import { routing } from "./modules/i18n/routing"
 
-const resolveRequestLocale = createMiddleware(routing);
+const resolveRequestLocale = createMiddleware(routing)
 
 /**
  * Detect the standalone router's self-proxy hop and stand aside.
@@ -22,9 +22,8 @@ const resolveRequestLocale = createMiddleware(routing);
  * arrive through a forward proxy merely skips the cosmetic prefix-strip.
  */
 const isStandaloneSelfProxy = (request: NextRequest): boolean =>
-  request.headers.has("x-forwarded-host") &&
-  (request.nextUrl.pathname === `/${DEFAULT_LOCALE}` ||
-    request.nextUrl.pathname.startsWith(`/${DEFAULT_LOCALE}/`));
+    request.headers.has("x-forwarded-host") &&
+    (request.nextUrl.pathname === `/${DEFAULT_LOCALE}` || request.nextUrl.pathname.startsWith(`/${DEFAULT_LOCALE}/`))
 
 /**
  * Resolves the locale before the route is matched.
@@ -40,13 +39,13 @@ const isStandaloneSelfProxy = (request: NextRequest): boolean =>
  * every script tag on the page.
  */
 const middleware = (request: NextRequest) => {
-  if (isStandaloneSelfProxy(request)) return NextResponse.next();
-  return resolveRequestLocale(request);
-};
+    if (isStandaloneSelfProxy(request)) return NextResponse.next()
+    return resolveRequestLocale(request)
+}
 
-export default middleware;
+export default middleware
 
 /** Which paths the locale middleware runs on: everything except API, build output and real files. */
 export const config = {
-  matcher: ["/((?!api|_next|_vercel|.*[.].*).*)"]
-};
+    matcher: ["/((?!api|_next|_vercel|.*[.].*).*)"],
+}

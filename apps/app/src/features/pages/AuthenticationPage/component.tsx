@@ -1,14 +1,14 @@
-import { NivoBrand, NivoUnicornArtwork } from "@nivo/ui";
-import { Heading, SurfaceCard, Text, TextAction } from "@starci/grammar/common";
-import { AuthenticationPanel, type AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel";
+import { NivoBrand, NivoUnicornArtwork } from "@nivo/ui"
+import { Heading, SurfaceCard, Text, TextAction } from "@starci/grammar/common"
+import { AuthenticationPanel, type AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel"
 import {
-  AUTH_EXIT_CLASS_NAME,
-  AUTH_EXITS_CLASS_NAME,
-  AUTH_HEADING_CLASS_NAME,
-  AUTH_PAGE_CLASS_NAME,
-  AUTH_TASK_COLUMN_CLASS_NAME,
-  AUTH_VIGNETTE_CLASS_NAME
-} from "./classNames";
+    AUTH_EXIT_CLASS_NAME,
+    AUTH_EXITS_CLASS_NAME,
+    AUTH_HEADING_CLASS_NAME,
+    AUTH_PAGE_CLASS_NAME,
+    AUTH_TASK_COLUMN_CLASS_NAME,
+    AUTH_VIGNETTE_CLASS_NAME,
+} from "./classNames"
 
 /**
  * PAGE - `/authentication`, presentational half.
@@ -33,13 +33,13 @@ import {
 
 /** Where the reader may go instead, drawn outside the surface. */
 export type AuthenticationPageExit = {
-  /** The question the action answers, or `""` for an exit that stands alone. */
-  readonly question: string;
-  /** The action's own words. */
-  readonly action: string;
-  /** What taking it does. */
-  readonly onPress: () => void;
-};
+    /** The question the action answers, or `""` for an exit that stands alone. */
+    readonly question: string
+    /** The action's own words. */
+    readonly action: string
+    /** What taking it does. */
+    readonly onPress: () => void
+}
 
 /**
  * Props for {@link AuthenticationPageView}.
@@ -49,11 +49,11 @@ export type AuthenticationPageExit = {
  * for two shapes.
  */
 export type AuthenticationPageViewProps = {
-  /** The panel's complete translated state and actions. */
-  readonly panel: AuthenticationPanelProps;
-  /** Everything offered below the surface, in reading order. */
-  readonly exits: ReadonlyArray<AuthenticationPageExit>;
-};
+    /** The panel's complete translated state and actions. */
+    readonly panel: AuthenticationPanelProps
+    /** Everything offered below the surface, in reading order. */
+    readonly exits: ReadonlyArray<AuthenticationPageExit>
+}
 
 /**
  * Whether this panel is the state the direction reserves the mascot for.
@@ -67,9 +67,14 @@ export type AuthenticationPageViewProps = {
  * @returns Whether the reserved area holds the mascot band.
  */
 const showsMascot = (panel: AuthenticationPanelProps): boolean => {
-  if (panel.state !== "details") return false;
-  return panel.props.mode === "signIn" && !panel.props.isError && panel.props.statusMessage === "" && !panel.props.isPending;
-};
+    if (panel.state !== "details") return false
+    return (
+        panel.props.mode === "signIn" &&
+        !panel.props.isError &&
+        panel.props.statusMessage === "" &&
+        !panel.props.isPending
+    )
+}
 
 /**
  * Draw the authentication screen.
@@ -78,33 +83,49 @@ const showsMascot = (panel: AuthenticationPanelProps): boolean => {
  * @returns The page node.
  */
 export const AuthenticationPageView = (props: AuthenticationPageViewProps) => {
-  const {
-    panel,
-    exits
-  }: AuthenticationPageViewProps = props;
-  const panelIdentity = panel.state === "details" || panel.state === "code" ? `${panel.state}:${panel.props.mode}` : panel.state;
+    const { panel, exits }: AuthenticationPageViewProps = props
+    const panelIdentity =
+        panel.state === "details" || panel.state === "code" ? `${panel.state}:${panel.props.mode}` : panel.state
 
-  return <main className={AUTH_PAGE_CLASS_NAME}>
-    <section aria-label={panel.props.title} className={AUTH_TASK_COLUMN_CLASS_NAME}>
-      <NivoBrand props={{ label: "Nivo", variant: "lockup", scale: "navbar" }} />
+    return (
+        <main className={AUTH_PAGE_CLASS_NAME}>
+            <section aria-label={panel.props.title} className={AUTH_TASK_COLUMN_CLASS_NAME}>
+                <NivoBrand props={{ label: "Nivo", variant: "lockup", scale: "navbar" }} />
 
-      <div className={AUTH_HEADING_CLASS_NAME}>
-        <Heading level={1} scale="display">{panel.props.title}</Heading>
-        <Text size="sm" tone="muted">{panel.props.subtitle}</Text>
-      </div>
+                <div className={AUTH_HEADING_CLASS_NAME}>
+                    <Heading level={1} scale="display">
+                        {panel.props.title}
+                    </Heading>
+                    <Text size="sm" tone="muted">
+                        {panel.props.subtitle}
+                    </Text>
+                </div>
 
-      <SurfaceCard measure="formCompact" composition="single" frame="bounded">
-        <AuthenticationPanel key={panelIdentity} {...panel} />
-      </SurfaceCard>
+                <SurfaceCard measure="formCompact" composition="single" frame="bounded">
+                    <AuthenticationPanel key={panelIdentity} {...panel} />
+                </SurfaceCard>
 
-      <div className={AUTH_EXITS_CLASS_NAME}>{exits.map(exit => <div key={`${exit.question}${exit.action}`} className={AUTH_EXIT_CLASS_NAME}>
-          {exit.question === "" ? null : <Text size="sm" tone="muted">{exit.question}</Text>}
-          <TextAction size="sm" onPress={exit.onPress}>{exit.action}</TextAction>
-        </div>)}</div>
-    </section>
+                <div className={AUTH_EXITS_CLASS_NAME}>
+                    {exits.map((exit) => (
+                        <div key={`${exit.question}${exit.action}`} className={AUTH_EXIT_CLASS_NAME}>
+                            {exit.question === "" ? null : (
+                                <Text size="sm" tone="muted">
+                                    {exit.question}
+                                </Text>
+                            )}
+                            <TextAction size="sm" onPress={exit.onPress}>
+                                {exit.action}
+                            </TextAction>
+                        </div>
+                    ))}
+                </div>
+            </section>
 
-    {showsMascot(panel) ? <aside aria-hidden="true" className={AUTH_VIGNETTE_CLASS_NAME}>
-        <NivoUnicornArtwork props={{ tone: "brand" }} />
-      </aside> : null}
-  </main>;
-};
+            {showsMascot(panel) ? (
+                <aside aria-hidden="true" className={AUTH_VIGNETTE_CLASS_NAME}>
+                    <NivoUnicornArtwork props={{ tone: "brand" }} />
+                </aside>
+            ) : null}
+        </main>
+    )
+}

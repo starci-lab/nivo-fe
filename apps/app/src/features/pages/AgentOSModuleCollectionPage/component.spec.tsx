@@ -20,7 +20,7 @@ const labels = {
     runtimeProvisioned: "Provisioned",
     runtimeNotProvisioned: "Not provisioned",
     runtimeUnavailable: "Unavailable",
-    runtimeUnknown: "Not established"
+    runtimeUnknown: "Not established",
 }
 
 const shellLabels: ShellLabels = {
@@ -52,7 +52,8 @@ const shellLabels: ShellLabels = {
     runtimeUnavailable: "Runtime is currently unavailable.",
     runtimeUnknown: "The runtime standing could not be established.",
     configurationSection: "Configuration",
-    configurationCurrent: ({ desired, tested, applied }) => `desired ${desired} · tested ${tested} · applied ${applied}`,
+    configurationCurrent: ({ desired, tested, applied }) =>
+        `desired ${desired} · tested ${tested} · applied ${applied}`,
     configurationAbsent: "No configuration observation exists.",
     configurationUnsupported: "This source does not support configuration.",
     attentionSection: "Needs attention",
@@ -63,12 +64,17 @@ const shellLabels: ShellLabels = {
     resultConfirmed: "The receiver confirmed the operation result.",
     resultUncertain: "The receiver has not clearly confirmed the operation result.",
     resultRecheck: "Read the result again",
-    installEntry: "Install module"
+    installEntry: "Install module",
 }
 
 const OBSERVED_AT = "2026-09-26T03:00:00.000Z"
 
-const installation = (installationId: string, moduleKey: string, displayName: string, status: string): ShellView["installations"][number] => ({ installationId, moduleKey, displayName, status, configuration: null })
+const installation = (
+    installationId: string,
+    moduleKey: string,
+    displayName: string,
+    status: string,
+): ShellView["installations"][number] => ({ installationId, moduleKey, displayName, status, configuration: null })
 
 /** The settled shell view the connected owner already produced, overridden per state under test. */
 const shellView = (overrides: Partial<ShellView> = {}): ShellView => ({
@@ -89,18 +95,34 @@ const shellView = (overrides: Partial<ShellView> = {}): ShellView => ({
     attentionObservedAt: OBSERVED_AT,
     operations: [],
     retrying: false,
-    ...overrides
+    ...overrides,
 })
 
 const renderPage = (shell: ShellView, onRetryShell = vi.fn()) => {
     const back = vi.fn()
-    const view = render(<AgentOSModuleCollectionPageBase props={{ workspaceId: "workspace-1", shell, shellLabels, labels, createHref: "/en/agentos/workspaces/workspace-1/modules/create" }} on={{ onBack: back, onRetryShell, formatDate: value => value }}/>)
+    const view = render(
+        <AgentOSModuleCollectionPageBase
+            props={{
+                workspaceId: "workspace-1",
+                shell,
+                shellLabels,
+                labels,
+                createHref: "/en/agentos/workspaces/workspace-1/modules/create",
+            }}
+            on={{ onBack: back, onRetryShell, formatDate: (value) => value }}
+        />,
+    )
     return { back, view, onRetryShell }
 }
 
 describe("AgentOSModuleCollectionPageBase", () => {
     it("names the collection region and shows every actual installation of one package as its own entry", () => {
-        const shell = shellView({ installations: [installation("installation-1", "sales-copilot", "Sales Copilot", "installed"), installation("installation-2", "sales-copilot", "Sales Copilot EU", "installed")] })
+        const shell = shellView({
+            installations: [
+                installation("installation-1", "sales-copilot", "Sales Copilot", "installed"),
+                installation("installation-2", "sales-copilot", "Sales Copilot EU", "installed"),
+            ],
+        })
         renderPage(shell)
         expect(screen.getByRole("region", { name: labels.title })).toBeTruthy()
         expect(screen.getByText("Sales Copilot")).toBeInTheDocument()
@@ -110,7 +132,9 @@ describe("AgentOSModuleCollectionPageBase", () => {
     })
 
     it("keeps the compact module heading and the inventory's own checked-at statement above the regions", () => {
-        const shell = shellView({ installations: [installation("installation-1", "sales-copilot", "Sales Copilot", "installed")] })
+        const shell = shellView({
+            installations: [installation("installation-1", "sales-copilot", "Sales Copilot", "installed")],
+        })
         renderPage(shell)
         expect(screen.getByRole("heading", { level: 1, name: "Modules" })).toBeTruthy()
         expect(screen.getByText("List checked at 2026-09-26T03:00:00.000Z")).toBeInTheDocument()
@@ -118,12 +142,26 @@ describe("AgentOSModuleCollectionPageBase", () => {
     })
 
     it("discloses no workspace, installation or count while no session is signed in", () => {
-        const shell = shellView({ state: "sign-in-required", workspaceId: null, instanceId: null, name: null, identityObservedAt: null, runtimeStanding: "unresolved", runtimeAvailability: null, runtimeGeneration: null, runtimeObservedAt: null, attentionStanding: "unresolved", attentionObservedAt: null })
+        const shell = shellView({
+            state: "sign-in-required",
+            workspaceId: null,
+            instanceId: null,
+            name: null,
+            identityObservedAt: null,
+            runtimeStanding: "unresolved",
+            runtimeAvailability: null,
+            runtimeGeneration: null,
+            runtimeObservedAt: null,
+            attentionStanding: "unresolved",
+            attentionObservedAt: null,
+        })
         renderPage(shell)
         expect(screen.queryByText("Sales Copilot")).toBeNull()
         expect(screen.queryByText(/installation-1/)).toBeNull()
         expect(screen.queryByText("Acme AgentOS")).toBeNull()
-        expect(screen.getByRole("link", { name: shellLabels.signInAction }).getAttribute("href")).toBe("/authentication")
+        expect(screen.getByRole("link", { name: shellLabels.signInAction }).getAttribute("href")).toBe(
+            "/authentication",
+        )
     })
 
     it("renders a limitation instead of an empty or all-ready list when the observation is partial", () => {
@@ -136,7 +174,12 @@ describe("AgentOSModuleCollectionPageBase", () => {
     })
 
     it("centres one dominant card carrying the empty notice and its install entry in the same surface", () => {
-        const shell = shellView({ state: "no-runtime", inventoryEmpty: true, runtimeAvailability: "not_provisioned", runtimeGeneration: null })
+        const shell = shellView({
+            state: "no-runtime",
+            inventoryEmpty: true,
+            runtimeAvailability: "not_provisioned",
+            runtimeGeneration: null,
+        })
         const { view } = renderPage(shell)
         const inventoryRegion = view.container.querySelector("[data-region='module-inventory']")
         const card = inventoryRegion?.querySelector("[data-grammar-surface-composition='joined']")
@@ -151,19 +194,36 @@ describe("AgentOSModuleCollectionPageBase", () => {
         expect(screen.getByText("Installed in Acme AgentOS")).toBeInTheDocument()
         const browse = screen.getByRole("link", { name: labels.browseCatalog })
         expect(browse.getAttribute("href")).toBe("/en/agentos/workspaces/workspace-1/modules/create")
-        expect(screen.getByRole("link", { name: labels.installFlow }).getAttribute("href")).toBe("/en/agentos/workspaces/workspace-1/modules/create")
+        expect(screen.getByRole("link", { name: labels.installFlow }).getAttribute("href")).toBe(
+            "/en/agentos/workspaces/workspace-1/modules/create",
+        )
         expect(screen.getByText("Runtime: Not provisioned")).toBeInTheDocument()
     })
 
     it("never shows the joined empty card or its entry affordance when the inventory carries rows", () => {
-        const shell = shellView({ installations: [installation("installation-1", "sales-copilot", "Sales Copilot", "installed")] })
+        const shell = shellView({
+            installations: [installation("installation-1", "sales-copilot", "Sales Copilot", "installed")],
+        })
         renderPage(shell)
         expect(screen.queryByText(shellLabels.inventoryEmpty)).toBeNull()
         expect(screen.queryByRole("link", { name: labels.browseCatalog })).toBeNull()
     })
 
     it("shows a returned operation's own receipt beside the ledger without claiming a result early", () => {
-        const shell = shellView({ state: "operation-pending", installations: [installation("installation-1", "sales-copilot", "Sales Copilot", "installed")], operations: [{ installationId: "installation-1", intentId: "intent-1", commandId: "c-1", receiverName: "Sales Copilot", standing: "pending", observedAt: OBSERVED_AT }] })
+        const shell = shellView({
+            state: "operation-pending",
+            installations: [installation("installation-1", "sales-copilot", "Sales Copilot", "installed")],
+            operations: [
+                {
+                    installationId: "installation-1",
+                    intentId: "intent-1",
+                    commandId: "c-1",
+                    receiverName: "Sales Copilot",
+                    standing: "pending",
+                    observedAt: OBSERVED_AT,
+                },
+            ],
+        })
         renderPage(shell)
         expect(screen.getByText(shellLabels.resultPending)).toBeInTheDocument()
         expect(screen.getByText(/installation-1 · intent-1 · c-1/)).toBeInTheDocument()

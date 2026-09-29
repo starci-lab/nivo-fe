@@ -13,38 +13,40 @@
  * - `unavailable` no usable answer arrived: no network, a timeout, a 5xx, or a body that is not the
  *                 shape the contract promises. Trying again may help.
  */
-export type FailureKind = "refused" | "forbidden" | "not-found" | "invalid" | "unavailable";
+export type FailureKind = "refused" | "forbidden" | "not-found" | "invalid" | "unavailable"
 
 /** One failed answer of one kind. `X` is the domain detail a gateway adds beside the common fields. */
 type FailureOf<K extends FailureKind, X extends object> = X & {
-  readonly ok: false;
-  readonly kind: K;
-  /** The HTTP status that produced this answer, or null when no reply arrived. */
-  readonly status: number | null;
-  /** A stable machine code: `NETWORK`, `TIMEOUT`, `MALFORMED`, `GRAPHQL`, or the operation's own code. */
-  readonly code: string;
-  /** The sentence that explains the refusal; the server's own words when it supplied them. */
-  readonly reason: string;
-  /** Whether repeating the same request could succeed. */
-  readonly retryable: boolean;
-};
+    readonly ok: false
+    readonly kind: K
+    /** The HTTP status that produced this answer, or null when no reply arrived. */
+    readonly status: number | null
+    /** A stable machine code: `NETWORK`, `TIMEOUT`, `MALFORMED`, `GRAPHQL`, or the operation's own code. */
+    readonly code: string
+    /** The sentence that explains the refusal; the server's own words when it supplied them. */
+    readonly reason: string
+    /** Whether repeating the same request could succeed. */
+    readonly retryable: boolean
+}
 
 /** Every failed answer, discriminated by `kind`. */
-export type Failure<X extends object = object> = { readonly [K in FailureKind]: FailureOf<K, X> }[FailureKind];
+export type Failure<X extends object = object> = { readonly [K in FailureKind]: FailureOf<K, X> }[FailureKind]
 
 /** A payload, or the failure that says why there is none. */
-export type Outcome<T, X extends object = object> = {
-  readonly ok: true;
-  readonly data: T;
-} | Failure<X>;
+export type Outcome<T, X extends object = object> =
+    | {
+          readonly ok: true
+          readonly data: T
+      }
+    | Failure<X>
 
 /** What a failed answer states about itself when a gateway builds one. */
 export type FailureInput = {
-  readonly status?: number | null;
-  readonly code: string;
-  readonly reason: string;
-  readonly retryable?: boolean;
-};
+    readonly status?: number | null
+    readonly code: string
+    readonly reason: string
+    readonly retryable?: boolean
+}
 
 /**
  * Build one failed answer.
@@ -54,13 +56,13 @@ export type FailureInput = {
  * @returns The failure; `retryable` defaults to true only for `unavailable`.
  */
 export const failed = (kind: FailureKind, input: FailureInput): Failure => ({
-  ok: false,
-  kind,
-  status: input.status ?? null,
-  code: input.code,
-  reason: input.reason,
-  retryable: input.retryable ?? kind === "unavailable"
-});
+    ok: false,
+    kind,
+    status: input.status ?? null,
+    code: input.code,
+    reason: input.reason,
+    retryable: input.retryable ?? kind === "unavailable",
+})
 
 /**
  * Build one failed answer that carries the gateway's own fields beside the common ones.
@@ -70,7 +72,8 @@ export const failed = (kind: FailureKind, input: FailureInput): Failure => ({
  * @param detail - The gateway's own fields.
  * @returns The failure with the detail merged in.
  */
-export const failedWith = <X extends object>(kind: FailureKind, input: FailureInput, detail: X): Failure<X> => ({ ...failed(kind, input), ...detail }) as Failure<X>;
+export const failedWith = <X extends object>(kind: FailureKind, input: FailureInput, detail: X): Failure<X> =>
+    ({ ...failed(kind, input), ...detail }) as Failure<X>
 
 /**
  * Which kind an HTTP status is. 2xx is not a failure and never reaches here.
@@ -79,12 +82,12 @@ export const failedWith = <X extends object>(kind: FailureKind, input: FailureIn
  * @returns The failure kind that status states.
  */
 export const failureKindOfStatus = (status: number): FailureKind => {
-  if (status === 401) return "refused";
-  if (status === 403) return "forbidden";
-  if (status === 404) return "not-found";
-  if (status >= 400 && status < 500 && status !== 408 && status !== 429) return "invalid";
-  return "unavailable";
-};
+    if (status === 401) return "refused"
+    if (status === 403) return "forbidden"
+    if (status === 404) return "not-found"
+    if (status >= 400 && status < 500 && status !== 408 && status !== 429) return "invalid"
+    return "unavailable"
+}
 
 /**
  * Which kind an operation's own refusal code states.
@@ -98,10 +101,11 @@ export const failureKindOfStatus = (status: number): FailureKind => {
  * @returns The failure kind that code states.
  */
 export const failureKindOfCode = (code: string): FailureKind => {
-  const words = code.toLowerCase().replaceAll("_", "-");
-  if (words.includes("unauthenticated")) return "refused";
-  if (words.includes("forbidden") || words.includes("denied") || words.includes("not-admitted")) return "forbidden";
-  if (words.includes("not-found")) return "not-found";
-  if (words.includes("unavailable") || words.includes("unreachable") || words.includes("outcome-unknown")) return "unavailable";
-  return "invalid";
-};
+    const words = code.toLowerCase().replaceAll("_", "-")
+    if (words.includes("unauthenticated")) return "refused"
+    if (words.includes("forbidden") || words.includes("denied") || words.includes("not-admitted")) return "forbidden"
+    if (words.includes("not-found")) return "not-found"
+    if (words.includes("unavailable") || words.includes("unreachable") || words.includes("outcome-unknown"))
+        return "unavailable"
+    return "invalid"
+}

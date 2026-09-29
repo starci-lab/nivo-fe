@@ -13,16 +13,50 @@ const data: AppsDashboardData = {
         phase: "answered",
         label: "Your apps",
         rows: [
-            { id: "ready", name: "Academy", detail: "academy.test", kindLabel: "Academy", status: "ready", statusLabel: "Running", actionLabel: "Open" },
-            { id: "dns", name: "IELTS", detail: "ielts.test", kindLabel: "Academy", status: "awaiting_dns", statusLabel: "Awaiting DNS", actionLabel: "View record" },
-            { id: "building", name: "Starter", detail: "Paid order", kindLabel: "Academy", status: "provisioning", statusLabel: "Building" },
+            {
+                id: "ready",
+                name: "Academy",
+                detail: "academy.test",
+                kindLabel: "Academy",
+                status: "ready",
+                statusLabel: "Running",
+                actionLabel: "Open",
+            },
+            {
+                id: "dns",
+                name: "IELTS",
+                detail: "ielts.test",
+                kindLabel: "Academy",
+                status: "awaiting_dns",
+                statusLabel: "Awaiting DNS",
+                actionLabel: "View record",
+            },
+            {
+                id: "building",
+                name: "Starter",
+                detail: "Paid order",
+                kindLabel: "Academy",
+                status: "provisioning",
+                statusLabel: "Building",
+            },
         ],
     },
     catalogue: {
         phase: "answered",
         label: "Use another app",
         fact: "Template catalogue",
-        offers: [{ id: "academy", templateKey: "ai_academy", name: "AI Academy", tagline: "Teach online", kindLabel: "Template app", priceLabel: "Starter · 490,000 VND", actionLabel: "Build", actionDisabled: false }],
+        offers: [
+            {
+                id: "academy",
+                templateKey: "ai_academy",
+                name: "AI Academy",
+                tagline: "Teach online",
+                kindLabel: "Template app",
+                priceLabel: "Starter · 490,000 VND",
+                actionLabel: "Build",
+                actionDisabled: false,
+            },
+        ],
     },
 }
 const on: AppsDashboardActions = { onBuildTemplate: vi.fn(), onOpenOwnedApp: vi.fn() }
@@ -37,7 +71,12 @@ describe("AppsDashboardBase", () => {
     })
 
     it("keeps the supported catalogue continuation available when the owned set is empty", () => {
-        const html = renderToStaticMarkup(<AppsDashboardBase props={{ ...data, owned: { phase: "empty", label: "Your apps", note: "No apps yet" } }} on={on} />)
+        const html = renderToStaticMarkup(
+            <AppsDashboardBase
+                props={{ ...data, owned: { phase: "empty", label: "Your apps", note: "No apps yet" } }}
+                on={on}
+            />,
+        )
         expect(html).toContain("No apps yet")
         expect(html).toContain("Build an app")
         expect(html).toContain("AI Academy")
@@ -50,31 +89,123 @@ describe("AppsDashboardBase", () => {
         const onBuildTemplate = vi.fn()
         const onOpenOwnedApp = vi.fn()
         const actions: AppsDashboardActions = { onBuildTemplate, onOpenOwnedApp }
-        render(<AppsDashboardBase props={{ title: "Apps", lede: "Lede", owned: { phase: "answered", label: "Owned", rows: [{ id: "site-1", name: "Academy", detail: "academy.test", kindLabel: "Academy", status: "ready", statusLabel: "Ready", actionLabel: "Open" }] }, catalogue: { phase: "answered", label: "Catalogue", fact: "Templates", offers: [{ id: "offer-1", templateKey: "ai_academy", name: "Academy", tagline: "Learn", kindLabel: "Template", priceLabel: "100", actionLabel: "Build", actionDisabled: false }] } }} on={actions} />)
+        render(
+            <AppsDashboardBase
+                props={{
+                    title: "Apps",
+                    lede: "Lede",
+                    owned: {
+                        phase: "answered",
+                        label: "Owned",
+                        rows: [
+                            {
+                                id: "site-1",
+                                name: "Academy",
+                                detail: "academy.test",
+                                kindLabel: "Academy",
+                                status: "ready",
+                                statusLabel: "Ready",
+                                actionLabel: "Open",
+                            },
+                        ],
+                    },
+                    catalogue: {
+                        phase: "answered",
+                        label: "Catalogue",
+                        fact: "Templates",
+                        offers: [
+                            {
+                                id: "offer-1",
+                                templateKey: "ai_academy",
+                                name: "Academy",
+                                tagline: "Learn",
+                                kindLabel: "Template",
+                                priceLabel: "100",
+                                actionLabel: "Build",
+                                actionDisabled: false,
+                            },
+                        ],
+                    },
+                }}
+                on={actions}
+            />,
+        )
         fireEvent.click(screen.getByRole("button", { name: "Build" }))
         for (const link of screen.getAllByRole("link", { name: "Academy" })) fireEvent.click(link)
         expect(onBuildTemplate).toHaveBeenCalledWith("ai_academy")
         expect(onOpenOwnedApp).toHaveBeenCalledWith("site-1")
-        render(<AppsDashboardBase props={{ title: "Apps", lede: "Lede", owned: { phase: "resting", label: "Owned" }, catalogue: { phase: "resting", label: "Catalogue", fact: "Fact" } }} on={actions} />)
-        render(<AppsDashboardBase props={{ title: "Apps", lede: "Lede", owned: { phase: "refused", label: "Owned", note: "Unavailable" }, catalogue: { phase: "empty", label: "Catalogue", note: "Empty" } }} on={actions} />)
+        render(
+            <AppsDashboardBase
+                props={{
+                    title: "Apps",
+                    lede: "Lede",
+                    owned: { phase: "resting", label: "Owned" },
+                    catalogue: { phase: "resting", label: "Catalogue", fact: "Fact" },
+                }}
+                on={actions}
+            />,
+        )
+        render(
+            <AppsDashboardBase
+                props={{
+                    title: "Apps",
+                    lede: "Lede",
+                    owned: { phase: "refused", label: "Owned", note: "Unavailable" },
+                    catalogue: { phase: "empty", label: "Catalogue", note: "Empty" },
+                }}
+                on={actions}
+            />,
+        )
         expect(screen.getAllByText("Unavailable").length).toBeGreaterThan(0)
     })
 })
 
 describe("AppsDashboardBase", () => {
     it("renders AppsPage owned apps and buyable catalogue offers", () => {
-        const html = renderToStaticMarkup(<AppsDashboardBase
-            props={{
-                title: "Apps",
-                lede: "Your applications",
-                buildAppLabel: "Build an app",
-                attentionGroupLabel: "Needs attention",
-                steadyGroupLabel: "Running and building",
-                owned: { phase: "answered", label: "Owned", rows: [{ id: "site-1", name: "Academy", detail: "academy.test", kindLabel: "Academy", status: "ready", statusLabel: "Ready", actionLabel: "Open" }] },
-                catalogue: { phase: "answered", label: "Catalogue", fact: "Templates", offers: [{ id: "offer-1", templateKey: "ai_academy", name: "Academy", tagline: "Learn", kindLabel: "Template", priceLabel: "100 VND", actionLabel: "Build", actionDisabled: false }] }
-            }}
-            on={{ onBuildTemplate: vi.fn(), onOpenOwnedApp: vi.fn() }}
-        />)
+        const html = renderToStaticMarkup(
+            <AppsDashboardBase
+                props={{
+                    title: "Apps",
+                    lede: "Your applications",
+                    buildAppLabel: "Build an app",
+                    attentionGroupLabel: "Needs attention",
+                    steadyGroupLabel: "Running and building",
+                    owned: {
+                        phase: "answered",
+                        label: "Owned",
+                        rows: [
+                            {
+                                id: "site-1",
+                                name: "Academy",
+                                detail: "academy.test",
+                                kindLabel: "Academy",
+                                status: "ready",
+                                statusLabel: "Ready",
+                                actionLabel: "Open",
+                            },
+                        ],
+                    },
+                    catalogue: {
+                        phase: "answered",
+                        label: "Catalogue",
+                        fact: "Templates",
+                        offers: [
+                            {
+                                id: "offer-1",
+                                templateKey: "ai_academy",
+                                name: "Academy",
+                                tagline: "Learn",
+                                kindLabel: "Template",
+                                priceLabel: "100 VND",
+                                actionLabel: "Build",
+                                actionDisabled: false,
+                            },
+                        ],
+                    },
+                }}
+                on={{ onBuildTemplate: vi.fn(), onOpenOwnedApp: vi.fn() }}
+            />,
+        )
         expect(html).toContain("Your applications")
         expect(html).toContain("Academy")
         expect(html).toContain("Build")

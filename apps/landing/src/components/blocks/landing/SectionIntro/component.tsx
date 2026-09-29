@@ -21,11 +21,19 @@ export const SectionIntro = (props: SectionIntroProps) => {
             id={id}
             level={2}
             className={inverse ? CLASS_NAMES.inverse : CLASS_NAMES.standard}
-            eyebrow={<Text as="span" size="xs" tone={inverse ? "default" : "accent"} weight="semibold">{eyebrow}</Text>}
+            eyebrow={
+                <Text as="span" size="xs" tone={inverse ? "default" : "accent"} weight="semibold">
+                    {eyebrow}
+                </Text>
+            }
             title={title}
-            description={description === undefined ? undefined : (
-                <Text as="p" size="md" tone={inverse ? "default" : "muted"}>{description}</Text>
-            )}
+            description={
+                description === undefined ? undefined : (
+                    <Text as="p" size="md" tone={inverse ? "default" : "muted"}>
+                        {description}
+                    </Text>
+                )
+            }
             action={action}
         />
     )

@@ -7,9 +7,11 @@ describe("middleware", () => {
     it("renders a self-proxied default-locale sub-request in place instead of canonicalizing it", () => {
         // The standalone router proxies an external-classified rewrite back to itself; the
         // sub-request must render where it landed or the locale redirect loops the client.
-        const response = middleware(new NextRequest("http://localhost:3067/vi/agentos", {
-            headers: { "x-forwarded-host": "localhost:3067" },
-        }))
+        const response = middleware(
+            new NextRequest("http://localhost:3067/vi/agentos", {
+                headers: { "x-forwarded-host": "localhost:3067" },
+            }),
+        )
         expect(response.headers.get("location")).toBeNull()
         expect(response.headers.get("x-middleware-rewrite")).toBeNull()
     })

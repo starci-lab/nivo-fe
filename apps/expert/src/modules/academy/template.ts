@@ -1,5 +1,5 @@
-import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/modules/i18n/config";
-import data from "./template.data.json";
+import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/modules/i18n/config"
+import data from "./template.data.json"
 
 /**
  * A value the expert authored once, or once per locale.
@@ -14,7 +14,7 @@ import data from "./template.data.json";
  * An academy name is a proper noun, not a sentence, and forcing it into `{ vi, en }` would invite somebody
  * to invent an English one.
  */
-export type Localized<T> = T | Partial<Record<Locale, T>>;
+export type Localized<T> = T | Partial<Record<Locale, T>>
 
 /**
  * Whether a value is a per-locale map rather than the thing itself.
@@ -26,7 +26,12 @@ export type Localized<T> = T | Partial<Record<Locale, T>>;
  * @param value - The authored value.
  * @returns Whether to index it by locale.
  */
-const isLocaleMap = <T,>(value: Localized<T>): value is Partial<Record<Locale, T>> => typeof value === "object" && value !== null && !Array.isArray(value) && Object.keys(value).length > 0 && Object.keys(value).every(key => (LOCALES as ReadonlyArray<string>).includes(key));
+const isLocaleMap = <T>(value: Localized<T>): value is Partial<Record<Locale, T>> =>
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.keys(value).length > 0 &&
+    Object.keys(value).every((key) => (LOCALES as ReadonlyArray<string>).includes(key))
 
 /**
  * Reads an authored value in one locale.
@@ -39,15 +44,15 @@ const isLocaleMap = <T,>(value: Localized<T>): value is Partial<Record<Locale, T
  * @param locale - The reader's locale.
  * @returns The value in the best available language, or undefined when there is nothing.
  */
-export const inLocale = <T,>(value: Localized<T> | undefined, locale: Locale): T | undefined => {
-  if (value === undefined) {
-    return undefined;
-  }
-  if (!isLocaleMap(value)) {
-    return value;
-  }
-  return value[locale] ?? value[DEFAULT_LOCALE] ?? Object.values(value)[0];
-};
+export const inLocale = <T>(value: Localized<T> | undefined, locale: Locale): T | undefined => {
+    if (value === undefined) {
+        return undefined
+    }
+    if (!isLocaleMap(value)) {
+        return value
+    }
+    return value[locale] ?? value[DEFAULT_LOCALE] ?? Object.values(value)[0]
+}
 
 /**
  * THE MOUNTED TEMPLATE - this academy's entire appearance, as one file.
@@ -92,13 +97,13 @@ export const inLocale = <T,>(value: Localized<T> | undefined, locale: Locale): T
  * EVERY ENTRY IS OPTIONAL. Whatever a template omits keeps the value from HeroUI's own stylesheet,
  * which is what makes an unprovisioned instance render as the vendor intends.
  */
-export type ThemeVariables = Record<string, string>;
+export type ThemeVariables = Record<string, string>
 
 /** A template's overrides for both colour schemes. `dark` may be omitted entirely. */
 export type AcademyTheme = {
-  readonly light?: ThemeVariables;
-  readonly dark?: ThemeVariables;
-};
+    readonly light?: ThemeVariables
+    readonly dark?: ThemeVariables
+}
 
 /**
  * Rejects anything that could escape a custom-property declaration.
@@ -110,7 +115,12 @@ export type AcademyTheme = {
  * @param value - The proposed variable value.
  * @returns Whether it is safe to emit.
  */
-export const isSafeThemeValue = (value: string): boolean => typeof value === "string" && value.length > 0 && value.length <= 200 && !/[;{}<>]/.test(value) && !/url\s*\(|expression\s*\(|@import/i.test(value);
+export const isSafeThemeValue = (value: string): boolean =>
+    typeof value === "string" &&
+    value.length > 0 &&
+    value.length <= 200 &&
+    !/[;{}<>]/.test(value) &&
+    !/url\s*\(|expression\s*\(|@import/i.test(value)
 
 /**
  * Every section this app knows how to draw, in catalog order.
@@ -120,13 +130,28 @@ export const isSafeThemeValue = (value: string): boolean => typeof value === "st
  * newer catalog; the cost is a section the expert configured and cannot see, so the two lists
  * drifting is a real defect and not a tolerance.
  */
-export const SYSTEM_SECTION_KEYS = ["hero", "problems", "outcomes", "roadmap", "instructor", "stats", "testimonials", "gallery", "courses", "community", "offer", "faq", "magnet", "lead"] as const;
+export const SYSTEM_SECTION_KEYS = [
+    "hero",
+    "problems",
+    "outcomes",
+    "roadmap",
+    "instructor",
+    "stats",
+    "testimonials",
+    "gallery",
+    "courses",
+    "community",
+    "offer",
+    "faq",
+    "magnet",
+    "lead",
+] as const
 
 /** One of the fixed sections. */
-export type SystemSectionKey = typeof SYSTEM_SECTION_KEYS[number];
+export type SystemSectionKey = (typeof SYSTEM_SECTION_KEYS)[number]
 
 /** What marks a section the expert wrote rather than one the product ships. */
-export const CUSTOM_SECTION_PREFIX = "custom:";
+export const CUSTOM_SECTION_PREFIX = "custom:"
 
 /**
  * The shape an expert-authored section is drawn in. A CLOSED set, like the colour slots.
@@ -138,19 +163,19 @@ export const CUSTOM_SECTION_PREFIX = "custom:";
  * that reads as a system notice, which is the deception BR-B07 exists to prevent, reached through
  * layout instead of through an input field.
  */
-export type CustomVariant = "stack" | "image-left" | "image-right" | "quote" | "columns" | "cta";
+export type CustomVariant = "stack" | "image-left" | "image-right" | "quote" | "columns" | "cta"
 
 /** The single onward link an expert-authored section may carry. Never a field. */
 export type CustomAction = {
-  readonly label: string;
-  readonly href: string;
-};
+    readonly label: string
+    readonly href: string
+}
 
 /** One item inside the `columns` shape. */
 export type CustomColumn = {
-  readonly title: string;
-  readonly text?: string;
-};
+    readonly title: string
+    readonly text?: string
+}
 
 /**
  * What an expert-authored section says. Static; it names no data source.
@@ -159,81 +184,81 @@ export type CustomColumn = {
  * closed set of permitted sources to be designed first.
  */
 export type CustomContent = {
-  /** Set by the template, not by the expert. */
-  readonly variant?: CustomVariant;
-  readonly heading?: string;
-  /** Plain text. No markup is interpreted. */
-  readonly body?: string;
-  /** A link the expert pasted. Nothing is uploaded to nivo. */
-  readonly imageUrl?: string;
-  readonly action?: CustomAction;
-  /** Used by the `columns` shape only. */
-  readonly columns?: ReadonlyArray<CustomColumn>;
-  /** Used by the `quote` shape only. */
-  readonly attribution?: string;
-};
+    /** Set by the template, not by the expert. */
+    readonly variant?: CustomVariant
+    readonly heading?: string
+    /** Plain text. No markup is interpreted. */
+    readonly body?: string
+    /** A link the expert pasted. Nothing is uploaded to nivo. */
+    readonly imageUrl?: string
+    readonly action?: CustomAction
+    /** Used by the `columns` shape only. */
+    readonly columns?: ReadonlyArray<CustomColumn>
+    /** Used by the `quote` shape only. */
+    readonly attribution?: string
+}
 
 /** One row of the stored layout. Position in the array IS render order. */
 export type LayoutSection = {
-  /** A catalog key, or `custom:<id>` for one the expert wrote. */
-  readonly key: string;
-  readonly visible: boolean;
-  /** Present on expert-authored sections only; a system section owns its own content. */
-  readonly content?: CustomContent;
-};
+    /** A catalog key, or `custom:<id>` for one the expert wrote. */
+    readonly key: string
+    readonly visible: boolean
+    /** Present on expert-authored sections only; a system section owns its own content. */
+    readonly content?: CustomContent
+}
 
 /** Who is teaching. */
 export type Instructor = {
-  readonly name: string;
-  /** Portrait, as a pasted link. */
-  readonly photoUrl?: string;
-  readonly title: string;
-  readonly bio: string;
-  readonly credentials: ReadonlyArray<string>;
-  readonly quote?: string;
-};
+    readonly name: string
+    /** Portrait, as a pasted link. */
+    readonly photoUrl?: string
+    readonly title: string
+    readonly bio: string
+    readonly credentials: ReadonlyArray<string>
+    readonly quote?: string
+}
 
 /** One testimonial. A measurable result carries further than praise. */
 export type Testimonial = {
-  readonly name: string;
-  readonly avatarUrl?: string;
-  readonly role: string;
-  readonly stars: number;
-  readonly quote: string;
-  readonly result?: string;
-};
+    readonly name: string
+    readonly avatarUrl?: string
+    readonly role: string
+    readonly stars: number
+    readonly quote: string
+    readonly result?: string
+}
 
 /** One figure on the statistics strip. */
 export type Stat = {
-  readonly value: string;
-  readonly label: string;
-};
+    readonly value: string
+    readonly label: string
+}
 
 /** One gallery photo: the expert's link, plus a caption. */
 export type GalleryItem = {
-  readonly url?: string;
-  readonly caption: string;
-};
+    readonly url?: string
+    readonly caption: string
+}
 
 /** One frequently asked question. */
 export type Faq = {
-  readonly q: string;
-  readonly a: string;
-};
+    readonly q: string
+    readonly a: string
+}
 
 /** Something free offered in exchange for contact. It collects nothing; its button leads to `lead`. */
 export type Magnet = {
-  readonly title: string;
-  readonly description: string;
-  readonly cta: string;
-};
+    readonly title: string
+    readonly description: string
+    readonly cta: string
+}
 
 /** Everything provisioning writes into this instance. */
 export type AcademyIdentity = {
-  /** The academy's own name, shown in the header and the document title. */
-  readonly name: Localized<string>;
-  readonly tagline: Localized<string>;
-};
+    /** The academy's own name, shown in the header and the document title. */
+    readonly name: Localized<string>
+    readonly tagline: Localized<string>
+}
 
 /**
  * What the expert wrote, as opposed to how it is arranged or painted.
@@ -244,21 +269,21 @@ export type AcademyIdentity = {
  * have forbidden it while making every value harder to read and to diff.
  */
 export type AcademyContent = {
-  readonly instructor?: Localized<Instructor>;
-  readonly testimonials: Localized<ReadonlyArray<Testimonial>>;
-  readonly stats: Localized<ReadonlyArray<Stat>>;
-  readonly gallery: Localized<ReadonlyArray<GalleryItem>>;
-  readonly problems: Localized<ReadonlyArray<string>>;
-  readonly roadmap: Localized<ReadonlyArray<string>>;
-  readonly faq: Localized<ReadonlyArray<Faq>>;
-  readonly magnet?: Localized<Magnet>;
-};
+    readonly instructor?: Localized<Instructor>
+    readonly testimonials: Localized<ReadonlyArray<Testimonial>>
+    readonly stats: Localized<ReadonlyArray<Stat>>
+    readonly gallery: Localized<ReadonlyArray<GalleryItem>>
+    readonly problems: Localized<ReadonlyArray<string>>
+    readonly roadmap: Localized<ReadonlyArray<string>>
+    readonly faq: Localized<ReadonlyArray<Faq>>
+    readonly magnet?: Localized<Magnet>
+}
 
 /** Which sections render, and in what order. */
 export type AcademyLayout = {
-  /** The full ordered section list, exactly as `TenantBrandEntity.layoutConfig` stores it. */
-  readonly sections: ReadonlyArray<LayoutSection>;
-};
+    /** The full ordered section list, exactly as `TenantBrandEntity.layoutConfig` stores it. */
+    readonly sections: ReadonlyArray<LayoutSection>
+}
 
 /**
  * Everything provisioning writes into this instance, in four parts that do not mix.
@@ -282,23 +307,23 @@ export type AcademyLayout = {
  * because it already knows its own". That absence is what makes re-applying a template safe.
  */
 export type AcademyTemplate = {
-  readonly identity: AcademyIdentity;
-  /** HeroUI variable overrides, per colour scheme. Emitted as the vendor's own theming block. */
-  readonly theme: AcademyTheme;
-  /**
-   * Hand-written CSS, already sanitised by the backend's `sanitizeTenantCss`.
-   *
-   * Real selectors survive here -- this is the escape hatch an admin is meant to write
-   * `.my-class { … }` in -- while `@import`, `url()`, `expression()` and friends do not. It is
-   * inlined rather than served as a file so it cannot arrive after the page has painted.
-   *
-   * Separate from `theme` on purpose: this is the half that is only safe because something
-   * cleaned it.
-   */
-  readonly customCss?: string;
-  readonly layout: AcademyLayout;
-  readonly content: AcademyContent;
-};
+    readonly identity: AcademyIdentity
+    /** HeroUI variable overrides, per colour scheme. Emitted as the vendor's own theming block. */
+    readonly theme: AcademyTheme
+    /**
+     * Hand-written CSS, already sanitised by the backend's `sanitizeTenantCss`.
+     *
+     * Real selectors survive here -- this is the escape hatch an admin is meant to write
+     * `.my-class { … }` in -- while `@import`, `url()`, `expression()` and friends do not. It is
+     * inlined rather than served as a file so it cannot arrive after the page has painted.
+     *
+     * Separate from `theme` on purpose: this is the half that is only safe because something
+     * cleaned it.
+     */
+    readonly customCss?: string
+    readonly layout: AcademyLayout
+    readonly content: AcademyContent
+}
 
 /**
  * This instance's mounted template, as DATA rather than as source.
@@ -324,4 +349,4 @@ export type AcademyTemplate = {
  * and the `courses` SECTION draws whatever the academy has -- which is what lets re-applying a
  * template be safe.
  */
-export const ACADEMY: AcademyTemplate = data as AcademyTemplate;
+export const ACADEMY: AcademyTemplate = data as AcademyTemplate

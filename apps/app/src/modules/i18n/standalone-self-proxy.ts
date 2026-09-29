@@ -1,6 +1,6 @@
-import type { NextRequest } from "next/server";
+import type { NextRequest } from "next/server"
 
-import { DEFAULT_LOCALE } from "./config";
+import { DEFAULT_LOCALE } from "./config"
 
 /**
  * Detect the standalone router's self-proxy hop and stand aside.
@@ -19,9 +19,9 @@ import { DEFAULT_LOCALE } from "./config";
  * arrive through a forward proxy merely skips the cosmetic prefix-strip.
  */
 export const isStandaloneSelfProxy = (request: NextRequest): boolean => {
-    const { pathname } = request.nextUrl;
+    const { pathname } = request.nextUrl
     return (
         request.headers.has("x-forwarded-host") &&
         (pathname === `/${DEFAULT_LOCALE}` || pathname.startsWith(`/${DEFAULT_LOCALE}/`))
-    );
-};
+    )
+}

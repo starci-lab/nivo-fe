@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { useSession } from "./useSession";
+import { useSession } from "./useSession"
 
 /**
  * The access token of the signed-in session, or null when no session holds one.
@@ -12,6 +12,6 @@ import { useSession } from "./useSession";
  * @returns The bearer token, or null while restoring, signed out or ended.
  */
 export const useAccessToken = (): string | null => {
-    const session = useSession();
-    return session.state.status === "signed-in" ? session.state.accessToken : null;
-};
+    const session = useSession()
+    return session.state.status === "signed-in" ? session.state.accessToken : null
+}

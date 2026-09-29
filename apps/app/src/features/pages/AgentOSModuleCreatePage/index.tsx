@@ -1,13 +1,13 @@
-"use client";
+"use client"
 
-import { useTranslations } from "next-intl";
-import { useRouter } from "@/hooks";
-import { AgentOSModuleCreatePageBase } from "./component";
+import { useTranslations } from "next-intl"
+import { useRouter } from "@/hooks"
+import { AgentOSModuleCreatePageBase } from "./component"
 
 /** Route identity supplied by the workspace modules segment. */
 export type AgentOSModuleCreatePageProps = {
-  readonly workspaceId: string;
-};
+    readonly workspaceId: string
+}
 
 /**
  * The `/[locale]/agentos/workspaces/[workspaceId]/modules/create` screen, connected half.
@@ -17,26 +17,26 @@ export type AgentOSModuleCreatePageProps = {
  * modules collection are this feature's work.
  */
 export const AgentOSModuleCreatePage = (props: AgentOSModuleCreatePageProps) => {
-  const {
-    workspaceId
-  }: AgentOSModuleCreatePageProps = props;
-  const t = useTranslations("console.agentos.modules.createPage");
-  const router = useRouter();
-  return <AgentOSModuleCreatePageBase
-    props={{
-      workspaceId,
-      labels: {
-        path: t("path"),
-        modules: t("modules"),
-        title: t("title"),
-        description: t("description"),
-        eyebrow: t("eyebrow")
-      }
-    }}
-    on={{
-      back: () => router.push(`/agentos/workspaces/${workspaceId}/modules`)
-    }}
-  />;
-};
+    const { workspaceId }: AgentOSModuleCreatePageProps = props
+    const t = useTranslations("console.agentos.modules.createPage")
+    const router = useRouter()
+    return (
+        <AgentOSModuleCreatePageBase
+            props={{
+                workspaceId,
+                labels: {
+                    path: t("path"),
+                    modules: t("modules"),
+                    title: t("title"),
+                    description: t("description"),
+                    eyebrow: t("eyebrow"),
+                },
+            }}
+            on={{
+                back: () => router.push(`/agentos/workspaces/${workspaceId}/modules`),
+            }}
+        />
+    )
+}
 
-export default AgentOSModuleCreatePage;
+export default AgentOSModuleCreatePage

@@ -26,11 +26,21 @@ describe("failureKindOfCode", () => {
 
 describe("failed", () => {
     it("carries the kind, the code, the reason and the status without collapsing any of them", () => {
-        expect(failed("forbidden", { status: 403, code: "REFUSED", reason: "no" })).toEqual({ ok: false, kind: "forbidden", status: 403, code: "REFUSED", reason: "no", retryable: false })
+        expect(failed("forbidden", { status: 403, code: "REFUSED", reason: "no" })).toEqual({
+            ok: false,
+            kind: "forbidden",
+            status: 403,
+            code: "REFUSED",
+            reason: "no",
+            retryable: false,
+        })
     })
 
     it("marks only an unavailable answer retryable unless told otherwise", () => {
-        expect(failed("unavailable", { code: "NETWORK", reason: "network" })).toMatchObject({ retryable: true, status: null })
+        expect(failed("unavailable", { code: "NETWORK", reason: "network" })).toMatchObject({
+            retryable: true,
+            status: null,
+        })
         expect(failed("invalid", { code: "X", reason: "x" })).toMatchObject({ retryable: false })
         expect(failed("invalid", { code: "X", reason: "x", retryable: true })).toMatchObject({ retryable: true })
     })
@@ -38,6 +48,11 @@ describe("failed", () => {
 
 describe("failedWith", () => {
     it("merges the gateway fields beside the common ones", () => {
-        expect(failedWith("not-found", { code: "GONE", reason: "gone" }, { operation: "x@1" })).toMatchObject({ ok: false, kind: "not-found", code: "GONE", operation: "x@1" })
+        expect(failedWith("not-found", { code: "GONE", reason: "gone" }, { operation: "x@1" })).toMatchObject({
+            ok: false,
+            kind: "not-found",
+            code: "GONE",
+            operation: "x@1",
+        })
     })
 })

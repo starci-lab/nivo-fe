@@ -1,4 +1,4 @@
-import type { FailureKind } from "@/modules/api/outcome";
+import type { FailureKind } from "@/modules/api/outcome"
 
 /**
  * How a caller reads one settled query answer.
@@ -12,23 +12,25 @@ import type { FailureKind } from "@/modules/api/outcome";
  */
 
 /** The narrowest answer shape the settlement helpers accept; every `Outcome<T>` satisfies it. */
-export type NivoQueryAnswer<T> = {
-  readonly ok: true;
-  readonly data: T;
-} | {
-  readonly ok: false;
-  readonly kind: FailureKind;
-};
+export type NivoQueryAnswer<T> =
+    | {
+          readonly ok: true
+          readonly data: T
+      }
+    | {
+          readonly ok: false
+          readonly kind: FailureKind
+      }
 
 /** Preserve loading, successful data and an explicit refused result as three distinct states. */
-export const nivoQueryData = <T,>(answer: NivoQueryAnswer<T> | undefined): T | null | undefined => {
-  if (answer === undefined) return undefined;
-  return answer.ok ? answer.data : null;
-};
+export const nivoQueryData = <T>(answer: NivoQueryAnswer<T> | undefined): T | null | undefined => {
+    if (answer === undefined) return undefined
+    return answer.ok ? answer.data : null
+}
 
 /**
  * Whether a settled answer says the viewer may not have this: the session is not accepted, or the
  * session may not read it. Every other failure is a fault the viewer could retry.
  */
 export const nivoAnswerDenied = (answer: NivoQueryAnswer<unknown> | undefined): boolean =>
-  answer !== undefined && !answer.ok && (answer.kind === "refused" || answer.kind === "forbidden");
+    answer !== undefined && !answer.ok && (answer.kind === "refused" || answer.kind === "forbidden")

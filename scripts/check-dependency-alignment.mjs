@@ -47,7 +47,10 @@ export const findDrift = (manifests) => {
         const pinned = root.overrides?.[name]
         if (typeof pinned === "string" && !pinned.startsWith("$")) {
             for (const [spec, paths] of bySpec) {
-                if (spec !== pinned) findings.push(`${name} is pinned to ${pinned} by root overrides but ${paths.join(", ")} declare ${spec}`)
+                if (spec !== pinned)
+                    findings.push(
+                        `${name} is pinned to ${pinned} by root overrides but ${paths.join(", ")} declare ${spec}`,
+                    )
             }
         }
     }
@@ -77,7 +80,10 @@ export const readManifests = (rootDirectory) => {
     return manifests
 }
 
-const readdirNames = (directory) => readdirSync(directory, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name)
+const readdirNames = (directory) =>
+    readdirSync(directory, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name)
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
     const findings = findDrift(readManifests(resolve(dirname(fileURLToPath(import.meta.url)), "..")))

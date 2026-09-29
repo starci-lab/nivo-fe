@@ -12,7 +12,19 @@ import { OverviewAccount } from "."
 describe("OverviewAccount", () => {
     it("names the exact balance and the one unpaid invoice that owes the next step", () => {
         mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 150000 } }
-        mocks.data.invoices = { ok: true, data: [{ id: "abcdef1234", amountVnd: 120000, status: "unpaid", dueAt: "2026-09-06T00:00:00.000Z", paidAt: null, catalogOrder: null }] }
+        mocks.data.invoices = {
+            ok: true,
+            data: [
+                {
+                    id: "abcdef1234",
+                    amountVnd: 120000,
+                    status: "unpaid",
+                    dueAt: "2026-09-06T00:00:00.000Z",
+                    paidAt: null,
+                    catalogOrder: null,
+                },
+            ],
+        }
         render(<OverviewAccount label="Account" />)
 
         expect(screen.getByText("₫150,000")).toBeInTheDocument()
@@ -21,7 +33,19 @@ describe("OverviewAccount", () => {
 
     it("routes the invoice row's own top-up command", () => {
         mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 150000 } }
-        mocks.data.invoices = { ok: true, data: [{ id: "abcdef1234", amountVnd: 120000, status: "unpaid", dueAt: "2026-09-06T00:00:00.000Z", paidAt: null, catalogOrder: null }] }
+        mocks.data.invoices = {
+            ok: true,
+            data: [
+                {
+                    id: "abcdef1234",
+                    amountVnd: 120000,
+                    status: "unpaid",
+                    dueAt: "2026-09-06T00:00:00.000Z",
+                    paidAt: null,
+                    catalogOrder: null,
+                },
+            ],
+        }
         render(<OverviewAccount label="Account" />)
 
         fireEvent.click(screen.getByRole("button", { name: "Top up wallet" }))
@@ -63,7 +87,19 @@ describe("OverviewAccount", () => {
 
     it("names the invoice as overdue once its due date already lies behind the current instant", () => {
         mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 150000 } }
-        mocks.data.invoices = { ok: true, data: [{ id: "abcdef1234", amountVnd: 120000, status: "unpaid", dueAt: "2020-01-01T00:00:00.000Z", paidAt: null, catalogOrder: null }] }
+        mocks.data.invoices = {
+            ok: true,
+            data: [
+                {
+                    id: "abcdef1234",
+                    amountVnd: 120000,
+                    status: "unpaid",
+                    dueAt: "2020-01-01T00:00:00.000Z",
+                    paidAt: null,
+                    catalogOrder: null,
+                },
+            ],
+        }
         const { container } = render(<OverviewAccount label="Account" />)
 
         expect(screen.getByText("Overdue")).toBeInTheDocument()
@@ -76,7 +112,9 @@ describe("OverviewAccount", () => {
         const { container } = render(<OverviewAccount label="Account" />)
 
         expect(container.querySelector('[data-grammar-state="cautionary"]')).toBeInTheDocument()
-        expect(screen.getByText("This part could not be read. The rest of the screen is still correct.")).toBeInTheDocument()
+        expect(
+            screen.getByText("This part could not be read. The rest of the screen is still correct."),
+        ).toBeInTheDocument()
         expect(screen.queryByRole("button", { name: "Top up wallet" })).not.toBeInTheDocument()
     })
 

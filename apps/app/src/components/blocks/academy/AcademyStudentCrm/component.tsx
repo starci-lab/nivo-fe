@@ -1,70 +1,70 @@
-import { Avatar, LabelledProgressRow } from "@nivo/ui";
-import { SurfaceCard, Button, Button as CoreButton, Input, Text, TextAction, Badge } from "@starci/grammar/common";
-import type { AcademyStudent, AcademyStudentDetail } from "@/modules/api/academy";
+import { Avatar, LabelledProgressRow } from "@nivo/ui"
+import { SurfaceCard, Button, Button as CoreButton, Input, Text, TextAction, Badge } from "@starci/grammar/common"
+import type { AcademyStudent, AcademyStudentDetail } from "@/modules/api/academy"
 
 /** Resolved copy for the student CRM block. */
-export type AcademyStudentCrmProps = AcademyStudentCrmViewProps;
+export type AcademyStudentCrmProps = AcademyStudentCrmViewProps
 /** Public API role for AcademyStudentCrmLabels. */
 export type AcademyStudentCrmLabels = {
-  readonly section: string;
-  readonly empty: string;
-  readonly refused: string;
-  readonly open: string;
-  readonly active: string;
-  readonly banned: string;
-  readonly detail: string;
-  readonly create: string;
-  readonly name: string;
-  readonly email: string;
-  readonly password: string;
-  readonly saveStudent: string;
-  readonly courseSlug: string;
-  readonly grant: string;
-  readonly revoke: string;
-  readonly ban: string;
-  readonly activate: string;
-  readonly loadingDetail: string;
-  readonly actionFailed: string;
-};
+    readonly section: string
+    readonly empty: string
+    readonly refused: string
+    readonly open: string
+    readonly active: string
+    readonly banned: string
+    readonly detail: string
+    readonly create: string
+    readonly name: string
+    readonly email: string
+    readonly password: string
+    readonly saveStudent: string
+    readonly courseSlug: string
+    readonly grant: string
+    readonly revoke: string
+    readonly ban: string
+    readonly activate: string
+    readonly loadingDetail: string
+    readonly actionFailed: string
+}
 
 /** Atoms the pure student CRM draws; the connected half owns the student requests. */
 export type AcademyStudentCrmData = {
-  readonly students: ReadonlyArray<AcademyStudent>;
-  readonly detailState: "idle" | "resting" | "refused" | "answered";
-  readonly detail?: AcademyStudentDetail;
-  readonly pendingAction?: string;
-  readonly actionMessage?: string;
-  readonly labels: AcademyStudentCrmLabels;
-};
+    readonly students: ReadonlyArray<AcademyStudent>
+    readonly detailState: "idle" | "resting" | "refused" | "answered"
+    readonly detail?: AcademyStudentDetail
+    readonly pendingAction?: string
+    readonly actionMessage?: string
+    readonly labels: AcademyStudentCrmLabels
+}
 
 /** Actions the pure student CRM emits; every argument is an atom. */
 export type AcademyStudentCrmActions = {
-  readonly openStudent: (memberId: string) => void;
-  readonly changeName: (value: string) => void;
-  readonly changeEmail: (value: string) => void;
-  readonly changePassword: (value: string) => void;
-  readonly createStudent: () => void;
-  readonly changeCourseSlug: (value: string) => void;
-  readonly setStatus: (status: "active" | "banned") => void;
-  readonly grantAccess: () => void;
-  readonly revokeAccess: () => void;
-};
+    readonly openStudent: (memberId: string) => void
+    readonly changeName: (value: string) => void
+    readonly changeEmail: (value: string) => void
+    readonly changePassword: (value: string) => void
+    readonly createStudent: () => void
+    readonly changeCourseSlug: (value: string) => void
+    readonly setStatus: (status: "active" | "banned") => void
+    readonly grantAccess: () => void
+    readonly revokeAccess: () => void
+}
 
 /** Pure state for the student list, selected detail and targeted actions. */
 export type AcademyStudentCrmViewProps = {
-  readonly state: "resting" | "empty" | "refused" | "answered";
-  readonly props: AcademyStudentCrmData;
-  readonly on: AcademyStudentCrmActions;
-};
+    readonly state: "resting" | "empty" | "refused" | "answered"
+    readonly props: AcademyStudentCrmData
+    readonly on: AcademyStudentCrmActions
+}
 
 /** Which situation the list itself is in. */
-type ListState = AcademyStudentCrmViewProps["state"];
+type ListState = AcademyStudentCrmViewProps["state"]
 
 /** Which situation the selected student's detail is in. */
-type DetailState = AcademyStudentCrmViewProps["props"]["detailState"];
+type DetailState = AcademyStudentCrmViewProps["props"]["detailState"]
 
 /** The handlers this block hands down, kept apart from the data it draws. */
-type CrmActions = AcademyStudentCrmViewProps["on"];
+type CrmActions = AcademyStudentCrmViewProps["on"]
 
 /**
  * Three placeholder rows, held while the list is still being asked for.
@@ -74,15 +74,25 @@ type CrmActions = AcademyStudentCrmViewProps["on"];
  *
  * @param labels - Resolved copy for the block.
  */
-const restingRows = (labels: AcademyStudentCrmLabels) => [0, 1, 2].map((item, index) => <div key={index}>
-  <Avatar props={{
-    size: "md"
-  }} isLoading /><div>
+const restingRows = (labels: AcademyStudentCrmLabels) =>
+    [0, 1, 2].map((item, index) => (
+        <div key={index}>
+            <Avatar
+                props={{
+                    size: "md",
+                }}
+                isLoading
+            />
+            <div>
+                <TextAction size="sm" isSkeleton>
+                    {""}
+                </TextAction>
+                <Text isSkeleton>{""}</Text>
+            </div>
 
-    <TextAction size="sm" isSkeleton>{""}</TextAction>
-    <Text isSkeleton>{""}</Text></div>
-
-  <Button isSkeleton>{labels.open}</Button></div>);
+            <Button isSkeleton>{labels.open}</Button>
+        </div>
+    ))
 
 /**
  * One row per student, in the order the connected half settled them.
@@ -91,20 +101,32 @@ const restingRows = (labels: AcademyStudentCrmLabels) => [0, 1, 2].map((item, in
  * @param labels - Resolved copy for the block.
  * @param on - What opening a student does.
  */
-const studentRows = (students: ReadonlyArray<AcademyStudent>, labels: AcademyStudentCrmLabels, on: CrmActions) => students.map((student, index) => <div key={index}>
-  <Avatar props={{
-    name: student.name,
-    size: "md"
-  }} /><div>
+const studentRows = (students: ReadonlyArray<AcademyStudent>, labels: AcademyStudentCrmLabels, on: CrmActions) =>
+    students.map((student, index) => (
+        <div key={index}>
+            <Avatar
+                props={{
+                    name: student.name,
+                    size: "md",
+                }}
+            />
+            <div>
+                <TextAction size="sm" onPress={() => on.openStudent(student.id)}>
+                    {student.name}
+                </TextAction>
+                <Text size="xs" tone="muted">
+                    {student.email}
+                </Text>
+            </div>
 
-    <TextAction size="sm" onPress={() => on.openStudent(student.id)}>{student.name}</TextAction>
-    <Text size="xs" tone="muted">{student.email}</Text></div>
-
-  <Badge tone={student.status === "active" ? "success" : "danger"}>{student.status === "active" ? labels.active : labels.banned}</Badge>
-  <CoreButton
-    size="sm"
-    onPress={() => on.openStudent(student.id)}
-  >{labels.open}</CoreButton></div>);
+            <Badge tone={student.status === "active" ? "success" : "danger"}>
+                {student.status === "active" ? labels.active : labels.banned}
+            </Badge>
+            <CoreButton size="sm" onPress={() => on.openStudent(student.id)}>
+                {labels.open}
+            </CoreButton>
+        </div>
+    ))
 
 /**
  * The sentence that stands in place of the list, when there is one.
@@ -116,14 +138,14 @@ const studentRows = (students: ReadonlyArray<AcademyStudent>, labels: AcademyStu
  * @param labels - Resolved copy for the block.
  */
 const noteFor = (state: ListState, labels: AcademyStudentCrmLabels) => {
-  if (state === "empty") {
-    return labels.empty;
-  }
-  if (state === "refused") {
-    return labels.refused;
-  }
-  return undefined;
-};
+    if (state === "empty") {
+        return labels.empty
+    }
+    if (state === "refused") {
+        return labels.refused
+    }
+    return undefined
+}
 
 /**
  * The card that takes a new student's details.
@@ -132,44 +154,44 @@ const noteFor = (state: ListState, labels: AcademyStudentCrmLabels) => {
  * @param labels - Resolved copy for the block.
  * @param on - What typing and saving do.
  */
-const createCard = (pendingAction: string | undefined, labels: AcademyStudentCrmLabels, on: CrmActions) => <SurfaceCard
-  label={labels.create}
-><div><>
+const createCard = (pendingAction: string | undefined, labels: AcademyStudentCrmLabels, on: CrmActions) => (
+    <SurfaceCard label={labels.create}>
+        <div>
+            <>
+                <Input
+                    id="academy-student-name"
+                    name="name"
+                    label={labels.name}
+                    isDisabled={pendingAction === "create"}
+                    variant="secondary"
+                    onValueChange={on.changeName}
+                />
+                <Input
+                    id="academy-student-email"
+                    name="email"
+                    kind="email"
+                    label={labels.email}
+                    isDisabled={pendingAction === "create"}
+                    variant="secondary"
+                    onValueChange={on.changeEmail}
+                />
+                <Input
+                    id="academy-student-password"
+                    name="password"
+                    kind="newPassword"
+                    label={labels.password}
+                    isDisabled={pendingAction === "create"}
+                    variant="secondary"
+                    onValueChange={on.changePassword}
+                />
+            </>
 
-
-
-      <Input
-        id="academy-student-name"
-        name="name"
-        label={labels.name}
-        isDisabled={pendingAction === "create"}
-        variant="secondary"
-        onValueChange={on.changeName}
-      />
-      <Input
-        id="academy-student-email"
-        name="email"
-        kind="email"
-        label={labels.email}
-        isDisabled={pendingAction === "create"}
-        variant="secondary"
-        onValueChange={on.changeEmail}
-      />
-      <Input
-        id="academy-student-password"
-        name="password"
-        kind="newPassword"
-        label={labels.password}
-        isDisabled={pendingAction === "create"}
-        variant="secondary"
-        onValueChange={on.changePassword}
-      /></>
-
-    <CoreButton
-      variant="primary"
-      isPending={pendingAction === "create"}
-      onPress={on.createStudent}
-    >{labels.saveStudent}</CoreButton></div></SurfaceCard>;
+            <CoreButton variant="primary" isPending={pendingAction === "create"} onPress={on.createStudent}>
+                {labels.saveStudent}
+            </CoreButton>
+        </div>
+    </SurfaceCard>
+)
 
 /**
  * A student's course progress, or the one line that says why it is not here.
@@ -181,32 +203,56 @@ const createCard = (pendingAction: string | undefined, labels: AcademyStudentCrm
  * @param detail - The selected student, when the read answered.
  * @param labels - Resolved copy for the block.
  */
-const detailCard = (detailState: DetailState, detail: AcademyStudentDetail | undefined, labels: AcademyStudentCrmLabels) => {
-  if (detailState === "idle") {
-    return null;
-  }
-  if (detailState === "answered" && detail !== undefined) {
-    return <SurfaceCard
-      label={labels.detail}
-    ><div>{detail.courses.length === 0 ? [<LabelledProgressRow key="item-0" props={{
-          id: "no-course",
-          title: labels.courseSlug,
-          percent: 0,
-          percentText: "0/0"
-        }} />] : detail.courses.map((course, index) => <LabelledProgressRow key={index} props={{
-          id: course.slug,
-          title: course.title,
-          percent: course.total === 0 ? 0 : Math.round(course.completed / course.total * 100),
-          percentText: `${course.completed}/${course.total}`
-        }} />)}</div></SurfaceCard>;
-  }
-  return <SurfaceCard
-    label={labels.detail}
-  ><div>
-
-
-        <Text size="sm" tone="muted">{detailState === "resting" ? labels.loadingDetail : labels.actionFailed}</Text></div></SurfaceCard>;
-};
+const detailCard = (
+    detailState: DetailState,
+    detail: AcademyStudentDetail | undefined,
+    labels: AcademyStudentCrmLabels,
+) => {
+    if (detailState === "idle") {
+        return null
+    }
+    if (detailState === "answered" && detail !== undefined) {
+        return (
+            <SurfaceCard label={labels.detail}>
+                <div>
+                    {detail.courses.length === 0
+                        ? [
+                              <LabelledProgressRow
+                                  key="item-0"
+                                  props={{
+                                      id: "no-course",
+                                      title: labels.courseSlug,
+                                      percent: 0,
+                                      percentText: "0/0",
+                                  }}
+                              />,
+                          ]
+                        : detail.courses.map((course, index) => (
+                              <LabelledProgressRow
+                                  key={index}
+                                  props={{
+                                      id: course.slug,
+                                      title: course.title,
+                                      percent:
+                                          course.total === 0 ? 0 : Math.round((course.completed / course.total) * 100),
+                                      percentText: `${course.completed}/${course.total}`,
+                                  }}
+                              />
+                          ))}
+                </div>
+            </SurfaceCard>
+        )
+    }
+    return (
+        <SurfaceCard label={labels.detail}>
+            <div>
+                <Text size="sm" tone="muted">
+                    {detailState === "resting" ? labels.loadingDetail : labels.actionFailed}
+                </Text>
+            </div>
+        </SurfaceCard>
+    )
+}
 
 /**
  * The control that grants a selected student access to one course.
@@ -220,27 +266,36 @@ const detailCard = (detailState: DetailState, detail: AcademyStudentDetail | und
  * @param labels - Resolved copy for the block.
  * @param on - What typing a slug and granting do.
  */
-const grantCard = (detailState: DetailState, detail: AcademyStudentDetail | undefined, pendingAction: string | undefined, labels: AcademyStudentCrmLabels, on: CrmActions) => {
-  if (detailState !== "answered" || detail === undefined) {
-    return null;
-  }
-  return <SurfaceCard><div><>
-
-
-          <Input
-            id="academy-course-slug"
-            name="courseSlug"
-            label={labels.courseSlug}
-            isDisabled={pendingAction !== undefined}
-            variant="secondary"
-            onValueChange={on.changeCourseSlug}
-          /></>
-        <CoreButton
-          variant="primary"
-          isPending={pendingAction === "grant"}
-          onPress={on.grantAccess}
-        >{labels.grant}</CoreButton></div></SurfaceCard>;
-};
+const grantCard = (
+    detailState: DetailState,
+    detail: AcademyStudentDetail | undefined,
+    pendingAction: string | undefined,
+    labels: AcademyStudentCrmLabels,
+    on: CrmActions,
+) => {
+    if (detailState !== "answered" || detail === undefined) {
+        return null
+    }
+    return (
+        <SurfaceCard>
+            <div>
+                <>
+                    <Input
+                        id="academy-course-slug"
+                        name="courseSlug"
+                        label={labels.courseSlug}
+                        isDisabled={pendingAction !== undefined}
+                        variant="secondary"
+                        onValueChange={on.changeCourseSlug}
+                    />
+                </>
+                <CoreButton variant="primary" isPending={pendingAction === "grant"} onPress={on.grantAccess}>
+                    {labels.grant}
+                </CoreButton>
+            </div>
+        </SurfaceCard>
+    )
+}
 
 /**
  * The two presses that act on the selected student: their standing, and their access.
@@ -251,56 +306,77 @@ const grantCard = (detailState: DetailState, detail: AcademyStudentDetail | unde
  * @param labels - Resolved copy for the block.
  * @param on - What each press does.
  */
-const statusCard = (detailState: DetailState, detail: AcademyStudentDetail | undefined, pendingAction: string | undefined, labels: AcademyStudentCrmLabels, on: CrmActions) => {
-  if (detailState !== "answered" || detail === undefined) {
-    return null;
-  }
-  return <SurfaceCard><div><>
-
-
-
-          <CoreButton
-            isPending={pendingAction === "status"}
-            onPress={() => on.setStatus(detail.member.status === "active" ? "banned" : "active")}
-          >{detail.member.status === "active" ? labels.ban : labels.activate}</CoreButton>
-          <CoreButton
-            isPending={pendingAction === "revoke"}
-            onPress={on.revokeAccess}
-          >{labels.revoke}</CoreButton></></div></SurfaceCard>;
-};
+const statusCard = (
+    detailState: DetailState,
+    detail: AcademyStudentDetail | undefined,
+    pendingAction: string | undefined,
+    labels: AcademyStudentCrmLabels,
+    on: CrmActions,
+) => {
+    if (detailState !== "answered" || detail === undefined) {
+        return null
+    }
+    return (
+        <SurfaceCard>
+            <div>
+                <>
+                    <CoreButton
+                        isPending={pendingAction === "status"}
+                        onPress={() => on.setStatus(detail.member.status === "active" ? "banned" : "active")}
+                    >
+                        {detail.member.status === "active" ? labels.ban : labels.activate}
+                    </CoreButton>
+                    <CoreButton isPending={pendingAction === "revoke"} onPress={on.revokeAccess}>
+                        {labels.revoke}
+                    </CoreButton>
+                </>
+            </div>
+        </SurfaceCard>
+    )
+}
 
 /** Render student CRM state without owning requests or secrets. */
 const AcademyStudentCrmContent = (input: AcademyStudentCrmViewProps) => {
-  const {
-    state,
-    on
-  } = input;
-  const {
-    students,
-    detailState,
-    detail,
-    pendingAction,
-    actionMessage,
-    labels
-  } = input.props;
-  const rows = state === "resting" ? restingRows(labels) : studentRows(students, labels, on);
-  const note = noteFor(state, labels);
-  return <>
-            {note === undefined ? <SurfaceCard
-              label={labels.section}
-              labelEnd={(state === "answered" ? String(students.length) : undefined) === undefined ? null : <Text size="sm" tone="muted" isSkeleton={state === "resting"}>{state === "answered" ? String(students.length) : undefined}</Text>}
-            ><div>{rows}</div></SurfaceCard> : <SurfaceCard
-      label={labels.section}
-    ><div>
-          <Text size="sm" tone="muted">{note}</Text></div></SurfaceCard>}
+    const { state, on } = input
+    const { students, detailState, detail, pendingAction, actionMessage, labels } = input.props
+    const rows = state === "resting" ? restingRows(labels) : studentRows(students, labels, on)
+    const note = noteFor(state, labels)
+    return (
+        <>
+            {note === undefined ? (
+                <SurfaceCard
+                    label={labels.section}
+                    labelEnd={
+                        (state === "answered" ? String(students.length) : undefined) === undefined ? null : (
+                            <Text size="sm" tone="muted" isSkeleton={state === "resting"}>
+                                {state === "answered" ? String(students.length) : undefined}
+                            </Text>
+                        )
+                    }
+                >
+                    <div>{rows}</div>
+                </SurfaceCard>
+            ) : (
+                <SurfaceCard label={labels.section}>
+                    <div>
+                        <Text size="sm" tone="muted">
+                            {note}
+                        </Text>
+                    </div>
+                </SurfaceCard>
+            )}
             {createCard(pendingAction, labels, on)}
             {detailCard(detailState, detail, labels)}
             {grantCard(detailState, detail, pendingAction, labels, on)}
             {statusCard(detailState, detail, pendingAction, labels, on)}
-            {actionMessage === undefined ? null : <Text size="sm" tone="muted">{actionMessage}</Text>}
-        </>;
-};
+            {actionMessage === undefined ? null : (
+                <Text size="sm" tone="muted">
+                    {actionMessage}
+                </Text>
+            )}
+        </>
+    )
+}
 
 /** Stable typed root for the Academy student CRM block. */
-export const AcademyStudentCrmBase = (props: AcademyStudentCrmProps) => <AcademyStudentCrmContent {...props} />;
-
+export const AcademyStudentCrmBase = (props: AcademyStudentCrmProps) => <AcademyStudentCrmContent {...props} />

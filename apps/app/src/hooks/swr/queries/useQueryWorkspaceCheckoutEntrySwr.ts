@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import { resolveWorkspaceCheckoutEntry, type WorkspaceCheckoutEntryRequest } from "@/modules/api/workspace-controlplane";
-import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
+import { resolveWorkspaceCheckoutEntry, type WorkspaceCheckoutEntryRequest } from "@/modules/api/workspace-controlplane"
+import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery"
 
 /*
  * One hook per file, one registered read per hook: the file's basename is the hook it exports, which
@@ -10,7 +10,12 @@ import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
  */
 
 /** Cache identity of one entry resolution: the purchase and the workspace the caller claims ready. */
-export const workspaceCheckoutEntryQueryKey = (request: WorkspaceCheckoutEntryRequest): NivoQueryKey => ["workspace-checkout", "entry", request.purchaseId, request.workspaceId];
+export const workspaceCheckoutEntryQueryKey = (request: WorkspaceCheckoutEntryRequest): NivoQueryKey => [
+    "workspace-checkout",
+    "entry",
+    request.purchaseId,
+    request.workspaceId,
+]
 
 /**
  * Resolve the registered entry destination for one readiness-confirmed workspace.
@@ -19,4 +24,4 @@ export const workspaceCheckoutEntryQueryKey = (request: WorkspaceCheckoutEntryRe
  *   addressing an identity the caller has not claimed.
  */
 export const useQueryWorkspaceCheckoutEntrySwr = (request: WorkspaceCheckoutEntryRequest, enabled = true) =>
-  useNivoQuery(enabled ? workspaceCheckoutEntryQueryKey(request) : null, () => resolveWorkspaceCheckoutEntry(request));
+    useNivoQuery(enabled ? workspaceCheckoutEntryQueryKey(request) : null, () => resolveWorkspaceCheckoutEntry(request))

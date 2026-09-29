@@ -4,7 +4,12 @@ import { Label } from "./"
 
 describe("Label", () => {
     it("associates labels and optional icons with controls", () => {
-        render(<><Label props={{ htmlFor: "email", content: "Email", icon: "email" }} /><input id="email" /></>)
+        render(
+            <>
+                <Label props={{ htmlFor: "email", content: "Email", icon: "email" }} />
+                <input id="email" />
+            </>,
+        )
         expect(screen.getByText("Email")).toHaveAttribute("for", "email")
         expect(document.querySelector("label svg")).toBeInTheDocument()
     })

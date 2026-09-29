@@ -94,19 +94,25 @@ describe("WalletControlCenterBase", () => {
                 phase: "answered",
                 label: "Invoices",
                 actionLabel: "Pay",
-                rows: [{
-                    id: "invoice",
-                    title: "Invoice 42",
-                    caption: "Due today",
-                    amount: "500,000 VND",
-                    state: "Unpaid",
-                    tone: "warning",
-                    detailLabel: "View invoice",
-                    detailFacts: [{ id: "amount", label: "Amount", value: "500,000 VND" }],
-                    note: "Payment is pending",
-                }],
+                rows: [
+                    {
+                        id: "invoice",
+                        title: "Invoice 42",
+                        caption: "Due today",
+                        amount: "500,000 VND",
+                        state: "Unpaid",
+                        tone: "warning",
+                        detailLabel: "View invoice",
+                        detailFacts: [{ id: "amount", label: "Amount", value: "500,000 VND" }],
+                        note: "Payment is pending",
+                    },
+                ],
             },
-            topUp: { ...topUp, overlayState: "open", checkout: { reference: "REF-42", amount: "500,000 VND", note: "Redirecting" } },
+            topUp: {
+                ...topUp,
+                overlayState: "open",
+                checkout: { reference: "REF-42", amount: "500,000 VND", note: "Redirecting" },
+            },
             result: { ...result, overlayState: "open", reference: "REF-42" },
             on,
         }
@@ -117,11 +123,17 @@ describe("WalletControlCenterBase", () => {
     })
 
     it("renders checkout evidence inside the open top-up overlay", () => {
-        render(<WalletControlCenterBase
-            state="ordinary"
-            {...shared}
-            topUp={{ ...topUp, overlayState: "open", checkout: { reference: "REF-42", amount: "500,000 VND", note: "Redirecting" } }}
-        />)
+        render(
+            <WalletControlCenterBase
+                state="ordinary"
+                {...shared}
+                topUp={{
+                    ...topUp,
+                    overlayState: "open",
+                    checkout: { reference: "REF-42", amount: "500,000 VND", note: "Redirecting" },
+                }}
+            />,
+        )
 
         expect(screen.getByText("REF-42")).toBeInTheDocument()
         expect(screen.getByText("Redirecting")).toBeInTheDocument()
@@ -155,7 +167,14 @@ describe("WalletControlCenterBase", () => {
                 label: "Linked invoice",
                 orderLabel: "Order 42",
                 row: {
-                    id: "invoice", title: "Invoice", caption: "Paid", amount: "500,000 VND", state: "Paid", tone: "success", detailLabel: "Details", detailFacts: [],
+                    id: "invoice",
+                    title: "Invoice",
+                    caption: "Paid",
+                    amount: "500,000 VND",
+                    state: "Paid",
+                    tone: "success",
+                    detailLabel: "Details",
+                    detailFacts: [],
                 },
                 actionLabel: "Return to order",
                 actionKind: "return",
@@ -180,29 +199,94 @@ describe("WalletControlCenterBase", () => {
 
 describe("WalletControlCenterBase", () => {
     it("renders wallet resting, empty, and refused ledger branches", () => {
-        const html = renderToStaticMarkup(<WalletControlCenterBase
-            state="ordinary"
-            title="Wallet"
-            balance={{ phase: "answered", label: "Balance", actionLabel: "Top up", facts: [{ id: "b", label: "Balance", value: "100 VND" }] }}
-            transactions={{ phase: "empty", label: "Transactions", note: "No transactions" }}
-            invoices={{ phase: "refused", label: "Invoices", note: "Invoices unavailable" }}
-            topUp={{ overlayState: "closed", title: "Top up", closeLabel: "Close", amountLabel: "Amount", amountPlaceholder: "10000", hint: "IPN", submitLabel: "Continue", amount: "", pending: false }}
-            result={{ overlayState: "closed", title: "Result", closeLabel: "Close", state: "Pending", tone: "warning", amount: "100 VND", note: "Waiting", actionLabel: "Back" }}
-            on={{ topUp: vi.fn(), payInvoice: vi.fn() }}
-        />)
+        const html = renderToStaticMarkup(
+            <WalletControlCenterBase
+                state="ordinary"
+                title="Wallet"
+                balance={{
+                    phase: "answered",
+                    label: "Balance",
+                    actionLabel: "Top up",
+                    facts: [{ id: "b", label: "Balance", value: "100 VND" }],
+                }}
+                transactions={{ phase: "empty", label: "Transactions", note: "No transactions" }}
+                invoices={{ phase: "refused", label: "Invoices", note: "Invoices unavailable" }}
+                topUp={{
+                    overlayState: "closed",
+                    title: "Top up",
+                    closeLabel: "Close",
+                    amountLabel: "Amount",
+                    amountPlaceholder: "10000",
+                    hint: "IPN",
+                    submitLabel: "Continue",
+                    amount: "",
+                    pending: false,
+                }}
+                result={{
+                    overlayState: "closed",
+                    title: "Result",
+                    closeLabel: "Close",
+                    state: "Pending",
+                    tone: "warning",
+                    amount: "100 VND",
+                    note: "Waiting",
+                    actionLabel: "Back",
+                }}
+                on={{ topUp: vi.fn(), payInvoice: vi.fn() }}
+            />,
+        )
         expect(html).toContain("Wallet")
         expect(html).toContain("100 VND")
         expect(html).toContain("No transactions")
         expect(html).toContain("Invoices unavailable")
-        expect(renderToStaticMarkup(<WalletControlCenterBase
-            state="ordinary"
-            title="Wallet"
-            balance={{ phase: "resting", label: "Balance", actionLabel: "Top up" }}
-            transactions={{ phase: "refused", label: "Transactions", note: "Transactions unavailable" }}
-            invoices={{ phase: "answered", label: "Invoices", rows: [{ id: "invoice-1", title: "Starter", caption: "Today", amount: "100 VND", state: "Unpaid", tone: "warning", detailLabel: "Details", detailFacts: [] }], actionLabel: "Pay" }}
-            topUp={{ overlayState: "closed", title: "Top up", closeLabel: "Close", amountLabel: "Amount", amountPlaceholder: "10000", hint: "IPN", submitLabel: "Continue", amount: "", pending: false }}
-            result={{ overlayState: "closed", title: "Result", closeLabel: "Close", state: "Pending", tone: "warning", amount: "100 VND", note: "Waiting", actionLabel: "Back" }}
-            on={{ topUp: vi.fn(), payInvoice: vi.fn() }}
-        />)).toContain("Transactions unavailable")
+        expect(
+            renderToStaticMarkup(
+                <WalletControlCenterBase
+                    state="ordinary"
+                    title="Wallet"
+                    balance={{ phase: "resting", label: "Balance", actionLabel: "Top up" }}
+                    transactions={{ phase: "refused", label: "Transactions", note: "Transactions unavailable" }}
+                    invoices={{
+                        phase: "answered",
+                        label: "Invoices",
+                        rows: [
+                            {
+                                id: "invoice-1",
+                                title: "Starter",
+                                caption: "Today",
+                                amount: "100 VND",
+                                state: "Unpaid",
+                                tone: "warning",
+                                detailLabel: "Details",
+                                detailFacts: [],
+                            },
+                        ],
+                        actionLabel: "Pay",
+                    }}
+                    topUp={{
+                        overlayState: "closed",
+                        title: "Top up",
+                        closeLabel: "Close",
+                        amountLabel: "Amount",
+                        amountPlaceholder: "10000",
+                        hint: "IPN",
+                        submitLabel: "Continue",
+                        amount: "",
+                        pending: false,
+                    }}
+                    result={{
+                        overlayState: "closed",
+                        title: "Result",
+                        closeLabel: "Close",
+                        state: "Pending",
+                        tone: "warning",
+                        amount: "100 VND",
+                        note: "Waiting",
+                        actionLabel: "Back",
+                    }}
+                    on={{ topUp: vi.fn(), payInvoice: vi.fn() }}
+                />,
+            ),
+        ).toContain("Transactions unavailable")
     })
 })

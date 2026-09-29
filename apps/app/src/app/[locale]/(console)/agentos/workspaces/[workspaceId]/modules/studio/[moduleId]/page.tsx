@@ -1,6 +1,8 @@
 import { AgentOSModuleStudioPage } from "@/features/pages/AgentOSModuleStudioPage"
 
-type AgentOSModuleStudioRouteProps = { readonly params: Promise<{ readonly workspaceId: string, readonly moduleId: string }> }
+type AgentOSModuleStudioRouteProps = {
+    readonly params: Promise<{ readonly workspaceId: string; readonly moduleId: string }>
+}
 
 const Page = async ({ params }: AgentOSModuleStudioRouteProps) => {
     const { workspaceId, moduleId } = await params

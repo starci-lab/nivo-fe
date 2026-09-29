@@ -35,7 +35,7 @@ const payload = (overrides: Partial<AuthPayload> = {}): AuthPayload => ({
 
 const deferred = <T,>() => {
     let resolve!: (value: T) => void
-    const promise = new Promise<T>(res => {
+    const promise = new Promise<T>((res) => {
         resolve = res
     })
     return { promise, resolve }
@@ -83,10 +83,14 @@ describe("SessionProvider", () => {
         const { result } = renderSession()
         await waitFor(() => expect(result.current.state.status).toBe("anonymous"))
 
-        act(() => { result.current.adopt(payload({ accessToken: null, requiresTwoFactor: true, twoFactorToken: "challenge-1" })) })
+        act(() => {
+            result.current.adopt(payload({ accessToken: null, requiresTwoFactor: true, twoFactorToken: "challenge-1" }))
+        })
         expect(result.current.state.status).toBe("anonymous")
 
-        act(() => { result.current.adopt(payload({ accessToken: "adopted-token" })) })
+        act(() => {
+            result.current.adopt(payload({ accessToken: "adopted-token" }))
+        })
         expect(result.current.state).toEqual({ status: "signed-in", accessToken: "adopted-token" })
     })
 
@@ -99,7 +103,9 @@ describe("SessionProvider", () => {
         mocks.api.refreshSession.mockReturnValue(refresh.promise)
         const { result } = renderSession()
 
-        act(() => { result.current.adopt(payload({ accessToken: "adopted-token" })) })
+        act(() => {
+            result.current.adopt(payload({ accessToken: "adopted-token" }))
+        })
         expect(result.current.state.status).toBe("signed-in")
 
         await act(async () => refresh.resolve({ ok: false, reason: "lineage-lost", code: "REFUSED" }))
@@ -231,7 +237,10 @@ describe("SessionProvider", () => {
         expect(result.current.state.status).toBe("signed-in")
 
         await act(async () => {
-            signOutRequest.resolve({ ok: true, data: { data: true, remoteRevocationObserved: true, authorityEndingConfirmed: true } })
+            signOutRequest.resolve({
+                ok: true,
+                data: { data: true, remoteRevocationObserved: true, authorityEndingConfirmed: true },
+            })
             report = await pending
         })
         expect(result.current.state.status).toBe("anonymous")
@@ -251,7 +260,9 @@ describe("SessionProvider", () => {
         expect(result.current.state.status).toBe("anonymous")
 
         // a thrown answer still drops this browser's custody through the same `finally`
-        act(() => { result.current.adopt(payload({ accessToken: "adopted-token" })) })
+        act(() => {
+            result.current.adopt(payload({ accessToken: "adopted-token" }))
+        })
         expect(result.current.state.status).toBe("signed-in")
         mocks.api.signOut.mockRejectedValue(new Error("offline"))
         let pending: Promise<SessionEndReport> | undefined
@@ -284,7 +295,10 @@ describe("SessionProvider", () => {
         expect(result.current.state.status).toBe("anonymous")
 
         await act(async () => {
-            signOutRequest.resolve({ ok: true, data: { data: true, remoteRevocationObserved: false, authorityEndingConfirmed: null } })
+            signOutRequest.resolve({
+                ok: true,
+                data: { data: true, remoteRevocationObserved: false, authorityEndingConfirmed: null },
+            })
             report = await pending
         })
         expect(report).toEqual({ localCleared: true, remoteRevocation: "unknown", authorityEnding: "notAsked" })

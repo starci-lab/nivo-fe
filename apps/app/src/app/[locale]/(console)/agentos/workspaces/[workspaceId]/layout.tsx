@@ -1,6 +1,6 @@
-import type { ComponentProps } from "react";
+import type { ComponentProps } from "react"
 
-import { AgentOSWorkspaceChrome } from "@/features/layouts/AgentOSWorkspaceChrome";
+import { AgentOSWorkspaceChrome } from "@/features/layouts/AgentOSWorkspaceChrome"
 
 /*
  * The `/[locale]/agentos/workspaces/[workspaceId]` segment shell.
@@ -11,11 +11,10 @@ import { AgentOSWorkspaceChrome } from "@/features/layouts/AgentOSWorkspaceChrom
 
 /** The nested route stream rendered under the workspace chrome. */
 type AgentOSWorkspaceRouteProps = {
-    readonly children: ComponentProps<"div">["children"];
-};
+    readonly children: ComponentProps<"div">["children"]
+}
 
 /** Mount the workspace chrome around every route nested in this segment. */
-const Layout = ({ children }: AgentOSWorkspaceRouteProps) =>
-    <AgentOSWorkspaceChrome>{children}</AgentOSWorkspaceChrome>;
+const Layout = ({ children }: AgentOSWorkspaceRouteProps) => <AgentOSWorkspaceChrome>{children}</AgentOSWorkspaceChrome>
 
-export default Layout;
+export default Layout

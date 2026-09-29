@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import { readWorkspaceCheckoutStatus } from "@/modules/api/workspace-controlplane";
-import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
+import { readWorkspaceCheckoutStatus } from "@/modules/api/workspace-controlplane"
+import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery"
 
 /*
  * One hook per file, one registered read per hook: the file's basename is the hook it exports, which
@@ -10,7 +10,11 @@ import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
  */
 
 /** Cache identity of one purchase's composed status read. */
-export const workspaceCheckoutStatusQueryKey = (purchaseId: string): NivoQueryKey => ["workspace-checkout", "status", purchaseId];
+export const workspaceCheckoutStatusQueryKey = (purchaseId: string): NivoQueryKey => [
+    "workspace-checkout",
+    "status",
+    purchaseId,
+]
 
 /**
  * Read one owned purchase's composed truth.
@@ -19,4 +23,6 @@ export const workspaceCheckoutStatusQueryKey = (purchaseId: string): NivoQueryKe
  *   than addressing the empty purchase identity.
  */
 export const useQueryWorkspaceCheckoutStatusSwr = (purchaseId: string, enabled = true) =>
-  useNivoQuery(enabled ? workspaceCheckoutStatusQueryKey(purchaseId) : null, () => readWorkspaceCheckoutStatus(purchaseId));
+    useNivoQuery(enabled ? workspaceCheckoutStatusQueryKey(purchaseId) : null, () =>
+        readWorkspaceCheckoutStatus(purchaseId),
+    )

@@ -8,9 +8,9 @@
 
 /** Custom domain state, including the DNS target the customer must publish. */
 export type AcademyCustomDomainState = {
-  readonly domain: string | null;
-  readonly target: string;
-  readonly dnsReady: boolean;
-  readonly delivery: string;
-  readonly detail: string;
-};
+    readonly domain: string | null
+    readonly target: string
+    readonly dnsReady: boolean
+    readonly delivery: string
+    readonly detail: string
+}

@@ -48,24 +48,32 @@ type SidebarProps = SidebarBaseProps
  * focus and dismissal, and a destination that activates closes it after the route push begins.
  */
 export const SidebarBase = (props: SidebarProps) => {
-    const {
-        state,
-        props: data,
-        on
-    }: SidebarBaseProps = props
-    const content = (presentation: "rail" | "drawer", close?: () => void) => <GrammarSidebar
-        label={data.navigationLabel}
-        groups={data.groups}
-        selectedKey={data.selectedKey}
-        presentation={presentation}
-        isCollapsed={presentation === "rail" && data.isCollapsed}
-        collapseLabel={data.closeMenuLabel}
-        expandLabel={data.openMenuLabel}
-        toggleSource={IconSource("sidebar", "leading")}
-        onAction={(id) => { if (on.action(id)) close?.() }}
-        onCollapsedChange={on.collapsedChange}
-    />
+    const { state, props: data, on }: SidebarBaseProps = props
+    const content = (presentation: "rail" | "drawer", close?: () => void) => (
+        <GrammarSidebar
+            label={data.navigationLabel}
+            groups={data.groups}
+            selectedKey={data.selectedKey}
+            presentation={presentation}
+            isCollapsed={presentation === "rail" && data.isCollapsed}
+            collapseLabel={data.closeMenuLabel}
+            expandLabel={data.openMenuLabel}
+            toggleSource={IconSource("sidebar", "leading")}
+            onAction={(id) => {
+                if (on.action(id)) close?.()
+            }}
+            onCollapsedChange={on.collapsedChange}
+        />
+    )
 
-    if (state === "mobile") return <DrawerBranch triggerLabel={data.openMenuLabel} title={data.titleLabel} closeLabel={data.closeMenuLabel} renderContent={(close) => content("drawer", close)} />
+    if (state === "mobile")
+        return (
+            <DrawerBranch
+                triggerLabel={data.openMenuLabel}
+                title={data.titleLabel}
+                closeLabel={data.closeMenuLabel}
+                renderContent={(close) => content("drawer", close)}
+            />
+        )
     return content("rail")
 }

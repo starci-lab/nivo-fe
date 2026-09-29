@@ -6,7 +6,11 @@ const STORAGE_KEY = "test:console-rail"
 
 const ExpandedDestinations = () => <span>Expanded destinations</span>
 const CompactDestinations = () => <span>Compact destinations</span>
-const SidebarGlyph = () => <span aria-hidden="true" data-testid="sidebar-glyph">Sidebar icon</span>
+const SidebarGlyph = () => (
+    <span aria-hidden="true" data-testid="sidebar-glyph">
+        Sidebar icon
+    </span>
+)
 
 const createStorage = (): Storage => {
     const values = new Map<string, string>()
@@ -58,8 +62,7 @@ describe("CollapsibleRail", () => {
 
         expect(host).toHaveClass("collapsible-rail")
         expect(toggle).toHaveAttribute("aria-expanded", "true")
-        expect(screen.getByRole("heading", { name: "Console navigation", level: 2 }))
-            .toBeInTheDocument()
+        expect(screen.getByRole("heading", { name: "Console navigation", level: 2 })).toBeInTheDocument()
         expect(host).toContainElement(destinations)
         expect(host.style.borderInlineEnd).toBe("1px solid var(--separator)")
         expect(host.style.flexDirection).toBe("column")
@@ -110,17 +113,14 @@ describe("CollapsibleRail", () => {
         )
 
         expect(screen.queryByRole("complementary")).not.toBeInTheDocument()
-        expect(screen.getByText("Expanded destinations").closest(".collapsible-rail"))
-            .toBeInTheDocument()
+        expect(screen.getByText("Expanded destinations").closest(".collapsible-rail")).toBeInTheDocument()
     })
 
     it("restores a persisted collapsed preference after mounting", async () => {
         localStorage.setItem(STORAGE_KEY, "true")
         renderRail()
 
-        await waitFor(() => expect(
-            screen.getByRole("button", { name: "Expand navigation" }),
-        ).toBeInTheDocument())
+        await waitFor(() => expect(screen.getByRole("button", { name: "Expand navigation" })).toBeInTheDocument())
         expect(screen.getByText("Compact destinations")).toBeInTheDocument()
     })
 
@@ -135,9 +135,7 @@ describe("CollapsibleRail", () => {
             throw new DOMException("Blocked", "SecurityError")
         })
 
-        expect(() => fireEvent.click(
-            screen.getByRole("button", { name: "Collapse navigation" }),
-        )).not.toThrow()
+        expect(() => fireEvent.click(screen.getByRole("button", { name: "Collapse navigation" }))).not.toThrow()
         expect(screen.getByRole("button", { name: "Expand navigation" })).toBeInTheDocument()
         write.mockRestore()
     })

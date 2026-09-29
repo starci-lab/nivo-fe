@@ -1,20 +1,20 @@
-"use client";
+"use client"
 
-import type { ReactNode } from "react";
-import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { usePathname, useQueryMyAgentWorkspaceControlCenterSwr, useRouter } from "@/hooks";
-import { nivoQueryData } from "@/modules/query";
-import { AgentOSWorkspaceChromeBase, type AgentOSWorkspaceChromeBaseProps } from "./component";
+import type { ReactNode } from "react"
+import { useParams } from "next/navigation"
+import { useTranslations } from "next-intl"
+import { usePathname, useQueryMyAgentWorkspaceControlCenterSwr, useRouter } from "@/hooks"
+import { nivoQueryData } from "@/modules/query"
+import { AgentOSWorkspaceChromeBase, type AgentOSWorkspaceChromeBaseProps } from "./component"
 
 /** The nested route body rendered under this workspace's shared header and tabs. */
 export type AgentOSWorkspaceChromeProps = {
-    readonly children: ReactNode;
-};
+    readonly children: ReactNode
+}
 
 /** The rev-17 workspace destination answering one nested pathname. */
 const workspaceTabFor = (pathname: string, modulesRoute: string): "overview" | "modules" =>
-    pathname === modulesRoute || pathname.startsWith(`${modulesRoute}/`) ? "modules" : "overview";
+    pathname === modulesRoute || pathname.startsWith(`${modulesRoute}/`) ? "modules" : "overview"
 
 /**
  * Keep the visible console chrome and add the exact workspace identity plus its overview/modules
@@ -22,14 +22,14 @@ const workspaceTabFor = (pathname: string, modulesRoute: string): "overview" | "
  * creation routes live outside this segment, so they never enter this header.
  */
 export const AgentOSWorkspaceChrome = ({ children }: AgentOSWorkspaceChromeProps) => {
-    const { workspaceId } = useParams<{ readonly workspaceId: string }>();
-    const t = useTranslations("console.agentos");
-    const pathname = usePathname();
-    const router = useRouter();
-    const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId);
-    const workspaceName = nivoQueryData(controlCenter.data)?.workspace.name ?? workspaceId;
-    const overviewRoute = `/agentos/workspaces/${workspaceId}`;
-    const modulesRoute = `${overviewRoute}/modules`;
+    const { workspaceId } = useParams<{ readonly workspaceId: string }>()
+    const t = useTranslations("console.agentos")
+    const pathname = usePathname()
+    const router = useRouter()
+    const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId)
+    const workspaceName = nivoQueryData(controlCenter.data)?.workspace.name ?? workspaceId
+    const overviewRoute = `/agentos/workspaces/${workspaceId}`
+    const modulesRoute = `${overviewRoute}/modules`
     const input: AgentOSWorkspaceChromeBaseProps = {
         props: {
             eyebrow: t("workspace.eyebrow"),
@@ -38,14 +38,14 @@ export const AgentOSWorkspaceChrome = ({ children }: AgentOSWorkspaceChromeProps
             tabsLabel: t("workspace.tabsLabel"),
             overviewLabel: t("workspace.tabs.overview"),
             modulesLabel: t("workspace.tabs.modules"),
-            selectedKey: workspaceTabFor(pathname, modulesRoute)
+            selectedKey: workspaceTabFor(pathname, modulesRoute),
         },
         on: {
-            select: key => router.push(key === "modules" ? modulesRoute : overviewRoute)
+            select: (key) => router.push(key === "modules" ? modulesRoute : overviewRoute),
         },
-        children
-    };
-    return <AgentOSWorkspaceChromeBase {...input} />;
-};
+        children,
+    }
+    return <AgentOSWorkspaceChromeBase {...input} />
+}
 
-export default AgentOSWorkspaceChrome;
+export default AgentOSWorkspaceChrome

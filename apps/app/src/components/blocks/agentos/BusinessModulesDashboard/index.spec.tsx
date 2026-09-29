@@ -1,41 +1,56 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
-type MockModuleProps = { readonly workspaceId: string };
+type MockModuleProps = { readonly workspaceId: string }
 
 const mocks = vi.hoisted(() => ({
-  push: vi.fn(),
-  mutate: vi.fn(),
-  query: { data: undefined as unknown, error: undefined as unknown, isValidating: false }
-}));
+    push: vi.fn(),
+    mutate: vi.fn(),
+    query: { data: undefined as unknown, error: undefined as unknown, isValidating: false },
+}))
 
-vi.mock("@/hooks", () => ({ useQueryMyAgentWorkspacesSwr: () => ({ ...mocks.query, mutate: mocks.mutate }), useRouter: () => ({ push: mocks.push }) }));
-vi.mock("@/components/blocks/agentos/AgentOSSolutionModuleCenter", () => ({ AgentOSSolutionModuleCenter: (props: MockModuleProps) => <div>modules:{props.workspaceId}</div> }));
+vi.mock("@/hooks", () => ({
+    useQueryMyAgentWorkspacesSwr: () => ({ ...mocks.query, mutate: mocks.mutate }),
+    useRouter: () => ({ push: mocks.push }),
+}))
+vi.mock("@/components/blocks/agentos/AgentOSSolutionModuleCenter", () => ({
+    AgentOSSolutionModuleCenter: (props: MockModuleProps) => <div>modules:{props.workspaceId}</div>,
+}))
 
-import { BusinessModulesDashboard } from ".";
+import { BusinessModulesDashboard } from "."
 
 describe("BusinessModulesDashboard", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mocks.query.data = undefined;
-    mocks.query.error = undefined;
-    mocks.query.isValidating = false;
-  });
+    beforeEach(() => {
+        vi.clearAllMocks()
+        mocks.query.data = undefined
+        mocks.query.error = undefined
+        mocks.query.isValidating = false
+    })
 
-  it("uses the only workspace and never selects the first of several", () => {
-    mocks.query.data = { ok: true, data: [{ id: "only", name: "Only", status: "active" }] };
-    const view = render(<BusinessModulesDashboard />);
-    expect(screen.getByText("modules:only")).toBeInTheDocument();
-    mocks.query.data = { ok: true, data: [{ id: "first", name: "First", status: "active" }, { id: "second", name: "Second", status: "active" }] };
-    view.rerender(<BusinessModulesDashboard />);
-    expect(screen.queryByText("modules:first")).not.toBeInTheDocument();
-    expect(screen.getByText("Nivo will not choose the first workspace automatically. Try again after the business binding is confirmed.")).toBeInTheDocument();
-  });
+    it("uses the only workspace and never selects the first of several", () => {
+        mocks.query.data = { ok: true, data: [{ id: "only", name: "Only", status: "active" }] }
+        const view = render(<BusinessModulesDashboard />)
+        expect(screen.getByText("modules:only")).toBeInTheDocument()
+        mocks.query.data = {
+            ok: true,
+            data: [
+                { id: "first", name: "First", status: "active" },
+                { id: "second", name: "Second", status: "active" },
+            ],
+        }
+        view.rerender(<BusinessModulesDashboard />)
+        expect(screen.queryByText("modules:first")).not.toBeInTheDocument()
+        expect(
+            screen.getByText(
+                "Nivo will not choose the first workspace automatically. Try again after the business binding is confirmed.",
+            ),
+        ).toBeInTheDocument()
+    })
 
-  it("routes an empty binding to package selection", () => {
-    mocks.query.data = { ok: true, data: [] };
-    render(<BusinessModulesDashboard />);
-    fireEvent.click(screen.getByRole("button", { name: "Choose a package" }));
-    expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new");
-  });
-});
+    it("routes an empty binding to package selection", () => {
+        mocks.query.data = { ok: true, data: [] }
+        render(<BusinessModulesDashboard />)
+        fireEvent.click(screen.getByRole("button", { name: "Choose a package" }))
+        expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new")
+    })
+})

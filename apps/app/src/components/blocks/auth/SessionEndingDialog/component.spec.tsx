@@ -16,7 +16,7 @@ const VIEW: SessionEndingDialogBaseProps["props"] = {
     confirmLabel: "Sign out everywhere",
     pendingLabel: "Ending your sessions on every browser…",
     isPending: false,
-    isOpen: false
+    isOpen: false,
 }
 
 const OPEN_LABEL = "open the confirmation"
@@ -34,7 +34,7 @@ const ENDING_COPY: ReadonlyArray<string> = [
     EN_ENDING.description,
     EN_ENDING.scopeNote,
     EN_ENDING.confirm,
-    EN_ENDING.pending
+    EN_ENDING.pending,
 ]
 
 /** A session inventory, a device or a place, named in either product locale. */
@@ -56,10 +56,14 @@ type SessionEndingHarnessProps = { readonly onConfirm: () => void }
  */
 const SessionEndingHarness = ({ onConfirm }: SessionEndingHarnessProps) => {
     const [isOpen, setIsOpen] = useState(false)
-    return <>
-        <button type="button" onClick={() => setIsOpen(true)}>{OPEN_LABEL}</button>
-        <SessionEndingDialogBase props={{ ...VIEW, isOpen }} on={{ confirm: onConfirm, onOpenChange: setIsOpen }} />
-    </>
+    return (
+        <>
+            <button type="button" onClick={() => setIsOpen(true)}>
+                {OPEN_LABEL}
+            </button>
+            <SessionEndingDialogBase props={{ ...VIEW, isOpen }} on={{ confirm: onConfirm, onOpenChange: setIsOpen }} />
+        </>
+    )
 }
 
 describe("SessionEndingDialogBase", () => {
@@ -97,7 +101,12 @@ describe("SessionEndingDialogBase", () => {
     it("withholds a second submission while the ending is in flight", async () => {
         const confirm = vi.fn()
         const user = userEvent.setup()
-        render(<SessionEndingDialogBase props={{ ...VIEW, isPending: true, isOpen: true }} on={{ confirm, onOpenChange: () => {} }} />)
+        render(
+            <SessionEndingDialogBase
+                props={{ ...VIEW, isPending: true, isOpen: true }}
+                on={{ confirm, onOpenChange: () => {} }}
+            />,
+        )
 
         const dialog = await screen.findByRole("dialog")
         expect(within(dialog).getByText(VIEW.pendingLabel)).toBeInTheDocument()
@@ -138,7 +147,12 @@ describe("SessionEndingDialogBase", () => {
         const confirm = vi.fn()
         const onOpenChange = vi.fn()
         const user = userEvent.setup()
-        render(<SessionEndingDialogBase props={{ ...VIEW, isPending: true, isOpen: true }} on={{ confirm, onOpenChange }} />)
+        render(
+            <SessionEndingDialogBase
+                props={{ ...VIEW, isPending: true, isOpen: true }}
+                on={{ confirm, onOpenChange }}
+            />,
+        )
         await screen.findByRole("dialog")
 
         expect(screen.getByRole("button", { name: VIEW.cancelLabel })).toBeDisabled()
@@ -153,7 +167,12 @@ describe("SessionEndingDialogBase", () => {
     it("gives cancel and Escape back as soon as the answer settles", async () => {
         const onOpenChange = vi.fn()
         const user = userEvent.setup()
-        const { rerender } = render(<SessionEndingDialogBase props={{ ...VIEW, isPending: true, isOpen: true }} on={{ confirm: vi.fn(), onOpenChange }} />)
+        const { rerender } = render(
+            <SessionEndingDialogBase
+                props={{ ...VIEW, isPending: true, isOpen: true }}
+                on={{ confirm: vi.fn(), onOpenChange }}
+            />,
+        )
         await screen.findByRole("dialog")
 
         rerender(<SessionEndingDialogBase props={{ ...VIEW, isOpen: true }} on={{ confirm: vi.fn(), onOpenChange }} />)

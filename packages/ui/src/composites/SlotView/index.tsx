@@ -53,7 +53,14 @@ export const SlotView = <T,>(props: SlotViewProps<T>) => {
     if (slot.isLoading) return <>{props.children(props.placeholder, true)}</>
     if (slot.isForbidden) return props.forbidden === "hide" ? null : <EmptyNotice message={labels.forbidden} />
     if (slot.isError) {
-        return <EmptyNotice message={labels.error} actionLabel={labels.retry} actionVariant="secondary" onAction={props.onRetry} />
+        return (
+            <EmptyNotice
+                message={labels.error}
+                actionLabel={labels.retry}
+                actionVariant="secondary"
+                onAction={props.onRetry}
+            />
+        )
     }
     const isEmpty = slot.items === undefined || (Array.isArray(slot.items) && slot.items.length === 0)
     if (isEmpty) return <EmptyNotice message={labels.empty} />

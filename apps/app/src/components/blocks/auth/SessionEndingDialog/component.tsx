@@ -1,24 +1,24 @@
-import { Button, Dialog, Text } from "@starci/grammar/common";
-import { SlotView } from "@nivo/ui";
+import { Button, Dialog, Text } from "@starci/grammar/common"
+import { SlotView } from "@nivo/ui"
 
 /** Resolved every-browser confirmation shown over the console. */
 export type SessionEndingDialogBaseProps = {
-  readonly props: {
-    readonly title: string;
-    readonly description: string;
-    readonly scopeNote: string;
-    readonly cancelLabel: string;
-    readonly confirmLabel: string;
-    readonly pendingLabel: string;
-    /** The ending request is in flight; the scope it was sent for is already fixed. */
-    readonly isPending: boolean;
-    readonly isOpen: boolean;
-  };
-  readonly on: {
-    readonly confirm?: () => void;
-    readonly onOpenChange: (isOpen: boolean) => void;
-  };
-};
+    readonly props: {
+        readonly title: string
+        readonly description: string
+        readonly scopeNote: string
+        readonly cancelLabel: string
+        readonly confirmLabel: string
+        readonly pendingLabel: string
+        /** The ending request is in flight; the scope it was sent for is already fixed. */
+        readonly isPending: boolean
+        readonly isOpen: boolean
+    }
+    readonly on: {
+        readonly confirm?: () => void
+        readonly onOpenChange: (isOpen: boolean) => void
+    }
+}
 
 /*
  * The installed `starci-fe/public-component-signature` rule reads the render half's own name and
@@ -26,7 +26,7 @@ export type SessionEndingDialogBaseProps = {
  * accepts; the exported contract above stays `<Unit>BaseProps`, which the code-pattern check
  * requires the render half to own. Not exported: one public contract per unit.
  */
-type SessionEndingDialogProps = SessionEndingDialogBaseProps;
+type SessionEndingDialogProps = SessionEndingDialogBaseProps
 
 /**
  * Pure every-browser confirmation: the Dialog asks, the connected half ends the sessions.
@@ -44,35 +44,48 @@ type SessionEndingDialogProps = SessionEndingDialogBaseProps;
  * half's state or closes the dialog outright.
  */
 export const SessionEndingDialogBase = (props: SessionEndingDialogProps) => {
-  const {
-    title,
-    description,
-    scopeNote,
-    cancelLabel,
-    confirmLabel,
-    pendingLabel,
-    isPending,
-    isOpen
-  }: SessionEndingDialogBaseProps["props"] = props.props;
-  return <Dialog
-    title={title}
-    description={description}
-    isOpen={isOpen}
-    onOpenChange={props.on.onOpenChange}
-    isDismissable={!isPending}
-    isKeyboardDismissDisabled={isPending}
-    footer={(close: () => void) => <>
-      <Button variant="outline" isDisabled={isPending} onPress={close}>{cancelLabel}</Button>
-      <Button variant="primary" isPending={isPending} isDisabled={isPending} onPress={() => props.on?.confirm?.()}>{confirmLabel}</Button>
-    </>}
-  >
-    <Text tone="muted">{scopeNote}</Text>
-    <SlotView
-      slot={{ items: isPending }}
-      placeholder={false}
-      labels={{ empty: pendingLabel, forbidden: pendingLabel, error: pendingLabel, retry: pendingLabel }}
-    >
-      {(requestIsPending) => requestIsPending ? <Text live="polite">{pendingLabel}</Text> : null}
-    </SlotView>
-  </Dialog>;
-};
+    const {
+        title,
+        description,
+        scopeNote,
+        cancelLabel,
+        confirmLabel,
+        pendingLabel,
+        isPending,
+        isOpen,
+    }: SessionEndingDialogBaseProps["props"] = props.props
+    return (
+        <Dialog
+            title={title}
+            description={description}
+            isOpen={isOpen}
+            onOpenChange={props.on.onOpenChange}
+            isDismissable={!isPending}
+            isKeyboardDismissDisabled={isPending}
+            footer={(close: () => void) => (
+                <>
+                    <Button variant="outline" isDisabled={isPending} onPress={close}>
+                        {cancelLabel}
+                    </Button>
+                    <Button
+                        variant="primary"
+                        isPending={isPending}
+                        isDisabled={isPending}
+                        onPress={() => props.on?.confirm?.()}
+                    >
+                        {confirmLabel}
+                    </Button>
+                </>
+            )}
+        >
+            <Text tone="muted">{scopeNote}</Text>
+            <SlotView
+                slot={{ items: isPending }}
+                placeholder={false}
+                labels={{ empty: pendingLabel, forbidden: pendingLabel, error: pendingLabel, retry: pendingLabel }}
+            >
+                {(requestIsPending) => (requestIsPending ? <Text live="polite">{pendingLabel}</Text> : null)}
+            </SlotView>
+        </Dialog>
+    )
+}

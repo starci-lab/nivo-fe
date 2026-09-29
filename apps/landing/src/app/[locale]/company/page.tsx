@@ -2,7 +2,8 @@ import { CompanyPage } from "@/features/pages/CompanyPage"
 import { pageMetadata, type LocaleParams } from "@/features/layouts/SiteShell"
 
 /** Search and sharing metadata for the canonical Company route, in the language of the request. */
-export const generateMetadata = ({ params }: LocaleParams) => pageMetadata({ params, page: "company", path: "/company" })
+export const generateMetadata = ({ params }: LocaleParams) =>
+    pageMetadata({ params, page: "company", path: "/company" })
 
 /**
  * The `/company` framework adapter. It mounts the page and nothing else.

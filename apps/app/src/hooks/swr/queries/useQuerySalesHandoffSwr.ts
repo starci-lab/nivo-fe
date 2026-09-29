@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { readSalesHandoff, type SalesHandoffRequest, type SalesInstallationScope } from "@/modules/api/sales";
-import { operationReadIdentity } from "@/modules/api/operation-route";
-import { useAccessToken } from "../../auth/useAccessToken";
-import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
+import { readSalesHandoff, type SalesHandoffRequest, type SalesInstallationScope } from "@/modules/api/sales"
+import { operationReadIdentity } from "@/modules/api/operation-route"
+import { useAccessToken } from "../../auth/useAccessToken"
+import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery"
 
 /*
  * One hook per file, one registered read per hook: this file names exactly one Sales operation, its
@@ -13,7 +13,14 @@ import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
  */
 
 /** Cache identity for one Accounting handoff inside one installation. */
-export const salesHandoffQueryKey = (scope: SalesInstallationScope, input: SalesHandoffRequest): NivoQueryKey => ["sales", "handoff", scope.workspaceId, scope.instanceId, scope.installationId, input.handoffId];
+export const salesHandoffQueryKey = (scope: SalesInstallationScope, input: SalesHandoffRequest): NivoQueryKey => [
+    "sales",
+    "handoff",
+    scope.workspaceId,
+    scope.instanceId,
+    scope.installationId,
+    input.handoffId,
+]
 
 /**
  * Read one Accounting handoff's sender-side state.
@@ -22,6 +29,13 @@ export const salesHandoffQueryKey = (scope: SalesInstallationScope, input: Sales
  *   held read addresses nothing rather than addressing a half-filled operation path.
  */
 export const useQuerySalesHandoffSwr = (scope: SalesInstallationScope, input: SalesHandoffRequest, enabled = true) => {
-  const accessToken = useAccessToken();
-  return useNivoQuery(enabled && accessToken !== null ? salesHandoffQueryKey(scope, input) : null, () => readSalesHandoff(accessToken, scope, input, operationReadIdentity("sales.handoff@1", scope.installationId, input.handoffId)));
-};
+    const accessToken = useAccessToken()
+    return useNivoQuery(enabled && accessToken !== null ? salesHandoffQueryKey(scope, input) : null, () =>
+        readSalesHandoff(
+            accessToken,
+            scope,
+            input,
+            operationReadIdentity("sales.handoff@1", scope.installationId, input.handoffId),
+        ),
+    )
+}

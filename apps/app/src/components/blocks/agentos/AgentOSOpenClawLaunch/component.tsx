@@ -1,52 +1,96 @@
-import { CONTENT_CLASS_NAME } from "./classNames";
-import { SectionHeader as DirectionHeader, PageContainer as DirectionPage, Badge, Button, SurfaceCard, Text, type BadgeTone } from "@starci/grammar/common";
+import { CONTENT_CLASS_NAME } from "./classNames"
+import {
+    SectionHeader as DirectionHeader,
+    PageContainer as DirectionPage,
+    Badge,
+    Button,
+    SurfaceCard,
+    Text,
+    type BadgeTone,
+} from "@starci/grammar/common"
 /** Source-owned launch phases rendered independently from workspace readiness. */
 export type AgentOSOpenClawLaunchProps = {
-    readonly state: OpenClawLaunchBlockState;
+    readonly state: OpenClawLaunchBlockState
     readonly props: {
-        readonly workspaceId: string;
-        readonly detail?: string;
-        readonly labels: AgentOSOpenClawLaunchLabels;
-        readonly isRetryPending?: boolean;
-    };
-    readonly on: { readonly onRetry: () => void; readonly onReturn: () => void };
-};
+        readonly workspaceId: string
+        readonly detail?: string
+        readonly labels: AgentOSOpenClawLaunchLabels
+        readonly isRetryPending?: boolean
+    }
+    readonly on: { readonly onRetry: () => void; readonly onReturn: () => void }
+}
 /** Public API role for OpenClawLaunchBlockState. */
-export type OpenClawLaunchBlockState = "issuing" | "connected" | "blocked" | "expired" | "disconnected";
+export type OpenClawLaunchBlockState = "issuing" | "connected" | "blocked" | "expired" | "disconnected"
 /** Resolved copy for the credential-free launch bridge. */
 export type AgentOSOpenClawLaunchLabels = {
-    readonly title: string;
-    readonly workspaceLabel: string;
-    readonly securityNote: string;
-    readonly returnToWorkspace: string;
-    readonly retry: string;
-    readonly states: Readonly<Record<OpenClawLaunchBlockState, {
-        readonly label: string;
-        readonly detail: string;
-    }>>;
-};
+    readonly title: string
+    readonly workspaceLabel: string
+    readonly securityNote: string
+    readonly returnToWorkspace: string
+    readonly retry: string
+    readonly states: Readonly<
+        Record<
+            OpenClawLaunchBlockState,
+            {
+                readonly label: string
+                readonly detail: string
+            }
+        >
+    >
+}
 /** Fixed launch page anatomy with an independently settled launch block. */
 export type AgentOSOpenClawLaunchViewProps = {
-    readonly launchState: OpenClawLaunchBlockState;
-    readonly workspaceId: string;
-    readonly detail?: string;
-    readonly labels: AgentOSOpenClawLaunchLabels;
-    readonly onRetry: () => void;
-    readonly onReturn: () => void;
-    readonly isRetryPending?: boolean;
-};
+    readonly launchState: OpenClawLaunchBlockState
+    readonly workspaceId: string
+    readonly detail?: string
+    readonly labels: AgentOSOpenClawLaunchLabels
+    readonly onRetry: () => void
+    readonly onReturn: () => void
+    readonly isRetryPending?: boolean
+}
 const toneOf: Readonly<Record<OpenClawLaunchBlockState, BadgeTone>> = {
     issuing: "warning",
     connected: "success",
     blocked: "danger",
     expired: "warning",
-    disconnected: "neutral"
-};
+    disconnected: "neutral",
+}
 /** Draw every launch-axis state without accepting a launch URL, token or credential-shaped value. */
 export const AgentOSOpenClawLaunchBase = (props: AgentOSOpenClawLaunchProps) => {
-    const { workspaceId, detail, labels, isRetryPending = false } = props.props;
-    const launchState = props.state;
-    const settled = labels.states[launchState];
-    const action = launchState === "issuing" && !isRetryPending ? null : <Button variant="primary" type="button" isPending={isRetryPending} onPress={launchState === "connected" ? props.on.onReturn : props.on.onRetry}>{launchState === "connected" ? labels.returnToWorkspace : labels.retry}</Button>;
-    return <DirectionPage measure="product"><div className={CONTENT_CLASS_NAME} data-contract="GAP-2"><DirectionHeader level={1} title={labels.title}/><SurfaceCard><div className={CONTENT_CLASS_NAME} data-contract="GAP-2"><Text weight="semibold">{labels.workspaceLabel}: {workspaceId}</Text><Badge tone={toneOf[launchState]}>{settled.label}</Badge><Text size="sm" tone="muted" live="polite">{detail ?? settled.detail}</Text>{action}</div></SurfaceCard><Text size="sm" tone="muted">{labels.securityNote}</Text></div></DirectionPage>;
-};
+    const { workspaceId, detail, labels, isRetryPending = false } = props.props
+    const launchState = props.state
+    const settled = labels.states[launchState]
+    const action =
+        launchState === "issuing" && !isRetryPending ? null : (
+            <Button
+                variant="primary"
+                type="button"
+                isPending={isRetryPending}
+                onPress={launchState === "connected" ? props.on.onReturn : props.on.onRetry}
+            >
+                {launchState === "connected" ? labels.returnToWorkspace : labels.retry}
+            </Button>
+        )
+    return (
+        <DirectionPage measure="product">
+            <div className={CONTENT_CLASS_NAME} data-contract="GAP-2">
+                <DirectionHeader level={1} title={labels.title} />
+                <SurfaceCard>
+                    <div className={CONTENT_CLASS_NAME} data-contract="GAP-2">
+                        <Text weight="semibold">
+                            {labels.workspaceLabel}: {workspaceId}
+                        </Text>
+                        <Badge tone={toneOf[launchState]}>{settled.label}</Badge>
+                        <Text size="sm" tone="muted" live="polite">
+                            {detail ?? settled.detail}
+                        </Text>
+                        {action}
+                    </div>
+                </SurfaceCard>
+                <Text size="sm" tone="muted">
+                    {labels.securityNote}
+                </Text>
+            </div>
+        </DirectionPage>
+    )
+}

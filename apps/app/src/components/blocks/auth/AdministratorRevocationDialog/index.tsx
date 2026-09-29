@@ -1,23 +1,31 @@
-"use client";
+"use client"
 
-import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
-import { useMutateEndPrincipalSessionsSwr, useQueryCollabOfficeSwr, useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks";
-import { nivoQueryData } from "@/modules/query";
-import { AdministratorRevocationDialogBase, type AdministratorRevocationMember, type AdministratorRevocationStage } from "./component";
+import { useParams } from "next/navigation"
+import { useTranslations } from "next-intl"
+import { useRef, useState } from "react"
+import {
+    useMutateEndPrincipalSessionsSwr,
+    useQueryCollabOfficeSwr,
+    useQueryMyAgentWorkspaceControlCenterSwr,
+} from "@/hooks"
+import { nivoQueryData } from "@/modules/query"
+import {
+    AdministratorRevocationDialogBase,
+    type AdministratorRevocationMember,
+    type AdministratorRevocationStage,
+} from "./component"
 
 /** Props for the console's scoped administrator session ending. */
 export type AdministratorRevocationDialogProps = {
-  readonly isOpen: boolean;
-  readonly onOpenChange: (isOpen: boolean) => void;
-};
+    readonly isOpen: boolean
+    readonly onOpenChange: (isOpen: boolean) => void
+}
 
 /** A fresh identity for one logical ending request, so a retry resends this exact value. */
 const newRequestId = (): string =>
-  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-    ? crypto.randomUUID()
-    : `principal-ending-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `principal-ending-${Date.now()}-${Math.random().toString(36).slice(2)}`
 
 /**
  * Connected scoped administrator ending: the resolve half of the confirmation above it.
@@ -55,97 +63,123 @@ const newRequestId = (): string =>
  * dismissed answer close the dialog. Escape and an outside press take the same route at each stage.
  */
 export const AdministratorRevocationDialog = (props: AdministratorRevocationDialogProps) => {
-  const { isOpen, onOpenChange } = props;
-  const t = useTranslations("console");
-  const { workspaceId } = useParams<{ readonly workspaceId?: string }>();
-  const workspace = workspaceId === undefined || workspaceId.length === 0 ? null : workspaceId;
-  const office = useQueryCollabOfficeSwr(workspace);
-  const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspace ?? "", workspace !== null);
-  const officeView = office.data?.ok === true ? office.data.data : null;
-  const members: ReadonlyArray<AdministratorRevocationMember> = officeView === null ? [] : officeView.participants
-    .filter((participant) => participant.kind === "human" && participant.status === "active" && participant.memberId !== officeView.viewer.memberId)
-    .map((participant) => ({ memberId: participant.memberId, displayName: participant.displayName }));
-  const [selected, setSelected] = useState<AdministratorRevocationMember | null>(null);
-  const [stage, setStage] = useState<AdministratorRevocationStage>("ready");
-  const requestId = useRef<string | null>(null);
-  const ending = useMutateEndPrincipalSessionsSwr();
-  const memberName = selected?.displayName ?? "";
-  const submit = (): void => {
-    if (stage === "pending" || workspace === null || selected === null) {
-      return;
+    const { isOpen, onOpenChange } = props
+    const t = useTranslations("console")
+    const { workspaceId } = useParams<{ readonly workspaceId?: string }>()
+    const workspace = workspaceId === undefined || workspaceId.length === 0 ? null : workspaceId
+    const office = useQueryCollabOfficeSwr(workspace)
+    const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspace ?? "", workspace !== null)
+    const officeView = office.data?.ok === true ? office.data.data : null
+    const members: ReadonlyArray<AdministratorRevocationMember> =
+        officeView === null
+            ? []
+            : officeView.participants
+                  .filter(
+                      (participant) =>
+                          participant.kind === "human" &&
+                          participant.status === "active" &&
+                          participant.memberId !== officeView.viewer.memberId,
+                  )
+                  .map((participant) => ({ memberId: participant.memberId, displayName: participant.displayName }))
+    const [selected, setSelected] = useState<AdministratorRevocationMember | null>(null)
+    const [stage, setStage] = useState<AdministratorRevocationStage>("ready")
+    const requestId = useRef<string | null>(null)
+    const ending = useMutateEndPrincipalSessionsSwr()
+    const memberName = selected?.displayName ?? ""
+    const submit = (): void => {
+        if (stage === "pending" || workspace === null || selected === null) {
+            return
+        }
+        const identity = requestId.current ?? newRequestId()
+        requestId.current = identity
+        setStage("pending")
+        /*
+         * The chosen member travels as the workspace roster memberId, never as a Login principal: the
+         * workspace authority owner resolves the member's principal from this value alone.
+         */
+        void ending
+            .trigger({ requestId: identity, workspaceId: workspace, memberId: selected.memberId })
+            .then((answer) => {
+                if (answer.ok && answer.data.kind === "scopeApplied") {
+                    requestId.current = null
+                    setStage("applied")
+                    return
+                }
+                if (answer.ok && answer.data.kind === "refused") {
+                    requestId.current = null
+                    setStage("refused")
+                    return
+                }
+                setStage("undecided")
+            })
     }
-    const identity = requestId.current ?? newRequestId();
-    requestId.current = identity;
-    setStage("pending");
-    /*
-     * The chosen member travels as the workspace roster memberId, never as a Login principal: the
-     * workspace authority owner resolves the member's principal from this value alone.
-     */
-    void ending.trigger({ requestId: identity, workspaceId: workspace, memberId: selected.memberId }).then((answer) => {
-      if (answer.ok && answer.data.kind === "scopeApplied") {
-        requestId.current = null;
-        setStage("applied");
-        return;
-      }
-      if (answer.ok && answer.data.kind === "refused") {
-        requestId.current = null;
-        setStage("refused");
-        return;
-      }
-      setStage("undecided");
-    });
-  };
-  return <AdministratorRevocationDialogBase props={{
-    title: stage === "ready" ? t("account.administratorEnding.chooseTitle") : t("account.administratorEnding.confirmTitle", {
-      member: memberName
-    }),
-    description: stage === "ready" ? t("account.administratorEnding.chooseDescription") : undefined,
-    contextLabel: t("account.administratorEnding.workspaceLabel"),
-    context: nivoQueryData(controlCenter.data)?.workspace.name ?? "",
-    memberLabel: t("account.administratorEnding.memberLabel"),
-    memberPlaceholder: t("account.administratorEnding.memberPlaceholder"),
-    members,
-    memberId: selected?.memberId ?? null,
-    memberNotice: office.data !== undefined && office.data.ok === false ? t("account.administratorEnding.rosterUnavailable") : members.length === 0 && officeView !== null ? t("account.administratorEnding.noMembers") : null,
-    isMemberPending: office.data === undefined,
-    consequence: stage === "ready" ? t("account.administratorEnding.chooseConsequence") : t("account.administratorEnding.confirmConsequence", {
-      member: memberName
-    }),
-    cancelLabel: t("account.administratorEnding.cancel"),
-    continueLabel: t("account.administratorEnding.continue"),
-    confirmLabel: t("account.administratorEnding.confirmAll"),
-    pendingLabel: t("account.administratorEnding.pending"),
-    appliedLabel: t("account.administratorEnding.applied"),
-    refusedLabel: t("account.administratorEnding.refused"),
-    undecidedLabel: t("account.administratorEnding.undecided"),
-    retryLabel: t("account.administratorEnding.retry"),
-    stage,
-    isOpen
-  }} on={{
-    memberChange: (next: string | null) => {
-      if (next !== (selected?.memberId ?? null)) {
-        requestId.current = null;
-      }
-      setSelected(members.find((member) => member.memberId === next) ?? null);
-    },
-    confirm: () => {
-      if (stage === "ready") {
-        setStage("confirm");
-        return;
-      }
-      submit();
-    },
-    retry: submit,
-    onOpenChange: (next: boolean) => {
-    if (!next) {
-      if (stage === "confirm") {
-        setStage("ready");
-        return;
-      }
-      setStage("ready");
-      setSelected(null);
-    }
-    onOpenChange(next);
-    }
-  }} />;
-};
+    return (
+        <AdministratorRevocationDialogBase
+            props={{
+                title:
+                    stage === "ready"
+                        ? t("account.administratorEnding.chooseTitle")
+                        : t("account.administratorEnding.confirmTitle", {
+                              member: memberName,
+                          }),
+                description: stage === "ready" ? t("account.administratorEnding.chooseDescription") : undefined,
+                contextLabel: t("account.administratorEnding.workspaceLabel"),
+                context: nivoQueryData(controlCenter.data)?.workspace.name ?? "",
+                memberLabel: t("account.administratorEnding.memberLabel"),
+                memberPlaceholder: t("account.administratorEnding.memberPlaceholder"),
+                members,
+                memberId: selected?.memberId ?? null,
+                memberNotice:
+                    office.data !== undefined && office.data.ok === false
+                        ? t("account.administratorEnding.rosterUnavailable")
+                        : members.length === 0 && officeView !== null
+                          ? t("account.administratorEnding.noMembers")
+                          : null,
+                isMemberPending: office.data === undefined,
+                consequence:
+                    stage === "ready"
+                        ? t("account.administratorEnding.chooseConsequence")
+                        : t("account.administratorEnding.confirmConsequence", {
+                              member: memberName,
+                          }),
+                cancelLabel: t("account.administratorEnding.cancel"),
+                continueLabel: t("account.administratorEnding.continue"),
+                confirmLabel: t("account.administratorEnding.confirmAll"),
+                pendingLabel: t("account.administratorEnding.pending"),
+                appliedLabel: t("account.administratorEnding.applied"),
+                refusedLabel: t("account.administratorEnding.refused"),
+                undecidedLabel: t("account.administratorEnding.undecided"),
+                retryLabel: t("account.administratorEnding.retry"),
+                stage,
+                isOpen,
+            }}
+            on={{
+                memberChange: (next: string | null) => {
+                    if (next !== (selected?.memberId ?? null)) {
+                        requestId.current = null
+                    }
+                    setSelected(members.find((member) => member.memberId === next) ?? null)
+                },
+                confirm: () => {
+                    if (stage === "ready") {
+                        setStage("confirm")
+                        return
+                    }
+                    submit()
+                },
+                retry: submit,
+                onOpenChange: (next: boolean) => {
+                    if (!next) {
+                        if (stage === "confirm") {
+                            setStage("ready")
+                            return
+                        }
+                        setStage("ready")
+                        setSelected(null)
+                    }
+                    onOpenChange(next)
+                },
+            }}
+        />
+    )
+}

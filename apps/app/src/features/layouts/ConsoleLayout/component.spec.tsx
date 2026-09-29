@@ -11,14 +11,17 @@ vi.mock("@/features/layouts/ConsoleTopBar", () => ({
 
 import { ConsoleLayoutBase } from "./component"
 
-const precedes = (first: Element, second: Element) => Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING)
+const precedes = (first: Element, second: Element) =>
+    Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING)
 
 describe("ConsoleLayoutBase", () => {
     it("projects Nivo chrome into the shared workspace landmarks", () => {
-        render(<ConsoleLayoutBase
-            state={{ children: <p>Workspace body</p> }}
-            props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace" }}
-        />)
+        render(
+            <ConsoleLayoutBase
+                state={{ children: <p>Workspace body</p> }}
+                props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace" }}
+            />,
+        )
 
         expect(screen.getByRole("banner")).toHaveTextContent("Nivo")
         const navigations = screen.getAllByRole("navigation", { name: "Console destinations" })
@@ -31,10 +34,12 @@ describe("ConsoleLayoutBase", () => {
     })
 
     it("gives every band exactly one navigation owner: rail for the shell, drawer for the compact band", () => {
-        render(<ConsoleLayoutBase
-            state={{ children: <p>Workspace body</p> }}
-            props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace" }}
-        />)
+        render(
+            <ConsoleLayoutBase
+                state={{ children: <p>Workspace body</p> }}
+                props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace" }}
+            />,
+        )
 
         const rail = document.querySelector("[data-grammar-workspace-navigation-region]")
         const compact = document.querySelector("[data-grammar-workspace-compact-navigation]")
@@ -49,10 +54,12 @@ describe("ConsoleLayoutBase", () => {
     })
 
     it("mounts the navigation band once, ahead of the workspace landmarks rather than inside them", () => {
-        render(<ConsoleLayoutBase
-            state={{ children: <p>Workspace body</p> }}
-            props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace" }}
-        />)
+        render(
+            <ConsoleLayoutBase
+                state={{ children: <p>Workspace body</p> }}
+                props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace" }}
+            />,
+        )
 
         const banners = screen.getAllByRole("banner")
         expect(banners).toHaveLength(1)

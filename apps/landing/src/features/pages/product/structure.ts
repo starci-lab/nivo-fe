@@ -32,13 +32,27 @@ export type OfferStructure = {
 
 /** One block of a section, by kind; the text of each block is read from the catalog under the block key. */
 export type BlockStructure =
-    | { readonly kind: "cards"; readonly key: string; readonly columns: number; readonly items: ReadonlyArray<CardStructure> }
+    | {
+          readonly kind: "cards"
+          readonly key: string
+          readonly columns: number
+          readonly items: ReadonlyArray<CardStructure>
+      }
     | { readonly kind: "flow"; readonly key: string; readonly steps: ReadonlyArray<string> }
     | { readonly kind: "status"; readonly key: string; readonly tone: string }
     | { readonly kind: "note"; readonly key: string }
     | { readonly kind: "actions"; readonly key: string; readonly items: ReadonlyArray<ActionStructure> }
-    | { readonly kind: "selector"; readonly key: string; readonly items: ReadonlyArray<{ readonly key: string; readonly href: string }> }
-    | { readonly kind: "table"; readonly key: string; readonly headers: ReadonlyArray<string>; readonly rows: ReadonlyArray<string> }
+    | {
+          readonly kind: "selector"
+          readonly key: string
+          readonly items: ReadonlyArray<{ readonly key: string; readonly href: string }>
+      }
+    | {
+          readonly kind: "table"
+          readonly key: string
+          readonly headers: ReadonlyArray<string>
+          readonly rows: ReadonlyArray<string>
+      }
     | { readonly kind: "paths"; readonly key: string; readonly items: ReadonlyArray<PathStructure> }
     | { readonly kind: "offers"; readonly key: string; readonly items: ReadonlyArray<OfferStructure> }
     | { readonly kind: "faq"; readonly key: string; readonly items: ReadonlyArray<string> }
@@ -105,9 +119,7 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                     {
                         kind: "actions",
                         key: "actions",
-                        items: [
-                            { key: "learnAboutTheSystem", appearance: "link", href: SITE_LINKS.responsibility },
-                        ],
+                        items: [{ key: "learnAboutTheSystem", appearance: "link", href: SITE_LINKS.responsibility }],
                     },
                 ],
             },
@@ -120,7 +132,13 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                     {
                         kind: "flow",
                         key: "flow",
-                        steps: ["businessIntent", "contextState", "responsibility", "governedExecution", "verifiedOutcome"],
+                        steps: [
+                            "businessIntent",
+                            "contextState",
+                            "responsibility",
+                            "governedExecution",
+                            "verifiedOutcome",
+                        ],
                     },
                     { kind: "status", key: "status", tone: "accent" },
                 ],
@@ -135,11 +153,7 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                         kind: "cards",
                         key: "cards",
                         columns: 3,
-                        items: [
-                            { key: "context" },
-                            { key: "action", strong: true },
-                            { key: "intelligence" },
-                        ],
+                        items: [{ key: "context" }, { key: "action", strong: true }, { key: "intelligence" }],
                     },
                     { kind: "note", key: "note" },
                 ],
@@ -155,17 +169,12 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                         kind: "cards",
                         key: "cards",
                         columns: 2,
-                        items: [
-                            { key: "currentResponsibility", strong: true },
-                            { key: "truthGate" },
-                        ],
+                        items: [{ key: "currentResponsibility", strong: true }, { key: "truthGate" }],
                     },
                     {
                         kind: "actions",
                         key: "actions",
-                        items: [
-                            { key: "exploreSolutions", appearance: "primary", href: SITE_LINKS.applications },
-                        ],
+                        items: [{ key: "exploreSolutions", appearance: "primary", href: SITE_LINKS.applications }],
                     },
                 ],
             },
@@ -189,9 +198,7 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                     {
                         kind: "actions",
                         key: "actions",
-                        items: [
-                            { key: "learnAboutTrustGovernance", appearance: "link", href: SITE_LINKS.trust },
-                        ],
+                        items: [{ key: "learnAboutTrustGovernance", appearance: "link", href: SITE_LINKS.trust }],
                     },
                 ],
             },
@@ -245,9 +252,7 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                 key: "definition",
                 tone: "soft",
                 description: true,
-                blocks: [
-                    { kind: "status", key: "status", tone: "accent" },
-                ],
+                blocks: [{ kind: "status", key: "status", tone: "accent" }],
             },
             {
                 id: "core-anatomy",
@@ -328,14 +333,16 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                 tone: "soft",
                 description: true,
                 blocks: [
-                    { kind: "flow", key: "flow", steps: ["contextualize", "coordinate", "execute", "observe", "verify"] },
+                    {
+                        kind: "flow",
+                        key: "flow",
+                        steps: ["contextualize", "coordinate", "execute", "observe", "verify"],
+                    },
                     {
                         kind: "cards",
                         key: "cards",
                         columns: 1,
-                        items: [
-                            { key: "currentFocusLeadTo", strong: true },
-                        ],
+                        items: [{ key: "currentFocusLeadTo", strong: true }],
                     },
                     { kind: "status", key: "status", tone: "warning" },
                     {
@@ -358,9 +365,7 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                     {
                         kind: "actions",
                         key: "actions",
-                        items: [
-                            { key: "learnAboutTrust", appearance: "link", href: SITE_LINKS.trust },
-                        ],
+                        items: [{ key: "learnAboutTrust", appearance: "link", href: SITE_LINKS.trust }],
                     },
                 ],
             },
@@ -382,9 +387,7 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                     {
                         kind: "actions",
                         key: "actions",
-                        items: [
-                            { key: "seePricingTheCommercial", appearance: "link", href: SITE_LINKS.pricing },
-                        ],
+                        items: [{ key: "seePricingTheCommercial", appearance: "link", href: SITE_LINKS.pricing }],
                     },
                 ],
             },
@@ -428,7 +431,11 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                 description: true,
                 blocks: [
                     { kind: "status", key: "status", tone: "warning" },
-                    { kind: "flow", key: "flow", steps: ["leadOpportunity", "owner", "currentState", "nextAction", "evidence"] },
+                    {
+                        kind: "flow",
+                        key: "flow",
+                        steps: ["leadOpportunity", "owner", "currentState", "nextAction", "evidence"],
+                    },
                     {
                         kind: "actions",
                         key: "actions",
@@ -506,11 +513,7 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                         kind: "cards",
                         key: "cards",
                         columns: 3,
-                        items: [
-                            { key: "currentFocus" },
-                            { key: "directional" },
-                            { key: "futureTarget" },
-                        ],
+                        items: [{ key: "currentFocus" }, { key: "directional" }, { key: "futureTarget" }],
                     },
                     {
                         kind: "flow",
@@ -537,9 +540,7 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                     {
                         kind: "actions",
                         key: "actions",
-                        items: [
-                            { key: "needHelpWithA", appearance: "link", href: "/contact?intent=product" },
-                        ],
+                        items: [{ key: "needHelpWithA", appearance: "link", href: "/contact?intent=product" }],
                     },
                 ],
             },
@@ -571,9 +572,7 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                     {
                         kind: "actions",
                         key: "actions",
-                        items: [
-                            { key: "needHelpFindingWhere", appearance: "link", href: "/contact?intent=product" },
-                        ],
+                        items: [{ key: "needHelpFindingWhere", appearance: "link", href: "/contact?intent=product" }],
                     },
                 ],
             },
@@ -644,10 +643,7 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                         kind: "cards",
                         key: "cards",
                         columns: 2,
-                        items: [
-                            { key: "startFirstProof", strong: true },
-                            { key: "proRepeatableValue" },
-                        ],
+                        items: [{ key: "startFirstProof", strong: true }, { key: "proRepeatableValue" }],
                     },
                 ],
             },
@@ -657,7 +653,11 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                 tone: "default",
                 description: true,
                 blocks: [
-                    { kind: "flow", key: "flow", steps: ["moreUsage", "additionalResources", "noForcedMaturityUpgrade"] },
+                    {
+                        kind: "flow",
+                        key: "flow",
+                        steps: ["moreUsage", "additionalResources", "noForcedMaturityUpgrade"],
+                    },
                     { kind: "status", key: "status", tone: "warning" },
                 ],
             },
@@ -671,11 +671,7 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                         kind: "cards",
                         key: "cards",
                         columns: 3,
-                        items: [
-                            { key: "opcExpand" },
-                            { key: "teamCoordinate" },
-                            { key: "enterpriseGovern" },
-                        ],
+                        items: [{ key: "opcExpand" }, { key: "teamCoordinate" }, { key: "enterpriseGovern" }],
                     },
                     { kind: "status", key: "status", tone: "neutral" },
                 ],
@@ -690,11 +686,7 @@ export const PRODUCT_PAGES: Record<ProductPageId, ProductPageStructure> = {
                         kind: "cards",
                         key: "cards",
                         columns: 3,
-                        items: [
-                            { key: "start" },
-                            { key: "pro", strong: true },
-                            { key: "managedRunCare" },
-                        ],
+                        items: [{ key: "start" }, { key: "pro", strong: true }, { key: "managedRunCare" }],
                     },
                 ],
             },

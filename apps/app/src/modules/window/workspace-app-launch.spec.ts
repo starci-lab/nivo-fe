@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { followWorkspaceAppRedirect, safeWorkspaceAppRedirect, workspaceAppLaunchChannelName } from "./workspace-app-launch"
+import {
+    followWorkspaceAppRedirect,
+    safeWorkspaceAppRedirect,
+    workspaceAppLaunchChannelName,
+} from "./workspace-app-launch"
 
 describe("workspace app launch boundaries", () => {
     afterEach(() => vi.restoreAllMocks())
@@ -8,7 +12,9 @@ describe("workspace app launch boundaries", () => {
     })
 
     it("accepts HTTPS and local gateway redirects", () => {
-        expect(safeWorkspaceAppRedirect("https://apps.example.test/open?id=1")).toBe("https://apps.example.test/open?id=1")
+        expect(safeWorkspaceAppRedirect("https://apps.example.test/open?id=1")).toBe(
+            "https://apps.example.test/open?id=1",
+        )
         expect(safeWorkspaceAppRedirect("http://localhost:4100/open")).toBe("http://localhost:4100/open")
     })
 

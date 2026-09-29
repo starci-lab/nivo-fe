@@ -14,31 +14,45 @@ const mocks = vi.hoisted(() => {
         replace: vi.fn(),
         push: vi.fn(),
         session: { state: { status: "signed-in", accessToken: "token" } },
-        realtime: { status: "disconnected" as string, event: undefined as { kind: string, id: string, status?: string, reason?: string } | undefined },
+        realtime: {
+            status: "disconnected" as string,
+            event: undefined as { kind: string; id: string; status?: string; reason?: string } | undefined,
+        },
     }
 })
 
 type TemplateProbeProps = {
     state: string
-    props: { subject: string, detail: string, statusText: string }
-    on?: { changeSlug?: (value: string) => void, submit?: () => void, act?: () => void }
+    props: { subject: string; detail: string; statusText: string }
+    on?: { changeSlug?: (value: string) => void; submit?: () => void; act?: () => void }
 }
 
 vi.mock("@/hooks", async (importOriginal) => ({
-    ...await importOriginal<object>(),
+    ...(await importOriginal<object>()),
     useRouter: () => ({ replace: mocks.replace, push: mocks.push }),
     useProvisioningRealtime: () => mocks.realtime,
 }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
-vi.mock("@/modules/api/expert-sites", () => mocks.api);
-vi.mock("@/modules/api/commerce", () => mocks.api);
+vi.mock("@/modules/api/expert-sites", () => mocks.api)
+vi.mock("@/modules/api/commerce", () => mocks.api)
 vi.mock("./component", () => ({
     TemplateAppProvisioningBase: (props: TemplateProbeProps) => (
         <div>
-            <output data-testid="template-flow">{JSON.stringify({ state: props.state, subject: props.props.subject, detail: props.props.detail, text: props.props.statusText })}</output>
+            <output data-testid="template-flow">
+                {JSON.stringify({
+                    state: props.state,
+                    subject: props.props.subject,
+                    detail: props.props.detail,
+                    text: props.props.statusText,
+                })}
+            </output>
             <input data-testid="slug" onChange={(event) => props.on?.changeSlug?.(event.target.value)} />
-            <button data-testid="submit" onClick={props.on?.submit}>submit</button>
-            <button data-testid="act" onClick={props.on?.act}>act</button>
+            <button data-testid="submit" onClick={props.on?.submit}>
+                submit
+            </button>
+            <button data-testid="act" onClick={props.on?.act}>
+                act
+            </button>
         </div>
     ),
 }))
@@ -76,7 +90,10 @@ describe("TemplateAppProvisioning", () => {
     })
 
     it("reports unsupported catalogue entries and failed create or publish", async () => {
-        mocks.api.catalogItems.mockResolvedValue({ ok: true, data: [{ id: "other", name: "Other", templateKey: "other" }] })
+        mocks.api.catalogItems.mockResolvedValue({
+            ok: true,
+            data: [{ id: "other", name: "Other", templateKey: "other" }],
+        })
         render(<TemplateAppProvisioning context={{ mode: "new", templateKey: "other" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"unsupported"'))
         fireEvent.click(screen.getByTestId("act"))
@@ -119,19 +136,28 @@ describe("TemplateAppProvisioning", () => {
     })
 
     it("maps deployment realtime events to ready and failed", async () => {
-        mocks.api.myExpertSiteDeployment.mockResolvedValue({ ok: true, data: { id: "deployment", status: "pending", publicHost: null } })
+        mocks.api.myExpertSiteDeployment.mockResolvedValue({
+            ok: true,
+            data: { id: "deployment", status: "pending", publicHost: null },
+        })
         const view = render(<TemplateAppProvisioning context={{ mode: "resume", siteId: "site" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"preparing"'))
         mocks.realtime = { status: "event", event: { kind: "deployment", id: "deployment", status: "ready" } }
         view.rerender(<TemplateAppProvisioning context={{ mode: "resume", siteId: "site" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"ready"'))
-        mocks.realtime = { status: "event", event: { kind: "deployment", id: "deployment", status: "failed", reason: "deploy-broken" } }
+        mocks.realtime = {
+            status: "event",
+            event: { kind: "deployment", id: "deployment", status: "failed", reason: "deploy-broken" },
+        }
         view.rerender(<TemplateAppProvisioning context={{ mode: "resume", siteId: "site" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"failed"'))
     })
 
     it("routes ready and failed deployment actions back to apps", async () => {
-        mocks.api.myExpertSiteDeployment.mockResolvedValue({ ok: true, data: { id: "deployment", status: "running", publicHost: "alpha.vn" } })
+        mocks.api.myExpertSiteDeployment.mockResolvedValue({
+            ok: true,
+            data: { id: "deployment", status: "running", publicHost: "alpha.vn" },
+        })
         render(<TemplateAppProvisioning context={{ mode: "resume", siteId: "site" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"ready"'))
         fireEvent.click(screen.getByTestId("act"))

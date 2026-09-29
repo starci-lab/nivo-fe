@@ -4,7 +4,13 @@ import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-    api: { createWalletTopUpPayLink: vi.fn(), myInvoices: vi.fn(), myWallet: vi.fn(), myWalletTransactions: vi.fn(), payInvoice: vi.fn() },
+    api: {
+        createWalletTopUpPayLink: vi.fn(),
+        myInvoices: vi.fn(),
+        myWallet: vi.fn(),
+        myWalletTransactions: vi.fn(),
+        payInvoice: vi.fn(),
+    },
     navigation: { pathname: "/en/wallet", search: "" },
     session: { state: { status: "signed-in", accessToken: "token" } },
 }))
@@ -30,26 +36,59 @@ type WalletProbeProps = {
     }
 }
 
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(mocks.navigation.search), redirect: vi.fn(), permanentRedirect: vi.fn() }))
+vi.mock("next/navigation", () => ({
+    useSearchParams: () => new URLSearchParams(mocks.navigation.search),
+    redirect: vi.fn(),
+    permanentRedirect: vi.fn(),
+}))
 vi.mock("@/hooks", async (importOriginal) => ({
-    ...await importOriginal<object>(),
+    ...(await importOriginal<object>()),
     usePathname: () => mocks.navigation.pathname,
 }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
-vi.mock("@/modules/api/commerce", () => mocks.api);
+vi.mock("@/modules/api/commerce", () => mocks.api)
 vi.mock("./component", () => ({
     WalletControlCenterBase: (props: WalletProbeProps) => (
         <div>
-            <output data-testid="wallet">{JSON.stringify({ state: props.state, breadcrumb: props.breadcrumb, balance: props.balance, linkedInvoice: props.linkedInvoice, transactions: props.transactions, invoices: props.invoices, topUp: props.topUp, result: props.result })}</output>
-            <button data-testid="pay" onClick={props.on?.payInvoice}>pay</button>
-            <button data-testid="open-top-up" onClick={props.on?.topUp}>top-up</button>
-            <button data-testid="amount" onClick={() => props.on?.changeTopUpAmount?.("25000")}>amount</button>
-            <button data-testid="invalid-amount" onClick={() => props.on?.changeTopUpAmount?.("999")}>invalid-amount</button>
-            <button data-testid="submit-top-up" onClick={props.on?.submitTopUp}>submit-top-up</button>
-            <button data-testid="close-top-up" onClick={props.on?.closeTopUp}>close-top-up</button>
-            <button data-testid="close-result" onClick={props.on?.closeResult}>close-result</button>
-            <button data-testid="open-order" onClick={props.on?.openOrder}>open-order</button>
-            <button data-testid="return-order" onClick={props.on?.returnToOrder}>return-order</button>
+            <output data-testid="wallet">
+                {JSON.stringify({
+                    state: props.state,
+                    breadcrumb: props.breadcrumb,
+                    balance: props.balance,
+                    linkedInvoice: props.linkedInvoice,
+                    transactions: props.transactions,
+                    invoices: props.invoices,
+                    topUp: props.topUp,
+                    result: props.result,
+                })}
+            </output>
+            <button data-testid="pay" onClick={props.on?.payInvoice}>
+                pay
+            </button>
+            <button data-testid="open-top-up" onClick={props.on?.topUp}>
+                top-up
+            </button>
+            <button data-testid="amount" onClick={() => props.on?.changeTopUpAmount?.("25000")}>
+                amount
+            </button>
+            <button data-testid="invalid-amount" onClick={() => props.on?.changeTopUpAmount?.("999")}>
+                invalid-amount
+            </button>
+            <button data-testid="submit-top-up" onClick={props.on?.submitTopUp}>
+                submit-top-up
+            </button>
+            <button data-testid="close-top-up" onClick={props.on?.closeTopUp}>
+                close-top-up
+            </button>
+            <button data-testid="close-result" onClick={props.on?.closeResult}>
+                close-result
+            </button>
+            <button data-testid="open-order" onClick={props.on?.openOrder}>
+                open-order
+            </button>
+            <button data-testid="return-order" onClick={props.on?.returnToOrder}>
+                return-order
+            </button>
         </div>
     ),
 }))
@@ -57,8 +96,11 @@ vi.mock("./component", () => ({
 import { WalletControlCenter } from "./"
 
 const output = () => screen.getByTestId("wallet").textContent ?? ""
-const renderWallet = () => render(<WalletControlCenter pageState={mocks.navigation.search === "" ? "ordinary" : "waypoint"} />)
-const resetQueryCache = () => { for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key) }
+const renderWallet = () =>
+    render(<WalletControlCenter pageState={mocks.navigation.search === "" ? "ordinary" : "waypoint"} />)
+const resetQueryCache = () => {
+    for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key)
+}
 
 describe("WalletControlCenter", () => {
     afterEach(() => cleanup())
@@ -85,15 +127,35 @@ describe("WalletControlCenter", () => {
 
     it("formats answered balance, unpaid invoice, movements, and a successful payment", async () => {
         mocks.api.myWallet.mockResolvedValue({ ok: true, data: { balanceVnd: 1250 } })
-        mocks.api.myInvoices.mockResolvedValue({ ok: true, data: [
-            { id: "invoice", amountVnd: 500, status: "unpaid", dueAt: "2026-08-20T00:00:00.000Z", catalogOrder: { catalogItem: { name: "Academy" }, catalogTier: { name: "Pro" } } },
-            { id: "legacy", amountVnd: 100, status: "paid", dueAt: "2026-08-20T00:00:00.000Z", catalogOrder: { catalogItem: { name: "Legacy" }, catalogTier: null } },
-        ] })
-        mocks.api.myWalletTransactions.mockResolvedValue({ ok: true, data: [{ id: "movement", amountVnd: 1250, type: "deposit", createdAt: "2026-08-20T00:00:00.000Z" }] })
+        mocks.api.myInvoices.mockResolvedValue({
+            ok: true,
+            data: [
+                {
+                    id: "invoice",
+                    amountVnd: 500,
+                    status: "unpaid",
+                    dueAt: "2026-08-20T00:00:00.000Z",
+                    catalogOrder: { catalogItem: { name: "Academy" }, catalogTier: { name: "Pro" } },
+                },
+                {
+                    id: "legacy",
+                    amountVnd: 100,
+                    status: "paid",
+                    dueAt: "2026-08-20T00:00:00.000Z",
+                    catalogOrder: { catalogItem: { name: "Legacy" }, catalogTier: null },
+                },
+            ],
+        })
+        mocks.api.myWalletTransactions.mockResolvedValue({
+            ok: true,
+            data: [{ id: "movement", amountVnd: 1250, type: "deposit", createdAt: "2026-08-20T00:00:00.000Z" }],
+        })
         renderWallet()
         await waitFor(() => expect(output()).toContain("Academy · Pro"))
         expect(output()).toContain("₫1,250")
-        await act(async () => { screen.getByTestId("pay").click() })
+        await act(async () => {
+            screen.getByTestId("pay").click()
+        })
         await waitFor(() => expect(mocks.api.payInvoice).toHaveBeenCalledWith("invoice"))
     })
 
@@ -107,37 +169,67 @@ describe("WalletControlCenter", () => {
         cleanup()
         resetQueryCache()
         mocks.api.myWallet.mockResolvedValue({ ok: true, data: { balanceVnd: 100 } })
-        mocks.api.myInvoices.mockResolvedValue({ ok: true, data: [{ id: "invoice", amountVnd: 100, status: "unpaid", dueAt: "2026-08-20T00:00:00.000Z", catalogOrder: null }] })
-        mocks.api.myWalletTransactions.mockResolvedValue({ ok: true, data: [{ id: "movement", amountVnd: 100, type: "spend", createdAt: "2026-08-20T00:00:00.000Z" }] })
+        mocks.api.myInvoices.mockResolvedValue({
+            ok: true,
+            data: [
+                {
+                    id: "invoice",
+                    amountVnd: 100,
+                    status: "unpaid",
+                    dueAt: "2026-08-20T00:00:00.000Z",
+                    catalogOrder: null,
+                },
+            ],
+        })
+        mocks.api.myWalletTransactions.mockResolvedValue({
+            ok: true,
+            data: [{ id: "movement", amountVnd: 100, type: "spend", createdAt: "2026-08-20T00:00:00.000Z" }],
+        })
         mocks.api.payInvoice.mockResolvedValue({ ok: false, reason: "payment-failed" })
         renderWallet()
         await waitFor(() => expect(output()).toContain("Transactions"))
-        await act(async () => { screen.getByTestId("pay").click() })
+        await act(async () => {
+            screen.getByTestId("pay").click()
+        })
         await waitFor(() => expect(mocks.api.payInvoice).toHaveBeenCalledWith("invoice"))
     })
 
     it("opens top-up and keeps a gateway refusal inside that flow", async () => {
         renderWallet()
         await waitFor(() => expect(output()).toContain("₫0"))
-        await act(async () => { screen.getByTestId("open-top-up").click() })
+        await act(async () => {
+            screen.getByTestId("open-top-up").click()
+        })
         expect(output()).toContain('"overlayState":"open"')
-        await act(async () => { screen.getByTestId("amount").click() })
-        await act(async () => { screen.getByTestId("submit-top-up").click() })
-        await waitFor(() => expect(mocks.api.createWalletTopUpPayLink).toHaveBeenCalledWith(
-            25000,
-            "http://localhost:3000/en/wallet/top-up/return",
-            "http://localhost:3000/en/wallet/top-up/return?status=cancelled",
-        ))
+        await act(async () => {
+            screen.getByTestId("amount").click()
+        })
+        await act(async () => {
+            screen.getByTestId("submit-top-up").click()
+        })
+        await waitFor(() =>
+            expect(mocks.api.createWalletTopUpPayLink).toHaveBeenCalledWith(
+                25000,
+                "http://localhost:3000/en/wallet/top-up/return",
+                "http://localhost:3000/en/wallet/top-up/return?status=cancelled",
+            ),
+        )
         await waitFor(() => expect(output()).toContain("gateway-unconfigured"))
-        await act(async () => { screen.getByTestId("close-top-up").click() })
+        await act(async () => {
+            screen.getByTestId("close-top-up").click()
+        })
         expect(output()).toContain('"overlayState":"closed"')
     })
 
     it("refuses an invalid top-up before requesting checkout", async () => {
         renderWallet()
         await waitFor(() => expect(output()).toContain("₫0"))
-        await act(async () => { screen.getByTestId("invalid-amount").click() })
-        await act(async () => { screen.getByTestId("submit-top-up").click() })
+        await act(async () => {
+            screen.getByTestId("invalid-amount").click()
+        })
+        await act(async () => {
+            screen.getByTestId("submit-top-up").click()
+        })
 
         expect(mocks.api.createWalletTopUpPayLink).not.toHaveBeenCalled()
         expect(output()).toContain("Enter an amount of at least ₫10,000.")
@@ -156,11 +248,17 @@ describe("WalletControlCenter", () => {
         })
         renderWallet()
         await waitFor(() => expect(output()).toContain("₫0"))
-        await act(async () => { screen.getByTestId("amount").click() })
-        await act(async () => { screen.getByTestId("submit-top-up").click() })
+        await act(async () => {
+            screen.getByTestId("amount").click()
+        })
+        await act(async () => {
+            screen.getByTestId("submit-top-up").click()
+        })
 
         await waitFor(() => expect(output()).toContain("ref-42"))
-        expect(document.querySelector("form[action='https://pay.example/checkout'] input[name='reference']")).toHaveValue("ref-42")
+        expect(
+            document.querySelector("form[action='https://pay.example/checkout'] input[name='reference']"),
+        ).toHaveValue("ref-42")
         expect(submit).toHaveBeenCalledTimes(1)
         submit.mockRestore()
     })
@@ -168,10 +266,19 @@ describe("WalletControlCenter", () => {
     it("correlates a complete page waypoint to the exact invoice and order", async () => {
         mocks.navigation.search = "orderId=order-42&invoiceId=invoice-42&returnTo=%2Fen%2Fagentos%2Forders%2Forder-42"
         mocks.api.myWallet.mockResolvedValue({ ok: true, data: { balanceVnd: 500 } })
-        mocks.api.myInvoices.mockResolvedValue({ ok: true, data: [{
-            id: "invoice-42", amountVnd: 500, status: "unpaid", dueAt: "2026-08-20T00:00:00.000Z", paidAt: null,
-            catalogOrder: { id: "order-42", catalogItem: { name: "AgentOS" }, catalogTier: { name: "Growth" } },
-        }] })
+        mocks.api.myInvoices.mockResolvedValue({
+            ok: true,
+            data: [
+                {
+                    id: "invoice-42",
+                    amountVnd: 500,
+                    status: "unpaid",
+                    dueAt: "2026-08-20T00:00:00.000Z",
+                    paidAt: null,
+                    catalogOrder: { id: "order-42", catalogItem: { name: "AgentOS" }, catalogTier: { name: "Growth" } },
+                },
+            ],
+        })
 
         renderWallet()
         await waitFor(() => expect(output()).toContain('"phase":"answered"'))
@@ -188,19 +295,31 @@ describe("WalletControlCenter", () => {
         renderWallet()
         expect(output()).toContain('"state":"waypoint"')
         expect(output()).toContain('"linkedInvoice":{"phase":"refused"')
-        expect(output()).toContain("This Wallet continuation is incomplete or unsafe. Return to the exact AgentOS order and open Wallet again.")
+        expect(output()).toContain(
+            "This Wallet continuation is incomplete or unsafe. Return to the exact AgentOS order and open Wallet again.",
+        )
     })
 
     it("marks an underfunded correlated invoice without exposing a pay action", async () => {
         mocks.navigation.search = "orderId=order-42&invoiceId=invoice-42&returnTo=%2Fen%2Fagentos%2Forders%2Forder-42"
         mocks.api.myWallet.mockResolvedValue({ ok: true, data: { balanceVnd: 100 } })
-        mocks.api.myInvoices.mockResolvedValue({ ok: true, data: [{
-            id: "invoice-42", amountVnd: 500, status: "unpaid", dueAt: "2026-08-20T00:00:00.000Z",
-            catalogOrder: { id: "order-42", catalogItem: { name: "AgentOS" }, catalogTier: null },
-        }] })
+        mocks.api.myInvoices.mockResolvedValue({
+            ok: true,
+            data: [
+                {
+                    id: "invoice-42",
+                    amountVnd: 500,
+                    status: "unpaid",
+                    dueAt: "2026-08-20T00:00:00.000Z",
+                    catalogOrder: { id: "order-42", catalogItem: { name: "AgentOS" }, catalogTier: null },
+                },
+            ],
+        })
         renderWallet()
 
-        await waitFor(() => expect(output()).toContain("Available balance is lower than this invoice. Top up before paying."))
+        await waitFor(() =>
+            expect(output()).toContain("Available balance is lower than this invoice. Top up before paying."),
+        )
         expect(output()).toContain('"actionDisabled":true')
     })
 })

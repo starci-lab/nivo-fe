@@ -412,8 +412,12 @@ summary:focus-visible {
     place-items: center;
     overflow: visible;
     border-radius: 50%;
-    background:
-        radial-gradient(circle at 52% 48%, rgb(255 225 216 / 74%) 0, rgb(255 241 237 / 46%) 38%, transparent 70%);
+    background: radial-gradient(
+        circle at 52% 48%,
+        rgb(255 225 216 / 74%) 0,
+        rgb(255 241 237 / 46%) 38%,
+        transparent 70%
+    );
 }
 
 .home-hero__spotlight {

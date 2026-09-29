@@ -16,23 +16,13 @@ import { resolve } from "node:path"
  */
 export default defineConfig({
     test: {
-        projects: [
-            "packages/*/vitest.config.ts",
-            "apps/*/vitest.config.ts",
-        ],
+        projects: ["packages/*/vitest.config.ts", "apps/*/vitest.config.ts"],
         coverage: {
             provider: "v8",
             reporter: ["text-summary", "json-summary", "json", "lcov"],
             reportsDirectory: resolve(import.meta.dirname, "coverage"),
-            include: [
-                "packages/*/src/**/*.{ts,tsx}",
-                "apps/*/src/**/*.{ts,tsx}",
-            ],
-            exclude: [
-                "**/*.d.ts",
-                "**/*.spec.{ts,tsx}",
-                "**/src/messages/**",
-            ],
+            include: ["packages/*/src/**/*.{ts,tsx}", "apps/*/src/**/*.{ts,tsx}"],
+            exclude: ["**/*.d.ts", "**/*.spec.{ts,tsx}", "**/src/messages/**"],
         },
     },
     plugins: [react()],

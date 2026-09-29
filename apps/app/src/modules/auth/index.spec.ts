@@ -1,10 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 vi.mock("@/modules/api/auth", () => ({
-    oauthRedirectUrl: (provider: string, redirectUri: string) => `https://api.test/api/v1/keycloak/${provider}/redirect?redirect_uri=${encodeURIComponent(redirectUri)}`,
+    oauthRedirectUrl: (provider: string, redirectUri: string) =>
+        `https://api.test/api/v1/keycloak/${provider}/redirect?redirect_uri=${encodeURIComponent(redirectUri)}`,
 }))
 
-import { DEFAULT_AUTHENTICATED_LANDING, authenticationOauthRedirectUrl, rememberOauthProvider, takeOauthProvider, validatedReturnTo } from "."
+import {
+    DEFAULT_AUTHENTICATED_LANDING,
+    authenticationOauthRedirectUrl,
+    rememberOauthProvider,
+    takeOauthProvider,
+    validatedReturnTo,
+} from "."
 
 describe("rememberOauthProvider", () => {
     beforeEach(() => window.sessionStorage.clear())

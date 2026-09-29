@@ -5,17 +5,19 @@ import { Breadcrumbs } from "."
 describe("Breadcrumbs", () => {
     it("delegates a shallow trail to HeroUI and keeps the current step inert", () => {
         const activate = vi.fn()
-        render(<Breadcrumbs
-            props={{
-                mode: "trail",
-                label: "Path",
-                steps: [
-                    { id: "overview", label: "Overview" },
-                    { id: "agentos", label: "AgentOS", isCurrent: true },
-                ],
-            }}
-            on={{ activate }}
-        />)
+        render(
+            <Breadcrumbs
+                props={{
+                    mode: "trail",
+                    label: "Path",
+                    steps: [
+                        { id: "overview", label: "Overview" },
+                        { id: "agentos", label: "AgentOS", isCurrent: true },
+                    ],
+                }}
+                on={{ activate }}
+            />,
+        )
 
         fireEvent.click(screen.getByText("Overview"))
         fireEvent.click(screen.getByText("AgentOS"))

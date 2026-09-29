@@ -1,10 +1,10 @@
-"use client";
+"use client"
 
-import type { ReactNode } from "react";
-import { useLocale } from "next-intl";
-import type { Locale } from "@/modules/i18n/config";
-import { ACADEMY, inLocale, isSafeThemeValue, type ThemeVariables } from "@/modules/academy/template";
-import { AcademyChromeBase } from "./component";
+import type { ReactNode } from "react"
+import { useLocale } from "next-intl"
+import type { Locale } from "@/modules/i18n/config"
+import { ACADEMY, inLocale, isSafeThemeValue, type ThemeVariables } from "@/modules/academy/template"
+import { AcademyChromeBase } from "./component"
 
 /**
  * The only place in this app that knows what colour the academy is.
@@ -46,11 +46,14 @@ import { AcademyChromeBase } from "./component";
  * @returns CSS declarations, or "" when nothing survived.
  */
 const declarationsFor = (variables: ThemeVariables | undefined): string => {
-  if (!variables) {
-    return "";
-  }
-  return Object.entries(variables).filter(([name, value]) => /^--[a-z0-9-]+$/i.test(name) && isSafeThemeValue(value)).map(([name, value]) => `  ${name}: ${value};`).join("\n");
-};
+    if (!variables) {
+        return ""
+    }
+    return Object.entries(variables)
+        .filter(([name, value]) => /^--[a-z0-9-]+$/i.test(name) && isSafeThemeValue(value))
+        .map(([name, value]) => `  ${name}: ${value};`)
+        .join("\n")
+}
 
 /**
  * The two characters that end a quoted CSS string early, and what they become inside one.
@@ -61,10 +64,10 @@ const declarationsFor = (variables: ThemeVariables | undefined): string => {
  * the sequence can be written literally; a lone backslash cannot be, because a template literal
  * ending in one escapes its own closing backtick.
  */
-const BACKSLASH = "\\";
-const ESCAPED_BACKSLASH = String.raw`\\`;
-const QUOTATION_MARK = '"';
-const ESCAPED_QUOTATION_MARK = String.raw`\"`;
+const BACKSLASH = "\\"
+const ESCAPED_BACKSLASH = String.raw`\\`
+const QUOTATION_MARK = '"'
+const ESCAPED_QUOTATION_MARK = String.raw`\"`
 
 /**
  * Names the mounted academy on the root, beside the palette that belongs to it.
@@ -90,12 +93,12 @@ const ESCAPED_QUOTATION_MARK = String.raw`\"`;
  * @returns The declaration, or "" when the name cannot be emitted safely.
  */
 const identityDeclarationFor = (name: string | undefined): string => {
-  if (name === undefined || !isSafeThemeValue(name)) {
-    return "";
-  }
-  const quoted = name.replaceAll(BACKSLASH, ESCAPED_BACKSLASH).replaceAll(QUOTATION_MARK, ESCAPED_QUOTATION_MARK);
-  return `  --academy: "${quoted}";`;
-};
+    if (name === undefined || !isSafeThemeValue(name)) {
+        return ""
+    }
+    const quoted = name.replaceAll(BACKSLASH, ESCAPED_BACKSLASH).replaceAll(QUOTATION_MARK, ESCAPED_QUOTATION_MARK)
+    return `  --academy: "${quoted}";`
+}
 
 /**
  * The page's ground.
@@ -122,7 +125,7 @@ const identityDeclarationFor = (name: string | undefined): string => {
  * It is emitted unconditionally, unlike the theme block: a template that overrides nothing still
  * needs its page painted, and before this the ground came from a class that was always present.
  */
-const GROUND_CSS = "body {\n  background-color: var(--background);\n  color: var(--foreground);\n}";
+const GROUND_CSS = "body {\n  background-color: var(--background);\n  color: var(--foreground);\n}"
 
 /**
  * Builds the vendor's theming block for this academy, plus the ground it is painted on.
@@ -134,31 +137,31 @@ const GROUND_CSS = "body {\n  background-color: var(--background);\n  color: var
  * @returns The stylesheet text.
  */
 const themeCss = (name: string | undefined): string => {
-  const light = [declarationsFor(ACADEMY.theme.light), identityDeclarationFor(name)].filter(Boolean).join("\n");
-  const dark = declarationsFor(ACADEMY.theme.dark);
-  const blocks: Array<string> = [GROUND_CSS];
-  if (light) {
-    blocks.push(`:root,\n.light,\n[data-theme="light"] {\n${light}\n}`);
-  }
-  if (dark) {
-    blocks.push(`.dark,\n[data-theme="dark"] {\n${dark}\n}`);
-  }
-  return blocks.join("\n");
-};
+    const light = [declarationsFor(ACADEMY.theme.light), identityDeclarationFor(name)].filter(Boolean).join("\n")
+    const dark = declarationsFor(ACADEMY.theme.dark)
+    const blocks: Array<string> = [GROUND_CSS]
+    if (light) {
+        blocks.push(`:root,\n.light,\n[data-theme="light"] {\n${light}\n}`)
+    }
+    if (dark) {
+        blocks.push(`.dark,\n[data-theme="dark"] {\n${dark}\n}`)
+    }
+    return blocks.join("\n")
+}
 
 /** Props for {@link AcademyChrome}. */
 type AcademyChromeProps = {
-  /**
-   * The routed page to wrap. Opaque on purpose -- this component styles a document, not a tree.
-   *
-   * A NAMED PROP RATHER THAN `children`, and the difference is not cosmetic. `children` is the one
-   * slot every JSX element already has, so a component that takes it accepts markup from anywhere
-   * without saying what it expects, and only the three closed vendor shells are allowed that.
-   * `content` says the same thing out loud: this layout receives exactly one routed interior, at a
-   * name a reader can grep, and a second one cannot be slipped in beside it.
-   */
-  readonly content: ReactNode;
-};
+    /**
+     * The routed page to wrap. Opaque on purpose -- this component styles a document, not a tree.
+     *
+     * A NAMED PROP RATHER THAN `children`, and the difference is not cosmetic. `children` is the one
+     * slot every JSX element already has, so a component that takes it accepts markup from anywhere
+     * without saying what it expects, and only the three closed vendor shells are allowed that.
+     * `content` says the same thing out loud: this layout receives exactly one routed interior, at a
+     * name a reader can grep, and a second one cannot be slipped in beside it.
+     */
+    readonly content: ReactNode
+}
 
 /**
  * Wrap a page in this academy's theme and its own CSS.
@@ -171,7 +174,12 @@ type AcademyChromeProps = {
  * @returns The themed shell.
  */
 export const AcademyChrome = (props: AcademyChromeProps) => {
-  const locale = useLocale() as Locale;
-  const theme = themeCss(inLocale(ACADEMY.identity.name, locale));
-  return <AcademyChromeBase state={{ content: props.content }} props={{ themeCss: theme, customCss: ACADEMY.customCss ?? null }} />;
-};
+    const locale = useLocale() as Locale
+    const theme = themeCss(inLocale(ACADEMY.identity.name, locale))
+    return (
+        <AcademyChromeBase
+            state={{ content: props.content }}
+            props={{ themeCss: theme, customCss: ACADEMY.customCss ?? null }}
+        />
+    )
+}

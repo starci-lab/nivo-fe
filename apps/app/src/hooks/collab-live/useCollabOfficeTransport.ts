@@ -1,12 +1,8 @@
-"use client";
+"use client"
 
-import { useCallback } from "react";
-import {
-    reconcileCollabRequest,
-    type CollabReconcileCall,
-    type CollabReconcileOutcome,
-} from "@/modules/api/collab";
-import type { Outcome } from "@/modules/api/outcome";
+import { useCallback } from "react"
+import { reconcileCollabRequest, type CollabReconcileCall, type CollabReconcileOutcome } from "@/modules/api/collab"
+import type { Outcome } from "@/modules/api/outcome"
 
 /**
  * The Collab Office transport seam the connected page reads directly.
@@ -18,8 +14,8 @@ import type { Outcome } from "@/modules/api/outcome";
  * one the session binds for every call.
  */
 export type CollabOfficeTransport = {
-    readonly reconcileRequest: (call: CollabReconcileCall) => Promise<Outcome<CollabReconcileOutcome>>;
-};
+    readonly reconcileRequest: (call: CollabReconcileCall) => Promise<Outcome<CollabReconcileOutcome>>
+}
 
 /**
  * Hand back the seam a resend consults. Call it once per connected page; the returned read is the
@@ -29,6 +25,6 @@ export const useCollabOfficeTransport = (): CollabOfficeTransport => {
     const reconcileRequest = useCallback(
         (call: CollabReconcileCall): Promise<Outcome<CollabReconcileOutcome>> => reconcileCollabRequest(call),
         [],
-    );
-    return { reconcileRequest };
-};
+    )
+    return { reconcileRequest }
+}

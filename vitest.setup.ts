@@ -32,18 +32,34 @@ vi.mock("@/i18n/navigation", () => ({
  */
 const messagesDir = process.env.NIVO_MESSAGES_DIR
 const testLocale = "en"
-const messages = messagesDir === undefined ? undefined : JSON.parse(readFileSync(join(messagesDir, `${testLocale}.json`), "utf8"))
+const messages =
+    messagesDir === undefined ? undefined : JSON.parse(readFileSync(join(messagesDir, `${testLocale}.json`), "utf8"))
 
-const throwOnCopyError = (error: Error): never => { throw error }
+const throwOnCopyError = (error: Error): never => {
+    throw error
+}
 
-const withCatalog = <Options extends { readonly wrapper?: (props: { readonly children: ReactNode }) => ReactElement | null }>(options: Options | undefined): Options | undefined => {
+const withCatalog = <
+    Options extends { readonly wrapper?: (props: { readonly children: ReactNode }) => ReactElement | null },
+>(
+    options: Options | undefined,
+): Options | undefined => {
     if (messages === undefined) return options
     const Inner = options?.wrapper
-    const Wrapper = ({ children }: { readonly children: ReactNode }) => createElement(
-        NextIntlClientProvider,
-        { locale: testLocale, messages, timeZone: "UTC", onError: throwOnCopyError, getMessageFallback: ({ namespace, key }) => { throw new Error(`Missing message: ${[namespace, key].filter(Boolean).join(".")}`) } },
-        Inner === undefined ? children : createElement(Inner, null, children),
-    )
+    const Wrapper = ({ children }: { readonly children: ReactNode }) =>
+        createElement(
+            NextIntlClientProvider,
+            {
+                locale: testLocale,
+                messages,
+                timeZone: "UTC",
+                onError: throwOnCopyError,
+                getMessageFallback: ({ namespace, key }) => {
+                    throw new Error(`Missing message: ${[namespace, key].filter(Boolean).join(".")}`)
+                },
+            },
+            Inner === undefined ? children : createElement(Inner, null, children),
+        )
     return { ...options, wrapper: Wrapper } as Options
 }
 
@@ -51,8 +67,10 @@ vi.mock("@testing-library/react", async (importOriginal) => {
     const actual = await importOriginal<typeof import("@testing-library/react")>()
     return {
         ...actual,
-        render: ((ui: ReactElement, options?: Parameters<typeof actual.render>[1]) => actual.render(ui, withCatalog(options))) as typeof actual.render,
-        renderHook: ((callback: never, options?: Parameters<typeof actual.renderHook>[1]) => actual.renderHook(callback, withCatalog(options))) as typeof actual.renderHook,
+        render: ((ui: ReactElement, options?: Parameters<typeof actual.render>[1]) =>
+            actual.render(ui, withCatalog(options))) as typeof actual.render,
+        renderHook: ((callback: never, options?: Parameters<typeof actual.renderHook>[1]) =>
+            actual.renderHook(callback, withCatalog(options))) as typeof actual.renderHook,
     }
 })
 
@@ -79,7 +97,9 @@ class TestIntersectionObserver {
     observe(): void {}
     unobserve(): void {}
     disconnect(): void {}
-    takeRecords(): IntersectionObserverEntry[] { return [] }
+    takeRecords(): IntersectionObserverEntry[] {
+        return []
+    }
 }
 
 globalThis.IntersectionObserver = TestIntersectionObserver

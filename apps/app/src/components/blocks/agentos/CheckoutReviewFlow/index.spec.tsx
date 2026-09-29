@@ -11,7 +11,7 @@ type PathnameRequest = { readonly href: string; readonly locale: string }
 /* Production-shaped: getPathname prefixes non-default locales, so feeding its localized output to
    the locale-aware router would double the prefix exactly like the live refused-return defect did. */
 vi.mock("@/modules/i18n/navigation", () => ({
-    getPathname: (request: PathnameRequest) => request.locale === "en" ? `/en${request.href}` : request.href,
+    getPathname: (request: PathnameRequest) => (request.locale === "en" ? `/en${request.href}` : request.href),
 }))
 vi.mock("next/navigation", () => ({
     useSearchParams: () => new URLSearchParams(mocks.search),
@@ -37,13 +37,21 @@ const captured: { view: ViewInput | null } = { view: null }
 vi.mock("./component", () => ({
     CheckoutReviewFlowBase: (input: ViewInput) => {
         captured.view = input
-        return <>
-            <output data-testid="flow-state">{input.state}</output>
-            <output data-testid="flow-props">{JSON.stringify(input.props)}</output>
-            {input.on?.requestPayment === undefined ? null : <button onClick={input.on.requestPayment}>request-payment</button>}
-            {input.on?.selectRail === undefined ? null : <button onClick={() => input.on?.selectRail?.("vnpay")}>choose-vnpay</button>}
-            {input.on?.returnToOffers === undefined ? null : <button onClick={input.on.returnToOffers}>return-to-offers</button>}
-        </>
+        return (
+            <>
+                <output data-testid="flow-state">{input.state}</output>
+                <output data-testid="flow-props">{JSON.stringify(input.props)}</output>
+                {input.on?.requestPayment === undefined ? null : (
+                    <button onClick={input.on.requestPayment}>request-payment</button>
+                )}
+                {input.on?.selectRail === undefined ? null : (
+                    <button onClick={() => input.on?.selectRail?.("vnpay")}>choose-vnpay</button>
+                )}
+                {input.on?.returnToOffers === undefined ? null : (
+                    <button onClick={input.on.returnToOffers}>return-to-offers</button>
+                )}
+            </>
+        )
     },
 }))
 import CheckoutReviewFlow from "./"
@@ -60,7 +68,11 @@ const growth = {
 }
 const offersAnswer = (selectionState: string) => ({
     ok: true,
-    data: { status: "offers", offers: [growth], selection: { offerId: growth.offerId, offerVersion: growth.offerVersion, state: selectionState } },
+    data: {
+        status: "offers",
+        offers: [growth],
+        selection: { offerId: growth.offerId, offerVersion: growth.offerVersion, state: selectionState },
+    },
 })
 const prepared = (paymentAction: unknown, state = "selected", purchaseId: string | null = "PUR-1") => ({
     ok: true,
@@ -68,7 +80,12 @@ const prepared = (paymentAction: unknown, state = "selected", purchaseId: string
         status: "prepared",
         purchaseId,
         paymentAction,
-        purchase: { purchaseId: purchaseId ?? "PUR-1", state, offer: growth, lastConfirmedAt: "2026-09-22T10:00:00.000Z" },
+        purchase: {
+            purchaseId: purchaseId ?? "PUR-1",
+            state,
+            offer: growth,
+            lastConfirmedAt: "2026-09-22T10:00:00.000Z",
+        },
     },
 })
 const props = () => JSON.parse(screen.getByTestId("flow-props").textContent ?? "{}") as Record<string, unknown>
@@ -100,7 +117,7 @@ describe("CheckoutReviewFlow", () => {
     it("offers only the boundary's two domestic rails and starts nothing before one is chosen", () => {
         render(<CheckoutReviewFlow />)
         const rails = props().rails as ReadonlyArray<{ readonly rail: string }>
-        expect(rails.map(rail => rail.rail)).toEqual(["vnpay", "momo"])
+        expect(rails.map((rail) => rail.rail)).toEqual(["vnpay", "momo"])
         expect(props().selectedRail).toBeNull()
         fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
         expect(mocks.start.trigger).not.toHaveBeenCalled()
@@ -111,7 +128,12 @@ describe("CheckoutReviewFlow", () => {
         expect(props().selectedRail).toBe("vnpay")
         fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
         await waitFor(() => expect(mocks.start.trigger).toHaveBeenCalledTimes(1))
-        expect(request(0)).toEqual({ retryKey: "start-checkout:nivo-workspace-growth@draft-2026-09-22", offerId: "nivo-workspace-growth", offerVersion: "draft-2026-09-22", paymentRail: "vnpay" })
+        expect(request(0)).toEqual({
+            retryKey: "start-checkout:nivo-workspace-growth@draft-2026-09-22",
+            offerId: "nivo-workspace-growth",
+            offerVersion: "draft-2026-09-22",
+            paymentRail: "vnpay",
+        })
     })
     it("binds an existing entitlement on a renewal and still requires a fresh payment", async () => {
         mocks.search = "offer=nivo-workspace-growth&offerVersion=draft-2026-09-22&entitlement=ENT-2026-0007"
@@ -141,12 +163,18 @@ describe("CheckoutReviewFlow", () => {
         fireEvent.click(screen.getByRole("button", { name: "choose-vnpay" }))
         fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
         await waitFor(() => expect(screen.getByTestId("flow-state")).toHaveTextContent("not-started"))
-        expect(props().notice).toBe("No payment request was accepted. The same purchase identity remains available for a safe retry.")
+        expect(props().notice).toBe(
+            "No payment request was accepted. The same purchase identity remains available for a safe retry.",
+        )
         expect(props().selectedRail).toBe("vnpay")
     })
     it("keeps one in-flight payment request across repeated presses", async () => {
         let release: (answer: unknown) => void = () => undefined
-        mocks.start.trigger.mockReturnValue(new Promise(resolve => { release = resolve }))
+        mocks.start.trigger.mockReturnValue(
+            new Promise((resolve) => {
+                release = resolve
+            }),
+        )
         render(<CheckoutReviewFlow />)
         fireEvent.click(screen.getByRole("button", { name: "choose-vnpay" }))
         fireEvent.click(screen.getByRole("button", { name: "request-payment" }))
@@ -164,7 +192,15 @@ describe("CheckoutReviewFlow", () => {
         expect(mocks.push).not.toHaveBeenCalledWith("/en/agentos/workspaces/purchases/PUR-1")
     })
     it("withholds payment and names the verified-Login door when the boundary refuses admission", () => {
-        mocks.offers = { data: { ok: true, data: { status: "refused", code: "purchaser-not-admitted", nextAction: "login-verify-email" } }, isValidating: false, error: undefined, mutate: vi.fn() }
+        mocks.offers = {
+            data: {
+                ok: true,
+                data: { status: "refused", code: "purchaser-not-admitted", nextAction: "login-verify-email" },
+            },
+            isValidating: false,
+            error: undefined,
+            mutate: vi.fn(),
+        }
         render(<CheckoutReviewFlow />)
         expect(screen.getByTestId("flow-state")).toHaveTextContent("refused")
         expect(props().message).toBe("The signed-in account is not an admitted purchaser yet.")

@@ -22,9 +22,19 @@ export const SiteHeader = (props: SiteHeaderProps) => {
     const triggerRef = useRef<HTMLButtonElement>(null)
     const t = useTranslations("site")
     const href = useLocalizedHref()
-    const navigation: ReadonlyArray<SiteHeaderEntry> = SITE_NAVIGATION.map((item) => "children" in item
-        ? { id: item.id, label: t(`navigation.${item.id}`), children: item.children.map((child) => ({ id: child.id, label: t(`navigation.${child.id}`), href: href(child.href) })) }
-        : { id: item.id, label: t(`navigation.${item.id}`), href: href(item.href) })
+    const navigation: ReadonlyArray<SiteHeaderEntry> = SITE_NAVIGATION.map((item) =>
+        "children" in item
+            ? {
+                  id: item.id,
+                  label: t(`navigation.${item.id}`),
+                  children: item.children.map((child) => ({
+                      id: child.id,
+                      label: t(`navigation.${child.id}`),
+                      href: href(child.href),
+                  })),
+              }
+            : { id: item.id, label: t(`navigation.${item.id}`), href: href(item.href) },
+    )
 
     useEffect(() => {
         if (!isOpen) return undefined

@@ -1,19 +1,19 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { usePathname, useRouter } from "@/hooks";
-import { ReturnNoticeBase } from "./component";
+import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
+import { usePathname, useRouter } from "@/hooks"
+import { ReturnNoticeBase } from "./component"
 
 /** The landing notice resolves everything it draws, so it takes no props of its own. */
 export type ReturnNoticeProps = {
-  readonly [key: string]: never;
-};
+    readonly [key: string]: never
+}
 
 /** The marker the sign-in surface leaves when a requested destination could not be honoured. */
-const RETURN_NOTICE_PARAM = "returnNotice";
-const UNAVAILABLE_VALUE = "unavailable";
+const RETURN_NOTICE_PARAM = "returnNotice"
+const UNAVAILABLE_VALUE = "unavailable"
 
 /**
  * Connected owner of the landing's unavailable-return notice.
@@ -40,25 +40,29 @@ const UNAVAILABLE_VALUE = "unavailable";
  * @returns The landing's notice, or nothing when no destination was refused.
  */
 export const ReturnNotice = (props: ReturnNoticeProps) => {
-  void props;
-  const t = useTranslations("authentication");
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const search = searchParams.toString();
-  const isMarked = new URLSearchParams(search).get(RETURN_NOTICE_PARAM) === UNAVAILABLE_VALUE;
-  const [landedOn, setLandedOn] = useState<string | null>(isMarked ? pathname : null);
-  useEffect(() => {
-    if (!isMarked) {
-      return;
-    }
-    setLandedOn(pathname);
-    const rest = new URLSearchParams(search);
-    rest.delete(RETURN_NOTICE_PARAM);
-    const query = rest.toString();
-    router.replace(query.length === 0 ? pathname : `${pathname}?${query}`);
-  }, [isMarked, pathname, router, search]);
-  return <ReturnNoticeBase props={{
-    message: landedOn === pathname ? t("unavailableReturnNotice") : null
-  }} />;
-};
+    void props
+    const t = useTranslations("authentication")
+    const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
+    const search = searchParams.toString()
+    const isMarked = new URLSearchParams(search).get(RETURN_NOTICE_PARAM) === UNAVAILABLE_VALUE
+    const [landedOn, setLandedOn] = useState<string | null>(isMarked ? pathname : null)
+    useEffect(() => {
+        if (!isMarked) {
+            return
+        }
+        setLandedOn(pathname)
+        const rest = new URLSearchParams(search)
+        rest.delete(RETURN_NOTICE_PARAM)
+        const query = rest.toString()
+        router.replace(query.length === 0 ? pathname : `${pathname}?${query}`)
+    }, [isMarked, pathname, router, search])
+    return (
+        <ReturnNoticeBase
+            props={{
+                message: landedOn === pathname ? t("unavailableReturnNotice") : null,
+            }}
+        />
+    )
+}

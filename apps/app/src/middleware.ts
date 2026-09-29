@@ -1,9 +1,9 @@
-import createMiddleware from "next-intl/middleware";
-import { NextResponse, type NextRequest } from "next/server";
-import { routing } from "./modules/i18n/routing";
-import { isStandaloneSelfProxy } from "./modules/i18n/standalone-self-proxy";
+import createMiddleware from "next-intl/middleware"
+import { NextResponse, type NextRequest } from "next/server"
+import { routing } from "./modules/i18n/routing"
+import { isStandaloneSelfProxy } from "./modules/i18n/standalone-self-proxy"
 
-const resolveRequestLocale = createMiddleware(routing);
+const resolveRequestLocale = createMiddleware(routing)
 
 /**
  * Resolve which language a request is in, before any route renders.
@@ -17,11 +17,11 @@ const resolveRequestLocale = createMiddleware(routing);
  * normalizes away (`127.0.0.1`, `[::1]`).
  */
 const middleware = (request: NextRequest) => {
-  if (isStandaloneSelfProxy(request)) return NextResponse.next();
-  return resolveRequestLocale(request);
-};
+    if (isStandaloneSelfProxy(request)) return NextResponse.next()
+    return resolveRequestLocale(request)
+}
 
-export default middleware;
+export default middleware
 
 /**
  * Which requests the resolver sees.
@@ -30,5 +30,5 @@ export default middleware;
  * asset has no language, and rewriting its path would only break its URL.
  */
 export const config = {
-  matcher: ["/((?!api|_next|_vercel|.*[.].*).*)"]
-};
+    matcher: ["/((?!api|_next|_vercel|.*[.].*).*)"],
+}

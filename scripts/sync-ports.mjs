@@ -29,15 +29,9 @@
  * rather than as an import.
  */
 
-import {
-    existsSync, readFileSync, writeFileSync,
-} from "node:fs"
-import {
-    dirname, join, resolve,
-} from "node:path"
-import {
-    fileURLToPath,
-} from "node:url"
+import { existsSync, readFileSync, writeFileSync } from "node:fs"
+import { dirname, join, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const REGISTRY = resolve(REPO_ROOT, "../nivo-backend/metadata.json")

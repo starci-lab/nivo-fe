@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { recoverWorkspacePurchase, type WorkspaceCheckoutRecoverRequest } from "@/modules/api/workspace-controlplane";
-import { useNivoMutation } from "../useNivoMutation";
-import { workspaceCheckoutStatusQueryKey } from "../queries/useQueryWorkspaceCheckoutStatusSwr";
+import { recoverWorkspacePurchase, type WorkspaceCheckoutRecoverRequest } from "@/modules/api/workspace-controlplane"
+import { useNivoMutation } from "../useNivoMutation"
+import { workspaceCheckoutStatusQueryKey } from "../queries/useQueryWorkspaceCheckoutStatusSwr"
 
 /*
  * One hook per file, one registered command per hook: the file's basename is the hook it exports,
@@ -17,6 +17,10 @@ import { workspaceCheckoutStatusQueryKey } from "../queries/useQueryWorkspaceChe
  * repeat addresses the same purchase, so only that purchase's status read is refreshed.
  */
 export const useMutateRecoverWorkspacePurchaseSwr = () =>
-  useNivoMutation(["workspace-checkout", "recover"], (request: WorkspaceCheckoutRecoverRequest) => recoverWorkspacePurchase(request), {
-    invalidates: request => [workspaceCheckoutStatusQueryKey(request.purchaseId)]
-  });
+    useNivoMutation(
+        ["workspace-checkout", "recover"],
+        (request: WorkspaceCheckoutRecoverRequest) => recoverWorkspacePurchase(request),
+        {
+            invalidates: (request) => [workspaceCheckoutStatusQueryKey(request.purchaseId)],
+        },
+    )

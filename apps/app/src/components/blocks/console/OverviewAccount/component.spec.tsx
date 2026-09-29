@@ -40,14 +40,21 @@ describe("OverviewAccountBase", () => {
 
     it("routes the label row's own transactions action", () => {
         const openWallet = vi.fn()
-        render(<OverviewAccountBase props={{ label: "Account", actionLabel: "See transactions", facts }} on={{ openWallet }} />)
+        render(
+            <OverviewAccountBase
+                props={{ label: "Account", actionLabel: "See transactions", facts }}
+                on={{ openWallet }}
+            />,
+        )
 
         fireEvent.click(screen.getByRole("button", { name: "See transactions" }))
         expect(openWallet).toHaveBeenCalledTimes(1)
     })
 
     it("marks the account unavailable when its own read was refused", () => {
-        const { container } = render(<OverviewAccountBase state="unavailable" props={{ label: "Account", facts: [] }} />)
+        const { container } = render(
+            <OverviewAccountBase state="unavailable" props={{ label: "Account", facts: [] }} />,
+        )
 
         expect(container.querySelector('[data-grammar-surface-card="true"]')).toBeInTheDocument()
         expect(container.querySelector('[data-grammar-state="unavailable"]')).toBeInTheDocument()

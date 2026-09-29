@@ -1,10 +1,14 @@
-"use client";
+"use client"
 
-import { commandSalesClarifyCommand, type SalesClarifyCommandRequest, type SalesInstallationScope } from "@/modules/api/sales";
-import { operationMutationKey, operationAnswerNeedsRead, type OperationTrigger } from "@/modules/api/operation-route";
-import { useAccessToken } from "../../auth/useAccessToken";
-import { useNivoMutation } from "../useNivoMutation";
-import { salesCommandQueryKey } from "../queries/useQuerySalesCommandSwr";
+import {
+    commandSalesClarifyCommand,
+    type SalesClarifyCommandRequest,
+    type SalesInstallationScope,
+} from "@/modules/api/sales"
+import { operationMutationKey, operationAnswerNeedsRead, type OperationTrigger } from "@/modules/api/operation-route"
+import { useAccessToken } from "../../auth/useAccessToken"
+import { useNivoMutation } from "../useNivoMutation"
+import { salesCommandQueryKey } from "../queries/useQuerySalesCommandSwr"
 
 /*
  * One hook per file, one registered command per hook.
@@ -20,6 +24,14 @@ import { salesCommandQueryKey } from "../queries/useQuerySalesCommandSwr";
  *   nothing rather than addressing a half-filled operation path.
  */
 export const useMutateSalesClarifyCommandSwr = (scope: SalesInstallationScope, enabled = true) => {
-  const accessToken = useAccessToken();
-  return useNivoMutation(enabled ? operationMutationKey("sales", "clarify-command", scope) : null, (trigger: OperationTrigger<SalesClarifyCommandRequest>) => commandSalesClarifyCommand(accessToken, scope, trigger.input, trigger.requestId), { invalidates: trigger => [salesCommandQueryKey(scope, { commandId: trigger.input.commandId })], shouldInvalidate: operationAnswerNeedsRead });
-};
+    const accessToken = useAccessToken()
+    return useNivoMutation(
+        enabled ? operationMutationKey("sales", "clarify-command", scope) : null,
+        (trigger: OperationTrigger<SalesClarifyCommandRequest>) =>
+            commandSalesClarifyCommand(accessToken, scope, trigger.input, trigger.requestId),
+        {
+            invalidates: (trigger) => [salesCommandQueryKey(scope, { commandId: trigger.input.commandId })],
+            shouldInvalidate: operationAnswerNeedsRead,
+        },
+    )
+}

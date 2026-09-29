@@ -1,13 +1,10 @@
-import type { Viewport } from "next";
-import type { ComponentProps } from "react";
+import type { Viewport } from "next"
+import type { ComponentProps } from "react"
 
-import "../globals.css";
-import { ConsoleLocaleLayout } from "@/features/layouts/ConsoleLocaleLayout";
+import "../globals.css"
+import { ConsoleLocaleLayout } from "@/features/layouts/ConsoleLocaleLayout"
 
-export {
-    generateMetadata,
-    generateStaticParams
-} from "@/features/layouts/ConsoleLocaleLayout";
+export { generateMetadata, generateStaticParams } from "@/features/layouts/ConsoleLocaleLayout"
 
 /*
  * The `/[locale]` shell, the stylesheet the document needs, and the framework's own viewport slot.
@@ -19,20 +16,21 @@ export {
 
 /** Props the locale segment hands its shell: the routed stream and the promised locale. */
 type ConsoleLocaleRouteProps = {
-    readonly children: ComponentProps<"div">["children"];
+    readonly children: ComponentProps<"div">["children"]
     readonly params: Promise<{
-        readonly locale: string;
-    }>;
-};
+        readonly locale: string
+    }>
+}
 
 /** Mount the console locale shell on this route segment. */
-const Layout = ({ children, params }: ConsoleLocaleRouteProps) =>
-    <ConsoleLocaleLayout params={params}>{children}</ConsoleLocaleLayout>;
+const Layout = ({ children, params }: ConsoleLocaleRouteProps) => (
+    <ConsoleLocaleLayout params={params}>{children}</ConsoleLocaleLayout>
+)
 
-export default Layout;
+export default Layout
 
 /** Viewport behaviour for every route under this shell. */
 export const viewport: Viewport = {
     width: "device-width",
-    initialScale: 1
-};
+    initialScale: 1,
+}

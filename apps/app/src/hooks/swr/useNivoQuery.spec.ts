@@ -8,19 +8,19 @@ import { nivoViewerQueryKeyFor, useNivoQuery, viewerCacheKeyFor } from "./useNiv
 
 const mocks = vi.hoisted(() => ({
     state: { status: "anonymous" } as
-        | { readonly status: "anonymous" }
-        | { readonly status: "signed-in"; readonly accessToken: string },
+        { readonly status: "anonymous" } | { readonly status: "signed-in"; readonly accessToken: string },
 }))
 
 vi.mock("@/hooks/auth/useSession", () => ({
     useSession: () => ({ state: mocks.state }),
 }))
 
-const wrapper = ({ children }: PropsWithChildren) => createElement(
-    SWRConfig,
-    { value: { provider: () => new Map(), dedupingInterval: 0, shouldRetryOnError: false } },
-    children,
-)
+const wrapper = ({ children }: PropsWithChildren) =>
+    createElement(
+        SWRConfig,
+        { value: { provider: () => new Map(), dedupingInterval: 0, shouldRetryOnError: false } },
+        children,
+    )
 
 const tokenFor = (subject: string, suffix: string) => {
     const payload = btoa(JSON.stringify({ sub: subject })).replaceAll("=", "")
@@ -33,8 +33,7 @@ beforeEach(() => {
 
 describe("viewerCacheKeyFor", () => {
     it("stays stable when one viewer rotates a JWT", () => {
-        expect(viewerCacheKeyFor(tokenFor("viewer-1", "first")))
-            .toBe(viewerCacheKeyFor(tokenFor("viewer-1", "second")))
+        expect(viewerCacheKeyFor(tokenFor("viewer-1", "first"))).toBe(viewerCacheKeyFor(tokenFor("viewer-1", "second")))
     })
 
     it("changes between viewers and never exposes the token in the query key", () => {
@@ -62,10 +61,9 @@ describe("useNivoQuery", () => {
     it("keeps an operation refusal as settled data", async () => {
         mocks.state = { status: "signed-in", accessToken: tokenFor("viewer-1", "one") }
         const refusal = { ok: false as const, reason: "forbidden", code: "FORBIDDEN" }
-        const { result } = renderHook(
-            () => useNivoQuery(["resource", "one"], vi.fn().mockResolvedValue(refusal)),
-            { wrapper },
-        )
+        const { result } = renderHook(() => useNivoQuery(["resource", "one"], vi.fn().mockResolvedValue(refusal)), {
+            wrapper,
+        })
         await waitFor(() => expect(result.current.data).toEqual(refusal))
         expect(result.current.error).toBeUndefined()
     })

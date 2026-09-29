@@ -1,8 +1,8 @@
-import type { ReactNode } from "react";
-import { StarCiDashboardThemeBoundary } from "@nivo/ui";
-import { WorkspaceShell } from "@starci/grammar/common";
-import { Sidebar } from "@/features/layouts/Sidebar";
-import { ConsoleTopBar } from "@/features/layouts/ConsoleTopBar";
+import type { ReactNode } from "react"
+import { StarCiDashboardThemeBoundary } from "@nivo/ui"
+import { WorkspaceShell } from "@starci/grammar/common"
+import { Sidebar } from "@/features/layouts/Sidebar"
+import { ConsoleTopBar } from "@/features/layouts/ConsoleTopBar"
 
 /**
  * The frame's approved drawing: the routed page that fills the primary slot.
@@ -11,14 +11,14 @@ import { ConsoleTopBar } from "@/features/layouts/ConsoleTopBar";
  * it, so the route file stays a server layout and the client boundary is this frame alone.
  */
 export type ConsoleLayoutBaseState = {
-  readonly children: ReactNode;
-};
+    readonly children: ReactNode
+}
 
 /** The atoms the frame's landmarks are named with. */
 export type ConsoleLayoutBaseData = {
-  readonly navigationLabel: string;
-  readonly primaryLabel: string;
-};
+    readonly navigationLabel: string
+    readonly primaryLabel: string
+}
 
 /*
  * The installed `starci-fe/public-component-signature` rule reads the render half's own name and
@@ -26,12 +26,12 @@ export type ConsoleLayoutBaseData = {
  * accepts; the exported contract below stays `<Unit>BaseProps`, which the code-pattern check
  * requires the render half to own. Not exported: one public contract per unit.
  */
-type ConsoleLayoutProps = ConsoleLayoutBaseProps;
+type ConsoleLayoutProps = ConsoleLayoutBaseProps
 /** Public API role for ConsoleLayoutBaseProps. */
 export type ConsoleLayoutBaseProps = {
-  readonly state: ConsoleLayoutBaseState;
-  readonly props: ConsoleLayoutBaseData;
-};
+    readonly state: ConsoleLayoutBaseState
+    readonly props: ConsoleLayoutBaseData
+}
 
 /**
  * Draw stable authenticated chrome around one opaque routed page.
@@ -46,34 +46,35 @@ export type ConsoleLayoutBaseProps = {
  * the rail projects, so the trigger's destinations, labels and focus recovery are identical in
  * every band.
  */
-const ConsoleFrame = ({
-  state: { children },
-  props: { navigationLabel, primaryLabel }
-}: ConsoleLayoutBaseProps) => <>
-  <ConsoleTopBar />
-  <WorkspaceShell
-    align="stretch"
-    compactNavigation={<Sidebar mode="mobile" />}
-    compactNavigationLabel={navigationLabel}
-    navigation={<Sidebar />}
-    navigationLabel={navigationLabel}
-    navigationTrack="intrinsic"
-    navigationVisibility="wide"
-    primary={children}
-    primaryLabel={primaryLabel}
-  />
-</>;
+const ConsoleFrame = ({ state: { children }, props: { navigationLabel, primaryLabel } }: ConsoleLayoutBaseProps) => (
+    <>
+        <ConsoleTopBar />
+        <WorkspaceShell
+            align="stretch"
+            compactNavigation={<Sidebar mode="mobile" />}
+            compactNavigationLabel={navigationLabel}
+            navigation={<Sidebar />}
+            navigationLabel={navigationLabel}
+            navigationTrack="intrinsic"
+            navigationVisibility="wide"
+            primary={children}
+            primaryLabel={primaryLabel}
+        />
+    </>
+)
 
 /** Draw stable authenticated chrome around one opaque routed page. */
 export const ConsoleLayoutBase = (props: ConsoleLayoutProps) => {
-  const {
-    state,
-    props: data
-  }: ConsoleLayoutBaseProps = props;
-  return <StarCiDashboardThemeBoundary content={ConsoleFrame} contentProps={{
-    state,
-    props: data
-  }} />;
-};
+    const { state, props: data }: ConsoleLayoutBaseProps = props
+    return (
+        <StarCiDashboardThemeBoundary
+            content={ConsoleFrame}
+            contentProps={{
+                state,
+                props: data,
+            }}
+        />
+    )
+}
 
 /** Registry identity for the pure console layout twin. */

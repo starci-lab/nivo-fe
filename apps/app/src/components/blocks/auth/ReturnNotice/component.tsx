@@ -1,15 +1,15 @@
-import { Text } from "@starci/grammar/common";
+import { Text } from "@starci/grammar/common"
 
 /** Resolved unavailable-return notice shown at the default authenticated landing. */
 export type ReturnNoticeBaseProps = {
-  readonly props: {
-    /**
-     * The notice sentence, or null on an ordinary landing. Null is not "the notice is late": it is
-     * the arrival nobody had to explain, because no destination was refused.
-     */
-    readonly message: string | null;
-  };
-};
+    readonly props: {
+        /**
+         * The notice sentence, or null on an ordinary landing. Null is not "the notice is late": it is
+         * the arrival nobody had to explain, because no destination was refused.
+         */
+        readonly message: string | null
+    }
+}
 
 /*
  * The installed `starci-fe/public-component-signature` rule reads the render half's own name and
@@ -17,7 +17,7 @@ export type ReturnNoticeBaseProps = {
  * accepts; the exported contract above stays `<Unit>BaseProps`, which the code-pattern check
  * requires the render half to own. Not exported: one public contract per unit.
  */
-type ReturnNoticeProps = ReturnNoticeBaseProps;
+type ReturnNoticeProps = ReturnNoticeBaseProps
 
 /**
  * Pure unavailable-return notice: one sentence, and no reason behind it.
@@ -30,6 +30,6 @@ type ReturnNoticeProps = ReturnNoticeBaseProps;
  * simply the landing.
  */
 export const ReturnNoticeBase = (props: ReturnNoticeProps) => {
-  const { message }: ReturnNoticeBaseProps["props"] = props.props;
-  return message === null ? null : <Text live="polite">{message}</Text>;
-};
+    const { message }: ReturnNoticeBaseProps["props"] = props.props
+    return message === null ? null : <Text live="polite">{message}</Text>
+}

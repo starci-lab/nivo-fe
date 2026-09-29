@@ -1,6 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { CheckoutReviewFlowBase, type CheckoutReviewCopy, type CheckoutReviewFacts, type CheckoutReviewFlowBaseProps, type CheckoutReviewRailOption } from "./component"
+import {
+    CheckoutReviewFlowBase,
+    type CheckoutReviewCopy,
+    type CheckoutReviewFacts,
+    type CheckoutReviewFlowBaseProps,
+    type CheckoutReviewRailOption,
+} from "./component"
 const copy: CheckoutReviewCopy = {
     path: "Purchase path",
     workspaces: "Workspaces",
@@ -20,7 +26,8 @@ const copy: CheckoutReviewCopy = {
     purchaser: "Purchaser",
     admission: "Purchaser admission",
     railLabel: "Request payment",
-    railNote: "This request reuses the account's existing purchase identity and opens the chosen gateway's payment page.",
+    railNote:
+        "This request reuses the account's existing purchase identity and opens the chosen gateway's payment page.",
     railChoice: "Payment method",
     railRequired: "Choose a payment method before requesting payment.",
     railCredentialPending: "The payment gateway is still waiting on the owner's credentials.",
@@ -98,12 +105,16 @@ describe("CheckoutReviewFlowBase", () => {
         render(<CheckoutReviewFlowBase {...reviewProps} />)
         expect(screen.getByRole("radiogroup", { name: "Payment method" })).toBeInTheDocument()
         expect(screen.getAllByRole("radio")).toHaveLength(2)
-        expect(screen.getAllByText("Choose a payment method before requesting payment.").length).toBeGreaterThanOrEqual(1)
+        expect(screen.getAllByText("Choose a payment method before requesting payment.").length).toBeGreaterThanOrEqual(
+            1,
+        )
         expect(screen.getByRole("button", { name: "Request payment" })).toBeDisabled()
     })
     it("hands the chosen rail to the owning action and enables the request", () => {
         const on = { requestPayment: vi.fn(), selectRail: vi.fn(), changeOffer: vi.fn() }
-        render(<CheckoutReviewFlowBase {...reviewProps} props={{ ...reviewProps.props, selectedRail: "vnpay" }} on={on} />)
+        render(
+            <CheckoutReviewFlowBase {...reviewProps} props={{ ...reviewProps.props, selectedRail: "vnpay" }} on={on} />,
+        )
         expect(screen.getByRole("radio", { name: /VNPAY/ })).toBeChecked()
         expect(screen.queryByText("Choose a payment method before requesting payment.")).not.toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Request payment" })).toBeEnabled()
@@ -112,16 +123,29 @@ describe("CheckoutReviewFlowBase", () => {
     })
     it("hands the payment request to the owning action exactly once per press", () => {
         const on = { requestPayment: vi.fn(), selectRail: vi.fn(), changeOffer: vi.fn() }
-        render(<CheckoutReviewFlowBase {...reviewProps} props={{ ...reviewProps.props, selectedRail: "vnpay" }} on={on} />)
+        render(
+            <CheckoutReviewFlowBase {...reviewProps} props={{ ...reviewProps.props, selectedRail: "vnpay" }} on={on} />,
+        )
         fireEvent.click(screen.getByRole("button", { name: "Request payment" }))
         expect(on.requestPayment).toHaveBeenCalledTimes(1)
     })
     it("keeps the payment action visibly pending so a second press cannot re-raise the request", () => {
-        render(<CheckoutReviewFlowBase {...reviewProps} props={{ ...reviewProps.props, selectedRail: "vnpay", isPaymentPending: true }} />)
+        render(
+            <CheckoutReviewFlowBase
+                {...reviewProps}
+                props={{ ...reviewProps.props, selectedRail: "vnpay", isPaymentPending: true }}
+            />,
+        )
         expect(screen.getByRole("button", { name: "Request payment" })).toBeDisabled()
     })
     it("draws payment-not-started with the no-start reason and a same-identity retry", () => {
-        render(<CheckoutReviewFlowBase {...reviewProps} state="not-started" props={{ ...reviewProps.props, selectedRail: "vnpay", notice: "No payment request was accepted." }} />)
+        render(
+            <CheckoutReviewFlowBase
+                {...reviewProps}
+                state="not-started"
+                props={{ ...reviewProps.props, selectedRail: "vnpay", notice: "No payment request was accepted." }}
+            />,
+        )
         expect(screen.getByText("No payment request was accepted.")).toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Retry payment request" })).toBeInTheDocument()
         expect(screen.getByRole("link", { name: "Return to offer selection" })).toBeInTheDocument()
@@ -131,7 +155,13 @@ describe("CheckoutReviewFlowBase", () => {
         expect(screen.queryByText("Purchaser")).not.toBeInTheDocument()
     })
     it("withholds the payment action entirely when checkout admission is refused", () => {
-        render(<CheckoutReviewFlowBase state="refused" props={{ copy, links, facts, message: "The offer terms changed.", nextAction: null }} on={{ returnToOffers: vi.fn() }} />)
+        render(
+            <CheckoutReviewFlowBase
+                state="refused"
+                props={{ copy, links, facts, message: "The offer terms changed.", nextAction: null }}
+                on={{ returnToOffers: vi.fn() }}
+            />,
+        )
         expect(screen.getByText("Checkout cannot continue")).toBeInTheDocument()
         expect(screen.getByText("The offer terms changed.")).toBeInTheDocument()
         expect(screen.getByText("Nivo Workspace Growth")).toBeInTheDocument()
@@ -139,7 +169,19 @@ describe("CheckoutReviewFlowBase", () => {
         expect(screen.getByRole("button", { name: "Return to offer selection" })).toBeInTheDocument()
     })
     it("names the verified-Login door the refusal points at", () => {
-        render(<CheckoutReviewFlowBase state="refused" props={{ copy, links, facts: null, message: "The signed-in account is not an admitted purchaser yet.", nextAction: "Verify the account's email, then try again." }} on={{ returnToOffers: vi.fn() }} />)
+        render(
+            <CheckoutReviewFlowBase
+                state="refused"
+                props={{
+                    copy,
+                    links,
+                    facts: null,
+                    message: "The signed-in account is not an admitted purchaser yet.",
+                    nextAction: "Verify the account's email, then try again.",
+                }}
+                on={{ returnToOffers: vi.fn() }}
+            />,
+        )
         expect(screen.getByText("Verify the account's email, then try again.")).toBeInTheDocument()
     })
 })

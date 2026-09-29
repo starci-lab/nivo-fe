@@ -35,9 +35,19 @@ export const pageMetadata = async ({ params, page, path, absolute = false }: Pag
         description: t("description"),
         alternates: {
             canonical,
-            languages: { ...Object.fromEntries(LOCALES.map((candidate) => [candidate, localizeHref(path, candidate)])), "x-default": localizeHref(path, DEFAULT_LOCALE) },
+            languages: {
+                ...Object.fromEntries(LOCALES.map((candidate) => [candidate, localizeHref(path, candidate)])),
+                "x-default": localizeHref(path, DEFAULT_LOCALE),
+            },
         },
-        openGraph: { type: "website", locale: OPEN_GRAPH_LOCALE[locale], url: canonical, siteName: "NIVO", title: t("title"), description: t("description") },
+        openGraph: {
+            type: "website",
+            locale: OPEN_GRAPH_LOCALE[locale],
+            url: canonical,
+            siteName: "NIVO",
+            title: t("title"),
+            description: t("description"),
+        },
     }
 }
 
@@ -54,7 +64,13 @@ export const siteMetadata = async ({ params }: LocaleParams): Promise<Metadata> 
     return {
         title: { default: t("title"), template: "%s | NIVO" },
         description: t("description"),
-        openGraph: { type: "website", locale: OPEN_GRAPH_LOCALE[locale], siteName: "NIVO", title: t("title"), description: t("description") },
+        openGraph: {
+            type: "website",
+            locale: OPEN_GRAPH_LOCALE[locale],
+            siteName: "NIVO",
+            title: t("title"),
+            description: t("description"),
+        },
         robots: { index: true, follow: true },
     }
 }

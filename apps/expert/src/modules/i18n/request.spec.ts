@@ -7,7 +7,9 @@ vi.mock("next/root-params", () => ({ locale: mocks.rootLocale }))
 import requestConfig from "./request"
 
 describe("expert request locale config", () => {
-    beforeEach(() => { vi.clearAllMocks() })
+    beforeEach(() => {
+        vi.clearAllMocks()
+    })
 
     it("loads the routed English academy messages", async () => {
         mocks.rootLocale.mockResolvedValue("en")

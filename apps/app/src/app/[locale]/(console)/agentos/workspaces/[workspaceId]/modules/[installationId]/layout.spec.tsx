@@ -10,7 +10,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 const mocks = vi.hoisted(() => ({
     push: vi.fn(),
     pathname: "/agentos/workspaces/workspace-1/modules/installation-1",
-    installations: null as ReadonlyArray<{ readonly id: string; readonly moduleKey: string; readonly displayName: string }> | null,
+    installations: null as ReadonlyArray<{
+        readonly id: string
+        readonly moduleKey: string
+        readonly displayName: string
+    }> | null,
 }))
 
 vi.mock("next/navigation", () => ({
@@ -34,11 +38,15 @@ import AgentOSModuleInstallationLayout from "./layout"
 
 const renderLayout = (locale: "en" | "vi" = "vi") =>
     render(
-        <NextIntlClientProvider locale={locale} messages={locale === "en" ? enMessages : viMessages} timeZone={TIME_ZONE}>
+        <NextIntlClientProvider
+            locale={locale}
+            messages={locale === "en" ? enMessages : viMessages}
+            timeZone={TIME_ZONE}
+        >
             <AgentOSModuleInstallationLayout>
                 <div data-testid="installation-route-body">installation route body</div>
             </AgentOSModuleInstallationLayout>
-        </NextIntlClientProvider>
+        </NextIntlClientProvider>,
     )
 
 describe("AgentOSModuleInstallationLayout", () => {
@@ -92,7 +100,7 @@ describe("AgentOSModuleInstallationLayout", () => {
             const shell = viMessages.console.agentos.modules.shell
             fireEvent.click(screen.getByRole("tab", { name: shell[segment] }))
             expect(mocks.push).toHaveBeenCalledWith(`/agentos/workspaces/workspace-1/modules/installation-1/${segment}`)
-        }
+        },
     )
 
     it("marks the bare installation route as setup and the matching segment as selected", () => {
@@ -109,7 +117,10 @@ describe("AgentOSModuleInstallationLayout", () => {
     })
 
     it("wraps only the exact installation segment and never the module siblings or purchase routes", () => {
-        const installationSegment = join(process.cwd(), "apps/app/src/app/[locale]/(console)/agentos/workspaces/[workspaceId]/modules/[installationId]")
+        const installationSegment = join(
+            process.cwd(),
+            "apps/app/src/app/[locale]/(console)/agentos/workspaces/[workspaceId]/modules/[installationId]",
+        )
         const modulesSegment = join(installationSegment, "..")
         const workspaceSegment = join(modulesSegment, "..")
         const workspacesSegment = join(workspaceSegment, "..")
@@ -122,6 +133,8 @@ describe("AgentOSModuleInstallationLayout", () => {
         expect(existsSync(join(workspacesSegment, "new", "checkout", "layout.tsx"))).toBe(false)
         expect(existsSync(join(workspacesSegment, "purchases", "layout.tsx"))).toBe(false)
         expect(existsSync(join(workspacesSegment, "purchases", "[purchaseId]", "layout.tsx"))).toBe(false)
-        expect(existsSync(join(workspacesSegment, "purchases", "[purchaseId]", "provisioning", "layout.tsx"))).toBe(false)
+        expect(existsSync(join(workspacesSegment, "purchases", "[purchaseId]", "provisioning", "layout.tsx"))).toBe(
+            false,
+        )
     })
 })

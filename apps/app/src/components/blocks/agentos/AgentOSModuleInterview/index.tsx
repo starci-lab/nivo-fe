@@ -1,60 +1,61 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { useAgentOSModuleStudioProjection, useMutateAnswerAgentosCustomModuleIntakeSwr } from "@/hooks";
-import { AgentOSModuleInterviewBase } from "./component";
+import { useState } from "react"
+import { useTranslations } from "next-intl"
+import { useAgentOSModuleStudioProjection, useMutateAnswerAgentosCustomModuleIntakeSwr } from "@/hooks"
+import { AgentOSModuleInterviewBase } from "./component"
 type AgentOSModuleInterviewProps = {
-  readonly workspaceId: string;
-  readonly moduleId: string;
-};
+    readonly workspaceId: string
+    readonly moduleId: string
+}
 const projectionState = (refused: boolean, studio: ReturnType<typeof useAgentOSModuleStudioProjection>["studio"]) => {
-  if (refused || studio === null) return "refused";
-  return studio === undefined ? "loading" : "ready";
-};
+    if (refused || studio === null) return "refused"
+    return studio === undefined ? "loading" : "ready"
+}
 
 /** Consume the page projection and own the answer-before-next-question mutation. */
 export const AgentOSModuleInterview = (props: AgentOSModuleInterviewProps) => {
-  const {
-    workspaceId,
-    moduleId
-  }: AgentOSModuleInterviewProps = props;
-  const t = useTranslations("console.agentos.modules.studio.interview");
-  const {
-    studio
-  } = useAgentOSModuleStudioProjection();
-  const answerIntake = useMutateAnswerAgentosCustomModuleIntakeSwr(workspaceId, moduleId);
-  const [refused, setRefused] = useState(false);
-  const [answer, setAnswer] = useState("");
-  const send = async () => {
-    try {
-      const result = await answerIntake.trigger({
-        answer: answer.trim()
-      });
-      if (!result.ok) {
-        setRefused(true);
-        return;
-      }
-      setRefused(false);
-      setAnswer("");
-    } catch {
-      setRefused(true);
+    const { workspaceId, moduleId }: AgentOSModuleInterviewProps = props
+    const t = useTranslations("console.agentos.modules.studio.interview")
+    const { studio } = useAgentOSModuleStudioProjection()
+    const answerIntake = useMutateAnswerAgentosCustomModuleIntakeSwr(workspaceId, moduleId)
+    const [refused, setRefused] = useState(false)
+    const [answer, setAnswer] = useState("")
+    const send = async () => {
+        try {
+            const result = await answerIntake.trigger({
+                answer: answer.trim(),
+            })
+            if (!result.ok) {
+                setRefused(true)
+                return
+            }
+            setRefused(false)
+            setAnswer("")
+        } catch {
+            setRefused(true)
+        }
     }
-  };
-  return <AgentOSModuleInterviewBase state={projectionState(refused, studio)} props={{
-    studio: studio ?? undefined,
-    answer,
-    pending: answerIntake.isMutating,
-    labels: {
-      title: t("title"),
-      saved: t("saved"),
-      refused: t("refused"),
-      field: t("field"),
-      placeholder: t("placeholder"),
-      send: t("send"),
-      complete: t("complete"),
-      agent: t("agent"),
-      you: t("you")
-    }
-  }} on={{ onAnswer: setAnswer, onSend: () => void send() }} />;
-};
+    return (
+        <AgentOSModuleInterviewBase
+            state={projectionState(refused, studio)}
+            props={{
+                studio: studio ?? undefined,
+                answer,
+                pending: answerIntake.isMutating,
+                labels: {
+                    title: t("title"),
+                    saved: t("saved"),
+                    refused: t("refused"),
+                    field: t("field"),
+                    placeholder: t("placeholder"),
+                    send: t("send"),
+                    complete: t("complete"),
+                    agent: t("agent"),
+                    you: t("you"),
+                },
+            }}
+            on={{ onAnswer: setAnswer, onSend: () => void send() }}
+        />
+    )
+}

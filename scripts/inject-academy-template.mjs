@@ -27,22 +27,13 @@
  * for that command rather than running it.
  */
 
-import {
-    copyFileSync, existsSync, readFileSync, writeFileSync,
-} from "node:fs"
-import {
-    dirname, join, resolve,
-} from "node:path"
-import {
-    fileURLToPath,
-} from "node:url"
+import { copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs"
+import { dirname, join, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const TARGET = join(REPO_ROOT, "apps/expert/src/academy/template.data.json")
-const DEFAULT_SOURCE = resolve(
-    REPO_ROOT,
-    "../nivo-backend/.starcistacks/dev/runtime/config/academy-template.json",
-)
+const DEFAULT_SOURCE = resolve(REPO_ROOT, "../nivo-backend/.starcistacks/dev/runtime/config/academy-template.json")
 
 /**
  * The unprovisioned default, rebuilt by `--reset` rather than kept as a second file on disk.
@@ -91,9 +82,20 @@ const UNPROVISIONED = {
 
 /** Every section key this build can draw, kept in step with `SYSTEM_SECTION_KEYS`. */
 const SYSTEM_SECTION_KEYS = new Set([
-    "hero", "problems", "outcomes", "roadmap", "instructor", "stats",
-    "testimonials", "gallery", "courses", "community", "offer", "faq",
-    "magnet", "lead",
+    "hero",
+    "problems",
+    "outcomes",
+    "roadmap",
+    "instructor",
+    "stats",
+    "testimonials",
+    "gallery",
+    "courses",
+    "community",
+    "offer",
+    "faq",
+    "magnet",
+    "lead",
 ])
 
 const die = (message, hints = []) => {
@@ -130,8 +132,7 @@ const problemsWith = (template) => {
         complaints.push("layout.sections must be an array -- position in it IS render order")
     } else {
         for (const section of sections) {
-            const known = SYSTEM_SECTION_KEYS.has(section.key)
-                || String(section.key).startsWith("custom:")
+            const known = SYSTEM_SECTION_KEYS.has(section.key) || String(section.key).startsWith("custom:")
             if (!known) {
                 complaints.push(`layout key this build cannot draw: ${section.key}`)
             }
@@ -144,8 +145,11 @@ const problemsWith = (template) => {
         for (const [name, value] of Object.entries(variables ?? {})) {
             if (!/^--[a-z0-9-]+$/i.test(name)) {
                 complaints.push(`theme.${scheme}: not a custom property name: ${name}`)
-            } else if (typeof value !== "string" || /[;{}<>]/.test(value)
-                || /url\s*\(|expression\s*\(|@import/i.test(value)) {
+            } else if (
+                typeof value !== "string" ||
+                /[;{}<>]/.test(value) ||
+                /url\s*\(|expression\s*\(|@import/i.test(value)
+            ) {
                 complaints.push(`theme.${scheme}.${name}: value would escape the declaration`)
             }
         }
@@ -201,8 +205,10 @@ if (complaints.length > 0) {
 copyFileSync(source, TARGET)
 const sections = parsed.layout.sections
 const visible = sections.filter((section) => section.visible).length
-const overrides = Object.values(parsed.theme ?? {})
-    .reduce((total, variables) => total + Object.keys(variables ?? {}).length, 0)
+const overrides = Object.values(parsed.theme ?? {}).reduce(
+    (total, variables) => total + Object.keys(variables ?? {}).length,
+    0,
+)
 console.log(`\nok  mounted "${parsed.identity.name}"`)
 console.log(`    ${visible} visible section(s) of ${sections.length}`)
 console.log(`    ${overrides} HeroUI variable override(s) across ${Object.keys(parsed.theme ?? {}).length} scheme(s)`)

@@ -9,18 +9,19 @@
  * @param signal - Aborts the wait: the timer is cleared at once and nothing is left to fire later.
  * @returns True when the interval elapsed, false when the wait was abandoned.
  */
-export const abortableWait = (duration: number, signal: AbortSignal): Promise<boolean> => new Promise(resolve => {
-  if (signal.aborted) {
-    resolve(false);
-    return;
-  }
-  const onAbort = () => {
-    globalThis.clearTimeout(timer);
-    resolve(false);
-  };
-  const timer = globalThis.setTimeout(() => {
-    signal.removeEventListener("abort", onAbort);
-    resolve(true);
-  }, duration);
-  signal.addEventListener("abort", onAbort, { once: true });
-});
+export const abortableWait = (duration: number, signal: AbortSignal): Promise<boolean> =>
+    new Promise((resolve) => {
+        if (signal.aborted) {
+            resolve(false)
+            return
+        }
+        const onAbort = () => {
+            globalThis.clearTimeout(timer)
+            resolve(false)
+        }
+        const timer = globalThis.setTimeout(() => {
+            signal.removeEventListener("abort", onAbort)
+            resolve(true)
+        }, duration)
+        signal.addEventListener("abort", onAbort, { once: true })
+    })

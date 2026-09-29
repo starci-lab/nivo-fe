@@ -21,7 +21,10 @@ vi.mock("@/hooks/swr/queries/console", () => ({
     useQueryMyWalletSwr: mocks.wallet,
     useQueryMyInvoicesSwr: mocks.invoices,
 }))
-vi.mock("@/hooks", async (importOriginal) => ({ ...await importOriginal<object>(), useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@/hooks", async (importOriginal) => ({
+    ...(await importOriginal<object>()),
+    useRouter: () => ({ push: mocks.push }),
+}))
 interface MockBaseProps {
     readonly props: {
         readonly title: string
@@ -35,11 +38,21 @@ interface MockBaseProps {
     }
     readonly on: { readonly buildApp: () => void }
 }
-vi.mock("./component", () => ({ OverviewPageBase: (input: MockBaseProps) => <div>
-    <span>{input.props.pathLabel}:{input.props.consoleLabel}:{input.props.title}</span>
-    <span>{input.props.lede}:{input.props.atAGlanceLabel}:{input.props.servicesLabel}:{input.props.accountLabel}</span>
-    <button type="button" onClick={input.on.buildApp}>{input.props.buildAppLabel}</button>
-</div> }))
+vi.mock("./component", () => ({
+    OverviewPageBase: (input: MockBaseProps) => (
+        <div>
+            <span>
+                {input.props.pathLabel}:{input.props.consoleLabel}:{input.props.title}
+            </span>
+            <span>
+                {input.props.lede}:{input.props.atAGlanceLabel}:{input.props.servicesLabel}:{input.props.accountLabel}
+            </span>
+            <button type="button" onClick={input.on.buildApp}>
+                {input.props.buildAppLabel}
+            </button>
+        </div>
+    ),
+}))
 
 import { OverviewPage } from "."
 
@@ -57,7 +70,11 @@ describe("OverviewPage", () => {
         render(<OverviewPage />)
 
         expect(screen.getByText(headline)).toBeInTheDocument()
-        expect(screen.getByText(`${consoleCopy.overview.lede}:${consoleCopy.overview.atAGlance}:${consoleCopy.servicesCaption}:${consoleCopy.accountCaption}`)).toBeInTheDocument()
+        expect(
+            screen.getByText(
+                `${consoleCopy.overview.lede}:${consoleCopy.overview.atAGlance}:${consoleCopy.servicesCaption}:${consoleCopy.accountCaption}`,
+            ),
+        ).toBeInTheDocument()
 
         fireEvent.click(screen.getByRole("button", { name: consoleCopy.agentos.purchase }))
         expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new")
@@ -79,7 +96,12 @@ describe("OverviewPage", () => {
     })
 
     it("keeps a slice that has not settled from holding back the page", () => {
-        mocks.domains.mockImplementation(() => ({ data: undefined, error: undefined, isLoading: true, mutate: vi.fn() }))
+        mocks.domains.mockImplementation(() => ({
+            data: undefined,
+            error: undefined,
+            isLoading: true,
+            mutate: vi.fn(),
+        }))
         render(<OverviewPage />)
 
         expect(screen.getByText(headline)).toBeInTheDocument()

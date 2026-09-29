@@ -45,7 +45,14 @@ export const runSmoke = async (): Promise<SmokeResult> => {
         if (!externalUrl) {
             server = spawn(
                 process.execPath,
-                [resolve(rootDir, "node_modules/next/dist/bin/next"), "start", "--hostname", "127.0.0.1", "--port", port],
+                [
+                    resolve(rootDir, "node_modules/next/dist/bin/next"),
+                    "start",
+                    "--hostname",
+                    "127.0.0.1",
+                    "--port",
+                    port,
+                ],
                 {
                     cwd: resolve(rootDir, "apps/app"),
                     stdio: "inherit",
@@ -57,7 +64,9 @@ export const runSmoke = async (): Promise<SmokeResult> => {
         const response = await waitForServer()
         const body = await response.text()
         if (!response.ok || !body.trim()) {
-            throw new Error(`Nivo FE smoke failed: ${baseUrl}${smokePath} returned HTTP ${response.status} or an empty document`)
+            throw new Error(
+                `Nivo FE smoke failed: ${baseUrl}${smokePath} returned HTTP ${response.status} or an empty document`,
+            )
         }
         console.log(`Nivo FE smoke passed: GET ${smokePath} returned ${response.status}`)
         return { status: response.status, path: smokePath }

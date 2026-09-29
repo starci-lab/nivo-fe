@@ -8,20 +8,20 @@
 
 /** The current authoritative state of the turn a notice names, re-read at follow time. */
 export type CollabTurnState = {
-    readonly state: "open" | "handled" | "ended";
-    readonly handledByMemberId: string | null;
-    readonly decision: "answered" | "approve" | "reject" | null;
-    readonly handledAt: string | null;
-};
+    readonly state: "open" | "handled" | "ended"
+    readonly handledByMemberId: string | null
+    readonly decision: "answered" | "approve" | "reject" | null
+    readonly handledAt: string | null
+}
 
 /** Where the live channel of a workspace stands; the hint channel is the freshness mechanism while it is up. */
-export type CollabLiveStatus = "idle" | "connecting" | "subscribed" | "disconnected";
+export type CollabLiveStatus = "idle" | "connecting" | "subscribed" | "disconnected"
 
 /** How often each read re-reads by itself while the live channel is down, in milliseconds. */
 const COLLAB_FALLBACK_POLL_MS = {
     group: 5_000,
     notices: 15_000,
-} as const;
+} as const
 
 /**
  * The polling interval a Collab read needs right now.
@@ -35,4 +35,4 @@ const COLLAB_FALLBACK_POLL_MS = {
  * @returns The interval in milliseconds, or 0 when the hint channel owns freshness.
  */
 export const collabFallbackInterval = (status: CollabLiveStatus, read: keyof typeof COLLAB_FALLBACK_POLL_MS): number =>
-    status === "disconnected" ? COLLAB_FALLBACK_POLL_MS[read] : 0;
+    status === "disconnected" ? COLLAB_FALLBACK_POLL_MS[read] : 0
