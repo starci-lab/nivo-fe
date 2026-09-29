@@ -16,7 +16,7 @@ const resolveRequestLocale = createMiddleware(routing)
  * stamps `x-forwarded-host` on that hop, and the sub-request always lands on the prefixed path
  * (`/{defaultLocale}/...`) the rewrite pointed at.
  *
- * Letting that sub-request run the locale middleware again canonicalizes the prefix right back off,
+ * Letting that sub-request run the locale proxy again canonicalizes the prefix right back off,
  * answering the rewrite with a 307 to the ORIGINAL path - the endless self-redirect. Standing aside
  * lets the prefixed route render in place instead. A `/{defaultLocale}` request that really did
  * arrive through a forward proxy merely skips the cosmetic prefix-strip.
@@ -28,7 +28,7 @@ const isStandaloneSelfProxy = (request: NextRequest): boolean =>
 /**
  * Resolves the locale before the route is matched.
  *
- * WHAT IT ACTUALLY DOES, since "locale middleware" hides three separate jobs: it reads the locale
+ * WHAT IT ACTUALLY DOES, since "locale proxy" hides three separate jobs: it reads the locale
  * out of the path when one is there, negotiates from `Accept-Language` when the visitor lands on
  * the bare path, and remembers a deliberate choice so the next visit does not argue with it. Only
  * the first of those is what makes the page addressable; the other two are what stop a Vietnamese
@@ -38,14 +38,12 @@ const isStandaloneSelfProxy = (request: NextRequest): boolean =>
  * file has no language to negotiate -- running this over them would put a redirect in front of
  * every script tag on the page.
  */
-const middleware = (request: NextRequest) => {
+export const proxy = (request: NextRequest) => {
     if (isStandaloneSelfProxy(request)) return NextResponse.next()
     return resolveRequestLocale(request)
 }
 
-export default middleware
-
-/** Which paths the locale middleware runs on: everything except API, build output and real files. */
+/** Which paths the locale proxy runs on: everything except API, build output and real files. */
 export const config = {
     matcher: ["/((?!api|_next|_vercel|.*[.].*).*)"],
 }

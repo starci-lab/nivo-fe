@@ -16,12 +16,10 @@ const resolveRequestLocale = createMiddleware(routing)
  * default-locale route into a 307 to itself when the server is bound to a loopback alias the worker
  * normalizes away (`127.0.0.1`, `[::1]`).
  */
-const middleware = (request: NextRequest) => {
+export const proxy = (request: NextRequest) => {
     if (isStandaloneSelfProxy(request)) return NextResponse.next()
     return resolveRequestLocale(request)
 }
-
-export default middleware
 
 /**
  * Which requests the resolver sees.

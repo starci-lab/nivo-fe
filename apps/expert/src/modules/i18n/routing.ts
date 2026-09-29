@@ -11,9 +11,8 @@ import { DEFAULT_LOCALE, LOCALES } from "./config"
  * `generateMetadata` runs before a cookie is available to it, so a page rendering in Vietnamese was
  * describing itself to search engines in English. A locale in the path is known early enough.
  *
- * `as-needed`, SO THE DEFAULT KEEPS THE BARE PATH. `/` is English and `/vi` is Vietnamese, rather
- * than `/en` and `/vi`. Every link that exists today keeps working, no redirect stands between a
- * visitor and the page they asked for, and the second language still gets the address it needed.
+ * `as-needed`, SO THE DEFAULT KEEPS THE BARE PATH. `/` is Vietnamese and `/en` is English. Every
+ * existing bare-path link stays in place, and the second language has an address of its own.
  */
 export const routing = defineRouting({
     locales: LOCALES,

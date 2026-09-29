@@ -16,10 +16,6 @@ const nextConfig: NextConfig = {
         optimizePackageImports: ["@heroui/react"],
         rootParams: true,
     },
-    webpack: (config) => {
-        config.resolve.symlinks = false
-        return config
-    },
 }
 
 /*

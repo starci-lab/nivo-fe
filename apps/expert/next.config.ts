@@ -21,10 +21,6 @@ const nextConfig: NextConfig = {
         optimizePackageImports: ["@heroui/react"],
         rootParams: true,
     },
-    webpack: (config) => {
-        config.resolve.symlinks = false
-        return config
-    },
 }
 
 export default createNextIntlPlugin("./src/modules/i18n/request.ts")(nextConfig)

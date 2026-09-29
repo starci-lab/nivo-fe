@@ -15,13 +15,12 @@ import { toLocale } from "./config"
  *
  * THE LOCALE NOW COMES FROM THE PATH. It used to be read from a cookie, and that note ended by
  * naming routing as "the next decision rather than half-built now". This is that decision: the
- * segment is resolved by `middleware.ts` before the route is matched, so `/vi` is a real address a
- * reader can send to somebody and a crawler can index -- and, the reason it stopped being optional,
- * `generateMetadata` can see it. A cookie cannot be read early enough for the description tag, so a
- * Vietnamese page was describing itself in English to every search engine.
+ * segment is resolved by `proxy.ts` before the route is matched, so `/en` is a real address a reader
+ * can share and a crawler can index. The routed locale is also available to `generateMetadata`, so
+ * a Vietnamese page describes itself in Vietnamese rather than inheriting the English description.
  *
  * IT IS READ THROUGH `next/root-params`, WHICH IS WHAT RETIRED `setRequestLocale`. next-intl's
- * `requestLocale` fell back to a header written by the middleware, and reading a header is what
+ * `requestLocale` fell back to a header written by the proxy, and reading a header is what
  * forced a render dynamic - so every route had to call `setRequestLocale` first to get its prerender
  * back. next-intl deprecated both in favour of the root param, which is known before the render
  * begins. `[locale]/layout.tsx` and `[locale]/page.tsx` no longer announce the locale to anybody,

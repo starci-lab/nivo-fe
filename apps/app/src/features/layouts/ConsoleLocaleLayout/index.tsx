@@ -66,7 +66,7 @@ export const generateStaticParams = () =>
  *
  * IT NO LONGER OPTS ITSELF INTO STATIC RENDERING, AND IT IS MORE STATIC THAN IT WAS. This used to
  * call `setRequestLocale(locale)` because anything reading the locale below would otherwise reach
- * the middleware's header and force the whole subtree dynamic. next-intl deprecated that call in
+ * the proxy's header and force the whole subtree dynamic. next-intl deprecated that call in
  * favour of `next/root-params`, which `src/i18n/request.ts` now reads: the segment is known before
  * the render begins, so no route has to announce it. The route table is the proof, and it moved the
  * right way - `/[locale]` was reported Dynamic before this change and is reported SSG after, because

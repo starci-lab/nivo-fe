@@ -16,10 +16,10 @@ vi.mock("next-intl/middleware", () => ({
     default: mocks.createMiddleware,
 }))
 
-import middleware, { config } from "./middleware"
+import { config, proxy } from "./proxy"
 import { routing } from "./modules/i18n/routing"
 
-describe("middleware", () => {
+describe("proxy", () => {
     it("binds the declared routing and excludes API, build, verification, and file paths", () => {
         expect(mocks.createMiddleware).toHaveBeenCalledWith(routing)
         expect(config.matcher).toEqual(["/((?!api|_next|_vercel|.*[.].*).*)"])
@@ -28,7 +28,7 @@ describe("middleware", () => {
     it("passes a page request through the next-intl handler", () => {
         const request = new Request("https://expert.test/en")
 
-        expect(middleware(request as never)).toEqual({
+        expect(proxy(request as never)).toEqual({
             request,
         })
         expect(mocks.handler).toHaveBeenCalledWith(request)
@@ -39,7 +39,7 @@ describe("middleware", () => {
             headers: { "x-forwarded-host": "expert.test" },
         })
 
-        expect(middleware(request)).toBeInstanceOf(NextResponse)
+        expect(proxy(request)).toBeInstanceOf(NextResponse)
         expect(mocks.handler).not.toHaveBeenCalledWith(request)
     })
 
@@ -48,7 +48,7 @@ describe("middleware", () => {
             headers: { "x-forwarded-host": "expert.test" },
         })
 
-        expect(middleware(request)).toEqual({ request })
+        expect(proxy(request)).toEqual({ request })
         expect(mocks.handler).toHaveBeenCalledWith(request)
     })
 })

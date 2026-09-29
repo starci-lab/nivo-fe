@@ -13,7 +13,7 @@ import { DEFAULT_LOCALE } from "./config"
  * stamps `x-forwarded-host` on that hop, and the sub-request always lands on the prefixed path
  * (`/{defaultLocale}/...`) the rewrite pointed at.
  *
- * Letting that sub-request run the locale middleware again canonicalizes the prefix right back off,
+ * Letting that sub-request run the locale proxy again canonicalizes the prefix right back off,
  * answering the rewrite with a 307 to the ORIGINAL path - the endless self-redirect. Standing aside
  * lets the prefixed route render in place instead. A `/{defaultLocale}` request that really did
  * arrive through a forward proxy merely skips the cosmetic prefix-strip.

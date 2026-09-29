@@ -5,7 +5,7 @@ import { routing } from "./modules/i18n/routing"
  * Resolve which language a request is in before any route renders: the path first, then the
  * `Accept-Language` header, so a shared link always wins over the recipient's browser preference.
  */
-export default createMiddleware(routing)
+export const proxy = createMiddleware(routing)
 
 /** Everything except the API, Next's build output and anything with a file extension. */
 export const config = {

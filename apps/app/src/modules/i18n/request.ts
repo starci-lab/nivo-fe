@@ -17,7 +17,7 @@ import { TIME_ZONE, toLocale } from "./config"
  * THE LOCALE IS ROUTED, AND IT IS READ FROM THE SEGMENT ITSELF. `next/root-params` hands back the
  * `[locale]` param of the root layout this render belongs to. It replaces next-intl's
  * `requestLocale`, which next-intl deprecated in favour of exactly this: that parameter reached the
- * middleware's header when no route had announced the locale first, and reading a header is what
+ * proxy's header when no route had announced the locale first, and reading a header is what
  * made a render dynamic. A root param is known before the render begins, so the same value now
  * arrives without costing the route its prerender - see the note in `[locale]/layout.tsx`.
  *

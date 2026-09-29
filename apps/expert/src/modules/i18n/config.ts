@@ -8,7 +8,7 @@
  */
 
 /** The locales this app ships copy for. The first is what an unrecognised cookie falls back to. */
-export const LOCALES = ["en", "vi"] as const
+export const LOCALES = ["vi", "en"] as const
 
 /** One of the locales the app ships. */
 export type Locale = (typeof LOCALES)[number]
@@ -19,22 +19,21 @@ export type Locale = (typeof LOCALES)[number]
  * `LOCALE_COOKIE` / `LOCALE_COOKIE_MAX_AGE` described a mechanism only half of which existed:
  * `request.ts` read the cookie and nothing in this app ever wrote one, so a reader had no way to
  * choose a language at all. The locale now lives in the path (`modules/i18n/routing.ts`), and remembering a
- * deliberate choice is `next-intl`'s middleware's job under its own cookie name -- a second name
+ * deliberate choice is `next-intl`'s proxy's job under its own cookie name -- a second name
  * declared here would be one nothing sets and nothing reads.
  */
 
 /**
  * The locale served when the reader has expressed no preference.
  *
- * English, because an academy instance may be provisioned for any market. It is also the locale
- * that keeps the bare path: `routing.ts` uses `as-needed`, so `/` is this one and `/vi` is the
- * other.
+ * Vietnamese is the default and keeps the bare path: `routing.ts` uses `as-needed`, so `/` is
+ * Vietnamese and `/en` is English.
  *
  * The academy's OWN words - its name, its tagline, what its sections say - are never translated by
  * this product. It only picks which of the versions the expert authored to show, and this is the
  * one it falls back to when the expert did not write the reader's language.
  */
-export const DEFAULT_LOCALE: Locale = "en"
+export const DEFAULT_LOCALE: Locale = "vi"
 
 /**
  * Narrow an arbitrary value to a locale the app actually ships.

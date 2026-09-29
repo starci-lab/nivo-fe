@@ -2,6 +2,27 @@ import { resolve } from "node:path"
 import type { NextConfig } from "next"
 import createNextIntlPlugin from "next-intl/plugin"
 
+const localePrefixes = [
+    { source: "", destination: "" },
+    { source: "/vi", destination: "" },
+    { source: "/en", destination: "/en" },
+] as const
+
+/** Static compatibility paths that must redirect before Next matches their old page files. */
+export const legacyRedirects = async () =>
+    localePrefixes.flatMap(({ source, destination }) => [
+        {
+            source: `${source}/apps/new/:templateKey`,
+            destination: `${destination}/apps/create/:templateKey`,
+            permanent: false,
+        },
+        {
+            source: `${source}/agentos/create`,
+            destination: `${destination}/agentos/workspaces/new`,
+            permanent: false,
+        },
+    ])
+
 /**
  * `@nivo/ui` ships TypeScript source rather than a build output, so Next must compile it the same
  * way it compiles this app. That is the price of one shared copy, and it is cheaper than the drift
@@ -18,10 +39,7 @@ const nextConfig: NextConfig = {
         optimizePackageImports: ["@heroui/react"],
         rootParams: true,
     },
-    webpack: (config) => {
-        config.resolve.symlinks = false
-        return config
-    },
+    redirects: legacyRedirects,
 }
 
 /*
