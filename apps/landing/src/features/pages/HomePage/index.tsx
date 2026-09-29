@@ -1,9 +1,9 @@
 import { useLocale, useTranslations } from "next-intl"
 import { NivoIcon } from "@nivo/ui"
 import { Button, Heading, PageContainer, Text, TextAction } from "@starci/grammar/common"
-import { useLocalizedHref } from "@/hooks"
-import { SiteMain, SectionIntro } from "@/features/layouts/SiteShell"
-import { HomeMotionSectionReveal } from "@/components/blocks/landing/HomeMotion"
+import { useLocalizedHref } from "../../../hooks"
+import { SiteMain, SectionIntro } from "../../layouts/SiteShell"
+import { HomeMotionSectionReveal } from "../../../components/blocks/landing/HomeMotion"
 import {
     HOMEPAGE_COMMERCIAL_ROUTE,
     HOMEPAGE_FOCUS,
@@ -14,8 +14,8 @@ import {
     HOMEPAGE_TRUST_TITLE,
     homepageStructuredData,
     type PublicFlowStep,
-} from "@/modules/landing/homepage"
-import { SITE_LINKS } from "@/modules/landing/site"
+} from "../../../modules/landing/homepage"
+import { SITE_LINKS } from "../../../modules/landing/site"
 import { CLASS_NAMES, homeCommercialRouteMarkerClassName, homeCommercialRouteStepClassName } from "./classNames"
 import { HomeHero, HomeOperatingModel, HomeRelevance, InlineRoute } from "./component"
 

@@ -1,14 +1,14 @@
 import Image from "next/image"
 import { NivoIcon } from "@nivo/ui"
 import { Button, Heading, PageContainer, Text, TextAction } from "@starci/grammar/common"
-import { ProcessFlow, SectionIntro } from "@/features/layouts/SiteShell"
+import { ProcessFlow, SectionIntro } from "../../layouts/SiteShell"
 import {
     HomeMotionHeroParallax,
     HomeMotionHeroReveal,
     HomeMotionRoleCard,
     HomeMotionSectionReveal,
-} from "@/components/blocks/landing/HomeMotion"
-import type { PublicFlowStep } from "@/modules/landing/homepage"
+} from "../../../components/blocks/landing/HomeMotion"
+import type { PublicFlowStep } from "../../../modules/landing/homepage"
 import { CLASS_NAMES, homeRoleImageClassName } from "./classNames"
 
 type InlineRouteProps = { readonly parts: ReadonlyArray<string>; readonly joiner: string }

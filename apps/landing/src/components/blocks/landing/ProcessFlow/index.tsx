@@ -1,5 +1,5 @@
 import { Text } from "@starci/grammar/common"
-import type { PublicFlowStep } from "@/modules/landing/homepage"
+import type { PublicFlowStep } from "../../../../modules/landing/homepage"
 import {
     processFlowClassName,
     processFlowCopyClassName,
