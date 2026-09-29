@@ -46,10 +46,10 @@ describe("AcademyControlCenter connected owner", () => {
         fireEvent.click(screen.getByText("open"))
         expect(window.open).toHaveBeenCalledWith("https://academy.nivo.vn", "_blank", "noopener,noreferrer")
     })
-    it("renders refused state when the site is not owned", async () => {
+    it("renders failed state when the site is not owned", async () => {
         m.sites = { ok: true, data: [] }
         m.list.mockResolvedValue(m.sites)
         render(<AcademyControlCenter siteId="missing" mode="growth" onSelectMode={vi.fn()} />)
-        await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("refused"))
+        await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("failed"))
     })
 })

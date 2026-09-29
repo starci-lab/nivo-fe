@@ -75,10 +75,10 @@ describe("AcademyLeadPipeline", () => {
             ),
         )
     })
-    it("handles refusal and converted/failure actions", async () => {
-        m.calls.list.mockResolvedValue({ ok: false, data: undefined })
+    it("handles read failure and converted/failure actions", async () => {
+        m.calls.list.mockResolvedValue({ ok: false, kind: "unavailable", code: "UNAVAILABLE", reason: "down" })
         render(<AcademyLeadPipeline siteId="site-1" />)
-        await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("refused"))
+        await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("failed"))
         cleanup()
         resetQueryCache()
         m.calls.update.mockResolvedValue({ ok: false })

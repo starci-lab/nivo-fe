@@ -6,7 +6,6 @@ import { AcademyStudentCrmBase } from "./component"
 const labels = {
     section: "Students",
     empty: "No students",
-    refused: "Unavailable",
     open: "Open",
     active: "Active",
     banned: "Banned",
@@ -45,7 +44,7 @@ const handlers = {
 }
 
 describe("AcademyStudentCrmBase", () => {
-    it("renders list empty/refused states and student identity", () => {
+    it("renders list empty/failed states and student identity", () => {
         expect(
             renderToStaticMarkup(
                 <AcademyStudentCrmBase
@@ -58,8 +57,8 @@ describe("AcademyStudentCrmBase", () => {
         expect(
             renderToStaticMarkup(
                 <AcademyStudentCrmBase
-                    state="refused"
-                    props={{ students: [], detailState: "idle", labels }}
+                    state="failed"
+                    props={{ students: [], detailState: "idle", notice: <div>Unavailable</div>, labels }}
                     on={handlers}
                 />,
             ),
@@ -157,7 +156,8 @@ describe("AcademyStudentCrmBase", () => {
                 state="answered"
                 props={{
                     students: [{ ...student, status: "banned" }],
-                    detailState: "refused",
+                    detailState: "failed",
+                    detailNotice: <div>Unavailable</div>,
                     actionMessage: "Failed",
                     detail: {
                         member: student,

@@ -10,8 +10,9 @@ import {
     useQueryMyAcademyStudentDetailSwr,
     useQueryMyAcademyStudentsSwr,
 } from "@/hooks"
-import type { AcademyStudent, AcademyStudentDetail } from "@/modules/api/academy"
-import { nivoQueryData } from "@/modules/query"
+import type { AcademyStudentDetail } from "@/modules/api/academy"
+import { nivoQueryReading } from "@/modules/query"
+import { QueryNotice } from "@/components/blocks/query/QueryNotice"
 import { AcademyStudentCrmBase } from "./component"
 
 /** Owner-scoped identity consumed by the student CRM. */
@@ -22,20 +23,20 @@ export type AcademyStudentCrmProps = {
 /**
  * Which situation the student list is in.
  *
- * `undefined` is "not asked yet" and `null` is "asked and refused" -- two different sentences on
- * screen, which is why the request state is not collapsed into an empty array.
- *
- * @param students - The loaded students, `null` when the request refused, `undefined` before it ran.
- * @returns The state the list surface draws.
+ * "Not asked yet", "asked and failed" and "answered" are different sentences on screen, which is
+ * why the request settlement is not collapsed into an empty array.
  */
-const listStateOf = (students: ReadonlyArray<AcademyStudent> | null | undefined) => {
-    if (students === undefined) {
+const listStateOf = (
+    reading: ReturnType<typeof nivoQueryReading<{ readonly items: ReadonlyArray<unknown> }>>,
+    count: number,
+) => {
+    if (reading.status === "resting") {
         return "resting" as const
     }
-    if (students === null) {
-        return "refused" as const
+    if (reading.status === "failed") {
+        return "failed" as const
     }
-    return students.length === 0 ? ("empty" as const) : ("answered" as const)
+    return count === 0 ? ("empty" as const) : ("answered" as const)
 }
 
 /**
@@ -43,19 +44,21 @@ const listStateOf = (students: ReadonlyArray<AcademyStudent> | null | undefined)
  *
  * An in-flight request outranks whatever the panel last held, so reopening a student does not show
  * the previous one's detail while the new one loads.
- *
- * @param detailLoading - Whether a detail request is in flight.
- * @param detail - The loaded detail, `null` when refused, `undefined` before any student was opened.
- * @returns The state the detail surface draws.
  */
-const detailStateOf = (detailLoading: boolean, detail: AcademyStudentDetail | null | undefined) => {
+const detailStateOf = (
+    detailLoading: boolean,
+    reading: ReturnType<typeof nivoQueryReading<AcademyStudentDetail>> | undefined,
+) => {
     if (detailLoading) {
         return "resting" as const
     }
-    if (detail === undefined) {
+    if (reading === undefined) {
         return "idle" as const
     }
-    return detail === null ? ("refused" as const) : ("answered" as const)
+    if (reading.status === "resting") {
+        return "resting" as const
+    }
+    return reading.status === "failed" ? ("failed" as const) : ("answered" as const)
 }
 
 /** Own student requests and targeted action state. */
@@ -63,15 +66,16 @@ export const AcademyStudentCrm = (props: AcademyStudentCrmProps) => {
     const { siteId }: AcademyStudentCrmProps = props
     const t = useTranslations("console.academyControlCenter.students")
     const studentsQuery = useQueryMyAcademyStudentsSwr(siteId)
-    const studentPage = nivoQueryData(studentsQuery.data)
-    const students = studentPage === null || studentPage === undefined ? studentPage : studentPage.items
+    const studentsReading = nivoQueryReading(studentsQuery.data)
+    const students = studentsReading.status === "ready" ? studentsReading.data.items : undefined
     const [selectedMemberId, setSelectedMemberId] = useState<string>()
     const detailQuery = useQueryMyAcademyStudentDetailSwr(siteId, selectedMemberId)
     const createMutation = useMutateCreateAcademyStudentSwr(siteId)
     const statusMutation = useMutateSetAcademyStudentStatusSwr(siteId, selectedMemberId)
     const grantMutation = useMutateGrantAcademyCourseAccessSwr(siteId, selectedMemberId)
     const revokeMutation = useMutateRevokeAcademyCourseAccessSwr(siteId, selectedMemberId)
-    const detail = selectedMemberId === undefined ? undefined : nivoQueryData(detailQuery.data)
+    const detailReading = selectedMemberId === undefined ? undefined : nivoQueryReading(detailQuery.data)
+    const detail = detailReading?.status === "ready" ? detailReading.data : undefined
     const detailLoading = selectedMemberId !== undefined && detailQuery.isLoading
     const [pendingAction, setPendingAction] = useState<string>()
     const [actionMessage, setActionMessage] = useState<string>()
@@ -93,17 +97,27 @@ export const AcademyStudentCrm = (props: AcademyStudentCrmProps) => {
     }
     return (
         <AcademyStudentCrmBase
-            state={listStateOf(students)}
+            state={listStateOf(studentsReading, students?.length ?? 0)}
             props={{
                 students: students ?? [],
-                detailState: detailStateOf(detailLoading, detail),
-                detail: detail ?? undefined,
+                detailState: detailStateOf(detailLoading, detailReading),
+                detail,
+                detailNotice:
+                    detailReading?.status === "failed" ? (
+                        <QueryNotice props={{ failure: detailReading }} on={{ retry: () => void detailQuery.mutate() }} />
+                    ) : undefined,
+                notice:
+                    studentsReading.status === "failed" ? (
+                        <QueryNotice
+                            props={{ failure: studentsReading }}
+                            on={{ retry: () => void studentsQuery.mutate() }}
+                        />
+                    ) : undefined,
                 pendingAction,
                 actionMessage,
                 labels: {
                     section: t("section"),
                     empty: t("empty"),
-                    refused: t("refused"),
                     open: t("open"),
                     active: t("active"),
                     banned: t("banned"),
@@ -119,7 +133,6 @@ export const AcademyStudentCrm = (props: AcademyStudentCrmProps) => {
                     ban: t("ban"),
                     activate: t("activate"),
                     loadingDetail: t("loadingDetail"),
-                    actionFailed: t("actionFailed"),
                 },
             }}
             on={{
@@ -144,7 +157,7 @@ export const AcademyStudentCrm = (props: AcademyStudentCrmProps) => {
                     ),
                 changeCourseSlug: setCourseSlug,
                 setStatus: (status) =>
-                    detail === null || detail === undefined
+                    detail === undefined
                         ? undefined
                         : void run("status", () =>
                               statusMutation.trigger({
@@ -154,7 +167,7 @@ export const AcademyStudentCrm = (props: AcademyStudentCrmProps) => {
                               }),
                           ),
                 grantAccess: () =>
-                    detail === null || detail === undefined
+                    detail === undefined
                         ? undefined
                         : void run("grant", () =>
                               grantMutation.trigger({
@@ -164,7 +177,7 @@ export const AcademyStudentCrm = (props: AcademyStudentCrmProps) => {
                               }),
                           ),
                 revokeAccess: () =>
-                    detail === null || detail === undefined
+                    detail === undefined
                         ? undefined
                         : void run("revoke", () =>
                               revokeMutation.trigger({

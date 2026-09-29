@@ -4,7 +4,8 @@ import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { useMutateDraftLeadReplySwr, useMutateUpdateExpertSiteLeadSwr, useQueryMyExpertSiteLeadsSwr } from "@/hooks"
 import type { ExpertSiteLead } from "@/modules/api/academy"
-import { nivoQueryData } from "@/modules/query"
+import { nivoQueryReading, type NivoQueryReading } from "@/modules/query"
+import { QueryNotice } from "@/components/blocks/query/QueryNotice"
 import { AcademyLeadPipelineBase } from "./component"
 
 /** Owner-scoped identity consumed by the lead pipeline. */
@@ -24,11 +25,11 @@ const NEXT_STATUS: Readonly<Record<string, string | undefined>> = {
     contacted: "qualified",
 }
 
-/** Settle which state the pipeline surface is in from what the load returned. */
-const pipelineState = (leads: ReadonlyArray<ExpertSiteLead> | null | undefined) => {
-    if (leads === undefined) return "resting" as const
-    if (leads === null) return "refused" as const
-    return leads.length === 0 ? ("empty" as const) : ("answered" as const)
+/** Settle which state the pipeline surface is in from how the load settled. */
+const pipelineState = (reading: NivoQueryReading<ReadonlyArray<ExpertSiteLead>>) => {
+    if (reading.status === "resting") return "resting" as const
+    if (reading.status === "failed") return "failed" as const
+    return reading.data.length === 0 ? ("empty" as const) : ("answered" as const)
 }
 
 /** Load leads and own targeted update/draft state. */
@@ -39,7 +40,8 @@ export const AcademyLeadPipeline = (props: AcademyLeadPipelineProps) => {
     const query = useQueryMyExpertSiteLeadsSwr(siteId)
     const draftMutation = useMutateDraftLeadReplySwr(siteId)
     const updateMutation = useMutateUpdateExpertSiteLeadSwr(siteId)
-    const leads = nivoQueryData(query.data)
+    const reading = nivoQueryReading(query.data)
+    const leads = reading.status === "ready" ? reading.data : undefined
     const [selectedId, setSelectedId] = useState<string>()
     const [draft, setDraft] = useState<string>()
     const [pendingAction, setPendingAction] = useState<"advance" | "draft">()
@@ -74,17 +76,20 @@ export const AcademyLeadPipeline = (props: AcademyLeadPipelineProps) => {
     }
     return (
         <AcademyLeadPipelineBase
-            state={pipelineState(leads)}
+            state={pipelineState(reading)}
             props={{
                 leads: leads ?? [],
                 selected,
                 draft,
                 pendingAction,
                 message,
+                notice:
+                    reading.status === "failed" ? (
+                        <QueryNotice props={{ failure: reading }} on={{ retry: () => void query.mutate() }} />
+                    ) : undefined,
                 labels: {
                     section: t("section"),
                     empty: t("empty"),
-                    refused: t("refused"),
                     open: t("open"),
                     detail: t("detail"),
                     advance: t("advance"),

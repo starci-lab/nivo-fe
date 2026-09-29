@@ -2,6 +2,8 @@
 
 import { useFormatter, useTranslations } from "next-intl"
 import { useQueryMyAcademyGrowthSnapshotSwr } from "@/hooks"
+import { nivoQueryReading } from "@/modules/query"
+import { QueryNotice } from "@/components/blocks/query/QueryNotice"
 import { BILLING_CURRENCY } from "@/modules/config"
 import { AcademyGrowthSummaryBase } from "./component"
 
@@ -15,14 +17,18 @@ export const AcademyGrowthSummary = (props: AcademyGrowthSummaryProps) => {
     const { siteId }: AcademyGrowthSummaryProps = props
     const t = useTranslations("console.academyControlCenter.growth")
     const format = useFormatter()
-    const answer = useQueryMyAcademyGrowthSnapshotSwr(siteId).data
-    const data = answer?.ok === true ? answer.data : undefined
-    const settledState = answer?.ok === true ? "answered" : "refused"
+    const query = useQueryMyAcademyGrowthSnapshotSwr(siteId)
+    const reading = nivoQueryReading(query.data)
+    const data = reading.status === "ready" ? reading.data : undefined
     return (
         <AcademyGrowthSummaryBase
-            state={answer === undefined ? "resting" : settledState}
+            state={reading.status === "resting" ? "resting" : reading.status === "failed" ? "failed" : "answered"}
             props={{
                 data,
+                notice:
+                    reading.status === "failed" ? (
+                        <QueryNotice props={{ failure: reading }} on={{ retry: () => void query.mutate() }} />
+                    ) : undefined,
                 revenue: format.number(data?.revenueVnd ?? 0, {
                     style: "currency",
                     currency: BILLING_CURRENCY,
@@ -32,7 +38,6 @@ export const AcademyGrowthSummary = (props: AcademyGrowthSummaryProps) => {
                     section: t("section"),
                     health: t("health"),
                     loading: t("loading"),
-                    refused: t("refused"),
                     revenue: t("revenue"),
                     orders: t("orders"),
                     members: t("members"),

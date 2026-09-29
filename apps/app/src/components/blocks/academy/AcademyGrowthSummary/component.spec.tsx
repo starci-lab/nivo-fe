@@ -6,7 +6,6 @@ const labels = {
     section: "Growth",
     health: "Health",
     loading: "Loading",
-    refused: "Unavailable",
     revenue: "Revenue",
     orders: "Orders",
     members: "Members",
@@ -31,11 +30,15 @@ describe("AcademyGrowthSummaryBase", () => {
         expect(html).toContain("75")
     })
 
-    it("keeps refused state free of aggregate values and handles zero members", () => {
-        const refused = renderToStaticMarkup(
-            <AcademyGrowthSummaryBase state="refused" props={{ revenue: "₫1,000", labels }} />,
+    it("keeps a failed read free of aggregate values and handles zero members", () => {
+        const failed = renderToStaticMarkup(
+            <AcademyGrowthSummaryBase
+                state="failed"
+                props={{ revenue: "₫1,000", notice: <div>Unavailable</div>, labels }}
+            />,
         )
-        expect(refused).toContain("Unavailable")
+        expect(failed).toContain("Unavailable")
+        expect(failed).not.toContain("₫1,000")
         const zero = renderToStaticMarkup(
             <AcademyGrowthSummaryBase
                 state="answered"

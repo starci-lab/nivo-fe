@@ -111,12 +111,12 @@ describe("AcademyStudentCrm", () => {
         expect(m.calls.grant).toHaveBeenCalled()
         expect(m.calls.revoke).toHaveBeenCalled()
     })
-    it("keeps refused list and failed detail distinct", async () => {
-        m.calls.list.mockResolvedValue({ ok: false, data: undefined })
+    it("keeps failed list and failed detail distinct", async () => {
+        m.calls.list.mockResolvedValue({ ok: false, kind: "unavailable", code: "UNAVAILABLE", reason: "down" })
         render(<AcademyStudentCrm siteId="site-1" />)
-        await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("refused:idle"))
-        m.calls.detail.mockResolvedValue({ ok: false, data: undefined })
+        await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("failed:idle"))
+        m.calls.detail.mockResolvedValue({ ok: false, kind: "forbidden", code: "FORBIDDEN", reason: "no access" })
         fireEvent.click(screen.getByText("open"))
-        await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("refused:refused"))
+        await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("failed:failed"))
     })
 })

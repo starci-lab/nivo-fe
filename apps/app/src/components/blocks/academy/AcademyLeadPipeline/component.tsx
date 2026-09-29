@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { Avatar, type AvatarData } from "@nivo/ui"
 import { SurfaceCard, Button, Button as CoreButton, Heading, Text, TextAction, Badge } from "@starci/grammar/common"
 import type { ExpertSiteLead } from "@/modules/api/academy"
@@ -8,7 +9,6 @@ export type AcademyLeadPipelineProps = AcademyLeadPipelineViewProps
 export type AcademyLeadPipelineLabels = {
     readonly section: string
     readonly empty: string
-    readonly refused: string
     readonly open: string
     readonly detail: string
     readonly advance: string
@@ -24,6 +24,8 @@ export type AcademyLeadPipelineData = {
     readonly draft?: string
     readonly pendingAction?: "advance" | "draft"
     readonly message?: string
+    /** The failure the connected half composed for a settled failed read. */
+    readonly notice?: ReactNode
     readonly labels: AcademyLeadPipelineLabels
 }
 
@@ -36,7 +38,7 @@ export type AcademyLeadPipelineActions = {
 
 /** Pure lead pipeline state. */
 export type AcademyLeadPipelineViewProps = {
-    readonly state: "resting" | "empty" | "refused" | "answered"
+    readonly state: "resting" | "empty" | "failed" | "answered"
     readonly props: AcademyLeadPipelineData
     readonly on: AcademyLeadPipelineActions
 }
@@ -47,7 +49,7 @@ const RESTING_AVATAR_PROPS: AvatarData = { size: "md" }
 /** Render leads as a joined identity scan with one selected follow-up. */
 const AcademyLeadPipelineContent = (input: AcademyLeadPipelineViewProps) => {
     const { state } = input
-    const { leads, selected, draft, pendingAction, message, labels } = input.props
+    const { leads, selected, draft, pendingAction, message, notice, labels } = input.props
     const { openLead, advance, draftReply } = input.on
     const leadRows: ReadonlyArray<{ lead: ExpertSiteLead; avatar: AvatarData }> = leads.map((lead) => ({
         lead,
@@ -86,11 +88,14 @@ const AcademyLeadPipelineContent = (input: AcademyLeadPipelineViewProps) => {
                       </CoreButton>
                   </div>
               ))
-    const refusalNote = state === "refused" ? labels.refused : undefined
-    const note = state === "empty" ? labels.empty : refusalNote
+    const note = state === "empty" ? labels.empty : undefined
     return (
         <>
-            {note === undefined ? (
+            {state === "failed" ? (
+                <SurfaceCard label={labels.section}>
+                    <div>{notice}</div>
+                </SurfaceCard>
+            ) : note === undefined ? (
                 <SurfaceCard
                     label={labels.section}
                     labelEnd={

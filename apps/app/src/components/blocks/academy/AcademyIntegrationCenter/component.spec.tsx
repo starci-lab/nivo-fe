@@ -17,8 +17,8 @@ describe("AcademyIntegrationCenterBase", () => {
         expect(
             renderToStaticMarkup(
                 <AcademyIntegrationCenterBase
-                    state="refused"
-                    props={{ sectionLabel: "Integrations", refusedLabel: "Unavailable", cards: [] }}
+                    state="failed"
+                    props={{ sectionLabel: "Integrations", notice: <div>Unavailable</div>, cards: [] }}
                     on={{ select: vi.fn(), changeField: vi.fn(), submit: vi.fn() }}
                 />,
             ),
@@ -27,7 +27,7 @@ describe("AcademyIntegrationCenterBase", () => {
             renderToStaticMarkup(
                 <AcademyIntegrationCenterBase
                     state="resting"
-                    props={{ sectionLabel: "Integrations", refusedLabel: "Unavailable", cards: [card] }}
+                    props={{ sectionLabel: "Integrations", notice: <div>Unavailable</div>, cards: [card] }}
                     on={{ select: vi.fn(), changeField: vi.fn(), submit: vi.fn() }}
                 />,
             ),
@@ -39,7 +39,7 @@ describe("AcademyIntegrationCenterBase", () => {
                 state="answered"
                 props={{
                     sectionLabel: "Integrations",
-                    refusedLabel: "Unavailable",
+                    notice: <div>Unavailable</div>,
                     cards: [card],
                     selected: {
                         id: "google",
@@ -70,7 +70,7 @@ describe("AcademyIntegrationCenterBase", () => {
                 state="answered"
                 props={{
                     sectionLabel: "Integrations",
-                    refusedLabel: "Unavailable",
+                    notice: <div>Unavailable</div>,
                     cards: [
                         {
                             id: "google",
@@ -104,7 +104,7 @@ describe("AcademyIntegrationCenterBase", () => {
                 state="answered"
                 props={{
                     sectionLabel: "Integrations",
-                    refusedLabel: "Unavailable",
+                    notice: <div>Unavailable</div>,
                     cards: [],
                     selected: {
                         id: "plain",

@@ -3,8 +3,9 @@
 import { useSyncExternalStore } from "react"
 import { useTranslations } from "next-intl"
 import { useQueryMyExpertSitesSwr } from "@/hooks"
-import { nivoQueryData } from "@/modules/query"
+import { nivoQueryReading, type NivoQueryFailure } from "@/modules/query"
 import { ACADEMY_HOST_SUFFIX } from "@/modules/config"
+import { QueryNotice } from "@/components/blocks/query/QueryNotice"
 import { AcademyControlCenterBase, type AcademyControlCenterMode } from "./component"
 
 /** The client mount read as an external store: no subscriptions, only the server/client snapshot split. */
@@ -25,23 +26,33 @@ export const AcademyControlCenter = (props: AcademyControlCenterProps) => {
     const t = useTranslations("console.academyControlCenter")
     const mounted = useSyncExternalStore(subscribeToMount, readClientMount, readServerMount)
     const answer = useQueryMyExpertSitesSwr()
-    const sites = nivoQueryData(answer.data)
-    const site = sites === null || sites === undefined ? sites : (sites.find((item) => item.id === siteId) ?? null)
+    const reading = nivoQueryReading(answer.data)
+    const site = reading.status === "ready" ? (reading.data.find((item) => item.id === siteId) ?? null) : undefined
+    /* A settled list that does not name this site is a not-found of its own. */
+    const failure: NivoQueryFailure | null =
+        reading.status === "failed"
+            ? reading
+            : site === null
+              ? { kind: "not-found", code: "ACADEMY_SITE_NOT_FOUND", reason: "", retryable: false }
+              : null
     const publicHost =
         site === null || site === undefined ? undefined : (site.customDomain ?? `${site.slug}${ACADEMY_HOST_SUFFIX}`)
     if (!mounted) return null
-    const settledState = site === null ? "refused" : "ready"
+    const settledState = failure === null ? "ready" : "failed"
     return (
         <AcademyControlCenterBase
-            state={site === undefined ? "restoring" : settledState}
+            state={reading.status === "resting" ? "restoring" : settledState}
             props={{
                 title: site?.slug ?? t("title"),
                 siteId,
                 publicHost,
                 mode,
+                notice:
+                    failure === null ? undefined : (
+                        <QueryNotice props={{ failure }} on={{ retry: () => void answer.mutate() }} />
+                    ),
                 labels: {
                     loading: t("loading"),
-                    refused: t("refused"),
                     openSite: t("openSite"),
                     tabsLabel: t("tabsLabel"),
                     tabs: (["growth", "system"] as const).map((id) => ({

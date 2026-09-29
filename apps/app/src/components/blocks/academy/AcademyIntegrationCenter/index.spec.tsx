@@ -5,7 +5,13 @@ import { AcademyIntegrationCenter } from "./index"
 
 const m = vi.hoisted(() => ({
     session: { state: { status: "signed-in", accessToken: "test-token" } },
-    integrations: { ok: true, data: undefined as unknown },
+    integrations: { ok: true, data: undefined as unknown } as {
+        ok: boolean
+        kind?: string
+        code?: string
+        reason?: string
+        data?: unknown
+    },
     calls: {
         domain: vi.fn(),
         google: vi.fn(),
@@ -153,9 +159,9 @@ beforeEach(() => {
 
 describe("AcademyIntegrationCenter", () => {
     it("loads refusal and answered provider states", async () => {
-        m.integrations = { ok: false, data: undefined }
+        m.integrations = { ok: false, kind: "unavailable", code: "UNAVAILABLE", reason: "down" }
         render(<AcademyIntegrationCenter siteId="site-1" />)
-        await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("refused"))
+        await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("failed"))
         cleanup()
         resetQueryCache()
         m.integrations = { ok: true, data: answered }

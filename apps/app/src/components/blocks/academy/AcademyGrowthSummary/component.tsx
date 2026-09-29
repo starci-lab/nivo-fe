@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { LabelledProgressRow } from "@nivo/ui"
 import { SurfaceCard, Text } from "@starci/grammar/common"
 import type { AcademyGrowthSnapshot } from "@/modules/api/academy"
@@ -9,7 +10,6 @@ export type AcademyGrowthSummaryLabels = {
     readonly section: string
     readonly health: string
     readonly loading: string
-    readonly refused: string
     readonly revenue: string
     readonly orders: string
     readonly members: string
@@ -20,20 +20,22 @@ export type AcademyGrowthSummaryLabels = {
 /** Atoms the pure growth block draws; the connected half owns the snapshot request. */
 export type AcademyGrowthSummaryData = {
     readonly data?: AcademyGrowthSnapshot
+    /** The failure the connected half composed for a settled failed read. */
+    readonly notice?: ReactNode
     readonly labels: AcademyGrowthSummaryLabels
     readonly revenue: string
 }
 
 /** Pure growth block state. */
 export type AcademyGrowthSummaryViewProps = {
-    readonly state: "resting" | "refused" | "answered"
+    readonly state: "resting" | "failed" | "answered"
     readonly props: AcademyGrowthSummaryData
 }
 
 /** Render aggregate facts without fetching or formatting. */
 const AcademyGrowthSummaryContent = (input: AcademyGrowthSummaryViewProps) => {
     const { state } = input
-    const { data, labels, revenue } = input.props
+    const { data, notice, labels, revenue } = input.props
     const facts = [
         {
             id: "revenue",
@@ -58,14 +60,10 @@ const AcademyGrowthSummaryContent = (input: AcademyGrowthSummaryViewProps) => {
     ]
     const activePercent =
         data === undefined || data.totalMembers === 0 ? 0 : Math.round((data.activeMembers / data.totalMembers) * 100)
-    if (state === "refused")
+    if (state === "failed")
         return (
             <SurfaceCard label={labels.section}>
-                <div>
-                    <Text size="sm" tone="muted">
-                        {labels.refused}
-                    </Text>
-                </div>
+                <div>{notice}</div>
             </SurfaceCard>
         )
     return (

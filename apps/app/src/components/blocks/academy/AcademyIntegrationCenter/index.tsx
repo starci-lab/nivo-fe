@@ -3,7 +3,8 @@
 import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { useMutateAcademyIntegrationSwr, useQueryMyAcademyIntegrationsSwr } from "@/hooks"
-import { nivoQueryData } from "@/modules/query"
+import { nivoQueryReading } from "@/modules/query"
+import { QueryNotice } from "@/components/blocks/query/QueryNotice"
 import {
     AcademyIntegrationCenterBase,
     type AcademyIntegrationCard,
@@ -46,7 +47,8 @@ export const AcademyIntegrationCenter = (props: AcademyIntegrationCenterProps) =
     const t = useTranslations("console.academyControlCenter.integrations")
     const query = useQueryMyAcademyIntegrationsSwr(siteId)
     const integrationMutation = useMutateAcademyIntegrationSwr(siteId)
-    const answer = nivoQueryData(query.data)
+    const reading = nivoQueryReading(query.data)
+    const answer = reading.status === "ready" ? reading.data : undefined
     const [selectedId, setSelectedId] = useState<ProviderId>()
     const [values, setValues] = useState<Readonly<Record<string, string>>>({})
     const [pendingId, setPendingId] = useState<ProviderId>()
@@ -294,13 +296,16 @@ export const AcademyIntegrationCenter = (props: AcademyIntegrationCenterProps) =
         setOutcome(outcomeOf(selectedId, result.ok))
         setPendingId(undefined)
     }
-    const settledState = answer === null ? "refused" : "answered"
+    const settledState = reading.status === "failed" ? "failed" : "answered"
     return (
         <AcademyIntegrationCenterBase
-            state={answer === undefined ? "resting" : settledState}
+            state={reading.status === "resting" ? "resting" : settledState}
             props={{
                 sectionLabel: t("section"),
-                refusedLabel: t("refused"),
+                notice:
+                    reading.status === "failed" ? (
+                        <QueryNotice props={{ failure: reading }} on={{ retry: () => void query.mutate() }} />
+                    ) : undefined,
                 cards,
                 selected:
                     selectedId === undefined

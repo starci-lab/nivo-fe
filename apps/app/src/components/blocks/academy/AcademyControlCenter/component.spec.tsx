@@ -18,7 +18,6 @@ vi.mock("@/components/blocks/academy/AcademyIntegrationCenter", () => ({
 
 const labels: AcademyControlCenterLabels = {
     loading: "Loading",
-    refused: "Refused",
     openSite: "Open",
     tabsLabel: "Mode",
     tabs: [
@@ -32,9 +31,13 @@ const base = {
 }
 
 describe("AcademyControlCenterBase", () => {
-    it("renders restoring and refused notices", () => {
+    it("renders restoring and failed notices", () => {
         expect(renderToStaticMarkup(<AcademyControlCenterBase {...base} state="restoring" />)).toContain("Loading")
-        expect(renderToStaticMarkup(<AcademyControlCenterBase {...base} state="refused" />)).toContain("Refused")
+        expect(
+            renderToStaticMarkup(
+                <AcademyControlCenterBase {...base} state="failed" props={{ ...base.props, notice: <div>Refused</div> }} />,
+            ),
+        ).toContain("Refused")
     })
     it("renders growth/system sections and optional public action", () => {
         const growth = renderToStaticMarkup(

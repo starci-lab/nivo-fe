@@ -6,7 +6,6 @@ import { AcademyLeadPipelineBase } from "./component"
 const labels = {
     section: "Leads",
     empty: "No leads",
-    refused: "Unavailable",
     open: "Open",
     detail: "Detail",
     advance: "Advance",
@@ -24,7 +23,7 @@ const lead = {
 }
 
 describe("AcademyLeadPipelineBase", () => {
-    it("renders empty and refusal notes distinctly", () => {
+    it("renders empty and failure notices distinctly", () => {
         expect(
             renderToStaticMarkup(
                 <AcademyLeadPipelineBase
@@ -37,8 +36,8 @@ describe("AcademyLeadPipelineBase", () => {
         expect(
             renderToStaticMarkup(
                 <AcademyLeadPipelineBase
-                    state="refused"
-                    props={{ leads: [], labels }}
+                    state="failed"
+                    props={{ leads: [], notice: <div>Unavailable</div>, labels }}
                     on={{ openLead: vi.fn(), advance: vi.fn(), draftReply: vi.fn() }}
                 />,
             ),

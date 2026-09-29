@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { Avatar, LabelledProgressRow } from "@nivo/ui"
 import { SurfaceCard, Button, Button as CoreButton, Input, Text, TextAction, Badge } from "@starci/grammar/common"
 import type { AcademyStudent, AcademyStudentDetail } from "@/modules/api/academy"
@@ -8,7 +9,6 @@ export type AcademyStudentCrmProps = AcademyStudentCrmViewProps
 export type AcademyStudentCrmLabels = {
     readonly section: string
     readonly empty: string
-    readonly refused: string
     readonly open: string
     readonly active: string
     readonly banned: string
@@ -24,14 +24,17 @@ export type AcademyStudentCrmLabels = {
     readonly ban: string
     readonly activate: string
     readonly loadingDetail: string
-    readonly actionFailed: string
 }
 
 /** Atoms the pure student CRM draws; the connected half owns the student requests. */
 export type AcademyStudentCrmData = {
     readonly students: ReadonlyArray<AcademyStudent>
-    readonly detailState: "idle" | "resting" | "refused" | "answered"
+    readonly detailState: "idle" | "resting" | "failed" | "answered"
     readonly detail?: AcademyStudentDetail
+    /** The failure the connected half composed for a settled failed detail read. */
+    readonly detailNotice?: ReactNode
+    /** The failure the connected half composed for a settled failed list read. */
+    readonly notice?: ReactNode
     readonly pendingAction?: string
     readonly actionMessage?: string
     readonly labels: AcademyStudentCrmLabels
@@ -52,7 +55,7 @@ export type AcademyStudentCrmActions = {
 
 /** Pure state for the student list, selected detail and targeted actions. */
 export type AcademyStudentCrmViewProps = {
-    readonly state: "resting" | "empty" | "refused" | "answered"
+    readonly state: "resting" | "empty" | "failed" | "answered"
     readonly props: AcademyStudentCrmData
     readonly on: AcademyStudentCrmActions
 }
@@ -131,8 +134,9 @@ const studentRows = (students: ReadonlyArray<AcademyStudent>, labels: AcademyStu
 /**
  * The sentence that stands in place of the list, when there is one.
  *
- * Nothing to show and a refused read are DIFFERENT facts and say different things; a list that
- * answered says nothing here at all and draws its rows instead.
+ * Nothing to show and a failed read are DIFFERENT facts and say different things; a list that
+ * answered says nothing here at all and draws its rows instead. A failure is the connected half's
+ * notice, not a sentence - it is drawn by the caller.
  *
  * @param state - Which situation the list is in.
  * @param labels - Resolved copy for the block.
@@ -140,9 +144,6 @@ const studentRows = (students: ReadonlyArray<AcademyStudent>, labels: AcademyStu
 const noteFor = (state: ListState, labels: AcademyStudentCrmLabels) => {
     if (state === "empty") {
         return labels.empty
-    }
-    if (state === "refused") {
-        return labels.refused
     }
     return undefined
 }
@@ -206,6 +207,7 @@ const createCard = (pendingAction: string | undefined, labels: AcademyStudentCrm
 const detailCard = (
     detailState: DetailState,
     detail: AcademyStudentDetail | undefined,
+    detailNotice: ReactNode,
     labels: AcademyStudentCrmLabels,
 ) => {
     if (detailState === "idle") {
@@ -243,11 +245,18 @@ const detailCard = (
             </SurfaceCard>
         )
     }
+    if (detailState === "failed") {
+        return (
+            <SurfaceCard label={labels.detail}>
+                <div>{detailNotice}</div>
+            </SurfaceCard>
+        )
+    }
     return (
         <SurfaceCard label={labels.detail}>
             <div>
                 <Text size="sm" tone="muted">
-                    {detailState === "resting" ? labels.loadingDetail : labels.actionFailed}
+                    {labels.loadingDetail}
                 </Text>
             </div>
         </SurfaceCard>
@@ -338,12 +347,16 @@ const statusCard = (
 /** Render student CRM state without owning requests or secrets. */
 const AcademyStudentCrmContent = (input: AcademyStudentCrmViewProps) => {
     const { state, on } = input
-    const { students, detailState, detail, pendingAction, actionMessage, labels } = input.props
+    const { students, detailState, detail, detailNotice, notice, pendingAction, actionMessage, labels } = input.props
     const rows = state === "resting" ? restingRows(labels) : studentRows(students, labels, on)
     const note = noteFor(state, labels)
     return (
         <>
-            {note === undefined ? (
+            {state === "failed" ? (
+                <SurfaceCard label={labels.section}>
+                    <div>{notice}</div>
+                </SurfaceCard>
+            ) : note === undefined ? (
                 <SurfaceCard
                     label={labels.section}
                     labelEnd={
@@ -366,7 +379,7 @@ const AcademyStudentCrmContent = (input: AcademyStudentCrmViewProps) => {
                 </SurfaceCard>
             )}
             {createCard(pendingAction, labels, on)}
-            {detailCard(detailState, detail, labels)}
+            {detailCard(detailState, detail, detailNotice, labels)}
             {grantCard(detailState, detail, pendingAction, labels, on)}
             {statusCard(detailState, detail, pendingAction, labels, on)}
             {actionMessage === undefined ? null : (

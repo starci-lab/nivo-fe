@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { StatusActionCard } from "@nivo/ui"
 import { SurfaceCard, Button, Input, type InputKind, Text, type BadgeTone } from "@starci/grammar/common"
 
@@ -26,7 +27,8 @@ export type AcademyIntegrationFormField = {
 /** Atoms the pure Integration Center draws; the connected half owns provider requests. */
 export type AcademyIntegrationCenterData = {
     readonly sectionLabel: string
-    readonly refusedLabel: string
+    /** The failure the connected half composed for a settled failed read. */
+    readonly notice?: ReactNode
     readonly cards: ReadonlyArray<AcademyIntegrationCard>
     readonly selected?: {
         readonly id: string
@@ -49,7 +51,7 @@ export type AcademyIntegrationCenterActions = {
 
 /** Resolved pure Integration Center state. */
 export type AcademyIntegrationCenterViewProps = {
-    readonly state: "resting" | "refused" | "answered"
+    readonly state: "resting" | "failed" | "answered"
     readonly props: AcademyIntegrationCenterData
     readonly on: AcademyIntegrationCenterActions
 }
@@ -57,17 +59,13 @@ export type AcademyIntegrationCenterViewProps = {
 /** Render provider status and one selected write-only setup form. */
 const AcademyIntegrationCenterContent = (input: AcademyIntegrationCenterViewProps) => {
     const { state } = input
-    const { sectionLabel, refusedLabel, cards, selected, pendingId, outcome } = input.props
+    const { sectionLabel, notice, cards, selected, pendingId, outcome } = input.props
     const { select, changeField, submit } = input.on
     return (
         <>
-            {state === "refused" ? (
+            {state === "failed" ? (
                 <SurfaceCard label={sectionLabel}>
-                    <div>
-                        <Text size="sm" tone="muted">
-                            {refusedLabel}
-                        </Text>
-                    </div>
+                    <div>{notice}</div>
                 </SurfaceCard>
             ) : (
                 <SurfaceCard label={sectionLabel}>
