@@ -229,6 +229,9 @@
     "@starci/grammar": "0.7.0",
     "@heroui/react": "3.2.6",
     "@heroui/styles": "3.2.6",
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
     "@starci/eslint-canon-fe": "4.0.0",
     "react-aria": "3.52.1"
   }
