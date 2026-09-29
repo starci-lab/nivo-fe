@@ -29,7 +29,6 @@ apps/
     modules/            App capabilities and integrations
 packages/ui/            Shared UI package
 scripts/                Repository tooling
-docs/                   Human documentation
 e2e/                    Repository-level end-to-end tests
 ```
 
