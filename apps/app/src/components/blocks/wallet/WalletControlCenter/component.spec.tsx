@@ -188,8 +188,8 @@ describe("WalletControlCenterBase", () => {
         render(<WalletControlCenterBase {...props} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Return to order", hidden: true }))
-        fireEvent.click(screen.getAllByRole("button", { name: "Close", hidden: true })[0])
-        fireEvent.click(screen.getAllByRole("button", { name: "Close", hidden: true })[1])
+        fireEvent.click(screen.getAllByRole("button", { name: "Close", hidden: true })[0]!)
+        fireEvent.click(screen.getAllByRole("button", { name: "Close", hidden: true })[1]!)
 
         expect(returnToOrder).toHaveBeenCalledTimes(1)
         expect(closeTopUp).toHaveBeenCalledTimes(1)

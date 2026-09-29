@@ -403,9 +403,9 @@ describe("AuthenticationPage connected journeys", () => {
 
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(mocks.api.signIn).toHaveBeenCalledTimes(2))
-        const unanswered = mocks.api.signIn.mock.calls[0][0]
+        const unanswered = mocks.api.signIn.mock.calls[0]![0]
         expect(unanswered.requestIdentity).toBeDefined()
-        expect(mocks.api.signIn.mock.calls[1][0].requestIdentity).toBe(unanswered.requestIdentity)
+        expect(mocks.api.signIn.mock.calls[1]![0].requestIdentity).toBe(unanswered.requestIdentity)
 
         // An UNDECIDED ANSWER is the same non-refusal, continued under the same identity.
         mocks.api.signIn.mockResolvedValue({
@@ -421,7 +421,7 @@ describe("AuthenticationPage connected journeys", () => {
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(mocks.api.signIn).toHaveBeenCalledTimes(3))
         expect(panel()).toContain(copy("signIn.undecided"))
-        expect(mocks.api.signIn.mock.calls[2][0].requestIdentity).toBe(unanswered.requestIdentity)
+        expect(mocks.api.signIn.mock.calls[2]![0].requestIdentity).toBe(unanswered.requestIdentity)
 
         // A REFUSAL settles the attempt, so the next press is a new logical request.
         mocks.api.signIn.mockResolvedValue({ ok: false, reason: "invalid", code: "INVALID_CREDENTIALS" })
@@ -429,7 +429,7 @@ describe("AuthenticationPage connected journeys", () => {
         await waitFor(() => expect(panel()).toContain(copy("signIn.refused")))
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(mocks.api.signIn).toHaveBeenCalledTimes(5))
-        const refused = mocks.api.signIn.mock.calls[4][0]
+        const refused = mocks.api.signIn.mock.calls[4]![0]
         expect(refused.requestIdentity).not.toBe(unanswered.requestIdentity)
     })
 

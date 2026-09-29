@@ -213,8 +213,8 @@ describe("AgentOSSolutionModuleCenterBase", () => {
         expect(screen.getByText("The catalogue could not be read")).toBeTruthy()
         const retries = screen.getAllByRole("button", { name: "Try again" })
         expect(retries).toHaveLength(2)
-        fireEvent.click(retries[0])
-        fireEvent.click(retries[1])
+        fireEvent.click(retries[0]!)
+        fireEvent.click(retries[1]!)
         expect(onRetryInstalled).toHaveBeenCalledTimes(1)
         expect(onRetryCatalogue).toHaveBeenCalledTimes(1)
         const pending = renderToStaticMarkup(

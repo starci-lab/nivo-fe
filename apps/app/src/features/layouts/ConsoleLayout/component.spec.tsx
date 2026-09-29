@@ -63,7 +63,7 @@ describe("ConsoleLayoutBase", () => {
 
         const banners = screen.getAllByRole("banner")
         expect(banners).toHaveLength(1)
-        const [band] = banners
+        const band = banners[0]!
         const navigations = screen.getAllByRole("navigation", { name: "Console destinations" })
         const workspace = screen.getByRole("main", { name: "Console workspace" })
         for (const navigation of navigations) {

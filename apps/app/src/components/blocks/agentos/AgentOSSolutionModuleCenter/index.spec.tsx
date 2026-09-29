@@ -285,13 +285,13 @@ describe("AgentOSSolutionModuleCenter", () => {
         expect(await screen.findByText("Nivo could not start this solution installation.")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Install solution" }))
         await waitFor(() => expect(installAgentosSolutionModule).toHaveBeenCalledTimes(2))
-        const firstKey = vi.mocked(installAgentosSolutionModule).mock.calls[0][0].idempotencyKey
-        const replayKey = vi.mocked(installAgentosSolutionModule).mock.calls[1][0].idempotencyKey
+        const firstKey = vi.mocked(installAgentosSolutionModule).mock.calls[0]![0].idempotencyKey
+        const replayKey = vi.mocked(installAgentosSolutionModule).mock.calls[1]![0].idempotencyKey
         expect(replayKey).toBe(firstKey)
 
         fireEvent.click(screen.getByRole("radio", { name: "Discover" }))
         fireEvent.click(screen.getByRole("button", { name: "Install solution" }))
         await waitFor(() => expect(installAgentosSolutionModule).toHaveBeenCalledTimes(3))
-        expect(vi.mocked(installAgentosSolutionModule).mock.calls[2][0].idempotencyKey).not.toBe(firstKey)
+        expect(vi.mocked(installAgentosSolutionModule).mock.calls[2]![0].idempotencyKey).not.toBe(firstKey)
     })
 })

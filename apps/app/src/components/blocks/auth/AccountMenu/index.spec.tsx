@@ -318,12 +318,12 @@ describe("AccountMenu", () => {
          * The chosen roster member travels as the workspace memberId; a Login principal or email
          * never crosses this wire - the authority owner resolves the member's principal from it.
          */
-        expect(endPrincipalSessions.mock.calls[0][0]).toMatchObject({
+        expect(endPrincipalSessions.mock.calls[0]![0]).toMatchObject({
             memberId: "member-2",
             workspaceId: "workspace-1",
         })
-        expect(endPrincipalSessions.mock.calls[0][0]).not.toHaveProperty("targetPrincipal")
-        expect(typeof endPrincipalSessions.mock.calls[0][0].requestId).toBe("string")
+        expect(endPrincipalSessions.mock.calls[0]![0]).not.toHaveProperty("targetPrincipal")
+        expect(typeof endPrincipalSessions.mock.calls[0]![0].requestId).toBe("string")
 
         const applied = await screen.findByText("Sign-ins in the scope you act in have been ended for this person.")
         expect(applied).toBeInTheDocument()
@@ -391,7 +391,7 @@ describe("AccountMenu", () => {
 
         await user.click(screen.getByRole("button", { name: "Try again" }))
         await waitFor(() => expect(endPrincipalSessions).toHaveBeenCalledTimes(2))
-        expect(endPrincipalSessions.mock.calls[1][0]).toEqual(endPrincipalSessions.mock.calls[0][0])
+        expect(endPrincipalSessions.mock.calls[1]![0]).toEqual(endPrincipalSessions.mock.calls[0]![0])
     })
 
     it("steps back to the picker when the confirmation is cancelled, and sends nothing", async () => {

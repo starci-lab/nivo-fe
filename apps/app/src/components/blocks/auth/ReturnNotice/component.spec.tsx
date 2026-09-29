@@ -19,18 +19,18 @@ describe("ReturnNoticeBase", () => {
     afterEach(cleanup)
 
     it("says the place could not be opened, and names no route and no cause", () => {
-        render(<ReturnNoticeBase props={{ message: NOTICE[0] }} />)
+        render(<ReturnNoticeBase props={{ message: NOTICE[0]! }} />)
 
-        expect(screen.getByText(NOTICE[0])).toBeInTheDocument()
+        expect(screen.getByText(NOTICE[0]!)).toBeInTheDocument()
         expect(NOTICE[0]).toContain("trang mặc định")
         expect(NOTICE[1]).toContain("default page")
         for (const line of NOTICE) expect(line).not.toMatch(ROUTE_OR_CAUSE)
     })
 
     it("announces the notice politely rather than interrupting", () => {
-        render(<ReturnNoticeBase props={{ message: NOTICE[0] }} />)
+        render(<ReturnNoticeBase props={{ message: NOTICE[0]! }} />)
 
-        expect(screen.getByRole("status")).toHaveTextContent(NOTICE[0])
+        expect(screen.getByRole("status")).toHaveTextContent(NOTICE[0]!)
     })
 
     it("draws nothing on a landing that has nothing to report", () => {
