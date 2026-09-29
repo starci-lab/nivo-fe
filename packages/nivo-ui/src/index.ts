@@ -1,3 +1,5 @@
+"use client"
+
 /** Public React components and their ordinary TypeScript props. */
 
 /** The nivo visual family over the Common contract; its values ship as `@nivo/ui/family.css`. */
