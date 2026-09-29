@@ -14,7 +14,7 @@ export const MESSAGE_SCOPES = {
     /** The sign-in door. */
     authentication: ["app", "authentication"],
     /** The authenticated console and the launch bridges it opens. */
-    console: ["app", "authentication", "agentos", "provisioning", "console"],
+    console: ["app", "authentication", "agentos", "provisioning", "console", "metadata"],
 } as const satisfies Readonly<Record<string, ReadonlyArray<string>>>
 
 /** One route group message scope. */

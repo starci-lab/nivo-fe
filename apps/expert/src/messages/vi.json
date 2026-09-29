@@ -75,5 +75,15 @@
       "description": "Địa chỉ này không tồn tại hoặc đã được chuyển.",
       "home": "Về trang chủ"
     }
+  },
+  "metadata": {
+    "home": {
+      "title": "Học viện Mộc",
+      "description": "Nghề mộc thủ công, dạy bởi người đã sống bằng nghề hai mươi năm."
+    },
+    "notFound": {
+      "title": "Không tìm thấy trang",
+      "description": "Địa chỉ này không tồn tại hoặc đã được chuyển."
+    }
   }
 }

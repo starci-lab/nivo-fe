@@ -1,4 +1,15 @@
+import type { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import { AcademyPage } from "@/features/pages/AcademyPage"
+
+/** The route's document metadata: the academy's own name and tagline in the request's language. */
+export const generateMetadata = async (): Promise<Metadata> => {
+    const t = await getTranslations("metadata.home")
+    return {
+        title: t("title"),
+        description: t("description"),
+    }
+}
 
 /**
  * The `/[locale]` route.

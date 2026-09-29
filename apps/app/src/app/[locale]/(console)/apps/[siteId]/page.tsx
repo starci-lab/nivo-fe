@@ -1,4 +1,15 @@
+import type { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import { AcademyControlCenterPage } from "@/features/pages/AcademyControlCenterPage"
+
+/** The route's document metadata: its own title and description in the request's language. */
+export const generateMetadata = async (): Promise<Metadata> => {
+    const t = await getTranslations("metadata.appSite")
+    return {
+        title: t("title"),
+        description: t("description"),
+    }
+}
 
 /** Dynamic identity supplied by the locale-aware Academy route. */
 export type AcademyControlCenterRouteProps = { readonly params: Promise<{ readonly siteId: string }> }

@@ -2550,5 +2550,139 @@
     "loading": {
       "label": "Đang tải"
     }
+  },
+  "metadata": {
+    "home": {
+      "title": "Trang chủ — nivo Console",
+      "description": "Bảng điều khiển cấp phát và vận hành."
+    },
+    "notFound": {
+      "title": "Không tìm thấy trang — nivo Console",
+      "description": "Địa chỉ này không tồn tại hoặc đã được chuyển."
+    },
+    "authentication": {
+      "title": "Đăng nhập — nivo Console",
+      "description": "Đăng nhập, mở tài khoản hoặc đặt lại mật khẩu."
+    },
+    "overview": {
+      "title": "Tổng quan — nivo Console",
+      "description": "Mọi thứ tài khoản đang chạy, và một việc nên làm tiếp theo."
+    },
+    "chat": {
+      "title": "Trò chuyện — nivo Console",
+      "description": "Trao đổi, phối hợp và cập nhật công việc của Workspace."
+    },
+    "wallet": {
+      "title": "Ví — nivo Console",
+      "description": "Số dư, các lần nạp và kết quả thanh toán của tài khoản."
+    },
+    "walletTopUp": {
+      "title": "Nạp ví — nivo Console",
+      "description": "Nạp thêm số dư vào ví của tài khoản."
+    },
+    "walletTopUpReturn": {
+      "title": "Kết quả nạp ví — nivo Console",
+      "description": "Kết quả trả về từ cổng thanh toán sau khi nạp ví."
+    },
+    "apps": {
+      "title": "Ứng dụng — nivo Console",
+      "description": "Mỗi ứng dụng dựng từ một mẫu và có vòng đời riêng."
+    },
+    "appCreate": {
+      "title": "Tạo ứng dụng mẫu — nivo Console",
+      "description": "Cấu hình mẫu đã chọn trước khi site có định danh persisted."
+    },
+    "appSite": {
+      "title": "Trung tâm học viện — nivo Console",
+      "description": "Màn hình quản trị của một site học viện chuyên gia."
+    },
+    "appProvisioning": {
+      "title": "Cấp phát ứng dụng mẫu — nivo Console",
+      "description": "Theo dõi site đã persisted này tới khi stack độc lập sẵn sàng."
+    },
+    "agentos": {
+      "title": "AgentOS — nivo Console",
+      "description": "Bảng điều khiển AgentOS: các workspace, đơn hàng và trạng thái của chúng."
+    },
+    "agentosOrder": {
+      "title": "Đơn AgentOS — nivo Console",
+      "description": "Tiếp tục một đơn AgentOS và thanh toán của nó."
+    },
+    "agentosWorkspaces": {
+      "title": "Các workspace AgentOS — nivo Console",
+      "description": "Mọi workspace AgentOS tài khoản này sở hữu."
+    },
+    "agentosWorkspace": {
+      "title": "Workspace AgentOS — nivo Console",
+      "description": "Trung tâm điều khiển của một workspace AgentOS."
+    },
+    "agentosWorkspaceNew": {
+      "title": "Workspace AgentOS mới — nivo Console",
+      "description": "Chọn một offer và khởi tạo workspace AgentOS mới."
+    },
+    "agentosWorkspaceCheckout": {
+      "title": "Thanh toán đơn mua workspace — nivo Console",
+      "description": "Xác nhận các điều khoản nháp đã chốt trước khi yêu cầu thanh toán."
+    },
+    "agentosPurchase": {
+      "title": "Đơn mua workspace — nivo Console",
+      "description": "Trạng thái của một đơn mua workspace."
+    },
+    "agentosPurchaseProvisioning": {
+      "title": "Cấp phát workspace — nivo Console",
+      "description": "Theo dõi một đơn mua đã trả tiền tới khi workspace sẵn sàng."
+    },
+    "agentosModules": {
+      "title": "Module của workspace — nivo Console",
+      "description": "Các module đã cài trong một workspace AgentOS."
+    },
+    "agentosModuleCreate": {
+      "title": "Module mới cho workspace — nivo Console",
+      "description": "Cài một module mới vào workspace AgentOS này."
+    },
+    "agentosModuleStudio": {
+      "title": "Studio module — nivo Console",
+      "description": "Studio soạn thảo của một module trong workspace."
+    },
+    "agentosModule": {
+      "title": "Module đã cài — nivo Console",
+      "description": "Một module đã cài của workspace AgentOS này."
+    },
+    "agentosModuleSetup": {
+      "title": "Thiết lập module — nivo Console",
+      "description": "Cấu hình một module đã cài của workspace này."
+    },
+    "agentosModuleDiagnostics": {
+      "title": "Chẩn đoán module — nivo Console",
+      "description": "Màn chẩn đoán của một module đã cài."
+    },
+    "agentosModuleOperate": {
+      "title": "Vận hành module — nivo Console",
+      "description": "Vận hành một module đã cài của workspace này."
+    },
+    "agentosModuleSales": {
+      "title": "Bàn làm việc bán hàng — nivo Console",
+      "description": "Bàn làm việc bán hàng của một module đã cài."
+    },
+    "agentosModuleSalesDecisions": {
+      "title": "Quyết định bán hàng — nivo Console",
+      "description": "Trả lời các yêu cầu quyết định thương mại của installation này."
+    },
+    "agentosModuleSalesHandoffs": {
+      "title": "Bàn giao bán hàng — nivo Console",
+      "description": "Các bàn giao bán hàng của installation này."
+    },
+    "agentosModuleSettings": {
+      "title": "Cài đặt module — nivo Console",
+      "description": "Cài đặt của một module đã cài."
+    },
+    "agentosModuleTest": {
+      "title": "Kiểm thử module — nivo Console",
+      "description": "Màn kiểm thử của một module đã cài."
+    },
+    "openclawLaunch": {
+      "title": "Khởi chạy OpenClaw — nivo Console",
+      "description": "Cầu nối không cần credential mở workspace này trong OpenClaw."
+    }
   }
 }

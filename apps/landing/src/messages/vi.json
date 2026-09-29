@@ -2032,5 +2032,11 @@
       "description": "Địa chỉ này không tồn tại hoặc đã được chuyển.",
       "home": "Về trang chủ"
     }
+  },
+  "metadata": {
+    "notFound": {
+      "title": "Không tìm thấy trang",
+      "description": "Địa chỉ này không tồn tại hoặc đã được chuyển."
+    }
   }
 }

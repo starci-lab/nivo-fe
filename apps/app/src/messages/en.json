@@ -2550,5 +2550,139 @@
     "loading": {
       "label": "Loading"
     }
+  },
+  "metadata": {
+    "home": {
+      "title": "Home — nivo Console",
+      "description": "Provisioning and operations console."
+    },
+    "notFound": {
+      "title": "Page not found — nivo Console",
+      "description": "This address does not exist or has moved."
+    },
+    "authentication": {
+      "title": "Sign in — nivo Console",
+      "description": "Sign in, open an account or reset a password."
+    },
+    "overview": {
+      "title": "Overview — nivo Console",
+      "description": "Everything this account runs, and the one thing to do next."
+    },
+    "chat": {
+      "title": "Chat — nivo Console",
+      "description": "Collaborate, coordinate and update the Workspace's work."
+    },
+    "wallet": {
+      "title": "Wallet — nivo Console",
+      "description": "The account's balance, top-ups and payment returns."
+    },
+    "walletTopUp": {
+      "title": "Top up wallet — nivo Console",
+      "description": "Add balance to the account's wallet."
+    },
+    "walletTopUpReturn": {
+      "title": "Wallet top-up return — nivo Console",
+      "description": "The payment provider's return after a wallet top-up."
+    },
+    "apps": {
+      "title": "Apps — nivo Console",
+      "description": "Each app is built from a template and has a lifecycle of its own."
+    },
+    "appCreate": {
+      "title": "Create template app — nivo Console",
+      "description": "Configure the selected template before a site identity exists."
+    },
+    "appSite": {
+      "title": "Academy control center — nivo Console",
+      "description": "The management surface of one expert academy site."
+    },
+    "appProvisioning": {
+      "title": "Template app provisioning — nivo Console",
+      "description": "Follow this persisted site until its isolated stack is ready."
+    },
+    "agentos": {
+      "title": "AgentOS — nivo Console",
+      "description": "The AgentOS dashboard: workspaces, orders and their state."
+    },
+    "agentosOrder": {
+      "title": "AgentOS order — nivo Console",
+      "description": "Resume one AgentOS order and its payment."
+    },
+    "agentosWorkspaces": {
+      "title": "AgentOS workspaces — nivo Console",
+      "description": "Every AgentOS workspace this account owns."
+    },
+    "agentosWorkspace": {
+      "title": "AgentOS workspace — nivo Console",
+      "description": "The control center of one AgentOS workspace."
+    },
+    "agentosWorkspaceNew": {
+      "title": "New AgentOS workspace — nivo Console",
+      "description": "Choose an offer and start a new AgentOS workspace."
+    },
+    "agentosWorkspaceCheckout": {
+      "title": "Workspace purchase checkout — nivo Console",
+      "description": "Confirm the frozen draft terms before requesting payment."
+    },
+    "agentosPurchase": {
+      "title": "Workspace purchase — nivo Console",
+      "description": "The status of one workspace purchase."
+    },
+    "agentosPurchaseProvisioning": {
+      "title": "Workspace provisioning — nivo Console",
+      "description": "Follow one paid purchase until the workspace is ready."
+    },
+    "agentosModules": {
+      "title": "Workspace modules — nivo Console",
+      "description": "The modules installed in one AgentOS workspace."
+    },
+    "agentosModuleCreate": {
+      "title": "New workspace module — nivo Console",
+      "description": "Install a new module into this AgentOS workspace."
+    },
+    "agentosModuleStudio": {
+      "title": "Module studio — nivo Console",
+      "description": "The authoring studio of one workspace module."
+    },
+    "agentosModule": {
+      "title": "Module installation — nivo Console",
+      "description": "One installed module of this AgentOS workspace."
+    },
+    "agentosModuleSetup": {
+      "title": "Module setup — nivo Console",
+      "description": "Configure one installed module of this workspace."
+    },
+    "agentosModuleDiagnostics": {
+      "title": "Module diagnostics — nivo Console",
+      "description": "The diagnostics surface of one installed module."
+    },
+    "agentosModuleOperate": {
+      "title": "Module operation — nivo Console",
+      "description": "Operate one installed module of this workspace."
+    },
+    "agentosModuleSales": {
+      "title": "Sales workbench — nivo Console",
+      "description": "The sales workbench of one installed module."
+    },
+    "agentosModuleSalesDecisions": {
+      "title": "Sales decisions — nivo Console",
+      "description": "Answer the commercial decision requests of this installation."
+    },
+    "agentosModuleSalesHandoffs": {
+      "title": "Sales handoffs — nivo Console",
+      "description": "The sales handoffs of this installation."
+    },
+    "agentosModuleSettings": {
+      "title": "Module settings — nivo Console",
+      "description": "The settings of one installed module."
+    },
+    "agentosModuleTest": {
+      "title": "Module test — nivo Console",
+      "description": "The test surface of one installed module."
+    },
+    "openclawLaunch": {
+      "title": "OpenClaw launch — nivo Console",
+      "description": "The credential-free bridge that opens this workspace in OpenClaw."
+    }
   }
 }

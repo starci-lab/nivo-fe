@@ -75,5 +75,15 @@
       "description": "This address does not exist or has moved.",
       "home": "Back to home"
     }
+  },
+  "metadata": {
+    "home": {
+      "title": "Học viện Mộc",
+      "description": "Hand joinery, taught by someone who has lived off the craft for twenty years."
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "This address does not exist or has moved."
+    }
   }
 }
