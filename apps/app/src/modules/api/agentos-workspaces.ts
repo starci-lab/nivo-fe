@@ -8,6 +8,13 @@
 
 import type { Outcome } from "./outcome"
 import { graphql } from "./graphql"
+import {
+    parseAgentWorkspaceAppLaunch,
+    parseAgentWorkspaceControlCenter,
+    parseAgentWorkspaceRows,
+    parseRenewedAgentWorkspaceAppLaunch,
+    parseRevokedAgentWorkspaceAppLaunch,
+} from "./agentos-workspaces.guards"
 
 /** One agent workspace. `myAgentWorkspace` returns a LIST despite the singular name. */
 export type AgentWorkspaceRow = {
@@ -185,7 +192,10 @@ const AGENT_WORKSPACE = "{ id name status catalogOrder { id } }"
  * @returns Every workspace, or why there is none.
  */
 export const myAgentWorkspace = (): Promise<Outcome<ReadonlyArray<AgentWorkspaceRow>>> =>
-    graphql(`query MyAgentWorkspace { myAgentWorkspace { data ${AGENT_WORKSPACE} message success error } }`)
+    graphql(
+        `query MyAgentWorkspace { myAgentWorkspace { data ${AGENT_WORKSPACE} message success error } }`,
+        parseAgentWorkspaceRows,
+    )
 
 /** Fetch one exact workspace control center; the backend enforces viewer ownership. */
 export const myAgentWorkspaceControlCenter = (workspaceId: string): Promise<Outcome<AgentWorkspaceControlCenter>> =>
@@ -291,6 +301,7 @@ export const myAgentWorkspaceControlCenter = (workspaceId: string): Promise<Outc
                 }
             }
         `,
+        parseAgentWorkspaceControlCenter,
         {
             request: { workspaceId },
         },
@@ -313,6 +324,7 @@ export const issueAgentWorkspaceAppLaunch = (workspaceId: string): Promise<Outco
                 }
             }
         `,
+        parseAgentWorkspaceAppLaunch,
         {
             input: {
                 workspaceId,
@@ -337,6 +349,7 @@ export const renewAgentWorkspaceAppLaunch = (launchId: string): Promise<Outcome<
                 }
             }
         `,
+        parseRenewedAgentWorkspaceAppLaunch,
         {
             input: {
                 launchId,
@@ -367,6 +380,7 @@ export const revokeAgentWorkspaceAppLaunch = (
                 }
             }
         `,
+        parseRevokedAgentWorkspaceAppLaunch,
         {
             input: {
                 launchId,

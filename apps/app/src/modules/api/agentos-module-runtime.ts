@@ -8,6 +8,7 @@
 
 import type { Outcome } from "./outcome"
 import { graphql } from "./graphql"
+import { parseChannelSetting, parseModuleRuntime } from "./agentos-module-runtime.guards"
 import type { AgentosModuleTestContract } from "./agentos-module-tests"
 import type { AgentosRuntimeValue, AgentosRuntimeWidgetNode } from "./agentos-runtime-tree"
 import type { AgentosModuleInstallation } from "./agentos-modules"
@@ -366,6 +367,7 @@ export const myAgentosModuleRuntime = (
                 message success error
             }
         }`,
+        parseModuleRuntime,
         {
             request: { installationId, includeDiagnostics },
         },
@@ -382,6 +384,7 @@ export const manageAgentosModuleRuntime = (
                 message success error
             }
         }`,
+        parseModuleRuntime,
         {
             input,
         },
@@ -414,6 +417,7 @@ export const configureAgentWorkspaceChannel = (
                 }
             }
         `,
+        parseChannelSetting,
         {
             input,
         },

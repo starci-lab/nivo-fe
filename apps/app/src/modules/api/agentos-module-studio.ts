@@ -10,6 +10,8 @@ import type { Outcome } from "./outcome"
 import { graphql } from "./graphql"
 import { CORE_API_ORIGIN } from "@/modules/config"
 import { send } from "./transport"
+import { parseBooleanAnswer } from "./wire"
+import { parseModuleStudio, parseModuleUploadCapability } from "./agentos-module-studio.guards"
 
 /** A byte upload may legitimately outlast an ordinary call. */
 const UPLOAD_TIMEOUT_MS = 120_000
@@ -95,6 +97,7 @@ export const myAgentosCustomModuleStudio = (
                 message success error
             }
         }`,
+        parseModuleStudio,
         {
             request: { agentWorkspaceId, moduleId },
         },
@@ -112,6 +115,7 @@ const studioMutation = (
                 message success error
             }
         }`,
+        parseModuleStudio,
         {
             input,
         },
@@ -197,6 +201,7 @@ export const prepareAgentosModuleAttachmentUpload = (
                 message success error
             }
         }`,
+        parseModuleUploadCapability,
         {
             input,
         },
@@ -246,6 +251,7 @@ export const removeAgentosModuleAttachment = (input: AgentosModuleAttachmentIden
                 }
             }
         `,
+        parseBooleanAnswer,
         {
             input,
         },
@@ -266,6 +272,7 @@ export const removeAgentosModuleIntegrationSecret = (
                 }
             }
         `,
+        parseBooleanAnswer,
         {
             input,
         },

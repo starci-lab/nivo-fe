@@ -8,6 +8,12 @@
 
 import type { Outcome } from "./outcome"
 import { graphql } from "./graphql"
+import {
+    parseModuleInstallation,
+    parseModuleInstallationDetail,
+    parseModuleInstallations,
+    parseSolutionModules,
+} from "./agentos-modules.guards"
 
 /** Immutable AgentOS solution package offered by the Nivo catalog. */
 export type AgentosSolutionModule = {
@@ -77,24 +83,27 @@ export type InstallAgentosSolutionModuleInput = {
 
 /** Read the immutable AgentOS solution-module catalog. */
 export const myAgentosSolutionModules = (): Promise<Outcome<ReadonlyArray<AgentosSolutionModule>>> =>
-    graphql(`
-        query MyAgentosSolutionModules {
-            myAgentosSolutionModules {
-                data {
-                    key
-                    version
-                    name
-                    summary
-                    agentRoles
-                    channelRoles
-                    safetyMode
+    graphql(
+        `
+            query MyAgentosSolutionModules {
+                myAgentosSolutionModules {
+                    data {
+                        key
+                        version
+                        name
+                        summary
+                        agentRoles
+                        channelRoles
+                        safetyMode
+                    }
+                    message
+                    success
+                    error
                 }
-                message
-                success
-                error
             }
-        }
-    `)
+        `,
+        parseSolutionModules,
+    )
 
 /** Read installations belonging to one exact owner-scoped AgentOS workspace. */
 export const myAgentosModuleInstallations = (
@@ -121,6 +130,7 @@ export const myAgentosModuleInstallations = (
                 }
             }
         `,
+        parseModuleInstallations,
         {
             request: { agentWorkspaceId },
         },
@@ -173,6 +183,7 @@ export const myAgentosModuleInstallation = (
                 }
             }
         `,
+        parseModuleInstallationDetail,
         {
             request: { installationId },
         },
@@ -203,6 +214,7 @@ export const installAgentosSolutionModule = (
                 }
             }
         `,
+        parseModuleInstallation,
         {
             input: {
                 ...input,

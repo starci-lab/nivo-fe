@@ -8,6 +8,7 @@
 
 import type { Outcome } from "./outcome"
 import { graphql } from "./graphql"
+import { parseModuleTestSurface } from "./agentos-module-tests.guards"
 import type { AgentosRuntimeValue, AgentosRuntimeWidgetNode } from "./agentos-runtime-tree"
 
 /** One declarative assertion pinned to a side-effect-free module test scenario. */
@@ -133,6 +134,7 @@ export const myAgentosModuleTestSurface = (installationId: string): Promise<Outc
                 message success error
             }
         }`,
+        parseModuleTestSurface,
         {
             request: { installationId },
         },
@@ -150,6 +152,7 @@ export const myAgentosModuleTestRun = (
                 message success error
             }
         }`,
+        parseModuleTestSurface,
         {
             request: { installationId, runId },
         },
@@ -164,6 +167,7 @@ export const runAgentosModuleTest = (input: RunAgentosModuleTestInput): Promise<
                 message success error
             }
         }`,
+        parseModuleTestSurface,
         {
             input,
         },

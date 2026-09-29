@@ -8,6 +8,7 @@
 
 import type { Outcome } from "./outcome"
 import { graphql } from "./graphql"
+import { parseAgentosAiKnowledgeReadiness, parseAgentosAiOperationReceipt } from "./agentos-knowledge.guards"
 
 /** Owner-safe AI, vector-store and knowledge provenance for one workspace. */
 export type AgentosAiKnowledgeReadiness = {
@@ -87,6 +88,7 @@ export const myAgentosAiKnowledgeReadiness = (workspaceId: string): Promise<Outc
                 }
             }
         `,
+        parseAgentosAiKnowledgeReadiness,
         {
             request: { workspaceId },
         },
@@ -110,6 +112,7 @@ export const runAgentosAiReadinessTest = (
                 }
             }
         `,
+        parseAgentosAiOperationReceipt,
         {
             input,
         },
@@ -133,6 +136,7 @@ export const reindexAgentWorkspaceKnowledge = (
                 }
             }
         `,
+        parseAgentosAiOperationReceipt,
         {
             input,
         },
