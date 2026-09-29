@@ -72,8 +72,8 @@ const AcademyGrowthSummaryContent = (input: AcademyGrowthSummaryViewProps) => {
         <>
             <SurfaceCard label={labels.section}>
                 <div>
-                    {facts.map((fact, index) => (
-                        <div key={index}>
+                    {facts.map((fact) => (
+                        <div key={fact.id}>
                             <Text weight="semibold" isSkeleton={state === "resting"}>
                                 {fact.subject}
                             </Text>

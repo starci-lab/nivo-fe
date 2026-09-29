@@ -45,6 +45,12 @@ export const AgentOSModuleIntakeBase = (props: AgentOSModuleIntakeProps) => {
         guideNote,
     }: AgentOSModuleIntakeData = props.props
     const { onGoal, onSubmit }: AgentOSModuleIntakeActions = props.on
+    const stepOccurrences = new Map<string, number>()
+    const guideStepRows = guideSteps.map((step) => {
+        const occurrence = stepOccurrences.get(step) ?? 0
+        stepOccurrences.set(step, occurrence + 1)
+        return { step, key: `${step}:${occurrence}` }
+    })
     return (
         <div>
             <div>
@@ -92,8 +98,8 @@ export const AgentOSModuleIntakeBase = (props: AgentOSModuleIntakeProps) => {
                             <div>
                                 <Heading level={3}>{guideTitle}</Heading>
                                 <div>
-                                    {guideSteps.map((step, index) => (
-                                        <div key={index}>
+                                    {guideStepRows.map(({ step, key }, index) => (
+                                        <div key={key}>
                                             <Text size="sm" weight="semibold">
                                                 {String(index + 1)}
                                             </Text>

@@ -232,8 +232,8 @@ export const AgentOSWorkspaceAiKnowledgeBase = (props: AgentOSWorkspaceAiKnowled
     const rail = (
         <div className={CONTENT_CLASS_NAME} data-contract="GAP-2">
             <DirectionList label={labels.sectionHeading}>
-                {readinessSteps(state, readiness, labels).map((step, index) => (
-                    <div className={ROW_CLASS_NAME} data-contract="BOUNDARY-2 PADDING-4 PADDING-3" key={index}>
+                {readinessSteps(state, readiness, labels).map((step) => (
+                    <div className={ROW_CLASS_NAME} data-contract="BOUNDARY-2 PADDING-4 PADDING-3" key={step.ordinal}>
                         <LifecycleStep props={step} isLoading={loading} />
                     </div>
                 ))}

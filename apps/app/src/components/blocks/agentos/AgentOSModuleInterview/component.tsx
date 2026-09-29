@@ -95,8 +95,8 @@ export const AgentOSModuleInterviewBase = (props: AgentOSModuleInterviewProps) =
                     </Heading>
                     <Text size="xs">{labels.saved}</Text>
                 </div>
-                {messages.map((message, index) => (
-                    <div key={index}>
+                {messages.map((message) => (
+                    <div key={message.id}>
                         <Text size="xs" weight="semibold" isSkeleton={loading}>
                             {message.role === "assistant" ? labels.agent : labels.you}
                         </Text>

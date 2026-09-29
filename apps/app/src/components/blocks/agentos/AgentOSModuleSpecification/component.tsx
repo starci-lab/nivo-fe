@@ -79,8 +79,8 @@ export const AgentOSModuleSpecificationBase = (props: AgentOSModuleSpecification
                     </Text>
                 </div>
                 <div>
-                    {facts.map((fact, index) => (
-                        <div key={index}>
+                    {facts.map((fact) => (
+                        <div key={fact.key}>
                             <Text size="sm" isSkeleton={loading}>
                                 {fact.key}
                             </Text>

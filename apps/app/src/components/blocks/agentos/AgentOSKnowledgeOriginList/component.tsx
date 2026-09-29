@@ -40,6 +40,13 @@ const shortDigest = (digest: string | null) => (digest === null ? "—" : `${dig
 export const AgentOSKnowledgeOriginListBase = (props: AgentOSKnowledgeOriginListProps) => {
     const { origins, labels, loading = false } = props.props
     const { documents } = props.on
+    const originOccurrences = new Map<string, number>()
+    const originRows = origins.map((origin) => {
+        const value = origin.digest ?? origin.origin
+        const occurrence = originOccurrences.get(value) ?? 0
+        originOccurrences.set(value, occurrence + 1)
+        return { origin, key: `${value}:${occurrence}` }
+    })
     return (
         <DirectionList label={labels.title} isLoading={loading}>
             {loading ? (
@@ -49,8 +56,8 @@ export const AgentOSKnowledgeOriginListBase = (props: AgentOSKnowledgeOriginList
             ) : origins.length === 0 ? (
                 <DirectionEmpty message={labels.unknownVersion} />
             ) : (
-                origins.map((origin, index) => (
-                    <div key={index} className={ROW_CLASS_NAME} data-contract="BOUNDARY-2 PADDING-4 PADDING-3">
+                originRows.map(({ origin, key }) => (
+                    <div key={key} className={ROW_CLASS_NAME} data-contract="BOUNDARY-2 PADDING-4 PADDING-3">
                         <DirectionHeader
                             level={3}
                             title={origin.origin}

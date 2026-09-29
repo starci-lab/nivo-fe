@@ -55,8 +55,8 @@ export const AgentOSModuleProfileBase = (props: AgentOSModuleProfileProps) => {
                     isLoading={loading}
                 />
                 <div>
-                    {facts.map((fact, index) => (
-                        <div key={index}>
+                    {facts.map((fact) => (
+                        <div key={fact.key}>
                             <Text size="sm" isSkeleton={loading}>
                                 {fact.key}
                             </Text>

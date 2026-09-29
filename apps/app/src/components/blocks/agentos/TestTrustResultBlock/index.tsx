@@ -106,6 +106,7 @@ const RejectedEvidence = ({ copy, assertion }: EvidenceComponentProps) => {
 const DEFAULT_EVIDENCE_REGISTRY: EvidenceRegistry = {
     "nivo.test-evidence@1.0.0": NivoTestEvidence,
 }
+const RUN_SUMMARY_KEYS = ["total", "pass", "warning", "fail"] as const
 const count = (run: AgentosModuleTestRun, key: "total" | "pass" | "warning" | "fail"): string => {
     const value = run.summary[key]
     return typeof value === "number" || typeof value === "string" ? String(value) : "0"
@@ -140,8 +141,8 @@ export const TestTrustResultBlock = (props: TestTrustResultBlockProps) => {
                                   <Text size="sm">{copy.trust.noRun}</Text>
                               </div>,
                           ]
-                        : (["total", "pass", "warning", "fail"] as const).map((key, index) => (
-                              <div key={index}>
+                        : RUN_SUMMARY_KEYS.map((key) => (
+                              <div key={key}>
                                   <Text size="sm">{copy.trust[key]}</Text>
                                   <Text size="sm" weight="semibold">
                                       {count(run, key)}

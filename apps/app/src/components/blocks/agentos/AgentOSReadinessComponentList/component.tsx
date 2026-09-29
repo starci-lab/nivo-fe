@@ -44,8 +44,12 @@ export const AgentOSReadinessComponentListBase = (props: AgentOSReadinessCompone
             ) : components.length === 0 ? (
                 <DirectionEmpty message={labels.evidence} />
             ) : (
-                components.map((component, index) => (
-                    <div key={index} className={ROW_CLASS_NAME} data-contract="BOUNDARY-2 PADDING-4 PADDING-3">
+                components.map((component) => (
+                    <div
+                        key={component.component}
+                        className={ROW_CLASS_NAME}
+                        data-contract="BOUNDARY-2 PADDING-4 PADDING-3"
+                    >
                         <DirectionHeader
                             level={3}
                             title={component.component}

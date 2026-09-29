@@ -120,6 +120,12 @@ export const ContextVersionBlock = (props: ContextVersionBlockProps) => {
                 : !draft.exactTestPassed
                   ? copy.setup.passTestFirst
                   : copy.setup.applyVersion({ version: draft.version })
+    const factOccurrences = new Map<string, number>()
+    const factRows = (draft?.facts.length ? draft.facts : [copy.setup.continueChat]).slice(0, 4).map((fact) => {
+        const occurrence = factOccurrences.get(fact) ?? 0
+        factOccurrences.set(fact, occurrence + 1)
+        return { fact, key: `${fact}:${occurrence}` }
+    })
     return (
         <SurfaceCard ariaLabel={copy.setup.gatesReview} composition="joined">
             <div className={CONTEXT_RAISED_BAND_CLASS_NAME} data-contract="SURFACE-3 GAP-3 PADDING-4">
@@ -138,8 +144,8 @@ export const ContextVersionBlock = (props: ContextVersionBlockProps) => {
                 <Text size="sm" weight="semibold">
                     {draft?.summary ?? copy.setup.noCandidate}
                 </Text>
-                {(draft?.facts.length ? draft.facts : [copy.setup.continueChat]).slice(0, 4).map((fact, index) => (
-                    <Text size="sm" key={`${draft?.setupSessionId ?? "empty"}-fact-${index}`}>
+                {factRows.map(({ fact, key }) => (
+                    <Text size="sm" key={key}>
                         {fact}
                     </Text>
                 ))}
