@@ -12,19 +12,13 @@ import {
 } from "../../../hooks"
 import type { AgentOSModuleView } from "../../../components/blocks/agentos/ModuleRouteShellBlock"
 import { AgentOSSolutionModuleAttachments } from "../../../components/blocks/agentos/AgentOSSolutionModuleAttachments"
-import type {
-    DiagnosticsSurfaceProps,
-    SetupSurfaceProps,
-} from "../../../modules/agentos/module-page/surface-types"
+import type { DiagnosticsSurfaceProps, SetupSurfaceProps } from "../../../modules/agentos/module-page/surface-types"
 import { contextDraftFor } from "../../../modules/agentos/module-page/setup-draft"
 import { moduleScreenFor, moduleShellPropsFor } from "../../../modules/agentos/module-page/screens"
 import { activeVersionFor } from "../../../modules/agentos/module-page/sessions"
 import { QueryNotice } from "../../../components/blocks/query/QueryNotice"
-import {
-    AgentOSSolutionModulePageBase,
-    AgentOSSolutionModuleState,
-    buildModulePageCopy,
-} from "./component"
+import { installation, workspaceModules } from "../../../modules/routes"
+import { AgentOSSolutionModulePageBase, AgentOSSolutionModuleState, buildModulePageCopy } from "./component"
 
 /** Exact workspace and installation route identities connected by the page. */
 export type AgentOSSolutionModulePageProps = {
@@ -50,8 +44,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     }
     const [setupPane, setSetupPane] = useState<SetupSurfaceProps["compactPane"]>("conversation")
     const [diagnosticsPane, setDiagnosticsPane] = useState<DiagnosticsSurfaceProps["compactPane"]>("readiness")
-    const [diagnosticSignal, setDiagnosticSignal] =
-        useState<DiagnosticsSurfaceProps["selectedSignal"]>("all")
+    const [diagnosticSignal, setDiagnosticSignal] = useState<DiagnosticsSurfaceProps["selectedSignal"]>("all")
 
     const moduleRuntime = useModuleRuntime({ workspaceId, installationId, view })
     const { runtime, runtimeReading, runtimeForeign, testSurface, testSurfaceReading } = moduleRuntime
@@ -84,7 +77,10 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
 
     if (runtimeReading.status === "failed")
         return (
-            <QueryNotice props={{ failure: runtimeReading }} on={{ retry: () => void moduleRuntime.runtimeQuery.mutate() }} />
+            <QueryNotice
+                props={{ failure: runtimeReading }}
+                on={{ retry: () => void moduleRuntime.runtimeQuery.mutate() }}
+            />
         )
     if (runtimeForeign)
         return (
@@ -110,7 +106,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
 
     const activeVersion = activeVersionFor(runtime)
     const draft = contextDraftFor(runtime, setup.selectedSetup, testSurface, copy)
-    const moduleRoot = `/agentos/workspaces/${workspaceId}/modules/${installationId}`
+    const moduleRoot = installation(workspaceId, installationId)
     const shell = moduleShellPropsFor({
         workspaceId,
         copy,
@@ -155,7 +151,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
             state={{ copy, screen }}
             props={shell}
             on={{
-                backToModules: () => router.push(`/agentos/workspaces/${workspaceId}/modules`),
+                backToModules: () => router.push(workspaceModules(workspaceId)),
                 navigate: (nextView) => router.push(`${moduleRoot}/${nextView}`),
             }}
         />
