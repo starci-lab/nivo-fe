@@ -1,7 +1,8 @@
 "use client"
 
-import { useLocale, useTranslations } from "next-intl"
+import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { useSalesWorkbench } from "@/hooks"
+import type { Formatter } from "@/modules/i18n/formatter"
 import { translationValuesForNextIntl } from "../translation-values"
 import { SalesWorkbenchBlockBase } from "./component"
 
@@ -12,12 +13,13 @@ export type SalesWorkbenchBlockProps = { readonly moduleId: string }
 export const SalesWorkbenchBlock = (props: SalesWorkbenchBlockProps) => {
     const translate = useTranslations("console.agentos.modules.runtime.workbench.salesWorkbench")
     const locale = useLocale()
+    const format: Formatter = useFormatter()
     const view = useSalesWorkbench(props.moduleId, locale, (key, values) =>
         translate(key, translationValuesForNextIntl(values)),
     )
     return (
         <SalesWorkbenchBlockBase
-            props={{ view }}
+            props={{ view, format }}
             on={{
                 selectOpportunity: view.wait.setOpportunityId,
                 setFactKind: view.ambiguity.setFactKind,

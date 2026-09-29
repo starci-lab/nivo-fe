@@ -1,5 +1,6 @@
 import type { Outcome } from "@/modules/api/outcome"
 import type { SalesActionValue, SalesPipelineItem, SalesRequestedAction } from "@/modules/api/sales"
+import type { Formatter } from "@/modules/i18n/formatter"
 
 /** The values one Sales copy key interpolates; the surface passes only already-worded text. */
 type TranslationValues = Readonly<Record<string, string | number | undefined>>
@@ -71,27 +72,31 @@ export const salesEffectUnattested = (answer: SalesAnswerStanding | undefined): 
     answer !== undefined && !answer.ok && answer.code === "outcome_unknown"
 
 /** One Sales command input's refusal message key. */
-export const salesRefusalKey = (code: string): string =>
-    (
-        ({
-            forbidden: "refusal.forbidden",
-            REFUSED: "refusal.forbidden",
-            UNAUTHENTICATED: "refusal.signIn",
-            SALES_REFUSED_DENIED: "refusal.forbidden",
-            SALES_REFUSED_INVALID: "refusal.validation",
-            SALES_REFUSED_CONFLICT: "refusal.conflict",
-            SALES_REFUSED_UNAVAILABLE: "refusal.unavailable",
-            SALES_POLICY_VALUE_INVALID: "refusal.validation",
-            outcome_unknown: "refusal.unattested",
-            DEADLINE_EXCEEDED: "refusal.unattested",
-            UNREACHABLE: "refusal.unreachable",
-            MALFORMED_ANSWER: "refusal.malformed",
-            UNEXPECTED_RESULT_KIND: "refusal.malformed",
-            UNEXPECTED_RESULT_STATUS: "refusal.malformed",
-            ECHOED_IDENTITY_MISMATCH: "refusal.malformed",
-            BAD_REQUEST: "refusal.validation",
-        }) as Readonly<Record<string, string>>
-    )[code] ?? "refusal.unreachable"
+const SALES_REFUSAL_KEYS = {
+    forbidden: "refusal.forbidden",
+    REFUSED: "refusal.forbidden",
+    UNAUTHENTICATED: "refusal.signIn",
+    SALES_REFUSED_DENIED: "refusal.forbidden",
+    SALES_REFUSED_INVALID: "refusal.validation",
+    SALES_REFUSED_CONFLICT: "refusal.conflict",
+    SALES_REFUSED_UNAVAILABLE: "refusal.unavailable",
+    SALES_POLICY_VALUE_INVALID: "refusal.validation",
+    outcome_unknown: "refusal.unattested",
+    DEADLINE_EXCEEDED: "refusal.unattested",
+    UNREACHABLE: "refusal.unreachable",
+    MALFORMED_ANSWER: "refusal.malformed",
+    UNEXPECTED_RESULT_KIND: "refusal.malformed",
+    UNEXPECTED_RESULT_STATUS: "refusal.malformed",
+    ECHOED_IDENTITY_MISMATCH: "refusal.malformed",
+    BAD_REQUEST: "refusal.validation",
+} satisfies Readonly<Record<string, string>>
+
+const salesKey = (
+    mapping: Readonly<Partial<Record<string, string>>>,
+    value: string,
+): string | undefined => mapping[value]
+
+export const salesRefusalKey = (code: string): string => salesKey(SALES_REFUSAL_KEYS, code) ?? "refusal.unreachable"
 
 /**
  * One instant as the operator reads it.
@@ -99,78 +104,77 @@ export const salesRefusalKey = (code: string): string =>
  * Sales measures nothing in a business period, so the instant is worded in the one zone every Sales
  * observation is recorded in, and an unreadable value is shown as the source wrote it.
  */
-export const formatSalesInstant = (value: string, locale: string): string => {
+export const formatSalesInstant = (value: string, format: Formatter): string => {
     const parsed = new Date(value)
     if (Number.isNaN(parsed.getTime())) return value
-    return new Intl.DateTimeFormat(locale, { dateStyle: "short", timeStyle: "short", timeZone: "UTC" }).format(parsed)
+    return format.dateTime(parsed, { dateStyle: "short", timeStyle: "short", timeZone: "UTC" })
 }
 
 /** One source-owned operational work state's label key; a state this build does not know stays its own word. */
+const SALES_WORK_STATE_KEYS = {
+    ready: "workState.ready",
+    waiting: "workState.waiting",
+    attention: "workState.attention",
+} satisfies Readonly<Record<string, string>>
+
 export const salesWorkStateKey = (workState: string): string | null =>
-    (
-        ({
-            ready: "workState.ready",
-            waiting: "workState.waiting",
-            attention: "workState.attention",
-        }) as Readonly<Record<string, string>>
-    )[workState] ?? null
+    salesKey(SALES_WORK_STATE_KEYS, workState) ?? null
 
 /** One terminal lifecycle status's label key; an undeclared status stays its own word. */
-export const salesLifecycleKey = (status: string): string | null =>
-    (
-        ({
-            open: "lifecycle.open",
-            won: "lifecycle.won",
-            lost: "lifecycle.lost",
-        }) as Readonly<Record<string, string>>
-    )[status] ?? null
+const SALES_LIFECYCLE_KEYS = {
+    open: "lifecycle.open",
+    won: "lifecycle.won",
+    lost: "lifecycle.lost",
+} satisfies Readonly<Record<string, string>>
+
+export const salesLifecycleKey = (status: string): string | null => salesKey(SALES_LIFECYCLE_KEYS, status) ?? null
 
 /** One wait or attention reason's label key; a reason this build does not know stays its own word. */
-export const salesWorkReasonKey = (reason: string): string | null =>
-    (
-        ({
-            "policy-unset": "workReason.policyUnset",
-            "policy-hold": "workReason.policyHold",
-            "waiting-customer": "workReason.waitingCustomer",
-            "waiting-authority": "workReason.waitingAuthority",
-            "needs-clarification": "workReason.needsClarification",
-            "needs-follow-up": "workReason.needsFollowUp",
-            "outcome-unknown": "workReason.outcomeUnknown",
-        }) as Readonly<Record<string, string>>
-    )[reason] ?? null
+const SALES_WORK_REASON_KEYS = {
+    "policy-unset": "workReason.policyUnset",
+    "policy-hold": "workReason.policyHold",
+    "waiting-customer": "workReason.waitingCustomer",
+    "waiting-authority": "workReason.waitingAuthority",
+    "needs-clarification": "workReason.needsClarification",
+    "needs-follow-up": "workReason.needsFollowUp",
+    "outcome-unknown": "workReason.outcomeUnknown",
+} satisfies Readonly<Record<string, string>>
+
+export const salesWorkReasonKey = (reason: string): string | null => salesKey(SALES_WORK_REASON_KEYS, reason) ?? null
 
 /** One command plan status's label key; an undeclared status stays its own word. */
+const SALES_COMMAND_STATUS_KEYS = {
+    pending: "commandStatus.pending",
+    "awaiting-clarification": "commandStatus.awaitingClarification",
+    accepted: "commandStatus.accepted",
+    rejected: "commandStatus.rejected",
+    withdrawn: "commandStatus.withdrawn",
+} satisfies Readonly<Record<string, string>>
+
 export const salesCommandStatusKey = (status: string): string | null =>
-    (
-        ({
-            pending: "commandStatus.pending",
-            "awaiting-clarification": "commandStatus.awaitingClarification",
-            accepted: "commandStatus.accepted",
-            rejected: "commandStatus.rejected",
-            withdrawn: "commandStatus.withdrawn",
-        }) as Readonly<Record<string, string>>
-    )[status] ?? null
+    salesKey(SALES_COMMAND_STATUS_KEYS, status) ?? null
 
 /** One Sales action status's label key; an undeclared status stays its own word. */
+const SALES_ACTION_STATUS_KEYS = {
+    "not-started": "actionStatus.notStarted",
+    started: "actionStatus.started",
+    delivered: "actionStatus.delivered",
+    waiting: "actionStatus.waiting",
+    stopped: "actionStatus.stopped",
+    "outcome-unknown": "actionStatus.outcomeUnknown",
+} satisfies Readonly<Record<string, string>>
+
 export const salesActionStatusKey = (status: string): string | null =>
-    (
-        ({
-            "not-started": "actionStatus.notStarted",
-            started: "actionStatus.started",
-            delivered: "actionStatus.delivered",
-            waiting: "actionStatus.waiting",
-            stopped: "actionStatus.stopped",
-            "outcome-unknown": "actionStatus.outcomeUnknown",
-        }) as Readonly<Record<string, string>>
-    )[status] ?? null
+    salesKey(SALES_ACTION_STATUS_KEYS, status) ?? null
 
 /** One closure outcome's label key. */
-export const salesOutcomeKey = (outcome: string): string =>
-    (
-        ({ won: "outcome.won", lost: "outcome.lost", attention: "outcome.attention" }) as Readonly<
-            Record<string, string>
-        >
-    )[outcome] ?? "outcome.attention"
+const SALES_OUTCOME_KEYS = {
+    won: "outcome.won",
+    lost: "outcome.lost",
+    attention: "outcome.attention",
+} satisfies Readonly<Record<string, string>>
+
+export const salesOutcomeKey = (outcome: string): string => salesKey(SALES_OUTCOME_KEYS, outcome) ?? "outcome.attention"
 
 /** One clarification fact as the plan discloses it: exactly one of the two permitted kinds is named. */
 export type SalesClarificationFactSource = { readonly customerRef?: unknown; readonly opportunityId?: unknown }
@@ -234,7 +238,8 @@ export const salesWriterFence = (
 ): { readonly claimTokenHash: string; readonly fencedAt: string } | null => {
     const fence = action?.receiverReceipt?.writerFence
     if (typeof fence !== "object" || fence === null) return null
-    const { claimTokenHash, fencedAt } = fence as { readonly claimTokenHash?: unknown; readonly fencedAt?: unknown }
+    if (!("claimTokenHash" in fence) || !("fencedAt" in fence)) return null
+    const { claimTokenHash, fencedAt } = fence
     return typeof claimTokenHash === "string" &&
         claimTokenHash.length > 0 &&
         typeof fencedAt === "string" &&

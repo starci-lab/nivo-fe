@@ -12,6 +12,7 @@ import {
 } from "@starci/grammar/common"
 import type { SalesActionValue, SalesCloseRequest, SalesPipelineItem } from "@/modules/api/sales"
 import type { useSalesWorkbench } from "@/hooks"
+import type { Formatter } from "@/modules/i18n/formatter"
 import {
     formatSalesInstant,
     salesActionStatusKey,
@@ -40,7 +41,7 @@ import {
 } from "./classNames"
 
 /** The settled view the render half draws; the connected owner resolves everything it shows. */
-type SalesWorkbenchBlockData = { readonly view: ReturnType<typeof useSalesWorkbench> }
+type SalesWorkbenchBlockData = { readonly view: ReturnType<typeof useSalesWorkbench>; readonly format: Formatter }
 /** The view's three direct-call mutations; every other member crosses as a value prop. */
 type SalesWorkbenchBlockActions = {
     readonly selectOpportunity: (opportunityId: string) => void
@@ -131,9 +132,9 @@ const ScopeLine = ({ scopeReady, scopeStanding, t }: ScopeLineProps) => {
 
 /** Render the complete responsive Sales workbench from a settled controller view. */
 export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
-    const { view } = props.props
+    const { view, format } = props.props
     const { selectOpportunity, setFactKind, setOutcome } = props.on
-    const { t, locale, scopeReady, scopeStanding, notice } = view
+    const { t, scopeReady, scopeStanding, notice } = view
     const stop = (handler: () => void) => (event: FormSubmit) => {
         event.preventDefault()
         handler()
@@ -287,7 +288,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
                     {view.attention.rows.map(attentionRow)}
                     {view.attention.observedAt === null ? null : (
                         <Text size="xs" tone="muted">
-                            {t("attention.observedAt", { at: formatSalesInstant(view.attention.observedAt, locale) })}
+                            {t("attention.observedAt", { at: formatSalesInstant(view.attention.observedAt, format) })}
                         </Text>
                     )}
                     {view.attention.nextAfter === null ? null : (
@@ -623,7 +624,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
                         </Text>
                         {view.wait.model.closedAt === null ? null : (
                             <Text size="xs" tone="muted">
-                                {t("wait.closedAt", { at: formatSalesInstant(view.wait.model.closedAt, locale) })}
+                                {t("wait.closedAt", { at: formatSalesInstant(view.wait.model.closedAt, format) })}
                             </Text>
                         )}
                     </FieldStack>
@@ -754,7 +755,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
                             </Text>
                         ) : (
                             <Text size="sm" tone="accent">
-                                {t("closure.closedAt", { at: formatSalesInstant(view.closure.model.closedAt, locale) })}
+                                {t("closure.closedAt", { at: formatSalesInstant(view.closure.model.closedAt, format) })}
                             </Text>
                         )}
                     </FieldStack>
@@ -786,7 +787,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
                         </ActionRow>
                         <Text size="xs" tone="muted">
                             {t("installation.observedAt", {
-                                at: formatSalesInstant(view.installation.model.observedAt, locale),
+                                at: formatSalesInstant(view.installation.model.observedAt, format),
                             })}
                         </Text>
                         <Text size="xs" tone="muted">

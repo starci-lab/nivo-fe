@@ -3,6 +3,7 @@ import { render } from "@testing-library/react"
 import type { ReactElement } from "react"
 import { SalesWorkbenchBlockBase } from "./component"
 import type { useSalesWorkbench } from "@/hooks"
+import type { Formatter } from "@/modules/i18n/formatter"
 import { formatSalesInstant } from "@/modules/sales/sales-workbench"
 import en from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
@@ -32,6 +33,11 @@ const translate = (key: string, values?: Readonly<Record<string, string | number
         (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
         messageFor(catalog, key),
     )
+const formatter = {
+    number: () => "",
+    dateTime: () => "formatted instant",
+    relativeTime: () => "",
+} satisfies Formatter
 const keyPaths = (source: unknown, prefix = ""): ReadonlyArray<string> =>
     source !== null && typeof source === "object"
         ? Object.entries(source as Record<string, unknown>).flatMap(([name, value]) =>
@@ -270,7 +276,7 @@ const view = (overrides: SalesWorkbenchViewOverrides = {}): SalesWorkbenchView =
 const renderBlock = (input: SalesWorkbenchViewOverrides = {}) => {
     const rendered: ReactElement = (
         <SalesWorkbenchBlockBase
-            props={{ view: view(input) }}
+            props={{ view: view(input), format: formatter }}
             on={{
                 selectOpportunity: () => undefined,
                 setFactKind: () => undefined,
@@ -428,7 +434,7 @@ describe("SalesWorkbenchBlockBase", () => {
 
     it("shows a closure only once the opportunity read discloses one", () => {
         expect(renderBlock().container.textContent).toContain(translate("closure.openNote"))
-        const closedAt = formatSalesInstant("2026-09-24T09:00:00Z", "en")
+        const closedAt = formatSalesInstant("2026-09-24T09:00:00Z", formatter)
         const closed =
             renderBlock({
                 closure: {
