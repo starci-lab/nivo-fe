@@ -3,7 +3,7 @@ import type {
     BlockStructure,
     ProductActionRenderer,
     ProductBlockContext,
-} from "@/modules/product/types"
+} from "../../../../modules/product/types"
 import { PRODUCT_PATHS_CLASS_NAMES as styles, productPathClassName } from "./classNames"
 
 type ProductPathsProps = {

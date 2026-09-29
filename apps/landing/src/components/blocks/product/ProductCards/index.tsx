@@ -1,6 +1,6 @@
 import { Heading, Text } from "@starci/grammar/common"
 import { NivoIcon } from "@nivo/ui"
-import type { BlockStructure, ProductBlockContext } from "@/modules/product/types"
+import type { BlockStructure, ProductBlockContext } from "../../../../modules/product/types"
 import {
     PRODUCT_CARDS_CLASS_NAMES as styles,
     productCardClassName,

@@ -1,4 +1,4 @@
-import type { BlockStructure, ProductBlockContext } from "@/modules/product/types"
+import type { BlockStructure, ProductBlockContext } from "../../../../modules/product/types"
 import { PRODUCT_TABLE_CLASS_NAMES as styles } from "./classNames"
 
 type ProductTableProps = {

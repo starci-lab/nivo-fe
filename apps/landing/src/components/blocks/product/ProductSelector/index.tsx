@@ -1,4 +1,4 @@
-import type { BlockStructure, ProductBlockContext } from "@/modules/product/types"
+import type { BlockStructure, ProductBlockContext } from "../../../../modules/product/types"
 import { productSelectorClassName, productSelectorLinkClassName } from "./classNames"
 
 type ProductSelectorProps = {

@@ -1,4 +1,4 @@
-import { SITE_LINKS } from "@/modules/landing/site"
+import { SITE_LINKS } from "../landing/site"
 import type { ProductPageStructure } from "./types"
 
 /** Canonical route structure for the systemOfResponsibility product page. */

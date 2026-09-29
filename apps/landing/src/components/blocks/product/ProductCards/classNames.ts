@@ -1,5 +1,5 @@
 import { cn } from "@heroui/react"
-import type { ProductBlockContext } from "@/modules/product/types"
+import type { ProductBlockContext } from "../../../../modules/product/types"
 
 const inverseTone = (context: ProductBlockContext) =>
     context.section.tone === "dark" || context.section.tone === "crimson"

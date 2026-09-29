@@ -1,5 +1,5 @@
 import { Heading } from "@starci/grammar/common"
-import type { BlockStructure, ProductBlockContext } from "@/modules/product/types"
+import type { BlockStructure, ProductBlockContext } from "../../../../modules/product/types"
 import { PRODUCT_NOTE_CLASS_NAMES } from "./classNames"
 
 type ProductNoteProps = {

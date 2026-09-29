@@ -1,5 +1,5 @@
 import { Badge, Text } from "@starci/grammar/common"
-import type { BlockStructure, ProductBlockContext } from "@/modules/product/types"
+import type { BlockStructure, ProductBlockContext } from "../../../../modules/product/types"
 import { productStatusClassName } from "./classNames"
 
 type ProductStatusProps = {

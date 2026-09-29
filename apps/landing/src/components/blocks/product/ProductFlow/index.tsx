@@ -1,5 +1,5 @@
 import { Text } from "@starci/grammar/common"
-import type { BlockStructure, ProductBlockContext } from "@/modules/product/types"
+import type { BlockStructure, ProductBlockContext } from "../../../../modules/product/types"
 import {
     PRODUCT_FLOW_CLASS_NAMES as styles,
     productFlowClassName,

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { PageContainer } from "@starci/grammar/common"
-import type { ProductBlockContext, SectionStructure } from "@/modules/product/types"
+import type { ProductBlockContext, SectionStructure } from "../../../../modules/product/types"
 import { PRODUCT_SECTION_CLASS_NAMES as styles, productSectionClassName } from "./classNames"
 
 type ProductSectionProps = {

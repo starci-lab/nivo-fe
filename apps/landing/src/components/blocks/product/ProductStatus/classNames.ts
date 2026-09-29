@@ -1,5 +1,5 @@
 import { cn } from "@heroui/react"
-import type { ProductBlockContext } from "@/modules/product/types"
+import type { ProductBlockContext } from "../../../../modules/product/types"
 
 /** Status alignment and the responsibility definition card surface. */
 export const productStatusClassName = (context: ProductBlockContext) =>

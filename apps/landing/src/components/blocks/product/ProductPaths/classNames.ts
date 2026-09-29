@@ -1,5 +1,5 @@
 import { cn } from "@heroui/react"
-import type { ProductBlockContext } from "@/modules/product/types"
+import type { ProductBlockContext } from "../../../../modules/product/types"
 
 /** Shared route card, index, and action roles for product paths. */
 export const PRODUCT_PATHS_CLASS_NAMES = {

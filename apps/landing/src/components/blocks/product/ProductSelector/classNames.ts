@@ -1,5 +1,5 @@
 import { cn } from "@heroui/react"
-import type { ProductBlockContext } from "@/modules/product/types"
+import type { ProductBlockContext } from "../../../../modules/product/types"
 
 /** Selector layouts preserve the page-specific responsive treatment. */
 export const productSelectorClassName = (context: ProductBlockContext) =>

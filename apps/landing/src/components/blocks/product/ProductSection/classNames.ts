@@ -1,5 +1,5 @@
 import { cn } from "@heroui/react"
-import type { ProductBlockContext } from "@/modules/product/types"
+import type { ProductBlockContext } from "../../../../modules/product/types"
 
 /** Section surface, border, and text roles follow the section's semantic tone. */
 export const productSectionClassName = (context: ProductBlockContext) =>
