@@ -1,13 +1,17 @@
 /*
  * THE NIVO BRAND LAYER: the one stylesheet in the app that writes a colour.
  *
- * It sets only the tokens the grammar publishes, and every token has a value in BOTH blocks, so the
- * brand can never be half a theme. The values are the accepted brand record's
- * (.starciwork/brand/index.yaml in nivo-backend); a value changes there first and here second.
+ * It sets only the tokens the grammar publishes plus the landing chrome tokens, and every
+ * theme-flipping token has a value in BOTH blocks, so the brand can never be half a theme. The
+ * values are the accepted brand record's (.starciwork/brand/index.yaml in nivo-backend); a value
+ * changes there first and here second.
  *
  *   :root  - the light theme, and what the page is before a choice is made.
  *   .dark  - the dark theme. next-themes puts this class on <html> (system default, or the person's
- *            choice), so the same block answers "system" and "dark" with no media-query copy.
+ *            choice), so the classed block answers "system" and "dark".
+ *   @media (prefers-color-scheme: dark) - the same dark values for an unclassed root, the gap before
+ *            next-themes runs or when scripting is off. An explicit .light/.dark choice always wins,
+ *            so the fallback is guarded by :not(.light):not(.dark) and simply repeats the dark block.
  *
  * The family stylesheet (`@nivo/ui/family.css`) carries no colour of its own: its root inherits
  * these values instead of restating them.
@@ -15,6 +19,11 @@
  * Unicorn red is a FILL (with --accent-foreground on it), a focus ring and a boundary. It is not
  * body copy on a dark ground (4.13:1 on the canvas); accent text goes through the grammar's derived
  * --accent-soft-foreground, which mixes the accent toward the foreground and clears 4.5:1 in both.
+ *
+ * THE LANDING TOKENS name roles, not colours, and sit in a `landing-` namespace because the
+ * `--nivo-*` namespace belongs to the family package: `--landing-inverse*` is the fixed night band
+ * the footer and the dark sections paint in BOTH themes, while the derived chrome tokens are pure
+ * mixes of the grammar tokens, so they follow the theme automatically and declare once on :root.
  */
 :root {
     color-scheme: light;
@@ -53,6 +62,24 @@
     --field-placeholder: oklch(55.17% 0.003 354.13);
 
     --surface-shadow: 0 2px 4px 0 rgb(0 0 0 / 4%), 0 1px 2px 0 rgb(0 0 0 / 6%), 0 0 1px 0 rgb(0 0 0 / 6%);
+
+    /* Landing chrome: mixes of the theme tokens above, so they follow light and dark on their own. */
+    --landing-accent-ink: color-mix(in oklab, var(--accent) 58%, var(--background-inverse));
+    --landing-accent-bright: color-mix(in oklab, var(--accent) 64%, white);
+    --landing-ink-soft: color-mix(in oklab, var(--background-inverse) 82%, white);
+    --landing-surface-tint: color-mix(in oklab, var(--accent) 8%, var(--surface));
+    --landing-header-line: color-mix(in srgb, var(--border) 82%, transparent);
+    --landing-header-canvas: color-mix(in srgb, var(--surface) 94%, transparent);
+
+    --landing-font-page: "Satoshi", "Avenir Next", Inter, ui-sans-serif, system-ui, sans-serif;
+    --landing-header-height: 5rem;
+    --landing-shadow-popover: 0 1rem 2rem rgb(15 23 42 / 10%);
+    --landing-shadow-sheet: 0 1.5rem 3rem rgb(15 23 42 / 12%);
+
+    /* The inverse band is theme-fixed: footer and dark sections are the same navy in both themes. */
+    --landing-inverse: #071224;
+    --landing-inverse-muted: #aebacf;
+    --landing-inverse-line: rgb(174 186 207 / 22%);
 }
 
 .dark {
@@ -92,4 +119,45 @@
     --field-placeholder: oklch(70.5% 0.003 354.13);
 
     --surface-shadow: 0 0 0 0 transparent inset;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not(.light):not(.dark) {
+        color-scheme: dark;
+
+        --accent: oklch(57% 0.24 25);
+        --accent-foreground: oklch(100% 0 0);
+
+        --background: oklch(12% 0.0015 354.13);
+        --background-inverse: oklch(99.11% 0.0015 354.13);
+        --foreground: oklch(99.11% 0.0015 354.13);
+        --surface: oklch(21.03% 0.003 354.13);
+        --surface-secondary: oklch(25.7% 0.0023 354.13);
+        --surface-tertiary: oklch(27.21% 0.0023 354.13);
+        --overlay: oklch(21.03% 0.003 354.13);
+        --default: oklch(27.4% 0.0015 354.13);
+        --default-foreground: oklch(99.11% 0 0);
+        --segment: oklch(39.64% 0.0015 354.13);
+        --muted: oklch(70.5% 0.003 354.13);
+
+        --success: oklch(73.29% 0.1941 162.85);
+        --success-foreground: oklch(21.03% 0.0059 162.85);
+        --warning: oklch(82.03% 0.1392 88.38);
+        --warning-foreground: oklch(21.03% 0.0059 88.38);
+        --danger: oklch(57% 0.24 25);
+        --danger-foreground: oklch(99.11% 0 0);
+        --info: oklch(72% 0.17 250);
+        --info-foreground: oklch(21.03% 0.0059 250);
+
+        --border: oklch(28% 0.0015 354.13);
+        --separator: oklch(25% 0.0015 354.13);
+        --scrollbar-thumb: oklch(70.5% 0.0015 354.13);
+        --backdrop: oklch(0% 0 0 / 60%);
+
+        --field-background: oklch(21.03% 0.003 354.13);
+        --field-foreground: oklch(99.11% 0.0015 354.13);
+        --field-placeholder: oklch(70.5% 0.003 354.13);
+
+        --surface-shadow: 0 0 0 0 transparent inset;
+    }
 }
