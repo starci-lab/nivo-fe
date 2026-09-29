@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import { useRouter, useSession } from "@/hooks"
 import { SessionEndingDialogBase } from "./component"
@@ -56,6 +56,16 @@ export const SessionEndingDialog = (props: SessionEndingDialogProps) => {
     const router = useRouter()
     const session = useSession()
     const [isPending, setIsPending] = useState(false)
+    const [ending, setEnding] = useState<string | null>(null)
+    useEffect(() => {
+        if (ending === null) {
+            return
+        }
+        const timer = setTimeout(() => {
+            router.replace(`${SIGN_IN_HREF}?${ENDING_PARAM}=${ending}`)
+        }, 0)
+        return () => clearTimeout(timer)
+    }, [ending, router])
     const confirm = (): void => {
         if (isPending) {
             return
@@ -67,11 +77,9 @@ export const SessionEndingDialog = (props: SessionEndingDialogProps) => {
                 (report) => (report.authorityEnding === "unconfirmed" ? UNCONFIRMED_VALUE : APPLIED_VALUE),
                 () => UNCONFIRMED_VALUE,
             )
-            .then((ending) => {
+            .then((answer) => {
                 onOpenChange(false)
-                setTimeout(() => {
-                    router.replace(`${SIGN_IN_HREF}?${ENDING_PARAM}=${ending}`)
-                }, 0)
+                setEnding(answer)
             })
     }
     return (
