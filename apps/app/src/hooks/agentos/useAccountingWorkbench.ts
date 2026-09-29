@@ -155,8 +155,8 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
         }
     }
     const summaryInput: AccountingSummaryQueryInput = {
-        periodStart: period!.periodStart,
-        periodEndExclusive: period!.periodEndExclusive,
+        periodStart: period?.periodStart ?? "",
+        periodEndExclusive: period?.periodEndExclusive ?? "",
         currency,
         pageSize: PAGE_SIZE,
         cursor,
@@ -164,7 +164,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
     const detailInput: AccountingResultDetailInput =
         asOf === null ? { action: "current", resultId } : { action: "asOf", itemId, asOf }
 
-    const summary = useQueryAccountingSummarySwr(addressable, summaryInput, ready)
+    const summary = useQueryAccountingSummarySwr(addressable, summaryInput, ready && period !== null)
     const evidence = useQueryAccountingEvidenceSwr(addressable, { evidenceId }, ready && evidenceId.length > 0)
     const routine = useQueryAccountingRoutineResultSwr(addressable, { intentId }, ready && intentId.length > 0)
     const detail = useQueryAccountingResultDetailSwr(
@@ -466,7 +466,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
         scopeReady: ready,
         periodMonth,
         setPeriodMonth: chooseMonth,
-        periodLabel: period!.periodStart,
+        periodLabel: period?.periodStart ?? periodMonth,
         currency,
         setCurrency,
         asOfDraft,

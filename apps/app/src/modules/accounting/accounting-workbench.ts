@@ -159,9 +159,10 @@ export const currencyAmountToMinor = (value: string, currency: string, locale: s
 export const formatMinorCurrency = (value: string, currency: string, locale: string): string => {
     try {
         const match = /^(-?)(\d+)$/.exec(value)
-        if (match === null) throw new Error("amount")
-        const negative = match[1] === "-" && !/^0+$/.test(match[2]!)
-        const absolute = match[2]!.replace(/^0+(?=\d)/, "") || "0"
+        const rawDigits = match?.[2]
+        if (match === null || rawDigits === undefined) throw new Error("amount")
+        const negative = match[1] === "-" && !/^0+$/.test(rawDigits)
+        const absolute = rawDigits.replace(/^0+(?=\d)/, "") || "0"
         const digits = fractionDigits(currency, locale)
         const padded = absolute.padStart(digits + 1, "0")
         const whole = digits === 0 ? padded : padded.slice(0, -digits)
@@ -175,8 +176,12 @@ export const formatMinorCurrency = (value: string, currency: string, locale: str
         const template = currencyFormat.formatToParts(negative ? -1 : 1)
         const numeric = new Set(["integer", "group", "decimal", "fraction"])
         const first = template.findIndex((part) => numeric.has(part.type))
+        if (first === -1) throw new Error("amount")
         let last = first
-        for (let index = first; index < template.length; index += 1) if (numeric.has(template[index]!.type)) last = index
+        for (let index = first; index < template.length; index += 1) {
+            const part = template[index]
+            if (part !== undefined && numeric.has(part.type)) last = index
+        }
         const prefix = template
             .slice(0, first)
             .map((part) => part.value)
