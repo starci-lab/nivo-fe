@@ -4,7 +4,7 @@ import type { ReactNode } from "react"
 import { useParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { usePathname, useQueryMyAgentosModuleInstallationsSwr, useRouter } from "@/hooks"
-import { nivoQueryData } from "@/modules/query"
+import { nivoQueryPayload } from "@/modules/query"
 import { installation } from "@/modules/routes"
 import type { AgentosModuleInstallation } from "@/modules/api/agentos-modules"
 import type { SelectionListGroup, SelectionListItem } from "@nivo/ui"
@@ -73,7 +73,7 @@ export const AgentOSInstallationChrome = ({ children }: AgentOSInstallationChrom
     const pathname = usePathname()
     const router = useRouter()
     const installationsQuery = useQueryMyAgentosModuleInstallationsSwr(workspaceId)
-    const installations = nivoQueryData(installationsQuery.data) ?? []
+    const installations = nivoQueryPayload(installationsQuery.data) ?? []
     const moduleRoot = installation(workspaceId, installationId)
     const groups = installationGroups(
         installations,

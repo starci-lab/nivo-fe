@@ -23,7 +23,7 @@ import {
     type WorkspaceCheckoutAnswer,
     type WorkspaceCheckoutStatusView,
 } from "@/modules/api/workspace-controlplane"
-import { nivoQueryData } from "@/modules/query"
+import { nivoQueryReading, type NivoQueryFailure } from "@/modules/query"
 import { AgentOSProvisioningBase, type AgentOSProvisioningViewProps } from "./component"
 
 /** Route identity owned by the AgentOS provisioning block. */
@@ -122,6 +122,18 @@ const observedIdentitiesOf = (purchase: WorkspaceCheckoutStatusView): WorkspaceC
         ? { workspaceId: purchase.readiness.reference }
         : {}),
 })
+
+/** The settled failure sentence of one owner-scoped readiness read, selected by the answer's own kind. */
+const queryFailureText = (kind: NivoQueryFailure["kind"], tShared: ProvisioningCopy): string =>
+    kind === "refused"
+        ? tShared("query.signInRequired")
+        : kind === "forbidden"
+          ? tShared("query.forbidden")
+          : kind === "not-found"
+            ? tShared("query.notFound")
+            : kind === "invalid"
+              ? tShared("query.invalid")
+              : tShared("query.unavailable")
 
 /** The registered entry destination is a named route; only the workspace shell maps onto this app. */
 const entryPathOf = (destination: WorkspaceCheckoutEntryDestination): string | null =>
@@ -321,7 +333,9 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
     const aiReadinessQuery = useQueryMyAgentosAiKnowledgeReadinessSwr(readyWorkspaceId ?? undefined, aiRetryPending)
     const retryReadiness = useMutateRunAgentosAiReadinessTestSwr(readyWorkspaceId ?? undefined)
     const refreshAiReadiness = aiReadinessQuery.mutate
-    const aiReadiness = nivoQueryData(aiReadinessQuery.data)
+    const aiReadinessReading = nivoQueryReading(aiReadinessQuery.data)
+    const aiReadiness =
+        aiReadinessReading.status === "ready" ? aiReadinessReading.data : aiReadinessReading.status === "failed" ? null : undefined
     /* The entry request names the purchase and the exact workspace the readiness facet confirmed;
      the readiness observation itself is the backend's to derive, never a caller claim. */
     const entryRequest = useMemo<WorkspaceCheckoutEntryRequest>(
@@ -384,7 +398,7 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
                           subject: productName,
                           detail: "",
                           reason: !answer.ok
-                              ? answer.reason
+                              ? queryFailureText(answer.kind, tShared)
                               : answer.data.status === "refused"
                                 ? answer.data.code
                                 : t("failedLoad"),
@@ -409,7 +423,7 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
                 verdict: outcome.selection.state,
             }
         })
-    }, [isResume, offersQuery.data, presented, productName, t])
+    }, [isResume, offersQuery.data, presented, productName, t, tShared])
     /* A fresh status answer settles the resumed purchase into the phase its facets prove. */
     useEffect(() => {
         if (!isResume || resumeOrderId === null || statusQuery.data === undefined) return
@@ -420,7 +434,7 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
                 orderId: resumeOrderId,
                 subject: productName,
                 detail: resumeOrderId,
-                reason: answer.reason,
+                reason: queryFailureText(answer.kind, tShared),
             })
             return
         }
@@ -472,7 +486,7 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
         consumedEntry.current = entryAnswer
         setEntryAsked(false)
         if (!entryAnswer.ok) {
-            setEntryRefusal(entryAnswer.reason)
+            setEntryRefusal(queryFailureText(entryAnswer.kind, tShared))
             return
         }
         const entry = entryAnswer.data
@@ -687,6 +701,7 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
             }
         const operationsSettled =
             aiReadiness?.readinessOperationId === null && aiReadiness.knowledgeRecoveryOperationId === null
+        const readFailure = aiReadinessReading.status === "failed" ? aiReadinessReading : null
         if (
             aiReadiness === null ||
             (aiReadiness?.failureCode !== null && aiReadiness?.failureCode !== undefined && operationsSettled)
@@ -699,8 +714,12 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
                     subject: readyFlow.subject,
                     detail: readyFlow.detail,
                     statusTitle: t("failedTitle"),
-                    statusText: aiReadiness?.failureCode ?? t("failedLoad"),
-                    statusActionLabel: t("agentos.retryAi"),
+                    statusText:
+                        readFailure !== null
+                            ? queryFailureText(readFailure.kind, tShared)
+                            : (aiReadiness?.failureCode ?? t("failedLoad")),
+                    statusActionLabel:
+                        readFailure !== null && !readFailure.retryable ? undefined : t("agentos.retryAi"),
                     isRequestPending: aiRetryPending,
                 },
                 on: {

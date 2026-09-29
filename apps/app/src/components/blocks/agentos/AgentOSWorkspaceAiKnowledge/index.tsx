@@ -5,7 +5,8 @@ import {
     useQueryMyAgentosAiKnowledgeReadinessSwr,
 } from "@/hooks"
 import { type AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge"
-import { nivoQueryData } from "@/modules/query"
+import { nivoQueryReading } from "@/modules/query"
+import { QueryNotice } from "@/components/blocks/query/QueryNotice"
 import { useLocale, useTranslations } from "next-intl"
 import { useState } from "react"
 import { AgentOSWorkspaceAiKnowledgeBase, type AgentOSWorkspaceAiKnowledgeViewProps } from "./component"
@@ -79,7 +80,8 @@ export const AgentOSWorkspaceAiKnowledge = (props: AgentOSWorkspaceAiKnowledgePr
         workspaceId,
         action?.kind === "testing" || action?.kind === "recovering",
     )
-    const readiness = nivoQueryData(query.data)
+    const reading = nivoQueryReading(query.data)
+    const readiness = reading.status === "ready" ? reading.data : undefined
     const visibleAction = resolveAgentOSWorkspaceAiKnowledgeAction(action, readiness)
     if (visibleAction !== action) setAction(visibleAction)
     const run = async () => {
@@ -119,6 +121,9 @@ export const AgentOSWorkspaceAiKnowledge = (props: AgentOSWorkspaceAiKnowledgePr
             kind: "recovering",
             operationId: result.data.operationId,
         })
+    }
+    if (reading.status === "failed") {
+        return <QueryNotice props={{ failure: reading }} on={{ retry: () => void query.mutate() }} />
     }
     const state = resolveAgentOSWorkspaceAiKnowledgeState(readiness, visibleAction, actionRefused)
     const labels = {

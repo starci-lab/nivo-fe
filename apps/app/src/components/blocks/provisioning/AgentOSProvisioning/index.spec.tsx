@@ -273,11 +273,31 @@ describe("AgentOSProvisioning", () => {
         expect(mocks.aiMutate).toHaveBeenCalled()
     })
 
+    it("reports a failed AI readiness read by kind, and only offers its retry when the answer asks", async () => {
+        mocks.status.data = statusAnswer(readyPurchase())
+        mocks.aiReadiness = { ok: false, kind: "forbidden", code: "FORBIDDEN", reason: "denied" }
+        const forbidden = render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
+        await waitFor(() => expect(flow()).toContain('"state":"failed"'))
+        expect(flow()).toContain("You don't have access to this.")
+        expect(flow()).not.toContain('"action"')
+        forbidden.unmount()
+        resetQueryCache()
+
+        mocks.aiReadiness = { ok: false, kind: "unavailable", code: "UNAVAILABLE", reason: "down" }
+        render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
+        await waitFor(() => expect(flow()).toContain('"state":"failed"'))
+        expect(flow()).toContain("This could not be loaded. Check your connection and try again.")
+        expect(flow()).toContain('"action":"Retry AI readiness"')
+        fireEvent.click(screen.getByTestId("status"))
+        await waitFor(() => expect(mocks.aiTrigger).toHaveBeenCalled())
+        expect(mocks.aiMutate).toHaveBeenCalled()
+    })
+
     it("reports a refused or unavailable offers read as failed without inventing a catalogue", async () => {
-        mocks.offers.data = { ok: false, reason: "catalog-down" }
+        mocks.offers.data = { ok: false, kind: "unavailable", code: "CATALOG_DOWN", reason: "catalog-down" }
         render(<AgentOSProvisioning context={{ mode: "new" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"failed"'))
-        expect(flow()).toContain("catalog-down")
+        expect(flow()).toContain("This could not be loaded. Check your connection and try again.")
         fireEvent.click(screen.getByTestId("status"))
         expect(mocks.push).toHaveBeenCalledWith("/agentos")
     })
@@ -333,10 +353,10 @@ describe("AgentOSProvisioning", () => {
     })
 
     it("keeps an unanswered status read as payment-unknown with a reconcile action", async () => {
-        mocks.status.data = { ok: false, reason: "status source refused" }
+        mocks.status.data = { ok: false, kind: "unavailable", code: "STATUS_DOWN", reason: "status source refused" }
         render(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"payment_unknown"'))
-        expect(flow()).toContain("status source refused")
+        expect(flow()).toContain("This could not be loaded. Check your connection and try again.")
         fireEvent.click(screen.getByTestId("status"))
         await waitFor(() => expect(mocks.status.mutate).toHaveBeenCalled())
         expect(mocks.recover.trigger).not.toHaveBeenCalled()

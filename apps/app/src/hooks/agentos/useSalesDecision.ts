@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react"
 import type { SalesDecideProposalRequest, SalesDecisionValue, SalesInstallationScope } from "@/modules/api/sales"
-import { nivoQueryData } from "@/modules/query"
-import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
+import { nivoQueryPayload } from "@/modules/query"
+import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/console"
 import { useQuerySalesDecisionRequestSwr } from "@/hooks/swr/queries/useQuerySalesDecisionRequestSwr"
 import { useMutateSalesDecideProposalSwr } from "@/hooks/swr/mutations/useMutateSalesDecideProposalSwr"
 import {
@@ -103,7 +103,7 @@ type Intent = { readonly fingerprint: string; readonly token: string }
 /** Own decision form state, the resolved installation scope, one idempotent answer and its readback-settled notice. */
 export const useSalesDecision = (workspaceId: string, installationId: string, t: SalesTranslation) => {
     const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId, workspaceId.length > 0)
-    const instanceId = nivoQueryData(controlCenter.data)?.instance?.id ?? ""
+    const instanceId = nivoQueryPayload(controlCenter.data)?.instance?.id ?? ""
     const scope = scopeOf(workspaceId, instanceId, installationId)
     const scopeStanding = scopeStandingFor(controlCenter.data, controlCenter.error, instanceId.length > 0)
     const addressable = scope ?? { workspaceId: "", instanceId: "", installationId }

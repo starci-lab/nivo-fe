@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useRef, type ReactNode } from "react"
 import { SurfaceCard, Button, Button as CoreButton, Text } from "@starci/grammar/common"
 import { LifecycleStep, type LifecycleStepData } from "@nivo/ui"
 import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
@@ -28,7 +28,9 @@ export type AgentOSSolutionModuleAttachmentsProps = {
     readonly state: "attachments"
     readonly props: {
         readonly studio?: Pick<AgentosModuleStudio, "attachments">
-        readonly status: "loading" | "refused" | "ready"
+        readonly status: "loading" | "refused" | "failed" | "ready"
+        /** The failure the connected half composed for a settled failed read. */
+        readonly notice?: ReactNode
         readonly pending: boolean
         readonly labels: AgentOSSolutionModuleAttachmentsLabels
     }
@@ -50,9 +52,15 @@ const lifecycleStateLabel = (index: number, active: number, labels: AgentOSSolut
 
 /** Draw quarantined file evidence with explicit scan outcomes. */
 export const AgentOSSolutionModuleAttachmentsBase = (props: AgentOSSolutionModuleAttachmentsProps) => {
-    const { studio, status, pending, labels } = props.props
+    const { studio, status, notice, pending, labels } = props.props
     const { onChoose, onRetry, onRemove, chunks } = props.on
     const fileInput = useRef<HTMLInputElement>(null)
+    if (status === "failed")
+        return (
+            <SurfaceCard label={labels.title}>
+                <div>{notice}</div>
+            </SurfaceCard>
+        )
     if (status === "refused")
         return (
             <SurfaceCard label={labels.title}>

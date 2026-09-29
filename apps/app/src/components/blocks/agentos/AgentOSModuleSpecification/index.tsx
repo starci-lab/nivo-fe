@@ -15,7 +15,7 @@ const specificationState = (
     refused: boolean,
     studio: ReturnType<typeof useAgentOSModuleStudioProjection>["studio"],
 ) => {
-    if (refused || studio === null) return "refused"
+    if (refused) return "refused"
     if (studio === undefined) return "loading"
     if (studio.specification === null) return "incomplete"
     return studio.module.status === "publishing" ? "publishing" : "ready"

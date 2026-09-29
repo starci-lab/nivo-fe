@@ -4,7 +4,7 @@ import type { ReactNode } from "react"
 import { useParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { usePathname, useQueryMyAgentWorkspaceControlCenterSwr, useRouter } from "@/hooks"
-import { nivoQueryData } from "@/modules/query"
+import { nivoQueryPayload } from "@/modules/query"
 import { AgentOSWorkspaceChromeBase, type AgentOSWorkspaceChromeBaseProps } from "./component"
 
 /** The nested route body rendered under this workspace's shared header and tabs. */
@@ -27,7 +27,7 @@ export const AgentOSWorkspaceChrome = ({ children }: AgentOSWorkspaceChromeProps
     const pathname = usePathname()
     const router = useRouter()
     const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId)
-    const workspaceName = nivoQueryData(controlCenter.data)?.workspace.name ?? workspaceId
+    const workspaceName = nivoQueryPayload(controlCenter.data)?.workspace.name ?? workspaceId
     const overviewRoute = `/agentos/workspaces/${workspaceId}`
     const modulesRoute = `${overviewRoute}/modules`
     const input: AgentOSWorkspaceChromeBaseProps = {

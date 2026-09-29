@@ -9,12 +9,12 @@ describe("useAgentOSModuleStudioProjection", () => {
     it("shares the page-owned projection with sibling connected blocks", () => {
         const refresh = vi.fn().mockResolvedValue(undefined)
         const wrapper = (props: ProjectionWrapperProps) => (
-            <AgentOSModuleStudioProjectionProvider value={{ studio: null, refresh }}>
+            <AgentOSModuleStudioProjectionProvider value={{ studio: undefined, refresh }}>
                 {props.children}
             </AgentOSModuleStudioProjectionProvider>
         )
         const { result } = renderHook(() => useAgentOSModuleStudioProjection(), { wrapper })
-        expect(result.current).toEqual({ studio: null, refresh })
+        expect(result.current).toEqual({ studio: undefined, refresh })
     })
 
     it("fails closed outside the page-owned boundary", () => {

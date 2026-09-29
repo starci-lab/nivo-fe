@@ -8,7 +8,8 @@ import {
     useMutateRemoveAgentosModuleAttachmentSwr,
     useQueryMyAgentosCustomModuleStudioSwr,
 } from "@/hooks"
-import { nivoQueryData } from "@/modules/query"
+import { nivoQueryReading } from "@/modules/query"
+import { QueryNotice } from "@/components/blocks/query/QueryNotice"
 import { AgentOSSolutionModuleAttachmentsBase } from "./component"
 
 type IndexedAttachment = {
@@ -35,7 +36,8 @@ export const AgentOSSolutionModuleAttachments = (props: AgentOSSolutionModuleAtt
     const { workspaceId, installationId, onIndexedAttachmentsChange } = props
     const t = useTranslations("console.agentos.modules.studio.attachments")
     const query = useQueryMyAgentosCustomModuleStudioSwr(workspaceId, installationId)
-    const studio = nivoQueryData(query.data)
+    const reading = nivoQueryReading(query.data)
+    const studio = reading.status === "ready" ? reading.data : undefined
     const upload = useMutateAgentosModuleAttachmentUploadSwr(workspaceId, installationId)
     const finalize = useMutateFinalizeAgentosModuleAttachmentSwr(workspaceId, installationId)
     const remove = useMutateRemoveAgentosModuleAttachmentSwr(workspaceId, installationId)
@@ -97,7 +99,11 @@ export const AgentOSSolutionModuleAttachments = (props: AgentOSSolutionModuleAtt
             state="attachments"
             props={{
                 studio: studio ?? undefined,
-                status: refused ? "refused" : query.data === undefined ? "loading" : "ready",
+                status: refused ? "refused" : reading.status === "failed" ? "failed" : reading.status === "resting" ? "loading" : "ready",
+                notice:
+                    reading.status === "failed" ? (
+                        <QueryNotice props={{ failure: reading }} on={{ retry: () => void query.mutate() }} />
+                    ) : undefined,
                 pending,
                 labels: {
                     title: t("title"),

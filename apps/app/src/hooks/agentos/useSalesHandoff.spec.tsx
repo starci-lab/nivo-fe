@@ -37,7 +37,7 @@ vi.mock("@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr", () => ({
 type ControlCenterAnswer = { readonly ok?: boolean; readonly data?: unknown }
 
 vi.mock("@/modules/query", () => ({
-    nivoQueryData: (answer: ControlCenterAnswer | undefined) => (answer?.ok === true ? answer.data : null),
+    nivoQueryPayload: (answer: ControlCenterAnswer | undefined) => (answer?.ok === true ? answer.data : undefined),
 }))
 vi.mock("@/hooks/swr/queries/useQuerySalesHandoffSwr", () => ({
     useQuerySalesHandoffSwr: (...args: ReadonlyArray<unknown>) => mocks.handoffRead(...args),

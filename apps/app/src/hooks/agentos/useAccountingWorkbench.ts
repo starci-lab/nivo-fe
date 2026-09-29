@@ -10,8 +10,8 @@ import type {
     AccountingResultDetailInput,
     AccountingSummaryQueryInput,
 } from "@/modules/api/accounting"
-import { nivoQueryData } from "@/modules/query"
-import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
+import { nivoQueryPayload } from "@/modules/query"
+import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/console"
 import { useQueryAccountingEvidenceSwr } from "@/hooks/swr/queries/useQueryAccountingEvidenceSwr"
 import { useQueryAccountingResultDetailSwr } from "@/hooks/swr/queries/useQueryAccountingResultDetailSwr"
 import { useQueryAccountingRoutineResultSwr } from "@/hooks/swr/queries/useQueryAccountingRoutineResultSwr"
@@ -101,7 +101,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
     const routeWorkspaceId = typeof params?.workspaceId === "string" ? params.workspaceId : ""
     const routeInstallationId = typeof params?.installationId === "string" ? params.installationId : moduleId
     const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(routeWorkspaceId, routeWorkspaceId.length > 0)
-    const instanceId = nivoQueryData(controlCenter.data)?.instance?.id ?? ""
+    const instanceId = nivoQueryPayload(controlCenter.data)?.instance?.id ?? ""
     const scope: AccountingInstallationScope | null =
         routeWorkspaceId.length > 0 && instanceId.length > 0
             ? { workspaceId: routeWorkspaceId, instanceId, installationId: routeInstallationId }

@@ -14,15 +14,13 @@ export const AgentOSModuleProfile = (props: AgentOSModuleProfileProps) => {
     const t = useTranslations("console.agentos.modules.studio.profile")
     const { studio } = useAgentOSModuleStudioProjection()
     const routeMismatch =
-        studio !== undefined &&
-        studio !== null &&
-        (studio.module.id !== moduleId || studio.module.agentWorkspaceId !== workspaceId)
+        studio !== undefined && (studio.module.id !== moduleId || studio.module.agentWorkspaceId !== workspaceId)
     return (
         <AgentOSModuleProfileBase
             props={{
-                studio: studio ?? undefined,
+                studio,
                 loading: studio === undefined,
-                refused: studio === null || routeMismatch,
+                refused: routeMismatch,
                 labels: {
                     title: t("title"),
                     progress: t("progress"),

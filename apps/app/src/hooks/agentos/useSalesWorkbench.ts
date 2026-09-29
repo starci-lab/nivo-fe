@@ -15,8 +15,8 @@ import type {
     SalesPolicyValue,
     SalesReadinessValue,
 } from "@/modules/api/sales"
-import { nivoQueryData } from "@/modules/query"
-import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
+import { nivoQueryPayload } from "@/modules/query"
+import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/console"
 import { useQuerySalesReadinessSwr } from "@/hooks/swr/queries/useQuerySalesReadinessSwr"
 import { useQuerySalesPolicySwr } from "@/hooks/swr/queries/useQuerySalesPolicySwr"
 import { useQuerySalesPipelineSwr } from "@/hooks/swr/queries/useQuerySalesPipelineSwr"
@@ -207,7 +207,7 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
     const routeWorkspaceId = stringOr(params?.workspaceId, "")
     const routeInstallationId = stringOr(params?.installationId, moduleId)
     const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(routeWorkspaceId, routeWorkspaceId.length > 0)
-    const instanceId = nivoQueryData(controlCenter.data)?.instance?.id ?? ""
+    const instanceId = nivoQueryPayload(controlCenter.data)?.instance?.id ?? ""
     const scope = scopeOf(routeWorkspaceId, instanceId, routeInstallationId)
     const scopeStanding = scopeStandingFor(controlCenter.data, controlCenter.error, instanceId.length > 0)
     const addressable = scope ?? { workspaceId: "", instanceId: "", installationId: routeInstallationId }

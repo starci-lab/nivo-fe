@@ -9,7 +9,8 @@ import {
     useQueryMyAgentosSolutionModulesSwr,
 } from "@/hooks"
 import type { AgentosSolutionModule } from "@/modules/api/agentos-modules"
-import { nivoQueryData } from "@/modules/query"
+import { nivoQueryReading, type NivoQueryReading } from "@/modules/query"
+import { QueryNotice } from "@/components/blocks/query/QueryNotice"
 import { useAccessToken } from "@/hooks"
 import {
     AgentOSSolutionModuleCenterBase,
@@ -30,10 +31,10 @@ const toneOf = (status: string): "neutral" | "success" | "warning" | "danger" =>
     if (status === "provisioning" || status === "degraded") return "warning"
     return "neutral"
 }
-const sectionState = (answer: ReadonlyArray<unknown> | null | undefined): AgentOSSolutionLedgerSectionStatus => {
-    if (answer === undefined) return "resting"
-    if (answer === null) return "refused"
-    return answer.length === 0 ? "empty" : "ready"
+const sectionState = (reading: NivoQueryReading<ReadonlyArray<unknown>>): AgentOSSolutionLedgerSectionStatus => {
+    if (reading.status === "resting") return "resting"
+    if (reading.status === "failed") return "failed"
+    return reading.data.length === 0 ? "empty" : "ready"
 }
 
 /** Own catalog/list/install calls and follow one exact installation Saga at a time. */
@@ -48,8 +49,10 @@ export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterPr
     const { trigger: installModule } = useMutateInstallAgentosSolutionModuleSwr(workspaceId)
     const refreshCatalog = catalogQuery.mutate
     const refreshInstallations = installationsQuery.mutate
-    const catalog = nivoQueryData(catalogQuery.data)
-    const installations = nivoQueryData(installationsQuery.data)
+    const catalogReading = nivoQueryReading(catalogQuery.data)
+    const installationsReading = nivoQueryReading(installationsQuery.data)
+    const catalog = catalogReading.status === "ready" ? catalogReading.data : undefined
+    const installations = installationsReading.status === "ready" ? installationsReading.data : undefined
     const [pendingKey, setPendingKey] = useState<string>()
     const [trackedInstallationId, setTrackedInstallationId] = useState<string>()
     const [outcome, setOutcome] = useState<string>()
@@ -162,12 +165,21 @@ export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterPr
             href: `/${locale}/agentos/workspaces/${workspaceId}/modules/${installation.id}`,
         }
     })
-    const refused = catalog === null || installations === null
-    const settledState = refused ? "refused" : "answered"
+    const failedReading =
+        catalogReading.status === "failed"
+            ? catalogReading
+            : installationsReading.status === "failed"
+              ? installationsReading
+              : null
+    const settledState = failedReading === null ? "answered" : "failed"
     const ledger = layout === "ledger"
     return (
         <AgentOSSolutionModuleCenterBase
-            state={catalog === undefined || installations === undefined ? "resting" : settledState}
+            state={
+                catalogReading.status === "resting" || installationsReading.status === "resting"
+                    ? "resting"
+                    : settledState
+            }
             props={{
                 layout,
                 mode,
@@ -183,7 +195,10 @@ export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterPr
                         label: t("modes.installed"),
                     },
                 ],
-                refusedLabel: t("refused"),
+                notice:
+                    failedReading === null ? undefined : (
+                        <QueryNotice props={{ failure: failedReading }} on={{ retry: () => void refresh() }} />
+                    ),
                 emptyLabel: t("empty"),
                 emptyActionLabel: t("browse"),
                 cards: ledger || mode === "catalog" ? catalogCards : installedCards,
@@ -192,21 +207,28 @@ export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterPr
                 ledger: {
                     installedLabel: t("installedSection"),
                     catalogLabel: t("catalogSection"),
-                    installedState: sectionState(installations),
-                    catalogueState: sectionState(catalog),
+                    installedState: sectionState(installationsReading),
+                    catalogueState: sectionState(catalogReading),
+                    installedNotice:
+                        installationsReading.status === "failed" ? (
+                            <QueryNotice
+                                props={{ failure: installationsReading, retryPending: retryingInstalled }}
+                                on={{ retry: onRetryInstalled }}
+                            />
+                        ) : undefined,
+                    catalogueNotice:
+                        catalogReading.status === "failed" ? (
+                            <QueryNotice
+                                props={{ failure: catalogReading, retryPending: retryingCatalogue }}
+                                on={{ retry: onRetryCatalogue }}
+                            />
+                        ) : undefined,
                     installedRows,
                     installedEmptyTitle: t("emptyTitle"),
                     installedEmpty: t("emptyHint"),
-                    installedRefusedTitle: t("refusedTitle"),
-                    installedRefused: t("refusedHint"),
                     catalogueEmptyTitle: t("catalogueEmptyTitle"),
                     catalogueEmpty: t("catalogueEmptyHint"),
-                    catalogueRefusedTitle: t("catalogueRefusedTitle"),
-                    catalogueRefused: t("catalogueRefusedHint"),
-                    retry: t("retry"),
                     installedEmptyAction: t("emptyAction"),
-                    retryingInstalled,
-                    retryingCatalogue,
                 },
             }}
             on={{
@@ -214,8 +236,6 @@ export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterPr
                 onPressCard: (id) => {
                     if (ledger || mode === "catalog") void install(id as AgentosSolutionModule["key"])
                 },
-                onRetryInstalled,
-                onRetryCatalogue,
             }}
         />
     )

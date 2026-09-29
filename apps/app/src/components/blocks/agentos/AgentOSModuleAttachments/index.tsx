@@ -15,7 +15,7 @@ type AgentOSModuleAttachmentsProps = {
 }
 const MAX_UPLOAD_BYTES = 20 * 1024 * 1024
 const projectionState = (refused: boolean, studio: ReturnType<typeof useAgentOSModuleStudioProjection>["studio"]) => {
-    if (refused || studio === null) return "refused"
+    if (refused) return "refused"
     return studio === undefined ? "loading" : "ready"
 }
 const mediaTypeFor = (file: File) => {

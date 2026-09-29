@@ -37,8 +37,8 @@ vi.mock("@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr", () => ({
     useQueryMyAgentWorkspaceControlCenterSwr: () => mocks.controlCenter.value,
 }))
 vi.mock("@/modules/query", () => ({
-    nivoQueryData: (answer: { readonly ok?: boolean; readonly data?: unknown } | undefined) =>
-        answer?.ok === true ? answer.data : null,
+    nivoQueryPayload: (answer: { readonly ok?: boolean; readonly data?: unknown } | undefined) =>
+        answer?.ok === true ? answer.data : undefined,
 }))
 vi.mock("@/hooks/swr/queries/useQueryAccountingSummarySwr", () => ({
     useQueryAccountingSummarySwr: (...args: ReadonlyArray<unknown>) => mocks.summaryRead(...args),

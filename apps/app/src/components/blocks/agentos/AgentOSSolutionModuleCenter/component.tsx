@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react"
+import { useCallback, useRef, type ReactNode } from "react"
 import { ChoiceTabs, IconSource, StatusActionCard } from "@nivo/ui"
 import {
     Badge,
@@ -21,14 +21,15 @@ import {
 
 /** One resolved catalog or installation card visible in the module center. */
 export type AgentOSSolutionModuleCenterProps = {
-    readonly state: "resting" | "refused" | "answered"
+    readonly state: "resting" | "failed" | "answered"
     readonly props: {
         readonly layout?: "tabs" | "ledger"
         readonly mode: "catalog" | "installed"
         readonly sectionLabel: string
         readonly modesLabel: string
         readonly modes: ReadonlyArray<{ readonly id: "catalog" | "installed"; readonly label: string }>
-        readonly refusedLabel: string
+        /** The failure the connected half composed for a settled failed read. */
+        readonly notice?: ReactNode
         readonly emptyLabel: string
         readonly emptyActionLabel: string
         readonly cards: ReadonlyArray<AgentOSSolutionModuleCard>
@@ -39,26 +40,20 @@ export type AgentOSSolutionModuleCenterProps = {
             readonly catalogLabel: string
             readonly installedState: AgentOSSolutionLedgerSectionStatus
             readonly catalogueState: AgentOSSolutionLedgerSectionStatus
+            /** The failure the connected half composed for each section's own settled failed read. */
+            readonly installedNotice?: ReactNode
+            readonly catalogueNotice?: ReactNode
             readonly installedRows: ReadonlyArray<AgentOSSolutionLedgerRow>
             readonly installedEmptyTitle: string
             readonly installedEmpty: string
-            readonly installedRefusedTitle: string
-            readonly installedRefused: string
             readonly catalogueEmptyTitle: string
             readonly catalogueEmpty: string
-            readonly catalogueRefusedTitle: string
-            readonly catalogueRefused: string
-            readonly retry: string
             readonly installedEmptyAction: string
-            readonly retryingInstalled: boolean
-            readonly retryingCatalogue: boolean
         }
     }
     readonly on: {
         readonly onSelectMode: (mode: "catalog" | "installed") => void
         readonly onPressCard: (id: string) => void
-        readonly onRetryInstalled: () => void
-        readonly onRetryCatalogue: () => void
     }
 }
 /** Public API role for AgentOSSolutionModuleCard. */
@@ -86,8 +81,8 @@ export type AgentOSSolutionLedgerRow = {
     readonly href: string
 }
 
-/** What one ledger section holds: nothing yet, a refused read, resting content, or rows. */
-export type AgentOSSolutionLedgerSectionStatus = "resting" | "refused" | "empty" | "ready"
+/** What one ledger section holds: nothing yet, a failed read, resting content, or rows. */
+export type AgentOSSolutionLedgerSectionStatus = "resting" | "failed" | "empty" | "ready"
 
 /** Everything the ledger form draws: its own section props plus the catalogue projection it shares with the tabs form. */
 type AgentOSSolutionModuleLedgerViewProps = {
@@ -104,27 +99,21 @@ export type AgentOSSolutionModuleLedgerProps = {
     readonly catalogLabel: string
     readonly installedState: AgentOSSolutionLedgerSectionStatus
     readonly catalogueState: AgentOSSolutionLedgerSectionStatus
+    /** The failure the connected half composed for each section's own settled failed read. */
+    readonly installedNotice?: ReactNode
+    readonly catalogueNotice?: ReactNode
     readonly installedRows: ReadonlyArray<AgentOSSolutionLedgerRow>
     readonly installedEmptyTitle: string
     readonly installedEmpty: string
-    readonly installedRefusedTitle: string
-    readonly installedRefused: string
     readonly catalogueEmptyTitle: string
     readonly catalogueEmpty: string
-    readonly catalogueRefusedTitle: string
-    readonly catalogueRefused: string
-    readonly retry: string
     /** The action that ends the installed section’s own emptiness: it moves the reader to the catalogue beneath. */
     readonly installedEmptyAction: string
-    readonly retryingInstalled: boolean
-    readonly retryingCatalogue: boolean
-    readonly onRetryInstalled: () => void
-    readonly onRetryCatalogue: () => void
 }
 
 /** Closed pure state for the solution-module catalog and installation fleet. */
 export type AgentOSSolutionModuleCenterViewProps = {
-    readonly state: "resting" | "refused" | "answered"
+    readonly state: "resting" | "failed" | "answered"
     readonly mode: "catalog" | "installed"
     readonly sectionLabel: string
     readonly modesLabel: string
@@ -132,7 +121,7 @@ export type AgentOSSolutionModuleCenterViewProps = {
         readonly id: "catalog" | "installed"
         readonly label: string
     }>
-    readonly refusedLabel: string
+    readonly notice?: ReactNode
     readonly emptyLabel: string
     readonly emptyActionLabel: string
     readonly cards: ReadonlyArray<AgentOSSolutionModuleCard>
@@ -214,27 +203,6 @@ const catalogGrid = (
     </div>
 )
 
-/** One refused section: what failed, what remains, and the retry that re-reads this section alone. */
-const refusal = (
-    label: string,
-    title: string,
-    description: string,
-    retry: string,
-    pending: boolean,
-    onRetry: () => void,
-) => (
-    <SurfaceCard label={label}>
-        <EmptyNotice
-            message={title}
-            description={description}
-            actionLabel={retry}
-            actionVariant="secondary"
-            isActionPending={pending}
-            onAction={onRetry}
-        />
-    </SurfaceCard>
-)
-
 /** The ledger form: installed solutions listed first, the catalogue beneath, every state stated in place. */
 const AgentOSSolutionModuleLedger = ({
     ledger,
@@ -244,15 +212,8 @@ const AgentOSSolutionModuleLedger = ({
     onPressCard,
 }: AgentOSSolutionModuleLedgerViewProps) => {
     const installed = () => {
-        if (ledger.installedState === "refused")
-            return refusal(
-                ledger.installedLabel,
-                ledger.installedRefusedTitle,
-                ledger.installedRefused,
-                ledger.retry,
-                ledger.retryingInstalled,
-                ledger.onRetryInstalled,
-            )
+        if (ledger.installedState === "failed")
+            return <SurfaceCard label={ledger.installedLabel}>{ledger.installedNotice}</SurfaceCard>
         if (ledger.installedState === "empty")
             return (
                 <SurfaceCard label={ledger.installedLabel}>
@@ -284,15 +245,8 @@ const AgentOSSolutionModuleLedger = ({
         node.focus()
     }, [])
     const catalogue = () => {
-        if (ledger.catalogueState === "refused")
-            return refusal(
-                ledger.catalogLabel,
-                ledger.catalogueRefusedTitle,
-                ledger.catalogueRefused,
-                ledger.retry,
-                ledger.retryingCatalogue,
-                ledger.onRetryCatalogue,
-            )
+        if (ledger.catalogueState === "failed")
+            return <SurfaceCard label={ledger.catalogLabel}>{ledger.catalogueNotice}</SurfaceCard>
         if (ledger.catalogueState === "empty")
             return (
                 <SurfaceCard label={ledger.catalogLabel}>
@@ -327,7 +281,7 @@ const AgentOSSolutionModuleCenterContent = ({
     sectionLabel,
     modesLabel,
     modes,
-    refusedLabel,
+    notice,
     emptyLabel,
     emptyActionLabel,
     cards,
@@ -336,17 +290,13 @@ const AgentOSSolutionModuleCenterContent = ({
     onSelectMode,
     onPressCard,
 }: AgentOSSolutionModuleCenterViewProps) => {
-    // The three situations under the tabs, read in order: a refusal, an answer with nothing in it,
+    // The three situations under the tabs, read in order: a failure, an answer with nothing in it,
     // and otherwise the grid - which draws the resting placeholders when the answer has not landed.
     const body = () => {
-        if (state === "refused") {
+        if (state === "failed") {
             return (
                 <SurfaceCard label={sectionLabel}>
-                    <div>
-                        <Text size="sm" tone="muted">
-                            {refusedLabel}
-                        </Text>
-                    </div>
+                    <div>{notice}</div>
                 </SurfaceCard>
             )
         }
@@ -412,15 +362,7 @@ export const AgentOSSolutionModuleCenterBase = (props: AgentOSSolutionModuleCent
         state: props.state,
         onSelectMode: props.on.onSelectMode,
         onPressCard: props.on.onPressCard,
-        ...(ledger === undefined
-            ? {}
-            : {
-                  ledger: {
-                      ...ledger,
-                      onRetryInstalled: props.on.onRetryInstalled,
-                      onRetryCatalogue: props.on.onRetryCatalogue,
-                  },
-              }),
+        ...(ledger === undefined ? {} : { ledger }),
     }
     return view.layout === "ledger" && view.ledger !== undefined ? (
         <AgentOSSolutionModuleLedger

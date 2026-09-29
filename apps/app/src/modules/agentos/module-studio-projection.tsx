@@ -5,7 +5,7 @@ import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
 
 /** One page-owned studio read shared by sibling connected blocks. */
 export type AgentOSModuleStudioProjection = {
-    readonly studio: AgentosModuleStudio | null | undefined
+    readonly studio: AgentosModuleStudio | undefined
     readonly refresh: () => Promise<void>
 }
 

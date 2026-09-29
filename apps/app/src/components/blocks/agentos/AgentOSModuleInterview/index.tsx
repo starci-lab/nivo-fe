@@ -9,7 +9,7 @@ type AgentOSModuleInterviewProps = {
     readonly moduleId: string
 }
 const projectionState = (refused: boolean, studio: ReturnType<typeof useAgentOSModuleStudioProjection>["studio"]) => {
-    if (refused || studio === null) return "refused"
+    if (refused) return "refused"
     return studio === undefined ? "loading" : "ready"
 }
 

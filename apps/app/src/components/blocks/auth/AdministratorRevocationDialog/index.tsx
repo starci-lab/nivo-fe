@@ -8,7 +8,7 @@ import {
     useQueryCollabOfficeSwr,
     useQueryMyAgentWorkspaceControlCenterSwr,
 } from "@/hooks"
-import { nivoQueryData } from "@/modules/query"
+import { nivoQueryPayload } from "@/modules/query"
 import {
     AdministratorRevocationDialogBase,
     type AdministratorRevocationMember,
@@ -124,7 +124,7 @@ export const AdministratorRevocationDialog = (props: AdministratorRevocationDial
                           }),
                 description: stage === "ready" ? t("account.administratorEnding.chooseDescription") : undefined,
                 contextLabel: t("account.administratorEnding.workspaceLabel"),
-                context: nivoQueryData(controlCenter.data)?.workspace.name ?? "",
+                context: nivoQueryPayload(controlCenter.data)?.workspace.name ?? "",
                 memberLabel: t("account.administratorEnding.memberLabel"),
                 memberPlaceholder: t("account.administratorEnding.memberPlaceholder"),
                 members,

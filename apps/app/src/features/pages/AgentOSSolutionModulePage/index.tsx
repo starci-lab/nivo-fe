@@ -29,7 +29,8 @@ import {
     type ManageAgentosModuleRuntimeInput,
 } from "@/modules/api/agentos-module-runtime"
 import type { AgentosRuntimeValue } from "@/modules/api/agentos-runtime-tree"
-import { nivoQueryData, type NivoQueryAnswer } from "@/modules/query"
+import { nivoQueryPayload, nivoQueryReading, type NivoQueryAnswer } from "@/modules/query"
+import { QueryNotice } from "@/components/blocks/query/QueryNotice"
 import { abortableWait } from "@/modules/window/abortable-wait"
 import {
     AgentOSSolutionModulePageBase,
@@ -315,13 +316,6 @@ const selectedSessionTitleFor = (
     if (selectedSession.id === runtime.installation.primaryOpsSessionId) return copy.shell.primaryOperations
     return executeSessionTitleFor(selectedSession.title, runtime.executeSessions.indexOf(selectedSession), copy)
 }
-const runtimeForWorkspace = (
-    answer: NivoQueryAnswer<AgentosModuleRuntime> | undefined,
-    workspaceId: string,
-): AgentosModuleRuntime | null => {
-    const candidate = nivoQueryData(answer)
-    return candidate?.installation.agentWorkspaceId === workspaceId ? candidate : null
-}
 const controllerHostnameForWorkspace = (
     answer:
         | NivoQueryAnswer<{
@@ -335,7 +329,7 @@ const controllerHostnameForWorkspace = (
         | undefined,
     workspaceId: string,
 ): string | null => {
-    const candidate = nivoQueryData(answer)
+    const candidate = nivoQueryPayload(answer)
     // An owned workspace with no instance yet has no controller to name.
     return candidate?.workspace.id === workspaceId ? (candidate.instance?.hostname ?? null) : null
 }
@@ -347,12 +341,6 @@ const selectedIdentity = <
     rows: ReadonlyArray<T>,
     selectedId: string | null,
 ): string | null => (rows.some((row) => row.id === selectedId) ? selectedId : (rows[0]?.id ?? null))
-const moduleQueriesRefused = (
-    runtimeAnswer: NivoQueryAnswer<AgentosModuleRuntime> | undefined,
-    runtime: AgentosModuleRuntime | null,
-    testAnswer: NivoQueryAnswer<unknown> | undefined,
-): boolean =>
-    runtimeAnswer?.ok === false || (runtimeAnswer !== undefined && runtime === null) || testAnswer?.ok === false
 
 /** Connect one stable module shell to its persistent backend runtime and separate task URLs. */
 export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps) => {
@@ -418,10 +406,17 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     const mutateRuntime = runtimeMutation.trigger
     const mutateTest = testMutation.trigger
     const mutateChannel = channelMutation.trigger
-    const runtime = runtimeForWorkspace(runtimeQuery.data, workspaceId)
+    const runtimeReading = nivoQueryReading(runtimeQuery.data)
+    const runtime =
+        runtimeReading.status === "ready" && runtimeReading.data.installation.agentWorkspaceId === workspaceId
+            ? runtimeReading.data
+            : null
+    /* A settled answer that names another workspace is not this page's runtime: a not-found, not a refusal. */
+    const runtimeForeign = runtimeReading.status === "ready" && runtime === null
     const testSurfaceQuery = useQueryMyAgentosModuleTestSurfaceSwr(installationId, view === "test" || view === "setup")
-    const testSurface = nivoQueryData(testSurfaceQuery.data) ?? null
-    const refused = actionRefused || moduleQueriesRefused(runtimeQuery.data, runtime, testSurfaceQuery.data)
+    const testSurfaceReading = nivoQueryReading(testSurfaceQuery.data)
+    const testSurface = testSurfaceReading.status === "ready" ? testSurfaceReading.data : null
+    const refused = actionRefused
     const isChatbotInstallation =
         runtime !== null &&
         ["chatbot", "agentos-chatbot", "multichannel-chatbot"].includes(runtime.installation.moduleKey)
@@ -435,7 +430,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
         enabled: chatbotEnabled,
     }
     const chatbotQuery = useQueryChatbotWorkbenchSwr(chatbotIdentity)
-    const chatbotWorkbench = nivoQueryData(chatbotQuery.data) ?? null
+    const chatbotWorkbench = nivoQueryPayload(chatbotQuery.data) ?? null
     const chatbotRefusedCode = chatbotQuery.data?.ok === false ? chatbotQuery.data.code : null
     const startZaloOauthMutation = useMutateStartChatbotZaloOauthSwr(chatbotIdentity)
     const setChatbotHandoffMutation = useMutateSetChatbotHandoffSwr(chatbotIdentity)
@@ -970,6 +965,27 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
         view,
         workspaceId,
     ])
+    if (runtimeReading.status === "failed")
+        return (
+            <QueryNotice props={{ failure: runtimeReading }} on={{ retry: () => void runtimeQuery.mutate() }} />
+        )
+    if (runtimeForeign)
+        return (
+            <QueryNotice
+                props={{
+                    failure: {
+                        kind: "not-found",
+                        code: "MODULE_RUNTIME_FOREIGN",
+                        reason: "",
+                        retryable: false,
+                    },
+                }}
+            />
+        )
+    if (testSurfaceReading.status === "failed")
+        return (
+            <QueryNotice props={{ failure: testSurfaceReading }} on={{ retry: () => void testSurfaceQuery.mutate() }} />
+        )
     if (runtime === null) return <AgentOSSolutionModuleState refused={refused} copy={copy} />
     const activeVersion = activeVersionFor(runtime)
     const selectedSetup =

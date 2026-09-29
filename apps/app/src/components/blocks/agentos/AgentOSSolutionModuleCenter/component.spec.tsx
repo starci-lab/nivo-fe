@@ -9,17 +9,14 @@ import {
 import { SOLUTION_CATALOG_GRID_CLASS_NAME, SOLUTION_LEDGER_ROWS_CLASS_NAME } from "./classNames"
 
 const AgentOSSolutionModuleCenterBase = (view: AgentOSSolutionModuleCenterViewProps) => {
-    const { state, onSelectMode, onPressCard, ledger, ...data } = view
-    const { onRetryInstalled, onRetryCatalogue, ...ledgerData } = ledger ?? ({} as AgentOSSolutionModuleLedgerProps)
+    const { state, onSelectMode, onPressCard, ...data } = view
     return (
         <AgentOSSolutionModuleCenterBaseView
             state={state}
-            props={{ ...data, ledger: ledger === undefined ? undefined : ledgerData }}
+            props={data}
             on={{
                 onSelectMode,
                 onPressCard,
-                onRetryInstalled: onRetryInstalled ?? (() => undefined),
-                onRetryCatalogue: onRetryCatalogue ?? (() => undefined),
             }}
         />
     )
@@ -32,7 +29,6 @@ const base = {
         { id: "catalog" as const, label: "Catalog" },
         { id: "installed" as const, label: "Installed" },
     ],
-    refusedLabel: "Unavailable",
     emptyLabel: "No modules",
     emptyActionLabel: "Browse catalog",
     onSelectMode: vi.fn(),
@@ -64,28 +60,25 @@ const ledger = (over: Partial<AgentOSSolutionModuleLedgerProps> = {}): AgentOSSo
     installedRows: [row],
     installedEmptyTitle: "No solution installed yet",
     installedEmpty: "Installing a package adds it here.",
-    installedRefusedTitle: "Installed solutions could not be read",
-    installedRefused: "The catalogue below remains available.",
     catalogueEmptyTitle: "No solution package is available",
     catalogueEmpty: "Nivo publishes packages to this catalogue.",
-    catalogueRefusedTitle: "The catalogue could not be read",
-    catalogueRefused: "Your own modules above are unaffected.",
-    retry: "Try again",
     installedEmptyAction: "Browse the catalogue",
-    retryingInstalled: false,
-    retryingCatalogue: false,
-    onRetryInstalled: vi.fn(),
-    onRetryCatalogue: vi.fn(),
     ...over,
 })
 
 describe("AgentOSSolutionModuleCenterBase", () => {
-    it("renders refusal and empty installed states in the tabs form", () => {
-        const refused = renderToStaticMarkup(
-            <AgentOSSolutionModuleCenterBase {...base} state="refused" mode="catalog" cards={[]} />,
+    it("renders failure and empty installed states in the tabs form", () => {
+        const failed = renderToStaticMarkup(
+            <AgentOSSolutionModuleCenterBase
+                {...base}
+                state="failed"
+                mode="catalog"
+                cards={[]}
+                notice={<div>Unavailable</div>}
+            />,
         )
-        expect(refused).toContain("Unavailable")
-        expect(refused).not.toContain("Retry")
+        expect(failed).toContain("Unavailable")
+        expect(failed).not.toContain("Retry")
         expect(
             renderToStaticMarkup(
                 <AgentOSSolutionModuleCenterBase {...base} state="answered" mode="installed" cards={[]} />,
@@ -190,7 +183,7 @@ describe("AgentOSSolutionModuleCenterBase", () => {
         expect(html).not.toContain("Try again")
     })
 
-    it("recovers a refused section from that section alone, with pending on its own action", () => {
+    it("recovers a failed section from the notice that section draws", () => {
         const onRetryInstalled = vi.fn()
         const onRetryCatalogue = vi.fn()
         render(
@@ -198,19 +191,17 @@ describe("AgentOSSolutionModuleCenterBase", () => {
                 {...base}
                 layout="ledger"
                 ledger={ledger({
-                    installedState: "refused",
-                    catalogueState: "refused",
+                    installedState: "failed",
+                    catalogueState: "failed",
                     installedRows: [],
-                    onRetryInstalled,
-                    onRetryCatalogue,
+                    installedNotice: <button onClick={onRetryInstalled}>Try again</button>,
+                    catalogueNotice: <button onClick={onRetryCatalogue}>Try again</button>,
                 })}
-                state="refused"
+                state="failed"
                 mode="catalog"
                 cards={[]}
             />,
         )
-        expect(screen.getByText("Installed solutions could not be read")).toBeTruthy()
-        expect(screen.getByText("The catalogue could not be read")).toBeTruthy()
         const retries = screen.getAllByRole("button", { name: "Try again" })
         expect(retries).toHaveLength(2)
         fireEvent.click(retries[0]!)
@@ -222,12 +213,16 @@ describe("AgentOSSolutionModuleCenterBase", () => {
                 {...base}
                 layout="ledger"
                 ledger={ledger({
-                    installedState: "refused",
+                    installedState: "failed",
                     catalogueState: "ready",
                     installedRows: [],
-                    retryingInstalled: true,
+                    installedNotice: (
+                        <button aria-busy="true" onClick={onRetryInstalled}>
+                            Try again
+                        </button>
+                    ),
                 })}
-                state="refused"
+                state="failed"
                 mode="catalog"
                 cards={[card]}
             />,
@@ -254,13 +249,16 @@ describe("AgentOSSolutionModuleCenterBase", () => {
         expect(document.activeElement).toBe(region)
     })
 
-    it("keeps a refused catalogue from hiding an answered installed section", () => {
+    it("keeps a failed catalogue from hiding an answered installed section", () => {
         render(
             <AgentOSSolutionModuleCenterBase
                 {...base}
                 layout="ledger"
-                ledger={ledger({ catalogueState: "refused" })}
-                state="refused"
+                ledger={ledger({
+                    catalogueState: "failed",
+                    catalogueNotice: <div>The catalogue could not be read</div>,
+                })}
+                state="failed"
                 mode="catalog"
                 cards={[]}
             />,
@@ -284,7 +282,6 @@ describe("AgentOSSolutionModuleCenterBase", () => {
                     { id: "catalog", label: "Catalog" },
                     { id: "installed", label: "Installed" },
                 ]}
-                refusedLabel="Unavailable"
                 emptyLabel="Empty"
                 emptyActionLabel="Browse"
                 cards={[
@@ -316,7 +313,6 @@ describe("AgentOSSolutionModuleCenterBase", () => {
                     { id: "catalog", label: "Catalog" },
                     { id: "installed", label: "Installed" },
                 ]}
-                refusedLabel="Unavailable"
                 emptyLabel="Empty"
                 emptyActionLabel="Browse"
                 cards={[]}

@@ -6,8 +6,8 @@
  * below names one hook, so a reader can see the whole surface without opening a
  * second file and a spec can mock the door in one `vi.mock("@/hooks", ...)`.
  * Hooks only: cache keys, request modules, response types and the helpers that
- * read a transport answer stay behind their own paths — `nivoQueryData` and
- * `NivoQueryAnswer` live in `@/modules/query`.
+ * read a transport answer stay behind their own paths — `nivoQueryReading`,
+ * `nivoQueryPayload` and `NivoQueryAnswer` live in `@/modules/query`.
  */
 export { useNivoQuery } from "./swr/useNivoQuery"
 export { useNivoMutation } from "./swr/useNivoMutation"
