@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 describe("index", () => {
     it("publishes the React component entry points", () => {
-        expect(UI.nivoIconSource).toBeTypeOf("function")
+        expect(UI.IconSource).toBeTypeOf("function")
         expect(UI.TileIcon).toBeTypeOf("function")
         expect(UI.RouteTabs).toBeTypeOf("function")
         expect(UI.NivoUnicornArtwork).toBeTypeOf("function")

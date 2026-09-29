@@ -38,15 +38,6 @@
         flex: none;
     }
 
-    .scroll-viewport {
-        overscroll-behavior: contain;
-        scrollbar-width: none;
-    }
-
-    .scroll-viewport::-webkit-scrollbar {
-        display: none;
-    }
-
     .collapsible-rail {
         display: none;
         color: var(--foreground);
@@ -67,15 +58,6 @@
     .collapsible-rail-control:focus-visible {
         outline: 2px solid var(--focus);
         outline-offset: 2px;
-    }
-
-    .pressable-surface .text-press-label {
-        text-decoration-color: var(--separator-tertiary);
-        text-decoration-thickness: 1.5px;
-    }
-
-    .pressable-surface:has(a:hover) .text-press-label {
-        text-decoration-line: none;
     }
 
     @media (min-width: 768px) {
