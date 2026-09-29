@@ -55,6 +55,7 @@ export const sessionFixture = (state: SessionState): Session => ({
     state,
     adopt: () => undefined,
     end: async () => ({ localCleared: true, remoteRevocation: "unknown", authorityEnding: "notAsked" }),
+    discard: () => undefined,
 })
 
 export const matchMediaFixture = (matches: boolean | ((media: string) => boolean)): typeof window.matchMedia =>
