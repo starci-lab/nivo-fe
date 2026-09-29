@@ -3,6 +3,7 @@
 @import "@heroui/styles/css";
 @import "@starci/grammar/common.css";
 @import "@nivo/ui/family.css";
+@import "../modules/brand/brand.css";
 
 /*
  * The shared canon lives outside this app's folder, so Tailwind cannot find its class names by
@@ -34,12 +35,12 @@
  *
  * WHERE THE PALETTE COMES FROM.
  *
- * Not from this file, and not from `@starci/grammar/core.css` either. nivo is its own Grammar
- * family: `@nivo/ui/family.css` above owns every `--nivo-*` value and every semantic binding, in
- * light, dark, forced colours and reduced motion. This file used to answer Core's family root by
- * re-declaring the accent under the console boundary, which is why every surface OUTSIDE that
- * boundary - the sign-in page's checkbox and focus rings among them - painted StarCi purple. There
- * is now one owner, so there is nothing left here to lose an argument with.
+ * From `modules/brand/brand.css`, imported above: the one file that writes a colour, with a light
+ * block and a dark block over the same grammar tokens. The dark block answers the `.dark` class
+ * the theme provider puts on `<html>`. nivo is its own Grammar family and never Core:
+ * `@nivo/ui/family.css` carries the family's structure (type, radii, motion) and makes the family
+ * root read the brand layer, so there is one owner of every colour and nothing left here to lose
+ * an argument with.
  */
 
 /*

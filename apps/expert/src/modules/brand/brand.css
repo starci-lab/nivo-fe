@@ -1,0 +1,95 @@
+/*
+ * THE NIVO BRAND LAYER: the one stylesheet in the app that writes a colour.
+ *
+ * It sets only the tokens the grammar publishes, and every token has a value in BOTH blocks, so the
+ * brand can never be half a theme. The values are the accepted brand record's
+ * (.starciwork/brand/index.yaml in nivo-backend); a value changes there first and here second.
+ *
+ *   :root  - the light theme, and what the page is before a choice is made.
+ *   .dark  - the dark theme. next-themes puts this class on <html> (system default, or the person's
+ *            choice), so the same block answers "system" and "dark" with no media-query copy.
+ *
+ * The family stylesheet (`@nivo/ui/family.css`) carries no colour of its own: its root inherits
+ * these values instead of restating them.
+ *
+ * Unicorn red is a FILL (with --accent-foreground on it), a focus ring and a boundary. It is not
+ * body copy on a dark ground (4.13:1 on the canvas); accent text goes through the grammar's derived
+ * --accent-soft-foreground, which mixes the accent toward the foreground and clears 4.5:1 in both.
+ */
+:root {
+    color-scheme: light;
+
+    --accent: oklch(57% 0.24 25);
+    --accent-foreground: oklch(100% 0 0);
+
+    --background: oklch(97.02% 0.0015 354.13);
+    --background-inverse: oklch(16% 0.035 255);
+    --foreground: oklch(21.03% 0.0015 354.13);
+    --surface: oklch(100% 0.0008 354.13);
+    --surface-secondary: oklch(95.24% 0.0012 354.13);
+    --surface-tertiary: oklch(93.73% 0.0012 354.13);
+    --overlay: oklch(100% 0.0004 354.13);
+    --default: oklch(94% 0.0015 354.13);
+    --default-foreground: oklch(21.03% 0.0059 354.13);
+    --segment: oklch(100% 0.0015 354.13);
+    --muted: oklch(51% 0.003 354.13);
+
+    --success: oklch(73.29% 0.1941 162.85);
+    --success-foreground: oklch(21.03% 0.0059 162.85);
+    --warning: oklch(78.19% 0.159 84.37);
+    --warning-foreground: oklch(21.03% 0.0059 84.37);
+    --danger: oklch(57% 0.24 25);
+    --danger-foreground: oklch(99.11% 0 0);
+    --info: oklch(72% 0.17 250);
+    --info-foreground: oklch(21.03% 0.0059 250);
+
+    --border: oklch(90% 0.0015 354.13);
+    --separator: oklch(92% 0.0015 354.13);
+    --scrollbar-thumb: oklch(62% 0.0015 354.13);
+    --backdrop: oklch(21.03% 0.0015 354.13 / 48%);
+
+    --field-background: oklch(100% 0.0008 354.13);
+    --field-foreground: oklch(21.03% 0.0015 354.13);
+    --field-placeholder: oklch(55.17% 0.003 354.13);
+
+    --surface-shadow: 0 2px 4px 0 rgb(0 0 0 / 4%), 0 1px 2px 0 rgb(0 0 0 / 6%), 0 0 1px 0 rgb(0 0 0 / 6%);
+}
+
+.dark {
+    color-scheme: dark;
+
+    --accent: oklch(57% 0.24 25);
+    --accent-foreground: oklch(100% 0 0);
+
+    --background: oklch(12% 0.0015 354.13);
+    --background-inverse: oklch(99.11% 0.0015 354.13);
+    --foreground: oklch(99.11% 0.0015 354.13);
+    --surface: oklch(21.03% 0.003 354.13);
+    --surface-secondary: oklch(25.7% 0.0023 354.13);
+    --surface-tertiary: oklch(27.21% 0.0023 354.13);
+    --overlay: oklch(21.03% 0.003 354.13);
+    --default: oklch(27.4% 0.0015 354.13);
+    --default-foreground: oklch(99.11% 0 0);
+    --segment: oklch(39.64% 0.0015 354.13);
+    --muted: oklch(70.5% 0.003 354.13);
+
+    --success: oklch(73.29% 0.1941 162.85);
+    --success-foreground: oklch(21.03% 0.0059 162.85);
+    --warning: oklch(82.03% 0.1392 88.38);
+    --warning-foreground: oklch(21.03% 0.0059 88.38);
+    --danger: oklch(57% 0.24 25);
+    --danger-foreground: oklch(99.11% 0 0);
+    --info: oklch(72% 0.17 250);
+    --info-foreground: oklch(21.03% 0.0059 250);
+
+    --border: oklch(28% 0.0015 354.13);
+    --separator: oklch(25% 0.0015 354.13);
+    --scrollbar-thumb: oklch(70.5% 0.0015 354.13);
+    --backdrop: oklch(0% 0 0 / 60%);
+
+    --field-background: oklch(21.03% 0.003 354.13);
+    --field-foreground: oklch(99.11% 0.0015 354.13);
+    --field-placeholder: oklch(70.5% 0.003 354.13);
+
+    --surface-shadow: 0 0 0 0 transparent inset;
+}

@@ -127,11 +127,14 @@ describe("NIVO_GRAMMAR", () => {
         }
     })
 
-    it("declares the family's stylesheet in every app that mounts the family root", () => {
+    it("declares the family's stylesheet, then the app's brand layer, in every app that mounts the family root", () => {
         for (const app of APPS) {
-            const globals = sources.find((file) => file.path === `${app}/src/app/globals.css`)
+            const globals = sources.find((file) => file.path === `${app}/src/app/globals.css`)?.text ?? ""
+            const family = globals.indexOf('@import "@nivo/ui/family.css";')
+            const brand = globals.indexOf('@import "../modules/brand/brand.css";')
 
-            expect(globals?.text).toContain('@import "@nivo/ui/family.css";')
+            expect(family).toBeGreaterThan(-1)
+            expect(brand).toBeGreaterThan(family)
         }
     })
 })
@@ -139,43 +142,165 @@ describe("NIVO_GRAMMAR", () => {
 /**
  * jsdom parses CSS but resolves no custom property, so `getComputedStyle` on a rendered root
  * reports an empty `--accent` whatever the stylesheet says. The declaration itself is therefore the
- * assertion: this file reads the family stylesheet as text and checks which selector owns which
- * value. `index.spec.tsx` proves the root carries the attribute those selectors key off.
+ * assertion: these specs read the family stylesheet and each app's brand layer as text and check
+ * which file owns which value. The first block of specs proves the root carries the attribute the
+ * theme bridge sets.
  */
 const FAMILY_SCOPE = '.grammar-common-root[data-grammar-family="nivo"]'
-const NIVO_RED = "oklch(57% 0.24 25)"
 const STARCI_PURPLE = "#7547ff"
 
-type Rule = { readonly selector: string; readonly body: string }
-
 /** Comments are stripped first: a comment before a selector would otherwise be read as part of it. */
-const css = readFileSync(resolve(import.meta.dirname, "nivo.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "")
+const stripComments = (text: string) => text.replace(/\/\*[\s\S]*?\*\//g, "")
+const family = stripComments(readFileSync(resolve(import.meta.dirname, "nivo.css"), "utf8"))
+const brandOf = (app: string) => stripComments(readFileSync(resolve(ROOT, app, "src/modules/brand/brand.css"), "utf8"))
 
-/** Every style rule in the sheet, at-rules descended into rather than treated as one rule. */
-const rulesIn = (text: string): ReadonlyArray<Rule> => {
-    const found: Array<Rule> = []
-    let cursor = 0
-    while (cursor < text.length) {
-        const open = text.indexOf("{", cursor)
-        if (open === -1) break
-        const selector = text.slice(cursor, open).trim()
-        let depth = 1
-        let scan = open + 1
-        while (scan < text.length && depth > 0) {
-            if (text[scan] === "{") depth += 1
-            if (text[scan] === "}") depth -= 1
-            scan += 1
-        }
-        const body = text.slice(open + 1, scan - 1)
-        found.push(...(selector.startsWith("@") ? rulesIn(body) : [{ selector, body }]))
-        cursor = scan
-    }
-    return found
+/** The declarations inside the first block whose selector is exactly `selector`. */
+const blockOf = (text: string, selector: string): ReadonlyMap<string, string> => {
+    const open = text.indexOf(`${selector} {`)
+    if (open === -1) return new Map()
+    const body = text.slice(open + selector.length + 2, text.indexOf("}", open))
+    return new Map(
+        [...body.matchAll(/^\s*(--[a-z-]+|color-scheme):\s*([^;]+);/gm)].map((match) => [
+            match[1] as string,
+            (match[2] as string).trim(),
+        ]),
+    )
 }
 
-const rules = rulesIn(css)
-const declares = (rule: Rule, property: string) => new RegExp(`(?:^|\\s)${property}:`, "m").test(rule.body)
-const declaring = (property: string) => rules.filter((rule) => declares(rule, property))
+describe("the nivo family stylesheet", () => {
+    it("writes no colour: every colour is the brand layer's", () => {
+        expect(family).not.toMatch(/#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab|lch|lab|color-mix)\(/i)
+    })
+
+    it("makes the family root inherit every value the brand layer sets, and nothing more", () => {
+        const rebound = blockOf(family, FAMILY_SCOPE)
+        const light = blockOf(brandOf("apps/app"), ":root")
+
+        expect(rebound.size).toBeGreaterThan(0)
+        for (const value of rebound.values()) expect(value).toBe("inherit")
+        expect([...rebound.keys()].sort()).toEqual([...light.keys()].sort())
+    })
+
+    it("steps aside for forced colours, which Common's own root answers", () => {
+        expect(family).toContain("@media (forced-colors: none)")
+        expect(family).not.toContain("forced-colors: active")
+    })
+
+    it("collapses its one motion duration under reduced motion", () => {
+        expect(family).toContain("@media (prefers-reduced-motion: reduce)")
+    })
+
+    it("keeps its legacy names as pure aliases of grammar tokens", () => {
+        const aliases = [...family.matchAll(/^\s*(--nivo-[a-z-]+):\s*var\((--[a-z-]+)\);/gm)]
+
+        expect(aliases.length).toBeGreaterThan(0)
+        for (const alias of aliases) expect(alias[2]).not.toMatch(/^--nivo-/)
+    })
+})
+
+describe("every app's brand layer", () => {
+    it("carries one light block and one dark block over the same tokens", () => {
+        for (const app of APPS) {
+            const light = blockOf(brandOf(app), ":root")
+            const dark = blockOf(brandOf(app), ".dark")
+
+            expect(light.size).toBeGreaterThan(0)
+            expect([...dark.keys()].sort()).toEqual([...light.keys()].sort())
+            expect(light.get("color-scheme")).toBe("light")
+            expect(dark.get("color-scheme")).toBe("dark")
+        }
+    })
+
+    it("names only grammar tokens, never a family-private one", () => {
+        for (const app of APPS) {
+            for (const name of blockOf(brandOf(app), ":root").keys()) expect(name).not.toMatch(/^--nivo-/)
+        }
+    })
+
+    it("is the same layer in every app", () => {
+        const [first, ...rest] = APPS.map(brandOf)
+
+        for (const other of rest) expect(other).toBe(first)
+    })
+
+    it("holds unicorn red as the accent in both themes, so one red serves light and dark", () => {
+        for (const app of APPS) {
+            expect(blockOf(brandOf(app), ":root").get("--accent")).toBe("oklch(57% 0.24 25)")
+            expect(blockOf(brandOf(app), ".dark").get("--accent")).toBe("oklch(57% 0.24 25)")
+        }
+    })
+})
+
+/** Linear-light sRGB of an `oklch(L% C H)` colour, clamped to the gamut. */
+const linearOf = (value: string): ReadonlyArray<number> => {
+    const parts = /oklch\(([\d.]+)% ([\d.]+) ([\d.]+)/.exec(value)
+    if (parts === null) throw new Error(`not an oklch colour: ${value}`)
+    const [lightness, chroma, hue] = [Number(parts[1]) / 100, Number(parts[2]), (Number(parts[3]) * Math.PI) / 180]
+    const a = chroma * Math.cos(hue)
+    const b = chroma * Math.sin(hue)
+    const l = (lightness + 0.3963377774 * a + 0.2158037573 * b) ** 3
+    const m = (lightness - 0.1055613458 * a - 0.0638541728 * b) ** 3
+    const s = (lightness - 0.0894841775 * a - 1.291485548 * b) ** 3
+    return [
+        4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+        -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+        -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+    ].map((channel) => Math.min(1, Math.max(0, channel)))
+}
+const luminance = (value: string) => {
+    const [red = 0, green = 0, blue = 0] = linearOf(value)
+    return 0.2126 * red + 0.7152 * green + 0.0722 * blue
+}
+/** WCAG 2 contrast ratio of two colours. */
+const contrast = (foreground: string, background: string) => {
+    const [high = 0, low = 0] = [luminance(foreground), luminance(background)].sort((x, y) => y - x)
+    return (high + 0.05) / (low + 0.05)
+}
+
+/** The text pairs the brand promises: [foreground token, ground token]. */
+const TEXT_PAIRS = [
+    ["--foreground", "--background"],
+    ["--foreground", "--surface"],
+    ["--foreground", "--surface-secondary"],
+    ["--foreground", "--surface-tertiary"],
+    ["--foreground", "--overlay"],
+    ["--foreground", "--segment"],
+    ["--muted", "--background"],
+    ["--muted", "--surface"],
+    ["--muted", "--surface-secondary"],
+    ["--muted", "--surface-tertiary"],
+    ["--muted", "--overlay"],
+    ["--field-foreground", "--field-background"],
+    ["--field-placeholder", "--field-background"],
+    ["--default-foreground", "--default"],
+    ["--accent-foreground", "--accent"],
+    ["--danger-foreground", "--danger"],
+    ["--success-foreground", "--success"],
+    ["--warning-foreground", "--warning"],
+    ["--info-foreground", "--info"],
+] as const
+
+describe("the brand layer's contrast, measured with the WCAG 2 formula", () => {
+    it.each([":root", ".dark"])("keeps every text pair at 4.5:1 or better under %s", (selector) => {
+        const tokens = blockOf(brandOf("apps/app"), selector)
+        const failing = TEXT_PAIRS.filter(
+            ([foreground, ground]) => contrast(tokens.get(foreground) ?? "", tokens.get(ground) ?? "") < 4.5,
+        )
+
+        expect(failing).toEqual([])
+    })
+
+    it.each([":root", ".dark"])(
+        "keeps the accent, which is also the focus ring, at 3:1 on the canvas and the surface under %s",
+        (selector) => {
+            const tokens = blockOf(brandOf("apps/app"), selector)
+
+            for (const ground of ["--background", "--surface"]) {
+                expect(contrast(tokens.get("--accent") ?? "", tokens.get(ground) ?? "")).toBeGreaterThanOrEqual(3)
+            }
+        },
+    )
+})
 
 /**
  * Every source file under `dir` a colour literal could hide in. Specs are excluded: this one names
@@ -189,41 +314,10 @@ const sourcesUnder = (dir: string): ReadonlyArray<string> =>
     })
 
 describe("NIVO_GRAMMAR", () => {
-    it("scopes every value it declares to the nivo family root", () => {
-        const valued = rules.filter((rule) => /(?:^|\s)--[a-z]/m.test(rule.body))
-
-        expect(valued.length).toBeGreaterThan(0)
-        for (const rule of valued) {
-            expect(rule.selector).toContain(FAMILY_SCOPE)
-        }
-    })
-
-    it("binds --accent to the nivo red under the family root, in light and in dark", () => {
-        const accent = declaring("--accent")
-        expect(accent).toHaveLength(1)
-        expect(accent[0]?.selector).toContain(FAMILY_SCOPE)
-        expect(accent[0]?.body).toContain("--accent: var(--nivo-accent);")
-
-        const light = declaring("--nivo-accent").find((rule) => rule.body.includes(`--nivo-accent: ${NIVO_RED};`))
-        expect(light?.selector).toContain(FAMILY_SCOPE)
-
-        // Dark restates the neutrals and never the accent, so one red serves both themes.
-        const dark = rules.find((rule) => rule.selector.includes('[data-grammar-theme="dark"]'))
-        expect(dark?.body).toContain("--nivo-foreground:")
-        expect(declares(dark as Rule, "--nivo-accent")).toBe(false)
-    })
-
-    it("answers the accessibility media queries the family is responsible for", () => {
-        expect(css).toContain("@media (prefers-color-scheme: dark)")
-        expect(css).toContain("@media (forced-colors: active)")
-        expect(css).toContain("@media (prefers-reduced-motion: reduce)")
-    })
-
     it("keeps StarCi purple out of the family, and out of every app that mounts it", () => {
-        const root = resolve(import.meta.dirname, "../../../../..")
         const searched = ["packages/ui/src", "apps/app/src", "apps/landing/src", "apps/expert/src"]
         const hits = searched.flatMap((dir) =>
-            sourcesUnder(resolve(root, dir)).filter((file) =>
+            sourcesUnder(resolve(ROOT, dir)).filter((file) =>
                 readFileSync(file, "utf8").toLowerCase().includes(STARCI_PURPLE),
             ),
         )

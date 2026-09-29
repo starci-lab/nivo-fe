@@ -3,6 +3,7 @@
 @import "@heroui/styles/css";
 @import "@starci/grammar/common.css";
 @import "@nivo/ui/family.css";
+@import "../modules/brand/brand.css";
 
 /*
  * The shared canon lives outside this app's folder, so Tailwind cannot find its class names by
