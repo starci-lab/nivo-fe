@@ -17,7 +17,7 @@ describe("rememberOauthProvider", () => {
     beforeEach(() => window.sessionStorage.clear())
 
     it("remembers the chosen provider and spends it exactly once", () => {
-        rememberOauthProvider("github")
+        expect(rememberOauthProvider("github")).toEqual({ remembered: true })
         expect(window.sessionStorage.getItem("nivo.oauth.provider")).toBe("github")
         expect(takeOauthProvider()).toBe("github")
         // Spent: a reload of the callback must not replay a trip that already finished.
@@ -44,7 +44,9 @@ describe("takeOauthProvider", () => {
             get: refuse,
         })
         try {
-            expect(() => rememberOauthProvider("github")).not.toThrow()
+            const outcome = rememberOauthProvider("github")
+            expect(outcome.remembered).toBe(false)
+            if (!outcome.remembered) expect(outcome.cause).toBeInstanceOf(Error)
             expect(takeOauthProvider()).toBe("google")
         } finally {
             if (real === undefined) Reflect.deleteProperty(window, "sessionStorage")

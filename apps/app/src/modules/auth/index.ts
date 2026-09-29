@@ -27,15 +27,24 @@ const PROVIDER_KEY = "nivo.oauth.provider"
 const DEFAULT_PROVIDER: OauthProvider = "google"
 
 /**
+ * What remembering the provider settled to. When storage refuses, the refusal is handed back with
+ * its cause instead of disappearing - the return leg still falls back to the default provider.
+ */
+export type RememberOauthProviderOutcome =
+    { readonly remembered: true } | { readonly remembered: false; readonly cause: unknown }
+
+/**
  * Remember the OAuth provider for the return leg without placing it in the callback URL.
  *
  * @param provider - The provider the reader chose.
+ * @returns Whether the provider was kept; a refusal carries its cause.
  */
-export const rememberOauthProvider = (provider: OauthProvider) => {
+export const rememberOauthProvider = (provider: OauthProvider): RememberOauthProviderOutcome => {
     try {
         window.sessionStorage.setItem(PROVIDER_KEY, provider)
-    } catch {
-        // Storage can be unavailable; the return leg safely falls back to the default provider.
+        return { remembered: true }
+    } catch (cause) {
+        return { remembered: false, cause }
     }
 }
 
