@@ -10,11 +10,11 @@ import {
     salesRefusalKey,
     salesSurfaceStanding,
     type SalesAnswerStanding,
-    type SalesCommandAnswer,
     type SalesNotice,
     type SalesSurfaceStanding,
     type SalesTranslation,
 } from "@/modules/sales/sales-workbench"
+import { parseSalesHandoffValue } from "@/modules/sales/sales-workbench.guards"
 
 /*
  * The connected handoff surface (impl.sales.nivo-fe.handoff-view).
@@ -46,19 +46,18 @@ const submissionRequestId = (): string => {
     return `submission-${Date.now()}-${submissionSequence}`
 }
 
-/** The receiver's own state spelling inside one settled payload. */
-type HandoffPayloadState = { readonly handoffId?: string; readonly status?: string; readonly revision?: number }
-
 /** The statuses whose attempt may already have started; after them only the same identity is looked up. */
 const LOOKUP_ONLY_STATUSES: ReadonlySet<string> = new Set(["possible-start", "outcome-unknown"])
 
 /** One read's served value, or null when it has not answered with one. */
-const answered = <TValue>(answer: SalesAnswerStanding | undefined): TValue | null =>
-    answer?.ok === true ? (answer.data as TValue) : null
+const answered = <TValue>(
+    answer: SalesAnswerStanding | undefined,
+    parse: (value: unknown) => TValue | null,
+): TValue | null => (answer?.ok === true ? parse(answer.data) : null)
 
 /** One settled payload, or undefined when the readback disclosed none. */
-const payloadState = (answer: SalesCommandAnswer): HandoffPayloadState | undefined =>
-    answer.ok ? (answer.data as HandoffPayloadState) : undefined
+const payloadState = (answer: SalesAnswerStanding | undefined): SalesHandoffValue | undefined =>
+    answer?.ok === true ? (parseSalesHandoffValue(answer.data) ?? undefined) : undefined
 
 /** The resolved installation address, or null while the instance coordinate is not known. */
 const scopeOf = (workspaceId: string, instanceId: string, installationId: string): SalesInstallationScope | null =>
@@ -117,7 +116,7 @@ export const useSalesHandoff = (workspaceId: string, installationId: string, t: 
 
     const handoff = useQuerySalesHandoffSwr(addressable, { handoffId }, named(ready, handoffId))
     const submitHandoff = useMutateSalesSubmitHandoffSwr(addressable, ready)
-    const model = answered<SalesHandoffValue>(handoff.data)
+    const model = answered(handoff.data, parseSalesHandoffValue)
 
     const status = model?.status ?? ""
     const mayLookupOnly = model !== null && lookupOnlyOf(model.status)
@@ -154,7 +153,7 @@ export const useSalesHandoff = (workspaceId: string, installationId: string, t: 
                 const answer = (await submitHandoff.trigger({
                     requestId: intentFor("submission", input),
                     input,
-                })) as SalesCommandAnswer
+                }))
                 if (!answer.ok && answer.code !== "outcome_unknown" && answer.code !== "DEADLINE_EXCEEDED") {
                     setNotice({
                         kind: "refused",
@@ -162,7 +161,7 @@ export const useSalesHandoff = (workspaceId: string, installationId: string, t: 
                     })
                     return
                 }
-                const settled = (await handoff.mutate()) as SalesCommandAnswer
+                const settled = await handoff.mutate()
                 const settledStatus = payloadState(settled)?.status
                 if (settledStatus === undefined || settledStatus === "prepared") {
                     setNotice({ kind: "refused", message: t("refusal.unsettled") })

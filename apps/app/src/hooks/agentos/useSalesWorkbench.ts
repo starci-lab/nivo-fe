@@ -3,17 +3,12 @@
 import { useRef, useState } from "react"
 import { useParams } from "next/navigation"
 import type {
-    SalesActionValue,
     SalesClarificationFact,
     SalesCloseRequest,
-    SalesCommandValue,
     SalesInstallationScope,
-    SalesOpportunityValue,
     SalesPipelineItem,
     SalesPipelineRequest,
     SalesPipelineValue,
-    SalesPolicyValue,
-    SalesReadinessValue,
 } from "@/modules/api/sales"
 import { nivoQueryPayload } from "@/modules/query"
 import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
@@ -48,6 +43,14 @@ import {
     type SalesSurfaceStanding,
     type SalesTranslation,
 } from "@/modules/sales/sales-workbench"
+import {
+    parseSalesActionValue,
+    parseSalesCommandValue,
+    parseSalesOpportunityValue,
+    parseSalesPipelineValue,
+    parseSalesPolicyValue,
+    parseSalesReadinessValue,
+} from "@/modules/sales/sales-workbench.guards"
 
 /*
  * The connected Sales workbench (impl.sales.nivo-fe.opportunity-workbench-view).
@@ -85,20 +88,11 @@ const requestId = (): string => {
 }
 const PAGE_SIZE = 20
 
-/** The receiver's own state spelling inside one settled payload. */
-type CommandPayloadState = {
-    readonly state?: string
-    readonly status?: string
-    readonly revision?: number
-    readonly opportunityId?: string
-    readonly actionId?: string
-}
-const payloadValue = (answer: SalesCommandAnswer): CommandPayloadState | undefined =>
-    answer.ok ? (answer.data as CommandPayloadState) : undefined
-
 /** One read's served value, or null when it has not answered with one. */
-const answered = <TValue>(answer: SalesAnswerStanding | undefined): TValue | null =>
-    answer?.ok === true ? (answer.data as TValue) : null
+const answered = <TValue>(
+    answer: SalesAnswerStanding | undefined,
+    parse: (value: unknown) => TValue | null,
+): TValue | null => (answer?.ok === true ? parse(answer.data) : null)
 
 /** One route parameter as a usable string. */
 const stringOr = (value: unknown, fallback: string): string => (typeof value === "string" ? value : fallback)
@@ -200,10 +194,7 @@ type Intent = { readonly fingerprint: string; readonly token: string }
 
 /** Own Sales form state, the resolved installation scope, idempotent intents and readback-settled feedback. */
 export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTranslation) => {
-    const params = useParams<{ readonly workspaceId?: string; readonly installationId?: string }>() as {
-        readonly workspaceId?: string
-        readonly installationId?: string
-    } | null
+    const params = useParams<{ readonly workspaceId?: string; readonly installationId?: string }>()
     const routeWorkspaceId = stringOr(params?.workspaceId, "")
     const routeInstallationId = stringOr(params?.installationId, moduleId)
     const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(routeWorkspaceId, routeWorkspaceId.length > 0)
@@ -261,12 +252,12 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
     const closeOpportunity = useMutateSalesCloseSwr(addressable, ready)
     const recoverAction = useMutateSalesRecoverActionSwr(addressable, ready)
 
-    const pipelineModel = answered<SalesPipelineValue>(pipeline.data)
-    const readinessModel = answered<SalesReadinessValue>(readiness.data)
-    const policyModel = answered<SalesPolicyValue>(policy.data)
-    const opportunityModel = answered<SalesOpportunityValue>(opportunity.data)
-    const commandModel = answered<SalesCommandValue>(command.data)
-    const actionModel = answered<SalesActionValue>(action.data)
+    const pipelineModel = answered(pipeline.data, parseSalesPipelineValue)
+    const readinessModel = answered(readiness.data, parseSalesReadinessValue)
+    const policyModel = answered(policy.data, parseSalesPolicyValue)
+    const opportunityModel = answered(opportunity.data, parseSalesOpportunityValue)
+    const commandModel = answered(command.data, parseSalesCommandValue)
+    const actionModel = answered(action.data, parseSalesActionValue)
 
     const intentFor = (key: string, value: unknown): string => {
         const valueFingerprint = JSON.stringify(value)
@@ -279,7 +270,7 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
     const settle = async (
         key: string,
         press: () => Promise<SalesCommandAnswer>,
-        readback: (() => Promise<SalesCommandAnswer>) | null,
+        readback: (() => Promise<SalesCommandAnswer | undefined>) | null,
         describe: (answer: SalesCommandAnswer) => string | null,
     ): Promise<void> => {
         setNotice(null)
@@ -293,7 +284,7 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
                 return
             }
             const settled = readback === null ? answer : await readback()
-            const confirmed = settled.ok ? describe(settled) : null
+            const confirmed = settled?.ok ? describe(settled) : null
             if (confirmed === null) {
                 setNotice({ kind: "refused", message: t("refusal.unsettled") })
                 return
@@ -348,14 +339,14 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
     const closeAddressable = closePressable(ready, closeIntentId, opportunityId, integerOrNull(closeRevision))
 
     const planSettled = (answer: SalesCommandAnswer): string | null => {
-        const state = payloadValue(answer)
-        const status = state?.status ?? state?.state
+        const state = answer.ok ? parseSalesCommandValue(answer.data) : null
+        const status = state?.status
         return status === undefined
             ? null
             : t("command.settled", { status: salesWording(salesCommandStatusKey(status), status, t) })
     }
     const closeSettled = (answer: SalesCommandAnswer): string | null => {
-        const state = payloadValue(answer)
+        const state = answer.ok ? parseSalesOpportunityValue(answer.data) : null
         const status = state?.status
         return state?.opportunityId === undefined || status === undefined
             ? null
@@ -365,7 +356,7 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
               })
     }
     const actionSettled = (answer: SalesCommandAnswer): string | null => {
-        const state = payloadValue(answer)
+        const state = answer.ok ? parseSalesActionValue(answer.data) : null
         const status = state?.status
         return state?.actionId === undefined || status === undefined
             ? null
@@ -375,7 +366,7 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
               })
     }
     const policySettled = (answer: SalesCommandAnswer): string | null => {
-        const state = payloadValue(answer)
+        const state = answer.ok ? parseSalesPolicyValue(answer.data) : null
         return state?.revision === undefined ? null : t("policy.settled", { revision: state.revision })
     }
 
@@ -387,8 +378,8 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
                 submitCommand.trigger({
                     requestId: intentFor(`command-${commandId}`, commandInput),
                     input: commandInput,
-                }) as Promise<SalesCommandAnswer>,
-            () => command.mutate() as Promise<SalesCommandAnswer>,
+                }),
+            () => command.mutate(),
             planSettled,
         )
     }
@@ -400,8 +391,8 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
                 clarifyCommand.trigger({
                     requestId: intentFor(`clarify-${commandId}`, clarifyInput),
                     input: clarifyInput,
-                }) as Promise<SalesCommandAnswer>,
-            () => command.mutate() as Promise<SalesCommandAnswer>,
+                }),
+            () => command.mutate(),
             planSettled,
         )
     }
@@ -413,8 +404,8 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
                 closeOpportunity.trigger({
                     requestId: intentFor(`close-${closeIntentId}`, closeInput),
                     input: closeInput,
-                }) as Promise<SalesCommandAnswer>,
-            () => opportunity.mutate() as Promise<SalesCommandAnswer>,
+                }),
+            () => opportunity.mutate(),
             closeSettled,
         )
     }
@@ -447,8 +438,8 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
                 recoverAction.trigger({
                     requestId: intentFor(`${operation}-${actionId}`, value),
                     input: value,
-                }) as Promise<SalesCommandAnswer>,
-            () => action.mutate() as Promise<SalesCommandAnswer>,
+                }),
+            () => action.mutate(),
             actionSettled,
         )
     }
@@ -469,8 +460,8 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
         }
         void settle(
             "policy",
-            () => configurePolicy.trigger({ requestId: value.requestId, input: value }) as Promise<SalesCommandAnswer>,
-            () => policy.mutate() as Promise<SalesCommandAnswer>,
+            () => configurePolicy.trigger({ requestId: value.requestId, input: value }),
+            () => policy.mutate(),
             policySettled,
         )
     }

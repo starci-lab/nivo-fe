@@ -10,11 +10,11 @@ import {
     salesRefusalKey,
     salesSurfaceStanding,
     type SalesAnswerStanding,
-    type SalesCommandAnswer,
     type SalesNotice,
     type SalesSurfaceStanding,
     type SalesTranslation,
 } from "@/modules/sales/sales-workbench"
+import { parseSalesDecisionValue } from "@/modules/sales/sales-workbench.guards"
 
 /*
  * The connected decision surface (impl.sales.nivo-fe.decision-view).
@@ -48,25 +48,18 @@ const answerRequestId = (): string => {
     return `answer-${Date.now()}-${answerSequence}`
 }
 
-/** The receiver's own state spelling inside one settled payload. */
-type DecisionPayloadState = {
-    readonly decisionRequestId?: string
-    readonly proposalVersion?: number
-    readonly proposalFingerprint?: string
-    readonly status?: string
-    readonly revision?: number
-}
-
 /** The proposal one answer was opened on: what an answer stays bound to. */
 type AnswerBasis = { readonly version: number; readonly fingerprint: string }
 
 /** One read's served value, or null when it has not answered with one. */
-const answered = <TValue>(answer: SalesAnswerStanding | undefined): TValue | null =>
-    answer?.ok === true ? (answer.data as TValue) : null
+const answered = <TValue>(
+    answer: SalesAnswerStanding | undefined,
+    parse: (value: unknown) => TValue | null,
+): TValue | null => (answer?.ok === true ? parse(answer.data) : null)
 
 /** One settled payload, or undefined when the readback disclosed none. */
-const payloadState = (answer: SalesCommandAnswer): DecisionPayloadState | undefined =>
-    answer.ok ? (answer.data as DecisionPayloadState) : undefined
+const payloadState = (answer: SalesAnswerStanding | undefined): SalesDecisionValue | undefined =>
+    answer?.ok === true ? (parseSalesDecisionValue(answer.data) ?? undefined) : undefined
 
 /** The resolved installation address, or null while the instance coordinate is not known. */
 const scopeOf = (workspaceId: string, instanceId: string, installationId: string): SalesInstallationScope | null =>
@@ -122,7 +115,7 @@ export const useSalesDecision = (workspaceId: string, installationId: string, t:
         named(ready, decisionRequestId),
     )
     const decideProposal = useMutateSalesDecideProposalSwr(addressable, ready)
-    const model = answered<SalesDecisionValue>(decision.data)
+    const model = answered(decision.data, parseSalesDecisionValue)
 
     /*
      * Whether the read on screen is still the proposal this surface opened its answer on. A moved
@@ -164,7 +157,7 @@ export const useSalesDecision = (workspaceId: string, installationId: string, t:
                 const answer = (await decideProposal.trigger({
                     requestId: intentFor("answer", input),
                     input,
-                })) as SalesCommandAnswer
+                }))
                 if (!answer.ok && answer.code !== "outcome_unknown" && answer.code !== "DEADLINE_EXCEEDED") {
                     setNotice({
                         kind: "refused",
@@ -172,7 +165,7 @@ export const useSalesDecision = (workspaceId: string, installationId: string, t:
                     })
                     return
                 }
-                const settled = (await decision.mutate()) as SalesCommandAnswer
+                const settled = await decision.mutate()
                 const state = payloadState(settled)
                 const settledStatus = state?.status
                 if (settledStatus === undefined) {
