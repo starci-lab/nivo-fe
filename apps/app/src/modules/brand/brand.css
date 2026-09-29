@@ -93,3 +93,13 @@
 
     --surface-shadow: 0 0 0 0 transparent inset;
 }
+
+/*
+ * The document canvas reads the same tokens: the family root carries the interface typeface, so
+ * the page and the brand stay one surface.
+ */
+body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--nivo-font-interface);
+}

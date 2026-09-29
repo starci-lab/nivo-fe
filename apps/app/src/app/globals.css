@@ -1,4 +1,3 @@
-@import "@nivo/ui/styles.css";
 @import "tailwindcss";
 @import "@heroui/styles/css";
 @import "@starci/grammar/common.css";
@@ -48,47 +47,3 @@
  * Declared here so `dark:` utilities in this app follow the same hook the provider sets.
  */
 @custom-variant dark (&:where(.dark, .dark *));
-
-/*
- * Authenticated console surfaces are a boundary of CHROME, not of colour. The palette below it is
- * the family's, identical to every public route's; what the console owns is its own full-height
- * canvas and its own typeface.
- */
-.starci-dashboard-theme {
-    min-height: 100dvh;
-    background: var(--background);
-    color: var(--foreground);
-    font-family: var(--font-open-sans), var(--nivo-font-console);
-}
-
-/* HeroUI's icon-only dropdown trigger must center its one glyph at every browser zoom. */
-.starci-dashboard-theme .button--icon-only {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-}
-
-.starci-dashboard-theme .button--icon-only > [data-slot="icon"] {
-    display: block;
-    flex: none;
-}
-
-/*
- * The Grammar Button underneath is HeroUI's, and its base rule paints `outline-style: none`
- * UNLAYERED - no layered utility can win that argument, which is why the purchase-status
- * refresh action showed no keyboard-focus indicator. The surface's action band owns this
- * descendant treatment instead: the family ring contract (2px solid var(--focus), 2px
- * offset) on real keyboard focus or the family's own focus-visible flag, while the
- * Grammar button anatomy stays installed.
- */
-.purchase-status-action button:is(:focus-visible, [data-focus-visible="true"]) {
-    outline: 2px solid var(--focus);
-    outline-offset: 2px;
-}
-
-body {
-    background: var(--background);
-    color: var(--foreground);
-    font-family: var(--nivo-font-interface);
-}

@@ -99,12 +99,21 @@ export const SKELETON_BANNER_RESERVED_CLASS_NAME = cn(BAND_CLASS_NAME, "max-[430
 
 /**
  * The consumed Grammar button paints no keyboard-focus treatment on this surface (measured:
- * data-focus-visible=true with no outline, ring or colour delta). HeroUI's unlayered
- * `outline-style: none` beats every layered utility, so the ring itself is the unlayered
- * `.purchase-status-action` descendant rule in globals.css - the family's own contract
- * (2px solid var(--focus), 2px offset) - while this hook keeps the treatment owned here.
+ * data-focus-visible=true with no outline, ring or colour delta), so the band owns the family's
+ * ring contract - 2px solid var(--focus), 2px offset - on real keyboard focus or the family's own
+ * focus-visible flag. The descendant utilities sit in `@layer utilities`, which wins over the
+ * vendor's `outline-none` in `@layer components`.
  */
-export const ACTION_FOCUS_CLASS_NAME = cn("purchase-status-action")
+export const ACTION_FOCUS_CLASS_NAME = cn(
+    "[&_button:focus-visible]:outline-2",
+    "[&_button:focus-visible]:outline-solid",
+    "[&_button:focus-visible]:outline-focus",
+    "[&_button:focus-visible]:outline-offset-2",
+    "[&_button[data-focus-visible=true]]:outline-2",
+    "[&_button[data-focus-visible=true]]:outline-solid",
+    "[&_button[data-focus-visible=true]]:outline-focus",
+    "[&_button[data-focus-visible=true]]:outline-offset-2",
+)
 
 /** Page-level escape link row, used where the rail band already holds the onward action. */
 export const ESCAPE_CLASS_NAME = cn("flex", "min-w-0", "justify-start")
