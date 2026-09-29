@@ -32,6 +32,13 @@ describe("ProductPage", () => {
         expect(html).toContain("CURRENT FOCUS · BUILDING &amp; VERIFYING")
         expect(html).toContain("Target Architecture")
         expect(html).toContain('data-product-page="nivo-os"')
+        expect(container.querySelector('[data-product-page="nivo-os"]')).toHaveClass(
+            "bg-surface",
+            "text-background-inverse",
+        )
+        expect(container.querySelector('[data-product-section="responsibility-center"]')).toHaveClass(
+            "py-[clamp(4.5rem,9vw,8rem)]",
+        )
         expect(screen.getByRole("list", { name: "NIVO OS operating model" })).toBeInTheDocument()
         expect(
             screen.getAllByRole("link", { name: "Explore Solutions" }).map((link) => link.getAttribute("href")),
