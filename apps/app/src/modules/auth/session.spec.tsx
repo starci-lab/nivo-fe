@@ -130,6 +130,37 @@ describe("SessionProvider", () => {
         expect(result.current.state.status).toBe("anonymous")
     })
 
+    it("discards a refused session locally without asking the server to end it", async () => {
+        mocks.api.refreshSession.mockResolvedValue({ ok: true, data: payload() })
+        const { result } = renderSession()
+        await waitFor(() => expect(result.current.state.status).toBe("signed-in"))
+
+        act(() => {
+            result.current.discard()
+        })
+
+        expect(result.current.state.status).toBe("anonymous")
+        expect(mocks.api.signOut).not.toHaveBeenCalled()
+    })
+
+    it("keeps a stale restore answer from putting back a discarded session", async () => {
+        /*
+         * A discard decides custody the same way an ending does: the restore minted before it must
+         * never win the epoch back and resurrect the session the server refused.
+         */
+        const refresh = deferred<Awaited<ReturnType<typeof mocks.api.refreshSession>>>()
+        mocks.api.refreshSession.mockReturnValue(refresh.promise)
+        const { result } = renderSession()
+
+        act(() => {
+            result.current.discard()
+        })
+        expect(result.current.state.status).toBe("anonymous")
+
+        await act(async () => refresh.resolve({ ok: true, data: payload() }))
+        expect(result.current.state.status).toBe("anonymous")
+    })
+
     it("ends locally and reports what the sign-out envelope stated", async () => {
         mocks.api.refreshSession.mockResolvedValue({ ok: true, data: payload() })
         const { result } = renderSession()

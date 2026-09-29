@@ -92,6 +92,15 @@ export type Session = {
      *                clears the local state first. Either way the local state is always cleared.
      */
     readonly end: (scope?: SignOutScope) => Promise<SessionEndReport>
+    /**
+     * Drop this browser's claim of a session the server has already refused.
+     *
+     * No sign-out request is owed: the refusal WAS the answer, so asking the server to end a
+     * session it just denied would only fail again. Local custody, the in-memory token and any
+     * restore still in flight end exactly as a this-browser ending ends them, and the anonymous
+     * state the console redirects on is what remains.
+     */
+    readonly discard: () => void
 }
 /** The slot the provider publishes and the `useSession` door reads; null says no provider is above. */
 export const SessionContext = createContext<Session | null>(null)
@@ -234,6 +243,18 @@ export const SessionProvider = (props: SessionProviderProps) => {
             authorityEnding: authorityEndingFrom(answer.data.authorityEndingConfirmed),
         }
     }, [])
+    const discard = useCallback(() => {
+        /*
+         * The same custody drop as a this-browser ending, minus the request: the server's own
+         * refusal is what ended the claim, so nothing needs confirming. Bumping the epoch retires
+         * any restore still in flight, whose late success must never put the refused session back.
+         */
+        custodyEpoch.current += 1
+        token.current = null
+        setState({
+            status: "anonymous",
+        })
+    }, [])
     useEffect(() => {
         let cancelled = false
         const restore = async (): Promise<void> => {
@@ -269,8 +290,9 @@ export const SessionProvider = (props: SessionProviderProps) => {
             state,
             adopt,
             end,
+            discard,
         }),
-        [state, adopt, end],
+        [state, adopt, end, discard],
     )
     return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
 }

@@ -1,11 +1,45 @@
 import { describe, expect, it } from "vitest"
-import { nivoAnswerDenied, nivoQueryData } from "."
+import { nivoAnswerDenied, nivoQueryPayload, nivoQueryReading } from "."
 
-describe("nivoQueryData", () => {
-    it("preserves loading, accepted data and refusal as distinct states", () => {
-        expect(nivoQueryData(undefined)).toBeUndefined()
-        expect(nivoQueryData({ ok: true, data: { id: "one" } })).toEqual({ id: "one" })
-        expect(nivoQueryData({ ok: false, kind: "unavailable" })).toBeNull()
+describe("nivoQueryReading", () => {
+    it("keeps a read in flight, accepted data and a failed settlement as three distinct states", () => {
+        expect(nivoQueryReading(undefined)).toEqual({ status: "resting" })
+        expect(nivoQueryReading({ ok: true, data: { id: "one" } })).toEqual({
+            status: "ready",
+            data: { id: "one" },
+        })
+        expect(nivoQueryReading({ ok: false, kind: "forbidden" })).toMatchObject({
+            status: "failed",
+            kind: "forbidden",
+        })
+    })
+
+    it("keeps every fact a failed answer states: kind, code, reason and retryability", () => {
+        expect(
+            nivoQueryReading({
+                ok: false,
+                kind: "unavailable",
+                code: "NETWORK",
+                reason: "The read timed out.",
+                retryable: true,
+            }),
+        ).toEqual({ status: "failed", kind: "unavailable", code: "NETWORK", reason: "The read timed out.", retryable: true })
+    })
+
+    it("defaults an unstated retryability the way the answer's own kind defaults it", () => {
+        expect(nivoQueryReading({ ok: false, kind: "unavailable" })).toMatchObject({ retryable: true })
+        expect(nivoQueryReading({ ok: false, kind: "not-found" })).toMatchObject({ retryable: false })
+        expect(nivoQueryReading({ ok: false, kind: "invalid" })).toMatchObject({ retryable: false })
+        expect(nivoQueryReading({ ok: false, kind: "refused" })).toMatchObject({ retryable: false })
+        expect(nivoQueryReading({ ok: false, kind: "forbidden" })).toMatchObject({ retryable: false })
+    })
+})
+
+describe("nivoQueryPayload", () => {
+    it("hands over only an accepted answer's data and nothing else", () => {
+        expect(nivoQueryPayload(undefined)).toBeUndefined()
+        expect(nivoQueryPayload({ ok: false, kind: "refused" })).toBeUndefined()
+        expect(nivoQueryPayload({ ok: true, data: 1 })).toBe(1)
     })
 })
 
