@@ -2,6 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl"
 import { useSalesWorkbench } from "@/hooks"
+import { translationValuesForNextIntl } from "../translation-values"
 import { SalesWorkbenchBlockBase } from "./component"
 
 /** The installed Sales workbench's open-registry entry: the one prop it addresses its installation by. */
@@ -11,7 +12,9 @@ export type SalesWorkbenchBlockProps = { readonly moduleId: string }
 export const SalesWorkbenchBlock = (props: SalesWorkbenchBlockProps) => {
     const translate = useTranslations("console.agentos.modules.runtime.workbench.salesWorkbench")
     const locale = useLocale()
-    const view = useSalesWorkbench(props.moduleId, locale, (key, values) => translate(key as never, values as never))
+    const view = useSalesWorkbench(props.moduleId, locale, (key, values) =>
+        translate(key, translationValuesForNextIntl(values)),
+    )
     return (
         <SalesWorkbenchBlockBase
             props={{ view }}

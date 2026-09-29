@@ -57,6 +57,7 @@ import {
     MODULE_ROUTE_SHELL_DETAIL_CLASS_NAME,
     MODULE_ROUTE_SHELL_IDENTITY_CLASS_NAME,
 } from "./classNames"
+import { isAgentOSModuleView } from "./module-route-shell-block.guards"
 
 /** Stable routed task identities owned by the shared installed-module shell. */
 export type AgentOSModuleView = "setup" | "test" | "operate" | "settings" | "diagnostics"
@@ -187,7 +188,9 @@ export const ModuleRouteShellBlock = <P extends object>(props: ModuleRouteShellB
                     tabs: routes,
                 }}
                 on={{
-                    select: (key) => onNavigate(key as AgentOSModuleView),
+                    select: (key) => {
+                        if (isAgentOSModuleView(key)) onNavigate(key)
+                    },
                 }}
             />
 

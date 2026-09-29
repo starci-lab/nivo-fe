@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/modules/i18n/config"
+import { DEFAULT_LOCALE, isLocale, type Locale } from "@/modules/i18n/config"
 import data from "./template.data.json"
 
 /**
@@ -31,7 +31,7 @@ const isLocaleMap = <T>(value: Localized<T>): value is Partial<Record<Locale, T>
     value !== null &&
     !Array.isArray(value) &&
     Object.keys(value).length > 0 &&
-    Object.keys(value).every((key) => (LOCALES as ReadonlyArray<string>).includes(key))
+    Object.keys(value).every((key) => isLocale(key))
 
 /**
  * Reads an authored value in one locale.
@@ -349,4 +349,4 @@ export type AcademyTemplate = {
  * and the `courses` SECTION draws whatever the academy has -- which is what lets re-applying a
  * template be safe.
  */
-export const ACADEMY: AcademyTemplate = data as AcademyTemplate
+export const ACADEMY: AcademyTemplate = data satisfies AcademyTemplate

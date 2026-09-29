@@ -124,11 +124,8 @@ export interface ShellObservationReduction {
 }
 
 /** The three whole-selection sources, in the order an overview asks for them. */
-const SELECTION_KINDS: ReadonlySet<ShellSelectionSourceKind> = new Set([
-    "core_registry",
-    "installation_inventory",
-    "runtime",
-])
+const SELECTION_KINDS = ["core_registry", "installation_inventory", "runtime"] as const satisfies
+    ReadonlyArray<ShellSelectionSourceKind>
 
 /**
  * The sources one AgentOS selection reads.

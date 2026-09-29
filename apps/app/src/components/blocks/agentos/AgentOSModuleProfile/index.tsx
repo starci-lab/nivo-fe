@@ -24,7 +24,7 @@ export const AgentOSModuleProfile = (props: AgentOSModuleProfileProps) => {
                 labels: {
                     title: t("title"),
                     progress: t("progress"),
-                    missing: t.raw("missing") as string,
+                    missing: t.raw("missing"),
                     refused: t("refused"),
                 },
             }}

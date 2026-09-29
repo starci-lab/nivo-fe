@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react"
 import { useLocale } from "next-intl"
-import type { Locale } from "@/modules/i18n/config"
+import { toLocale } from "@/modules/i18n/config"
 import { ACADEMY, inLocale, isSafeThemeValue, type ThemeVariables } from "@/modules/academy/template"
 import { AcademyChromeBase } from "./component"
 
@@ -174,7 +174,7 @@ type AcademyChromeProps = {
  * @returns The themed shell.
  */
 export const AcademyChrome = (props: AcademyChromeProps) => {
-    const locale = useLocale() as Locale
+    const locale = toLocale(useLocale())
     const theme = themeCss(inLocale(ACADEMY.identity.name, locale))
     return (
         <AcademyChromeBase

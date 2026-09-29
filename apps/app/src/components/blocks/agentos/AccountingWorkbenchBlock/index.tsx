@@ -2,6 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl"
 import { useAccountingWorkbench } from "@/hooks"
+import { translationValuesForNextIntl } from "../translation-values"
 import { AccountingWorkbenchBlockBase } from "./component"
 
 /** The installed Accounting workbench's open-registry entry: kind identity only, no caller wiring. */
@@ -16,7 +17,7 @@ export const AccountingWorkbenchBlock = (props: AccountingWorkbenchBlockProps) =
     const translate = useTranslations("console.agentos.modules.runtime.workbench.accountingWorkbench")
     const locale = useLocale()
     const view = useAccountingWorkbench(props.moduleId, locale, (key, values) =>
-        translate(key as never, values as never),
+        translate(key, translationValuesForNextIntl(values)),
     )
     return <AccountingWorkbenchBlockBase props={{ view }} />
 }

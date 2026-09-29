@@ -1,7 +1,7 @@
 "use client"
 
 import { useLocale, useTranslations } from "next-intl"
-import { LOCALES, type Locale } from "@/modules/i18n/config"
+import { LOCALES, toLocale } from "@/modules/i18n/config"
 import { usePathname, useRouter } from "@/hooks"
 import { LanguageMenuBase } from "./component"
 
@@ -11,7 +11,7 @@ export type LanguageMenuProps = Record<string, never>
 export const LanguageMenu = (props: LanguageMenuProps) => {
     void props
     const t = useTranslations("console")
-    const locale = useLocale() as Locale
+    const locale = toLocale(useLocale())
     const pathname = usePathname()
     const router = useRouter()
     return (

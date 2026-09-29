@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { hasLocale } from "next-intl"
 import { getMessages, getTimeZone, getTranslations } from "next-intl/server"
 import { Open_Sans } from "next/font/google"
 import type { ComponentProps, CSSProperties } from "react"
+import { isLocale } from "@/modules/i18n/config"
 import { MESSAGE_SCOPES, pickMessages } from "@/modules/i18n/messages"
 import { routing } from "@/modules/i18n/routing"
 import { ConsoleLocaleLayoutBase } from "./component"
@@ -94,19 +94,18 @@ export const ConsoleLocaleLayout = async ({ children, params }: ConsoleLocaleLay
      * a 500 where a 404 is the truthful answer.
      */
     const { locale } = await params
-    if (!hasLocale(routing.locales, locale)) {
+    if (!isLocale(locale)) {
         notFound()
     }
     const [messages, timeZone] = await Promise.all([getMessages(), getTimeZone()])
+    const bodyStyle: CSSProperties & { "--font-open-sans": string } = {
+        "--font-open-sans": openSans.style.fontFamily,
+    } satisfies CSSProperties & { "--font-open-sans": string }
     return (
         <html lang={locale} suppressHydrationWarning>
             <body
                 className="min-h-dvh bg-background text-foreground antialiased"
-                style={
-                    {
-                        "--font-open-sans": openSans.style.fontFamily,
-                    } as CSSProperties
-                }
+                style={bodyStyle}
             >
                 <ConsoleLocaleLayoutBase
                     {...{
