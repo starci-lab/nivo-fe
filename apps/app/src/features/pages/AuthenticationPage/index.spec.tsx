@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+﻿import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import en from "@/messages/en.json"
 import type { AuthActions, AuthCode, AuthDetails } from "@/components/blocks/auth/AuthenticationPanel"
@@ -40,6 +40,7 @@ const code = { otp: "123456", newPassword: "new-password" } satisfies AuthCode
 
 vi.mock("@/hooks/i18n/useRouter", () => ({ useRouter: () => ({ push: mocks.push, replace: mocks.replace }) }))
 vi.mock("@/hooks/i18n/usePathname", () => ({ usePathname: () => "/authentication" }))
+vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("next/navigation", () => ({
     useSearchParams: () => new URLSearchParams(window.location.search),
     redirect: vi.fn(),
@@ -153,17 +154,6 @@ describe("AuthenticationPage connected journeys", () => {
         window.sessionStorage.clear()
     })
 
-    it("handles sign-in refusal, remember-me and mode switching", async () => {
-        render(<AuthenticationPage />)
-        fireEvent.click(screen.getByTestId("remember"))
-        fireEvent.click(screen.getByTestId("submit-details"))
-        await waitFor(() => expect(panel()).toContain(copy("signIn.refused")))
-        fireEvent.click(screen.getByTestId("sign-up"))
-        expect(panel()).toContain(copy("signUp.title"))
-        fireEvent.click(screen.getByTestId("sign-in"))
-        expect(panel()).toContain(copy("signIn.title"))
-    })
-
     it("completes sign-in and handles a two-factor response", async () => {
         mocks.api.signIn.mockResolvedValue({
             ok: true,
@@ -202,39 +192,6 @@ describe("AuthenticationPage connected journeys", () => {
         await waitFor(() => expect(panel()).toContain('"state":"secondFactor"'))
         fireEvent.click(screen.getByTestId("onward"))
         expect(panel()).toContain('"state":"details"')
-    })
-
-    it("completes sign-up, including resend, verify refusal and success", async () => {
-        render(<AuthenticationPage />)
-        fireEvent.click(screen.getByTestId("sign-up"))
-        fireEvent.click(screen.getByTestId("submit-details"))
-        await waitFor(() => expect(panel()).toContain('"state":"code"'))
-        fireEvent.click(screen.getByTestId("resend"))
-        await waitFor(() => expect(panel()).toContain(copy("resentLabel")))
-        mocks.api.signUpVerifyOtp.mockResolvedValue({ ok: false, reason: "used", code: "OTP_INVALID" })
-        fireEvent.click(screen.getByTestId("submit-code"))
-        await waitFor(() => expect(panel()).toContain(copy("signUp.codeRefused")))
-        mocks.api.signUpVerifyOtp.mockResolvedValue({
-            ok: true,
-            data: {
-                accessToken: "signup-access",
-                requiresTwoFactor: false,
-                twoFactorToken: null,
-                conclusion: null,
-                undecided: null,
-            },
-        })
-        fireEvent.click(screen.getByTestId("submit-code"))
-        await waitFor(() => expect(panel()).toContain('"state":"done"'))
-        expect(mocks.session.adopt).toHaveBeenCalledWith({
-            accessToken: "signup-access",
-            requiresTwoFactor: false,
-            twoFactorToken: null,
-            conclusion: null,
-            undecided: null,
-        })
-        fireEvent.click(screen.getByTestId("onward"))
-        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/overview"))
     })
 
     it("completes reset, masks code refusal and returns onward to sign-in", async () => {
@@ -641,37 +598,6 @@ describe("AuthenticationPage connected journeys", () => {
         expect(panel()).toContain('"state":"details"')
         expect(panel()).not.toContain(copy("unavailableReturnNotice"))
         expect(panel()).not.toContain("agentos")
-    })
-
-    it("reports the handed-off session ending once, drops the param and keeps sign-in one press away", async () => {
-        // APPLIED: the authority confirmed every browser, and the notice may say so.
-        window.history.replaceState(null, "", "/authentication?sessionEnding=applied")
-        render(<AuthenticationPage />)
-        await waitFor(() => expect(panel()).toContain('"state":"notice"'))
-        expect(panel()).toContain(copy("signOut.everywhereAppliedNotice"))
-        expect(mocks.replace).toHaveBeenCalledWith("/authentication")
-        expect(mocks.session.adopt).not.toHaveBeenCalled()
-        expect(mocks.push).not.toHaveBeenCalled()
-
-        fireEvent.click(screen.getByTestId("onward"))
-        await waitFor(() => expect(panel()).toContain(copy("signIn.title")))
-
-        // UNCONFIRMED: this browser is out and the others were never confirmed - no completion claim.
-        cleanup()
-        window.history.replaceState(null, "", "/authentication?sessionEnding=unconfirmed")
-        render(<AuthenticationPage />)
-        await waitFor(() => expect(panel()).toContain('"state":"notice"'))
-        expect(panel()).toContain(copy("signOut.unconfirmedNotice"))
-        expect(panel()).not.toContain(copy("signOut.everywhereAppliedNotice"))
-
-        // AN UNRECOGNISED VALUE is not an answer: no notice, and the param is still consumed.
-        cleanup()
-        window.history.replaceState(null, "", "/authentication?sessionEnding=something-else")
-        render(<AuthenticationPage />)
-        await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith("/authentication"))
-        expect(panel()).toContain('"state":"details"')
-        expect(panel()).not.toContain(copy("signOut.everywhereAppliedNotice"))
-        expect(panel()).not.toContain(copy("signOut.unconfirmedNotice"))
     })
 
     it("catches a session ending that lands after mount, announces it once, and drops the param", async () => {

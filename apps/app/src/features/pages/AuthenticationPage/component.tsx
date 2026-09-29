@@ -1,3 +1,6 @@
+﻿import type { AuthMode, AuthNoticeCopy, AuthPendingAction } from "@/components/blocks/auth/AuthenticationPanel"
+import type { AuthNoticeKind, AuthPhase } from "@/modules/auth/authentication"
+import type { AuthenticationTranslate } from "@/hooks/auth/auth.shared"
 import { NivoBrand, NivoUnicornArtwork } from "@nivo/ui"
 import { Heading, SurfaceCard, Text, TextAction } from "@starci/grammar/common"
 import { AuthenticationPanel, type AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel"
@@ -10,26 +13,7 @@ import {
     AUTH_VIGNETTE_CLASS_NAME,
 } from "./classNames"
 
-/**
- * PAGE - `/authentication`, presentational half.
- *
- * ONE ROUTE FOR ALL THREE JOURNEYS. Sign in, sign up and password recovery stay panel state rather
- * than becoming separate addresses, so this page can change its composition without changing any
- * authentication behaviour.
- *
- * THE COMPOSITION IS THE ACCEPTED DIRECTION'S. An external heading and its line stand ABOVE one
- * soft, borderless form surface; the surface is the only card on the page; the exits - the other
- * journey and the way back from a challenge - sit BELOW it, outside the surface. Nothing is nested
- * in a second surface, and the form surface's width is Grammar's own `formCompact` measure rather
- * than a number this file invents.
- *
- * THE BRAND IS DRAWN HERE AND THE MASCOT ONLY ON SIGN-IN-READY. `NivoBrand` is the page's own
- * element on every state. The unicorn band is not: the record reserves the right-side desktop area
- * for it on ONE state (`auth-desktop-mascot-vignette`, `states: [sign-in-ready]`), so it is drawn
- * when the first step of a password sign-in is showing and nothing is being refused or waited on -
- * and it is decorative, so it is hidden from assistive technology and leaves the layout entirely
- * below desktop.
- */
+/** Presentational authentication page: heading, panel and journey exits. */
 
 /** Where the reader may go instead, drawn outside the surface. */
 export type AuthenticationPageExit = {
@@ -55,17 +39,6 @@ export type AuthenticationPageViewProps = {
     readonly exits: ReadonlyArray<AuthenticationPageExit>
 }
 
-/**
- * Whether this panel is the state the direction reserves the mascot for.
- *
- * SIGN-IN-READY, AND NOTHING ELSE: the first step of a password sign-in, with no wait and no
- * sentence in front of the reader. A refusal, an undecided result or a settled notice is not a
- * place to decorate, and neither is a challenge the reader is still working through - the brand
- * forbids the mascot on a failure surface and the record binds it to this one state.
- *
- * @param panel - The panel about to be drawn.
- * @returns Whether the reserved area holds the mascot band.
- */
 const showsMascot = (panel: AuthenticationPanelProps): boolean => {
     if (panel.state !== "details") return false
     return (
@@ -76,12 +49,7 @@ const showsMascot = (panel: AuthenticationPanelProps): boolean => {
     )
 }
 
-/**
- * Draw the authentication screen.
- *
- * @param props - {@link AuthenticationPageViewProps}
- * @returns The page node.
- */
+/** Draw the authentication screen. */
 export const AuthenticationPageView = (props: AuthenticationPageViewProps) => {
     const { panel, exits }: AuthenticationPageViewProps = props
     const panelIdentity =
@@ -128,4 +96,203 @@ export const AuthenticationPageView = (props: AuthenticationPageViewProps) => {
             ) : null}
         </main>
     )
+}
+
+type PanelOptions = {
+    readonly t: AuthenticationTranslate
+    readonly mode: AuthMode
+    readonly phase: AuthPhase
+    readonly noticeKind: AuthNoticeKind | null
+    readonly email: string
+    readonly ttlMinutes: number
+    readonly cooldownSeconds: number
+    readonly isRememberMe: boolean
+    readonly isRestoring: boolean
+    readonly isSignedInArrival: boolean
+    readonly isPending: boolean
+    readonly pendingAction: AuthPendingAction | null
+    readonly pendingProvider?: "google" | "github"
+    readonly statusMessage: string
+    readonly isError: boolean
+}
+
+/** Resolve the complete translated state for the authentication surface. */
+export const authenticationPanelFor = (options: PanelOptions): AuthenticationPanelProps => {
+    const {
+        t,
+        mode,
+        phase,
+        noticeKind,
+        email,
+        ttlMinutes,
+        cooldownSeconds,
+        isRememberMe,
+        isRestoring,
+        isSignedInArrival,
+        isPending,
+        pendingAction,
+        pendingProvider,
+        statusMessage,
+        isError,
+    } = options
+    const frame = {
+        title: t(`${mode}.title`),
+        subtitle: t(`${mode}.subtitle`),
+        isPending,
+        pendingAction: pendingAction ?? undefined,
+        pendingProvider,
+    }
+    const baseNotice: AuthNoticeCopy = {
+        ...frame,
+        statusMessage: "",
+        isError: false,
+        doneTitle: "",
+        doneHint: "",
+        onwardLabel: "",
+        secondaryLabel: "",
+    }
+
+    if (isRestoring || isSignedInArrival)
+        return {
+            state: "restoring",
+            props: {
+                title: t("restoringTitle"),
+                subtitle: t("restoringSubtitle"),
+                progressLabel: t("restoringLabel"),
+            },
+        }
+
+    if (phase === "notice") {
+        if (noticeKind === "heldAddress")
+            return {
+                state: "notice",
+                props: {
+                    ...baseNotice,
+                    doneTitle: t("signUp.heldAddressTitle"),
+                    doneHint: t("signUp.emailTaken"),
+                    onwardLabel: t("signUp.heldAddressSignInLabel"),
+                    secondaryLabel: t("signUp.heldAddressRecoverLabel"),
+                },
+            }
+        if (noticeKind === "createdNoSession")
+            return {
+                state: "notice",
+                props: {
+                    ...baseNotice,
+                    doneTitle: t("signUp.createdNoSessionTitle"),
+                    doneHint: t("signUp.createdNoSessionNotice"),
+                    onwardLabel: t("signUp.createdNoSessionSignInLabel"),
+                },
+            }
+        return {
+            state: "notice",
+            props: {
+                ...baseNotice,
+                doneHint:
+                    noticeKind === "sessionEndingApplied"
+                        ? t("signOut.everywhereAppliedNotice")
+                        : t("signOut.unconfirmedNotice"),
+                onwardLabel: t("forgotPassword.onwardLabel"),
+            },
+        }
+    }
+
+    if (phase === "twoFactor")
+        return {
+            state: "secondFactor",
+            props: {
+                ...frame,
+                subtitle: t("signIn.twoFactorSubtitle"),
+                statusMessage,
+                isError,
+                codeLabel: t("codeLabel"),
+                codeRequired: t("codeRequired"),
+                codeInvalid: t("codeInvalid"),
+                submitLabel: t("signIn.twoFactorSubmitLabel"),
+                backLabel: t("signIn.backLabel"),
+            },
+        }
+
+    if (phase === "done")
+        return {
+            state: "done",
+            props: {
+                ...frame,
+                statusMessage,
+                isError,
+                doneTitle: t(`${mode}.doneTitle`),
+                doneHint: t(`${mode}.doneHint`),
+                onwardLabel: t(`${mode}.onwardLabel`),
+                secondaryLabel: "",
+            },
+        }
+
+    if (phase === "code")
+        return {
+            state: "code",
+            props: {
+                ...frame,
+                mode,
+                subtitle: t(`${mode}.codeSubtitle`, { email }),
+                statusMessage,
+                isError,
+                codeLabel: t("codeLabel"),
+                codeRequired: t("codeRequired"),
+                codeInvalid: t("codeInvalid"),
+                codeHint: t("codeHint", { minutes: ttlMinutes }),
+                newPasswordLabel: t("newPasswordLabel"),
+                newPasswordPlaceholder: t("newPasswordPlaceholder"),
+                newPasswordRequired: t("newPasswordRequired"),
+                newPasswordTooShort: t("newPasswordTooShort"),
+                newPasswordHint: t("newPasswordHint"),
+                confirmNewPasswordLabel: t("confirmNewPasswordLabel"),
+                confirmNewPasswordPlaceholder: t("confirmNewPasswordPlaceholder"),
+                confirmNewPasswordRequired: t("confirmNewPasswordRequired"),
+                confirmNewPasswordMismatch: t("confirmNewPasswordMismatch"),
+                revealLabel: t("revealLabel"),
+                hideLabel: t("hideLabel"),
+                submitLabel: t(`${mode}.codeSubmitLabel`),
+                resendLabel: t("resendLabel"),
+                cooldownLabel: cooldownSeconds === 0 ? "" : t("cooldownLabel", { seconds: cooldownSeconds }),
+                backLabel: t("backLabel"),
+            },
+        }
+
+    return {
+        state: "details",
+        props: {
+            ...frame,
+            mode,
+            statusMessage,
+            isError,
+            emailLabel: t("emailLabel"),
+            emailPlaceholder: t("emailPlaceholder"),
+            emailRequired: t("emailRequired"),
+            emailInvalid: t("emailInvalid"),
+            emailHint: t("emailHint"),
+            passwordLabel: t("passwordLabel"),
+            passwordPlaceholder: mode === "signUp" ? t("newAccountPasswordPlaceholder") : t("passwordPlaceholder"),
+            passwordRequired: t("passwordRequired"),
+            passwordTooShort: t("passwordTooShort"),
+            passwordHint: t("passwordHint"),
+            confirmPasswordLabel: t("confirmPasswordLabel"),
+            confirmPasswordPlaceholder: t("confirmPasswordPlaceholder"),
+            confirmPasswordRequired: t("confirmPasswordRequired"),
+            confirmPasswordMismatch: t("confirmPasswordMismatch"),
+            nameLabel: t("nameLabel"),
+            namePlaceholder: t("namePlaceholder"),
+            nameHint: t("nameOptionalHint"),
+            nameTooLong: t("nameTooLong"),
+            authorityHint: t("signUp.authorityHint"),
+            revealLabel: t("revealLabel"),
+            hideLabel: t("hideLabel"),
+            submitLabel: t(`${mode}.submitLabel`),
+            orLabel: t("orLabel"),
+            googleLabel: t("googleLabel"),
+            githubLabel: t("githubLabel"),
+            forgotPasswordLabel: t("forgotPasswordLabel"),
+            rememberMeLabel: t("rememberMeLabel"),
+            isRememberMe,
+        },
+    }
 }
