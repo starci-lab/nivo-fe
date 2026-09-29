@@ -6,7 +6,8 @@ import { useMutateCollabPressApprovalSwr, useQueryCollabTasksSwr, type CollabTas
 import type { GroupChatTab } from "../../modules/collab/group-chat/model"
 import type { GroupChatPageView } from "../../modules/collab/group-chat/types"
 import { nivoAnswerDenied } from "../../modules/query"
-import { scrollToElement } from "./collab.shared"
+import { readCollabPressCard } from "../../modules/collab/group-chat/model.guards"
+import { useScrollToElement, type CollabScrollRequest } from "./useScrollToElement"
 
 /** The question the composer is answering, carried until a send commits or the viewer cancels. */
 export type GroupChatAnswering = GroupChatPageView["composer"]["answering"]
@@ -34,9 +35,11 @@ export const useGroupChatTasks = (scope: GroupChatTasksScope) => {
     const [pressingApprovalId, setPressingApprovalId] = useState<string | null>(null)
     const [settledApprovals, setSettledApprovals] = useState<Readonly<Record<string, CollabApprovalCardView>>>({})
     const [approvalNotices, setApprovalNotices] = useState<Readonly<Record<string, "denied" | "uncertain">>>({})
+    const [cardScroll, setCardScroll] = useState<CollabScrollRequest | null>(null)
 
     const tasks = useQueryCollabTasksSwr(readScope, tab === "tasks" ? tasksFilter : undefined)
     const pressApproval = useMutateCollabPressApprovalSwr(workspaceId)
+    useScrollToElement(cardScroll)
 
     const tasksState: GroupChatPageView["tasks"]["state"] =
         tasks.data === undefined && tasks.error === undefined
@@ -58,15 +61,11 @@ export const useGroupChatTasks = (scope: GroupChatTasksScope) => {
         })
         try {
             const answer = await pressApproval.trigger({ approvalId, button })
-            const pressOutcome = answer.ok ? (answer.data as { card?: CollabApprovalCardView } | undefined) : undefined
-            if (pressOutcome?.card !== undefined) {
-                setSettledApprovals((current) => ({
-                    ...current,
-                    [approvalId]: pressOutcome.card as CollabApprovalCardView,
-                }))
-                return
-            }
             if (answer.ok) {
+                const card = readCollabPressCard(answer.data)
+                if (card !== null) {
+                    setSettledApprovals((current) => ({ ...current, [approvalId]: card }))
+                }
                 return
             }
             /*
@@ -74,12 +73,10 @@ export const useGroupChatTasks = (scope: GroupChatTasksScope) => {
              * so; a lost or malformed answer stays visibly uncertain until the
              * revalidated read proves the card's state - never a speculative approval.
              */
-            if (!answer.ok) {
-                setApprovalNotices((current) => ({
-                    ...current,
-                    [approvalId]: nivoAnswerDenied(answer) ? "denied" : "uncertain",
-                }))
-            }
+            setApprovalNotices((current) => ({
+                ...current,
+                [approvalId]: nivoAnswerDenied(answer) ? "denied" : "uncertain",
+            }))
         } finally {
             setPressingApprovalId(null)
         }
@@ -89,7 +86,7 @@ export const useGroupChatTasks = (scope: GroupChatTasksScope) => {
         if (tab !== "office") {
             selectTab("office")
         }
-        window.setTimeout(() => scrollToElement(`collab-task-${taskId}`), 50)
+        setCardScroll({ elementId: `collab-task-${taskId}` })
     }
 
     const answerQuestion = (task: CollabTaskView, question: CollabTaskQuestionView) =>

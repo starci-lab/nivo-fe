@@ -11,9 +11,11 @@ import {
     useQueryCollabOfficeSwr,
 } from "@/hooks"
 import { collabFallbackInterval } from "../../modules/collab"
+import { readCollabInviteOutcome, readCollabOpenNotice } from "../../modules/collab/group-chat/model.guards"
 import type { GroupChatTab } from "../../modules/collab/group-chat/model"
 import type { GroupChatPageView } from "../../modules/collab/group-chat/types"
-import { noticeTargetElementId, scrollToElement } from "./collab.shared"
+import { noticeTargetElementId } from "./collab.shared"
+import { useScrollToElement } from "./useScrollToElement"
 
 /** The route state the office reads and the notice follow are scoped and steered by. */
 export type GroupChatOfficeScope = {
@@ -83,9 +85,9 @@ export const useGroupChatOffice = (scope: GroupChatOfficeScope) => {
             return
         }
         const answer = await inviteByEmail.trigger({ email: inviteEmail, role: inviteRole })
-        const outcome = answer.ok ? (answer.data as { outcome?: string } | undefined)?.outcome : undefined
-        if (answer.ok && (outcome === "created" || outcome === "existing")) {
-            setInviteOutcome({ kind: outcome === "created" ? "created" : "existing", email: inviteEmail })
+        const outcome = answer.ok ? readCollabInviteOutcome(answer.data) : null
+        if (outcome !== null) {
+            setInviteOutcome({ kind: outcome, email: inviteEmail })
             if (outcome === "created") {
                 setInviteEmail("")
             }
@@ -115,17 +117,17 @@ export const useGroupChatOffice = (scope: GroupChatOfficeScope) => {
         if (!answer.ok) {
             outcome = "unavailable"
         } else {
-            const data = answer.data as {
-                outcome?: string
-                target?: { approvalId: string | null; taskId: string | null; cardMessageId: string | null }
-            }
-            if (data.outcome === "open" && data.target !== undefined) {
-                const elementId = noticeTargetElementId(data.target)
+            const opened = readCollabOpenNotice(answer.data)
+            if (opened !== null && opened.outcome === "open" && opened.target !== undefined) {
+                const elementId = noticeTargetElementId(opened.target)
                 if (elementId !== null) {
                     scroll = { elementId, fromTab: tab, selectTab }
                 }
             } else {
-                outcome = data.outcome === "handled" || data.outcome === "ended" ? data.outcome : "unavailable"
+                outcome =
+                    opened !== null && (opened.outcome === "handled" || opened.outcome === "ended")
+                        ? opened.outcome
+                        : "unavailable"
             }
         }
         setHandledNotice({ id: pendingNoticeId, scroll })
@@ -137,14 +139,11 @@ export const useGroupChatOffice = (scope: GroupChatOfficeScope) => {
 
     const pendingScroll = handledNotice?.scroll ?? null
     useEffect(() => {
-        if (pendingScroll === null) {
-            return
-        }
-        if (pendingScroll.fromTab !== "office") {
+        if (pendingScroll !== null && pendingScroll.fromTab !== "office") {
             pendingScroll.selectTab("office")
         }
-        window.setTimeout(() => scrollToElement(pendingScroll.elementId), 50)
     }, [pendingScroll])
+    useScrollToElement(pendingScroll)
 
     const outstandingNotices =
         notices.data?.ok === true

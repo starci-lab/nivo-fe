@@ -98,9 +98,11 @@ describe("useGroupChatTasks", () => {
         card.scrollIntoView = vi.fn()
         document.body.appendChild(card)
         const { result } = renderHook(() => useGroupChatTasks(scope()))
-        result.current.openTaskCard("t-1")
+        act(() => result.current.openTaskCard("t-1"))
         expect(selectTab).toHaveBeenCalledWith("office")
-        vi.advanceTimersByTime(60)
+        act(() => {
+            vi.advanceTimersByTime(60)
+        })
         expect(card.scrollIntoView).toHaveBeenCalledWith({ block: "center" })
         card.remove()
     })
@@ -108,8 +110,10 @@ describe("useGroupChatTasks", () => {
     it("scrolls in place when the card opens from Office", () => {
         vi.useFakeTimers()
         const { result } = renderHook(() => useGroupChatTasks(scope({ tab: "office" })))
-        result.current.openTaskCard("t-missing")
-        vi.advanceTimersByTime(60)
+        act(() => result.current.openTaskCard("t-missing"))
+        act(() => {
+            vi.advanceTimersByTime(60)
+        })
         expect(selectTab).not.toHaveBeenCalled()
     })
 
@@ -143,7 +147,25 @@ describe("useGroupChatTasks", () => {
 
     describe("approvals", () => {
         it("settles the card the press answered with", async () => {
-            const card = { approvalId: "ap-1", state: "approved" }
+            const card = {
+                approvalId: "ap-1",
+                workspaceId: "ws-1",
+                groupId: "grp-1",
+                taskId: "task-1",
+                action: "Send the sales report",
+                consequence: null,
+                heldActionKey: "sales.send-report",
+                requiredRole: "manager-or-owner",
+                status: "approved",
+                decidedByMemberId: "mem-an",
+                decision: "approve",
+                decidedAt: "2026-09-24T10:30:00Z",
+                releaseIntentId: null,
+                cardMessageId: "msg-2",
+                buttons: ["approve", "reject"],
+                decidedByDisplayName: "An",
+                decidedByRole: "owner",
+            }
             let release: (value: Answer) => void = () => undefined
             press.trigger.mockReturnValueOnce(
                 new Promise<Answer>((resolve) => {
