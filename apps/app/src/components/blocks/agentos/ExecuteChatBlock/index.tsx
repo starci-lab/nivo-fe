@@ -207,7 +207,7 @@ const OperationWidget = ({ copy, payload, onAction, title, caption, factKeys, no
     const taskId = payload.node.props.taskId
     const expectedVersion = payload.node.props.expectedVersion
     const facts = factKeys.flatMap((key) =>
-        Object.hasOwn(payload.node.props, key) ? [[key, payload.node.props[key]!] as const] : [],
+        Object.hasOwn(payload.node.props, key) ? [[key, payload.node.props[key] ?? null] as const] : [],
     )
     const admitted = new Set(payload.actions.map((action) => action.key))
     const canOpen = typeof taskId === "string" && admitted.has("open-task")

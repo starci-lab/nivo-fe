@@ -359,7 +359,7 @@ export const OfferSelectionFlowBase = (props: OfferSelectionFlowProps) => {
         )
     }
     const selected =
-        props.props.offers.find((offer) => offer.offerId === props.props.selectedOfferId) ?? props.props.offers[0]!
+        props.props.offers.find((offer) => offer.offerId === props.props.selectedOfferId) ?? props.props.offers[0]
     return (
         <PageContainer measure="product">
             <div className={SECTIONS_CLASS_NAME} data-contract="GAP-5">
@@ -367,26 +367,28 @@ export const OfferSelectionFlowBase = (props: OfferSelectionFlowProps) => {
                 <SurfaceCard label={copy.offersLabel} fact={copy.offersFact} composition="joined">
                     <div role="radiogroup" aria-label={copy.offerGroupLabel}>
                         {props.props.offers.map((offer) =>
-                            selectableRow(offer, copy, offer.offerId === selected.offerId, props.on.select),
+                            selectableRow(offer, copy, offer.offerId === selected?.offerId, props.on.select),
                         )}
                     </div>
-                    {summaryBand(copy, selected)}
-                    <div className={ACTION_BAND_CLASS_NAME}>
-                        <span className={ACTION_TARGET_CLASS_NAME}>
-                            <Button
-                                variant="primary"
-                                size="lg"
-                                width="fill"
-                                href={props.props.checkoutHref}
-                                onFollow={props.on.review}
-                            >
-                                {copy.reviewAction}
-                            </Button>
-                        </span>
-                        <Text size="xs" tone="muted" overflow="wrap">
-                            {copy.noPaymentNote}
-                        </Text>
-                    </div>
+                    {selected === undefined ? null : summaryBand(copy, selected)}
+                    {selected === undefined ? null : (
+                        <div className={ACTION_BAND_CLASS_NAME}>
+                            <span className={ACTION_TARGET_CLASS_NAME}>
+                                <Button
+                                    variant="primary"
+                                    size="lg"
+                                    width="fill"
+                                    href={props.props.checkoutHref}
+                                    onFollow={props.on.review}
+                                >
+                                    {copy.reviewAction}
+                                </Button>
+                            </span>
+                            <Text size="xs" tone="muted" overflow="wrap">
+                                {copy.noPaymentNote}
+                            </Text>
+                        </div>
+                    )}
                 </SurfaceCard>
                 <TextAction href={links.workspaces} size="sm">
                     {copy.backToWorkspaces}

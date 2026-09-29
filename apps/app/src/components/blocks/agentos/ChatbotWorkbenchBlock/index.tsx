@@ -219,8 +219,9 @@ export const ChatbotWorkbenchBlock = (props: ChatbotWorkbenchBlockProps) => {
         selected === null
             ? []
             : (props.workbench?.messages ?? []).filter((message) => message.conversationId === selected.id)
-    const ambiguousMessage =
-        messages.find((message) => message.deliveryState === "ambiguous" && message.providerOutboxId !== null) ?? null
+    const ambiguousOutboxId =
+        messages.find((message) => message.deliveryState === "ambiguous" && message.providerOutboxId !== null)
+            ?.providerOutboxId ?? null
     const conversationRegion =
         selected === null ? (
             <EmptyNotice message={props.copy.selectConversation} />
@@ -269,13 +270,13 @@ export const ChatbotWorkbenchBlock = (props: ChatbotWorkbenchBlockProps) => {
                 >
                     {selected.handoffState === "human" ? props.copy.resolveHandoff : props.copy.requestHandoff}
                 </Button>
-                {ambiguousMessage === null ? null : (
+                {ambiguousOutboxId === null ? null : (
                     <>
                         <Button
                             variant="secondary"
                             width="fill"
                             isPending={props.pending}
-                            onPress={() => props.onReconcile(ambiguousMessage.providerOutboxId!, true)}
+                            onPress={() => props.onReconcile(ambiguousOutboxId, true)}
                         >
                             {props.copy.markDelivered}
                         </Button>
@@ -283,7 +284,7 @@ export const ChatbotWorkbenchBlock = (props: ChatbotWorkbenchBlockProps) => {
                             variant="outline"
                             width="fill"
                             isPending={props.pending}
-                            onPress={() => props.onReconcile(ambiguousMessage.providerOutboxId!, false)}
+                            onPress={() => props.onReconcile(ambiguousOutboxId, false)}
                         >
                             {props.copy.markFailed}
                         </Button>

@@ -64,10 +64,7 @@ export const OverviewServices = (props: OverviewServicesProps) => {
                       id: site.id,
                       name: site.slug,
                       detail: site.customDomain ?? `${site.slug}${ACADEMY_HOST_SUFFIX}`,
-                      statusLabel:
-                          APPS_STATUS_KEY[site.provisionStatus] === undefined
-                              ? t("status.unknown")
-                              : t(APPS_STATUS_KEY[site.provisionStatus]!),
+                      statusLabel: t(APPS_STATUS_KEY[site.provisionStatus] ?? "status.unknown"),
                       statusTone: APPS_STATUS_TONE[site.provisionStatus] ?? "neutral",
                       actionLabel: isUnavailable
                           ? t("apps.unavailable")
@@ -93,10 +90,7 @@ export const OverviewServices = (props: OverviewServicesProps) => {
                               : t("overview.services.workspaceDetailWithOrder", {
                                     orderId: workspace.catalogOrder.id,
                                 }),
-                      statusLabel:
-                          WORKSPACE_STATUS_KEY[workspace.status] === undefined
-                              ? t("status.unknown")
-                              : t(WORKSPACE_STATUS_KEY[workspace.status]!),
+                      statusLabel: t(WORKSPACE_STATUS_KEY[workspace.status] ?? "status.unknown"),
                       statusTone: WORKSPACE_STATUS_TONE[workspace.status] ?? "neutral",
                       actionLabel: t("overview.services.openWorkspace"),
                       route: `/agentos/workspaces/${workspace.id}`,

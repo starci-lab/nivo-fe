@@ -150,6 +150,38 @@ describe("OfferSelectionFlowBase", () => {
         expect(selected?.className).toContain("bg-accent-soft")
     })
 
+    it("falls back to the first offer when the presented identity is absent from the list", () => {
+        render(
+            <OfferSelectionFlowBase
+                state="selection"
+                props={{
+                    copy,
+                    links,
+                    offers,
+                    selectedOfferId: "retired-offer",
+                    checkoutHref: "/checkout?offer=retired-offer&offerVersion=draft-2026-09-22",
+                }}
+                on={{ select: vi.fn() }}
+            />,
+        )
+        expect(screen.getByRole("radio", { name: /Nivo Workspace Starter/ })).toBeChecked()
+        expect(screen.getByText("Selected offer")).toBeInTheDocument()
+    })
+
+    it("draws the surface without a summary or review action when no offer can be resolved", () => {
+        render(
+            <OfferSelectionFlowBase
+                state="selection"
+                props={{ copy, links, offers: [], selectedOfferId: "gone", checkoutHref: "/checkout" }}
+                on={{ select: vi.fn() }}
+            />,
+        )
+        expect(screen.queryAllByRole("radio")).toHaveLength(0)
+        expect(screen.queryByText("Selected offer")).not.toBeInTheDocument()
+        expect(screen.queryByRole("link", { name: "Review selected offer" })).not.toBeInTheDocument()
+        expect(screen.getByRole("link", { name: "Back to workspaces" })).toBeInTheDocument()
+    })
+
     it("keeps the workspace return path below the surface", () => {
         render(
             <OfferSelectionFlowBase

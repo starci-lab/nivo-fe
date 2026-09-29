@@ -45,8 +45,10 @@ export const OverviewSignals = (props: OverviewSignalsProps) => {
     const data = useOverviewData()
     const t = useTranslations("console")
     const format = useFormatter()
-    const statusLabel = (value: string) =>
-        STATUS_KEY[value] === undefined ? t("status.unknown") : t(STATUS_KEY[value]!)
+    const statusLabel = (value: string) => {
+        const key = STATUS_KEY[value]
+        return key === undefined ? t("status.unknown") : t(key)
+    }
     const refusal = (code: string | undefined) =>
         code !== undefined && NAMED_REFUSALS.has(code) ? t(`refusal.${code}`) : t("refusal.unknown")
     const money = (value: number) =>
