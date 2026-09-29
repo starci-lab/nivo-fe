@@ -1,5 +1,36 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { graphql, graphqlEnvelope, setAccessTokenReader, setLocaleReader } from "./graphql"
+import {
+    graphql, graphqlEnvelope, setAccessTokenReader, setLocaleReader,
+    type EnvelopeAnswer, type EnvelopeShell,
+} from "./graphql"
+
+const parseRow = (input: unknown): { readonly id: string } | null =>
+    typeof input === "object" && input !== null && "id" in input && typeof input.id === "string"
+        ? { id: input.id }
+        : null
+
+const parseCount = (input: unknown): number | null => (typeof input === "number" ? input : null)
+
+/** The two answers the sign-out envelope states beside its payload. */
+interface SignOutOutcome {
+    readonly remoteRevocationObserved: boolean
+    readonly authorityEndingConfirmed: boolean | null
+}
+
+const parseSignOutAnswer = (shell: EnvelopeShell): EnvelopeAnswer<boolean, SignOutOutcome> | null => {
+    const revocation: unknown = shell.siblings.remoteRevocationObserved
+    const authority: unknown = shell.siblings.authorityEndingConfirmed
+    if (typeof shell.data !== "boolean" || typeof revocation !== "boolean") return null
+    if (authority !== null && typeof authority !== "boolean") return null
+    return {
+        data: shell.data,
+        error: shell.error,
+        message: shell.message,
+        success: shell.success,
+        remoteRevocationObserved: revocation,
+        authorityEndingConfirmed: authority,
+    }
+}
 
 describe("graphql", () => {
     beforeEach(() => {
@@ -22,7 +53,9 @@ describe("graphql", () => {
         )
         vi.stubGlobal("fetch", fetchMock)
 
-        await expect(graphql("query Operation($id: ID!) { operation(id: $id) }", { id: "row-1" })).resolves.toEqual({
+        await expect(
+            graphql("query Operation($id: ID!) { operation(id: $id) }", parseRow, { id: "row-1" }),
+        ).resolves.toEqual({
             ok: true,
             data: { id: "row-1" },
         })
@@ -42,26 +75,38 @@ describe("graphql", () => {
     it("returns network failures without throwing", async () => {
         const fetchMock = vi.fn().mockRejectedValue(new Error("offline"))
         vi.stubGlobal("fetch", fetchMock)
-        await expect(graphql("query Broken")).resolves.toMatchObject({ ok: false, code: "NETWORK" })
+        await expect(graphql("query Broken", parseRow)).resolves.toMatchObject({ ok: false, code: "NETWORK" })
     })
 
     it("returns malformed responses without throwing", async () => {
         const fetchMock = vi.fn().mockResolvedValue(new Response("not-json"))
         vi.stubGlobal("fetch", fetchMock)
-        await expect(graphql("query Broken")).resolves.toMatchObject({ ok: false, code: "MALFORMED" })
+        await expect(graphql("query Broken", parseRow)).resolves.toMatchObject({ ok: false, code: "MALFORMED" })
+    })
+
+    it("returns a successful payload its document parser rejects as unavailable", async () => {
+        const fetchMock = vi.fn().mockResolvedValue(
+            new Response(JSON.stringify({ data: { operation: { success: true, data: { bad: 1 } } } })),
+        )
+        vi.stubGlobal("fetch", fetchMock)
+        await expect(graphql("query Weird", parseRow)).resolves.toMatchObject({
+            ok: false,
+            code: "MALFORMED",
+            kind: "unavailable",
+        })
     })
 
     it("distinguishes GraphQL, empty and application refusals", async () => {
         const fetchMock = vi.fn()
         vi.stubGlobal("fetch", fetchMock)
         fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ errors: [{ message: "bad document" }] })))
-        await expect(graphql("query Broken")).resolves.toMatchObject({
+        await expect(graphql("query Broken", parseRow)).resolves.toMatchObject({
             ok: false,
             reason: "bad document",
             code: "GRAPHQL",
         })
         fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ data: {} })))
-        await expect(graphql("query Empty")).resolves.toMatchObject({ ok: false, reason: "empty", code: "EMPTY" })
+        await expect(graphql("query Empty", parseRow)).resolves.toMatchObject({ ok: false, reason: "empty", code: "EMPTY" })
         fetchMock.mockResolvedValueOnce(
             new Response(
                 JSON.stringify({
@@ -69,19 +114,13 @@ describe("graphql", () => {
                 }),
             ),
         )
-        await expect(graphql("query Refused")).resolves.toMatchObject({
+        await expect(graphql("query Refused", parseRow)).resolves.toMatchObject({
             ok: false,
             reason: "denied",
             code: "FORBIDDEN",
         })
     })
 })
-
-/** The two answers the sign-out envelope states beside its payload. */
-interface SignOutOutcome {
-    readonly remoteRevocationObserved: boolean
-    readonly authorityEndingConfirmed: boolean | null
-}
 
 describe("graphqlEnvelope", () => {
     beforeEach(() => {
@@ -114,7 +153,9 @@ describe("graphqlEnvelope", () => {
          * The whole envelope, not only `data`: these two siblings are how a caller tells a completed
          * request apart from an observed revocation, so they must survive the trip unchanged.
          */
-        await expect(graphqlEnvelope<boolean, SignOutOutcome>("mutation SignOut { signOut }")).resolves.toEqual({
+        await expect(
+            graphqlEnvelope<boolean, SignOutOutcome>("mutation SignOut { signOut }", parseSignOutAnswer),
+        ).resolves.toEqual({
             ok: true,
             data: {
                 success: true,
@@ -138,13 +179,13 @@ describe("graphqlEnvelope", () => {
         vi.stubGlobal("fetch", fetchMock)
 
         fetchMock.mockRejectedValueOnce(new Error("offline"))
-        await expect(graphqlEnvelope("mutation SignOut { signOut }")).resolves.toMatchObject({
+        await expect(graphqlEnvelope("mutation SignOut { signOut }", parseSignOutAnswer)).resolves.toMatchObject({
             ok: false,
             code: "NETWORK",
         })
 
         fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ data: {} })))
-        await expect(graphqlEnvelope("mutation SignOut { signOut }")).resolves.toMatchObject({
+        await expect(graphqlEnvelope("mutation SignOut { signOut }", parseSignOutAnswer)).resolves.toMatchObject({
             ok: false,
             reason: "empty",
             code: "EMPTY",
@@ -157,7 +198,7 @@ describe("graphqlEnvelope", () => {
                 }),
             ),
         )
-        await expect(graphqlEnvelope("mutation SignOut { signOut }")).resolves.toMatchObject({
+        await expect(graphqlEnvelope("mutation SignOut { signOut }", parseSignOutAnswer)).resolves.toMatchObject({
             ok: false,
             reason: "refused",
             code: "UNAUTHENTICATED",
@@ -186,19 +227,19 @@ describe("graphql failure kinds", () => {
         [503, "unavailable"],
     ] as const)("keeps HTTP %i as the %s kind rather than a bare failure", async (status, kind) => {
         answerOnce(status, { message: "nope" })
-        await expect(graphql("query Q { q }")).resolves.toMatchObject({ ok: false, kind, status })
+        await expect(graphql("query Q { q }", parseRow)).resolves.toMatchObject({ ok: false, kind, status })
     })
 
     it("reads a GraphQL error the server classified by the code it named, and an unnamed one as unavailable", async () => {
         answerOnce(200, { errors: [{ message: "Unauthorized", extensions: { code: "UNAUTHENTICATED" } }] })
-        await expect(graphql("query Q { q }")).resolves.toMatchObject({
+        await expect(graphql("query Q { q }", parseRow)).resolves.toMatchObject({
             ok: false,
             kind: "refused",
             code: "GRAPHQL",
             reason: "Unauthorized",
         })
         answerOnce(200, { errors: [{ message: "bad document" }] })
-        await expect(graphql("query Q { q }")).resolves.toMatchObject({
+        await expect(graphql("query Q { q }", parseRow)).resolves.toMatchObject({
             ok: false,
             kind: "unavailable",
             code: "GRAPHQL",
@@ -207,21 +248,21 @@ describe("graphql failure kinds", () => {
 
     it("classifies a refused operation by its own code and an empty success as not found", async () => {
         answerOnce(200, { data: { q: { success: false, data: null, message: "no", error: "purchaser-not-admitted" } } })
-        await expect(graphql("query Q { q }")).resolves.toMatchObject({
+        await expect(graphql("query Q { q }", parseRow)).resolves.toMatchObject({
             ok: false,
             kind: "forbidden",
             code: "purchaser-not-admitted",
             reason: "no",
         })
         answerOnce(200, { data: { q: { success: true, data: null, message: "none", error: null } } })
-        await expect(graphql("query Q { q }")).resolves.toMatchObject({ ok: false, kind: "not-found", code: "NO_DATA" })
+        await expect(graphql("query Q { q }", parseRow)).resolves.toMatchObject({ ok: false, kind: "not-found", code: "NO_DATA" })
     })
 
     it("sends the credential a caller supplies instead of the bound one, and none for an empty string", async () => {
         setAccessTokenReader(() => "bound")
         const fetchMock = answerOnce(200, { data: { q: { success: true, data: 1, message: "" } } })
-        await graphql("query Q { q }", undefined, { accessToken: "own" })
-        await graphql("query Q { q }", undefined, { accessToken: "" })
+        await graphql("query Q { q }", parseCount, undefined, { accessToken: "own" })
+        await graphql("query Q { q }", parseCount, undefined, { accessToken: "" })
         expect((fetchMock.mock.calls[0]![1] as RequestInit).headers).toMatchObject({ authorization: "Bearer own" })
         expect((fetchMock.mock.calls[1]![1] as RequestInit).headers).not.toHaveProperty("authorization")
     })
@@ -237,7 +278,7 @@ describe("graphql failure kinds", () => {
                     }),
             ),
         )
-        const pending = graphql("query Q { q }", undefined, { signal: controller.signal })
+        const pending = graphql("query Q { q }", parseRow, undefined, { signal: controller.signal })
         controller.abort()
         await expect(pending).resolves.toMatchObject({ ok: false, kind: "unavailable", code: "ABORTED" })
     })

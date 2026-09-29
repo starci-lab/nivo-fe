@@ -121,33 +121,66 @@ export type GraphqlOptions = {
     readonly signal?: AbortSignal
 }
 
-type GraphqlBody = {
-    readonly data?: Readonly<Record<string, unknown>> | null
-    readonly errors?: ReadonlyArray<{
-        readonly message?: string
-        readonly extensions?: { readonly code?: string }
-    }>
+/**
+ * The checked shell of one operation envelope.
+ *
+ * `data` stays `unknown`: only the document's own parser can say what its payload is, and it runs
+ * after the refusal and empty checks below, exactly like the unchecked reads they replace.
+ * `siblings` are the answers an operation states beside the envelope keys, still unchecked.
+ */
+export interface EnvelopeShell {
+    readonly data: unknown
+    readonly error: string | null
+    readonly message: string
+    readonly success: boolean
+    readonly siblings: Readonly<Record<string, unknown>>
+}
+
+/** A document parser: the unchecked wire value in, the checked payload out, null when malformed. */
+export type GraphqlParse<T> = (input: unknown) => T | null
+
+/** An envelope parser: the checked shell in, the whole typed answer out, null when malformed. */
+export type EnvelopeParse<T, TExtra extends object> = (shell: EnvelopeShell) => EnvelopeAnswer<T, TExtra> | null
+
+/**
+ * Narrow one root-field value to the envelope shell every operation answers with.
+ *
+ * `error` and `message` read as their declared types or their safe defaults, the same reads the
+ * unchecked envelope cast performed; `success` is checked because the refusal branch depends on it.
+ */
+const parseEnvelopeShell = (value: unknown): EnvelopeShell | null => {
+    if (!isRecord(value) || typeof value.success !== "boolean") return null
+    const { data, error, message, success, ...rest } = value
+    return {
+        data,
+        error: typeof error === "string" ? error : null,
+        message: typeof message === "string" ? message : "",
+        success,
+        siblings: rest,
+    }
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
     typeof value === "object" && value !== null && !Array.isArray(value)
-
-const bodyOf = (value: unknown): GraphqlBody => (isRecord(value) ? (value as GraphqlBody) : {})
 
 /*
  * A GraphQL-level error is a different animal from a refused operation: the document was wrong, or
  * the request was unauthenticated before any resolver ran. It never carries the interceptor's
  * envelope, so it has to be read before the envelope is looked for. The server's own extension code
  * decides the kind; an error that names none means the operation never ran, so it is unavailable.
+ * Reads the fields it needs off `unknown` and reads nothing else.
  */
-const graphqlErrorFailure = (body: GraphqlBody, status: number | null): Failure | null => {
-    const first = body.errors?.[0]
-    if (first === undefined) return null
-    const named = first.extensions?.code
+const graphqlErrorFailure = (body: unknown, status: number | null): Failure | null => {
+    if (!isRecord(body) || !Array.isArray(body.errors) || body.errors.length === 0) return null
+    const first: unknown = body.errors[0]
+    const firstRecord = isRecord(first) ? first : undefined
+    const extensions = isRecord(firstRecord?.extensions) ? firstRecord.extensions : undefined
+    const named = typeof extensions?.code === "string" ? extensions.code : undefined
+    const message = typeof firstRecord?.message === "string" ? firstRecord.message : "graphql"
     return failed(named === undefined ? "unavailable" : failureKindOfCode(named), {
         status,
         code: "GRAPHQL",
-        reason: first.message ?? "graphql",
+        reason: message,
     })
 }
 
@@ -187,15 +220,15 @@ export const graphqlFields = async (
         signal: options?.signal,
     })
     if (!sent.ok) {
-        return graphqlErrorFailure(bodyOf(sent.body), sent.status) ?? sent
+        return graphqlErrorFailure(sent.body, sent.status) ?? sent
     }
-    const body = bodyOf(sent.data.body)
-    const refusal = graphqlErrorFailure(body, sent.data.status)
+    const refusal = graphqlErrorFailure(sent.data.body, sent.data.status)
     if (refusal !== null) return refusal
-    if (body.data === undefined || body.data === null) {
+    const data: unknown = isRecord(sent.data.body) ? sent.data.body.data : undefined
+    if (!isRecord(data) || Object.keys(data).length === 0) {
         return failed("unavailable", { status: sent.data.status, code: "EMPTY", reason: "empty" })
     }
-    return { ok: true, data: body.data }
+    return { ok: true, data }
 }
 
 /**
@@ -206,36 +239,36 @@ export const graphqlFields = async (
  * answers beside it, and carries them unchanged. Both classify failures the same way.
  *
  * @param query - The operation document.
+ * @param parse - The document's own check of the checked envelope shell; null means malformed.
  * @param variables - Its variables, if any.
  * @param options - A credential of its own, or a signal that abandons the call.
  * @returns The whole envelope, or why there is none.
  */
 export const graphqlEnvelope = async <T, TExtra extends object = Record<string, unknown>>(
     query: string,
+    parse: EnvelopeParse<T, TExtra>,
     variables?: Readonly<Record<string, unknown>>,
     options?: GraphqlOptions,
 ): Promise<Outcome<EnvelopeAnswer<T, TExtra>>> => {
     const fields = await graphqlFields(query, variables, options)
     if (!fields.ok) return fields
-    const envelope = Object.values(fields.data)[0] as (Envelope<T> & TExtra) | undefined
-    if (envelope === undefined) {
-        return failed("unavailable", { code: "EMPTY", reason: "empty" })
+    const root = Object.values(fields.data)[0]
+    const shell = parseEnvelopeShell(root)
+    if (shell === null) {
+        return failed("unavailable", { code: root === undefined ? "EMPTY" : "MALFORMED", reason: root === undefined ? "empty" : "malformed" })
     }
-    const { data } = envelope
-    if (!envelope.success) {
-        const code = envelope.error ?? "REFUSED"
-        return failed(failureKindOfCode(code), { code, reason: envelope.message })
+    if (!shell.success) {
+        const code = shell.error ?? "REFUSED"
+        return failed(failureKindOfCode(code), { code, reason: shell.message })
     }
-    if (data === null) {
-        return failed("not-found", { code: envelope.error ?? "NO_DATA", reason: envelope.message })
+    if (shell.data === null || shell.data === undefined) {
+        return failed("not-found", { code: shell.error ?? "NO_DATA", reason: shell.message })
     }
-    return {
-        ok: true,
-        data: {
-            ...envelope,
-            data,
-        },
+    const answer = parse(shell)
+    if (answer === null) {
+        return failed("unavailable", { code: "MALFORMED", reason: "malformed" })
     }
+    return { ok: true, data: answer }
 }
 
 /**
@@ -246,16 +279,30 @@ export const graphqlEnvelope = async <T, TExtra extends object = Record<string, 
  * dropped here.
  *
  * @param query - The operation document.
+ * @param parse - The document's own check of the wire payload; null means malformed, and a malformed
+ *   payload is an unavailable outcome, never a thrown error and never a value named for a shape it
+ *   does not have.
  * @param variables - Its variables, if any.
  * @param options - A credential of its own, or a signal that abandons the call.
  * @returns The unwrapped payload, or why there is none.
  */
 export const graphql = async <T>(
     query: string,
+    parse: GraphqlParse<T>,
     variables?: Readonly<Record<string, unknown>>,
     options?: GraphqlOptions,
 ): Promise<Outcome<T>> => {
-    const answer = await graphqlEnvelope<T, Record<string, unknown>>(query, variables, options)
+    const answer = await graphqlEnvelope<T, Record<string, unknown>>(
+        query,
+        (shell) => {
+            const data = parse(shell.data)
+            return data === null
+                ? null
+                : { ...shell.siblings, data, error: shell.error, message: shell.message, success: shell.success }
+        },
+        variables,
+        options,
+    )
     if (!answer.ok) {
         return answer
     }

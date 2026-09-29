@@ -73,7 +73,7 @@ export const failed = (kind: FailureKind, input: FailureInput): Failure => ({
  * @returns The failure with the detail merged in.
  */
 export const failedWith = <X extends object>(kind: FailureKind, input: FailureInput, detail: X): Failure<X> =>
-    ({ ...failed(kind, input), ...detail }) as Failure<X>
+    Object.assign(failed(kind, input), detail)
 
 /**
  * Which kind an HTTP status is. 2xx is not a failure and never reaches here.

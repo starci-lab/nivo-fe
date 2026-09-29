@@ -54,7 +54,7 @@ const answerWith = (status: number, body: unknown): void => {
 
 const sentUrls = (): Array<string> => fetchMock.mock.calls.map((call) => String(call[0]))
 const sentUrl = (index = 0): string => sentUrls()[index] ?? ""
-const sentInit = (index = 0): RequestInit => fetchMock.mock.calls[index]?.[1] as RequestInit
+const sentInit = (index = 0): RequestInit => fetchMock.mock.calls[index]?.[1] ?? {}
 
 beforeEach(() => {
     vi.restoreAllMocks()

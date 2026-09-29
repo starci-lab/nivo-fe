@@ -25,11 +25,11 @@ import {
 /** The document of the one call the operation under test just made. */
 const lastDocument = () => vi.mocked(graphql).mock.calls.at(-1)?.[0] ?? ""
 /** The variables of the one call the operation under test just made. */
-const lastVariables = () => vi.mocked(graphql).mock.calls.at(-1)?.[1]
+const lastVariables = () => vi.mocked(graphql).mock.calls.at(-1)?.[2]
 /** The document of the one envelope-stating call the operation under test just made. */
 const lastEnvelopeDocument = () => vi.mocked(graphqlEnvelope).mock.calls.at(-1)?.[0] ?? ""
 /** The variables of the one envelope-stating call the operation under test just made. */
-const lastEnvelopeVariables = () => vi.mocked(graphqlEnvelope).mock.calls.at(-1)?.[1]
+const lastEnvelopeVariables = () => vi.mocked(graphqlEnvelope).mock.calls.at(-1)?.[2]
 
 beforeEach(() => {
     vi.clearAllMocks()

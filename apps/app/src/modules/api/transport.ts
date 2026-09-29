@@ -59,7 +59,7 @@ const failure = (
     code: string,
     reason: string,
     body: unknown,
-): Failure<WireFailureDetail> => ({ ...failed(kind, { status, code, reason }), body }) as Failure<WireFailureDetail>
+): Failure<WireFailureDetail> => Object.assign(failed(kind, { status, code, reason }), { body })
 
 const headersOf = (request: WireRequest): Record<string, string> => {
     const headers: Record<string, string> = {}

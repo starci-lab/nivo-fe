@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, vi } from "vitest"
+import { isRecord } from "../wire"
 
 const WORKSPACE = "11111111-1111-4111-8111-111111111111"
 const INSTANCE = "22222222-2222-4222-8222-222222222222"
@@ -15,9 +16,11 @@ const answerWith = (status: number, body: unknown): void => {
     fetchMock.mockResolvedValue({ status, json: async () => body })
 }
 const sentUrls = (): Array<string> => fetchMock.mock.calls.map((call) => String(call[0]))
-const sentInit = (index = 0): RequestInit => fetchMock.mock.calls[index]?.[1] as RequestInit
-const sentBody = (index = 0): Record<string, unknown> =>
-    JSON.parse(String(sentInit(index).body)) as Record<string, unknown>
+const sentInit = (index = 0): RequestInit => fetchMock.mock.calls[index]?.[1] ?? {}
+const sentBody = (index = 0): Record<string, unknown> => {
+    const parsed: unknown = JSON.parse(String(sentInit(index).body))
+    return isRecord(parsed) ? parsed : {}
+}
 const accountingResult = (op: string, payload: Record<string, unknown>) => ({
     kind: "accounting_result",
     operation: "accounting.evidence@1",
