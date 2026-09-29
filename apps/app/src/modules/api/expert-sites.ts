@@ -8,6 +8,13 @@
 
 import type { Outcome } from "./outcome"
 import { graphql } from "./graphql"
+import {
+    parseCreatedExpertSite,
+    parseExpertDeploymentSnapshot,
+    parseExpertSiteRows,
+    parseProvisionedExpertSite,
+    parsePublishedExpertSite,
+} from "./expert-sites.guards"
 
 /** How far a provisioned expert site has got. A real enum with exactly five members. */
 export type ExpertProvisionStatus = "not_provisioned" | "provisioning" | "awaiting_dns" | "ready" | "failed"
@@ -41,7 +48,10 @@ const EXPERT_SITE = "{ id slug customDomain provisionStatus status }"
  * @returns Every app, or why there is none.
  */
 export const myExpertSites = (): Promise<Outcome<ReadonlyArray<ExpertSiteRow>>> =>
-    graphql(`query MyExpertSites { myExpertSites { data ${EXPERT_SITE} message success error } }`)
+    graphql(
+        `query MyExpertSites { myExpertSites { data ${EXPERT_SITE} message success error } }`,
+        parseExpertSiteRows,
+    )
 
 /** The draft site returned by the expert academy create mutation. */
 export interface CreatedExpertSite {
@@ -77,6 +87,7 @@ export const createExpertSite = (slug: string): Promise<Outcome<CreatedExpertSit
                 }
             }
         `,
+        parseCreatedExpertSite,
         {
             input: {
                 slug,
@@ -101,6 +112,7 @@ export const publishExpertSite = (siteId: string): Promise<Outcome<PublishedExpe
                 }
             }
         `,
+        parsePublishedExpertSite,
         {
             input: {
                 siteId,
@@ -126,6 +138,7 @@ export const provisionExpertSite = (siteId: string): Promise<Outcome<Provisioned
                 }
             }
         `,
+        parseProvisionedExpertSite,
         {
             input: {
                 siteId,
@@ -141,7 +154,11 @@ export interface ExpertDeploymentSnapshot {
 }
 
 /** Read the latest deployment snapshot for one owned expert site so a resumed flow starts from persisted truth. */
-export const myExpertSiteDeployment = (siteId: string): Promise<Outcome<ExpertDeploymentSnapshot | null>> =>
+/*
+ * The wire answers `data: null` when no deployment exists, which the transport already reports as
+ * `not-found`; a snapshot payload is therefore never null on the `ok` arm.
+ */
+export const myExpertSiteDeployment = (siteId: string): Promise<Outcome<ExpertDeploymentSnapshot>> =>
     graphql(
         `
             query MyExpertSiteDeployment($request: MyExpertSiteDeploymentRequest!) {
@@ -157,6 +174,7 @@ export const myExpertSiteDeployment = (siteId: string): Promise<Outcome<ExpertDe
                 }
             }
         `,
+        parseExpertDeploymentSnapshot,
         {
             request: { siteId },
         },

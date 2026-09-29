@@ -8,6 +8,17 @@
 
 import type { Outcome } from "./outcome"
 import { graphql } from "./graphql"
+import {
+    parseCatalogItemRows,
+    parseCatalogOrderRowAnswer,
+    parseCatalogOrderRows,
+    parseDomainRows,
+    parseInvoiceRowAnswer,
+    parseInvoiceRows,
+    parseWalletRow,
+    parseWalletTopUpPayLink,
+    parseWalletTransactionRows,
+} from "./commerce.guards"
 
 /** How a held domain stands. */
 export type DomainStatus = "active" | "expiring" | "expired"
@@ -201,7 +212,7 @@ const CATALOG_ITEM = "{ id slug name tagline templateKey tiers { id tierKey name
  * @returns Every domain, or why there is none.
  */
 export const myDomains = (): Promise<Outcome<ReadonlyArray<DomainRow>>> =>
-    graphql(`query MyDomains { myDomains { data ${DOMAIN} message success error } }`)
+    graphql(`query MyDomains { myDomains { data ${DOMAIN} message success error } }`, parseDomainRows)
 
 /**
  * The account's balance.
@@ -209,7 +220,7 @@ export const myDomains = (): Promise<Outcome<ReadonlyArray<DomainRow>>> =>
  * @returns The wallet, or why there is none.
  */
 export const myWallet = (): Promise<Outcome<WalletRow>> =>
-    graphql(`query MyWallet { myWallet { data ${WALLET} message success error } }`)
+    graphql(`query MyWallet { myWallet { data ${WALLET} message success error } }`, parseWalletRow)
 
 /**
  * Every movement of money, newest first.
@@ -217,7 +228,10 @@ export const myWallet = (): Promise<Outcome<WalletRow>> =>
  * @returns The movements, or why there are none.
  */
 export const myWalletTransactions = (): Promise<Outcome<ReadonlyArray<WalletTransactionRow>>> =>
-    graphql(`query MyWalletTransactions { myWalletTransactions { data ${WALLET_TRANSACTION} message success error } }`)
+    graphql(
+        `query MyWalletTransactions { myWalletTransactions { data ${WALLET_TRANSACTION} message success error } }`,
+        parseWalletTransactionRows,
+    )
 
 /** Create one real gateway checkout. Settlement remains owned by the provider IPN. */
 export const createWalletTopUpPayLink = (
@@ -229,6 +243,7 @@ export const createWalletTopUpPayLink = (
         `mutation CreateWalletTopUpPayLink($input: CreateWalletTopUpPayLinkInput!) {
             createWalletTopUpPayLink(request: $input) { data ${WALLET_TOP_UP_PAY_LINK} message success error }
         }`,
+        parseWalletTopUpPayLink,
         {
             input: {
                 amountVnd,
@@ -248,7 +263,7 @@ export const createWalletTopUpPayLink = (
  * @returns The invoices, or why there are none.
  */
 export const myInvoices = (): Promise<Outcome<ReadonlyArray<InvoiceRow>>> =>
-    graphql(`query MyInvoices { myInvoices { data ${INVOICE} message success error } }`)
+    graphql(`query MyInvoices { myInvoices { data ${INVOICE} message success error } }`, parseInvoiceRows)
 
 /**
  * Settle one invoice owned by the current account.
@@ -259,6 +274,7 @@ export const myInvoices = (): Promise<Outcome<ReadonlyArray<InvoiceRow>>> =>
 export const payInvoice = (invoiceId: string): Promise<Outcome<InvoiceRow>> =>
     graphql(
         `mutation PayInvoice($input: PayInvoiceInput!) { payInvoice(request: $input) { data ${INVOICE} message success error } }`,
+        parseInvoiceRowAnswer,
         {
             input: {
                 invoiceId,
@@ -272,7 +288,10 @@ export const payInvoice = (invoiceId: string): Promise<Outcome<InvoiceRow>> =>
  * @returns The orders, or why there are none.
  */
 export const myCatalogOrders = (): Promise<Outcome<ReadonlyArray<CatalogOrderRow>>> =>
-    graphql(`query MyCatalogOrders { myCatalogOrders { data ${CATALOG_ORDER} message success error } }`)
+    graphql(
+        `query MyCatalogOrders { myCatalogOrders { data ${CATALOG_ORDER} message success error } }`,
+        parseCatalogOrderRows,
+    )
 
 /**
  * The buyable products in one slice of the catalogue.
@@ -286,6 +305,7 @@ export const myCatalogOrders = (): Promise<Outcome<ReadonlyArray<CatalogOrderRow
 export const catalogItems = (category: CatalogCategory): Promise<Outcome<ReadonlyArray<CatalogItemRow>>> =>
     graphql(
         `query CatalogItems($request: CatalogItemsRequest!) { catalogItems(request: $request) { data ${CATALOG_ITEM} message success error } }`,
+        parseCatalogItemRows,
         {
             request: { category },
         },
@@ -297,6 +317,7 @@ export const orderAgentOs = (catalogItemSlug: string, catalogTierId?: string): P
         `mutation OrderAgentOs($input: OrderCatalogItemInput!) {
             orderCatalogItem(request: $input) { data { id status ${ORDER_PRODUCT} } message success error }
         }`,
+        parseCatalogOrderRowAnswer,
         {
             input: {
                 catalogItemSlug,

@@ -8,6 +8,7 @@
 
 import type { Outcome } from "./outcome"
 import { graphql } from "./graphql"
+import { parseInstanceRows, parsePodStatusRow } from "./instances.guards"
 
 /** One running instance, which is the infrastructure view of an app or a workspace. */
 export type InstanceRow = {
@@ -55,7 +56,7 @@ const POD_STATUS = "{ reachable httpStatus tokenConfigured tokenHint checkedAt }
  * @returns Every instance, or why there is none.
  */
 export const myInstances = (): Promise<Outcome<ReadonlyArray<InstanceRow>>> =>
-    graphql(`query MyInstances { myInstances { data ${INSTANCE} message success error } }`)
+    graphql(`query MyInstances { myInstances { data ${INSTANCE} message success error } }`, parseInstanceRows)
 
 /**
  * Whether the agent workspace's pod is answering.
@@ -68,4 +69,7 @@ export const myInstances = (): Promise<Outcome<ReadonlyArray<InstanceRow>>> =>
  * @returns The pod check, or why it could not be made.
  */
 export const myPodOpenclawStatus = (): Promise<Outcome<PodStatusRow>> =>
-    graphql(`query MyPodOpenclawStatus { myPodOpenclawStatus { data ${POD_STATUS} message success error } }`)
+    graphql(
+        `query MyPodOpenclawStatus { myPodOpenclawStatus { data ${POD_STATUS} message success error } }`,
+        parsePodStatusRow,
+    )
