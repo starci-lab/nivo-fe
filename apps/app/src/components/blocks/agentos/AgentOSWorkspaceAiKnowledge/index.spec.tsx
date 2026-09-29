@@ -83,9 +83,9 @@ describe("resolveAgentOSWorkspaceAiKnowledgeState", () => {
         expect(
             resolveAgentOSWorkspaceAiKnowledgeState(answer, { kind: "recovering", operationId: "op-1" }, false),
         ).toBe("recovering")
-        expect(resolveAgentOSWorkspaceAiKnowledgeState(answer, { kind: "success", operationId: null }, false)).toBe(
-            "success",
-        )
+        expect(
+            resolveAgentOSWorkspaceAiKnowledgeState(answer, { kind: "success", operationId: null }, false),
+        ).toBe("success")
     })
 
     it("is refused when the answer is refused or the action was refused", () => {
@@ -95,9 +95,9 @@ describe("resolveAgentOSWorkspaceAiKnowledgeState", () => {
 
     it("loads, configures, then settles from the server lifecycle when nothing is pending", () => {
         expect(resolveAgentOSWorkspaceAiKnowledgeState(undefined, null, false)).toBe("loading")
-        expect(resolveAgentOSWorkspaceAiKnowledgeState(readiness({ credentialStatus: "missing" }), null, false)).toBe(
-            "key-configuring",
-        )
+        expect(
+            resolveAgentOSWorkspaceAiKnowledgeState(readiness({ credentialStatus: "missing" }), null, false),
+        ).toBe("key-configuring")
         expect(resolveAgentOSWorkspaceAiKnowledgeState(readiness({ aiReady: false }), null, false)).toBe("refused")
         expect(resolveAgentOSWorkspaceAiKnowledgeState(readiness({}), null, false)).toBe("ready")
     })

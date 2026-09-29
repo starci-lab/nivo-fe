@@ -41,8 +41,6 @@ const handlers = {
     setStatus: vi.fn(),
     grantAccess: vi.fn(),
     revokeAccess: vi.fn(),
-    retryNotice: vi.fn(),
-    retryDetailNotice: vi.fn(),
 }
 
 describe("AcademyStudentCrmBase", () => {
@@ -60,7 +58,7 @@ describe("AcademyStudentCrmBase", () => {
             renderToStaticMarkup(
                 <AcademyStudentCrmBase
                     state="failed"
-                    props={{ students: [], detailState: "idle", notice: { message: "Unavailable" }, labels }}
+                    props={{ students: [], detailState: "idle", notice: <div>Unavailable</div>, labels }}
                     on={handlers}
                 />,
             ),
@@ -114,8 +112,6 @@ describe("AcademyStudentCrmBase", () => {
             setStatus: vi.fn(),
             grantAccess: vi.fn(),
             revokeAccess: vi.fn(),
-            retryNotice: vi.fn(),
-            retryDetailNotice: vi.fn(),
         }
         const student = {
             id: "member-1",
@@ -161,7 +157,7 @@ describe("AcademyStudentCrmBase", () => {
                 props={{
                     students: [{ ...student, status: "banned" }],
                     detailState: "failed",
-                    detailNotice: { message: "Unavailable" },
+                    detailNotice: <div>Unavailable</div>,
                     actionMessage: "Failed",
                     detail: {
                         member: student,
