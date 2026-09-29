@@ -302,11 +302,11 @@ describe("the brand layer's contrast, measured with the WCAG 2 formula", () => {
     )
 
     it.each([":root", ".dark"])(
-        "keeps the success, warning, info and danger tones, which are also bare glyphs, at 3:1 on the canvas and the surface under %s",
+        "keeps the success, warning, info and danger tones, which are also bare glyphs, at 3:1 on the canvas and every surface under %s",
         (selector) => {
             const tokens = blockOf(brandOf("apps/app"), selector)
             const failing = ["--success", "--warning", "--info", "--danger"].flatMap((glyph) =>
-                ["--background", "--surface"]
+                ["--background", "--surface", "--surface-secondary", "--surface-tertiary"]
                     .filter((ground) => contrast(tokens.get(glyph) ?? "", tokens.get(ground) ?? "") < 3)
                     .map((ground) => [glyph, ground]),
             )
