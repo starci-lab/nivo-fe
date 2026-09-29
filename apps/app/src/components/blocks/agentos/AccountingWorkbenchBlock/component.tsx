@@ -6,6 +6,7 @@ import {
     Heading,
     Input,
     PrimaryRailLayout,
+    Select,
     SectionHeader,
     SurfaceCard,
     SurfaceListCard,
@@ -36,8 +37,6 @@ import {
     ACCOUNTING_FIELD_STACK_CLASS_NAME,
     ACCOUNTING_FORM_FULL_SPAN_CLASS_NAME,
     ACCOUNTING_FORM_GRID_CLASS_NAME,
-    ACCOUNTING_NATIVE_CONTROL_CLASS_NAME,
-    ACCOUNTING_NATIVE_FIELD_CLASS_NAME,
     ACCOUNTING_OPERATIONS_GRID_CLASS_NAME,
     ACCOUNTING_ROW_CLASS_NAME,
     ACCOUNTING_SUMMARY_GRID_CLASS_NAME,
@@ -221,46 +220,30 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
         >
             <div className={ACCOUNTING_SUMMARY_GRID_CLASS_NAME}>
                 <FieldStack>
-                    <label className={ACCOUNTING_NATIVE_FIELD_CLASS_NAME} htmlFor="accounting-period">
-                        <Text size="sm" weight="semibold">
-                            {t("overview.period")}
-                        </Text>
-                        <input
-                            className={ACCOUNTING_NATIVE_CONTROL_CLASS_NAME}
-                            id="accounting-period"
-                            name="accounting-period"
-                            type="month"
-                            value={periodMonth}
-                            onChange={(event) => setPeriodMonth(event.currentTarget.value)}
-                        />
-                    </label>
-                    <label className={ACCOUNTING_NATIVE_FIELD_CLASS_NAME} htmlFor="accounting-currency">
-                        <Text size="sm" weight="semibold">
-                            {t("overview.currency")}
-                        </Text>
-                        <select
-                            className={ACCOUNTING_NATIVE_CONTROL_CLASS_NAME}
-                            id="accounting-currency"
-                            name="accounting-currency"
-                            value={currency ?? ""}
-                            onChange={(event) =>
-                                setCurrency(event.currentTarget.value.length === 0 ? null : event.currentTarget.value)
-                            }
-                        >
-                            <option value="">{t("overview.allCurrencies")}</option>
-                            {[
+                    <Input
+                        id="accounting-period"
+                        name="accounting-period"
+                        label={t("overview.period")}
+                        kind="text"
+                        value={periodMonth}
+                        onValueChange={setPeriodMonth}
+                    />
+                    <Select
+                        name="accounting-currency"
+                        label={t("overview.currency")}
+                        options={[
+                            { id: "", label: t("overview.allCurrencies") },
+                            ...[
                                 ...new Set(
                                     (view.overview.model?.items ?? []).flatMap((item) =>
                                         item.currency === null ? [] : [item.currency],
                                     ),
                                 ),
-                            ].map((code) => (
-                                <option key={code} value={code}>
-                                    {code}
-                                </option>
-                            ))}
-                        </select>
-                    </label>
+                            ].map((code) => ({ id: code, label: code })),
+                        ]}
+                        value={currency ?? ""}
+                        onValueChange={(value) => setCurrency(value === null || value.length === 0 ? null : value)}
+                    />
                     <ActionRow>
                         {view.overview.model === null ? null : (
                             <Badge tone={view.overview.model.partialReasons.length > 0 ? "warning" : "success"}>

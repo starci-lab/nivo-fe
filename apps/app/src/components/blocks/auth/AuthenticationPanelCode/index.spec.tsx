@@ -1,8 +1,11 @@
+import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import type { AuthActions } from "@/modules/auth/authentication-panel/actions"
 import type { AuthCodeCopy } from "@/modules/auth/authentication-panel/copy"
 import { EMPTY, type AuthPanelFormState } from "@/modules/auth/authentication-panel/types"
+import enMessages from "@/messages/en.json"
+import viMessages from "@/messages/vi.json"
 import { AuthenticationPanelCode } from "./"
 
 const frame = { title: "Sign in", subtitle: "Welcome", statusMessage: "", isError: false, isPending: false }
@@ -40,8 +43,44 @@ const formState = (): AuthPanelFormState => ({
 
 const renderCode = (copy: AuthCodeCopy = code, on: AuthActions = { submitCode: vi.fn(), resend: vi.fn() }) =>
     renderToStaticMarkup(<AuthenticationPanelCode state="code" props={copy} formState={formState()} on={on} />)
+const localizedCode = (messages: typeof enMessages): AuthCodeCopy => ({
+    ...code,
+    cooldownLabel: "",
+    resendLabel: messages.authentication.resendLabel,
+    codeLabel: messages.authentication.codeLabel,
+    newPasswordLabel: messages.authentication.newPasswordLabel,
+    confirmNewPasswordLabel: messages.authentication.confirmNewPasswordLabel,
+    revealLabel: messages.authentication.revealLabel,
+    hideLabel: messages.authentication.hideLabel,
+    submitLabel: messages.authentication.forgotPassword.codeSubmitLabel,
+})
 
 describe("AuthenticationPanelCode", () => {
+    it("names the code and reset fields through the English and Vietnamese catalogs", () => {
+        for (const messages of [enMessages, viMessages]) {
+            const localized = localizedCode(messages)
+            render(
+                <AuthenticationPanelCode
+                    state="code"
+                    props={localized}
+                    formState={formState()}
+                    on={{ submitCode: vi.fn(), resend: vi.fn() }}
+                />,
+            )
+            expect(screen.getByRole("group", { name: messages.authentication.codeLabel })).toBeInTheDocument()
+            expect(screen.getByRole("textbox", { name: messages.authentication.codeLabel })).toBeInTheDocument()
+            expect(screen.getByRole("textbox", { name: messages.authentication.newPasswordLabel })).toBeInTheDocument()
+            expect(
+                screen.getByRole("textbox", { name: messages.authentication.confirmNewPasswordLabel }),
+            ).toBeInTheDocument()
+            expect(screen.getAllByRole("button", { name: messages.authentication.revealLabel })).toHaveLength(2)
+            expect(
+                screen.getByRole("button", { name: messages.authentication.forgotPassword.codeSubmitLabel }),
+            ).toBeInTheDocument()
+            expect(screen.getByRole("button", { name: messages.authentication.resendLabel })).toBeInTheDocument()
+        }
+    })
+
     it("draws the reset code and password fields with their hint", () => {
         const markup = renderCode()
         expect(markup).toContain("Check your inbox")

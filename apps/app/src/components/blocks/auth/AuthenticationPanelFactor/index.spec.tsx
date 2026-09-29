@@ -1,7 +1,10 @@
+import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import type { AuthFactorCopy } from "@/modules/auth/authentication-panel/copy"
 import { EMPTY, type AuthPanelFormState } from "@/modules/auth/authentication-panel/types"
+import enMessages from "@/messages/en.json"
+import viMessages from "@/messages/vi.json"
 import { AuthenticationPanelFactor } from "./"
 
 const factor: AuthFactorCopy = {
@@ -26,6 +29,28 @@ const formState: AuthPanelFormState = {
 }
 
 describe("AuthenticationPanelFactor", () => {
+    it("names the second-factor code field through both locale catalogs", () => {
+        for (const messages of [enMessages, viMessages]) {
+            render(
+                <AuthenticationPanelFactor
+                    state="secondFactor"
+                    props={{
+                        ...factor,
+                        codeLabel: messages.authentication.codeLabel,
+                        submitLabel: messages.authentication.signIn.twoFactorSubmitLabel,
+                    }}
+                    formState={formState}
+                    on={{ submitFactor: vi.fn(), back: vi.fn() }}
+                />,
+            )
+            expect(screen.getByRole("group", { name: messages.authentication.codeLabel })).toBeInTheDocument()
+            expect(screen.getByRole("textbox", { name: messages.authentication.codeLabel })).toBeInTheDocument()
+            expect(
+                screen.getByRole("button", { name: messages.authentication.signIn.twoFactorSubmitLabel }),
+            ).toBeInTheDocument()
+        }
+    })
+
     it("draws the second-factor challenge without a resend affordance", () => {
         const markup = renderToStaticMarkup(
             <AuthenticationPanelFactor

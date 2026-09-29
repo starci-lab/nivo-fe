@@ -5,6 +5,7 @@ import {
     EmptyNotice,
     Input,
     PrimaryRailLayout,
+    Select,
     SectionHeader,
     SurfaceCard,
     SurfaceListCard,
@@ -33,8 +34,6 @@ import {
     SALES_FIELD_STACK_CLASS_NAME,
     SALES_FORM_FULL_SPAN_CLASS_NAME,
     SALES_FORM_GRID_CLASS_NAME,
-    SALES_NATIVE_CONTROL_CLASS_NAME,
-    SALES_NATIVE_FIELD_CLASS_NAME,
     SALES_OPERATIONS_GRID_CLASS_NAME,
     SALES_ROW_CLASS_NAME,
     SALES_WORKBENCH_CLASS_NAME,
@@ -379,27 +378,18 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
                             ? t("ambiguity.noQuestion")
                             : JSON.stringify(view.ambiguity.clarification)}
                     </Text>
-                    <label className={SALES_NATIVE_FIELD_CLASS_NAME} htmlFor="sales-fact-kind">
-                        <Text size="sm" weight="semibold">
-                            {t("ambiguity.fact")}
-                        </Text>
-                        <select
-                            className={SALES_NATIVE_CONTROL_CLASS_NAME}
-                            id="sales-fact-kind"
-                            name="sales-fact-kind"
-                            value={view.ambiguity.factKind}
-                            onChange={(event) =>
-                                setFactKind(
-                                    event.currentTarget.value === "customerRef" ? "customerRef" : "opportunityId",
-                                )
-                            }
-                        >
-                            <option value="opportunityId">
-                                {t(salesClarificationFactKey({ opportunityId: "x" }))}
-                            </option>
-                            <option value="customerRef">{t(salesClarificationFactKey({ customerRef: "x" }))}</option>
-                        </select>
-                    </label>
+                    <Select
+                        name="sales-fact-kind"
+                        label={t("ambiguity.fact")}
+                        options={[
+                            { id: "opportunityId", label: t(salesClarificationFactKey({ opportunityId: "x" })) },
+                            { id: "customerRef", label: t(salesClarificationFactKey({ customerRef: "x" })) },
+                        ]}
+                        value={view.ambiguity.factKind}
+                        onValueChange={(value) =>
+                            setFactKind(value === "customerRef" ? "customerRef" : "opportunityId")
+                        }
+                    />
                     <Input
                         id="sales-fact-value"
                         name="sales-fact-value"
@@ -672,22 +662,17 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
                         onValueChange={view.wait.setOpportunityId}
                         isRequired
                     />
-                    <label className={SALES_NATIVE_FIELD_CLASS_NAME} htmlFor="sales-close-outcome">
-                        <Text size="sm" weight="semibold">
-                            {t("closure.outcome")}
-                        </Text>
-                        <select
-                            className={SALES_NATIVE_CONTROL_CLASS_NAME}
-                            id="sales-close-outcome"
-                            name="sales-close-outcome"
-                            value={view.closure.outcome}
-                            onChange={(event) => setOutcome(closeOutcomeOf(event.currentTarget.value))}
-                        >
-                            <option value="won">{t(salesOutcomeKey("won"))}</option>
-                            <option value="lost">{t(salesOutcomeKey("lost"))}</option>
-                            <option value="attention">{t(salesOutcomeKey("attention"))}</option>
-                        </select>
-                    </label>
+                    <Select
+                        name="sales-close-outcome"
+                        label={t("closure.outcome")}
+                        options={[
+                            { id: "won", label: t(salesOutcomeKey("won")) },
+                            { id: "lost", label: t(salesOutcomeKey("lost")) },
+                            { id: "attention", label: t(salesOutcomeKey("attention")) },
+                        ]}
+                        value={view.closure.outcome}
+                        onValueChange={(value) => setOutcome(closeOutcomeOf(value ?? "won"))}
+                    />
                     <Input
                         id="sales-close-evidence"
                         name="sales-close-evidence"

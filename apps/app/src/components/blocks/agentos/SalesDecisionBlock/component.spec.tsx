@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { render } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import type { ReactElement } from "react"
 import { SalesDecisionBlockBase } from "./component"
 import type { useSalesDecision } from "@/hooks"
@@ -29,6 +29,11 @@ const translate = (key: string, values?: Readonly<Record<string, string | number
     Object.entries(values ?? {}).reduce(
         (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
         messageFor(catalog, key),
+    )
+const translateVi = (key: string, values?: Readonly<Record<string, string | number | undefined>>): string =>
+    Object.entries(values ?? {}).reduce(
+        (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+        messageFor(vietnamese, key),
     )
 const keyPaths = (source: unknown, prefix = ""): ReadonlyArray<string> =>
     source !== null && typeof source === "object"
@@ -103,6 +108,22 @@ const renderBlock = (input: SalesDecisionViewOverrides = {}) => {
 describe("SalesDecisionBlockBase", () => {
     it("keeps every decision copy key in both catalogues", () => {
         expect([...keyPaths(vietnamese)].sort()).toEqual([...keyPaths(catalog)].sort())
+    })
+
+    it("names every decision field and action from the English and Vietnamese catalogues", () => {
+        for (const [source, t] of [
+            [catalog, translate],
+            [vietnamese, translateVi],
+        ] as const) {
+            const { unmount } = renderBlock({ t })
+            expect(screen.getByRole("textbox", { name: messageFor(source, "proposal.requestId") })).toBeInTheDocument()
+            expect(screen.getByRole("button", { name: messageFor(source, "proposal.reload") })).toBeInTheDocument()
+            expect(
+                screen.getByRole("textbox", { name: messageFor(source, "answer.expectedRevision") }),
+            ).toBeInTheDocument()
+            expect(screen.getByRole("button", { name: messageFor(source, "answer.submit") })).toBeInTheDocument()
+            unmount()
+        }
     })
 
     it("draws the pending proposal exactly as the read disclosed it, with one answer offered", () => {

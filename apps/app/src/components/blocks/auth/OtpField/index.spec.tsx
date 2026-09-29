@@ -1,8 +1,25 @@
+import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import { OtpField } from "./"
 
 describe("OtpField", () => {
+    it("makes the code input reachable by role and its catalog label", () => {
+        render(
+            <OtpField
+                id="authentication-code"
+                label="Verification code"
+                statusId="authentication-code-status"
+                message="Enter the code."
+                isError={false}
+                isPending={false}
+                onValue={vi.fn()}
+            />,
+        )
+        expect(screen.getByRole("group", { name: "Verification code" })).toBeInTheDocument()
+        expect(screen.getByRole("textbox", { name: "Verification code" })).toBeInTheDocument()
+    })
+
     it("connects the visible label and refusal status to the six-slot input", () => {
         const markup = renderToStaticMarkup(
             <OtpField

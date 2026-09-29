@@ -1,5 +1,5 @@
-import { useRef } from "react"
-import { SurfaceCard, Button, Button as CoreButton, Text } from "@starci/grammar/common"
+import { useState } from "react"
+import { SurfaceCard, Button, FileDropzone, Text } from "@starci/grammar/common"
 import { LifecycleStep, type LifecycleStepData, QueryNoticeView, type QueryNoticeViewData } from "@nivo/ui"
 import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
 
@@ -56,7 +56,7 @@ const lifecycleStateLabel = (index: number, active: number, labels: AgentOSSolut
 export const AgentOSSolutionModuleAttachmentsBase = (props: AgentOSSolutionModuleAttachmentsProps) => {
     const { studio, status, notice, pending, labels } = props.props
     const { onChoose, onRetry, onRemove, onRetryNotice, chunks } = props.on
-    const fileInput = useRef<HTMLInputElement>(null)
+    const [filePickerRevision, setFilePickerRevision] = useState(0)
     if (status === "failed")
         return (
             <SurfaceCard label={labels.title}>
@@ -137,14 +137,14 @@ export const AgentOSSolutionModuleAttachmentsBase = (props: AgentOSSolutionModul
                                     </Text>
                                 </div>
                                 {refused && labels.retry !== undefined && onRetry !== undefined ? (
-                                    <CoreButton
+                                    <Button
                                         variant="secondary"
                                         size="sm"
                                         isDisabled={pending}
                                         onPress={() => onRetry(file.id)}
                                     >
                                         {labels.retry}
-                                    </CoreButton>
+                                    </Button>
                                 ) : (
                                     <Button
                                         variant="ghost"
@@ -165,21 +165,20 @@ export const AgentOSSolutionModuleAttachmentsBase = (props: AgentOSSolutionModul
                         </div>
                     )
                 })}
-                <input
-                    ref={fileInput}
-                    type="file"
+                <FileDropzone
+                    key={filePickerRevision}
                     accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown"
-                    hidden
-                    disabled={pending}
-                    onChange={(event) => {
-                        const file = event.currentTarget.files?.[0]
+                    label={labels.upload}
+                    isLabelHidden
+                    prompt={labels.upload}
+                    hideFileList
+                    isDisabled={pending}
+                    onFilesChange={(files) => {
+                        const file = files[0]
                         if (file !== undefined) onChoose(file)
-                        event.currentTarget.value = ""
+                        setFilePickerRevision((revision) => revision + 1)
                     }}
                 />
-                <CoreButton variant="secondary" isPending={pending} onPress={() => fileInput.current?.click()}>
-                    {labels.upload}
-                </CoreButton>
             </div>
         </SurfaceCard>
     )

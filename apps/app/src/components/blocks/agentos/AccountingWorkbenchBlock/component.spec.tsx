@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { render } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import type { ReactElement } from "react"
 import { AccountingWorkbenchBlockBase } from "./component"
 import type { useAccountingWorkbench } from "@/hooks"
@@ -30,6 +30,11 @@ const translate = (key: string, values?: Readonly<Record<string, string | number
     Object.entries(values ?? {}).reduce(
         (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
         messageFor(catalog, key),
+    )
+const translateVi = (key: string, values?: Readonly<Record<string, string | number | undefined>>): string =>
+    Object.entries(values ?? {}).reduce(
+        (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+        messageFor(vietnamese, key),
     )
 const keyPaths = (source: unknown, prefix = ""): ReadonlyArray<string> =>
     source !== null && typeof source === "object"
@@ -267,6 +272,21 @@ const renderBlock = (input: AccountingWorkbenchViewOverrides = {}): string => {
 describe("AccountingWorkbenchBlockBase", () => {
     it("keeps every Accounting workbench copy key in both catalogues", () => {
         expect([...keyPaths(vietnamese)].sort()).toEqual([...keyPaths(catalog)].sort())
+    })
+
+    it("names the period and currency controls from both locale catalogues", () => {
+        const english = render(<AccountingWorkbenchBlockBase props={{ view: view() }} />)
+        expect(screen.getByRole("textbox", { name: messageFor(catalog, "overview.period") })).toHaveValue("2026-09")
+        expect(screen.getByRole("button", { name: messageFor(catalog, "overview.currency") })).toBeInTheDocument()
+        english.unmount()
+
+        render(<AccountingWorkbenchBlockBase props={{ view: view({ locale: "vi", t: translateVi }) }} />)
+        expect(screen.getByRole("textbox", { name: messageFor(vietnamese, "overview.period") })).toHaveValue(
+            "2026-09",
+        )
+        expect(
+            screen.getByRole("button", { name: messageFor(vietnamese, "overview.currency") }),
+        ).toBeInTheDocument()
     })
 
     it("shows every available measure of a period, its partial coverage and its attention codes", () => {

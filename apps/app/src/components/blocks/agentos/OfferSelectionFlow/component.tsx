@@ -9,7 +9,6 @@ import {
     OFFER_RADIO_CLASS_NAME,
     OFFER_ROW_CLASS_NAME,
     SECTIONS_CLASS_NAME,
-    SELECTABLE_OFFER_ROW_CLASS_NAME,
     SELECTED_OFFER_ROW_CLASS_NAME,
     SUMMARY_BAND_CLASS_NAME,
     SUMMARY_BAND_DIVIDER_CLASS_NAME,
@@ -20,6 +19,7 @@ import {
     Button,
     EmptyNotice,
     PageContainer,
+    RadioGroup,
     SectionHeader,
     SurfaceCard,
     Text,
@@ -187,33 +187,21 @@ const selectableRow = (
     offer: OfferSelectionOffer,
     copy: OfferSelectionCopy,
     selected: boolean,
-    onSelect: (offerId: string) => void,
-) => (
-    <label
-        key={offer.offerId}
-        className={selected ? SELECTED_OFFER_ROW_CLASS_NAME : SELECTABLE_OFFER_ROW_CLASS_NAME}
-        data-offer={offer.offerId}
-    >
-        <input
-            type="radio"
-            name="workspace-offer"
-            value={offer.offerId}
-            checked={selected}
-            onChange={() => onSelect(offer.offerId)}
-            className={OFFER_RADIO_CLASS_NAME}
-        />
-        <span className={OFFER_IDENTITY_CLASS_NAME}>
-            <Text size="sm" weight="semibold">
-                {offer.displayName}
-            </Text>
-            <Text size="sm" tone="muted">
-                {offer.amount}
-            </Text>
-        </span>
-        {offerFacts(offer, copy)}
-        {selected ? <Badge tone="accent">{copy.selectedBadge}</Badge> : <span aria-hidden="true" />}
-    </label>
-)
+) => ({
+    value: offer.offerId,
+    label: offer.displayName,
+    description: (
+        <div className={selected ? SELECTED_OFFER_ROW_CLASS_NAME : OFFER_ROW_CLASS_NAME} data-offer={offer.offerId}>
+            <span className={OFFER_IDENTITY_CLASS_NAME}>
+                <Text size="sm" tone="muted">
+                    {offer.amount}
+                </Text>
+            </span>
+            {offerFacts(offer, copy)}
+            {selected ? <Badge tone="accent">{copy.selectedBadge}</Badge> : null}
+        </div>
+    ),
+})
 
 const readOnlyRow = (offer: OfferSelectionOffer, copy: OfferSelectionCopy) => (
     <div key={offer.offerId} className={OFFER_ROW_CLASS_NAME} data-offer={offer.offerId}>
@@ -365,11 +353,15 @@ export const OfferSelectionFlowBase = (props: OfferSelectionFlowProps) => {
             <div className={SECTIONS_CLASS_NAME} data-contract="GAP-5">
                 {head(copy, links)}
                 <SurfaceCard label={copy.offersLabel} fact={copy.offersFact} composition="joined">
-                    <div role="radiogroup" aria-label={copy.offerGroupLabel}>
-                        {props.props.offers.map((offer) =>
-                            selectableRow(offer, copy, offer.offerId === selected?.offerId, props.on.select),
+                    <RadioGroup
+                        name="workspace-offer"
+                        label={copy.offerGroupLabel}
+                        options={props.props.offers.map((offer) =>
+                            selectableRow(offer, copy, offer.offerId === selected?.offerId),
                         )}
-                    </div>
+                        value={selected?.offerId ?? null}
+                        onValueChange={props.on.select}
+                    />
                     {selected === undefined ? null : summaryBand(copy, selected)}
                     {selected === undefined ? null : (
                         <div className={ACTION_BAND_CLASS_NAME}>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { render } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import type { ReactElement } from "react"
 import { SalesHandoffBlockBase } from "./component"
 import type { useSalesHandoff } from "@/hooks"
@@ -29,6 +29,11 @@ const translate = (key: string, values?: Readonly<Record<string, string | number
     Object.entries(values ?? {}).reduce(
         (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
         messageFor(catalog, key),
+    )
+const translateVi = (key: string, values?: Readonly<Record<string, string | number | undefined>>): string =>
+    Object.entries(values ?? {}).reduce(
+        (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+        messageFor(vietnamese, key),
     )
 const keyPaths = (source: unknown, prefix = ""): ReadonlyArray<string> =>
     source !== null && typeof source === "object"
@@ -99,6 +104,25 @@ const renderBlock = (input: SalesHandoffViewOverrides = {}) => {
 describe("SalesHandoffBlockBase", () => {
     it("keeps every handoff copy key in both catalogues", () => {
         expect([...keyPaths(vietnamese)].sort()).toEqual([...keyPaths(catalog)].sort())
+    })
+
+    it("names every handoff field and action from the English and Vietnamese catalogues", () => {
+        for (const [source, t] of [
+            [catalog, translate],
+            [vietnamese, translateVi],
+        ] as const) {
+            const { unmount } = renderBlock({ t })
+            expect(screen.getByRole("textbox", { name: messageFor(source, "handoff.handoffId") })).toBeInTheDocument()
+            expect(screen.getByRole("button", { name: messageFor(source, "handoff.reload") })).toBeInTheDocument()
+            expect(
+                screen.getByRole("textbox", { name: messageFor(source, "submission.fingerprint") }),
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole("textbox", { name: messageFor(source, "submission.expectedRevision") }),
+            ).toBeInTheDocument()
+            expect(screen.getByRole("button", { name: messageFor(source, "submission.submit") })).toBeInTheDocument()
+            unmount()
+        }
     })
 
     it("draws the prepared handoff exactly as the read disclosed it, with one submission offered", () => {

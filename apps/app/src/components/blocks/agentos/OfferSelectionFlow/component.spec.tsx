@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
+import enMessages from "@/messages/en.json"
+import viMessages from "@/messages/vi.json"
 import { OfferSelectionFlowBase, type OfferSelectionCopy, type OfferSelectionOffer } from "./component"
 
 const copy: OfferSelectionCopy = {
@@ -72,9 +74,16 @@ describe("OfferSelectionFlowBase", () => {
                 on={{ select: vi.fn() }}
             />,
         )
-        expect(screen.getByRole("radiogroup", { name: "Available offers" })).toBeInTheDocument()
+        expect(
+            screen.getByRole("radiogroup", {
+                name: enMessages.console.agentos.offerSelection.offerGroupLabel,
+            }),
+        ).toBeInTheDocument()
         const radios = screen.getAllByRole("radio")
         expect(radios).toHaveLength(3)
+        for (const currentOffer of offers) {
+            expect(screen.getByRole("radio", { name: currentOffer.displayName })).toBeInTheDocument()
+        }
         expect(screen.getByText("Nivo Workspace Starter")).toBeInTheDocument()
         expect(screen.getAllByText("Nivo Workspace Growth").length).toBeGreaterThan(0)
         expect(screen.getAllByText("2,990,000 VND").length).toBeGreaterThan(0)
@@ -84,6 +93,32 @@ describe("OfferSelectionFlowBase", () => {
         expect(screen.getAllByText("market:VN")).toHaveLength(3)
         expect(screen.getByText("Read from the Workspace Provision checkout boundary")).toBeInTheDocument()
         expect(screen.getByText("No payment is requested at this step.")).toBeInTheDocument()
+    })
+
+    it("names every offer choice with the catalog group label in both locales", () => {
+        for (const offerGroupLabel of [
+            enMessages.console.agentos.offerSelection.offerGroupLabel,
+            viMessages.console.agentos.offerSelection.offerGroupLabel,
+        ]) {
+            const { unmount } = render(
+                <OfferSelectionFlowBase
+                    state="selection"
+                    props={{
+                        copy: { ...copy, offerGroupLabel },
+                        links,
+                        offers,
+                        selectedOfferId: "nivo-workspace-growth",
+                        checkoutHref: "/checkout",
+                    }}
+                    on={{ select: vi.fn() }}
+                />,
+            )
+            expect(screen.getByRole("radiogroup", { name: offerGroupLabel })).toBeInTheDocument()
+            for (const currentOffer of offers) {
+                expect(screen.getByRole("radio", { name: currentOffer.displayName })).toBeInTheDocument()
+            }
+            unmount()
+        }
     })
 
     it("marks the selected offer through checked state and a visible text badge, not color alone", () => {

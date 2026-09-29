@@ -1,7 +1,10 @@
+import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import type { AuthDetailsCopy } from "@/modules/auth/authentication-panel/copy"
 import { EMPTY, type AuthPanelFormState } from "@/modules/auth/authentication-panel/types"
+import enMessages from "@/messages/en.json"
+import viMessages from "@/messages/vi.json"
 import { AuthenticationPanelDetails } from "./"
 
 const frame = { title: "Sign in", subtitle: "Welcome", statusMessage: "", isError: false, isPending: false }
@@ -50,8 +53,66 @@ const renderDetails = (copy: AuthDetailsCopy = details) =>
     renderToStaticMarkup(
         <AuthenticationPanelDetails state="details" props={copy} formState={formState()} on={{ submitDetails: vi.fn() }} />,
     )
+const localizedDetails = (messages: typeof enMessages): AuthDetailsCopy => ({
+    ...details,
+    emailLabel: messages.authentication.emailLabel,
+    passwordLabel: messages.authentication.passwordLabel,
+    confirmPasswordLabel: messages.authentication.confirmPasswordLabel,
+    nameLabel: messages.authentication.nameLabel,
+    revealLabel: messages.authentication.revealLabel,
+    hideLabel: messages.authentication.hideLabel,
+    googleLabel: messages.authentication.googleLabel,
+    githubLabel: messages.authentication.githubLabel,
+    forgotPasswordLabel: messages.authentication.forgotPasswordLabel,
+    submitLabel: messages.authentication.signIn.submitLabel,
+})
 
 describe("AuthenticationPanelDetails", () => {
+    it("names sign-in and registration fields through the English and Vietnamese catalogs", () => {
+        for (const messages of [enMessages, viMessages]) {
+            const localized = localizedDetails(messages)
+            const signIn = render(
+                <AuthenticationPanelDetails
+                    state="details"
+                    props={localized}
+                    formState={formState()}
+                    on={{ submitDetails: vi.fn() }}
+                />,
+            )
+            expect(screen.getByRole("textbox", { name: messages.authentication.emailLabel })).toBeInTheDocument()
+            expect(screen.getByRole("textbox", { name: messages.authentication.passwordLabel })).toBeInTheDocument()
+            expect(screen.getByRole("button", { name: messages.authentication.revealLabel })).toBeInTheDocument()
+            expect(screen.getByRole("button", { name: messages.authentication.signIn.submitLabel })).toBeInTheDocument()
+            expect(screen.getByRole("button", { name: messages.authentication.googleLabel })).toBeInTheDocument()
+            expect(screen.getByRole("button", { name: messages.authentication.githubLabel })).toBeInTheDocument()
+            expect(screen.getByRole("checkbox", { name: messages.authentication.rememberMeLabel })).toBeInTheDocument()
+            expect(screen.getByRole("button", { name: messages.authentication.forgotPasswordLabel })).toBeInTheDocument()
+            signIn.unmount()
+
+            const signUp = render(
+                <AuthenticationPanelDetails
+                    state="details"
+                    props={{
+                        ...localized,
+                        mode: "signUp",
+                        submitLabel: messages.authentication.signUp.submitLabel,
+                    }}
+                    formState={formState()}
+                    on={{ submitDetails: vi.fn() }}
+                />,
+            )
+            expect(screen.getByRole("textbox", { name: messages.authentication.nameLabel })).toBeInTheDocument()
+            expect(screen.getByRole("textbox", { name: messages.authentication.emailLabel })).toBeInTheDocument()
+            expect(screen.getByRole("textbox", { name: messages.authentication.passwordLabel })).toBeInTheDocument()
+            expect(
+                screen.getByRole("textbox", { name: messages.authentication.confirmPasswordLabel }),
+            ).toBeInTheDocument()
+            expect(screen.getAllByRole("button", { name: messages.authentication.revealLabel })).toHaveLength(2)
+            expect(screen.getByRole("button", { name: messages.authentication.signUp.submitLabel })).toBeInTheDocument()
+            signUp.unmount()
+        }
+    })
+
     it("draws sign-in details and the remember-me option", () => {
         const markup = renderDetails()
         expect(markup).toContain("Email")

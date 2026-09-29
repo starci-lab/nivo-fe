@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { render } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import type { ReactElement } from "react"
 import { SalesWorkbenchBlockBase } from "./component"
 import type { useSalesWorkbench } from "@/hooks"
@@ -32,6 +32,11 @@ const translate = (key: string, values?: Readonly<Record<string, string | number
     Object.entries(values ?? {}).reduce(
         (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
         messageFor(catalog, key),
+    )
+const translateVi = (key: string, values?: Readonly<Record<string, string | number | undefined>>): string =>
+    Object.entries(values ?? {}).reduce(
+        (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+        messageFor(vietnamese, key),
     )
 const formatter = {
     number: () => "",
@@ -290,6 +295,17 @@ const renderBlock = (input: SalesWorkbenchViewOverrides = {}) => {
 describe("SalesWorkbenchBlockBase", () => {
     it("keeps every Sales workbench copy key in both catalogues", () => {
         expect([...keyPaths(vietnamese)].sort()).toEqual([...keyPaths(catalog)].sort())
+    })
+
+    it("names the fact-kind and closure-outcome controls from both locale catalogues", () => {
+        const english = renderBlock()
+        expect(screen.getByRole("button", { name: messageFor(catalog, "ambiguity.fact") })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: messageFor(catalog, "closure.outcome") })).toBeInTheDocument()
+        english.unmount()
+
+        renderBlock({ t: translateVi, locale: "vi" })
+        expect(screen.getByRole("button", { name: messageFor(vietnamese, "ambiguity.fact") })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: messageFor(vietnamese, "closure.outcome") })).toBeInTheDocument()
     })
 
     it("shows the bounded command band, the attention rows and only the facts the reads disclosed", () => {

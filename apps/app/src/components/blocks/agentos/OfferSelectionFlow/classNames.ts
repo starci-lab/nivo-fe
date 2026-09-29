@@ -27,17 +27,8 @@ export const OFFER_ROW_CLASS_NAME = cn(
     "md:gap-3",
 )
 
-/** A selectable band keeps its pointer affordance and a visible focus ring inside the boundary. */
-export const SELECTABLE_OFFER_ROW_CLASS_NAME = cn(
-    OFFER_ROW_CLASS_NAME,
-    "cursor-pointer",
-    "focus-within:ring-2",
-    "focus-within:ring-inset",
-    "focus-within:ring-accent",
-)
-
 /** The owner-accepted selected treatment: one soft accent tint behind the whole band. */
-export const SELECTED_OFFER_ROW_CLASS_NAME = cn(SELECTABLE_OFFER_ROW_CLASS_NAME, "bg-accent-soft")
+export const SELECTED_OFFER_ROW_CLASS_NAME = cn(OFFER_ROW_CLASS_NAME, "bg-accent-soft")
 
 /**
  * The native radio stays the real control; the family accent marks it without hiding semantics.

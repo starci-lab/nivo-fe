@@ -1,5 +1,5 @@
-import { useRef } from "react"
-import { SurfaceCard, Button, Button as CoreButton, Text } from "@starci/grammar/common"
+import { useState } from "react"
+import { Button, FileDropzone, SurfaceCard, Text } from "@starci/grammar/common"
 import { LifecycleStep, type LifecycleStepData } from "@nivo/ui"
 import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
 
@@ -58,7 +58,7 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProp
     const { state } = props
     const { studio, pending, labels }: AgentOSModuleAttachmentsData = props.props
     const { onChoose, onRetry, onRemove, chunks }: AgentOSModuleAttachmentsActions = props.on
-    const fileInput = useRef<HTMLInputElement>(null)
+    const [filePickerRevision, setFilePickerRevision] = useState(0)
     if (state === "refused")
         return (
             <SurfaceCard label={labels.title}>
@@ -131,14 +131,14 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProp
                                     </Text>
                                 </div>
                                 {refused && labels.retry !== undefined && onRetry !== undefined ? (
-                                    <CoreButton
+                                    <Button
                                         variant="secondary"
                                         size="sm"
                                         isDisabled={pending}
                                         onPress={() => onRetry(file.id)}
                                     >
                                         {labels.retry}
-                                    </CoreButton>
+                                    </Button>
                                 ) : (
                                     <Button
                                         variant="ghost"
@@ -161,22 +161,20 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProp
                 })}
 
                 <>
-                    <input
-                        ref={fileInput}
-                        type="file"
+                    <FileDropzone
+                        key={filePickerRevision}
                         accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown"
-                        hidden
-                        disabled={pending}
-                        onChange={(event) => {
-                            const file = event.currentTarget.files?.[0]
+                        label={labels.upload}
+                        isLabelHidden
+                        prompt={labels.upload}
+                        hideFileList
+                        isDisabled={pending}
+                        onFilesChange={(files) => {
+                            const file = files[0]
                             if (file !== undefined) onChoose(file)
-                            event.currentTarget.value = ""
+                            setFilePickerRevision((revision) => revision + 1)
                         }}
                     />
-
-                    <CoreButton variant="secondary" isPending={pending} onPress={() => fileInput.current?.click()}>
-                        {labels.upload}
-                    </CoreButton>
                 </>
             </div>
         </SurfaceCard>
