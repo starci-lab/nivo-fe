@@ -2,7 +2,8 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { pageMetadata } from "@/features/layouts/SiteShell"
-import { IDEA_SLUGS, IdeaDetailPage, getIdeaBySlug } from "@/features/pages/explore"
+import ExploreIdeaPage from "@/features/pages/ExploreIdeaPage"
+import { IDEA_SLUGS, getIdeaBySlug } from "@/modules/landing/ideas"
 
 type IdeaDetailRouteProps = {
     readonly params: Promise<{ readonly locale: string; readonly slug: string }>
@@ -39,7 +40,7 @@ const Page = async ({ params }: IdeaDetailRouteProps) => {
     const { slug } = await params
     const idea = getIdeaBySlug(slug)
     if (idea === undefined) notFound()
-    return <IdeaDetailPage idea={idea} />
+    return <ExploreIdeaPage idea={idea} />
 }
 
 export default Page

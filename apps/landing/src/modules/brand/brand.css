@@ -80,6 +80,72 @@
     --landing-inverse: #071224;
     --landing-inverse-muted: #aebacf;
     --landing-inverse-line: rgb(174 186 207 / 22%);
+
+    /* Explore page roles: colors and gradients stay in this light/dark brand layer. */
+    --landing-explore-hero-background:
+        radial-gradient(circle at 76% 8%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 29rem),
+        radial-gradient(circle at 12% 86%, color-mix(in srgb, var(--accent) 3%, var(--surface)), transparent 26rem),
+        linear-gradient(128deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 98%, var(--accent)) 54%, color-mix(in srgb, var(--surface) 91%, var(--accent)) 100%);
+    --landing-explore-article-background:
+        radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 28rem),
+        linear-gradient(130deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 98%, var(--accent)) 58%, color-mix(in srgb, var(--surface) 92%, var(--accent)) 100%);
+    --landing-explore-soft-background:
+        radial-gradient(circle at 90% 15%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 28rem),
+        linear-gradient(color-mix(in srgb, var(--surface) 96%, var(--accent)), color-mix(in srgb, var(--surface) 96%, var(--accent)));
+    --landing-explore-dark-background:
+        radial-gradient(circle at 90% 10%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 28rem),
+        linear-gradient(var(--landing-inverse), var(--landing-inverse));
+    --landing-explore-burgundy-background:
+        radial-gradient(circle at 15% 15%, rgb(255 255 255 / 9%), transparent 24rem),
+        linear-gradient(145deg, #4c0519, var(--landing-accent-ink) 58%, #9f1239);
+    --landing-explore-panel-background: color-mix(in srgb, var(--surface) 66%, transparent);
+    --landing-explore-panel-shadow: 0 2.5rem 6rem color-mix(in srgb, var(--accent) 13%, transparent);
+    --landing-explore-panel-edge:
+        linear-gradient(145deg, color-mix(in srgb, var(--surface) 90%, transparent), color-mix(in srgb, var(--accent) 20%, transparent));
+    --landing-explore-panel-halo: color-mix(in srgb, var(--accent) 14%, transparent);
+    --landing-explore-thesis-shadow: 0 1.5rem 3rem color-mix(in srgb, var(--accent) 6%, transparent);
+    --landing-explore-pulse-ring: color-mix(in srgb, var(--accent) 10%, transparent);
+    --landing-explore-model-background: color-mix(in srgb, var(--surface) 88%, transparent);
+    --landing-explore-model-border: color-mix(in srgb, var(--accent) 9%, transparent);
+    --landing-explore-model-shadow: 0 0.8rem 2rem color-mix(in srgb, var(--accent) 6%, transparent);
+    --landing-explore-icon-background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+    --landing-explore-action-shadow: 0 0.8rem 1.6rem color-mix(in srgb, var(--accent) 8%, transparent);
+    --landing-explore-flow-background: color-mix(in srgb, var(--surface) 76%, transparent);
+    --landing-explore-card-shadow: 0 1.2rem 3rem color-mix(in srgb, var(--accent) 7%, transparent);
+    --landing-explore-card-hover-shadow: 0 1.6rem 3.4rem color-mix(in srgb, var(--accent) 11%, transparent);
+    --landing-explore-card-decoration: color-mix(in srgb, var(--accent) 5%, transparent);
+    --landing-explore-future-background:
+        linear-gradient(145deg, var(--surface), color-mix(in srgb, var(--surface) 92%, var(--accent)));
+    --landing-explore-notice-background:
+        linear-gradient(115deg, var(--surface), color-mix(in srgb, var(--surface) 90%, var(--accent)));
+    --landing-explore-featured-background:
+        radial-gradient(circle at 86% 15%, color-mix(in srgb, var(--accent) 31%, transparent), transparent 13rem),
+        linear-gradient(145deg, var(--surface), color-mix(in srgb, var(--surface) 91%, var(--accent)));
+    --landing-explore-thesis-background: color-mix(in srgb, var(--surface) 76%, transparent);
+    --landing-explore-signature-background: color-mix(in srgb, white 10%, transparent);
+    --landing-explore-signature-icon-background: color-mix(in srgb, white 14%, transparent);
+    --landing-explore-orbit: color-mix(in srgb, var(--accent) 10%, transparent);
+    --landing-explore-orbit-shadow:
+        0 0 0 5rem color-mix(in srgb, var(--accent) 2.5%, transparent),
+        0 0 0 10rem color-mix(in srgb, var(--accent) 1.5%, transparent);
+    --landing-explore-dots:
+        radial-gradient(circle, color-mix(in srgb, var(--accent) 10%, transparent) 0 1px, transparent 1.5px);
+    --landing-explore-dot-mask: radial-gradient(circle, black, transparent 68%);
+    --landing-explore-model-icon-shadow: 0 0 0 0.35rem color-mix(in srgb, var(--accent) 10%, transparent);
+    --landing-explore-quote-mark: color-mix(in srgb, var(--accent) 12%, transparent);
+    --landing-explore-featured-orbit: color-mix(in srgb, var(--accent) 20%, transparent);
+    --landing-explore-featured-shadow:
+        inset 0 0 0 2rem color-mix(in srgb, white 30%, transparent),
+        0 0 0 1.2rem color-mix(in srgb, var(--accent) 4%, transparent);
+    --landing-explore-article-orbit: color-mix(in srgb, var(--accent) 16%, transparent);
+    --landing-explore-article-shadow:
+        0 0 0 3rem color-mix(in srgb, var(--accent) 4%, transparent),
+        0 0 0 6rem color-mix(in srgb, var(--accent) 2%, transparent);
+    --landing-explore-article-line: color-mix(in srgb, var(--accent) 20%, transparent);
+    --landing-explore-article-index-background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+    --landing-explore-inverse-foreground: oklch(100% 0 0);
+    --landing-explore-inverse-muted: #e2e8f0;
+    --landing-explore-sequence: #fecdd3;
 }
 
 .dark {
@@ -119,6 +185,68 @@
     --field-placeholder: oklch(70.5% 0.003 354.13);
 
     --surface-shadow: 0 0 0 0 transparent inset;
+
+    /* The same semantic roles follow the dark palette instead of retaining light-only paint. */
+    --landing-explore-hero-background:
+        radial-gradient(circle at 76% 8%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 29rem),
+        radial-gradient(circle at 12% 86%, color-mix(in srgb, var(--accent) 4%, var(--background)), transparent 26rem),
+        linear-gradient(128deg, var(--background) 0%, color-mix(in srgb, var(--background) 96%, var(--accent)) 54%, color-mix(in srgb, var(--background) 90%, var(--accent)) 100%);
+    --landing-explore-article-background:
+        radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 28rem),
+        linear-gradient(130deg, var(--background) 0%, color-mix(in srgb, var(--background) 96%, var(--accent)) 58%, color-mix(in srgb, var(--background) 90%, var(--accent)) 100%);
+    --landing-explore-soft-background:
+        radial-gradient(circle at 90% 15%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 28rem),
+        linear-gradient(color-mix(in srgb, var(--surface) 92%, var(--accent)), color-mix(in srgb, var(--surface) 92%, var(--accent)));
+    --landing-explore-panel-background: color-mix(in srgb, var(--surface) 84%, transparent);
+    --landing-explore-panel-shadow: 0 2.5rem 6rem color-mix(in srgb, black 32%, transparent);
+    --landing-explore-burgundy-background:
+        radial-gradient(circle at 15% 15%, rgb(255 255 255 / 9%), transparent 24rem),
+        linear-gradient(145deg, #4c0519, #7f1d36 58%, #9f1239);
+    --landing-explore-thesis-shadow: 0 1.5rem 3rem color-mix(in srgb, black 22%, transparent);
+    --landing-explore-panel-edge:
+        linear-gradient(145deg, color-mix(in srgb, var(--surface) 90%, transparent), color-mix(in srgb, var(--accent) 24%, transparent));
+    --landing-explore-panel-halo: color-mix(in srgb, var(--accent) 22%, transparent);
+    --landing-explore-pulse-ring: color-mix(in srgb, var(--accent) 18%, transparent);
+    --landing-explore-model-background: color-mix(in srgb, var(--surface) 96%, transparent);
+    --landing-explore-model-border: color-mix(in srgb, var(--accent) 20%, transparent);
+    --landing-explore-model-shadow: 0 0.8rem 2rem color-mix(in srgb, black 28%, transparent);
+    --landing-explore-icon-background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+    --landing-explore-flow-background: color-mix(in srgb, var(--surface) 90%, transparent);
+    --landing-explore-card-shadow: 0 1.2rem 3rem color-mix(in srgb, black 32%, transparent);
+    --landing-explore-card-hover-shadow: 0 1.6rem 3.4rem color-mix(in srgb, black 40%, transparent);
+    --landing-explore-card-decoration: color-mix(in srgb, var(--accent) 14%, transparent);
+    --landing-explore-future-background:
+        linear-gradient(145deg, var(--surface), color-mix(in srgb, var(--surface) 84%, var(--accent)));
+    --landing-explore-notice-background:
+        linear-gradient(115deg, var(--surface), color-mix(in srgb, var(--surface) 82%, var(--accent)));
+    --landing-explore-featured-background:
+        radial-gradient(circle at 86% 15%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 13rem),
+        linear-gradient(145deg, var(--surface), color-mix(in srgb, var(--surface) 84%, var(--accent)));
+    --landing-explore-thesis-background: color-mix(in srgb, var(--surface) 84%, transparent);
+    --landing-explore-signature-background: color-mix(in srgb, white 10%, transparent);
+    --landing-explore-signature-icon-background: color-mix(in srgb, white 14%, transparent);
+    --landing-explore-orbit: color-mix(in srgb, var(--accent) 20%, transparent);
+    --landing-explore-orbit-shadow:
+        0 0 0 5rem color-mix(in srgb, var(--accent) 6%, transparent),
+        0 0 0 10rem color-mix(in srgb, var(--accent) 3%, transparent);
+    --landing-explore-dots:
+        radial-gradient(circle, color-mix(in srgb, var(--accent) 18%, transparent) 0 1px, transparent 1.5px);
+    --landing-explore-dot-mask: radial-gradient(circle, black, transparent 68%);
+    --landing-explore-model-icon-shadow: 0 0 0 0.35rem color-mix(in srgb, var(--accent) 18%, transparent);
+    --landing-explore-quote-mark: color-mix(in srgb, var(--accent) 28%, transparent);
+    --landing-explore-featured-orbit: color-mix(in srgb, var(--accent) 30%, transparent);
+    --landing-explore-featured-shadow:
+        inset 0 0 0 2rem color-mix(in srgb, white 8%, transparent),
+        0 0 0 1.2rem color-mix(in srgb, var(--accent) 12%, transparent);
+    --landing-explore-article-orbit: color-mix(in srgb, var(--accent) 24%, transparent);
+    --landing-explore-article-shadow:
+        0 0 0 3rem color-mix(in srgb, var(--accent) 8%, transparent),
+        0 0 0 6rem color-mix(in srgb, var(--accent) 4%, transparent);
+    --landing-explore-article-line: color-mix(in srgb, var(--accent) 32%, transparent);
+    --landing-explore-article-index-background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+    --landing-explore-inverse-foreground: oklch(99% 0 0);
+    --landing-explore-inverse-muted: oklch(88% 0.01 255);
+    --landing-explore-sequence: oklch(88% 0.055 15);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -159,5 +287,66 @@
         --field-placeholder: oklch(70.5% 0.003 354.13);
 
         --surface-shadow: 0 0 0 0 transparent inset;
+
+        --landing-explore-hero-background:
+            radial-gradient(circle at 76% 8%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 29rem),
+            radial-gradient(circle at 12% 86%, color-mix(in srgb, var(--accent) 4%, var(--background)), transparent 26rem),
+            linear-gradient(128deg, var(--background) 0%, color-mix(in srgb, var(--background) 96%, var(--accent)) 54%, color-mix(in srgb, var(--background) 90%, var(--accent)) 100%);
+        --landing-explore-article-background:
+            radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 28rem),
+            linear-gradient(130deg, var(--background) 0%, color-mix(in srgb, var(--background) 96%, var(--accent)) 58%, color-mix(in srgb, var(--background) 90%, var(--accent)) 100%);
+        --landing-explore-soft-background:
+            radial-gradient(circle at 90% 15%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 28rem),
+            linear-gradient(color-mix(in srgb, var(--surface) 92%, var(--accent)), color-mix(in srgb, var(--surface) 92%, var(--accent)));
+        --landing-explore-panel-background: color-mix(in srgb, var(--surface) 84%, transparent);
+        --landing-explore-panel-shadow: 0 2.5rem 6rem color-mix(in srgb, black 32%, transparent);
+        --landing-explore-burgundy-background:
+            radial-gradient(circle at 15% 15%, rgb(255 255 255 / 9%), transparent 24rem),
+            linear-gradient(145deg, #4c0519, #7f1d36 58%, #9f1239);
+        --landing-explore-thesis-shadow: 0 1.5rem 3rem color-mix(in srgb, black 22%, transparent);
+        --landing-explore-panel-edge:
+            linear-gradient(145deg, color-mix(in srgb, var(--surface) 90%, transparent), color-mix(in srgb, var(--accent) 24%, transparent));
+        --landing-explore-panel-halo: color-mix(in srgb, var(--accent) 22%, transparent);
+        --landing-explore-pulse-ring: color-mix(in srgb, var(--accent) 18%, transparent);
+        --landing-explore-model-background: color-mix(in srgb, var(--surface) 96%, transparent);
+        --landing-explore-model-border: color-mix(in srgb, var(--accent) 20%, transparent);
+        --landing-explore-model-shadow: 0 0.8rem 2rem color-mix(in srgb, black 28%, transparent);
+        --landing-explore-icon-background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+        --landing-explore-flow-background: color-mix(in srgb, var(--surface) 90%, transparent);
+        --landing-explore-card-shadow: 0 1.2rem 3rem color-mix(in srgb, black 32%, transparent);
+        --landing-explore-card-hover-shadow: 0 1.6rem 3.4rem color-mix(in srgb, black 40%, transparent);
+        --landing-explore-card-decoration: color-mix(in srgb, var(--accent) 14%, transparent);
+        --landing-explore-future-background:
+            linear-gradient(145deg, var(--surface), color-mix(in srgb, var(--surface) 84%, var(--accent)));
+        --landing-explore-notice-background:
+            linear-gradient(115deg, var(--surface), color-mix(in srgb, var(--surface) 82%, var(--accent)));
+        --landing-explore-featured-background:
+            radial-gradient(circle at 86% 15%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 13rem),
+            linear-gradient(145deg, var(--surface), color-mix(in srgb, var(--surface) 84%, var(--accent)));
+        --landing-explore-thesis-background: color-mix(in srgb, var(--surface) 84%, transparent);
+        --landing-explore-signature-background: color-mix(in srgb, white 10%, transparent);
+        --landing-explore-signature-icon-background: color-mix(in srgb, white 14%, transparent);
+        --landing-explore-orbit: color-mix(in srgb, var(--accent) 20%, transparent);
+        --landing-explore-orbit-shadow:
+            0 0 0 5rem color-mix(in srgb, var(--accent) 6%, transparent),
+            0 0 0 10rem color-mix(in srgb, var(--accent) 3%, transparent);
+        --landing-explore-dots:
+            radial-gradient(circle, color-mix(in srgb, var(--accent) 18%, transparent) 0 1px, transparent 1.5px);
+        --landing-explore-dot-mask: radial-gradient(circle, black, transparent 68%);
+        --landing-explore-model-icon-shadow: 0 0 0 0.35rem color-mix(in srgb, var(--accent) 18%, transparent);
+        --landing-explore-quote-mark: color-mix(in srgb, var(--accent) 28%, transparent);
+        --landing-explore-featured-orbit: color-mix(in srgb, var(--accent) 30%, transparent);
+        --landing-explore-featured-shadow:
+            inset 0 0 0 2rem color-mix(in srgb, white 8%, transparent),
+            0 0 0 1.2rem color-mix(in srgb, var(--accent) 12%, transparent);
+        --landing-explore-article-orbit: color-mix(in srgb, var(--accent) 24%, transparent);
+        --landing-explore-article-shadow:
+            0 0 0 3rem color-mix(in srgb, var(--accent) 8%, transparent),
+            0 0 0 6rem color-mix(in srgb, var(--accent) 4%, transparent);
+        --landing-explore-article-line: color-mix(in srgb, var(--accent) 32%, transparent);
+        --landing-explore-article-index-background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+        --landing-explore-inverse-foreground: oklch(99% 0 0);
+        --landing-explore-inverse-muted: oklch(88% 0.01 255);
+        --landing-explore-sequence: oklch(88% 0.055 15);
     }
 }

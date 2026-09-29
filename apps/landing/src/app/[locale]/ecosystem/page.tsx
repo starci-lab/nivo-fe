@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { pageMetadata, type LocaleParams } from "@/features/layouts/SiteShell"
-import { EcosystemPage } from "@/features/pages/explore"
+import EcosystemPage from "@/features/pages/EcosystemPage"
 
 /** Search and sharing metadata for the canonical Ecosystem route, in the routed language. */
 export const generateMetadata = ({ params }: LocaleParams): Promise<Metadata> =>
