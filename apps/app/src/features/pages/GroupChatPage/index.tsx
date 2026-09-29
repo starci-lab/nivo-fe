@@ -1,6 +1,6 @@
 "use client"
 
-import { useLocale, useTranslations } from "next-intl"
+import { useFormatter, useTranslations } from "next-intl"
 import { useCallback, useMemo } from "react"
 import {
     useCompactMemberView,
@@ -10,6 +10,7 @@ import {
     useGroupChatTasks,
 } from "@/hooks"
 import { nivoAnswerDenied } from "../../../modules/query"
+import { overview } from "../../../modules/routes"
 import { buildGroupChatLabels } from "../../../modules/collab/group-chat/labels"
 import {
     buildConversationItems,
@@ -32,7 +33,7 @@ export type GroupChatPageProps = Record<string, never>
 export const GroupChatPage = (props: GroupChatPageProps) => {
     void props
     const t = useTranslations("console.groupChat")
-    const locale = useLocale()
+    const format = useFormatter()
 
     const route = useGroupChatTab()
     const office = useGroupChatOffice({
@@ -97,9 +98,9 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
             if (Number.isNaN(at.getTime())) {
                 return iso
             }
-            return new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(at)
+            return format.dateTime(at, { hour: "2-digit", minute: "2-digit" })
         },
-        [locale],
+        [format],
     )
 
     const labels: GroupChatPageLabels = useMemo(() => buildGroupChatLabels(t, formatTime), [t, formatTime])
@@ -145,7 +146,7 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
                 changeTasksFilter: tasks.changeTasksFilter,
                 openNotice: office.openNotice,
                 openTaskCard: tasks.openTaskCard,
-                leaveOffice: () => route.router.push("/overview"),
+                leaveOffice: () => route.router.push(overview()),
             }}
         />
     )
