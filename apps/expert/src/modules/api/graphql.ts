@@ -110,7 +110,7 @@ export const graphql = async <T>(
     if (body.errors?.length) {
         return {
             ok: false,
-            reason: body.errors[0]!.message,
+            reason: body.errors[0]?.message ?? "request failed",
         }
     }
     // One operation per call, so the envelope is whatever single key came back. Read positionally
