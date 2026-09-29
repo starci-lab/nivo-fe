@@ -1,5 +1,5 @@
 import { NivoIcon } from "@nivo/ui"
-import { Badge, Button, Heading, PageContainer } from "@starci/grammar/common"
+import { Badge, Button, Heading, PageContainer, TextAction } from "@starci/grammar/common"
 import { useTranslations } from "next-intl"
 import { SiteMain } from "@/features/layouts/SiteShell"
 import { useLocalizedHref } from "@/hooks"
@@ -281,10 +281,14 @@ export const CompanyPage = () => {
                             </div>
                             <nav className={CLASS_NAMES.ctaLinks} aria-label={t("next.label")}>
                                 {NEXT_LINKS.map((link) => (
-                                    <a href={href(link.href)} className={CLASS_NAMES.ctaLink} key={link.id}>
+                                    <TextAction
+                                        href={href(link.href)}
+                                        appearance="route"
+                                        endContent={<ArrowIcon />}
+                                        key={link.id}
+                                    >
                                         {t(`next.links.${link.id}`)}
-                                        <ArrowIcon />
-                                    </a>
+                                    </TextAction>
                                 ))}
                             </nav>
                         </PageContainer>

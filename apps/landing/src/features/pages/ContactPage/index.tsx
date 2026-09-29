@@ -1,5 +1,5 @@
 import { NivoIcon } from "@nivo/ui"
-import { Badge, Button, Heading, PageContainer } from "@starci/grammar/common"
+import { Badge, Button, Heading, PageContainer, TextAction } from "@starci/grammar/common"
 import { useTranslations } from "next-intl"
 import { SiteMain } from "@/features/layouts/SiteShell"
 import { useLocalizedHref } from "@/hooks"
@@ -208,20 +208,26 @@ export const ContactPage = (props: ContactPageProps) => {
                                 <span className={`${CLASS_NAMES.eyebrow} ${CLASS_NAMES.eyebrowInverse}`}>
                                     {t("direct.eyebrow")}
                                 </span>
-                                    <Heading level={2}><span id="direct-title" className={CLASS_NAMES.inverseHeadingText}>{t("direct.title")}</span></Heading>
-                                    <p className={CLASS_NAMES.sectionCopyInverse}>
-                                        {t("direct.description")}
-                                    </p>
+                                <Heading level={2}>
+                                    <span id="direct-title" className={CLASS_NAMES.inverseHeadingText}>
+                                        {t("direct.title")}
+                                    </span>
+                                </Heading>
+                                <p className={CLASS_NAMES.sectionCopyInverse}>{t("direct.description")}</p>
                             </div>
                             <nav className={CLASS_NAMES.directLinks} aria-label={t("direct.label")}>
                                 {DIRECT_PATHS.map((path, index) => (
-                                    <a href={href(PATH_HREFS[path])} className={CLASS_NAMES.directLink} key={path}>
+                                    <TextAction
+                                        href={href(PATH_HREFS[path])}
+                                        appearance="route"
+                                        endContent={<ArrowIcon />}
+                                        key={path}
+                                    >
                                         <span className={CLASS_NAMES.directLinkContent}>
                                             <small>{String(index + 1).padStart(2, "0")}</small>
                                             {t(`paths.${path}`)}
                                         </span>
-                                        <ArrowIcon />
-                                    </a>
+                                    </TextAction>
                                 ))}
                             </nav>
                         </PageContainer>

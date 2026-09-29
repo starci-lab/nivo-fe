@@ -47,8 +47,6 @@ export const CLASS_NAMES = {
     directGrid:
         "grid grid-cols-[minmax(0,0.8fr)_minmax(24rem,1.2fr)] gap-[clamp(3rem,8vw,8rem)] [@media(max-width:64rem)]:grid-cols-[minmax(0,1fr)]",
     directLinks:
-        "grid grid-cols-2 content-start border-t border-[var(--landing-commercial-inverse-grid-rule)] [&_a]:min-h-[4.5rem] [&_a]:justify-between [&_a]:border-b [&_a]:border-[var(--landing-commercial-inverse-grid-rule)] [&_a]:p-4 [&_a]:text-[var(--landing-commercial-white)] [&_a:nth-child(odd)]:border-r [&_small]:mr-3 [&_small]:text-[var(--landing-accent-bright)] [&_small]:text-[0.65rem] [@media(max-width:48rem)]:grid-cols-1 [@media(max-width:48rem)]:[&_a:nth-child(odd)]:border-r-0",
-    directLink:
-        "flex min-h-[4.5rem] items-center justify-between gap-3 border-b border-[var(--landing-commercial-inverse-grid-rule)] p-4 text-[var(--landing-commercial-white)]",
+        "grid grid-cols-2 [--muted:var(--landing-commercial-white)] [--starci-core-muted:var(--landing-commercial-white)] content-start border-t border-[var(--landing-commercial-inverse-grid-rule)] [&_a]:min-h-[4.5rem] [&_a]:justify-between [&_a]:border-b [&_a]:border-[var(--landing-commercial-inverse-grid-rule)] [&_a]:p-4 [&_a]:text-[var(--landing-commercial-white)] [&_a:nth-child(odd)]:border-r [&_small]:mr-3 [&_small]:text-[var(--landing-accent-bright)] [&_small]:text-[0.65rem] [@media(max-width:48rem)]:grid-cols-1 [@media(max-width:48rem)]:[&_a:nth-child(odd)]:border-r-0",
     directLinkContent: "flex items-center",
 } as const

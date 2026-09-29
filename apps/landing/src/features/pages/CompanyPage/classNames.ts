@@ -71,5 +71,4 @@ export const CLASS_NAMES = {
         "grid grid-cols-[minmax(0,1fr)_minmax(20rem,0.7fr)] items-end gap-16 [&>div]:grid [&>div]:gap-4 [&_h2]:text-[clamp(2.3rem,5vw,4.5rem)] [&_h2]:font-[620] [&_h2]:tracking-[-0.05em] [&_h2]:leading-[1.02] [@media(max-width:64rem)]:grid-cols-[minmax(0,1fr)] [@media(max-width:48rem)]:[&_h2]:text-[clamp(2.15rem,10vw,3.35rem)]",
     ctaLinks:
         "grid border-t border-[var(--landing-commercial-line)] [&_a]:justify-between [&_a]:border-b [&_a]:border-[var(--landing-commercial-line)] [&_a]:py-4",
-    ctaLink: "flex items-center justify-between gap-3 border-b border-[var(--landing-commercial-line)] py-4",
 } as const
