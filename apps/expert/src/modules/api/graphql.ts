@@ -8,14 +8,12 @@
  * session and mutations that invalidate each other, that is the moment to reconsider; the two
  * functions here are small enough to throw away then.
  *
- * WHERE THE PORT COMES FROM. `NEXT_PUBLIC_ACADEMY_API_URL`, defaulting to the port
- * `metadata.json` in nivo-backend projects for this app (`ports.expertApi`, academy slot = 4068).
- * The default is written out rather than derived because this repository has no copy of that
- * registry, and a wrong guess should be visible in one place instead of implied.
+ * WHERE THE ADDRESS COMES FROM. `modules/config` reads `NEXT_PUBLIC_ACADEMY_API_URL` once; only a
+ * development build defaults to the port `metadata.json` in nivo-backend projects gives this app
+ * (`ports.expertApi`, academy slot = 4068), and a production build without it stops.
  */
 
-/** Where the academy API answers. */
-const ENDPOINT = process.env.NEXT_PUBLIC_ACADEMY_API_URL ?? "http://localhost:4068/graphql";
+import { ACADEMY_API_URL } from "@/modules/config";
 
 /**
  * Every response this API sends, whatever the operation.
@@ -66,7 +64,7 @@ export interface FetchInit extends RequestInit {
 export const graphql = async <T,>(query: string, variables?: Record<string, unknown>, init?: FetchInit): Promise<Result<T>> => {
   let response: Response;
   try {
-    response = await fetch(ENDPOINT, {
+    response = await fetch(ACADEMY_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

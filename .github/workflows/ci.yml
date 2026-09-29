@@ -43,7 +43,12 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      # A production build refuses to guess where the APIs are, so the build names them. Nothing is
+      # sent to these addresses at build time.
       - name: Build
+        env:
+          NEXT_PUBLIC_CORE_API_URL: http://localhost:3068/graphql
+          NEXT_PUBLIC_ACADEMY_API_URL: http://localhost:4068/graphql
         run: npm run build
 
       # ONE run, ONE `coverage/lcov.info`, read by both providers below.

@@ -25,4 +25,7 @@ jobs:
         run: npm ci
 
       - name: Built application HTTP E2E
+        env:
+          NEXT_PUBLIC_CORE_API_URL: http://localhost:3068/graphql
+          NEXT_PUBLIC_ACADEMY_API_URL: http://localhost:4068/graphql
         run: npm run test:e2e
