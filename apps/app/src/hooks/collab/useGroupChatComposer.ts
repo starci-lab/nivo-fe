@@ -6,8 +6,8 @@ import {
     useCollabOfficeTransport,
     useMutateCollabPostMessageSwr,
 } from "@/hooks"
-import { parseAddressedModule } from "@/modules/collab/group-chat/model"
-import type { GroupChatPageView } from "@/modules/collab/group-chat/types"
+import { parseAddressedModule } from "../../modules/collab/group-chat/model"
+import type { GroupChatPageView } from "../../modules/collab/group-chat/types"
 import { newIntentId } from "./collab.shared"
 import type { GroupChatAnswering } from "./useGroupChatTasks"
 

@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it } from "vitest"
-import { matchMediaFixture } from "@/test-support/mock-result"
+import { matchMediaFixture } from "../../test-support/mock-result"
 import { useCompactMemberView } from "./useCompactMemberView"
 
 const world = { compact: true }

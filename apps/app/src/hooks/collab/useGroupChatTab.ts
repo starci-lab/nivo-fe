@@ -9,8 +9,9 @@ import {
     useRouter,
     useSession,
 } from "@/hooks"
-import { parseRoleHint, type GroupChatTab } from "@/modules/collab/group-chat/model"
-import type { GroupChatPageView } from "@/modules/collab/group-chat/types"
+import type { AgentWorkspaceRow } from "../../modules/api/agentos-workspaces"
+import { parseRoleHint, type GroupChatTab } from "../../modules/collab/group-chat/model"
+import type { GroupChatPageView } from "../../modules/collab/group-chat/types"
 
 /**
  * The route and session inputs the connected GroupChat page reads, plus the
@@ -43,7 +44,7 @@ export const useGroupChatTab = () => {
     const workspaceId = workspaceParam ?? ownedWorkspaceId
     const workspaceListed =
         workspaces.data?.ok === true
-            ? (workspaces.data.data.find((workspace) => workspace.id === workspaceId)?.name ?? null)
+            ? (workspaces.data.data.find((workspace: AgentWorkspaceRow) => workspace.id === workspaceId)?.name ?? null)
             : null
 
     const selectTab = useCallback(

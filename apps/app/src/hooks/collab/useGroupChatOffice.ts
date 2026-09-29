@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import type { CollabHumanRole } from "@/modules/api/collab"
+import type { CollabHumanRole, CollabTurnNoticeItem } from "../../modules/api/collab"
 import {
     useCollabLive,
     useMutateCollabInviteByEmailSwr,
@@ -10,9 +10,9 @@ import {
     useQueryCollabNoticesSwr,
     useQueryCollabOfficeSwr,
 } from "@/hooks"
-import { collabFallbackInterval } from "@/modules/collab"
-import type { GroupChatTab } from "@/modules/collab/group-chat/model"
-import type { GroupChatPageView } from "@/modules/collab/group-chat/types"
+import { collabFallbackInterval } from "../../modules/collab"
+import type { GroupChatTab } from "../../modules/collab/group-chat/model"
+import type { GroupChatPageView } from "../../modules/collab/group-chat/types"
 import { noticeTargetElementId, scrollToElement } from "./collab.shared"
 
 /** The route state the office reads and the notice follow are scoped and steered by. */
@@ -147,7 +147,9 @@ export const useGroupChatOffice = (scope: GroupChatOfficeScope) => {
     }, [pendingScroll])
 
     const outstandingNotices =
-        notices.data?.ok === true ? notices.data.data.notices.filter((item) => item.turn.state === "open") : []
+        notices.data?.ok === true
+            ? notices.data.data.notices.filter((item: CollabTurnNoticeItem) => item.turn.state === "open")
+            : []
 
     const invite: GroupChatPageView["invite"] = {
         email: inviteEmail,

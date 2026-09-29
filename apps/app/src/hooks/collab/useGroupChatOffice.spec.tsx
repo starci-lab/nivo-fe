@@ -1,5 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import type { CollabTurnNoticeItem } from "../../modules/api/collab"
 import { useGroupChatOffice, type GroupChatOfficeScope } from "./useGroupChatOffice"
 
 type Answer =
@@ -120,7 +121,7 @@ describe("useGroupChatOffice", () => {
             expect(mocks.notices).toHaveBeenLastCalledWith("ws-1", undefined, 0)
             expect(result.current.officeReady).toBe(true)
             expect(result.current.officeView?.viewer).toEqual({ memberId: "mem-an", role: "owner" })
-            expect(result.current.outstandingNotices.map((item) => item.notice.noticeId)).toEqual(["n-open"])
+            expect(result.current.outstandingNotices.map((item: CollabTurnNoticeItem) => item.notice.noticeId)).toEqual(["n-open"])
         })
 
         it("withholds every Office read while an invitation is open", () => {

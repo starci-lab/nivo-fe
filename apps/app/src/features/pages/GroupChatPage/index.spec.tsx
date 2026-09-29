@@ -1,7 +1,7 @@
 import { cleanup, render } from "@testing-library/react"
-import { matchMediaFixture } from "@/test-support/mock-result"
+import { matchMediaFixture } from "../../../test-support/mock-result"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import type * as HooksModule from "@/hooks"
+import type * as HooksModule from "../../../hooks"
 import type * as ComponentModule from "./component"
 import type { GroupChatPageActions, GroupChatPageLabels, GroupChatPageView } from "./component"
 

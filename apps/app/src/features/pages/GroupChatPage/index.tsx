@@ -9,7 +9,7 @@ import {
     useGroupChatTab,
     useGroupChatTasks,
 } from "@/hooks"
-import { nivoAnswerDenied } from "@/modules/query"
+import { nivoAnswerDenied } from "../../../modules/query"
 import { buildGroupChatLabels } from "../../../modules/collab/group-chat/labels"
 import {
     buildConversationItems,
