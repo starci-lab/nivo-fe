@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import type { ContextDraft } from "../../../components/blocks/agentos/ContextVersionBlock"
 import type { ExecuteMessage, TrustedWidgetComponentProps } from "../../../components/blocks/agentos/ExecuteChatBlock"
 import type { ExecuteSession } from "../../../components/blocks/agentos/ExecuteSessionRailBlock"
+import type { AgentOSModuleView } from "../../../components/blocks/agentos/ModuleRouteShellBlock"
 import type { SetupMessage, SetupRevision } from "../../../components/blocks/agentos/PrivateSetupChatBlock"
 import type { AgentosModuleRuntime } from "../../api/agentos-module-runtime"
 import type { AgentosRuntimeValue } from "../../api/agentos-runtime-tree"
@@ -159,4 +160,42 @@ export type DiagnosticsSurfaceProps = {
     readonly compactPane: "signals" | "readiness" | "evidence"
     readonly onSelectSignal: (signal: "all" | "channel" | "ai") => void
     readonly onSelectPane: (pane: "signals" | "readiness" | "evidence") => void
+}
+
+/** Closed pure screen states produced by the connected Module Studio page. */
+export type AgentOSSolutionModuleScreen =
+    | {
+          readonly view: "setup"
+          readonly contentProps: SetupSurfaceProps
+      }
+    | {
+          readonly view: "test"
+          readonly contentProps: TestSurfaceProps
+      }
+    | {
+          readonly view: "test-unavailable"
+      }
+    | {
+          readonly view: "operate"
+          readonly contentProps: OperateSurfaceProps
+      }
+    | {
+          readonly view: "settings"
+          readonly contentProps: SettingsSurfaceProps
+      }
+    | {
+          readonly view: "diagnostics"
+          readonly contentProps: DiagnosticsSurfaceProps
+      }
+
+/** Shell data drawn alongside the selected module screen. */
+export type AgentOSSolutionModuleShellData = {
+    readonly workspaceLabel: string
+    readonly moduleName: string
+    readonly moduleKind: string
+    readonly lifecycleLabel: string
+    readonly contextVersion: string
+    readonly channelLabel: string
+    readonly controllerLabel: string
+    readonly activeView: AgentOSModuleView
 }

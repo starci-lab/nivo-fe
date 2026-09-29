@@ -7,12 +7,9 @@ import { OperateSurface } from "../../../components/blocks/agentos/OperateSurfac
 import { SettingsSurface } from "../../../components/blocks/agentos/SettingsSurface"
 import { DiagnosticsSurface } from "../../../components/blocks/agentos/DiagnosticsSurface"
 import type {
-    SetupSurfaceProps,
-    TestSurfaceProps,
-    OperateSurfaceProps,
-    SettingsSurfaceProps,
+    AgentOSSolutionModuleScreen,
+    AgentOSSolutionModuleShellData,
 } from "../../../modules/agentos/module-page/surface-types"
-import type { DiagnosticsSurfaceProps } from "../../../modules/agentos/module-page/surface-types"
 import type { ModulePageCopy } from "../../../modules/agentos/module-page-copy"
 
 export { exactTestSurfaceFor } from "../../../modules/agentos/module-page/exactTestSurfaceFor"
@@ -24,51 +21,15 @@ export type {
     ModulePageCopyProps,
     WithModulePageCopy,
 } from "../../../modules/agentos/module-page-copy"
+export type { AgentOSSolutionModuleScreen } from "../../../modules/agentos/module-page/surface-types"
 
 /** Complete screen contract accepted by the connected module route. */
 export type AgentOSSolutionModulePageProps = AgentOSSolutionModulePageViewProps
-
-type AgentOSSolutionModuleShellData = {
-    readonly workspaceLabel: string
-    readonly moduleName: string
-    readonly moduleKind: string
-    readonly lifecycleLabel: string
-    readonly contextVersion: string
-    readonly channelLabel: string
-    readonly controllerLabel: string
-    readonly activeView: AgentOSModuleView
-}
 
 type AgentOSSolutionModuleShellProps = AgentOSSolutionModuleShellData & {
     readonly onBackToModules: () => void
     readonly onNavigate: (view: AgentOSModuleView) => void
 }
-
-/** Closed pure screen states produced by the connected Module Studio page. */
-export type AgentOSSolutionModuleScreen =
-    | {
-          readonly view: "setup"
-          readonly contentProps: SetupSurfaceProps
-      }
-    | {
-          readonly view: "test"
-          readonly contentProps: TestSurfaceProps
-      }
-    | {
-          readonly view: "test-unavailable"
-      }
-    | {
-          readonly view: "operate"
-          readonly contentProps: OperateSurfaceProps
-      }
-    | {
-          readonly view: "settings"
-          readonly contentProps: SettingsSurfaceProps
-      }
-    | {
-          readonly view: "diagnostics"
-          readonly contentProps: DiagnosticsSurfaceProps
-      }
 
 /** Settled page state handed to the pure half for drawing. */
 export type AgentOSSolutionModulePageState = {
