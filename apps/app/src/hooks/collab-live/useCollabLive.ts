@@ -55,6 +55,10 @@ export type CollabLiveState = {
 
 const COLLAB_LIVE_HINT_KINDS: ReadonlySet<string> = new Set(["message", "card", "task", "membership", "notice"])
 
+/** Whether a hint's kind word is one of the closed change kinds the namespace may announce. */
+const isCollabLiveHintKind = (value: unknown): value is CollabLiveHintKind =>
+    typeof value === "string" && COLLAB_LIVE_HINT_KINDS.has(value)
+
 /**
  * Which cached collab domains of the workspace a hint kind can touch. A card and a
  * task each live in the conversation page and the task projections; a message is a
@@ -77,35 +81,38 @@ const collabWorkspaceKeys =
 const collabDomainKeys =
     (workspaceId: string, domains: ReadonlyArray<string>) =>
     (key: unknown): boolean =>
-        Array.isArray(key) && collabWorkspaceKeys(workspaceId)(key) && domains.includes(key[3] as string)
+        Array.isArray(key) &&
+        collabWorkspaceKeys(workspaceId)(key) &&
+        typeof key[3] === "string" &&
+        domains.includes(key[3])
 
 /** Accept exactly the three hint fields; anything else is not a hint. */
 const readHint = (payload: unknown): CollabLiveHint | null => {
-    if (typeof payload !== "object" || payload === null) {
-        return null
-    }
-    const hint = payload as Record<string, unknown>
     if (
-        typeof hint.workspaceId !== "string" ||
-        typeof hint.kind !== "string" ||
-        !COLLAB_LIVE_HINT_KINDS.has(hint.kind)
+        typeof payload !== "object" ||
+        payload === null ||
+        !("workspaceId" in payload) ||
+        typeof payload.workspaceId !== "string" ||
+        !("kind" in payload) ||
+        !isCollabLiveHintKind(payload.kind)
     ) {
         return null
     }
+    const cursor = "cursor" in payload ? payload.cursor : null
     return {
-        workspaceId: hint.workspaceId,
-        kind: hint.kind as CollabLiveHintKind,
-        cursor: typeof hint.cursor === "string" ? hint.cursor : null,
+        workspaceId: payload.workspaceId,
+        kind: payload.kind,
+        cursor: typeof cursor === "string" ? cursor : null,
     }
 }
 
 /** The subscribe acknowledgement; a denial is non-disclosing by design. */
 const readSubscribeAck = (payload: unknown): { ok: true } | { ok: false; reason: string } => {
-    if (typeof payload === "object" && payload !== null && (payload as Record<string, unknown>).ok === true) {
+    if (typeof payload === "object" && payload !== null && "ok" in payload && payload.ok === true) {
         return { ok: true }
     }
     const reasonValue =
-        typeof payload === "object" && payload !== null ? (payload as Record<string, unknown>).reason : undefined
+        typeof payload === "object" && payload !== null && "reason" in payload ? payload.reason : undefined
     return { ok: false, reason: typeof reasonValue === "string" ? reasonValue : "unavailable" }
 }
 
