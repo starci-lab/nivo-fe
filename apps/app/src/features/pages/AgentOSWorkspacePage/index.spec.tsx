@@ -41,7 +41,6 @@ vi.mock("@/modules/api/agentos-workspaces", () => ({ myAgentWorkspace: vi.fn().m
 vi.mock("@/modules/api/agentos-modules", () => ({ myAgentosModuleInstallation: vi.fn().mockResolvedValue({ ok: false, reason: "unavailable" }), myAgentosSolutionModules: vi.fn().mockResolvedValue({ ok: true, data: [] }), myAgentosModuleInstallations: vi.fn().mockResolvedValue({ ok: true, data: [] }), installAgentosSolutionModule: vi.fn().mockResolvedValue({ ok: false, reason: "unavailable" }) }));
 vi.mock("@/modules/api/agentos-module-runtime", () => ({ myAgentosModuleRuntime: vi.fn().mockResolvedValue({ ok: false, reason: "unavailable" }), manageAgentosModuleRuntime: vi.fn().mockResolvedValue({ ok: false, reason: "unavailable" }) }));
 vi.mock("@/modules/api/agentos-module-tests", () => ({ myAgentosModuleTestSurface: vi.fn().mockResolvedValue({ ok: false, reason: "unavailable" }) }));
-vi.mock("@/modules/api/agentos-module-studio", () => ({ myAgentosCustomModules: vi.fn().mockResolvedValue({ ok: true, data: [] }) }));
 vi.mock("@/modules/api/academy", () => ({ myAcademyGrowthSnapshot: vi.fn().mockResolvedValue({ ok: true, data: { revenueVnd: 1000, paidOrders: 1, totalMembers: 2, activeMembers: 1, totalCompletions: 3 } }) }))
 
 import { AgentOSWorkspacePage } from "."

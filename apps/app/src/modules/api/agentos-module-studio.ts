@@ -82,16 +82,6 @@ const MODULE_STUDIO_FIELDS = `
     specification { id version status }
 `;
 
-/** Read custom drafts and active custom modules belonging to one exact workspace. */
-export const myAgentosCustomModules = (agentWorkspaceId: string): Promise<Outcome<ReadonlyArray<AgentosCustomModule>>> => graphql(`query MyAgentosCustomModules($request: MyAgentosCustomModulesRequest!) {
-            myAgentosCustomModules(request: $request) {
-                data { id agentWorkspaceId name status progress missingFields currentQuestion specificationVersion installationId failureCode }
-                message success error
-            }
-        }`, {
-  request: { agentWorkspaceId }
-});
-
 /** Resume the durable module studio for one owner-scoped module. */
 export const myAgentosCustomModuleStudio = (agentWorkspaceId: string, moduleId: string): Promise<Outcome<AgentosModuleStudio>> => graphql(`query MyAgentosCustomModuleStudio($request: MyAgentosCustomModuleStudioRequest!) {
             myAgentosCustomModuleStudio(request: $request) {

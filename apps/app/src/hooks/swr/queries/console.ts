@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { catalogItems, myCatalogOrders, myDomains, myInvoices, myWallet, myWalletTransactions, type CatalogCategory } from "@/modules/api/commerce";
 import { myAcademyGrowthSnapshot, myAcademyIntegrations, myAcademyStudentDetail, myAcademyStudents, myExpertSiteLeads } from "@/modules/api/academy";
 import { myAgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge";
-import { myAgentosCustomModuleStudio, myAgentosCustomModules } from "@/modules/api/agentos-module-studio";
+import { myAgentosCustomModuleStudio } from "@/modules/api/agentos-module-studio";
 import { myAgentosModuleInstallation, myAgentosModuleInstallations, myAgentosSolutionModules } from "@/modules/api/agentos-modules";
 import { myAgentosModuleRuntime } from "@/modules/api/agentos-module-runtime";
 import { myAgentosModuleTestRun, myAgentosModuleTestSurface } from "@/modules/api/agentos-module-tests";
@@ -25,8 +25,6 @@ export const expertSitesQueryKey = ["expert-sites"] as const;
 export const agentWorkspaceControlCenterQueryKey = (workspaceId: string) => ["agentos", "workspace-control-center", workspaceId] as const;
 /** Cache identity for all module installations owned by one workspace. */
 export const agentosModuleInstallationsQueryKey = (workspaceId: string) => ["agentos", "module-installations", workspaceId] as const;
-/** Cache identity for the custom modules visible in one workspace. */
-export const agentosCustomModulesQueryKey = (workspaceId: string) => ["agentos", "custom-modules", workspaceId] as const;
 /** Cache identity for one custom module Studio projection. */
 export const agentosModuleStudioQueryKey = (workspaceId: string, moduleId: string) => ["agentos", "module-studio", workspaceId, moduleId] as const;
 /** Cache identity for one workspace-private AI knowledge projection. */
@@ -72,8 +70,6 @@ export const useQueryMyAgentosModuleTestSurfaceSwr = (installationId: string, en
 export const useQueryMyAgentosModuleTestRunSwr = (installationId: string, runId?: string) => useNivoQuery(runId === undefined ? null : ["agentos", "module-test-run", installationId, runId], () => myAgentosModuleTestRun(installationId, runId ?? ""));
 /** Read one exact durable test run imperatively while a bounded poll is active. */
 export const useReadMyAgentosModuleTestRun = (installationId: string) => useCallback((runId: string) => myAgentosModuleTestRun(installationId, runId), [installationId]);
-/** Read custom modules visible in one AgentOS workspace. */
-export const useQueryMyAgentosCustomModulesSwr = (workspaceId: string) => useNivoQuery(agentosCustomModulesQueryKey(workspaceId), () => myAgentosCustomModules(workspaceId));
 /** Read the Studio projection for one custom module. */
 export const useQueryMyAgentosCustomModuleStudioSwr = (workspaceId: string, moduleId: string) => useNivoQuery(agentosModuleStudioQueryKey(workspaceId, moduleId), () => myAgentosCustomModuleStudio(workspaceId, moduleId));
 /** Read and, while an operation is active, poll workspace AI-knowledge readiness. */

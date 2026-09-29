@@ -12,7 +12,7 @@ import { refreshSession } from "@/modules/api/auth";
 import { failed, type Outcome } from "@/modules/api/outcome";
 import { useSession } from "../../auth/useSession";
 import { useNivoMutation } from "../useNivoMutation";
-import { agentosAiKnowledgeQueryKey, agentosCustomModulesQueryKey, agentosModuleInstallationsQueryKey, agentosModuleStudioQueryKey, agentWorkspaceControlCenterQueryKey, agentWorkspacesQueryKey, catalogOrdersQueryKey, expertSiteDeploymentQueryKey, expertSitesQueryKey, invoicesQueryKey } from "../queries/console";
+import { agentosAiKnowledgeQueryKey, agentosModuleInstallationsQueryKey, agentosModuleStudioQueryKey, agentWorkspaceControlCenterQueryKey, agentWorkspacesQueryKey, catalogOrdersQueryKey, expertSiteDeploymentQueryKey, expertSitesQueryKey, invoicesQueryKey } from "../queries/console";
 type AgentosModuleAttachmentUploadCommand = {
   readonly file: File;
   readonly mediaType: string;
@@ -45,14 +45,11 @@ type AcceptedAnswer = {
 };
 const accepted = (answer: AcceptedAnswer) => answer.ok;
 
-/** Create one durable custom-module intake and refresh its workspace collection. */
+/** Create one durable custom-module intake. */
 export const useMutateStartAgentosCustomModuleIntakeSwr = (workspaceId: string) => useNivoMutation(["agentos", "custom-module-intake", workspaceId], (input: StartAgentosCustomModuleIntakeCommand) => startAgentosCustomModuleIntake({
   agentWorkspaceId: workspaceId,
   ...input
-}), {
-  invalidates: [agentosCustomModulesQueryKey(workspaceId)],
-  shouldInvalidate: accepted
-});
+}));
 
 /** Append one intake answer and refresh the exact Studio projection. */
 export const useMutateAnswerAgentosCustomModuleIntakeSwr = (workspaceId: string, moduleId: string) => useNivoMutation(["agentos", "custom-module-answer", workspaceId, moduleId], (input: AnswerAgentosCustomModuleIntakeCommand) => answerAgentosCustomModuleIntake({
@@ -90,7 +87,7 @@ export const useMutatePublishAgentosCustomModuleSwr = (workspaceId: string, modu
   moduleId,
   ...input
 }), {
-  invalidates: [agentosModuleStudioQueryKey(workspaceId, moduleId), agentosCustomModulesQueryKey(workspaceId), agentosModuleInstallationsQueryKey(workspaceId)],
+  invalidates: [agentosModuleStudioQueryKey(workspaceId, moduleId), agentosModuleInstallationsQueryKey(workspaceId)],
   shouldInvalidate: accepted
 });
 

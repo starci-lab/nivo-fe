@@ -9,7 +9,7 @@ import { issueAgentWorkspaceAppLaunch, myAgentWorkspace, myAgentWorkspaceControl
 import { myAgentosModuleInstallations, myAgentosModuleInstallation, myAgentosSolutionModules, installAgentosSolutionModule } from "./agentos-modules"
 import { myInstances, myPodOpenclawStatus } from "./instances"
 import { myAcademyGrowthSnapshot, myAcademyStudents, myAcademyStudentDetail, myAcademyIntegrations, myExpertSiteLeads, createAcademyStudent, updateAcademyStudent, setAcademyStudentStatus, grantAcademyCourseAccess, revokeAcademyCourseAccess, updateExpertSiteLead, draftLeadReply, saveAcademyCredential, setAcademyCustomDomain, saveAcademyGoogleOAuth, disconnectAcademyGoogleOAuth, beginAcademyZaloAuthorization, saveAcademyAnalytics, createAcademyWebhook, rotateAcademyWebhookSecret, disableAcademyWebhook } from "./academy"
-import { myAgentosCustomModules, myAgentosCustomModuleStudio, startAgentosCustomModuleIntake, answerAgentosCustomModuleIntake, prepareAgentosModuleAttachmentUpload, finalizeAgentosModuleAttachment, removeAgentosModuleAttachment, saveAgentosModuleIntegrationSecret, removeAgentosModuleIntegrationSecret, publishAgentosCustomModule, resolveCoreApiCapabilityUrl } from "./agentos-module-studio"
+import { myAgentosCustomModuleStudio, startAgentosCustomModuleIntake, answerAgentosCustomModuleIntake, prepareAgentosModuleAttachmentUpload, finalizeAgentosModuleAttachment, removeAgentosModuleAttachment, saveAgentosModuleIntegrationSecret, removeAgentosModuleIntegrationSecret, publishAgentosCustomModule, resolveCoreApiCapabilityUrl } from "./agentos-module-studio"
 import { manageAgentosModuleRuntime, myAgentosModuleRuntime } from "./agentos-module-runtime"
 import { myAgentosModuleTestRun, myAgentosModuleTestSurface, runAgentosModuleTest } from "./agentos-module-tests"
 
@@ -73,7 +73,7 @@ describe("modules/api owner-scoped operations", () => {
             grantAcademyCourseAccess({ siteId: "site-1" } as never), revokeAcademyCourseAccess({ siteId: "site-1" } as never), updateExpertSiteLead({ siteId: "site-1" } as never), draftLeadReply({ siteId: "site-1" } as never),
             saveAcademyCredential({ siteId: "site-1" } as never), setAcademyCustomDomain({ siteId: "site-1" } as never), saveAcademyGoogleOAuth({ siteId: "site-1" } as never), disconnectAcademyGoogleOAuth("site-1"),
             beginAcademyZaloAuthorization("site-1"), saveAcademyAnalytics({ siteId: "site-1" } as never), createAcademyWebhook({ siteId: "site-1" } as never), rotateAcademyWebhookSecret({ siteId: "site-1" } as never), disableAcademyWebhook("site-1", "webhook-1"),
-            myAgentosCustomModules("workspace-1"), myAgentosCustomModuleStudio("workspace-1", "module-1"),
+            myAgentosCustomModuleStudio("workspace-1", "module-1"),
             startAgentosCustomModuleIntake({ agentWorkspaceId: "workspace-1", goal: "Qualify support", idempotencyKey: "intake-1" }),
             answerAgentosCustomModuleIntake({ agentWorkspaceId: "workspace-1", moduleId: "module-1", answer: "Support team" }),
             prepareAgentosModuleAttachmentUpload({ agentWorkspaceId: "workspace-1", moduleId: "module-1", fileName: "playbook.pdf", mediaType: "application/pdf", sizeBytes: 42 }),
