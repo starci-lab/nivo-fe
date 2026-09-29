@@ -4,7 +4,7 @@ import { useRef, useState } from "react"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
 import { getPathname } from "@/modules/i18n/navigation"
-import { useSession } from "@/hooks"
+import { useAccessToken, useSession } from "@/hooks"
 import { useMutateWorkspaceCheckoutStartSwr, useQueryWorkspaceCheckoutOffersSwr, useRouter } from "@/hooks"
 import type {
     WorkspaceCheckoutOffer,
@@ -65,7 +65,7 @@ const CheckoutReviewFlow = (props: CheckoutReviewFlowProps) => {
     const router = useRouter()
     const searchParams = useSearchParams()
     const session = useSession()
-    const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
+    const accessToken = useAccessToken()
     const offerId = props.offerId ?? searchParams.get("offer") ?? ""
     const offerVersion = props.offerVersion ?? searchParams.get("offerVersion") ?? ""
     const renewalEntitlementId = props.renewalEntitlementId ?? searchParams.get("entitlement") ?? undefined

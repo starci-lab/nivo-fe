@@ -8,7 +8,7 @@ import {
     useQueryCatalogItemsSwr,
     useQueryMyExpertSiteDeploymentSwr,
     useRouter,
-    useSession,
+    useAccessToken,
     type ProvisioningTarget,
 } from "@/hooks"
 
@@ -134,8 +134,7 @@ export const TemplateAppProvisioning = (props: TemplateAppProvisioningProps) => 
     const { context }: TemplateAppProvisioningProps = props
     const t = useTranslations("console.provisioningFlows")
     const router = useRouter()
-    const session = useSession()
-    const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
+    const accessToken = useAccessToken()
     const [slug, setSlug] = useState("")
     const createAndPublish = useMutateCreateAndPublishExpertSiteSwr()
     const [flow, setFlow] = useState<TemplateFlow>({

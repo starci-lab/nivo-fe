@@ -10,7 +10,7 @@ import {
 } from "@/hooks"
 import type { AgentosSolutionModule } from "@/modules/api/agentos-modules"
 import { nivoQueryData } from "@/modules/query"
-import { useSession } from "@/hooks"
+import { useAccessToken } from "@/hooks"
 import {
     AgentOSSolutionModuleCenterBase,
     type AgentOSSolutionLedgerRow,
@@ -41,8 +41,7 @@ export const AgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterPr
     const { workspaceId, layout = "tabs" }: AgentOSSolutionModuleCenterProps = props
     const t = useTranslations("console.agentos.workspace.solutions")
     const locale = useLocale()
-    const session = useSession()
-    const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
+    const accessToken = useAccessToken()
     const [mode, setMode] = useState<"catalog" | "installed">("catalog")
     const catalogQuery = useQueryMyAgentosSolutionModulesSwr()
     const installationsQuery = useQueryMyAgentosModuleInstallationsSwr(workspaceId)

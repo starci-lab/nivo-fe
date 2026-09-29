@@ -71,6 +71,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/hooks", () => ({
     useCollabLive: hooks.live,
     useSession: () => ({ state: world.session }),
+    useAccessToken: () => world.session.accessToken ?? null,
     useCollabOfficeTransport: () => ({ reconcileRequest: hooks.reconcile }),
     useMutateCollabAcceptInvitationSwr: hooks.accept,
     useMutateCollabInviteByEmailSwr: hooks.invite,

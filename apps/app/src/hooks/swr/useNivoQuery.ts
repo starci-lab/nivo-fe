@@ -1,7 +1,7 @@
 "use client"
 
 import useSWR, { type SWRConfiguration, type SWRResponse } from "swr"
-import { useSession } from "../auth/useSession"
+import { useAccessToken } from "../auth/useAccessToken"
 
 /** A product query key before the signed-in viewer identity is attached. */
 export type NivoQueryKey = readonly [name: string, ...parts: ReadonlyArray<string | number | boolean | null>]
@@ -56,14 +56,9 @@ export const useNivoQuery = <TAnswer>(
     query: () => Promise<TAnswer>,
     config?: SWRConfiguration<TAnswer, Error>,
 ): SWRResponse<TAnswer, Error> => {
-    const session = useSession()
+    const accessToken = useAccessToken()
     const key: NivoViewerQueryKey | null =
-        session.state.status === "signed-in" &&
-        typeof session.state.accessToken === "string" &&
-        session.state.accessToken.length > 0 &&
-        queryKey !== null
-            ? nivoViewerQueryKeyFor(session.state.accessToken, queryKey)
-            : null
+        accessToken !== null && accessToken.length > 0 && queryKey !== null ? nivoViewerQueryKeyFor(accessToken, queryKey) : null
     return useSWR<TAnswer, Error>(key, query, {
         revalidateOnFocus: true,
         ...config,

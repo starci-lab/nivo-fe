@@ -11,7 +11,7 @@ import {
     useQueryWorkspaceCheckoutOffersSwr,
     useQueryWorkspaceCheckoutStatusSwr,
     useRouter,
-    useSession,
+    useAccessToken,
     type ProvisioningTarget,
 } from "@/hooks"
 
@@ -296,9 +296,8 @@ export const AgentOSProvisioning = (props: AgentOSProvisioningProps) => {
     const tShared = useTranslations("console")
     const format = useFormatter()
     const router = useRouter()
-    const session = useSession()
     const productName = t("agentos.productName")
-    const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
+    const accessToken = useAccessToken()
     const [flow, setFlow] = useState<AgentOSFlow>({
         phase: "catalog_loading",
     })

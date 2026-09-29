@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { getPathname } from "@/modules/i18n/navigation"
-import { useSession } from "@/hooks"
+import { useAccessToken, useSession } from "@/hooks"
 import {
     useMutateRecoverWorkspacePurchaseSwr,
     useProvisioningRealtime,
@@ -312,7 +312,7 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
     const t = useTranslations("console.agentos.purchaseStatus")
     const router = useRouter()
     const session = useSession()
-    const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
+    const accessToken = useAccessToken()
     const statusQuery = useQueryWorkspaceCheckoutStatusSwr(purchaseId, accessToken !== null)
     const recoverPurchase = useMutateRecoverWorkspacePurchaseSwr()
     const [surfacePinned, setSurfacePinned] = useState(surface)

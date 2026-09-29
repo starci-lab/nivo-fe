@@ -83,6 +83,7 @@ vi.mock("@/hooks", () => ({
     useMutateRunAgentosAiReadinessTestSwr: () => ({ trigger: mocks.aiTrigger, isMutating: false }),
     useRouter: () => ({ replace: mocks.replace, push: mocks.push }),
     useSession: () => mocks.session,
+    useAccessToken: () => mocks.session.state.status === "signed-in" ? mocks.session.state.accessToken : null,
     useProvisioningRealtime: () => mocks.realtime,
 }))
 vi.mock("./component", () => ({

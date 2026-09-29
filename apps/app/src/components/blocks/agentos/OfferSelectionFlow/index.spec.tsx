@@ -15,6 +15,10 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/hooks", () => ({
     useSession: () => mocks.session,
+    useAccessToken: () => {
+        const state = mocks.session.state as { readonly status: string; readonly accessToken?: string };
+        return state.status === "signed-in" ? state.accessToken ?? null : null;
+    },
     useQueryWorkspaceCheckoutOffersSwr: () => mocks.offers,
 }))
 type ViewOffer = {

@@ -7,7 +7,7 @@ import {
     useQueryMyAgentosModuleInstallationsSwr,
     useQueryMyAgentWorkspaceControlCenterSwr,
 } from "@/hooks"
-import { useSession } from "@/hooks"
+import { useAccessToken } from "@/hooks"
 import { workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@/modules/window/workspace-app-launch"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { useCallback, useEffect, useRef, useState } from "react"
@@ -34,8 +34,7 @@ export const AgentOSWorkspaceControlCenter = (props: AgentOSWorkspaceControlCent
     const s = useTranslations("console.agentos.shell")
     const format = useFormatter()
     const locale = useLocale()
-    const session = useSession()
-    const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
+    const accessToken = useAccessToken()
     const [mounted, setMounted] = useState(false)
     const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId)
     // The connected shell reads one exact selection: the console aggregate already resolves the

@@ -22,6 +22,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useLocale } from "next-intl"
 import { toLocale } from "@/modules/i18n/config"
+import { useAccessToken } from "../auth/useAccessToken"
 import { useSession } from "../auth/useSession"
 import { type SessionState } from "@/modules/auth/session"
 import { failed, type Failure, type Outcome } from "@/modules/api/outcome"
@@ -202,7 +203,7 @@ export const useAgentOSShell = (options: AgentOSShellOptions) => {
         .join("|")
     const session = useSession()
     const sessionStatus = session.state.status
-    const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
+    const accessToken = useAccessToken()
     const locale = toLocale(useLocale())
     // The selection token is derived from the selection itself, so a different AgentOS is always a
     // different token and the same AgentOS keeps one across refreshes and returns.

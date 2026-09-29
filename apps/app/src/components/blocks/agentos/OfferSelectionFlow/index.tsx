@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
 import { getPathname } from "@/modules/i18n/navigation"
-import { useSession } from "@/hooks"
+import { useAccessToken, useSession } from "@/hooks"
 import { useQueryWorkspaceCheckoutOffersSwr } from "@/hooks"
 import type { WorkspaceCheckoutOffer } from "@/modules/api/workspace-controlplane"
 import {
@@ -83,7 +83,7 @@ const OfferSelectionFlow = () => {
     const format = useFormatter()
     const searchParams = useSearchParams()
     const session = useSession()
-    const accessToken = session.state.status === "signed-in" ? session.state.accessToken : null
+    const accessToken = useAccessToken()
     const [presented, setPresented] = useState(() => ({
         offerId: searchParams.get("offer") ?? PRESENTED_OFFER_ID,
         offerVersion: searchParams.get("offerVersion") ?? PRESENTED_OFFER_VERSION,

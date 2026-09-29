@@ -19,6 +19,7 @@ import {
     useQueryCollabTasksSwr,
     useQueryMyAgentWorkspacesSwr,
     useRouter,
+    useAccessToken,
     useSession,
     type CollabTasksFilter,
 } from "@/hooks"
@@ -100,7 +101,7 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
 
     /* ---------------- Workspace resolution ---------------- */
     const signedIn = session.state.status === "signed-in"
-    const accessToken = signedIn ? session.state.accessToken : null
+    const accessToken = useAccessToken()
     const workspaces = useQueryMyAgentWorkspacesSwr(signedIn && invitationId === null)
     const ownedWorkspaceId = workspaces.data?.ok === true ? (workspaces.data.data[0]?.id ?? null) : null
     const workspaceId = workspaceParam ?? ownedWorkspaceId
