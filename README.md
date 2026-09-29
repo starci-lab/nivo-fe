@@ -27,7 +27,7 @@ apps/
     components/         Blocks and reusable UI components
     hooks/              Domain hooks
     modules/            App capabilities and integrations
-packages/ui/            Shared UI package
+packages/nivo-ui/       Shared UI package
 scripts/                Repository tooling
 e2e/                    Repository-level end-to-end tests
 ```

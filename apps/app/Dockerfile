@@ -8,12 +8,12 @@ COPY scripts/check-dependency-alignment.mjs scripts/check-dependency-alignment.m
 COPY apps/app/package.json apps/app/package.json
 COPY apps/expert/package.json apps/expert/package.json
 COPY apps/landing/package.json apps/landing/package.json
-COPY packages/ui/package.json packages/ui/package.json
+COPY packages/nivo-ui/package.json packages/nivo-ui/package.json
 RUN npm ci
 
 COPY turbo.json ./
 COPY apps/app apps/app
-COPY packages/ui packages/ui
+COPY packages/nivo-ui packages/nivo-ui
 
 ARG NEXT_PUBLIC_CORE_API_URL
 ARG NEXT_PUBLIC_ACADEMY_HOST_SUFFIX=.nivo.vn

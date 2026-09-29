@@ -9,7 +9,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@nivo/ui": ["../../packages/nivo-ui/dist/index.d.ts"]
     }
   },
   "include": ["next-env.d.ts", "testing.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],

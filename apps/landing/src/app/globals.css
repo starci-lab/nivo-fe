@@ -4,7 +4,8 @@
 @import "@nivo/ui/styles.css";
 @import "@nivo/ui/family.css";
 @import "../modules/brand/brand.css";
-@source "../../../../packages/ui/src";
+@source "../../../../packages/nivo-ui/src";
+@source "../../../../packages/nivo-ui/dist";
 
 :root {
     --nivo-core-crimson: var(--nivo-accent);

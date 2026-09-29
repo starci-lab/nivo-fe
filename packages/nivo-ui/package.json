@@ -4,11 +4,16 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./styles.css": "./src/styles.css",
-    "./family.css": "./src/leaves/NivoGrammar/nivo.css"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./family.css": "./dist/family.css"
   },
+  "files": ["dist"],
   "scripts": {
+    "build": "tsc --build tsconfig.build.json && node scripts/copy-assets.mjs",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit"
   },

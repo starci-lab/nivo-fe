@@ -5,7 +5,7 @@
     "apps/app/tsconfig.json",
     "apps/expert/tsconfig.json",
     "apps/landing/tsconfig.json",
-    "packages/ui/tsconfig.json"
+    "packages/nivo-ui/tsconfig.json"
   ],
   "owners": [
     {
@@ -253,7 +253,7 @@
         "apps/app/package.json",
         "apps/expert/package.json",
         "apps/landing/package.json",
-        "packages/ui/package.json"
+        "packages/nivo-ui/package.json"
       ],
       "peers": ["react", "@heroui/react"]
     }

@@ -10,6 +10,13 @@ export default defineConfig({
     resolve: {
         dedupe: ["react", "react-dom", "@heroui/react", "@heroui/styles"],
         alias: {
+            // Tests exercise workspace source without requiring generated package output.
+            "@nivo/ui/family.css": resolve(
+                import.meta.dirname,
+                "../../packages/nivo-ui/src/leaves/NivoGrammar/nivo.css",
+            ),
+            "@nivo/ui/styles.css": resolve(import.meta.dirname, "../../packages/nivo-ui/src/styles.css"),
+            "@nivo/ui": resolve(import.meta.dirname, "../../packages/nivo-ui/src/index.ts"),
             "@": resolve(import.meta.dirname, "src"),
             // next-intl imports the package subpath without an extension; Node's ESM runner used
             // by Vitest needs the concrete compatibility entry while Next resolves it itself.

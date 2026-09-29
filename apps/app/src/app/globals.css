@@ -9,7 +9,8 @@
  * scanning `src` alone. Without this line every class a leaf writes is dropped from the build and
  * the components render unstyled - a failure that looks like a component bug and is not one.
  */
-@source "../../../../packages/ui/src";
+@source "../../../../packages/nivo-ui/src";
+@source "../../../../packages/nivo-ui/dist";
 
 /*
  * The SAME failure mode, one layer further out. Grammar's own Common renderers spell their

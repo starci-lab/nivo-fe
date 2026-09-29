@@ -21,7 +21,7 @@
           "apps/app/tsconfig.json",
           "apps/expert/tsconfig.json",
           "apps/landing/tsconfig.json",
-          "packages/ui/tsconfig.json"
+          "packages/nivo-ui/tsconfig.json"
         ],
         "owners": [
           {
@@ -59,7 +59,7 @@
         ],
         "closedVocabularies": [
           {
-            "path": "packages/ui/src/composites/LifecycleStep/index.tsx",
+            "path": "packages/nivo-ui/src/composites/LifecycleStep/index.tsx",
             "type": "LifecycleStepState",
             "inventory": "LIFECYCLE_STEP_STATES",
             "role": "state"

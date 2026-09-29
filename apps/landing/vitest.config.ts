@@ -7,6 +7,13 @@ export default defineConfig({
     resolve: {
         dedupe: ["react", "react-dom", "@heroui/react", "@heroui/styles"],
         alias: {
+            // Tests exercise workspace source without requiring generated package output.
+            "@nivo/ui/family.css": resolve(
+                import.meta.dirname,
+                "../../packages/nivo-ui/src/leaves/NivoGrammar/nivo.css",
+            ),
+            "@nivo/ui/styles.css": resolve(import.meta.dirname, "../../packages/nivo-ui/src/styles.css"),
+            "@nivo/ui": resolve(import.meta.dirname, "../../packages/nivo-ui/src/index.ts"),
             "@": resolve(import.meta.dirname, "src"),
         },
     },

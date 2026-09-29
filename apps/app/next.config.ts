@@ -23,13 +23,10 @@ export const legacyRedirects = async () =>
         },
     ])
 
-/**
- * `@nivo/ui` ships TypeScript source, so Next compiles it with this app.
- */
 const nextConfig: NextConfig = {
     output: "standalone",
     outputFileTracingRoot: resolve(import.meta.dirname, "../.."),
-    transpilePackages: ["@nivo/i18n", "@nivo/ui", "@starci/grammar"],
+    transpilePackages: ["@nivo/i18n", "@starci/grammar"],
     turbopack: {
         root: resolve(import.meta.dirname, "../.."),
     },

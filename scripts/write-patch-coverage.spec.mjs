@@ -33,7 +33,7 @@ test("normalizes monorepo paths and measures every metric", () => {
 
 test("fails missing changed production and ignores tests", () => {
     assert.throws(
-        () => buildPatchSummary({}, ["packages/ui/src/missing.tsx"], "C:/repo"),
+        () => buildPatchSummary({}, ["packages/nivo-ui/src/missing.tsx"], "C:/repo"),
         /missing from coverage-final/,
     )
     assert.equal(

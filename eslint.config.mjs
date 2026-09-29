@@ -29,7 +29,7 @@ import { defineConfig } from "eslint/config"
  *
  * WHY THE RULE MODULES ARE THE SAME ONES AS THE SINGLE-APP REPOSITORY. The tier vocabulary here is
  * identical - `leaves`, `composites`, `branches`, and `blocks`. Only the prefix above the tiers
- * differs: `packages/ui/src/*` instead of `src/components/*`. The published canon receives that
+ * differs: `packages/nivo-ui/src/*` instead of `src/components/*`. The published canon receives that
  * workspace layout through configuration, so one implementation serves both layouts.
  */
 export default defineConfig([
@@ -119,7 +119,7 @@ export default defineConfig([
         },
     },
     {
-        files: ["apps/*/src/**/*.{ts,tsx}", "packages/ui/src/**/*.{ts,tsx}"],
+        files: ["apps/*/src/**/*.{ts,tsx}", "packages/nivo-ui/src/**/*.{ts,tsx}"],
         languageOptions: {
             parserOptions: {
                 projectService: true,
@@ -154,7 +154,7 @@ export default defineConfig([
         // preference. Inline config is disabled in both halves so neither `eslint-disable` nor
         // `eslint-enable` can turn that boundary off.
         files: [
-            "packages/ui/src/blocks/**/{index,component}.tsx",
+            "packages/nivo-ui/src/blocks/**/{index,component}.tsx",
             "**/candidate/src/**/blocks/**/{index,component}.tsx",
         ],
         linterOptions: { noInlineConfig: true },

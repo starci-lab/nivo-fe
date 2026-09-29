@@ -2,13 +2,8 @@ import { resolve } from "node:path"
 import type { NextConfig } from "next"
 import createNextIntlPlugin from "next-intl/plugin"
 
-/**
- * `@nivo/ui` ships TypeScript source rather than a build output, so Next must compile it the same
- * way it compiles this app. That is the price of one shared copy, and it is cheaper than the drift
- * a per-app copy caused.
- */
 const nextConfig: NextConfig = {
-    transpilePackages: ["@nivo/i18n", "@nivo/ui", "@starci/grammar"],
+    transpilePackages: ["@nivo/i18n", "@starci/grammar"],
     turbopack: {
         root: resolve(import.meta.dirname, "../.."),
     },
