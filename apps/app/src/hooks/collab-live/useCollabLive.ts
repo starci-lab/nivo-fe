@@ -118,11 +118,29 @@ const readSubscribeAck = (payload: unknown): { ok: true } | { ok: false; reason:
 export const useCollabLive = (workspaceId: string | null): CollabLiveState => {
     const accessToken = useAccessToken()
     const { mutate } = useSWRConfig()
-    const [state, setState] = useState<CollabLiveState>({ status: "idle", reason: null, lastHint: null })
+
+    /*
+     * IDLE IS DERIVED, NOT SET. A signed-out session or a missing workspace is a fact of the inputs,
+     * so the idle answer is computed during render rather than pushed by an effect.
+     *
+     * THE CHANNEL STATE IS KEYED ON THE CONNECTION. While a socket attempt is live its phase is
+     * `connecting` until the handshake answers; when the workspace or bearer changes, the key
+     * changes and the render-phase comparison resets the channel to `connecting` before the new
+     * effect opens its socket. A socket event reaching for a key that is no longer current is
+     * dropped instead of landing on the successor channel.
+     */
+    const channelKey =
+        accessToken === null || workspaceId === null || workspaceId === "" ? null : `${accessToken} ${workspaceId}`
+    const [channel, setChannel] = useState<{ key: string | null; state: CollabLiveState }>({
+        key: null,
+        state: { status: "connecting", reason: null, lastHint: null },
+    })
+    if (channel.key !== channelKey) {
+        setChannel({ key: channelKey, state: { status: "connecting", reason: null, lastHint: null } })
+    }
 
     useEffect(() => {
-        if (accessToken === null || workspaceId === null || workspaceId === "") {
-            setState({ status: "idle", reason: accessToken === null ? "signed-out" : "no-workspace", lastHint: null })
+        if (channelKey === null || accessToken === null || workspaceId === null) {
             return
         }
 
@@ -131,7 +149,8 @@ export const useCollabLive = (workspaceId: string | null): CollabLiveState => {
             transports: ["websocket"],
             reconnection: true,
         })
-        setState({ status: "connecting", reason: null, lastHint: null })
+        const publish = (state: CollabLiveState) =>
+            setChannel((current) => (current.key === channelKey ? { key: channelKey, state } : current))
 
         const subscribe = () => {
             // Every connect - first or regained - subscribes and re-reads everything:
@@ -139,25 +158,25 @@ export const useCollabLive = (workspaceId: string | null): CollabLiveState => {
             socket.emit("collab.subscribe", { workspaceId }, (ack: unknown) => {
                 const answer = readSubscribeAck(ack)
                 if (!answer.ok) {
-                    setState({ status: "disconnected", reason: answer.reason, lastHint: null })
+                    publish({ status: "disconnected", reason: answer.reason, lastHint: null })
                     return
                 }
-                setState({ status: "subscribed", reason: null, lastHint: null })
+                publish({ status: "subscribed", reason: null, lastHint: null })
                 void mutate(collabWorkspaceKeys(workspaceId))
             })
         }
 
         socket.on("connect", subscribe)
-        socket.on("disconnect", (reason: string) => setState({ status: "disconnected", reason, lastHint: null }))
+        socket.on("disconnect", (reason: string) => publish({ status: "disconnected", reason, lastHint: null }))
         socket.on("connect_error", (error: Error) =>
-            setState({ status: "disconnected", reason: error.message, lastHint: null }),
+            publish({ status: "disconnected", reason: error.message, lastHint: null }),
         )
         socket.on("collab.changed", (payload: unknown) => {
             const hint = readHint(payload)
             if (hint === null || hint.workspaceId !== workspaceId) {
                 return
             }
-            setState({ status: "subscribed", reason: null, lastHint: hint })
+            publish({ status: "subscribed", reason: null, lastHint: hint })
             void mutate(collabDomainKeys(workspaceId, COLLAB_HINT_DOMAINS[hint.kind]))
         })
 
@@ -165,9 +184,12 @@ export const useCollabLive = (workspaceId: string | null): CollabLiveState => {
             socket.removeAllListeners()
             socket.disconnect()
         }
-    }, [accessToken, workspaceId, mutate])
+    }, [accessToken, workspaceId, mutate, channelKey])
 
-    return state
+    if (channelKey === null) {
+        return { status: "idle", reason: accessToken === null ? "signed-out" : "no-workspace", lastHint: null }
+    }
+    return channel.state
 }
 
 export default useCollabLive
