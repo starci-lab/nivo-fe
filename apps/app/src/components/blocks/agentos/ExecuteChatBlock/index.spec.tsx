@@ -4,7 +4,6 @@ import { NextIntlClientProvider, useTranslations, createTranslator } from "next-
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n/config"
-import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import { ExecuteChatBlock as ActualExecuteChatBlock, type ExecuteChatBlockCopy, type ExecuteMessage } from "."
 
@@ -100,9 +99,9 @@ describe("ExecuteChatBlock", () => {
         ["nivo.calendar-options", "Scheduling options", { taskId: "task-3", expectedVersion: 1, title: "Confirm meeting", timeZone: "Asia/Bangkok" }],
         ["nivo.knowledge-evidence", "Knowledge evidence", { taskId: "task-4", expectedVersion: 3, title: "Grounded answer", confidence: "high" }],
     ])("renders trusted %s through its distinct component", (component, expectedTitle, props) => {
-        const html = renderToStaticMarkup(
+        const html = render(
             <ExecuteChatBlock sessionTitle="Primary Operations" messages={[message(component, props)]} onSend={vi.fn()} onWidgetAction={vi.fn()} />,
-        )
+        ).container.innerHTML
         expect(html).toContain("Proactive update")
         expect(html).toContain("Evidence accepted")
         expect(html).toContain(expectedTitle)
@@ -112,9 +111,9 @@ describe("ExecuteChatBlock", () => {
     })
 
     it("fails closed for an unregistered widget identity", () => {
-        const html = renderToStaticMarkup(
+        const html = render(
             <ExecuteChatBlock sessionTitle="Primary Operations" messages={[message("untrusted.widget", { taskId: "task-x" })]} onSend={vi.fn()} />,
-        )
+        ).container.innerHTML
         expect(html).toContain("Widget refused")
         expect(html).toContain("No trusted ComponentType is registered")
     })
@@ -124,7 +123,7 @@ describe("ExecuteChatBlock", () => {
             const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime
             const identities = { support: "nivo.support-task", finance: "nivo.finance-approval", calendar: "nivo.calendar-options", knowledge: "nivo.knowledge-evidence" }
             const titles = { support: copy.widgets.supportTitle, finance: copy.widgets.financeTitle, calendar: copy.widgets.calendarTitle, knowledge: copy.widgets.knowledgeTitle }
-            const html = renderToStaticMarkup(<ExecuteChatBlock locale={locale} sessionTitle="Owner conversation" messages={[message(identities[family], { taskId: "raw-task", expectedVersion: 7, title: "Untranslated task" })]} onSend={vi.fn()} />)
+            const html = render(<ExecuteChatBlock locale={locale} sessionTitle="Owner conversation" messages={[message(identities[family], { taskId: "raw-task", expectedVersion: 7, title: "Untranslated task" })]} onSend={vi.fn()} />).container.innerHTML
             expect(html).toContain(titles[family])
             expect(html).toContain("Untranslated task")
             expect(html).toContain(copy.executeChat.acceptTask)

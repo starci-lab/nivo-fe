@@ -1,10 +1,14 @@
+import { NextIntlClientProvider } from "next-intl"
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { SWRConfig } from "swr"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { AcademyLeadPipeline } from "./index"
+import viMessages from "@/messages/vi.json"
+import { AcademyLeadPipeline as AcademyLeadPipelineBlock } from "./index"
 
-const m = vi.hoisted(() => ({ locale: "vi", session: { state: { status: "signed-in", accessToken: "test-token" } }, leads: { ok: true, data: [] as Array<unknown> }, calls: { list: vi.fn(), update: vi.fn(), draft: vi.fn() } }))
-vi.mock("next-intl", () => ({ useLocale: () => m.locale, useTranslations: () => (key: string) => key }))
+type LeadPipelineHostProps = { readonly siteId: string }
+const AcademyLeadPipeline = (props: LeadPipelineHostProps) => <NextIntlClientProvider locale="vi" messages={viMessages}><AcademyLeadPipelineBlock {...props} /></NextIntlClientProvider>
+
+const m = vi.hoisted(() => ({ session: { state: { status: "signed-in", accessToken: "test-token" } }, leads: { ok: true, data: [] as Array<unknown> }, calls: { list: vi.fn(), update: vi.fn(), draft: vi.fn() } }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => m.session }))
 vi.mock("@/modules/api/console", () => ({ myExpertSiteLeads: m.calls.list, updateExpertSiteLead: m.calls.update, draftLeadReply: m.calls.draft }))
 type LeadView = { state: string; on: { openLead: (id: string) => void; advance: () => void; draftReply: () => void } }

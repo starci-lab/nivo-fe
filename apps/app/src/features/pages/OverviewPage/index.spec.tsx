@@ -22,7 +22,6 @@ vi.mock("@/hooks/swr/queries/console", () => ({
     useQueryMyInvoicesSwr: mocks.invoices,
 }))
 vi.mock("@/hooks", async (importOriginal) => ({ ...await importOriginal<object>(), useRouter: () => ({ push: mocks.push }) }))
-vi.mock("next-intl", () => ({ useLocale: () => "en", useTranslations: () => (key: string) => key }))
 interface MockBaseProps {
     readonly props: {
         readonly title: string
@@ -44,6 +43,8 @@ vi.mock("./component", () => ({ OverviewPageBase: (input: MockBaseProps) => <div
 
 import { OverviewPage } from "."
 
+const consoleCopy = enMessages.console
+const headline = `${consoleCopy.breadcrumbLabel}:${consoleCopy.title}:${consoleCopy.overview.title}`
 const slices = () => [mocks.apps, mocks.workspaces, mocks.pod, mocks.domains, mocks.wallet, mocks.invoices]
 
 describe("OverviewPage", () => {
@@ -55,10 +56,10 @@ describe("OverviewPage", () => {
     it("hands the page every resolved label and routes the one next step to the workspace purchase route", () => {
         render(<OverviewPage />)
 
-        expect(screen.getByText("breadcrumbLabel:title:overview.title")).toBeInTheDocument()
-        expect(screen.getByText("overview.lede:overview.atAGlance:servicesCaption:accountCaption")).toBeInTheDocument()
+        expect(screen.getByText(headline)).toBeInTheDocument()
+        expect(screen.getByText(`${consoleCopy.overview.lede}:${consoleCopy.overview.atAGlance}:${consoleCopy.servicesCaption}:${consoleCopy.accountCaption}`)).toBeInTheDocument()
 
-        fireEvent.click(screen.getByRole("button", { name: "agentos.purchase" }))
+        fireEvent.click(screen.getByRole("button", { name: consoleCopy.agentos.purchase }))
         expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new")
         expect(mocks.push).not.toHaveBeenCalledWith("/apps")
     })
@@ -66,7 +67,7 @@ describe("OverviewPage", () => {
     it("carries the shell rev 17 purchaseAction label for the one next step", () => {
         render(<OverviewPage />)
 
-        expect(screen.getByRole("button", { name: "agentos.purchase" })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: consoleCopy.agentos.purchase })).toBeInTheDocument()
         expect(viMessages.console.agentos.purchase).toBe("Mua workspace")
         expect(enMessages.console.agentos.purchase).toBe("Buy workspace")
     })
@@ -81,7 +82,7 @@ describe("OverviewPage", () => {
         mocks.domains.mockImplementation(() => ({ data: undefined, error: undefined, isLoading: true, mutate: vi.fn() }))
         render(<OverviewPage />)
 
-        expect(screen.getByText("breadcrumbLabel:title:overview.title")).toBeInTheDocument()
+        expect(screen.getByText(headline)).toBeInTheDocument()
         expect(mocks.domains).toHaveBeenCalledTimes(1)
     })
 })

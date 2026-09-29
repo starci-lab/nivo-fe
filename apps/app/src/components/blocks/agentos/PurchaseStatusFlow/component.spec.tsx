@@ -211,6 +211,7 @@ describe("PurchaseStatusFlowBase", () => {
         const html = renderToStaticMarkup(<PurchaseStatusFlowBase state="loading" props={head} />)
         expect(html).toContain('aria-busy="true"')
         expect(html).toContain("data-loading")
+        expect(html).toContain(copy.loading)
         expect(html).not.toContain("Check payment status")
     })
 

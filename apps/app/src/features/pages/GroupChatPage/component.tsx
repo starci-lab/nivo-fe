@@ -351,6 +351,7 @@ export const parseRoleHint = (raw: string | null): CollabHumanRole | null =>
 export type GroupChatPageLabels = {
   readonly title: string;
   readonly description: string;
+  readonly workspace: string;
   readonly today: string;
   readonly tabListLabel: string;
   readonly tabs: { readonly office: string; readonly tasks: string };
@@ -1621,7 +1622,7 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
       <div className={GROUP_CHAT_HEADER_BAND_COMPACT_CLASS_NAME}>
         <div className={GROUP_CHAT_HEADER_COMPACT_ROW_CLASS_NAME}>
           <Text size="sm" weight="semibold" overflow="truncate">
-            <span>Workspace</span> <span>{view.workspaceName}</span>
+            <span>{labels.workspace}</span> <span>{view.workspaceName}</span>
           </Text>
           {memberChip}
         </div>
@@ -1633,7 +1634,7 @@ export const GroupChatPageBase = (props: GroupChatPageProps) => {
         level={2}
         title={
           <>
-            <span>Workspace</span> <span>{view.workspaceName}</span>
+            <span>{labels.workspace}</span> <span>{view.workspaceName}</span>
           </>
         }
         description={labels.description}

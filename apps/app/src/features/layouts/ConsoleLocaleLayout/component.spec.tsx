@@ -19,9 +19,6 @@ type GrammarRootProbeProps = ProviderProbeProps & {
 vi.mock("@heroui/react", () => ({
   I18nProvider: ({ children }: ProviderProbeProps) => <>{children}</>
 }));
-vi.mock("next-intl", () => ({
-  NextIntlClientProvider: ({ children }: ProviderProbeProps) => <>{children}</>
-}));
 vi.mock("next-themes", () => ({
   ThemeProvider: ({ children }: ProviderProbeProps) => (
     <div data-testid="theme-provider">{children}</div>

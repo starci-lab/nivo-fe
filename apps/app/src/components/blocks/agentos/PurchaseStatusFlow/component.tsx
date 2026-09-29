@@ -253,68 +253,68 @@ const railCard = (rail: PurchaseStatusRail, on: PurchaseStatusActions) => <Surfa
  */
 const skeletonMark: IconSource = () => null;
 
-const skeletonLine = (size: "xs" | "sm" | "md") => <Text size={size} isSkeleton>Loading</Text>;
+const skeletonLine = (size: "xs" | "sm" | "md", label: string) => <Text size={size} isSkeleton>{label}</Text>;
 
 /* The resolved cards that publish a trailing fact keep a two-line external label row; the
    skeleton stands a fact bar in the same slot so the label row holds its resolved height. */
-const skeletonLabelEnd = <Text size="md" isSkeleton>Loading</Text>;
+const skeletonLabelEnd = (label: string) => <Text size="md" isSkeleton>{label}</Text>;
 
-const skeletonFactCell = (key: string) => <div key={key} className={FACT_CELL_CLASS_NAME}>
-    {skeletonLine("xs")}
-    {skeletonLine("sm")}
+const skeletonFactCell = (key: string, label: string) => <div key={key} className={FACT_CELL_CLASS_NAME}>
+    {skeletonLine("xs", label)}
+    {skeletonLine("sm", label)}
 </div>;
 
-const skeletonFactBand = (id: string, cells: number) => <div key={id} className={BAND_CLASS_NAME}>
-    <div className={FACT_GRID_CLASS_NAME}>{Array.from({ length: cells }, (_, index) => skeletonFactCell(`${id}-${index}`))}</div>
+const skeletonFactBand = (id: string, cells: number, label: string) => <div key={id} className={BAND_CLASS_NAME}>
+    <div className={FACT_GRID_CLASS_NAME}>{Array.from({ length: cells }, (_, index) => skeletonFactCell(`${id}-${index}`, label))}</div>
 </div>;
 
 /* The resolved row pairs an `at` line with its detail line on the checks that observe one;
    `withAt` keeps that two-line rank on the row that resolves with a timestamp. */
-const skeletonCheckRow = (key: string, withAt = false) => <div key={key} className={ROW_CLASS_NAME}>
+const skeletonCheckRow = (key: string, label: string, withAt = false) => <div key={key} className={ROW_CLASS_NAME}>
     <IconTile source={skeletonMark} tone="neutral" size="sm" isSkeleton />
     <div className={ROW_BODY_CLASS_NAME}>
         <div className={ROW_HEAD_CLASS_NAME}>
-            {skeletonLine("sm")}
-            <Badge isSkeleton>Loading</Badge>
+            {skeletonLine("sm", label)}
+            <Badge isSkeleton>{label}</Badge>
         </div>
-        {withAt ? skeletonLine("xs") : null}
-        {skeletonLine("xs")}
+        {withAt ? skeletonLine("xs", label) : null}
+        {skeletonLine("xs", label)}
     </div>
 </div>;
 
-const skeletonTimelineRow = (key: string) => <div key={key} className={BAND_CLASS_NAME}><div className={ROW_CLASS_NAME}>
+const skeletonTimelineRow = (key: string, label: string) => <div key={key} className={BAND_CLASS_NAME}><div className={ROW_CLASS_NAME}>
     <IconTile source={skeletonMark} tone="neutral" size="sm" isSkeleton />
     <div className={ROW_BODY_CLASS_NAME}>
-        {skeletonLine("sm")}
-        {skeletonLine("xs")}
+        {skeletonLine("sm", label)}
+        {skeletonLine("xs", label)}
     </div>
 </div></div>;
 
 /* `reserved` marks the band whose resolved value wraps to two lines in the narrow rail or on a
    phone card; the class reserves that band's resolved height where the wrap occurs. */
-const skeletonFactRow = (key: string, reserved = false) => <div key={key} className={reserved ? SKELETON_FACT_ROW_RESERVED_CLASS_NAME : BAND_CLASS_NAME}>
-    <div className={FACT_ROW_CLASS_NAME}>{skeletonLine("sm")}{skeletonLine("sm")}</div>
+const skeletonFactRow = (key: string, label: string, reserved = false) => <div key={key} className={reserved ? SKELETON_FACT_ROW_RESERVED_CLASS_NAME : BAND_CLASS_NAME}>
+    <div className={FACT_ROW_CLASS_NAME}>{skeletonLine("sm", label)}{skeletonLine("sm", label)}</div>
 </div>;
 
 /** The payment surface's loading preview: the same bands at the same ranks as the resolved card. */
-const paymentLoadingPrimary = (copy: PurchaseStatusCopy) => <SurfaceCard label={copy.purchaseFactsLabel} labelEnd={skeletonLabelEnd} composition="joined" height="fill">
+const paymentLoadingPrimary = (copy: PurchaseStatusCopy) => <SurfaceCard label={copy.purchaseFactsLabel} labelEnd={skeletonLabelEnd(copy.loading)} composition="joined" height="fill">
     <div className={SKELETON_BANNER_RESERVED_CLASS_NAME}><div className={BANNER_CLASS_NAME}>
-        {skeletonLine("md")}
-        {skeletonLine("sm")}
-        {skeletonLine("sm")}
+        {skeletonLine("md", copy.loading)}
+        {skeletonLine("sm", copy.loading)}
+        {skeletonLine("sm", copy.loading)}
     </div></div>
-    {skeletonFactBand("facts", 8)}
-    {["order", "invoice", "read"].map(skeletonTimelineRow)}
+    {skeletonFactBand("facts", 8, copy.loading)}
+    {["order", "invoice", "read"].map(key => skeletonTimelineRow(key, copy.loading))}
 </SurfaceCard>;
 
 const paymentLoadingRail = (copy: PurchaseStatusCopy) => <SurfaceCard label={copy.verificationLabel} composition="joined" height="fill">
-    <div className={BAND_CLASS_NAME}>{skeletonLine("sm")}</div>
-    <div className={BAND_CLASS_NAME}>{["provider", "amount", "canonical", "admission"].map(key => skeletonCheckRow(key, key === "provider"))}</div>
-    <div className={BAND_CLASS_NAME}><div className={NOTICE_CLASS_NAME}><Badge isSkeleton>!</Badge><div className={ROW_BODY_CLASS_NAME}>{skeletonLine("sm")}{skeletonLine("xs")}</div></div></div>
+    <div className={BAND_CLASS_NAME}>{skeletonLine("sm", copy.loading)}</div>
+    <div className={BAND_CLASS_NAME}>{["provider", "amount", "canonical", "admission"].map(key => skeletonCheckRow(key, copy.loading, key === "provider"))}</div>
+    <div className={BAND_CLASS_NAME}><div className={NOTICE_CLASS_NAME}><Badge isSkeleton>!</Badge><div className={ROW_BODY_CLASS_NAME}>{skeletonLine("sm", copy.loading)}{skeletonLine("xs", copy.loading)}</div></div></div>
     <div className={BAND_CLASS_NAME}>
-        <Button variant="primary" size="lg" width="fill" type="button" isSkeleton>Loading</Button>
-        <div className={CAPTION_CLASS_NAME}>{skeletonLine("xs")}</div>
-        {skeletonLine("sm")}
+        <Button variant="primary" size="lg" width="fill" type="button" isSkeleton>{copy.loading}</Button>
+        <div className={CAPTION_CLASS_NAME}>{skeletonLine("xs", copy.loading)}</div>
+        {skeletonLine("sm", copy.loading)}
     </div>
 </SurfaceCard>;
 
@@ -322,23 +322,23 @@ const paymentLoadingRail = (copy: PurchaseStatusCopy) => <SurfaceCard label={cop
     The resolved card withholds its trailing order fact while the provisioning-order reference seam is
     unpublished, so the label row stands label-only and the preview reserves no fact bar. */
 const provisioningLoadingPrimary = (copy: PurchaseStatusCopy) => <SurfaceCard label={copy.provisioningOrderLabel} composition="joined" height="fill">
-    {skeletonFactBand("identity", 6)}
-    {skeletonFactBand("cadence", 2)}
+    {skeletonFactBand("identity", 6, copy.loading)}
+    {skeletonFactBand("cadence", 2, copy.loading)}
     <div className={BAND_CLASS_NAME}>
-        {skeletonLine("xs")}
-        <div className={ROW_HEAD_CLASS_NAME}>{skeletonLine("md")}<Badge isSkeleton>Loading</Badge></div>
+        {skeletonLine("xs", copy.loading)}
+        <div className={ROW_HEAD_CLASS_NAME}>{skeletonLine("md", copy.loading)}<Badge isSkeleton>{copy.loading}</Badge></div>
         <Progress label={copy.loadingTitle} isSkeleton />
-        {skeletonLine("xs")}
+        {skeletonLine("xs", copy.loading)}
     </div>
-    <div className={SKELETON_FOOTNOTE_RESERVED_CLASS_NAME}>{skeletonLine("xs")}</div>
-    <div className={BAND_CLASS_NAME}><div><Button variant="primary" type="button" isSkeleton>Loading</Button></div></div>
+    <div className={SKELETON_FOOTNOTE_RESERVED_CLASS_NAME}>{skeletonLine("xs", copy.loading)}</div>
+    <div className={BAND_CLASS_NAME}><div><Button variant="primary" type="button" isSkeleton>{copy.loading}</Button></div></div>
 </SurfaceCard>;
 
-const provisioningLoadingRail = (copy: PurchaseStatusCopy) => <SurfaceCard label={copy.confirmedFactsLabel} labelEnd={skeletonLabelEnd} composition="joined" height="fill">
-    <div className={BAND_CLASS_NAME}>{["payment", "entitlement", "configure", "readiness"].map(key => skeletonCheckRow(key, key === "configure"))}</div>
-    {skeletonFactRow("owner", true)}
-    {skeletonFactRow("attempt")}
-    <div className={BAND_CLASS_NAME}>{skeletonLine("sm")}{skeletonLine("xs")}</div>
+const provisioningLoadingRail = (copy: PurchaseStatusCopy) => <SurfaceCard label={copy.confirmedFactsLabel} labelEnd={skeletonLabelEnd(copy.loading)} composition="joined" height="fill">
+    <div className={BAND_CLASS_NAME}>{["payment", "entitlement", "configure", "readiness"].map(key => skeletonCheckRow(key, copy.loading, key === "configure"))}</div>
+    {skeletonFactRow("owner", copy.loading, true)}
+    {skeletonFactRow("attempt", copy.loading)}
+    <div className={BAND_CLASS_NAME}>{skeletonLine("sm", copy.loading)}{skeletonLine("xs", copy.loading)}</div>
 </SurfaceCard>;
 
 /** Draw every purchase-status state from resolved props; data and routes belong to the connected owner. */

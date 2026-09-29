@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { AcademyControlCenter } from "./index"
 
 const m = vi.hoisted(() => ({ session: { state: { status: "signed-in", accessToken: "test-token" } }, sites: { ok: true, data: [] as Array<unknown> }, list: vi.fn(), open: vi.fn() }))
-vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => m.session }))
 vi.mock("@/modules/api/console", () => ({ myExpertSites: m.list }))
 type PageView = { state: string; props: { mode: string }; on: { selectMode: (mode: string) => void; openPublicSite: () => void } }

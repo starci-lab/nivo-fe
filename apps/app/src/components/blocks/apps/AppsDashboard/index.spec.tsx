@@ -2,10 +2,9 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-    locale: "vi", push: vi.fn(), sites: vi.fn(), instances: vi.fn(), orders: vi.fn(), catalogue: vi.fn(),
+    push: vi.fn(), sites: vi.fn(), instances: vi.fn(), orders: vi.fn(), catalogue: vi.fn(),
     session: { state: { status: "signed-in", accessToken: "apps-dashboard-0" } },
 }))
-vi.mock("next-intl", () => ({ useLocale: () => mocks.locale, useTranslations: () => (key: string) => key, useFormatter: () => ({ number: (value: number) => String(value) }) }))
 vi.mock("@/modules/i18n/navigation", () => ({ navigation: { useRouter: () => ({ push: mocks.push }) } }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => ({ myExpertSites: mocks.sites, myInstances: mocks.instances, myCatalogOrders: mocks.orders, catalogItems: mocks.catalogue }))
@@ -18,7 +17,6 @@ describe("AppsDashboard", () => {
     beforeEach(() => {
         vi.clearAllMocks()
         viewerSequence += 1
-        mocks.locale = "vi"
         mocks.session.state.status = "signed-in"
         mocks.session.state.accessToken = `apps-dashboard-${viewerSequence}`
         mocks.sites.mockResolvedValue({ ok: true, data: [] })
@@ -29,15 +27,14 @@ describe("AppsDashboard", () => {
 
     it("owns dashboard loading and empty answers", async () => {
         render(<AppsDashboard />)
-        await waitFor(() => expect(screen.getAllByText("apps.emptyDescription").length).toBeGreaterThan(0))
+        await waitFor(() => expect(screen.getAllByText("Pick a template below to build the first one.").length).toBeGreaterThan(0))
         expect(mocks.catalogue).toHaveBeenCalledWith("site_from_template")
     })
 
     it("routes a supported template to the separate create flow", async () => {
-        mocks.locale = "en"
         mocks.catalogue.mockResolvedValue({ ok: true, data: [{ id: "item-1", name: "Academy", tagline: "Learn", templateKey: "ai_academy", tiers: [{ name: "Starter", priceMonthlyVnd: 100 }] }] })
         render(<AppsDashboard />)
-        fireEvent.click(await screen.findByRole("button", { name: "apps.build" }))
+        fireEvent.click(await screen.findByRole("button", { name: "Build" }))
         expect(mocks.push).toHaveBeenCalledWith("/apps/create/ai_academy")
     })
 })

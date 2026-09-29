@@ -5,8 +5,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 const push = vi.fn()
 const replace = vi.fn()
 const signedIn = { state: { status: "signed-in", accessToken: "token" } }
-const localeState = { value: "en" }
-const t = (key: string) => key
 const resetQueryCache = () => { for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key) }
 let viewerSequence = 0
 if (!Element.prototype.getAnimations) Element.prototype.getAnimations = () => []
@@ -20,11 +18,6 @@ vi.mock("@/modules/i18n/navigation", async () => {
     const navigation = { ...(actual.navigation as Record<string, unknown>), useRouter: () => ({ push, replace }), usePathname: () => "/wallet" }
     return { ...actual, navigation }
 })
-vi.mock("next-intl", () => ({
-    useTranslations: () => t,
-    useLocale: () => localeState.value,
-    useFormatter: () => ({ number: (value: number) => String(value), dateTime: (value: string) => value }),
-}))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => signedIn }))
 vi.mock("@/hooks", async () => ({ ...(await vi.importActual("@/hooks") as Record<string, unknown>), useSession: () => signedIn, useProvisioningRealtime: () => ({ status: "disconnected", reason: null }) }))
 vi.mock("@/modules/api/console", () => ({
@@ -59,7 +52,7 @@ import { AgentOSSolutionModuleCenter } from "../../agentos/AgentOSSolutionModule
 import { myAcademyGrowthSnapshot } from "@/modules/api/console"
 
 describe("AcademyGrowthSummary", () => {
-    afterEach(() => { localeState.value = "en"; cleanup(); resetQueryCache() })
+    afterEach(() => { cleanup(); resetQueryCache() })
     beforeEach(() => {
         window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })
         viewerSequence += 1

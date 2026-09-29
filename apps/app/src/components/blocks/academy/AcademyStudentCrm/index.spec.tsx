@@ -4,7 +4,6 @@ import { AcademyStudentCrm } from "./index"
 
 type StudentFixture = { readonly id: string; readonly name: string; readonly email: string; readonly role: string; readonly status: string; readonly xp: number }
 const m = vi.hoisted(() => ({ session: { state: { status: "signed-in", accessToken: "test-token" } }, students: { ok: true, data: { items: [] as Array<StudentFixture> } }, detail: { ok: true, data: undefined as unknown }, calls: { create: vi.fn(), status: vi.fn(), grant: vi.fn(), revoke: vi.fn(), list: vi.fn(), detail: vi.fn() } }))
-vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => m.session }))
 vi.mock("@/modules/api/console", () => ({ myAcademyStudents: m.calls.list, myAcademyStudentDetail: m.calls.detail, createAcademyStudent: m.calls.create, setAcademyStudentStatus: m.calls.status, grantAcademyCourseAccess: m.calls.grant, revokeAcademyCourseAccess: m.calls.revoke }))
 type StudentView = { on: { openStudent: (id: string) => void; changeName: (value: string) => void; changeEmail: (value: string) => void; changePassword: (value: string) => void; createStudent: () => void; changeCourseSlug: (value: string) => void; setStatus: (status: string) => void; grantAccess: () => void; revokeAccess: () => void }; state: string; props: { detailState: string } }

@@ -142,10 +142,6 @@
     "filterAll": "All",
     "empty": "No sites or workspaces yet. Provision the first one to begin.",
     "error": "Could not load the resource list. This is a failure asking the server, not a resource that failed.",
-    "kind": {
-      "site": "Site",
-      "workspace": "Workspace"
-    },
     "status": {
       "notProvisioned": "Not provisioned",
       "provisioning": "Provisioning",
@@ -154,14 +150,6 @@
       "failed": "Failed",
       "active": "Active",
       "suspended": "Suspended"
-    },
-    "action": {
-      "open": "Open",
-      "suspend": "Suspend",
-      "resume": "Resume",
-      "retry": "Try again",
-      "viewDns": "View DNS record",
-      "provision": "Provision"
     }
   },
   "authentication": {
@@ -222,7 +210,6 @@
       "promptAction": "Create one",
       "refused": "That email or password is not right.",
       "oauthRefused": "Provider sign-in could not be completed. Please try again.",
-      "twoFactorTitle": "Two-factor verification",
       "twoFactorSubtitle": "Enter the 6-digit code from your authenticator app.",
       "twoFactorSubmitLabel": "Verify and sign in",
       "twoFactorRefused": "That code is not right. Check it and try again.",
@@ -312,12 +299,7 @@
       "administratorEnding": {
         "title": "End the sign-ins of {target}?",
         "description": "This ends every current Nivo session of this person on every browser. Your authority is checked as you submit.",
-        "targetLabel": "Person to end sign-ins for",
-        "contextLabel": "Scope you act in",
-        "workspaceContext": "Workspace {workspace}",
-        "operationContext": "Nivo operation",
         "cancel": "Cancel",
-        "confirm": "End sign-ins",
         "pending": "Checking your authority and ending the sessions…",
         "applied": "Sign-ins in the scope you act in have been ended for this person.",
         "refused": "This action cannot be carried out.",
@@ -473,7 +455,8 @@
         "action": "Accept invitation",
         "refused": "This invitation is no longer valid, or your sign-in email does not match.",
         "invalidLink": "This invitation link is missing its workspace."
-      }
+      },
+      "workspace": "Workspace"
     },
     "state": {
       "loading": "Asking the server"
@@ -489,7 +472,6 @@
       "title": "Overview",
       "lede": "Everything this account runs, and the one thing to do next.",
       "atAGlance": "At a glance",
-      "buildApp": "Build an app",
       "none": "None yet",
       "runtimeLabel": "Runtime",
       "runtimeFact": "The workspace pod, as it answered",
@@ -538,9 +520,6 @@
       "provisioningTitle": "Provisioning Template App",
       "provisioningDescription": "Follow this persisted site until its isolated stack is ready.",
       "listLabel": "Your apps",
-      "openSet": "Open Apps",
-      "namesNotCount": "This section names the first few apps rather than counting them. A list page is not a total.",
-      "empty": "No apps yet.",
       "emptyDescription": "Pick a template below to build the first one.",
       "catalogueLabel": "Use another app",
       "catalogueFact": "template catalogue",
@@ -551,7 +530,6 @@
       "open": "Open",
       "viewDns": "View record",
       "orderInProgress": "paid order · being built",
-      "priceFrom": "From {price}/month",
       "priceTier": "{tier} · {price}",
       "attentionGroup": "Needs your attention",
       "steadyGroup": "Running and building"
@@ -576,7 +554,6 @@
         "purchaser": "Purchaser",
         "admission": "Purchaser admission",
         "railLabel": "Request payment",
-        "railNote": "This request reuses the same purchase identity and opens the SePay checkout. It does not mark payment as paid.",
         "stepRecheck": "Recheck admission and frozen terms",
         "stepIdentity": "Create purchase identity",
         "stepProvider": "Open payment action",
@@ -587,21 +564,11 @@
         "footnote": "Browser return is navigation, not payment proof.",
         "refusedTitle": "Checkout cannot continue",
         "admitted": "Admitted",
-        "admissionNamed": "{name} · Admitted",
-        "eligibilityValue": "Vietnam · admitted organization owner",
-        "sellerValue": "Nivo · platform invoice",
         "recheckDetail": "Admitted purchaser · current offer terms",
-        "recheckDetailNamed": "{name} · Vietnam eligibility",
-        "providerRail": "SePay · Online Banking",
-        "monthlyBilling": "Monthly billing",
-        "oneTimeBilling": "One-time charge",
-        "renewalManual": "Manual re-authorization required each period",
-        "noRenewal": "Manual re-authorization required for renewal",
         "staleOffer": "The selected offer is no longer current. Return to offer selection and choose a current offer.",
         "checkoutUnavailable": "Checkout could not confirm this purchase. The offer may have changed.",
         "paymentNotStarted": "No payment request was accepted. The same purchase identity remains available for a safe retry.",
         "paymentRefused": "This purchase's invoice was cancelled. Return to offer selection to start a current purchase.",
-        "checkoutInvalid": "The provider returned unreadable checkout fields.",
         "railChoice": "Payment method",
         "railVnpay": "VNPAY",
         "railVnpayDetail": "Domestic cards and bank accounts through VNPAY",
@@ -611,7 +578,6 @@
         "railCredentialPending": "The payment gateway is still waiting on the owner's credentials. The payment request uses placeholder credentials and is not blocked.",
         "purchaseIdentityReused": "This request reuses the account's existing purchase identity and opens the chosen gateway's payment page. It does not mark the payment as paid.",
         "sellerLedger": "Nivo · invoice posted on the platform billing ledger",
-        "purchaserVerifiedLogin": "Purchaser · verified Login account",
         "refusedNotAdmitted": "The signed-in account is not an admitted purchaser yet.",
         "nextActionVerifyEmail": "Verify the account's email, then try again.",
         "nextActionSignIn": "Sign in with an admitted purchaser account, then try again.",
@@ -859,7 +825,8 @@
           "ready": "Readiness confirmed",
           "failed": "Provisioning halted",
           "suspended": "Provisioning suspended"
-        }
+        },
+        "loading": "Loading"
       },
       "title": "AgentOS",
       "description": "Monitor the business modules, activation state, and the next available action.",
@@ -870,7 +837,6 @@
       "createDescription": "Choose an AgentOS plan and submit a request to create an order.",
       "orderTitle": "AgentOS order",
       "orderDescription": "Continue payment for this order and provision the workspace.",
-      "openService": "Open service",
       "workspaceDescription": "Your agent workspace and its current runtime reachability.",
       "kindWorkspace": "Workspace",
       "emptyDescription": "Create your first AgentOS workspace.",
@@ -880,7 +846,6 @@
       "retry": "Try again",
       "orderReference": "Order {id}",
       "workspaceReference": "Workspace ID {id}",
-      "viewPlans": "See plans",
       "workspacesLabel": "Your workspaces",
       "summary": {
         "overview": "AgentOS team status",
@@ -891,7 +856,8 @@
         "attention": "Needs attention",
         "attentionCaption": "Requires an owner decision",
         "attentionGroup": "Needs your attention",
-        "steadyGroup": "Running and starting up"
+        "steadyGroup": "Running and starting up",
+        "status": "Status"
       },
       "businessDashboard": {
         "workspaceLabel": "Operating workspace",
@@ -906,7 +872,6 @@
       },
       "podReachable": "Pod is answering",
       "podUnreachable": "Pod is not answering",
-      "checkedAt": "checked at {time}",
       "shell": {
         "headingFallback": "AgentOS workspace",
         "eyebrow": "AgentOS",
@@ -1063,23 +1028,7 @@
             "empty": "None",
             "summary": {
               "section": "Package and lifecycle",
-              "module": "Module",
-              "version": "Version",
-              "status": "Status",
-              "failure": "Failure code",
-              "modelProfile": "Model profile",
-              "manifest": "Manifest digest"
-            },
-            "bindings": {
-              "section": "Agents and knowledge",
-              "agents": "Created agents",
-              "channels": "Channel accounts",
-              "sharedKnowledge": "Shared knowledge sources",
-              "knowledgeVersions": "Common · private knowledge",
-              "artifact": "Pinned knowledge artifact",
-              "currentness": "Workspace import",
-              "embedding": "Embedding",
-              "retrievalScope": "Private retrieval scope"
+              "status": "Status"
             }
           }
         },
@@ -1176,7 +1125,6 @@
           "title": "Modules",
           "description": "Create a custom module through guided questions or install an immutable Nivo solution for this workspace.",
           "eyebrow": "AgentOS module studio",
-          "create": "Create module",
           "checkedAt": "The list was checked at {time}",
           "installedIn": "Installed in {name}",
           "browseCatalog": "View available modules",
@@ -1203,24 +1151,10 @@
           "sections": "Module workflow"
         },
         "collection": {
-          "title": "Custom modules",
-          "refused": "Nivo could not read this workspace's custom modules. The solution catalog below is still available.",
-          "empty": "This workspace has no custom modules.",
-          "emptyTitle": "No custom module yet",
-          "refusedTitle": "Custom modules could not be read",
-          "retry": "Try again",
-          "create": "Create module",
-          "custom": "Custom",
-          "progress": "{progress}% complete",
-          "inspect": "View module",
-          "resume": "Continue guided questions"
+          "title": "Custom modules"
         },
         "status": {
-          "draft": "Needs input",
-          "ready_for_review": "Ready for review",
-          "publishing": "Publishing",
-          "active": "Active",
-          "publish_failed": "Publish failed"
+          "active": "Active"
         },
         "intake": {
           "title": "What should this module help your team do?",
@@ -1908,7 +1842,11 @@
                 "unsetItems": "Unset items: {items}",
                 "settled": "The policy settled at revision {revision}."
               },
-              "workState": { "ready": "Ready", "waiting": "Waiting", "attention": "Needs attention" },
+              "workState": {
+                "ready": "Ready",
+                "waiting": "Waiting",
+                "attention": "Needs attention"
+              },
               "workReason": {
                 "policyUnset": "Policy not set",
                 "policyHold": "Held by policy",
@@ -1918,7 +1856,11 @@
                 "needsFollowUp": "Needs follow-up",
                 "outcomeUnknown": "Outcome unknown"
               },
-              "lifecycle": { "open": "Open", "won": "Won", "lost": "Lost" },
+              "lifecycle": {
+                "open": "Open",
+                "won": "Won",
+                "lost": "Lost"
+              },
               "commandStatus": {
                 "pending": "Pending",
                 "awaitingClarification": "Awaiting clarification",
@@ -1934,263 +1876,270 @@
                 "stopped": "Stopped",
                 "outcomeUnknown": "Outcome unknown"
               },
-              "outcome": { "won": "Won", "lost": "Lost", "attention": "Attention" },
-              "fact": { "customerRef": "Customer reference", "opportunityId": "Opportunity identity" }
+              "outcome": {
+                "won": "Won",
+                "lost": "Lost",
+                "attention": "Attention"
+              },
+              "fact": {
+                "customerRef": "Customer reference",
+                "opportunityId": "Opportunity identity"
+              }
             },
             "accountingWorkbench": {
-                                     "title": "Accounting workbench",
-                                     "description": "Every figure here is a signed result read back from this installation's Accounting operations.",
-                                     "none": "—",
-                                     "reload": "Re-read",
-                                     "revision": "revision {value}",
-                                     "evidenceIdsHint": "Comma separated evidence identities",
-                                     "surfaceUnavailable": "The operation could not answer",
-                                     "nothingChanged": "Nothing was changed, so nothing here is out of date.",
-                                     "standing": {
-                                       "loading": "Reading the Accounting surface…",
-                                       "denied": "This account cannot read this installation's Accounting records.",
-                                       "unavailable": "The Accounting operations did not answer.",
-                                       "empty": "Nothing is recorded for this reading yet.",
-                                       "ready": "Read from the Accounting operations."
-                                     },
-                                     "overview": {
-                                       "label": "Statement",
-                                       "covered": "covering {count} recorded results",
-                                       "empty": "No result is recorded for this period",
-                                       "emptyHint": "Choose another period, or admit the evidence this period should contain.",
-                                       "period": "Period",
-                                       "currency": "Currency",
-                                       "allCurrencies": "All currencies",
-                                       "availability": "Availability: {value}",
-                                       "periodBadge": "Period {period}",
-                                       "itemCount": "{count} results",
-                                       "attention": "Needs attention: {codes}",
-                                       "sourceCoverage": "{count} source evidence identities behind this period",
-                                       "partial": "Partly covered because: {reasons}",
-                                       "loadMore": "Read the next page",
-                                       "measureAbsent": "Not measured by this period",
-                                       "measureUnknown": "Not measured: {reason}",
-                                       "measureCovered": "over {count} results",
-                                       "estimate": "The tax figure is an estimate under {currency} policy and excludes whatever that policy names."
-                                     },
-                                     "availability": {
-                                       "current": "current",
-                                       "partial": "partial",
-                                       "stale": "stale",
-                                       "unavailable": "unavailable"
-                                     },
-                                     "measure": {
-                                       "cashIn": "Cash in",
-                                       "cashOut": "Cash out",
-                                       "revenue": "Recognized revenue",
-                                       "cost": "Recognized cost",
-                                       "unpaid": "Unpaid",
-                                       "estimatedTax": "Estimated tax",
-                                       "other": "Other measure"
-                                     },
-                                     "partialReason": {
-                                       "missingOccurredOn": "a result has no occurred-on date",
-                                       "missingMeasureCoverage": "a measure has no coverage",
-                                       "staleSource": "a source is stale",
-                                       "unavailableSource": "a source is unavailable"
-                                     },
-                                     "attention": {
-                                       "missingReceipt": "a result has no receipt",
-                                       "unmatchedPayment": "a payment is unmatched",
-                                       "missingOccurredOn": "a result has no occurred-on date",
-                                       "staleSource": "a result rests on a stale source",
-                                       "other": "an unregistered attention code"
-                                     },
-                                     "intake": {
-                                       "label": "Evidence intake",
-                                       "evidenceId": "Evidence identity",
-                                       "evidenceIdHint": "The identity the source itself gives this item",
-                                       "sourceKind": "Source kind",
-                                       "sourceRef": "Source reference",
-                                       "sourceRevision": "Source revision",
-                                       "fingerprint": "Fingerprint",
-                                       "fingerprintHint": "What makes this item distinct from a near duplicate",
-                                       "expectedRevision": "Expected revision",
-                                       "admit": "Admit evidence",
-                                       "empty": "Nothing is read for this evidence identity",
-                                       "emptyHint": "Admit an item, or name an identity that already exists.",
-                                       "noMissingFacts": "No fact is missing",
-                                       "missingFacts": "Missing: {facts}",
-                                       "duplicateNotice": "This item looks like a duplicate; the admission is recorded, not resolved.",
-                                       "conflictNotice": "This item needs information before it can be read.",
-                                       "settled": "Evidence settled as {state}."
-                                     },
-                                     "evidenceState": {
-                                       "admitted": "admitted",
-                                       "reading": "reading",
-                                       "ready": "ready",
-                                       "needsInformation": "needs information",
-                                       "likelyDuplicate": "likely duplicate",
-                                       "unreadable": "unreadable",
-                                       "rejected": "rejected"
-                                     },
-                                     "routine": {
-                                       "label": "Routine processing",
-                                       "intentId": "Intent identity",
-                                       "itemId": "Item identity",
-                                       "policyRevision": "Policy revision",
-                                       "evidenceIds": "Evidence identities",
-                                       "evidenceIdsHint": "Comma separated",
-                                       "itemRevision": "Expected item revision",
-                                       "commit": "Commit the decision",
-                                       "empty": "No intent is read yet",
-                                       "emptyHint": "Name an intent to read its stable state.",
-                                       "readback": "Item {item} · attempt {attempt}",
-                                       "receipt": "Receipt {receipt} · result {result}",
-                                       "unknownNotice": "The outcome is not attested. Re-read this intent; the read is what settles it.",
-                                       "retryHint": "A retry needs the proof that the earlier attempt never started.",
-                                       "oldAttemptId": "Earlier attempt",
-                                       "notStartedProofRef": "Proof it never started",
-                                       "newAttemptId": "New attempt",
-                                       "retry": "Retry with proof",
-                                       "settled": "Routine settled as {state}."
-                                     },
-                                     "routineState": {
-                                       "admitted": "admitted",
-                                       "committed": "committed",
-                                       "needsDecision": "needs a decision",
-                                       "pendingAuthority": "pending authority",
-                                       "denied": "denied",
-                                       "outcomeUnknown": "outcome unknown"
-                                     },
-                                     "question": {
-                                       "label": "Material question",
-                                       "why": "Why it matters",
-                                       "whyUnknown": "The routine named no reason code.",
-                                       "whyReason": "The routine answered {reason}.",
-                                       "attention": "Attention: {codes}",
-                                       "evidence": "Evidence",
-                                       "evidenceAbsent": "No evidence identity stands behind the results of this period.",
-                                       "alternatives": "Answering records the alternative you choose; deferring keeps the question open.",
-                                       "consequence": "Answering a question records no financial effect. Only an applied correction changes a figure.",
-                                       "exceptionId": "Exception identity",
-                                       "exceptionIdHint": "The identity of the question you are acting on; no read on this surface discloses one.",
-                                       "choiceCode": "Chosen alternative",
-                                       "reason": "Reason",
-                                       "answerEvidenceRefs": "Answer evidence",
-                                       "expectedRevision": "Expected revision",
-                                       "answer": "Answer",
-                                       "defer": "Defer",
-                                       "reopen": "Reopen",
-                                       "escalate": "Escalate",
-                                       "dismiss": "Dismiss",
-                                       "settled": "Answered and read back",
-                                       "pending": "Recorded, still being processed",
-                                       "consequenceHeld": "The financial effect is still held until the readback returns it.",
-                                       "empty": "No material question is open",
-                                       "emptyHint": "A question appears when a routine read needs a decision."
-                                     },
-                                     "exceptionState": {
-                                       "open": "open",
-                                       "deferred": "deferred",
-                                       "escalated": "escalated",
-                                       "answered": "answered",
-                                       "resolved": "resolved",
-                                       "dismissed": "dismissed"
-                                     },
-                                     "detail": {
-                                       "label": "Result",
-                                       "current": "current",
-                                       "historical": "historical",
-                                       "resultId": "Result identity",
-                                       "itemId": "Item identity",
-                                       "asOfHint": "An as-of read needs an item and an instant",
-                                       "asOf": "As-of instant",
-                                       "asOfFormat": "Epoch milliseconds or an ISO instant",
-                                       "load": "Read the result",
-                                       "empty": "No result is read yet",
-                                       "emptyHint": "Read a current result by identity, or an item as it stood at an instant.",
-                                       "effectiveAt": "effective {at}",
-                                       "matchStatus": "Payment",
-                                       "treatment": "Treatment",
-                                       "evidenceRefs": "Evidence: {refs}",
-                                       "receipt": "Receipt {receipt} · policy {policy}",
-                                       "lineage": "Predecessor {predecessor} · successor {successor}"
-                                     },
-                                     "matchStatus": {
-                                       "unpaid": "unpaid",
-                                       "unmatched": "unmatched",
-                                       "matched": "matched",
-                                       "ambiguous": "ambiguous"
-                                     },
-                                     "treatment": {
-                                       "supported": "supported",
-                                       "unsupported": "unsupported",
-                                       "unknown": "unknown"
-                                     },
-                                     "fact": {
-                                       "amount": "Amount",
-                                       "currency": "Currency",
-                                       "occurredOn": "Occurred on",
-                                       "counterparty": "Counterparty",
-                                       "matchStatus": "Payment",
-                                       "treatment": "Treatment",
-                                       "other": "Other fact"
-                                     },
-                                     "correction": {
-                                       "label": "Forward correction",
-                                       "correctionId": "Correction identity",
-                                       "predecessorResultId": "Result being corrected",
-                                       "predecessorHint": "A correction always appends after the result it changes",
-                                       "correctedAmount": "Corrected amount (minor units)",
-                                       "correctedCounterparty": "Corrected counterparty",
-                                       "reason": "Reason",
-                                       "evidenceRefs": "Evidence",
-                                       "expectedResultRevision": "Expected result revision",
-                                       "propose": "Propose the correction",
-                                       "appendHint": "Appending applies the proposal and adds one new result.",
-                                       "attemptId": "Attempt identity",
-                                       "append": "Append the applied result",
-                                       "empty": "No correction is read yet",
-                                       "emptyHint": "Propose a correction against a result, then append it.",
-                                       "original": "Original result",
-                                       "originalUnchanged": "The original result is never rewritten.",
-                                       "lineage": "Predecessor {predecessor} · appended {result}",
-                                       "appended": "Appended result {result}",
-                                       "unknownNotice": "This attempt is not attested. The result lineage is what settles it.",
-                                       "settled": "Correction settled as {state} with result {result}."
-                                     },
-                                     "correctionState": {
-                                       "proposed": "proposed",
-                                       "blocked": "blocked",
-                                       "possibleStart": "possibly started",
-                                       "applied": "applied",
-                                       "provenNotApplied": "proven not applied",
-                                       "outcomeUnknown": "outcome unknown"
-                                     },
-                                     "rail": {
-                                       "scope": "Installation",
-                                       "scopeReady": "Addressed to this installation's operation route.",
-                                       "attention": "Attention",
-                                       "attentionEmpty": "Nothing needs attention",
-                                       "attentionEmptyHint": "No result in this period carries an attention code.",
-                                       "asOf": "As-of",
-                                       "asOfValue": "Instant",
-                                       "asOfHint": "Read a historical figure without changing the current one",
-                                       "asOfApply": "Read as-of",
-                                       "returnCurrent": "Return to current",
-                                       "current": "Showing the current statement.",
-                                       "historical": "Showing a historical figure; nothing here is written.",
-                                       "notice": "Last settlement",
-                                       "noticeEmpty": "No command has settled in this view."
-                                     },
-                                     "refusal": {
-                                       "forbidden": "This account is not allowed to do that.",
-                                       "signIn": "Sign in again to continue.",
-                                       "staleAuthority": "The authority this command was fenced by has moved on.",
-                                       "validation": "The command was refused as malformed.",
-                                       "conflict": "The record changed since this view read it.",
-                                       "unattested": "The effect is not attested. Re-read the identity that settles it.",
-                                       "malformed": "The operation answered something this client cannot read.",
-                                       "unreachable": "The Accounting operation could not be reached.",
-                                       "unsettled": "The command did not settle: the readback did not disclose the new state."
-                                     }
-                                   },
+              "title": "Accounting workbench",
+              "description": "Every figure here is a signed result read back from this installation's Accounting operations.",
+              "none": "—",
+              "reload": "Re-read",
+              "revision": "revision {value}",
+              "evidenceIdsHint": "Comma separated evidence identities",
+              "surfaceUnavailable": "The operation could not answer",
+              "nothingChanged": "Nothing was changed, so nothing here is out of date.",
+              "standing": {
+                "loading": "Reading the Accounting surface…",
+                "denied": "This account cannot read this installation's Accounting records.",
+                "unavailable": "The Accounting operations did not answer.",
+                "empty": "Nothing is recorded for this reading yet.",
+                "ready": "Read from the Accounting operations."
+              },
+              "overview": {
+                "label": "Statement",
+                "covered": "covering {count} recorded results",
+                "empty": "No result is recorded for this period",
+                "emptyHint": "Choose another period, or admit the evidence this period should contain.",
+                "period": "Period",
+                "currency": "Currency",
+                "allCurrencies": "All currencies",
+                "availability": "Availability: {value}",
+                "periodBadge": "Period {period}",
+                "itemCount": "{count} results",
+                "attention": "Needs attention: {codes}",
+                "sourceCoverage": "{count} source evidence identities behind this period",
+                "partial": "Partly covered because: {reasons}",
+                "loadMore": "Read the next page",
+                "measureAbsent": "Not measured by this period",
+                "measureUnknown": "Not measured: {reason}",
+                "measureCovered": "over {count} results",
+                "estimate": "The tax figure is an estimate under {currency} policy and excludes whatever that policy names."
+              },
+              "availability": {
+                "current": "current",
+                "partial": "partial",
+                "stale": "stale",
+                "unavailable": "unavailable"
+              },
+              "measure": {
+                "cashIn": "Cash in",
+                "cashOut": "Cash out",
+                "revenue": "Recognized revenue",
+                "cost": "Recognized cost",
+                "unpaid": "Unpaid",
+                "estimatedTax": "Estimated tax",
+                "other": "Other measure"
+              },
+              "partialReason": {
+                "missingOccurredOn": "a result has no occurred-on date",
+                "missingMeasureCoverage": "a measure has no coverage",
+                "staleSource": "a source is stale",
+                "unavailableSource": "a source is unavailable"
+              },
+              "attention": {
+                "missingReceipt": "a result has no receipt",
+                "unmatchedPayment": "a payment is unmatched",
+                "missingOccurredOn": "a result has no occurred-on date",
+                "staleSource": "a result rests on a stale source",
+                "other": "an unregistered attention code"
+              },
+              "intake": {
+                "label": "Evidence intake",
+                "evidenceId": "Evidence identity",
+                "evidenceIdHint": "The identity the source itself gives this item",
+                "sourceKind": "Source kind",
+                "sourceRef": "Source reference",
+                "sourceRevision": "Source revision",
+                "fingerprint": "Fingerprint",
+                "fingerprintHint": "What makes this item distinct from a near duplicate",
+                "expectedRevision": "Expected revision",
+                "admit": "Admit evidence",
+                "empty": "Nothing is read for this evidence identity",
+                "emptyHint": "Admit an item, or name an identity that already exists.",
+                "noMissingFacts": "No fact is missing",
+                "missingFacts": "Missing: {facts}",
+                "duplicateNotice": "This item looks like a duplicate; the admission is recorded, not resolved.",
+                "conflictNotice": "This item needs information before it can be read.",
+                "settled": "Evidence settled as {state}."
+              },
+              "evidenceState": {
+                "admitted": "admitted",
+                "reading": "reading",
+                "ready": "ready",
+                "needsInformation": "needs information",
+                "likelyDuplicate": "likely duplicate",
+                "unreadable": "unreadable",
+                "rejected": "rejected"
+              },
+              "routine": {
+                "label": "Routine processing",
+                "intentId": "Intent identity",
+                "itemId": "Item identity",
+                "policyRevision": "Policy revision",
+                "evidenceIds": "Evidence identities",
+                "evidenceIdsHint": "Comma separated",
+                "itemRevision": "Expected item revision",
+                "commit": "Commit the decision",
+                "empty": "No intent is read yet",
+                "emptyHint": "Name an intent to read its stable state.",
+                "readback": "Item {item} · attempt {attempt}",
+                "receipt": "Receipt {receipt} · result {result}",
+                "unknownNotice": "The outcome is not attested. Re-read this intent; the read is what settles it.",
+                "retryHint": "A retry needs the proof that the earlier attempt never started.",
+                "oldAttemptId": "Earlier attempt",
+                "notStartedProofRef": "Proof it never started",
+                "newAttemptId": "New attempt",
+                "retry": "Retry with proof",
+                "settled": "Routine settled as {state}."
+              },
+              "routineState": {
+                "admitted": "admitted",
+                "committed": "committed",
+                "needsDecision": "needs a decision",
+                "pendingAuthority": "pending authority",
+                "denied": "denied",
+                "outcomeUnknown": "outcome unknown"
+              },
+              "question": {
+                "label": "Material question",
+                "why": "Why it matters",
+                "whyUnknown": "The routine named no reason code.",
+                "whyReason": "The routine answered {reason}.",
+                "attention": "Attention: {codes}",
+                "evidence": "Evidence",
+                "evidenceAbsent": "No evidence identity stands behind the results of this period.",
+                "alternatives": "Answering records the alternative you choose; deferring keeps the question open.",
+                "consequence": "Answering a question records no financial effect. Only an applied correction changes a figure.",
+                "exceptionId": "Exception identity",
+                "exceptionIdHint": "The identity of the question you are acting on; no read on this surface discloses one.",
+                "choiceCode": "Chosen alternative",
+                "reason": "Reason",
+                "answerEvidenceRefs": "Answer evidence",
+                "expectedRevision": "Expected revision",
+                "answer": "Answer",
+                "defer": "Defer",
+                "reopen": "Reopen",
+                "escalate": "Escalate",
+                "dismiss": "Dismiss",
+                "settled": "Answered and read back",
+                "pending": "Recorded, still being processed",
+                "consequenceHeld": "The financial effect is still held until the readback returns it.",
+                "empty": "No material question is open",
+                "emptyHint": "A question appears when a routine read needs a decision."
+              },
+              "exceptionState": {
+                "open": "open",
+                "deferred": "deferred",
+                "escalated": "escalated",
+                "answered": "answered",
+                "resolved": "resolved",
+                "dismissed": "dismissed"
+              },
+              "detail": {
+                "label": "Result",
+                "current": "current",
+                "historical": "historical",
+                "resultId": "Result identity",
+                "itemId": "Item identity",
+                "asOfHint": "An as-of read needs an item and an instant",
+                "asOf": "As-of instant",
+                "asOfFormat": "Epoch milliseconds or an ISO instant",
+                "load": "Read the result",
+                "empty": "No result is read yet",
+                "emptyHint": "Read a current result by identity, or an item as it stood at an instant.",
+                "effectiveAt": "effective {at}",
+                "matchStatus": "Payment",
+                "treatment": "Treatment",
+                "evidenceRefs": "Evidence: {refs}",
+                "receipt": "Receipt {receipt} · policy {policy}",
+                "lineage": "Predecessor {predecessor} · successor {successor}"
+              },
+              "matchStatus": {
+                "unpaid": "unpaid",
+                "unmatched": "unmatched",
+                "matched": "matched",
+                "ambiguous": "ambiguous"
+              },
+              "treatment": {
+                "supported": "supported",
+                "unsupported": "unsupported",
+                "unknown": "unknown"
+              },
+              "fact": {
+                "amount": "Amount",
+                "currency": "Currency",
+                "occurredOn": "Occurred on",
+                "counterparty": "Counterparty",
+                "matchStatus": "Payment",
+                "treatment": "Treatment",
+                "other": "Other fact"
+              },
+              "correction": {
+                "label": "Forward correction",
+                "correctionId": "Correction identity",
+                "predecessorResultId": "Result being corrected",
+                "predecessorHint": "A correction always appends after the result it changes",
+                "correctedAmount": "Corrected amount (minor units)",
+                "correctedCounterparty": "Corrected counterparty",
+                "reason": "Reason",
+                "evidenceRefs": "Evidence",
+                "expectedResultRevision": "Expected result revision",
+                "propose": "Propose the correction",
+                "appendHint": "Appending applies the proposal and adds one new result.",
+                "attemptId": "Attempt identity",
+                "append": "Append the applied result",
+                "empty": "No correction is read yet",
+                "emptyHint": "Propose a correction against a result, then append it.",
+                "original": "Original result",
+                "originalUnchanged": "The original result is never rewritten.",
+                "lineage": "Predecessor {predecessor} · appended {result}",
+                "appended": "Appended result {result}",
+                "unknownNotice": "This attempt is not attested. The result lineage is what settles it.",
+                "settled": "Correction settled as {state} with result {result}."
+              },
+              "correctionState": {
+                "proposed": "proposed",
+                "blocked": "blocked",
+                "possibleStart": "possibly started",
+                "applied": "applied",
+                "provenNotApplied": "proven not applied",
+                "outcomeUnknown": "outcome unknown"
+              },
+              "rail": {
+                "scope": "Installation",
+                "scopeReady": "Addressed to this installation's operation route.",
+                "attention": "Attention",
+                "attentionEmpty": "Nothing needs attention",
+                "attentionEmptyHint": "No result in this period carries an attention code.",
+                "asOf": "As-of",
+                "asOfValue": "Instant",
+                "asOfHint": "Read a historical figure without changing the current one",
+                "asOfApply": "Read as-of",
+                "returnCurrent": "Return to current",
+                "current": "Showing the current statement.",
+                "historical": "Showing a historical figure; nothing here is written.",
+                "notice": "Last settlement",
+                "noticeEmpty": "No command has settled in this view."
+              },
+              "refusal": {
+                "forbidden": "This account is not allowed to do that.",
+                "signIn": "Sign in again to continue.",
+                "staleAuthority": "The authority this command was fenced by has moved on.",
+                "validation": "The command was refused as malformed.",
+                "conflict": "The record changed since this view read it.",
+                "unattested": "The effect is not attested. Re-read the identity that settles it.",
+                "malformed": "The operation answered something this client cannot read.",
+                "unreachable": "The Accounting operation could not be reached.",
+                "unsettled": "The command did not settle: the readback did not disclose the new state."
+              }
+            },
             "calendar": "Calendar week",
             "scheduleCaption": "Collaborative schedule for {kind}@{version}",
             "proposals": "Pending proposals",
@@ -2246,6 +2195,32 @@
             "received": "Received"
           }
         }
+      },
+      "offerSelection": {
+        "path": "Purchase path",
+        "workspaces": "Workspaces",
+        "newWorkspace": "New",
+        "title": "Choose a workspace offer",
+        "description": "Compare the offers that currently apply before any payment.",
+        "offersLabel": "Current offers",
+        "offersFact": "Read from the Workspace Provision checkout boundary",
+        "offerGroupLabel": "Available offers",
+        "billingCadence": "Billing cadence",
+        "renewalBehavior": "Renewal",
+        "includedOutcome": "Included outcome",
+        "eligibility": "Eligibility",
+        "selectedBadge": "Selected",
+        "selectedOffer": "Selected offer",
+        "reviewAction": "Review selected offer",
+        "noPaymentNote": "No payment is requested at this step.",
+        "backToWorkspaces": "Back to workspaces",
+        "unavailableTitle": "No current offer can be presented",
+        "refreshOffers": "Refresh offers",
+        "noSessionTitle": "Sign in to see offers",
+        "signIn": "Sign in",
+        "signUp": "Create an account",
+        "refusalPurchaserNotAdmitted": "The signed-in account is not an admitted purchaser yet. Verify its email, or create a purchaser account, then return to this step.",
+        "refusalUnauthenticated": "No valid Login session was found. Sign in, or create an account, then return to this step."
       }
     },
     "academyControlCenter": {
@@ -2382,7 +2357,9 @@
             "description": "Send signed CRM events to an automation system.",
             "formLabel": "Create webhook"
           }
-        }
+        },
+        "reveal": "Show",
+        "hide": "Hide"
       }
     },
     "provisioningFlows": {
@@ -2445,31 +2422,22 @@
         "retryAi": "Retry AI readiness",
         "paymentTitle": "Waiting for payment",
         "paymentText": "Open Wallet and settle this order's invoice to start fulfillment.",
-        "openWallet": "Open Wallet",
         "acceptedTitle": "Order accepted",
         "acceptedText": "Payment is settled and nivo is creating the workspace identity.",
         "watchFulfillment": "Watch fulfillment",
         "preparingText": "The workspace event stream is following this workspace only.",
         "watchProvisioning": "Watch provisioning",
-        "readyText": "The workspace is ready and now appears in your AgentOS management list.",
         "aiLoading": "Reading the workspace AI and knowledge readiness snapshot.",
         "aiTesting": "The bounded readiness test is checking the provider, model and private retrieval path.",
         "aiRecovering": "Nivo is restoring pinned Nivo/module snapshots and uploaded documents into this workspace's private Qdrant collection.",
         "aiReady": "The OpenRouter credential, DeepSeek model, knowledge snapshot, Qdrant collection and bounded AI test are ready.",
         "manage": "Manage AgentOS",
         "orderMissing": "This AgentOS order was not found for the signed-in account.",
-        "orderCancelled": "This AgentOS order was cancelled.",
         "startAgain": "Start again"
       }
     },
     "servers": {
-      "title": "Servers",
-      "lede": "This is the infrastructure view of the apps and workspaces above.",
-      "empty": "nivo does not sell a standalone server. This section fills in only after an app or a workspace has been built.",
-      "shape": "{ram} · {vcpu} vCPU",
-      "shapeUnknown": "no dedicated pod",
-      "plan": "{plan} plan",
-      "renewsAt": "renews {date}"
+      "title": "Servers"
     },
     "domains": {
       "title": "Domains",
@@ -2486,7 +2454,6 @@
     "wallet": {
       "title": "Wallet",
       "pathLabel": "AgentOS order path",
-      "agentOsParent": "AgentOS",
       "orderLabel": "Order {orderId}",
       "linkedInvoiceLabel": "Invoice for this AgentOS order",
       "linkedInvoiceConsequence": "Pay this exact invoice to resume the same AgentOS order.",

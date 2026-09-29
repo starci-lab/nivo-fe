@@ -5,8 +5,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 const push = vi.fn()
 const replace = vi.fn()
 const signedIn = { state: { status: "signed-in", accessToken: "token" } }
-const localeState = { value: "en" }
-const t = (key: string) => key
 const resetQueryCache = () => { for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key) }
 let viewerSequence = 0
 if (!Element.prototype.getAnimations) Element.prototype.getAnimations = () => []
@@ -17,11 +15,6 @@ vi.mock("next/navigation", async () => ({
 }))
 vi.mock("@/hooks/i18n/useRouter", () => ({ useRouter: () => ({ push, replace }) }))
 vi.mock("@/hooks/i18n/usePathname", () => ({ usePathname: () => "/wallet" }))
-vi.mock("next-intl", () => ({
-    useTranslations: () => t,
-    useLocale: () => localeState.value,
-    useFormatter: () => ({ number: (value: number) => String(value), dateTime: (value: string) => value }),
-}))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => signedIn }))
 vi.mock("@/modules/api/console", () => ({
     myExpertSites: vi.fn().mockResolvedValue({ ok: true, data: [] }),
@@ -51,9 +44,10 @@ vi.mock("@/modules/api/console", () => ({
 }))
 
 import { WalletPage } from "."
+import enMessages from "@/messages/en.json"
 
 describe("WalletPage", () => {
-    afterEach(() => { localeState.value = "en"; cleanup(); resetQueryCache() })
+    afterEach(() => { cleanup(); resetQueryCache() })
     beforeEach(() => {
         window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })
         viewerSequence += 1
@@ -64,6 +58,6 @@ describe("WalletPage", () => {
 
     it("settles WalletPage into empty ledgers", async () => {
         render(<WalletPage />)
-        expect(screen.getByText("wallet.title")).toBeInTheDocument()
+        expect(screen.getAllByText(enMessages.console.wallet.title).length).toBeGreaterThan(0)
     })
 })

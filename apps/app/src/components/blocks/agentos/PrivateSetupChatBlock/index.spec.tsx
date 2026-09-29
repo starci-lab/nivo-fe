@@ -1,4 +1,3 @@
-import { renderToStaticMarkup } from "react-dom/server"
 import type { ComponentProps } from "react"
 import { NextIntlClientProvider, createTranslator, useTranslations } from "next-intl"
 import enMessages from "@/messages/en.json"
@@ -139,7 +138,7 @@ describe("PrivateSetupChatBlock", () => {
     describe.each(["en", "vi"] as const)("Setup identity states %s", locale => {
         it.each(["open", "ready", "completed", "superseded"] as const)("localizes %s and every role without rewriting messages", status => {
             const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.setup
-            const html = renderToStaticMarkup(<PrivateSetupChatBlock locale={locale} messages={[{ id: "u", role: "user", content: "Owner question" }, { id: "a", role: "assistant", content: "Business answer" }, { id: "s", role: "system", content: "Raw system detail" }]} revisions={[{ id: "revision-raw", revision: 2, status }]} selectedRevisionId="revision-raw" canSend={false} canStartRevision={false} onSend={vi.fn()} onSelectRevision={vi.fn()} onStartRevision={vi.fn()} />)
+            const html = render(<PrivateSetupChatBlock locale={locale} messages={[{ id: "u", role: "user", content: "Owner question" }, { id: "a", role: "assistant", content: "Business answer" }, { id: "s", role: "system", content: "Raw system detail" }]} revisions={[{ id: "revision-raw", revision: 2, status }]} selectedRevisionId="revision-raw" canSend={false} canStartRevision={false} onSend={vi.fn()} onSelectRevision={vi.fn()} onStartRevision={vi.fn()} />).container.innerHTML
             expect(html).toContain(copy.revisionStatus[status])
             for (const role of ["user", "assistant", "system"] as const) expect(html).toContain(copy.actor[role])
             expect(html).toContain("Owner question")

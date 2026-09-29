@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import en from "@/messages/en.json"
 import type { AuthActions, AuthCode, AuthDetails } from "@/components/blocks/auth/AuthenticationPanel"
 
 const mocks = vi.hoisted(() => {
@@ -23,7 +24,6 @@ const mocks = vi.hoisted(() => {
         replace: vi.fn(),
         adopt: vi.fn(),
         session: { state: { status: "anonymous" as string }, adopt: vi.fn() },
-        t: (key: string, values?: Record<string, unknown>) => values === undefined ? key : `${key}:${JSON.stringify(values)}`,
     }
 })
 
@@ -41,7 +41,6 @@ const code = { otp: "123456", newPassword: "new-password" } satisfies AuthCode
 vi.mock("@/hooks/i18n/useRouter", () => ({ useRouter: () => ({ push: mocks.push, replace: mocks.replace }) }))
 vi.mock("@/hooks/i18n/usePathname", () => ({ usePathname: () => "/authentication" }))
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(window.location.search), redirect: vi.fn(), permanentRedirect: vi.fn() }))
-vi.mock("next-intl", () => ({ useTranslations: () => mocks.t }))
 vi.mock("@/hooks", async (importOriginal) => ({ ...await importOriginal(), useSession: () => mocks.session, useRouter: () => ({ push: mocks.push, replace: mocks.replace }), usePathname: () => "/authentication" }))
 vi.mock("@/modules/api/auth", () => mocks.api)
 vi.mock("./component", () => ({
@@ -67,6 +66,12 @@ vi.mock("./component", () => ({
 
 import { AuthenticationPage } from "./"
 
+/** The real English copy of the authentication namespace, escaped the way the probe serialises it into JSON. */
+const copy = (key: string): string => {
+    const text = key.split(".").reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], en.authentication)
+    if (typeof text !== "string") throw new Error(`authentication.${key} is not a catalog message`)
+    return JSON.stringify(text).slice(1, -1)
+}
 const panel = () => screen.getByTestId("auth-panel").textContent ?? ""
 const exits = () => screen.getByTestId("auth-exits").textContent ?? ""
 
@@ -94,11 +99,11 @@ describe("AuthenticationPage connected journeys", () => {
         render(<AuthenticationPage />)
         fireEvent.click(screen.getByTestId("remember"))
         fireEvent.click(screen.getByTestId("submit-details"))
-        await waitFor(() => expect(panel()).toContain("signIn.refused"))
+        await waitFor(() => expect(panel()).toContain(copy("signIn.refused")))
         fireEvent.click(screen.getByTestId("sign-up"))
-        expect(panel()).toContain("signUp.title")
+        expect(panel()).toContain(copy("signUp.title"))
         fireEvent.click(screen.getByTestId("sign-in"))
-        expect(panel()).toContain("signIn.title")
+        expect(panel()).toContain(copy("signIn.title"))
     })
 
     it("completes sign-in and handles a two-factor response", async () => {
@@ -123,10 +128,10 @@ describe("AuthenticationPage connected journeys", () => {
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(panel()).toContain('"state":"code"'))
         fireEvent.click(screen.getByTestId("resend"))
-        await waitFor(() => expect(panel()).toContain("resentLabel"))
+        await waitFor(() => expect(panel()).toContain(copy("resentLabel")))
         mocks.api.signUpVerifyOtp.mockResolvedValue({ ok: false, reason: "used", code: "OTP_INVALID" })
         fireEvent.click(screen.getByTestId("submit-code"))
-        await waitFor(() => expect(panel()).toContain("signUp.codeRefused"))
+        await waitFor(() => expect(panel()).toContain(copy("signUp.codeRefused")))
         mocks.api.signUpVerifyOtp.mockResolvedValue({ ok: true, data: { accessToken: "signup-access", requiresTwoFactor: false, twoFactorToken: null, conclusion: null, undecided: null } })
         fireEvent.click(screen.getByTestId("submit-code"))
         await waitFor(() => expect(panel()).toContain('"state":"done"'))
@@ -142,15 +147,15 @@ describe("AuthenticationPage connected journeys", () => {
         await waitFor(() => expect(panel()).toContain('"state":"code"'))
         mocks.api.forgotPasswordResend.mockResolvedValue({ ok: false, reason: "reset-resend-failed" })
         fireEvent.click(screen.getByTestId("resend"))
-        await waitFor(() => expect(panel()).toContain("resendRefused"))
+        await waitFor(() => expect(panel()).toContain(copy("resendRefused")))
         mocks.api.forgotPasswordVerifyOtp.mockResolvedValue({ ok: false, reason: "do-not-leak" })
         fireEvent.click(screen.getByTestId("submit-code"))
-        await waitFor(() => expect(panel()).toContain("forgotPassword.codeRefused"))
+        await waitFor(() => expect(panel()).toContain(copy("forgotPassword.codeRefused")))
         mocks.api.forgotPasswordVerifyOtp.mockResolvedValue({ ok: true, data: true })
         fireEvent.click(screen.getByTestId("submit-code"))
         await waitFor(() => expect(panel()).toContain('"state":"done"'))
         fireEvent.click(screen.getByTestId("onward"))
-        expect(panel()).toContain("signIn.title")
+        expect(panel()).toContain(copy("signIn.title"))
         fireEvent.click(screen.getByTestId("back"))
         expect(panel()).toContain('"state":"details"')
     })
@@ -160,7 +165,7 @@ describe("AuthenticationPage connected journeys", () => {
         render(<AuthenticationPage />)
         fireEvent.click(screen.getByTestId("sign-up"))
         fireEvent.click(screen.getByTestId("submit-details"))
-        await waitFor(() => expect(panel()).toContain("signUp.mailRefused"))
+        await waitFor(() => expect(panel()).toContain(copy("signUp.mailRefused")))
         expect(panel()).toContain('"state":"details"')
 
         cleanup()
@@ -171,7 +176,7 @@ describe("AuthenticationPage connected journeys", () => {
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(panel()).toContain('"state":"code"'))
         fireEvent.click(screen.getByTestId("resend"))
-        await waitFor(() => expect(panel()).toContain("resendRefused"))
+        await waitFor(() => expect(panel()).toContain(copy("resendRefused")))
     })
 
     it("handles provider redirects and callback exchange outcomes", async () => {
@@ -180,7 +185,6 @@ describe("AuthenticationPage connected journeys", () => {
         expect(window.sessionStorage.getItem("nivo.oauth.provider")).toBe("google")
         expect(mocks.api.oauthRedirectUrl).toHaveBeenCalledWith("google", expect.stringContaining("/authentication"))
         await waitFor(() => expect(panel()).toContain('"pendingAction":"provider"'))
-        expect(panel()).not.toContain("providerUnavailable")
 
         cleanup()
         window.sessionStorage.setItem("nivo.oauth.provider", "google")
@@ -200,12 +204,12 @@ describe("AuthenticationPage connected journeys", () => {
         window.history.replaceState(null, "", "/authentication?code=bad&state=bad-state")
         mocks.api.exchangeOauthCode.mockResolvedValue({ ok: false, reason: "oauth-failed" })
         render(<AuthenticationPage />)
-        await waitFor(() => expect(panel()).toContain("signIn.oauthRefused"))
+        await waitFor(() => expect(panel()).toContain(copy("signIn.oauthRefused")))
 
         cleanup()
         window.history.replaceState(null, "", "/authentication?error=cancelled")
         render(<AuthenticationPage />)
-        await waitFor(() => expect(panel()).toContain("signIn.oauthRefused"))
+        await waitFor(() => expect(panel()).toContain(copy("signIn.oauthRefused")))
         expect(panel()).toContain('"state":"details"')
     })
 
@@ -247,8 +251,8 @@ describe("AuthenticationPage connected journeys", () => {
         mocks.api.signIn.mockResolvedValue({ ok: false, reason: "gateway", code: "NETWORK" })
         render(<AuthenticationPage />)
         fireEvent.click(screen.getByTestId("submit-details"))
-        await waitFor(() => expect(panel()).toContain("signIn.undecided"))
-        expect(panel()).not.toContain("signIn.refused")
+        await waitFor(() => expect(panel()).toContain(copy("signIn.undecided")))
+        expect(panel()).not.toContain(copy("signIn.refused"))
         expect(panel()).toContain('"isError":false')
 
         fireEvent.click(screen.getByTestId("submit-details"))
@@ -261,13 +265,13 @@ describe("AuthenticationPage connected journeys", () => {
         mocks.api.signIn.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, destination: null, undecided: { retryWithSameRequest: true } } })
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(mocks.api.signIn).toHaveBeenCalledTimes(3))
-        expect(panel()).toContain("signIn.undecided")
+        expect(panel()).toContain(copy("signIn.undecided"))
         expect(mocks.api.signIn.mock.calls[2][0].requestIdentity).toBe(unanswered.requestIdentity)
 
         // A REFUSAL settles the attempt, so the next press is a new logical request.
         mocks.api.signIn.mockResolvedValue({ ok: false, reason: "invalid", code: "INVALID_CREDENTIALS" })
         fireEvent.click(screen.getByTestId("submit-details"))
-        await waitFor(() => expect(panel()).toContain("signIn.refused"))
+        await waitFor(() => expect(panel()).toContain(copy("signIn.refused")))
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(mocks.api.signIn).toHaveBeenCalledTimes(5))
         const refused = mocks.api.signIn.mock.calls[4][0]
@@ -279,8 +283,8 @@ describe("AuthenticationPage connected journeys", () => {
         fireEvent.click(screen.getByTestId("sign-up"))
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(panel()).toContain('"state":"code"'))
-        expect(exits()).toContain("backLabel")
-        expect(exits()).toContain("signUp.promptAction")
+        expect(exits()).toContain(copy("backLabel"))
+        expect(exits()).toContain(copy("signUp.promptAction"))
 
         fireEvent.click(screen.getByTestId("back"))
         await waitFor(() => expect(panel()).toContain('"state":"details"'))
@@ -298,20 +302,20 @@ describe("AuthenticationPage connected journeys", () => {
             await waitFor(() => expect(panel()).toContain('"state":"notice"'))
         }
         await arrivedAtHeldAddress()
-        expect(panel()).toContain("signUp.heldAddressTitle")
-        expect(panel()).toContain("signUp.emailTaken")
-        expect(panel()).toContain("signUp.heldAddressRecoverLabel")
+        expect(panel()).toContain(copy("signUp.heldAddressTitle"))
+        expect(panel()).toContain(copy("signUp.emailTaken"))
+        expect(panel()).toContain(copy("signUp.heldAddressRecoverLabel"))
         expect(exits()).toBe("[]")
         expect(mocks.session.adopt).not.toHaveBeenCalled()
         expect(mocks.push).not.toHaveBeenCalled()
 
         fireEvent.click(screen.getByTestId("onward-secondary"))
-        await waitFor(() => expect(panel()).toContain("forgotPassword.title"))
+        await waitFor(() => expect(panel()).toContain(copy("forgotPassword.title")))
 
         cleanup()
         await arrivedAtHeldAddress()
         fireEvent.click(screen.getByTestId("onward"))
-        await waitFor(() => expect(panel()).toContain("signIn.title"))
+        await waitFor(() => expect(panel()).toContain(copy("signIn.title")))
     })
 
     it("explains an identity created with no session and offers the password just set", async () => {
@@ -322,8 +326,8 @@ describe("AuthenticationPage connected journeys", () => {
         await waitFor(() => expect(panel()).toContain('"state":"code"'))
         fireEvent.click(screen.getByTestId("submit-code"))
         await waitFor(() => expect(panel()).toContain('"state":"notice"'))
-        expect(panel()).toContain("signUp.createdNoSessionNotice")
-        expect(panel()).toContain("signUp.createdNoSessionSignInLabel")
+        expect(panel()).toContain(copy("signUp.createdNoSessionNotice"))
+        expect(panel()).toContain(copy("signUp.createdNoSessionSignInLabel"))
         expect(panel()).toContain('"secondaryLabel":""')
         expect(mocks.session.adopt).not.toHaveBeenCalled()
     })
@@ -333,10 +337,10 @@ describe("AuthenticationPage connected journeys", () => {
         window.history.replaceState(null, "", "/authentication?code=abc&state=xyz")
         mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: true, undecided: null } })
         render(<AuthenticationPage />)
-        await waitFor(() => expect(panel()).toContain("signIn.oauthEmailRefused"))
+        await waitFor(() => expect(panel()).toContain(copy("signIn.oauthEmailRefused")))
         expect(panel()).toContain('"state":"details"')
         expect(panel()).toContain('"mode":"signIn"')
-        expect(exits()).toContain("signIn.promptAction")
+        expect(exits()).toContain(copy("signIn.promptAction"))
         expect(mocks.session.adopt).not.toHaveBeenCalled()
     })
 
@@ -351,7 +355,7 @@ describe("AuthenticationPage connected journeys", () => {
         expect(mocks.session.adopt).toHaveBeenCalledWith({ accessToken: "continued-access", requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: null })
         expect(mocks.api.exchangeOauthCode).toHaveBeenCalledTimes(1)
         expect(mocks.api.continueBrokeredSignIn).toHaveBeenCalledTimes(1)
-        expect(panel()).not.toContain("signIn.oauthUndecided")
+        expect(panel()).not.toContain(copy("signIn.oauthUndecided"))
     })
 
     it("reports a brokered undecided result as a try-again when nothing could be held", async () => {
@@ -359,8 +363,8 @@ describe("AuthenticationPage connected journeys", () => {
         window.history.replaceState(null, "", "/authentication?code=abc&state=xyz")
         mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: { continuationReference: null } } })
         render(<AuthenticationPage />)
-        await waitFor(() => expect(panel()).toContain("signIn.oauthUndecided"))
-        expect(panel()).not.toContain("signIn.oauthRefused")
+        await waitFor(() => expect(panel()).toContain(copy("signIn.oauthUndecided")))
+        expect(panel()).not.toContain(copy("signIn.oauthRefused"))
         expect(panel()).toContain('"isError":false')
         expect(mocks.api.exchangeOauthCode).toHaveBeenCalledTimes(1)
         expect(mocks.api.continueBrokeredSignIn).not.toHaveBeenCalled()
@@ -372,8 +376,8 @@ describe("AuthenticationPage connected journeys", () => {
         mocks.api.exchangeOauthCode.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: { continuationReference: "hold-lapsed" } } })
         mocks.api.continueBrokeredSignIn.mockResolvedValue({ ok: true, data: { accessToken: null, requiresTwoFactor: false, twoFactorToken: null, providerEmailRefused: null, undecided: { retryWithSameRequest: true } } })
         render(<AuthenticationPage />)
-        await waitFor(() => expect(panel()).toContain("signIn.oauthUndecided"))
-        expect(panel()).not.toContain("signIn.oauthRefused")
+        await waitFor(() => expect(panel()).toContain(copy("signIn.oauthUndecided")))
+        expect(panel()).not.toContain(copy("signIn.oauthRefused"))
         expect(mocks.api.continueBrokeredSignIn).toHaveBeenCalledTimes(1)
         expect(mocks.session.adopt).not.toHaveBeenCalled()
     })
@@ -391,7 +395,7 @@ describe("AuthenticationPage connected journeys", () => {
         await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/overview?returnNotice=unavailable"))
         expect(mocks.session.adopt).toHaveBeenCalled()
         expect(panel()).toContain('"state":"details"')
-        expect(panel()).not.toContain("unavailableReturnNotice")
+        expect(panel()).not.toContain(copy("unavailableReturnNotice"))
         expect(panel()).not.toContain("agentos")
     })
 
@@ -400,21 +404,21 @@ describe("AuthenticationPage connected journeys", () => {
         window.history.replaceState(null, "", "/authentication?sessionEnding=applied")
         render(<AuthenticationPage />)
         await waitFor(() => expect(panel()).toContain('"state":"notice"'))
-        expect(panel()).toContain("signOut.everywhereAppliedNotice")
+        expect(panel()).toContain(copy("signOut.everywhereAppliedNotice"))
         expect(mocks.replace).toHaveBeenCalledWith("/authentication")
         expect(mocks.session.adopt).not.toHaveBeenCalled()
         expect(mocks.push).not.toHaveBeenCalled()
 
         fireEvent.click(screen.getByTestId("onward"))
-        await waitFor(() => expect(panel()).toContain("signIn.title"))
+        await waitFor(() => expect(panel()).toContain(copy("signIn.title")))
 
         // UNCONFIRMED: this browser is out and the others were never confirmed - no completion claim.
         cleanup()
         window.history.replaceState(null, "", "/authentication?sessionEnding=unconfirmed")
         render(<AuthenticationPage />)
         await waitFor(() => expect(panel()).toContain('"state":"notice"'))
-        expect(panel()).toContain("signOut.unconfirmedNotice")
-        expect(panel()).not.toContain("everywhereAppliedNotice")
+        expect(panel()).toContain(copy("signOut.unconfirmedNotice"))
+        expect(panel()).not.toContain(copy("signOut.everywhereAppliedNotice"))
 
         // AN UNRECOGNISED VALUE is not an answer: no notice, and the param is still consumed.
         cleanup()
@@ -422,7 +426,8 @@ describe("AuthenticationPage connected journeys", () => {
         render(<AuthenticationPage />)
         await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith("/authentication"))
         expect(panel()).toContain('"state":"details"')
-        expect(panel()).not.toContain("signOut.")
+        expect(panel()).not.toContain(copy("signOut.everywhereAppliedNotice"))
+        expect(panel()).not.toContain(copy("signOut.unconfirmedNotice"))
     })
 
     it("catches a session ending that lands after mount, announces it once, and drops the param", async () => {
@@ -438,14 +443,14 @@ describe("AuthenticationPage connected journeys", () => {
         window.history.replaceState(null, "", "/authentication?sessionEnding=unconfirmed")
         rerender(<AuthenticationPage />)
         await waitFor(() => expect(panel()).toContain('"state":"notice"'))
-        expect(panel()).toContain("signOut.unconfirmedNotice")
+        expect(panel()).toContain(copy("signOut.unconfirmedNotice"))
         expect(mocks.replace).toHaveBeenCalledWith("/authentication")
         expect(mocks.replace).toHaveBeenCalledTimes(1)
 
         // the param still sits on the test's static address; a re-render must not re-announce it
         rerender(<AuthenticationPage />)
         expect(mocks.replace).toHaveBeenCalledTimes(1)
-        expect(panel()).toContain("signOut.unconfirmedNotice")
+        expect(panel()).toContain(copy("signOut.unconfirmedNotice"))
         expect(mocks.session.adopt).not.toHaveBeenCalled()
     })
 })

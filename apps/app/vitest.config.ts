@@ -29,6 +29,8 @@ export default defineConfig({
             },
         },
         environment: "jsdom",
+        // The real catalog every spec render is wrapped in - see the root vitest.setup.ts.
+        env: { NIVO_MESSAGES_DIR: resolve(import.meta.dirname, "src/messages") },
         globals: true,
         setupFiles: ["../../vitest.setup.ts"],
         include: ["src/**/*.spec.{ts,tsx}"],

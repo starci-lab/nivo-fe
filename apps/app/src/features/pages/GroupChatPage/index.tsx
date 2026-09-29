@@ -417,6 +417,7 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
     () => ({
       title: t("title"),
       description: t("description"),
+      workspace: t("workspace"),
       today: t("today"),
       tabListLabel: t("tabs.label"),
       tabs: { office: t("tabs.office"), tasks: t("tabs.tasks") },

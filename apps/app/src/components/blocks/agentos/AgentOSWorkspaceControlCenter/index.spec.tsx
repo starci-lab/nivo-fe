@@ -23,11 +23,6 @@ const mocks = vi.hoisted(() => ({
     sources: [] as ReadonlyArray<ShellSourceObservation>,
 }))
 
-vi.mock("next-intl", () => ({
-    useLocale: () => "en",
-    useTranslations: () => (key: string) => key,
-    useFormatter: () => ({ dateTime: (value: Date) => value.toISOString() }),
-}))
 vi.mock("@/modules/api/console", () => ({
     myAgentWorkspaceControlCenter: mocks.api.load,
     myAgentosModuleInstallations: mocks.api.installations,

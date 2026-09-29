@@ -11,6 +11,8 @@ export type PurchaseStatusCopy = {
     readonly provisioning: string;
     readonly loadingTitle: string;
     readonly loadingText: string;
+    /** Spoken name of a skeleton placeholder while the read is in flight. */
+    readonly loading: string;
     readonly paymentPendingTitle: string;
     readonly paymentPendingBadge: string;
     readonly paymentPendingSubtitle: string;

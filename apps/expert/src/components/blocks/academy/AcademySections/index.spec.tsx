@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { renderToStaticMarkup } from "react-dom/server"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
-vi.mock("next-intl", () => ({ useLocale: () => "en", useTranslations: () => (key: string) => key }))
 vi.mock("@/modules/api/academy", () => ({ submitLead: vi.fn().mockResolvedValue({ ok: true }) }))
 type SectionsOutputProps = {
     readonly props: {
@@ -19,7 +17,7 @@ import { AcademySectionsBase } from "./component"
 import { AcademySections } from "./index"
 describe("AcademySections", () => {
     it("settles the configured visible sections into the pure twin", () => {
-        const html = renderToStaticMarkup(<AcademySections courses={[]} />)
+        const html = render(<AcademySections courses={[]} />).container.innerHTML
         expect(html).toContain("hero:hero")
         expect(html).toContain("courses:courses")
     })

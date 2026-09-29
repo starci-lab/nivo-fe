@@ -63,13 +63,6 @@ vi.mock("./component", async () => {
   };
 });
 
-const translate = (key: string, values?: Record<string, unknown>): string =>
-  values === undefined ? key : `${key}|${JSON.stringify(values)}`;
-
-vi.mock("next-intl", () => ({
-  useTranslations: () => translate,
-  useLocale: () => "vi",
-}));
 vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(world.search),
 }));
@@ -634,33 +627,34 @@ describe("GroupChatPage", () => {
     it("resolves every catalog entry, passing its values", () => {
       render(<GroupChatPage />);
       const { labels } = last();
-      expect(labels.title).toBe("title");
-      expect(labels.statuses["waiting-on-answer"]).toBe("statuses.waitingOnAnswer");
-      expect(labels.members.humans(2)).toBe('members.humans|{"count":2}');
-      expect(labels.members.modules(3)).toBe('members.modules|{"count":3}');
-      expect(labels.members.countLabel(5)).toBe('members.countLabel|{"count":5}');
-      expect(labels.members.openRail(5)).toBe('members.openRail|{"count":5}');
-      expect(labels.invite.sent("a@b.vn")).toBe('invite.sent|{"email":"a@b.vn"}');
-      expect(labels.composer.answering("Sales", "Tháng nào?")).toBe('composer.answering|{"moduleName":"Sales","excerpt":"Tháng nào?"}');
-      expect(labels.card.reference("T-1", "Sales")).toBe('card.reference|{"ref":"T-1","moduleName":"Sales"}');
-      expect(labels.card.requestedBy("An")).toBe('card.requestedBy|{"name":"An"}');
-      expect(labels.card.assignedTo("Huy")).toBe('card.assignedTo|{"name":"Huy"}');
-      expect(labels.approval.decidedBy("Minh", "09:14")).toBe('approval.decidedBy|{"name":"Minh","at":"09:14"}');
-      expect(labels.question.waiting("Sales")).toBe('question.waiting|{"name":"Sales"}');
-      expect(labels.notice.taskAssign()).toBe("notice.taskAssign");
-      expect(labels.tasks.count(4)).toBe('tasks.count|{"count":4}');
-      expect(labels.tasks.asker("An")).toBe('tasks.asker|{"name":"An"}');
-      expect(labels.tasks.assignee("Huy")).toBe('tasks.assignee|{"name":"Huy"}');
-      expect(labels.tasks.module("Sales")).toBe('tasks.module|{"name":"Sales"}');
-      expect(labels.accept.roleLine("Quản lý")).toBe('accept.roleLine|{"role":"Quản lý"}');
+      expect(labels.title).toBe("Office")
+      expect(labels.workspace).toBe("Workspace");
+      expect(labels.statuses["waiting-on-answer"]).toBe("Waiting for answer");
+      expect(labels.members.humans(2)).toBe("People (2)");
+      expect(labels.members.modules(3)).toBe("Hired modules (3)");
+      expect(labels.members.countLabel(5)).toBe("Members (5)");
+      expect(labels.members.openRail(5)).toBe("5 members");
+      expect(labels.invite.sent("a@b.vn")).toBe("Invitation recorded for a@b.vn.");
+      expect(labels.composer.answering("Sales", "Tháng nào?")).toBe("Answering Sales: Tháng nào?");
+      expect(labels.card.reference("T-1", "Sales")).toBe("T-1 • Sales");
+      expect(labels.card.requestedBy("An")).toBe("Asked by An");
+      expect(labels.card.assignedTo("Huy")).toBe("Assigned to Huy");
+      expect(labels.approval.decidedBy("Minh", "09:14")).toBe("Minh decided at 09:14");
+      expect(labels.question.waiting("Sales")).toBe("Waiting for Sales to answer");
+      expect(labels.notice.taskAssign()).toBe("A new task is assigned to you");
+      expect(labels.tasks.count(4)).toBe("4 tasks");
+      expect(labels.tasks.asker("An")).toBe("Asked by An");
+      expect(labels.tasks.assignee("Huy")).toBe("Assigned to Huy");
+      expect(labels.tasks.module("Sales")).toBe("Module: Sales");
+      expect(labels.accept.roleLine("Quản lý")).toBe("Invited role: Quản lý");
     });
   
-    it("formats times in the page locale and passes an unreadable instant through", () => {
+    it("formats times in the page locale (en) and passes an unreadable instant through", () => {
       render(<GroupChatPage />);
       const { formatTime } = last().labels;
       expect(formatTime("not-a-time")).toBe("not-a-time");
       const at = "2026-09-24T09:14:00Z";
-      expect(formatTime(at)).toBe(new Intl.DateTimeFormat("vi", { hour: "2-digit", minute: "2-digit" }).format(new Date(at)));
+      expect(formatTime(at)).toBe(new Intl.DateTimeFormat("en", { hour: "2-digit", minute: "2-digit" }).format(new Date(at)));
     });
   });
 });

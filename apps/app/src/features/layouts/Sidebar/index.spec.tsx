@@ -7,7 +7,6 @@ import viMessages from "@/messages/vi.json"
 const push = vi.fn()
 const location = { pathname: "/overview" }
 vi.mock("@/hooks", () => ({ usePathname: () => location.pathname, useRouter: () => ({ push }) }))
-vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 import { Sidebar } from "."
 
 /** The owner-ruled console registry: key -> route, in rail order. */
@@ -26,26 +25,26 @@ describe("Sidebar", () => {
     it("projects exactly the shell rev 17 destinations through Grammar Sidebar", () => {
         render(<Sidebar />)
         const options = screen.getAllByRole("option")
-        expect(options.map((option) => option.textContent)).toEqual(REGISTRY.map(([key]) => `nav.${key}`))
-        expect(screen.queryByText("nav.packages")).not.toBeInTheDocument()
-        expect(screen.queryByText("nav.settings")).not.toBeInTheDocument()
-        expect(screen.queryByRole("option", { name: "nav.packages" })).not.toBeInTheDocument()
-        expect(screen.queryByRole("option", { name: "nav.settings" })).not.toBeInTheDocument()
+        expect(options.map((option) => option.textContent)).toEqual(REGISTRY.map(([key]) => enMessages.console.nav[key]))
+        expect(screen.queryByText("Packages")).not.toBeInTheDocument()
+        expect(screen.queryByText("Settings")).not.toBeInTheDocument()
+        expect(screen.queryByRole("option", { name: "Packages" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("option", { name: "Settings" })).not.toBeInTheDocument()
     })
 
     it("routes every destination to its shell rev 17 target", () => {
         render(<Sidebar />)
-        expect(screen.getByRole("option", { name: "nav.overview" })).toHaveAttribute("aria-selected", "true")
+        expect(screen.getByRole("option", { name: enMessages.console.nav.overview })).toHaveAttribute("aria-selected", "true")
         for (const [key, route] of REGISTRY.filter(([key]) => key !== "overview")) {
             push.mockClear()
-            fireEvent.click(screen.getByText(`nav.${key}`))
+            fireEvent.click(screen.getByText(enMessages.console.nav[key]))
             expect(push).toHaveBeenCalledWith(route)
         }
         cleanup()
 
         location.pathname = "/chat"
         render(<Sidebar />)
-        fireEvent.click(screen.getByText("nav.overview"))
+        fireEvent.click(screen.getByText(enMessages.console.nav.overview))
         expect(push).toHaveBeenCalledWith("/overview")
         location.pathname = "/overview"
     })
@@ -69,19 +68,19 @@ describe("Sidebar", () => {
 
     it("keeps packages and the route-less settings item out of the mobile drawer too", async () => {
         render(<Sidebar mode="mobile" />)
-        fireEvent.click(screen.getByRole("button", { name: "openMenu" }))
+        fireEvent.click(screen.getByRole("button", { name: enMessages.console.openMenu }))
         const dialog = await screen.findByRole("dialog")
         expect(within(dialog).getAllByRole("option")).toHaveLength(5)
-        expect(within(dialog).queryByText("nav.packages")).not.toBeInTheDocument()
-        expect(within(dialog).queryByText("nav.settings")).not.toBeInTheDocument()
+        expect(within(dialog).queryByText("Packages")).not.toBeInTheDocument()
+        expect(within(dialog).queryByText("Settings")).not.toBeInTheDocument()
     })
 
     it("closes the mobile drawer only after a routable destination is activated", async () => {
         render(<Sidebar mode="mobile" />)
-        fireEvent.click(screen.getByRole("button", { name: "openMenu" }))
+        fireEvent.click(screen.getByRole("button", { name: enMessages.console.openMenu }))
         const dialog = await screen.findByRole("dialog")
 
-        fireEvent.click(within(dialog).getByText("nav.wallet"))
+        fireEvent.click(within(dialog).getByText(enMessages.console.nav.wallet))
         expect(push).toHaveBeenCalledWith("/wallet")
         expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     })
@@ -91,9 +90,9 @@ describe("Sidebar", () => {
         render(<Sidebar />)
         await user.tab()
         await user.tab()
-        expect(screen.getByRole("option", { name: "nav.overview" })).toHaveFocus()
+        expect(screen.getByRole("option", { name: enMessages.console.nav.overview })).toHaveFocus()
         await user.keyboard("{ArrowDown}")
-        expect(screen.getByRole("option", { name: "nav.chat" })).toHaveFocus()
+        expect(screen.getByRole("option", { name: enMessages.console.nav.chat })).toHaveFocus()
         await user.keyboard("{Enter}")
         expect(push).toHaveBeenCalledWith("/chat")
     })

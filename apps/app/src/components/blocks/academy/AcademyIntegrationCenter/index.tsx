@@ -221,7 +221,9 @@ export const AcademyIntegrationCenter = (props: AcademyIntegrationCenterProps) =
       id: selectedId,
       label: t(`providers.${selectedId}.formLabel`),
       fields: fieldsOf(selectedId),
-      submitLabel: selectedId === "zalo" ? t("authorize") : t("save")
+      submitLabel: selectedId === "zalo" ? t("authorize") : t("save"),
+      revealLabel: t("reveal"),
+      hideLabel: t("hide")
     },
     pendingId,
     outcome

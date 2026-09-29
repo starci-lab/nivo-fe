@@ -13,7 +13,6 @@ const mocks = vi.hoisted(() => ({
     },
 }))
 
-vi.mock("next-intl", () => ({ useLocale: () => "en" }))
 vi.mock("../api/auth", () => ({
     refreshSession: mocks.api.refreshSession,
     signOut: mocks.api.signOut,

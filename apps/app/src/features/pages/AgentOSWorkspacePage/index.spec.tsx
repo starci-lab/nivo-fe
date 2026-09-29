@@ -19,11 +19,6 @@ vi.mock("next/navigation", () => ({
     redirect: vi.fn(),
     permanentRedirect: vi.fn(),
 }))
-vi.mock("next-intl", () => ({
-    useTranslations: () => (key: string) => key,
-    useLocale: () => localeState.value,
-    useFormatter: () => ({ number: (value: number) => String(value), dateTime: (value: string) => value }),
-}))
 vi.mock("@/hooks", async () => ({
     ...await vi.importActual("@/hooks"),
     usePathname: () => "/agentos/workspaces/workspace-1",
@@ -34,8 +29,6 @@ vi.mock("@/hooks", async () => ({
 const push = vi.fn()
 const replace = vi.fn()
 const signedIn = { state: { status: "signed-in", accessToken: "token" } }
-const localeState = { value: "en" }
-const t = (key: string) => key
 const resetQueryCache = () => { for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key) }
 let viewerSequence = 0
 if (!Element.prototype.getAnimations) Element.prototype.getAnimations = () => []
@@ -94,11 +87,6 @@ describe("AgentOSWorkspacePage", () => {
                 ...await vi.importActual("next/navigation"),
                 useSearchParams: () => new URLSearchParams(),
             }))
-            vi.doMock("next-intl", () => ({
-                useTranslations: () => t,
-                useLocale: () => localeState.value,
-                useFormatter: () => ({ number: (value: number) => String(value), dateTime: (value: string) => value }),
-            }))
             ConnectedAgentOSWorkspacePage = (await import(".")).AgentOSWorkspacePage
             window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })
             viewerSequence += 1
@@ -109,8 +97,6 @@ describe("AgentOSWorkspacePage", () => {
         afterEach(() => {
             vi.doUnmock("./component")
             vi.doUnmock("next/navigation")
-            vi.doUnmock("next-intl")
-            localeState.value = "en"
             cleanup()
             resetQueryCache()
         })

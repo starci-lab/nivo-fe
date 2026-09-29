@@ -4,10 +4,6 @@ import { describe, expect, it, vi } from "vitest"
 const mocks = vi.hoisted(() => ({
     data: { workspaces: null, pod: null } as Record<string, unknown>,
 }))
-vi.mock("next-intl", () => ({
-    useTranslations: () => (key: string, values?: Record<string, unknown>) => values === undefined ? key : `${key}:${JSON.stringify(values)}`,
-    useFormatter: () => ({ dateTime: (value: Date) => `time-${value.toISOString()}` }),
-}))
 vi.mock("@/hooks", () => ({ useOverviewData: () => mocks.data }))
 
 import { OverviewRuntime } from "."
@@ -18,9 +14,9 @@ describe("OverviewRuntime", () => {
         mocks.data.pod = { ok: true, data: { reachable: true, httpStatus: 200, tokenConfigured: true, tokenHint: "4f21", checkedAt: "2026-09-03T22:31:00.000Z" } }
         render(<OverviewRuntime />)
 
-        expect(screen.getByText("overview.runtime.yes")).toBeInTheDocument()
+        expect(screen.getByText("Yes")).toBeInTheDocument()
         expect(screen.getByText("200")).toBeInTheDocument()
-        expect(screen.getByText("overview.runtime.tokenConfigured:{\"hint\":\"4f21\"}")).toBeInTheDocument()
+        expect(screen.getByText("Configured · 4f21")).toBeInTheDocument()
     })
 
     it("names which part could not be read when the pod refuses", () => {
@@ -28,9 +24,9 @@ describe("OverviewRuntime", () => {
         mocks.data.pod = { ok: false, code: "POD_REGISTRATION_MISSING_EXCEPTION" }
         const { container } = render(<OverviewRuntime />)
 
-        expect(screen.getByText("refusal.POD_REGISTRATION_MISSING_EXCEPTION")).toBeInTheDocument()
-        expect(screen.getByText("overview.runtime.podUnavailable")).toBeInTheDocument()
-        expect(screen.queryByText("overview.runtime.podAnswered")).not.toBeInTheDocument()
+        expect(screen.getByText("This workspace has no pod registered yet. Everything above is still correct.")).toBeInTheDocument()
+        expect(screen.getByText("Pod unavailable")).toBeInTheDocument()
+        expect(screen.queryByText("Pod answered")).not.toBeInTheDocument()
         expect(container.querySelector('[data-grammar-state="unavailable"]')).toBeInTheDocument()
     })
 
@@ -55,7 +51,7 @@ describe("OverviewRuntime", () => {
         mocks.data.pod = { ok: true, data: { reachable: false, httpStatus: null, tokenConfigured: true, tokenHint: "4f21", checkedAt: "2026-09-03T22:31:00.000Z" } }
         render(<OverviewRuntime />)
 
-        expect(screen.getByText("overview.runtime.no")).toBeInTheDocument()
+        expect(screen.getByText("No")).toBeInTheDocument()
         expect(screen.getByText("—")).toBeInTheDocument()
     })
 
@@ -64,7 +60,7 @@ describe("OverviewRuntime", () => {
         mocks.data.pod = { ok: true, data: { reachable: true, httpStatus: 200, tokenConfigured: false, tokenHint: null, checkedAt: "2026-09-03T22:31:00.000Z" } }
         render(<OverviewRuntime />)
 
-        expect(screen.getByText("overview.runtime.tokenNotConfigured")).toBeInTheDocument()
+        expect(screen.getByText("Not configured")).toBeInTheDocument()
     })
 
     it("names the token as configured with no hint when the pod carries a configured token but no hint", () => {
@@ -72,7 +68,7 @@ describe("OverviewRuntime", () => {
         mocks.data.pod = { ok: true, data: { reachable: true, httpStatus: 200, tokenConfigured: true, tokenHint: null, checkedAt: "2026-09-03T22:31:00.000Z" } }
         render(<OverviewRuntime />)
 
-        expect(screen.getByText("overview.runtime.tokenConfiguredNoHint")).toBeInTheDocument()
+        expect(screen.getByText("Configured")).toBeInTheDocument()
     })
 
     it("names the refusal as unknown once the pod's own code carries no named refusal", () => {
@@ -80,6 +76,6 @@ describe("OverviewRuntime", () => {
         mocks.data.pod = { ok: false, code: "SOME_UNNAMED_EXCEPTION" }
         render(<OverviewRuntime />)
 
-        expect(screen.getByText("refusal.unknown")).toBeInTheDocument()
+        expect(screen.getByText("This part could not be read. The rest of the screen is still correct.")).toBeInTheDocument()
     })
 })

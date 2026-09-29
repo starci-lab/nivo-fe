@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useFormatter, useLocale } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { getPathname } from "@/modules/i18n/navigation";
 import { useSession } from "@/hooks";
@@ -26,36 +26,31 @@ const LOGIN_PATH = "/authentication";
 const PRESENTED_OFFER_ID = "nivo-workspace-growth";
 const PRESENTED_OFFER_VERSION = "draft-2026-09-22";
 
-/** Resolved copy of this surface. Offer-selection copy stays block-local: the message catalog files are outside this cut's owned paths. */
-const COPY: OfferSelectionCopy = {
-    path: "Purchase path",
-    workspaces: "Workspaces",
-    newWorkspace: "New",
-    title: "Choose a workspace offer",
-    description: "Compare the offers that currently apply before any payment.",
-    offersLabel: "Current offers",
-    offersFact: "Read from the Workspace Provision checkout boundary",
-    offerGroupLabel: "Available offers",
-    billingCadence: "Billing cadence",
-    renewalBehavior: "Renewal",
-    includedOutcome: "Included outcome",
-    eligibility: "Eligibility",
-    selectedBadge: "Selected",
-    selectedOffer: "Selected offer",
-    reviewAction: "Review selected offer",
-    noPaymentNote: "No payment is requested at this step.",
-    backToWorkspaces: "Back to workspaces",
-    unavailableTitle: "No current offer can be presented",
-    refreshOffers: "Refresh offers",
-    noSessionTitle: "Sign in to see offers",
-    signIn: "Sign in",
-    signUp: "Create an account",
-};
-
-/** The boundary's own refusal code read as the sentence this surface shows. */
-const refusalSentence = (code: string): string => code === "purchaser-not-admitted"
-    ? "The signed-in account is not an admitted purchaser yet. Verify its email, or create a purchaser account, then return to this step."
-    : "No valid Login session was found. Sign in, or create an account, then return to this step.";
+/** The catalog phrases this surface draws, resolved for the pure view. */
+const copyFor = (t: ReturnType<typeof useTranslations<"console.agentos.offerSelection">>): OfferSelectionCopy => ({
+    path: t("path"),
+    workspaces: t("workspaces"),
+    newWorkspace: t("newWorkspace"),
+    title: t("title"),
+    description: t("description"),
+    offersLabel: t("offersLabel"),
+    offersFact: t("offersFact"),
+    offerGroupLabel: t("offerGroupLabel"),
+    billingCadence: t("billingCadence"),
+    renewalBehavior: t("renewalBehavior"),
+    includedOutcome: t("includedOutcome"),
+    eligibility: t("eligibility"),
+    selectedBadge: t("selectedBadge"),
+    selectedOffer: t("selectedOffer"),
+    reviewAction: t("reviewAction"),
+    noPaymentNote: t("noPaymentNote"),
+    backToWorkspaces: t("backToWorkspaces"),
+    unavailableTitle: t("unavailableTitle"),
+    refreshOffers: t("refreshOffers"),
+    noSessionTitle: t("noSessionTitle"),
+    signIn: t("signIn"),
+    signUp: t("signUp"),
+});
 
 /** One boundary offer read into the view's field vocabulary; the amount keeps its currency inseparably. */
 const toViewOffer = (offer: WorkspaceCheckoutOffer, formatAmount: (offer: WorkspaceCheckoutOffer) => string): OfferSelectionOffer => ({
@@ -72,6 +67,10 @@ const toViewOffer = (offer: WorkspaceCheckoutOffer, formatAmount: (offer: Worksp
 /** Offer-selection owner: the boundary's current-offer read → the review handoff carrying identity only. */
 const OfferSelectionFlow = () => {
     const locale = useLocale();
+    const t = useTranslations("console.agentos.offerSelection");
+    const copy = copyFor(t);
+    /** The boundary's own refusal code read as the sentence this surface shows. */
+    const refusalSentence = (code: string): string => code === "purchaser-not-admitted" ? t("refusalPurchaserNotAdmitted") : t("refusalUnauthenticated");
     const format = useFormatter();
     const searchParams = useSearchParams();
     const session = useSession();
@@ -98,29 +97,29 @@ const OfferSelectionFlow = () => {
         setPresented({ offerId: chosen.offerId, offerVersion: chosen.offerVersion });
     };
     const view = (): OfferSelectionFlowProps => {
-        const unavailable = (message: string, isRefreshPending = false): OfferSelectionFlowProps => ({ state: "unavailable", props: { copy: COPY, links, offers, message, isRefreshPending }, on: { refresh: () => void offersQuery.mutate() } });
-        const noSession = (message: string): OfferSelectionFlowProps => ({ state: "no-session", props: { copy: COPY, links, message, signInHref: loginHref, signUpHref: loginHref }, on: { signIn: () => undefined } });
+        const unavailable = (message: string, isRefreshPending = false): OfferSelectionFlowProps => ({ state: "unavailable", props: { copy, links, offers, message, isRefreshPending }, on: { refresh: () => void offersQuery.mutate() } });
+        const noSession = (message: string): OfferSelectionFlowProps => ({ state: "no-session", props: { copy, links, message, signInHref: loginHref, signUpHref: loginHref }, on: { signIn: () => undefined } });
         if (session.state.status === "restoring") {
-            return { state: "loading", props: { copy: COPY, links } };
+            return { state: "loading", props: { copy, links } };
         }
         if (accessToken === null) {
             return noSession(refusalSentence("unauthenticated"));
         }
         if (answer === undefined) {
-            return offersQuery.error === undefined ? { state: "loading", props: { copy: COPY, links } } : unavailable(COPY.unavailableTitle, true);
+            return offersQuery.error === undefined ? { state: "loading", props: { copy, links } } : unavailable(copy.unavailableTitle, true);
         }
         if (!answer.ok) {
             return unavailable(answer.reason);
         }
         const outcome = answer.data;
         if (outcome.status === "refused") {
-            return outcome.code === "unauthenticated" || outcome.code === "purchaser-not-admitted" ? noSession(refusalSentence(outcome.code)) : unavailable(COPY.unavailableTitle);
+            return outcome.code === "unauthenticated" || outcome.code === "purchaser-not-admitted" ? noSession(refusalSentence(outcome.code)) : unavailable(copy.unavailableTitle);
         }
         if (outcome.status !== "offers" || outcome.selection.state !== "current" || offers.length === 0) {
-            return unavailable(COPY.unavailableTitle, offersQuery.isValidating);
+            return unavailable(copy.unavailableTitle, offersQuery.isValidating);
         }
         const checkoutHref = `${route(CHECKOUT_PATH)}?offer=${encodeURIComponent(presented.offerId)}&offerVersion=${encodeURIComponent(presented.offerVersion)}`;
-        return { state: "selection", props: { copy: COPY, links, offers, selectedOfferId: presented.offerId, checkoutHref }, on: { select } };
+        return { state: "selection", props: { copy, links, offers, selectedOfferId: presented.offerId, checkoutHref }, on: { select } };
     };
     return <OfferSelectionFlowBase {...view()} />;
 };

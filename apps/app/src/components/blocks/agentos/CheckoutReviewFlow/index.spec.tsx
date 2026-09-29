@@ -8,23 +8,11 @@ const mocks = vi.hoisted(() => ({
     session: { state: { status: "signed-in", accessToken: "token" } as unknown },
 }))
 type PathnameRequest = { readonly href: string; readonly locale: string }
-/** The currency-formatting call the surface makes, named so the mocked API stays reusable. */
-type CurrencyFormatOptions = { readonly currency: string }
 /* Production-shaped: getPathname prefixes non-default locales, so feeding its localized output to
    the locale-aware router would double the prefix exactly like the live refused-return defect did. */
 vi.mock("@/modules/i18n/navigation", () => ({
     getPathname: (request: PathnameRequest) => request.locale === "en" ? `/en${request.href}` : request.href,
 }))
-vi.mock("next-intl", async () => {
-    const copyEn = (await import("@/messages/en.json")).default.console.agentos.checkoutReview as Record<string, string>
-    const translate = (key: string, values?: Record<string, unknown>) =>
-        Object.entries(values ?? {}).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), copyEn[key] ?? key)
-    return {
-        useLocale: () => "en",
-        useFormatter: () => ({ number: (value: number, options: CurrencyFormatOptions) => `${options.currency} ${value}` }),
-        useTranslations: () => translate,
-    }
-})
 vi.mock("next/navigation", () => ({
     useSearchParams: () => new URLSearchParams(mocks.search),
 }))
@@ -101,7 +89,7 @@ describe("CheckoutReviewFlow", () => {
         const view = props()
         expect(JSON.stringify(view.facts)).toContain("Nivo Workspace Growth")
         expect(JSON.stringify(view.facts)).toContain("draft-2026-09-22")
-        expect(JSON.stringify(view.facts)).toContain("VND 2990000")
+        expect(JSON.stringify(view.facts)).toContain("₫2,990,000")
         expect(JSON.stringify(view.facts)).toContain("yearly")
         expect((view.facts as Record<string, unknown>).purchaser).toBeNull()
         expect(view.admission).toBe("Admitted")

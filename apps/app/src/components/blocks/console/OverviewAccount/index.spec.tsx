@@ -5,13 +5,6 @@ const mocks = vi.hoisted(() => ({
     push: vi.fn(),
     data: { wallet: null, invoices: null } as Record<string, unknown>,
 }))
-vi.mock("next-intl", () => ({
-    useTranslations: () => (key: string, values?: Record<string, unknown>) => values === undefined ? key : `${key}:${JSON.stringify(values)}`,
-    useFormatter: () => ({
-        number: (value: number) => `money-${value}`,
-        dateTime: (value: Date) => `date-${value.toISOString().slice(0, 10)}`,
-    }),
-}))
 vi.mock("@/hooks", () => ({ useRouter: () => ({ push: mocks.push }), useOverviewData: () => mocks.data }))
 
 import { OverviewAccount } from "."
@@ -22,8 +15,8 @@ describe("OverviewAccount", () => {
         mocks.data.invoices = { ok: true, data: [{ id: "abcdef1234", amountVnd: 120000, status: "unpaid", dueAt: "2026-09-06T00:00:00.000Z", paidAt: null, catalogOrder: null }] }
         render(<OverviewAccount label="Account" />)
 
-        expect(screen.getByText("money-150000")).toBeInTheDocument()
-        expect(screen.getByText("overview.account.invoiceName:{\"id\":\"ABCDEF12\"}")).toBeInTheDocument()
+        expect(screen.getByText("₫150,000")).toBeInTheDocument()
+        expect(screen.getByText("Invoice ABCDEF12")).toBeInTheDocument()
     })
 
     it("routes the invoice row's own top-up command", () => {
@@ -31,7 +24,7 @@ describe("OverviewAccount", () => {
         mocks.data.invoices = { ok: true, data: [{ id: "abcdef1234", amountVnd: 120000, status: "unpaid", dueAt: "2026-09-06T00:00:00.000Z", paidAt: null, catalogOrder: null }] }
         render(<OverviewAccount label="Account" />)
 
-        fireEvent.click(screen.getByRole("button", { name: "overview.account.topUpWallet" }))
+        fireEvent.click(screen.getByRole("button", { name: "Top up wallet" }))
         expect(mocks.push).toHaveBeenCalledWith("/wallet/top-up")
     })
 
@@ -48,7 +41,7 @@ describe("OverviewAccount", () => {
         mocks.data.invoices = { ok: true, data: [] }
         render(<OverviewAccount label="Account" />)
 
-        expect(screen.queryByRole("button", { name: "overview.account.topUpWallet" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "Top up wallet" })).not.toBeInTheDocument()
     })
 
     it("keeps the surface loading until both slices settle", () => {
@@ -64,7 +57,7 @@ describe("OverviewAccount", () => {
         mocks.data.invoices = { ok: true, data: [] }
         render(<OverviewAccount label="Account" />)
 
-        fireEvent.click(screen.getByRole("button", { name: "wallet.viewTransactions" }))
+        fireEvent.click(screen.getByRole("button", { name: "See transactions" }))
         expect(mocks.push).toHaveBeenCalledWith("/wallet")
     })
 
@@ -73,7 +66,7 @@ describe("OverviewAccount", () => {
         mocks.data.invoices = { ok: true, data: [{ id: "abcdef1234", amountVnd: 120000, status: "unpaid", dueAt: "2020-01-01T00:00:00.000Z", paidAt: null, catalogOrder: null }] }
         const { container } = render(<OverviewAccount label="Account" />)
 
-        expect(screen.getByText("overview.account.overdue")).toBeInTheDocument()
+        expect(screen.getByText("Overdue")).toBeInTheDocument()
         expect(container.querySelector('[data-component="Badge"][data-tone="danger"]')).toBeInTheDocument()
     })
 
@@ -83,8 +76,8 @@ describe("OverviewAccount", () => {
         const { container } = render(<OverviewAccount label="Account" />)
 
         expect(container.querySelector('[data-grammar-state="cautionary"]')).toBeInTheDocument()
-        expect(screen.getByText("refusal.unknown")).toBeInTheDocument()
-        expect(screen.queryByRole("button", { name: "overview.account.topUpWallet" })).not.toBeInTheDocument()
+        expect(screen.getByText("This part could not be read. The rest of the screen is still correct.")).toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "Top up wallet" })).not.toBeInTheDocument()
     })
 
     it("carries the skeleton row's own no-op top-up command while unresolved", () => {

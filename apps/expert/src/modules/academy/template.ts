@@ -11,12 +11,8 @@ import data from "./template.data.json";
  * Vietnamese academy selling to both markets had to pick one and lose the other.
  *
  * A BARE VALUE MEANS "THE SAME IN EVERY LANGUAGE", which is the honest default for a proper noun.
- * "Học viện Mộc" is a name, not a sentence, and forcing it into `{ vi, en }` would invite somebody
+ * An academy name is a proper noun, not a sentence, and forcing it into `{ vi, en }` would invite somebody
  * to invent an English one.
- *
- * vn-ok: the quoted words are an example academy NAME, which is the very thing this paragraph says
- * must not be translated. Rewriting them in English to satisfy the rule would demonstrate the
- * mistake the comment exists to warn against.
  */
 export type Localized<T> = T | Partial<Record<Locale, T>>;
 

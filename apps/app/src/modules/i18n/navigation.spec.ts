@@ -1,28 +1,22 @@
 import { describe, expect, it, vi } from "vitest"
 
-const navigation = vi.hoisted(() => ({
-    Link: "link",
-    redirect: vi.fn(),
-    usePathname: vi.fn(),
-    useRouter: vi.fn(),
-    getPathname: vi.fn(),
-}))
-const createNavigation = vi.hoisted(() => vi.fn(() => navigation))
-
-vi.mock("next-intl/navigation", () => ({ createNavigation }))
 vi.unmock("@/modules/i18n/navigation")
 
 import { Link, getPathname, navigation as created, redirect } from "./navigation"
-import { routing } from "./routing"
 
 describe("navigation", () => {
-    it("creates one navigation family from the routed locale authority", () => {
-        expect(createNavigation).toHaveBeenCalledWith(routing)
-        expect(created).toBe(navigation)
+    it("exposes one navigation family whose primitives are the created ones", () => {
         expect({ Link, redirect, getPathname }).toEqual({
-            Link: navigation.Link,
-            redirect: navigation.redirect,
-            getPathname: navigation.getPathname,
+            Link: created.Link,
+            redirect: created.redirect,
+            getPathname: created.getPathname,
         })
+        expect(typeof created.useRouter).toBe("function")
+        expect(typeof created.usePathname).toBe("function")
+    })
+
+    it("formats a route from the routed locale authority: bare for the default locale, prefixed for the other", () => {
+        expect(getPathname({ href: "/wallet", locale: "vi" })).toBe("/wallet")
+        expect(getPathname({ href: "/wallet", locale: "en" })).toBe("/en/wallet")
     })
 })

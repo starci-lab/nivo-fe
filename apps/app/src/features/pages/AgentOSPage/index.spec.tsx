@@ -4,7 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 
-const mocks = vi.hoisted(() => ({ locale: "vi", push: vi.fn() }))
+const purchaseLabel = enMessages.console.agentos.purchase
+
+const mocks = vi.hoisted(() => ({ push: vi.fn() }))
 
 type AgentOSPageProbeProps = {
     readonly state: {
@@ -20,10 +22,6 @@ type AgentOSPageProbeProps = {
     }
 }
 
-vi.mock("next-intl", () => ({
-    useLocale: () => mocks.locale,
-    useTranslations: () => (key: string) => key,
-}))
 vi.mock("@/hooks", async () => ({
     ...(await vi.importActual("@/hooks") as Record<string, unknown>),
     useRouter: () => ({ push: mocks.push }),
@@ -45,8 +43,6 @@ vi.mock("./component", () => ({
 const push = vi.fn()
 const replace = vi.fn()
 const signedIn = { state: { status: "signed-in", accessToken: "token" } }
-const localeState = { value: "en" }
-const t = (key: string) => key
 const resetQueryCache = () => { for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key) }
 let viewerSequence = 0
 if (!Element.prototype.getAnimations) Element.prototype.getAnimations = () => []
@@ -83,34 +79,33 @@ import { AgentOSPage } from "."
 import { myAgentWorkspace } from "@/modules/api/console"
 
 describe("AgentOSPage", () => {
-    beforeEach(() => { mocks.locale = "vi"; mocks.push.mockClear() })
+    beforeEach(() => { mocks.push.mockClear() })
 
     it("routes dashboard creation without resolving child data", () => {
         render(<AgentOSPage mode="dashboard" />)
-        fireEvent.click(screen.getByRole("button", { name: "agentos.purchase" }))
+        fireEvent.click(screen.getByRole("button", { name: purchaseLabel }))
         expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new")
         expect(mocks.push).not.toHaveBeenCalledWith("/agentos/create")
     })
 
     it("keeps the primary Mua workspace purchase action on the dashboard entry", () => {
         const dashboard = render(<AgentOSPage mode="dashboard" />)
-        expect(screen.getByRole("button", { name: "agentos.purchase" })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: purchaseLabel })).toBeInTheDocument()
         dashboard.unmount()
 
         render(<AgentOSPage mode="create" />)
-        expect(screen.queryByRole("button", { name: "agentos.purchase" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: purchaseLabel })).not.toBeInTheDocument()
     })
 
     it("carries the shell rev 17 purchaseAction label for the dashboard primary action", () => {
         render(<AgentOSPage mode="dashboard" />)
 
-        expect(screen.getByRole("button", { name: "agentos.purchase" })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: purchaseLabel })).toBeInTheDocument()
         expect(viMessages.console.agentos.purchase).toBe("Mua workspace")
         expect(enMessages.console.agentos.purchase).toBe("Buy workspace")
     })
 
-    it("preserves non-default locale navigation", () => {
-        mocks.locale = "en"
+    it("routes back to the dashboard from a resumed order", () => {
         render(<AgentOSPage mode="resume" orderId="order-1" />)
         fireEvent.click(screen.getByRole("button", { name: "dashboard" }))
         expect(mocks.push).toHaveBeenCalledWith("/agentos")
@@ -124,11 +119,6 @@ describe("AgentOSPage", () => {
         beforeEach(async () => {
             vi.resetModules()
             vi.doMock("./component", async () => await vi.importActual("./component"))
-            vi.doMock("next-intl", () => ({
-                useTranslations: () => t,
-                useLocale: () => localeState.value,
-                useFormatter: () => ({ number: (value: number) => String(value), dateTime: (value: string) => value }),
-            }))
             ConnectedAgentOSPage = (await import(".")).AgentOSPage
             window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })
             viewerSequence += 1
@@ -138,8 +128,6 @@ describe("AgentOSPage", () => {
         }, 60000)
         afterEach(() => {
             vi.doUnmock("./component")
-            vi.doUnmock("next-intl")
-            localeState.value = "en"
             cleanup()
             resetQueryCache()
         })
@@ -154,7 +142,7 @@ describe("AgentOSPage", () => {
         it("records refusal states for the single-business binding", async () => {
             vi.mocked(myAgentWorkspace).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
             render(<ConnectedAgentOSPage mode="dashboard" />)
-            await waitFor(() => expect(screen.getAllByText("unavailableHint").length).toBeGreaterThan(0))
+            await waitFor(() => expect(screen.getAllByText(enMessages.console.agentos.businessDashboard.unavailableHint).length).toBeGreaterThan(0))
         })
     })
 })

@@ -2,31 +2,28 @@ import { render, screen, waitFor } from "@testing-library/react"
 import type { ComponentType } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-const mocks = vi.hoisted(() => ({ locale: "vi", pathname: "/overview", replace: vi.fn(), session: { state: { status: "signed-in" } }, labels: { navigationLabel: "", primaryLabel: "" } }))
-vi.mock("next-intl", () => ({
-    useLocale: () => mocks.locale,
-    useTranslations: () => (key: string) => key,
-}))
+const mocks = vi.hoisted(() => ({ pathname: "/overview", replace: vi.fn(), session: { state: { status: "signed-in" } }, labels: { navigationLabel: "", primaryLabel: "" } }))
 vi.mock("@/hooks", () => ({ useRouter: () => ({ replace: mocks.replace }), usePathname: () => mocks.pathname, useSession: () => mocks.session }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 interface MockBaseProps { readonly state: { readonly body: ComponentType; readonly bodyProps: object }; readonly props: { readonly navigationLabel: string; readonly primaryLabel: string } }
 vi.mock("./component", () => ({ ConsoleLayoutBase: ({ state, props: data }: MockBaseProps) => { mocks.labels = { navigationLabel: data.navigationLabel, primaryLabel: data.primaryLabel }; const Body = state.body; return <div><Body {...state.bodyProps} /></div> } }))
 
 import { ConsoleLayout } from "."
+import en from "@/messages/en.json"
 
 describe("ConsoleLayout", () => {
     const Workspace = () => <>workspace</>
-    beforeEach(() => { mocks.locale = "vi"; mocks.session.state = { status: "signed-in" }; mocks.replace.mockClear() })
+    beforeEach(() => { mocks.session.state = { status: "signed-in" }; mocks.replace.mockClear() })
     it("keeps a signed-in routed page", () => { render(<ConsoleLayout body={Workspace} bodyProps={{}} />); expect(screen.getByText("workspace")).toBeInTheDocument(); expect(mocks.replace).not.toHaveBeenCalled() })
     it("names the rail and the routed region apart, and neither after the band's context", () => {
         render(<ConsoleLayout body={Workspace} bodyProps={{}} />)
-        expect(mocks.labels.navigationLabel).toBe("navigationLabel")
-        expect(mocks.labels.primaryLabel).toBe("workspaceLabel")
+        expect(mocks.labels.navigationLabel).toBe(en.console.navigationLabel)
+        expect(mocks.labels.primaryLabel).toBe(en.console.workspaceLabel)
         expect(mocks.labels.primaryLabel).not.toBe(mocks.labels.navigationLabel)
-        expect(mocks.labels.primaryLabel).not.toBe("title")
+        expect(mocks.labels.primaryLabel).not.toBe(en.console.title)
     })
     it("returns an anonymous reader to the locale-aware door carrying the interrupted route", async () => {
-        mocks.locale = "en"; mocks.session.state = { status: "anonymous" }; mocks.pathname = "/agentos/workspaces/w1/modules/m1/setup"
+        mocks.session.state = { status: "anonymous" }; mocks.pathname = "/agentos/workspaces/w1/modules/m1/setup"
         render(<ConsoleLayout body={Workspace} bodyProps={{}} />)
         expect(screen.queryByText("workspace")).toBeNull()
         await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith("/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fw1%2Fmodules%2Fm1%2Fsetup"))

@@ -66,7 +66,7 @@ const labels: AgentOSWorkspaceControlCenterShellLabels = {
     runtimeUnavailable: "Runtime is currently unavailable.",
     runtimeUnknown: "The runtime standing could not be established.",
     configurationSection: "Configuration",
-    configurationCurrent: "desired {desired} · tested {tested} · applied {applied}",
+    configurationCurrent: ({ desired, tested, applied }) => `desired ${desired} · tested ${tested} · applied ${applied}`,
     configurationAbsent: "No configuration observation exists.",
     configurationUnsupported: "This source does not support configuration.",
     attentionSection: "Needs attention",

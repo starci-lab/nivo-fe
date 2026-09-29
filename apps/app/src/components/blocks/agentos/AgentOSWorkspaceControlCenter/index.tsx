@@ -144,7 +144,7 @@ export const AgentOSWorkspaceControlCenter = (props: AgentOSWorkspaceControlCent
         runtimeUnavailable: s("runtime.unavailable"),
         runtimeUnknown: s("runtime.unknown"),
         configurationSection: s("configuration.section"),
-        configurationCurrent: s("configuration.current"),
+        configurationCurrent: digests => s("configuration.current", digests),
         configurationAbsent: s("configuration.absent"),
         configurationUnsupported: s("configuration.unsupported"),
         attentionSection: s("attention.section"),

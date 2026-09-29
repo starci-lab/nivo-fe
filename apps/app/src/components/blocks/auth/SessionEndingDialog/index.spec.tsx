@@ -19,7 +19,6 @@ vi.mock("@/hooks", () => ({
     useSession: () => ({ state: { status: "signed-in", accessToken: "token" }, end }),
     useRouter: () => ({ replace }),
 }))
-vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("@/modules/i18n/navigation", () => ({ navigation: { useRouter: () => ({ replace }) } }))
 
 import { SessionEndingDialog } from "."
@@ -52,13 +51,13 @@ describe("SessionEndingDialog", () => {
         render(<SessionEndingDialog isOpen onOpenChange={openChange} />)
         const dialog = await screen.findByRole("dialog")
 
-        const confirm = within(dialog).getByRole("button", { name: "account.sessionEnding.confirm" })
+        const confirm = within(dialog).getByRole("button", { name: "Sign out everywhere" })
         await user.click(confirm)
         expect(end).toHaveBeenCalledOnce()
         expect(end).toHaveBeenCalledWith("everywhere")
 
         // the request is unanswered: the confirmation still stands, wearing its pending face
-        expect(within(dialog).getByText("account.sessionEnding.pending")).toBeInTheDocument()
+        expect(within(dialog).getByText("Ending your sessions on every browser…")).toBeInTheDocument()
         expect(confirm).toBeDisabled()
         await user.click(confirm)
         expect(end).toHaveBeenCalledOnce()
@@ -74,7 +73,7 @@ describe("SessionEndingDialog", () => {
         render(<SessionEndingDialog isOpen onOpenChange={openChange} />)
         await screen.findByRole("dialog")
 
-        await user.click(screen.getByRole("button", { name: "account.sessionEnding.confirm" }))
+        await user.click(screen.getByRole("button", { name: "Sign out everywhere" }))
         await waitFor(() => expect(replace).toHaveBeenCalledWith("/authentication?sessionEnding=unconfirmed"))
         expect(replace).not.toHaveBeenCalledWith("/authentication?sessionEnding=applied")
     })
@@ -89,7 +88,7 @@ describe("SessionEndingDialog", () => {
         render(<SessionEndingDialog isOpen onOpenChange={openChange} />)
         await screen.findByRole("dialog")
 
-        await user.click(screen.getByRole("button", { name: "account.sessionEnding.confirm" }))
+        await user.click(screen.getByRole("button", { name: "Sign out everywhere" }))
         await waitFor(() => expect(replace).toHaveBeenCalledWith("/authentication?sessionEnding=unconfirmed"))
     })
 })

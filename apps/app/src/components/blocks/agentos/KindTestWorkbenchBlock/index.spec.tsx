@@ -4,7 +4,6 @@ import { NextIntlClientProvider, useTranslations, createTranslator } from "next-
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n/config"
-import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import type { AgentosModuleTestContract } from "@/modules/api/console"
 import { DEFAULT_TEST_WORKBENCH_REGISTRY, KindTestWorkbenchBlock as ActualKindTestWorkbenchBlock, type KindTestWorkbenchBlockCopy } from "."
@@ -69,7 +68,7 @@ describe("KindTestWorkbenchBlock", () => {
         ["calendar-sandbox", "Calendar sandbox test"],
         ["citation-check", "Citation grounding test"],
     ])("resolves trusted Test workbench %s", (workbenchKey, expectedTitle) => {
-        const html = renderToStaticMarkup(
+        const html = render(
             <KindTestWorkbenchBlock
                 contract={contractFor(workbenchKey)}
                 contextLabel="Context v2 · candidate"
@@ -78,14 +77,14 @@ describe("KindTestWorkbenchBlock", () => {
                 registry={DEFAULT_TEST_WORKBENCH_REGISTRY}
                 onRun={vi.fn()}
             />,
-        )
+        ).container.innerHTML
         expect(html).toContain(expectedTitle)
         expect(html).toContain("Fake input only")
         expect(html).toContain("cannot call live channels")
     })
 
     it("fails closed for an unregistered workbench", () => {
-        const html = renderToStaticMarkup(
+        const html = render(
             <KindTestWorkbenchBlock
                 contract={contractFor("untrusted-workbench")}
                 contextLabel="Context v1"
@@ -94,7 +93,7 @@ describe("KindTestWorkbenchBlock", () => {
                 registry={DEFAULT_TEST_WORKBENCH_REGISTRY}
                 onRun={vi.fn()}
             />,
-        )
+        ).container.innerHTML
         expect(html).toContain("Test workbench unavailable")
         expect(html).toContain("no test was executed")
     })
@@ -102,7 +101,7 @@ describe("KindTestWorkbenchBlock", () => {
     describe.each(["en", "vi"] as const)("Kind test copy %s", locale => {
         it.each(["conversation-sandbox", "accounting-fixture", "calendar-sandbox", "citation-check", "generic-sandbox", "missing"])("renders %s with its real fixture and fail-closed fallback", workbenchKey => {
             const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.kindTest
-            const html = renderToStaticMarkup(<KindTestWorkbenchBlock locale={locale} contract={contractFor(workbenchKey)} contextLabel="Untranslated context" targetReady pending={false} registry={DEFAULT_TEST_WORKBENCH_REGISTRY} onRun={vi.fn()} />)
+            const html = render(<KindTestWorkbenchBlock locale={locale} contract={contractFor(workbenchKey)} contextLabel="Untranslated context" targetReady pending={false} registry={DEFAULT_TEST_WORKBENCH_REGISTRY} onRun={vi.fn()} />).container.innerHTML
             expect(html).toContain(workbenchKey === "missing" ? copy.unavailable : "Safe fixture")
             expect(html).toContain(workbenchKey === "missing" ? copy.closed : copy.fakeHint)
         })

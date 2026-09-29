@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import viMessages from "@/messages/vi.json"
+import enMessages from "@/messages/en.json"
 
 const replace = vi.fn()
 const router = { replace }
@@ -15,15 +15,11 @@ vi.mock("@/modules/i18n/navigation", () => ({
         useRouter: () => router,
     },
 }))
-vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 
 import { ReturnNotice } from "."
 
-/** The copy key the connected half resolves, which is the text this fixture's translation echo draws. */
-const NOTICE_KEY = "unavailableReturnNotice"
-
-/** The sentence the catalog carries under that key, so the key is known to name real words. */
-const NOTICE = viMessages.authentication[NOTICE_KEY]
+/** The sentence the catalog carries for a place that could not be opened. */
+const NOTICE = enMessages.authentication.unavailableReturnNotice
 
 /** What the signing-in person is told when a place it could not open was asked for. */
 const MARKER = "returnNotice=unavailable"
@@ -40,8 +36,7 @@ describe("ReturnNotice", () => {
         address.search = MARKER
         render(<ReturnNotice />)
 
-        expect(screen.getByText(NOTICE_KEY)).toBeInTheDocument()
-        expect(NOTICE).not.toBe(NOTICE_KEY)
+        expect(screen.getByText(NOTICE)).toBeInTheDocument()
     })
 
     it("puts the address back without the marker, keeping what it does not own", () => {
@@ -55,7 +50,7 @@ describe("ReturnNotice", () => {
         address.search = "tab=members"
         render(<ReturnNotice />)
 
-        expect(screen.queryByText(NOTICE_KEY)).not.toBeInTheDocument()
+        expect(screen.queryByText(NOTICE)).not.toBeInTheDocument()
         expect(replace).not.toHaveBeenCalled()
     })
 
@@ -65,7 +60,7 @@ describe("ReturnNotice", () => {
         address.search = ""
         rerender(<ReturnNotice />)
 
-        expect(screen.getByText(NOTICE_KEY)).toBeInTheDocument()
+        expect(screen.getByText(NOTICE)).toBeInTheDocument()
         expect(replace).toHaveBeenCalledOnce()
     })
 
@@ -76,6 +71,6 @@ describe("ReturnNotice", () => {
         address.search = ""
         rerender(<ReturnNotice />)
 
-        expect(screen.queryByText(NOTICE_KEY)).not.toBeInTheDocument()
+        expect(screen.queryByText(NOTICE)).not.toBeInTheDocument()
     })
 })

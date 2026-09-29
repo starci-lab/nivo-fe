@@ -5,13 +5,6 @@ import { vi } from "vitest"
 const mocks = vi.hoisted(() => ({
     data: { apps: null, workspaces: null, pod: null, domains: null, wallet: null, invoices: null } as Record<string, unknown>,
 }))
-vi.mock("next-intl", () => ({
-    useTranslations: () => (key: string, values?: Record<string, unknown>) => values === undefined ? key : `${key}:${JSON.stringify(values)}`,
-    useFormatter: () => ({
-        number: (value: number) => `money-${value}`,
-        dateTime: (value: Date) => `date-${value.toISOString().slice(0, 10)}`,
-    }),
-}))
 vi.mock("@/hooks", () => ({ useOverviewData: () => mocks.data }))
 
 import { OverviewSignals } from "."
@@ -31,7 +24,7 @@ describe("OverviewSignals", () => {
         expect(container).toHaveTextContent("attention-app")
         expect(container).toHaveTextContent("nivo AI Agent")
         expect(container).toHaveTextContent("api.nivo.vn")
-        expect(container).toHaveTextContent("money-2450000")
+        expect(container).toHaveTextContent("₫2,450,000")
     })
 
     it("settles empty source collections without inventing resources", () => {
@@ -42,9 +35,9 @@ describe("OverviewSignals", () => {
         mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 0 } }
         mocks.data.invoices = { ok: true, data: [] }
         const { container } = render(<OverviewSignals label="At a glance" />)
-        expect(container).toHaveTextContent("overview.none")
-        expect(container).toHaveTextContent("domains.autoRenewOn")
-        expect(container).toHaveTextContent("wallet.noUnpaid")
+        expect(container).toHaveTextContent("None yet")
+        expect(container).toHaveTextContent("Auto-renews")
+        expect(container).toHaveTextContent("None")
     })
 
     it("keeps named and unknown refusals inside their own cells", () => {
@@ -55,8 +48,8 @@ describe("OverviewSignals", () => {
         mocks.data.wallet = { ok: false, code: "UNKNOWN" }
         mocks.data.invoices = { ok: false, code: "UNKNOWN" }
         const { container } = render(<OverviewSignals label="At a glance" />)
-        expect(container).toHaveTextContent("refusal.EXPERT_SITE_NOT_FOUND_EXCEPTION")
-        expect(container).toHaveTextContent("refusal.unknown")
+        expect(container).toHaveTextContent("This account has no app yet, so there are no academy settings to read.")
+        expect(container).toHaveTextContent("This part could not be read. The rest of the screen is still correct.")
     })
 
     it("keeps every unsettled answer visibly pending", () => {
@@ -93,10 +86,10 @@ describe("OverviewSignals", () => {
         mocks.data.invoices = { ok: true, data: [] }
         const { container } = render(<OverviewSignals label="At a glance" />)
 
-        expect(container).toHaveTextContent("status.unknown")
-        expect(container).toHaveTextContent("agentos.kindWorkspace")
-        expect(container).toHaveTextContent("refusal.unknown")
-        expect(container).toHaveTextContent("overview.signals.nothingToOpen")
+        expect(container).toHaveTextContent("Unknown")
+        expect(container).toHaveTextContent("Workspace")
+        expect(container).toHaveTextContent("This part could not be read. The rest of the screen is still correct.")
+        expect(container).toHaveTextContent("Nothing to open")
     })
 
     it("reads auto-renew as off for a domain signal that carries no expiry and does not renew", () => {
@@ -108,7 +101,7 @@ describe("OverviewSignals", () => {
         mocks.data.invoices = { ok: true, data: [] }
         const { container } = render(<OverviewSignals label="At a glance" />)
 
-        expect(container).toHaveTextContent("domains.autoRenewOff")
+        expect(container).toHaveTextContent("No auto-renew")
     })
 
     it("reads the wallet signal as settled with no unpaid invoice once the invoice read itself was refused", () => {
@@ -120,7 +113,7 @@ describe("OverviewSignals", () => {
         mocks.data.invoices = { ok: false, code: "UNKNOWN" }
         const { container } = render(<OverviewSignals label="At a glance" />)
 
-        expect(container).toHaveTextContent("wallet.noUnpaid")
+        expect(container).toHaveTextContent("None")
     })
 
     it("leaves a settled healthy account with no raised badge and names the fact none needs attention", () => {
@@ -134,6 +127,6 @@ describe("OverviewSignals", () => {
         const { container } = render(<OverviewSignals label="At a glance" />)
 
         expect(container.querySelectorAll('[data-component="Badge"]')).toHaveLength(0)
-        expect(container).toHaveTextContent("overview.signals.factNone")
+        expect(container).toHaveTextContent("Nothing needs attention")
     })
 })

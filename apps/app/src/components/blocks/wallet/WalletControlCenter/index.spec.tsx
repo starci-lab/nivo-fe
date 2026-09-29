@@ -7,7 +7,6 @@ const mocks = vi.hoisted(() => ({
     api: { createWalletTopUpPayLink: vi.fn(), myInvoices: vi.fn(), myWallet: vi.fn(), myWalletTransactions: vi.fn(), payInvoice: vi.fn() },
     navigation: { pathname: "/en/wallet", search: "" },
     session: { state: { status: "signed-in", accessToken: "token" } },
-    t: (key: string, values?: Record<string, unknown>) => values === undefined ? key : `${key}:${JSON.stringify(values)}`,
 }))
 
 type WalletProbeProps = {
@@ -31,7 +30,6 @@ type WalletProbeProps = {
     }
 }
 
-vi.mock("next-intl", () => ({ useLocale: () => "en", useTranslations: () => mocks.t, useFormatter: () => ({ number: (value: number) => `money-${value}`, dateTime: (value: Date) => `date-${value.toISOString().slice(0, 10)}` }) }))
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(mocks.navigation.search), redirect: vi.fn(), permanentRedirect: vi.fn() }))
 vi.mock("@/hooks", async (importOriginal) => ({
     ...await importOriginal<object>(),
@@ -94,7 +92,7 @@ describe("WalletControlCenter", () => {
         mocks.api.myWalletTransactions.mockResolvedValue({ ok: true, data: [{ id: "movement", amountVnd: 1250, type: "deposit", createdAt: "2026-08-20T00:00:00.000Z" }] })
         renderWallet()
         await waitFor(() => expect(output()).toContain("Academy · Pro"))
-        expect(output()).toContain("money-1250")
+        expect(output()).toContain("₫1,250")
         await act(async () => { screen.getByTestId("pay").click() })
         await waitFor(() => expect(mocks.api.payInvoice).toHaveBeenCalledWith("invoice"))
     })
@@ -113,14 +111,14 @@ describe("WalletControlCenter", () => {
         mocks.api.myWalletTransactions.mockResolvedValue({ ok: true, data: [{ id: "movement", amountVnd: 100, type: "spend", createdAt: "2026-08-20T00:00:00.000Z" }] })
         mocks.api.payInvoice.mockResolvedValue({ ok: false, reason: "payment-failed" })
         renderWallet()
-        await waitFor(() => expect(output()).toContain("wallet.transactionsLabel"))
+        await waitFor(() => expect(output()).toContain("Transactions"))
         await act(async () => { screen.getByTestId("pay").click() })
         await waitFor(() => expect(mocks.api.payInvoice).toHaveBeenCalledWith("invoice"))
     })
 
     it("opens top-up and keeps a gateway refusal inside that flow", async () => {
         renderWallet()
-        await waitFor(() => expect(output()).toContain("money-0"))
+        await waitFor(() => expect(output()).toContain("₫0"))
         await act(async () => { screen.getByTestId("open-top-up").click() })
         expect(output()).toContain('"overlayState":"open"')
         await act(async () => { screen.getByTestId("amount").click() })
@@ -137,12 +135,12 @@ describe("WalletControlCenter", () => {
 
     it("refuses an invalid top-up before requesting checkout", async () => {
         renderWallet()
-        await waitFor(() => expect(output()).toContain("money-0"))
+        await waitFor(() => expect(output()).toContain("₫0"))
         await act(async () => { screen.getByTestId("invalid-amount").click() })
         await act(async () => { screen.getByTestId("submit-top-up").click() })
 
         expect(mocks.api.createWalletTopUpPayLink).not.toHaveBeenCalled()
-        expect(output()).toContain("wallet.topUpInvalid")
+        expect(output()).toContain("Enter an amount of at least ₫10,000.")
     })
 
     it("submits a safe checkout form and retains its exact evidence", async () => {
@@ -157,7 +155,7 @@ describe("WalletControlCenter", () => {
             },
         })
         renderWallet()
-        await waitFor(() => expect(output()).toContain("money-0"))
+        await waitFor(() => expect(output()).toContain("₫0"))
         await act(async () => { screen.getByTestId("amount").click() })
         await act(async () => { screen.getByTestId("submit-top-up").click() })
 
@@ -178,7 +176,7 @@ describe("WalletControlCenter", () => {
         renderWallet()
         await waitFor(() => expect(output()).toContain('"phase":"answered"'))
         expect(output()).toContain('"state":"waypoint"')
-        expect(output()).toContain('"backLabel":"wallet.returnToOrder"')
+        expect(output()).toContain('"backLabel":"Return to order"')
         expect(output()).toContain('"actionKind":"pay"')
         expect(output()).toContain("order-42")
         expect(output()).toContain('"rows":[]')
@@ -190,7 +188,7 @@ describe("WalletControlCenter", () => {
         renderWallet()
         expect(output()).toContain('"state":"waypoint"')
         expect(output()).toContain('"linkedInvoice":{"phase":"refused"')
-        expect(output()).toContain("wallet.invalidContinuation")
+        expect(output()).toContain("This Wallet continuation is incomplete or unsafe. Return to the exact AgentOS order and open Wallet again.")
     })
 
     it("marks an underfunded correlated invoice without exposing a pay action", async () => {
@@ -202,7 +200,7 @@ describe("WalletControlCenter", () => {
         }] })
         renderWallet()
 
-        await waitFor(() => expect(output()).toContain("wallet.insufficientBalance"))
+        await waitFor(() => expect(output()).toContain("Available balance is lower than this invoice. Top up before paying."))
         expect(output()).toContain('"actionDisabled":true')
     })
 })

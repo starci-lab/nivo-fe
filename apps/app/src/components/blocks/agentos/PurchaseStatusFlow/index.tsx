@@ -263,6 +263,7 @@ const PurchaseStatusFlow = (props: PurchaseStatusFlowProps) => {
             provisioning: t("provisioning"),
             loadingTitle: t("loadingTitle"),
             loadingText: t("loadingText"),
+            loading: t("loading"),
             paymentPendingTitle: t("paymentPendingTitle"),
             paymentPendingBadge: t("paymentPendingBadge"),
             paymentPendingSubtitle: t("paymentPendingSubtitle"),

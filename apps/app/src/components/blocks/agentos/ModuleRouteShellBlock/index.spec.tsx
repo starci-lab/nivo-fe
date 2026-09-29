@@ -4,7 +4,6 @@ import { NextIntlClientProvider, useTranslations } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n/config"
-import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import { ModuleRouteShellBlock as ActualModuleRouteShellBlock, type ModuleRouteShellBlockCopy } from "./index"
 
@@ -60,7 +59,7 @@ const ModuleRouteShellBlock = ({ locale = "en", ...props }: ModuleRouteShellBloc
 
 describe("ModuleRouteShellBlock", () => {
     it("uses the human kind heading while retaining a machine key", () => {
-        const html = renderToStaticMarkup(<ModuleRouteShellBlock workspaceLabel="Workspace" moduleName="custom:1234567890abcdef1234567890" moduleKind="generic-agent" lifecycleLabel="ready" contextVersion="not applied" channelLabel="Channel not connected" controllerLabel="Controller healthy" activeView="setup" content={() => <div>Setup</div>} contentProps={{}} onBackToModules={() => undefined} onNavigate={() => undefined} />)
+        const html = render(<ModuleRouteShellBlock workspaceLabel="Workspace" moduleName="custom:1234567890abcdef1234567890" moduleKind="generic-agent" lifecycleLabel="ready" contextVersion="not applied" channelLabel="Channel not connected" controllerLabel="Controller healthy" activeView="setup" content={() => <div>Setup</div>} contentProps={{}} onBackToModules={() => undefined} onNavigate={() => undefined} />).container.innerHTML
         expect(html).toContain("Generic agent")
         expect(html).toContain("custom:1234567890abcdef1234567890")
     })
@@ -68,7 +67,7 @@ describe("ModuleRouteShellBlock", () => {
     describe.each(["en", "vi"] as const)("Module shell copy %s", locale => {
         it.each(["generic-agent", "__proto__", "constructor"])("preserves machine identity for %s", moduleKind => {
             const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.shell
-            const html = renderToStaticMarkup(<ModuleRouteShellBlock locale={locale} workspaceLabel="Raw workspace" moduleName="custom:1234567890abcdef1234567890" moduleKind={moduleKind} lifecycleLabel="Raw status" contextVersion="v1" channelLabel="Raw channel" controllerLabel="Raw controller" activeView="setup" content={() => <div>Raw body</div>} contentProps={{}} onBackToModules={() => undefined} onNavigate={() => undefined} />)
+            const html = render(<ModuleRouteShellBlock locale={locale} workspaceLabel="Raw workspace" moduleName="custom:1234567890abcdef1234567890" moduleKind={moduleKind} lifecycleLabel="Raw status" contextVersion="v1" channelLabel="Raw channel" controllerLabel="Raw controller" activeView="setup" content={() => <div>Raw body</div>} contentProps={{}} onBackToModules={() => undefined} onNavigate={() => undefined} />).container.innerHTML
             expect(html).toContain(copy.modules)
             expect(html).toContain("custom:1234567890abcdef1234567890")
             expect(html).toContain(moduleKind === "generic-agent" ? copy.genericAgent : moduleKind)

@@ -5,7 +5,6 @@ const mocks = vi.hoisted(() => ({
     push: vi.fn(),
     data: { apps: null, workspaces: null } as Record<string, unknown>,
 }))
-vi.mock("next-intl", () => ({ useTranslations: () => (key: string, values?: Record<string, unknown>) => values === undefined ? key : `${key}:${JSON.stringify(values)}` }))
 vi.mock("@/hooks", () => ({ useRouter: () => ({ push: mocks.push }), useOverviewData: () => mocks.data }))
 
 import { OverviewServices } from "."
@@ -22,7 +21,7 @@ describe("OverviewServices", () => {
         expect(screen.getByText("reader-app")).toBeInTheDocument()
         expect(screen.getByText("second-app")).toBeInTheDocument()
         expect(screen.getByText("reader workspace")).toBeInTheDocument()
-        expect(screen.getByText("overview.services.workspaceDetailWithOrder:{\"orderId\":\"order-1\"}")).toBeInTheDocument()
+        expect(screen.getByText("Agent workspace · fulfils catalog order order-1")).toBeInTheDocument()
     })
 
     it("opens the row's own app from its own action", () => {
@@ -30,7 +29,7 @@ describe("OverviewServices", () => {
         mocks.data.workspaces = { ok: true, data: [] }
         render(<OverviewServices label="Services" />)
 
-        fireEvent.click(screen.getByRole("button", { name: "apps.open" }))
+        fireEvent.click(screen.getByRole("button", { name: "Open" }))
         expect(mocks.push).toHaveBeenCalledWith("/apps/site-1")
     })
 
@@ -39,7 +38,7 @@ describe("OverviewServices", () => {
         mocks.data.workspaces = { ok: true, data: [] }
         render(<OverviewServices label="Services" />)
 
-        expect(screen.getByRole("button", { name: "apps.unavailable" })).toBeDisabled()
+        expect(screen.getByRole("button", { name: "Not available yet" })).toBeDisabled()
     })
 
     it("keeps the collection loading until both slices settle", () => {
@@ -55,8 +54,8 @@ describe("OverviewServices", () => {
         mocks.data.workspaces = { ok: true, data: [] }
         render(<OverviewServices label="Services" />)
 
-        expect(screen.getByRole("button", { name: "apps.viewDns" })).toBeInTheDocument()
-        expect(screen.getByText(/overview\.services\.factDegraded:/)).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "View record" })).toBeInTheDocument()
+        expect(screen.getByText(/1 answered · 1 degraded/)).toBeInTheDocument()
     })
 
     it("opens the one agent workspace row from its own action and names it with no catalog order", () => {
@@ -64,9 +63,9 @@ describe("OverviewServices", () => {
         mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: null, status: "waiting_capacity", catalogOrder: null }] }
         render(<OverviewServices label="Services" />)
 
-        expect(screen.getByText("agentos.kindWorkspace")).toBeInTheDocument()
-        expect(screen.getByText("overview.services.workspaceDetailNoOrder")).toBeInTheDocument()
-        fireEvent.click(screen.getByRole("button", { name: "overview.services.openWorkspace" }))
+        expect(screen.getByText("Workspace")).toBeInTheDocument()
+        expect(screen.getByText("Agent workspace")).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Open workspace" }))
         expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/workspace-1")
     })
 
@@ -75,7 +74,7 @@ describe("OverviewServices", () => {
         mocks.data.workspaces = { ok: true, data: [{ id: "workspace-1", name: "reader workspace", status: "reticulating_splines", catalogOrder: null }] }
         render(<OverviewServices label="Services" />)
 
-        expect(screen.getByText("status.unknown")).toBeInTheDocument()
+        expect(screen.getByText("Unknown")).toBeInTheDocument()
     })
 
     it("draws no workspace row and names none degraded once the workspace read itself was refused", () => {
@@ -83,7 +82,7 @@ describe("OverviewServices", () => {
         mocks.data.workspaces = { ok: false, code: "UNKNOWN" }
         render(<OverviewServices label="Services" />)
 
-        expect(screen.queryByRole("button", { name: "overview.services.openWorkspace" })).not.toBeInTheDocument()
-        expect(screen.getByText(/overview\.services\.factDegradedNone/)).toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: "Open workspace" })).not.toBeInTheDocument()
+        expect(screen.getByText(/0 answered · nothing degraded/)).toBeInTheDocument()
     })
 })

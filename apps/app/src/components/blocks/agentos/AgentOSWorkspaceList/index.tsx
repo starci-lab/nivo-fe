@@ -35,6 +35,7 @@ export const AgentOSWorkspaceList = (props: AgentOSWorkspaceListProps) => {
             attentionCaption: t("agentos.summary.attentionCaption"),
             attentionGroup: t("agentos.summary.attentionGroup"),
             steadyGroup: t("agentos.summary.steadyGroup"),
+            status: t("agentos.summary.status"),
             manage: t("agentos.manageWorkspace"),
             retry: t("agentos.retry")
         };

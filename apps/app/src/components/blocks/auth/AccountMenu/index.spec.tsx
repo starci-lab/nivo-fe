@@ -17,10 +17,6 @@ type EndingCall = (scope?: "thisBrowser" | "everywhere") => Promise<SessionEndRe
 
 const end = vi.fn<EndingCall>(() => Promise.resolve(APPLIED))
 const replace = vi.fn()
-vi.mock("next-intl", () => ({
-    useTranslations: () => (key: string, values?: Readonly<Record<string, unknown>>) =>
-        values === undefined ? key : `${key}(${Object.entries(values).map(([name, value]) => `${name}=${String(value)}`).join(",")})`,
-}))
 vi.mock("@/modules/i18n/navigation", () => ({
     Link: "a",
     redirect: vi.fn(),
@@ -99,29 +95,29 @@ const unansweredEnding = () => {
 /** Open the account menu and choose sign out everywhere, answering with the confirmation. */
 const openEveryBrowserConfirmation = async (user: ReturnType<typeof userEvent.setup>) => {
     render(<AccountMenu />)
-    fireEvent.click(screen.getByRole("button", { name: "account.label" }))
-    await user.click(await screen.findByRole("menuitem", { name: "account.signOutEverywhere" }))
+    fireEvent.click(screen.getByRole("button", { name: "Account" }))
+    await user.click(await screen.findByRole("menuitem", { name: "Sign out everywhere" }))
     return screen.findByRole("dialog")
 }
 
 /** Open the account menu and the administrator ending, answering with the dialog it mounts. */
 const openMemberEndingDialog = async (user: ReturnType<typeof userEvent.setup>) => {
     render(<AccountMenu />)
-    fireEvent.click(screen.getByRole("button", { name: "account.label" }))
-    await user.click(await screen.findByRole("menuitem", { name: "account.endSessionsForPerson" }))
+    fireEvent.click(screen.getByRole("button", { name: "Account" }))
+    await user.click(await screen.findByRole("menuitem", { name: "End the sign-ins of a person" }))
     return screen.findByRole("dialog")
 }
 
 /** The picker's trigger inside the drawn dialog, named by the field label the connected half resolved. */
 const memberPicker = (dialog: HTMLElement): HTMLElement =>
-    within(dialog).getByRole("button", { name: /account\.administratorEnding\.memberLabel/ })
+    within(dialog).getByRole("button", { name: /Member/ })
 
 /** Open the administrator ending, choose a roster member by display name and continue, answering with the confirmation. */
 const openMemberEnding = async (user: ReturnType<typeof userEvent.setup>) => {
     const dialog = await openMemberEndingDialog(user)
     await user.click(memberPicker(dialog))
     await user.click(await screen.findByRole("option", { name: "Binh Tran" }))
-    await user.click(screen.getByRole("button", { name: "account.administratorEnding.continue" }))
+    await user.click(screen.getByRole("button", { name: "Continue" }))
     return screen.findByRole("dialog")
 }
 
@@ -158,8 +154,8 @@ describe("AccountMenu", () => {
         const user = userEvent.setup()
         render(<AccountMenu />)
 
-        fireEvent.click(screen.getByRole("button", { name: "account.label" }))
-        await user.click(await screen.findByRole("menuitem", { name: "account.signOut" }))
+        fireEvent.click(screen.getByRole("button", { name: "Account" }))
+        await user.click(await screen.findByRole("menuitem", { name: "Sign out" }))
         expect(end).toHaveBeenCalledOnce()
         expect(end).toHaveBeenCalledWith()
     })
@@ -168,11 +164,11 @@ describe("AccountMenu", () => {
         const user = userEvent.setup()
         const dialog = await openEveryBrowserConfirmation(user)
 
-        expect(dialog).toHaveAccessibleName("account.sessionEnding.title")
-        expect(within(dialog).getByText("account.sessionEnding.description")).toBeInTheDocument()
-        expect(within(dialog).getByText("account.sessionEnding.scopeNote")).toBeInTheDocument()
+        expect(dialog).toHaveAccessibleName("Sign out everywhere")
+        expect(within(dialog).getByText("End your current Nivo sessions on every browser. Your login stays available for a fresh sign-in.")).toBeInTheDocument()
+        expect(within(dialog).getByText("This includes this browser.")).toBeInTheDocument()
 
-        await user.click(screen.getByRole("button", { name: "account.sessionEnding.confirm" }))
+        await user.click(screen.getByRole("button", { name: "Sign out everywhere" }))
         expect(end).toHaveBeenCalledOnce()
         expect(end).toHaveBeenCalledWith("everywhere")
         await waitFor(() => expect(replace).toHaveBeenCalledWith("/authentication?sessionEnding=applied"))
@@ -182,7 +178,7 @@ describe("AccountMenu", () => {
         const user = userEvent.setup()
         await openEveryBrowserConfirmation(user)
 
-        await user.click(screen.getByRole("button", { name: "account.sessionEnding.cancel" }))
+        await user.click(screen.getByRole("button", { name: "Cancel" }))
         expect(end).not.toHaveBeenCalled()
         expect(replace).not.toHaveBeenCalled()
         await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
@@ -193,7 +189,7 @@ describe("AccountMenu", () => {
         const user = userEvent.setup()
         await openEveryBrowserConfirmation(user)
 
-        await user.click(screen.getByRole("button", { name: "account.sessionEnding.confirm" }))
+        await user.click(screen.getByRole("button", { name: "Sign out everywhere" }))
         await waitFor(() => expect(replace).toHaveBeenCalledWith("/authentication?sessionEnding=unconfirmed"))
         expect(replace).not.toHaveBeenCalledWith("/authentication?sessionEnding=applied")
     })
@@ -203,7 +199,7 @@ describe("AccountMenu", () => {
         end.mockReturnValueOnce(promise)
         const user = userEvent.setup()
         await openEveryBrowserConfirmation(user)
-        const confirm = screen.getByRole("button", { name: "account.sessionEnding.confirm" })
+        const confirm = screen.getByRole("button", { name: "Sign out everywhere" })
 
         await user.click(confirm)
         await user.click(confirm)
@@ -218,25 +214,25 @@ describe("AccountMenu", () => {
         scope.role = "staff"
         render(<AccountMenu />)
 
-        fireEvent.click(screen.getByRole("button", { name: "account.label" }))
+        fireEvent.click(screen.getByRole("button", { name: "Account" }))
         await screen.findByRole("menu")
-        expect(screen.queryByRole("menuitem", { name: "account.endSessionsForPerson" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("menuitem", { name: "End the sign-ins of a person" })).not.toBeInTheDocument()
 
         await user.keyboard("{Escape}")
         cleanup()
         scope.role = "manager"
         render(<AccountMenu />)
-        fireEvent.click(screen.getByRole("button", { name: "account.label" }))
-        expect(await screen.findByRole("menuitem", { name: "account.endSessionsForPerson" })).toBeInTheDocument()
+        fireEvent.click(screen.getByRole("button", { name: "Account" }))
+        expect(await screen.findByRole("menuitem", { name: "End the sign-ins of a person" })).toBeInTheDocument()
     })
 
     it("offers no administrator ending off a workspace route, whatever the membership answers", async () => {
         scope.params = { locale: "vi" }
         render(<AccountMenu />)
 
-        fireEvent.click(screen.getByRole("button", { name: "account.label" }))
+        fireEvent.click(screen.getByRole("button", { name: "Account" }))
         await screen.findByRole("menu")
-        expect(screen.queryByRole("menuitem", { name: "account.endSessionsForPerson" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("menuitem", { name: "End the sign-ins of a person" })).not.toBeInTheDocument()
         expect(endPrincipalSessions).not.toHaveBeenCalled()
     })
 
@@ -244,7 +240,7 @@ describe("AccountMenu", () => {
         const user = userEvent.setup()
         const dialog = await openMemberEndingDialog(user)
 
-        expect(within(dialog).getByText("account.administratorEnding.workspaceLabel")).toBeInTheDocument()
+        expect(within(dialog).getByText("Workspace")).toBeInTheDocument()
         expect(within(dialog).getByText("Support")).toBeInTheDocument()
         await user.click(memberPicker(dialog))
         const options = await screen.findAllByRole("option")
@@ -257,7 +253,7 @@ describe("AccountMenu", () => {
         scope.roster = "loading"
         await mountMemberEnding()
 
-        expect(screen.getByRole("button", { name: "account.administratorEnding.continue" })).toBeDisabled()
+        expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled()
         expect(endPrincipalSessions).not.toHaveBeenCalled()
     })
 
@@ -265,8 +261,8 @@ describe("AccountMenu", () => {
         scope.roster = "unavailable"
         const dialog = await mountMemberEnding()
 
-        expect(within(dialog).getByText("account.administratorEnding.rosterUnavailable")).toBeInTheDocument()
-        expect(screen.getByRole("button", { name: "account.administratorEnding.continue" })).toBeDisabled()
+        expect(within(dialog).getByText("The member list could not be loaded. Please try again.")).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled()
     })
 
     it("says nobody else can be chosen rather than drawing an empty picker", async () => {
@@ -274,16 +270,16 @@ describe("AccountMenu", () => {
         const user = userEvent.setup()
         const dialog = await openMemberEndingDialog(user)
 
-        expect(within(dialog).getByText("account.administratorEnding.noMembers")).toBeInTheDocument()
-        expect(screen.getByRole("button", { name: "account.administratorEnding.continue" })).toBeDisabled()
+        expect(within(dialog).getByText("This workspace has no other members to choose.")).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled()
     })
 
     it("names the chosen member and the workspace scope, sends one request identity, and reports the applied scope in one sentence", async () => {
         const user = userEvent.setup()
         const dialog = await openMemberEnding(user)
 
-        expect(dialog).toHaveAccessibleName("account.administratorEnding.confirmTitle(member=Binh Tran)")
-        await user.click(screen.getByRole("button", { name: "account.administratorEnding.confirmAll" }))
+        expect(dialog).toHaveAccessibleName("End Binh Tran's sign-ins?")
+        await user.click(screen.getByRole("button", { name: "End all sign-ins" }))
         await waitFor(() => expect(endPrincipalSessions).toHaveBeenCalledOnce())
         /*
          * The chosen roster member travels as the workspace memberId; a Login principal or email
@@ -296,7 +292,7 @@ describe("AccountMenu", () => {
         expect(endPrincipalSessions.mock.calls[0][0]).not.toHaveProperty("targetPrincipal")
         expect(typeof endPrincipalSessions.mock.calls[0][0].requestId).toBe("string")
 
-        const applied = await screen.findByText("account.administratorEnding.applied")
+        const applied = await screen.findByText("Sign-ins in the scope you act in have been ended for this person.")
         expect(applied).toBeInTheDocument()
         expect(applied.textContent).not.toMatch(/\d/)
     })
@@ -305,8 +301,8 @@ describe("AccountMenu", () => {
         const user = userEvent.setup()
         await openMemberEnding(user)
 
-        await user.click(screen.getByRole("button", { name: "account.administratorEnding.confirmAll" }))
-        const confirmed = await screen.findByText("account.administratorEnding.applied")
+        await user.click(screen.getByRole("button", { name: "End all sign-ins" }))
+        const confirmed = await screen.findByText("Sign-ins in the scope you act in have been ended for this person.")
         expect(confirmed).toBeInTheDocument()
 
         cleanup()
@@ -315,8 +311,8 @@ describe("AccountMenu", () => {
             data: { kind: "scopeApplied", authorityEndingConfirmed: null },
         }))
         await openMemberEnding(user)
-        await user.click(screen.getByRole("button", { name: "account.administratorEnding.confirmAll" }))
-        const silent = await screen.findByText("account.administratorEnding.applied")
+        await user.click(screen.getByRole("button", { name: "End all sign-ins" }))
+        const silent = await screen.findByText("Sign-ins in the scope you act in have been ended for this person.")
         expect(silent.textContent).toBe(confirmed.textContent)
     })
 
@@ -328,12 +324,12 @@ describe("AccountMenu", () => {
         })
         const dialog = await openMemberEnding(user)
 
-        await user.click(screen.getByRole("button", { name: "account.administratorEnding.confirmAll" }))
-        const refused = await within(dialog).findByText("account.administratorEnding.refused")
+        await user.click(screen.getByRole("button", { name: "End all sign-ins" }))
+        const refused = await within(dialog).findByText("This action cannot be carried out.")
         expect(refused).toBeInTheDocument()
-        expect(within(dialog).queryByText("account.administratorEnding.applied")).not.toBeInTheDocument()
-        expect(within(dialog).queryByText("account.administratorEnding.undecided")).not.toBeInTheDocument()
-        expect(within(dialog).queryByRole("button", { name: "account.administratorEnding.retry" })).not.toBeInTheDocument()
+        expect(within(dialog).queryByText("Sign-ins in the scope you act in have been ended for this person.")).not.toBeInTheDocument()
+        expect(within(dialog).queryByText("This action could not be completed. Please try again.")).not.toBeInTheDocument()
+        expect(within(dialog).queryByRole("button", { name: "Try again" })).not.toBeInTheDocument()
     })
 
     it("reports an authority that never answered as undecided and resends the same request identity on retry", async () => {
@@ -341,11 +337,11 @@ describe("AccountMenu", () => {
         endPrincipalSessions.mockResolvedValueOnce({ ok: false, reason: "network", code: "NETWORK" })
         const dialog = await openMemberEnding(user)
 
-        await user.click(screen.getByRole("button", { name: "account.administratorEnding.confirmAll" }))
-        expect(await within(dialog).findByText("account.administratorEnding.undecided")).toBeInTheDocument()
-        expect(within(dialog).queryByText("account.administratorEnding.refused")).not.toBeInTheDocument()
+        await user.click(screen.getByRole("button", { name: "End all sign-ins" }))
+        expect(await within(dialog).findByText("This action could not be completed. Please try again.")).toBeInTheDocument()
+        expect(within(dialog).queryByText("This action cannot be carried out.")).not.toBeInTheDocument()
 
-        await user.click(screen.getByRole("button", { name: "account.administratorEnding.retry" }))
+        await user.click(screen.getByRole("button", { name: "Try again" }))
         await waitFor(() => expect(endPrincipalSessions).toHaveBeenCalledTimes(2))
         expect(endPrincipalSessions.mock.calls[1][0]).toEqual(endPrincipalSessions.mock.calls[0][0])
     })
@@ -354,7 +350,7 @@ describe("AccountMenu", () => {
         const user = userEvent.setup()
         await openMemberEnding(user)
 
-        await user.click(screen.getByRole("button", { name: "account.administratorEnding.cancel" }))
+        await user.click(screen.getByRole("button", { name: "Cancel" }))
         expect(endPrincipalSessions).not.toHaveBeenCalled()
         expect(await screen.findByRole("dialog")).toBeInTheDocument()
         expect(memberPicker(screen.getByRole("dialog"))).toBeInTheDocument()

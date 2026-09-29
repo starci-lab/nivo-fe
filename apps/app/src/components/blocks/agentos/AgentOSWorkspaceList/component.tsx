@@ -33,6 +33,7 @@ export type AgentOSWorkspaceSummaryLabels = {
     readonly attentionCaption: string;
     readonly attentionGroup: string;
     readonly steadyGroup: string;
+    readonly status: string;
     readonly manage: string;
     readonly retry: string;
 };
@@ -90,13 +91,13 @@ const workspaceRow = (row: AgentOSWorkspaceView, manage: string, onOpen: (id: st
         <Button href={row.href} size="sm" variant={ATTENTION_STATUSES.has(row.status) ? "primary" : "secondary"} onFollow={() => onOpen(row.id)}>{manage}</Button>
     </div>
 </div>;
-const restingRow = (index: number, label: string, actionLabel: string) => <div key={`resting-${index}`} className={ROW_CLASS_NAME} data-contract="BOUNDARY-2 PADDING-4 PADDING-3">
+const restingRow = (index: number, label: string, statusLabel: string, actionLabel: string) => <div key={`resting-${index}`} className={ROW_CLASS_NAME} data-contract="BOUNDARY-2 PADDING-4 PADDING-3">
     <div className={IDENTITY_CLASS_NAME}>
         <Text size="sm" isSkeleton>{label}</Text>
         <Text size="xs" isSkeleton>{label}</Text>
     </div>
     <div className={ACTIONS_CLASS_NAME}>
-        <Badge tone="neutral" isSkeleton>Status</Badge>
+        <Badge tone="neutral" isSkeleton>{statusLabel}</Badge>
         <Button size="sm" variant="secondary" isSkeleton>{actionLabel}</Button>
     </div>
 </div>;
@@ -131,7 +132,7 @@ export const AgentOSWorkspaceListBase = (props: AgentOSWorkspaceListProps) => {
         collection = <SurfaceCard label={common.label}><div role="alert"><EmptyNotice message={props.props.message} actionLabel={labels?.retry} isActionPending={props.on.isRetrying} onAction={props.on.retry}/></div></SurfaceCard>;
     } else {
         collection = <DirectionList label={common.label} labelHidden isLoading={loading} isVerdict>
-            {loading ? [restingRow(1, common.label, labels?.manage ?? common.label), restingRow(2, common.label, labels?.manage ?? common.label), restingRow(3, common.label, labels?.manage ?? common.label)] : labels === undefined ? null : groupedRows(rows, labels, props.on.openWorkspace)}
+            {loading ? [1, 2, 3].map(index => restingRow(index, common.label, labels?.status ?? common.label, labels?.manage ?? common.label)) : labels === undefined ? null : groupedRows(rows, labels, props.on.openWorkspace)}
         </DirectionList>;
     }
     return <div className={DASHBOARD_CLASS_NAME} aria-busy={loading || undefined}>{summary}{collection}</div>;

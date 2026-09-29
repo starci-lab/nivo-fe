@@ -4,7 +4,6 @@ import { NextIntlClientProvider, useTranslations, createTranslator } from "next-
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n/config"
-import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import { ContextVersionBlock as ActualContextVersionBlock, type ContextDraft, type ContextVersionBlockCopy } from "./index"
 
@@ -78,7 +77,7 @@ const testedDraft: ContextDraft = {
 describe("ContextVersionBlock", () => {
     it("keeps Apply disabled until the existing immutable guard is ready", () => {
         const onApply = vi.fn()
-        const html = renderToStaticMarkup(<ContextVersionBlock activeVersion={null} draft={{ ...draft, exactTestPassed: false }} pending={false} refused={false} onApply={onApply} />)
+        const html = render(<ContextVersionBlock activeVersion={null} draft={{ ...draft, exactTestPassed: false }} pending={false} refused={false} onApply={onApply} />).container.innerHTML
         expect(html).toContain("Required before Apply")
         expect(html).toContain("disabled")
         expect(onApply).not.toHaveBeenCalled()
@@ -114,14 +113,14 @@ describe("ContextVersionBlock", () => {
     describe.each(["en", "vi"] as const)("Context copy %s", locale => {
         it("keeps completed context identity and distinguishes untested, active and missing versions", () => {
             const copy = copyFor(createTranslator({ locale, messages: locale === "en" ? enMessages : viMessages, namespace: "console.agentos.modules" })).setup
-            const untested = renderToStaticMarkup(<ContextVersionBlock locale={locale} activeVersion={null} draft={{ ...draft, exactTestPassed: false }} pending={false} refused={false} onApply={vi.fn()} />)
+            const untested = render(<ContextVersionBlock locale={locale} activeVersion={null} draft={{ ...draft, exactTestPassed: false }} pending={false} refused={false} onApply={vi.fn()} />).container.innerHTML
             expect(untested).toContain(copy.testRequired)
             expect(untested).toContain("Support context")
             expect(untested).toContain("disabled")
-            const missing = renderToStaticMarkup(<ContextVersionBlock locale={locale} activeVersion={null} draft={null} pending={false} refused onApply={vi.fn()} />)
+            const missing = render(<ContextVersionBlock locale={locale} activeVersion={null} draft={null} pending={false} refused onApply={vi.fn()} />).container.innerHTML
             expect(missing).toContain(copy.noGates)
             expect(missing).toContain(copy.operationRefused)
-            const active = renderToStaticMarkup(<ContextVersionBlock locale={locale} activeVersion={1} draft={{ ...draft, isActive: true }} pending={false} refused={false} onApply={vi.fn()} />)
+            const active = render(<ContextVersionBlock locale={locale} activeVersion={1} draft={{ ...draft, isActive: true }} pending={false} refused={false} onApply={vi.fn()} />).container.innerHTML
             expect(active).toContain(copy.versionActive({ version: 1 }))
             expect(active).toContain("disabled")
         })
@@ -129,7 +128,7 @@ describe("ContextVersionBlock", () => {
 
     describe.each(["en", "vi"] as const)("Context pending copy %s", locale => {
         it("keeps an otherwise applicable context disabled during its own command", () => {
-            const html = renderToStaticMarkup(<ContextVersionBlock locale={locale} activeVersion={null} draft={draft} pending ownPending refused={false} onApply={vi.fn()} />)
+            const html = render(<ContextVersionBlock locale={locale} activeVersion={null} draft={draft} pending ownPending refused={false} onApply={vi.fn()} />).container.innerHTML
             expect(html).toContain("disabled")
             expect(html).toContain("Support context")
         })

@@ -33,6 +33,8 @@ export type AcademyIntegrationCenterData = {
     readonly label: string;
     readonly fields: ReadonlyArray<AcademyIntegrationFormField>;
     readonly submitLabel: string;
+    readonly revealLabel: string;
+    readonly hideLabel: string;
   };
   readonly pendingId?: string;
   readonly outcome?: string;
@@ -91,8 +93,8 @@ const AcademyIntegrationCenterContent = (input: AcademyIntegrationCenterViewProp
     key={field.id}
     {...field}
     isDisabled={pendingId !== undefined}
-    revealLabel={field.kind === "password" ? "Show" : undefined}
-    hideLabel={field.kind === "password" ? "Hide" : undefined}
+    revealLabel={field.kind === "password" ? selected.revealLabel : undefined}
+    hideLabel={field.kind === "password" ? selected.hideLabel : undefined}
     variant="secondary"
     onValueChange={value => changeField(field.name, value)}
   />)}

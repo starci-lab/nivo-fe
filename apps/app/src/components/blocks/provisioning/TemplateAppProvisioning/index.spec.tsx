@@ -15,7 +15,6 @@ const mocks = vi.hoisted(() => {
         push: vi.fn(),
         session: { state: { status: "signed-in", accessToken: "token" } },
         realtime: { status: "disconnected" as string, event: undefined as { kind: string, id: string, status?: string, reason?: string } | undefined },
-        t: (key: string) => key,
     }
 })
 
@@ -30,7 +29,6 @@ vi.mock("@/hooks", async (importOriginal) => ({
     useRouter: () => ({ replace: mocks.replace, push: mocks.push }),
     useProvisioningRealtime: () => mocks.realtime,
 }))
-vi.mock("next-intl", () => ({ useTranslations: () => mocks.t, useLocale: () => "en" }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/console", () => mocks.api)
 vi.mock("./component", () => ({

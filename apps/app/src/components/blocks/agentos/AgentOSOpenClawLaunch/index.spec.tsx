@@ -13,11 +13,6 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/hooks", async () => ({ ...(await vi.importActual("@/hooks") as Record<string, unknown>), useRouter: () => ({ push: mocks.push }), useSession: () => mocks.session }))
-vi.mock("next-intl", () => ({
-    useTranslations: () => (key: string, values?: Record<string, unknown>) => values === undefined ? key : `${key}:${JSON.stringify(values)}`,
-    useLocale: () => "en",
-    useFormatter: () => ({ dateTime: (value: Date) => value.toISOString() }),
-}))
 vi.mock("@/modules/api/console", () => ({ issueAgentWorkspaceAppLaunch: mocks.issue, revokeAgentWorkspaceAppLaunch: mocks.revoke }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/window/workspace-app-launch", () => ({

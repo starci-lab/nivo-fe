@@ -1,7 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import enMessages from "../../../../messages/en.json"
 
 const mocks = vi.hoisted(() => ({
     status: {
@@ -23,14 +22,6 @@ const mocks = vi.hoisted(() => ({
     realtime: { status: "disconnected" as string, event: undefined as { kind: string, id: string, status?: string, reason?: string | null, updatedAt?: string } | undefined },
 }))
 
-const catalog = enMessages.console.agentos.purchaseStatus as Record<string, unknown>
-const translate = (key: string, params?: Record<string, unknown>) => {
-    const value = key.split(".").reduce<unknown>((node, part) => node === null || typeof node !== "object" ? undefined : (node as Record<string, unknown>)[part], catalog)
-    let text = typeof value === "string" ? value : key
-    if (params !== undefined) for (const [name, replacement] of Object.entries(params)) text = text.replace(`{${name}}`, String(replacement))
-    return text
-}
-
 type RailProbe = { label?: string, fact?: string, facts?: Array<{ label: string, value: string }>, checks?: Array<{ id: string, word: string, mark?: unknown }>, action?: { label: string }, actionCaption?: string, notice?: string, refusalText?: string, outcome?: { title: string, detail?: string }, secondaryLink?: { label: string } }
 type PrimaryProbe = { label?: string, fact?: string, facts?: Array<{ label: string, value: string }>, operation?: { name: string, word: string, progressValue?: number }, action?: { label: string }, cadenceFacts?: Array<{ label: string, value: string }> }
 type FlowProbeProps = {
@@ -43,14 +34,6 @@ type PathnameRequest = { readonly href: string }
 
 vi.mock("@/modules/i18n/navigation", () => ({
     getPathname: ({ href }: PathnameRequest) => href,
-}))
-vi.mock("next-intl", () => ({
-    useLocale: () => "en",
-    useFormatter: () => ({
-        number: (value: number) => `money-${value}`,
-        dateTime: (value: Date) => `t-${value.toISOString()}`,
-    }),
-    useTranslations: () => Object.assign(translate, { has: (key: string) => translate(key) !== key }),
 }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/hooks", () => ({
@@ -166,7 +149,7 @@ describe("PurchaseStatusFlow", () => {
         expect(flow()).toContain("Check payment status")
         expect(flow()).toContain("Provisioning remains locked until exact settlement is accepted")
         expect(flow()).toContain('"value":"purchase-1"')
-        expect(flow()).toContain('"value":"money-4800000"')
+        expect(flow()).toContain('"value":"₫4,800,000"')
         fireEvent.click(screen.getByTestId("primary"))
         await waitFor(() => expect(mocks.status.mutate).toHaveBeenCalled())
         expect(mocks.recover.trigger).not.toHaveBeenCalled()

@@ -25,11 +25,11 @@ type AgentOSModuleCollectionPageViewProps = {
     readonly path: string;
     readonly workspace: string;
     readonly title: string;
-    readonly checkedAt: string;
-    readonly installedIn: string;
+    readonly checkedAt: (time: string) => string;
+    readonly installedIn: (name: string) => string;
     readonly browseCatalog: string;
     readonly installFlow: string;
-    readonly runtimeLine: string;
+    readonly runtimeLine: (value: string) => string;
     readonly runtimeProvisioned: string;
     readonly runtimeNotProvisioned: string;
     readonly runtimeUnavailable: string;
@@ -72,7 +72,7 @@ const ledgerRuntimeLineOf = (shell: AgentOSShellView, labels: AgentOSModuleColle
       : shell.runtimeAvailability === "unavailable" ? labels.runtimeUnavailable
       : labels.runtimeUnknown
     : labels.runtimeUnknown;
-  return labels.runtimeLine.replace("{value}", value);
+  return labels.runtimeLine(value);
 };
 
 /** One source-qualified fact of the ledger: the label names its source, the value is its answer. */
@@ -102,7 +102,7 @@ const ModuleLedgerEmpty = (props: ModuleLedgerEmptyProps) => {
   return <>
     <div className={MODULE_COLLECTION_SOURCE_TIME_CLASS_NAME} data-region="runtime"><Text size="sm" tone="muted">{ledgerRuntimeLineOf(shell, labels)}</Text></div>
     <div data-region="module-inventory">
-      <SurfaceCard label={labels.installedIn.replace("{name}", shell.name ?? shell.workspaceId ?? "")} composition="joined">
+      <SurfaceCard label={labels.installedIn(shell.name ?? shell.workspaceId ?? "")} composition="joined">
         <div className={MODULE_LEDGER_BAND_CLASS_NAME}>
           <EmptyNotice message={shellLabels.inventoryEmpty} description={shellLabels.inventoryEmptyDescription}/>
         </div>
@@ -145,7 +145,7 @@ const ModuleLedgerRegions = (props: ModuleLedgerRegionsProps) => {
     <div data-region="result"><AgentOSShellOperationRegion operations={shell.operations} labels={labels} formatDate={formatDate} onRecheck={onRetryOperation} recheckPending={isRetrying}/></div>
     <div className={MODULE_LEDGER_FACETS_CLASS_NAME}>
       <ModuleLedgerFacet label={labels.runtimeSection} fact={shell.runtimeObservedAt === null ? undefined : formatDate(shell.runtimeObservedAt)} value={ledgerRuntimeValueOf(shell, labels)}/>
-      {shell.installations.map(installation => <ModuleLedgerFacet key={"configuration-" + installation.installationId} label={labels.configurationSection + " · " + installation.displayName} fact={installation.configuration === null || installation.configuration.observedAt === null ? undefined : formatDate(installation.configuration.observedAt)} value={installation.configuration === null ? labels.configurationUnsupported : installation.configuration.standing === "current" ? labels.configurationCurrent.replace("{desired}", installation.configuration.desiredDigest ?? "-").replace("{tested}", installation.configuration.testedDigest ?? "-").replace("{applied}", installation.configuration.appliedDigest ?? "-") : installation.configuration.standing === "unsupported" ? labels.configurationUnsupported : labels.configurationAbsent}/>)}
+      {shell.installations.map(installation => <ModuleLedgerFacet key={"configuration-" + installation.installationId} label={labels.configurationSection + " · " + installation.displayName} fact={installation.configuration === null || installation.configuration.observedAt === null ? undefined : formatDate(installation.configuration.observedAt)} value={installation.configuration === null ? labels.configurationUnsupported : installation.configuration.standing === "current" ? labels.configurationCurrent({ desired: installation.configuration.desiredDigest ?? "-", tested: installation.configuration.testedDigest ?? "-", applied: installation.configuration.appliedDigest ?? "-" }) : installation.configuration.standing === "unsupported" ? labels.configurationUnsupported : labels.configurationAbsent}/>)}
       <ModuleLedgerFacet label={labels.attentionSection} fact={shell.attentionObservedAt === null ? undefined : formatDate(shell.attentionObservedAt)} value={shell.attentionStanding === "unsupported" || shell.attentionStanding === "unresolved" ? labels.attentionUnsupported : ledgerLimitOf(shell.attentionStanding, labels)}/>
       {shell.operations.length === 0 ? <div data-region="result"><ModuleLedgerFacet label={labels.resultSection} value={labels.resultUnavailable}/></div> : null}
     </div>
@@ -186,7 +186,7 @@ export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPa
     formatDate
   }: AgentOSModuleCollectionPageViewActions = props.on;
   const accessState = shell.state === "sign-in-required" || shell.state === "access-unverified" || shell.state === "access-denied";
-  const sourceStatement = accessState || shell.inventoryObservedAt === null ? null : labels.checkedAt.replace("{time}", formatDate(shell.inventoryObservedAt));
+  const sourceStatement = accessState || shell.inventoryObservedAt === null ? null : labels.checkedAt(formatDate(shell.inventoryObservedAt));
   return (
     <PageContainer measure="product">
       <div className={MODULE_COLLECTION_PAGE_CLASS_NAME} data-region="page" data-contract="GAP-5">

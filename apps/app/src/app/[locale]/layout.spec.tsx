@@ -5,7 +5,6 @@ import { describe, expect, it, vi } from "vitest"
 const mocks = vi.hoisted(() => ({ notFound: vi.fn(), getMessages: vi.fn(), getTimeZone: vi.fn(), getTranslations: vi.fn() }))
 type ShellProbeProps = { readonly children: ReactNode, readonly props: { readonly locale: string, readonly timeZone: string } }
 vi.mock("next/navigation", () => ({ notFound: mocks.notFound }))
-vi.mock("next-intl", () => ({ hasLocale: (locales: ReadonlyArray<string>, locale: string) => locales.includes(locale) }))
 vi.mock("next-intl/server", () => ({ getMessages: mocks.getMessages, getTimeZone: mocks.getTimeZone, getTranslations: mocks.getTranslations }))
 vi.mock("next/font/google", () => ({ Open_Sans: () => ({ style: { fontFamily: "Open Sans" } }) }))
 vi.mock("@/features/layouts/ConsoleLocaleLayout/component", () => ({ ConsoleLocaleLayoutBase: ({ children, props }: ShellProbeProps) => <section data-locale={props.locale} data-time-zone={props.timeZone}>{children}</section> }))

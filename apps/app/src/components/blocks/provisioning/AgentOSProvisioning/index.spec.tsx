@@ -1,7 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import enMessages from "../../../../messages/en.json"
 
 const mocks = vi.hoisted(() => ({
     offers: {
@@ -30,43 +29,12 @@ const mocks = vi.hoisted(() => ({
     realtime: { status: "disconnected" as string, event: undefined as { kind: string, id: string, status?: string, reason?: string } | undefined },
 }))
 
-const consoleCatalog = enMessages.console as Record<string, unknown>
-const provisioningCatalog = enMessages.console.provisioningFlows as Record<string, unknown>
-const lookup = (root: Record<string, unknown>, key: string) =>
-    key.split(".").reduce<unknown>((node, part) => node === null || typeof node !== "object" ? undefined : (node as Record<string, unknown>)[part], root)
-const translator = (root: Record<string, unknown>) => {
-    const tr = (key: string, params?: Record<string, unknown>) => {
-        const value = lookup(root, key)
-        let text = typeof value === "string" ? value : key
-        if (params !== undefined) for (const [name, replacement] of Object.entries(params)) text = text.replace(`{${name}}`, String(replacement))
-        return text
-    }
-    return Object.assign(tr, { has: (key: string) => typeof lookup(root, key) === "string" })
-}
-
 type AgentProbeProps = {
     state: string
     props: { subject: string, detail: string, statusText: string, statusActionLabel?: string, statusActionDisabled?: boolean, requestActionDisabled?: boolean, isRequestPending?: boolean, selection?: { offers: Array<{ id: string, label: string }>, selectedOfferId?: string } }
     on?: { request?: () => void, statusAction?: () => void, selectOffer?: (id: string) => void, selectTier?: (id: string) => void }
 }
 
-vi.mock("next-intl", () => {
-    /* Translators must be stable per namespace: a new function identity each render would
-       re-fire the settlement effects, which set a fresh flow object and loop. */
-    const cache = new Map<string, ReturnType<typeof translator>>()
-    return {
-        useTranslations: (namespace: string) => {
-            let tr = cache.get(namespace)
-            if (tr === undefined) {
-                tr = translator(namespace === "console" ? consoleCatalog : provisioningCatalog)
-                cache.set(namespace, tr)
-            }
-            return tr
-        },
-        useLocale: () => "en",
-        useFormatter: () => ({ number: (value: number) => `money-${value}`, dateTime: (value: Date) => `t-${value.toISOString()}` }),
-    }
-})
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/hooks", () => ({
     useQueryWorkspaceCheckoutOffersSwr: () => ({ data: mocks.offers.data, error: mocks.offers.error, isValidating: false, mutate: vi.fn() }),

@@ -167,6 +167,7 @@ const labels: GroupChatPageLabels = {
   title: "Office",
   today: "Hôm nay",
   description: "Trao đổi, phối hợp và cập nhật công việc của Workspace.",
+  workspace: "Workspace",
   tabListLabel: "Chuyển giữa Office và Tasks",
   tabs: { office: "Office", tasks: "Tasks" },
   roles: { owner: "Owner", manager: "Manager", staff: "Staff" },

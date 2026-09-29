@@ -8,7 +8,7 @@ const summary = {
     running: "Running", runningCaption: "Ready now",
     attention: "Needs attention", attentionCaption: "Requires action",
     attentionGroup: "Needs your attention", steadyGroup: "Running and starting up",
-    manage: "Manage workspace", retry: "Try again",
+    status: "Status", manage: "Manage workspace", retry: "Try again",
 }
 
 describe("AgentOSWorkspaceListBase", () => {

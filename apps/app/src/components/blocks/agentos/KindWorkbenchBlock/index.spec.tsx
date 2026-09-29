@@ -1,10 +1,10 @@
+import { render } from "@testing-library/react"
 import type { AgentosRuntimeTask, AgentosRuntimeOperationEvent } from "@/modules/api/console"
 import type { ComponentProps } from "react"
 import { NextIntlClientProvider, useTranslations } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n/config"
-import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 vi.mock("@/components/blocks/agentos/AccountingWorkbenchBlock", () => ({ AccountingWorkbenchBlock: () => <div>Accounting workbench</div> }))
 vi.mock("@/components/blocks/agentos/SalesWorkbenchBlock", () => ({ SalesWorkbenchBlock: () => <div>Sales workbench</div> }))
@@ -83,7 +83,7 @@ describe("KindWorkbenchBlock", () => {
         ["calendar-week", "Calendar week"],
         ["document-reader", "Document reader"],
     ])("resolves trusted workbench %s", (workbenchKey, expectedTitle) => {
-        const html = renderToStaticMarkup(
+        const html = render(
             <KindWorkbenchBlock
                 moduleId="installation-1"
                 kindKey="open-kind"
@@ -91,13 +91,13 @@ describe("KindWorkbenchBlock", () => {
                 workbenchVersion="1.0.0"
                 registry={DEFAULT_WORKBENCH_REGISTRY}
             />,
-        )
+        ).container.innerHTML
         expect(html).toContain(expectedTitle)
         expect(html).not.toContain("No registered workbench")
     })
 
     it("mounts the Sales workbench on the sales-pipeline entry instead of asserting static counts", () => {
-        const html = renderToStaticMarkup(
+        const html = render(
             <KindWorkbenchBlock
                 moduleId="installation-1"
                 kindKey="sales-copilot"
@@ -105,7 +105,7 @@ describe("KindWorkbenchBlock", () => {
                 workbenchVersion="1.0.0"
                 registry={DEFAULT_WORKBENCH_REGISTRY}
             />,
-        )
+        ).container.innerHTML
         expect(html).toContain("Sales workbench")
         expect(html).toContain("sales-pipeline@1.0.0")
         expect(html).not.toMatch(/>12</u)
@@ -113,7 +113,7 @@ describe("KindWorkbenchBlock", () => {
     })
 
     it("projects durable tasks into the kind workbench instead of static queue claims", () => {
-        const html = renderToStaticMarkup(
+        const html = render(
             <KindWorkbenchBlock
                 moduleId="installation-1"
                 kindKey="customer-support"
@@ -128,7 +128,7 @@ describe("KindWorkbenchBlock", () => {
                 events={[]}
                 registry={DEFAULT_WORKBENCH_REGISTRY}
             />,
-        )
+        ).container.innerHTML
         expect(html).toContain("Customer follow-up overdue")
         expect(html).toContain("High / urgent")
         expect(html).not.toContain("#4821")
@@ -137,7 +137,7 @@ describe("KindWorkbenchBlock", () => {
     describe.each(["en", "vi"] as const)("Workbench copy %s", locale => {
         it.each(["support-queue", "accounting-sheet", "calendar-week", "document-reader", "sales-pipeline", "conversation-inbox", "generic-workbench", "missing"])("keeps %s registration identity while translating its title", workbenchKey => {
             const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.workbench
-            const html = renderToStaticMarkup(<KindWorkbenchBlock locale={locale} moduleId="raw-module" kindKey="raw-kind" workbenchKey={workbenchKey} workbenchVersion="1.0.0" registry={DEFAULT_WORKBENCH_REGISTRY} />)
+            const html = render(<KindWorkbenchBlock locale={locale} moduleId="raw-module" kindKey="raw-kind" workbenchKey={workbenchKey} workbenchVersion="1.0.0" registry={DEFAULT_WORKBENCH_REGISTRY} />).container.innerHTML
             expect(html).toContain(copy.title)
             expect(html).toContain(workbenchKey + "@1.0.0")
             if (workbenchKey === "missing") expect(html).toContain(copy.unavailableNotice)
@@ -150,7 +150,7 @@ describe("KindWorkbenchBlock", () => {
         it.each(["support-queue", "accounting-sheet", "calendar-week", "document-reader"])("renders active tasks and excludes completed work in %s", workbenchKey => {
             const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.workbench
             const props = { locale, moduleId: "installation/raw", kindKey: "raw-kind", workbenchKey, workbenchVersion: "1.0.0", registry: DEFAULT_WORKBENCH_REGISTRY }
-            const html = renderToStaticMarkup(<KindWorkbenchBlock {...props} tasks={[{ ...task, id: "completed", title: "Completed excluded", status: "completed" }, task, { ...task, id: "normal", status: "open", priority: "normal" }]} events={[event]} />)
+            const html = render(<KindWorkbenchBlock {...props} tasks={[{ ...task, id: "completed", title: "Completed excluded", status: "completed" }, task, { ...task, id: "normal", status: "open", priority: "normal" }]} events={[event]} />).container.innerHTML
             if (workbenchKey === "accounting-sheet") {
                 expect(html).toContain("Accounting workbench")
             } else {
@@ -160,11 +160,11 @@ describe("KindWorkbenchBlock", () => {
             }
             if (workbenchKey === "support-queue") expect(html).toContain("raw-source")
             if (workbenchKey === "calendar-week") expect(html).toContain(new Date(task.dueAt!).toLocaleString())
-            const empty = renderToStaticMarkup(<KindWorkbenchBlock {...props} tasks={[]} events={[]} />)
+            const empty = render(<KindWorkbenchBlock {...props} tasks={[]} events={[]} />).container.innerHTML
             const emptyLabel = workbenchKey === "support-queue" ? copy.clear : workbenchKey === "calendar-week" ? copy.noMeeting : copy.noAnswer
             expect(empty).toContain(workbenchKey === "accounting-sheet" ? "Accounting workbench" : emptyLabel)
             if (workbenchKey === "calendar-week") {
-                const unscheduled = renderToStaticMarkup(<KindWorkbenchBlock {...props} tasks={[{ ...task, dueAt: null }]} />)
+                const unscheduled = render(<KindWorkbenchBlock {...props} tasks={[{ ...task, dueAt: null }]} />).container.innerHTML
                 expect(unscheduled).toContain(copy.notScheduled)
             }
         })

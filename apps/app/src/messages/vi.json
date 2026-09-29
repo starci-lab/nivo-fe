@@ -142,10 +142,6 @@
     "filterAll": "Tất cả",
     "empty": "Chưa có site hay workspace nào. Cấp phát cái đầu tiên để bắt đầu.",
     "error": "Không tải được danh sách tài nguyên. Đây là lỗi khi hỏi máy chủ, không phải một tài nguyên bị lỗi.",
-    "kind": {
-      "site": "Site",
-      "workspace": "Workspace"
-    },
     "status": {
       "notProvisioned": "Chưa cấp phát",
       "provisioning": "Đang cấp phát",
@@ -154,14 +150,6 @@
       "failed": "Thất bại",
       "active": "Hoạt động",
       "suspended": "Tạm dừng"
-    },
-    "action": {
-      "open": "Mở",
-      "suspend": "Tạm dừng",
-      "resume": "Tiếp tục",
-      "retry": "Thử lại",
-      "viewDns": "Xem bản ghi DNS",
-      "provision": "Cấp phát"
     }
   },
   "authentication": {
@@ -222,7 +210,6 @@
       "promptAction": "Đăng ký",
       "refused": "Email hoặc mật khẩu không đúng.",
       "oauthRefused": "Không thể hoàn tất đăng nhập qua nhà cung cấp. Vui lòng thử lại.",
-      "twoFactorTitle": "Xác minh hai lớp",
       "twoFactorSubtitle": "Nhập mã gồm 6 chữ số từ ứng dụng xác thực của bạn.",
       "twoFactorSubmitLabel": "Xác minh và đăng nhập",
       "twoFactorRefused": "Mã không đúng. Kiểm tra lại rồi nhập tiếp.",
@@ -312,12 +299,7 @@
       "administratorEnding": {
         "title": "Kết thúc phiên đăng nhập của {target}?",
         "description": "Thao tác này kết thúc mọi phiên Nivo hiện tại của người này trên mọi trình duyệt. Quyền của bạn được kiểm tra ngay khi bạn gửi yêu cầu.",
-        "targetLabel": "Người cần kết thúc phiên",
-        "contextLabel": "Phạm vi bạn thao tác",
-        "workspaceContext": "Workspace {workspace}",
-        "operationContext": "Vận hành Nivo",
         "cancel": "Hủy",
-        "confirm": "Kết thúc các phiên",
         "pending": "Đang kiểm tra quyền và kết thúc các phiên…",
         "applied": "Đã kết thúc các phiên của người này trong phạm vi bạn thao tác.",
         "refused": "Không thể thực hiện thao tác này.",
@@ -473,7 +455,8 @@
         "action": "Chấp nhận lời mời",
         "refused": "Lời mời không còn hiệu lực hoặc email đăng nhập chưa khớp.",
         "invalidLink": "Liên kết lời mời thiếu thông tin workspace."
-      }
+      },
+      "workspace": "Workspace"
     },
     "state": {
       "loading": "Đang hỏi máy chủ"
@@ -489,7 +472,6 @@
       "title": "Tổng quan",
       "lede": "Mọi thứ tài khoản đang chạy, và một việc nên làm tiếp theo.",
       "atAGlance": "Nhìn nhanh",
-      "buildApp": "Dựng một ứng dụng",
       "none": "Chưa có",
       "runtimeLabel": "Runtime",
       "runtimeFact": "Trạng thái pod của workspace, như đã trả lời",
@@ -538,9 +520,6 @@
       "provisioningTitle": "Đang cấp phát Template App",
       "provisioningDescription": "Theo dõi site đã persisted này tới khi stack độc lập sẵn sàng.",
       "listLabel": "Ứng dụng của bạn",
-      "openSet": "Mở Ứng dụng",
-      "namesNotCount": "Mục này gọi tên vài ứng dụng đầu tiên chứ không đếm. Một trang danh sách không phải là tổng số.",
-      "empty": "Chưa có ứng dụng nào.",
       "emptyDescription": "Chọn một mẫu bên dưới để dựng cái đầu tiên.",
       "catalogueLabel": "Dùng thêm ứng dụng",
       "catalogueFact": "danh mục mẫu",
@@ -551,7 +530,6 @@
       "open": "Mở",
       "viewDns": "Xem bản ghi",
       "orderInProgress": "đơn đã thanh toán · đang dựng",
-      "priceFrom": "Từ {price}/tháng",
       "priceTier": "{tier} · {price}",
       "attentionGroup": "Cần bạn xử lý",
       "steadyGroup": "Đang chạy và đang dựng"
@@ -576,7 +554,6 @@
         "purchaser": "Người mua",
         "admission": "Thừa nhận người mua",
         "railLabel": "Yêu cầu thanh toán",
-        "railNote": "Yêu cầu này tái sử dụng cùng một định danh đơn mua và mở trang thanh toán SePay. Nó không đánh dấu khoản thanh toán là đã trả.",
         "stepRecheck": "Kiểm tra lại thừa nhận và điều khoản đã chốt",
         "stepIdentity": "Tạo định danh đơn mua",
         "stepProvider": "Mở thao tác thanh toán",
@@ -587,21 +564,11 @@
         "footnote": "Trình duyệt quay lại chỉ là điều hướng, không phải bằng chứng thanh toán.",
         "refusedTitle": "Không thể tiếp tục thanh toán",
         "admitted": "Được thừa nhận",
-        "admissionNamed": "{name} · Được thừa nhận",
-        "eligibilityValue": "Việt Nam · chủ tổ chức được thừa nhận",
-        "sellerValue": "Nivo · hóa đơn nền tảng",
         "recheckDetail": "Người mua được thừa nhận · điều khoản hiện hành",
-        "recheckDetailNamed": "{name} · điều kiện Việt Nam",
-        "providerRail": "SePay · Ngân hàng trực tuyến",
-        "monthlyBilling": "Thanh toán hàng tháng",
-        "oneTimeBilling": "Thu phí một lần",
-        "renewalManual": "Cần tái ủy quyền thủ công mỗi kỳ",
-        "noRenewal": "Cần tái ủy quyền thủ công khi gia hạn",
         "staleOffer": "Ưu đãi đã chọn không còn hiện hành. Quay lại chọn ưu đãi và chọn một ưu đãi hiện hành.",
         "checkoutUnavailable": "Không thể xác nhận đơn mua này. Ưu đãi có thể đã thay đổi.",
         "paymentNotStarted": "Chưa có yêu cầu thanh toán nào được chấp nhận. Cùng một định danh đơn mua vẫn sẵn sàng để thử lại an toàn.",
         "paymentRefused": "Hóa đơn của đơn mua này đã bị hủy. Quay lại chọn ưu đãi để bắt đầu một đơn mua hiện hành.",
-        "checkoutInvalid": "Nhà cung cấp thanh toán trả về trường không đọc được.",
         "railChoice": "Phương thức thanh toán",
         "railVnpay": "VNPAY",
         "railVnpayDetail": "Thẻ và tài khoản ngân hàng nội địa qua VNPAY",
@@ -611,7 +578,6 @@
         "railCredentialPending": "Cổng thanh toán vẫn đang chờ thông tin xác thực của chủ sở hữu. Yêu cầu thanh toán dùng thông tin tạm và không bị chặn.",
         "purchaseIdentityReused": "Yêu cầu này dùng lại định danh mua hàng đã có của tài khoản và mở trang thanh toán của cổng đã chọn. Nó không đánh dấu khoản thanh toán là đã trả.",
         "sellerLedger": "Nivo · hoá đơn ghi trên sổ thanh toán nền tảng",
-        "purchaserVerifiedLogin": "Người mua · tài khoản đăng nhập đã xác minh",
         "refusedNotAdmitted": "Tài khoản đang đăng nhập chưa phải người mua được thừa nhận.",
         "nextActionVerifyEmail": "Xác minh email của tài khoản rồi thử lại.",
         "nextActionSignIn": "Đăng nhập bằng tài khoản người mua đã được thừa nhận rồi thử lại.",
@@ -859,7 +825,8 @@
           "ready": "Đã xác nhận sẵn sàng",
           "failed": "Cấp phát đã dừng",
           "suspended": "Cấp phát tạm dừng"
-        }
+        },
+        "loading": "Đang tải"
       },
       "title": "AgentOS",
       "description": "Theo dõi modules của doanh nghiệp, trạng thái kích hoạt và hành động tiếp theo.",
@@ -870,7 +837,6 @@
       "createDescription": "Chọn gói AgentOS và gửi yêu cầu để tạo đơn hàng.",
       "orderTitle": "Đơn hàng AgentOS",
       "orderDescription": "Tiếp tục thanh toán đơn hàng này và cấp phát không gian làm việc.",
-      "openService": "Mở dịch vụ",
       "workspaceDescription": "Không gian làm việc AgentOS và trạng thái kết nối hiện tại.",
       "kindWorkspace": "Không gian làm việc",
       "emptyDescription": "Tạo không gian làm việc AgentOS đầu tiên của bạn.",
@@ -880,7 +846,6 @@
       "retry": "Thử lại",
       "orderReference": "Đơn hàng {id}",
       "workspaceReference": "Mã workspace {id}",
-      "viewPlans": "Xem gói",
       "workspacesLabel": "Không gian làm việc của bạn",
       "summary": {
         "overview": "Trạng thái đội AgentOS",
@@ -891,7 +856,8 @@
         "attention": "Cần xử lý",
         "attentionCaption": "Cần quyết định của chủ sở hữu",
         "attentionGroup": "Cần bạn xử lý",
-        "steadyGroup": "Đang chạy và khởi tạo"
+        "steadyGroup": "Đang chạy và khởi tạo",
+        "status": "Trạng thái"
       },
       "businessDashboard": {
         "workspaceLabel": "Workspace vận hành",
@@ -906,7 +872,6 @@
       },
       "podReachable": "Pod đang trả lời",
       "podUnreachable": "Pod chưa trả lời",
-      "checkedAt": "kiểm tra lúc {time}",
       "shell": {
         "headingFallback": "Không gian làm việc AgentOS",
         "eyebrow": "AgentOS",
@@ -1063,23 +1028,7 @@
             "empty": "Chưa có",
             "summary": {
               "section": "Gói và vòng đời",
-              "module": "Module",
-              "version": "Phiên bản",
-              "status": "Trạng thái",
-              "failure": "Mã lỗi",
-              "modelProfile": "Hồ sơ mô hình",
-              "manifest": "Mã băm bản kê"
-            },
-            "bindings": {
-              "section": "Trợ lý và tri thức",
-              "agents": "Trợ lý đã tạo",
-              "channels": "Tài khoản kênh",
-              "sharedKnowledge": "Nguồn tri thức dùng chung",
-              "knowledgeVersions": "Tri thức chung · riêng",
-              "artifact": "Bản tri thức đã ghim",
-              "currentness": "Nhập vào không gian làm việc",
-              "embedding": "Vector hóa",
-              "retrievalScope": "Phạm vi truy xuất riêng"
+              "status": "Trạng thái"
             }
           }
         },
@@ -1176,7 +1125,6 @@
           "title": "Mô-đun",
           "description": "Tạo module tùy chỉnh qua câu hỏi gợi mở hoặc cài giải pháp Nivo bất biến cho không gian làm việc này.",
           "eyebrow": "Trình tạo module AgentOS",
-          "create": "Tạo module",
           "checkedAt": "Danh sách được kiểm tra lúc {time}",
           "installedIn": "Đã cài trong {name}",
           "browseCatalog": "Xem mô-đun khả dụng",
@@ -1203,24 +1151,10 @@
           "sections": "Quy trình module"
         },
         "collection": {
-          "title": "Module tùy chỉnh",
-          "refused": "Nivo chưa đọc được module tùy chỉnh của không gian làm việc này. Danh mục giải pháp bên dưới vẫn dùng được.",
-          "empty": "Không gian làm việc này chưa có module tùy chỉnh.",
-          "emptyTitle": "Chưa có custom module",
-          "refusedTitle": "Chưa đọc được custom module",
-          "retry": "Thử lại",
-          "create": "Tạo module",
-          "custom": "Tùy chỉnh",
-          "progress": "Hoàn thành {progress}%",
-          "inspect": "Xem module",
-          "resume": "Tiếp tục trả lời câu hỏi"
+          "title": "Module tùy chỉnh"
         },
         "status": {
-          "draft": "Cần bổ sung",
-          "ready_for_review": "Sẵn sàng duyệt",
-          "publishing": "Đang xuất bản",
-          "active": "Đang hoạt động",
-          "publish_failed": "Xuất bản thất bại"
+          "active": "Đang hoạt động"
         },
         "intake": {
           "title": "Module này cần giúp đội ngũ làm gì?",
@@ -1908,7 +1842,11 @@
                 "unsetItems": "Mục chưa đặt: {items}",
                 "settled": "Chính sách đã chốt ở bản sửa đổi {revision}."
               },
-              "workState": { "ready": "Sẵn sàng", "waiting": "Đang chờ", "attention": "Cần chú ý" },
+              "workState": {
+                "ready": "Sẵn sàng",
+                "waiting": "Đang chờ",
+                "attention": "Cần chú ý"
+              },
               "workReason": {
                 "policyUnset": "Chưa đặt chính sách",
                 "policyHold": "Bị chính sách giữ",
@@ -1918,7 +1856,11 @@
                 "needsFollowUp": "Cần theo dõi",
                 "outcomeUnknown": "Kết quả chưa xác định"
               },
-              "lifecycle": { "open": "Đang mở", "won": "Thắng", "lost": "Thua" },
+              "lifecycle": {
+                "open": "Đang mở",
+                "won": "Thắng",
+                "lost": "Thua"
+              },
               "commandStatus": {
                 "pending": "Chờ xử lý",
                 "awaitingClarification": "Chờ làm rõ",
@@ -1934,263 +1876,270 @@
                 "stopped": "Đã dừng",
                 "outcomeUnknown": "Kết quả chưa xác định"
               },
-              "outcome": { "won": "Thắng", "lost": "Thua", "attention": "Cần chú ý" },
-              "fact": { "customerRef": "Tham chiếu khách hàng", "opportunityId": "Định danh cơ hội" }
+              "outcome": {
+                "won": "Thắng",
+                "lost": "Thua",
+                "attention": "Cần chú ý"
+              },
+              "fact": {
+                "customerRef": "Tham chiếu khách hàng",
+                "opportunityId": "Định danh cơ hội"
+              }
             },
             "accountingWorkbench": {
-                                     "title": "Bảng kế toán",
-                                     "description": "Mọi con số ở đây đều là kết quả đã ký, đọc lại từ các thao tác Kế toán của bản cài đặt này.",
-                                     "none": "—",
-                                     "reload": "Đọc lại",
-                                     "revision": "bản {value}",
-                                     "evidenceIdsHint": "Nhiều mã bằng chứng, cách nhau bằng dấu phẩy",
-                                     "surfaceUnavailable": "Thao tác không trả lời được",
-                                     "nothingChanged": "Không có gì bị thay đổi, nên ở đây không có gì lỗi thời.",
-                                     "standing": {
-                                       "loading": "Đang đọc bề mặt Kế toán…",
-                                       "denied": "Tài khoản này không được đọc sổ Kế toán của bản cài đặt này.",
-                                       "unavailable": "Các thao tác Kế toán không trả lời.",
-                                       "empty": "Chưa có gì được ghi cho lần đọc này.",
-                                       "ready": "Đã đọc từ các thao tác Kế toán."
-                                     },
-                                     "overview": {
-                                       "label": "Báo cáo",
-                                       "covered": "gồm {count} kết quả đã ghi",
-                                       "empty": "Kỳ này chưa ghi kết quả nào",
-                                       "emptyHint": "Hãy chọn kỳ khác, hoặc nhận bằng chứng mà kỳ này cần có.",
-                                       "period": "Kỳ",
-                                       "currency": "Loại tiền",
-                                       "allCurrencies": "Tất cả loại tiền",
-                                       "availability": "Mức đầy đủ: {value}",
-                                       "periodBadge": "Kỳ {period}",
-                                       "itemCount": "{count} kết quả",
-                                       "attention": "Cần chú ý: {codes}",
-                                       "sourceCoverage": "{count} mã bằng chứng nguồn đứng sau kỳ này",
-                                       "partial": "Đầy đủ một phần vì: {reasons}",
-                                       "loadMore": "Đọc trang tiếp theo",
-                                       "measureAbsent": "Kỳ này không đo chỉ tiêu này",
-                                       "measureUnknown": "Không đo được: {reason}",
-                                       "measureCovered": "trên {count} kết quả",
-                                       "estimate": "Số thuế là ước tính theo chính sách {currency} và loại trừ những gì chính sách đó nêu tên."
-                                     },
-                                     "availability": {
-                                       "current": "hiện hành",
-                                       "partial": "một phần",
-                                       "stale": "đã cũ",
-                                       "unavailable": "không khả dụng"
-                                     },
-                                     "measure": {
-                                       "cashIn": "Tiền vào",
-                                       "cashOut": "Tiền ra",
-                                       "revenue": "Doanh thu ghi nhận",
-                                       "cost": "Chi phí ghi nhận",
-                                       "unpaid": "Chưa thanh toán",
-                                       "estimatedTax": "Thuế ước tính",
-                                       "other": "Chỉ tiêu khác"
-                                     },
-                                     "partialReason": {
-                                       "missingOccurredOn": "một kết quả thiếu ngày phát sinh",
-                                       "missingMeasureCoverage": "một chỉ tiêu thiếu phạm vi đo",
-                                       "staleSource": "một nguồn đã cũ",
-                                       "unavailableSource": "một nguồn không khả dụng"
-                                     },
-                                     "attention": {
-                                       "missingReceipt": "một kết quả thiếu biên nhận",
-                                       "unmatchedPayment": "một khoản thanh toán chưa khớp",
-                                       "missingOccurredOn": "một kết quả thiếu ngày phát sinh",
-                                       "staleSource": "một kết quả dựa trên nguồn đã cũ",
-                                       "other": "mã chú ý chưa đăng ký"
-                                     },
-                                     "intake": {
-                                       "label": "Nhận bằng chứng",
-                                       "evidenceId": "Mã bằng chứng",
-                                       "evidenceIdHint": "Mã mà chính nguồn đặt cho mục này",
-                                       "sourceKind": "Loại nguồn",
-                                       "sourceRef": "Tham chiếu nguồn",
-                                       "sourceRevision": "Bản nguồn",
-                                       "fingerprint": "Dấu vân tay",
-                                       "fingerprintHint": "Điều làm mục này khác với một mục gần trùng",
-                                       "expectedRevision": "Bản mong đợi",
-                                       "admit": "Nhận bằng chứng",
-                                       "empty": "Chưa đọc gì cho mã bằng chứng này",
-                                       "emptyHint": "Hãy nhận một mục, hoặc nêu một mã đã tồn tại.",
-                                       "noMissingFacts": "Không thiếu dữ kiện nào",
-                                       "missingFacts": "Còn thiếu: {facts}",
-                                       "duplicateNotice": "Mục này có dấu hiệu trùng; việc nhận đã được ghi, chưa được giải quyết.",
-                                       "conflictNotice": "Mục này cần thêm thông tin trước khi đọc được.",
-                                       "settled": "Bằng chứng đã về trạng thái {state}."
-                                     },
-                                     "evidenceState": {
-                                       "admitted": "đã nhận",
-                                       "reading": "đang đọc",
-                                       "ready": "sẵn sàng",
-                                       "needsInformation": "cần thông tin",
-                                       "likelyDuplicate": "có thể trùng",
-                                       "unreadable": "không đọc được",
-                                       "rejected": "bị từ chối"
-                                     },
-                                     "routine": {
-                                       "label": "Xử lý định kỳ",
-                                       "intentId": "Mã ý định",
-                                       "itemId": "Mã mục",
-                                       "policyRevision": "Bản chính sách",
-                                       "evidenceIds": "Mã bằng chứng",
-                                       "evidenceIdsHint": "Nhiều mã, cách nhau bằng dấu phẩy",
-                                       "itemRevision": "Bản mục mong đợi",
-                                       "commit": "Ghi nhận quyết định",
-                                       "empty": "Chưa đọc ý định nào",
-                                       "emptyHint": "Nêu một mã ý định để đọc trạng thái ổn định của nó.",
-                                       "readback": "Mục {item} · lần thử {attempt}",
-                                       "receipt": "Biên nhận {receipt} · kết quả {result}",
-                                       "unknownNotice": "Kết cục chưa được chứng thực. Hãy đọc lại ý định này; chính lần đọc mới chốt được.",
-                                       "retryHint": "Thử lại cần bằng chứng rằng lần thử trước chưa hề bắt đầu.",
-                                       "oldAttemptId": "Lần thử trước",
-                                       "notStartedProofRef": "Bằng chứng chưa bắt đầu",
-                                       "newAttemptId": "Lần thử mới",
-                                       "retry": "Thử lại kèm bằng chứng",
-                                       "settled": "Xử lý định kỳ đã về trạng thái {state}."
-                                     },
-                                     "routineState": {
-                                       "admitted": "đã nhận",
-                                       "committed": "đã ghi nhận",
-                                       "needsDecision": "cần quyết định",
-                                       "pendingAuthority": "chờ thẩm quyền",
-                                       "denied": "bị từ chối",
-                                       "outcomeUnknown": "chưa rõ kết cục"
-                                     },
-                                     "question": {
-                                       "label": "Câu hỏi vật chất",
-                                       "why": "Vì sao quan trọng",
-                                       "whyUnknown": "Lần xử lý không nêu mã lý do.",
-                                       "whyReason": "Lần xử lý trả lời {reason}.",
-                                       "attention": "Cần chú ý: {codes}",
-                                       "evidence": "Bằng chứng",
-                                       "evidenceAbsent": "Không có mã bằng chứng nào đứng sau các kết quả của kỳ này.",
-                                       "alternatives": "Trả lời sẽ ghi lại phương án bạn chọn; hoãn lại giữ câu hỏi còn mở.",
-                                       "consequence": "Trả lời một câu hỏi không ghi nhận ảnh hưởng tài chính nào. Chỉ bản sửa đã áp dụng mới đổi con số.",
-                                       "exceptionId": "Mã ngoại lệ",
-                                       "exceptionIdHint": "Mã của câu hỏi bạn đang xử lý; không lần đọc nào trên bề mặt này tiết lộ mã đó.",
-                                       "choiceCode": "Phương án đã chọn",
-                                       "reason": "Lý do",
-                                       "answerEvidenceRefs": "Bằng chứng cho câu trả lời",
-                                       "expectedRevision": "Bản mong đợi",
-                                       "answer": "Trả lời",
-                                       "defer": "Hoãn",
-                                       "reopen": "Mở lại",
-                                       "escalate": "Chuyển lên",
-                                       "dismiss": "Bỏ qua",
-                                       "settled": "Đã trả lời và đọc lại",
-                                       "pending": "Đã ghi, còn đang xử lý",
-                                       "consequenceHeld": "Ảnh hưởng tài chính vẫn đang được giữ cho tới khi lần đọc lại trả về.",
-                                       "empty": "Không có câu hỏi vật chất nào đang mở",
-                                       "emptyHint": "Câu hỏi xuất hiện khi một lần đọc xử lý định kỳ cần quyết định."
-                                     },
-                                     "exceptionState": {
-                                       "open": "đang mở",
-                                       "deferred": "đã hoãn",
-                                       "escalated": "đã chuyển lên",
-                                       "answered": "đã trả lời",
-                                       "resolved": "đã giải quyết",
-                                       "dismissed": "đã bỏ qua"
-                                     },
-                                     "detail": {
-                                       "label": "Kết quả",
-                                       "current": "hiện hành",
-                                       "historical": "lịch sử",
-                                       "resultId": "Mã kết quả",
-                                       "itemId": "Mã mục",
-                                       "asOfHint": "Đọc theo mốc cần cả mục lẫn thời điểm",
-                                       "asOf": "Mốc thời gian",
-                                       "asOfFormat": "Mili giây epoch hoặc một mốc ISO",
-                                       "load": "Đọc kết quả",
-                                       "empty": "Chưa đọc kết quả nào",
-                                       "emptyHint": "Đọc một kết quả hiện hành theo mã, hoặc một mục tại đúng thời điểm.",
-                                       "effectiveAt": "hiệu lực {at}",
-                                       "matchStatus": "Thanh toán",
-                                       "treatment": "Cách xử lý",
-                                       "evidenceRefs": "Bằng chứng: {refs}",
-                                       "receipt": "Biên nhận {receipt} · chính sách {policy}",
-                                       "lineage": "Bản trước {predecessor} · bản sau {successor}"
-                                     },
-                                     "matchStatus": {
-                                       "unpaid": "chưa thanh toán",
-                                       "unmatched": "chưa khớp",
-                                       "matched": "đã khớp",
-                                       "ambiguous": "chưa rõ"
-                                     },
-                                     "treatment": {
-                                       "supported": "được hỗ trợ",
-                                       "unsupported": "không được hỗ trợ",
-                                       "unknown": "chưa rõ"
-                                     },
-                                     "fact": {
-                                       "amount": "Số tiền",
-                                       "currency": "Loại tiền",
-                                       "occurredOn": "Ngày phát sinh",
-                                       "counterparty": "Đối tác",
-                                       "matchStatus": "Thanh toán",
-                                       "treatment": "Cách xử lý",
-                                       "other": "Dữ kiện khác"
-                                     },
-                                     "correction": {
-                                       "label": "Sửa tiến",
-                                       "correctionId": "Mã bản sửa",
-                                       "predecessorResultId": "Kết quả được sửa",
-                                       "predecessorHint": "Bản sửa luôn nối tiếp sau kết quả mà nó đổi",
-                                       "correctedAmount": "Số tiền đúng (đơn vị nhỏ)",
-                                       "correctedCounterparty": "Đối tác đúng",
-                                       "reason": "Lý do",
-                                       "evidenceRefs": "Bằng chứng",
-                                       "expectedResultRevision": "Bản kết quả mong đợi",
-                                       "propose": "Đề xuất bản sửa",
-                                       "appendHint": "Nối tiếp sẽ áp dụng đề xuất và thêm một kết quả mới.",
-                                       "attemptId": "Mã lần thử",
-                                       "append": "Nối tiếp kết quả đã áp dụng",
-                                       "empty": "Chưa đọc bản sửa nào",
-                                       "emptyHint": "Đề xuất một bản sửa cho một kết quả, rồi nối tiếp nó.",
-                                       "original": "Kết quả gốc",
-                                       "originalUnchanged": "Kết quả gốc không bao giờ bị viết lại.",
-                                       "lineage": "Bản trước {predecessor} · đã nối {result}",
-                                       "appended": "Kết quả đã nối {result}",
-                                       "unknownNotice": "Lần thử này chưa được chứng thực. Dòng kết quả mới chốt được nó.",
-                                       "settled": "Bản sửa đã về trạng thái {state} với kết quả {result}."
-                                     },
-                                     "correctionState": {
-                                       "proposed": "đã đề xuất",
-                                       "blocked": "bị chặn",
-                                       "possibleStart": "có thể đã bắt đầu",
-                                       "applied": "đã áp dụng",
-                                       "provenNotApplied": "đã chứng minh chưa áp dụng",
-                                       "outcomeUnknown": "chưa rõ kết cục"
-                                     },
-                                     "rail": {
-                                       "scope": "Bản cài đặt",
-                                       "scopeReady": "Đang gửi tới đường thao tác của bản cài đặt này.",
-                                       "attention": "Cần chú ý",
-                                       "attentionEmpty": "Không có gì cần chú ý",
-                                       "attentionEmptyHint": "Không kết quả nào trong kỳ này mang mã chú ý.",
-                                       "asOf": "Mốc thời gian",
-                                       "asOfValue": "Thời điểm",
-                                       "asOfHint": "Đọc một con số lịch sử mà không đổi con số hiện hành",
-                                       "asOfApply": "Đọc theo mốc",
-                                       "returnCurrent": "Về hiện hành",
-                                       "current": "Đang xem báo cáo hiện hành.",
-                                       "historical": "Đang xem một con số lịch sử; ở đây không ghi gì cả.",
-                                       "notice": "Lần chốt gần nhất",
-                                       "noticeEmpty": "Chưa có lệnh nào được chốt trong màn này."
-                                     },
-                                     "refusal": {
-                                       "forbidden": "Tài khoản này không được phép làm việc đó.",
-                                       "signIn": "Hãy đăng nhập lại để tiếp tục.",
-                                       "staleAuthority": "Thẩm quyền mà lệnh này bị chặn theo đã đổi.",
-                                       "validation": "Lệnh bị từ chối vì sai định dạng.",
-                                       "conflict": "Bản ghi đã đổi kể từ lúc màn này đọc.",
-                                       "unattested": "Kết cục chưa được chứng thực. Hãy đọc lại mã có thể chốt nó.",
-                                       "malformed": "Thao tác trả về thứ mà ứng dụng này không đọc được.",
-                                       "unreachable": "Không gọi được thao tác Kế toán.",
-                                       "unsettled": "Lệnh chưa chốt: lần đọc lại không cho thấy trạng thái mới."
-                                     }
-                                   },
+              "title": "Bảng kế toán",
+              "description": "Mọi con số ở đây đều là kết quả đã ký, đọc lại từ các thao tác Kế toán của bản cài đặt này.",
+              "none": "—",
+              "reload": "Đọc lại",
+              "revision": "bản {value}",
+              "evidenceIdsHint": "Nhiều mã bằng chứng, cách nhau bằng dấu phẩy",
+              "surfaceUnavailable": "Thao tác không trả lời được",
+              "nothingChanged": "Không có gì bị thay đổi, nên ở đây không có gì lỗi thời.",
+              "standing": {
+                "loading": "Đang đọc bề mặt Kế toán…",
+                "denied": "Tài khoản này không được đọc sổ Kế toán của bản cài đặt này.",
+                "unavailable": "Các thao tác Kế toán không trả lời.",
+                "empty": "Chưa có gì được ghi cho lần đọc này.",
+                "ready": "Đã đọc từ các thao tác Kế toán."
+              },
+              "overview": {
+                "label": "Báo cáo",
+                "covered": "gồm {count} kết quả đã ghi",
+                "empty": "Kỳ này chưa ghi kết quả nào",
+                "emptyHint": "Hãy chọn kỳ khác, hoặc nhận bằng chứng mà kỳ này cần có.",
+                "period": "Kỳ",
+                "currency": "Loại tiền",
+                "allCurrencies": "Tất cả loại tiền",
+                "availability": "Mức đầy đủ: {value}",
+                "periodBadge": "Kỳ {period}",
+                "itemCount": "{count} kết quả",
+                "attention": "Cần chú ý: {codes}",
+                "sourceCoverage": "{count} mã bằng chứng nguồn đứng sau kỳ này",
+                "partial": "Đầy đủ một phần vì: {reasons}",
+                "loadMore": "Đọc trang tiếp theo",
+                "measureAbsent": "Kỳ này không đo chỉ tiêu này",
+                "measureUnknown": "Không đo được: {reason}",
+                "measureCovered": "trên {count} kết quả",
+                "estimate": "Số thuế là ước tính theo chính sách {currency} và loại trừ những gì chính sách đó nêu tên."
+              },
+              "availability": {
+                "current": "hiện hành",
+                "partial": "một phần",
+                "stale": "đã cũ",
+                "unavailable": "không khả dụng"
+              },
+              "measure": {
+                "cashIn": "Tiền vào",
+                "cashOut": "Tiền ra",
+                "revenue": "Doanh thu ghi nhận",
+                "cost": "Chi phí ghi nhận",
+                "unpaid": "Chưa thanh toán",
+                "estimatedTax": "Thuế ước tính",
+                "other": "Chỉ tiêu khác"
+              },
+              "partialReason": {
+                "missingOccurredOn": "một kết quả thiếu ngày phát sinh",
+                "missingMeasureCoverage": "một chỉ tiêu thiếu phạm vi đo",
+                "staleSource": "một nguồn đã cũ",
+                "unavailableSource": "một nguồn không khả dụng"
+              },
+              "attention": {
+                "missingReceipt": "một kết quả thiếu biên nhận",
+                "unmatchedPayment": "một khoản thanh toán chưa khớp",
+                "missingOccurredOn": "một kết quả thiếu ngày phát sinh",
+                "staleSource": "một kết quả dựa trên nguồn đã cũ",
+                "other": "mã chú ý chưa đăng ký"
+              },
+              "intake": {
+                "label": "Nhận bằng chứng",
+                "evidenceId": "Mã bằng chứng",
+                "evidenceIdHint": "Mã mà chính nguồn đặt cho mục này",
+                "sourceKind": "Loại nguồn",
+                "sourceRef": "Tham chiếu nguồn",
+                "sourceRevision": "Bản nguồn",
+                "fingerprint": "Dấu vân tay",
+                "fingerprintHint": "Điều làm mục này khác với một mục gần trùng",
+                "expectedRevision": "Bản mong đợi",
+                "admit": "Nhận bằng chứng",
+                "empty": "Chưa đọc gì cho mã bằng chứng này",
+                "emptyHint": "Hãy nhận một mục, hoặc nêu một mã đã tồn tại.",
+                "noMissingFacts": "Không thiếu dữ kiện nào",
+                "missingFacts": "Còn thiếu: {facts}",
+                "duplicateNotice": "Mục này có dấu hiệu trùng; việc nhận đã được ghi, chưa được giải quyết.",
+                "conflictNotice": "Mục này cần thêm thông tin trước khi đọc được.",
+                "settled": "Bằng chứng đã về trạng thái {state}."
+              },
+              "evidenceState": {
+                "admitted": "đã nhận",
+                "reading": "đang đọc",
+                "ready": "sẵn sàng",
+                "needsInformation": "cần thông tin",
+                "likelyDuplicate": "có thể trùng",
+                "unreadable": "không đọc được",
+                "rejected": "bị từ chối"
+              },
+              "routine": {
+                "label": "Xử lý định kỳ",
+                "intentId": "Mã ý định",
+                "itemId": "Mã mục",
+                "policyRevision": "Bản chính sách",
+                "evidenceIds": "Mã bằng chứng",
+                "evidenceIdsHint": "Nhiều mã, cách nhau bằng dấu phẩy",
+                "itemRevision": "Bản mục mong đợi",
+                "commit": "Ghi nhận quyết định",
+                "empty": "Chưa đọc ý định nào",
+                "emptyHint": "Nêu một mã ý định để đọc trạng thái ổn định của nó.",
+                "readback": "Mục {item} · lần thử {attempt}",
+                "receipt": "Biên nhận {receipt} · kết quả {result}",
+                "unknownNotice": "Kết cục chưa được chứng thực. Hãy đọc lại ý định này; chính lần đọc mới chốt được.",
+                "retryHint": "Thử lại cần bằng chứng rằng lần thử trước chưa hề bắt đầu.",
+                "oldAttemptId": "Lần thử trước",
+                "notStartedProofRef": "Bằng chứng chưa bắt đầu",
+                "newAttemptId": "Lần thử mới",
+                "retry": "Thử lại kèm bằng chứng",
+                "settled": "Xử lý định kỳ đã về trạng thái {state}."
+              },
+              "routineState": {
+                "admitted": "đã nhận",
+                "committed": "đã ghi nhận",
+                "needsDecision": "cần quyết định",
+                "pendingAuthority": "chờ thẩm quyền",
+                "denied": "bị từ chối",
+                "outcomeUnknown": "chưa rõ kết cục"
+              },
+              "question": {
+                "label": "Câu hỏi vật chất",
+                "why": "Vì sao quan trọng",
+                "whyUnknown": "Lần xử lý không nêu mã lý do.",
+                "whyReason": "Lần xử lý trả lời {reason}.",
+                "attention": "Cần chú ý: {codes}",
+                "evidence": "Bằng chứng",
+                "evidenceAbsent": "Không có mã bằng chứng nào đứng sau các kết quả của kỳ này.",
+                "alternatives": "Trả lời sẽ ghi lại phương án bạn chọn; hoãn lại giữ câu hỏi còn mở.",
+                "consequence": "Trả lời một câu hỏi không ghi nhận ảnh hưởng tài chính nào. Chỉ bản sửa đã áp dụng mới đổi con số.",
+                "exceptionId": "Mã ngoại lệ",
+                "exceptionIdHint": "Mã của câu hỏi bạn đang xử lý; không lần đọc nào trên bề mặt này tiết lộ mã đó.",
+                "choiceCode": "Phương án đã chọn",
+                "reason": "Lý do",
+                "answerEvidenceRefs": "Bằng chứng cho câu trả lời",
+                "expectedRevision": "Bản mong đợi",
+                "answer": "Trả lời",
+                "defer": "Hoãn",
+                "reopen": "Mở lại",
+                "escalate": "Chuyển lên",
+                "dismiss": "Bỏ qua",
+                "settled": "Đã trả lời và đọc lại",
+                "pending": "Đã ghi, còn đang xử lý",
+                "consequenceHeld": "Ảnh hưởng tài chính vẫn đang được giữ cho tới khi lần đọc lại trả về.",
+                "empty": "Không có câu hỏi vật chất nào đang mở",
+                "emptyHint": "Câu hỏi xuất hiện khi một lần đọc xử lý định kỳ cần quyết định."
+              },
+              "exceptionState": {
+                "open": "đang mở",
+                "deferred": "đã hoãn",
+                "escalated": "đã chuyển lên",
+                "answered": "đã trả lời",
+                "resolved": "đã giải quyết",
+                "dismissed": "đã bỏ qua"
+              },
+              "detail": {
+                "label": "Kết quả",
+                "current": "hiện hành",
+                "historical": "lịch sử",
+                "resultId": "Mã kết quả",
+                "itemId": "Mã mục",
+                "asOfHint": "Đọc theo mốc cần cả mục lẫn thời điểm",
+                "asOf": "Mốc thời gian",
+                "asOfFormat": "Mili giây epoch hoặc một mốc ISO",
+                "load": "Đọc kết quả",
+                "empty": "Chưa đọc kết quả nào",
+                "emptyHint": "Đọc một kết quả hiện hành theo mã, hoặc một mục tại đúng thời điểm.",
+                "effectiveAt": "hiệu lực {at}",
+                "matchStatus": "Thanh toán",
+                "treatment": "Cách xử lý",
+                "evidenceRefs": "Bằng chứng: {refs}",
+                "receipt": "Biên nhận {receipt} · chính sách {policy}",
+                "lineage": "Bản trước {predecessor} · bản sau {successor}"
+              },
+              "matchStatus": {
+                "unpaid": "chưa thanh toán",
+                "unmatched": "chưa khớp",
+                "matched": "đã khớp",
+                "ambiguous": "chưa rõ"
+              },
+              "treatment": {
+                "supported": "được hỗ trợ",
+                "unsupported": "không được hỗ trợ",
+                "unknown": "chưa rõ"
+              },
+              "fact": {
+                "amount": "Số tiền",
+                "currency": "Loại tiền",
+                "occurredOn": "Ngày phát sinh",
+                "counterparty": "Đối tác",
+                "matchStatus": "Thanh toán",
+                "treatment": "Cách xử lý",
+                "other": "Dữ kiện khác"
+              },
+              "correction": {
+                "label": "Sửa tiến",
+                "correctionId": "Mã bản sửa",
+                "predecessorResultId": "Kết quả được sửa",
+                "predecessorHint": "Bản sửa luôn nối tiếp sau kết quả mà nó đổi",
+                "correctedAmount": "Số tiền đúng (đơn vị nhỏ)",
+                "correctedCounterparty": "Đối tác đúng",
+                "reason": "Lý do",
+                "evidenceRefs": "Bằng chứng",
+                "expectedResultRevision": "Bản kết quả mong đợi",
+                "propose": "Đề xuất bản sửa",
+                "appendHint": "Nối tiếp sẽ áp dụng đề xuất và thêm một kết quả mới.",
+                "attemptId": "Mã lần thử",
+                "append": "Nối tiếp kết quả đã áp dụng",
+                "empty": "Chưa đọc bản sửa nào",
+                "emptyHint": "Đề xuất một bản sửa cho một kết quả, rồi nối tiếp nó.",
+                "original": "Kết quả gốc",
+                "originalUnchanged": "Kết quả gốc không bao giờ bị viết lại.",
+                "lineage": "Bản trước {predecessor} · đã nối {result}",
+                "appended": "Kết quả đã nối {result}",
+                "unknownNotice": "Lần thử này chưa được chứng thực. Dòng kết quả mới chốt được nó.",
+                "settled": "Bản sửa đã về trạng thái {state} với kết quả {result}."
+              },
+              "correctionState": {
+                "proposed": "đã đề xuất",
+                "blocked": "bị chặn",
+                "possibleStart": "có thể đã bắt đầu",
+                "applied": "đã áp dụng",
+                "provenNotApplied": "đã chứng minh chưa áp dụng",
+                "outcomeUnknown": "chưa rõ kết cục"
+              },
+              "rail": {
+                "scope": "Bản cài đặt",
+                "scopeReady": "Đang gửi tới đường thao tác của bản cài đặt này.",
+                "attention": "Cần chú ý",
+                "attentionEmpty": "Không có gì cần chú ý",
+                "attentionEmptyHint": "Không kết quả nào trong kỳ này mang mã chú ý.",
+                "asOf": "Mốc thời gian",
+                "asOfValue": "Thời điểm",
+                "asOfHint": "Đọc một con số lịch sử mà không đổi con số hiện hành",
+                "asOfApply": "Đọc theo mốc",
+                "returnCurrent": "Về hiện hành",
+                "current": "Đang xem báo cáo hiện hành.",
+                "historical": "Đang xem một con số lịch sử; ở đây không ghi gì cả.",
+                "notice": "Lần chốt gần nhất",
+                "noticeEmpty": "Chưa có lệnh nào được chốt trong màn này."
+              },
+              "refusal": {
+                "forbidden": "Tài khoản này không được phép làm việc đó.",
+                "signIn": "Hãy đăng nhập lại để tiếp tục.",
+                "staleAuthority": "Thẩm quyền mà lệnh này bị chặn theo đã đổi.",
+                "validation": "Lệnh bị từ chối vì sai định dạng.",
+                "conflict": "Bản ghi đã đổi kể từ lúc màn này đọc.",
+                "unattested": "Kết cục chưa được chứng thực. Hãy đọc lại mã có thể chốt nó.",
+                "malformed": "Thao tác trả về thứ mà ứng dụng này không đọc được.",
+                "unreachable": "Không gọi được thao tác Kế toán.",
+                "unsettled": "Lệnh chưa chốt: lần đọc lại không cho thấy trạng thái mới."
+              }
+            },
             "calendar": "Lịch tuần",
             "scheduleCaption": "Lịch cộng tác cho {kind}@{version}",
             "proposals": "Đề xuất đang chờ",
@@ -2246,6 +2195,32 @@
             "received": "Đã nhận"
           }
         }
+      },
+      "offerSelection": {
+        "path": "Đường dẫn đơn mua",
+        "workspaces": "Không gian làm việc",
+        "newWorkspace": "Mới",
+        "title": "Chọn ưu đãi không gian làm việc",
+        "description": "So sánh các ưu đãi đang áp dụng trước khi thanh toán.",
+        "offersLabel": "Ưu đãi hiện tại",
+        "offersFact": "Đọc từ ranh giới thanh toán của Workspace Provision",
+        "offerGroupLabel": "Ưu đãi khả dụng",
+        "billingCadence": "Chu kỳ thanh toán",
+        "renewalBehavior": "Gia hạn",
+        "includedOutcome": "Kết quả bao gồm",
+        "eligibility": "Điều kiện áp dụng",
+        "selectedBadge": "Đã chọn",
+        "selectedOffer": "Ưu đãi đã chọn",
+        "reviewAction": "Xem lại ưu đãi đã chọn",
+        "noPaymentNote": "Bước này không yêu cầu thanh toán.",
+        "backToWorkspaces": "Quay lại không gian làm việc",
+        "unavailableTitle": "Hiện không có ưu đãi nào để hiển thị",
+        "refreshOffers": "Làm mới ưu đãi",
+        "noSessionTitle": "Đăng nhập để xem ưu đãi",
+        "signIn": "Đăng nhập",
+        "signUp": "Tạo tài khoản",
+        "refusalPurchaserNotAdmitted": "Tài khoản đang đăng nhập chưa được chấp nhận là người mua. Hãy xác minh email hoặc tạo tài khoản người mua, rồi quay lại bước này.",
+        "refusalUnauthenticated": "Không tìm thấy phiên đăng nhập hợp lệ. Hãy đăng nhập hoặc tạo tài khoản, rồi quay lại bước này."
       }
     },
     "academyControlCenter": {
@@ -2382,7 +2357,9 @@
             "description": "Đẩy sự kiện CRM đã ký sang hệ thống tự động hóa.",
             "formLabel": "Tạo webhook"
           }
-        }
+        },
+        "reveal": "Hiện",
+        "hide": "Ẩn"
       }
     },
     "provisioningFlows": {
@@ -2445,31 +2422,22 @@
         "retryAi": "Thử lại AI readiness",
         "paymentTitle": "Đang chờ thanh toán",
         "paymentText": "Mở Ví và thanh toán đúng hóa đơn của đơn hàng này để bắt đầu chuẩn bị dịch vụ.",
-        "openWallet": "Mở Ví",
         "acceptedTitle": "Đơn hàng đã được nhận",
         "acceptedText": "Thanh toán đã hoàn tất và nivo đang tạo không gian làm việc cho doanh nghiệp.",
         "watchFulfillment": "Theo dõi tiến độ",
         "preparingText": "Trạng thái đang được cập nhật cho đúng không gian làm việc của đơn hàng này.",
         "watchProvisioning": "Theo dõi cấp phát",
-        "readyText": "Không gian làm việc đã sẵn sàng và xuất hiện trong trang Mô-đun.",
         "aiLoading": "Đang đọc snapshot mức sẵn sàng AI và tri thức của workspace.",
         "aiTesting": "Bài test có giới hạn đang kiểm tra provider, model và đường truy xuất riêng tư.",
         "aiRecovering": "Nivo đang khôi phục snapshot Nivo/module và tài liệu tải lên vào collection Qdrant riêng của workspace.",
         "aiReady": "Key OpenRouter, model DeepSeek, snapshot tri thức, Qdrant và bài test AI đã sẵn sàng.",
         "manage": "Quản lý AgentOS",
         "orderMissing": "Không tìm thấy order AgentOS này trong tài khoản đang đăng nhập.",
-        "orderCancelled": "Order AgentOS này đã bị hủy.",
         "startAgain": "Bắt đầu lại"
       }
     },
     "servers": {
-      "title": "Máy chủ",
-      "lede": "Đây là góc nhìn hạ tầng của các ứng dụng và workspace ở trên.",
-      "empty": "nivo chưa bán máy chủ riêng. Mục này chỉ có nội dung sau khi một ứng dụng hoặc một workspace được dựng.",
-      "shape": "{ram} · {vcpu} vCPU",
-      "shapeUnknown": "chưa có pod riêng",
-      "plan": "Gói {plan}",
-      "renewsAt": "gia hạn {date}"
+      "title": "Máy chủ"
     },
     "domains": {
       "title": "Tên miền",
@@ -2486,7 +2454,6 @@
     "wallet": {
       "title": "Ví",
       "pathLabel": "Đường dẫn đơn AgentOS",
-      "agentOsParent": "AgentOS",
       "orderLabel": "Đơn {orderId}",
       "linkedInvoiceLabel": "Invoice của đơn AgentOS này",
       "linkedInvoiceConsequence": "Thanh toán đúng invoice này để tiếp tục cùng một đơn AgentOS.",

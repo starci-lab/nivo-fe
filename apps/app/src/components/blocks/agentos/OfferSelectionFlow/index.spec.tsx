@@ -6,14 +6,8 @@ const mocks = vi.hoisted(() => ({
     search: "",
 }))
 type PathnameRequest = { readonly href: string }
-/** The currency-formatting call the surface makes, named so the mocked API stays reusable. */
-type CurrencyFormatOptions = { readonly currency: string }
 vi.mock("@/modules/i18n/navigation", () => ({
     getPathname: (request: PathnameRequest) => request.href,
-}))
-vi.mock("next-intl", () => ({
-    useLocale: () => "en",
-    useFormatter: () => ({ number: (value: number, options: CurrencyFormatOptions) => `${options.currency} ${value}` }),
 }))
 vi.mock("next/navigation", () => ({
     useSearchParams: () => new URLSearchParams(mocks.search),
@@ -97,7 +91,7 @@ describe("OfferSelectionFlow", () => {
         expect(screen.getByTestId("flow-state")).toHaveTextContent("selection")
         const offers = offersProp()
         expect(offers.map(offer => offer.displayName)).toEqual(["Nivo Workspace Starter", "Nivo Workspace Growth", "Nivo Workspace Scale"])
-        expect(offers.map(offer => offer.amount)).toEqual(["VND 1490000", "VND 2990000", "VND 5990000"])
+        expect(offers.map(offer => offer.amount)).toEqual(["₫1,490,000", "₫2,990,000", "₫5,990,000"])
         expect(props().selectedOfferId).toBe("nivo-workspace-growth")
     })
     it("hands the selected offer identity and version to the checkout route as navigation", () => {
@@ -131,6 +125,7 @@ describe("OfferSelectionFlow", () => {
         expect(screen.getByTestId("flow-state")).toHaveTextContent("no-session")
         expect(props().offers).toBeUndefined()
         expect(props().message).toContain("not an admitted purchaser")
+        expect((props().copy as { readonly noSessionTitle: string }).noSessionTitle).toBe("Sign in to see offers")
         expect(props().signInHref).toBe("/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fnew")
         expect(props().signUpHref).toBe("/authentication?returnTo=%2Fagentos%2Fworkspaces%2Fnew")
     })
