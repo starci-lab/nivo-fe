@@ -3,7 +3,7 @@
 import { useRef, useState } from "react"
 import type { SalesHandoffValue, SalesInstallationScope, SalesSubmitHandoffRequest } from "@/modules/api/sales"
 import { nivoQueryPayload } from "@/modules/query"
-import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/console"
+import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
 import { useQuerySalesHandoffSwr } from "@/hooks/swr/queries/useQuerySalesHandoffSwr"
 import { useMutateSalesSubmitHandoffSwr } from "@/hooks/swr/mutations/useMutateSalesSubmitHandoffSwr"
 import {

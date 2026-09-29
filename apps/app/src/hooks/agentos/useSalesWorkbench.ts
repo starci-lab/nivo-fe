@@ -16,7 +16,7 @@ import type {
     SalesReadinessValue,
 } from "@/modules/api/sales"
 import { nivoQueryPayload } from "@/modules/query"
-import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/console"
+import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
 import { useQuerySalesReadinessSwr } from "@/hooks/swr/queries/useQuerySalesReadinessSwr"
 import { useQuerySalesPolicySwr } from "@/hooks/swr/queries/useQuerySalesPolicySwr"
 import { useQuerySalesPipelineSwr } from "@/hooks/swr/queries/useQuerySalesPipelineSwr"
