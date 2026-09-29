@@ -15,8 +15,8 @@
  * if it decides to try again, which is what keeps a replay one intent.
  */
 import { CORE_API_URL } from "@/modules/config"
-import type { FailureKind, Outcome } from "./outcome"
-import { send } from "./transport"
+import type { FailureKind, Outcome } from "../outcome"
+import { send } from "../transport"
 
 /** The registered installation operation route prefix; an absolute path, so it replaces `/graphql`. */
 export const OPERATION_ROUTE_PREFIX = "/api/v1/agentos/workspaces"

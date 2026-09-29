@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-vi.mock("./graphql", () => ({ graphql: vi.fn(), graphqlEnvelope: vi.fn() }))
+vi.mock("../graphql", () => ({ graphql: vi.fn(), graphqlEnvelope: vi.fn() }))
 
-import { graphql, graphqlEnvelope } from "./graphql"
+import { graphql, graphqlEnvelope } from "../graphql"
 import {
     continueBrokeredSignIn,
     endPrincipalSessions,
@@ -20,7 +20,7 @@ import {
     signUpResend,
     signUpVerifyOtp,
     verifyTwoFactor,
-} from "./auth"
+} from "./index"
 
 /** The document of the one call the operation under test just made. */
 const lastDocument = () => vi.mocked(graphql).mock.calls.at(-1)?.[0] ?? ""
@@ -54,7 +54,7 @@ describe("signUpInit", () => {
          * NO DOOR CREATES AN IDENTITY BEFORE A CONSUMED PROOF. The bypass was removed from the
          * backend schema, so an adapter document for it could only ever answer a GraphQL error.
          */
-        const published = await import("./auth")
+        const published = await import("./index")
         expect("signUp" in published).toBe(false)
     })
 

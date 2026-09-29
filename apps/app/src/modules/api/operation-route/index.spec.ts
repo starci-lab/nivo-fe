@@ -8,8 +8,8 @@ import {
     operationReadIdentity,
     routeFailureKind,
     sendOperation,
-} from "./operation-route"
-import { failed } from "./outcome"
+} from "./index"
+import { failed } from "../outcome"
 
 const SCOPE = { workspaceId: "w/1", instanceId: "i 1", installationId: "n?1" }
 const ADDRESS = "http://core.test/op"
