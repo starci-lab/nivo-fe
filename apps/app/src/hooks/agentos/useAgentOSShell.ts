@@ -19,41 +19,21 @@
  *    read generations and asks again; nothing is replayed and nothing is restored from the browser.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react"
-import { useLocale } from "next-intl"
-import { toLocale } from "@/modules/i18n/config"
-import { useAccessToken } from "../auth/useAccessToken"
 import { useSession } from "../auth/useSession"
+import { useAccessToken } from "../auth/useAccessToken"
 import { type SessionState } from "@/modules/auth/session"
-import { failed, type Failure, type Outcome } from "@/modules/api/outcome"
+import type { Outcome } from "@/modules/api/outcome"
+import type { ShellRegisteredDestination, ShellRouteKey, ShellSourceIdentity } from "@/modules/api/agentos-shell"
 import {
-    formatShellSourceIdentity,
-    readAgentosShellCommandReceipt,
-    readAgentosShellOverview,
-    resolveAgentosShellNavigation,
-    type ShellCommandReceiptAnswer,
-    type ShellOverviewAnswer,
-    type ShellRead,
-    type ShellRegisteredDestination,
-    type ShellRouteKey,
-    type ShellSourceEnvelope,
-    type ShellSourceIdentity,
-} from "@/modules/api/agentos-shell"
-import {
-    initialShellObservationSnapshot,
     isShellReadBlocked,
-    reduceShellObservation,
-    shellOperationIdentities,
-    shellSelectionIdentities,
-    type ShellObservationEvent,
-    type ShellObservationSnapshot,
     type ShellOperationIntent,
     type ShellSelection,
     type ShellSessionStanding,
     type ShellSourceObservation,
-    type ShellSourceOutcome,
 } from "@/modules/agentos/shell-observation-store"
-import { shellNavigationDecision, type ShellNavigationDecision } from "@/modules/agentos/shell-navigation"
+import { type ShellNavigationDecision } from "@/modules/agentos/shell-navigation"
+import { useAgentOSShellNavigation } from "./useAgentOSShellNavigation"
+import { useAgentOSShellSources } from "./useAgentOSShellSources"
 
 /** Which AgentOS the shell is showing, and which installations its sources are scoped to. */
 export interface AgentOSShellOptions {
@@ -85,113 +65,13 @@ export interface AgentOSShellHandle {
 }
 
 /**
- * A refusal Core answered for the whole request, as the outcome each source of it gets.
- *
- * The registered route refuses a read SET, not one source, so the meaning has to be recovered from
- * the status Core chose: a permission refusal hides protected content, an outage does not, and a
- * malformed request is a grammar problem. Collapsing all three into "denied" would tell an owner
- * they lost access every time Core had a bad minute.
- */
-const requestFailureOutcome = (failure: Failure): ShellSourceOutcome => {
-    if (failure.kind === "forbidden" || failure.kind === "not-found") return { kind: "refused" }
-    if (failure.kind === "unavailable") return { kind: "unavailable" }
-    return { kind: "unsupported" }
-}
-
-/** One source's outcome from one answered overview envelope; a refusal never carries its payload. */
-const envelopeOutcome = (envelope: ShellSourceEnvelope): ShellSourceOutcome => {
-    if (envelope.availability === "refused") return { kind: "refused" }
-    if (envelope.availability === "unavailable") return { kind: "unavailable" }
-    if (envelope.availability === "unsupported") return { kind: "unsupported" }
-    return {
-        kind: "observation",
-        availability: envelope.availability,
-        freshness: envelope.freshness,
-        completeness: envelope.completeness,
-        observedAt: envelope.observedAt,
-        payload: envelope.payload,
-    }
-}
-
-const outcomeForRead = (outcome: Outcome<ShellOverviewAnswer>, read: ShellRead): ShellSourceOutcome => {
-    if (outcome.ok) {
-        const canonical = formatShellSourceIdentity(read.identity)
-        const envelope = outcome.data.sources.find((source): boolean => source.sourceIdentity === canonical)
-        // The client already proved that every requested source answered; a missing one is a failure
-        // of this read rather than an empty answer, and it is never presented as absence.
-        return envelope === undefined ? { kind: "unavailable" } : envelopeOutcome(envelope)
-    }
-    return requestFailureOutcome(outcome)
-}
-
-/**
- * One receiver source's outcome from its command-receipt answer.
- *
- * The receipt carries a queue state and receiver observations, none of which is a promise of
- * completion: the payload is preserved verbatim so the view decides pending, confirmed or uncertain
- * from the receiver's own words. A receipt that never arrives cannot become a result.
- */
-const outcomeForReceipt = (outcome: Outcome<ShellCommandReceiptAnswer>): ShellSourceOutcome => {
-    if (outcome.ok) {
-        const projection = outcome.data.commandObservation
-        if (projection.availability === "refused") return { kind: "refused" }
-        if (projection.availability === "unavailable") return { kind: "unavailable" }
-        if (projection.availability === "unsupported") return { kind: "unsupported" }
-        const observation = projection.projection
-        // A partial projection carries no command observation at all: it is a limit, not a receipt.
-        if (observation === null)
-            return {
-                kind: "observation",
-                availability: "partial",
-                freshness: "current",
-                completeness: "partial",
-                observedAt: null,
-                payload: null,
-            }
-        const observedAts = observation.observations
-            .map((entry) => entry.observedAt)
-            .filter((value): value is string => value !== null)
-            .sort()
-        return {
-            kind: "observation",
-            availability: projection.availability,
-            freshness: "current",
-            completeness: projection.availability === "available" ? "complete" : "partial",
-            observedAt: observedAts.at(-1) ?? observation.possibleStartAt,
-            payload: {
-                commandId: observation.commandId,
-                receiverInstallationId: observation.receiverInstallationId,
-                queueState: observation.queueState,
-                attempt: observation.attempt,
-                possibleStartAt: observation.possibleStartAt,
-                observations: [...observation.observations],
-                localTransportGaps: [...observation.localTransportGaps],
-            },
-        }
-    }
-    return requestFailureOutcome(outcome)
-}
-
-/** The command identity an operation carries for one receiver source, or null when none matches. */
-const commandIdFor = (
-    operations: ReadonlyArray<ShellOperationIntent>,
-    installationId: string,
-    intentId: string,
-): string | null => {
-    for (const operation of operations) {
-        if (operation.installationId === installationId && operation.intentId === intentId) return operation.commandId
-    }
-    return null
-}
-
-/**
  * Own one AgentOS shell selection: its sources, its session standing and its navigation.
  *
  * @param options - The selected workspace and instance, and the installations its sources cover.
  * @returns The connected shell handle. Reads are only ever issued while a session is signed in, and
  *   every read, retry, refresh and return allocates newer read generations for the sources it asks.
  */
-export const useAgentOSShell = (options: AgentOSShellOptions) => {
+export const useAgentOSShell = (options: AgentOSShellOptions): AgentOSShellHandle => {
     const { workspaceId, instanceId } = options
     const installationKey = [...options.installationIds]
         .sort((left, right): number => left.localeCompare(right))
@@ -204,199 +84,36 @@ export const useAgentOSShell = (options: AgentOSShellOptions) => {
     const session = useSession()
     const sessionStatus = session.state.status
     const accessToken = useAccessToken()
-    const locale = toLocale(useLocale())
     // The selection token is derived from the selection itself, so a different AgentOS is always a
     // different token and the same AgentOS keeps one across refreshes and returns.
     const selectionGeneration = `shell-${workspaceId}-${instanceId}`
 
-    const [state, setState] = useState<ShellObservationSnapshot>(() =>
-        initialShellObservationSnapshot({ workspaceId, instanceId }, 1),
-    )
-    const [readTrigger, setReadTrigger] = useState(0)
-    // Generations are allocated here rather than derived from the store, so the set a request is sent
-    // under is fixed before anything can be applied back to it.
-    const generations = useRef<Map<string, number>>(new Map())
-    // The latest store standing, for the one decision that must be made before a request is sent.
-    const blockedRef = useRef(false)
-    blockedRef.current = isShellReadBlocked(state)
-    // The operations list is rebuilt by callers each render; the reads it feeds change only with
-    // `operationKey`, so the current contents live behind a ref rather than a callback identity.
-    const operationsRef = useRef<ReadonlyArray<ShellOperationIntent>>(operations)
-    operationsRef.current = operations
-
-    const dispatch = useCallback(
-        (build: (current: ShellObservationSnapshot) => ReadonlyArray<ShellObservationEvent>) => {
-            setState((current) =>
-                build(current).reduce((next, event) => reduceShellObservation(next, event).state, current),
-            )
-        },
-        [],
-    )
-
-    const runReads = useCallback(
-        (identities: ReadonlyArray<ShellSourceIdentity>) => {
-            if (accessToken === null || blockedRef.current || identities.length === 0) return
-            const reads: ReadonlyArray<ShellRead> = identities.map((identity) => {
-                const key = formatShellSourceIdentity(identity)
-                const readGeneration = (generations.current.get(key) ?? 0) + 1
-                generations.current.set(key, readGeneration)
-                return { identity, readGeneration }
-            })
-            dispatch((current) =>
-                reads.map((read) => ({
-                    type: "begin-read",
-                    sessionEpoch: current.sessionEpoch,
-                    selection: current.selection,
-                    identity: read.identity,
-                    readGeneration: read.readGeneration,
-                })),
-            )
-            void (async () => {
-                // A receiver source is read through its own command-receipt route, never through the
-                // overview: the receipt carries the queue state the overview does not know. Every other
-                // identity keeps the one registered selection read.
-                const overviewReads = reads.filter((read) => read.identity.kind !== "receiver")
-                const receiptReads = reads.filter((read) => read.identity.kind === "receiver")
-                const overviewOutcome =
-                    overviewReads.length === 0
-                        ? null
-                        : await readAgentosShellOverview(
-                              accessToken,
-                              { workspaceId, instanceId },
-                              selectionGeneration,
-                              overviewReads,
-                          )
-                if (overviewOutcome !== null && !overviewOutcome.ok && overviewOutcome.kind === "refused") {
-                    // A session outcome belongs to the whole selection: it clears every protected payload
-                    // at once and blocks reads until a fresh session check succeeds.
-                    dispatch((current) => [{ type: "require-sign-in", sessionEpoch: current.sessionEpoch + 1 }])
-                    return
-                }
-                const receiptOutcomes = await Promise.all(
-                    receiptReads.map(async (read) => {
-                        if (read.identity.kind !== "receiver")
-                            return { read, outcome: { kind: "unsupported" } as ShellSourceOutcome }
-                        const commandId = commandIdFor(
-                            operationsRef.current,
-                            read.identity.installationId,
-                            read.identity.intentId,
-                        )
-                        if (commandId === null || instanceId.length === 0)
-                            return { read, outcome: { kind: "unsupported" } as ShellSourceOutcome }
-                        const outcome = await readAgentosShellCommandReceipt(accessToken, {
-                            workspaceId,
-                            instanceId,
-                            commandId,
-                            sourceIdentity: formatShellSourceIdentity(read.identity),
-                            readGeneration: read.readGeneration,
-                            selectionGeneration,
-                        })
-                        if (!outcome.ok && outcome.kind === "refused") return { read, outcome: null }
-                        return { read, outcome: outcomeForReceipt(outcome) }
-                    }),
-                )
-                if (receiptOutcomes.some((entry) => entry.outcome === null)) {
-                    dispatch((current) => [{ type: "require-sign-in", sessionEpoch: current.sessionEpoch + 1 }])
-                    return
-                }
-                const outcomes = new Map<string, ShellSourceOutcome>()
-                if (overviewOutcome !== null)
-                    for (const read of overviewReads)
-                        outcomes.set(formatShellSourceIdentity(read.identity), outcomeForRead(overviewOutcome, read))
-                for (const entry of receiptOutcomes)
-                    outcomes.set(formatShellSourceIdentity(entry.read.identity), entry.outcome as ShellSourceOutcome)
-                dispatch((current) =>
-                    reads.flatMap((read) => {
-                        const outcome = outcomes.get(formatShellSourceIdentity(read.identity))
-                        return outcome === undefined
-                            ? []
-                            : [
-                                  {
-                                      type: "apply-outcome" as const,
-                                      sessionEpoch: current.sessionEpoch,
-                                      selection: current.selection,
-                                      identity: read.identity,
-                                      readGeneration: read.readGeneration,
-                                      outcome,
-                                  },
-                              ]
-                    }),
-                )
-            })()
-        },
-        [accessToken, dispatch, instanceId, selectionGeneration, workspaceId],
-    )
-
-    /** A selection change discards every former payload before any new read is sent. */
-    useEffect(() => {
-        dispatch(() => [{ type: "change-selection", selection: { workspaceId, instanceId } }])
-    }, [dispatch, instanceId, workspaceId])
-
-    /**
-     * Apply the session standing before any protected read is attempted.
-     *
-     * `restoring` is deliberately not classified: nothing is known yet, and inventing sign-in-required
-     * from an unsettled session would tell a signed-in owner to sign in during a normal start-up.
-     */
-    useEffect(() => {
-        if (sessionStatus === "restoring") return
-        dispatch((current) => [
-            sessionStatus === "anonymous"
-                ? { type: "require-sign-in", sessionEpoch: current.sessionEpoch + 1 }
-                : { type: "session-reestablished", sessionEpoch: current.sessionEpoch + 1 },
-        ])
-    }, [dispatch, sessionStatus])
-
-    /** Read the whole selection: on a session, on a selection change, and on a refresh or return. */
-    useEffect(() => {
-        if (sessionStatus !== "signed-in") return
-        runReads([
-            ...shellSelectionIdentities(installationKey.length === 0 ? [] : installationKey.split("|")),
-            ...shellOperationIdentities(operationsRef.current),
-        ])
-    }, [installationKey, operationKey, readTrigger, runReads, sessionStatus])
-
-    const readSelection = useCallback(() => setReadTrigger((current) => current + 1), [])
-    const retrySource = useCallback((identity: ShellSourceIdentity) => runReads([identity]), [runReads])
-
-    const resolveEntry = useCallback(
-        async (
-            installationId: string,
-            routeKey: ShellRouteKey,
-            opaqueItemId: string | null,
-        ): Promise<Outcome<ShellRegisteredDestination>> => {
-            if (accessToken === null)
-                return failed("refused", {
-                    code: "UNAUTHENTICATED",
-                    reason: "No access token is held, so no request left the browser.",
-                })
-            return resolveAgentosShellNavigation(accessToken, {
-                workspaceId,
-                instanceId,
-                installationId,
-                routeKey,
-                opaqueItemId,
-                selectionGeneration,
-            })
-        },
-        [accessToken, instanceId, selectionGeneration, workspaceId],
-    )
-
-    const navigationDecision = useCallback(
-        (outcome: Outcome<ShellRegisteredDestination>) => shellNavigationDecision(outcome, locale),
-        [locale],
-    )
-
-    const handle: AgentOSShellHandle = {
-        selection: { workspaceId, instanceId },
-        session: state.session,
+    const { snapshot, readSelection, retrySource } = useAgentOSShellSources({
+        workspaceId,
+        instanceId,
+        installationKey,
+        operationKey,
+        operations,
+        selectionGeneration,
         sessionStatus,
-        blocked: isShellReadBlocked(state),
-        sources: state.sources,
+        accessToken,
+    })
+    const { resolveEntry, navigationDecision } = useAgentOSShellNavigation({
+        accessToken,
+        workspaceId,
+        instanceId,
+        selectionGeneration,
+    })
+
+    return {
+        selection: { workspaceId, instanceId },
+        session: snapshot.session,
+        sessionStatus,
+        blocked: isShellReadBlocked(snapshot),
+        sources: snapshot.sources,
         readSelection,
         retrySource,
         resolveEntry,
         navigationDecision,
     }
-    return handle
 }
