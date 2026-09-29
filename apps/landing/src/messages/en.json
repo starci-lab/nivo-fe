@@ -1,0 +1,2009 @@
+{
+  "site": {
+    "metadata": {
+      "title": "NIVO — AI-Native Business Operating Platform",
+      "description": "NIVO is the AI-Native Business Operating Platform that builds NIVO OS to turn business context into clear responsibility and verifiable outcomes."
+    },
+    "homeLabel": "NIVO — go to the home page",
+    "primaryNavigationLabel": "Main navigation",
+    "mobileNavigationLabel": "Mobile navigation",
+    "quickActionsLabel": "Quick actions",
+    "openNavigationLabel": "Open navigation",
+    "closeNavigationLabel": "Close navigation",
+    "login": "Sign in",
+    "contact": "Contact",
+    "skipToContent": "Skip to main content",
+    "philosophy": "Human Leads. AI Operates. System Learns.",
+    "distinction": "NIVO is the corporate brand. NIVO OS is the master product.",
+    "copyright": "© 2026 NIVO. All rights reserved.",
+    "contactNivo": "Contact NIVO",
+    "navigation": {
+      "nivoOs": "NIVO OS",
+      "applications": "Solutions",
+      "explore": "Explore",
+      "ideas": "Ideas",
+      "ecosystem": "The NIVO ecosystem",
+      "about": "About NIVO",
+      "company": "Company",
+      "trust": "Trust",
+      "contact": "Contact",
+      "pricing": "Pricing"
+    },
+    "footer": {
+      "groups": {
+        "nivoOs": "NIVO OS",
+        "solutions": "Solutions",
+        "explore": "Explore",
+        "about": "About NIVO"
+      },
+      "links": {
+        "nivoOs": "NIVO OS",
+        "responsibility": "System of Responsibility",
+        "trust": "Trust",
+        "applications": "Solutions",
+        "pricing": "Pricing",
+        "ideas": "Ideas",
+        "ecosystem": "Ecosystem",
+        "company": "Company",
+        "contact": "Contact",
+        "login": "Sign in"
+      }
+    }
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "NIVO",
+      "title": "The AI-Native Business Operating Platform",
+      "titlePrefix": "The business operating platform",
+      "titleAccent": "AI-Native",
+      "descriptor": "AI-Native Business Operating Platform",
+      "supporting": "NIVO builds NIVO OS to help businesses turn business context into clear responsibility, coordinate people and AI to execute, verify outcomes and learn from operations.",
+      "philosophy": "Human Leads. AI Operates. System Learns.",
+      "primary": "Explore NIVO OS",
+      "secondary": "Explore Solutions",
+      "signal": "Human + AI",
+      "artworkAlt": "The NIVO unicorn inside an operating loop that connects people, AI, responsibility and verifiable outcomes.",
+      "artworkCaption": "Context, Responsibility, Human + AI, Verified outcome."
+    },
+    "focus": {
+      "lead": "Lead",
+      "revenue": "Revenue"
+    },
+    "routeJoiner": " then ",
+    "today": {
+      "status": "NIVO today · Building, operating & verifying",
+      "headline": "Building. Operating. Verifying.",
+      "focusLabel": "Current focus",
+      "principle": "Evidence before scale."
+    },
+    "relevance": {
+      "eyebrow": "Solutions",
+      "title": "Start from one business outcome that must be guaranteed.",
+      "supporting": "NIVO does not start from the question “which AI Agent do we need to add?”. NIVO starts from what the business needs to happen, the responsibility that must be assured, and the evidence that confirms the outcome was actually achieved.",
+      "exampleLabel": "Featured example",
+      "responsibility": "Make sure important sales opportunities are never forgotten and always have a clear next step.",
+      "steps": {
+        "need": {
+          "label": "Business need",
+          "description": "What the business needs to happen."
+        },
+        "responsibility": {
+          "label": "Responsibility",
+          "description": "Responsibility and limits are clearly defined."
+        },
+        "execution": {
+          "label": "Human + AI execution",
+          "description": "People lead, AI operates within limits."
+        },
+        "evidence": {
+          "label": "Evidence",
+          "description": "Results are checked against evidence."
+        }
+      },
+      "flowLabel": "From business need to evidence",
+      "action": "Explore Solutions"
+    },
+    "operatingModel": {
+      "eyebrow": "NIVO OS · System of Responsibility",
+      "title": "From what the business needs to happen to a verifiable outcome.",
+      "supporting": "Not just automating work. Systematizing responsibility.",
+      "rolesLabel": "Core roles",
+      "visualsLabel": "Human leads. AI operates. System learns. Verified outcome.",
+      "visuals": {
+        "humanLeads": {
+          "label": "Human leads",
+          "description": "People hold the goal, the judgment and the responsibility."
+        },
+        "aiOperates": {
+          "label": "AI operates",
+          "description": "AI operates within the responsibility limits already defined."
+        },
+        "systemLearns": {
+          "label": "System learns",
+          "description": "The system learns from operations and real evidence."
+        },
+        "verifiedOutcome": {
+          "label": "Verified outcome",
+          "description": "Results are checked before scaling up."
+        }
+      },
+      "steps": {
+        "intent": {
+          "label": "Business intent",
+          "description": "Goals, priorities and value."
+        },
+        "context": {
+          "label": "Context & state",
+          "description": "Context, data and the current state."
+        },
+        "responsibility": {
+          "label": "Responsibility",
+          "description": "Responsibility, boundaries and principles."
+        },
+        "execution": {
+          "label": "Governed execution",
+          "description": "Controlled, supervised execution."
+        },
+        "outcome": {
+          "label": "Verified outcome",
+          "description": "Results are checked against evidence."
+        }
+      },
+      "principle": "Action ≠ Outcome",
+      "principleBody": "Finishing a task is not necessarily fulfilling a responsibility.",
+      "flowLabel": "The NIVO OS operating model",
+      "primaryAction": "Explore NIVO OS",
+      "secondaryAction": "Explore System of Responsibility"
+    },
+    "commercial": {
+      "eyebrow": "Start with NIVO",
+      "title": "Start with one real responsibility.",
+      "supporting": "Find the right business need, understand the responsibility, then choose the way to start that fits. Pricing owns the commercial decision; activation owns the transaction and the trial state.",
+      "routeLabel": "Path to get started",
+      "route": {
+        "need": "Find the right business need",
+        "understand": "Understand the responsibility",
+        "start": "See how to start"
+      },
+      "primaryAction": "See Pricing",
+      "assistedAction": "Need to talk it through?"
+    },
+    "trust": {
+      "eyebrow": "The trust layer",
+      "titleParts": {
+        "evidence": "Evidence",
+        "trust": "Trust",
+        "permission": "Permission"
+      },
+      "supporting": "The permission to widen scope and the level of autonomy only grow after responsibility has been carried out within clear limits and the outcome has been verified.",
+      "futureLabel": "Long-term direction",
+      "futureTitle": "Businesses that are more autonomous. Smarter. More sustainable.",
+      "futureBody": "The AI-Self-Sustaining Business is the long-term destination, not a current capability or a sales promise.",
+      "trustAction": "Explore Trust",
+      "ecosystemAction": "Explore the Ecosystem"
+    },
+    "ideas": {
+      "eyebrow": "NIVO Ideas",
+      "title": "The ideas shaping NIVO.",
+      "supporting": "Explore the perspectives, frameworks and lessons NIVO is learning while building a System of Responsibility.",
+      "action": "Explore Ideas"
+    },
+    "nextPaths": {
+      "label": "Choose the next step",
+      "groups": {
+        "learn": "Learn",
+        "start": "Get started",
+        "connect": "Connect"
+      },
+      "links": {
+        "nivoOs": "NIVO OS",
+        "applications": "Solutions",
+        "pricing": "Pricing",
+        "company": "About NIVO",
+        "contact": "Contact"
+      }
+    }
+  },
+  "explore": {
+    "links": {
+      "nivoOs": "Learn about NIVO OS",
+      "sor": "Understand System of Responsibility",
+      "trust": "Learn about Trust",
+      "contactTrust": "Talk about Trust & Security"
+    },
+    "trust": {
+      "metadata": {
+        "title": "Trust",
+        "description": "How NIVO connects Human Accountability, Evidence, Trust, Permission and operating capacity without turning the future into current capability."
+      },
+      "hero": {
+        "eyebrow": "Trust",
+        "title": "A more autonomous future does not begin with more AI. It begins with one responsibility carried out reliably.",
+        "body": "Autonomy is not assumed. It has to be earned through clear Responsibility, verified Outcomes, Evidence and Human Accountability.",
+        "primary": "See how Trust is built",
+        "modelLabel": "Trust starts with operating reality",
+        "steps": {
+          "oneResponsibility": "One real responsibility",
+          "verifiedOutcome": "Verified outcome",
+          "trust": "Trust"
+        }
+      },
+      "start": {
+        "eyebrow": "Start small",
+        "title": "Trust does not begin by handing the whole business to AI.",
+        "description": "Start with one Responsibility that is clear enough: what must happen, who is accountable, the scope of operation, permission, evidence and the exception path.",
+        "contract": {
+          "outcome": {
+            "term": "Outcome",
+            "body": "What must happen?"
+          },
+          "accountability": {
+            "term": "Accountability",
+            "body": "Who is ultimately accountable?"
+          },
+          "boundary": {
+            "term": "Boundary",
+            "body": "Within what scope does the system operate?"
+          },
+          "permission": {
+            "term": "Permission",
+            "body": "What is AI allowed to do?"
+          },
+          "evidence": {
+            "term": "Evidence",
+            "body": "What proves the Outcome?"
+          },
+          "exception": {
+            "term": "Exception",
+            "body": "When do humans step in?"
+          }
+        },
+        "flowLabel": "Start-small model",
+        "steps": {
+          "oneResponsibility": {
+            "title": "One real responsibility",
+            "description": "One real, sufficiently clear responsibility."
+          },
+          "controlledExecution": {
+            "title": "Controlled execution",
+            "description": "Execution within Boundary and Permission."
+          },
+          "verifiedOutcome": {
+            "title": "Verified outcome",
+            "description": "Results verified by Evidence."
+          }
+        }
+      },
+      "governance": {
+        "eyebrow": "Human + AI governance",
+        "title": "Humans keep responsibility. AI operates only within the permitted scope.",
+        "description": "Human leadership keeps intent, judgment, accountability, high-risk decisions and exception decisions.",
+        "quote": "Technical capability does not automatically become business permission.",
+        "pillars": {
+          "minimumContext": "Minimum necessary context",
+          "controlledAccess": "Controlled access",
+          "explicitPermission": "Explicit permission",
+          "traceability": "Traceability",
+          "humanOversight": "Human oversight",
+          "recovery": "Recovery"
+        },
+        "noticeTitle": "Security must be proven by control.",
+        "noticeBody": "No security-control inventory is cleared for publication yet. No badge, certification or security level is to be inferred."
+      },
+      "evidence": {
+        "eyebrow": "Evidence before scale",
+        "title": "NIVO does not ask you to believe in a roadmap. NIVO has to earn trust from results.",
+        "description": "Observed Outcome and Verified Outcome are two different states; Verification stands between observation and the right to expand Permission.",
+        "loopLabel": "Earned Trust Loop",
+        "stepDescription": "Each step has a clear owner, state and limit.",
+        "steps": {
+          "responsibility": "Responsibility",
+          "execution": "Execution",
+          "outcomeObserved": "Outcome observed",
+          "evidence": "Evidence",
+          "verification": "Verification",
+          "verifiedOutcome": "Verified outcome",
+          "trust": "Trust",
+          "permission": "Permission",
+          "moreResponsibility": "More responsibility"
+        },
+        "signatureTitle": "Autonomy must be earned.",
+        "sequenceLabel": "Verified Outcomes, Evidence, Trust, More Permission",
+        "sequence": {
+          "verifiedOutcomes": "Verified Outcomes",
+          "evidence": "Evidence",
+          "trust": "Trust",
+          "morePermission": "More Permission"
+        }
+      },
+      "journey": {
+        "eyebrow": "The transformation journey",
+        "title": "As trust grows, a business can hand over more responsibility — without giving up control.",
+        "description": "Maturity direction; not a mandatory roadmap or a commitment to current capability.",
+        "flowLabel": "Transformation journey",
+        "stepDescription": "Operating capacity expands only when Evidence and governance allow.",
+        "steps": {
+          "humanDependent": "Human-dependent operations",
+          "systemized": "Systemized context & responsibility",
+          "governed": "Governed Human + AI",
+          "reliable": "Reliable business loops",
+          "aiNative": "AI-Native Business"
+        }
+      },
+      "possible": {
+        "eyebrow": "Customer value horizon",
+        "title": "As operations become more reliable, greater value can gradually open up.",
+        "description": "Conditional horizons, not outcomes guaranteed by NIVO.",
+        "horizons": {
+          "nearTerm": {
+            "state": "Near-term · Evidence-gated",
+            "title": "Clearer operations"
+          },
+          "validation": {
+            "state": "Needs user validation",
+            "title": "More peace of mind and initiative"
+          },
+          "longTerm": {
+            "state": "Long-term possibility",
+            "title": "More time for what matters"
+          },
+          "conditional": {
+            "state": "Conditional possibility",
+            "title": "Conditionally creating greater value"
+          }
+        },
+        "noticeTitle": "AI-Self-Sustaining Business · Long-term destination",
+        "noticeBody": "Not a business that needs no humans, a current capability or a guarantee."
+      },
+      "truth": {
+        "eyebrow": "Truth before promise",
+        "title": "A trustworthy future has to state clearly what does not exist yet.",
+        "description": "Current, Verified, Experimental, Target and Long-term must be called by name.",
+        "terms": {
+          "current": {
+            "term": "Current",
+            "meaning": "What is true today."
+          },
+          "verified": {
+            "term": "Verified",
+            "meaning": "What has suitable Evidence."
+          },
+          "experimental": {
+            "term": "Experimental",
+            "meaning": "What is being tried in a limited Context."
+          },
+          "target": {
+            "term": "Target",
+            "meaning": "The capability NIVO is heading toward."
+          },
+          "longTerm": {
+            "term": "Long-term",
+            "meaning": "The long-term maturity direction."
+          }
+        },
+        "pathsLabel": "Trust next paths"
+      }
+    },
+    "ecosystem": {
+      "metadata": {
+        "title": "NIVO Ecosystem",
+        "description": "The four actors of the NIVO ecosystem and how contribution, evidence and trust together create shared operating capacity."
+      },
+      "hero": {
+        "eyebrow": "NIVO Ecosystem",
+        "title": "Stronger operating capability is built from real contexts.",
+        "body": "The NIVO ecosystem connects business context, domain knowledge, implementation capability and organizational context to create operating capacity that can learn, be verified and be reused.",
+        "primary": "Understand how value is created",
+        "modelLabel": "Shared operating capacity",
+        "steps": {
+          "contribution": "Contribution",
+          "scopedCollaboration": "Scoped collaboration",
+          "evidence": "Evidence",
+          "reusableCapacity": "Reusable capacity"
+        }
+      },
+      "value": {
+        "eyebrow": "Value model",
+        "title": "Context, knowledge and capability create advantage only when they can be connected and reused.",
+        "description": "Strategic operating thesis; not proof of a current network effect.",
+        "flowLabel": "Shared Operating Capacity",
+        "stepDescription": "Contribution is connected, verified and reused in the right context.",
+        "steps": {
+          "realContext": "Real business context",
+          "domainExpertise": "Domain expertise",
+          "implementationCapacity": "Implementation capacity",
+          "institutionalContext": "Institutional context",
+          "scopedCollaboration": "Scoped collaboration",
+          "evidence": "Evidence",
+          "reusableCapacity": "Reusable operating capacity"
+        },
+        "noticeTitle": "Future extensibility",
+        "noticeBody": "A future option; not a current developer program, marketplace or open platform."
+      },
+      "actors": {
+        "eyebrow": "Who participates",
+        "title": "Each actor contributes a different part of the shared capability.",
+        "description": "Contribution, value received and shared outcome are three different layers.",
+        "listLabel": "The four actors of the NIVO ecosystem",
+        "badgeFuture": "Future",
+        "badgeCurrent": "Actor model · Current",
+        "labels": {
+          "contribution": "Contribution",
+          "value": "Value received",
+          "outcome": "Potential shared outcome",
+          "status": "Truth status"
+        },
+        "items": {
+          "customers": {
+            "name": "Customers",
+            "role": "Reality source / Operating partner",
+            "contribution": "Real Context + Responsibility + Execution Reality + Evidence",
+            "value": "Operating Capability + Visibility + Learning",
+            "outcome": "Grounded operating patterns",
+            "status": "Current actor model · Relationships: Verify",
+            "action": "Explore Solutions"
+          },
+          "partners": {
+            "name": "Partners & Experts",
+            "role": "Capability extension",
+            "contribution": "Domain Expertise + Implementation Capacity + Market Context",
+            "value": "Reusable capability + new value-delivery paths",
+            "outcome": "Repeatable application patterns",
+            "status": "Current actor model · Relationships: Verify",
+            "action": "Talk about Partnership"
+          },
+          "institutions": {
+            "name": "Institutions",
+            "role": "Responsible adoption at ecosystem scale",
+            "contribution": "Program + Ecosystem + Institutional Context",
+            "value": "Responsible adoption capability",
+            "outcome": "Broader AI-Native capability",
+            "status": "Current actor model · Programs: Verify",
+            "action": "Talk about Institutional Partnership"
+          },
+          "futureBuilders": {
+            "name": "Future Builders",
+            "role": "Future extensibility",
+            "contribution": "Future extensions + integrations",
+            "value": "Potential future participation",
+            "outcome": "Expanded operating capacity",
+            "status": "Future · Not a current developer program or marketplace",
+            "action": "Learn about NIVO OS"
+          }
+        }
+      },
+      "growth": {
+        "eyebrow": "Trust + participation",
+        "title": "A deeper relationship has to be earned through fit and evidence.",
+        "description": "Relationship depth does not come from logos or default access.",
+        "flowLabel": "Relationship development",
+        "stepDescription": "Start small. Verify value. Deepen the relationship.",
+        "steps": {
+          "interest": "Interest",
+          "fit": "Fit",
+          "context": "Context",
+          "scopedCollaboration": "Scoped collaboration",
+          "evidence": "Evidence",
+          "deeperRelationship": "Deeper relationship"
+        }
+      },
+      "proof": {
+        "eyebrow": "Ecosystem in practice",
+        "title": "Show only relationships that can be proven.",
+        "noticeTitle": "No public proof inventory",
+        "noticeBody": "No logo, badge, customer count or relationship claim is inferred from unverified data."
+      },
+      "path": {
+        "eyebrow": "Progression",
+        "title": "Which role do you want to join from?",
+        "description": "Ecosystem explains; Contact routes.",
+        "label": "Actor-specific routes",
+        "route": "{name} · {action}"
+      }
+    },
+    "ideas": {
+      "metadata": {
+        "title": "Ideas",
+        "description": "NIVO's knowledge surface: Perspectives, Frameworks and what NIVO is building around Responsibility-Centered AI-Native Business."
+      },
+      "hero": {
+        "eyebrow": "NIVO Ideas",
+        "title": "Perspectives, frameworks and what NIVO is learning while building an AI-Native Business.",
+        "body": "Where NIVO interprets important shifts, structures operating models and shares what is being learned while building NIVO OS. Ideas is a knowledge surface, not a blog or news feed.",
+        "primary": "Explore Ideas",
+        "modelLabel": "Knowledge progression",
+        "steps": {
+          "discover": "Discover",
+          "understand": "Understand",
+          "connect": "Connect"
+        }
+      },
+      "featured": {
+        "eyebrow": "Featured knowledge",
+        "title": "Start with the most important ideas.",
+        "description": "Editorial curation; not latest or most clicked.",
+        "emptyTitle": "No approved object",
+        "emptyBody": "No filler is created to fill the layout.",
+        "read": "Read Idea"
+      },
+      "byType": {
+        "eyebrow": "Explore by type",
+        "title": "Which way of thinking do you want to read by?",
+        "description": "Content type does not change truth state or lifecycle.",
+        "label": "Ideas content types",
+        "explore": "Explore",
+        "types": {
+          "perspective": {
+            "label": "Perspective",
+            "role": "Interpret"
+          },
+          "framework": {
+            "label": "Framework",
+            "role": "Structure"
+          },
+          "building": {
+            "label": "NIVO is building",
+            "role": "Learn by doing"
+          }
+        }
+      },
+      "curated": {
+        "eyebrow": "Curated knowledge",
+        "title": "Conceptual coherence before content volume.",
+        "description": "Editorial collection; not a taxonomy or a new page.",
+        "label": "Curated Ideas"
+      },
+      "byTopic": {
+        "eyebrow": "Explore by topic",
+        "title": "Go deep by topic.",
+        "description": "Topic is secondary metadata.",
+        "topics": {
+          "aiNativeBusiness": "AI-Native Business",
+          "leadership": "Leadership & Operating Model",
+          "responsibility": "Responsibility & Outcome",
+          "humanAi": "Human + AI",
+          "trust": "Trust, Governance & Autonomy",
+          "growth": "Growth & Revenue",
+          "knowledge": "Knowledge & Decision"
+        }
+      },
+      "continue": {
+        "eyebrow": "Continue learning",
+        "title": "From an Idea to the right canonical owner.",
+        "description": "An Idea interprets; the canonical page defines.",
+        "label": "Ideas next paths",
+        "paths": {
+          "nivoOs": "NIVO OS",
+          "sor": "System of Responsibility",
+          "applications": "Solutions",
+          "trust": "Trust",
+          "company": "About NIVO"
+        }
+      },
+      "items": {
+        "responsibility-before-agent": {
+          "title": "Responsibility before Agent",
+          "thesis": "An AI Agent is an execution mechanism; Responsibility is the business unit that defines what must happen, who is accountable and what evidence confirms the result.",
+          "truthContext": "Strategic interpretation; not a claim about current product capability.",
+          "canonicalReference": "System of Responsibility",
+          "sections": {
+            "observation": {
+              "title": "Observation",
+              "body": "Technical capability does not by itself answer which Outcome must happen, which Boundary must be held and who bears final Accountability."
+            },
+            "thesis": {
+              "title": "Thesis",
+              "body": "Responsibility puts Outcome, Accountability, Boundary, Permission, Evidence and Exception into a single operating contract. Agents take part only inside that contract."
+            },
+            "limit": {
+              "title": "Limits",
+              "body": "The model does not claim that every level of observation, recommendation or execution is already available in NIVO OS."
+            }
+          }
+        },
+        "context-responsibility-outcome": {
+          "title": "Context · Responsibility · Outcome",
+          "thesis": "An AI-Native operating system creates lasting value only when context is turned into clear responsibility and responsibility is verified by Outcome.",
+          "truthContext": "Strategic framework; does not replace the canonical definition of NIVO OS.",
+          "canonicalReference": "NIVO OS",
+          "sections": {
+            "problem": {
+              "title": "Problem",
+              "body": "Data and actions can grow while the business is still unclear about what needs to happen."
+            },
+            "model": {
+              "title": "Model",
+              "body": "Context describes reality; Responsibility sets the owner and boundary; Outcome creates a verifiable end point."
+            },
+            "limit": {
+              "title": "Limits",
+              "body": "The framework does not prove Outcome by itself and does not grant Permission."
+            }
+          }
+        },
+        "earned-autonomy-needs-evidence": {
+          "title": "Autonomy must be earned through Evidence",
+          "thesis": "More AI does not create more autonomy; Permission should expand only after Outcomes are observed, verified and have built enough Trust.",
+          "truthContext": "Governance direction; not a claim of current full autonomy.",
+          "canonicalReference": "Trust",
+          "sections": {
+            "structured": {
+              "title": "What is being structured",
+              "body": "Responsibility, Execution, Outcome, Evidence, Verification, Trust and Permission form an earned autonomy loop."
+            },
+            "notClaimed": {
+              "title": "What is not yet claimed",
+              "body": "AI-Self-Sustaining Business is a long-term destination, not a current capability or a promise of results."
+            },
+            "open": {
+              "title": "What remains open",
+              "body": "The right Permission depends on risk, Context, capability, Evidence and Human Accountability."
+            }
+          }
+        }
+      }
+    },
+    "ideaDetail": {
+      "notAvailable": "Idea not available",
+      "author": "NIVO",
+      "publisher": "NIVO",
+      "lifecyclePublished": "Published",
+      "sourceVersion": "NIVO.VN V1.0 — Official Canonical Release",
+      "dateNote": "The canonical source does not provide a public publication date.",
+      "labels": {
+        "author": "Author",
+        "publisher": "Publisher",
+        "lifecycle": "Lifecycle",
+        "source": "Source"
+      },
+      "body": {
+        "eyebrow": "Knowledge object",
+        "title": "Reasoning"
+      },
+      "truth": {
+        "eyebrow": "Truth / evidence context",
+        "title": "Claim and limitation",
+        "noticeTitle": "Truth context",
+        "canonicalReference": "Canonical reference"
+      },
+      "next": {
+        "eyebrow": "Primary next path",
+        "title": "Continue",
+        "label": "One primary next path",
+        "relatedLabel": "Related Ideas",
+        "read": "Read"
+      }
+    }
+  },
+  "contact": {
+    "metadata": {
+      "title": "Contact NIVO",
+      "description": "Choose the right relationship intent and go straight to the canonical answer before providing unnecessary data."
+    },
+    "hero": {
+      "eyebrow": "CONTACT NIVO · RELATIONSHIP ROUTER",
+      "title": "What would you like to discuss with NIVO?",
+      "body": "Choose the most fitting option. If your need can be resolved directly on NIVO.VN, the page takes you to the right place instead of asking you to fill in an unnecessary form.",
+      "primary": "Choose the right option",
+      "routeLabel": "Contact routing sequence",
+      "steps": {
+        "orient": "Orient",
+        "resolveIntent": "Resolve intent",
+        "route": "Route",
+        "confirmNextState": "Confirm next state"
+      }
+    },
+    "router": {
+      "eyebrow": "CHOOSE YOUR PATH",
+      "title": "Six intents. One right next step.",
+      "description": "General is a fallback, not a default.",
+      "legend": "Select relationship intent",
+      "submit": "Resolve next path"
+    },
+    "intents": {
+      "product": {
+        "label": "Product Assistance",
+        "userJob": "Learn about, evaluate or need support related to NIVO OS.",
+        "expectation": "Self-service paths are preferred before a direct conversation."
+      },
+      "partnership": {
+        "label": "Partnership",
+        "userJob": "Expand expertise, implementation or market capability together with NIVO.",
+        "expectation": "Understand the ecosystem first; the intake channel is awaiting verification."
+      },
+      "institution": {
+        "label": "Institution",
+        "userJob": "Talk about programs, organizations or ecosystem collaboration.",
+        "expectation": "The intake channel is awaiting verification of the owner and privacy path."
+      },
+      "media": {
+        "label": "Media",
+        "userJob": "Press, content and communications.",
+        "expectation": "No verified media channel is available to publish yet."
+      },
+      "talent": {
+        "label": "Talent",
+        "userJob": "Interested in working or contributing with NIVO.",
+        "expectation": "Does not imply any current open position."
+      },
+      "general": {
+        "label": "General",
+        "userJob": "Another request that does not fit the groups above.",
+        "expectation": "Fallback only; no verified general channel yet."
+      }
+    },
+    "result": {
+      "eyebrow": "RESOLVED ROUTE",
+      "emptyTitle": "No intent selected",
+      "emptyBody": "Select one option, then resolve the next path.",
+      "resolved": "Intent resolved",
+      "pathsLabel": "{intent} direct paths"
+    },
+    "truth": {
+      "eyebrow": "ADAPTIVE MINIMAL FORM",
+      "title": "Ask only what helps routing better.",
+      "description": "Live intake needs a verified owner, destination, privacy wording and recovery path.",
+      "badge": "Route unavailable · No personal-data collection",
+      "body": "There is no operational owner, submission destination or privacy wording that has been fact-locked yet. The page does not collect name, organization, email or free text.",
+      "submittedLabel": "NO REQUEST SUBMITTED",
+      "submittedBody": "Selecting an Intent only changes the URL and the guidance; it creates no relationship request. No SLA, success message or receipt when no effect has been confirmed."
+    },
+    "direct": {
+      "eyebrow": "OTHER DIRECT PATHS",
+      "title": "You can continue on your own without submitting a form.",
+      "description": "The canonical owner usually resolves the need before Contact.",
+      "label": "NIVO.VN direct paths"
+    },
+    "paths": {
+      "nivoOs": "Learn about NIVO OS",
+      "applications": "Explore Solutions",
+      "pricing": "See Pricing",
+      "ecosystem": "Explore the Ecosystem",
+      "trust": "Learn about Trust",
+      "company": "About NIVO",
+      "login": "Sign in",
+      "home": "Explore NIVO.VN"
+    }
+  },
+  "company": {
+    "metadata": {
+      "title": "Company",
+      "description": "Who NIVO is, why it exists, where it is heading and how it operates by Human Leads. AI Operates. System Learns."
+    },
+    "hero": {
+      "eyebrow": "NIVO · AI-NATIVE BUSINESS",
+      "title": "NIVO builds operating capacity for the generation of",
+      "titleEmphasis": "AI-Native businesses.",
+      "lede": "NIVO is an AI-Native Business Operating Platform that helps Leaders move important operations from depending on memory and manual follow-up to clear responsibility, controlled operation and verified results.",
+      "primaryAction": "Explore NIVO OS",
+      "secondaryAction": "Explore the Ecosystem",
+      "visualLabel": "Organization, product and strategic center",
+      "visualBrand": "NIVO",
+      "visualCore": "Strategic center",
+      "visualCards": {
+        "organization": "Organization",
+        "product": "NIVO OS",
+        "responsibility": "Responsibility"
+      }
+    },
+    "today": {
+      "eyebrow": "NIVO TODAY",
+      "title": "Building. Verifying. Expanding only with Evidence.",
+      "lede": "Current identity comes before history.",
+      "items": {
+        "today": {
+          "title": "Today",
+          "body": "Organization, master product, category and strategic center."
+        },
+        "building": {
+          "title": "Building / Verifying",
+          "body": "Capability that is being built or verified."
+        },
+        "toward": {
+          "title": "Building toward",
+          "body": "Strategic target direction."
+        },
+        "notClaimed": {
+          "title": "Not yet claimed",
+          "body": "No claim of full autonomy, universal fit or category leadership."
+        }
+      }
+    },
+    "provenance": {
+      "eyebrow": "HOW NIVO GOT HERE",
+      "title": "Capability accumulated through each layer of operation.",
+      "lede": "The journey explains how capability evolved; history is not used in place of current evidence.",
+      "label": "NIVO capability evolution",
+      "items": {
+        "delivery": {
+          "title": "Digital delivery",
+          "body": "Turning needs into products that can operate."
+        },
+        "systems": {
+          "title": "System building",
+          "body": "Standardizing context, workflow and responsibility."
+        },
+        "operations": {
+          "title": "AI-Native operations",
+          "body": "Bringing AI in with boundaries, permission and evidence."
+        },
+        "today": {
+          "title": "NIVO today",
+          "body": "The master product and strategic center are being verified."
+        }
+      }
+    },
+    "mission": {
+      "eyebrow": "MISSION",
+      "title": "Why does NIVO exist?",
+      "sequenceLabel": "Context, Responsibility, Real Outcome, Scalable Capacity",
+      "steps": {
+        "context": "Context",
+        "responsibility": "Responsibility",
+        "outcome": "Real Outcome",
+        "capacity": "Scalable Capacity"
+      },
+      "quoteLead": "To give the generation of",
+      "quoteStrong": "VIETNAMESE LEADERS",
+      "quoteTail": "more time for vision, people and the decisions that create the future — with NIVO OS, where business context becomes clear responsibility, real outcomes and operating capacity that can scale."
+    },
+    "vision": {
+      "eyebrow": "VISION",
+      "title": "Which future is NIVO heading toward?",
+      "body": "NIVO aims to become the pioneering AI-Native business operating platform in Vietnam — where people lead, AI operates within clear boundaries and the system learns from results.",
+      "steps": {
+        "native": {
+          "title": "AI-Native Business",
+          "body": "Responsibility-centered operating capacity."
+        },
+        "autonomy": {
+          "title": "More governed autonomy",
+          "body": "Permission grows based on Evidence."
+        },
+        "selfSustaining": {
+          "title": "AI-Self-Sustaining Business",
+          "body": "Long-term destination; not a current capability."
+        }
+      }
+    },
+    "philosophy": {
+      "eyebrow": "HOW NIVO OPERATES",
+      "title": "Humans lead. AI operates. The system learns.",
+      "lede": "Human Leads. AI Operates. System Learns.",
+      "items": {
+        "human": {
+          "title": "Human Leads",
+          "body": "Purpose, judgment and accountability."
+        },
+        "ai": {
+          "title": "AI Operates",
+          "body": "Observe, recommend or execute within Boundary and Permission."
+        },
+        "system": {
+          "title": "System Learns",
+          "body": "Context, Evidence, exceptions and corrections improve operation."
+        }
+      }
+    },
+    "values": {
+      "eyebrow": "WHAT NIVO VALUES",
+      "title": "Values must come with behavior and decision implications.",
+      "lede": "A value is not just an icon or an inspiring line.",
+      "items": {
+        "outcome": {
+          "name": "Real results",
+          "meaning": "Do not confuse activity with business outcome.",
+          "implication": "Outcome over Activity"
+        },
+        "simplify": {
+          "name": "Simplification",
+          "meaning": "Reduce operating complexity without hiding the truth.",
+          "implication": "Remove before adding"
+        },
+        "discipline": {
+          "name": "Data discipline & transparency",
+          "meaning": "State, assumption and Evidence must be told apart.",
+          "implication": "Truth before appearance"
+        },
+        "ai": {
+          "name": "AI that supports people",
+          "meaning": "AI increases capacity and does not erase accountability.",
+          "implication": "Human accountability remains"
+        },
+        "evolve": {
+          "name": "Evolving with the team & ecosystem",
+          "meaning": "Learning is stronger when it can be reused.",
+          "implication": "Learn / Reuse / Improve"
+        }
+      }
+    },
+    "leadership": {
+      "eyebrow": "LEADERSHIP · TRUTH BOUNDARY",
+      "title": "Leadership = Responsibility before prestige.",
+      "badge": "Roster not published",
+      "notice": "Names, public roles and responsibility areas must be verified before release. The page does not infer titles, bios, photos or profile links."
+    },
+    "next": {
+      "eyebrow": "CONTINUE",
+      "title": "I understand NIVO now. Where should I go next?",
+      "label": "Company next paths",
+      "links": {
+        "nivoOs": "Explore NIVO OS",
+        "ecosystem": "Explore the Ecosystem",
+        "contact": "Contact",
+        "trust": "Explore Trust"
+      }
+    }
+  },
+  "product": {
+    "nivoOs": {
+      "metadata": {
+        "title": "NIVO OS — The AI-Native Business Operating System",
+        "description": "NIVO OS turns what needs to happen into a clear Responsibility, coordinates Human + AI execution and verifies the Outcome."
+      },
+      "hero": {
+        "eyebrow": "NIVO OS",
+        "title": "THE AI-NATIVE BUSINESS OPERATING SYSTEM",
+        "descriptor": "AI-Native Business Operating System",
+        "supporting": "NIVO OS helps a business turn what needs to happen into a clear Responsibility, coordinate Human + AI execution and verify the Outcome.",
+        "philosophy": "Human Leads. AI Operates. System Learns.",
+        "signalLabel": "Operating signal",
+        "signalValue": "Business intent · Responsibility · Verified outcome",
+        "signalNote": "NIVO OS is explained through business operating logic, not through a feature inventory.",
+        "actions": {
+          "learnHowNivoOs": "Learn how NIVO OS operates",
+          "exploreSolutions": "Explore Solutions"
+        },
+        "visual": {
+          "coreName": "NIVO OS",
+          "coreLabel": "Responsibility core",
+          "nodesLabel": "NIVO OS operating model",
+          "nodes": {
+            "businessIntent": "Business intent",
+            "humanLeads": "Human leads",
+            "aiOperates": "AI operates",
+            "outcomeVerified": "Outcome verified"
+          }
+        }
+      },
+      "sections": {
+        "responsibilityCenter": {
+          "eyebrow": "S02 · Operating center",
+          "title": "NIVO OS does not start from an Agent. It starts from Responsibility.",
+          "description": "A business does not need more activity for the sake of activity. What matters has to be genuinely guaranteed to happen.",
+          "cards": {
+            "items": {
+              "outcome": {
+                "title": "Outcome",
+                "body": "What must genuinely happen?"
+              },
+              "accountability": {
+                "title": "Accountability",
+                "body": "Who remains accountable?"
+              },
+              "boundary": {
+                "title": "Boundary",
+                "body": "How far may the system go?"
+              },
+              "evidence": {
+                "title": "Evidence",
+                "body": "What proves the Outcome happened?"
+              }
+            }
+          },
+          "actions": {
+            "items": {
+              "learnAboutTheSystem": "Learn about the System of Responsibility"
+            }
+          }
+        },
+        "operatingModel": {
+          "eyebrow": "S03 · Operating model",
+          "title": "From what the business needs to happen to a result that can be verified.",
+          "description": "Five layers keep Business Intent and Verified Outcome inside one operating logic.",
+          "flow": {
+            "label": "The five-step NIVO OS operating model",
+            "steps": {
+              "businessIntent": {
+                "label": "Business intent",
+                "description": "What the business must achieve — not which feature needs to run."
+              },
+              "contextState": {
+                "label": "Context & state",
+                "description": "The context, data and state that matter right now."
+              },
+              "responsibility": {
+                "label": "Responsibility",
+                "description": "The Outcome, accountability, boundary and evidence that must be guaranteed."
+              },
+              "governedExecution": {
+                "label": "Governed execution",
+                "description": "Human, AI, workflow and systems coordinate within clear limits."
+              },
+              "verifiedOutcome": {
+                "label": "Verified outcome",
+                "description": "The business state is checked against suitable evidence."
+              }
+            }
+          },
+          "status": {
+            "label": "LOCKED",
+            "detail": "Governed execution does not mean AI-only execution."
+          }
+        },
+        "capabilityModel": {
+          "eyebrow": "S04 · Capability model",
+          "title": "Context. Action. Intelligence.",
+          "description": "Responsibility keeps all three capabilities pointed at the Outcome — so Intelligence never becomes a goal in itself.",
+          "cards": {
+            "items": {
+              "context": {
+                "title": "Context",
+                "body": "Understand the relevant operating state so action fits the context."
+              },
+              "action": {
+                "title": "Action",
+                "body": "Move a Responsibility forward through Human, AI, workflow, tools and systems."
+              },
+              "intelligence": {
+                "title": "Intelligence",
+                "body": "Interpret context, suggest action and support better decisions."
+              }
+            }
+          },
+          "note": {
+            "text": "Systems of Record store. NIVO OS helps operate around Responsibility."
+          }
+        },
+        "nivoOsToday": {
+          "eyebrow": "S05 · NIVO OS today",
+          "title": "Current focus: Lead to Revenue",
+          "description": "The application meaning is locked; product maturity and evidence must still be verified before they become a current claim.",
+          "status": {
+            "label": "CURRENT FOCUS · BUILDING & VERIFYING",
+            "detail": "Do not infer capability from UI, mockups, roadmap or strategy."
+          },
+          "cards": {
+            "items": {
+              "currentResponsibility": {
+                "title": "Current Responsibility",
+                "body": "Make sure an important sales opportunity is never forgotten and always has a clear next step."
+              },
+              "truthGate": {
+                "title": "Truth gate",
+                "body": "Lead state, owner, next action, follow-up and evidence are published only when Product / CTO verifies each part."
+              }
+            }
+          },
+          "actions": {
+            "items": {
+              "exploreSolutions": "Explore Solutions"
+            }
+          }
+        },
+        "trustBridge": {
+          "eyebrow": "S06 · Governed execution & trust",
+          "title": "Accountability, permission and evidence must be present together.",
+          "description": "Humans remain accountable. AI operates within limits. Evidence supports the Outcome claim. Autonomy has to be earned.",
+          "cards": {
+            "items": {
+              "whoIsAccountable": {
+                "title": "Who is accountable?",
+                "body": "Human accountability is always clear."
+              },
+              "whatMayAiDo": {
+                "title": "What may AI do?",
+                "body": "Action is limited by the Responsibility."
+              },
+              "withWhatPermission": {
+                "title": "With what permission?",
+                "body": "Permission follows the scope that has been confirmed."
+              },
+              "whatEvidenceProvesIt": {
+                "title": "What evidence proves it?",
+                "body": "An Outcome claim needs suitable evidence."
+              }
+            }
+          },
+          "actions": {
+            "items": {
+              "learnAboutTrustGovernance": "Learn about Trust & Governance"
+            }
+          }
+        },
+        "targetArchitecture": {
+          "eyebrow": "S07 · Today to target",
+          "title": "Architecture direction is not a shipping capability.",
+          "description": "The long-term direction grows out of verified responsibility and is not presented as current fact.",
+          "flow": {
+            "label": "From today to the Target Architecture",
+            "steps": {
+              "nivoOsToday": {
+                "label": "NIVO OS today",
+                "description": "Only capability verified by Product / CTO is published."
+              },
+              "currentFocus": {
+                "label": "Current focus",
+                "description": "Lead to Revenue is being built and verified."
+              },
+              "evidenceLearning": {
+                "label": "Evidence / learning",
+                "description": "Real evidence decides the next step."
+              },
+              "targetArchitecture": {
+                "label": "Target Architecture",
+                "description": "The intended system direction; not a capability that is shipping."
+              }
+            }
+          },
+          "status": {
+            "label": "LONG-TERM DESTINATION",
+            "detail": "The AI-Self-Sustaining Business is a long-term direction, not a sales promise."
+          }
+        },
+        "nextPath": {
+          "eyebrow": "S08 · Choose the right next path",
+          "title": "Take the next step that matches your intent.",
+          "description": "Apply, evaluate commercially or get started — with no unnecessary detour.",
+          "paths": {
+            "items": {
+              "apply": {
+                "label": "APPLY",
+                "title": "Explore Solutions",
+                "body": "See which business need Responsibility applies to.",
+                "action": "Explore Solutions"
+              },
+              "buy": {
+                "label": "BUY",
+                "title": "See Pricing",
+                "body": "Evaluate how to begin commercially.",
+                "action": "See Pricing"
+              },
+              "start": {
+                "label": "START",
+                "title": "Try NIVO OS",
+                "body": "Begin the product journey when activation is ready.",
+                "action": "Try NIVO OS"
+              }
+            }
+          }
+        }
+      }
+    },
+    "systemOfResponsibility": {
+      "metadata": {
+        "title": "System of Responsibility",
+        "description": "Responsibility is what must be guaranteed to happen — with a clear Outcome, Accountability, Boundary and Evidence."
+      },
+      "hero": {
+        "eyebrow": "SYSTEM OF RESPONSIBILITY",
+        "title": "NOT JUST GETTING THE WORK DONE. GUARANTEEING WHAT NEEDS TO HAPPEN.",
+        "supporting": "A Task says an action needs to be completed. A Responsibility defines a result that must be guaranteed — with the accountable person, the limits of execution and the evidence required.",
+        "philosophy": "Responsibility is not a Task.",
+        "signalLabel": "Strategic signature",
+        "signalValue": "Context · Responsibility · Outcome",
+        "signalNote": "Responsibility is the central node. Execution supports Responsibility but does not become a fourth strategic peer.",
+        "actions": {
+          "understandResponsibility": "Understand Responsibility",
+          "learnAboutNivoOs": "Learn about NIVO OS"
+        },
+        "visual": {
+          "owner": "Outcome owner",
+          "responsibility": "Responsibility",
+          "stepsLabel": "Responsibility assurance loop",
+          "steps": {
+            "context": "Context",
+            "boundary": "Boundary",
+            "evidence": "Evidence"
+          }
+        }
+      },
+      "sections": {
+        "definition": {
+          "eyebrow": "S02 · Canonical definition",
+          "title": "Responsibility is what must be guaranteed to happen.",
+          "description": "It is defined by the required business outcome becoming true within the agreed boundary and backed by evidence — not by the number of actions, AI output, workflow completion or a Done mark.",
+          "status": {
+            "label": "LOCKED",
+            "detail": "Context · Responsibility · Outcome"
+          }
+        },
+        "coreAnatomy": {
+          "eyebrow": "S03 · Core anatomy",
+          "title": "A Responsibility needs four things to be clear.",
+          "description": "Permission and Exception / Escalation are governance conditions around the core anatomy, not a fifth and sixth component.",
+          "cards": {
+            "items": {
+              "outcome": {
+                "title": "Outcome",
+                "body": "What must genuinely be true when the Responsibility succeeds?"
+              },
+              "accountability": {
+                "title": "Accountability",
+                "body": "Who remains accountable for the Outcome happening correctly?"
+              },
+              "boundary": {
+                "title": "Boundary",
+                "body": "Within what scope does the Responsibility apply, and how far may the system go?"
+              },
+              "evidence": {
+                "title": "Evidence",
+                "body": "What proves the Outcome really happened?"
+              }
+            }
+          },
+          "cards2": {
+            "items": {
+              "permission": {
+                "title": "Permission",
+                "body": "Which execution is currently permitted?",
+                "label": "GOVERNANCE CONDITION"
+              },
+              "exceptionEscalation": {
+                "title": "Exception / Escalation",
+                "body": "What happens when context is missing, confidence is low, a policy boundary is reached or evidence is missing?",
+                "label": "GOVERNANCE CONDITION"
+              }
+            }
+          }
+        },
+        "taskVsResponsibility": {
+          "eyebrow": "S04 · Task vs Responsibility",
+          "title": "Action completion is not Outcome assurance.",
+          "description": "A sent email does not prove the opportunity moved forward; a completed workflow does not prove the Responsibility was carried out.",
+          "table": {
+            "label": "Task versus Responsibility comparison",
+            "headers": {
+              "task": "Task",
+              "responsibility": "Responsibility"
+            },
+            "rows": {
+              "sendAFollowUp": {
+                "task": "Send a follow-up email",
+                "responsibility": "An important opportunity is not forgotten"
+              },
+              "actionCompletion": {
+                "task": "Action completion",
+                "responsibility": "Outcome assurance"
+              },
+              "oneFiniteAction": {
+                "task": "One finite action",
+                "responsibility": "May need many actions and events"
+              },
+              "aHumanAiWorkflow": {
+                "task": "A Human / AI / Workflow can perform it",
+                "responsibility": "Human accountability remains"
+              },
+              "doneMayOnlyBe": {
+                "task": "Done may only be an operational state",
+                "responsibility": "Evidence must prove the business state"
+              },
+              "theOutputHasBeen": {
+                "task": "The output has been produced",
+                "responsibility": "The desired Outcome may still not have happened"
+              }
+            }
+          },
+          "note": {
+            "text": "ACTION ≠ OUTCOME. TASK COMPLETED ≠ RESPONSIBILITY FULFILLED."
+          }
+        },
+        "evidence": {
+          "eyebrow": "S05 · Evidence to Verified Outcome",
+          "title": "An Outcome becomes credible only with Evidence.",
+          "description": "Target Outcome, Observed Outcome and Verified Outcome are three different states. Observed is not automatically Verified.",
+          "flow": {
+            "label": "The evidence and verification chain",
+            "steps": {
+              "evidenceRequired": {
+                "label": "Evidence required",
+                "description": "The evidence required is defined before execution."
+              },
+              "execution": {
+                "label": "Execution",
+                "description": "Human, AI, workflow and systems execute within the boundary."
+              },
+              "evidenceObserved": {
+                "label": "Evidence observed",
+                "description": "The real state and evidence are recorded."
+              },
+              "verification": {
+                "label": "Verification",
+                "description": "Evidence is checked against the success conditions."
+              },
+              "verifiedOutcome": {
+                "label": "Verified outcome",
+                "description": "An Outcome is called verified only when the verification rule is satisfied."
+              }
+            }
+          },
+          "cards": {
+            "items": {
+              "targetOutcome": {
+                "title": "Target outcome",
+                "body": "What should happen and the success conditions that apply."
+              },
+              "observedOutcome": {
+                "title": "Observed outcome",
+                "body": "What appears to have happened according to current observation."
+              },
+              "verifiedOutcome": {
+                "title": "Verified outcome",
+                "body": "What the available evidence is enough to confirm under the verification rule."
+              }
+            }
+          }
+        },
+        "nivoOsCurrent": {
+          "eyebrow": "S06 · NIVO OS + current grounding",
+          "title": "NIVO OS turns Responsibility into something that can be operated and verified.",
+          "description": "The bridge is kept short so /nivo-os keeps owning the deep HOW.",
+          "flow": {
+            "label": "How NIVO OS operates Responsibility",
+            "steps": {
+              "contextualize": {
+                "label": "Contextualize",
+                "description": "Understand the relevant context and current state."
+              },
+              "coordinate": {
+                "label": "Coordinate",
+                "description": "Identify the Human, AI, workflow and systems involved."
+              },
+              "execute": {
+                "label": "Execute",
+                "description": "Move the Responsibility forward within the boundary."
+              },
+              "observe": {
+                "label": "Observe",
+                "description": "Record the real state and evidence."
+              },
+              "verify": {
+                "label": "Verify",
+                "description": "Assess whether the Outcome was really achieved."
+              }
+            }
+          },
+          "cards": {
+            "items": {
+              "currentFocusLeadTo": {
+                "title": "Current focus · Lead to Revenue",
+                "body": "An important sales opportunity is not forgotten. Exact maturity and evidence must still be verified by Product / Operations."
+              }
+            }
+          },
+          "status": {
+            "label": "CURRENT FOCUS · BUILDING & VERIFYING",
+            "detail": "No ROI or revenue uplift claim without evidence."
+          },
+          "actions": {
+            "items": {
+              "learnAboutNivoOs": "Learn about NIVO OS",
+              "exploreSolutions": "Explore Solutions"
+            }
+          }
+        },
+        "trustBridge": {
+          "eyebrow": "S07 · Verified Outcome to Trust",
+          "title": "Trust begins with a result that can be verified.",
+          "description": "This page stops at Evidence, Verification and Verified Outcome, then hands off to Trust. Deeper Permission and Autonomy belong to /trust.",
+          "flow": {
+            "label": "From evidence to trust",
+            "steps": {
+              "evidence": {
+                "label": "Evidence",
+                "description": "Suitable data and observation."
+              },
+              "verification": {
+                "label": "Verification",
+                "description": "Checked against the rule that was set."
+              },
+              "verifiedOutcome": {
+                "label": "Verified outcome",
+                "description": "The Outcome confirmed by evidence."
+              },
+              "trust": {
+                "label": "Trust",
+                "description": "A basis for considering more permission."
+              }
+            }
+          },
+          "actions": {
+            "items": {
+              "learnAboutTrust": "Learn about Trust"
+            }
+          }
+        },
+        "nextPath": {
+          "eyebrow": "S08 · Right next path",
+          "title": "You understand the concept — now choose the right next depth.",
+          "paths": {
+            "items": {
+              "how": {
+                "label": "HOW",
+                "title": "NIVO OS",
+                "body": "How NIVO operates Responsibility as a product system.",
+                "action": "Learn about NIVO OS"
+              },
+              "apply": {
+                "label": "APPLY",
+                "title": "Solutions",
+                "body": "Which business job Responsibility applies to.",
+                "action": "Explore Solutions"
+              },
+              "trust": {
+                "label": "TRUST",
+                "title": "Trust",
+                "body": "How Evidence, Permission and Autonomy are governed.",
+                "action": "Learn about Trust"
+              }
+            }
+          },
+          "actions": {
+            "items": {
+              "seePricingTheCommercial": "See Pricing — the commercial next path"
+            }
+          }
+        }
+      }
+    },
+    "applications": {
+      "metadata": {
+        "title": "NIVO Solutions by business need",
+        "description": "Explore NIVO by Business Need and the Responsibility that must be guaranteed, with Current and Directional clearly distinguished."
+      },
+      "hero": {
+        "eyebrow": "SOLUTIONS",
+        "title": "What does your business need guaranteed to happen?",
+        "supporting": "NIVO organizes Solutions by business need and the Responsibility that must be guaranteed — not from a list of AI features, Agents or automations.",
+        "signalLabel": "Business relevance",
+        "signalValue": "Business need · Responsibility · Outcome",
+        "signalNote": "An Application is not the same as a feature, an Agent, a pricing plan or an industry page.",
+        "actions": {
+          "exploreByNeed": "Explore by Need",
+          "learnAboutNivoOs": "Learn about NIVO OS"
+        },
+        "visual": {
+          "gallery": {
+            "growth": "Create growth",
+            "operate": "Operate better",
+            "money": "Manage cash flow",
+            "create": "Create something new"
+          }
+        }
+      },
+      "sections": {
+        "needSelector": {
+          "eyebrow": "S01 · Light need selector",
+          "title": "What does your business need a system to guarantee?",
+          "description": "The choice leads to the relevant section on the same canonical page; it does not create another page or change the truth state.",
+          "selector": {
+            "label": "Explore Solutions by need",
+            "items": {
+              "leadershipExecution": "Leadership & Execution",
+              "growthRevenue": "Growth & Revenue",
+              "customersService": "Customers & Service",
+              "operationsResults": "Operations & Results",
+              "knowledgeDecisions": "Knowledge & Decisions"
+            }
+          }
+        },
+        "currentFocus": {
+          "eyebrow": "S02 · Current focus",
+          "title": "Lead to Revenue",
+          "description": "Make sure an important sales opportunity is never forgotten and always has a clear next step.",
+          "status": {
+            "label": "CURRENT FOCUS · BUILDING & VERIFYING",
+            "detail": "The business application meaning is locked; product maturity and current evidence must still be verified."
+          },
+          "flow": {
+            "label": "Operating view of Lead to Revenue",
+            "steps": {
+              "leadOpportunity": {
+                "label": "Lead / opportunity",
+                "description": "The opportunity needs to be recorded."
+              },
+              "owner": {
+                "label": "Owner",
+                "description": "A clear accountable Human."
+              },
+              "currentState": {
+                "label": "Current state",
+                "description": "A state that can be observed."
+              },
+              "nextAction": {
+                "label": "Next action",
+                "description": "A clear next step."
+              },
+              "evidence": {
+                "label": "Evidence",
+                "description": "Evidence that fits the claim."
+              }
+            }
+          },
+          "actions": {
+            "items": {
+              "seePricing": "See Pricing",
+              "learnAboutNivoOs": "Learn about NIVO OS",
+              "tryNivoOs": "Try NIVO OS"
+            }
+          }
+        },
+        "byNeed": {
+          "eyebrow": "S03 · Explore by need",
+          "title": "Five groups of needs. One question: what needs to be guaranteed?",
+          "description": "One current focus is clearly distinguished from four Directional areas. Directional does not mean available or purchasable.",
+          "cards": {
+            "items": {
+              "leadershipExecution": {
+                "title": "Leadership & Execution",
+                "body": "Important commitments have a clear owner, state and next step.",
+                "label": "DIRECTIONAL · VERIFY"
+              },
+              "growthRevenue": {
+                "title": "Growth & Revenue",
+                "body": "An important sales opportunity is never forgotten and always has a clear next step.",
+                "label": "CURRENT FOCUS · BUILDING & VERIFYING"
+              },
+              "customersService": {
+                "title": "Customers & Service",
+                "body": "Important follow-ups and service commitments are tracked to a clear state.",
+                "label": "DIRECTIONAL · VERIFY"
+              },
+              "operationsResults": {
+                "title": "Operations & Results",
+                "body": "Important operational issues have an owner, a state and a tracked Outcome.",
+                "label": "DIRECTIONAL · VERIFY"
+              },
+              "knowledgeDecisions": {
+                "title": "Knowledge & Decisions",
+                "body": "Relevant knowledge appears at the right moment to support the decision or action needed.",
+                "label": "DIRECTIONAL · VERIFY"
+              }
+            }
+          }
+        },
+        "byRole": {
+          "eyebrow": "S04 · Explore by role",
+          "title": "Role changes the relevance view — not the truth.",
+          "description": "Role is the second discovery context; one application can serve many roles.",
+          "cards": {
+            "items": {
+              "founderCeo": {
+                "title": "Founder / CEO",
+                "body": "Visibility · commitments · priorities · exceptions · decisions"
+              },
+              "revenueGrowth": {
+                "title": "Revenue / Growth",
+                "body": "Lead · opportunity · next action · follow-up · pipeline state"
+              },
+              "customerOperations": {
+                "title": "Customer / Operations",
+                "body": "Customer commitments · service follow-up · exceptions · operational state"
+              },
+              "expertKnowledgeWorker": {
+                "title": "Expert / Knowledge Worker",
+                "body": "Knowledge · recommendation · decision support · expertise reuse"
+              }
+            }
+          }
+        },
+        "byContext": {
+          "eyebrow": "S05 · Explore by industry / context",
+          "title": "Context helps recognize the problem — it does not prove product availability.",
+          "description": "Wave 1 keeps only two contexts: Expert / Knowledge Services and B2B Services.",
+          "cards": {
+            "items": {
+              "expertKnowledgeServices": {
+                "title": "Expert / Knowledge Services",
+                "body": "Expert-led sales, consultation, knowledge-heavy service, founder dependency and repeated follow-up.",
+                "label": "TERTIARY CONTEXT"
+              },
+              "b2bServices": {
+                "title": "B2B Services",
+                "body": "Lead qualification, consultation, proposal follow-up, opportunity progression and customer commitments.",
+                "label": "TERTIARY CONTEXT"
+              }
+            }
+          }
+        },
+        "truthEvidence": {
+          "eyebrow": "S06 · Current / directional truth + evidence",
+          "title": "Current and Directional must look different.",
+          "description": "The UI does not infer truth from card style; material state always carries a text label.",
+          "cards": {
+            "items": {
+              "currentFocus": {
+                "title": "Current focus",
+                "body": "What NIVO is actively building and verifying."
+              },
+              "directional": {
+                "title": "Directional",
+                "body": "Where NIVO sees credible application potential, not yet an offer."
+              },
+              "futureTarget": {
+                "title": "Future / target",
+                "body": "Where the architecture may expand later, not a current capability."
+              }
+            }
+          },
+          "flow": {
+            "label": "The four evidence levels of Applications",
+            "steps": {
+              "buildEvidence": {
+                "label": "Build evidence",
+                "description": "Proves there was a real build/test; does not yet prove impact."
+              },
+              "operationalEvidence": {
+                "label": "Operational evidence",
+                "description": "An event, action or state has occurred."
+              },
+              "businessOutcomeEvidence": {
+                "label": "Business outcome evidence",
+                "description": "Supports the claim that the desired business state has changed."
+              },
+              "verifiedOutcome": {
+                "label": "Verified outcome",
+                "description": "An Outcome that satisfies the applicable verification policy."
+              }
+            }
+          }
+        },
+        "nextPath": {
+          "eyebrow": "S07 · Choose the right next path",
+          "title": "Go from relevance to the right next action.",
+          "paths": {
+            "items": {
+              "understand": {
+                "label": "UNDERSTAND",
+                "title": "NIVO OS",
+                "body": "Understand the product operating model before evaluating more deeply.",
+                "action": "Learn about NIVO OS"
+              },
+              "buy": {
+                "label": "BUY",
+                "title": "Pricing",
+                "body": "Evaluate Start, Pro and the commercial progression.",
+                "action": "See Pricing"
+              },
+              "start": {
+                "label": "START",
+                "title": "Try NIVO OS",
+                "body": "Go to activation once the destination is verified.",
+                "action": "Try NIVO OS"
+              }
+            }
+          },
+          "actions": {
+            "items": {
+              "needHelpWithA": "Need help with a complex context? Contact us"
+            }
+          }
+        }
+      }
+    },
+    "pricing": {
+      "metadata": {
+        "title": "NIVO OS Pricing — Start and Pro",
+        "description": "Start with one real Responsibility, verify the Outcome and expand as the business problem changes."
+      },
+      "hero": {
+        "eyebrow": "NIVO OS PRICING",
+        "title": "START WITH ONE RESPONSIBILITY. EXPAND WHEN YOU ARE READY.",
+        "supporting": "Start from one real business job. Verify the result. Repeat what has been proven. Expand as the problem changes.",
+        "signalLabel": "Commercial progression",
+        "signalValue": "Find · Prove · Repeat · Expand",
+        "signalNote": "7 days free · No card needed. Pricing is a decision architecture, not a feature catalog.",
+        "actions": {
+          "tryNivoStartFree": "Try NIVO Start free for 7 days",
+          "findTheRightPlace": "Find the right place to start"
+        }
+      },
+      "sections": {
+        "discover": {
+          "eyebrow": "S02 · Discover",
+          "title": "Not sure where to start?",
+          "description": "Discover is a qualification experience inside /pricing — it is not a Free Plan and does not create a /discover canonical page.",
+          "flow": {
+            "label": "Discover qualification",
+            "steps": {
+              "rightProblem": {
+                "label": "Right problem",
+                "description": "Which operating problem is important enough?"
+              },
+              "responsibilityCandidate": {
+                "label": "Responsibility candidate",
+                "description": "What needs to be guaranteed to happen?"
+              },
+              "readiness": {
+                "label": "Readiness",
+                "description": "Are context, boundary and evidence sufficient?"
+              },
+              "rightNextPath": {
+                "label": "Right next path",
+                "description": "Start, Pro Qualification, nurture, an alternate path or not a fit."
+              }
+            }
+          },
+          "actions": {
+            "items": {
+              "needHelpFindingWhere": "Need help finding where to start? Contact us"
+            }
+          }
+        },
+        "availableNow": {
+          "eyebrow": "S03 · Available now",
+          "title": "Two current commercial states: Proof and Repeat.",
+          "description": "Prices are a source snapshot and must be reverified against the Pricing Execution Register before publication.",
+          "offers": {
+            "items": {
+              "nivoStart": {
+                "label": "NIVO START",
+                "title": "Start & verify",
+                "price": "499,000đ",
+                "period": "/ month · first 7 days free · No card needed",
+                "state": "CURRENT · AVAILABLE / CONTROLLED",
+                "detail": "First proof",
+                "body": "One real business job is assigned within a clear scope and a first result is verified.",
+                "qualifier": "Reference price source · VERIFY BEFORE PUBLICATION",
+                "action": "Try NIVO Start free for 7 days",
+                "bullets": {
+                  "b1": "Identify one important job worth assigning.",
+                  "b2": "Provide enough context, success condition and boundary.",
+                  "b3": "Track execution and evidence.",
+                  "b4": "Verify the first Outcome."
+                }
+              },
+              "nivoPro": {
+                "label": "NIVO PRO",
+                "title": "Repeatable operation",
+                "price": "1,590,000đ",
+                "period": "/ month · billed monthly · no separate trial",
+                "state": "CURRENT · CONTROLLED PAID",
+                "detail": "Repeatable operating value",
+                "body": "Turn a proven job into a repeatable way of operating, accumulating context, Evidence and Learning across many cycles.",
+                "qualifier": "Reference price source · VERIFY BEFORE PUBLICATION",
+                "action": "Get started with NIVO Pro",
+                "bullets": {
+                  "b1": "Hand the proven job back across many cycles.",
+                  "b2": "Keep context instead of starting over.",
+                  "b3": "Track Outcomes and accumulate Evidence.",
+                  "b4": "Build a dependable Operating Rhythm."
+                }
+              }
+            }
+          }
+        },
+        "proDecision": {
+          "eyebrow": "S04 · Start hay Pro?",
+          "title": "Start exists to prove. Pro exists to repeat.",
+          "description": "Direct Pro entry can happen after qualification; the buyer is not forced to go through Start first.",
+          "cards": {
+            "items": {
+              "start": {
+                "title": "START",
+                "body": "One real job · First proof",
+                "label": "NOT PROVEN YET?"
+              },
+              "pro": {
+                "title": "PRO",
+                "body": "Proven job · Reliable operating rhythm",
+                "label": "ALREADY PROVEN?"
+              }
+            }
+          },
+          "status": {
+            "label": "LOCKED",
+            "detail": "Start ≠ smaller Pro. Pro ≠ Start + more features."
+          }
+        },
+        "comparison": {
+          "eyebrow": "S05 · Primary comparison",
+          "title": "Seven decision rows — not an entitlement wall.",
+          "table": {
+            "label": "NIVO Start versus NIVO Pro comparison",
+            "headers": {
+              "decision": "Decision",
+              "nivoStart": "NIVO Start",
+              "nivoPro": "NIVO Pro"
+            },
+            "rows": {
+              "bestWhen": {
+                "decision": "Best when",
+                "nivoStart": "You want to start by assigning one real job",
+                "nivoPro": "The job is proven and needs to run repeatedly"
+              },
+              "goal": {
+                "decision": "Goal",
+                "nivoStart": "Verify the first result",
+                "nivoPro": "Create a dependable operating rhythm"
+              },
+              "scope": {
+                "decision": "Scope",
+                "nivoStart": "One clear job",
+                "nivoPro": "One proven, recurring job"
+              },
+              "context": {
+                "decision": "Context",
+                "nivoStart": "Enough to begin",
+                "nivoPro": "Accumulates with operation"
+              },
+              "result": {
+                "decision": "Result",
+                "nivoStart": "The first Outcome",
+                "nivoPro": "Outcomes across many cycles"
+              },
+              "resources": {
+                "decision": "Resources",
+                "nivoStart": "Included",
+                "nivoPro": "Higher, more can be bought"
+              },
+              "referencePrice": {
+                "decision": "Reference price",
+                "nivoStart": "499,000đ/month",
+                "nivoPro": "1,590,000đ/month"
+              }
+            }
+          }
+        },
+        "whatYouBuy": {
+          "eyebrow": "S06 · What you're really buying",
+          "title": "You buy an Outcome — and operate by assigning a Responsibility.",
+          "description": "Agents, tokens, storage, workflow runs and connectors are not the first layer of language in the commercial choice.",
+          "cards": {
+            "items": {
+              "startFirstProof": {
+                "title": "START · First proof",
+                "body": "Minimum context · one real business job · boundary · execution · evidence · first verified outcome."
+              },
+              "proRepeatableValue": {
+                "title": "PRO · Repeatable value",
+                "body": "Proven responsibility · recurring execution · repeated outcomes · evidence · learning · operating rhythm · trust."
+              }
+            }
+          }
+        },
+        "usageResources": {
+          "eyebrow": "S07 · Usage & resources",
+          "title": "More usage, buy more resources.",
+          "description": "More usage does not automatically mean the buyer has moved from Proof to Repeat. Exact quota and top-up price are published only when the register exists.",
+          "flow": {
+            "label": "Usage routing",
+            "steps": {
+              "moreUsage": {
+                "label": "More usage",
+                "description": "Inference, actions, workflow, storage, messaging or compute increases."
+              },
+              "additionalResources": {
+                "label": "Additional resources",
+                "description": "Buy more once the commercial register has verified quota and price."
+              },
+              "noForcedMaturityUpgrade": {
+                "label": "No forced maturity upgrade",
+                "description": "You are not forced up to Pro just because usage grows."
+              }
+            }
+          },
+          "status": {
+            "label": "VERIFY",
+            "detail": "Exact quota, top-up price and usage-limit behavior must not be inferred yet."
+          }
+        },
+        "growth": {
+          "eyebrow": "S08 · NIVO grows with your business",
+          "title": "After Pro, the problem branches by capacity, coordination and governance.",
+          "description": "OPC and Team are two branches from Pro — not sequential levels. None of the three growth offers is a current public plan yet.",
+          "cards": {
+            "items": {
+              "opcExpand": {
+                "title": "OPC · Expand",
+                "body": "Founder Capacity — more Responsibility. Research / Hypothesis, not a current offer."
+              },
+              "teamCoordinate": {
+                "title": "Team · Coordinate",
+                "body": "Coordination — more coordination. Future Option, not yet standardized."
+              },
+              "enterpriseGovern": {
+                "title": "Enterprise · Govern",
+                "body": "Governance — more governance. Target Architecture, not the same as unlimited."
+              }
+            }
+          },
+          "status": {
+            "label": "AUTONOMY IS EARNED · NOT BOUGHT",
+            "detail": "A higher plan does not automatically grant more autonomy."
+          }
+        },
+        "serviceSupport": {
+          "eyebrow": "S09 · Service & support",
+          "title": "Service mode is not Offer maturity.",
+          "description": "Assisted and Managed / Run & Care are their own service lines; they are not other names for Pro, Team or Enterprise.",
+          "cards": {
+            "items": {
+              "start": {
+                "title": "Start",
+                "body": "Self-Service. Optional Assisted is bought separately."
+              },
+              "pro": {
+                "title": "Pro",
+                "body": "Self-Service + Standard Product Support. Exact support scope: VERIFY."
+              },
+              "managedRunCare": {
+                "title": "Managed / Run & Care",
+                "body": "Separate service line. Pricing and scope need their own service policy."
+              }
+            }
+          }
+        },
+        "faq": {
+          "eyebrow": "S10 · Trust / FAQ",
+          "title": "Questions that must be clear before the commercial progression.",
+          "faq": {
+            "items": {
+              "startOrPro": {
+                "question": "Start or Pro?",
+                "answer": "Start proves that one real business job can be assigned and create an Outcome. Pro turns a proven job into a repeatable operating rhythm."
+              },
+              "doIHaveTo": {
+                "question": "Do I have to go through Start before Pro?",
+                "answer": "No. Direct Pro entry is allowed after Pro Qualification when the Responsibility is supported, maturity fits and evidence is sufficient."
+              },
+              "doesStartHaveA": {
+                "question": "Does Start have a trial?",
+                "answer": "Yes: the first 7 days are free and no card is needed, per the locked commercial truth."
+              },
+              "doesProHaveIts": {
+                "question": "Does Pro have its own trial?",
+                "answer": "No. Pro has no separate trial; Start is the first-proof path, Pro is repeat."
+              },
+              "ifIRunOut": {
+                "question": "If I run out of resources, do I have to move up to Pro?",
+                "answer": "No. Usage is not maturity. The need for more usage goes to additional usage once the register and top-up price are verified."
+              },
+              "whyIsProMore": {
+                "question": "Why is Pro more expensive?",
+                "answer": "Pro sustains context, execution, evidence and learning across many cycles to create a reliable operating rhythm."
+              },
+              "isSupportIncluded": {
+                "question": "Is support included?",
+                "answer": "Start is self-service; assisted is bought separately. Pro includes Standard Product Support but the exact scope must still be verified."
+              },
+              "canOpcBeBought": {
+                "question": "Can OPC be bought yet?",
+                "answer": "Not yet. OPC is a research / hypothesis for Founder Capacity, not a current public plan."
+              },
+              "canTeamBeBought": {
+                "question": "Can Team be bought yet?",
+                "answer": "Not yet. Team is a future option for coordination, not a current offer."
+              },
+              "isEnterpriseAnUnlimited": {
+                "question": "Is Enterprise an Unlimited plan?",
+                "answer": "No. Enterprise is a target architecture for governance; it does not mean unlimited."
+              },
+              "doesAHigherPlan": {
+                "question": "Does a higher plan mean a more autonomous AI?",
+                "answer": "No. Autonomy is earned from evidence, trust and permission; it is not bought with a plan."
+              },
+              "whatAboutVatRefunds": {
+                "question": "What about VAT, refunds and proration?",
+                "answer": "No policy has been published yet. Pricing does not infer these terms."
+              }
+            }
+          }
+        },
+        "startRight": {
+          "eyebrow": "S11 · Start in the right place",
+          "title": "Choose First Proof, Repeat or Qualification.",
+          "description": "Checkout and authenticated operation do not belong to Pricing; activation owns the trial / transaction / identity entry.",
+          "actions": {
+            "items": {
+              "tryNivoStartFree": "Try NIVO Start free for 7 days",
+              "getStartedWithNivo": "Get started with NIVO Pro",
+              "findTheRightPlace": "Find the right place to start",
+              "contactUs": "Contact us"
+            }
+          }
+        }
+      }
+    }
+  }
+}

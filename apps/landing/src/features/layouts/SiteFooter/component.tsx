@@ -1,34 +1,54 @@
 import { NivoBrand } from "@nivo/ui"
 import { PageContainer, Text, TextAction } from "@starci/grammar/common"
-import { SITE_COPY, SITE_FOOTER_GROUPS, SITE_LINKS } from "@/modules/landing/site"
 import { SITE_CLASS_NAMES } from "../SiteShell"
 
+/** One footer group with its words and localised addresses resolved. */
+export type SiteFooterGroup = {
+    readonly id: string
+    readonly title: string
+    readonly links: ReadonlyArray<{ readonly id: string; readonly label: string; readonly href: string; readonly external: boolean }>
+}
+
+/** What the footer draws, resolved by the connected half. */
+export type SiteFooterBaseProps = {
+    readonly homeHref: string
+    readonly contactHref: string
+    readonly groups: ReadonlyArray<SiteFooterGroup>
+    readonly copy: {
+        readonly homeLabel: string
+        readonly philosophy: string
+        readonly distinction: string
+        readonly copyright: string
+        readonly contactNivo: string
+    }
+}
+
 /** The compact footer shared by every canonical public route. */
-export const SiteFooter = () => {
+export const SiteFooterBase = ({ homeHref, contactHref, groups, copy }: SiteFooterBaseProps) => {
 
     return (
         <footer className={SITE_CLASS_NAMES.footer}>
             <PageContainer className={SITE_CLASS_NAMES.footerInner}>
                 <div className={SITE_CLASS_NAMES.footerIdentity}>
-                    <a href={SITE_LINKS.home} aria-label={SITE_COPY.homeLabel}>
+                    <a href={homeHref} aria-label={copy.homeLabel}>
                     <NivoBrand props={{ label: "NIVO", variant: "lockup", scale: "navbar" }} />
                     </a>
-                    <Text as="p" size="sm">{SITE_COPY.philosophy}</Text>
-                    <Text as="p" size="xs">{SITE_COPY.distinction}</Text>
+                    <Text as="p" size="sm">{copy.philosophy}</Text>
+                    <Text as="p" size="xs">{copy.distinction}</Text>
                 </div>
 
                 <div className={SITE_CLASS_NAMES.footerDirectory}>
-                    {SITE_FOOTER_GROUPS.map((group, groupIndex) => {
+                    {groups.map((group, groupIndex) => {
                         const labelId = `footer-group-${groupIndex}`
                         return (
-                            <nav aria-labelledby={labelId} key={group.title}>
+                            <nav aria-labelledby={labelId} key={group.id}>
                                 <Text as="p" id={labelId} size="xs" weight="semibold">{group.title}</Text>
                                 <ul>
                                     {group.links.map((link) => (
-                                        <li key={link.href}>
+                                        <li key={link.id}>
                                             <TextAction
                                                 href={link.href}
-                                                target={"external" in link && link.external ? "_self" : undefined}
+                                                target={link.external ? "_self" : undefined}
                                                 appearance="section"
                                                 size="sm"
                                             >
@@ -43,8 +63,8 @@ export const SiteFooter = () => {
                 </div>
 
                 <div className={SITE_CLASS_NAMES.footerLegal}>
-                    <Text as="span" size="xs">{SITE_COPY.copyright}</Text>
-                    <TextAction href={SITE_LINKS.contact} appearance="section" size="sm">{SITE_COPY.contactNivo}</TextAction>
+                    <Text as="span" size="xs">{copy.copyright}</Text>
+                    <TextAction href={contactHref} appearance="section" size="sm">{copy.contactNivo}</TextAction>
                 </div>
             </PageContainer>
         </footer>

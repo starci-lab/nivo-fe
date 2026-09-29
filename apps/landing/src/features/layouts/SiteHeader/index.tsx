@@ -1,7 +1,10 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
-import { SiteHeaderBase } from "./component"
+import { useLocalizedHref } from "@/hooks"
+import { SITE_LINKS, SITE_NAVIGATION } from "@/modules/landing/site"
+import { SiteHeaderBase, type SiteHeaderEntry } from "./component"
 
 /** The connected header takes no input: its disclosure state is owned here. */
 export type SiteHeaderProps = Record<string, never>
@@ -17,6 +20,11 @@ export const SiteHeader = (props: SiteHeaderProps) => {
     void props
     const [isOpen, setIsOpen] = useState(false)
     const triggerRef = useRef<HTMLButtonElement>(null)
+    const t = useTranslations("site")
+    const href = useLocalizedHref()
+    const navigation: ReadonlyArray<SiteHeaderEntry> = SITE_NAVIGATION.map((item) => "children" in item
+        ? { id: item.id, label: t(`navigation.${item.id}`), children: item.children.map((child) => ({ id: child.id, label: t(`navigation.${child.id}`), href: href(child.href) })) }
+        : { id: item.id, label: t(`navigation.${item.id}`), href: href(item.href) })
 
     useEffect(() => {
         if (!isOpen) return undefined
@@ -33,7 +41,21 @@ export const SiteHeader = (props: SiteHeaderProps) => {
 
     return (
         <SiteHeaderBase
-            props={{ open: isOpen }}
+            props={{
+                open: isOpen,
+                navigation,
+                hrefs: { home: href(SITE_LINKS.home), login: SITE_LINKS.login, contact: href(SITE_LINKS.contact) },
+                copy: {
+                    homeLabel: t("homeLabel"),
+                    primaryNavigationLabel: t("primaryNavigationLabel"),
+                    mobileNavigationLabel: t("mobileNavigationLabel"),
+                    quickActionsLabel: t("quickActionsLabel"),
+                    openNavigationLabel: t("openNavigationLabel"),
+                    closeNavigationLabel: t("closeNavigationLabel"),
+                    login: t("login"),
+                    contact: t("contact"),
+                },
+            }}
             on={{
                 toggle: () => setIsOpen((value) => !value),
                 follow: () => setIsOpen(false),

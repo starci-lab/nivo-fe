@@ -1,28 +1,35 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
+import { pageMetadata } from "@/features/layouts/SiteShell"
 import { IDEA_SLUGS, IdeaDetailPage, getIdeaBySlug } from "@/features/pages/explore"
 
 type IdeaDetailRouteProps = {
-    readonly params: Promise<{ readonly slug: string }>
+    readonly params: Promise<{ readonly locale: string; readonly slug: string }>
 }
 
 /** Static identities for the approved public Idea inventory. */
 export const generateStaticParams = () => IDEA_SLUGS
 
-/** Article metadata follows the same governed Idea object as the rendered page. */
+/** Article metadata follows the same governed Idea object, in the same language, as the rendered page. */
 export const generateMetadata = async ({ params }: IdeaDetailRouteProps): Promise<Metadata> => {
-    const { slug } = await params
+    const { locale, slug } = await params
     const idea = getIdeaBySlug(slug)
-    if (idea === undefined) return { title: "Idea không khả dụng", robots: { index: false, follow: true } } // vn-ok: Canonical Vietnamese public fallback.
+    if (idea === undefined) {
+        const detail = await getTranslations({ locale, namespace: "explore.ideaDetail" })
+        return { title: detail("notAvailable"), robots: { index: false, follow: true } }
+    }
+    const t = await getTranslations({ locale, namespace: "explore.ideas" })
+    const base = await pageMetadata({ params, page: "explore.ideas", path: `/ideas/${idea.slug}` })
     return {
-        title: idea.title,
-        description: idea.thesis,
-        alternates: { canonical: `/ideas/${idea.slug}` },
+        ...base,
+        title: t(`items.${idea.slug}.title`),
+        description: t(`items.${idea.slug}.thesis`),
         openGraph: {
+            ...base.openGraph,
             type: "article",
-            title: idea.title,
-            description: idea.thesis,
-            url: `/ideas/${idea.slug}`,
+            title: t(`items.${idea.slug}.title`),
+            description: t(`items.${idea.slug}.thesis`),
         },
     }
 }

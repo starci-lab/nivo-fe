@@ -1,12 +1,9 @@
 import type { Metadata } from "next"
+import { pageMetadata, type LocaleParams } from "@/features/layouts/SiteShell"
 import { TrustPage } from "@/features/pages/explore"
 
-/** Search and sharing metadata for the canonical Trust route. */
-export const metadata: Metadata = {
-    title: "Trust",
-    description: "Cách NIVO kết nối Human Accountability, Evidence, Trust, Permission và operating capacity mà không biến future thành current capability.", // vn-ok: Canonical Vietnamese public copy.
-    alternates: { canonical: "/trust" },
-}
+/** Search and sharing metadata for the canonical Trust route, in the routed language. */
+export const generateMetadata = ({ params }: LocaleParams): Promise<Metadata> => pageMetadata({ params, page: "explore.trust", path: "/trust" })
 
 /** The `/trust` framework adapter. */
 const Page = () => <TrustPage />

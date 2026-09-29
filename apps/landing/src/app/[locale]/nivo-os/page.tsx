@@ -1,10 +1,10 @@
-import type { Metadata } from "next"
-import { PRODUCT_PAGE_METADATA, ProductPage } from "@/features/pages/product"
+import { pageMetadata, type LocaleParams } from "@/features/layouts/SiteShell"
+import { ProductPage } from "@/features/pages/product"
 
-/** Search and social metadata owned by the canonical NIVO OS content contract. */
-export const metadata: Metadata = PRODUCT_PAGE_METADATA["nivo-os"]
+/** Search and social metadata: the `product.nivoOs.metadata` catalog entries in the language of the request. */
+export const generateMetadata = ({ params }: LocaleParams) => pageMetadata({ params, page: "product.nivoOs", path: "/nivo-os" })
 
 /** The `/nivo-os` adapter mounts one canonical product page owner. */
-const Page = () => <ProductPage page="nivo-os" />
+const Page = () => <ProductPage page="nivoOs" />
 
 export default Page

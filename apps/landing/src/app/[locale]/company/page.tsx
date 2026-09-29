@@ -1,12 +1,8 @@
-import type { Metadata } from "next"
 import { CompanyPage } from "@/features/pages/CompanyPage"
+import { pageMetadata, type LocaleParams } from "@/features/layouts/SiteShell"
 
-/** Search and sharing metadata for the canonical Company route. */
-export const metadata: Metadata = {
-    title: "Company",
-    description: "NIVO là ai, vì sao tồn tại, đang hướng tới đâu và vận hành theo Human Leads. AI Operates. System Learns.", // vn-ok: Canonical Vietnamese public copy.
-    alternates: { canonical: "/company" },
-}
+/** Search and sharing metadata for the canonical Company route, in the language of the request. */
+export const generateMetadata = ({ params }: LocaleParams) => pageMetadata({ params, page: "company", path: "/company" })
 
 /**
  * The `/company` framework adapter. It mounts the page and nothing else.

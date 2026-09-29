@@ -8,15 +8,22 @@ describe("SiteHeader", () => {
         const user = userEvent.setup()
         render(<SiteHeader />)
 
-        const trigger = screen.getByRole("button", { name: "Mở điều hướng" })
+        const trigger = screen.getByRole("button", { name: "Open navigation" })
         expect(trigger).toHaveAttribute("aria-expanded", "false")
 
         await user.click(trigger)
-        expect(screen.getByRole("navigation", { name: "Điều hướng di động" })).toBeInTheDocument()
+        expect(screen.getByRole("navigation", { name: "Mobile navigation" })).toBeInTheDocument()
         expect(trigger).toHaveAttribute("aria-expanded", "true")
 
         await user.keyboard("{Escape}")
-        expect(screen.queryByRole("navigation", { name: "Điều hướng di động" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("navigation", { name: "Mobile navigation" })).not.toBeInTheDocument()
         expect(trigger).toHaveFocus()
+    })
+
+    it("draws the navigation from the catalog with locale-prefixed addresses", () => {
+        render(<SiteHeader />)
+
+        expect(screen.getByRole("navigation", { name: "Main navigation" })).toBeInTheDocument()
+        expect(screen.getAllByRole("link", { name: "Solutions" })[0]).toHaveAttribute("href", "/en/applications")
     })
 })

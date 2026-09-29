@@ -1,13 +1,9 @@
 import type { Metadata } from "next"
-import { normalizeContactIntent } from "@/features/pages/explore"
-import { ContactPage } from "@/features/pages/ContactPage"
+import { pageMetadata, type LocaleParams } from "@/features/layouts/SiteShell"
+import { ContactPage, normalizeContactIntent } from "@/features/pages/ContactPage"
 
-/** Search and sharing metadata for the canonical Contact route. */
-export const metadata: Metadata = {
-    title: "Liên hệ NIVO", // vn-ok: Canonical Vietnamese public label.
-    description: "Chọn đúng relationship intent và đi thẳng tới canonical answer trước khi cung cấp dữ liệu không cần thiết.", // vn-ok: Canonical Vietnamese public copy.
-    alternates: { canonical: "/contact" },
-}
+/** Search and sharing metadata for the canonical Contact route, in the routed language. */
+export const generateMetadata = ({ params }: LocaleParams): Promise<Metadata> => pageMetadata({ params, page: "contact", path: "/contact" })
 
 type ContactRouteProps = {
     readonly searchParams: Promise<{ readonly intent?: string | ReadonlyArray<string> }>

@@ -1,5 +1,6 @@
 import { resolve } from "node:path"
 import type { NextConfig } from "next"
+import createNextIntlPlugin from "next-intl/plugin"
 
 /**
  * `@nivo/ui` ships TypeScript source rather than a build output, so Next must compile it the same
@@ -13,6 +14,7 @@ const nextConfig: NextConfig = {
     },
     experimental: {
         optimizePackageImports: ["@heroui/react"],
+        rootParams: true,
     },
     webpack: (config) => {
         config.resolve.symlinks = false
@@ -20,4 +22,8 @@ const nextConfig: NextConfig = {
     },
 }
 
-export default nextConfig
+/*
+ * The plugin is what makes `src/modules/i18n/request.ts` run at all: without it `getTranslations`
+ * and the client provider resolve against nothing and every key renders as its own name.
+ */
+export default createNextIntlPlugin("./src/modules/i18n/request.ts")(nextConfig)
