@@ -1,21 +1,24 @@
 import { cn } from "@heroui/react"
 
-/**
- * Canonical classes for the public-site section introduction, mirroring SITE_CLASS_NAMES: the
- * `site-section-intro` marker stays while the home-area rules in globals.css still select it.
- */
+/** Component-owned utilities for the public-site section introduction. */
 export const CLASS_NAMES = {
     standard: cn(
-        "site-section-intro",
         "max-w-[50rem]",
+        "[&_.starci-core-section-eyebrow>span]:tracking-home-eyebrow",
         "[@media(max-width:48rem)]:flex-col",
-        "[@media(max-width:48rem)]:items-start!",
+        "[@media(max-width:48rem)]:items-start",
     ),
     inverse: cn(
-        "site-section-intro",
         "max-w-[50rem]",
         "text-surface",
+        "[&_.starci-core-section-title]:text-surface",
+        "[&_.starci-core-section-eyebrow>span[data-tone=muted]]:text-landing-inverse-muted",
+        "[&_.starci-core-section-eyebrow>span]:tracking-home-eyebrow",
+        "[&_.starci-core-section-description>[data-tone=default]]:text-surface",
         "[@media(max-width:48rem)]:flex-col",
-        "[@media(max-width:48rem)]:items-start!",
+        "[@media(max-width:48rem)]:items-start",
     ),
 } as const
+
+/** Resolve the section intro presentation from its semantic inverse flag. */
+export const sectionIntroClassName = (inverse: boolean) => (inverse ? CLASS_NAMES.inverse : CLASS_NAMES.standard)

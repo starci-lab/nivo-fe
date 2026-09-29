@@ -25,6 +25,121 @@
  * the footer and the dark sections paint in BOTH themes, while the derived chrome tokens are pure
  * mixes of the grammar tokens, so they follow the theme automatically and declare once on :root.
  */
+@custom-variant forced-colors (@media (forced-colors: active));
+
+@theme inline {
+    --font-landing-page: var(--landing-font-page);
+    --color-landing-accent-ink: var(--landing-accent-ink);
+    --color-landing-accent-bright: var(--landing-accent-bright);
+    --color-landing-ink-soft: var(--landing-ink-soft);
+    --color-landing-surface-tint: var(--landing-surface-tint);
+    --color-landing-inverse: var(--landing-inverse);
+    --color-landing-inverse-muted: var(--landing-inverse-muted);
+    --color-landing-inverse-line: var(--landing-inverse-line);
+    --color-landing-header-line: var(--landing-header-line);
+    --color-landing-header-canvas: var(--landing-header-canvas);
+    --shadow-landing-popover: var(--landing-shadow-popover);
+    --shadow-landing-sheet: var(--landing-shadow-sheet);
+    --background-image-landing-home-hero-stage: var(--landing-home-hero-stage);
+    --background-image-landing-home-relevance: var(--landing-home-relevance-image);
+    --background-image-landing-home-commercial-route: var(--landing-home-commercial-route-image);
+    --background-image-landing-home-trust-scene: var(--landing-home-trust-scene);
+    --color-landing-home-signal: var(--landing-home-signal);
+    --color-landing-home-today: var(--landing-home-today);
+    --color-landing-home-commercial-route-surface: var(--landing-home-commercial-route-surface);
+    --color-landing-home-commercial-card: var(--landing-home-commercial-card);
+    --color-landing-home-commercial-marker: var(--landing-home-commercial-marker);
+    --color-landing-home-commercial-marker-active: var(--landing-home-commercial-marker-active);
+    --color-landing-home-commercial-marker-muted: var(--landing-home-commercial-marker-muted);
+    --color-landing-home-route-arrow: var(--landing-home-route-arrow);
+    --color-landing-home-visual-floor: var(--landing-home-visual-floor);
+    --color-landing-home-separator: var(--separator);
+    --shadow-landing-home-signal: var(--landing-home-signal-shadow);
+    --shadow-landing-home-signal-ring: var(--landing-home-signal-ring);
+    --shadow-landing-home-today: var(--landing-home-today-shadow);
+    --shadow-landing-home-flow-emphasis: var(--landing-home-flow-emphasis);
+    --shadow-landing-home-commercial-route: var(--landing-home-commercial-route-shadow);
+    --shadow-landing-home-commercial-card: var(--landing-home-commercial-card-shadow);
+    --shadow-landing-home-route-arrow: var(--landing-home-route-arrow-shadow);
+    --shadow-landing-home-visual: var(--nivo-surface-shadow);
+    --drop-shadow-landing-home-mascot: var(--landing-home-mascot-shadow);
+    --radius-landing-home-surface: var(--nivo-surface-radius);
+    --container-home-copy: 38rem;
+    --container-home-copy-wide: 45rem;
+    --container-home-copy-text: 36rem;
+    --container-home-visual: 48rem;
+    --container-home-route: 48rem;
+    --container-home-route-copy: 11rem;
+    --spacing-home-section: clamp(5rem, 9vw, 8rem);
+    --spacing-home-hero: clamp(4rem, 8vw, 7rem);
+    --spacing-home-hero-grid: clamp(2rem, 5vw, 5rem);
+    --spacing-home-hero-stage: clamp(31rem, 47vw, 39rem);
+    --spacing-home-hero-stage-tablet: clamp(30rem, 70vw, 39rem);
+    --spacing-home-hero-stage-mobile: min(30rem, 120vw);
+    --spacing-home-relevance-grid: clamp(3rem, 7vw, 7rem);
+    --spacing-home-relevance-top: clamp(3rem, 6vw, 5rem);
+    --spacing-home-trust-grid: clamp(3rem, 8vw, 8rem);
+    --spacing-home-visuals: clamp(0.75rem, 1.6vw, 1.5rem);
+    --spacing-home-route: clamp(0.75rem, 1.5vw, 1.25rem);
+    --spacing-home-route-padding-y: clamp(2rem, 4vw, 3.5rem);
+    --spacing-home-route-padding-x: clamp(1.5rem, 3vw, 3rem);
+    --spacing-home-caption: 8.35rem;
+    --spacing-home-caption-mobile: 10rem;
+    --text-home-micro: 0.6875rem;
+    --text-home-route-copy: clamp(1rem, 1.25vw, 1.25rem);
+    --leading-home-copy: 1.7;
+    --leading-home-route: 1.25;
+    --tracking-home-eyebrow: 0.12em;
+    --tracking-home-kicker: 0.08em;
+}
+
+@utility grid-cols-home-hero {
+    grid-template-columns: minmax(0, 0.92fr) minmax(30rem, 1.08fr);
+}
+
+@utility grid-cols-home-today {
+    grid-template-columns: minmax(0, 1.5fr) minmax(10rem, 0.65fr) auto;
+}
+
+@utility grid-cols-home-relevance {
+    grid-template-columns: minmax(15rem, 0.72fr) minmax(0, 1.4fr);
+}
+
+@utility grid-cols-home-operating-footer {
+    grid-template-columns: minmax(0, 1.35fr) auto;
+}
+
+@utility grid-cols-home-commercial {
+    grid-template-columns: minmax(18rem, 0.72fr) minmax(34rem, 1.28fr);
+}
+
+@utility grid-cols-home-trust {
+    grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.7fr);
+}
+
+@utility grid-cols-home-role-card-mobile {
+    grid-template-columns: minmax(10rem, 0.95fr) minmax(0, 1.05fr);
+}
+
+@utility grid-cols-home-commercial-step-mobile {
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+}
+
+@utility grid-cols-home-process-mobile {
+    grid-template-columns: 1.25rem 1.5rem minmax(0, 1fr);
+}
+
+@utility grid-rows-home-process-step {
+    grid-template-rows: 1rem 1.5rem minmax(0, 1fr);
+}
+
+.landing-inverse-band {
+    --foreground: var(--surface);
+    --muted: var(--landing-inverse-muted);
+    --starci-core-foreground: var(--surface);
+    --starci-core-muted: var(--landing-inverse-muted);
+}
+
 :root {
     color-scheme: light;
 
@@ -206,6 +321,36 @@
         linear-gradient(0deg, var(--product-feature-overlay-top), var(--product-feature-overlay-bottom)),
         url("/images/intent/revenue-v2.png");
     --product-status-shadow: 0 1.5rem 4rem rgb(136 19 55 / 9%);
+
+    --landing-home-role-image-human: translate(-0.403%, 2.477%) scale(1.01033);
+    --landing-home-role-image-ai: translate(0.603%, 0.446%) scale(1.07975);
+    --landing-home-role-image-system: translate(0.909%, 5.167%) scale(0.99099);
+    --landing-home-role-image-outcome: translate(-2.204%, 4.659%) scale(0.89159);
+
+    --landing-home-hero-stage: radial-gradient(circle at 52% 48%, rgb(255 225 216 / 74%) 0, rgb(255 241 237 / 46%) 38%, transparent 70%);
+    --landing-home-spotlight-start: rgb(255 252 241 / 68%);
+    --landing-home-spotlight-middle: rgb(255 225 216 / 34%);
+    --landing-home-spotlight-accent: rgb(251 113 133 / 14%);
+    --landing-home-signal: rgb(255 255 255 / 88%);
+    --landing-home-signal-shadow: 0 0.9rem 2.25rem rgb(69 31 43 / 14%);
+    --landing-home-signal-ring: 0 0 0 0.35rem rgb(225 29 72 / 10%);
+    --landing-home-mascot-shadow: 0 2rem 2.8rem rgb(71 38 45 / 18%);
+    --landing-home-relevance-image: linear-gradient(90deg, rgb(5 14 29 / 98%) 0%, rgb(5 14 29 / 91%) 48%, rgb(5 14 29 / 24%) 100%), url("/images/backgrounds/nivo-blue-planet-v1.png");
+    --landing-home-today: rgb(17 31 54 / 86%);
+    --landing-home-today-shadow: 0 1.25rem 3rem rgb(0 0 0 / 22%);
+    --landing-home-flow-emphasis: 0 0 0 0.6rem rgb(225 29 72 / 14%);
+    --landing-home-commercial-route-surface: rgb(255 255 255 / 38%);
+    --landing-home-commercial-route-image: radial-gradient(circle at 48% 38%, rgb(255 255 255 / 94%), rgb(255 255 255 / 58%) 58%, rgb(255 255 255 / 38%));
+    --landing-home-commercial-route-shadow: inset 0 1px 0 rgb(255 255 255 / 92%), 0 2.5rem 5rem rgb(221 92 107 / 13%);
+    --landing-home-commercial-card: rgb(255 255 255 / 88%);
+    --landing-home-commercial-card-shadow: 0 1.4rem 2.8rem rgb(117 60 69 / 10%), inset 0 1px 0 rgb(255 255 255 / 96%);
+    --landing-home-commercial-marker: color-mix(in srgb, var(--accent) 9%, white);
+    --landing-home-commercial-marker-active: color-mix(in srgb, var(--accent) 62%, white);
+    --landing-home-commercial-marker-muted: color-mix(in srgb, var(--landing-inverse) 58%, white);
+    --landing-home-route-arrow: rgb(255 255 255 / 92%);
+    --landing-home-route-arrow-shadow: 0 0.7rem 1.6rem rgb(117 60 69 / 13%);
+    --landing-home-trust-scene: linear-gradient(90deg, rgb(5 14 29 / 90%), rgb(5 14 29 / 70%)), url("/images/backgrounds/nivo-trust-mountains-v1.png");
+    --landing-home-visual-floor: rgb(15 23 42 / 13%);
 }
 
 /* Fixed commercial art direction shared by the company, contact and pricing routes. */
@@ -477,6 +622,31 @@
         linear-gradient(0deg, var(--product-feature-overlay-top), var(--product-feature-overlay-bottom)),
         url("/images/intent/revenue-v2.png");
     --product-status-shadow: 0 1.5rem 4rem color-mix(in srgb, var(--accent) 16%, transparent);
+
+    --landing-home-hero-stage: radial-gradient(circle at 52% 48%, rgb(255 225 216 / 74%) 0, rgb(255 241 237 / 46%) 38%, transparent 70%);
+    --landing-home-spotlight-start: rgb(255 252 241 / 68%);
+    --landing-home-spotlight-middle: rgb(255 225 216 / 34%);
+    --landing-home-spotlight-accent: rgb(251 113 133 / 14%);
+    --landing-home-signal: rgb(255 255 255 / 88%);
+    --landing-home-signal-shadow: 0 0.9rem 2.25rem rgb(69 31 43 / 14%);
+    --landing-home-signal-ring: 0 0 0 0.35rem rgb(225 29 72 / 10%);
+    --landing-home-mascot-shadow: 0 2rem 2.8rem rgb(71 38 45 / 18%);
+    --landing-home-relevance-image: linear-gradient(90deg, rgb(5 14 29 / 98%) 0%, rgb(5 14 29 / 91%) 48%, rgb(5 14 29 / 24%) 100%), url("/images/backgrounds/nivo-blue-planet-v1.png");
+    --landing-home-today: rgb(17 31 54 / 86%);
+    --landing-home-today-shadow: 0 1.25rem 3rem rgb(0 0 0 / 22%);
+    --landing-home-flow-emphasis: 0 0 0 0.6rem rgb(225 29 72 / 14%);
+    --landing-home-commercial-route-surface: rgb(255 255 255 / 38%);
+    --landing-home-commercial-route-image: radial-gradient(circle at 48% 38%, rgb(255 255 255 / 94%), rgb(255 255 255 / 58%) 58%, rgb(255 255 255 / 38%));
+    --landing-home-commercial-route-shadow: inset 0 1px 0 rgb(255 255 255 / 92%), 0 2.5rem 5rem rgb(221 92 107 / 13%);
+    --landing-home-commercial-card: rgb(255 255 255 / 88%);
+    --landing-home-commercial-card-shadow: 0 1.4rem 2.8rem rgb(117 60 69 / 10%), inset 0 1px 0 rgb(255 255 255 / 96%);
+    --landing-home-commercial-marker: color-mix(in srgb, var(--accent) 9%, white);
+    --landing-home-commercial-marker-active: color-mix(in srgb, var(--accent) 62%, white);
+    --landing-home-commercial-marker-muted: color-mix(in srgb, var(--landing-inverse) 58%, white);
+    --landing-home-route-arrow: rgb(255 255 255 / 92%);
+    --landing-home-route-arrow-shadow: 0 0.7rem 1.6rem rgb(117 60 69 / 13%);
+    --landing-home-trust-scene: linear-gradient(90deg, rgb(5 14 29 / 90%), rgb(5 14 29 / 70%)), url("/images/backgrounds/nivo-trust-mountains-v1.png");
+    --landing-home-visual-floor: rgb(15 23 42 / 13%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -634,5 +804,30 @@
             linear-gradient(0deg, var(--product-feature-overlay-top), var(--product-feature-overlay-bottom)),
             url("/images/intent/revenue-v2.png");
         --product-status-shadow: 0 1.5rem 4rem color-mix(in srgb, var(--accent) 16%, transparent);
+
+        --landing-home-hero-stage: radial-gradient(circle at 52% 48%, rgb(255 225 216 / 74%) 0, rgb(255 241 237 / 46%) 38%, transparent 70%);
+        --landing-home-spotlight-start: rgb(255 252 241 / 68%);
+        --landing-home-spotlight-middle: rgb(255 225 216 / 34%);
+        --landing-home-spotlight-accent: rgb(251 113 133 / 14%);
+        --landing-home-signal: rgb(255 255 255 / 88%);
+        --landing-home-signal-shadow: 0 0.9rem 2.25rem rgb(69 31 43 / 14%);
+        --landing-home-signal-ring: 0 0 0 0.35rem rgb(225 29 72 / 10%);
+        --landing-home-mascot-shadow: 0 2rem 2.8rem rgb(71 38 45 / 18%);
+        --landing-home-relevance-image: linear-gradient(90deg, rgb(5 14 29 / 98%) 0%, rgb(5 14 29 / 91%) 48%, rgb(5 14 29 / 24%) 100%), url("/images/backgrounds/nivo-blue-planet-v1.png");
+        --landing-home-today: rgb(17 31 54 / 86%);
+        --landing-home-today-shadow: 0 1.25rem 3rem rgb(0 0 0 / 22%);
+        --landing-home-flow-emphasis: 0 0 0 0.6rem rgb(225 29 72 / 14%);
+        --landing-home-commercial-route-surface: rgb(255 255 255 / 38%);
+        --landing-home-commercial-route-image: radial-gradient(circle at 48% 38%, rgb(255 255 255 / 94%), rgb(255 255 255 / 58%) 58%, rgb(255 255 255 / 38%));
+        --landing-home-commercial-route-shadow: inset 0 1px 0 rgb(255 255 255 / 92%), 0 2.5rem 5rem rgb(221 92 107 / 13%);
+        --landing-home-commercial-card: rgb(255 255 255 / 88%);
+        --landing-home-commercial-card-shadow: 0 1.4rem 2.8rem rgb(117 60 69 / 10%), inset 0 1px 0 rgb(255 255 255 / 96%);
+        --landing-home-commercial-marker: color-mix(in srgb, var(--accent) 9%, white);
+        --landing-home-commercial-marker-active: color-mix(in srgb, var(--accent) 62%, white);
+        --landing-home-commercial-marker-muted: color-mix(in srgb, var(--landing-inverse) 58%, white);
+        --landing-home-route-arrow: rgb(255 255 255 / 92%);
+        --landing-home-route-arrow-shadow: 0 0.7rem 1.6rem rgb(117 60 69 / 13%);
+        --landing-home-trust-scene: linear-gradient(90deg, rgb(5 14 29 / 90%), rgb(5 14 29 / 70%)), url("/images/backgrounds/nivo-trust-mountains-v1.png");
+        --landing-home-visual-floor: rgb(15 23 42 / 13%);
     }
 }

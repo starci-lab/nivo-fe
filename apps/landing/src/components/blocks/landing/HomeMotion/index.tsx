@@ -1,8 +1,8 @@
 "use client"
 
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion"
-import { useRef, type PointerEvent as ReactPointerEvent, type ReactNode } from "react"
-import { CLASS_NAMES } from "./classNames"
+import { motion, useMotionTemplate, useMotionValue, useReducedMotion, useScroll, useTransform } from "framer-motion"
+import { useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react"
+import { CLASS_NAMES, homeSpotlightClassName } from "./classNames"
 
 type RevealDirection = "up" | "left" | "right"
 
@@ -45,7 +45,6 @@ export const HomeMotionSectionReveal = (props: HomeMotionSectionRevealProps) => 
 
     return (
         <motion.div
-            className={CLASS_NAMES.reveal}
             initial={false}
             whileInView={reduceMotion ? undefined : { opacity: [0.56, 1], x: [x, 0], y: [y, 0] }}
             viewport={{ once: true, amount: 0.18 }}
@@ -63,22 +62,24 @@ export const HomeMotionHeroParallax = (props: HomeMotionHeroParallaxProps) => {
     const { scrollYProgress } = useScroll({ target, offset: ["start end", "end start"] })
     const distance = props.distance ?? 34
     const y = useTransform(scrollYProgress, [0, 1], [distance, -distance])
+    const glowX = useMotionValue("54%")
+    const glowY = useMotionValue("44%")
+    const spotlightBackground = useMotionTemplate`radial-gradient(circle 10rem at ${glowX} ${glowY}, var(--landing-home-spotlight-start) 0, var(--landing-home-spotlight-middle) 24%, var(--landing-home-spotlight-accent) 44%, transparent 72%)`
+    const [spotlightActive, setSpotlightActive] = useState(false)
 
     const moveSpotlight = (event: ReactPointerEvent<HTMLDivElement>) => {
         if (reduceMotion || event.pointerType === "touch") return
 
         const bounds = event.currentTarget.getBoundingClientRect()
-        const x = ((event.clientX - bounds.left) / bounds.width) * 100
-        const yPosition = ((event.clientY - bounds.top) / bounds.height) * 100
-        event.currentTarget.style.setProperty("--hero-glow-x", `${x.toFixed(2)}%`)
-        event.currentTarget.style.setProperty("--hero-glow-y", `${yPosition.toFixed(2)}%`)
-        event.currentTarget.style.setProperty("--hero-glow-opacity", "0.92")
+        glowX.set(`${(((event.clientX - bounds.left) / bounds.width) * 100).toFixed(2)}%`)
+        glowY.set(`${(((event.clientY - bounds.top) / bounds.height) * 100).toFixed(2)}%`)
+        setSpotlightActive(true)
     }
 
-    const settleSpotlight = (event: ReactPointerEvent<HTMLDivElement>) => {
-        event.currentTarget.style.setProperty("--hero-glow-x", "54%")
-        event.currentTarget.style.setProperty("--hero-glow-y", "44%")
-        event.currentTarget.style.setProperty("--hero-glow-opacity", "0.34")
+    const settleSpotlight = () => {
+        glowX.set("54%")
+        glowY.set("44%")
+        setSpotlightActive(false)
     }
 
     return (
@@ -90,7 +91,11 @@ export const HomeMotionHeroParallax = (props: HomeMotionHeroParallaxProps) => {
             onPointerLeave={settleSpotlight}
             onPointerCancel={settleSpotlight}
         >
-            <span className={CLASS_NAMES.heroSpotlight} aria-hidden="true" />
+            <motion.span
+                className={homeSpotlightClassName(spotlightActive)}
+                style={{ backgroundImage: spotlightBackground }}
+                aria-hidden="true"
+            />
             {props.children}
         </motion.div>
     )
@@ -102,6 +107,7 @@ export const HomeMotionRoleCard = (props: HomeMotionRoleCardProps) => {
 
     return (
         <motion.figure
+            className={CLASS_NAMES.roleCard}
             initial={false}
             whileInView={reduceMotion ? undefined : { opacity: [0.5, 1], y: [34, 0] }}
             viewport={{ once: true, amount: 0.28 }}
