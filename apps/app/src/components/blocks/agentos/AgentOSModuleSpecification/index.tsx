@@ -3,11 +3,14 @@
 import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { useAgentOSModuleStudioProjection, useRouter, useMutatePublishAgentosCustomModuleSwr } from "@/hooks"
+import { installation } from "@/modules/routes"
 import { AgentOSModuleSpecificationBase } from "./component"
 type AgentOSModuleSpecificationProps = {
     readonly workspaceId: string
     readonly moduleId: string
 }
+/** The raw template one catalogue key holds; a non-string answer means the key is not copy. */
+const rawTemplate = (value: unknown): string => (typeof value === "string" ? value : "")
 const specificationState = (
     refused: boolean,
     studio: ReturnType<typeof useAgentOSModuleStudioProjection>["studio"],
@@ -41,7 +44,7 @@ export const AgentOSModuleSpecification = (props: AgentOSModuleSpecificationProp
             }
             setRefused(false)
             if (result.data.module.installationId !== null)
-                router.push(`/agentos/workspaces/${workspaceId}/modules/${result.data.module.installationId}`)
+                router.push(installation(workspaceId, result.data.module.installationId))
         } catch {
             setRefused(true)
         }
@@ -58,8 +61,8 @@ export const AgentOSModuleSpecification = (props: AgentOSModuleSpecificationProp
                     title: t("title"),
                     refused: t("refused"),
                     incomplete: t("incomplete"),
-                    version: t.raw("version") as string,
-                    acknowledge: t.raw("acknowledge") as string,
+                    version: rawTemplate(t.raw("version")),
+                    acknowledge: rawTemplate(t.raw("acknowledge")),
                     publish: t("publish"),
                     publishing: t("publishing"),
                     published: t("published"),

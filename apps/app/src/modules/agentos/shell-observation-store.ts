@@ -23,6 +23,7 @@
 import type {
     ShellCompleteness,
     ShellFreshness,
+    ShellSelectionSourceKind,
     ShellSourceIdentity,
     ShellWireAvailability,
 } from "@/modules/api/agentos-shell"
@@ -123,7 +124,11 @@ export interface ShellObservationReduction {
 }
 
 /** The three whole-selection sources, in the order an overview asks for them. */
-const SELECTION_KINDS: ReadonlySet<string> = new Set(["core_registry", "installation_inventory", "runtime"])
+const SELECTION_KINDS: ReadonlySet<ShellSelectionSourceKind> = new Set([
+    "core_registry",
+    "installation_inventory",
+    "runtime",
+])
 
 /**
  * The sources one AgentOS selection reads.
@@ -137,8 +142,7 @@ export const shellSelectionIdentities = (
     installationIds: ReadonlyArray<string>,
 ): ReadonlyArray<ShellSourceIdentity> => {
     const identities: Array<ShellSourceIdentity> = []
-    for (const kind of SELECTION_KINDS)
-        identities.push({ kind: kind as "core_registry" | "installation_inventory" | "runtime" })
+    for (const kind of SELECTION_KINDS) identities.push({ kind })
     for (const installationId of installationIds) {
         for (const kind of ["capability", "attention", "configuration"] as const)
             identities.push({ kind, installationId })
