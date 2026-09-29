@@ -76,11 +76,19 @@ describe("Collab query cache identities", () => {
         expect(office.key).toEqual(collabOfficeQueryKey("ws-1"));
         const group = useQueryCollabGroupSwr("ws-1", "c-1") as unknown as { readonly key: unknown; readonly options: { readonly refreshInterval: number } };
         expect(group.key).toEqual(collabGroupQueryKey("ws-1", "c-1"));
-        expect(group.options.refreshInterval).toBeGreaterThan(0);
+        // The socket owns freshness: no poll unless the caller passes the fallback interval.
+        expect(group.options.refreshInterval).toBe(0);
         const notices = useQueryCollabNoticesSwr("ws-1") as unknown as { readonly key: unknown; readonly options: { readonly refreshInterval: number } };
         expect(notices.key).toEqual(collabNoticesQueryKey("ws-1"));
-        expect(notices.options.refreshInterval).toBeGreaterThan(0);
+        expect(notices.options.refreshInterval).toBe(0);
         expect(useNivoQuery).toHaveBeenCalledTimes(3);
+    });
+
+    it("polls a conversation or notice read only at the fallback interval a lost channel asks for", () => {
+        const group = useQueryCollabGroupSwr("ws-1", undefined, 5_000) as unknown as { readonly options: { readonly refreshInterval: number } };
+        const notices = useQueryCollabNoticesSwr("ws-1", undefined, 15_000) as unknown as { readonly options: { readonly refreshInterval: number } };
+        expect(group.options.refreshInterval).toBe(5_000);
+        expect(notices.options.refreshInterval).toBe(15_000);
     });
 
     it("calls the api with the signed-in access token, workspace scope and exact input", async () => {

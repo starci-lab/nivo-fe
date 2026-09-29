@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";
 import { io, type Socket } from "socket.io-client";
+import type { CollabLiveStatus } from "@/modules/collab";
 import { CORE_API_BASE } from "@/modules/config";
 import { useAccessToken } from "../auth/useAccessToken";
 
@@ -46,7 +47,7 @@ export type CollabLiveState = {
      * handshake; `subscribed` joined the workspace channels; `disconnected` lost the
      * socket or was refused, with `reason` carrying the closed reason when known.
      */
-    readonly status: "idle" | "connecting" | "subscribed" | "disconnected";
+    readonly status: CollabLiveStatus;
     readonly reason: string | null;
     /** The most recent accepted hint - a re-read trigger, not content. */
     readonly lastHint: CollabLiveHint | null;

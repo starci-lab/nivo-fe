@@ -28,8 +28,9 @@ import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery";
  * `decision.collab.live-delivery` rev 2). The `/collab` live namespace emits only
  * content-free `{workspaceId, kind, cursor}` hints; `hooks/collab-live` subscribes and
  * answers each hint by revalidating these keys, and a reconnect re-reads every domain.
- * The conversation and notice reads still poll at a conservative interval and every
- * query revalidates on focus, so a hint that never arrives still converges the view.
+ * The conversation and notice reads do not poll while the socket is up: the hint is their one
+ * freshness mechanism. They poll only as the fallback of a lost socket, through the interval
+ * `collabFallbackInterval` answers for the live state, and every query revalidates on focus.
  */
 
 /** Cache identity for the one Office landing bundle of a workspace. */
@@ -85,10 +86,11 @@ export const useQueryCollabOfficeSwr = (workspaceId: string | null) => {
 };
 
 /**
- * Read one authorized conversation page. Polls on a conservative interval - the live
- * channel is a hint, this authoritative page is the truth (`br.collab.reads-cheap`).
+ * Read one authorized conversation page. The live channel is a hint, this authoritative page is the
+ * truth (`br.collab.reads-cheap`); it polls only when the caller passes the fallback interval of a
+ * lost channel.
  */
-export const useQueryCollabGroupSwr = (workspaceId: string | null, cursor?: string | null, refreshInterval = 5_000) => {
+export const useQueryCollabGroupSwr = (workspaceId: string | null, cursor?: string | null, refreshInterval = 0) => {
     const accessToken = useAccessToken();
     const scope = scoped(accessToken, workspaceId);
     return useNivoQuery(scope === null ? null : collabGroupQueryKey(scope.workspaceId, cursor), () => readCollabGroup({ workspaceId: scope?.workspaceId ?? "", accessToken: accessToken ?? "", ...(cursor == null ? {} : { cursor }) }), { refreshInterval });
@@ -115,8 +117,8 @@ export const useQueryCollabCommandsSwr = (workspaceId: string | null, moduleName
     return useNivoQuery(scope === null || moduleName === null || moduleName === "" ? null : collabCommandsQueryKey(scope.workspaceId, moduleName), () => readCollabAvailableCommands({ workspaceId: scope?.workspaceId ?? "", accessToken: accessToken ?? "", moduleName: moduleName ?? "" }));
 };
 
-/** Read the member's outstanding turn notices; polls while outstanding turns may exist. */
-export const useQueryCollabNoticesSwr = (workspaceId: string | null, cursor?: string | null, refreshInterval = 15_000) => {
+/** Read the member's outstanding turn notices; polls only when the caller passes the fallback interval of a lost channel. */
+export const useQueryCollabNoticesSwr = (workspaceId: string | null, cursor?: string | null, refreshInterval = 0) => {
     const accessToken = useAccessToken();
     const scope = scoped(accessToken, workspaceId);
     return useNivoQuery(scope === null ? null : collabNoticesQueryKey(scope.workspaceId, cursor), () => readCollabNotices({ workspaceId: scope?.workspaceId ?? "", accessToken: accessToken ?? "", ...(cursor == null ? {} : { cursor }) }), { refreshInterval });

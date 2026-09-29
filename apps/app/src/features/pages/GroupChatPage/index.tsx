@@ -26,6 +26,7 @@ import {
   useSession,
   type CollabTasksFilter,
 } from "@/hooks";
+import { collabFallbackInterval } from "@/modules/collab";
 import { nivoAnswerDenied } from "@/modules/query";
 import {
   buildConversationItems,
@@ -144,10 +145,11 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
   const officeView = office.data?.ok === true ? office.data.data : null;
   const officeReady = officeView !== null;
 
-  const group = useQueryCollabGroupSwr(officeReady ? workspaceId : null);
+  // The socket owns freshness; the reads poll only while it is lost.
+  const live = useCollabLive(officeReady ? workspaceId : null);
+  const group = useQueryCollabGroupSwr(officeReady ? workspaceId : null, undefined, collabFallbackInterval(live.status, "group"));
   const tasks = useQueryCollabTasksSwr(officeReady ? workspaceId : null, tab === "tasks" ? tasksFilter : undefined);
-  const notices = useQueryCollabNoticesSwr(officeReady ? workspaceId : null);
-  useCollabLive(officeReady ? workspaceId : null);
+  const notices = useQueryCollabNoticesSwr(officeReady ? workspaceId : null, undefined, collabFallbackInterval(live.status, "notices"));
 
   const postMessage = useMutateCollabPostMessageSwr(workspaceId);
   const pressApproval = useMutateCollabPressApprovalSwr(workspaceId);

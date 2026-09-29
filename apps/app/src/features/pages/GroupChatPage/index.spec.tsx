@@ -125,6 +125,7 @@ let state: {
   press: Mutation;
   invite: Mutation;
   accept: Mutation;
+  live: { readonly status: string; readonly reason: string | null; readonly lastHint: null };
 };
 
 const last = () => {
@@ -162,7 +163,9 @@ beforeEach(() => {
     press: mutation(),
     invite: mutation(ok({ outcome: "created" })),
     accept: mutation(),
+    live: { status: "subscribed", reason: null, lastHint: null },
   };
+  hooks.live.mockImplementation(() => state.live);
   hooks.workspaces.mockImplementation((enabled: boolean) => (enabled ? state.workspaces : query()));
   hooks.office.mockImplementation(() => state.office);
   hooks.group.mockImplementation(() => state.group);
@@ -197,7 +200,8 @@ describe("GroupChatPage", () => {
       expect(view.workspaceName).toBe("Công ty An");
       expect(view.viewer).toEqual({ memberId: "mem-an", role: "owner" });
       expect(hooks.office).toHaveBeenLastCalledWith("ws-1");
-      expect(hooks.group).toHaveBeenLastCalledWith("ws-1");
+      // The socket is up, so neither read polls.
+      expect(hooks.group).toHaveBeenLastCalledWith("ws-1", undefined, 0);
       expect(hooks.tasks).toHaveBeenLastCalledWith("ws-1", undefined);
       expect(hooks.live).toHaveBeenLastCalledWith("ws-1");
       expect(view.items.length).toBeGreaterThan(0);
@@ -211,12 +215,28 @@ describe("GroupChatPage", () => {
       expect(last().view.workspaceName).toBe("Văn phòng An");
     });
   
+    it("polls the conversation and the notices only while the live channel is lost", () => {
+      state.live = { status: "disconnected", reason: "transport close", lastHint: null };
+      render(<GroupChatPage />);
+      expect(hooks.group).toHaveBeenLastCalledWith("ws-1", undefined, 5_000);
+      expect(hooks.notices).toHaveBeenLastCalledWith("ws-1", undefined, 15_000);
+    });
+
+    it("stops polling again once the live channel is subscribed", () => {
+      state.live = { status: "disconnected", reason: "transport close", lastHint: null };
+      const { rerender } = render(<GroupChatPage />);
+      state.live = { status: "subscribed", reason: null, lastHint: null };
+      rerender(<GroupChatPage />);
+      expect(hooks.group).toHaveBeenLastCalledWith("ws-1", undefined, 0);
+      expect(hooks.notices).toHaveBeenLastCalledWith("ws-1", undefined, 0);
+    });
+
     it("holds the dependent reads until Office answers", () => {
       state.office = query();
       render(<GroupChatPage />);
       expect(last().view.officeState).toBe("loading");
-      expect(hooks.group).toHaveBeenLastCalledWith(null);
-      expect(hooks.notices).toHaveBeenLastCalledWith(null);
+      expect(hooks.group).toHaveBeenLastCalledWith(null, undefined, 0);
+      expect(hooks.notices).toHaveBeenLastCalledWith(null, undefined, 0);
       expect(last().view.workspaceName).toBe("Công ty An");
     });
   
