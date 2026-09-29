@@ -6,6 +6,7 @@ import {
     COLLAB_GATEWAY_READ_FIELD,
     acceptCollabInvitation,
     collabGatewayTransport,
+    collabOutcomeOfReply,
     inviteCollabMemberByEmail,
     listCollabTasks,
     openCollabNotice,
@@ -18,18 +19,18 @@ import {
     readCollabTask,
     reconcileCollabRequest,
     setCollabTransport,
-    type CollabGatewayOutcome,
+    type CollabGatewayReply,
     type CollabGatewayRequest,
     type CollabOfficeView,
 } from "./collab";
 
 type SeenCall = { readonly accessToken: string; readonly request: CollabGatewayRequest };
 
-const transportSpy = (outcome: CollabGatewayOutcome) => {
+const transportSpy = (reply: CollabGatewayReply) => {
     const calls: Array<SeenCall> = [];
     const spy = vi.fn(async (call: SeenCall) => {
         calls.push(call);
-        return outcome;
+        return collabOutcomeOfReply(reply);
     });
     return { calls, spy };
 };
@@ -250,7 +251,7 @@ describe("modules/api/collab", () => {
         });
         setCollabTransport(spy);
         const denied = await readCollabTask({ workspaceId: "ws-1", accessToken: "tok", taskId: "t-1" });
-        expect(denied).toEqual({ ok: false, code: "COLLAB_DENIED", reason: "membership", kind: "denied", retryable: false });
+        expect(denied).toMatchObject({ ok: false, code: "COLLAB_DENIED", reason: "membership", kind: "forbidden", retryable: false });
     });
 
     it("marks unavailable and unknown outcomes retryable so callers reconcile rather than resend blindly", async () => {
@@ -268,7 +269,7 @@ describe("modules/api/collab", () => {
             throw new Error("socket dropped");
         }));
         const answer = await openCollabOffice({ workspaceId: "ws-1", accessToken: "tok" });
-        expect(answer).toEqual({ ok: false, code: "COLLAB_UNKNOWN", reason: "transport threw", kind: "unknown", retryable: true });
+        expect(answer).toMatchObject({ ok: false, code: "COLLAB_UNKNOWN", reason: "transport threw", kind: "unavailable", retryable: true });
     });
 
     it("refuses unsigned and unscoped calls before any transport runs", async () => {
@@ -276,7 +277,7 @@ describe("modules/api/collab", () => {
         setCollabTransport(spy);
         const unsigned = await openCollabOffice({ workspaceId: "ws-1", accessToken: "" });
         const unscoped = await openCollabOffice({ workspaceId: "", accessToken: "tok" });
-        expect(unsigned).toMatchObject({ ok: false, code: "COLLAB_UNAUTHENTICATED", kind: "unauthenticated", retryable: false });
+        expect(unsigned).toMatchObject({ ok: false, code: "COLLAB_UNAUTHENTICATED", kind: "refused", retryable: false });
         expect(unscoped).toMatchObject({ ok: false, code: "COLLAB_INVALID", kind: "invalid", retryable: false });
         expect(calls).toEqual([]);
     });
@@ -290,7 +291,7 @@ describe("collabGatewayTransport", () => {
     });
     afterEach(() => vi.unstubAllGlobals());
 
-    const okEnvelope = (field: string, outcome: CollabGatewayOutcome) =>
+    const okEnvelope = (field: string, outcome: CollabGatewayReply) =>
         new Response(JSON.stringify({ data: { [field]: outcome } }), { status: 200, headers: { "content-type": "application/json" } });
 
     const requestBody = () => JSON.parse(fetchStub.mock.calls.at(-1)?.[1]?.body as string) as { query: string; variables: { request: CollabGatewayRequest } };
@@ -319,33 +320,33 @@ describe("collabGatewayTransport", () => {
     });
 
     it("returns the gateway's typed outcome untouched", async () => {
-        const outcome: CollabGatewayOutcome = { ok: false, failure: { op: "readTask", kind: "denied", reason: "membership", retryable: false } };
+        const outcome: CollabGatewayReply = { ok: false, failure: { op: "readTask", kind: "denied", reason: "membership", retryable: false } };
         fetchStub.mockResolvedValue(okEnvelope(COLLAB_GATEWAY_READ_FIELD, outcome));
         const answer = await collabGatewayTransport({ accessToken: "tok", request: { workspaceId: "ws-1", op: "readTask", input: { taskId: "t-1" } } });
-        expect(answer).toEqual(outcome);
+        expect(answer).toMatchObject({ ok: false, kind: "forbidden", code: "COLLAB_DENIED", reason: "membership", retryable: false });
     });
 
     it("maps http refusals, graphql errors, malformed bodies and dead networks to retryable-or-denied failures", async () => {
         fetchStub.mockResolvedValue(new Response("nope", { status: 403 }));
         const forbidden = await collabGatewayTransport({ accessToken: "tok", request: { workspaceId: "ws-1", op: "openOffice", input: {} } });
-        expect(forbidden).toEqual({ ok: false, failure: { op: "openOffice", kind: "denied", reason: "http:403", retryable: false } });
+        expect(forbidden).toMatchObject({ ok: false, kind: "forbidden", status: 403, retryable: false });
 
         fetchStub.mockResolvedValue(new Response(JSON.stringify({ errors: [{ message: "bad document" }] }), { status: 200 }));
         const gqlError = await collabGatewayTransport({ accessToken: "tok", request: { workspaceId: "ws-1", op: "openOffice", input: {} } });
-        expect(gqlError).toMatchObject({ ok: false, failure: { kind: "unavailable", retryable: true } });
+        expect(gqlError).toMatchObject({ ok: false, kind: "unavailable", code: "GRAPHQL", reason: "bad document", retryable: true });
 
         fetchStub.mockResolvedValue(new Response("not json", { status: 200 }));
         const malformed = await collabGatewayTransport({ accessToken: "tok", request: { workspaceId: "ws-1", op: "openOffice", input: {} } });
-        expect(malformed).toMatchObject({ ok: false, failure: { kind: "unknown", reason: "malformed", retryable: true } });
+        expect(malformed).toMatchObject({ ok: false, kind: "unavailable", code: "MALFORMED", retryable: true });
 
         fetchStub.mockRejectedValue(new Error("offline"));
         const network = await collabGatewayTransport({ accessToken: "tok", request: { workspaceId: "ws-1", op: "openOffice", input: {} } });
-        expect(network).toEqual({ ok: false, failure: { op: "openOffice", kind: "unavailable", reason: "network", retryable: true } });
+        expect(network).toMatchObject({ ok: false, kind: "unavailable", code: "NETWORK", retryable: true });
     });
 
     it("refuses a payload that is not the boundary's outcome shape", async () => {
-        fetchStub.mockResolvedValue(okEnvelope(COLLAB_GATEWAY_READ_FIELD, { unexpected: true } as unknown as CollabGatewayOutcome));
+        fetchStub.mockResolvedValue(okEnvelope(COLLAB_GATEWAY_READ_FIELD, { unexpected: true } as unknown as CollabGatewayReply));
         const answer = await collabGatewayTransport({ accessToken: "tok", request: { workspaceId: "ws-1", op: "openOffice", input: {} } });
-        expect(answer).toMatchObject({ ok: false, failure: { kind: "unknown", reason: "malformed", retryable: true } });
+        expect(answer).toMatchObject({ ok: false, kind: "unavailable", code: "COLLAB_UNKNOWN", reason: "malformed", retryable: true });
     });
 });

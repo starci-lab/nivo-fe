@@ -1,6 +1,6 @@
 "use client";
 import { useMutateReindexAgentWorkspaceKnowledgeSwr, useMutateRunAgentosAiReadinessTestSwr, useQueryMyAgentosAiKnowledgeReadinessSwr } from "@/hooks";
-import { type AgentosAiKnowledgeReadiness } from "@/modules/api/console";
+import { type AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge";
 import { nivoQueryData } from "@/modules/query";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";

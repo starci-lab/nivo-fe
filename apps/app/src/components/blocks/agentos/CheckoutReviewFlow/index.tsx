@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { getPathname } from "@/modules/i18n/navigation";
 import { useSession } from "@/hooks";
 import { useMutateWorkspaceCheckoutStartSwr, useQueryWorkspaceCheckoutOffersSwr, useRouter } from "@/hooks";
-import type { WorkspaceCheckoutOffer, WorkspaceCheckoutOutcome, WorkspaceCheckoutPaymentRail, WorkspaceCheckoutStartRequest } from "@/modules/api/workspace-controlplane";
+import type { WorkspaceCheckoutOffer, WorkspaceCheckoutAnswer, WorkspaceCheckoutPaymentRail, WorkspaceCheckoutStartRequest } from "@/modules/api/workspace-controlplane";
 import { CheckoutReviewFlowBase, type CheckoutReviewCopy, type CheckoutReviewFacts, type CheckoutReviewFlowBaseProps, type CheckoutReviewRailOption } from "./component";
 
 /** What the route hands the connected checkout owner: which frozen offer and entitlement to review. */
@@ -40,7 +40,7 @@ const purchaseStatusPath = (purchaseId: string): string => `/agentos/workspaces/
 const retryKeyFor = (offer: WorkspaceCheckoutOffer): string => `start-checkout:${offer.offerId}@${offer.offerVersion}`;
 
 /** The provider action's own redirect destination, when the action carries one. */
-const redirectDestination = (outcome: WorkspaceCheckoutOutcome): string | null => {
+const redirectDestination = (outcome: WorkspaceCheckoutAnswer): string | null => {
     if (outcome.status !== "prepared" || outcome.paymentAction === null) return null;
     const destination = outcome.paymentAction.payload["url"];
     return typeof destination === "string" && destination.length > 0 ? destination : null;
@@ -139,7 +139,7 @@ const CheckoutReviewFlow = (props: CheckoutReviewFlowProps) => {
         purchaser: null,
     });
     /** Route an answer that named a purchase which already left the checkout cursor to its status surface. */
-    const routeAdvancedPurchase = (outcome: WorkspaceCheckoutOutcome): boolean => {
+    const routeAdvancedPurchase = (outcome: WorkspaceCheckoutAnswer): boolean => {
         const named = "purchaseId" in outcome && typeof outcome.purchaseId === "string" ? outcome.purchaseId : null;
         if (named !== null) setPurchaseRef(named);
         const state = outcome.status === "prepared" || outcome.status === "status" ? outcome.purchase.state : null;
@@ -147,7 +147,7 @@ const CheckoutReviewFlow = (props: CheckoutReviewFlowProps) => {
         router.push(purchaseStatusPath(named));
         return true;
     };
-    const settleStartAnswer = (outcome: WorkspaceCheckoutOutcome) => {
+    const settleStartAnswer = (outcome: WorkspaceCheckoutAnswer) => {
         if (outcome.status === "prepared") {
             if (outcome.purchaseId !== null) setPurchaseRef(outcome.purchaseId);
             if (routeAdvancedPurchase(outcome)) return;

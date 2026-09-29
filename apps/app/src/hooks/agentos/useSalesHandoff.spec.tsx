@@ -43,7 +43,7 @@ const messageFor = (key: string): string => {
 };
 const translate = (key: string, values?: Readonly<Record<string, string | number | undefined>>): string =>
   Object.entries(values ?? {}).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), messageFor(key));
-const handoffAnswer = (status: string, revision = 2) => ({ ok: true, value: { handoffId: "handoff-1", status, orderRevision: 4, actionId: null, revision } });
+const handoffAnswer = (status: string, revision = 2) => ({ ok: true, data: { handoffId: "handoff-1", status, orderRevision: 4, actionId: null, revision } });
 const render = () => renderHook(() => useSalesHandoff("workspace-1", "installation-1", translate));
 
 /** The rendered controller one submission is driven through. */
@@ -166,7 +166,7 @@ describe("useSalesHandoff", () => {
   });
 
   it("takes the outcome it shows from the readback, not from the press", async () => {
-    mocks.submitHandoff.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, value: { status: "prepared" } })) };
+    mocks.submitHandoff.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, data: { status: "prepared" } })) };
     mocks.handoffRead.mockReturnValue(mocks.query(handoffAnswer("prepared"), vi.fn(async () => handoffAnswer("accounting-admitted", 3))).value);
     const { result } = render();
     nameHandoff(result);
@@ -176,7 +176,7 @@ describe("useSalesHandoff", () => {
   });
 
   it("says a submission did not settle while the handoff still reads as prepared", async () => {
-    mocks.submitHandoff.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, value: { status: "prepared" } })) };
+    mocks.submitHandoff.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, data: { status: "prepared" } })) };
     mocks.handoffRead.mockReturnValue(mocks.query(handoffAnswer("prepared"), vi.fn(async () => handoffAnswer("prepared"))).value);
     const { result } = render();
     nameHandoff(result);

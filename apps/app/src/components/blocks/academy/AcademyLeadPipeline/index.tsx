@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMutateDraftLeadReplySwr, useMutateUpdateExpertSiteLeadSwr, useQueryMyExpertSiteLeadsSwr } from "@/hooks";
-import type { ExpertSiteLead } from "@/modules/api/console";
+import type { ExpertSiteLead } from "@/modules/api/academy";
 import { nivoQueryData } from "@/modules/query";
 import { AcademyLeadPipelineBase } from "./component";
 

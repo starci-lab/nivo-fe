@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { usePathname, useQueryMyAgentosModuleInstallationsSwr, useRouter } from "@/hooks";
 import { nivoQueryData } from "@/modules/query";
-import type { AgentosModuleInstallation } from "@/modules/api/console";
+import type { AgentosModuleInstallation } from "@/modules/api/agentos-modules";
 import type { SelectionListGroup, SelectionListItem } from "@nivo/ui";
 import { AgentOSInstallationChromeBase, type AgentOSInstallationChromeBaseProps } from "./component";
 

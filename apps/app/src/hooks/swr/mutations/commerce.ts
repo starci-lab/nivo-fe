@@ -1,6 +1,6 @@
 "use client";
 
-import { createWalletTopUpPayLink, payInvoice } from "@/modules/api/console";
+import { createWalletTopUpPayLink, payInvoice } from "@/modules/api/commerce";
 import { useNivoMutation } from "../useNivoMutation";
 type WalletTopUpInput = {
   readonly amountVnd: number;

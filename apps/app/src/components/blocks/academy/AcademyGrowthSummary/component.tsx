@@ -1,6 +1,6 @@
 import { LabelledProgressRow } from "@nivo/ui";
 import { SurfaceCard, Text } from "@starci/grammar/common";
-import type { AcademyGrowthSnapshot } from "@/modules/api/console";
+import type { AcademyGrowthSnapshot } from "@/modules/api/academy";
 
 /** Resolved copy for the growth block. */
 export type AcademyGrowthSummaryProps = AcademyGrowthSummaryViewProps;

@@ -208,24 +208,6 @@ const SessionEndingQuery = (props: SessionEndingQueryProps) => {
   return null;
 };
 
-/**
- * The transport codes that mean NOBODY DECIDED.
- *
- * A request that never arrived, could not be parsed, was refused before any resolver ran, or came
- * back empty is not an answer about the reader's credential - and reporting one as a refusal would
- * tell somebody their password was wrong during an outage. Every one of them is presented as the
- * same non-refusal try-again sentence an undecided result wears.
- */
-const UNANSWERED_CODES = new Set(["NETWORK", "MALFORMED", "GRAPHQL", "EMPTY"]);
-
-/**
- * Whether a failed result means the control plane never decided.
- *
- * @param code - The transport's own code, when it published one.
- * @returns Whether the failure is "no answer" rather than a refusal.
- */
-const isUnanswered = (code: string | undefined): boolean => code !== undefined && UNANSWERED_CODES.has(code);
-
 /** What the shell's address leaf reported off the live query; null until a hand-off lands. */
 type AuthenticationPageConnectedProps = {
   readonly sessionEnding: SessionEndingArrival | null;
@@ -616,7 +598,7 @@ const AuthenticationPageConnected = (props: AuthenticationPageConnectedProps) =>
           continuationReference: reference
         }));
         if (!continued.ok) {
-          if (isUnanswered(continued.code)) hesitate(t("signIn.oauthUndecided"));
+          if (continued.kind === "unavailable") hesitate(t("signIn.oauthUndecided"));
           else refuse(t("signIn.oauthRefused"));
           return;
         }
@@ -634,7 +616,7 @@ const AuthenticationPageConnected = (props: AuthenticationPageConnectedProps) =>
     if (result === undefined || hasAdoptedOauth.current) return;
     hasAdoptedOauth.current = true;
     if (!result.ok) {
-      if (isUnanswered(result.code)) hesitate(t("signIn.oauthUndecided"));
+      if (result.kind === "unavailable") hesitate(t("signIn.oauthUndecided"));
       else refuse(t("signIn.oauthRefused"));
       return;
     }
@@ -660,7 +642,7 @@ const AuthenticationPageConnected = (props: AuthenticationPageConnectedProps) =>
       }));
       if (!result.ok) {
         // THE ATTEMPT IS STILL OPEN CONCEPTUALLY when nobody answered, so the identity stays.
-        if (isUnanswered(result.code)) {
+        if (result.kind === "unavailable") {
           hesitate(t("signIn.undecided"));
           return;
         }
@@ -726,7 +708,7 @@ const AuthenticationPageConnected = (props: AuthenticationPageConnectedProps) =>
         otp: code.otp
       }));
       if (!result.ok) {
-        if (isUnanswered(result.code)) {
+        if (result.kind === "unavailable") {
           hesitate(t("signUp.undecided"));
           return;
         }
@@ -780,7 +762,7 @@ const AuthenticationPageConnected = (props: AuthenticationPageConnectedProps) =>
       newPassword: code.newPassword
     }));
     if (!result.ok) {
-      if (isUnanswered(result.code)) {
+      if (result.kind === "unavailable") {
         hesitate(t("signUp.undecided"));
         return;
       }
@@ -801,7 +783,7 @@ const AuthenticationPageConnected = (props: AuthenticationPageConnectedProps) =>
       code: factor.code
     }));
     if (!result.ok) {
-      if (isUnanswered(result.code)) {
+      if (result.kind === "unavailable") {
         hesitate(t("signIn.undecided"));
         return;
       }

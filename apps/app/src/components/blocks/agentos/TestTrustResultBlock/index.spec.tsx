@@ -5,7 +5,7 @@ import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n/config"
 import { describe, expect, it } from "vitest"
-import type { AgentosModuleTestAssertionResult, AgentosModuleTestContract, AgentosModuleTestRun } from "@/modules/api/console"
+import type { AgentosModuleTestAssertionResult, AgentosModuleTestContract, AgentosModuleTestRun } from "@/modules/api/agentos-module-tests"
 import { TestTrustResultBlock as ActualTestTrustResultBlock, type TestTrustResultBlockCopy } from "."
 
 type CopyTranslator = (key: string, values?: Readonly<Record<string, string | number>>) => string

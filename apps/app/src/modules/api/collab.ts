@@ -10,7 +10,7 @@
  * `collabGatewayCommand` the closed command ops (`contract.collab.chat` rev 5,
  * `sds.collab.chat-gateway` rev 4, `impl.collab.nivo-backend.gateway`). Each takes one
  * `CollabGatewayRequest {workspaceId, op, input}` and returns one typed
- * `CollabGatewayOutcome` - never throws. The verified-bearer guard derives the actor
+ * `CollabGatewayReply` - never throws. The verified-bearer guard derives the actor
  * (Login principal plus its `email_verified` email); the request carries only the
  * workspace scope, the operation name and the domain input. This module mirrors that
  * closed operation set and its projections one-for-one; it owns no second task
@@ -34,24 +34,23 @@
  * grant and never inferred client-side from the session token, roster order or a display
  * name; the roster identities are what a Tasks person or module filter matches.
  *
- * WHY NOT `graphql()`. The shared transport unwraps the `GraphQLTransformInterceptor`
- * envelope `{success, message, error, data}`; a gateway outcome is itself the typed
+ * WHY NOT `graphql()`. The shared client unwraps the `GraphQLTransformInterceptor`
+ * envelope `{success, message, error, data}`; a gateway reply is itself the typed
  * answer (`{ok:true, op, result}` / `{ok:false, failure}`) and would be mangled by that
- * unwrap. So this module posts its own document and reads the field payload bare, the
- * same way `chatbotCoreRequest` does for the chatbot gateway.
+ * unwrap. So this module sends its own document through `graphqlFields` and reads the
+ * field payload bare, the same way `chatbotCoreRequest` does for the chatbot gateway.
  *
  * WHY FAILURE KIND AND RETRYABILITY SURVIVE. The contract separates a non-disclosing
  * denial (a foreign or former member learns nothing, retrying is pointless) from an
  * unavailable or unknown outcome (safe to reconcile and retry). Collapsing them into one
  * `ok:false` is exactly how a client invents work or leaks a workspace boundary, so
- * `CollabResult` keeps `kind` and `retryable` where plain `Result<T>` only keeps `code`.
+ * the shared `Outcome` keeps `kind`, `code` and `retryable`: a denial is `forbidden` or `refused`,
+ * a conflict is `invalid` under `COLLAB_CONFLICT`, and only `unavailable` says try again.
  */
 
-import type { Result } from "./graphql"
+import { graphqlFields } from "./graphql"
+import { failed, type FailureKind, type Outcome } from "./outcome"
 import type { CollabTurnState } from "../collab"
-
-/** Where the core API answers; same endpoint the shared transport uses. */
-const COLLAB_ENDPOINT = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql";
 
 /** The served query field the closed read ops travel on (`CollabGatewayResolver`). */
 export const COLLAB_GATEWAY_READ_FIELD = "collabGatewayRead";
@@ -93,7 +92,7 @@ const COLLAB_READ_OPERATIONS: ReadonlySet<CollabOperation> = new Set([
     "reconcileRequest",
 ]);
 
-/** The failure vocabulary the gateway maps; member-visible denial never discloses scope. */
+/** The failure vocabulary the gateway states on the wire; member-visible denial never discloses scope. */
 export type CollabFailureKind =
     | "unauthenticated"
     | "denied"
@@ -119,32 +118,16 @@ export type CollabGatewayRequest = {
 };
 
 /**
- * The tagged outcome the gateway returns. `op` echoes the operation answered so a
+ * The tagged reply the gateway returns. `op` echoes the operation answered so a
  * caller can never mistake which request a page belongs to.
  */
-export type CollabGatewayOutcome = {
+export type CollabGatewayReply = {
     readonly ok: true;
     readonly op: CollabOperation;
     readonly result: Record<string, unknown>;
 } | {
     readonly ok: false;
     readonly failure: CollabFailure;
-};
-
-/**
- * What a caller gets back. Unlike plain `Result<T>`, the refusal keeps the boundary's
- * own `kind` and `retryable`, because "denied" and "unavailable" demand opposite client
- * behaviour (never retry versus reconcile and retry).
- */
-export type CollabResult<T> = {
-    readonly ok: true;
-    readonly data: T;
-} | {
-    readonly ok: false;
-    readonly code: string;
-    readonly reason: string;
-    readonly kind: CollabFailureKind | null;
-    readonly retryable: boolean;
 };
 
 /* ------------------------------------------------------------------ */
@@ -560,38 +543,31 @@ export type CollabTransportCall = {
     readonly request: CollabGatewayRequest;
 };
 
+/** What the ingress answered for one request: the operation echoed and its own result record. */
+export type CollabServed = {
+    readonly op: CollabOperation;
+    readonly result: Record<string, unknown>;
+};
+
 /** How one tagged member request travels; the app binds exactly one implementation. */
-export type CollabTransport = (call: CollabTransportCall) => Promise<CollabGatewayOutcome>;
+export type CollabTransport = (call: CollabTransportCall) => Promise<Outcome<CollabServed>>;
 
-/** How a caller supplies the reader's language without this module knowing routing. */
-export type CollabLocaleReader = () => string;
-
-/**
- * The language every Collab refusal should come back in; mirrors `readLocale` in
- * `graphql.ts`. The backend interceptor currently answers English regardless - the
- * header rides anyway so the day per-request locale lands, Collab is already honest.
- */
-let readCollabLocale: CollabLocaleReader = (): string => "vi";
-
-/**
- * Tell the Collab transport which language the reader is in.
- *
- * THE MODULE-SIDE DOOR, deliberately not a hook: a `modules/` owner binds its reader here
- * directly, while a component binds through the `useCollabLocaleFrom` hook (`@/hooks`),
- * which calls this setter - the dependency runs one way.
- *
- * @param reader - Answers with the active locale.
- */
-export const setCollabLocaleReader = (reader: CollabLocaleReader) => {
-    readCollabLocale = reader;
+/** Which shared failure kind each failure the gateway states on the wire is. */
+const COLLAB_FAILURE_KIND_MAP: Readonly<Record<CollabFailureKind, FailureKind>> = {
+    unauthenticated: "refused",
+    denied: "forbidden",
+    invalid: "invalid",
+    conflict: "invalid",
+    unavailable: "unavailable",
+    unknown: "unavailable",
 };
 
 const collabFailure = (
-    kind: CollabFailureKind | null,
+    kind: CollabFailureKind,
     code: string,
     reason: string,
     retryable: boolean,
-): CollabResult<never> => ({ ok: false, code, reason, kind, retryable });
+) => failed(COLLAB_FAILURE_KIND_MAP[kind], { code, reason, retryable });
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
     typeof value === "object" && value !== null && !Array.isArray(value);
@@ -605,8 +581,8 @@ const COLLAB_FAILURE_KINDS: ReadonlySet<string> = new Set([
     "unknown",
 ]);
 
-/** Reject anything that is not the boundary's own outcome shape before trusting it. */
-const readOutcome = (value: unknown): CollabGatewayOutcome | null => {
+/** Reject anything that is not the boundary's own reply shape before trusting it. */
+const readReply = (value: unknown): CollabGatewayReply | null => {
     if (!isRecord(value) || typeof value.ok !== "boolean") {
         return null;
     }
@@ -637,63 +613,39 @@ const readOutcome = (value: unknown): CollabGatewayOutcome | null => {
 };
 
 /**
+ * What one reply of the gateway says, as the shared outcome: the served operation and its result
+ * record, or the failure kind the gateway stated under its own `COLLAB_<KIND>` code.
+ */
+export const collabOutcomeOfReply = (reply: CollabGatewayReply): Outcome<CollabServed> => {
+    if (reply.ok) {
+        return { ok: true, data: { op: reply.op, result: reply.result } };
+    }
+    return collabFailure(reply.failure.kind, `COLLAB_${reply.failure.kind.toUpperCase()}`, reply.failure.reason, reply.failure.retryable);
+};
+
+/**
  * The default binding: one tagged-request document to the shared core GraphQL endpoint,
  * `collabGatewayRead` for reads and `collabGatewayCommand` for writes - the door
  * `CollabGatewayResolver` serves (`sds.collab.chat-gateway` rev 4). The request argument
  * is exactly `{workspaceId, op, input}`; the field's GraphQLJSON payload is the typed
  * outcome itself, read bare rather than through the shared envelope unwrap.
  */
-export const collabGatewayTransport: CollabTransport = async ({ accessToken, request }): Promise<CollabGatewayOutcome> => {
+export const collabGatewayTransport: CollabTransport = async ({ accessToken, request }) => {
     const field = COLLAB_READ_OPERATIONS.has(request.op)
         ? COLLAB_GATEWAY_READ_FIELD
         : COLLAB_GATEWAY_COMMAND_FIELD;
     const document = COLLAB_READ_OPERATIONS.has(request.op)
         ? `query CollabGateway($request: CollabGatewayRequest!) { ${field}(request: $request) }`
         : `mutation CollabGateway($request: CollabGatewayRequest!) { ${field}(request: $request) }`;
-    let response: Response;
-    try {
-        response = await fetch(COLLAB_ENDPOINT, {
-            method: "POST",
-            credentials: "include",
-            headers: {
-                "content-type": "application/json",
-                "accept-language": readCollabLocale(),
-                ...(accessToken === "" ? {} : { authorization: `Bearer ${accessToken}` }),
-            },
-            body: JSON.stringify({ query: document, variables: { request } }),
-        });
-    } catch {
-        return { ok: false, failure: { op: request.op, kind: "unavailable", reason: "network", retryable: true } };
+    const answered = await graphqlFields(document, { request }, { accessToken });
+    if (!answered.ok) {
+        return answered;
     }
-    if (!response.ok) {
-        return {
-            ok: false,
-            failure: {
-                op: request.op,
-                kind: response.status === 401 || response.status === 403 ? "denied" : "unavailable",
-                reason: `http:${response.status}`,
-                retryable: response.status !== 401 && response.status !== 403,
-            },
-        };
+    const reply = readReply(answered.data[field]);
+    if (reply === null) {
+        return collabFailure("unknown", "COLLAB_UNKNOWN", "malformed", true);
     }
-    let body: { data?: Record<string, unknown>; errors?: ReadonlyArray<{ message: string }> };
-    try {
-        body = await response.json();
-    } catch {
-        return { ok: false, failure: { op: request.op, kind: "unknown", reason: "malformed", retryable: true } };
-    }
-    if (body.errors !== undefined && body.errors.length > 0) {
-        return {
-            ok: false,
-            failure: { op: request.op, kind: "unavailable", reason: `graphql:${body.errors[0].message}`, retryable: true },
-        };
-    }
-    const payload = body.data === undefined ? undefined : body.data[field];
-    const outcome = readOutcome(payload);
-    if (outcome === null) {
-        return { ok: false, failure: { op: request.op, kind: "unknown", reason: "malformed", retryable: true } };
-    }
-    return outcome;
+    return collabOutcomeOfReply(reply);
 };
 
 /**
@@ -723,25 +675,24 @@ const collabRequest = async <T>(
     op: CollabOperation,
     input: Readonly<Record<string, unknown>>,
     pick: (result: Record<string, unknown>) => T,
-): Promise<CollabResult<T>> => {
+): Promise<Outcome<T>> => {
     if (accessToken === "") {
         return collabFailure("unauthenticated", "COLLAB_UNAUTHENTICATED", "sign-in required", false);
     }
     if (workspaceId === "") {
         return collabFailure("invalid", "COLLAB_INVALID", "workspaceId required", false);
     }
-    let outcome: CollabGatewayOutcome;
+    let served: Outcome<CollabServed>;
     try {
-        outcome = await transport({ accessToken, request: { workspaceId, op, input } });
+        served = await transport({ accessToken, request: { workspaceId, op, input } });
     } catch {
         return collabFailure("unknown", "COLLAB_UNKNOWN", "transport threw", true);
     }
-    if (!outcome.ok) {
-        const code = `COLLAB_${outcome.failure.kind.toUpperCase().replace(/-/g, "_")}`;
-        return collabFailure(outcome.failure.kind, code, outcome.failure.reason, outcome.failure.retryable);
+    if (!served.ok) {
+        return served;
     }
     try {
-        return { ok: true, data: pick(outcome.result) };
+        return { ok: true, data: pick(served.data.result) };
     } catch {
         // An ok outcome whose result record is not the op's own shape is
         // untrusted wire data, not a crash: a retryable unknown, never success.
@@ -852,11 +803,11 @@ export type CollabChangeRoleCall = CollabCallScope & {
 };
 
 /** `openOffice`: a current member lands in the one Office group with its roster and viewer identity. */
-export const openCollabOffice = (args: CollabCallScope): Promise<CollabResult<CollabOfficeView>> =>
+export const openCollabOffice = (args: CollabCallScope): Promise<Outcome<CollabOfficeView>> =>
     collabRequest(args.accessToken, args.workspaceId, "openOffice", {}, (r) => readResultField(r, "office") as CollabOfficeView);
 
 /** `readGroup`: the authorized conversation page under a resumable cursor. */
-export const readCollabGroup = (args: CollabPageCall): Promise<CollabResult<CollabGroupRead>> =>
+export const readCollabGroup = (args: CollabPageCall): Promise<Outcome<CollabGroupRead>> =>
     collabRequest(
         args.accessToken,
         args.workspaceId,
@@ -893,7 +844,7 @@ const FORBIDDEN_AUTHORITY_CLAIMS = new Set([
  * `changeMemberRole`'s `memberId`/`role`) are passed in `allowed` - they name the
  * invitee or target, never the actor.
  */
-const rejectAuthorityClaims = (op: string, args: Readonly<Record<string, unknown>>, allowed: ReadonlyArray<string>): CollabResult<never> | null => {
+const rejectAuthorityClaims = (op: string, args: Readonly<Record<string, unknown>>, allowed: ReadonlyArray<string>): Outcome<never> | null => {
     const claim = Object.keys(args).find((key): boolean => FORBIDDEN_AUTHORITY_CLAIMS.has(key) && !allowed.includes(key));
     return claim === undefined
         ? null
@@ -906,7 +857,7 @@ const rejectAuthorityClaims = (op: string, args: Readonly<Record<string, unknown
  * identity is a refusal, not an edit. `route` is the admission answer; `answer` carries
  * the bound question-answer when the message closed one.
  */
-export const postCollabMessage = (args: CollabPostMessageCall): Promise<CollabResult<CollabPostMessageOutcome>> => {
+export const postCollabMessage = (args: CollabPostMessageCall): Promise<Outcome<CollabPostMessageOutcome>> => {
     const refused = rejectAuthorityClaims("postMessage", args, []);
     if (refused !== null) {
         return Promise.resolve(refused);
@@ -929,7 +880,7 @@ export const postCollabMessage = (args: CollabPostMessageCall): Promise<CollabRe
 };
 
 /** `pressApprovalButton`: the exact card, the exact two-button control value. */
-export const pressCollabApprovalButton = (args: CollabPressApprovalCall): Promise<CollabResult<CollabPressApprovalButtonOutcome>> => {
+export const pressCollabApprovalButton = (args: CollabPressApprovalCall): Promise<Outcome<CollabPressApprovalButtonOutcome>> => {
     const refused = rejectAuthorityClaims("pressApprovalButton", args, []);
     if (refused !== null) {
         return Promise.resolve(refused);
@@ -944,7 +895,7 @@ export const pressCollabApprovalButton = (args: CollabPressApprovalCall): Promis
 };
 
 /** `listTasks`: the authorized Tasks page; every filter is presentation only. */
-export const listCollabTasks = (args: CollabListTasksCall): Promise<CollabResult<CollabTaskList>> =>
+export const listCollabTasks = (args: CollabListTasksCall): Promise<Outcome<CollabTaskList>> =>
     collabRequest(
         args.accessToken,
         args.workspaceId,
@@ -960,7 +911,7 @@ export const listCollabTasks = (args: CollabListTasksCall): Promise<CollabResult
     );
 
 /** `readTask`: the same authoritative task the Office card reads, plus its card target. */
-export const readCollabTask = (args: CollabReadTaskCall): Promise<CollabResult<CollabReadTaskOutcome>> =>
+export const readCollabTask = (args: CollabReadTaskCall): Promise<Outcome<CollabReadTaskOutcome>> =>
     collabRequest(
         args.accessToken,
         args.workspaceId,
@@ -970,7 +921,7 @@ export const readCollabTask = (args: CollabReadTaskCall): Promise<CollabResult<C
     );
 
 /** `availableCommands`: resolve one typed `@` name to its published command set. */
-export const readCollabAvailableCommands = (args: CollabCommandsCall): Promise<CollabResult<CollabAvailableCommandsOutcome>> =>
+export const readCollabAvailableCommands = (args: CollabCommandsCall): Promise<Outcome<CollabAvailableCommandsOutcome>> =>
     collabRequest(
         args.accessToken,
         args.workspaceId,
@@ -980,7 +931,7 @@ export const readCollabAvailableCommands = (args: CollabCommandsCall): Promise<C
     );
 
 /** `readNotices`: the member's outstanding turn notices under a resumable cursor. */
-export const readCollabNotices = (args: CollabPageCall): Promise<CollabResult<CollabTurnNoticePage>> =>
+export const readCollabNotices = (args: CollabPageCall): Promise<Outcome<CollabTurnNoticePage>> =>
     collabRequest(
         args.accessToken,
         args.workspaceId,
@@ -990,7 +941,7 @@ export const readCollabNotices = (args: CollabPageCall): Promise<CollabResult<Co
     );
 
 /** `openNotice`: follow one named notice to its live authoritative target. */
-export const openCollabNotice = (args: CollabOpenNoticeCall): Promise<CollabResult<CollabOpenTurnNoticeOutcome>> =>
+export const openCollabNotice = (args: CollabOpenNoticeCall): Promise<Outcome<CollabOpenTurnNoticeOutcome>> =>
     collabRequest(
         args.accessToken,
         args.workspaceId,
@@ -1004,7 +955,7 @@ export const openCollabNotice = (args: CollabOpenNoticeCall): Promise<CollabResu
  * uncertain submit. `matched` returns the durable binding and its receiver-owned
  * receipt; an intent that committed is never resent.
  */
-export const reconcileCollabRequest = (args: CollabReconcileCall): Promise<CollabResult<CollabReconcileOutcome>> =>
+export const reconcileCollabRequest = (args: CollabReconcileCall): Promise<Outcome<CollabReconcileOutcome>> =>
     collabRequest(
         args.accessToken,
         args.workspaceId,
@@ -1020,7 +971,7 @@ export const reconcileCollabRequest = (args: CollabReconcileCall): Promise<Colla
 /* ------------------------------------------------------------------ */
 
 /** `inviteByEmail`: one invitation naming exactly one V1 human role. */
-export const inviteCollabMemberByEmail = (args: CollabInviteCall): Promise<CollabResult<CollabInviteOutcome>> => {
+export const inviteCollabMemberByEmail = (args: CollabInviteCall): Promise<Outcome<CollabInviteOutcome>> => {
     const refused = rejectAuthorityClaims("inviteByEmail", args, ["email", "role"]);
     if (refused !== null) {
         return Promise.resolve(refused);
@@ -1045,7 +996,7 @@ export const inviteCollabMemberByEmail = (args: CollabInviteCall): Promise<Colla
  * call carries only the invitation identity and an optional display name - never an
  * accepter email, phone, role, grant or principal, which the guard above refuses.
  */
-export const acceptCollabInvitation = (args: CollabAcceptInvitationCall): Promise<CollabResult<CollabAcceptOutcome>> => {
+export const acceptCollabInvitation = (args: CollabAcceptInvitationCall): Promise<Outcome<CollabAcceptOutcome>> => {
     const refused = rejectAuthorityClaims("acceptInvitation", args, []);
     if (refused !== null) {
         return Promise.resolve(refused);
@@ -1066,7 +1017,7 @@ export const acceptCollabInvitation = (args: CollabAcceptInvitationCall): Promis
 };
 
 /** `withdrawInvitation`: a current Owner closes one pending invitation. */
-export const withdrawCollabInvitation = (args: CollabWithdrawInvitationCall): Promise<CollabResult<CollabWithdrawOutcome>> => {
+export const withdrawCollabInvitation = (args: CollabWithdrawInvitationCall): Promise<Outcome<CollabWithdrawOutcome>> => {
     const refused = rejectAuthorityClaims("withdrawInvitation", args, []);
     if (refused !== null) {
         return Promise.resolve(refused);
@@ -1087,7 +1038,7 @@ export const withdrawCollabInvitation = (args: CollabWithdrawInvitationCall): Pr
 };
 
 /** `changeMemberRole`: a current Owner replaces one member's role. */
-export const changeCollabMemberRole = (args: CollabChangeRoleCall): Promise<CollabResult<CollabChangeMemberRoleOutcome>> => {
+export const changeCollabMemberRole = (args: CollabChangeRoleCall): Promise<Outcome<CollabChangeMemberRoleOutcome>> => {
     const refused = rejectAuthorityClaims("changeMemberRole", args, ["memberId", "role"]);
     if (refused !== null) {
         return Promise.resolve(refused);
@@ -1107,5 +1058,3 @@ export const changeCollabMemberRole = (args: CollabChangeRoleCall): Promise<Coll
     );
 };
 
-/** Result re-export so consumers can test `ok` without importing the transport module. */
-export type { Result };

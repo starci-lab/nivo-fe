@@ -66,7 +66,8 @@ export type ExecuteChatBlockCopy = {
 import { createElement, useState, type ComponentType } from "react";
 import { MarkdownComponent } from "@nivo/ui";
 import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common";
-import type { AgentosRuntimeMessageTree, AgentosRuntimeValue, AgentosRuntimeWidgetNode } from "@/modules/api/console";
+import type { AgentosRuntimeMessageTree } from "@/modules/api/agentos-module-runtime";
+import type { AgentosRuntimeValue, AgentosRuntimeWidgetNode } from "@/modules/api/agentos-runtime-tree";
 
 /** Trusted widget action advertised by the pinned runtime manifest. */
 export type ChatWidgetAction = {

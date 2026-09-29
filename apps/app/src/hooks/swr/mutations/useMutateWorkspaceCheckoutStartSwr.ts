@@ -1,7 +1,7 @@
 "use client";
 
-import type { Result } from "@/modules/api/graphql";
-import { startWorkspaceCheckoutPurchase, type WorkspaceCheckoutOutcome, type WorkspaceCheckoutStartRequest } from "@/modules/api/workspace-controlplane";
+import type { Outcome } from "@/modules/api/outcome";
+import { startWorkspaceCheckoutPurchase, type WorkspaceCheckoutAnswer, type WorkspaceCheckoutStartRequest } from "@/modules/api/workspace-controlplane";
 import { useNivoMutation } from "../useNivoMutation";
 import { workspaceCheckoutStatusQueryKey } from "../queries/useQueryWorkspaceCheckoutStatusSwr";
 
@@ -13,7 +13,7 @@ import { workspaceCheckoutStatusQueryKey } from "../queries/useQueryWorkspaceChe
  */
 
 /** The purchase identity an admission answer names, or null when the answer names none. */
-const admittedPurchaseId = (answer: Result<WorkspaceCheckoutOutcome>): string | null => {
+const admittedPurchaseId = (answer: Outcome<WorkspaceCheckoutAnswer>): string | null => {
   if (!answer.ok || answer.data.status === "offers") return null;
   return answer.data.purchaseId ?? null;
 };

@@ -248,7 +248,7 @@ describe("AuthenticationPage connected journeys", () => {
     })
 
     it("separates an undecided sign-in from a refusal and keeps one request identity across the retry", async () => {
-        mocks.api.signIn.mockResolvedValue({ ok: false, reason: "gateway", code: "NETWORK" })
+        mocks.api.signIn.mockResolvedValue({ ok: false, kind: "unavailable", reason: "gateway", code: "NETWORK" })
         render(<AuthenticationPage />)
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(panel()).toContain(copy("signIn.undecided")))

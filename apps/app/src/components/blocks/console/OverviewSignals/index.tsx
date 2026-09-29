@@ -2,7 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { useOverviewData } from "@/hooks";
-import type { DomainRow } from "@/modules/api/console";
+import type { DomainRow } from "@/modules/api/commerce";
 import { BILLING_CURRENCY } from "@/modules/config";
 import { OverviewSignalsBase, type OverviewSignalsCell } from "./component";
 /** Public API role for OverviewSignalsProps. */

@@ -23,8 +23,9 @@
  * credentials: `CORS_ORIGIN=http://localhost:3067` in `.env.override`.
  */
 
-/** Where the core API answers. Overridable so a deployed build can point at its own host. */
-const ENDPOINT = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql";
+import { CORE_API_URL } from "@/modules/config";
+import { failed, failureKindOfCode, type Failure, type Outcome } from "./outcome";
+import { send } from "./transport";
 
 /**
  * Every response this API sends, whatever the operation.
@@ -58,16 +59,6 @@ export interface Envelope<T> {
  * the payload itself, since the classification below only succeeds with one.
  */
 export type EnvelopeAnswer<T, TExtra extends object> = Envelope<T> & TExtra & { readonly data: T };
-
-/** What a caller gets back: the payload, or the reason there is none. */
-export type Result<T> = {
-  readonly ok: true;
-  readonly data: T;
-} | {
-  readonly ok: false;
-  readonly reason: string;
-  readonly code?: string;
-};
 
 /** How a caller supplies the credential without this module knowing where sessions are kept. */
 export type TokenReader = () => string | null;
@@ -122,100 +113,116 @@ export const setLocaleReader = (reader: LocaleReader) => {
   readLocale = reader;
 };
 
+/** What a caller may pass beside the document: a credential of its own, or a signal that abandons the call. */
+export type GraphqlOptions = {
+  /** Overrides the bound token reader; an empty string sends no credential at all. */
+  readonly accessToken?: string | null;
+  /** Abandon the call when this signal aborts. */
+  readonly signal?: AbortSignal;
+};
+
+type GraphqlBody = {
+  readonly data?: Readonly<Record<string, unknown>> | null;
+  readonly errors?: ReadonlyArray<{
+    readonly message?: string;
+    readonly extensions?: { readonly code?: string };
+  }>;
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
+
+const bodyOf = (value: unknown): GraphqlBody => isRecord(value) ? value as GraphqlBody : {};
+
+/*
+ * A GraphQL-level error is a different animal from a refused operation: the document was wrong, or
+ * the request was unauthenticated before any resolver ran. It never carries the interceptor's
+ * envelope, so it has to be read before the envelope is looked for. The server's own extension code
+ * decides the kind; an error that names none means the operation never ran, so it is unavailable.
+ */
+const graphqlErrorFailure = (body: GraphqlBody, status: number | null): Failure | null => {
+  const first = body.errors?.[0];
+  if (first === undefined) return null;
+  const named = first.extensions?.code;
+  return failed(named === undefined ? "unavailable" : failureKindOfCode(named), {
+    status,
+    code: "GRAPHQL",
+    reason: first.message ?? "graphql"
+  });
+};
+
 /**
- * Run one GraphQL operation and hand back its whole envelope.
+ * Run one GraphQL document and hand back the operation fields of its answer.
  *
- * NEVER THROWS. Every call site is a submit handler or a page render, and both have something better
- * to show than a stack trace: the API's own refusal sentence. A thrown error inside a submit would
- * leave the form in its pending state forever.
- *
- * THE ENVELOPE-STATING DOOR. {@link graphql} is the door for every operation whose answer is `data`
- * and nothing else, which is nearly all of them; this one exists for the operation that states
- * answers beside it, and carries them unchanged. Both classify the same three failures the same way.
+ * THE ONLY GRAPHQL DOOR. The envelope-reading doors below and every gateway that owns a differently
+ * shaped payload (the collaboration and chatbot gateways answer bare JSON, not the interceptor's
+ * envelope) go through here, so the endpoint, the credential, the language and the three failure
+ * modes - the request never arrived, GraphQL refused the document, the answer is not readable - are
+ * decided once. NEVER THROWS.
  *
  * @param query - The operation document.
  * @param variables - Its variables, if any.
+ * @param options - A credential of its own, or a signal that abandons the call.
+ * @returns The `data` object of the response, or why there is none.
+ */
+export const graphqlFields = async (query: string, variables?: Readonly<Record<string, unknown>>, options?: GraphqlOptions): Promise<Outcome<Readonly<Record<string, unknown>>>> => {
+  const sent = await send({
+    url: CORE_API_URL,
+    method: "POST",
+    // The refresh cookie rides on this. Without it `refreshSession` looks like a signed-out
+    // user rather than like a missing credential, which is a much harder failure to read.
+    credentials: "include",
+    accessToken: options?.accessToken === undefined ? readToken() : options.accessToken,
+    /*
+     * Standard `Accept-Language` rather than a private header, so the backend can read it
+     * with the same mechanism any other client would use and no bespoke contract has to
+     * be agreed for it.
+     */
+    locale: readLocale(),
+    json: { query, variables: variables ?? {} },
+    signal: options?.signal
+  });
+  if (!sent.ok) {
+    return graphqlErrorFailure(bodyOf(sent.body), sent.status) ?? sent;
+  }
+  const body = bodyOf(sent.data.body);
+  const refusal = graphqlErrorFailure(body, sent.data.status);
+  if (refusal !== null) return refusal;
+  if (body.data === undefined || body.data === null) {
+    return failed("unavailable", { status: sent.data.status, code: "EMPTY", reason: "empty" });
+  }
+  return { ok: true, data: body.data };
+};
+
+/**
+ * Run one GraphQL operation and hand back its whole envelope.
+ *
+ * THE ENVELOPE-STATING DOOR. {@link graphql} is the door for every operation whose answer is `data`
+ * and nothing else, which is nearly all of them; this one exists for the operation that states
+ * answers beside it, and carries them unchanged. Both classify failures the same way.
+ *
+ * @param query - The operation document.
+ * @param variables - Its variables, if any.
+ * @param options - A credential of its own, or a signal that abandons the call.
  * @returns The whole envelope, or why there is none.
  */
 export const graphqlEnvelope = async <T, TExtra extends object = Record<string, unknown>>(
   query: string,
   variables?: Readonly<Record<string, unknown>>,
-): Promise<Result<EnvelopeAnswer<T, TExtra>>> => {
-  const token = readToken();
-  let response: Response;
-  try {
-    response = await fetch(ENDPOINT, {
-      method: "POST",
-      // The refresh cookie rides on this. Without it `refreshSession` looks like a signed-out
-      // user rather than like a missing credential, which is a much harder failure to read.
-      credentials: "include",
-      headers: {
-        "content-type": "application/json",
-        /*
-         * Standard `Accept-Language` rather than a private header, so the backend can read it
-         * with the same mechanism any other client would use and no bespoke contract has to
-         * be agreed for it.
-         */
-        "accept-language": readLocale(),
-        ...(token === null ? {} : {
-          authorization: `Bearer ${token}`
-        })
-      },
-      body: JSON.stringify({
-        query,
-        variables: variables ?? {}
-      })
-    });
-  } catch {
-    return {
-      ok: false,
-      reason: "network",
-      code: "NETWORK"
-    };
-  }
-  let body: {
-    data?: Record<string, Envelope<T> & TExtra>;
-    errors?: ReadonlyArray<{
-      message: string;
-    }>;
-  };
-  try {
-    body = await response.json();
-  } catch {
-    return {
-      ok: false,
-      reason: "malformed",
-      code: "MALFORMED"
-    };
-  }
-
-  /*
-   * A GraphQL-level error is a different animal from a refused operation: the document was wrong,
-   * or the request was unauthenticated before any resolver ran. It never carries the interceptor's
-   * envelope, so it has to be read before the envelope is looked for.
-   */
-  if (body.errors !== undefined && body.errors.length > 0) {
-    return {
-      ok: false,
-      reason: body.errors[0].message,
-      code: "GRAPHQL"
-    };
-  }
-  const envelope = body.data === undefined ? undefined : Object.values(body.data)[0];
+  options?: GraphqlOptions,
+): Promise<Outcome<EnvelopeAnswer<T, TExtra>>> => {
+  const fields = await graphqlFields(query, variables, options);
+  if (!fields.ok) return fields;
+  const envelope = Object.values(fields.data)[0] as (Envelope<T> & TExtra) | undefined;
   if (envelope === undefined) {
-    return {
-      ok: false,
-      reason: "empty",
-      code: "EMPTY"
-    };
+    return failed("unavailable", { code: "EMPTY", reason: "empty" });
   }
   const { data } = envelope;
-  if (!envelope.success || data === null) {
-    return {
-      ok: false,
-      reason: envelope.message,
-      code: envelope.error ?? undefined
-    };
+  if (!envelope.success) {
+    const code = envelope.error ?? "REFUSED";
+    return failed(failureKindOfCode(code), { code, reason: envelope.message });
+  }
+  if (data === null) {
+    return failed("not-found", { code: envelope.error ?? "NO_DATA", reason: envelope.message });
   }
   return {
     ok: true,
@@ -229,16 +236,17 @@ export const graphqlEnvelope = async <T, TExtra extends object = Record<string, 
 /**
  * Run one GraphQL operation and hand back only its payload.
  *
- * THE DOOR FOR EVERY ORDINARY OPERATION, and its contract is unchanged: the console, accounting and
- * collaboration clients keep reading the payload or the reason there is none, and answers an
- * operation states beside its payload are dropped here rather than changing what they read.
+ * THE DOOR FOR EVERY ORDINARY OPERATION: the console, accounting and collaboration clients read the
+ * payload or the reason there is none, and answers an operation states beside its payload are
+ * dropped here.
  *
  * @param query - The operation document.
  * @param variables - Its variables, if any.
+ * @param options - A credential of its own, or a signal that abandons the call.
  * @returns The unwrapped payload, or why there is none.
  */
-export const graphql = async <T,>(query: string, variables?: Readonly<Record<string, unknown>>): Promise<Result<T>> => {
-  const answer = await graphqlEnvelope<T, Record<string, unknown>>(query, variables);
+export const graphql = async <T,>(query: string, variables?: Readonly<Record<string, unknown>>, options?: GraphqlOptions): Promise<Outcome<T>> => {
+  const answer = await graphqlEnvelope<T, Record<string, unknown>>(query, variables, options);
   if (!answer.ok) {
     return answer;
   }

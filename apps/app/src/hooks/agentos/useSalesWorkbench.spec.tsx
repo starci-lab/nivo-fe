@@ -60,7 +60,7 @@ const messageFor = (key: string): string => {
 };
 const translate = (key: string, values?: Readonly<Record<string, string | number | undefined>>): string =>
   Object.entries(values ?? {}).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), messageFor(key));
-const commandAnswer = (status: string) => ({ ok: true, value: { commandId: "command-1", commandRevision: 2, status, clarification: null, actionIds: [], revision: 2 } });
+const commandAnswer = (status: string) => ({ ok: true, data: { commandId: "command-1", commandRevision: 2, status, clarification: null, actionIds: [], revision: 2 } });
 const render = () => renderHook(() => useSalesWorkbench("installation-1", "en", translate));
 
 /** The rendered controller a press is driven through. */
@@ -128,7 +128,7 @@ describe("useSalesWorkbench settlement", () => {
   });
 
   it("takes the success it shows from the readback, not from the press", async () => {
-    mocks.submitCommand.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, value: { status: "reading" } })) };
+    mocks.submitCommand.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, data: { status: "reading" } })) };
     mocks.commandRead.mockReturnValue(mocks.query(undefined, vi.fn(async () => commandAnswer("accepted"))).value);
     const { result } = render();
     nameCommand(result);
@@ -137,8 +137,8 @@ describe("useSalesWorkbench settlement", () => {
   });
 
   it("says a command did not settle when the readback discloses no new state", async () => {
-    mocks.submitCommand.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, value: { status: "accepted" } })) };
-    mocks.commandRead.mockReturnValue(mocks.query(undefined, vi.fn(async () => ({ ok: true, value: undefined }))).value);
+    mocks.submitCommand.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, data: { status: "accepted" } })) };
+    mocks.commandRead.mockReturnValue(mocks.query(undefined, vi.fn(async () => ({ ok: true, data: undefined }))).value);
     const { result } = render();
     nameCommand(result);
     await act(async () => { result.current.command.onSubmit(); });
@@ -162,7 +162,7 @@ describe("useSalesWorkbench settlement", () => {
     const { result } = render();
     expect(result.current.routine.door).toBe("hold");
     expect(result.current.routine.addressable).toBe(false);
-    mocks.actionRead.mockReturnValue(mocks.query({ ok: true, value: { actionId: "action-1", attemptGeneration: 1, status: "not-started", receiverReceipt: { noStartProofRef: "proof-1", writerFence: { claimTokenHash: "fence-1", fencedAt: "2026-09-25T00:00:00.000Z" } }, observationGap: false, revision: 2 } }).value);
+    mocks.actionRead.mockReturnValue(mocks.query({ ok: true, data: { actionId: "action-1", attemptGeneration: 1, status: "not-started", receiverReceipt: { noStartProofRef: "proof-1", writerFence: { claimTokenHash: "fence-1", fencedAt: "2026-09-25T00:00:00.000Z" } }, observationGap: false, revision: 2 } }).value);
     const attested = render();
     act(() => attested.result.current.routine.setActionId("action-1"));
     expect(attested.result.current.routine.door).toBe("retry");

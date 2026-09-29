@@ -1,5 +1,5 @@
 import { CONTENT_CLASS_NAME } from "./classNames";
-import type { AgentWorkspaceAppCapability } from "@/modules/api/console";
+import type { AgentWorkspaceAppCapability } from "@/modules/api/agentos-workspaces";
 import { Badge as DirectionBadge, Button as DirectionButton, SectionHeader as DirectionHeader, Text as DirectionText, SurfaceCard } from "@starci/grammar/common";
 /** Workspace capabilities and resolved copy consumed by the application block. */
 export type AgentOSWorkspaceApplicationsProps = {

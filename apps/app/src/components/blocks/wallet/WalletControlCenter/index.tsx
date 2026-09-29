@@ -5,7 +5,7 @@ import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useMutateCreateWalletTopUpPayLinkSwr, useMutatePayInvoiceSwr, usePathname, useQueryMyInvoicesSwr, useQueryMyWalletSwr, useQueryMyWalletTransactionsSwr } from "@/hooks";
 import { DEFAULT_LOCALE } from "@/modules/i18n/config";
-import type { InvoiceRow, WalletTopUpPayLink } from "@/modules/api/console";
+import type { InvoiceRow, WalletTopUpPayLink } from "@/modules/api/commerce";
 import { BILLING_CURRENCY } from "@/modules/config";
 import { WalletControlCenterBase, type BalanceSectionView, type LedgerSectionView, type LinkedInvoiceSectionView, type PaymentResultView, type TopUpView, type WalletFactRow, type WalletLedgerRow } from "./component";
 type TopUpSession = {

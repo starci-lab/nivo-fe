@@ -36,7 +36,7 @@ vi.mock("@/hooks", async (importOriginal) => ({
     usePathname: () => mocks.navigation.pathname,
 }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
-vi.mock("@/modules/api/console", () => mocks.api)
+vi.mock("@/modules/api/commerce", () => mocks.api);
 vi.mock("./component", () => ({
     WalletControlCenterBase: (props: WalletProbeProps) => (
         <div>

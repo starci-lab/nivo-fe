@@ -102,7 +102,7 @@ describe("accounting", () => {
     for (const index of [0, 1, 2, 3, 4, 5, 6, 7]) {
       expect(sentInit(index).method).toBe("POST");
       expect(sentInit(index).credentials).toBe("omit");
-      expect(sentInit(index).headers).toEqual({ "Authorization": `Bearer ${TOKEN}`, "Content-Type": "application/json" });
+      expect(sentInit(index).headers).toEqual({ authorization: `Bearer ${TOKEN}`, "content-type": "application/json" });
       expect(sentBody(index).requestId).toBe(INTENT);
     }
     expect(sentBody(2).input).toEqual({ op: "summary", input: { periodStart: "2026-09-01", periodEndExclusive: "2026-10-01", currency: "VND", pageSize: 25, cursor: null } });
@@ -117,25 +117,25 @@ describe("accounting", () => {
 
   it("keeps an unknown outcome unknown, names the matching read, and never re-sends", async () => {
     answerWith(200, { kind: "outcome_unknown", operation: "accounting.routine@1", requestId: INTENT });
-    expect(await commandAccountingRoutine(TOKEN, SCOPE, { action: "retry", intentId: "intent-1", oldAttemptId: "attempt-1", notStartedProofRef: "proof-1", newAttemptId: "attempt-2" }, INTENT)).toEqual({ ok: false, code: "outcome_unknown", operation: "accounting.routine@1", requestId: INTENT, reconciles: "accounting.routineResult@1" });
+    expect(await commandAccountingRoutine(TOKEN, SCOPE, { action: "retry", intentId: "intent-1", oldAttemptId: "attempt-1", notStartedProofRef: "proof-1", newAttemptId: "attempt-2" }, INTENT)).toMatchObject({ ok: false, code: "outcome_unknown", operation: "accounting.routine@1", requestId: INTENT, reconciles: "accounting.routineResult@1" });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("treats a receiver outcome-unknown failure as the same unknown rather than a refusal", async () => {
     answerWith(200, { kind: "accounting_result", operation: "accounting.admitEvidence@1", requestId: INTENT, result: { ok: false, failure: { op: "admitEvidence", error: "outcome-unknown", reasonCode: "controlplane-wait" } } });
-    expect(await commandAccountingAdmitEvidence(TOKEN, SCOPE, { evidenceId: "evidence-1", sourceKind: "statement-import", sourceRef: "s3://source-1", sourceRevision: "2", fingerprint: "fingerprint-1", expectedRevision: 1 }, INTENT)).toEqual({ ok: false, code: "outcome_unknown", operation: "accounting.admitEvidence@1", requestId: INTENT, reconciles: "accounting.evidence@1" });
+    expect(await commandAccountingAdmitEvidence(TOKEN, SCOPE, { evidenceId: "evidence-1", sourceKind: "statement-import", sourceRef: "s3://source-1", sourceRevision: "2", fingerprint: "fingerprint-1", expectedRevision: 1 }, INTENT)).toMatchObject({ ok: false, code: "outcome_unknown", operation: "accounting.admitEvidence@1", requestId: INTENT, reconciles: "accounting.evidence@1" });
   });
 
   it("names no read for a command whose surface registers none", async () => {
     answerWith(200, { kind: "outcome_unknown", operation: "accounting.exception@1", requestId: INTENT });
     const answer = await commandAccountingException(TOKEN, SCOPE, { action: "defer", exceptionId: "exception-1", reason: "awaiting owner", expectedRevision: 4 }, INTENT);
-    expect(answer).toEqual({ ok: false, code: "outcome_unknown", operation: "accounting.exception@1", requestId: INTENT, reconciles: null });
+    expect(answer).toMatchObject({ ok: false, code: "outcome_unknown", operation: "accounting.exception@1", requestId: INTENT, reconciles: null });
   });
 
   it("keeps a deadline a refusal that still names the read of the same identity", async () => {
     answerWith(200, { kind: "DEADLINE_EXCEEDED", reason: "core-wait" });
     const answer = await commandAccountingRoutine(TOKEN, SCOPE, { action: "retry", intentId: "intent-1", oldAttemptId: "attempt-1", notStartedProofRef: "proof-1", newAttemptId: "attempt-2" }, INTENT);
-    expect(answer).toEqual({ ok: false, code: "DEADLINE_EXCEEDED", operation: "accounting.routine@1", requestId: INTENT, reason: "core-wait", reconciles: "accounting.routineResult@1" });
+    expect(answer).toMatchObject({ ok: false, code: "DEADLINE_EXCEEDED", operation: "accounting.routine@1", requestId: INTENT, reason: "core-wait", reconciles: "accounting.routineResult@1" });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
@@ -153,6 +153,27 @@ describe("accounting", () => {
   it("refuses a variant that is not the one the operation asked for", async () => {
     answerWith(200, { kind: "accounting_result", operation: "accounting.evidence@1", requestId: INTENT, result: { ok: true, result: { op: "summary", payload: {} } } });
     expect(await readAccountingEvidence(TOKEN, SCOPE, { evidenceId: "evidence-1" }, INTENT)).toMatchObject({ ok: false, code: "UNEXPECTED_RESULT_TAG" });
+  });
+
+  it("maps every failure to one shared outcome kind, so a screen never reads a status off a code", async () => {
+    const summary = { periodStart: "2026-09-01", periodEndExclusive: "2026-10-01", currency: null, pageSize: 25, cursor: null };
+    const kindOf = async (status: number, body: unknown) => {
+      answerWith(status, body);
+      const answer = await readAccountingSummary(TOKEN, SCOPE, summary, INTENT);
+      return answer.ok ? "ok" : answer.kind;
+    };
+    const failure = (error: string) => ({ kind: "accounting_result", operation: "accounting.summary@1", requestId: INTENT, result: { ok: false, failure: { error, reasonCode: "r" } } });
+    expect(await kindOf(200, failure("forbidden"))).toBe("forbidden");
+    expect(await kindOf(200, failure("validation"))).toBe("invalid");
+    expect(await kindOf(200, failure("conflict"))).toBe("invalid");
+    expect(await kindOf(200, failure("stale-authority"))).toBe("unavailable");
+    expect(await kindOf(200, failure("outcome-unknown"))).toBe("unavailable");
+    expect(await kindOf(200, { kind: "REFUSED", reason: "no" })).toBe("forbidden");
+    expect(await kindOf(200, { kind: "OPERATION_NOT_REGISTERED_FOR_INSTALLATION", reason: "no" })).toBe("not-found");
+    expect(await kindOf(401, {})).toBe("refused");
+    fetchMock.mockRejectedValueOnce(new Error("offline"));
+    expect(await readAccountingSummary(TOKEN, SCOPE, summary, INTENT)).toMatchObject({ ok: false, kind: "unavailable", code: "UNREACHABLE", retryable: true });
+    expect(await readAccountingSummary(null, SCOPE, summary, INTENT)).toMatchObject({ ok: false, kind: "refused", code: "UNAUTHENTICATED" });
   });
 
   it("refuses a result kind the route does not declare", async () => {

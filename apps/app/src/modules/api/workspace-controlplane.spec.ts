@@ -15,7 +15,6 @@ import {
     retryWorkspaceProvisioningSaga,
     startWorkspaceCheckout,
     startWorkspaceCheckoutPurchase,
-    workspaceControlplaneTesting,
     workspaceProvisioningSaga,
 } from "./workspace-controlplane"
 
@@ -70,7 +69,6 @@ describe("modules/api/workspace-controlplane", () => {
         expect(readBody.variables).toEqual({ request: { workspaceId, installationId: "chatbot-2" } })
         expect(mutationBody.query).toContain("chatbotWorkspaceCommand(request: $request)")
         expect(mutationBody.variables.request).toMatchObject({ installationId: "chatbot-2", operation: "reconcile-delivery", input: { outboxId: "outbox-1", terminalState: "failed", evidenceRef: "operator://manual-reconciliation/outbox-1" } })
-        expect(workspaceControlplaneTesting.chatbotCoreEndpoint(workspaceId)).toBe("http://localhost:3068/graphql")
     })
 })
 
@@ -111,7 +109,7 @@ describe("startWorkspaceCheckout", () => {
 
         const result = await startWorkspaceCheckout("agentos-workspace")
 
-        expect(result).toEqual({ ok: false, reason: "refused", code: "ORDER_REFUSED" })
+        expect(result).toMatchObject({ ok: false, reason: "refused", code: "ORDER_REFUSED" })
         const body = requestBody(fetchMock, 0)
         expect(body.variables.input).toEqual({ catalogItemSlug: "agentos-workspace" })
     })
@@ -121,13 +119,14 @@ describe("startWorkspaceCheckout", () => {
     describe("double-submit safety", () => {
         beforeEach(() => {
             vi.resetModules()
-            vi.doMock("@/modules/api/console", () => api)
+            vi.doMock("./commerce", () => api)
+            vi.doMock("./agentos-workspaces", () => api)
             vi.clearAllMocks()
             api.myCatalogOrders.mockResolvedValue({ ok: true, data: [order("purchase-1")] })
             api.myInvoices.mockResolvedValue({ ok: true, data: [] })
             api.myAgentWorkspace.mockResolvedValue({ ok: true, data: [] })
         })
-        afterEach(() => { vi.doUnmock("@/modules/api/console") })
+        afterEach(() => { vi.doUnmock("./commerce"); vi.doUnmock("./agentos-workspaces") })
 
         it("joins an identical repeat while the first admission is still in flight", async () => {
             const { startWorkspaceCheckout } = await load()
@@ -274,7 +273,7 @@ describe("readWorkspacePurchaseStatus", () => {
 
         const result = await readWorkspacePurchaseStatus("order-1")
 
-        expect(result).toEqual({ ok: false, reason: "refused", code: "AUTH" })
+        expect(result).toMatchObject({ ok: false, reason: "refused", code: "AUTH" })
     })
 })
 
@@ -459,7 +458,7 @@ describe("startWorkspaceCheckoutPurchase", () => {
 
         const result = await startWorkspaceCheckoutPurchase({ retryKey: "start-purchase-1", offerId: "offer-team", offerVersion: "v1", paymentRail: "vnpay" })
 
-        expect(result).toEqual({ ok: false, reason: "refused", code: "PURCHASER_NOT_ADMITTED" })
+        expect(result).toMatchObject({ ok: false, reason: "refused", code: "PURCHASER_NOT_ADMITTED" })
     })
 })
 

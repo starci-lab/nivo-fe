@@ -39,7 +39,8 @@ export type KindTestWorkbenchBlockCopy = {
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { ChoiceTabs } from "@nivo/ui";
 import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common";
-import type { AgentosModuleTestContract, AgentosModuleTestScenarioContract, AgentosRuntimeValue } from "@/modules/api/console";
+import type { AgentosModuleTestContract, AgentosModuleTestScenarioContract } from "@/modules/api/agentos-module-tests";
+import type { AgentosRuntimeValue } from "@/modules/api/agentos-runtime-tree";
 type ScenarioField = {
   readonly path: string;
   readonly value: AgentosRuntimeValue;

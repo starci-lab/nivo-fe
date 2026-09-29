@@ -1,6 +1,6 @@
 import { ROW_CLASS_NAME } from "./classNames";
 import { EmptyNotice as DirectionEmpty, SectionHeader as DirectionHeader, SurfaceListCard as DirectionList, Badge, Text } from "@starci/grammar/common";
-import type { AgentosAiKnowledgeReadiness } from "@/modules/api/console";
+import type { AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge";
 /** Public API role for AgentOSKnowledgeOriginListLabels. */
 export type AgentOSKnowledgeOriginListLabels = {
     readonly title: string;

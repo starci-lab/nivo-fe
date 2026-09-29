@@ -1,7 +1,16 @@
 "use client";
 
 import { useCallback } from "react";
-import { catalogItems, myAcademyGrowthSnapshot, myAcademyIntegrations, myAcademyStudentDetail, myAcademyStudents, myAgentosAiKnowledgeReadiness, myAgentosCustomModuleStudio, myAgentosCustomModules, myAgentosModuleInstallation, myAgentosModuleInstallations, myAgentosModuleRuntime, myAgentosModuleTestRun, myAgentosModuleTestSurface, myAgentosSolutionModules, myAgentWorkspace, myAgentWorkspaceControlCenter, myCatalogOrders, myDomains, myExpertSiteDeployment, myExpertSiteLeads, myExpertSites, myInstances, myInvoices, myPodOpenclawStatus, myWallet, myWalletTransactions, type CatalogCategory } from "@/modules/api/console";
+import { catalogItems, myCatalogOrders, myDomains, myInvoices, myWallet, myWalletTransactions, type CatalogCategory } from "@/modules/api/commerce";
+import { myAcademyGrowthSnapshot, myAcademyIntegrations, myAcademyStudentDetail, myAcademyStudents, myExpertSiteLeads } from "@/modules/api/academy";
+import { myAgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge";
+import { myAgentosCustomModuleStudio, myAgentosCustomModules } from "@/modules/api/agentos-module-studio";
+import { myAgentosModuleInstallation, myAgentosModuleInstallations, myAgentosSolutionModules } from "@/modules/api/agentos-modules";
+import { myAgentosModuleRuntime } from "@/modules/api/agentos-module-runtime";
+import { myAgentosModuleTestRun, myAgentosModuleTestSurface } from "@/modules/api/agentos-module-tests";
+import { myAgentWorkspace, myAgentWorkspaceControlCenter } from "@/modules/api/agentos-workspaces";
+import { myExpertSiteDeployment, myExpertSites } from "@/modules/api/expert-sites";
+import { myInstances, myPodOpenclawStatus } from "@/modules/api/instances";
 import { useNivoQuery } from "../useNivoQuery";
 
 /** Stable resource keys shared by reads and the commands that invalidate them. */

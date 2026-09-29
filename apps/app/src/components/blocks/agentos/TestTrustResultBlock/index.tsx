@@ -37,7 +37,8 @@ import { SurfaceCard, Heading, Text } from "@starci/grammar/common";
 
 import type { ComponentType } from "react";
 
-import type { AgentosModuleTestAssertionResult, AgentosModuleTestContract, AgentosModuleTestRun, AgentosRuntimeValue } from "@/modules/api/console";
+import type { AgentosModuleTestAssertionResult, AgentosModuleTestContract, AgentosModuleTestRun } from "@/modules/api/agentos-module-tests";
+import type { AgentosRuntimeValue } from "@/modules/api/agentos-runtime-tree";
 type EvidenceComponentProps = {
   readonly copy: TestTrustResultBlockCopy;
   readonly assertion: AgentosModuleTestAssertionResult;

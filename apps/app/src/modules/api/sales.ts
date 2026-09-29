@@ -19,12 +19,11 @@
  * the same identity it can be reconciled by (fr.sales.fr-sales-recovery).
  */
 
+import { failedWith, type Failure, type Outcome } from "./outcome";
+import { isClosedRecord, isRouteErrorName, operationAddress, routeFailureKind, sendOperation, type InstallationScope } from "./operation-route";
+
 /** Where one Sales installation lives: the three coordinates the route authenticates the caller to. */
-export interface SalesInstallationScope {
-  readonly workspaceId: string;
-  readonly instanceId: string;
-  readonly installationId: string;
-}
+export type SalesInstallationScope = InstallationScope;
 
 /** The eight registered Sales queries. */
 export type SalesQueryName =
@@ -75,44 +74,6 @@ export const SALES_MUTATION_NAMES: ReadonlyArray<SalesMutationName> = [
   "sales.recoverAction@1"
 ];
 
-/** The one Sales-tagged result variant each registered operation answers with. */
-export type SalesResultTag =
-  | "sales_policy"
-  | "sales_readiness"
-  | "sales_opportunity"
-  | "sales_pipeline"
-  | "sales_command"
-  | "sales_decision"
-  | "sales_action"
-  | "sales_handoff";
-
-/**
- * Which variant each operation carries.
- *
- * A query answers the variant of the object it reads; a mutation answers the variant of the object it
- * changed, which is why `sales.close@1` carries `sales_opportunity` and `sales.recoverAction@1`
- * carries `sales_action`. The variant is derived here from the operation the caller chose and is
- * never read off the wire, so a reply cannot rename the object it answered for.
- */
-export const SALES_RESULT_TAGS: Readonly<Record<SalesOperationName, SalesResultTag>> = {
-  "sales.policy@1": "sales_policy",
-  "sales.readiness@1": "sales_readiness",
-  "sales.opportunity@1": "sales_opportunity",
-  "sales.pipeline@1": "sales_pipeline",
-  "sales.command@1": "sales_command",
-  "sales.decisionRequest@1": "sales_decision",
-  "sales.action@1": "sales_action",
-  "sales.handoff@1": "sales_handoff",
-  "sales.configurePolicy@1": "sales_policy",
-  "sales.submitCommand@1": "sales_command",
-  "sales.clarifyCommand@1": "sales_command",
-  "sales.decideProposal@1": "sales_decision",
-  "sales.close@1": "sales_opportunity",
-  "sales.prepareHandoff@1": "sales_handoff",
-  "sales.submitHandoff@1": "sales_handoff",
-  "sales.recoverAction@1": "sales_action"
-};
-
 /**
  * The one registered read each mutation is reconciled by.
  *
@@ -149,52 +110,26 @@ export type SalesRefusalCode =
   | "SALES_REFUSED_CONFLICT"
   | "SALES_REFUSED_UNAVAILABLE";
 
-/** The route's own closed error names, minus the deadline handled on its own. */
-export type SalesRouteError =
-  | "BAD_REQUEST"
-  | "REFUSED"
-  | "UNSUPPORTED_OPERATION_VERSION"
-  | "OPERATION_NOT_REGISTERED_FOR_INSTALLATION"
-  | "CURRENT_AUTHORITY_UNAVAILABLE"
-  | "CONTROLPLANE_UNAVAILABLE";
-
-/** Everything this client refuses locally, before or instead of a served Sales result. */
-export type SalesTransportFailure =
-  | "UNAUTHENTICATED"
-  | "UNREACHABLE"
-  | "MALFORMED_ANSWER"
-  | "UNEXPECTED_RESULT_KIND"
-  | "UNEXPECTED_RESULT_STATUS"
-  | "ECHOED_IDENTITY_MISMATCH";
-
-/** Every code one Sales answer may fail with. */
-export type SalesFailureCode =
-  | SalesRefusalCode
-  | SalesRouteError
-  | SalesTransportFailure
-  | "outcome_unknown"
-  | "DEADLINE_EXCEEDED";
-
-/** One answer this client refuses to report as a served Sales variant. */
-export interface SalesFailure {
-  readonly ok: false;
-  readonly code: SalesFailureCode;
+/**
+ * What one failed Sales answer adds to the common failure fields.
+ *
+ * The `code` is one of the route's closed error names, one of `outcome_unknown` and
+ * `DEADLINE_EXCEEDED` (the effect is unattested), one of the four `SALES_REFUSED_*` codes, or a
+ * transport condition (`UNAUTHENTICATED`, `UNREACHABLE`, `MALFORMED_ANSWER`,
+ * `UNEXPECTED_RESULT_KIND`, `UNEXPECTED_RESULT_STATUS`, `ECHOED_IDENTITY_MISMATCH`).
+ */
+export type SalesFailureDetail = {
   readonly operation: SalesOperationName;
   readonly requestId: string | null;
   readonly reconciles: SalesQueryName | null;
   readonly refusal: SalesRefusal | null;
-  readonly reason: string | null;
-}
+};
 
-/** One Sales answer: the operation's own variant, or a refusal that names why it is unresolved. */
-export type SalesAnswer<TValue> =
-  | {
-    readonly ok: true;
-    readonly operation: SalesOperationName;
-    readonly variant: SalesResultTag;
-    readonly value: TValue;
-  }
-  | SalesFailure;
+/** One answer this client refuses to report as a served Sales variant. */
+export type SalesFailure = Failure<SalesFailureDetail>;
+
+/** One Sales answer: the operation's own variant value, or a failure that names why it is unresolved. */
+export type SalesAnswer<TValue> = Outcome<TValue, SalesFailureDetail>;
 
 /** One requested command action of the bounded Sales planner. */
 export type SalesRequestedAction = "qualify" | "contact" | "request-decision" | "prepare-handoff" | "close";
@@ -459,15 +394,6 @@ export interface SalesHandoffValue {
   readonly revision: number;
 }
 
-/** Core API address, read the way `graphql.ts` and `agentos-shell.ts` read it: one variable, one fallback. */
-const CORE_API_URL = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql";
-
-/** The registered installation operation route prefix; an absolute path, so it replaces `/graphql`. */
-const OPERATION_ROUTE_PREFIX = "/api/v1/agentos/workspaces";
-
-/** The longest stable identity the route accepts, mirroring its own bound. */
-const MAXIMUM_REQUEST_ID_LENGTH = 512;
-
 /** The one refusal code that means the proposed value set was invalid rather than unauthorized. */
 const SALES_INVALID_VALUE_CODE = "SALES_POLICY_VALUE_INVALID";
 
@@ -494,28 +420,8 @@ const SALES_SERVED_STATUSES: ReadonlySet<string> = new Set([
   "lost"
 ]);
 
-const isClosedRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
-
-/** Bounded printable text; a control byte would split or hide the wire field it travels in. */
-const isPrintableIdentity = (value: string): boolean =>
-  value.length > 0 &&
-  value.length <= MAXIMUM_REQUEST_ID_LENGTH &&
-  [...value].every(character => {
-    const code = character.codePointAt(0) ?? 0;
-    return code >= 0x20 && code !== 0x7f;
-  });
-
 /** A revision a failure may disclose: a positive safe integer, never a re-spelled string. */
 const isDisclosedRevision = (value: unknown): value is number => typeof value === "number" && Number.isSafeInteger(value) && value > 0;
-
-/** Whether a kind is one of the route's closed error names (the deadline is narrowed separately). */
-const isSalesRouteError = (value: unknown): value is SalesRouteError =>
-  value === "BAD_REQUEST" ||
-  value === "REFUSED" ||
-  value === "UNSUPPORTED_OPERATION_VERSION" ||
-  value === "OPERATION_NOT_REGISTERED_FOR_INSTALLATION" ||
-  value === "CURRENT_AUTHORITY_UNAVAILABLE" ||
-  value === "CONTROLPLANE_UNAVAILABLE";
 
 /** The one registered read a mutation is reconciled by; a query is reconciled by nothing. */
 const reconcilesFor = (operation: SalesOperationName): SalesQueryName | null => SALES_RECONCILIATIONS[operation] ?? null;
@@ -546,15 +452,8 @@ const disclosedRevision = (detail: Readonly<Record<string, unknown>> | null): nu
 const disclosedItem = (detail: Readonly<Record<string, unknown>> | null): string | null =>
   detail !== null && typeof detail.item === "string" && detail.item.length > 0 ? detail.item : null;
 
-const failure = (operation: SalesOperationName, code: SalesFailureCode, reason: string | null, requestId: string | null): SalesFailure => ({
-  ok: false,
-  code,
-  operation,
-  requestId,
-  reconciles: reconcilesFor(operation),
-  refusal: null,
-  reason
-});
+const failure = (operation: SalesOperationName, code: string, reason: string | null, requestId: string | null): SalesFailure =>
+  failedWith(routeFailureKind(code), { code, reason: reason ?? "" }, { operation, requestId, reconciles: reconcilesFor(operation), refusal: null });
 
 /** Keep the receiver's own disclosure: the refusal reason, and the item or revision it named. */
 const salesRefusal = (reason: SalesRefusalReason, code: string, value: unknown): SalesRefusal => {
@@ -576,7 +475,7 @@ const narrowSalesServed = <TValue,>(operation: SalesOperationName, requestId: st
   if (!isClosedRecord(value)) return failure(operation, "MALFORMED_ANSWER", "The served variant carries no value object.", requestId);
   // The receiver's field-level closure is its own guarantee, so the value enters as the variant type
   // the caller asked for: there is no second shape here for a cast to erase.
-  return { ok: true, operation, variant: SALES_RESULT_TAGS[operation], value: value as TValue };
+  return { ok: true, data: value as TValue };
 };
 
 /**
@@ -616,23 +515,12 @@ const narrowSalesAnswer = <TValue,>(operation: SalesOperationName, requestId: st
   if (body.kind === "outcome_unknown") return narrowUnknownOutcome(operation, requestId, body);
   if (body.kind === "sales_result") return narrowSalesEnvelope<TValue>(operation, requestId, body);
   if (body.kind === "accounting_result") return failure(operation, "UNEXPECTED_RESULT_KIND", "The route answered the Accounting result kind for a Sales operation.", requestId);
-  if (body.kind === "DEADLINE_EXCEEDED") return failure(operation, "DEADLINE_EXCEEDED", typeof body.reason === "string" ? body.reason : null, requestId);
-  if (isSalesRouteError(body.kind)) return failure(operation, body.kind, typeof body.reason === "string" ? body.reason : null, requestId);
+  if (isRouteErrorName(body.kind)) return failure(operation, body.kind, typeof body.reason === "string" ? body.reason : null, requestId);
   return failure(operation, "UNEXPECTED_RESULT_KIND", `The route answered the undeclared result kind ${String(body.kind)}.`, requestId);
 };
 
-/**
- * Build the one address of one registered operation.
- *
- * The three coordinates are percent-encoded because they are caller-held; the operation name is not,
- * because it is one of sixteen literal registered names and the receiver matches its `@1` version
- * separator verbatim.
- */
-export const salesOperationAddress = (scope: SalesInstallationScope, operation: SalesOperationName): string =>
-  new URL(
-    `${OPERATION_ROUTE_PREFIX}/${encodeURIComponent(scope.workspaceId)}/instances/${encodeURIComponent(scope.instanceId)}/installations/${encodeURIComponent(scope.installationId)}/operations/${operation}`,
-    CORE_API_URL
-  ).toString();
+/** Build the one address of one registered operation. */
+export const salesOperationAddress = (scope: SalesInstallationScope, operation: SalesOperationName): string => operationAddress(scope, operation);
 
 /**
  * Send exactly one Sales operation request, and nothing else.
@@ -647,31 +535,9 @@ const sendSalesOperation = async <TValue,>(
   request: Readonly<Record<string, unknown>>,
   requestId: string
 ): Promise<SalesAnswer<TValue>> => {
-  if (!isPrintableIdentity(requestId)) {
-    return failure(operation, "BAD_REQUEST", "The stable operation identity is empty, over-long or carries a control byte.", requestId);
-  }
-  if (accessToken === null || accessToken.length === 0) {
-    return failure(operation, "UNAUTHENTICATED", "No access token is held, so no request left the browser.", null);
-  }
-  let answer: Response;
-  try {
-    answer = await fetch(salesOperationAddress(scope, operation), {
-      method: "POST",
-      credentials: "omit",
-      headers: { "Authorization": `Bearer ${accessToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ requestId, input: request })
-    });
-  } catch (error) {
-    return failure(operation, "UNREACHABLE", `The Core route could not be reached: ${error instanceof Error ? error.message : "unknown"}`, requestId);
-  }
-  if (answer.status === 401) return failure(operation, "UNAUTHENTICATED", "Core refused the bearer token.", requestId);
-  let body: unknown;
-  try {
-    body = await answer.json();
-  } catch {
-    return failure(operation, "MALFORMED_ANSWER", "The route answer is not JSON.", requestId);
-  }
-  return narrowSalesAnswer<TValue>(operation, requestId, body);
+  const exchange = await sendOperation(accessToken, salesOperationAddress(scope, operation), requestId, request);
+  if (!exchange.arrived) return failure(operation, exchange.code, exchange.reason, exchange.requestId);
+  return narrowSalesAnswer<TValue>(operation, requestId, exchange.body);
 };
 
 /** Read one installation's operating policy, or the revision one configure request stored. */

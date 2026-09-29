@@ -7,7 +7,7 @@ import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n/config"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import type { ContextDraft } from "@/components/blocks/agentos/ContextVersionBlock"
-import type { AgentosModuleTestContract } from "@/modules/api/console"
+import type { AgentosModuleTestContract } from "@/modules/api/agentos-module-tests"
 import { SessionProvider } from "@/modules/auth/session"
 import {
     AgentOSSolutionModulePageBase,

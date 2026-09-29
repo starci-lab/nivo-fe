@@ -1,6 +1,6 @@
 import { Checkbox } from "@nivo/ui";
 import { SurfaceCard, Button, EmptyNotice, Heading, Text } from "@starci/grammar/common";
-import type { AgentosModuleStudio } from "@/modules/api/console";
+import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio";
 
 /** Exact versioned specification state and acknowledgement action. */
 export type AgentOSModuleSpecificationProps = AgentOSModuleSpecificationViewProps;

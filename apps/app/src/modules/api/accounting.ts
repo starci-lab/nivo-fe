@@ -30,12 +30,11 @@
  *    on its own: one call is one request.
  */
 
+import { failedWith, type Outcome } from "./outcome";
+import { isClosedRecord, isRouteErrorName, operationAddress, routeFailureKind, sendOperation, type InstallationScope } from "./operation-route";
+
 /** The three installation coordinates every Accounting operation address carries. */
-export type AccountingInstallationScope = {
-  readonly workspaceId: string;
-  readonly instanceId: string;
-  readonly installationId: string;
-};
+export type AccountingInstallationScope = InstallationScope;
 
 /** The operation discriminator the receiver repeats on every answer, success or failure. */
 export type AccountingApiOperation =
@@ -68,31 +67,6 @@ export type AccountingReadName =
 
 /** Closed transport failures the receiver names; they carry no protected detail. */
 export type AccountingApiFailureKind = "forbidden" | "stale-authority" | "validation" | "conflict" | "outcome-unknown";
-
-/** The closed error set the route answers by name. UNAUTHENTICATED arrives as a status, never a body. */
-export type AccountingRouteError =
-  | "BAD_REQUEST"
-  | "REFUSED"
-  | "UNSUPPORTED_OPERATION_VERSION"
-  | "OPERATION_NOT_REGISTERED_FOR_INSTALLATION"
-  | "CURRENT_AUTHORITY_UNAVAILABLE"
-  | "CONTROLPLANE_UNAVAILABLE"
-  | "DEADLINE_EXCEEDED";
-
-/** What this browser half adds: transport conditions the route never gets to name. */
-export type AccountingTransportError =
-  | "UNAUTHENTICATED"
-  | "UNREACHABLE"
-  | "MALFORMED_ANSWER"
-  | "UNEXPECTED_RESULT_KIND"
-  | "UNEXPECTED_RESULT_TAG"
-  | "ECHOED_IDENTITY_MISMATCH";
-
-/** Every way one Accounting operation can be refused as uncompleted, apart from the unknown outcome. */
-export type AccountingRefusalCode =
-  | AccountingRouteError
-  | Exclude<AccountingApiFailureKind, "outcome-unknown">
-  | AccountingTransportError;
 
 /** Closed lifecycle states for admitted evidence. */
 export type AccountingEvidenceState =
@@ -461,30 +435,23 @@ export type AccountingResult =
   | AccountingSummaryResult
   | AccountingResultDetailResult;
 
-/** One Accounting answer: the receiver's own tagged variant, or a refusal that names why it is unresolved. */
-export type AccountingOperationAnswer<TResult extends AccountingResult> =
-  | { readonly ok: true; readonly data: TResult }
-  | AccountingOutcomeUnknown
-  | AccountingOperationRefusal;
-
-/** A command whose effect nobody can attest: never success, never failure, reconciled only by a read. */
-export type AccountingOutcomeUnknown = {
-  readonly ok: false;
-  readonly code: "outcome_unknown";
-  readonly operation: AccountingRouteName;
-  readonly requestId: string;
-  readonly reconciles: AccountingReadName | null;
-};
-
-/** An operation this client refuses to report as completed. */
-export type AccountingOperationRefusal = {
-  readonly ok: false;
-  readonly code: AccountingRefusalCode;
+/**
+ * What one failed Accounting answer adds to the common failure fields.
+ *
+ * The `code` is one of the route's closed error names, `outcome_unknown` (a command whose effect
+ * nobody can attest: never success, never failure, reconciled only by a read), one of the receiver's
+ * named failures (`forbidden`, `stale-authority`, `validation`, `conflict`), or a transport condition
+ * (`UNAUTHENTICATED`, `UNREACHABLE`, `MALFORMED_ANSWER`, `UNEXPECTED_RESULT_KIND`,
+ * `UNEXPECTED_RESULT_TAG`, `ECHOED_IDENTITY_MISMATCH`).
+ */
+export type AccountingFailureDetail = {
   readonly operation: AccountingRouteName;
   readonly requestId: string | null;
-  readonly reason: string;
   readonly reconciles: AccountingReadName | null;
 };
+
+/** One Accounting answer: the receiver's own tagged variant, or a failure that names why it is unresolved. */
+export type AccountingOperationAnswer<TResult extends AccountingResult> = Outcome<TResult, AccountingFailureDetail>;
 
 /** The read one uncertain command is reconciled through; a command absent here registers no read. */
 export const ACCOUNTING_COMMAND_RECONCILIATIONS: Readonly<Partial<Record<AccountingRouteName, AccountingReadName>>> = {
@@ -492,17 +459,6 @@ export const ACCOUNTING_COMMAND_RECONCILIATIONS: Readonly<Partial<Record<Account
   "accounting.routine@1": "accounting.routineResult@1",
   "accounting.correct@1": "accounting.resultDetail@1"
 };
-
-/** Core API address, read the way `graphql.ts` and `agentos-shell.ts` read it: one variable, one fallback. */
-const CORE_API_URL = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql";
-
-/** The registered installation operation route prefix; an absolute path, so it replaces `/graphql`. */
-const OPERATION_ROUTE_PREFIX = "/api/v1/agentos/workspaces";
-
-/** The longest stable identity the route accepts, mirroring its own bound. */
-const MAXIMUM_REQUEST_ID_LENGTH = 512;
-
-const isClosedRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 
 /** The receiver's own result tags each route name may answer with; a command and its read share a pair. */
 const ACCOUNTING_RESULT_TAGS: Readonly<Record<AccountingRouteName, Array<AccountingApiOperation>>> = {
@@ -516,24 +472,10 @@ const ACCOUNTING_RESULT_TAGS: Readonly<Record<AccountingRouteName, Array<Account
   "accounting.resultDetail@1": ["resultDetail"]
 };
 
-/** Bounded printable text; a control byte would split or hide the wire field it travels in. */
-const isPrintableIdentity = (value: string): boolean =>
-  value.length > 0 &&
-  value.length <= MAXIMUM_REQUEST_ID_LENGTH &&
-  [...value].every(character => {
-    const code = character.codePointAt(0) ?? 0;
-    return code >= 0x20 && code !== 0x7f;
-  });
+const refusal = (operation: AccountingRouteName, code: string, reason: string, requestId: string | null): AccountingOperationAnswer<never> =>
+  failedWith(routeFailureKind(code), { code, reason }, { operation, requestId, reconciles: ACCOUNTING_COMMAND_RECONCILIATIONS[operation] ?? null });
 
-const refusal = (operation: AccountingRouteName, code: AccountingRefusalCode, reason: string, requestId: string | null): AccountingOperationRefusal => ({ ok: false, code, operation, requestId, reason, reconciles: ACCOUNTING_COMMAND_RECONCILIATIONS[operation] ?? null });
-
-const unknownOutcome = (operation: AccountingRouteName, requestId: string): AccountingOutcomeUnknown => ({
-  ok: false,
-  code: "outcome_unknown",
-  operation,
-  requestId,
-  reconciles: ACCOUNTING_COMMAND_RECONCILIATIONS[operation] ?? null
-});
+const unknownOutcome = (operation: AccountingRouteName, requestId: string): AccountingOperationAnswer<never> => refusal(operation, "outcome_unknown", "", requestId);
 
 /*
  * Hand the receiver's own tagged variant through unchanged.
@@ -545,19 +487,6 @@ const unknownOutcome = (operation: AccountingRouteName, requestId: string): Acco
  * no shape here for it to erase.
  */
 const accountingServedResult = (tagged: unknown): AccountingResult => tagged as AccountingResult;
-
-/**
- * Build the one address of one operation.
- *
- * The three coordinates are percent-encoded because they are caller-held; the operation name is not,
- * because it is one of eight literal registered names and the receiver matches its `@1` version
- * separator verbatim.
- */
-const accountingOperationUrl = (scope: AccountingInstallationScope, name: AccountingRouteName): string =>
-  new URL(
-    `${OPERATION_ROUTE_PREFIX}/${encodeURIComponent(scope.workspaceId)}/instances/${encodeURIComponent(scope.instanceId)}/installations/${encodeURIComponent(scope.installationId)}/operations/${name}`,
-    CORE_API_URL
-  ).toString();
 
 /** Whether a result tag is one of the eight registered Accounting tags. */
 const isAccountingApiOperation = (value: unknown): value is AccountingApiOperation =>
@@ -573,16 +502,6 @@ const isAccountingApiOperation = (value: unknown): value is AccountingApiOperati
 /** Whether a failure name is one the receiver's closed set declares. */
 const isAccountingApiFailureKind = (value: unknown): value is AccountingApiFailureKind =>
   value === "forbidden" || value === "stale-authority" || value === "validation" || value === "conflict" || value === "outcome-unknown";
-
-/** Whether a kind is one of the route's closed error names. */
-const isAccountingRouteError = (value: unknown): value is AccountingRouteError =>
-  value === "BAD_REQUEST" ||
-  value === "REFUSED" ||
-  value === "UNSUPPORTED_OPERATION_VERSION" ||
-  value === "OPERATION_NOT_REGISTERED_FOR_INSTALLATION" ||
-  value === "CURRENT_AUTHORITY_UNAVAILABLE" ||
-  value === "CONTROLPLANE_UNAVAILABLE" ||
-  value === "DEADLINE_EXCEEDED";
 
 /**
  * Narrow the receiver's own outcome.
@@ -629,7 +548,7 @@ const narrowOperationAnswer = (operation: AccountingRouteName, requestId: string
     if (body.requestId !== requestId) return refusal(operation, "ECHOED_IDENTITY_MISMATCH", "The result echoes another stable identity.", requestId);
     return narrowAccountingOutcome(operation, requestId, body.result);
   }
-  if (isAccountingRouteError(body.kind)) {
+  if (isRouteErrorName(body.kind)) {
     return refusal(operation, body.kind, typeof body.reason === "string" ? body.reason : "", requestId);
   }
   return refusal(operation, "UNEXPECTED_RESULT_KIND", `The route answered the undeclared result kind ${String(body.kind)}.`, requestId);
@@ -648,31 +567,9 @@ const sendAccountingOperation = async (
   request: AccountingRequest,
   requestId: string
 ): Promise<AccountingOperationAnswer<AccountingResult>> => {
-  if (!isPrintableIdentity(requestId)) {
-    return refusal(operation, "BAD_REQUEST", "The stable intent identity is empty, over-long or carries a control byte.", requestId);
-  }
-  if (accessToken === null || accessToken.length === 0) {
-    return refusal(operation, "UNAUTHENTICATED", "No access token is held, so no request left the browser.", null);
-  }
-  let answer: Response;
-  try {
-    answer = await fetch(accountingOperationUrl(scope, operation), {
-      method: "POST",
-      credentials: "omit",
-      headers: { "Authorization": `Bearer ${accessToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ requestId, input: request })
-    });
-  } catch (error) {
-    return refusal(operation, "UNREACHABLE", `The Core route could not be reached: ${error instanceof Error ? error.message : "unknown"}`, requestId);
-  }
-  if (answer.status === 401) return refusal(operation, "UNAUTHENTICATED", "Core refused the bearer token.", requestId);
-  let body: unknown;
-  try {
-    body = await answer.json();
-  } catch {
-    return refusal(operation, "MALFORMED_ANSWER", "The route answer is not JSON.", requestId);
-  }
-  return narrowOperationAnswer(operation, requestId, body);
+  const exchange = await sendOperation(accessToken, operationAddress(scope, operation), requestId, request);
+  if (!exchange.arrived) return refusal(operation, exchange.code, exchange.reason, exchange.requestId);
+  return narrowOperationAnswer(operation, requestId, exchange.body);
 };
 
 /** Read one evidence identity and its intake state. */

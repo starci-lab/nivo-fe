@@ -26,6 +26,7 @@ import {
   useSession,
   type CollabTasksFilter,
 } from "@/hooks";
+import { nivoAnswerDenied } from "@/modules/query";
 import {
   buildConversationItems,
   GroupChatPageBase,
@@ -91,7 +92,7 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
    * The Collab refusal language follows the page locale; the transport seam binds
    * the reader here the same way session.tsx binds the shared transport's.
    */
-  const { reconcileRequest } = useCollabOfficeTransport(locale);
+  const { reconcileRequest } = useCollabOfficeTransport();
 
   /* ---------------- Route inputs ---------------- */
   const invitationId = searchParams.get("invitation");
@@ -218,7 +219,7 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
     const moduleName = parseAddressedModule(composerValue);
     setSendFailure(null);
     // The mutation layer's revalidation wrapper types its answer as
-    // CollabResult<unknown>; the wire value is still the op's own outcome.
+    // Outcome<unknown>; the wire value is still the op's own outcome.
     const answer = await postMessage.trigger({
       intentId: intentRef.current,
       body: composerValue,
@@ -298,7 +299,7 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
       if (!answer.ok) {
         setApprovalNotices((current) => ({
           ...current,
-          [approvalId]: answer.kind === "denied" ? "denied" : "uncertain",
+          [approvalId]: nivoAnswerDenied(answer) ? "denied" : "uncertain",
         }));
       }
     } finally {
@@ -332,11 +333,8 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
   };
 
   /* ---------------- View assembly ---------------- */
-  const officeDenied =
-    office.data?.ok === false && office.data.kind === "denied";
-  const readsDenied =
-    (group.data?.ok === false && group.data.kind === "denied") ||
-    (tasks.data?.ok === false && tasks.data.kind === "denied");
+  const officeDenied = nivoAnswerDenied(office.data);
+  const readsDenied = nivoAnswerDenied(group.data) || nivoAnswerDenied(tasks.data);
   const officeState: GroupChatPageView["officeState"] = acceptanceMode
     ? "ready"
     : !signedIn
@@ -377,7 +375,7 @@ export const GroupChatPage = (props: GroupChatPageProps) => {
     tasks.data === undefined && tasks.error === undefined
       ? "loading"
       : tasks.data?.ok === false
-        ? tasks.data.kind === "denied"
+        ? nivoAnswerDenied(tasks.data)
           ? "denied"
           : "failed"
         : tasks.error !== undefined

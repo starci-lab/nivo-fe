@@ -159,7 +159,6 @@ export { useSession } from "./auth/useSession"
 export { usePathname } from "./i18n/usePathname"
 export { useRouter } from "./i18n/useRouter"
 
-export { useCollabLocaleFrom } from "./api/useCollabLocaleFrom"
 export { useCollabTransportFrom } from "./api/useCollabTransportFrom"
 
 export { OverviewDataProvider, useOverviewData } from "./overview/useOverviewData"

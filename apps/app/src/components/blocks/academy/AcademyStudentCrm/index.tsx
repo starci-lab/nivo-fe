@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useMutateCreateAcademyStudentSwr, useMutateGrantAcademyCourseAccessSwr, useMutateRevokeAcademyCourseAccessSwr, useMutateSetAcademyStudentStatusSwr, useQueryMyAcademyStudentDetailSwr, useQueryMyAcademyStudentsSwr } from "@/hooks";
-import type { AcademyStudent, AcademyStudentDetail } from "@/modules/api/console";
+import type { AcademyStudent, AcademyStudentDetail } from "@/modules/api/academy";
 import { nivoQueryData } from "@/modules/query";
 import { AcademyStudentCrmBase } from "./component";
 

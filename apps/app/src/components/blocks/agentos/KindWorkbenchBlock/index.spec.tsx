@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react"
-import type { AgentosRuntimeTask, AgentosRuntimeOperationEvent } from "@/modules/api/console"
+import type { AgentosRuntimeTask, AgentosRuntimeOperationEvent } from "@/modules/api/agentos-module-runtime"
 import type { ComponentProps } from "react"
 import { NextIntlClientProvider, useTranslations } from "next-intl"
 import enMessages from "@/messages/en.json"

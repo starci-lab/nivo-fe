@@ -18,7 +18,7 @@ vi.mock("@/hooks", async () => ({
     useRouter: () => ({ push: mocks.push }),
 }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
-vi.mock("@/modules/api/console", () => ({ myAgentWorkspace: mocks.load }))
+vi.mock("@/modules/api/agentos-workspaces", () => ({ myAgentWorkspace: mocks.load }))
 
 import { AgentOSWorkspaceList } from "."
 

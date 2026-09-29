@@ -1,6 +1,6 @@
 import { Avatar, LabelledProgressRow } from "@nivo/ui";
 import { SurfaceCard, Button, Button as CoreButton, Input, Text, TextAction, Badge } from "@starci/grammar/common";
-import type { AcademyStudent, AcademyStudentDetail } from "@/modules/api/console";
+import type { AcademyStudent, AcademyStudentDetail } from "@/modules/api/academy";
 
 /** Resolved copy for the student CRM block. */
 export type AcademyStudentCrmProps = AcademyStudentCrmViewProps;

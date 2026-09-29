@@ -23,12 +23,8 @@ const mocks = vi.hoisted(() => ({
     sources: [] as ReadonlyArray<ShellSourceObservation>,
 }))
 
-vi.mock("@/modules/api/console", () => ({
-    myAgentWorkspaceControlCenter: mocks.api.load,
-    myAgentosModuleInstallations: mocks.api.installations,
-    renewAgentWorkspaceAppLaunch: mocks.api.renew,
-    revokeAgentWorkspaceAppLaunch: mocks.api.revoke,
-}))
+vi.mock("@/modules/api/agentos-workspaces", () => ({ myAgentWorkspaceControlCenter: mocks.api.load, renewAgentWorkspaceAppLaunch: mocks.api.renew, revokeAgentWorkspaceAppLaunch: mocks.api.revoke }));
+vi.mock("@/modules/api/agentos-modules", () => ({ myAgentosModuleInstallations: mocks.api.installations }))
 // The SWR half stays real; only the connected shell handle is settled here, because the exact
 // selection it reads is the projection's input and nothing else in this file decides it.
 vi.mock("@/hooks", async (importOriginal) => ({

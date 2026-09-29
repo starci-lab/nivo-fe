@@ -1,3 +1,4 @@
+import type { Outcome } from "@/modules/api/outcome";
 import type { SalesActionValue, SalesPipelineItem, SalesRequestedAction } from "@/modules/api/sales";
 
 /** The values one Sales copy key interpolates; the surface passes only already-worded text. */
@@ -19,10 +20,10 @@ export type SalesSurface = (typeof SALES_SURFACES)[number];
 export type SalesSurfaceStanding = "loading" | "denied" | "unavailable" | "empty" | "ready";
 
 /** One Sales read's answer, as much of it as a standing depends on. */
-export type SalesAnswerStanding = { readonly ok: boolean; readonly code?: string };
+export type SalesAnswerStanding = Outcome<unknown>;
 
 /** One Sales command's answer, as much of it as settlement depends on. */
-export type SalesCommandAnswer = { readonly ok: boolean; readonly code?: string; readonly reason?: string | null; readonly value?: unknown };
+export type SalesCommandAnswer = Outcome<unknown>;
 
 /** One Sales command input's naming translation, plus the two plural counts the surface states. */
 export type SalesTranslation = (key: string, values?: TranslationValues) => string;
@@ -39,7 +40,6 @@ export const salesNoticeLive = (kind: SalesNotice["kind"]): "assertive" | "polit
  * is an outage the operator can retry, and telling them they lost access would be a lie. An absent
  * answer is a read in flight, never an empty one.
  */
-const SALES_DENIED_CODES: ReadonlySet<string> = new Set(["forbidden", "REFUSED", "UNAUTHENTICATED", "SALES_REFUSED_DENIED"]);
 
 /**
  * Project one read's standing from its answer.
@@ -50,7 +50,7 @@ const SALES_DENIED_CODES: ReadonlySet<string> = new Set(["forbidden", "REFUSED",
  */
 export const salesSurfaceStanding = (answer: SalesAnswerStanding | undefined, hasContent: boolean): SalesSurfaceStanding => {
   if (answer === undefined) return "loading";
-  if (!answer.ok) return SALES_DENIED_CODES.has(answer.code ?? "") ? "denied" : "unavailable";
+  if (!answer.ok) return answer.kind === "refused" || answer.kind === "forbidden" ? "denied" : "unavailable";
   return hasContent ? "ready" : "empty";
 };
 

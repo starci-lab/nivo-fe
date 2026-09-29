@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { AdministratorRevocationDialog } from "@/components/blocks/auth/AdministratorRevocationDialog"
 import type { EndPrincipalSessionsAnswer, EndPrincipalSessionsInput } from "@/modules/api/auth"
-import type { Result } from "@/modules/api/graphql"
+import type { Outcome } from "@/modules/api/outcome"
 import type { SessionEndReport } from "@/modules/auth/session"
 
 /** An everywhere ending the identity authority confirmed. */
@@ -76,7 +76,7 @@ vi.mock("@/hooks", async () => {
 })
 
 /** One scoped administrator ending answer, and the request the transport was handed. */
-type AdministratorEndingCall = (input: EndPrincipalSessionsInput) => Promise<Result<EndPrincipalSessionsAnswer>>
+type AdministratorEndingCall = (input: EndPrincipalSessionsInput) => Promise<Outcome<EndPrincipalSessionsAnswer>>
 const APPLIED_SCOPE: EndPrincipalSessionsAnswer = { kind: "scopeApplied", authorityEndingConfirmed: true }
 const endPrincipalSessions = vi.fn<AdministratorEndingCall>(() => Promise.resolve({ ok: true, data: APPLIED_SCOPE }))
 vi.mock("@/modules/api/auth", () => ({
@@ -334,7 +334,7 @@ describe("AccountMenu", () => {
 
     it("reports an authority that never answered as undecided and resends the same request identity on retry", async () => {
         const user = userEvent.setup()
-        endPrincipalSessions.mockResolvedValueOnce({ ok: false, reason: "network", code: "NETWORK" })
+        endPrincipalSessions.mockResolvedValueOnce({ ok: false, kind: "unavailable", status: null, reason: "network", code: "NETWORK", retryable: true })
         const dialog = await openMemberEnding(user)
 
         await user.click(screen.getByRole("button", { name: "End all sign-ins" }))

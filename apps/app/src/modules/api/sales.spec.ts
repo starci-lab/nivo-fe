@@ -5,7 +5,7 @@ import {
   commandSalesPrepareHandoff, commandSalesRecoverAction, commandSalesSubmitCommand, commandSalesSubmitHandoff,
   readSalesAction, readSalesCommand, readSalesDecisionRequest, readSalesHandoff, readSalesOpportunity,
   readSalesPipeline, readSalesPolicy, readSalesReadiness, SALES_MUTATION_NAMES, SALES_QUERY_NAMES,
-  SALES_RECONCILIATIONS, SALES_RESULT_TAGS, salesOperationAddress
+  SALES_RECONCILIATIONS, salesOperationAddress
 } from "./sales";
 
 const WORKSPACE = "11111111-1111-4111-8111-111111111111";
@@ -77,11 +77,10 @@ describe("sales", () => {
       "sales.configurePolicy@1", "sales.submitCommand@1", "sales.clarifyCommand@1", "sales.decideProposal@1",
       "sales.close@1", "sales.prepareHandoff@1", "sales.submitHandoff@1", "sales.recoverAction@1"
     ]);
-    // The closed set is callable and nothing else: every name carries one variant and one read, and a
+    // The closed set is callable and nothing else: every mutation names one read, and a
     // query registers none.
     const registered = [...SALES_QUERY_NAMES, ...SALES_MUTATION_NAMES];
     expect(new Set(registered).size).toBe(16);
-    expect(Object.keys(SALES_RESULT_TAGS).sort()).toEqual([...registered].sort());
     expect(Object.keys(SALES_RECONCILIATIONS).sort()).toEqual([...SALES_MUTATION_NAMES].sort());
   });
 
@@ -116,7 +115,7 @@ describe("sales", () => {
     for (const index of [0, 1, 2, 3, 4, 5, 6, 7]) {
       expect(sentInit(index).method).toBe("POST");
       expect(sentInit(index).credentials).toBe("omit");
-      expect(sentInit(index).headers).toEqual({ "Authorization": `Bearer ${TOKEN}`, "Content-Type": "application/json" });
+      expect(sentInit(index).headers).toEqual({ authorization: `Bearer ${TOKEN}`, "content-type": "application/json" });
       expect(sentBody(index).requestId).toBe(INTENT);
     }
     expect(sentBody(0).input).toEqual({ operation: "policy", salesInstallationId: INSTALLATION, requestId: null });
@@ -170,15 +169,15 @@ describe("sales", () => {
 
   it("hands the receiver's own variant through with the tag the operation registers", async () => {
     answerWith(200, served("sales.close@1", { status: "won", value: { opportunityId: "opportunity-1", revision: 3 } }));
-    expect(await commandSalesClose(TOKEN, SCOPE, CLOSE_REQUEST, INTENT)).toEqual({ ok: true, operation: "sales.close@1", variant: "sales_opportunity", value: { opportunityId: "opportunity-1", revision: 3 } });
+    expect(await commandSalesClose(TOKEN, SCOPE, CLOSE_REQUEST, INTENT)).toEqual({ ok: true, data: { opportunityId: "opportunity-1", revision: 3 } });
     answerWith(200, served("sales.readiness@1", { status: "pending", value: { ready: false, revision: 1 } }));
-    expect(await readSalesReadiness(TOKEN, SCOPE, READINESS_REQUEST, INTENT)).toEqual({ ok: true, operation: "sales.readiness@1", variant: "sales_readiness", value: { ready: false, revision: 1 } });
+    expect(await readSalesReadiness(TOKEN, SCOPE, READINESS_REQUEST, INTENT)).toEqual({ ok: true, data: { ready: false, revision: 1 } });
   });
 
   it("surfaces DENIED as its own typed failure and keeps the receiver's code", async () => {
     answerWith(200, served("sales.opportunity@1", { status: "denied", code: "SALES_OPPORTUNITY_NOT_FOUND" }));
-    expect(await readSalesOpportunity(TOKEN, SCOPE, OPPORTUNITY_REQUEST, INTENT)).toEqual({
-      ok: false, code: "SALES_REFUSED_DENIED", operation: "sales.opportunity@1", requestId: INTENT, reconciles: null, reason: null,
+    expect(await readSalesOpportunity(TOKEN, SCOPE, OPPORTUNITY_REQUEST, INTENT)).toMatchObject({
+      ok: false, code: "SALES_REFUSED_DENIED", operation: "sales.opportunity@1", requestId: INTENT, reconciles: null, reason: "",
       refusal: { reason: "DENIED", code: "SALES_OPPORTUNITY_NOT_FOUND", item: null, currentRevision: null }
     });
   });
@@ -212,8 +211,8 @@ describe("sales", () => {
 
   it("surfaces UNAVAILABLE as its own typed failure", async () => {
     answerWith(200, served("sales.readiness@1", { status: "unavailable", code: "SALES_READINESS_NOT_OBSERVED" }));
-    expect(await readSalesReadiness(TOKEN, SCOPE, READINESS_REQUEST, INTENT)).toEqual({
-      ok: false, code: "SALES_REFUSED_UNAVAILABLE", operation: "sales.readiness@1", requestId: INTENT, reconciles: null, reason: null,
+    expect(await readSalesReadiness(TOKEN, SCOPE, READINESS_REQUEST, INTENT)).toMatchObject({
+      ok: false, code: "SALES_REFUSED_UNAVAILABLE", operation: "sales.readiness@1", requestId: INTENT, reconciles: null, reason: "",
       refusal: { reason: "UNAVAILABLE", code: "SALES_READINESS_NOT_OBSERVED", item: null, currentRevision: null }
     });
   });
@@ -232,7 +231,7 @@ describe("sales", () => {
     expect(await readSalesOpportunity(TOKEN, SCOPE, OPPORTUNITY_REQUEST, INTENT)).toMatchObject({ ok: false, code: "UNEXPECTED_RESULT_STATUS" });
     // A lifecycle denial is the readiness fact, not a refusal of the read: it carries no code.
     answerWith(200, served("sales.readiness@1", { status: "denied", value: { ready: false, revision: 2 } }));
-    expect(await readSalesReadiness(TOKEN, SCOPE, READINESS_REQUEST, INTENT)).toEqual({ ok: true, operation: "sales.readiness@1", variant: "sales_readiness", value: { ready: false, revision: 2 } });
+    expect(await readSalesReadiness(TOKEN, SCOPE, READINESS_REQUEST, INTENT)).toEqual({ ok: true, data: { ready: false, revision: 2 } });
   });
 
   it("fails closed when the served result is not a result object at all", async () => {
@@ -248,19 +247,19 @@ describe("sales", () => {
 
   it("keeps an unknown outcome unknown, names the one read of the same identity, and never re-sends", async () => {
     answerWith(200, { kind: "outcome_unknown", operation: "sales.close@1", requestId: INTENT });
-    expect(await commandSalesClose(TOKEN, SCOPE, CLOSE_REQUEST, INTENT)).toEqual({
-      ok: false, code: "outcome_unknown", operation: "sales.close@1", requestId: INTENT, reconciles: "sales.opportunity@1", refusal: null, reason: null
+    expect(await commandSalesClose(TOKEN, SCOPE, CLOSE_REQUEST, INTENT)).toMatchObject({
+      ok: false, code: "outcome_unknown", operation: "sales.close@1", requestId: INTENT, reconciles: "sales.opportunity@1", refusal: null, reason: ""
     });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("keeps a deadline a refusal that still names the read of the same identity", async () => {
     answerWith(200, { kind: "DEADLINE_EXCEEDED", reason: "receiver-deadline" });
-    expect(await commandSalesSubmitHandoff(TOKEN, SCOPE, SUBMIT_HANDOFF_REQUEST, INTENT)).toEqual({
+    expect(await commandSalesSubmitHandoff(TOKEN, SCOPE, SUBMIT_HANDOFF_REQUEST, INTENT)).toMatchObject({
       ok: false, code: "DEADLINE_EXCEEDED", operation: "sales.submitHandoff@1", requestId: INTENT, reconciles: "sales.handoff@1", refusal: null, reason: "receiver-deadline"
     });
     answerWith(200, { kind: "DEADLINE_EXCEEDED" });
-    expect(await readSalesPipeline(TOKEN, SCOPE, PIPELINE_REQUEST, INTENT)).toMatchObject({ ok: false, code: "DEADLINE_EXCEEDED", reconciles: null, reason: null });
+    expect(await readSalesPipeline(TOKEN, SCOPE, PIPELINE_REQUEST, INTENT)).toMatchObject({ ok: false, code: "DEADLINE_EXCEEDED", reconciles: null, reason: "" });
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
@@ -286,10 +285,31 @@ describe("sales", () => {
   it("never translates OPERATION_NOT_REGISTERED_FOR_INSTALLATION into a Sales state", async () => {
     answerWith(200, { kind: "OPERATION_NOT_REGISTERED_FOR_INSTALLATION", reason: "installation-serves-no-such-package" });
     const answer = await readSalesReadiness(TOKEN, SCOPE, READINESS_REQUEST, INTENT);
-    expect(answer).toEqual({
+    expect(answer).toMatchObject({
       ok: false, code: "OPERATION_NOT_REGISTERED_FOR_INSTALLATION", operation: "sales.readiness@1", requestId: INTENT, reconciles: null, refusal: null, reason: "installation-serves-no-such-package"
     });
     expect(answer).not.toHaveProperty("value");
+  });
+
+  it("maps every failure to one shared outcome kind, so a screen never reads a status off a code", async () => {
+    const kindOf = async (status: number, body: unknown) => {
+      answerWith(status, body);
+      const answer = await readSalesOpportunity(TOKEN, SCOPE, OPPORTUNITY_REQUEST, INTENT);
+      return answer.ok ? "ok" : answer.kind;
+    };
+    expect(await kindOf(200, served("sales.opportunity@1", { status: "denied", code: "SALES_OPPORTUNITY_NOT_FOUND" }))).toBe("forbidden");
+    expect(await kindOf(200, served("sales.opportunity@1", { status: "denied", code: "SALES_POLICY_VALUE_INVALID" }))).toBe("invalid");
+    expect(await kindOf(200, served("sales.opportunity@1", { status: "conflict", code: "SALES_POLICY_REVISION_CONFLICT" }))).toBe("invalid");
+    expect(await kindOf(200, served("sales.opportunity@1", { status: "unavailable", code: "SALES_READINESS_NOT_OBSERVED" }))).toBe("unavailable");
+    expect(await kindOf(200, { kind: "outcome_unknown", operation: "sales.opportunity@1", requestId: INTENT })).toBe("unavailable");
+    expect(await kindOf(200, { kind: "REFUSED", reason: "no" })).toBe("forbidden");
+    expect(await kindOf(200, { kind: "BAD_REQUEST", reason: "no" })).toBe("invalid");
+    expect(await kindOf(200, { kind: "OPERATION_NOT_REGISTERED_FOR_INSTALLATION", reason: "no" })).toBe("not-found");
+    expect(await kindOf(503, { kind: "CONTROLPLANE_UNAVAILABLE", reason: "down" })).toBe("unavailable");
+    expect(await kindOf(401, {})).toBe("refused");
+    fetchMock.mockRejectedValueOnce(new Error("offline"));
+    expect(await readSalesOpportunity(TOKEN, SCOPE, OPPORTUNITY_REQUEST, INTENT)).toMatchObject({ ok: false, kind: "unavailable", code: "UNREACHABLE", retryable: true });
+    expect(await readSalesOpportunity(null, SCOPE, OPPORTUNITY_REQUEST, INTENT)).toMatchObject({ ok: false, kind: "refused", code: "UNAUTHENTICATED" });
   });
 
   it("keeps every other closed route error its own name", async () => {
@@ -341,7 +361,7 @@ describe("sales", () => {
     fetchMock.mockRejectedValueOnce(new Error("socket closed"));
     expect(await readSalesAction(TOKEN, SCOPE, ACTION_REQUEST, INTENT)).toMatchObject({ ok: false, code: "UNREACHABLE" });
     fetchMock.mockRejectedValueOnce("not an error");
-    expect(await readSalesAction(TOKEN, SCOPE, ACTION_REQUEST, INTENT)).toMatchObject({ ok: false, code: "UNREACHABLE", reason: expect.stringContaining("unknown") });
+    expect(await readSalesAction(TOKEN, SCOPE, ACTION_REQUEST, INTENT)).toMatchObject({ ok: false, kind: "unavailable", code: "UNREACHABLE", reason: expect.stringContaining("network") });
     fetchMock.mockResolvedValueOnce({ status: 200, json: async () => { throw new Error("not json"); } });
     expect(await readSalesAction(TOKEN, SCOPE, ACTION_REQUEST, INTENT)).toMatchObject({ ok: false, code: "MALFORMED_ANSWER" });
     answerWith(200, "not an envelope");

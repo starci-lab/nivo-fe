@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/hooks", async () => ({ ...(await vi.importActual("@/hooks") as Record<string, unknown>), useRouter: () => ({ push: mocks.push }), useSession: () => mocks.session }))
-vi.mock("@/modules/api/console", () => ({ issueAgentWorkspaceAppLaunch: mocks.issue, revokeAgentWorkspaceAppLaunch: mocks.revoke }))
+vi.mock("@/modules/api/agentos-workspaces", () => ({ issueAgentWorkspaceAppLaunch: mocks.issue, revokeAgentWorkspaceAppLaunch: mocks.revoke }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/window/workspace-app-launch", () => ({
     followWorkspaceAppRedirect: mocks.followRedirect,

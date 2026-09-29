@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useMutateCreateAndPublishExpertSiteSwr, useProvisioningRealtime, useQueryCatalogItemsSwr, useQueryMyExpertSiteDeploymentSwr, useRouter, useSession, type ProvisioningTarget } from "@/hooks";
 
-import type { ExpertDeploymentSnapshot } from "@/modules/api/console";
+import type { ExpertDeploymentSnapshot } from "@/modules/api/expert-sites";
 import { TemplateAppProvisioningBase, type TemplateAppProvisioningViewProps } from "./component";
 
 /** Route identity owned by the template-app provisioning block. */

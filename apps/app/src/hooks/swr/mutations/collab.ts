@@ -10,8 +10,8 @@ import {
     withdrawCollabInvitation,
     type CollabApprovalDecision,
     type CollabHumanRole,
-    type CollabResult,
 } from "@/modules/api/collab";
+import type { Outcome } from "@/modules/api/outcome";
 import { useSession } from "../../auth/useSession";
 import { useNivoMutation, type NivoMutationKey } from "../useNivoMutation";
 
@@ -45,7 +45,7 @@ const collabDomainKeys = (workspaceId: string, domains: ReadonlyArray<string>) =
 /** Revalidate the workspace's cached projections in `domains` after an accepted answer. */
 const useCollabRevalidate = (workspaceId: string | null, domains: ReadonlyArray<string>) => {
     const { mutate } = useSWRConfig();
-    return async (answer: CollabResult<unknown>) => {
+    return async (answer: Outcome<unknown>) => {
         if (workspaceId !== null && answer.ok) {
             await mutate(collabDomainKeys(workspaceId, domains));
         }

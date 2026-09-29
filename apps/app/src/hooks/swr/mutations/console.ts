@@ -1,8 +1,15 @@
 "use client";
 
-import { answerAgentosCustomModuleIntake, configureAgentWorkspaceChannel, createExpertSite, finalizeAgentosModuleAttachment, installAgentosSolutionModule, issueAgentWorkspaceAppLaunch, manageAgentosModuleRuntime, orderAgentOs, prepareAgentosModuleAttachmentUpload, publishAgentosCustomModule, publishExpertSite, reindexAgentWorkspaceKnowledge, removeAgentosModuleIntegrationSecret, removeAgentosModuleAttachment, renewAgentWorkspaceAppLaunch, revokeAgentWorkspaceAppLaunch, runAgentosModuleTest, runAgentosAiReadinessTest, saveAgentosModuleIntegrationSecret, startAgentosCustomModuleIntake, uploadAgentosModuleAttachment, type ConfigureAgentWorkspaceChannelInput, type ManageAgentosModuleRuntimeInput, type RenewedAgentWorkspaceAppLaunch, type RunAgentosModuleTestInput } from "@/modules/api/console";
+import { answerAgentosCustomModuleIntake, finalizeAgentosModuleAttachment, prepareAgentosModuleAttachmentUpload, publishAgentosCustomModule, removeAgentosModuleIntegrationSecret, removeAgentosModuleAttachment, saveAgentosModuleIntegrationSecret, startAgentosCustomModuleIntake, uploadAgentosModuleAttachment } from "@/modules/api/agentos-module-studio";
+import { configureAgentWorkspaceChannel, manageAgentosModuleRuntime, type ConfigureAgentWorkspaceChannelInput, type ManageAgentosModuleRuntimeInput } from "@/modules/api/agentos-module-runtime";
+import { createExpertSite, publishExpertSite } from "@/modules/api/expert-sites";
+import { installAgentosSolutionModule } from "@/modules/api/agentos-modules";
+import { issueAgentWorkspaceAppLaunch, renewAgentWorkspaceAppLaunch, revokeAgentWorkspaceAppLaunch, type RenewedAgentWorkspaceAppLaunch } from "@/modules/api/agentos-workspaces";
+import { orderAgentOs } from "@/modules/api/commerce";
+import { reindexAgentWorkspaceKnowledge, runAgentosAiReadinessTest } from "@/modules/api/agentos-knowledge";
+import { runAgentosModuleTest, type RunAgentosModuleTestInput } from "@/modules/api/agentos-module-tests";
 import { refreshSession } from "@/modules/api/auth";
-import type { Result } from "@/modules/api/graphql";
+import { failed, type Outcome } from "@/modules/api/outcome";
 import { useSession } from "../../auth/useSession";
 import { useNivoMutation } from "../useNivoMutation";
 import { agentosAiKnowledgeQueryKey, agentosCustomModulesQueryKey, agentosModuleInstallationsQueryKey, agentosModuleStudioQueryKey, agentWorkspaceControlCenterQueryKey, agentWorkspacesQueryKey, catalogOrdersQueryKey, expertSiteDeploymentQueryKey, expertSitesQueryKey, invoicesQueryKey } from "../queries/console";
@@ -105,15 +112,11 @@ export const useMutateRevokeAgentWorkspaceAppLaunchSwr = (workspaceId: string) =
 /** Refresh the Nivo session and renew one exact workspace launch without exposing transport to UI. */
 export const useMutateRenewAgentWorkspaceAppLaunchSwr = (workspaceId: string) => {
   const session = useSession();
-  return useNivoMutation(["agentos", "workspace-app-launch-renew", workspaceId], async (launchId: string): Promise<Result<RenewedAgentWorkspaceAppLaunch>> => {
+  return useNivoMutation(["agentos", "workspace-app-launch-renew", workspaceId], async (launchId: string): Promise<Outcome<RenewedAgentWorkspaceAppLaunch>> => {
     const refreshed = await refreshSession();
     if (!refreshed.ok) return refreshed;
     if (refreshed.data.accessToken === null || refreshed.data.requiresTwoFactor) {
-      return {
-        ok: false,
-        reason: "session renewal requires authentication",
-        code: "AUTH_REQUIRED"
-      };
+      return failed("refused", { code: "AUTH_REQUIRED", reason: "session renewal requires authentication" });
     }
     session.adopt(refreshed.data);
     return renewAgentWorkspaceAppLaunch(launchId);

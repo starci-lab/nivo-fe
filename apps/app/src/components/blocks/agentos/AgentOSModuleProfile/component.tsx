@@ -1,6 +1,6 @@
 import { LabelledProgressRow } from "@nivo/ui";
 import { SurfaceCard, Text } from "@starci/grammar/common";
-import type { AgentosModuleStudio } from "@/modules/api/console";
+import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio";
 /** Public API role for AgentOSModuleProfileProps. */
 export type AgentOSModuleProfileProps = AgentOSModuleProfileViewProps;
 /** Resolved copy for the profile block. */

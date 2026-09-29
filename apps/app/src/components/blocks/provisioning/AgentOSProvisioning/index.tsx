@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useQueryMyAgentosAiKnowledgeReadinessSwr, useMutateRunAgentosAiReadinessTestSwr, useMutateRecoverWorkspacePurchaseSwr, useProvisioningRealtime, useQueryWorkspaceCheckoutEntrySwr, useQueryWorkspaceCheckoutOffersSwr, useQueryWorkspaceCheckoutStatusSwr, useRouter, useSession, type ProvisioningTarget } from "@/hooks";
 
-import { type WorkspaceCheckoutEntryDestination, type WorkspaceCheckoutEntryRequest, type WorkspaceCheckoutObservedIdentities, type WorkspaceCheckoutOffer, type WorkspaceCheckoutOutcome, type WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane";
+import { type WorkspaceCheckoutEntryDestination, type WorkspaceCheckoutEntryRequest, type WorkspaceCheckoutObservedIdentities, type WorkspaceCheckoutOffer, type WorkspaceCheckoutAnswer, type WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane";
 import { nivoQueryData } from "@/modules/query";
 import { AgentOSProvisioningBase, type AgentOSProvisioningViewProps } from "./component";
 
@@ -77,7 +77,7 @@ const PRESENTED_OFFER_VERSION = "draft-2026-09-22";
 const ENTRY_ROUTE_NAME = "instance-management.workspace-shell";
 
 /** The purchase view one checkout outcome carries, when the arm carries one at all. */
-const purchaseOf = (outcome: WorkspaceCheckoutOutcome | null): WorkspaceCheckoutStatusView | null =>
+const purchaseOf = (outcome: WorkspaceCheckoutAnswer | null): WorkspaceCheckoutStatusView | null =>
   outcome !== null && "purchase" in outcome && outcome.purchase !== undefined ? outcome.purchase : null;
 
 /**

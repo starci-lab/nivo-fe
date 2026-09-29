@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { SurfaceCard, Button, Button as CoreButton, Text } from "@starci/grammar/common";
 import { LifecycleStep, type LifecycleStepData } from "@nivo/ui";
-import type { AgentosModuleStudio } from "@/modules/api/console";
+import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio";
 
 /** Attachment lifecycle rows and their bounded upload/removal actions. */
 export type AgentOSModuleAttachmentsProps = AgentOSModuleAttachmentsViewProps;

@@ -10,7 +10,8 @@ import type { AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteS
 import type { SetupMessage, SetupRevision } from "@/components/blocks/agentos/PrivateSetupChatBlock";
 import { AgentOSSolutionModuleAttachments } from "@/components/blocks/agentos/AgentOSSolutionModuleAttachments";
 import { useQueryChatbotWorkbenchSwr, useQueryMyAgentosModuleRuntimeSwr, useQueryMyAgentosModuleTestSurfaceSwr, useQueryMyAgentWorkspaceControlCenterSwr, useReadMyAgentosModuleTestRun, useMutateConfigureAgentWorkspaceChannelSwr, useMutateManageAgentosModuleRuntimeSwr, useMutateReconcileChatbotDeliverySwr, useMutateResolveChatbotHandoffSwr, useMutateRunAgentosModuleTestSwr, useMutateSetChatbotHandoffSwr, useMutateStartChatbotZaloOauthSwr } from "@/hooks";
-import { type AgentosModuleRuntime, type AgentosRuntimeManifest, type AgentosRuntimeValue, type ManageAgentosModuleRuntimeInput } from "@/modules/api/console";
+import { type AgentosModuleRuntime, type AgentosRuntimeManifest, type ManageAgentosModuleRuntimeInput } from "@/modules/api/agentos-module-runtime";
+import type { AgentosRuntimeValue } from "@/modules/api/agentos-runtime-tree";
 import { nivoQueryData, type NivoQueryAnswer } from "@/modules/query";
 import { AgentOSSolutionModulePageBase, AgentOSSolutionModuleState, buildModulePageCopy, exactTestSurfaceFor, type ModulePageCopy, type AgentOSSolutionModulePageViewProps, type AgentOSSolutionModuleScreen } from "./component";
 

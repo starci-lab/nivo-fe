@@ -1,4 +1,4 @@
-import type { AgentWorkspaceControlCenter } from "@/modules/api/console";
+import type { AgentWorkspaceControlCenter } from "@/modules/api/agentos-workspaces";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { AgentOSWorkspaceRuntime } from "./index";

@@ -1,3 +1,4 @@
+import type { Outcome } from "@/modules/api/outcome";
 /*
  * The pure Accounting workbench projection.
  *
@@ -153,15 +154,14 @@ export type AccountingSurface = (typeof ACCOUNTING_SURFACES)[number];
 /** What one surface's read settled into, in the terms the block renders. */
 export type AccountingSurfaceStanding = "loading" | "denied" | "unavailable" | "empty" | "ready";
 /** One Accounting read's answer, as much of it as a standing depends on. */
-export type AccountingAnswerStanding = { readonly ok: boolean; readonly code?: string };
+export type AccountingAnswerStanding = Outcome<unknown>;
 
 /*
- * A refusal is not one thing. `forbidden`, `REFUSED` and `UNAUTHENTICATED` hide protected content
- * and are the only ones the surface calls denied; a stale authority, a conflict, a malformed answer
+ * A refusal is not one thing. A `refused` or `forbidden` answer hides protected content
+ * and is the only kind the surface calls denied; a stale authority, a conflict, a malformed answer
  * or an unreachable route is an outage the operator can retry, and telling them they lost access
  * would be a lie. An absent answer is a read in flight, never an empty one.
  */
-const ACCOUNTING_DENIED_CODES: ReadonlySet<string> = new Set(["forbidden", "REFUSED", "UNAUTHENTICATED"]);
 
 /**
  * Project one read's standing from its answer.
@@ -172,7 +172,7 @@ const ACCOUNTING_DENIED_CODES: ReadonlySet<string> = new Set(["forbidden", "REFU
  */
 export const accountingSurfaceStanding = (answer: AccountingAnswerStanding | undefined, hasContent: boolean): AccountingSurfaceStanding => {
   if (answer === undefined) return "loading";
-  if (!answer.ok) return ACCOUNTING_DENIED_CODES.has(answer.code ?? "") ? "denied" : "unavailable";
+  if (!answer.ok) return answer.kind === "refused" || answer.kind === "forbidden" ? "denied" : "unavailable";
   return hasContent ? "ready" : "empty";
 };
 

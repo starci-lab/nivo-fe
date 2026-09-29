@@ -21,11 +21,10 @@
  *    receipt never reconciles, cancels or retries the command it reports on.
  */
 
-/** Core API address, read the same way `graphql.ts` and `auth.ts` read it: one variable, one fallback. */
-const CORE_API_URL = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql";
-
-/** The registered shell route prefix; an absolute path so it replaces the configured `/graphql` path. */
-const SHELL_ROUTE_PREFIX = "/api/v1/agentos/workspaces";
+import { CORE_API_URL } from "@/modules/config";
+import { failed, failureKindOfStatus, type Failure, type Outcome } from "./outcome";
+import { OPERATION_ROUTE_PREFIX } from "./operation-route";
+import { send } from "./transport";
 
 /** The one mutation this door registers. Core refuses any other operation name. */
 export const AGENTOS_SHELL_NAVIGATION_OPERATION = "navigation.resolve@1";
@@ -264,41 +263,27 @@ export interface ShellRegisteredDestination {
     readonly returnContext: ShellReturnContext;
 }
 
-/**
- * What a caller learns from one registered read.
+/*
+ * WHAT A CALLER LEARNS from one registered read or one navigation resolution is the shared
+ * `Outcome`: the answer, or the failure whose kind says which of five things it was.
  *
- * `refused` is a current authorization refusal for the exact source asked about and carries no
- * payload; the registered route refuses the whole read set, so the status Core chose travels with it
- * and the caller can tell a permission refusal from an outage without parsing a reason string.
- * `unauthenticated` is the Shared route's own UNAUTHENTICATED classification, which is a session
- * outcome rather than a source outcome. `unreachable` is a request that never produced an answer.
- * `unsupported` is a reply the registered grammar cannot express: an unknown kind, an unknown
- * version, an echoed identity that disagrees with the request, a re-ordered or duplicated read set,
- * or a body that is not an envelope at all.
- */
-export type ShellGatewayOutcome<T> =
-    | { readonly state: "answered"; readonly answer: T }
-    | { readonly state: "refused"; readonly reason: string; readonly status: number }
-    | { readonly state: "unauthenticated" }
-    | { readonly state: "unreachable" }
-    | { readonly state: "unsupported" };
-
-/**
- * What a caller learns from one navigation resolution.
+ * - `refused`     the session is not accepted (the route's own 401): a session outcome that belongs
+ *                 to the whole selection, not to one source.
+ * - `forbidden`   a current authorization refusal for the exact source asked about. The registered
+ *                 route refuses the whole read set, so the status Core chose travels in `status` and
+ *                 the reason token in `code`: a permission refusal is told from an outage without
+ *                 parsing a sentence.
+ * - `not-found`   Core states the source is not there.
+ * - `invalid`     a request this client refuses to send (`UNSUPPORTED`), a destination resolved for a
+ *                 selection no longer displayed (`OBSOLETE_SELECTION`), or a malformed request Core
+ *                 refused.
+ * - `unavailable` no answer arrived (`NETWORK`, `TIMEOUT`), Core had an outage, or the reply is one
+ *                 the registered grammar cannot express (`UNSUPPORTED_REPLY`): an unknown kind or
+ *                 version, an echoed identity that disagrees with the request, a re-ordered or
+ *                 duplicated read set, or a body that is not an envelope at all.
  *
- * This is the navigation contract's own vocabulary rather than the read one: `unavailable` is a
- * decision Core made and answered, `obsolete` is a destination resolved for a selection that is no
- * longer the one being displayed, and `unsupported` covers both an unknown destination grammar and
- * a request this client refuses to send. None of the non-`resolved` outcomes may open anything.
+ * A navigation answer is the destination and nothing else: no failure may open anything.
  */
-export type ShellNavigationOutcome =
-    | { readonly state: "resolved"; readonly destination: ShellRegisteredDestination }
-    | { readonly state: "refused"; readonly reason: string }
-    | { readonly state: "unavailable"; readonly reason: string }
-    | { readonly state: "unsupported"; readonly reason: string }
-    | { readonly state: "obsolete" }
-    | { readonly state: "unauthenticated" }
-    | { readonly state: "unreachable" };
 
 /** Everything a registered read needs that is not the access token. */
 export interface ShellReadScope {
@@ -397,45 +382,53 @@ export const canonicalShellReads = (reads: ReadonlyArray<ShellRead>): ReadonlyAr
     return ordered;
 };
 
-const shellRouteUrl = (scope: ShellReadScope, suffix = ""): URL => new URL(`${SHELL_ROUTE_PREFIX}/${encodeURIComponent(scope.workspaceId)}/instances/${encodeURIComponent(scope.instanceId)}${suffix}`, CORE_API_URL);
+const shellRouteUrl = (scope: ShellReadScope, suffix = ""): URL => new URL(`${OPERATION_ROUTE_PREFIX}/${encodeURIComponent(scope.workspaceId)}/instances/${encodeURIComponent(scope.instanceId)}${suffix}`, CORE_API_URL);
 
 const keyedQuery = (entries: ReadonlyArray<readonly [string, string]>): string => entries.map(([name, value]) => `${name}=${value}`).join("&");
 
-type ShellTransportResult =
-    | { readonly state: "received"; readonly status: number; readonly body: unknown }
-    | { readonly state: "unauthenticated" }
-    | { readonly state: "unreachable" }
-    | { readonly state: "unsupported" };
+/** A reply that arrived, and the status Core stated it under. */
+export interface ShellArrivedReply {
+    readonly status: number;
+    readonly body: unknown;
+}
+
+/** The method and, for a mutation, the JSON body of one registered request. */
+type ShellRequest = { readonly method: "GET" | "POST"; readonly json?: unknown };
+
+/** What one registered request settled as: a reply that arrived, or the failure that stopped it. */
+type ShellExchange =
+    | { readonly arrived: true; readonly reply: ShellArrivedReply }
+    | { readonly arrived: false; readonly failure: Failure };
+
+/** A request this client refuses to send: the scope or the intent is outside the registered grammar. */
+const unsupportedRequest = (reason: string): Failure => failed("invalid", { code: "UNSUPPORTED", reason });
+
+/** A reply the registered grammar cannot express; a refusal of this client's own making, not a Core decision. */
+const unreadableReply = (status: number, reason = "unreadable-reply"): Failure => failed("unavailable", { status, code: "UNSUPPORTED_REPLY", reason });
 
 /**
  * Send one registered request and classify what came back.
  *
+ * `credentials: "omit"` is load-bearing: the refresh cookie is renewal input for the Core session
+ * boundary and is never authorization for this route. A body-carrying request keeps its content type.
+ * The route states an unauthenticated request as a 401, which is a session outcome; every other
+ * status that still carries a JSON body is a reply the caller reads, because the route names its
+ * own refusals in the body.
+ *
  * @param url - Fully built registered URL; the access token is never part of it.
  * @param accessToken - The volatile Bearer token, or null when the session minted none.
- * @param init - Method, headers and body for the request.
+ * @param request - Method and, for a mutation, the JSON body.
  * @returns Whether an envelope arrived, or the closed reason none did. No request is ever repeated.
  */
-const sendShellRequest = async (url: URL, accessToken: string | null, init: RequestInit): Promise<ShellTransportResult> => {
-    if (accessToken === null || accessToken.length === 0) return { state: "unauthenticated" };
-    // The Authorization header is added to whatever the caller already asked for, so a body-carrying
-    // request keeps its content type and no call site has to remember to re-send the token.
-    const headers = new Headers(init.headers);
-    headers.set("Authorization", `Bearer ${accessToken}`);
-    let response: Response;
-    try {
-        // `credentials: "omit"` is load-bearing: the refresh cookie is renewal input for the Core
-        // session boundary and is never authorization for this route.
-        response = await fetch(url.toString(), { ...init, credentials: "omit", headers });
-    } catch {
-        return { state: "unreachable" };
+const sendShellRequest = async (url: URL, accessToken: string | null, request: ShellRequest): Promise<ShellExchange> => {
+    if (accessToken === null || accessToken.length === 0) {
+        return { arrived: false, failure: failed("refused", { code: "UNAUTHENTICATED", reason: "No access token is held, so no request left the browser." }) };
     }
-    // The Shared route answers an unauthenticated request with 401 and states it in the body too.
-    if (response.status === 401) return { state: "unauthenticated" };
-    try {
-        return { state: "received", status: response.status, body: await response.json() as unknown };
-    } catch {
-        return { state: "unsupported" };
-    }
+    const sent = await send({ url: url.toString(), method: request.method, credentials: "omit", accessToken, json: request.json });
+    if (sent.ok) return { arrived: true, reply: { status: sent.data.status, body: sent.data.body } };
+    if (sent.kind === "refused") return { arrived: false, failure: failed("refused", { status: sent.status, code: "UNAUTHENTICATED", reason: "Core refused the bearer token." }) };
+    if (sent.status !== null && sent.body !== null) return { arrived: true, reply: { status: sent.status, body: sent.body } };
+    return { arrived: false, failure: sent };
 };
 
 const authoredCoreResult = (value: unknown): ShellCoreResult | null => {
@@ -614,16 +607,10 @@ const authoredDestination = (value: unknown, scope: ShellReadScope): ShellRegist
 
 const authoredRefusal = (value: unknown): string | null => isRecord(value) && value.kind === "refused" && isText(value.reason) ? value.reason : null;
 
-/** A reply that arrived, and the status Core stated it under. */
-export interface ShellArrivedReply {
-    readonly status: number;
-    readonly body: unknown;
-}
-
 /** A request-level refusal, carrying the status Core chose beside the contract's reason token. */
-const refusalFor = <T>(sent: ShellArrivedReply): ShellGatewayOutcome<T> | null => {
+const refusalFor = (sent: ShellArrivedReply): Failure | null => {
     const reason = authoredRefusal(sent.body);
-    return reason === null ? null : { state: "refused", reason, status: sent.status };
+    return reason === null ? null : failed(sent.status >= 400 ? failureKindOfStatus(sent.status) : "forbidden", { status: sent.status, code: reason, reason });
 };
 
 /**
@@ -635,26 +622,26 @@ const refusalFor = <T>(sent: ShellArrivedReply): ShellGatewayOutcome<T> | null =
  * @param reads - The requested sources and their generations.
  * @returns The closed overview answer, or the closed non-answer.
  */
-export const readAgentosShellOverview = async (accessToken: string | null, scope: ShellReadScope, selectionGeneration: string, reads: ReadonlyArray<ShellRead>): Promise<ShellGatewayOutcome<ShellOverviewAnswer>> => {
+export const readAgentosShellOverview = async (accessToken: string | null, scope: ShellReadScope, selectionGeneration: string, reads: ReadonlyArray<ShellRead>): Promise<Outcome<ShellOverviewAnswer>> => {
     const ordered = canonicalShellReads(reads);
-    if (ordered === null || selectionGeneration.length === 0) return { state: "unsupported" };
+    if (ordered === null || selectionGeneration.length === 0) return unsupportedRequest("invalid-read-scope");
     const query = keyedQuery([...ordered.map(read => ["read", formatShellRead(read.identity, read.readGeneration)] as const), ["selectionGeneration", encodeURIComponent(selectionGeneration)]]);
     const sent = await sendShellRequest(new URL(`${shellRouteUrl(scope).toString()}?${query}`), accessToken, { method: "GET" });
-    if (sent.state !== "received") return sent;
-    const refusal = refusalFor<ShellOverviewAnswer>(sent);
+    if (!sent.arrived) return sent.failure;
+    const refusal = refusalFor(sent.reply);
     if (refusal !== null) return refusal;
-    if (!isRecord(sent.body) || sent.body.kind !== "overview" || sent.body.selectionGeneration !== selectionGeneration) return { state: "unsupported" };
-    if (sent.body.core !== null && !isRecord(sent.body.core)) return { state: "unsupported" };
-    const core = sent.body.core === null ? null : authoredCoreResult(sent.body.core);
-    if (sent.body.core !== null && core === null) return { state: "unsupported" };
-    if (!Array.isArray(sent.body.sources) || sent.body.sources.length !== ordered.length) return { state: "unsupported" };
+    if (!isRecord(sent.reply.body) || sent.reply.body.kind !== "overview" || sent.reply.body.selectionGeneration !== selectionGeneration) return unreadableReply(sent.reply.status);
+    if (sent.reply.body.core !== null && !isRecord(sent.reply.body.core)) return unreadableReply(sent.reply.status);
+    const core = sent.reply.body.core === null ? null : authoredCoreResult(sent.reply.body.core);
+    if (sent.reply.body.core !== null && core === null) return unreadableReply(sent.reply.status);
+    if (!Array.isArray(sent.reply.body.sources) || sent.reply.body.sources.length !== ordered.length) return unreadableReply(sent.reply.status);
     const sources: Array<ShellSourceEnvelope> = [];
     for (let index = 0; index < ordered.length; index += 1) {
-        const envelope = authoredEnvelope(sent.body.sources[index], ordered[index]);
-        if (envelope === null) return { state: "unsupported" };
+        const envelope = authoredEnvelope(sent.reply.body.sources[index], ordered[index]);
+        if (envelope === null) return unreadableReply(sent.reply.status);
         sources.push(envelope);
     }
-    return { state: "answered", answer: { kind: "overview", selectionGeneration, core, sources } };
+    return { ok: true, data: { kind: "overview", selectionGeneration, core, sources } };
 };
 
 /**
@@ -667,26 +654,26 @@ export const readAgentosShellOverview = async (accessToken: string | null, scope
  * @param scope - The command, receiver source identity, generations and selection.
  * @returns The closed command-receipt answer, or the closed non-answer.
  */
-export const readAgentosShellCommandReceipt = async (accessToken: string | null, scope: ShellCommandReceiptScope): Promise<ShellGatewayOutcome<ShellCommandReceiptAnswer>> => {
-    if (!isUuid(scope.commandId) || scope.selectionGeneration.length === 0 || !isCount(scope.readGeneration) || scope.readGeneration < 1) return { state: "unsupported" };
+export const readAgentosShellCommandReceipt = async (accessToken: string | null, scope: ShellCommandReceiptScope): Promise<Outcome<ShellCommandReceiptAnswer>> => {
+    if (!isUuid(scope.commandId) || scope.selectionGeneration.length === 0 || !isCount(scope.readGeneration) || scope.readGeneration < 1) return unsupportedRequest("invalid-read-scope");
     const query = keyedQuery([
         ["sourceIdentity", encodeURIComponent(scope.sourceIdentity)],
         ["readGeneration", String(scope.readGeneration)],
         ["selectionGeneration", encodeURIComponent(scope.selectionGeneration)]
     ]);
     const sent = await sendShellRequest(shellRouteUrl(scope, `/command-receipts/${encodeURIComponent(scope.commandId)}?${query}`), accessToken, { method: "GET" });
-    if (sent.state !== "received") return sent;
-    const refusal = refusalFor<ShellCommandReceiptAnswer>(sent);
+    if (!sent.arrived) return sent.failure;
+    const refusal = refusalFor(sent.reply);
     if (refusal !== null) return refusal;
-    if (!isRecord(sent.body) || sent.body.kind !== "command_observation") return { state: "unsupported" };
+    if (!isRecord(sent.reply.body) || sent.reply.body.kind !== "command_observation") return unreadableReply(sent.reply.status);
     // The read identity is echoed in full; a disagreement means this is another read's answer.
-    if (sent.body.selectionGeneration !== scope.selectionGeneration || sent.body.sourceIdentity !== scope.sourceIdentity || sent.body.readGeneration !== scope.readGeneration) return { state: "unsupported" };
-    const core = authoredCoreResult(sent.body.core);
-    const commandObservation = authoredObservationProjection(sent.body.commandObservation, authoredCommandObservation);
-    if (core === null || commandObservation === null) return { state: "unsupported" };
+    if (sent.reply.body.selectionGeneration !== scope.selectionGeneration || sent.reply.body.sourceIdentity !== scope.sourceIdentity || sent.reply.body.readGeneration !== scope.readGeneration) return unreadableReply(sent.reply.status);
+    const core = authoredCoreResult(sent.reply.body.core);
+    const commandObservation = authoredObservationProjection(sent.reply.body.commandObservation, authoredCommandObservation);
+    if (core === null || commandObservation === null) return unreadableReply(sent.reply.status);
     return {
-        state: "answered",
-        answer: { kind: "command_observation", selectionGeneration: scope.selectionGeneration, sourceIdentity: scope.sourceIdentity, readGeneration: scope.readGeneration, core, commandObservation }
+        ok: true,
+        data: { kind: "command_observation", selectionGeneration: scope.selectionGeneration, sourceIdentity: scope.sourceIdentity, readGeneration: scope.readGeneration, core, commandObservation }
     };
 };
 
@@ -697,18 +684,18 @@ export const readAgentosShellCommandReceipt = async (accessToken: string | null,
  * @param scope - The exact installation inside the selected workspace and instance.
  * @returns The closed authority-status answer, or the closed non-answer.
  */
-export const readAgentosShellAuthorityStatus = async (accessToken: string | null, scope: ShellInstallationScope): Promise<ShellGatewayOutcome<ShellAuthorityStatusAnswer>> => {
-    if (!isUuid(scope.installationId)) return { state: "unsupported" };
+export const readAgentosShellAuthorityStatus = async (accessToken: string | null, scope: ShellInstallationScope): Promise<Outcome<ShellAuthorityStatusAnswer>> => {
+    if (!isUuid(scope.installationId)) return unsupportedRequest("invalid-read-scope");
     const sent = await sendShellRequest(shellRouteUrl(scope, `/authority-status?${keyedQuery([["installationId", encodeURIComponent(scope.installationId)]])}`), accessToken, { method: "GET" });
-    if (sent.state !== "received") return sent;
-    const refusal = refusalFor<ShellAuthorityStatusAnswer>(sent);
+    if (!sent.arrived) return sent.failure;
+    const refusal = refusalFor(sent.reply);
     if (refusal !== null) return refusal;
-    if (!isRecord(sent.body) || sent.body.kind !== "authority_status") return { state: "unsupported" };
-    const core = authoredCoreResult(sent.body.core);
-    const authorityStatus = authoredAuthorityStatus(sent.body.authorityStatus);
-    if (core === null || authorityStatus === null) return { state: "unsupported" };
-    if (authorityStatus.installationId !== scope.installationId) return { state: "unsupported" };
-    return { state: "answered", answer: { kind: "authority_status", core, authorityStatus } };
+    if (!isRecord(sent.reply.body) || sent.reply.body.kind !== "authority_status") return unreadableReply(sent.reply.status);
+    const core = authoredCoreResult(sent.reply.body.core);
+    const authorityStatus = authoredAuthorityStatus(sent.reply.body.authorityStatus);
+    if (core === null || authorityStatus === null) return unreadableReply(sent.reply.status);
+    if (authorityStatus.installationId !== scope.installationId) return unreadableReply(sent.reply.status);
+    return { ok: true, data: { kind: "authority_status", core, authorityStatus } };
 };
 
 /**
@@ -719,34 +706,35 @@ export const readAgentosShellAuthorityStatus = async (accessToken: string | null
  * @returns The closed lifecycle answer, or the closed non-answer. Applied truth is reported apart
  *   from the lifecycle the instance claims, so a recorder that refuses is never read as absence.
  */
-export const readAgentosShellLifecycleObservation = async (accessToken: string | null, scope: ShellInstallationScope): Promise<ShellGatewayOutcome<ShellLifecycleObservationAnswer>> => {
-    if (!isUuid(scope.installationId)) return { state: "unsupported" };
+export const readAgentosShellLifecycleObservation = async (accessToken: string | null, scope: ShellInstallationScope): Promise<Outcome<ShellLifecycleObservationAnswer>> => {
+    if (!isUuid(scope.installationId)) return unsupportedRequest("invalid-read-scope");
     const sent = await sendShellRequest(shellRouteUrl(scope, `/lifecycle-observations/${encodeURIComponent(scope.installationId)}`), accessToken, { method: "GET" });
-    if (sent.state !== "received") return sent;
-    const refusal = refusalFor<ShellLifecycleObservationAnswer>(sent);
+    if (!sent.arrived) return sent.failure;
+    const refusal = refusalFor(sent.reply);
     if (refusal !== null) return refusal;
-    if (!isRecord(sent.body) || sent.body.kind !== "lifecycle_observation") return { state: "unsupported" };
-    const core = authoredCoreResult(sent.body.core);
-    const lifecycleObservation = authoredObservationProjection(sent.body.lifecycleObservation, authoredLifecycleObservation);
-    const appliedObservation = authoredAppliedObservation(sent.body.appliedObservation);
-    if (core === null || lifecycleObservation === null || appliedObservation === null) return { state: "unsupported" };
-    return { state: "answered", answer: { kind: "lifecycle_observation", core, lifecycleObservation, appliedObservation } };
+    if (!isRecord(sent.reply.body) || sent.reply.body.kind !== "lifecycle_observation") return unreadableReply(sent.reply.status);
+    const core = authoredCoreResult(sent.reply.body.core);
+    const lifecycleObservation = authoredObservationProjection(sent.reply.body.lifecycleObservation, authoredLifecycleObservation);
+    const appliedObservation = authoredAppliedObservation(sent.reply.body.appliedObservation);
+    if (core === null || lifecycleObservation === null || appliedObservation === null) return unreadableReply(sent.reply.status);
+    return { ok: true, data: { kind: "lifecycle_observation", core, lifecycleObservation, appliedObservation } };
 };
 
 /**
- * The closed non-destination outcome of one navigation reply, or null when it is a destination.
+ * The failure a navigation reply states instead of a destination, or null when it states one.
  *
  * The three failure kinds are read from their own `kind`; none of them is ever read as a partial
  * destination.
  *
  * @param body - The arrived, record-shaped reply.
- * @returns The failure outcome, or null when the reply states a destination.
+ * @param status - The status Core stated the reply under.
+ * @returns The failure, or null when the reply states a destination.
  */
-const navigationFailure = (body: Record<string, unknown>): ShellNavigationOutcome | null => {
-    if (body.kind === "unavailable") return { state: "unavailable", reason: isText(body.reason) ? body.reason : "navigation-unavailable" };
-    if (body.kind === "unsupported") return { state: "unsupported", reason: isText(body.reason) ? body.reason : "navigation-unsupported" };
+const navigationFailure = (body: Record<string, unknown>, status: number): Failure | null => {
+    if (body.kind === "unavailable") return failed("unavailable", { status, code: "NAVIGATION_UNAVAILABLE", reason: isText(body.reason) ? body.reason : "navigation-unavailable" });
+    if (body.kind === "unsupported") return failed("invalid", { status, code: "NAVIGATION_UNSUPPORTED", reason: isText(body.reason) ? body.reason : "navigation-unsupported" });
     if (body.kind === "registered_destination") return null;
-    return { state: "unsupported", reason: "unreadable-navigation-answer" };
+    return unreadableReply(status, "unreadable-navigation-answer");
 };
 
 /**
@@ -758,13 +746,14 @@ const navigationFailure = (body: Record<string, unknown>): ShellNavigationOutcom
  *
  * @param accessToken - Volatile Bearer token, or null when the session minted none.
  * @param scope - The exact selection, registered route key and optional opaque item identity.
- * @returns The registered destination, or the closed reason it may not be opened.
+ * @returns The registered destination, or the failure that says why it may not be opened. A
+ *   destination resolved for a selection that is no longer displayed is `OBSOLETE_SELECTION`.
  */
-export const resolveAgentosShellNavigation = async (accessToken: string | null, scope: ShellNavigationScope): Promise<ShellNavigationOutcome> => {
-    if (!isUuid(scope.installationId) || scope.selectionGeneration.length === 0) return { state: "unsupported", reason: "invalid-navigation-intent" };
-    if (scope.routeKey !== "module_home" && scope.routeKey !== "attention_item" && scope.routeKey !== "result_item" && scope.routeKey !== "operation_entry") return { state: "unsupported", reason: "route-key-unsupported" };
+export const resolveAgentosShellNavigation = async (accessToken: string | null, scope: ShellNavigationScope): Promise<Outcome<ShellRegisteredDestination>> => {
+    if (!isUuid(scope.installationId) || scope.selectionGeneration.length === 0) return unsupportedRequest("invalid-navigation-intent");
+    if (scope.routeKey !== "module_home" && scope.routeKey !== "attention_item" && scope.routeKey !== "result_item" && scope.routeKey !== "operation_entry") return unsupportedRequest("route-key-unsupported");
     const wantsItem = scope.routeKey === "attention_item" || scope.routeKey === "result_item";
-    if (wantsItem !== (scope.opaqueItemId !== null)) return { state: "unsupported", reason: "invalid-navigation-intent" };
+    if (wantsItem !== (scope.opaqueItemId !== null)) return unsupportedRequest("invalid-navigation-intent");
     const intent = {
         workspaceId: scope.workspaceId,
         instanceId: scope.instanceId,
@@ -775,19 +764,18 @@ export const resolveAgentosShellNavigation = async (accessToken: string | null, 
         returnContext: { routeName: SHELL_RETURN_ROUTE_NAME, workspaceId: scope.workspaceId, instanceId: scope.instanceId, installationId: scope.installationId }
     };
     const url = shellRouteUrl(scope, `/operations/${encodeURIComponent(AGENTOS_SHELL_NAVIGATION_OPERATION)}`);
-    const sent = await sendShellRequest(url, accessToken, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(intent) });
-    // A reply the grammar cannot read is a refusal of this client's own making, not a Core decision.
-    if (sent.state === "unsupported") return { state: "unsupported", reason: "unreadable-navigation-answer" };
-    if (sent.state !== "received") return sent;
-    const refusal = authoredRefusal(sent.body);
-    if (refusal !== null) return { state: "refused", reason: refusal };
-    if (!isRecord(sent.body)) return { state: "unsupported", reason: "unreadable-navigation-answer" };
-    const failure = navigationFailure(sent.body);
+    const sent = await sendShellRequest(url, accessToken, { method: "POST", json: intent });
+    if (!sent.arrived) return sent.failure;
+    const refusal = refusalFor(sent.reply);
+    if (refusal !== null) return refusal;
+    const body = sent.reply.body;
+    if (!isRecord(body)) return unreadableReply(sent.reply.status, "unreadable-navigation-answer");
+    const failure = navigationFailure(body, sent.reply.status);
     if (failure !== null) return failure;
     // A destination resolved for a selection that is no longer displayed is never opened.
-    if (sent.body.selectionGeneration !== scope.selectionGeneration) return { state: "obsolete" };
-    const destination = authoredDestination(sent.body.destination, scope);
-    if (destination === null) return { state: "unsupported", reason: "unregistered-destination" };
-    if (destination.installationId !== scope.installationId) return { state: "unsupported", reason: "unregistered-destination" };
-    return { state: "resolved", destination };
+    if (body.selectionGeneration !== scope.selectionGeneration) return failed("invalid", { status: sent.reply.status, code: "OBSOLETE_SELECTION", reason: "obsolete-selection" });
+    const destination = authoredDestination(body.destination, scope);
+    if (destination === null) return unreadableReply(sent.reply.status, "unregistered-destination");
+    if (destination.installationId !== scope.installationId) return unreadableReply(sent.reply.status, "unregistered-destination");
+    return { ok: true, data: destination };
 };

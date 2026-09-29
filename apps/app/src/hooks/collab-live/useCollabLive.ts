@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";
 import { io, type Socket } from "socket.io-client";
+import { CORE_API_BASE } from "@/modules/config";
 import { useSession } from "../auth/useSession";
 
 /**
@@ -26,8 +27,7 @@ import { useSession } from "../auth/useSession";
  * that fired while the socket was down are unknowable.
  */
 
-const API_ENDPOINT = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql";
-const COLLAB_SOCKET_URL = `${API_ENDPOINT.replace(/\/graphql\/?$/, "")}/collab`;
+const COLLAB_SOCKET_URL = `${CORE_API_BASE}/collab`;
 
 /** The closed set of change kinds the live namespace may announce. */
 export type CollabLiveHintKind = "message" | "card" | "task" | "membership" | "notice";

@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 import { AgentOSWorkspaceSummary } from "./index"
-import type { AgentWorkspaceControlCenter } from "@/modules/api/console"
+import type { AgentWorkspaceControlCenter } from "@/modules/api/agentos-workspaces"
 
 const labels = { section: "Summary", status: "Status", plan: "Plan", allocation: "Allocation", host: "Host", chart: "Chart", unprovisioned: "No instance is provisioned for this workspace yet." }
 const data = { workspace: { id: "workspace-1", name: "Support", status: "active", externalWorkspaceRef: null }, instance: { id: "instance-1", name: "Support", hostname: "support.test", status: "active", chartVersion: "1.0", ramMb: 1024, vcpu: 2, planCode: "pro", planRamGb: 1, planVcpu: 2 }, apps: [], runtime: null } as AgentWorkspaceControlCenter

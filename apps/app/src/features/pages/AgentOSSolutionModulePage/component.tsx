@@ -11,7 +11,9 @@ import { ModuleCockpitRailBlock } from "@/components/blocks/agentos/ModuleCockpi
 import { ModuleRouteShellBlock, type AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteShellBlock";
 import { PrivateSetupChatBlock, type SetupMessage, type SetupRevision } from "@/components/blocks/agentos/PrivateSetupChatBlock";
 import { TestTrustResultBlock } from "@/components/blocks/agentos/TestTrustResultBlock";
-import type { AgentosModuleRuntime, AgentosModuleTestContract, AgentosModuleTestSurface, AgentosRuntimeValue } from "@/modules/api/console";
+import type { AgentosModuleRuntime } from "@/modules/api/agentos-module-runtime";
+import type { AgentosRuntimeValue } from "@/modules/api/agentos-runtime-tree";
+import type { AgentosModuleTestContract, AgentosModuleTestSurface } from "@/modules/api/agentos-module-tests";
 import type { ChatbotWorkbench } from "@/modules/api/workspace-controlplane";
 import { AGENTOS_SETUP_SURFACE_CLASS_NAME, CONTEXT_BAND_CLASS_NAME, CONTEXT_RAISED_BAND_CLASS_NAME } from "./classNames";
 /** Catalog keys resolved only by the connected owner or a real-provider fixture. */

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { shellNavigationDecision, shellNavigationPath, shellReturnSelection } from "./shell-navigation"
-import type { ShellNavigationOutcome, ShellRegisteredDestination, ShellRegisteredViewName } from "@/modules/api/agentos-shell"
+import type { ShellRegisteredDestination, ShellRegisteredViewName } from "@/modules/api/agentos-shell"
+import { failed, type Failure } from "@/modules/api/outcome"
 
 const WORKSPACE = "11111111-1111-4111-8111-111111111111"
 const INSTANCE = "22222222-2222-4222-8222-222222222222"
@@ -45,7 +46,7 @@ describe("shellReturnSelection", () => {
 
 describe("shellNavigationDecision", () => {
     it("opens a resolved destination at its registered path", () => {
-        const decision = shellNavigationDecision({ state: "resolved", destination: destination("module-diagnostics") }, "vi")
+        const decision = shellNavigationDecision({ ok: true, data: destination("module-diagnostics") }, "vi")
         expect(decision).toEqual({
             open: true,
             href: `/agentos/workspaces/${WORKSPACE}/modules/${INSTALLATION}/diagnostics`,
@@ -55,24 +56,24 @@ describe("shellNavigationDecision", () => {
 
     it("opens the module-owned destination of an attention or result entry", () => {
         for (const routeName of ["sales-opportunity", "accounting-result", "chatbot-conversation"] as const) {
-            const decision = shellNavigationDecision({ state: "resolved", destination: { ...destination(routeName), opaqueItemId: "item-1" } }, "vi")
+            const decision = shellNavigationDecision({ ok: true, data: { ...destination(routeName), opaqueItemId: "item-1" } }, "vi")
             expect(decision.open).toBe(true)
         }
     })
 
     it("leaves the current view unchanged for every non-destination outcome", () => {
-        const outcomes: ReadonlyArray<ShellNavigationOutcome> = [
-            { state: "refused", reason: "parent-mismatch" },
-            { state: "unavailable", reason: "deadline-exceeded" },
-            { state: "unsupported", reason: "route-key-unsupported" },
-            { state: "obsolete" },
-            { state: "unauthenticated" },
-            { state: "unreachable" }
+        const outcomes: ReadonlyArray<Failure> = [
+            failed("forbidden", { code: "parent-mismatch", reason: "parent-mismatch" }),
+            failed("unavailable", { code: "NAVIGATION_UNAVAILABLE", reason: "deadline-exceeded" }),
+            failed("invalid", { code: "UNSUPPORTED", reason: "route-key-unsupported" }),
+            failed("invalid", { code: "OBSOLETE_SELECTION", reason: "obsolete-selection" }),
+            failed("refused", { code: "UNAUTHENTICATED", reason: "no token" }),
+            failed("unavailable", { code: "NETWORK", reason: "network" })
         ]
         for (const outcome of outcomes) {
             const decision = shellNavigationDecision(outcome, "vi")
             expect(decision.open).toBe(false)
-            expect(decision).toEqual({ open: false, reason: outcome.state })
+            expect(decision).toEqual({ open: false, kind: outcome.kind, code: outcome.code })
         }
     })
 

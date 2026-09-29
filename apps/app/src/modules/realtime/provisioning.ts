@@ -1,12 +1,8 @@
 /**
- * Transport layer of one provisioning realtime subscription: the socket endpoint, the
+ * Transport layer of one provisioning realtime subscription: the
  * wire-message shapes each room emits and the pure folds that read them. The React binding
  * that subscribes lives in `@/hooks/realtime/useProvisioningRealtime`.
  */
-const API_ENDPOINT = process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql"
-
-/** Socket.IO endpoint derived from the configured GraphQL API endpoint. */
-export const SOCKET_ENDPOINT = API_ENDPOINT.replace(/\/graphql\/?$/, "")
 
 /** One `workspace.status` wire message from the provisioning room. */
 export type WorkspaceMessage = { readonly eventId?: string; readonly sequence?: number; readonly workspaceId: string; readonly status: string; readonly reason: string | null; readonly updatedAt: string }

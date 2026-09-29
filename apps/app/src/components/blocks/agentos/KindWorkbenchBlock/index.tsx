@@ -69,7 +69,7 @@ import { SurfaceCard, Heading, Text } from "@starci/grammar/common";
 
 import type { ComponentType } from "react";
 
-import type { AgentosRuntimeOperationEvent, AgentosRuntimeTask } from "@/modules/api/console";
+import type { AgentosRuntimeOperationEvent, AgentosRuntimeTask } from "@/modules/api/agentos-module-runtime";
 import { AccountingWorkbenchBlock } from "@/components/blocks/agentos/AccountingWorkbenchBlock";
 import { SalesWorkbenchBlock } from "@/components/blocks/agentos/SalesWorkbenchBlock";
 

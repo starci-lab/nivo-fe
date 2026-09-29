@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { SurfaceCard, Button, Button as CoreButton, Text } from "@starci/grammar/common";
 import { LifecycleStep, type LifecycleStepData } from "@nivo/ui";
-import type { AgentosModuleStudio } from "@/modules/api/console";
+import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio";
 
 /** Copy and settled evidence owned by the connected installation attachment surface. */
 export type AgentOSSolutionModuleAttachmentsLabels = {

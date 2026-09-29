@@ -3,11 +3,14 @@
 import { createContext, useContext, useMemo } from "react";
 import type { ComponentType } from "react";
 import { useQueryMyAgentWorkspacesSwr, useQueryMyDomainsSwr, useQueryMyExpertSitesSwr, useQueryMyInvoicesSwr, useQueryMyPodOpenclawStatusSwr, useQueryMyWalletSwr } from "../swr/queries/console";
-import { type AgentWorkspaceRow, type DomainRow, type ExpertSiteRow, type InvoiceRow, type PodStatusRow, type WalletRow } from "@/modules/api/console";
-import type { Result } from "@/modules/api/graphql";
+import { type AgentWorkspaceRow } from "@/modules/api/agentos-workspaces";
+import { type DomainRow, type InvoiceRow, type WalletRow } from "@/modules/api/commerce";
+import { type ExpertSiteRow } from "@/modules/api/expert-sites";
+import { type PodStatusRow } from "@/modules/api/instances";
+import type { Outcome } from "@/modules/api/outcome";
 
 /** One independently settling answer in the account operations briefing. */
-export type OverviewAnswer<T> = Result<T> | null;
+export type OverviewAnswer<T> = Outcome<T> | null;
 
 /** Source-owned answers shared by the connected overview blocks. */
 export type OverviewDataProviderData = {

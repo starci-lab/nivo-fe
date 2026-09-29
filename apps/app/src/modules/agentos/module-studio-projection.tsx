@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, type ReactNode } from "react";
-import type { AgentosModuleStudio } from "@/modules/api/console";
+import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio";
 
 /** One page-owned studio read shared by sibling connected blocks. */
 export type AgentOSModuleStudioProjection = {

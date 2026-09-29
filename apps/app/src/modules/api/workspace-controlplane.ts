@@ -1,33 +1,9 @@
 /** Workspace controller contracts. Chatbot browser traffic is always mediated by Core. */
 
-import {
-  catalogItems,
-  createWalletTopUpPayLink,
-  issueAgentWorkspaceAppLaunch,
-  myAgentWorkspace,
-  myCatalogOrders,
-  myInvoices,
-  orderAgentOs,
-  payInvoice,
-  type AgentWorkspaceAppLaunch,
-  type AgentWorkspaceRow,
-  type CatalogCategory,
-  type CatalogItemRow,
-  type CatalogOrderStatus,
-  type InvoiceRow,
-  type InvoiceStatus,
-  type WalletTopUpPayLink
-} from "./console";
-import { graphql, type Result } from "./graphql";
-
-/** The Chatbot boundary's own result: a payload, or the single refusal code a screen may key on. */
-export type WorkspaceControlplaneResult<T> = {
-  readonly ok: true;
-  readonly data: T;
-} | {
-  readonly ok: false;
-  readonly code: string;
-};
+import { catalogItems, createWalletTopUpPayLink, myCatalogOrders, myInvoices, orderAgentOs, payInvoice, type CatalogCategory, type CatalogItemRow, type CatalogOrderStatus, type InvoiceRow, type InvoiceStatus, type WalletTopUpPayLink } from "./commerce";
+import { issueAgentWorkspaceAppLaunch, myAgentWorkspace, type AgentWorkspaceAppLaunch, type AgentWorkspaceRow } from "./agentos-workspaces";
+import { graphql, graphqlFields } from "./graphql";
+import { failed, failureKindOfCode, type Outcome } from "./outcome";
 
 /** One installation-qualified channel projection; credential material never crosses this boundary. */
 export type ChatbotChannelBinding = {
@@ -80,7 +56,7 @@ export type ChatbotCommandResult = {
   readonly state: string;
   readonly authorizationUrl?: string | null;
 };
-type GraphqlEnvelope<T> = {
+type ChatbotEnvelope<T> = {
   readonly data?: T;
   readonly errors?: ReadonlyArray<{
     readonly message?: string;
@@ -88,60 +64,42 @@ type GraphqlEnvelope<T> = {
 };
 const WORKSPACE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 type ChatbotCoreOperation = "workbench" | "bind-channel" | "start-zalo-oauth" | "set-handoff" | "resolve-handoff" | "reconcile-delivery";
-const chatbotCoreEndpoint = (workspaceId: string): string | null => {
-  if (!WORKSPACE_ID.test(workspaceId)) return null;
-  try {
-    return new URL(process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:3068/graphql").toString();
-  } catch {
-    return null;
+const CHATBOT_UNAVAILABLE = (reason: string) => failed("unavailable", { code: "WORKSPACE_CONTROLLER_UNAVAILABLE", reason });
+
+/*
+ * The Chatbot boundary keeps three refusal codes a screen may key on: REFUSED (the session was not
+ * accepted or may not do this), UNREACHABLE (no reply arrived) and FAILED (a reply arrived and was
+ * not an answer). The kind and status of the failure travel beside them.
+ */
+const chatbotCoreRequest = async <T,>(workspaceId: string, accessToken: string, installationId: string, operation: ChatbotCoreOperation, input?: Readonly<Record<string, unknown>>): Promise<Outcome<T>> => {
+  if (!WORKSPACE_ID.test(workspaceId) || accessToken.length === 0) return CHATBOT_UNAVAILABLE("The workspace or the credential is not usable.");
+  const read = operation === "workbench";
+  const field = read ? "chatbotWorkspaceWorkbench" : "chatbotWorkspaceCommand";
+  const answered = await graphqlFields(
+    `${read ? "query" : "mutation"} ChatbotWorkspaceGateway($request: ${read ? "ChatbotWorkspaceReadRequest" : "ChatbotWorkspaceCommandRequest"}!) { ${field}(request: $request) }`,
+    { request: { workspaceId, installationId, ...(read ? {} : { operation, input: input ?? {} }) } },
+    { accessToken }
+  );
+  if (!answered.ok) {
+    const code = answered.kind === "refused" || answered.kind === "forbidden" ? "WORKSPACE_CONTROLLER_REFUSED" : answered.status === null ? "WORKSPACE_CONTROLLER_UNREACHABLE" : "WORKSPACE_CONTROLLER_FAILED";
+    return failed(answered.kind, { status: answered.status, code, reason: answered.reason });
   }
-};
-const chatbotCoreRequest = async <T,>(workspaceId: string, accessToken: string, installationId: string, operation: ChatbotCoreOperation, input?: Readonly<Record<string, unknown>>): Promise<WorkspaceControlplaneResult<T>> => {
-  const endpoint = chatbotCoreEndpoint(workspaceId);
-  if (endpoint === null || accessToken.length === 0) return { ok: false, code: "WORKSPACE_CONTROLLER_UNAVAILABLE" };
-  try {
-    const read = operation === "workbench";
-    const field = read ? "chatbotWorkspaceWorkbench" : "chatbotWorkspaceCommand";
-    const response = await fetch(endpoint, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        authorization: `Bearer ${accessToken}`,
-        "content-type": "application/json"
-      },
-      body: JSON.stringify({
-        query: `${read ? "query" : "mutation"} ChatbotWorkspaceGateway($request: ${read ? "ChatbotWorkspaceReadRequest" : "ChatbotWorkspaceCommandRequest"}!) { ${field}(request: $request) }`,
-        variables: {
-          request: { workspaceId, installationId, ...(read ? {} : { operation, input: input ?? {} }) }
-        }
-      })
-    });
-    const outer = (await response.json()) as {
-      readonly data?: Readonly<Record<string, GraphqlEnvelope<T>>>;
-      readonly errors?: ReadonlyArray<{ readonly message?: string }>;
-    };
-    const envelope = outer.data?.[field];
-    if (!response.ok || envelope?.data === undefined || (outer.errors?.length ?? 0) > 0 || (envelope.errors?.length ?? 0) > 0) return {
-      ok: false,
-      code: response.status === 401 || response.status === 403 ? "WORKSPACE_CONTROLLER_REFUSED" : "WORKSPACE_CONTROLLER_FAILED"
-    };
-    return { ok: true, data: envelope.data };
-  } catch {
-    return { ok: false, code: "WORKSPACE_CONTROLLER_UNREACHABLE" };
-  }
+  const envelope = answered.data[field] as ChatbotEnvelope<T> | undefined;
+  if (envelope?.data === undefined || (envelope.errors?.length ?? 0) > 0) return failed("unavailable", { code: "WORKSPACE_CONTROLLER_FAILED", reason: "The controller answered without a payload." });
+  return { ok: true, data: envelope.data };
 };
 
 /** Read the accepted installation-qualified Chatbot workbench contract. */
-export const chatbotWorkbench = async (_hostname: string, workspaceId: string, accessToken: string, installationId: string): Promise<WorkspaceControlplaneResult<ChatbotWorkbench>> => {
+export const chatbotWorkbench = async (_hostname: string, workspaceId: string, accessToken: string, installationId: string): Promise<Outcome<ChatbotWorkbench>> => {
   const result = await chatbotCoreRequest<{ readonly chatbotWorkbench: ChatbotWorkbench }>(workspaceId, accessToken, installationId, "workbench");
   return result.ok ? { ok: true, data: result.data.chatbotWorkbench } : result;
 };
 
-const mutateChatbot = async (workspaceId: string, accessToken: string, installationId: string, operation: ChatbotCoreOperation, input: Readonly<Record<string, unknown>>, field: string): Promise<WorkspaceControlplaneResult<ChatbotCommandResult>> => {
+const mutateChatbot = async (workspaceId: string, accessToken: string, installationId: string, operation: ChatbotCoreOperation, input: Readonly<Record<string, unknown>>, field: string): Promise<Outcome<ChatbotCommandResult>> => {
   const result = await chatbotCoreRequest<Readonly<Record<string, ChatbotCommandResult>>>(workspaceId, accessToken, installationId, operation, input);
   if (!result.ok) return result;
   const action = result.data[field];
-  return action === undefined ? { ok: false, code: "WORKSPACE_CONTROLLER_FAILED" } : { ok: true, data: action };
+  return action === undefined ? failed("unavailable", { code: "WORKSPACE_CONTROLLER_FAILED", reason: "The controller answered without the requested action." }) : { ok: true, data: action };
 };
 
 /** Bind an opaque, already-sealed channel reference to one installation. */
@@ -166,11 +124,6 @@ export const reconcileChatbotDelivery = (_hostname: string, workspaceId: string,
     outcome: undefined
   }, "reconcileChatbotDelivery");
 
-/** Narrow transport hooks exposed only for focused endpoint-policy tests. */
-export const workspaceControlplaneTesting = {
-  chatbotCoreEndpoint
-};
-
 /*
  * Workspace purchase boundary (contract.workspace-provision.workspace-checkout and
  * contract.workspace-provision.purchased-workspace-entry).
@@ -188,8 +141,7 @@ export const workspaceControlplaneTesting = {
  * elapsed time never enter these results, so a screen cannot mistake them for a fact.
  *
  * RESULTS CARRY THE REFUSAL SENTENCE, NOT JUST A CODE. The purchase screens owe the reader the
- * server's own words, so this section returns the transport's `Result` rather than the narrower
- * `WorkspaceControlplaneResult` the Chatbot boundary above uses.
+ * server's own words, so this section returns the transport's `Outcome`, reason included.
  */
 
 /** One currently published workspace offer; the catalog row IS the offer the contract names. */
@@ -338,7 +290,7 @@ const WORKSPACE_PROVISIONING_SAGA_STEP = "{ id stepKey ordinal isCompensable for
  * @param category - Which catalogue slice publishes the workspace offers.
  * @returns The offers, or why there are none.
  */
-export const listWorkspacePurchaseOffers = (category: CatalogCategory): Promise<Result<ReadonlyArray<WorkspacePurchaseOffer>>> => catalogItems(category);
+export const listWorkspacePurchaseOffers = (category: CatalogCategory): Promise<Outcome<ReadonlyArray<WorkspacePurchaseOffer>>> => catalogItems(category);
 
 /**
  * Order statuses whose purchase is still the same admitted checkout. A repeat inside the reuse
@@ -351,12 +303,12 @@ const REUSABLE_ORDER_STATUSES: ReadonlySet<CatalogOrderStatus> = new Set(["activ
 const CHECKOUT_RECEIPT_TTL_MS = 10 * 60 * 1000;
 
 /** Checkouts still in flight, keyed by their canonical request meaning: offer slug plus rung. */
-const checkoutInFlight = new Map<string, Promise<Result<WorkspacePurchaseReceipt>>>();
+const checkoutInFlight = new Map<string, Promise<Outcome<WorkspacePurchaseReceipt>>>();
 
 /** Receipts recent checkouts earned; a repeat re-reads the purchase before it may reuse one. */
 const checkoutReceipts = new Map<string, { readonly at: number; readonly receipt: WorkspacePurchaseReceipt }>();
 
-const admitWorkspaceCheckout = async (offerSlug: string, tierId?: string): Promise<Result<WorkspacePurchaseReceipt>> => {
+const admitWorkspaceCheckout = async (offerSlug: string, tierId?: string): Promise<Outcome<WorkspacePurchaseReceipt>> => {
   const order = await orderAgentOs(offerSlug, tierId);
   if (!order.ok) return order;
   return {
@@ -388,7 +340,7 @@ const admitWorkspaceCheckout = async (offerSlug: string, tierId?: string): Promi
  * @param tierId - The selected rung, when the offer is tiered.
  * @returns The admitted purchase, or why checkout was refused.
  */
-export const startWorkspaceCheckout = async (offerSlug: string, tierId?: string): Promise<Result<WorkspacePurchaseReceipt>> => {
+export const startWorkspaceCheckout = async (offerSlug: string, tierId?: string): Promise<Outcome<WorkspacePurchaseReceipt>> => {
   const checkoutKey = `${offerSlug}:${tierId ?? ""}`;
   const recorded = checkoutReceipts.get(checkoutKey);
   if (recorded !== undefined && Date.now() - recorded.at < CHECKOUT_RECEIPT_TTL_MS) {
@@ -400,7 +352,8 @@ export const startWorkspaceCheckout = async (offerSlug: string, tierId?: string)
     } else if (status.data.order.state === "missing") {
       checkoutReceipts.delete(checkoutKey);
     } else {
-      return { ok: false, reason: status.data.order.code ?? "purchase source unavailable", code: status.data.order.code ?? undefined };
+      const code = status.data.order.code ?? "purchase-source-unavailable";
+      return failed(failureKindOfCode(code), { code, reason: status.data.order.code ?? "purchase source unavailable" });
     }
   }
   const pending = checkoutInFlight.get(checkoutKey);
@@ -427,7 +380,7 @@ export const startWorkspaceCheckout = async (offerSlug: string, tierId?: string)
  * @param purchaseId - The purchase identity returned by {@link startWorkspaceCheckout}.
  * @returns The status, or why no source could be read.
  */
-export const readWorkspacePurchaseStatus = async (purchaseId: string): Promise<Result<WorkspacePurchaseStatus>> => {
+export const readWorkspacePurchaseStatus = async (purchaseId: string): Promise<Outcome<WorkspacePurchaseStatus>> => {
   const [orders, invoices, workspaces] = await Promise.all([myCatalogOrders(), myInvoices(), myAgentWorkspace()]);
   if (!orders.ok && !invoices.ok && !workspaces.ok) return orders;
   const order = orders.ok ? orders.data.find((row) => row.id === purchaseId) : undefined;
@@ -486,7 +439,7 @@ export const readWorkspacePurchaseStatus = async (purchaseId: string): Promise<R
  * @param invoiceId - The unpaid invoice reported by {@link readWorkspacePurchaseStatus}.
  * @returns The canonical invoice, or why settlement was refused.
  */
-export const payWorkspacePurchaseInvoice = (invoiceId: string): Promise<Result<InvoiceRow>> => payInvoice(invoiceId);
+export const payWorkspacePurchaseInvoice = (invoiceId: string): Promise<Outcome<InvoiceRow>> => payInvoice(invoiceId);
 
 /**
  * Raise the provider-hosted payment action for one purchase invoice (a `request-safe-recovery`
@@ -499,7 +452,7 @@ export const payWorkspacePurchaseInvoice = (invoiceId: string): Promise<Result<I
  * @param input - The invoice amount and the provider's return/cancel addresses.
  * @returns The hosted checkout details, or why none could be raised.
  */
-export const createWorkspacePurchasePayLink = (input: WorkspacePurchasePayLinkInput): Promise<Result<WorkspacePurchasePayLink>> => createWalletTopUpPayLink(input.amountVnd, input.returnUrl, input.cancelUrl);
+export const createWorkspacePurchasePayLink = (input: WorkspacePurchasePayLinkInput): Promise<Outcome<WorkspacePurchasePayLink>> => createWalletTopUpPayLink(input.amountVnd, input.returnUrl, input.cancelUrl);
 
 /**
  * Read the durable provisioning order bound to one purchase (contract operation
@@ -511,7 +464,7 @@ export const createWorkspacePurchasePayLink = (input: WorkspacePurchasePayLinkIn
  * @param sagaId - The provisioning order identity observed through the realtime stream.
  * @returns The saga and its steps, or why the read was refused.
  */
-export const workspaceProvisioningSaga = (sagaId: string): Promise<Result<WorkspaceProvisioningSagaView>> => graphql(`query WorkspaceProvisioningSaga($input: MyProvisioningSagaInput!) { myProvisioningSaga(request: $input) { data { saga ${WORKSPACE_PROVISIONING_SAGA} steps ${WORKSPACE_PROVISIONING_SAGA_STEP} } message success error } }`, {
+export const workspaceProvisioningSaga = (sagaId: string): Promise<Outcome<WorkspaceProvisioningSagaView>> => graphql(`query WorkspaceProvisioningSaga($input: MyProvisioningSagaInput!) { myProvisioningSaga(request: $input) { data { saga ${WORKSPACE_PROVISIONING_SAGA} steps ${WORKSPACE_PROVISIONING_SAGA_STEP} } message success error } }`, {
   input: {
     sagaId
   }
@@ -526,7 +479,7 @@ export const workspaceProvisioningSaga = (sagaId: string): Promise<Result<Worksp
  * @param sagaId - The provisioning order identity.
  * @returns The saga row as it now stands, or why the retry was refused.
  */
-export const retryWorkspaceProvisioningSaga = (sagaId: string): Promise<Result<WorkspaceProvisioningSaga>> => graphql(`mutation RetryWorkspaceProvisioningSaga($input: RetryProvisioningSagaInput!) { retryProvisioningSaga(request: $input) { data ${WORKSPACE_PROVISIONING_SAGA} message success error } }`, {
+export const retryWorkspaceProvisioningSaga = (sagaId: string): Promise<Outcome<WorkspaceProvisioningSaga>> => graphql(`mutation RetryWorkspaceProvisioningSaga($input: RetryProvisioningSagaInput!) { retryProvisioningSaga(request: $input) { data ${WORKSPACE_PROVISIONING_SAGA} message success error } }`, {
   input: {
     sagaId
   }
@@ -538,7 +491,7 @@ export const retryWorkspaceProvisioningSaga = (sagaId: string): Promise<Result<W
  * @param sagaId - The provisioning order identity.
  * @returns The saga row as it now stands, or why the cancellation was refused.
  */
-export const cancelWorkspaceProvisioningSaga = (sagaId: string): Promise<Result<WorkspaceProvisioningSaga>> => graphql(`mutation CancelWorkspaceProvisioningSaga($input: CancelProvisioningSagaInput!) { cancelProvisioningSaga(request: $input) { data ${WORKSPACE_PROVISIONING_SAGA} message success error } }`, {
+export const cancelWorkspaceProvisioningSaga = (sagaId: string): Promise<Outcome<WorkspaceProvisioningSaga>> => graphql(`mutation CancelWorkspaceProvisioningSaga($input: CancelProvisioningSagaInput!) { cancelProvisioningSaga(request: $input) { data ${WORKSPACE_PROVISIONING_SAGA} message success error } }`, {
   input: {
     sagaId
   }
@@ -555,7 +508,7 @@ export const cancelWorkspaceProvisioningSaga = (sagaId: string): Promise<Result<
  * @param workspaceId - The bound workspace reported by {@link readWorkspacePurchaseStatus}.
  * @returns The launch grant, or why entry was refused.
  */
-export const resolvePurchasedWorkspaceEntry = (workspaceId: string): Promise<Result<PurchasedWorkspaceEntry>> => issueAgentWorkspaceAppLaunch(workspaceId);
+export const resolvePurchasedWorkspaceEntry = (workspaceId: string): Promise<Outcome<PurchasedWorkspaceEntry>> => issueAgentWorkspaceAppLaunch(workspaceId);
 
 /**
  * Ask the backend to re-drive provisioning of one failed workspace (the `retry-provisioning-order`
@@ -571,7 +524,7 @@ export const resolvePurchasedWorkspaceEntry = (workspaceId: string): Promise<Res
  * @param workspaceId - The failed workspace reported by {@link readWorkspacePurchaseStatus}.
  * @returns The workspace row as it now stands, or why the retry was refused.
  */
-export const retryWorkspaceProvisioningOrder = (workspaceId: string): Promise<Result<AgentWorkspaceRow>> => graphql(`mutation ManageAgentWorkspace($input: ManageAgentWorkspaceInput!) { manageAgentWorkspace(request: $input) { data { id name status catalogOrder { id } } message success error } }`, {
+export const retryWorkspaceProvisioningOrder = (workspaceId: string): Promise<Outcome<AgentWorkspaceRow>> => graphql(`mutation ManageAgentWorkspace($input: ManageAgentWorkspaceInput!) { manageAgentWorkspace(request: $input) { data { id name status catalogOrder { id } } message success error } }`, {
   input: {
     agentWorkspaceId: workspaceId,
     action: "retry_provision"
@@ -756,7 +709,7 @@ export type WorkspaceCheckoutPaymentAction = {
  * boundary's own contract declares it for those two arms, so a caller switches
  * on `status` and then reads the fact it asked for.
  */
-export type WorkspaceCheckoutOutcome =
+export type WorkspaceCheckoutAnswer =
   | {
     readonly status: "offers";
     readonly offers: ReadonlyArray<WorkspaceCheckoutOffer>;
@@ -964,7 +917,7 @@ const WORKSPACE_CHECKOUT_ENTRY_FIELDS = `
  * @param offerVersion - The exact version presented, never a floating "latest".
  * @returns The closed outcome, or why no answer arrived.
  */
-export const readWorkspaceCheckoutOffers = (offerId: string, offerVersion: string): Promise<Result<WorkspaceCheckoutOutcome>> => graphql(`query WorkspaceCheckoutOffers($request: WorkspaceCheckoutOffersInput!) { workspaceCheckoutOffers(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`, {
+export const readWorkspaceCheckoutOffers = (offerId: string, offerVersion: string): Promise<Outcome<WorkspaceCheckoutAnswer>> => graphql(`query WorkspaceCheckoutOffers($request: WorkspaceCheckoutOffersInput!) { workspaceCheckoutOffers(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`, {
   request: {
     offerId,
     offerVersion
@@ -983,7 +936,7 @@ export const readWorkspaceCheckoutOffers = (offerId: string, offerVersion: strin
  * @param request - The retry identity, the frozen selection and the chosen rail.
  * @returns The closed outcome carrying the payment action, or why none was admitted.
  */
-export const startWorkspaceCheckoutPurchase = (request: WorkspaceCheckoutStartRequest): Promise<Result<WorkspaceCheckoutOutcome>> => graphql(`mutation WorkspaceCheckoutStart($request: WorkspaceCheckoutStartInput!) { workspaceCheckoutStart(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`, {
+export const startWorkspaceCheckoutPurchase = (request: WorkspaceCheckoutStartRequest): Promise<Outcome<WorkspaceCheckoutAnswer>> => graphql(`mutation WorkspaceCheckoutStart($request: WorkspaceCheckoutStartInput!) { workspaceCheckoutStart(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`, {
   request: {
     retryKey: request.retryKey,
     offerId: request.offerId,
@@ -1004,7 +957,7 @@ export const startWorkspaceCheckoutPurchase = (request: WorkspaceCheckoutStartRe
  * @param purchaseId - The purchase identity to read; ownership resolves from the session, never from this value.
  * @returns The closed outcome, or why the read was refused.
  */
-export const readWorkspaceCheckoutStatus = (purchaseId: string): Promise<Result<WorkspaceCheckoutOutcome>> => graphql(`query WorkspacePurchaseStatus($request: WorkspacePurchaseStatusInput!) { workspacePurchaseStatus(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`, {
+export const readWorkspaceCheckoutStatus = (purchaseId: string): Promise<Outcome<WorkspaceCheckoutAnswer>> => graphql(`query WorkspacePurchaseStatus($request: WorkspacePurchaseStatusInput!) { workspacePurchaseStatus(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`, {
   request: {
     purchaseId
   }
@@ -1022,7 +975,7 @@ export const readWorkspaceCheckoutStatus = (purchaseId: string): Promise<Result<
  * @param request - The purchase identity plus the identities the caller last observed.
  * @returns The closed outcome, or why the recovery was refused.
  */
-export const recoverWorkspacePurchase = (request: WorkspaceCheckoutRecoverRequest): Promise<Result<WorkspaceCheckoutOutcome>> => graphql(`mutation WorkspacePurchaseRecover($request: WorkspacePurchaseRecoverInput!) { workspacePurchaseRecover(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`, {
+export const recoverWorkspacePurchase = (request: WorkspaceCheckoutRecoverRequest): Promise<Outcome<WorkspaceCheckoutAnswer>> => graphql(`mutation WorkspacePurchaseRecover($request: WorkspacePurchaseRecoverInput!) { workspacePurchaseRecover(request: $request) { data { ${WORKSPACE_CHECKOUT_OUTCOME_FIELDS} } message success error } }`, {
   request: {
     purchaseId: request.purchaseId,
     lastObserved: request.lastObserved
@@ -1041,7 +994,7 @@ export const recoverWorkspacePurchase = (request: WorkspaceCheckoutRecoverReques
  * @param request - The purchase and workspace identities the caller claims, plus its return context.
  * @returns The closed entry outcome, or why navigation stays withheld.
  */
-export const resolveWorkspaceCheckoutEntry = (request: WorkspaceCheckoutEntryRequest): Promise<Result<WorkspaceCheckoutEntryOutcome>> => graphql(`query WorkspacePurchaseEntry($request: WorkspacePurchaseEntryInput!) { workspacePurchaseEntry(request: $request) { data { ${WORKSPACE_CHECKOUT_ENTRY_FIELDS} } message success error } }`, {
+export const resolveWorkspaceCheckoutEntry = (request: WorkspaceCheckoutEntryRequest): Promise<Outcome<WorkspaceCheckoutEntryOutcome>> => graphql(`query WorkspacePurchaseEntry($request: WorkspacePurchaseEntryInput!) { workspacePurchaseEntry(request: $request) { data { ${WORKSPACE_CHECKOUT_ENTRY_FIELDS} } message success error } }`, {
   request: {
     purchaseId: request.purchaseId,
     workspaceId: request.workspaceId,

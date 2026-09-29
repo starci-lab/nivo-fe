@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react"
 import { io, type Socket } from "socket.io-client"
+import { CORE_API_BASE } from "@/modules/config"
 import {
-    SOCKET_ENDPOINT,
     terminalSagaStatus,
     unwrapMessage,
     type DeploymentMessage,
@@ -73,7 +73,7 @@ const useProvisioningRealtime = ({
             return
         }
 
-        const socket: Socket = io(`${SOCKET_ENDPOINT}/provisioning`, {
+        const socket: Socket = io(`${CORE_API_BASE}/provisioning`, {
             auth: { token: accessToken },
             transports: ["websocket"],
             reconnection: true,

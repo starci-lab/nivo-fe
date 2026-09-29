@@ -2,7 +2,7 @@ import { DETAILS_CLASS_NAME, CONTENT_CLASS_NAME, ROW_CLASS_NAME } from "./classN
 import { EmptyNotice as DirectionEmpty, SectionHeader as DirectionHeader, PrimaryRailLayout as DirectionLayout, SurfaceListCard as DirectionList, Badge, Button, Heading, SurfaceCard, Text, type BadgeTone } from "@starci/grammar/common";
 import { AgentOSKnowledgeOriginList } from "@/components/blocks/agentos/AgentOSKnowledgeOriginList";
 import { AgentOSReadinessComponentList } from "@/components/blocks/agentos/AgentOSReadinessComponentList";
-import type { AgentosAiKnowledgeReadiness } from "@/modules/api/console";
+import type { AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge";
 import { LifecycleStep, type LifecycleStepData } from "@nivo/ui";
 /** Resolved bilingual copy for the workspace AI and knowledge operating surface. */
 export type AgentOSWorkspaceAiKnowledgeProps = {

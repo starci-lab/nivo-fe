@@ -1,6 +1,6 @@
 import { Avatar } from "@nivo/ui";
 import { SurfaceCard, Button, Button as CoreButton, Heading, Text, TextAction, Badge } from "@starci/grammar/common";
-import type { ExpertSiteLead } from "@/modules/api/console";
+import type { ExpertSiteLead } from "@/modules/api/academy";
 
 /** Resolved copy for the lead pipeline. */
 export type AcademyLeadPipelineProps = AcademyLeadPipelineViewProps;

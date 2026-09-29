@@ -1,6 +1,6 @@
 
 import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common";
-import type { AgentosModuleStudio } from "@/modules/api/console";
+import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio";
 
 /** Durable conversation projection and the one current answer operation. */
 export type AgentOSModuleInterviewProps = AgentOSModuleInterviewViewProps;

@@ -44,7 +44,7 @@ const messageFor = (key: string): string => {
 };
 const translate = (key: string, values?: Readonly<Record<string, string | number | undefined>>): string =>
   Object.entries(values ?? {}).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), messageFor(key));
-const proposalAnswer = (status: string, revision: number, version = 3) => ({ ok: true, value: { decisionRequestId: "decision-request-1", opportunityId: "opportunity-1", proposalVersion: version, proposalFingerprint: "sha256:proposal", status, revision } });
+const proposalAnswer = (status: string, revision: number, version = 3) => ({ ok: true, data: { decisionRequestId: "decision-request-1", opportunityId: "opportunity-1", proposalVersion: version, proposalFingerprint: "sha256:proposal", status, revision } });
 const render = () => renderHook(() => useSalesDecision("workspace-1", "installation-1", translate));
 
 /** The rendered controller one answer is driven through. */
@@ -155,7 +155,7 @@ describe("useSalesDecision", () => {
   });
 
   it("takes the answer it shows from the readback, not from the press", async () => {
-    mocks.decideProposal.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, value: { status: "pending" } })) };
+    mocks.decideProposal.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, data: { status: "pending" } })) };
     mocks.decisionRead.mockReturnValue(mocks.query(proposalAnswer("pending", 7), vi.fn(async () => proposalAnswer("approved", 8))).value);
     const { result } = render();
     nameRequest(result);
@@ -165,8 +165,8 @@ describe("useSalesDecision", () => {
   });
 
   it("says an answer did not settle when the readback discloses no state", async () => {
-    mocks.decideProposal.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, value: { status: "pending" } })) };
-    mocks.decisionRead.mockReturnValue(mocks.query(proposalAnswer("pending", 7), vi.fn(async () => ({ ok: true, value: undefined }))).value);
+    mocks.decideProposal.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, data: { status: "pending" } })) };
+    mocks.decisionRead.mockReturnValue(mocks.query(proposalAnswer("pending", 7), vi.fn(async () => ({ ok: true, data: undefined }))).value);
     const { result } = render();
     nameRequest(result);
     nameAnswer(result);
@@ -175,7 +175,7 @@ describe("useSalesDecision", () => {
   });
 
   it("refuses an answer the readback shows was sent against a proposal that moved", async () => {
-    mocks.decideProposal.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, value: { status: "pending" } })) };
+    mocks.decideProposal.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, data: { status: "pending" } })) };
     mocks.decisionRead.mockReturnValue(mocks.query(proposalAnswer("pending", 7), vi.fn(async () => proposalAnswer("pending", 9, 4))).value);
     const { result } = render();
     nameRequest(result);
@@ -185,7 +185,7 @@ describe("useSalesDecision", () => {
   });
 
   it("holds the answer once the read on screen is no longer the proposal it opened on", async () => {
-    mocks.decideProposal.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, value: { status: "pending" } })) };
+    mocks.decideProposal.value = { isMutating: false, trigger: vi.fn(async () => ({ ok: true, data: { status: "pending" } })) };
     mocks.decisionRead.mockReturnValue(mocks.query(proposalAnswer("pending", 7), vi.fn(async () => proposalAnswer("pending", 9, 4))).value);
     const { result } = render();
     nameRequest(result);

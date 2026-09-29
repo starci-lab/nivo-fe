@@ -3,26 +3,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 const { graphql } = vi.hoisted(() => ({ graphql: vi.fn().mockResolvedValue({ ok: true, data: {} }) }))
 vi.mock("./graphql", () => ({ graphql }))
 
-import {
-    catalogItems, createExpertSite, issueAgentWorkspaceAppLaunch, myAgentWorkspace, myAgentWorkspaceControlCenter,
-    myAgentosModuleInstallations, myAgentosModuleInstallation, myAgentosSolutionModules, myCatalogOrders,
-    myDomains, myExpertSiteDeployment, myExpertSites, myInstances, myInvoices, myPodOpenclawStatus, myWallet,
-    myWalletTransactions, orderAgentOs, payInvoice, publishExpertSite, renewAgentWorkspaceAppLaunch,
-    revokeAgentWorkspaceAppLaunch, installAgentosSolutionModule,
-    myAcademyGrowthSnapshot, myAcademyStudents, myAcademyStudentDetail, myAcademyIntegrations,
-    myExpertSiteLeads, createAcademyStudent, updateAcademyStudent, setAcademyStudentStatus,
-    grantAcademyCourseAccess, revokeAcademyCourseAccess, updateExpertSiteLead, draftLeadReply,
-    saveAcademyCredential, setAcademyCustomDomain, saveAcademyGoogleOAuth, disconnectAcademyGoogleOAuth,
-    beginAcademyZaloAuthorization, saveAcademyAnalytics, createAcademyWebhook, rotateAcademyWebhookSecret,
-    disableAcademyWebhook, myAgentosCustomModules, myAgentosCustomModuleStudio,
-    startAgentosCustomModuleIntake, answerAgentosCustomModuleIntake, prepareAgentosModuleAttachmentUpload,
-    finalizeAgentosModuleAttachment, removeAgentosModuleAttachment, saveAgentosModuleIntegrationSecret,
-    removeAgentosModuleIntegrationSecret, publishAgentosCustomModule, resolveCoreApiCapabilityUrl,
-    manageAgentosModuleRuntime, myAgentosModuleRuntime, myAgentosModuleTestRun, myAgentosModuleTestSurface,
-    runAgentosModuleTest,
-} from "./console"
+import { catalogItems, myCatalogOrders, myDomains, myInvoices, myWallet, myWalletTransactions, orderAgentOs, payInvoice } from "./commerce"
+import { createExpertSite, myExpertSiteDeployment, myExpertSites, publishExpertSite } from "./expert-sites"
+import { issueAgentWorkspaceAppLaunch, myAgentWorkspace, myAgentWorkspaceControlCenter, renewAgentWorkspaceAppLaunch, revokeAgentWorkspaceAppLaunch } from "./agentos-workspaces"
+import { myAgentosModuleInstallations, myAgentosModuleInstallation, myAgentosSolutionModules, installAgentosSolutionModule } from "./agentos-modules"
+import { myInstances, myPodOpenclawStatus } from "./instances"
+import { myAcademyGrowthSnapshot, myAcademyStudents, myAcademyStudentDetail, myAcademyIntegrations, myExpertSiteLeads, createAcademyStudent, updateAcademyStudent, setAcademyStudentStatus, grantAcademyCourseAccess, revokeAcademyCourseAccess, updateExpertSiteLead, draftLeadReply, saveAcademyCredential, setAcademyCustomDomain, saveAcademyGoogleOAuth, disconnectAcademyGoogleOAuth, beginAcademyZaloAuthorization, saveAcademyAnalytics, createAcademyWebhook, rotateAcademyWebhookSecret, disableAcademyWebhook } from "./academy"
+import { myAgentosCustomModules, myAgentosCustomModuleStudio, startAgentosCustomModuleIntake, answerAgentosCustomModuleIntake, prepareAgentosModuleAttachmentUpload, finalizeAgentosModuleAttachment, removeAgentosModuleAttachment, saveAgentosModuleIntegrationSecret, removeAgentosModuleIntegrationSecret, publishAgentosCustomModule, resolveCoreApiCapabilityUrl } from "./agentos-module-studio"
+import { manageAgentosModuleRuntime, myAgentosModuleRuntime } from "./agentos-module-runtime"
+import { myAgentosModuleTestRun, myAgentosModuleTestSurface, runAgentosModuleTest } from "./agentos-module-tests"
 
-describe("modules/api/console", () => {
+describe("modules/api operation documents", () => {
     beforeEach(() => vi.clearAllMocks())
 
     it("keeps operation variables and documents aligned for high-risk mutations and paged reads", async () => {
@@ -62,7 +53,7 @@ describe("modules/api/console", () => {
     })
 })
 
-describe("console", () => {
+describe("modules/api owner-scoped operations", () => {
     it("dispatches owner-scoped reads and lifecycle mutations to GraphQL", async () => {
         await Promise.all([
             myExpertSites(), myAgentWorkspace(), myInstances(), myDomains(), myWallet(), myWalletTransactions(),

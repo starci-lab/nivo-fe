@@ -1,6 +1,6 @@
 import { ROW_CLASS_NAME } from "./classNames";
 import { EmptyNotice as DirectionEmpty, SectionHeader as DirectionHeader, SurfaceListCard as DirectionList, Badge, Text, type BadgeTone } from "@starci/grammar/common";
-import type { AgentosAiKnowledgeReadiness } from "@/modules/api/console";
+import type { AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge";
 /** Resolved copy used by the readiness component evidence inventory. */
 export type AgentOSReadinessComponentListProps = {
     readonly state: "loading" | "ready";

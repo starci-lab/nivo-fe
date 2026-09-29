@@ -43,7 +43,7 @@ export const viewerCacheKeyFor = (accessToken: string): string => decodeJwtSubje
 export const nivoViewerQueryKeyFor = (accessToken: string, queryKey: NivoQueryKey): NivoViewerQueryKey => ["NIVO_QUERY", viewerCacheKeyFor(accessToken), ...queryKey];
 
 /**
- * Own one authenticated server read. Components receive the transport's explicit `Result<T>` and
+ * Own one authenticated server read. Components receive the transport's explicit `Outcome<T>` and
  * therefore keep operation refusal distinct from loading and from an unexpected thrown failure.
  */
 export const useNivoQuery = <TAnswer,>(queryKey: NivoQueryKey | null, query: () => Promise<TAnswer>, config?: SWRConfiguration<TAnswer, Error>): SWRResponse<TAnswer, Error> => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { beginAcademyZaloAuthorization, createAcademyStudent, createAcademyWebhook, draftLeadReply, grantAcademyCourseAccess, revokeAcademyCourseAccess, saveAcademyAnalytics, saveAcademyCredential, saveAcademyGoogleOAuth, setAcademyCustomDomain, setAcademyStudentStatus, updateExpertSiteLead } from "@/modules/api/console";
+import { beginAcademyZaloAuthorization, createAcademyStudent, createAcademyWebhook, draftLeadReply, grantAcademyCourseAccess, revokeAcademyCourseAccess, saveAcademyAnalytics, saveAcademyCredential, saveAcademyGoogleOAuth, setAcademyCustomDomain, setAcademyStudentStatus, updateExpertSiteLead } from "@/modules/api/academy";
 import { useNivoMutation } from "../useNivoMutation";
 type AcademyIntegrationCommand = {
   readonly kind: "domain";

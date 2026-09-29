@@ -24,16 +24,16 @@ import { useLocale } from "next-intl";
 import { toLocale } from "@/modules/i18n/config";
 import { useSession } from "../auth/useSession";
 import { type SessionState } from "@/modules/auth/session";
+import { failed, type Failure, type Outcome } from "@/modules/api/outcome";
 import {
     formatShellSourceIdentity,
     readAgentosShellCommandReceipt,
     readAgentosShellOverview,
     resolveAgentosShellNavigation,
     type ShellCommandReceiptAnswer,
-    type ShellGatewayOutcome,
-    type ShellNavigationOutcome,
     type ShellOverviewAnswer,
     type ShellRead,
+    type ShellRegisteredDestination,
     type ShellRouteKey,
     type ShellSourceEnvelope,
     type ShellSourceIdentity
@@ -75,8 +75,8 @@ export interface AgentOSShellHandle {
     readonly sources: ReadonlyArray<ShellSourceObservation>;
     readonly readSelection: () => void;
     readonly retrySource: (identity: ShellSourceIdentity) => void;
-    readonly resolveEntry: (installationId: string, routeKey: ShellRouteKey, opaqueItemId: string | null) => Promise<ShellNavigationOutcome>;
-    readonly navigationDecision: (outcome: ShellNavigationOutcome) => ShellNavigationDecision;
+    readonly resolveEntry: (installationId: string, routeKey: ShellRouteKey, opaqueItemId: string | null) => Promise<Outcome<ShellRegisteredDestination>>;
+    readonly navigationDecision: (outcome: Outcome<ShellRegisteredDestination>) => ShellNavigationDecision;
 }
 
 /**
@@ -87,9 +87,9 @@ export interface AgentOSShellHandle {
  * malformed request is a grammar problem. Collapsing all three into "denied" would tell an owner
  * they lost access every time Core had a bad minute.
  */
-const requestRefusalOutcome = (status: number): ShellSourceOutcome => {
-    if (status === 403 || status === 404) return { kind: "refused" };
-    if (status >= 500) return { kind: "unavailable" };
+const requestFailureOutcome = (failure: Failure): ShellSourceOutcome => {
+    if (failure.kind === "forbidden" || failure.kind === "not-found") return { kind: "refused" };
+    if (failure.kind === "unavailable") return { kind: "unavailable" };
     return { kind: "unsupported" };
 };
 
@@ -108,17 +108,15 @@ const envelopeOutcome = (envelope: ShellSourceEnvelope): ShellSourceOutcome => {
     };
 };
 
-const outcomeForRead = (outcome: ShellGatewayOutcome<ShellOverviewAnswer>, read: ShellRead): ShellSourceOutcome => {
-    if (outcome.state === "answered") {
+const outcomeForRead = (outcome: Outcome<ShellOverviewAnswer>, read: ShellRead): ShellSourceOutcome => {
+    if (outcome.ok) {
         const canonical = formatShellSourceIdentity(read.identity);
-        const envelope = outcome.answer.sources.find((source): boolean => source.sourceIdentity === canonical);
+        const envelope = outcome.data.sources.find((source): boolean => source.sourceIdentity === canonical);
         // The client already proved that every requested source answered; a missing one is a failure
         // of this read rather than an empty answer, and it is never presented as absence.
         return envelope === undefined ? { kind: "unavailable" } : envelopeOutcome(envelope);
     }
-    if (outcome.state === "refused") return requestRefusalOutcome(outcome.status);
-    if (outcome.state === "unsupported") return { kind: "unsupported" };
-    return { kind: "unavailable" };
+    return requestFailureOutcome(outcome);
 };
 
 /**
@@ -128,9 +126,9 @@ const outcomeForRead = (outcome: ShellGatewayOutcome<ShellOverviewAnswer>, read:
  * completion: the payload is preserved verbatim so the view decides pending, confirmed or uncertain
  * from the receiver's own words. A receipt that never arrives cannot become a result.
  */
-const outcomeForReceipt = (outcome: ShellGatewayOutcome<ShellCommandReceiptAnswer>): ShellSourceOutcome => {
-    if (outcome.state === "answered") {
-        const projection = outcome.answer.commandObservation;
+const outcomeForReceipt = (outcome: Outcome<ShellCommandReceiptAnswer>): ShellSourceOutcome => {
+    if (outcome.ok) {
+        const projection = outcome.data.commandObservation;
         if (projection.availability === "refused") return { kind: "refused" };
         if (projection.availability === "unavailable") return { kind: "unavailable" };
         if (projection.availability === "unsupported") return { kind: "unsupported" };
@@ -155,9 +153,7 @@ const outcomeForReceipt = (outcome: ShellGatewayOutcome<ShellCommandReceiptAnswe
             }
         };
     }
-    if (outcome.state === "refused") return requestRefusalOutcome(outcome.status);
-    if (outcome.state === "unsupported") return { kind: "unsupported" };
-    return { kind: "unavailable" };
+    return requestFailureOutcome(outcome);
 };
 
 /** The command identity an operation carries for one receiver source, or null when none matches. */
@@ -227,7 +223,7 @@ export const useAgentOSShell = (options: AgentOSShellOptions) => {
             const overviewReads = reads.filter(read => read.identity.kind !== "receiver");
             const receiptReads = reads.filter(read => read.identity.kind === "receiver");
             const overviewOutcome = overviewReads.length === 0 ? null : await readAgentosShellOverview(accessToken, { workspaceId, instanceId }, selectionGeneration, overviewReads);
-            if (overviewOutcome !== null && overviewOutcome.state === "unauthenticated") {
+            if (overviewOutcome !== null && !overviewOutcome.ok && overviewOutcome.kind === "refused") {
                 // A session outcome belongs to the whole selection: it clears every protected payload
                 // at once and blocks reads until a fresh session check succeeds.
                 dispatch(current => [{ type: "require-sign-in", sessionEpoch: current.sessionEpoch + 1 }]);
@@ -245,7 +241,7 @@ export const useAgentOSShell = (options: AgentOSShellOptions) => {
                     readGeneration: read.readGeneration,
                     selectionGeneration
                 });
-                if (outcome.state === "unauthenticated") return { read, outcome: null };
+                if (!outcome.ok && outcome.kind === "refused") return { read, outcome: null };
                 return { read, outcome: outcomeForReceipt(outcome) };
             }));
             if (receiptOutcomes.some(entry => entry.outcome === null)) {
@@ -299,12 +295,12 @@ export const useAgentOSShell = (options: AgentOSShellOptions) => {
     const readSelection = useCallback(() => setReadTrigger(current => current + 1), []);
     const retrySource = useCallback((identity: ShellSourceIdentity) => runReads([identity]), [runReads]);
 
-    const resolveEntry = useCallback(async (installationId: string, routeKey: ShellRouteKey, opaqueItemId: string | null): Promise<ShellNavigationOutcome> => {
-        if (accessToken === null) return { state: "unauthenticated" };
+    const resolveEntry = useCallback(async (installationId: string, routeKey: ShellRouteKey, opaqueItemId: string | null): Promise<Outcome<ShellRegisteredDestination>> => {
+        if (accessToken === null) return failed("refused", { code: "UNAUTHENTICATED", reason: "No access token is held, so no request left the browser." });
         return resolveAgentosShellNavigation(accessToken, { workspaceId, instanceId, installationId, routeKey, opaqueItemId, selectionGeneration });
     }, [accessToken, instanceId, selectionGeneration, workspaceId]);
 
-    const navigationDecision = useCallback((outcome: ShellNavigationOutcome) => shellNavigationDecision(outcome, locale), [locale]);
+    const navigationDecision = useCallback((outcome: Outcome<ShellRegisteredDestination>) => shellNavigationDecision(outcome, locale), [locale]);
 
     const handle: AgentOSShellHandle = {
         selection: { workspaceId, instanceId },

@@ -1,5 +1,5 @@
 import { AgentOSKnowledgeOriginListBase, type AgentOSKnowledgeOriginListLabels } from "./component";
-import type { AgentosAiKnowledgeReadiness } from "@/modules/api/console";
+import type { AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge";
 
 /** Keep provenance presentation independently reusable inside workspace AI surfaces. */
 type AgentOSKnowledgeOriginListProps = {

@@ -7,7 +7,9 @@ const mocks = vi.hoisted(() => ({
 }))
 vi.mock("@/modules/i18n/navigation", () => ({ navigation: { useRouter: () => ({ push: mocks.push }) } }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
-vi.mock("@/modules/api/console", () => ({ myExpertSites: mocks.sites, myInstances: mocks.instances, myCatalogOrders: mocks.orders, catalogItems: mocks.catalogue }))
+vi.mock("@/modules/api/expert-sites", () => ({ myExpertSites: mocks.sites }));
+vi.mock("@/modules/api/instances", () => ({ myInstances: mocks.instances }));
+vi.mock("@/modules/api/commerce", () => ({ myCatalogOrders: mocks.orders, catalogItems: mocks.catalogue }))
 
 import { AppsDashboard } from "."
 

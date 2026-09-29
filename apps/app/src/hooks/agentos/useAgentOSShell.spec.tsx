@@ -22,6 +22,7 @@ vi.mock("@/modules/api/graphql", () => ({
     setLocaleReader: mocks.transport.setLocaleReader
 }))
 
+import { failed } from "@/modules/api/outcome"
 import { SessionProvider } from "@/modules/auth/session"
 import { useAgentOSShell } from "./useAgentOSShell"
 import type { AgentOSShellOptions } from "./useAgentOSShell"
@@ -252,12 +253,12 @@ describe("useAgentOSShell", () => {
 
         const outcome = await act(async () => result.current.resolveEntry(INSTALLATION, "module_home", null))
 
-        expect(outcome.state).toBe("resolved")
+        expect(outcome.ok).toBe(true)
         const navigationUrl = sentUrls().at(-1) ?? ""
         expect(navigationUrl).toContain("/operations/navigation.resolve%401")
         expect(fetchMock.mock.calls.at(-1)?.[1]).toMatchObject({ method: "POST" })
         expect(result.current.navigationDecision(outcome)).toMatchObject({ open: true })
-        expect(result.current.navigationDecision({ state: "obsolete" })).toEqual({ open: false, reason: "obsolete" })
+        expect(result.current.navigationDecision(failed("invalid", { code: "OBSOLETE_SELECTION", reason: "obsolete-selection" }))).toEqual({ open: false, kind: "invalid", code: "OBSOLETE_SELECTION" })
     })
 
     it("holds every observation in memory and writes nothing to browser storage", async () => {

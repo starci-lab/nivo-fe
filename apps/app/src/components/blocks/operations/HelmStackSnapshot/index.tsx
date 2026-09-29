@@ -1,4 +1,4 @@
-import type { AgentWorkspaceRuntime } from "@/modules/api/console";
+import type { AgentWorkspaceRuntime } from "@/modules/api/agentos-workspaces";
 import { HelmComponentStatusTable } from "@nivo/ui";
 import { HorizontalScrollRegion as DirectionScroll, EmptyNotice, SurfaceCard } from "@starci/grammar/common";
 /** Public-safe Helm snapshot and resolved labels consumed by the stack block. */

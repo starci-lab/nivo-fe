@@ -242,9 +242,9 @@ describe("GroupChatPage", () => {
     });
   
     it.each([
-      ["an Office denial", "denied", () => { state.office = query(fail("denied")); }],
-      ["a group denial", "denied", () => { state.group = query(fail("denied")); }],
-      ["a tasks denial", "denied", () => { state.tasks = query(fail("denied")); }],
+      ["an Office denial", "denied", () => { state.office = query(fail("forbidden")); }],
+      ["a group denial", "denied", () => { state.group = query(fail("forbidden")); }],
+      ["a tasks denial", "denied", () => { state.tasks = query(fail("forbidden")); }],
       ["a transport error", "failed", () => { state.office = query(undefined, new Error("offline")); }],
       ["a refused Office read", "failed", () => { state.office = query(fail("unavailable", true)); }],
       ["a stale error beside data", "failed", () => { state.office = query(ok(OFFICE), new Error("stale")); }],
@@ -298,7 +298,7 @@ describe("GroupChatPage", () => {
   
     it.each([
       ["loading", "loading", query()],
-      ["denied", "denied", query(fail("denied"))],
+      ["denied", "denied", query(fail("forbidden"))],
       ["refused", "failed", query(fail("invalid"))],
       ["errored", "failed", query(undefined, new Error("offline"))],
       ["answered", "ready", query(ok({ tasks: [] }))],
@@ -378,7 +378,7 @@ describe("GroupChatPage", () => {
       last().on.sendMessage();
       await waitFor(() => expect(last().view.composer.failure).toBe("retry"));
       expect(last().view.composer.value).toBe("Chào");
-      state.post = mutation(fail("denied"));
+      state.post = mutation(fail("forbidden"));
       rerender(<GroupChatPage />);
       last().on.sendMessage();
       await waitFor(() => expect(last().view.composer.failure).toBe("denied"));
@@ -467,7 +467,7 @@ describe("GroupChatPage", () => {
     });
   
     it.each([
-      ["a refusal", fail("denied")],
+      ["a refusal", fail("forbidden")],
       ["an unknown outcome", ok({ outcome: "queued" })],
       ["an empty answer", ok(undefined)],
     ])("reports %s as refused", async (_label, answer) => {
@@ -504,7 +504,7 @@ describe("GroupChatPage", () => {
     });
   
     it("says denied for a refused press and uncertain for a lost one, clearing on the next press", async () => {
-      state.press = mutation(fail("denied"));
+      state.press = mutation(fail("forbidden"));
       const { rerender } = render(<GroupChatPage />);
       last().on.pressApproval("ap-1", "approve");
       await waitFor(() => expect(last().view.approvalNotices).toEqual({ "ap-1": "denied" }));
@@ -548,7 +548,7 @@ describe("GroupChatPage", () => {
   
     it("shows a refused acceptance", async () => {
       world.search = "invitation=inv-1&workspace=ws-1";
-      state.accept = mutation(fail("denied"));
+      state.accept = mutation(fail("forbidden"));
       render(<GroupChatPage />);
       last().on.acceptInvitation();
       await waitFor(() => expect(last().view.acceptance?.state).toBe("refused"));
@@ -567,7 +567,7 @@ describe("GroupChatPage", () => {
     };
   
     it.each([
-      ["an unreadable notice", "unavailable", fail("denied")],
+      ["an unreadable notice", "unavailable", fail("forbidden")],
       ["a handled turn", "handled", ok({ outcome: "handled" })],
       ["an ended turn", "ended", ok({ outcome: "ended" })],
       ["an unknown outcome", "unavailable", ok({ outcome: "unavailable" })],

@@ -5,7 +5,7 @@ import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { getPathname } from "@/modules/i18n/navigation";
 import { useSession } from "@/hooks";
 import { useMutateRecoverWorkspacePurchaseSwr, useProvisioningRealtime, useQueryWorkspaceCheckoutEntrySwr, useQueryWorkspaceCheckoutStatusSwr, useRouter, type ProvisioningTarget } from "@/hooks";
-import { type WorkspaceCheckoutEntryDestination, type WorkspaceCheckoutEntryRequest, type WorkspaceCheckoutObservedIdentities, type WorkspaceCheckoutOutcome, type WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane";
+import { type WorkspaceCheckoutEntryDestination, type WorkspaceCheckoutEntryRequest, type WorkspaceCheckoutObservedIdentities, type WorkspaceCheckoutAnswer, type WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane";
 import { nivoIconSource } from "@nivo/ui";
 import { type IconSource } from "@starci/grammar/common";
 import { PurchaseStatusFlowBase, type PurchaseStatusCheck, type PurchaseStatusFlowViewProps, type PurchaseStatusOperation, type PurchaseStatusRail } from "./component";
@@ -221,7 +221,7 @@ const check = (id: string, label: string, word: WordTone["word"], detail?: strin
 });
 
 /** The purchase view one checkout outcome carries, when the arm carries one at all. */
-const purchaseOf = (outcome: WorkspaceCheckoutOutcome | null): WorkspaceCheckoutStatusView | null =>
+const purchaseOf = (outcome: WorkspaceCheckoutAnswer | null): WorkspaceCheckoutStatusView | null =>
     outcome !== null && "purchase" in outcome && outcome.purchase !== undefined ? outcome.purchase : null;
 
 /** Connected purchase → payment → workspace status surface bound to one stable purchase identity. */

@@ -6,7 +6,7 @@ import { AgentOSWorkspaceRuntime } from "@/components/blocks/agentos/AgentOSWork
 import { AgentOSWorkspaceSummary } from "@/components/blocks/agentos/AgentOSWorkspaceSummary";
 import { AgentOSWorkspaceOperations } from "@/components/blocks/operations/AgentOSWorkspaceOperations";
 import { HelmStackSnapshot } from "@/components/blocks/operations/HelmStackSnapshot";
-import type { AgentWorkspaceControlCenter } from "@/modules/api/console";
+import type { AgentWorkspaceControlCenter } from "@/modules/api/agentos-workspaces";
 import type { ShellSourceIdentity } from "@/modules/api/agentos-shell";
 import type { ShellSessionStanding, ShellSourceObservation, ShellSourceStanding } from "@/modules/agentos/shell-observation-store";
 import { SectionHeader as DirectionHeader, PrimaryRailLayout as DirectionLayout, PageContainer as DirectionPage, Tabs as DirectionTabs, Badge, EmptyNotice, StaticStateRow, SurfaceCard, SurfaceListCard, Text, TextAction } from "@starci/grammar/common";

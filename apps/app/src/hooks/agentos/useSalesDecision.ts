@@ -6,7 +6,7 @@ import { nivoQueryData } from "@/modules/query";
 import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/console";
 import { useQuerySalesDecisionRequestSwr } from "@/hooks/swr/queries/useQuerySalesDecisionRequestSwr";
 import { useMutateSalesDecideProposalSwr } from "@/hooks/swr/mutations/useMutateSalesDecideProposalSwr";
-import { salesRefusalKey, salesSurfaceStanding, type SalesCommandAnswer, type SalesNotice, type SalesSurfaceStanding, type SalesTranslation } from "@/modules/sales/sales-workbench";
+import { salesRefusalKey, salesSurfaceStanding, type SalesAnswerStanding, type SalesCommandAnswer, type SalesNotice, type SalesSurfaceStanding, type SalesTranslation } from "@/modules/sales/sales-workbench";
 
 /*
  * The connected decision surface (impl.sales.nivo-fe.decision-view).
@@ -53,10 +53,10 @@ type DecisionPayloadState = {
 type AnswerBasis = { readonly version: number; readonly fingerprint: string };
 
 /** One read's served value, or null when it has not answered with one. */
-const answered = <TValue>(answer: { readonly ok?: boolean; readonly value?: unknown } | undefined): TValue | null => answer?.ok === true ? (answer.value as TValue) : null;
+const answered = <TValue>(answer: SalesAnswerStanding | undefined): TValue | null => answer?.ok === true ? (answer.data as TValue) : null;
 
 /** One settled payload, or undefined when the readback disclosed none. */
-const payloadState = (answer: SalesCommandAnswer): DecisionPayloadState | undefined => answer.value as DecisionPayloadState | undefined;
+const payloadState = (answer: SalesCommandAnswer): DecisionPayloadState | undefined => answer.ok ? answer.data as DecisionPayloadState : undefined;
 
 /** The resolved installation address, or null while the instance coordinate is not known. */
 const scopeOf = (workspaceId: string, instanceId: string, installationId: string): SalesInstallationScope | null => workspaceId.length > 0 && instanceId.length > 0 ? { workspaceId, instanceId, installationId } : null;
@@ -74,7 +74,7 @@ const answerPressable = (ready: boolean, pending: boolean, stale: boolean, revis
 const loadingOf = (isLoading: boolean, isValidating: boolean): boolean => isLoading || isValidating;
 
 /** What the scope line shows before an address exists: a held read, a refusal, or a true standing. */
-const scopeStandingFor = (answer: { readonly ok: boolean; readonly code?: string } | undefined, error: unknown, hasInstance: boolean): SalesSurfaceStanding => {
+const scopeStandingFor = (answer: SalesAnswerStanding | undefined, error: unknown, hasInstance: boolean): SalesSurfaceStanding => {
   if (answer === undefined && error === undefined) return "loading";
   if (error !== undefined) return "unavailable";
   const standing = salesSurfaceStanding(answer, hasInstance);
@@ -160,7 +160,7 @@ export const useSalesDecision = (workspaceId: string, installationId: string, t:
    * One region's standing. Before an address exists the scope's own answer decides what the surface
    * shows; after it, the read's answer does - and a held read is still 'loading', never empty.
    */
-  const regionStanding = (answer: { readonly ok: boolean; readonly code?: string } | undefined, hasContent: boolean): SalesSurfaceStanding => ready ? salesSurfaceStanding(answer, hasContent) : scopeStanding;
+  const regionStanding = (answer: SalesAnswerStanding | undefined, hasContent: boolean): SalesSurfaceStanding => ready ? salesSurfaceStanding(answer, hasContent) : scopeStanding;
 
   return {
     t,

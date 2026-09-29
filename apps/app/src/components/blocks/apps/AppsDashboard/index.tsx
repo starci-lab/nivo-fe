@@ -3,7 +3,7 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { fleetResourceHref, type FleetStatus } from "@/components/blocks/provisioning/FleetRow";
 import { useQueryCatalogItemsSwr, useQueryMyCatalogOrdersSwr, useQueryMyExpertSitesSwr, useQueryMyInstancesSwr, useRouter } from "@/hooks";
-import type { CatalogItemRow } from "@/modules/api/console";
+import type { CatalogItemRow } from "@/modules/api/commerce";
 import { ACADEMY_HOST_SUFFIX, BILLING_CURRENCY } from "@/modules/config";
 import { AppsDashboardBase, type CatalogueSectionView, type OwnedAppRow, type OwnedSectionView } from "./component";
 

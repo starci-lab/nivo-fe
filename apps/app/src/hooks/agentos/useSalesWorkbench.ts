@@ -87,10 +87,10 @@ const PAGE_SIZE = 20;
 
 /** The receiver's own state spelling inside one settled payload. */
 type CommandPayloadState = { readonly state?: string; readonly status?: string; readonly revision?: number; readonly opportunityId?: string; readonly actionId?: string };
-const payloadValue = (answer: SalesCommandAnswer): CommandPayloadState | undefined => answer.value as CommandPayloadState | undefined;
+const payloadValue = (answer: SalesCommandAnswer): CommandPayloadState | undefined => answer.ok ? answer.data as CommandPayloadState : undefined;
 
 /** One read's served value, or null when it has not answered with one. */
-const answered = <TValue>(answer: { readonly ok?: boolean; readonly value?: unknown } | undefined): TValue | null => answer?.ok === true ? (answer.value as TValue) : null;
+const answered = <TValue>(answer: SalesAnswerStanding | undefined): TValue | null => answer?.ok === true ? (answer.data as TValue) : null;
 
 /** One route parameter as a usable string. */
 const stringOr = (value: unknown, fallback: string): string => typeof value === "string" ? value : fallback;
@@ -154,7 +154,7 @@ const attentionRowsOf = (model: SalesPipelineValue | null): ReadonlyArray<SalesP
 const loadingOf = (isLoading: boolean, isValidating: boolean): boolean => isLoading || isValidating;
 
 /** What the installation line shows before an address exists: a held read, a refusal, or a true standing. */
-const scopeStandingFor = (answer: { readonly ok: boolean; readonly code?: string } | undefined, error: unknown, hasInstance: boolean): SalesSurfaceStanding => {
+const scopeStandingFor = (answer: SalesAnswerStanding | undefined, error: unknown, hasInstance: boolean): SalesSurfaceStanding => {
   if (answer === undefined && error === undefined) return "loading";
   if (error !== undefined) return "unavailable";
   const standing = salesSurfaceStanding(answer, hasInstance);
