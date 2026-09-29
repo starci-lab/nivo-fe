@@ -1,5 +1,6 @@
 import { failedWith } from "../outcome"
 import { isClosedRecord, isRouteErrorName, routeFailureKind } from "../operation-route"
+import { parseAccountingResult } from "./payload.guards"
 import { ACCOUNTING_COMMAND_RECONCILIATIONS } from "./types"
 import type { AccountingApiFailureKind, AccountingApiOperation, AccountingOperationAnswer, AccountingResult, AccountingRouteName } from "./types"
 
@@ -32,17 +33,15 @@ export const refusal = (
 export const unknownOutcome = (operation: AccountingRouteName, requestId: string): AccountingOperationAnswer<never> =>
     refusal(operation, "outcome_unknown", "", requestId)
 
-/*
- * Hand the receiver's own tagged variant through unchanged.
+/**
+ * Hand the receiver's tagged variant through after its payload validates.
  *
  * The variant identity, its operation tag and its payload object are verified by the caller before
- * this runs; what cannot be recovered statically is the union member, because a wire object carries
- * no type. The value therefore enters as `unknown`, which is the one starting point a single cast can
- * legitimately narrow - a cast through `unknown` would erase a shape the compiler had, and there is
- * no shape here for it to erase.
+ * this runs; the payload itself is checked field by field by the parser this delegates to. A
+ * malformed payload answers null, which the caller reports as the existing `MALFORMED_ANSWER`
+ * refusal - never a thrown error and never a result under a borrowed name.
  */
-/** Hand a validated receiver result through with its registered tagged variant intact. */
-export const accountingServedResult = (tagged: unknown): AccountingResult => tagged as AccountingResult
+export const accountingServedResult = (tagged: unknown): AccountingResult | null => parseAccountingResult(tagged)
 
 /** Whether a result tag is one of the eight registered Accounting tags. */
 export const isAccountingApiOperation = (value: unknown): value is AccountingApiOperation =>
@@ -113,7 +112,10 @@ export const narrowAccountingOutcome = (
     }
     if (!isClosedRecord(rawResult.payload))
         return refusal(operation, "MALFORMED_ANSWER", "The tagged result carries no payload object.", requestId)
-    return { ok: true, data: accountingServedResult(rawResult) }
+    const served = accountingServedResult(rawResult)
+    if (served === null)
+        return refusal(operation, "MALFORMED_ANSWER", "The tagged result's payload is malformed.", requestId)
+    return { ok: true, data: served }
 }
 
 /** Narrow the route's own closed reply, keeping every non-served outcome a refusal. */

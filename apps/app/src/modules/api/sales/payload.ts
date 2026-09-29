@@ -104,12 +104,13 @@ const narrowSalesRefusal = (
     }
 }
 
-/** One served variant, or the failure its own status or missing value is a variant under. */
+/** One served variant, or the failure its own status, missing value or malformed payload is under. */
 const narrowSalesServed = <TValue>(
     operation: SalesOperationName,
     requestId: string,
     status: string,
     value: unknown,
+    parse: (input: unknown) => TValue | null,
 ): SalesAnswer<TValue> => {
     if (!SALES_SERVED_STATUSES.has(status))
         return failure(
@@ -120,9 +121,10 @@ const narrowSalesServed = <TValue>(
         )
     if (!isClosedRecord(value))
         return failure(operation, "MALFORMED_ANSWER", "The served variant carries no value object.", requestId)
-    // The receiver's field-level closure is its own guarantee, so the value enters as the variant type
-    // the caller asked for: there is no second shape here for a cast to erase.
-    return { ok: true, data: value as TValue }
+    const parsed = parse(value)
+    if (parsed === null)
+        return failure(operation, "MALFORMED_ANSWER", "The served value is not this operation's payload.", requestId)
+    return { ok: true, data: parsed }
 }
 
 /**
@@ -139,6 +141,7 @@ const narrowSalesResult = <TValue>(
     operation: SalesOperationName,
     requestId: string,
     result: unknown,
+    parse: (input: unknown) => TValue | null,
 ): SalesAnswer<TValue> => {
     if (!isClosedRecord(result))
         return failure(operation, "MALFORMED_ANSWER", "The served result is not a result object.", requestId)
@@ -146,7 +149,7 @@ const narrowSalesResult = <TValue>(
     if (typeof status !== "string" || status.length === 0)
         return failure(operation, "MALFORMED_ANSWER", "The served result carries no status.", requestId)
     if (result.code !== undefined) return narrowSalesRefusal(operation, requestId, status, result.code, result.value)
-    return narrowSalesServed<TValue>(operation, requestId, status, result.value)
+    return narrowSalesServed<TValue>(operation, requestId, status, result.value, parse)
 }
 
 /** One served Sales result, accepted only under this call's own echoed identity. */
@@ -154,12 +157,13 @@ const narrowSalesEnvelope = <TValue>(
     operation: SalesOperationName,
     requestId: string,
     body: Readonly<Record<string, unknown>>,
+    parse: (input: unknown) => TValue | null,
 ): SalesAnswer<TValue> => {
     if (body.operation !== operation)
         return failure(operation, "ECHOED_IDENTITY_MISMATCH", "The result echoes another operation name.", requestId)
     if (body.requestId !== requestId)
         return failure(operation, "ECHOED_IDENTITY_MISMATCH", "The result echoes another stable identity.", requestId)
-    return narrowSalesResult<TValue>(operation, requestId, body.result)
+    return narrowSalesResult<TValue>(operation, requestId, body.result, parse)
 }
 
 /** One outcome nobody can attest, accepted only under this call's own echoed identity. */
@@ -182,11 +186,12 @@ export const narrowSalesAnswer = <TValue>(
     operation: SalesOperationName,
     requestId: string,
     body: unknown,
+    parse: (input: unknown) => TValue | null,
 ): SalesAnswer<TValue> => {
     if (!isClosedRecord(body))
         return failure(operation, "MALFORMED_ANSWER", "The route answer is not an envelope object.", requestId)
     if (body.kind === "outcome_unknown") return narrowUnknownOutcome(operation, requestId, body)
-    if (body.kind === "sales_result") return narrowSalesEnvelope<TValue>(operation, requestId, body)
+    if (body.kind === "sales_result") return narrowSalesEnvelope<TValue>(operation, requestId, body, parse)
     if (body.kind === "accounting_result")
         return failure(
             operation,

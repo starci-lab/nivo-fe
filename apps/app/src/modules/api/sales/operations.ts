@@ -1,5 +1,15 @@
 import { operationAddress, sendOperation } from "../operation-route"
 import { failure, narrowSalesAnswer } from "./payload"
+import {
+    parseSalesActionValue,
+    parseSalesCommandValue,
+    parseSalesDecisionValue,
+    parseSalesHandoffValue,
+    parseSalesOpportunityValue,
+    parseSalesPipelineValue,
+    parseSalesPolicyValue,
+    parseSalesReadinessValue,
+} from "./payload.guards"
 import type {
     SalesActionRequest, SalesActionValue, SalesAnswer, SalesClarifyCommandRequest, SalesCloseRequest,
     SalesCommandRequest, SalesCommandValue, SalesConfigurePolicyRequest, SalesDecisionRequestRequest,
@@ -27,10 +37,11 @@ const sendSalesOperation = async <TValue>(
     operation: SalesOperationName,
     request: Readonly<Record<string, unknown>>,
     requestId: string,
+    parse: (input: unknown) => TValue | null,
 ): Promise<SalesAnswer<TValue>> => {
     const exchange = await sendOperation(accessToken, salesOperationAddress(scope, operation), requestId, request)
     if (!exchange.arrived) return failure(operation, exchange.code, exchange.reason, exchange.requestId)
-    return narrowSalesAnswer<TValue>(operation, requestId, exchange.body)
+    return narrowSalesAnswer<TValue>(operation, requestId, exchange.body, parse)
 }
 
 /** Read one installation's operating policy, or the revision one configure request stored. */
@@ -46,6 +57,7 @@ export const readSalesPolicy = async (
         "sales.policy@1",
         { operation: "policy", ...request },
         requestId,
+        parseSalesPolicyValue,
     )
 
 /** Read one installation's observed readiness. */
@@ -61,6 +73,7 @@ export const readSalesReadiness = async (
         "sales.readiness@1",
         { operation: "readiness", ...request },
         requestId,
+        parseSalesReadinessValue,
     )
 
 /** Read one opportunity's committed state, the read a close is reconciled by. */
@@ -76,6 +89,7 @@ export const readSalesOpportunity = async (
         "sales.opportunity@1",
         { operation: "opportunity", ...request },
         requestId,
+        parseSalesOpportunityValue,
     )
 
 /** Read one bounded live page of the current pipeline. */
@@ -91,6 +105,7 @@ export const readSalesPipeline = async (
         "sales.pipeline@1",
         { operation: "pipeline", ...request },
         requestId,
+        parseSalesPipelineValue,
     )
 
 /** Read one command plan's committed state, the read a command and its clarification are reconciled by. */
@@ -106,6 +121,7 @@ export const readSalesCommand = async (
         "sales.command@1",
         { operation: "command", ...request },
         requestId,
+        parseSalesCommandValue,
     )
 
 /** Read one decision request's committed state, the read a decision is reconciled by. */
@@ -121,6 +137,7 @@ export const readSalesDecisionRequest = async (
         "sales.decisionRequest@1",
         { operation: "decisionRequest", ...request },
         requestId,
+        parseSalesDecisionValue,
     )
 
 /** Read one Sales action's stored state, the read any recovery attempt is reconciled by. */
@@ -136,6 +153,7 @@ export const readSalesAction = async (
         "sales.action@1",
         { operation: "action", ...request },
         requestId,
+        parseSalesActionValue,
     )
 
 /** Read one Accounting handoff's sender-side state, the read a handoff is reconciled by. */
@@ -151,6 +169,7 @@ export const readSalesHandoff = async (
         "sales.handoff@1",
         { operation: "handoff", ...request },
         requestId,
+        parseSalesHandoffValue,
     )
 
 /** Record one complete operating-policy revision; an exact replay returns the revision it stored. */
@@ -166,6 +185,7 @@ export const commandSalesConfigurePolicy = async (
         "sales.configurePolicy@1",
         { operation: "configurePolicy", ...request },
         requestId,
+        parseSalesPolicyValue,
     )
 
 /** Submit one bounded command plan under its own command identity and fingerprint. */
@@ -181,6 +201,7 @@ export const commandSalesSubmitCommand = async (
         "sales.submitCommand@1",
         { operation: "executeCommand", ...request },
         requestId,
+        parseSalesCommandValue,
     )
 
 /** Refine one awaiting-clarification command plan, admitted under its own pending revision. */
@@ -196,6 +217,7 @@ export const commandSalesClarifyCommand = async (
         "sales.clarifyCommand@1",
         { operation: "clarifyCommand", ...request },
         requestId,
+        parseSalesCommandValue,
     )
 
 /** Answer one immutable proposal once, against its exact version and fingerprint. */
@@ -211,6 +233,7 @@ export const commandSalesDecideProposal = async (
         "sales.decideProposal@1",
         { operation: "answerDecision", ...request },
         requestId,
+        parseSalesDecisionValue,
     )
 
 /** Close or hold one opportunity at its expected revision, reporting the committed status. */
@@ -226,6 +249,7 @@ export const commandSalesClose = async (
         "sales.close@1",
         { operation: "close", ...request },
         requestId,
+        parseSalesOpportunityValue,
     )
 
 /** Prepare one confirmed-order handoff without contacting Accounting. */
@@ -241,6 +265,7 @@ export const commandSalesPrepareHandoff = async (
         "sales.prepareHandoff@1",
         { operation: "prepareHandoff", ...request },
         requestId,
+        parseSalesHandoffValue,
     )
 
 /** Admit one prepared handoff into the Sales external-action queue. */
@@ -256,6 +281,7 @@ export const commandSalesSubmitHandoff = async (
         "sales.submitHandoff@1",
         { operation: "submitPreparedHandoff", ...request },
         requestId,
+        parseSalesHandoffValue,
     )
 
 /** Retry after proven no-start, or stop: the one registered name that opens two recovery doors. */
@@ -265,4 +291,4 @@ export const commandSalesRecoverAction = async (
     request: SalesRecoverActionRequest,
     requestId: string,
 ): Promise<SalesAnswer<SalesActionValue>> =>
-    sendSalesOperation<SalesActionValue>(accessToken, scope, "sales.recoverAction@1", { ...request }, requestId)
+    sendSalesOperation<SalesActionValue>(accessToken, scope, "sales.recoverAction@1", { ...request }, requestId, parseSalesActionValue)
