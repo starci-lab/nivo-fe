@@ -210,6 +210,16 @@ describe("collab live subscription", () => {
         expect(state()).toMatchObject({ status: "disconnected", reason: "denied" })
     })
 
+    it("reads a denial with no string reason as unavailable", () => {
+        mount("ws-1")
+        const socket = sockets[0]
+        act(() => {
+            socket!.handlers.get("connect")?.()
+        })
+        subscribeAck(socket!, { ok: false, reason: 403 })
+        expect(state()).toMatchObject({ status: "disconnected", reason: "unavailable" })
+    })
+
     it("surfaces disconnects and handshake errors", () => {
         mount("ws-1")
         const socket = sockets[0]
