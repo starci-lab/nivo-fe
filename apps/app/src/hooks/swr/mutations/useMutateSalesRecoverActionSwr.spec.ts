@@ -3,7 +3,11 @@ import { runAndReadMock } from "@/test-support/mock-result"
 import type { QueryMockCallback, MutationMockOptions } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({ key, mutation, options })),
+    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({
+        key,
+        mutation,
+        options,
+    })),
     useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
     api: { commandSalesRecoverAction: vi.fn(async () => ({ ok: true })) },
 }))
@@ -36,31 +40,17 @@ const STOP = {
     oldWriterFence: FENCE,
     expectedRevision: 2,
 }
-type MutationShape = {
-    readonly key: unknown
-    readonly options: {
-        readonly invalidates: (
-            trigger: { readonly input: typeof RETRY | typeof STOP },
-            answer: unknown,
-        ) => ReadonlyArray<unknown>
-        readonly shouldInvalidate: (answer: { readonly ok: boolean; readonly code?: string }) => boolean
-    }
-    readonly mutation: (input: {
-        readonly requestId: string
-        readonly input: typeof RETRY | typeof STOP
-    }) => Promise<unknown>
-}
 
 describe("useMutateSalesRecoverActionSwr", () => {
     it("keeps the command on its installation-qualified identity and holds it while disabled", () => {
-        expect((runAndReadMock(() => useMutateSalesRecoverActionSwr(SCOPE), mocks.useNivoMutation)).key).toEqual([
+        expect(runAndReadMock(() => useMutateSalesRecoverActionSwr(SCOPE), mocks.useNivoMutation).key).toEqual([
             "sales",
             "recover-action",
             "workspace-1",
             "instance-1",
             "installation-1",
         ])
-        expect((runAndReadMock(() => useMutateSalesRecoverActionSwr(SCOPE, false), mocks.useNivoMutation)).key).toBeNull()
+        expect(runAndReadMock(() => useMutateSalesRecoverActionSwr(SCOPE, false), mocks.useNivoMutation).key).toBeNull()
     })
 
     it("opens the retry door with the no-start proof and the stop door with the same fence", async () => {

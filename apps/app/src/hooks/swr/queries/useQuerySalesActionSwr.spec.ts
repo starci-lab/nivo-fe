@@ -15,7 +15,6 @@ vi.mock("@/modules/api/sales", () => mocks.api)
 import { salesActionQueryKey, useQuerySalesActionSwr } from "./useQuerySalesActionSwr"
 
 const SCOPE = { workspaceId: "workspace-1", instanceId: "instance-1", installationId: "installation-1" }
-type ReadShape = { readonly key: unknown; readonly query: () => Promise<unknown> }
 
 describe("useQuerySalesActionSwr", () => {
     it("keys one action inside one installation, never across installations", () => {
@@ -33,9 +32,14 @@ describe("useQuerySalesActionSwr", () => {
     })
 
     it("addresses nothing while it is held or no session holds a token", () => {
-        expect((runAndReadMock(() => useQuerySalesActionSwr(SCOPE, { actionId: "action-1" }, false), mocks.useNivoQuery)).key).toBeNull()
+        expect(
+            runAndReadMock(() => useQuerySalesActionSwr(SCOPE, { actionId: "action-1" }, false), mocks.useNivoQuery)
+                .key,
+        ).toBeNull()
         mocks.useSession.mockReturnValueOnce(sessionFixture({ status: "anonymous" }))
-        expect((runAndReadMock(() => useQuerySalesActionSwr(SCOPE, { actionId: "action-1" }), mocks.useNivoQuery)).key).toBeNull()
+        expect(
+            runAndReadMock(() => useQuerySalesActionSwr(SCOPE, { actionId: "action-1" }), mocks.useNivoQuery).key,
+        ).toBeNull()
     })
 
     it("reads the action that discloses the stored state a recovery door needs", async () => {

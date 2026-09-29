@@ -13,7 +13,7 @@ export const runAndReadMock = <T>(invoke: () => unknown, mock: MockWithResults<T
     return result.value
 }
 
-export type QueryMockCallback = (...args: unknown[]) => unknown
+export type QueryMockCallback = (...args: Array<unknown>) => unknown
 
 export type QueryMockOptions = {
     readonly refreshInterval?: (data: unknown, error?: unknown) => number
@@ -25,7 +25,7 @@ export type MutationMockOptions = {
 }
 
 /** Couple a mocked API answer to the operation whose contract it must satisfy. */
-export const apiAnswer = <TArgs extends unknown[], TAnswer>(
+export const apiAnswer = <TArgs extends Array<unknown>, TAnswer>(
     operation: (...args: TArgs) => Promise<TAnswer>,
     answer: TAnswer,
 ): TAnswer => answer
@@ -58,7 +58,8 @@ export const sessionFixture = (state: SessionState): Session => ({
     discard: () => undefined,
 })
 
-export const matchMediaFixture = (matches: boolean | ((media: string) => boolean)): typeof window.matchMedia =>
+export const matchMediaFixture =
+    (matches: boolean | ((media: string) => boolean)): typeof window.matchMedia =>
     (media) => {
         const value = typeof matches === "function" ? matches(media) : matches
         return {

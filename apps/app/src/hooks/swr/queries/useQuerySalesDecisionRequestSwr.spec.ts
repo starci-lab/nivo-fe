@@ -15,7 +15,6 @@ vi.mock("@/modules/api/sales", () => mocks.api)
 import { salesDecisionRequestQueryKey, useQuerySalesDecisionRequestSwr } from "./useQuerySalesDecisionRequestSwr"
 
 const SCOPE = { workspaceId: "workspace-1", instanceId: "instance-1", installationId: "installation-1" }
-type ReadShape = { readonly key: unknown; readonly query: () => Promise<unknown> }
 
 describe("useQuerySalesDecisionRequestSwr", () => {
     it("keys one decision request inside one installation, never across installations", () => {
@@ -37,17 +36,25 @@ describe("useQuerySalesDecisionRequestSwr", () => {
 
     it("addresses nothing while it is held or no session holds a token", () => {
         expect(
-            (runAndReadMock(() => useQuerySalesDecisionRequestSwr(SCOPE, { decisionRequestId: "decision-1" }, false), mocks.useNivoQuery))
-                .key,
+            runAndReadMock(
+                () => useQuerySalesDecisionRequestSwr(SCOPE, { decisionRequestId: "decision-1" }, false),
+                mocks.useNivoQuery,
+            ).key,
         ).toBeNull()
         mocks.useSession.mockReturnValueOnce(sessionFixture({ status: "anonymous" }))
         expect(
-            (runAndReadMock(() => useQuerySalesDecisionRequestSwr(SCOPE, { decisionRequestId: "decision-1" }), mocks.useNivoQuery)).key,
+            runAndReadMock(
+                () => useQuerySalesDecisionRequestSwr(SCOPE, { decisionRequestId: "decision-1" }),
+                mocks.useNivoQuery,
+            ).key,
         ).toBeNull()
     })
 
     it("settles an answer from the decision request's own committed state", async () => {
-        const hook = runAndReadMock(() => useQuerySalesDecisionRequestSwr(SCOPE, { decisionRequestId: "decision-1" }), mocks.useNivoQuery)
+        const hook = runAndReadMock(
+            () => useQuerySalesDecisionRequestSwr(SCOPE, { decisionRequestId: "decision-1" }),
+            mocks.useNivoQuery,
+        )
         await hook.query()
         expect(mocks.api.readSalesDecisionRequest).toHaveBeenCalledWith(
             "access-token",

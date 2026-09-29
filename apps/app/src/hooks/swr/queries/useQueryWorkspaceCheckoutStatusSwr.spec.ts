@@ -14,8 +14,6 @@ import {
     workspaceCheckoutStatusQueryKey,
 } from "./useQueryWorkspaceCheckoutStatusSwr"
 
-type ReadShape = { readonly key: unknown; readonly query: () => Promise<unknown> }
-
 describe("useQueryWorkspaceCheckoutStatusSwr", () => {
     it("keys one purchase status read by the purchase identity alone", () => {
         expect(workspaceCheckoutStatusQueryKey("purchase-1")).toEqual(["workspace-checkout", "status", "purchase-1"])
@@ -23,7 +21,9 @@ describe("useQueryWorkspaceCheckoutStatusSwr", () => {
     })
 
     it("addresses nothing until a purchase identity is known", () => {
-        expect((runAndReadMock(() => useQueryWorkspaceCheckoutStatusSwr("purchase-1", false), mocks.useNivoQuery)).key).toBeNull()
+        expect(
+            runAndReadMock(() => useQueryWorkspaceCheckoutStatusSwr("purchase-1", false), mocks.useNivoQuery).key,
+        ).toBeNull()
     })
 
     it("reads one purchase's composed truth through the boundary read", async () => {

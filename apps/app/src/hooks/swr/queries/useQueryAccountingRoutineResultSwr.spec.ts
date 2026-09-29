@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest"
-import { sessionFixture } from "@/test-support/mock-result"
 import { runAndReadMock } from "@/test-support/mock-result"
 import type { QueryMockCallback, Session } from "@/test-support/mock-result"
 
@@ -18,7 +17,6 @@ import {
 } from "./useQueryAccountingRoutineResultSwr"
 
 const SCOPE = { workspaceId: "workspace-1", instanceId: "instance-1", installationId: "installation-1" }
-type ReadShape = { readonly key: unknown; readonly query: () => Promise<unknown> }
 
 describe("useQueryAccountingRoutineResultSwr", () => {
     it("keys one routine intent inside one installation", () => {
@@ -34,12 +32,18 @@ describe("useQueryAccountingRoutineResultSwr", () => {
 
     it("addresses nothing while it is held", () => {
         expect(
-            (runAndReadMock(() => useQueryAccountingRoutineResultSwr(SCOPE, { intentId: "intent-1" }, false), mocks.useNivoQuery)).key,
+            runAndReadMock(
+                () => useQueryAccountingRoutineResultSwr(SCOPE, { intentId: "intent-1" }, false),
+                mocks.useNivoQuery,
+            ).key,
         ).toBeNull()
     })
 
     it("reads the routine intent through its registered operation address", async () => {
-        const hook = runAndReadMock(() => useQueryAccountingRoutineResultSwr(SCOPE, { intentId: "intent-1" }), mocks.useNivoQuery)
+        const hook = runAndReadMock(
+            () => useQueryAccountingRoutineResultSwr(SCOPE, { intentId: "intent-1" }),
+            mocks.useNivoQuery,
+        )
         await hook.query()
         expect(mocks.api.readAccountingRoutineResult).toHaveBeenCalledWith(
             "access-token",

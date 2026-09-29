@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest"
-import { sessionFixture } from "@/test-support/mock-result"
 import { runAndReadMock } from "@/test-support/mock-result"
 import type { QueryMockCallback, Session } from "@/test-support/mock-result"
 
@@ -22,7 +21,6 @@ const INPUT = {
     pageSize: 20,
     cursor: null,
 }
-type ReadShape = { readonly key: unknown; readonly query: () => Promise<unknown> }
 
 describe("useQueryAccountingSummarySwr", () => {
     it("keys one canonical period page, its currency filter and its continuation", () => {
@@ -44,7 +42,9 @@ describe("useQueryAccountingSummarySwr", () => {
     })
 
     it("addresses nothing while it is held", () => {
-        expect((runAndReadMock(() => useQueryAccountingSummarySwr(SCOPE, INPUT, false), mocks.useNivoQuery)).key).toBeNull()
+        expect(
+            runAndReadMock(() => useQueryAccountingSummarySwr(SCOPE, INPUT, false), mocks.useNivoQuery).key,
+        ).toBeNull()
     })
 
     it("reads the period through its registered operation address, cursor included", async () => {

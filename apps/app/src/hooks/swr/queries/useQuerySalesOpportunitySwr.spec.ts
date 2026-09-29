@@ -15,7 +15,6 @@ vi.mock("@/modules/api/sales", () => mocks.api)
 import { salesOpportunityQueryKey, useQuerySalesOpportunitySwr } from "./useQuerySalesOpportunitySwr"
 
 const SCOPE = { workspaceId: "workspace-1", instanceId: "instance-1", installationId: "installation-1" }
-type ReadShape = { readonly key: unknown; readonly query: () => Promise<unknown> }
 
 describe("useQuerySalesOpportunitySwr", () => {
     it("keys one opportunity inside one installation, never across installations", () => {
@@ -37,16 +36,25 @@ describe("useQuerySalesOpportunitySwr", () => {
 
     it("addresses nothing while it is held or no session holds a token", () => {
         expect(
-            (runAndReadMock(() => useQuerySalesOpportunitySwr(SCOPE, { opportunityId: "opportunity-1" }, false), mocks.useNivoQuery)).key,
+            runAndReadMock(
+                () => useQuerySalesOpportunitySwr(SCOPE, { opportunityId: "opportunity-1" }, false),
+                mocks.useNivoQuery,
+            ).key,
         ).toBeNull()
         mocks.useSession.mockReturnValueOnce(sessionFixture({ status: "anonymous" }))
         expect(
-            (runAndReadMock(() => useQuerySalesOpportunitySwr(SCOPE, { opportunityId: "opportunity-1" }), mocks.useNivoQuery)).key,
+            runAndReadMock(
+                () => useQuerySalesOpportunitySwr(SCOPE, { opportunityId: "opportunity-1" }),
+                mocks.useNivoQuery,
+            ).key,
         ).toBeNull()
     })
 
     it("reads one opportunity under the address that names it", async () => {
-        const hook = runAndReadMock(() => useQuerySalesOpportunitySwr(SCOPE, { opportunityId: "opportunity-1" }), mocks.useNivoQuery)
+        const hook = runAndReadMock(
+            () => useQuerySalesOpportunitySwr(SCOPE, { opportunityId: "opportunity-1" }),
+            mocks.useNivoQuery,
+        )
         await hook.query()
         expect(mocks.api.readSalesOpportunity).toHaveBeenCalledWith(
             "access-token",

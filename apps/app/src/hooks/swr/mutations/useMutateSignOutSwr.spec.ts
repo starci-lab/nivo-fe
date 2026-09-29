@@ -11,11 +11,6 @@ vi.mock("@/modules/api/auth", () => ({ signOut }))
 
 import { useMutateSignOutSwr } from "./useMutateSignOutSwr"
 
-type HookShape = {
-    readonly key: unknown
-    readonly mutation: (key: unknown, trigger: { readonly arg: unknown }) => Promise<unknown>
-}
-
 describe("useMutateSignOutSwr", () => {
     beforeEach(() => vi.clearAllMocks())
 

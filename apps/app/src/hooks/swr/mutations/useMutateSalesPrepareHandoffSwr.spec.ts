@@ -3,7 +3,11 @@ import { runAndReadMock } from "@/test-support/mock-result"
 import type { QueryMockCallback, MutationMockOptions } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({ key, mutation, options })),
+    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({
+        key,
+        mutation,
+        options,
+    })),
     useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
     api: { commandSalesPrepareHandoff: vi.fn(async () => ({ ok: true })) },
 }))
@@ -25,25 +29,19 @@ const INPUT = {
     fingerprint: FINGERPRINT,
     expectedRevision: 4,
 }
-type MutationShape = {
-    readonly key: unknown
-    readonly options: {
-        readonly invalidates: (trigger: { readonly input: typeof INPUT }, answer: unknown) => ReadonlyArray<unknown>
-        readonly shouldInvalidate: (answer: { readonly ok: boolean; readonly code?: string }) => boolean
-    }
-    readonly mutation: (input: { readonly requestId: string; readonly input: typeof INPUT }) => Promise<unknown>
-}
 
 describe("useMutateSalesPrepareHandoffSwr", () => {
     it("keeps the command on its installation-qualified identity and holds it while disabled", () => {
-        expect((runAndReadMock(() => useMutateSalesPrepareHandoffSwr(SCOPE), mocks.useNivoMutation)).key).toEqual([
+        expect(runAndReadMock(() => useMutateSalesPrepareHandoffSwr(SCOPE), mocks.useNivoMutation).key).toEqual([
             "sales",
             "prepare-handoff",
             "workspace-1",
             "instance-1",
             "installation-1",
         ])
-        expect((runAndReadMock(() => useMutateSalesPrepareHandoffSwr(SCOPE, false), mocks.useNivoMutation)).key).toBeNull()
+        expect(
+            runAndReadMock(() => useMutateSalesPrepareHandoffSwr(SCOPE, false), mocks.useNivoMutation).key,
+        ).toBeNull()
     })
 
     it("prepares the confirmed order with its consent reference, contacting nobody", async () => {

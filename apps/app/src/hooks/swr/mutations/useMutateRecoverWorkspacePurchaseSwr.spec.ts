@@ -3,7 +3,11 @@ import { runAndReadMock } from "@/test-support/mock-result"
 import type { QueryMockCallback, MutationMockOptions } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({ key, mutation, options })),
+    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({
+        key,
+        mutation,
+        options,
+    })),
     api: {
         recoverWorkspacePurchase: vi.fn(async () => ({ ok: true })),
         readWorkspaceCheckoutStatus: vi.fn(async () => ({ ok: true })),
@@ -19,17 +23,10 @@ const RECOVER = {
     purchaseId: "purchase-1",
     lastObserved: { paymentAttemptId: "attempt-1", providerReference: "vnpay-tx-1" },
 } as const
-type RecoverShape = {
-    readonly key: unknown
-    readonly mutation: (request: typeof RECOVER) => Promise<unknown>
-    readonly options: {
-        readonly invalidates: (request: typeof RECOVER, answer: { readonly ok: boolean }) => ReadonlyArray<unknown>
-    }
-}
 
 describe("useMutateRecoverWorkspacePurchaseSwr", () => {
     it("keeps the recovery on its own press-local identity", () => {
-        expect((runAndReadMock(() => useMutateRecoverWorkspacePurchaseSwr(), mocks.useNivoMutation)).key).toEqual([
+        expect(runAndReadMock(() => useMutateRecoverWorkspacePurchaseSwr(), mocks.useNivoMutation).key).toEqual([
             "workspace-checkout",
             "recover",
         ])
@@ -46,7 +43,9 @@ describe("useMutateRecoverWorkspacePurchaseSwr", () => {
     it("refreshes the purchase the recovery named, whatever the answer says", () => {
         const hook = runAndReadMock(() => useMutateRecoverWorkspacePurchaseSwr(), mocks.useNivoMutation)
 
-        expect(hook.options?.invalidates?.(RECOVER, { ok: true })).toEqual([workspaceCheckoutStatusQueryKey("purchase-1")])
+        expect(hook.options?.invalidates?.(RECOVER, { ok: true })).toEqual([
+            workspaceCheckoutStatusQueryKey("purchase-1"),
+        ])
         expect(hook.options?.invalidates?.(RECOVER, { ok: false })).toEqual([
             workspaceCheckoutStatusQueryKey("purchase-1"),
         ])

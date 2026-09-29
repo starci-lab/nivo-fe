@@ -11,11 +11,6 @@ vi.mock("@/modules/api/auth", () => ({ continueBrokeredSignIn }))
 
 import { useMutateContinueBrokeredSignInSwr } from "./useMutateContinueBrokeredSignInSwr"
 
-type HookShape = {
-    readonly key: unknown
-    readonly mutation: (key: unknown, trigger: { readonly arg: unknown }) => Promise<unknown>
-}
-
 describe("useMutateContinueBrokeredSignInSwr", () => {
     beforeEach(() => vi.clearAllMocks())
 

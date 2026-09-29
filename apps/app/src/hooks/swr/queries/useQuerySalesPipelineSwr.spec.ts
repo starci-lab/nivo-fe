@@ -17,7 +17,6 @@ import { salesPipelineQueryKey, useQuerySalesPipelineSwr } from "./useQuerySales
 const SCOPE = { workspaceId: "workspace-1", instanceId: "instance-1", installationId: "installation-1" }
 const FINGERPRINT = "a".repeat(64)
 const PAGE = { scopeFingerprint: FINGERPRINT, statusFilter: null, after: null, limit: 25 }
-type ReadShape = { readonly key: unknown; readonly query: () => Promise<unknown> }
 
 describe("useQuerySalesPipelineSwr", () => {
     it("scopes a page by fingerprint, canonicalised status filter, cursor and page size", () => {
@@ -42,17 +41,21 @@ describe("useQuerySalesPipelineSwr", () => {
     })
 
     it("addresses nothing while it is held or no session holds a token", () => {
-        expect((runAndReadMock(() => useQuerySalesPipelineSwr(SCOPE, PAGE, false), mocks.useNivoQuery)).key).toBeNull()
+        expect(runAndReadMock(() => useQuerySalesPipelineSwr(SCOPE, PAGE, false), mocks.useNivoQuery).key).toBeNull()
         mocks.useSession.mockReturnValueOnce(sessionFixture({ status: "anonymous" }))
-        expect((runAndReadMock(() => useQuerySalesPipelineSwr(SCOPE, PAGE), mocks.useNivoQuery)).key).toBeNull()
+        expect(runAndReadMock(() => useQuerySalesPipelineSwr(SCOPE, PAGE), mocks.useNivoQuery).key).toBeNull()
     })
 
     it("reads one page under its own fingerprint and cursor", async () => {
         const first = runAndReadMock(() => useQuerySalesPipelineSwr(SCOPE, PAGE), mocks.useNivoQuery)
-        const next = runAndReadMock(() => useQuerySalesPipelineSwr(SCOPE, {
-            ...PAGE,
-            after: { lastOpportunityId: "opportunity-9" },
-        }), mocks.useNivoQuery)
+        const next = runAndReadMock(
+            () =>
+                useQuerySalesPipelineSwr(SCOPE, {
+                    ...PAGE,
+                    after: { lastOpportunityId: "opportunity-9" },
+                }),
+            mocks.useNivoQuery,
+        )
         expect(first.key).not.toEqual(next.key)
         await first.query()
         await next.query()

@@ -12,7 +12,6 @@ vi.mock("@/modules/api/workspace-controlplane", () => mocks.api)
 import { useQueryWorkspaceCheckoutEntrySwr, workspaceCheckoutEntryQueryKey } from "./useQueryWorkspaceCheckoutEntrySwr"
 
 const ENTRY = { purchaseId: "purchase-1", workspaceId: "ws-1" } as const
-type ReadShape = { readonly key: unknown; readonly query: () => Promise<unknown> }
 
 describe("useQueryWorkspaceCheckoutEntrySwr", () => {
     it("keys one entry resolution by the purchase and workspace the entry contract compares", () => {
@@ -23,7 +22,7 @@ describe("useQueryWorkspaceCheckoutEntrySwr", () => {
     })
 
     it("addresses nothing while readiness is unconfirmed", () => {
-        expect((runAndReadMock(() => useQueryWorkspaceCheckoutEntrySwr(ENTRY, false), mocks.useNivoQuery)).key).toBeNull()
+        expect(runAndReadMock(() => useQueryWorkspaceCheckoutEntrySwr(ENTRY, false), mocks.useNivoQuery).key).toBeNull()
     })
 
     it("resolves the entry destination through the boundary read", async () => {

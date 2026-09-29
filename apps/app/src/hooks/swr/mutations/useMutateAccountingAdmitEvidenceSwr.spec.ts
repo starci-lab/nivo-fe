@@ -3,7 +3,11 @@ import { runAndReadMock } from "@/test-support/mock-result"
 import type { QueryMockCallback, MutationMockOptions } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({ key, mutation, options })),
+    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({
+        key,
+        mutation,
+        options,
+    })),
     useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
     api: { commandAccountingAdmitEvidence: vi.fn(async () => ({ ok: true })) },
 }))
@@ -23,25 +27,19 @@ const INPUT = {
     fingerprint: "sha256:1",
     expectedRevision: 0,
 }
-type MutationShape = {
-    readonly key: unknown
-    readonly options: {
-        readonly invalidates: (trigger: { readonly input: typeof INPUT }, answer: unknown) => ReadonlyArray<unknown>
-        readonly shouldInvalidate: (answer: { readonly ok: boolean; readonly code?: string }) => boolean
-    }
-    readonly mutation: (input: { readonly requestId: string; readonly input: typeof INPUT }) => Promise<unknown>
-}
 
 describe("useMutateAccountingAdmitEvidenceSwr", () => {
     it("keeps the command on its installation-qualified identity and holds it while disabled", () => {
-        expect((runAndReadMock(() => useMutateAccountingAdmitEvidenceSwr(SCOPE), mocks.useNivoMutation)).key).toEqual([
+        expect(runAndReadMock(() => useMutateAccountingAdmitEvidenceSwr(SCOPE), mocks.useNivoMutation).key).toEqual([
             "accounting",
             "admit-evidence",
             "workspace-1",
             "instance-1",
             "installation-1",
         ])
-        expect((runAndReadMock(() => useMutateAccountingAdmitEvidenceSwr(SCOPE, false), mocks.useNivoMutation)).key).toBeNull()
+        expect(
+            runAndReadMock(() => useMutateAccountingAdmitEvidenceSwr(SCOPE, false), mocks.useNivoMutation).key,
+        ).toBeNull()
     })
 
     it("hands the press identity to the client untouched", async () => {

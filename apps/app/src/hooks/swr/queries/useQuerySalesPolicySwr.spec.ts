@@ -15,7 +15,6 @@ vi.mock("@/modules/api/sales", () => mocks.api)
 import { salesPolicyQueryKey, useQuerySalesPolicySwr } from "./useQuerySalesPolicySwr"
 
 const SCOPE = { workspaceId: "workspace-1", instanceId: "instance-1", installationId: "installation-1" }
-type ReadShape = { readonly key: unknown; readonly query: () => Promise<unknown> }
 
 describe("useQuerySalesPolicySwr", () => {
     it("keys the current revision apart from the one a configure request stored, never across installations", () => {
@@ -42,30 +41,33 @@ describe("useQuerySalesPolicySwr", () => {
 
     it("addresses nothing while it is held or no session holds a token", () => {
         expect(
-            (
-                runAndReadMock(() => useQuerySalesPolicySwr(
-                    SCOPE,
-                    { salesInstallationId: "installation-1", requestId: null },
-                    false,
-                ), mocks.useNivoQuery)
+            runAndReadMock(
+                () => useQuerySalesPolicySwr(SCOPE, { salesInstallationId: "installation-1", requestId: null }, false),
+                mocks.useNivoQuery,
             ).key,
         ).toBeNull()
         mocks.useSession.mockReturnValueOnce(sessionFixture({ status: "anonymous" }))
         expect(
-            (
-                runAndReadMock(() => useQuerySalesPolicySwr(SCOPE, {
-                    salesInstallationId: "installation-1",
-                    requestId: null,
-                }), mocks.useNivoQuery)
+            runAndReadMock(
+                () =>
+                    useQuerySalesPolicySwr(SCOPE, {
+                        salesInstallationId: "installation-1",
+                        requestId: null,
+                    }),
+                mocks.useNivoQuery,
             ).key,
         ).toBeNull()
     })
 
     it("reads through its registered operation address, carrying the request identity a replay is reconciled by", async () => {
-        const current = runAndReadMock(() => useQuerySalesPolicySwr(SCOPE, {
-            salesInstallationId: "installation-1",
-            requestId: null,
-        }), mocks.useNivoQuery)
+        const current = runAndReadMock(
+            () =>
+                useQuerySalesPolicySwr(SCOPE, {
+                    salesInstallationId: "installation-1",
+                    requestId: null,
+                }),
+            mocks.useNivoQuery,
+        )
         await current.query()
         expect(mocks.api.readSalesPolicy).toHaveBeenCalledWith(
             "access-token",
@@ -73,10 +75,14 @@ describe("useQuerySalesPolicySwr", () => {
             { salesInstallationId: "installation-1", requestId: null },
             "sales.policy@1/installation-1/-",
         )
-        const stored = runAndReadMock(() => useQuerySalesPolicySwr(SCOPE, {
-            salesInstallationId: "installation-1",
-            requestId: "request-1",
-        }), mocks.useNivoQuery)
+        const stored = runAndReadMock(
+            () =>
+                useQuerySalesPolicySwr(SCOPE, {
+                    salesInstallationId: "installation-1",
+                    requestId: "request-1",
+                }),
+            mocks.useNivoQuery,
+        )
         await stored.query()
         expect(mocks.api.readSalesPolicy).toHaveBeenLastCalledWith(
             "access-token",

@@ -3,7 +3,11 @@ import { runAndReadMock } from "@/test-support/mock-result"
 import type { QueryMockCallback, MutationMockOptions } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({ key, mutation, options })),
+    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({
+        key,
+        mutation,
+        options,
+    })),
     api: {
         startWorkspaceCheckoutPurchase: vi.fn(async () => ({ ok: true })),
         readWorkspaceCheckoutStatus: vi.fn(async () => ({ ok: true })),
@@ -16,21 +20,10 @@ import { workspaceCheckoutStatusQueryKey } from "../queries/useQueryWorkspaceChe
 import { useMutateWorkspaceCheckoutStartSwr } from "./useMutateWorkspaceCheckoutStartSwr"
 
 const START = { retryKey: "start-purchase-1", offerId: "offer-team", offerVersion: "v1", paymentRail: "vnpay" } as const
-type CheckoutAnswer = {
-    readonly ok: boolean
-    readonly data?: { readonly status: string; readonly purchaseId?: string | null }
-}
-type StartShape = {
-    readonly key: unknown
-    readonly mutation: (request: typeof START) => Promise<unknown>
-    readonly options: {
-        readonly invalidates: (request: typeof START, answer: CheckoutAnswer) => ReadonlyArray<unknown>
-    }
-}
 
 describe("useMutateWorkspaceCheckoutStartSwr", () => {
     it("keeps the admission on its own press-local identity", () => {
-        expect((runAndReadMock(() => useMutateWorkspaceCheckoutStartSwr(), mocks.useNivoMutation)).key).toEqual([
+        expect(runAndReadMock(() => useMutateWorkspaceCheckoutStartSwr(), mocks.useNivoMutation).key).toEqual([
             "workspace-checkout",
             "start",
         ])

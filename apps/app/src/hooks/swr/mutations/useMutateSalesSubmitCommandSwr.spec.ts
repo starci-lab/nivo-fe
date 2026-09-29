@@ -3,7 +3,11 @@ import { runAndReadMock } from "@/test-support/mock-result"
 import type { QueryMockCallback, MutationMockOptions } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({ key, mutation, options })),
+    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({
+        key,
+        mutation,
+        options,
+    })),
     useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
     api: { commandSalesSubmitCommand: vi.fn(async () => ({ ok: true })) },
 }))
@@ -24,25 +28,17 @@ const INPUT = {
     fingerprint: FINGERPRINT,
     expectedOpportunityRevisions: {},
 }
-type MutationShape = {
-    readonly key: unknown
-    readonly options: {
-        readonly invalidates: (trigger: { readonly input: typeof INPUT }, answer: unknown) => ReadonlyArray<unknown>
-        readonly shouldInvalidate: (answer: { readonly ok: boolean; readonly code?: string }) => boolean
-    }
-    readonly mutation: (input: { readonly requestId: string; readonly input: typeof INPUT }) => Promise<unknown>
-}
 
 describe("useMutateSalesSubmitCommandSwr", () => {
     it("keeps the command on its installation-qualified identity and holds it while disabled", () => {
-        expect((runAndReadMock(() => useMutateSalesSubmitCommandSwr(SCOPE), mocks.useNivoMutation)).key).toEqual([
+        expect(runAndReadMock(() => useMutateSalesSubmitCommandSwr(SCOPE), mocks.useNivoMutation).key).toEqual([
             "sales",
             "submit-command",
             "workspace-1",
             "instance-1",
             "installation-1",
         ])
-        expect((runAndReadMock(() => useMutateSalesSubmitCommandSwr(SCOPE, false), mocks.useNivoMutation)).key).toBeNull()
+        expect(runAndReadMock(() => useMutateSalesSubmitCommandSwr(SCOPE, false), mocks.useNivoMutation).key).toBeNull()
     })
 
     it("sends one bounded plan under its own identity and fingerprint", async () => {

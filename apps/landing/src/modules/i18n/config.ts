@@ -6,5 +6,7 @@ const config = createI18nConfig({
     timeZone: "Asia/Ho_Chi_Minh",
 })
 
+/** The locale set, default, time zone and locale resolvers this app is configured with. */
 export const { LOCALES, DEFAULT_LOCALE, TIME_ZONE, toLocale, toLocaleFromPathname } = config
+/** One of the locales this app ships. */
 export type Locale = (typeof LOCALES)[number]

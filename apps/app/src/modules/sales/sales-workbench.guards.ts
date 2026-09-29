@@ -16,8 +16,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const isString = (value: unknown): value is string => typeof value === "string"
 const isNumber = (value: unknown): value is number => typeof value === "number"
 const isNullableString = (value: unknown): value is string | null => value === null || isString(value)
-const isStringArray = (value: unknown): value is ReadonlyArray<string> =>
-    Array.isArray(value) && value.every(isString)
+const isStringArray = (value: unknown): value is ReadonlyArray<string> => Array.isArray(value) && value.every(isString)
 
 /** Parse one Sales policy operation payload. */
 export const parseSalesPolicyValue = (value: unknown): SalesPolicyValue | null => {
@@ -129,7 +128,7 @@ export const parseSalesPipelineValue = (value: unknown): SalesPipelineValue | nu
     if (!isRecord(value) || !isString(value.observedAt) || !isString(value.scopeFingerprint)) return null
     if (!Array.isArray(value.items)) return null
     const rawItems: ReadonlyArray<unknown> = value.items
-    const items: SalesPipelineItem[] = []
+    const items: Array<SalesPipelineItem> = []
     for (const item of rawItems) {
         const parsed = parseSalesPipelineItem(item)
         if (parsed === null) return null

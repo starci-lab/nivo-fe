@@ -15,7 +15,6 @@ vi.mock("@/modules/api/sales", () => mocks.api)
 import { salesCommandQueryKey, useQuerySalesCommandSwr } from "./useQuerySalesCommandSwr"
 
 const SCOPE = { workspaceId: "workspace-1", instanceId: "instance-1", installationId: "installation-1" }
-type ReadShape = { readonly key: unknown; readonly query: () => Promise<unknown> }
 
 describe("useQuerySalesCommandSwr", () => {
     it("keys one command plan inside one installation, never across installations", () => {
@@ -34,14 +33,20 @@ describe("useQuerySalesCommandSwr", () => {
 
     it("addresses nothing while it is held or no session holds a token", () => {
         expect(
-            (runAndReadMock(() => useQuerySalesCommandSwr(SCOPE, { commandId: "command-1" }, false), mocks.useNivoQuery)).key,
+            runAndReadMock(() => useQuerySalesCommandSwr(SCOPE, { commandId: "command-1" }, false), mocks.useNivoQuery)
+                .key,
         ).toBeNull()
         mocks.useSession.mockReturnValueOnce(sessionFixture({ status: "anonymous" }))
-        expect((runAndReadMock(() => useQuerySalesCommandSwr(SCOPE, { commandId: "command-1" }), mocks.useNivoQuery)).key).toBeNull()
+        expect(
+            runAndReadMock(() => useQuerySalesCommandSwr(SCOPE, { commandId: "command-1" }), mocks.useNivoQuery).key,
+        ).toBeNull()
     })
 
     it("reconciles a press by reading the same command identity, never a second one", async () => {
-        const hook = runAndReadMock(() => useQuerySalesCommandSwr(SCOPE, { commandId: "command-1" }), mocks.useNivoQuery)
+        const hook = runAndReadMock(
+            () => useQuerySalesCommandSwr(SCOPE, { commandId: "command-1" }),
+            mocks.useNivoQuery,
+        )
         await hook.query()
         expect(mocks.api.readSalesCommand).toHaveBeenCalledWith(
             "access-token",

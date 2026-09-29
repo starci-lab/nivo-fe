@@ -3,7 +3,11 @@ import { runAndReadMock } from "@/test-support/mock-result"
 import type { QueryMockCallback, MutationMockOptions } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({ key, mutation, options })),
+    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({
+        key,
+        mutation,
+        options,
+    })),
     useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
     api: { commandAccountingCorrect: vi.fn(async () => ({ ok: true })) },
 }))
@@ -25,34 +29,17 @@ const PROPOSE = {
     expectedResultRevision: 3,
 }
 const APPEND = { action: "append" as const, correctionId: "correction-1", attemptId: "attempt-2", expectedRevision: 3 }
-type MutationShape = {
-    readonly key: unknown
-    readonly options: {
-        readonly invalidates: (
-            trigger: { readonly input: typeof PROPOSE | typeof APPEND },
-            answer: {
-                readonly ok: boolean
-                readonly data?: { readonly payload: { readonly resultId: string | null } }
-            },
-        ) => ReadonlyArray<unknown>
-        readonly shouldInvalidate: (answer: { readonly ok: boolean; readonly code?: string }) => boolean
-    }
-    readonly mutation: (input: {
-        readonly requestId: string
-        readonly input: typeof PROPOSE | typeof APPEND
-    }) => Promise<unknown>
-}
 
 describe("useMutateAccountingCorrectSwr", () => {
     it("keeps the command on its installation-qualified identity and holds it while disabled", () => {
-        expect((runAndReadMock(() => useMutateAccountingCorrectSwr(SCOPE), mocks.useNivoMutation)).key).toEqual([
+        expect(runAndReadMock(() => useMutateAccountingCorrectSwr(SCOPE), mocks.useNivoMutation).key).toEqual([
             "accounting",
             "correct",
             "workspace-1",
             "instance-1",
             "installation-1",
         ])
-        expect((runAndReadMock(() => useMutateAccountingCorrectSwr(SCOPE, false), mocks.useNivoMutation)).key).toBeNull()
+        expect(runAndReadMock(() => useMutateAccountingCorrectSwr(SCOPE, false), mocks.useNivoMutation).key).toBeNull()
     })
 
     it("sends a proposal and an append through the same correction address", async () => {

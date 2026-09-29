@@ -11,11 +11,6 @@ vi.mock("@/modules/api/auth", () => ({ endPrincipalSessions }))
 
 import { useMutateEndPrincipalSessionsSwr } from "./useMutateEndPrincipalSessionsSwr"
 
-type HookShape = {
-    readonly key: unknown
-    readonly mutation: (key: unknown, trigger: { readonly arg: unknown }) => Promise<unknown>
-}
-
 describe("useMutateEndPrincipalSessionsSwr", () => {
     beforeEach(() => vi.clearAllMocks())
 

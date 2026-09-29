@@ -14,8 +14,6 @@ import {
     workspaceCheckoutOffersQueryKey,
 } from "./useQueryWorkspaceCheckoutOffersSwr"
 
-type ReadShape = { readonly key: unknown; readonly query: () => Promise<unknown> }
-
 describe("useQueryWorkspaceCheckoutOffersSwr", () => {
     it("keys one offer selection by the exact offer identity and version presented", () => {
         expect(workspaceCheckoutOffersQueryKey("offer-team", "v1")).toEqual([
@@ -30,7 +28,9 @@ describe("useQueryWorkspaceCheckoutOffersSwr", () => {
     })
 
     it("addresses nothing while the screen holds no offer to present", () => {
-        expect((runAndReadMock(() => useQueryWorkspaceCheckoutOffersSwr("offer-team", "v1", false), mocks.useNivoQuery)).key).toBeNull()
+        expect(
+            runAndReadMock(() => useQueryWorkspaceCheckoutOffersSwr("offer-team", "v1", false), mocks.useNivoQuery).key,
+        ).toBeNull()
     })
 
     it("selects the exact offer version through the boundary read", async () => {
