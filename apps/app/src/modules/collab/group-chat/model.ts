@@ -10,6 +10,7 @@
     CollabTaskView,
 } from "../../api/collab"
 import type { CollabTasksFilter } from "../../../hooks"
+import { COLLAB_HUMAN_ROLES, isCollabHumanRole } from "./model.guards"
 
 const GROUP_CHAT_AVATAR_TINT_CLASS_NAMES = [
     "bg-accent-soft",
@@ -40,7 +41,7 @@ export type GroupChatTab = "office" | "tasks"
  */
 
 /** Roles an invitation or role change may name - the closed V1 set. */
-export const GROUP_CHAT_HUMAN_ROLES: ReadonlyArray<CollabHumanRole> = ["owner", "manager", "staff"]
+export const GROUP_CHAT_HUMAN_ROLES: ReadonlyArray<CollabHumanRole> = COLLAB_HUMAN_ROLES
 
 /**
  * Presentation hint only: the invite controls appear while the server-derived
@@ -139,9 +140,12 @@ export type ConversationBuildArgs = {
 export const buildConversationItems = (args: ConversationBuildArgs): ReadonlyArray<ConversationItem> => {
     const { messages, cards, tasks, participants, viewerMemberId, unknownAuthor } = args
     const bindingByMessage = new Map(cards.map((card) => [card.sourceMessageId, card]))
-    const taskByBinding = new Map(
-        tasks.filter((task) => task.bindingId !== null).map((task) => [task.bindingId as string, task]),
-    )
+    const taskByBinding = new Map<string, CollabTaskView>()
+    for (const task of tasks) {
+        if (task.bindingId !== null) {
+            taskByBinding.set(task.bindingId, task)
+        }
+    }
     const anchoredApprovals = new Map<string, Array<AnchoredApproval>>()
     const looseApprovals: Array<AnchoredApproval> = []
     for (const task of tasks) {
@@ -269,7 +273,7 @@ export const taskStatusTone = (
 
 /** Role choices a live invitation link may echo as a display hint; authority never reads it. */
 export const parseRoleHint = (raw: string | null): CollabHumanRole | null =>
-    raw !== null && GROUP_CHAT_HUMAN_ROLES.includes(raw as CollabHumanRole) ? (raw as CollabHumanRole) : null
+    isCollabHumanRole(raw) ? raw : null
 
 /** Derive the two initials shown when a member has no avatar image. */
 export const initialsOf = (displayName: string): string =>

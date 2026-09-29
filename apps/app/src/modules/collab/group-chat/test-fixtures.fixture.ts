@@ -248,7 +248,7 @@ export const actions = (): GroupChatPageActions & Record<keyof GroupChatPageActi
         openTaskCard: vi.fn(),
         leaveOffice: vi.fn(),
     }
-    return calls as GroupChatPageActions & Record<keyof GroupChatPageActions, ReturnType<typeof vi.fn>>
+    return calls
 }
 
 /** A receipt binding already reported by its module. */
@@ -256,7 +256,7 @@ export const REPORTED_BINDING: CollabBindingView = {
     ...BINDING,
     bindingId: "bind-2",
     sourceMessageId: "msg-3",
-    receipt: { disposition: "reported" } as CollabBindingView["receipt"],
+    receipt: { disposition: "reported", receiptId: "rcpt-2" },
 }
 
 /** A receipt binding refused by its module. */
@@ -264,7 +264,7 @@ export const REFUSED_BINDING: CollabBindingView = {
     ...BINDING,
     bindingId: "bind-3",
     sourceMessageId: "msg-4",
-    receipt: { disposition: "refused" } as CollabBindingView["receipt"],
+    receipt: { disposition: "refused", reason: "unsupported-version" },
 }
 
 /** A working task bound to the reported receipt. */
