@@ -1,5 +1,5 @@
 import {expect, test} from "@playwright/test"
-import {runSmoke} from "./e2e-smoke"
+import {runSmoke} from "./support/smoke"
 
 test("the built customer app serves a complete localized document", async () => {
     const result = await runSmoke()

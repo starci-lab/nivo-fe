@@ -1,16 +1,21 @@
-import {spawn, spawnSync} from "node:child_process"
+import { spawn, spawnSync, type ChildProcess } from "node:child_process"
 import process from "node:process"
-import {resolve} from "node:path"
+import { resolve } from "node:path"
 
-const rootDir = resolve(__dirname, "..")
+const rootDir = resolve(__dirname, "..", "..")
+
+export interface SmokeResult {
+    status: number
+    path: string
+}
 
 /** Exercise the production Next server, never an already-running development process. */
-export const runSmoke = async () => {
+export const runSmoke = async (): Promise<SmokeResult> => {
     const port = process.env.NIVO_FE_E2E_PORT ?? "13067"
     const externalUrl = process.env.NIVO_FE_E2E_URL?.replace(/\/$/, "")
     const smokePath = process.env.NIVO_FE_E2E_PATH ?? "/en"
     const baseUrl = externalUrl ?? `http://127.0.0.1:${port}`
-    let server
+    let server: ChildProcess | undefined
 
     const stop = () => {
         if (!server || server.exitCode !== null) return
@@ -23,7 +28,7 @@ export const runSmoke = async () => {
         }
         server.kill("SIGTERM")
     }
-    const waitForServer = async () => {
+    const waitForServer = async (): Promise<Response> => {
         const deadline = Date.now() + 45_000
         while (Date.now() < deadline) {
             try {
@@ -55,7 +60,7 @@ export const runSmoke = async () => {
             throw new Error(`Nivo FE smoke failed: ${baseUrl}${smokePath} returned HTTP ${response.status} or an empty document`)
         }
         console.log(`Nivo FE smoke passed: GET ${smokePath} returned ${response.status}`)
-        return {status: response.status, path: smokePath}
+        return { status: response.status, path: smokePath }
     } finally {
         stop()
     }

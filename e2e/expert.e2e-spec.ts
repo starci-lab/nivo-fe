@@ -14,14 +14,14 @@
  */
 import process from "node:process";
 import { expect, test } from "@playwright/test";
-import { serveNextApp } from "./serve-next";
+import { serveNextApp, type ServedApp } from "./support/serve-next";
 
 const PORT = process.env.NIVO_FE_E2E_EXPERT_PORT ?? String(Number(process.env.NIVO_FE_E2E_PORT ?? 13067) + 3);
 const EXTERNAL_URL = process.env.NIVO_FE_E2E_EXPERT_URL?.replace(/\/$/u, "");
 
 test.describe("the built expert app serves both declared locales and refuses an unknown one", () => {
-    let server;
-    let baseUrl;
+    let server: ServedApp;
+    let baseUrl: string;
     test.beforeAll(async () => {
         server = EXTERNAL_URL ? { baseUrl: EXTERNAL_URL, stop: () => {} } : await serveNextApp({ appDir: "apps/expert", port: PORT });
         baseUrl = server.baseUrl;
