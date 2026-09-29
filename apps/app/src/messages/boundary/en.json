@@ -1,0 +1,22 @@
+{
+  "error": {
+    "unexpected": {
+      "message": "Something went wrong",
+      "description": "This page could not be shown. Try again, and if it keeps failing contact support."
+    },
+    "staleBundle": {
+      "message": "This page is out of date",
+      "description": "A newer version was released while you were here. Reload to continue."
+    },
+    "retry": "Try again",
+    "reload": "Reload"
+  },
+  "notFound": {
+    "message": "Page not found",
+    "description": "This address does not exist or has moved.",
+    "home": "Back to home"
+  },
+  "loading": {
+    "label": "Loading"
+  }
+}

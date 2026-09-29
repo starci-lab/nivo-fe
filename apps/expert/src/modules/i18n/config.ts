@@ -47,3 +47,14 @@ export const DEFAULT_LOCALE: Locale = "en";
  * @returns A locale this app ships copy for.
  */
 export const toLocale = (value: string | undefined): Locale => LOCALES.includes(value as Locale) ? value as Locale : DEFAULT_LOCALE;
+
+
+/**
+ * Read the locale out of an address for the one caller with no request config above it: the
+ * document-level error boundary, which renders when the layout that owns the provider has failed.
+ * An address without a prefix is the default locale, because routing is `as-needed`.
+ *
+ * @param pathname - The current pathname, or null when the router has none.
+ * @returns A locale this app ships.
+ */
+export const toLocaleFromPathname = (pathname: string | null): Locale => toLocale(pathname?.split("/")[1]);

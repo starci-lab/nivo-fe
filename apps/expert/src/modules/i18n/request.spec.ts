@@ -15,6 +15,7 @@ describe("expert request locale config", () => {
         expect(config.locale).toBe("en")
         expect(config.timeZone).toBe("Asia/Ho_Chi_Minh")
         expect(config.messages).toHaveProperty("landing")
+        expect(config.messages).toHaveProperty("boundary.error.retry")
     })
 
     it("uses the validated default when the route is not a supported locale", async () => {
@@ -22,5 +23,6 @@ describe("expert request locale config", () => {
         const config = await requestConfig({ requestLocale: Promise.resolve(undefined) })
         expect(config.locale).toBe("en")
         expect(config.messages).toHaveProperty("landing")
+        expect(config.messages).toHaveProperty("boundary.error.retry")
     })
 })

@@ -79,14 +79,56 @@
           "sourceRoots": [
             "apps/app/src",
             "apps/expert/src",
-            "apps/landing/src",
-            "packages/ui/src"
+            "apps/landing/src"
           ],
           "transports": [],
           "worldMappings": [],
           "envelopes": [],
           "writes": [],
-          "boundaries": [],
+          "boundaries": [
+            {
+              "role": "global",
+              "routeRoot": "apps/app/src/app",
+              "path": "apps/app/src/app/global-error.tsx",
+              "recoveryProp": "reset"
+            },
+            {
+              "role": "segment",
+              "routeRoot": "apps/app/src/app/[locale]",
+              "path": "apps/app/src/app/[locale]/error.tsx",
+              "recoveryProp": "reset"
+            },
+            {
+              "role": "segment",
+              "routeRoot": "apps/app/src/app/[locale]/(console)",
+              "path": "apps/app/src/app/[locale]/(console)/error.tsx",
+              "recoveryProp": "reset"
+            },
+            {
+              "role": "global",
+              "routeRoot": "apps/expert/src/app",
+              "path": "apps/expert/src/app/global-error.tsx",
+              "recoveryProp": "reset"
+            },
+            {
+              "role": "segment",
+              "routeRoot": "apps/expert/src/app/[locale]",
+              "path": "apps/expert/src/app/[locale]/error.tsx",
+              "recoveryProp": "reset"
+            },
+            {
+              "role": "global",
+              "routeRoot": "apps/landing/src/app",
+              "path": "apps/landing/src/app/global-error.tsx",
+              "recoveryProp": "reset"
+            },
+            {
+              "role": "segment",
+              "routeRoot": "apps/landing/src/app",
+              "path": "apps/landing/src/app/error.tsx",
+              "recoveryProp": "reset"
+            }
+          ],
           "requiredValues": []
         },
         "dataLifecycle": {
