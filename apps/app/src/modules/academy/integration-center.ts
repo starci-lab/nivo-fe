@@ -4,14 +4,7 @@ import type { NivoQueryFailure } from "../query"
 
 /** Closed provider keys accepted by the Integration Center. */
 export type AcademyIntegrationProviderId =
-    | "domain"
-    | "google"
-    | "smtp"
-    | "payment"
-    | "zalo"
-    | "ga4"
-    | "meta_pixel"
-    | "webhook"
+    "domain" | "google" | "smtp" | "payment" | "zalo" | "ga4" | "meta_pixel" | "webhook"
 
 /** One safe provider card; it contains no credential value. */
 export type AcademyIntegrationCard = {
@@ -83,8 +76,17 @@ export type AcademyIntegrationCardFact = {
 /** Keep provider wire states from escaping the resolved status message catalog. */
 export const academyIntegrationStatusKeyOf = (status: string) => {
     const knownStatuses = new Set([
-        "absent", "connected", "verified", "live", "configured", "rejected", "failed", "expired", "pending",
-        "unreachable", "authorizing",
+        "absent",
+        "connected",
+        "verified",
+        "live",
+        "configured",
+        "rejected",
+        "failed",
+        "expired",
+        "pending",
+        "unreachable",
+        "authorizing",
     ])
     return knownStatuses.has(status) ? status : "absent"
 }
@@ -130,8 +132,7 @@ export const academyIntegrationCardFactsOf = (
                     : domain?.domain === null || domain === null || domain === undefined
                       ? "absent"
                       : "pending",
-            detail:
-                domain?.domain == null ? undefined : { kind: "text", value: `${domain.domain} → ${domain.target}` },
+            detail: domain?.domain == null ? undefined : { kind: "text", value: `${domain.domain} → ${domain.target}` },
         },
         {
             id: "google",
@@ -165,13 +166,17 @@ export const academyIntegrationCardFactsOf = (
             return {
                 id,
                 status: provider?.status ?? "absent",
-                detail: provider?.identifier == null ? undefined : { kind: "text" as const, value: provider.identifier },
+                detail:
+                    provider?.identifier == null ? undefined : { kind: "text" as const, value: provider.identifier },
             }
         }),
         {
             id: "webhook",
             status: answer?.webhooks.some((item) => item.enabled) === true ? "connected" : "absent",
-            detail: answer === null || answer === undefined ? undefined : { kind: "webhookCount", count: answer.webhooks.length },
+            detail:
+                answer === null || answer === undefined
+                    ? undefined
+                    : { kind: "webhookCount", count: answer.webhooks.length },
         },
     ]
 }
@@ -206,7 +211,12 @@ export const academyIntegrationFormFieldFactsOf = (
     if (id === "ga4" || id === "meta_pixel")
         return [
             { id: `academy-${id}-identifier`, name: "identifier", label: "identifier" },
-            { id: `academy-${id}-consent`, name: "consentMode", label: "consentMode", hint: "required | granted | denied" },
+            {
+                id: `academy-${id}-consent`,
+                name: "consentMode",
+                label: "consentMode",
+                hint: "required | granted | denied",
+            },
         ]
     return [
         { id: "academy-webhook-endpoint", name: "endpoint", label: "endpoint" },
@@ -223,9 +233,11 @@ export const academyIntegrationFormFieldFactsOf = (
 export const academyConsentModeOf = (value: string | undefined): "required" | "granted" | "denied" =>
     value === "granted" || value === "denied" ? value : "required"
 
-/** Select the localized outcome key for a completed provider save. */
-export const academyIntegrationOutcomeKeyOf = (id: AcademyIntegrationProviderId, ok: boolean) =>
-    !ok ? "saveFailed" : id === "webhook" ? "webhookSecretCopied" : "saved"
+/** Name what a completed provider save came to; the connected hook phrases each outcome from the catalogue. */
+export const academyIntegrationOutcomeOf = (
+    id: AcademyIntegrationProviderId,
+    ok: boolean,
+): "failed" | "secret-copied" | "saved" => (!ok ? "failed" : id === "webhook" ? "secret-copied" : "saved")
 
 /** Build the provider-specific mutation command from the controlled form fields. */
 export const academyIntegrationCommandOf = (
@@ -248,6 +260,9 @@ export const academyIntegrationCommandOf = (
     return {
         kind: "webhook" as const,
         endpoint: values.endpoint ?? "",
-        events: (values.events ?? "").split(",").map((event) => event.trim()).filter(Boolean),
+        events: (values.events ?? "")
+            .split(",")
+            .map((event) => event.trim())
+            .filter(Boolean),
     }
 }

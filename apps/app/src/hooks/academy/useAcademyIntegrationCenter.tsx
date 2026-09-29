@@ -12,7 +12,7 @@ import {
     academyIntegrationCardFactsOf,
     academyIntegrationCommandOf,
     academyIntegrationFormFieldFactsOf,
-    academyIntegrationOutcomeKeyOf,
+    academyIntegrationOutcomeOf,
     academyIntegrationStatusKeyOf,
     academyIntegrationToneOf,
     type AcademyIntegrationProviderId,
@@ -83,7 +83,14 @@ export const useAcademyIntegrationCenter = (siteId: string): AcademyIntegrationC
                 /* Browser permission may refuse clipboard; never echo the secret into the DOM. */
             }
         }
-        setOutcome(t(academyIntegrationOutcomeKeyOf(selectedId, result.ok)))
+        const saveOutcome = academyIntegrationOutcomeOf(selectedId, result.ok)
+        setOutcome(
+            outcome === "failed"
+                ? t("saveFailed")
+                : outcome === "secret-copied"
+                  ? t("webhookSecretCopied")
+                  : t("saved"),
+        )
         setPendingId(undefined)
     }
     return {
