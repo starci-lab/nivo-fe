@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react"
+import { matchMediaFixture } from "@/test-support/mock-result"
 import { beforeAll, describe, expect, it, vi } from "vitest"
 import { ChatbotWorkbenchBlock, type ChatbotWorkbenchBlockCopy } from "."
 
@@ -135,11 +136,7 @@ const controlWorkbench = (handoffState: "automated" | "human") => ({
 
 describe("ChatbotWorkbenchBlock", () => {
     beforeAll(() => {
-        window.matchMedia = vi.fn().mockReturnValue({
-            matches: false,
-            addEventListener: vi.fn(),
-            removeEventListener: vi.fn(),
-        }) as unknown as typeof window.matchMedia
+        window.matchMedia = matchMediaFixture(false)
     })
 
     it("keeps installation identity, handoff and ambiguous delivery distinct", () => {

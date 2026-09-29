@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest"
+import { runAndReadMock } from "@/test-support/mock-result"
+import type { QueryMockCallback, MutationMockOptions } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoMutation: vi.fn((key: unknown, mutation: unknown, options: unknown) => ({ key, mutation, options })),
+    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({ key, mutation, options })),
     api: {
         startWorkspaceCheckoutPurchase: vi.fn(async () => ({ ok: true })),
         readWorkspaceCheckoutStatus: vi.fn(async () => ({ ok: true })),
@@ -28,14 +30,14 @@ type StartShape = {
 
 describe("useMutateWorkspaceCheckoutStartSwr", () => {
     it("keeps the admission on its own press-local identity", () => {
-        expect((useMutateWorkspaceCheckoutStartSwr() as unknown as StartShape).key).toEqual([
+        expect((runAndReadMock(() => useMutateWorkspaceCheckoutStartSwr(), mocks.useNivoMutation)).key).toEqual([
             "workspace-checkout",
             "start",
         ])
     })
 
     it("admits the purchase through the boundary command with the request unchanged", async () => {
-        const hook = useMutateWorkspaceCheckoutStartSwr() as unknown as StartShape
+        const hook = runAndReadMock(() => useMutateWorkspaceCheckoutStartSwr(), mocks.useNivoMutation)
 
         await hook.mutation(START)
 
@@ -43,18 +45,18 @@ describe("useMutateWorkspaceCheckoutStartSwr", () => {
     })
 
     it("refreshes exactly the purchase an admission answer named, and nothing when it named none", () => {
-        const hook = useMutateWorkspaceCheckoutStartSwr() as unknown as StartShape
+        const hook = runAndReadMock(() => useMutateWorkspaceCheckoutStartSwr(), mocks.useNivoMutation)
 
         expect(
-            hook.options.invalidates(START, { ok: true, data: { status: "prepared", purchaseId: "purchase-1" } }),
+            hook.options?.invalidates?.(START, { ok: true, data: { status: "prepared", purchaseId: "purchase-1" } }),
         ).toEqual([workspaceCheckoutStatusQueryKey("purchase-1")])
         expect(
-            hook.options.invalidates(START, {
+            hook.options?.invalidates?.(START, {
                 ok: true,
                 data: { status: "outcome-unknown", purchaseId: "purchase-1" },
             }),
         ).toEqual([workspaceCheckoutStatusQueryKey("purchase-1")])
-        expect(hook.options.invalidates(START, { ok: true, data: { status: "offers" } })).toEqual([])
-        expect(hook.options.invalidates(START, { ok: false })).toEqual([])
+        expect(hook.options?.invalidates?.(START, { ok: true, data: { status: "offers" } })).toEqual([])
+        expect(hook.options?.invalidates?.(START, { ok: false })).toEqual([])
     })
 })

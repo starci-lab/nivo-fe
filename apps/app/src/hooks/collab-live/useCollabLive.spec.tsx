@@ -30,7 +30,9 @@ vi.mock("socket.io-client", () => ({
 }))
 
 const { useSession, mutate } = vi.hoisted(() => ({
-    useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "tok" } })),
+    useSession: vi.fn<() => { state: { status: string; accessToken: string } }>(() => ({
+        state: { status: "signed-in", accessToken: "tok" },
+    })),
     mutate: vi.fn(async () => undefined),
 }))
 vi.mock("swr", () => ({ useSWRConfig: () => ({ mutate }) }))
@@ -67,7 +69,7 @@ describe("collab live subscription", () => {
         host.remove()
         sockets.length = 0
         vi.clearAllMocks()
-        useSession.mockImplementation(() => ({ state: { status: "signed-in", accessToken: "tok" } }) as never)
+        useSession.mockImplementation(() => ({ state: { status: "signed-in", accessToken: "tok" } }))
     })
     const mount = (workspaceId: string | null) => {
         host = document.createElement("div")
@@ -82,7 +84,7 @@ describe("collab live subscription", () => {
         (mutate.mock.calls as ReadonlyArray<ReadonlyArray<unknown>>).at(-1)?.[0] as (key: unknown) => boolean
 
     it("mounts no socket while signed out or without a workspace", () => {
-        useSession.mockImplementation(() => ({ state: { status: "signed-out" } }) as never)
+        useSession.mockImplementation(() => ({ state: { status: "anonymous", accessToken: "" } }))
         mount("ws-1")
         expect(state().status).toBe("idle")
         expect(sockets).toHaveLength(0)

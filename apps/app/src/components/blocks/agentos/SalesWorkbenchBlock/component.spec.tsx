@@ -82,9 +82,24 @@ const ACTION = {
     revision: 2,
 }
 
+type SalesWorkbenchView = ReturnType<typeof useSalesWorkbench>
+type SalesWorkbenchGroup =
+    | "attention"
+    | "command"
+    | "history"
+    | "routine"
+    | "wait"
+    | "ambiguity"
+    | "closure"
+    | "installation"
+    | "policy"
+type SalesWorkbenchViewOverrides = Omit<Partial<SalesWorkbenchView>, SalesWorkbenchGroup> & {
+    readonly [Key in SalesWorkbenchGroup]?: Partial<SalesWorkbenchView[Key]>
+}
+
 /** The full settled view the direction's populated state draws, overridden per state under test. */
-const view = (overrides: Record<string, unknown> = {}) => {
-    const settled: Record<string, unknown> = {
+const view = (overrides: SalesWorkbenchViewOverrides = {}): SalesWorkbenchView => {
+    const settled: SalesWorkbenchView = {
         t: translate,
         locale: "en",
         scopeStanding: "ready",
@@ -211,6 +226,9 @@ const view = (overrides: Record<string, unknown> = {}) => {
                 salesInstallationId: "installation-1",
                 lifecycleIntentId: "lifecycle-1",
                 configurationRevision: "configuration-1",
+                setupAuthorityGeneration: 1,
+                runtimeGeneration: "runtime-1",
+                sourceRevision: "source-1",
                 ready: true,
                 observedAt: "2026-09-23T14:10:00Z",
                 revision: 2,
@@ -221,6 +239,7 @@ const view = (overrides: Record<string, unknown> = {}) => {
             model: {
                 salesInstallationId: "installation-1",
                 revision: 7,
+                requestId: "policy-request-1",
                 values: {},
                 unsetItems: ["routineCadence"],
                 configuredBy: "owner",
@@ -234,25 +253,21 @@ const view = (overrides: Record<string, unknown> = {}) => {
             onConfigure: () => undefined,
         },
     }
-    const merged: Record<string, unknown> = { ...settled, ...overrides }
-    for (const group of [
-        "attention",
-        "command",
-        "history",
-        "routine",
-        "wait",
-        "ambiguity",
-        "closure",
-        "installation",
-        "policy",
-    ])
-        merged[group] = {
-            ...(settled[group] as Record<string, unknown>),
-            ...((overrides[group] as Record<string, unknown> | undefined) ?? {}),
-        }
-    return merged as unknown as ReturnType<typeof useSalesWorkbench>
+    return {
+        ...settled,
+        ...overrides,
+        attention: { ...settled.attention, ...overrides.attention },
+        command: { ...settled.command, ...overrides.command },
+        history: { ...settled.history, ...overrides.history },
+        routine: { ...settled.routine, ...overrides.routine },
+        wait: { ...settled.wait, ...overrides.wait },
+        ambiguity: { ...settled.ambiguity, ...overrides.ambiguity },
+        closure: { ...settled.closure, ...overrides.closure },
+        installation: { ...settled.installation, ...overrides.installation },
+        policy: { ...settled.policy, ...overrides.policy },
+    }
 }
-const renderBlock = (input: Record<string, unknown> = {}) => {
+const renderBlock = (input: SalesWorkbenchViewOverrides = {}) => {
     const rendered: ReactElement = (
         <SalesWorkbenchBlockBase
             props={{ view: view(input) }}

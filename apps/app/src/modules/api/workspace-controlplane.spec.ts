@@ -42,11 +42,16 @@ const envelope = (field: string, data: unknown) =>
     jsonResponse({ data: { [field]: { data, success: true, message: "ok", error: null } } })
 const refusal = (field: string, error: string) =>
     jsonResponse({ data: { [field]: { data: null, success: false, message: "refused", error } } })
-const requestBody = (fetchMock: ReturnType<typeof vi.fn>, call: number) =>
-    JSON.parse(String(fetchMock.mock.calls[call]?.[1]?.body)) as {
-        query: string
-        variables: Record<string, never> & { input?: Record<string, unknown> }
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === "object" && value !== null && !Array.isArray(value)
+
+const requestBody = (fetchMock: ReturnType<typeof vi.fn>, call: number) => {
+    const parsed: unknown = JSON.parse(String(fetchMock.mock.calls[call]?.[1]?.body))
+    if (!isRecord(parsed) || typeof parsed.query !== "string" || !isRecord(parsed.variables)) {
+        throw new Error("The request body did not match the GraphQL request shape")
     }
+    return { query: parsed.query, variables: parsed.variables }
+}
 
 const orderRow = {
     id: "order-1",
@@ -555,8 +560,11 @@ describe("resolvePurchasedWorkspaceEntry", () => {
 
 // The workspace-checkout boundary is reached through the same `<field>(request: $request)` shape the
 // rest of the transport uses, so these specs read the `request` variable rather than `input`.
-const requestVariables = (fetchMock: ReturnType<typeof vi.fn>, call: number) =>
-    requestBody(fetchMock, call).variables as unknown as { request: Record<string, unknown> }
+const requestVariables = (fetchMock: ReturnType<typeof vi.fn>, call: number) => {
+    const request = requestBody(fetchMock, call).variables.request
+    if (!isRecord(request)) throw new Error("The workspace checkout request variables were missing")
+    return { request }
+}
 
 const checkoutOffer = {
     offerId: "offer-team",

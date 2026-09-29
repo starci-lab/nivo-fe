@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { apiAnswer, unavailableFailure } from "@/test-support/mock-result"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -89,7 +90,7 @@ describe("AgentOSSolutionModuleCenter", () => {
     })
 
     it("renders catalog and installed module cards with their status vocabulary", async () => {
-        vi.mocked(myAgentosSolutionModules).mockResolvedValue({
+        vi.mocked(myAgentosSolutionModules).mockResolvedValue(apiAnswer(myAgentosSolutionModules, {
             ok: true,
             data: [
                 {
@@ -111,33 +112,45 @@ describe("AgentOSSolutionModuleCenter", () => {
                     version: "1",
                 },
             ],
-        } as never)
-        vi.mocked(myAgentosModuleInstallations).mockResolvedValue({
+        }))
+        vi.mocked(myAgentosModuleInstallations).mockResolvedValue(apiAnswer(myAgentosModuleInstallations, {
             ok: true,
             data: [
                 {
                     id: "install-1",
+                    agentWorkspaceId: "workspace-1",
                     moduleKey: "sales-copilot",
                     moduleVersion: "1.0",
+                    displayName: "Sales",
                     status: "ready",
                     failureCode: null,
+                    createdAt: "2026-09-01T00:00:00.000Z",
+                    updatedAt: "2026-09-01T00:00:00.000Z",
                 },
                 {
                     id: "install-2",
+                    agentWorkspaceId: "workspace-1",
                     moduleKey: "multichannel-chatbot",
                     moduleVersion: "1.0",
+                    displayName: "Chat",
                     status: "failed",
                     failureCode: "BROKEN",
+                    createdAt: "2026-09-01T00:00:00.000Z",
+                    updatedAt: "2026-09-01T00:00:00.000Z",
                 },
                 {
                     id: "install-3",
+                    agentWorkspaceId: "workspace-1",
                     moduleKey: "missing",
                     moduleVersion: "1.0",
+                    displayName: "Missing module",
                     status: "provisioning",
                     failureCode: null,
+                    createdAt: "2026-09-01T00:00:00.000Z",
+                    updatedAt: "2026-09-01T00:00:00.000Z",
                 },
             ],
-        } as never)
+        }))
         render(<AgentOSSolutionModuleCenter workspaceId="workspace-1" />)
         expect(await screen.findByText("Sales")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("radio", { name: "Installed" }))
@@ -151,8 +164,8 @@ describe("AgentOSSolutionModuleCenter", () => {
         cleanup()
         resetQueryCache()
         signedIn.state = { status: "signed-in", accessToken: `orchestration-pages-${viewerSequence}-list-refusal` }
-        vi.mocked(myAgentosSolutionModules).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
-        vi.mocked(myAgentosModuleInstallations).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
+        vi.mocked(myAgentosSolutionModules).mockResolvedValue(apiAnswer(myAgentosSolutionModules, unavailableFailure()))
+        vi.mocked(myAgentosModuleInstallations).mockResolvedValue(apiAnswer(myAgentosModuleInstallations, unavailableFailure()))
         render(<AgentOSSolutionModuleCenter workspaceId="workspace-1" />)
         await waitFor(() =>
             expect(
@@ -165,7 +178,7 @@ describe("AgentOSSolutionModuleCenter", () => {
         cleanup()
         resetQueryCache()
         signedIn.state = { status: "signed-in", accessToken: `orchestration-pages-${viewerSequence}-ledger` }
-        vi.mocked(myAgentosSolutionModules).mockResolvedValue({
+        vi.mocked(myAgentosSolutionModules).mockResolvedValue(apiAnswer(myAgentosSolutionModules, {
             ok: true,
             data: [
                 {
@@ -178,8 +191,8 @@ describe("AgentOSSolutionModuleCenter", () => {
                     version: "1",
                 },
             ],
-        } as never)
-        vi.mocked(myAgentosModuleInstallations).mockResolvedValue({
+        }))
+        vi.mocked(myAgentosModuleInstallations).mockResolvedValue(apiAnswer(myAgentosModuleInstallations, {
             ok: true,
             data: [
                 {
@@ -194,7 +207,7 @@ describe("AgentOSSolutionModuleCenter", () => {
                     updatedAt: "",
                 },
             ],
-        } as never)
+        }))
         render(<AgentOSSolutionModuleCenter workspaceId="workspace-1" layout="ledger" />)
         expect((await screen.findByRole("link", { name: "UAT Knowledge Hub" })).getAttribute("href")).toBe(
             "/en/agentos/workspaces/workspace-1/modules/install-1",
@@ -207,13 +220,13 @@ describe("AgentOSSolutionModuleCenter", () => {
         resetQueryCache()
         viewerSequence += 1
         signedIn.state = { status: "signed-in", accessToken: `orchestration-pages-${viewerSequence}-recovery` }
-        vi.mocked(myAgentosSolutionModules).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
-        vi.mocked(myAgentosModuleInstallations).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
+        vi.mocked(myAgentosSolutionModules).mockResolvedValue(apiAnswer(myAgentosSolutionModules, unavailableFailure()))
+        vi.mocked(myAgentosModuleInstallations).mockResolvedValue(apiAnswer(myAgentosModuleInstallations, unavailableFailure()))
         render(<AgentOSSolutionModuleCenter workspaceId="workspace-1" layout="ledger" />)
         // Two reads refused, so the two sections each carry their own recovery: installed and catalogue.
         await waitFor(() => expect(screen.getAllByRole("button", { name: "Try again" })).toHaveLength(2))
         const retries = screen.getAllByRole("button", { name: "Try again" })
-        vi.mocked(myAgentosSolutionModules).mockResolvedValue({
+        vi.mocked(myAgentosSolutionModules).mockResolvedValue(apiAnswer(myAgentosSolutionModules, {
             ok: true,
             data: [
                 {
@@ -226,8 +239,8 @@ describe("AgentOSSolutionModuleCenter", () => {
                     version: "1",
                 },
             ],
-        } as never)
-        vi.mocked(myAgentosModuleInstallations).mockResolvedValue({
+        }))
+        vi.mocked(myAgentosModuleInstallations).mockResolvedValue(apiAnswer(myAgentosModuleInstallations, {
             ok: true,
             data: [
                 {
@@ -242,7 +255,7 @@ describe("AgentOSSolutionModuleCenter", () => {
                     updatedAt: "",
                 },
             ],
-        } as never)
+        }))
         for (const retry of retries) fireEvent.click(retry)
         expect(await screen.findByRole("link", { name: "UAT Knowledge Hub" })).toBeInTheDocument()
         // The catalogue beneath still installs, and a refused install is reported without losing the rows above.
@@ -255,7 +268,7 @@ describe("AgentOSSolutionModuleCenter", () => {
         cleanup()
         resetQueryCache()
         vi.mocked(installAgentosSolutionModule).mockClear()
-        vi.mocked(myAgentosSolutionModules).mockResolvedValue({
+        vi.mocked(myAgentosSolutionModules).mockResolvedValue(apiAnswer(myAgentosSolutionModules, {
             ok: true,
             data: [
                 {
@@ -268,17 +281,45 @@ describe("AgentOSSolutionModuleCenter", () => {
                     version: "1",
                 },
             ],
-        } as never)
-        vi.mocked(myAgentosModuleInstallations).mockResolvedValue({ ok: true, data: [] } as never)
+        }))
+        vi.mocked(myAgentosModuleInstallations).mockResolvedValue(apiAnswer(myAgentosModuleInstallations, { ok: true, data: [] }))
         vi.mocked(installAgentosSolutionModule)
-            .mockResolvedValueOnce({
+            .mockResolvedValueOnce(apiAnswer(installAgentosSolutionModule, {
                 ok: false,
                 kind: "unavailable",
+                status: null,
                 reason: "response lost",
                 code: "NETWORK",
-            } as never)
-            .mockResolvedValueOnce({ ok: true, data: { id: "install-1" } } as never)
-            .mockResolvedValueOnce({ ok: true, data: { id: "install-2" } } as never)
+                retryable: true,
+            }))
+            .mockResolvedValueOnce(apiAnswer(installAgentosSolutionModule, {
+                ok: true,
+                data: {
+                    id: "install-1",
+                    agentWorkspaceId: "workspace-1",
+                    moduleKey: "knowledge-hub",
+                    moduleVersion: "1",
+                    displayName: "Knowledge Hub",
+                    status: "provisioning",
+                    failureCode: null,
+                    createdAt: "2026-09-01T00:00:00.000Z",
+                    updatedAt: "2026-09-01T00:00:00.000Z",
+                },
+            }))
+            .mockResolvedValueOnce(apiAnswer(installAgentosSolutionModule, {
+                ok: true,
+                data: {
+                    id: "install-2",
+                    agentWorkspaceId: "workspace-1",
+                    moduleKey: "knowledge-hub",
+                    moduleVersion: "1",
+                    displayName: "Knowledge Hub",
+                    status: "provisioning",
+                    failureCode: null,
+                    createdAt: "2026-09-01T00:00:00.000Z",
+                    updatedAt: "2026-09-01T00:00:00.000Z",
+                },
+            }))
         render(<AgentOSSolutionModuleCenter workspaceId="workspace-1" />)
 
         fireEvent.click(await screen.findByRole("button", { name: "Install solution" }))

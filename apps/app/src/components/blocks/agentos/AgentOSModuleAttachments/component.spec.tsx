@@ -39,7 +39,7 @@ describe("AgentOSModuleAttachmentsBase", () => {
     it("reports collection and upload actions", () => {
         const choose = vi.fn()
         const remove = vi.fn()
-        const studio = {
+        const studio: Pick<AgentosModuleStudio, "attachments"> = {
             attachments: [
                 {
                     id: "attachment-1",
@@ -48,10 +48,17 @@ describe("AgentOSModuleAttachmentsBase", () => {
                     sizeBytes: 128,
                     status: "refused",
                     ingestionStatus: "refused",
+                    detectedMediaType: null,
+                    sha256: null,
                     chunkCount: 0,
+                    indexedAt: null,
+                    retrievalRemovedAt: null,
+                    objectDeletionStatus: "retained",
+                    objectDeletionDueAt: null,
+                    failureCode: "ATTACHMENT_REFUSED",
                 },
             ],
-        } as unknown as AgentosModuleStudio
+        }
         const attachments = render(
             <AgentOSModuleAttachmentsBase
                 state="ready"

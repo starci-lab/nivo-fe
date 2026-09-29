@@ -1,8 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
+import { sessionFixture } from "@/test-support/mock-result"
+import { runAndReadMock } from "@/test-support/mock-result"
+import type { QueryMockCallback, Session } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoQuery: vi.fn((key: unknown, query: unknown) => ({ key, query })),
-    useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
+    useNivoQuery: vi.fn((key: unknown, query: QueryMockCallback) => ({ key, query })),
+    useSession: vi.fn<() => Session>(),
     api: { readSalesHandoff: vi.fn(async () => ({ ok: true })) },
 }))
 vi.mock("../useNivoQuery", () => ({ useNivoQuery: mocks.useNivoQuery }))
@@ -31,14 +34,14 @@ describe("useQuerySalesHandoffSwr", () => {
 
     it("addresses nothing while it is held or no session holds a token", () => {
         expect(
-            (useQuerySalesHandoffSwr(SCOPE, { handoffId: "handoff-1" }, false) as unknown as ReadShape).key,
+            (runAndReadMock(() => useQuerySalesHandoffSwr(SCOPE, { handoffId: "handoff-1" }, false), mocks.useNivoQuery)).key,
         ).toBeNull()
-        mocks.useSession.mockReturnValueOnce({ state: { status: "signed-out", accessToken: undefined } } as never)
-        expect((useQuerySalesHandoffSwr(SCOPE, { handoffId: "handoff-1" }) as unknown as ReadShape).key).toBeNull()
+        mocks.useSession.mockReturnValueOnce(sessionFixture({ status: "anonymous" }))
+        expect((runAndReadMock(() => useQuerySalesHandoffSwr(SCOPE, { handoffId: "handoff-1" }), mocks.useNivoQuery)).key).toBeNull()
     })
 
     it("reads only the sender's own handoff state through its registered operation address", async () => {
-        const hook = useQuerySalesHandoffSwr(SCOPE, { handoffId: "handoff-1" }) as unknown as ReadShape
+        const hook = runAndReadMock(() => useQuerySalesHandoffSwr(SCOPE, { handoffId: "handoff-1" }), mocks.useNivoQuery)
         await hook.query()
         expect(mocks.api.readSalesHandoff).toHaveBeenCalledWith(
             "access-token",

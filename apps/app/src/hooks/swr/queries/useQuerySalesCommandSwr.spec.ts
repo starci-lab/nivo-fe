@@ -1,8 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
+import { sessionFixture } from "@/test-support/mock-result"
+import { runAndReadMock } from "@/test-support/mock-result"
+import type { QueryMockCallback, Session } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoQuery: vi.fn((key: unknown, query: unknown) => ({ key, query })),
-    useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
+    useNivoQuery: vi.fn((key: unknown, query: QueryMockCallback) => ({ key, query })),
+    useSession: vi.fn<() => Session>(),
     api: { readSalesCommand: vi.fn(async () => ({ ok: true })) },
 }))
 vi.mock("../useNivoQuery", () => ({ useNivoQuery: mocks.useNivoQuery }))
@@ -31,14 +34,14 @@ describe("useQuerySalesCommandSwr", () => {
 
     it("addresses nothing while it is held or no session holds a token", () => {
         expect(
-            (useQuerySalesCommandSwr(SCOPE, { commandId: "command-1" }, false) as unknown as ReadShape).key,
+            (runAndReadMock(() => useQuerySalesCommandSwr(SCOPE, { commandId: "command-1" }, false), mocks.useNivoQuery)).key,
         ).toBeNull()
-        mocks.useSession.mockReturnValueOnce({ state: { status: "signed-out", accessToken: undefined } } as never)
-        expect((useQuerySalesCommandSwr(SCOPE, { commandId: "command-1" }) as unknown as ReadShape).key).toBeNull()
+        mocks.useSession.mockReturnValueOnce(sessionFixture({ status: "anonymous" }))
+        expect((runAndReadMock(() => useQuerySalesCommandSwr(SCOPE, { commandId: "command-1" }), mocks.useNivoQuery)).key).toBeNull()
     })
 
     it("reconciles a press by reading the same command identity, never a second one", async () => {
-        const hook = useQuerySalesCommandSwr(SCOPE, { commandId: "command-1" }) as unknown as ReadShape
+        const hook = runAndReadMock(() => useQuerySalesCommandSwr(SCOPE, { commandId: "command-1" }), mocks.useNivoQuery)
         await hook.query()
         expect(mocks.api.readSalesCommand).toHaveBeenCalledWith(
             "access-token",

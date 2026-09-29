@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { apiAnswer, unavailableFailure } from "@/test-support/mock-result"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -98,20 +99,20 @@ describe("AppsPage", () => {
         })
 
         it("renders owned apps, an in-progress order, and catalogue offers", async () => {
-            vi.mocked(myExpertSites).mockResolvedValue({
+            vi.mocked(myExpertSites).mockResolvedValue(apiAnswer(myExpertSites, {
                 ok: true,
                 data: [
-                    { id: "site-1", slug: "academy", customDomain: null, provisionStatus: "ready", status: "active" },
+                    { id: "site-1", slug: "academy", customDomain: null, provisionStatus: "ready", status: "live" },
                     {
                         id: "site-2",
                         slug: "unknown",
                         customDomain: "unknown.test",
                         provisionStatus: "awaiting_dns",
-                        status: "active",
+                        status: "live",
                     },
                 ],
-            } as never)
-            vi.mocked(myInstances).mockResolvedValue({
+            }))
+            vi.mocked(myInstances).mockResolvedValue(apiAnswer(myInstances, {
                 ok: true,
                 data: [
                     {
@@ -125,8 +126,8 @@ describe("AppsPage", () => {
                         status: "ready",
                     },
                 ],
-            } as never)
-            vi.mocked(myCatalogOrders).mockResolvedValue({
+            }))
+            vi.mocked(myCatalogOrders).mockResolvedValue(apiAnswer(myCatalogOrders, {
                 ok: true,
                 data: [
                     {
@@ -137,8 +138,8 @@ describe("AppsPage", () => {
                     },
                     { id: "order-2", status: "in_progress", catalogItem: null, catalogTier: null },
                 ],
-            } as never)
-            vi.mocked(catalogItems).mockResolvedValue({
+            }))
+            vi.mocked(catalogItems).mockResolvedValue(apiAnswer(catalogItems, {
                 ok: true,
                 data: [
                     {
@@ -156,7 +157,7 @@ describe("AppsPage", () => {
                     { id: "item-2", slug: "custom", name: "Custom", tagline: null, templateKey: "custom", tiers: null },
                     { id: "item-3", slug: "ignored", name: "Ignored", tagline: null, templateKey: null, tiers: null },
                 ],
-            } as never)
+            }))
             render(<ConnectedAppsPage />)
             await waitFor(() => expect(screen.getAllByText("Academy").length).toBeGreaterThan(0))
             for (const button of screen.getAllByRole("button")) {
@@ -167,18 +168,18 @@ describe("AppsPage", () => {
         it("covers AppsPage refusal and empty catalogue answers", async () => {
             cleanup()
             resetQueryCache()
-            vi.mocked(myExpertSites).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
-            vi.mocked(myInstances).mockResolvedValue({ ok: true, data: [] } as never)
-            vi.mocked(myCatalogOrders).mockResolvedValue({ ok: true, data: [] } as never)
-            vi.mocked(catalogItems).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
+            vi.mocked(myExpertSites).mockResolvedValue(apiAnswer(myExpertSites, unavailableFailure()))
+            vi.mocked(myInstances).mockResolvedValue(apiAnswer(myInstances, { ok: true, data: [] }))
+            vi.mocked(myCatalogOrders).mockResolvedValue(apiAnswer(myCatalogOrders, { ok: true, data: [] }))
+            vi.mocked(catalogItems).mockResolvedValue(apiAnswer(catalogItems, unavailableFailure()))
             render(<ConnectedAppsPage />)
             await waitFor(() =>
                 expect(screen.getAllByText(enMessages.console.refusal.unknown).length).toBeGreaterThan(0),
             )
             cleanup()
             resetQueryCache()
-            vi.mocked(myExpertSites).mockResolvedValue({ ok: true, data: [] } as never)
-            vi.mocked(catalogItems).mockResolvedValue({ ok: true, data: [] } as never)
+            vi.mocked(myExpertSites).mockResolvedValue(apiAnswer(myExpertSites, { ok: true, data: [] }))
+            vi.mocked(catalogItems).mockResolvedValue(apiAnswer(catalogItems, { ok: true, data: [] }))
             render(<ConnectedAppsPage />)
             await waitFor(() =>
                 expect(screen.getAllByText(enMessages.console.apps.emptyDescription).length).toBeGreaterThan(0),
@@ -194,23 +195,23 @@ describe("AppsPage", () => {
             cleanup()
             resetQueryCache()
             signedIn.state = { status: "signed-in", accessToken: `orchestration-pages-${viewerSequence}-apps` }
-            vi.mocked(myExpertSites).mockResolvedValue({
+            vi.mocked(myExpertSites).mockResolvedValue(apiAnswer(myExpertSites, {
                 ok: true,
                 data: [
-                    { id: "site-1", slug: "academy", customDomain: null, provisionStatus: "unknown", status: "active" },
+                    { id: "site-1", slug: "academy", customDomain: null, provisionStatus: "failed", status: "live" },
                 ],
-            } as never)
-            vi.mocked(myInstances).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
-            vi.mocked(myCatalogOrders).mockResolvedValue({ ok: true, data: [] } as never)
-            vi.mocked(catalogItems).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
+            }))
+            vi.mocked(myInstances).mockResolvedValue(apiAnswer(myInstances, unavailableFailure()))
+            vi.mocked(myCatalogOrders).mockResolvedValue(apiAnswer(myCatalogOrders, { ok: true, data: [] }))
+            vi.mocked(catalogItems).mockResolvedValue(apiAnswer(catalogItems, unavailableFailure()))
             render(<ConnectedAppsPage />)
             expect(await screen.findByText("academy")).toBeInTheDocument()
             cleanup()
             resetQueryCache()
-            vi.mocked(myAgentWorkspace).mockResolvedValue({
+            vi.mocked(myAgentWorkspace).mockResolvedValue(apiAnswer(myAgentWorkspace, {
                 ok: true,
                 data: [{ id: "workspace-1", name: null, status: "unknown", catalogOrder: null }],
-            } as never)
+            }))
             render(<ConnectedAgentOSPage mode="dashboard" />)
             await waitFor(() =>
                 expect(

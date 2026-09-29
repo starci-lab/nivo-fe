@@ -1,8 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
+import { sessionFixture } from "@/test-support/mock-result"
+import { runAndReadMock } from "@/test-support/mock-result"
+import type { QueryMockCallback, Session } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoQuery: vi.fn((key: unknown, query: unknown) => ({ key, query })),
-    useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
+    useNivoQuery: vi.fn((key: unknown, query: QueryMockCallback) => ({ key, query })),
+    useSession: vi.fn<() => Session>(),
     api: { readSalesAction: vi.fn(async () => ({ ok: true })) },
 }))
 vi.mock("../useNivoQuery", () => ({ useNivoQuery: mocks.useNivoQuery }))
@@ -30,13 +33,13 @@ describe("useQuerySalesActionSwr", () => {
     })
 
     it("addresses nothing while it is held or no session holds a token", () => {
-        expect((useQuerySalesActionSwr(SCOPE, { actionId: "action-1" }, false) as unknown as ReadShape).key).toBeNull()
-        mocks.useSession.mockReturnValueOnce({ state: { status: "signed-out", accessToken: undefined } } as never)
-        expect((useQuerySalesActionSwr(SCOPE, { actionId: "action-1" }) as unknown as ReadShape).key).toBeNull()
+        expect((runAndReadMock(() => useQuerySalesActionSwr(SCOPE, { actionId: "action-1" }, false), mocks.useNivoQuery)).key).toBeNull()
+        mocks.useSession.mockReturnValueOnce(sessionFixture({ status: "anonymous" }))
+        expect((runAndReadMock(() => useQuerySalesActionSwr(SCOPE, { actionId: "action-1" }), mocks.useNivoQuery)).key).toBeNull()
     })
 
     it("reads the action that discloses the stored state a recovery door needs", async () => {
-        const hook = useQuerySalesActionSwr(SCOPE, { actionId: "action-1" }) as unknown as ReadShape
+        const hook = runAndReadMock(() => useQuerySalesActionSwr(SCOPE, { actionId: "action-1" }), mocks.useNivoQuery)
         await hook.query()
         expect(mocks.api.readSalesAction).toHaveBeenCalledWith(
             "access-token",

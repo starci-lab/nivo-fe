@@ -1,4 +1,5 @@
 import type { ComponentProps } from "react"
+import { matchMediaFixture } from "@/test-support/mock-result"
 import { NextIntlClientProvider, createTranslator, useTranslations } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
@@ -71,11 +72,7 @@ const PrivateSetupChatBlock = ({ locale = "en", ...props }: PrivateSetupChatBloc
 
 describe("PrivateSetupChatBlock", () => {
     beforeAll(() => {
-        window.matchMedia = vi.fn().mockReturnValue({
-            matches: false,
-            addEventListener: vi.fn(),
-            removeEventListener: vi.fn(),
-        }) as unknown as typeof window.matchMedia
+        window.matchMedia = matchMediaFixture(false)
     })
 
     describe.each(["en", "vi"] as const)("Support Desk Setup journey %s", (locale) => {

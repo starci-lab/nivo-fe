@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest"
+import { runAndReadMock } from "@/test-support/mock-result"
+import type { QueryMockCallback, MutationMockOptions } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoMutation: vi.fn((key: unknown, mutation: unknown, options: unknown) => ({ key, mutation, options })),
+    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({ key, mutation, options })),
     useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
     api: { commandSalesPrepareHandoff: vi.fn(async () => ({ ok: true })) },
 }))
@@ -34,28 +36,28 @@ type MutationShape = {
 
 describe("useMutateSalesPrepareHandoffSwr", () => {
     it("keeps the command on its installation-qualified identity and holds it while disabled", () => {
-        expect((useMutateSalesPrepareHandoffSwr(SCOPE) as unknown as MutationShape).key).toEqual([
+        expect((runAndReadMock(() => useMutateSalesPrepareHandoffSwr(SCOPE), mocks.useNivoMutation)).key).toEqual([
             "sales",
             "prepare-handoff",
             "workspace-1",
             "instance-1",
             "installation-1",
         ])
-        expect((useMutateSalesPrepareHandoffSwr(SCOPE, false) as unknown as MutationShape).key).toBeNull()
+        expect((runAndReadMock(() => useMutateSalesPrepareHandoffSwr(SCOPE, false), mocks.useNivoMutation)).key).toBeNull()
     })
 
     it("prepares the confirmed order with its consent reference, contacting nobody", async () => {
-        const hook = useMutateSalesPrepareHandoffSwr(SCOPE) as unknown as MutationShape
+        const hook = runAndReadMock(() => useMutateSalesPrepareHandoffSwr(SCOPE), mocks.useNivoMutation)
         await hook.mutation({ requestId: "request-1", input: INPUT })
         expect(mocks.api.commandSalesPrepareHandoff).toHaveBeenCalledWith("access-token", SCOPE, INPUT, "request-1")
     })
 
     it("refreshes the handoff it prepared", () => {
-        const hook = useMutateSalesPrepareHandoffSwr(SCOPE) as unknown as MutationShape
-        expect(hook.options.invalidates({ input: INPUT }, { ok: true })).toEqual([
+        const hook = runAndReadMock(() => useMutateSalesPrepareHandoffSwr(SCOPE), mocks.useNivoMutation)
+        expect(hook.options?.invalidates?.({ input: INPUT }, { ok: true })).toEqual([
             salesHandoffQueryKey(SCOPE, { handoffId: "handoff-1" }),
         ])
-        expect(hook.options.shouldInvalidate({ ok: false, code: "outcome_unknown" })).toBe(true)
-        expect(hook.options.shouldInvalidate({ ok: false, code: "SALES_REFUSED_INVALID" })).toBe(false)
+        expect(hook.options?.shouldInvalidate?.({ ok: false, code: "outcome_unknown" })).toBe(true)
+        expect(hook.options?.shouldInvalidate?.({ ok: false, code: "SALES_REFUSED_INVALID" })).toBe(false)
     })
 })

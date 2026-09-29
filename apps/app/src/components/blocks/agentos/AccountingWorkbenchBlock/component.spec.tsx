@@ -39,10 +39,15 @@ const keyPaths = (source: unknown, prefix = ""): ReadonlyArray<string> =>
         : [prefix]
 
 const GROUPS = ["overview", "intake", "routine", "question", "detail", "correction"] as const
+type AccountingWorkbenchView = ReturnType<typeof useAccountingWorkbench>
+type AccountingWorkbenchGroup = (typeof GROUPS)[number]
+type AccountingWorkbenchViewOverrides = Omit<Partial<AccountingWorkbenchView>, AccountingWorkbenchGroup> & {
+    readonly [Key in AccountingWorkbenchGroup]?: Partial<AccountingWorkbenchView[Key]>
+}
 
 /** A complete settled view with one readable result, overridden per state under test. */
-const view = (overrides: Record<string, unknown> = {}) => {
-    const settled: Record<string, unknown> = {
+const view = (overrides: AccountingWorkbenchViewOverrides = {}): AccountingWorkbenchView => {
+    const settled: AccountingWorkbenchView = {
         t: translate,
         locale: "en",
         scopeStanding: "ready",
@@ -111,7 +116,15 @@ const view = (overrides: Record<string, unknown> = {}) => {
             intakeRevision: "0",
             setIntakeRevision: () => undefined,
             model: { evidenceId: "evidence-1", state: "admitted", revision: 2, missingFacts: [] },
-            admit: { isMutating: false },
+            admit: {
+                trigger: async () => {
+                    throw new Error("The fixture does not submit an admission")
+                },
+                reset: () => undefined,
+                data: undefined,
+                error: undefined,
+                isMutating: false,
+            },
             isAdmitting: false,
             onAdmit: () => undefined,
             reload: () => undefined,
@@ -160,11 +173,7 @@ const view = (overrides: Record<string, unknown> = {}) => {
             setEvidenceRefs: () => undefined,
             exceptionRevision: "4",
             setExceptionRevision: () => undefined,
-            answerState: { exceptionId: "exception-1", state: "open", revision: 4 } as {
-                readonly exceptionId: string
-                readonly state: string
-                readonly revision: number
-            } | null,
+            answerState: { exceptionId: "exception-1", state: "open", revision: 4 },
             isAnswering: false,
             onAnswer: () => undefined,
             onDefer: () => undefined,
@@ -227,29 +236,26 @@ const view = (overrides: Record<string, unknown> = {}) => {
             setCorrectionRevision: () => undefined,
             appendAttemptId: "",
             setAppendAttemptId: () => undefined,
-            model: null as {
-                readonly correctionId: string
-                readonly attemptId: string
-                readonly state: string
-                readonly resultId: string | null
-                readonly predecessorResultId: string | null
-            } | null,
-            predecessor: null as unknown,
+            model: null,
+            predecessor: null,
             isCorrecting: false,
             onPropose: () => undefined,
             onAppend: () => undefined,
             reload: () => undefined,
         },
     }
-    const merged: Record<string, unknown> = { ...settled, ...overrides }
-    for (const group of GROUPS)
-        merged[group] = {
-            ...(settled[group] as Record<string, unknown>),
-            ...((overrides[group] as Record<string, unknown> | undefined) ?? {}),
-        }
-    return merged as unknown as ReturnType<typeof useAccountingWorkbench>
+    return {
+        ...settled,
+        ...overrides,
+        overview: { ...settled.overview, ...overrides.overview },
+        intake: { ...settled.intake, ...overrides.intake },
+        routine: { ...settled.routine, ...overrides.routine },
+        question: { ...settled.question, ...overrides.question },
+        detail: { ...settled.detail, ...overrides.detail },
+        correction: { ...settled.correction, ...overrides.correction },
+    }
 }
-const renderBlock = (input: Record<string, unknown> = {}): string => {
+const renderBlock = (input: AccountingWorkbenchViewOverrides = {}): string => {
     const rendered: ReactElement = <AccountingWorkbenchBlockBase props={{ view: view(input) }} />
     return render(rendered).container.textContent ?? ""
 }
@@ -282,6 +288,7 @@ describe("AccountingWorkbenchBlockBase", () => {
                     periodStart: "2026-09-01",
                     periodEndExclusive: "2026-10-01",
                     currency: "VND",
+                    nextCursor: null,
                     partialReasons: ["stale-source"],
                     items: [
                         {
@@ -389,7 +396,23 @@ describe("AccountingWorkbenchBlockBase", () => {
                 },
                 predecessor: {
                     resultId: "result-1",
-                    facts: { amountMinor: 421000000, currency: "VND", counterpartyRef: "supplier-a" },
+                    itemId: "item-1",
+                    version: 2,
+                    effectiveAt: "2026-09-17T00:00:00Z",
+                    state: "historical",
+                    facts: {
+                        amountMinor: 421000000,
+                        currency: "VND",
+                        occurredOn: "2026-09-16",
+                        counterpartyRef: "supplier-a",
+                        matchStatus: "unmatched",
+                        treatment: { kind: "supported", code: "revenue" },
+                    },
+                    sourceEvidenceRefs: ["evidence-1"],
+                    policyRevision: "policy-7",
+                    receiptId: "receipt-1",
+                    predecessorResultId: null,
+                    successorResultId: "result-2",
                 },
             },
         })

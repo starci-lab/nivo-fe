@@ -48,12 +48,18 @@ const PENDING_PROPOSAL = {
     proposalFingerprint: "sha256:proposal-3",
     status: "pending",
     revision: 7,
+} as const
+const ANSWERED_PROPOSAL = { ...PENDING_PROPOSAL, status: "approved", revision: 8 } as const
+
+type SalesDecisionView = ReturnType<typeof useSalesDecision>
+type SalesDecisionViewOverrides = Omit<Partial<SalesDecisionView>, "proposal" | "answer"> & {
+    readonly proposal?: Partial<SalesDecisionView["proposal"]>
+    readonly answer?: Partial<SalesDecisionView["answer"]>
 }
-const ANSWERED_PROPOSAL = { ...PENDING_PROPOSAL, status: "approved", revision: 8 }
 
 /** The full settled view the direction's pending state draws, overridden per state under test. */
-const view = (overrides: Record<string, unknown> = {}): ReturnType<typeof useSalesDecision> => {
-    const settled: Record<string, unknown> = {
+const view = (overrides: SalesDecisionViewOverrides = {}): SalesDecisionView => {
+    const settled: SalesDecisionView = {
         t: translate,
         scopeWorkspace: "workspace-1",
         scopeInstallation: "installation-1",
@@ -62,7 +68,7 @@ const view = (overrides: Record<string, unknown> = {}): ReturnType<typeof useSal
         notice: null,
         proposal: {
             standing: "ready",
-            model: PENDING_PROPOSAL as typeof PENDING_PROPOSAL | null,
+            model: PENDING_PROPOSAL,
             decisionRequestId: "decision-request-1",
             setDecisionRequestId: () => undefined,
             isLoading: false,
@@ -80,15 +86,14 @@ const view = (overrides: Record<string, unknown> = {}): ReturnType<typeof useSal
             onSubmit: () => undefined,
         },
     }
-    const merged: Record<string, unknown> = { ...settled, ...overrides }
-    for (const group of ["proposal", "answer"])
-        merged[group] = {
-            ...(settled[group] as Record<string, unknown>),
-            ...((overrides[group] as Record<string, unknown> | undefined) ?? {}),
-        }
-    return merged as unknown as ReturnType<typeof useSalesDecision>
+    return {
+        ...settled,
+        ...overrides,
+        proposal: { ...settled.proposal, ...overrides.proposal },
+        answer: { ...settled.answer, ...overrides.answer },
+    }
 }
-const renderBlock = (input: Record<string, unknown> = {}) => {
+const renderBlock = (input: SalesDecisionViewOverrides = {}) => {
     const rendered: ReactElement = (
         <SalesDecisionBlockBase props={{ view: view(input) }} on={{ selectChoice: () => undefined }} />
     )

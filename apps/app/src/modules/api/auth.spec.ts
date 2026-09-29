@@ -33,8 +33,11 @@ const lastEnvelopeVariables = () => vi.mocked(graphqlEnvelope).mock.calls.at(-1)
 
 beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(graphql).mockResolvedValue({ ok: true, data: {} } as never)
-    vi.mocked(graphqlEnvelope).mockResolvedValue({ ok: true, data: {} } as never)
+    vi.mocked(graphql).mockResolvedValue({ ok: true, data: {} })
+    vi.mocked(graphqlEnvelope).mockResolvedValue({
+        ok: true,
+        data: { data: {}, message: "", success: true },
+    })
 })
 
 describe("oauthRedirectUrl", () => {

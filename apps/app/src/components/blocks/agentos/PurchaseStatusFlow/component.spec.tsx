@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
-import type { IconSource } from "@starci/grammar/common"
+import { IconSource } from "@nivo/ui"
 import {
     PurchaseStatusFlowBase,
     type PurchaseStatusCheck,
@@ -12,9 +12,36 @@ import type { PurchaseStatusCopy } from "./copy"
 import enMessages from "../../../../messages/en.json"
 
 /** The view contract resolves copy through the locale catalogs; tests bind the real English strings. */
-const copy = enMessages.console.agentos.purchaseStatus as unknown as PurchaseStatusCopy
+const copy: PurchaseStatusCopy = {
+    ...enMessages.console.agentos.purchaseStatus,
+    renewalAutoAt: (date) => `Auto-renews ${date}`,
+    renewalManualAt: (date) => `Manual re-authorization by ${date}`,
+    rechecksOnly: (attempt) => `Rechecks ${attempt} only`,
+    preparingOffer: (offer) => `Preparing ${offer}`,
+    orderReports: (status) => `Order reports ${status}`,
+    invoiceReports: (status) => `Invoice reports ${status}`,
+    paidSentence: (amount) => `${amount} paid`,
+    startedSentence: (at, elapsed) => `Started ${at} · ${elapsed} elapsed`,
+    lastObservationSentence: (detail, at) => `Last observation: ${detail} at ${at}`,
+    operationStatus: (status) => status,
+    attemptFact: (attempt) => `Attempt ${attempt}`,
+    heldSinceLabel: (date) => `On hold since ${date}`,
+    paidThroughLabel: (date) => `Paid through ${date}`,
+    purchaseStateLabel: (state) => state,
+    sourceLabel: (source) => source,
+    sourceStateLabel: (state) => state,
+    ledgerStateLabel: (state) => state,
+    ledgerEntryKindLabel: (kind) => kind,
+    refundStateLabel: (state) => state,
+    holdStateLabel: (state) => state,
+    holdReasonLabel: (reason) => reason,
+    renewalEvidenceLabel: (evidence) => evidence,
+    entryStateLabel: (state) => state,
+    entryRefusalLabel: (code) => code,
+    provisioningDispositionLabel: (disposition) => disposition,
+}
 /** A no-op mark glyph; the view only forwards it into IconTile. */
-const mark = (() => null) as unknown as IconSource
+const mark = IconSource("complete")
 
 const links = { workspaces: "/agentos/workspaces", offerSelection: "/agentos/workspaces/new" }
 const trail = [

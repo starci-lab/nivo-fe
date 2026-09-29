@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest"
+import { runAndReadMock } from "@/test-support/mock-result"
+import type { QueryMockCallback } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoQuery: vi.fn((key: unknown, query: unknown) => ({ key, query })),
+    useNivoQuery: vi.fn((key: unknown, query: QueryMockCallback) => ({ key, query })),
     api: { resolveWorkspaceCheckoutEntry: vi.fn(async () => ({ ok: true })) },
 }))
 vi.mock("../useNivoQuery", () => ({ useNivoQuery: mocks.useNivoQuery }))
@@ -21,11 +23,11 @@ describe("useQueryWorkspaceCheckoutEntrySwr", () => {
     })
 
     it("addresses nothing while readiness is unconfirmed", () => {
-        expect((useQueryWorkspaceCheckoutEntrySwr(ENTRY, false) as unknown as ReadShape).key).toBeNull()
+        expect((runAndReadMock(() => useQueryWorkspaceCheckoutEntrySwr(ENTRY, false), mocks.useNivoQuery)).key).toBeNull()
     })
 
     it("resolves the entry destination through the boundary read", async () => {
-        const hook = useQueryWorkspaceCheckoutEntrySwr(ENTRY) as unknown as ReadShape
+        const hook = runAndReadMock(() => useQueryWorkspaceCheckoutEntrySwr(ENTRY), mocks.useNivoQuery)
 
         await hook.query()
 

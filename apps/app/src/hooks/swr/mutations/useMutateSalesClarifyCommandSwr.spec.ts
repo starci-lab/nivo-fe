@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest"
+import { runAndReadMock } from "@/test-support/mock-result"
+import type { QueryMockCallback, MutationMockOptions } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoMutation: vi.fn((key: unknown, mutation: unknown, options: unknown) => ({ key, mutation, options })),
+    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({ key, mutation, options })),
     useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
     api: { commandSalesClarifyCommand: vi.fn(async () => ({ ok: true })) },
 }))
@@ -30,28 +32,28 @@ type MutationShape = {
 
 describe("useMutateSalesClarifyCommandSwr", () => {
     it("keeps the command on its installation-qualified identity and holds it while disabled", () => {
-        expect((useMutateSalesClarifyCommandSwr(SCOPE) as unknown as MutationShape).key).toEqual([
+        expect((runAndReadMock(() => useMutateSalesClarifyCommandSwr(SCOPE), mocks.useNivoMutation)).key).toEqual([
             "sales",
             "clarify-command",
             "workspace-1",
             "instance-1",
             "installation-1",
         ])
-        expect((useMutateSalesClarifyCommandSwr(SCOPE, false) as unknown as MutationShape).key).toBeNull()
+        expect((runAndReadMock(() => useMutateSalesClarifyCommandSwr(SCOPE, false), mocks.useNivoMutation)).key).toBeNull()
     })
 
     it("sends the refinement at the pending clarification revision the input carries", async () => {
-        const hook = useMutateSalesClarifyCommandSwr(SCOPE) as unknown as MutationShape
+        const hook = runAndReadMock(() => useMutateSalesClarifyCommandSwr(SCOPE), mocks.useNivoMutation)
         await hook.mutation({ requestId: "request-1", input: INPUT })
         expect(mocks.api.commandSalesClarifyCommand).toHaveBeenCalledWith("access-token", SCOPE, INPUT, "request-1")
     })
 
     it("refreshes the same command plan the clarification refined", () => {
-        const hook = useMutateSalesClarifyCommandSwr(SCOPE) as unknown as MutationShape
-        expect(hook.options.invalidates({ input: INPUT }, { ok: true })).toEqual([
+        const hook = runAndReadMock(() => useMutateSalesClarifyCommandSwr(SCOPE), mocks.useNivoMutation)
+        expect(hook.options?.invalidates?.({ input: INPUT }, { ok: true })).toEqual([
             salesCommandQueryKey(SCOPE, { commandId: "command-1" }),
         ])
-        expect(hook.options.shouldInvalidate({ ok: false, code: "outcome_unknown" })).toBe(true)
-        expect(hook.options.shouldInvalidate({ ok: false, code: "SALES_REFUSED_UNAVAILABLE" })).toBe(false)
+        expect(hook.options?.shouldInvalidate?.({ ok: false, code: "outcome_unknown" })).toBe(true)
+        expect(hook.options?.shouldInvalidate?.({ ok: false, code: "SALES_REFUSED_UNAVAILABLE" })).toBe(false)
     })
 })

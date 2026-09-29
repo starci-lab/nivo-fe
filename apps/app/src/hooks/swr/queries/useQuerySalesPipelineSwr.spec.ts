@@ -1,8 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
+import { sessionFixture } from "@/test-support/mock-result"
+import { runAndReadMock } from "@/test-support/mock-result"
+import type { QueryMockCallback, Session } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoQuery: vi.fn((key: unknown, query: unknown) => ({ key, query })),
-    useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
+    useNivoQuery: vi.fn((key: unknown, query: QueryMockCallback) => ({ key, query })),
+    useSession: vi.fn<() => Session>(),
     api: { readSalesPipeline: vi.fn(async () => ({ ok: true })) },
 }))
 vi.mock("../useNivoQuery", () => ({ useNivoQuery: mocks.useNivoQuery }))
@@ -39,17 +42,17 @@ describe("useQuerySalesPipelineSwr", () => {
     })
 
     it("addresses nothing while it is held or no session holds a token", () => {
-        expect((useQuerySalesPipelineSwr(SCOPE, PAGE, false) as unknown as ReadShape).key).toBeNull()
-        mocks.useSession.mockReturnValueOnce({ state: { status: "signed-out", accessToken: undefined } } as never)
-        expect((useQuerySalesPipelineSwr(SCOPE, PAGE) as unknown as ReadShape).key).toBeNull()
+        expect((runAndReadMock(() => useQuerySalesPipelineSwr(SCOPE, PAGE, false), mocks.useNivoQuery)).key).toBeNull()
+        mocks.useSession.mockReturnValueOnce(sessionFixture({ status: "anonymous" }))
+        expect((runAndReadMock(() => useQuerySalesPipelineSwr(SCOPE, PAGE), mocks.useNivoQuery)).key).toBeNull()
     })
 
     it("reads one page under its own fingerprint and cursor", async () => {
-        const first = useQuerySalesPipelineSwr(SCOPE, PAGE) as unknown as ReadShape
-        const next = useQuerySalesPipelineSwr(SCOPE, {
+        const first = runAndReadMock(() => useQuerySalesPipelineSwr(SCOPE, PAGE), mocks.useNivoQuery)
+        const next = runAndReadMock(() => useQuerySalesPipelineSwr(SCOPE, {
             ...PAGE,
             after: { lastOpportunityId: "opportunity-9" },
-        }) as unknown as ReadShape
+        }), mocks.useNivoQuery)
         expect(first.key).not.toEqual(next.key)
         await first.query()
         await next.query()

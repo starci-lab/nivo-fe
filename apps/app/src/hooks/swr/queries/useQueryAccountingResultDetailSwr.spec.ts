@@ -1,8 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
+import { sessionFixture } from "@/test-support/mock-result"
+import { runAndReadMock } from "@/test-support/mock-result"
+import type { QueryMockCallback, Session } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoQuery: vi.fn((key: unknown, query: unknown) => ({ key, query })),
-    useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
+    useNivoQuery: vi.fn((key: unknown, query: QueryMockCallback) => ({ key, query })),
+    useSession: vi.fn<() => Session>(),
     api: { readAccountingResultDetail: vi.fn(async () => ({ ok: true })) },
 }))
 vi.mock("../useNivoQuery", () => ({ useNivoQuery: mocks.useNivoQuery }))
@@ -48,21 +51,21 @@ describe("useQueryAccountingResultDetailSwr", () => {
     it("addresses nothing while it is held", () => {
         expect(
             (
-                useQueryAccountingResultDetailSwr(
+                runAndReadMock(() => useQueryAccountingResultDetailSwr(
                     SCOPE,
                     { action: "current", resultId: "result-1" },
                     false,
-                ) as unknown as ReadShape
+                ), mocks.useNivoQuery)
             ).key,
         ).toBeNull()
     })
 
     it("reads the current result and the as-of item through their registered operation address", async () => {
         await (
-            useQueryAccountingResultDetailSwr(SCOPE, {
+            runAndReadMock(() => useQueryAccountingResultDetailSwr(SCOPE, {
                 action: "current",
                 resultId: "result-1",
-            }) as unknown as ReadShape
+            }), mocks.useNivoQuery)
         ).query()
         expect(mocks.api.readAccountingResultDetail).toHaveBeenCalledWith(
             "access-token",
@@ -71,11 +74,11 @@ describe("useQueryAccountingResultDetailSwr", () => {
             "accounting.resultDetail@1/installation-1/result-1/-",
         )
         await (
-            useQueryAccountingResultDetailSwr(SCOPE, {
+            runAndReadMock(() => useQueryAccountingResultDetailSwr(SCOPE, {
                 action: "asOf",
                 itemId: "item-1",
                 asOf: "2026-09-18T00:00:00Z",
-            }) as unknown as ReadShape
+            }), mocks.useNivoQuery)
         ).query()
         expect(mocks.api.readAccountingResultDetail).toHaveBeenLastCalledWith(
             "access-token",

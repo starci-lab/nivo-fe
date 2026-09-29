@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react"
+import { matchMediaFixture } from "@/test-support/mock-result"
 import { beforeAll, describe, expect, it, vi } from "vitest"
 import type {
+    CollabApprovalCardView,
     CollabApprovalView,
     CollabBindingView,
     CollabMessageView,
@@ -378,11 +380,7 @@ const actions = (): GroupChatPageActions & Record<keyof GroupChatPageActions, Re
 
 describe("GroupChatPageBase", () => {
     beforeAll(() => {
-        window.matchMedia = vi.fn().mockReturnValue({
-            matches: false,
-            addEventListener: vi.fn(),
-            removeEventListener: vi.fn(),
-        }) as unknown as typeof window.matchMedia
+        window.matchMedia = matchMediaFixture(false)
     })
 
     it("renders the authorized Office snapshot: roster, modules, conversation and a working composer", () => {
@@ -833,11 +831,7 @@ describe("component", () => {
 
 describe("component", () => {
     beforeAll(() => {
-        window.matchMedia = vi.fn().mockReturnValue({
-            matches: false,
-            addEventListener: vi.fn(),
-            removeEventListener: vi.fn(),
-        }) as unknown as typeof window.matchMedia
+        window.matchMedia = matchMediaFixture(false)
     })
 
     const REPORTED_BINDING: CollabBindingView = {
@@ -957,11 +951,16 @@ describe("component", () => {
             status: "withdrawn",
             cardMessageId: null,
         }
-        const approved = {
+        const approved: CollabApprovalCardView = {
             ...WAITING_APPROVAL,
+            buttons: ["approve", "reject"],
             status: "approved",
+            decision: "approve",
+            decidedByMemberId: OWNER.memberId,
             decidedAt: "2026-09-24T10:30:00Z",
             decidedByDisplayName: "Minh",
+            decidedByRole: "manager",
+            releaseIntentId: "release-1",
         }
         const task = (approval: CollabApprovalView): CollabTaskView => ({
             ...TASK_WAITING_APPROVAL,
@@ -980,7 +979,7 @@ describe("component", () => {
         render(
             <GroupChatPageBase
                 state={{ isRailOpen: false, isCompactMembers: true, labels }}
-                props={{ view: baseView({ items, settledApprovals: { "appr-1": approved as never } }) }}
+                props={{ view: baseView({ items, settledApprovals: { "appr-1": approved } }) }}
                 on={actions()}
             />,
         )
@@ -1073,7 +1072,7 @@ describe("component", () => {
         const on = actions()
         const assign: CollabTurnNoticeItem = {
             ...NOTICE,
-            notice: { ...NOTICE.notice, noticeId: "ntc-2", turnKind: "task-assign" as never },
+            notice: { ...NOTICE.notice, noticeId: "ntc-2", turnKind: "task-assign" },
         }
         const ended: CollabTurnNoticeItem = { ...NOTICE, notice: { ...NOTICE.notice, noticeId: "ntc-3" } }
         render(

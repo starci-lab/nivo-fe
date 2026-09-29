@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest"
+import { runAndReadMock } from "@/test-support/mock-result"
+import type { QueryMockCallback, MutationMockOptions } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoMutation: vi.fn((key: unknown, mutation: unknown, options: unknown) => ({ key, mutation, options })),
+    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({ key, mutation, options })),
     useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
     api: { commandAccountingCorrect: vi.fn(async () => ({ ok: true })) },
 }))
@@ -43,18 +45,18 @@ type MutationShape = {
 
 describe("useMutateAccountingCorrectSwr", () => {
     it("keeps the command on its installation-qualified identity and holds it while disabled", () => {
-        expect((useMutateAccountingCorrectSwr(SCOPE) as unknown as MutationShape).key).toEqual([
+        expect((runAndReadMock(() => useMutateAccountingCorrectSwr(SCOPE), mocks.useNivoMutation)).key).toEqual([
             "accounting",
             "correct",
             "workspace-1",
             "instance-1",
             "installation-1",
         ])
-        expect((useMutateAccountingCorrectSwr(SCOPE, false) as unknown as MutationShape).key).toBeNull()
+        expect((runAndReadMock(() => useMutateAccountingCorrectSwr(SCOPE, false), mocks.useNivoMutation)).key).toBeNull()
     })
 
     it("sends a proposal and an append through the same correction address", async () => {
-        const hook = useMutateAccountingCorrectSwr(SCOPE) as unknown as MutationShape
+        const hook = runAndReadMock(() => useMutateAccountingCorrectSwr(SCOPE), mocks.useNivoMutation)
         await hook.mutation({ requestId: "request-1", input: PROPOSE })
         expect(mocks.api.commandAccountingCorrect).toHaveBeenCalledWith("access-token", SCOPE, PROPOSE, "request-1")
         await hook.mutation({ requestId: "request-2", input: APPEND })
@@ -62,15 +64,15 @@ describe("useMutateAccountingCorrectSwr", () => {
     })
 
     it("refreshes the appended result lineage, and the corrected result while an append is unattested", () => {
-        const hook = useMutateAccountingCorrectSwr(SCOPE) as unknown as MutationShape
+        const hook = runAndReadMock(() => useMutateAccountingCorrectSwr(SCOPE), mocks.useNivoMutation)
         expect(
-            hook.options.invalidates({ input: APPEND }, { ok: true, data: { payload: { resultId: "result-2" } } }),
+            hook.options?.invalidates?.({ input: APPEND }, { ok: true, data: { payload: { resultId: "result-2" } } }),
         ).toEqual([accountingResultDetailQueryKey(SCOPE, { action: "current", resultId: "result-2" })])
-        expect(hook.options.invalidates({ input: PROPOSE }, { ok: false })).toEqual([
+        expect(hook.options?.invalidates?.({ input: PROPOSE }, { ok: false })).toEqual([
             accountingResultDetailQueryKey(SCOPE, { action: "current", resultId: "result-1" }),
         ])
-        expect(hook.options.invalidates({ input: APPEND }, { ok: false })).toEqual([])
-        expect(hook.options.shouldInvalidate({ ok: false, code: "outcome_unknown" })).toBe(true)
-        expect(hook.options.shouldInvalidate({ ok: false, code: "conflict" })).toBe(false)
+        expect(hook.options?.invalidates?.({ input: APPEND }, { ok: false })).toEqual([])
+        expect(hook.options?.shouldInvalidate?.({ ok: false, code: "outcome_unknown" })).toBe(true)
+        expect(hook.options?.shouldInvalidate?.({ ok: false, code: "conflict" })).toBe(false)
     })
 })

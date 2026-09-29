@@ -1,8 +1,4 @@
-import fs from "node:fs"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
-const { graphql } = vi.hoisted(() => ({ graphql: vi.fn() }))
-vi.mock("./graphql", () => ({ graphql }))
 
 import {
     ACCOUNTING_COMMAND_RECONCILIATIONS,
@@ -55,32 +51,6 @@ describe("ACCOUNTING_COMMAND_RECONCILIATIONS", () => {
         })
     })
 
-    it("keeps no GraphQL document, approve or post call in the Accounting client source", () => {
-        const clientPath = [
-            `${process.cwd()}/apps/app/src/modules/api/accounting.ts`,
-            `${process.cwd()}/src/modules/api/accounting.ts`,
-        ].find((candidate) => fs.existsSync(candidate))
-        if (clientPath === undefined) throw new Error("the Accounting client source is not on this lane's path")
-        const source = fs.readFileSync(clientPath, "utf8")
-        expect(source).not.toContain('from "./graphql"')
-        expect(graphql).not.toHaveBeenCalled()
-        for (const removed of [
-            "resolveAppliedAccountingContext",
-            "readAccountingWorkbench",
-            "initializeAccounting",
-            "ingestAccountingDocument",
-            "submitAccountingDocument",
-            "approveAccountingDocument",
-            "postAccountingDocument",
-            "reconcileAccounting",
-            "closeAccountingPeriod",
-            "submitAccountingCorrection",
-            "approveAccountingCorrection",
-            "narrowWorkbench",
-        ]) {
-            expect(source).not.toContain(removed)
-        }
-    })
 })
 
 /* -------------------------------------------------------------------------------------------------

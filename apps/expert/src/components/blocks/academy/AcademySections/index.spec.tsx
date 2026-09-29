@@ -37,9 +37,6 @@ describe("AcademySections", () => {
         expect(html).toContain("hero:hero")
         expect(html).toContain("courses:courses")
     })
-    it.each(["hero", "courses", "lead"])("recognizes the %s system branch in source", (key) => {
-        expect(key).toMatch(/hero|courses|lead/)
-    })
     it("renders the presentational twin contract", () => {
         expect(AcademySectionsBase).toBeTypeOf("function")
     })

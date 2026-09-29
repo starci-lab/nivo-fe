@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { apiAnswer, unavailableFailure } from "@/test-support/mock-result"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import enMessages from "@/messages/en.json"
@@ -153,17 +154,17 @@ describe("AgentOSPage", () => {
         })
 
         it("settles the single-business dashboard after its owner-scoped query answers", async () => {
-            vi.mocked(myAgentWorkspace).mockResolvedValue({
+            vi.mocked(myAgentWorkspace).mockResolvedValue(apiAnswer(myAgentWorkspace, {
                 ok: true,
                 data: [{ id: "workspace-1", name: "Workspace", status: "ready", catalogOrder: { id: "order-1" } }],
-            } as never)
+            }))
             render(<ConnectedAgentOSPage mode="dashboard" />)
             expect(await screen.findByText("Workspace")).toBeInTheDocument()
             expect(screen.queryByRole("link", { name: "Workspace" })).toBeNull()
         })
 
         it("records refusal states for the single-business binding", async () => {
-            vi.mocked(myAgentWorkspace).mockResolvedValue({ ok: false, reason: "unavailable" } as never)
+            vi.mocked(myAgentWorkspace).mockResolvedValue(apiAnswer(myAgentWorkspace, unavailableFailure()))
             render(<ConnectedAgentOSPage mode="dashboard" />)
             await waitFor(() =>
                 expect(

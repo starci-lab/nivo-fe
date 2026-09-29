@@ -1,5 +1,7 @@
 import { act, cleanup, render, waitFor } from "@testing-library/react"
+import { matchMediaFixture } from "@/test-support/mock-result"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { collabQuestionFixture, collabTaskFixture } from "@/test-support/mock-result"
 import type * as ComponentModule from "./component"
 import type { GroupChatPageActions, GroupChatPageLabels, GroupChatPageView } from "./component"
 
@@ -207,11 +209,7 @@ beforeEach(() => {
     hooks.invite.mockImplementation(() => state.invite)
     hooks.accept.mockImplementation(() => state.accept)
     hooks.reconcile.mockResolvedValue(ok({ outcome: "unmatched" }))
-    window.matchMedia = vi.fn().mockImplementation(() => ({
-        matches: world.compact,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-    })) as unknown as typeof window.matchMedia
+    window.matchMedia = matchMediaFixture(() => world.compact)
 })
 
 afterEach(() => {
@@ -431,8 +429,8 @@ describe("GroupChatPage", () => {
             render(<GroupChatPage />)
             act(() =>
                 last().on.answerQuestion(
-                    { owningModuleDisplayName: null, owningModuleKey: "sales" } as never,
-                    { questionId: "q-1", body: "Tháng nào?".padEnd(120, ".") } as never,
+                    collabTaskFixture({ owningModuleDisplayName: null, owningModuleKey: "sales" }),
+                    collabQuestionFixture({ questionId: "q-1", body: "Tháng nào?".padEnd(120, ".") }),
                 ),
             )
             expect(last().view.composer.answering).toEqual({
@@ -511,8 +509,8 @@ describe("GroupChatPage", () => {
             render(<GroupChatPage />)
             act(() =>
                 last().on.answerQuestion(
-                    { owningModuleDisplayName: "Kế toán", owningModuleKey: "accounting" } as never,
-                    { questionId: "q-2", body: "Mã số thuế?" } as never,
+                    collabTaskFixture({ owningModuleDisplayName: "Kế toán", owningModuleKey: "accounting" }),
+                    collabQuestionFixture({ questionId: "q-2", body: "Mã số thuế?" }),
                 ),
             )
             expect(last().view.composer.answering?.moduleName).toBe("Kế toán")

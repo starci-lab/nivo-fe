@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest"
+import { runAndReadMock } from "@/test-support/mock-result"
+import type { QueryMockCallback, MutationMockOptions } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoMutation: vi.fn((key: unknown, mutation: unknown, options: unknown) => ({ key, mutation, options })),
+    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({ key, mutation, options })),
     useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
     api: { commandAccountingException: vi.fn(async () => ({ ok: true })) },
 }))
@@ -27,7 +29,7 @@ const DEFER = {
 }
 type MutationShape = {
     readonly key: unknown
-    readonly options: unknown
+    readonly options: MutationMockOptions | undefined
     readonly mutation: (input: {
         readonly requestId: string
         readonly input: typeof ANSWER | typeof DEFER
@@ -36,18 +38,18 @@ type MutationShape = {
 
 describe("useMutateAccountingExceptionSwr", () => {
     it("keeps the command on its installation-qualified identity and holds it while disabled", () => {
-        expect((useMutateAccountingExceptionSwr(SCOPE) as unknown as MutationShape).key).toEqual([
+        expect((runAndReadMock(() => useMutateAccountingExceptionSwr(SCOPE), mocks.useNivoMutation)).key).toEqual([
             "accounting",
             "exception",
             "workspace-1",
             "instance-1",
             "installation-1",
         ])
-        expect((useMutateAccountingExceptionSwr(SCOPE, false) as unknown as MutationShape).key).toBeNull()
+        expect((runAndReadMock(() => useMutateAccountingExceptionSwr(SCOPE, false), mocks.useNivoMutation)).key).toBeNull()
     })
 
     it("sends an answer and a non-answer disposition as revision-fenced commands", async () => {
-        const hook = useMutateAccountingExceptionSwr(SCOPE) as unknown as MutationShape
+        const hook = runAndReadMock(() => useMutateAccountingExceptionSwr(SCOPE), mocks.useNivoMutation)
         await hook.mutation({ requestId: "request-1", input: ANSWER })
         expect(mocks.api.commandAccountingException).toHaveBeenCalledWith("access-token", SCOPE, ANSWER, "request-1")
         await hook.mutation({ requestId: "request-2", input: DEFER })
@@ -55,6 +57,6 @@ describe("useMutateAccountingExceptionSwr", () => {
     })
 
     it("registers no reconciliation read, because no read discloses an exception identity", () => {
-        expect((useMutateAccountingExceptionSwr(SCOPE) as unknown as MutationShape).options).toBeUndefined()
+        expect((runAndReadMock(() => useMutateAccountingExceptionSwr(SCOPE), mocks.useNivoMutation)).options).toBeUndefined()
     })
 })

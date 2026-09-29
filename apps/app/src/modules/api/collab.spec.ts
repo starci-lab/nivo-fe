@@ -81,17 +81,18 @@ describe("modules/api/collab", () => {
             result: { op: "postMessage", route: { kind: "not-addressed", message: { messageId: "m-1" } } },
         })
         setCollabTransport(spy)
-        const result = await postCollabMessage({
+        const result = await postCollabMessage(Object.assign({
             workspaceId: "ws-1",
             accessToken: "tok",
             intentId: "intent-1",
             body: "hello",
+        }, {
             askerGrantScope: { quote: true },
             role: "owner",
             member: { id: "m-1" },
             phone: "+84900000000",
             membership: { active: true },
-        } as never)
+        }))
         expect(result).toMatchObject({ ok: false, kind: "invalid", code: "COLLAB_INVALID", retryable: false })
         expect(spy).not.toHaveBeenCalled()
     })
@@ -271,12 +272,11 @@ describe("modules/api/collab", () => {
             { principal: "p" },
             { actor: { sub: "s" } },
         ]) {
-            const result = await acceptCollabInvitation({
+            const result = await acceptCollabInvitation(Object.assign({
                 workspaceId: "ws-1",
                 accessToken: "tok",
                 invitationId: "inv-1",
-                ...claim,
-            } as never)
+            }, claim))
             expect(result).toMatchObject({ ok: false, kind: "invalid", retryable: false })
         }
         expect(spy).not.toHaveBeenCalled()
@@ -289,13 +289,14 @@ describe("modules/api/collab", () => {
             result: { op: "inviteByEmail", membership: { outcome: "existing" } },
         })
         setCollabTransport(spy)
-        const smuggled = await inviteCollabMemberByEmail({
+        const smuggled = await inviteCollabMemberByEmail(Object.assign({
             workspaceId: "ws-1",
             accessToken: "tok",
             email: "p@x.y",
-            role: "staff",
+            role: "staff" as const,
+        }, {
             principal: "p",
-        } as never)
+        }))
         expect(smuggled).toMatchObject({ ok: false, kind: "invalid" })
         const legit = await inviteCollabMemberByEmail({
             workspaceId: "ws-1",
@@ -516,7 +517,10 @@ describe("collabGatewayTransport", () => {
 
     it("refuses a payload that is not the boundary's outcome shape", async () => {
         fetchStub.mockResolvedValue(
-            okEnvelope(COLLAB_GATEWAY_READ_FIELD, { unexpected: true } as unknown as CollabGatewayReply),
+            new Response(JSON.stringify({ data: { [COLLAB_GATEWAY_READ_FIELD]: { unexpected: true } } }), {
+                status: 200,
+                headers: { "content-type": "application/json" },
+            }),
         )
         const answer = await collabGatewayTransport({
             accessToken: "tok",

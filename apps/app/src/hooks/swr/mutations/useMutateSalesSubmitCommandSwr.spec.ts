@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest"
+import { runAndReadMock } from "@/test-support/mock-result"
+import type { QueryMockCallback, MutationMockOptions } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoMutation: vi.fn((key: unknown, mutation: unknown, options: unknown) => ({ key, mutation, options })),
+    useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback, options: MutationMockOptions | undefined) => ({ key, mutation, options })),
     useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
     api: { commandSalesSubmitCommand: vi.fn(async () => ({ ok: true })) },
 }))
@@ -33,28 +35,28 @@ type MutationShape = {
 
 describe("useMutateSalesSubmitCommandSwr", () => {
     it("keeps the command on its installation-qualified identity and holds it while disabled", () => {
-        expect((useMutateSalesSubmitCommandSwr(SCOPE) as unknown as MutationShape).key).toEqual([
+        expect((runAndReadMock(() => useMutateSalesSubmitCommandSwr(SCOPE), mocks.useNivoMutation)).key).toEqual([
             "sales",
             "submit-command",
             "workspace-1",
             "instance-1",
             "installation-1",
         ])
-        expect((useMutateSalesSubmitCommandSwr(SCOPE, false) as unknown as MutationShape).key).toBeNull()
+        expect((runAndReadMock(() => useMutateSalesSubmitCommandSwr(SCOPE, false), mocks.useNivoMutation)).key).toBeNull()
     })
 
     it("sends one bounded plan under its own identity and fingerprint", async () => {
-        const hook = useMutateSalesSubmitCommandSwr(SCOPE) as unknown as MutationShape
+        const hook = runAndReadMock(() => useMutateSalesSubmitCommandSwr(SCOPE), mocks.useNivoMutation)
         await hook.mutation({ requestId: "request-1", input: INPUT })
         expect(mocks.api.commandSalesSubmitCommand).toHaveBeenCalledWith("access-token", SCOPE, INPUT, "request-1")
     })
 
     it("refreshes the command plan the press named rather than the whole board", () => {
-        const hook = useMutateSalesSubmitCommandSwr(SCOPE) as unknown as MutationShape
-        expect(hook.options.invalidates({ input: INPUT }, { ok: true })).toEqual([
+        const hook = runAndReadMock(() => useMutateSalesSubmitCommandSwr(SCOPE), mocks.useNivoMutation)
+        expect(hook.options?.invalidates?.({ input: INPUT }, { ok: true })).toEqual([
             salesCommandQueryKey(SCOPE, { commandId: "command-1" }),
         ])
-        expect(hook.options.shouldInvalidate({ ok: false, code: "DEADLINE_EXCEEDED" })).toBe(true)
-        expect(hook.options.shouldInvalidate({ ok: false, code: "SALES_REFUSED_INVALID" })).toBe(false)
+        expect(hook.options?.shouldInvalidate?.({ ok: false, code: "DEADLINE_EXCEEDED" })).toBe(true)
+        expect(hook.options?.shouldInvalidate?.({ ok: false, code: "SALES_REFUSED_INVALID" })).toBe(false)
     })
 })

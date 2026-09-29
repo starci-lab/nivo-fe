@@ -1,8 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
+import { sessionFixture } from "@/test-support/mock-result"
+import { runAndReadMock } from "@/test-support/mock-result"
+import type { QueryMockCallback, Session } from "@/test-support/mock-result"
 
 const mocks = vi.hoisted(() => ({
-    useNivoQuery: vi.fn((key: unknown, query: unknown) => ({ key, query })),
-    useSession: vi.fn(() => ({ state: { status: "signed-in", accessToken: "access-token" } })),
+    useNivoQuery: vi.fn((key: unknown, query: QueryMockCallback) => ({ key, query })),
+    useSession: vi.fn<() => Session>(),
     api: { readSalesDecisionRequest: vi.fn(async () => ({ ok: true })) },
 }))
 vi.mock("../useNivoQuery", () => ({ useNivoQuery: mocks.useNivoQuery }))
@@ -34,17 +37,17 @@ describe("useQuerySalesDecisionRequestSwr", () => {
 
     it("addresses nothing while it is held or no session holds a token", () => {
         expect(
-            (useQuerySalesDecisionRequestSwr(SCOPE, { decisionRequestId: "decision-1" }, false) as unknown as ReadShape)
+            (runAndReadMock(() => useQuerySalesDecisionRequestSwr(SCOPE, { decisionRequestId: "decision-1" }, false), mocks.useNivoQuery))
                 .key,
         ).toBeNull()
-        mocks.useSession.mockReturnValueOnce({ state: { status: "signed-out", accessToken: undefined } } as never)
+        mocks.useSession.mockReturnValueOnce(sessionFixture({ status: "anonymous" }))
         expect(
-            (useQuerySalesDecisionRequestSwr(SCOPE, { decisionRequestId: "decision-1" }) as unknown as ReadShape).key,
+            (runAndReadMock(() => useQuerySalesDecisionRequestSwr(SCOPE, { decisionRequestId: "decision-1" }), mocks.useNivoQuery)).key,
         ).toBeNull()
     })
 
     it("settles an answer from the decision request's own committed state", async () => {
-        const hook = useQuerySalesDecisionRequestSwr(SCOPE, { decisionRequestId: "decision-1" }) as unknown as ReadShape
+        const hook = runAndReadMock(() => useQuerySalesDecisionRequestSwr(SCOPE, { decisionRequestId: "decision-1" }), mocks.useNivoQuery)
         await hook.query()
         expect(mocks.api.readSalesDecisionRequest).toHaveBeenCalledWith(
             "access-token",

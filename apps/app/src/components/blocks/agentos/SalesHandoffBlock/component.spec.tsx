@@ -47,11 +47,17 @@ const PREPARED = {
     orderRevision: 4,
     actionId: null as string | null,
     revision: 2,
+} as const
+
+type SalesHandoffView = ReturnType<typeof useSalesHandoff>
+type SalesHandoffViewOverrides = Omit<Partial<SalesHandoffView>, "handoff" | "submission"> & {
+    readonly handoff?: Partial<SalesHandoffView["handoff"]>
+    readonly submission?: Partial<SalesHandoffView["submission"]>
 }
 
 /** The full settled view the direction's prepared state draws, overridden per state under test. */
-const view = (overrides: Record<string, unknown> = {}): ReturnType<typeof useSalesHandoff> => {
-    const settled: Record<string, unknown> = {
+const view = (overrides: SalesHandoffViewOverrides = {}): SalesHandoffView => {
+    const settled: SalesHandoffView = {
         t: translate,
         scopeWorkspace: "workspace-1",
         scopeInstallation: "installation-1",
@@ -60,7 +66,7 @@ const view = (overrides: Record<string, unknown> = {}): ReturnType<typeof useSal
         notice: null,
         handoff: {
             standing: "ready",
-            model: PREPARED as typeof PREPARED | null,
+            model: PREPARED,
             handoffId: "handoff-1",
             setHandoffId: () => undefined,
             isLoading: false,
@@ -78,15 +84,14 @@ const view = (overrides: Record<string, unknown> = {}): ReturnType<typeof useSal
             onSubmit: () => undefined,
         },
     }
-    const merged: Record<string, unknown> = { ...settled, ...overrides }
-    for (const group of ["handoff", "submission"])
-        merged[group] = {
-            ...(settled[group] as Record<string, unknown>),
-            ...((overrides[group] as Record<string, unknown> | undefined) ?? {}),
-        }
-    return merged as unknown as ReturnType<typeof useSalesHandoff>
+    return {
+        ...settled,
+        ...overrides,
+        handoff: { ...settled.handoff, ...overrides.handoff },
+        submission: { ...settled.submission, ...overrides.submission },
+    }
 }
-const renderBlock = (input: Record<string, unknown> = {}) => {
+const renderBlock = (input: SalesHandoffViewOverrides = {}) => {
     const rendered: ReactElement = <SalesHandoffBlockBase props={{ view: view(input) }} />
     return render(rendered)
 }

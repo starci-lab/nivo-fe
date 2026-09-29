@@ -26,9 +26,9 @@ describe("proxy", () => {
     })
 
     it("passes a page request through the next-intl handler", () => {
-        const request = new Request("https://expert.test/en")
+        const request = new NextRequest("https://expert.test/en")
 
-        expect(proxy(request as never)).toEqual({
+        expect(proxy(request)).toEqual({
             request,
         })
         expect(mocks.handler).toHaveBeenCalledWith(request)

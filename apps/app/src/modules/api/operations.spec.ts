@@ -70,7 +70,7 @@ describe("modules/api operation documents", () => {
     beforeEach(() => vi.clearAllMocks())
 
     it("keeps operation variables and documents aligned for high-risk mutations and paged reads", async () => {
-        vi.mocked(graphql).mockResolvedValue({ ok: true, data: {} } as never)
+        vi.mocked(graphql).mockResolvedValue({ ok: true, data: {} })
         await payInvoice("invoice-1")
         await orderAgentOs("agent-os", "tier-pro")
         await installAgentosSolutionModule({
@@ -154,27 +154,27 @@ describe("modules/api owner-scoped operations", () => {
                 agentWorkspaceId: "workspace-1",
                 moduleKey: "module-1",
                 idempotencyKey: "key-1",
-            } as never),
+            }),
             myAcademyGrowthSnapshot("site-1"),
-            myAcademyStudents({ siteId: "site-1" } as never),
+            myAcademyStudents({ siteId: "site-1", limit: 25 }),
             myAcademyStudentDetail("site-1", "student-1"),
             myAcademyIntegrations("site-1"),
             myExpertSiteLeads("site-1"),
-            createAcademyStudent({ siteId: "site-1" } as never),
-            updateAcademyStudent({ siteId: "site-1" } as never),
-            setAcademyStudentStatus({ siteId: "site-1" } as never),
-            grantAcademyCourseAccess({ siteId: "site-1" } as never),
-            revokeAcademyCourseAccess({ siteId: "site-1" } as never),
-            updateExpertSiteLead({ siteId: "site-1" } as never),
-            draftLeadReply({ siteId: "site-1" } as never),
-            saveAcademyCredential({ siteId: "site-1" } as never),
-            setAcademyCustomDomain({ siteId: "site-1" } as never),
-            saveAcademyGoogleOAuth({ siteId: "site-1" } as never),
+            createAcademyStudent({ siteId: "site-1", name: "Learner", email: "learner@example.test" }),
+            updateAcademyStudent({ siteId: "site-1", memberId: "student-1", name: "Learner" }),
+            setAcademyStudentStatus({ siteId: "site-1", memberId: "student-1", status: "active" }),
+            grantAcademyCourseAccess({ siteId: "site-1", email: "learner@example.test", courseSlug: "course-1" }),
+            revokeAcademyCourseAccess({ siteId: "site-1", email: "learner@example.test", courseSlug: "course-1" }),
+            updateExpertSiteLead({ leadId: "lead-1", status: "contacted" }),
+            draftLeadReply({ leadId: "lead-1", locale: "en" }),
+            saveAcademyCredential({ siteId: "site-1", key: "provider-key", value: "" }),
+            setAcademyCustomDomain({ siteId: "site-1", domain: null }),
+            saveAcademyGoogleOAuth({ siteId: "site-1", clientId: "", clientSecret: "" }),
             disconnectAcademyGoogleOAuth("site-1"),
             beginAcademyZaloAuthorization("site-1"),
-            saveAcademyAnalytics({ siteId: "site-1" } as never),
-            createAcademyWebhook({ siteId: "site-1" } as never),
-            rotateAcademyWebhookSecret({ siteId: "site-1" } as never),
+            saveAcademyAnalytics({ siteId: "site-1", provider: "ga4", identifier: null, consentMode: "required" }),
+            createAcademyWebhook({ siteId: "site-1", endpoint: "https://example.test/webhook", events: [] }),
+            rotateAcademyWebhookSecret({ siteId: "site-1", webhookId: "webhook-1", expectedVersion: 0 }),
             disableAcademyWebhook("site-1", "webhook-1"),
             myAgentosCustomModuleStudio("workspace-1", "module-1"),
             startAgentosCustomModuleIntake({

@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import type { ContextDraft } from "@/components/blocks/agentos/ContextVersionBlock"
 import type { AgentosModuleTestContract } from "@/modules/api/agentos-module-tests"
 import { SessionProvider } from "@/modules/auth/session"
+import { moduleTestSurfaceFixture } from "@/test-support/mock-result"
 import {
     AgentOSSolutionModulePageBase,
     exactTestSurfaceFor,
@@ -281,11 +282,8 @@ describe("AgentOSSolutionModulePageBase", () => {
             exactTestPassed: true,
             isActive: false,
         }
-        const exact = {
-            contract,
-            runs: [],
-            assertions: [],
-            run: {
+        const exact = moduleTestSurfaceFixture(
+            {
                 setupSessionId: "setup-1",
                 draftDigest: "a".repeat(64),
                 definitionDigest: "d".repeat(64),
@@ -294,28 +292,34 @@ describe("AgentOSSolutionModulePageBase", () => {
                 sourceGeneration: 1,
                 retrievalGeneration: 1,
             },
-        }
-        expect(exactTestSurfaceFor(exact as never, draft)).toBe(exact)
+            contract,
+        )
+        expect(exactTestSurfaceFor(exact, draft)).toBe(exact)
         const versionedDraft = { ...draft, contextId: "context-1" }
-        const contextTargeted = {
-            ...exact,
-            run: { ...exact.run, setupSessionId: null, draftDigest: null, contextVersionId: versionedDraft.contextId },
-        }
-        expect(exactTestSurfaceFor(contextTargeted as never, versionedDraft)).toBe(contextTargeted)
+        const contextTargeted = moduleTestSurfaceFixture(
+            {
+                ...exact.run,
+                setupSessionId: null,
+                draftDigest: null,
+                contextVersionId: versionedDraft.contextId,
+            },
+            contract,
+        )
+        expect(exactTestSurfaceFor(contextTargeted, versionedDraft)).toBe(contextTargeted)
         expect(
             exactTestSurfaceFor(
-                { ...contextTargeted, run: { ...contextTargeted.run, contextVersionId: null } } as never,
+                moduleTestSurfaceFixture({ ...contextTargeted.run, contextVersionId: null }, contract),
                 draft,
             ),
         ).toBeNull()
         expect(
             exactTestSurfaceFor(
-                { ...contextTargeted, run: { ...contextTargeted.run, contextVersionId: "other-context" } } as never,
+                moduleTestSurfaceFixture({ ...contextTargeted.run, contextVersionId: "other-context" }, contract),
                 versionedDraft,
             ),
         ).toBeNull()
         expect(
-            exactTestSurfaceFor({ ...exact, run: { ...exact.run, draftDigest: "b".repeat(64) } } as never, draft),
+            exactTestSurfaceFor(moduleTestSurfaceFixture({ ...exact.run, draftDigest: "b".repeat(64) }, contract), draft),
         ).toBeNull()
         expect(exactTestSurfaceFor(null, draft)).toBeNull()
     })
@@ -757,14 +761,16 @@ describe("exactTestSurfaceFor", () => {
         citationPolicy: "none" as const,
     }))
 
+    const testedDraftDigest = "a".repeat(64)
+    const testedDraftDefinitionDigest = "d".repeat(64)
     const testedDraft: ContextDraft = {
         contextId: "22222222-2222-4222-8222-222222222222",
         setupSessionId: "11111111-1111-4111-8111-111111111111",
         revision: 2,
         status: "completed",
         version: 2,
-        digest: "a".repeat(64),
-        definitionDigest: "d".repeat(64),
+        digest: testedDraftDigest,
+        definitionDigest: testedDraftDefinitionDigest,
         authorityGeneration: 1,
         sourceGeneration: 1,
         retrievalGeneration: 1,
@@ -776,25 +782,19 @@ describe("exactTestSurfaceFor", () => {
     }
 
     it("does not attach stale Test evidence to a different Setup draft", () => {
-        const stale = {
-            run: {
+        const stale = moduleTestSurfaceFixture({
                 setupSessionId: "33333333-3333-4333-8333-333333333333",
                 draftDigest: "b".repeat(64),
-            },
-            assertions: [{ id: "assertion-1" }],
-        } as never
-        const exact = {
-            run: {
+            }, contract)
+        const exact = moduleTestSurfaceFixture({
                 setupSessionId: testedDraft.setupSessionId,
-                draftDigest: testedDraft.digest,
-                definitionDigest: testedDraft.definitionDigest,
-                targetDigest: testedDraft.digest,
+                draftDigest: testedDraftDigest,
+                definitionDigest: testedDraftDefinitionDigest,
+                targetDigest: testedDraftDigest,
                 authorityGeneration: 1,
                 sourceGeneration: 1,
                 retrievalGeneration: 1,
-            },
-            assertions: [{ id: "assertion-2" }],
-        } as never
+            }, contract)
 
         expect(exactTestSurfaceFor(stale, testedDraft)).toBeNull()
         expect(exactTestSurfaceFor(exact, testedDraft)).toBe(exact)
