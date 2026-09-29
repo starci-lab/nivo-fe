@@ -2,7 +2,8 @@ import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { useSubmitAcademyLead } from ".."
 import type { Course } from "../../modules/api/academy"
-import type { Locale } from "../../modules/i18n/config"
+import { DEFAULT_LOCALE } from "../../modules/i18n/config"
+import { isLocale } from "../../modules/i18n/config.guards"
 import {
     academySectionsOf,
     type AcademySectionsBaseProps,
@@ -13,7 +14,8 @@ import {
 
 /** Own translations, authored-content projection and transient browser action state. */
 export const useAcademySections = (courses: ReadonlyArray<Course>): AcademySectionsBaseProps => {
-    const locale = useLocale() as Locale
+    const rawLocale = useLocale()
+    const locale = isLocale(rawLocale) ? rawLocale : DEFAULT_LOCALE
     const hero = useTranslations("landing.hero")
     const problems = useTranslations("landing.problems")
     const outcomes = useTranslations("landing.outcomes")

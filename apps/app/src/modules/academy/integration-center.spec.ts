@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import type { AcademyIntegrations } from "../api/academy"
 import {
+    copyAcademyIntegrationSecret,
     academyIntegrationCardFactsOf,
     academyIntegrationCommandOf,
     academyIntegrationFormFieldFactsOf,
@@ -46,6 +47,20 @@ const integrations: AcademyIntegrations = {
 }
 
 describe("academy Integration Center projections", () => {
+    it("returns a success result after the secret writer accepts it", async () => {
+        const writeText = vi.fn(async () => {})
+        await expect(copyAcademyIntegrationSecret("write-only-secret", writeText)).resolves.toEqual({ kind: "copied" })
+        expect(writeText).toHaveBeenCalledWith("write-only-secret")
+    })
+
+    it("returns clipboard permission failures as typed outcomes with their cause", async () => {
+        const cause = new Error("clipboard permission denied")
+        const outcome = await copyAcademyIntegrationSecret("write-only-secret", async () => {
+            throw cause
+        })
+        expect(outcome).toEqual({ kind: "unavailable", cause })
+    })
+
     it("keeps statuses closed and projects safe provider facts", () => {
         expect(academyIntegrationStatusKeyOf("unknown-wire-value")).toBe("absent")
         expect(academyIntegrationToneOf("pending")).toBe("warning")

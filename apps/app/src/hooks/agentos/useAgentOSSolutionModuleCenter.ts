@@ -121,7 +121,7 @@ export const useAgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCente
         [installModule, installRequestKeys, t],
     )
     const onPressCard = (id: string) => {
-        if (layout === "ledger" || mode === "catalog") void install(id as AgentosSolutionModule["key"])
+        if (layout === "ledger" || mode === "catalog") void install(id)
     }
     return {
         layout,

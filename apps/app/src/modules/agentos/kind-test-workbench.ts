@@ -1,6 +1,7 @@
 import type { ComponentType } from "react"
 import type { AgentosModuleTestContract, AgentosModuleTestScenarioContract } from "../api/agentos-module-tests"
 import type { AgentosRuntimeValue } from "../api/agentos-runtime-tree"
+import { isAgentosRuntimeRecord, isAgentosRuntimeValue } from "../api/agentos-runtime-tree.guards"
 
 type RuntimeKindTestBoundaryDetailValues = {
     readonly scenario: string
@@ -97,7 +98,19 @@ export const parseOverride = (raw: string, fixture: AgentosRuntimeValue): Agento
     if (Array.isArray(fixture)) {
         try {
             const parsed: unknown = JSON.parse(raw)
-            if (Array.isArray(parsed)) return parsed as ReadonlyArray<AgentosRuntimeValue>
+            if (Array.isArray(parsed)) {
+                const entries: ReadonlyArray<unknown> = parsed
+                const items: Array<AgentosRuntimeValue> = []
+                for (const entry of entries) {
+                    if (!isAgentosRuntimeValue(entry))
+                        return raw
+                            .split(",")
+                            .map((item) => item.trim())
+                            .filter(Boolean)
+                    items.push(entry)
+                }
+                return items
+            }
         } catch {
             return raw
                 .split(",")
@@ -119,8 +132,8 @@ export const setScenarioPath = (
     if (tail.length === 0) return { ...root, [head]: value }
     const current = root[head]
     const branch =
-        typeof current === "object" && current !== null && !Array.isArray(current)
-            ? (current as Readonly<Record<string, AgentosRuntimeValue>>)
+        isAgentosRuntimeRecord(current)
+            ? current
             : {}
     return { ...root, [head]: setScenarioPath(branch, tail.join("."), value) }
 }

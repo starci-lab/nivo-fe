@@ -6,6 +6,24 @@ import type { NivoQueryFailure } from "../query"
 export type AcademyIntegrationProviderId =
     "domain" | "google" | "smtp" | "payment" | "zalo" | "ga4" | "meta_pixel" | "webhook"
 
+/** Result of copying a write-only provider secret without leaking the browser rejection. */
+export type AcademyIntegrationSecretCopyOutcome =
+    | { readonly kind: "copied" }
+    | { readonly kind: "unavailable"; readonly cause: unknown }
+
+/** Copy a secret through an injected browser writer and retain permission failures as a typed result. */
+export const copyAcademyIntegrationSecret = async (
+    secret: string,
+    writeText: (value: string) => Promise<void>,
+): Promise<AcademyIntegrationSecretCopyOutcome> => {
+    try {
+        await writeText(secret)
+        return { kind: "copied" }
+    } catch (cause) {
+        return { kind: "unavailable", cause }
+    }
+}
+
 /** One safe provider card; it contains no credential value. */
 export type AcademyIntegrationCard = {
     readonly id: string
