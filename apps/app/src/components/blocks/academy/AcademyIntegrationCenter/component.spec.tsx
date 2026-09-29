@@ -18,8 +18,8 @@ describe("AcademyIntegrationCenterBase", () => {
             renderToStaticMarkup(
                 <AcademyIntegrationCenterBase
                     state="failed"
-                    props={{ sectionLabel: "Integrations", notice: <div>Unavailable</div>, cards: [] }}
-                    on={{ select: vi.fn(), changeField: vi.fn(), submit: vi.fn() }}
+                    props={{ sectionLabel: "Integrations", failure: { kind: "unavailable", code: "UNAVAILABLE", reason: "Unavailable", retryable: true }, cards: [] }}
+                    on={{ select: vi.fn(), changeField: vi.fn(), submit: vi.fn(), retry: vi.fn() }}
                 />,
             ),
         ).toContain("Unavailable")
@@ -27,7 +27,7 @@ describe("AcademyIntegrationCenterBase", () => {
             renderToStaticMarkup(
                 <AcademyIntegrationCenterBase
                     state="resting"
-                    props={{ sectionLabel: "Integrations", notice: <div>Unavailable</div>, cards: [card] }}
+                    props={{ sectionLabel: "Integrations", failure: { kind: "unavailable", code: "UNAVAILABLE", reason: "Unavailable", retryable: true }, cards: [card] }}
                     on={{ select: vi.fn(), changeField: vi.fn(), submit: vi.fn() }}
                 />,
             ),
@@ -39,7 +39,7 @@ describe("AcademyIntegrationCenterBase", () => {
                 state="answered"
                 props={{
                     sectionLabel: "Integrations",
-                    notice: <div>Unavailable</div>,
+                    failure: { kind: "unavailable", code: "UNAVAILABLE", reason: "Unavailable", retryable: true },
                     cards: [card],
                     selected: {
                         id: "google",
@@ -70,7 +70,7 @@ describe("AcademyIntegrationCenterBase", () => {
                 state="answered"
                 props={{
                     sectionLabel: "Integrations",
-                    notice: <div>Unavailable</div>,
+                    failure: { kind: "unavailable", code: "UNAVAILABLE", reason: "Unavailable", retryable: true },
                     cards: [
                         {
                             id: "google",
@@ -104,7 +104,7 @@ describe("AcademyIntegrationCenterBase", () => {
                 state="answered"
                 props={{
                     sectionLabel: "Integrations",
-                    notice: <div>Unavailable</div>,
+                    failure: { kind: "unavailable", code: "UNAVAILABLE", reason: "Unavailable", retryable: true },
                     cards: [],
                     selected: {
                         id: "plain",

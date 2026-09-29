@@ -1,71 +1,30 @@
-import type { ReactNode } from "react"
 import { StatusActionCard } from "@nivo/ui"
-import { SurfaceCard, Button, Input, type InputKind, Text, type BadgeTone } from "@starci/grammar/common"
+import { SurfaceCard, Button, Input, Text } from "@starci/grammar/common"
+import { QueryNotice } from "@/components/blocks/query/QueryNotice"
+import type {
+    AcademyIntegrationCenterProps,
+    AcademyIntegrationCenterViewProps,
+} from "@/modules/academy/integration-center"
 
-/** One safe provider card; it contains no credential value. */
-export type AcademyIntegrationCenterProps = AcademyIntegrationCenterViewProps
-/** Public API role for AcademyIntegrationCard. */
-export type AcademyIntegrationCard = {
-    readonly id: string
-    readonly title: string
-    readonly description: string
-    readonly statusLabel: string
-    readonly statusTone: BadgeTone
-    readonly detail?: string
-    readonly actionLabel: string
-}
-
-/** One provider-specific local form field. */
-export type AcademyIntegrationFormField = {
-    readonly id: string
-    readonly name: string
-    readonly label: string
-    readonly kind?: InputKind
-    readonly hint?: string
-}
-
-/** Atoms the pure Integration Center draws; the connected half owns provider requests. */
-export type AcademyIntegrationCenterData = {
-    readonly sectionLabel: string
-    /** The failure the connected half composed for a settled failed read. */
-    readonly notice?: ReactNode
-    readonly cards: ReadonlyArray<AcademyIntegrationCard>
-    readonly selected?: {
-        readonly id: string
-        readonly label: string
-        readonly fields: ReadonlyArray<AcademyIntegrationFormField>
-        readonly submitLabel: string
-        readonly revealLabel: string
-        readonly hideLabel: string
-    }
-    readonly pendingId?: string
-    readonly outcome?: string
-}
-
-/** Actions the pure Integration Center emits; every argument is an atom. */
-export type AcademyIntegrationCenterActions = {
-    readonly select: (id: string) => void
-    readonly changeField: (name: string, value: string) => void
-    readonly submit: () => void
-}
-
-/** Resolved pure Integration Center state. */
-export type AcademyIntegrationCenterViewProps = {
-    readonly state: "resting" | "failed" | "answered"
-    readonly props: AcademyIntegrationCenterData
-    readonly on: AcademyIntegrationCenterActions
-}
+export type {
+    AcademyIntegrationCard,
+    AcademyIntegrationCenterActions,
+    AcademyIntegrationCenterData,
+    AcademyIntegrationCenterProps,
+    AcademyIntegrationCenterViewProps,
+    AcademyIntegrationFormField,
+} from "@/modules/academy/integration-center"
 
 /** Render provider status and one selected write-only setup form. */
 const AcademyIntegrationCenterContent = (input: AcademyIntegrationCenterViewProps) => {
     const { state } = input
-    const { sectionLabel, notice, cards, selected, pendingId, outcome } = input.props
-    const { select, changeField, submit } = input.on
+    const { sectionLabel, failure, cards, selected, pendingId, outcome } = input.props
+    const { select, changeField, submit, retry } = input.on
     return (
         <>
             {state === "failed" ? (
                 <SurfaceCard label={sectionLabel}>
-                    <div>{notice}</div>
+                    <div>{failure === undefined ? null : <QueryNotice props={{ failure }} on={{ retry }} />}</div>
                 </SurfaceCard>
             ) : (
                 <SurfaceCard label={sectionLabel}>
