@@ -34,7 +34,7 @@ docs/                   Human documentation
 e2e/                    Repository-level end-to-end tests
 ```
 
-## Development commands
+## Development
 
 Run these from the repository root after `npm ci`:
 
