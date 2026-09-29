@@ -120,7 +120,6 @@ export const SessionProvider = (props: SessionProviderProps) => {
      * when the reader was installed - the one that expired.
      */
     const token = useRef<string | null>(null)
-    setAccessTokenReader(useCallback(() => token.current, []))
 
     /*
      * A CUSTODY EPOCH BESIDE THE TOKEN, because a refresh answer can arrive after a newer custody
@@ -137,7 +136,15 @@ export const SessionProvider = (props: SessionProviderProps) => {
      * API has to be told which language to refuse in.
      */
     const locale = useLocale()
-    setLocaleReader(useCallback(() => locale, [locale]))
+    /*
+     * THE READERS ARE BOUND ONCE THE PROVIDER HAS MOUNTED. Installing them during render would read
+     * the ref before React permits; installing them in the first effect still puts the binding in
+     * place before any restore answer - and therefore before any signed-in surface - can exist.
+     */
+    useEffect(() => {
+        setAccessTokenReader(() => token.current)
+        setLocaleReader(() => locale)
+    }, [locale])
     const adopt = useCallback((payload: AuthPayload) => {
         /*
          * A payload that still owes a second factor is NOT a session. Adopting it would put `null`
