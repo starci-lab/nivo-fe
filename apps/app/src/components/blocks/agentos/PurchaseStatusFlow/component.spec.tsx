@@ -4,11 +4,10 @@ import { describe, expect, it, vi } from "vitest"
 import { IconSource } from "@nivo/ui"
 import {
     PurchaseStatusFlowBase,
-    type PurchaseStatusCheck,
-    type PurchaseStatusFlowViewProps,
-    type PurchaseStatusHeadProps,
 } from "./component"
-import type { PurchaseStatusCopy } from "./copy"
+import type { PurchaseStatusCheck } from "@/modules/agentos/purchase-status/checks"
+import type { PurchaseStatusCopy } from "@/modules/agentos/purchase-status/copy"
+import type { PurchaseStatusFlowViewProps, PurchaseStatusHeadProps } from "@/modules/agentos/purchase-status/view-model"
 import enMessages from "../../../../messages/en.json"
 
 /** The view contract resolves copy through the locale catalogs; tests bind the real English strings. */
