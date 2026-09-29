@@ -4,8 +4,8 @@ import { useTranslations } from "next-intl"
 import { SiteMain } from "@/features/layouts/SiteShell"
 import { useLocalizedHref } from "@/hooks"
 import { SITE_LINKS } from "@/modules/landing/site"
-import { HeroBand } from "@/components/blocks/commercial/HeroBand"
-import { ContactIntentForm } from "@/components/blocks/commercial/ContactIntentForm"
+import { HeroBand } from "../../../components/blocks/commercial/HeroBand"
+import { ContactIntentForm } from "../../../components/blocks/commercial/ContactIntentForm"
 import { CLASS_NAMES } from "./classNames"
 
 /** The six stable relationship-routing intent ids; the `?intent=` query and the catalog both use them. */

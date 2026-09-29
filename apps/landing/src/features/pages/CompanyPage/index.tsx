@@ -4,8 +4,8 @@ import { useTranslations } from "next-intl"
 import { SiteMain } from "@/features/layouts/SiteShell"
 import { useLocalizedHref } from "@/hooks"
 import { SITE_LINKS } from "@/modules/landing/site"
-import { CardGrid } from "@/components/blocks/commercial/CardGrid"
-import { HeroBand } from "@/components/blocks/commercial/HeroBand"
+import { CardGrid } from "../../../components/blocks/commercial/CardGrid"
+import { HeroBand } from "../../../components/blocks/commercial/HeroBand"
 import { CLASS_NAMES } from "./classNames"
 
 const VALUE_IDS = ["outcome", "simplify", "discipline", "ai", "evolve"] as const
