@@ -3,8 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import type { AuthFactorCopy } from "@/modules/auth/authentication-panel/copy"
 import { EMPTY, type AuthPanelFormState } from "@/modules/auth/authentication-panel/types"
-import enMessages from "@/messages/en.json"
-import viMessages from "@/messages/vi.json"
+import enMessages from "../../../../messages/en.json"
+import viMessages from "../../../../messages/vi.json"
 import { AuthenticationPanelFactor } from "./"
 
 const factor: AuthFactorCopy = {

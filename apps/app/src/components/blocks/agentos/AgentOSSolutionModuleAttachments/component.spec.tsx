@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import enMessages from "@/messages/en.json"
-import viMessages from "@/messages/vi.json"
+import enMessages from "../../../../messages/en.json"
+import viMessages from "../../../../messages/vi.json"
 import { AgentOSSolutionModuleAttachmentsBase } from "./component"
 
 const labels = {

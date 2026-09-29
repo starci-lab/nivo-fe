@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from "vitest"
 import type { AuthActions } from "@/modules/auth/authentication-panel/actions"
 import type { AuthCodeCopy } from "@/modules/auth/authentication-panel/copy"
 import { EMPTY, type AuthPanelFormState } from "@/modules/auth/authentication-panel/types"
-import enMessages from "@/messages/en.json"
-import viMessages from "@/messages/vi.json"
+import enMessages from "../../../../messages/en.json"
+import viMessages from "../../../../messages/vi.json"
 import { AuthenticationPanelCode } from "./"
 
 const frame = { title: "Sign in", subtitle: "Welcome", statusMessage: "", isError: false, isPending: false }
