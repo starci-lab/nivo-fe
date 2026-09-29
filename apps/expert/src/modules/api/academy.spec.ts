@@ -15,7 +15,7 @@ describe("academy API operations", () => {
             ],
         })
         await expect(fetchCourses()).resolves.toMatchObject({ courses: [{ id: "1" }, { id: "2" }] })
-        expect(vi.mocked(graphql).mock.calls[0][2]).toEqual({ next: { revalidate: 60 } })
+        expect(vi.mocked(graphql).mock.calls[0]![2]).toEqual({ next: { revalidate: 60 } })
     })
 
     it("turns failed catalog reads into an empty catalog and forwards lead results", async () => {
