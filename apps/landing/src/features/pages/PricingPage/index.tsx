@@ -1,5 +1,5 @@
 import { ProductPage } from "@/features/pages/product"
-import styles from "../../../app/commercial-corporate.module.css"
+import { CLASS_NAMES } from "./classNames"
 
 /**
  * The canonical `/pricing` page: the commercial-decision frame.
@@ -11,7 +11,7 @@ import styles from "../../../app/commercial-corporate.module.css"
  * @returns The page.
  */
 export const PricingPage = () => (
-    <div className={`${styles.routeFrame} ${styles.pricingRoute}`}>
+    <div className={CLASS_NAMES.page}>
         <ProductPage page="pricing" />
     </div>
 )

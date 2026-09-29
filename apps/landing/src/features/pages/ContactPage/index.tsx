@@ -1,10 +1,12 @@
 import { NivoIcon } from "@nivo/ui"
-import { Badge, Button, Heading, PageContainer, Text, TextAction } from "@starci/grammar/common"
+import { Badge, Button, Heading, PageContainer } from "@starci/grammar/common"
 import { useTranslations } from "next-intl"
 import { SiteMain } from "@/features/layouts/SiteShell"
 import { useLocalizedHref } from "@/hooks"
 import { SITE_LINKS } from "@/modules/landing/site"
-import styles from "../../../app/commercial-corporate.module.css"
+import { HeroBand } from "@/components/blocks/commercial/HeroBand"
+import { ContactIntentForm } from "@/components/blocks/commercial/ContactIntentForm"
+import { CLASS_NAMES } from "./classNames"
 
 /** The six stable relationship-routing intent ids; the `?intent=` query and the catalog both use them. */
 export const CONTACT_INTENT_IDS = ["product", "partnership", "institution", "media", "talent", "general"] as const
@@ -75,24 +77,26 @@ export const ContactPage = (props: ContactPageProps) => {
     const selected = CONTACT_INTENTS.find(({ id }): boolean => id === props.initialIntent)
 
     return (
-        <div className={`${styles.routeFrame} ${styles.contactRoute}`}>
+        <div className={CLASS_NAMES.page}>
             <SiteMain>
-                <div className={styles.contactPage}>
-                    <section id="choose-intent" className={styles.contactHero} aria-labelledby="contact-title">
-                        <PageContainer className={styles.contactHeroGrid}>
-                            <div className={styles.heroCopy}>
-                                <span className={styles.eyebrow}>{t("hero.eyebrow")}</span>
-                                <Heading level={1} scale="display">
-                                    <span id="contact-title">{t("hero.title")}</span>
-                                </Heading>
-                                <Text as="p" size="md" tone="muted">
+                <div>
+                    <HeroBand
+                        id="choose-intent"
+                        variant="contact"
+                        aria-labelledby="contact-title"
+                    >
+                        <PageContainer className={CLASS_NAMES.contactHeroGrid}>
+                            <div className={CLASS_NAMES.heroCopy}>
+                                <span className={CLASS_NAMES.eyebrow}>{t("hero.eyebrow")}</span>
+                                <Heading level={1} scale="display"><span id="contact-title">{t("hero.title")}</span></Heading>
+                                <p className={CLASS_NAMES.heroBody}>
                                     {t("hero.body")}
-                                </Text>
+                                </p>
                                 <Button href="#intent-router" variant="primary" size="lg" endContent={<ArrowIcon />}>
                                     {t("hero.primary")}
                                 </Button>
                             </div>
-                            <ol className={styles.contactRouteMap} aria-label={t("hero.routeLabel")}>
+                            <ol className={CLASS_NAMES.contactRouteMap} aria-label={t("hero.routeLabel")}>
                                 {ROUTE_STEP_IDS.map((step, index) => (
                                     <li key={step} data-active={index === 1 ? "true" : undefined}>
                                         <span>{String(index + 1).padStart(2, "0")}</span>
@@ -101,102 +105,68 @@ export const ContactPage = (props: ContactPageProps) => {
                                 ))}
                             </ol>
                         </PageContainer>
-                    </section>
+                    </HeroBand>
 
-                    <section className={styles.intentSection} id="intent-router" aria-labelledby="intent-title">
-                        <PageContainer className={styles.intentLayout}>
-                            <div className={styles.intentMain}>
-                                <div className={styles.sectionHeading}>
-                                    <span className={styles.eyebrow}>{t("router.eyebrow")}</span>
-                                    <Heading level={2}>
-                                        <span id="intent-title">{t("router.title")}</span>
-                                    </Heading>
-                                    <Text as="p" size="md" tone="muted">
+                    <section className={CLASS_NAMES.intentSection} id="intent-router" aria-labelledby="intent-title">
+                        <PageContainer className={CLASS_NAMES.intentLayout}>
+                            <div className={CLASS_NAMES.intentMain}>
+                                <div className={CLASS_NAMES.sectionHeading}>
+                                    <span className={CLASS_NAMES.eyebrow}>{t("router.eyebrow")}</span>
+                                    <Heading level={2}><span id="intent-title">{t("router.title")}</span></Heading>
+                                    <p className={CLASS_NAMES.sectionCopyMuted}>
                                         {t("router.description")}
-                                    </Text>
+                                    </p>
                                 </div>
-                                <form
-                                    id="adaptive-form"
-                                    className={styles.intentForm}
+                                <ContactIntentForm
                                     action={href(`${SITE_LINKS.contact}#intent-router`)}
-                                    method="get"
-                                >
-                                    <fieldset>
-                                        <legend>{t("router.legend")}</legend>
-                                        <div className={styles.intentGrid}>
-                                            {CONTACT_INTENTS.map((intent, index) => (
-                                                <label
-                                                    className={styles.intentOption}
-                                                    key={intent.id}
-                                                    data-selected={selected?.id === intent.id ? "true" : undefined}
-                                                >
-                                                    <input
-                                                        type="radio"
-                                                        name="intent"
-                                                        value={intent.id}
-                                                        defaultChecked={selected?.id === intent.id}
-                                                    />
-                                                    <span className={styles.cardIndex}>
-                                                        {String(index + 1).padStart(2, "0")}
-                                                    </span>
-                                                    <strong>{t(`intents.${intent.id}.label`)}</strong>
-                                                    <small>{t(`intents.${intent.id}.userJob`)}</small>
-                                                    <span className={styles.intentCheck} aria-hidden="true">
-                                                        <NivoIcon props={{ name: "complete", usage: "chip" }} />
-                                                    </span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </fieldset>
-                                    <Button type="submit" variant="primary" size="lg" endContent={<ArrowIcon />}>
-                                        {t("router.submit")}
-                                    </Button>
-                                </form>
+                                    initialIntent={selected?.id}
+                                    legend={t("router.legend")}
+                                    options={CONTACT_INTENTS.map((intent) => ({
+                                        id: intent.id,
+                                        label: t(`intents.${intent.id}.label`),
+                                        description: t(`intents.${intent.id}.userJob`),
+                                    }))}
+                                    submitLabel={t("router.submit")}
+                                />
                             </div>
 
                             <aside
                                 id="contact-next-step"
-                                className={styles.routeResult}
+                                className={CLASS_NAMES.routeResult}
                                 aria-live="polite"
                                 aria-labelledby="route-result-title"
                             >
-                                <span className={styles.eyebrow}>{t("result.eyebrow")}</span>
+                                <span className={`${CLASS_NAMES.eyebrow} ${CLASS_NAMES.eyebrowInverse}`}>
+                                    {t("result.eyebrow")}
+                                </span>
                                 {selected === undefined ? (
                                     <>
-                                        <span className={styles.resultIcon}>
+                                        <span className={CLASS_NAMES.resultIcon}>
                                             <NivoIcon props={{ name: "overview", usage: "heading" }} />
                                         </span>
-                                        <Heading level={3}>
-                                            <span id="route-result-title">{t("result.emptyTitle")}</span>
-                                        </Heading>
-                                        <Text as="p" size="sm">
+                                        <Heading level={3}><span id="route-result-title" className={CLASS_NAMES.inverseHeadingText}>{t("result.emptyTitle")}</span></Heading>
+                                        <p className={CLASS_NAMES.resultCopy}>
                                             {t("result.emptyBody")}
-                                        </Text>
+                                        </p>
                                     </>
                                 ) : (
                                     <>
                                         <Badge tone="success">{t("result.resolved")}</Badge>
-                                        <Heading level={3}>
-                                            <span id="route-result-title">{t(`intents.${selected.id}.label`)}</span>
-                                        </Heading>
-                                        <Text as="p" size="sm">
+                                        <Heading level={3}><span id="route-result-title" className={CLASS_NAMES.inverseHeadingText}>{t(`intents.${selected.id}.label`)}</span></Heading>
+                                        <p className={CLASS_NAMES.resultCopy}>
                                             {t(`intents.${selected.id}.expectation`)}
-                                        </Text>
+                                        </p>
                                         <nav
-                                            className={styles.resultLinks}
+                                            className={CLASS_NAMES.resultLinks}
                                             aria-label={t("result.pathsLabel", {
                                                 intent: t(`intents.${selected.id}.label`),
                                             })}
                                         >
                                             {selected.directPaths.map((path) => (
-                                                <TextAction
-                                                    href={href(PATH_HREFS[path])}
-                                                    appearance="route"
-                                                    endContent={<ArrowIcon />}
-                                                    key={path}
-                                                >
+                                                <a href={href(PATH_HREFS[path])} className={CLASS_NAMES.resultLink} key={path}>
                                                     {t(`paths.${path}`)}
-                                                </TextAction>
+                                                    <ArrowIcon />
+                                                </a>
                                             ))}
                                         </nav>
                                     </>
@@ -205,57 +175,53 @@ export const ContactPage = (props: ContactPageProps) => {
                         </PageContainer>
                     </section>
 
-                    <section className={styles.contactTruthSection} aria-labelledby="contact-truth-title">
-                        <PageContainer className={styles.contactTruthGrid}>
+                    <section className={CLASS_NAMES.contactTruthSection} aria-labelledby="contact-truth-title">
+                        <PageContainer className={CLASS_NAMES.contactTruthGrid}>
                             <div>
-                                <span className={styles.eyebrow}>{t("truth.eyebrow")}</span>
-                                <Heading level={2}>
-                                    <span id="contact-truth-title">{t("truth.title")}</span>
-                                </Heading>
-                                <Text as="p" size="md">
+                                <span className={`${CLASS_NAMES.eyebrow} ${CLASS_NAMES.eyebrowInverse}`}>
+                                    {t("truth.eyebrow")}
+                                </span>
+                                <Heading level={2}><span id="contact-truth-title" className={CLASS_NAMES.inverseHeadingText}>{t("truth.title")}</span></Heading>
+                                <p className={CLASS_NAMES.sectionCopyInverse}>
                                     {t("truth.description")}
-                                </Text>
+                                </p>
                             </div>
-                            <div className={styles.privacyCard}>
-                                <span className={styles.privacyIcon}>
+                            <div className={CLASS_NAMES.privacyCard}>
+                                <span className={CLASS_NAMES.privacyIcon}>
                                     <NivoIcon props={{ name: "complete", usage: "heading" }} />
                                 </span>
                                 <Badge tone="warning">{t("truth.badge")}</Badge>
-                                <Text as="p" size="sm">
+                                <p className={CLASS_NAMES.privacyCopy}>
                                     {t("truth.body")}
-                                </Text>
+                                </p>
                             </div>
-                            <div className={styles.noSubmission}>
+                            <div className={CLASS_NAMES.noSubmission}>
                                 <span>{t("truth.submittedLabel")}</span>
                                 <p>{t("truth.submittedBody")}</p>
                             </div>
                         </PageContainer>
                     </section>
 
-                    <section id="direct-paths" className={styles.directSection} aria-labelledby="direct-title">
-                        <PageContainer className={styles.directGrid}>
-                            <div className={styles.sectionHeadingInverse}>
-                                <span className={styles.eyebrow}>{t("direct.eyebrow")}</span>
-                                <Heading level={2}>
-                                    <span id="direct-title">{t("direct.title")}</span>
-                                </Heading>
-                                <Text as="p" size="md">
-                                    {t("direct.description")}
-                                </Text>
+                    <section id="direct-paths" className={CLASS_NAMES.directSection} aria-labelledby="direct-title">
+                        <PageContainer className={CLASS_NAMES.directGrid}>
+                            <div className={CLASS_NAMES.sectionHeadingInverse}>
+                                <span className={`${CLASS_NAMES.eyebrow} ${CLASS_NAMES.eyebrowInverse}`}>
+                                    {t("direct.eyebrow")}
+                                </span>
+                                    <Heading level={2}><span id="direct-title" className={CLASS_NAMES.inverseHeadingText}>{t("direct.title")}</span></Heading>
+                                    <p className={CLASS_NAMES.sectionCopyInverse}>
+                                        {t("direct.description")}
+                                    </p>
                             </div>
-                            <nav className={styles.directLinks} aria-label={t("direct.label")}>
+                            <nav className={CLASS_NAMES.directLinks} aria-label={t("direct.label")}>
                                 {DIRECT_PATHS.map((path, index) => (
-                                    <TextAction
-                                        href={href(PATH_HREFS[path])}
-                                        appearance="route"
-                                        endContent={<ArrowIcon />}
-                                        key={path}
-                                    >
-                                        <span>
+                                    <a href={href(PATH_HREFS[path])} className={CLASS_NAMES.directLink} key={path}>
+                                        <span className={CLASS_NAMES.directLinkContent}>
                                             <small>{String(index + 1).padStart(2, "0")}</small>
                                             {t(`paths.${path}`)}
                                         </span>
-                                    </TextAction>
+                                        <ArrowIcon />
+                                    </a>
                                 ))}
                             </nav>
                         </PageContainer>

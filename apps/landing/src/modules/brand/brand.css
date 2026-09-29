@@ -208,6 +208,120 @@
     --product-status-shadow: 0 1.5rem 4rem rgb(136 19 55 / 9%);
 }
 
+/* Fixed commercial art direction shared by the company, contact and pricing routes. */
+:root,
+.dark {
+    --landing-commercial-ink: #071224;
+    --landing-commercial-paper: #fbfaf8;
+    --landing-commercial-line: color-mix(in srgb, var(--border) 74%, transparent);
+    --landing-commercial-glow: color-mix(in srgb, var(--accent) 13%, transparent);
+    --landing-commercial-white: #fff;
+    --landing-commercial-rose: #ffd8dd;
+    --landing-commercial-rose-mist: #fff2ee;
+    --landing-commercial-card-rose: #fff5f3;
+    --landing-commercial-soft-rose: #fff0ed;
+    --landing-commercial-contact-rose: #fff3f1;
+    --landing-commercial-pricing-rose: #fff1f2;
+    --landing-commercial-quote-cream: #fff0e7;
+    --landing-commercial-leadership-mist: #f6f3ef;
+    --landing-commercial-muted-ink: #cbd5e1;
+    --landing-commercial-panel-line: rgb(255 255 255 / 13%);
+    --landing-commercial-panel-fill: rgb(255 255 255 / 5%);
+    --landing-commercial-accent-panel: rgb(225 29 72 / 16%);
+
+    --landing-commercial-accent-hairline: rgb(225 29 72 / 4%);
+    --landing-commercial-accent-rule: rgb(225 29 72 / 5%);
+    --landing-commercial-accent-whisper: rgb(225 29 72 / 9%);
+    --landing-commercial-accent-faint: rgb(225 29 72 / 12%);
+    --landing-commercial-accent-glow: rgb(225 29 72 / 13%);
+    --landing-commercial-accent-soft-glow: rgb(225 29 72 / 14%);
+    --landing-commercial-accent-orbit-inner: rgb(225 29 72 / 16%);
+    --landing-commercial-accent-cloud: rgb(225 29 72 / 20%);
+    --landing-commercial-accent-cloud-strong: rgb(225 29 72 / 22%);
+    --landing-commercial-accent-glass-line: rgb(225 29 72 / 25%);
+    --landing-commercial-accent-orbit: rgb(225 29 72 / 30%);
+    --landing-commercial-glass-highlight: rgb(255 255 255 / 18%);
+    --landing-commercial-watermark: rgb(255 255 255 / 7%);
+    --landing-commercial-glass-border: rgb(255 255 255 / 80%);
+    --landing-commercial-glass-fill: rgb(255 255 255 / 82%);
+    --landing-commercial-contact-border: rgb(255 255 255 / 75%);
+    --landing-commercial-contact-fill: rgb(255 255 255 / 68%);
+    --landing-commercial-icon-fill: rgb(255 255 255 / 8%);
+    --landing-commercial-inverse-rule: rgb(255 255 255 / 35%);
+    --landing-commercial-inverse-grid-rule: rgb(255 255 255 / 17%);
+    --landing-commercial-hero-white: rgb(255 255 255 / 96%);
+    --landing-commercial-hero-glass: rgb(255 255 255 / 54%);
+
+    --landing-commercial-hero-background: linear-gradient(
+            90deg,
+            var(--landing-commercial-hero-white) 0 48%,
+            var(--landing-commercial-hero-glass) 66%,
+            transparent
+        ),
+        radial-gradient(
+            circle at 82% 44%,
+            var(--landing-commercial-rose),
+            var(--landing-commercial-rose-mist) 38%,
+            var(--landing-commercial-white) 72%
+        );
+    --landing-commercial-contact-background-image: linear-gradient(
+            120deg,
+            var(--landing-commercial-white) 0 48%,
+            transparent 70%
+        ),
+        repeating-linear-gradient(
+            90deg,
+            transparent 0 5.9rem,
+            var(--landing-commercial-accent-rule) 6rem
+        );
+    --landing-commercial-contact-background-color: var(--landing-commercial-contact-rose);
+    --landing-commercial-pricing-background: radial-gradient(
+            circle at 86% 26%,
+            var(--landing-commercial-accent-glow),
+            transparent 24rem
+        ),
+        linear-gradient(
+            135deg,
+            var(--landing-commercial-white) 0%,
+            var(--landing-commercial-paper) 56%,
+            var(--landing-commercial-pricing-rose) 100%
+        );
+    --landing-commercial-philosophy-background-image: radial-gradient(
+            circle at 87% 15%,
+            var(--landing-commercial-accent-cloud-strong),
+            transparent 25rem
+        );
+    --landing-commercial-philosophy-background-color: var(--landing-commercial-ink);
+    --landing-commercial-provenance-rule: linear-gradient(
+        90deg,
+        var(--accent),
+        var(--landing-commercial-accent-faint)
+    );
+    --landing-commercial-available-rule-image: linear-gradient(
+            90deg,
+            transparent 0 49.95%,
+            var(--landing-commercial-line) 49.95% 50.05%,
+            transparent 50.05%
+        );
+    --landing-commercial-available-rule-color: var(--landing-commercial-white);
+
+    --landing-commercial-company-trace-shadow: 0 8rem 0 var(--landing-commercial-accent-cloud),
+        0 16rem 0 var(--landing-commercial-accent-soft-glow), 0 24rem 0 var(--landing-commercial-accent-whisper);
+    --landing-commercial-orbit-inset: inset 0 0 0 4rem var(--landing-commercial-glass-highlight);
+    --landing-commercial-core-shadow: 0 2rem 5rem rgb(7 18 36 / 25%);
+    --landing-commercial-orbit-card-shadow: 0 1rem 2.5rem rgb(93 45 55 / 12%);
+    --landing-commercial-pricing-card-shadow: 0 2rem 5rem rgb(7 18 36 / 10%);
+    --landing-commercial-pricing-table-shadow: 0 1.5rem 4rem rgb(7 18 36 / 8%);
+    --landing-commercial-contact-ring-shadow: inset 0 0 0 6rem var(--landing-commercial-accent-hairline),
+        inset 0 0 0 12rem var(--landing-commercial-accent-hairline);
+    --landing-commercial-contact-card-shadow: 0 2rem 5rem rgb(87 43 51 / 12%);
+    --landing-commercial-contact-active-shadow: 0 1.4rem 3rem rgb(7 18 36 / 20%);
+    --landing-commercial-contact-hover-shadow: 0 1rem 2.5rem rgb(7 18 36 / 8%);
+    --landing-commercial-contact-result-shadow: 0 2rem 5rem rgb(7 18 36 / 20%);
+    --landing-commercial-privacy-shadow: 0 2rem 5rem rgb(108 11 44 / 20%);
+    --landing-commercial-pricing-proof-ink: rgb(14 30 52 / 4%);
+}
+
 .dark {
     color-scheme: dark;
 

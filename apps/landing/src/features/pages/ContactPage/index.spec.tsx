@@ -7,6 +7,7 @@ describe("ContactPage", () => {
     it("routes six Contact intents without collecting personal data", () => {
         render(<ContactPage />)
         expect(screen.getAllByRole("radio")).toHaveLength(6)
+        expect(screen.getByRole("radiogroup", { name: en.contact.router.legend })).toBeInTheDocument()
         expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
         expect(screen.getByText(en.contact.result.emptyTitle)).toBeInTheDocument()
         fireEvent.click(screen.getByRole("radio", { name: /Partnership/i }))
