@@ -12,6 +12,9 @@ export type StorageArea = "local" | "session"
 /** Local key: whether the console navigation is collapsed. */
 export const NAVIGATION_COLLAPSED_KEY = "nivo-console-navigation-collapsed"
 
+/** Local key: whether the AgentOS Execute session rail is collapsed. */
+export const EXECUTE_SESSIONS_COLLAPSED_KEY = "nivo:agentos:execute-sessions"
+
 /** Session key: the route interrupted by authentication. */
 export const RETURN_TO_STORAGE_KEY = "nivo.auth.return-to"
 

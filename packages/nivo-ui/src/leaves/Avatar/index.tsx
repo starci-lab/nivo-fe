@@ -4,6 +4,7 @@ import { Avatar as DiceAvatar, Style } from "@dicebear/core"
 import lorelei from "@dicebear/styles/lorelei.json" with { type: "json" }
 import { Avatar as HeroAvatar } from "@heroui/react"
 import { skeletonVariants } from "@heroui/styles"
+import Image from "next/image"
 import { FALLBACK_IMAGE_CLASS_NAME, LOADING_CLASS_NAME } from "./classNames"
 
 /**
@@ -31,6 +32,9 @@ export type AvatarProps = { readonly props: AvatarData; readonly isLoading?: boo
 
 /** The size step, as the vendor names it. */
 const SIZES = { sm: "sm", md: "md", lg: "lg" } as const
+
+/** The pixel edge of the generated fallback mark for each step, matching the vendor avatar sizes. */
+const FALLBACK_EDGES = { sm: 32, md: 40, lg: 48 } as const satisfies Record<AvatarSize, number>
 
 /** The resting shape - same circle, glyphs out. */
 const RESTING_CLASSES = skeletonVariants({ animationType: "shimmer" }).base({
@@ -74,11 +78,14 @@ const AvatarView = ({ props, isLoading = false }: AvatarProps) => {
             {!isLoading ? <HeroAvatar.Image src={showsImage ? props.src : fallbackSrc} alt={name} /> : null}
             <HeroAvatar.Fallback>
                 {fallbackSrc !== undefined ? (
-                    <img
+                    <Image
                         data-avatar-fallback="dicebear-lorelei"
                         className={FALLBACK_IMAGE_CLASS_NAME}
                         src={fallbackSrc}
                         alt={name}
+                        width={FALLBACK_EDGES[size]}
+                        height={FALLBACK_EDGES[size]}
+                        unoptimized
                     />
                 ) : null}
             </HeroAvatar.Fallback>

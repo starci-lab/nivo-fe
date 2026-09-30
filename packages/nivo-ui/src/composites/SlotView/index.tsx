@@ -62,7 +62,7 @@ export const SlotView = <T,>(props: SlotViewProps<T>) => {
             />
         )
     }
-    const isEmpty = slot.items === undefined || (Array.isArray(slot.items) && slot.items.length === 0)
-    if (isEmpty) return <EmptyNotice message={labels.empty} />
-    return <>{props.children(slot.items as T, false)}</>
+    const items = slot.items
+    if (items === undefined || (Array.isArray(items) && items.length === 0)) return <EmptyNotice message={labels.empty} />
+    return <>{props.children(items, false)}</>
 }

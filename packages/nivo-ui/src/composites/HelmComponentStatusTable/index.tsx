@@ -20,13 +20,21 @@ export type HelmComponentStatusTableProps = {
     readonly isLoading?: boolean
 }
 
+/** One drawn row: its key beside the data, absent while loading. */
+type HelmComponentStatusEntry = { readonly key: string; readonly row: HelmComponentStatusRow | undefined }
+
+/** The fixed skeleton rows: one key per placeholder, since a placeholder has no id of its own. */
+const LOADING_KEYS: ReadonlyArray<string> = ["loading-first", "loading-second", "loading-third"]
+
 /** Render safe component status rows, including stable loading placeholders. */
 export const HelmComponentStatusTable = (props: HelmComponentStatusTableProps) => {
-    const rows = props.isLoading ? [undefined, undefined, undefined] : props.props.rows
+    const rows: ReadonlyArray<HelmComponentStatusEntry> = props.isLoading
+        ? LOADING_KEYS.map((key) => ({ key, row: undefined }))
+        : props.props.rows.map((row) => ({ key: row.id, row }))
     return (
         <div>
-            {rows.map((row, index) => (
-                <div key={row?.id ?? `loading-${index}`}>
+            {rows.map(({ key, row }) => (
+                <div key={key}>
                     <div>
                         <Text weight="semibold" isSkeleton={props.isLoading}>
                             {row?.name}

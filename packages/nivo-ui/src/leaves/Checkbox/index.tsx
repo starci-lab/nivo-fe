@@ -49,6 +49,24 @@ export type CheckboxProps = {
 /** The tick and its words on one baseline, with the whole row pressable. */
 const ROOT_CLASSES = "flex flex-row items-center gap-2 text-sm"
 
+/** A label part beside the key it is drawn under. */
+type KeyedLabelPart = { readonly key: string; readonly part: CheckboxLabelPart }
+
+/**
+ * Give each label part a key built once from its own value and how many equal parts came before it.
+ *
+ * @param parts - The label parts in reading order.
+ */
+const keyedPartsOf = (parts: ReadonlyArray<CheckboxLabelPart>): ReadonlyArray<KeyedLabelPart> => {
+    const seen = new Map<string, number>()
+    return parts.map((part) => {
+        const value = part.kind === "text" ? `text:${part.content}` : `link:${part.id}`
+        const occurrence = seen.get(value) ?? 0
+        seen.set(value, occurrence + 1)
+        return { key: `${value}:${String(occurrence)}`, part }
+    })
+}
+
 /**
  * Draw a choice.
  *
@@ -72,11 +90,11 @@ const CheckboxView = ({ props, on }: CheckboxProps) => (
                 props.label
             ) : (
                 <span>
-                    {props.labelParts.map((part, index) =>
+                    {keyedPartsOf(props.labelParts).map(({ key, part }) =>
                         part.kind === "text" ? (
-                            <span key={`${part.kind}-${index}`}>{part.content}</span>
+                            <span key={key}>{part.content}</span>
                         ) : (
-                            <TextAction key={`${part.kind}-${index}`} size="sm" onPress={() => on?.follow?.(part.id)}>
+                            <TextAction key={key} size="sm" onPress={() => on?.follow?.(part.id)}>
                                 {part.label}
                             </TextAction>
                         ),

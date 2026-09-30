@@ -5,6 +5,7 @@ export type MarkdownComponentProps = { readonly markdown: string }
 type MarkdownBlock =
     | { readonly kind: "heading"; readonly level: 2 | 3 | 4; readonly content: string }
     | { readonly kind: "text"; readonly content: string }
+type KeyedMarkdownBlock = { readonly key: string; readonly block: MarkdownBlock }
 const blocks = (markdown: string): ReadonlyArray<MarkdownBlock> =>
     markdown
         .trim()
@@ -19,17 +20,28 @@ const blocks = (markdown: string): ReadonlyArray<MarkdownBlock> =>
             ]
         })
 
+/** Give each block a key built once from its kind, its content and how many equal blocks came before it. */
+const keyedBlocks = (markdown: string): ReadonlyArray<KeyedMarkdownBlock> => {
+    const seen = new Map<string, number>()
+    return blocks(markdown).map((block) => {
+        const value = `${block.kind}:${block.content}`
+        const occurrence = seen.get(value) ?? 0
+        seen.set(value, occurrence + 1)
+        return { key: `${value}:${String(occurrence)}`, block }
+    })
+}
+
 /** Render the trusted Markdown subset without an HTML escape hatch. */
 export const MarkdownComponent = (props: MarkdownComponentProps) => (
     <div>
-        {blocks(props.markdown).map((item, index) =>
-            item.kind === "heading" ? (
-                <Heading key={`${String(index)}-${item.kind}`} level={item.level}>
-                    {item.content}
+        {keyedBlocks(props.markdown).map(({ key, block }) =>
+            block.kind === "heading" ? (
+                <Heading key={key} level={block.level}>
+                    {block.content}
                 </Heading>
             ) : (
-                <Text key={`${String(index)}-${item.kind}`} size="sm">
-                    {item.content}
+                <Text key={key} size="sm">
+                    {block.content}
                 </Text>
             ),
         )}

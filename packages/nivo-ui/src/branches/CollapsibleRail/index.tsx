@@ -3,11 +3,11 @@
 import { Button, Heading } from "@starci/grammar/common"
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
-import { createElement, useId, useState, useSyncExternalStore, type ComponentType, type CSSProperties } from "react"
+import { createElement, useId, type ComponentType, type CSSProperties } from "react"
 
 import { RAIL_CLASS_NAME } from "./classNames"
 
-/** Props for a persisted, accessible navigation rail. */
+/** Props for an accessible navigation rail whose collapsed state the caller owns. */
 export type CollapsibleRailProps<RailProps extends object, CompactProps extends object, ToggleProps extends object> = {
     readonly ariaLabel: string
     /** Whether this standalone rail owns a complementary landmark. */
@@ -21,74 +21,21 @@ export type CollapsibleRailProps<RailProps extends object, CompactProps extends 
     readonly toggleControlProps: ToggleProps
     readonly collapseLabel: string
     readonly expandLabel: string
-    readonly storageKey?: string
-    readonly isDefaultCollapsed?: boolean
-    readonly onCollapsedChange?: (collapsed: boolean) => void
+    /** Whether the rail is drawn in its compact form. Controlled: the caller decides where it is kept. */
+    readonly collapsed: boolean
+    /** Called with the state the reader asked for; the caller stores it and passes it back as `collapsed`. */
+    readonly onCollapsedChange: (collapsed: boolean) => void
 }
 
-const DEFAULT_STORAGE_KEY = "nivo:console-rail-collapsed"
-
-/*
- * The persisted preference is external state: it lives in browser storage, not in React. The
- * `storage` event keeps other tabs in step, while `railListeners` carries same-tab writes the
- * event never fires for. `railMemory` is the fallback for an environment whose storage throws, so
- * the toggle still answers the click instead of reading the failure as "never stored".
- */
-const railListeners = new Set<() => void>()
-const railMemory = new Map<string, boolean>()
-
-const subscribeRail = (onChange: () => void): (() => void) => {
-    if (typeof window === "undefined") {
-        return () => undefined
-    }
-    railListeners.add(onChange)
-    window.addEventListener("storage", onChange)
-    return () => {
-        railListeners.delete(onChange)
-        window.removeEventListener("storage", onChange)
-    }
-}
-
-const readPersistedCollapsed = (key: string, fallback: boolean): boolean => {
-    try {
-        const value = globalThis.localStorage?.getItem(key)
-        if (value === "true") return true
-        if (value === "false") return false
-    } catch {
-        /* storage is optional */
-    }
-    return railMemory.get(key) ?? fallback
-}
-
-const writePersistedCollapsed = (key: string, collapsed: boolean): void => {
-    railMemory.set(key, collapsed)
-    try {
-        globalThis.localStorage?.setItem(key, String(collapsed))
-    } catch {
-        /* storage is optional */
-    }
-    for (const listener of railListeners) listener()
-}
-
-/** Render a responsive navigation rail with persisted collapse state. */
+/** Render a responsive navigation rail; the collapse state is controlled by the caller. */
 export const CollapsibleRail = <R extends object, C extends object, T extends object>(
     props: CollapsibleRailProps<R, C, T>,
 ) => {
     const reduceMotion = useReducedMotion()
     const headingId = useId()
-    const storageKey = props.storageKey ?? DEFAULT_STORAGE_KEY
-    // The default answers only until storage says otherwise; it is the server snapshot as well, so
-    // hydration and a mounted restore draw the same rail.
-    const [defaultCollapsed] = useState(() => props.isDefaultCollapsed ?? false)
-    const collapsed = useSyncExternalStore(
-        subscribeRail,
-        () => readPersistedCollapsed(storageKey, defaultCollapsed),
-        () => defaultCollapsed,
-    )
+    const collapsed = props.collapsed
     const toggle = () => {
-        const next = !collapsed
-        writePersistedCollapsed(storageKey, next)
-        props.onCollapsedChange?.(next)
+        props.onCollapsedChange(!collapsed)
     }
     const label = collapsed ? props.expandLabel : props.collapseLabel
     const railStyle: CSSProperties = {

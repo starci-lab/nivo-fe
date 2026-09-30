@@ -7,6 +7,8 @@ describe("Avatar", () => {
         const { rerender } = render(<Avatar props={{ name: "Ada Lovelace", size: "lg" }} />)
         const fallback = document.querySelector("[data-avatar-fallback='dicebear-lorelei']")
         expect(fallback).toHaveAttribute("alt", "Ada Lovelace")
+        expect(fallback).toHaveAttribute("width", "48")
+        expect(fallback).toHaveAttribute("height", "48")
         rerender(<Avatar props={{ name: "Ada Lovelace", src: "/ada.png", size: "sm" }} />)
         expect(document.querySelector("[data-size='sm']")).toHaveAttribute("data-size", "sm")
         expect(document.querySelector("[data-avatar-fallback='dicebear-lorelei']")).toBeInTheDocument()

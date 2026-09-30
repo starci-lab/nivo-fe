@@ -6,7 +6,11 @@ import viMessages from "@/messages/vi.json"
 
 const push = vi.fn()
 const location = { pathname: "/overview" }
-vi.mock("@/hooks", () => ({ usePathname: () => location.pathname, useRouter: () => ({ push }) }))
+vi.mock("@/hooks", () => ({
+    usePathname: () => location.pathname,
+    usePersistedFlag: () => [false, vi.fn()],
+    useRouter: () => ({ push }),
+}))
 import { Sidebar } from "."
 
 /** The owner-ruled console registry: key -> route, in rail order. */

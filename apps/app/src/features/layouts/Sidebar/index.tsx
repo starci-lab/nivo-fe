@@ -1,11 +1,10 @@
 "use client"
 
-import { useSyncExternalStore } from "react"
 import { useTranslations } from "next-intl"
 import type { SidebarGroup } from "@starci/grammar/common"
 import { IconSource } from "@nivo/ui"
-import { usePathname, useRouter } from "@/hooks"
-import { NAVIGATION_COLLAPSED_KEY, readStored, writeStored } from "@/modules/browser-storage"
+import { usePathname, usePersistedFlag, useRouter } from "@/hooks"
+import { NAVIGATION_COLLAPSED_KEY } from "@/modules/browser-storage"
 import { SidebarBase } from "./component"
 
 /** Which console surface the navigation is drawn on: the persistent rail, or the mobile drawer. */
@@ -32,57 +31,18 @@ const DESTINATIONS: ReadonlyArray<Destination> = [
     { key: "wallet", route: "/wallet", group: "account", icon: "wallet" },
 ]
 
-/*
- * The collapsed preference is external state: it lives in browser storage, not in React. The
- * `storage` event keeps other tabs in step, while `collapsedListeners` carries same-tab writes the
- * event never fires for. `collapsedMemory` is the fallback for an environment whose storage throws,
- * so the control still answers the click instead of reading the failure as "never stored".
- */
-const collapsedListeners = new Set<() => void>()
-let collapsedMemory: boolean | undefined
-
-const subscribeCollapsed = (onChange: () => void): (() => void) => {
-    if (typeof window === "undefined") {
-        return () => undefined
-    }
-    collapsedListeners.add(onChange)
-    window.addEventListener("storage", onChange)
-    return () => {
-        collapsedListeners.delete(onChange)
-        window.removeEventListener("storage", onChange)
-    }
-}
-
-const getCollapsedSnapshot = (): boolean => {
-    const value = readStored("local", NAVIGATION_COLLAPSED_KEY)
-    if (value === "true") return true
-    if (value === "false") return false
-    return collapsedMemory ?? false
-}
-
-const getCollapsedServerSnapshot = (): boolean => false
-
-const writeCollapsed = (collapsed: boolean) => {
-    collapsedMemory = collapsed
-    writeStored("local", NAVIGATION_COLLAPSED_KEY, String(collapsed))
-    for (const listener of collapsedListeners) listener()
-}
-
 /** Nivo route/translation adapter over the shared Grammar sidebar renderer. */
 export const Sidebar = (props: SidebarProps) => {
     const mode = props.mode ?? "desktop"
     const t = useTranslations("console")
     const router = useRouter()
     const pathname = usePathname()
-    const isCollapsed = useSyncExternalStore(subscribeCollapsed, getCollapsedSnapshot, getCollapsedServerSnapshot)
+    const [isCollapsed, setCollapsed] = usePersistedFlag(NAVIGATION_COLLAPSED_KEY, false)
     const selectedKey =
         [...DESTINATIONS]
             .filter((destination) => pathname.startsWith(destination.route))
             .sort((left, right) => right.route.length - left.route.length)[0]?.key ?? "overview"
 
-    const setCollapsed = (collapsed: boolean) => {
-        writeCollapsed(collapsed)
-    }
     const activate = (id: string): boolean => {
         const destination = DESTINATIONS.find((candidate): boolean => candidate.key === id)
         if (destination === undefined) return false

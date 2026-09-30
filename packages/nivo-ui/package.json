@@ -27,6 +27,7 @@
     "framer-motion": "^13.1.0"
   },
   "peerDependencies": {
+    "next": "^16",
     "react": "^19",
     "react-dom": "^19"
   },

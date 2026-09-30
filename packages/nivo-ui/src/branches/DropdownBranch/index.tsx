@@ -47,8 +47,8 @@ export const DropdownBranch = <I extends string>(props: DropdownBranchProps<I>) 
                 selectionMode={props.props.selectionMode}
                 selectedKeys={props.props.selectedId === undefined ? undefined : new Set([props.props.selectedId])}
             >
-                {props.props.sections.map((section, index) => (
-                    <Dropdown.Section key={"section-" + index}>
+                {props.props.sections.map((section) => (
+                    <Dropdown.Section key={section.items.map((item) => item.id).join("|")}>
                         {section.items.map((item) => (
                             <Dropdown.Item
                                 key={item.id}

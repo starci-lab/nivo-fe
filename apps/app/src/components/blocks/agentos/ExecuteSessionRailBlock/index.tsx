@@ -14,6 +14,8 @@ export type ExecuteSessionRailBlockCopy = {
 
 import { Button, Icon } from "@starci/grammar/common"
 
+import { usePersistedFlag } from "@/hooks"
+import { EXECUTE_SESSIONS_COLLAPSED_KEY } from "@/modules/browser-storage"
 import { ChoiceTabs, CollapsibleRail, SelectionList, type SelectionListGroup, IconSource } from "@nivo/ui"
 
 /** One collaborative Execute conversation listed outside the private Setup session. */
@@ -86,6 +88,7 @@ const SessionRailToggle = () => <Icon source={IconSource("sidebar", "leading")} 
 /** Navigate multiple Execute conversations through one selected identity at every breakpoint. */
 export const ExecuteSessionRailBlock = (props: ExecuteSessionRailBlockProps) => {
     const { copy } = props
+    const [collapsed, setCollapsed] = usePersistedFlag(EXECUTE_SESSIONS_COLLAPSED_KEY, false)
     const { sessions, selectedId, pending, onSelect, onCreate }: ExecuteSessionRailBlockProps = props
     const railProps = {
         copy,
@@ -131,7 +134,8 @@ export const ExecuteSessionRailBlock = (props: ExecuteSessionRailBlockProps) => 
                 toggleControlProps={{}}
                 collapseLabel={copy.sessions.collapse}
                 expandLabel={copy.sessions.expand}
-                storageKey="nivo:agentos:execute-sessions"
+                collapsed={collapsed}
+                onCollapsedChange={setCollapsed}
             />
         </div>
     )

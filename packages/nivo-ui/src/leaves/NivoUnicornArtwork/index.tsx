@@ -1,4 +1,5 @@
 import { cn, skeletonVariants } from "@heroui/styles"
+import Image from "next/image"
 import { UNICORN_ARTWORK_CLASS_NAME, UNICORN_ARTWORK_IMAGE_CLASS_NAME } from "./classNames"
 
 /** Data owned by the Nivo dashboard mascot artwork. */
@@ -21,11 +22,11 @@ export const NivoUnicornArtwork = (props: NivoUnicornArtworkProps) => {
             className={cn(UNICORN_ARTWORK_CLASS_NAME, isLoading ? RESTING_CLASSES : undefined)}
         >
             {isLoading ? null : (
-                <img
+                <Image
                     src="/images/nivo-unicorn-overview.png"
                     alt=""
-                    width="180"
-                    height="120"
+                    width={180}
+                    height={120}
                     className={UNICORN_ARTWORK_IMAGE_CLASS_NAME}
                 />
             )}
