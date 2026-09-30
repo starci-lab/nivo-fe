@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useState } from "react"
 import { useTranslations } from "next-intl"
+import { RouteLoadingView } from "@nivo/ui"
 import {
     useAuthenticationCode,
     useAuthenticationDetails,
@@ -133,13 +134,12 @@ const AuthenticationPageConnected = ({ sessionEnding }: AuthenticationPageConnec
 /** Keep the live address reader under its required Suspense boundary. */
 export const AuthenticationPage = (props: AuthenticationPageProps) => {
     void props
+    const t = useTranslations("boundary.loading")
     const [sessionEnding, setSessionEnding] = useState<SessionEndingArrival | null>(null)
     return (
-        <>
-            <Suspense fallback={null}>
-                <SessionEndingQuery onParam={setSessionEnding} />
-            </Suspense>
+        <Suspense fallback={<RouteLoadingView props={{ label: t("label") }} />}>
+            <SessionEndingQuery onParam={setSessionEnding} />
             <AuthenticationPageConnected sessionEnding={sessionEnding} />
-        </>
+        </Suspense>
     )
 }

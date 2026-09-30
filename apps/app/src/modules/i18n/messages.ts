@@ -10,13 +10,13 @@ export { pickMessages } from "@nivo/i18n/messages"
  */
 export const MESSAGE_SCOPES = {
     /** The document shell and the locale root page. */
-    root: ["app"],
+    root: ["app", "boundary"],
     /** The sign-in door. */
-    authentication: ["app", "authentication"],
+    authentication: ["app", "boundary", "authentication"],
     /** The authenticated console and the launch bridges it opens. */
-    console: ["app", "authentication", "agentos", "provisioning", "console", "metadata"],
+    console: ["app", "boundary", "authentication", "agentos", "provisioning", "console", "metadata"],
     /** AgentOS console routes and the launch bridges: the console copy (which holds the AgentOS surfaces) and the sales workbench copy, no sign-in or metadata copy. */
-    agentos: ["console", "agentos"],
+    agentos: ["boundary", "console", "agentos"],
 } as const satisfies Readonly<Record<string, ReadonlyArray<string>>>
 
 /** One route group message scope. */

@@ -1,5 +1,5 @@
 import { DropdownBranch, IconSource, type DropdownBranchItemData } from "@nivo/ui"
-import { Icon } from "@starci/grammar/common"
+import { Icon, Skeleton } from "@starci/grammar/common"
 import { Suspense, type ComponentType } from "react"
 import type { AdministratorRevocationDialogProps } from "@/components/blocks/auth/AdministratorRevocationDialog"
 import type { ReturnNoticeProps } from "@/components/blocks/auth/ReturnNotice"
@@ -48,6 +48,8 @@ type AccountMenuProps = AccountMenuBaseProps
 /** Every action this menu can report, so the reported id is one of a closed set. */
 type AccountMenuAction = "sign-out" | "sign-out-everywhere" | "administrator-ending"
 const accountTrigger = <Icon source={IconSource("account", "leading")} usage="leading" />
+/** What the notice rests as while the address it reads is unresolved: one line of the grammar's own skeleton. */
+const noticeWaiting = <Skeleton shape="text" lines={1} />
 
 /**
  * Pure account menu: vendor mechanics stay in DropdownBranch, session behavior stays above.
@@ -128,11 +130,10 @@ export const AccountMenuBase = (props: AccountMenuProps) => {
       statically when a component reads the query without a Suspense boundary over it, and the
       account control is the only Login-owned mount point the landing has - the chrome around it
       belongs to the shell. The boundary is drawn here, in the pure half, because it must be an
-      ancestor of the read rather than a child of it; it draws nothing of its own, and the notice is
-      the only thing inside it. It rests as nothing: the notice is usually absent, so a placeholder
-      shape would flash a description of something that is not there.
+      ancestor of the read rather than a child of it; the notice is the only thing inside it. While the
+      address is unread it rests as one line of the grammar's skeleton, never as an empty region.
     */}
-            <Suspense>
+            <Suspense fallback={noticeWaiting}>
                 <ReturnNoticeControl {...returnNoticeControlProps} />
             </Suspense>
         </>

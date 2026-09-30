@@ -1,5 +1,3 @@
-"use client"
-
 import { AppsPageBase } from "./component"
 
 /** Mount the Apps dashboard compositor; the child block owns all external state. */

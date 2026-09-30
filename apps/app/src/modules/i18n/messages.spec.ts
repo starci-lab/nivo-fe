@@ -27,6 +27,10 @@ describe("MESSAGE_SCOPES", () => {
         }
     })
 
+    it("ships the boundary copy in every scope, so loading, error and not-found never render a raw key", () => {
+        for (const namespaces of Object.values(MESSAGE_SCOPES)) expect(namespaces).toContain("boundary")
+    })
+
     it("ships the sign-in door far less than the console, and the console every namespace the catalogue has", () => {
         const size = (namespaces: ReadonlyArray<string>) => JSON.stringify(pickMessages(en, namespaces)).length
         expect(size(MESSAGE_SCOPES.authentication)).toBeLessThan(size(MESSAGE_SCOPES.console) / 5)
