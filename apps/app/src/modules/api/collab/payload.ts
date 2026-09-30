@@ -1,6 +1,7 @@
-import { failed, type FailureKind, type Outcome } from '../outcome'
-import { isCollabFailureKind, parseCollabOperation } from './payload.guards'
-import type { CollabFailureKind, CollabGatewayReply, CollabServed } from './types'
+import { failed, type FailureKind, type Outcome } from "../outcome"
+import { isRecord } from "../wire"
+import { isCollabFailureKind, parseCollabOperation } from "./payload.guards"
+import type { CollabFailureKind, CollabGatewayReply, CollabServed } from "./types"
 
 const COLLAB_FAILURE_KIND_MAP: Readonly<Record<CollabFailureKind, FailureKind>> = {
     unauthenticated: "refused",
@@ -14,10 +15,6 @@ const COLLAB_FAILURE_KIND_MAP: Readonly<Record<CollabFailureKind, FailureKind>> 
 /** Maps the boundary failure vocabulary into the shared app outcome. */
 export const collabFailure = (kind: CollabFailureKind, code: string, reason: string, retryable: boolean) =>
     failed(COLLAB_FAILURE_KIND_MAP[kind], { code, reason, retryable })
-
-/** Narrows untrusted payloads to plain record values. */
-export const isRecord = (value: unknown): value is Record<string, unknown> =>
-    typeof value === "object" && value !== null && !Array.isArray(value)
 
 /** Checks untrusted GraphQL JSON against the Collab gateway reply shape. */
 export const readReply = (value: unknown): CollabGatewayReply | null => {

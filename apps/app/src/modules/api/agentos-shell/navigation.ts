@@ -1,5 +1,6 @@
 import { failed, type Failure, type Outcome } from "../outcome"
-import { isRecord, isText, isUuid } from "./identity"
+import { isText, isUuid } from "./identity"
+import { isRecord } from "../wire"
 import { sendShellRequest, shellRouteUrl, unreadableReply, unsupportedRequest } from "./transport"
 import { authoredDestination, refusalFor } from "./narrow"
 import { AGENTOS_SHELL_NAVIGATION_OPERATION, SHELL_RETURN_ROUTE_NAME } from "./types"

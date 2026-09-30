@@ -1,7 +1,8 @@
 import { graphqlFields } from "../graphql"
 import type { Outcome } from "../outcome"
 import { collabGatewayDocument } from "./documents"
-import { collabFailure, collabOutcomeOfReply, isRecord, readReply } from "./payload"
+import { collabFailure, collabOutcomeOfReply, readReply } from "./payload"
+import { isRecord } from "../wire"
 import { parseCollabMembershipResult } from "./payload.guards"
 import type { CollabMembershipResult, CollabOperation, CollabServed, CollabTransport } from "./types"
 /**

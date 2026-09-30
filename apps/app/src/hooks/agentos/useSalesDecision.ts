@@ -14,7 +14,7 @@ import {
     type SalesSurfaceStanding,
     type SalesTranslation,
 } from "@/modules/sales/sales-workbench"
-import { parseSalesDecisionValue } from "@/modules/sales/sales-workbench.guards"
+import { parseSalesDecisionValue } from "@/modules/api/sales/payload.guards"
 
 /*
  * The connected decision surface (impl.sales.nivo-fe.decision-view).

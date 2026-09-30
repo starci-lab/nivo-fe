@@ -64,9 +64,6 @@ export const REGISTERED_VIEWS: ReadonlySet<string> = new Set([
     "module-diagnostics",
 ])
 
-/** Recognize a non-array object before reading fields from a wire value. */
-export const isRecord = (value: unknown): value is Record<string, unknown> =>
-    value !== null && typeof value === "object" && !Array.isArray(value)
 /** Recognize non-empty wire text. */
 export const isText = (value: unknown): value is string => typeof value === "string" && value.length > 0
 /** Recognize a non-negative safe integer count. */

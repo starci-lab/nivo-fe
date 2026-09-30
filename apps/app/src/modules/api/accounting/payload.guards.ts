@@ -171,3 +171,48 @@ export const parseAccountingResult = (tagged: unknown): AccountingResult | null 
             return null
     }
 }
+
+/** The optional state fields read by Accounting command settlement. */
+export type AccountingCommandPayloadState = { readonly state?: string; readonly resultId?: string | null }
+
+/** Narrow the optional settlement fields on one Accounting command payload. */
+export const isCommandPayloadState = (value: unknown): value is AccountingCommandPayloadState =>
+    isRecord(value) &&
+    (value.state === undefined || isString(value.state)) &&
+    (value.resultId === undefined || value.resultId === null || isString(value.resultId))
+
+/** Parse one untrusted summary reading using the registered summary result shape. */
+export const parseAccountingSummaryReading = (value: unknown): AccountingSummaryPayload | null => {
+    const parsed = parseAccountingResult({ op: "summary", payload: value })
+    return parsed?.op === "summary" ? parsed.payload : null
+}
+
+/** Parse one untrusted evidence reading using the registered evidence result shape. */
+export const parseAccountingEvidenceReading = (value: unknown): AccountingEvidenceResultPayload | null => {
+    const parsed = parseAccountingResult({ op: "evidence", payload: value })
+    return parsed?.op === "evidence" ? parsed.payload : null
+}
+
+/** Parse one untrusted routine reading using the registered routine result shape. */
+export const parseAccountingRoutineReading = (value: unknown): AccountingRoutineResultPayload | null => {
+    const parsed = parseAccountingResult({ op: "routine", payload: value })
+    return parsed?.op === "routine" ? parsed.payload : null
+}
+
+/** Parse one untrusted material-exception reading using the registered exception result shape. */
+export const parseAccountingExceptionReading = (value: unknown): AccountingExceptionResultPayload | null => {
+    const parsed = parseAccountingResult({ op: "exception", payload: value })
+    return parsed?.op === "exception" ? parsed.payload : null
+}
+
+/** Parse one untrusted forward-correction reading using the registered correction result shape. */
+export const parseAccountingCorrectionReading = (value: unknown): AccountingCorrectResultPayload | null => {
+    const parsed = parseAccountingResult({ op: "correct", payload: value })
+    return parsed?.op === "correct" ? parsed.payload : null
+}
+
+/** Parse one untrusted result-detail reading using the registered detail result shape. */
+export const parseAccountingResultDetailReading = (value: unknown): AccountingResultDetailPayload | null => {
+    const parsed = parseAccountingResult({ op: "resultDetail", payload: value })
+    return parsed?.op === "resultDetail" ? parsed.payload : null
+}

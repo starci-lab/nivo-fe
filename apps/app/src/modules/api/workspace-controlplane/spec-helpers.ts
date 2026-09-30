@@ -1,4 +1,5 @@
 import { vi } from "vitest"
+import { isRecord } from "../wire"
 
 /** Minimal successful response shape for transport specs. */
 export const jsonResponse = (payload: unknown) => ({ ok: true, status: 200, json: async () => payload })
@@ -33,9 +34,6 @@ export const envelope = (field: string, data: unknown) =>
 /** Wraps a refused field response in the shared GraphQL envelope. */
 export const refusal = (field: string, error: string) =>
     jsonResponse({ data: { [field]: { data: null, success: false, message: "refused", error } } })
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-    typeof value === "object" && value !== null && !Array.isArray(value)
 
 /** Reads one serialized GraphQL request from a mocked fetch call. */
 export const requestBody = (fetchMock: ReturnType<typeof vi.fn>, call: number) => {

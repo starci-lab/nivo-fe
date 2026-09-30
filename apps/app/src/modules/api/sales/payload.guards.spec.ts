@@ -22,8 +22,9 @@ describe("parseSalesPolicyValue", () => {
             configuredBy: null,
             recordedAt: null,
         }
-        expect(parseSalesPolicyValue(value)).not.toBeNull()
+        expect(parseSalesPolicyValue(value)).toEqual(value)
         expect(parseSalesPolicyValue({ ...value, revision: "1" })).toBeNull()
+        expect(parseSalesPolicyValue({ ...value, revision: Number.POSITIVE_INFINITY })).toBeNull()
         expect(parseSalesPolicyValue({ ...value, values: [] })).toBeNull()
     })
 })
@@ -41,8 +42,9 @@ describe("parseSalesReadinessValue", () => {
             ready: true,
             revision: 1,
         }
-        expect(parseSalesReadinessValue(value)).not.toBeNull()
+        expect(parseSalesReadinessValue(value)).toEqual(value)
         expect(parseSalesReadinessValue({ ...value, ready: "yes" })).toBeNull()
+        expect(parseSalesReadinessValue({ ...value, ready: "true" })).toBeNull()
     })
 })
 
@@ -59,8 +61,9 @@ describe("parseSalesOpportunityValue", () => {
             revision: 1,
             closedAt: null,
         }
-        expect(parseSalesOpportunityValue(value)).not.toBeNull()
+        expect(parseSalesOpportunityValue(value)).toEqual(value)
         expect(parseSalesOpportunityValue({ ...value, opportunityId: 7 })).toBeNull()
+        expect(parseSalesOpportunityValue({ ...value, evidenceRefs: [1] })).toBeNull()
     })
 })
 
@@ -75,7 +78,7 @@ describe("parseSalesPipelineValue", () => {
             revision: 1,
         }
         const value = { observedAt: "t", scopeFingerprint: "f", items: [item], nextAfter: null, livePagination: false }
-        expect(parseSalesPipelineValue(value)).not.toBeNull()
+        expect(parseSalesPipelineValue(value)).toEqual(value)
         expect(parseSalesPipelineValue({ ...value, items: [{ ...item, revision: "x" }] })).toBeNull()
         expect(parseSalesPipelineValue({ ...value, nextAfter: { lastOpportunityId: 5 } })).toBeNull()
     })
@@ -91,8 +94,9 @@ describe("parseSalesCommandValue", () => {
             actionIds: [],
             revision: 1,
         }
-        expect(parseSalesCommandValue(value)).not.toBeNull()
+        expect(parseSalesCommandValue(value)).toEqual(value)
         expect(parseSalesCommandValue({ ...value, clarification: "?" })).toBeNull()
+        expect(parseSalesCommandValue({ ...value, actionIds: null })).toBeNull()
     })
 })
 
@@ -106,8 +110,9 @@ describe("parseSalesDecisionValue", () => {
             status: "s",
             revision: 1,
         }
-        expect(parseSalesDecisionValue(value)).not.toBeNull()
+        expect(parseSalesDecisionValue(value)).toEqual(value)
         expect(parseSalesDecisionValue({ ...value, proposalFingerprint: null })).toBeNull()
+        expect(parseSalesDecisionValue({ ...value, proposalVersion: "4" })).toBeNull()
     })
 })
 
@@ -121,15 +126,17 @@ describe("parseSalesActionValue", () => {
             observationGap: false,
             revision: 1,
         }
-        expect(parseSalesActionValue(value)).not.toBeNull()
+        expect(parseSalesActionValue(value)).toEqual(value)
         expect(parseSalesActionValue({ ...value, observationGap: "none" })).toBeNull()
+        expect(parseSalesActionValue({ ...value, observationGap: 0 })).toBeNull()
     })
 })
 
 describe("parseSalesHandoffValue", () => {
     it("refuses a payload missing the order revision", () => {
         const value = { handoffId: "h", status: "s", orderRevision: 1, actionId: null, revision: 1 }
-        expect(parseSalesHandoffValue(value)).not.toBeNull()
+        expect(parseSalesHandoffValue(value)).toEqual(value)
         expect(parseSalesHandoffValue({ ...value, orderRevision: "1" })).toBeNull()
+        expect(parseSalesHandoffValue({ ...value, orderRevision: null })).toBeNull()
     })
 })

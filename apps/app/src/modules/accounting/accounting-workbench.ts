@@ -1,10 +1,6 @@
 import type { Outcome } from "@/modules/api/outcome"
+import { isOneOf, isRecord } from "@/modules/api/wire"
 import type { Formatter } from "@/modules/i18n/formatter"
-import {
-    isAccountingClassifications,
-    isAccountingIntakeSnapshot,
-    isAccountingRecord,
-} from "./accounting-workbench.guards"
 /*
  * The pure Accounting workbench projection.
  *
@@ -33,17 +29,16 @@ type AccountingPeriod = { readonly periodKey: string; readonly status: string }
 type TranslationValues = Readonly<Record<string, string | number | undefined>>
 /** Accounting classifications accepted by the setup projection and intake controller. */
 export const ACCOUNTING_CLASSIFICATIONS = ["income", "expense", "receivable", "payable"] as const
+const isAccountingClassification = (value: unknown): value is AccountingClassification =>
+    isOneOf(value, ACCOUNTING_CLASSIFICATIONS)
+const isAccountingClassifications = (value: unknown): value is ReadonlyArray<AccountingClassification> =>
+    Array.isArray(value) && value.every(isAccountingClassification)
 type AccountingIntakePolicy = {
     readonly currency: string
     readonly classifications: ReadonlyArray<AccountingClassification>
 }
 /** Minimal message formatter accepted by the Accounting controller. */
 export type AccountingTranslation = (key: string, values?: TranslationValues) => string
-/** The untrusted portion of the Setup snapshot used to offer intake controls. */
-export type AccountingIntakeSnapshot = {
-    readonly accountingScope?: unknown
-    readonly currencyAndLocale?: unknown
-}
 /** Accessible settled command feedback projected into the pure view. */
 export type AccountingNotice = { readonly kind: "success" | "refused"; readonly message: string }
 /** Refusals interrupt the current task; confirmations remain non-disruptive. */
@@ -51,10 +46,10 @@ export const accountingNoticeLive = (kind: AccountingNotice["kind"]): "assertive
     kind === "refused" ? "assertive" : "polite"
 /** Narrow only the Setup facts that authorize document intake; every command remains server-authorized. */
 export const accountingIntakePolicy = (snapshot: unknown): AccountingIntakePolicy | null => {
-    if (!isAccountingIntakeSnapshot(snapshot)) return null
+    if (!isRecord(snapshot)) return null
     const scope = snapshot.accountingScope
     const currencyAndLocale = snapshot.currencyAndLocale
-    if (!isAccountingRecord(scope) || !isAccountingRecord(currencyAndLocale)) return null
+    if (!isRecord(scope) || !isRecord(currencyAndLocale)) return null
     const rawClassifications = scope.classifications
     const currency = currencyAndLocale.functionalCurrency
     if (

@@ -8,6 +8,7 @@ import type {
     CollabOpenTurnNoticeOutcome,
     CollabTaskStatus,
 } from "../../api/collab"
+import { isNullableString, isOneOf, isRecord, isString } from "../../api/wire"
 
 /**
  * The collab group-chat surface's runtime guards. The wire speaks loosely typed
@@ -15,16 +16,6 @@ import type {
  * those shapes are proven before a domain type is claimed. A refusal is always
  * a null or a closed-set miss - the callers keep their existing fallbacks.
  */
-
-const isCollabRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
-    typeof value === "object" && value !== null && !Array.isArray(value)
-
-const isString = (value: unknown): value is string => typeof value === "string"
-
-const isNullableString = (value: unknown): value is string | null => value === null || isString(value)
-
-const isOneOf = <Value extends string>(value: unknown, choices: ReadonlyArray<Value>): value is Value =>
-    isString(value) && choices.some((choice) => choice === value)
 
 /** Roles an invitation, a roster row or a role hint may name - the closed V1 set. */
 export const COLLAB_HUMAN_ROLES: ReadonlyArray<CollabHumanRole> = ["owner", "manager", "staff"]
@@ -53,7 +44,7 @@ export const isCollabTaskStatus = (value: unknown): value is CollabTaskStatus =>
  * names neither shape - the caller's refused path covers every other payload.
  */
 export const readCollabInviteOutcome = (payload: unknown): CollabInviteOutcome["outcome"] | null =>
-    isCollabRecord(payload) && (payload.outcome === "created" || payload.outcome === "existing")
+    isRecord(payload) && (payload.outcome === "created" || payload.outcome === "existing")
         ? payload.outcome
         : null
 
@@ -69,7 +60,7 @@ const COLLAB_APPROVAL_CARD_STATUSES: ReadonlyArray<CollabApprovalView["status"]>
 
 /** Whether a press answer's card is the full projection an Office card draws. */
 export const isCollabApprovalCardView = (value: unknown): value is CollabApprovalCardView =>
-    isCollabRecord(value) &&
+    isRecord(value) &&
     isString(value.approvalId) &&
     isString(value.workspaceId) &&
     isString(value.groupId) &&
@@ -95,13 +86,13 @@ export const isCollabApprovalCardView = (value: unknown): value is CollabApprova
  * path - the revalidated read proves the card's state instead.
  */
 export const readCollabPressCard = (payload: unknown): CollabApprovalCardView | null =>
-    isCollabRecord(payload) && isCollabApprovalCardView(payload.card) ? payload.card : null
+    isRecord(payload) && isCollabApprovalCardView(payload.card) ? payload.card : null
 
 /** The card identities an open notice's target may name - the fields the follow consumes. */
 type CollabOpenNoticeTarget = Pick<CollabNoticeTarget, "approvalId" | "taskId" | "cardMessageId">
 
 const isCollabOpenNoticeTarget = (value: unknown): value is CollabOpenNoticeTarget =>
-    isCollabRecord(value) &&
+    isRecord(value) &&
     isNullableString(value.approvalId) &&
     isNullableString(value.taskId) &&
     isNullableString(value.cardMessageId)
@@ -126,7 +117,7 @@ const COLLAB_OPEN_NOTICE_OUTCOMES: ReadonlyArray<CollabOpenTurnNoticeOutcome["ou
  * scroll to a garbage element identity.
  */
 export const readCollabOpenNotice = (payload: unknown): CollabOpenNoticeRead | null =>
-    isCollabRecord(payload) && isOneOf(payload.outcome, COLLAB_OPEN_NOTICE_OUTCOMES)
+    isRecord(payload) && isOneOf(payload.outcome, COLLAB_OPEN_NOTICE_OUTCOMES)
         ? {
               outcome: payload.outcome,
               ...(isCollabOpenNoticeTarget(payload.target) ? { target: payload.target } : {}),

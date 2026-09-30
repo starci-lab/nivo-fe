@@ -12,6 +12,16 @@ import type {
     AccountingResultDetailInput,
     AccountingSummaryQueryInput,
 } from "@/modules/api/accounting"
+import {
+    isCommandPayloadState,
+    parseAccountingCorrectionReading,
+    parseAccountingEvidenceReading,
+    parseAccountingExceptionReading,
+    parseAccountingResultDetailReading,
+    parseAccountingRoutineReading,
+    parseAccountingSummaryReading,
+} from "@/modules/api/accounting/payload.guards"
+import type { AccountingCommandPayloadState } from "@/modules/api/accounting/payload.guards"
 import { nivoQueryPayload } from "@/modules/query"
 import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
 import { useQueryAccountingEvidenceSwr } from "@/hooks/swr/queries/useQueryAccountingEvidenceSwr"
@@ -35,15 +45,6 @@ import {
     type AccountingSurfaceStanding,
     type AccountingTranslation,
 } from "@/modules/accounting/accounting-workbench"
-import {
-    parseAccountingCorrectionReading,
-    parseAccountingEvidenceReading,
-    parseAccountingExceptionReading,
-    parseAccountingResultDetailReading,
-    parseAccountingRoutineReading,
-    parseAccountingSummaryReading,
-} from "@/modules/accounting/accounting-workbench.guards"
-import { isCommandPayloadState } from "./useAccountingWorkbench.guards"
 
 /*
  * The connected Accounting workbench (impl.accounting.nivo-fe.workbench-view).
@@ -84,8 +85,7 @@ const scopeStandingFor = (
 }
 
 /** The receiver's own state spelling inside one settled payload. */
-export type CommandPayloadState = { readonly state?: string; readonly resultId?: string | null }
-const payloadState = (answer: CommandAnswer): CommandPayloadState | undefined =>
+const payloadState = (answer: CommandAnswer): AccountingCommandPayloadState | undefined =>
     answer.ok && isCommandPayloadState(answer.data.payload) ? answer.data.payload : undefined
 /** The three states whose catalogue key differs from the receiver's spelling. */
 const EVIDENCE_STATE_KEYS = {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { createFormatter } from "use-intl/core"
+import { createFormatter } from "next-intl"
 import {
     accountingIntakePolicy,
     accountingCorrectionAccess,
@@ -9,7 +9,7 @@ import {
     formatAccountingInstant,
     formatMinorCurrency,
     maskParticipantId,
-} from "@/modules/accounting/accounting-workbench"
+} from "./accounting-workbench"
 
 const formatter = (locale: string) => createFormatter({ locale })
 
@@ -71,6 +71,14 @@ describe("accountingIntakePolicy", () => {
         expect(
             accountingIntakePolicy({
                 accountingScope: { classifications: ["income", "income"] },
+                currencyAndLocale: { functionalCurrency: "USD" },
+            }),
+        ).toBeNull()
+        expect(accountingIntakePolicy(null)).toBeNull()
+        expect(accountingIntakePolicy([])).toBeNull()
+        expect(
+            accountingIntakePolicy({
+                accountingScope: [],
                 currencyAndLocale: { functionalCurrency: "USD" },
             }),
         ).toBeNull()

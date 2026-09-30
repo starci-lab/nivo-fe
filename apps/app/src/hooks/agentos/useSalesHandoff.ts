@@ -14,7 +14,7 @@ import {
     type SalesSurfaceStanding,
     type SalesTranslation,
 } from "@/modules/sales/sales-workbench"
-import { parseSalesHandoffValue } from "@/modules/sales/sales-workbench.guards"
+import { parseSalesHandoffValue } from "@/modules/api/sales/payload.guards"
 
 /*
  * The connected handoff surface (impl.sales.nivo-fe.handoff-view).

@@ -7,7 +7,6 @@ import {
     isFreshness,
     isObservationKind,
     isQueueState,
-    isRecord,
     isRegisteredViewName,
     isTestState,
     isText,
@@ -16,6 +15,7 @@ import {
     isWireAvailability,
     formatShellSourceIdentity,
 } from "./identity"
+import { isRecord } from "../wire"
 import type { ShellArrivedReply } from "./types"
 import { SHELL_NAVIGATION_GRAMMAR_VERSION, SHELL_RETURN_ROUTE_NAME } from "./types"
 import type {

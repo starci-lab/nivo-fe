@@ -50,7 +50,7 @@ import {
     parseSalesPipelineValue,
     parseSalesPolicyValue,
     parseSalesReadinessValue,
-} from "@/modules/sales/sales-workbench.guards"
+} from "@/modules/api/sales/payload.guards"
 
 /*
  * The connected Sales workbench (impl.sales.nivo-fe.opportunity-workbench-view).
