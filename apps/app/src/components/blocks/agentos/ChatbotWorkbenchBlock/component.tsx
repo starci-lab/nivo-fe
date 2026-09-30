@@ -5,11 +5,11 @@ import {
     EmptyNotice,
     Heading,
     SurfaceCard,
-    SurfaceListCard,
     Text,
 } from "@starci/grammar/common"
-import type { ChatbotConversation, ChatbotMessage, ChatbotWorkbench } from "@/modules/api/workspace-controlplane"
+import type { ChatbotMessage, ChatbotWorkbench } from "@/modules/api/workspace-controlplane"
 import type { Formatter } from "../../../../modules/i18n/formatter"
+import { ChatbotChannelRail, ChatbotConversationRail, chatbotControlLabel } from "./ChatbotWorkbenchRails"
 import {
     CHATBOT_ACTIONS_CLASS_NAME,
     CHATBOT_CHANNEL_ROW_CLASS_NAME,
@@ -65,7 +65,8 @@ export type ChatbotWorkbenchBlockBaseCopy = {
 }
 
 /** The workbench's settled data, with the version line and locale formatter its connected half resolved. */
-type ChatbotWorkbenchBlockBaseData = {
+/** Settled workbench values the presentation draws without resolving the world itself. */
+export type ChatbotWorkbenchBlockBaseData = {
     readonly installationId: string
     readonly workbench: ChatbotWorkbench | null
     readonly selectedConversationId: string | null
@@ -77,7 +78,8 @@ type ChatbotWorkbenchBlockBaseData = {
 }
 
 /** The workbench's commands back into the connected half, including the rail disclosure. */
-type ChatbotWorkbenchBlockBaseActions = {
+/** Commands the presentation sends to the connected Chatbot workbench owner. */
+export type ChatbotWorkbenchBlockBaseActions = {
     readonly selectConversation: (conversationId: string) => void
     readonly connectZalo: () => void
     readonly setHandoff: (conversationId: string) => void
@@ -145,87 +147,6 @@ const deliveryLabel = (message: ChatbotMessage, copy: ChatbotWorkbenchBlockBaseC
             : copy.failedBeforeStart
     const label = DELIVERY_STATE_LABELS[message.deliveryState]
     return label === undefined ? copy.recorded : copy[label]
-}
-
-const conversationLabel = (conversation: ChatbotConversation, copy: ChatbotWorkbenchBlockBaseCopy): string =>
-    conversation.handoffState === "human" ? copy.humanOwned : copy.automated
-
-/** Control axis of the selected conversation, including the command still in flight. */
-const controlLabel = (conversation: ChatbotConversation, copy: ChatbotWorkbenchBlockBaseCopy, pending: boolean): string => {
-    if (conversation.handoffState === "human") return pending ? copy.returnPending : copy.humanOwned
-    return pending ? copy.handoffPending : copy.automated
-}
-
-type WorkbenchRegionProps = {
-    readonly props: ChatbotWorkbenchBlockBaseData
-    readonly on: ChatbotWorkbenchBlockBaseActions
-}
-
-const ChannelRail = ({ props, on }: WorkbenchRegionProps) => {
-    const channels = props.workbench?.channels ?? []
-    const hasZaloChannel = channels.some(
-        (channel) => channel.provider.toLowerCase() === "zalo" && channel.state !== "revoked",
-    )
-    return (
-        <SurfaceCard label={props.copy.channels} composition="joined">
-            {channels.length === 0 ? (
-                <EmptyNotice
-                    message={props.copy.noChannels}
-                    actionLabel={props.copy.connectZalo}
-                    actionVariant="secondary"
-                    isActionPending={props.pending}
-                    onAction={on.connectZalo}
-                />
-            ) : (
-                <SurfaceListCard label={props.copy.channels} depth="nested">
-                    {channels.map((channel) => (
-                        <div className={CHATBOT_CHANNEL_ROW_CLASS_NAME} key={channel.id}>
-                            <Text size="sm" weight="semibold">
-                                {channel.provider.toUpperCase()}
-                            </Text>
-                            <Text size="sm" tone="muted">
-                                {channel.accountRef}
-                            </Text>
-                            <Badge tone={channel.state === "active" ? "success" : "neutral"}>{channel.state}</Badge>
-                        </div>
-                    ))}
-                </SurfaceListCard>
-            )}
-            {channels.length > 0 && !hasZaloChannel ? (
-                <Button variant="secondary" width="fill" isPending={props.pending} onPress={on.connectZalo}>
-                    {props.copy.connectZalo}
-                </Button>
-            ) : null}
-            <Text size="xs" tone="muted">
-                {props.copy.installation}: {props.installationId}
-            </Text>
-        </SurfaceCard>
-    )
-}
-
-const ConversationRail = ({ props, on }: WorkbenchRegionProps) => {
-    const conversations = props.workbench?.conversations ?? []
-    return (
-        <SurfaceCard label={props.copy.conversations} composition="joined">
-            {conversations.length === 0 ? (
-                <EmptyNotice message={props.copy.noConversations} />
-            ) : (
-                <SurfaceListCard label={props.copy.conversations} depth="nested">
-                    {conversations.map((conversation) => (
-                        <Button
-                            key={conversation.id}
-                            variant={conversation.id === props.selectedConversationId ? "primary" : "secondary"}
-                            width="fill"
-                            onPress={() => on.selectConversation(conversation.id)}
-                        >
-                            {conversation.participantRef} · {conversationLabel(conversation, props.copy)}
-                            {conversation.id === props.selectedConversationId ? ` · ${props.copy.selected}` : ""}
-                        </Button>
-                    ))}
-                </SurfaceListCard>
-            )}
-        </SurfaceCard>
-    )
 }
 
 /** Responsive console composition whose rail collapse is owned by the published Grammar. */
@@ -332,7 +253,7 @@ export const ChatbotWorkbenchBlockBase = (props: ChatbotWorkbenchBlockBaseProps)
                             <Heading level={3}>{selected?.participantRef ?? data.copy.selectConversation}</Heading>
                             {selected === null ? null : (
                                 <Badge tone={selected.handoffState === "human" ? "warning" : "success"}>
-                                    {controlLabel(selected, data.copy, data.pending)}
+                                    {chatbotControlLabel(selected, data.copy, data.pending)}
                                 </Badge>
                             )}
                         </div>
@@ -359,8 +280,8 @@ export const ChatbotWorkbenchBlockBase = (props: ChatbotWorkbenchBlockBaseProps)
                     composer={actionRegion}
                     rail={
                         <div className={CHATBOT_RAIL_CLASS_NAME}>
-                            <ChannelRail props={data} on={on} />
-                            <ConversationRail props={data} on={on} />
+                            <ChatbotChannelRail props={data} on={on} />
+                            <ChatbotConversationRail props={data} on={on} />
                         </div>
                     }
                     railLabel={data.copy.conversations}

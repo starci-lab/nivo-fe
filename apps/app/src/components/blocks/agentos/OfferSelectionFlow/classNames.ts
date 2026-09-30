@@ -19,7 +19,7 @@ export const OFFER_ROW_CLASS_NAME = cn(
     "py-4",
     "last:border-b-0",
     "md:grid",
-    "md:grid-cols-[auto_2fr_minmax(0px,1fr)_minmax(7.5rem,1fr)_repeat(2,minmax(0px,1fr))_auto]",
+    "md:grid-cols-[auto_2fr_minmax(0,1fr)_minmax(7.5rem,1fr)_repeat(2,minmax(0,1fr))_auto]",
     "md:items-start",
     "md:gap-3",
 )
@@ -32,7 +32,7 @@ export const SELECTED_OFFER_ROW_CLASS_NAME = cn(OFFER_ROW_CLASS_NAME, "bg-accent
  * It renders at the accepted direction's mark size (~26px) so the row's primary affordance
  * carries its accepted visual weight.
  */
-export const OFFER_RADIO_CLASS_NAME = cn("mt-1", "h-[26px]", "w-[26px]", "shrink-0", "accent-accent")
+export const OFFER_RADIO_CLASS_NAME = cn("mt-1", "h-7", "w-7", "shrink-0", "accent-accent")
 
 /** Offer name and its inseparable amount/currency pair read as one unit. */
 export const OFFER_IDENTITY_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-1")

@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl"
 import type { ReactNode } from "react"
 import { matchMediaFixture } from "@/test-support/mock-result"
 import { TIME_ZONE } from "@/modules/i18n"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { beforeAll, describe, expect, it, vi } from "vitest"
 import { ChatbotWorkbenchBlock, type ChatbotWorkbenchBlockCopy } from "."
 
@@ -149,10 +150,10 @@ describe("ChatbotWorkbenchBlock", () => {
         window.matchMedia = matchMediaFixture(false)
     })
 
-    it("keeps installation identity, handoff and ambiguous delivery distinct", () => {
+    it("keeps installation identity, handoff and ambiguous delivery distinct", async () => {
         const resolve = vi.fn()
         const reconcile = vi.fn()
-        render(
+        const { container } = render(
             <ChatbotWorkbenchBlock
                 installationId="chatbot-1"
                 workbench={workbench}
@@ -173,6 +174,7 @@ describe("ChatbotWorkbenchBlock", () => {
         fireEvent.click(screen.getByRole("button", { name: "Mark delivered" }))
         expect(resolve).toHaveBeenCalledWith("conversation-1")
         expect(reconcile).toHaveBeenCalledWith("outbox-1", true)
+        await expectNoA11yViolations(container)
     })
 
     it("formats message timestamps through the configured app formatter", () => {

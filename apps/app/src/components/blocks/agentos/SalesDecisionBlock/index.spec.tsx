@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { NextIntlClientProvider } from "next-intl"
 import enMessages from "@/messages/en.json"
 import { TIME_ZONE } from "@/modules/i18n"
+import { expectNoA11yViolations } from "@/testing/axe"
 
 /*
  * The connected decision block, driven at its published door. `@/hooks` is the only place this block
@@ -140,7 +141,7 @@ describe("SalesDecisionBlock", () => {
         mocks.setState("loading")
     })
 
-    it("reads the whole surface through the published door with the route's own scope and catalogue", () => {
+    it("reads the whole surface through the published door with the route's own scope and catalogue", async () => {
         mocks.setState("pending")
         const { container } = renderBlock()
         expect(mocks.calls[0]?.workspaceId).toBe("workspace-1")
@@ -150,6 +151,7 @@ describe("SalesDecisionBlock", () => {
         expect(textOf(container)).toContain(
             translate("rail.installation", { workspace: "workspace-1", installation: "installation-1" }),
         )
+        await expectNoA11yViolations(container)
     })
 
     it("keeps the surface inert while the door still holds a loading standing", () => {

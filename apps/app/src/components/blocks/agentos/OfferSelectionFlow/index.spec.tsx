@@ -1,5 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react"
+import { NextIntlClientProvider } from "next-intl"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import enMessages from "@/messages/en.json"
+import { TIME_ZONE } from "@/modules/i18n"
+import { expectNoA11yViolations } from "@/testing/axe"
+import type { OfferSelectionFlowProps } from "./component"
 const mocks = vi.hoisted(() => ({
     offers: { data: undefined as unknown, isValidating: false, error: undefined as unknown, mutate: vi.fn() },
     session: { state: { status: "signed-in", accessToken: "token" } as unknown },
@@ -27,32 +32,39 @@ type ViewOffer = {
     readonly displayName: string
     readonly amount: string
 }
-type ViewInput = {
-    readonly state: string
-    readonly props: Record<string, unknown>
-    readonly on?: {
-        readonly select?: (offerId: string) => void
-        readonly refresh?: () => void
-        readonly signIn?: () => void
-    }
-}
+type ViewInput = OfferSelectionFlowProps
 const captured: { view: ViewInput | null } = { view: null }
-vi.mock("./component", () => ({
-    OfferSelectionFlowBase: (input: ViewInput) => {
-        captured.view = input
-        return (
-            <>
-                <output data-testid="flow-state">{input.state}</output>
-                <output data-testid="flow-props">{JSON.stringify(input.props)}</output>
-                {input.on?.select === undefined ? null : (
-                    <button onClick={() => input.on?.select?.("nivo-workspace-scale")}>select-offer</button>
-                )}
-                {input.on?.refresh === undefined ? null : <button onClick={input.on.refresh}>refresh</button>}
-            </>
-        )
-    },
-}))
+vi.mock("./component", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("./component")>()
+    return {
+        ...actual,
+        OfferSelectionFlowBase: (input: ViewInput) => {
+            captured.view = input
+            const actions = "on" in input ? input.on : undefined
+            const select = actions !== undefined && "select" in actions ? actions.select : undefined
+            const refresh = actions !== undefined && "refresh" in actions ? actions.refresh : undefined
+            return (
+                <>
+                    <output data-testid="flow-state">{input.state}</output>
+                    <output data-testid="flow-props">{JSON.stringify(input.props)}</output>
+                    {select === undefined ? null : (
+                        <button onClick={() => select("nivo-workspace-scale")}>select-offer</button>
+                    )}
+                    {refresh === undefined ? null : <button onClick={refresh}>refresh</button>}
+                    <actual.OfferSelectionFlowBase {...input} />
+                </>
+            )
+        },
+    }
+})
 import OfferSelectionFlow from "./"
+
+const renderFlow = () =>
+    render(
+        <NextIntlClientProvider locale="en" messages={enMessages} timeZone={TIME_ZONE}>
+            <OfferSelectionFlow />
+        </NextIntlClientProvider>,
+    )
 /** One boundary offer as the checkout boundary publishes it (amount carries no separator). */
 const boundaryOffer = (offerId: string, offerVersion: string, displayName: string, amount: string) => ({
     offerId,
@@ -91,19 +103,23 @@ describe("OfferSelectionFlow", () => {
         mocks.offers = { data: offersAnswer("current"), isValidating: false, error: undefined, mutate: vi.fn() }
         mocks.session = { state: { status: "signed-in", accessToken: "token" } }
     })
+    it("renders the real offer surface without accessibility violations", async () => {
+        const { container } = renderFlow()
+        await expectNoA11yViolations(container)
+    })
     it("waits for the signed-in session before settling any offer state", () => {
         mocks.session = { state: { status: "restoring" } }
-        render(<OfferSelectionFlow />)
+        renderFlow()
         expect(screen.getByTestId("flow-state")).toHaveTextContent("loading")
     })
     it("keeps the skeleton while the boundary's current-offer read is unresolved", () => {
         mocks.offers = { data: undefined, isValidating: true, error: undefined, mutate: vi.fn() }
-        render(<OfferSelectionFlow />)
+        renderFlow()
         expect(screen.getByTestId("flow-state")).toHaveTextContent("loading")
         expect(props().offers).toBeUndefined()
     })
     it("presents the boundary's current offers with the presented version selected", () => {
-        render(<OfferSelectionFlow />)
+        renderFlow()
         expect(screen.getByTestId("flow-state")).toHaveTextContent("selection")
         const offers = offersProp()
         expect(offers.map((offer) => offer.displayName)).toEqual([
@@ -115,13 +131,13 @@ describe("OfferSelectionFlow", () => {
         expect(props().selectedOfferId).toBe("nivo-workspace-growth")
     })
     it("hands the selected offer identity and version to the checkout route as navigation", () => {
-        render(<OfferSelectionFlow />)
+        renderFlow()
         expect(props().checkoutHref).toBe(
             "/agentos/workspaces/new/checkout?offer=nivo-workspace-growth&offerVersion=draft-2026-09-22",
         )
     })
     it("recomputes the review destination when the purchaser selects another current offer", () => {
-        render(<OfferSelectionFlow />)
+        renderFlow()
         fireEvent.click(screen.getByRole("button", { name: "select-offer" }))
         expect(props().selectedOfferId).toBe("nivo-workspace-scale")
         expect(props().checkoutHref).toContain("offer=nivo-workspace-scale")
@@ -134,7 +150,7 @@ describe("OfferSelectionFlow", () => {
             error: undefined,
             mutate,
         }
-        render(<OfferSelectionFlow />)
+        renderFlow()
         expect(screen.getByTestId("flow-state")).toHaveTextContent("unavailable")
         expect(props().message).toBe("boundary read refused")
         fireEvent.click(screen.getByRole("button", { name: "refresh" }))
@@ -142,7 +158,7 @@ describe("OfferSelectionFlow", () => {
     })
     it("omits the offer and requests no checkout when the presented version is stale", () => {
         mocks.offers = { data: offersAnswer("stale"), isValidating: false, error: undefined, mutate: vi.fn() }
-        render(<OfferSelectionFlow />)
+        renderFlow()
         expect(screen.getByTestId("flow-state")).toHaveTextContent("unavailable")
         expect(props().checkoutHref).toBeUndefined()
     })
@@ -153,7 +169,7 @@ describe("OfferSelectionFlow", () => {
             error: undefined,
             mutate: vi.fn(),
         }
-        render(<OfferSelectionFlow />)
+        renderFlow()
         expect(screen.getByTestId("flow-state")).toHaveTextContent("no-session")
         expect(props().offers).toBeUndefined()
         expect(props().message).toContain("not an admitted purchaser")
@@ -163,13 +179,13 @@ describe("OfferSelectionFlow", () => {
     })
     it("shows no private offer terms when nobody is signed in", () => {
         mocks.session = { state: { status: "anonymous" } }
-        render(<OfferSelectionFlow />)
+        renderFlow()
         expect(screen.getByTestId("flow-state")).toHaveTextContent("no-session")
         expect(props().offers).toBeUndefined()
         expect(props().signInHref).toContain("/authentication")
     })
     it("resolves the workspaces return path through the locale-aware owner", () => {
-        render(<OfferSelectionFlow />)
+        renderFlow()
         const links = props().links as { readonly workspaces: string }
         expect(links.workspaces).toBe("/agentos/workspaces")
     })

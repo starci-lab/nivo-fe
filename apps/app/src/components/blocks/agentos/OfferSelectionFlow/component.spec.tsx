@@ -164,25 +164,19 @@ describe("OfferSelectionFlowBase", () => {
         expect(review).toHaveAttribute("href", "/checkout?offer=nivo-workspace-starter&offerVersion=draft-2026-09-22")
     })
 
-    it("draws the joined surface with one external label row and hairline-separated flush bands", () => {
-        const { container } = render(
+    it("keeps every offer inside the labelled surface and marks the current selection", () => {
+        render(
             <OfferSelectionFlowBase
                 state="selection"
                 props={{ copy, links, offers, selectedOfferId: "nivo-workspace-growth", checkoutHref: "/checkout" }}
                 on={{ select: vi.fn() }}
             />,
         )
-        const html = container.innerHTML
-        expect(html).toContain("Current offers")
-        expect(html).toContain("Read from the Workspace Provision checkout boundary")
-        const rows = container.querySelectorAll("[data-offer]")
-        expect(rows).toHaveLength(3)
-        rows.forEach((row) => {
-            expect(row.className).toContain("border-separator")
-            expect(row.className).toContain("px-4")
-        })
-        const selected = container.querySelector("[data-offer='nivo-workspace-growth']")
-        expect(selected?.className).toContain("bg-accent-soft")
+        expect(screen.getByRole("radiogroup", { name: "Available offers" })).toBeInTheDocument()
+        expect(screen.getByText("Read from the Workspace Provision checkout boundary")).toBeInTheDocument()
+        expect(screen.getByRole("radio", { name: /Nivo Workspace Starter/ })).not.toBeChecked()
+        expect(screen.getByRole("radio", { name: /Nivo Workspace Growth/ })).toBeChecked()
+        expect(screen.getByRole("radio", { name: /Nivo Workspace Scale/ })).not.toBeChecked()
     })
 
     it("falls back to the first offer when the presented identity is absent from the list", () => {

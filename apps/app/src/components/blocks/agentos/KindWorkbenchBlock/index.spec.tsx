@@ -5,6 +5,7 @@ import { NextIntlClientProvider, useTranslations } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { describe, expect, it, vi } from "vitest"
 vi.mock("@/components/blocks/agentos/AccountingWorkbenchBlock", () => ({
     AccountingWorkbenchBlock: () => <div>Accounting workbench</div>,
@@ -97,6 +98,20 @@ const KindWorkbenchBlock = ({ locale = "en", ...props }: KindWorkbenchBlockFixtu
 )
 
 describe("KindWorkbenchBlock", () => {
+    it("renders the real support workbench without accessibility violations", async () => {
+        const { container } = render(
+            <KindWorkbenchBlock
+                moduleId="installation-1"
+                kindKey="customer-support"
+                workbenchKey="support-queue"
+                workbenchVersion="1.0.0"
+                registry={DEFAULT_WORKBENCH_REGISTRY}
+            />,
+        )
+
+        await expectNoA11yViolations(container)
+    })
+
     it.each([
         ["support-queue", "Support queue"],
         ["accounting-sheet", "Accounting workbench"],

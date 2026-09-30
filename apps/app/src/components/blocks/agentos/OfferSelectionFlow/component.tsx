@@ -3,18 +3,16 @@ import {
     ACTION_TARGET_CLASS_NAME,
     NOTICE_BAND_CLASS_NAME,
     NO_SESSION_BAND_CLASS_NAME,
-    OFFER_FACT_CLASS_NAME,
-    OFFER_IDENTITY_CLASS_NAME,
-    OFFER_RADIO_CLASS_NAME,
-    OFFER_ROW_CLASS_NAME,
     SECTIONS_CLASS_NAME,
-    SELECTED_OFFER_ROW_CLASS_NAME,
-    SUMMARY_BAND_CLASS_NAME,
-    SUMMARY_BAND_DIVIDER_CLASS_NAME,
-    SUMMARY_FACTS_CLASS_NAME,
 } from "./classNames"
 import {
-    Badge,
+    offerSelectionHead,
+    offerSelectionReadOnlyRow,
+    offerSelectionSelectableRow,
+    offerSelectionSkeletonRow,
+    offerSelectionSummaryBand,
+} from "./OfferSelectionRows"
+import {
     Button,
     EmptyNotice,
     PageContainer,
@@ -23,7 +21,6 @@ import {
     Text,
     TextAction,
 } from "@starci/grammar/common"
-import { CheckoutFlowHead } from "../CheckoutFlowHead"
 
 /** Resolved copy the connected owner supplies; no translation or transport lives here. */
 export type OfferSelectionCopy = {
@@ -129,112 +126,6 @@ export type OfferSelectionFlowProps =
           }
       }
 
-const factCell = (label: string, value: string, isSkeleton = false) => (
-    <span key={label} className={OFFER_FACT_CLASS_NAME}>
-        <Text size="xs" tone="muted" isSkeleton={isSkeleton}>
-            {label}
-        </Text>
-        <Text size="sm" overflow="wrap" isSkeleton={isSkeleton}>
-            {value}
-        </Text>
-    </span>
-)
-
-const head = (copy: OfferSelectionCopy, links: OfferSelectionLinks) => (
-    <CheckoutFlowHead
-        accessibilityLabel={copy.path}
-        breadcrumbs={[
-            { label: copy.workspaces, href: links.workspaces },
-            { label: copy.newWorkspace, isCurrent: true },
-        ]}
-        title={copy.title}
-        description={copy.description}
-    />
-)
-
-const offerFacts = (offer: OfferSelectionOffer, copy: OfferSelectionCopy, isSkeleton = false) => (
-    <>
-        {factCell(copy.billingCadence, isSkeleton ? copy.billingCadence : offer.billingCadence, isSkeleton)}
-        {factCell(copy.renewalBehavior, isSkeleton ? copy.renewalBehavior : offer.renewalMode, isSkeleton)}
-        {factCell(copy.includedOutcome, isSkeleton ? copy.includedOutcome : offer.includedOutcome, isSkeleton)}
-        {factCell(copy.eligibility, isSkeleton ? copy.eligibility : offer.eligibility, isSkeleton)}
-    </>
-)
-
-const selectableRow = (
-    offer: OfferSelectionOffer,
-    copy: OfferSelectionCopy,
-    selected: boolean,
-) => ({
-    value: offer.offerId,
-    label: offer.displayName,
-    description: (
-        <div className={selected ? SELECTED_OFFER_ROW_CLASS_NAME : OFFER_ROW_CLASS_NAME} data-offer={offer.offerId}>
-            <span className={OFFER_IDENTITY_CLASS_NAME}>
-                <Text size="sm" tone="muted">
-                    {offer.amount}
-                </Text>
-            </span>
-            {offerFacts(offer, copy)}
-            {selected ? <Badge tone="accent">{copy.selectedBadge}</Badge> : null}
-        </div>
-    ),
-})
-
-const readOnlyRow = (offer: OfferSelectionOffer, copy: OfferSelectionCopy) => (
-    <div key={offer.offerId} className={OFFER_ROW_CLASS_NAME} data-offer={offer.offerId}>
-        <span aria-hidden="true" className={OFFER_RADIO_CLASS_NAME} />
-        <span className={OFFER_IDENTITY_CLASS_NAME}>
-            <Text size="sm" weight="semibold">
-                {offer.displayName}
-            </Text>
-            <Text size="sm" tone="muted">
-                {offer.amount}
-            </Text>
-        </span>
-        {offerFacts(offer, copy)}
-        <span aria-hidden="true" />
-    </div>
-)
-
-const skeletonRow = (key: string, copy: OfferSelectionCopy) => (
-    <div key={key} className={OFFER_ROW_CLASS_NAME}>
-        <span aria-hidden="true" className={OFFER_RADIO_CLASS_NAME} />
-        <span className={OFFER_IDENTITY_CLASS_NAME}>
-            <Text size="sm" weight="semibold" isSkeleton>
-                {copy.offerGroupLabel}
-            </Text>
-            <Text size="sm" tone="muted" isSkeleton>
-                {copy.offersFact}
-            </Text>
-        </span>
-        {factCell(copy.billingCadence, copy.billingCadence, true)}
-        {factCell(copy.renewalBehavior, copy.renewalBehavior, true)}
-        {factCell(copy.includedOutcome, copy.includedOutcome, true)}
-        {factCell(copy.eligibility, copy.eligibility, true)}
-        <span aria-hidden="true" />
-    </div>
-)
-
-const summaryBand = (copy: OfferSelectionCopy, selected: OfferSelectionOffer) => (
-    <div className={SUMMARY_BAND_CLASS_NAME}>
-        <span className={OFFER_IDENTITY_CLASS_NAME}>
-            <Text size="xs" tone="muted">
-                {copy.selectedOffer}
-            </Text>
-            <Text size="sm" weight="semibold">
-                {selected.displayName}
-            </Text>
-        </span>
-        <span aria-hidden="true" className={SUMMARY_BAND_DIVIDER_CLASS_NAME} />
-        <span className={SUMMARY_FACTS_CLASS_NAME}>
-            <Text size="sm">{selected.amount}</Text>
-            <Text size="sm">{selected.billingCadence}</Text>
-            <Text size="sm">{selected.renewalMode}</Text>
-        </span>
-    </div>
-)
-
 /** Draw every offer-selection state from resolved props; the connected owner supplies data and routes. */
 export const OfferSelectionFlowBase = (props: OfferSelectionFlowProps) => {
     const { state } = props
@@ -243,11 +134,11 @@ export const OfferSelectionFlowBase = (props: OfferSelectionFlowProps) => {
         return (
             <PageContainer measure="product">
                 <div className={SECTIONS_CLASS_NAME} aria-busy="true" data-contract="GAP-5">
-                    {head(copy, links)}
+                    {offerSelectionHead(copy, links)}
                     <SurfaceCard label={copy.offersLabel} fact={copy.offersFact} composition="joined">
-                        {skeletonRow("offer-a", copy)}
-                        {skeletonRow("offer-b", copy)}
-                        {skeletonRow("offer-c", copy)}
+                        {offerSelectionSkeletonRow("offer-a", copy)}
+                        {offerSelectionSkeletonRow("offer-b", copy)}
+                        {offerSelectionSkeletonRow("offer-c", copy)}
                         <div className={ACTION_BAND_CLASS_NAME}>
                             <span className={ACTION_TARGET_CLASS_NAME}>
                                 <Button variant="primary" size="lg" width="fill" isSkeleton>
@@ -267,7 +158,7 @@ export const OfferSelectionFlowBase = (props: OfferSelectionFlowProps) => {
         return (
             <PageContainer measure="product">
                 <div className={SECTIONS_CLASS_NAME} data-contract="GAP-5">
-                    {head(copy, links)}
+                    {offerSelectionHead(copy, links)}
                     <SurfaceCard label={copy.offersLabel} fact={copy.offersFact} composition="joined">
                         <div className={NO_SESSION_BAND_CLASS_NAME}>
                             <Text size="sm" weight="semibold">
@@ -303,9 +194,9 @@ export const OfferSelectionFlowBase = (props: OfferSelectionFlowProps) => {
         return (
             <PageContainer measure="product">
                 <div className={SECTIONS_CLASS_NAME} data-contract="GAP-5">
-                    {head(copy, links)}
+                    {offerSelectionHead(copy, links)}
                     <SurfaceCard label={copy.offersLabel} fact={copy.offersFact} composition="joined">
-                        {props.props.offers.map((offer) => readOnlyRow(offer, copy))}
+                        {props.props.offers.map((offer) => offerSelectionReadOnlyRow(offer, copy))}
                         <div className={NOTICE_BAND_CLASS_NAME}>
                             <EmptyNotice
                                 message={copy.unavailableTitle}
@@ -329,18 +220,18 @@ export const OfferSelectionFlowBase = (props: OfferSelectionFlowProps) => {
     return (
         <PageContainer measure="product">
             <div className={SECTIONS_CLASS_NAME} data-contract="GAP-5">
-                {head(copy, links)}
+                {offerSelectionHead(copy, links)}
                 <SurfaceCard label={copy.offersLabel} fact={copy.offersFact} composition="joined">
                     <RadioGroup
                         name="workspace-offer"
                         label={copy.offerGroupLabel}
                         options={props.props.offers.map((offer) =>
-                            selectableRow(offer, copy, offer.offerId === selected?.offerId),
+                            offerSelectionSelectableRow(offer, copy, offer.offerId === selected?.offerId),
                         )}
                         value={selected?.offerId ?? null}
                         onValueChange={props.on.select}
                     />
-                    {selected === undefined ? null : summaryBand(copy, selected)}
+                    {selected === undefined ? null : offerSelectionSummaryBand(copy, selected)}
                     {selected === undefined ? null : (
                         <div className={ACTION_BAND_CLASS_NAME}>
                             <span className={ACTION_TARGET_CLASS_NAME}>

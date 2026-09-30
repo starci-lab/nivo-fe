@@ -25,7 +25,7 @@ type AgentOSModuleAttachmentsLabels = {
 }
 
 /** Data and actions drawn by the one studio and solution attachment surface. */
-export type AgentOSModuleAttachmentsViewProps = {
+export type AgentOSModuleAttachmentsBaseProps = {
     readonly state: "attachments"
     readonly props: {
         readonly studio?: Pick<AgentosModuleStudio, "attachments">
@@ -54,7 +54,7 @@ const lifecycleStateLabel = (index: number, active: number, labels: AgentOSModul
 }
 
 /** Draw quarantined file evidence with explicit scan outcomes for both module scopes. */
-export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsViewProps) => {
+export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsBaseProps) => {
     const { studio, status, notice, pending, labels } = props.props
     const { onChoose, onRetry, onRemove, onRetryNotice, chunks } = props.on
     const [filePickerRevision, setFilePickerRevision] = useState(0)
