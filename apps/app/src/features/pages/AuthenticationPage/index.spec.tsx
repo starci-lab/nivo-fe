@@ -198,6 +198,7 @@ describe("AuthenticationPage connected journeys", () => {
     it("completes reset, masks code refusal and returns onward to sign-in", async () => {
         render(<AuthenticationPage />)
         fireEvent.click(screen.getByTestId("forgot"))
+        expect(panel()).toContain(`"submitLabel":"${copy("signUp.submitLabel")}"`)
         fireEvent.click(screen.getByTestId("submit-details"))
         await waitFor(() => expect(panel()).toContain('"state":"code"'))
         mocks.api.forgotPasswordResend.mockResolvedValue({ ok: false, reason: "reset-resend-failed" })

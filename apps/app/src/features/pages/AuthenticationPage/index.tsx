@@ -26,17 +26,17 @@ type AuthenticationPageConnectedProps = {
 }
 
 const AuthenticationPageConnected = ({ sessionEnding }: AuthenticationPageConnectedProps) => {
-    const t = useTranslations("authentication")
+    const translateAuthentication = useTranslations("authentication")
     const router = useRouter()
     const pathname = usePathname()
     const session = useSession()
     const notice = useAuthenticationNotice({ sessionEnding, pathname, router })
     const flow = useAuthenticationPhase({ noticeKind: notice.noticeKind })
-    const twoFactor = useAuthenticationTwoFactor({ control: flow, session, t })
+    const twoFactor = useAuthenticationTwoFactor({ control: flow, session, t: translateAuthentication })
     const isSignedInArrival = session.state.status === "signed-in" && flow.phase === "details"
     const details = useAuthenticationDetails({
         control: flow,
-        t,
+        t: translateAuthentication,
         activateTwoFactor: twoFactor.activate,
         isSignedInArrival,
     })
@@ -44,7 +44,7 @@ const AuthenticationPageConnected = ({ sessionEnding }: AuthenticationPageConnec
         mode: details.mode,
         control: flow,
         session,
-        t,
+        t: translateAuthentication,
         showNotice: notice.show,
         activateTwoFactor: twoFactor.activate,
     })
@@ -92,12 +92,14 @@ const AuthenticationPageConnected = ({ sessionEnding }: AuthenticationPageConnec
         },
     }
 
-    const statusMessage = details.providerRefusalVisible ? t("signIn.oauthRefused") : flow.feedback.statusMessage
+    const statusMessage = details.providerRefusalVisible
+        ? translateAuthentication("signIn.oauthRefused")
+        : flow.feedback.statusMessage
     const isError = details.providerRefusalVisible || flow.feedback.isError
     const isPending = details.oauthIsMutating || flow.pendingAction !== null
     const panel: AuthenticationPanelProps = {
         ...authenticationPanelFor({
-            t,
+            t: translateAuthentication,
             mode: details.mode,
             phase: flow.phase,
             noticeKind: notice.noticeKind,
@@ -119,12 +121,14 @@ const AuthenticationPageConnected = ({ sessionEnding }: AuthenticationPageConnec
         if (isRestoring || isSignedInArrival || flow.phase === "done" || flow.phase === "notice") return []
         const switchTo = details.mode === "signIn" ? "signUp" : "signIn"
         const prompt = {
-            question: t(`${details.mode}.promptQuestion`),
-            action: t(`${details.mode}.promptAction`),
+            question: translateAuthentication(`${details.mode}.promptQuestion`),
+            action: translateAuthentication(`${details.mode}.promptAction`),
             onPress: () => changeMode(switchTo),
         }
-        if (flow.phase === "twoFactor") return [{ question: "", action: t("signIn.backLabel"), onPress: clear }]
-        if (flow.phase === "code") return [{ question: "", action: t("backLabel"), onPress: clear }, prompt]
+        if (flow.phase === "twoFactor")
+            return [{ question: "", action: translateAuthentication("signIn.backLabel"), onPress: clear }]
+        if (flow.phase === "code")
+            return [{ question: "", action: translateAuthentication("backLabel"), onPress: clear }, prompt]
         return [prompt]
     })()
 
@@ -134,10 +138,10 @@ const AuthenticationPageConnected = ({ sessionEnding }: AuthenticationPageConnec
 /** Keep the live address reader under its required Suspense boundary. */
 export const AuthenticationPage = (props: AuthenticationPageProps) => {
     void props
-    const t = useTranslations("boundary.loading")
+    const translateLoading = useTranslations("boundary.loading")
     const [sessionEnding, setSessionEnding] = useState<SessionEndingArrival | null>(null)
     return (
-        <Suspense fallback={<RouteLoadingView props={{ label: t("label") }} />}>
+        <Suspense fallback={<RouteLoadingView props={{ label: translateLoading("label") }} />}>
             <SessionEndingQuery onParam={setSessionEnding} />
             <AuthenticationPageConnected sessionEnding={sessionEnding} />
         </Suspense>
