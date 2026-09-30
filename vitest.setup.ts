@@ -1,4 +1,3 @@
-import "./packages/i18n/vitest.setup"
 import "@testing-library/jest-dom/vitest"
 import { cleanup } from "@testing-library/react"
 import { mutate, SWRConfig } from "swr"
