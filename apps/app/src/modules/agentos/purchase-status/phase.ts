@@ -1,7 +1,4 @@
 import type {
-    WorkspaceCheckoutAnswer,
-    WorkspaceCheckoutEntryDestination,
-    WorkspaceCheckoutObservedIdentities,
     WorkspaceCheckoutStatusView,
 } from "@/modules/api/workspace-controlplane"
 
@@ -86,25 +83,9 @@ export const OBSERVED_ORDER_STATES: ReadonlySet<string> = new Set([
     "ready",
 ])
 
-/** The registered workspace-shell destination the entry owner may return. */
-const ENTRY_ROUTE_NAME = "instance-management.workspace-shell"
-
-/** The purchase view one checkout outcome carries, when the arm carries one at all. */
-export const purchaseOf = (outcome: WorkspaceCheckoutAnswer | null): WorkspaceCheckoutStatusView | null =>
-    outcome !== null && "purchase" in outcome && outcome.purchase !== undefined ? outcome.purchase : null
-
 /** The order fact is distinct from the purchase identity and exists only for an observed order. */
 export const provisioningOrderRefOf = (purchase: WorkspaceCheckoutStatusView): string | null =>
     OBSERVED_ORDER_STATES.has(purchase.provisioning.state) ? purchase.provisioning.reference : null
-
-/** Exact source identities the recovery command may reconcile from this observed purchase. */
-export const observedIdentitiesOf = (purchase: WorkspaceCheckoutStatusView): WorkspaceCheckoutObservedIdentities => ({
-    ...(purchase.billing.reference !== null ? { billingReceiptId: purchase.billing.reference } : {}),
-    ...(purchase.provisioning.reference !== null ? { provisioningOrderId: purchase.provisioning.reference } : {}),
-    ...(purchase.readiness.state === "ready" && purchase.readiness.reference !== null
-        ? { workspaceId: purchase.readiness.reference }
-        : {}),
-})
 
 /**
  * The refund-family phase a refused paid order stands on. A settled refund is shown only beside
@@ -180,7 +161,3 @@ export const readinessPhaseOf = (state: WorkspaceCheckoutStatusView["readiness"]
     if (state === "unavailable") return "provisioning-unknown"
     return "provisioning"
 }
-
-/** Resolve only the registered workspace-shell destination. */
-export const entryPathOf = (destination: WorkspaceCheckoutEntryDestination): string | null =>
-    destination.routeName === ENTRY_ROUTE_NAME ? `/agentos/workspaces/${destination.workspaceId}` : null

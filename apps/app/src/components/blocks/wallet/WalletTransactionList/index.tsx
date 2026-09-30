@@ -3,21 +3,10 @@ import { Badge, Button, Heading, SurfaceCard, SurfaceListCard, Text } from "@sta
 import type {
     LedgerSectionView,
     LinkedInvoiceSectionView,
-    WalletFactRow,
     WalletControlCenterActions,
     WalletLedgerRow,
 } from "@/modules/wallet/wallet-center/types"
-
-const factRow = (row: WalletFactRow, isLoading = false) => (
-    <div key={row.id}>
-        <Text size="sm" isSkeleton={isLoading}>
-            {row.label}
-        </Text>
-        <Text size="sm" isSkeleton={isLoading}>
-            {row.value}
-        </Text>
-    </div>
-)
+import { WalletFact } from "../WalletFact"
 
 const noteSection = (label: string, note: string) => (
     <SurfaceCard label={label}>
@@ -31,7 +20,11 @@ const noteSection = (label: string, note: string) => (
 
 const ledgerDetail = (row: WalletLedgerRow) => (
     <div>
-        <div>{row.detailFacts.map((fact) => factRow(fact))}</div>
+        <div>
+            {row.detailFacts.map((fact) => (
+                <WalletFact key={fact.id} row={fact} />
+            ))}
+        </div>
         {row.note === undefined ? undefined : (
             <Text size="sm" tone="muted">
                 {row.note}

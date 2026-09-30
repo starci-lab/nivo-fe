@@ -5,7 +5,8 @@ import { useProvisioningRealtime, type ProvisioningTarget } from "@/hooks"
 import type { WorkspaceCheckoutAnswer, WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane"
 import type { Outcome } from "@/modules/api/outcome"
 import { settle } from "@/modules/api/settle"
-import { HOLD_PHASES, phaseOf, POLLING_PHASES, PROVISIONING_PHASES, purchaseOf, type PurchasePhase } from "@/modules/agentos/purchase-status/phase"
+import { HOLD_PHASES, phaseOf, POLLING_PHASES, PROVISIONING_PHASES, type PurchasePhase } from "@/modules/agentos/purchase-status/phase"
+import { purchaseOf } from "@/modules/agentos/purchase-source"
 
 type UsePurchaseStatusPhaseInput = {
     readonly purchaseId: string

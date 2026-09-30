@@ -3,9 +3,6 @@ import { cn } from "@heroui/react"
 /** Keep the breadcrumb, heading and offer surface in one readable page flow. */
 export const SECTIONS_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-5")
 
-/** Inline breadcrumb steps; separators are text so the list stays semantic. */
-export const BREADCRUMB_LIST_CLASS_NAME = cn("flex", "min-w-0", "flex-wrap", "items-center", "gap-2")
-
 /**
  * One flush offer band: radio, identity and fact pairs stack on a phone and on narrow tablets,
  * grid from the desktop band up. The renewal column reserves enough room for "reauthorization"

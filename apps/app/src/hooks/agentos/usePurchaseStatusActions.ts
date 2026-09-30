@@ -10,7 +10,7 @@ import type { WorkspaceCheckoutAnswer, WorkspaceCheckoutEntryRequest, WorkspaceC
 import type { Outcome } from "@/modules/api/outcome"
 import { settle } from "@/modules/api/settle"
 import type { PurchaseStatusCopy } from "@/modules/agentos/purchase-status/copy"
-import { entryPathOf, observedIdentitiesOf, purchaseOf } from "@/modules/agentos/purchase-status/phase"
+import { entryPathOf, observedIdentitiesOf, purchaseOf } from "@/modules/agentos/purchase-source"
 import { newWorkspace, newWorkspaceCheckout, purchaseProvisioning, workspaces } from "@/modules/routes"
 
 type UsePurchaseStatusActionsInput = {

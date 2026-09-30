@@ -12,11 +12,9 @@ import {
     useMutateRunAgentosAiReadinessTestSwr,
     useRouter,
 } from "@/hooks"
+import { entryPathOf, observedIdentitiesOf, purchaseOf } from "@/modules/agentos/purchase-source"
 import {
-    entryPathOf,
-    observedIdentitiesOf,
     phaseFromPurchase,
-    purchaseOf,
     queryFailureText,
     type AgentOSFlow,
     type AgentOSFlowOverride,

@@ -1,11 +1,8 @@
-import type { WorkspaceCheckoutAnswer, WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane"
+import type { WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane"
 import { describe, expect, it } from "vitest"
 import {
-    entryPathOf,
-    observedIdentitiesOf,
     phaseFromPurchase,
     phaseIndexOf,
-    purchaseOf,
     readinessMilestoneState,
     realtimeTarget,
     stepState,
@@ -44,39 +41,9 @@ const copy = {
 }
 
 describe("AgentOS flow derivations", () => {
-    it("extracts only the purchase-bearing checkout outcomes", () => {
-        const record = purchase()
-        const answer: WorkspaceCheckoutAnswer = { status: "status", purchaseId: record.purchaseId, purchase: record }
-        expect(purchaseOf(answer)).toBe(record)
-        expect(purchaseOf(null)).toBeNull()
-    })
-
-    it("forwards only the observed recovery identities and readiness-confirmed workspace", () => {
-        expect(observedIdentitiesOf(purchase())).toEqual({
-            billingReceiptId: "receipt-1",
-            provisioningOrderId: "provisioning-1",
-            workspaceId: "workspace-1",
-        })
-        expect(observedIdentitiesOf(purchase({ readiness: sourceFact("not-ready", null) }))).not.toHaveProperty("workspaceId")
-    })
-
-    it("settles a ready purchase and resolves only its registered workspace route", () => {
+    it("settles a ready purchase", () => {
         const ready = purchase({ state: "ready" })
         expect(phaseFromPurchase(ready, copy, "AgentOS")).toMatchObject({ phase: "ready", workspaceId: "workspace-1" })
-        expect(entryPathOf({
-            workspaceId: "workspace-1",
-            ownerId: "owner-1",
-            routeName: "instance-management.workspace-shell",
-            routeVersion: "1",
-            context: {},
-        })).toBe("/agentos/workspaces/workspace-1")
-        expect(entryPathOf({
-            workspaceId: "workspace-1",
-            ownerId: "owner-1",
-            routeName: "other.route",
-            routeVersion: "1",
-            context: {},
-        })).toBeNull()
     })
 
     it("keeps the phase rail and readiness milestone positions derived", () => {

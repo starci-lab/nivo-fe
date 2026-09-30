@@ -1,21 +1,11 @@
 import { Button, SurfaceCard, Text } from "@starci/grammar/common"
 import type { BalanceSectionView, WalletControlCenterActions, WalletFactRow } from "@/modules/wallet/wallet-center/types"
+import { WalletFact } from "../WalletFact"
 
 const RESTING_FACTS: ReadonlyArray<WalletFactRow> = [
     { id: "resting-1", label: "", value: "" },
     { id: "resting-2", label: "", value: "" },
 ]
-
-const factRow = (row: WalletFactRow, isLoading: boolean) => (
-    <div key={row.id}>
-        <Text size="sm" isSkeleton={isLoading}>
-            {row.label}
-        </Text>
-        <Text size="sm" isSkeleton={isLoading}>
-            {row.value}
-        </Text>
-    </div>
-)
 
 type WalletBalanceProps = {
     readonly balance: BalanceSectionView
@@ -40,7 +30,11 @@ export const WalletBalance = (props: WalletBalanceProps) => {
     return (
         <SurfaceCard label={balance.label}>
             <div>
-                <div>{facts.map((row) => factRow(row, loading))}</div>
+                <div>
+                    {facts.map((row) => (
+                        <WalletFact key={row.id} row={row} isLoading={loading} />
+                    ))}
+                </div>
                 {
                     <div>
                         {[

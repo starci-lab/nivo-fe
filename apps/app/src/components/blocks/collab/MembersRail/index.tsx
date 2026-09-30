@@ -12,8 +12,8 @@ import {
 } from "./classNames"
 import { EmptyNotice, Icon, IconButton, SurfaceCard, Text } from "@starci/grammar/common"
 import { IconSource } from "@nivo/ui"
-import { MemberRow } from "../MemberRow"
 import { InviteForm } from "../InviteForm"
+import { ParticipantRows } from "../ParticipantRows"
 import { mayPresentInvite, partitionParticipants } from "../../../../modules/collab/group-chat/model"
 
 /**
@@ -54,20 +54,19 @@ export const MembersRail = (props: MembersRailProps) => {
                         />
                     ) : null}
                 </div>
-                {humans.length === 0 ? (
-                    <EmptyNotice message={labels.members.empty} />
-                ) : (
-                    <>
+                <ParticipantRows
+                    participants={humans}
+                    labels={labels}
+                    density="detailed"
+                    empty={<EmptyNotice message={labels.members.empty} />}
+                    beforeRows={
                         <span className={GROUP_CHAT_RAIL_HUMANS_BADGE_CLASS_NAME}>
                             <Text size="xs" weight="semibold" tone="muted">
                                 {labels.members.humans(humans.length)}
                             </Text>
                         </span>
-                        {humans.map((participant) => (
-                            <MemberRow key={participant.memberId} participant={participant} labels={labels} detailed />
-                        ))}
-                    </>
-                )}
+                    }
+                />
             </div>
             <div className={GROUP_CHAT_RAIL_SECTION_INVITE_MODULES_CLASS_NAME}>
                 <div className={GROUP_CHAT_RAIL_LABEL_CLASS_NAME}>
@@ -76,22 +75,18 @@ export const MembersRail = (props: MembersRailProps) => {
                         {labels.members.modules(modules.length)}
                     </Text>
                 </div>
-                {modules.length === 0 ? (
-                    <div className={GROUP_CHAT_MEMBER_ROW_CLASS_NAME}>
-                        <Text size="sm" tone="muted">
-                            {labels.members.noModules}
-                        </Text>
-                    </div>
-                ) : (
-                    modules.map((participant) => (
-                        <MemberRow
-                            key={participant.moduleInstallationId ?? participant.memberId}
-                            participant={participant}
-                            labels={labels}
-                            detailed
-                        />
-                    ))
-                )}
+                <ParticipantRows
+                    participants={modules}
+                    labels={labels}
+                    density="detailed"
+                    empty={
+                        <div className={GROUP_CHAT_MEMBER_ROW_CLASS_NAME}>
+                            <Text size="sm" tone="muted">
+                                {labels.members.noModules}
+                            </Text>
+                        </div>
+                    }
+                />
             </div>
             {mayInvite ? (
                 <div className={GROUP_CHAT_RAIL_SECTION_INVITE_FORM_CLASS_NAME}>

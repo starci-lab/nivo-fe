@@ -2,10 +2,8 @@ import {
     Button,
     PageContainer,
     PrimaryRailLayout,
-    SectionHeader,
     SurfaceCard,
     Text,
-    TextAction,
 } from "@starci/grammar/common"
 import type {
     CheckoutReviewCopy,
@@ -14,7 +12,8 @@ import type {
 } from "../../../../modules/agentos/checkout-review"
 import { CheckoutReviewFactsPanel } from "../CheckoutReviewFactsPanel"
 import { CheckoutReviewPaymentRail } from "../CheckoutReviewPaymentRail"
-import { BREADCRUMB_LIST_CLASS_NAME, RAIL_BAND_CLASS_NAME, SECTIONS_CLASS_NAME } from "./classNames"
+import { CheckoutFlowHead } from "../CheckoutFlowHead"
+import { RAIL_BAND_CLASS_NAME, SECTIONS_CLASS_NAME } from "./classNames"
 
 export type {
     CheckoutReviewCopy,
@@ -27,46 +26,16 @@ export type {
 type CheckoutReviewFlowProps = CheckoutReviewFlowBaseProps
 
 const head = (copy: CheckoutReviewCopy, links: CheckoutReviewLinks) => (
-    <>
-        <nav aria-label={copy.path}>
-            <ol className={BREADCRUMB_LIST_CLASS_NAME}>
-                <li>
-                    <TextAction href={links.workspaces} size="sm">
-                        {copy.workspaces}
-                    </TextAction>
-                </li>
-                <li aria-hidden="true">
-                    <Text size="sm" tone="muted">
-                        ›
-                    </Text>
-                </li>
-                <li>
-                    <TextAction href={links.offerSelection} size="sm">
-                        {copy.newWorkspace}
-                    </TextAction>
-                </li>
-                <li aria-hidden="true">
-                    <Text size="sm" tone="muted">
-                        ›
-                    </Text>
-                </li>
-                <li aria-current="page">
-                    <Text size="sm" tone="muted">
-                        {copy.checkout}
-                    </Text>
-                </li>
-            </ol>
-        </nav>
-        <SectionHeader
-            level={1}
-            title={copy.title}
-            description={
-                <Text size="md" tone="muted">
-                    {copy.description}
-                </Text>
-            }
-        />
-    </>
+    <CheckoutFlowHead
+        accessibilityLabel={copy.path}
+        breadcrumbs={[
+            { label: copy.workspaces, href: links.workspaces },
+            { label: copy.newWorkspace, href: links.offerSelection },
+            { label: copy.checkout, isCurrent: true },
+        ]}
+        title={copy.title}
+        description={copy.description}
+    />
 )
 
 /** Draw every checkout state from resolved props; the connected owner supplies data and routes. */

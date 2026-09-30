@@ -1,12 +1,11 @@
 import type {
     WorkspaceCheckoutAnswer,
-    WorkspaceCheckoutEntryDestination,
-    WorkspaceCheckoutObservedIdentities,
     WorkspaceCheckoutOffer,
     WorkspaceCheckoutStatusView,
 } from "@/modules/api/workspace-controlplane"
 import type { NivoQueryFailure } from "@/modules/query"
 import type { Outcome } from "@/modules/api/outcome"
+import { purchaseOf } from "@/modules/agentos/purchase-source"
 
 /** The settled phase of the AgentOS purchase and readiness journey. */
 export type AgentOSFlow =
@@ -85,24 +84,6 @@ export const INITIAL_AGENTOS_OFFER: AgentOSOfferIdentity = {
     offerVersion: "draft-2026-09-22",
 }
 
-const ENTRY_ROUTE_NAME = "instance-management.workspace-shell"
-
-/** The purchase view one checkout outcome carries, when the arm carries one at all. */
-export const purchaseOf = (outcome: WorkspaceCheckoutAnswer | null): WorkspaceCheckoutStatusView | null =>
-    outcome !== null && "purchase" in outcome && outcome.purchase !== undefined ? outcome.purchase : null
-
-/**
- * The exact source identities the screen observed for safe recovery. Payment references stay out:
- * their owner may return a provider reference or attempt id in the same slot.
- */
-export const observedIdentitiesOf = (purchase: WorkspaceCheckoutStatusView): WorkspaceCheckoutObservedIdentities => ({
-    ...(purchase.billing.reference !== null ? { billingReceiptId: purchase.billing.reference } : {}),
-    ...(purchase.provisioning.reference !== null ? { provisioningOrderId: purchase.provisioning.reference } : {}),
-    ...(purchase.readiness.state === "ready" && purchase.readiness.reference !== null
-        ? { workspaceId: purchase.readiness.reference }
-        : {}),
-})
-
 /** The settled failure sentence for one owner-scoped read. */
 export const queryFailureText = (kind: NivoQueryFailure["kind"], shared: AgentOSCopy["shared"]): string =>
     kind === "refused"
@@ -114,10 +95,6 @@ export const queryFailureText = (kind: NivoQueryFailure["kind"], shared: AgentOS
             : kind === "invalid"
               ? shared("query.invalid")
               : shared("query.unavailable")
-
-/** A registered destination is accepted only when it names the workspace shell. */
-export const entryPathOf = (destination: WorkspaceCheckoutEntryDestination): string | null =>
-    destination.routeName === ENTRY_ROUTE_NAME ? `/agentos/workspaces/${destination.workspaceId}` : null
 
 /** Settle one composed purchase view into the phase its confirmed facets prove. */
 export const phaseFromPurchase = (

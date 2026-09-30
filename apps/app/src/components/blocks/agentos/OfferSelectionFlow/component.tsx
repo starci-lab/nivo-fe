@@ -1,7 +1,6 @@
 import {
     ACTION_BAND_CLASS_NAME,
     ACTION_TARGET_CLASS_NAME,
-    BREADCRUMB_LIST_CLASS_NAME,
     NOTICE_BAND_CLASS_NAME,
     NO_SESSION_BAND_CLASS_NAME,
     OFFER_FACT_CLASS_NAME,
@@ -20,11 +19,11 @@ import {
     EmptyNotice,
     PageContainer,
     RadioGroup,
-    SectionHeader,
     SurfaceCard,
     Text,
     TextAction,
 } from "@starci/grammar/common"
+import { CheckoutFlowHead } from "../CheckoutFlowHead"
 
 /** Resolved copy the connected owner supplies; no translation or transport lives here. */
 export type OfferSelectionCopy = {
@@ -142,36 +141,15 @@ const factCell = (label: string, value: string, isSkeleton = false) => (
 )
 
 const head = (copy: OfferSelectionCopy, links: OfferSelectionLinks) => (
-    <>
-        <nav aria-label={copy.path}>
-            <ol className={BREADCRUMB_LIST_CLASS_NAME}>
-                <li>
-                    <TextAction href={links.workspaces} size="sm">
-                        {copy.workspaces}
-                    </TextAction>
-                </li>
-                <li aria-hidden="true">
-                    <Text size="sm" tone="muted">
-                        ›
-                    </Text>
-                </li>
-                <li aria-current="page">
-                    <Text size="sm" tone="muted">
-                        {copy.newWorkspace}
-                    </Text>
-                </li>
-            </ol>
-        </nav>
-        <SectionHeader
-            level={1}
-            title={copy.title}
-            description={
-                <Text size="md" tone="muted">
-                    {copy.description}
-                </Text>
-            }
-        />
-    </>
+    <CheckoutFlowHead
+        accessibilityLabel={copy.path}
+        breadcrumbs={[
+            { label: copy.workspaces, href: links.workspaces },
+            { label: copy.newWorkspace, isCurrent: true },
+        ]}
+        title={copy.title}
+        description={copy.description}
+    />
 )
 
 const offerFacts = (offer: OfferSelectionOffer, copy: OfferSelectionCopy, isSkeleton = false) => (
