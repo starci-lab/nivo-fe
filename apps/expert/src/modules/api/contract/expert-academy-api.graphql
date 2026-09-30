@@ -644,6 +644,32 @@ type ConfirmOrderResponse {
   success: Boolean!
 }
 
+"""Input for confirming two-factor (TOTP) setup."""
+input ConfirmTwoFactorInput {
+  """The current TOTP code shown by the authenticator app."""
+  code: String!
+}
+
+"""Response for confirming two-factor (TOTP) setup."""
+type ConfirmTwoFactorResponse {
+  """Whether two-factor authentication was enabled successfully."""
+  data: Boolean
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
 """The provider, its API key, and the verified sender to send as."""
 input ConnectMailInput {
   """The provider API key. Stored encrypted and never returned."""
@@ -1321,6 +1347,32 @@ type DeleteMediaAssetResponse {
 type DeleteMediaAssetResult {
   """Asset deleted."""
   id: ID!
+}
+
+"""Input for disabling two-factor (TOTP)."""
+input DisableTwoFactorInput {
+  """A current TOTP code, required to prove device ownership."""
+  code: String!
+}
+
+"""Response for disabling two-factor (TOTP)."""
+type DisableTwoFactorResponse {
+  """Whether two-factor authentication was disabled successfully."""
+  data: Boolean
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
 }
 
 """A signed download URL for a lesson resource."""
@@ -2190,6 +2242,12 @@ type Mutation {
     request: ConfirmOrderInput!
   ): ConfirmOrderResponse!
 
+  """Verify a TOTP code against the pending secret and enable 2FA."""
+  confirmTwoFactor(
+    """The TOTP code from the authenticator."""
+    request: ConfirmTwoFactorInput!
+  ): ConfirmTwoFactorResponse!
+
   """
   Connect this academy's mail provider. The key is stored encrypted and never returned.
   """
@@ -2277,6 +2335,12 @@ type Mutation {
     """Asset to delete."""
     request: DeleteMediaAssetInput!
   ): DeleteMediaAssetResponse!
+
+  """Disable 2FA (requires a valid TOTP code) and clear the secret."""
+  disableTwoFactor(
+    """The TOTP code proving device ownership."""
+    request: DisableTwoFactorInput!
+  ): DisableTwoFactorResponse!
 
   """
   Exchange an OAuth authorization code (PKCE) for a session; sets the refresh-token cookie.
@@ -2382,6 +2446,20 @@ type Mutation {
     request: RemovePostInput!
   ): RemovePostResponse!
 
+  """
+  Request a password-reset email; always succeeds regardless of whether the email exists.
+  """
+  requestPasswordReset(
+    """Email of the account requesting the reset."""
+    request: RequestPasswordResetInput!
+  ): RequestPasswordResetResponse!
+
+  """Reset a password using a reset token; clears the refresh-token cookie."""
+  resetPassword(
+    """Raw reset token + the new password."""
+    request: ResetPasswordInput!
+  ): ResetPasswordResponse!
+
   """Restore a hidden/removed post to the feed (admin/moderator only)."""
   restorePost(
     """Post id."""
@@ -2435,6 +2513,9 @@ type Mutation {
     request: SetMemberStatusInput!
   ): SetMemberStatusResponse!
 
+  """Start TOTP enrollment; returns the secret + otpauth URI for the QR."""
+  setupTwoFactor: SetupTwoFactorResponse!
+
   """Sign in with an email + password; sets the refresh-token cookie."""
   signIn(
     """Email + password."""
@@ -2468,6 +2549,14 @@ type Mutation {
     """The ending scope; omit to sign out of this browser only."""
     request: SignOutInput
   ): SignOutResponse!
+
+  """
+  Create an account without a one-time code; only served while the academy switches code verification off.
+  """
+  signUp(
+    """Email, password and optional display name."""
+    request: SignUpInput!
+  ): SignUpResponse!
 
   """
   Start sign-up: mails a one-time code. No account is created until signUpVerifyOtp.
@@ -2557,6 +2646,12 @@ type Mutation {
     """Fields to change."""
     request: UpdateThemeInput!
   ): UpdateThemeResponse!
+
+  """Complete a pending two-factor sign-in; sets the refresh-token cookie."""
+  verifyTwoFactor(
+    """Challenge token + TOTP code."""
+    request: VerifyTwoFactorInput!
+  ): VerifyTwoFactorResponse!
 }
 
 """A completion certificate with its course title."""
@@ -3251,6 +3346,61 @@ type RemovedMember {
   memberId: String!
 }
 
+"""Input for requesting a password-reset email."""
+input RequestPasswordResetInput {
+  """Email of the account to send the reset link to."""
+  email: String!
+}
+
+"""Response wrapper for the requestPasswordReset mutation."""
+type RequestPasswordResetResponse {
+  """Always true (never reveals whether the email exists)."""
+  data: Boolean
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for resetting a password with a reset token."""
+input ResetPasswordInput {
+  """New password to set (min 6 characters)."""
+  newPassword: String!
+
+  """Raw reset token from the emailed link."""
+  token: String!
+}
+
+"""Response wrapper for the resetPassword mutation."""
+type ResetPasswordResponse {
+  """Whether the password was successfully reset."""
+  data: Boolean
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
 """Input for restoring a post."""
 input RestorePostInput {
   """Post to restore."""
@@ -3531,6 +3681,35 @@ type SetMemberStatusResponse {
   success: Boolean!
 }
 
+"""TOTP enrollment material (show the QR, then confirm with a code)."""
+type SetupTwoFactorData {
+  """otpauth:// URI to render as a QR code in an authenticator app."""
+  otpauthUrl: String!
+
+  """Base32-encoded shared secret (for manual entry)."""
+  secret: String!
+}
+
+"""Response for starting two-factor (TOTP) setup."""
+type SetupTwoFactorResponse {
+  """The TOTP enrollment material."""
+  data: SetupTwoFactorData
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
 """
 Email + password. The password is checked immediately; a code is then mailed.
 """
@@ -3765,6 +3944,20 @@ type SignUpInitResponse {
   success: Boolean!
 }
 
+"""
+Email + password for a new account. The account is created at once; no one-time code is involved.
+"""
+input SignUpInput {
+  """Email to register."""
+  email: String!
+
+  """Display name, when the reader gave one."""
+  name: String
+
+  """Password for the new account."""
+  password: String!
+}
+
 """The pending challenge to send a new code for."""
 input SignUpResendInput {
   """The challenge id returned by signUpInit."""
@@ -3775,6 +3968,28 @@ input SignUpResendInput {
 type SignUpResendResponse {
   """The challenge, or null when the request was refused."""
   data: OtpChallenge
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""
+Result of creating an account directly: a session, a no-session conclusion, or the undecided result.
+"""
+type SignUpResponse {
+  """The session, conclusion or undecided result."""
+  data: SignUpVerifyOtpPayload
 
   """The error of the response."""
   error: String
@@ -4037,18 +4252,6 @@ type SystemDeployment {
   updating: Boolean!
 }
 
-"""A schema script not yet applied here."""
-type SystemPendingUpdate {
-  """Script file name."""
-  file: String!
-
-  """Runs before or after schema sync."""
-  phase: String!
-
-  """Release the script belongs to."""
-  version: String!
-}
-
 """Stack version + rollout state."""
 type SystemStatus {
   """Per-deployment detail."""
@@ -4056,9 +4259,6 @@ type SystemStatus {
 
   """Whether this app runs inside a cluster."""
   manageable: Boolean!
-
-  """Schema scripts pending here."""
-  pendingUpdates: [SystemPendingUpdate!]!
 
   """True while any deployment is still rolling."""
   updating: Boolean!
@@ -4524,4 +4724,33 @@ type ValidateCouponResult {
 
   """Whether the coupon is currently redeemable."""
   valid: Boolean!
+}
+
+"""Input for completing a pending two-factor sign-in."""
+input VerifyTwoFactorInput {
+  """The current TOTP code shown by the authenticator app."""
+  code: String!
+
+  """Opaque challenge token returned by the sign-in mutation."""
+  twoFactorToken: String!
+}
+
+"""Response wrapper for the verifyTwoFactor mutation."""
+type VerifyTwoFactorResponse {
+  """Payload containing the access token."""
+  data: AuthPayload
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
 }

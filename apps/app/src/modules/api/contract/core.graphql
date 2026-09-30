@@ -3594,6 +3594,32 @@ type ConfirmAppointmentHoldResponse {
   success: Boolean!
 }
 
+"""Input for confirming two-factor (TOTP) setup."""
+input ConfirmTwoFactorInput {
+  """The current TOTP code shown by the authenticator app."""
+  code: String!
+}
+
+"""Response for confirming two-factor (TOTP) setup."""
+type ConfirmTwoFactorResponse {
+  """Whether two-factor authentication was enabled successfully."""
+  data: Boolean
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
 """Input for connecting a new messaging channel."""
 input ConnectChannelInput {
   """Id of the agent workspace to connect the channel on."""
@@ -4741,6 +4767,32 @@ type DisableAcademyWebhookResponse {
   success: Boolean!
 }
 
+"""Input for disabling two-factor (TOTP)."""
+input DisableTwoFactorInput {
+  """A current TOTP code, required to prove device ownership."""
+  code: String!
+}
+
+"""Response for disabling two-factor (TOTP)."""
+type DisableTwoFactorResponse {
+  """Whether two-factor authentication was disabled successfully."""
+  data: Boolean
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
 input DisconnectAcademyGoogleOAuthRequest {
   siteId: String!
 }
@@ -4889,6 +4941,60 @@ input DualConditionEvidenceInput {
 
   """Reference proving the second condition."""
   secondConditionRef: String!
+}
+
+"""
+The decided answer to an administrator session-ending request: the applied scope, undecided, or the generic refusal.
+"""
+type EndPrincipalSessionsData {
+  """
+  For the applied scope, whether the identity authority confirmed its own ending.
+  """
+  authorityEndingConfirmed: Boolean
+
+  """`scopeApplied`, `undecided` or `refused`."""
+  kind: String!
+}
+
+"""
+Input for ending a named Login principal's sessions under a stated authority context.
+"""
+input EndPrincipalSessionsInput {
+  """
+  The roster member whose sessions would end; the workspace context's target.
+  """
+  memberId: String
+
+  """Stable identity of this ending request; resend it unchanged on retry."""
+  requestId: String!
+
+  """The Login principal whose sessions would end; Nivo operation only."""
+  targetPrincipal: String
+
+  """
+  The workspace the requester administers; omit to ask as Nivo operation.
+  """
+  workspaceId: String
+}
+
+"""Response wrapper for the endPrincipalSessions mutation."""
+type EndPrincipalSessionsResponse {
+  """The decided answer to the ending request."""
+  data: EndPrincipalSessionsData
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
 }
 
 """Input for enrolling a customer on a class session."""
@@ -6797,6 +6903,12 @@ type Mutation {
     request: ConfirmAppointmentHoldInput!
   ): ConfirmAppointmentHoldResponse!
 
+  """Verify a TOTP code against the pending secret and enable 2FA."""
+  confirmTwoFactor(
+    """The TOTP code from the authenticator."""
+    request: ConfirmTwoFactorInput!
+  ): ConfirmTwoFactorResponse!
+
   """Connect a new messaging channel on the viewer's own agent workspace."""
   connectChannel(
     """Channel kind + display name."""
@@ -6925,6 +7037,12 @@ type Mutation {
     request: DeployExpertSiteInput!
   ): DeployExpertSiteResponse!
   disableAcademyWebhook(request: DisableAcademyWebhookInput!): DisableAcademyWebhookResponse!
+
+  """Disable 2FA (requires a valid TOTP code) and clear the secret."""
+  disableTwoFactor(
+    """The TOTP code proving device ownership."""
+    request: DisableTwoFactorInput!
+  ): DisableTwoFactorResponse!
   disconnectAcademyGoogleOAuth(request: DisconnectAcademyGoogleOAuthRequest!): SaveAcademyGoogleOAuthResponse!
   disconnectAgentWorkspaceChannel(request: DisconnectAgentWorkspaceChannelInput!): DisconnectAgentWorkspaceChannelResponse!
 
@@ -6933,6 +7051,14 @@ type Mutation {
     """Lead id plus the reply language."""
     request: DraftLeadReplyInput!
   ): DraftLeadReplyResponse!
+
+  """
+  End a named principal's Login sessions once the stated authority context confirms the requester. Answers the applied scope, undecided, or the generic refusal.
+  """
+  endPrincipalSessions(
+    """Request identity, the named principal and the authority context."""
+    request: EndPrincipalSessionsInput!
+  ): EndPrincipalSessionsResponse!
 
   """Book a customer onto a class session -- seated or waitlisted."""
   enrollInClass(
@@ -7177,11 +7303,25 @@ type Mutation {
     request: RequestCustodyApprovalInput!
   ): RequestCustodyApprovalResponse!
 
+  """
+  Request a password-reset email; always succeeds regardless of whether the email exists.
+  """
+  requestPasswordReset(
+    """Email of the account requesting the reset."""
+    request: RequestPasswordResetInput!
+  ): RequestPasswordResetResponse!
+
   """Move a pre-in_progress appointment onto a newly-held slot."""
   rescheduleAppointment(
     """Instance, appointment, new hold ids and new slot shape."""
     request: RescheduleAppointmentInput!
   ): RescheduleAppointmentResponse!
+
+  """Reset a password using a reset token; clears the refresh-token cookie."""
+  resetPassword(
+    """Raw reset token + the new password."""
+    request: ResetPasswordInput!
+  ): ResetPasswordResponse!
 
   """
   Decide an open approval gate, flipping the ticket to approved/declined.
@@ -7263,6 +7403,9 @@ type Mutation {
     """The instance and the configuration to set."""
     request: SetMeasurementProfileInput!
   ): SetMeasurementProfileResponse!
+
+  """Start TOTP enrollment; returns the secret + otpauth URI for the QR."""
+  setupTwoFactor: SetupTwoFactorResponse!
 
   """Sign in with an email + password; sets the refresh-token cookie."""
   signIn(
@@ -7381,6 +7524,12 @@ type Mutation {
     request: UpdateExpertSiteLeadInput!
   ): UpdateExpertSiteLeadResponse!
 
+  """Update the viewer's notification preferences."""
+  updateNotificationPreferences(
+    """The three notification switches."""
+    request: UpdateNotificationPreferencesInput!
+  ): UpdateNotificationPreferencesResponse!
+
   """Update the status of an ops ticket the caller is assigned to."""
   updateOpsTicketStatus(
     """Ops ticket id + new status."""
@@ -7418,6 +7567,12 @@ type Mutation {
     """Catalog order id + target tier id."""
     request: UpgradeCatalogTierInput!
   ): UpgradeCatalogTierResponse!
+
+  """Complete a pending two-factor sign-in; sets the refresh-token cookie."""
+  verifyTwoFactor(
+    """Challenge token + TOTP code."""
+    request: VerifyTwoFactorInput!
+  ): VerifyTwoFactorResponse!
   withdrawAgentosModuleRuntimeConfiguration(request: WithdrawAgentosModuleRuntimeConfigurationRequest!): AgentosModuleRuntimeConfigurationResultType!
   workspaceCheckoutStart(request: WorkspaceCheckoutStartInput!): WorkspaceCheckoutOutcomeResponse!
   workspacePurchaseRecover(request: WorkspacePurchaseRecoverInput!): WorkspaceCheckoutOutcomeResponse!
@@ -10548,6 +10703,32 @@ type RequestCustodyApprovalResponse {
   success: Boolean!
 }
 
+"""Input for requesting a password-reset email."""
+input RequestPasswordResetInput {
+  """Email of the account to send the reset link to."""
+  email: String!
+}
+
+"""Response wrapper for the requestPasswordReset mutation."""
+type RequestPasswordResetResponse {
+  """Always true (never reveals whether the email exists)."""
+  data: Boolean
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
 """Input for rescheduling an appointment to a newly-held slot."""
 input RescheduleAppointmentInput {
   """Id of the appointment to move."""
@@ -10573,6 +10754,35 @@ input RescheduleAppointmentInput {
 type RescheduleAppointmentResponse {
   """The rescheduled appointment."""
   data: AppointmentGraphQLType
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for resetting a password with a reset token."""
+input ResetPasswordInput {
+  """New password to set (min 6 characters)."""
+  newPassword: String!
+
+  """Raw reset token from the emailed link."""
+  token: String!
+}
+
+"""Response wrapper for the resetPassword mutation."""
+type ResetPasswordResponse {
+  """Whether the password was successfully reset."""
+  data: Boolean
 
   """The error of the response."""
   error: String
@@ -11633,6 +11843,35 @@ input SetMeasurementProfileInput {
 type SetMeasurementProfileResponse {
   """The profile after the change."""
   data: MeasurementProfileGraphQLType
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""TOTP enrollment material (show the QR, then confirm with a code)."""
+type SetupTwoFactorData {
+  """otpauth:// URI to render as a QR code in an authenticator app."""
+  otpauthUrl: String!
+
+  """Base32-encoded shared secret (for manual entry)."""
+  secret: String!
+}
+
+"""Response for starting two-factor (TOTP) setup."""
+type SetupTwoFactorResponse {
+  """The TOTP enrollment material."""
+  data: SetupTwoFactorData
 
   """The error of the response."""
   error: String
@@ -12722,6 +12961,38 @@ type UpdateExpertSiteResponse {
   success: Boolean!
 }
 
+"""Input for updating notification preferences."""
+input UpdateNotificationPreferencesInput {
+  """Notify when a service or domain is about to expire."""
+  notifyExpiringSoon: Boolean!
+
+  """Notify when a new invoice is issued."""
+  notifyInvoiceCreated: Boolean!
+
+  """Notify when a service's status changes."""
+  notifyServiceStatusChanged: Boolean!
+}
+
+"""Response wrapper for the updateNotificationPreferences mutation."""
+type UpdateNotificationPreferencesResponse {
+  """The viewer, with updated notification preferences."""
+  data: UserEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
 """Input for updating the status of an assigned ops ticket."""
 input UpdateOpsTicketStatusInput {
   """New status to set on the ticket."""
@@ -13075,6 +13346,35 @@ type UserEntity {
 
   """Username of the user."""
   username: String
+}
+
+"""Input for completing a pending two-factor sign-in."""
+input VerifyTwoFactorInput {
+  """The current TOTP code shown by the authenticator app."""
+  code: String!
+
+  """Opaque challenge token returned by the sign-in mutation."""
+  twoFactorToken: String!
+}
+
+"""Response wrapper for the verifyTwoFactor mutation."""
+type VerifyTwoFactorResponse {
+  """Payload containing the access token."""
+  data: AuthPayload
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
 }
 
 """A user's mock wallet, holding a VND balance."""
