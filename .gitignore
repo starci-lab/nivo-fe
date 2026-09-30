@@ -42,3 +42,6 @@ vi-flat.txt
 # stay out of the tree (repository-baseline common.gitignore)
 .starciwork/
 config.yaml
+
+# graphql-codegen output -- rebuilt by `npm run codegen` before every typecheck, test and build, never reviewed as source
+__generated__/

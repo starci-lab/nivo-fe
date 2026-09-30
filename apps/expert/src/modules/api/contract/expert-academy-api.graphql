@@ -1,0 +1,4527 @@
+"""
+This academy's mail connection, verification setting and authored wording.
+"""
+type AcademyMailSettings {
+  """The mail connection, without the secret."""
+  connection: MailConnection!
+
+  """Whether a one-time code is required at sign-up and sign-in."""
+  isMailVerificationEnabled: Boolean!
+
+  """
+  Messages this academy has rewritten. Empty means all use the built-in copy.
+  """
+  templates: [MailTemplate!]!
+}
+
+"""Response wrapper for the academyMailSettings query."""
+type AcademyMailSettingsResponse {
+  """The academy's mail settings."""
+  data: AcademyMailSettings
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for commenting on a post."""
+input AddCommentInput {
+  """Comment body."""
+  body: String!
+
+  """Post to comment on."""
+  postId: ID!
+}
+
+"""Response wrapper for the addComment mutation."""
+type AddCommentResponse {
+  """The created comment."""
+  data: CommentEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""A member enrolled in the referral program."""
+type AffiliateEntity {
+  """Public referral code."""
+  code: String!
+
+  """Commission in basis points (2000 = 20%)."""
+  commissionBps: Int!
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Referring member id."""
+  memberId: String!
+
+  """Status (active | disabled)."""
+  status: String!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""Response wrapper for the affiliates query."""
+type AffiliatesResponse {
+  """Affiliates, newest first."""
+  data: [AffiliateEntity!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for applying a built-in template preset."""
+input ApplyTemplateInput {
+  """Preset key, e.g. "crimson" | "ocean" | "emerald"."""
+  templateKey: String!
+}
+
+"""Response wrapper for the applyTemplate mutation."""
+type ApplyTemplateResponse {
+  """
+  The persisted branding + theme overrides, after the preset was applied.
+  """
+  data: TenantBrandEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for asking the AI tutor."""
+input AskTutorInput {
+  """Restrict to a course slug."""
+  courseSlug: String
+
+  """The learner's question."""
+  question: String!
+}
+
+"""Response wrapper for the askTutor query."""
+type AskTutorResponse {
+  """The answer."""
+  data: AskTutorResult
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""The tutor's grounded answer."""
+type AskTutorResult {
+  """Answer grounded in course content."""
+  answer: String!
+
+  """Cited lessons."""
+  sources: [RagSource!]!
+}
+
+"""Input for attaching a lesson's video."""
+input AttachVideoInput {
+  """Lesson to update."""
+  lessonId: ID!
+
+  """Uploaded video asset id (null clears)."""
+  videoAssetId: ID
+}
+
+"""Response wrapper for the attachVideo mutation."""
+type AttachVideoResponse {
+  """The updated lesson."""
+  data: LessonEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""
+Nivo could not complete the provider sign-in because an authority did not answer; continue with the continuation reference from this browser, or start a fresh provider sign-in when none is returned. This is never a refusal.
+"""
+type AuthBrokeredUndecided {
+  """
+  Opaque continuation reference for `continueBrokeredSignIn` from the same browser; null means start a fresh provider sign-in. Never a credential.
+  """
+  continuationReference: String
+}
+
+"""A Login operation that concluded on purpose without issuing a session."""
+type AuthConclusion {
+  """Why no session was issued."""
+  reason: AuthConclusionReason!
+}
+
+"""Why a Login operation concluded without a session."""
+enum AuthConclusionReason {
+  """
+  The proven address already has a Login identity; sign in or recover the password.
+  """
+  heldAddress
+
+  """The password changed; sign in with the new password."""
+  passwordResetConfirmed
+
+  """The identity was created; sign in with the password just set."""
+  registeredSignInRequired
+}
+
+"""
+Auth payload carrying the access token (refresh token stays in an HttpOnly cookie), or a pending two-factor challenge when the account has 2FA enabled.
+"""
+type AuthPayload {
+  """
+  Access token (JWT) used as the Bearer credential. Null when a two-factor code is still required.
+  """
+  accessToken: String
+
+  """Whether a TOTP code is required to complete this sign-in."""
+  requiresTwoFactor: Boolean!
+
+  """
+  Opaque challenge token for `verifyTwoFactor`; present only when `requiresTwoFactor` is true.
+  """
+  twoFactorToken: String
+}
+
+"""
+Nivo could not complete this request because an authority did not answer; resubmit with the same request identity. This is never a refusal.
+"""
+type AuthUndecided {
+  """
+  Always true: resubmitting the same request identity continues this request.
+  """
+  retryWithSameRequest: Boolean!
+}
+
+"""Shape of how a catalog item generates invoices."""
+enum BillingModel {
+  """A single invoice, never recurs."""
+  one_time
+
+  """An invoice every billing cycle."""
+  recurring
+
+  """A one-time setup invoice, then a recurring invoice."""
+  setup_plus_recurring
+}
+
+"""Input for cancelling an order."""
+input CancelOrderInput {
+  """Order to cancel."""
+  orderId: ID!
+}
+
+"""Response wrapper for the cancelOrder mutation."""
+type CancelOrderResponse {
+  """The cancelled order."""
+  data: OrderEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Product family a catalog item belongs to."""
+enum CatalogCategory {
+  """Multi-agent AI assistant team (nivo AI Agent)."""
+  ai_agent
+
+  """Domain/email digital-identity products."""
+  digital_identity
+
+  """AI-driven lead-gen websites/apps."""
+  launch_ai
+
+  """Website rescue/migration projects."""
+  migration
+
+  """Ready-made WordPress websites."""
+  ready_made_site
+
+  """Site generated from a template (AI academy now, MMO/ecommerce later)."""
+  site_from_template
+}
+
+"""A purchasable catalog item (one row per sellable product)."""
+type CatalogItemEntity {
+  """Monthly base price in VND for flat items."""
+  basePriceMonthlyVnd: Int
+
+  """One-time base price in VND for flat items."""
+  basePriceOneTimeVnd: Int
+
+  """Shape of how this catalog item generates invoices."""
+  billingModel: BillingModel!
+
+  """Product family this catalog item belongs to."""
+  category: CatalogCategory!
+
+  """Row creation timestamp (UTC)."""
+  createdAt: DateTime!
+
+  """How this catalog item is fulfilled once ordered."""
+  fulfillmentKind: FulfillmentKind!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Whether the catalog item is currently offered for sale."""
+  isActive: Boolean!
+
+  """Whether the real order path is wired end-to-end for this item yet."""
+  isOrderWired: Boolean!
+
+  """Whether this catalog item has price tiers."""
+  isTiered: Boolean!
+
+  """Display name of the catalog item."""
+  name: String!
+
+  """Orders placed against this catalog item."""
+  orders: [CatalogOrderEntity!]
+
+  """Stable unique slug of the catalog item."""
+  slug: String!
+
+  """Short one-line positioning copy shown on the catalog card."""
+  tagline: String
+
+  """Generator template key for SiteFromTemplate items (null otherwise)."""
+  templateKey: String
+
+  """Price tiers offered for this catalog item."""
+  tiers: [CatalogTierEntity!]
+
+  """Row last update timestamp (UTC)."""
+  updatedAt: DateTime!
+}
+
+"""One kind of event recorded on a catalog order's activity log."""
+enum CatalogOrderActivityAction {
+  """The order was cancelled."""
+  cancelled
+
+  """An OpsService order's ticket was marked done and the order completed."""
+  completed
+
+  """The catalog item/tier was ordered."""
+  ordered
+
+  """The order's invoice was paid."""
+  paid
+
+  """The order was resumed after being suspended."""
+  resumed
+
+  """The order was suspended."""
+  suspended
+}
+
+"""One event recorded on a catalog order's activity log."""
+type CatalogOrderActivityLogEntity {
+  """Kind of event that happened."""
+  action: CatalogOrderActivityAction!
+
+  """Catalog order this event happened on."""
+  catalogOrder: CatalogOrderEntity
+
+  """Row creation timestamp (UTC)."""
+  createdAt: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Human-readable message describing the event."""
+  message: String!
+
+  """Row last update timestamp (UTC)."""
+  updatedAt: DateTime!
+}
+
+"""One catalog purchase made by a user (spans all categories)."""
+type CatalogOrderEntity {
+  """Timestamp when the order became active."""
+  activatedAt: DateTime
+
+  """Activity-log events recorded on this catalog order."""
+  activityLogs: [CatalogOrderActivityLogEntity!]
+
+  """Whether the order auto-renews."""
+  autoRenew: Boolean!
+
+  """Catalog item that was ordered."""
+  catalogItem: CatalogItemEntity
+
+  """Tier that was ordered (null for flat items)."""
+  catalogTier: CatalogTierEntity
+
+  """Row creation timestamp (UTC)."""
+  createdAt: DateTime!
+
+  """Fulfillment kind of the order (denormalized)."""
+  fulfillmentKind: FulfillmentKind!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Invoices linked to this catalog order."""
+  invoices: [InvoiceEntity!]
+
+  """When the order next renews / expires."""
+  renewsAt: DateTime
+
+  """Current lifecycle status of the catalog order."""
+  status: CatalogOrderStatus!
+
+  """Row last update timestamp (UTC)."""
+  updatedAt: DateTime!
+
+  """Owner of the catalog order."""
+  user: UserEntity
+}
+
+"""Lifecycle status of a catalog order."""
+enum CatalogOrderStatus {
+  """Invoice paid; the product is live/usable."""
+  active
+
+  """Order was cancelled."""
+  cancelled
+
+  """A one-time fulfillment has finished."""
+  completed
+
+  """Fulfillment is under way."""
+  in_progress
+
+  """Ordered but the invoice has not been paid yet."""
+  pending_payment
+
+  """Order was suspended."""
+  suspended
+}
+
+"""One price tier of a tiered catalog item."""
+type CatalogTierEntity {
+  """Catalog item this tier belongs to."""
+  catalogItem: CatalogItemEntity
+
+  """Row creation timestamp (UTC)."""
+  createdAt: DateTime!
+
+  """Short positioning copy shown on the tier card."""
+  description: String
+
+  """Arbitrary per-tier feature flags."""
+  featureFlags: JSONObject
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Positioning flag ("Đề xuất") — at most one true per family."""
+  isRecommended: Boolean!
+
+  """Whether the tier unlocks reseller sub-accounts."""
+  isResellerTier: Boolean!
+
+  """Whether the tier bundles a human service component."""
+  isServiceComponent: Boolean!
+
+  """Display name of the tier."""
+  name: String!
+
+  """Sort position of the tier within its item."""
+  orderIndex: Int!
+
+  """Monthly price in VND for this tier."""
+  priceMonthlyVnd: Int
+
+  """One-time price in VND for this tier."""
+  priceOneTimeVnd: Int
+
+  """Migration scope depth for migration tiers."""
+  scopeDepth: String
+
+  """Stable key of the tier within its item."""
+  tierKey: String!
+
+  """Row last update timestamp (UTC)."""
+  updatedAt: DateTime!
+}
+
+"""A course-completion certificate."""
+type CertificateEntity {
+  """Short unique certificate code."""
+  code: String!
+
+  """Course slug completed."""
+  courseSlug: String!
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Member the certificate was issued to."""
+  memberId: ID!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""Response wrapper for the certificates query."""
+type CertificatesResponse {
+  """Every certificate issued, newest first."""
+  data: [CertificateEntity!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""A comment on a community post."""
+type CommentEntity {
+  """Member id of the commenter."""
+  authorMemberId: ID
+
+  """Display name of the commenter."""
+  authorName: String!
+
+  """Comment body."""
+  body: String!
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""A commission earned for a paid referral order."""
+type CommissionEntity {
+  """Referral code used."""
+  affiliateCode: String!
+
+  """Affiliate id."""
+  affiliateId: String!
+
+  """Commission amount in VND."""
+  amountVnd: Int!
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Order id."""
+  orderId: String!
+
+  """Payout status (pending | paid)."""
+  status: String!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""Response wrapper for the commissions query."""
+type CommissionsResponse {
+  """Commissions, newest first."""
+  data: [CommissionEntity!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""One course's completion funnel."""
+type CompletionFunnelPoint {
+  """Distinct members who completed this course."""
+  completed: Int!
+
+  """Distinct buyers with a paid order for this course."""
+  learners: Int!
+
+  """Course slug."""
+  slug: String!
+
+  """Distinct members who started this course."""
+  started: Int!
+
+  """Course title."""
+  title: String!
+}
+
+"""Response wrapper for the completionFunnel query."""
+type CompletionFunnelResponse {
+  """Per-course completion funnel."""
+  data: [CompletionFunnelPoint!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for confirming an order."""
+input ConfirmOrderInput {
+  """Order to confirm paid."""
+  orderId: ID!
+}
+
+"""Response wrapper for the confirmOrder mutation."""
+type ConfirmOrderResponse {
+  """The paid order."""
+  data: OrderEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""The provider, its API key, and the verified sender to send as."""
+input ConnectMailInput {
+  """The provider API key. Stored encrypted and never returned."""
+  apiKey: String!
+
+  """Verified sender address mail goes out as."""
+  fromEmail: String!
+
+  """Optional display name shown beside the address."""
+  fromName: String
+
+  """Provider to connect: resend, or console for local work."""
+  provider: String!
+}
+
+"""Response wrapper for the connectAcademyMail mutation."""
+type ConnectMailResponse {
+  """The stored connection, without the secret."""
+  data: MailConnection
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""
+Input for continuing a brokered sign-in under the reference the completion returned.
+"""
+input ContinueBrokeredSignInInput {
+  """
+  Opaque continuation reference returned by `exchangeOauthCode`; present it from the same browser. Never a credential.
+  """
+  continuationReference: String!
+}
+
+"""
+The brokered continuation result: a released session, a pending second factor, the undecided shape, or the recoverable provider-email refusal. Never the refusal value.
+"""
+type ContinueBrokeredSignInPayload {
+  """
+  Access token (JWT) used as the Bearer credential. Null when a two-factor code is still required.
+  """
+  accessToken: String
+
+  """
+  Present only for a held subject with no verified email; offer password registration or sign-in.
+  """
+  providerEmailRefused: Boolean
+
+  """Whether a TOTP code is required to complete this sign-in."""
+  requiresTwoFactor: Boolean!
+
+  """
+  Opaque challenge token for `verifyTwoFactor`; present only when `requiresTwoFactor` is true.
+  """
+  twoFactorToken: String
+
+  """
+  Present only when an authority did not answer or the hold lapsed; start a fresh provider sign-in. Never a refusal.
+  """
+  undecided: AuthUndecided
+}
+
+"""Response wrapper for the continueBrokeredSignIn mutation."""
+type ContinueBrokeredSignInResponse {
+  """
+  Payload containing the access token (refresh token is set as a cookie).
+  """
+  data: ContinueBrokeredSignInPayload
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""A discount coupon redeemable at checkout."""
+type CouponEntity {
+  """Whether the coupon is currently redeemable."""
+  active: Boolean!
+
+  """Coupon code."""
+  code: String!
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Discount type (percent | fixed)."""
+  discountType: String!
+
+  """Discount value (percent 0-100, or VND for fixed)."""
+  discountValue: Int!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Max redemptions (null = unlimited)."""
+  maxUses: Int
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+
+  """Redemptions so far."""
+  usedCount: Int!
+}
+
+"""Response wrapper for the coupons query."""
+type CouponsResponse {
+  """All coupons."""
+  data: [CouponEntity!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Per-course enrolment + completion."""
+type CourseEnrollStat {
+  """Lessons completed."""
+  completions: Int!
+
+  """Distinct paying learners."""
+  learners: Int!
+
+  """Course slug."""
+  slug: String!
+
+  """Course title."""
+  title: String!
+}
+
+"""A course the expert publishes."""
+type CourseEntity {
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Lessons in this course."""
+  lessons: [LessonEntity!]
+
+  """Display price string."""
+  priceText: String
+
+  """
+  Authoritative numeric price in VND (null = not yet priced, not purchasable).
+  """
+  priceVnd: Int
+
+  """URL slug."""
+  slug: String!
+
+  """Position in the classroom list."""
+  sortIndex: Int!
+
+  """Short summary."""
+  summary: String
+
+  """Course title."""
+  title: String!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""Input for the course query."""
+input CourseInput {
+  """Course slug."""
+  slug: String!
+}
+
+"""Input for reading course progress."""
+input CourseProgressInput {
+  """Course slug."""
+  courseSlug: String!
+}
+
+"""Response wrapper for the courseProgress query."""
+type CourseProgressResponse {
+  """Per-lesson states."""
+  data: [LessonProgressState!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Response wrapper for the course query."""
+type CourseResponse {
+  """The course."""
+  data: CourseEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Response wrapper for the courses query."""
+type CoursesResponse {
+  """The published courses."""
+  data: [CourseEntity!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for creating an affiliate."""
+input CreateAffiliateInput {
+  """Commission in basis points (default 2000 = 20%)."""
+  commissionBps: Int
+
+  """Member to enrol."""
+  memberId: ID!
+}
+
+"""Response wrapper for the createAffiliate mutation."""
+type CreateAffiliateResponse {
+  """The created affiliate (with code)."""
+  data: AffiliateEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for creating a coupon."""
+input CreateCouponInput {
+  """Coupon code (unique)."""
+  code: String!
+
+  """Discount type (percent | fixed)."""
+  discountType: String!
+
+  """Discount value (percent 0-100, or VND for fixed)."""
+  discountValue: Int!
+
+  """Max redemptions (omit = unlimited)."""
+  maxUses: Int
+}
+
+"""Response wrapper for the createCoupon mutation."""
+type CreateCouponResponse {
+  """The created coupon."""
+  data: CouponEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for creating a course."""
+input CreateCourseInput {
+  """Display price string."""
+  priceText: String
+
+  """URL slug (unique)."""
+  slug: String!
+
+  """Short summary shown on the course card."""
+  summary: String
+
+  """Course title."""
+  title: String!
+}
+
+"""Response wrapper for the createCourse mutation."""
+type CreateCourseResponse {
+  """The created course."""
+  data: CourseEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for creating an installment plan."""
+input CreateInstallmentPlanInput {
+  """Course being bought (slug)."""
+  courseSlug: String!
+
+  """Number of installments (2-6)."""
+  numInstallments: Int!
+}
+
+"""A created installment plan with its installment rows."""
+type CreateInstallmentPlanPayload {
+  """Buyer's contact (email/phone)."""
+  buyerContact: String!
+
+  """Course being bought (slug)."""
+  courseSlug: String!
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """The plan's installment rows, in order."""
+  installments: [InstallmentEntity!]!
+
+  """Number of installments (2-6)."""
+  numInstallments: Int!
+
+  """Plan status (active | completed | defaulted)."""
+  status: String!
+
+  """Total amount in VND."""
+  totalAmount: Int!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""Response wrapper for the createInstallmentPlan mutation."""
+type CreateInstallmentPlanResponse {
+  """The created plan + installments."""
+  data: CreateInstallmentPlanPayload
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for creating a lesson."""
+input CreateLessonInput {
+  """Lesson content (markdown)."""
+  body: String!
+
+  """Course this lesson belongs to."""
+  courseId: ID!
+
+  """URL slug within the course."""
+  slug: String!
+
+  """Position within the course (omit = appended last)."""
+  sortIndex: Int
+
+  """Lesson title."""
+  title: String!
+}
+
+"""Response wrapper for the createLesson mutation."""
+type CreateLessonResponse {
+  """The created lesson."""
+  data: LessonEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for creating a member."""
+input CreateMemberInput {
+  """Login email — must be unique."""
+  email: String!
+
+  """Display name."""
+  name: String!
+
+  """Initial password (optional)."""
+  password: String
+
+  """Role (member | moderator | admin). Default member."""
+  role: String
+}
+
+"""Response wrapper for the createMember mutation."""
+type CreateMemberResponse {
+  """The created member."""
+  data: MemberEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for creating a course order."""
+input CreateOrderInput {
+  """Buyer's contact (email/phone)."""
+  buyerContact: String!
+
+  """Buyer's name."""
+  buyerName: String!
+
+  """Coupon code to redeem against this order."""
+  couponCode: String
+
+  """Course being bought (slug)."""
+  courseSlug: String!
+
+  """Referral code (affiliate)."""
+  referralCode: String
+}
+
+"""Response wrapper for the createOrder mutation."""
+type CreateOrderResponse {
+  """The created order (with checkoutUrl)."""
+  data: OrderEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for creating a community post."""
+input CreatePostInput {
+  """Post body."""
+  body: String!
+
+  """Post title."""
+  title: String!
+}
+
+"""Response wrapper for the createPost mutation."""
+type CreatePostResponse {
+  """The created post."""
+  data: PostEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""One onward link inside an expert-authored section."""
+input CustomSectionActionInput {
+  """Where the action goes."""
+  href: String!
+
+  """Already-resolved button text."""
+  label: String!
+}
+
+"""Static content of an expert-authored section."""
+input CustomSectionContentInput {
+  """At most one onward link."""
+  action: CustomSectionActionInput
+
+  """Its paragraph. Plain text; no markup is interpreted."""
+  body: String
+
+  """The section's own title."""
+  heading: String
+
+  """One image, by URL."""
+  imageUrl: String
+}
+
+"""Expert dashboard aggregate."""
+type DashboardStats {
+  """Active members."""
+  activeMembers: Int!
+
+  """Per-course breakdown."""
+  byCourse: [CourseEnrollStat!]!
+
+  """Comments."""
+  comments: Int!
+
+  """Number of paid orders."""
+  paidOrders: Int!
+
+  """Published posts."""
+  posts: Int!
+
+  """Total revenue (VND) from paid orders."""
+  revenueVnd: Float!
+
+  """Total lesson completions."""
+  totalCompletions: Int!
+
+  """Total members."""
+  totalMembers: Int!
+}
+
+"""Response wrapper for the dashboardStats query."""
+type DashboardStatsResponse {
+  """The aggregate."""
+  data: DashboardStats
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+"""Input for deleting a lesson attachment."""
+input DeleteAttachmentInput {
+  """Attachment to delete."""
+  attachmentId: ID!
+}
+
+"""Response wrapper for the deleteAttachment mutation."""
+type DeleteAttachmentResponse {
+  """The attachment that was deleted."""
+  data: DeleteAttachmentResult
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""The attachment that was deleted."""
+type DeleteAttachmentResult {
+  """Attachment deleted."""
+  id: ID!
+}
+
+"""Input for deleting a course."""
+input DeleteCourseInput {
+  """Course to delete."""
+  id: ID!
+}
+
+"""Response wrapper for the deleteCourse mutation."""
+type DeleteCourseResponse {
+  """The course that was deleted."""
+  data: DeleteCourseResult
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""The course that was deleted."""
+type DeleteCourseResult {
+  """Course deleted."""
+  id: ID!
+}
+
+"""Input for deleting a lesson."""
+input DeleteLessonInput {
+  """Lesson to delete."""
+  id: ID!
+}
+
+"""Response wrapper for the deleteLesson mutation."""
+type DeleteLessonResponse {
+  """The lesson that was deleted."""
+  data: DeleteLessonResult
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""The lesson that was deleted."""
+type DeleteLessonResult {
+  """Lesson deleted."""
+  id: ID!
+}
+
+"""Input for deleting a media asset."""
+input DeleteMediaAssetInput {
+  """Media asset to delete."""
+  assetId: ID!
+}
+
+"""Response wrapper for the deleteMediaAsset mutation."""
+type DeleteMediaAssetResponse {
+  """The asset that was deleted."""
+  data: DeleteMediaAssetResult
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""The media asset that was deleted."""
+type DeleteMediaAssetResult {
+  """Asset deleted."""
+  id: ID!
+}
+
+"""A signed download URL for a lesson resource."""
+type DownloadPayload {
+  """Suggested filename."""
+  filename: String!
+
+  """Signed download URL (?token=...)."""
+  url: String!
+}
+
+"""Input for requesting an attachment download URL."""
+input DownloadTokenInput {
+  """Attachment to download."""
+  attachmentId: ID!
+}
+
+"""Response wrapper for the downloadToken query."""
+type DownloadTokenResponse {
+  """Signed URL + filename."""
+  data: DownloadPayload
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for exchanging an OAuth authorization code (PKCE) for a session."""
+input ExchangeOauthCodeInput {
+  """Authorization code returned by the Keycloak login redirect."""
+  code: String!
+
+  """
+  Identity provider the redirect was started for -- "google" or "github".
+  """
+  provider: String!
+
+  """Opaque `state` the redirect endpoint issued and Keycloak handed back."""
+  state: String!
+}
+
+"""
+The brokered completion result: a released session, a pending second factor, the undecided shape with or without a continuation reference, or the recoverable provider-email refusal. Never the refusal value.
+"""
+type ExchangeOauthCodePayload {
+  """
+  Access token (JWT) used as the Bearer credential. Null when a two-factor code is still required.
+  """
+  accessToken: String
+
+  """
+  Present only for an unbound provider subject with no verified email; offer password registration or sign-in.
+  """
+  providerEmailRefused: Boolean
+
+  """Whether a TOTP code is required to complete this sign-in."""
+  requiresTwoFactor: Boolean!
+
+  """
+  Opaque challenge token for `verifyTwoFactor`; present only when `requiresTwoFactor` is true.
+  """
+  twoFactorToken: String
+
+  """
+  Present only when an authority did not answer; continue under the returned reference, or start a fresh provider sign-in when none is returned. Never a refusal.
+  """
+  undecided: AuthBrokeredUndecided
+}
+
+"""Response wrapper for the exchangeOauthCode mutation."""
+type ExchangeOauthCodeResponse {
+  """
+  Payload containing the access token (refresh token is set as a cookie).
+  """
+  data: ExchangeOauthCodePayload
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""
+The address to mail a reset code to. The answer is the same whether or not it exists.
+"""
+input ForgotPasswordInitInput {
+  """The account's email."""
+  email: String!
+}
+
+"""Result of starting a password reset: the pending code challenge."""
+type ForgotPasswordInitResponse {
+  """The pending challenge, or null when the request was refused."""
+  data: OtpChallenge
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""The pending challenge to send a new code for."""
+input ForgotPasswordResendInput {
+  """The challenge id returned by forgotPasswordInit."""
+  challengeId: String!
+}
+
+"""Result of resending: the same challenge, with a fresh code."""
+type ForgotPasswordResendResponse {
+  """The pending challenge, or null when the request was refused."""
+  data: OtpChallenge
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""The pending challenge, the mailed code, and the new password."""
+input ForgotPasswordVerifyOtpInput {
+  """The challenge id returned by forgotPasswordInit."""
+  challengeId: String!
+
+  """The password to set."""
+  newPassword: String!
+
+  """The one-time code from the email."""
+  otp: String!
+}
+
+"""Result of proving the code: whether the password was set."""
+type ForgotPasswordVerifyOtpResponse {
+  """True when the password was set."""
+  data: Boolean
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""How a catalog item is actually fulfilled once ordered."""
+enum FulfillmentKind {
+  """Retired alias: provisions an agentos instance."""
+  agent_workspace_provisioned @deprecated(reason: "Use INSTANCE_PROVISIONED; the app is named by the order.")
+
+  """Fulfilled by the domain registrar flow."""
+  domain_registrar
+
+  """Retired alias: provisions an ai_academy instance."""
+  expert_site_provisioned @deprecated(reason: "Use INSTANCE_PROVISIONED; the app is named by the order.")
+
+  """Fulfilled by provisioning an instance of the app the order names."""
+  instance_provisioned
+
+  """Fulfilled by a human-driven ops ticket."""
+  ops_service
+
+  """Fulfilled by configuring a SaaS workspace."""
+  saas_configured
+}
+
+type GpuWorkersGraphQLType {
+  gpus: [String!]!
+}
+
+type GpuWorkersResponse {
+  data: GpuWorkersGraphQLType
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for granting course access."""
+input GrantCourseAccessInput {
+  """Course slug to unlock."""
+  courseSlug: String!
+
+  """Learner email (the key access is checked against)."""
+  email: String!
+
+  """Why it was granted — kept on the order."""
+  note: String
+}
+
+"""Response wrapper for the grantCourseAccess mutation."""
+type GrantCourseAccessResponse {
+  """The comped order that unlocks the course."""
+  data: OrderEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for hiding a post."""
+input HidePostInput {
+  """Post to hide."""
+  postId: ID!
+}
+
+"""Response wrapper for the hidePost mutation."""
+type HidePostResponse {
+  """The hidden post."""
+  data: PostEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""One due installment of an installment plan."""
+type InstallmentEntity {
+  """Amount due, in VND."""
+  amount: Int!
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Due date."""
+  dueDate: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """0-based position within the plan."""
+  index: Int!
+
+  """When this installment was paid."""
+  paidAt: DateTime
+
+  """Owning installment plan id."""
+  planId: ID!
+
+  """Status (pending | paid)."""
+  status: String!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""An installment (trả góp) purchase plan."""
+type InstallmentPlanEntity {
+  """Buyer's contact (email/phone)."""
+  buyerContact: String!
+
+  """Course being bought (slug)."""
+  courseSlug: String!
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Number of installments (2-6)."""
+  numInstallments: Int!
+
+  """Plan status (active | completed | defaulted)."""
+  status: String!
+
+  """Total amount in VND."""
+  totalAmount: Int!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""An installment plan with its installment rows."""
+type InstallmentPlanWithInstallments {
+  """Buyer's contact (email/phone)."""
+  buyerContact: String!
+
+  """Course being bought (slug)."""
+  courseSlug: String!
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """The plan's installment rows, in order."""
+  installments: [InstallmentEntity!]!
+
+  """Number of installments (2-6)."""
+  numInstallments: Int!
+
+  """Plan status (active | completed | defaulted)."""
+  status: String!
+
+  """Total amount in VND."""
+  totalAmount: Int!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""An invoice issued to a user, optionally tied to a service instance."""
+type InvoiceEntity {
+  """Invoice amount in VND."""
+  amountVnd: Int!
+
+  """Catalog order this invoice pays for."""
+  catalogOrder: CatalogOrderEntity
+
+  """
+  The amount actually charged at the gateway (may differ from amountVnd outside production).
+  """
+  chargedAmountVnd: Int
+
+  """Row creation timestamp (UTC)."""
+  createdAt: DateTime!
+
+  """Due date of the invoice."""
+  dueAt: DateTime!
+
+  """SePay signed checkout fields (JSON-encoded). Null for PayOS."""
+  gatewayCheckoutFields: String
+
+  """Gateway checkout URL the buyer is sent to / the FE form POSTs to."""
+  gatewayCheckoutUrl: String
+
+  """
+  Gateway order code / invoice number used to reconcile the webhook callback.
+  """
+  gatewayReferenceId: String
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Timestamp when the invoice was paid."""
+  paidAt: DateTime
+
+  """Which real-money gateway a pay link was created against."""
+  paymentGateway: InvoicePaymentGateway
+
+  """What the invoice was issued for."""
+  purpose: InvoicePurpose!
+
+  """Payment status of the invoice."""
+  status: InvoiceStatus!
+
+  """
+  Target tier this invoice pays to swap the order onto (CatalogUpgrade only).
+  """
+  targetCatalogTier: CatalogTierEntity
+
+  """Row last update timestamp (UTC)."""
+  updatedAt: DateTime!
+
+  """User the invoice was issued to."""
+  user: UserEntity
+}
+
+"""
+Which real-money payment gateway an invoice's pay link was created against.
+"""
+enum InvoicePaymentGateway {
+  """PayOS — Vietnam domestic gateway (bank QR / cards)."""
+  payos
+
+  """SePay Payment Gateway — bank-transfer + VietQR."""
+  sepay
+}
+
+"""What an invoice was issued for."""
+enum InvoicePurpose {
+  """A brand-new catalog order (non-infra product)."""
+  catalog_order
+
+  """A catalog order renewal."""
+  catalog_renewal
+
+  """A catalog tier upgrade."""
+  catalog_upgrade
+
+  """A brand-new order."""
+  order
+
+  """A plan upgrade."""
+  upgrade
+}
+
+"""Payment status of an invoice."""
+enum InvoiceStatus {
+  """Cancelled before payment."""
+  cancelled
+
+  """Fully paid."""
+  paid
+
+  """Issued but not paid yet."""
+  unpaid
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
+"""One landing section's order and visibility."""
+input LayoutSectionInput {
+  """Content -- expert-authored sections only."""
+  content: CustomSectionContentInput
+
+  """A catalog key, or "custom:<id>" for a section the expert wrote."""
+  key: String!
+
+  """Whether the section renders."""
+  visible: Boolean!
+}
+
+"""A contact request from the expert's site."""
+type LeadEntity {
+  """How to reach them."""
+  contact: String!
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """When this lead was last emailed a remarketing nudge."""
+  lastNudgedAt: DateTime
+
+  """What they wrote."""
+  message: String
+
+  """Visitor's name."""
+  name: String!
+
+  """Private note the expert keeps."""
+  note: String
+
+  """Follow-up status."""
+  status: String!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""A downloadable resource attached to a lesson."""
+type LessonAttachmentEntity {
+  """MIME type."""
+  contentType: String!
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Lesson id."""
+  lessonId: String!
+
+  """Original filename."""
+  originalName: String!
+
+  """Size in bytes."""
+  sizeBytes: Int!
+
+  """Display title."""
+  title: String!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""Input for listing a lesson's resources."""
+input LessonAttachmentsInput {
+  """Lesson to list resources for."""
+  lessonId: ID!
+}
+
+"""Response wrapper for the lessonAttachments query."""
+type LessonAttachmentsResponse {
+  """Resources on the lesson."""
+  data: [LessonAttachmentEntity!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""One lesson inside a course."""
+type LessonEntity {
+  """Lesson content (markdown)."""
+  body: String!
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Whether this lesson is a free preview (no purchase required)."""
+  isFree: Boolean!
+
+  """URL slug within the course."""
+  slug: String!
+
+  """Position within the course."""
+  sortIndex: Int!
+
+  """Lesson title."""
+  title: String!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+
+  """Uploaded video asset id."""
+  videoAssetId: ID
+}
+
+"""A lesson completion record."""
+type LessonProgressResult {
+  """When it was completed."""
+  completedAt: DateTime!
+
+  """Lesson completed."""
+  lessonId: ID!
+}
+
+"""A member's state for one lesson."""
+type LessonProgressState {
+  """When completed (null if not)."""
+  completedAt: DateTime
+
+  """Lesson id."""
+  lessonId: ID!
+
+  """Saved watch position in seconds."""
+  positionSec: Int!
+}
+
+"""Response wrapper for the listMediaAssets query."""
+type ListMediaAssetsResponse {
+  """The expert's media library (newest first)."""
+  data: [MediaAssetSummary!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""This academy's mail connection, without the secret."""
+type MailConnection {
+  """Whether this academy could send a message right now."""
+  canSend: Boolean!
+
+  """The sender address mail goes out as."""
+  fromEmail: String
+
+  """Display name shown beside the address."""
+  fromName: String
+
+  """The connected provider, e.g. resend. Null when mail is not connected."""
+  provider: String
+}
+
+"""
+An expert's wording for one message; null fields keep the built-in copy.
+"""
+type MailTemplate {
+  """The expert's body. Null keeps the built-in one."""
+  body: String
+
+  """Which message this rewrites, e.g. otp.sign-up."""
+  kind: String!
+
+  """The expert's subject line. Null keeps the built-in one."""
+  subject: String
+}
+
+"""This academy's email-verification setting."""
+type MailVerification {
+  """Whether this academy can currently send mail."""
+  canSendMail: Boolean!
+
+  """Whether a one-time code is required at sign-up and sign-in."""
+  isMailVerificationEnabled: Boolean!
+}
+
+"""Response wrapper for the markAllNotificationsRead mutation."""
+type MarkAllNotificationsReadResponse {
+  """How many notifications were marked read."""
+  data: MarkAllNotificationsReadResult
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""How many notifications were marked read."""
+type MarkAllNotificationsReadResult {
+  """Notifications marked read."""
+  count: Int!
+}
+
+"""Input for marking a lesson complete."""
+input MarkLessonCompleteInput {
+  """Lesson to mark."""
+  lessonId: ID!
+}
+
+"""Response wrapper for the markLessonComplete mutation."""
+type MarkLessonCompleteResponse {
+  """The completion record."""
+  data: LessonProgressResult
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for marking one notification read."""
+input MarkNotificationReadInput {
+  """Notification to mark read."""
+  notificationId: ID!
+}
+
+"""Response wrapper for the markNotificationRead mutation."""
+type MarkNotificationReadResponse {
+  """The notification that was marked read."""
+  data: MarkNotificationReadResult
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""The notification that was marked read."""
+type MarkNotificationReadResult {
+  """Notification marked read."""
+  id: ID!
+
+  """Whether a row was actually flipped to read."""
+  updated: Boolean!
+}
+
+"""Response wrapper for the me query."""
+type MeResponse {
+  """The authenticated user synced from Keycloak."""
+  data: UserEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""
+A media asset — video/image upload, transcode status, no internal storage paths.
+"""
+type MediaAssetSummary {
+  """Caption language (BCP-47), if transcribed."""
+  captionsLang: String
+
+  """MIME type."""
+  contentType: String!
+
+  """When the asset was created."""
+  createdAt: DateTime!
+
+  """Duration in seconds (video only)."""
+  durationSec: Int
+
+  """Last transcode error, if any."""
+  error: String
+
+  """Asset id."""
+  id: ID!
+
+  """Asset kind (video/image)."""
+  kind: String!
+
+  """Original filename as uploaded."""
+  originalName: String!
+
+  """Size in bytes."""
+  sizeBytes: Int!
+
+  """Processing status (uploading/processing/ready/failed)."""
+  status: String!
+}
+
+"""A member of the expert's community."""
+type MemberEntity {
+  """Why the member was banned (null if not banned)."""
+  banReason: String
+
+  """When the member was banned."""
+  bannedAt: DateTime
+
+  """Admin who issued the ban."""
+  bannedBy: ID
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Email (unique identity)."""
+  email: String!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Keycloak user id (JWT sub claim)."""
+  keycloakUserId: String
+
+  """Display name."""
+  name: String!
+
+  """Role (member | moderator | admin)."""
+  role: String!
+
+  """Status (active | banned)."""
+  status: String!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+
+  """Experience points earned from learning activity."""
+  xp: Int!
+}
+
+"""Response wrapper for the members query."""
+type MembersResponse {
+  """Community members, newest first."""
+  data: [MemberEntity!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+type Mutation {
+  """Comment on a post."""
+  addComment(
+    """Comment fields."""
+    request: AddCommentInput!
+  ): AddCommentResponse!
+
+  """Apply a built-in template preset (admin only)."""
+  applyTemplate(
+    """Which preset to apply."""
+    request: ApplyTemplateInput!
+  ): ApplyTemplateResponse!
+
+  """Attach or clear a lesson's uploaded video (admin only)."""
+  attachVideo(
+    """Lesson + video asset."""
+    request: AttachVideoInput!
+  ): AttachVideoResponse!
+
+  """Cancel an order (admin only)."""
+  cancelOrder(
+    """Order to cancel."""
+    request: CancelOrderInput!
+  ): CancelOrderResponse!
+
+  """Mark an order paid (admin only)."""
+  confirmOrder(
+    """Order to confirm."""
+    request: ConfirmOrderInput!
+  ): ConfirmOrderResponse!
+
+  """
+  Connect this academy's mail provider. The key is stored encrypted and never returned.
+  """
+  connectAcademyMail(
+    """Provider, API key and verified sender."""
+    request: ConnectMailInput!
+  ): ConnectMailResponse!
+
+  """
+  Continue a brokered sign-in whose verified proof was held; repeats only the identity-mapping read.
+  """
+  continueBrokeredSignIn(
+    """The continuation reference the brokered completion returned."""
+    request: ContinueBrokeredSignInInput!
+  ): ContinueBrokeredSignInResponse!
+
+  """Enrol a member as an affiliate (admin only)."""
+  createAffiliate(
+    """Member + commission rate."""
+    request: CreateAffiliateInput!
+  ): CreateAffiliateResponse!
+
+  """Create a discount coupon (admin only)."""
+  createCoupon(
+    """Coupon code + discount."""
+    request: CreateCouponInput!
+  ): CreateCouponResponse!
+
+  """Create a course (admin only)."""
+  createCourse(
+    """Course slug + title + summary/price."""
+    request: CreateCourseInput!
+  ): CreateCourseResponse!
+
+  """Start an installment (trả góp) purchase plan for a course."""
+  createInstallmentPlan(
+    """Course + number of installments (total amount is derived server-side)."""
+    request: CreateInstallmentPlanInput!
+  ): CreateInstallmentPlanResponse!
+
+  """Create a lesson inside a course (admin only)."""
+  createLesson(
+    """Course + slug + title + body."""
+    request: CreateLessonInput!
+  ): CreateLessonResponse!
+
+  """Create a member (admin only)."""
+  createMember(
+    """Name + email, optional password and role."""
+    request: CreateMemberInput!
+  ): CreateMemberResponse!
+
+  """Buy a course."""
+  createOrder(
+    """Course + buyer."""
+    request: CreateOrderInput!
+  ): CreateOrderResponse!
+
+  """Create a community post."""
+  createPost(
+    """Post fields."""
+    request: CreatePostInput!
+  ): CreatePostResponse!
+
+  """Delete a lesson attachment (admin only)."""
+  deleteAttachment(
+    """Attachment to delete."""
+    request: DeleteAttachmentInput!
+  ): DeleteAttachmentResponse!
+
+  """Delete a course and its lessons (admin only)."""
+  deleteCourse(
+    """Course to delete."""
+    request: DeleteCourseInput!
+  ): DeleteCourseResponse!
+
+  """Delete a lesson (admin only)."""
+  deleteLesson(
+    """Lesson to delete."""
+    request: DeleteLessonInput!
+  ): DeleteLessonResponse!
+
+  """Delete a media asset (admin only)."""
+  deleteMediaAsset(
+    """Asset to delete."""
+    request: DeleteMediaAssetInput!
+  ): DeleteMediaAssetResponse!
+
+  """
+  Exchange an OAuth authorization code (PKCE) for a session; sets the refresh-token cookie.
+  """
+  exchangeOauthCode(
+    """Code + provider + the `state` the redirect endpoint issued."""
+    request: ExchangeOauthCodeInput!
+  ): ExchangeOauthCodeResponse!
+
+  """
+  Mail a reset code. The answer is identical whether or not the address exists.
+  """
+  forgotPasswordInit(
+    """The address as typed."""
+    request: ForgotPasswordInitInput!
+  ): ForgotPasswordInitResponse!
+
+  """Mail a fresh code for a pending reset challenge."""
+  forgotPasswordResend(
+    """The challenge to resend for."""
+    request: ForgotPasswordResendInput!
+  ): ForgotPasswordResendResponse!
+
+  """Prove the mailed code and set the new password."""
+  forgotPasswordVerifyOtp(
+    """The challenge, the code, and the new password."""
+    request: ForgotPasswordVerifyOtpInput!
+  ): ForgotPasswordVerifyOtpResponse!
+
+  """Give a learner a course without payment (admin only)."""
+  grantCourseAccess(
+    """Learner email + course slug."""
+    request: GrantCourseAccessInput!
+  ): GrantCourseAccessResponse!
+
+  """Reversibly hide a post from the feed (admin/moderator only)."""
+  hidePost(
+    """Post id."""
+    request: HidePostInput!
+  ): HidePostResponse!
+
+  """Mark all of the member's notifications read."""
+  markAllNotificationsRead: MarkAllNotificationsReadResponse!
+
+  """Mark a lesson complete for a member."""
+  markLessonComplete(
+    """Lesson to mark."""
+    request: MarkLessonCompleteInput!
+  ): MarkLessonCompleteResponse!
+
+  """Mark one of the member's notifications read."""
+  markNotificationRead(
+    """Notification to mark read."""
+    request: MarkNotificationReadInput!
+  ): MarkNotificationReadResponse!
+
+  """Pay one due installment row."""
+  payInstallment(
+    """Installment to pay."""
+    request: PayInstallmentInput!
+  ): PayInstallmentResponse!
+
+  """Pin a post to the top of the feed (admin/moderator only)."""
+  pinPost(
+    """Post id."""
+    request: PinPostInput!
+  ): PinPostResponse!
+  platformCreateStudent(request: CreateMemberInput!): CreateMemberResponse!
+  platformGrantCourseAccess(request: GrantCourseAccessInput!): GrantCourseAccessResponse!
+  platformRevokeCourseAccess(request: RevokeCourseAccessInput!): RevokeCourseAccessResponse!
+  platformSetStudentStatus(request: SetMemberStatusInput!): SetMemberStatusResponse!
+  platformUpdateStudent(request: UpdateMemberInput!): UpdateMemberResponse!
+
+  """Toggle a like on a post."""
+  reactPost(
+    """Post to like."""
+    request: ReactPostInput!
+  ): ReactPostResponse!
+
+  """Bootstrap a session from the refresh-token cookie; rotates the cookie."""
+  refreshSession: RefreshSessionResponse!
+
+  """Refund a paid order (admin only)."""
+  refundOrder(
+    """Order to refund."""
+    request: RefundOrderInput!
+  ): RefundOrderResponse!
+
+  """Rebuild the RAG content index (admin only)."""
+  reindexRag: ReindexRagResponse!
+
+  """Remove a member (admin only). Refused when they have paid orders."""
+  removeMember(
+    """Member id."""
+    request: RemoveMemberInput!
+  ): RemoveMemberResponse!
+
+  """
+  Remove a post from the feed (admin/moderator only; use restorePost to undo).
+  """
+  removePost(
+    """Post id."""
+    request: RemovePostInput!
+  ): RemovePostResponse!
+
+  """Restore a hidden/removed post to the feed (admin/moderator only)."""
+  restorePost(
+    """Post id."""
+    request: RestorePostInput!
+  ): RestorePostResponse!
+
+  """Retry a failed transcode (admin only)."""
+  retryTranscode(
+    """Failed asset to retry."""
+    request: RetryTranscodeInput!
+  ): RetryTranscodeResponse!
+
+  """Take back a gifted course (admin only). Never touches a real purchase."""
+  revokeCourseAccess(
+    """Learner email + course slug."""
+    request: RevokeCourseAccessInput!
+  ): RevokeCourseAccessResponse!
+
+  """Save a lesson watch position."""
+  saveLessonPosition(
+    """Lesson + position."""
+    request: SaveLessonPositionInput!
+  ): SaveLessonPositionResponse!
+
+  """Run the remarketing nudge now (admin only)."""
+  sendRemarketing: SendRemarketingResponse!
+
+  """
+  Rewrite one of this academy's messages. Null fields keep the built-in copy.
+  """
+  setAcademyMailTemplate(
+    """Which message, and the subject and body to use."""
+    request: SetMailTemplateInput!
+  ): SetMailTemplateResponse!
+
+  """Require, or stop requiring, a one-time code at sign-up and sign-in."""
+  setAcademyMailVerification(
+    """Whether to require a one-time code."""
+    request: SetMailVerificationInput!
+  ): SetMailVerificationResponse!
+
+  """Promote/demote a member (admin only)."""
+  setMemberRole(
+    """Member + new role."""
+    request: SetMemberRoleInput!
+  ): SetMemberRoleResponse!
+
+  """Ban/unban a member (admin only)."""
+  setMemberStatus(
+    """Member + new status."""
+    request: SetMemberStatusInput!
+  ): SetMemberStatusResponse!
+
+  """Sign in with an email + password; sets the refresh-token cookie."""
+  signIn(
+    """Email + password."""
+    request: SignInInput!
+  ): SignInResponse!
+
+  """
+  Check the password and mail a one-time code. No session exists until signInVerifyOtp.
+  """
+  signInInit(
+    """The email and password."""
+    request: SignInInitInput!
+  ): SignInInitResponse!
+
+  """Mail a fresh code for a pending sign-in challenge."""
+  signInResend(
+    """The challenge to resend for."""
+    request: SignInResendInput!
+  ): SignInResendResponse!
+
+  """Prove the mailed code and open the session the password earned."""
+  signInVerifyOtp(
+    """The challenge and the code."""
+    request: SignInVerifyOtpInput!
+  ): SignInVerifyOtpResponse!
+
+  """
+  Clear the refresh-token cookie and attempt provider revocation, reporting whether that revocation was observed; on the everywhere scope, end every session of the verified requester.
+  """
+  signOut(
+    """The ending scope; omit to sign out of this browser only."""
+    request: SignOutInput
+  ): SignOutResponse!
+
+  """
+  Start sign-up: mails a one-time code. No account is created until signUpVerifyOtp.
+  """
+  signUpInit(
+    """Email, password and optional display name."""
+    request: SignUpInitInput!
+  ): SignUpInitResponse!
+
+  """Mail a fresh code for a pending sign-up challenge."""
+  signUpResend(
+    """The challenge to resend for."""
+    request: SignUpResendInput!
+  ): SignUpResendResponse!
+
+  """Prove the mailed code and complete the registration it was holding."""
+  signUpVerifyOtp(
+    """The challenge and the code."""
+    request: SignUpVerifyOtpInput!
+  ): SignUpVerifyOtpResponse!
+
+  """Submit a contact request."""
+  submitLead(
+    """Lead fields."""
+    request: SubmitLeadInput!
+  ): SubmitLeadResponse!
+
+  """Unpin a post (admin/moderator only)."""
+  unpinPost(
+    """Post id."""
+    request: UnpinPostInput!
+  ): UnpinPostResponse!
+
+  """Update the expert's branding (admin only)."""
+  updateBrand(
+    """Fields to change."""
+    request: UpdateBrandInput!
+  ): UpdateBrandResponse!
+
+  """Update a coupon's active/maxUses (admin only)."""
+  updateCoupon(
+    """Coupon id + fields to change."""
+    request: UpdateCouponInput!
+  ): UpdateCouponResponse!
+
+  """Update a course (admin only)."""
+  updateCourse(
+    """Course id + fields to change."""
+    request: UpdateCourseInput!
+  ): UpdateCourseResponse!
+
+  """Update the expert's custom CSS override (admin only)."""
+  updateCustomCss(
+    """Fields to change."""
+    request: UpdateCustomCssInput!
+  ): UpdateCustomCssResponse!
+
+  """Update the expert's landing section order/visibility (admin only)."""
+  updateLayoutConfig(
+    """Full, ordered section list."""
+    request: UpdateLayoutConfigInput!
+  ): UpdateLayoutConfigResponse!
+
+  """Update a lead's status/note (admin only)."""
+  updateLead(
+    """Lead + changes."""
+    request: UpdateLeadInput!
+  ): UpdateLeadResponse!
+
+  """Update a lesson (admin only)."""
+  updateLesson(
+    """Lesson id + fields to change."""
+    request: UpdateLessonInput!
+  ): UpdateLessonResponse!
+
+  """Update a member (admin only)."""
+  updateMember(
+    """Member id + fields to change."""
+    request: UpdateMemberInput!
+  ): UpdateMemberResponse!
+
+  """Restart this stack onto the newest image (admin only)."""
+  updateStack: StackUpdateResponse!
+
+  """Update the expert's theme tokens (admin only)."""
+  updateTheme(
+    """Fields to change."""
+    request: UpdateThemeInput!
+  ): UpdateThemeResponse!
+}
+
+"""A completion certificate with its course title."""
+type MyCertificate {
+  """Short unique certificate code."""
+  code: String!
+
+  """Course slug completed."""
+  courseSlug: String!
+
+  """
+  Course title (joined from CourseEntity; null if the course was removed).
+  """
+  courseTitle: String
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Member the certificate was issued to."""
+  memberId: ID!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""Response wrapper for the myCertificates query."""
+type MyCertificatesResponse {
+  """The caller's certificates, newest first."""
+  data: [MyCertificate!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Response wrapper for the myInstallmentPlans query."""
+type MyInstallmentPlansResponse {
+  """The caller's installment plans, newest first."""
+  data: [InstallmentPlanWithInstallments!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Response wrapper for the myLeads query."""
+type MyLeadsResponse {
+  """The expert's leads, newest first."""
+  data: [LeadEntity!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Optional pagination for myNotifications."""
+input MyNotificationsInput {
+  """Max rows to return (default 50, capped at 100)."""
+  limit: Int
+
+  """Rows to skip."""
+  offset: Int
+}
+
+"""Response wrapper for the myNotifications query."""
+type MyNotificationsResponse {
+  """The member's notifications, newest first."""
+  data: [NotificationEntity!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""A member's XP total and derived level."""
+type MyXp {
+  """1-based level rank."""
+  level: Int!
+
+  """XP threshold of the next level (null at the top level)."""
+  nextAt: Int
+
+  """Level title."""
+  title: String!
+
+  """Total experience points earned."""
+  xp: Int!
+}
+
+"""Response wrapper for the myXp query."""
+type MyXpResponse {
+  """The caller's XP + level."""
+  data: MyXp
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""An in-app notification for a member."""
+type NotificationEntity {
+  """Detail text."""
+  body: String!
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Whether the recipient has read it."""
+  isRead: Boolean!
+
+  """Recipient member id."""
+  memberId: String!
+
+  """Short headline."""
+  title: String!
+
+  """Notification type (order | lesson | system)."""
+  type: String!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""A course purchase order."""
+type OrderEntity {
+  """Amount in VND."""
+  amountVnd: Int!
+
+  """Buyer's contact (email/phone)."""
+  buyerContact: String!
+
+  """Buyer's name."""
+  buyerName: String!
+
+  """SePay signed checkout fields (JSON-encoded). Null for PayOS/mock."""
+  checkoutFields: String
+
+  """Checkout URL for the buyer."""
+  checkoutUrl: String
+
+  """Coupon code redeemed at checkout."""
+  couponCode: String
+
+  """Course being bought (slug)."""
+  courseSlug: String!
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Gateway reference id."""
+  gatewayRef: String
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """When the order was paid."""
+  paidAt: DateTime
+
+  """Referral code carried at checkout."""
+  referralCode: String
+
+  """Order status (pending | paid | cancelled | refunded)."""
+  status: String!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""Response wrapper for the orders query."""
+type OrdersResponse {
+  """Orders, newest first."""
+  data: [OrderEntity!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Handle for a pending one-time-code challenge."""
+type OtpChallenge {
+  """
+  Opaque challenge id; present it to the matching resend and verify mutations.
+  """
+  challengeId: String!
+
+  """Seconds until the code stops being accepted."""
+  expiresInSeconds: Int!
+}
+
+"""Input for paying one installment."""
+input PayInstallmentInput {
+  """Installment to pay."""
+  installmentId: ID!
+}
+
+"""A paid installment with its owning plan."""
+type PayInstallmentPayload {
+  """The installment just paid."""
+  installment: InstallmentEntity!
+
+  """The owning plan (status may have moved to completed)."""
+  plan: InstallmentPlanEntity!
+}
+
+"""Response wrapper for the payInstallment mutation."""
+type PayInstallmentResponse {
+  """The paid installment + owning plan."""
+  data: PayInstallmentPayload
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for pinning a post."""
+input PinPostInput {
+  """Post to pin."""
+  postId: ID!
+}
+
+"""Response wrapper for the pinPost mutation."""
+type PinPostResponse {
+  """The pinned post."""
+  data: PostEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+type PlatformGrowthSnapshot {
+  activeMembers: Int!
+  paidOrders: Int!
+  revenueVnd: Int!
+  totalCompletions: Int!
+  totalMembers: Int!
+}
+
+type PlatformGrowthSnapshotResponse {
+  data: PlatformGrowthSnapshot
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""What a person may do to the nivo platform itself, not to one academy."""
+enum PlatformRole {
+  """Owns their own instances and can act on nobody else's."""
+  customer
+
+  """May upgrade the fleet and drive the instance recovery ladder."""
+  operator
+}
+
+input PlatformStudentsInput {
+  limit: Int! = 20
+  offset: Int! = 0
+  search: String
+  status: String
+}
+
+type PlatformStudentsPage {
+  items: [MemberEntity!]!
+  total: Int!
+}
+
+type PlatformStudentsResponse {
+  data: PlatformStudentsPage
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for requesting a playback token."""
+input PlaybackTokenInput {
+  """Media asset to play."""
+  assetId: ID!
+}
+
+"""A signed playback token for one asset."""
+type PlaybackTokenPayload {
+  """Stream URL: GET this with ?token=<token>."""
+  streamUrl: String!
+
+  """Short-lived signed token (attach as ?token=)."""
+  token: String!
+}
+
+"""Response wrapper for the playbackToken query."""
+type PlaybackTokenResponse {
+  """The signed token + stream URL."""
+  data: PlaybackTokenPayload
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""A community feed post."""
+type PostEntity {
+  """Member id of the author."""
+  authorMemberId: ID
+
+  """Display name of the author."""
+  authorName: String!
+
+  """Post body (markdown)."""
+  body: String!
+
+  """Comments on this post."""
+  comments: [CommentEntity!]
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Whether the post is pinned."""
+  pinned: Boolean!
+
+  """Like count."""
+  reactionCount: Int!
+
+  """Moderation status (published | hidden | removed)."""
+  status: String!
+
+  """Post title."""
+  title: String!
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""Response wrapper for the posts query."""
+type PostsResponse {
+  """Published posts."""
+  data: [PostEntity!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+type Query {
+  """
+  This academy's mail connection, verification setting and authored wording.
+  """
+  academyMailSettings: AcademyMailSettingsResponse!
+
+  """The expert's affiliates (admin only)."""
+  affiliates: AffiliatesResponse!
+
+  """Ask the AI tutor (RAG over course content)."""
+  askTutor(
+    """Question + optional course."""
+    request: AskTutorInput!
+  ): AskTutorResponse!
+
+  """Every certificate issued (admin only)."""
+  certificates: CertificatesResponse!
+
+  """The affiliate commission ledger (admin only)."""
+  commissions: CommissionsResponse!
+
+  """Per-course learners -> started -> completed (admin only)."""
+  completionFunnel: CompletionFunnelResponse!
+
+  """All coupons (admin only)."""
+  coupons: CouponsResponse!
+
+  """One course by slug (with lessons)."""
+  course(
+    """Course slug."""
+    request: CourseInput!
+  ): CourseResponse!
+
+  """The member's progress in a course."""
+  courseProgress(
+    """Course slug."""
+    request: CourseProgressInput!
+  ): CourseProgressResponse!
+
+  """The classroom catalog (courses with lessons)."""
+  courses: CoursesResponse!
+
+  """Expert dashboard aggregate (admin only)."""
+  dashboardStats: DashboardStatsResponse!
+
+  """Get a signed URL to download a resource."""
+  downloadToken(
+    """Attachment to download."""
+    request: DownloadTokenInput!
+  ): DownloadTokenResponse!
+
+  """GPU workers seen in the last 90 seconds."""
+  gpuWorkers: GpuWorkersResponse!
+
+  """A lesson's downloadable resources."""
+  lessonAttachments(
+    """Lesson."""
+    request: LessonAttachmentsInput!
+  ): LessonAttachmentsResponse!
+
+  """The expert's media library (admin only)."""
+  listMediaAssets: ListMediaAssetsResponse!
+
+  """The authenticated user synced from Keycloak."""
+  me: MeResponse!
+
+  """The community's members (admin only)."""
+  members: MembersResponse!
+
+  """The caller's completion certificates, newest first."""
+  myCertificates: MyCertificatesResponse!
+
+  """The caller's installment plans, newest first."""
+  myInstallmentPlans: MyInstallmentPlansResponse!
+
+  """The expert's leads (admin only)."""
+  myLeads: MyLeadsResponse!
+
+  """The authenticated member's notifications, newest first (paginated)."""
+  myNotifications(
+    """Optional pagination."""
+    request: MyNotificationsInput
+  ): MyNotificationsResponse!
+
+  """The caller's XP total and derived level."""
+  myXp: MyXpResponse!
+
+  """The expert's course orders (admin only)."""
+  orders: OrdersResponse!
+  platformGrowthSnapshot: PlatformGrowthSnapshotResponse!
+  platformStudentDetail(request: StudentDetailInput!): StudentDetailResponse!
+  platformStudents(request: PlatformStudentsInput!): PlatformStudentsResponse!
+
+  """Get a signed token to play an asset."""
+  playbackToken(
+    """Asset to play."""
+    request: PlaybackTokenInput!
+  ): PlaybackTokenResponse!
+
+  """The community feed."""
+  posts: PostsResponse!
+
+  """Last 12 months of paid-order revenue (admin only)."""
+  revenueSeries: RevenueSeriesResponse!
+
+  """The email outbox (admin observability only)."""
+  sentEmails: SentEmailsResponse!
+
+  """Resolved public branding, theme, and landing layout."""
+  sitePresentation: SitePresentationResponse!
+
+  """Resolved public theme, custom CSS, and landing section order."""
+  siteTheme: SiteThemeResponse!
+
+  """One learner's orders + per-course progress (admin only)."""
+  studentDetail(
+    """Member to look up."""
+    request: StudentDetailInput!
+  ): StudentDetailResponse!
+
+  """Stack version + rollout state (admin only)."""
+  systemStatus: SystemStatusResponse!
+
+  """The built-in template catalog."""
+  templatePresets: TemplatePresetsResponse!
+
+  """Preview a coupon's discount (does not redeem)."""
+  validateCoupon(
+    """Coupon code + amount."""
+    request: ValidateCouponInput!
+  ): ValidateCouponResponse!
+}
+
+"""A source lesson the answer draws on."""
+type RagSource {
+  """Lesson id."""
+  lessonId: ID!
+
+  """Lesson title."""
+  title: String!
+}
+
+"""Input for liking a post."""
+input ReactPostInput {
+  """Post to like."""
+  postId: ID!
+}
+
+"""Response wrapper for the reactPost mutation."""
+type ReactPostResponse {
+  """The post with updated like count."""
+  data: PostEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Response wrapper for the refreshSession mutation."""
+type RefreshSessionResponse {
+  """Payload containing the rotated access token."""
+  data: AuthPayload
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for refunding an order."""
+input RefundOrderInput {
+  """Order to refund."""
+  orderId: ID!
+}
+
+"""Response wrapper for the refundOrder mutation."""
+type RefundOrderResponse {
+  """The refunded order."""
+  data: OrderEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Response wrapper for the reindexRag mutation."""
+type ReindexRagResponse {
+  """The result."""
+  data: ReindexResult
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""RAG reindex result."""
+type ReindexResult {
+  """Chunks indexed."""
+  indexed: Int!
+}
+
+"""Result of a remarketing run."""
+type RemarketingResult {
+  """How many leads were emailed."""
+  sent: Int!
+}
+
+"""Input for removing a member."""
+input RemoveMemberInput {
+  """Member to remove."""
+  memberId: ID!
+}
+
+"""Response wrapper for the removeMember mutation."""
+type RemoveMemberResponse {
+  """The removed member."""
+  data: RemovedMember
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for removing a post."""
+input RemovePostInput {
+  """Post to remove from the feed."""
+  postId: ID!
+}
+
+"""Response wrapper for the removePost mutation."""
+type RemovePostResponse {
+  """The removed post."""
+  data: PostEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Outcome of removing a member."""
+type RemovedMember {
+  """Email of the removed member."""
+  email: String!
+
+  """Id of the removed member."""
+  memberId: String!
+}
+
+"""Input for restoring a post."""
+input RestorePostInput {
+  """Post to restore."""
+  postId: ID!
+}
+
+"""Response wrapper for the restorePost mutation."""
+type RestorePostResponse {
+  """The restored post."""
+  data: PostEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for retrying a failed transcode."""
+input RetryTranscodeInput {
+  """Media asset to retry."""
+  assetId: ID!
+}
+
+"""Response wrapper for the retryTranscode mutation."""
+type RetryTranscodeResponse {
+  """The asset, now back in processing."""
+  data: MediaAssetSummary
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""One month's revenue bucket."""
+type RevenuePoint {
+  """Month (YYYY-MM)."""
+  month: String!
+
+  """Number of paid orders that month."""
+  orders: Int!
+
+  """Revenue (VND) from paid orders that month."""
+  revenueVnd: Float!
+}
+
+"""Response wrapper for the revenueSeries query."""
+type RevenueSeriesResponse {
+  """Last 12 months of revenue, oldest first."""
+  data: [RevenuePoint!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for revoking granted course access."""
+input RevokeCourseAccessInput {
+  """Course slug to lock again."""
+  courseSlug: String!
+
+  """Learner email."""
+  email: String!
+}
+
+"""Response wrapper for the revokeCourseAccess mutation."""
+type RevokeCourseAccessResponse {
+  """Outcome of revoking."""
+  data: RevokedAccess
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Outcome of revoking granted access."""
+type RevokedAccess {
+  """True when a real purchase still unlocks the course."""
+  keptPaidPurchase: Boolean!
+
+  """Number of gifted orders removed."""
+  revoked: Int!
+}
+
+"""Input for saving a lesson watch position."""
+input SaveLessonPositionInput {
+  """Lesson being watched."""
+  lessonId: ID!
+
+  """Current position in seconds."""
+  positionSec: Int!
+}
+
+"""Response wrapper for the saveLessonPosition mutation."""
+type SaveLessonPositionResponse {
+  """The saved position."""
+  data: SaveLessonPositionResult
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""A saved watch position."""
+type SaveLessonPositionResult {
+  """Lesson the position is for."""
+  lessonId: ID!
+
+  """Saved position in seconds."""
+  positionSec: Int!
+}
+
+"""Response wrapper for the sendRemarketing mutation."""
+type SendRemarketingResponse {
+  """How many were emailed."""
+  data: RemarketingResult
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""A sent email (outbox record)."""
+type SentEmailRecord {
+  """When it was sent."""
+  sentAt: DateTime!
+
+  """Subject line."""
+  subject: String!
+
+  """Recipient."""
+  to: String!
+}
+
+"""Response wrapper for the sentEmails query."""
+type SentEmailsResponse {
+  """Outbox, newest first."""
+  data: [SentEmailRecord!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Which message to rewrite, and the subject and body to use."""
+input SetMailTemplateInput {
+  """Body text. Omit or send null to keep the built-in one."""
+  body: String
+
+  """
+  Which message to rewrite. One of: otp.sign-up, otp.sign-in, otp.forgot-password.
+  """
+  kind: String!
+
+  """Subject line. Omit or send null to keep the built-in one."""
+  subject: String
+}
+
+"""Response wrapper for the setMailTemplate mutation."""
+type SetMailTemplateResponse {
+  """The wording as it now stands."""
+  data: MailTemplate
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""
+Whether a member must prove their email address before their account works.
+"""
+input SetMailVerificationInput {
+  """True to require a one-time code at sign-up and sign-in."""
+  enabled: Boolean!
+}
+
+"""Response wrapper for the setAcademyMailVerification mutation."""
+type SetMailVerificationResponse {
+  """The setting as it now stands."""
+  data: MailVerification
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for setting a member's role."""
+input SetMemberRoleInput {
+  """Member to update."""
+  memberId: ID!
+
+  """New role (member | moderator | admin)."""
+  role: String!
+}
+
+"""Response wrapper for the setMemberRole mutation."""
+type SetMemberRoleResponse {
+  """The updated member."""
+  data: MemberEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for setting a member's status."""
+input SetMemberStatusInput {
+  """Member to update."""
+  memberId: ID!
+
+  """Ban reason (only used when status is 'banned')."""
+  reason: String
+
+  """New status (active | banned)."""
+  status: String!
+}
+
+"""Response wrapper for the setMemberStatus mutation."""
+type SetMemberStatusResponse {
+  """The updated member."""
+  data: MemberEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""
+Email + password. The password is checked immediately; a code is then mailed.
+"""
+input SignInInitInput {
+  """The account's email. The one-time code is sent here."""
+  email: String!
+
+  """The account's password."""
+  password: String!
+}
+
+"""Result of starting a sign-in: the pending code challenge."""
+type SignInInitResponse {
+  """The payload, or null when the request was refused."""
+  data: OtpChallenge
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for signing in with an email + password."""
+input SignInInput {
+  """Email of the account."""
+  email: String!
+
+  """Password of the account (min 6 characters)."""
+  password: String!
+
+  """
+  Idempotency key of this sign-in attempt; resend the same value to retry.
+  """
+  requestIdentity: String
+
+  """
+  Untrusted requested return path; resolved only after a session is current.
+  """
+  requestedDestination: String
+}
+
+"""
+The signIn result: a released session with its landing place, a pending second factor, or the undecided shape. Never the refusal value.
+"""
+type SignInPayload {
+  """
+  Access token (JWT) used as the Bearer credential. Null when a two-factor code is still required.
+  """
+  accessToken: String
+
+  """The internal place to land on; present only for a released session."""
+  destination: String
+
+  """Whether a TOTP code is required to complete this sign-in."""
+  requiresTwoFactor: Boolean!
+
+  """
+  Opaque challenge token for `verifyTwoFactor`; present only when `requiresTwoFactor` is true.
+  """
+  twoFactorToken: String
+
+  """
+  Present only when an authority did not answer; resubmit the same request identity. Never a refusal.
+  """
+  undecided: AuthUndecided
+}
+
+"""The pending challenge to send a new code for."""
+input SignInResendInput {
+  """The challenge id returned by signInInit."""
+  challengeId: String!
+}
+
+"""Result of resending: the same challenge, with a fresh code."""
+type SignInResendResponse {
+  """The payload, or null when the request was refused."""
+  data: OtpChallenge
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Response wrapper for the signIn mutation."""
+type SignInResponse {
+  """
+  Payload containing the access token (refresh token is set as a cookie).
+  """
+  data: SignInPayload
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""The pending challenge and the code that finishes the sign-in."""
+input SignInVerifyOtpInput {
+  """The challenge id returned by signInInit."""
+  challengeId: String!
+
+  """The one-time code from the email."""
+  otp: String!
+}
+
+"""
+Result of proving the code: a session, or a pending two-factor challenge.
+"""
+type SignInVerifyOtpResponse {
+  """The payload, or null when the request was refused."""
+  data: AuthPayload
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for signing out -- the ending scope, nothing else."""
+input SignOutInput {
+  """The ending scope; omit to sign out of this browser only."""
+  scope: SignOutScope
+}
+
+"""Response wrapper for the signOut mutation."""
+type SignOutResponse {
+  """
+  Whether the identity authority confirmed ending an everywhere scope; null when none was asked.
+  """
+  authorityEndingConfirmed: Boolean
+
+  """Whether the sign-out completed."""
+  data: Boolean
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """Whether the provider confirmed revocation of the refresh token."""
+  remoteRevocationObserved: Boolean!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""How wide one sign-out reaches."""
+enum SignOutScope {
+  """
+  End every current session of the signed-in principal, in every browser.
+  """
+  everywhere
+
+  """End only this browser's session."""
+  thisBrowser
+}
+
+"""
+Email + password for a new account. A one-time code is mailed and no account exists until it is verified.
+"""
+input SignUpInitInput {
+  """Email to register. The one-time code is sent here."""
+  email: String!
+
+  """Display name, when the reader gave one."""
+  name: String
+
+  """Password for the new account."""
+  password: String!
+}
+
+"""Result of starting sign-up: the pending code challenge."""
+type SignUpInitResponse {
+  """The pending challenge, or null when the request was refused."""
+  data: OtpChallenge
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""The pending challenge to send a new code for."""
+input SignUpResendInput {
+  """The challenge id returned by signUpInit."""
+  challengeId: String!
+}
+
+"""Result of resending: the same challenge, with a fresh lifetime."""
+type SignUpResendResponse {
+  """The challenge, or null when the request was refused."""
+  data: OtpChallenge
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""The pending challenge and the code that proves the address."""
+input SignUpVerifyOtpInput {
+  """The challenge id returned by signUpInit."""
+  challengeId: String!
+
+  """The one-time code from the email."""
+  otp: String!
+}
+
+"""
+The registration completion result: a released session, a no-session conclusion with its reason, or the undecided result. Never the refusal value.
+"""
+type SignUpVerifyOtpPayload {
+  """
+  Access token (JWT) used as the Bearer credential. Null when a two-factor code is still required.
+  """
+  accessToken: String
+
+  """
+  Present only when registration concluded without a session; the reason says what the client offers next.
+  """
+  conclusion: AuthConclusion
+
+  """Whether a TOTP code is required to complete this sign-in."""
+  requiresTwoFactor: Boolean!
+
+  """
+  Opaque challenge token for `verifyTwoFactor`; present only when `requiresTwoFactor` is true.
+  """
+  twoFactorToken: String
+
+  """Present only when an authority did not answer; never a refusal."""
+  undecided: AuthUndecided
+}
+
+"""
+Result of proving the code: a session, a no-session conclusion, or the undecided result.
+"""
+type SignUpVerifyOtpResponse {
+  """
+  The session, conclusion or undecided result, or null when the code was refused.
+  """
+  data: SignUpVerifyOtpPayload
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """
+  Structured error detail, when the failed operation's exception carried any.
+  """
+  metadata: JSONObject
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+type SitePresentationGraphQLType {
+  accentHue: Int
+  avatarUrl: String
+  communityEnabled: Boolean!
+  communityGroup: JSON
+  customCss: String!
+  displayName: String!
+  layoutConfig: JSON!
+  presetKey: String
+  slug: String!
+  tagline: String
+  theme: SiteThemeGraphQLType!
+}
+
+type SitePresentationResponse {
+  data: SitePresentationGraphQLType
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+type SiteThemeGraphQLType {
+  css: String!
+  customCss: String!
+  layoutConfig: [SiteThemeSectionGraphQLType!]
+  template: String!
+}
+
+type SiteThemeResponse {
+  data: SiteThemeGraphQLType
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+type SiteThemeSectionGraphQLType {
+  id: String!
+  visible: Boolean!
+}
+
+"""Outcome of a stack update."""
+type StackUpdate {
+  """When the restart was stamped."""
+  at: String!
+
+  """Deployments asked to roll."""
+  restarted: [String!]!
+}
+
+"""Envelope for updateStack."""
+type StackUpdateResponse {
+  """Outcome of a stack update."""
+  data: StackUpdate
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""One student's full detail."""
+type StudentDetail {
+  """Per-course progress."""
+  courses: [StudentDetailCourse!]!
+
+  """The student."""
+  member: StudentDetailMember!
+
+  """The student's orders."""
+  orders: [OrderEntity!]!
+}
+
+"""One course's progress for this student."""
+type StudentDetailCourse {
+  """Lessons completed by this student."""
+  completed: Int!
+
+  """Course slug."""
+  slug: String!
+
+  """Course title."""
+  title: String!
+
+  """Total lessons in the course."""
+  total: Int!
+}
+
+"""Input for looking up one student's detail."""
+input StudentDetailInput {
+  """Member id to look up."""
+  memberId: ID!
+}
+
+"""A student's identity."""
+type StudentDetailMember {
+  """Email."""
+  email: String!
+
+  """Member id."""
+  id: String!
+
+  """Display name."""
+  name: String!
+
+  """Role (member | moderator | admin)."""
+  role: String!
+
+  """Status (active | banned)."""
+  status: String!
+}
+
+"""Response wrapper for the studentDetail query."""
+type StudentDetailResponse {
+  """The student's detail."""
+  data: StudentDetail
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for submitting a lead."""
+input SubmitLeadInput {
+  """Email or phone."""
+  contact: String!
+
+  """Message."""
+  message: String
+
+  """Visitor name."""
+  name: String!
+}
+
+"""Response wrapper for the submitLead mutation."""
+type SubmitLeadResponse {
+  """The recorded lead."""
+  data: LeadEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""One deployment of the expert's stack."""
+type SystemDeployment {
+  """Replicas wanted."""
+  desired: Int!
+
+  """Container image currently declared."""
+  image: String!
+
+  """Deployment name (be / fe / agent)."""
+  name: String!
+
+  """Replicas ready to serve."""
+  ready: Int!
+
+  """True while a restart is still rolling out."""
+  updating: Boolean!
+}
+
+"""A schema script not yet applied here."""
+type SystemPendingUpdate {
+  """Script file name."""
+  file: String!
+
+  """Runs before or after schema sync."""
+  phase: String!
+
+  """Release the script belongs to."""
+  version: String!
+}
+
+"""Stack version + rollout state."""
+type SystemStatus {
+  """Per-deployment detail."""
+  deployments: [SystemDeployment!]!
+
+  """Whether this app runs inside a cluster."""
+  manageable: Boolean!
+
+  """Schema scripts pending here."""
+  pendingUpdates: [SystemPendingUpdate!]!
+
+  """True while any deployment is still rolling."""
+  updating: Boolean!
+
+  """Version this app was built at."""
+  version: String!
+
+  """False when `version` is the literal fallback "unknown"."""
+  versionKnown: Boolean!
+}
+
+"""Envelope for systemStatus."""
+type SystemStatusResponse {
+  """Stack version + rollout state."""
+  data: SystemStatus
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""One built-in template preset (preview)."""
+type TemplatePresetPreview {
+  """Accent colour, for the swatch."""
+  accent: String!
+
+  """Accent hue (oklch, 0-360)."""
+  accentHue: Int!
+
+  """Preset key — pass this to applyTemplate."""
+  key: String!
+
+  """Human-facing name."""
+  label: String!
+}
+
+"""Envelope for templatePresets."""
+type TemplatePresetsResponse {
+  """The built-in template catalog."""
+  data: [TemplatePresetPreview!]
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Persisted branding + theme overrides for this expert's site."""
+type TenantBrandEntity {
+  """Accent hue override (0-360)."""
+  accentHue: Int
+
+  """Row creation timestamp."""
+  createdAt: DateTime!
+
+  """Raw custom CSS override (sanitized at render time)."""
+  customCss: String
+
+  """Display name override."""
+  displayName: String
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Logo/avatar URL override."""
+  logoUrl: String
+
+  """Key of the last template preset applied."""
+  presetKey: String
+
+  """Tagline override."""
+  tagline: String
+
+  """Landing layout preset override."""
+  template: String
+
+  """Row last update timestamp."""
+  updatedAt: DateTime!
+}
+
+"""Input for unpinning a post."""
+input UnpinPostInput {
+  """Post to unpin."""
+  postId: ID!
+}
+
+"""Response wrapper for the unpinPost mutation."""
+type UnpinPostResponse {
+  """The unpinned post."""
+  data: PostEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for updating the expert's branding."""
+input UpdateBrandInput {
+  """Accent hue, 0-360."""
+  accentHue: Int
+
+  """Display name (empty clears the override)."""
+  displayName: String
+
+  """Logo/avatar URL (empty clears the override)."""
+  logoUrl: String
+
+  """One-line tagline (empty clears the override)."""
+  tagline: String
+}
+
+"""Response wrapper for the updateBrand mutation."""
+type UpdateBrandResponse {
+  """The persisted branding overrides."""
+  data: TenantBrandEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for updating a coupon."""
+input UpdateCouponInput {
+  """Whether the coupon is redeemable (false = retired)."""
+  active: Boolean
+
+  """Coupon to update."""
+  id: ID!
+
+  """New redemption cap (null = unlimited)."""
+  maxUses: Int
+}
+
+"""Response wrapper for the updateCoupon mutation."""
+type UpdateCouponResponse {
+  """The updated coupon."""
+  data: CouponEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for updating a course."""
+input UpdateCourseInput {
+  """Course to update."""
+  id: ID!
+
+  """New display price string (empty clears)."""
+  priceText: String
+
+  """New position in the classroom list (reorder)."""
+  sortIndex: Int
+
+  """New summary (empty clears)."""
+  summary: String
+
+  """New title."""
+  title: String
+}
+
+"""Response wrapper for the updateCourse mutation."""
+type UpdateCourseResponse {
+  """The updated course."""
+  data: CourseEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for updating the expert's custom CSS."""
+input UpdateCustomCssInput {
+  """Raw CSS (empty clears the override)."""
+  css: String
+}
+
+"""Response wrapper for the updateCustomCss mutation."""
+type UpdateCustomCssResponse {
+  """The persisted branding + theme overrides."""
+  data: TenantBrandEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for updating the expert's landing layout."""
+input UpdateLayoutConfigInput {
+  """Full, ordered section list."""
+  sections: [LayoutSectionInput!]!
+}
+
+"""Response wrapper for the updateLayoutConfig mutation."""
+type UpdateLayoutConfigResponse {
+  """The persisted branding + theme overrides."""
+  data: TenantBrandEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for updating a lead."""
+input UpdateLeadInput {
+  """Lead to update."""
+  leadId: ID!
+
+  """New note (empty clears)."""
+  note: String
+
+  """New status (new|contacted|won|lost)."""
+  status: String
+}
+
+"""Response wrapper for the updateLead mutation."""
+type UpdateLeadResponse {
+  """The updated lead."""
+  data: LeadEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for updating a lesson."""
+input UpdateLessonInput {
+  """New content (markdown)."""
+  body: String
+
+  """Lesson to update."""
+  id: ID!
+
+  """New position within the course."""
+  sortIndex: Int
+
+  """New title."""
+  title: String
+}
+
+"""Response wrapper for the updateLesson mutation."""
+type UpdateLessonResponse {
+  """The updated lesson."""
+  data: LessonEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for updating a member."""
+input UpdateMemberInput {
+  """New login email."""
+  email: String
+
+  """Member to update."""
+  memberId: ID!
+
+  """New display name."""
+  name: String
+}
+
+"""Response wrapper for the updateMember mutation."""
+type UpdateMemberResponse {
+  """The updated member."""
+  data: MemberEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Input for updating the expert's theme."""
+input UpdateThemeInput {
+  """Accent (brand) colour."""
+  accent: String
+
+  """Text colour ON the accent."""
+  accentContrast: String
+
+  """Page background."""
+  bg: String
+
+  """Border colour."""
+  border: String
+
+  """Content max-width."""
+  container: String
+
+  """Body font-family stack."""
+  font: String
+
+  """Heading font-family stack."""
+  fontHeading: String
+
+  """Muted / secondary text."""
+  muted: String
+
+  """Card corner radius."""
+  radiusCard: String
+
+  """Control corner radius."""
+  radiusControl: String
+
+  """Card / raised surface."""
+  surface: String
+
+  """Secondary surface (inputs, ghost buttons)."""
+  surface2: String
+
+  """Landing layout preset (classic | bold | minimal)."""
+  template: String
+
+  """Body text colour."""
+  text: String
+}
+
+"""Response wrapper for the updateTheme mutation."""
+type UpdateThemeResponse {
+  """The persisted theme overrides."""
+  data: TenantBrandEntity
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Application user entity mapped from Keycloak identity."""
+type UserEntity {
+  """Role inside one academy; null outside an academy app."""
+  academyRole: String
+
+  """Avatar URL of the user."""
+  avatarUrl: String
+
+  """Row creation timestamp (UTC)."""
+  createdAt: DateTime!
+
+  """Email of the user."""
+  email: String
+
+  """HostBill client id (links this user to a HostBill Client record)."""
+  hostbillClientId: String
+
+  """Primary key (UUID)."""
+  id: ID!
+
+  """Invoices issued to this user."""
+  invoices: [InvoiceEntity!]
+
+  """Keycloak user id (JWT sub claim)."""
+  keycloakUserId: String!
+
+  """Notify when a service or domain is about to expire."""
+  notifyExpiringSoon: Boolean!
+
+  """Notify when a new invoice is issued."""
+  notifyInvoiceCreated: Boolean!
+
+  """Notify when a service's status changes."""
+  notifyServiceStatusChanged: Boolean!
+
+  """What this person may do to the nivo platform itself."""
+  platformRole: PlatformRole!
+
+  """Whether two-factor authentication (TOTP) is enabled."""
+  twoFactorEnabled: Boolean!
+
+  """Row last update timestamp (UTC)."""
+  updatedAt: DateTime!
+
+  """Username of the user."""
+  username: String
+}
+
+"""Input for validating a coupon."""
+input ValidateCouponInput {
+  """Amount in VND the coupon would apply to."""
+  amountVnd: Int!
+
+  """Coupon code to preview."""
+  code: String!
+}
+
+"""Response wrapper for the validateCoupon query."""
+type ValidateCouponResponse {
+  """The preview result."""
+  data: ValidateCouponResult
+
+  """The error of the response."""
+  error: String
+
+  """The message of the response."""
+  message: String!
+
+  """The success of the response."""
+  success: Boolean!
+}
+
+"""Result of previewing a coupon against an amount."""
+type ValidateCouponResult {
+  """Amount (VND) after applying the discount."""
+  discountedAmount: Int!
+
+  """Whether the coupon is currently redeemable."""
+  valid: Boolean!
+}

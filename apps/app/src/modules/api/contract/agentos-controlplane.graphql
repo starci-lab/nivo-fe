@@ -1,0 +1,712 @@
+input BindChatbotChannelInput {
+  credentialRef: String!
+  installationId: ID!
+  provider: String!
+  providerAccountId: String!
+  requestToken: String!
+}
+
+input CancelSalesReferralInput {
+  expectedRevision: String!
+  installationId: ID!
+  referralIntentId: ID!
+}
+
+input ChangeChatbotHandoffInput {
+  authorityEpoch: Int
+  conversationId: ID!
+  installationId: ID!
+  requestToken: String!
+}
+
+input ChannelChallengeEvidenceInput {
+  inboundMessageId: ID!
+  providerChallengeId: String!
+}
+
+"""The three channel platforms the webhook half serves."""
+enum ChannelPlatform {
+  Meta
+  Telegram
+  Zalo
+}
+
+type ChatbotActionPayload {
+  authorizationUrl: String
+  id: ID!
+  installationId: ID!
+  state: String!
+}
+
+type ChatbotChannelPayload {
+  accountRef: String!
+  credentialRef: String
+  id: ID!
+  installationId: ID!
+  provider: String!
+  state: String!
+}
+
+type ChatbotChannelTransferPayload {
+  bindingId: ID
+  bindingRevision: String
+  outstandingAttempts: Int!
+  reason: String
+  status: String!
+}
+
+type ChatbotConversationPayload {
+  approvedVersion: Int
+  authorityEpoch: Int!
+  handoffState: String!
+  id: ID!
+  installationId: ID!
+  lastMessageAt: String!
+  participantRef: String!
+}
+
+type ChatbotMessagePayload {
+  body: String!
+  conversationId: ID!
+  deliveryState: String!
+  direction: String!
+  failureCode: String
+  id: ID!
+  occurredAt: String!
+  providerOutboxId: ID
+  sequence: String!
+}
+
+type ChatbotWorkbenchPayload {
+  approvedVersion: Int
+  channels: [ChatbotChannelPayload!]!
+  conversations: [ChatbotConversationPayload!]!
+  installationId: ID!
+  lifecycleState: String!
+  messages: [ChatbotMessagePayload!]!
+}
+
+input ChatbotWorkbenchRequest {
+  installationId: ID!
+}
+
+input ConfirmIdentityLinkInput {
+  expectedRevision: String!
+  installationId: ID!
+  linkRequestId: ID!
+}
+
+input CorrectSalesReferralAttributionInput {
+  correctionCommandId: ID!
+  correctionFingerprint: String!
+  installationId: ID!
+  pendingRevision: String!
+  permittedAnswer: String!
+  questionId: String!
+  referralIntentId: ID!
+}
+
+"""Input for minting a presigned document-upload URL."""
+input CreatePresignInput {
+  """MIME type of the upload."""
+  contentType: String!
+
+  """The filename about to be uploaded."""
+  filename: String!
+}
+
+"""A presigned, short-TTL, single-object, PUT-only upload URL."""
+type CreatePresignResponse {
+  bucket: String!
+  contentType: String!
+  expiresAt: DateTime!
+  objectKey: String!
+  url: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+"""This instance's own readiness, as reported to the owner's panel."""
+type HealthResponse {
+  imageVersion: String!
+  knowledgeSha: String
+  ready: Boolean!
+  reason: String
+  suspended: Boolean!
+}
+
+type IdentityAssociationPayload {
+  associationId: ID
+  associationStatus: String
+  historyScopeDigest: String
+  linkRequestId: ID
+  reason: String
+  revision: String
+  status: String!
+}
+
+input IdentityLinkInput {
+  installationId: ID!
+  linkRequestId: ID!
+}
+
+type IdentityLinkPayload {
+  contextAProofRecorded: Boolean!
+  contextBProofRecorded: Boolean!
+  expiresAt: String
+  historyConsentRecorded: Boolean!
+  historyScopeDigest: String
+  linkRequestId: ID
+  orderedPairDigest: String
+  reason: String
+  requestStatus: String
+  revision: String
+  status: String!
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
+type LinkedContextEntryPayload {
+  conversationId: ID!
+  direction: String!
+  occurredAt: String!
+  sequence: String!
+}
+
+input LinkedContextInput {
+  associationId: ID!
+  installationId: ID!
+  requestingConversationId: ID!
+}
+
+type LinkedContextPayload {
+  associationId: ID
+  counterpartLinked: Boolean!
+  counterpartWithheldReason: String
+  historyScopeDigest: String
+  permittedEntries: [LinkedContextEntryPayload!]!
+  reason: String
+  requestingConversationId: ID
+  status: String!
+}
+
+type ModuleAppliedMismatchType {
+  appliedGeneration: String
+  currentCandidate: String!
+  reason: String!
+}
+
+type ModuleAppliedObservationType {
+  appliedGeneration: String
+  currentCandidate: String!
+  mismatch: ModuleAppliedMismatchType
+  observedAt: String
+  sourceId: String!
+}
+
+type ModuleAttentionItemType {
+  label: String!
+  occurredAt: String
+  severity: String!
+  targetRef: String!
+}
+
+type ModuleConfigurationIdentityType {
+  appliedDigest: String
+  desiredDigest: String
+  testedDigest: String
+}
+
+type ModuleFacetObservationType {
+  appliedGeneration: String
+  availability: String!
+  completeness: String!
+  configurationIdentity: ModuleConfigurationIdentityType
+  contractVersion: Int!
+  data: ModuleObservationDataType
+  facet: String!
+  freshness: String!
+  observedAt: String
+  safeReason: String
+  scope: ModuleInstallationScopeType!
+  sourceId: String!
+  sourceVersion: ModuleSourceVersionType
+}
+
+type ModuleInstallationScopeType {
+  generation: Int!
+  installationId: String!
+  instanceId: String!
+  moduleKey: String!
+  runtimeGeneration: String
+  workspaceId: String!
+}
+
+type ModuleObservationDataType {
+  blockers: [String!]
+  count: Int
+  items: [ModuleAttentionItemType!]
+  kind: String!
+  label: String
+  nextCursor: String
+  receiptRef: String
+  state: String
+  verdict: String
+}
+
+input ModuleOverviewAppliedRequest {
+  expectedCandidate: String
+  installationId: String!
+}
+
+type ModuleOverviewAppliedType {
+  applied: ModuleAppliedObservationType
+  cas: String
+  reason: String
+  status: String!
+}
+
+input ModuleOverviewSummaryRequest {
+  facet: String!
+  installationId: String!
+}
+
+type ModuleOverviewSummaryType {
+  observation: ModuleFacetObservationType
+  reason: String
+  status: String!
+}
+
+input ModuleOverviewTargetRequest {
+  installationId: String!
+  targetRef: String
+}
+
+type ModuleSourceVersionType {
+  aggregateRef: String!
+  sourceId: String!
+  version: String!
+}
+
+type ModuleTargetResolutionType {
+  reason: String
+  resourceRef: String
+  scope: ModuleInstallationScopeType
+  status: String!
+  view: String
+}
+
+type Mutation {
+  bindChatbotChannel(request: BindChatbotChannelInput!): ChatbotActionPayload!
+  cancelSalesReferral(request: CancelSalesReferralInput!): SalesReferralPayload!
+  confirmIdentityLink(request: ConfirmIdentityLinkInput!): IdentityAssociationPayload!
+  correctSalesReferralAttribution(request: CorrectSalesReferralAttributionInput!): SalesReferralPayload!
+
+  """
+  Mint a presigned, PUT-only upload URL against this instance's own MinIO.
+  """
+  createPresign(request: CreatePresignInput!): CreatePresignResponse!
+  previewIdentityLink(request: PreviewIdentityLinkInput!): IdentityLinkPayload!
+  rebindChannel(request: RebindChatbotChannelInput!): ChatbotChannelTransferPayload!
+  reconcileChatbotDelivery(request: ReconcileChatbotDeliveryInput!): ChatbotActionPayload!
+  recordChannelProof(request: RecordChannelProofInput!): IdentityLinkPayload!
+  recordLinkConsent(request: RecordLinkConsentInput!): IdentityLinkPayload!
+  resolveChatbotHandoff(request: ChangeChatbotHandoffInput!): ChatbotActionPayload!
+  retryChatbotReply(request: RetryChatbotReplyInput!): ChatbotActionPayload!
+
+  """Enqueue (and spawn, if idle) the nivo-cli index-pending drain."""
+  runRagJob(request: RunRagJobInput): RunRagJobResponse!
+  salesAnswerDecision(request: SalesAnswerDecisionInput!): SalesOperationResult!
+  salesCancelNoStart(request: SalesCancelNoStartInput!): SalesOperationResult!
+  salesClose(request: SalesCloseInput!): SalesOperationResult!
+  salesConfigure(request: SalesConfigureInput!): SalesOperationResult!
+  salesCorrectReferralAttribution(request: SalesReferralCorrectAttributionInput!): SalesOperationResult!
+  salesExecuteCommand(request: SalesExecuteCommandInput!): SalesOperationResult!
+  salesNarrow(request: SalesNarrowInput!): SalesOperationResult!
+  salesPrepareHandoff(request: SalesPrepareHandoffInput!): SalesOperationResult!
+  salesProgress(request: SalesProgressInput!): SalesOperationResult!
+  salesReconcile(request: SalesReconcileInput!): SalesOperationResult!
+  salesRemove(request: SalesRemoveInput!): SalesOperationResult!
+  salesRequestDecision(request: SalesRequestDecisionInput!): SalesOperationResult!
+  salesRetryNoStart(request: SalesRetryNoStartInput!): SalesOperationResult!
+  salesRevoke(request: SalesRevokeInput!): SalesOperationResult!
+  salesRotate(request: SalesRotateInput!): SalesOperationResult!
+  salesSubmitPreparedHandoff(request: SalesSubmitPreparedHandoffInput!): SalesOperationResult!
+  salesSubmitReferral(request: SalesReferralSubmitInput!): SalesOperationResult!
+  setChatbotHandoff(request: ChangeChatbotHandoffInput!): ChatbotActionPayload!
+  startZaloChatbotAuthorization(request: StartZaloChatbotAuthorizationInput!): ChatbotActionPayload!
+  submitSalesReferral(request: SubmitSalesReferralInput!): SalesReferralPayload!
+  unlinkIdentity(request: UnlinkIdentityInput!): IdentityAssociationPayload!
+
+  """Store (encrypted) one channel's credential and issue its webhook path."""
+  writeChannelKey(request: WriteChannelKeyInput!): WriteChannelKeyResponse!
+}
+
+type PendingSalesReferralQuestionPayload {
+  candidateHint: String
+  pendingRevision: String!
+  permittedAnswerShape: JSON!
+  questionId: String!
+  reasonCode: String!
+}
+
+input PreviewIdentityLinkInput {
+  conversationAId: ID!
+  conversationBId: ID!
+  historyScope: String!
+  installationId: ID!
+  requestId: ID!
+}
+
+type Query {
+  chatbotWorkbench(request: ChatbotWorkbenchRequest!): ChatbotWorkbenchPayload!
+
+  """This instance's own readiness, as reported to the owner's panel."""
+  health: HealthResponse!
+  identityLink(request: IdentityLinkInput!): IdentityLinkPayload!
+  linkedContext(request: LinkedContextInput!): LinkedContextPayload!
+  moduleOverviewApplied(request: ModuleOverviewAppliedRequest!): ModuleOverviewAppliedType!
+  moduleOverviewSummary(request: ModuleOverviewSummaryRequest!): ModuleOverviewSummaryType!
+  moduleOverviewTarget(request: ModuleOverviewTargetRequest!): ModuleTargetResolutionType!
+  salesLookupReferralReceipt(request: SalesReferralLookupInput!): SalesOperationResult!
+  salesPipeline(request: SalesPipelineInput!): SalesOperationResult!
+  salesReadiness(request: SalesReadinessInput!): SalesOperationResult!
+  salesReferral(request: SalesReferralInput!): SalesReferralPayload!
+}
+
+input RebindChatbotChannelInput {
+  bindingId: ID!
+  expectedBindingRevision: String!
+  installationId: ID!
+  targetProviderAccountId: String!
+  transferFenceId: ID!
+}
+
+input ReconcileChatbotDeliveryInput {
+  evidenceRef: String!
+  installationId: ID!
+  outboxId: ID!
+  providerMessageId: String
+  requestToken: String!
+  terminalState: String!
+}
+
+input RecordChannelProofInput {
+  challengeEvidence: ChannelChallengeEvidenceInput!
+  conversationId: ID!
+  expectedRevision: String!
+  installationId: ID!
+  linkRequestId: ID!
+}
+
+input RecordLinkConsentInput {
+  expectedRevision: String!
+  historyScopeDigest: String!
+  installationId: ID!
+  linkRequestId: ID!
+  orderedPairDigest: String!
+}
+
+input RetryChatbotReplyInput {
+  conversationId: ID!
+  installationId: ID!
+  outboxId: ID!
+  requestToken: String!
+}
+
+"""Input for enqueueing a RAG index drain."""
+input RunRagJobInput {
+  """The document id that just finished uploading, if any."""
+  documentId: String
+}
+
+"""The outcome of enqueueing (and possibly spawning) a RAG index drain."""
+type RunRagJobResponse {
+  jobId: String!
+  spawn: String!
+}
+
+input SalesAnswerDecisionInput {
+  answer: SalesDecisionAnswer!
+  decisionRequestId: String!
+  expectedDecisionRevision: JSON!
+  proposalFingerprint: String!
+  proposalVersion: Int!
+}
+
+input SalesCancelNoStartInput {
+  actionId: String!
+  attemptGeneration: Int!
+  expectedRevision: JSON!
+  noStartProof: JSON!
+  oldWriterFence: SalesWriterFenceInput!
+}
+
+input SalesCloseInput {
+  confirmedOrder: JSON
+  evidenceRefs: [String!]!
+  expectedRevision: JSON!
+  intentId: String!
+  opportunityId: String!
+  outcome: SalesCloseOutcome!
+}
+
+enum SalesCloseOutcome {
+  attention
+  lost
+  won
+}
+
+input SalesCommandScopeInput {
+  customerRefs: [String!]!
+  offerRefs: [String!]!
+  opportunityIds: [String!]!
+}
+
+input SalesConfigureInput {
+  desiredConfigurationRevision: String!
+  expectedSharedRevision: String
+  lifecycleIntentId: String!
+  permissionSet: [SalesPermissionBoundaryInput!]!
+}
+
+enum SalesDecisionAnswer {
+  approve
+  reject
+}
+
+input SalesExecuteCommandInput {
+  commandId: String!
+  commandRevision: Int!
+  expectedOpportunityRevisions: JSON!
+  fingerprint: String!
+  requestedActions: [SalesRequestedAction!]!
+  scope: SalesCommandScopeInput!
+}
+
+input SalesNarrowInput {
+  expectedSharedRevision: String!
+  lifecycleIntentId: String!
+  newBoundary: SalesPermissionBoundaryInput!
+  targetPermission: String!
+  targetResource: String!
+}
+
+type SalesOperationResult {
+  code: String
+  status: String!
+  value: JSON
+}
+
+input SalesPermissionBoundaryInput {
+  permission: String!
+  resource: String!
+}
+
+input SalesPipelineCursorInput {
+  lastOpportunityId: String!
+}
+
+input SalesPipelineInput {
+  after: SalesPipelineCursorInput
+  limit: Int!
+  scopeFingerprint: String!
+  statusFilter: [SalesPipelineStatus!]
+}
+
+enum SalesPipelineStatus {
+  lost
+  open
+  won
+}
+
+input SalesPrepareHandoffInput {
+  consentRef: String!
+  destinationAccountingInstallationId: String!
+  expectedRevision: JSON!
+  fingerprint: String!
+  handoffId: String!
+  opportunityId: String!
+  orderRevision: Int!
+}
+
+input SalesProgressInput {
+  customerRef: String!
+  evidence: [JSON!]!
+  expectedRevision: JSON
+  intentId: String!
+  opportunityId: String
+  purpose: String!
+}
+
+input SalesReadinessInput {
+  salesInstallationId: String!
+}
+
+input SalesReconcileInput {
+  actionId: String!
+  attemptGeneration: Int!
+  expectedReceiverIdentity: JSON!
+}
+
+input SalesReferralAuthorityInput {
+  chatbotInstallationId: String!
+  purpose: String!
+  runtimeGeneration: String
+  salesInstallationId: String!
+  setupAuthorityGeneration: Int!
+  workspaceId: String!
+}
+
+input SalesReferralConsentSnapshotInput {
+  consentId: String!
+  grantedAt: String!
+  scope: [String!]!
+}
+
+input SalesReferralCorrectAttributionInput {
+  correctedCustomerRef: String!
+  correctionFingerprint: String!
+  destinationSalesInstallationId: String!
+  pendingRevision: JSON!
+  referralIntentId: String!
+  sourceChatbotInstallationId: String!
+}
+
+input SalesReferralInput {
+  installationId: ID!
+  referralIntentId: ID!
+}
+
+input SalesReferralLookupInput {
+  destinationSalesInstallationId: String!
+  referralIntentId: String!
+  sourceChatbotInstallationId: String!
+}
+
+type SalesReferralPayload {
+  correctionCommandId: ID
+  lastReconciledAt: String
+  pendingQuestion: PendingSalesReferralQuestionPayload
+  reason: String
+  recipientReceiptId: String
+  referralIntentId: ID
+  revision: String
+  status: String!
+  version: String!
+}
+
+input SalesReferralSubmitInput {
+  authority: SalesReferralAuthorityInput!
+  consentSnapshot: SalesReferralConsentSnapshotInput!
+  contextSummary: String
+  customerRef: String!
+  fingerprint: String!
+  referralIntentId: String!
+}
+
+input SalesRemoveInput {
+  expectedSharedRevision: String!
+  lifecycleIntentId: String!
+  targetSalesInstallationId: String!
+}
+
+input SalesRequestDecisionInput {
+  expectedRevision: JSON!
+  intentId: String!
+  opportunityId: String!
+  proposal: JSON!
+  proposalFingerprint: String!
+  proposalVersion: Int!
+}
+
+enum SalesRequestedAction {
+  close
+  contact
+  prepareHandoff
+  qualify
+  requestDecision
+}
+
+input SalesRetryNoStartInput {
+  actionId: String!
+  attemptGeneration: Int!
+  expectedRevision: JSON!
+  fingerprint: String!
+  oldWriterFence: SalesWriterFenceInput!
+  receiverAttemptId: String!
+  receiverIntentId: String!
+  receiverNoStartProofRef: String!
+}
+
+input SalesRevokeInput {
+  expectedSharedRevision: String!
+  lifecycleIntentId: String!
+  targetPermission: String!
+  targetResource: String!
+}
+
+input SalesRotateInput {
+  expectedSharedRevision: String!
+  lifecycleIntentId: String!
+  replacementBindingRef: String!
+  targetPermission: String!
+  targetResource: String!
+}
+
+input SalesSubmitPreparedHandoffInput {
+  confirmedOrderRevision: Int!
+  expectedHandoffRevision: JSON!
+  fingerprint: String!
+  handoffId: String!
+}
+
+input SalesWriterFenceInput {
+  claimTokenHash: String!
+  fencedAt: String!
+}
+
+input StartZaloChatbotAuthorizationInput {
+  installationId: ID!
+  requestToken: String!
+}
+
+input SubmitSalesReferralInput {
+  expectedRevision: String!
+  installationId: ID!
+  referralIntentId: ID!
+  reviewedFingerprint: String!
+}
+
+input UnlinkIdentityInput {
+  associationId: ID!
+  expectedRevision: String!
+  installationId: ID!
+}
+
+"""Input for connecting (or rotating) one channel's credentials."""
+input WriteChannelKeyInput {
+  credentials: JSONObject!
+  externalId: String!
+  platform: ChannelPlatform!
+}
+
+"""
+Confirms a channel's credential was stored; never echoes the credential back.
+"""
+type WriteChannelKeyResponse {
+  channelId: String!
+  platform: ChannelPlatform!
+  webhookPath: String
+}
