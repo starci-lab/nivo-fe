@@ -285,7 +285,6 @@ export const SalesDecisionBlockBase = (props: SalesDecisionBlockProps) => {
     const rail = () => (
         <WorkbenchRail
             props={{
-                className: SALES_DECISION_FIELD_STACK_CLASS_NAME,
                 scopeLabel: t("rail.scope"),
                 scope: (
                     <FieldStack>

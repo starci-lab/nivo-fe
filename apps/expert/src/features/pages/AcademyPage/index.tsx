@@ -25,6 +25,6 @@ import { AcademyPageBase as AcademyPageView } from "./component"
  * @returns The page.
  */
 export const AcademyPage = async () => {
-    const { courses } = await queryAcademyCourses()
-    return <AcademyPageView props={{ courses }} />
+    const catalog = await queryAcademyCourses()
+    return <AcademyPageView props={{ courses: catalog.ok ? catalog.data : [] }} />
 }

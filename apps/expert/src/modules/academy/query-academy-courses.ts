@@ -1,12 +1,9 @@
 import { fetchCourses, type Course } from "@/modules/api/academy"
+import type { Outcome } from "@nivo/api"
 
 /**
  * Keep the public Academy catalog transport behind one server query boundary.
  *
- * A failed read is an empty catalog, not an error page: the `courses` section already owns the empty
- * state a new academy hits on its first day.
+ * Return the API outcome intact so the page can choose how to present a failed read.
  */
-export const queryAcademyCourses = async (): Promise<{ readonly courses: ReadonlyArray<Course> }> => {
-    const result = await fetchCourses()
-    return { courses: result.ok ? result.data : [] }
-}
+export const queryAcademyCourses = (): Promise<Outcome<Array<Course>>> => fetchCourses()

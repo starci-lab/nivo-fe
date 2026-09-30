@@ -1,8 +1,9 @@
+import type * as NivoApi from "@nivo/api"
 import { describe, expect, it, vi } from "vitest"
 
 const client = vi.hoisted(() => ({ graphql: vi.fn() }))
 vi.mock("@nivo/api", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@nivo/api")>()),
+    ...(await importOriginal<typeof NivoApi>()),
     createGraphqlClient: () => client,
 }))
 

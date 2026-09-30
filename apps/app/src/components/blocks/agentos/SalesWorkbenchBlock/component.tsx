@@ -859,7 +859,6 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
     const rail = () => (
         <WorkbenchRail
             props={{
-                className: SALES_FIELD_STACK_CLASS_NAME,
                 scopeLabel: t("rail.scope"),
                 scope: <ScopeLine scopeReady={scopeReady} scopeStanding={scopeStanding} t={t} />,
                 beforeNotice: wait(),

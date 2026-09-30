@@ -276,7 +276,6 @@ export const SalesHandoffBlockBase = (props: SalesHandoffBlockProps) => {
     const rail = () => (
         <WorkbenchRail
             props={{
-                className: SALES_HANDOFF_FIELD_STACK_CLASS_NAME,
                 scopeLabel: t("rail.scope"),
                 scope: (
                     <FieldStack>

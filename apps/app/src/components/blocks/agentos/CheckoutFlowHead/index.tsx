@@ -1,8 +1,6 @@
 import { Fragment } from "react"
-import { cn } from "@heroui/react"
 import { SectionHeader, Text, TextAction } from "@starci/grammar/common"
-
-const BREADCRUMB_LIST_CLASS_NAME = cn("flex", "min-w-0", "flex-wrap", "items-center", "gap-2")
+import { CHECKOUT_FLOW_BREADCRUMB_LIST_CLASS_NAME } from "./classNames"
 
 /** One linked or current step in an AgentOS checkout breadcrumb. */
 type CheckoutFlowBreadcrumb = {
@@ -23,9 +21,9 @@ type CheckoutFlowHeadProps = {
 export const CheckoutFlowHead = (props: CheckoutFlowHeadProps) => (
     <>
         <nav aria-label={props.accessibilityLabel}>
-            <ol className={BREADCRUMB_LIST_CLASS_NAME}>
+            <ol className={CHECKOUT_FLOW_BREADCRUMB_LIST_CLASS_NAME}>
                 {props.breadcrumbs.map((breadcrumb, index) => (
-                    <Fragment key={`${index}-${breadcrumb.label}`}>
+                    <Fragment key={breadcrumb.href ?? breadcrumb.label}>
                         {index === 0 ? null : (
                             <li aria-hidden="true">
                                 <Text size="sm" tone="muted">

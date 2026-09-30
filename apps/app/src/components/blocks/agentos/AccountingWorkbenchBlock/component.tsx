@@ -1085,7 +1085,6 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
     const rail = (
         <WorkbenchRail
             props={{
-                className: ACCOUNTING_FIELD_STACK_CLASS_NAME,
                 scopeLabel: t("rail.scope"),
                 scope: <ScopeLine scopeReady={scopeReady} scopeStanding={scopeStanding} t={t} />,
                 beforeNotice: (

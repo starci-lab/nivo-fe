@@ -10,8 +10,8 @@ type WorkbenchRailCardProps = {
 }
 
 /** Draw one labelled workbench rail card. */
-export const WorkbenchRailCard = ({ props }: WorkbenchRailCardProps) => (
-    <SurfaceCard label={props.label}>{props.children}</SurfaceCard>
+export const WorkbenchRailCard = (props: WorkbenchRailCardProps) => (
+    <SurfaceCard label={props.props.label}>{props.props.children}</SurfaceCard>
 )
 
 /** The copy both workbenches share, resolved once by their connected owners. */
