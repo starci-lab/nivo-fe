@@ -1,5 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import enMessages from "@/messages/en.json"
+import { expectNoA11yViolations } from "@/testing/axe"
 const mocks = vi.hoisted(() => ({
     push: vi.fn(),
     start: { trigger: vi.fn() },
@@ -222,5 +224,22 @@ describe("CheckoutReviewFlow", () => {
         render(<CheckoutReviewFlow />)
         expect(screen.getByTestId("flow-state")).toHaveTextContent("loading")
         await waitFor(() => expect(mocks.start.trigger).not.toHaveBeenCalled())
+    })
+
+    it("renders the real checkout screen without accessibility violations", async () => {
+        vi.doUnmock("./component")
+        vi.resetModules()
+        const [{ default: ActualCheckoutReviewFlow }, { NextIntlClientProvider }] = await Promise.all([
+            import("./"),
+            import("next-intl"),
+        ])
+        const { container } = render(
+            <NextIntlClientProvider locale="en" messages={enMessages} timeZone="Asia/Bangkok">
+                <ActualCheckoutReviewFlow />
+            </NextIntlClientProvider>,
+        )
+
+        await screen.findByRole("heading")
+        await expectNoA11yViolations(container)
     })
 })

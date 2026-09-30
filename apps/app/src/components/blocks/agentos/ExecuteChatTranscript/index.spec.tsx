@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type { ExecuteChatBlockCopy, ExecuteMessage } from "../../../../modules/agentos/execute-chat"
 import { ExecuteChatTranscript } from "."
 
@@ -62,11 +63,12 @@ const message: ExecuteMessage = {
 }
 
 describe("ExecuteChatTranscript", () => {
-    it("uses the message tree and keeps its role and context labels", () => {
-        render(<ExecuteChatTranscript copy={copy} messages={[message]} registry={{}} />)
+    it("uses the message tree and keeps its role and context labels", async () => {
+        const { container } = render(<ExecuteChatTranscript copy={copy} messages={[message]} registry={{}} />)
         expect(screen.getByText("Visible answer")).toBeInTheDocument()
         expect(screen.getByText("You")).toBeInTheDocument()
         expect(screen.getByText("Bound context")).toBeInTheDocument()
         expect(screen.queryByText("Fallback")).toBeNull()
+        await expectNoA11yViolations(container)
     })
 })

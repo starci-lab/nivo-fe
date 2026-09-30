@@ -203,10 +203,12 @@ describe("PurchaseStatusFlowBase", () => {
         expect(html).not.toContain("aria-busy")
     })
 
-    it("pairs every check word with its semantic mark plate", () => {
-        const { container } = render(<PurchaseStatusFlowBase {...paymentView} />)
-        const tiles = container.querySelectorAll("[class*=iconTile], [class*=tile]")
-        expect(tiles.length).toBeGreaterThanOrEqual(paymentChecks.length)
+    it("shows each check beside its own status word", () => {
+        render(<PurchaseStatusFlowBase {...paymentView} />)
+        for (const check of paymentChecks) {
+            expect(screen.getByText(check.label)).toBeInTheDocument()
+            expect(screen.getByText(check.word)).toBeInTheDocument()
+        }
     })
 
     it("wires the check action to the owner callback", () => {

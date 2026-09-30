@@ -30,22 +30,3 @@ export const ORDINAL_CLASS_NAME = cn(
 )
 /** Class names of the step body. */
 export const STEP_BODY_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-0.5")
-/** Class names of the rail options. */
-export const RAIL_OPTIONS_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "gap-2")
-/** Class names of the rail option. */
-export const RAIL_OPTION_CLASS_NAME = cn(
-    "border",
-    "border-separator",
-    "flex",
-    "min-w-0",
-    "cursor-pointer",
-    "items-start",
-    "gap-3",
-    "rounded-md",
-    "px-3",
-    "py-2",
-)
-/** Class names of the selected rail option. */
-export const SELECTED_RAIL_OPTION_CLASS_NAME = cn(RAIL_OPTION_CLASS_NAME, "border-accent", "bg-accent-soft")
-/** Class names of the rail radio. */
-export const RAIL_RADIO_CLASS_NAME = cn("mt-1", "h-4", "w-4", "shrink-0", "accent-accent")

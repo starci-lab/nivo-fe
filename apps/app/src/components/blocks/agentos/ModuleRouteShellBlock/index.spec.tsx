@@ -5,6 +5,7 @@ import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { ModuleRouteShellBlock as ActualModuleRouteShellBlock, type ModuleRouteShellBlockCopy } from "./index"
 
 type CopyTranslator = (key: string, values?: Readonly<Record<string, string | number>>) => string
@@ -71,8 +72,8 @@ const ModuleRouteShellBlock = ({ locale = "en", ...props }: ModuleRouteShellBloc
 )
 
 describe("ModuleRouteShellBlock", () => {
-    it("uses the human kind heading while retaining a machine key", () => {
-        const html = render(
+    it("uses the human kind heading while retaining a machine key", async () => {
+        const view = render(
             <ModuleRouteShellBlock
                 workspaceLabel="Workspace"
                 moduleName="custom:1234567890abcdef1234567890"
@@ -87,9 +88,11 @@ describe("ModuleRouteShellBlock", () => {
                 onBackToModules={() => undefined}
                 onNavigate={() => undefined}
             />,
-        ).container.innerHTML
+        )
+        const html = view.container.innerHTML
         expect(html).toContain("Generic agent")
         expect(html).toContain("custom:1234567890abcdef1234567890")
+        await expectNoA11yViolations(view.container)
     })
 
     describe.each(["en", "vi"] as const)("Module shell copy %s", (locale) => {

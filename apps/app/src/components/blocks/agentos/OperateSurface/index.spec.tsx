@@ -6,6 +6,7 @@ import { OperateSurface } from "."
 import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
 import type { OperateSurfaceProps } from "../../../../modules/agentos/module-page/surface-types"
 import { TIME_ZONE } from "@/modules/i18n"
+import { expectNoA11yViolations } from "@/testing/axe"
 
 const copy = buildModulePageCopy(
     createTranslator({
@@ -52,9 +53,9 @@ describe("OperateSurface", () => {
     it.each([
         ["internal-chat", "internal-workbench"],
         ["internal-workbench", "internal-chat"],
-    ] as const)("forwards %s selection to %s", (operationTarget, destination) => {
+    ] as const)("forwards %s selection to %s", async (operationTarget, destination) => {
         const onSelectTarget = vi.fn()
-        render(
+        const { container } = render(
             <OperateSurface copy={copy} {...props} operationTarget={operationTarget} onSelectTarget={onSelectTarget} />,
         )
 
@@ -65,5 +66,6 @@ describe("OperateSurface", () => {
         )
 
         expect(onSelectTarget).toHaveBeenCalledExactlyOnceWith(destination)
+        await expectNoA11yViolations(container)
     })
 })

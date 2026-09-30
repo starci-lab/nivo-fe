@@ -5,6 +5,7 @@ import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type {
     AgentosModuleTestAssertionResult,
     AgentosModuleTestContract,
@@ -111,19 +112,21 @@ const TestTrustResultBlock = ({ locale = "en", ...props }: TestTrustResultBlockF
 )
 
 describe("TestTrustResultBlock", () => {
-    it("renders persisted assertion evidence through the trusted registration", () => {
-        const html = render(
+    it("renders persisted assertion evidence through the trusted registration", async () => {
+        const view = render(
             <TestTrustResultBlock
                 contract={contract}
                 run={run}
                 assertions={[assertion()]}
                 contextLabel="Context v2 · candidate"
             />,
-        ).container.innerHTML
+        )
+        const html = view.container.innerHTML
         expect(html).toContain("Result: Passed")
         expect(html).toContain("Acknowledges before acting")
         expect(html).toContain("verify the contract")
         expect(html).not.toContain("Untrusted evidence rejected")
+        await expectNoA11yViolations(view.container)
     })
 
     it("rejects a component identity outside the trusted evidence contract", () => {

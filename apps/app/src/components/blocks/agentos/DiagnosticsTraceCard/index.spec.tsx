@@ -1,6 +1,8 @@
 import { createTranslator } from "next-intl"
+import { render } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import enMessages from "../../../../messages/en.json"
 import { DiagnosticsTraceCard } from "."
 import type { AgentosModuleRuntime } from "../../../../modules/api/agentos-module-runtime"
@@ -43,6 +45,21 @@ const format = {
 } satisfies Formatter
 
 describe("DiagnosticsTraceCard", () => {
+    it("has no axe violations for the rendered event", async () => {
+        const { container } = render(
+            <DiagnosticsTraceCard
+                copy={copy}
+                installationId="installation-1"
+                kindKey="customer-support"
+                workbenchKey="support-queue"
+                events={[event]}
+                format={format}
+            />,
+        )
+
+        await expectNoA11yViolations(container)
+    })
+
     it("shows the persisted event and exact event count", () => {
         const html = renderToStaticMarkup(
             <DiagnosticsTraceCard

@@ -1,4 +1,4 @@
-import { Button, SurfaceCard, Text, TextAction } from "@starci/grammar/common"
+import { Button, RadioGroup, SurfaceCard, Text, TextAction } from "@starci/grammar/common"
 import type {
     CheckoutReviewDecisionProps,
     CheckoutReviewFlowActions,
@@ -7,10 +7,6 @@ import type {
 import {
     ORDINAL_CLASS_NAME,
     RAIL_BAND_CLASS_NAME,
-    RAIL_OPTION_CLASS_NAME,
-    RAIL_OPTIONS_CLASS_NAME,
-    RAIL_RADIO_CLASS_NAME,
-    SELECTED_RAIL_OPTION_CLASS_NAME,
     STEP_BODY_CLASS_NAME,
     STEP_ROW_CLASS_NAME,
 } from "./classNames"
@@ -40,38 +36,20 @@ const stepRow = (step: CheckoutReviewStep, position: number) => (
 
 const railChoiceBand = (props: CheckoutReviewDecisionProps, on: CheckoutReviewFlowActions) => (
     <div className={RAIL_BAND_CLASS_NAME}>
-        <Text size="sm" weight="semibold">
-            {props.copy.railChoice}
-        </Text>
-        <div role="radiogroup" aria-label={props.copy.railChoice} className={RAIL_OPTIONS_CLASS_NAME}>
-            {props.rails.map((rail) => (
-                <label
-                    key={rail.rail}
-                    data-rail={rail.rail}
-                    className={
-                        rail.rail === props.selectedRail ? SELECTED_RAIL_OPTION_CLASS_NAME : RAIL_OPTION_CLASS_NAME
-                    }
-                >
-                    <input
-                        type="radio"
-                        name="payment-rail"
-                        value={rail.rail}
-                        aria-label={rail.label}
-                        checked={rail.rail === props.selectedRail}
-                        onChange={() => on.selectRail(rail.rail)}
-                        className={RAIL_RADIO_CLASS_NAME}
-                    />
-                    <span className={STEP_BODY_CLASS_NAME}>
-                        <Text size="sm" weight="semibold">
-                            {rail.label}
-                        </Text>
-                        <Text size="xs" tone="muted" overflow="wrap">
-                            {rail.detail}
-                        </Text>
-                    </span>
-                </label>
-            ))}
-        </div>
+        <RadioGroup
+            name="payment-rail"
+            label={props.copy.railChoice}
+            options={props.rails.map((rail) => ({
+                value: rail.rail,
+                label: rail.label,
+                description: rail.detail,
+            }))}
+            value={props.selectedRail}
+            onValueChange={(value) => {
+                const rail = props.rails.find((candidate) => candidate.rail === value)
+                if (rail !== undefined) on.selectRail(rail.rail)
+            }}
+        />
         {props.selectedRail === null ? (
             <Text size="xs" tone="muted" overflow="wrap">
                 {props.copy.railRequired}

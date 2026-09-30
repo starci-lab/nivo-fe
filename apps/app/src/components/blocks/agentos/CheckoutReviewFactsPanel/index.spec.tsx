@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type { CheckoutReviewCopy, CheckoutReviewFacts } from "../../../../modules/agentos/checkout-review"
 import { CheckoutReviewFactsPanel } from "."
 
@@ -49,11 +50,12 @@ const facts: CheckoutReviewFacts = {
 }
 
 describe("CheckoutReviewFactsPanel", () => {
-    it("draws only the facts whose source named a value", () => {
-        render(<CheckoutReviewFactsPanel copy={copy} facts={facts} admission="Admitted" />)
+    it("draws only the facts whose source named a value", async () => {
+        const { container } = render(<CheckoutReviewFactsPanel copy={copy} facts={facts} admission="Admitted" />)
         expect(screen.getByText("Growth")).toBeInTheDocument()
         expect(screen.getByText("Admitted")).toBeInTheDocument()
         expect(screen.queryByText("Purchaser")).toBeNull()
+        await expectNoA11yViolations(container)
     })
 
     it("keeps the same fact anatomy while loading", () => {

@@ -1,5 +1,7 @@
+import { render } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type { IconSource } from "@starci/grammar/common"
 import { createTranslator } from "next-intl"
 import enMessages from "@/messages/en.json"
@@ -54,6 +56,12 @@ const pendingView: PurchaseStatusFlowViewProps = {
 }
 
 describe("PurchaseStatusChecks", () => {
+    it("has no axe violations for the real purchase facts and checks", async () => {
+        const { container } = render(<PurchaseStatusChecks {...pendingView} />)
+
+        await expectNoA11yViolations(container)
+    })
+
     it("draws purchase facts and source checks as separate cards", () => {
         const html = renderToStaticMarkup(<PurchaseStatusChecks {...pendingView} />)
 

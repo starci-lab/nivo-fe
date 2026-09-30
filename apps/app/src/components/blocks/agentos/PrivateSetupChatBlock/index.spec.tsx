@@ -8,6 +8,7 @@ import { TIME_ZONE } from "@/modules/i18n"
 
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeAll, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import {
     PrivateSetupChatBlock as ActualPrivateSetupChatBlock,
     type PrivateSetupChatBlockCopy,
@@ -178,7 +179,7 @@ describe("PrivateSetupChatBlock", () => {
         fireEvent.submit(screen.getByRole("button", { name: "Send" }).closest("form")!)
         expect(onSend).not.toHaveBeenCalled()
     })
-    it("keeps the send action beside the field and bounds the chat host so the composer stays in reach", () => {
+    it("keeps the send action beside the field and bounds the chat host so the composer stays in reach", async () => {
         const { container } = render(
             <PrivateSetupChatBlock
                 messages={[{ id: "u", role: "user", content: "Owner question" }]}
@@ -199,6 +200,7 @@ describe("PrivateSetupChatBlock", () => {
         expect(row?.querySelector("[data-contract='MEASURE-2'] input[name='setupMessage']")).not.toBeNull()
         expect(container.querySelector("[data-contract='MEASURE-2 MEASURE-7']")).not.toBeNull()
         expect(screen.getByText(enMessages.console.agentos.modules.setup.messageHint)).toBeInTheDocument()
+        await expectNoA11yViolations(container)
     })
     it("prevents duplicate submit while its own append is pending", () => {
         const onSend = vi.fn()

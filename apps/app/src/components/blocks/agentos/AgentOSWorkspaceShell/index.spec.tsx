@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { AgentOSWorkspaceShell } from "./index"
 import type { AgentOSShellView, AgentOSWorkspaceControlCenterShellLabels } from "@/modules/agentos/workspace-control-center/shell-types"
 
@@ -74,11 +75,12 @@ const view: AgentOSShellView = {
 }
 
 describe("AgentOSWorkspaceShell", () => {
-    it("draws each installation beside its source-qualified runtime facets", () => {
-        render(<AgentOSWorkspaceShell view={view} labels={labels} formatDate={() => "Observed now"} formatConfiguration={({ desired, tested, applied }) => `${desired}/${tested}/${applied}`} />)
+    it("draws each installation beside its source-qualified runtime facets", async () => {
+        const { container } = render(<AgentOSWorkspaceShell view={view} labels={labels} formatDate={() => "Observed now"} formatConfiguration={({ desired, tested, applied }) => `${desired}/${tested}/${applied}`} />)
 
         expect(screen.getByText("Sales Copilot")).toBeInTheDocument()
         expect(screen.getByText("Provisioned")).toBeInTheDocument()
         expect(screen.getByText("Configuration unsupported")).toBeInTheDocument()
+        await expectNoA11yViolations(container)
     })
 })

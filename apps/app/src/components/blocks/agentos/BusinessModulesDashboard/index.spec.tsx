@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 
 type MockModuleProps = { readonly workspaceId: string }
 
@@ -47,10 +48,11 @@ describe("BusinessModulesDashboard", () => {
         ).toBeInTheDocument()
     })
 
-    it("routes an empty binding to package selection", () => {
+    it("routes an empty binding to package selection", async () => {
         mocks.query.data = { ok: true, data: [] }
-        render(<BusinessModulesDashboard />)
+        const { container } = render(<BusinessModulesDashboard />)
         fireEvent.click(screen.getByRole("button", { name: "Choose a package" }))
         expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new")
+        await expectNoA11yViolations(container)
     })
 })

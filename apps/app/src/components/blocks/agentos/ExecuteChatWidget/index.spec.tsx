@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type { ExecuteChatBlockCopy, ChatWidgetPayload } from "../../../../modules/agentos/execute-chat"
 import { ExecuteChatWidget } from "."
 
@@ -65,13 +66,14 @@ const payload = (component: string, props: Readonly<Record<string, string | numb
     }) as ChatWidgetPayload
 
 describe("ExecuteChatWidget", () => {
-    it("keeps the structured widget read-only unless an action requires no input", () => {
+    it("keeps the structured widget read-only unless an action requires no input", async () => {
         const onAction = vi.fn()
-        render(<ExecuteChatWidget copy={copy} payload={payload("nivo.metric", { amount: 12 })} onAction={onAction} />)
+        const { container } = render(<ExecuteChatWidget copy={copy} payload={payload("nivo.metric", { amount: 12 })} onAction={onAction} />)
         expect(screen.getByText("Schema 1.0.0")).toBeInTheDocument()
         expect(screen.getByText("amount")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "refresh" }))
         expect(onAction).toHaveBeenCalledExactlyOnceWith("widget-1", "refresh", {})
+        await expectNoA11yViolations(container)
     })
 
     it("admits operation actions only with the required runtime values", () => {

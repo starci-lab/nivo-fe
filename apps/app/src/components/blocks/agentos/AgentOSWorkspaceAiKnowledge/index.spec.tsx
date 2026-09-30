@@ -1,10 +1,25 @@
-import { describe, expect, it } from "vitest"
+import { NextIntlClientProvider } from "next-intl"
+import { render, screen } from "@testing-library/react"
+import { describe, expect, it, vi } from "vitest"
+import enMessages from "@/messages/en.json"
+import { TIME_ZONE } from "@/modules/i18n"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type { AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge"
 import {
     resolveAgentOSWorkspaceAiKnowledgeAction,
     resolveAgentOSWorkspaceAiKnowledgeState,
+    AgentOSWorkspaceAiKnowledge,
     type AgentOSWorkspaceAiKnowledgeAction,
 } from "."
+
+const readinessQuery = vi.hoisted(() => ({ data: undefined, mutate: vi.fn() }))
+
+vi.mock("@/hooks", () => ({
+    useMutateReindexAgentWorkspaceKnowledgeSwr: () => ({ trigger: vi.fn() }),
+    useMutateRunAgentosAiReadinessTestSwr: () => ({ trigger: vi.fn() }),
+    useQueryMyAgentosAiKnowledgeReadinessSwr: () => ({ ...readinessQuery, error: undefined }),
+    useQueryNoticeData: () => () => undefined,
+}))
 
 /** A settled readiness answer the cases vary only where they must. */
 const readiness = (overrides: Partial<AgentosAiKnowledgeReadiness>): AgentosAiKnowledgeReadiness => ({
@@ -100,5 +115,25 @@ describe("resolveAgentOSWorkspaceAiKnowledgeState", () => {
         ).toBe("key-configuring")
         expect(resolveAgentOSWorkspaceAiKnowledgeState(readiness({ aiReady: false }), null, false)).toBe("refused")
         expect(resolveAgentOSWorkspaceAiKnowledgeState(readiness({}), null, false)).toBe("ready")
+    })
+})
+
+describe("AgentOSWorkspaceAiKnowledge", () => {
+    it("renders its real loading screen without accessibility violations", async () => {
+        const { container } = render(
+            <NextIntlClientProvider
+                locale="en"
+                messages={enMessages}
+                timeZone={TIME_ZONE}
+                onError={(error) => {
+                    throw error
+                }}
+            >
+                <AgentOSWorkspaceAiKnowledge workspaceId="workspace-1" />
+            </NextIntlClientProvider>,
+        )
+
+        expect(screen.getByText(enMessages.console.agentos.workspace.aiKnowledge.title)).toBeInTheDocument()
+        await expectNoA11yViolations(container)
     })
 })

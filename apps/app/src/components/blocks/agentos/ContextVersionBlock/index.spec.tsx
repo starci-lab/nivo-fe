@@ -5,6 +5,7 @@ import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import {
     ContextVersionBlock as ActualContextVersionBlock,
     type ContextDraft,
@@ -145,9 +146,9 @@ const testedDraft: ContextDraft = {
 }
 
 describe("ContextVersionBlock", () => {
-    it("keeps Apply disabled until the existing immutable guard is ready", () => {
+    it("keeps Apply disabled until the existing immutable guard is ready", async () => {
         const onApply = vi.fn()
-        const html = render(
+        const view = render(
             <ContextVersionBlock
                 activeVersion={null}
                 draft={{ ...draft, exactTestPassed: false }}
@@ -155,10 +156,12 @@ describe("ContextVersionBlock", () => {
                 refused={false}
                 onApply={onApply}
             />,
-        ).container.innerHTML
+        )
+        const html = view.container.innerHTML
         expect(html).toContain("Required before Apply")
         expect(html).toContain("disabled")
         expect(onApply).not.toHaveBeenCalled()
+        await expectNoA11yViolations(view.container)
     })
 
     describe.each(["en", "vi"] as const)("Support Desk Setup journey %s", (locale) => {

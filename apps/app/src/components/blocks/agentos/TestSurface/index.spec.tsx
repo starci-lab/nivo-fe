@@ -1,6 +1,8 @@
 import { createTranslator } from "next-intl"
+import { render } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import enMessages from "../../../../messages/en.json"
 import { TestSurface } from "."
 import type { AgentosModuleTestContract } from "../../../../modules/api/agentos-module-tests"
@@ -44,6 +46,12 @@ const props: TestSurfaceProps = {
 }
 
 describe("TestSurface", () => {
+    it("has no axe violations for the real current test surface", async () => {
+        const { container } = render(<TestSurface copy={copy} {...props} />)
+
+        await expectNoA11yViolations(container)
+    })
+
     it("renders the current test scenario and its evidence pane", () => {
         const html = renderToStaticMarkup(<TestSurface copy={copy} {...props} />)
 

@@ -7,6 +7,7 @@ import { SettingsSurface } from "."
 import type { SettingsSurfaceProps } from "../../../../modules/agentos/module-page/surface-types"
 import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
 import { TIME_ZONE } from "@/modules/i18n"
+import { expectNoA11yViolations } from "@/testing/axe"
 
 const copy = buildModulePageCopy(
     createTranslator({
@@ -63,8 +64,8 @@ describe("SettingsSurface", () => {
 
     it.each(["configured", "invalid", "constructor"] as const)(
         "keeps %s status separate from credential identity",
-        (status) => {
-            render(
+        async (status) => {
+            const { container } = render(
                 <SettingsSurface
                     copy={copy}
                     {...props}
@@ -91,6 +92,7 @@ describe("SettingsSurface", () => {
             expect(
                 screen.queryByRole("button", { name: copy.settings.removeCredential({ label: "Telegram bot token" }) }),
             ).toBeNull()
+            await expectNoA11yViolations(container)
         },
     )
 })

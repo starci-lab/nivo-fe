@@ -1,6 +1,8 @@
 import { createTranslator } from "next-intl"
+import { render } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import enMessages from "../../../../messages/en.json"
 import { DiagnosticsHealthCard } from "."
 import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
@@ -19,6 +21,18 @@ const copy = buildModulePageCopy(
 )
 
 describe("DiagnosticsHealthCard", () => {
+    it("has no axe violations for the rendered health summary", async () => {
+        const { container } = render(
+            <DiagnosticsHealthCard
+                copy={copy}
+                selectedSignal="all"
+                diagnostics={{ telegramWebhook: "ready", promptCache: 17 }}
+            />,
+        )
+
+        await expectNoA11yViolations(container)
+    })
+
     it.each(["all", "channel", "ai"] as const)(
         "filters %s without translating field names or values",
         (selectedSignal) => {

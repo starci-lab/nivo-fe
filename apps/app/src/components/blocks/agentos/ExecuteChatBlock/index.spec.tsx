@@ -5,6 +5,7 @@ import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { ExecuteChatBlock as ActualExecuteChatBlock, type ExecuteChatBlockCopy, type ExecuteMessage } from "."
 
 type CopyTranslator = ReturnType<typeof createTranslator<typeof enMessages, "console.agentos.modules">>
@@ -127,21 +128,23 @@ describe("ExecuteChatBlock", () => {
             "Knowledge evidence",
             { taskId: "task-4", expectedVersion: 3, title: "Grounded answer", confidence: "high" },
         ],
-    ])("renders trusted %s through its distinct component", (component, expectedTitle, props) => {
-        const html = render(
+    ])("renders trusted %s through its distinct component", async (component, expectedTitle, props) => {
+        const view = render(
             <ExecuteChatBlock
                 sessionTitle="Primary Operations"
                 messages={[message(component, props)]}
                 onSend={vi.fn()}
                 onWidgetAction={vi.fn()}
             />,
-        ).container.innerHTML
+        )
+        const html = view.container.innerHTML
         expect(html).toContain("Proactive update")
         expect(html).toContain("Evidence accepted")
         expect(html).toContain(expectedTitle)
         expect(html).toContain("Open in workbench")
         expect(html).toContain("Accept task")
         expect(html).not.toContain("Widget refused")
+        await expectNoA11yViolations(view.container)
     })
 
     it("fails closed for an unregistered widget identity", () => {

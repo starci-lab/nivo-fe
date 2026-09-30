@@ -5,6 +5,7 @@ import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type { AgentosModuleTestContract } from "@/modules/api/agentos-module-tests"
 import {
     DEFAULT_TEST_WORKBENCH_REGISTRY,
@@ -95,8 +96,8 @@ describe("KindTestWorkbenchBlock", () => {
         ["accounting-fixture", "Accounting fixture test"],
         ["calendar-sandbox", "Calendar sandbox test"],
         ["citation-check", "Citation grounding test"],
-    ])("resolves trusted Test workbench %s", (workbenchKey, expectedTitle) => {
-        const html = render(
+    ])("resolves trusted Test workbench %s", async (workbenchKey, expectedTitle) => {
+        const view = render(
             <KindTestWorkbenchBlock
                 contract={contractFor(workbenchKey)}
                 contextLabel="Context v2 · candidate"
@@ -105,9 +106,11 @@ describe("KindTestWorkbenchBlock", () => {
                 registry={DEFAULT_TEST_WORKBENCH_REGISTRY}
                 onRun={vi.fn()}
             />,
-        ).container.innerHTML
+        )
+        const html = view.container.innerHTML
         expect(html).toContain(expectedTitle)
         expect(html).toContain("Fake input only")
+        await expectNoA11yViolations(view.container)
         expect(html).toContain("cannot call live channels")
     })
 

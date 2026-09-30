@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type {
     AgentOSSolutionModuleCenterProps,
     AgentOSSolutionModuleCenterViewProps,
@@ -22,9 +23,10 @@ const view: AgentOSSolutionModuleCenterViewProps = {
 const on: AgentOSSolutionModuleCenterProps["on"] = { onSelectMode: vi.fn(), onPressCard: vi.fn() }
 
 describe("AgentOSSolutionModuleTabs", () => {
-    it("states an empty catalogue and offers the catalogue action", () => {
-        render(<AgentOSSolutionModuleTabs view={view} on={on} />)
+    it("states an empty catalogue and offers the catalogue action", async () => {
+        const { container } = render(<AgentOSSolutionModuleTabs view={view} on={on} />)
         expect(screen.getByText("No modules")).toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Browse" })).toBeInTheDocument()
+        await expectNoA11yViolations(container)
     })
 })

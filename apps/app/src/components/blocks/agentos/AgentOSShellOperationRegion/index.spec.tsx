@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { AgentOSShellOperationRegion } from "./index"
 import type { AgentOSShellOperationView, AgentOSWorkspaceControlCenterShellLabels } from "@/modules/agentos/workspace-control-center/shell-types"
 
@@ -55,9 +56,9 @@ const operation: AgentOSShellOperationView = {
 }
 
 describe("AgentOSShellOperationRegion", () => {
-    it("keeps each receiver result source-qualified and offers its own recheck", () => {
+    it("keeps each receiver result source-qualified and offers its own recheck", async () => {
         const onRecheck = vi.fn()
-        render(
+        const { container } = render(
             <AgentOSShellOperationRegion
                 operations={[operation]}
                 labels={labels}
@@ -70,5 +71,6 @@ describe("AgentOSShellOperationRegion", () => {
         expect(screen.getByText("Result pending")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Recheck" }))
         expect(onRecheck).toHaveBeenCalledWith("installation-1", "intent-1")
+        await expectNoA11yViolations(container)
     })
 })

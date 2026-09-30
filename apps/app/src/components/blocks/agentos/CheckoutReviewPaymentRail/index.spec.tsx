@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type { CheckoutReviewCopy, CheckoutReviewDecisionProps } from "../../../../modules/agentos/checkout-review"
 import { CheckoutReviewPaymentRail } from "."
 
@@ -62,12 +63,13 @@ const props: CheckoutReviewDecisionProps = {
 }
 
 describe("CheckoutReviewPaymentRail", () => {
-    it("requires a selected rail and emits the exact choice", () => {
+    it("requires a selected rail and emits the exact choice", async () => {
         const on = { requestPayment: vi.fn(), selectRail: vi.fn(), changeOffer: vi.fn() }
-        render(<CheckoutReviewPaymentRail props={props} state="review" on={on} />)
+        const { container } = render(<CheckoutReviewPaymentRail props={props} state="review" on={on} />)
         expect(screen.getByRole("button", { name: "Request payment" })).toBeDisabled()
         fireEvent.click(screen.getByRole("radio", { name: /MoMo/ }))
         expect(on.selectRail).toHaveBeenCalledWith("momo")
+        await expectNoA11yViolations(container)
     })
 
     it("draws the no-start reason and labels the action as a retry", () => {

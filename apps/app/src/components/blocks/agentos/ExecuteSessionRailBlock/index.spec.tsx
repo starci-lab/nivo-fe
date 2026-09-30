@@ -5,6 +5,7 @@ import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n"
 import { fireEvent, render, screen, cleanup } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { ExecuteSessionRailBlock as ActualExecuteSessionRailBlock, type ExecuteSessionRailBlockCopy } from "./index"
 
 type CopyTranslator = (key: string, values?: Readonly<Record<string, string | number>>) => string
@@ -45,11 +46,11 @@ afterEach(cleanup)
 
 describe("ExecuteSessionRailBlock", () => {
     describe.each(["en", "vi"] as const)("Execute session rail %s", (locale) => {
-        it("localizes navigation and preserves session identifiers", () => {
+        it("localizes navigation and preserves session identifiers", async () => {
             const copy = (locale === "en" ? enMessages : viMessages).console.agentos.modules.runtime.sessions
             const onSelect = vi.fn()
             const onCreate = vi.fn()
-            render(
+            const { container } = render(
                 <ExecuteSessionRailBlock
                     locale={locale}
                     sessions={[
@@ -72,6 +73,7 @@ describe("ExecuteSessionRailBlock", () => {
             expect(onCreate).toHaveBeenCalledTimes(1)
             fireEvent.click(screen.getAllByText("User conversation")[0]!)
             expect(onSelect).toHaveBeenCalledWith("session-raw")
+            await expectNoA11yViolations(container)
         })
     })
 

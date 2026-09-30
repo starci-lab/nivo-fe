@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { apiAnswer, unavailableFailure } from "@/test-support/mock-result"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 
 const push = vi.fn()
 const replace = vi.fn()
@@ -151,9 +152,10 @@ describe("AgentOSSolutionModuleCenter", () => {
                 },
             ],
         }))
-        render(<AgentOSSolutionModuleCenter workspaceId="workspace-1" />)
+        const { container } = render(<AgentOSSolutionModuleCenter workspaceId="workspace-1" />)
         expect(await screen.findByText("Sales")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("radio", { name: "Installed" }))
+        await expectNoA11yViolations(container)
     })
 
     it("keeps module and workspace lists resting when signed out and refused when reads fail", async () => {

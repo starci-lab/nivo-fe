@@ -1,5 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server"
+import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { AgentOSWorkspaceSummary } from "./index"
 import type { AgentWorkspaceControlCenter } from "@/modules/api/agentos-workspaces"
 
@@ -31,6 +33,12 @@ const data = {
 } as AgentWorkspaceControlCenter
 
 describe("AgentOSWorkspaceSummary", () => {
+    it("has no axe violations in the resolved workspace state", async () => {
+        const { container } = render(<AgentOSWorkspaceSummary data={data} labels={labels} />)
+
+        await expectNoA11yViolations(container)
+    })
+
     it("keeps commercial allocation separate from live runtime", () => {
         const html = renderToStaticMarkup(<AgentOSWorkspaceSummary data={data} labels={labels} />)
         expect(html).toContain("active")

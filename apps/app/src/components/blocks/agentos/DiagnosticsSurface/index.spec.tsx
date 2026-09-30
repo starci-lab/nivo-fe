@@ -7,6 +7,7 @@ import type { AgentosModuleRuntime } from "../../../../modules/api/agentos-modul
 import type { DiagnosticsSurfaceProps } from "../../../../modules/agentos/module-page/surface-types"
 import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
 import { TIME_ZONE } from "@/modules/i18n"
+import { expectNoA11yViolations } from "@/testing/axe"
 
 const copy = buildModulePageCopy(
     createTranslator({
@@ -49,10 +50,10 @@ const event: AgentosModuleRuntime["operationEvents"][number] = {
 }
 
 describe("DiagnosticsSurface", () => {
-    it("forwards diagnostic filter and compact pane selections", () => {
+    it("forwards diagnostic filter and compact pane selections", async () => {
         const onSelectSignal = vi.fn()
         const onSelectPane = vi.fn()
-        render(
+        const { container } = render(
             <NextIntlClientProvider locale="en" messages={enMessages} timeZone={TIME_ZONE}>
                 <DiagnosticsSurface
                     copy={copy}
@@ -73,5 +74,6 @@ describe("DiagnosticsSurface", () => {
         expect(screen.getByText("Raw event")).toBeInTheDocument()
         expect(onSelectSignal).toHaveBeenCalledExactlyOnceWith("channel")
         expect(onSelectPane).toHaveBeenCalledExactlyOnceWith("evidence")
+        await expectNoA11yViolations(container)
     })
 })

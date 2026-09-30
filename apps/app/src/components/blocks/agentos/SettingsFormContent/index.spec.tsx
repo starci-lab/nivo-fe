@@ -3,6 +3,7 @@ import { createTranslator } from "next-intl"
 import { renderToStaticMarkup } from "react-dom/server"
 import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import enMessages from "../../../../messages/en.json"
 import { SettingsFormContent } from "."
 import type { SettingsFormContentProps } from "../../../../modules/agentos/module-page/surface-types"
@@ -94,7 +95,7 @@ describe("SettingsFormContent", () => {
         expect(html).not.toContain("credential-secret")
     })
 
-    it("reveals, hides, saves and removes credentials without translating input", () => {
+    it("reveals, hides, saves and removes credentials without translating input", async () => {
         const view = render(<SettingsInteractionFixture />)
         const input = screen.getByLabelText("Telegram bot token", { selector: "input" })
 
@@ -133,6 +134,7 @@ describe("SettingsFormContent", () => {
             "assist",
             "TELEGRAM:987",
         )
+        await expectNoA11yViolations(view.container)
         view.unmount()
     })
 })

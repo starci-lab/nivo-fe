@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type { AgentOSSolutionModuleLedgerProps } from "../../../../modules/agentos/solution-module-center"
 import { AgentOSSolutionModuleLedger } from "."
 
@@ -17,8 +18,8 @@ const ledger: AgentOSSolutionModuleLedgerProps = {
 }
 
 describe("AgentOSSolutionModuleLedger", () => {
-    it("moves the reader to the catalogue and focuses its region", () => {
-        render(<AgentOSSolutionModuleLedger ledger={ledger} cards={[]} onPressCard={vi.fn()} />)
+    it("moves the reader to the catalogue and focuses its region", async () => {
+        const { container } = render(<AgentOSSolutionModuleLedger ledger={ledger} cards={[]} onPressCard={vi.fn()} />)
         const region = document.querySelector<HTMLElement>("[data-region='module-catalogue']")
         expect(region).not.toBeNull()
         if (region === null) return
@@ -26,5 +27,6 @@ describe("AgentOSSolutionModuleLedger", () => {
         fireEvent.click(screen.getByRole("button", { name: "Browse the catalogue" }))
         expect(region.scrollIntoView).toHaveBeenCalled()
         expect(document.activeElement).toBe(region)
+        await expectNoA11yViolations(container)
     })
 })

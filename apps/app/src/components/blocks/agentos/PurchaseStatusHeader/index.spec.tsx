@@ -1,5 +1,7 @@
+import { render } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { createTranslator } from "next-intl"
 import enMessages from "@/messages/en.json"
 import { createPurchaseStatusCopy } from "@/modules/agentos/purchase-status/copy"
@@ -30,6 +32,12 @@ const head: PurchaseStatusHeadProps = {
 }
 
 describe("PurchaseStatusHeader", () => {
+    it("has no axe violations for the real purchase heading", async () => {
+        const { container } = render(<PurchaseStatusHeader head={head} />)
+
+        await expectNoA11yViolations(container)
+    })
+
     it("draws the breadcrumb, heading, subtitle and phase badge", () => {
         const html = renderToStaticMarkup(<PurchaseStatusHeader head={head} />)
 

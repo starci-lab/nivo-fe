@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type {
     PurchaseStatusActions as PurchaseStatusActionCallbacks,
     PurchaseStatusRail,
@@ -7,14 +8,15 @@ import type {
 import { PurchaseStatusActions } from "./index"
 
 describe("PurchaseStatusActions", () => {
-    it("binds the primary action to the connected owner callback", () => {
+    it("binds the primary action to the connected owner callback", async () => {
         const primary = vi.fn()
         const on: PurchaseStatusActionCallbacks = { primary }
-        render(<PurchaseStatusActions kind="primary" action={{ label: "Check payment status" }} on={on} />)
+        const { container } = render(<PurchaseStatusActions kind="primary" action={{ label: "Check payment status" }} on={on} />)
 
         fireEvent.click(screen.getByRole("button", { name: "Check payment status" }))
 
         expect(primary).toHaveBeenCalledOnce()
+        await expectNoA11yViolations(container)
     })
 
     it("draws a refusal with the return link inside the rail action group", () => {

@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from "next-intl"
 import viMessages from "@/messages/vi.json"
 import enMessages from "@/messages/en.json"
 import { TIME_ZONE, type Locale } from "@/modules/i18n"
+import { expectNoA11yViolations } from "@/testing/axe"
 
 const mocks = vi.hoisted(() => ({
     locale: "vi" as Locale,
@@ -47,9 +48,10 @@ describe("AgentOSWorkspaceList", () => {
     })
 
     it("owns the empty read and routes creation", async () => {
-        renderList()
+        const { container } = renderList()
         fireEvent.click(await screen.findByRole("button", { name: viMessages.console.agentos.create }))
         expect(mocks.push).toHaveBeenCalledWith("/agentos/workspaces/new")
+        await expectNoA11yViolations(container)
     })
 
     it("maps rows to native locale-aware links without pushing", async () => {

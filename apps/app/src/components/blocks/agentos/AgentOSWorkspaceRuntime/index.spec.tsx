@@ -1,6 +1,8 @@
 import type { AgentWorkspaceControlCenter } from "@/modules/api/agentos-workspaces"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
+import { render } from "@testing-library/react"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { AgentOSWorkspaceRuntime } from "./index"
 const labels = {
     section: "Runtime",
@@ -31,6 +33,18 @@ const base = {
     apps: [],
 }
 describe("AgentOSWorkspaceRuntime", () => {
+    it("has no axe violations in its unavailable state", async () => {
+        const { container } = render(
+            <AgentOSWorkspaceRuntime
+                data={{ ...base, runtime: null } as AgentWorkspaceControlCenter}
+                labels={labels}
+                formatDate={() => "never"}
+            />,
+        )
+
+        await expectNoA11yViolations(container)
+    })
+
     it("renders measured CPU, memory and stale freshness", () => {
         const data = {
             ...base,

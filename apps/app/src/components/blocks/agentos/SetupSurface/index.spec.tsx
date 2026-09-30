@@ -7,6 +7,7 @@ import { SetupSurface } from "."
 import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
 import type { SetupSurfaceProps } from "../../../../modules/agentos/module-page/surface-types"
 import { TIME_ZONE } from "@/modules/i18n"
+import { expectNoA11yViolations } from "@/testing/axe"
 
 const copy = buildModulePageCopy(
     createTranslator({
@@ -51,14 +52,15 @@ describe("SetupSurface", () => {
         expect(html).not.toContain('id="setup-panel-versions"')
     })
 
-    it("forwards the selected setup pane", () => {
+    it("forwards the selected setup pane", async () => {
         const onSelectPane = vi.fn()
-        render(<SetupSurface copy={copy} {...setup} onSelectPane={onSelectPane} />)
+        const { container } = render(<SetupSurface copy={copy} {...setup} onSelectPane={onSelectPane} />)
 
         fireEvent.click(screen.getByRole("button", { name: copy.setup.openVersions }))
         fireEvent.click(screen.getByRole("button", { name: copy.setup.reviewGates }))
 
         expect(onSelectPane.mock.calls).toEqual([["versions"], ["context"]])
+        await expectNoA11yViolations(container)
     })
 
     it("forwards revision and setup actions while retaining one mounted panel", () => {

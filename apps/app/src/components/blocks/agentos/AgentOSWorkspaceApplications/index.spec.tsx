@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { AgentOSWorkspaceApplications } from "./index"
 
 const labels = {
@@ -46,7 +47,7 @@ describe("AgentOSWorkspaceApplications", () => {
         expect(html).toContain("Unavailable")
     })
 
-    it("renders opening and connected launch copy", () => {
+    it("renders opening and connected launch copy", async () => {
         const app = [
             {
                 app: "OPENCLAW" as const,
@@ -56,7 +57,7 @@ describe("AgentOSWorkspaceApplications", () => {
                 observedVersion: "1.2.3",
             },
         ]
-        const { rerender } = render(
+        const { container, rerender } = render(
             <AgentOSWorkspaceApplications
                 apps={app}
                 labels={labels}
@@ -79,6 +80,7 @@ describe("AgentOSWorkspaceApplications", () => {
         )
         expect(screen.getByRole("status")).toHaveTextContent("1.2.3")
         expect(screen.getByRole("link", { name: "Manage" })).toHaveAttribute("href", "/openclaw")
+        await expectNoA11yViolations(container)
     })
 
     it("offers the accepted open-again transition only after launch expiry", () => {

@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { AgentOSWorkspaceRuntimeSummary } from "./index"
 
 const data = {
@@ -10,8 +11,8 @@ const data = {
 }
 
 describe("AgentOSWorkspaceRuntimeSummary", () => {
-    it("draws the workspace summary from the aggregate", () => {
-        render(
+    it("draws the workspace summary from the aggregate", async () => {
+        const { container } = render(
             <AgentOSWorkspaceRuntimeSummary
                 view="summary"
                 data={data}
@@ -28,5 +29,6 @@ describe("AgentOSWorkspaceRuntimeSummary", () => {
         )
 
         expect(screen.getByText("Summary")).toBeInTheDocument()
+        await expectNoA11yViolations(container)
     })
 })

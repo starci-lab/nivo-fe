@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type { AgentosModuleTestContract } from "../../../../modules/api/agentos-module-tests"
 import type { KindTestWorkbenchBlockCopy, TestWorkbenchComponentProps } from "../../../../modules/agentos/kind-test-workbench"
 import { KindTestScenarioWorkbench } from "."
@@ -55,11 +56,12 @@ const props: TestWorkbenchComponentProps = {
 }
 
 describe("KindTestScenarioWorkbench", () => {
-    it("shows fixture inputs and emits parsed overrides", () => {
-        render(<KindTestScenarioWorkbench {...props} />)
+    it("shows fixture inputs and emits parsed overrides", async () => {
+        const { container } = render(<KindTestScenarioWorkbench {...props} />)
         expect(screen.getByRole("heading", { name: "Conversation test" })).toBeInTheDocument()
         const input = screen.getByRole("textbox", { name: "value" })
         fireEvent.change(input, { target: { value: "owner input" } })
         expect(props.onOverride).toHaveBeenCalledWith("value", "owner input")
+        await expectNoA11yViolations(container)
     })
 })

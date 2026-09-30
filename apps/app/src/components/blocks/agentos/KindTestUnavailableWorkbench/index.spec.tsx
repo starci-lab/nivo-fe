@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type { AgentosModuleTestContract } from "../../../../modules/api/agentos-module-tests"
 import type { KindTestWorkbenchBlockCopy, TestWorkbenchComponentProps } from "../../../../modules/agentos/kind-test-workbench"
 import { KindTestUnavailableWorkbench } from "."
@@ -53,9 +54,10 @@ const props: TestWorkbenchComponentProps = {
 }
 
 describe("KindTestUnavailableWorkbench", () => {
-    it("explains the refusal and disables the run action", () => {
-        render(<KindTestUnavailableWorkbench {...props} />)
+    it("explains the refusal and disables the run action", async () => {
+        const { container } = render(<KindTestUnavailableWorkbench {...props} />)
         expect(screen.getByText("No test was executed")).toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Test cannot run" })).toBeDisabled()
+        await expectNoA11yViolations(container)
     })
 })

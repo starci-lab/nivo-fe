@@ -1,19 +1,12 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { AgentOSWorkspaceApplicationsPane } from "./index"
 import type { AgentOSWorkspaceControlCenterLabels } from "@/modules/agentos/workspace-control-center/labels"
 
-type ApplicationsProbeProps = { readonly openClawLaunchHref: string }
-
-vi.mock("@/components/blocks/agentos/AgentOSWorkspaceApplications", () => ({
-    AgentOSWorkspaceApplications: ({ openClawLaunchHref }: ApplicationsProbeProps) => (
-        <output>{openClawLaunchHref}</output>
-    ),
-}))
-
 describe("AgentOSWorkspaceApplicationsPane", () => {
-    it("passes the launch destination into the applications pane", () => {
-        render(
+    it("draws the real applications pane with its workspace launch destination", async () => {
+        const { container } = render(
             <AgentOSWorkspaceApplicationsPane
                 data={{
                     workspace: {
@@ -23,7 +16,15 @@ describe("AgentOSWorkspaceApplicationsPane", () => {
                         externalWorkspaceRef: null,
                     },
                     instance: null,
-                    apps: [],
+                    apps: [
+                        {
+                            app: "OPENCLAW",
+                            accessMode: "NIVO_CONSOLE",
+                            available: true,
+                            reason: null,
+                            observedVersion: "1.2.3",
+                        },
+                    ],
                     runtime: null,
                 }}
                 labels={{
@@ -50,6 +51,10 @@ describe("AgentOSWorkspaceApplicationsPane", () => {
             />,
         )
 
-        expect(screen.getByText("/en/launch/agentos/workspace-1/openclaw")).toBeInTheDocument()
+        expect(screen.getByRole("link", { name: "Manage" })).toHaveAttribute(
+            "href",
+            "/en/launch/agentos/workspace-1/openclaw",
+        )
+        await expectNoA11yViolations(container)
     })
 })
