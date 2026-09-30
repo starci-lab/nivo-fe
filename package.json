@@ -176,19 +176,24 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "dev:app": "npm run dev -w @nivo/app",
-    "dev:expert": "npm run dev -w @nivo/expert",
-    "dev:landing": "npm run dev -w @nivo/landing",
+    "prepare": "husky",
+    "dev:app": "npm run dev --workspace apps/app",
+    "start:app": "npm run start --workspace apps/app",
+    "dev:expert": "npm run dev --workspace apps/expert",
+    "start:expert": "npm run start --workspace apps/expert",
+    "dev:landing": "npm run dev --workspace apps/landing",
+    "start:landing": "npm run start --workspace apps/landing",
+    "codegen": "npm run codegen --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run codegen --silent && eslint . --fix --max-warnings=0 && stylelint \"{apps,packages}/*/src/**/*.css\" --fix",
+    "lint:check": "npm run codegen --silent && eslint . --max-warnings=0 && stylelint \"{apps,packages}/*/src/**/*.css\"",
+    "lint:report": "eslint . --format json --output-file reports/eslint.json",
+    "lint:report:css": "stylelint \"{apps,packages}/*/src/**/*.css\" --formatter json --output-file reports/stylelint.json",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "turbo run lint",
-    "lint:check": "turbo run lint -- --max-warnings=0",
-    "prepare": "husky",
-    "sonar:check": "sonar-scanner-npm -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=600",
-    "typecheck": "turbo run typecheck",
-    "codegen": "npm run codegen --workspace @nivo/app --workspace @nivo/expert --"
+    "hfs:check": "hfs check",
+    "hfs:report": "hfs check --sonar reports/hfs.sonar.json"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.7",
@@ -196,9 +201,12 @@
     "@graphql-codegen/typescript": "^4.1.6",
     "@graphql-codegen/typescript-operations": "^4.6.1",
     "@sonar/scan": "^5.0.0",
-    "@starci/eslint-canon-fe": "6.0.2",
+    "@starci/eslint-canon-fe": "7.0.0",
     "@starci/grammar": "0.7.2",
+    "@starci/hfs": "2.0.0",
+    "@starci/prettier-config": "1.0.0",
     "@starci/stylelint-canon": "2.0.0",
+    "@starci/tsconfig": "2.0.0",
     "eslint-plugin-react-hooks": "^7.0.1",
     "graphql": "^16.14.2",
     "husky": "^9.1.7",
@@ -217,7 +225,7 @@
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "@starci/eslint-canon-fe": "6.0.2",
+    "@starci/eslint-canon-fe": "7.0.0",
     "react-aria": "3.52.1"
   }
 }
