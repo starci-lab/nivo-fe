@@ -27,7 +27,7 @@ export type ExecuteSession = {
 }
 
 /** Session navigation commands owned by the responsive rail adapter. */
-export type ExecuteSessionRailBlockProps = {
+type ExecuteSessionRailBlockProps = {
     readonly copy: ExecuteSessionRailBlockCopy
     readonly sessions: ReadonlyArray<ExecuteSession>
     readonly selectedId: string | null

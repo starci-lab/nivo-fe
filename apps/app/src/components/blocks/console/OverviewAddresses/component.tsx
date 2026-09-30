@@ -26,7 +26,7 @@ export type OverviewAddressesState =
           readonly message: string
       }
 /** Pure addresses input: the domains that back the services, stating their own absence. */
-export type OverviewAddressesViewProps = {
+type OverviewAddressesViewProps = {
     readonly state: OverviewAddressesState
     readonly props: {
         readonly label: string

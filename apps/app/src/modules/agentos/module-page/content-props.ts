@@ -126,7 +126,7 @@ export type ModuleDiagnosticsView = {
 }
 
 /** The connected facts setupContentPropsFor combines. */
-export type SetupContentInput = {
+type SetupContentInput = {
     readonly runtime: AgentosModuleRuntime
     readonly activeVersion: number | null
     readonly draft: ContextDraft | null
@@ -178,7 +178,7 @@ export const setupContentPropsFor = (input: SetupContentInput): SetupSurfaceProp
 }
 
 /** The connected facts operateContentPropsFor combines. */
-export type OperateContentInput = {
+type OperateContentInput = {
     readonly runtime: AgentosModuleRuntime
     readonly copy: ModulePageCopy
     readonly pending: boolean
@@ -235,7 +235,7 @@ export const operateContentPropsFor = (input: OperateContentInput): OperateSurfa
 }
 
 /** The connected facts testContentPropsFor combines. */
-export type TestContentInput = {
+type TestContentInput = {
     readonly copy: ModulePageCopy
     readonly draft: ContextDraft | null
     readonly pending: boolean
@@ -274,7 +274,7 @@ export const testContentPropsFor = (input: TestContentInput): TestSurfaceProps |
 }
 
 /** The connected facts settingsContentPropsFor combines. */
-export type SettingsContentInput = {
+type SettingsContentInput = {
     readonly runtime: AgentosModuleRuntime
     readonly activeVersion: number | null
     readonly pending: boolean
@@ -309,7 +309,7 @@ export const settingsContentPropsFor = (input: SettingsContentInput): SettingsSu
 }
 
 /** The connected facts diagnosticsContentPropsFor combines. */
-export type DiagnosticsContentInput = {
+type DiagnosticsContentInput = {
     readonly runtime: AgentosModuleRuntime
     readonly diagnostics: ModuleDiagnosticsView
 }

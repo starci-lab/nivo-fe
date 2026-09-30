@@ -8,7 +8,7 @@ import {
     SurfaceCard,
 } from "@starci/grammar/common"
 /** Workspace capabilities and resolved copy consumed by the application block. */
-export type AgentOSWorkspaceApplicationsProps = {
+type AgentOSWorkspaceApplicationsProps = {
     readonly apps: ReadonlyArray<AgentWorkspaceAppCapability>
     readonly labels: {
         readonly section: string

@@ -32,16 +32,16 @@ type AgentOSSolutionModuleShellProps = AgentOSSolutionModuleShellData & {
 }
 
 /** Settled page state handed to the pure half for drawing. */
-export type AgentOSSolutionModulePageState = {
+type AgentOSSolutionModulePageState = {
     readonly copy: ModulePageCopy
     readonly screen: AgentOSSolutionModuleScreen
 }
 
 /** Shell data drawn alongside the selected module screen. */
-export type AgentOSSolutionModulePageData = AgentOSSolutionModuleShellData
+type AgentOSSolutionModulePageData = AgentOSSolutionModuleShellData
 
 /** Shell actions resolved by the connected module route. */
-export type AgentOSSolutionModulePageActions = {
+type AgentOSSolutionModulePageActions = {
     readonly backToModules: () => void
     readonly navigate: (view: AgentOSModuleView) => void
 }
@@ -110,7 +110,7 @@ export const AgentOSSolutionModulePageBase = (view: AgentOSSolutionModulePageVie
 }
 
 /** State accepted by the typed runtime-loading page. */
-export type AgentOSSolutionModuleStateProps = {
+type AgentOSSolutionModuleStateProps = {
     readonly copy: ModulePageCopy
     readonly refused: boolean
 }

@@ -13,7 +13,7 @@ import { type Outcome } from "@nivo/api"
  * values from `@/modules/api/collab`. The reader's language for refusal copy is the
  * one the session binds for every call.
  */
-export type CollabOfficeTransport = {
+type CollabOfficeTransport = {
     readonly reconcileRequest: (call: CollabReconcileCall) => Promise<Outcome<CollabReconcileOutcome>>
 }
 

@@ -13,7 +13,7 @@ import {
 export type { ProvisioningTarget, ProvisioningEvent, ProvisioningRealtimeState } from "./realtime.shared"
 
 /** Inputs required to subscribe to exactly one provisioning subject. */
-export type UseProvisioningRealtimeInput = {
+type UseProvisioningRealtimeInput = {
     readonly accessToken: string | null
     readonly target: ProvisioningTarget | null
 }

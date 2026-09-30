@@ -64,7 +64,7 @@ export type SetupRevision = {
 }
 
 /** Controlled conversation, draft and command feedback supplied by the Setup owner. */
-export type PrivateSetupChatBlockProps = {
+type PrivateSetupChatBlockProps = {
     readonly copy: PrivateSetupChatBlockCopy
     readonly messages: ReadonlyArray<SetupMessage>
     readonly pending?: boolean

@@ -4,7 +4,7 @@ import { getMessages } from "next-intl/server"
 import { MESSAGE_SCOPES, pickMessages, type MessageScopeName } from "@/modules/i18n/messages"
 
 /** Props for {@link MessageScope}: which route group copy to ship, and the routed stream. */
-export type MessageScopeProps = {
+type MessageScopeProps = {
     readonly scope: MessageScopeName
     readonly children: ReactNode
 }

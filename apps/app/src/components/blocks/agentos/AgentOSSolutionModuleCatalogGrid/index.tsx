@@ -3,7 +3,7 @@ import type { AgentOSSolutionModuleCard } from "../../../../modules/agentos/solu
 import { SOLUTION_CATALOG_GRID_CLASS_NAME } from "./classNames"
 
 /** Props for {@link AgentOSSolutionModuleCatalogGrid}. */
-export type AgentOSSolutionModuleCatalogGridProps = {
+type AgentOSSolutionModuleCatalogGridProps = {
     readonly cards: ReadonlyArray<AgentOSSolutionModuleCard>
     readonly loading: boolean
     readonly pendingId?: string

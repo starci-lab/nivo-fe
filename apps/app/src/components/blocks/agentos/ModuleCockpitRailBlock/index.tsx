@@ -4,14 +4,14 @@ import { SurfaceCard, Button, Text } from "@starci/grammar/common"
 import { SelectionList, type SelectionListGroup } from "@nivo/ui"
 
 /** One data-only identity rendered in a Module Studio cockpit rail. */
-export type ModuleCockpitRailItem = {
+type ModuleCockpitRailItem = {
     readonly id: string
     readonly label: string
     readonly status: string
 }
 
 /** Shared rail input for Setup versions, Test scenarios and diagnostic signals. */
-export type ModuleCockpitRailBlockProps = {
+type ModuleCockpitRailBlockProps = {
     readonly label: string
     readonly fact?: string
     readonly summary?: string

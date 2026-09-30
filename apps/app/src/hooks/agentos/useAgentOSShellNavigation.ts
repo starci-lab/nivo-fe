@@ -20,7 +20,7 @@ import { failed, type Outcome } from "@nivo/api"
 import { shellNavigationDecision, type ShellNavigationDecision } from "@/modules/agentos/shell-navigation"
 
 /** What the navigation half needs: where the selection lives and who is asking. */
-export interface AgentOSShellNavigationOptions {
+interface AgentOSShellNavigationOptions {
     readonly accessToken: string | null
     readonly workspaceId: string
     readonly instanceId: string
@@ -28,7 +28,7 @@ export interface AgentOSShellNavigationOptions {
 }
 
 /** The two navigation verbs the connected shell publishes. */
-export interface AgentOSShellNavigation {
+interface AgentOSShellNavigation {
     readonly resolveEntry: (
         installationId: string,
         routeKey: ShellRouteKey,

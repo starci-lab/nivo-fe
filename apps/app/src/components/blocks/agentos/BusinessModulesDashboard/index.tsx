@@ -11,7 +11,7 @@ import {
 } from "./component"
 
 /** Public props for the dashboard, which has no caller-controlled values. */
-export type BusinessModulesDashboardProps = { readonly children?: never }
+type BusinessModulesDashboardProps = { readonly children?: never }
 
 /** Resolve exactly one workspace; zero and ambiguity remain explicit product states. */
 export const BusinessModulesDashboard = (props: BusinessModulesDashboardProps) => {

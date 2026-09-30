@@ -6,7 +6,7 @@ import { isAgentOSWorkspacePageState } from "@/modules/agentos/workspace-page-st
 import { AgentOSWorkspacePageBase, type AgentOSWorkspacePageState } from "./component"
 
 /** Exact workspace route identity connected by the page. */
-export type AgentOSWorkspacePageProps = {
+type AgentOSWorkspacePageProps = {
     readonly workspaceId: string
 }
 /** Own the tab-driven page architecture and delegate the aggregate lifecycle to its connected block. */

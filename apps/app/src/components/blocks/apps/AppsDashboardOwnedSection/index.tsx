@@ -12,7 +12,7 @@ import { AppsDashboardRestingRows } from "../AppsDashboardRestingRows"
 import { APPS_DASHBOARD_OWNED_LIST_CLASS_NAME } from "./classNames"
 
 /** Props for {@link AppsDashboardOwnedSection}. */
-export type AppsDashboardOwnedSectionProps = {
+type AppsDashboardOwnedSectionProps = {
     readonly owned: OwnedSectionView
     readonly catalogue: CatalogueSectionView
     readonly buildAppLabel?: string

@@ -5,7 +5,7 @@ import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
 /** Exact versioned specification state and acknowledgement action. */
 export type AgentOSModuleSpecificationProps = AgentOSModuleSpecificationViewProps
 /** Resolved copy for the specification block. */
-export type AgentOSModuleSpecificationLabels = {
+type AgentOSModuleSpecificationLabels = {
     readonly title: string
     readonly refused: string
     readonly incomplete: string
@@ -16,19 +16,19 @@ export type AgentOSModuleSpecificationLabels = {
     readonly published: string
 }
 /** Specification projection, acknowledgement flag and copy the pure block draws. */
-export type AgentOSModuleSpecificationData = {
+type AgentOSModuleSpecificationData = {
     readonly studio?: AgentosModuleStudio
     readonly acknowledged: boolean
     readonly pending: boolean
     readonly labels: AgentOSModuleSpecificationLabels
 }
 /** The acknowledgement toggle and publish the specification emits. */
-export type AgentOSModuleSpecificationActions = {
+type AgentOSModuleSpecificationActions = {
     readonly onAcknowledge: (value: boolean) => void
     readonly onPublish: () => void
 }
 /** Public API role for AgentOSModuleSpecificationViewProps. */
-export type AgentOSModuleSpecificationViewProps = {
+type AgentOSModuleSpecificationViewProps = {
     readonly state: "loading" | "refused" | "incomplete" | "ready" | "publishing"
     readonly props: AgentOSModuleSpecificationData
     readonly on: AgentOSModuleSpecificationActions

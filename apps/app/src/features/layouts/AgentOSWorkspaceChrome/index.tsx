@@ -8,7 +8,7 @@ import { nivoQueryPayload } from "@/modules/query"
 import { AgentOSWorkspaceChromeBase, type AgentOSWorkspaceChromeBaseProps } from "./component"
 
 /** The nested route body rendered under this workspace's shared header and tabs. */
-export type AgentOSWorkspaceChromeProps = {
+type AgentOSWorkspaceChromeProps = {
     readonly children: ReactNode
 }
 

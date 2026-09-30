@@ -21,7 +21,7 @@ import {
 } from "./commerce.guards"
 
 /** How a held domain stands. */
-export type DomainStatus = "active" | "expiring" | "expired"
+type DomainStatus = "active" | "expiring" | "expired"
 
 /** One domain this account holds. */
 export type DomainRow = {
@@ -46,7 +46,7 @@ export type WalletRow = {
 }
 
 /** Which direction money moved. */
-export type WalletTransactionType = "deposit" | "spend"
+type WalletTransactionType = "deposit" | "spend"
 
 /** One movement of money. */
 export type WalletTransactionRow = {
@@ -75,7 +75,7 @@ export type WalletTopUpPayLink = {
 }
 
 /** How a catalog item bills its buyer; additive seam field, absent on a pre-billing schema. */
-export type CatalogBillingModel = "one_time" | "recurring" | "setup_plus_recurring"
+type CatalogBillingModel = "one_time" | "recurring" | "setup_plus_recurring"
 
 /** What an order bought, as the two relations an order carries. */
 export type OrderProduct = {

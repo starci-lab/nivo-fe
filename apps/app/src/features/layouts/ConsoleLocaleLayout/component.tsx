@@ -2,10 +2,10 @@ import type { ReactNode } from "react"
 import { ConsoleProviders, type ConsoleProvidersData } from "../ConsoleProviders"
 
 /** The resolved request facts the provider stack needs, resolved by its connected index. */
-export type ConsoleLocaleLayoutBaseData = ConsoleProvidersData
+type ConsoleLocaleLayoutBaseData = ConsoleProvidersData
 
 /** Props for {@link ConsoleLocaleLayoutBase}: resolved data and the routed stream. */
-export type ConsoleLocaleLayoutBaseProps = {
+type ConsoleLocaleLayoutBaseProps = {
     readonly props: ConsoleLocaleLayoutBaseData
     readonly children: ReactNode
 }

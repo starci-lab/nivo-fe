@@ -1,7 +1,7 @@
 import type { IconSourceProps } from "@starci/grammar/common"
 
 /** SVG props supplied by the grammar Icon that renders the glyph. */
-export type RefusalGlyphProps = IconSourceProps
+type RefusalGlyphProps = IconSourceProps
 
 /** The refusal mark: a current-color circle carrying an exclamation. */
 export const RefusalGlyph = (props: RefusalGlyphProps) => (

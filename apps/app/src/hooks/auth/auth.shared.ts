@@ -19,7 +19,7 @@ import { DEFAULT_AUTHENTICATED_LANDING, validatedReturnTo } from "@/modules/auth
 export type AuthenticationTranslate = (key: string, values?: Record<string, string | number>) => string
 
 /** Initial navigation facts carried through a provider round trip. */
-export type AuthenticationArrival = {
+type AuthenticationArrival = {
     readonly provider: "google" | "github" | null
     readonly refused: boolean
 }
@@ -41,7 +41,7 @@ export const readAuthenticationArrival = (): AuthenticationArrival => {
 }
 
 /** A sentence and whether it reports a refusal. */
-export type AuthenticationFeedback = {
+type AuthenticationFeedback = {
     readonly statusMessage: string
     readonly isError: boolean
 }

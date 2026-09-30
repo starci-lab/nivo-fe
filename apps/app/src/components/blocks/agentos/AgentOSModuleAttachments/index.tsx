@@ -20,7 +20,7 @@ type IndexedAttachment = {
 }
 
 /** The supported attachment sources and their scope-specific identity. */
-export type AgentOSModuleAttachmentsProps =
+type AgentOSModuleAttachmentsProps =
     | {
           readonly scope: "studio"
           readonly workspaceId: string

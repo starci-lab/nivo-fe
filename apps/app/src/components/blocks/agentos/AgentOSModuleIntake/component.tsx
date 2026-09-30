@@ -3,7 +3,7 @@ import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/commo
 /** Opening-goal form copy, local state and persistence action. */
 export type AgentOSModuleIntakeProps = AgentOSModuleIntakeViewProps
 /** Form data and resolved copy the pure intake draws. */
-export type AgentOSModuleIntakeData = {
+type AgentOSModuleIntakeData = {
     readonly goal: string
     readonly pending: boolean
     readonly error?: string
@@ -18,12 +18,12 @@ export type AgentOSModuleIntakeData = {
     readonly guideNote: string
 }
 /** The bounded edits and submit the intake emits. */
-export type AgentOSModuleIntakeActions = {
+type AgentOSModuleIntakeActions = {
     readonly onGoal: (value: string) => void
     readonly onSubmit: () => void
 }
 /** Public API role for AgentOSModuleIntakeViewProps. */
-export type AgentOSModuleIntakeViewProps = {
+type AgentOSModuleIntakeViewProps = {
     readonly props: AgentOSModuleIntakeData
     readonly on: AgentOSModuleIntakeActions
 }

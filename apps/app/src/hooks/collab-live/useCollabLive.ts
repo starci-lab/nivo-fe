@@ -31,10 +31,10 @@ import { useAccessToken } from "../auth/useAccessToken"
 const COLLAB_SOCKET_URL = `${CORE_API_BASE}/collab`
 
 /** The closed set of change kinds the live namespace may announce. */
-export type CollabLiveHintKind = "message" | "card" | "task" | "membership" | "notice"
+type CollabLiveHintKind = "message" | "card" | "task" | "membership" | "notice"
 
 /** The only payload a `collab.changed` hint carries; never content, never truth. */
-export type CollabLiveHint = {
+type CollabLiveHint = {
     readonly workspaceId: string
     readonly kind: CollabLiveHintKind
     readonly cursor: string | null

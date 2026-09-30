@@ -16,7 +16,7 @@ import {
 /** Presentational authentication page: heading, panel and journey exits. */
 
 /** Where the reader may go instead, drawn outside the surface. */
-export type AuthenticationPageExit = {
+type AuthenticationPageExit = {
     /** The question the action answers, or `""` for an exit that stands alone. */
     readonly question: string
     /** The action's own words. */
@@ -32,7 +32,7 @@ export type AuthenticationPageExit = {
  * half's own contract is named after the export it serves and the two files never carry one name
  * for two shapes.
  */
-export type AuthenticationPageViewProps = {
+type AuthenticationPageViewProps = {
     /** The panel's complete translated state and actions. */
     readonly panel: AuthenticationPanelProps
     /** Everything offered below the surface, in reading order. */

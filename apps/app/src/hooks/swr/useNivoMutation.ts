@@ -10,10 +10,10 @@ import { nivoViewerQueryKeyFor, viewerCacheKeyFor, type NivoQueryKey } from "./u
 export type NivoMutationKey = readonly [name: string, ...parts: ReadonlyArray<string | number | boolean | null>]
 
 /** Viewer-scoped mutation identity, never containing a bearer credential. */
-export type NivoViewerMutationKey = readonly ["NIVO_MUTATION", viewerKey: string, ...mutationKey: NivoMutationKey]
+type NivoViewerMutationKey = readonly ["NIVO_MUTATION", viewerKey: string, ...mutationKey: NivoMutationKey]
 
 /** Query invalidation owned by a named command rather than repeated in its component consumers. */
-export type NivoMutationOptions<TAnswer, TInput> = {
+type NivoMutationOptions<TAnswer, TInput> = {
     readonly invalidates?:
         ReadonlyArray<NivoQueryKey> | ((input: TInput, answer: TAnswer) => ReadonlyArray<NivoQueryKey>)
     readonly shouldInvalidate?: (answer: TAnswer) => boolean

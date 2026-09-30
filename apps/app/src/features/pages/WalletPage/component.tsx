@@ -4,7 +4,7 @@ import { WalletControlCenter } from "@/components/blocks/wallet/WalletControlCen
 export type WalletPageState = "ordinary" | "waypoint"
 
 /** Complete input of WalletPageBase: one drawn shape; page data and overlays stay inside WalletControlCenter. */
-export type WalletPageBaseProps = {
+type WalletPageBaseProps = {
     readonly state: WalletPageState
 }
 

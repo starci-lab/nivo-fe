@@ -10,8 +10,6 @@ import { SidebarBase } from "./component"
 /** Which console surface the navigation is drawn on: the persistent rail, or the mobile drawer. */
 export type SidebarMode = "desktop" | "mobile"
 
-/** Every SidebarMode member, beside its union per the closed-vocabulary law. */
-export const SIDEBAR_MODES: ReadonlyArray<SidebarMode> = ["desktop", "mobile"] as const
 
 /** What a caller states about the navigation - the surface it belongs to, and nothing else. */
 export type SidebarProps = { readonly mode?: SidebarMode }

@@ -6,7 +6,7 @@ import { workspaceModules } from "@/modules/routes"
 import { AgentOSModuleCreatePageBase } from "./component"
 
 /** Route identity supplied by the workspace modules segment. */
-export type AgentOSModuleCreatePageProps = {
+type AgentOSModuleCreatePageProps = {
     readonly workspaceId: string
 }
 

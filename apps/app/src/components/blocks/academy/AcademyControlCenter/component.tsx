@@ -22,7 +22,7 @@ export type AcademyControlCenterLabels = {
 }
 
 /** Atoms the pure Academy page draws; domain blocks own their own requests and failures. */
-export type AcademyControlCenterData = {
+type AcademyControlCenterData = {
     readonly title: string
     readonly siteId: string
     readonly publicHost?: string
@@ -33,7 +33,7 @@ export type AcademyControlCenterData = {
 }
 
 /** Actions the pure Academy page emits; every argument is an atom. */
-export type AcademyControlCenterActions = {
+type AcademyControlCenterActions = {
     readonly selectMode: (mode: AcademyControlCenterMode) => void
     readonly openPublicSite: () => void
     /** Re-read the site list after a failed answer. */
@@ -41,7 +41,7 @@ export type AcademyControlCenterActions = {
 }
 
 /** Pure page state; domain blocks own their own requests and failures. */
-export type AcademyControlCenterViewProps = {
+type AcademyControlCenterViewProps = {
     readonly state: "restoring" | "failed" | "ready"
     readonly props: AcademyControlCenterData
     readonly on: AcademyControlCenterActions

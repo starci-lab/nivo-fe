@@ -2,7 +2,7 @@ import { FleetRow } from "../../provisioning/FleetRow"
 import { APPS_DASHBOARD_RESTING_ROWS_CLASS_NAME } from "./classNames"
 
 /** Props for {@link AppsDashboardRestingRows}. */
-export type AppsDashboardRestingRowsProps = { readonly indexes: ReadonlyArray<number> }
+type AppsDashboardRestingRowsProps = { readonly indexes: ReadonlyArray<number> }
 
 type RestingRowProps = { readonly index: number }
 

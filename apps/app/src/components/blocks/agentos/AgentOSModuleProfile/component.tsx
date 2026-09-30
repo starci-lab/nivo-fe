@@ -4,14 +4,14 @@ import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
 /** Public API role for AgentOSModuleProfileProps. */
 export type AgentOSModuleProfileProps = AgentOSModuleProfileViewProps
 /** Resolved copy for the profile block. */
-export type AgentOSModuleProfileLabels = {
+type AgentOSModuleProfileLabels = {
     readonly title: string
     readonly progress: string
     readonly missing: string
     readonly refused: string
 }
 /** Profile projection, slot flags and copy the pure profile draws. */
-export type AgentOSModuleProfileData = {
+type AgentOSModuleProfileData = {
     readonly studio?: AgentosModuleStudio
     readonly loading: boolean
     readonly refused: boolean

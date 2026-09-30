@@ -3,7 +3,7 @@ import { SurfaceListCard } from "@starci/grammar/common"
 import { ROW_CLASS_NAME } from "./classNames"
 
 /** Inputs for the purchase and readiness lifecycle rail. */
-export type AgentOSProvisioningStepsProps = {
+type AgentOSProvisioningStepsProps = {
     readonly label: string
     readonly steps: ReadonlyArray<LifecycleStepData>
     readonly isLoading: boolean

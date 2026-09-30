@@ -5,14 +5,14 @@ import { SectionHeader, Text, TextAction } from "@starci/grammar/common"
 const BREADCRUMB_LIST_CLASS_NAME = cn("flex", "min-w-0", "flex-wrap", "items-center", "gap-2")
 
 /** One linked or current step in an AgentOS checkout breadcrumb. */
-export type CheckoutFlowBreadcrumb = {
+type CheckoutFlowBreadcrumb = {
     readonly label: string
     readonly href?: string
     readonly isCurrent?: boolean
 }
 
 /** Shared heading and breadcrumb content for the offer and checkout surfaces. */
-export type CheckoutFlowHeadProps = {
+type CheckoutFlowHeadProps = {
     readonly accessibilityLabel: string
     readonly breadcrumbs: ReadonlyArray<CheckoutFlowBreadcrumb>
     readonly title: string

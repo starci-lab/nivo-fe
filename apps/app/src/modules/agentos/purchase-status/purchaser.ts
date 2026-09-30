@@ -1,7 +1,7 @@
 import { isRecord } from "@nivo/api"
 
 /** The owner-identity claims the signed-in session's access token may carry. */
-export type PurchaserClaims = {
+type PurchaserClaims = {
     readonly name?: unknown
     readonly preferred_username?: unknown
     readonly email?: unknown
@@ -22,7 +22,7 @@ export const purchaserClaimsOf = (accessToken: string): PurchaserClaims => {
 }
 
 /** Accept a nonempty claim without changing its displayed value. */
-export const claimText = (value: unknown): string | null =>
+const claimText = (value: unknown): string | null =>
     typeof value === "string" && value.trim().length > 0 ? value : null
 
 /** Display name, then login handle, then contact. */

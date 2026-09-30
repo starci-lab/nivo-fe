@@ -8,7 +8,7 @@ import type { PurchasePhase } from "./phase"
 import type { PurchaseStatusLinks } from "./view-model"
 
 /** Locale-bound formatters the pure view derivation needs for observed timestamps and amounts. */
-export type PurchaseStatusFormatters = {
+type PurchaseStatusFormatters = {
     readonly timeOf: (iso: string) => string
     readonly stampOf: (iso: string) => string
     readonly dayOf: (iso: string) => string

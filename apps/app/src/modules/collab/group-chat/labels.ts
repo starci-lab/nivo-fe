@@ -3,7 +3,7 @@ import type enMessages from "@/messages/en.json"
 import type { GroupChatPageLabels } from "./types"
 
 /** The next-intl translator bound to `console.groupChat`; its keys are checked against the catalog. */
-export type GroupChatTranslator = ReturnType<typeof createTranslator<typeof enMessages, "console.groupChat">>
+type GroupChatTranslator = ReturnType<typeof createTranslator<typeof enMessages, "console.groupChat">>
 
 /**
  * Resolve every Office label from the group-chat catalog namespace.

@@ -29,7 +29,7 @@ export type TemplateAppProvisioningPageViewProps = TemplateAppProvisioningRouteP
 }
 
 /** Actions the connected page wires into the pure half. */
-export type TemplateAppProvisioningPageBaseOn = {
+type TemplateAppProvisioningPageBaseOn = {
     readonly openApps: () => void
 }
 

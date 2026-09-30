@@ -25,7 +25,7 @@ import {
 import { createShellObservationStore, runShellReads } from "./agentos.shared"
 
 /** The identity-level inputs the source reader consumes; none of them is transport detail. */
-export interface AgentOSShellSourceOptions {
+interface AgentOSShellSourceOptions {
     readonly workspaceId: string
     readonly instanceId: string
     /** Canonical sorted join of `installationIds`; the read set changes only when this does. */
@@ -39,7 +39,7 @@ export interface AgentOSShellSourceOptions {
 }
 
 /** The snapshot plus the two read intents a view may raise. */
-export interface AgentOSShellSources {
+interface AgentOSShellSources {
     readonly snapshot: ShellObservationSnapshot
     readonly readSelection: () => void
     readonly retrySource: (identity: ShellSourceIdentity) => void

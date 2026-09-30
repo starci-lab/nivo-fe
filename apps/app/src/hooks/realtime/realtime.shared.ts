@@ -94,7 +94,7 @@ export type ProvisioningRealtimeState =
  * replayed message cannot overwrite a newer observation; `unsequenced` is reserved for the order
  * wire, which carries no clock of its own and is therefore applied as it arrives.
  */
-export interface ProvisioningSink {
+interface ProvisioningSink {
     readonly ordered: (updatedAt: string, event: ProvisioningEvent, sequence?: number) => void
     readonly unsequenced: (event: ProvisioningEvent) => void
     readonly connected: () => void
@@ -102,7 +102,7 @@ export interface ProvisioningSink {
 }
 
 /** The exact kind and id a socket subscription attaches to. */
-export type ProvisioningSocketTarget = { readonly kind: ProvisioningTarget["kind"]; readonly id: string }
+type ProvisioningSocketTarget = { readonly kind: ProvisioningTarget["kind"]; readonly id: string }
 
 /**
  * Attach every provisioning message handler of one target to one socket.

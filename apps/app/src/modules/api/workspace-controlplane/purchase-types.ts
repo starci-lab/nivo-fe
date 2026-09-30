@@ -27,7 +27,7 @@ export type WorkspacePurchaseReceipt = {
 }
 
 /** The order-source fact of one purchase status read. */
-export type WorkspacePurchaseOrderFact =
+type WorkspacePurchaseOrderFact =
     | {
           readonly state: "observed"
           readonly status: CatalogOrderStatus
@@ -38,7 +38,7 @@ export type WorkspacePurchaseOrderFact =
     | { readonly state: "unavailable"; readonly code: string | null }
 
 /** The billing-source fact of one purchase status read. */
-export type WorkspacePurchasePaymentFact =
+type WorkspacePurchasePaymentFact =
     | { readonly state: "not-raised" }
     | {
           readonly state: "observed"
@@ -50,7 +50,7 @@ export type WorkspacePurchasePaymentFact =
     | { readonly state: "unavailable"; readonly code: string | null }
 
 /** The provisioning-source fact of one purchase status read. */
-export type WorkspacePurchaseProvisioningFact =
+type WorkspacePurchaseProvisioningFact =
     | { readonly state: "not-admitted" }
     | {
           readonly state: "observed"
@@ -78,7 +78,7 @@ export type WorkspacePurchaseStatus = {
 }
 
 /** The lifecycle states a provisioning saga's own enum can report. */
-export type WorkspaceProvisioningSagaStatus =
+type WorkspaceProvisioningSagaStatus =
     | "queued"
     | "running_forward"
     | "waiting_retry"
@@ -88,7 +88,7 @@ export type WorkspaceProvisioningSagaStatus =
     | "compensation_failed"
 
 /** The lifecycle states one durable saga step's own enum can report. */
-export type WorkspaceProvisioningSagaStepStatus =
+type WorkspaceProvisioningSagaStepStatus =
     "pending" | "running" | "completed" | "failed" | "compensating" | "compensated" | "compensation_failed" | "skipped"
 
 /** The durable record of one purchase-bound provisioning order, as `myProvisioningSaga` reports it. */

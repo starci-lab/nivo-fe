@@ -7,7 +7,7 @@
  */
 
 /** Which browser storage area a key lives in. */
-export type StorageArea = "local" | "session"
+type StorageArea = "local" | "session"
 
 /** Local key: whether the console navigation is collapsed. */
 export const NAVIGATION_COLLAPSED_KEY = "nivo-console-navigation-collapsed"

@@ -3,7 +3,7 @@ import type { AgentosModuleInstallation, AgentosSolutionModule } from "../api/ag
 import type { NivoQueryReading } from "../query"
 
 /** The badge tone a solution module card or ledger row is drawn in. */
-export type AgentOSSolutionTone = "neutral" | "success" | "warning" | "danger"
+type AgentOSSolutionTone = "neutral" | "success" | "warning" | "danger"
 
 /** One resolved catalog or installation card visible in the module center. */
 export type AgentOSSolutionModuleCard = {
@@ -112,7 +112,7 @@ export type AgentOSSolutionModuleCenterRouteProps = {
 }
 
 /** Tone for a known installation lifecycle; unknown states stay neutral. */
-export const solutionToneOf = (status: string): AgentOSSolutionTone => {
+const solutionToneOf = (status: string): AgentOSSolutionTone => {
     if (status === "ready") return "success"
     if (status === "failed") return "danger"
     if (status === "provisioning" || status === "degraded") return "warning"

@@ -74,14 +74,6 @@ export const collabRequest = async <T>(
     }
 }
 
-/** One named field of an ok result record, or a thrown malformed marker. */
-export const readResultField = (result: Record<string, unknown>, field: string): Record<string, unknown> => {
-    const value = result[field]
-    if (!isRecord(value)) {
-        throw new Error(`${field} result missing`)
-    }
-    return value
-}
 
 /** The `membership` result record of a member command, or null when malformed. */
 export const readMembershipResult = (result: Record<string, unknown>): CollabMembershipResult | null =>

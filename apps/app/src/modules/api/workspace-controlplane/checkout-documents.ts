@@ -1,11 +1,11 @@
 /** Field selection reused for the current checkout offers. */
-export const WORKSPACE_CHECKOUT_OFFER_FIELDS = `offerId offerVersion displayName includedOutcome amount currency billingCadence renewalMode eligibility`
+const WORKSPACE_CHECKOUT_OFFER_FIELDS = `offerId offerVersion displayName includedOutcome amount currency billingCadence renewalMode eligibility`
 
 /** Source-qualified facet selection reused by every facet that carries no extra field. */
-export const WORKSPACE_CHECKOUT_SOURCE_FIELDS = `source state reference observedAt`
+const WORKSPACE_CHECKOUT_SOURCE_FIELDS = `source state reference observedAt`
 
 /** Composed purchase view selection, including the facets only purchase-status composes. */
-export const WORKSPACE_CHECKOUT_STATUS_FIELDS = `
+const WORKSPACE_CHECKOUT_STATUS_FIELDS = `
   purchaseId
   state
   offer { ${WORKSPACE_CHECKOUT_OFFER_FIELDS} }

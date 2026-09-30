@@ -16,7 +16,7 @@ import {
 } from "./classNames"
 
 /** Props for {@link CheckoutReviewPaymentRail}. */
-export type CheckoutReviewPaymentRailProps = {
+type CheckoutReviewPaymentRailProps = {
     readonly props: CheckoutReviewDecisionProps
     readonly state: "review" | "not-started"
     readonly on: CheckoutReviewFlowActions

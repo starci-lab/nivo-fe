@@ -4,13 +4,13 @@ import { AcademyControlCenter, type AcademyControlCenterProps } from "@/componen
 export type AcademyControlCenterMode = AcademyControlCenterProps["mode"]
 
 /** Resolved identity and tab the pure page draws. */
-export type AcademyControlCenterPageBaseData = {
+type AcademyControlCenterPageBaseData = {
     readonly siteId: string
     readonly mode: AcademyControlCenterMode
 }
 
 /** Actions the connected page wires into the pure half. */
-export type AcademyControlCenterPageBaseOn = {
+type AcademyControlCenterPageBaseOn = {
     readonly selectMode: (mode: AcademyControlCenterMode) => void
 }
 

@@ -22,7 +22,7 @@ export type FleetStatus =
     "not_provisioned" | "provisioning" | "awaiting_dns" | "ready" | "failed" | "active" | "suspended"
 
 /** Which kind of thing the row is. Two kinds, one row shape. */
-export type FleetKind = "site" | "workspace"
+type FleetKind = "site" | "workspace"
 
 /**
  * Status to tone. Written out rather than derived, because the interesting cases are exactly the
@@ -51,7 +51,7 @@ export const fleetResourceHref = (kind: FleetKind, id: string): string =>
     kind === "workspace" ? `/agentos/workspaces/${encodeURIComponent(id)}` : `/apps/${encodeURIComponent(id)}`
 
 /** Resolved identity, kind, state and the one action this row currently permits. */
-export type FleetRowData = {
+type FleetRowData = {
     readonly id: string
     readonly name?: string
     readonly detail?: string
@@ -68,13 +68,13 @@ export type FleetRowData = {
 }
 
 /** Product journeys reported by one fleet row. */
-export type FleetRowActions = {
+type FleetRowActions = {
     readonly open?: () => void
     readonly act?: () => void
 }
 
 /** Props for the closed fleet-row composition. */
-export type FleetRowProps = {
+type FleetRowProps = {
     readonly props: FleetRowData
     readonly on?: FleetRowActions
     readonly isLoading?: boolean

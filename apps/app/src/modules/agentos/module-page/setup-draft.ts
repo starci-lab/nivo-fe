@@ -52,7 +52,7 @@ type SetupRequirement = NonNullable<AgentosRuntimeManifest["setup"]>["requiremen
 type SetupGenerations = { readonly authority: number; readonly source: number; readonly retrieval: number }
 
 /** The gates one setup session reports: required keys first, legacy fields or evidence keys after. */
-export const setupGatesFor = (
+const setupGatesFor = (
     session: AgentosModuleRuntime["setupSession"],
     requirements: ReadonlyArray<SetupRequirement>,
     legacyFields: ReadonlyArray<string>,

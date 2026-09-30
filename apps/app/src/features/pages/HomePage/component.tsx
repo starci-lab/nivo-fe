@@ -3,12 +3,12 @@ import { NivoIcon } from "@nivo/ui"
 import { CONTENT_CLASS_NAME, ROOT_CLASS_NAME } from "./classNames"
 
 /** The settled copy the home page draws. */
-export type HomePageBaseData = {
+type HomePageBaseData = {
     readonly description: string
 }
 
 /** Complete input of {@link HomePageBase}: resolved atoms only, no world reads cross in. */
-export type HomePageBaseProps = {
+type HomePageBaseProps = {
     readonly props: HomePageBaseData
 }
 

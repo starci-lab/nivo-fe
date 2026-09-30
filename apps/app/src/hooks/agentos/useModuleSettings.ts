@@ -20,7 +20,7 @@ type ModuleSettingsValues = {
 }
 
 /** The runtime, view and shared commands the settings form connects. */
-export interface ModuleSettingsInput {
+interface ModuleSettingsInput {
     readonly workspaceId: string
     readonly installationId: string
     readonly runtime: AgentosModuleRuntime | null

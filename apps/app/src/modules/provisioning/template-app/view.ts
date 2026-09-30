@@ -2,7 +2,7 @@ import type { TemplateFlow } from "./index"
 
 type CopyCatalog = (key: string) => string
 /** One resolved lifecycle milestone in the Template App progress rail. */
-export type TemplateStepView = {
+type TemplateStepView = {
     readonly ordinal: string
     readonly label: string
     readonly state: "done" | "current" | "upcoming"
@@ -32,7 +32,7 @@ export type TemplateAppProvisioningViewProps = {
 }
 
 /** Data required to resolve one localized Template App phase into the block view. */
-export type TemplateAppProvisioningViewInput = {
+type TemplateAppProvisioningViewInput = {
     readonly flow: TemplateFlow
     readonly steps: ReadonlyArray<TemplateStepView>
     readonly t: CopyCatalog

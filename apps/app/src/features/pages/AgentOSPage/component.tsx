@@ -30,16 +30,16 @@ export type AgentOSPageLabels = {
     readonly orderEyebrow?: string
 }
 /** Resolved atoms the page draws; connected blocks keep their own request states. */
-export type AgentOSPageBaseData = {
+type AgentOSPageBaseData = {
     readonly labels: AgentOSPageLabels
 }
 /** Route commands the connected half binds to locale-aware navigation. */
-export type AgentOSPageBaseCommands = {
+type AgentOSPageBaseCommands = {
     readonly openDashboard: () => void
     readonly create: () => void
 }
 /** The page's approved drawing: route identity, resolved copy and bound commands. */
-export type AgentOSPageBaseProps = {
+type AgentOSPageBaseProps = {
     readonly state: AgentOSPageBaseState
     readonly props: AgentOSPageBaseData
     readonly on: AgentOSPageBaseCommands

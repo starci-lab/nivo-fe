@@ -2,7 +2,7 @@ import { Text } from "@starci/grammar/common"
 import type { WalletFactRow as WalletFactRowData } from "@/modules/wallet/wallet-center/types"
 
 /** Props for one wallet fact and its optional loading state. */
-export type WalletFactProps = {
+type WalletFactProps = {
     readonly row: WalletFactRowData
     readonly isLoading?: boolean
 }

@@ -31,7 +31,7 @@ export type InstallationScope = {
 const MAXIMUM_REQUEST_ID_LENGTH = 512
 
 /** The closed error names the route answers by. UNAUTHENTICATED arrives as a status, never a body. */
-export type RouteErrorName =
+type RouteErrorName =
     | "BAD_REQUEST"
     | "REFUSED"
     | "UNSUPPORTED_OPERATION_VERSION"
@@ -55,7 +55,7 @@ export const isRouteErrorName = (value: unknown): value is RouteErrorName =>
     typeof value === "string" && ROUTE_ERROR_NAMES.has(value)
 
 /** What this browser half adds: conditions the route never gets to name. */
-export type RouteTransportCode =
+type RouteTransportCode =
     | "UNAUTHENTICATED"
     | "UNREACHABLE"
     | "MALFORMED_ANSWER"
@@ -117,7 +117,7 @@ export const operationAddress = (scope: InstallationScope, operation: string): s
     ).toString()
 
 /** What one operation request settled as: the reply body, or the transport condition that stopped it. */
-export type RouteExchange =
+type RouteExchange =
     | { readonly arrived: true; readonly body: unknown }
     | {
           readonly arrived: false

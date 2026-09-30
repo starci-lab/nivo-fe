@@ -73,7 +73,7 @@ export type OfferSelectionOffer = {
 }
 
 /** Destinations the connected owner resolved for navigation actions. */
-export type OfferSelectionLinks = {
+type OfferSelectionLinks = {
     readonly workspaces: string
 }
 

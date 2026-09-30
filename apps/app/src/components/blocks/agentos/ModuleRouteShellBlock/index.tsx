@@ -61,7 +61,7 @@ import { isAgentOSModuleView } from "./module-route-shell-block.guards"
 export type AgentOSModuleView = "setup" | "test" | "operate" | "settings" | "diagnostics"
 
 /** Copy and runtime identity shared by every route in one installed module. */
-export type ModuleRouteShellData = {
+type ModuleRouteShellData = {
     readonly workspaceLabel: string
     readonly moduleName: string
     readonly moduleKind: string
@@ -73,7 +73,7 @@ export type ModuleRouteShellData = {
 }
 
 /** Stable component-type lane used to replace the shell body without accepting prebuilt JSX. */
-export type ModuleRouteShellBlockProps<P extends object> = ModuleRouteShellData & {
+type ModuleRouteShellBlockProps<P extends object> = ModuleRouteShellData & {
     readonly copy: ModuleRouteShellBlockCopy
     readonly content: ComponentType<P>
     readonly contentProps: P

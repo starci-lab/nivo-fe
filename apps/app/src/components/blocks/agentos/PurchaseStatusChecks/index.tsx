@@ -22,7 +22,7 @@ import {
 import { PurchaseStatusLoadingPreview } from "./loading"
 
 /** Complete resolved purchase-status view contract consumed by the evidence-card block. */
-export type PurchaseStatusChecksProps = PurchaseStatusFlowViewProps
+type PurchaseStatusChecksProps = PurchaseStatusFlowViewProps
 
 const factCell = (fact: PurchaseStatusFact) => (
     <div key={fact.label} className={FACT_CELL_CLASS_NAME}>

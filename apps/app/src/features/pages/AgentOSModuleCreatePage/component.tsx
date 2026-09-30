@@ -3,7 +3,7 @@ import { Breadcrumbs, TileIcon } from "@nivo/ui"
 import { AgentOSModuleIntake } from "@/components/blocks/agentos/AgentOSModuleIntake"
 
 /** Resolved copy and identifiers the intake-composition screen draws. */
-export type AgentOSModuleCreatePageBaseData = {
+type AgentOSModuleCreatePageBaseData = {
     readonly workspaceId: string
     readonly labels: {
         readonly path: string
@@ -15,12 +15,12 @@ export type AgentOSModuleCreatePageBaseData = {
 }
 
 /** Actions the connected index wires into the page. */
-export type AgentOSModuleCreatePageBaseActions = {
+type AgentOSModuleCreatePageBaseActions = {
     readonly back: () => void
 }
 
 /** Props for {@link AgentOSModuleCreatePageBase}: atoms under `props`, actions under `on`. */
-export type AgentOSModuleCreatePageBaseProps = {
+type AgentOSModuleCreatePageBaseProps = {
     readonly props: AgentOSModuleCreatePageBaseData
     readonly on: AgentOSModuleCreatePageBaseActions
 }

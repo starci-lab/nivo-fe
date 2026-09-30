@@ -7,9 +7,9 @@ import { AgentOSPageBase } from "./component"
 import type { AgentOSPageBaseState, AgentOSPageLabels } from "./component"
 
 /** Route identity for the dashboard, pre-persistence create flow, or persisted order. */
-export type AgentOSPageRouteProps = AgentOSPageBaseState
+type AgentOSPageRouteProps = AgentOSPageBaseState
 /** Connected page input; resolved copy and commands are page-owned. */
-export type AgentOSPageProps = AgentOSPageRouteProps & {
+type AgentOSPageProps = AgentOSPageRouteProps & {
     readonly labels?: AgentOSPageLabels
     readonly onOpenDashboard?: () => void
     readonly onCreate?: () => void

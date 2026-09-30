@@ -107,7 +107,7 @@ export type Session = {
 export const SessionContext = createContext<Session | null>(null)
 
 /** Props for {@link SessionProvider}. */
-export type SessionProviderProps = {
+type SessionProviderProps = {
     /** Everything that may read the session. */
     readonly children: ComponentProps<"div">["children"]
 }

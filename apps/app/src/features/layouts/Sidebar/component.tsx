@@ -10,7 +10,7 @@ import type { SidebarMode } from "./index"
  * `on.collapsedChange` the two commands back into that world. This twin owns only the
  * rail-or-drawer projection.
  */
-export type SidebarBaseData = {
+type SidebarBaseData = {
     readonly groups: ReadonlyArray<SidebarGroup>
     readonly selectedKey: string
     readonly isCollapsed: boolean
@@ -21,13 +21,13 @@ export type SidebarBaseData = {
 }
 
 /** The registry's two commands: activate a destination, or persist the rail's collapse. */
-export type SidebarBaseActions = {
+type SidebarBaseActions = {
     readonly action: (id: string) => boolean
     readonly collapsedChange: (collapsed: boolean) => void
 }
 
 /** Public API role for SidebarBaseProps. */
-export type SidebarBaseProps = {
+type SidebarBaseProps = {
     readonly state: SidebarMode
     readonly props: SidebarBaseData
     readonly on: SidebarBaseActions

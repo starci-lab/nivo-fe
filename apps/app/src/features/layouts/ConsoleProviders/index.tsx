@@ -16,7 +16,7 @@ export type ConsoleProvidersData = {
 }
 
 /** Props for {@link ConsoleProviders}: resolved data and the routed stream. */
-export type ConsoleProvidersProps = {
+type ConsoleProvidersProps = {
     readonly props: ConsoleProvidersData
     readonly children: ReactNode
 }

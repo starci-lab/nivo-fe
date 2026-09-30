@@ -145,7 +145,7 @@ const commandIdFor = (
  * for the read pipeline: a request's generation is fixed before anything can be applied back to
  * it.
  */
-export interface ShellObservationStore {
+interface ShellObservationStore {
     readonly getSnapshot: () => ShellObservationSnapshot
     readonly subscribe: (listener: () => void) => () => void
     readonly dispatch: (build: (current: ShellObservationSnapshot) => ReadonlyArray<ShellObservationEvent>) => void
@@ -181,7 +181,7 @@ export const createShellObservationStore = (selection: ShellSelection): ShellObs
 }
 
 /** Everything the read pipeline needs that a caller or the store owns. */
-export interface ShellReadEnvironment {
+interface ShellReadEnvironment {
     readonly accessToken: string
     readonly workspaceId: string
     readonly instanceId: string
@@ -296,7 +296,7 @@ export const sha256 = async (value: string): Promise<string> =>
         .join("")
 
 /** The Telegram bot account id a bot token encodes, or null when the token is not shaped like one. */
-export const telegramAccountIdFromToken = (token: string): string | null => {
+const telegramAccountIdFromToken = (token: string): string | null => {
     const separator = token.indexOf(":")
     const accountId = separator > 0 ? token.slice(0, separator) : ""
     return /^\d{5,20}$/u.test(accountId) ? accountId : null
@@ -333,7 +333,7 @@ export const confirmationEvidence = async (
 }
 
 /** The command surface a module credential save needs from its owning page. */
-export interface ModuleCredentialEnvironment {
+interface ModuleCredentialEnvironment {
     readonly workspaceId: string
     readonly installationId: string
     readonly displayName: string

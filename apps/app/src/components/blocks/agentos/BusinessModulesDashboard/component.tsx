@@ -32,7 +32,7 @@ export const BusinessModulesDashboardModuleCenter = (props: BusinessModulesDashb
 )
 
 /** Closed presentation states; ambiguity never falls through to an arbitrary workspace. */
-export type BusinessModulesDashboardBaseProps =
+type BusinessModulesDashboardBaseProps =
     | {
           readonly state: "resting"
           readonly labels: BusinessModulesDashboardLabels

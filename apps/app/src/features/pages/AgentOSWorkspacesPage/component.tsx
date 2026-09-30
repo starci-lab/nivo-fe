@@ -5,7 +5,7 @@ import { AgentOSWorkspaceList } from "@/components/blocks/agentos/AgentOSWorkspa
 const SECTIONS_CLASS_NAME = "flex min-w-0 flex-col gap-6"
 
 /** Every sentence and destination the workspaces page renders, resolved by its connected index. */
-export type AgentOSWorkspacesPageBaseData = {
+type AgentOSWorkspacesPageBaseData = {
     readonly title: string
     readonly description: string
     readonly createLabel: string
@@ -13,7 +13,7 @@ export type AgentOSWorkspacesPageBaseData = {
 }
 
 /** Props for {@link AgentOSWorkspacesPageBase}: resolved data only, no actions cross in. */
-export type AgentOSWorkspacesPageBaseProps = {
+type AgentOSWorkspacesPageBaseProps = {
     readonly props: AgentOSWorkspacesPageBaseData
 }
 

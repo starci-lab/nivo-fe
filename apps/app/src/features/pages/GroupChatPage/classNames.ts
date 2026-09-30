@@ -11,7 +11,7 @@ export const GROUP_CHAT_PAGE_CLASS_NAME = cn("flex", "min-w-0", "flex-col")
  * conversation scroll, the pinned composer and the docked member sheet inside
  * the viewport instead of the document's flow.
  */
-export const GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME = cn(
+const GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME = cn(
     "flex",
     "h-[calc(100dvh-13.5rem)]",
     "min-h-0",
@@ -138,7 +138,7 @@ export const GROUP_CHAT_WORKSPACE_WRAP_CLASS_NAME = cn(
 )
 
 /** The persistent member rail: a fixed-width column beside the workbench card. */
-export const GROUP_CHAT_RAIL_ASIDE_CLASS_NAME = cn(
+const GROUP_CHAT_RAIL_ASIDE_CLASS_NAME = cn(
     "hidden",
     "w-80",
     "flex-none",

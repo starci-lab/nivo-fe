@@ -4,7 +4,7 @@ import { QueryNoticeView, type QueryNoticeViewActions, type QueryNoticeViewData 
 export type QueryNoticeActions = QueryNoticeViewActions
 
 /** Props for {@link QueryNoticeBase}. */
-export type QueryNoticeBaseProps = {
+type QueryNoticeBaseProps = {
     readonly props: QueryNoticeViewData
     readonly on?: QueryNoticeActions
 }

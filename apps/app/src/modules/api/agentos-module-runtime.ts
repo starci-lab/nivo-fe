@@ -270,7 +270,7 @@ export type AgentosRuntimeWidget = {
 }
 
 /** Closed commands accepted by the shared Module Studio mutation. */
-export type AgentosModuleRuntimeAction =
+type AgentosModuleRuntimeAction =
     | "START_SETUP_REVISION"
     | "APPEND_SETUP_MESSAGE"
     | "UPDATE_SETUP_DRAFT"

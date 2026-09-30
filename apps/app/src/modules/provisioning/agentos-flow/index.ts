@@ -74,7 +74,7 @@ export type AgentOSOfferIdentity = { readonly offerId: string; readonly offerVer
 export type AgentOSContext = { readonly mode: "new" } | { readonly mode: "resume"; readonly orderId: string }
 
 /** The only realtime resource kinds this flow subscribes to. */
-export type AgentOSRealtimeTarget =
+type AgentOSRealtimeTarget =
     | { readonly kind: "order"; readonly id: string }
     | { readonly kind: "workspace"; readonly id: string }
 
@@ -212,7 +212,7 @@ export const readinessMilestoneState = (index: number, current: number): "done" 
     current === -1 ? (index < 4 ? "done" : "current") : stepState(index, current)
 
 /** Inputs for deriving the visible AgentOS phase from the current owner-scoped answers. */
-export type AgentOSFlowFromAnswersInput = {
+type AgentOSFlowFromAnswersInput = {
     readonly context: AgentOSContext
     readonly offerIdentity: AgentOSOfferIdentity
     readonly offersAnswer: Outcome<WorkspaceCheckoutAnswer> | undefined

@@ -13,7 +13,7 @@ import {
 type SetupAction = { readonly kind: "send" | "apply" | "confirm"; readonly sessionId: string } | { readonly kind: "start" }
 type SetupFeedback = { readonly refused?: "send" | "apply"; readonly unconfirmed?: boolean }
 /** The runtime state and shared commands the setup session state machine connects. */
-export interface ModuleSetupSessionInput {
+interface ModuleSetupSessionInput {
     readonly installationId: string
     readonly runtime: AgentosModuleRuntime | null
     readonly controls: ModuleRuntimeControls

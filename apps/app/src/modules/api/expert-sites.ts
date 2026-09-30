@@ -17,10 +17,10 @@ import {
 } from "./expert-sites.guards"
 
 /** How far a provisioned expert site has got. A real enum with exactly five members. */
-export type ExpertProvisionStatus = "not_provisioned" | "provisioning" | "awaiting_dns" | "ready" | "failed"
+type ExpertProvisionStatus = "not_provisioned" | "provisioning" | "awaiting_dns" | "ready" | "failed"
 
 /** Which lifecycle state an expert site is published in. */
-export type ExpertSiteStatus = "draft" | "live" | "suspended"
+type ExpertSiteStatus = "draft" | "live" | "suspended"
 
 /** One app this account owns, as `myExpertSites` puts it on the wire. */
 export type ExpertSiteRow = {

@@ -46,7 +46,7 @@ const useCollabRevalidate = (workspaceId: string | null, domains: ReadonlyArray<
 }
 
 /** One Office message to post; `intentId` is the caller-owned stable resend identity. */
-export type CollabPostMessageInput = {
+type CollabPostMessageInput = {
     readonly intentId: string
     readonly body: string
     readonly moduleName?: string
@@ -54,7 +54,7 @@ export type CollabPostMessageInput = {
 }
 
 /** One button press on one exact waiting approval card. */
-export type CollabPressApprovalInput = {
+type CollabPressApprovalInput = {
     readonly approvalId: string
     readonly button: CollabApprovalDecision
 }
@@ -64,22 +64,22 @@ export type CollabPressApprovalInput = {
  * `contract.collab.member-invite` rev 4). The email names the invitee only; no phone
  * exists in this layer and the actor's identity never rides the input.
  */
-export type CollabInviteByEmailInput = {
+type CollabInviteByEmailInput = {
     readonly email: string
     readonly role: CollabHumanRole
 }
 
 /** One invitation consumed by the invited person. */
-export type CollabAcceptInvitationInput = {
+type CollabAcceptInvitationInput = {
     readonly invitationId: string
     readonly displayName?: string
 }
 
 /** One pending invitation to close. */
-export type CollabWithdrawInvitationInput = { readonly invitationId: string }
+type CollabWithdrawInvitationInput = { readonly invitationId: string }
 
 /** One member's replacement role. */
-export type CollabChangeMemberRoleInput = {
+type CollabChangeMemberRoleInput = {
     readonly memberId: string
     readonly role: CollabHumanRole
 }

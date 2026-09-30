@@ -3,7 +3,7 @@ import { RouteTabs } from "@nivo/ui"
 import { Heading, Text } from "@starci/grammar/common"
 
 /** Every sentence and selection the workspace chrome renders, resolved by its connected index. */
-export type AgentOSWorkspaceChromeBaseData = {
+type AgentOSWorkspaceChromeBaseData = {
     readonly eyebrow: string
     readonly name: string
     readonly reference: string
@@ -14,7 +14,7 @@ export type AgentOSWorkspaceChromeBaseData = {
 }
 
 /** The one action the chrome raises; the connected index binds it to the router. */
-export type AgentOSWorkspaceChromeBaseActions = {
+type AgentOSWorkspaceChromeBaseActions = {
     readonly select: (key: string) => void
 }
 

@@ -4,13 +4,13 @@ import { createContext, type ReactNode } from "react"
 import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
 
 /** One page-owned studio read shared by sibling connected blocks. */
-export type AgentOSModuleStudioProjection = {
+type AgentOSModuleStudioProjection = {
     readonly studio: AgentosModuleStudio | undefined
     readonly refresh: () => Promise<void>
 }
 
 /** Values and content owned by the studio projection boundary. */
-export type AgentOSModuleStudioProjectionProviderProps = {
+type AgentOSModuleStudioProjectionProviderProps = {
     readonly value: AgentOSModuleStudioProjection
     readonly children: ReactNode
 }

@@ -5,12 +5,12 @@ import { AgentOSModuleInterview } from "@/components/blocks/agentos/AgentOSModul
 import { AgentOSModuleProfile } from "@/components/blocks/agentos/AgentOSModuleProfile"
 import { AgentOSModuleSpecification } from "@/components/blocks/agentos/AgentOSModuleSpecification"
 /** Public API role for AgentOSModuleStudioPageBaseProps. */
-export type AgentOSModuleStudioPageBaseProps = {
+type AgentOSModuleStudioPageBaseProps = {
     readonly props: AgentOSModuleStudioPageViewProps
     readonly on: AgentOSModuleStudioPageActions
 }
 /** Navigation commands the connected Studio page exposes to its pure drawing half. */
-export type AgentOSModuleStudioPageActions = { readonly back: () => void }
+type AgentOSModuleStudioPageActions = { readonly back: () => void }
 type AgentOSModuleStudioPageViewProps = {
     readonly workspaceId: string
     readonly moduleId: string

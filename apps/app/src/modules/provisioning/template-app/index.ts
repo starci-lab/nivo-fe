@@ -56,7 +56,7 @@ export const settleDeployment = (
 }
 
 /** One owner event that may advance the exact deployment already shown by the flow. */
-export type TemplateDeploymentEvent = {
+type TemplateDeploymentEvent = {
     readonly id: string
     readonly status: string
     readonly reason: string | null
@@ -75,7 +75,7 @@ export const templateFlowWithDeploymentEvent = (
 }
 
 /** Inputs for deriving the Template App phase from catalog, mutation, and deployment answers. */
-export type TemplateFlowFromAnswersInput = {
+type TemplateFlowFromAnswersInput = {
     readonly templateKey: string | null
     readonly resumeSiteId: string | null
     readonly catalog: Outcome<ReadonlyArray<CatalogItemRow>> | undefined

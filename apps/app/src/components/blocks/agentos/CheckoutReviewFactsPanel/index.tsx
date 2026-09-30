@@ -3,7 +3,7 @@ import type { CheckoutReviewCopy, CheckoutReviewFacts } from "../../../../module
 import { FACT_ROW_CLASS_NAME, FACT_VALUE_CLASS_NAME } from "./classNames"
 
 /** Props for {@link CheckoutReviewFactsPanel}. */
-export type CheckoutReviewFactsPanelProps = {
+type CheckoutReviewFactsPanelProps = {
     readonly copy: CheckoutReviewCopy
     readonly facts?: CheckoutReviewFacts | null
     readonly admission?: string | null

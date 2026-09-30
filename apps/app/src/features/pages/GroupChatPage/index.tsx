@@ -20,7 +20,7 @@ import {
 } from "./component"
 
 /** This page resolves its workspace from the session, the route query, or an invitation link. */
-export type GroupChatPageProps = Record<string, never>
+type GroupChatPageProps = Record<string, never>
 
 /**
  * Connect the Office/Tasks surface to the session, the workspace-scoped Collab

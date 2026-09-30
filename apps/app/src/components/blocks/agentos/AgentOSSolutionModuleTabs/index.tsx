@@ -7,7 +7,7 @@ import type {
 import { SOLUTION_TABS_CARD_LIST_CLASS_NAME } from "./classNames"
 
 /** Settled tab view plus the two controls owned by its connected parent. */
-export type AgentOSSolutionModuleTabsProps = {
+type AgentOSSolutionModuleTabsProps = {
     readonly view: AgentOSSolutionModuleCenterViewProps
     readonly on: AgentOSSolutionModuleCenterProps["on"]
 }

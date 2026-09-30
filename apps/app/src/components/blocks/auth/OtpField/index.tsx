@@ -3,7 +3,7 @@ import { RefusalGlyph } from "../RefusalGlyph"
 import { AUTH_PANEL_OTP_FIELD_CLASS_NAME } from "./classNames"
 
 /** What the labelled six-slot code field needs. */
-export type OtpFieldProps = {
+type OtpFieldProps = {
     readonly id: string
     readonly label: string
     readonly statusId: string

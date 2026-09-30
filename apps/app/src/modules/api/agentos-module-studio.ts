@@ -15,7 +15,7 @@ import { parseModuleStudio, parseModuleUploadCapability } from "./agentos-module
 const UPLOAD_TIMEOUT_MS = 120_000
 
 /** Backend-owned lifecycle for one workspace custom module. */
-export type AgentosCustomModuleStatus = "draft" | "ready_for_review" | "publishing" | "active" | "publish_failed"
+type AgentosCustomModuleStatus = "draft" | "ready_for_review" | "publishing" | "active" | "publish_failed"
 
 /** One workspace-owned custom module summary returned to the collection. */
 export type AgentosCustomModule = {
@@ -132,7 +132,7 @@ type AnswerAgentosCustomModuleIntakeInput = {
 }
 
 /** File metadata required before Core issues one short-lived upload capability. */
-export type PrepareAgentosModuleAttachmentUploadInput = {
+type PrepareAgentosModuleAttachmentUploadInput = {
     readonly agentWorkspaceId: string
     readonly moduleId: string
     readonly fileName: string
@@ -141,7 +141,7 @@ export type PrepareAgentosModuleAttachmentUploadInput = {
 }
 
 /** Stable attachment identity used by ingestion retry and removal commands. */
-export type AgentosModuleAttachmentIdentityInput = {
+type AgentosModuleAttachmentIdentityInput = {
     readonly agentWorkspaceId: string
     readonly moduleId: string
     readonly attachmentId: string

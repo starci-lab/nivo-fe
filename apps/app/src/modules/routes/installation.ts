@@ -1,5 +1,5 @@
 /** Dynamic route values supplied to every installed-module page. */
-export type InstallationRoute = {
+type InstallationRoute = {
     readonly workspaceId: string
     readonly installationId: string
 }

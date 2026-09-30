@@ -83,7 +83,7 @@ export type AppsDashboardCopy = {
 }
 
 /** Cheapest rung that actually publishes a monthly price. */
-export const cheapestTier = (item: CatalogItemRow) => {
+const cheapestTier = (item: CatalogItemRow) => {
     let cheapest: { readonly name: string; readonly priceMonthlyVnd: number } | undefined
     for (const tier of item.tiers ?? []) {
         const price = tier.priceMonthlyVnd
@@ -104,7 +104,7 @@ const wireStatuses: Readonly<Record<string, FleetStatus | undefined>> = {
     suspended: "suspended",
 }
 /** Preserve a recognized fleet state, with an unknown state kept neutral. */
-export const fleetStatusOf = (wire: string): FleetStatus => wireStatuses[wire] ?? "not_provisioned"
+const fleetStatusOf = (wire: string): FleetStatus => wireStatuses[wire] ?? "not_provisioned"
 
 /** Derive the owned section from the three answered sources it joins. */
 export const ownedSectionFor = (

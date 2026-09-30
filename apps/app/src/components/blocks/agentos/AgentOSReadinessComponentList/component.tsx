@@ -17,7 +17,7 @@ export type AgentOSReadinessComponentListProps = {
     }
 }
 /** Public API role for AgentOSReadinessComponentListLabels. */
-export type AgentOSReadinessComponentListLabels = {
+type AgentOSReadinessComponentListLabels = {
     readonly title: string
     readonly evidence: string
 }

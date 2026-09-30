@@ -43,7 +43,7 @@ import { Badge, Button, Heading, SurfaceCard, Text } from "@starci/grammar/commo
 import { CONTEXT_BAND_CLASS_NAME, CONTEXT_GATE_ROW_CLASS_NAME, CONTEXT_RAISED_BAND_CLASS_NAME } from "./classNames"
 
 /** One readiness requirement and its measured evidence for the selected revision. */
-export type SetupGate = {
+type SetupGate = {
     readonly key: string
     readonly label: string
     readonly passed: boolean
@@ -70,7 +70,7 @@ export type ContextDraft = {
     readonly isActive: boolean
 }
 /** Facts and action state supplied by the selected revision owner. */
-export type ContextVersionContentProps = {
+type ContextVersionContentProps = {
     readonly copy: ContextVersionBlockCopy
     readonly activeVersion: number | null
     readonly draft: ContextDraft | null
@@ -83,7 +83,7 @@ export type ContextVersionContentProps = {
     readonly onConfirmRequirement: (gate: SetupGate) => void
 }
 /** Public review contract for activating one tested context version. */
-export type ContextVersionBlockProps = ContextVersionContentProps
+type ContextVersionBlockProps = ContextVersionContentProps
 
 /** Render facts, confirmations, immutable-version creation and exact Apply readiness. */
 export const ContextVersionBlock = (props: ContextVersionBlockProps) => {

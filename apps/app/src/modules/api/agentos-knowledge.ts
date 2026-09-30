@@ -45,7 +45,7 @@ export type AgentosAiOperationReceipt = {
 }
 
 /** Input shared by bounded workspace AI readiness and knowledge recovery operations. */
-export type AgentosAiOperationInput = {
+type AgentosAiOperationInput = {
     readonly workspaceId: string
     readonly idempotencyKey: string
 }

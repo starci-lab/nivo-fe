@@ -3,7 +3,7 @@ import type { ExecuteChatBlockCopy } from "../../../../modules/agentos/execute-c
 import { EXECUTE_CHAT_COMPOSER_CLASS_NAME } from "./classNames"
 
 /** Props for {@link ExecuteChatComposer}. */
-export type ExecuteChatComposerProps = {
+type ExecuteChatComposerProps = {
     readonly copy: ExecuteChatBlockCopy
     readonly draft: string
     readonly composerKey: number

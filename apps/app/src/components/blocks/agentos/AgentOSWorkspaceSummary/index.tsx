@@ -2,7 +2,7 @@ import { CONTENT_CLASS_NAME } from "./classNames"
 import type { AgentWorkspaceControlCenter } from "@/modules/api/agentos-workspaces"
 import { SurfaceCard, Text } from "@starci/grammar/common"
 /** Stable workspace identity and labels consumed by the summary block. */
-export type AgentOSWorkspaceSummaryProps = {
+type AgentOSWorkspaceSummaryProps = {
     readonly data: AgentWorkspaceControlCenter
     readonly labels: {
         readonly section: string

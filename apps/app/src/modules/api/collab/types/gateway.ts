@@ -4,7 +4,7 @@ import type { CollabOperation } from './operation'
 export type CollabFailureKind = "unauthenticated" | "denied" | "invalid" | "conflict" | "unavailable" | "unknown"
 
 /** One typed refusal inside the boundary; `retryable` separates transient from final. */
-export type CollabFailure = {
+type CollabFailure = {
     /** The operation that failed, when one resolved before the failure. */
     readonly op: CollabOperation | null
     readonly kind: CollabFailureKind

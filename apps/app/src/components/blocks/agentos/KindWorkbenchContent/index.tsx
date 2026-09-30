@@ -6,7 +6,7 @@ import type { Formatter } from "../../../../modules/i18n/formatter"
 import { KindWorkbenchContentBase, type KindWorkbenchContentData } from "./component"
 
 /** Props for {@link KindWorkbenchContent}. */
-export type KindWorkbenchContentProps = { readonly props: WorkbenchProps; readonly mode: KindWorkbenchContentData["mode"] }
+type KindWorkbenchContentProps = { readonly props: WorkbenchProps; readonly mode: KindWorkbenchContentData["mode"] }
 
 /** Connect one registered AgentOS workbench to the reader's formatter. */
 export const KindWorkbenchContent = (props: KindWorkbenchContentProps) => {

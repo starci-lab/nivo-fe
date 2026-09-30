@@ -16,7 +16,7 @@ type AgentosModuleTestTarget = {
 }
 
 /** The test contract and shared command surface the run state machine connects. */
-export interface ModuleTestRunInput {
+interface ModuleTestRunInput {
     readonly installationId: string
     readonly testContract: AgentosModuleTestContract | undefined
     readonly testSurfaceQuery: SWRResponse<Outcome<AgentosModuleTestSurface>, Error>

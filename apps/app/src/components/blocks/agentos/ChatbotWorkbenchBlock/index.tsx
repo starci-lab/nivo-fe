@@ -13,7 +13,7 @@ export type ChatbotWorkbenchBlockCopy = ChatbotWorkbenchBlockBaseCopy & {
 }
 
 /** Installation-qualified state and actions for the workbench surface. */
-export type ChatbotWorkbenchBlockProps = {
+type ChatbotWorkbenchBlockProps = {
     readonly installationId: string
     readonly workbench: ChatbotWorkbench | null
     readonly selectedConversationId: string | null

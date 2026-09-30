@@ -5,7 +5,7 @@ import { AppsDashboardRestingRows } from "../AppsDashboardRestingRows"
 import { APPS_DASHBOARD_CATALOGUE_CONTENT_CLASS_NAME } from "./classNames"
 
 /** Props for {@link AppsDashboardCatalogueSection}. */
-export type AppsDashboardCatalogueSectionProps = {
+type AppsDashboardCatalogueSectionProps = {
     readonly catalogue: CatalogueSectionView
     readonly onBuildTemplate: (templateKey: string) => void
 }

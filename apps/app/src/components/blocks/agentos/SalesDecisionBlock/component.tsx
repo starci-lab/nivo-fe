@@ -79,17 +79,6 @@ type AnswerRegion = {
     readonly onSubmit: () => void
 }
 
-/** The settled view the render half draws; the connected owner resolves everything it shows. */
-export type SalesDecisionBlockView = {
-    readonly t: SalesTranslation
-    readonly scopeWorkspace: string
-    readonly scopeInstallation: string
-    readonly scopeReady: boolean
-    readonly scopeStanding: SalesSurfaceStanding
-    readonly notice: SalesNotice | null
-    readonly proposal: ProposalRegion
-    readonly answer: AnswerRegion
-}
 
 /** The settled view the drawing half receives; opaque so actions stay out of the atom check. */
 type SalesDecisionBlockData = { readonly view: ReturnType<typeof useSalesDecision> }

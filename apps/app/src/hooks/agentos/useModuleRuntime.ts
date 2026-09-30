@@ -21,7 +21,7 @@ import {
 } from "./agentos.shared"
 
 /** The runtime identities and the active view one module page connects. */
-export interface ModuleRuntimeQueryInput {
+interface ModuleRuntimeQueryInput {
     readonly workspaceId: string
     readonly installationId: string
     readonly view: AgentOSModuleView

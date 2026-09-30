@@ -5,17 +5,17 @@ export type AgentOSWorkspacePageState =
     "overview" | "solutions" | "ai-knowledge" | "applications" | "infrastructure" | "operations" | "access"
 
 /** Public API role for AgentOSWorkspacePageBaseProps. */
-export type AgentOSWorkspacePageBaseProps = {
+type AgentOSWorkspacePageBaseProps = {
     readonly props: AgentOSWorkspacePageViewProps
     readonly on: AgentOSWorkspacePageViewActions
 }
 /** Route identity and the selected workspace tab the pure page draws from. */
-export type AgentOSWorkspacePageViewProps = {
+type AgentOSWorkspacePageViewProps = {
     readonly workspaceId: string
     readonly pageState: AgentOSWorkspacePageState
 }
 /** The tab-selection command the connected page exposes to its drawing half. */
-export type AgentOSWorkspacePageViewActions = {
+type AgentOSWorkspacePageViewActions = {
     readonly onSelectPageState: (pageState: AgentOSWorkspacePageState) => void
 }
 

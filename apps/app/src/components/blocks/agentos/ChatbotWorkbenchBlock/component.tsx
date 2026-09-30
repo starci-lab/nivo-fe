@@ -65,7 +65,7 @@ export type ChatbotWorkbenchBlockBaseCopy = {
 }
 
 /** The workbench's settled data, with the version line and locale formatter its connected half resolved. */
-export type ChatbotWorkbenchBlockBaseData = {
+type ChatbotWorkbenchBlockBaseData = {
     readonly installationId: string
     readonly workbench: ChatbotWorkbench | null
     readonly selectedConversationId: string | null
@@ -77,7 +77,7 @@ export type ChatbotWorkbenchBlockBaseData = {
 }
 
 /** The workbench's commands back into the connected half, including the rail disclosure. */
-export type ChatbotWorkbenchBlockBaseActions = {
+type ChatbotWorkbenchBlockBaseActions = {
     readonly selectConversation: (conversationId: string) => void
     readonly connectZalo: () => void
     readonly setHandoff: (conversationId: string) => void
@@ -87,12 +87,12 @@ export type ChatbotWorkbenchBlockBaseActions = {
 }
 
 /** The workbench's disclosure situation. */
-export type ChatbotWorkbenchBlockBaseState = {
+type ChatbotWorkbenchBlockBaseState = {
     readonly isRailOpen: boolean
 }
 
 /** Props for {@link ChatbotWorkbenchBlockBase}: disclosure state, settled data and commands. */
-export type ChatbotWorkbenchBlockBaseProps = {
+type ChatbotWorkbenchBlockBaseProps = {
     readonly state: ChatbotWorkbenchBlockBaseState
     readonly props: ChatbotWorkbenchBlockBaseData
     readonly on: ChatbotWorkbenchBlockBaseActions

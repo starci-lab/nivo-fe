@@ -30,7 +30,7 @@ const STATUS_TONE: Readonly<Record<FleetStatus, BadgeTone>> = {
     suspended: "neutral",
 }
 /** One resolved AgentOS management row. */
-export type AgentOSWorkspaceView = {
+type AgentOSWorkspaceView = {
     readonly id: string
     readonly href: string
     readonly name: string
@@ -40,7 +40,7 @@ export type AgentOSWorkspaceView = {
     readonly statusLabel: string
 }
 /** Copy for the three measured dashboard signals. */
-export type AgentOSWorkspaceSummaryLabels = {
+type AgentOSWorkspaceSummaryLabels = {
     readonly overview: string
     readonly workspaces: string
     readonly workspacesCaption: string

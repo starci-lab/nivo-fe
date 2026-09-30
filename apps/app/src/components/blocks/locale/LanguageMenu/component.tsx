@@ -5,13 +5,13 @@ import type { Locale } from "@/modules/i18n"
 /** One resolved locale choice. */
 export type LanguageMenuProps = LanguageMenuViewProps
 /** Public API role for LanguageMenuOption. */
-export type LanguageMenuOption = {
+type LanguageMenuOption = {
     readonly id: Locale
     readonly label: string
 }
 
 /** Resolved locale state accepted by the pure block half. */
-export type LanguageMenuViewProps = {
+type LanguageMenuViewProps = {
     readonly props: {
         readonly label: string
         readonly selectedLocale: Locale

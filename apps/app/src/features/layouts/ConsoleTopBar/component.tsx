@@ -3,7 +3,7 @@ import type { ComponentType } from "react"
 import { NivoBrand } from "@nivo/ui"
 
 /** The mounted controls take no props: the connected half renders them fully resolved. */
-export type ConsoleTopBarControlProps = { readonly [key: string]: never }
+type ConsoleTopBarControlProps = { readonly [key: string]: never }
 
 /**
  * The bar's approved drawing: which resolved controls mount in its actions band.
@@ -11,7 +11,7 @@ export type ConsoleTopBarControlProps = { readonly [key: string]: never }
  * The controls arrive as render functions plus their atoms because they read the world - the
  * connected half resolves them, and instantiating them here keeps every render path pure.
  */
-export type ConsoleTopBarBaseState = {
+type ConsoleTopBarBaseState = {
     readonly localeControl: ComponentType<ConsoleTopBarControlProps>
     readonly localeControlProps: ConsoleTopBarControlProps
     readonly themeControl: ComponentType<ConsoleTopBarControlProps>
@@ -21,14 +21,14 @@ export type ConsoleTopBarBaseState = {
 }
 
 /** Pure top-bar labels. */
-export type ConsoleTopBarBaseData = {
+type ConsoleTopBarBaseData = {
     readonly brandLabel: string
     readonly contextLabel: string
     readonly actionsLabel: string
 }
 
 /** Public API role for ConsoleTopBarBaseProps. */
-export type ConsoleTopBarBaseProps = {
+type ConsoleTopBarBaseProps = {
     readonly state: ConsoleTopBarBaseState
     readonly props: ConsoleTopBarBaseData
 }

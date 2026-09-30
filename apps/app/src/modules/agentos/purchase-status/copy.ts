@@ -197,7 +197,7 @@ export type PurchaseStatusCopy = {
 }
 
 /** The next-intl translator bound to `console.agentos.purchaseStatus`; its keys are checked against the catalog. */
-export type PurchaseStatusTranslator = ReturnType<
+type PurchaseStatusTranslator = ReturnType<
     typeof createTranslator<typeof enMessages, "console.agentos.purchaseStatus">
 >
 

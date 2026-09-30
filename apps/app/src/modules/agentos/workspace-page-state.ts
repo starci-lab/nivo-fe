@@ -1,5 +1,5 @@
 /** The routed tabs of one workspace page, in the order the page offers them. */
-export const AGENT_OS_WORKSPACE_PAGE_STATES = [
+const AGENT_OS_WORKSPACE_PAGE_STATES = [
     "overview",
     "solutions",
     "ai-knowledge",

@@ -7,7 +7,7 @@ export type WorkspaceCheckoutPaymentRail = "vnpay" | "momo"
  * THE CURSOR IS THE PROCESS, NOT THE BROWSER: only a confirmed transition
  * moves it, so a provider return or an elapsed timer can never advance it.
  */
-export type WorkspaceCheckoutPurchaseState =
+type WorkspaceCheckoutPurchaseState =
     | "selected"
     | "payment-not-started"
     | "payment-pending"
@@ -22,7 +22,7 @@ export type WorkspaceCheckoutPurchaseState =
     | "payment-cancelled"
 
 /** Closed refusal and failure codes of the checkout contract. */
-export type WorkspaceCheckoutRefusalCode =
+type WorkspaceCheckoutRefusalCode =
     | "unauthenticated"
     | "purchaser-not-admitted"
     | "offer-unavailable"
@@ -37,10 +37,10 @@ export type WorkspaceCheckoutRefusalCode =
     | "observed-identity-mismatch"
 
 /** Verified-Login door an admission refusal points at, when the caller must become an admitted purchaser. */
-export type WorkspaceCheckoutNextAction = "login-sign-in" | "login-register" | "login-verify-email"
+type WorkspaceCheckoutNextAction = "login-sign-in" | "login-register" | "login-verify-email"
 
 /** Verdict on the requested offer identity and version against the current catalog. */
-export type WorkspaceCheckoutSelectionState = "current" | "stale" | "unavailable"
+type WorkspaceCheckoutSelectionState = "current" | "stale" | "unavailable"
 
 /** One currently approved offer as the purchaser may see it. */
 export type WorkspaceCheckoutOffer = {
@@ -77,7 +77,7 @@ export type WorkspaceCheckoutProvisioningFact = WorkspaceCheckoutSourceFact & {
 }
 
 /** Explicit next-period payment offered only to an entitled owner; never a new operation. */
-export type WorkspaceCheckoutRenewalAction = {
+type WorkspaceCheckoutRenewalAction = {
     readonly operation: string
     readonly offerId: string
     readonly offerVersion: string
@@ -207,7 +207,7 @@ export type WorkspaceCheckoutAnswer =
       }
 
 /** Versioned return context naming the purchaser-scoped surface a resolved entry returns to. */
-export type WorkspaceCheckoutEntryReturnContext = {
+type WorkspaceCheckoutEntryReturnContext = {
     readonly name: string
     readonly version: string
 }
@@ -222,7 +222,7 @@ export type WorkspaceCheckoutEntryDestination = {
 }
 
 /** Closed refusal codes of the purchased-workspace entry contract. */
-export type WorkspaceCheckoutEntryRefusalCode =
+type WorkspaceCheckoutEntryRefusalCode =
     | "unauthenticated"
     | "purchaser-not-admitted"
     | "purchase-not-found-non-disclosing"

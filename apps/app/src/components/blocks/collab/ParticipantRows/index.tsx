@@ -4,7 +4,7 @@ import type { GroupChatPageLabels } from "../../../../modules/collab/group-chat/
 import { MemberRow } from "../MemberRow"
 
 /** Props for one roster group that renders its empty state or shared member rows. */
-export type ParticipantRowsProps = {
+type ParticipantRowsProps = {
     readonly participants: ReadonlyArray<CollabOfficeParticipant>
     readonly labels: GroupChatPageLabels
     readonly density: "compact" | "roomy" | "detailed"

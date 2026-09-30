@@ -5,7 +5,7 @@ import type { AcademyGrowthSnapshot } from "@/modules/api/academy"
 /** Resolved copy for the growth block. */
 export type AcademyGrowthSummaryProps = AcademyGrowthSummaryViewProps
 /** Public API role for AcademyGrowthSummaryLabels. */
-export type AcademyGrowthSummaryLabels = {
+type AcademyGrowthSummaryLabels = {
     readonly section: string
     readonly health: string
     readonly loading: string
@@ -17,7 +17,7 @@ export type AcademyGrowthSummaryLabels = {
 }
 
 /** Atoms the pure growth block draws; the connected half owns the snapshot request. */
-export type AcademyGrowthSummaryData = {
+type AcademyGrowthSummaryData = {
     readonly data?: AcademyGrowthSnapshot
     /** The failure the connected half composed for a settled failed read. */
     readonly notice?: QueryNoticeViewData
@@ -26,13 +26,13 @@ export type AcademyGrowthSummaryData = {
 }
 
 /** Actions the pure growth block emits. */
-export type AcademyGrowthSummaryActions = {
+type AcademyGrowthSummaryActions = {
     /** Re-read the snapshot after a failed answer. */
     readonly retryNotice?: () => void
 }
 
 /** Pure growth block state. */
-export type AcademyGrowthSummaryViewProps = {
+type AcademyGrowthSummaryViewProps = {
     readonly state: "resting" | "failed" | "answered"
     readonly props: AcademyGrowthSummaryData
     readonly on?: AcademyGrowthSummaryActions

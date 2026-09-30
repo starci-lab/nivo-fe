@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { SurfaceCard } from "@starci/grammar/common"
 
 /** The shared card frame used by a workbench rail. */
-export type WorkbenchRailCardProps = {
+type WorkbenchRailCardProps = {
     readonly props: {
         readonly label: string
         readonly children: ReactNode

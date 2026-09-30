@@ -75,7 +75,7 @@ export type AgentosModuleInstallationDetail = {
 }
 
 /** Customer choice required to start one immutable solution-module installation. */
-export type InstallAgentosSolutionModuleInput = {
+type InstallAgentosSolutionModuleInput = {
     readonly agentWorkspaceId: string
     readonly moduleKey: AgentosSolutionModule["key"]
     readonly idempotencyKey: string

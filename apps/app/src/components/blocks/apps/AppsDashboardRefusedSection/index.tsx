@@ -2,7 +2,7 @@ import { SurfaceCard, Text } from "@starci/grammar/common"
 import { APPS_DASHBOARD_REFUSED_CLASS_NAME } from "./classNames"
 
 /** Props for {@link AppsDashboardRefusedSection}. */
-export type AppsDashboardRefusedSectionProps = { readonly label: string; readonly note: string }
+type AppsDashboardRefusedSectionProps = { readonly label: string; readonly note: string }
 
 /** State plainly when an owned or catalogue read was refused. */
 export const AppsDashboardRefusedSection = (props: AppsDashboardRefusedSectionProps) => {

@@ -78,7 +78,7 @@ export type LinkedInvoiceSectionView =
           readonly consequence: string
       }
 /** Path context shown only while Wallet is the waypoint of one exact AgentOS order. */
-export type WalletBreadcrumbView = {
+type WalletBreadcrumbView = {
     readonly label: string
     readonly backLabel: string
 }

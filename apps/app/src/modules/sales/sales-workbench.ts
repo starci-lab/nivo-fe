@@ -13,7 +13,7 @@ type TranslationValues = Readonly<Record<string, string | number | undefined>>
  */
 
 /** The Sales surfaces this route draws: the operatable surface and the six detail regions it discloses. */
-export const SALES_SURFACES = [
+const SALES_SURFACES = [
     "opportunity-attention",
     "boss-command-history",
     "autonomous-routine-history",
@@ -22,8 +22,6 @@ export const SALES_SURFACES = [
     "ambiguity-clarification",
     "won-lost-closure-detail",
 ] as const
-/** One accepted Sales workbench surface. */
-export type SalesSurface = (typeof SALES_SURFACES)[number]
 
 /** What one surface's read settled into, in the terms the block renders. */
 export type SalesSurfaceStanding = "loading" | "denied" | "unavailable" | "empty" | "ready"
@@ -67,9 +65,6 @@ export const salesSurfaceStanding = (
     return hasContent ? "ready" : "empty"
 }
 
-/** Whether an answer left the effect unattested, which only a read of the same identity resolves. */
-export const salesEffectUnattested = (answer: SalesAnswerStanding | undefined): boolean =>
-    answer !== undefined && !answer.ok && answer.code === "outcome_unknown"
 
 /** One Sales command input's refusal message key. */
 const SALES_REFUSAL_KEYS = {
@@ -182,14 +177,14 @@ const SALES_OUTCOME_KEYS = {
 export const salesOutcomeKey = (outcome: string): string => salesKey(SALES_OUTCOME_KEYS, outcome) ?? "outcome.attention"
 
 /** One clarification fact as the plan discloses it: exactly one of the two permitted kinds is named. */
-export type SalesClarificationFactSource = { readonly customerRef?: unknown; readonly opportunityId?: unknown }
+type SalesClarificationFactSource = { readonly customerRef?: unknown; readonly opportunityId?: unknown }
 
 /** One clarification fact's label key: the plan accepts exactly one permitted fact kind. */
 export const salesClarificationFactKey = (fact: SalesClarificationFactSource): string =>
     typeof fact.opportunityId === "string" && fact.opportunityId.length > 0 ? "fact.opportunityId" : "fact.customerRef"
 
 /** The closed requested-action vocabulary of the bounded planner, in the one order that canonicalises a press. */
-export const SALES_REQUESTED_ACTION_ORDER: ReadonlyArray<SalesRequestedAction> = [
+const SALES_REQUESTED_ACTION_ORDER: ReadonlyArray<SalesRequestedAction> = [
     "qualify",
     "contact",
     "request-decision",
@@ -229,7 +224,7 @@ export const salesExpectedRevisions = (value: string): Readonly<Record<string, n
     }, {})
 
 /** One Sales action payload, as much of it as the recovery doors depend on. */
-export type SalesActionSource = Pick<SalesActionValue, "status" | "receiverReceipt" | "observationGap">
+type SalesActionSource = Pick<SalesActionValue, "status" | "receiverReceipt" | "observationGap">
 
 /** The no-start proof one read attests, or null when it attests none. */
 export const salesNoStartProof = (action: SalesActionSource | null): string | null => {
@@ -280,7 +275,3 @@ export const salesActionIdentityOf = (actionIds: ReadonlyArray<string>, chosen: 
 /** Whether a status the read returned is one this build can word; the surface shows the source's word otherwise. */
 export const salesWording = (key: string | null, status: string, t: SalesTranslation): string =>
     key === null ? status : t(key)
-
-/** The attention rows of one pipeline page: only the rows whose work state is waiting or attention are attention. */
-export const salesAttentionRows = (items: ReadonlyArray<SalesPipelineItem>): ReadonlyArray<SalesPipelineItem> =>
-    items.filter((item) => item.workState !== "ready")

@@ -13,7 +13,7 @@ import {
 } from "../../../../modules/agentos/module-page/surface-types.guards"
 
 /** The surface's settled data, plus the locale formatter its connected half resolved. */
-export type DiagnosticsSurfaceBaseData = Omit<
+type DiagnosticsSurfaceBaseData = Omit<
     WithModulePageCopy<DiagnosticsSurfaceDataProps>,
     "onSelectSignal" | "onSelectPane"
 > & {
@@ -21,13 +21,13 @@ export type DiagnosticsSurfaceBaseData = Omit<
 }
 
 /** The filter and pane commands back into the connected half. */
-export type DiagnosticsSurfaceBaseActions = {
+type DiagnosticsSurfaceBaseActions = {
     readonly selectSignal: (signal: "all" | "channel" | "ai") => void
     readonly selectPane: (pane: "signals" | "readiness" | "evidence") => void
 }
 
 /** Props for {@link DiagnosticsSurfaceBase}: settled data and its commands. */
-export type DiagnosticsSurfaceBaseProps = {
+type DiagnosticsSurfaceBaseProps = {
     readonly props: DiagnosticsSurfaceBaseData
     readonly on: DiagnosticsSurfaceBaseActions
 }

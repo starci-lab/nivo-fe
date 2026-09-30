@@ -83,7 +83,7 @@ export type ShellSourceOutcome =
     | { readonly kind: "unsupported" }
 
 /** The published transition names, plus `none` for an event that could not change anything. */
-export type ShellObservationTransition =
+type ShellObservationTransition =
     | "begin-read"
     | "apply-current"
     | "apply-limited"
@@ -118,7 +118,7 @@ export type ShellObservationEvent =
     | { readonly type: "session-reestablished"; readonly sessionEpoch: number }
 
 /** The reducer's answer: the next state, and which published transition produced it. */
-export interface ShellObservationReduction {
+interface ShellObservationReduction {
     readonly state: ShellObservationSnapshot
     readonly transition: ShellObservationTransition
 }
@@ -292,7 +292,7 @@ const transitionFor = (outcome: ShellSourceOutcome): ShellObservationTransition 
 }
 
 /** The scope an arriving outcome claims: which session and which selection it belongs to. */
-export interface ShellReadOrigin {
+interface ShellReadOrigin {
     readonly sessionEpoch: number
     readonly selection: ShellSelection
 }

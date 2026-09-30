@@ -30,7 +30,7 @@ export const refusal = (
     )
 
 /** Preserve an unresolved effect as unknown while keeping the same request identity. */
-export const unknownOutcome = (operation: AccountingRouteName, requestId: string): AccountingOperationAnswer<never> =>
+const unknownOutcome = (operation: AccountingRouteName, requestId: string): AccountingOperationAnswer<never> =>
     refusal(operation, "outcome_unknown", "", requestId)
 
 /**
@@ -41,10 +41,10 @@ export const unknownOutcome = (operation: AccountingRouteName, requestId: string
  * malformed payload answers null, which the caller reports as the existing `MALFORMED_ANSWER`
  * refusal - never a thrown error and never a result under a borrowed name.
  */
-export const accountingServedResult = (tagged: unknown): AccountingResult | null => parseAccountingResult(tagged)
+const accountingServedResult = (tagged: unknown): AccountingResult | null => parseAccountingResult(tagged)
 
 /** Whether a result tag is one of the eight registered Accounting tags. */
-export const isAccountingApiOperation = (value: unknown): value is AccountingApiOperation =>
+const isAccountingApiOperation = (value: unknown): value is AccountingApiOperation =>
     value === "admitEvidence" ||
     value === "evidence" ||
     value === "routine" ||
@@ -55,7 +55,7 @@ export const isAccountingApiOperation = (value: unknown): value is AccountingApi
     value === "resultDetail"
 
 /** Whether a failure name is one the receiver's closed set declares. */
-export const isAccountingApiFailureKind = (value: unknown): value is AccountingApiFailureKind =>
+const isAccountingApiFailureKind = (value: unknown): value is AccountingApiFailureKind =>
     value === "forbidden" ||
     value === "stale-authority" ||
     value === "validation" ||

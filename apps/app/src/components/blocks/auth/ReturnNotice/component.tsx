@@ -1,7 +1,7 @@
 import { Text } from "@starci/grammar/common"
 
 /** Resolved unavailable-return notice shown at the default authenticated landing. */
-export type ReturnNoticeBaseProps = {
+type ReturnNoticeBaseProps = {
     readonly props: {
         /**
          * The notice sentence, or null on an ordinary landing. Null is not "the notice is late": it is

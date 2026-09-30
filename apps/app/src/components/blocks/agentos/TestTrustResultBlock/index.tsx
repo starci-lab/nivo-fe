@@ -46,7 +46,7 @@ type EvidenceComponentProps = {
 type EvidenceRegistry = Readonly<Record<string, ComponentType<EvidenceComponentProps>>>
 
 /** Persisted result boundary rendered by the trusted evidence registry. */
-export type TestTrustResultBlockProps = {
+type TestTrustResultBlockProps = {
     readonly copy: TestTrustResultBlockCopy
     readonly contract: AgentosModuleTestContract
     readonly run: AgentosModuleTestRun | null

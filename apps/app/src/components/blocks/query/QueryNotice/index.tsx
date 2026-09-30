@@ -5,13 +5,13 @@ import type { NivoQueryFailure } from "@/modules/query"
 import { QueryNoticeBase, type QueryNoticeActions } from "./component"
 
 /** The settled failure one query surface draws, and whether its retry is already running. */
-export type QueryNoticeData = {
+type QueryNoticeData = {
     readonly failure: NivoQueryFailure
     readonly retryPending?: boolean
 }
 
 /** Props for {@link QueryNotice}. */
-export type QueryNoticeProps = {
+type QueryNoticeProps = {
     readonly props: QueryNoticeData
     readonly on?: QueryNoticeActions
 }

@@ -48,7 +48,7 @@ export interface AgentOSShellOptions {
 }
 
 /** Everything a view of the connected shell needs, and nothing that could change a domain. */
-export interface AgentOSShellHandle {
+interface AgentOSShellHandle {
     readonly selection: ShellSelection
     readonly session: ShellSessionStanding
     readonly sessionStatus: SessionState["status"]

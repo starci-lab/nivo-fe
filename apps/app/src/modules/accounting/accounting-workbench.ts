@@ -9,7 +9,7 @@ import type { Formatter } from "@/modules/i18n/formatter"
  */
 
 /** A closed Accounting intake classification, as the Setup snapshot words it. */
-export type AccountingClassification = "income" | "expense" | "receivable" | "payable"
+type AccountingClassification = "income" | "expense" | "receivable" | "payable"
 /** The two distinguishable Accounting viewer roles. */
 type AccountingViewerRole = "owner" | "approver"
 /** The ledger row facts the correction tips are chosen from. */
@@ -27,7 +27,7 @@ type AccountingPeriod = { readonly periodKey: string; readonly status: string }
 
 type TranslationValues = Readonly<Record<string, string | number | undefined>>
 /** Accounting classifications accepted by the setup projection and intake controller. */
-export const ACCOUNTING_CLASSIFICATIONS = ["income", "expense", "receivable", "payable"] as const
+const ACCOUNTING_CLASSIFICATIONS = ["income", "expense", "receivable", "payable"] as const
 const isAccountingClassification = (value: unknown): value is AccountingClassification =>
     isOneOf(value, ACCOUNTING_CLASSIFICATIONS)
 const isAccountingClassifications = (value: unknown): value is ReadonlyArray<AccountingClassification> =>
@@ -74,7 +74,7 @@ type CorrectionAccessReason =
     | "self-assigned"
     | "period-not-open"
 /** Advisory facts used to project safe correction controls for one exact proposal. */
-export type CorrectionAccessInput = {
+type CorrectionAccessInput = {
     readonly explicitLedgerVersion: boolean
     readonly role?: AccountingViewerRole
     readonly canSubmitCorrection?: boolean
@@ -227,27 +227,9 @@ export const formatMinorCurrency = (value: string, currency: string, format: For
 /** Convert the business month control value into the canonical backend month key. */
 export const canonicalMonthKey = (month: string): string | null =>
     /^\d{4}-(0[1-9]|1[0-2])$/.test(month) ? `${month}-01` : null
-/** Convert evidence bytes without asking a person to handle base64. */
-export const bytesToBase64 = (bytes: Uint8Array): string => {
-    let binary = ""
-    for (let offset = 0; offset < bytes.length; offset += 0x8000)
-        binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000))
-    return globalThis.btoa(binary)
-}
 /** Keep participant identity recognizable without making the raw id a primary control label. */
 export const maskParticipantId = (userId: string): string =>
     userId.length <= 8 ? `${userId.slice(0, 2)}…${userId.slice(-2)}` : `${userId.slice(0, 4)}…${userId.slice(-4)}`
-/** Offer only current ledger tips that do not already have a correction proposal. */
-export const eligibleCorrectionSourceEntries = (
-    ledger: ReadonlyArray<AccountingLedgerEntry>,
-    corrections: ReadonlyArray<Pick<AccountingCorrection, "sourceEntryId">>,
-): ReadonlyArray<AccountingLedgerEntry> => {
-    const supersededIds = new Set(
-        ledger.flatMap((entry) => (entry.correctionOfId === null ? [] : [entry.correctionOfId])),
-    )
-    const proposedIds = new Set(corrections.map((correction) => correction.sourceEntryId))
-    return ledger.filter((entry) => !supersededIds.has(entry.id) && !proposedIds.has(entry.id))
-}
 
 /*
  * THE ACCEPTED ui.accounting.workbench VOCABULARY.
@@ -260,7 +242,7 @@ export const eligibleCorrectionSourceEntries = (
  */
 
 /** The accepted Accounting workbench surfaces, in the order the page reads them. */
-export const ACCOUNTING_SURFACES = [
+const ACCOUNTING_SURFACES = [
     "overview",
     "source-intake",
     "routine-progress",
@@ -268,8 +250,6 @@ export const ACCOUNTING_SURFACES = [
     "result-detail",
     "forward-correction",
 ] as const
-/** One accepted Accounting workbench surface. */
-export type AccountingSurface = (typeof ACCOUNTING_SURFACES)[number]
 /** What one surface's read settled into, in the terms the block renders. */
 export type AccountingSurfaceStanding = "loading" | "denied" | "unavailable" | "empty" | "ready"
 /** One Accounting read's answer, as much of it as a standing depends on. */
@@ -353,7 +333,7 @@ export const accountingMeasureKey = (kind: string): string =>
 export type AccountingMeasureReading =
     { readonly amountMinor: number; readonly currency: string } | { readonly reasonCode: string }
 /** One measure payload, as much of it as a reading depends on. */
-export type AccountingMeasureSource = {
+type AccountingMeasureSource = {
     readonly status: string
     readonly amountMinor?: number | null
     readonly currency?: string | null
@@ -500,38 +480,7 @@ const ACCOUNTING_FACT_FIELD_KEYS = {
 export const accountingFactFieldKey = (field: string): string =>
     mappedMessageKey(ACCOUNTING_FACT_FIELD_KEYS, field) ?? "fact.other"
 
-/** One tagged fact value as the operator reads it; a money value keeps its own currency. */
-export const accountingFactValueText = (
-    value: {
-        readonly kind: string
-        readonly value?: string | number | boolean
-        readonly amountMinor?: number
-        readonly currency?: string
-    } | null,
-    format: Formatter,
-): string => {
-    if (value === null) return "—"
-    if (value.kind === "money") return formatAccountingMinor(value.amountMinor ?? 0, value.currency ?? "", format)
-    if (value.kind === "boolean") return value.value === true ? "true" : "false"
-    if (value.kind === "local-date" && typeof value.value === "string") {
-        const parsed = new Date(`${value.value}T00:00:00Z`)
-        return Number.isNaN(parsed.getTime())
-            ? value.value
-            : format.dateTime(parsed, { dateStyle: "short", timeZone: "UTC" })
-    }
-    if (value.kind === "timestamptz" && typeof value.value === "string") {
-        const parsed = new Date(value.value)
-        return Number.isNaN(parsed.getTime())
-            ? value.value
-            : format.dateTime(parsed, { dateStyle: "short", timeStyle: "short", timeZone: "UTC" })
-    }
-    if (typeof value.value === "number") return format.number(value.value)
-    return value.value === undefined ? "—" : String(value.value)
-}
 
-/** Whether an answer left the effect unattested, which only a read of the same identity resolves. */
-export const accountingEffectUnattested = (answer: AccountingAnswerStanding | undefined): boolean =>
-    answer !== undefined && !answer.ok && answer.code === "outcome_unknown"
 
 /** One command input's refusal message key. */
 const ACCOUNTING_REFUSAL_KEYS = {

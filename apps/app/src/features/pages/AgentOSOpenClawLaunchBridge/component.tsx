@@ -1,12 +1,12 @@
 import { AgentOSOpenClawLaunch } from "@/components/blocks/agentos/AgentOSOpenClawLaunch"
 
 /** Every atom the bridge needs: the exact workspace route identity and nothing else. */
-export type AgentOSOpenClawLaunchBridgeBaseData = {
+type AgentOSOpenClawLaunchBridgeBaseData = {
     readonly workspaceId: string
 }
 
 /** Complete input of {@link AgentOSOpenClawLaunchBridgeBase}: resolved atoms only, no launch state crosses in. */
-export type AgentOSOpenClawLaunchBridgeBaseProps = {
+type AgentOSOpenClawLaunchBridgeBaseProps = {
     readonly props: AgentOSOpenClawLaunchBridgeBaseData
 }
 

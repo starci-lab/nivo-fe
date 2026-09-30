@@ -11,12 +11,12 @@ import { CONSOLE_MAIN_ID, CONSOLE_SKIP_LINK_CLASS_NAME } from "./classNames"
  * The page is the opaque element the route has already rendered on the server; the frame only seats
  * it, so the route file stays a server layout and the client boundary is this frame alone.
  */
-export type ConsoleLayoutBaseState = {
+type ConsoleLayoutBaseState = {
     readonly children: ReactNode
 }
 
 /** The atoms the frame's landmarks are named with. */
-export type ConsoleLayoutBaseData = {
+type ConsoleLayoutBaseData = {
     readonly navigationLabel: string
     readonly primaryLabel: string
     readonly skipLabel: string
@@ -30,7 +30,7 @@ export type ConsoleLayoutBaseData = {
  */
 type ConsoleLayoutProps = ConsoleLayoutBaseProps
 /** Public API role for ConsoleLayoutBaseProps. */
-export type ConsoleLayoutBaseProps = {
+type ConsoleLayoutBaseProps = {
     readonly state: ConsoleLayoutBaseState
     readonly props: ConsoleLayoutBaseData
 }

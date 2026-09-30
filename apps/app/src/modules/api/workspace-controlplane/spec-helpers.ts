@@ -2,7 +2,7 @@ import { vi } from "vitest"
 import { isRecord } from "@nivo/api"
 
 /** Minimal successful response shape for transport specs. */
-export const jsonResponse = (payload: unknown) => ({ ok: true, status: 200, json: async () => payload })
+const jsonResponse = (payload: unknown) => ({ ok: true, status: 200, json: async () => payload })
 
 /** Mock capability functions used to exercise repeated checkout admission. */
 export const api = vi.hoisted(() => ({

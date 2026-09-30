@@ -8,7 +8,7 @@ import { OverviewSignals } from "@/components/blocks/console/OverviewSignals"
 import { OVERVIEW_FRAME_CLASS_NAME, OVERVIEW_TRACK_CLASS_NAME } from "./classNames"
 
 /** Resolved copy of the operations overview, handed in as data. */
-export type OverviewPageBaseData = {
+type OverviewPageBaseData = {
     readonly title: string
     readonly lede: string
     readonly pathLabel: string
@@ -20,7 +20,7 @@ export type OverviewPageBaseData = {
 }
 
 /** The commands the overview offers: the one page-level decision. */
-export type OverviewPageBaseActions = {
+type OverviewPageBaseActions = {
     readonly buildApp: () => void
 }
 

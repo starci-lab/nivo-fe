@@ -21,13 +21,13 @@ type AgentOSKnowledgeOriginListBaseLabels = {
     readonly unknownVersion: string
 }
 /** Settled source rows consumed by the pure provenance renderer. */
-export type AgentOSKnowledgeOriginListData = {
+type AgentOSKnowledgeOriginListData = {
     readonly origins: AgentosAiKnowledgeReadiness["origins"]
     readonly labels: AgentOSKnowledgeOriginListBaseLabels
     readonly loading?: boolean
 }
 /** The provenance count renderer lives in `on`: a fixture cannot hold a function as data. */
-export type AgentOSKnowledgeOriginListActions = {
+type AgentOSKnowledgeOriginListActions = {
     readonly documents: (count: number) => string
 }
 /** The atom contract the pure half draws from. */

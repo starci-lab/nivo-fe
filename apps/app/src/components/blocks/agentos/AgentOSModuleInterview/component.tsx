@@ -4,7 +4,7 @@ import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
 /** Durable conversation projection and the one current answer operation. */
 export type AgentOSModuleInterviewProps = AgentOSModuleInterviewViewProps
 /** Resolved copy for the interview block. */
-export type AgentOSModuleInterviewLabels = {
+type AgentOSModuleInterviewLabels = {
     readonly title: string
     readonly saved: string
     readonly refused: string
@@ -16,19 +16,19 @@ export type AgentOSModuleInterviewLabels = {
     readonly you: string
 }
 /** Conversation projection, draft answer and copy the pure interview draws. */
-export type AgentOSModuleInterviewData = {
+type AgentOSModuleInterviewData = {
     readonly studio?: AgentosModuleStudio
     readonly answer: string
     readonly pending: boolean
     readonly labels: AgentOSModuleInterviewLabels
 }
 /** The bounded answer edit and send the interview emits. */
-export type AgentOSModuleInterviewActions = {
+type AgentOSModuleInterviewActions = {
     readonly onAnswer: (value: string) => void
     readonly onSend: () => void
 }
 /** Public API role for AgentOSModuleInterviewViewProps. */
-export type AgentOSModuleInterviewViewProps = {
+type AgentOSModuleInterviewViewProps = {
     readonly state: "loading" | "refused" | "ready"
     readonly props: AgentOSModuleInterviewData
     readonly on: AgentOSModuleInterviewActions

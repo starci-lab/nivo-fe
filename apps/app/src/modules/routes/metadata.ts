@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
 /** Translation namespaces used by the installed-module route metadata. */
-export type ModuleMetadataNamespace =
+type ModuleMetadataNamespace =
     | "metadata.agentosModuleDiagnostics"
     | "metadata.agentosModuleOperate"
     | "metadata.agentosModuleSales"

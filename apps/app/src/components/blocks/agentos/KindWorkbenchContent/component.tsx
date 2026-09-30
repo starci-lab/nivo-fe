@@ -21,7 +21,7 @@ export type KindWorkbenchContentData = {
 }
 
 /** Props for {@link KindWorkbenchContentBase}. */
-export type KindWorkbenchContentBaseProps = { readonly props: KindWorkbenchContentData }
+type KindWorkbenchContentBaseProps = { readonly props: KindWorkbenchContentData }
 
 type WorkbenchFact = { readonly id: string; readonly label: string; readonly value: string }
 type WorkbenchContentViewProps = {

@@ -3,7 +3,7 @@ import type { AgentOSShellOperationView, AgentOSWorkspaceControlCenterShellLabel
 import { SurfaceCard, Text, TextAction } from "@starci/grammar/common"
 
 /** One returned operation's own result card: exact receiver, its standing and its source time. */
-export type AgentOSShellOperationRegionProps = {
+type AgentOSShellOperationRegionProps = {
     readonly operations: ReadonlyArray<AgentOSShellOperationView>
     readonly labels: AgentOSWorkspaceControlCenterShellLabels
     readonly formatDate: (value: string) => string

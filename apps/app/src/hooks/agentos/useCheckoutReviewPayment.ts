@@ -16,7 +16,7 @@ import {
 } from "../../modules/agentos/checkout-review"
 
 /** The resolved phrases the checkout payment step draws. */
-export type CheckoutReviewPaymentCopy = {
+type CheckoutReviewPaymentCopy = {
     readonly checkoutUnavailable: string
     readonly paymentNotStarted: string
     readonly outcomeUnknownNotice: string
@@ -30,7 +30,7 @@ export type CheckoutReviewPaymentCopy = {
 }
 
 /** Props for {@link CheckoutReviewPayment}. */
-export type CheckoutReviewPaymentProps = {
+type CheckoutReviewPaymentProps = {
     readonly offer: WorkspaceCheckoutOffer | null
     readonly renewalEntitlementId?: string
     readonly copy: CheckoutReviewPaymentCopy

@@ -5,7 +5,7 @@ import type { ExpertSiteLead } from "@/modules/api/academy"
 /** Resolved copy for the lead pipeline. */
 export type AcademyLeadPipelineProps = AcademyLeadPipelineViewProps
 /** Public API role for AcademyLeadPipelineLabels. */
-export type AcademyLeadPipelineLabels = {
+type AcademyLeadPipelineLabels = {
     readonly section: string
     readonly empty: string
     readonly open: string
@@ -17,7 +17,7 @@ export type AcademyLeadPipelineLabels = {
 }
 
 /** Atoms the pure lead pipeline draws; the connected half owns the lead request. */
-export type AcademyLeadPipelineData = {
+type AcademyLeadPipelineData = {
     readonly leads: ReadonlyArray<ExpertSiteLead>
     readonly selected?: ExpertSiteLead
     readonly draft?: string
@@ -29,7 +29,7 @@ export type AcademyLeadPipelineData = {
 }
 
 /** Actions the pure lead pipeline emits; every argument is an atom. */
-export type AcademyLeadPipelineActions = {
+type AcademyLeadPipelineActions = {
     readonly openLead: (leadId: string) => void
     readonly advance: () => void
     readonly draftReply: () => void
@@ -38,7 +38,7 @@ export type AcademyLeadPipelineActions = {
 }
 
 /** Pure lead pipeline state. */
-export type AcademyLeadPipelineViewProps = {
+type AcademyLeadPipelineViewProps = {
     readonly state: "resting" | "empty" | "failed" | "answered"
     readonly props: AcademyLeadPipelineData
     readonly on: AcademyLeadPipelineActions

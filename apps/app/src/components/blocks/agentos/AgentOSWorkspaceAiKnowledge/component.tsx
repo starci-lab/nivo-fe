@@ -37,7 +37,7 @@ export type AgentOSWorkspaceAiKnowledgeProps = {
     }
 }
 /** Public API role for AgentOSWorkspaceAiKnowledgeLabels. */
-export type AgentOSWorkspaceAiKnowledgeLabels = {
+type AgentOSWorkspaceAiKnowledgeLabels = {
     readonly sectionHeading: string
     readonly title: string
     readonly description: string
@@ -65,7 +65,7 @@ export type AgentOSWorkspaceAiKnowledgeLabels = {
     readonly failureTitle: string
 }
 /** Text only in the view props; formatting callbacks stay under `on`. */
-export type AgentOSWorkspaceAiKnowledgeCopy = {
+type AgentOSWorkspaceAiKnowledgeCopy = {
     readonly sectionHeading: string
     readonly title: string
     readonly description: string

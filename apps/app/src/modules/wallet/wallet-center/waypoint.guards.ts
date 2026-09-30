@@ -6,7 +6,7 @@ export const isTopUpSession = (value: unknown): value is TopUpSession =>
     isRecord(value) && isNumber(value.amountVnd) && isNumber(value.startingBalanceVnd) && isString(value.referenceId)
 
 /** The hidden form fields a provider checkout is posted with: text names mapped to text values. */
-export type CheckoutFields = Readonly<Record<string, string>>
+type CheckoutFields = Readonly<Record<string, string>>
 
 /**
  * Parse the provider's serialized checkout fields.

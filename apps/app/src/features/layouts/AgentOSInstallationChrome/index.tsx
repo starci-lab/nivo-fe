@@ -11,7 +11,7 @@ import type { SelectionListGroup, SelectionListItem } from "@nivo/ui"
 import { AgentOSInstallationChromeBase, type AgentOSInstallationChromeBaseProps } from "./component"
 
 /** The nested route body rendered under this installation's shared subnavigation and tabs. */
-export type AgentOSInstallationChromeProps = {
+type AgentOSInstallationChromeProps = {
     readonly children: ReactNode
 }
 

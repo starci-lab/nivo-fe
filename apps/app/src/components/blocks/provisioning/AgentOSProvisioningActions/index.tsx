@@ -5,7 +5,7 @@ import { OFFER_CLASS_NAME, TIER_ACTIONS_CLASS_NAME } from "./classNames"
 type Selection = AgentOSProvisioningViewProps["props"]["selection"]
 
 /** Selection and action controls admitted by the current AgentOS phase. */
-export type AgentOSProvisioningActionsProps = {
+type AgentOSProvisioningActionsProps = {
     readonly selection?: Selection
     readonly requestActionLabel?: string
     readonly statusActionLabel?: string

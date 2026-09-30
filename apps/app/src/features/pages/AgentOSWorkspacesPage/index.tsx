@@ -3,7 +3,7 @@ import { toLocale, getPathname } from "@/modules/i18n"
 import { AgentOSWorkspacesPageBase } from "./component"
 
 /** Route identity supplied by the locale-aware workspaces segment. */
-export type AgentOSWorkspacesPageProps = {
+type AgentOSWorkspacesPageProps = {
     readonly params: Promise<{ readonly locale: string }>
 }
 

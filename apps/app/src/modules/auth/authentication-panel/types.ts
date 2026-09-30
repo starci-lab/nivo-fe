@@ -62,7 +62,7 @@ export const EMPTY = {
 }
 
 /** Mutable input values stored outside the uncontrolled controls. */
-export type AuthFormValues = typeof EMPTY
+type AuthFormValues = typeof EMPTY
 
 /** Shared uncontrolled form state, kept by the dispatcher across state changes. */
 export type AuthPanelFormState = {

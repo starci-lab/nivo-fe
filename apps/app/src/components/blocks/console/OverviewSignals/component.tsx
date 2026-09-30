@@ -14,7 +14,7 @@ export type OverviewSignalsCell = {
     readonly isSkeleton?: boolean
 }
 /** Resolved signal cells and the card's own label and fact. */
-export type OverviewSignalsViewProps = {
+type OverviewSignalsViewProps = {
     readonly props: {
         readonly label: string
         readonly fact?: string

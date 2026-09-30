@@ -9,7 +9,7 @@ import { useSession } from "../auth/useSession"
 export type NivoQueryKey = readonly [name: string, ...parts: ReadonlyArray<string | number | boolean | null>]
 
 /** The cache key used by every signed-in Nivo query. */
-export type NivoViewerQueryKey = readonly ["NIVO_QUERY", viewerKey: string, ...queryKey: NivoQueryKey]
+type NivoViewerQueryKey = readonly ["NIVO_QUERY", viewerKey: string, ...queryKey: NivoQueryKey]
 
 const tokenHash = (value: string): string => {
     let hash = 2166136261

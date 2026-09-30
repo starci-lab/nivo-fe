@@ -3,7 +3,7 @@ import type { PurchaseStatusHeadProps } from "@/modules/agentos/purchase-status/
 import { BREADCRUMB_LIST_CLASS_NAME, SKELETON_TITLE_RESERVED_CLASS_NAME } from "./classNames"
 
 /** Inputs resolved by the purchase-status owner for the heading region. */
-export type PurchaseStatusHeaderProps = {
+type PurchaseStatusHeaderProps = {
     readonly head: PurchaseStatusHeadProps
     readonly reserveResolvedTitle?: boolean
 }

@@ -37,7 +37,7 @@ export type OverviewAccountInvoiceRow = {
     readonly isSkeleton?: boolean
 }
 /** Resolved account facts, its one invoice row, and its legal commands. */
-export type OverviewAccountViewProps = {
+type OverviewAccountViewProps = {
     readonly state?: PresentationState
     readonly props: {
         readonly label: string

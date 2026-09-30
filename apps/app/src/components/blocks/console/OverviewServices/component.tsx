@@ -21,7 +21,7 @@ export type OverviewServicesRow = {
     readonly isSkeleton?: boolean
 }
 /** Resolved service rows and the card's own label and fact. */
-export type OverviewServicesViewProps = {
+type OverviewServicesViewProps = {
     readonly props: {
         readonly label: string
         readonly fact?: string

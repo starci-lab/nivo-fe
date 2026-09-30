@@ -12,7 +12,7 @@ import {
 import { EXECUTE_CHAT_TRANSCRIPT_CLASS_NAME } from "./classNames"
 
 /** Props for {@link ExecuteChatTranscript}. */
-export type ExecuteChatTranscriptProps = {
+type ExecuteChatTranscriptProps = {
     readonly copy: ExecuteChatBlockCopy
     readonly messages: ReadonlyArray<ExecuteMessage>
     readonly registry: TrustedWidgetRegistry

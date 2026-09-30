@@ -17,7 +17,7 @@ import { selectedIdentity } from "../../modules/agentos/module-page/runtime-valu
 import { idempotencyKey, type ModuleRuntimeControls } from "./agentos.shared"
 
 /** The runtime, the chatbot identity and the shared commands the operate surface connects. */
-export interface ModuleOperateInput {
+interface ModuleOperateInput {
     readonly installationId: string
     readonly runtime: AgentosModuleRuntime | null
     readonly chatbotIdentity: SupportQueryIdentity

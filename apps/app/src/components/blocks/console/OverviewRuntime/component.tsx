@@ -11,7 +11,7 @@ export type OverviewRuntimeFact = {
     readonly isSkeleton?: boolean
 }
 /** Resolved pod facts and the card's own label and fact. */
-export type OverviewRuntimeViewProps = {
+type OverviewRuntimeViewProps = {
     readonly state?: PresentationState
     readonly props: {
         readonly label: string

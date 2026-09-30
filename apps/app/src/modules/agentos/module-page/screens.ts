@@ -23,7 +23,7 @@ import type {
 } from "./surface-types"
 
 /** The connected facts the shell strip is built from. */
-export type ModuleShellInput = {
+type ModuleShellInput = {
     readonly workspaceId: string
     readonly copy: ModulePageCopy
     readonly displayName: string

@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { RouteTabs, SelectionList, type SelectionListGroup } from "@nivo/ui"
 
 /** Every sentence, grouping and selection the installation chrome renders, resolved by its connected index. */
-export type AgentOSInstallationChromeBaseData = {
+type AgentOSInstallationChromeBaseData = {
     readonly modulesLabel: string
     readonly sectionsLabel: string
     readonly groups: ReadonlyArray<SelectionListGroup>
@@ -12,7 +12,7 @@ export type AgentOSInstallationChromeBaseData = {
 }
 
 /** The actions the chrome raises; the connected index binds them to the router. */
-export type AgentOSInstallationChromeBaseActions = {
+type AgentOSInstallationChromeBaseActions = {
     readonly activate: (id: string) => void
     readonly selectTab: (key: string) => void
 }

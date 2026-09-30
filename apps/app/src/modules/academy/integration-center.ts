@@ -7,7 +7,7 @@ export type AcademyIntegrationProviderId =
     "domain" | "google" | "smtp" | "payment" | "zalo" | "ga4" | "meta_pixel" | "webhook"
 
 /** Result of copying a write-only provider secret without leaking the browser rejection. */
-export type AcademyIntegrationSecretCopyOutcome =
+type AcademyIntegrationSecretCopyOutcome =
     | { readonly kind: "copied" }
     | { readonly kind: "unavailable"; readonly cause: unknown }
 
@@ -85,7 +85,7 @@ type CardDetail =
     | { readonly kind: "webhookCount"; readonly count: number }
 
 /** One provider's raw status and safe detail before user-facing copy is applied. */
-export type AcademyIntegrationCardFact = {
+type AcademyIntegrationCardFact = {
     readonly id: AcademyIntegrationProviderId
     readonly status: string
     readonly detail?: CardDetail
@@ -201,7 +201,7 @@ export const academyIntegrationCardFactsOf = (
 
 /** Translation-neutral field description for one provider configuration form. */
 /** Translation-neutral field description for one provider configuration form. */
-export type AcademyIntegrationFormFieldFact = {
+type AcademyIntegrationFormFieldFact = {
     readonly id: string
     readonly name: string
     readonly label: string
@@ -248,7 +248,7 @@ export const academyIntegrationFormFieldFactsOf = (
 }
 
 /** Keep consent mode inside its three-value contract, defaulting any other input to required. */
-export const academyConsentModeOf = (value: string | undefined): "required" | "granted" | "denied" =>
+const academyConsentModeOf = (value: string | undefined): "required" | "granted" | "denied" =>
     value === "granted" || value === "denied" ? value : "required"
 
 /** Name what a completed provider save came to; the connected hook phrases each outcome from the catalogue. */

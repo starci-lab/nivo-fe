@@ -2,7 +2,7 @@ import { CONTENT_CLASS_NAME } from "./classNames"
 import type { AgentWorkspaceControlCenter } from "@/modules/api/agentos-workspaces"
 import { Progress as DirectionProgress, SurfaceCard, Text } from "@starci/grammar/common"
 /** Runtime snapshot and resolved copy consumed by the metrics block. */
-export type AgentOSWorkspaceRuntimeProps = {
+type AgentOSWorkspaceRuntimeProps = {
     readonly data: AgentWorkspaceControlCenter
     readonly labels: {
         readonly section: string

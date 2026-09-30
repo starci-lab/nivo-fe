@@ -8,13 +8,13 @@ export const getGroupChatConversationListClassName = (compact: boolean, decision
 }
 
 /** The ordered conversation list inside the workspace's scroll region. */
-export const GROUP_CHAT_CONVERSATION_LIST_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "py-1")
+const GROUP_CHAT_CONVERSATION_LIST_CLASS_NAME = cn("flex", "min-w-0", "flex-col", "py-1")
 
 /** Invite messages keep the vertical interval shown in the desktop direction. */
-export const GROUP_CHAT_CONVERSATION_LIST_INVITE_CLASS_NAME = cn(
+const GROUP_CHAT_CONVERSATION_LIST_INVITE_CLASS_NAME = cn(
     GROUP_CHAT_CONVERSATION_LIST_CLASS_NAME,
     "min-[70rem]:gap-3",
 )
 
 /** The compact conversation list trims the slot band's outer padding. */
-export const GROUP_CHAT_CONVERSATION_LIST_COMPACT_CLASS_NAME = cn("flex", "min-w-0", "flex-col")
+const GROUP_CHAT_CONVERSATION_LIST_COMPACT_CLASS_NAME = cn("flex", "min-w-0", "flex-col")

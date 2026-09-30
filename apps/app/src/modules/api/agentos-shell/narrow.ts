@@ -121,7 +121,7 @@ export const authoredEnvelope = (value: unknown, expected: ShellRead): ShellSour
 }
 
 /** Narrow the receiver-authored observations carried by a command receipt. */
-export const authoredReceiverObservations = (value: unknown): ReadonlyArray<ShellReceiverObservation> | null => {
+const authoredReceiverObservations = (value: unknown): ReadonlyArray<ShellReceiverObservation> | null => {
     if (!Array.isArray(value)) return null
     const entries: Array<ShellReceiverObservation> = []
     for (const entry of value) {
@@ -151,7 +151,7 @@ export const authoredReceiverObservations = (value: unknown): ReadonlyArray<Shel
 }
 
 /** Narrow local transport gaps without treating them as receiver evidence. */
-export const authoredTransportGaps = (value: unknown): ReadonlyArray<ShellLocalTransportGap> | null => {
+const authoredTransportGaps = (value: unknown): ReadonlyArray<ShellLocalTransportGap> | null => {
     if (!Array.isArray(value)) return null
     const entries: Array<ShellLocalTransportGap> = []
     for (const entry of value) {
@@ -200,7 +200,7 @@ export const authoredObservationProjection = <T>(
 }
 
 /** Narrow one source's current standing inside Core's authority. */
-export const authoredAuthoritySource = (value: unknown): ShellAuthoritySourceStatus | null => {
+const authoredAuthoritySource = (value: unknown): ShellAuthoritySourceStatus | null => {
     if (!isRecord(value) || !isWireAvailability(value.availability)) return null
     const reason = nullableText(value.reason)
     if (reason === undefined) return null
@@ -260,7 +260,7 @@ export const authoredLifecycleObservation = (value: unknown): ShellLifecycleObse
 }
 
 /** Narrow recorder evidence about the candidate actually observed for an installation. */
-export const authoredAppliedRecord = (value: unknown): ShellAppliedRecord | null => {
+const authoredAppliedRecord = (value: unknown): ShellAppliedRecord | null => {
     if (
         !isRecord(value) ||
         !isText(value.installationId) ||
@@ -311,7 +311,7 @@ export const authoredAppliedObservation = (value: unknown): ShellAppliedObservat
 }
 
 /** Narrow the registered return context and bind it to the selected workspace and instance. */
-export const authoredReturnContext = (value: unknown, scope: ShellReadScope): ShellReturnContext | null => {
+const authoredReturnContext = (value: unknown, scope: ShellReadScope): ShellReturnContext | null => {
     if (!isRecord(value) || value.routeName !== SHELL_RETURN_ROUTE_NAME) return null
     if (value.workspaceId !== scope.workspaceId || value.instanceId !== scope.instanceId) return null
     const installationId = nullableText(value.installationId)

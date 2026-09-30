@@ -12,7 +12,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
 }
 
 /** Dynamic identity supplied by the native OpenClaw launch bridge route. */
-export type AgentOSOpenClawLaunchRouteProps = { readonly params: Promise<{ readonly workspaceId: string }> }
+type AgentOSOpenClawLaunchRouteProps = { readonly params: Promise<{ readonly workspaceId: string }> }
 
 /** Mount the credential-free bridge in the browser-created tab. */
 const Page = async ({ params }: AgentOSOpenClawLaunchRouteProps) => {

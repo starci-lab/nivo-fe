@@ -91,7 +91,7 @@ export const provisioningOrderRefOf = (purchase: WorkspaceCheckoutStatusView): s
  * The refund-family phase a refused paid order stands on. A settled refund is shown only beside
  * its linked ledger entry; an unavailable or unlinked projection remains pending reconciliation.
  */
-export const refundPhaseOf = (purchase: WorkspaceCheckoutStatusView): PurchasePhase => {
+const refundPhaseOf = (purchase: WorkspaceCheckoutStatusView): PurchasePhase => {
     const refund = purchase.refund ?? purchase.refundStatus
     if (refund === null || refund === undefined) return "provisioning-refused"
     if (refund.state === "refunded") {
@@ -156,7 +156,7 @@ export const phaseOf = (purchase: WorkspaceCheckoutStatusView): PurchasePhase =>
 }
 
 /** Readiness is settled only by the readiness facet's own state. */
-export const readinessPhaseOf = (state: WorkspaceCheckoutStatusView["readiness"]["state"]): PurchasePhase => {
+const readinessPhaseOf = (state: WorkspaceCheckoutStatusView["readiness"]["state"]): PurchasePhase => {
     if (state === "ready") return "ready"
     if (state === "unavailable") return "provisioning-unknown"
     return "provisioning"

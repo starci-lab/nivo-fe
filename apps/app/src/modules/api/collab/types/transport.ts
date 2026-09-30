@@ -3,7 +3,7 @@ import type { CollabGatewayRequest } from './gateway'
 import type { CollabOperation } from './operation'
 
 /** Credential and request passed to the bound Collab transport. */
-export type CollabTransportCall = {
+type CollabTransportCall = {
     readonly accessToken: string
     readonly request: CollabGatewayRequest
 }

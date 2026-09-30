@@ -4,7 +4,7 @@ import { LifecycleStep, QueryNoticeView, type LifecycleStepData, type QueryNotic
 import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
 
 /** Resolved copy for the shared attachment lifecycle. */
-export type AgentOSModuleAttachmentsLabels = {
+type AgentOSModuleAttachmentsLabels = {
     readonly title: string
     readonly upload: string
     readonly retry?: string

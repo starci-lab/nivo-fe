@@ -4,7 +4,7 @@ import type { AgentOSFlow } from "./index"
 
 type CopyCatalog = ((key: string) => string) & { readonly has: (key: string) => boolean }
 /** One resolved lifecycle milestone in the AgentOS progress rail. */
-export type AgentOSStepView = {
+type AgentOSStepView = {
     readonly ordinal: string
     readonly label: string
     readonly state: "done" | "current" | "upcoming"
@@ -61,7 +61,7 @@ export type AgentOSProvisioningViewProps = {
 }
 
 /** Data required to resolve one localized AgentOS phase into the block view. */
-export type AgentOSProvisioningViewInput = {
+type AgentOSProvisioningViewInput = {
     readonly flow: AgentOSFlow
     readonly steps: ReadonlyArray<AgentOSStepView>
     readonly t: CopyCatalog

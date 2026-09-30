@@ -12,7 +12,7 @@ import type {
 } from "./types"
 
 /** Availability states that may cross the shell wire. */
-export const WIRE_AVAILABILITIES: ReadonlySet<string> = new Set([
+const WIRE_AVAILABILITIES: ReadonlySet<string> = new Set([
     "available",
     "partial",
     "unavailable",
@@ -20,11 +20,11 @@ export const WIRE_AVAILABILITIES: ReadonlySet<string> = new Set([
     "refused",
 ])
 /** Freshness states that may cross the shell wire. */
-export const FRESHNESSES: ReadonlySet<string> = new Set(["current", "stale", "unknown"])
+const FRESHNESSES: ReadonlySet<string> = new Set(["current", "stale", "unknown"])
 /** Completeness states that may cross the shell wire. */
-export const COMPLETENESSES: ReadonlySet<string> = new Set(["complete", "partial", "unknown"])
+const COMPLETENESSES: ReadonlySet<string> = new Set(["complete", "partial", "unknown"])
 /** Queue states the shell may report for a command observation. */
-export const QUEUE_STATES: ReadonlySet<string> = new Set([
+const QUEUE_STATES: ReadonlySet<string> = new Set([
     "queued",
     "claimed",
     "possible_start",
@@ -33,13 +33,13 @@ export const QUEUE_STATES: ReadonlySet<string> = new Set([
     "quarantined",
 ])
 /** Receiver-authored observation kinds accepted by the registered grammar. */
-export const OBSERVATION_KINDS: ReadonlySet<string> = new Set(["progress", "question", "final", "outcome_unknown"])
+const OBSERVATION_KINDS: ReadonlySet<string> = new Set(["progress", "question", "final", "outcome_unknown"])
 /** Configuration requirements accepted for one lifecycle observation. */
-export const CONFIGURATION_REQUIREMENTS: ReadonlySet<string> = new Set(["required", "server_established_not_applicable"])
+const CONFIGURATION_REQUIREMENTS: ReadonlySet<string> = new Set(["required", "server_established_not_applicable"])
 /** Test states accepted for one lifecycle observation. */
-export const TEST_STATES: ReadonlySet<string> = new Set(["not_tested", "testing", "passed", "rejected"])
+const TEST_STATES: ReadonlySet<string> = new Set(["not_tested", "testing", "passed", "rejected"])
 /** Application states accepted for one lifecycle observation. */
-export const APPLICATION_STATES: ReadonlySet<string> = new Set([
+const APPLICATION_STATES: ReadonlySet<string> = new Set([
     "prepared",
     "applying",
     "active",
@@ -51,7 +51,7 @@ export const APPLICATION_STATES: ReadonlySet<string> = new Set([
     "unavailable",
 ])
 /** Destination names Core may register for navigation. */
-export const REGISTERED_VIEWS: ReadonlySet<string> = new Set([
+const REGISTERED_VIEWS: ReadonlySet<string> = new Set([
     "module-home",
     "sales-opportunity",
     "sales-owner-decision",

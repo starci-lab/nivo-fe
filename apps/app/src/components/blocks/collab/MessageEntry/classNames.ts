@@ -20,7 +20,7 @@ export const getGroupChatMessageBodyClassName = (decision: boolean, isViewer: bo
 }
 
 /** A peer message bubble in decision presentation reads on the secondary surface. */
-export const GROUP_CHAT_BUBBLE_CLASS_NAME = cn(
+const GROUP_CHAT_BUBBLE_CLASS_NAME = cn(
     "inline-block",
     "max-w-[38rem]",
     "rounded-xl",
@@ -33,7 +33,7 @@ export const GROUP_CHAT_BUBBLE_CLASS_NAME = cn(
 )
 
 /** The viewer's own message bubble reads on the soft accent surface. */
-export const GROUP_CHAT_BUBBLE_OWN_CLASS_NAME = cn(
+const GROUP_CHAT_BUBBLE_OWN_CLASS_NAME = cn(
     "inline-block",
     "max-w-[38rem]",
     "rounded-xl",
@@ -48,7 +48,7 @@ export const GROUP_CHAT_BUBBLE_OWN_CLASS_NAME = cn(
 )
 
 /** A plain message body in the growth presentation - text on the card, not a bubble. */
-export const GROUP_CHAT_MESSAGE_BODY_CLASS_NAME = cn("max-w-[42rem]")
+const GROUP_CHAT_MESSAGE_BODY_CLASS_NAME = cn("max-w-[42rem]")
 
 /** An addressed module mention reads as a soft accent chip inside the body line. */
 export const GROUP_CHAT_MENTION_CLASS_NAME = cn(

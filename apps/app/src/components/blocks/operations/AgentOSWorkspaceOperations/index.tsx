@@ -1,7 +1,7 @@
 import { CONTENT_CLASS_NAME } from "./classNames"
 import { Button as DirectionButton, SurfaceCard, Text } from "@starci/grammar/common"
 /** Resolved lifecycle labels consumed by the operations block. */
-export type AgentOSWorkspaceOperationsProps = {
+type AgentOSWorkspaceOperationsProps = {
     readonly labels: {
         readonly section: string
         readonly note: string

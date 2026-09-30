@@ -1,7 +1,7 @@
 import PurchaseStatusFlow from "@/components/blocks/agentos/PurchaseStatusFlow"
 
 /** Route identity supplied by the purchase segment. */
-export type AgentOSWorkspacePurchaseProvisioningPageProps = {
+type AgentOSWorkspacePurchaseProvisioningPageProps = {
     readonly params: Promise<{ readonly purchaseId: string }>
 }
 

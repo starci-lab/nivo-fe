@@ -52,7 +52,7 @@ export const apiAnswer = <TArgs extends Array<unknown>, TAnswer>(
 ): TAnswer => answer
 
 /** The failure branch of an API outcome, as spec fixtures build it. */
-export type ApiFailure = Failure
+type ApiFailure = Failure
 
 /** Build a retryable "source unavailable" API failure for specs, with an overridable reason and code. */
 export const unavailableFailure = (reason = "unavailable", code = "UNAVAILABLE"): ApiFailure => ({
@@ -149,7 +149,7 @@ export const collabQuestionFixture = (overrides: Partial<CollabTaskQuestionView>
 })
 
 /** Build a human-authored collab message with plain placeholder values, overridable field by field. */
-export const collabMessageFixture = (overrides: Partial<CollabMessageView> = {}): CollabMessageView => ({
+const collabMessageFixture = (overrides: Partial<CollabMessageView> = {}): CollabMessageView => ({
     messageId: "message-fixture",
     workspaceId: "workspace-fixture",
     groupId: "group-fixture",
