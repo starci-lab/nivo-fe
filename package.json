@@ -206,7 +206,7 @@
     "@playwright/test": "1.51.1",
     "@sonar/scan": "^5.0.0",
     "@starci/eslint-canon-fe": "4.0.0",
-    "@starci/grammar": "0.7.0",
+    "@starci/grammar": "0.7.1",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
@@ -226,7 +226,7 @@
     "vitest": "^3.2.7"
   },
   "overrides": {
-    "@starci/grammar": "0.7.0",
+    "@starci/grammar": "0.7.1",
     "@heroui/react": "3.2.6",
     "@heroui/styles": "3.2.6",
     "next": "16.1.6",
