@@ -3,11 +3,11 @@ import { NivoIcon } from "@nivo/ui"
 import { Button, Heading, PageContainer, Text, TextAction } from "@starci/grammar/common"
 import { ProcessFlow, SectionIntro } from "../../layouts/SiteShell"
 import {
-    HomeMotionHeroParallax,
     HomeMotionHeroReveal,
     HomeMotionRoleCard,
     HomeMotionSectionReveal,
 } from "../../../components/blocks/landing/HomeMotion"
+import { HomeMotionHeroParallax } from "../../../components/blocks/landing/HomeMotionHeroParallax"
 import type { PublicFlowStep } from "../../../modules/landing/homepage"
 import { CLASS_NAMES, homeRoleImageClassName } from "./classNames"
 

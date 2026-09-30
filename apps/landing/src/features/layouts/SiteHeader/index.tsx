@@ -1,11 +1,11 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { ThemeToggle } from "@/components/blocks/theme/ThemeToggle"
 import { useLocalizedHref } from "@/hooks"
 import { SITE_LINKS, SITE_NAVIGATION } from "@/modules/landing/site"
-import { SiteHeaderBase, type SiteHeaderEntry } from "./component"
+import { SITE_MENU_TRIGGER_ID, SiteHeaderBase, type SiteHeaderEntry } from "./component"
 
 /** The connected header takes no input: its disclosure state is owned here. */
 export type SiteHeaderProps = Record<string, never>
@@ -20,7 +20,6 @@ export type SiteHeaderProps = Record<string, never>
 export const SiteHeader = (props: SiteHeaderProps) => {
     void props
     const [isOpen, setIsOpen] = useState(false)
-    const triggerRef = useRef<HTMLButtonElement>(null)
     const t = useTranslations("site")
     const href = useLocalizedHref()
     const navigation: ReadonlyArray<SiteHeaderEntry> = SITE_NAVIGATION.map((item) =>
@@ -43,7 +42,7 @@ export const SiteHeader = (props: SiteHeaderProps) => {
         const closeOnEscape = (event: KeyboardEvent) => {
             if (event.key !== "Escape") return
             setIsOpen(false)
-            triggerRef.current?.focus()
+            document.getElementById(SITE_MENU_TRIGGER_ID)?.focus()
         }
 
         window.addEventListener("keydown", closeOnEscape)
@@ -71,9 +70,6 @@ export const SiteHeader = (props: SiteHeaderProps) => {
             on={{
                 toggle: () => setIsOpen((value) => !value),
                 follow: () => setIsOpen(false),
-                menuTrigger: (element) => {
-                    triggerRef.current = element
-                },
             }}
         />
     )

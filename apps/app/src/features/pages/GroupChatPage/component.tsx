@@ -22,7 +22,6 @@ import {
     GROUP_CHAT_LOADING_CLASS_NAME,
 } from "./classNames"
 export {
-    GROUP_CHAT_HUMAN_ROLES,
     avatarTintClassName,
     buildConversationItems,
     displayMessageBody,

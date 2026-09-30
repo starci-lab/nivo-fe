@@ -4,7 +4,6 @@
  */
 
 import {
-    isBoolean,
     isNullableString,
     isNumber,
     isOneOf,

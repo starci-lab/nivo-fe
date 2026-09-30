@@ -98,12 +98,6 @@ export default defineConfig([
             ...pluginReactHooks.configs.flat["recommended-latest"].rules,
             "react-hooks/rules-of-hooks": "error",
             "react-hooks/exhaustive-deps": "error",
-            // Existing connected state machines still reconcile durable projections in effects;
-            // this rule becomes binding only after those machines move into dedicated hooks.
-            "react-hooks/set-state-in-effect": "off",
-            // React Compiler currently flags the Authentication action aggregate even though its
-            // ref is read only by press callbacks; keep the stable runtime rule set meanwhile.
-            "react-hooks/refs": "off",
             "jsx-a11y/alt-text": "error",
             "jsx-a11y/anchor-has-content": "error",
             "jsx-a11y/anchor-is-valid": "error",

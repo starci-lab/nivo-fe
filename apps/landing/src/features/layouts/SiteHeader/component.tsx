@@ -97,11 +97,13 @@ export type SiteHeaderBaseData = {
     readonly navigation: ReadonlyArray<SiteHeaderEntry>
 }
 
+/** The compact navigation trigger's id: focus returns to it when Escape closes the panel. */
+export const SITE_MENU_TRIGGER_ID = "site-menu-trigger"
+
 /** The disclosure's commands back into the connected half. */
 export type SiteHeaderBaseActions = {
     readonly toggle: () => void
     readonly follow: () => void
-    readonly menuTrigger: (element: HTMLButtonElement | null) => void
 }
 
 /** The mounted control the header hosts but does not own. */
@@ -152,7 +154,7 @@ export const SiteHeaderBase = (props: SiteHeaderProps) => {
                 </div>
 
                 <button
-                    ref={on.menuTrigger}
+                    id={SITE_MENU_TRIGGER_ID}
                     className={SITE_CLASS_NAMES.headerMenuTrigger}
                     type="button"
                     aria-controls={panelId}

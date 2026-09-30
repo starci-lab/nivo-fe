@@ -10,7 +10,7 @@
     CollabTaskView,
 } from "../../api/collab"
 import type { CollabTasksFilter } from "../../../hooks"
-import { COLLAB_HUMAN_ROLES, isCollabHumanRole } from "./model.guards"
+import { isCollabHumanRole } from "./model.guards"
 
 const GROUP_CHAT_AVATAR_TINT_CLASS_NAMES = [
     "bg-accent-soft",
@@ -39,9 +39,6 @@ export type GroupChatTab = "office" | "tasks"
  * member chip on one chrome row and presents the member content as a bottom
  * sheet instead of the right-edge drawer.
  */
-
-/** Roles an invitation or role change may name - the closed V1 set. */
-export const GROUP_CHAT_HUMAN_ROLES: ReadonlyArray<CollabHumanRole> = COLLAB_HUMAN_ROLES
 
 /**
  * Presentation hint only: the invite controls appear while the server-derived

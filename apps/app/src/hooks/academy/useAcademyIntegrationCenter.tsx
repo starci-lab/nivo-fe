@@ -94,9 +94,9 @@ export const useAcademyIntegrationCenter = (siteId: string): AcademyIntegrationC
         }
         const saveOutcome = academyIntegrationOutcomeOf(selectedId, result.ok)
         setOutcome(
-            outcome === "failed"
+            saveOutcome === "failed"
                 ? t("saveFailed")
-                : outcome === "secret-copied"
+                : saveOutcome === "secret-copied"
                   ? t("webhookSecretCopied")
                   : t("saved"),
         )

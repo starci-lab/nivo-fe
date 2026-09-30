@@ -99,9 +99,8 @@ export const parseOverride = (raw: string, fixture: AgentosRuntimeValue): Agento
         try {
             const parsed: unknown = JSON.parse(raw)
             if (Array.isArray(parsed)) {
-                const entries: ReadonlyArray<unknown> = parsed
                 const items: Array<AgentosRuntimeValue> = []
-                for (const entry of entries) {
+                for (const entry of parsed satisfies ReadonlyArray<unknown>) {
                     if (!isAgentosRuntimeValue(entry))
                         return raw
                             .split(",")

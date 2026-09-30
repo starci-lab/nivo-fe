@@ -5,7 +5,7 @@
 } from "../../../../modules/collab/group-chat/types"
 import { GROUP_CHAT_FORM_STACK_CLASS_NAME, GROUP_CHAT_FORM_STACK_COMPACT_CLASS_NAME } from "./classNames"
 import { Button, Input, RadioGroup, Text } from "@starci/grammar/common"
-import { GROUP_CHAT_HUMAN_ROLES } from "../../../../modules/collab/group-chat/model"
+import { COLLAB_HUMAN_ROLES } from "../../../../modules/collab/group-chat/model.guards"
 import type { CollabHumanRole } from "../../../../modules/api/collab"
 
 /** Props for the role-gated invitation form shared by the member rail and the compact sheet. */
@@ -42,7 +42,7 @@ export const InviteForm = (props: InviteFormProps) => {
             <RadioGroup
                 name="invite-role"
                 label={labels.invite.role}
-                options={GROUP_CHAT_HUMAN_ROLES.map((role) => ({ value: role, label: labels.roles[role] }))}
+                options={COLLAB_HUMAN_ROLES.map((role) => ({ value: role, label: labels.roles[role] }))}
                 value={view.invite.role}
                 orientation="horizontal"
                 isDisabled={view.invite.pending}

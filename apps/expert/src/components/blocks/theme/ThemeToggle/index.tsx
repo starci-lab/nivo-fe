@@ -3,8 +3,13 @@
 import { THEME_MODES, type ThemeMode } from "@nivo/ui"
 import { useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
+import { useSyncExternalStore } from "react"
 import { ThemeToggleBase } from "./component"
+
+/** No store to watch: the mounted flag only differs between the server render and the client. */
+const subscribeNever = () => () => undefined
+const readMountedOnClient = () => true
+const readMountedOnServer = () => false
 
 /** The toggle reads the theme provider and the catalogue, so it takes no props. */
 export type ThemeToggleProps = Record<string, never>
@@ -23,8 +28,7 @@ export const ThemeToggle = (props: ThemeToggleProps) => {
     void props
     const t = useTranslations("theme")
     const { theme, resolvedTheme, setTheme } = useTheme()
-    const [isMounted, setIsMounted] = useState(false)
-    useEffect(() => setIsMounted(true), [])
+    const isMounted = useSyncExternalStore(subscribeNever, readMountedOnClient, readMountedOnServer)
     return (
         <ThemeToggleBase
             props={{
