@@ -1,3 +1,4 @@
+import Image from "next/image"
 import {
     FIGURE_CLASS_NAME,
     FIGURE_IMAGE_CLASS_NAME,
@@ -19,9 +20,12 @@ export const AcademySectionFigure = (props: AcademySectionFigureProps) => {
     return (
         <figure className={FIGURE_CLASS_NAME} style={{ aspectRatio: ratio }}>
             {usable ? (
-                <img
+                <Image
                     src={props.src}
                     alt={props.alt}
+                    fill
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    unoptimized
                     referrerPolicy="no-referrer"
                     onError={() => props.src !== undefined && props.failImage(props.src)}
                     className={FIGURE_IMAGE_CLASS_NAME}

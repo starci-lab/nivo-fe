@@ -1,5 +1,7 @@
 import { render, screen } from "@testing-library/react"
+import { NextIntlClientProvider } from "next-intl"
 import { describe, expect, it } from "vitest"
+import { TIME_ZONE } from "../../../../modules/i18n/config"
 import type { KindWorkbenchBlockCopy, WorkbenchProps } from "../../../../modules/agentos/kind-workbench"
 import { KindWorkbenchContent } from "."
 
@@ -48,7 +50,11 @@ const props: WorkbenchProps = {
 
 describe("KindWorkbenchContent", () => {
     it("projects active task counts and the next task from runtime data", () => {
-        render(<KindWorkbenchContent props={props} mode="support-queue" />)
+        render(
+            <NextIntlClientProvider locale="en" timeZone={TIME_ZONE}>
+                <KindWorkbenchContent props={props} mode="support-queue" />
+            </NextIntlClientProvider>,
+        )
         expect(screen.getByRole("heading", { name: "Support queue" })).toBeInTheDocument()
         expect(screen.getByText("Urgent follow up")).toBeInTheDocument()
     })

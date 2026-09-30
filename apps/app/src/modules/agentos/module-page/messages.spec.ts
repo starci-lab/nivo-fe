@@ -1,4 +1,4 @@
-import { createTranslator } from "next-intl"
+import { createFormatter, createTranslator } from "next-intl"
 import { describe, expect, it } from "vitest"
 import enMessages from "../../../messages/en.json"
 import { TIME_ZONE } from "../../i18n/config"
@@ -70,7 +70,7 @@ describe("executeSessionsFor", () => {
                 runtimeSessionFixture({ id: "s-2", mode: "execute", isArchived: true }),
             ],
         })
-        const rows = executeSessionsFor(runtime, copy)
+        const rows = executeSessionsFor(runtime, copy, createFormatter({ locale: "en" }))
         expect(rows.map((row) => row.title)).toEqual([
             copy.shell.primaryOperations,
             copy.shell.conversation({ number: 2 }),

@@ -1,4 +1,4 @@
-import { createTranslator } from "next-intl"
+import { createFormatter, createTranslator } from "next-intl"
 import { describe, expect, it, vi } from "vitest"
 import enMessages from "../../../messages/en.json"
 import { TIME_ZONE } from "../../i18n/config"
@@ -123,6 +123,7 @@ const source = (
     return {
         runtime: overrideRuntime ?? moduleRuntimeFixture(),
         copy,
+        format: createFormatter({ locale: "en" }),
         view: "setup",
         pending: false,
         refused: false,

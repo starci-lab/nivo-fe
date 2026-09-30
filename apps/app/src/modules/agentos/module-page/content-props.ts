@@ -3,6 +3,7 @@ import type { ContextDraft } from "../../../components/blocks/agentos/ContextVer
 import type { AgentosModuleRuntime, AgentosRuntimeSession } from "../../api/agentos-module-runtime"
 import type { AgentosModuleTestContract, AgentosModuleTestSurface } from "../../api/agentos-module-tests"
 import type { AgentosRuntimeValue } from "../../api/agentos-runtime-tree"
+import type { Formatter } from "../../i18n/formatter"
 import type { ModulePageCopy } from "../module-page-copy"
 import { exactTestSurfaceFor } from "./exactTestSurfaceFor"
 import {
@@ -182,19 +183,20 @@ export type OperateContentInput = {
     readonly copy: ModulePageCopy
     readonly pending: boolean
     readonly refused: boolean
+    readonly format: Formatter
     readonly operate: ModuleOperateView
 }
 
 /** The operate surface's settled content props for one runtime and session selection. */
 export const operateContentPropsFor = (input: OperateContentInput): OperateSurfaceProps => {
-    const { runtime, copy, operate } = input
+    const { runtime, copy, format, operate } = input
     const selectedSession = executeSessionFor(runtime, operate.selectedSessionId)
     return {
         installationId: runtime.installation.id,
         kindKey: runtime.installation.kindKey,
         workbenchKey: runtime.installation.workbenchKey,
         workbenchVersion: runtime.installation.workbenchVersion,
-        sessions: executeSessionsFor(runtime, copy),
+        sessions: executeSessionsFor(runtime, copy, format),
         selectedSessionId: operate.selectedSessionId,
         selectedSessionTitle: selectedSessionTitleFor(selectedSession, runtime, copy),
         messages: executeMessagesFor(runtime, selectedSession, copy),

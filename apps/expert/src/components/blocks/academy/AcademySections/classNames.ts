@@ -1,7 +1,7 @@
 import { cn } from "@heroui/react"
 
 /** Frame classes for authored academy imagery. */
-export const FIGURE_CLASS_NAME = cn("rounded-xl", "border", "border-border", "bg-surface-secondary")
+export const FIGURE_CLASS_NAME = cn("relative", "overflow-hidden", "rounded-xl", "border", "border-border", "bg-surface-secondary")
 
 /** Image classes that preserve the authored figure frame. */
 export const FIGURE_IMAGE_CLASS_NAME = cn("h-full", "w-full", "rounded-xl", "object-cover")

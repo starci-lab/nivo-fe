@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import type { AgentOSModuleView } from "../../../components/blocks/agentos/ModuleRouteShellBlock"
 import type { ContextDraft } from "../../../components/blocks/agentos/ContextVersionBlock"
 import type { AgentosModuleRuntime } from "../../api/agentos-module-runtime"
+import type { Formatter } from "../../i18n/formatter"
 import type { ModulePageCopy } from "../module-page-copy"
 import { channelLabelFor } from "./channel-identity"
 import {
@@ -57,6 +58,7 @@ export const moduleShellPropsFor = (input: ModuleShellInput): AgentOSSolutionMod
 export type ModuleScreenSource = {
     readonly runtime: AgentosModuleRuntime
     readonly copy: ModulePageCopy
+    readonly format: Formatter
     readonly view: AgentOSModuleView
     readonly pending: boolean
     readonly refused: boolean
@@ -95,6 +97,7 @@ export const moduleScreenFor = (source: ModuleScreenSource): AgentOSSolutionModu
                 copy: source.copy,
                 pending: source.pending,
                 refused: source.refused,
+                format: source.format,
                 operate: source.operate,
             }),
         }

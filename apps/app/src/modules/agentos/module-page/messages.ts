@@ -2,6 +2,7 @@ import type { ExecuteMessage } from "../../../components/blocks/agentos/ExecuteC
 import type { ExecuteSession } from "../../../components/blocks/agentos/ExecuteSessionRailBlock"
 import type { SetupMessage, SetupRevision } from "../../../components/blocks/agentos/PrivateSetupChatBlock"
 import type { AgentosModuleRuntime, AgentosRuntimeSession } from "../../api/agentos-module-runtime"
+import type { Formatter } from "../../i18n/formatter"
 import type { ModulePageCopy } from "../module-page-copy"
 import { executeSessionTitleFor } from "./sessions"
 
@@ -45,6 +46,7 @@ export const setupOpenFor = (runtime: AgentosModuleRuntime): boolean =>
 export const executeSessionsFor = (
     runtime: AgentosModuleRuntime,
     copy: ModulePageCopy,
+    format: Formatter,
 ): ReadonlyArray<ExecuteSession> =>
     runtime.executeSessions.map((item, index) => ({
         id: item.id,
@@ -52,7 +54,7 @@ export const executeSessionsFor = (
             item.id === runtime.installation.primaryOpsSessionId
                 ? copy.shell.primaryOperations
                 : executeSessionTitleFor(item.title, index, copy),
-        updatedLabel: new Date(item.updatedAt).toLocaleDateString(),
+        updatedLabel: format.dateTime(new Date(item.updatedAt), { dateStyle: "medium" }),
         status: item.isArchived ? "archived" : "active",
     }))
 

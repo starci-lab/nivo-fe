@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useTranslations } from "next-intl"
+import { useFormatter, useTranslations } from "next-intl"
 import {
     useModuleOperate,
     useModuleRuntime,
@@ -17,6 +17,7 @@ import { contextDraftFor } from "../../../modules/agentos/module-page/setup-draf
 import { moduleScreenFor, moduleShellPropsFor } from "../../../modules/agentos/module-page/screens"
 import { activeVersionFor } from "../../../modules/agentos/module-page/sessions"
 import { QueryNotice } from "../../../components/blocks/query/QueryNotice"
+import type { Formatter } from "../../../modules/i18n/formatter"
 import { installation, workspaceModules } from "../../../modules/routes"
 import { AgentOSSolutionModulePageBase, AgentOSSolutionModuleState, buildModulePageCopy } from "./component"
 
@@ -32,6 +33,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
     const { workspaceId, installationId, view = "setup" }: AgentOSSolutionModulePageProps = props
     const router = useRouter()
     const t = useTranslations("console.agentos.modules")
+    const format: Formatter = useFormatter()
     const statusT = useTranslations("console.agentos.workspace.solutions.status")
     const copy = buildModulePageCopy(t)
     const lifecycleLabels: Readonly<Partial<Record<string, string>>> = {
@@ -121,6 +123,7 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
         view,
         runtime,
         copy,
+        format,
         pending: moduleRuntime.pending,
         refused: moduleRuntime.refused,
         activeVersion,
