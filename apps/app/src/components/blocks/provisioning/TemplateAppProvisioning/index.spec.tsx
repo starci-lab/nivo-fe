@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import type { ReactNode } from "react"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import type * as TemplateAppProvisioningComponent from "./component"
@@ -29,6 +30,12 @@ type TemplateProbeProps = {
     on?: { changeSlug?: (value: string) => void; submit?: () => void; act?: () => void }
 }
 
+type TemplatePageProbeProps = {
+    readonly props: { readonly mode: string }
+    readonly on: { readonly openApps: () => void }
+    readonly children: ReactNode
+}
+
 vi.mock("@/hooks", async (importOriginal) => ({
     ...(await importOriginal<object>()),
     useRouter: () => ({ replace: mocks.replace, push: mocks.push }),
@@ -57,9 +64,14 @@ vi.mock("./component", () => ({
             </button>
         </div>
     ),
+    TemplateAppProvisioningPageBase: ({ props, on }: TemplatePageProbeProps) => (
+        <button type="button" onClick={on.openApps}>
+            {props.mode}
+        </button>
+    ),
 }))
 
-import { TemplateAppProvisioning } from "./"
+import { TemplateAppProvisioning, TemplateAppProvisioningPage } from "./"
 
 const item = { id: "item", name: "Academy", templateKey: "ai_academy" }
 const flow = () => screen.getByTestId("template-flow").textContent ?? ""
@@ -193,6 +205,14 @@ describe("TemplateAppProvisioning", () => {
         render(<TemplateAppProvisioning context={{ mode: "resume", siteId: "site" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"failed"'))
         fireEvent.click(screen.getByTestId("act"))
+        expect(mocks.push).toHaveBeenCalledWith("/apps")
+    })
+})
+
+describe("TemplateAppProvisioningPage connected route", () => {
+    it("preserves the route composition and returns to apps", () => {
+        render(<TemplateAppProvisioningPage mode="resume" siteId="site-1" />)
+        fireEvent.click(screen.getByRole("button", { name: "resume" }))
         expect(mocks.push).toHaveBeenCalledWith("/apps")
     })
 })

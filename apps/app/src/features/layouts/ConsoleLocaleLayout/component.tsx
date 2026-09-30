@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { ConsoleProviders, type ConsoleProvidersData } from "../ConsoleProviders"
+import { ConsoleProviders, type ConsoleProvidersData } from "@/app/[locale]/providers"
 
 /** The resolved request facts the provider stack needs, resolved by its connected index. */
 type ConsoleLocaleLayoutBaseData = ConsoleProvidersData

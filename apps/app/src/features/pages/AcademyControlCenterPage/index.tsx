@@ -1,16 +1,13 @@
-"use client"
-
-import { useState } from "react"
-import { AcademyControlCenterPageBase, type AcademyControlCenterMode } from "./component"
+import { AcademyControlCenter } from "@/components/blocks/academy/AcademyControlCenter"
 
 /** Exact Academy identity supplied by the resource route. */
 export type AcademyControlCenterPageProps = {
     readonly siteId: string
 }
 
-/** Own the Growth/System page composition and delegate site lifecycle to its block. */
-export const AcademyControlCenterPage = (props: AcademyControlCenterPageProps) => {
-    const { siteId }: AcademyControlCenterPageProps = props
-    const [mode, setMode] = useState<AcademyControlCenterMode>("growth")
-    return <AcademyControlCenterPageBase props={{ siteId, mode }} on={{ selectMode: setMode }} />
-}
+/** Compose the interactive Academy block for one resource route. */
+export const AcademyControlCenterPage = (props: AcademyControlCenterPageProps) => (
+    <AcademyControlCenter siteId={props.siteId} />
+)
+
+export default AcademyControlCenterPage

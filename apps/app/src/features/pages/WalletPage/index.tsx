@@ -1,28 +1,12 @@
-"use client"
+import { WalletControlCenter } from "@/components/blocks/wallet/WalletControlCenter"
 
-import { Suspense } from "react"
-import { useSearchParams } from "next/navigation"
-import { useTranslations } from "next-intl"
-import { RouteLoadingView } from "@nivo/ui"
-import { WalletPageBase, type WalletPageState } from "./component"
-/** Public API role for WalletPageProps. */
+/** Empty route input; the wallet reads its payment return state from the address. */
 export type WalletPageProps = { readonly [key: string]: never }
-const WAYPOINT_KEYS = ["orderId", "invoiceId", "returnTo"] as const
 
-/** Resolve the route-owned architecture axis inside the boundary required by Next prerendering. */
-const WalletPageSearchState = () => {
-    const searchParams = useSearchParams()
-    const pageState: WalletPageState = WAYPOINT_KEYS.some((key) => searchParams.has(key)) ? "waypoint" : "ordinary"
-    return <WalletPageBase state={pageState} />
-}
-
-/** Connect only the page architecture axis; WalletControlCenter owns every local block and overlay condition. */
+/** Compose the interactive wallet block below the server route. */
 export const WalletPage = (props: WalletPageProps) => {
     void props
-    const t = useTranslations("boundary.loading")
-    return (
-        <Suspense fallback={<RouteLoadingView props={{ label: t("label") }} />}>
-            <WalletPageSearchState />
-        </Suspense>
-    )
+    return <WalletControlCenter />
 }
+
+export default WalletPage

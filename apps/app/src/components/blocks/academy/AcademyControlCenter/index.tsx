@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { useIsHydrated } from "@nivo/ui"
 import { useTranslations } from "next-intl"
 import { useQueryMyExpertSitesSwr, useQueryNoticeData } from "@/hooks"
@@ -10,13 +11,12 @@ import { AcademyControlCenterBase, type AcademyControlCenterMode } from "./compo
 /** Exact Academy identity supplied by the resource route. */
 export type AcademyControlCenterProps = {
     readonly siteId: string
-    readonly mode: AcademyControlCenterMode
-    readonly onSelectMode: (mode: AcademyControlCenterMode) => void
 }
 
 /** Resolve ownership and page identity; each block resolves its own domain state. */
 export const AcademyControlCenter = (props: AcademyControlCenterProps) => {
-    const { siteId, mode, onSelectMode }: AcademyControlCenterProps = props
+    const { siteId }: AcademyControlCenterProps = props
+    const [mode, setMode] = useState<AcademyControlCenterMode>("growth")
     const t = useTranslations("console.academyControlCenter")
     const mounted = useIsHydrated()
     const answer = useQueryMyExpertSitesSwr()
@@ -54,7 +54,7 @@ export const AcademyControlCenter = (props: AcademyControlCenterProps) => {
                 },
             }}
             on={{
-                selectMode: onSelectMode,
+                selectMode: setMode,
                 retryNotice: () => void answer.mutate(),
                 openPublicSite: () => {
                     if (publicHost !== undefined) window.open(`https://${publicHost}`, "_blank", "noopener,noreferrer")

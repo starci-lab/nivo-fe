@@ -1,42 +1,13 @@
-"use client"
+import { TemplateAppProvisioningPage as TemplateAppProvisioningPageBlock } from "@/components/blocks/provisioning/TemplateAppProvisioning"
 
-import { useTranslations } from "next-intl"
-import { useRouter } from "@/hooks"
-import { apps } from "@/modules/routes"
-import {
-    TemplateAppProvisioningPageBase,
-    type TemplateAppProvisioningPageLabels,
-    type TemplateAppProvisioningRouteProps,
-} from "./component"
+/** Route identity needed to create or resume one Template App. */
+export type TemplateAppProvisioningPageProps =
+    | { readonly mode: "new"; readonly templateKey: string }
+    | { readonly mode: "resume"; readonly siteId: string }
 
-/** Route identity plus the optional resolutions this page always fills. */
-export type TemplateAppProvisioningPageProps = TemplateAppProvisioningRouteProps & {
-    readonly labels?: TemplateAppProvisioningPageLabels
-    readonly onOpenApps?: () => void
-}
+/** Compose the interactive Template App provisioning block for its route identity. */
+export const TemplateAppProvisioningPage = (props: TemplateAppProvisioningPageProps) => (
+    <TemplateAppProvisioningPageBlock {...props} />
+)
 
-/** Resolve route-level copy and navigation around the connected lifecycle block. */
-export const TemplateAppProvisioningPage = (props: TemplateAppProvisioningPageProps) => {
-    const t = useTranslations("console")
-    const router = useRouter()
-    const route =
-        props.mode === "new"
-            ? { mode: "new" as const, templateKey: props.templateKey }
-            : { mode: "resume" as const, siteId: props.siteId }
-    return (
-        <TemplateAppProvisioningPageBase
-            props={{
-                ...route,
-                labels: {
-                    path: t("navigationLabel"),
-                    apps: t("apps.title"),
-                    createTitle: t("apps.createTitle"),
-                    createDescription: t("apps.createDescription"),
-                    provisioningTitle: t("apps.provisioningTitle"),
-                    provisioningDescription: t("apps.provisioningDescription"),
-                },
-            }}
-            on={{ openApps: () => router.push(apps()) }}
-        />
-    )
-}
+export default TemplateAppProvisioningPage

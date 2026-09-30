@@ -1,8 +1,8 @@
-﻿import { fireEvent, render, screen } from "@testing-library/react"
-import { matchMediaFixture } from "../../../test-support/mock-result"
+import { fireEvent, render, screen } from "@testing-library/react"
+import { matchMediaFixture } from "@/test-support/mock-result"
 import { beforeAll, describe, expect, it } from "vitest"
 import { GroupChatPageBase } from "./component"
-import { actions, baseView, labels } from "../../../modules/collab/group-chat/test-fixtures.fixture"
+import { actions, baseView, labels } from "@/modules/collab/group-chat/test-fixtures.fixture"
 
 describe("GroupChatPageBase", () => {
     beforeAll(() => {

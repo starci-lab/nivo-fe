@@ -2,9 +2,10 @@
 
 import { useFormatter, useTranslations } from "next-intl"
 import { useNow, useOverviewData } from "@/hooks"
-import type { DomainRow } from "@/modules/api/commerce"
+
 import { BILLING_CURRENCY } from "@/modules/config"
 import { OverviewSignalsBase, type OverviewSignalsCell } from "./component"
+
 /** Public API role for OverviewSignalsProps. */
 export type OverviewSignalsProps = {
     readonly label: string
@@ -64,7 +65,7 @@ export const OverviewSignals = (props: OverviewSignalsProps) => {
             day: "2-digit",
             month: "2-digit",
         })
-    const domainStatus = (domain: DomainRow) => {
+    const domainStatus = (domain: DomainFieldsFragment) => {
         if (domain.expiresAt !== null)
             return t("domains.expiresAt", {
                 date: day(domain.expiresAt),

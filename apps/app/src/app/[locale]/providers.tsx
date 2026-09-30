@@ -21,13 +21,7 @@ type ConsoleProvidersProps = {
     readonly children: ReactNode
 }
 
-/**
- * Mount request locale, vendor theme and session contexts around the routed stream.
- *
- * The providers are client components (one of them, `@heroui/react`, is `client-only` and cannot
- * even be imported from a server module), so the whole stack is one connected unit: this file is
- * the client boundary the locale layout hands its resolved request facts to.
- */
+/** Mount locale, vendor theme and session providers around the routed stream. */
 export const ConsoleProviders = ({ props, children }: ConsoleProvidersProps) => {
     const { locale, messages, timeZone } = props
     return (

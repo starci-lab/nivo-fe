@@ -1,11 +1,12 @@
+import type { AgentosModuleTestContractView } from "@/modules/api/agentos-module-tests"
+
 import { renderToStaticMarkup } from "react-dom/server"
 import { NextIntlClientProvider, useTranslations } from "next-intl"
-import enMessages from "../../../messages/en.json"
-import viMessages from "../../../messages/vi.json"
+import enMessages from "@/messages/en.json"
+import viMessages from "@/messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n"
 import { describe, expect, it, vi } from "vitest"
-import type { AgentosModuleTestContract } from "../../../modules/api/agentos-module-tests"
-import { SessionProvider } from "../../../modules/auth/session"
+import { SessionProvider } from "@/modules/auth/session"
 import {
     AgentOSSolutionModulePageBase,
     type AgentOSSolutionModulePageViewProps,
@@ -29,7 +30,7 @@ const shellOn: AgentOSSolutionModulePageViewProps["on"] = {
     navigate: action,
 }
 
-const contract: AgentosModuleTestContract = {
+const contract: AgentosModuleTestContractView = {
     workbench: { key: "conversation-sandbox", version: "1.0.0" },
     contract: { key: "conversation-test", version: "1.0.0" },
     sandboxAdapter: { key: "declarative-scenario", version: "1.0.0" },

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { expectNoA11yViolations } from "@/testing/axe"
 
 const signedIn = { state: { status: "signed-in", accessToken: "control-center-token" } }
+const route = vi.hoisted(() => ({ search: "" }))
 const resetQueryCache = () => {
     for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key)
 }
@@ -11,7 +12,7 @@ if (!Element.prototype.getAnimations) Element.prototype.getAnimations = () => []
 
 vi.mock("next/navigation", async () => ({
     ...(await vi.importActual("next/navigation")),
-    useSearchParams: () => new URLSearchParams(),
+    useSearchParams: () => new URLSearchParams(route.search),
 }))
 vi.mock("@/hooks/i18n/useRouter", () => ({ useRouter: () => ({ push: vi.fn(), replace: vi.fn() }) }))
 vi.mock("@/hooks/i18n/usePathname", () => ({ usePathname: () => "/wallet" }))
@@ -60,6 +61,7 @@ import { WalletControlCenter } from "."
 
 describe("WalletControlCenter", () => {
     beforeEach(() => {
+        route.search = ""
         window.matchMedia = vi
             .fn()
             .mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })
@@ -70,9 +72,15 @@ describe("WalletControlCenter", () => {
     })
 
     it("has no axe violations", async () => {
-        const { container } = render(<WalletControlCenter pageState="ordinary" />)
+        const { container } = render(<WalletControlCenter />)
         await waitFor(() => expect(container.childElementCount).toBeGreaterThan(0))
         await waitFor(() => expect(container.querySelector("[aria-busy=true]")).toBeNull())
         await expectNoA11yViolations(container)
+    })
+
+    it("reads a payment return waypoint from the address", async () => {
+        route.search = "orderId=order-1"
+        const { container } = render(<WalletControlCenter />)
+        await waitFor(() => expect(container.querySelector('[data-mode="back"]')).not.toBeNull())
     })
 })

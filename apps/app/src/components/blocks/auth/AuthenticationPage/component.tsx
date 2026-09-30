@@ -1,6 +1,7 @@
-﻿import type { AuthMode, AuthNoticeCopy, AuthPendingAction } from "@/components/blocks/auth/AuthenticationPanel"
+import type { AuthMode, AuthNoticeCopy, AuthPendingAction } from "@/components/blocks/auth/AuthenticationPanel"
 import type { AuthNoticeKind, AuthPhase } from "@/modules/auth/authentication"
 import type { AuthenticationTranslate } from "@/hooks/auth/auth.shared"
+import type { AuthenticationJourneyExit } from "./journeys"
 import { NivoBrand, NivoUnicornArtwork } from "@nivo/ui"
 import { Heading, SurfaceCard, Text, TextAction } from "@starci/grammar/common"
 import { AuthenticationPanel, type AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel"
@@ -15,16 +16,6 @@ import {
 
 /** Presentational authentication page: heading, panel and journey exits. */
 
-/** Where the reader may go instead, drawn outside the surface. */
-type AuthenticationPageExit = {
-    /** The question the action answers, or `""` for an exit that stands alone. */
-    readonly question: string
-    /** The action's own words. */
-    readonly action: string
-    /** What taking it does. */
-    readonly onPress: () => void
-}
-
 /**
  * Props for {@link AuthenticationPageView}.
  *
@@ -36,7 +27,7 @@ type AuthenticationPageViewProps = {
     /** The panel's complete translated state and actions. */
     readonly panel: AuthenticationPanelProps
     /** Everything offered below the surface, in reading order. */
-    readonly exits: ReadonlyArray<AuthenticationPageExit>
+    readonly exits: ReadonlyArray<AuthenticationJourneyExit>
     /** The catalogue-resolved brand name announced by the lockup. */
     readonly brandLabel: string
 }

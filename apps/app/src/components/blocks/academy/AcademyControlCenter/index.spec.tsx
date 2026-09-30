@@ -64,19 +64,18 @@ describe("AcademyControlCenter connected owner", () => {
     })
 
     it("restores, resolves the owned site, reports tab selection, and opens the public host", async () => {
-        const onSelectMode = vi.fn()
-        render(<AcademyControlCenter siteId="site-1" mode="growth" onSelectMode={onSelectMode} />)
+        render(<AcademyControlCenter siteId="site-1" />)
         expect(screen.getByTestId("state")).toHaveTextContent("restoring")
         await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("ready:growth"))
         fireEvent.click(screen.getByText("system"))
-        expect(onSelectMode).toHaveBeenCalledWith("system")
+        expect(screen.getByTestId("state")).toHaveTextContent("ready:system")
         fireEvent.click(screen.getByText("open"))
         expect(window.open).toHaveBeenCalledWith("https://academy.nivo.vn", "_blank", "noopener,noreferrer")
     })
     it("renders failed state when the site is not owned", async () => {
         m.sites = { ok: true, data: [] }
         m.list.mockResolvedValue(m.sites)
-        render(<AcademyControlCenter siteId="missing" mode="growth" onSelectMode={vi.fn()} />)
+        render(<AcademyControlCenter siteId="missing" />)
         await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("failed"))
     })
 })
