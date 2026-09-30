@@ -15,6 +15,8 @@ export const MESSAGE_SCOPES = {
     authentication: ["app", "authentication"],
     /** The authenticated console and the launch bridges it opens. */
     console: ["app", "authentication", "agentos", "provisioning", "console", "metadata"],
+    /** AgentOS console routes and the launch bridges: the console copy (which holds the AgentOS surfaces) and the sales workbench copy, no sign-in or metadata copy. */
+    agentos: ["console", "agentos"],
 } as const satisfies Readonly<Record<string, ReadonlyArray<string>>>
 
 /** One route group message scope. */

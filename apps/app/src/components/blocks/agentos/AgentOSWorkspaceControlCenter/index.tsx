@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useWorkspaceControlCenter } from "@/hooks/agentos/useWorkspaceControlCenter"
 import { AgentOSWorkspaceControlCenterBase, type AgentOSWorkspacePageState } from "./component"

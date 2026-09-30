@@ -13,16 +13,16 @@ vi.mock("@/features/layouts/MessageScope", () => ({
     ),
 }))
 
-import LaunchRouteLayout from "./layout"
+import AgentOSRouteLayout from "./layout"
 
-describe("launch route layout", () => {
-    it("carries the AgentOS copy the launch bridges open surfaces for", () => {
+describe("AgentOS route layout", () => {
+    it("carries the AgentOS slice of the catalogue for its routes", () => {
         render(
-            <LaunchRouteLayout>
-                <span>bridge</span>
-            </LaunchRouteLayout>,
+            <AgentOSRouteLayout>
+                <span>page</span>
+            </AgentOSRouteLayout>,
         )
         expect(screen.getByTestId("message-scope")).toHaveAttribute("data-scope", "agentos")
-        expect(screen.getByTestId("message-scope")).toContainElement(screen.getByText("bridge"))
+        expect(screen.getByTestId("message-scope")).toContainElement(screen.getByText("page"))
     })
 })

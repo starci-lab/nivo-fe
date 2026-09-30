@@ -32,4 +32,8 @@ describe("MESSAGE_SCOPES", () => {
         expect(size(MESSAGE_SCOPES.authentication)).toBeLessThan(size(MESSAGE_SCOPES.console) / 5)
         expect(Object.keys(pickMessages(en, MESSAGE_SCOPES.console)).sort()).toEqual(Object.keys(en).sort())
     })
+
+    it("ships the AgentOS routes the console and agentos namespaces and nothing else", () => {
+        expect(Object.keys(pickMessages(en, MESSAGE_SCOPES.agentos)).sort()).toEqual(["agentos", "console"])
+    })
 })

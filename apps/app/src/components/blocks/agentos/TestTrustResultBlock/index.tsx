@@ -1,5 +1,3 @@
-"use client"
-
 type RuntimeTrustResultValues = { readonly status: string }
 
 /** Settled display labels and typed formatters supplied by the page owner. */

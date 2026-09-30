@@ -1,5 +1,3 @@
-"use client"
-
 import { SurfaceCard } from "@starci/grammar/common"
 import type { ComponentType } from "react"
 import { KindWorkbenchContent } from "../KindWorkbenchContent"

@@ -1,4 +1,4 @@
-﻿import type { AgentOSWorkspaceControlCenterLabels } from "@/modules/agentos/workspace-control-center/labels"
+import type { AgentOSWorkspaceControlCenterLabels } from "@/modules/agentos/workspace-control-center/labels"
 import type { AgentOSWorkspacePageState, AgentOSWorkspaceControlCenterStatus } from "@/modules/agentos/workspace-control-center/contracts"
 import type { AgentOSShellConfigurationDigests, AgentOSShellView, AgentOSShellViewStatus, AgentOSWorkspaceControlCenterShellLabels } from "@/modules/agentos/workspace-control-center/shell-types"
 import { AgentOSWorkspaceApplicationsPane } from "@/components/blocks/agentos/AgentOSWorkspaceApplicationsPane"

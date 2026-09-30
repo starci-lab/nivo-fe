@@ -1,5 +1,3 @@
-"use client"
-
 type ShellActiveContextValues = { readonly version: string; readonly channel: string; readonly controller: string }
 type ShellBoundContextValues = { readonly version: number }
 type ShellConversationValues = { readonly number: number }
