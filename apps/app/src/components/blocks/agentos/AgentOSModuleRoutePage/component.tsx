@@ -69,16 +69,24 @@ export type AgentOSModuleRoutePageBaseProps =
     | AgentOSModuleRoutePageFailureView
     | AgentOSModuleRoutePageRuntimeView
 
+const isAgentOSModuleRoutePageFailureView = (
+    props: AgentOSModuleRoutePageBaseProps,
+): props is AgentOSModuleRoutePageFailureView => props.state.kind === "failed"
+
+const isAgentOSModuleRoutePageRuntimeView = (
+    props: AgentOSModuleRoutePageBaseProps,
+): props is AgentOSModuleRoutePageRuntimeView => props.state.kind === "runtime"
+
 /** Draw the selected Module Studio screen or its explicit runtime/read state. */
 export const AgentOSModuleRoutePageBase = (props: AgentOSModuleRoutePageBaseProps) => {
-    if (props.state.kind === "failed")
+    if (isAgentOSModuleRoutePageFailureView(props))
         return (
             <QueryNoticeView
                 props={props.state.notice}
                 on={props.on.retry === undefined ? undefined : { retry: props.on.retry }}
             />
         )
-    if (props.state.kind === "runtime")
+    if (isAgentOSModuleRoutePageRuntimeView(props))
         return <AgentOSSolutionModuleState refused={props.state.refused} copy={props.state.copy} />
     const { copy, screen } = props.state
     const shell: AgentOSSolutionModuleShellProps = {

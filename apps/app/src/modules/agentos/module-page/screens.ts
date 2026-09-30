@@ -21,6 +21,7 @@ import {
 import type {
     AgentOSSolutionModuleScreen,
     AgentOSSolutionModuleShellData,
+    SetupSurfaceProps,
 } from "./surface-types"
 
 /** The connected facts the shell strip is built from. */
