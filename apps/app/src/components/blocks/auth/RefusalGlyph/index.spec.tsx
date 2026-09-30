@@ -13,7 +13,7 @@ describe("RefusalGlyph", () => {
     })
 
     it("has no accessibility violations when used decoratively", async () => {
-        const { container } = render(<RefusalGlyph aria-hidden="true" focusable="false" />)
+        const { container } = render(<RefusalGlyph aria-hidden={true} focusable="false" />)
         await expectNoA11yViolations(container)
     })
 })

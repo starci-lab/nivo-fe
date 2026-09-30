@@ -145,7 +145,7 @@ export const AccountingWorkbenchOverview = (props: AccountingWorkbenchOverviewPr
                                 "unpaid",
                                 "estimated-tax",
                             ].map((kind) => {
-                                const band = measureBand(view.overview.model?.items ?? [], kind)
+                                const band = accountingMeasureBand(view.overview.model?.items ?? [], kind)
                                 return (
                                     <AccountingWorkbenchRow key={kind}>
                                         <Text size="sm" weight="semibold">

@@ -51,7 +51,7 @@ vi.mock("@/hooks", async (importOriginal) => {
                       readSelection: mocks.readSelection,
                       retrySource: mocks.retrySource,
                   }
-                : original.useAgentOSShell(),
+                : original.useAgentOSShell({ workspaceId: "workspace-1", instanceId: "", installationIds: [] }),
         useSession: () =>
             mocks.screenProbe ? { ...mocks.session, adopt: mocks.adopt } : original.useSession(),
         useProvisioningRealtime: () =>

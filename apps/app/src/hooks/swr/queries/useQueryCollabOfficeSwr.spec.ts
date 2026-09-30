@@ -1,6 +1,10 @@
 import { runAndReadMock } from "@/test-support/mock-result"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
+type NivoQueryMockOptions = {
+    readonly refreshInterval?: number | ((data: unknown, error?: unknown) => number)
+}
+
 const { useNivoQuery, useAccessToken, api } = vi.hoisted(() => ({
     useNivoQuery: vi.fn((key: unknown, query: (...args: Array<unknown>) => unknown, options?: NivoQueryMockOptions) => ({ key, query, options })),
     useAccessToken: vi.fn((): string | null => "tok"),

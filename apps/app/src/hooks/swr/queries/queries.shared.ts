@@ -169,6 +169,14 @@ export const salesOpportunityQueryKey = (
     input.opportunityId,
 ]
 
+const SALES_STATUS_ORDER: ReadonlyArray<"open" | "won" | "lost"> = ["open", "won", "lost"]
+
+/** Canonicalize a pipeline filter into the Sales status vocabulary's declared order. */
+const salesStatusFilterSegment = (statusFilter: SalesPipelineRequest["statusFilter"]): string =>
+    statusFilter === null || statusFilter.length === 0
+        ? "all-statuses"
+        : SALES_STATUS_ORDER.filter((status) => statusFilter.includes(status)).join("+")
+
 /** Cache identity for one pipeline page inside one installation. */
 export const salesPipelineQueryKey = (scope: SalesInstallationScope, input: SalesPipelineRequest): NivoQueryKey => [
     "sales",

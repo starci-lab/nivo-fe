@@ -80,7 +80,7 @@ export const SalesHandoffReadbackCard = (props: SalesHandoffReadbackCardProps) =
     const facts = (settled: SalesHandoffValue) => (
         <FieldStack>
             <ActionRow>
-                <Badge tone={toneFor(settled.status)}>{statusText(settled.status, t)}</Badge>
+                <Badge tone={toneFor(settled.status)}>{statusText(settled.status)}</Badge>
                 <Badge tone="neutral">{t("handoff.revision", { revision: settled.revision })}</Badge>
             </ActionRow>
             <Row>
@@ -97,9 +97,15 @@ export const SalesHandoffReadbackCard = (props: SalesHandoffReadbackCardProps) =
     )
     return (
         <SurfaceCard label={t("handoff.label")} fact={model === null ? undefined : statusText(model.status)}>
-            {region(handoff.standing, t("handoff.empty"), t("handoff.emptyHint"), model === null ? null : facts(model))}
+            {region(
+                handoff.standing,
+                t("handoff.empty"),
+                t("handoff.emptyHint"),
+                model === null ? null : facts(model),
+                t,
+            )}
             <form onSubmit={stop(() => undefined)}>
-                <SalesHandoffFieldStack>
+                <FieldStack>
                     <Input
                         id="sales-handoff-id"
                         name="sales-handoff-id"
@@ -108,7 +114,7 @@ export const SalesHandoffReadbackCard = (props: SalesHandoffReadbackCardProps) =
                         value={handoff.handoffId}
                         onValueChange={handoff.setHandoffId}
                     />
-                    <SalesHandoffActionRow>
+                    <ActionRow>
                         <Button
                             size="lg"
                             type="button"
@@ -118,8 +124,8 @@ export const SalesHandoffReadbackCard = (props: SalesHandoffReadbackCardProps) =
                         >
                             {t("handoff.reload")}
                         </Button>
-                    </SalesHandoffActionRow>
-                </SalesHandoffFieldStack>
+                    </ActionRow>
+                </FieldStack>
             </form>
             {status !== "accounting-admitted" ? null : (
                 <Text size="xs" tone="muted">
@@ -135,7 +141,7 @@ type SalesHandoffSubmissionCardProps = { readonly view: SalesHandoffView }
 /** Draw the handoff submission controls and keep the lookup-only fence visible. */
 export const SalesHandoffSubmissionCard = (props: SalesHandoffSubmissionCardProps) => {
     const view = props.view
-    const { t, scopeReady, submission } = view
+    const { t, scopeReady, handoff, submission } = view
     const model = handoff.model
     const status = model?.status ?? ""
     const mayLookupOnly = model !== null && lookupOnly(model.status)
@@ -163,13 +169,13 @@ export const SalesHandoffSubmissionCard = (props: SalesHandoffSubmissionCardProp
                         isRequired
                     />
                     <div className={SALES_HANDOFF_FORM_FULL_SPAN_CLASS_NAME}>
-                        <SalesHandoffFieldStack>
+                        <FieldStack>
                             {submission.isSubmitting ? (
                                 <Text size="sm" tone="muted" live="polite">
                                     {t("submission.submitting")}
                                 </Text>
                             ) : null}
-                            <SalesHandoffActionRow>
+                            <ActionRow>
                                 <Button
                                     size="lg"
                                     type="submit"
@@ -181,11 +187,11 @@ export const SalesHandoffSubmissionCard = (props: SalesHandoffSubmissionCardProp
                                 >
                                     {t("submission.submit")}
                                 </Button>
-                            </SalesHandoffActionRow>
+                            </ActionRow>
                             <Text size="xs" tone="muted">
                                 {mayLookupOnly ? t("submission.lookupOnly") : t("submission.held")}
                             </Text>
-                        </SalesHandoffFieldStack>
+                        </FieldStack>
                     </div>
                 </div>
             </form>

@@ -108,7 +108,7 @@ export const AccountingWorkbenchRoutine = (props: AccountingWorkbenchRoutineProp
                     <AccountingWorkbenchRow>
                         <AccountingWorkbenchActionRow>
                             <Text weight="semibold">{view.routine.model.intentId}</Text>
-                            <Badge tone={toneFor(ROUTINE_TONES, view.routine.model.state)}>
+                            <Badge tone={accountingToneFor(ACCOUNTING_ROUTINE_TONES, view.routine.model.state)}>
                                 {t(accountingRoutineStateKey(view.routine.model.state))}
                             </Badge>
                             {view.routine.model.reasonCode === null ? null : (

@@ -1,7 +1,12 @@
 import type { ReactNode } from "react"
 import { LoadingRegion } from "@/components/blocks/loading/LoadingRegion"
 import { EmptyNotice, Heading, Text } from "@starci/grammar/common"
-import type { AccountingSurfaceStanding, AccountingTranslation, AccountingNotice } from "@/modules/accounting/accounting-workbench"
+import {
+    accountingNoticeLive,
+    type AccountingSurfaceStanding,
+    type AccountingTranslation,
+    type AccountingNotice,
+} from "@/modules/accounting/accounting-workbench"
 import { ACCOUNTING_FIELD_STACK_CLASS_NAME, ACCOUNTING_ROW_CLASS_NAME, ACCOUNTING_ACTION_ROW_CLASS_NAME } from "./classNames"
 import type { AccountingWorkbenchSectionData } from "./accounting-workbench.types"
 import type { AccountingMeasureBandReading } from "./accounting-workbench.helpers"
@@ -66,7 +71,11 @@ export type AccountingWorkbenchStatusNoticeProps = { readonly notice: Accounting
 /** Draw the notice kind with its settled accessibility announcement mode. */
 export const AccountingWorkbenchStatusNotice = (props: AccountingWorkbenchStatusNoticeProps) =>
     props.notice === null ? null : (
-        <Text size="sm" tone={props.notice.kind === "refused" ? "accent" : "muted"} live={props.notice.live}>
+        <Text
+            size="sm"
+            tone={props.notice.kind === "refused" ? "accent" : "muted"}
+            live={accountingNoticeLive(props.notice.kind)}
+        >
             {props.notice.message}
         </Text>
     )

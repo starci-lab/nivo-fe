@@ -178,7 +178,7 @@ export const AccountingWorkbenchCorrection = (props: AccountingWorkbenchCorrecti
                                 {view.correction.model.correctionId}
                             </Text>
                             <AccountingWorkbenchActionRow>
-                                <Badge tone={toneFor(CORRECTION_TONES, view.correction.model.state)}>
+                                <Badge tone={accountingToneFor(ACCOUNTING_CORRECTION_TONES, view.correction.model.state)}>
                                     {t(accountingCorrectionStateKey(view.correction.model.state))}
                                 </Badge>
                                 <Text size="sm">

@@ -119,7 +119,7 @@ export const AccountingWorkbenchIntake = (props: AccountingWorkbenchIntakeProps)
                     <AccountingWorkbenchRow>
                         <AccountingWorkbenchActionRow>
                             <Text weight="semibold">{view.intake.model.evidenceId}</Text>
-                            <Badge tone={toneFor(EVIDENCE_TONES, view.intake.model.state)}>
+                            <Badge tone={accountingToneFor(ACCOUNTING_EVIDENCE_TONES, view.intake.model.state)}>
                                 {t(accountingEvidenceStateKey(view.intake.model.state))}
                             </Badge>
                             <Badge tone="neutral">{t("revision", { value: view.intake.model.revision })}</Badge>

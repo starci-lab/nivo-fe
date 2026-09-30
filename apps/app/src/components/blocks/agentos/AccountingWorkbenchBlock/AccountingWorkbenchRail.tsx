@@ -23,7 +23,7 @@ const ScopeLine = (props: ScopeLineProps) => {
     const { scopeReady, scopeStanding, t } = props
     if (scopeReady)
         return (
-            <Text size="sm" tone="success">
+            <Text size="sm" tone="muted" live="polite">
                 {t("standing.ready")}
             </Text>
         )

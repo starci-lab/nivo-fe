@@ -1,4 +1,5 @@
 import type { AccountingSummaryItemPayload } from "@/modules/api/accounting"
+import { accountingMeasureReading } from "@/modules/accounting/accounting-workbench"
 
 /** A known amount and currency pair from one covered accounting measure. */
 export type AccountingKnownMeasureReading = {
@@ -22,16 +23,23 @@ export const accountingMeasureBand = (
     items: ReadonlyArray<AccountingSummaryItemPayload>,
     kind: string,
 ): AccountingMeasureBandReading => {
-    const readings = items.map((item) => item.measures[kind] ?? { reasonCode: "not-covered" })
+    const readings = items.map((item) => {
+        const measure = item.measures.find((candidate) => candidate.kind === kind)
+        return measure === undefined ? { reasonCode: "not-covered" } : accountingMeasureReading(measure)
+    })
     if (readings.length === 0) return null
-    const unknown = readings.find((reading) => !("amountMinor" in reading))
+    const unknown = readings.find(
+        (reading): reading is { readonly reasonCode: string } => "reasonCode" in reading,
+    )
     if (unknown !== undefined) return unknown
     const known = readings.filter((reading): reading is AccountingKnownMeasureReading => "amountMinor" in reading)
+    const firstKnown = known[0]
+    if (firstKnown === undefined) return null
     const currencies = new Set(known.map((reading) => reading.currency))
     if (currencies.size !== 1) return { reasonCode: "mixed-currency" }
     return {
         amountMinor: known.reduce((total, reading) => total + reading.amountMinor, 0),
-        currency: known[0].currency,
+        currency: firstKnown.currency,
         covered: known.length,
     }
 }

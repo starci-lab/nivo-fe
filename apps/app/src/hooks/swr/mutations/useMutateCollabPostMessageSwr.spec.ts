@@ -5,7 +5,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 const mocks = vi.hoisted(() => ({
     useNivoMutation: vi.fn((key: unknown, mutation: QueryMockCallback) => ({ key, mutation })),
     useAccessToken: vi.fn((): string | null => "tok"),
-    mutate: vi.fn(async () => undefined),
+    mutate: vi.fn(async (filter: (key: unknown) => boolean) => {
+        void filter
+    }),
     postMessage: vi.fn(),
 }))
 vi.mock("../useNivoMutation", () => ({ useNivoMutation: mocks.useNivoMutation }))
@@ -73,4 +75,3 @@ describe("useMutateCollabPostMessageSwr", () => {
         expect(filter("opaque-string-key")).toBe(false)
     })
 })
-

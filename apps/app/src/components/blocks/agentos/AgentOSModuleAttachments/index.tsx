@@ -113,10 +113,7 @@ const useAgentOSModuleAttachmentsView = (
     const projection = useContext(AgentOSModuleStudioProjectionContext)
     const workspaceId = props.workspaceId
     const moduleId = props.scope === "studio" ? props.moduleId : props.installationId
-    const query = useQueryMyAgentosCustomModuleStudioSwr(workspaceId, moduleId, {
-        enabled: props.scope === "solution",
-        pollAttachments: props.scope === "solution",
-    })
+    const query = useQueryMyAgentosCustomModuleStudioSwr(workspaceId, moduleId)
     const reading = nivoQueryReading(query.data)
     const noticeOf = useQueryNoticeData()
     const copy = useAttachmentCopy()
