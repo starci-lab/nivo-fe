@@ -37,12 +37,8 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
-    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/react": "^19",
-    "@vitejs/plugin-react": "^5.2.0",
-    "jsdom": "^29.1.1",
-    "typescript": "^5",
-    "vitest": "^3.2.7"
+    "typescript": "^5"
   }
 }
