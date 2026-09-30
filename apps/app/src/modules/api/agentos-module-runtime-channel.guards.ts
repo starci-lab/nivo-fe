@@ -4,6 +4,12 @@ import type { ConfigureAgentWorkspaceChannelMutation } from "./__generated__/cor
 import type { AgentWorkspaceChannelSettingView } from "./agentos-module-runtime"
 
 type ChannelSetting = NonNullable<ConfigureAgentWorkspaceChannelMutation["configureAgentWorkspaceChannel"]["data"]>
+const CHANNEL_STATE_LABELS = {
+    [AgentChannelApplyState.Applied]: "APPLIED",
+    [AgentChannelApplyState.Error]: "ERROR",
+    [AgentChannelApplyState.NotConfigured]: "NOT_CONFIGURED",
+    [AgentChannelApplyState.Pending]: "PENDING",
+} satisfies Record<AgentChannelApplyState, AgentWorkspaceChannelSettingView["state"]>
 
 /** Parse the `data` of `configureAgentWorkspaceChannel`: statuses only, never the secret. */
 export const parseChannelSetting = (input: unknown): AgentWorkspaceChannelSettingView | null => {
@@ -55,12 +61,7 @@ export const parseChannelSetting = (input: unknown): AgentWorkspaceChannelSettin
     return {
         provider: setting.provider,
         accountId: setting.accountId,
-        state: {
-            Applied: "APPLIED",
-            Error: "ERROR",
-            NotConfigured: "NOT_CONFIGURED",
-            Pending: "PENDING",
-        }[setting.state],
+        state: CHANNEL_STATE_LABELS[setting.state],
         displayName: setting.displayName,
         credentials: setting.credentials,
     }

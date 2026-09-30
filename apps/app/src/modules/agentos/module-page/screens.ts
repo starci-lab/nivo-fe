@@ -1,7 +1,6 @@
 
 import type { MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
 
-import type { ReactNode } from "react"
 import type { AgentOSModuleView } from "../../../components/blocks/agentos/ModuleRouteShellBlock"
 import type { ContextDraft } from "../../../components/blocks/agentos/ContextVersionBlock"
 import type { Formatter } from "../../i18n/formatter"
@@ -66,8 +65,8 @@ export type ModuleScreenSource = {
     readonly refused: boolean
     readonly activeVersion: number | null
     readonly draft: ContextDraft | null
-    /** The connected attachment panel, drawn by the route when citation requirements need one. */
-    readonly sourceAttachmentPanel: ReactNode | undefined
+    /** Attachment identity and update action for the Setup surface's source panel. */
+    readonly sourceAttachments: SetupSurfaceProps["sourceAttachments"]
     readonly setup: ModuleSetupView
     readonly operate: ModuleOperateView
     readonly test: ModuleTestView
@@ -87,7 +86,7 @@ export const moduleScreenFor = (source: ModuleScreenSource): AgentOSSolutionModu
                 draft: source.draft,
                 pending: source.pending,
                 refused: source.refused,
-                sourceAttachmentPanel: source.sourceAttachmentPanel,
+                sourceAttachments: source.sourceAttachments,
                 setup: source.setup,
             }),
         }

@@ -4,15 +4,16 @@ import { Badge, Button, EmptyNotice, SurfaceCard, SurfaceListCard, Text } from "
 import type { ComponentProps } from "react"
 
 import { CHATBOT_CHANNEL_ROW_CLASS_NAME } from "./classNames"
+import type { ChatbotWorkbenchBlockBaseCopy } from "./ChatbotWorkbenchBlock.types"
 import type { ChatbotWorkbenchBlock } from "."
 
-type ChatbotWorkbenchBlockCopy = ComponentProps<typeof ChatbotWorkbenchBlock>["copy"]
+type ChatbotWorkbenchBlockCopy = ChatbotWorkbenchBlockBaseCopy
 type ChatbotWorkbenchBlockProps = ComponentProps<typeof ChatbotWorkbenchBlock>
 type WorkbenchRailProps = {
-    readonly props: Pick<
-        ChatbotWorkbenchBlockProps,
-        "installationId" | "workbench" | "selectedConversationId" | "pending" | "copy"
-    >
+    readonly props: Omit<
+        Pick<ChatbotWorkbenchBlockProps, "installationId" | "workbench" | "selectedConversationId" | "pending" | "copy">,
+        "copy"
+    > & { readonly copy: ChatbotWorkbenchBlockBaseCopy }
     readonly on: {
         readonly selectConversation: ChatbotWorkbenchBlockProps["onSelectConversation"]
         readonly connectZalo: ChatbotWorkbenchBlockProps["onConnectZalo"]

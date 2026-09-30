@@ -6,7 +6,8 @@ import { useFormatter } from "next-intl"
 import { useState } from "react"
 
 import type { Formatter } from "../../../../modules/i18n/formatter"
-import { ChatbotWorkbenchBlockBase, type ChatbotWorkbenchBlockBaseCopy } from "./component"
+import { ChatbotWorkbenchBlockBase } from "./component"
+import type { ChatbotWorkbenchBlockBaseCopy } from "./ChatbotWorkbenchBlock.types"
 
 /** Localized copy for the installed Chatbot workbench, including the version line's two forms. */
 

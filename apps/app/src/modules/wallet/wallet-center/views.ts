@@ -2,19 +2,20 @@ import type { InvoiceFieldsFragment, WalletFieldsFragment, WalletTransactionFiel
 
 import type { useTranslations } from "next-intl"
 
-import { type FailureKind, type Outcome } from "@nivo/api"
+import { type Outcome } from "@nivo/api"
+import type { NivoQueryFailure } from "@/modules/query"
 import type { BalanceSectionView, LedgerSectionView, LinkedInvoiceSectionView, WalletFactRow, WalletLedgerRow } from "./types"
 import { invoiceTone, type WalletWaypoint } from "./waypoint"
 
 type WalletTranslator = ReturnType<typeof useTranslations<"console">>
 
-const queryFailureText = (kind: FailureKind, t: WalletTranslator): string => {
-    if (kind === "refused") return t("query.signInRequired")
-    if (kind === "forbidden") return t("query.forbidden")
-    if (kind === "not-found") return t("query.notFound")
-    if (kind === "invalid") return t("query.invalid")
-    return t("query.unavailable")
-}
+const queryFailure = <T,>(failure: Extract<Outcome<T>, { readonly ok: false }>): NivoQueryFailure => ({
+    kind: failure.kind,
+    responseStatus: failure.status,
+    code: failure.code,
+    reason: failure.reason,
+    retryable: failure.retryable,
+})
 
 type WalletSectionInput = {
     readonly walletAnswer: Outcome<WalletFieldsFragment> | undefined
@@ -77,10 +78,9 @@ export const createWalletSectionViews = (input: WalletSectionInput) => {
             }
         if (!walletAnswer.ok)
             return {
-                phase: "refused",
+                phase: "failed",
                 label,
-                note: queryFailureText(walletAnswer.kind, t),
-                failure: walletAnswer,
+                failure: queryFailure(walletAnswer),
             }
         const facts: Array<WalletFactRow> = [
             {
@@ -113,10 +113,10 @@ export const createWalletSectionViews = (input: WalletSectionInput) => {
             }
         if (!movements.ok)
             return {
-                phase: "refused",
+                phase: "failed",
                 label,
-                note: queryFailureText(movements.kind, t),
-                failure: movements,
+                failure: queryFailure(movements),
+                source: "transactions",
             }
         if (movements.data.length === 0)
             return {
@@ -165,10 +165,10 @@ export const createWalletSectionViews = (input: WalletSectionInput) => {
             }
         if (!invoicesAnswer.ok)
             return {
-                phase: "refused",
+                phase: "failed",
                 label,
-                note: queryFailureText(invoicesAnswer.kind, t),
-                failure: invoicesAnswer,
+                failure: queryFailure(invoicesAnswer),
+                source: "invoices",
             }
         if (invoicesAnswer.data.length === 0)
             return {
@@ -208,17 +208,19 @@ export const createWalletSectionViews = (input: WalletSectionInput) => {
             }
         if (!invoicesAnswer.ok)
             return {
-                phase: "refused",
+                phase: "failed",
                 label,
-                note: queryFailureText(invoicesAnswer.kind, t),
-                failure: invoicesAnswer,
+                orderLabel: t("wallet.orderLabel", { orderId: currentWaypoint.orderId }),
+                failure: queryFailure(invoicesAnswer),
+                source: "invoices",
             }
         if (!walletAnswer.ok)
             return {
-                phase: "refused",
+                phase: "failed",
                 label,
-                note: queryFailureText(walletAnswer.kind, t),
-                failure: walletAnswer,
+                orderLabel: t("wallet.orderLabel", { orderId: currentWaypoint.orderId }),
+                failure: queryFailure(walletAnswer),
+                source: "wallet",
             }
         const invoice = invoicesAnswer.data.find(
             (row) => row.id === currentWaypoint.invoiceId && row.catalogOrder?.id === currentWaypoint.orderId,

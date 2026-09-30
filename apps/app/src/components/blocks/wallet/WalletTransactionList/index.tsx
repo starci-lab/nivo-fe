@@ -6,6 +6,7 @@ import type {
     WalletControlCenterActions,
     WalletLedgerRow,
 } from "@/modules/wallet/wallet-center/types"
+import { WalletTransactionListFailure } from "./WalletTransactionListFailure"
 import { WalletFact } from "../WalletFact"
 
 const noteSection = (label: string, note: string) => (
@@ -86,8 +87,10 @@ const walletLedgerContent = (ledger: LedgerSectionView, closeLabel: string) => {
     )
 }
 
-const ledgerSection = (ledger: LedgerSectionView, closeLabel: string, action?: () => void) => {
-    if (ledger.phase === "empty" || ledger.phase === "refused") return noteSection(ledger.label, ledger.note)
+const ledgerSection = (ledger: LedgerSectionView, closeLabel: string, retry?: () => void, action?: () => void) => {
+    if (ledger.phase === "failed")
+        return <WalletTransactionListFailure label={ledger.label} failure={ledger.failure} retry={retry} />
+    if (ledger.phase === "empty") return noteSection(ledger.label, ledger.note)
     const content = walletLedgerContent(ledger, closeLabel)
     const actionLabel = ledger.phase === "answered" ? ledger.actionLabel : undefined
     const isLoading = ledger.phase === "resting"
@@ -113,6 +116,15 @@ const linkedInvoiceSection = (
     closeLabel: string,
     on?: WalletControlCenterActions,
 ) => {
+    if (linkedInvoice.phase === "failed")
+        return (
+            <WalletTransactionListFailure
+                label={linkedInvoice.label}
+                failure={linkedInvoice.failure}
+                retry={linkedInvoice.source === "wallet" ? on?.retryWallet : on?.retryInvoices}
+                detail={linkedInvoice.orderLabel}
+            />
+        )
     if (linkedInvoice.phase === "refused") return noteSection(linkedInvoice.label, linkedInvoice.note)
     const loading = linkedInvoice.phase === "resting"
     const row = linkedInvoice.phase === "answered" ? linkedInvoice.row : undefined
@@ -173,7 +185,7 @@ export const WalletTransactionList = (props: WalletTransactionListProps) => (
         {props.linkedInvoice === undefined
             ? undefined
             : linkedInvoiceSection(props.linkedInvoice, props.closeLabel, props.on)}
-        {ledgerSection(props.transactions, props.closeLabel)}
-        {ledgerSection(props.invoices, props.closeLabel, props.on?.payInvoice)}
+        {ledgerSection(props.transactions, props.closeLabel, props.on?.retryTransactions)}
+        {ledgerSection(props.invoices, props.closeLabel, props.on?.retryInvoices, props.on?.payInvoice)}
     </>
 )

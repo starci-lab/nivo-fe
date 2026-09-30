@@ -6,7 +6,6 @@ import type { AgentosModuleTestContractView } from "@/modules/api/agentos-module
 
 
 
-import type { ReactNode } from "react"
 import type { ContextDraft } from "../../../components/blocks/agentos/ContextVersionBlock"
 import type { ExecuteMessage, TrustedWidgetComponentProps } from "../../../components/blocks/agentos/ExecuteChatBlock"
 import type { ExecuteSession } from "../../../components/blocks/agentos/ExecuteSessionRailBlock"
@@ -36,7 +35,13 @@ export type SetupSurfaceProps = {
     readonly setupStartRefused?: boolean
     readonly setupUnconfirmed?: boolean
     readonly compactPane: "versions" | "conversation" | "context"
-    readonly sourceAttachmentPanel?: ReactNode
+    readonly sourceAttachments?: {
+        readonly workspaceId: string
+        readonly installationId: string
+        readonly onIndexedAttachmentsChange: (
+            attachments: ReadonlyArray<{ readonly attachmentId: string; readonly sha256: string }>,
+        ) => void
+    }
     readonly onSelectRevision: (sessionId: string) => void
     readonly onStartRevision: () => void
     readonly onSend: (content: string) => void

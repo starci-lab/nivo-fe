@@ -101,18 +101,13 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsBase
     ]
     const stageOf = (file: (typeof rows)[number]) => {
         if (!("ingestionStatus" in file)) return 1
-        return (
-            {
-                pending: 0,
-                scanning: 1,
-                extracting: 2,
-                embedding: 3,
-                indexing: 4,
-                indexed: 5,
-                refused: 1,
-                removed: 5,
-            } as const
-        )[file.ingestionStatus]
+        if (file.ingestionStatus === "pending") return 0
+        if (file.ingestionStatus === "scanning" || file.ingestionStatus === "refused") return 1
+        if (file.ingestionStatus === "extracting") return 2
+        if (file.ingestionStatus === "embedding") return 3
+        if (file.ingestionStatus === "indexing") return 4
+        if (file.ingestionStatus === "indexed" || file.ingestionStatus === "removed") return 5
+        return -1
     }
     return (
         <SurfaceCard label={labels.title}>

@@ -29,7 +29,7 @@ export const AcademyControlCenter = (props: AcademyControlCenterProps) => {
         reading.status === "failed"
             ? reading
             : site === null
-              ? { ok: false, kind: "not-found", code: "ACADEMY_SITE_NOT_FOUND", reason: "", retryable: false }
+              ? { kind: "not-found", code: "ACADEMY_SITE_NOT_FOUND", reason: "", retryable: false }
               : null
     const publicHost =
         site === null || site === undefined ? undefined : (site.customDomain ?? `${site.slug}${ACADEMY_HOST_SUFFIX}`)

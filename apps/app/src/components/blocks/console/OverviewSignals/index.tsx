@@ -6,6 +6,7 @@ import { useFormatter, useTranslations } from "next-intl"
 import { useNow } from "@/hooks/time"
 import { useOverviewData } from "@/hooks/overview"
 import { useQueryNoticeData } from "@/hooks/query"
+import type { NivoQueryFailure } from "@/modules/query"
 
 import { BILLING_CURRENCY } from "@/modules/config"
 import { OverviewSignalsBase, type OverviewSignalsCell } from "./component"

@@ -153,6 +153,9 @@ export const useWalletControlCenter = (pageState: WalletPageState): WalletContro
         checkout: topUp.checkout,
     })
     const on = {
+        retryWallet: () => void wallet.mutate(),
+        retryInvoices: () => void invoices.mutate(),
+        retryTransactions: () => void transactions.mutate(),
         topUp: () => setTopUp((current) => ({ ...current, open: true })),
         closeTopUp: () => setTopUp((current) => ({ ...current, open: false })),
         changeTopUpAmount: (value: string) => setTopUp((current) => ({ ...current, amount: value })),

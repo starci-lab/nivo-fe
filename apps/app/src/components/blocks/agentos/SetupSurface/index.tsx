@@ -1,6 +1,7 @@
 import { SurfaceCard, Button, Heading, Text, Tabs, PrimaryRailLayout, TextAction } from "@starci/grammar/common"
 import { ContextVersionBlock } from "../ContextVersionBlock"
 import { PrivateSetupChatBlock } from "../PrivateSetupChatBlock"
+import { AgentOSModuleAttachments } from "../AgentOSModuleAttachments"
 import { AGENTOS_SETUP_SURFACE_CLASS_NAME, CONTEXT_BAND_CLASS_NAME, CONTEXT_RAISED_BAND_CLASS_NAME } from "./classNames"
 import type { SetupSurfaceProps as SetupSurfaceDataProps } from "../../../../modules/agentos/module-page/surface-types"
 import type { WithModulePageCopy } from "../../../../modules/agentos/module-page-copy"
@@ -86,7 +87,14 @@ const setupConversationPane = (props: SetupSurfaceProps) => (
 
 const setupContextPane = (props: SetupSurfaceProps) => (
     <div>
-        {props.sourceAttachmentPanel}
+        {props.sourceAttachments === undefined ? null : (
+            <AgentOSModuleAttachments
+                scope="solution"
+                workspaceId={props.sourceAttachments.workspaceId}
+                installationId={props.sourceAttachments.installationId}
+                onIndexedAttachmentsChange={props.sourceAttachments.onIndexedAttachmentsChange}
+            />
+        )}
         <ContextVersionBlock
             copy={props.copy}
             activeVersion={props.activeVersion}
@@ -147,7 +155,12 @@ export const SetupSurface = (props: SetupSurfaceProps) => {
     const { copy } = props
     const { compactPane } = props
     return (
-        <section className={AGENTOS_SETUP_SURFACE_CLASS_NAME} data-contract="MEASURE-2 GAP-4">
+        <div
+            className={AGENTOS_SETUP_SURFACE_CLASS_NAME}
+            role="region"
+            aria-label={copy.setup.title}
+            data-contract="MEASURE-2 GAP-4"
+        >
             <Heading level={2}>{copy.setup.title}</Heading>
             <Tabs
                 label={copy.setup.views}
@@ -162,7 +175,7 @@ export const SetupSurface = (props: SetupSurfaceProps) => {
                 panelId={(key) => `setup-panel-${key}`}
             />
             {compactPane === "conversation" ? (
-                <section id="setup-panel-conversation" role="tabpanel" aria-label={copy.setup.chat}>
+                <div id="setup-panel-conversation" role="tabpanel" aria-label={copy.setup.chat}>
                     <PrimaryRailLayout
                         primary={setupConversationPane(props)}
                         rail={setupSummaryPane(props)}
@@ -170,16 +183,16 @@ export const SetupSurface = (props: SetupSurfaceProps) => {
                         align="start"
                         collapsedOrder="primary-first"
                     />
-                </section>
+                </div>
             ) : compactPane === "context" ? (
-                <section id="setup-panel-context" role="tabpanel" aria-label={copy.setup.gates}>
+                <div id="setup-panel-context" role="tabpanel" aria-label={copy.setup.gates}>
                     {setupContextPane(props)}
-                </section>
+                </div>
             ) : (
-                <section id="setup-panel-versions" role="tabpanel" aria-label={copy.setup.versions}>
+                <div id="setup-panel-versions" role="tabpanel" aria-label={copy.setup.versions}>
                     {setupVersionsPane(props)}
-                </section>
+                </div>
             )}
-        </section>
+        </div>
     )
 }

@@ -1,10 +1,9 @@
-import type { ChatbotMessagePayload, ChatbotWorkbenchFieldsFragment } from "@/modules/api/__generated__/agentos-controlplane"
+import type { ChatbotWorkbenchFieldsFragment } from "@/modules/api/__generated__/agentos-controlplane"
 
 import {
     Badge,
     Button,
     ChatWorkspace,
-    EmptyNotice,
     Heading,
     SurfaceCard,
     Text,
@@ -14,57 +13,13 @@ import type { Formatter } from "../../../../modules/i18n/formatter"
 import { ChatbotChannelRail, ChatbotConversationRail, chatbotControlLabel } from "./ChatbotWorkbenchRails"
 import {
     CHATBOT_ACTIONS_CLASS_NAME,
-    CHATBOT_CHANNEL_ROW_CLASS_NAME,
-    CHATBOT_DELIVERY_NOTICE_CLASS_NAME,
     CHATBOT_HEADER_CLASS_NAME,
-    CHATBOT_MESSAGE_BODY_CLASS_NAME,
-    CHATBOT_MESSAGE_ROW_CLASS_NAME,
-    CHATBOT_OUTBOUND_MESSAGE_ROW_CLASS_NAME,
     CHATBOT_RAIL_CLASS_NAME,
     CHATBOT_TITLE_CLASS_NAME,
-    CHATBOT_TRANSCRIPT_CLASS_NAME,
     CHATBOT_WORKSPACE_HOST_CLASS_NAME,
 } from "./classNames"
-
-/** Localized, plain-string copy for the installed Chatbot workbench. */
-export type ChatbotWorkbenchBlockBaseCopy = {
-    readonly title: string
-    readonly installation: string
-    readonly channels: string
-    readonly noChannels: string
-    readonly connectZalo: string
-    readonly conversations: string
-    readonly openConversations: string
-    readonly closeConversations: string
-    readonly noConversations: string
-    readonly selectConversation: string
-    readonly selected: string
-    readonly automated: string
-    readonly handoffPending: string
-    readonly humanOwned: string
-    readonly returnPending: string
-    readonly requestHandoff: string
-    readonly resolveHandoff: string
-    readonly messages: string
-    readonly noMessages: string
-    readonly pending: string
-    readonly refused: string
-    readonly actionRefused: string
-    readonly permissionDenied: string
-    readonly ambiguous: string
-    readonly markDelivered: string
-    readonly markFailed: string
-    readonly recorded: string
-    readonly deliveryQueued: string
-    readonly deliveryPossibleStart: string
-    readonly providerAccepted: string
-    readonly delivered: string
-    readonly read: string
-    readonly deliveryUnknown: string
-    readonly terminalNotDelivered: string
-    readonly failedBeforeStart: string
-    readonly cancelled: string
-}
+import { ChatbotWorkbenchTranscript } from "./ChatbotWorkbenchTranscript"
+import type { ChatbotWorkbenchBlockBaseCopy } from "./ChatbotWorkbenchBlock.types"
 
 /** The workbench's settled data, with the version line and locale formatter its connected half resolved. */
 /** Settled workbench values the presentation draws without resolving the world itself. */
@@ -119,38 +74,6 @@ type ChatbotStateLabelKey =
     | "humanOwned"
     | "returnPending"
 
-/** Terminal provider evidence that the original attempt never reached the recipient. */
-const PROVIDER_TERMINAL_NOT_DELIVERED = "PROVIDER_TERMINAL_NOT_DELIVERED"
-
-/**
- * One label per delivery state the read model can carry, so no state is folded into another.
- * `sent` is the durable state Core writes for an accepted attempt; the finer provider
- * observations (`provider-accepted`, `delivered`, `read`) are labelled directly when the read
- * model carries them.
- */
-const DELIVERY_STATE_LABELS: Readonly<Record<string, ChatbotStateLabelKey>> = {
-    queued: "deliveryQueued",
-    sending: "deliveryPossibleStart",
-    "provider-accepted": "providerAccepted",
-    sent: "providerAccepted",
-    delivered: "delivered",
-    read: "read",
-    ambiguous: "deliveryUnknown",
-    "delivery-unknown": "deliveryUnknown",
-    "terminal-not-delivered": "terminalNotDelivered",
-    "failed-before-start": "failedBeforeStart",
-    cancelled: "cancelled",
-}
-
-const deliveryLabel = (message: ChatbotMessagePayload, copy: ChatbotWorkbenchBlockBaseCopy): string => {
-    if (message.deliveryState === "failed")
-        return message.failureCode === PROVIDER_TERMINAL_NOT_DELIVERED
-            ? copy.terminalNotDelivered
-            : copy.failedBeforeStart
-    const label = DELIVERY_STATE_LABELS[message.deliveryState]
-    return label === undefined ? copy.recorded : copy[label]
-}
-
 /** Responsive console composition whose rail collapse is owned by the published Grammar. */
 export const ChatbotWorkbenchBlockBase = (props: ChatbotWorkbenchBlockBaseProps) => {
     const { props: data, on, state } = props
@@ -165,40 +88,6 @@ export const ChatbotWorkbenchBlockBase = (props: ChatbotWorkbenchBlockBaseProps)
     const ambiguousOutboxId =
         messages.find((message) => message.deliveryState === "ambiguous" && message.providerOutboxId !== null)
             ?.providerOutboxId ?? null
-    const conversationRegion =
-        selected === null ? (
-            <EmptyNotice message={data.copy.selectConversation} />
-        ) : messages.length === 0 ? (
-            <EmptyNotice message={data.copy.noMessages} />
-        ) : (
-            <div className={CHATBOT_TRANSCRIPT_CLASS_NAME}>
-                {messages.map((message) => (
-                    <div
-                        className={
-                            message.direction === "outbound"
-                                ? CHATBOT_OUTBOUND_MESSAGE_ROW_CLASS_NAME
-                                : CHATBOT_MESSAGE_ROW_CLASS_NAME
-                        }
-                        key={message.id}
-                    >
-                        <div className={CHATBOT_MESSAGE_BODY_CLASS_NAME}>
-                            <Text>{message.body}</Text>
-                        </div>
-                        <Text size="xs" tone="muted">
-                            {deliveryLabel(message, data.copy)} · {format.dateTime(new Date(message.occurredAt), {
-                                dateStyle: "medium",
-                                timeStyle: "short",
-                            })}
-                        </Text>
-                        {message.deliveryState === "ambiguous" ? (
-                            <div className={CHATBOT_DELIVERY_NOTICE_CLASS_NAME}>
-                                <Badge tone="warning">{data.copy.ambiguous}</Badge>
-                            </div>
-                        ) : null}
-                    </div>
-                ))}
-            </div>
-        )
     const actionRegion =
         selected === null ? (
             <div />
@@ -262,7 +151,12 @@ export const ChatbotWorkbenchBlockBase = (props: ChatbotWorkbenchBlockBaseProps)
                     }
                     conversation={
                         <>
-                            {conversationRegion}
+                            <ChatbotWorkbenchTranscript
+                                selected={selected}
+                                messages={messages}
+                                format={format}
+                                copy={data.copy}
+                            />
                             {data.pending ? (
                                 <Text size="sm" live="polite">
                                     {data.copy.pending}

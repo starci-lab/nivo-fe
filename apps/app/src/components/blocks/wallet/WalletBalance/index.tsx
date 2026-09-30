@@ -1,4 +1,5 @@
-import { Button, SurfaceCard, Text } from "@starci/grammar/common"
+import { Button, SurfaceCard } from "@starci/grammar/common"
+import { QueryNotice } from "@/components/blocks/query/QueryNotice"
 import type { BalanceSectionView, WalletControlCenterActions, WalletFactRow } from "@/modules/wallet/wallet-center/types"
 import { WalletFact } from "../WalletFact"
 
@@ -15,13 +16,14 @@ type WalletBalanceProps = {
 /** Draw balance evidence and its top-up action. */
 export const WalletBalance = (props: WalletBalanceProps) => {
     const { balance, on } = props
-    if (balance.phase === "refused")
+    if (balance.phase === "failed")
         return (
             <SurfaceCard label={balance.label}>
                 <div>
-                    <Text size="sm" tone="muted">
-                        {balance.note}
-                    </Text>
+                    <QueryNotice
+                        props={{ failure: balance.failure }}
+                        on={on?.retryWallet === undefined ? undefined : { retry: on.retryWallet }}
+                    />
                 </div>
             </SurfaceCard>
         )

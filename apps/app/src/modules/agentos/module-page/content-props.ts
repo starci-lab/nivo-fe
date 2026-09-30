@@ -5,7 +5,6 @@ import type { AgentosModuleTestContractView } from "@/modules/api/agentos-module
 
 
 
-import type { ReactNode } from "react"
 import type { ContextDraft } from "../../../components/blocks/agentos/ContextVersionBlock"
 
 
@@ -139,7 +138,7 @@ type SetupContentInput = {
     readonly draft: ContextDraft | null
     readonly pending: boolean
     readonly refused: boolean
-    readonly sourceAttachmentPanel: ReactNode | undefined
+    readonly sourceAttachments: SetupSurfaceProps["sourceAttachments"]
     readonly setup: ModuleSetupView
 }
 
@@ -167,7 +166,7 @@ export const setupContentPropsFor = (input: SetupContentInput): SetupSurfaceProp
         setupUnconfirmed: setup.unconfirmed,
         draftText: setup.draftText,
         compactPane: setup.compactPane,
-        sourceAttachmentPanel: input.sourceAttachmentPanel,
+        sourceAttachments: input.sourceAttachments,
         onSelectRevision: setup.selectRevision,
         onStartRevision: setup.startRevision,
         onSend: (content) =>

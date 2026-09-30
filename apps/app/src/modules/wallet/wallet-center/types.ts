@@ -1,4 +1,5 @@
 import type { BadgeTone } from "@starci/grammar/common"
+import type { NivoQueryFailure } from "@/modules/query"
 
 /** One already-formatted label and value used by wallet evidence surfaces. */
 export type WalletControlCenterProps = WalletControlCenterViewProps
@@ -22,9 +23,9 @@ export type BalanceSectionView =
           readonly facts: ReadonlyArray<WalletFactRow>
       }
     | {
-          readonly phase: "refused"
+          readonly phase: "failed"
           readonly label: string
-          readonly note: string
+          readonly failure: NivoQueryFailure
       }
 /** One movement or invoice row with the complete evidence its detail drawer reveals. */
 export type WalletLedgerRow = {
@@ -45,9 +46,15 @@ export type LedgerSectionView =
           readonly label: string
       }
     | {
-          readonly phase: "empty" | "refused"
+          readonly phase: "empty"
           readonly label: string
           readonly note: string
+      }
+    | {
+          readonly phase: "failed"
+          readonly label: string
+          readonly failure: NivoQueryFailure
+          readonly source: "transactions" | "invoices"
       }
     | {
           readonly phase: "answered"
@@ -66,6 +73,13 @@ export type LinkedInvoiceSectionView =
           readonly phase: "refused"
           readonly label: string
           readonly note: string
+      }
+    | {
+          readonly phase: "failed"
+          readonly label: string
+          readonly orderLabel: string
+          readonly failure: NivoQueryFailure
+          readonly source: "wallet" | "invoices"
       }
     | {
           readonly phase: "answered"
@@ -114,6 +128,9 @@ export type PaymentResultView = {
 }
 /** User outcomes reported from the pure wallet drawing. */
 export type WalletControlCenterActions = {
+    readonly retryWallet?: () => void
+    readonly retryInvoices?: () => void
+    readonly retryTransactions?: () => void
     readonly topUp?: () => void
     readonly closeTopUp?: () => void
     readonly changeTopUpAmount?: (value: string) => void

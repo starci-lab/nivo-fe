@@ -12,8 +12,8 @@ import {
     useModuleTestRun,
 } from "@/hooks/agentos"
 import { useRouter } from "@/hooks/i18n"
+import { useQueryNoticeData } from "@/hooks/query"
 import type { AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteShellBlock"
-import { AgentOSModuleAttachments } from "@/components/blocks/agentos/AgentOSModuleAttachments"
 import type { DiagnosticsSurfaceProps, SetupSurfaceProps } from "@/modules/agentos/module-page/surface-types"
 import { contextDraftFor } from "@/modules/agentos/module-page/setup-draft"
 import { moduleScreenFor, moduleShellPropsFor } from "@/modules/agentos/module-page/screens"
@@ -21,10 +21,10 @@ import { activeVersionFor } from "@/modules/agentos/module-page/sessions"
 import { parseModuleTestSurface } from "@/modules/api/agentos-module-tests.guards"
 import type { AgentosModuleTestSurfaceView } from "@/modules/api/agentos-module-tests"
 import type { AgentosRuntimeManifestView } from "@/modules/api/agentos-module-runtime"
-import { QueryNotice } from "@/components/blocks/query/QueryNotice"
+import type { NivoQueryFailure } from "@/modules/query"
 import type { Formatter } from "@/modules/i18n/formatter"
 import { installation, workspaceModules } from "@/modules/routes"
-import { AgentOSSolutionModulePageBase, AgentOSSolutionModuleState, buildModulePageCopy } from "./component"
+import { AgentOSModuleRoutePageBase, buildModulePageCopy } from "./component"
 
 type AgentosSetupRequirement = NonNullable<AgentosRuntimeManifestView["setup"]>["requirements"][number]
 
@@ -43,6 +43,7 @@ export const AgentOSModuleRoutePage = (props: AgentOSModuleRoutePageProps) => {
     const format: Formatter = useFormatter()
     const statusT = useTranslations("console.agentos.workspace.solutions.status")
     const copy = buildModulePageCopy(t)
+    const noticeOf = useQueryNoticeData()
     const lifecycleLabels: Readonly<Partial<Record<string, string>>> = {
         available: statusT("available"),
         requested: statusT("requested"),
@@ -93,33 +94,42 @@ export const AgentOSModuleRoutePage = (props: AgentOSModuleRoutePageProps) => {
 
     if (runtimeReading.status === "failed")
         return (
-            <QueryNotice
-                props={{ failure: runtimeReading }}
+            <AgentOSModuleRoutePageBase
+                state={{ kind: "failed", failure: runtimeReading, notice: noticeOf(runtimeReading) }}
+                props={{}}
                 on={{ retry: () => void moduleRuntime.runtimeQuery.mutate() }}
             />
         )
+    const foreignFailure: NivoQueryFailure = {
+        kind: "not-found",
+        code: "MODULE_RUNTIME_FOREIGN",
+        reason: "",
+        retryable: false,
+    }
     if (runtimeForeign)
         return (
-            <QueryNotice
-                props={{
-                    failure: {
-                        ok: false,
-                        kind: "not-found",
-                        code: "MODULE_RUNTIME_FOREIGN",
-                        reason: "",
-                        retryable: false,
-                    },
-                }}
+            <AgentOSModuleRoutePageBase
+                state={{ kind: "failed", failure: foreignFailure, notice: noticeOf(foreignFailure) }}
+                props={{}}
+                on={{}}
             />
         )
     if (testSurfaceReading.status === "failed")
         return (
-            <QueryNotice
-                props={{ failure: testSurfaceReading }}
+            <AgentOSModuleRoutePageBase
+                state={{ kind: "failed", failure: testSurfaceReading, notice: noticeOf(testSurfaceReading) }}
+                props={{}}
                 on={{ retry: () => void moduleRuntime.testSurfaceQuery.mutate() }}
             />
         )
-    if (runtime === null) return <AgentOSSolutionModuleState refused={moduleRuntime.refused} copy={copy} />
+    if (runtime === null)
+        return (
+            <AgentOSModuleRoutePageBase
+                state={{ kind: "runtime", refused: moduleRuntime.refused, copy }}
+                props={{}}
+                on={{}}
+            />
+        )
 
     const activeVersion = activeVersionFor(runtime)
     const draft = contextDraftFor(runtime, setup.selectedSetup, parsedTestSurface, copy)
@@ -143,20 +153,26 @@ export const AgentOSModuleRoutePage = (props: AgentOSModuleRoutePageProps) => {
         refused: moduleRuntime.refused,
         activeVersion,
         draft,
-        sourceAttachmentPanel:
+        sourceAttachments:
             runtime.installation.runtimeManifest.setup?.requirements.some(
                 (requirement: AgentosSetupRequirement) => requirement.citationPolicy === "attachment-content",
-            ) === true ? (
-                <AgentOSModuleAttachments
-                    scope="solution"
-                    workspaceId={workspaceId}
-                    installationId={installationId}
-                    onIndexedAttachmentsChange={setup.updateIndexedSourceAttachments}
-                />
-            ) : undefined,
+            ) === true
+                ? {
+                      workspaceId,
+                      installationId,
+                      onIndexedAttachmentsChange: setup.updateIndexedSourceAttachments,
+                  }
+                : undefined,
         setup: { ...setup, compactPane: setupPane, selectPane: setSetupPane },
         operate: { ...operate, isChatbot: moduleRuntime.isChatbotInstallation },
-        test: { ...testRun, contract: testContract, surface: parsedTestSurface },
+        test: {
+            ...testRun,
+            contract: testContract,
+            surface: parsedTestSurface,
+            run: async (...args: Parameters<typeof testRun.run>) => {
+                await testRun.run(...args)
+            },
+        },
         settings: {
             ...settings,
             currentConfirmation: settings.currentConfirmation === true,
@@ -170,8 +186,8 @@ export const AgentOSModuleRoutePage = (props: AgentOSModuleRoutePageProps) => {
         },
     })
     return (
-        <AgentOSSolutionModulePageBase
-            state={{ copy, screen }}
+        <AgentOSModuleRoutePageBase
+            state={{ kind: "screen", copy, screen }}
             props={shell}
             on={{
                 backToModules: () => router.push(workspaceModules(workspaceId)),

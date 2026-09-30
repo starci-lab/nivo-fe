@@ -1,4 +1,6 @@
 import { SurfaceCard, Heading, Text } from "@starci/grammar/common"
+import { QueryNoticeView, type QueryNoticeViewData } from "@nivo/ui"
+import type { NivoQueryFailure } from "@/modules/query"
 import { ModuleRouteShellBlock, type AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteShellBlock"
 import { SetupSurface } from "@/components/blocks/agentos/SetupSurface"
 import { TestSurface } from "@/components/blocks/agentos/TestSurface"
@@ -23,43 +25,66 @@ export type {
 } from "@/modules/agentos/module-page-copy"
 export type { AgentOSSolutionModuleScreen } from "@/modules/agentos/module-page/surface-types"
 
-/** Complete screen contract accepted by the connected module route. */
-export type AgentOSSolutionModulePageProps = AgentOSSolutionModulePageViewProps
-
 type AgentOSSolutionModuleShellProps = AgentOSSolutionModuleShellData & {
     readonly onBackToModules: () => void
     readonly onNavigate: (view: AgentOSModuleView) => void
 }
 
-/** Settled page state handed to the pure half for drawing. */
-type AgentOSSolutionModulePageState = {
-    readonly copy: ModulePageCopy
-    readonly screen: AgentOSSolutionModuleScreen
+type AgentOSModuleRoutePageScreenView = {
+    readonly state: {
+        readonly kind: "screen"
+        readonly copy: ModulePageCopy
+        readonly screen: AgentOSSolutionModuleScreen
+    }
+    readonly props: AgentOSSolutionModuleShellData
+    readonly on: {
+        readonly backToModules: () => void
+        readonly navigate: (view: AgentOSModuleView) => void
+    }
 }
 
-/** Shell data drawn alongside the selected module screen. */
-type AgentOSSolutionModulePageData = AgentOSSolutionModuleShellData
-
-/** Shell actions resolved by the connected module route. */
-type AgentOSSolutionModulePageActions = {
-    readonly backToModules: () => void
-    readonly navigate: (view: AgentOSModuleView) => void
+type AgentOSModuleRoutePageFailureView = {
+    readonly state: {
+        readonly kind: "failed"
+        readonly failure: NivoQueryFailure
+        readonly notice: QueryNoticeViewData
+    }
+    readonly props: Record<never, never>
+    readonly on: { readonly retry?: () => void }
 }
 
-/** Complete world-free contract for the persistent module shell and selected screen. */
-export type AgentOSSolutionModulePageViewProps = {
-    readonly state: AgentOSSolutionModulePageState
-    readonly props: AgentOSSolutionModulePageData
-    readonly on: AgentOSSolutionModulePageActions
+type AgentOSModuleRoutePageRuntimeView = {
+    readonly state: {
+        readonly kind: "runtime"
+        readonly copy: ModulePageCopy
+        readonly refused: boolean
+    }
+    readonly props: Record<never, never>
+    readonly on: Record<never, never>
 }
 
-/** Draw the selected Module Studio surface from resolved state, data and actions. */
-export const AgentOSSolutionModulePageBase = (view: AgentOSSolutionModulePageViewProps) => {
-    const { copy, screen } = view.state
+/** Complete pure input for every connected module route state. */
+export type AgentOSModuleRoutePageBaseProps =
+    | AgentOSModuleRoutePageScreenView
+    | AgentOSModuleRoutePageFailureView
+    | AgentOSModuleRoutePageRuntimeView
+
+/** Draw the selected Module Studio screen or its explicit runtime/read state. */
+export const AgentOSModuleRoutePageBase = (props: AgentOSModuleRoutePageBaseProps) => {
+    if (props.state.kind === "failed")
+        return (
+            <QueryNoticeView
+                props={props.state.notice}
+                on={props.on.retry === undefined ? undefined : { retry: props.on.retry }}
+            />
+        )
+    if (props.state.kind === "runtime")
+        return <AgentOSSolutionModuleState refused={props.state.refused} copy={props.state.copy} />
+    const { copy, screen } = props.state
     const shell: AgentOSSolutionModuleShellProps = {
-        ...view.props,
-        onBackToModules: view.on.backToModules,
-        onNavigate: view.on.navigate,
+        ...props.props,
+        onBackToModules: props.on.backToModules,
+        onNavigate: props.on.navigate,
     }
     if (screen.view === "setup")
         return (
