@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { CheckoutFlowHead } from "./CheckoutFlowHead"
+import { CheckoutFlowHead } from "./index"
 
 describe("CheckoutFlowHead", () => {
     it("links prior steps and marks the active breadcrumb", () => {
