@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes"
 import { ThemeToggle } from "@/components/blocks/theme/ThemeToggle"
 import { NivoGrammarTheme } from "@/features/layouts/NivoGrammarTheme"
 import { ACADEMY, inLocale } from "@/modules/academy/template"
+import { CLIENT_NAMESPACES, pickMessages } from "@/modules/i18n/messages"
 import { routing } from "@/modules/i18n/routing"
 import { toLocale } from "@/modules/i18n/config"
 import type { ComponentProps } from "react"
@@ -77,7 +78,8 @@ export const generateMetadata = async ({ params }: LocaleSegment): Promise<Metad
  *
  * The locale travels two ways: onto `<html lang>`, so a screen reader pronounces the page
  * correctly, and into the provider, so a client section can ask for a string instead of holding a
- * sentence beside its markup.
+ * sentence beside its markup. Only the namespaces a client component reads are handed to the
+ * provider; the rest of the catalogue stays on the server.
  *
  * AN UNKNOWN SEGMENT IS A 404, NOT A FALLBACK. `/fr` is a page that was never written; answering it
  * with the English one would tell a crawler that address exists and hand a reader a language they
@@ -96,7 +98,7 @@ export const AcademyLocaleLayout = async ({ children, params }: LocaleLayoutProp
     if (!hasLocale(routing.locales, locale)) {
         notFound()
     }
-    const messages = await getMessages()
+    const messages = pickMessages(await getMessages(), CLIENT_NAMESPACES)
     return (
         <html lang={locale} suppressHydrationWarning>
             <body className="min-h-dvh bg-background text-foreground antialiased">
