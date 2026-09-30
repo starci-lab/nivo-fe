@@ -46,7 +46,7 @@ vi.mock("./component", () => ({
                     text: props.props.statusText,
                 })}
             </output>
-            <input data-testid="slug" onChange={(event) => props.on?.changeSlug?.(event.target.value)} />
+            <input aria-label="slug" data-testid="slug" onChange={(event) => props.on?.changeSlug?.(event.target.value)} />
             <button data-testid="submit" onClick={props.on?.submit}>
                 submit
             </button>

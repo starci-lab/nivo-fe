@@ -1,3 +1,4 @@
+import { LoadingRegion } from "@/components/blocks/loading/LoadingRegion"
 import { Badge, SurfaceCard, Text } from "@starci/grammar/common"
 import { OVERVIEW_SIGNALS_BAND_CLASS_NAME, OVERVIEW_SIGNALS_CELL_CLASS_NAME } from "./classNames"
 
@@ -36,7 +37,8 @@ const status = (cell: OverviewSignalsCell) =>
 export const OverviewSignalsBase = (props: OverviewSignalsProps) => {
     const { props: view } = props
     const { label, fact, cells } = view
-    return (
+    const isBusy = cells.some((cell) => cell.isSkeleton === true)
+    const card = (
         <SurfaceCard label={label} fact={fact} composition="joined">
             <div
                 className={OVERVIEW_SIGNALS_BAND_CLASS_NAME}
@@ -67,6 +69,7 @@ export const OverviewSignalsBase = (props: OverviewSignalsProps) => {
             </div>
         </SurfaceCard>
     )
+    return <LoadingRegion isBusy={isBusy}>{card}</LoadingRegion>
 }
 
 /** Registry identity for the pure overview signals twin. */

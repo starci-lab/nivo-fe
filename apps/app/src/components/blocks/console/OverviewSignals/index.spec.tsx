@@ -1,14 +1,15 @@
-import { render } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
+    now: Date.now() as number | null,
     data: { apps: null, workspaces: null, pod: null, domains: null, wallet: null, invoices: null } as Record<
         string,
         unknown
     >,
 }))
-vi.mock("@/hooks", () => ({ useOverviewData: () => mocks.data }))
+vi.mock("@/hooks", () => ({ useNow: () => mocks.now, useOverviewData: () => mocks.data }))
 
 import { OverviewSignals } from "."
 
@@ -124,6 +125,8 @@ describe("OverviewSignals", () => {
                 '[data-component="Text"][data-tone][data-size="md"][data-loading="true"][aria-hidden="true"]',
             ),
         ).toHaveLength(4)
+        expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
+        expect(screen.getByRole("status")).toHaveTextContent("Loading")
     })
 
     it("raises every warning status out of the healthy tone", () => {

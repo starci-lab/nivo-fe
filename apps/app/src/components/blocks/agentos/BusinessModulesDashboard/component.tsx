@@ -1,3 +1,4 @@
+import { LoadingRegion } from "@/components/blocks/loading/LoadingRegion"
 import type { ComponentType } from "react"
 import { Badge, EmptyNotice, SurfaceCard, Text } from "@starci/grammar/common"
 import { AgentOSSolutionModuleCenter } from "@/components/blocks/agentos/AgentOSSolutionModuleCenter"
@@ -63,7 +64,7 @@ const BusinessModulesDashboardView = (props: BusinessModulesDashboardBaseProps) 
     if (props.state === "resting")
         return (
             <SurfaceCard label={props.labels.workspaceLabel}>
-                <Text isSkeleton>{props.labels.loading}</Text>
+                <LoadingRegion label={props.labels.loading} />
             </SurfaceCard>
         )
     if (props.state === "empty")

@@ -1,3 +1,4 @@
+import { LoadingRegion } from "@/components/blocks/loading/LoadingRegion"
 import { SurfaceCard, Text, type PresentationState } from "@starci/grammar/common"
 import { OVERVIEW_RUNTIME_CELL_CLASS_NAME, OVERVIEW_RUNTIME_FACTS_CLASS_NAME } from "./classNames"
 
@@ -24,7 +25,8 @@ type OverviewRuntimeProps = OverviewRuntimeViewProps
 export const OverviewRuntimeBase = (props: OverviewRuntimeProps) => {
     const { state, props: view } = props
     const { label, fact, facts } = view
-    return (
+    const isBusy = facts.some((item) => item.isSkeleton === true)
+    const card = (
         <SurfaceCard label={label} fact={fact} state={state} composition="joined">
             <div
                 className={OVERVIEW_RUNTIME_FACTS_CLASS_NAME}
@@ -49,6 +51,7 @@ export const OverviewRuntimeBase = (props: OverviewRuntimeProps) => {
             </div>
         </SurfaceCard>
     )
+    return <LoadingRegion isBusy={isBusy}>{card}</LoadingRegion>
 }
 
 /** Registry identity for the pure overview runtime twin. */

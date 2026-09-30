@@ -1,3 +1,4 @@
+import { LoadingRegion } from "@/components/blocks/loading/LoadingRegion"
 import { EmptyNotice, SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common"
 import {
     OVERVIEW_ADDRESSES_CELL_CLASS_NAME,
@@ -63,7 +64,7 @@ export const OverviewAddressesBase = (props: OverviewAddressesProps) => {
     if (state.phase === "populated" || state.phase === "pending") {
         const isLoading = state.phase === "pending"
         const facts = state.phase === "pending" ? PENDING_ROWS : state.facts
-        return (
+        const card = (
             <SurfaceListCard label={label} isLoading={isLoading}>
                 <div
                     className={OVERVIEW_ADDRESSES_ROWS_CLASS_NAME}
@@ -74,6 +75,7 @@ export const OverviewAddressesBase = (props: OverviewAddressesProps) => {
                 </div>
             </SurfaceListCard>
         )
+        return <LoadingRegion isBusy={isLoading}>{card}</LoadingRegion>
     }
     return (
         <SurfaceCard label={label}>

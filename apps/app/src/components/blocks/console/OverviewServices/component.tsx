@@ -1,3 +1,4 @@
+import { LoadingRegion } from "@/components/blocks/loading/LoadingRegion"
 import { Badge, Button, SurfaceListCard, Text, TextAction, type BadgeTone } from "@starci/grammar/common"
 import {
     OVERVIEW_SERVICES_COPY_CLASS_NAME,
@@ -66,7 +67,7 @@ const row = (item: OverviewServicesRow, open?: (route: string) => void) => {
 export const OverviewServicesBase = (props: OverviewServicesProps) => {
     const { props: view, on } = props
     const { label, fact, rows, isLoading } = view
-    return (
+    const card = (
         <SurfaceListCard label={label} fact={fact} isLoading={isLoading}>
             <div
                 className={OVERVIEW_SERVICES_ROWS_CLASS_NAME}
@@ -77,6 +78,7 @@ export const OverviewServicesBase = (props: OverviewServicesProps) => {
             </div>
         </SurfaceListCard>
     )
+    return <LoadingRegion isBusy={isLoading === true}>{card}</LoadingRegion>
 }
 
 /** Registry identity for the pure overview services twin. */

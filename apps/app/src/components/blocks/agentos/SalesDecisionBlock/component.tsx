@@ -1,3 +1,4 @@
+import { LoadingRegion } from "@/components/blocks/loading/LoadingRegion"
 import type { ReactNode } from "react"
 import {
     Badge,
@@ -173,7 +174,7 @@ export const SalesDecisionBlockBase = (props: SalesDecisionBlockProps) => {
 
     /* One surface's standing around the content it settled to; a refusal to read is not an empty read. */
     const region = (standing: SalesSurfaceStanding, empty: string, emptyHint: string, children: ReactNode) => {
-        if (standing === "loading") return <Text isSkeleton>…</Text>
+        if (standing === "loading") return <LoadingRegion label={t("standing.loading")} />
         if (standing === "denied") return <Text live="assertive">{t("refusal.forbidden")}</Text>
         if (standing === "unavailable")
             return (

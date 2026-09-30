@@ -1,3 +1,4 @@
+import { LoadingRegion } from "@/components/blocks/loading/LoadingRegion"
 import { IconSource } from "@nivo/ui"
 import {
     Badge,
@@ -57,7 +58,8 @@ export const OverviewAccountBase = (props: OverviewAccountProps) => {
     const { state, props: view, on } = props
     const { label, actionLabel, isHighlight, facts, invoiceRow } = view
     const { openWallet, topUp } = on ?? {}
-    return (
+    const isBusy = invoiceRow?.isSkeleton === true || facts.some((item) => item.isSkeleton === true)
+    const card = (
         <SurfaceCard
             label={label}
             composition="joined"
@@ -129,6 +131,7 @@ export const OverviewAccountBase = (props: OverviewAccountProps) => {
             )}
         </SurfaceCard>
     )
+    return <LoadingRegion isBusy={isBusy}>{card}</LoadingRegion>
 }
 
 /** Registry identity for the pure overview account twin. */

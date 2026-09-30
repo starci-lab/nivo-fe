@@ -2,10 +2,15 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
+    now: Date.now() as number | null,
     push: vi.fn(),
     data: { wallet: null, invoices: null } as Record<string, unknown>,
 }))
-vi.mock("@/hooks", () => ({ useRouter: () => ({ push: mocks.push }), useOverviewData: () => mocks.data }))
+vi.mock("@/hooks", () => ({
+    useNow: () => mocks.now,
+    useRouter: () => ({ push: mocks.push }),
+    useOverviewData: () => mocks.data,
+}))
 
 import { OverviewAccount } from "."
 
@@ -74,6 +79,8 @@ describe("OverviewAccount", () => {
         const { container } = render(<OverviewAccount label="Account" />)
 
         expect(container.querySelectorAll('[data-loading="true"]').length).toBeGreaterThan(0)
+        expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
+        expect(screen.getByRole("status")).toHaveTextContent("Loading")
     })
 
     it("routes the label row's own transactions command once settled", () => {
@@ -104,6 +111,29 @@ describe("OverviewAccount", () => {
 
         expect(screen.getByText("Overdue")).toBeInTheDocument()
         expect(container.querySelector('[data-component="Badge"][data-tone="danger"]')).toBeInTheDocument()
+    })
+
+    it("decides no overdue verdict before the clock is known, so hydration draws what the server drew", () => {
+        mocks.now = null
+        mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 150000 } }
+        mocks.data.invoices = {
+            ok: true,
+            data: [
+                {
+                    id: "abcdef1234",
+                    amountVnd: 120000,
+                    status: "unpaid",
+                    dueAt: "2020-01-01T00:00:00.000Z",
+                    paidAt: null,
+                    catalogOrder: null,
+                },
+            ],
+        }
+        render(<OverviewAccount label="Account" />)
+        mocks.now = Date.now()
+
+        expect(screen.queryByText("Overdue")).not.toBeInTheDocument()
+        expect(screen.getByText("Due soon")).toBeInTheDocument()
     })
 
     it("marks the account cautionary and names the count as unknown when the invoice read itself was refused", () => {
