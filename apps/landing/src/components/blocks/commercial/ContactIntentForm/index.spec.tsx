@@ -1,10 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { ContactIntentForm } from "."
 
 describe("ContactIntentForm", () => {
-    it("exposes named intent choices and a grammar submit action", () => {
-        render(
+    it("exposes named intent choices and a grammar submit action", async () => {
+        const { container } = render(
             <ContactIntentForm
                 action="/contact#intent-router"
                 legend="Choose a path"
@@ -16,6 +17,7 @@ describe("ContactIntentForm", () => {
             />,
         )
 
+        await expectNoA11yViolations(container)
         const group = screen.getByRole("radiogroup", { name: "Choose a path" })
         expect(group).toBeInTheDocument()
         expect(screen.getAllByRole("radio")).toHaveLength(2)

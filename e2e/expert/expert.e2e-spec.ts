@@ -14,7 +14,7 @@
  */
 import process from "node:process"
 import { expect, test } from "@playwright/test"
-import { serveNextApp, type ServedApp } from "./support/serve-next"
+import { serveNextApp, type ServedApp } from "../support/serve-next"
 
 const PORT = process.env.NIVO_FE_E2E_EXPERT_PORT ?? String(Number(process.env.NIVO_FE_E2E_PORT ?? 13067) + 3)
 const EXTERNAL_URL = process.env.NIVO_FE_E2E_EXPERT_URL?.replace(/\/$/u, "")

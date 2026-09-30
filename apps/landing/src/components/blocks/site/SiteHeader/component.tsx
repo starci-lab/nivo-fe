@@ -1,8 +1,9 @@
 import { cn } from "@heroui/react"
-import { NivoBrand } from "@nivo/ui"
+import { IconSource, NivoBrand } from "@nivo/ui"
 import type { ReactNode } from "react"
-import { Button, PageContainer, TextAction } from "@starci/grammar/common"
-import { SITE_CLASS_NAMES } from "../SiteShell"
+import { Button, IconButton, PageContainer, TextAction } from "@starci/grammar/common"
+import { SITE_CLASS_NAMES } from "@/features/layouts/SiteShell"
+import { SITE_HEADER_MENU_TRIGGER_CLASS_NAME } from "./classNames"
 
 /** One resolved destination: its words and the address for the language being rendered. */
 type SiteHeaderLink = {
@@ -97,9 +98,6 @@ type SiteHeaderBaseData = {
     readonly navigation: ReadonlyArray<SiteHeaderEntry>
 }
 
-/** The compact navigation trigger's id: focus returns to it when Escape closes the panel. */
-export const SITE_MENU_TRIGGER_ID = "site-menu-trigger"
-
 /** The disclosure's commands back into the connected half. */
 type SiteHeaderBaseActions = {
     readonly toggle: () => void
@@ -135,7 +133,7 @@ export const SiteHeaderBase = (props: SiteHeaderProps) => {
         <header className={SITE_CLASS_NAMES.header}>
             <PageContainer className={SITE_CLASS_NAMES.headerBar}>
                 <a className={SITE_CLASS_NAMES.headerBrand} href={data.hrefs.home} aria-label={data.copy.homeLabel}>
-                    <NivoBrand props={{ label: "NIVO", variant: "lockup", scale: "navbar" }} />
+                    <NivoBrand props={{ label: data.copy.homeLabel, variant: "lockup", scale: "navbar" }} />
                 </a>
 
                 <nav className={SITE_CLASS_NAMES.headerDesktopNavigation} aria-label={data.copy.primaryNavigationLabel}>
@@ -153,19 +151,14 @@ export const SiteHeaderBase = (props: SiteHeaderProps) => {
                     </Button>
                 </div>
 
-                <button
-                    id={SITE_MENU_TRIGGER_ID}
-                    className={SITE_CLASS_NAMES.headerMenuTrigger}
-                    type="button"
-                    aria-controls={panelId}
-                    aria-expanded={data.open}
-                    aria-label={data.open ? data.copy.closeNavigationLabel : data.copy.openNavigationLabel}
-                    onClick={on.toggle}
-                >
-                    <span aria-hidden="true" />
-                    <span aria-hidden="true" />
-                    <span aria-hidden="true" />
-                </button>
+                <div className={SITE_HEADER_MENU_TRIGGER_CLASS_NAME}>
+                    <IconButton
+                        source={IconSource("sidebar", "leading")}
+                        label={data.open ? data.copy.closeNavigationLabel : data.copy.openNavigationLabel}
+                        isActive={data.open}
+                        onPress={on.toggle}
+                    />
+                </div>
             </PageContainer>
 
             {data.open ? (

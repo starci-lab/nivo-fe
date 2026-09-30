@@ -1,5 +1,3 @@
-"use client"
-
 import { useCallback } from "react"
 import { submitLead, type LeadSubmission } from "@/modules/api/academy"
 

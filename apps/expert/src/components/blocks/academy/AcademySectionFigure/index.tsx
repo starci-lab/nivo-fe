@@ -24,7 +24,7 @@ export const AcademySectionFigure = (props: AcademySectionFigureProps) => {
                     src={props.src}
                     alt={props.alt}
                     fill
-                    sizes="(min-width: 768px) 50vw, 100vw"
+                    sizes="(min-width: 48rem) 50vw, 100vw"
                     unoptimized
                     referrerPolicy="no-referrer"
                     onError={() => props.src !== undefined && props.failImage(props.src)}

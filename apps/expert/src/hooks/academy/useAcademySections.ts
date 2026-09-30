@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { useSubmitAcademyLead } from ".."
+import { useSubmitAcademyLead } from "./useSubmitAcademyLead"
 import type { Course } from "../../modules/api/academy"
 import { DEFAULT_LOCALE, isLocale } from "@/modules/i18n"
 import {

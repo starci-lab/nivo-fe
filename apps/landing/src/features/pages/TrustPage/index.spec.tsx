@@ -1,11 +1,13 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import en from "../../../messages/en.json"
 import TrustPage from "."
 
 describe("TrustPage", () => {
-    it("preserves the seven-stage Trust progression without invented security evidence", () => {
+    it("preserves the seven-stage Trust progression without invented security evidence", async () => {
         const { container } = render(<TrustPage />)
+        await expectNoA11yViolations(container)
         const html = container.innerHTML
         const anchors = [
             "future-worth-earning",

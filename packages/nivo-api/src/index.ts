@@ -6,6 +6,7 @@ export {
     type EnvelopeParse,
     type EnvelopeShell,
     type GraphqlClientConfig,
+    type GraphqlDocument,
     type GraphqlOptions,
     type GraphqlParse,
     type LocaleReader,

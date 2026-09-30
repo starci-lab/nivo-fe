@@ -1,1 +1,0 @@
-export { useSubmitAcademyLead } from "./academy/useSubmitAcademyLead"

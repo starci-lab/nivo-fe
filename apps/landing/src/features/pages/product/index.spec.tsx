@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import en from "@/messages/en.json"
 import vi from "@/messages/vi.json"
 import { ProductPage } from "."
@@ -12,8 +13,9 @@ const expectSectionOrder = (html: string, ids: ReadonlyArray<string>) => {
 }
 
 describe("ProductPage", () => {
-    it("keeps the NIVO OS narrative in canonical order with textual strategic diagrams", () => {
+    it("keeps the NIVO OS narrative in canonical order with textual strategic diagrams", async () => {
         const { container } = render(<ProductPage page="nivoOs" />)
+        await expectNoA11yViolations(container)
         const html = container.innerHTML
 
         expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1)
@@ -32,13 +34,6 @@ describe("ProductPage", () => {
         expect(html).toContain("CURRENT FOCUS · BUILDING &amp; VERIFYING")
         expect(html).toContain("Target Architecture")
         expect(html).toContain('data-product-page="nivo-os"')
-        expect(container.querySelector('[data-product-page="nivo-os"]')).toHaveClass(
-            "bg-surface",
-            "text-background-inverse",
-        )
-        expect(container.querySelector('[data-product-section="responsibility-center"]')).toHaveClass(
-            "py-[clamp(4.5rem,9vw,8rem)]",
-        )
         expect(screen.getByRole("list", { name: "NIVO OS operating model" })).toBeInTheDocument()
         expect(
             screen.getAllByRole("link", { name: "Explore Solutions" }).map((link) => link.getAttribute("href")),

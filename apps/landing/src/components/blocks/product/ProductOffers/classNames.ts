@@ -1,7 +1,7 @@
 import { cn } from "@heroui/react"
 
 /** Base card surface used by all commercial offers. */
-const productOfferBaseClassName = cn(
+export const productOfferBaseClassName = cn(
     "relative", "flex", "min-w-0", "flex-col", "items-start", "gap-[0.9rem]", "rounded-3xl", "bg-surface",
     "p-[clamp(1.5rem,4vw,2.5rem)]", "shadow-[var(--product-card-shadow)]", "forced-colors:bg-[Canvas]",
     "forced-colors:text-[CanvasText]",

@@ -1,11 +1,12 @@
-import { NivoIcon } from "@nivo/ui"
-import { Badge, Button, Heading, PageContainer, TextAction } from "@starci/grammar/common"
+import { Badge, Heading, PageContainer } from "@starci/grammar/common"
 import { useTranslations } from "next-intl"
 import { SiteMain } from "@/features/layouts/SiteShell"
 import { useLocalizedHref } from "@/hooks"
 import { SITE_LINKS } from "@/modules/landing/site"
 import { CardGrid } from "../../../components/blocks/commercial/CardGrid"
-import { HeroBand } from "../../../components/blocks/commercial/HeroBand"
+import { CompanyArrowIcon } from "./CompanyArrowIcon"
+import { CompanyHero } from "./CompanyHero"
+import { CompanyNextPath } from "./CompanyNextPath"
 import { CLASS_NAMES } from "./classNames"
 
 const VALUE_IDS = ["outcome", "simplify", "discipline", "ai", "evolve"] as const
@@ -25,8 +26,6 @@ const NEXT_LINKS = [
     { id: "trust", href: SITE_LINKS.trust },
 ] as const
 
-const ArrowIcon = () => <NivoIcon props={{ name: "next", usage: "chip" }} />
-
 /**
  * The canonical `/company` page.
  *
@@ -42,62 +41,23 @@ export const CompanyPage = () => {
         <div className={CLASS_NAMES.page}>
             <SiteMain>
                 <article>
-                    <HeroBand
-                        id="nivo-is"
-                        variant="company"
-                        aria-labelledby="company-title"
-                    >
-                        <PageContainer className={CLASS_NAMES.heroGrid}>
-                            <div className={CLASS_NAMES.heroCopy}>
-                                <span className={CLASS_NAMES.eyebrow}>{t("hero.eyebrow")}</span>
-                                <Heading level={1} scale="display">
-                                    <span id="company-title">
-                                        {t("hero.title")} <em className={CLASS_NAMES.heroEmphasis}>{t("hero.titleEmphasis")}</em>
-                                    </span>
-                                </Heading>
-                                <p className={CLASS_NAMES.heroBody}>
-                                    {t("hero.lede")}
-                                </p>
-                                <div className={CLASS_NAMES.actionRow}>
-                                    <Button
-                                        href={href(SITE_LINKS.nivoOs)}
-                                        variant="primary"
-                                        size="lg"
-                                        endContent={<ArrowIcon />}
-                                    >
-                                        {t("hero.primaryAction")}
-                                    </Button>
-                                    <Button
-                                        href={href(SITE_LINKS.ecosystem)}
-                                        variant="secondary"
-                                        size="lg"
-                                        endContent={<ArrowIcon />}
-                                    >
-                                        {t("hero.secondaryAction")}
-                                    </Button>
-                                </div>
-                            </div>
-                            <div className={CLASS_NAMES.companyVisual} aria-label={t("hero.visualLabel")}>
-                                <span className={CLASS_NAMES.visualOrbit} aria-hidden="true" />
-                                <div className={CLASS_NAMES.visualCore}>
-                                    <span>{t("hero.visualBrand")}</span>
-                                    <strong>{t("hero.visualCore")}</strong>
-                                </div>
-                                <div className={`${CLASS_NAMES.orbitCard} ${CLASS_NAMES.orbitCardOne}`}>
-                                    <span>01</span>
-                                    <strong>{t("hero.visualCards.organization")}</strong>
-                                </div>
-                                <div className={`${CLASS_NAMES.orbitCard} ${CLASS_NAMES.orbitCardTwo}`}>
-                                    <span>02</span>
-                                    <strong>{t("hero.visualCards.product")}</strong>
-                                </div>
-                                <div className={`${CLASS_NAMES.orbitCard} ${CLASS_NAMES.orbitCardThree}`}>
-                                    <span>03</span>
-                                    <strong>{t("hero.visualCards.responsibility")}</strong>
-                                </div>
-                            </div>
-                        </PageContainer>
-                    </HeroBand>
+                    <CompanyHero
+                        copy={{
+                            eyebrow: t("hero.eyebrow"),
+                            title: t("hero.title"),
+                            titleEmphasis: t("hero.titleEmphasis"),
+                            lede: t("hero.lede"),
+                            primaryAction: t("hero.primaryAction"),
+                            secondaryAction: t("hero.secondaryAction"),
+                            visualLabel: t("hero.visualLabel"),
+                            visualBrand: t("hero.visualBrand"),
+                            visualCore: t("hero.visualCore"),
+                            organization: t("hero.visualCards.organization"),
+                            product: t("hero.visualCards.product"),
+                            responsibility: t("hero.visualCards.responsibility"),
+                        }}
+                        hrefs={{ nivoOs: href(SITE_LINKS.nivoOs), ecosystem: href(SITE_LINKS.ecosystem) }}
+                    />
 
                     <section id="nivo-today" className={CLASS_NAMES.todaySection} aria-labelledby="company-today-title">
                         <PageContainer>
@@ -167,7 +127,7 @@ export const CompanyPage = () => {
                                     {MISSION_STEP_IDS.map((id, index) => (
                                         <span key={id}>
                                             <strong>{t(`mission.steps.${id}`)}</strong>
-                                            {index < MISSION_STEP_IDS.length - 1 ? <ArrowIcon /> : null}
+                                            {index < MISSION_STEP_IDS.length - 1 ? <CompanyArrowIcon /> : null}
                                         </span>
                                     ))}
                                 </div>
@@ -273,26 +233,16 @@ export const CompanyPage = () => {
                         </PageContainer>
                     </section>
 
-                    <section id="company-next-path" className={CLASS_NAMES.companyCta} aria-labelledby="company-next-title">
-                        <PageContainer className={CLASS_NAMES.ctaGrid}>
-                            <div>
-                                <span className={CLASS_NAMES.eyebrow}>{t("next.eyebrow")}</span>
-                                <Heading level={2}><span id="company-next-title">{t("next.title")}</span></Heading>
-                            </div>
-                            <nav className={CLASS_NAMES.ctaLinks} aria-label={t("next.label")}>
-                                {NEXT_LINKS.map((link) => (
-                                    <TextAction
-                                        href={href(link.href)}
-                                        appearance="route"
-                                        endContent={<ArrowIcon />}
-                                        key={link.id}
-                                    >
-                                        {t(`next.links.${link.id}`)}
-                                    </TextAction>
-                                ))}
-                            </nav>
-                        </PageContainer>
-                    </section>
+                    <CompanyNextPath
+                        eyebrow={t("next.eyebrow")}
+                        title={t("next.title")}
+                        label={t("next.label")}
+                        links={NEXT_LINKS.map((link) => ({
+                            id: link.id,
+                            href: href(link.href),
+                            label: t(`next.links.${link.id}`),
+                        }))}
+                    />
                 </article>
             </SiteMain>
         </div>

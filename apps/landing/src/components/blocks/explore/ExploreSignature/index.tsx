@@ -15,7 +15,7 @@ const ExploreSignature = ({ title, label, sequence }: ExploreSignatureProps) => 
         <span className={C.icon} aria-hidden="true">
             <NivoIcon props={{ name: "complete", usage: "heading" }} />
         </span>
-        <strong className={C.title}>{title}</strong>
+        <strong className={C.headingClassName}>{title}</strong>
         <div className={C.sequence} aria-label={label}>
             {sequence.map((item, index) => (
                 <span className={C.item} key={item}>

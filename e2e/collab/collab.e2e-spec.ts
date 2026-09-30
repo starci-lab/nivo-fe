@@ -23,9 +23,9 @@
  */
 import process from "node:process"
 import { chromium, expect, test, type Browser } from "@playwright/test"
-import { serveNextApp, type ServedApp } from "./support/serve-next"
-import { sleep, waitFor } from "./support/poll"
-import { APPROVAL, HUMAN_MINH, MODULE_ACC, OFFICE_PATH, TASK_DONE_ID } from "./support/collab-contract"
+import { serveNextApp, type ServedApp } from "../support/serve-next"
+import { sleep, waitFor } from "../support/poll"
+import { APPROVAL, HUMAN_MINH, MODULE_ACC, OFFICE_PATH, TASK_DONE_ID } from "../support/collab-contract"
 import {
     interRef,
     officeReady,
@@ -33,7 +33,7 @@ import {
     rowIds,
     startCollabFixture,
     type CollabFixture,
-} from "./support/collab-fixture"
+} from "../support/collab-fixture"
 
 const APP_PORT = process.env.NIVO_FE_E2E_COLLAB_PORT ?? String(Number(process.env.NIVO_FE_E2E_PORT ?? 13067) + 1)
 const EXTERNAL_URL = process.env.NIVO_FE_E2E_COLLAB_URL?.replace(/\/$/u, "")

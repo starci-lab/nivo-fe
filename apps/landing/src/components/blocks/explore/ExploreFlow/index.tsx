@@ -13,7 +13,7 @@ const ExploreFlow = ({ label, steps, tabletResponsive = false }: ExploreFlowProp
         {steps.map((step, index) => (
             <li className={C.step} key={step.title}>
                 <span className={C.index}>{String(index + 1).padStart(2, "0")}</span>
-                <span className={C.title}>{step.title}</span>
+                <span className={C.headingClassName}>{step.title}</span>
                 <span className={C.body}>{step.description}</span>
             </li>
         ))}

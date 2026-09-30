@@ -1,11 +1,13 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import en from "@/messages/en.json"
 import { CONTACT_INTENT_IDS, ContactPage, normalizeContactIntent } from "."
 
 describe("ContactPage", () => {
-    it("routes six Contact intents without collecting personal data", () => {
-        render(<ContactPage />)
+    it("routes six Contact intents without collecting personal data", async () => {
+        const { container } = render(<ContactPage />)
+        await expectNoA11yViolations(container)
         expect(screen.getAllByRole("radio")).toHaveLength(6)
         expect(screen.getByRole("radiogroup", { name: en.contact.router.legend })).toBeInTheDocument()
         expect(screen.queryByRole("textbox")).not.toBeInTheDocument()

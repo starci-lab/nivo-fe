@@ -1,8 +1,6 @@
-import { Button } from "@starci/grammar/common"
-import { Label } from "@nivo/ui"
+import { Button, Input } from "@starci/grammar/common"
 import type { AcademySection, LeadStatus } from "../../../../modules/academy/academy-sections"
 import { AcademySectionBand } from "../AcademySectionBand"
-import { LEAD_INPUT_CLASS_NAME } from "./classNames"
 
 type LeadField = readonly [id: string, label: string, kind: "text" | "tel"]
 type AcademyLeadBandProps = {
@@ -24,19 +22,15 @@ type LeadFieldRowProps = {
 }
 
 const LeadFieldRow = ({ id, label, kind, locked }: LeadFieldRowProps) => (
-    <div>
-        <Label props={{ htmlFor: id, content: label }} />
-        <input
-            id={id}
-            name={id}
-            aria-label={label}
-            type={kind}
-            placeholder={label}
-            required
-            disabled={locked}
-            className={LEAD_INPUT_CLASS_NAME}
-        />
-    </div>
+    <Input
+        id={id}
+        name={id}
+        label={label}
+        kind={kind === "tel" ? "text" : kind}
+        placeholder={label}
+        isRequired
+        isDisabled={locked}
+    />
 )
 
 const leadForm = (

@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test"
 import { mkdirSync } from "node:fs"
 import { resolve } from "node:path"
-import { serveNextApp, type ServedApp } from "./support/serve-next"
+import { serveNextApp, type ServedApp } from "../support/serve-next"
 
 /**
  * The suite owns its server: the production landing app on the port `playwright.config.ts` names

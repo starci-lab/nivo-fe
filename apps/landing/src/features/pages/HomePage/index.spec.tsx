@@ -1,10 +1,12 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { HomePage } from "./index"
 
 describe("HomePage", () => {
-    it("renders the homepage sections and exact mascot artwork", () => {
+    it("renders the homepage sections and exact mascot artwork", async () => {
         const { container } = render(<HomePage />)
+        await expectNoA11yViolations(container)
 
         expect(container.querySelectorAll("h1")).toHaveLength(1)
         expect(container.querySelector("img[src*='nivo-unicorn-responsibility-transparent-v18.png']")).not.toBeNull()

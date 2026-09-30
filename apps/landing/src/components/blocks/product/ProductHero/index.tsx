@@ -100,7 +100,7 @@ const ProductHeroVisual = ({ page, t }: Pick<ProductHeroProps, "page" | "t">) =>
                             width={1536}
                             height={1024}
                             priority
-                            sizes="(max-width: 768px) 88vw, 38vw"
+                            sizes="(max-width: 48rem) 88vw, 38vw"
                         />
                     </div>
                     <div className={styles.responsibility}>
@@ -146,7 +146,7 @@ const ProductHeroVisual = ({ page, t }: Pick<ProductHeroProps, "page" | "t">) =>
                                 width={1536}
                                 height={1152}
                                 priority={index < 2}
-                                sizes="(max-width: 768px) 42vw, 18vw"
+                                sizes="(max-width: 48rem) 42vw, 18vw"
                             />
                             <figcaption className={styles.galleryCaption}>
                                 <span className={styles.galleryIndex}>0{index + 1}</span>

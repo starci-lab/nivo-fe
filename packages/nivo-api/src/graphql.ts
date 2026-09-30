@@ -51,6 +51,15 @@ export interface Envelope<T> {
  */
 export type EnvelopeAnswer<T, TExtra extends object> = Envelope<T> & TExtra & { readonly data: T }
 
+/**
+ * One GraphQL document: the text sent to the endpoint, optionally carrying the variables type its
+ * generated `TypedDocumentString` declares, so a call names exactly the variables the operation takes.
+ */
+export type GraphqlDocument<TVariables = Readonly<Record<string, unknown>>> = {
+    readonly toString: () => string
+    readonly __apiType?: (variables: TVariables) => unknown
+}
+
 /** How a caller supplies the credential without this module knowing where sessions are kept. */
 export type TokenReader = () => string | null
 
@@ -182,9 +191,9 @@ export const createGraphqlClient = (config: GraphqlClientConfig) => {
      * @param options - A credential of its own, a signal that abandons the call, a revalidation hint.
      * @returns The `data` object of the response, or why there is none.
      */
-    const graphqlFields = async (
-        query: string,
-        variables?: Readonly<Record<string, unknown>>,
+    const graphqlFields = async <TVariables = Readonly<Record<string, unknown>>>(
+        query: GraphqlDocument<TVariables>,
+        variables?: TVariables,
         options?: GraphqlOptions,
     ): Promise<Outcome<Readonly<Record<string, unknown>>>> => {
         const sent = await send({
@@ -193,7 +202,7 @@ export const createGraphqlClient = (config: GraphqlClientConfig) => {
             credentials: config.credentials,
             accessToken: options?.accessToken === undefined ? readToken() : options.accessToken,
             locale: readLocale(),
-            json: { query, variables: variables ?? {} },
+            json: { query: query.toString(), variables: variables ?? {} },
             signal: options?.signal,
             revalidate: options?.revalidate,
         })
@@ -221,10 +230,10 @@ export const createGraphqlClient = (config: GraphqlClientConfig) => {
      * @param options - A credential of its own, or a signal that abandons the call.
      * @returns The whole envelope, or why there is none.
      */
-    const graphqlEnvelope = async <T, TExtra extends object = Record<string, unknown>>(
-        query: string,
+    const graphqlEnvelope = async <T, TExtra extends object = Record<string, unknown>, TVariables = Readonly<Record<string, unknown>>>(
+        query: GraphqlDocument<TVariables>,
         parse: EnvelopeParse<T, TExtra>,
-        variables?: Readonly<Record<string, unknown>>,
+        variables?: TVariables,
         options?: GraphqlOptions,
     ): Promise<Outcome<EnvelopeAnswer<T, TExtra>>> => {
         const fields = await graphqlFields(query, variables, options)
@@ -265,13 +274,13 @@ export const createGraphqlClient = (config: GraphqlClientConfig) => {
      * @param options - A credential of its own, or a signal that abandons the call.
      * @returns The unwrapped payload, or why there is none.
      */
-    const graphql = async <T>(
-        query: string,
+    const graphql = async <T, TVariables = Readonly<Record<string, unknown>>>(
+        query: GraphqlDocument<TVariables>,
         parse: GraphqlParse<T>,
-        variables?: Readonly<Record<string, unknown>>,
+        variables?: TVariables,
         options?: GraphqlOptions,
     ): Promise<Outcome<T>> => {
-        const answer = await graphqlEnvelope<T, Record<string, unknown>>(
+        const answer = await graphqlEnvelope<T, Record<string, unknown>, TVariables>(
             query,
             (shell) => {
                 const data = parse(shell.data)

@@ -41,7 +41,7 @@ export const SiteFooterBase = (props: SiteFooterBaseProps) => {
             <PageContainer className={SITE_CLASS_NAMES.footerInner}>
                 <div className={SITE_CLASS_NAMES.footerIdentity}>
                     <a href={homeHref} aria-label={copy.homeLabel}>
-                        <NivoBrand props={{ label: "NIVO", variant: "lockup", scale: "navbar" }} />
+                        <NivoBrand props={{ label: copy.homeLabel, variant: "lockup", scale: "navbar" }} />
                     </a>
                     <Text as="p" size="sm">
                         {copy.philosophy}

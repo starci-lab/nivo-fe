@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import EcosystemPage from "../EcosystemPage"
 import ExploreIdeaPage from "../ExploreIdeaPage"
 import TrustPage from "../TrustPage"
@@ -7,13 +8,14 @@ import ExplorePage from "."
 import { getIdeaBySlug, IDEA_TYPE_IDS, normalizeIdeaType } from "../../../modules/landing/ideas"
 
 describe("ExplorePage", () => {
-    it("filters Ideas by the stable type id and rejects every other query value", () => {
+    it("filters Ideas by the stable type id and rejects every other query value", async () => {
         expect(IDEA_TYPE_IDS.map((id) => normalizeIdeaType(id))).toEqual(["perspective", "framework", "building"])
         expect(normalizeIdeaType(["building", "framework"])).toBe("building")
         expect(normalizeIdeaType("unknown")).toBeNull()
         expect(normalizeIdeaType(undefined)).toBeNull()
 
-        render(<ExplorePage selectedType="framework" />)
+        const { container } = render(<ExplorePage selectedType="framework" />)
+        await expectNoA11yViolations(container)
         expect(screen.getByRole("heading", { level: 3, name: "Context · Responsibility · Outcome" })).toBeInTheDocument()
         expect(screen.queryByRole("heading", { level: 3, name: "Responsibility before Agent" })).not.toBeInTheDocument()
     })
