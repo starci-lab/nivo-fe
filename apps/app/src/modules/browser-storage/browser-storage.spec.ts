@@ -7,7 +7,7 @@ import {
     RETURN_TO_STORAGE_KEY,
     TOP_UP_SESSION_KEY,
     writeStored,
-} from "./index"
+} from "./browser-storage"
 
 describe("browser storage keys", () => {
     it("keeps the persisted key names unchanged", () => {

@@ -1,5 +1,3 @@
-"use client"
-
 import { createContext, type ReactNode } from "react"
 import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
 

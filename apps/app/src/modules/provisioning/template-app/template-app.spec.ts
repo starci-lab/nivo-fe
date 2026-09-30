@@ -5,7 +5,7 @@ import {
     templateFlowFromAnswers,
     templateFlowWithDeploymentEvent,
     templateStepState,
-} from "./index"
+} from "./template-app"
 
 describe("Template App flow derivations", () => {
     it("maps the deployment owner's status without storing a mirrored phase", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { collabFallbackInterval } from "."
+import { collabFallbackInterval } from "./collab"
 
 describe("collabFallbackInterval", () => {
     it("polls nothing while the hint channel is up or has not been asked for yet", () => {

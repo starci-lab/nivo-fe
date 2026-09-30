@@ -6,7 +6,7 @@ import {
     readinessMilestoneState,
     realtimeTarget,
     stepState,
-} from "./index"
+} from "./agentos-flow"
 
 const sourceFact = (state: string, reference: string | null) => ({ source: "owner", state, reference, observedAt: null })
 const purchase = (overrides: Partial<WorkspaceCheckoutStatusView> = {}): WorkspaceCheckoutStatusView => ({

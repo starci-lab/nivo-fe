@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { nivoAnswerDenied, nivoQueryPayload, nivoQueryReading } from "."
+import { nivoAnswerDenied, nivoQueryPayload, nivoQueryReading } from "./query"
 
 describe("nivoQueryReading", () => {
     it("keeps a read in flight, accepted data and a failed settlement as three distinct states", () => {

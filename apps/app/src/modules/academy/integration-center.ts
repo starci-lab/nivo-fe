@@ -206,8 +206,7 @@ type AcademyIntegrationFormFieldFact = {
     readonly name: string
     readonly label: string
     readonly kind?: "password"
-    readonly hint?: string
-    readonly hintKey?: "dnsTarget" | "providerKeys"
+    readonly hintKey?: "dnsTarget" | "providerKeys" | "consentMode" | "webhookEvents"
 }
 
 /** Describe each provider's editable fields without mixing translations into the domain module. */
@@ -233,7 +232,7 @@ export const academyIntegrationFormFieldFactsOf = (
                 id: `academy-${id}-consent`,
                 name: "consentMode",
                 label: "consentMode",
-                hint: "required | granted | denied",
+                hintKey: "consentMode",
             },
         ]
     return [
@@ -242,7 +241,7 @@ export const academyIntegrationFormFieldFactsOf = (
             id: "academy-webhook-events",
             name: "events",
             label: "events",
-            hint: "student.created, student.updated, student.status.changed, course.access.changed",
+            hintKey: "webhookEvents",
         },
     ]
 }

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import enMessages from "../../../messages/en.json"
 import viMessages from "../../../messages/vi.json"
 import { TIME_ZONE } from "@/modules/i18n"
-import { buildModulePageCopy } from "."
+import { buildModulePageCopy } from "./module-page-copy"
 
 describe.each([
     ["en", enMessages],

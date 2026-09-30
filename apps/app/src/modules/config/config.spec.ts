@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { CORE_API_ORIGIN, CORE_API_URL, resolveCoreApiUrl } from "."
+import { CORE_API_ORIGIN, CORE_API_URL, resolveCoreApiUrl } from "./config"
 
 describe("resolveCoreApiUrl", () => {
     it("uses the configured endpoint", () => {

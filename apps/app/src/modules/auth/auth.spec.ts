@@ -11,7 +11,7 @@ import {
     rememberOauthProvider,
     takeOauthProvider,
     validatedReturnTo,
-} from "."
+} from "./auth"
 
 describe("rememberOauthProvider", () => {
     beforeEach(() => window.sessionStorage.clear())
