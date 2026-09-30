@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
     pathname: "/overview",
     replace: vi.fn(),
     session: { state: { status: "signed-in" } },
-    labels: { navigationLabel: "", primaryLabel: "" },
+    labels: { navigationLabel: "", primaryLabel: "", skipLabel: "" },
 }))
 vi.mock("@/hooks", () => ({
     useRouter: () => ({ replace: mocks.replace }),
@@ -15,11 +15,11 @@ vi.mock("@/hooks", () => ({
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 interface MockBaseProps {
     readonly state: { readonly children: React.ReactNode }
-    readonly props: { readonly navigationLabel: string; readonly primaryLabel: string }
+    readonly props: { readonly navigationLabel: string; readonly primaryLabel: string; readonly skipLabel: string }
 }
 vi.mock("./component", () => ({
     ConsoleLayoutBase: ({ state, props: data }: MockBaseProps) => {
-        mocks.labels = { navigationLabel: data.navigationLabel, primaryLabel: data.primaryLabel }
+        mocks.labels = { navigationLabel: data.navigationLabel, primaryLabel: data.primaryLabel, skipLabel: data.skipLabel }
         return <div>{state.children}</div>
     },
 }))
@@ -44,6 +44,7 @@ describe("ConsoleLayout", () => {
         expect(mocks.labels.primaryLabel).toBe(en.console.workspaceLabel)
         expect(mocks.labels.primaryLabel).not.toBe(mocks.labels.navigationLabel)
         expect(mocks.labels.primaryLabel).not.toBe(en.console.title)
+        expect(mocks.labels.skipLabel).toBe(en.console.skipToContent)
     })
     it("returns an anonymous reader to the locale-aware door carrying the interrupted route", async () => {
         mocks.session.state = { status: "anonymous" }

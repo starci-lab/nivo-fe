@@ -4,7 +4,6 @@ import { hasLocale } from "next-intl"
 import { I18nProvider } from "@nivo/i18n/provider"
 import { getMessages } from "next-intl/server"
 import { ThemeProvider } from "next-themes"
-import { ThemeToggle } from "@/components/blocks/theme/ThemeToggle"
 import { NivoGrammarTheme } from "@/features/layouts/NivoGrammarTheme"
 import { ACADEMY, inLocale } from "@/modules/academy/template"
 import { CLIENT_NAMESPACES, pickMessages } from "@/modules/i18n/messages"
@@ -105,9 +104,6 @@ export const AcademyLocaleLayout = async ({ children, params }: LocaleLayoutProp
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                     <NivoGrammarTheme>
                         <I18nProvider locale={locale} messages={messages}>
-                            <div className="flex justify-end px-4 py-2">
-                                <ThemeToggle />
-                            </div>
                             {children}
                         </I18nProvider>
                     </NivoGrammarTheme>

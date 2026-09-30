@@ -44,8 +44,8 @@ export const AcademyPageBase = ({ props }: AcademyPageBaseProps) => (
          * else can arrive beside it unannounced. Only the three closed vendor shells may take the
          * anonymous slot.
          *
-         * The interior is a semantic main landmark so a reader can skip the chrome above it. The page
-         * keeps the section block responsible for its own internal structure.
+         * The chrome seats this interior inside its one main landmark, so a reader can skip the chrome
+         * above it. The page keeps the section block responsible for its own internal structure.
          */ content={<AcademyRoutedContent courses={[...props.courses]} />}
     />
 )

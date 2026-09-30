@@ -265,6 +265,8 @@
     "brand": "nivo",
     "title": "Bảng điều khiển",
     "workspaceLabel": "Không gian làm việc",
+    "skipToContent": "Bỏ qua để tới nội dung",
+    "loadingStatus": "Đang tải",
     "servicesCaption": "Dịch vụ",
     "accountCaption": "Tài khoản",
     "navigationLabel": "Điểm đến trong bảng điều khiển",
@@ -461,9 +463,6 @@
         "invalidLink": "Liên kết lời mời thiếu thông tin workspace."
       },
       "workspace": "Workspace"
-    },
-    "state": {
-      "loading": "Đang hỏi máy chủ"
     },
     "refusal": {
       "EXPERT_SITE_NOT_FOUND_EXCEPTION": "Tài khoản này chưa có ứng dụng nào, nên chưa có cài đặt học viện để đọc.",

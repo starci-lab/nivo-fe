@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { ACADEMY_MAIN_ID, ACADEMY_SKIP_LINK_CLASS_NAME, ACADEMY_TOOLBAR_CLASS_NAME } from "./classNames"
 
 /** The rendered tree the chrome wraps: state, never an atom. */
 export type AcademyChromeBaseState = {
@@ -12,6 +13,8 @@ export type AcademyChromeBaseState = {
      * name a reader can grep, and a second one cannot be slipped in beside it.
      */
     readonly content: ReactNode
+    /** The reader's own controls (theme), drawn after the skip link and before the main landmark. */
+    readonly toolbar: ReactNode
 }
 
 /** The atoms the chrome draws: both stylesheets, already rendered as text one file away. */
@@ -26,6 +29,8 @@ export type AcademyChromeBaseData = {
     readonly themeCss: string
     /** The template's hand-written stylesheet, already gated, or null when it authored none. */
     readonly customCss: string | null
+    /** The words of the skip link. */
+    readonly skipLabel: string
 }
 
 /** Props for {@link AcademyChromeBase}. */
@@ -37,9 +42,9 @@ export type AcademyChromeBaseProps = {
 /**
  * Wrap a page in this academy's theme and its own CSS -- the drawing half.
  *
- * IT OPENS NO ELEMENT OF ITS OWN, AND THAT IS THE HONEST SHAPE RATHER THAN A CONCESSION. Whatever a
- * route hands it, it wraps. The wrapper deliberately leaves the interior to the route so each page
- * can preserve its own semantic structure and interaction model.
+ * IT OWNS THE PAGE'S ONE MAIN LANDMARK AND THE SKIP LINK THAT TARGETS IT. The skip link is the first
+ * focusable element; the routed interior sits inside `main#main-content`, so no route renders a
+ * second main.
  *
  * BOTH STYLESHEETS ARE INLINED RATHER THAN LINKED, in that order, so a hand-written rule can
  * override a token rather than losing to one. A stylesheet that arrives after the page has painted
@@ -57,6 +62,12 @@ export const AcademyChromeBase = ({ state, props }: AcademyChromeBaseProps) => (
          */}
         <style>{props.themeCss}</style>
         {props.customCss ? <style>{props.customCss}</style> : null}
-        {state.content}
+        <a className={ACADEMY_SKIP_LINK_CLASS_NAME} href={`#${ACADEMY_MAIN_ID}`}>
+            {props.skipLabel}
+        </a>
+        <div className={ACADEMY_TOOLBAR_CLASS_NAME}>{state.toolbar}</div>
+        <main id={ACADEMY_MAIN_ID} tabIndex={-1}>
+            {state.content}
+        </main>
     </>
 )

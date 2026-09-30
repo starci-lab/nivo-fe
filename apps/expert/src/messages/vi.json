@@ -1,5 +1,7 @@
 {
   "landing": {
+    "skipToContent": "Bỏ qua để tới nội dung",
+    "loadingStatus": "Đang tải",
     "hero": {
       "tryFree": "Học thử miễn phí",
       "seeCourses": "Xem khoá học"

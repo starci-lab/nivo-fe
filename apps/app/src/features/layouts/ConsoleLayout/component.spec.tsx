@@ -19,7 +19,7 @@ describe("ConsoleLayoutBase", () => {
         render(
             <ConsoleLayoutBase
                 state={{ children: <p>Workspace body</p> }}
-                props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace" }}
+                props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace", skipLabel: "Skip to content" }}
             />,
         )
 
@@ -37,7 +37,7 @@ describe("ConsoleLayoutBase", () => {
         render(
             <ConsoleLayoutBase
                 state={{ children: <p>Workspace body</p> }}
-                props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace" }}
+                props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace", skipLabel: "Skip to content" }}
             />,
         )
 
@@ -57,7 +57,7 @@ describe("ConsoleLayoutBase", () => {
         render(
             <ConsoleLayoutBase
                 state={{ children: <p>Workspace body</p> }}
-                props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace" }}
+                props={{ navigationLabel: "Console destinations", primaryLabel: "Console workspace", skipLabel: "Skip to content" }}
             />,
         )
 
@@ -74,5 +74,25 @@ describe("ConsoleLayoutBase", () => {
         expect(band.contains(workspace)).toBe(false)
         expect(workspace.contains(band)).toBe(false)
         expect(precedes(band, workspace)).toBe(true)
+    })
+    it("opens with a skip link that targets the one shell-owned main landmark", () => {
+        render(
+            <ConsoleLayoutBase
+                state={{ children: <p>Workspace body</p> }}
+                props={{
+                    navigationLabel: "Console destinations",
+                    primaryLabel: "Console workspace",
+                    skipLabel: "Skip to content",
+                }}
+            />,
+        )
+
+        const skip = screen.getByRole("link", { name: "Skip to content" })
+        const main = screen.getByRole("main", { name: "Console workspace" })
+        expect(skip).toHaveAttribute("href", "#main-content")
+        expect(main).toHaveAttribute("id", "main-content")
+        expect(main).toHaveAttribute("tabindex", "-1")
+        expect(screen.getAllByRole("main")).toHaveLength(1)
+        expect(precedes(skip, screen.getByRole("banner"))).toBe(true)
     })
 })

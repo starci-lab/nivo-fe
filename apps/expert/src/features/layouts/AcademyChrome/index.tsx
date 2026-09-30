@@ -1,7 +1,8 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
+import { ThemeToggle } from "@/components/blocks/theme/ThemeToggle"
 import { toLocale } from "@/modules/i18n/config"
 import { ACADEMY, inLocale, isSafeThemeValue, type ThemeVariables } from "@/modules/academy/template"
 import { AcademyChromeBase } from "./component"
@@ -25,10 +26,9 @@ import { AcademyChromeBase } from "./component"
  * open while it was written, and wrong for every other one -- which is why reading the brand is
  * confined to this file rather than offered as a hook any section could call.
  *
- * IT OPENS NO ELEMENT OF ITS OWN, AND THAT IS THE HONEST SHAPE RATHER THAN A CONCESSION. This
- * component takes `children` as an opaque `ReactNode`: whatever a route hands it, it wraps. The
- * wrapper deliberately leaves the interior to the route so each page can preserve its own
- * semantic structure and interaction model.
+ * THE DRAWING HALF OWNS THE ONE MAIN LANDMARK. This component takes the routed interior as an opaque
+ * `ReactNode` and hands it to `AcademyChromeBase`, which seats it inside `main#main-content` behind
+ * the skip link.
  *
  * WHAT THAT DIV ACTUALLY CARRIED HAS MOVED TO THE STYLESHEET THIS FILE ALREADY OWNS, which is where
  * it belonged: the page's ground is a DOCUMENT fact, not a node in any page's tree. See
@@ -175,11 +175,12 @@ type AcademyChromeProps = {
  */
 export const AcademyChrome = (props: AcademyChromeProps) => {
     const locale = toLocale(useLocale())
+    const t = useTranslations("landing")
     const theme = themeCss(inLocale(ACADEMY.identity.name, locale))
     return (
         <AcademyChromeBase
-            state={{ content: props.content }}
-            props={{ themeCss: theme, customCss: ACADEMY.customCss ?? null }}
+            state={{ content: props.content, toolbar: <ThemeToggle /> }}
+            props={{ themeCss: theme, customCss: ACADEMY.customCss ?? null, skipLabel: t("skipToContent") }}
         />
     )
 }

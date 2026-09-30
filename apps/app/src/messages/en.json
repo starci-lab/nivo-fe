@@ -265,6 +265,8 @@
     "brand": "nivo",
     "title": "Console",
     "workspaceLabel": "Console workspace",
+    "skipToContent": "Skip to content",
+    "loadingStatus": "Loading",
     "servicesCaption": "Services",
     "accountCaption": "Account",
     "navigationLabel": "Console destinations",
@@ -461,9 +463,6 @@
         "invalidLink": "This invitation link is missing its workspace."
       },
       "workspace": "Workspace"
-    },
-    "state": {
-      "loading": "Asking the server"
     },
     "refusal": {
       "EXPERT_SITE_NOT_FOUND_EXCEPTION": "This account has no app yet, so there are no academy settings to read.",

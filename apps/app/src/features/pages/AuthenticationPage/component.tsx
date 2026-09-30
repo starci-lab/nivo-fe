@@ -56,7 +56,7 @@ export const AuthenticationPageView = (props: AuthenticationPageViewProps) => {
         panel.state === "details" || panel.state === "code" ? `${panel.state}:${panel.props.mode}` : panel.state
 
     return (
-        <main className={AUTH_PAGE_CLASS_NAME}>
+        <main id="main-content" tabIndex={-1} className={AUTH_PAGE_CLASS_NAME}>
             <section aria-label={panel.props.title} className={AUTH_TASK_COLUMN_CLASS_NAME}>
                 <NivoBrand props={{ label: "Nivo", variant: "lockup", scale: "navbar" }} />
 

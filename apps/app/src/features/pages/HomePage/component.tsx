@@ -29,7 +29,7 @@ type HomePageProps = HomePageBaseProps
 export const HomePageBase = (props: HomePageProps) => {
     const { props: data }: HomePageProps = props
     return (
-        <main className={ROOT_CLASS_NAME}>
+        <main id="main-content" tabIndex={-1} className={ROOT_CLASS_NAME}>
             <div className={CONTENT_CLASS_NAME}>
                 <NivoIcon props={{ name: "brand", usage: "heading" }} />
                 <Heading level={1}>{"nivo app"}</Heading>

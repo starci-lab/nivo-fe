@@ -45,6 +45,7 @@ export const ConsoleLayout = (props: ConsoleLayoutProps) => {
             props={{
                 navigationLabel: t("navigationLabel"),
                 primaryLabel: t("workspaceLabel"),
+                skipLabel: t("skipToContent"),
             }}
         />
     )

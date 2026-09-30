@@ -3,6 +3,7 @@ import { StarCiDashboardThemeBoundary } from "@nivo/ui"
 import { WorkspaceShell } from "@starci/grammar/common"
 import { Sidebar } from "@/features/layouts/Sidebar"
 import { ConsoleTopBar } from "@/features/layouts/ConsoleTopBar"
+import { CONSOLE_MAIN_ID, CONSOLE_SKIP_LINK_CLASS_NAME } from "./classNames"
 
 /**
  * The frame's approved drawing: the routed page that fills the primary slot.
@@ -18,6 +19,7 @@ export type ConsoleLayoutBaseState = {
 export type ConsoleLayoutBaseData = {
     readonly navigationLabel: string
     readonly primaryLabel: string
+    readonly skipLabel: string
 }
 
 /*
@@ -36,6 +38,9 @@ export type ConsoleLayoutBaseProps = {
 /**
  * Draw stable authenticated chrome around one opaque routed page.
  *
+ * The skip link is the first focusable element and targets the shell-owned main landmark, which is
+ * the one `main` the page renders and carries `id="main-content"` with `tabIndex={-1}` from the shell.
+ *
  * The navigation band is mounted as a sibling above the shell, never in `WorkspaceShell.header`:
  * that slot is the page-level hero and wraps its content in its own `<header>`, so placing
  * `NavigationFeatureNav` (itself a `<header>`) there would expose two banner landmarks.
@@ -46,8 +51,11 @@ export type ConsoleLayoutBaseProps = {
  * the rail projects, so the trigger's destinations, labels and focus recovery are identical in
  * every band.
  */
-const ConsoleFrame = ({ state: { children }, props: { navigationLabel, primaryLabel } }: ConsoleLayoutBaseProps) => (
+const ConsoleFrame = ({ state: { children }, props: { navigationLabel, primaryLabel, skipLabel } }: ConsoleLayoutBaseProps) => (
     <>
+        <a className={CONSOLE_SKIP_LINK_CLASS_NAME} href={`#${CONSOLE_MAIN_ID}`}>
+            {skipLabel}
+        </a>
         <ConsoleTopBar />
         <WorkspaceShell
             align="stretch"
@@ -58,6 +66,7 @@ const ConsoleFrame = ({ state: { children }, props: { navigationLabel, primaryLa
             navigationTrack="intrinsic"
             navigationVisibility="wide"
             primary={children}
+            primaryId={CONSOLE_MAIN_ID}
             primaryLabel={primaryLabel}
         />
     </>
