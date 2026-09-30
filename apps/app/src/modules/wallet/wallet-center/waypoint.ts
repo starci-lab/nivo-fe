@@ -16,8 +16,6 @@ export type WalletWaypoint = {
     readonly returnTo: string
 }
 
-/** Session storage key retaining the active provider return evidence. */
-export const TOP_UP_SESSION_KEY = "nivo.wallet.top-up"
 
 /** Tone an invoice row with the status it actually reports. */
 export const invoiceTone = (status: InvoiceRow["status"]): WalletLedgerRow["tone"] => {
@@ -89,15 +87,6 @@ export const readWalletWaypoint = (search: string, locale: string): WalletWaypoi
 export const parseTopUpSession = (raw: string | null): TopUpSession | null => {
     try {
         return raw === null ? null : (JSON.parse(raw) as TopUpSession)
-    } catch {
-        return null
-    }
-}
-
-/** Read one stored provider return record, tolerating storage restrictions or malformed JSON. */
-export const readTopUpSession = (): TopUpSession | null => {
-    try {
-        return parseTopUpSession(sessionStorage.getItem(TOP_UP_SESSION_KEY))
     } catch {
         return null
     }

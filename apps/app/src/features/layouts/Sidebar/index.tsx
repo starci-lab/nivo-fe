@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl"
 import type { SidebarGroup } from "@starci/grammar/common"
 import { IconSource } from "@nivo/ui"
 import { usePathname, useRouter } from "@/hooks"
+import { NAVIGATION_COLLAPSED_KEY, readStored, writeStored } from "@/modules/browser-storage"
 import { SidebarBase } from "./component"
 
 /** Which console surface the navigation is drawn on: the persistent rail, or the mobile drawer. */
@@ -30,7 +31,6 @@ const DESTINATIONS: ReadonlyArray<Destination> = [
     { key: "apps", route: "/apps", group: "workspace", icon: "apps" },
     { key: "wallet", route: "/wallet", group: "account", icon: "wallet" },
 ]
-const STORAGE_KEY = "nivo-console-navigation-collapsed"
 
 /*
  * The collapsed preference is external state: it lives in browser storage, not in React. The
@@ -54,13 +54,9 @@ const subscribeCollapsed = (onChange: () => void): (() => void) => {
 }
 
 const getCollapsedSnapshot = (): boolean => {
-    try {
-        const value = globalThis.localStorage?.getItem(STORAGE_KEY)
-        if (value === "true") return true
-        if (value === "false") return false
-    } catch {
-        /* persistence is optional */
-    }
+    const value = readStored("local", NAVIGATION_COLLAPSED_KEY)
+    if (value === "true") return true
+    if (value === "false") return false
     return collapsedMemory ?? false
 }
 
@@ -68,11 +64,7 @@ const getCollapsedServerSnapshot = (): boolean => false
 
 const writeCollapsed = (collapsed: boolean) => {
     collapsedMemory = collapsed
-    try {
-        globalThis.localStorage?.setItem(STORAGE_KEY, String(collapsed))
-    } catch {
-        /* persistence is optional */
-    }
+    writeStored("local", NAVIGATION_COLLAPSED_KEY, String(collapsed))
     for (const listener of collapsedListeners) listener()
 }
 

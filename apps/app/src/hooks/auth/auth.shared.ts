@@ -11,7 +11,8 @@ import type {
 } from "@/modules/api/auth"
 import type { Outcome } from "@/modules/api/outcome"
 import type { Session } from "@/modules/auth/session"
-import { continuationReference, RETURN_TO_STORAGE_KEY, UNAVAILABLE_RETURN_LANDING } from "@/modules/auth/authentication"
+import { continuationReference, UNAVAILABLE_RETURN_LANDING } from "@/modules/auth/authentication"
+import { OAUTH_PROVIDER_KEY, readStored, RETURN_TO_STORAGE_KEY } from "@/modules/browser-storage"
 import { DEFAULT_AUTHENTICATED_LANDING, validatedReturnTo } from "@/modules/auth"
 
 /** The authentication catalogue translator accepted by the flow hooks. */
@@ -26,30 +27,17 @@ export type AuthenticationArrival = {
 /** Read the validated return intent once, falling back to the value saved before provider navigation. */
 export const readAuthenticationReturnToFromBrowser = (): string | null => {
     if (typeof window === "undefined") return null
-    try {
-        return readAuthenticationReturnTo(window.location.search, window.sessionStorage.getItem(RETURN_TO_STORAGE_KEY))
-    } catch {
-        return readAuthenticationReturnTo(window.location.search, null)
-    }
+    return readAuthenticationReturnTo(window.location.search, readStored("session", RETURN_TO_STORAGE_KEY))
 }
 
 /** Read only the provider label and refusal marker from the arriving address. */
 export const readAuthenticationArrival = (): AuthenticationArrival => {
     if (typeof window === "undefined") return { provider: null, refused: false }
-    let provider: AuthenticationArrival["provider"] = null
-    let refused = false
-    try {
-        const remembered = window.sessionStorage.getItem("nivo.oauth.provider")
-        provider = remembered === "github" || remembered === "google" ? remembered : null
-    } catch {
-        // Session storage can be unavailable while the error query is still readable.
+    const remembered = readStored("session", OAUTH_PROVIDER_KEY)
+    return {
+        provider: remembered === "github" || remembered === "google" ? remembered : null,
+        refused: new URLSearchParams(window.location.search).has("error"),
     }
-    try {
-        refused = new URLSearchParams(window.location.search).has("error")
-    } catch {
-        // A malformed address is treated as having no provider refusal marker.
-    }
-    return { provider, refused }
 }
 
 /** A sentence and whether it reports a refusal. */

@@ -21,7 +21,7 @@ import {
     type AuthenticationFlowControl,
     type AuthenticationTranslate,
 } from "./auth.shared"
-import { RETURN_TO_STORAGE_KEY } from "@/modules/auth/authentication"
+import { removeStored, RETURN_TO_STORAGE_KEY, writeStored } from "@/modules/browser-storage"
 import { authenticationOauthRedirectUrl, rememberOauthProvider } from "@/modules/auth"
 
 type UseAuthenticationDetailsOptions = {
@@ -58,21 +58,13 @@ export const useAuthenticationDetails = ({
 
     useEffect(() => {
         if (returnTo === null) return
-        try {
-            window.sessionStorage.setItem(RETURN_TO_STORAGE_KEY, returnTo)
-        } catch {
-            // Storage is optional; the current page still honors the validated address value.
-        }
+        writeStored("session", RETURN_TO_STORAGE_KEY, returnTo)
     }, [returnTo])
 
     const arriveAt = useCallback(
         (place: string) => {
             hasLanded.current = true
-            try {
-                window.sessionStorage.removeItem(RETURN_TO_STORAGE_KEY)
-            } catch {
-                // Nothing was stored, so nothing needs clearing.
-            }
+            removeStored("session", RETURN_TO_STORAGE_KEY)
             router.push(place)
         },
         [router],

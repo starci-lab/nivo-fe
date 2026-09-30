@@ -44,9 +44,7 @@ describe("takeOauthProvider", () => {
             get: refuse,
         })
         try {
-            const outcome = rememberOauthProvider("github")
-            expect(outcome.remembered).toBe(false)
-            if (!outcome.remembered) expect(outcome.cause).toBeInstanceOf(Error)
+            expect(rememberOauthProvider("github")).toBe(false)
             expect(takeOauthProvider()).toBe("google")
         } finally {
             if (real === undefined) Reflect.deleteProperty(window, "sessionStorage")

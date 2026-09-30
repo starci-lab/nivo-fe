@@ -38,9 +38,6 @@ export const sessionEndingNotice = (arrival: SessionEndingArrival | null): AuthN
 /** The destination carrying the reasonless unavailable-return notice. */
 export const UNAVAILABLE_RETURN_LANDING = `${DEFAULT_AUTHENTICATED_LANDING}?returnNotice=unavailable`
 
-/** Storage key for the route interrupted by authentication. */
-export const RETURN_TO_STORAGE_KEY = "nivo.auth.return-to"
-
 /** The only brokered answer that can carry a continuation reference. */
 export const continuationReference = (answer: BrokeredAnswer): string | null => {
     if (answer.undecided === null || !("continuationReference" in answer.undecided)) return null

@@ -1,4 +1,5 @@
 import { oauthRedirectUrl, type OauthProvider } from "@/modules/api/auth"
+import { OAUTH_PROVIDER_KEY, readStored, removeStored, writeStored } from "@/modules/browser-storage"
 
 /**
  * The provider hand-off: the address a reader leaves through, and the memory of who they left with.
@@ -20,33 +21,18 @@ import { oauthRedirectUrl, type OauthProvider } from "@/modules/api/auth"
  * back - Keycloak compares the two.
  */
 
-/** Where the chosen provider is remembered. Session-scoped: it dies with the tab, like the trip. */
-const PROVIDER_KEY = "nivo.oauth.provider"
-
 /** The provider assumed when nothing was remembered, so a return leg is never left without one. */
 const DEFAULT_PROVIDER: OauthProvider = "google"
 
 /**
- * What remembering the provider settled to. When storage refuses, the refusal is handed back with
- * its cause instead of disappearing - the return leg still falls back to the default provider.
- */
-export type RememberOauthProviderOutcome =
-    { readonly remembered: true } | { readonly remembered: false; readonly cause: unknown }
-
-/**
  * Remember the OAuth provider for the return leg without placing it in the callback URL.
+ * Session-scoped: it dies with the tab, like the trip.
  *
  * @param provider - The provider the reader chose.
- * @returns Whether the provider was kept; a refusal carries its cause.
+ * @returns Whether the provider was kept; when storage refuses the return leg uses the default provider.
  */
-export const rememberOauthProvider = (provider: OauthProvider): RememberOauthProviderOutcome => {
-    try {
-        window.sessionStorage.setItem(PROVIDER_KEY, provider)
-        return { remembered: true }
-    } catch (cause) {
-        return { remembered: false, cause }
-    }
-}
+export const rememberOauthProvider = (provider: OauthProvider): boolean =>
+    writeStored("session", OAUTH_PROVIDER_KEY, provider)
 
 /**
  * Read the remembered provider once and forget it, so a reload cannot replay a spent trip.
@@ -54,13 +40,9 @@ export const rememberOauthProvider = (provider: OauthProvider): RememberOauthPro
  * @returns The remembered provider, or the default when nothing was kept.
  */
 export const takeOauthProvider = (): OauthProvider => {
-    try {
-        const remembered = window.sessionStorage.getItem(PROVIDER_KEY)
-        window.sessionStorage.removeItem(PROVIDER_KEY)
-        return remembered === "github" ? "github" : DEFAULT_PROVIDER
-    } catch {
-        return DEFAULT_PROVIDER
-    }
+    const remembered = readStored("session", OAUTH_PROVIDER_KEY)
+    removeStored("session", OAUTH_PROVIDER_KEY)
+    return remembered === "github" ? "github" : DEFAULT_PROVIDER
 }
 
 /**

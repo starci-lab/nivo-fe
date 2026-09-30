@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useState, useSyncExternalStore } from "react"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
 import {
@@ -13,11 +13,19 @@ import {
 } from "@/hooks"
 import { createWalletOverlayViews } from "@/modules/wallet/wallet-center/overlay-views"
 import { createWalletSectionViews } from "@/modules/wallet/wallet-center/views"
-import { readTopUpSession, readWalletWaypoint, TOP_UP_SESSION_KEY } from "@/modules/wallet/wallet-center/waypoint"
+import { readStored, removeStored, TOP_UP_SESSION_KEY, writeStored } from "@/modules/browser-storage"
+import { parseTopUpSession, readWalletWaypoint } from "@/modules/wallet/wallet-center/waypoint"
 import { initialTopUpInteractionState, type InvoicePaymentState, type TopUpInteractionState } from "@/modules/wallet/wallet-center/interaction"
 import type { WalletControlCenterViewProps, WalletPageState } from "@/modules/wallet/wallet-center/types"
 import { BILLING_CURRENCY } from "@/modules/config"
 import { DEFAULT_LOCALE } from "@/modules/i18n/config"
+
+const subscribeTopUpSession = (onChange: () => void): (() => void) => {
+    window.addEventListener("storage", onChange)
+    return () => window.removeEventListener("storage", onChange)
+}
+const readTopUpSessionRaw = (): string | null => readStored("session", TOP_UP_SESSION_KEY)
+const readTopUpSessionServer = (): string | null => null
 
 /** Own wallet data, view projection and payment actions for the connected Wallet block. */
 export const useWalletControlCenter = (pageState: WalletPageState): WalletControlCenterViewProps => {
@@ -26,6 +34,7 @@ export const useWalletControlCenter = (pageState: WalletPageState): WalletContro
     const locale = useLocale()
     const pathname = usePathname()
     const searchParams = useSearchParams()
+    const storedTopUp = useSyncExternalStore(subscribeTopUpSession, readTopUpSessionRaw, readTopUpSessionServer)
     const route = (path: string) => (locale === DEFAULT_LOCALE ? path : `/${locale}${path}`)
     const waypoint = readWalletWaypoint(searchParams.toString(), locale)
     const wallet = useQueryMyWalletSwr()
@@ -108,7 +117,8 @@ export const useWalletControlCenter = (pageState: WalletPageState): WalletContro
             return
         }
         setTopUp((current) => ({ ...current, checkout: answer.data }))
-        sessionStorage.setItem(
+        writeStored(
+            "session",
             TOP_UP_SESSION_KEY,
             JSON.stringify({
                 amountVnd,
@@ -136,7 +146,7 @@ export const useWalletControlCenter = (pageState: WalletPageState): WalletContro
         document.body.append(form)
         form.submit()
     }
-    const stored = typeof window === "undefined" ? null : readTopUpSession()
+    const stored = parseTopUpSession(storedTopUp)
     const overlays = createWalletOverlayViews({
         t,
         isReturn: pathname.endsWith("/wallet/top-up/return"),
@@ -156,7 +166,7 @@ export const useWalletControlCenter = (pageState: WalletPageState): WalletContro
         changeTopUpAmount: (value: string) => setTopUp((current) => ({ ...current, amount: value })),
         submitTopUp: () => void submitTopUp(),
         closeResult: () => {
-            sessionStorage.removeItem(TOP_UP_SESSION_KEY)
+            removeStored("session", TOP_UP_SESSION_KEY)
             window.location.assign(route("/wallet"))
         },
         payInvoice: () => void payInvoice(),
