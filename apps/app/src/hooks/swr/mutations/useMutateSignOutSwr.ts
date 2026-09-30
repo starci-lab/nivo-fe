@@ -1,14 +1,7 @@
 "use client"
 
-import useSWRMutation from "swr/mutation"
 import { signOut } from "@/modules/api/auth"
-type AuthMutationTrigger<TInput> = {
-    readonly arg: TInput
-}
-
-/** Own one public authentication command; unlike viewer mutations it is intentionally signed-out. */
-const useAuthMutation = <TAnswer, TInput>(key: string, mutation: (input: TInput) => Promise<TAnswer>) =>
-    useSWRMutation(["NIVO_AUTH_MUTATION", key] as const, (_key, { arg }: AuthMutationTrigger<TInput>) => mutation(arg))
+import { useAuthMutation } from "../useAuthMutation"
 
 /**
  * Own ending a session, and carry the answers the ending states BESIDE its payload.

@@ -3,6 +3,7 @@
 import useSWRMutation from "swr/mutation"
 import { useSWRConfig } from "swr"
 import { useAccessToken } from "../auth/useAccessToken"
+import type { MutationTrigger } from "./useAuthMutation"
 import { nivoViewerQueryKeyFor, viewerCacheKeyFor, type NivoQueryKey } from "./useNivoQuery"
 
 /** Product mutation identity before the signed-in viewer scope is attached. */
@@ -10,9 +11,6 @@ export type NivoMutationKey = readonly [name: string, ...parts: ReadonlyArray<st
 
 /** Viewer-scoped mutation identity, never containing a bearer credential. */
 export type NivoViewerMutationKey = readonly ["NIVO_MUTATION", viewerKey: string, ...mutationKey: NivoMutationKey]
-type NivoMutationTrigger<TInput> = {
-    readonly arg: TInput
-}
 
 /** Query invalidation owned by a named command rather than repeated in its component consumers. */
 export type NivoMutationOptions<TAnswer, TInput> = {
@@ -45,7 +43,7 @@ export const useNivoMutation = <TAnswer, TInput>(
         typeof accessToken === "string" && accessToken.length > 0 && mutationKey !== null
             ? ["NIVO_MUTATION", viewerCacheKeyFor(accessToken), ...mutationKey]
             : null
-    return useSWRMutation(key, async (_key: NivoViewerMutationKey, { arg }: NivoMutationTrigger<TInput>) => {
+    return useSWRMutation(key, async (_key: NivoViewerMutationKey, { arg }: MutationTrigger<TInput>) => {
         const answer = await mutation(arg)
         await invalidateQueries(accessToken, arg, answer, options, mutateCache)
         return answer

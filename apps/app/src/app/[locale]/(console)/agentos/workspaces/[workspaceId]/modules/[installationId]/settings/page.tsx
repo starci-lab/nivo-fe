@@ -1,24 +1,14 @@
 import type { Metadata } from "next"
-import { getTranslations } from "next-intl/server"
 import { AgentOSSolutionModulePage } from "@/features/pages/AgentOSSolutionModulePage"
+import { readInstallationRoute, type InstallationRouteProps } from "@/modules/routes/installation"
+import { readModuleMetadata } from "@/modules/routes/metadata"
 
 /** The route's document metadata: its own title and description in the request's language. */
-export const generateMetadata = async (): Promise<Metadata> => {
-    const t = await getTranslations("metadata.agentosModuleSettings")
-    return {
-        title: t("title"),
-        description: t("description"),
-    }
-}
-
-/** Dynamic route identities for one exact AgentOS module installation. */
-type AgentOSSolutionModuleRouteProps = {
-    readonly params: Promise<{ readonly workspaceId: string; readonly installationId: string }>
-}
+export const generateMetadata = (): Promise<Metadata> => readModuleMetadata("metadata.agentosModuleSettings")
 
 /** Mount the installation's settings surface. */
-const Page = async ({ params }: AgentOSSolutionModuleRouteProps) => {
-    const { workspaceId, installationId } = await params
+const Page = async ({ params }: InstallationRouteProps) => {
+    const { workspaceId, installationId } = await readInstallationRoute(params)
     return <AgentOSSolutionModulePage workspaceId={workspaceId} installationId={installationId} view="settings" />
 }
 

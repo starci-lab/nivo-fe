@@ -1,17 +1,7 @@
 "use client"
 
-import useSWRMutation from "swr/mutation"
 import { endPrincipalSessions } from "@/modules/api/auth"
-type AuthMutationTrigger<TInput> = {
-    readonly arg: TInput
-}
-
-/**
- * Own one session-lifecycle command; its key is deliberately not scoped to a viewer, because the
- * request already carries the access grant the transport puts on the wire.
- */
-const useAuthMutation = <TAnswer, TInput>(key: string, mutation: (input: TInput) => Promise<TAnswer>) =>
-    useSWRMutation(["NIVO_AUTH_MUTATION", key] as const, (_key, { arg }: AuthMutationTrigger<TInput>) => mutation(arg))
+import { useAuthMutation } from "../useAuthMutation"
 
 /**
  * Own the scoped administrator session ending.

@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import useSWRImmutable from "swr/immutable"
-import useSWRMutation from "swr/mutation"
 import {
     exchangeOauthCode,
     forgotPasswordInit,
@@ -15,13 +14,7 @@ import {
     verifyTwoFactor,
 } from "@/modules/api/auth"
 import { takeOauthProvider } from "@/modules/auth"
-type AuthMutationTrigger<TInput> = {
-    readonly arg: TInput
-}
-
-/** Own one public authentication command; unlike viewer mutations it is intentionally signed-out. */
-const useAuthMutation = <TAnswer, TInput>(key: string, mutation: (input: TInput) => Promise<TAnswer>) =>
-    useSWRMutation(["NIVO_AUTH_MUTATION", key] as const, (_key, { arg }: AuthMutationTrigger<TInput>) => mutation(arg))
+import { useAuthMutation } from "../useAuthMutation"
 
 /** Own the signed-out password exchange. */
 export const useMutateSignInSwr = () => useAuthMutation("sign-in", signIn)
