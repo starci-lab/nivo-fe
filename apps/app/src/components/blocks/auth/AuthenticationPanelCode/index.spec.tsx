@@ -1,3 +1,4 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
@@ -56,10 +57,10 @@ const localizedCode = (messages: typeof enMessages): AuthCodeCopy => ({
 })
 
 describe("AuthenticationPanelCode", () => {
-    it("names the code and reset fields through the English and Vietnamese catalogs", () => {
+    it("names the code and reset fields through the English and Vietnamese catalogs", async () => {
         for (const messages of [enMessages, viMessages]) {
             const localized = localizedCode(messages)
-            render(
+            const { container } = render(
                 <AuthenticationPanelCode
                     state="code"
                     props={localized}
@@ -78,6 +79,7 @@ describe("AuthenticationPanelCode", () => {
                 screen.getByRole("button", { name: messages.authentication.forgotPassword.codeSubmitLabel }),
             ).toBeInTheDocument()
             expect(screen.getByRole("button", { name: messages.authentication.resendLabel })).toBeInTheDocument()
+            await expectNoA11yViolations(container)
         }
     })
 

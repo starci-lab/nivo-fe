@@ -1,4 +1,5 @@
-﻿import { TaskReceiptCard } from "./index"
+import { expectNoA11yViolations } from "@/testing/axe"
+import { TaskReceiptCard } from "./index"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { buildConversationItems } from "../../../../modules/collab/group-chat/model"
@@ -17,7 +18,7 @@ import {
 } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("TaskReceiptCard", () => {
-    it("renders task receipts for pending, reported and refused cards", () => {
+    it("renders task receipts for pending, reported and refused cards", async () => {
         const items = buildConversationItems({
             messages: [MESSAGE, messageAt("msg-3"), messageAt("msg-4")],
             cards: [BINDING, REPORTED_BINDING, REFUSED_BINDING],
@@ -26,7 +27,7 @@ describe("TaskReceiptCard", () => {
             viewerMemberId: OWNER.memberId,
             unknownAuthor: labels.conversation.unknownAuthor,
         })
-        render(
+        const { container } = render(
             <>
                 {conversationItemsOfKind(baseView({ items }), "task-card").map((item) => (
                     <TaskReceiptCard key={item.binding.bindingId} item={item} labels={labels} />
@@ -39,5 +40,6 @@ describe("TaskReceiptCard", () => {
         expect(screen.getByText(labels.statuses.working)).toBeInTheDocument()
         expect(screen.getAllByText("build-sales-report")).toHaveLength(2)
         expect(document.getElementById("collab-task-task-w")).not.toBeNull()
+        await expectNoA11yViolations(container)
     })
 })

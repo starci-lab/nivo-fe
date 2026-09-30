@@ -1,3 +1,4 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { cleanup, render, waitFor } from "@testing-library/react"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
@@ -85,8 +86,9 @@ describe("AcademyGrowthSummary", () => {
     })
 
     it("settles connected block twins after their owner reads", async () => {
-        render(<AcademyGrowthSummary siteId="site-1" />)
+        const { container } = render(<AcademyGrowthSummary siteId="site-1" />)
         render(<AgentOSSolutionModuleCenter workspaceId="workspace-1" />)
         await waitFor(() => expect(myAcademyGrowthSnapshot).toHaveBeenCalledWith("site-1"))
+        await expectNoA11yViolations(container)
     })
 })

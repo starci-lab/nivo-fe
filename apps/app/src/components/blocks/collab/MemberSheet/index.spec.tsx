@@ -1,15 +1,17 @@
-﻿import { MemberSheet } from "./index"
+import { expectNoA11yViolations } from "@/testing/axe"
+import { MemberSheet } from "./index"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { STAFF, PARTICIPANTS, labels, baseView, actions } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("MemberSheet", () => {
-    it("renders and closes the compact member sheet", () => {
+    it("renders and closes the compact member sheet", async () => {
         const on = actions()
-        render(<MemberSheet view={baseView()} labels={labels} on={on} showInvite={false} />)
+        const { container } = render(<MemberSheet view={baseView()} labels={labels} on={on} showInvite={false} />)
         expect(screen.getByRole("button", { name: labels.members.closeRail })).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: labels.members.closeRail }))
         expect(on.changeRailOpen).toHaveBeenCalledWith(false)
+        await expectNoA11yViolations(container)
     })
     it("renders the Staff roster in the compact member sheet", () => {
         const on = actions()

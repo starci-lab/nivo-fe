@@ -1,4 +1,5 @@
-﻿import { ApprovalCard } from "./index"
+import { expectNoA11yViolations } from "@/testing/axe"
+import { ApprovalCard } from "./index"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import type { CollabApprovalCardView, CollabApprovalView, CollabTaskView } from "../../../../modules/api/collab"
@@ -19,7 +20,7 @@ import {
 } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("ApprovalCard", () => {
-    it("renders a waiting approval card with exactly two eligible actions for an Owner", () => {
+    it("renders a waiting approval card with exactly two eligible actions for an Owner", async () => {
         const on = actions()
         const view = baseView({
             items: buildConversationItems({
@@ -31,7 +32,7 @@ describe("ApprovalCard", () => {
                 unknownAuthor: labels.conversation.unknownAuthor,
             }),
         })
-        render(
+        const { container } = render(
             <>
                 {conversationItemsOfKind(view, "approval-card").map((item) => (
                     <ApprovalCard key={item.approval.approvalId} item={item} view={view} labels={labels} on={on} />
@@ -47,6 +48,7 @@ describe("ApprovalCard", () => {
         expect(reject).toBeEnabled()
         fireEvent.click(approve)
         expect(on.pressApproval).toHaveBeenCalledWith("appr-1", "approve")
+        await expectNoA11yViolations(container)
     })
     it("keeps a waiting card readable but inactive for Staff with the decider statement", () => {
         const on = actions()

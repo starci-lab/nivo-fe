@@ -1,15 +1,17 @@
-﻿import { NoticesBand } from "./index"
+import { expectNoA11yViolations } from "@/testing/axe"
+import { NoticesBand } from "./index"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import type { CollabTurnNoticeItem } from "../../../../modules/api/collab"
 import { NOTICE, labels, baseView, actions } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("NoticesBand", () => {
-    it("lists outstanding notices and follows one to its card", () => {
+    it("lists outstanding notices and follows one to its card", async () => {
         const on = actions()
-        render(<NoticesBand view={baseView({ notices: [NOTICE] })} labels={labels} on={on} />)
+        const { container } = render(<NoticesBand view={baseView({ notices: [NOTICE] })} labels={labels} on={on} />)
         fireEvent.click(screen.getByRole("button", { name: "Mở" }))
         expect(on.openNotice).toHaveBeenCalledWith("ntc-1")
+        await expectNoA11yViolations(container)
     })
     it("marks a handled notice without offering a stale action", () => {
         const on = actions()

@@ -1,4 +1,5 @@
-﻿import { QuestionCard } from "./index"
+import { expectNoA11yViolations } from "@/testing/axe"
+import { QuestionCard } from "./index"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import type { CollabOfficeViewer } from "../../../../modules/api/collab"
@@ -16,7 +17,7 @@ import {
 } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("QuestionCard", () => {
-    it("shows a waiting question with the assignee's answer affordance only", () => {
+    it("shows a waiting question with the assignee's answer affordance only", async () => {
         const on = actions()
         const items = buildConversationItems({
             messages: [MESSAGE],
@@ -26,7 +27,7 @@ describe("QuestionCard", () => {
             viewerMemberId: OWNER.memberId,
             unknownAuthor: labels.conversation.unknownAuthor,
         })
-        const { rerender } = render(
+        const { rerender, container } = render(
             <>
                 {conversationItemsOfKind(baseView({ items }), "question-card").map((item) => (
                     <QuestionCard
@@ -60,6 +61,7 @@ describe("QuestionCard", () => {
         const answer = screen.getByRole("button", { name: "Trả lời" })
         fireEvent.click(answer)
         expect(on.answerQuestion).toHaveBeenCalledWith(TASK_WAITING_ANSWER, QUESTION)
+        await expectNoA11yViolations(container)
     })
     it("marks the question being answered and cancels it from the composer banner", () => {
         const on = actions()

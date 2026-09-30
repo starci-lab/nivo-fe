@@ -1,3 +1,4 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
@@ -9,15 +10,16 @@ vi.mock("@/hooks", () => ({ useOverviewData: () => mocks.data }))
 import { OverviewAddresses } from "."
 
 describe("OverviewAddresses", () => {
-    it("names every held domain and its own renewal state", () => {
+    it("names every held domain and its own renewal state", async () => {
         mocks.data.domains = {
             ok: true,
             data: [{ id: "domain-1", name: "api.nivo.vn", status: "active", expiresAt: null, autoRenew: true }],
         }
-        render(<OverviewAddresses />)
+        const { container } = render(<OverviewAddresses />)
 
         expect(screen.getByText("api.nivo.vn")).toBeInTheDocument()
         expect(screen.getByText("Held · Auto-renews")).toBeInTheDocument()
+        await expectNoA11yViolations(container)
     })
 
     it("states its own absence when there are no domains held", () => {

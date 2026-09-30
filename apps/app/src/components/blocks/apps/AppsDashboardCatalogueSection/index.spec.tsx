@@ -1,10 +1,11 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import type { CatalogueSectionView } from "../../../../modules/apps/apps-dashboard"
 import { AppsDashboardCatalogueSection } from "."
 
 describe("AppsDashboardCatalogueSection", () => {
-    it("starts the named template and keeps unsupported offers disabled", () => {
+    it("starts the named template and keeps unsupported offers disabled", async () => {
         const onBuildTemplate = vi.fn()
         const catalogue: CatalogueSectionView = {
             phase: "answered",
@@ -33,9 +34,10 @@ describe("AppsDashboardCatalogueSection", () => {
                 },
             ],
         }
-        render(<AppsDashboardCatalogueSection catalogue={catalogue} onBuildTemplate={onBuildTemplate} />)
+        const { container } = render(<AppsDashboardCatalogueSection catalogue={catalogue} onBuildTemplate={onBuildTemplate} />)
         fireEvent.click(screen.getByRole("button", { name: "Build" }))
         expect(onBuildTemplate).toHaveBeenCalledExactlyOnceWith("ai_academy")
         expect(screen.getByRole("button", { name: "Unavailable" })).toBeDisabled()
+        await expectNoA11yViolations(container)
     })
 })

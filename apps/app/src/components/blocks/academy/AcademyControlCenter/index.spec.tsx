@@ -1,5 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import type * as AcademyControlCenterComponent from "./component"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { AcademyControlCenter } from "./index"
 
 const m = vi.hoisted(() => ({
@@ -36,6 +38,31 @@ beforeEach(() => {
 })
 
 describe("AcademyControlCenter connected owner", () => {
+    it("checks accessibility on the real Academy screen", async () => {
+        const { AcademyControlCenterBase } = await vi.importActual<typeof AcademyControlCenterComponent>("./component")
+        const { container } = render(
+            <AcademyControlCenterBase
+                state="failed"
+                props={{
+                    title: "Academy",
+                    siteId: "site-1",
+                    mode: "growth",
+                    labels: {
+                        loading: "Loading",
+                        openSite: "Open site",
+                        tabsLabel: "Academy sections",
+                        tabs: [
+                            { id: "growth", label: "Growth" },
+                            { id: "system", label: "System" },
+                        ],
+                    },
+                }}
+                on={{ selectMode: vi.fn(), openPublicSite: vi.fn(), retryNotice: vi.fn() }}
+            />,
+        )
+        await expectNoA11yViolations(container)
+    })
+
     it("restores, resolves the owned site, reports tab selection, and opens the public host", async () => {
         const onSelectMode = vi.fn()
         render(<AcademyControlCenter siteId="site-1" mode="growth" onSelectMode={onSelectMode} />)

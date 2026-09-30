@@ -1,11 +1,12 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { WalletBalance } from "./index"
 
 describe("WalletBalance", () => {
-    it("shows settled facts and sends the top-up action to its owner", () => {
+    it("shows settled facts and sends the top-up action to its owner", async () => {
         const topUp = vi.fn()
-        render(
+        const { container } = render(
             <WalletBalance
                 balance={{
                     phase: "answered",
@@ -20,5 +21,6 @@ describe("WalletBalance", () => {
         expect(screen.getByText("500,000 VND")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Top up" }))
         expect(topUp).toHaveBeenCalledTimes(1)
+        await expectNoA11yViolations(container)
     })
 })

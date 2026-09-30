@@ -1,3 +1,4 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { NextIntlClientProvider } from "next-intl"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
@@ -22,14 +23,15 @@ const failure = (overrides: Partial<NivoQueryFailure>): NivoQueryFailure => ({
 })
 
 describe("QueryNotice", () => {
-    it("draws the refused kind as the sign-in door, not a retry", () => {
+    it("draws the refused kind as the sign-in door, not a retry", async () => {
         const retry = vi.fn()
-        renderNotice(failure({ kind: "refused", retryable: false }), retry)
+        const { container } = renderNotice(failure({ kind: "refused", retryable: false }), retry)
         expect(screen.getByText("Sign in to continue.")).toBeInTheDocument()
         expect(screen.getByRole("link")).toHaveAttribute("href", "/authentication")
         expect(screen.queryByText("Try again")).toBeNull()
         fireEvent.click(screen.getByRole("link"))
         expect(retry).not.toHaveBeenCalled()
+        await expectNoA11yViolations(container)
     })
 
     it("draws each denied kind with its own sentence and no retry the answer did not allow", () => {

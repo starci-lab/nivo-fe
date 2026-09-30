@@ -1,3 +1,4 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
@@ -9,7 +10,7 @@ vi.mock("@/hooks", () => ({ useOverviewData: () => mocks.data }))
 import { OverviewRuntime } from "."
 
 describe("OverviewRuntime", () => {
-    it("draws the pod's own five fields once the workspace and the pod have settled", () => {
+    it("draws the pod's own five fields once the workspace and the pod have settled", async () => {
         mocks.data.workspaces = {
             ok: true,
             data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: null }],
@@ -24,11 +25,12 @@ describe("OverviewRuntime", () => {
                 checkedAt: "2026-09-03T22:31:00.000Z",
             },
         }
-        render(<OverviewRuntime />)
+        const { container } = render(<OverviewRuntime />)
 
         expect(screen.getByText("Yes")).toBeInTheDocument()
         expect(screen.getByText("200")).toBeInTheDocument()
         expect(screen.getByText("Configured · 4f21")).toBeInTheDocument()
+        await expectNoA11yViolations(container)
     })
 
     it("names which part could not be read when the pod refuses", () => {

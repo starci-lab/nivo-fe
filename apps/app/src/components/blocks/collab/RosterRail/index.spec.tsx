@@ -1,4 +1,5 @@
-﻿import { RosterRail } from "./index"
+import { expectNoA11yViolations } from "@/testing/axe"
+import { RosterRail } from "./index"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { buildConversationItems } from "../../../../modules/collab/group-chat/model"
@@ -10,7 +11,7 @@ import {
 } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("RosterRail", () => {
-    it("lists an empty roster on the decision rail", () => {
+    it("lists an empty roster on the decision rail", async () => {
         const items = buildConversationItems({
             messages: [MODULE_MESSAGE],
             cards: [],
@@ -19,8 +20,9 @@ describe("RosterRail", () => {
             viewerMemberId: null,
             unknownAuthor: labels.conversation.unknownAuthor,
         })
-        render(<RosterRail view={baseView({ items, participants: [] })} labels={labels} />)
+        const { container } = render(<RosterRail view={baseView({ items, participants: [] })} labels={labels} />)
         expect(screen.getByText(labels.members.empty)).toBeInTheDocument()
         expect(screen.getByText(labels.members.noModules)).toBeInTheDocument()
+        await expectNoA11yViolations(container)
     })
 })

@@ -5,7 +5,7 @@ export const getGroupChatAvatarClassName = (compact: boolean, tint: string): Ret
     cn(compact ? GROUP_CHAT_AVATAR_COMPACT_CLASS_NAME : GROUP_CHAT_AVATAR_CLASS_NAME, tint)
 
 /** The avatar frame both the wide and compact member avatars build on. */
-const GROUP_CHAT_AVATAR_BASE_CLASS_NAME = cn(
+export const GROUP_CHAT_AVATAR_BASE_CLASS_NAME = cn(
     "relative",
     "flex",
     "shrink-0",
@@ -17,10 +17,10 @@ const GROUP_CHAT_AVATAR_BASE_CLASS_NAME = cn(
 )
 
 /** Tinted initials avatar circle shared by humans and modules. */
-const GROUP_CHAT_AVATAR_CLASS_NAME = cn(GROUP_CHAT_AVATAR_BASE_CLASS_NAME, "h-10", "w-10", "text-sm")
+export const GROUP_CHAT_AVATAR_CLASS_NAME = cn(GROUP_CHAT_AVATAR_BASE_CLASS_NAME, "h-10", "w-10", "text-sm")
 
 /** The compact avatar the mobile direction's tighter message rows use. */
-const GROUP_CHAT_AVATAR_COMPACT_CLASS_NAME = cn(GROUP_CHAT_AVATAR_BASE_CLASS_NAME, "h-8", "w-8", "text-xs")
+export const GROUP_CHAT_AVATAR_COMPACT_CLASS_NAME = cn(GROUP_CHAT_AVATAR_BASE_CLASS_NAME, "h-8", "w-8", "text-xs")
 
 /** The presence dot docked at a member avatar's lower edge. */
 export const GROUP_CHAT_AVATAR_PRESENCE_CLASS_NAME = cn(

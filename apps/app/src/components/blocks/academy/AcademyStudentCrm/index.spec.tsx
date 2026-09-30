@@ -1,5 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import type * as AcademyStudentCrmComponent from "./component"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { AcademyStudentCrm } from "./index"
 
 type StudentFixture = {
@@ -89,6 +91,50 @@ beforeEach(() => {
 })
 
 describe("AcademyStudentCrm", () => {
+    it("checks accessibility on the real student CRM", async () => {
+        const { AcademyStudentCrmBase } = await vi.importActual<typeof AcademyStudentCrmComponent>("./component")
+        const { container } = render(
+            <AcademyStudentCrmBase
+                state="empty"
+                props={{
+                    students: [],
+                    detailState: "idle",
+                    labels: {
+                        section: "Students",
+                        empty: "No students",
+                        open: "Open",
+                        active: "Active",
+                        banned: "Banned",
+                        detail: "Detail",
+                        create: "Create",
+                        name: "Name",
+                        email: "Email",
+                        password: "Password",
+                        saveStudent: "Save",
+                        courseSlug: "Course",
+                        grant: "Grant",
+                        revoke: "Revoke",
+                        ban: "Ban",
+                        activate: "Activate",
+                        loadingDetail: "Loading",
+                    },
+                }}
+                on={{
+                    openStudent: vi.fn(),
+                    changeName: vi.fn(),
+                    changeEmail: vi.fn(),
+                    changePassword: vi.fn(),
+                    createStudent: vi.fn(),
+                    changeCourseSlug: vi.fn(),
+                    setStatus: vi.fn(),
+                    grantAccess: vi.fn(),
+                    revokeAccess: vi.fn(),
+                }}
+            />,
+        )
+        await expectNoA11yViolations(container)
+    })
+
     it("loads students, opens detail and dispatches create/access/status actions", async () => {
         render(<AcademyStudentCrm siteId="site-1" />)
         await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("answered"))

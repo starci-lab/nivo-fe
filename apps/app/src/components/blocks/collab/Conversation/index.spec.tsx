@@ -1,4 +1,5 @@
-﻿import { Conversation } from "./index"
+import { expectNoA11yViolations } from "@/testing/axe"
+import { Conversation } from "./index"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { buildConversationItems } from "../../../../modules/collab/group-chat/model"
@@ -13,7 +14,7 @@ import {
 } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("Conversation", () => {
-    it("renders the authorized Office snapshot: roster, modules, conversation and a working composer", () => {
+    it("renders the authorized Office snapshot: roster, modules, conversation and a working composer", async () => {
         const on = actions()
         const view = baseView({
             items: buildConversationItems({
@@ -25,7 +26,7 @@ describe("Conversation", () => {
                 unknownAuthor: labels.conversation.unknownAuthor,
             }),
         })
-        render(
+        const { container } = render(
             <Conversation
                 view={view}
                 labels={labels}
@@ -37,5 +38,6 @@ describe("Conversation", () => {
         expect(screen.getByText("Sales")).toBeInTheDocument()
         expect(screen.getByText("Can you send me this month's sales report?")).toBeInTheDocument()
         expect(screen.getByText("@sales")).toBeInTheDocument()
+        await expectNoA11yViolations(container)
     })
 })

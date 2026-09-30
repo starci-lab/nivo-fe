@@ -1,3 +1,4 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
@@ -179,12 +180,13 @@ describe("AccountMenu", () => {
 
     it("ends the real session from the account action", async () => {
         const user = userEvent.setup()
-        render(<AccountMenu />)
+        const { container } = render(<AccountMenu />)
 
         fireEvent.click(screen.getByRole("button", { name: "Account" }))
         await user.click(await screen.findByRole("menuitem", { name: "Sign out" }))
         expect(end).toHaveBeenCalledOnce()
         expect(end).toHaveBeenCalledWith()
+        await expectNoA11yViolations(container)
     })
 
     it("asks the every-browser scope in the console's own words, ends every session once, and leaves for Login", async () => {

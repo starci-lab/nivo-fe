@@ -1,3 +1,4 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import type * as Hooks from "@/hooks"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
@@ -37,11 +38,12 @@ describe("LanguageMenu", () => {
 
     it("replaces only the locale while preserving route and query", async () => {
         window.history.replaceState({}, "", "/en/agentos?workspace=one#details")
-        renderMenu("en")
+        const { container } = renderMenu("en")
 
         fireEvent.click(screen.getByRole("button", { name: enMessages.console.locale.label }))
         fireEvent.click(await screen.findByRole("menuitemradio", { name: enMessages.console.locale.options.vi }))
         expect(replace).toHaveBeenCalledWith("/agentos?workspace=one#details", { locale: "vi" })
+        await expectNoA11yViolations(container)
     })
 
     it("keeps the current locale without replacing the route", async () => {

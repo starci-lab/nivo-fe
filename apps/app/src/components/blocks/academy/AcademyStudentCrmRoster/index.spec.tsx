@@ -1,5 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server"
+import { render } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type { AcademyStudentCrmLabels } from "../../../../modules/academy/student-crm"
 import { AcademyStudentCrmRoster } from "./index"
 
@@ -15,5 +17,17 @@ describe("AcademyStudentCrmRoster", () => {
         expect(renderToStaticMarkup(<AcademyStudentCrmRoster state="empty" students={[]} labels={labels} on={on} />)).toContain("No students")
         expect(renderToStaticMarkup(<AcademyStudentCrmRoster state="failed" students={[]} notice={<b>Unavailable</b>} labels={labels} on={on} />)).toContain("Unavailable")
         expect(renderToStaticMarkup(<AcademyStudentCrmRoster state="answered" students={[{ id: "s1", name: "Reader", email: "reader@example.test", role: "student", status: "active", xp: 0 }]} labels={labels} on={on} />)).toContain("Reader")
+    })
+
+    it("has no accessibility violations in the student roster", async () => {
+        const { container } = render(
+            <AcademyStudentCrmRoster
+                state="answered"
+                students={[{ id: "s1", name: "Reader", email: "reader@example.test", role: "student", status: "active", xp: 0 }]}
+                labels={labels}
+                on={{ openStudent: vi.fn() } as never}
+            />,
+        )
+        await expectNoA11yViolations(container)
     })
 })

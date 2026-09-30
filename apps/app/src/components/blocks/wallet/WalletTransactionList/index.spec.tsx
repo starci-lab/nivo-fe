@@ -1,11 +1,12 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { WalletTransactionList } from "./index"
 
 describe("WalletTransactionList", () => {
-    it("shows invoice evidence and wires the linked return action", () => {
+    it("shows invoice evidence and wires the linked return action", async () => {
         const returnToOrder = vi.fn()
-        render(
+        const { container } = render(
             <WalletTransactionList
                 transactions={{ phase: "empty", label: "Transactions", note: "No transactions" }}
                 invoices={{ phase: "empty", label: "Invoices", note: "No invoices" }}
@@ -37,5 +38,6 @@ describe("WalletTransactionList", () => {
         expect(screen.getByText("Continue the order.")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Return to order" }))
         expect(returnToOrder).toHaveBeenCalledTimes(1)
+        await expectNoA11yViolations(container)
     })
 })

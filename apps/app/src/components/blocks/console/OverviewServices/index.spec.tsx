@@ -1,3 +1,4 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
@@ -10,7 +11,7 @@ vi.mock("@/hooks", () => ({ useRouter: () => ({ push: mocks.push }), useOverview
 import { OverviewServices } from "."
 
 describe("OverviewServices", () => {
-    it("lists every owned app before the one agent workspace", () => {
+    it("lists every owned app before the one agent workspace", async () => {
         mocks.data.apps = {
             ok: true,
             data: [
@@ -28,12 +29,13 @@ describe("OverviewServices", () => {
             ok: true,
             data: [{ id: "workspace-1", name: "reader workspace", status: "active", catalogOrder: { id: "order-1" } }],
         }
-        render(<OverviewServices label="Services" />)
+        const { container } = render(<OverviewServices label="Services" />)
 
         expect(screen.getByText("reader-app")).toBeInTheDocument()
         expect(screen.getByText("second-app")).toBeInTheDocument()
         expect(screen.getByText("reader workspace")).toBeInTheDocument()
         expect(screen.getByText("Agent workspace · fulfils catalog order order-1")).toBeInTheDocument()
+        await expectNoA11yViolations(container)
     })
 
     it("opens the row's own app from its own action", () => {

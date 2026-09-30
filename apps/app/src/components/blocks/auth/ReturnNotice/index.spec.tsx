@@ -1,3 +1,4 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -32,11 +33,12 @@ describe("ReturnNotice", () => {
     })
     afterEach(cleanup)
 
-    it("shows the reasonless notice on a landing reached with the marker", () => {
+    it("shows the reasonless notice on a landing reached with the marker", async () => {
         address.search = MARKER
-        render(<ReturnNotice />)
+        const { container } = render(<ReturnNotice />)
 
         expect(screen.getByText(NOTICE)).toBeInTheDocument()
+        await expectNoA11yViolations(container)
     })
 
     it("puts the address back without the marker, keeping what it does not own", () => {

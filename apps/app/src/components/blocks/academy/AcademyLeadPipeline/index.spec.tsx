@@ -3,6 +3,8 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { SWRConfig } from "swr"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import viMessages from "@/messages/vi.json"
+import type * as AcademyLeadPipelineComponent from "./component"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { AcademyLeadPipeline as AcademyLeadPipelineBlock } from "./index"
 
 type LeadPipelineHostProps = { readonly siteId: string }
@@ -62,6 +64,30 @@ beforeEach(() => {
 })
 
 describe("AcademyLeadPipeline", () => {
+    it("checks accessibility on the real lead pipeline", async () => {
+        const { AcademyLeadPipelineBase } = await vi.importActual<typeof AcademyLeadPipelineComponent>("./component")
+        const { container } = render(
+            <AcademyLeadPipelineBase
+                state="empty"
+                props={{
+                    leads: [],
+                    labels: {
+                        section: "Leads",
+                        empty: "No leads yet",
+                        open: "Open",
+                        detail: "Lead details",
+                        advance: "Advance",
+                        draft: "Draft reply",
+                        saved: "Saved",
+                        actionFailed: "Action failed",
+                    },
+                }}
+                on={{ openLead: vi.fn(), advance: vi.fn(), draftReply: vi.fn(), retryNotice: vi.fn() }}
+            />,
+        )
+        await expectNoA11yViolations(container)
+    })
+
     it("loads leads, drafts replies, and advances status with locale", async () => {
         render(<AcademyLeadPipeline siteId="site-1" />)
         await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("answered"))

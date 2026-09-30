@@ -1,13 +1,14 @@
-﻿import { MembersRail } from "./index"
+import { expectNoA11yViolations } from "@/testing/axe"
+import { MembersRail } from "./index"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import type { CollabOfficeParticipant } from "../../../../modules/api/collab"
 import { PARTICIPANTS, STAFF, labels, baseView, actions } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("MembersRail", () => {
-    it("says plainly when no module is hired while human chat stays usable", () => {
+    it("says plainly when no module is hired while human chat stays usable", async () => {
         const on = actions()
-        render(
+        const { container } = render(
             <MembersRail
                 view={baseView({ participants: PARTICIPANTS.filter((p) => p.kind === "human") })}
                 labels={labels}
@@ -15,6 +16,7 @@ describe("MembersRail", () => {
             />,
         )
         expect(screen.getByText("Chưa có module nào được thuê.")).toBeInTheDocument()
+        await expectNoA11yViolations(container)
     })
     it("presents empty rosters and a pending invitee on the rail", () => {
         const invited: CollabOfficeParticipant = {

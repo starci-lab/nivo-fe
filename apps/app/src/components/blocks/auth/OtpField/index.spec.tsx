@@ -1,11 +1,12 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import { OtpField } from "./"
 
 describe("OtpField", () => {
-    it("makes the code input reachable by role and its catalog label", () => {
-        render(
+    it("makes the code input reachable by role and its catalog label", async () => {
+        const { container } = render(
             <OtpField
                 id="authentication-code"
                 label="Verification code"
@@ -18,6 +19,7 @@ describe("OtpField", () => {
         )
         expect(screen.getByRole("group", { name: "Verification code" })).toBeInTheDocument()
         expect(screen.getByRole("textbox", { name: "Verification code" })).toBeInTheDocument()
+        await expectNoA11yViolations(container)
     })
 
     it("connects the visible label and refusal status to the six-slot input", () => {

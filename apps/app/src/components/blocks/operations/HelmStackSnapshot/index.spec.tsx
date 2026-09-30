@@ -1,5 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server"
+import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { HelmStackSnapshot } from "./index"
 import type { AgentWorkspaceRuntime } from "@/modules/api/agentos-workspaces"
 
@@ -61,5 +63,10 @@ describe("Helm stack snapshot", () => {
         expect(html).toContain("release-1")
         expect(html).toContain("agentos@1.0")
         expect(html).toContain("data: 10Gi")
+    })
+
+    it("has no accessibility violations when runtime is unavailable", async () => {
+        const { container } = render(<HelmStackSnapshot runtime={null} labels={labels} />)
+        await expectNoA11yViolations(container)
     })
 })

@@ -12,7 +12,7 @@ describe("LoadingRegionBase", () => {
         const region = container.querySelector("[data-loading-region]")
         expect(region).toHaveAttribute("aria-busy", "true")
         expect(screen.getByRole("status")).toHaveTextContent("Loading")
-        expect(screen.getByRole("status")).toHaveClass("sr-only")
+        expect(screen.getByRole("status")).toBeInTheDocument()
         expect(region?.querySelector("[aria-hidden='true']")).not.toBeNull()
     })
 

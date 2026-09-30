@@ -1,20 +1,22 @@
-﻿import { AcceptanceSurface } from "./index"
+import { expectNoA11yViolations } from "@/testing/axe"
+import { AcceptanceSurface } from "./index"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { labels, baseView, actions } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("AcceptanceSurface", () => {
-    it("renders the invitation acceptance surface without Office content", () => {
+    it("renders the invitation acceptance surface without Office content", async () => {
         const on = actions()
         const view = baseView({
             screen: "acceptance",
             acceptance: { state: "ready", roleHint: "staff", invalidLink: false },
         })
-        render(<AcceptanceSurface view={view} labels={labels} on={on} />)
+        const { container } = render(<AcceptanceSurface view={view} labels={labels} on={on} />)
         expect(screen.getByText("Lời mời vào workspace")).toBeInTheDocument()
         expect(screen.getByText("Vai trò được mời: Staff")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Chấp nhận lời mời" }))
         expect(on.acceptInvitation).toHaveBeenCalled()
+        await expectNoA11yViolations(container)
     })
     it("shows a non-disclosing refusal for an unentitled acceptance", () => {
         const on = actions()

@@ -1,5 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server"
+import { render } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type { AuthNoticeCopy } from "@/modules/auth/authentication-panel/copy"
 import { AuthenticationPanelNotice } from "./"
 
@@ -29,6 +31,13 @@ describe("AuthenticationPanelNotice", () => {
         )
         expect(done).toContain("Done")
         expect(unsupported).toContain("Two-factor unavailable")
+    })
+
+    it("has no accessibility violations in the real notice", async () => {
+        const { container } = render(
+            <AuthenticationPanelNotice state="done" props={notice} on={{ onward: vi.fn() }} />,
+        )
+        await expectNoA11yViolations(container)
     })
 
     it("offers a second way out only when a secondary action is present", () => {

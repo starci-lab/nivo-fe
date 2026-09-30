@@ -1,3 +1,4 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { WalletTopUp } from "./index"
@@ -28,13 +29,14 @@ const result: PaymentResultView = {
 }
 
 describe("WalletTopUp", () => {
-    it("shows provider checkout evidence and closes the top-up overlay", () => {
+    it("shows provider checkout evidence and closes the top-up overlay", async () => {
         const closeTopUp = vi.fn()
-        render(<WalletTopUp topUp={topUp} result={result} on={{ closeTopUp }} />)
+        const { container } = render(<WalletTopUp topUp={topUp} result={result} on={{ closeTopUp }} />)
 
         expect(screen.getByText("REF-42")).toBeInTheDocument()
         expect(screen.getByText("Redirecting")).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: "Close", hidden: true }))
         expect(closeTopUp).toHaveBeenCalledTimes(1)
+        await expectNoA11yViolations(container)
     })
 })

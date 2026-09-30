@@ -1,12 +1,13 @@
-﻿import { Composer } from "./index"
+import { expectNoA11yViolations } from "@/testing/axe"
+import { Composer } from "./index"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { labels, baseView, actions } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("Composer", () => {
-    it("keeps a drafted message in the composer and submits it once through the form", () => {
+    it("keeps a drafted message in the composer and submits it once through the form", async () => {
         const on = actions()
-        render(
+        const { container } = render(
             <Composer
                 view={baseView({ composer: { value: "Xin chào", pending: false, failure: null, answering: null } })}
                 labels={labels}
@@ -23,6 +24,7 @@ describe("Composer", () => {
         expect(screen.getByRole("button", { name: labels.composer.send })).toBeEnabled()
         fireEvent.submit(form)
         expect(on.sendMessage).toHaveBeenCalledTimes(1)
+        await expectNoA11yViolations(container)
     })
     it("keeps a failed send's draft and offers the reconcile-and-retry path", () => {
         const on = actions()

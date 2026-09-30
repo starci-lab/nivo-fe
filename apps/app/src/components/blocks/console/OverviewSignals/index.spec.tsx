@@ -1,3 +1,4 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { vi } from "vitest"
@@ -14,7 +15,7 @@ vi.mock("@/hooks", () => ({ useNow: () => mocks.now, useOverviewData: () => mock
 import { OverviewSignals } from "."
 
 describe("OverviewSignals", () => {
-    it("prioritises actionable source facts across all four cells", () => {
+    it("prioritises actionable source facts across all four cells", async () => {
         mocks.data.apps = {
             ok: true,
             data: [
@@ -73,6 +74,7 @@ describe("OverviewSignals", () => {
         expect(container).toHaveTextContent("nivo AI Agent")
         expect(container).toHaveTextContent("api.nivo.vn")
         expect(container).toHaveTextContent("₫2,450,000")
+        await expectNoA11yViolations(container)
     })
 
     it("settles empty source collections without inventing resources", () => {

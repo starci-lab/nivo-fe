@@ -1,3 +1,4 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { act, cleanup, render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
@@ -54,7 +55,7 @@ describe("SessionEndingDialog", () => {
         const { promise, release } = unansweredEnding()
         end.mockReturnValueOnce(promise)
         const user = userEvent.setup()
-        render(<SessionEndingDialog isOpen onOpenChange={openChange} />)
+        const { container } = render(<SessionEndingDialog isOpen onOpenChange={openChange} />)
         const dialog = await screen.findByRole("dialog")
 
         const confirm = within(dialog).getByRole("button", { name: "Sign out everywhere" })
@@ -73,6 +74,7 @@ describe("SessionEndingDialog", () => {
         })
         await waitFor(() => expect(replace).toHaveBeenCalledWith("/authentication?sessionEnding=applied"))
         expect(openChange).toHaveBeenCalledWith(false)
+        await expectNoA11yViolations(container)
     })
 
     it("carries an unconfirmed authority answer on the address, never an applied one", async () => {

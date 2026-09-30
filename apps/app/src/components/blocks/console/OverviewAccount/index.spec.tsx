@@ -1,3 +1,4 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
@@ -15,7 +16,7 @@ vi.mock("@/hooks", () => ({
 import { OverviewAccount } from "."
 
 describe("OverviewAccount", () => {
-    it("names the exact balance and the one unpaid invoice that owes the next step", () => {
+    it("names the exact balance and the one unpaid invoice that owes the next step", async () => {
         mocks.data.wallet = { ok: true, data: { id: "wallet-1", balanceVnd: 150000 } }
         mocks.data.invoices = {
             ok: true,
@@ -30,10 +31,11 @@ describe("OverviewAccount", () => {
                 },
             ],
         }
-        render(<OverviewAccount label="Account" />)
+        const { container } = render(<OverviewAccount label="Account" />)
 
         expect(screen.getByText("₫150,000")).toBeInTheDocument()
         expect(screen.getByText("Invoice ABCDEF12")).toBeInTheDocument()
+        await expectNoA11yViolations(container)
     })
 
     it("routes the invoice row's own top-up command", () => {

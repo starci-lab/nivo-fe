@@ -1,4 +1,5 @@
-﻿import { TasksPanel } from "./index"
+import { expectNoA11yViolations } from "@/testing/axe"
+import { TasksPanel } from "./index"
 import { fireEvent, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
@@ -16,7 +17,7 @@ describe("TasksPanel", () => {
         const user = userEvent.setup()
         const on = actions()
         const view = baseView({ tab: "tasks", tasks: { state: "ready", rows: [TASK_WAITING_APPROVAL], filter: {} } })
-        render(<TasksPanel view={view} labels={labels} on={on} />)
+        const { container } = render(<TasksPanel view={view} labels={labels} on={on} />)
         const person = screen.getByRole("combobox", { name: labels.tasks.filterPerson })
         const moduleSelect = screen.getByRole("combobox", { name: labels.tasks.filterModule })
         const statusSelect = screen.getByRole("combobox", { name: labels.tasks.filterStatus })
@@ -34,6 +35,7 @@ describe("TasksPanel", () => {
         expect(screen.getAllByText("Chờ phê duyệt").length).toBeGreaterThan(0)
         fireEvent.click(screen.getByRole("button", { name: "Mở trong Office" }))
         expect(on.openTaskCard).toHaveBeenCalledWith(TASK_WAITING_APPROVAL.taskId)
+        await expectNoA11yViolations(container)
     })
     it("explains an invalid filter against the current roster instead of leaking another workspace", () => {
         const on = actions()

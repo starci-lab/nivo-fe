@@ -1,6 +1,8 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import type * as TemplateAppProvisioningComponent from "./component"
+import { expectNoA11yViolations } from "@/testing/axe"
 
 const mocks = vi.hoisted(() => {
     const api = {
@@ -67,6 +69,28 @@ const resetQueryCache = () => {
 
 describe("TemplateAppProvisioning", () => {
     afterEach(() => cleanup())
+
+    it("checks accessibility on the real provisioning screen", async () => {
+        const { TemplateAppProvisioningBase } = await vi.importActual<typeof TemplateAppProvisioningComponent>("./component")
+        const { container } = render(
+            <TemplateAppProvisioningBase
+                state="failed"
+                props={{
+                    steps: [],
+                    subject: "Academy",
+                    detail: "site-1",
+                    statusTitle: "Could not continue",
+                    statusText: "The request failed.",
+                    slugLabel: "Address",
+                    slugPlaceholder: "academy",
+                    submitLabel: "Create",
+                    actionLabel: "Back to apps",
+                }}
+                on={{ act: vi.fn() }}
+            />,
+        )
+        await expectNoA11yViolations(container)
+    })
 
     beforeEach(() => {
         vi.clearAllMocks()

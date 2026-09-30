@@ -1,3 +1,4 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
@@ -68,7 +69,7 @@ const localizedDetails = (messages: typeof enMessages): AuthDetailsCopy => ({
 })
 
 describe("AuthenticationPanelDetails", () => {
-    it("names sign-in and registration fields through the English and Vietnamese catalogs", () => {
+    it("names sign-in and registration fields through the English and Vietnamese catalogs", async () => {
         for (const messages of [enMessages, viMessages]) {
             const localized = localizedDetails(messages)
             const signIn = render(
@@ -87,6 +88,7 @@ describe("AuthenticationPanelDetails", () => {
             expect(screen.getByRole("button", { name: messages.authentication.githubLabel })).toBeInTheDocument()
             expect(screen.getByRole("checkbox", { name: messages.authentication.rememberMeLabel })).toBeInTheDocument()
             expect(screen.getByRole("button", { name: messages.authentication.forgotPasswordLabel })).toBeInTheDocument()
+            await expectNoA11yViolations(signIn.container)
             signIn.unmount()
 
             const signUp = render(
@@ -109,6 +111,7 @@ describe("AuthenticationPanelDetails", () => {
             ).toBeInTheDocument()
             expect(screen.getAllByRole("button", { name: messages.authentication.revealLabel })).toHaveLength(2)
             expect(screen.getByRole("button", { name: messages.authentication.signUp.submitLabel })).toBeInTheDocument()
+            await expectNoA11yViolations(signUp.container)
             signUp.unmount()
         }
     })

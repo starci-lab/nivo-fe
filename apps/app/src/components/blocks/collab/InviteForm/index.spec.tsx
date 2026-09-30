@@ -1,12 +1,13 @@
-﻿import { fireEvent, render, screen } from "@testing-library/react"
+import { expectNoA11yViolations } from "@/testing/axe"
+import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { InviteForm } from "./index"
 import { labels, baseView, actions } from "../../../../modules/collab/group-chat/test-fixtures.fixture"
 
 describe("InviteForm", () => {
-    it("submits the selected role through the invitation form", () => {
+    it("submits the selected role through the invitation form", async () => {
         const on = actions()
-        render(
+        const { container } = render(
             <InviteForm
                 view={baseView({
                     invite: {
@@ -36,6 +37,7 @@ describe("InviteForm", () => {
         if (form === null) throw new Error("Invitation form is missing")
         fireEvent.submit(form)
         expect(on.submitInvite).toHaveBeenCalledTimes(1)
+        await expectNoA11yViolations(container)
     })
 
     it("shows invite outcomes without disclosing beyond the authorized answer", () => {

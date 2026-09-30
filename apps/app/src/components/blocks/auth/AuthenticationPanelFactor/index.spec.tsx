@@ -1,3 +1,4 @@
+import { expectNoA11yViolations } from "@/testing/axe"
 import { render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
@@ -29,9 +30,9 @@ const formState: AuthPanelFormState = {
 }
 
 describe("AuthenticationPanelFactor", () => {
-    it("names the second-factor code field through both locale catalogs", () => {
+    it("names the second-factor code field through both locale catalogs", async () => {
         for (const messages of [enMessages, viMessages]) {
-            render(
+            const { container } = render(
                 <AuthenticationPanelFactor
                     state="secondFactor"
                     props={{
@@ -48,6 +49,7 @@ describe("AuthenticationPanelFactor", () => {
             expect(
                 screen.getByRole("button", { name: messages.authentication.signIn.twoFactorSubmitLabel }),
             ).toBeInTheDocument()
+            await expectNoA11yViolations(container)
         }
     })
 

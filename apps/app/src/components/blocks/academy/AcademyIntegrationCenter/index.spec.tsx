@@ -1,6 +1,8 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { SWRConfig } from "swr"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import type * as AcademyIntegrationCenterComponent from "./component"
+import { expectNoA11yViolations } from "@/testing/axe"
 import { AcademyIntegrationCenter } from "./index"
 
 const m = vi.hoisted(() => ({
@@ -158,6 +160,18 @@ beforeEach(() => {
 })
 
 describe("AcademyIntegrationCenter", () => {
+    it("checks accessibility on the real integration screen", async () => {
+        const { AcademyIntegrationCenterBase } = await vi.importActual<typeof AcademyIntegrationCenterComponent>("./component")
+        const { container } = render(
+            <AcademyIntegrationCenterBase
+                state="answered"
+                props={{ sectionLabel: "Integrations", cards: [] }}
+                on={{ select: vi.fn(), changeField: vi.fn(), submit: vi.fn() }}
+            />,
+        )
+        await expectNoA11yViolations(container)
+    })
+
     it("loads refusal and answered provider states", async () => {
         m.integrations = { ok: false, kind: "unavailable", code: "UNAVAILABLE", reason: "down" }
         render(<AcademyIntegrationCenter siteId="site-1" />)
