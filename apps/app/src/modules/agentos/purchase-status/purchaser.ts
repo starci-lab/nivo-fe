@@ -1,4 +1,4 @@
-import { isRecord } from "@/modules/api/wire"
+import { isRecord } from "@nivo/api"
 
 /** The owner-identity claims the signed-in session's access token may carry. */
 export type PurchaserClaims = {

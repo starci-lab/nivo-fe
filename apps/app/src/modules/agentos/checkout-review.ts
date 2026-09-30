@@ -3,7 +3,7 @@ import type {
     WorkspaceCheckoutOffer,
     WorkspaceCheckoutPaymentRail,
 } from "../api/workspace-controlplane"
-import type { Outcome } from "../api/outcome"
+import { type Outcome } from "@nivo/api"
 
 /** Resolved copy the connected owner supplies; no translation or transport lives here. */
 export type CheckoutReviewCopy = {

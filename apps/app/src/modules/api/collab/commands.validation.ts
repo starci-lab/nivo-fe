@@ -1,5 +1,5 @@
 import { collabFailure } from "./payload"
-import type { Outcome } from "../outcome"
+import { type Outcome } from "@nivo/api"
 const FORBIDDEN_AUTHORITY_CLAIMS = new Set([
     "askerGrantScope",
     "askerGrant",

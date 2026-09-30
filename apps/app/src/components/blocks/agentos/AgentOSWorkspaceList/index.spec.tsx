@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { NextIntlClientProvider } from "next-intl"
 import viMessages from "@/messages/vi.json"
 import enMessages from "@/messages/en.json"
-import { TIME_ZONE, type Locale } from "@/modules/i18n/config"
+import { TIME_ZONE, type Locale } from "@/modules/i18n"
 
 const mocks = vi.hoisted(() => ({
     locale: "vi" as Locale,

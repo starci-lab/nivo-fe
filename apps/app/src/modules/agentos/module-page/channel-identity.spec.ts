@@ -1,7 +1,7 @@
 import { createTranslator } from "next-intl"
 import { describe, expect, it } from "vitest"
 import enMessages from "../../../messages/en.json"
-import { TIME_ZONE } from "../../i18n/config"
+import { TIME_ZONE } from "@/modules/i18n"
 import type { AgentWorkspaceControlCenter } from "../../api/agentos-workspaces"
 import type { NivoQueryAnswer } from "../../query"
 import { buildModulePageCopy } from "../module-page-copy"

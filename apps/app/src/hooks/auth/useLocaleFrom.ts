@@ -1,6 +1,7 @@
 "use client"
 
-import { setLocaleReader, type LocaleReader } from "@/modules/api/graphql"
+import { type LocaleReader } from "@nivo/api"
+import { setLocaleReader } from "@/modules/api/graphql"
 
 /**
  * Point the GraphQL transport at the reader that answers with the reader's language.

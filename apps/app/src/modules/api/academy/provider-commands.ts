@@ -1,5 +1,5 @@
+import { type Outcome } from "@nivo/api"
 import { graphql } from "../graphql"
-import type { Outcome } from "../outcome"
 import type { AcademyCustomDomainState } from "../../academy"
 import {
     parseAcademyCredentialSaveResult,

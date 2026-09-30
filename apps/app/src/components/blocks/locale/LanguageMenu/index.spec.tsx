@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { NextIntlClientProvider } from "next-intl"
 import viMessages from "@/messages/vi.json"
 import enMessages from "@/messages/en.json"
-import { TIME_ZONE } from "@/modules/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n"
 
 const replace = vi.fn()
 vi.mock("@/hooks", async () => ({

@@ -1,6 +1,5 @@
+import { parseBooleanAnswer, type Outcome } from "@nivo/api"
 import { graphql } from "../graphql"
-import { parseBooleanAnswer } from "../wire"
-import type { Outcome } from "../outcome"
 import { OTP_CHALLENGE } from "./documents"
 import { parseOtpChallenge } from "./guards"
 import type { ForgotPasswordInitInput, ForgotPasswordVerifyOtpInput, OtpChallenge, OtpResendInput, RequestPasswordResetInput, ResetPasswordInput } from "./types"

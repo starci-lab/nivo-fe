@@ -6,11 +6,9 @@
  * The nullability of every type is the schema's, not a guess.
  */
 
-import type { Outcome } from "./outcome"
+import { send, parseBooleanAnswer, type Outcome } from "@nivo/api"
 import { graphql } from "./graphql"
 import { CORE_API_ORIGIN } from "@/modules/config"
-import { send } from "./transport"
-import { parseBooleanAnswer } from "./wire"
 import { parseModuleStudio, parseModuleUploadCapability } from "./agentos-module-studio.guards"
 
 /** A byte upload may legitimately outlast an ordinary call. */

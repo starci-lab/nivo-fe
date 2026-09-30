@@ -2,7 +2,7 @@
 
 import { useCallback } from "react"
 import { reconcileCollabRequest, type CollabReconcileCall, type CollabReconcileOutcome } from "@/modules/api/collab"
-import type { Outcome } from "@/modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 
 /**
  * The Collab Office transport seam the connected page reads directly.

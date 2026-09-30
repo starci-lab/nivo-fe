@@ -8,9 +8,7 @@
  */
 
 import type { CollabTurnState } from "../../collab"
-import {
-    isBoolean, isNullableString, isNumber, isOneOf, isRecord, isString, isStringArray, parseEach,
-} from "../wire"
+import { isBoolean, isNullableString, isNumber, isOneOf, isRecord, isString, isStringArray, parseEach } from "@nivo/api"
 import type {
     CollabAnswerBinding,
     CollabApprovalAnswer,

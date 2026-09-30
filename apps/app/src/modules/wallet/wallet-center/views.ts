@@ -1,6 +1,6 @@
 import type { useTranslations } from "next-intl"
 import type { InvoiceRow, WalletRow, WalletTransactionRow } from "@/modules/api/commerce"
-import type { Outcome } from "@/modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 import type { BalanceSectionView, LedgerSectionView, LinkedInvoiceSectionView, WalletFactRow, WalletLedgerRow } from "./types"
 import { invoiceTone, type WalletWaypoint } from "./waypoint"
 

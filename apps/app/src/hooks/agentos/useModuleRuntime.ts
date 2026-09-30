@@ -9,7 +9,7 @@ import type {
     AgentosModuleRuntime,
     ManageAgentosModuleRuntimeInput,
 } from "../../modules/api/agentos-module-runtime"
-import type { Outcome } from "../../modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 import type { AgentOSModuleView } from "../../components/blocks/agentos/ModuleRouteShellBlock"
 import { nivoQueryReading } from "../../modules/query"
 import { controllerHostnameForWorkspace } from "../../modules/agentos/module-page/channel-identity"

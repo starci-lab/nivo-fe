@@ -6,7 +6,7 @@ import { NivoGrammarTheme } from "@nivo/ui"
 import { getMessages, getTranslations } from "next-intl/server"
 import { ThemeProvider } from "next-themes"
 import type { ReactNode } from "react"
-import { routing } from "@/modules/i18n/routing"
+import { routing } from "@/modules/i18n"
 import { SiteShell } from "./component"
 
 export { PUBLIC_SITE_URL } from "@/modules/landing/site"

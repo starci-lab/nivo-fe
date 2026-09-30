@@ -1,7 +1,6 @@
 import createMiddleware from "next-intl/middleware"
 import { NextResponse, type NextRequest } from "next/server"
-import { DEFAULT_LOCALE } from "./modules/i18n/config"
-import { routing } from "./modules/i18n/routing"
+import { DEFAULT_LOCALE, routing } from "@/modules/i18n"
 
 const resolveRequestLocale = createMiddleware(routing)
 

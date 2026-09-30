@@ -1,6 +1,6 @@
 import { Button, Heading, PageContainer, Text } from "@starci/grammar/common"
 import { NivoIcon } from "@nivo/ui"
-import { useLocalizedHref } from "../../../../hooks"
+import { useLocalizedHref } from "@/hooks"
 import { CLASS_NAMES as C } from "./classNames"
 
 const NEXT_CHIP_ICON = { name: "next", usage: "chip" } as const

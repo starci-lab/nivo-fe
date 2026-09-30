@@ -1,5 +1,5 @@
 import createMiddleware from "next-intl/middleware"
-import { routing } from "./modules/i18n/routing"
+import { routing } from "@/modules/i18n"
 
 /**
  * Resolve which language a request is in before any route renders: the path first, then the

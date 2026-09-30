@@ -6,8 +6,7 @@
  * malformed answer is never a thrown error and never a payload under a borrowed name.
  */
 
-import { isBoolean, isNullableBoolean, isNullableString, isNumber, isOneOf, isRecord, isString } from "../wire"
-import type { EnvelopeAnswer, EnvelopeShell } from "../graphql"
+import { isBoolean, isNullableBoolean, isNullableString, isNumber, isOneOf, isRecord, isString, type EnvelopeAnswer, type EnvelopeShell } from "@nivo/api"
 import type {
     AuthConclusion,
     AuthConclusionReason,

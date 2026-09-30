@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { AgentosModuleRuntime } from "../../modules/api/agentos-module-runtime"
-import type { Outcome } from "../../modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 import { MODULE_SETTLE_INTERVAL_MS } from "./agentos.shared"
 
 /*

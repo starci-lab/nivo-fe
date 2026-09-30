@@ -8,7 +8,7 @@ import {
     useQueryWorkspaceCheckoutOffersSwr,
     useQueryWorkspaceCheckoutStatusSwr,
 } from "@/hooks"
-import { settle } from "@/modules/api/settle"
+import { settle } from "@nivo/api"
 import {
     agentOSFlowFromAnswers,
     realtimeTarget,

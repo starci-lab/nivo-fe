@@ -1,6 +1,6 @@
 "use client"
 
-import type { Outcome } from "@/modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 import {
     startWorkspaceCheckoutPurchase,
     type WorkspaceCheckoutAnswer,

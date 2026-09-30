@@ -22,7 +22,7 @@
 import { useSession } from "../auth/useSession"
 import { useAccessToken } from "../auth/useAccessToken"
 import { type SessionState } from "@/modules/auth/session"
-import type { Outcome } from "@/modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 import type { ShellRegisteredDestination, ShellRouteKey, ShellSourceIdentity } from "@/modules/api/agentos-shell"
 import {
     isShellReadBlocked,

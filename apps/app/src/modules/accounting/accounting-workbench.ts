@@ -1,5 +1,4 @@
-import type { Outcome } from "@/modules/api/outcome"
-import { isOneOf, isRecord } from "@/modules/api/wire"
+import { isOneOf, isRecord, type Outcome } from "@nivo/api"
 import type { Formatter } from "@/modules/i18n/formatter"
 /*
  * The pure Accounting workbench projection.

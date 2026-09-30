@@ -6,7 +6,7 @@ import { DiagnosticsSurfaceBase } from "./component"
 import type { AgentosModuleRuntime } from "../../../../modules/api/agentos-module-runtime"
 import type { DiagnosticsSurfaceProps } from "../../../../modules/agentos/module-page/surface-types"
 import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
-import { TIME_ZONE } from "../../../../modules/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n"
 
 const copy = buildModulePageCopy(
     createTranslator({

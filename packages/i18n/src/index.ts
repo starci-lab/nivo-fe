@@ -1,6 +1,3 @@
-export { createI18nConfig, type I18nSettings } from "./config"
-export { createLocalizeHref, createNavigation } from "./navigation"
+export { createAppI18n } from "./app"
 export { I18nProvider } from "./provider"
-export { createRequestConfig } from "./request"
-export { createRouting } from "./routing"
 export { pickMessages } from "./messages"

@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
     search: "",
 }))
 type PathnameRequest = { readonly href: string }
-vi.mock("@/modules/i18n/navigation", () => ({
+vi.mock("@/modules/i18n", () => ({
     getPathname: (request: PathnameRequest) => request.href,
 }))
 vi.mock("next/navigation", () => ({

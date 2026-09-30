@@ -1,4 +1,4 @@
-import type { Outcome } from "@/modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 import type { SalesActionValue, SalesPipelineItem, SalesRequestedAction } from "@/modules/api/sales"
 import type { Formatter } from "@/modules/i18n/formatter"
 

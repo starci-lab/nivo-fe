@@ -3,15 +3,7 @@
  * installation detail. Each returns the value or null, which `graphql` reports as `unavailable`.
  */
 
-import {
-    isNullableString,
-    isNumber,
-    isOneOf,
-    isRecord,
-    isString,
-    isStringArray,
-    parseEach,
-} from "./wire"
+import { isNullableString, isNumber, isOneOf, isRecord, isString, isStringArray, parseEach } from "@nivo/api"
 import type {
     AgentosModuleInstallation,
     AgentosModuleInstallationDetail,

@@ -8,7 +8,7 @@
  * result under a borrowed name.
  */
 
-import { isNullableString, isNumber, isOneOf, isRecord, isString, isStringArray } from "../wire"
+import { isNullableString, isNumber, isOneOf, isRecord, isString, isStringArray } from "@nivo/api"
 import type {
     AccountingAvailability,
     AccountingCorrectResultPayload,

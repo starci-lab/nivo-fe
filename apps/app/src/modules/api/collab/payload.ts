@@ -1,5 +1,4 @@
-import { failed, type FailureKind, type Outcome } from "../outcome"
-import { isRecord } from "../wire"
+import { failed, isRecord, type FailureKind, type Outcome } from "@nivo/api"
 import { isCollabFailureKind, parseCollabOperation } from "./payload.guards"
 import type { CollabFailureKind, CollabGatewayReply, CollabServed } from "./types"
 

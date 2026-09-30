@@ -3,17 +3,7 @@
  * each returns the value or null, which `graphql` reports as `unavailable`.
  */
 
-import {
-    isBoolean,
-    isNullableBoolean,
-    isNullableNumber,
-    isNullableString,
-    isNumber,
-    isOneOf,
-    isRecord,
-    isString,
-    parseEach,
-} from "./wire"
+import { isBoolean, isNullableBoolean, isNullableNumber, isNullableString, isNumber, isOneOf, isRecord, isString, parseEach } from "@nivo/api"
 import type {
     AgentWorkspaceAppCapability,
     AgentWorkspaceAppLaunch,

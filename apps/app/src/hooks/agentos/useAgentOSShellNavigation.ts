@@ -10,13 +10,13 @@
 
 import { useCallback } from "react"
 import { useLocale } from "next-intl"
-import { toLocale } from "@/modules/i18n/config"
+import { toLocale } from "@/modules/i18n"
 import {
     resolveAgentosShellNavigation,
     type ShellRegisteredDestination,
     type ShellRouteKey,
 } from "@/modules/api/agentos-shell"
-import { failed, type Outcome } from "@/modules/api/outcome"
+import { failed, type Outcome } from "@nivo/api"
 import { shellNavigationDecision, type ShellNavigationDecision } from "@/modules/agentos/shell-navigation"
 
 /** What the navigation half needs: where the selection lives and who is asking. */

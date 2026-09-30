@@ -1,6 +1,7 @@
 "use client"
 
-import { setAccessTokenReader, type TokenReader } from "@/modules/api/graphql"
+import { type TokenReader } from "@nivo/api"
+import { setAccessTokenReader } from "@/modules/api/graphql"
 
 /**
  * Point the GraphQL transport at the reader that answers with the access token in force.

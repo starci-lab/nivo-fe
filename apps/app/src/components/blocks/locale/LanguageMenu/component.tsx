@@ -1,6 +1,6 @@
 import { Icon } from "@starci/grammar/common"
 import { DropdownBranch, IconSource } from "@nivo/ui"
-import type { Locale } from "@/modules/i18n/config"
+import type { Locale } from "@/modules/i18n"
 
 /** One resolved locale choice. */
 export type LanguageMenuProps = LanguageMenuViewProps

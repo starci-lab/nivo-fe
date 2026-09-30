@@ -9,13 +9,13 @@ import {
     type CatalogOrderStatus,
     type InvoiceRow,
 } from "../commerce"
+import { failed, failureKindOfCode, type Outcome } from "@nivo/api"
 import { graphql } from "../graphql"
 import {
     issueAgentWorkspaceAppLaunch,
     myAgentWorkspace,
     type AgentWorkspaceRow,
 } from "../agentos-workspaces"
-import { failed, failureKindOfCode, type Outcome } from "../outcome"
 import { parseAgentWorkspaceRowAnswer } from "../agentos-workspaces.guards"
 import { parseProvisioningSaga, parseProvisioningSagaView } from "./payload.guards"
 import type {

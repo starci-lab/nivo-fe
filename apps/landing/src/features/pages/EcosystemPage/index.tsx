@@ -10,7 +10,7 @@ import ExplorePathGrid from "../../../components/blocks/explore/ExplorePathGrid"
 import ExploreSection from "../../../components/blocks/explore/ExploreSection"
 import ExploreSurface from "../../../components/blocks/explore/ExploreSurface"
 import { SiteMain } from "../../layouts/SiteShell"
-import { useLocalizedHref } from "../../../hooks"
+import { useLocalizedHref } from "@/hooks"
 import { SITE_LINKS } from "../../../modules/landing/site"
 
 const NEXT_CHIP_ICON = { name: "next", usage: "chip" } as const

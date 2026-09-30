@@ -1,7 +1,7 @@
 import type {
     WorkspaceCheckoutStatusView,
 } from "@/modules/api/workspace-controlplane"
-import type { Outcome } from "@/modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 import type { WorkspaceCheckoutAnswer } from "@/modules/api/workspace-controlplane"
 import type { PurchaseStatusCopy } from "./copy"
 import type { PurchasePhase } from "./phase"

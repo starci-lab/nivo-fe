@@ -1,4 +1,4 @@
-import type { FailureKind } from "@/modules/api/outcome"
+import { type FailureKind } from "@nivo/api"
 
 /**
  * How a caller reads one settled query answer.
@@ -11,7 +11,7 @@ import type { FailureKind } from "@/modules/api/outcome"
  * folder (`component-runtime-transport-import`).
  */
 
-export type { FailureKind } from "@/modules/api/outcome"
+export type { FailureKind } from "@nivo/api"
 
 /**
  * The narrowest answer shape the settlement helpers accept; every `Outcome<T>` satisfies it.

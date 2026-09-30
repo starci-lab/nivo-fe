@@ -4,7 +4,7 @@ import type { ComponentProps } from "react"
 import { NextIntlClientProvider, useTranslations } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
-import { TIME_ZONE } from "@/modules/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n"
 import { describe, expect, it, vi } from "vitest"
 vi.mock("@/components/blocks/agentos/AccountingWorkbenchBlock", () => ({
     AccountingWorkbenchBlock: () => <div>Accounting workbench</div>,

@@ -3,7 +3,7 @@ import type { ComponentProps } from "react"
 import { NextIntlClientProvider, useTranslations, createTranslator } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
-import { TIME_ZONE } from "@/modules/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n"
 import { describe, expect, it, vi } from "vitest"
 import { ExecuteChatBlock as ActualExecuteChatBlock, type ExecuteChatBlockCopy, type ExecuteMessage } from "."
 

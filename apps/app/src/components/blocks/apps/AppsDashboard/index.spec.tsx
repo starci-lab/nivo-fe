@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
     catalogue: vi.fn(),
     session: { state: { status: "signed-in", accessToken: "apps-dashboard-0" } },
 }))
-vi.mock("@/modules/i18n/navigation", () => ({ navigation: { useRouter: () => ({ push: mocks.push }) } }))
+vi.mock("@/modules/i18n", () => ({ navigation: { useRouter: () => ({ push: mocks.push }) } }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/expert-sites", () => ({ myExpertSites: mocks.sites }))
 vi.mock("@/modules/api/instances", () => ({ myInstances: mocks.instances }))

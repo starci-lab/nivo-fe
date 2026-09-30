@@ -1,7 +1,7 @@
 "use client"
 
 import { useLocale, useTranslations } from "next-intl"
-import { LOCALES, toLocale } from "@/modules/i18n/config"
+import { LOCALES, toLocale } from "@/modules/i18n"
 import { usePathname, useRouter } from "@/hooks"
 import { LanguageMenuBase } from "./component"
 

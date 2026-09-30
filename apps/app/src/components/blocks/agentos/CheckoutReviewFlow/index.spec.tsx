@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
 type PathnameRequest = { readonly href: string; readonly locale: string }
 /* Production-shaped: getPathname prefixes non-default locales, so feeding its localized output to
    the locale-aware router would double the prefix exactly like the live refused-return defect did. */
-vi.mock("../../../../modules/i18n/navigation", () => ({
+vi.mock("@/modules/i18n", () => ({
     getPathname: (request: PathnameRequest) => (request.locale === "en" ? `/en${request.href}` : request.href),
 }))
 vi.mock("next/navigation", () => ({

@@ -15,6 +15,8 @@ export const createI18nConfig = <const Locales extends readonly [string, ...stri
         settings.locales.find((locale) => locale === value) ?? settings.defaultLocale
 
     const toLocaleFromPathname = (pathname: string | null): Locale => toLocale(pathname?.split("/")[1])
+    const isLocale = (value: unknown): value is Locale =>
+        typeof value === "string" && settings.locales.some((locale) => locale === value)
 
     return {
         LOCALES: settings.locales,
@@ -22,5 +24,6 @@ export const createI18nConfig = <const Locales extends readonly [string, ...stri
         TIME_ZONE: settings.timeZone,
         toLocale,
         toLocaleFromPathname,
+        isLocale,
     }
 }

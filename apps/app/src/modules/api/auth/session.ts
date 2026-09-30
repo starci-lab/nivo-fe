@@ -1,5 +1,5 @@
-import { graphql, graphqlEnvelope, type EnvelopeAnswer } from "../graphql"
-import type { Outcome } from "../outcome"
+import { type EnvelopeAnswer, type Outcome } from "@nivo/api"
+import { graphql, graphqlEnvelope } from "../graphql"
 import { AUTH_PAYLOAD } from "./documents"
 import { parseAuthPayload, parseEndPrincipalSessionsAnswer, parseSignOutEnvelope } from "./guards"
 import type { AuthPayload, EndPrincipalSessionsAnswer, EndPrincipalSessionsInput, SignOutInput, SignOutOutcome } from "./types"

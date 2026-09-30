@@ -2,8 +2,7 @@ import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { useSubmitAcademyLead } from ".."
 import type { Course } from "../../modules/api/academy"
-import { DEFAULT_LOCALE } from "../../modules/i18n/config"
-import { isLocale } from "../../modules/i18n/config.guards"
+import { DEFAULT_LOCALE, isLocale } from "@/modules/i18n"
 import {
     academySectionsOf,
     type AcademySectionsBaseProps,

@@ -2,7 +2,7 @@ import { render } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { NextIntlClientProvider } from "next-intl"
 import enMessages from "@/messages/en.json"
-import { TIME_ZONE } from "@/modules/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n"
 
 /*
  * The connected handoff block, driven at its published door. `@/hooks` is the only place this block

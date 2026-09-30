@@ -1,4 +1,4 @@
-import { isRecord } from "@/modules/api/wire"
+import { isRecord } from "@nivo/api"
 import type { ShellSourceIdentity } from "@/modules/api/agentos-shell"
 import type { ShellSourceObservation, ShellSourceStanding } from "@/modules/agentos/shell-observation-store"
 import type { AgentOSShellFacetStanding, AgentOSShellInstallationView, AgentOSShellOperationStanding, AgentOSShellOperationView, AgentOSShellReading, AgentOSShellView, AgentOSShellViewStatus, AgentOSWorkspaceControlCenterShellLabels } from "./shell-types"

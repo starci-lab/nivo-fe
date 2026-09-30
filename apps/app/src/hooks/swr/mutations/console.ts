@@ -29,7 +29,7 @@ import { orderAgentOs } from "@/modules/api/commerce"
 import { reindexAgentWorkspaceKnowledge, runAgentosAiReadinessTest } from "@/modules/api/agentos-knowledge"
 import { runAgentosModuleTest, type RunAgentosModuleTestInput } from "@/modules/api/agentos-module-tests"
 import { refreshSession } from "@/modules/api/auth"
-import { failed, type Outcome } from "@/modules/api/outcome"
+import { failed, type Outcome } from "@nivo/api"
 import { useSession } from "../../auth/useSession"
 import { useNivoMutation } from "../useNivoMutation"
 import {

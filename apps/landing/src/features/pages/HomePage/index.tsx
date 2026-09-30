@@ -1,7 +1,7 @@
 import { useLocale, useTranslations } from "next-intl"
 import { NivoIcon } from "@nivo/ui"
 import { Button, Heading, PageContainer, Text, TextAction } from "@starci/grammar/common"
-import { useLocalizedHref } from "../../../hooks"
+import { useLocalizedHref } from "@/hooks"
 import { SiteMain, SectionIntro } from "../../layouts/SiteShell"
 import { HomeMotionSectionReveal } from "../../../components/blocks/landing/HomeMotion"
 import {

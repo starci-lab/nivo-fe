@@ -12,8 +12,7 @@ import {
     useQueryMyAgentWorkspaceControlCenterSwr,
     useRouter,
 } from "@/hooks"
-import { getPathname } from "@/modules/i18n/navigation"
-import { toLocale } from "@/modules/i18n/config"
+import { getPathname, toLocale } from "@/modules/i18n"
 import { moduleCreate, workspace } from "@/modules/routes"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"

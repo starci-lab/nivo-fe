@@ -12,7 +12,7 @@ import { type AgentWorkspaceRow } from "@/modules/api/agentos-workspaces"
 import { type DomainRow, type InvoiceRow, type WalletRow } from "@/modules/api/commerce"
 import { type ExpertSiteRow } from "@/modules/api/expert-sites"
 import { type PodStatusRow } from "@/modules/api/instances"
-import type { Outcome } from "@/modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 
 /** One independently settling answer in the account operations briefing. */
 export type OverviewAnswer<T> = Outcome<T> | null

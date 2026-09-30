@@ -1,4 +1,4 @@
-import type { Failure, Outcome } from "../outcome"
+import { type Failure, type Outcome } from "@nivo/api"
 import type { InstallationScope } from "../operation-route"
 
 /** Where one Sales installation lives: the three coordinates the route authenticates the caller to. */

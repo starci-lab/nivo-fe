@@ -3,7 +3,7 @@
  * select; each returns the value or null, which `graphql` reports as `unavailable`.
  */
 
-import { isNullableString, isOneOf, isRecord, isString, parseEach } from "./wire"
+import { isNullableString, isOneOf, isRecord, isString, parseEach } from "@nivo/api"
 import type {
     CreatedExpertSite,
     ExpertDeploymentSnapshot,

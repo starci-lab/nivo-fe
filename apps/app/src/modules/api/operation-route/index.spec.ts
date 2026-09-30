@@ -9,7 +9,7 @@ import {
     routeFailureKind,
     sendOperation,
 } from "./index"
-import { failed } from "../outcome"
+import { failed } from "@nivo/api"
 
 const SCOPE = { workspaceId: "w/1", instanceId: "i 1", installationId: "n?1" }
 const ADDRESS = "http://core.test/op"

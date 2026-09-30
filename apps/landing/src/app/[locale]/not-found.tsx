@@ -1,7 +1,6 @@
 import { NotFoundPage } from "@nivo/ui"
 import { getLocale } from "next-intl/server"
-import { toLocale } from "@/modules/i18n/config"
-import { localizeHref } from "@/modules/i18n/navigation"
+import { toLocale, localizeHref } from "@/modules/i18n"
 
 /** Mount the shared not-found answer with this app's locale-aware home address. */
 const NotFound = async () => {

@@ -1,5 +1,5 @@
 import type { useTranslations } from "next-intl"
-import type { Outcome } from "@/modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 import type { WalletRow, WalletTopUpPayLink } from "@/modules/api/commerce"
 import type { PaymentResultView, TopUpView } from "./types"
 import { paymentResultCopy, type TopUpSession } from "./waypoint"

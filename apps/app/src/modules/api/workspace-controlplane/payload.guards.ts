@@ -10,16 +10,7 @@
  * declares. An arm that fails to parse is null, never a best-effort reading.
  */
 
-import {
-    isBoolean,
-    isNullableNumber,
-    isNullableString,
-    isNumber,
-    isOneOf,
-    isRecord,
-    isString,
-    parseEach,
-} from "../wire"
+import { isBoolean, isNullableNumber, isNullableString, isNumber, isOneOf, isRecord, isString, parseEach } from "@nivo/api"
 import type {
     ChatbotChannelBinding,
     ChatbotCommandResult,

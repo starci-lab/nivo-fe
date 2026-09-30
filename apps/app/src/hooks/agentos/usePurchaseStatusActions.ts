@@ -7,8 +7,7 @@ import {
     useRouter,
 } from "@/hooks"
 import type { WorkspaceCheckoutAnswer, WorkspaceCheckoutEntryRequest, WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane"
-import type { Outcome } from "@/modules/api/outcome"
-import { settle } from "@/modules/api/settle"
+import { settle, type Outcome } from "@nivo/api"
 import type { PurchaseStatusCopy } from "@/modules/agentos/purchase-status/copy"
 import { entryPathOf, observedIdentitiesOf, purchaseOf } from "@/modules/agentos/purchase-source"
 import { newWorkspace, newWorkspaceCheckout, purchaseProvisioning, workspaces } from "@/modules/routes"

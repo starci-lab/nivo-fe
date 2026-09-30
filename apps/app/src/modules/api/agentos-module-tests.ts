@@ -6,7 +6,7 @@
  * The nullability of every type is the schema's, not a guess.
  */
 
-import type { Outcome } from "./outcome"
+import { type Outcome } from "@nivo/api"
 import { graphql } from "./graphql"
 import { parseModuleTestSurface } from "./agentos-module-tests.guards"
 import type { AgentosRuntimeValue, AgentosRuntimeWidgetNode } from "./agentos-runtime-tree"

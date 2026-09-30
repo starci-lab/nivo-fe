@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { shellNavigationDecision, shellNavigationPath, shellReturnSelection } from "./shell-navigation"
 import type { ShellRegisteredDestination, ShellRegisteredViewName } from "@/modules/api/agentos-shell"
-import { failed, type Failure } from "@/modules/api/outcome"
+import { failed, type Failure } from "@nivo/api"
 
 const WORKSPACE = "11111111-1111-4111-8111-111111111111"
 const INSTANCE = "22222222-2222-4222-8222-222222222222"

@@ -12,7 +12,7 @@ import ExplorePathGrid from "../../../components/blocks/explore/ExplorePathGrid"
 import ExploreSection from "../../../components/blocks/explore/ExploreSection"
 import ExploreSurface from "../../../components/blocks/explore/ExploreSurface"
 import { SiteMain } from "../../layouts/SiteShell"
-import { useLocalizedHref } from "../../../hooks"
+import { useLocalizedHref } from "@/hooks"
 import { IDEA_ARTICLES, type IdeaArticle } from "../../../modules/landing/ideas"
 import { SITE_LINKS } from "../../../modules/landing/site"
 

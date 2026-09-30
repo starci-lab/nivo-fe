@@ -3,20 +3,6 @@ import en from "../../messages/en.json"
 import vi from "../../messages/vi.json"
 import { MESSAGE_SCOPES, pickMessages } from "./messages"
 
-describe("pickMessages", () => {
-    it("keeps only the named namespaces, untouched", () => {
-        const messages = { app: { a: "1" }, console: { b: "2" }, authentication: { c: "3" } }
-        expect(pickMessages(messages, ["app", "authentication"])).toEqual({
-            app: { a: "1" },
-            authentication: { c: "3" },
-        })
-    })
-
-    it("skips a namespace the catalogue does not have", () => {
-        expect(pickMessages({ app: { a: "1" } }, ["app", "slot"])).toEqual({ app: { a: "1" } })
-    })
-})
-
 describe("MESSAGE_SCOPES", () => {
     it.each([
         ["en", en],

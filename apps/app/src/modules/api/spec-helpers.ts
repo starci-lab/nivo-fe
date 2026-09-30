@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, vi } from "vitest"
-import { isRecord } from "./wire"
+import { isRecord } from "@nivo/api"
 
 /** Workspace fixture used by installation-scoped API specs. */
 export const API_SPEC_WORKSPACE = "11111111-1111-4111-8111-111111111111"

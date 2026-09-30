@@ -1,6 +1,5 @@
+import { failed, isRecord, type Outcome } from "@nivo/api"
 import { graphqlFields } from "../graphql"
-import { failed, type Outcome } from "../outcome"
-import { isRecord } from "../wire"
 import { parseChatbotCommandResult, parseChatbotWorkbenchAnswer } from "./payload.guards"
 /** A channel binding safe to display without exposing provider credentials. */
 export type ChatbotChannelBinding = {

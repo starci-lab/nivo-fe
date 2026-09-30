@@ -5,7 +5,7 @@ import enMessages from "../../../../messages/en.json"
 import { DiagnosticsTraceCard } from "."
 import type { AgentosModuleRuntime } from "../../../../modules/api/agentos-module-runtime"
 import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
-import { TIME_ZONE } from "../../../../modules/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n"
 import type { Formatter } from "../../../../modules/i18n/formatter"
 
 const copy = buildModulePageCopy(

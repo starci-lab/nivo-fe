@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl"
 import { describe, expect, it } from "vitest"
-import { TIME_ZONE } from "../../../../modules/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n"
 import type { KindWorkbenchBlockCopy, WorkbenchProps } from "../../../../modules/agentos/kind-workbench"
 import { KindWorkbenchContent } from "."
 

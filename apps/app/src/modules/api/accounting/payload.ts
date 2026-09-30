@@ -1,4 +1,4 @@
-import { failedWith } from "../outcome"
+import { failedWith } from "@nivo/api"
 import { isClosedRecord, isRouteErrorName, routeFailureKind } from "../operation-route"
 import { parseAccountingResult } from "./payload.guards"
 import { ACCOUNTING_COMMAND_RECONCILIATIONS } from "./types"

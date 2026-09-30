@@ -5,15 +5,7 @@
  */
 
 import type { AcademyCustomDomainState } from "../../academy"
-import {
-    isBoolean,
-    isNullableString,
-    isNumber,
-    isRecord,
-    isString,
-    isStringArray,
-    parseEach,
-} from "../wire"
+import { isBoolean, isNullableString, isNumber, isRecord, isString, isStringArray, parseEach } from "@nivo/api"
 import type {
     AcademyCourseAccess,
     AcademyCredentialSaveResult,

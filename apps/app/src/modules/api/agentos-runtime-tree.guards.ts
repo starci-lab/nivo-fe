@@ -6,7 +6,7 @@
  * value; they only answer whether the wire value IS the shape.
  */
 
-import { isBoolean, isNumber, isRecord, isString } from "./wire"
+import { isBoolean, isNumber, isRecord, isString } from "@nivo/api"
 import type { AgentosRuntimeValue, AgentosRuntimeWidgetNode } from "./agentos-runtime-tree"
 
 /** A wire value IS a runtime JSON value: primitive, array or record whose entries all are. */

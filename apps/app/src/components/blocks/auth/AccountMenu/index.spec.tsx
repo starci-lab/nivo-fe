@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { AdministratorRevocationDialog } from "@/components/blocks/auth/AdministratorRevocationDialog"
 import type { EndPrincipalSessionsAnswer, EndPrincipalSessionsInput } from "@/modules/api/auth"
-import type { Outcome } from "@/modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 import type { SessionEndReport } from "@/modules/auth/session"
 
 /** An everywhere ending the identity authority confirmed. */
@@ -21,7 +21,7 @@ type EndingCall = (scope?: "thisBrowser" | "everywhere") => Promise<SessionEndRe
 
 const end = vi.fn<EndingCall>(() => Promise.resolve(APPLIED))
 const replace = vi.fn()
-vi.mock("@/modules/i18n/navigation", () => ({
+vi.mock("@/modules/i18n", () => ({
     Link: "a",
     redirect: vi.fn(),
     navigation: {

@@ -23,7 +23,7 @@ vi.mock("@/hooks", () => ({
     useSession: () => ({ state: { status: "signed-in", accessToken: "token" }, end }),
     useRouter: () => ({ replace }),
 }))
-vi.mock("@/modules/i18n/navigation", () => ({ navigation: { useRouter: () => ({ replace }) } }))
+vi.mock("@/modules/i18n", () => ({ navigation: { useRouter: () => ({ replace }) } }))
 
 import { SessionEndingDialog } from "."
 

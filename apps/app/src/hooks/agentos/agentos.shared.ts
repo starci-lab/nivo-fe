@@ -26,7 +26,7 @@ import type {
     ConfigureAgentWorkspaceChannelInput,
     ManageAgentosModuleRuntimeInput,
 } from "../../modules/api/agentos-module-runtime"
-import type { Failure, Outcome } from "@/modules/api/outcome"
+import { type Failure, type Outcome } from "@nivo/api"
 import {
     initialShellObservationSnapshot,
     reduceShellObservation,

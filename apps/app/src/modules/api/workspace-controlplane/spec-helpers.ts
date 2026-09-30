@@ -1,5 +1,5 @@
 import { vi } from "vitest"
-import { isRecord } from "../wire"
+import { isRecord } from "@nivo/api"
 
 /** Minimal successful response shape for transport specs. */
 export const jsonResponse = (payload: unknown) => ({ ok: true, status: 200, json: async () => payload })

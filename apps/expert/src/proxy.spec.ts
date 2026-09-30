@@ -17,7 +17,7 @@ vi.mock("next-intl/middleware", () => ({
 }))
 
 import { config, proxy } from "./proxy"
-import { routing } from "./modules/i18n/routing"
+import { routing } from "@/modules/i18n"
 
 describe("proxy", () => {
     it("binds the declared routing and excludes API, build, verification, and file paths", () => {

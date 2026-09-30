@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
-import { getPathname } from "@/modules/i18n/navigation"
+import { getPathname } from "@/modules/i18n"
 import { useAccessToken, useSession } from "@/hooks"
 import { useQueryWorkspaceCheckoutOffersSwr } from "@/hooks"
 import type { WorkspaceCheckoutOffer } from "@/modules/api/workspace-controlplane"

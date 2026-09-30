@@ -1,5 +1,5 @@
 import type { Course } from "../api/academy"
-import type { Locale } from "../i18n/config"
+import type { Locale } from "@/modules/i18n"
 import {
     ACADEMY,
     CUSTOM_SECTION_PREFIX,

@@ -2,7 +2,7 @@ import { createTranslator } from "next-intl"
 import { describe, expect, it } from "vitest"
 import enMessages from "../../../messages/en.json"
 import viMessages from "../../../messages/vi.json"
-import { TIME_ZONE } from "../../i18n/config"
+import { TIME_ZONE } from "@/modules/i18n"
 import { buildModulePageCopy } from "."
 
 describe.each([

@@ -3,9 +3,8 @@ import { notFound } from "next/navigation"
 import { getMessages, getTimeZone, getTranslations } from "next-intl/server"
 import { Open_Sans } from "next/font/google"
 import type { ComponentProps, CSSProperties } from "react"
-import { isLocale } from "@/modules/i18n/config"
+import { isLocale, routing } from "@/modules/i18n"
 import { MESSAGE_SCOPES, pickMessages } from "@/modules/i18n/messages"
-import { routing } from "@/modules/i18n/routing"
 import { ConsoleLocaleLayoutBase } from "./component"
 
 const openSans = Open_Sans({

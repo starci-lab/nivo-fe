@@ -8,25 +8,13 @@
       "types": "./src/index.ts",
       "default": "./dist/index.js"
     },
-    "./config": {
-      "types": "./src/config.ts",
-      "default": "./dist/config.js"
-    },
-    "./navigation": {
-      "types": "./src/navigation.ts",
-      "default": "./dist/navigation.js"
+    "./app": {
+      "types": "./src/app.ts",
+      "default": "./dist/app.js"
     },
     "./provider": {
       "types": "./src/provider.tsx",
       "default": "./dist/provider.js"
-    },
-    "./request": {
-      "types": "./src/request.ts",
-      "default": "./dist/request.js"
-    },
-    "./routing": {
-      "types": "./src/routing.ts",
-      "default": "./dist/routing.js"
     },
     "./messages": {
       "types": "./src/messages.ts",

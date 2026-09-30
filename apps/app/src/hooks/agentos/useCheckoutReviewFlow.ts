@@ -3,7 +3,7 @@
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
 import { useAccessToken, useQueryWorkspaceCheckoutOffersSwr, useRouter, useSession } from ".."
-import { getPathname } from "../../modules/i18n/navigation"
+import { getPathname } from "@/modules/i18n"
 import {
     checkoutFactsFor,
     frozenOfferFor,

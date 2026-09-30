@@ -3,7 +3,7 @@
  * assertion evidence. Each returns the value or null, which `graphql` reports as `unavailable`.
  */
 
-import { isNullableString, isNumber, isOneOf, isRecord, isString, parseEach } from "./wire"
+import { isNullableString, isNumber, isOneOf, isRecord, isString, parseEach } from "@nivo/api"
 import { isAgentosRuntimeValue, isAgentosRuntimeRecord, isAgentosRuntimeWidgetNode } from "./agentos-runtime-tree.guards"
 import type {
     AgentosModuleTestAssertionContract,

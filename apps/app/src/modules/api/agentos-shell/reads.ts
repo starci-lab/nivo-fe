@@ -1,6 +1,5 @@
-import type { Outcome } from "../outcome"
+import { isRecord, type Outcome } from "@nivo/api"
 import { canonicalShellReads, formatShellRead, isCount, isUuid } from "./identity"
-import { isRecord } from "../wire"
 import { keyedQuery, sendShellRequest, shellRouteUrl, unreadableReply, unsupportedRequest } from "./transport"
 import {
     authoredAppliedObservation,

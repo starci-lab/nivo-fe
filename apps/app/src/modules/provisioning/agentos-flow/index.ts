@@ -4,7 +4,7 @@ import type {
     WorkspaceCheckoutStatusView,
 } from "@/modules/api/workspace-controlplane"
 import type { NivoQueryFailure } from "@/modules/query"
-import type { Outcome } from "@/modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 import { purchaseOf } from "@/modules/agentos/purchase-source"
 
 /** The settled phase of the AgentOS purchase and readiness journey. */

@@ -17,6 +17,8 @@ export default defineConfig({
             ),
             "@nivo/ui/styles.css": resolve(import.meta.dirname, "../../packages/nivo-ui/src/styles.css"),
             "@nivo/ui": resolve(import.meta.dirname, "../../packages/nivo-ui/src/index.ts"),
+            "@nivo/api": resolve(import.meta.dirname, "../../packages/nivo-api/src/index.ts"),
+            "@nivo/i18n/app": resolve(import.meta.dirname, "../../packages/i18n/src/app.ts"),
             "@": resolve(import.meta.dirname, "src"),
             // next-intl imports the package subpath without an extension; Node's ESM runner used
             // by Vitest needs the concrete compatibility entry while Next resolves it itself.

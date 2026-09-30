@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
-import { getPathname } from "@/modules/i18n/navigation"
+import { getPathname } from "@/modules/i18n"
 import { purchaserClaimsOf, purchaserDetailOf, purchaserNameOf, purchaseOf } from "@/modules/agentos/purchase-status"
 import { createPurchaseStatusCopy } from "@/modules/agentos/purchase-status/copy"
 import { purchaseStatusViewOf } from "@/modules/agentos/purchase-status/view"

@@ -1,6 +1,5 @@
 import { getTranslations } from "next-intl/server"
-import { toLocale } from "@/modules/i18n/config"
-import { getPathname } from "@/modules/i18n/navigation"
+import { toLocale, getPathname } from "@/modules/i18n"
 import { AgentOSWorkspacesPageBase } from "./component"
 
 /** Route identity supplied by the locale-aware workspaces segment. */

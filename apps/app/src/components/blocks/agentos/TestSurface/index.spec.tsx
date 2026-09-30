@@ -6,7 +6,7 @@ import { TestSurface } from "."
 import type { AgentosModuleTestContract } from "../../../../modules/api/agentos-module-tests"
 import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
 import type { TestSurfaceProps } from "../../../../modules/agentos/module-page/surface-types"
-import { TIME_ZONE } from "../../../../modules/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n"
 
 const copy = buildModulePageCopy(
     createTranslator({

@@ -1,5 +1,5 @@
+import { type Outcome } from "@nivo/api"
 import { graphql } from "../graphql"
-import type { Outcome } from "../outcome"
 import {
     WORKSPACE_CHECKOUT_ENTRY_FIELDS,
     WORKSPACE_CHECKOUT_OUTCOME_FIELDS,

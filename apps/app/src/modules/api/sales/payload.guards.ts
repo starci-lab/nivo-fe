@@ -7,7 +7,7 @@
  * domain value under a borrowed name.
  */
 
-import { isNumber, isNullableString, isRecord, isString, isStringArray } from "../wire"
+import { isNumber, isNullableString, isRecord, isString, isStringArray } from "@nivo/api"
 import type {
     SalesActionValue,
     SalesCommandValue,

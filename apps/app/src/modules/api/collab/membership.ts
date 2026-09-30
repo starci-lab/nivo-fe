@@ -1,4 +1,4 @@
-import type { Outcome } from "../outcome"
+import { type Outcome } from "@nivo/api"
 import { rejectAuthorityClaims } from "./commands.validation"
 import { collabRequest, readMembershipResult } from "./transport"
 import type {

@@ -9,7 +9,7 @@ const router = { replace }
 /** The landing the notice is on and the address it is reading; each case sets what it needs. */
 const address = { pathname: "/overview", search: "" }
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(address.search) }))
-vi.mock("@/modules/i18n/navigation", () => ({
+vi.mock("@/modules/i18n", () => ({
     navigation: {
         usePathname: () => address.pathname,
         useRouter: () => router,

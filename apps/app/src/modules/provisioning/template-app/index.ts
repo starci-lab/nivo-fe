@@ -1,4 +1,4 @@
-import type { Outcome } from "@/modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 import type { ExpertDeploymentSnapshot } from "@/modules/api/expert-sites"
 import type { CatalogItemRow } from "@/modules/api/commerce"
 

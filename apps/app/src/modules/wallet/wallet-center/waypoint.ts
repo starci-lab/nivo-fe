@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE } from "@/modules/i18n/config"
+import { DEFAULT_LOCALE } from "@/modules/i18n"
 import type { InvoiceRow } from "@/modules/api/commerce"
 import { isTopUpSession } from "./waypoint.guards"
 import type { PaymentResultView, WalletLedgerRow } from "./types"

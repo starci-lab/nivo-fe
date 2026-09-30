@@ -6,7 +6,7 @@ import { useMutateRunAgentosModuleTestSwr } from "../swr/mutations/console"
 import { useQueryMyAgentosModuleTestRunSwr } from "../swr/queries/useQueryMyAgentosModuleTestRunSwr"
 import type { AgentosModuleTestContract, AgentosModuleTestSurface } from "../../modules/api/agentos-module-tests"
 import type { AgentosRuntimeValue } from "../../modules/api/agentos-runtime-tree"
-import type { Outcome } from "../../modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 import type { TestSurfaceProps } from "../../modules/agentos/module-page/surface-types"
 import { idempotencyKey, MODULE_SETTLE_ATTEMPTS, MODULE_SETTLE_INTERVAL_MS } from "./agentos.shared"
 

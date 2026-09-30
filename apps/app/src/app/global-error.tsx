@@ -2,7 +2,7 @@
 
 import { GlobalErrorPage } from "@nivo/ui"
 import type en from "@/messages/en.json"
-import { toLocaleFromPathname } from "@/modules/i18n/config"
+import { toLocaleFromPathname } from "@/modules/i18n"
 import { usePathname } from "next/navigation"
 import "./globals.css"
 

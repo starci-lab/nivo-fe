@@ -1,5 +1,5 @@
+import { type Outcome } from "@nivo/api"
 import { graphql } from "../graphql"
-import type { Outcome } from "../outcome"
 import { AUTH_PAYLOAD, BROKERED_PAYLOAD, SIGN_IN_PAYLOAD } from "./documents"
 import {
     parseAuthPayload,

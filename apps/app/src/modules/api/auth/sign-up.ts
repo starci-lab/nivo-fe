@@ -1,5 +1,5 @@
+import { type Outcome } from "@nivo/api"
 import { graphql } from "../graphql"
-import type { Outcome } from "../outcome"
 import { OTP_CHALLENGE, SIGN_UP_VERIFY_PAYLOAD } from "./documents"
 import { parseOtpChallenge, parseSignUpVerifyOtpPayload } from "./guards"
 import type { OtpChallenge, OtpResendInput, SignUpInitInput, SignUpVerifyOtpInput, SignUpVerifyOtpPayload } from "./types"

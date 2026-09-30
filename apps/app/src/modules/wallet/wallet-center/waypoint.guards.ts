@@ -1,4 +1,4 @@
-import { isNumber, isRecord, isString } from "@/modules/api/wire"
+import { isNumber, isRecord, isString } from "@nivo/api"
 import type { TopUpSession } from "./waypoint"
 
 /** Whether a value parsed from storage carries the payment evidence a top-up round trip keeps. */

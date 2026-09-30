@@ -3,15 +3,7 @@
  * `graphql` reports as `unavailable`. Secret values are never part of these shapes.
  */
 
-import {
-    isNullableString,
-    isNumber,
-    isOneOf,
-    isRecord,
-    isString,
-    isStringArray,
-    parseEach,
-} from "./wire"
+import { isNullableString, isNumber, isOneOf, isRecord, isString, isStringArray, parseEach } from "@nivo/api"
 import type {
     AgentosCustomModule,
     AgentosModuleStudio,

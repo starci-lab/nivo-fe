@@ -3,7 +3,7 @@ import { matchMediaFixture } from "@/test-support/mock-result"
 import { NextIntlClientProvider, createTranslator, useTranslations } from "next-intl"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
-import { TIME_ZONE } from "@/modules/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n"
 /** @vitest-environment jsdom */
 
 import { fireEvent, render, screen } from "@testing-library/react"

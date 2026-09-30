@@ -1,8 +1,7 @@
 import { CORE_API_URL } from "@/modules/config"
-import { failed, type Failure } from "../outcome"
+import { failed, send, type Failure } from "@nivo/api"
 import { OPERATION_ROUTE_PREFIX } from "../operation-route"
 import type { ShellArrivedReply, ShellReadScope } from "./types"
-import { send } from "../transport"
 
 /** Build the one registered route address for the selected workspace and instance. */
 export const shellRouteUrl = (scope: ShellReadScope, suffix = ""): URL =>

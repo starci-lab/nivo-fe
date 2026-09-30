@@ -3,7 +3,7 @@
 import type { ReactNode } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { ThemeToggle } from "@nivo/ui"
-import { toLocale } from "@/modules/i18n/config"
+import { toLocale } from "@/modules/i18n"
 import { ACADEMY, inLocale, isSafeThemeValue, type ThemeVariables } from "@/modules/academy/template"
 import { AcademyChromeBase } from "./component"
 

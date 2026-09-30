@@ -19,5 +19,8 @@ describe("createI18nConfig", () => {
         expect(config.toLocale("fr")).toBe("vi")
         expect(config.toLocaleFromPathname("/en/account")).toBe("en")
         expect(config.toLocaleFromPathname(null)).toBe("vi")
+        expect(config.isLocale("en")).toBe(true)
+        expect(config.isLocale("fr")).toBe(false)
+        expect(config.isLocale(null)).toBe(false)
     })
 })

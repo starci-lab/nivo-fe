@@ -11,7 +11,7 @@ import ExploreSection from "../../../components/blocks/explore/ExploreSection"
 import ExploreSurface from "../../../components/blocks/explore/ExploreSurface"
 import ExploreTopicList from "../../../components/blocks/explore/ExploreTopicList"
 import { SiteMain } from "../../layouts/SiteShell"
-import { useLocalizedHref } from "../../../hooks"
+import { useLocalizedHref } from "@/hooks"
 import { IDEA_ARTICLES, IDEA_TOPIC_IDS, IDEA_TYPE_IDS, type IdeaContentType } from "../../../modules/landing/ideas"
 import { SITE_LINKS } from "../../../modules/landing/site"
 

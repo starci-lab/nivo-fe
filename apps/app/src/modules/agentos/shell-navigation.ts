@@ -23,11 +23,11 @@
  *   here is a selection rather than a restored observation.
  */
 
-import { getPathname } from "@/modules/i18n/navigation"
+import { getPathname } from "@/modules/i18n"
+import type { Locale } from "@/modules/i18n"
 import { installation } from "@/modules/routes"
-import type { Locale } from "@/modules/i18n/config"
 import type { ShellReadScope, ShellRegisteredDestination } from "@/modules/api/agentos-shell"
-import type { FailureKind, Outcome } from "@/modules/api/outcome"
+import { type FailureKind, type Outcome } from "@nivo/api"
 
 /** What the shell may do with one navigation answer. */
 export type ShellNavigationDecision =

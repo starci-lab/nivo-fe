@@ -4,16 +4,7 @@
  * `unavailable`. No credential value is ever read - statuses and masked hints only.
  */
 
-import {
-    isBoolean,
-    isNullableString,
-    isNumber,
-    isOneOf,
-    isRecord,
-    isString,
-    isStringArray,
-    parseEach,
-} from "./wire"
+import { isBoolean, isNullableString, isNumber, isOneOf, isRecord, isString, isStringArray, parseEach } from "@nivo/api"
 import { isAgentosRuntimeRecord, isAgentosRuntimeWidgetNode } from "./agentos-runtime-tree.guards"
 import type { AgentosRuntimeValue } from "./agentos-runtime-tree"
 import { parseModuleTestContract } from "./agentos-module-tests.guards"

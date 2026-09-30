@@ -12,7 +12,7 @@ import type {
     CollabTaskQuestionView,
     CollabTaskView,
 } from "@/modules/api/collab"
-import type { Failure } from "@/modules/api/outcome"
+import { type Failure } from "@nivo/api"
 import type { Session, SessionState } from "@/modules/auth/session"
 
 /** Run an invocation that calls a mock, then read that mock's typed returned fixture. */

@@ -3,8 +3,7 @@
 import { useCallback, useEffect } from "react"
 import { useProvisioningRealtime, type ProvisioningTarget } from "@/hooks"
 import type { WorkspaceCheckoutAnswer, WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane"
-import type { Outcome } from "@/modules/api/outcome"
-import { settle } from "@/modules/api/settle"
+import { settle, type Outcome } from "@nivo/api"
 import { HOLD_PHASES, phaseOf, POLLING_PHASES, PROVISIONING_PHASES, type PurchasePhase } from "@/modules/agentos/purchase-status/phase"
 import { purchaseOf } from "@/modules/agentos/purchase-source"
 

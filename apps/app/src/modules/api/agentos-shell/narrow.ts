@@ -1,4 +1,4 @@
-import { failed, failureKindOfStatus, type Failure } from "../outcome"
+import { failed, failureKindOfStatus, isRecord, type Failure } from "@nivo/api"
 import {
     isApplicationState,
     isCompleteness,
@@ -15,7 +15,6 @@ import {
     isWireAvailability,
     formatShellSourceIdentity,
 } from "./identity"
-import { isRecord } from "../wire"
 import type { ShellArrivedReply } from "./types"
 import { SHELL_NAVIGATION_GRAMMAR_VERSION, SHELL_RETURN_ROUTE_NAME } from "./types"
 import type {

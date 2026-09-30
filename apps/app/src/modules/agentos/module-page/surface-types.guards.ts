@@ -5,7 +5,7 @@ import type {
     SetupSurfaceProps,
     TestSurfaceProps,
 } from "./surface-types"
-import { isOneOf } from "@/modules/api/wire"
+import { isOneOf } from "@nivo/api"
 
 const DIAGNOSTICS_COMPACT_PANES: ReadonlyArray<DiagnosticsSurfaceProps["compactPane"]> = [
     "signals",

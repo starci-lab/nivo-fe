@@ -1,4 +1,4 @@
-import { failedWith } from "../outcome"
+import { failedWith } from "@nivo/api"
 import { isClosedRecord, isRouteErrorName, routeFailureKind } from "../operation-route"
 import { SALES_RECONCILIATIONS } from "./types"
 import type { SalesAnswer, SalesFailure, SalesOperationName, SalesQueryName, SalesRefusal, SalesRefusalCode, SalesRefusalReason } from "./types"

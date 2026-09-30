@@ -16,8 +16,8 @@ vi.mock("next/navigation", async () => ({
     ...(await vi.importActual("next/navigation")),
     useSearchParams: () => new URLSearchParams(),
 }))
-vi.mock("@/modules/i18n/navigation", async () => {
-    const actual = (await vi.importActual("@/modules/i18n/navigation")) as Record<string, unknown>
+vi.mock("@/modules/i18n", async () => {
+    const actual = (await vi.importActual("@/modules/i18n")) as Record<string, unknown>
     const navigation = {
         ...(actual.navigation as Record<string, unknown>),
         useRouter: () => ({ push, replace }),

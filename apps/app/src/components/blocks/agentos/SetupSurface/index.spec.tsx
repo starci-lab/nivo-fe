@@ -6,7 +6,7 @@ import enMessages from "../../../../messages/en.json"
 import { SetupSurface } from "."
 import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
 import type { SetupSurfaceProps } from "../../../../modules/agentos/module-page/surface-types"
-import { TIME_ZONE } from "../../../../modules/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n"
 
 const copy = buildModulePageCopy(
     createTranslator({

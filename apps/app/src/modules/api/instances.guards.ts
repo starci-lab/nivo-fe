@@ -3,7 +3,7 @@
  * each returns the value or null, which `graphql` reports as `unavailable`.
  */
 
-import { isBoolean, isNullableNumber, isNullableString, isRecord, isString, parseEach } from "./wire"
+import { isBoolean, isNullableNumber, isNullableString, isRecord, isString, parseEach } from "@nivo/api"
 import type { InstanceRow, PodStatusRow } from "./instances"
 
 const parseInstanceRow = (value: unknown): InstanceRow | null =>

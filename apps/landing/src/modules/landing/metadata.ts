@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
-import { LOCALES, DEFAULT_LOCALE, toLocale, type Locale } from "@/modules/i18n/config"
-import { localizeHref } from "@/modules/i18n/navigation"
+import { LOCALES, DEFAULT_LOCALE, toLocale, type Locale, localizeHref } from "@/modules/i18n"
 
 /** The `[locale]` segment every route hands its metadata function. */
 export type LocaleParams = { readonly params: Promise<{ readonly locale: string }> }

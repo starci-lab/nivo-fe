@@ -26,7 +26,7 @@ export const legacyRedirects = async () =>
 const nextConfig: NextConfig = {
     output: "standalone",
     outputFileTracingRoot: resolve(import.meta.dirname, "../.."),
-    transpilePackages: ["@nivo/i18n", "@nivo/ui", "@starci/grammar"],
+    transpilePackages: ["@nivo/api", "@nivo/i18n", "@nivo/ui", "@starci/grammar"],
     turbopack: {
         root: resolve(import.meta.dirname, "../.."),
     },

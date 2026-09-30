@@ -1,6 +1,6 @@
 "use client"
 
-import { navigation } from "@/modules/i18n/navigation"
+import { navigation } from "@/modules/i18n"
 
 /**
  * The locale-aware pathname reader, bound once beside {@link navigation}. A component reaches it as

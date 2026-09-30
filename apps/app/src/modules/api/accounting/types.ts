@@ -1,4 +1,4 @@
-import type { Outcome } from "../outcome"
+import { type Outcome } from "@nivo/api"
 import type { InstallationScope } from "../operation-route"
 
 /** The read one uncertain command is reconciled through; a command absent here registers no read. */

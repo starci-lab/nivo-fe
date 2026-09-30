@@ -1,6 +1,6 @@
 import createMiddleware from "next-intl/middleware"
 import { NextResponse, type NextRequest } from "next/server"
-import { routing } from "./modules/i18n/routing"
+import { routing } from "@/modules/i18n"
 import { isStandaloneSelfProxy } from "./modules/middleware/standalone-self-proxy"
 
 const resolveRequestLocale = createMiddleware(routing)

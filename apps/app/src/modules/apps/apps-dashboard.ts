@@ -2,7 +2,7 @@ import type { FleetStatus } from "../../components/blocks/provisioning/FleetRow"
 import type { CatalogItemRow, CatalogOrderRow } from "../api/commerce"
 import type { ExpertSiteRow } from "../api/expert-sites"
 import type { InstanceRow } from "../api/instances"
-import type { Outcome } from "../api/outcome"
+import { type Outcome } from "@nivo/api"
 
 /** Public API role for one owned app or unbuilt order row. */
 export type OwnedAppRow = {

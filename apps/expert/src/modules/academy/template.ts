@@ -1,5 +1,4 @@
-import { DEFAULT_LOCALE, type Locale } from "@/modules/i18n/config"
-import { isLocale } from "../i18n/config.guards"
+import { DEFAULT_LOCALE, type Locale, isLocale } from "@/modules/i18n"
 import data from "./template.data.json"
 
 /**

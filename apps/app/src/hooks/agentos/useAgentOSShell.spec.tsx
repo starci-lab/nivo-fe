@@ -22,7 +22,7 @@ vi.mock("@/modules/api/graphql", () => ({
     setLocaleReader: mocks.transport.setLocaleReader,
 }))
 
-import { failed } from "@/modules/api/outcome"
+import { failed } from "@nivo/api"
 import { SessionProvider } from "@/modules/auth/session"
 import { useAgentOSShell } from "./useAgentOSShell"
 import type { AgentOSShellOptions } from "./useAgentOSShell"

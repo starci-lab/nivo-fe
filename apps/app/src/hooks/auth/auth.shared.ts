@@ -9,7 +9,7 @@ import type {
     SignInPayload,
     SignUpInitInput,
 } from "@/modules/api/auth"
-import type { Outcome } from "@/modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 import type { Session } from "@/modules/auth/session"
 import { continuationReference, UNAVAILABLE_RETURN_LANDING } from "@/modules/auth/authentication"
 import { OAUTH_PROVIDER_KEY, readStored, RETURN_TO_STORAGE_KEY } from "@/modules/browser-storage"

@@ -11,7 +11,7 @@ import {
     useAccessToken,
 } from "@/hooks"
 import { projectAgentOSShellView } from "@/modules/agentos/workspace-control-center/shell-projection"
-import { settle } from "@/modules/api/settle"
+import { settle } from "@nivo/api"
 import type { AgentOSShellConfigurationDigests } from "@/modules/agentos/workspace-control-center/shell-types"
 import type { AgentOSWorkspaceControlCenterStatus } from "@/modules/agentos/workspace-control-center/contracts"
 import { createAgentOSWorkspaceControlCenterLabels } from "@/modules/agentos/workspace-control-center/labels"

@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import {
-    graphql, graphqlEnvelope, setAccessTokenReader, setLocaleReader,
-    type EnvelopeAnswer, type EnvelopeShell,
-} from "./graphql"
+import { createGraphqlClient, type EnvelopeAnswer, type EnvelopeShell } from "./graphql"
+
+const { graphql, graphqlEnvelope, setAccessTokenReader, setLocaleReader } = createGraphqlClient({
+    endpoint: "http://localhost:3068/graphql",
+    credentials: "include",
+})
 
 const parseRow = (input: unknown): { readonly id: string } | null =>
     typeof input === "object" && input !== null && "id" in input && typeof input.id === "string"
@@ -281,5 +283,19 @@ describe("graphql failure kinds", () => {
         const pending = graphql("query Q { q }", parseRow, undefined, { signal: controller.signal })
         controller.abort()
         await expect(pending).resolves.toMatchObject({ ok: false, kind: "unavailable", code: "ABORTED" })
+    })
+
+    it("binds a public client to its own endpoint without cookies and forwards the revalidation hint", async () => {
+        const publicClient = createGraphqlClient({ endpoint: "http://localhost:4068/graphql", credentials: "omit" })
+        const fetchMock = answerOnce(200, { data: { q: { success: true, data: 1, message: "" } } })
+        await expect(publicClient.graphql("query Q { q }", parseCount, undefined, { revalidate: 60 })).resolves.toEqual({
+            ok: true,
+            data: 1,
+        })
+        const [url, init] = fetchMock.mock.calls[0]! as [string, RequestInit & { next?: { revalidate?: number } }]
+        expect(url).toBe("http://localhost:4068/graphql")
+        expect(init.credentials).toBe("omit")
+        expect(init.next).toEqual({ revalidate: 60 })
+        expect(init.headers).not.toHaveProperty("authorization")
     })
 })

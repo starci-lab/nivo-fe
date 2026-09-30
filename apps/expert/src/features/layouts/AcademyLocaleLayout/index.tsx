@@ -7,8 +7,7 @@ import { getMessages } from "next-intl/server"
 import { ThemeProvider } from "next-themes"
 import { ACADEMY, inLocale } from "@/modules/academy/template"
 import { CLIENT_NAMESPACES, pickMessages } from "@/modules/i18n/messages"
-import { routing } from "@/modules/i18n/routing"
-import { toLocale } from "@/modules/i18n/config"
+import { routing, toLocale } from "@/modules/i18n"
 import type { ComponentProps } from "react"
 
 /** The routed locale segment, awaited by every handler in this file. */

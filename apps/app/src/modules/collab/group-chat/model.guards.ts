@@ -8,7 +8,7 @@ import type {
     CollabOpenTurnNoticeOutcome,
     CollabTaskStatus,
 } from "../../api/collab"
-import { isNullableString, isOneOf, isRecord, isString } from "../../api/wire"
+import { isNullableString, isOneOf, isRecord, isString } from "@nivo/api"
 
 /**
  * The collab group-chat surface's runtime guards. The wire speaks loosely typed

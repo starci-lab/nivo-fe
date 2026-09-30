@@ -8,7 +8,7 @@ import { SettingsFormContent } from "."
 import type { SettingsFormContentProps } from "../../../../modules/agentos/module-page/surface-types"
 import { buildModulePageCopy } from "../../../../modules/agentos/module-page-copy"
 import { SessionProvider } from "../../../../modules/auth/session"
-import { TIME_ZONE } from "../../../../modules/i18n/config"
+import { TIME_ZONE } from "@/modules/i18n"
 
 const copy = buildModulePageCopy(
     createTranslator({

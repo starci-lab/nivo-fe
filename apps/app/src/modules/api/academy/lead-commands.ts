@@ -1,5 +1,5 @@
+import { type Outcome } from "@nivo/api"
 import { graphql } from "../graphql"
-import type { Outcome } from "../outcome"
 import { parseDraftedLeadReply, parseExpertSiteLead } from "./payload.guards"
 import type {
     DraftLeadReplyInput,

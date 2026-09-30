@@ -74,7 +74,7 @@ type FlowProbeProps = {
 
 type PathnameRequest = { readonly href: string }
 
-vi.mock("@/modules/i18n/navigation", () => ({
+vi.mock("@/modules/i18n", () => ({
     getPathname: ({ href }: PathnameRequest) => href,
 }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))

@@ -4,7 +4,7 @@ const navigation = vi.hoisted(() => ({
     usePathname: vi.fn(),
 }))
 
-vi.mock("@/modules/i18n/navigation", () => ({ navigation }))
+vi.mock("@/modules/i18n", () => ({ navigation }))
 vi.unmock("@/hooks/i18n/usePathname")
 
 import { usePathname } from "./usePathname"

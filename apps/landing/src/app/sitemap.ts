@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next"
 import { PUBLIC_SITE_URL } from "@/features/layouts/SiteShell"
-import { LOCALES, type Locale } from "@/modules/i18n/config"
-import { localizeHref } from "@/modules/i18n/navigation"
+import { LOCALES, type Locale, localizeHref } from "@/modules/i18n"
 
 const PUBLIC_ROUTES = [
     "/",

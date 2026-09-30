@@ -27,11 +27,9 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-            "@nivo/i18n/config": resolve(import.meta.dirname, "packages/i18n/src/config.ts"),
-            "@nivo/i18n/navigation": resolve(import.meta.dirname, "packages/i18n/src/navigation.ts"),
+            "@nivo/api": resolve(import.meta.dirname, "packages/nivo-api/src/index.ts"),
+            "@nivo/i18n/app": resolve(import.meta.dirname, "packages/i18n/src/app.ts"),
             "@nivo/i18n/provider": resolve(import.meta.dirname, "packages/i18n/src/provider.tsx"),
-            "@nivo/i18n/request": resolve(import.meta.dirname, "packages/i18n/src/request.ts"),
-            "@nivo/i18n/routing": resolve(import.meta.dirname, "packages/i18n/src/routing.ts"),
             "@nivo/i18n/messages": resolve(import.meta.dirname, "packages/i18n/src/messages.ts"),
             "@nivo/i18n": resolve(import.meta.dirname, "packages/i18n/src/index.ts"),
         },

@@ -11,7 +11,7 @@ import {
     type CollabApprovalDecision,
     type CollabHumanRole,
 } from "@/modules/api/collab"
-import type { Outcome } from "@/modules/api/outcome"
+import { type Outcome } from "@nivo/api"
 import { useAccessToken } from "../../auth/useAccessToken"
 import { useNivoMutation, type NivoMutationKey } from "../useNivoMutation"
 import { collabDomainKeys } from "../swr.shared"

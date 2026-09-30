@@ -19,7 +19,7 @@ import { parseCheckoutFields } from "@/modules/wallet/wallet-center/waypoint.gua
 import { initialTopUpInteractionState, type InvoicePaymentState, type TopUpInteractionState } from "@/modules/wallet/wallet-center/interaction"
 import type { WalletControlCenterViewProps, WalletPageState } from "@/modules/wallet/wallet-center/types"
 import { BILLING_CURRENCY } from "@/modules/config"
-import { DEFAULT_LOCALE } from "@/modules/i18n/config"
+import { DEFAULT_LOCALE } from "@/modules/i18n"
 
 const subscribeTopUpSession = (onChange: () => void): (() => void) => {
     window.addEventListener("storage", onChange)

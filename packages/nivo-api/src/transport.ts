@@ -1,7 +1,7 @@
 /**
- * The only `fetch` in the console.
+ * The only `fetch` of the nivo core API clients.
  *
- * Every gateway under `modules/api` describes ITS request (an address, a body, whose credential
+ * Every gateway describes ITS request (an address, a body, whose credential
  * travels) and reads ITS reply; the mechanics of getting bytes across are decided here once: the
  * credential header, the deadline, the cancellation, and what each HTTP status means.
  *
@@ -37,6 +37,8 @@ export type WireRequest = {
     /** Abandon the request when this signal aborts (an unmounted page, a superseded read). */
     readonly signal?: AbortSignal
     readonly timeoutMs?: number
+    /** Next's revalidation hint for a server read, in seconds; ignored by a plain browser fetch. */
+    readonly revalidate?: number
 }
 
 /** What arrived: the status and the parsed JSON body (`null` when the reply said `none` or was not JSON on a failure). */
@@ -106,6 +108,7 @@ export const send = async (request: WireRequest): Promise<WireOutcome> => {
                 headers: headersOf(request),
                 body: request.json === undefined ? request.body : JSON.stringify(request.json),
                 signal: controller.signal,
+                ...(request.revalidate === undefined ? {} : { next: { revalidate: request.revalidate } }),
             })
         } catch {
             if (timedOut) return failure("unavailable", null, "TIMEOUT", "timeout", null)
